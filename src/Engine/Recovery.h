@@ -359,20 +359,10 @@ private:
 		PsimagLite::String energyLabel = checkpoint_.parameters().checkpoint.labelForEnergy();
 		ioOut.flush();
 		typename IoType::In ioIn(file);
-		SizeType total = 0;
-		ioIn.read(total, energyLabel + "/Size");
-		if (total == 0)
-			err("writeEnergies: no energies?\n");
 
-		ioOut.createGroup(energyLabel);
-
-		ioOut.write(total, energyLabel + "/Size");
-
-		for (SizeType i = 0; i < total; ++i) {
-			typename CheckpointType::RealType x = 0.0;
-			ioIn.read(x, energyLabel + "/" + ttos(i));
-			ioOut.write(x, energyLabel + "/" + ttos(i));
-		}
+		typename CheckpointType::VectorVectorRealType energies;
+		CheckpointType::readEnergies(energies, energyLabel, ioIn);
+		CheckpointType::writeEnergies(true, energyLabel, energies, ioOut);
 
 		ioIn.close();
 	}

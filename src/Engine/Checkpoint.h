@@ -158,20 +158,7 @@ public:
 		{
 			IoType::In ioIn2(parameters_.checkpoint.filename());
 
-			// Energies/Size <-- sectors
-			// Energies/0/Size <--- excited
-			const PsimagLite::String lfEnergy = parameters_.checkpoint.labelForEnergy();
-			SizeType nsectors = 0;
-			ioIn2.read(nsectors, lfEnergy + "/Size");
-			energiesFromFile_.resize(nsectors);
-			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-				SizeType nexcited = 0;
-				ioIn2.read(nexcited, lfEnergy + "/" + ttos(sectorIndex) + "/Size");
-				energiesFromFile_[sectorIndex].resize(nexcited);
-				for (SizeType e = 0; e < nexcited; ++e)
-					ioIn2.read(energiesFromFile_[sectorIndex][e],
-					             lfEnergy + "/" + ttos(sectorIndex) + "/" + ttos(e));
-			}
+			readEnergies(energiesFromFile_, parameters_.checkpoint.labelForEnergy(), ioIn2);
 
 			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
 			if (v.size() == 0) return;
@@ -205,6 +192,56 @@ public:
 			return;
 
 		loadStacksMemoryToDisk();
+	}
+
+	static void readEnergies(VectorVectorRealType& energies,
+	                         PsimagLite::String lfEnergy,
+	                         IoType::In& ioIn2)
+	{
+		// Energies/Size <-- sectors
+		// Energies/0/Size <--- excited
+		SizeType nsectors = 0;
+		ioIn2.read(nsectors, lfEnergy + "/Size");
+		energies.resize(nsectors);
+		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			SizeType nexcited = 0;
+			ioIn2.read(nexcited, lfEnergy + "/" + ttos(sectorIndex) + "/Size");
+			energies[sectorIndex].resize(nexcited);
+			for (SizeType e = 0; e < nexcited; ++e)
+				ioIn2.read(energies[sectorIndex][e],
+				           lfEnergy + "/" + ttos(sectorIndex) + "/" + ttos(e));
+		}
+	}
+
+	static void writeEnergies(bool firstCall,
+	                          PsimagLite::String label,
+	                          const VectorVectorRealType& energies,
+	                          IoType::Out& io)
+	{
+		PsimagLite::IoNgSerializer::WriteMode mode =
+		        (firstCall) ? PsimagLite::IoNgSerializer::NO_OVERWRITE
+		                    : PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
+
+		// Energies/Size <-- sectors
+		// Energies/0/Size <--- excited
+		const SizeType nsectors = energies.size();
+
+		if (firstCall)
+			io.createGroup(label);
+
+		io.write(nsectors, label + "/Size", mode);
+		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			const SizeType nexcited = energies[sectorIndex].size();
+			if (firstCall)
+				io.createGroup(label + "/" + ttos(sectorIndex));
+			io.write(nexcited,
+			         label + "/" + ttos(sectorIndex) + "/Size",
+			         mode);
+			for (SizeType e = 0; e < nexcited; ++e)
+				io.write(energies[sectorIndex][e],
+				         label + "/" + ttos(sectorIndex) + "/" + ttos(e),
+				         mode);
+		}
 	}
 
 	void checkpointStacks(PsimagLite::String filename) const

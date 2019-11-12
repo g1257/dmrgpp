@@ -659,30 +659,8 @@ obtain ordered
 		if (!saveData_) return;
 
 		static bool firstCall = true;
-		PsimagLite::IoNgSerializer::WriteMode mode =
-		        (firstCall) ? PsimagLite::IoNgSerializer::NO_OVERWRITE
-		                    : PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
 
-		// Energies/Size <-- sectors
-		// Energies/0/Size <--- excited
-		const SizeType nsectors = energies.size();
-
-		if (firstCall)
-			ioOut_.createGroup("Energies");
-
-		ioOut_.write(nsectors, "Energies/Size", mode);
-		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-			const SizeType nexcited = energies[sectorIndex].size();
-			if (firstCall)
-				ioOut_.createGroup("Energies/" + ttos(sectorIndex));
-			ioOut_.write(nexcited,
-			             "Energies/" + ttos(sectorIndex) + "/Size",
-			             mode);
-			for (SizeType e = 0; e < nexcited; ++e)
-				ioOut_.write(energies[sectorIndex][e],
-				             "Energies/" + ttos(sectorIndex) + "/" + ttos(e),
-				             mode);
-		}
+		CheckpointType::writeEnergies(firstCall, "Energies", energies, ioOut_);
 
 		firstCall = false;
 	}
