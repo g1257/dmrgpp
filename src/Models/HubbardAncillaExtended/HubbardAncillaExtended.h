@@ -189,9 +189,7 @@ protected:
 		for (SizeType i=0;i<block.size();i++) {
 			VectorSparseMatrixType vm;
 			HelperHubbardAncillaType::findAllMatrices(vm,i,natBasis);
-			for (SizeType sigma2=0;sigma2<dofs;++sigma2) {
-				SizeType sigma = (hot) ? 2*sigma2 : sigma2;
-				if (sigma >= dofs) sigma -= (dofs - 1);
+			for (SizeType sigma=0;sigma<dofs;++sigma) {
 				if (!hot && (sigma & 1)) continue;
 				MatrixType tmp;
 				HelperHubbardAncillaType::findOperatorMatrices(tmp,i,sigma,natBasis);
