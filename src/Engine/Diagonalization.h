@@ -317,18 +317,17 @@ private:
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex)
 					vecSaved[j][excitedIndex].resize(initialVectorBySector.size());
 
-				RealType myEnergy = 0;
-				diagonaliseOneBlock(i,
+				VectorRealType myEnergy;
+				diagonaliseOneBlock(myEnergy,
 				                    vecSaved[j],
-				                    myEnergy,
+				                    i,
 				                    lrs,
 				                    target.time(),
 				                    initialVectorBySector,
-				                    loopIndex,
-				                    parameters_.numberOfExcited);
+				                    loopIndex);
 
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex)
-					energySaved[j][excitedIndex] = myEnergy;
+					energySaved[j][excitedIndex] = myEnergy[excitedIndex];
 
 			} // end if
 		} // end sectors
@@ -384,14 +383,13 @@ private:
 	/** Diagonalise the i-th block of the matrix, return its eigenvectors
 			in tmpVec and its eigenvalues in energyTmp
 		!PTEX_LABEL{diagonaliseOneBlock} */
-	void diagonaliseOneBlock(SizeType partitionIndex,
-	                         TargetVectorType& tmpVec,
-	                         RealType& energyTmp,
+	void diagonaliseOneBlock(VectorRealType& energyTmp,
+	                         VectorVectorType& tmpVec,
+	                         SizeType partitionIndex,
 	                         const LeftRightSuperType& lrs,
 	                         RealType targetTime,
 	                         const TargetVectorType& initialVector,
-	                         SizeType loopIndex,
-	                         SizeType excited)
+	                         SizeType loopIndex)
 	{
 		const OptionsType& options = parameters_.options;
 		const bool dumperEnabled = options.isSet("KroneckerDumper");
@@ -432,13 +430,16 @@ private:
 				throw std::logic_error("Exiting due to option test in the input\n");
 
 			if (options.isSet("exactdiag") && (saveOption & 4) == 0) {
-				energyTmp = eigs[0];
-				for (SizeType i = 0; i < tmpVec.size(); ++i)
-					tmpVec[i] = fullm2(i,0);
-				PsimagLite::OstringStream msg;
-				msg<<"Uses exact due to user request. ";
-				msg<<"Found lowest eigenvalue= "<<energyTmp;
-				progress_.printline(msg,std::cout);
+				SizeType nexcited = std::min(energyTmp.size(), eigs.size());
+				for (SizeType excited = 0; excited < nexcited; ++excited) {
+					energyTmp[excited] = eigs[excited];
+					for (SizeType i = 0; i < tmpVec.size(); ++i)
+						tmpVec[excited][i] = fullm2(i, excited);
+					PsimagLite::OstringStream msg;
+					msg<<"Uses exact due to user request. ";
+					msg<<"Found lowest eigenvalue= "<<energyTmp[0];
+					progress_.printline(msg,std::cout);
+				}
 				return;
 			}
 		}
@@ -446,30 +447,31 @@ private:
 		PsimagLite::OstringStream msg;
 		msg<<"I will now diagonalize a matrix of size="<<hc.modelHelper().size();
 		progress_.printline(msg,std::cout);
-		diagonaliseOneBlock(tmpVec,
-		                    energyTmp,
+		diagonaliseOneBlock(energyTmp,
+		                    tmpVec,
 		                    hc,
 		                    initialVector,
-		                    loopIndex,
-		                    excited);
+		                    loopIndex);
 	}
 
-	void diagonaliseOneBlock(TargetVectorType& tmpVec,
-	                         VectorRealType &energyTmp,
+	void diagonaliseOneBlock(VectorRealType& energyTmp,
+	                         VectorVectorType& tmpVec,
 	                         HamiltonianConnectionType& hc,
 	                         const TargetVectorType& initialVector,
-	                         SizeType loopIndex,
-	                         SizeType excited)
+	                         SizeType loopIndex)
 	{
+		const SizeType nexcited = energyTmp.size();
 		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_,
 		                                                             hc);
 
 		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 
 		if ((saveOption & 4)>0) {
-			energyTmp = slowWft(lanczosHelper, tmpVec, initialVector, excited);
+			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
 			PsimagLite::OstringStream msg;
-			msg<<"Early exit due to user requesting (slow) WFT, energy= "<<energyTmp;
+			msg<<"Early exit due to user requesting (slow) WFT, energy= ";
+			for (SizeType i = 0; i < nexcited; ++i)
+				msg<<energyTmp[i]<<" ";
 			progress_.printline(msg,std::cout);
 			return;
 		}
@@ -486,17 +488,18 @@ private:
 		}
 
 		if (lanczosHelper.rows()==0) {
-			energyTmp=10000;
+			static const RealType val = 10000;
+			std::fill(energyTmp.begin(), energyTmp.end(), val);
 			PsimagLite::OstringStream msg;
 			msg<<"Early exit due to matrix rank being zero.";
-			msg<<" BOGUS energy= "<<energyTmp;
-			progress_.printline(msg,std::cout);
+			msg<<" BOGUS energy= "<<val;
+			progress_.printline(msg, std::cout);
 			if (lanczosOrDavidson) delete lanczosOrDavidson;
 			return;
 		}
 
 		try {
-			energyTmp = computeLevel(*lanczosOrDavidson,tmpVec,initialVector, excited);
+			computeAllLevelsBelow(energyTmp, tmpVec, *lanczosOrDavidson, initialVector);
 		} catch (std::exception& e) {
 			PsimagLite::OstringStream msg0;
 			msg0<<e.what()<<"\n";
@@ -508,25 +511,31 @@ private:
 			VectorRealType eigs(lanczosHelper.rows());
 			PsimagLite::Matrix<ComplexOrRealType> fm;
 			lanczosHelper.fullDiag(eigs,fm);
-			for (SizeType j = 0; j < eigs.size(); ++j)
-				tmpVec[j] = fm(j, 0);
-			energyTmp = eigs[0];
+			SizeType minExcited = std::min(energyTmp.size(), eigs.size());
+			for (SizeType excited = 0; excited < minExcited; ++excited) {
+				for (SizeType j = 0; j < eigs.size(); ++j)
+					tmpVec[excited][j] = fm(j, excited);
+				energyTmp[excited] = eigs[excited];
+				PsimagLite::OstringStream msg2;
+				msg2<<"Found eigenvalue["<<excited<<"]= "<<energyTmp[excited];
+				progress_.printline(msg2,std::cout);
+			}
 
 			PsimagLite::OstringStream msg1;
-			msg1<<"Found lowest eigenvalue= "<<energyTmp<<" ";
+			msg1<<"Found lowest eigenvalue= "<<energyTmp[0];
 			progress_.printline(msg1,std::cout);
 		}
 
 		if (lanczosOrDavidson) delete lanczosOrDavidson;
 	}
 
-	RealType computeLevel(LanczosOrDavidsonBaseType& object,
-	                      TargetVectorType& gsVector,
-	                      const TargetVectorType& initialVector,
-	                      SizeType excited) const
+	void computeAllLevelsBelow(VectorRealType& energyTmp,
+	                           VectorVectorType& gsVector,
+	                           LanczosOrDavidsonBaseType& object,
+	                           const TargetVectorType& initialVector) const
 	{
+		const SizeType nexcited = gsVector.size();
 		RealType norma = PsimagLite::norm(initialVector);
-		RealType gsEnergy = 0;
 		if (fabs(norma) < 1e-12) {
 			PsimagLite::OstringStream msg;
 			msg<<"WARNING: diagonaliseOneBlock: Norm of guess vector is zero, ";
@@ -534,37 +543,31 @@ private:
 			progress_.printline(msg, std::cout);
 			TargetVectorType init(initialVector.size());
 			PsimagLite::fillRandom(init);
-			object.computeOneState(gsEnergy, gsVector, init, excited);
+			object.computeAllStatesBelow(energyTmp, gsVector,init, nexcited);
 		} else {
-			object.computeOneState(gsEnergy, gsVector, initialVector, excited);
+			object.computeAllStatesBelow(energyTmp, gsVector, initialVector, nexcited);
 		}
-
-		return gsEnergy;
 	}
 
-	RealType slowWft(const typename LanczosOrDavidsonBaseType::MatrixType& object,
-	                 TargetVectorType& gsVector,
-	                 const TargetVectorType& initialVector,
-	                 SizeType excited) const
+	void slowWft(VectorRealType& energyTmp,
+	             VectorVectorType& gsVector,
+	             const typename LanczosOrDavidsonBaseType::MatrixType& object,
+	             const TargetVectorType& initialVector) const
 	{
-		if (excited > 0) {
-			PsimagLite::OstringStream msg;
-			msg<<"FATAL: slowWft: Not possible when excited > 0\n";
-			throw PsimagLite::RuntimeError(msg.str());
-		}
+		const SizeType nexcited = gsVector.size();
 
 		RealType norma = PsimagLite::norm(initialVector);
 		if (fabs(norma) < 1e-12)
 			err("FATAL: slowWft: Norm of guess vector is zero\n");
 
-		object.matrixVectorProduct(gsVector, initialVector);
-		RealType gsEnergy = PsimagLite::real(initialVector*gsVector);
-		gsVector = initialVector;
+		for (SizeType i = 0; i < nexcited; ++i) {
+			object.matrixVectorProduct(gsVector[i], initialVector);
+			energyTmp[i] = PsimagLite::real(initialVector*gsVector[i]);
+			gsVector[i] = initialVector;
+		}
 
 		if (parameters_.options.isSet("debugmatrix"))
 			std::cout<<"VECTOR: Printing of BlockOffDiagMatrix not supported\n";
-
-		return gsEnergy;
 	}
 
 	void checkSaveOption(SizeType saveOption) const
