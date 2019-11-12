@@ -139,6 +139,7 @@ public:
 	typedef typename BasisWithOperatorsType::QnType QnType;
 	typedef typename QnType::PairSizeType PairSizeType;
 	typedef typename DiagonalizationType::VectorRealType VectorRealType;
+	typedef typename DiagonalizationType::VectorVectorRealType VectorVectorRealType;
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
 	VectorVectorVectorWithOffsetType;
 
@@ -153,7 +154,7 @@ public:
 	      ioOut_(parameters_.filename, PsimagLite::IoSelector::ACC_TRUNC),
 	      progress_("DmrgSolver"),
 	      stepCurrent_(0),
-	      checkpoint_(parameters_, ioIn, model, false),
+	      checkpoint_(parameters_, ioIn, model, quantumSector_.size(), false),
 	      wft_(parameters_),
 	      diagonalization_(parameters_,
 	                       model,
@@ -324,7 +325,7 @@ obtain ordered
 		const SizeType initialSizeOfHashTable = std::max(ten, parameters_.keptStatesInfinite);
 
 		RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
-		VectorRealType energies;
+		VectorVectorRealType energies;
 		for (SizeType step=0;step<X.size();step++) {
 			PsimagLite::OstringStream msg;
 			msg<<"Infinite-loop: step="<<step<<" ( of "<<X.size()<<"), ";
@@ -505,7 +506,7 @@ obtain ordered
 			stepLengthCorrected = int((stepLength+sitesPerBlock-1)/sitesPerBlock);
 		int stepFinal = stepCurrent_ + stepLengthCorrected;
 
-		VectorRealType energies;
+		VectorVectorRealType energies;
 		while (true) {
 
 			if (static_cast<SizeType>(stepCurrent_) >= sitesIndices_.size())
@@ -655,7 +656,7 @@ obtain ordered
 		return false;
 	}
 
-	void printEnergies(const VectorRealType& energies)
+	void printEnergies(const VectorVectorRealType& energies)
 	{
 		if (!saveData_) return;
 		static SizeType counter = 0;

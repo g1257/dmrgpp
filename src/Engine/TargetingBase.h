@@ -255,7 +255,7 @@ public:
 		commonTargeting_.aoe().initPsi(nsectors, nexcited);
 	}
 
-	virtual void initialGuess(VectorVectorVectorType& initialVector,
+	virtual void initialGuess(VectorVectorType& initialVector,
 	                          const VectorSizeType& block,
 	                          bool noguess,
 	                          const VectorSizeType& compactedWeights,
@@ -328,7 +328,7 @@ protected:
 
 private:
 
-	virtual void initialGuessVwo(VectorVectorVectorType& initialVector,
+	virtual void initialGuessVwo(VectorVectorType& initialVector,
 	                             const VectorSizeType& block,
 	                             bool noguess,
 	                             const VectorSizeType& compactedWeights,
@@ -342,25 +342,23 @@ private:
 			err("initialGuessVwo\n");
 		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
 			const SizeType nexcited = psi[sectorIndex].size();
-			initialVector[sectorIndex].resize(nexcited);
 			if (nexcited != compactedWeights.size())
 				err("initialGuessVwo compactedWeights\n");
-			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+			SizeType excitedIndex = 0;
 
-				VectorWithOffsetType vwo(compactedWeights[sectorIndex],
-				                         sectors[sectorIndex],
-				                         basis);
-				commonTargeting_.initialGuess(vwo,
-				                              *(psi[sectorIndex][excitedIndex]),
-				                              block,
-				                              noguess);
-				vwo.extract(initialVector[sectorIndex][excitedIndex], vwo.sector(0));
-			}
+			VectorWithOffsetType vwo(compactedWeights[sectorIndex],
+			                         sectors[sectorIndex],
+			                         basis);
+			commonTargeting_.initialGuess(vwo,
+			                              *(psi[sectorIndex][excitedIndex]),
+			                              block,
+			                              noguess);
+			vwo.extract(initialVector[sectorIndex], vwo.sector(0));
 		}
 	}
 
 	// legacy thing for vectorwithoffsets
-	virtual void initialGuessVwos(VectorVectorVectorType& initialVector,
+	virtual void initialGuessVwos(VectorVectorType& initialVector,
 	                              const VectorSizeType& block,
 	                              bool noguess,
 	                              const VectorSizeType& compactedWeights,
@@ -372,10 +370,9 @@ private:
 		VectorWithOffsetType vwo(compactedWeights, sectors, basis);
 		commonTargeting_.initialGuess(vwo, psi00, block, noguess);
 		const SizeType n = vwo.sectors();
-		initialVector.resize(1);
-		initialVector[0].resize(n);
+		initialVector.resize(n);
 		for (SizeType i = 0; i < n; ++i)
-			vwo.extract(initialVector[0][i], vwo.sector(i));
+			vwo.extract(initialVector[i], vwo.sector(i));
 	}
 
 	const LeftRightSuperType& lrs_;

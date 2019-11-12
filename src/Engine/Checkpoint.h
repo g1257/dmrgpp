@@ -112,10 +112,12 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 
 	Checkpoint(const ParametersType& parameters,
 	           InputValidatorType& ioIn,
 	           const ModelType& model,
+	           SizeType nsectors,
 	           bool isObserveCode) :
 	    parameters_(parameters),
 	    isObserveCode_(isObserveCode),
@@ -129,9 +131,12 @@ public:
 	              "environ",
 	              isObserveCode),
 	    progress_("Checkpoint"),
-	    energiesFromFile_(parameters_.numberOfExcited, 0),
+	    energiesFromFile_(nsectors),
 	    dummyBwo_("dummy")
 	{
+		for (SizeType i = 0; i < nsectors; ++i)
+			energiesFromFile_[i].resize(parameters_.numberOfExcited);
+
 		if (parameters_.autoRestart) isRestart_ = true;
 
 		SizeType site = 0; // FIXME for Immm model, find max of hilbert(site) over site
@@ -270,7 +275,7 @@ public:
 
 	const ParametersType& parameters() const { return parameters_; }
 
-	const VectorRealType& energies() const { return energiesFromFile_; }
+	const VectorVectorRealType& energies() const { return energiesFromFile_; }
 
 private:
 
@@ -454,7 +459,7 @@ private:
 	DiskOrMemoryStackType systemStack_;
 	DiskOrMemoryStackType envStack_;
 	PsimagLite::ProgressIndicator progress_;
-	VectorRealType energiesFromFile_;
+	VectorVectorRealType energiesFromFile_;
 	BasisWithOperatorsType dummyBwo_;
 }; // class Checkpoint
 } // namespace Dmrg
