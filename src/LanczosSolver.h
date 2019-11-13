@@ -89,7 +89,7 @@ public:
 	void decomposition(const VectorType& initVector,
 	                   TridiagonalMatrixType& ab)
 	{
-		return ls_.decomposition(initVector, ab);
+		return ls_.decomposition(initVector, ab, 1);
 	}
 
 	const typename LanczosCoreType::DenseMatrixType& lanczosVectors() const

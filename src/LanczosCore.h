@@ -148,7 +148,7 @@ public:
 	  */
 	void decomposition(const VectorType& initVector,
 	                   TridiagonalMatrixType& ab,
-	                   SizeType excitedForStop = 0)
+	                   SizeType excitedForStop)
 	{
 		SizeType& max_nstep = steps_;
 		SizeType matsize = mat_.rows();
@@ -174,10 +174,8 @@ public:
 		if (max_nstep > matsize) max_nstep = matsize;
 		ab.resize(max_nstep,0);
 
-		RealType eold = 100.;
 		bool exitFlag = false;
 		SizeType j = 0;
-		RealType enew = 0;
 		lanczosVectors_.saveInitialVector(V0);
 		lanczosVectors_.prepareMemory(matsize, max_nstep);
 
@@ -209,13 +207,25 @@ public:
 			lanczosVectors_.saveVector(V1, 1);
 
 		VectorRealType tmpEigs(ab.size(), 0);
+		VectorRealType eold(ab.size(), 0);
+		RealType deltaMax = 0;
+
 		// ---- Starting the loop -------
 		for (j = 1; j < max_nstep; ++j) {
 
 			lanczosVectors_.oneStepDecomposition(V0,V1,V2,ab,j);
 			ab.diag(tmpEigs, j + 1);
-			enew = tmpEigs[excitedForStop]; // only need eigen-values here
-			if (fabs (enew - eold) < params_.tolerance) exitFlag=true;
+			const SizeType eigsForError = std::min(excitedForStop,
+			                                       static_cast<SizeType>(tmpEigs.size()));
+
+			deltaMax = 0;
+			for (SizeType ii = 0; ii < eigsForError; ++ii) {
+				const RealType delta = fabs(tmpEigs[ii] - eold[ii]);
+				eold[ii] = tmpEigs[ii];
+				if (delta > deltaMax) deltaMax = delta;
+			}
+
+			if (deltaMax < params_.tolerance) exitFlag=true;
 			if (j == max_nstep-1) exitFlag=true;
 			if (exitFlag && mat_.rows()<=4) break;
 			if (exitFlag && j >= params_.minSteps) break;
@@ -227,8 +237,6 @@ public:
 				V0[i] = V1[i];
 				V1[i] = V2[i];
 			}
-
-			eold = enew;
 		}
 
 		if (j < max_nstep) {
@@ -241,7 +249,7 @@ public:
 		OstringStream msg;
 		msg<<"Decomposition done for mat.rank="<<mat_.rows();
 		msg<<" after "<<j<<" steps";
-		if (params_.tolerance>0) msg<<", actual eps="<<fabs(enew - eold);
+		if (params_.tolerance>0) msg<<", actual eps="<<deltaMax;
 
 		progress_.printline(msg,std::cout);
 
