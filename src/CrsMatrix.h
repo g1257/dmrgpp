@@ -290,7 +290,7 @@ public:
 
 
 	void setCol(int n,int v) {
-             if (n == (colind_.size() + 1)) {
+             if ( ((size_t) n) == (colind_.size() + 1)) {
                 colind_.push_back(v);
                 }
              else {
@@ -300,7 +300,7 @@ public:
 
 
 	void setValues(int n,const T &v) {
-             if (n == (values_.size() + 1)) {
+             if ( ((size_t) n) == (values_.size() + 1)) {
                 values_.push_back(v);
                 }
              else {
