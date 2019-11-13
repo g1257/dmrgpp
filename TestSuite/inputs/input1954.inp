@@ -1,10 +1,12 @@
 TotalNumberOfSites=6
 
 NumberOfTerms=2
-DegreesOfFreedom=1
+DegreesOfFreedom=2
 GeometryKind=chain
 GeometryOptions=ConstantValues
-Connectors 1 0
+Connectors 2 2
+0 0
+0 0
 
 DegreesOfFreedom=1
 GeometryKind=LongRange
@@ -15,10 +17,13 @@ GeometryEntangler=-1
 FeAsMode=INT_ORBITAL0
 Orbitals=1
 
-hubbardU  6
+hubbardU  12
+0 0 0 0 0 0
 0 0 0 0 0 0
 
-potentialV 12
+potentialV 24
+0 0 0 0 0 0
+0 0 0 0 0 0
 0 0 0 0 0 0
 0 0 0 0 0 0
 

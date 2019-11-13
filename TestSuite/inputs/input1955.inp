@@ -17,10 +17,13 @@ Connectors 1 0
 FeAsMode=INT_ORBITAL0
 Orbitals=1
 
-hubbardU  6
+hubbardU  12
 10.00 10.00 10.00 10.00 10.00 10.00
+0 0 0 0 0 0
 
-potentialV  12
+potentialV  24
+0 0 0 0 0 0
+0 0 0 0 0 0
 0 0 0 0 0 0
 0 0 0 0 0 0
 
