@@ -13,9 +13,7 @@ Connectors 1 0
 
 Model=HubbardAncilla
 hubbardU	6  10.0 10.0 10.0 10.0 10.0 10.0  
-potentialV	24 0.0 0.0 0.0 0.0 0.0 0.0 
-                   0.0 0.0 0.0 0.0 0.0 0.0 
-                   0.0 0.0 0.0 0.0 0.0 0.0 
+potentialV	12 0.0 0.0 0.0 0.0 0.0 0.0 
                    0.0 0.0 0.0 0.0 0.0 0.0 
 
 SolverOptions=twositedmrg,restart,TargetingAncilla
