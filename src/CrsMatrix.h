@@ -1379,14 +1379,23 @@ void fromBlockToFull(CrsMatrix<T>& Bfull,
 
         Bfull.reserve( B.nonZeros() );
 
+        const bool use_push = true;
+
 	for (SizeType ii = 0; ii < B.rows(); ++ii) {
 		SizeType i = ii + offset;
 		Bfull.setRow(i, counter);
 		for (int jj = B.getRowPtr(ii); jj < B.getRowPtr(ii + 1); ++jj) {
 			SizeType j = B.getCol(jj) + offset;
 			T tmp = B.getValue(jj);
-			Bfull.setCol(counter, j);
-			Bfull.setValues(counter++, tmp);
+                        if (use_push) {
+                           Bfull.pushCol(j);
+                           Bfull.pushValue(tmp);
+                        }
+                        else {
+			   Bfull.setCol(counter, j);
+			   Bfull.setValues(counter, tmp);
+                           counter++;
+                        };
 		}
 	}
 
