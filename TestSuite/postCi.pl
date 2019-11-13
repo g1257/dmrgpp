@@ -147,7 +147,7 @@ sub procCout
 			next;
 		}
 
-		if (/lowest eigenvalue= ([^ ]+) /) {
+		if (/lowest eigenvalue= ([^ ]+) */) {
 			push(@energies, $1);
 			next;
 		}
@@ -192,7 +192,7 @@ sub maxEnergyDiff
 	return "NEW ENERGIES UNDEFINED" if (!defined($eNew));
 	return "OLD ENERGIES UNDEFINED" if (!defined($eOld));
 	my $n = scalar(@$eNew);
-	return "ENERGY SIZES DIFFERENT" if (scalar(@$eOld) != $n);
+	return "ENERGY SIZES DIFFERENT ".scalar(@$eOld)." $n" if (scalar(@$eOld) != $n);
 	return "NO ENERGIES!" if ($n == 0);
 	my $maxEdiff = 0;
 	for (my $i = 0; $i < $n; ++$i) {

@@ -277,12 +277,19 @@ private:
 		                    sectors,
 		                    lrs.super());
 
+		if (oldEnergy_.size() != totalSectors)
+			oldEnergy_.resize(totalSectors);
+
 		for (SizeType j = 0; j < totalSectors; ++j) {
 
 			energySaved[j].resize(numberOfExcited);
 
+			if (oldEnergy_[j].size() != numberOfExcited)
+				oldEnergy_[j].resize(numberOfExcited);
+
 			vecSaved[j].resize(numberOfExcited);
 		}
+
 
 		for (SizeType j = 0; j < totalSectors; ++j) {
 
@@ -326,8 +333,10 @@ private:
 				                    initialVectorBySector,
 				                    loopIndex);
 
-				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex)
+				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
 					energySaved[j][excitedIndex] = myEnergy[excitedIndex];
+					oldEnergy_[j][excitedIndex] = myEnergy[excitedIndex];
+				}
 
 			} // end if
 		} // end sectors

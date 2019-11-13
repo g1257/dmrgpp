@@ -20,9 +20,7 @@ Connectors 6 6
 
 Model=HubbardAncilla
 hubbardU	6 0.0 0.0 0.0 0.0 0.0 0.0
-potentialV	24 0.0 0.0 0.0 0.0 0.0 0.0
-                   0.0 0.0 0.0 0.0 0.0 0.0
-                   0.0 0.0 0.0 0.0 0.0 0.0
+potentialV	12     0.0 0.0 0.0 0.0 0.0 0.0
                    0.0 0.0 0.0 0.0 0.0 0.0
 
 SolverOptions=twositedmrg,MatrixVectorOnTheFly

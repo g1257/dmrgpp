@@ -247,10 +247,10 @@ private:
 			SparseMatrixType nup = n(cm[orbital + SPIN_UP*ORBITALS]);
 			SparseMatrixType ndown = n(cm[orbital + SPIN_DOWN*ORBITALS]);
 
-			SizeType iUp = actualIndexOfSite + (orbital + 0*ORBITALS)*nsites;
+			SizeType iUp = actualIndexOfSite + (orbital + 0*factor)*nsites;
 			assert(iUp < modelParameters_.potentialV.size());
 			hmatrix += modelParameters_.potentialV[iUp] * nup;
-			SizeType iDown = actualIndexOfSite + (orbital + 1*ORBITALS)*nsites;
+			SizeType iDown = actualIndexOfSite + (orbital + 1*factor)*nsites;
 			assert(iDown < modelParameters_.potentialV.size());
 			hmatrix += modelParameters_.potentialV[iDown] * ndown;
 		}
