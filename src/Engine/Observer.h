@@ -119,6 +119,13 @@ public:
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
 
+	struct ManyPointActionBase {
+		virtual bool operator()(SizeType, SizeType, SizeType, SizeType) const
+		{
+			return true;
+		}
+	};
+
 	Observer(IoInputType& io,
 	         SizeType start,
 	         SizeType nf,
@@ -286,7 +293,8 @@ public:
 
 	void fourPoint(const BraketType& braket,
 	               SizeType rows,
-	               SizeType cols)
+	               SizeType cols,
+	               const ManyPointActionBase& myaction)
 	{
 		assert(braket.points() == 4);
 
@@ -366,6 +374,7 @@ public:
 			for (SizeType site1 = site0+1; site1 < cols; ++site1) {
 				for (SizeType site2 = site1+1; site2 < rows; ++site2) {
 					for (SizeType site3 = site2+1; site3 < cols; ++site3) {
+						if (!myaction(site0, site1, site2, site3)) continue;
 						typename FourPointCorrelationsType::SparseMatrixType O2gt;
 						fourpoint_.firstStage(O2gt,'N',site0,'N',site1,braket,0,1);
 						typename MatrixType::value_type tmp = fourpoint_.secondStage(O2gt,

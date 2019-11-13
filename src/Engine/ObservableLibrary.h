@@ -108,6 +108,7 @@ public:
 	typedef typename ObserverType::BraketType BraketType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
+	typedef typename ObserverType::ManyPointActionBase ManyPointActionType;
 
 	template<typename IoInputter>
 	ObservableLibrary(IoInputter& io,
@@ -125,7 +126,10 @@ public:
 
 	const ModelType& model() const { return model_; }
 
-	void interpret(const PsimagLite::String& list, SizeType rows, SizeType cols)
+	void interpret(const PsimagLite::String& list,
+	               SizeType rows,
+	               SizeType cols,
+	               const ManyPointActionType& manyPointAction)
 	{
 		typename BraketType::VectorStringType vecStr;
 		PsimagLite::split(vecStr, list, ",");
@@ -141,21 +145,22 @@ public:
 				continue;
 			}
 
-			manyPoint(0,braket,rows,cols);
+			manyPoint(0, braket, rows, cols, manyPointAction);
 		}
 	}
 
 	void measure(const PsimagLite::String& label,
 	             SizeType rows,
 	             SizeType cols,
+	             const ManyPointActionType& manyPointAction,
 	             SizeType orbitals)
 	{
 		// FIXME: No support for site varying operators
 		if (label=="cc") {
 			BraketType braket(model_,"<gs|c?0-;c'?0-|gs>");
-			manyPoint(0,braket,rows,cols); // c_{0,0} spin down
+			manyPoint(0,braket, rows, cols, manyPointAction); // c_{0,0} spin down
 			BraketType braket2(model_,"<gs|c?1-;c'?1-|gs>");
-			manyPoint(0,braket2,rows,cols); // c_{0,0} spin down
+			manyPoint(0,braket2, rows, cols, manyPointAction); // c_{0,0} spin down
 		} else if (label=="nn") {
 			MatrixType out(rows,cols);
 			SizeType site = 1;
@@ -190,7 +195,7 @@ public:
 				for (SizeType j = i; j < orbitals; ++j) {
 					PsimagLite::String str = "<gs|sz?" + ttos(i) + ";sz?" + ttos(j) + "|gs>";
 					BraketType braket(model_,str);
-					manyPoint(&szsz_[counter],braket,rows,cols);
+					manyPoint(&szsz_[counter], braket, rows, cols, manyPointAction);
 					MatrixType tSzThis = szsz_[counter];
 					RealType factor = (i != j) ? 2.0 : 1.0;
 					if (counter == 0)
@@ -220,7 +225,7 @@ public:
 				for (SizeType j = i; j < orbitals; ++j) {
 					PsimagLite::String str = "<gs|splus?" + ttos(i) + ";sminus?" + ttos(j) + "|gs>";
 					BraketType braket(model_,str);
-					manyPoint(&sPlusSminus_[counter],braket,rows,cols);
+					manyPoint(&sPlusSminus_[counter], braket, rows, cols, manyPointAction);
 					MatrixType tSpThis = sPlusSminus_[counter];
 					RealType factor = (i != j) ? 2.0 : 1.0;
 					if (counter == 0)
@@ -251,7 +256,7 @@ public:
 				for (SizeType j = i; j < orbitals; ++j) {
 					PsimagLite::String str = "<gs|sminus?" + ttos(i) + ";splus?" + ttos(j) + "|gs>";
 					BraketType braket(model_,str);
-					manyPoint(&sMinusSplus_[counter],braket,rows,cols);
+					manyPoint(&sMinusSplus_[counter], braket, rows, cols, manyPointAction);
 					MatrixType tSmThis = sMinusSplus_[counter];
 					RealType factor = (i != j) ? 2.0 : 1.0;
 					if (counter == 0)
@@ -279,11 +284,11 @@ public:
 			for (SizeType x = 0; x < orbitals; ++x) {
 				for (SizeType y = x; y < orbitals; ++y) {
 					if (szsz_.size() == 0)
-						measure("szsz",rows,cols,orbitals);
+						measure("szsz", rows, cols, manyPointAction, orbitals);
 					if (sPlusSminus_.size() == 0)
-						measure("s+s-",rows,cols,orbitals);
+						measure("s+s-", rows, cols, manyPointAction, orbitals);
 					if (sMinusSplus_.size() == 0)
-						measure("s-s+",rows,cols,orbitals);
+						measure("s-s+", rows, cols, manyPointAction, orbitals);
 
 					MatrixType spinTotal(szsz_[counter].n_row(),szsz_[counter].n_col());
 
@@ -318,7 +323,7 @@ public:
 		} else if (label=="dd") {
 
 			BraketType braket(model_,"<gs|d;d'|gs>");
-			manyPoint(0,braket,rows,cols);
+			manyPoint(0, braket, rows, cols, manyPointAction);
 
 		} else if (label == "pp") {
 			if (model_.params().model!="TjMultiOrb" &&
@@ -1114,7 +1119,8 @@ private:
 	void manyPoint(MatrixType* storage,
 	               const BraketType& braket,
 	               SizeType rows,
-	               SizeType cols)
+	               SizeType cols,
+	               const ManyPointActionType& someAction)
 	{
 		if (hasTimeEvolution_) {
 			printSites();
@@ -1146,7 +1152,7 @@ private:
 
 
 		if (braket.points() == 4)
-			return observe_.fourPoint(braket,rows,cols);
+			return observe_.fourPoint(braket, rows, cols, someAction);
 
 		observe_.anyPoint(braket);
 	}

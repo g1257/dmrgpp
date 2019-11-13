@@ -14,6 +14,7 @@ bool observeOneFullSweep(IoInputType& io,
 	typedef typename ModelType::GeometryType GeometryType;
 	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
 	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
+	typedef typename ObservableLibraryType::ManyPointActionType ManyPointActionType;
 
 	static SizeType start = 0;
 
@@ -80,10 +81,11 @@ bool observeOneFullSweep(IoInputType& io,
 
 		if (item.find("%") == 0) continue;
 
+		ManyPointActionType manyPointAction;
 		if (item.length() > 0 && item[0] != '<')
-			observerLib.measure(item, rows, cols, orbitals);
+			observerLib.measure(item, rows, cols, manyPointAction, orbitals);
 		else
-			observerLib.interpret(item, rows, cols);
+			observerLib.interpret(item, rows, cols, manyPointAction);
 	}
 
 	start = end;
