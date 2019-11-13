@@ -288,12 +288,24 @@ public:
 		rowptr_[n]=v;
 	}
 
+
 	void setCol(int n,int v) {
+             if (n == (colind_.size() + 1)) {
+                colind_.push_back(v);
+                }
+             else {
 		colind_[n]=v;
+             };
 	}
 
+
 	void setValues(int n,const T &v) {
+             if (n == (values_.size() + 1)) {
+                values_.push_back(v);
+                }
+             else {
 		values_[n]=v;
+             };
 	}
 
 	void operator*=(T x)
@@ -703,8 +715,12 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 	const T zval = 0.0;
 	SizeType rows = a.rows();
 	SizeType cols = a.cols();
-	SizeType nonZeros = a.nonZeros();
-	crsMatrix.resize(rows, cols, nonZeros);
+	SizeType nonZeros = rows * cols;
+
+	crsMatrix.resize(rows, cols );
+        crsMatrix.reserve( nonZeros );
+
+        const bool use_push = true;
 
 	SizeType counter = 0;
 	for (SizeType i = 0; i < rows; ++i) {
@@ -712,9 +728,16 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 		for (SizeType j = 0; j < cols; ++j) {
 			const T& val = a(i,j);
 			if (val == zval) continue;
-			crsMatrix.setValues(counter, val);
-			crsMatrix.setCol(counter, j);
-			++counter;
+
+                        if (use_push) {
+                           crsMatrix.pushValue(val);
+                           crsMatrix.pushCol(j);
+                         }
+                        else {
+			   crsMatrix.setValues(counter, val);
+			   crsMatrix.setCol(counter, j);
+			   ++counter;
+                        };
 		}
 	}
 
@@ -960,13 +983,10 @@ void transposeConjugate(CrsMatrix<S>& B, const CrsMatrix<S2>& A)
 	SizeType nnz_A = A.nonZeros();
 	SizeType nnz_B = nnz_A;
 
-	B.resize( nrowB, ncolB,  nnz_B );
+	B.resize( nrowB, ncolB , nnz_B );
 
-	std::vector<SizeType> nnz_count(ncolA);
+	std::vector<SizeType> nnz_count(ncolA,0);
 
-	for(SizeType ja=0; ja < ncolA; ja++) {
-		nnz_count[ ja ] = 0;
-	};
 
 	// ----------------------------------------------------
 	// 1st pass to count number of nonzeros per column in A
@@ -1075,13 +1095,9 @@ void operatorPlus(CrsMatrix<T>& A,
 	// ------------------------------------------
 	// temporary vectors to accelerate processing
 	// ------------------------------------------
-	std::vector<T> valueTmp( ncol_A);
-	std::vector<bool> is_examined_already( ncol_A);
+	std::vector<T> valueTmp( ncol_A,zero);
+	std::vector<bool> is_examined_already( ncol_A,false);
 
-	for(SizeType jcol=0; jcol < ncol_A; jcol++) {
-		valueTmp[ jcol ] = zero;
-		is_examined_already[ jcol ] = false;
-	};
 
 	SizeType counter = 0;
 	for(SizeType irow=0; irow < nrow_A; irow++) {
@@ -1360,6 +1376,8 @@ void fromBlockToFull(CrsMatrix<T>& Bfull,
 	int counter = 0;
 	for (SizeType i = 0; i < offset; ++i)
 		Bfull.setRow(i, counter);
+
+        Bfull.reserve( B.nonZeros() );
 
 	for (SizeType ii = 0; ii < B.rows(); ++ii) {
 		SizeType i = ii + offset;
