@@ -43,17 +43,19 @@ struct OneOperatorSpec {
 		String siteString;
 	};
 
-	static SiteSplit extractSiteIfAny(PsimagLite::String name)
+	static SiteSplit extractSiteIfAny(PsimagLite::String name,
+	                                  const char cBegin = '[',
+	                                  const char cEnd = ']')
 	{
 		int firstIndex = -1;
 		int lastIndex = -1;
 		for (SizeType i = 0; i < name.length(); ++i) {
-			if (name[i] == '[') {
+			if (name[i] == cBegin) {
 				firstIndex = i;
 				continue;
 			}
 
-			if (name[i] == ']') {
+			if (name[i] == cEnd) {
 				lastIndex = i;
 				continue;
 			}
@@ -64,7 +66,7 @@ struct OneOperatorSpec {
 		bool b1 = (firstIndex < 0 && lastIndex >= 0);
 		bool b2 = (firstIndex >= 0 && lastIndex < 0);
 		if (b1 || b2)
-			err(name + " has unmatched [ or ]\n");
+			err(name + " has unmatched " + cBegin + " or " + cEnd + "\n");
 
 		String str = name.substr(0, firstIndex);
 		str += name.substr(lastIndex + 1, name.length() - lastIndex);
