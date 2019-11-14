@@ -141,13 +141,8 @@ public:
 		{
 			if (!nonTrivial_) return true;
 
-			PsimagLite::String copy = actionString_;
-			PredicateAwesomeType::replaceAll(copy, "%0", ttos(s0));
-			PredicateAwesomeType::replaceAll(copy, "%1", ttos(s1));
-			PredicateAwesomeType::replaceAll(copy, "%2", ttos(s2));
-
-			PredicateAwesomeType pred(copy);
-			return pred.isTrue("%3", s3);
+			PredicateAwesomeType pred(actionString_);
+			return pred.isTrue("%0", s0, "%1", s1, "%2", s2, "%3", s3);
 		}
 
 	private:

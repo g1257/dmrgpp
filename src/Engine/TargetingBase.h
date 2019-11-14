@@ -345,16 +345,24 @@ private:
 
 		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
 
-			SizeType excitedIndex = 0;
+			const SizeType numberOfExcited = psi[sectorIndex].size();
+			for (SizeType e = 0; e < numberOfExcited; ++e) {
 
-			VectorWithOffsetType vwo(compactedWeights[sectorIndex],
-			                         sectors[sectorIndex],
-			                         basis);
-			commonTargeting_.initialGuess(vwo,
-			                              *(psi[sectorIndex][excitedIndex]),
-			                              block,
-			                              noguess);
-			vwo.extract(initialVector[sectorIndex], vwo.sector(0));
+				VectorWithOffsetType vwo(compactedWeights[sectorIndex],
+				                         sectors[sectorIndex],
+				                         basis);
+				commonTargeting_.initialGuess(vwo,
+				                              *(psi[sectorIndex][e]),
+				                              block,
+				                              noguess);
+
+				VectorType tmpVector;
+				vwo.extract(tmpVector, vwo.sector(0));
+				if (e == 0)
+					initialVector[sectorIndex] = tmpVector;
+				else
+					initialVector[sectorIndex] += tmpVector;
+			}
 		}
 	}
 

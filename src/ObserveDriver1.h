@@ -89,17 +89,14 @@ bool observeOneFullSweep(IoInputType& io,
 
 		PsimagLite::String actionString;
 		if (braceContent.hasSiteString) {
-			PsimagLite::Vector<PsimagLite::String>::Type braceOptions;
-			PsimagLite::split(braceOptions, braceContent.siteString, ";");
-			if (braceOptions.size() == 0)
-				err("Nothing inside brace, for " + braceContent.siteString + "\n");
-			size_t index = braceOptions[0].find("action=");
+			PsimagLite::String actionContent = braceContent.siteString;
+			size_t index = actionContent.find("action=");
 
 			if (index == PsimagLite::String::npos)
 				err("Only action=something accepted for brace option, not "
 				    + braceContent.siteString + "\n");
 
-			actionString = braceOptions[0].substr(index + 7, braceOptions[0].length() - 7);
+			actionString = actionContent.substr(index + 7, actionContent.length() - 7);
 			delete manyPointAction;
 			manyPointAction = new ManyPointActionType(braceContent.hasSiteString, actionString);
 			if (braceContent.root != "")
