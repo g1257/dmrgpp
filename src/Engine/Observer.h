@@ -123,10 +123,7 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
 
-	class SpecForManyPointAction
-	{};
-
-	class ManyPointActionBase {
+	class ManyPointAction {
 
 	public:
 
@@ -134,13 +131,13 @@ public:
 		typedef PsimagLite::PrepassData<int> PrepassDataType;
 		typedef PsimagLite::ExpressionPrepass<PrepassDataType> ExpressionPrepassType;
 
-		ManyPointActionBase(bool hasNonTrivialAction,
-		                    PsimagLite::String actionString)
+		ManyPointAction(bool hasNonTrivialAction,
+		                PsimagLite::String actionString)
 		    : nonTrivial_(hasNonTrivialAction),
 		      actionString_(actionString)
 		{}
 
-		virtual bool operator()(SizeType s0, SizeType s1, SizeType s2, SizeType s3) const
+		bool operator()(SizeType s0, SizeType s1, SizeType s2, SizeType s3) const
 		{
 			if (!nonTrivial_) return true;
 
@@ -151,26 +148,12 @@ public:
 
 			PredicateAwesomeType pred(copy);
 			return pred.isTrue("%3", s3);
-
-			/*values_[0] = s0;
-			values_[1] = s1;
-			values_[2] = s2;
-			values_[3] = s3;
-
-			PrepassDataType prepassData(names_, values_);
-			VectorStringType ve;
-			PsimagLite::split(ve, actionString_, ":");
-			ExpressionPrepassType::prepass(ve, prepassData);
-			ExpressionCalculatorType expressionCalc(ve);
-			return (expressionCalc() > 0);*/
 		}
 
 	private:
 
 		bool nonTrivial_;
 		PsimagLite::String actionString_;
-		/*PsimagLite::String names_;
-		mutable PsimagLite::Vector<int>::Type values_;*/
 	};
 
 	Observer(IoInputType& io,
@@ -341,7 +324,7 @@ public:
 	void fourPoint(const BraketType& braket,
 	               SizeType rows,
 	               SizeType cols,
-	               const ManyPointActionBase& myaction)
+	               const ManyPointAction& myaction)
 	{
 		assert(braket.points() == 4);
 
@@ -556,7 +539,7 @@ public:
 	                  SizeType rows,
 	                  SizeType cols,
 	                  PsimagLite::String bra,
-                      PsimagLite::String ket)
+	                  PsimagLite::String ket)
 	{
 		MultiPointCorrelationsType multi(skeleton_);
 		multi(result, O, rows, cols, bra, ket);

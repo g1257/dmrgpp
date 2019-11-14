@@ -77,6 +77,7 @@ bool observeOneFullSweep(IoInputType& io,
 	                                  nf,
 	                                  trail);
 
+	ManyPointActionType* manyPointAction = new ManyPointActionType(false, "");
 	for (SizeType i = 0; i < vecOptions.size(); ++i) {
 		PsimagLite::String item = vecOptions[i];
 
@@ -99,15 +100,17 @@ bool observeOneFullSweep(IoInputType& io,
 				    + braceContent.siteString + "\n");
 
 			actionString = braceOptions[0].substr(index + 7, braceOptions[0].length() - 7);
+			delete manyPointAction;
+			manyPointAction = new ManyPointActionType(braceContent.hasSiteString, actionString);
+			if (braceContent.root != "")
+				err("Garbage trailing after brace close\n");
+			continue;
 		}
 
-		ManyPointActionType manyPointAction(braceContent.hasSiteString, actionString);
-		item = braceContent.root;
-
 		if (item.length() > 0 && item[0] != '<')
-			observerLib.measure(item, rows, cols, manyPointAction, orbitals);
+			observerLib.measure(item, rows, cols, *manyPointAction, orbitals);
 		else
-			observerLib.interpret(item, rows, cols, manyPointAction);
+			observerLib.interpret(item, rows, cols, *manyPointAction);
 	}
 
 	start = end;

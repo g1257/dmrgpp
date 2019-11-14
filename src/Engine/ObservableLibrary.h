@@ -108,7 +108,7 @@ public:
 	typedef typename ObserverType::BraketType BraketType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeType;
-	typedef typename ObserverType::ManyPointActionBase ManyPointActionType;
+	typedef typename ObserverType::ManyPointAction ManyPointActionType;
 
 	template<typename IoInputter>
 	ObservableLibrary(IoInputter& io,
