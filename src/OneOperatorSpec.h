@@ -32,7 +32,18 @@ struct OneOperatorSpec {
 		dof = atoi(label_.substr(i + 1, label_.length()).c_str());
 	}
 
-	static int extractSiteIfAny(PsimagLite::String& name)
+	struct SiteSplit {
+
+		SiteSplit(bool hasSiteString_, String root_, String siteString_)
+		    : hasSiteString(hasSiteString_), root(root_), siteString(siteString_)
+		{}
+
+		bool hasSiteString;
+		String root;
+		String siteString;
+	};
+
+	static SiteSplit extractSiteIfAny(PsimagLite::String name)
 	{
 		int firstIndex = -1;
 		int lastIndex = -1;
@@ -48,24 +59,36 @@ struct OneOperatorSpec {
 			}
 		}
 
-		if (firstIndex < 0 && lastIndex < 0) return -1;
+		if (firstIndex < 0 && lastIndex < 0) return SiteSplit(false, name, "");
 
 		bool b1 = (firstIndex < 0 && lastIndex >= 0);
 		bool b2 = (firstIndex >= 0 && lastIndex < 0);
-		if (b1 || b2) {
-			PsimagLite::String str("Braket operator ");
+		if (b1 || b2)
 			err(name + " has unmatched [ or ]\n");
-		}
 
-		PsimagLite::String str = name.substr(0, firstIndex);
+		String str = name.substr(0, firstIndex);
 		str += name.substr(lastIndex + 1, name.length() - lastIndex);
-		int site = atoi(name.substr(firstIndex+1,lastIndex-1).c_str());
-		name = str;
-		return site;
+		String siteString = name.substr(firstIndex+1,lastIndex-1).c_str();
+		return SiteSplit(true, str, siteString);
+	}
+
+	static bool isNonNegativeInteger(const String& s)
+	{
+		return !s.empty() &&
+		        std::find_if(s.begin(),
+		                     s.end(),
+		                     [](char c) { return !std::isdigit(c); }) == s.end();
+	}
+
+	static SizeType strToNumberOfFail(String s)
+	{
+		if (!isNonNegativeInteger(s))
+			err("string " + s + " is not a NonNegativeInteger\n");
+		return atoi(s.c_str());
 	}
 
 	SizeType dof;
-	PsimagLite::String label;
+	String label;
 	bool transpose;
 }; // struct OneOperatorSpec
 
