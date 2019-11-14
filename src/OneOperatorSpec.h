@@ -68,7 +68,7 @@ struct OneOperatorSpec {
 
 		String str = name.substr(0, firstIndex);
 		str += name.substr(lastIndex + 1, name.length() - lastIndex);
-		String siteString = name.substr(firstIndex+1,lastIndex-1).c_str();
+		String siteString = name.substr(firstIndex + 1, lastIndex - firstIndex - 1);
 		return SiteSplit(true, str, siteString);
 	}
 
