@@ -15,6 +15,7 @@ class OperatorSpec {
 	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef LazyAlgebra<typename ModelType::OperatorType> LazyAlgebraType;
 	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
+	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
 
 public:
 
@@ -29,13 +30,18 @@ public:
 	ResultType operator()(PsimagLite::String opLabel, int& site2) const
 	{
 		PsimagLite::String copyOfOpLabel = opLabel;
-		int site3 = OneOperatorSpecType::extractSiteIfAny(opLabel);
+		SiteSplitType site3Split = OneOperatorSpecType::extractSiteIfAny(opLabel);
 
-		if (site2 >= 0 && site3 >= 0 && site2 != site3)
+		if (site2 >= 0 &&
+		        site3Split.hasSiteString &&
+		        static_cast<SizeType>(site2) !=
+		        OneOperatorSpecType::strToNumberOfFail(site3Split.siteString))
 			err(PsimagLite::String(__FILE__) +
 			    " FATAL , delete site from " + copyOfOpLabel + "\n");
 
-		if (site2 < 0) site2 = site3;
+		opLabel = site3Split.root;
+
+		if (site2 < 0) site2 = OneOperatorSpecType::strToNumberOfFail(site3Split.siteString);
 
 		SizeType site = (site2 < 0) ? 0 : site2;
 

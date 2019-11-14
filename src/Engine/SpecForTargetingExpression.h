@@ -65,6 +65,7 @@ public:
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::BorderEnumType BorderEnumType;
+	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
 
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false), factor_(1.0), aux_(aux) {}
@@ -158,7 +159,12 @@ public:
 
 			// it's a matrix
 			assert(j < sites.size());
-			sites[j] = OneOperatorSpecType::extractSiteIfAny(tmp);
+			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
+			sites[j] = (siteSplit.hasSiteString)
+			        ? OneOperatorSpecType::strToNumberOfFail(siteSplit.siteString)
+			        : -1;
+			tmp = siteSplit.root;
+
 			assert(j < ops.size());
 			ops[j] = new OneOperatorSpecType(tmp);
 			++j;
