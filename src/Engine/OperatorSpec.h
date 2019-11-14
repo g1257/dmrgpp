@@ -41,7 +41,8 @@ public:
 
 		opLabel = site3Split.root;
 
-		if (site2 < 0) site2 = OneOperatorSpecType::strToNumberOfFail(site3Split.siteString);
+		if (site2 < 0 && site3Split.hasSiteString)
+			site2 = OneOperatorSpecType::strToNumberOfFail(site3Split.siteString);
 
 		SizeType site = (site2 < 0) ? 0 : site2;
 

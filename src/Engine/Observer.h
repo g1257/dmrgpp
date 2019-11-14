@@ -90,6 +90,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include "Utils.h"
+#include "ExpressionCalculator.h"
+#include "PredicateAwesome.h"
 
 namespace Dmrg {
 
@@ -118,12 +120,57 @@ public:
 	typedef ModelType_ ModelType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
 
-	struct ManyPointActionBase {
-		virtual bool operator()(SizeType, SizeType, SizeType, SizeType) const
+	class SpecForManyPointAction
+	{};
+
+	class ManyPointActionBase {
+
+	public:
+
+		typedef PsimagLite::ExpressionCalculator<int> ExpressionCalculatorType;
+		typedef PsimagLite::PrepassData<int> PrepassDataType;
+		typedef PsimagLite::ExpressionPrepass<PrepassDataType> ExpressionPrepassType;
+
+		ManyPointActionBase(bool hasNonTrivialAction,
+		                    PsimagLite::String actionString)
+		    : nonTrivial_(hasNonTrivialAction),
+		      actionString_(actionString)
+		{}
+
+		virtual bool operator()(SizeType s0, SizeType s1, SizeType s2, SizeType s3) const
 		{
-			return true;
+			if (!nonTrivial_) return true;
+
+			PsimagLite::String copy = actionString_;
+			PredicateAwesomeType::replaceAll(copy, "%0", ttos(s0));
+			PredicateAwesomeType::replaceAll(copy, "%1", ttos(s1));
+			PredicateAwesomeType::replaceAll(copy, "%2", ttos(s2));
+
+			PredicateAwesomeType pred(copy);
+			return pred.isTrue("%3", s3);
+
+			/*values_[0] = s0;
+			values_[1] = s1;
+			values_[2] = s2;
+			values_[3] = s3;
+
+			PrepassDataType prepassData(names_, values_);
+			VectorStringType ve;
+			PsimagLite::split(ve, actionString_, ":");
+			ExpressionPrepassType::prepass(ve, prepassData);
+			ExpressionCalculatorType expressionCalc(ve);
+			return (expressionCalc() > 0);*/
 		}
+
+	private:
+
+		bool nonTrivial_;
+		PsimagLite::String actionString_;
+		/*PsimagLite::String names_;
+		mutable PsimagLite::Vector<int>::Type values_;*/
 	};
 
 	Observer(IoInputType& io,
