@@ -160,6 +160,22 @@ protected:
 
 		cm[2] = this->naturalOperator("n", site, 0);
 
+		// BEGIN define ph operator
+		MatrixType tmp1 = multiplyTc(cm[1].getCRS(), cm[1].getCRS());
+		MatrixType tmp2 = multiplyTc(cm[0].getCRS(), cm[0].getCRS());
+		MatrixType tmp3 = tmp1*tmp2;
+		SparseMatrixType tmp3crs;
+		fullMatrixToCrsMatrix(tmp3crs, tmp3);
+		OpsLabelType& ph = this->createOpsLabel("ph");
+		typename OperatorType::Su2RelatedType su2related;
+		OperatorType phOp(tmp3crs,
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0,0),
+		                  1,
+		                  su2related);
+		ph.push(phOp);
+		// END define ph operator
+
 		OpsLabelType& p = this->createOpsLabel("pair");
 
 		for (SizeType i = 0; i < block.size(); ++i)

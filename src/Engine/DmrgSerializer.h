@@ -138,17 +138,24 @@ public:
 	{
 		if (bogus) return;
 
-		SizeType nsectors = 0;
-		io.read(nsectors, prefix + "/WaveFunction/Size");
-		wavefunction_.resize(nsectors);
-		for (SizeType i = 0; i < nsectors; ++i) {
-			SizeType nexcited = 0;
-			io.read(nexcited, prefix + "/WaveFunction/" + ttos(i) + "/Size");
-			wavefunction_[i].resize(nexcited);
-			for (SizeType j = 0; j < nexcited; ++j) {
-				wavefunction_[i][j] = new VectorWithOffsetType;
-				wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
+		try {
+			SizeType nsectors = 0;
+			io.read(nsectors, prefix + "/WaveFunction/Size");
+			wavefunction_.resize(nsectors);
+			for (SizeType i = 0; i < nsectors; ++i) {
+				SizeType nexcited = 0;
+				io.read(nexcited, prefix + "/WaveFunction/" + ttos(i) + "/Size");
+				wavefunction_[i].resize(nexcited);
+				for (SizeType j = 0; j < nexcited; ++j) {
+					wavefunction_[i][j] = new VectorWithOffsetType;
+					wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
+				}
 			}
+		} catch (...) {
+			wavefunction_.resize(1);
+			wavefunction_[0].resize(1);
+			wavefunction_[0][0] = new VectorWithOffsetType;
+			wavefunction_[0][0]->read(io, prefix + "/WaveFunction");
 		}
 
 		io.read(direction_, prefix + "/direction");
