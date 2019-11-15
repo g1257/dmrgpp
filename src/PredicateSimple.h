@@ -56,12 +56,12 @@ public:
 			err("Left or right expression is empty\n");
 	}
 
-	template<typename T>
-	bool isTrue(String name, T val)
+	template<typename SomeVectorType>
+	bool isTrue(const VectorStringType& names, const SomeVectorType& vals)
 	{
-
-		T lv = getValue(lhs_, name, val);
-		T rv = getValue(rhs_, name, val);
+		typedef typename SomeVectorType::value_type SomeValueType;
+		SomeValueType lv = getValue(lhs_, names, vals);
+		SomeValueType rv = getValue(rhs_, names, vals);
 		return compareOnOp(lv, op_, rv);
 	}
 
@@ -98,15 +98,32 @@ private:
 		return 0;
 	}
 
-	template<typename T>
-	static T getValue(String hs, String name, T val)
+	template<typename SomeVectorType>
+	static typename SomeVectorType::value_type getValue(String hs,
+	                                                    const VectorStringType& names,
+	                                                    const SomeVectorType& vals)
 	{
-		String numericHs = replaceVariable(hs, name, val);
+		String numericHs = replaceVariables(hs, names, vals);
 		VectorStringType tokens;
 		split(tokens, numericHs, "|");
-		typedef ExpressionCalculator<T> ExpressionCalculatorType;
+		typedef ExpressionCalculator<typename SomeVectorType::value_type> ExpressionCalculatorType;
 		ExpressionCalculatorType expressionCalculator(tokens);
 		return expressionCalculator();
+	}
+
+	template<typename SomeVectorType>
+	static String replaceVariables(String hs,
+	                               const VectorStringType& names,
+	                               const SomeVectorType& vals)
+	{
+		const SizeType n = names.size();
+		assert(n == vals.size());
+		String buffer = hs;
+		for (SizeType i = 0; i < n; ++i) {
+			buffer = replaceVariable(buffer, names[i], vals[i]);
+		}
+
+		return buffer;
 	}
 
 	template<typename T>
@@ -114,16 +131,18 @@ private:
 	                              String name,
 	                              T val)
 	{
-		String buffer;
-		const SizeType n = hs.length();
-		for (SizeType i = 0; i < n; ++i) {
-			if (hs[i] == name[0])
-				buffer += ttos(val);
-			else
-				buffer += hs[i];
+		const String valString = ttos(val);
+		const SizeType nameLength = name.length();
+
+		while (true) {
+			size_t index = hs.find(name);
+			if (index == String::npos) return hs;
+			String part1 = (index == 0) ? "" : hs.substr(0, index);
+			String part2 = hs.substr(index + nameLength, hs.length() - nameLength - index);
+			hs = part1 + valString + part2;
 		}
 
-		return buffer;
+		return hs;
 	}
 
 	static VectorStringType ops_;

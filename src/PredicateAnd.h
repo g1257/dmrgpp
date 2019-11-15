@@ -33,9 +33,36 @@ public:
 	template<typename T>
 	bool isTrue(String name, T val)
 	{
+		VectorStringType names{name};
+		typename Vector<T>::Type values{val};
 		SizeType n = vPredicateSimple_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (!vPredicateSimple_[i].isTrue(name, val)) return false;
+			if (!vPredicateSimple_[i].isTrue(names, values)) return false;
+		return true;
+	}
+
+	template<typename T>
+	bool isTrue(String name1, T val1, String name2, T val2)
+	{
+		VectorStringType names{name1, name2};
+		typename Vector<T>::Type values{val1, val2};
+		SizeType n = vPredicateSimple_.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (!vPredicateSimple_[i].isTrue(names, values)) return false;
+		return true;
+	}
+
+	template<typename T>
+	bool isTrue(String name1, T val1,
+	            String name2, T val2,
+	            String name3, T val3,
+	            String name4, T val4)
+	{
+		VectorStringType names{name1, name2, name3, name4};
+		typename Vector<T>::Type values{val1, val2, val3, val4};
+		SizeType n = vPredicateSimple_.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (!vPredicateSimple_[i].isTrue(names, values)) return false;
 		return true;
 	}
 

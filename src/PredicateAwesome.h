@@ -87,7 +87,11 @@ public:
 	template<typename T1, typename T2>
 	bool isTrue(String name1, T1 val1, String name2, T2 val2)
 	{
-		return (isTrue(name1, val1) && isTrue(name2, val2));
+		if (pred_ == "") return false;
+		SizeType n = predicateAnd_.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (predicateAnd_[i].isTrue(name1, val1, name2, val2)) return true;
+		return false;
 	}
 
 	template<typename T1, typename T2>
@@ -96,10 +100,14 @@ public:
 	            String name3, T1 val3,
 	            String name4, T2 val4)
 	{
-		return (isTrue(name1, val1) &&
-		        isTrue(name2, val2) &&
-		        isTrue(name3, val3) &&
-		        isTrue(name4, val4));
+		if (pred_ == "") return false;
+		SizeType n = predicateAnd_.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (predicateAnd_[i].isTrue(name1, val1,
+			                            name2, val2,
+			                            name3, val3,
+			                            name4, val4)) return true;
+		return false;
 	}
 
 	static void replaceAll(String& str, const String& from, const String& to)
