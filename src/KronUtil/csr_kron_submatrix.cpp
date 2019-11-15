@@ -80,9 +80,22 @@ void csr_kron_submatrix(
       };
 
 
+  const bool use_push = true;
+
   int ih = 0;
   int ifree = 0;
-  h.resize(nrow_H, ncol_H, max_nnz);
+
+  // ----------------------------------------------------
+  // note avoid zeroing out large arrays in sparse matrix
+  // ----------------------------------------------------
+  if (use_push) {
+    h.resize(nrow_H, ncol_H );
+    h.reserve( max_nnz );
+  }
+  else {
+          h.resize(nrow_H, ncol_H, max_nnz );
+  };
+
   for(ih=0; ih < nrow_H; ih++) {
      h.setRow(ih,ifree);
 
@@ -98,11 +111,12 @@ void csr_kron_submatrix(
      int ka = 0;
      int kb = 0;
      for(ka=istarta; ka < ienda; ka++) {
-     for(kb=istartb; kb < iendb; kb++) {
-         int ja = a.getCol(ka);
+
+       int ja = a.getCol(ka);
+       ComplexOrRealType aij = a.getValue(ka);
+
+       for(kb=istartb; kb < iendb; kb++) {
          int jb = b.getCol(kb);
-         ComplexOrRealType aij = a.getValue(ka);
-         ComplexOrRealType bij = b.getValue(kb);
 
          int jc = jb + ja*ncol_B;
      
@@ -111,13 +125,21 @@ void csr_kron_submatrix(
          int jh = cmap[jc];
          int isvalid = (0 <= jh) && (jh < ncol_H);
          if (isvalid) {
+            ComplexOrRealType bij = b.getValue(kb);
             ComplexOrRealType cij = aij * bij;
 
             assert((ifree < max_nnz));
 
-            h.setCol(ifree, jh);
-            h.setValues(ifree,cij);
+            if (use_push) {
+               h.pushCol( jh );
+               h.pushValue( cij );
+            }
+            else {
+               h.setCol(ifree, jh);
+               h.setValues(ifree,cij);
+            };
             ifree++;
+
             };
          };
          };

@@ -95,8 +95,15 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
   * prefix sum to setup row pointers
   * ---------------------------------
   */
+        const bool use_push = true;
+        if (use_push) {
+           b.resize(nrow_B, ncol_B);
+           b.reserve( max_nnz );
+        }
+        else {
+	   b.resize(nrow_B, ncol_B, max_nnz);
+        };
 
-	b.resize(nrow_B, ncol_B, max_nnz);
 	b.setRow(0,0);
 	for(ib=0; ib < nrow_B; ib++)
 		b.setRow(ib+1,b.getRowPtr(ib) + nnz[ib]);
@@ -129,11 +136,16 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 			jb = cmap[ja];
 			int isvalid =  (0 <= jb) && (jb < ncol_B);
 			if (isvalid) {
+                            if (use_push) {
+                                    b.pushValue( aij );
+                                    b.pushCol( jb );
+                            }
+                            else {
 				int ipos = b.getRowPtr(ib) + nnz[ib];
-
 				b.setValues(ipos,aij);
 				b.setCol(ipos,jb);
 				nnz[ib] += 1;
+                            };
 			};
 		};
 	};
