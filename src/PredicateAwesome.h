@@ -63,12 +63,14 @@ public:
 	typedef Vector<PredicateAnd>::Type VectorPredicateAndType;
 	typedef PredicateAnd::VectorStringType VectorStringType;
 
-	PredicateAwesome(String pred)
+	PredicateAwesome(String pred, char orSep = ',')
 	    : pred_(pred)
 	{
 		if (pred_ == "") return;
 		VectorStringType tokens;
-		split(tokens, pred, ",");
+		String orSeparator(",");
+		orSeparator[0] = orSep;
+		split(tokens, pred, orSeparator);
 		const SizeType n = tokens.size();
 		for (SizeType i = 0; i < n; ++i)
 			predicateAnd_.push_back(PredicateAnd(tokens[i]));
