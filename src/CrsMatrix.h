@@ -717,10 +717,19 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 	SizeType cols = a.cols();
 	SizeType nonZeros = rows * cols;
 
-	crsMatrix.resize(rows, cols );
-        crsMatrix.reserve( nonZeros );
-
         const bool use_push = true;
+
+        if (use_push) {
+          // ------------------------------
+          // avoid filling array with zeros
+          // ------------------------------
+	  crsMatrix.resize(rows, cols );
+          crsMatrix.reserve( nonZeros );
+        }
+        else {
+	  crsMatrix.resize(rows, cols, nonZeros );
+        };
+
 
 	SizeType counter = 0;
 	for (SizeType i = 0; i < rows; ++i) {
@@ -736,14 +745,16 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
                         else {
 			   crsMatrix.setValues(counter, val);
 			   crsMatrix.setCol(counter, j);
-			   ++counter;
                         };
+			++counter;
 		}
 	}
 
 	crsMatrix.setRow(rows, counter);
 	crsMatrix.checkValidity();
 }
+
+
 
 /** If order==false then
 		creates B such that B_{i1+j1*nout,i2+j2*nout)=A(j1,j2)\delta_{i1,i2}
