@@ -24,7 +24,8 @@ use NewMake;
 use PsiTag;
 
 my ($cfiles, $flavor, $gccdash) = @ARGV;
-defined($cfiles) or $cfiles = "../../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag";
+# defined($cfiles) or $cfiles = "../../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag";
+defined($cfiles) or $cfiles = "../../dmrgpp/TestSuite/inputs/ConfigBase.psiTag";
 defined($flavor) or $flavor = NewMake::noFlavor();
 defined($gccdash) or $gccdash = "";
 
