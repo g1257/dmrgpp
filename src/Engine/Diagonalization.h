@@ -180,6 +180,25 @@ public:
 		wft_.triggerOff(target.lrs());
 	}
 
+	static void checkSaveOption(const SizeType original)
+	{
+		// Only 1 bit of bit 1, bit 2, and bit 3 may be set
+		SizeType saveOption = original;
+		bool flag = false;
+		for (SizeType i = 0; i < 3; ++i) {
+			saveOption >>= 1; // ATTENTION: Discards bit 0 when i === 0
+			if (!(saveOption & 1)) continue;
+			if (flag) {
+				PsimagLite::OstringStream msg;
+				msg<<"Triplet 3rd: Only one bit of bit 1, bit 2, and bit 3 may be set";
+				msg<<" VALUE= "<<original<<"\n";
+				err(msg.str());
+			} else {
+				flag = true;
+			}
+		}
+	}
+
 private:
 
 	void targetedSymmetrySectors(VectorSizeType& mVector,
@@ -608,16 +627,6 @@ private:
 
 		if (parameters_.options.isSet("debugmatrix"))
 			std::cout<<"VECTOR: Printing of BlockOffDiagMatrix not supported\n";
-	}
-
-	void checkSaveOption(SizeType saveOption) const
-	{
-		bool bit1 = (saveOption & 2);
-		bool bit2 = (saveOption & 4);
-		if (!bit1 || !bit2) return;
-		PsimagLite::OstringStream msg;
-		msg<<"FATAL: Third number of triplet cannot have both bits 1 and 2 set\n";
-		throw PsimagLite::RuntimeError(msg.str());
 	}
 
 	const ParametersType& parameters_;

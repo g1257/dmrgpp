@@ -185,6 +185,12 @@ public:
 		const SizeType n = model_.targetQuantum().size();
 		for (SizeType i = 0; i < n; ++i)
 			quantumSector_.push_back(model_.targetQuantum().qn(i));
+
+		const SizeType totalFiniteLoops = parameters_.finiteLoop.size();
+		for (SizeType loopIndex = 0; loopIndex < totalFiniteLoops; ++loopIndex) {
+			const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+			DiagonalizationType::checkSaveOption(saveOption);
+		}
 	}
 
 	~DmrgSolver()
