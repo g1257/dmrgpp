@@ -46,6 +46,22 @@ public:
 	}
 
 
+	explicit MatrixDenseOrSparse(const SizeType nrows,
+	                             const SizeType ncols,
+	                             bool  isDense_in,
+                                     SizeType nonzeros )
+	    : isDense_( isDense_in ), sparseMatrix_(nrows,ncols), denseMatrix_(0,0)
+	{
+		if (isDense_) {
+			denseMatrix_.clear();
+			denseMatrix_.resize(nrows,ncols );
+		}
+		else  {
+			sparseMatrix_.resize(nrows,ncols);
+                        sparseMatrix_.reserve( nonzeros );
+		};
+	}
+
 	void conjugate()
 	{
 		SparseMatrixType& nonconst = const_cast<SparseMatrixType&>(sparseMatrix_);
