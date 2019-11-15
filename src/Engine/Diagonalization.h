@@ -265,17 +265,10 @@ private:
 		}
 
 		SizeType totalSectors = sectors.size();
-		VectorVectorType initialVector(totalSectors);
 		VectorVectorRealType energySaved(totalSectors);
 		VectorVectorVectorType vecSaved(totalSectors);
 
 		target.initPsi(totalSectors, numberOfExcited);
-		target.initialGuess(initialVector,
-		                    block,
-		                    noguess,
-		                    compactedWeights,
-		                    sectors,
-		                    lrs.super());
 
 		if (oldEnergy_.size() != totalSectors)
 			oldEnergy_.resize(totalSectors);
@@ -290,6 +283,15 @@ private:
 			vecSaved[j].resize(numberOfExcited);
 		}
 
+		const bool isVwoS = (VectorWithOffsetType::name() == "vectorwithoffsets");
+		VectorVectorType onlyForVwoS;
+		if (isVwoS)
+			target.initialGuess(onlyForVwoS,
+			                    block,
+			                    noguess,
+			                    compactedWeights,
+			                    sectors,
+			                    lrs.super());
 
 		for (SizeType j = 0; j < totalSectors; ++j) {
 
@@ -300,19 +302,30 @@ private:
 			msg<<" quantumSector="<<lrs.super().qnEx(i);
 			msg<<" and numberOfExcited="<<parameters_.numberOfExcited;
 			progress_.printline(msg, std::cout);
-			TargetVectorType& initialVectorBySector = initialVector[j];
-			RealType norma = PsimagLite::norm(initialVectorBySector);
 
-			if (fabs(norma) < 1e-12) {
-				if (onlyWft)
-					err("FATAL Norm of initial vector is zero\n");
-			} else {
-				initialVectorBySector /= norma;
-			}
+			TargetVectorType* initialBySector = (isVwoS) ? &onlyForVwoS[j]
+			                                               : new TargetVectorType;
 
 			if (onlyWft) {
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
-					vecSaved[j][excitedIndex] = initialVectorBySector;
+					if (!isVwoS)
+						target.initialGuess(*initialBySector,
+						                    block,
+						                    noguess,
+						                    compactedWeights,
+						                    sectors,
+						                    j,
+						                    excitedIndex,
+						                    lrs.super());
+					RealType norma = PsimagLite::norm(*initialBySector);
+
+					if (fabs(norma) < 1e-12) {
+						err("FATAL Norm of initial vector is zero\n");
+					} else {
+						*initialBySector /= norma;
+					}
+
+					vecSaved[j][excitedIndex] = *initialBySector;
 					energySaved[j][excitedIndex] = oldEnergy_[j][excitedIndex];
 					PsimagLite::OstringStream msg;
 					msg<<"Early exit due to user requesting (fast) WFT only, ";
@@ -320,9 +333,22 @@ private:
 					progress_.printline(msg,std::cout);
 				}
 			} else {
+				if (!isVwoS)
+					target.initialGuess(*initialBySector,
+					                    block,
+					                    noguess,
+					                    compactedWeights,
+					                    sectors,
+					                    j,
+					                    numberOfExcited, // sum all excited
+					                    lrs.super());
+				RealType norma = PsimagLite::norm(*initialBySector);
+
+				if (fabs(norma) >= 1e-12)
+					*initialBySector /= norma;
 
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex)
-					vecSaved[j][excitedIndex].resize(initialVectorBySector.size());
+					vecSaved[j][excitedIndex].resize(initialBySector->size());
 
 				VectorRealType myEnergy;
 				diagonaliseOneBlock(myEnergy,
@@ -330,15 +356,20 @@ private:
 				                    i,
 				                    lrs,
 				                    target.time(),
-				                    initialVectorBySector,
+				                    *initialBySector,
 				                    loopIndex);
 
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
 					energySaved[j][excitedIndex] = myEnergy[excitedIndex];
 					oldEnergy_[j][excitedIndex] = myEnergy[excitedIndex];
 				}
-
 			} // end if
+
+			if (!isVwoS) {
+				delete initialBySector;
+				initialBySector = 0;
+			}
+
 		} // end sectors
 
 		// calc gs energy

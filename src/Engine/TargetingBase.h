@@ -255,6 +255,7 @@ public:
 		commonTargeting_.aoe().initPsi(nsectors, nexcited);
 	}
 
+	// legacy thing for vectorwithoffsets
 	virtual void initialGuess(VectorVectorType& initialVector,
 	                          const VectorSizeType& block,
 	                          bool noguess,
@@ -262,10 +263,67 @@ public:
 	                          const VectorSizeType& sectors,
 	                          const BasisType& basis) const
 	{
+		if (VectorWithOffsetType::name() != "vectorwithoffsets")
+			err("FATAL: Wrong execution path\n");
+
+		const VectorWithOffsetType& psi00 = commonTargeting_.aoe().
+		        ensureOnlyOnePsi("initialGuess");
+		VectorWithOffsetType vwo(compactedWeights, sectors, basis);
+		commonTargeting_.initialGuess(vwo, psi00, block, noguess);
+		const SizeType n = vwo.sectors();
+		initialVector.resize(n);
+		for (SizeType i = 0; i < n; ++i)
+			vwo.extract(initialVector[i], vwo.sector(i));
+	}
+
+	virtual void initialGuess(VectorType& initialVector,
+	                          const VectorSizeType& block,
+	                          bool noguess,
+	                          const VectorSizeType& compactedWeights,
+	                          const VectorSizeType& sectors,
+	                          SizeType sectorIndex,
+	                          SizeType excited,
+	                          const BasisType& basis) const
+	{
 		if (VectorWithOffsetType::name() == "vectorwithoffsets")
-			initialGuessVwos(initialVector, block, noguess, compactedWeights, sectors, basis);
-		else
-			initialGuessVwo(initialVector, block, noguess, compactedWeights, sectors, basis);
+			err("FATAL: Wrong execution path\n");
+
+		const VectorVectorVectorWithOffsetType& psi = commonTargeting_.aoe().psiConst();
+		const SizeType nsectors = psi.size();
+
+		if (nsectors != compactedWeights.size())
+			err("initialGuess compactedWeights\n");
+
+		const SizeType numberOfExcited = psi[sectorIndex].size();
+
+		if (excited > numberOfExcited)
+			err("initialGuess, excited=" + ttos(excited) + " > " +
+			    ttos(numberOfExcited) + "\n");
+
+		SizeType start = 0;
+		SizeType end = numberOfExcited;
+		if (excited < numberOfExcited) {
+			start = excited;
+			end = excited + 1;
+		}
+
+		for (SizeType e = start; e < end; ++e) {
+
+			VectorWithOffsetType vwo(compactedWeights[sectorIndex],
+			                         sectors[sectorIndex],
+			                         basis);
+			commonTargeting_.initialGuess(vwo,
+			                              *(psi[sectorIndex][e]),
+			                              block,
+			                              noguess);
+
+			VectorType tmpVector;
+			vwo.extract(tmpVector, vwo.sector(0));
+			if (e == start)
+				initialVector = tmpVector;
+			else
+				initialVector += tmpVector;
+		}
 	}
 
 	// non-virtual below
@@ -327,62 +385,6 @@ protected:
 	}
 
 private:
-
-	virtual void initialGuessVwo(VectorVectorType& initialVector,
-	                             const VectorSizeType& block,
-	                             bool noguess,
-	                             const VectorSizeType& compactedWeights,
-	                             const VectorSizeType& sectors,
-	                             const BasisType& basis) const
-	{
-		const VectorVectorVectorWithOffsetType& psi = commonTargeting_.aoe().psiConst();
-		const SizeType nsectors = psi.size();
-
-		if (initialVector.size() != nsectors)
-			err("initialGuessVwo\n");
-		if (nsectors != compactedWeights.size())
-			err("initialGuessVwo compactedWeights\n");
-
-		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-
-			const SizeType numberOfExcited = psi[sectorIndex].size();
-			for (SizeType e = 0; e < numberOfExcited; ++e) {
-
-				VectorWithOffsetType vwo(compactedWeights[sectorIndex],
-				                         sectors[sectorIndex],
-				                         basis);
-				commonTargeting_.initialGuess(vwo,
-				                              *(psi[sectorIndex][e]),
-				                              block,
-				                              noguess);
-
-				VectorType tmpVector;
-				vwo.extract(tmpVector, vwo.sector(0));
-				if (e == 0)
-					initialVector[sectorIndex] = tmpVector;
-				else
-					initialVector[sectorIndex] += tmpVector;
-			}
-		}
-	}
-
-	// legacy thing for vectorwithoffsets
-	virtual void initialGuessVwos(VectorVectorType& initialVector,
-	                              const VectorSizeType& block,
-	                              bool noguess,
-	                              const VectorSizeType& compactedWeights,
-	                              const VectorSizeType& sectors,
-	                              const BasisType& basis) const
-	{
-		const VectorWithOffsetType& psi00 = commonTargeting_.aoe().
-		        ensureOnlyOnePsi("initialGuess");
-		VectorWithOffsetType vwo(compactedWeights, sectors, basis);
-		commonTargeting_.initialGuess(vwo, psi00, block, noguess);
-		const SizeType n = vwo.sectors();
-		initialVector.resize(n);
-		for (SizeType i = 0; i < n; ++i)
-			vwo.extract(initialVector[i], vwo.sector(i));
-	}
 
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
