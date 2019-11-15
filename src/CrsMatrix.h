@@ -1384,13 +1384,27 @@ void fromBlockToFull(CrsMatrix<T>& Bfull,
                      const CrsMatrix<T>& B,
                      SizeType offset)
 {
+        const bool use_push = true;
+        int nrows_Bfull = Bfull.rows();
+        int ncols_Bfull = Bfull.cols();
+        int nnz_Bfull   = B.nonZeros();
+        Bfull.clear();
+
+        if (use_push) {
+           Bfull.resize( nrows_Bfull, ncols_Bfull );
+           Bfull.reserve( nnz_Bfull );
+        }
+        else {
+            Bfull.resize( nrows_Bfull,
+                          ncols_Bfull,
+                          nnz_Bfull);
+          };
+
 	int counter = 0;
 	for (SizeType i = 0; i < offset; ++i)
 		Bfull.setRow(i, counter);
 
-        Bfull.reserve( B.nonZeros() );
 
-        const bool use_push = true;
 
 	for (SizeType ii = 0; ii < B.rows(); ++ii) {
 		SizeType i = ii + offset;
@@ -1405,8 +1419,8 @@ void fromBlockToFull(CrsMatrix<T>& Bfull,
                         else {
 			   Bfull.setCol(counter, j);
 			   Bfull.setValues(counter, tmp);
-                           counter++;
                         };
+                        counter++;
 		}
 	}
 
