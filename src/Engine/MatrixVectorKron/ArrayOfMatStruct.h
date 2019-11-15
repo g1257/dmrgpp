@@ -122,6 +122,8 @@ public:
 		const SizeType ipatchSize = npatchNew;
 		const SizeType jpatchSize = npatchOld;
 
+                const bool use_push = true;
+
 #ifdef NDEBUG
 		const int idebug = 0;
 #else
@@ -316,7 +318,7 @@ public:
 
 				data_(ipatch, jpatch) = new MatrixDenseOrSparseType(lnrows,
 				                                                    lncols,
-				                                                    isDense);
+				                                                    isDense, nnz);
 
 				MatrixDenseOrSparseType* pmat = data_(ipatch, jpatch);
 
@@ -328,7 +330,7 @@ public:
 					assert( dense_mat.rows() == lnrows );
 					assert( dense_mat.cols() == lncols );
 
-					bool const need_zero_out = true;
+					bool const need_zero_out = false;
 					if (need_zero_out) {
 
 						for( SizeType j=0; j < lncols; j++) {
@@ -349,7 +351,16 @@ public:
 					// ------------------------------
 					// preallocate sufficient storage
 					// ------------------------------
-					sparse_mat.resize( lnrows, lncols, nnz );
+                                        if (use_push) {
+                                          // -----------------------
+                                          // avoid zeroing out array
+                                          // -----------------------
+					  sparse_mat.resize( lnrows, lncols );
+                                          sparse_mat.reserve( nnz );
+                                        }
+                                        else {
+                                                sparse_mat.resize(lnrows,lncols,nnz);
+                                        };
 
 					SizeType ip = 0;
 					for(SizeType irow = 0; irow < lnrows; irow++) {
@@ -405,8 +416,14 @@ public:
 
 						const SizeType ip = (rowPtr1D[ indx ])[ local_irow ];
 
-						sparse_mat.setCol( ip, local_jcol );
-						sparse_mat.setValues(ip, aij );
+                                                if (use_push) {
+                                                   sparse_mat.pushCol( local_jcol );
+                                                   sparse_mat.pushValue( aij );
+                                                }
+                                                else {
+						  sparse_mat.setCol( ip, local_jcol );
+						  sparse_mat.setValues(ip, aij );
+                                                };
 
 						(rowPtr1D[ indx ])[ local_irow ]++;
 					};
