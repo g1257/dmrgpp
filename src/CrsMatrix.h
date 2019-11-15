@@ -290,6 +290,10 @@ public:
 
 
 	void setCol(int n,int v) {
+		colind_[n]=v;
+        }
+
+	void setCol_check(int n,int v) {
              if ( ((size_t) n) == (colind_.size() + 1)) {
                 colind_.push_back(v);
                 }
@@ -300,6 +304,10 @@ public:
 
 
 	void setValues(int n,const T &v) {
+		values_[n]=v;
+        }
+
+	void setValues_check(int n,const T &v) {
              if ( ((size_t) n) == (values_.size() + 1)) {
                 values_.push_back(v);
                 }
