@@ -4,9 +4,76 @@
 #include <boost/spirit/include/phoenix_core.hpp>
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include "AinurDoubleOrFloat.h"
-#include "AinurComplexHelper.h"
 
 namespace PsimagLite {
+
+template<typename ComplexOrRealType, bool>
+struct MyProxyFor {
+	typedef ComplexOrRealType Type;
+
+	static void copy(ComplexOrRealType& dest, const ComplexOrRealType& src)
+	{
+		dest = src;
+	}
+
+	static void copy(std::vector<ComplexOrRealType>& dest,
+	                 const std::vector<ComplexOrRealType>& src)
+	{
+		dest = src;
+	}
+};
+
+template<typename ComplexOrRealType>
+struct MyProxyFor<ComplexOrRealType, true> {
+
+	typedef std::string Type;
+	typedef typename Real<ComplexOrRealType>::Type RealType;
+
+	static void copy(std::vector<ComplexOrRealType>& dest,
+	                 const std::vector<Type>& src)
+	{
+		dest.clear();
+		const SizeType n = src.size();
+		if (n == 0) return;
+		dest.resize(n);
+		for (SizeType i = 0; i < n; ++i) {
+			std::string copystr = src[i];
+			dest[i] = toComplex(copystr);
+		}
+	}
+
+	static void copy(std::vector<ComplexOrRealType>& dest,
+	                 const Type& src)
+	{
+		dest.push_back(toComplex(src));
+	}
+
+private:
+
+	static ComplexOrRealType toComplex(std::string str)
+	{
+		String buffer;
+		bool flag = false;
+		const SizeType n = str.length();
+		RealType real1 = 0;
+		for (SizeType i = 0; i < n; ++i) {
+			bool isSqrtMinus1 = (str[i] == 'i');
+			if (isSqrtMinus1 && flag)
+				throw RuntimeError("Error parsing number " + str + "\n");
+
+			if (isSqrtMinus1) {
+				flag = true;
+				real1 = atof(buffer.c_str());
+				buffer = "";
+				continue;
+			}
+
+			buffer += str[i];
+		}
+
+		return ComplexOrRealType(real1, atof(buffer.c_str()));
+	}
+};
 
 template<typename T>
 boost::spirit::qi::rule<std::string::iterator,
@@ -25,15 +92,15 @@ ruleRows<DoubleOrFloatType>()
 
 template<>
 boost::spirit::qi::rule<std::string::iterator,
-std::vector<AinurComplexHelper<DoubleOrFloatType> >(),
+std::vector<std::string>(),
 boost::spirit::qi::space_type>
-ruleRows<AinurComplexHelper<DoubleOrFloatType> >()
+ruleRows<std::string>()
 {
-	auto fl = boost::spirit::DoubleOrFloatUnderscore;
+	//auto fl = boost::spirit::DoubleOrFloatUnderscore;
 	boost::spirit::qi::rule<std::string::iterator,
-	std::vector<AinurComplexHelper<DoubleOrFloatType> >(),
-	boost::spirit::qi::space_type> myrule =  "[" >> -( ( fl  | "(" >> fl >> "," >> fl >> ")" )
-	            % ",") >> "]";
+	std::vector<std::string>(),
+	boost::spirit::qi::space_type> myrule =  "[" >> (+~boost::spirit::qi::char_(",[]"))
+	                                                % ',' >> "]";
 	return myrule;
 }
 
@@ -73,13 +140,13 @@ ruleElipsis<DoubleOrFloatType>()
 
 template<>
 boost::spirit::qi::rule<std::string::iterator,
-AinurComplexHelper<DoubleOrFloatType>(),
+std::string(),
 boost::spirit::qi::space_type>
-ruleElipsis<AinurComplexHelper<DoubleOrFloatType> >()
+ruleElipsis<std::string>()
 {
 	auto fl = boost::spirit::DoubleOrFloatUnderscore;
 	boost::spirit::qi::rule<std::string::iterator,
-	AinurComplexHelper<DoubleOrFloatType>(),
+	std::string(),
 	boost::spirit::qi::space_type> myrule =  "[" >> (fl |
 	                (fl >> "i" >> fl) |
 	                ("i" >> fl))
