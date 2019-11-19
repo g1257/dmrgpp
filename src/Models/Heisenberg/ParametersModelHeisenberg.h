@@ -97,25 +97,28 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 	    : BaseType(io, false)
 	{
 		io.readline(twiceTheSpin,"HeisenbergTwiceS=");
+		SizeType nsites = 0;
+		io.readline(nsites, "TotalNumberOfSites=");
 
+		bool hasField = false;
 		try {
-			io.read(magneticFieldV,"MagneticField");
+			magneticFieldV.resize(nsites);
+			io.read(magneticFieldV, "MagneticField");
+			hasField = true;
 		} catch (std::exception&) {}
 
-		if (magneticFieldV.size() > 0) {
-
+		if (hasField) {
 			magneticFieldDirection = "z";
 			try {
-				io.readline(magneticFieldDirection,"MagneticFieldDirection=");
+				io.readline(magneticFieldDirection, "MagneticFieldDirection=");
 			} catch (std::exception&) {
 				std::cerr<<"WARNING: MagneticFieldDirection= not given, assuming z\n";
 			}
 
-
 			if (magneticFieldDirection != "x" && magneticFieldDirection != "z")
-			{
 				err("magneticFieldDirection must be in {x, z}\n");
-			}
+		} else {
+			magneticFieldV.clear();
 		}
 
 		try {
