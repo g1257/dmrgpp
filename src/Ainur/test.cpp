@@ -1,10 +1,17 @@
 #include "Ainur.h"
+#include <vector>
+#include <complex>
 
 void partiallyReadSomething(const PsimagLite::Ainur& ainur)
 {
 	SizeType n = 0;
 	ainur.readValue(n, "TotalNumberOfSites");
 	std::cout<<"Read: TotalNumberOfSites="<<n<<"\n";
+
+	std::vector<std::complex<double> > v;
+	//std::vector<double> v;
+	ainur.readValue(v, "myv");
+	std::cout<<v;
 }
 
 int main(int argc, char** argv)
