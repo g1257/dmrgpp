@@ -48,8 +48,6 @@ struct MyProxyFor<ComplexOrRealType, true> {
 		dest.push_back(toComplex(src));
 	}
 
-private:
-
 	static ComplexOrRealType toComplex(std::string str)
 	{
 		String buffer;
@@ -191,7 +189,16 @@ AinurState::ActionMatrix<T>::operator()(A& attr,
                                         ContextType&,
                                         bool&) const
 {
-	err("Ainur: Not sure how to handle this\n");
+	SizeType rows = attr.size();
+	if (rows == 0) return;
+	SizeType cols = attr[0].size();
+	t_.resize(rows, cols);
+	for (SizeType i = 0; i < rows; ++i) {
+		if (attr[i].size() != cols)
+			err("Ainur: Problem reading matrix\n");
+		for (SizeType j = 0; j < cols; ++j)
+			t_(i, j) = MyProxyFor<T, true>::toComplex(attr[i][j]);
+	}
 }
 
 template <typename T>
