@@ -14,6 +14,8 @@ defined($parallel) or die "USAGE: $0 $usage\n";
 my ($omega0,$total,$omegaStep,$obs,$GlobalNumberOfSites);
 my $offset = 0;
 
+my $isAinur = isAinur($templateInput);
+
 my $hptr = {
 "#OmegaBegin" => \$omega0,
 "#OmegaTotal" => \$total,
@@ -22,7 +24,7 @@ my $hptr = {
 "#Offset" => \$offset,
 "TotalNumberOfSites" => \$GlobalNumberOfSites};
 
-OmegaUtils::getLabels($hptr,$templateInput);
+OmegaUtils::getLabels($hptr, $templateInput);
 
 if ($omegaStep < 0) {
 	my $beta = -$omegaStep;
@@ -35,7 +37,7 @@ my @outfiles;
 for (my $i = $offset; $i < $total; ++$i) {
 	my $omega = sprintf("%.3f", $omega0 + $omegaStep * $i);
 	print STDERR "$0: About to run for omega = $omega\n";
-	my ($jobid,$outfile) = runThisOmega($i,$omega);
+	my ($jobid,$outfile) = runThisOmega($i, $omega, $obs, $isAinur);
 	print STDERR "$0: Finished         omega = $omega\n";
 	$jobs .= ":" if ($i > 0);
 	$jobid =~ s/\..*$//;
@@ -43,33 +45,38 @@ for (my $i = $offset; $i < $total; ++$i) {
 	push @outfiles, $outfile;
 }
 
-my $tarname = "runFor".$templateInput;
-$tarname =~ s/\.inp//;
-$tarname .= ".tar.gz";
-$tarname = "tar --group nobody --owner nobody -zcvf $tarname";
-if ($parallel eq "nobatch") {
-	system("$tarname @outfiles");
-} else {
-	my $batch = createFinalBatch($total,$tarname,\@outfiles);
-	my $afterok =  "-W depend=afterok:$jobs";
-	submitBatch($batch,$afterok) if ($parallel eq "submit");
+# Never called:
+sub tarTheThing
+{
+	my $tarname = "runFor".$templateInput;
+	$tarname =~ s/\.inp//;
+	$tarname .= ".tar.gz";
+	$tarname = "tar --group nobody --owner nobody -zcvf $tarname";
+	if ($parallel eq "nobatch") {
+		system("$tarname @outfiles");
+	} else {
+		my $batch = createFinalBatch($total,$tarname,\@outfiles);
+		my $afterok =  "-W depend=afterok:$jobs";
+		submitBatch($batch,$afterok) if ($parallel eq "submit");
+	}
 }
 
 sub runThisOmega
 {
-	my ($ind,$omega) = @_;
+	my ($ind, $omega, $obs, $isAinur) = @_;
 	my $n = $GlobalNumberOfSites;
-	my $input = createInput($n,$ind,$omega);
+	my $input = createInput($n, $ind, $omega, $obs, $isAinur);
 	my $jobid = "";
 	my $outfile = "runFor$input";
-	$outfile =~ s/\.inp//;
+	my $ext = ($isAinur) ? "ain" : "inp";
+	$outfile =~ s/\.$ext//;
 	$outfile .= ".cout";
 	if ($parallel eq "nobatch") {
 		(-x "./dmrg") or die "$0: No ./dmrg found in this directory\n";
 		system("./dmrg -f $input ':$obs.txt'");
 		system("echo '#omega=$omega' >> $outfile");
 	} else {
-		my $batch = createBatch($ind,$omega,$input);
+		my $batch = createBatch($ind, $omega, $input, $obs);
 		$jobid = submitBatch($batch) if ($parallel eq "submit");
 	}
 
@@ -78,9 +85,15 @@ sub runThisOmega
 
 sub createInput
 {
-	my ($n,$ind,$omega)=@_;
-	my $file="input$ind.inp";
+	my ($n, $ind, $omega, $obs, $isAinur)=@_;
+
+	$n =~ s/;// if ($isAinur);
+	my $ext = ($isAinur) ? "ain" : "inp";
+	my $file="input$ind.$ext";
 	open(FOUT, ">", "$file") or die "$0: Cannot write to $file\n";
+
+	print FOUT "##Ainur1.0\n" if ($isAinur);
+
 	my $steps = int($n/2) - 1;
 	my $data = "data$ind.txt";
 	my $nup = int($n/2);
@@ -91,7 +104,8 @@ sub createInput
 	"data" => $data,
 	"nup" => $nup,
 	"ndown" => $ndown,
-	"omega" => $omega);
+	"omega" => $omega,
+	"obs" => $obs);
 
 	open(FILE, "<", "$templateInput") or die "$0: Cannot open $templateInput: $!\n";
 
@@ -103,6 +117,7 @@ sub createInput
 				defined($val) or die "$0: Undefined substitution for $name\n";
 				s/\$\Q$name/$val/g;
 		}
+
 		print FOUT;
 	}
 
@@ -114,7 +129,7 @@ sub createInput
 
 sub createFinalBatch
 {
-	my ($ind,$tarname,$files) = @_;
+	my ($ind, $tarname, $files, $obs) = @_;
 	createBatch($ind,0,"FINAL");
 	my $fout = "temp.pbs";
 	my $file = "Batch$ind.pbs";
@@ -139,13 +154,14 @@ sub createFinalBatch
 
 sub createBatch
 {
-        my ($ind,$omega,$input) = @_;
+        my ($ind, $omega, $input, $obs) = @_;
         my $file = "Batch$ind.pbs";
 
 	my %valuesHash = (
 	"input" => $input,
 	"ind" => $ind,
-	"omega" => $omega);
+	"omega" => $omega,
+	"obs" => $obs);
 
         open(FOUT, ">", "$file") or die "$0: Cannot write to $file: $!\n";
 
@@ -182,3 +198,14 @@ sub submitBatch
 	chomp($ret);
 	return $ret;
 }
+
+sub isAinur
+{
+	my ($file) = @_;
+	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
+	$_ = <FILE>;
+	close(FILE);
+	chomp;
+	return $_ eq "##Ainur1.0";
+}
+
