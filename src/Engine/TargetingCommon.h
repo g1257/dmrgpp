@@ -699,9 +699,11 @@ private:
 		}
 
 		const SizeType sectorIndex = getBraOrKet.sectorIndex();
-		if (aoe_.psiConst().size() <= sectorIndex)
-			err("getVector: sectorIndex = " + ttos(sectorIndex) + ">=" +
-			    ttos(aoe_.psiConst().size()) + "\n");
+		if (aoe_.psiConst().size() <= sectorIndex) {
+			std::cout<<"getVector: sectorIndex = "<<sectorIndex<<">=";
+			std::cout<<aoe_.psiConst().size()<<" (skipping)\n";
+			return nullptr;
+		}
 
 		const SizeType levelIndex = getBraOrKet.levelIndex();
 		if (aoe_.psiConst()[sectorIndex].size() <= levelIndex)
