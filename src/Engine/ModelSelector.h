@@ -72,6 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/Kitaev/Kitaev.h"
 #include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
 #include "../Models/HubbardHolstein/HubbardHolstein.h"
+#include "../Models/HolsteinThin/HolsteinThin.h"
 #include "../Models/Kondo/Kondo.h"
 #include "../Models/UlsOsu/UlsOsu.h"
 #include "../Models/Graphene/Graphene.h"
@@ -114,6 +115,7 @@ class ModelSelector {
 	typedef HubbardHolstein<ModelBaseType> HubbardHolsteinType;
 	typedef Kondo<ModelBaseType> KondoType;
 	typedef Graphene<ModelBaseType> GrapheneType;
+	typedef HolsteinThin<ModelBaseType> HolsteinThinType;
 
 #endif
 	// end models
@@ -189,6 +191,8 @@ public:
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardHolsteinSSH") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH");
+		} else if (name_ == "HolsteinThin") {
+			model_ = new HolsteinThinType(solverParams, io, geometry, "");
 		} else if (name_ == "Kondo") {
 			model_ = new KondoType(solverParams, io, geometry, "");
 		} else if (name_ == "KondoEx") {
