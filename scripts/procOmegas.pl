@@ -39,25 +39,33 @@ my $testoutputfile = "runForinput\$";
 my ($lx, $ly) = (0, 0);
 my $options = "";
 
+my $isAinur = OmegaUtils::isAinur($templateInput);
+
 my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaTotal" => \$omegaTotal,
             "#OmegaStep" => \$omegaStep,
             "#OmegaOffset" => \$omegaOffset,
             "#Lx" => \$lx,
             "#Ly" => \$ly,
-	    "#options" => \$options,
+            "#options" => \$options,
             "GeometryKind" => \$geometryName,
             "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,
             "Orbitals" => \$orbitals,
             "#ChebyshevC" => \$ChebyC,
             "#ChebyshevSign" => \$ChebySign,
-            "TSPSites 1" => \$centralSite,
             "#JacksonOrLorentz" => \$jacksOrLorentz,
             "TotalNumberOfSites" => \$GlobalNumberOfSites,
             "OutputFile" => \$testoutputfile};
 
 OmegaUtils::getLabels($hptr, $templateInput);
+
+$centralSite = getCentralSite($templateInput, $isAinur);
+
+if ($isAinur) {
+	$geometryName =~ s/[\";]//g;
+	$GlobalNumberOfSites =~ s/;//g;
+}
 
 $hptr->{"isPeriodic"} = $isPeriodic;
 $hptr->{"mMax"} = $mMax;
@@ -603,3 +611,27 @@ sub findIfWeAreCheby
 
 	die "$0: JacksOrLorentz is NOT none, but OutputFile= is dollarized\n";
 }
+
+sub getCentralSite
+{
+	my ($input, $isAinur) = @_;
+	open(FILE, "<", $input) or die "$0: Cannot open $input : $!\n";
+	my $c;
+	while (<FILE>) {
+		chomp;
+		if (!$isAinur && /^[ \t]*TSPSites[ \t]+1[ \t]+(\d+)[ \t]*$/) {
+			$c = $1;
+			last;
+		}
+
+		if ($isAinur && /^[ \t]*TSPSites[ \t]*=[ \t]*\[[ \t]*(\d+)[ \t]*\]/) {
+			$c = $1;
+			last;
+		}
+	}
+
+	close(FILE);
+	defined($c) or die "$0: Could not find TSPSites in $input\n";
+	return $c;
+}
+

@@ -14,7 +14,7 @@ defined($parallel) or die "USAGE: $0 $usage\n";
 my ($omega0,$total,$omegaStep,$obs,$GlobalNumberOfSites);
 my $offset = 0;
 
-my $isAinur = isAinur($templateInput);
+my $isAinur = OmegaUtils::isAinur($templateInput);
 
 my $hptr = {
 "#OmegaBegin" => \$omega0,
@@ -45,22 +45,6 @@ for (my $i = $offset; $i < $total; ++$i) {
 	push @outfiles, $outfile;
 }
 
-# Never called:
-sub tarTheThing
-{
-	my $tarname = "runFor".$templateInput;
-	$tarname =~ s/\.inp//;
-	$tarname .= ".tar.gz";
-	$tarname = "tar --group nobody --owner nobody -zcvf $tarname";
-	if ($parallel eq "nobatch") {
-		system("$tarname @outfiles");
-	} else {
-		my $batch = createFinalBatch($total,$tarname,\@outfiles);
-		my $afterok =  "-W depend=afterok:$jobs";
-		submitBatch($batch,$afterok) if ($parallel eq "submit");
-	}
-}
-
 sub runThisOmega
 {
 	my ($ind, $omega, $obs, $isAinur) = @_;
@@ -71,15 +55,9 @@ sub runThisOmega
 	my $ext = ($isAinur) ? "ain" : "inp";
 	$outfile =~ s/\.$ext//;
 	$outfile .= ".cout";
-	if ($parallel eq "nobatch") {
-		(-x "./dmrg") or die "$0: No ./dmrg found in this directory\n";
-		system("./dmrg -f $input ':$obs.txt'");
-		system("echo '#omega=$omega' >> $outfile");
-	} else {
-		my $batch = createBatch($ind, $omega, $input, $obs);
-		$jobid = submitBatch($batch) if ($parallel eq "submit");
-	}
-
+	my $batch = createBatch($ind, $omega, $input, $obs);
+	$jobid = submitBatch($batch, $parallel);
+	#system("echo '#omega=$omega' >> $outfile") if ($submit eq "nobatch");
 	return ($jobid,$outfile);
 }
 
@@ -189,23 +167,14 @@ sub createBatch
 
 sub submitBatch
 {
-	my ($batch,$extra) = @_;
-	defined($extra) or $extra = "";
+	my ($batch, $doIt) = @_;
+	return if ($doIt ne "nobatch" and $doIt ne "submit");
 	sleep(1);
-	print STDERR "$0: Submitted $batch $extra $batch\n";
-
-	my $ret = `qsub $extra $batch`;
+	print STDERR "$0: Submitted $batch \n";
+	my $execCommand = ($doIt eq "nobatch") ? "env PBS_O_WORKDIR=. /usr/bin/bash" : "qsub";
+	my $ret = `$execCommand $batch`;
 	chomp($ret);
 	return $ret;
 }
 
-sub isAinur
-{
-	my ($file) = @_;
-	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
-	$_ = <FILE>;
-	close(FILE);
-	chomp;
-	return $_ eq "##Ainur1.0";
-}
 

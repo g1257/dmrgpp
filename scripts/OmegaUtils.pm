@@ -9,6 +9,16 @@ package OmegaUtils;
 
 my $pi = Math::Trig::pi;
 
+sub isAinur
+{
+	my ($file) = @_;
+	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
+	$_ = <FILE>;
+	close(FILE);
+	chomp;
+	return $_ eq "##Ainur1.0";
+}
+
 sub getLabels
 {
 	my ($hptr,$file) = @_;
@@ -20,7 +30,7 @@ sub getLabels
 			if (/$key[= ]([^ ]+)/) {
 				my $newVal = $1;
 				my $prev = ${$hptr->{$key}};
-				if ($prev && $prev != $newVal) {
+				if ($prev && $prev ne $newVal) {
 					print STDERR "Already a previous value for $key of $prev\n";
 					print "New value is $newVal\n";
 					print "To take new value press ENTER. Or enter value ";
@@ -290,7 +300,7 @@ sub fourierChain
 	if (!$isPeriodic) {
 		my $b = ($centralSite == int($n/2));
 		if (!$b && ($centralSite != int($n/2) - 1)) {
-			die "$0: Chain of $n sites, but central site is $centralSite, makes not sense!?\n";
+			die "$0: Chain of $n sites, but central site is $centralSite, makes no sense!?\n";
 		}
 
 		# FIXME: DOES NOT WORK, CHECK FORMULA BELOW
