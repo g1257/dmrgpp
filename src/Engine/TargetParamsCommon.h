@@ -103,6 +103,7 @@ public:
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef std::pair<SizeType, SizeType> PairSizeType;
 
 	TargetParamsCommon(InputValidatorType& io,
 	                   PsimagLite::String targeting,
@@ -117,7 +118,8 @@ public:
 	      gsWeight_(0.0),
 	      energyForExp_(0.0),
 	      io_(io),
-	      model_(model)
+	      model_(model),
+	      sectorLevel_(PairSizeType(0,0))
 	{
 		/*PSIDOC TargetParamsCommon
 		\item[TSPSites] [VectorInteger] The first number is the number of numbers
@@ -198,6 +200,18 @@ public:
 			io.read(tmpVector,"TSPOperatorMultiplier");
 			multiplyOperators(tmpVector);
 		} catch (std::exception&) {}
+
+		bool hasApplyTo = false;
+		PsimagLite::String tmp;
+		try {
+			io.readline(tmp, "TSPApplyTo=");
+			 hasApplyTo = true;
+		} catch (std::exception&) {}
+
+		if (hasApplyTo) {
+			PsimagLite::GetBraOrKet gbok(tmp);
+			sectorLevel_ = PairSizeType(gbok.sectorIndex(), gbok.levelIndex());
+		}
 
 		noOperator_ = isNoOperator();
 		checkBorderOperators();
@@ -284,6 +298,10 @@ public:
 	{
 		return gsWeight_;
 	}
+
+	virtual SizeType sectorIndex() const { return sectorLevel_.first; }
+
+	virtual SizeType levelIndex() const { return sectorLevel_.second; }
 
 	void write(PsimagLite::String label,
 	               PsimagLite::IoSerializer& ioSerializer) const
@@ -417,6 +435,7 @@ private:
 	VectorOperatorType aOperators_;
 	InputValidatorType& io_;
 	const ModelType& model_;
+	PairSizeType sectorLevel_;
 }; // class TargetParamsCommon
 } // namespace Dmrg
 

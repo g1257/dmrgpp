@@ -193,8 +193,19 @@ public:
 	                SizeType loopNumber,
 	                const TargetParamsType& tstStruct)
 	{
-		SizeType count =0;
-		VectorWithOffsetType phiOld = ensureOnlyOnePsi("getPhi");
+		SizeType count = 0;
+		const SizeType nsectors = psi_.size();
+		const SizeType sectorIndex = tstStruct.sectorIndex();
+		if (sectorIndex >= nsectors)
+			err("getPhi: sectors=" + ttos(nsectors) + " <= " + ttos(sectorIndex) + "\n");
+
+		const SizeType nlevels = psi_[sectorIndex].size();
+		const SizeType levelIndex = tstStruct.levelIndex();
+		if (levelIndex >= nlevels)
+			err("getPhi: levels=" + ttos(nlevels) + " <= " + ttos(levelIndex) + "\n");
+
+		// deep copy needed
+		VectorWithOffsetType phiOld = *(psi_[sectorIndex][levelIndex]);
 		VectorWithOffsetType vectorSum;
 
 		SizeType max = tstStruct.sites();

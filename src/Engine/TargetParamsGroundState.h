@@ -95,6 +95,16 @@ public:
 
 	virtual SizeType sites() const { return 0; }
 
+	virtual SizeType sectorIndex() const
+	{
+		throw PsimagLite::RuntimeError("sectorIndex called for gs\n");
+	}
+
+	virtual SizeType levelIndex() const
+	{
+		throw PsimagLite::RuntimeError("levelIndex called for gs\n");
+	}
+
 	void write(PsimagLite::String,
 	               PsimagLite::IoSerializer&) const
 	{

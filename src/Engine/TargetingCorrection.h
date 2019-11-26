@@ -175,6 +175,7 @@ public:
 		this->common().write(io, block, prefix);
 	}
 
+
 private:
 
 	TargetParamsType tstStruct_;

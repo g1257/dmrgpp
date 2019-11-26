@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "TargetParamsTimeVectors.h"
 #include "TargetParamsCommon.h"
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
@@ -103,12 +104,6 @@ public:
 	{
 		try {
 			io.readline(maxTime_,"TSPMaxTime=");
-		} catch (std::exception&) {}
-
-		try {
-			int x = 0;
-			io.readline(x,"TSPUseQns=");
-			err("TSPUseQns= is no longer needed, please delete it from the input file\n");
 		} catch (std::exception&) {}
 	}
 

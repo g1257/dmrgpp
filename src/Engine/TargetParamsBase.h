@@ -110,6 +110,10 @@ public:
 
 	virtual SizeType sites() const = 0;
 
+	virtual SizeType sectorIndex() const = 0;
+
+	virtual SizeType levelIndex() const = 0;
+
 	virtual SizeType sites(SizeType) const
 	{
 		PsimagLite::String s = "TargetParamsBase: unimplemented sites\n";
