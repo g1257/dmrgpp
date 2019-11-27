@@ -245,8 +245,10 @@ sub correctionVectorReadOpen
 		next if (/PsiApp\: +CmdLine/);
 
 		my $skip = 1;
+		my $thisLine = $_;
 		foreach my $label (@$labels) {
-			next unless (/$label/ and /X0/);
+			my $isGs = ($thisLine =~ /gs/ or $thisLine =~ /X0/);
+			next unless (/$label/ and $isGs);
 			$status = $label;
 			$skip = 0;
 		}
