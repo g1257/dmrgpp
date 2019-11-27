@@ -246,15 +246,15 @@ sub correctionVectorReadOpen
 
 		my $skip = 1;
 		foreach my $label (@$labels) {
-			next unless (/$label/ and /gs/);
+			next unless (/$label/ and /X0/);
 			$status = $label;
 			$skip = 0;
 		}
 
 		next if ($skip);
 
-	chomp;
-	my @temp = split;
+		chomp;
+		my @temp = split;
 		die "$0: Line $_\n" unless (scalar(@temp)==5);
 
 		my $site = $temp[0];
@@ -328,7 +328,7 @@ sub getDirAndBase
 	my ($file) = @_;
 	my $b1 = ($file =~ /^\//);
 	my $b2 = ($file =~ /^\.\.\//);
-	return $file if (!$b1 && !$b2);
+	return ("./", $file) if (!$b1 && !$b2);
 
 	my @temp = split/\//, $file;
 	my $n = scalar(@temp);
