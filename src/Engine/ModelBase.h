@@ -160,7 +160,7 @@ public:
 	void postCtor()
 	{
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
-		modelLinks_.postCtor1(cm_, labeledOperators_, modelCommon_.geometry().terms());
+		modelLinks_.postCtor1(labeledOperators_, modelCommon_.geometry().terms());
 		fillModelLinks(); // fills modelLinks_
 		modelLinks_.postCtor2();
 
@@ -307,7 +307,9 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return maxElectrons*modelCommon_.geometry().numberOfSites() + 1;
 	}
 
-	//virtual SizeType differentTypesOfAtoms() const { return 1; }
+	virtual SizeType siteToAtomKind(SizeType) const { return 0; }
+
+	virtual SizeType kindsOfAtoms() const { return 1; }
 
 	virtual PsimagLite::String oracle() const { return ""; }
 
@@ -433,9 +435,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// should be static
 	SizeType hilbertSize(SizeType actualSite) const
 	{
-		const PairSizeType startEndC = labeledOperators_.startEndOperators(actualSite);
-		assert(cm_.size() > startEndC.first);
-		return cm_[startEndC.first].getStorage().rows();
+		const SizeType kindOfSite = siteToAtomKind(actualSite);
+		return modelLinks_.hilbertSize(kindOfSite, labeledOperators_);
 	}
 
 	// Fill the VectorOperatorType with operators that need to be kept
@@ -451,13 +452,22 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	                         const BlockType& block) const
 	{
 		assert(block.size() == 1);
-		cm.clear();
-		const PairSizeType startEndC = labeledOperators_.startEndOperators(block[0]);
-		std::copy(cm_.begin() + startEndC.first, cm_.end() + startEndC.second, cm.begin());
 
-		const PairSizeType startEndQ = labeledOperators_.startEndBasis(block[0]);
-		qns_.clear();
-		std::copy(qns_.begin() + startEndQ.first, qns_.end() + startEndQ.second, qns.begin());
+		const SizeType kindOfSite = siteKind(block[0]);
+		modelLinks_.setOperatorMatrices(cm, labeledOperators_, kindOfSite);
+
+		const SizeType k = kindsOfAtoms();
+		SizeType start = 0;
+		for (SizeType i = 0; i < k; ++i) {
+			if (i == kindOfSite)
+				break;
+			start += modelLinks_.hilbertSize(i, labeledOperators_);
+		}
+
+		const SizeType end = start + modelLinks_.hilbertSize(kindOfSite, labeledOperators_);
+
+		qns.resize(end - start);
+		std::copy(qns_.begin() + start, qns_.end() + end, qns.begin());
 	}
 
 	static const ModelLinksType& modelLinks()
@@ -603,12 +613,8 @@ private:
 	InputValidatorType_& ioIn_;
 	static LabeledOperatorsType labeledOperators_;
 	static ModelLinksType modelLinks_;
-	static VectorOperatorType cm_;
 	static VectorQnType qns_;
 }; //class ModelBase
-
-template<typename T1, typename T2, typename T3, typename T4>
-typename ModelBase<T1, T2, T3, T4>::VectorOperatorType ModelBase<T1, T2, T3, T4>::cm_;
 
 template<typename T1, typename T2, typename T3, typename T4>
 typename ModelBase<T1, T2, T3, T4>::VectorQnType ModelBase<T1, T2, T3, T4>::qns_;

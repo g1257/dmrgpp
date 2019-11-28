@@ -157,8 +157,7 @@ public:
 		terms_.clear();
 	}
 
-	void postCtor1(VectorOperatorType& cm,
-	               const LabeledOperatorsType& labeledOps,
+	void postCtor1(const LabeledOperatorsType& labeledOps,
 	               SizeType geometryTerms)
 	{
 		if (terms_.size() > geometryTerms) {
@@ -166,6 +165,7 @@ public:
 			err(str + ttos(terms_.size()) + " in input file for this model\n");
 		}
 
+		VectorOperatorType cm; // only for hermit
 		SizeType n = trackables_.size();
 		offsets_.resize(n, 0);
 		SizeType dofs = 0;
@@ -176,11 +176,8 @@ public:
 
 			dofs = ll.dofs();
 
-			for (SizeType j = 0; j < dofs; ++j) {
+			for (SizeType j = 0; j < dofs; ++j)
 				cm.push_back(ll(j));
-				cmNameDof_.push_back(typename LabelType::PairStringSizeType(trackables_[i],
-				                                                            j));
-			}
 		}
 
 		SizeType m = cm.size();
@@ -235,16 +232,38 @@ public:
 		return *(terms_[term]);
 	}
 
-	// FIXME TODO SDHS Immm: add type of site to arguments here
-	SizeType nameDofToIndex(PsimagLite::String name,
-	                        SizeType dof) const
+	void setOperatorMatrices(VectorOperatorType& cm,
+	                         const LabeledOperatorsType& labeledOps,
+	                         SizeType kindOfSite) const
 	{
-		PairStringSizeType p(name, dof);
-		auto result = std::find(cmNameDof_.begin(), cmNameDof_.end(), p);
-		if (result == cmNameDof_.end())
-			err("siteNameDofToIndex: not found for name=" + name + " dof= " +
-			    ttos(dof) + "\n");
-		return (result - cmNameDof_.begin());
+		cm.clear();
+		SizeType n = trackables_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			const LabelType& ll = labeledOps.findLabel(trackables_[i]);
+
+			if (ll.kindOfSite() != kindOfSite)
+				continue;
+
+			const SizeType dofs = ll.dofs();
+			for (SizeType j = 0; j < dofs; ++j)
+				cm.push_back(ll(j));
+		}
+	}
+
+	SizeType hilbertSize(SizeType kindOfSite,
+	                     const LabeledOperatorsType& labeledOps) const
+	{
+		SizeType n = trackables_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			const LabelType& ll = labeledOps.findLabel(trackables_[i]);
+
+			if (ll.kindOfSite() != kindOfSite)
+				continue;
+
+			return ll(0).rows();
+		}
+
+		throw PsimagLite::RuntimeError("hilbertSize FATAL: " + ttos(kindOfSite) + "\n");
 	}
 
 private:
@@ -260,7 +279,6 @@ private:
 	SizeType maxDofs_;
 	static VectorSizeType offsets_;
 	static VectorStringType trackables_;
-	static VectorPairStringSizeType cmNameDof_;
 };
 
 template<typename T1, typename T2>
@@ -268,8 +286,5 @@ typename ModelLinks<T1, T2>::VectorSizeType ModelLinks<T1, T2>::offsets_;
 
 template<typename T1, typename T2>
 typename ModelLinks<T1, T2>::VectorStringType ModelLinks<T1, T2>::trackables_;
-
-template<typename T1, typename T2>
-typename ModelLinks<T1, T2>::VectorPairStringSizeType ModelLinks<T1, T2>::cmNameDof_;
 }
 #endif // MODEL_LINKS_H

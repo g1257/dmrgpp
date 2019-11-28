@@ -152,6 +152,13 @@ public:
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
+	virtual SizeType siteToAtomKind(SizeType site) const
+	{
+		return (site & 1);
+	}
+
+	virtual SizeType kindsOfAtoms() const { return 2; }
+
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const BlockType& block,
 	                                RealType) const

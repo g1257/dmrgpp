@@ -80,6 +80,7 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename OperatorType::value_type ComplexOrRealType;
+	typedef std::pair<SizeType, SizeType> PairSizeType;
 
 	LabeledOperators(PsimagLite::String model = "") : model_(model)
 	{}
@@ -182,7 +183,6 @@ private:
 	LabeledOperators& operator=(const LabeledOperators&);
 
 	PsimagLite::String model_;
-	SizeType sites_;
 	VectorLabelType labels_;
 };
 }
