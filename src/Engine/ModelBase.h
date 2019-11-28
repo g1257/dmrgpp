@@ -613,11 +613,14 @@ private:
 }; //class ModelBase
 
 template<typename T1, typename T2, typename T3, typename T4>
-typename ModelBase<T1, T2, T3, T4>::VectorQnType ModelBase<T1, T2, T3, T4>::qns_;
+typename ModelBase<T1, T2, T3, T4>::LabeledOperatorsType
+ModelBase<T1, T2, T3, T4>::labeledOperators_;
 
 template<typename T1, typename T2, typename T3, typename T4>
 typename ModelBase<T1, T2, T3, T4>::ModelLinksType ModelBase<T1, T2, T3, T4>::modelLinks_;
 
+template<typename T1, typename T2, typename T3, typename T4>
+typename ModelBase<T1, T2, T3, T4>::VectorQnType ModelBase<T1, T2, T3, T4>::qns_;
 } // namespace Dmrg
 /*@}*/
 #endif
