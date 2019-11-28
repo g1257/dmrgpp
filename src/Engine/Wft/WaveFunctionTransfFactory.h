@@ -124,7 +124,7 @@ public:
 	typedef typename WaveStructCombinedType::WaveStructSvdType WaveStructSvdType;
 
 	template<typename SomeParametersType>
-	WaveFunctionTransfFactory(SomeParametersType& params)
+	WaveFunctionTransfFactory(SomeParametersType& params, SizeType volumeOfSite0)
 	    : isEnabled_(!(params.options.isSet("nowft"))),
 	      wftOptions_(ProgramGlobals::DirectionEnum::INFINITE,
 	                  params.options,
@@ -161,7 +161,8 @@ public:
 			                                       wftOptions_);
 		else
 			wftImpl_=new WaveFunctionTransfLocalType(waveStructCombined_,
-			                                         wftOptions_);
+			                                         wftOptions_,
+			                                         volumeOfSite0);
 	}
 
 	~WaveFunctionTransfFactory()

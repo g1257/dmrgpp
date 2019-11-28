@@ -328,6 +328,8 @@ public:
 
 			const typename BraketType::AlgebraType& nup = Braket.op(0);
 
+			if (PsimagLite::isZero(nup.getCRS())) continue;
+
 			const VectorWithOffsetType* v1 = getVector(Braket.bra());
 			const VectorWithOffsetType* v2 = getVector(Braket.ket());
 

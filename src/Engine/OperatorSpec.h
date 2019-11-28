@@ -70,13 +70,8 @@ public:
 
 		SizeType foundSize = nup.getStorage().rows();
 		SizeType expectedSize = model_.hilbertSize(site);
-		if (foundSize != expectedSize) {
-			PsimagLite::String str("getOperatorForTest ");
-			str += " Expected size " + ttos(expectedSize);
-			str += " but found size " + ttos(foundSize);
-			str += " for operator " + opLabel + "\n";
-			throw PsimagLite::RuntimeError(str);
-		}
+		if (foundSize != expectedSize)
+			return specialOperator(site, 0.0);
 
 		return nup;
 	}

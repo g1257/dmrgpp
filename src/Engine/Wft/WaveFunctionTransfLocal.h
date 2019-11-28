@@ -129,12 +129,14 @@ public:
 	typedef WftAccelSvd<BaseType> WftAccelSvdType;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
-	                        const WftOptionsType& wftOptions)
+	                        const WftOptionsType& wftOptions,
+	                        SizeType volumeOfSite0)
 	    : dmrgWaveStruct_(dmrgWaveStruct),
 	      wftOptions_(wftOptions),
 	      wftAccelBlocks_(dmrgWaveStruct, wftOptions),
 	      wftAccelPatches_(dmrgWaveStruct, wftOptions),
-	      wftAccelSvd_(dmrgWaveStruct, wftOptions)
+	      wftAccelSvd_(dmrgWaveStruct, wftOptions),
+	      volumeOfSite0_(volumeOfSite0)
 	{}
 
 	virtual void transformVector(VectorWithOffsetType& psiDest,
@@ -262,6 +264,7 @@ private:
 		                               wftOptions_,
 		                               lrs,
 		                               nk,
+		                               volumeOfSite0_,
 		                               ws,
 		                               weT,
 		                               ProgramGlobals::SysOrEnvEnum::ENVIRON);
@@ -330,6 +333,7 @@ private:
 					                               wftOptions_,
 					                               lrs,
 					                               nk,
+					                               volumeOfSite0_,
 					                               wsT,
 					                               we,
 					                               ProgramGlobals::SysOrEnvEnum::SYSTEM);
@@ -462,6 +466,7 @@ private:
 	WftAccelBlocksType wftAccelBlocks_;
 	WftAccelPatchesType wftAccelPatches_;
 	WftAccelSvdType wftAccelSvd_;
+	const SizeType volumeOfSite0_;
 }; // class WaveFunctionTransfLocal
 } // namespace Dmrg
 

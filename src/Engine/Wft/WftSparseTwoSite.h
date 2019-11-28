@@ -31,6 +31,7 @@ public:
 	                 const WftOptionsType& wftOptions,
 	                 const LeftRightSuperType& lrs,
 	                 const VectorSizeType& nk,
+	                 SizeType volumeOfSite0,
 	                 const SparseMatrixType& wsT,
 	                 const SparseMatrixType& we,
 	                 const ProgramGlobals::SysOrEnvEnum sysOrEnv)
@@ -60,7 +61,7 @@ public:
 			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
 
 		} else {
-			assert(lrs.left().permutationInverse().size() == volumeOfNk_ ||
+			assert(lrs.left().permutationInverse().size() == volumeOfSite0 ||
 			       lrs.left().permutationInverse().size() == dmrgWaveStruct_.
 			       getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
 			assert(lrs.right().permutationInverse().size()/volumeOfNk_ ==
