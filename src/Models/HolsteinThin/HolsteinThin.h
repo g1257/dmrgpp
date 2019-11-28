@@ -130,6 +130,20 @@ public:
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename ModelBaseType::ModelLinksType ModelLinksType;
+	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
+
+	class AtomKind : public AtomKindBaseType {
+
+	public:
+
+		virtual SizeType siteToAtomKind(SizeType site) const
+		{
+			return (site & 1);
+		}
+
+		virtual SizeType kindsOfAtoms() const { return 2; }
+	};
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP = HilbertSpaceHubbardType::SPIN_UP;
@@ -144,20 +158,20 @@ public:
 	                    io),
 	      modelParameters_(io),
 	      geometry_(geometry),
-	      isSsh_(additional == "SSH")
+	      isSsh_(additional == "SSH"),
+	      atomKind_(0)
 	{
 		if (isSsh_)
 			err("SSH not supported in thin version yet!\n");
 	}
 
-	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
-
-	virtual SizeType siteToAtomKind(SizeType site) const
+	~HolsteinThin()
 	{
-		return (site & 1);
+		delete atomKind_;
+		atomKind_ = nullptr;
 	}
 
-	virtual SizeType kindsOfAtoms() const { return 2; }
+	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const BlockType& block,
@@ -198,6 +212,12 @@ public:
 	}
 
 protected:
+
+	virtual const AtomKindBaseType& getAtomKind()
+	{
+		atomKind_ = new AtomKind();
+		return *atomKind_;
+	}
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
@@ -458,6 +478,7 @@ private:
 	ParametersHolsteinThinType modelParameters_;
 	const GeometryType& geometry_;
 	bool isSsh_;
+	const AtomKind* atomKind_;
 }; //class HolsteinThin
 } // namespace Dmrg
 /*@}*/

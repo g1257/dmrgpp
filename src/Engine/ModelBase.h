@@ -104,11 +104,13 @@ public:
 		    : name(name_), dof(dof_), edof(edof_)
 		{
 			fermionOrBoson = labeledOperators_(name_, dof_).fermionOrBoson();
+			kindOfSite = labeledOperators_.findLabel(name_).kindOfSite();
 		}
 
 		PsimagLite::String name;
 		SizeType dof;
 		SizeType edof;
+		SizeType kindOfSite;
 		ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
 	};
 
@@ -149,13 +151,15 @@ public:
 	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;
 	typedef typename ModelLinksType::TermType ModelTermType;
 	typedef OpaqueOp OpForLinkType;
+	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
 	          InputValidatorType& io)
 	    : modelCommon_(params, geometry),
 	      targetQuantum_(io),
-	      ioIn_(io)
+	      ioIn_(io),
+	      atomKind_(0)
 	{
 		labeledOperators_.setModelName(params.model);
 	}
@@ -163,14 +167,20 @@ public:
 	void postCtor()
 	{
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
-		modelLinks_.postCtor1(labeledOperators_, modelCommon_.geometry().terms());
+		modelLinks_.postCtor1(labeledOperators_,
+		                      &getAtomKind(),
+		                      modelCommon_.geometry().terms());
 		fillModelLinks(); // fills modelLinks_
 		modelLinks_.postCtor2();
 
 		ProgramGlobals::init(maxElectronsOneSpin());
 	}
 
-	virtual ~ModelBase() {}
+	virtual ~ModelBase()
+	{
+		delete atomKind_;
+		atomKind_ = nullptr;
+	}
 
 	/* PSIDOC ModelInterface
 	These are the functions that each model must implement.
@@ -310,9 +320,11 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return maxElectrons*modelCommon_.geometry().numberOfSites() + 1;
 	}
 
-	virtual SizeType siteToAtomKind(SizeType) const { return 0; }
-
-	virtual SizeType kindsOfAtoms() const { return 1; }
+	virtual const AtomKindBaseType& getAtomKind()
+	{
+		atomKind_ = new AtomKindBaseType();
+		return *atomKind_;
+	}
 
 	virtual PsimagLite::String oracle() const { return ""; }
 
@@ -438,7 +450,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// should be static
 	SizeType hilbertSize(SizeType actualSite) const
 	{
-		const SizeType kindOfSite = siteToAtomKind(actualSite);
+		const SizeType kindOfSite = modelLinks_.siteToAtomKind(actualSite);
 		return modelLinks_.hilbertSize(kindOfSite, labeledOperators_);
 	}
 
@@ -456,10 +468,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	{
 		assert(block.size() == 1);
 
-		const SizeType kindOfSite = siteToAtomKind(block[0]);
+		const SizeType kindOfSite = modelLinks_.siteToAtomKind(block[0]);
 		modelLinks_.setOperatorMatrices(cm, labeledOperators_, kindOfSite);
 
-		const SizeType k = kindsOfAtoms();
+		const SizeType k = modelLinks_.kindsOfAtoms();
 		SizeType start = 0;
 		for (SizeType i = 0; i < k; ++i) {
 			if (i == kindOfSite)
@@ -470,7 +482,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		const SizeType end = start + modelLinks_.hilbertSize(kindOfSite, labeledOperators_);
 
 		qns.resize(end - start, qns_[start]);
-		std::copy(qns_.begin() + start, qns_.end() + end, qns.begin());
+		std::copy(qns_.begin() + start, qns_.begin() + end, qns.begin());
 	}
 
 	static const ModelLinksType& modelLinks()
@@ -607,6 +619,7 @@ private:
 	ModelCommonType modelCommon_;
 	TargetQuantumElectronsType targetQuantum_;
 	InputValidatorType_& ioIn_;
+	AtomKindBaseType* atomKind_;
 	static LabeledOperatorsType labeledOperators_;
 	static ModelLinksType modelLinks_;
 	static VectorQnType qns_;

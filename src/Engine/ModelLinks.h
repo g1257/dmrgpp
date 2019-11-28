@@ -61,6 +61,17 @@ public:
 		LambdaType modifier;
 	}; // OneLink
 
+	class AtomKindBase {
+
+	public:
+
+		virtual ~AtomKindBase() {}
+
+		static SizeType siteToAtomKind(SizeType)  { return 0; }
+
+		static SizeType kindsOfAtoms() { return 1; }
+	};
+
 	class Term {
 
 		typedef typename PsimagLite::Vector<OneLink>::Type VectorOneLinkType;
@@ -72,13 +83,12 @@ public:
 
 		// pair of sites should actually be pair of kinds of sites
 		Term(PsimagLite::String name) // name of term, not name of operator
-		    : name_(name)
+		    : name_(name), pairKind_(0, 0)
 		{}
 
-		bool sitesAreCompatible(SizeType kind1, SizeType kind2) const
+		bool areSitesCompatible(SizeType kind0, SizeType kind1) const
 		{
-			std::cerr<<"sitesAreCompatible\n";
-			return true;
+			return (pairKind_.first == kind0 && pairKind_.second == kind1);
 		}
 
 		template<typename OpaqueOp>
@@ -89,8 +99,15 @@ public:
 		          SizeType angularMomentum = 0,
 		          RealType_ angularFactor = 1.0,
 		          SizeType category = 0
-				          ,LambdaType vModifier = [](ComplexOrRealType&) {})
+		        ,LambdaType vModifier = [](ComplexOrRealType&) {})
 		{
+			if (links_.size() > 0) {
+				if (!areSitesCompatible(op1.kindOfSite, op2.kindOfSite))
+					err("Term " + name_ + " incompatible atom kinds at push\n");
+			} else {
+				pairKind_ = PairSizeType(op1.kindOfSite, op2.kindOfSite);
+			}
+
 			SizeType index1 = findIndexOfOp(op1.name, op1.dof);
 			SizeType index2 = findIndexOfOp(op2.name, op2.dof);
 
@@ -141,6 +158,7 @@ public:
 
 		PsimagLite::String name_; // name of term, not name of operator
 		VectorOneLinkType links_;
+		PairSizeType pairKind_;
 	};
 
 	class IsValue {
@@ -169,7 +187,7 @@ public:
 	typedef typename PsimagLite::Vector<Term*>::Type VectorTermType;
 	typedef Term TermType;
 
-	ModelLinks() : maxDofs_(0) {}
+	ModelLinks() : maxDofs_(0), atomKind_(0) {}
 
 	~ModelLinks()
 	{
@@ -181,6 +199,7 @@ public:
 	}
 
 	void postCtor1(const LabeledOperatorsType& labeledOps,
+	               const AtomKindBase* ptr,
 	               SizeType geometryTerms)
 	{
 		if (terms_.size() > geometryTerms) {
@@ -188,6 +207,7 @@ public:
 			err(str + ttos(terms_.size()) + " in input file for this model\n");
 		}
 
+		atomKind_ = ptr;
 		VectorOperatorType cm; // only for hermit
 		SizeType n = trackables_.size();
 		offsets_.resize(n, 0);
@@ -289,6 +309,30 @@ public:
 		throw PsimagLite::RuntimeError("hilbertSize FATAL: " + ttos(kindOfSite) + "\n");
 	}
 
+	bool areSitesCompatibleForThisTerm(SizeType termIndex,
+	                                   SizeType actualSite0,
+	                                   SizeType actualSite1) const
+	{
+		assert(atomKind_);
+		const SizeType kind0 = atomKind_->siteToAtomKind(actualSite0);
+		const SizeType kind1 = atomKind_->siteToAtomKind(actualSite1);
+
+		assert(termIndex < terms_.size());
+		return terms_[termIndex]->areSitesCompatible(kind0, kind1);
+	}
+
+	SizeType siteToAtomKind(SizeType actualSite) const
+	{
+		assert(atomKind_);
+		return atomKind_->siteToAtomKind(actualSite);
+	}
+
+	SizeType kindsOfAtoms() const
+	{
+		assert(atomKind_);
+		return atomKind_->kindsOfAtoms();
+	}
+
 private:
 
 	static HermitianEnum getHermitianProperty(const OperatorStorageType& m)
@@ -300,6 +344,7 @@ private:
 	VectorTermType terms_;
 	VectorHermitianEnum hermit_;
 	SizeType maxDofs_;
+	const AtomKindBase* atomKind_;
 	static VectorSizeType offsets_;
 	static VectorStringType trackables_;
 };

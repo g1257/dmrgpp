@@ -115,15 +115,6 @@ public:
 		model_ = model;
 	}
 
-	//	void postCtor()
-	//	{
-	//		assert(0 < labels_.size());
-	//		SizeType h = labels_[0].data.rows();
-	//		Label* labeli = new Label("i", site);
-	//		labels_.push_back(labeli);
-	//		pushIdentity(*labeli, h);
-	//	}
-
 	Label& createLabel(PsimagLite::String name,
 	                   SizeType site)
 	{

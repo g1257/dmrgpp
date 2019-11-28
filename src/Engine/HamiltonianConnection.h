@@ -127,7 +127,7 @@ public:
 	                      const ParamsForKroneckerDumperType* pKroneckerDumper)
 	    : modelHelper_(m, lrs),
 	      superGeometry_(geometry),
-	      lpb_(lpb),
+	      modelLinks_(lpb),
 	      targetTime_(targetTime),
 	      kroneckerDumper_(pKroneckerDumper,lrs,m),
 	      progress_("HamiltonianConnection"),
@@ -288,10 +288,11 @@ private:
 		SizeType totalOne = 0;
 		SizeType geometryTerms = superGeometry_.geometry().terms();
 		for (SizeType termIndex = 0; termIndex < geometryTerms; ++termIndex) {
-			const typename ModelLinksType::TermType& term = lpb_.term(termIndex);
 
-			if (!term.sitesAreCompatible(hItems[0], hItems[1]))
+			if (!modelLinks_.areSitesCompatibleForThisTerm(termIndex, hItems[0], hItems[1]))
 				continue;
+
+			const typename ModelLinksType::TermType& term = modelLinks_.term(termIndex);
 
 			SizeType dofsTotal = term.size();
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
@@ -357,8 +358,8 @@ private:
 	{
 		assert(link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION);
 
-		HermitianEnum h1 = lpb_.getHermitianProperty(link.ops.first, link.site1);
-		HermitianEnum h2 = lpb_.getHermitianProperty(link.ops.second, link.site2);
+		HermitianEnum h1 = modelLinks_.getHermitianProperty(link.ops.first, link.site1);
+		HermitianEnum h2 = modelLinks_.getHermitianProperty(link.ops.second, link.site2);
 
 		bool isHermit1 = (h1 == ModelLinksType::HERMIT_PLUS);
 		bool isHermit2 = (h2 == ModelLinksType::HERMIT_PLUS);
@@ -373,8 +374,8 @@ private:
 	{
 		assert(link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::BOSON);
 
-		HermitianEnum h1 = lpb_.getHermitianProperty(link.ops.first, link.site1);
-		HermitianEnum h2 = lpb_.getHermitianProperty(link.ops.second, link.site2);
+		HermitianEnum h1 = modelLinks_.getHermitianProperty(link.ops.first, link.site1);
+		HermitianEnum h2 = modelLinks_.getHermitianProperty(link.ops.second, link.site2);
 
 		bool isHermit1 = (h1 == ModelLinksType::HERMIT_PLUS);
 		bool isHermit2 = (h2 == ModelLinksType::HERMIT_PLUS);
@@ -384,7 +385,7 @@ private:
 
 	const ModelHelperType modelHelper_;
 	SuperGeometryType superGeometry_;
-	const ModelLinksType& lpb_;
+	const ModelLinksType& modelLinks_;
 	RealType targetTime_;
 	mutable KroneckerDumperType kroneckerDumper_;
 	PsimagLite::ProgressIndicator progress_;
