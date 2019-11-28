@@ -232,7 +232,9 @@ protected:
 
 		if (modelParameters_.numberphonons == 0) return;
 
-		tmpMatrix = findPhononadaggerMatrix(fermionicBasis);
+		HilbertBasisType bosonicBasis;
+		setBasis(bosonicBasis, SiteType::SITE_BOSON);
+		tmpMatrix = findPhononadaggerMatrix(bosonicBasis);
 
 		typename OperatorType::Su2RelatedType su2related2;
 		su2related2.source.push_back(0*2);

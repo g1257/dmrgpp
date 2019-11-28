@@ -82,15 +82,9 @@ public:
 		typedef typename OneLinkType::LambdaType LambdaType;
 
 		// pair of sites should actually be pair of kinds of sites
-		Term(PsimagLite::String name, // name of term, not name of operator
-		     const VectorSizeType& sites)
-		    : name_(name), sites_(sites)
+		Term(PsimagLite::String name) // name of term, not name of operator
+		    : name_(name)
 		{}
-
-		static void init(const LabeledOperatorsType& l)
-		{
-			labeledOps_ = &l;
-		}
 
 		void push(const OpaqueOp& op1,
 		          char mod1,
@@ -101,9 +95,8 @@ public:
 		          SizeType category = 0,
 		          LambdaType vModifier = [](ComplexOrRealType&) {})
 		{
-			assert(sites_.size() == 2);
-			SizeType index1 = findIndexOfOp(op1.name, sites_[0], op1.dof);
-			SizeType index2 = findIndexOfOp(op2.name, sites_[1], op2.dof);
+			SizeType index1 = findIndexOfOp(op1.name, op1.dof);
+			SizeType index2 = findIndexOfOp(op2.name, op2.dof);
 
 
 			assert(index1 < cm_.size() && index2 < cm_.size());
@@ -132,28 +125,20 @@ public:
 			return links_[dof];
 		}
 
-		const VectorSizeType& sites() const { return sites_; }
-
 		const PsimagLite::String& name() const { return name_; }
 
 	private:
 
-		SizeType findIndexOfOp(PsimagLite::String name,
-		                       SizeType site,
-		                       SizeType dof) const
+		SizeType findIndexOfOp(PsimagLite::String name, SizeType dof) const
 		{
-			assert(labeledOps_);
 			SizeType n = offsets_.size();
 			for (SizeType i = 0; i < n; ++i) {
-				const typename LabelType::PairStringSizeType& nameAndSite = trackables_[i];
-
-				if (nameAndSite.first == name && nameAndSite.second == site)
+				if (trackables_[i] == name)
 					return offsets_[i] + dof;
 			}
 
 			throw PsimagLite::RuntimeError("Cannot find TRACKABLE operator " +
-			                               name + " with dof " + ttos(dof) +
-			                               " and site " + ttos(site) + "\n");
+			                               name + " with dof " + ttos(dof) + "\n");
 		}
 
 		Term(const Term&);
@@ -161,28 +146,7 @@ public:
 		Term& operator=(const Term&);
 
 		PsimagLite::String name_; // name of term, not name of operator
-		VectorSizeType sites_;
 		VectorOneLinkType links_;
-		static const LabeledOperatorsType* labeledOps_;
-	};
-
-	class IsValue {
-
-	public:
-
-		IsValue(PsimagLite::String name, VectorSizeType sites)
-		    : name_(name), sites_(sites)
-		{}
-
-		bool operator()(const Term* term) const
-		{
-			return (term->name() == name_ && sites_ == term->sites());
-		}
-
-	private:
-
-		PsimagLite::String name_;
-		VectorSizeType sites_;
 	};
 
 	enum HermitianEnum { HERMIT_NEITHER, HERMIT_PLUS, HERMIT_MINUS};
@@ -217,9 +181,7 @@ public:
 		offsets_.resize(n, 0);
 		SizeType dofs = 0;
 		for (SizeType i = 0; i < n; ++i) {
-			const typename LabelType::PairStringSizeType& nameAndSite = trackables_[i];
-			const LabelType& ll = labeledOps.findLabel(nameAndSite.first,
-			                                           nameAndSite.second);
+			const LabelType& ll = labeledOps.findLabel(trackables_[i]);
 
 			offsets_[i] = (i == 0) ? 0 : offsets_[i - 1] + dofs;
 
@@ -227,7 +189,7 @@ public:
 
 			for (SizeType j = 0; j < dofs; ++j) {
 				cm_.push_back(ll(j));
-				cmNameDof_.push_back(typename LabelType::PairStringSizeType(nameAndSite.first,
+				cmNameDof_.push_back(typename LabelType::PairStringSizeType(trackables_[i],
 				                                                            j));
 			}
 		}
@@ -237,8 +199,6 @@ public:
 		hermit_.resize(m);
 		for (SizeType i = 0; i < m; ++i)
 			hermit_[i] = getHermitianProperty(cm_[i].getStorage());
-
-		Term::init(labeledOps);
 	}
 
 	void postCtor2()
@@ -250,25 +210,23 @@ public:
 		}
 	}
 
-	void makeTrackable(PsimagLite::String what, SizeType site)
+	void makeTrackable(PsimagLite::String what)
 	{
-		typename LabelType::PairStringSizeType p(what, site);
-		if (std::find(trackables_.begin(), trackables_.end(), p) != trackables_.end())
-			err("makeTrackable: repeated entry " + what + "\n");
-		trackables_.push_back(p);
+		if (std::find(trackables_.begin(), trackables_.end(), what) != trackables_.end())
+			err("makeTrackable: cannot find operator " + what + "\n");
+		trackables_.push_back(what);
 	}
 
-	Term& createTerm(PsimagLite::String name,
-	                 VectorSizeType sites)
+	Term& createTerm(PsimagLite::String name)
 	{
 		typename VectorTermType::const_iterator x = std::find_if(terms_.begin(),
 		                                                         terms_.end(),
-		                                                         IsValue(name, sites));
+		                                                         name);
 
 		if (x != terms_.end())
-			err("Repeated term " + name + " sites=NOT DISPLAYED\n");
+			err("Repeated term " + name + "\n");
 
-		Term* term = new Term(name, sites);
+		Term* term = new Term(name);
 		terms_.push_back(term);
 		return *term;
 	}
@@ -284,11 +242,6 @@ public:
 	{
 		assert(cm_.size() > 0);
 		return cm_[0].getStorage().rows();
-	}
-
-	void setOperatorMatrices(VectorOperatorType& cm) const
-	{
-		cm = cm_;
 	}
 
 	SizeType dofsAllocationSize() const { return maxDofs_; }
@@ -326,12 +279,9 @@ private:
 	SizeType maxDofs_;
 	static VectorOperatorType cm_;
 	static VectorSizeType offsets_;
-	static VectorPairStringSizeType trackables_;
+	static VectorStringType trackables_;
 	static VectorPairStringSizeType cmNameDof_;
 };
-
-template<typename T1, typename T2>
-const T1* ModelLinks<T1, T2>::Term::labeledOps_ = 0;
 
 template<typename T1, typename T2>
 typename ModelLinks<T1, T2>::VectorSizeType ModelLinks<T1, T2>::offsets_;
@@ -340,7 +290,7 @@ template<typename T1, typename T2>
 typename ModelLinks<T1, T2>::VectorOperatorType ModelLinks<T1, T2>::cm_;
 
 template<typename T1, typename T2>
-typename ModelLinks<T1, T2>::VectorPairStringSizeType ModelLinks<T1, T2>::trackables_;
+typename ModelLinks<T1, T2>::VectorStringType ModelLinks<T1, T2>::trackables_;
 
 template<typename T1, typename T2>
 typename ModelLinks<T1, T2>::VectorPairStringSizeType ModelLinks<T1, T2>::cmNameDof_;

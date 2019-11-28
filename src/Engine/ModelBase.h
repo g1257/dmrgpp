@@ -296,7 +296,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return maxElectrons*modelCommon_.geometry().numberOfSites() + 1;
 	}
 
-	virtual SizeType differentTypesOfAtoms() const { return 1; }
+	//virtual SizeType differentTypesOfAtoms() const { return 1; }
 
 	virtual PsimagLite::String oracle() const { return ""; }
 
@@ -438,8 +438,13 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	                         const BlockType& block) const
 	{
 		assert(block.size() == 1);
-		modelLinks_.setOperatorMatrices(cm);
-		qns = qns_;
+		cm.clear();
+		const PairSizeType startEndC = labeledOperators_.startEndOperators(block[0]);
+		std::copy(cm_.begin() + startEndC.first, cm_.end() + startEndC.second, cm.begin());
+
+		const PairSizeType startEndQ = labeledOperators_.startEndBasis(block[0]);
+		qns_.clear();
+		std::copy(qns_.begin() + startEndQ.first, qns_.end() + startEndQ.second, qns.begin());
 	}
 
 	static const ModelLinksType& modelLinks()
@@ -449,10 +454,9 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	// should be static
 	const OperatorType& naturalOperator(const PsimagLite::String& what,
-	                                    SizeType,
 	                                    SizeType dof) const
 	{
-		return labeledOperators_(what, 0, dof);
+		return labeledOperators_(what, dof);
 	}
 
 	// should be static
@@ -541,33 +545,26 @@ protected:
 	}
 
 	static OpsLabelType& createOpsLabel(PsimagLite::String name,
-	                                    SizeType site = 0)
+	                                    SizeType kindOfSite = 0)
 	{
-		return labeledOperators_.createLabel(name, site);
+		return labeledOperators_.createLabel(name, kindOfSite);
 	}
 
-	static void makeTrackable(PsimagLite::String name, SizeType site = 0)
+	static void makeTrackable(PsimagLite::String name)
 	{
-		modelLinks_.makeTrackable(name, site);
+		modelLinks_.makeTrackable(name);
 	}
 
-	static void makeTrackableOrderMatters(VectorStringType vname, SizeType site = 0)
-	{
-		SizeType n = vname.size();
-		for (SizeType i = 0; i < n; ++i)
-			labeledOperators_.makeTrackableOrderMatters(vname[i], site);
-	}
-
-	static ModelTermType& createTerm(PsimagLite::String name,
-	                                 VectorSizeType sites)
-	{
-		return modelLinks_.createTerm(name, sites);
-	}
+//	static void makeTrackableOrderMatters(VectorStringType vname, SizeType site = 0)
+//	{
+//		SizeType n = vname.size();
+//		for (SizeType i = 0; i < n; ++i)
+//			labeledOperators_.makeTrackableOrderMatters(vname[i], site);
+//	}
 
 	static ModelTermType& createTerm(PsimagLite::String name)
 	{
-		VectorSizeType sites(2, 0);
-		return modelLinks_.createTerm(name, sites);
+		return modelLinks_.createTerm(name);
 	}
 
 private:
@@ -593,11 +590,7 @@ private:
 	static LabeledOperatorsType labeledOperators_;
 	static ModelLinksType modelLinks_;
 	static VectorQnType qns_;
-};     //class ModelBase
-
-template<typename T1, typename T2, typename T3, typename T4>
-typename ModelBase<T1, T2, T3, T4>::LabeledOperatorsType
-ModelBase<T1, T2, T3, T4>::labeledOperators_;
+}; //class ModelBase
 
 template<typename T1, typename T2, typename T3, typename T4>
 typename ModelBase<T1, T2, T3, T4>::VectorQnType ModelBase<T1, T2, T3, T4>::qns_;

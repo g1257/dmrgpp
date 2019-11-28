@@ -323,6 +323,7 @@ Page* where more or less this feature is used: Will be given when published
 
 4700) Hubbard Holstein
 4710) Hubbard Holstein SSH
+4720) Holstein Thin
 # 4711 to 4799 reserved for Hubbard Holstein with and without SSH
 4800) HubbardOneBandRashbaSOC
 4804) RashbaSOC chain with complex

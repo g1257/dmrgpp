@@ -289,6 +289,10 @@ private:
 		SizeType geometryTerms = superGeometry_.geometry().terms();
 		for (SizeType termIndex = 0; termIndex < geometryTerms; ++termIndex) {
 			const typename ModelLinksType::TermType& term = lpb_.term(termIndex);
+
+			if (!term.sitesAreCompatible(hItems[0], hItems[1]))
+				continue;
+
 			SizeType dofsTotal = term.size();
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
 
