@@ -27,17 +27,6 @@ class ModelLinks {
 
 public:
 
-	struct OpaqueOp {
-
-		OpaqueOp(PsimagLite::String name_, SizeType dof_ = 0, SizeType edof_ = 0)
-		    : name(name_), dof(dof_), edof(edof_)
-		{}
-
-		PsimagLite::String name;
-		SizeType dof;
-		SizeType edof;
-	};
-
 	class OneLink {
 
 	public:
@@ -86,6 +75,7 @@ public:
 		    : name_(name)
 		{}
 
+		template<typename OpaqueOp>
 		void push(const OpaqueOp& op1,
 		          char mod1,
 		          const OpaqueOp& op2,
@@ -98,12 +88,10 @@ public:
 			SizeType index1 = findIndexOfOp(op1.name, op1.dof);
 			SizeType index2 = findIndexOfOp(op2.name, op2.dof);
 
-
-			assert(index1 < cm_.size() && index2 < cm_.size());
 			ProgramGlobals::FermionOrBosonEnum fermionOrBoson =
 			        ProgramGlobals::FermionOrBosonEnum::BOSON;
-			if (cm_[index1].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION &&
-			cm_[index2].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION)
+			if (op1.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION &&
+			        op2.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION)
 				fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::FERMION;
 			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
 
@@ -169,7 +157,8 @@ public:
 		terms_.clear();
 	}
 
-	void postCtor1(const LabeledOperatorsType& labeledOps,
+	void postCtor1(VectorOperatorType& cm,
+	               const LabeledOperatorsType& labeledOps,
 	               SizeType geometryTerms)
 	{
 		if (terms_.size() > geometryTerms) {
@@ -188,17 +177,17 @@ public:
 			dofs = ll.dofs();
 
 			for (SizeType j = 0; j < dofs; ++j) {
-				cm_.push_back(ll(j));
+				cm.push_back(ll(j));
 				cmNameDof_.push_back(typename LabelType::PairStringSizeType(trackables_[i],
 				                                                            j));
 			}
 		}
 
-		SizeType m = cm_.size();
+		SizeType m = cm.size();
 		if (m == 0) return;
 		hermit_.resize(m);
 		for (SizeType i = 0; i < m; ++i)
-			hermit_[i] = getHermitianProperty(cm_[i].getStorage());
+			hermit_[i] = getHermitianProperty(cm[i].getStorage());
 	}
 
 	void postCtor2()
@@ -238,12 +227,6 @@ public:
 		return hermit_[opsIndex];
 	}
 
-	SizeType hilbertSize(SizeType) const
-	{
-		assert(cm_.size() > 0);
-		return cm_[0].getStorage().rows();
-	}
-
 	SizeType dofsAllocationSize() const { return maxDofs_; }
 
 	const TermType& term(SizeType term) const
@@ -264,8 +247,6 @@ public:
 		return (result - cmNameDof_.begin());
 	}
 
-	const VectorOperatorType& cm() const { return cm_; }
-
 private:
 
 	static HermitianEnum getHermitianProperty(const OperatorStorageType& m)
@@ -277,7 +258,6 @@ private:
 	VectorTermType terms_;
 	VectorHermitianEnum hermit_;
 	SizeType maxDofs_;
-	static VectorOperatorType cm_;
 	static VectorSizeType offsets_;
 	static VectorStringType trackables_;
 	static VectorPairStringSizeType cmNameDof_;
@@ -285,9 +265,6 @@ private:
 
 template<typename T1, typename T2>
 typename ModelLinks<T1, T2>::VectorSizeType ModelLinks<T1, T2>::offsets_;
-
-template<typename T1, typename T2>
-typename ModelLinks<T1, T2>::VectorOperatorType ModelLinks<T1, T2>::cm_;
 
 template<typename T1, typename T2>
 typename ModelLinks<T1, T2>::VectorStringType ModelLinks<T1, T2>::trackables_;

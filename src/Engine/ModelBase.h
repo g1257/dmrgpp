@@ -98,6 +98,17 @@ class ModelBase  {
 
 public:
 
+	struct OpaqueOp {
+
+		OpaqueOp(PsimagLite::String name_, SizeType dof_ = 0, SizeType edof_ = 0)
+		    : name(name_), dof(dof_), edof(edof_)
+		{}
+
+		PsimagLite::String name;
+		SizeType dof;
+		SizeType edof;
+	};
+
 	typedef ParametersType_ ParametersType;
 	typedef InputValidatorType_ InputValidatorType;
 	typedef ModelHelperType_ ModelHelperType;
@@ -134,7 +145,7 @@ public:
 	typedef typename ModelCommonType::VerySparseMatrixType VerySparseMatrixType;
 	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;
 	typedef typename ModelLinksType::TermType ModelTermType;
-	typedef typename ModelLinksType::OpaqueOp OpForLinkType;
+	typedef OpaqueOp OpForLinkType;
 
 	ModelBase(const ParametersType& params,
 	          const GeometryType_& geometry,
@@ -149,7 +160,7 @@ public:
 	void postCtor()
 	{
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
-		modelLinks_.postCtor1(labeledOperators_, modelCommon_.geometry().terms());
+		modelLinks_.postCtor1(cm_, labeledOperators_, modelCommon_.geometry().terms());
 		fillModelLinks(); // fills modelLinks_
 		modelLinks_.postCtor2();
 
@@ -420,9 +431,11 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// site MUST be ignored unless your model has a site-dependent
 	// Hilbert space (SDHS)
 	// should be static
-	SizeType hilbertSize(SizeType site) const
+	SizeType hilbertSize(SizeType actualSite) const
 	{
-		return modelLinks_.hilbertSize(site);
+		const PairSizeType startEndC = labeledOperators_.startEndOperators(actualSite);
+		assert(cm_.size() > startEndC.first);
+		return cm_[startEndC.first].getStorage().rows();
 	}
 
 	// Fill the VectorOperatorType with operators that need to be kept
@@ -454,6 +467,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	// should be static
 	const OperatorType& naturalOperator(const PsimagLite::String& what,
+	                                    SizeType kindOfSite, // ignore, legacy
 	                                    SizeType dof) const
 	{
 		return labeledOperators_(what, dof);
@@ -589,8 +603,12 @@ private:
 	InputValidatorType_& ioIn_;
 	static LabeledOperatorsType labeledOperators_;
 	static ModelLinksType modelLinks_;
+	static VectorOperatorType cm_;
 	static VectorQnType qns_;
 }; //class ModelBase
+
+template<typename T1, typename T2, typename T3, typename T4>
+typename ModelBase<T1, T2, T3, T4>::VectorOperatorType ModelBase<T1, T2, T3, T4>::cm_;
 
 template<typename T1, typename T2, typename T3, typename T4>
 typename ModelBase<T1, T2, T3, T4>::VectorQnType ModelBase<T1, T2, T3, T4>::qns_;
