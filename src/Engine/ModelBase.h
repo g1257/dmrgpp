@@ -102,11 +102,14 @@ public:
 
 		OpaqueOp(PsimagLite::String name_, SizeType dof_ = 0, SizeType edof_ = 0)
 		    : name(name_), dof(dof_), edof(edof_)
-		{}
+		{
+			fermionOrBoson = labeledOperators_(name_, dof_).fermionOrBoson();
+		}
 
 		PsimagLite::String name;
 		SizeType dof;
 		SizeType edof;
+		ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
 	};
 
 	typedef ParametersType_ ParametersType;
@@ -453,7 +456,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	{
 		assert(block.size() == 1);
 
-		const SizeType kindOfSite = siteKind(block[0]);
+		const SizeType kindOfSite = siteToAtomKind(block[0]);
 		modelLinks_.setOperatorMatrices(cm, labeledOperators_, kindOfSite);
 
 		const SizeType k = kindsOfAtoms();
@@ -466,7 +469,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 		const SizeType end = start + modelLinks_.hilbertSize(kindOfSite, labeledOperators_);
 
-		qns.resize(end - start);
+		qns.resize(end - start, qns_[start]);
 		std::copy(qns_.begin() + start, qns_.end() + end, qns.begin());
 	}
 
@@ -578,13 +581,6 @@ protected:
 	{
 		modelLinks_.makeTrackable(name);
 	}
-
-//	static void makeTrackableOrderMatters(VectorStringType vname, SizeType site = 0)
-//	{
-//		SizeType n = vname.size();
-//		for (SizeType i = 0; i < n; ++i)
-//			labeledOperators_.makeTrackableOrderMatters(vname[i], site);
-//	}
 
 	static ModelTermType& createTerm(PsimagLite::String name)
 	{

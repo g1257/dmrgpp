@@ -29,10 +29,10 @@ class LabeledOperators {
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-//		bool operator==(PairStringSizeType nameAndSite) const
-//		{
-//			return (nameAndSite.first == name_ && nameAndSite.second == site_);
-//		}
+		bool operator==(const PsimagLite::String& name) const
+		{
+			return (name == name_);
+		}
 
 		SizeType rows() const
 		{
@@ -44,7 +44,7 @@ class LabeledOperators {
 		void push(const OperatorType_& op)
 		{
 			const SizeType n = ops_.size();
-			if (n > 0 && ops_[n - 1].getCrs().rows() != op.getCrs().rows())
+			if (n > 0 && ops_[n - 1].getStorage().rows() != op.getStorage().rows())
 				err("LabeledOperators::Label::push: FATAL\n");
 
 			ops_.push_back(op);
@@ -72,6 +72,22 @@ class LabeledOperators {
 	};
 
 	typedef typename PsimagLite::Vector<Label*>::Type VectorLabelType;
+	class IsValue {
+
+	public:
+
+		IsValue(PsimagLite::String value)
+		    : value_(value) {}
+
+		bool operator()(Label const* label) const
+		{
+			return (*label == value_);
+		}
+
+	private:
+
+		PsimagLite::String value_;
+	};
 
 public:
 
@@ -99,21 +115,21 @@ public:
 		model_ = model;
 	}
 
-//	void postCtor()
-//	{
-//		assert(0 < labels_.size());
-//		SizeType h = labels_[0].data.rows();
-//		Label* labeli = new Label("i", site);
-//		labels_.push_back(labeli);
-//		pushIdentity(*labeli, h);
-//	}
+	//	void postCtor()
+	//	{
+	//		assert(0 < labels_.size());
+	//		SizeType h = labels_[0].data.rows();
+	//		Label* labeli = new Label("i", site);
+	//		labels_.push_back(labeli);
+	//		pushIdentity(*labeli, h);
+	//	}
 
 	Label& createLabel(PsimagLite::String name,
 	                   SizeType site)
 	{
 		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
 		                                                          labels_.end(),
-		                                                          name);
+		                                                          IsValue(name));
 
 		if (x != labels_.end())
 			err("Repeated label " + name + "\n");
@@ -133,7 +149,7 @@ public:
 	{
 		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
 		                                                          labels_.end(),
-		                                                          what);
+		                                                          IsValue(what));
 		if (x != labels_.end())
 			return *(labels_[x - labels_.begin()]);
 

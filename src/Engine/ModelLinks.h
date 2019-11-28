@@ -75,6 +75,12 @@ public:
 		    : name_(name)
 		{}
 
+		bool sitesAreCompatible(SizeType kind1, SizeType kind2) const
+		{
+			std::cerr<<"sitesAreCompatible\n";
+			return true;
+		}
+
 		template<typename OpaqueOp>
 		void push(const OpaqueOp& op1,
 		          char mod1,
@@ -82,8 +88,8 @@ public:
 		          char mod2,
 		          SizeType angularMomentum = 0,
 		          RealType_ angularFactor = 1.0,
-		          SizeType category = 0,
-		          LambdaType vModifier = [](ComplexOrRealType&) {})
+		          SizeType category = 0
+				          ,LambdaType vModifier = [](ComplexOrRealType&) {})
 		{
 			SizeType index1 = findIndexOfOp(op1.name, op1.dof);
 			SizeType index2 = findIndexOfOp(op2.name, op2.dof);
@@ -91,7 +97,7 @@ public:
 			ProgramGlobals::FermionOrBosonEnum fermionOrBoson =
 			        ProgramGlobals::FermionOrBosonEnum::BOSON;
 			if (op1.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION &&
-			        op2.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION)
+			        op2.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 				fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::FERMION;
 			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
 
@@ -135,6 +141,23 @@ public:
 
 		PsimagLite::String name_; // name of term, not name of operator
 		VectorOneLinkType links_;
+	};
+
+	class IsValue {
+
+	public:
+
+		IsValue(PsimagLite::String name)
+		    : name_(name) {}
+
+		bool operator()(const Term* term) const
+		{
+			return (term->name() == name_);
+		}
+
+	private:
+
+		PsimagLite::String name_;
 	};
 
 	enum HermitianEnum { HERMIT_NEITHER, HERMIT_PLUS, HERMIT_MINUS};
@@ -207,7 +230,7 @@ public:
 	{
 		typename VectorTermType::const_iterator x = std::find_if(terms_.begin(),
 		                                                         terms_.end(),
-		                                                         name);
+		                                                         IsValue(name));
 
 		if (x != terms_.end())
 			err("Repeated term " + name + "\n");
@@ -260,7 +283,7 @@ public:
 			if (ll.kindOfSite() != kindOfSite)
 				continue;
 
-			return ll(0).rows();
+			return ll(0).getStorage().rows();
 		}
 
 		throw PsimagLite::RuntimeError("hilbertSize FATAL: " + ttos(kindOfSite) + "\n");
