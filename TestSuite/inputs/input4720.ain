@@ -1,0 +1,39 @@
+##Ainur1.0
+TotalNumberOfSites=4;
+
+NumberOfTerms=2;
+
+#Hopping term
+gt0:DegreesOfFreedom=1;
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[-1.0];
+
+# Phonon fermion (not used yet FIXME)
+gt1:DegreesOfFreedom=1;
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[-1.0];
+
+vector hubbardFU=[10,...];
+vector potentialFV=[20,...];
+
+integers NumberPhonons=4;
+
+vector lambdaFP=[0.2,...];
+
+vector potentialPV=[0.4,...];
+
+Model="HolsteinThin";
+SolverOptions="twositedmrg";
+Version="version"
+OutputFile="data4720";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[
+[1, 100, 0], 
+[-2, 100, 0], [2, 100, 0]];
+
+TargetElectronsUp=2;
+TargetElectronsDown=2;
+
+
