@@ -227,11 +227,15 @@ protected:
 		if (modelParameters_.numberphonons > 0)
 			this->makeTrackable("a");
 
-		// no qns for bosons
+		// qns for bosons are all the same
+		HilbertBasisType bosonicBasis;
+		setBasis(bosonicBasis, SiteType::SITE_BOSON);
+		qns.clear();
+		setSymmetryRelated(qns, bosonicBasis, 0, SiteType::SITE_BOSON);
 
 		HilbertBasisType fermionicBasis;
 		setBasis(fermionicBasis, SiteType::SITE_FERMION);
-		setSymmetryRelated(qns, fermionicBasis);
+		setSymmetryRelated(qns, fermionicBasis, bosonicBasis.size(), SiteType::SITE_FERMION);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		SparseMatrixType tmpMatrix;
@@ -259,8 +263,6 @@ protected:
 
 		if (modelParameters_.numberphonons == 0) return;
 
-		HilbertBasisType bosonicBasis;
-		setBasis(bosonicBasis, SiteType::SITE_BOSON);
 		tmpMatrix = findPhononadaggerMatrix(bosonicBasis);
 
 		typename OperatorType::Su2RelatedType su2related2;
@@ -371,26 +373,35 @@ private:
 	}
 
 	// only fermions, bosons have no symmetry
-	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis) const
+	void setSymmetryRelated(VectorQnType& qns,
+	                        const HilbertBasisType& basis,
+	                        SizeType offset,
+	                        SiteType typeOfSite) const
 	{
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		qns.resize(basis.size(), QnType::zero());
-		static const bool isCanonical = false;
+		qns.resize(basis.size() + offset, QnType::zero());
+		static const bool isCanonical = true;
 		VectorSizeType other((isCanonical) ? 2 : 1, 0);
 		for (SizeType i = 0; i < basis.size(); ++i) {
+
 			PairType jmpair(0,0);
-			// nup
-			SizeType electronsUp = HilbertSpaceHubbardType::getNofDigits(basis[i], 0);
-			// ndown
-			SizeType electronsDown = HilbertSpaceHubbardType::getNofDigits(basis[i], 1);
 
-			other[0] = electronsUp + electronsDown;
+			bool sign = false;
 
-			//if (isCanonical) other[1] = electronsUp;
+			if (typeOfSite == SiteType::SITE_FERMION) {
+				// nup
+				SizeType electronsUp = HilbertSpaceHubbardType::getNofDigits(basis[i], 0);
+				// ndown
+				SizeType electronsDown = HilbertSpaceHubbardType::getNofDigits(basis[i], 1);
 
-			bool sign = other[0] & 1;
-			qns[i] = QnType(sign, other, jmpair, other[0]);
+				other[0] = electronsUp + electronsDown;
+
+				if (isCanonical) other[1] = electronsUp;
+				sign = other[0] & 1;
+			}
+
+			qns[i + offset] = QnType(sign, other, jmpair, other[0]);
 		}
 	}
 

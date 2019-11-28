@@ -67,9 +67,9 @@ public:
 
 		virtual ~AtomKindBase() {}
 
-		static SizeType siteToAtomKind(SizeType)  { return 0; }
+		virtual SizeType siteToAtomKind(SizeType) const  { return 0; }
 
-		static SizeType kindsOfAtoms() { return 1; }
+		virtual SizeType kindsOfAtoms() const { return 1; }
 	};
 
 	class Term {
