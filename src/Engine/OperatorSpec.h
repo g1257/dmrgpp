@@ -68,11 +68,6 @@ public:
 				nup.dagger();
 		}
 
-		SizeType foundSize = nup.getStorage().rows();
-		SizeType expectedSize = model_.hilbertSize(site);
-		if (foundSize != expectedSize)
-			return specialOperator(site, 0.0);
-
 		return nup;
 	}
 

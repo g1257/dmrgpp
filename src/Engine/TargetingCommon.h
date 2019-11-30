@@ -321,17 +321,20 @@ public:
 		        direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			border = ApplyOperatorType::BORDER_YES;
 
+		const SizeType expectedSize = targetHelper_.model().hilbertSize(site);
+
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
 
-			BraketType Braket(targetHelper_.model(), opLabel);
+			BraketType braket(targetHelper_.model(), opLabel);
 
-			const typename BraketType::AlgebraType& nup = Braket.op(0);
+			const typename BraketType::AlgebraType& nup = braket.op(0);
 
-			if (PsimagLite::isZero(nup.getCRS())) continue;
+			const SizeType foundSize = nup.getStorage().rows();
+			if (foundSize != expectedSize) continue;
 
-			const VectorWithOffsetType* v1 = getVector(Braket.bra());
-			const VectorWithOffsetType* v2 = getVector(Braket.ket());
+			const VectorWithOffsetType* v1 = getVector(braket.bra());
+			const VectorWithOffsetType* v2 = getVector(braket.ket());
 
 			if (!v1 || !v2) continue;
 

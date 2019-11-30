@@ -105,6 +105,7 @@ public:
 		SizeType nx = basis.oldSigns().size()/signs.size();
 		PackIndicesType pack(nx);
 		signs_.resize(nx);
+		if (nx == 1) return;
 		for (SizeType x = 0; x < n; ++x) {
 			SizeType x0 = 0;
 			SizeType x1 = 0;
