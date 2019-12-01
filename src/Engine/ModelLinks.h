@@ -4,6 +4,7 @@
 #include "ProgramGlobals.h"
 #include "PsimagLite.h"
 #include <functional>
+#include <map>
 
 namespace Dmrg {
 
@@ -91,6 +92,11 @@ public:
 			return (pairKind_.first == kind0 && pairKind_.second == kind1);
 		}
 
+		bool areSiteKindsEqual() const
+		{
+			return (pairKind_.first == pairKind_.second);
+		}
+
 		template<typename OpaqueOp>
 		void push(const OpaqueOp& op1,
 		          char mod1,
@@ -142,14 +148,7 @@ public:
 
 		SizeType findIndexOfOp(PsimagLite::String name, SizeType dof) const
 		{
-			SizeType n = offsets_.size();
-			for (SizeType i = 0; i < n; ++i) {
-				if (trackables_[i] == name)
-					return offsets_[i] + dof;
-			}
-
-			throw PsimagLite::RuntimeError("Cannot find TRACKABLE operator " +
-			                               name + " with dof " + ttos(dof) + "\n");
+			return offsets_[name] + dof;
 		}
 
 		Term(const Term&);
@@ -210,16 +209,17 @@ public:
 		atomKind_ = ptr;
 		VectorOperatorType cm; // only for hermit
 		SizeType n = trackables_.size();
-		offsets_.resize(n, 0);
-		SizeType dofs = 0;
+		VectorSizeType dofsByKind(n);
 		for (SizeType i = 0; i < n; ++i) {
 			const LabelType& ll = labeledOps.findLabel(trackables_[i]);
 
-			offsets_[i] = (i == 0) ? 0 : offsets_[i - 1] + dofs;
+			const SizeType kindOfSite = ll.kindOfSite();
 
-			dofs = ll.dofs();
+			offsets_[ll.name()] = (i == 0) ? 0 : dofsByKind[kindOfSite];
 
-			for (SizeType j = 0; j < dofs; ++j)
+			dofsByKind[kindOfSite] += ll.dofs();
+
+			for (SizeType j = 0; j < ll.dofs(); ++j)
 				cm.push_back(ll(j));
 		}
 
@@ -309,6 +309,12 @@ public:
 		throw PsimagLite::RuntimeError("hilbertSize FATAL: " + ttos(kindOfSite) + "\n");
 	}
 
+	bool areSiteKindsEqual(SizeType termIndex) const
+	{
+		assert(termIndex < terms_.size());
+		return terms_[termIndex]->areSiteKindsEqual();
+	}
+
 	bool areSitesCompatibleForThisTerm(SizeType termIndex,
 	                                   SizeType actualSite0,
 	                                   SizeType actualSite1) const
@@ -345,12 +351,12 @@ private:
 	VectorHermitianEnum hermit_;
 	SizeType maxDofs_;
 	const AtomKindBase* atomKind_;
-	static VectorSizeType offsets_;
+	static std::map<PsimagLite::String, SizeType> offsets_;
 	static VectorStringType trackables_;
 };
 
 template<typename T1, typename T2>
-typename ModelLinks<T1, T2>::VectorSizeType ModelLinks<T1, T2>::offsets_;
+std::map<PsimagLite::String, SizeType> ModelLinks<T1, T2>::offsets_;
 
 template<typename T1, typename T2>
 typename ModelLinks<T1, T2>::VectorStringType ModelLinks<T1, T2>::trackables_;

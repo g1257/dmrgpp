@@ -1,31 +1,41 @@
 ##Ainur1.0
 TotalNumberOfSites=4;
 
-NumberOfTerms=2;
+NumberOfTerms=4;
 
-#Hopping term
+#Hopping term Fermionic
 gt0:DegreesOfFreedom=1;
 gt0:GeometryKind="chain";
 gt0:GeometryOptions="ConstantValues";
 gt0:dir0:Connectors=[-1.0];
 
-# Phonon fermion (not used yet FIXME)
+#Hopping term Bosonic
 gt1:DegreesOfFreedom=1;
 gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[-1.0];
 
+#Phonon-Fermion
+gt2:DegreesOfFreedom=1;
+gt2:GeometryKind="chain";
+gt2:GeometryOptions="ConstantValues";
+gt2:dir0:Connectors=[3.0];
+
+#Fermion-Phonon
+gt3:DegreesOfFreedom=1;
+gt3:GeometryKind="chain";
+gt3:GeometryOptions="ConstantValues";
+gt3:dir0:Connectors=[3.0];
+
 vector hubbardFU=[10,...];
 vector potentialFV=[20,...];
 
-integers NumberPhonons=4;
-
-vector lambdaFP=[0.2,...];
+integers NumberPhonons=1;
 
 vector potentialPV=[0.4,...];
 
 Model="HolsteinThin";
-SolverOptions="twositedmrg";
+SolverOptions="twositedmrg,MatrixVectorStored,printmatrix,debugmatrix";
 Version="version"
 OutputFile="data4720";
 InfiniteLoopKeptStates=100;
@@ -33,7 +43,7 @@ FiniteLoops=[
 [1, 100, 0], 
 [-2, 100, 0], [2, 100, 0]];
 
-TargetElectronsUp=2;
-TargetElectronsDown=2;
+TargetElectronsUp=1;
+TargetElectronsDown=1;
 
 

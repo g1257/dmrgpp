@@ -102,15 +102,32 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 
 		SizeType nsites = 0;
 		io.readline(nsites, "TotalNumberOfSites=");
+		PsimagLite::String model;
+		io.readline(model, "Model=");
 		hubbardFU.resize(nsites, 0.0);
 		potentialFV.resize(2*nsites, 0.0);
-		lambdaFP.resize(nsites, 0.0);
 		potentialPV.resize(nsites, 0.0);
 		io.readline(numberphonons,"NumberPhonons=");
 		io.read(hubbardFU,"hubbardFU");
-		io.read(lambdaFP,"lambdaFP");
 		io.read(potentialFV,"potentialFV");
 		io.read(potentialPV,"potentialPV");
+
+		lambdaFP.resize(nsites, 0.0);
+		bool hasLambdaFP = false;
+		try {
+			io.read(lambdaFP,"lambdaFP");
+			hasLambdaFP = true;
+		} catch (...) {
+			lambdaFP.clear();
+		}
+
+		if (model == "HubbardHolstein") {
+			if (!hasLambdaFP)
+				err("HubbardHolstein: must have lambdaFP vector in input file\n");
+		} else {
+			if (hasLambdaFP)
+				err("HolsteinThin: lambdaFP should be given as a connection\n");
+		}
 
 		/*
 		for (SizeType i = 0; i < h; ++i) {

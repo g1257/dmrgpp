@@ -58,6 +58,8 @@ class LabeledOperators {
 
 		SizeType dofs() const { return ops_.size(); }
 
+		PsimagLite::String name() const { return name_; }
+
 		SizeType kindOfSite() const { return kindOfSite_; }
 
 	private:

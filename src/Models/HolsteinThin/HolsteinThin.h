@@ -196,9 +196,6 @@ public:
 			SparseMatrixType tmpMatrix = findPhononadaggerMatrix(bosonicBasis);
 			addPotentialPhononV(hmatrix, tmpMatrix, actualSite);
 		}
-
-		// FIXME: TODO: This is a connection in the thin-site model:
-		// addInteractionFPhonon(hmatrix, cm, block[i]);
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -239,6 +236,7 @@ protected:
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		SparseMatrixType tmpMatrix;
+		MatrixType nmatrix;
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
 			tmpMatrix = findOperatorMatrices(sigma, fermionicBasis);
 			int asign = 1;
@@ -259,9 +257,29 @@ protected:
 			                  su2related);
 
 			c.push(myOp);
+
+			if (sigma == 0)
+				nmatrix = multiplyTc(tmpMatrix, tmpMatrix);
+			else
+				nmatrix += multiplyTc(tmpMatrix, tmpMatrix);
 		}
 
+
+		OpsLabelType& n = this->createOpsLabel("n", 1); // 1 == fermionic site
+		SparseMatrixType nmatrixCrs;
+		fullMatrixToCrsMatrix(nmatrixCrs, nmatrix);
+		typename OperatorType::Su2RelatedType su2related;
+		OperatorType myOp(nmatrixCrs,
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0, 0),
+		                  1,
+		                  su2related);
+
+		n.push(myOp);
+
 		if (modelParameters_.numberphonons == 0) return;
+
+		this->makeTrackable("n");
 
 		tmpMatrix = findPhononadaggerMatrix(bosonicBasis);
 
@@ -296,10 +314,16 @@ protected:
 
 			OpForLinkType a("a");
 			hopb.push(a, 'C', a, 'N', 1, 1, 0);
+
+			ModelTermType& phononFermion = ModelBaseType::createTerm("PhononFermion");
+
+			OpForLinkType n("n");
+			phononFermion.push(n, 'N', a, 'N', 1, 1, 0);
+
+			ModelTermType& fermionPhonon = ModelBaseType::createTerm("FermionPhonon");
+
+			fermionPhonon.push(a, 'N', n, 'N', 1, 1, 0);
 		}
-
-		// FIXME: ADD boson fermion interaction
-
 	}
 
 private:
