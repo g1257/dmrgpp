@@ -154,22 +154,23 @@ public:
 		Note: Used only for debugging purposes
 		*/
 	void fullHamiltonian(SparseMatrixType& matrix,
-	                     const HamiltonianConnectionType& hc) const
+	                     const HamiltonianConnectionType& hc,
+	                     const typename ModelHelperType::Aux& aux) const
 	{
 		SparseMatrixType matrixBlock;
 
 		//! contribution to Hamiltonian from current system
-		hc.modelHelper().calcHamiltonianPart(matrixBlock,true);
+		hc.modelHelper().calcHamiltonianPart(matrixBlock, true, aux);
 		matrix = matrixBlock;
 
 		//! contribution to Hamiltonian from current envirnoment
-		hc.modelHelper().calcHamiltonianPart(matrixBlock,false);
+		hc.modelHelper().calcHamiltonianPart(matrixBlock, false, aux);
 		matrix += matrixBlock;
 
 		matrixBlock.clear();
 
 		VerySparseMatrixType vsm(matrix);
-		hc.matrixBond(vsm);
+		hc.matrixBond(vsm, aux);
 
 		matrix = vsm;
 	}

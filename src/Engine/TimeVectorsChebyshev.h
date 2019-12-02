@@ -258,14 +258,13 @@ private:
 	                      RealType Eg)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
-		typename ModelType::HamiltonianConnectionType hc(p,
-		                                                 lrs_,
+		typename ModelHelperType::Aux aux(p, lrs_);
+		typename ModelType::HamiltonianConnectionType hc(lrs_,
 		                                                 model_.geometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 time(),
 		                                                 0);
-		MatrixLanczosType lanczosHelper(model_,
-		                                hc);
+		MatrixLanczosType lanczosHelper(model_, hc, aux);
 
 		ProgramGlobals::VerboseEnum verbose = (model_.params().options.isSet("VerboseCheby"))
 		            ? ProgramGlobals::VerboseEnum::YES

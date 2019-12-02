@@ -460,18 +460,19 @@ private:
 		if (lrs.super().block().size() == model_.geometry().numberOfSites())
 			paramsKrDumperPtr = &paramsKrDumper;
 
-		HamiltonianConnectionType hc(partitionIndex,
-		                             lrs,
+		HamiltonianConnectionType hc(lrs,
 		                             model_.geometry(),
 		                             ModelType::modelLinks(),
 		                             targetTime,
 		                             paramsKrDumperPtr);
 
 		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+		typename ModelHelperType::Aux aux(partitionIndex, lrs);
+
 		if (options.isSet("debugmatrix") && !(saveOption & 4) ) {
 			SparseMatrixType fullm;
 
-			model_.fullHamiltonian(fullm, hc);
+			model_.fullHamiltonian(fullm, hc, aux);
 
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 			crsMatrixToFullMatrix(fullm2,fullm);
@@ -504,24 +505,27 @@ private:
 		}
 
 		PsimagLite::OstringStream msg;
-		msg<<"I will now diagonalize a matrix of size="<<hc.modelHelper().size();
+		msg<<"I will now diagonalize a matrix of size="<<hc.modelHelper().size(partitionIndex);
 		progress_.printline(msg,std::cout);
 		diagonaliseOneBlock(energyTmp,
 		                    tmpVec,
 		                    hc,
 		                    initialVector,
-		                    loopIndex);
+		                    loopIndex,
+		                    aux);
 	}
 
 	void diagonaliseOneBlock(VectorRealType& energyTmp,
 	                         VectorVectorType& tmpVec,
 	                         HamiltonianConnectionType& hc,
 	                         const TargetVectorType& initialVector,
-	                         SizeType loopIndex)
+	                         SizeType loopIndex,
+	                         const typename ModelHelperType::Aux& aux)
 	{
 		const SizeType nexcited = energyTmp.size();
 		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_,
-		                                                             hc);
+		                                                             hc,
+		                                                             aux);
 
 		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 

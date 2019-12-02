@@ -5,8 +5,8 @@
 #include "DmrgDriver1.h"
 
 
-typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance16Type;
-typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance16Type;
+typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance16Type;
+typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance16Type;
 
 typedef Dmrg::MatrixVectorStored<
  Dmrg::ModelBase<
@@ -19,18 +19,18 @@ typedef Dmrg::MatrixVectorStored<
  >
 > MatrixVector16Type;
 
-typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance16Type::RealType>,
+typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance16Type::RealType>,
 	MatrixVector16Type, MatrixVector16Type::VectorType> LanczosSolver16Type;
 
-template void mainLoop4<LanczosSolver16Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >
+template void mainLoop4<LanczosSolver16Type,Dmrg::VectorWithOffsets<std::complex<RealType> , Dmrg::Qn> >
 (LanczosSolver16Type::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&);
 
 
-typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance17Type;
-typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance17Type;
+typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance17Type;
+typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance17Type;
 
 typedef Dmrg::MatrixVectorKron<
  Dmrg::ModelBase<
@@ -43,10 +43,10 @@ typedef Dmrg::MatrixVectorKron<
  >
 > MatrixVector17Type;
 
-typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance17Type::RealType>,
+typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance17Type::RealType>,
 	MatrixVector17Type, MatrixVector17Type::VectorType> LanczosSolver17Type;
 
-template void mainLoop4<LanczosSolver17Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >
+template void mainLoop4<LanczosSolver17Type,Dmrg::VectorWithOffsets<std::complex<RealType> , Dmrg::Qn> >
 (LanczosSolver17Type::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,

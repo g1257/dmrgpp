@@ -135,13 +135,13 @@ private:
 	                 SizeType i0)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
-		typename ModelType::HamiltonianConnectionType hc(p,
-		                                                 lrs_,
+		typename ModelHelperType::Aux aux(p, lrs_);
+		typename ModelType::HamiltonianConnectionType hc(lrs_,
 		                                                 model_.geometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 currentTime_,
 		                                                 0);
-		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc);
+		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc, aux);
 
 		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");
 		params.lotaMemory = true;

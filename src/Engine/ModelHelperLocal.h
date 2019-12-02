@@ -114,17 +114,102 @@ public:
 	VectorVectorOperatorStorageType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
-	ModelHelperLocal(SizeType m, const LeftRightSuperType& lrs)
-	    : m_(m),
-	      lrs_(lrs),
-	      buffer_(lrs_.left().size()),
+	class Aux {
+
+	public:
+
+		Aux(SizeType m, const LeftRightSuperType& lrs) :
+		    m_(m), buffer_(lrs.left().size())
+
+		{
+			createBuffer(lrs);
+			createAlphaAndBeta(lrs);
+		}
+
+		SizeType m() const { return m_; }
+
+		int buffer(SizeType i, SizeType j) const
+		{
+			assert(i < buffer_.size());
+			assert(j < buffer_[i].size());
+			return buffer_[i][j];
+		}
+
+		const PsimagLite::Vector<int>::Type& buffer(SizeType i) const
+		{
+			assert(i < buffer_.size());
+			return buffer_[i];
+		}
+
+		SizeType alpha(SizeType i) const
+		{
+			assert(i < alpha_.size());
+			return alpha_[i];
+		}
+
+		SizeType beta(SizeType i) const
+		{
+			assert(i < beta_.size());
+			return beta_[i];
+		}
+
+		bool fermionSigns(SizeType i) const
+		{
+			assert(i < fermionSigns_.size());
+			return fermionSigns_[i];
+		}
+
+	private:
+
+		void createBuffer(const LeftRightSuperType& lrs)
+		{
+			SizeType ns = lrs.left().size();
+			SizeType ne = lrs.right().size();
+			int offset = lrs.super().partition(m_);
+			int total = lrs.super().partition(m_+1) - offset;
+
+			typename PsimagLite::Vector<int>::Type  tmpBuffer(ne);
+			for (SizeType alphaPrime=0;alphaPrime<ns;alphaPrime++) {
+				for (SizeType betaPrime=0;betaPrime<ne;betaPrime++) {
+					tmpBuffer[betaPrime] = lrs.super().
+					        permutationInverse(alphaPrime + betaPrime*ns) -offset;
+					if (tmpBuffer[betaPrime]>=total) tmpBuffer[betaPrime]= -1;
+				}
+				buffer_[alphaPrime]=tmpBuffer;
+			}
+		}
+
+		void createAlphaAndBeta(const LeftRightSuperType& lrs)
+		{
+			SizeType ns = lrs.left().size();
+			int offset = lrs.super().partition(m_);
+			int total = lrs.super().partition(m_+1) - offset;
+
+			PackIndicesType pack(ns);
+			alpha_.resize(total);
+			beta_.resize(total);
+			fermionSigns_.resize(total);
+			for (int i=0;i<total;i++) {
+				// row i of the ordered product basis
+				pack.unpack(alpha_[i],beta_[i],lrs.super().permutation(i+offset));
+				int fs = lrs.left().fermionicSign(alpha_[i],-1);
+				fermionSigns_[i] = (fs < 0) ? true : false;
+			}
+		}
+
+		SizeType m_;
+		typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
+		VectorSizeType alpha_;
+		VectorSizeType beta_;
+		typename PsimagLite::Vector<bool>::Type fermionSigns_;
+	};
+
+	ModelHelperLocal(const LeftRightSuperType& lrs)
+	    : lrs_(lrs),
 	      garbage_(ConcurrencyType::codeSectionParams.npthreads),
 	      seen_(ConcurrencyType::codeSectionParams.npthreads)
 	{
 		ConcurrencyType::mutexInit(&mutex_);
-
-		createBuffer();
-		createAlphaAndBeta();
 	}
 
 	~ModelHelperLocal()
@@ -196,19 +281,17 @@ public:
 		return *mc;
 	}
 
-	SizeType m() const { return m_; }
-
 	static bool isSu2() { return false; }
 
-	int size() const
+	int size(SizeType mm) const
 	{
-		int tmp = lrs_.super().partition(m_+1)-lrs_.super().partition(m_);
+		int tmp = lrs_.super().partition(mm + 1) - lrs_.super().partition(mm);
 		return tmp; //reflection_.size(tmp);
 	}
 
-	const QnType& quantumNumber() const
+	const QnType& quantumNumber(SizeType mm) const
 	{
-		return lrs_.super().qnEx(m_);
+		return lrs_.super().qnEx(mm);
 	}
 
 	//! Does matrixBlock= (AB), A belongs to pSprime and B
@@ -216,7 +299,8 @@ public:
 	void fastOpProdInter(SparseMatrixType const &A,
 	                     SparseMatrixType const &B,
 	                     SparseMatrixType &matrixBlock,
-	                     const LinkType& link) const
+	                     const LinkType& link,
+	                     const Aux& aux) const
 	{
 		RealType fermionSign = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 		        ? -1 : 1;
@@ -226,13 +310,13 @@ public:
 			LinkType link2 = link;
 			link2.value *= fermionSign;
 			link2.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
-			fastOpProdInter(B,A,matrixBlock,link2);
+			fastOpProdInter(B, A, matrixBlock, link2, aux);
 			return;
 		}
 
-		int m = m_;
+		SizeType m = aux.m();
 		int offset = lrs_.super().partition(m);
-		int total = lrs_.super().partition(m+1) - offset;
+		int total = lrs_.super().partition(m + 1) - offset;
 		int counter=0;
 		matrixBlock.resize(total,total);
 
@@ -240,18 +324,18 @@ public:
 		for (i=0;i<total;i++) {
 			// row i of the ordered product basis
 			matrixBlock.setRow(i,counter);
-			int alpha=alpha_[i];
-			int beta=beta_[i];
+			int alpha = aux.alpha(i);
+			int beta = aux.beta(i);
 
-			SparseElementType fsValue = (fermionSign < 0 && fermionSigns_[i])
+			SparseElementType fsValue = (fermionSign < 0 && aux.fermionSigns(i))
 			        ? -link.value
 			        : link.value;
 
 			for (int k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
 				int alphaPrime = A.getCol(k);
 				for (int kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
-					int betaPrime= B.getCol(kk);
-					int j = buffer_[alphaPrime][betaPrime];
+					int betaPrime = B.getCol(kk);
+					int j = aux.buffer(alphaPrime, betaPrime);
 					if (j<0) continue;
 					/* fermion signs note:
 					here the environ is applied first and has to "cross"
@@ -276,7 +360,8 @@ public:
 	                     const VectorSparseElementType& y,
 	                     const SparseMatrixType& A,
 	                     const SparseMatrixType& B,
-	                     const LinkType& link) const
+	                     const LinkType& link,
+	                     const Aux& aux) const
 	{
 		RealType fermionSign =  (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 		        ? -1 : 1;
@@ -290,14 +375,14 @@ public:
 		}
 
 		//! work only on partition m
-		int m = m_;
+		int m = aux.m();
 		int offset = lrs_.super().partition(m);
-		int total = lrs_.super().partition(m+1) - offset;
+		int total = lrs_.super().partition(m + 1) - offset;
 
 		for (int i=0;i<total;++i) {
 			// row i of the ordered product basis
-			int alpha=alpha_[i];
-			int beta=beta_[i];
+			int alpha = aux.alpha(i);
+			int beta = aux.beta(i);
 			SparseElementType sum = 0.0;
 			int startkk = B.getRowPtr(beta);
 			int endkk = B.getRowPtr(beta+1);
@@ -308,7 +393,7 @@ public:
 			 * the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 			 */
 
-			SparseElementType fsValue = (fermionSign < 0 && fermionSigns_[i])
+			SparseElementType fsValue = (fermionSign < 0 && aux.fermionSigns(i))
 			        ? -link.value
 			        : link.value;
 
@@ -316,7 +401,7 @@ public:
 				int alphaPrime = A.getCol(k);
 				SparseElementType tmp2 = A.getValue(k) *fsValue;
 				const typename PsimagLite::Vector<int>::Type& bufferTmp =
-				        buffer_[alphaPrime];
+				        aux.buffer(alphaPrime);
 
 				for (int kk=startkk;kk<endkk;++kk) {
 					int betaPrime= B.getCol(kk);
@@ -339,9 +424,10 @@ public:
 	// This is a performance critical function
 	// Has been changed to accomodate for reflection symmetry
 	void hamiltonianLeftProduct(VectorSparseElementType& x,
-	                            const VectorSparseElementType& y) const
+	                            const VectorSparseElementType& y,
+	                            const Aux& aux) const
 	{
-		int m = m_;
+		int m = aux.m();
 		int offset = lrs_.super().partition(m);
 		int i,k,alphaPrime;
 		int bs = lrs_.super().partition(m+1)-offset;
@@ -356,7 +442,7 @@ public:
 			// row i of the ordered product basis
 			for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
 				alphaPrime = hamiltonian.getCol(k);
-				int j = buffer_[alphaPrime][beta];
+				int j = aux.buffer(alphaPrime, beta);
 				if (j<0) continue;
 				sum += hamiltonian.getValue(k)*y[j];
 			}
@@ -372,9 +458,10 @@ public:
 	// Then, this function does x += H_m * y
 	// This is a performance critical function
 	void hamiltonianRightProduct(VectorSparseElementType& x,
-	                             const VectorSparseElementType& y) const
+	                             const VectorSparseElementType& y,
+	                             const Aux& aux) const
 	{
-		int m = m_;
+		int m = aux.m();
 		int offset = lrs_.super().partition(m);
 		int i,k;
 		int bs = lrs_.super().partition(m+1)-offset;
@@ -388,8 +475,8 @@ public:
 
 			// row i of the ordered product basis
 			for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
-				int j = buffer_[alpha][hamiltonian.getCol(k)];
-				if (j<0) continue;
+				int j = aux.buffer(alpha, hamiltonian.getCol(k));
+				if (j < 0) continue;
 				sum += hamiltonian.getValue(k)*y[j];
 			}
 
@@ -405,9 +492,10 @@ public:
 	// returns the m-th block (in the ordering of basis1) of H
 	// Note: USed only for debugging
 	void calcHamiltonianPart(SparseMatrixType &matrixBlock,
-	                         bool option) const
+	                         bool option,
+	                         const Aux& aux) const
 	{
-		int m  = m_;
+		int m  = aux.m();
 		SizeType offset = lrs_.super().partition(m);
 		int k,alphaPrime=0,betaPrime=0;
 		int bs = lrs_.super().partition(m+1)-offset;
@@ -469,42 +557,6 @@ public:
 
 private:
 
-	void createBuffer()
-	{
-		SizeType ns=lrs_.left().size();
-		SizeType ne=lrs_.right().size();
-		int offset = lrs_.super().partition(m_);
-		int total = lrs_.super().partition(m_+1) - offset;
-
-		typename PsimagLite::Vector<int>::Type  tmpBuffer(ne);
-		for (SizeType alphaPrime=0;alphaPrime<ns;alphaPrime++) {
-			for (SizeType betaPrime=0;betaPrime<ne;betaPrime++) {
-				tmpBuffer[betaPrime] = lrs_.super().
-				        permutationInverse(alphaPrime + betaPrime*ns) -offset;
-				if (tmpBuffer[betaPrime]>=total) tmpBuffer[betaPrime]= -1;
-			}
-			buffer_[alphaPrime]=tmpBuffer;
-		}
-	}
-
-	void createAlphaAndBeta()
-	{
-		SizeType ns=lrs_.left().size();
-		int offset = lrs_.super().partition(m_);
-		int total = lrs_.super().partition(m_+1) - offset;
-
-		PackIndicesType pack(ns);
-		alpha_.resize(total);
-		beta_.resize(total);
-		fermionSigns_.resize(total);
-		for (int i=0;i<total;i++) {
-			// row i of the ordered product basis
-			pack.unpack(alpha_[i],beta_[i],lrs_.super().permutation(i+offset));
-			int fs = lrs_.left().fermionicSign(alpha_[i],-1);
-			fermionSigns_[i] = (fs < 0) ? true : false;
-		}
-	}
-
 	SizeType threadNumberFromSelf(ConcurrencyType::PthreadtType threadSelf) const
 	{
 		ConcurrencyType::mutexLock(&mutex_);
@@ -520,11 +572,7 @@ private:
 		return threadPreNum;
 	}
 
-	int m_;
 	const LeftRightSuperType& lrs_;
-	typename PsimagLite::Vector<PsimagLite::Vector<int>::Type>::Type buffer_;
-	typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
-	typename PsimagLite::Vector<bool>::Type fermionSigns_;
 	mutable VectorVectorOperatorStorageType garbage_;
 	mutable typename PsimagLite::Vector<BlockType>::Type seen_;
 	mutable ConcurrencyType::MutexType mutex_;

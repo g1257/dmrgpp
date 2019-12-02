@@ -10,7 +10,6 @@
 #include "Geometry/Geometry.h"
 #include "CrsMatrix.h"
 #include "ModelHelperLocal.h"
-#include "ModelHelperSu2.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 #include "DmrgSolver.h" // only used for types

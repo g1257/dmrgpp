@@ -109,10 +109,11 @@ public:
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 
 	InitKronHamiltonian(const ModelType& model,
-	                    const HamiltonianConnectionType& hc)
+	                    const HamiltonianConnectionType& hc,
+	                    const typename ModelHelperType::Aux& aux)
 	    : BaseType(hc.modelHelper().leftRightSuper(),
-	               hc.modelHelper().m(),
-	               hc.modelHelper().quantumNumber(),
+	               aux.m(),
+	               hc.modelHelper().quantumNumber(aux.m()),
 	               model.params().denseSparseThreshold,
 	               !model.params().options.isSet("KronNoUseLowerPart")
 	               && !model.params().options.isSet("BatchedGemm")),

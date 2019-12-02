@@ -12,7 +12,7 @@ my $cppEach = 2;
 
 my @lanczos = ("LanczosSolver","ChebyshevSolver");
 my @matrixVector = ("MatrixVectorOnTheFly","MatrixVectorStored","MatrixVectorKron");
-my @modelHelpers = ("Local","Su2");
+my @modelHelpers = ("Local");
 my @vecWithOffsets = ("","s");
 my @complexOrReal = ("RealType","std::complex<RealType> ");
 

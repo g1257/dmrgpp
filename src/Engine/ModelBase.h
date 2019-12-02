@@ -351,6 +351,12 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total, 0);
 		VectorSizeType nzs(total, 0);
 
+		HamiltonianConnectionType hc(lrs,
+		                             modelCommon_.geometry(),
+		                             modelLinks_,
+		                             currentTime,
+		                             0);
+
 		for (SizeType m = 0; m < total; ++m) {
 			SizeType offset = lrs.super().partition(m);
 			assert(lrs.super().partition(m + 1) >= offset);
@@ -358,14 +364,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 			vvsm[m] = new VerySparseMatrixType(bs, bs);
 			VerySparseMatrixType& vsm = *(vvsm[m]);
-			HamiltonianConnectionType hc(m,
-			                             lrs,
-			                             modelCommon_.geometry(),
-			                             modelLinks_,
-			                             currentTime,
-			                             0);
 
-			hc.matrixBond(vsm);
+			typename HamiltonianConnectionType::AuxType aux(m, lrs);
+
+			hc.matrixBond(vsm, aux);
 			nzs[m] = vsm.nonZeros();
 			if (nzs[m] > 0) continue;
 			delete vvsm[m];
@@ -439,9 +441,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	void fullHamiltonian(SparseMatrixType& matrix,
-	                     const HamiltonianConnectionType& hc) const
+	                     const HamiltonianConnectionType& hc,
+	                     const typename ModelHelperType::Aux& aux) const
 	{
-		return modelCommon_.fullHamiltonian(matrix, hc);
+		return modelCommon_.fullHamiltonian(matrix, hc, aux);
 	}
 
 	// Return the size of the one-site Hilbert space basis for this model

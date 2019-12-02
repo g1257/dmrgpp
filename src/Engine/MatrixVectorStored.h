@@ -105,7 +105,8 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 
 	MatrixVectorStored(const ModelType& model,
-	                   const HamiltonianConnectionType& hc)
+	                   const HamiltonianConnectionType& hc,
+	                   const typename ModelHelperType::Aux& aux)
 	    : model_(model),
 	      matrixStored_(2),
 	      pointer_(0),
@@ -115,7 +116,7 @@ public:
 		const bool debugMatrix = options.isSet("debugmatrix");
 
 		matrixStored_[0].clear();
-		model.fullHamiltonian(matrixStored_[0], hc);
+		model.fullHamiltonian(matrixStored_[0], hc, aux);
 		assert(isHermitian(matrixStored_[0],true));
 		PsimagLite::OstringStream msg;
 		msg<<"fullHamiltonian has rank="<<matrixStored_[0].rows();

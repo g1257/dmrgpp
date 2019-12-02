@@ -283,13 +283,13 @@ private:
 	                       SizeType p)
 	{
 		RealType fakeTime = 0;
-		typename ModelType::HamiltonianConnectionType hc(p,
-		                                                 BaseType::lrs(),
+		typename ModelHelperType::Aux aux(p, BaseType::lrs());
+		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
 		                                                 BaseType::model().geometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 fakeTime,
 		                                                 0);
-		typename LanczosSolverType::MatrixType h(BaseType::model(), hc);
+		typename LanczosSolverType::MatrixType h(BaseType::model(), hc, aux);
 		paramsForSolver_.lotaMemory = true;
 		LanczosSolverType lanczosSolver(h,paramsForSolver_);
 

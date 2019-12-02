@@ -803,14 +803,15 @@ private:
 	                   SizeType i0) const
 	{
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-		typename ModelType::HamiltonianConnectionType hc(p,
-		                                                 BaseType::lrs(),
+		typename ModelHelperType::Aux aux(p, BaseType::lrs());
+		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
 		                                                 BaseType::model().geometry(),
 		                                                 BaseType::ModelType::modelLinks(),
 		                                                 this->common().aoe().time(),
 		                                                 0);
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		                                                     hc);
+		                                                     hc,
+		                                                     aux);
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);

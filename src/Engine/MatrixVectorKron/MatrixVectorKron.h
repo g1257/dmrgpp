@@ -110,16 +110,17 @@ public:
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
 	MatrixVectorKron(const ModelType& model,
-	                 const HamiltonianConnectionType& hc)
+	                 const HamiltonianConnectionType& hc,
+	                 const typename ModelHelperType::Aux& aux)
 	    : params_(model.params()),
-	      initKron_(model, hc),
+	      initKron_(model, hc, aux),
 	      kronMatrix_(initKron_, "Hamiltonian"),
 	      time_(0, 0)
 	{
 		int maxMatrixRankStored = model.params().maxMatrixRankStored;
-		if (hc.modelHelper().size() > maxMatrixRankStored) return;
+		if (hc.modelHelper().size(aux.m()) > maxMatrixRankStored) return;
 
-		model.fullHamiltonian(matrixStored_, hc);
+		model.fullHamiltonian(matrixStored_, hc, aux);
 		assert(isHermitian(matrixStored_,true));
 
 		checkKron();

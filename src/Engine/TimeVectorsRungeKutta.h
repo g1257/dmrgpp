@@ -186,8 +186,9 @@ private:
 			: E0_(E0),
 		      timeDirection_(timeDirection),
 			  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
-		      hc_(p_, lrs, model.geometry(), ModelType::modelLinks(), currentTime, 0),
-			  lanczosHelper_(model, hc_)
+		      aux_(p_, lrs),
+		      hc_(lrs, model.geometry(), ModelType::modelLinks(), currentTime, 0),
+			  lanczosHelper_(model, hc_, aux_)
 		{}
 
 		TargetVectorType operator()(const RealType&,const TargetVectorType& y) const
@@ -207,6 +208,7 @@ private:
 		RealType E0_;
 		RealType timeDirection_;
 		SizeType p_;
+		typename ModelHelperType::Aux aux_;
 		typename ModelType::HamiltonianConnectionType hc_;
 		typename LanczosSolverType::MatrixType lanczosHelper_;
 	}; // FunctionForRungeKutta

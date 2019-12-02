@@ -43,8 +43,7 @@ public:
 	}; // struct ParamsForKroneckerDumper
 
 	KroneckerDumper(const ParamsForKroneckerDumper* p,
-	                const LeftRightSuperType& lrs,
-	                SizeType m)
+	                const LeftRightSuperType& lrs)
 	    : enabled_(p && p->enabled),pairCount_(0),disable_(false)
 	{
 		if (!enabled_) return;
@@ -75,8 +74,8 @@ public:
 
 		fout_<<"SuperBasisPermutation\n";
 		fout_<<lrs.super().permutationVector();
-		QnType qtarget = lrs.super().qnEx(m);
-		fout_<<qtarget<<"\n";
+		//QnType qtarget = lrs.super().qnEx(m);
+		//fout_<<qtarget<<"\n";
 
 		signs_ = lrs.left().signs();
 		counter_++;

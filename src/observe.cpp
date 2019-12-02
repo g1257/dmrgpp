@@ -85,8 +85,7 @@ void mainLoop0(InputNgType::Readable& io,
 	bool su2 = (tmp > 0);
 
 	if (su2) {
-		mainLoop1<GeometryType, ModelHelperSu2, MySparseMatrix>
-		        (geometry, io, dmrgSolverParams, list);
+		err("SU(2) no longer supported\n");
 	} else {
 		mainLoop1<GeometryType, ModelHelperLocal, MySparseMatrix>
 		        (geometry, io, dmrgSolverParams, list);

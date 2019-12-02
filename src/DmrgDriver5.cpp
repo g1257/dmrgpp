@@ -10,7 +10,7 @@ typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Rea
 
 typedef Dmrg::MatrixVectorStored<
  Dmrg::ModelBase<
-  Dmrg::ModelHelperSu2<
+  Dmrg::ModelHelperLocal<
    Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance10Type> >  >,Dmrg::Basis<SparseMatrixInstance10Type> >
   >,
   ParametersDmrgSolverType,
@@ -19,7 +19,7 @@ typedef Dmrg::MatrixVectorStored<
  >
 > MatrixVector10Type;
 
-typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance10Type::RealType>,
+typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance10Type::RealType>,
 	MatrixVector10Type, MatrixVector10Type::VectorType> LanczosSolver10Type;
 
 template void mainLoop4<LanczosSolver10Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >
@@ -34,7 +34,7 @@ typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Rea
 
 typedef Dmrg::MatrixVectorKron<
  Dmrg::ModelBase<
-  Dmrg::ModelHelperSu2<
+  Dmrg::ModelHelperLocal<
    Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance11Type> >  >,Dmrg::Basis<SparseMatrixInstance11Type> >
   >,
   ParametersDmrgSolverType,
@@ -43,7 +43,7 @@ typedef Dmrg::MatrixVectorKron<
  >
 > MatrixVector11Type;
 
-typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance11Type::RealType>,
+typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance11Type::RealType>,
 	MatrixVector11Type, MatrixVector11Type::VectorType> LanczosSolver11Type;
 
 template void mainLoop4<LanczosSolver11Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >

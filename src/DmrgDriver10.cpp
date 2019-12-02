@@ -5,12 +5,12 @@
 #include "DmrgDriver1.h"
 
 
-typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance20Type;
-typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance20Type;
+typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance20Type;
+typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance20Type;
 
 typedef Dmrg::MatrixVectorKron<
  Dmrg::ModelBase<
-  Dmrg::ModelHelperSu2<
+  Dmrg::ModelHelperLocal<
    Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance20Type> >  >,Dmrg::Basis<SparseMatrixInstance20Type> >
   >,
   ParametersDmrgSolverType,
@@ -22,19 +22,19 @@ typedef Dmrg::MatrixVectorKron<
 typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance20Type::RealType>,
 	MatrixVector20Type, MatrixVector20Type::VectorType> LanczosSolver20Type;
 
-template void mainLoop4<LanczosSolver20Type,Dmrg::VectorWithOffset<RealType, Dmrg::Qn> >
+template void mainLoop4<LanczosSolver20Type,Dmrg::VectorWithOffset<std::complex<RealType> , Dmrg::Qn> >
 (LanczosSolver20Type::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&);
 
 
-typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance21Type;
-typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance21Type;
+typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance21Type;
+typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance21Type;
 
 typedef Dmrg::MatrixVectorOnTheFly<
  Dmrg::ModelBase<
-  Dmrg::ModelHelperSu2<
+  Dmrg::ModelHelperLocal<
    Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance21Type> >  >,Dmrg::Basis<SparseMatrixInstance21Type> >
   >,
   ParametersDmrgSolverType,
@@ -46,7 +46,7 @@ typedef Dmrg::MatrixVectorOnTheFly<
 typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance21Type::RealType>,
 	MatrixVector21Type, MatrixVector21Type::VectorType> LanczosSolver21Type;
 
-template void mainLoop4<LanczosSolver21Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >
+template void mainLoop4<LanczosSolver21Type,Dmrg::VectorWithOffsets<std::complex<RealType> , Dmrg::Qn> >
 (LanczosSolver21Type::MatrixType::ModelType::GeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,

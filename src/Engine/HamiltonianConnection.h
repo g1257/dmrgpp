@@ -118,18 +118,18 @@ public:
 	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
 	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
 	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
+	typedef typename ModelHelperType::Aux AuxType;
 
-	HamiltonianConnection(SizeType m,
-	                      const LeftRightSuperType& lrs,
+	HamiltonianConnection(const LeftRightSuperType& lrs,
 	                      const GeometryType& geometry,
 	                      const ModelLinksType& lpb,
 	                      RealType targetTime,
 	                      const ParamsForKroneckerDumperType* pKroneckerDumper)
-	    : modelHelper_(m, lrs),
+	    : modelHelper_(lrs),
 	      superGeometry_(geometry),
 	      modelLinks_(lpb),
 	      targetTime_(targetTime),
-	      kroneckerDumper_(pKroneckerDumper,lrs,m),
+	      kroneckerDumper_(pKroneckerDumper, lrs),
 	      progress_("HamiltonianConnection"),
 	      systemBlock_(modelHelper_.leftRightSuper().left().block()),
 	      envBlock_(modelHelper_.leftRightSuper().right().block()),
@@ -188,7 +188,7 @@ public:
 		progress_.printline(msg2,std::cout);
 	}
 
-	void matrixBond(VerySparseMatrixType& matrix) const
+	void matrixBond(VerySparseMatrixType& matrix, const AuxType& aux) const
 	{
 		SizeType matrixRank = matrix.rows();
 		VerySparseMatrixType matrix2(matrixRank, matrixRank);
@@ -202,7 +202,7 @@ public:
 				OperatorStorageType const* A = 0;
 				OperatorStorageType const* B = 0;
 				const LinkType& link2 = getKron(&A, &B, x++);
-				modelHelper_.fastOpProdInter(A->getCRS(), B->getCRS(), mBlock, link2);
+				modelHelper_.fastOpProdInter(A->getCRS(), B->getCRS(), mBlock, link2, aux);
 
 				matrixBlock += mBlock;
 			}
