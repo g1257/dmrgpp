@@ -370,7 +370,7 @@ public:
 			LinkType link2 = link;
 			link2.value *= fermionSign;
 			link2.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
-			fastOpProdInter(x,y,B,A,link2);
+			fastOpProdInter(x, y, B, A, link2, aux);
 			return;
 		}
 

@@ -17,15 +17,18 @@ class ParallelHamiltonianConnection {
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename HamiltonianConnectionType::VectorType VectorType;
 	typedef typename HamiltonianConnectionType::LinkType LinkType;
+	typedef typename ModelHelperType::Aux AuxType;
 
 public:
 
 	ParallelHamiltonianConnection(VectorType& x,
 	                              const VectorType& y,
-	                              const HamiltonianConnectionType& hc)
+	                              const HamiltonianConnectionType& hc,
+	                              const AuxType& aux)
 	    : x_(x),
 	      y_(y),
 	      hc_(hc),
+	      aux_(aux),
 	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::codeSectionParams.npthreads))
 	{
 		hc_.modelHelper().clearThreadSelves();
@@ -37,7 +40,7 @@ public:
 			xtemp_[threadNum].resize(x_.size(),0.0);
 
 		if (taskNumber == 0) {
-			hc_.modelHelper().hamiltonianLeftProduct(xtemp_[threadNum], y_);
+			hc_.modelHelper().hamiltonianLeftProduct(xtemp_[threadNum], y_, aux_);
 			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
 			        left().hamiltonian().getCRS();
 			hc_.kroneckerDumper().push(true, hamiltonian, y_);
@@ -45,7 +48,7 @@ public:
 		}
 
 		if (taskNumber == 1) {
-			hc_.modelHelper().hamiltonianRightProduct(xtemp_[threadNum],y_);
+			hc_.modelHelper().hamiltonianRightProduct(xtemp_[threadNum], y_, aux_);
 			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
 			        right().hamiltonian().getCRS();
 			hc_.kroneckerDumper().push(false, hamiltonian, y_);
@@ -58,7 +61,13 @@ public:
 		OperatorStorageType const* A = 0;
 		OperatorStorageType const* B = 0;
 		const LinkType& link2 = hc_.getKron(&A, &B, taskNumber);
-		hc_.modelHelper().fastOpProdInter(xtemp_[threadNum], y_, A->getCRS(), B->getCRS(), link2);
+		hc_.modelHelper().fastOpProdInter(xtemp_[threadNum],
+		                                  y_,
+		                                  A->getCRS(),
+		                                  B->getCRS(),
+		                                  link2,
+		                                  aux_);
+
 		hc_.kroneckerDumper().push(A->getCRS(),
 		                           B->getCRS(),
 		                           link2.value,
@@ -97,6 +106,7 @@ private:
 	VectorType& x_;
 	const VectorType& y_;
 	const HamiltonianConnectionType& hc_;
+	const AuxType& aux_;
 	typename PsimagLite::Vector<VectorType>::Type xtemp_;
 };
 }

@@ -429,12 +429,13 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		 */
 	void matrixVectorProduct(VectorType& x,
 	                         const VectorType& y,
-	                         const HamiltonianConnectionType& hc) const
+	                         const HamiltonianConnectionType& hc,
+	                         const typename ModelHelperType::Aux& aux) const
 	{
 		typedef PsimagLite::Parallelizer<ParallelHamConnectionType> ParallelizerType;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
 
-		ParallelHamConnectionType phc(x, y, hc);
+		ParallelHamConnectionType phc(x, y, hc, aux);
 		parallelConnections.loopCreate(phc);
 
 		phc.sync();

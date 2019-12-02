@@ -100,19 +100,21 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
+	typedef typename ModelHelperType::Aux AuxType;
 
 	MatrixVectorOnTheFly(const ModelType& model,
-	                     const HamiltonianConnectionType& hc)
-	    : model_(model), hc_(hc)
+	                     const HamiltonianConnectionType& hc,
+	                     const AuxType& aux)
+	    : model_(model), hc_(hc), aux_(aux)
 	{
 		int maxMatrixRankStored = model.params().maxMatrixRankStored;
-		if (hc.modelHelper().size() > maxMatrixRankStored) return;
+		if (hc.modelHelper().size(aux_.m()) > maxMatrixRankStored) return;
 
-		model.fullHamiltonian(matrixStored_, hc);
-		assert(isHermitian(matrixStored_,true));
+		model.fullHamiltonian(matrixStored_, hc, aux_);
+		assert(isHermitian(matrixStored_, true));
 	}
 
-	SizeType rows() const { return hc_.modelHelper().size(); }
+	SizeType rows() const { return hc_.modelHelper().size(aux_.m()); }
 
 	template<typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
@@ -120,7 +122,7 @@ public:
 		if (matrixStored_.rows() > 0)
 			matrixStored_.matrixVectorProduct(x,y);
 		else
-			model_.matrixVectorProduct(x, y, hc_);
+			model_.matrixVectorProduct(x, y, hc_, aux_);
 	}
 
 	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
@@ -138,6 +140,7 @@ private:
 
 	const ModelType& model_;
 	const HamiltonianConnectionType& hc_;
+	const AuxType& aux_;
 	SparseMatrixType matrixStored_;
 }; // class MatrixVectorOnTheFly
 } // namespace Dmrg

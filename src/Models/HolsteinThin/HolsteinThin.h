@@ -177,8 +177,7 @@ public:
 	                                const BlockType& block,
 	                                RealType) const
 	{
-		SizeType n = block.size();
-		assert(n == 1);
+		assert(block.size() == 1);
 		const SizeType actualSite = block[0];
 		SiteType kindOfSite = determineKindOfSiteFromSite(actualSite);
 
