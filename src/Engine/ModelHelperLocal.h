@@ -452,6 +452,14 @@ public:
 		}
 
 		matrixBlock.setRow(lrs_.super().partition(m+1)-offset,counter);
+
+#ifndef NDEBUG
+		if (!isHermitian(matrixBlock)) {
+			std::cerr<<matrixBlock.toDense();
+			PsimagLite::String lOrR = (option) ? "Left" : "Right";
+			err(lOrR + " Hamiltonian Matrix not Hermitian\n");
+		}
+#endif
 	}
 
 	const LeftRightSuperType& leftRightSuper() const

@@ -19,7 +19,7 @@ gt1:dir0:Connectors=[-1.0];
 gt2:DegreesOfFreedom=1;
 gt2:GeometryKind="chain";
 gt2:GeometryOptions="ConstantValues";
-gt2:dir0:Connectors=[3.0];
+gt2:dir0:Connectors=[0.0];
 
 #Fermion-Phonon
 gt3:DegreesOfFreedom=1;
