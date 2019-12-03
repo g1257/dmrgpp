@@ -236,8 +236,9 @@ public:
 		// one site basis is assumed ordered
 
 		operatorsPerSite_.clear();
-		for (SizeType i=0;i<block.size();i++)
-			operatorsPerSite_.push_back(SizeType(ops.size()/block.size()));
+		for (SizeType i = 0; i < block.size(); ++i)
+			operatorsPerSite_.push_back(ops.size()/block.size());
+
 		assert(operatorsPerSite_.size() > 0);
 	}
 

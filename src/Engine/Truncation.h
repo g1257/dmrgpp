@@ -282,8 +282,7 @@ private:
 	{
 		bool expandSys = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
-		SizeType site = 0; // FIXME for model Immm
-		size_t mostRecent = lrs_.left().operatorsPerSite(site)*geometry_.maxConnections();
+		size_t mostRecent = maxOpsPerSiteLeft()*geometry_.maxConnections();
 		size_t numOfOp = basis.numberOfOperators();
 		PairSizeSizeType startEnd(0, numOfOp);
 		if (startEnd.second > mostRecent) {
@@ -331,6 +330,19 @@ private:
 
 		delete lrs;
 		lrs = 0;
+	}
+
+	// there is no right
+	SizeType maxOpsPerSiteLeft() const
+	{
+		const SizeType n = lrs_.left().block().size();
+		SizeType max = lrs_.left().operatorsPerSite(0);
+		for (SizeType i = 1; i < n; ++i) {
+			if (max < lrs_.left().operatorsPerSite(i))
+				max = lrs_.left().operatorsPerSite(i);
+		}
+
+		return max;
 	}
 
 	void updateKeptStates(SizeType& keptStates,
