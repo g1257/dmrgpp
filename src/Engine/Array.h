@@ -22,7 +22,7 @@ public:
 
 	Array(const Array& other) : size_(0), data_(0)
 	{
-		assert(other.data_);
+		assert(other.data_ || other.size_ == 0);
 		clear();
 		allocate(other.size_);
 		memcpy(data_, other.data_, size_*sizeof(T));
@@ -41,7 +41,7 @@ public:
 
 	Array& operator=(const Array& other)
 	{
-		assert(other.data_);
+		assert(other.data_ || other.size_ == 0);
 		clear();
 		allocate(other.size_);
 		memcpy(data_, other.data_, size_*sizeof(T));
