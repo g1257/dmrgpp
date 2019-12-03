@@ -5,21 +5,23 @@ NumberOfTerms=4;
 
 #Hopping term Fermionic
 gt0:DegreesOfFreedom=1;
-gt0:GeometryKind="chain";
+gt0:GeometryKind="ladder";
 gt0:GeometryOptions="ConstantValues";
+gt0:LadderLeg=2;
 gt0:dir0:Connectors=[-1.0];
+gt0:dir1:Connectors=[0.0];
 
 #Hopping term Bosonic
 gt1:DegreesOfFreedom=1;
 gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
-gt1:dir0:Connectors=[-1.0];
+gt1:dir0:Connectors=[0.0];
 
 #Phonon-Fermion
 gt2:DegreesOfFreedom=1;
 gt2:GeometryKind="chain";
 gt2:GeometryOptions="ConstantValues";
-gt2:dir0:Connectors=[0.0];
+gt2:dir0:Connectors=[3.0];
 
 #Fermion-Phonon
 gt3:DegreesOfFreedom=1;

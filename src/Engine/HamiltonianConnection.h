@@ -335,9 +335,8 @@ private:
 				if (oneLink.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 					link2.value *= (-1.0);
 
-				char saved = oneLink.mods.first;
-				link2.mods.first = oneLink.mods.second;
-				link2.mods.second = saved;
+				link2.mods.first = conjugateChar(link2.mods.first);
+				link2.mods.second = conjugateChar(link2.mods.second);
 
 				++totalOne;
 				lps_.push_back(link2);
@@ -346,6 +345,14 @@ private:
 		}
 
 		return totalOne;
+	}
+
+	static char conjugateChar(char c)
+	{
+		if (c != 'N' && c != 'C')
+			err("conjugateChar\n");
+
+		return (c == 'N') ? 'C' : 'N';
 	}
 
 	bool connectionIsHermitian(const LinkType& link) const
