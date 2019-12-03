@@ -400,24 +400,23 @@ public:
 
 	//! removes the indices contained in removedIndices and
 	//! transforms this basis by transform
-	//! eigs cannot be const because su(2) needs to sort them due to being obtained in blocks
 	template<typename SolverParametersType>
 	void changeBasis(VectorSizeType& removedIndices,
-	                 typename PsimagLite::Vector<RealType>::Type& eigs,
+	                 const VectorSizeType& perm,
 	                 SizeType kept,
 	                 const SolverParametersType& solverParams)
 	{
 		removedIndices.clear();
 		if (useSu2Symmetry_)
-			symmSu2_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
+			err("SU(2) symmetry no longer supported\n");
 		else
-			symmLocal_.calcRemovedIndices(removedIndices,eigs,kept,solverParams);
+			symmLocal_.calcRemovedIndices(removedIndices, perm, kept, solverParams);
 
 		if (removedIndices.size()==0) return;
 
-		VectorSizeType perm(removedIndices.size());
+		VectorSizeType unusedPerm(removedIndices.size());
 		PsimagLite::Sort<VectorSizeType > sort;
-		sort.sort(removedIndices,perm);
+		sort.sort(removedIndices, unusedPerm);
 	}
 
 	RealType truncateBasis(const typename PsimagLite::Vector<RealType>::Type& eigs,

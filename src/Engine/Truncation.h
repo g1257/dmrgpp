@@ -261,6 +261,10 @@ private:
 
 		dmS->diag(cache.eigs,'V');
 
+		typename PsimagLite::Vector<SizeType>::Type perm(cache.eigs.size());
+		PsimagLite::Sort<VectorRealType> sort;
+		sort.sort(cache.eigs, perm);
+
 		updateKeptStates(keptStates, cache.eigs);
 
 		cache.transform = dmS->operator()();
@@ -272,7 +276,7 @@ private:
 		}
 
 		rSprime = pBasis;
-		rSprime.changeBasis(cache.removedIndices,cache.eigs,keptStates,parameters_);
+		rSprime.changeBasis(cache.removedIndices, perm, keptStates, parameters_);
 	}
 
 	void truncateBasis(BasisWithOperatorsType& rPrime,
@@ -346,19 +350,15 @@ private:
 	}
 
 	void updateKeptStates(SizeType& keptStates,
-	                      const VectorRealType& eigs2)
+	                      const VectorRealType& eigs)
 	{
-		VectorRealType eigs = eigs2;
-		typename PsimagLite::Vector<SizeType>::Type perm(eigs.size());
-		PsimagLite::Sort<VectorRealType> sort;
-		sort.sort(eigs,perm);
 		dumpEigs(eigs);
 
-		SizeType newKeptStates = computeKeptStates(keptStates,eigs);
+		SizeType newKeptStates = computeKeptStates(keptStates, eigs);
 		SizeType statesToRemove = 0;
 		if (eigs.size()>=newKeptStates)
-			statesToRemove = eigs.size()-newKeptStates;
-		RealType discWeight = sumUpTo(eigs,statesToRemove);
+			statesToRemove = eigs.size() - newKeptStates;
+		RealType discWeight = sumUpTo(eigs, statesToRemove);
 		PsimagLite::OstringStream msg;
 		if (newKeptStates != keptStates) {
 			// we report that the "m" value has been changed and...

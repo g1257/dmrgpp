@@ -100,26 +100,20 @@ public:
 
 	template<typename SolverParametersType>
 	void calcRemovedIndices(VectorSizeType& removedIndices,
-	                        typename PsimagLite::Vector<RealType>::Type& eigs,
+	                        const VectorSizeType& perm,
 	                        SizeType kept,
 	                        const SolverParametersType&) const
 	{
-		if (eigs.size()<=kept) return;
-		// we sort the eigenvalues
-		// note: eigenvalues are not ordered because DensityMatrix is
-		// diagonalized in blocks
-		VectorSizeType perm(eigs.size());
-		PsimagLite::Sort<typename PsimagLite::Vector<RealType>::Type > sort;
-		sort.sort(eigs,perm);
-		VectorSizeType permInverse(perm.size());
-		for (SizeType i=0;i<permInverse.size();i++) permInverse[perm[i]]=i;
+		const SizeType permSize = perm.size();
+		if (permSize <= kept) return;
 
-		SizeType target = eigs.size()-kept;
+		SizeType target = permSize - kept;
 
 		removedIndices.clear();
-		for (SizeType i=0;i<target;i++) {
-			if (removedIndices.size()>=target) break;
-			if (PsimagLite::indexOrMinusOne(removedIndices,perm[i])>=0) continue;
+		for (SizeType i = 0; i < target; ++i) {
+			if (removedIndices.size() >= target) break;
+			if (PsimagLite::indexOrMinusOne(removedIndices, perm[i]) >= 0)
+				continue;
 			removedIndices.push_back(perm[i]);
 		}
 	}
