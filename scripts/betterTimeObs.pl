@@ -5,31 +5,38 @@ use warnings;
 use utf8;
 use timeObservablesInSitu;
 
-my ($file, $label, $nsites, $tau) = @ARGV;
-defined($nsites) or die "USAGE: $0 file label numberOfSites [tau]\n";
-defined($tau) or $tau = 0.1;
+my ($file, $label) = @ARGV;
+defined($label) or die "USAGE: $0 file label\n";
 
-my @matrix;
-my $times = 0;
-for (my $site = 0; $site < $nsites; ++$site) {
+my @a;
+my %times;
+open(FIN, "<", $file) or die "$0: Cannot open $file : $!\n";
+while (<FIN>) {
+	next unless /\Q$label/;
+	next if (/CmdLine/);
 
-	open(FIN, "<", $file) or die "$0: Cannot open $file : $!\n";
-	my @a = timeObservablesInSitu::getMatrix($site, $label, *FIN, $tau);
-	$matrix[$site] = \@a;
-	$_ = scalar(@a);
-	$times = $_ if ($_ > $times);
-	close(FIN);
+	my @tmp = split;
+	next if (scalar(@tmp) < 5);
+
+	my $site = $tmp[0];
+	my $value = realPartOf($tmp[1]);
+	my $time = $tmp[2];
+	my $superdensity = realPartOf($tmp[4]);
+
+	$a[$site]{"$time"} = {"value" => $value, "superdensity" => $superdensity};
+	$times{"$time"} = 1;
 }
 
-print STDERR "$0: Found $times times in $file\n";
+close(FIN);
 
-for (my $t = 0; $t < $times; $t += 1) {
-	my $time = $tau*$t;
+my $nsites = scalar(@a);
+print STDERR "$0: Found $nsites sites in $file\n";
+
+for my $time (sort keys %times) {
 	for (my $site = 0; $site < $nsites; ++$site) {
-		my $a = $matrix[$site];
-		my $pair = $a->[$t];
+		my $pair = $a[$site]{"$time"};
 		if (!defined($pair)) {
-	#		print "$time $site -100 -100\n";
+			print "$time $site -100 -100\n";
 			next;
 		}
 
@@ -37,4 +44,12 @@ for (my $t = 0; $t < $times; $t += 1) {
 	}
 }
 
+sub realPartOf
+{
+	my ($x) = @_;
+	$_ = $x;
+	s/\,.*$//;
+	s/\(//;
+	return $_;
+}
 
