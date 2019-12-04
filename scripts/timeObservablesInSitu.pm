@@ -5,27 +5,35 @@ use warnings;
 
 package timeObservablesInSitu;
 
-sub main
+sub getMatrix 
 {
-	my ($site, $label, $fin, $fout)=@_;
-	defined($fout) or return;
+	my ($site, $label, $fin, $tau)=@_;
+	defined($tau) or return;
 
 	my $counter=0;
-	print $fout "#site= $site\n";
-	print $fout "#label=$label\n";
 
+	while (<$fin>) {
+
+		last if (/^ALL OPERATORS/);
+	}
+
+	my @a;
 	while (<$fin>) {
 		chomp;
 		next unless /\Q$label/;
+
 		if (/^${site} /) {
 			my @temp = split;
 			(scalar(@temp) >= 5) or next;
 			my $value = procValue($temp[1]);
-			my $time = $temp[2];
+			my $time = int($temp[2]/$tau);
 			my $superdensity = procValue($temp[4]);
-			print $fout "$time  $value $superdensity\n";
+			my $h = { "value" => $value, "superdensity" => $superdensity};
+			$a[$time] = $h;
 		}
 	}
+
+	return @a;
 }
 
 sub load
