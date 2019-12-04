@@ -154,7 +154,7 @@ flavor production = (
 
 flavor debug = (
 < group basics
-STRIP_COMMAND = true
+STRIP_COMMAND = gdb-add-index
 < compilerCPPOptions Symbols3
 < compilerCPPOptions Werror
 )
