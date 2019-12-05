@@ -3,7 +3,6 @@
 use strict;
 use warnings;
 use utf8;
-use timeObservablesInSitu;
 
 my ($file, $label) = @ARGV;
 defined($label) or die "USAGE: $0 file label\n";
