@@ -202,10 +202,6 @@ public:
 		evolveInternal(Eg,direction,block1,loopNumber);
 		SizeType numberOfSites = this->lrs().super().block().size();
 
-		// corner case only for TargetingAncilla
-		const OptionsType& options = this->model().params().options;
-		if (!options.isSet("TargetingAncilla"))
-			return;
 		if (site > 1 && site < numberOfSites-2)
 			return;
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
