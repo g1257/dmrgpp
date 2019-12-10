@@ -18,10 +18,9 @@ SolverOptions=twositedmrg
 Version=247b335fe1542909b90be8647456bfd8fd56191c
 OutputFile=data3510
 InfiniteLoopKeptStates=64
-FiniteLoops 5
-31 1000 0 -62 1000 0 
-62 1000 0 -62 1000 0
-62 1000 0
+FiniteLoops 3
+31 200 0 -62 300 0 
+62 400 0
 
 TargetSzPlusConst=32
 TruncationTolerance=1e-10
