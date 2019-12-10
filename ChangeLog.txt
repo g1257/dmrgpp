@@ -1,3 +1,17 @@
+2019-12-09 version 2.66
+
+* GetBraOrKet: Quantum sector before excited level
+
+* LanczosSolver: early exit has new algorithm for excited states
+
+* OneOperatorSpec has generalization
+
+* PredicateAwesome: bug fix and new features
+
+* CrsMatrix: performance improvements by Ed
+
+* Ainur supports complex numbers now
+
 2019-11-08 version 2.64
 
 * libpsimaglite can now be built without HDF5
