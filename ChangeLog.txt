@@ -1,3 +1,53 @@
+2019-12-09 Version 5.66
+
+User facing
+
+* 3rd number of the finite loop triplet: only one bit
+of bit 1, bit 2, and bit 3 may be set
+
+* TSPApplyTo= input line to deal with Sectors and Excited
+in NGSTs.
+
+Engine changes
+
+* Changes by Ed due to changes in CrsMatrix regarding performance
+
+* Diagonalization: Quantum symmetry sector before excited level.
+
+* TargetingGroundState: The guess for diagonalization sums
+over all excited states.
+
+* Site-dependent Hilbert spaces (SDHS): only ground state
+and in-situ measurements for now. See HolsteinThin model.
+
+* ModelHelperLocal and HamiltonianConnection no
+longer depend on symmetry sector
+
+* Eigs of density matrix sorted only once (thanks to Alberto)
+
+New features and models:
+
+* HubbardAncilla supports hot mode
+
+* Braket actions for observe; only for 4-points for now
+
+* HolsteinThin to showcase site dependent Hilbert spaces (SDHS)
+
+Scripts
+
+* Work by Pontus on procOmegas for Excited
+
+* betterTimeObs.pl script by Bradraj
+
+TestSuite
+
+* 5800.ain with complex numbers and Ainur
+
+* manyOmegas supports Ainur inputs
+
+* procOmegas supports Ainur inputs
+
+
 2019-11-08 Version 5.64
 
 * MultiExcited implemented
