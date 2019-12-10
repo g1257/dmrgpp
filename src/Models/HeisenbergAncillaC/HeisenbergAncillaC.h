@@ -315,10 +315,10 @@ protected:
 		auto modifierTerm0 = [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5;};
 		spsm.push(splus0, 'N', splus0, 'C', 2, -1, 2, modifierTerm0);
 
-		OpForLinkType splus1("splus", 1, 1);
-
-		if (hot_)
+		if (hot_) {
+			OpForLinkType splus1("splus", 1, 1);
 			spsm.push(splus1, 'N', splus1, 'C', 2, -1, 2, modifierTerm0);
+		}
 
 		auto modifierTerm1 = [isSu2](SparseElementType& value) {if (isSu2) value = -value;};
 
@@ -328,6 +328,7 @@ protected:
 		szsz.push(sz0, 'N', sz0, 'C', 2, 0.5, 1, modifierTerm1);
 
 		if (hot_) {
+			OpForLinkType splus1("splus", 1, 1);
 			OpForLinkType sz1("sz", 1, 1);
 			if (isSu2)
 				szsz.push(splus1, 'N', splus1, 'C', 2, 0.5, 1, modifierTerm1);
