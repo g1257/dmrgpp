@@ -52,5 +52,4 @@ OperatorExpression=c'
 Threads=4
 #ci dmrg arguments="<P0|nup|P0>"
 
-#ci getTimeObservablesInSitu 25 <P0|nup|P0>
-#ci getTimeObservablesInSitu 18 <P0|nup|P0>
+#ci getTimeObservablesInSitu <P0|nup|P0>

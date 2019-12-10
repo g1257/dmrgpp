@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use utf8;
 use lib "../../scripts";
-use timeObservablesInSitu;
 use EnergyAncillaInSitu;
 use CollectBrakets;
 use Metts;
@@ -35,22 +34,11 @@ sub runTimeInSituObs
 			next;
 		}
 
-		my @temp = split(/ /, $what->[$i]);
-		(scalar(@temp) == 2) or die "$0: FATAL annotation ".$what->[$i]."\n";
-		my ($site, $label) = @temp;
-		my $fin;
-		open($fin, "<", $file) or die "$0: Could not open $file : $!\n";
-		my $fout;
-		my $foutname = "timeObservablesInSitu${n}_$i.txt";
-		if (!open($fout, ">", "$foutname")) {
-			close($fin);
-			die "$0: Could not write to $foutname: $!\n";
-		}
+		my $label = $what->[$i];
 
-		timeObservablesInSitu::main($site, $label, $fin, $fout);
+		my $cmd = "perl ../../scripts/betterTimeObs.pl $file $label > timeObservablesInSitu${n}_$i.txt";
+		system($cmd);
 
-		close($fin);
-		close($fout);
 	}
 }
 

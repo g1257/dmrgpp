@@ -7,6 +7,8 @@ use utf8;
 my ($file, $label) = @ARGV;
 defined($label) or die "USAGE: $0 file label\n";
 
+print "#CmdLine: $file $label\n";
+
 my @a;
 my %times;
 open(FIN, "<", $file) or die "$0: Cannot open $file : $!\n";
