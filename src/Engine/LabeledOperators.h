@@ -172,6 +172,8 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
+	PsimagLite::String modelName() const { return model_; }
+
 private:
 
 	void pushIdentity(LabelType& label, SizeType nrow)

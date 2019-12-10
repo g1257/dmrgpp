@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ModelCommon.h"
 #include "QnHash.h"
 #include "ParallelHamiltonianConnection.h"
+#include "Braket.h"
 
 namespace Dmrg {
 
@@ -118,6 +119,9 @@ public:
 	typedef InputValidatorType_ InputValidatorType;
 	typedef ModelHelperType_ ModelHelperType;
 	typedef GeometryType_ GeometryType;
+	typedef ModelBase<ModelHelperType_, ParametersType_, InputValidatorType_, GeometryType_>
+	ThisType;
+	typedef Braket<ThisType> BraketType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelHelperType::RealType RealType;
@@ -171,6 +175,7 @@ public:
 		                      &getAtomKind(),
 		                      modelCommon_.geometry().terms());
 		fillModelLinks(); // fills modelLinks_
+		customOperators();
 		modelLinks_.postCtor2();
 
 		ProgramGlobals::init(maxElectronsOneSpin());
@@ -618,6 +623,31 @@ private:
 			offsets[qn] = offset;
 			offset  += thisSize;
 		}
+	}
+
+	virtual void customOperators()
+	{
+		PsimagLite::String ops;
+		ioIn_.readline(ops, "DefineOperators=");
+		VectorStringType tokens;
+		PsimagLite::split(tokens, ops, ",");
+		const SizeType n = tokens.size();
+		for (SizeType i = 0; i < n; ++i) {
+			customOperator(tokens[i]);
+		}
+	}
+
+	virtual void customOperator(PsimagLite::String opStr)
+	{
+		VectorStringType tokens;
+		PsimagLite::split(tokens, opStr, ":");
+		if (tokens.size() != 2)
+			err("Custom Operator " + opStr + " must have exactly one colon\n");
+
+		OpsLabelType& c = this->createOpsLabel(tokens[0]);
+		BraketType braket(*this, "<gs|" + tokens[1] + "|gs>");
+
+		c.push(braket.op(0));
 	}
 
 	ModelCommonType modelCommon_;
