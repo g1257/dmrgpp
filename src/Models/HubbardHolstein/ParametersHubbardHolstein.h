@@ -121,7 +121,7 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 			lambdaFP.clear();
 		}
 
-		if (model == "HubbardHolstein") {
+		if (model == "HubbardHolstein" || model == "HubbardHolsteinSSH") {
 			if (!hasLambdaFP)
 				err("HubbardHolstein: must have lambdaFP vector in input file\n");
 		} else {
