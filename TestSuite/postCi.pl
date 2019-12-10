@@ -103,7 +103,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 	               procOmegas => \&checkProcOmegas);
 	for (my $i = 0; $i < $totalAnnotations; ++$i) {
 		my ($ppLabel, $w) = Ci::readAnnotationFromIndex(\@ciAnnotations, $i);
-		my $x = defined($w) ? scalar(@$w) : 0;
+		my $x = $w ? scalar(@$w) : 0;
 		next if ($x == 0);
 		print "|$n| has $x $ppLabel lines\n";
 		if ($ppLabel eq "dmrg" || $ppLabel eq "nDollar") {

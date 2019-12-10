@@ -268,6 +268,7 @@ sub readAnnotationFromIndex
 	my $n = scalar(@$a);
 	die "$0: index too big $ind >= $n \n" if ($ind < 0 || $ind >= $n);
 	my $ptr = $a->[$ind];
+	$ptr or return ("", "");
 	my @copy = @$ptr;
 	my $key = pop @copy;
 	return ($key, \@copy);
