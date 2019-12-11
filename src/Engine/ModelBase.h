@@ -628,7 +628,12 @@ private:
 	virtual void customOperators()
 	{
 		PsimagLite::String ops;
-		ioIn_.readline(ops, "DefineOperators=");
+		try {
+			ioIn_.readline(ops, "DefineOperators=");
+		} catch (std::exception&) {
+			return;
+		}
+
 		VectorStringType tokens;
 		PsimagLite::split(tokens, ops, ",");
 		const SizeType n = tokens.size();
