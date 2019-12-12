@@ -99,10 +99,10 @@ public:
 
 	void write(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
 	{
-		static bool firstcall = true;
-		if (firstcall) {
+		try {
+			io.read(modalStruct, "modalStruct");
+		} catch(...) {
 			io.write("modalStruct", modalStruct);
-			firstcall = false;
 		}
 
 		io.createGroup(str);
