@@ -649,10 +649,14 @@ private:
 		if (tokens.size() != 2)
 			err("Custom Operator " + opStr + " must have exactly one colon\n");
 
+		if (tokens[0].length() == 0) return;
+		char firstChar = tokens[0][0];
 		OpsLabelType& c = this->createOpsLabel(tokens[0]);
 		BraketType braket(*this, "<gs|" + tokens[1] + "|gs>");
 
 		c.push(braket.op(0));
+		if (firstChar == '_')
+			this->makeTrackable(tokens[0]);
 	}
 
 	ModelCommonType modelCommon_;
