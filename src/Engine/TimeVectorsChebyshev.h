@@ -229,7 +229,7 @@ public:
 
 		bool flagcorrection = timeHasAdvanced_;
 		if (flagcorrection)
-			correctVectors(Eg);
+			correctVectors(indices, Eg);
 
 		timeHasAdvanced_ = false;
 	}
@@ -297,13 +297,23 @@ private:
 		}
 	}
 
-	void correctVectors(RealType Eg)
+	void correctVectors(const VectorSizeType& indices, RealType Eg)
 	{
 		// take the first vector and compute V and weights
-		const SizeType indexToUse = 0;
-		const VectorWithOffsetType& phi = targetVectors_[indexToUse];
+		const SizeType n = indices.size();
+		if (n != 3) {
+			PsimagLite::String msg = "TimeVectorsChebyshev:: correctVectors " +
+			        PsimagLite::String(" indices.size() = " + ttos(indices.size()) +
+			                           " != 3 (ignoring)\n");
+			std::cout<<msg;
+			std::cerr<<msg;
+			return;
+		}
 
-		if (phi.sectors() == 1) {
+		const SizeType indexToUse = 0;
+		const VectorWithOffsetType& phi = targetVectors_[indices[indexToUse]];
+
+		if (phi.sectors() == 0) {
 			PsimagLite::String msg = "TimeVectorsChebyshev:: correctVectors " +
 			        PsimagLite::String(" called too early maybe? (ignoring)\n");
 			std::cout<<msg;
@@ -323,9 +333,9 @@ private:
 		assert(V.size() == 1);
 
 		// correct all vectors based on the same V and weights
-		const SizeType nvectors = targetVectors_.size();
+		const SizeType nvectors = indices.size(); // = 3
 		for (SizeType i = 0; i < nvectors; ++i)
-			correctVectors(targetVectors_[i], V[0], weights, permutation);
+			correctVectors(targetVectors_[indices[i]], V[0], weights, permutation);
 	}
 
 	void correctVectors(VectorWithOffsetType& phi,
