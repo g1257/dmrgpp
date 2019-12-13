@@ -221,23 +221,6 @@ public:
 		}
 	}
 
-	// legacy reading (use as fallback only)
-	static void readEnergiesLegacy(VectorVectorRealType& energies,
-	                               PsimagLite::String lfEnergy,
-	                               IoType::In& ioIn2)
-	{
-		// Energies/Size <-- numbers
-		// Energies/Energy <--- value
-		SizeType total = 0;
-		ioIn2.read(total, lfEnergy + "/Size");
-		energies.resize(1);
-		energies[0].clear();
-		RealType value = 0;
-		for (SizeType i = 0; i < total; ++i)
-			ioIn2.read(value, lfEnergy + "/" + ttos(i));
-		energies[0].push_back(value);
-	}
-
 	static void writeEnergies(bool firstCall,
 	                          PsimagLite::String label,
 	                          const VectorVectorRealType& energies,
@@ -353,6 +336,23 @@ public:
 	const VectorVectorRealType& energies() const { return energiesFromFile_; }
 
 private:
+
+	// legacy reading (use as fallback only)
+	static void readEnergiesLegacy(VectorVectorRealType& energies,
+	                               PsimagLite::String lfEnergy,
+	                               IoType::In& ioIn2)
+	{
+		// Energies/Size <-- numbers
+		// Energies/Energy <--- value
+		SizeType total = 0;
+		ioIn2.read(total, lfEnergy + "/Size");
+		energies.resize(1);
+		energies[0].clear();
+		RealType value = 0;
+		for (SizeType i = 0; i < total; ++i)
+			ioIn2.read(value, lfEnergy + "/" + ttos(i));
+		energies[0].push_back(value);
+	}
 
 	void sayAboutToWrite() const
 	{

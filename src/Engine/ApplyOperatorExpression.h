@@ -474,7 +474,13 @@ public:
 			err("FATAL: " + label + "/Size=0");
 
 		SizeType nexcited = 0;
-		io.read(nexcited, label + "/0/Size");
+		try {
+			io.read(nexcited, label + "/0/Size");
+		} catch (...) {
+			loadEnergyLegacy(io, label);
+			return;
+		}
+
 		if (nexcited == 0)
 			err("FATAL: " + label + "/0/Size=0");
 
@@ -574,6 +580,17 @@ public:
 	}
 
 private:
+
+	// legacy reading, use only as fallback
+	void loadEnergyLegacy(PsimagLite::IoSelector::In& io,
+	                      PsimagLite::String label)
+	{
+		SizeType total = 0;
+		io.read(total, label + "/Size");
+
+		for (SizeType i = 0; i < total; ++i)
+			io.read(E0_, label + "/" + ttos(i));
+	}
 
 	void checkOrder(SizeType i, const TargetParamsType& tstStruct) const
 	{

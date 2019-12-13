@@ -225,8 +225,10 @@ public:
 
 	void read(IoInputType& io, PsimagLite::String prefix)
 	{
+		const PsimagLite::String label = targetHelper_.model().params().
+		        checkpoint.labelForEnergy();
 		prefix += "/";
-		aoe_.loadEnergy(io, "Energies");
+		aoe_.loadEnergy(io, label);
 		aoe_.readPsi(io, prefix);
 	}
 
