@@ -205,12 +205,37 @@ public:
 		energies.resize(nsectors);
 		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
 			SizeType nexcited = 0;
-			ioIn2.read(nexcited, lfEnergy + "/" + ttos(sectorIndex) + "/Size");
+
+			try {
+				ioIn2.read(nexcited, lfEnergy + "/" + ttos(sectorIndex) + "/Size");
+			} catch (...) {
+				// legacy reading
+				readEnergiesLegacy(energies, lfEnergy, ioIn2);
+				return;
+			}
+
 			energies[sectorIndex].resize(nexcited);
 			for (SizeType e = 0; e < nexcited; ++e)
 				ioIn2.read(energies[sectorIndex][e],
 				           lfEnergy + "/" + ttos(sectorIndex) + "/" + ttos(e));
 		}
+	}
+
+	// legacy reading (use as fallback only)
+	static void readEnergiesLegacy(VectorVectorRealType& energies,
+	                               PsimagLite::String lfEnergy,
+	                               IoType::In& ioIn2)
+	{
+		// Energies/Size <-- numbers
+		// Energies/Energy <--- value
+		SizeType total = 0;
+		ioIn2.read(total, lfEnergy + "/Size");
+		energies.resize(1);
+		energies[0].clear();
+		RealType value = 0;
+		for (SizeType i = 0; i < total; ++i)
+			ioIn2.read(value, lfEnergy + "/" + ttos(i));
+		energies[0].push_back(value);
 	}
 
 	static void writeEnergies(bool firstCall,
