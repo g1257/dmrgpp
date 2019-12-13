@@ -425,7 +425,8 @@ public:
 			                                                targetVectors_,
 			                                                model,
 			                                                wft,
-			                                                lrs);
+			                                                lrs,
+			                                                ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTimeStep_,

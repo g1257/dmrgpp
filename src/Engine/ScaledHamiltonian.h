@@ -60,6 +60,13 @@ public:
 		x += d_*y;
 	}
 
+	void scale (VectorRealType& eigs) const
+	{
+		for (SizeType i=0; i<eigs.size();++i) {
+			eigs[i] = c_*eigs[i]+d_;
+		}
+	}
+
 private:
 
 	const MatrixLanczosType& matx_;

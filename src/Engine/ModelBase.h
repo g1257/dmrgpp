@@ -650,7 +650,7 @@ private:
 			err("Custom Operator " + opStr + " must have exactly one colon\n");
 
 		if (tokens[0].length() == 0) return;
-		char firstChar = tokens[0][0];
+		const char firstChar = tokens[0][0];
 		OpsLabelType& c = this->createOpsLabel(tokens[0]);
 		BraketType braket(*this, "<gs|" + tokens[1] + "|gs>");
 
