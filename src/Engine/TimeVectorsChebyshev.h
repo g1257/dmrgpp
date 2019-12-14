@@ -330,6 +330,7 @@ private:
 
 		VectorSizeType permutation;
 		computeAuxForCorrection(V, weights, permutation, phi, phi.sector(0), Eg);
+		if (weights.size() == 0) return;
 		assert(V.size() == 1);
 
 		// correct all vectors based on the same V and weights
@@ -402,7 +403,7 @@ private:
 		lanczosHelper2.scale(veigs);
 
 		for (SizeType i = 0; i < veigs.size(); ++i)
-			veigs[i] = -abs(veigs[i]);
+			veigs[i] = -fabs(veigs[i]);
 
 		const MatrixRealType& Vmatrix = V[0];
 
@@ -415,6 +416,8 @@ private:
 		SizeType counter = 0;
 		for (; counter < small; ++counter)
 			if (veigs[counter] > -1.0) break;
+
+		if (counter == 0) return;
 
 		const SizeType nbad = counter;
 		weights.resize(nbad);
