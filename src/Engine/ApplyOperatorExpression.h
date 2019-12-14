@@ -356,9 +356,18 @@ public:
 
 	void readPsi(PsimagLite::IoSelector::In& io, PsimagLite::String prefix)
 	{
-		SizeType nsectors = 0;
-		io.read(nsectors, prefix + "/PSI/Size");
 		clearPsi();
+		SizeType nsectors = 0;
+		try {
+			io.read(nsectors, prefix + "/PSI/Size");
+		} catch (...) {
+			psi_.resize(1);
+			psi_[0].resize(1);
+			psi_[0][0] = new VectorWithOffsetType;
+			psi_[0][0]->read(io, prefix + "PSI");
+			return;
+		}
+
 		psi_.resize(nsectors);
 
 		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
