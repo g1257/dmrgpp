@@ -192,7 +192,8 @@ protected:
 
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			OpForLinkType c("c", spin);
-			hop.push(c, 'N', c, 'C', 1, (spin == 1) ? -1 : 1, spin);
+			typename ModelTermType::Su2Properties su2properties(1, (spin == 1) ? -1 : 1, spin);
+			hop.push(c, 'N', c, 'C', su2properties);
 		}
 
 		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
@@ -204,14 +205,18 @@ protected:
 		OpForLinkType sz("Sz");
 		OpForLinkType n("n");
 
-		spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModiferTerm0);
+		typename ModelTermType::Su2Properties su2properties(2, -1, 2);
+		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
 
-		if (!isSu2)
-			szsz.push(sz, 'N', sz, 'N', 2, 0.5);
-		else
-			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther);
+		if (!isSu2) {
+			typename ModelTermType::Su2Properties su2properties(2, 0.5);
+			szsz.push(sz, 'N', sz, 'N', su2properties);
+		} else {
+			typename ModelTermType::Su2Properties su2properties(2, -1, 2);
+			spsm.push(splus, 'N', splus, 'C', valueModifierTermOther, su2properties);
+		}
 
-		ninj.push(n, 'N', n, 'N');		
+		ninj.push(n, 'N', n, 'N');
 	}
 
 private:

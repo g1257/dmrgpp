@@ -308,7 +308,9 @@ public:
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			OpForLinkType c1("C", 0 + spin*orbitals);
 			OpForLinkType c2("C", 0 + spin*orbitals);
-			hopA.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+			typename ModelTermType::Su2Properties su2properties(1, (spin == 1) ? -1 : 1, spin);
+
+			hopA.push(c1, 'N', c2, 'C', su2properties);
 		}
 
 		ModelTermType& hopB = ModelBaseType::createTerm("hoppingB");
@@ -316,7 +318,8 @@ public:
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			OpForLinkType c1("C", 1 + spin*orbitals);
 			OpForLinkType c2("C", 1 + spin*orbitals);
-			hopB.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+			typename ModelTermType::Su2Properties su2properties(1, (spin == 1) ? -1 : 1, spin);
+			hopB.push(c1, 'N', c2, 'C', su2properties);
 		}
 
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");

@@ -303,25 +303,27 @@ protected:
 		ModelTermType& hopf = ModelBaseType::createTerm("HoppingFermionic");
 
 		OpForLinkType cup("c", 0);
-		hopf.push(cup, 'C', cup, 'N', 1, 1, 0);
+		typename ModelTermType::Su2Properties su2properties(1, 1, 0);
+		hopf.push(cup, 'C', cup, 'N', su2properties);
 
+		typename ModelTermType::Su2Properties su2properties2(1, -1, 1);
 		OpForLinkType cdown("c", 1);
-		hopf.push(cdown, 'C', cdown, 'N', 1, -1, 1);
+		hopf.push(cdown, 'C', cdown, 'N', su2properties2);
 
 		if (modelParameters_.numberphonons > 0) {
 			ModelTermType& hopb = ModelBaseType::createTerm("HoppingBosonic");
 
 			OpForLinkType a("a");
-			hopb.push(a, 'C', a, 'N', 1, 1, 0);
+			hopb.push(a, 'C', a, 'N');
 
 			ModelTermType& phononFermion = ModelBaseType::createTerm("PhononFermion");
 
 			OpForLinkType n("n");
-			phononFermion.push(n, 'N', a, 'N', 1, 1, 0);
+			phononFermion.push(n, 'N', a, 'N');
 
 			ModelTermType& fermionPhonon = ModelBaseType::createTerm("FermionPhonon");
 
-			fermionPhonon.push(a, 'N', n, 'N', 1, 1, 0);
+			fermionPhonon.push(a, 'N', n, 'N');
 		}
 	}
 

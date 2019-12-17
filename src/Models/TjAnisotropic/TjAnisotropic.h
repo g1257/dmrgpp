@@ -339,7 +339,11 @@ protected:
         for (SizeType spin = 0; spin < 2; ++spin) {
             OpForLinkType c1("c", spin, 0);
             OpForLinkType c2("c", spin, 0);
-            hop.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+            hop.push(c1,
+			         'N',
+			         c2,
+			         'C',
+			         typename ModelTermType::Su2Properties(1, (spin == 1) ? -1 : 1, spin));
         }
 
         ModelBaseType::createTerm("sxsx").push(sx, 'N', sx, 'N');

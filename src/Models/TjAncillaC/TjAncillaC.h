@@ -289,7 +289,13 @@ protected:
 				for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
 					OpForLinkType c2("c", orb2 + spin*orbitals, orb2);
 
-					hop.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+					hop.push(c1,
+					         'N',
+					         c2,
+					         'C',
+					         typename ModelTermType::Su2Properties(1,
+					                                               (spin == 1) ? -1 : 1,
+					                                               spin));
 				}
 			}
 
@@ -310,12 +316,22 @@ protected:
 				OpForLinkType sz2("sz", orb2, orb2);
 				OpForLinkType n2("n", orb2, orb2);
 
-				spsm.push(splus1, 'N', splus2, 'C', 2, -1, 2, valueModiferTerm0);
+				spsm.push(splus1,
+				          'N',
+				          splus2,
+				          'C',
+				          valueModiferTerm0,
+				          typename ModelTermType::Su2Properties(2, -1, 2));
 
 				if (!isSu2)
-					szsz.push(sz1, 'N', sz2, 'N', 2, 0.5);
+					szsz.push(sz1, 'N', sz2, 'N', typename ModelTermType::Su2Properties(2, 0.5));
 				else
-					spsm.push(splus1, 'N', splus2, 'C', 2, -1, 2, valueModifierTermOther);
+					spsm.push(splus1,
+					          'N',
+					          splus2,
+					          'C',
+					          valueModifierTermOther,
+					          typename ModelTermType::Su2Properties(2, -1, 2));
 
 				ninj.push(n1, 'N', n2, 'N');
 			}

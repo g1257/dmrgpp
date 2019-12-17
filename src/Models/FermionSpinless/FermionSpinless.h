@@ -242,10 +242,10 @@ protected:
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
 
 		OpForLinkType cup("c", 0);
-		hop.push(cup, 'N', cup, 'C', 1, 1, 0);
+		hop.push(cup, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, 1, 0));
 
 		OpForLinkType cdown("c", 1);
-		hop.push(cdown, 'N', cdown, 'C', 1, -1, 1);
+		hop.push(cdown, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, -1, 1));
 
 		OpForLinkType n("n");
 		ninj.push(n, 'N', n, 'N');

@@ -232,7 +232,11 @@ protected:
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
 				OpForLinkType c("c", orb + spin*orbitals, orb);
 
-				hop.push(c, 'N', c, 'C', 1, (spin == 1) ? -1 : 1, spin);
+				hop.push(c,
+				         'N',
+				         c,
+				         'C',
+				         typename ModelTermType::Su2Properties(1, (spin == 1) ? -1 : 1, spin));
 			}
 
 			OpForLinkType l("l", spin);

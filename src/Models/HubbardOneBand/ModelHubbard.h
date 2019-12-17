@@ -333,10 +333,10 @@ protected:
 		ModelTermType& hop = ModelBaseType::createTerm("hopping");//(A)
 
 		OpForLinkType cup("c", 0); // (B)
-		hop.push(cup, 'N', cup, 'C', 1, 1, 0); // (C)
+		hop.push(cup, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, 1, 0)); // (C)
 
 		OpForLinkType cdown("c", 1); // (D)
-		hop.push(cdown, 'N', cdown, 'C', 1, -1, 1); // (E)
+		hop.push(cdown, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, -1, 1)); // (E)
 
 		if (extension_ != "RashbaSOC") return;
 
@@ -351,7 +351,12 @@ protected:
 		auto valueModifer = [](SparseElementType& value)
 		{ value = -PsimagLite::conj(value);};
 
-		rashbaSOC.push(cdown, 'N', cup, 'C', 1, 0, 0, valueModifer);
+		rashbaSOC.push(cdown,
+		               'N',
+		               cup,
+		               'C',
+		               valueModifer,
+		               typename ModelTermType::Su2Properties(1, 0, 0));
 	}
 
 	/* PSIDOC Hubbard::write

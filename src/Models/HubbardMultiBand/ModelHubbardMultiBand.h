@@ -305,12 +305,13 @@ protected:
 		const SizeType orbitals = modelParameters_.orbitals;
 		ModelTermType& hop = ModelBaseType::createTerm("hopping");
 		for (SizeType spin = 0; spin < 2; ++spin) {
+			typename ModelTermType::Su2Properties su2properties(1, (spin == 1) ? -1 : 1, spin);
 			for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
 				OpForLinkType c1("c", orb1 + spin*orbitals, orb1);
 				for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
 					OpForLinkType c2("c", orb2 + spin*orbitals, orb2);
 
-					hop.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+					hop.push(c1, 'N', c2, 'C', su2properties);
 				}
 			}
 		}

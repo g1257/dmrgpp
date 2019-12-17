@@ -198,10 +198,10 @@ protected:
 			OpForLinkType cdown("c", 1, 1);
 
 			// spin1 = 1 spin2 = 0
-			so.push(cdown, 'N', cup, 'C', 1, -1, 1);
+			so.push(cdown, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, -1, 1));
 
 			// spin1 = 0 spin2 = 1
-			so.push(cup, 'N', cdown, 'C', 1, 1, 0);
+			so.push(cup, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, 1, 0));
 		}
 
 		const bool isSu2 = BasisType::useSu2Symmetry();
@@ -209,19 +209,27 @@ protected:
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 		OpForLinkType splus("splus");
 
-		spsm.push(splus, 'N', splus, 'C', 2, -1, 2,
-		          [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5;});
+		spsm.push(splus,
+		          'N',
+		          splus,
+		          'C',
+		          [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5;},
+		          typename ModelTermType::Su2Properties(2, -1, 2));
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		OpForLinkType sz("sz");
 
-		szsz.push(sz, 'N', sz, 'N', 2, 0.5, 1,
-		          [isSu2](SparseElementType& value) { if (isSu2) value = -value; });
+		szsz.push(sz,
+		          'N',
+		          sz,
+		          'N',
+		          [isSu2](SparseElementType& value) { if (isSu2) value = -value; },
+		          typename ModelTermType::Su2Properties(2, 0.5, 1));
 
 		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
 		OpForLinkType pair("pair");
 
-		pp.push(pair, 'N', pair, 'C', 2, 1, 2);
+		pp.push(pair, 'N', pair, 'C', typename ModelTermType::Su2Properties(2, 1, 2));
 	}
 
 private:

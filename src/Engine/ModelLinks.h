@@ -79,6 +79,16 @@ public:
 
 	public:
 
+		struct Su2Properties {
+			Su2Properties(SizeType a = 0, RealType_ f = 1.0, SizeType c = 0)
+			    : angularMomentum(a), angularFactor(f), category(c)
+			{}
+
+			SizeType angularMomentum;
+			RealType_ angularFactor;
+			SizeType category;
+		};
+
 		typedef OneLink OneLinkType;
 		typedef typename OneLinkType::LambdaType LambdaType;
 
@@ -102,10 +112,18 @@ public:
 		          char mod1,
 		          const OpaqueOp& op2,
 		          char mod2,
-		          SizeType angularMomentum = 0,
-		          RealType_ angularFactor = 1.0,
-		          SizeType category = 0
-		        ,LambdaType vModifier = [](ComplexOrRealType&) {})
+		          Su2Properties su2properties)
+		{
+			push(op1, mod1, op2, mod2, [](ComplexOrRealType&) {}, su2properties);
+		}
+
+		template<typename OpaqueOp>
+		void push(const OpaqueOp& op1,
+		          char mod1,
+		          const OpaqueOp& op2,
+		          char mod2
+		          ,LambdaType vModifier = [](ComplexOrRealType&) {}
+		,Su2Properties su2properties = Su2Properties())
 		{
 			if (links_.size() > 0) {
 				if (!areSitesCompatible(op1.kindOfSite, op2.kindOfSite))
@@ -128,9 +146,9 @@ public:
 			                         PairSizeType(op1.edof, op2.edof),
 			                         fermionOrBoson,
 			                         PairCharType(mod1, mod2),
-			                         angularMomentum,
-			                         angularFactor,
-			                         category,
+			                         su2properties.angularMomentum,
+			                         su2properties.angularFactor,
+			                         su2properties.category,
 			                         vModifier));
 		}
 

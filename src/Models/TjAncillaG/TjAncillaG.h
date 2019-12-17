@@ -302,18 +302,28 @@ protected:
 		OpForLinkType splus0("splus");
 
 		auto modifierTerm0 = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5;};
-		spsm.push(splus0, 'N', splus0, 'C', 2, -1, 2, modifierTerm0);
+		spsm.push(splus0,
+		          'N',
+		          splus0,
+		          'C',
+		          modifierTerm0,
+		          typename ModelTermType::Su2Properties(2, -1, 2));
 
 		auto modifierTerm1 = [isSu2](ComplexOrRealType& value) {if (isSu2) value = -value;};
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		OpForLinkType sz0("sz");
 
-		szsz.push(sz0, 'N', sz0, 'C', 2, 0.5, 1, modifierTerm1);
+		szsz.push(sz0,
+		          'N',
+		          sz0,
+		          'C',
+		          modifierTerm1,
+		          typename ModelTermType::Su2Properties(2, 0.5, 1));
 
 		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
 		OpForLinkType d("d");
-		ancilla.push(d, 'N', d, 'C', 2, 1, 0);
+		ancilla.push(d, 'N', d, 'C', typename ModelTermType::Su2Properties(2, 1, 0));
 	}
 
 private:

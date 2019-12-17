@@ -313,11 +313,21 @@ protected:
 		OpForLinkType splus0("splus");
 
 		auto modifierTerm0 = [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5;};
-		spsm.push(splus0, 'N', splus0, 'C', 2, -1, 2, modifierTerm0);
+		spsm.push(splus0,
+		          'N',
+		          splus0,
+		          'C',
+		          modifierTerm0,
+		          typename ModelTermType::Su2Properties(2, -1, 2));
 
 		if (hot_) {
 			OpForLinkType splus1("splus", 1, 1);
-			spsm.push(splus1, 'N', splus1, 'C', 2, -1, 2, modifierTerm0);
+			spsm.push(splus1,
+			          'N',
+			          splus1,
+			          'C',
+			          modifierTerm0,
+			          typename ModelTermType::Su2Properties(2, -1, 2));
 		}
 
 		auto modifierTerm1 = [isSu2](SparseElementType& value) {if (isSu2) value = -value;};
@@ -325,20 +335,30 @@ protected:
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		OpForLinkType sz0("sz");
 
-		szsz.push(sz0, 'N', sz0, 'C', 2, 0.5, 1, modifierTerm1);
+		szsz.push(sz0,
+		          'N',
+		          sz0,
+		          'C',
+		          modifierTerm1,
+		          typename ModelTermType::Su2Properties(2, 0.5, 1));
 
 		if (hot_) {
 			OpForLinkType splus1("splus", 1, 1);
 			OpForLinkType sz1("sz", 1, 1);
 			if (isSu2)
-				szsz.push(splus1, 'N', splus1, 'C', 2, 0.5, 1, modifierTerm1);
+				szsz.push(splus1,
+				          'N',
+				          splus1,
+				          'C',
+				          modifierTerm1,
+				          typename ModelTermType::Su2Properties(2, 0.5, 1));
 			else
-				szsz.push(sz1, 'N', sz1, 'C', 2, 0.5, 1);
+				szsz.push(sz1, 'N', sz1, 'C', typename ModelTermType::Su2Properties(2, 0.5, 1));
 		}
 
 		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
 		OpForLinkType d("d");
-		ancilla.push(d, 'N', d, 'C', 2, 1, 0);
+		ancilla.push(d, 'N', d, 'C', typename ModelTermType::Su2Properties(2, 1, 0));
 	}
 
 private:

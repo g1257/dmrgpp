@@ -128,7 +128,7 @@ public:
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
-		        io.createGroup(label1);
+			io.createGroup(label1);
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
@@ -166,17 +166,27 @@ protected:
 		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
 		{ value *= (isSu2) ? -0.5 : 0.5;};
 
-		spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModiferTerm0);
+		spsm.push(splus,
+		          'N',
+		          splus,
+		          'C',
+		          valueModiferTerm0,
+		          typename ModelTermType::Su2Properties(2, -1, 2));
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
 		if (!isSu2) {
 			OpForLinkType sz("sz");
-			szsz.push(sz, 'N', sz, 'N', 2, 0.5);
+			szsz.push(sz, 'N', sz, 'N',  typename ModelTermType::Su2Properties(2, 0.5));
 		} else {
 			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
 			{ if (isSu2) value = -value;};
-			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther);
+			spsm.push(splus,
+			          'N',
+			          splus,
+			          'C',
+			          valueModifierTermOther,
+			          typename ModelTermType::Su2Properties(2, -1, 2));
 		}
 	}
 

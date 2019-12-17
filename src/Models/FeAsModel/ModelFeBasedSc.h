@@ -472,7 +472,13 @@ public:
 				for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
 					OpForLinkType c2("C", orb2 + spin*orbitals, orb2); // (C)
 
-					hop.push(c1, 'N', c2, 'C', 1, (spin == 1) ? -1 : 1, spin);
+					hop.push(c1,
+					         'N',
+					         c2,
+					         'C',
+					         typename ModelTermType::Su2Properties(1,
+					                                               (spin == 1) ? -1 : 1,
+					                                               spin));
 				}
 			}
 		}
@@ -1152,7 +1158,7 @@ private:
 	//! only for feAsMode == 4
 	void addInteractionKspace(SparseMatrixType& hmatrix,
 	                          SizeType,
-		                      const VectorSizeType& block) const
+	                          const VectorSizeType& block) const
 	{
 		SizeType iOfSite = 0;
 		assert(block.size() > iOfSite);

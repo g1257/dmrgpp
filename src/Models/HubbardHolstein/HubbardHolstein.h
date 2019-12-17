@@ -289,16 +289,16 @@ protected:
 		ModelTermType& hopf = ModelBaseType::createTerm("HoppingFermionic");
 
 		OpForLinkType cup("c", 0);
-		hopf.push(cup, 'C', cup, 'N', 1, 1, 0);
+		hopf.push(cup, 'C', cup, 'N');
 
 		OpForLinkType cdown("c", 1);
-		hopf.push(cdown, 'C', cdown, 'N', 1, -1, 1);
+		hopf.push(cdown, 'C', cdown, 'N');
 
 		if (modelParameters_.numberphonons > 0) {
 			ModelTermType& hopb = ModelBaseType::createTerm("HoppingBosonic");
 
 			OpForLinkType a("a");
-			hopb.push(a, 'C', a, 'N', 1, 1, 0);
+			hopb.push(a, 'C', a, 'N');
 		}
 
 		if (!isSsh_) return; // <---- EARLY EXIT HERE
@@ -310,13 +310,13 @@ protected:
 
 		auto modifier = [](ComplexOrRealType& value) { value *= (-1.0);};
 
-		hopSsh.push(cup, 'C', cx0, 'N', 1, 1, 0);
+		hopSsh.push(cup, 'C', cx0, 'N');
 
-		hopSsh.push(cx0, 'C', cup, 'N', 1, -1, 1, modifier);
+		hopSsh.push(cx0, 'C', cup, 'N', modifier);
 
-		hopSsh.push(cdown, 'C', cx1, 'N', 1, 1, 2);
+		hopSsh.push(cdown, 'C', cx1, 'N');
 
-		hopSsh.push(cx1, 'C', cdown, 'N', 1, 1, 3, modifier);
+		hopSsh.push(cx1, 'C', cdown, 'N', modifier);
 
 	}
 

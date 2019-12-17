@@ -250,8 +250,10 @@ protected:
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
 				OpForLinkType c("c", orb + spin*orbitals, orb);
-
-				hop.push(c, 'N', c, 'C', 1, (spin == 1) ? -1 : 1, spin);
+				typename ModelTermType::Su2Properties su2properties(1,
+				                                                    (spin == 1) ? -1 : 1,
+				                                                    spin);
+				hop.push(c, 'N', c, 'C', su2properties);
 			}
 
 			OpForLinkType d("d", spin);
@@ -270,17 +272,31 @@ protected:
 			OpForLinkType n("n", orb, orb);
 			OpForLinkType pair("p", orb, orb);
 
-			spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModiferTerm0);
+			spsm.push(splus,
+			          'N',
+			          splus,
+			          'C',
+			          valueModiferTerm0,
+			          typename ModelTermType::Su2Properties(2, -1, 2));
 
 			if (!isSu2)
-				szsz.push(sz, 'N', sz, 'N', 2, 0.5);
+				szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
 			else
-				spsm.push(splus, 'N', splus, 'C', 2, -1, 2, valueModifierTermOther);
+				spsm.push(splus,
+				          'N',
+				          splus,
+				          'C',
+				          valueModifierTermOther,
+				          typename ModelTermType::Su2Properties(2, -1, 2));
 
 			ninj.push(n, 'N', n, 'N');
 
-			pp.push(pair, 'N', pair, 'C', 1, 1, 0,
-			        [](ComplexOrRealType& value) {value *= (-1.0);});
+			pp.push(pair,
+			        'N',
+			        pair,
+			        'C',
+			        [](ComplexOrRealType& value) {value *= (-1.0);},
+			        typename ModelTermType::Su2Properties(1, 1, 0));
 		}
 	}
 
