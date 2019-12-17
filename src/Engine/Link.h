@@ -86,38 +86,32 @@ namespace Dmrg {
 template<typename FieldType>
 struct Link {
 
-	typedef std::pair<SizeType,SizeType> PairSizeType;
-	typedef std::pair<char,char> PairCharType;
+	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef std::pair<char, char> PairCharType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
-	Link(SizeType s1,
-	     SizeType s2,
+	Link(PairSizeType finalIndices1,
 	     ProgramGlobals::ConnectionEnum type1,
 	     const FieldType& value1,
 	     ProgramGlobals::FermionOrBosonEnum fOb,
-	     const PairSizeType& ops1,
 	     const PairCharType& mods1,
 	     SizeType aM,
 	     RealType aF,
 	     SizeType cat)
-	    : site1(s1),
-	      site2(s2),
+	    : finalIndices(finalIndices1),
 	      type(type1),
 	      value(value1),
 	      fermionOrBoson(fOb),
-	      ops(ops1),
-	      mods(mods1)
-	      ,angularMomentum(aM),
+	      mods(mods1),
+	      angularMomentum(aM),
 	      angularFactor(aF),
 	      category(cat)
 	{}
 
-	SizeType site1;
-	SizeType site2;
+	PairSizeType finalIndices;
 	ProgramGlobals::ConnectionEnum type;
 	FieldType value;
 	ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
-	std::pair<SizeType,SizeType> ops; // operator indices
 	PairCharType mods; // operator modifiers
 	SizeType angularMomentum;
 	RealType angularFactor;

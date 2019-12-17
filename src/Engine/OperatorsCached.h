@@ -21,6 +21,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorStorageType*>::Type VectorOperatorStorageType;
 	typedef typename PsimagLite::Vector<VectorOperatorStorageType>::Type
 	VectorVectorOperatorStorageType;
+	typedef BlockType VectorSizeType;
 
 	OperatorsCached(const LeftRightSuperType& lrs)
 	    : lrs_(lrs),
@@ -50,22 +51,18 @@ public:
 	}
 
 	const OperatorStorageType& reducedOperator(char modifier,
-	                                           SizeType i,
-	                                           SizeType sigma,
+	                                           SizeType iifirst,
 	                                           const ProgramGlobals::SysOrEnvEnum type) const
 	{
 
 		assert(!BasisType::useSu2Symmetry());
 
 		const OperatorStorageType* m = 0;
-		PairType ii;
 		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
-			ii = lrs_.left().getOperatorIndices(i,sigma);
-			m = &(lrs_.left().getOperatorByIndex(ii.first).getStorage());
+			m = &(lrs_.left().getOperatorByIndex(iifirst).getStorage());
 		} else {
 			assert(type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
-			ii = lrs_.right().getOperatorIndices(i,sigma);
-			m =&(lrs_.right().getOperatorByIndex(ii.first).getStorage());
+			m =&(lrs_.right().getOperatorByIndex(iifirst).getStorage());
 		}
 
 		m->checkValidity();
@@ -73,7 +70,7 @@ public:
 
 		assert(modifier == 'C');
 		SizeType typeIndex = (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? 0 : 1;
-		SizeType packed = typeIndex + ii.first*2;
+		SizeType packed = typeIndex + iifirst*2;
 		const ConcurrencyType::PthreadtType threadSelf = ConcurrencyType::threadSelf();
 		const SizeType threadNum = threadNumberFromSelf(threadSelf);
 

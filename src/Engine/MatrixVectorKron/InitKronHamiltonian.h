@@ -99,7 +99,7 @@ public:
 	typedef typename LeftRightSuperType::BasisType BasisType;
 	typedef InitKronBase<LeftRightSuperType> BaseType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::LinkType LinkType;
+	typedef typename HamiltonianConnectionType::LinkType LinkType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BaseType::ArrayOfMatStructType ArrayOfMatStructType;
@@ -243,20 +243,9 @@ private:
 		const OperatorStorageType& aR = hc_.modelHelper().leftRightSuper().right().hamiltonian();
 		identityL_.makeDiagonal(aL.rows(), value);
 		identityR_.makeDiagonal(aR.rows(), value);
-		std::pair<SizeType, SizeType> ops(0,0);
-		std::pair<char, char> mods('n', 'n');
-		LinkType link(0,
-		              0,
-		              ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM,
-		              value,
-		              ProgramGlobals::FermionOrBosonEnum::BOSON,
-		              ops,
-		              mods,
-		              1,
-		              value,
-		              0);
-		BaseType::addOneConnection(aL,identityR_,link);
-		BaseType::addOneConnection(identityL_,aR,link);
+
+		BaseType::addOneConnection(aL,identityR_, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
+		BaseType::addOneConnection(identityL_,aR, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	void convertXcYcArrays()
@@ -276,7 +265,7 @@ private:
 
 				assert(A);
 				assert(B);
-				BaseType::addOneConnection(*B,*A,link3);
+				BaseType::addOneConnection(*B, *A, link3.value, link2.fermionOrBoson);
 				continue;
 			}
 

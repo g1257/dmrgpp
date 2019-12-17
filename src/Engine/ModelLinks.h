@@ -34,10 +34,10 @@ public:
 
 		typedef std::function<void(ComplexOrRealType&)> LambdaType;
 
-		OneLink(PairSizeType indices_,
-		        PairSizeType orbs_,
+		OneLink(VectorSizeType indices_,
+		        VectorSizeType orbs_,
 		        ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
-		        PairCharType mods_,
+		        PsimagLite::String mods_,
 		        SizeType angularMomentum_,
 		        RealType_ angularFactor_,
 		        SizeType category_,
@@ -52,10 +52,10 @@ public:
 		      modifier(vModifier_)
 		{}
 
-		PairSizeType indices;
-		PairSizeType orbs;
+		VectorSizeType indices;
+		VectorSizeType orbs;
 		ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
-		PairCharType mods;
+		PsimagLite::String mods;
 		SizeType angularMomentum;
 		RealType_ angularFactor;
 		SizeType category;
@@ -94,17 +94,32 @@ public:
 
 		// pair of sites should actually be pair of kinds of sites
 		Term(PsimagLite::String name) // name of term, not name of operator
-		    : name_(name), pairKind_(0, 0)
+		    : name_(name)
 		{}
 
-		bool areSitesCompatible(SizeType kind0, SizeType kind1) const
+		bool areSitesCompatible(const VectorSizeType& actualSites) const
 		{
-			return (pairKind_.first == kind0 && pairKind_.second == kind1);
+			const SizeType n = actualSites.size();
+			assert(n == vectorKind_.size());
+			for (SizeType i = 0; i < n; ++i) {
+				if (vectorKind_[i] != atomKind_->siteToAtomKind(actualSites[i]))
+					return false;
+			}
+
+			return true;
 		}
 
 		bool areSiteKindsEqual() const
 		{
-			return (pairKind_.first == pairKind_.second);
+			const SizeType n = vectorKind_.size();
+			if (n < 2) return true;
+			const SizeType kind0 = vectorKind_[0];
+			for (SizeType i = 1; i < n; ++i) {
+				if (vectorKind_[i] != kind0)
+					return false;
+			}
+
+			return true;
 		}
 
 		template<typename OpaqueOp>
@@ -126,10 +141,10 @@ public:
 		,Su2Properties su2properties = Su2Properties())
 		{
 			if (links_.size() > 0) {
-				if (!areSitesCompatible(op1.kindOfSite, op2.kindOfSite))
+				if (!areSitesCompatible(VectorSizeType{op1.kindOfSite, op2.kindOfSite}))
 					err("Term " + name_ + " incompatible atom kinds at push\n");
 			} else {
-				pairKind_ = PairSizeType(op1.kindOfSite, op2.kindOfSite);
+				vectorKind_ = VectorSizeType{op1.kindOfSite, op2.kindOfSite};
 			}
 
 			SizeType index1 = findIndexOfOp(op1.name, op1.dof);
@@ -175,7 +190,7 @@ public:
 
 		PsimagLite::String name_; // name of term, not name of operator
 		VectorOneLinkType links_;
-		PairSizeType pairKind_;
+		VectorSizeType vectorKind_;
 	};
 
 	class IsValue {
@@ -204,7 +219,7 @@ public:
 	typedef typename PsimagLite::Vector<Term*>::Type VectorTermType;
 	typedef Term TermType;
 
-	ModelLinks() : maxDofs_(0), atomKind_(0) {}
+	ModelLinks() : maxDofs_(0) {}
 
 	~ModelLinks()
 	{
@@ -334,15 +349,11 @@ public:
 	}
 
 	bool areSitesCompatibleForThisTerm(SizeType termIndex,
-	                                   SizeType actualSite0,
-	                                   SizeType actualSite1) const
+	                                   const VectorSizeType& actualSites) const
 	{
 		assert(atomKind_);
-		const SizeType kind0 = atomKind_->siteToAtomKind(actualSite0);
-		const SizeType kind1 = atomKind_->siteToAtomKind(actualSite1);
-
 		assert(termIndex < terms_.size());
-		return terms_[termIndex]->areSitesCompatible(kind0, kind1);
+		return terms_[termIndex]->areSitesCompatible(actualSites);
 	}
 
 	SizeType siteToAtomKind(SizeType actualSite) const
@@ -368,7 +379,7 @@ private:
 	VectorTermType terms_;
 	VectorHermitianEnum hermit_;
 	SizeType maxDofs_;
-	const AtomKindBase* atomKind_;
+	const static AtomKindBase* atomKind_;
 	static std::map<PsimagLite::String, SizeType> offsets_;
 	static VectorStringType trackables_;
 };
@@ -378,5 +389,8 @@ std::map<PsimagLite::String, SizeType> ModelLinks<T1, T2>::offsets_;
 
 template<typename T1, typename T2>
 typename ModelLinks<T1, T2>::VectorStringType ModelLinks<T1, T2>::trackables_;
+
+template<typename T1, typename T2>
+const typename ModelLinks<T1, T2>::AtomKindBase* ModelLinks<T1, T2>::atomKind_ = 0;
 }
 #endif // MODEL_LINKS_H

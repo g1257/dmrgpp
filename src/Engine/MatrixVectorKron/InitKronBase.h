@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ArrayOfMatStruct.h"
 #include "Vector.h"
-#include "Link.h"
 #include "ProgressIndicator.h"
 
 namespace Dmrg {
@@ -97,7 +96,6 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorStorageType OperatorStorageType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef Link<ComplexOrRealType> LinkType;
 	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
@@ -251,10 +249,11 @@ protected:
 
 	void addOneConnection(const OperatorStorageType& A,
 	                      const OperatorStorageType& B,
-	                      const LinkType& link2)
+	                      const ComplexOrRealType& value,
+	                      const ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
 	{
 		OperatorStorageType Ahat;
-		calculateAhat(Ahat.getCRSNonConst(), A.getCRS(), link2.value, link2.fermionOrBoson);
+		calculateAhat(Ahat.getCRSNonConst(), A.getCRS(), value, fermionOrBoson);
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
 		                                                    ijpatchesOld_,
 		                                                    *ijpatchesNew_,

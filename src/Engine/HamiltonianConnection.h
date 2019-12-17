@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "OperatorStorage.h"
 #include "OperatorsCached.h"
+#include "ManyToTwoConnection.h"
 
 namespace Dmrg {
 
@@ -121,6 +122,8 @@ public:
 	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
 	typedef typename ModelHelperType::Aux AuxType;
 	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
+	typedef typename ModelLinksType::TermType::OneLinkType OneLinkType;
+	typedef ManyToTwoConnection<OneLinkType, LeftRightSuperType> ManyToTwoConnectionType;
 
 	HamiltonianConnection(const LeftRightSuperType& lrs,
 	                      const GeometryType& geometry,
@@ -234,25 +237,11 @@ public:
 		        (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
-		SizeType i = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
-		                                         link2.site1);
-		SizeType j = PsimagLite::indexOrMinusOne(modelHelper_.leftRightSuper().super().block(),
-		                                         link2.site2);
-
-		int offset = modelHelper_.leftRightSuper().left().block().size();
-
-		SizeType site1Corrected = (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
-		            i : i - offset;
-		SizeType site2Corrected = (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
-		            j - offset : j;
-
 		*A = &operatorsCached_.reducedOperator(link2.mods.first,
-		                                       site1Corrected,
-		                                       link2.ops.first,
+		                                       link2.finalIndices.first,
 		                                       sysOrEnv);
 		*B = &operatorsCached_.reducedOperator(link2.mods.second,
-		                                       site2Corrected,
-		                                       link2.ops.second,
+		                                       link2.finalIndices.second,
 		                                       envOrSys);
 
 		assert(isNonZeroMatrix(**A));
@@ -290,14 +279,11 @@ private:
 		assert(type != ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM &&
 		        type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
 
-		assert(hItems.size() == 2);
-
-		VectorSizeType edofs(2, 0);
 		SizeType totalOne = 0;
 		SizeType geometryTerms = superGeometry_.geometry().terms();
 		for (SizeType termIndex = 0; termIndex < geometryTerms; ++termIndex) {
 
-			if (!modelLinks_.areSitesCompatibleForThisTerm(termIndex, hItems[0], hItems[1]))
+			if (!modelLinks_.areSitesCompatibleForThisTerm(termIndex, hItems))
 				continue;
 
 			const typename ModelLinksType::TermType& term = modelLinks_.term(termIndex);
@@ -305,14 +291,12 @@ private:
 			SizeType dofsTotal = term.size();
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
 
-				const typename ModelLinksType::TermType::OneLinkType& oneLink = term(dofs);
+				const OneLinkType& oneLink = term(dofs);
 
-				edofs[0] = oneLink.orbs.first;
-				edofs[1] = oneLink.orbs.second;
 				ComplexOrRealType tmp = superGeometry_(smax_,
 				                                       emin_,
 				                                       hItems,
-				                                       edofs,
+				                                       oneLink.orbs,
 				                                       termIndex);
 
 				if (tmp == static_cast<RealType>(0.0)) continue;
@@ -321,16 +305,19 @@ private:
 
 				oneLink.modifier(tmp);
 
-				LinkType link2(hItems[0],
-				        hItems[1],
-				        type,
-				        tmp,
-				        oneLink.fermionOrBoson,
-				        oneLink.indices,
-				        oneLink.mods,
-				        oneLink.angularMomentum,
-				        oneLink.angularFactor,
-				        oneLink.category);
+				ManyToTwoConnectionType manyToTwo(hItems,
+				                                  type,
+				                                  oneLink,
+				                                  modelHelper_.leftRightSuper());
+
+				LinkType link2(manyToTwo.finalIndices(),
+				               type,
+				               tmp,
+				               oneLink.fermionOrBoson,
+				               manyToTwo.finalMods(),
+				               oneLink.angularMomentum,
+				               oneLink.angularFactor,
+				               oneLink.category);
 
 				++totalOne;
 				lps_.push_back(link2);
