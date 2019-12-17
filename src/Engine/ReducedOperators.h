@@ -139,24 +139,6 @@ public:
 		io.read(reducedOperators_,"Operators");
 	}
 
-	const OperatorType& getReducedOperatorByIndex(int i) const
-	{
-		return reducedOperators_[i];
-	}
-
-	const OperatorType& getReducedOperatorByIndex(char modifier,
-	                                              const PairType& p) const
-	{
-		SizeType s = SizeType(p.first/p.second);
-		SizeType tmp = p.first%p.second;
-		SizeType offset = reducedOperators_[s*p.second].su2Related.offset;
-		SizeType g = tmp%offset;
-		SizeType i0 = s*p.second+g;
-
-		if (modifier=='N') return getReducedOperatorByIndex(i0);
-		else return getReducedOperatorByIndex(i0+offset);
-	}
-
 	const OperatorStorageType& hamiltonian()const { return reducedHamiltonian_; }
 
 	void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)

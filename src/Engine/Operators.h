@@ -289,23 +289,11 @@ public:
 		else reducedOpImpl_.setOperators(ops);
 	}
 
-	const OperatorType& getReducedOperatorByIndex(char modifier,const PairType& p) const
-	{
-		assert(BasisType::useSu2Symmetry());
-		return reducedOpImpl_.getReducedOperatorByIndex(modifier,p);
-	}
-
 	const OperatorType& getOperatorByIndex(int i) const
 	{
 		assert(!BasisType::useSu2Symmetry());
 		assert(i>=0 && SizeType(i)<operators_.size());
 		return operators_[i];
-	}
-
-	const OperatorType& getReducedOperatorByIndex(int i) const
-	{
-		assert(BasisType::useSu2Symmetry());
-		return reducedOpImpl_.getReducedOperatorByIndex(i);
 	}
 
 	SizeType numberOfOperators() const

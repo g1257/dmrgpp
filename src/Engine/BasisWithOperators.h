@@ -259,17 +259,6 @@ public:
 		return operators_.getOperatorByIndex(i);
 	}
 
-	const OperatorType& getReducedOperatorByIndex(int i) const
-	{
-		return operators_.getReducedOperatorByIndex(i);
-	}
-
-	const OperatorType& getReducedOperatorByIndex(char modifier,
-	                                              const PairType& p) const
-	{
-		return operators_.getReducedOperatorByIndex(modifier,p);
-	}
-
 	SizeType numberOfOperators() const { return operators_.numberOfOperators(); }
 
 	SizeType operatorsPerSite(SizeType i) const
@@ -318,6 +307,7 @@ private:
 	void setToProduct(const ThisType& basis2,
 	                  const ThisType& basis3)
 	{
+		assert(!this->useSu2Symmetry());
 		BasisType &parent = *this;
 		// reorder the basis
 		parent.setToProduct(basis2, basis3);
@@ -325,67 +315,49 @@ private:
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 		SizeType x = basis2.numberOfOperators()+basis3.numberOfOperators();
 
-		if (this->useSu2Symmetry()) setMomentumOfOperators(basis2);
 		operators_.setToProduct(basis2,basis3,x,this);
 		ApplyFactors<FactorsType> apply(this->getFactors(), this->useSu2Symmetry());
 		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		for (SizeType i=0;i<this->numberOfOperators();i++) {
 			if (i<basis2.numberOfOperators()) {
-				if (!this->useSu2Symmetry()) {
-					const OperatorType& myOp =  basis2.getOperatorByIndex(i);
-					bool isFermion = (myOp.fermionOrBoson() ==
-					                  ProgramGlobals::FermionOrBosonEnum::FERMION);
-					if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
-						utils::fillFermionicSigns(fermionicSigns,
-						                          basis2.signs(),
-						                          (isFermion) ? -1 : 1);
-						savedSign = myOp.fermionOrBoson();
-					}
-
-					operators_.externalProduct(i,
-					                           myOp,
-					                           basis3.size(),
-					                           fermionicSigns,
-					                           true,
-					                           BaseType::permutationInverse());
-				} else {
-					operators_.externalProductReduced(i,
-					                                  basis2,
-					                                  basis3,
-					                                  true,
-					                                  basis2.getReducedOperatorByIndex(i));
+				const OperatorType& myOp =  basis2.getOperatorByIndex(i);
+				bool isFermion = (myOp.fermionOrBoson() ==
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION);
+				if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
+					utils::fillFermionicSigns(fermionicSigns,
+					                          basis2.signs(),
+					                          (isFermion) ? -1 : 1);
+					savedSign = myOp.fermionOrBoson();
 				}
+
+				operators_.externalProduct(i,
+				                           myOp,
+				                           basis3.size(),
+				                           fermionicSigns,
+				                           true,
+				                           BaseType::permutationInverse());
+
 			} else {
-				if (!this->useSu2Symmetry()) {
+				const OperatorType& myOp = basis3.
+				        getOperatorByIndex(i - basis2.numberOfOperators());
 
-					const OperatorType& myOp = basis3.
-					        getOperatorByIndex(i - basis2.numberOfOperators());
+				bool isFermion = (myOp.fermionOrBoson() ==
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION);
 
-					bool isFermion = (myOp.fermionOrBoson() ==
-					                  ProgramGlobals::FermionOrBosonEnum::FERMION);
-
-					if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
-						utils::fillFermionicSigns(fermionicSigns,
-						                          basis2.signs(),
-						                          (isFermion) ? -1 : 1);
-						savedSign = myOp.fermionOrBoson();
-					}
-
-					operators_.externalProduct(i,
-					                           myOp,
-					                           basis2.size(),
-					                           fermionicSigns,
-					                           false,
-					                           BaseType::permutationInverse());
-				} else {
-					operators_.externalProductReduced(i,
-					                                  basis2,
-					                                  basis3,
-					                                  false,
-					                                  basis3.getReducedOperatorByIndex(
-					                                      i-basis2.numberOfOperators()));
+				if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
+					utils::fillFermionicSigns(fermionicSigns,
+					                          basis2.signs(),
+					                          (isFermion) ? -1 : 1);
+					savedSign = myOp.fermionOrBoson();
 				}
+
+				operators_.externalProduct(i,
+				                           myOp,
+				                           basis2.size(),
+				                           fermionicSigns,
+				                           false,
+				                           BaseType::permutationInverse());
 			}
 		}
 
@@ -407,19 +379,6 @@ private:
 		for (SizeType i=0;i<basis3.operatorsPerSite_.size();i++)
 			operatorsPerSite_[i+offset1] =  basis3.operatorsPerSite_[i];
 		assert(operatorsPerSite_.size() > 0);
-	}
-
-	void setMomentumOfOperators(const ThisType& basis)
-	{
-		PsimagLite::Vector<SizeType>::Type momentum;
-		for (SizeType i=0;i<basis.numberOfOperators();i++) {
-			int x = PsimagLite::indexOrMinusOne(momentum,
-			                                    basis.getReducedOperatorByIndex(i).jm().first);
-			if (x < 0)
-				momentum.push_back(basis.getReducedOperatorByIndex(i).jm().first);
-		}
-
-		operators_.setMomentumOfOperators(momentum);
 	}
 
 	// BasisWithOperators(const BasisWithOperators&);
