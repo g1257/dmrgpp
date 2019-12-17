@@ -441,9 +441,16 @@ private:
 
 		const SizeType big = Vmatrix.rows();
 		const SizeType nbad = weights.size();
-		for (SizeType i = 0; i < big; ++i)
+		ComplexOrRealType sum = 0;
+		for (SizeType i = 0; i < big; ++i) {
 			for (SizeType alpha = 0; alpha < nbad; ++alpha)
 				r[i] -= weights[alpha] * Vmatrix(i, permutation[alpha]);
+			sum += r[i]*PsimagLite::conj(r[i]);
+		}
+
+		const RealType factor = 1.0/sqrt(PsimagLite::real(sum));
+		for (SizeType i = 0; i < big; ++i)
+			r[i] *= factor;
 	}
 
 	const SizeType& currentTimeStep_;
