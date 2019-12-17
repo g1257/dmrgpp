@@ -442,13 +442,16 @@ private:
 		const SizeType big = Vmatrix.rows();
 		const SizeType nbad = weights.size();
 		ComplexOrRealType sum = 0;
+		ComplexOrRealType sumOld = 0;
+
 		for (SizeType i = 0; i < big; ++i) {
+			sumOld += r[i]*PsimagLite::conj(r[i]);
 			for (SizeType alpha = 0; alpha < nbad; ++alpha)
 				r[i] -= weights[alpha] * Vmatrix(i, permutation[alpha]);
 			sum += r[i]*PsimagLite::conj(r[i]);
 		}
 
-		const RealType factor = 1.0/sqrt(PsimagLite::real(sum));
+		const RealType factor = sqrt(PsimagLite::real(sumOld))/sqrt(PsimagLite::real(sum));
 		for (SizeType i = 0; i < big; ++i)
 			r[i] *= factor;
 	}
