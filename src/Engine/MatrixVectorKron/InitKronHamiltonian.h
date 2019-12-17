@@ -271,7 +271,7 @@ private:
 
 			assert(A);
 			assert(B);
-			BaseType::addOneConnection(*A,*B,link2);
+			BaseType::addOneConnection(*A, *B, link2.value, link2.fermionOrBoson);
 		}
 	}
 

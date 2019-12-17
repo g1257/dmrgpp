@@ -157,10 +157,13 @@ public:
 				fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::FERMION;
 			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
 
-			links_.push_back(OneLink(PairSizeType(index1, index2),
-			                         PairSizeType(op1.edof, op2.edof),
+			PsimagLite::String modStr("NN");
+			modStr[0] = mod1;
+			modStr[1] = mod2;
+			links_.push_back(OneLink(VectorSizeType{index1, index2},
+			                         VectorSizeType{op1.edof, op2.edof},
 			                         fermionOrBoson,
-			                         PairCharType(mod1, mod2),
+			                         modStr,
 			                         su2properties.angularMomentum,
 			                         su2properties.angularFactor,
 			                         su2properties.category,
@@ -294,7 +297,7 @@ public:
 	}
 
 	// FIXME: For Immm and SDHS
-	HermitianEnum getHermitianProperty(SizeType opsIndex, SizeType) const
+	HermitianEnum getHermitianProperty(SizeType opsIndex) const
 	{
 		assert(opsIndex < hermit_.size());
 		return hermit_[opsIndex];

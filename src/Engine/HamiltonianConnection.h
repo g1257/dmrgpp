@@ -119,11 +119,10 @@ public:
 	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType ParamsForKroneckerDumperType;
 	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
 	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
-	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
 	typedef typename ModelHelperType::Aux AuxType;
 	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
 	typedef typename ModelLinksType::TermType::OneLinkType OneLinkType;
-	typedef ManyToTwoConnection<OneLinkType, LeftRightSuperType> ManyToTwoConnectionType;
+	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType> ManyToTwoConnectionType;
 
 	HamiltonianConnection(const LeftRightSuperType& lrs,
 	                      const GeometryType& geometry,
@@ -323,7 +322,7 @@ private:
 				lps_.push_back(link2);
 
 				// add h.c. parts if needed
-				if (connectionIsHermitian(link2)) continue;
+				if (manyToTwo.connectionIsHermitian(modelLinks_)) continue;
 
 				link2.value = PsimagLite::conj(tmp);
 
@@ -348,41 +347,6 @@ private:
 			err("conjugateChar\n");
 
 		return (c == 'N') ? 'C' : 'N';
-	}
-
-	bool connectionIsHermitian(const LinkType& link) const
-	{
-		return (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ?
-		            linkIsHermitianFermion(link) : linkIsHermitianBoson(link);
-	}
-
-	bool linkIsHermitianFermion(const LinkType& link) const
-	{
-		assert(link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION);
-
-		HermitianEnum h1 = modelLinks_.getHermitianProperty(link.ops.first, link.site1);
-		HermitianEnum h2 = modelLinks_.getHermitianProperty(link.ops.second, link.site2);
-
-		bool isHermit1 = (h1 == ModelLinksType::HERMIT_PLUS);
-		bool isHermit2 = (h2 == ModelLinksType::HERMIT_PLUS);
-		bool isAnti1 = (h1 == ModelLinksType::HERMIT_MINUS);
-		bool isAnti2 = (h2 == ModelLinksType::HERMIT_MINUS);
-		bool b1 = (isHermit1 && isAnti2);
-		bool b2 = (isAnti1 && isHermit2);
-		return (b1 || b2);
-	}
-
-	bool linkIsHermitianBoson(const LinkType& link) const
-	{
-		assert(link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::BOSON);
-
-		HermitianEnum h1 = modelLinks_.getHermitianProperty(link.ops.first, link.site1);
-		HermitianEnum h2 = modelLinks_.getHermitianProperty(link.ops.second, link.site2);
-
-		bool isHermit1 = (h1 == ModelLinksType::HERMIT_PLUS);
-		bool isHermit2 = (h2 == ModelLinksType::HERMIT_PLUS);
-
-		return (isHermit1 && isHermit2);
 	}
 
 	const ModelHelperType modelHelper_;
