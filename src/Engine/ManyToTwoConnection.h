@@ -80,10 +80,21 @@ private:
 		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
 		assert(hItems.size() == 2);
+
+		SizeType i = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems[0]);
+		SizeType j = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems[1]);
+
+		int offset = lrs_.left().block().size();
+
+		SizeType site1Corrected = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
+		            i : i - offset;
+		SizeType site2Corrected = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
+		            j - offset : j;
+
 		assert(oneLink_.indices.size() == 2);
 		PairSizeType finalIndex0;
-		finalIndex0.first = finalIndex(sysOrEnv, hItems[0], oneLink_.indices[0]);
-		finalIndex0.second = finalIndex(envOrSys, hItems[1], oneLink_.indices[1]);
+		finalIndex0.first = finalIndex(sysOrEnv, site1Corrected, oneLink_.indices[0]);
+		finalIndex0.second = finalIndex(envOrSys, site2Corrected, oneLink_.indices[1]);
 		return finalIndex0;
 	}
 
