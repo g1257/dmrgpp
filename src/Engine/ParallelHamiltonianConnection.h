@@ -31,7 +31,7 @@ public:
 	      aux_(aux),
 	      xtemp_(ConcurrencyType::storageSize(ConcurrencyType::codeSectionParams.npthreads))
 	{
-		hc_.modelHelper().clearThreadSelves();
+		hc_.clearThreadSelves();
 	}
 
 	void doTask(SizeType taskNumber ,SizeType threadNum)

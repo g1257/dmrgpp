@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include "ProgressIndicator.h"
 #include "OperatorStorage.h"
+#include "OperatorsCached.h"
 
 namespace Dmrg {
 
@@ -119,6 +120,7 @@ public:
 	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
 	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
 	typedef typename ModelHelperType::Aux AuxType;
+	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
 
 	HamiltonianConnection(const LeftRightSuperType& lrs,
 	                      const GeometryType& geometry,
@@ -130,6 +132,7 @@ public:
 	      modelLinks_(lpb),
 	      targetTime_(targetTime),
 	      kroneckerDumper_(pKroneckerDumper, lrs),
+	      operatorsCached_(lrs),
 	      progress_("HamiltonianConnection"),
 	      systemBlock_(modelHelper_.leftRightSuper().left().block()),
 	      envBlock_(modelHelper_.leftRightSuper().right().block()),
@@ -243,14 +246,14 @@ public:
 		SizeType site2Corrected = (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            j - offset : j;
 
-		*A = &modelHelper_.reducedOperator(link2.mods.first,
-		                                   site1Corrected,
-		                                   link2.ops.first,
-		                                   sysOrEnv);
-		*B = &modelHelper_.reducedOperator(link2.mods.second,
-		                                   site2Corrected,
-		                                   link2.ops.second,
-		                                   envOrSys);
+		*A = &operatorsCached_.reducedOperator(link2.mods.first,
+		                                       site1Corrected,
+		                                       link2.ops.first,
+		                                       sysOrEnv);
+		*B = &operatorsCached_.reducedOperator(link2.mods.second,
+		                                       site2Corrected,
+		                                       link2.ops.second,
+		                                       envOrSys);
 
 		assert(isNonZeroMatrix(**A));
 		assert(isNonZeroMatrix(**B));
@@ -269,6 +272,11 @@ public:
 	const ModelHelperType& modelHelper() const { return modelHelper_; }
 
 	SizeType tasks() const {return lps_.size(); }
+
+	void clearThreadSelves() const
+	{
+		operatorsCached_.clearThreadSelves();
+	}
 
 private:
 
@@ -395,6 +403,7 @@ private:
 	const ModelLinksType& modelLinks_;
 	RealType targetTime_;
 	mutable KroneckerDumperType kroneckerDumper_;
+	OperatorsCachedType operatorsCached_;
 	PsimagLite::ProgressIndicator progress_;
 	VectorLinkType lps_;
 	const VectorSizeType& systemBlock_;
