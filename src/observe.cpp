@@ -127,7 +127,7 @@ int main(int argc,char **argv)
 	PsimagLite::String filename;
 	PsimagLite::String filesOption;
 	int opt = 0;
-	int precision = 6;
+	int precision = 0;
 	SizeType threadsInCmd = 0;
 	bool versionOnly = false;
 	PsimagLite::String sOptions("");
@@ -192,6 +192,7 @@ int main(int argc,char **argv)
 	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);
 
 	if (threadsInCmd > 0) dmrgSolverParams.nthreads = threadsInCmd;
+	if (precision > 0) dmrgSolverParams.precision = precision;
 
 	bool setAffinities = (dmrgSolverParams.options.isSet("setAffinities"));
 

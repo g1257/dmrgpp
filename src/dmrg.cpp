@@ -179,7 +179,7 @@ int main(int argc, char **argv)
 	if (utils::basename(argv[0]) == "operator") options.enabled = true;
 	strUsage += " -f filename [-k] [-p precision] [-o solverOptions] [-V] [whatToMeasure]";
 	PsimagLite::String sOptions("");
-	int precision = 6;
+	int precision = 0;
 	bool unbuffered = false;
 	SizeType threadsInCmd = 0;
 	bool versionOnly = false;
@@ -326,6 +326,7 @@ to the main dmrg driver are the following.
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
 
 	if (threadsInCmd > 0) dmrgSolverParams.nthreads = threadsInCmd;
+	if (precision > 0) dmrgSolverParams.precision = precision;
 
 	bool echoInput = false;
 	if (!options.enabled && options.label != "-") {

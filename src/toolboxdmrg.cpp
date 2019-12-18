@@ -87,7 +87,7 @@ int main(int argc,char **argv)
 	PsimagLite::PsiApp application("toolboxdmrg",&argc,&argv,1);
 	ToolOptions toolOptions;
 	int opt = 0;
-	int precision = 6;
+	int precision = 0;
 	bool versionOnly = false;
 	PsimagLite::String sOptions;
 	while ((opt = getopt(argc, argv,"f:p:a:E:o:sV")) != -1) {
@@ -152,6 +152,8 @@ int main(int argc,char **argv)
 	//! Read the parameters for this run
 	bool earlyExit = true;
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, earlyExit);
+
+	if (precision > 0) dmrgSolverParams.precision = precision;
 
 	if (dmrgSolverParams.options.isSet("useComplex"))
 		main1<std::complex<RealType> >(io, application, dmrgSolverParams, toolOptions);
