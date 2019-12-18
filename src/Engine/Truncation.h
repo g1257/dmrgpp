@@ -138,10 +138,11 @@ public:
 	      error_(0.0)
 	{
 		if (parameters_.truncationControl.first < 0) return;
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"has tolerance= "<<parameters_.truncationControl.first;
 		msg<<" minimum m= "<<parameters_.truncationControl.second;
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	void changeBasisFinite(BasisWithOperatorsType& pS,
@@ -269,9 +270,10 @@ private:
 
 		cache.transform = dmS->operator()();
 		if (parameters_.options.isSet("nodmrgtransform")) {
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"SolverOptions=nodmrgtransform, setting transform to identity";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 			cache.transform.setTo(1.0);
 		}
 
@@ -294,7 +296,8 @@ private:
 			else startEnd.second = mostRecent;
 		}
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		TruncationCache& cache = (expandSys) ? leftCache_ : rightCache_;
 
 		cache.transform.truncate(cache.removedIndices);
@@ -330,7 +333,7 @@ private:
 		msg<<"new size of basis="<<rPrime.size();
 		msg<<" transform is "<<cache.transform.rows()<<" x "<<cache.transform.cols();
 		msg<<" with "<<cache.transform.blocks()<<" symmetry blocks";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		delete lrs;
 		lrs = 0;
@@ -359,7 +362,8 @@ private:
 		if (eigs.size()>=newKeptStates)
 			statesToRemove = eigs.size() - newKeptStates;
 		RealType discWeight = sumUpTo(eigs, statesToRemove);
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		if (newKeptStates != keptStates) {
 			// we report that the "m" value has been changed and...
 			msg<<"Reducing kept states to "<<newKeptStates<<" from "<<keptStates;
@@ -370,14 +374,15 @@ private:
 			msg<<"Not changing kept states="<<keptStates;
 		}
 
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		error_ = discWeight;
 
 		// we report the discarded weight
-		PsimagLite::OstringStream msg2;
+		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"Discarded weight (Truncation error): "<< discWeight;
-		progress_.printline(msg2,std::cout);
+		progress_.printline(msgg2, std::cout);
 
 		if (parameters_.options.isSet("calcAndPrintEntropies"))
 			calcAndPrintEntropies(eigs);
@@ -388,11 +393,12 @@ private:
 		RealType rntentropy = entropy(eigs, 1.0);
 		const RealType reyniIndex = 2.0;
 		RealType r2p0entropy = entropy(eigs, reyniIndex);
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		// von-neumann entaglement entropy; and 2nd order Reyni entropy
 		msg<<"EntropyVonNeumann= "<<rntentropy;
 		msg<<"; ReyniIndex= "<<reyniIndex<<" EntropyReyni="<<r2p0entropy;
-		progress_.printline(msg, std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	RealType entropy(const VectorRealType& eigs,

@@ -150,13 +150,14 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             const typename BaseType::ExtraData& extraData)
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"EXPERIMENTAL: using SuzukiTrotter";
 
 		RealType norma = norm(phi);
 		if (norma<1e-10) return;
 		msg<<" Norm of phi= "<<norma;
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		// set non-zero sectors
 		targetVectors_[0] = phi;
@@ -196,19 +197,21 @@ public:
 		if (b1 || b2) return;
 
 		bool areAllLinksSeen = allLinksSeen();
-		PsimagLite::OstringStream msg2;
+		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"LINKS SEEN ";
 		for (SizeType i=0;i<linksSeen_.size();i++)
 			msg2<<linksSeen_[i]<<" ";
-		progress_.printline(msg2,std::cout);
+		progress_.printline(msgg2, std::cout);
 
 		if (!areAllLinksSeen) {
 			for (SizeType i = 0; i < extraData.block.size(); ++i)
 				linksSeen_.push_back(lastIndexLeft+i);
 		} else {
-			PsimagLite::OstringStream msg3;
+			PsimagLite::OstringStream msgg3(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg3 = msgg3();
 			msg3<<"ALL LINKS SEEN";
-			progress_.printline(msg3,std::cout);
+			progress_.printline(msgg3, std::cout);
 			return;
 		}
 
@@ -259,9 +262,10 @@ public:
 	virtual void timeHasAdvanced()
 	{
 		linksSeen_.clear();
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"ALL LINKS CLEARED";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 private:
@@ -536,12 +540,13 @@ private:
 			factorForDiagonals = 1.0;
 
 		if (fabs(factorForDiagonals)>1e-6) {
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"LINKS factors="<<factorForDiagonals;
 			msg<<" added for diagonals on sites ";
 			for (SizeType i = 0; i < block.size(); ++i)
 				msg<<block[i]<<" ";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 		}
 
 		err("ST not supported\n");

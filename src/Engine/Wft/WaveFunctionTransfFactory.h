@@ -202,9 +202,10 @@ public:
 		waveStructCombined_.beforeWft(wftOptions_.dir,
 		                              wftOptions_.twoSiteDmrg,
 		                              wftOptions_.bounce);
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Window open, ready to transform vectors";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	// FIXME: change name to transformVector
@@ -265,9 +266,10 @@ public:
 
 		if (!isEnabled_ || !allow) return;
 		afterWft(lrs);
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Window closed, no more transformations, please";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	void createRandomVector(VectorWithOffsetType& y) const
@@ -278,9 +280,10 @@ public:
 		}
 
 		if (!isEnabled_) return; // don't make noise unless enabled
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Yes, I'm awake, but there's nothing heavy to do now";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	void createRandomVector(VectorWithOffsetType& y, SizeType i0) const
@@ -311,10 +314,11 @@ public:
 
 		waveStructCombined_.push(transform, direction, vts, s, qns, wftOptions_.dir);
 		waveStructCombined_.setLrs(lrs);
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"OK, pushing option="<<ProgramGlobals::toString(direction);
 		msg<<" and stage="<<ProgramGlobals::toString(wftOptions_.dir);
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		if (noLoad_) {
 			SizeType center = computeCenter(lrs,direction);
@@ -413,7 +417,8 @@ private:
 		wftImpl_->transformVector(psiDest, psiSrc, lrs, nk);
 
 		RealType norm2 = norm(psiDest);
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Transformation completed ";
 		if (fabs(norm1-norm2)>1e-5) {
 			msg<<"WARNING: orig. norm= "<<norm1<<" resulting norm= "<<norm2;
@@ -422,7 +427,7 @@ private:
 		if (norm2 < 1e-5)
 			std::cerr << "WFT Factory: norm2 = " << norm2 << " < 1e-5\n";
 
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	SizeType computeCenter(const LeftRightSuperType& lrs,
@@ -444,9 +449,10 @@ private:
 		SizeType numberOfSites = lrs.super().block().size();
 		if (checkSites(numberOfSites)) {
 			noLoad_=false;
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<" now available";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 		}
 	}
 

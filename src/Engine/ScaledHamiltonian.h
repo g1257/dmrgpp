@@ -36,18 +36,20 @@ public:
 
 		SizeType n = matx_.rows();
 		PsimagLite::ProgressIndicator progress("InternalMatrix");
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"H'="<<c_<<"*H "<<d_<<"      (rank="<<n<<")";
-		progress.printline(msg, std::cout);
+		progress.printline(msgg, std::cout);
 
 		if (verbose == ProgramGlobals::VerboseEnum::NO) return;
 
 		MatrixType dense;
 		VectorRealType eigs(n);
 		matx_.fullDiag(eigs, dense);
-		PsimagLite::OstringStream msg2;
+		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"eigs[0]="<<eigs[0]<<" eigs["<<(n-1)<<"]="<<eigs[n - 1];
-		progress.printline(msg2, std::cout);
+		progress.printline(msgg2, std::cout);
 	}
 
 	SizeType rows() const { return matx_.rows(); }

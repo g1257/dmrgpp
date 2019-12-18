@@ -34,9 +34,10 @@ public:
 		if (!enabled()) return;
 
 		{
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Constructing...";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 		}
 
 		SizeType npatches = initKron_.numberOfPatches(InitKronType::OLD);
@@ -139,9 +140,10 @@ public:
 		BX_.resize(ldBX,  ncolA*noperator);
 
 		{
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Construction done.";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 		}
 	}
 

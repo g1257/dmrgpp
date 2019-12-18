@@ -51,10 +51,11 @@ public:
 			r[k] = sum * whatRorI(k);
 		}
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Abridgment="<<sum2;
 		if (krylovAbridge) msg<<" KrylovAbridge enabled";
-		progress_.printline(msg, std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	static ComplexOrRealType calcVTimesPhi(SizeType kprime,

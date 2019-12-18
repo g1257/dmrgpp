@@ -162,11 +162,13 @@ public:
 		if (!superIsReallySuper)
 			return; // <-- CONDITIONAL EARLY EXIT HERE
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"LinkProductStructSize="<<lps_.size();
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
-		PsimagLite::OstringStream msg2;
+		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		// add left and right contributions
 		msg2<<"PthreadsTheoreticalLimitForThisPart="<<(lps_.size() + 2);
 
@@ -190,7 +192,7 @@ public:
 		// Therefore there is only one term: term = 0.
 		// And dof(0,...) = 2, as you can see in  LinkProductHubbardOneBand.h.
 		// Then M = 2.
-		progress_.printline(msg2,std::cout);
+		progress_.printline(msgg2, std::cout);
 	}
 
 	void matrixBond(VerySparseMatrixType& matrix, const AuxType& aux) const

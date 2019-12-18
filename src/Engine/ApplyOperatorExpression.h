@@ -249,7 +249,8 @@ public:
 		if (allStages(StageEnum::DISABLED)) E0_ = Eg;
 
 		if (noStageIs(StageEnum::DISABLED)) {
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"EnergyForExp was ";
 			if (tstStruct.isEnergyForExp()) {
 				E0_ = tstStruct.energyForExp();
@@ -259,7 +260,7 @@ public:
 			}
 
 			msg<<" value= "<<E0_;
-			progress_.printline(msg, std::cout);
+			progress_.printline(msgg, std::cout);
 		}
 
 		return count;
@@ -542,9 +543,10 @@ public:
 		BorderEnumType corner = (site == 0 || site == numberOfSites -1) ?
 		            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"I'm applying a local operator now";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 		typename PsimagLite::Vector<bool>::Type signs;
 		targetHelper_.model().findOddElectronsOfOneSite(signs, site);
 		FermionSign fs(targetHelper_.lrs().left(), signs);
@@ -557,9 +559,10 @@ public:
 
 		RealType norma = norm(phiNew);
 		if (norma<1e-6) {
-			PsimagLite::OstringStream msg2;
+			PsimagLite::OstringStream msgg2(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 			msg2<<"Norm of phi is zero\n";
-			progress_.printline(msg2,std::cout);
+			progress_.printline(msgg2, std::cout);
 		}
 	}
 
@@ -695,16 +698,18 @@ private:
 		        site==1)
 			firstSeeLeftCorner=true;
 
-		PsimagLite::OstringStream msg2;
+		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"Steps without advance: "<<timesWithoutAdvancement;
 		msg2<<" site="<<site<<" currenTime="<<time();
-		if (timesWithoutAdvancement>0) progress_.printline(msg2,std::cout);
+		if (timesWithoutAdvancement>0) progress_.printline(msgg2, std::cout);
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Evolving, stage="<<stageToString(i);
 		msg<<" site="<<site<<" loopNumber="<<loopNumber;
 		msg<<" Eg="<<Eg;
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		return 1;
 	}
@@ -724,9 +729,10 @@ private:
 			                         tstStruct.sites(i)==numberOfSites -1) ?
 			            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"I'm applying a local operator now";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 			typename PsimagLite::Vector<bool>::Type signs;
 			targetHelper_.model().findOddElectronsOfOneSite(signs,site);
 			FermionSign fs(targetHelper_.lrs().left(), signs);
@@ -738,9 +744,10 @@ private:
 			RealType norma = norm(phiNew);
 
 			if (norma<1e-6) {
-				PsimagLite::OstringStream msg2;
+				PsimagLite::OstringStream msgg2(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 				msg2<<"Norm of phi is zero\n";
-				progress_.printline(msg2,std::cout);
+				progress_.printline(msgg2, std::cout);
 			}
 		} else if (stage_[i] == StageEnum::WFT_NOADVANCE ||
 		           stage_[i] == StageEnum::WFT_ADVANCE) {
@@ -773,9 +780,6 @@ private:
 				phiNew = src;
 				return;
 			}
-
-			PsimagLite::OstringStream msg;
-			msg<<"I'm calling the WFT now";
 
 			wftHelper_.wftOneVector(phiNew, src, site);
 		} else {

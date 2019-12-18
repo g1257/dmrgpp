@@ -171,9 +171,10 @@ public:
 	      saveData_(!parameters_.options.isSet("noSaveData"))
 	{
 		std::cout<<appInfo_;
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Turning the engine on";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 		ioOut_.write(appInfo_, "ApplicationInfo");
 
 		PsimagLite::PsiBase64::Encode base64encode(ioIn.data());
@@ -204,9 +205,10 @@ public:
 		ioOut_.write(appInfo_, "ApplicationInfo");
 		ioOut_.close();
 
-		PsimagLite::OstringStream msg2;
-		msg2<<"Turning off the engine.";
-		progress_.printline(msg2,std::cout);
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+		msg<<"Turning off the engine.";
+		progress_.printline(msgg, std::cout);
 	}
 
 	void main(const GeometryType& geometry)
@@ -332,10 +334,11 @@ obtain ordered
 		RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
 		VectorVectorRealType energies;
 		for (SizeType step=0;step<X.size();step++) {
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Infinite-loop: step="<<step<<" ( of "<<X.size()<<"), ";
 			msg<<" size of blk. added="<<X[step].size();
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 			printerInDetail.print(std::cout, "infinite");
 
 			lrs_.growLeftBlock(model_, pS, X[step], time); // grow system
@@ -421,12 +424,13 @@ obtain ordered
 		for (SizeType i = indexOfFirstFiniteLoop; i < loopsTotal; ++i)  {
 
 			lastSign = (parameters_.finiteLoop[i].stepLength < 0) ? -1 : 1;
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Finite loop number "<<i;
 			msg<<" with l="<<parameters_.finiteLoop[i].stepLength;
 			msg<<" keptStates="<<parameters_.finiteLoop[i].keptStates;
 			msg<<". "<<(parameters_.finiteLoop.size()-i)<<" more loops to go.";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 
 			if (i > 0) {
 				int signPrev = parameters_.finiteLoop[i - 1].stepLength;

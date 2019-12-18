@@ -193,9 +193,10 @@ public:
 		if (block.size() != 1)
 			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Saving state...";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		io.write(block[0], prefix + "/TargetCentralSite");
 		aoe_.writePsi(io, prefix);
@@ -596,13 +597,15 @@ public:
 		if (aoe_.allStages(StageEnumType::DISABLED))
 			return;
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"gsWeight="<<gsWeight<<" weights= ";
 		for (SizeType i = 0; i < weights.size(); ++i)
 			msg<<weights[i]<<" ";
-		progress_.printline(msg, std::cout);
+		progress_.printline(msgg, std::cout);
 
-		PsimagLite::OstringStream msg2;
+		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"gsNorms=";
 
 		const SizeType nsectors = aoe_.psiConst().size();
@@ -621,13 +624,14 @@ public:
 		msg2<<" norms= ";
 		for (SizeType i = 0; i < weights.size(); i++)
 			msg2<<normSquared(i)<<" ";
-		progress_.printline(msg2, std::cout);
+		progress_.printline(msgg2, std::cout);
 
 		if (aoe_.currentTimeStep() == 0) return;
 
-		PsimagLite::OstringStream msg3;
+		PsimagLite::OstringStream msgg3(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg3 = msgg3();
 		msg3<<"CurrentTime="<<aoe_.time()<<" CurrentTimeStep="<<aoe_.currentTimeStep();
-		progress_.printline(msg3, std::cout);
+		progress_.printline(msgg3, std::cout);
 	}
 
 private:

@@ -304,9 +304,10 @@ public:
 		        sites,
 		        direction);
 		if (hasCollapsed) {
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Has Collapsed";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 		}
 	}
 
@@ -351,10 +352,11 @@ private:
 		if (index==0 && start==0)
 			advanceCounterAndComputeStage(block);
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Evolving, stage="<<getStage()<<" loopNumber="<<loopNumber;
 		msg<<" Eg="<<Eg;
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 		advanceOrWft(index,indexAdvance,direction,block);
 	}
 
@@ -364,10 +366,11 @@ private:
 	                     const VectorSizeType& block)
 	{
 		const VectorWithOffsetType& phi = this->common().aoe().targetVectors()[startEnd.first];
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<" vector number "<<startEnd.first<<" has norm ";
 		msg<<norm(phi);
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 		if (norm(phi)<1e-6)
 			setFromInfinite(this->common().aoe().targetVectors(startEnd.first),lrs_);
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
@@ -405,11 +408,12 @@ private:
 			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 			timesWithoutAdvancement = 0;
 			this->common().aoe().setCurrentTimeStep(0);
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			SizeType n1 = mettsStruct_.timeSteps();
 			RealType x = norm(this->common().aoe().targetVectors()[n1]);
 			msg<<"Changing direction, setting collapsed with norm="<<x;
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 			for (SizeType i=0;i<n1;i++)
 				this->common().aoe().targetVectors(i) = this->common().aoe().targetVectors()[n1];
 			this->common().aoe().timeHasAdvanced();
@@ -454,10 +458,11 @@ private:
 
 	void printAdvancement(SizeType timesWithoutAdvancement) const
 	{
-		PsimagLite::OstringStream msg2;
-		msg2<<"Steps without advance: "<<timesWithoutAdvancement;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+		msg<<"Steps without advance: "<<timesWithoutAdvancement;
 		if (timesWithoutAdvancement > 0)
-			progress_.printline(msg2,std::cout);
+			progress_.printline(msgg,std::cout);
 	}
 
 	void advanceOrWft(SizeType index,
@@ -480,9 +485,10 @@ private:
 			}
 			// don't advance the collapsed vector because we'll recompute
 			if (index==weight_.size()-1) advance=index;
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"I'm calling the WFT now";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 
 			VectorWithOffsetType phiNew; // same sectors as g.s.
 			//phiNew.populateSectors(lrs_.super());
@@ -528,14 +534,15 @@ private:
 		for (SizeType i=0;i<betaFixed.size();i++)
 			betaFixed[i] = mettsStochastics_.chooseRandomState(block2[i]);
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"New pures for ";
 		for (SizeType i=0;i<alphaFixed.size();i++)
 			msg<<" site="<<block1[i]<<" is "<<alphaFixed[i];
 		msg<<" and for ";
 		for (SizeType i=0;i<betaFixed.size();i++)
 			msg<<" site="<<block2[i]<<" is "<<betaFixed[i];
-		progress_.printline(msg,std::cerr);
+		progress_.printline(msgg, std::cerr);
 
 		const BlockDiagonalMatrixType& transformSystem =
 		        getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM);
@@ -634,12 +641,14 @@ private:
 			newVector[gamma] = tmpVector[alpha];
 		}
 
-		PsimagLite::OstringStream msg2;
+		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"Old size of pure is "<<ns<<" norm="<<PsimagLite::norm(tmpVector);
-		progress_.printline(msg2,std::cerr);
-		PsimagLite::OstringStream msg;
+		progress_.printline(msgg2, std::cerr);
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"New size of pure is "<<newSize<<" norm="<<PsimagLite::norm(newVector);
-		progress_.printline(msg,std::cerr);
+		progress_.printline(msgg, std::cerr);
 		assert(PsimagLite::norm(newVector)>1e-6);
 	}
 
@@ -691,12 +700,13 @@ private:
 		for (SizeType i=0;i<alphaFixed.size();i++)
 			alphaFixed[i] = mettsStochastics_.chooseRandomState(blockCorrected[i]);
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"New pures for site ";
 		for (SizeType i=0;i<blockCorrected.size();i++)
 			msg<<blockCorrected[i]<<" ";
 		msg<<" is "<<alphaFixed;
-		progress_.printline(msg,std::cerr);
+		progress_.printline(msgg, std::cerr);
 
 		SizeType volumeOfAlphaFixed = mettsCollapse_.volumeOf(alphaFixed,nk);
 
@@ -818,7 +828,8 @@ private:
 		phi.extract(phi2,i0);
 		TargetVectorType x(total);
 		lanczosHelper.matrixVectorProduct(x,phi2);
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Hamiltonian average at time="<<this->common().aoe().time();
 		msg<<" for target="<<whatTarget;
 		ComplexOrRealType numerator = phi2*x;
@@ -826,7 +837,7 @@ private:
 		ComplexOrRealType division = (PsimagLite::norm(den)<1e-10) ? 0 : numerator/den;
 		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
 		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	const BlockDiagonalMatrixType& getTransform(ProgramGlobals::SysOrEnvEnum sysOrEnv)

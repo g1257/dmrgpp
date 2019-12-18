@@ -221,9 +221,10 @@ public:
 
 		offsets_[np]=size_;
 		setIndex2Sector();
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Populated "<<np<<" sectors";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	template<typename SomeBasisType>
@@ -253,9 +254,10 @@ public:
 		}
 
 		setIndex2Sector();
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"populateFromQns "<<v.sectors()<<" sectors";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	void collapseSectors()
@@ -278,9 +280,10 @@ public:
 
 		nzMsAndQns_ = nzMsAndQns;
 		setIndex2Sector();
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Collapsed. Non-zero sectors now are "<<nzMsAndQns_.size();
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	void setDataInSector(const VectorType& v,SizeType i0)
@@ -639,9 +642,10 @@ private:
 		}
 
 		if (!found) {
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"No partition found";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 		}
 	}
 

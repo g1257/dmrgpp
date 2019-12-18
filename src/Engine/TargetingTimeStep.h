@@ -227,9 +227,10 @@ public:
 	           PsimagLite::IoSelector::Out& io,
 	           PsimagLite::String prefix) const
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Saving state...";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, block, prefix);
@@ -328,7 +329,8 @@ private:
 		phi.extract(phi2,i0);
 		TargetVectorType x(total);
 		lanczosHelper.matrixVectorProduct(x,phi2);
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Hamiltonian average at time="<<this->common().aoe().time();
 		msg<<" for target="<<whatTarget;
 		ComplexOrRealType numerator = phi2*x;
@@ -336,7 +338,7 @@ private:
 		ComplexOrRealType division = (PsimagLite::norm(den)<1e-10) ? 0 : numerator/den;
 		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
 		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 		tvEnergy_[whatTarget] = PsimagLite::real(division);
 	}
 

@@ -189,7 +189,8 @@ public:
 			saveOption >>= 1; // ATTENTION: Discards bit 0 when i === 0
 			if (!(saveOption & 1)) continue;
 			if (flag) {
-				PsimagLite::OstringStream msg;
+				PsimagLite::OstringStream msgg(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 				msg<<"Triplet 3rd: Only one bit of bit 1, bit 2, and bit 3 may be set";
 				msg<<" VALUE= "<<original<<"\n";
 				err(msg.str());
@@ -245,9 +246,10 @@ private:
 		if (parameters_.options.isSet("TargetingAncilla"))
 			onlyWft = true;
 
-		PsimagLite::OstringStream msg0;
+		PsimagLite::OstringStream msgg0(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg0 = msgg0();
 		msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
-		progress_.printline(msg0,std::cout);
+		progress_.printline(msgg0, std::cout);
 
 		SizeType total = lrs.super().partition()-1;
 		SizeType weightsTotal = 0;
@@ -316,11 +318,12 @@ private:
 
 			SizeType i = sectors[j];
 
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"About to diag. sector with";
 			msg<<" quantumSector="<<lrs.super().qnEx(i);
 			msg<<" and numberOfExcited="<<parameters_.numberOfExcited;
-			progress_.printline(msg, std::cout);
+			progress_.printline(msgg, std::cout);
 
 			TargetVectorType* initialBySector = (isVwoS) ? &onlyForVwoS[j]
 			                                               : new TargetVectorType;
@@ -346,10 +349,11 @@ private:
 
 					vecSaved[j][excitedIndex] = *initialBySector;
 					energySaved[j][excitedIndex] = oldEnergy_[j][excitedIndex];
-					PsimagLite::OstringStream msg;
+					PsimagLite::OstringStream msgg(std::cout.precision());
+					PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 					msg<<"Early exit due to user requesting (fast) WFT only, ";
 					msg<<"(non updated) energy= "<<energySaved[j][excitedIndex];
-					progress_.printline(msg,std::cout);
+					progress_.printline(msgg, std::cout);
 				}
 			} else {
 				if (!isVwoS)
@@ -407,32 +411,36 @@ private:
 				if (vecSaved[j][excitedIndex].size() == 0)
 					continue;
 
-				PsimagLite::OstringStream msg4;
+				PsimagLite::OstringStream msgg4(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg4 = msgg4();
 				msg4<<" Sector["<<j<<"]="<<sectors[j];
 				msg4<<" excited="<<excitedIndex;
 				msg4<<" sector energy = "<<energySaved[j][excitedIndex];
-				progress_.printline(msg4, std::cout);
+				progress_.printline(msgg4, std::cout);
 
 				const QnType& q = lrs.super().qnEx(sector);
 				const SizeType bs = lrs.super().partition(sector + 1) -
 				        lrs.super().partition(sector);
-				PsimagLite::OstringStream msg;
+				PsimagLite::OstringStream msgg(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 				msg<<"Found targetted symmetry sector in partition "<<j;
 				msg<<" of size="<<bs;
-				progress_.printline(msg, std::cout);
+				progress_.printline(msgg, std::cout);
 
-				PsimagLite::OstringStream msg2;
+				PsimagLite::OstringStream msgg2(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 				msg2<<"Norm of vector is "<<PsimagLite::norm(vecSaved[j][excitedIndex]);
 				msg2<<" and quantum numbers are ";
 				msg2<<q;
-				progress_.printline(msg2, std::cout);
+				progress_.printline(msgg2, std::cout);
 				++counter;
 			}
 
-			PsimagLite::OstringStream msg4;
+			PsimagLite::OstringStream msgg4(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg4 = msgg4();
 			msg4<<"Number of Sectors found "<<counter;
 			msg4<<" for numberOfExcited="<<parameters_.numberOfExcited;
-			progress_.printline(msg4, std::cout);
+			progress_.printline(msgg4, std::cout);
 		}
 
 		target.set(vecSaved, sectors, lrs.super());
@@ -495,18 +503,20 @@ private:
 					energyTmp[excited] = eigs[excited];
 					for (SizeType i = 0; i < tmpVec.size(); ++i)
 						tmpVec[excited][i] = fullm2(i, excited);
-					PsimagLite::OstringStream msg;
+					PsimagLite::OstringStream msgg(std::cout.precision());
+					PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 					msg<<"Uses exact due to user request. ";
 					msg<<"Found lowest eigenvalue= "<<energyTmp[0];
-					progress_.printline(msg,std::cout);
+					progress_.printline(msgg, std::cout);
 				}
 				return;
 			}
 		}
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"I will now diagonalize a matrix of size="<<hc.modelHelper().size(partitionIndex);
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 		diagonaliseOneBlock(energyTmp,
 		                    tmpVec,
 		                    hc,
@@ -531,11 +541,12 @@ private:
 
 		if ((saveOption & 4)>0) {
 			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Early exit due to user requesting (slow) WFT, energy= ";
 			for (SizeType i = 0; i < nexcited; ++i)
 				msg<<energyTmp[i]<<" ";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 			return;
 		}
 
@@ -553,10 +564,11 @@ private:
 		if (lanczosHelper.rows()==0) {
 			static const RealType val = 10000;
 			std::fill(energyTmp.begin(), energyTmp.end(), val);
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Early exit due to matrix rank being zero.";
 			msg<<" BOGUS energy= "<<val;
-			progress_.printline(msg, std::cout);
+			progress_.printline(msgg, std::cout);
 			if (lanczosOrDavidson) delete lanczosOrDavidson;
 			return;
 		}
@@ -564,12 +576,13 @@ private:
 		try {
 			computeAllLevelsBelow(energyTmp, tmpVec, *lanczosOrDavidson, initialVector);
 		} catch (std::exception& e) {
-			PsimagLite::OstringStream msg0;
+			PsimagLite::OstringStream msgg0(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg0 = msgg0();
 			msg0<<e.what()<<"\n";
 			msg0<<"Lanczos or Davidson solver failed, ";
 			msg0<<"trying with exact diagonalization...";
-			progress_.printline(msg0,std::cout);
-			progress_.printline(msg0,std::cerr);
+			progress_.printline(msgg0, std::cout);
+			progress_.printline(msgg0, std::cerr);
 
 			VectorRealType eigs(lanczosHelper.rows());
 			PsimagLite::Matrix<ComplexOrRealType> fm;
@@ -579,15 +592,17 @@ private:
 				for (SizeType j = 0; j < eigs.size(); ++j)
 					tmpVec[excited][j] = fm(j, excited);
 				energyTmp[excited] = eigs[excited];
-				PsimagLite::OstringStream msg2;
+				PsimagLite::OstringStream msgg2(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 				msg2<<"Found eigenvalue["<<excited<<"]= "<<energyTmp[excited];
-				progress_.printline(msg2,std::cout);
+				progress_.printline(msgg2, std::cout);
 			}
 		}
 
-		PsimagLite::OstringStream msg1;
+		PsimagLite::OstringStream msgg1(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg1 = msgg1();
 		msg1<<"Found lowest eigenvalue= "<<energyTmp[0];
-		progress_.printline(msg1,std::cout);
+		progress_.printline(msgg1, std::cout);
 
 		if (lanczosOrDavidson) delete lanczosOrDavidson;
 	}
@@ -600,10 +615,11 @@ private:
 		const SizeType nexcited = gsVector.size();
 		RealType norma = PsimagLite::norm(initialVector);
 		if (fabs(norma) < 1e-12) {
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"WARNING: diagonaliseOneBlock: Norm of guess vector is zero, ";
 			msg<<"ignoring guess\n";
-			progress_.printline(msg, std::cout);
+			progress_.printline(msgg, std::cout);
 			TargetVectorType init(initialVector.size());
 			PsimagLite::fillRandom(init);
 			object.computeAllStatesBelow(energyTmp, gsVector,init, nexcited);

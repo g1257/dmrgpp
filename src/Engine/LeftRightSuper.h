@@ -219,12 +219,13 @@ public:
 		assert(left_);
 		assert(right_);
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<label<<": left-block basis="<<left_->size();
 		msg<<", right-block basis="<<right_->size();
 		msg<<" sites="<<left_->block().size()<<"+";
 		msg<<right_->block().size();
-		progress_.printline(msg,os);
+		progress_.printline(msgg, os);
 	}
 
 	SizeType sites() const

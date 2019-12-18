@@ -121,11 +121,12 @@ public:
 	      ijpatchesNew_(&ijpatchesOld_),
 	      wftMode_(false)
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"::ctor (for H), ";
 		msg<<"denseSparseThreshold= "<<denseSparseThreshold;
 		msg<<", useLowerPart= "<<useLowerPart;
-		progress_.printline(msg, std::cout);
+		progress_.printline(msgg, std::cout);
 
 		signsNew_ = lrs.left().signs();
 	}

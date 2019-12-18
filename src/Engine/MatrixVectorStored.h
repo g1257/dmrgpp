@@ -118,10 +118,11 @@ public:
 		matrixStored_[0].clear();
 		model.fullHamiltonian(matrixStored_[0], hc, aux);
 		assert(isHermitian(matrixStored_[0],true));
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"fullHamiltonian has rank="<<matrixStored_[0].rows();
 		msg<<" nonzeros="<<matrixStored_[0].nonZeros();
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 		if (debugMatrix)
 			printFullMatrix(matrixStored_[0],"matrix",1);
 	}

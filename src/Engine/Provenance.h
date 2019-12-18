@@ -24,7 +24,8 @@ public:
 
 	static PsimagLite::String logo(PsimagLite::String appName)
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<appName<<"\x1b[38;5;124m";
 		msg<<" [features "<<DMRGPP_VERSION<<"] "<<PsimagLite::AnsiColor::reset;
 		PsimagLite::String ctOpts("");

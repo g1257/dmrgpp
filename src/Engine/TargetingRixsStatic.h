@@ -273,9 +273,10 @@ private:
 					if (tmpV1.size() > 0) {
 						this->common().aoe().targetVectors(3) = tmpV1;
 						applied_ = true;
-						PsimagLite::OstringStream msg;
+						PsimagLite::OstringStream msgg(std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 						msg<<"Applied operator";
-						progress_.printline(msg, std::cout);
+						progress_.printline(msgg, std::cout);
 					}
 				}
 			}
@@ -294,9 +295,10 @@ private:
 						this->common().aoe().targetVectors(3) = tmpV1;
 						applied_ = false;
 						appliedFirst_ = true;
-						PsimagLite::OstringStream msg;
+						PsimagLite::OstringStream msgg(std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 						msg<<"Applied first operator";
-						progress_.printline(msg, std::cout);
+						progress_.printline(msgg, std::cout);
 					}
 				}
 				if (site == tstStruct_.sites(1)) {
@@ -312,9 +314,10 @@ private:
 					if (tmpV2.size() > 0) {
 						this->common().aoe().targetVectors(3) += tmpV2;
 						applied_ = true;
-						PsimagLite::OstringStream msg;
+						PsimagLite::OstringStream msgg(std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 						msg<<"Applied second operator";
-						progress_.printline(msg, std::cout);
+						progress_.printline(msgg, std::cout);
 					}
 				}
 			}

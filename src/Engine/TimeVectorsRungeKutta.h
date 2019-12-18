@@ -151,13 +151,14 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             const typename BaseType::ExtraData&)
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"using RungeKutta";
 
 		RealType norma = norm(phi);
 		if (norma<1e-10) return;
 		msg<<" Norm of phi= "<<norma;
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		// set non-zero sectors
 		for (SizeType i=0;i<times_.size();i++) targetVectors_[i] = phi;

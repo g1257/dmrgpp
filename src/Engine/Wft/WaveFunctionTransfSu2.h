@@ -125,9 +125,10 @@ public:
 	      wftOptions_(wftOptions),
 	      progress_("WaveFunctionTransfLocal")
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Constructing SU(2)";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	virtual void transformVector(VectorWithOffsetType& psiDest,
@@ -341,10 +342,11 @@ private:
 	                                  const LeftRightSuperType& lrs,
 	                                  const VectorSizeType& nk) const
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<" Destination sectors "<<psiDest.sectors();
 		msg<<" Source sectors "<<psiSrc.sectors();
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 		const LeftRightSuperType& lrsOld = dmrgWaveStruct_.lrs();
 		assert(lrsOld.super().permutationInverse().size() == psiSrc.size());
 

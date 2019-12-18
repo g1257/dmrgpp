@@ -473,7 +473,8 @@ public:
 			addThisTarget2(x, v, sqrt(weight));
 		}
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Found "<<allTargets_.size()<<" groups on left or right";
 		profiling.end(msg.str());
 	}

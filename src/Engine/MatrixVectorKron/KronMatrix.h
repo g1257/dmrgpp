@@ -117,11 +117,12 @@ public:
 	      batchedGemm_(initKron)
 	{
 		PsimagLite::String str((initKron.loadBalance()) ? "true" : "false");
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"KronMatrix: "<<name<<" sizes="<<initKron.size(InitKronType::NEW);
 		msg<<" "<<initKron.size(InitKronType::OLD);
 		msg<<" loadBalance "<<str;
-		progress_.printline(msg, std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	void matrixVectorProduct(VectorType& vout, const VectorType& vin) const

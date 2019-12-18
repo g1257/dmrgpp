@@ -271,9 +271,10 @@ public:
 	           const BasisWithOperatorsType &pE,
 	           typename IoType::Out& io) const
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Saving pS and pE...";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 		pS.write(io,
 		         "CHKPOINTSYSTEM",
 		         IoType::Out::Serializer::NO_OVERWRITE,
@@ -356,16 +357,18 @@ private:
 
 	void sayAboutToWrite() const
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Writing sys. and env. stacks to disk...";
-		progress_.printline(msg, std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	void sayWritingDone() const
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Written sys. and env. stacks to disk.";
-		progress_.printline(msg, std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	Checkpoint(const Checkpoint&);
@@ -490,9 +493,11 @@ private:
 		                      isRestart_,
 		                      "environ",
 		                      isObserveCode_);
-		PsimagLite::OstringStream msg;
+
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Loading sys. and env. stacks from disk...";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		DiskOrMemoryStackType::loadStack(systemStack_, systemDisk);
 		DiskOrMemoryStackType::loadStack(envStack_, envDisk);

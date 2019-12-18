@@ -121,9 +121,10 @@ public:
 	      debug_(p.debug)
 	{
 		{
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Init partition for all targets";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 		}
 
 		const BasisWithOperatorsType& pBasis =
@@ -187,9 +188,10 @@ public:
 		}
 
 		{
-			PsimagLite::OstringStream msg;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Done with init partition";
-			progress_.printline(msg,std::cout);
+			progress_.printline(msgg, std::cout);
 		}
 
 	}

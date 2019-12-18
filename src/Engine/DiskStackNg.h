@@ -107,9 +107,10 @@ public:
 		}
 
 		ioIn_->read(total_, label_ + "/Size");
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Read from file " + filename + " succeeded";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	~DiskStack()

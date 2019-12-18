@@ -375,9 +375,10 @@ private:
 			if (tmpV2.size() > 0) {
 				this->common().aoe().targetVectors(7) = tmpV2;
 				applied_ = true;
-				PsimagLite::OstringStream msg;
+				PsimagLite::OstringStream msgg(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 				msg<<"Applied";
-				progress_.printline(msg, std::cout);
+				progress_.printline(msgg, std::cout);
 			}
 		}
 	}
@@ -412,9 +413,10 @@ private:
 				this->common().aoe().targetVectors(7) = tmpV2;
 				applied_ = false;
 				appliedFirst_ = true;
-				PsimagLite::OstringStream msg;
+				PsimagLite::OstringStream msgg(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 				msg<<"First Operator Applied";
-				progress_.printline(msg, std::cout);
+				progress_.printline(msgg, std::cout);
 			}
 		}
 
@@ -468,9 +470,10 @@ private:
 			if (tmpV2.size() > 0) {
 				this->common().aoe().targetVectors(7) += tmpV2;
 				applied_ = true;
-				PsimagLite::OstringStream msg;
+				PsimagLite::OstringStream msgg(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 				msg<<"Applied";
-				progress_.printline(msg, std::cout);
+				progress_.printline(msgg, std::cout);
 			}
 		}
 	}
@@ -514,9 +517,10 @@ private:
 
 		RealType norma = norm(phiNew);
 		if (norma<1e-6) {
-			PsimagLite::OstringStream msg2;
+			PsimagLite::OstringStream msgg2(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 			msg2<<"Norm of phi is zero\n";
-			progress_.printline(msg2,std::cout);
+			progress_.printline(msgg2, std::cout);
 		}
 	}
 

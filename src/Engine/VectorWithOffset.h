@@ -269,9 +269,10 @@ public:
 		VectorType tmpV(total,0);
 		data_ = tmpV;
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"populateFromQns succeeded";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	void collapseSectors() {}

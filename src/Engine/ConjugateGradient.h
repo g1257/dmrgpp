@@ -127,18 +127,20 @@ public:
 			k++;
 		}
 
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Finished after "<<k<<" steps out of "<<max_;
 		msg<<" requested eps= "<<eps_;
 		RealType finalEps = PsimagLite::norm(rnext);
 		msg<<" actual eps= "<<finalEps;
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		if (finalEps <= eps_) return;
 
-		PsimagLite::OstringStream msg2;
+		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"WARNING: actual eps "<<finalEps<<" greater than requested eps= "<<eps_;
-		progress_.printline(msg2,std::cout);
+		progress_.printline(msgg2, std::cout);
 	}
 
 private:
