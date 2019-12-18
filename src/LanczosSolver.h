@@ -56,13 +56,12 @@ public:
 		if (norma<1e-5 || norma>100)
 			std::cerr<<"norma="<<norma<<"\n";
 
-		OstringStream msg;
-		msg.precision(std::cout.precision());
+		OstringStream msg(std::cout.precision());
 		String what = "lowest";
 		if (excited > 0) what = ttos(excited) + " excited";
-		msg<<"Found "<<what<<" eigenvalue= "<<energy<<" after "<<iter;
-		msg<<" iterations, "<<" orig. norm="<<norma<<" excited="<<excited;
-		profiling.end(msg.str());
+		msg()<<"Found "<<what<<" eigenvalue= "<<energy<<" after "<<iter;
+		msg()<<" iterations, "<<" orig. norm="<<norma<<" excited="<<excited;
+		profiling.end(msg().str());
 	}
 
 	void computeAllStatesBelow(VectorRealType& eigs,

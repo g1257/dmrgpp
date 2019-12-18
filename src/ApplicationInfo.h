@@ -176,16 +176,16 @@ private:
 
 	static void printFinalLegacy(std::ostream& os, const ApplicationInfo& ai)
 	{
-		OstringStream msg;
-		msg<<ai.name_<<"\nsizeof(SizeType)="<<sizeof(SizeType)<<"\n";
+		OstringStream msg(std::cout.precision());
+		msg()<<ai.name_<<"\nsizeof(SizeType)="<<sizeof(SizeType)<<"\n";
 #ifdef USE_FLOAT
-		msg<<ai.name_<<" using float\n";
+		msg()<<ai.name_<<" using float\n";
 #else
-		msg<<ai.name_<<" using double\n";
+		msg()<<ai.name_<<" using double\n";
 #endif
-		msg<<"UnixTimeEnd="<<ai.unixTime(false)<<"\n";
-		msg<<ai.getTimeDate();
-		os<<msg.str();
+		msg()<<"UnixTimeEnd="<<ai.unixTime(false)<<"\n";
+		msg()<<ai.getTimeDate();
+		os<<msg().str();
 	}
 
 	RunIdType runIdInternal() const
@@ -194,14 +194,16 @@ private:
 		time_t tt = unixTime(true);
 		MersenneTwister mt(tt + p);
 		unsigned int x = tt ^ mt.random();
-		OstringStream msg;
+		OstringStream msgg(std::cout.precision());
+		OstringStream::OstringStreamType& msg = msgg();
 		msg<<x;
 		x = p ^ mt.random();
 		msg<<x;
 		unsigned long int y = atol(msg.str().c_str());
 		y ^= mt.random();
 		x = BitManip::countKernighan(y);
-		OstringStream msg2;
+		OstringStream msgg2(std::cout.precision());
+		OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<y;
 		if (x < 10) msg2<<"0";
 		msg2<<x;

@@ -174,12 +174,12 @@ public:
 			(*fout_)<<s<<"\n";
 		}
 
-		void printline(OstringStream &s)
+		void printline(OstringStream& s)
 		{
 			if (rank_!=0) return;
-			(*fout_)<<s.str()<<"\n";
-			s.flush();
-			s.seekp(std::ios_base::beg);
+			(*fout_)<<s().str()<<"\n";
+			s().flush();
+			s().seekp(std::ios_base::beg);
 		}
 
 		template<typename T>

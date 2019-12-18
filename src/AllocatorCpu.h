@@ -136,7 +136,29 @@ struct IsStringLike<std::basic_string<char, std::char_traits<char>, A> > {
 
 typedef std::basic_string<char,std::char_traits<char>,Allocator<char>::Type> String;
 typedef std::basic_istringstream<char,std::char_traits<char>,Allocator<char>::Type> IstringStream;
-typedef std::basic_ostringstream<char,std::char_traits<char>,Allocator<char>::Type> OstringStream;
+
+class OstringStream {
+public:
+
+    typedef std::basic_ostringstream<char,std::char_traits<char>,Allocator<char>::Type>
+    OstringStreamType;
+
+    OstringStream(int prec)
+    {
+        data_.precision(prec);
+    }
+
+	int precision(int prec)
+	{
+		return data_.precision(prec);
+	}
+
+    OstringStreamType& operator()() { return data_; }
+
+private:
+
+    OstringStreamType data_;
+};
 
 class RuntimeError : public std::runtime_error {
 public:

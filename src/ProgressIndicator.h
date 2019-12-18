@@ -115,9 +115,9 @@ public:
 			outName += ttos(p);
 			outName += ".txt";
 			std::ofstream fout(outName.c_str());
-			fout<<buffer_.str()<<"\n";
+			fout<<buffer_().str()<<"\n";
 			fout.close();
-			buffer_.str("");
+			buffer_().str("");
 		}
 
 		bufferActive_ = !bufferActive_;
@@ -139,25 +139,25 @@ public:
 		if (!bufferActive_) return;
 
 		prefix(buffer_);
-		buffer_<<s<<"\n";
+		buffer_()<<s<<"\n";
 	}
 
-	void printline(OstringStream &s,std::ostream& os) const
+	void printline(OstringStream& s, std::ostream& os) const
 	{
 		if (threadId_ != 0) return;
 		if (rank_!=0) return;
 		prefix(os);
-		os<<s.str()<<"\n";
-		s.seekp(std::ios_base::beg);
+		os<<s().str()<<"\n";
+		s().seekp(std::ios_base::beg);
 
 		if (!bufferActive_) return;
 
 		prefix(buffer_);
-		buffer_<<s.str()<<"\n";
-		s.seekp(std::ios_base::beg);
+		buffer_()<<s().str()<<"\n";
+		s().seekp(std::ios_base::beg);
 	}
 
-	void print(const String& something,std::ostream& os) const
+	void print(const String& something, std::ostream& os) const
 	{
 		if (threadId_ != 0) return;
 		if (rank_!=0) return;
@@ -167,7 +167,7 @@ public:
 		if (!bufferActive_) return;
 
 		prefix(buffer_);
-		buffer_<<something;
+		buffer_()<<something;
 	}
 
 	void printMemoryUsage()
@@ -175,14 +175,14 @@ public:
 		musage_.update();
 		String vmPeak = musage_.findEntry("VmPeak:");
 		String vmSize = musage_.findEntry("VmSize:");
-		OstringStream msg;
-		msg<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
-		printline(msg,std::cout);
+		OstringStream msg(std::cout.precision());
+		msg()<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
+		printline(msg, std::cout);
 
 		if (!bufferActive_) return;
 
-		buffer_<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
-		printline(buffer_,std::cout);
+		buffer_()<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
+		printline(buffer_, std::cout);
 	}
 
 	static MemoryUsage::TimeHandle time() { return musage_.time(); }
@@ -195,8 +195,19 @@ private:
 		const MemoryUsage::TimeHandle t = musage_.time();
 		const double seconds = t.millis();
 		const SizeType prec = os.precision(3);
-		os<<caller_<<" "<<"["<<std::fixed<<seconds<<"]: ";
+		prefixHelper(os)<<caller_<<" "<<"["<<std::fixed<<seconds<<"]: ";
 		os.precision(prec);
+	}
+
+	OstringStream::OstringStreamType& prefixHelper(OstringStream& os) const
+	{
+		return os();
+	}
+
+	template<typename SomeOutputStreamType>
+	SomeOutputStreamType& prefixHelper(SomeOutputStreamType& os) const
+	{
+		return os;
 	}
 
 	String caller_;

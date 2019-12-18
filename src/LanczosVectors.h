@@ -279,17 +279,17 @@ private:
 
 		data_ = new DenseMatrixType(rows, cols);
 		needsDelete_ = true;
-		OstringStream msg;
-		msg<<"lotaMemory_=true";
-		progress_.printline(msg,std::cout);
+		OstringStream msg(std::cout.precision());
+		msg()<<"lotaMemory_=true";
+		progress_.printline(msg, std::cout);
 	}
 
 	void dealWithOverlapStorage(SizeType steps)
 	{
 		if (!isReorthoEnabled_) return;
 
-		OstringStream msg;
-		msg<<"Reortho enabled";
+		OstringStream msg(std::cout.precision());
+		msg()<<"Reortho enabled";
 		progress_.printline(msg,std::cout);
 		return;
 

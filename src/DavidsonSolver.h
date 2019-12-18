@@ -111,10 +111,10 @@ public:
 	      steps_(params.steps),
 	      eps_(params.tolerance)
 	{
-		OstringStream msg;
-		msg<<"Constructing... mat.rank="<<mat_.rows();
-		msg<<" steps="<<steps_<<" eps="<<eps_;
-		progress_.printline(msg,std::cout);
+		OstringStream msg(std::cout.precision());
+		msg()<<"Constructing... mat.rank="<<mat_.rows();
+		msg()<<" steps="<<steps_<<" eps="<<eps_;
+		progress_.printline(msg, std::cout);
 	}
 
 	void computeOneState(RealType&, VectorType&, const VectorType&, SizeType)

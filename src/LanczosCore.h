@@ -128,10 +128,10 @@ public:
 	                      params.steps,
 	                      isReorthoEnabled)
 	{
-		OstringStream msg;
-		msg<<"Constructing... mat.rank="<<mat_.rows();
-		msg<<" maximum steps="<<steps_<<" maximum eps="<<params_.tolerance<<" requested";
-		progress_.printline(msg,std::cout);
+		OstringStream msg(std::cout.precision());
+		msg()<<"Constructing... mat.rank="<<mat_.rows();
+		msg()<<" maximum steps="<<steps_<<" maximum eps="<<params_.tolerance<<" requested";
+		progress_.printline(msg, std::cout);
 	}
 
 	/**
@@ -246,18 +246,18 @@ public:
 
 		lanczosVectors_.resize(max_nstep);
 
-		OstringStream msg;
-		msg<<"Decomposition done for mat.rank="<<mat_.rows();
-		msg<<" after "<<j<<" steps";
-		if (params_.tolerance>0) msg<<", actual eps="<<deltaMax;
+		OstringStream msg(std::cout.precision());
+		msg()<<"Decomposition done for mat.rank="<<mat_.rows();
+		msg()<<" after "<<j<<" steps";
+		if (params_.tolerance>0) msg()<<", actual eps="<<deltaMax;
 
-		progress_.printline(msg,std::cout);
+		progress_.printline(msg, std::cout);
 
 		if (j == max_nstep && j != mat_.rows()) {
-			OstringStream msg2;
-			msg2<<"WARNING: Maximum number of steps used. ";
-			msg2<<"Increasing this maximum is recommended.";
-			progress_.printline(msg2,std::cout);
+			OstringStream msg2(std::cout.precision());
+			msg2()<<"WARNING: Maximum number of steps used. ";
+			msg2()<<"Increasing this maximum is recommended.";
+			progress_.printline(msg2, std::cout);
 		}
 	}
 

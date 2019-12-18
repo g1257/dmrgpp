@@ -44,8 +44,8 @@ public:
 	      isDead_(false),
 	      os_(os)
 	{
-		OstringStream msg;
-		msg << "starting clock " << additional;
+		OstringStream msg(std::cout.precision());
+		msg() << "starting clock " << additional;
 		progressIndicator_.printline(msg, os);
 	}
 
@@ -56,8 +56,8 @@ public:
 	      isDead_(false),
 	      os_(os)
 	{
-		OstringStream msg;
-		msg << "starting clock";;
+		OstringStream msg(std::cout.precision());
+		msg() << "starting clock";;
 		progressIndicator_.printline(msg, os);
 	}
 
@@ -76,8 +76,8 @@ private:
 	void killIt(String message)
 	{
 		if (isDead_) return;
-		OstringStream msg;
-		msg << "stopping clock " << message;
+		OstringStream msg(std::cout.precision());
+		msg() << "stopping clock " << message;
 		progressIndicator_.printline(msg, os_);
 		isDead_ = true;
 	}

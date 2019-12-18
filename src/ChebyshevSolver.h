@@ -141,9 +141,10 @@ public:
 		params.steps=400;
 		setMode(params.options);
 		computeAandB();
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Constructing... mat.rank="<<mat_.rows()<<" steps="<<params.steps;
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 	}
 
 	void computeGroundState(RealType&, VectorType&)
@@ -270,11 +271,11 @@ private:
 			//throw RuntimeError("Norm\n");
 		}
 
-		PsimagLite::OstringStream msg;
-		msg.precision(8);
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Found Energy="<<energyTmp<<" after "<<params_.steps;
 		msg<<" iterations, "<<" orig. norm="<<norma;
-		progress_.printline(msg,os);
+		progress_.printline(msgg, os);
 	}
 
 	//! only for debugging:
@@ -311,9 +312,10 @@ private:
 
 	void computeAandB()
 	{
-		PsimagLite::OstringStream msg;
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"Asking LanczosSolver to compute spectrum bounds...";
-		progress_.printline(msg,std::cout);
+		progress_.printline(msgg, std::cout);
 
 		SolverParametersType params;
 		InternalMatrix mat2(mat_);
@@ -340,9 +342,10 @@ private:
 		params_.oneOverA=2.0/(eMax-eMin);
 		params_.b=(eMax+eMin)/2;
 
-		PsimagLite::OstringStream msg2;
+		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"Spectrum bounds computed, eMax="<<eMax<<" eMin="<<eMin;
-		progress_.printline(msg2,std::cout);
+		progress_.printline(msgg2, std::cout);
 	}
 
 	ProgressIndicator progress_;
