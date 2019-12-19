@@ -87,6 +87,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 #include "ScaledHamiltonian.h"
 #include "Sort.h"
+#include "ExpressionCalculator.h"
+#include "PredicateAwesome.h"
 
 namespace Dmrg {
 
@@ -132,6 +134,10 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<TargetParamsType,
 	typedef typename LanczosSolverType::MatrixType MatrixLanczosType;
 	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType> ScaledMatrixType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::ExpressionCalculator<int> ExpressionCalculatorType;
+	typedef PsimagLite::PrepassData<int> PrepassDataType;
+	typedef PsimagLite::ExpressionPrepass<PrepassDataType> ExpressionPrepassType;
+	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
 
 public:
 
@@ -152,8 +158,13 @@ public:
 	      wft_(wft),
 	      lrs_(lrs),
 	      ioIn_(ioIn),
-	      timeHasAdvanced_(false)
-	{}
+	      timeHasAdvanced_(false),
+	      correctVectorsAwesomePred_("0==1") // never correct
+	{
+		try {
+			ioIn_.readline(correctVectorsAwesomePred_, "ChebyshevCorrectVector=");
+		} catch (std::exception&) {}
+	}
 
 	virtual void calcTimeVectors(const VectorSizeType& indices,
 	                             RealType Eg,
@@ -227,7 +238,12 @@ public:
 			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2, Eg);
 		}
 
-		bool flagcorrection = timeHasAdvanced_;
+		assert(extra.block.size() > 0);
+		const SizeType site = extra.block[0];
+		const SizeType nsites = model_.geometry().numberOfSites();
+		const SizeType center = nsites/2;
+		PredicateAwesomeType pred(correctVectorsAwesomePred_);
+		const bool flagcorrection = pred.isTrue("%s", site, "%c", center, "%n", nsites);
 		if (flagcorrection)
 			correctVectors(indices, Eg);
 
@@ -465,6 +481,7 @@ private:
 	const LeftRightSuperType& lrs_;
 	InputValidatorType& ioIn_;
 	bool timeHasAdvanced_;
+	PsimagLite::String correctVectorsAwesomePred_;
 }; //class TimeVectorsChebyshev
 } // namespace Dmrg
 /*@}*/
