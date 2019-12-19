@@ -55,6 +55,19 @@ public:
 	template<typename T>
 	bool isTrue(String name1, T val1,
 	            String name2, T val2,
+	            String name3, T val3)
+	{
+		VectorStringType names{name1, name2, name3};
+		typename Vector<T>::Type values{val1, val2, val3};
+		SizeType n = vPredicateSimple_.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (!vPredicateSimple_[i].isTrue(names, values)) return false;
+		return true;
+	}
+
+	template<typename T>
+	bool isTrue(String name1, T val1,
+	            String name2, T val2,
 	            String name3, T val3,
 	            String name4, T val4)
 	{
