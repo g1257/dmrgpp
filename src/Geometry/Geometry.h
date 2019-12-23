@@ -292,14 +292,6 @@ public:
 		return result;
 	}
 
-	void fillAdditionalData(AdditionalDataType& additionalData,
-	                        SizeType term,
-	                        SizeType ind,
-	                        SizeType jnd) const
-	{
-		terms_[term]->fillAdditionalData(additionalData,ind,jnd);
-	}
-
 	SizeType findReflection(SizeType site,SizeType termId) const
 	{
 		return terms_[termId]->findReflection(site);

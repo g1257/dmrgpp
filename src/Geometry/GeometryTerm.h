@@ -346,13 +346,6 @@ public:
 		return geometryBase_->maxConnections();
 	}
 
-	void fillAdditionalData(AdditionalDataType& additionalData,
-	                        SizeType ind,
-	                        SizeType jnd) const
-	{
-		geometryBase_->fillAdditionalData(additionalData,ind,jnd);
-	}
-
 	SizeType findReflection(SizeType site) const
 	{
 		return geometryBase_->findReflection(site);
