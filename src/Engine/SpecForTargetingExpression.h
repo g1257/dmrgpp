@@ -293,7 +293,7 @@ private:
 		aux_.model.findOddElectronsOfOneSite(oddElectrons,site);
 		FermionSign fs(aux_.lrs.left(), oddElectrons);
 		bool b1 = (site == 1 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
-		SizeType n = aux_.model.geometry().numberOfSites();
+		SizeType n = aux_.model.superGeometry().numberOfSites();
 		assert(n > 2);
 		bool b2 = (site == n - 2 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES

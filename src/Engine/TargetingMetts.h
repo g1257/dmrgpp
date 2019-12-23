@@ -281,7 +281,7 @@ public:
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
 		PsimagLite::String predicate = model_.params().printHamiltonianAverage;
-		const SizeType center = model_.geometry().numberOfSites()/2;
+		const SizeType center = model_.superGeometry().numberOfSites()/2;
 		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		assert(block1.size() > 0);
@@ -398,7 +398,7 @@ private:
 
 		if (this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
 			if (!allSitesCollapsed()) {
-				if (sitesCollapsed_.size()>2*model_.geometry().numberOfSites())
+				if (sitesCollapsed_.size()>2*model_.superGeometry().numberOfSites())
 					throw PsimagLite::RuntimeError("advanceCounterAndComputeStage\n");
 				printAdvancement(timesWithoutAdvancement);
 				return;
@@ -784,7 +784,7 @@ private:
 
 	bool allSitesCollapsed() const
 	{
-		SizeType n = model_.geometry().numberOfSites();
+		SizeType n = model_.superGeometry().numberOfSites();
 		for (SizeType i=0;i<n;i++) {
 			bool seen = (std::find(sitesCollapsed_.begin(),
 			                       sitesCollapsed_.end(),
@@ -815,7 +815,7 @@ private:
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 BaseType::model().geometry(),
+		                                                 BaseType::model().superGeometry(),
 		                                                 BaseType::ModelType::modelLinks(),
 		                                                 this->common().aoe().time(),
 		                                                 0);

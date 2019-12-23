@@ -82,7 +82,7 @@ sub printInstance
 	print FOUT<<EOF;
 
 typedef PsimagLite::CrsMatrix<$complexOrNot> $sparseMatrix;
-typedef PsimagLite::Geometry<$complexOrNot,$inputNg,Dmrg::ProgramGlobals> $geometry;
+typedef Dmrg::SuperGeometry<$complexOrNot,$inputNg,Dmrg::ProgramGlobals> $geometry;
 
 typedef Dmrg::$matrixVector<
  Dmrg::ModelBase<
@@ -99,7 +99,7 @@ typedef PsimagLite::$lanczos<PsimagLite::ParametersForSolver<${geometry}::RealTy
 	$matrixVectorType, ${matrixVectorType}::VectorType> $lanczosType;
 
 template void mainLoop4<$lanczosType,$vecWithOffsetType>
-(${lanczosType}::MatrixType::ModelType::GeometryType&,
+(${lanczosType}::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&);

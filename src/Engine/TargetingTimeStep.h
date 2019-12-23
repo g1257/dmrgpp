@@ -275,7 +275,7 @@ private:
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
 		PsimagLite::String predicate = this->model().params().printHamiltonianAverage;
-		const SizeType center = this->model().geometry().numberOfSites()/2;
+		const SizeType center = this->model().superGeometry().numberOfSites()/2;
 		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		assert(block1.size() > 0);
@@ -316,7 +316,7 @@ private:
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 BaseType::model().geometry(),
+		                                                 BaseType::model().superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 this->common().aoe().time(),
 		                                                 0);

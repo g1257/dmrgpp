@@ -188,7 +188,7 @@ private:
 		      timeDirection_(timeDirection),
 			  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
 		      aux_(p_, lrs),
-		      hc_(lrs, model.geometry(), ModelType::modelLinks(), currentTime, 0),
+		      hc_(lrs, model.superGeometry(), ModelType::modelLinks(), currentTime, 0),
 			  lanczosHelper_(model, hc_, aux_)
 		{}
 

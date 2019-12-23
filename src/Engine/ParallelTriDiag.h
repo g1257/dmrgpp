@@ -137,7 +137,7 @@ private:
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 model_.geometry(),
+		                                                 model_.superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 currentTime_,
 		                                                 0);

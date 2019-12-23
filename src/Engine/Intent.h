@@ -103,7 +103,7 @@ private:
 
 	void examineSite(SizeType site) const
 	{
-		const SizeType l = model_.geometry().numberOfSites();
+		const SizeType l = model_.superGeometry().numberOfSites();
 		const SizeType leg = (l & 1) ? 0 : getLeg();
 		const SizeType lOverTwo = l/2;
 
@@ -151,12 +151,12 @@ private:
 
 	SizeType getLeg() const
 	{
-		SizeType terms = model_.geometry().terms();
+		SizeType terms = model_.superGeometry().terms();
 		PsimagLite::String name("");
 		for (SizeType t = 0; t < terms; ++t) {
-			if (t > 0 && name != model_.geometry().label(t))
+			if (t > 0 && name != model_.superGeometry().label(t))
 				return 0;
-			name = model_.geometry().label(t);
+			name = model_.superGeometry().label(t);
 		}
 
 		if (name == "chain") return 1;

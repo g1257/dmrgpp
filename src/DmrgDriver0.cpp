@@ -6,7 +6,7 @@
 
 
 typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance0Type;
-typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance0Type;
+typedef Dmrg::SuperGeometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance0Type;
 
 typedef Dmrg::MatrixVectorOnTheFly<
  Dmrg::ModelBase<
@@ -23,14 +23,14 @@ typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstan
 	MatrixVector0Type, MatrixVector0Type::VectorType> LanczosSolver0Type;
 
 template void mainLoop4<LanczosSolver0Type,Dmrg::VectorWithOffset<RealType, Dmrg::Qn> >
-(LanczosSolver0Type::MatrixType::ModelType::GeometryType&,
+(LanczosSolver0Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&);
 
 
 typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance1Type;
-typedef PsimagLite::Geometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance1Type;
+typedef Dmrg::SuperGeometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance1Type;
 
 typedef Dmrg::MatrixVectorStored<
  Dmrg::ModelBase<
@@ -47,7 +47,7 @@ typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstan
 	MatrixVector1Type, MatrixVector1Type::VectorType> LanczosSolver1Type;
 
 template void mainLoop4<LanczosSolver1Type,Dmrg::VectorWithOffset<RealType, Dmrg::Qn> >
-(LanczosSolver1Type::MatrixType::ModelType::GeometryType&,
+(LanczosSolver1Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&);

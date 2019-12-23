@@ -95,13 +95,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ParametersType, typename GeometryType, typename ModelHelperType>
+template<typename ParametersType, typename SuperGeometryType, typename ModelHelperType>
 class ModelCommon  {
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelHelperType::LinkType LinkType;
-	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 
 public:
 
@@ -114,7 +113,7 @@ public:
 	typedef typename ModelHelperType::BasisType MyBasis;
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
-	typedef ModelLinks<LabeledOperatorsType, GeometryType> ModelLinksType;
+	typedef ModelLinks<LabeledOperatorsType, SuperGeometryType> ModelLinksType;
 	typedef HamiltonianConnection<ModelLinksType, ModelHelperType> HamiltonianConnectionType;
 	typedef typename HamiltonianConnectionType::VectorLinkType VectorLinkType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -124,9 +123,9 @@ public:
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 
 	ModelCommon(const ParametersType& params,
-	            const GeometryType& geometry)
+	            const SuperGeometryType& superGeometry)
 	    : params_(params),
-	      geometry_(geometry),
+	      superGeometry_(superGeometry),
 	      progress_("ModelCommon")
 	{
 		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
@@ -137,7 +136,7 @@ public:
 
 	const ParametersType& params() const { return params_; }
 
-	const GeometryType& geometry() const { return geometry_; }
+	const SuperGeometryType& superGeometry() const { return superGeometry_; }
 
 	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                  const VectorOperatorType& cm,
@@ -178,7 +177,7 @@ public:
 private:
 
 	const ParametersType& params_;
-	const GeometryType& geometry_;
+	const SuperGeometryType& superGeometry_;
 	PsimagLite::ProgressIndicator progress_;
 }; //class ModelCommon
 } // namespace Dmrg

@@ -111,7 +111,7 @@ public:
 			io.read(pure,"MettsPure");
 		} catch (std::exception& e) {}
 
-		SizeType n = model.geometry().numberOfSites();
+		SizeType n = model.superGeometry().numberOfSites();
 		if (pure.size() > 0 && pure.size() != n) {
 			PsimagLite::String msg("MettsParams: If provided, MettsPure must be");
 			msg += " a vector of " + ttos(n) + " entries.\n";

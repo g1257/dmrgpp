@@ -141,7 +141,7 @@ public:
 	      targetVectors_(0),
 	      timeVectorsBase_(0),
 	      wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft()),
-	      multiSiteExprHelper_(targetHelper_.model().geometry().numberOfSites() - 2),
+	      multiSiteExprHelper_(targetHelper_.model().superGeometry().numberOfSites() - 2),
 	      correlationsSkel_(multiSiteExprHelper_, false)
 	{}
 
@@ -674,7 +674,7 @@ private:
 		const OptionsType& options = targetHelper_.model().params().options;
 		const bool advanceOnlyAtBorder = !options.isSet("advanceUnrestricted");
 
-		SizeType sites = targetHelper_.model().geometry().numberOfSites();
+		SizeType sites = targetHelper_.model().superGeometry().numberOfSites();
 		bool weAreAtBorder = (site < 2 || site >= sites-2);
 		bool dontAdvance = (advanceOnlyAtBorder & !weAreAtBorder);
 

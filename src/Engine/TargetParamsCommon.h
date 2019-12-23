@@ -381,7 +381,7 @@ private:
 	{
 		if (sites_.size() == 0) return;
 
-		SizeType linSize = model_.geometry().numberOfSites();
+		SizeType linSize = model_.superGeometry().numberOfSites();
 
 		if (hasOperatorAt(0) && !hasOperatorAt(1)) {
 			errorBorderOperators(0);
@@ -394,8 +394,8 @@ private:
 
 	void checkSites() const
 	{
-		SizeType linSize = model_.geometry().numberOfSites();
-		for (SizeType i=0;i<sites_.size();i++) {
+		SizeType linSize = model_.superGeometry().numberOfSites();
+		for (SizeType i = 0; i < sites_.size(); ++i) {
 			if (sites_[i] >= linSize) {
 				PsimagLite::String str(__FILE__);
 				str += " TSPSites: The " + ttos(i) + "-th site is ";
@@ -416,7 +416,7 @@ private:
 
 	void errorBorderOperators(SizeType site) const
 	{
-		SizeType linSize = model_.geometry().numberOfSites();
+		SizeType linSize = model_.superGeometry().numberOfSites();
 		SizeType site2 = (site == 0) ? 1 : linSize - 2;
 
 		PsimagLite::String str("ERROR: Operators at border site: Please ");

@@ -6,7 +6,6 @@
 #include "InputCheck.h"
 #include "ParametersDmrgSolver.h"
 #include "ModelSelector.h"
-#include "Geometry/Geometry.h"
 #include "ModelHelperLocal.h"
 #include "ModelHelperSu2.h"
 #include "MatrixVectorOnTheFly.h"
@@ -110,7 +109,7 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 }
 
 template<typename SolverType, typename VectorWithOffsetType>
-void mainLoop4(typename SolverType::MatrixType::ModelType::GeometryType&,
+void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType&,
                const ParametersDmrgSolverType&,
                InputNgType::Readable&,
                const OperatorOptions&);

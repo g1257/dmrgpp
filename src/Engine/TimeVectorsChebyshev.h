@@ -240,7 +240,7 @@ public:
 
 		assert(extra.block.size() > 0);
 		const SizeType site = extra.block[0];
-		const SizeType nsites = model_.geometry().numberOfSites();
+		const SizeType nsites = model_.superGeometry().numberOfSites();
 		const SizeType center = nsites/2;
 		PredicateAwesomeType pred(correctVectorsAwesomePred_);
 		const bool flagcorrection = pred.isTrue("%s", site, "%c", center, "%n", nsites);
@@ -284,7 +284,7 @@ private:
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 model_.geometry(),
+		                                                 model_.superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 time(),
 		                                                 0);
@@ -380,7 +380,7 @@ private:
 		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 model_.geometry(),
+		                                                 model_.superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 time(),
 		                                                 0);

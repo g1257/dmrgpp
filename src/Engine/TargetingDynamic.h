@@ -285,7 +285,7 @@ private:
 		RealType fakeTime = 0;
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 BaseType::model().geometry(),
+		                                                 BaseType::model().superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 fakeTime,
 		                                                 0);

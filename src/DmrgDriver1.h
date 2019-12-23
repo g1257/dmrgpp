@@ -4,7 +4,7 @@
 #include "DmrgDriver.h"
 
 template<typename SolverType, typename VectorWithOffsetType>
-void mainLoop4(typename SolverType::MatrixType::ModelType::GeometryType& geometry,
+void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions)

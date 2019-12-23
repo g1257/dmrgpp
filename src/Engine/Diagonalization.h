@@ -465,11 +465,11 @@ private:
 		                                            parameters_.dumperEnd,
 		                                            parameters_.precision);
 		ParamsForKroneckerDumperType* paramsKrDumperPtr = 0;
-		if (lrs.super().block().size() == model_.geometry().numberOfSites())
+		if (lrs.super().block().size() == model_.superGeometry().numberOfSites())
 			paramsKrDumperPtr = &paramsKrDumper;
 
 		HamiltonianConnectionType hc(lrs,
-		                             model_.geometry(),
+		                             model_.superGeometry(),
 		                             ModelType::modelLinks(),
 		                             targetTime,
 		                             paramsKrDumperPtr);

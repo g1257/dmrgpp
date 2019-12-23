@@ -12,8 +12,6 @@ class ParallelHamiltonianConnection {
 	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename HamiltonianConnectionType::GeometryType GeometryType;
-	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename HamiltonianConnectionType::VectorType VectorType;
 	typedef typename HamiltonianConnectionType::LinkType LinkType;

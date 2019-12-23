@@ -272,7 +272,7 @@ private:
 
 	bool allLinksSeen() const
 	{
-		SizeType nsites = model_.geometry().numberOfSites();
+		SizeType nsites = model_.superGeometry().numberOfSites();
 		assert(nsites>0);
 		SizeType start = model_.params().sitesPerBlock - 1;
 		for (SizeType i=start;i<nsites-1;i++) {
@@ -280,6 +280,7 @@ private:
 			        find(linksSeen_.begin(),linksSeen_.end(),i);
 			if (it == linksSeen_.end()) return false;
 		}
+
 		return true;
 	}
 
@@ -575,7 +576,7 @@ private:
 			for (SizeType j=0; j < blockRight.size(); ++j) {
 				SizeType jnd = blockRight[j];
 				assert(ind != jnd);
-				if (!model_.geometry().connected(smax, emin, ind, jnd))
+				if (!model_.superGeometry().connected(smax, emin, VectorSizeType{ind, jnd}))
 					continue;
 				block.push_back(ind);
 				block.push_back(jnd);

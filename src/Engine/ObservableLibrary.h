@@ -337,7 +337,7 @@ public:
 			ppFourpoint(results, names, rows, cols);
 
 		} else if (label=="dd4") {
-			if (model_.geometry().label(0)!="ladderx") {
+			if (model_.superGeometry().label(0)!="ladderx") {
 				PsimagLite::String str(__FILE__);
 				str += " " + ttos(__LINE__) + "\n";
 				str += "dd4 only available for ladderx\n";

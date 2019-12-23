@@ -107,7 +107,7 @@ class Truncation  {
 	typedef DensityMatrixBase<TargetingType> DensityMatrixBaseType;
 	typedef typename DensityMatrixBaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename TargetingType::ModelType ModelType;
-	typedef typename ModelType::GeometryType GeometryType;
+	typedef typename ModelType::SuperGeometryType SuperGeometryType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 public:
@@ -127,12 +127,12 @@ public:
 	Truncation(const LeftRightSuperType& lrs,
 	           WaveFunctionTransfType& waveFunctionTransformation,
 	           const ParametersType& parameters,
-	           const GeometryType& geometry,
+	           const SuperGeometryType& geometry,
 	           IoOutType& ioOut)
 	    : lrs_(lrs),
 	      waveFunctionTransformation_(waveFunctionTransformation),
 	      parameters_(parameters),
-	      geometry_(geometry),
+	      superGeometry_(geometry),
 	      ioOut_(ioOut),
 	      progress_("Truncation"),
 	      error_(0.0)
@@ -288,7 +288,7 @@ private:
 	{
 		bool expandSys = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
-		size_t mostRecent = maxOpsPerSiteLeft()*geometry_.maxConnections();
+		size_t mostRecent = maxOpsPerSiteLeft()*superGeometry_.maxConnections();
 		size_t numOfOp = basis.numberOfOperators();
 		PairSizeSizeType startEnd(0, numOfOp);
 		if (startEnd.second > mostRecent) {
@@ -493,7 +493,7 @@ private:
 		SizeType index = lrs_.left().block()[last - 1];
 
 		PsimagLite::String predicate = parameters_.saveDensityMatrixEigenvalues;
-		const SizeType center = geometry_.numberOfSites()/2;
+		const SizeType center = superGeometry_.numberOfSites()/2;
 		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 
@@ -505,7 +505,7 @@ private:
 		static bool firstCall = true;
 		if (firstCall) {
 			ioOut_.createGroup(label);
-			SizeType n = geometry_.numberOfSites();
+			SizeType n = superGeometry_.numberOfSites();
 			counterVector_.resize(n, 0);
 			ioOut_.write(n, label + "/Size");
 			for (SizeType i = 0; i < n; ++i)
@@ -530,7 +530,7 @@ private:
 	const LeftRightSuperType& lrs_;
 	WaveFunctionTransfType& waveFunctionTransformation_;
 	const ParametersType& parameters_;
-	const GeometryType& geometry_;
+	const SuperGeometryType& superGeometry_;
 	IoOutType& ioOut_;
 	ProgressIndicatorType progress_;
 	RealType error_;

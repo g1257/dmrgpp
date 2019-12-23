@@ -100,8 +100,7 @@ class HamiltonianConnection {
 public:
 
 	typedef ModelHelperType_ ModelHelperType;
-	typedef typename ModelLinksType::GeometryType GeometryType;
-	typedef SuperGeometry<GeometryType, ModelLinksType> SuperGeometryType;
+	typedef typename ModelLinksType::SuperGeometryType SuperGeometryType;
 	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
@@ -110,7 +109,6 @@ public:
 	typedef VerySparseMatrix<ComplexOrRealType> VerySparseMatrixType;
 	typedef typename ModelHelperType::LinkType LinkType;
 	typedef std::pair<SizeType,SizeType> PairType;
-	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Concurrency ConcurrencyType;
@@ -125,12 +123,12 @@ public:
 	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType> ManyToTwoConnectionType;
 
 	HamiltonianConnection(const LeftRightSuperType& lrs,
-	                      const GeometryType& geometry,
+	                      const SuperGeometryType& superGeometry,
 	                      const ModelLinksType& lpb,
 	                      RealType targetTime,
 	                      const ParamsForKroneckerDumperType* pKroneckerDumper)
 	    : modelHelper_(lrs),
-	      superGeometry_(geometry, lpb),
+	      superGeometry_(superGeometry),
 	      modelLinks_(lpb),
 	      targetTime_(targetTime),
 	      kroneckerDumper_(pKroneckerDumper, lrs),
@@ -154,7 +152,7 @@ public:
 		SizeType last = lrs.super().block().size();
 		assert(last > 0);
 		--last;
-		SizeType numberOfSites = geometry.numberOfSites();
+		SizeType numberOfSites = superGeometry.numberOfSites();
 		assert(numberOfSites > 0);
 		bool superIsReallySuper = (lrs.super().block()[0] == 0 &&
 		        lrs.super().block()[last] == numberOfSites - 1);
@@ -281,7 +279,7 @@ private:
 		        type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
 
 		SizeType totalOne = 0;
-		SizeType geometryTerms = superGeometry_.geometry().terms();
+		SizeType geometryTerms = superGeometry_.terms();
 		for (SizeType termIndex = 0; termIndex < geometryTerms; ++termIndex) {
 
 			if (!modelLinks_.areSitesCompatibleForThisTerm(termIndex, hItems))
@@ -302,7 +300,7 @@ private:
 
 				if (tmp == static_cast<RealType>(0.0)) continue;
 
-				tmp = superGeometry_.geometry().vModifier(termIndex, tmp, targetTime_);
+				tmp = superGeometry_.vModifier(termIndex, tmp, targetTime_);
 
 				oneLink.modifier(tmp);
 
@@ -352,7 +350,7 @@ private:
 	}
 
 	const ModelHelperType modelHelper_;
-	SuperGeometryType superGeometry_;
+	const SuperGeometryType& superGeometry_;
 	const ModelLinksType& modelLinks_;
 	RealType targetTime_;
 	mutable KroneckerDumperType kroneckerDumper_;

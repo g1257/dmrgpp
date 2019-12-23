@@ -149,7 +149,7 @@ public:
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		checkFiniteLoops(model.geometry().numberOfSites(), hilbertOneSite, ioIn);
+		checkFiniteLoops(model.superGeometry().numberOfSites(), hilbertOneSite, ioIn);
 
 		if (!isRestart_) return;
 

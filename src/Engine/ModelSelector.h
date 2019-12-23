@@ -47,7 +47,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_SELECTOR_H
 #define MODEL_SELECTOR_H
 
-#define ALL_MODELS 1
+//#define ALL_MODELS 1
 #include <stdexcept>
 #include "ProgramGlobals.h"
 #include "Utils.h"
@@ -86,7 +86,7 @@ class ModelSelector {
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 
@@ -133,7 +133,7 @@ public:
 
 	const ModelBaseType& operator()(const SolverParamsType& solverParams,
 	                                InputValidatorType& io,
-	                                const GeometryType& geometry)
+	                                const SuperGeometryType& geometry)
 	{
 		if (model_) return *model_;
 

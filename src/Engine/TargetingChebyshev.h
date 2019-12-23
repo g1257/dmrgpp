@@ -139,7 +139,7 @@ public:
 			err("TST needs at least one TSPSite\n");
 
 		SizeType nops = tstStruct_.sites();
-		SizeType linSize = model.geometry().numberOfSites();
+		SizeType linSize = model.superGeometry().numberOfSites();
 		for (SizeType i = 0; i < nops; ++i)
 			if (tstStruct_.sites(i) == 0 || tstStruct_.sites(i) == linSize - 1)
 				err("TargetingChebyshev: FATAL: No application of operators at borders\n");

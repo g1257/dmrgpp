@@ -8,7 +8,7 @@
 
 namespace Dmrg {
 
-template<typename LabeledOperatorsType, typename GeometryType_>
+template<typename LabeledOperatorsType, typename SuperGeometryType_>
 class ModelLinks {
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
@@ -215,8 +215,7 @@ public:
 
 	enum HermitianEnum { HERMIT_NEITHER, HERMIT_PLUS, HERMIT_MINUS};
 
-	typedef GeometryType_ GeometryType;
-	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
+	typedef SuperGeometryType_ SuperGeometryType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Vector<HermitianEnum>::Type VectorHermitianEnum;
 	typedef typename PsimagLite::Vector<Term*>::Type VectorTermType;

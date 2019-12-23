@@ -101,7 +101,7 @@ public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::BasisType BasisType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -130,17 +130,17 @@ public:
 
 	ModelHeisenberg(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
-	                const GeometryType& geometry,
+	                const SuperGeometryType& geometry,
 	                PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry),
+	      superGeometry_(geometry),
 	      additional_(additional),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
-		SizeType n = geometry_.numberOfSites();
+		SizeType n = superGeometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticFieldV.size();
 		SizeType md = modelParameters_.anisotropyD.size();
 		SizeType me = modelParameters_.anisotropyE.size();
@@ -192,7 +192,7 @@ public:
 	                                const BlockType& block,
 	                                RealType) const
 	{
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = superGeometry_.numberOfSites();
 		SizeType n = block.size();
 
 		for (SizeType i = 0; i < n; ++i) {
@@ -481,7 +481,7 @@ private:
 	}
 
 	ParametersModelHeisenberg<RealType, QnType>  modelParameters_;
-	GeometryType const &geometry_;
+	const SuperGeometryType& superGeometry_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	PsimagLite::String additional_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;

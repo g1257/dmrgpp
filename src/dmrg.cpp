@@ -3,6 +3,7 @@
 #include "Provenance.h"
 #include "RegisterSignals.h"
 #include "DmrgDriver.h"
+#include "SuperGeometry.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
@@ -40,7 +41,7 @@ void restoreCoutBuffer()
 }
 
 template<typename MatrixVectorType, typename VectorWithOffsetType>
-void mainLoop3(typename MatrixVectorType::ModelType::GeometryType& geometry,
+void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions)
@@ -65,7 +66,7 @@ void mainLoop3(typename MatrixVectorType::ModelType::GeometryType& geometry,
 }
 
 template<typename MatrixVectorType>
-void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
+void mainLoop2(typename MatrixVectorType::ModelType::SuperGeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions)
@@ -88,10 +89,10 @@ void mainLoop2(typename MatrixVectorType::ModelType::GeometryType& geometry,
 	}
 }
 
-template<typename GeometryType,
+template<typename SuperGeometryType,
          template<typename> class ModelHelperTemplate,
          typename MySparseMatrix>
-void mainLoop1(GeometryType& geometry,
+void mainLoop1(SuperGeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions)
@@ -104,7 +105,7 @@ void mainLoop1(GeometryType& geometry,
 	typedef ModelBase<ModelHelperType,
 	        ParametersDmrgSolverType,
 	        InputNgType::Readable,
-	        GeometryType> ModelBaseType;
+	        SuperGeometryType> ModelBaseType;
 
 	if (dmrgSolverParams.options.isSet("MatrixVectorStored")) {
 		mainLoop2<MatrixVectorStored<ModelBaseType> >(geometry,
@@ -132,11 +133,11 @@ void mainLoop0(InputNgType::Readable& io,
                const OperatorOptions& opOptions)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef PsimagLite::Geometry<ComplexOrRealType,
+	typedef SuperGeometry<ComplexOrRealType,
 	        InputNgType::Readable,
-	        ProgramGlobals> GeometryType;
+	        ProgramGlobals> SuperGeometryType;
 
-	GeometryType geometry(io);
+	SuperGeometryType geometry(io);
 	if (dmrgSolverParams.options.isSet("printgeometry"))
 		std::cout<<geometry;
 
@@ -162,10 +163,10 @@ void mainLoop0(InputNgType::Readable& io,
 		return;
 	}
 
-	mainLoop1<GeometryType,ModelHelperLocal,MySparseMatrix>(geometry,
-	                                                        dmrgSolverParams,
-	                                                        io,
-	                                                        opOptions);
+	mainLoop1<SuperGeometryType,ModelHelperLocal,MySparseMatrix>(geometry,
+	                                                             dmrgSolverParams,
+	                                                             io,
+	                                                             opOptions);
 }
 
 int main(int argc, char **argv)

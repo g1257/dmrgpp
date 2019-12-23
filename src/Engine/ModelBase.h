@@ -94,7 +94,7 @@ namespace Dmrg {
 template<typename ModelHelperType_,
          typename ParametersType_,
          typename InputValidatorType_,
-         typename GeometryType_>
+         typename SuperGeometryType_>
 class ModelBase  {
 
 public:
@@ -118,8 +118,8 @@ public:
 	typedef ParametersType_ ParametersType;
 	typedef InputValidatorType_ InputValidatorType;
 	typedef ModelHelperType_ ModelHelperType;
-	typedef GeometryType_ GeometryType;
-	typedef ModelBase<ModelHelperType_, ParametersType_, InputValidatorType_, GeometryType_>
+	typedef SuperGeometryType_ SuperGeometryType;
+	typedef ModelBase<ModelHelperType_, ParametersType_, InputValidatorType_, SuperGeometryType>
 	ThisType;
 	typedef Braket<ThisType> BraketType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -136,7 +136,7 @@ public:
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelHelperType::SparseElementType ComplexOrRealType;
-	typedef ModelCommon<ParametersType, GeometryType, ModelHelperType> ModelCommonType;
+	typedef ModelCommon<ParametersType, SuperGeometryType, ModelHelperType> ModelCommonType;
 	typedef typename ModelCommonType::HamiltonianConnectionType HamiltonianConnectionType;
 	typedef typename ModelCommonType::VectorLinkType VectorLinkType;
 	typedef typename ModelCommonType::VectorType VectorType;
@@ -158,9 +158,9 @@ public:
 	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
 
 	ModelBase(const ParametersType& params,
-	          const GeometryType_& geometry,
+	          const SuperGeometryType& superGeometry,
 	          InputValidatorType& io)
-	    : modelCommon_(params, geometry),
+	    : modelCommon_(params, superGeometry),
 	      targetQuantum_(io),
 	      ioIn_(io),
 	      atomKind_(0)
@@ -173,7 +173,7 @@ public:
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
 		modelLinks_.postCtor1(labeledOperators_,
 		                      &getAtomKind(),
-		                      modelCommon_.geometry().terms());
+		                      modelCommon_.superGeometry().terms());
 		fillModelLinks(); // fills modelLinks_
 		customOperators();
 		modelLinks_.postCtor2();
@@ -322,7 +322,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		SizeType maxElectrons = static_cast<SizeType>(tmp/2);
 		if (tmp & 1) maxElectrons++;
 
-		return maxElectrons*modelCommon_.geometry().numberOfSites() + 1;
+		return maxElectrons*modelCommon_.superGeometry().numberOfSites() + 1;
 	}
 
 	virtual const AtomKindBaseType& getAtomKind()
@@ -357,7 +357,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		VectorSizeType nzs(total, 0);
 
 		HamiltonianConnectionType hc(lrs,
-		                             modelCommon_.geometry(),
+		                             modelCommon_.superGeometry(),
 		                             modelLinks_,
 		                             currentTime,
 		                             0);
@@ -531,7 +531,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		}
 	}
 
-	const GeometryType& geometry() const { return modelCommon_.geometry(); }
+	const SuperGeometryType& superGeometry() const
+	{
+		return modelCommon_.superGeometry();
+	}
 
 	const ParametersType& params() const { return modelCommon_.params(); }
 

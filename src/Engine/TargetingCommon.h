@@ -155,7 +155,7 @@ public:
 	      progress_("TargetingCommon"),
 	      targetHelper_(lrs, model, wft),
 	      aoe_(targetHelper_, indexNoAdvance),
-	      inSitu_(model.geometry().numberOfSites())
+	      inSitu_(model.superGeometry().numberOfSites())
 	{
 		PsimagLite::split(meas_, model.params().insitu, ",");
 		SizeType n = meas_.size();
@@ -315,7 +315,7 @@ public:
 		SizeType n = meas_.size();
 		assert(block.size()>0);
 		SizeType site = block[0];
-		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
+		SizeType numberOfSites = targetHelper_.model().superGeometry().numberOfSites();
 		BorderEnumType border = ApplyOperatorType::BORDER_NO;
 		if (site == 0 &&
 		        direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
@@ -385,7 +385,7 @@ public:
 		if (cocoonType_ != OpLabelCategory::BARE)
 			err("rixsCocoon: supports only bare operators\n");
 
-		SizeType numberOfSites = targetHelper_.model().geometry().numberOfSites();
+		SizeType numberOfSites = targetHelper_.model().superGeometry().numberOfSites();
 		BorderEnumType border = (site == 0 || site == numberOfSites - 1) ?
 		            ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
 

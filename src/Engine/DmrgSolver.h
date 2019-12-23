@@ -126,7 +126,7 @@ public:
 	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef Truncation<ParametersType,TargetingType> TruncationType;
 	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
-	typedef typename ModelType::GeometryType GeometryType;
+	typedef typename ModelType::SuperGeometryType SuperGeometryType;
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 	typedef Recovery<CheckpointType, TargetingType> RecoveryType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
@@ -166,7 +166,7 @@ public:
 	      truncate_(lrs_,
 	                wft_,
 	                parameters_,
-	                model.geometry(),
+	                model.superGeometry(),
 	                ioOut_),
 	      saveData_(!parameters_.options.isSet("noSaveData"))
 	{
@@ -211,7 +211,7 @@ public:
 		progress_.printline(msgg, std::cout);
 	}
 
-	void main(const GeometryType& geometry)
+	void main(const SuperGeometryType& geometry)
 	{
 		ioOut_.write(geometry, "GEOMETRY");
 
@@ -466,7 +466,7 @@ obtain ordered
 	void checkForWft(ProgramGlobals::SysOrEnvEnum what,
 	                 const MyBasis& pS) const
 	{
-		SizeType numberOfSites = model_.geometry().numberOfSites();
+		SizeType numberOfSites = model_.superGeometry().numberOfSites();
 		assert(numberOfSites > 2);
 		SizeType last = pS.block().size();
 		assert(last > 0);
@@ -635,7 +635,7 @@ obtain ordered
 		typename BasisWithOperatorsType::SaveEnum saveOption2 = (saveOption & 4)
 		        ? BasisWithOperatorsType::SaveEnum::ALL
 		        : BasisWithOperatorsType::SaveEnum::PARTIAL;
-		SizeType numberOfSites = model_.geometry().numberOfSites();
+		SizeType numberOfSites = model_.superGeometry().numberOfSites();
 		PsimagLite::String prefix("Serializer");
 		ds->write(ioOut_, prefix, saveOption2, numberOfSites, counter);
 		PsimagLite::String prefixForTarget = TargetingType::buildPrefix(ioOut_, counter);

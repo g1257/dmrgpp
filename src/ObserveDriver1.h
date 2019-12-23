@@ -11,7 +11,7 @@ bool observeOneFullSweep(IoInputType& io,
                          const PsimagLite::String& list,
                          SizeType orbitals)
 {
-	typedef typename ModelType::GeometryType GeometryType;
+	typedef typename ModelType::SuperGeometryType SuperGeometryType;
 	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
 	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
 	typedef typename ObservableLibraryType::ManyPointActionType ManyPointActionType;
@@ -19,8 +19,8 @@ bool observeOneFullSweep(IoInputType& io,
 
 	static SizeType start = 0;
 
-	const GeometryType& geometry = model.geometry();
-	SizeType n  = geometry.numberOfSites();
+	const SuperGeometryType& superGeometry = model.superGeometry();
+	SizeType n  = superGeometry.numberOfSites();
 	SizeType rows = n; // could be n/2 if there's enough symmetry
 	SizeType cols = n;
 	SizeType nf = n - 2;

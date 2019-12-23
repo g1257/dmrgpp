@@ -5,21 +5,59 @@
 
 namespace Dmrg {
 
-template<typename GeometryType, typename SuperConnectorType>
+template<typename ComplexOrRealType_,typename InputType_, typename ProgramGlobalsType>
 class SuperGeometry {
 
+	typedef PsimagLite::Geometry<ComplexOrRealType_, InputType_, ProgramGlobalsType> GeometryType;
 	typedef typename GeometryType::ComplexOrRealType ComplexOrRealType;
 	typedef typename GeometryType::VectorSizeType VectorSizeType;
-	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
 	typedef typename PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
 
 public:
 
-	SuperGeometry(const GeometryType& geometry, const SuperConnectorType& superc)
-	    : geometry_(geometry), superc_(superc)
+	typedef typename GeometryType::RealType RealType;
+
+	SuperGeometry(InputType_& io)
+	    : geometry_(io)
 	{}
 
-	const GeometryType& geometry() const { return geometry_; }
+	// const GeometryType& geometry() const { return geometry_; }
+
+	void split(SizeType sitesPerBlock,
+	           VectorSizeType& S,
+	           VectorVectorSizeType& X,
+	           VectorVectorSizeType& Y,
+	           VectorSizeType& E,
+	           bool allInSystem = false) const
+	{
+		geometry_.split(sitesPerBlock, S, X, Y, E, allInSystem);
+	}
+
+	SizeType numberOfSites() const { return geometry_.numberOfSites(); }
+
+	SizeType terms() const { return geometry_.terms(); }
+
+	void write(PsimagLite::String label, PsimagLite::IoNgSerializer& ioSerializer) const
+	{
+		geometry_.write(label, ioSerializer);
+	}
+
+//	SizeType maxConnections(SizeType termId) const
+//	{
+//		return geometry_.maxConnections(termId);
+//	}
+
+	SizeType maxConnections() const { return geometry_.maxConnections(); }
+
+	PsimagLite::String label(SizeType i) const { return geometry_.label(i); }
+
+	template<typename T>
+	typename PsimagLite::EnableIf<PsimagLite::IsComplexNumber<T>::True ||
+	Loki::TypeTraits<T>::isStdFloat,
+	T>::Type vModifier(SizeType term, T value, RealType time) const
+	{
+		return geometry_.vModifier(term, value, time);
+	}
 
 	ComplexOrRealType operator()(SizeType smax,
 	                             SizeType emin,
@@ -62,6 +100,12 @@ public:
 //		return c + counter;
 //	}
 
+	friend std::ostream& operator<<(std::ostream& os, const SuperGeometry& supergeometry)
+	{
+		os<<supergeometry.geometry_;
+		return os;
+	}
+
 private:
 
 	static void checkVectorHasTwoEntries(const VectorSizeType& hItems)
@@ -71,7 +115,7 @@ private:
 	}
 
 	const GeometryType& geometry_;
-	const SuperConnectorType& superc_;
 };
+
 }
 #endif // SUPERGEOMETRY_H
