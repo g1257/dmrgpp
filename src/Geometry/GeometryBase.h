@@ -93,8 +93,6 @@ class GeometryBase {
 
 public:
 
-	typedef Vector<SizeType>::Type AdditionalDataType;
-
 	virtual ~GeometryBase()
 	{}
 

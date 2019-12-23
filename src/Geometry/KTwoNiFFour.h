@@ -96,7 +96,6 @@ public:
 
 	typedef std::pair<TypeEnum, SubtypeEnum> PairType;
 	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
-	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 
 	KTwoNiFFour() {}
 

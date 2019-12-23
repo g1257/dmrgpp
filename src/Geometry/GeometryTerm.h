@@ -105,7 +105,6 @@ class GeometryTerm {
 
 public:
 
-	typedef typename GeometryBaseType::AdditionalDataType AdditionalDataType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef typename GeometryDirectionType::InternalDofEnum InternalDofEnum;
 

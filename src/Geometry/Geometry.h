@@ -95,7 +95,6 @@ public:
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef GeometryTerm<ComplexOrRealType,InputType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type VectorSizeType;
-	typedef typename GeometryTermType::AdditionalDataType AdditionalDataType;
 	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type,InputType> GeometryExType;
 
 
