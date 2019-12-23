@@ -5,17 +5,18 @@
 
 namespace Dmrg {
 
-template<typename GeometryType>
+template<typename GeometryType, typename SuperConnectorType>
 class SuperGeometry {
 
 	typedef typename GeometryType::ComplexOrRealType ComplexOrRealType;
 	typedef typename GeometryType::VectorSizeType VectorSizeType;
 	typedef typename GeometryType::AdditionalDataType AdditionalDataType;
+	typedef typename PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
 
 public:
 
-	SuperGeometry(const GeometryType& geometry)
-	    : geometry_(geometry)
+	SuperGeometry(const GeometryType& geometry, const SuperConnectorType& superc)
+	    : geometry_(geometry), superc_(superc)
 	{}
 
 	const GeometryType& geometry() const { return geometry_; }
@@ -46,13 +47,20 @@ public:
 		return geometry_.connectionKind(smax, hItems[0], hItems[1]);
 	}
 
-	void fillAdditionalData(AdditionalDataType& additionalData,
-	                        SizeType term,
-	                        const VectorSizeType& hItems) const
+	SizeType overSize(SizeType blockSize) const
 	{
-		checkVectorHasTwoEntries(hItems);
-		return geometry_.fillAdditionalData(additionalData, term, hItems[0], hItems[1]);
+		return blockSize*(blockSize/2 + 1); // + superc_.size();
 	}
+
+//	SizeType addSuperConnections(VectorVectorSizeType& data,
+//	                             SizeType smax,
+//	                             SizeType emin,
+//	                             const VectorSizeType& block,
+//	                             SizeType counter) const
+//	{
+//		SizeType c = superc_.addSuperConnections(data, smax, emin, block);
+//		return c + counter;
+//	}
 
 private:
 
@@ -63,6 +71,7 @@ private:
 	}
 
 	const GeometryType& geometry_;
+	const SuperConnectorType& superc_;
 };
 }
 #endif // SUPERGEOMETRY_H

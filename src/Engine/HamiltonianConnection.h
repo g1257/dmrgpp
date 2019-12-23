@@ -101,7 +101,7 @@ public:
 
 	typedef ModelHelperType_ ModelHelperType;
 	typedef typename ModelLinksType::GeometryType GeometryType;
-	typedef SuperGeometry<GeometryType> SuperGeometryType;
+	typedef SuperGeometry<GeometryType, ModelLinksType> SuperGeometryType;
 	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
@@ -130,7 +130,7 @@ public:
 	                      RealType targetTime,
 	                      const ParamsForKroneckerDumperType* pKroneckerDumper)
 	    : modelHelper_(lrs),
-	      superGeometry_(geometry),
+	      superGeometry_(geometry, lpb),
 	      modelLinks_(lpb),
 	      targetTime_(targetTime),
 	      kroneckerDumper_(pKroneckerDumper, lrs),

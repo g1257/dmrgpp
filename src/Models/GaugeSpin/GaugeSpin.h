@@ -228,6 +228,7 @@ protected:
 		if (BasisType::useSu2Symmetry())
 			err("SU(2): no longer supported\n");
 
+		auto lambda = []
 		ModelTermType& plaquetteX = ModelBaseType::createTerm("PlaquetteX");
 
 		OpForLinkType sx("sx");

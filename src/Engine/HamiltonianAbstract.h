@@ -19,7 +19,7 @@ public:
 	                    SizeType emin,
 	                    const VectorSizeType& block)
 	    : block_(block),
-	      data_(block.size()*block.size())
+	      data_(superGeometry.overSize(block.size()))
 	{
 		VectorSizeType v(2, 0);
 		SizeType n = block.size();
@@ -35,9 +35,12 @@ public:
 				if (type == ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM ||
 				        type == ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON) continue;
 
+				assert(counter < data_.size());
 				data_[counter++] = v;
 			}
 		}
+
+		//counter = superGeometry.addSuperConnections(data_, smax, emin, block, counter);
 
 		data_.resize(counter);
 	}
