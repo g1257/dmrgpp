@@ -271,6 +271,9 @@ private:
 	SizeType cacheConnections(SizeType x)
 	{
 		const VectorSizeType& hItems = hamAbstract_.item(x);
+
+		if (hItems.size() == 0) return 0;
+
 		assert(superGeometry_.connected(smax_, emin_, hItems));
 
 		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
