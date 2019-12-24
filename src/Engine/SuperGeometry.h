@@ -18,10 +18,26 @@ public:
 
 	typedef typename GeometryType::RealType RealType;
 	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	SuperGeometry(InputType_& io)
 	    : geometry_(io), dcaPtr_(0)
-	{}
+	{
+		// add super terms as needed
+		const SizeType n = geometry_.terms();
+		for (SizeType i = 0; i < n; ++i) {
+			if (geometry_.directions(i) > 0) continue;
+			// super term found
+			// it's gotta be "SuperPlaquette" for now, (only one option, sorry!)
+			if (geometry_.options(i) == "SuperPlaquette") {
+				if (std::find(superStrings_.begin(),
+				              superStrings_.end(),
+				              "SuperPlaquette") != superStrings_.end())
+					continue;
+				superStrings_.push_back("SuperPlaquette");
+			}
+		}
+	}
 
 	~SuperGeometry()
 	{
@@ -103,15 +119,15 @@ public:
 		return blockSize*(blockSize/2 + 1); // + superc_.size();
 	}
 
-//	SizeType addSuperConnections(VectorVectorSizeType& data,
-//	                             SizeType smax,
-//	                             SizeType emin,
-//	                             const VectorSizeType& block,
-//	                             SizeType counter) const
-//	{
-//		SizeType c = superc_.addSuperConnections(data, smax, emin, block);
-//		return c + counter;
-//	}
+	SizeType addSuperConnections(VectorVectorSizeType& data,
+	                             SizeType smax,
+	                             SizeType emin,
+	                             const VectorSizeType& block,
+	                             SizeType counter) const
+	{
+		SizeType c = addSuperConnections_(data, smax, emin, block);
+		return c + counter;
+	}
 
 	friend std::ostream& operator<<(std::ostream& os, const SuperGeometry& supergeometry)
 	{
@@ -121,6 +137,42 @@ public:
 
 private:
 
+	SizeType addSuperConnections_(VectorVectorSizeType& data,
+	                              SizeType smax,
+	                              SizeType emin,
+	                              const VectorSizeType& block)
+	{
+		return (smax + 1 == emin) ? addSuperConnectionsFinite_(data, smax, emin, block) : 0;
+		//		                          : addSuperConnectionsInfinite_(data, smax, emin, block);
+	}
+
+	SizeType addSuperConnectionsInfinite_(VectorVectorSizeType& data,
+	                                      SizeType smax,
+	                                      SizeType emin,
+	                                      const VectorSizeType& block)
+	{
+		if (superStrings_.size() == 0) return 0;
+
+
+		assert(superStrings_.size() == 1);
+
+		assert(superStrings_[0] == "SuperPlaquette");
+
+		const SizeType linSize = geometry_.numberOfSites();
+
+		// smax - 1, smax, emin, emin + 1
+		if (smax > 0 && emin + 1 < linSize)
+			data.push_back(VectorSizeType{smax - 1, smax, emin, emin + 1});
+
+		// smax, emin, emin + 1, emin + 2
+		if (emin + 2 < linSize)
+			data.push_back(VectorSizeType{smax, emin, emin + 1, emin + 2});
+
+		// smax - 2, smax -1, smax, emin
+		if (smax > 1)
+			data.push_back(VectorSizeType{smax - 2, smax - 1, smax, emin});
+	}
+
 	static void checkVectorHasTwoEntries(const VectorSizeType& hItems)
 	{
 		if (hItems.size() != 2)
@@ -129,6 +181,7 @@ private:
 
 	const GeometryType geometry_;
 	mutable GeometryDcaType* dcaPtr_;
+	VectorStringType superStrings_;
 };
 
 }

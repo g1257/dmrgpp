@@ -170,6 +170,58 @@ public:
 			                         vModifier));
 		}
 
+		template<typename OpaqueOp>
+		void push4(const OpaqueOp& op1, char mod1,
+		           const OpaqueOp& op2, char mod2,
+		           const OpaqueOp& op3, char mod3,
+		           const OpaqueOp& op4, char mod4
+		           ,LambdaType vModifier = [](ComplexOrRealType&) {},
+		           Su2Properties su2properties = Su2Properties())
+		{
+			if (links_.size() > 0) {
+				if (!areSitesCompatible(VectorSizeType{op1.kindOfSite,
+				                        op2.kindOfSite,
+				                        op3.kindOfSite,
+				                        op4.kindOfSite}))
+					err("Term " + name_ + " incompatible atom kinds at push\n");
+			} else {
+				vectorKind_ = VectorSizeType{op1.kindOfSite,
+				        op2.kindOfSite,
+				        op3.kindOfSite,
+				        op4.kindOfSite};
+			}
+
+			SizeType index1 = findIndexOfOp(op1.name, op1.dof);
+			SizeType index2 = findIndexOfOp(op2.name, op2.dof);
+			SizeType index3 = findIndexOfOp(op3.name, op2.dof);
+			SizeType index4 = findIndexOfOp(op3.name, op2.dof);
+
+			ProgramGlobals::FermionOrBosonEnum fermionOrBoson =
+			        ProgramGlobals::FermionOrBosonEnum::BOSON;
+			// FIXME:
+			if (op1.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION ||
+			        op2.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION ||
+			        op3.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION ||
+			        op4.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+				err(PsimagLite::String(__FILE__) + "::push4(): Unsupported fermionic ops\n");
+
+			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
+
+			PsimagLite::String modStr("NNNN");
+			modStr[0] = mod1;
+			modStr[1] = mod2;
+			modStr[2] = mod3;
+			modStr[3] = mod4;
+			links_.push_back(OneLink(VectorSizeType{index1, index2, index3, index4},
+			                         VectorSizeType{op1.edof, op2.edof, op3.edof, op4.edof},
+			                         fermionOrBoson,
+			                         modStr,
+			                         su2properties.angularMomentum,
+			                         su2properties.angularFactor,
+			                         su2properties.category,
+			                         vModifier));
+		}
+
 		SizeType size() const { return links_.size(); }
 
 		const OneLinkType& operator()(SizeType dof) const
