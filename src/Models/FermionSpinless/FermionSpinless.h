@@ -101,7 +101,7 @@ class FermionSpinless : public ModelBaseType {
 public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -130,15 +130,14 @@ public:
 
 	FermionSpinless(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
-	                GeometryType const &geometry,
+	                const SuperGeometryType& geometry,
 	                SizeType offset = DEGREES_OF_FREEDOM)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      geometry_(geometry),
 	      offset_(offset),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
-		SizeType expected = geometry_.numberOfSites();
+		SizeType expected = geometry.numberOfSites();
 		SizeType found = modelParameters_.potentialV.size();
 		if (expected == found) return;
 		PsimagLite::String str("FermionSpinless: potentialV: expected ");
@@ -361,7 +360,6 @@ protected:
 	}
 
 	ParametersFermionSpinless<RealType, QnType>  modelParameters_;
-	const GeometryType& geometry_;
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;

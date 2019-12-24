@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_ULSOSU_H
 #define DMRG_ULSOSU_H
 #include "../Models/UlsOsu/ParametersModelUlsOsu.h"
+#include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "Matrix.h"
 #include "CrsMatrix.h"
 #include "VerySparseMatrix.h"
@@ -101,7 +102,7 @@ public:
     typedef typename ModelBaseType::VectorRealType VectorRealType;
     typedef ModelHubbard<ModelBaseType> ModelHubbardType;
     typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-    typedef typename ModelBaseType::GeometryType GeometryType;
+    typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
     typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
     typedef typename ModelBaseType::LinkType LinkType;
     typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -137,17 +138,17 @@ public:
 
     UlsOsu(const SolverParamsType& solverParams,
                InputValidatorType& io,
-               GeometryType const &geometry)
+               const SuperGeometryType& geometry)
         : ModelBaseType(solverParams, geometry, io),
           modelParameters_(io),
-          geometry_(geometry),
+          superGeometry_(geometry),
           offset_(6), // Sx, Sy, Sz, Lx, Ly, Lz
           spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
     {
         if (modelParameters_.orbitals != 1)
             throw PsimagLite::RuntimeError("UlsOsu: must use Orbital=1 \n");
 
-        SizeType n = geometry_.numberOfSites();
+        SizeType n = superGeometry_.numberOfSites();
         SizeType mx = modelParameters_.magneticFieldX.size();
         SizeType my = modelParameters_.magneticFieldY.size();
         SizeType mz = modelParameters_.magneticFieldZ.size();
@@ -171,7 +172,7 @@ public:
             err("UlsOsu does not have SU(2) implimentation \n");
 
         // fill caches
-        ProgramGlobals::init(geometry_.numberOfSites() + 1);
+        ProgramGlobals::init(superGeometry_.numberOfSites() + 1);
         BlockType block(1,0);
         setNaturalBasis(basis_, block, true);
     }
@@ -187,7 +188,7 @@ public:
 
     SizeType maxElectronsOneSpin() const
     {
-        return 1*geometry_.numberOfSites() + 1;
+        return 1*superGeometry_.numberOfSites() + 1;
     }
 
     void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -378,7 +379,7 @@ private:
                                     RealType) const
     {
         SizeType n=block.size();
-        SizeType linSize = geometry_.numberOfSites();
+        SizeType linSize = superGeometry_.numberOfSites();
         if (modelParameters_.magneticFieldX.size() != linSize)
             return; // <<---- PLEASE NOTE EARLY EXIT HERE
         if (modelParameters_.magneticFieldY.size() != linSize)
@@ -433,7 +434,7 @@ private:
 
 
     ParametersModelUlsOsu<RealType, QnType>  modelParameters_;
-    const GeometryType &geometry_;
+    const SuperGeometryType& superGeometry_;
     SizeType offset_;
     SpinSquaredHelper<RealType,HilbertStateType> spinSquaredHelper_;
     SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;

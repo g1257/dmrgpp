@@ -98,7 +98,7 @@ public:
 
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -117,7 +117,6 @@ public:
 	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersHubbardAncilla<RealType, QnType> ParametersHubbardAncillaType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -136,11 +135,11 @@ public:
 
 	HubbardAncilla(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
-	               GeometryType const &geometry)
+	               const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      geometry_(geometry),
-	      helperHubbardAncilla_(geometry_, modelParameters_)
+	      superGeometry_(geometry),
+	      helperHubbardAncilla_(superGeometry_, modelParameters_)
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -160,7 +159,7 @@ public:
 		const RealType ne = ModelBaseType::targetQuantum().qn(0).other[0];
 		const RealType nup = ModelBaseType::targetQuantum().qn(0).other[1];
 		const RealType ndown = ne - nup;
-		const RealType n = ModelBaseType::geometry().numberOfSites();
+		const RealType n = ModelBaseType::superGeometry().numberOfSites();
 		RealType energy = -nup*(n - nup) - ndown*(n - ndown);
 		return ModelBaseType::oracle(energy, " -Nup*(L-Nup) -Ndown*(L-Ndown)");
 	}
@@ -247,10 +246,8 @@ protected:
 
 private:
 
-	//serializr normal modelParameters_
 	ParametersHubbardAncillaType  modelParameters_;
-	//serializr ref geometry_ start
-	const GeometryType& geometry_;
+	const SuperGeometryType& superGeometry_;
 	HelperHubbardAncillaType helperHubbardAncilla_;
 }; //class HubbardAncilla
 } // namespace Dmrg

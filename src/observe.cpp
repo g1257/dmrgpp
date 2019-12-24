@@ -72,11 +72,11 @@ void mainLoop0(InputNgType::Readable& io,
                const PsimagLite::String& list)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef PsimagLite::Geometry<ComplexOrRealType,
+	typedef Dmrg::SuperGeometry<ComplexOrRealType,
 	        InputNgType::Readable,
-	        ProgramGlobals> GeometryType;
+	        ProgramGlobals> SuperGeometryType;
 
-	GeometryType geometry(io);
+	SuperGeometryType superGeometry(io);
 	int tmp = 0;
 	try {
 		io.readline(tmp,"UseSu2Symmetry=");
@@ -87,8 +87,8 @@ void mainLoop0(InputNgType::Readable& io,
 	if (su2) {
 		err("SU(2) no longer supported\n");
 	} else {
-		mainLoop1<GeometryType, ModelHelperLocal, MySparseMatrix>
-		        (geometry, io, dmrgSolverParams, list);
+		mainLoop1<SuperGeometryType, ModelHelperLocal, MySparseMatrix>
+		        (superGeometry, io, dmrgSolverParams, list);
 	}
 }
 

@@ -91,7 +91,7 @@ public:
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ExtendedHubbard1OrbType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -120,13 +120,13 @@ public:
 
 	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
 	                         InputValidatorType& io,
-	                         GeometryType const &geometry)
+	                         const SuperGeometryType& superGeometry)
 	    : ModelBaseType(solverParams,
-	                    geometry,
+	                    superGeometry,
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry),
-	      extendedHubbard_(solverParams,io,geometry)
+	      superGeometry_(superGeometry),
+	      extendedHubbard_(solverParams, io, superGeometry)
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -190,7 +190,7 @@ protected:
 	{
 		extendedHubbard_.fillModelLinks();
 
-		const bool spinOrbit = (geometry_.orbitals(0, 0) == 2);
+		const bool spinOrbit = (superGeometry_.orbitals(0, 0) == 2);
 		if (spinOrbit) {
 			ModelTermType& so = ModelBaseType::createTerm("SpinOrbit");
 			// spin dependence of the hopping parameter (spin orbit)
@@ -272,14 +272,8 @@ private:
 		return -1;
 	}
 
-
-	//serializr start class ExtendedSuperHubbard1Orb
-	//serializr vptr
-	//serializr normal modelParameters_
 	ParametersModelHubbard<RealType, QnType>  modelParameters_;
-	//serializr ref geometry_ start
-	const GeometryType &geometry_;
-	//serializr normal modelExtHubbard_
+	const SuperGeometryType& superGeometry_;
 	ExtendedHubbard1OrbType extendedHubbard_;
 };	//class ExtendedSuperHubbard1Orb
 

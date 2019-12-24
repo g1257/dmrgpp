@@ -97,7 +97,7 @@ class HubbardAncillaExtended : public ModelBaseType {
 public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -118,7 +118,6 @@ public:
 	typedef typename ModelBaseType::VectorType VectorType;
 	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef ParametersHubbardAncillaExtended<RealType, QnType> ParametersHubbardAncillaType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
@@ -137,13 +136,12 @@ public:
 
 	HubbardAncillaExtended(const SolverParamsType& solverParams,
 	                       InputValidatorType& io,
-	                       GeometryType const &geometry)
+	                       const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry),
-	      helperHubbardAncilla_(geometry_, modelParameters_)
+	      helperHubbardAncilla_(geometry, modelParameters_)
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -404,7 +402,6 @@ private:
 	}
 
 	ParametersHubbardAncillaType modelParameters_;
-	const GeometryType& geometry_;
 	HelperHubbardAncillaType helperHubbardAncilla_;
 }; //class HubbardAncilla
 } // namespace Dmrg

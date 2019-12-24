@@ -91,7 +91,7 @@ public:
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -118,12 +118,12 @@ public:
 
 	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
-	                    GeometryType const &geometry)
+	                    SuperGeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry),
+	      superGeometry_(geometry),
 	      modelHubbard_(solverParams, io, geometry, "")
 	{}
 
@@ -187,7 +187,7 @@ private:
 	}
 
 	ParametersModelHubbard<RealType, QnType>  modelParameters_;
-	const GeometryType &geometry_;
+	const SuperGeometryType& superGeometry_;
 	ModelHubbardType modelHubbard_;
 };	//class ExtendedHubbard1Orb
 

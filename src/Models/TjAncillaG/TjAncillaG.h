@@ -94,7 +94,7 @@ public:
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -130,10 +130,10 @@ public:
 
 	TjAncillaG(const SolverParamsType& solverParams,
 	           InputValidatorType& io,
-	           GeometryType const &geometry)
+	           const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      geometry_(geometry),
+	      superGeometry_(geometry),
 	      TjMultiOrb_(solverParams,io,geometry),
 	      offset_(DEGREES_OF_FREEDOM+3), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
@@ -148,7 +148,7 @@ public:
 	{
 		SizeType n=block.size();
 
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = superGeometry_.numberOfSites();
 		for (SizeType i=0;i<n;i++) {
 			// potentialV
 			SparseMatrixType nup = this->naturalOperator("nup",i,0).getCRS();
@@ -469,18 +469,11 @@ private:
 		return jm;
 	}
 
-	//serializr start class TjAncillaG
-	//serializr vptr
-	//serializr normal modelParameters_
 	ParametersModelTjMultiOrb<RealType, QnType>  modelParameters_;
-	//serializr ref geometry_ end
-	const GeometryType &geometry_;
+	const SuperGeometryType& superGeometry_;
 	TjMultiOrbType TjMultiOrb_;
-	//serializr normal offset_
 	SizeType offset_;
-	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,HilbertStateType> spinSquaredHelper_;
-	//serializr normal spinSquared_
 	SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;
 
 };	//class TjAncillaG

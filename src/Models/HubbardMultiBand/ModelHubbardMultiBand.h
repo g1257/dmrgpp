@@ -95,7 +95,7 @@ public:
 
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -115,7 +115,6 @@ public:
 	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersHubbardMultiBand<ComplexOrRealType, QnType> ParamsModelType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
@@ -128,15 +127,15 @@ public:
 
 	ModelHubbardMultiBand(const SolverParamsType& solverParams,
 	                      InputValidatorType& io,
-	                      GeometryType const &geometry)
+	                      const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      geometry_(geometry),
+	      superGeometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals)
 	{
-		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
+		ProgramGlobals::init(modelParameters_.orbitals*superGeometry_.numberOfSites() + 1);
 		SizeType v1 = 2*modelParameters_.orbitals*geometry.numberOfSites();
 		SizeType v2 = v1*modelParameters_.orbitals;
 		if (modelParameters_.potentialV.size() != v1 &&
@@ -548,7 +547,7 @@ private:
 	                   SizeType actualIndexOfSite,
 	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
-		SizeType v1 = 2*modelParameters_.orbitals*geometry_.numberOfSites();
+		SizeType v1 = 2*modelParameters_.orbitals*superGeometry_.numberOfSites();
 		SizeType v2 = v1*modelParameters_.orbitals;
 
 		if (V.size() != v1 && V.size() != v2) {
@@ -586,7 +585,7 @@ private:
 		SparseMatrixType nup = n(cm[orbital+SPIN_UP*modelParameters_.orbitals+i*dof].getCRS());
 		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*modelParameters_.orbitals+i*dof].getCRS());
 
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = superGeometry_.numberOfSites();
 
 		SizeType iUp = actualIndexOfSite + (orbital + 0*modelParameters_.orbitals)*linSize;
 		hmatrix +=  V[iUp] * nup;
@@ -610,7 +609,7 @@ private:
 		SparseMatrixType ndown = nEx(cm[orb+SPIN_DOWN*modelParameters_.orbitals+i*dof].getCRS(),
 		        cm[orb2+SPIN_DOWN*modelParameters_.orbitals+i*dof].getCRS());
 
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = superGeometry_.numberOfSites();
 
 		SizeType iUp = actualIndexOfSite + (orb + orb2*modelParameters_.orbitals +
 		                                    0*orbitalsSquared)*linSize;
@@ -676,7 +675,7 @@ private:
 	}
 
 	ParamsModelType  modelParameters_;
-	const GeometryType& geometry_;
+	const SuperGeometryType& superGeometry_;
 	SpinSquaredHelper<RealType,HilbertState> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,HilbertState> > spinSquared_;
 	HilbertBasisType basis_;

@@ -6,7 +6,7 @@ typedef Qn QnType;
 typedef VectorWithOffset<ComplexType, QnType> VectorWithOffset2Type;
 typedef VectorWithOffsets<ComplexType, QnType> VectorWithOffset4Type;
 
-typedef PsimagLite::Geometry<RealType,
+typedef Dmrg::SuperGeometry<RealType,
 InputNgType::Readable,
 ProgramGlobals> Geometry1Type;
 

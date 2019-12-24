@@ -93,7 +93,7 @@ class Immm : public ModelBaseType {
 public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -129,10 +129,10 @@ public:
 
 	Immm(const SolverParamsType& solverParams,
 	     InputValidatorType& io,
-	     GeometryType const &geometry)
+	     SuperGeometryType const &geometry)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      geometry_(geometry),
+	      superGeometry_(geometry),
 	      copperEach_(4),
 	      hilbertSpace_(ORBITALS_OXYGEN)
 	{
@@ -175,7 +175,7 @@ public:
 
 	virtual SizeType maxElectronsOneSpin() const
 	{
-		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * geometry_.numberOfSites() + 1;
+		return NUMBER_OF_SPINS * ORBITALS_OXYGEN * superGeometry_.numberOfSites() + 1;
 	}
 
 	SizeType differentTypesOfAtoms() const { return 2; }
@@ -418,7 +418,7 @@ private:
 	{
 		// on-site potential:
 		SizeType site = block[0];
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = superGeometry_.numberOfSites();
 
 		SizeType siteCorrected  = 0;
 		for (SizeType i=0;i<site;i++) {
@@ -563,7 +563,7 @@ private:
 	}
 
 	ParametersImmm<RealType, QnType> modelParameters_;
-	const GeometryType& geometry_;
+	const SuperGeometryType& superGeometry_;
 	SizeType copperEach_;
 	HilbertSpaceImmmType hilbertSpace_;
 	SizeType statesCopper_;

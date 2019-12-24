@@ -47,7 +47,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_SELECTOR_H
 #define MODEL_SELECTOR_H
 
-//#define ALL_MODELS 1
+#define ALL_MODELS 1
 #include <stdexcept>
 #include "ProgramGlobals.h"
 #include "Utils.h"

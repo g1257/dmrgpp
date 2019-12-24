@@ -104,7 +104,7 @@ public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::BasisType BasisType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -134,15 +134,14 @@ public:
 
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
 	                   InputValidatorType& io,
-	                   GeometryType const &geometry)
+	                   const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry),
-	      hot_(geometry_.orbitals(0,0) > 1)
+	      hot_(geometry.orbitals(0,0) > 1)
 	{
-		SizeType n = geometry_.numberOfSites();
+		SizeType n = geometry.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
 		if (m > 0 && m != n) {
 			PsimagLite::String msg("HeisenbergAncillaC: If provided, ");
@@ -185,7 +184,8 @@ public:
 	                                const BlockType& block,
 	                                RealType)  const
 	{
-		if (modelParameters_.magneticField.size() != geometry_.numberOfSites())
+		if (modelParameters_.magneticField.size() !=
+		        ModelBaseType::superGeometry().numberOfSites())
 			return;
 
 		SizeType n = block.size();
@@ -202,7 +202,7 @@ public:
 	virtual PsimagLite::String oracle() const
 	{
 		const RealType nup = ModelBaseType::targetQuantum().qn(0).other[0];
-		const RealType n = ModelBaseType::geometry().numberOfSites();
+		const RealType n = ModelBaseType::superGeometry().numberOfSites();
 		RealType energy = -nup*(n - nup);
 		return ModelBaseType::oracle(energy, "-Nup*Ndown");
 	}
@@ -495,12 +495,7 @@ private:
 		return p.first*(modelParameters_.twiceTheSpin + 1) + p.second;
 	}
 
-	//serializr start class HeisenbergAncillaC
-	//serializr vptr
-	//serializr normal modelParameters_
 	ParametersHeisenbergAncillaC<RealType, QnType> modelParameters_;
-	//serializr ref geometry_ start
-	const GeometryType& geometry_;
 	bool hot_;
 }; // class HeisenbergAncillaC
 

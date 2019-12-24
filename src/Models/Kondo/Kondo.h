@@ -20,7 +20,7 @@ class Kondo : public ModelBaseType {
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef ParametersKondo<RealType, QnType> ParametersKondoType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
@@ -33,11 +33,10 @@ public:
 
 	Kondo(const SolverParamsType& solverParams,
 	      InputValidatorType& io,
-	      GeometryType const &geometry,
+	      const SuperGeometryType& geometry,
 	      PsimagLite::String option)
 	    : ModelBaseType(solverParams, geometry, io),
 	      solverParams_(solverParams),
-	      geometry_(geometry),
 	      modelParams_(io, option == "Ex")
 	{
 		SizeType sitesTimesDof = 2 + modelParams_.twiceTheSpin;
@@ -80,7 +79,7 @@ public:
 	{
 		SizeType n = block.size();
 		assert(n == 1);
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType niup;
 		SparseMatrixType nidown;
@@ -476,7 +475,6 @@ private:
 	}
 
 	const SolverParamsType& solverParams_;
-	const GeometryType& geometry_;
 	ParametersKondoType modelParams_;
 	VectorSizeType basis_;
 	VectorQnType qn_;

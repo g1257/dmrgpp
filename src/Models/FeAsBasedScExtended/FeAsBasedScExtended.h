@@ -96,7 +96,7 @@ public:
 	typedef typename ModelFeAsType::HilbertState HilbertState;
 	typedef typename ModelFeAsType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -123,10 +123,9 @@ public:
 
 	FeAsBasedScExtended(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
-	                    const GeometryType& geometry)
+	                    const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      geometry_(geometry),
 	      modelFeAs_(solverParams,io,geometry),
 	      orbitals_(modelParameters_.orbitals)
 	{}
@@ -323,7 +322,6 @@ private:
 	}
 
 	ParametersModelFeAs<RealType, QnType>  modelParameters_;
-	const GeometryType& geometry_;
 	ModelFeAsType modelFeAs_;
 	SizeType orbitals_;
 }; //class FeAsBasedScExtended

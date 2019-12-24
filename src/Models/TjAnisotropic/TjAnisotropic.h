@@ -97,7 +97,7 @@ public:
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -137,17 +137,17 @@ public:
 
 	TjAnisotropic(const SolverParamsType& solverParams,
 	              InputValidatorType& io,
-	              GeometryType const &geometry)
+	              const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      geometry_(geometry),
+	      superGeometry_(geometry),
 	      offset_(5*modelParameters_.orbitals), // c^\dagger_up, c^\dagger_down, S+, Sz, n
 	      spinSquared_(spinSquaredHelper_,modelParameters_.orbitals,2*modelParameters_.orbitals)
 	{
 		if (modelParameters_.orbitals != 1)
 			throw PsimagLite::RuntimeError("TjAnisotropic: must use Orbital=1 \n");
 
-		SizeType n = geometry_.numberOfSites();
+		SizeType n = superGeometry_.numberOfSites();
 		SizeType mx = modelParameters_.magneticFieldX.size();
 		SizeType my = modelParameters_.magneticFieldY.size();
 		SizeType mz = modelParameters_.magneticFieldZ.size();
@@ -174,7 +174,7 @@ public:
 			err("Kitaev does not have SU(2) symmetry\n");
 
 		// fill caches
-		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
+		ProgramGlobals::init(modelParameters_.orbitals*superGeometry_.numberOfSites() + 1);
 		BlockType block(1,0);
 		setNaturalBasis(basis_, block, true);
 	}
@@ -190,7 +190,7 @@ public:
 
 	SizeType maxElectronsOneSpin() const
 	{
-		return modelParameters_.orbitals*geometry_.numberOfSites() + 1;
+		return modelParameters_.orbitals*superGeometry_.numberOfSites() + 1;
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -580,7 +580,7 @@ private:
 	{
 		SizeType n=block.size();
 		SizeType orbitals = modelParameters_.orbitals;
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = superGeometry_.numberOfSites();
 
 		for (SizeType i=0;i<n;i++) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
@@ -741,7 +741,7 @@ private:
 
 
 	ParametersModelTjAnisotropic<RealType, QnType>  modelParameters_;
-	const GeometryType &geometry_;
+	const SuperGeometryType& superGeometry_;
 	SizeType offset_;
 	SpinSquaredHelper<RealType,HilbertStateType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,HilbertStateType> > spinSquared_;

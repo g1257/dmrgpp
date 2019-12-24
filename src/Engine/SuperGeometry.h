@@ -2,6 +2,7 @@
 #define SUPERGEOMETRY_H
 #include "Geometry/Geometry.h"
 #include "ProgramGlobals.h"
+#include "Geometry/GeometryDca.h"
 
 namespace Dmrg {
 
@@ -16,12 +17,17 @@ class SuperGeometry {
 public:
 
 	typedef typename GeometryType::RealType RealType;
+	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 
 	SuperGeometry(InputType_& io)
-	    : geometry_(io)
+	    : geometry_(io), dcaPtr_(0)
 	{}
 
-	// const GeometryType& geometry() const { return geometry_; }
+	~SuperGeometry()
+	{
+		delete dcaPtr_;
+		dcaPtr_ = 0;
+	}
 
 	void split(SizeType sitesPerBlock,
 	           VectorSizeType& S,
@@ -42,12 +48,12 @@ public:
 		geometry_.write(label, ioSerializer);
 	}
 
-//	SizeType maxConnections(SizeType termId) const
-//	{
-//		return geometry_.maxConnections(termId);
-//	}
-
 	SizeType maxConnections() const { return geometry_.maxConnections(); }
+
+	SizeType orbitals(SizeType term, SizeType site) const
+	{
+		return geometry_.orbitals(term, site);
+	}
 
 	PsimagLite::String label(SizeType i) const { return geometry_.label(i); }
 
@@ -85,6 +91,13 @@ public:
 		return geometry_.connectionKind(smax, hItems[0], hItems[1]);
 	}
 
+	const GeometryDcaType& createDcaObject(SizeType orbitals) const
+	{
+		if (!dcaPtr_)
+			dcaPtr_ = new GeometryDcaType(geometry_, orbitals);
+		return *dcaPtr_;
+	}
+
 	SizeType overSize(SizeType blockSize) const
 	{
 		return blockSize*(blockSize/2 + 1); // + superc_.size();
@@ -115,6 +128,7 @@ private:
 	}
 
 	const GeometryType& geometry_;
+	mutable GeometryDcaType* dcaPtr_;
 };
 
 }

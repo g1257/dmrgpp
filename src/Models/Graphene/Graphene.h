@@ -96,7 +96,7 @@ public:
 
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -128,12 +128,11 @@ public:
 
 	Graphene(const SolverParamsType& solverParams,
 	         InputValidatorType& io,
-	         GeometryType const &geometry)
+	         const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io),
-	      modelParameters_(io),
-	      geometry_(geometry)
+	      modelParameters_(io)
 	{
-		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
+		ProgramGlobals::init(modelParameters_.orbitals*geometry.numberOfSites() + 1);
 
 		HilbertSpaceFeAsType::setOrbitals(modelParameters_.orbitals);
 		statesPerSite_ = (1 << (modelParameters_.orbitals*2));
@@ -556,7 +555,6 @@ private:
 	}
 
 	ParametersGrapheneType  modelParameters_;
-	const GeometryType& geometry_;
 	SizeType statesPerSite_;
 	HilbertBasisType basis_;
 	VectorQnType qq_;

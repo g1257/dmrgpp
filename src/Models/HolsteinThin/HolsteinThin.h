@@ -100,7 +100,7 @@ public:
 
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -121,7 +121,6 @@ public:
 	typedef	typename ModelBaseType::MyBasis BasisType;
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersHubbardHolstein<RealType, QnType> ParametersHolsteinThinType;
 	typedef std::pair<SizeType,SizeType> PairType;
@@ -151,13 +150,12 @@ public:
 
 	HolsteinThin(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
-	             const GeometryType& geometry,
+	             const SuperGeometryType& geometry,
 	             PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry),
 	      isSsh_(additional == "SSH"),
 	      atomKind_(0)
 	{
@@ -451,7 +449,7 @@ private:
 		SparseMatrixType nup = n(cm[SPIN_UP]);
 		SparseMatrixType ndown = n(cm[SPIN_DOWN]);
 
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
 		SizeType iUp = actualIndexOfSite;
 		assert(iUp < modelParameters_.potentialFV.size());
 		hmatrix += modelParameters_.potentialFV[iUp] * nup;
@@ -512,7 +510,6 @@ private:
 	}
 
 	ParametersHolsteinThinType modelParameters_;
-	const GeometryType& geometry_;
 	bool isSsh_;
 	const AtomKind* atomKind_;
 }; //class HolsteinThin

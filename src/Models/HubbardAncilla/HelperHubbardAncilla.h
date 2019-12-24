@@ -11,7 +11,7 @@ class HelperHubbardAncilla {
 
 public:
 
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
 	typedef typename HilbertBasisType::value_type HilbertState;
 	typedef HilbertSpaceFeAs<HilbertState> HilbertSpaceFeAsType;
@@ -35,10 +35,11 @@ public:
 	static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
 	static const int FERMION_SIGN = -1;
 
-	HelperHubbardAncilla(const GeometryType& geometry, const ModelParametersType& modelParams)
-	    : geometry_(geometry),
+	HelperHubbardAncilla(const SuperGeometryType& geometry,
+	                     const ModelParametersType& modelParams)
+	    : superGeometry_(geometry),
 	      modelParameters_(modelParams),
-	      hot_(geometry_.orbitals(0,0) > 1)
+	      hot_(superGeometry_.orbitals(0,0) > 1)
 	{
 		if (!hot_) return;
 
@@ -219,7 +220,7 @@ private:
 	                    SizeType actualSite) const
 	{
 		SparseMatrixType tmpMatrix;
-		SizeType nsites = geometry_.numberOfSites();
+		SizeType nsites = superGeometry_.numberOfSites();
 		SizeType factor = (hot_) ? 2 : 1;
 		if (modelParameters_.hubbardU.size() != factor*nsites)
 			err("Number of Us is incorrect\n");
@@ -239,7 +240,7 @@ private:
 	                   SizeType actualIndexOfSite) const
 	{
 		SizeType factor = (hot_) ? 2 : 1;
-		SizeType nsites = geometry_.numberOfSites();
+		SizeType nsites = superGeometry_.numberOfSites();
 		if (modelParameters_.potentialV.size() != factor*2*nsites)
 			err("Number of Vs is incorrect\n");
 
@@ -322,7 +323,7 @@ private:
 		return (value==0 || value%2==0) ? 1.0 : FERMION_SIGN;
 	}
 
-	const GeometryType& geometry_;
+	const SuperGeometryType& superGeometry_;
 	const ModelParametersType& modelParameters_;
 	bool hot_;
 };

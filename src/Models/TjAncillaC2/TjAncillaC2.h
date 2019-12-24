@@ -92,7 +92,7 @@ public:
 	typedef typename ModelBaseType::VectorRealType VectorRealType;
 	typedef ModelFeBasedSc<ModelBaseType> ModelFeAsType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -127,13 +127,13 @@ public:
 
 	TjAncillaC2(const SolverParamsType& solverParams,
 	            InputValidatorType& io,
-	            GeometryType const &geometry)
+	            SuperGeometryType const &geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry),
-	      hot_(geometry_.orbitals(0,0) > 1)
+	      superGeometry_(geometry),
+	      hot_(superGeometry_.orbitals(0,0) > 1)
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -150,7 +150,7 @@ public:
 	virtual PsimagLite::String oracle() const
 	{
 		const RealType ne = ModelBaseType::targetQuantum().qn(0).other[0];
-		const RealType n = ModelBaseType::geometry().numberOfSites();
+		const RealType n = ModelBaseType::superGeometry().numberOfSites();
 		RealType energy = -ne*(n - ne);
 		return ModelBaseType::oracle(energy, "-Ne*(L-Ne)");
 	}
@@ -564,7 +564,7 @@ private:
 	{
 		SizeType n=block.size();
 
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = superGeometry_.numberOfSites();
 		for (SizeType i=0;i<n;i++) {
 			SizeType orb = 0;
 			// potentialV
@@ -625,7 +625,7 @@ private:
 	}
 
 	ParametersTjAncillaC<RealType, QnType>  modelParameters_;
-	const GeometryType &geometry_;
+	const SuperGeometryType& superGeometry_;
 	bool hot_;
 };	//class TjAncillaC2
 

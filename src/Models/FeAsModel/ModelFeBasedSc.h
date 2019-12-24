@@ -99,7 +99,7 @@ public:
 
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -119,7 +119,7 @@ public:
 	typedef	 typename ModelBaseType::MyBasis MyBasis;
 	typedef	 typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::GeometryDca<RealType,GeometryType> GeometryDcaType;
+	typedef typename SuperGeometryType::GeometryDcaType GeometryDcaType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersModelFeAs<ComplexOrRealType, QnType> ParamsModelFeAsType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
@@ -135,20 +135,20 @@ public:
 
 	ModelFeBasedSc(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
-	               GeometryType const &geometry)
-	    : ModelBaseType(solverParams, geometry, io),
+	               const SuperGeometryType& superGeometry)
+	    : ModelBaseType(solverParams, superGeometry, io),
 	      reinterpretX_(6),
 	      reinterpretY_(9),
 	      modelParameters_(io),
-	      geometry_(geometry),
-	      geometryDca_(geometry, modelParameters_.orbitals),
+	      superGeometry_(superGeometry),
+	      geometryDca_(superGeometry.createDcaObject(modelParameters_.orbitals)),
 	      spinSquared_(spinSquaredHelper_,
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals),
 	      reinterpret_(!modelParameters_.jzSymmetry),
 	      feAsJzSymmetry_(modelParameters_.jzSymmetry)
 	{
-		ProgramGlobals::init(modelParameters_.orbitals*geometry_.numberOfSites() + 1);
+		ProgramGlobals::init(modelParameters_.orbitals*superGeometry_.numberOfSites() + 1);
 
 		PsimagLite::String tspAlgo = "";
 		try {
@@ -157,7 +157,7 @@ public:
 
 		if (tspAlgo == "SuzukiTrotter") reinterpret_ = false;
 
-		SizeType v1 = 2*modelParameters_.orbitals*geometry.numberOfSites();
+		SizeType v1 = 2*modelParameters_.orbitals*superGeometry.numberOfSites();
 		SizeType v2 = v1*modelParameters_.orbitals;
 		if (modelParameters_.potentialV.size() != v1 &&
 		        modelParameters_.potentialV.size() != v2) {
@@ -971,7 +971,7 @@ private:
 	                   const VectorSizeType& block,
 	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
-		SizeType v1 = 2*modelParameters_.orbitals*geometry_.numberOfSites();
+		SizeType v1 = 2*modelParameters_.orbitals*superGeometry_.numberOfSites();
 		SizeType v2 = v1*modelParameters_.orbitals;
 		if (V.size() != v1 && V.size() != v2) {
 			PsimagLite::String str(__FILE__);
@@ -1012,7 +1012,7 @@ private:
 		SparseMatrixType ndown = n(cm[orbital+SPIN_DOWN*modelParameters_.orbitals+
 		        iOfSite*dof].getCRS());
 
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = superGeometry_.numberOfSites();
 
 		SizeType iUp = site + (orbital + 0*modelParameters_.orbitals)*linSize;
 		hmatrix += V[iUp] * nup;
@@ -1037,7 +1037,7 @@ private:
 		SparseMatrixType ndown = nEx(cm[orb+SPIN_DOWN*modelParameters_.orbitals+iOfSite*dof].getCRS(),
 		        cm[orb2+SPIN_DOWN*modelParameters_.orbitals+iOfSite*dof].getCRS());
 
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = superGeometry_.numberOfSites();
 
 		SizeType iUp = site + (orb + orb2*modelParameters_.orbitals +
 		                       0*orbitalsSquared)*linSize;
@@ -1334,9 +1334,9 @@ private:
 	HilbertState reinterpretY_;
 	//serializr normal modelParameters_
 	ParamsModelFeAsType  modelParameters_;
-	//serializr ref geometry_ start
-	const GeometryType& geometry_;
-	GeometryDcaType geometryDca_;
+	//serializr ref superGeometry_ start
+	const SuperGeometryType& superGeometry_;
+	const GeometryDcaType& geometryDca_;
 	//serializr normal spinSquaredHelper_
 	SpinSquaredHelper<RealType,HilbertState> spinSquaredHelper_;
 	//serializr normal spinSquared_

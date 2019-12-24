@@ -104,7 +104,7 @@ public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::BasisType BasisType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -133,17 +133,16 @@ public:
 
 	Kitaev(const SolverParamsType& solverParams,
 	       InputValidatorType& io,
-	       const GeometryType& geometry,
+	       const SuperGeometryType& geometry,
 	       PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry),
 	      extended_(additional == "Extended"),
 	      withGammas_(additional == "WithGammas")
 	{
-		SizeType n = geometry_.numberOfSites();
+		SizeType n = geometry.numberOfSites();
 		SizeType mx = modelParameters_.magneticFieldX.size();
 		SizeType my = modelParameters_.magneticFieldY.size();
 		SizeType mz = modelParameters_.magneticFieldZ.size();
@@ -181,7 +180,7 @@ public:
 	                                const BlockType& block,
 	                                RealType)  const
 	{
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
 		if (modelParameters_.magneticFieldX.size() != linSize)
 			return; // <<---- PLEASE NOTE EARLY EXIT HERE
 		if (modelParameters_.magneticFieldY.size() != linSize)
@@ -370,7 +369,6 @@ private:
 	}
 
 	ParametersKitaev<RealType, QnType>  modelParameters_;
-	const GeometryType& geometry_;
 	bool extended_;
 	bool withGammas_;
 }; // class Kitaev

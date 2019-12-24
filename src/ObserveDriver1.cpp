@@ -8,11 +8,11 @@ typedef VectorWithOffset<ComplexType, QnType> VectorWithOffset2Type;
 typedef VectorWithOffsets<RealType, QnType> VectorWithOffset3Type;
 typedef VectorWithOffsets<ComplexType, QnType> VectorWithOffset4Type;
 
-typedef PsimagLite::Geometry<RealType,
+typedef Dmrg::SuperGeometry<RealType,
 InputNgType::Readable,
 ProgramGlobals> Geometry1Type;
 
-typedef PsimagLite::Geometry<ComplexType,
+typedef Dmrg::SuperGeometry<ComplexType,
 InputNgType::Readable,
 ProgramGlobals> Geometry2Type;
 
