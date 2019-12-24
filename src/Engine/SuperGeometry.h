@@ -127,7 +127,7 @@ private:
 			err("SuperGeometry unimplemented\n");
 	}
 
-	const GeometryType& geometry_;
+	const GeometryType geometry_;
 	mutable GeometryDcaType* dcaPtr_;
 };
 

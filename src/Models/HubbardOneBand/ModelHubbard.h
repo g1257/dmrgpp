@@ -110,7 +110,7 @@ public:
 	typedef unsigned int long WordType;
 	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -136,19 +136,18 @@ public:
 
 	ModelHubbard(const SolverParamsType& solverParams,
 	             InputValidatorType& io,
-	             GeometryType const &geometry,
+	             const SuperGeometryType& geometry,
 	             PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      geometry_(geometry),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 	      extension_(extension)
 	{
 		SizeType usize = modelParameters_.hubbardU.size();
 		SizeType vsize = modelParameters_.potentialV.size();
-		SizeType totalSites = geometry_.numberOfSites();
+		SizeType totalSites = geometry.numberOfSites();
 
 		if (usize != totalSites) {
 			PsimagLite::String msg("ModelHubbard: hubbardU expecting ");
@@ -395,7 +394,7 @@ protected:
 	{
 		SizeType n=block.size();
 		SparseMatrixType tmpMatrix,niup,nidown,Szsquare,Szi;
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
@@ -573,7 +572,6 @@ private:
 	}
 
 	ParametersModelHubbard<RealType, QnType>  modelParameters_;
-	const GeometryType &geometry_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 	PsimagLite::String extension_;
