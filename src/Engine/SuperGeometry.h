@@ -21,7 +21,7 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	SuperGeometry(InputType_& io)
-	    : geometry_(io), dcaPtr_(0)
+	    : geometry_(io), dcaPtr_(0), hollowOutRadius_(0)
 	{
 		// add super terms as needed
 		const SizeType n = geometry_.terms();
@@ -35,6 +35,7 @@ public:
 				              "SuperPlaquette") != superStrings_.end())
 					continue;
 				superStrings_.push_back("SuperPlaquette");
+				hollowOutRadius_ = 4;
 			}
 		}
 	}
@@ -64,7 +65,10 @@ public:
 		geometry_.write(label, ioSerializer);
 	}
 
-	SizeType maxConnections() const { return geometry_.maxConnections(); }
+	SizeType hollowOutRadius(SizeType maxLeft) const
+	{
+		return std::max(maxLeft*geometry_.maxConnections(), hollowOutRadius_);
+	}
 
 	SizeType orbitals(SizeType term, SizeType site) const
 	{
@@ -181,6 +185,7 @@ private:
 
 	const GeometryType geometry_;
 	mutable GeometryDcaType* dcaPtr_;
+	SizeType hollowOutRadius_;
 	VectorStringType superStrings_;
 };
 

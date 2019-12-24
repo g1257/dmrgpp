@@ -288,7 +288,7 @@ private:
 	{
 		bool expandSys = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
-		size_t mostRecent = maxOpsPerSiteLeft()*superGeometry_.maxConnections();
+		size_t mostRecent = superGeometry_.hollowOutRadius( maxOpsPerSiteLeft());
 		size_t numOfOp = basis.numberOfOperators();
 		PairSizeSizeType startEnd(0, numOfOp);
 		if (startEnd.second > mostRecent) {
