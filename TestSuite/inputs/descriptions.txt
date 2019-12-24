@@ -356,4 +356,6 @@ the "half filled" case). U=2
 6010) Kitaev with Gammas
 #6010) Kitaev
 6500) Hybrid space-k ladders
+7000) Chemical H: Gauge spin
+#7001-7500 reserved for ChemicalH
 #TAGEND DO NOT REMOVE THIS TAG

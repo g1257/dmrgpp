@@ -96,6 +96,7 @@ struct ParametersGaugeSpin : public ParametersModelBase<RealType, QnType> {
 	ParametersGaugeSpin(IoInputType& io)
 	    : BaseType(io, false)
 	{
+		SizeType nsites = 0;
 		io.readline(nsites, "TotalNumberOfSites=");
 
 		try {

@@ -76,6 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/Kondo/Kondo.h"
 #include "../Models/UlsOsu/UlsOsu.h"
 #include "../Models/Graphene/Graphene.h"
+#include "../Models/GaugeSpin/GaugeSpin.h"
 
 #endif
 
@@ -116,7 +117,7 @@ class ModelSelector {
 	typedef Kondo<ModelBaseType> KondoType;
 	typedef Graphene<ModelBaseType> GrapheneType;
 	typedef HolsteinThin<ModelBaseType> HolsteinThinType;
-
+	typedef GaugeSpin<ModelBaseType> GaugeSpinType;
 #endif
 	// end models
 
@@ -201,6 +202,8 @@ public:
 			model_ = new ModelHubbardType(solverParams, io, geometry, "RashbaSOC");
 		} else if (name_ == "Graphene") {
 			model_ = new GrapheneType(solverParams, io, geometry);
+		} else if (name_ == "GaugeSpin") {
+			model_ = new GaugeSpinType(solverParams, io, geometry);
 		}
 #endif
 		else {

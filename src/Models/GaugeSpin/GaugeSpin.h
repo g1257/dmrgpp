@@ -96,7 +96,7 @@ public:
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::BasisType BasisType;
-	typedef typename ModelBaseType::GeometryType GeometryType;
+	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -127,13 +127,11 @@ public:
 
 	GaugeSpin(const SolverParamsType& solverParams,
 	          InputValidatorType& io,
-	          const GeometryType& geometry,
-	          PsimagLite::String)
+	          const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
-	      modelParameters_(io),
-	      geometry_(geometry)
+	      modelParameters_(io)
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -150,11 +148,11 @@ public:
 	                                const BlockType& block,
 	                                RealType) const
 	{
-		SizeType linSize = geometry_.numberOfSites();
+		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
 		SizeType n = block.size();
 		assert(n == 1);
 
-		SizeType site = block[i];
+		SizeType site = block[0];
 
 		const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
 
@@ -173,54 +171,46 @@ protected:
 		HilbertBasisType natBasis(total);
 		for (SizeType i = 0; i < total; ++i) natBasis[i] = i;
 
-		setSymmetryRelated(qns, natBasis, block.size());
+		setSymmetryRelated(qns, natBasis);
 
-		for (SizeType i=0;i<block.size();i++) {
-			// Set the operators S^+_i in the natural basis
-			SparseMatrixType tmpMatrix = findSplusMatrices(i, natBasis);
+		// Set the operators S^+_i in the natural basis
+		SparseMatrixType tmpMatrix = findSplusMatrices(0, natBasis);
 
-			typename OperatorType::Su2RelatedType su2related;
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM+NUMBER_OF_ORBITALS);
-			su2related.source.push_back(i*DEGREES_OF_FREEDOM);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(-1);
-			su2related.transpose.push_back(1);
-			su2related.offset = NUMBER_OF_ORBITALS;
+		typename OperatorType::Su2RelatedType su2related;
 
-			OperatorType myOp(tmpMatrix,
-			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                  PairType(2, 2),
-			                  -1,
-			                  su2related);
-			this->createOpsLabel("splus").push(myOp);
-			// this->makeTrackable("splus");
+		OperatorType myOp(tmpMatrix,
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  PairType(2, 2),
+		                  -1,
+		                  su2related);
+		this->createOpsLabel("splus").push(myOp);
+		// this->makeTrackable("splus");
 
-			myOp.dagger();
-			this->createOpsLabel("sminus").push(myOp);
+		myOp.dagger();
+		this->createOpsLabel("sminus").push(myOp);
 
-			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSzMatrices(i,natBasis);
-			typename OperatorType::Su2RelatedType su2related2;
-			OperatorType myOp2(tmpMatrix,
-			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                   PairType(2, 1),
-			                   1.0/sqrt(2.0),
-			                   su2related2);
-			this->createOpsLabel("sz").push(myOp2);
-			// this->makeTrackable("sz");
+		// Set the operators S^z_i in the natural basis
+		tmpMatrix = findSzMatrices(0, natBasis);
+		typename OperatorType::Su2RelatedType su2related2;
+		OperatorType myOp2(tmpMatrix,
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 1),
+		                   1.0/sqrt(2.0),
+		                   su2related2);
+		this->createOpsLabel("sz").push(myOp2);
+		// this->makeTrackable("sz");
 
-			// Set the operators S^x_i in the natural basis
-			tmpMatrix = findSxMatrices(i,natBasis);
-			typename OperatorType::Su2RelatedType su2related3;
-			OperatorType myOp3(tmpMatrix,
-			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                   PairType(2, 1),
-			                   1.0/sqrt(2.0),
-			                   su2related3);
-			this->createOpsLabel("sx").push(myOp3);
-			this->makeTrackable("sx");
-		}
+		// Set the operators S^x_i in the natural basis
+		tmpMatrix = findSxMatrices(0, natBasis);
+		typename OperatorType::Su2RelatedType su2related3;
+		OperatorType myOp3(tmpMatrix,
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 1),
+		                   1.0/sqrt(2.0),
+		                   su2related3);
+		this->createOpsLabel("sx").push(myOp3);
+		this->makeTrackable("sx");
+
 	}
 
 	void fillModelLinks()
@@ -228,7 +218,7 @@ protected:
 		if (BasisType::useSu2Symmetry())
 			err("SU(2): no longer supported\n");
 
-		auto lambda = []
+		//auto lambda = []
 		ModelTermType& plaquetteX = ModelBaseType::createTerm("PlaquetteX");
 
 		OpForLinkType sx("sx");
@@ -323,9 +313,7 @@ private:
 		return Sx;
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int n) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -344,7 +332,6 @@ private:
 	}
 
 	ParametersGaugeSpin<RealType, QnType> modelParameters_;
-	const GeometryType& geometry_;
 }; // class GaugeSpin
 
 } // namespace Dmrg
