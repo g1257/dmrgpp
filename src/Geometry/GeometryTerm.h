@@ -183,11 +183,16 @@ public:
 			idof = GeometryDirectionType::GENERAL;
 		} else if (s == "Honeycomb") {
 			geometryBase_ = new Honeycomb<ComplexOrRealType, InputType>(aux.linSize,io);
+		} else if (s.substr(0, 5) == "Super") {
+			std::cout<<__FILE__<<" SuperGeometry "<<s<<" detected\n";
+			std::cerr<<__FILE__<<" SuperGeometry "<<s<<" detected\n";
+			gOptions_ = s;
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}
 
-		for (SizeType i=0;i<geometryBase_->dirs();i++) {
+		const SizeType ndirs = (geometryBase_) ? geometryBase_->dirs() : 0;
+		for (SizeType i = 0; i < ndirs; ++i) {
 			typename GeometryDirectionType::Auxiliary aux(constantValues, i, idof, orbitals_);
 
 			directions_.push_back(GeometryDirectionType(io, aux, geometryBase_));
@@ -263,6 +268,7 @@ public:
 	                                    SizeType i2,
 	                                    SizeType edof2) const
 	{
+		assert(geometryBase_);
 		int k1 = geometryBase_->index(i1,edof1,orbitals_);
 		int k2 = geometryBase_->index(i2,edof2,orbitals_);
 		assert(k1>=0 && k2>=0);
@@ -300,6 +306,7 @@ public:
 	                                    SizeType i2,
 	                                    SizeType edof2) const
 	{
+		assert(geometryBase_);
 		bool bothFringe = (geometryBase_->fringe(i1,smax,emin) &&
 		                   geometryBase_->fringe(i2,smax,emin));
 		SizeType siteNew1 = i1;
@@ -313,8 +320,10 @@ public:
 				edofNew1 = edof2;
 				edofNew2 = edof1;
 			}
+
 			siteNew2 = geometryBase_->getSubstituteSite(smax,emin,siteNew2);
 		}
+
 		return operator()(siteNew1,edofNew1,siteNew2,edofNew2);
 	}
 
@@ -322,6 +331,7 @@ public:
 	{
 		if (i1==i2) return false;
 
+		assert(geometryBase_);
 		bool bothFringe = (geometryBase_->fringe(i1,smax,emin) &&
 		                   geometryBase_->fringe(i2,smax,emin));
 
@@ -332,31 +342,35 @@ public:
 
 	bool connected(SizeType i1,SizeType i2) const
 	{
-		return geometryBase_->connected(i1,i2);
+		return (geometryBase_) ? geometryBase_->connected(i1,i2) : false;
 	}
 
 	String label() const
 	{
+		assert(geometryBase_);
 		return geometryBase_->label();
 	}
 
 	SizeType maxConnections() const
 	{
-		return geometryBase_->maxConnections();
+		return (geometryBase_) ? geometryBase_->maxConnections() : 0;
 	}
 
 	SizeType findReflection(SizeType site) const
 	{
+		assert(geometryBase_);
 		return geometryBase_->findReflection(site);
 	}
 
 	SizeType length(SizeType i) const
 	{
+		assert(geometryBase_);
 		return geometryBase_->length(i);
 	}
 
 	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
 	{
+		assert(geometryBase_);
 		return geometryBase_->translate(site,dir,amount);
 	}
 
@@ -386,16 +400,18 @@ public:
 
 	SizeType handle(SizeType ind, SizeType jnd) const
 	{
+		assert(geometryBase_);
 		return geometryBase_->handle(ind,jnd);
 	}
 
 	SizeType directions() const
 	{
-		return geometryBase_->dirs();
+		return (geometryBase_) ? geometryBase_->dirs() : 0;
 	}
 
 	SizeType calcDir(SizeType i, SizeType j) const
 	{
+		assert(geometryBase_);
 		return geometryBase_->calcDir(i,j);
 	}
 
@@ -404,13 +420,17 @@ public:
 		return gOptions_;
 	}
 
-	template<typename ComplexOrRealType_,typename InputType_>
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const GeometryTerm<ComplexOrRealType_,
-	                                InputType_>& gt);
+	friend std::ostream& operator<<(std::ostream& os, const GeometryTerm& gt)
+	{
+		os<<"#GeometryDirections="<<gt.directions_.size()<<"\n";
+		for (SizeType i=0;i<gt.directions_.size();i++) os<<gt.directions_[i];
+		gt.print(os);
+		return os;
+	}
 
 	SizeType orbitals(SizeType site) const
 	{
+		assert(geometryBase_);
 		return geometryBase_->orbitals(orbitals_, site);
 	}
 
@@ -418,6 +438,8 @@ private:
 
 	void cacheValues()
 	{
+		if (!geometryBase_) return;
+
 		SizeType linSize = aux_.linSize;
 		SizeType matrixRank = geometryBase_->matrixRank(linSize, orbitals_);
 		cachedValues_.resize(matrixRank,matrixRank);
@@ -443,6 +465,7 @@ private:
 	                            SizeType i2,
 	                            SizeType edof2) const
 	{
+		assert(geometryBase_);
 		if (!geometryBase_->connected(i1,i2)) return 0.0;
 
 		SizeType dir = geometryBase_->calcDir(i1,i2);
@@ -462,16 +485,6 @@ private:
 	typename Vector<GeometryDirectionType>::Type directions_;
 	Matrix<ComplexOrRealType> cachedValues_;
 }; // class GeometryTerm
-
-template<typename ComplexOrRealType,typename InputType>
-std::ostream& operator<<(std::ostream& os,
-                         const GeometryTerm<ComplexOrRealType,InputType>& gt)
-{
-	os<<"#GeometryDirections="<<gt.directions_.size()<<"\n";
-	for (SizeType i=0;i<gt.directions_.size();i++) os<<gt.directions_[i];
-	gt.print(os);
-	return os;
-}
 } // namespace PsimagLite
 
 /*@}*/
