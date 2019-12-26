@@ -72,6 +72,11 @@ private:
 	PairSizeType finalIndices(const VectorSizeType& hItems,
 	                          ProgramGlobals::ConnectionEnum type) const
 	{
+		if (hItems.size() == 4) {
+			assert(type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON);
+			return finalIndices4sites(hItems);
+		}
+
 		const ProgramGlobals::SysOrEnvEnum sysOrEnv =
 		        (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON;
@@ -111,6 +116,29 @@ private:
 		}
 
 		return ii.first;
+	}
+
+	PairSizeType finalIndices4sites(const VectorSizeType& hItems) const
+	{
+		SizeType last = lrs_.left().block().size();
+		assert(last > 0);
+		--last;
+		SizeType lmax = lrs_.left().block()[last];
+		VectorSizeType sysSites;
+		VectorSizeType envSites;
+		assert(hItems.size() == 4);
+		for (SizeType i = 0; i < 4; ++i) {
+			if (hItems[i] <= lmax)
+				sysSites.push_back(hItems[i]);
+			else
+				envSites.push_back(hItems[i]);
+		}
+
+		assert(sysSites.size() > 0);
+		assert(envSites.size() > 0);
+		PairSizeType finalIndex(lrs_.left(). superOperatorIndices(sysSites, oneLink_.indices[0]),
+		                        lrs_.right().superOperatorIndices(envSites, oneLink_.indices[1]));
+		return finalIndex;
 	}
 
 	const ModelTermLinkType& oneLink_;

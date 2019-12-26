@@ -261,6 +261,11 @@ public:
 
 	SizeType numberOfOperators() const { return operators_.numberOfOperators(); }
 
+	SizeType superOperatorIndices(const VectorSizeType& sites, SizeType sigma) const
+	{
+		return operators_.superOperatorIndices(sites, sigma);
+	}
+
 	SizeType operatorsPerSite(SizeType i) const
 	{
 		assert(i < operatorsPerSite_.size());
