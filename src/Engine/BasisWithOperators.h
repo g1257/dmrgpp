@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ApplyFactors.h"
 #include "Basis.h"
+#include "Operators.h"
 
 namespace Dmrg {
 
@@ -112,22 +113,22 @@ namespace Dmrg {
 	 local operators in a Hilbert space basis. These include functions to create
 	 an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc.
 	 */
-template<typename OperatorsType_>
-class BasisWithOperators : public OperatorsType_::BasisType {
+template<typename BasisType_, int>
+class BasisWithOperators : public BasisType_ {
 
 public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorIntegerType;
-	typedef typename OperatorsType_::BasisType BaseType;
+	typedef BasisType_ BaseType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename BaseType::RealType RealType;
-	typedef OperatorsType_ OperatorsType;
+	typedef Operators<BasisType_> OperatorsType;
 	typedef typename OperatorsType::PairSizeSizeType PairSizeSizeType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType VectorSizeType;
 	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef BasisWithOperators<OperatorsType> ThisType;
+	typedef BasisWithOperators<BasisType_,1> ThisType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename OperatorStorageType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
@@ -263,7 +264,7 @@ public:
 
 	SizeType superOperatorIndices(const VectorSizeType& sites, SizeType sigma) const
 	{
-		return operators_.superOperatorIndices(sites, sigma);
+		return 0; //operators_.superOperatorIndices(sites, sigma);
 	}
 
 	SizeType operatorsPerSite(SizeType i) const
@@ -394,24 +395,8 @@ private:
 	PsimagLite::Vector<SizeType>::Type operatorsPerSite_;
 }; // class BasisWithOperators
 
-template<typename OperatorsType>
-std::ostream& operator<<(std::ostream& os,
-                         const BasisWithOperators<OperatorsType>& bwo)
-{
-	throw PsimagLite::RuntimeError("Unimplemented <<\n");
-	return os;
-}
-
-template<typename OperatorsType>
-std::istream& operator>>(std::istream& is,
-                         BasisWithOperators<OperatorsType>& bwo)
-{
-	throw PsimagLite::RuntimeError("Unimplemented >>\n");
-	return is;
-}
-
-template<typename OperatorsType>
-struct IsBasisType<BasisWithOperators<OperatorsType> > {
+template<typename T,int x>
+struct IsBasisType<BasisWithOperators<T,x> > {
 	enum {True = true};
 };
 } // namespace Dmrg

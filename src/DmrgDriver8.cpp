@@ -11,7 +11,7 @@ typedef Dmrg::SuperGeometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::In
 typedef Dmrg::MatrixVectorStored<
  Dmrg::ModelBase<
   Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance16Type> >  >,Dmrg::Basis<SparseMatrixInstance16Type> >
+   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance16Type> ,1>,Dmrg::Basis<SparseMatrixInstance16Type> >
   >,
   ParametersDmrgSolverType,
   InputNgType::Readable,
@@ -35,7 +35,7 @@ typedef Dmrg::SuperGeometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::In
 typedef Dmrg::MatrixVectorKron<
  Dmrg::ModelBase<
   Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance17Type> >  >,Dmrg::Basis<SparseMatrixInstance17Type> >
+   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance17Type> ,1>,Dmrg::Basis<SparseMatrixInstance17Type> >
   >,
   ParametersDmrgSolverType,
   InputNgType::Readable,
