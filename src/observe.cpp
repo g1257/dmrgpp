@@ -47,7 +47,7 @@ void mainLoop1(GeometryType& geometry,
                const PsimagLite::String& list)
 {
 	typedef Basis<MySparseMatrix> BasisType;
-	typedef BasisWithOperators<BasisType, 1> BasisWithOperatorsType;
+	typedef BasisWithOperators<BasisType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;

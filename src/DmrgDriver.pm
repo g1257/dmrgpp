@@ -69,7 +69,7 @@ sub printInstance
 	$values) = @_;
 	my $sparseMatrix = "SparseMatrixInstance${counter}Type";
 	my $basisWithout = "Dmrg::Basis<$sparseMatrix>";
-	my $basisWith = "Dmrg::BasisWithOperators<$basisWithout ,1>";
+	my $basisWith = "Dmrg::BasisWithOperators<$basisWithout >";
 	my $basis = $basisWithout;
 	my $inputNg = "PsimagLite::InputNg<Dmrg::InputCheck>::Readable";
 	my $geometry = "GeometryInstance${counter}Type";

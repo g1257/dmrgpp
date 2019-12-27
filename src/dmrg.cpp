@@ -98,7 +98,7 @@ void mainLoop1(SuperGeometryType& geometry,
                const OperatorOptions& opOptions)
 {
 	typedef Basis<MySparseMatrix> BasisType;
-	typedef BasisWithOperators<BasisType, 1> BasisWithOperatorsType;
+	typedef BasisWithOperators<BasisType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
 	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
 	typedef ModelBase<ModelHelperType,

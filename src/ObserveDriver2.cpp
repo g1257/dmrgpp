@@ -12,7 +12,7 @@ ProgramGlobals> Geometry1Type;
 
 
 typedef Basis<MySparseMatrixComplex> Basis2Type;
-typedef BasisWithOperators<Basis2Type, 1> BasisWithOperators2Type;
+typedef BasisWithOperators<Basis2Type> BasisWithOperators2Type;
 typedef LeftRightSuper<BasisWithOperators2Type,Basis2Type> LeftRightSuper2Type;
 
 typedef ModelHelperLocal<LeftRightSuper2Type> ModelHelper2Type;

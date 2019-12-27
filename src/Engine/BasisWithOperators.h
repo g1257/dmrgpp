@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009-2012-2019, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 5.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -113,7 +113,7 @@ namespace Dmrg {
 	 local operators in a Hilbert space basis. These include functions to create
 	 an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc.
 	 */
-template<typename BasisType_, int>
+template<typename BasisType_>
 class BasisWithOperators : public BasisType_ {
 
 public:
@@ -128,7 +128,7 @@ public:
 	typedef typename OperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType VectorSizeType;
 	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef BasisWithOperators<BasisType_,1> ThisType;
+	typedef BasisWithOperators<BasisType_> ThisType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename OperatorStorageType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
@@ -395,8 +395,8 @@ private:
 	PsimagLite::Vector<SizeType>::Type operatorsPerSite_;
 }; // class BasisWithOperators
 
-template<typename T,int x>
-struct IsBasisType<BasisWithOperators<T,x> > {
+template<typename T>
+struct IsBasisType<BasisWithOperators<T> > {
 	enum {True = true};
 };
 } // namespace Dmrg
