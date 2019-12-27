@@ -79,13 +79,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef OPERATORS_H
 #define OPERATORS_H
 
-#include "ReducedOperators.h"
 #include <cassert>
 #include "ProgressIndicator.h"
 #include "Complex.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include "ApplyFactors.h"
+#include "BlockOffDiagMatrix.h"
+#include "ChangeOfBasis.h"
+#include "Operator.h"
+#include "Matrix.h"
 
 namespace Dmrg {
 /* PSIDOC Operators
@@ -111,14 +114,16 @@ transformed operator can be used (or not because of the reason limitation above)
 template<typename BasisType_>
 class Operators {
 
-	typedef std::pair<SizeType,SizeType> PairType;
-
 public:
 
+	typedef std::pair<SizeType,SizeType> PairType;
 	typedef BasisType_ BasisType;
-	typedef ReducedOperators<BasisType> ReducedOperatorsType;
-	typedef typename ReducedOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename ReducedOperatorsType::OperatorType OperatorType;
+	typedef typename BasisType::SparseMatrixType SparseMatrixType;
+	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef Operator<SparseElementType> OperatorType;
+	typedef typename OperatorType::StorageType OperatorStorageType;
+	typedef PsimagLite::Matrix<SparseElementType> DenseMatrixType;
+	typedef ChangeOfBasis<OperatorStorageType, DenseMatrixType> ChangeOfBasisType;
 	typedef typename OperatorType::StorageType StorageType;
 	typedef typename StorageType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
@@ -126,8 +131,8 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<SizeType,SizeType> PairSizeSizeType;
-	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
 	typedef typename BasisType::FactorsType FactorsType;
+	typedef typename ChangeOfBasisType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 
 	// law of the excluded middle went out the window here:
 	enum class ChangeAllEnum { UNSET, TRUE_SET, FALSE_SET};
@@ -136,19 +141,17 @@ public:
 
 	public:
 
-		MyLoop(ReducedOperatorsType& reducedOpImpl,
-		       typename PsimagLite::Vector<OperatorType>::Type& operators,
+		MyLoop(typename PsimagLite::Vector<OperatorType>::Type& operators,
+		       ChangeOfBasisType& changeOfBasis,
 		       const BlockDiagonalMatrixType& ftransform1,
-		       const BasisType* thisBasis1,
 		       const PairSizeSizeType& startEnd)
-		    : reducedOpImpl_(reducedOpImpl),
-		      operators_(operators),
+		    : operators_(operators),
+		      changeOfBasis_(changeOfBasis),
 		      ftransform(ftransform1),
-		      thisBasis(thisBasis1),
 		      hasMpi_(ConcurrencyType::hasMpi()),
 		      startEnd_(startEnd)
 		{
-			reducedOpImpl_.prepareTransform(ftransform,thisBasis);
+			changeOfBasis.update(ftransform);
 		}
 
 		void doTask(SizeType taskNumber, SizeType)
@@ -159,15 +162,11 @@ public:
 				return;
 			}
 
-			if (!BasisType::useSu2Symmetry())
-				reducedOpImpl_.changeBasis(operators_[k].getStorageNonConst());
-			else
-				reducedOpImpl_.changeBasis(k);
+			changeOfBasis_(operators_[k].getStorageNonConst());
 		}
 
 		SizeType tasks() const
 		{
-			if (BasisType::useSu2Symmetry()) return reducedOpImpl_.size();
 			return operators_.size();
 		}
 
@@ -175,13 +174,8 @@ public:
 		{
 			if (ConcurrencyType::isMpiDisabled("Operators")) return;
 
-			if (!BasisType::useSu2Symmetry()) {
-				gatherOperators();
-				bcastOperators();
-			} else {
-				reducedOpImpl_.gather();
-				reducedOpImpl_.bcast();
-			}
+			gatherOperators();
+			bcastOperators();
 		}
 
 	private:
@@ -208,30 +202,22 @@ public:
 				bcast2(operators_[i]);
 		}
 
-		ReducedOperatorsType& reducedOpImpl_;
 		typename PsimagLite::Vector<OperatorType>::Type& operators_;
+		ChangeOfBasisType& changeOfBasis_;
 		const BlockDiagonalMatrixType& ftransform;
-		const BasisType* thisBasis;
 		bool hasMpi_;
 		const PairSizeSizeType& startEnd_;
 	};
 
-	Operators(const BasisType* thisBasis)
-	    : reducedOpImpl_(thisBasis),
-	      progress_("Operators")
+	Operators() : progress_("Operators")
 	{
 		if (changeAll_ == ChangeAllEnum::UNSET)
 			changeAll_ = ChangeAllEnum::FALSE_SET;
 	}
 
 	template<typename IoInputter>
-	Operators(IoInputter& io,
-	          PsimagLite::String prefix,
-	          SizeType level,
-	          const BasisType* thisBasis,
-	          bool isObserveCode)
-	    : reducedOpImpl_(io,level,thisBasis),
-	      progress_("Operators")
+	Operators(IoInputter& io, PsimagLite::String prefix, bool isObserveCode)
+	    : progress_("Operators")
 	{
 		if (changeAll_ == ChangeAllEnum::UNSET)
 			changeAll_ = ChangeAllEnum::FALSE_SET;
@@ -254,14 +240,8 @@ public:
 
 		if (prefix[last] != '/') prefix += "/";
 
-		if (!BasisType::useSu2Symmetry()) {
-			io.read(operators_, prefix + "Operators");
-		} else {
-			if (roi) reducedOpImpl_.read(io);
-		}
-
+		io.read(operators_, prefix + "Operators");
 		io.read(hamiltonian_, prefix + "Hamiltonian");
-		reducedOpImpl_.setHamiltonian(hamiltonian_);
 	}
 
 	static void setChangeAll(bool flag)
@@ -285,8 +265,7 @@ public:
 
 	void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
 	{
-		if (!BasisType::useSu2Symmetry()) operators_=ops;
-		else reducedOpImpl_.setOperators(ops);
+		operators_ = ops;
 	}
 
 	const OperatorType& getOperatorByIndex(int i) const
@@ -298,7 +277,6 @@ public:
 
 	SizeType numberOfOperators() const
 	{
-		if (BasisType::useSu2Symmetry()) return reducedOpImpl_.size();
 		return operators_.size();
 	}
 
@@ -313,28 +291,24 @@ public:
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		ParallelizerType threadObject(codeSectionParams);
 
-		MyLoop helper(reducedOpImpl_,operators_,ftransform,thisBasis,startEnd);
+		MyLoop helper(operators_, changeOfBasis_, ftransform, startEnd);
 
 		threadObject.loopCreate(helper); // FIXME: needs weights
 
 		helper.gather();
 
-		reducedOpImpl_.changeBasisHamiltonian(hamiltonian_, ftransform);
+		hamiltonian_.checkValidity();
+		ChangeOfBasisType::changeBasis(hamiltonian_, ftransform);
 	}
 
-	void setMomentumOfOperators(const   VectorSizeType& momentum)
+	void setMomentumOfOperators(const VectorSizeType& momentum)
 	{
-		reducedOpImpl_.setMomentumOfOperators(momentum);
+		momentumOfOperators_ = momentum;
 	}
 
-	void setToProduct(const BasisType& basis2,
-	                  const BasisType& basis3,
-	                  SizeType x,
-	                  const BasisType* thisBasis)
+	void setToProduct(SizeType x)
 	{
-		if (!BasisType::useSu2Symmetry())
-			operators_.resize(x);
-		reducedOpImpl_.setToProduct(basis2,basis3,x,thisBasis);
+		operators_.resize(x);
 	}
 
 	/* PSIDOC OperatorsExternalProduct
@@ -379,15 +353,6 @@ public:
 		// apply(operators_[i]);
 	}
 
-	void externalProductReduced(SizeType i,
-	                            const BasisType& basis2,
-	                            const BasisType& basis3,
-	                            bool option,
-	                            const OperatorType& A)
-	{
-		reducedOpImpl_.externalProduct(i,basis2,basis3,option,A);
-	}
-
 	template<typename ApplyFactorsType>
 	void outerProductHamiltonian(const StorageType& h2,
 	                             const StorageType& h3,
@@ -406,44 +371,23 @@ public:
 		apply(hamiltonian_);
 	}
 
-	void outerProductHamiltonianReduced(const BasisType& basis2,
-	                                    const BasisType& basis3,
-	                                    const StorageType& h2,
-	                                    const StorageType& h3)
-	{
-		reducedOpImpl_.outerProductHamiltonian(basis2,basis3,h2,h3);
-	}
-
 	void setHamiltonian(StorageType const &h)
 	{
 		hamiltonian_ = h;
-		reducedOpImpl_.setHamiltonian(h);
 	}
 
 	void setHamiltonian(const SparseMatrixType& h)
 	{
 		fromCRS(hamiltonian_, h);
-		reducedOpImpl_.setHamiltonian(hamiltonian_);
 	}
 
 	const StorageType& hamiltonian() const { return hamiltonian_; }
 
-	const StorageType& reducedHamiltonian() const
-	{
-		return reducedOpImpl_.hamiltonian();
-	}
-
-	//const   VectorSizeType& electrons() const {return operatorsImpl_.electrons(); }
-
 	void print(int ind= -1) const
 	{
-		if (!BasisType::useSu2Symmetry()) {
-			if (ind<0)
-				for (SizeType i=0;i<operators_.size();i++) std::cerr<<operators_[i];
-			else std::cerr<<operators_[ind];
-		} else {
-			reducedOpImpl_.print(ind);
-		}
+		if (ind<0)
+			for (SizeType i=0;i<operators_.size();i++) std::cerr<<operators_[i];
+		else std::cerr<<operators_[ind];
 	}
 
 	template<typename SomeIoOutType>
@@ -452,11 +396,7 @@ public:
 	               typename PsimagLite::EnableIf<
 	               PsimagLite::IsOutputLike<SomeIoOutType>::True, int*>::Type = 0) const
 	{
-		if (!BasisType::useSu2Symmetry())
-			io.overwrite(operators_, s + "/Operators");
-		else
-			reducedOpImpl_.overwrite(io,s);
-
+		io.overwrite(operators_, s + "/Operators");
 		io.overwrite(hamiltonian_, s + "/Hamiltonian");
 	}
 
@@ -464,14 +404,10 @@ public:
 	           const PsimagLite::String& s,
 	           PsimagLite::IoNgSerializer::WriteMode mode) const
 	{
-		if (!BasisType::useSu2Symmetry()) {
-			if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
-				io.overwrite(operators_, s + "/Operators");
-			else
-				io.write(operators_, s + "/Operators");
-		} else {
-			reducedOpImpl_.write(io, s, mode);
-		}
+		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+			io.overwrite(operators_, s + "/Operators");
+		else
+			io.write(operators_, s + "/Operators");
 
 		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			io.overwrite(hamiltonian_, s + "/Hamiltonian");
@@ -483,9 +419,14 @@ public:
 
 	void clear()
 	{
-		reducedOpImpl_.clear();
 		operators_.clear();
 		hamiltonian_.clear();
+	}
+
+	SizeType superOperatorIndices(const VectorSizeType&, SizeType) const
+	{
+		PsimagLite::String msg(__FILE__);
+		throw PsimagLite::RuntimeError(msg + "::superOperatorIndices() not implemented yet\n");
 	}
 
 private:
@@ -517,10 +458,11 @@ private:
 	}
 
 	static ChangeAllEnum changeAll_;
-	ReducedOperatorsType reducedOpImpl_;
+	ChangeOfBasisType changeOfBasis_;
 	typename PsimagLite::Vector<OperatorType>::Type operators_;
 	StorageType hamiltonian_;
 	PsimagLite::ProgressIndicator progress_;
+	VectorSizeType momentumOfOperators_;
 }; //class Operators
 
 template<typename T>

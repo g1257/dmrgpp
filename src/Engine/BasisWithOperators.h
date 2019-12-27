@@ -138,7 +138,7 @@ public:
 	enum class SaveEnum {ALL, PARTIAL};
 
 	BasisWithOperators(const PsimagLite::String& s)
-	    : BasisType(s), operators_(this)
+	    : BasisType(s)
 	{}
 
 	template<typename IoInputter>
@@ -146,7 +146,7 @@ public:
 	                   const PsimagLite::String& ss,
 	                   bool isObserveCode)
 	    : BasisType(io, ss, false),
-	      operators_(io, ss + "/", 0, this, isObserveCode)
+	      operators_(io, ss + "/", isObserveCode)
 	{
 		const PsimagLite::String prefix = ss + "/";
 		io.read(operatorsPerSite_, prefix + "OperatorPerSite");
@@ -264,7 +264,7 @@ public:
 
 	SizeType superOperatorIndices(const VectorSizeType& sites, SizeType sigma) const
 	{
-		return 0; //operators_.superOperatorIndices(sites, sigma);
+		return operators_.superOperatorIndices(sites, sigma);
 	}
 
 	SizeType operatorsPerSite(SizeType i) const
@@ -321,7 +321,7 @@ private:
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 		SizeType x = basis2.numberOfOperators()+basis3.numberOfOperators();
 
-		operators_.setToProduct(basis2,basis3,x,this);
+		operators_.setToProduct(x);
 		ApplyFactors<FactorsType> apply(this->getFactors(), this->useSu2Symmetry());
 		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
@@ -372,10 +372,6 @@ private:
 		                                   basis3.hamiltonian(),
 		                                   apply,
 		                                   BaseType::permutationInverse());
-		operators_.outerProductHamiltonianReduced(basis2,
-		                                          basis3,
-		                                          basis2.reducedHamiltonian(),
-		                                          basis3.reducedHamiltonian());
 
 		SizeType offset1 = basis2.operatorsPerSite_.size();
 		operatorsPerSite_.resize(offset1+basis3.operatorsPerSite_.size());
