@@ -133,6 +133,7 @@ public:
 	typedef std::pair<SizeType,SizeType> PairSizeSizeType;
 	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename ChangeOfBasisType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 
 	// law of the excluded middle went out the window here:
 	enum class ChangeAllEnum { UNSET, TRUE_SET, FALSE_SET};
@@ -141,14 +142,15 @@ public:
 
 	public:
 
-		MyLoop(typename PsimagLite::Vector<OperatorType>::Type& operators,
+		MyLoop(VectorOperatorType& operators,
+		       VectorOperatorType& superOps,
 		       ChangeOfBasisType& changeOfBasis,
 		       const BlockDiagonalMatrixType& ftransform1,
 		       const PairSizeSizeType& startEnd)
 		    : operators_(operators),
+		      superOps_(superOps),
 		      changeOfBasis_(changeOfBasis),
 		      ftransform(ftransform1),
-		      hasMpi_(ConcurrencyType::hasMpi()),
 		      startEnd_(startEnd)
 		{
 			changeOfBasis.update(ftransform);
@@ -156,8 +158,23 @@ public:
 
 		void doTask(SizeType taskNumber, SizeType)
 		{
-			SizeType k = taskNumber;
-			if (isExcluded(k) && k < operators_.size()) {
+			const SizeType nLocals =  operators_.size();
+			if (taskNumber < nLocals)
+				doTaskForLocal(taskNumber);
+			else
+				doTaskForSuper(taskNumber - nLocals);
+		}
+
+		SizeType tasks() const
+		{
+			return operators_.size() + superOps_.size();
+		}
+
+	private:
+
+		void doTaskForLocal(SizeType k)
+		{
+			if (isLocalExcluded(k) && k < operators_.size()) {
 				operators_[k].clear();
 				return;
 			}
@@ -165,22 +182,17 @@ public:
 			changeOfBasis_(operators_[k].getStorageNonConst());
 		}
 
-		SizeType tasks() const
+		void doTaskForSuper(SizeType k)
 		{
-			return operators_.size();
+			if (isSuperExcluded(k) && k < superOps_.size()) {
+				superOps_[k].clear();
+				return;
+			}
+
+			changeOfBasis_(superOps_[k].getStorageNonConst());
 		}
 
-		void gather()
-		{
-			if (ConcurrencyType::isMpiDisabled("Operators")) return;
-
-			gatherOperators();
-			bcastOperators();
-		}
-
-	private:
-
-		bool isExcluded(SizeType k) const
+		bool isLocalExcluded(SizeType k) const
 		{
 			if (changeAll_ == ChangeAllEnum::TRUE_SET)
 				return false; // <-- this is the safest answer
@@ -189,23 +201,15 @@ public:
 			return false;
 		}
 
-		void gatherOperators()
+		bool isSuperExcluded(SizeType) const
 		{
-			if (!hasMpi_) return;
-			PsimagLite::MPI::pointByPointGather(operators_);
+			throw PsimagLite::RuntimeError("Operators.h: isLocalExcluded not written yet\n");
 		}
 
-		void bcastOperators()
-		{
-			if (!hasMpi_) return;
-			for (SizeType i = 0; i < operators_.size(); i++)
-				bcast2(operators_[i]);
-		}
-
-		typename PsimagLite::Vector<OperatorType>::Type& operators_;
+		VectorOperatorType& operators_;
+		VectorOperatorType& superOps_;
 		ChangeOfBasisType& changeOfBasis_;
 		const BlockDiagonalMatrixType& ftransform;
-		bool hasMpi_;
 		const PairSizeSizeType& startEnd_;
 	};
 
@@ -263,7 +267,7 @@ public:
 		err("Operators::setChangeAll(true) called to late\n");
 	}
 
-	void setLocal(const typename PsimagLite::Vector<OperatorType>::Type& ops)
+	void setLocal(const VectorOperatorType& ops)
 	{
 		operators_ = ops;
 	}
@@ -280,7 +284,6 @@ public:
 	}
 
 	void changeBasis(const BlockDiagonalMatrixType& ftransform,
-	                 const BasisType* thisBasis,
 	                 const PairSizeSizeType& startEnd,
 	                 bool blasIsThreadSafe)
 	{
@@ -290,11 +293,9 @@ public:
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		ParallelizerType threadObject(codeSectionParams);
 
-		MyLoop helper(operators_, changeOfBasis_, ftransform, startEnd);
+		MyLoop helper(operators_, superOps_, changeOfBasis_, ftransform, startEnd);
 
 		threadObject.loopCreate(helper); // FIXME: needs weights
-
-		helper.gather();
 
 		hamiltonian_.checkValidity();
 		ChangeOfBasisType::changeBasis(hamiltonian_, ftransform);
@@ -453,7 +454,8 @@ private:
 
 	static ChangeAllEnum changeAll_;
 	ChangeOfBasisType changeOfBasis_;
-	typename PsimagLite::Vector<OperatorType>::Type operators_;
+	VectorOperatorType operators_;
+	VectorOperatorType superOps_;
 	StorageType hamiltonian_;
 	PsimagLite::ProgressIndicator progress_;
 }; //class Operators

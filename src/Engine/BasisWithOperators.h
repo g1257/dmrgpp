@@ -194,7 +194,7 @@ public:
 	{
 		RealType error = BasisType::truncateBasis(eigs, removedIndices);
 
-		operators_.changeBasis(ftransform, this, startEnd, blasIsThreadSafe);
+		operators_.changeBasis(ftransform, startEnd, blasIsThreadSafe);
 
 		return error;
 	}
