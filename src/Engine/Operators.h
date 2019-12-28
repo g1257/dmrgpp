@@ -203,7 +203,7 @@ public:
 
 		bool isSuperExcluded(SizeType) const
 		{
-			throw PsimagLite::RuntimeError("Operators.h: isLocalExcluded not written yet\n");
+			throw PsimagLite::RuntimeError("Operators.h: isSuperExcluded not written yet\n");
 		}
 
 		VectorOperatorType& operators_;
@@ -245,6 +245,7 @@ public:
 		if (prefix[last] != '/') prefix += "/";
 
 		io.read(operators_, prefix + "Operators");
+		//io.read(superOps_, prefix + "SuperOperators");
 		io.read(hamiltonian_, prefix + "Hamiltonian");
 	}
 
@@ -306,6 +307,7 @@ public:
 	                  SizeType x)
 	{
 		operators_.resize(x);
+		// ChemicalH: Set super ops here
 	}
 
 	/* PSIDOC OperatorsExternalProduct
@@ -394,6 +396,7 @@ public:
 	               PsimagLite::IsOutputLike<SomeIoOutType>::True, int*>::Type = 0) const
 	{
 		io.overwrite(operators_, s + "/Operators");
+		//		 io.overwrite(superOps_, s + "/SuperOperators");
 		io.overwrite(hamiltonian_, s + "/Hamiltonian");
 	}
 
@@ -401,20 +404,21 @@ public:
 	           const PsimagLite::String& s,
 	           PsimagLite::IoNgSerializer::WriteMode mode) const
 	{
-		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE) {
 			io.overwrite(operators_, s + "/Operators");
-		else
-			io.write(operators_, s + "/Operators");
-
-		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+//			io.overwrite(superOps_, s + "/SuperOperators");
 			io.overwrite(hamiltonian_, s + "/Hamiltonian");
-		else
+		} else {
+			io.write(operators_, s + "/Operators");
+//			io.write(superOps_, s + "/SuperOperators");
 			io.write(hamiltonian_, s + "/Hamiltonian");
+		}
 	}
 
 	void clear()
 	{
 		operators_.clear();
+		superOps_.clear();
 		hamiltonian_.clear();
 	}
 

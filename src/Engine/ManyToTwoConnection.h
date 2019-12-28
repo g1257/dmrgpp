@@ -109,10 +109,10 @@ private:
 	{
 		PairSizeType ii;
 		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
-			ii = lrs_.left().getOperatorIndices(i, sigma);
+			ii = lrs_.left().localOperatorIndices(i, sigma);
 		} else {
 			assert(type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
-			ii = lrs_.right().getOperatorIndices(i, sigma);
+			ii = lrs_.right().localOperatorIndices(i, sigma);
 		}
 
 		return ii.first;
