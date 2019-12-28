@@ -117,6 +117,7 @@ public:
 
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef BasisType_ BasisType;
+	typedef Operators<BasisType_> ThisType;
 	typedef typename BasisType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef Operator<SparseElementType> OperatorType;
@@ -302,53 +303,13 @@ public:
 	}
 
 	void setToProduct(const BasisType& basis1,
+	                  const ThisType& ops1,
 	                  const BasisType& basis2,
-	                  SizeType x)
+	                  const ThisType& ops2,
+	                  const VectorSizeType& permutationInverse)
 	{
-		operators_.resize(x);
+		setToProductLocal(basis1, ops1, basis2, ops2, permutationInverse);
 		// ChemicalH: Set super ops here
-	}
-
-	/* PSIDOC OperatorsExternalProduct
-		I will know explain how the full outer product between two operators
-		is implemented. If local operator $A$ lives in Hilbert space
-		$\mathcal{A}$ and local operator $B$ lives in Hilbert space
-		$\mathcal{B}$, then $C=AB$ lives in Hilbert space
-		$\mathcal{C}=\mathcal{A}\otimes\mathcal{B}$. Let $\alpha_1$ and
-		$\alpha_2$ represent states of $\mathcal{A}$, and let $\beta_1$ and
-		$\beta_2$ represent states of   $\mathcal{B}$. Then, in the product
-		basis, $C_{\alpha_1,\beta_1;\alpha_2,\beta_2}=A_{\alpha_1,\alpha_2}
-		B_{\beta_1,\beta_2}$. Additionally,  $\mathcal{C}$ is reordered
-		such that each state of this outer product basis is labeled in
-		increasing effective quantum number (see
-		Section~\ref{sec:dmrgbasis}). In the previous example, if the Hilbert
-		spaces  $\mathcal{A}$ and $\mathcal{B}$ had sizes $a$ and $b$,
-		respectively, then their outer product would have size $ab$.
-		When we add sites to the system (or the environment) the memory
-		usage remains bounded by the truncation, and it is usually not a
-		problem to store full product matrices, as long as we do it in a
-		sparse way (DMRG++ uses compressed row storage). In short, local
-		operators are always stored in the most recently transformed basis
-		for \emph{all sites} and, if applicable, \emph{all values} of the
-		internal degree of freedom $\sigma$. See PTEXREF{setToProductOps}
-		and PTEXREF{HERE}.
-		*/
-	void crossProductForLocal(SizeType i,
-	                          const OperatorType& m,
-	                          int x,
-	                          const VectorRealType& fermionicSigns,
-	                          bool option,
-	                          const VectorSizeType& permutationFull)
-	{
-		assert(!BasisType::useSu2Symmetry());
-		operators_[i].outerProduct(m,
-		                           x,
-		                           fermionicSigns,
-		                           option,
-		                           permutationFull);
-		// don't forget to set fermion sign and j:
-		operators_[i].set(m.fermionOrBoson(), m.jm(), m.angularFactor());
-		// apply(operators_[i]);
 	}
 
 	void outerProductHamiltonian(const StorageType& h2,
@@ -401,11 +362,11 @@ public:
 	{
 		if (mode == PsimagLite::IoNgSerializer::ALLOW_OVERWRITE) {
 			io.overwrite(operators_, s + "/Operators");
-//			io.overwrite(superOps_, s + "/SuperOperators");
+			//			io.overwrite(superOps_, s + "/SuperOperators");
 			io.overwrite(hamiltonian_, s + "/Hamiltonian");
 		} else {
 			io.write(operators_, s + "/Operators");
-//			io.write(superOps_, s + "/SuperOperators");
+			//			io.write(superOps_, s + "/SuperOperators");
 			io.write(hamiltonian_, s + "/Hamiltonian");
 		}
 	}
@@ -424,6 +385,101 @@ public:
 	}
 
 private:
+
+	void setToProductLocal(const BasisType& basis2,
+	                       const ThisType& ops2,
+		                   const BasisType& basis3,
+		                   const ThisType& ops3,
+	                       const VectorSizeType& permutationInverse)
+	{
+		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
+		SizeType nlocalOps = ops2.sizeOfLocal() + ops3.sizeOfLocal();
+		operators_.resize(nlocalOps);
+		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
+
+		for (SizeType i = 0; i < nlocalOps; ++i) {
+			if (i < ops2.sizeOfLocal()) {
+				const OperatorType& myOp = ops2.getLocalByIndex(i);
+				bool isFermion = (myOp.fermionOrBoson() ==
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION);
+				if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
+					utils::fillFermionicSigns(fermionicSigns,
+					                          basis2.signs(),
+					                          (isFermion) ? -1 : 1);
+					savedSign = myOp.fermionOrBoson();
+				}
+
+				crossProductForLocal(i,
+				                     myOp,
+				                     basis3.size(),
+				                     fermionicSigns,
+				                     true,
+				                     permutationInverse);
+
+			} else {
+				const OperatorType& myOp = ops3.getLocalByIndex(i - ops2.sizeOfLocal());
+
+				bool isFermion = (myOp.fermionOrBoson() ==
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION);
+
+				if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
+					utils::fillFermionicSigns(fermionicSigns,
+					                          basis2.signs(),
+					                          (isFermion) ? -1 : 1);
+					savedSign = myOp.fermionOrBoson();
+				}
+
+				crossProductForLocal(i,
+				                     myOp,
+				                     basis2.size(),
+				                     fermionicSigns,
+				                     false,
+				                     permutationInverse);
+			}
+		}
+	}
+
+	/* PSIDOC OperatorsExternalProduct
+		I will know explain how the full outer product between two operators
+		is implemented. If local operator $A$ lives in Hilbert space
+		$\mathcal{A}$ and local operator $B$ lives in Hilbert space
+		$\mathcal{B}$, then $C=AB$ lives in Hilbert space
+		$\mathcal{C}=\mathcal{A}\otimes\mathcal{B}$. Let $\alpha_1$ and
+		$\alpha_2$ represent states of $\mathcal{A}$, and let $\beta_1$ and
+		$\beta_2$ represent states of   $\mathcal{B}$. Then, in the product
+		basis, $C_{\alpha_1,\beta_1;\alpha_2,\beta_2}=A_{\alpha_1,\alpha_2}
+		B_{\beta_1,\beta_2}$. Additionally,  $\mathcal{C}$ is reordered
+		such that each state of this outer product basis is labeled in
+		increasing effective quantum number (see
+		Section~\ref{sec:dmrgbasis}). In the previous example, if the Hilbert
+		spaces  $\mathcal{A}$ and $\mathcal{B}$ had sizes $a$ and $b$,
+		respectively, then their outer product would have size $ab$.
+		When we add sites to the system (or the environment) the memory
+		usage remains bounded by the truncation, and it is usually not a
+		problem to store full product matrices, as long as we do it in a
+		sparse way (DMRG++ uses compressed row storage). In short, local
+		operators are always stored in the most recently transformed basis
+		for \emph{all sites} and, if applicable, \emph{all values} of the
+		internal degree of freedom $\sigma$. See PTEXREF{setToProductOps}
+		and PTEXREF{HERE}.
+		*/
+	void crossProductForLocal(SizeType i,
+	                          const OperatorType& m,
+	                          int x,
+	                          const VectorRealType& fermionicSigns,
+	                          bool option,
+	                          const VectorSizeType& permutationFull)
+	{
+		assert(!BasisType::useSu2Symmetry());
+		operators_[i].outerProduct(m,
+		                           x,
+		                           fermionicSigns,
+		                           option,
+		                           permutationFull);
+		// don't forget to set fermion sign and j:
+		operators_[i].set(m.fermionOrBoson(), m.jm(), m.angularFactor());
+		// apply(operators_[i]);
+	}
 
 	static void printChangeAll()
 	{

@@ -312,54 +312,13 @@ private:
 		// reorder the basis
 		BasisType::setToProduct(basis2, basis3);
 
-		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
-		SizeType x = basis2.numberOfLocalOperators()+basis3.numberOfLocalOperators();
+		// Do local and super
+		operators_.setToProduct(basis2,
+		                        basis2.operators_,
+		                        basis3,
+		                        basis3.operators_,
+		                        BaseType::permutationInverse());
 
-		operators_.setToProduct(basis2, basis3, x);
-		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
-
-		const SizeType nlocalOps = numberOfLocalOperators();
-		for (SizeType i = 0; i < nlocalOps; ++i) {
-			if (i<basis2.numberOfLocalOperators()) {
-				const OperatorType& myOp = basis2.localOperator(i);
-				bool isFermion = (myOp.fermionOrBoson() ==
-				                  ProgramGlobals::FermionOrBosonEnum::FERMION);
-				if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
-					utils::fillFermionicSigns(fermionicSigns,
-					                          basis2.signs(),
-					                          (isFermion) ? -1 : 1);
-					savedSign = myOp.fermionOrBoson();
-				}
-
-				operators_.crossProductForLocal(i,
-				                                myOp,
-				                                basis3.size(),
-				                                fermionicSigns,
-				                                true,
-				                                BaseType::permutationInverse());
-
-			} else {
-				const OperatorType& myOp = basis3.
-				        localOperator(i - basis2.numberOfLocalOperators());
-
-				bool isFermion = (myOp.fermionOrBoson() ==
-				                  ProgramGlobals::FermionOrBosonEnum::FERMION);
-
-				if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
-					utils::fillFermionicSigns(fermionicSigns,
-					                          basis2.signs(),
-					                          (isFermion) ? -1 : 1);
-					savedSign = myOp.fermionOrBoson();
-				}
-
-				operators_.crossProductForLocal(i,
-				                                myOp,
-				                                basis2.size(),
-				                                fermionicSigns,
-				                                false,
-				                                BaseType::permutationInverse());
-			}
-		}
 
 		//! Calc. hamiltonian
 		operators_.outerProductHamiltonian(basis2.hamiltonian(),
