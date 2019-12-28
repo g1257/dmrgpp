@@ -243,19 +243,18 @@ public:
 		assert(operatorsPerSite_.size() > 0);
 	}
 
-	PairType localOperatorIndices(SizeType i,SizeType sigma) const
+	SizeType localOperatorIndex(SizeType i,SizeType sigma) const
 	{
 		SizeType sum = 0;
-		for (SizeType j=0;j<i;j++) {
-			assert(j<operatorsPerSite_.size());
+		assert(i <= operatorsPerSite_.size());
+		for (SizeType j = 0; j < i; ++j)
 			sum += operatorsPerSite_[j];
-		}
 
-		assert(i<operatorsPerSite_.size());
-		return PairType(sum + sigma,operatorsPerSite_[i]);
+		assert(i < operatorsPerSite_.size());
+		return sum + sigma;
 	}
 
-	const OperatorType& localOperatorByIndex(int i) const
+	const OperatorType& localOperator(SizeType i) const
 	{
 		return operators_.getLocalByIndex(i);
 	}
@@ -325,7 +324,7 @@ private:
 		const SizeType nlocalOps = numberOfLocalOperators();
 		for (SizeType i = 0; i < nlocalOps; ++i) {
 			if (i<basis2.numberOfLocalOperators()) {
-				const OperatorType& myOp =  basis2.localOperatorByIndex(i);
+				const OperatorType& myOp = basis2.localOperator(i);
 				bool isFermion = (myOp.fermionOrBoson() ==
 				                  ProgramGlobals::FermionOrBosonEnum::FERMION);
 				if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
@@ -344,7 +343,7 @@ private:
 
 			} else {
 				const OperatorType& myOp = basis3.
-				        localOperatorByIndex(i - basis2.numberOfLocalOperators());
+				        localOperator(i - basis2.numberOfLocalOperators());
 
 				bool isFermion = (myOp.fermionOrBoson() ==
 				                  ProgramGlobals::FermionOrBosonEnum::FERMION);

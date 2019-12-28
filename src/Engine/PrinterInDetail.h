@@ -9,6 +9,8 @@ class PrinterInDetail {
 
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::QnType QnType;
+	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
+	typedef typename OperatorsType::OperatorType OperatorType;
 
 public:
 
@@ -57,11 +59,10 @@ private:
 
 		os<<"Operators at site "<<site<<" ("<<siteC<<")\n";
 		for (SizeType sigma = 0; sigma < end; ++sigma) {
-			typename BasisWithOperatorsType::PairType p = basis.localOperatorIndices(siteC,
-			                                                                         sigma);
+			const OperatorType& myop = basis.localOperator(basis.localOperatorIndex(siteC,
+			                                                                        sigma));
 			os<<sigma<<" non-zeroes=";
-			os<<basis.localOperatorByIndex(p.first).getStorage().nonZeros();
-			os<<" rows="<<basis.localOperatorByIndex(p.first).getStorage().rows()<<"\n";
+			os<<myop.getStorage().nonZeros()<<" rows="<<myop.getStorage().rows()<<"\n";
 		}
 	}
 

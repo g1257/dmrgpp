@@ -107,15 +107,12 @@ private:
 	                    SizeType i,
 	                    SizeType sigma) const
 	{
-		PairSizeType ii;
-		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
-			ii = lrs_.left().localOperatorIndices(i, sigma);
-		} else {
-			assert(type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
-			ii = lrs_.right().localOperatorIndices(i, sigma);
-		}
+		assert(type == ProgramGlobals::SysOrEnvEnum::SYSTEM ||
+		       type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
 
-		return ii.first;
+		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ?
+		            lrs_.left(). localOperatorIndex(i, sigma) :
+		            lrs_.right().localOperatorIndex(i, sigma);
 	}
 
 	PairSizeType finalIndices4sites(const VectorSizeType& hItems) const

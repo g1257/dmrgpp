@@ -59,10 +59,10 @@ public:
 
 		const OperatorStorageType* m = 0;
 		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
-			m = &(lrs_.left().localOperatorByIndex(iifirst).getStorage());
+			m = &(lrs_.left().localOperator(iifirst).getStorage());
 		} else {
 			assert(type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
-			m =&(lrs_.right().localOperatorByIndex(iifirst).getStorage());
+			m =&(lrs_.right().localOperator(iifirst).getStorage());
 		}
 
 		m->checkValidity();
