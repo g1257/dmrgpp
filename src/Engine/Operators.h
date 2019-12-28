@@ -263,19 +263,18 @@ public:
 		err("Operators::setChangeAll(true) called to late\n");
 	}
 
-	void setOperators(const typename PsimagLite::Vector<OperatorType>::Type& ops)
+	void setLocal(const typename PsimagLite::Vector<OperatorType>::Type& ops)
 	{
 		operators_ = ops;
 	}
 
-	const OperatorType& getOperatorByIndex(int i) const
+	const OperatorType& getLocalByIndex(SizeType i) const
 	{
-		assert(!BasisType::useSu2Symmetry());
-		assert(i>=0 && SizeType(i)<operators_.size());
+		assert(i < operators_.size());
 		return operators_[i];
 	}
 
-	SizeType numberOfOperators() const
+	SizeType sizeOfLocal() const
 	{
 		return operators_.size();
 	}
@@ -415,15 +414,13 @@ public:
 			io.write(hamiltonian_, s + "/Hamiltonian");
 	}
 
-	SizeType size() const { return operators_.size(); }
-
 	void clear()
 	{
 		operators_.clear();
 		hamiltonian_.clear();
 	}
 
-	SizeType superOperatorIndices(const VectorSizeType&, SizeType) const
+	SizeType superIndices(const VectorSizeType&, SizeType) const
 	{
 		PsimagLite::String msg(__FILE__);
 		throw PsimagLite::RuntimeError(msg + "::superOperatorIndices() not implemented yet\n");

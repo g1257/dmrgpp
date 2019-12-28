@@ -232,7 +232,7 @@ public:
 
 		OperatorStorageType hOp(h);
 		operators_.setHamiltonian(hOp);
-		operators_.setOperators(ops);
+		operators_.setLocal(ops);
 
 		// one site basis is assumed ordered
 
@@ -257,14 +257,14 @@ public:
 
 	const OperatorType& getOperatorByIndex(int i) const
 	{
-		return operators_.getOperatorByIndex(i);
+		return operators_.getLocalByIndex(i);
 	}
 
-	SizeType numberOfOperators() const { return operators_.numberOfOperators(); }
+	SizeType numberOfLocalOperators() const { return operators_.sizeOfLocal(); }
 
 	SizeType superOperatorIndices(const VectorSizeType& sites, SizeType sigma) const
 	{
-		return operators_.superOperatorIndices(sites, sigma);
+		return operators_.superIndices(sites, sigma);
 	}
 
 	SizeType operatorsPerSite(SizeType i) const
@@ -287,7 +287,7 @@ public:
 	           typename PsimagLite::EnableIf<
 	           PsimagLite::IsOutputLike<SomeOutputType>::True, int*>::Type = 0) const
 	{
-		write(io, prefix + "/" + this->name(), mode, option);
+		write(io, prefix + "/" + BasisType::name(), mode, option);
 	}
 
 	template<typename SomeOutputType>
@@ -313,20 +313,19 @@ private:
 	void setToProduct(const ThisType& basis2,
 	                  const ThisType& basis3)
 	{
-		assert(!this->useSu2Symmetry());
-		BasisType &parent = *this;
 		// reorder the basis
-		parent.setToProduct(basis2, basis3);
+		BasisType::setToProduct(basis2, basis3);
 
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
-		SizeType x = basis2.numberOfOperators()+basis3.numberOfOperators();
+		SizeType x = basis2.numberOfLocalOperators()+basis3.numberOfLocalOperators();
 
 		operators_.setToProduct(x);
-		ApplyFactors<FactorsType> apply(this->getFactors(), this->useSu2Symmetry());
+		ApplyFactors<FactorsType> apply(BasisType::getFactors(), BasisType::useSu2Symmetry());
 		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
-		for (SizeType i=0;i<this->numberOfOperators();i++) {
-			if (i<basis2.numberOfOperators()) {
+		const SizeType nlocalOps = numberOfLocalOperators();
+		for (SizeType i = 0; i < nlocalOps; ++i) {
+			if (i<basis2.numberOfLocalOperators()) {
 				const OperatorType& myOp =  basis2.getOperatorByIndex(i);
 				bool isFermion = (myOp.fermionOrBoson() ==
 				                  ProgramGlobals::FermionOrBosonEnum::FERMION);
@@ -346,7 +345,7 @@ private:
 
 			} else {
 				const OperatorType& myOp = basis3.
-				        getOperatorByIndex(i - basis2.numberOfOperators());
+				        getOperatorByIndex(i - basis2.numberOfLocalOperators());
 
 				bool isFermion = (myOp.fermionOrBoson() ==
 				                  ProgramGlobals::FermionOrBosonEnum::FERMION);
