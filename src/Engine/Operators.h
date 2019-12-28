@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Complex.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
-#include "ApplyFactors.h"
 #include "BlockOffDiagMatrix.h"
 #include "ChangeOfBasis.h"
 #include "Operator.h"
@@ -352,10 +351,8 @@ public:
 		// apply(operators_[i]);
 	}
 
-	template<typename ApplyFactorsType>
 	void outerProductHamiltonian(const StorageType& h2,
 	                             const StorageType& h3,
-	                             ApplyFactorsType& apply,
 	                             const VectorSizeType& permutationFull)
 	{
 		StorageType tmpMatrix;
@@ -366,8 +363,6 @@ public:
 		externalProduct2(tmpMatrix,h3,h2.rows(),ones,false, permutationFull);
 
 		hamiltonian_ += tmpMatrix;
-
-		apply(hamiltonian_);
 	}
 
 	void setHamiltonian(StorageType const &h)

@@ -77,7 +77,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef BASISWITHOPERATORS_HEADER_H
 #define BASISWITHOPERATORS_HEADER_H
 
-#include "ApplyFactors.h"
 #include "Basis.h"
 #include "Operators.h"
 
@@ -118,7 +117,6 @@ class BasisWithOperators : public BasisType_ {
 
 public:
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorIntegerType;
 	typedef BasisType_ BaseType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename BaseType::RealType RealType;
@@ -318,7 +316,6 @@ private:
 		SizeType x = basis2.numberOfLocalOperators()+basis3.numberOfLocalOperators();
 
 		operators_.setToProduct(basis2, basis3, x);
-		ApplyFactors<FactorsType> apply(BasisType::getFactors(), BasisType::useSu2Symmetry());
 		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		const SizeType nlocalOps = numberOfLocalOperators();
@@ -367,7 +364,6 @@ private:
 		//! Calc. hamiltonian
 		operators_.outerProductHamiltonian(basis2.hamiltonian(),
 		                                   basis3.hamiltonian(),
-		                                   apply,
 		                                   BaseType::permutationInverse());
 
 		SizeType offset1 = basis2.operatorsPerSite_.size();
@@ -385,7 +381,7 @@ private:
 	// BasisWithOperators& operator=(const BasisWithOperators&);
 
 	OperatorsType operators_;
-	PsimagLite::Vector<SizeType>::Type operatorsPerSite_;
+	VectorSizeType operatorsPerSite_;
 }; // class BasisWithOperators
 
 template<typename T>
