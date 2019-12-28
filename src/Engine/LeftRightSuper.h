@@ -363,7 +363,7 @@ private:
 	{
 		BasisWithOperatorsType Xbasis("Xbasis");
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
-		Xbasis.setVarious(X, model, time);
+		Xbasis.setOneSite(X, model, time);
 		leftOrRight.setToProduct(pS, Xbasis, dir);
 
 		SparseMatrixType matrix = leftOrRight.hamiltonian().getCRS();

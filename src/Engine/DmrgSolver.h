@@ -245,8 +245,8 @@ public:
 		} else { // move this block elsewhere:
 
 			RealType time = 0;
-			pE.setVarious(E, model_, time);
-			pS.setVarious(S, model_, time);
+			pE.setOneSite(E, model_, time);
+			pS.setOneSite(S, model_, time);
 
 			infiniteDmrgLoop(X,Y,E,pS,pE,psi);
 		}

@@ -231,7 +231,7 @@ public:
 		if (X[0] != 0 && X[0] != lrs_.super().block().size()-1)
 			return;
 
-		basisWithOps.setVarious(X, model_, commonTargeting_.aoe().time());
+		basisWithOps.setOneSite(X, model_, commonTargeting_.aoe().time());
 	}
 
 	virtual bool end() const

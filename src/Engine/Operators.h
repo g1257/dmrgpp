@@ -300,12 +300,9 @@ public:
 		ChangeOfBasisType::changeBasis(hamiltonian_, ftransform);
 	}
 
-	void setMomentumOfOperators(const VectorSizeType& momentum)
-	{
-		momentumOfOperators_ = momentum;
-	}
-
-	void setToProduct(SizeType x)
+	void setToProduct(const BasisType& basis1,
+	                  const BasisType& basis2,
+	                  SizeType x)
 	{
 		operators_.resize(x);
 	}
@@ -334,12 +331,12 @@ public:
 		internal degree of freedom $\sigma$. See PTEXREF{setToProductOps}
 		and PTEXREF{HERE}.
 		*/
-	void externalProduct(SizeType i,
-	                     const OperatorType& m,
-	                     int x,
-	                     const VectorRealType& fermionicSigns,
-	                     bool option,
-	                     const VectorSizeType& permutationFull)
+	void crossProductForLocal(SizeType i,
+	                          const OperatorType& m,
+	                          int x,
+	                          const VectorRealType& fermionicSigns,
+	                          bool option,
+	                          const VectorSizeType& permutationFull)
 	{
 		assert(!BasisType::useSu2Symmetry());
 		operators_[i].outerProduct(m,
@@ -459,7 +456,6 @@ private:
 	typename PsimagLite::Vector<OperatorType>::Type operators_;
 	StorageType hamiltonian_;
 	PsimagLite::ProgressIndicator progress_;
-	VectorSizeType momentumOfOperators_;
 }; //class Operators
 
 template<typename T>

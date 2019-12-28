@@ -215,7 +215,7 @@ public:
 	}
 
 	template<typename SomeModelType>
-	void setVarious(const VectorSizeType& block,
+	void setOneSite(const VectorSizeType& block,
 	                const SomeModelType& model,
 	                RealType time)
 	{
@@ -319,7 +319,7 @@ private:
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 		SizeType x = basis2.numberOfLocalOperators()+basis3.numberOfLocalOperators();
 
-		operators_.setToProduct(x);
+		operators_.setToProduct(basis2, basis3, x);
 		ApplyFactors<FactorsType> apply(BasisType::getFactors(), BasisType::useSu2Symmetry());
 		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
@@ -336,12 +336,12 @@ private:
 					savedSign = myOp.fermionOrBoson();
 				}
 
-				operators_.externalProduct(i,
-				                           myOp,
-				                           basis3.size(),
-				                           fermionicSigns,
-				                           true,
-				                           BaseType::permutationInverse());
+				operators_.crossProductForLocal(i,
+				                                myOp,
+				                                basis3.size(),
+				                                fermionicSigns,
+				                                true,
+				                                BaseType::permutationInverse());
 
 			} else {
 				const OperatorType& myOp = basis3.
@@ -357,12 +357,12 @@ private:
 					savedSign = myOp.fermionOrBoson();
 				}
 
-				operators_.externalProduct(i,
-				                           myOp,
-				                           basis2.size(),
-				                           fermionicSigns,
-				                           false,
-				                           BaseType::permutationInverse());
+				operators_.crossProductForLocal(i,
+				                                myOp,
+				                                basis2.size(),
+				                                fermionicSigns,
+				                                false,
+				                                BaseType::permutationInverse());
 			}
 		}
 
