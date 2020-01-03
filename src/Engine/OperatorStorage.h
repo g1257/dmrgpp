@@ -249,6 +249,24 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
 	}
 
+	friend void externalProduct2(OperatorStorage& C,
+	                             const OperatorStorage& A,
+	                             const OperatorStorage& B,
+	                             const VectorRealType& signs,
+	                             bool order,
+	                             const VectorSizeType& permutationFull)
+	{
+		if (A.justCRS() && B.justCRS() && C.justCRS())
+			return externalProduct(C.crs_,
+			                       A.getCRS(),
+			                       B.getCRS(),
+			                       signs,
+			                       order,
+			                       permutationFull);
+
+		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
+	}
+
 	friend void fullMatrixToCrsMatrix(OperatorStorage& dest,
 	                                  const PsimagLite::Matrix<ComplexOrRealType>& src)
 	{

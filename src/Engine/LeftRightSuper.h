@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2009-2014-2020, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "KroneckerDumper.h"
 #include "Io/IoNg.h"
+#include "SuperOperatorHelper.h"
 
 namespace Dmrg {
 
@@ -364,7 +365,8 @@ private:
 		BasisWithOperatorsType Xbasis("Xbasis");
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
 		Xbasis.setOneSite(X, model, time);
-		leftOrRight.setToProduct(pS, Xbasis, dir);
+		SuperOperatorHelper<SomeModelType> superOperatorHelper(model, pS.block(), X, dir);
+		leftOrRight.setToProduct(pS, Xbasis, superOperatorHelper);
 
 		SparseMatrixType matrix = leftOrRight.hamiltonian().getCRS();
 

@@ -355,6 +355,21 @@ public:
 		                 permutationFull);
 	}
 
+
+	void outerProduct(const Operator& A,
+	                  const Operator& B,
+	                  const VectorRealType& signs,
+	                  bool order,
+	                  const VectorSizeType& permutationFull)
+	{
+		externalProduct2(data_,
+		                 A.getStorage(),
+		                 B.getStorage(),
+		                 signs,
+		                 order,
+		                 permutationFull);
+	}
+
 	SizeType metaDiff(const Operator& op2) const
 	{
 		const Operator& op1 = *this;

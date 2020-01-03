@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2012-2019, UT-Battelle, LLC
+Copyright (c) 2009-2012-2019-2020, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -172,14 +172,15 @@ public:
 
 	// set this basis to the outer product of
 	// basis2 and basis3 or basis3 and basis2  depending on dir
+	template<typename SomeSuperOperatorHelperType>
 	void setToProduct(const ThisType& basis2,
 	                  const ThisType& basis3,
-	                  ProgramGlobals::DirectionEnum dir)
+	                  const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
-		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-			setToProduct(basis2, basis3);
+		if (someSuperOpHelper.dir() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+			setToProductInternal(basis2, basis3, someSuperOpHelper);
 		else
-			setToProduct(basis3, basis2);
+			setToProductInternal(basis3, basis2, someSuperOpHelper);
 	}
 
 	//! transform this basis by transform
@@ -306,8 +307,10 @@ private:
 
 	//! set this basis to the outer product of   basis2 and basis3
 	//!PTEX_LABEL{setToProductOps}
-	void setToProduct(const ThisType& basis2,
-	                  const ThisType& basis3)
+	template<typename SomeSuperOperatorHelperType>
+	void setToProductInternal(const ThisType& basis2,
+	                          const ThisType& basis3,
+	                          const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
 		// reorder the basis
 		BasisType::setToProduct(basis2, basis3);
@@ -317,7 +320,8 @@ private:
 		                        basis2.operators_,
 		                        basis3,
 		                        basis3.operators_,
-		                        BaseType::permutationInverse());
+		                        BaseType::permutationInverse(),
+		                        someSuperOpHelper);
 
 
 		//! Calc. hamiltonian

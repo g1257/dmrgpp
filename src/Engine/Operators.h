@@ -302,14 +302,16 @@ public:
 		ChangeOfBasisType::changeBasis(hamiltonian_, ftransform);
 	}
 
+	template<typename SomeSuperOperatorHelperType>
 	void setToProduct(const BasisType& basis1,
 	                  const ThisType& ops1,
 	                  const BasisType& basis2,
 	                  const ThisType& ops2,
-	                  const VectorSizeType& permutationInverse)
+	                  const VectorSizeType& permutationInverse,
+	                  const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
 		setToProductLocal(basis1, ops1, basis2, ops2, permutationInverse);
-		// ChemicalH: Set super ops here
+		setToProductSuper(basis1, ops1, basis2, ops2, permutationInverse, someSuperOpHelper);
 	}
 
 	void outerProductHamiltonian(const StorageType& h2,
@@ -378,6 +380,12 @@ public:
 		hamiltonian_.clear();
 	}
 
+	const OperatorType& getSuperByIndex(SizeType ind) const
+	{
+		assert(ind < superOps_.size());
+		return superOps_[ind];
+	}
+
 	SizeType superIndices(const VectorSizeType&, SizeType) const
 	{
 		PsimagLite::String msg(__FILE__);
@@ -436,6 +444,42 @@ private:
 				                     false,
 				                     permutationInverse);
 			}
+		}
+	}
+
+	template<typename SomeSuperOperatorHelperType>
+	void setToProductSuper(const BasisType& basis2,
+	                       const ThisType& ops2,
+		                   const BasisType& basis3,
+		                   const ThisType& ops3,
+	                       const VectorSizeType& permutationInverse,
+	                       const SomeSuperOperatorHelperType& someSuperOpHelper)
+	{
+		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
+		SizeType nSuperOps = someSuperOpHelper.size();
+		superOps_.resize(nSuperOps);
+		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
+		typedef typename SomeSuperOperatorHelperType::PairBoolSizeType PairBoolSizeType;
+		const bool option = (basis3.block().size() == 1);
+		for (SizeType i = 0; i < nSuperOps; ++i) {
+			const PairBoolSizeType op2Index  = someSuperOpHelper.leftOperatorIndex(i);
+			const PairBoolSizeType op3Index = someSuperOpHelper.rightOperatorIndex(i);
+			const OperatorType& op1 = (!op2Index.first) ? ops2.getLocalByIndex(op2Index.second)
+			                                                   : ops2.getSuperByIndex(op2Index.
+			                                                                          second);
+			const OperatorType& op3 = (!op3Index.first) ? ops3.getLocalByIndex(op3Index.second)
+			                                                   : ops3.getSuperByIndex(op3Index.
+			                                                                          second);
+			bool isFermion = (op3.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
+
+			if (savedSign != op3.fermionOrBoson() || fermionicSigns.size() == 0) {
+				utils::fillFermionicSigns(fermionicSigns, basis2.signs(), (isFermion) ? -1 : 1);
+				savedSign = op3.fermionOrBoson();
+			}
+
+
+			superOps_[i].outerProduct(op1, op3, fermionicSigns, option, permutationInverse);
+
 		}
 	}
 
