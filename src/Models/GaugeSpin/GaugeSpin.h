@@ -149,8 +149,7 @@ public:
 	                                RealType) const
 	{
 		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
-		SizeType n = block.size();
-		assert(n == 1);
+		assert(block.size() == 1);
 
 		SizeType site = block[0];
 

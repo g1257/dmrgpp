@@ -208,9 +208,11 @@ protected:
 					su2related.offset = ORBITALS;
 				}
 
-				OperatorType myOp(tmpMatrix,
+				SparseMatrixType tmpMatrix2;
+				transposeConjugate(tmpMatrix2, tmpMatrix);
+				OperatorType myOp(tmpMatrix2,
 				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
-				                  typename OperatorType::PairType(1,m),
+				                  typename OperatorType::PairType(1, m),
 				                  asign,
 				                  su2related);
 				c.push(myOp);
