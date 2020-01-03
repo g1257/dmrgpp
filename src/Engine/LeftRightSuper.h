@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "KroneckerDumper.h"
 #include "Io/IoNg.h"
-#include "SuperOperatorHelper.h"
 
 namespace Dmrg {
 
@@ -365,8 +364,8 @@ private:
 		BasisWithOperatorsType Xbasis("Xbasis");
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
 		Xbasis.setOneSite(X, model, time);
-		SuperOperatorHelper<SomeModelType> superOperatorHelper(model, pS.block(), X, dir);
-		leftOrRight.setToProduct(pS, Xbasis, superOperatorHelper);
+
+		leftOrRight.setToProduct(pS, Xbasis, model.superOpHelper(pS.block(), X, dir));
 
 		SparseMatrixType matrix = leftOrRight.hamiltonian().getCRS();
 

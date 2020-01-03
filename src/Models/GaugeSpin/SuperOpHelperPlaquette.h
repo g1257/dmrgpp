@@ -1,31 +1,29 @@
-#ifndef SUPEROPERATORHELPER_H
-#define SUPEROPERATORHELPER_H
+#ifndef SuperOpHelperPlaquette_H
+#define SuperOpHelperPlaquette_H
 #include "ProgramGlobals.h"
 #include "Vector.h"
+#include "SuperOpHelperBase.h"
 
 namespace Dmrg {
 
-template<typename ModelType>
-class SuperOperatorHelper {
+class SuperOpHelperPlaquette : public SuperOpHelperBase {
 
 public:
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef std::pair<bool, SizeType> PairBoolSizeType;
+	typedef SuperOpHelperBase BaseType;
+	typedef typename BaseType::VectorSizeType VectorSizeType;
+	typedef typename BaseType::PairBoolSizeType PairBoolSizeType;
 
-	SuperOperatorHelper(const ModelType& model,
-	                    const VectorSizeType& bigBlock,
-	                    const VectorSizeType& smallBlock,
-	                    ProgramGlobals::DirectionEnum dir)
-	    : model_(model), bigBlock_(bigBlock), smallBlock_(smallBlock), dir_(dir)
+	SuperOpHelperPlaquette(const VectorSizeType& bigBlock,
+	                       const VectorSizeType& smallBlock,
+	                       ProgramGlobals::DirectionEnum dir)
+	    : BaseType(bigBlock, smallBlock, dir), bigBlock_(bigBlock), smallBlock_(smallBlock)
 	{
 		assert(smallBlock_.size() == 1);
 		isTriangle_ = (smallBlock_[0] & 1);
-		if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			isTriangle_ = !isTriangle_;
 	}
-
-	const ProgramGlobals::DirectionEnum& dir() const { return dir_; }
 
 	// This below is for a plaquette, and will have to be
 	// written somewhere else
@@ -35,7 +33,7 @@ public:
 	PairBoolSizeType leftOperatorIndex(SizeType) const
 	{
 		if (isTriangle_) {
-			if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+			if (BaseType::dir() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				return PairBoolSizeType(true, 0);
 			} else {
 				return PairBoolSizeType(false, 0);
@@ -48,7 +46,7 @@ public:
 	PairBoolSizeType rightOperatorIndex(SizeType) const
 	{
 		if (isTriangle_) {
-			if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+			if (BaseType::dir() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				return PairBoolSizeType(false, 0);
 			} else {
 				return PairBoolSizeType(false, 0);
@@ -60,11 +58,9 @@ public:
 
 private:
 
-	const ModelType& model_;
 	const VectorSizeType& bigBlock_;
 	const VectorSizeType& smallBlock_;
-	ProgramGlobals::DirectionEnum dir_;
 	bool isTriangle_;
 };
 }
-#endif // SUPEROPERATORHELPER_H
+#endif // SuperOpHelperPlaquette_H

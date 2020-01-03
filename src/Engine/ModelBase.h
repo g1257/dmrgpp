@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "QnHash.h"
 #include "ParallelHamiltonianConnection.h"
 #include "Braket.h"
+#include "SuperOpHelperBase.h"
 
 namespace Dmrg {
 
@@ -156,6 +157,7 @@ public:
 	typedef typename ModelLinksType::TermType ModelTermType;
 	typedef OpaqueOp OpForLinkType;
 	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
+	typedef SuperOpHelperBase SuperOpHelperType;
 
 	ModelBase(const ParametersType& params,
 	          const SuperGeometryType& superGeometry,
@@ -163,7 +165,8 @@ public:
 	    : modelCommon_(params, superGeometry),
 	      targetQuantum_(io),
 	      ioIn_(io),
-	      atomKind_(0)
+	      atomKind_(nullptr),
+	      superOpHelper_(nullptr)
 	{
 		labeledOperators_.setModelName(params.model);
 	}
@@ -185,6 +188,8 @@ public:
 	{
 		delete atomKind_;
 		atomKind_ = nullptr;
+		delete superOpHelper_;
+		superOpHelper_ = nullptr;
 	}
 
 	/* PSIDOC ModelInterface
@@ -332,6 +337,19 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	virtual PsimagLite::String oracle() const { return ""; }
+
+	virtual const SuperOpHelperType& superOpHelper(const VectorSizeType& bigBlock,
+	                                               const VectorSizeType& smallBlock,
+	                                               ProgramGlobals::DirectionEnum dir) const
+	{
+		if (superOpHelper_) {
+			delete superOpHelper_;
+			superOpHelper_ = nullptr;
+		}
+
+		superOpHelper_ = new SuperOpHelperType(bigBlock, smallBlock, dir);
+		return *superOpHelper_;
+	}
 
 	/**
 		The function \cppFunction{addHamiltonianConnection} implements
@@ -666,6 +684,7 @@ private:
 	TargetQuantumElectronsType targetQuantum_;
 	InputValidatorType_& ioIn_;
 	AtomKindBaseType* atomKind_;
+	mutable SuperOpHelperType* superOpHelper_;
 	static LabeledOperatorsType labeledOperators_;
 	static ModelLinksType modelLinks_;
 	static VectorQnType qns_;

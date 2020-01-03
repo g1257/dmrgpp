@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include "ProgramGlobals.h"
 #include "Utils.h"
+#include "SuperOpHelperPlaquette.h"
 
 namespace Dmrg {
 
@@ -131,8 +132,15 @@ public:
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
-	      modelParameters_(io)
+	      modelParameters_(io),
+	      superOpHelper_(nullptr)
 	{}
+
+	~GaugeSpin()
+	{
+		delete superOpHelper_;
+		superOpHelper_ = nullptr;
+	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -224,6 +232,20 @@ protected:
 
 		plaquetteX.push4(sx, 'N', sx, 'N', sx, 'N', sx, 'N');
 	}
+
+	const SuperOpHelperPlaquette& superOpHelper(const VectorSizeType& bigBlock,
+	                                            const VectorSizeType& smallBlock,
+	                                            ProgramGlobals::DirectionEnum dir) const
+	{
+		if (superOpHelper_) {
+			delete superOpHelper_;
+			superOpHelper_ = nullptr;
+		}
+
+		superOpHelper_ = new SuperOpHelperPlaquette(bigBlock, smallBlock, dir);
+		return *superOpHelper_;
+	}
+
 
 private:
 
@@ -331,6 +353,7 @@ private:
 	}
 
 	ParametersGaugeSpin<RealType, QnType> modelParameters_;
+	mutable SuperOpHelperPlaquette* superOpHelper_;
 }; // class GaugeSpin
 
 } // namespace Dmrg

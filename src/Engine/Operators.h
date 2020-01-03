@@ -455,6 +455,7 @@ private:
 	                       const VectorSizeType& permutationInverse,
 	                       const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
+		if (someSuperOpHelper.size() == 0) return;
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 		SizeType nSuperOps = someSuperOpHelper.size();
 		superOps_.resize(nSuperOps);
