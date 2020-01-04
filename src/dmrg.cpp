@@ -3,7 +3,6 @@
 #include "Provenance.h"
 #include "RegisterSignals.h"
 #include "DmrgDriver.h"
-#include "SuperGeometry.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;

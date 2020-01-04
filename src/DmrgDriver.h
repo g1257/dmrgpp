@@ -23,6 +23,7 @@
 #include "OperatorSpec.h"
 #include "CanonicalExpression.h"
 #include "ModelBase.h"
+#include "SuperGeometry.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;

@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "ProgramGlobals.h"
 #include "HamiltonianAbstract.h"
-#include "SuperGeometry.h"
 #include "Vector.h"
 #include "VerySparseMatrix.h"
 #include "ProgressIndicator.h"

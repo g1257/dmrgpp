@@ -27,6 +27,7 @@
 #include "ModelSelector.h"
 #include "ModelBase.h"
 #include "InputFromDataOrNot.h"
+#include "SuperGeometry.h"
 
 namespace Dmrg {
 
