@@ -134,13 +134,12 @@ private:
 	                 MatrixComplexOrRealType& V,
 	                 SizeType i0)
 	{
-		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
+		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 model_.superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 currentTime_,
-		                                                 0);
+		                                                 model_.superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc, aux);
 
 		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");

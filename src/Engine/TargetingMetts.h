@@ -815,10 +815,9 @@ private:
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 BaseType::model().superGeometry(),
 		                                                 BaseType::ModelType::modelLinks(),
 		                                                 this->common().aoe().time(),
-		                                                 0);
+		                                                 model_.superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
 		                                                     hc,
 		                                                     aux);

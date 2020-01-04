@@ -313,18 +313,17 @@ private:
 	                   SizeType whatTarget,
 	                   SizeType i0) const
 	{
-		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
+		const SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 BaseType::model().superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 this->common().aoe().time(),
-		                                                 0);
+		                                                 BaseType::model().superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
 		                                                     hc,
 		                                                     aux);
 
-		SizeType total = phi.effectiveSize(i0);
+		const SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		phi.extract(phi2,i0);
 		TargetVectorType x(total);

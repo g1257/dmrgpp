@@ -9,7 +9,7 @@
 
 namespace Dmrg {
 
-template<typename LeftRightSuperType>
+template<typename LeftRightSuperType, typename SolverParamsType>
 class KroneckerDumper {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -42,20 +42,29 @@ public:
 		SizeType nOfQns;
 	}; // struct ParamsForKroneckerDumper
 
-	KroneckerDumper(const ParamsForKroneckerDumper* p,
-	                const LeftRightSuperType& lrs)
-	    : enabled_(p && p->enabled),pairCount_(0),disable_(false)
+	KroneckerDumper(const SolverParamsType& params,
+	                const LeftRightSuperType& lrs,
+	                ProgramGlobals::DirectionEnum dir)
+	    : enabled_(false),pairCount_(0),disable_(false)
 	{
-		if (!enabled_) return;
+		if (dir == ProgramGlobals::DirectionEnum::INFINITE)
+			return;
 
-		bool b = (p->end > 0 && counter_ >= p->end);
-		if (counter_ < p->begin || b) {
-			counter_++;
+		enabled_ = params.options.isSet("KroneckerDumper");
+		if (!enabled_) return;
+		ParamsForKroneckerDumper p(enabled_,
+		                           params.dumperBegin,
+		                           params.dumperEnd,
+		                           params.precision);
+
+		bool b = (p.end > 0 && counter_ >= p.end);
+		if (counter_ < p.begin || b) {
+			++counter_;
 			enabled_ = false;
 			return;
 		}
 
-		if (p->nOfQns == 0) {
+		if (p.nOfQns == 0) {
 			PsimagLite::String msg("KroneckerDumper::ctor(): internal error ");
 			throw PsimagLite::RuntimeError(msg + "nOfQns\n");
 		}
@@ -64,13 +73,13 @@ public:
 
 		PsimagLite::String filename = "kroneckerDumper" + ttos(counter_) + ".txt";
 		fout_.open(filename.c_str());
-		fout_.precision(p->precision);
+		fout_.precision(p.precision);
 		fout_<<"KroneckerDumper for DMRG++ version "<<DMRGPP_VERSION<<"\n";
 		fout_<<"Instance="<<counter_<<"\n";
 		fout_<<"EncodingOfQuantumNumbers="<<(2*ProgramGlobals::maxElectronsOneSpin)<<"\n";
 
-		printOneBasis("Left",lrs.left(),p->nOfQns);
-		printOneBasis("Right",lrs.right(),p->nOfQns);
+		printOneBasis("Left",lrs.left(),p.nOfQns);
+		printOneBasis("Right",lrs.right(),p.nOfQns);
 
 		fout_<<"SuperBasisPermutation\n";
 		fout_<<lrs.super().permutationVector();
@@ -78,7 +87,7 @@ public:
 		//fout_<<qtarget<<"\n";
 
 		signs_ = lrs.left().signs();
-		counter_++;
+		++counter_;
 	}
 
 	~KroneckerDumper()
@@ -217,8 +226,8 @@ private:
 	ConcurrencyType::MutexType mutex_;
 }; // class KroneckerDumpter
 
-template<typename SparseMatrixType>
-SizeType KroneckerDumper<SparseMatrixType>::counter_ = 0;
+template<typename T1, typename T2>
+SizeType KroneckerDumper<T1, T2>::counter_ = 0;
 
 } // namespace Dmrg
 #endif // KRONECKERDUMPER_H

@@ -317,13 +317,12 @@ private:
 		if (tstStruct_.omega().first != PsimagLite::FREQ_REAL)
 			throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
 
-		RealType fakeTime = 0;
+		const RealType fakeTime = 0;
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 model_.superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 fakeTime,
-		                                                 0);
+		                                                 model_.superOpHelper());
 		LanczosMatrixType h(model_, hc, aux);
 		RealType E0 = energy_;
 		CorrectionVectorFunctionType cvft(h,tstStruct_,E0);

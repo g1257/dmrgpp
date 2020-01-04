@@ -4,7 +4,9 @@
 
 namespace Dmrg {
 
-template<typename ModelLinksType, typename LeftRightSuperType>
+template<typename ModelLinksType,
+         typename LeftRightSuperType,
+         typename SuperOpHelperType>
 class ManyToTwoConnection {
 
 public:
@@ -18,10 +20,11 @@ public:
 	ManyToTwoConnection(const VectorSizeType& hItems,
 	                    ProgramGlobals::ConnectionEnum type,
 	                    const ModelTermLinkType& oneLink,
-	                    const LeftRightSuperType& lrs)
+	                    const LeftRightSuperType& lrs,
+	                    const SuperOpHelperType& superOpHelper)
 	    : oneLink_(oneLink), lrs_(lrs)
 	{
-		finalIndices_ = finalIndices(hItems, type);
+		finalIndices_ = finalIndices(hItems, type, superOpHelper);
 		assert(oneLink.mods.size() == 2);
 		mods_ = PairCharType(oneLink.mods[0], oneLink.mods[1]);
 	}
@@ -70,11 +73,12 @@ private:
 	}
 
 	PairSizeType finalIndices(const VectorSizeType& hItems,
-	                          ProgramGlobals::ConnectionEnum type) const
+	                          ProgramGlobals::ConnectionEnum type,
+	                          const SuperOpHelperType& superOpHelper) const
 	{
 		if (hItems.size() == 4) {
 			assert(type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON);
-			return finalIndices4sites(hItems);
+			return finalIndices4sites(hItems, superOpHelper);
 		}
 
 		const ProgramGlobals::SysOrEnvEnum sysOrEnv =
@@ -115,7 +119,8 @@ private:
 		            lrs_.right().localOperatorIndex(i, sigma);
 	}
 
-	PairSizeType finalIndices4sites(const VectorSizeType& hItems) const
+	PairSizeType finalIndices4sites(const VectorSizeType& hItems,
+	                                const SuperOpHelperType& superOpHelper) const
 	{
 		SizeType last = lrs_.left().block().size();
 		assert(last > 0);
@@ -133,9 +138,9 @@ private:
 
 		assert(sysSites.size() > 0);
 		assert(envSites.size() > 0);
-		PairSizeType finalIndex(lrs_.left(). superOperatorIndices(sysSites, oneLink_.indices[0]),
-		                        lrs_.right().superOperatorIndices(envSites, oneLink_.indices[1]));
-		return finalIndex;
+		const SizeType finalLeft = superOpHelper.leftIndex(sysSites, oneLink_.indices[0]);
+		const SizeType finalRight = superOpHelper.leftIndex(sysSites, oneLink_.indices[1]);
+		return PairSizeType(finalLeft, finalRight);
 	}
 
 	const ModelTermLinkType& oneLink_;

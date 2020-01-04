@@ -114,7 +114,8 @@ public:
 	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
 	typedef ModelLinks<LabeledOperatorsType, SuperGeometryType> ModelLinksType;
-	typedef HamiltonianConnection<ModelLinksType, ModelHelperType> HamiltonianConnectionType;
+	typedef HamiltonianConnection<ModelLinksType, ModelHelperType, ParametersType>
+	HamiltonianConnectionType;
 	typedef typename HamiltonianConnectionType::VectorLinkType VectorLinkType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;

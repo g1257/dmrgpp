@@ -284,10 +284,9 @@ private:
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 model_.superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 time(),
-		                                                 0);
+		                                                 model_.superOpHelper());
 		MatrixLanczosType lanczosHelper(model_, hc, aux);
 
 		ProgramGlobals::VerboseEnum verbose = (model_.params().options.isSet("VerboseCheby"))
@@ -380,10 +379,9 @@ private:
 		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 model_.superGeometry(),
 		                                                 ModelType::modelLinks(),
 		                                                 time(),
-		                                                 0);
+		                                                 model_.superOpHelper());
 		MatrixLanczosType lanczosHelper(model_, hc, aux);
 		ProgramGlobals::VerboseEnum verbose = (model_.params().options.isSet("VerboseCheby"))
 		        ? ProgramGlobals::VerboseEnum::YES

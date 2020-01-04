@@ -123,6 +123,8 @@ public:
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename ModelBaseType::SuperOpHelperBaseType SuperOpHelperBaseType;
+	typedef SuperOpHelperPlaquette<SuperGeometryType, SolverParamsType> SuperOpHelperPlaquetteType;
 
 	static const SizeType TWICE_THE_SPIN = 2;
 
@@ -132,15 +134,8 @@ public:
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
-	      modelParameters_(io),
-	      superOpHelper_(nullptr)
+	      modelParameters_(io)
 	{}
-
-	~GaugeSpin()
-	{
-		delete superOpHelper_;
-		superOpHelper_ = nullptr;
-	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -233,19 +228,10 @@ protected:
 		plaquetteX.push4(sx, 'N', sx, 'N', sx, 'N', sx, 'N');
 	}
 
-	const SuperOpHelperPlaquette& superOpHelper(const VectorSizeType& bigBlock,
-	                                            const VectorSizeType& smallBlock,
-	                                            ProgramGlobals::DirectionEnum dir) const
+	virtual SuperOpHelperBaseType* setSuperOpHelper()
 	{
-		if (superOpHelper_) {
-			delete superOpHelper_;
-			superOpHelper_ = nullptr;
-		}
-
-		superOpHelper_ = new SuperOpHelperPlaquette(bigBlock, smallBlock, dir);
-		return *superOpHelper_;
+		return new SuperOpHelperPlaquetteType(ModelBaseType::superGeometry());
 	}
-
 
 private:
 
@@ -353,7 +339,6 @@ private:
 	}
 
 	ParametersGaugeSpin<RealType, QnType> modelParameters_;
-	mutable SuperOpHelperPlaquette* superOpHelper_;
 }; // class GaugeSpin
 
 } // namespace Dmrg

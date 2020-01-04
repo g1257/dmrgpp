@@ -88,17 +88,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "OperatorStorage.h"
 #include "OperatorsCached.h"
 #include "ManyToTwoConnection.h"
+#include "SuperOpHelperBase.h"
 
 namespace Dmrg {
 
 // Keep this class independent of x and y in x = H*y
 // For things that depend on x and y use ParallelHamiltonianConnection.h
-template<typename ModelLinksType, typename ModelHelperType_>
+template<typename ModelLinksType, typename ModelHelperType_, typename ParamsForSolverType_>
 class HamiltonianConnection {
 
 public:
 
 	typedef ModelHelperType_ ModelHelperType;
+	typedef ParamsForSolverType_ ParamsForSolverType;
 	typedef typename ModelLinksType::SuperGeometryType SuperGeometryType;
 	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
 	typedef typename ModelHelperType::RealType RealType;
@@ -113,24 +115,23 @@ public:
 	typedef typename PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType ParamsForKroneckerDumperType;
-	typedef typename LeftRightSuperType::KroneckerDumperType KroneckerDumperType;
 	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
 	typedef typename ModelHelperType::Aux AuxType;
 	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
 	typedef typename ModelLinksType::TermType::OneLinkType OneLinkType;
-	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType> ManyToTwoConnectionType;
+	typedef SuperOpHelperBase<SuperGeometryType, ParamsForSolverType> SuperOpHelperBaseType;
+	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>
+	ManyToTwoConnectionType;
 
 	HamiltonianConnection(const LeftRightSuperType& lrs,
-	                      const SuperGeometryType& superGeometry,
 	                      const ModelLinksType& lpb,
 	                      RealType targetTime,
-	                      const ParamsForKroneckerDumperType* pKroneckerDumper)
+	                      const SuperOpHelperBaseType& superOpHelper)
 	    : modelHelper_(lrs),
-	      superGeometry_(superGeometry),
+	      superGeometry_(superOpHelper.superGeometry()),
 	      modelLinks_(lpb),
 	      targetTime_(targetTime),
-	      kroneckerDumper_(pKroneckerDumper, lrs),
+	      superOpHelper_(superOpHelper),
 	      operatorsCached_(lrs),
 	      progress_("HamiltonianConnection"),
 	      systemBlock_(modelHelper_.leftRightSuper().left().block()),
@@ -151,7 +152,7 @@ public:
 		SizeType last = lrs.super().block().size();
 		assert(last > 0);
 		--last;
-		SizeType numberOfSites = superGeometry.numberOfSites();
+		SizeType numberOfSites = superGeometry_.numberOfSites();
 		assert(numberOfSites > 0);
 		bool superIsReallySuper = (lrs.super().block()[0] == 0 &&
 		        lrs.super().block()[last] == numberOfSites - 1);
@@ -251,11 +252,6 @@ public:
 		return link2;
 	}
 
-	KroneckerDumperType& kroneckerDumper() const
-	{
-		return kroneckerDumper_;
-	}
-
 	const ModelHelperType& modelHelper() const { return modelHelper_; }
 
 	SizeType tasks() const {return lps_.size(); }
@@ -309,7 +305,8 @@ private:
 				ManyToTwoConnectionType manyToTwo(hItems,
 				                                  type,
 				                                  oneLink,
-				                                  modelHelper_.leftRightSuper());
+				                                  modelHelper_.leftRightSuper(),
+				                                  superOpHelper_);
 
 				LinkType link2(manyToTwo.finalIndices(),
 				               type,
@@ -355,7 +352,7 @@ private:
 	const SuperGeometryType& superGeometry_;
 	const ModelLinksType& modelLinks_;
 	RealType targetTime_;
-	mutable KroneckerDumperType kroneckerDumper_;
+	const SuperOpHelperBaseType& superOpHelper_;
 	OperatorsCachedType operatorsCached_;
 	PsimagLite::ProgressIndicator progress_;
 	VectorLinkType lps_;

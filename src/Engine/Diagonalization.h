@@ -111,7 +111,6 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::ParamsForKroneckerDumperType ParamsForKroneckerDumperType;
 	typedef typename TargetingType::MatrixVectorType MatrixVectorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -459,20 +458,11 @@ private:
 	                         SizeType loopIndex)
 	{
 		const OptionsType& options = parameters_.options;
-		const bool dumperEnabled = options.isSet("KroneckerDumper");
-		ParamsForKroneckerDumperType paramsKrDumper(dumperEnabled,
-		                                            parameters_.dumperBegin,
-		                                            parameters_.dumperEnd,
-		                                            parameters_.precision);
-		ParamsForKroneckerDumperType* paramsKrDumperPtr = 0;
-		if (lrs.super().block().size() == model_.superGeometry().numberOfSites())
-			paramsKrDumperPtr = &paramsKrDumper;
 
 		HamiltonianConnectionType hc(lrs,
-		                             model_.superGeometry(),
 		                             ModelType::modelLinks(),
 		                             targetTime,
-		                             paramsKrDumperPtr);
+		                             model_.superOpHelper());
 
 		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
 		typename ModelHelperType::Aux aux(partitionIndex, lrs);

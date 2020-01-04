@@ -6,21 +6,27 @@
 
 namespace Dmrg {
 
-class SuperOpHelperPlaquette : public SuperOpHelperBase {
+template<typename SuperGeometryType, typename ParamsType>
+class SuperOpHelperPlaquette : public SuperOpHelperBase<SuperGeometryType, ParamsType> {
 
 public:
 
-	typedef SuperOpHelperBase BaseType;
+	typedef SuperOpHelperBase<SuperGeometryType, ParamsType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename BaseType::PairBoolSizeType PairBoolSizeType;
 
-	SuperOpHelperPlaquette(const VectorSizeType& bigBlock,
-	                       const VectorSizeType& smallBlock,
-	                       ProgramGlobals::DirectionEnum dir)
-	    : BaseType(bigBlock, smallBlock, dir), bigBlock_(bigBlock), smallBlock_(smallBlock)
+	SuperOpHelperPlaquette(const SuperGeometryType& superGeometry)
+	    : BaseType(superGeometry), smaxOrEmin_(0), newSite_(0)
+	{}
+
+	void setToProduct(SizeType smaxOrEmin,
+	                  SizeType newSite,
+	                  ProgramGlobals::DirectionEnum dir)
 	{
-		assert(smallBlock_.size() == 1);
-		isTriangle_ = (smallBlock_[0] & 1);
+		smaxOrEmin_ = smaxOrEmin;
+		newSite_ = newSite;
+		BaseType::setToProduct(smaxOrEmin, newSite, dir);
+		isTriangle_ = (newSite & 1);
 		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			isTriangle_ = !isTriangle_;
 	}
@@ -58,8 +64,8 @@ public:
 
 private:
 
-	const VectorSizeType& bigBlock_;
-	const VectorSizeType& smallBlock_;
+	SizeType smaxOrEmin_;
+	SizeType newSite_;
 	bool isTriangle_;
 };
 }

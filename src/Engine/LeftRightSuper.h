@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LEFT_RIGHT_SUPER_H
 
 #include "ProgressIndicator.h"
-#include "KroneckerDumper.h"
 #include "Io/IoNg.h"
 
 namespace Dmrg {
@@ -100,8 +99,6 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef  LeftRightSuper<BasisWithOperatorsType_,SuperBlockType> ThisType;
-	typedef KroneckerDumper<ThisType> KroneckerDumperType;
-	typedef typename KroneckerDumperType::ParamsForKroneckerDumper ParamsForKroneckerDumperType;
 	typedef typename BasisType::QnType QnType;
 
 	template<typename IoInputter>
@@ -365,7 +362,11 @@ private:
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
 		Xbasis.setOneSite(X, model, time);
 
-		leftOrRight.setToProduct(pS, Xbasis, model.superOpHelper(pS.block(), X, dir));
+		assert(X.size() == 1);
+		SizeType lastS = pS.block().size();
+		assert(lastS > 0);
+		model.superOpHelper().setToProduct(pS.block()[--lastS], X[0], dir);
+		leftOrRight.setToProduct(pS, Xbasis, model.superOpHelper());
 
 		SparseMatrixType matrix = leftOrRight.hamiltonian().getCRS();
 

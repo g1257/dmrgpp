@@ -5,6 +5,7 @@
 
 namespace Dmrg {
 
+template<typename SuperGeometryType, typename ParametersType>
 class SuperOpHelperBase {
 
 public:
@@ -12,12 +13,16 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<bool, SizeType> PairBoolSizeType;
 
-	SuperOpHelperBase(const VectorSizeType&,
-	                  const VectorSizeType&,
-	                  ProgramGlobals::DirectionEnum dir)
-	    : dir_(dir) {}
+	SuperOpHelperBase(const SuperGeometryType& superGeometry)
+	    : superGeometry_(superGeometry)
+	{}
 
 	virtual ~SuperOpHelperBase() {}
+
+	virtual void setToProduct(SizeType, SizeType, ProgramGlobals::DirectionEnum dir)
+	{
+		dir_ = dir;
+	}
 
 	// This below is for a plaquette, and will have to be
 	// written somewhere else
@@ -34,10 +39,23 @@ public:
 		return PairBoolSizeType(false, 0);
 	}
 
+	virtual SizeType leftIndex(VectorSizeType&, SizeType) const
+	{
+		throw PsimagLite::RuntimeError("SuperOpHelperBase::leftIndex\n");
+	}
+
+	// non virtual below
+
+	const SuperGeometryType& superGeometry() const
+	{
+		return superGeometry_;
+	}
+
 	const ProgramGlobals::DirectionEnum& dir() const { return dir_; }
 
 private:
 
+	const SuperGeometryType& superGeometry_;
 	ProgramGlobals::DirectionEnum dir_;
 };
 }

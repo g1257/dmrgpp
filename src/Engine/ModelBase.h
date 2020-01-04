@@ -157,7 +157,7 @@ public:
 	typedef typename ModelLinksType::TermType ModelTermType;
 	typedef OpaqueOp OpForLinkType;
 	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
-	typedef SuperOpHelperBase SuperOpHelperType;
+	typedef SuperOpHelperBase<SuperGeometryType, ParametersType> SuperOpHelperBaseType;
 
 	ModelBase(const ParametersType& params,
 	          const SuperGeometryType& superGeometry,
@@ -180,6 +180,9 @@ public:
 		fillModelLinks(); // fills modelLinks_
 		customOperators();
 		modelLinks_.postCtor2();
+
+		superOpHelper_ = setSuperOpHelper();
+		assert(superOpHelper_);
 
 		ProgramGlobals::init(maxElectronsOneSpin());
 	}
@@ -338,19 +341,6 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual PsimagLite::String oracle() const { return ""; }
 
-	virtual const SuperOpHelperType& superOpHelper(const VectorSizeType& bigBlock,
-	                                               const VectorSizeType& smallBlock,
-	                                               ProgramGlobals::DirectionEnum dir) const
-	{
-		if (superOpHelper_) {
-			delete superOpHelper_;
-			superOpHelper_ = nullptr;
-		}
-
-		superOpHelper_ = new SuperOpHelperType(bigBlock, smallBlock, dir);
-		return *superOpHelper_;
-	}
-
 	/**
 		The function \cppFunction{addHamiltonianConnection} implements
 		the Hamiltonian connection (e.g. tight-binding links in the case of the Hubbard Model
@@ -375,10 +365,9 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		VectorSizeType nzs(total, 0);
 
 		HamiltonianConnectionType hc(lrs,
-		                             modelCommon_.superGeometry(),
 		                             modelLinks_,
 		                             currentTime,
-		                             0);
+		                             superOpHelper());
 
 		for (SizeType m = 0; m < total; ++m) {
 			SizeType offset = lrs.super().partition(m);
@@ -601,6 +590,11 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	InputValidatorType_& ioIn() const { return ioIn_; }
 
+	SuperOpHelperBaseType& superOpHelper() const
+	{
+		return *superOpHelper_;
+	}
+
 protected:
 
 	PsimagLite::String oracle(const RealType& energy,
@@ -627,6 +621,11 @@ protected:
 	static ModelTermType& createTerm(PsimagLite::String name)
 	{
 		return modelLinks_.createTerm(name);
+	}
+
+	virtual SuperOpHelperBaseType* setSuperOpHelper()
+	{
+		return new SuperOpHelperBaseType(modelCommon_.superGeometry());
 	}
 
 private:
@@ -684,7 +683,7 @@ private:
 	TargetQuantumElectronsType targetQuantum_;
 	InputValidatorType_& ioIn_;
 	AtomKindBaseType* atomKind_;
-	mutable SuperOpHelperType* superOpHelper_;
+	mutable SuperOpHelperBaseType* superOpHelper_;
 	static LabeledOperatorsType labeledOperators_;
 	static ModelLinksType modelLinks_;
 	static VectorQnType qns_;
