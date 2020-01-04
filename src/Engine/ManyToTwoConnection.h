@@ -29,7 +29,7 @@ public:
 		mods_ = PairCharType(oneLink.mods[0], oneLink.mods[1]);
 	}
 
-	const PairSizeType& finalIndices() const { return finalIndices_; }
+	//const PairSizeType& finalIndices() const { return finalIndices_; }
 
 	const PairCharType& finalMods() const { return mods_; }
 
@@ -93,7 +93,7 @@ private:
 		SizeType i = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems[0]);
 		SizeType j = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems[1]);
 
-		int offset = lrs_.left().block().size();
+		const SizeType offset = lrs_.left().block().size();
 
 		SizeType site1Corrected = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            i : i - offset;
@@ -138,8 +138,29 @@ private:
 
 		assert(sysSites.size() > 0);
 		assert(envSites.size() > 0);
-		const SizeType finalLeft = superOpHelper.leftIndex(sysSites, oneLink_.indices[0]);
-		const SizeType finalRight = superOpHelper.leftIndex(sysSites, oneLink_.indices[1]);
+
+		SizeType finalLeft = 0;
+		if (sysSites.size() == 1) {
+			SizeType site1Corrected = PsimagLite::indexOrMinusOne(lrs_.super().block(),
+			                                                      sysSites[0]);
+			finalLeft = finalIndex(ProgramGlobals::SysOrEnvEnum::SYSTEM,
+			                       site1Corrected,
+			                       oneLink_.indices[0]);
+		} else {
+			finalLeft = superOpHelper.leftIndex(sysSites, oneLink_.indices[0]);
+		}
+
+		SizeType finalRight = 0;
+		if (envSites.size() == 1) {
+			SizeType jj = PsimagLite::indexOrMinusOne(lrs_.super().block(), envSites[0]);
+			SizeType site2Corrected = jj - lrs_.left().block().size();
+			finalRight = finalIndex(ProgramGlobals::SysOrEnvEnum::ENVIRON,
+			                        site2Corrected,
+			                        oneLink_.indices[1]);
+		} else {
+			finalRight = superOpHelper.rightIndex(envSites, oneLink_.indices[1]);
+		}
+
 		return PairSizeType(finalLeft, finalRight);
 	}
 

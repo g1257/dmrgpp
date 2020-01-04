@@ -62,6 +62,19 @@ public:
 		return PairBoolSizeType(false, 0);
 	}
 
+	SizeType leftIndex(VectorSizeType& sysSites, SizeType) const
+	{
+		SizeType last = sysSites.size();
+		assert(last > 0);
+		--last;
+
+	}
+
+	SizeType rightIndex(VectorSizeType&, SizeType) const
+	{
+		throw PsimagLite::RuntimeError("SuperOpHelperBase::rightIndex\n");
+	}
+
 private:
 
 	SizeType smaxOrEmin_;

@@ -44,6 +44,11 @@ public:
 		throw PsimagLite::RuntimeError("SuperOpHelperBase::leftIndex\n");
 	}
 
+	virtual SizeType rightIndex(VectorSizeType&, SizeType) const
+	{
+		throw PsimagLite::RuntimeError("SuperOpHelperBase::rightIndex\n");
+	}
+
 	// non virtual below
 
 	const SuperGeometryType& superGeometry() const
