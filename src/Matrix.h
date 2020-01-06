@@ -29,6 +29,7 @@ Please see full open source license included in file LICENSE.
 #include "TypeToString.h"
 #include "Mpi.h"
 #include "Io/IoSerializerStub.h"
+#include <fstream>
 
 namespace PsimagLite {
 
@@ -89,6 +90,19 @@ public:
 		for (SizeType i=0;i<nrow_;i++)
 			for (SizeType j=0;j<ncol_;j++)
 				data_[i+j*nrow_] = m(i,j);
+	}
+
+	Matrix(std::ifstream& io)
+	{
+		io>>nrow_;
+		io>>ncol_;
+		if (nrow_ <= 0 || ncol_ <= 0)
+			throw RuntimeError("Matrix::nrows or ncols negative: cannot construct\n");
+
+		data_.resize(nrow_*ncol_);
+		for (SizeType i = 0; i < nrow_; ++i)
+			for (SizeType j = 0; j < ncol_; ++j)
+				io >> data_[i + j*nrow_];
 	}
 
 	// ctor closures

@@ -87,6 +87,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "loki/TypeTraits.h"
 #include "Mpi.h"
 #include "Io/IoSerializerStub.h"
+#include <fstream>
+#include "Sort.h"
 
 namespace PsimagLite {
 
@@ -187,6 +189,35 @@ public:
 		}
 
 		setRow(a.rows(),counter);
+	}
+
+	CrsMatrix(SizeType rank, // square matrix ONLY for now
+	          const Vector<SizeType>::Type& rows2,
+	          const Vector<SizeType>::Type& cols,
+	          const typename Vector<T>::Type& vals)
+	    : rowptr_(rank + 1), nrow_(rank), ncol_(rank)
+	{
+		Sort<Vector<SizeType>::Type > s;
+		Vector<SizeType>::Type iperm(rows2.size());
+		Vector<SizeType>::Type rows = rows2;
+		s.sort(rows, iperm);
+		SizeType counter = 0;
+		SizeType prevRow = rows[0]+1;
+		for (SizeType i=0;i<rows.size();i++) {
+			SizeType row = rows[i];
+			if (prevRow!=row) {
+				// add new row
+				rowptr_[row] = counter++;
+				prevRow = row;
+			}
+
+			colind_.push_back(cols[iperm[i]]);
+			values_.push_back(vals[iperm[i]]);
+		}
+
+		SizeType lastNonZeroRow = rows[rows.size()-1];
+		for (SizeType i = lastNonZeroRow + 1; i <= rank; ++i)
+			rowptr_[i] = counter;
 	}
 
 	// start closure ctors
@@ -291,36 +322,35 @@ public:
 
 	void setCol(int n,int v) {
 		colind_[n]=v;
-        }
+	}
 
 	void setCol_check(int n,int v) {
-             if ( ((size_t) n) == (colind_.size() + 1)) {
-                colind_.push_back(v);
-                }
-             else {
-		colind_[n]=v;
-             };
+		if ( ((size_t) n) == (colind_.size() + 1)) {
+			colind_.push_back(v);
+		}
+		else {
+			colind_[n]=v;
+		};
 	}
 
 
 	void setValues(int n,const T &v) {
 		values_[n]=v;
-        }
+	}
 
 	void setValues_check(int n,const T &v) {
-             if ( ((size_t) n) == (values_.size() + 1)) {
-                values_.push_back(v);
-                }
-             else {
-		values_[n]=v;
-             };
+		if ( ((size_t) n) == (values_.size() + 1)) {
+			values_.push_back(v);
+		}
+		else {
+			values_[n]=v;
+		};
 	}
 
 	void operator*=(T x)
 	{
 		values_ *= x;
 	}
-
 
 	bool operator==(const CrsMatrix<T>& op) const
 	{
@@ -437,6 +467,7 @@ public:
 			colind_[i]=i;
 			rowptr_[i]=i;
 		}
+
 		rowptr_[row]=row;
 	}
 
@@ -725,18 +756,18 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 	SizeType cols = a.cols();
 	SizeType nonZeros = rows * cols;
 
-        const bool use_push = true;
+	const bool use_push = true;
 
-        if (use_push) {
-          // ------------------------------
-          // avoid filling array with zeros
-          // ------------------------------
-	  crsMatrix.resize(rows, cols );
-          crsMatrix.reserve( nonZeros );
-        }
-        else {
-	  crsMatrix.resize(rows, cols, nonZeros );
-        };
+	if (use_push) {
+		// ------------------------------
+		// avoid filling array with zeros
+		// ------------------------------
+		crsMatrix.resize(rows, cols );
+		crsMatrix.reserve( nonZeros );
+	}
+	else {
+		crsMatrix.resize(rows, cols, nonZeros );
+	};
 
 
 	SizeType counter = 0;
@@ -746,14 +777,14 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 			const T& val = a(i,j);
 			if (val == zval) continue;
 
-                        if (use_push) {
-                           crsMatrix.pushValue(val);
-                           crsMatrix.pushCol(j);
-                         }
-                        else {
-			   crsMatrix.setValues(counter, val);
-			   crsMatrix.setCol(counter, j);
-                        };
+			if (use_push) {
+				crsMatrix.pushValue(val);
+				crsMatrix.pushCol(j);
+			}
+			else {
+				crsMatrix.setValues(counter, val);
+				crsMatrix.setCol(counter, j);
+			};
 			++counter;
 		}
 	}
@@ -829,7 +860,7 @@ externalProduct(CrsMatrix<T>& B,
 
 		for( SizeType ie=0; ie < nrow_eye;  ie++) {
 			SizeType ib = (is_A_fastest) ?   permutationFull[ia + ie * nrow_A]:
-			                                 permutationFull[ie + ia * nrow_eye];
+			        permutationFull[ie + ia * nrow_eye];
 			nnz_B_row[ ib ] = nnz_row;
 		};
 	};
@@ -921,40 +952,40 @@ externalProduct(CrsMatrix<T>& C,
                 bool order,
                 const PsimagLite::Vector<SizeType>::Type& permutationFull)
 {
-    const SizeType nfull = permutationFull.size();
+	const SizeType nfull = permutationFull.size();
 
-    Vector<SizeType>::Type perm(nfull);
-    for (SizeType i = 0; i < nfull; ++i) perm[permutationFull[i]] = i;
+	Vector<SizeType>::Type perm(nfull);
+	for (SizeType i = 0; i < nfull; ++i) perm[permutationFull[i]] = i;
 
-    const SizeType nout = B.rows();
-    const SizeType na = A.rows();
-    const SizeType noutOrNa = (!order) ? nout : na;
-    const CrsMatrix<T>& AorB = (!order) ? A : B;
-    const CrsMatrix<T>& BorA = (!order) ? B : A;
-    assert(A.rows() == A.cols());
-    assert(B.rows() == B.cols());
-    assert(nout*na == nfull);
-    assert(signs.size() == noutOrNa);
-    C.resize(nfull, nfull);
-    SizeType counter = 0;
-    for (SizeType i = 0; i < nfull; ++i) {
-        C.setRow(i, counter);
-        const SizeType ind = perm[i];
-        div_t q = div(ind, noutOrNa);
-        for (int k1 = BorA.getRowPtr(q.rem); k1 < BorA.getRowPtr(q.rem + 1); ++k1) {
-            const SizeType col1 = BorA.getCol(k1);
-            for (int k2 = AorB.getRowPtr(q.quot); k2 < AorB.getRowPtr(q.quot + 1); ++k2) {
-                const SizeType col2 = AorB.getCol(k2);
-                SizeType j = permutationFull[col1 + col2*noutOrNa];
-                C.pushCol(j);
-                C.pushValue(BorA.getValue(k1) * AorB.getValue(k2) * signs[q.rem]);
-                ++counter;
-            }
-        }
-    }
+	const SizeType nout = B.rows();
+	const SizeType na = A.rows();
+	const SizeType noutOrNa = (!order) ? nout : na;
+	const CrsMatrix<T>& AorB = (!order) ? A : B;
+	const CrsMatrix<T>& BorA = (!order) ? B : A;
+	assert(A.rows() == A.cols());
+	assert(B.rows() == B.cols());
+	assert(nout*na == nfull);
+	assert(signs.size() == noutOrNa);
+	C.resize(nfull, nfull);
+	SizeType counter = 0;
+	for (SizeType i = 0; i < nfull; ++i) {
+		C.setRow(i, counter);
+		const SizeType ind = perm[i];
+		div_t q = div(ind, noutOrNa);
+		for (int k1 = BorA.getRowPtr(q.rem); k1 < BorA.getRowPtr(q.rem + 1); ++k1) {
+			const SizeType col1 = BorA.getCol(k1);
+			for (int k2 = AorB.getRowPtr(q.quot); k2 < AorB.getRowPtr(q.quot + 1); ++k2) {
+				const SizeType col2 = AorB.getCol(k2);
+				SizeType j = permutationFull[col1 + col2*noutOrNa];
+				C.pushCol(j);
+				C.pushValue(BorA.getValue(k1) * AorB.getValue(k2) * signs[q.rem]);
+				++counter;
+			}
+		}
+	}
 
-    C.setRow(nfull, counter);
-    C.checkValidity();
+	C.setRow(nfull, counter);
+	C.checkValidity();
 }
 
 template<typename T>
@@ -1447,21 +1478,21 @@ void fromBlockToFull(CrsMatrix<T>& Bfull,
                      const CrsMatrix<T>& B,
                      SizeType offset)
 {
-        const bool use_push = true;
-        int nrows_Bfull = Bfull.rows();
-        int ncols_Bfull = Bfull.cols();
-        int nnz_Bfull   = B.nonZeros();
-        Bfull.clear();
+	const bool use_push = true;
+	int nrows_Bfull = Bfull.rows();
+	int ncols_Bfull = Bfull.cols();
+	int nnz_Bfull   = B.nonZeros();
+	Bfull.clear();
 
-        if (use_push) {
-           Bfull.resize( nrows_Bfull, ncols_Bfull );
-           Bfull.reserve( nnz_Bfull );
-        }
-        else {
-            Bfull.resize( nrows_Bfull,
-                          ncols_Bfull,
-                          nnz_Bfull);
-          };
+	if (use_push) {
+		Bfull.resize( nrows_Bfull, ncols_Bfull );
+		Bfull.reserve( nnz_Bfull );
+	}
+	else {
+		Bfull.resize( nrows_Bfull,
+		              ncols_Bfull,
+		              nnz_Bfull);
+	};
 
 	int counter = 0;
 	for (SizeType i = 0; i < offset; ++i)
@@ -1475,15 +1506,15 @@ void fromBlockToFull(CrsMatrix<T>& Bfull,
 		for (int jj = B.getRowPtr(ii); jj < B.getRowPtr(ii + 1); ++jj) {
 			SizeType j = B.getCol(jj) + offset;
 			T tmp = B.getValue(jj);
-                        if (use_push) {
-                           Bfull.pushCol(j);
-                           Bfull.pushValue(tmp);
-                        }
-                        else {
-			   Bfull.setCol(counter, j);
-			   Bfull.setValues(counter, tmp);
-                        };
-                        counter++;
+			if (use_push) {
+				Bfull.pushCol(j);
+				Bfull.pushValue(tmp);
+			}
+			else {
+				Bfull.setCol(counter, j);
+				Bfull.setValues(counter, tmp);
+			};
+			counter++;
 		}
 	}
 
