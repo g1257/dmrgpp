@@ -67,7 +67,7 @@ public:
 		SizeType last = sysSites.size();
 		assert(last > 0);
 		--last;
-
+		throw PsimagLite::RuntimeError("SuperOpHelperBase::leftIndex\n");
 	}
 
 	SizeType rightIndex(VectorSizeType&, SizeType) const

@@ -29,7 +29,7 @@ public:
 		mods_ = PairCharType(oneLink.mods[0], oneLink.mods[1]);
 	}
 
-	//const PairSizeType& finalIndices() const { return finalIndices_; }
+	const PairSizeType& finalIndices() const { return finalIndices_; }
 
 	const PairCharType& finalMods() const { return mods_; }
 
