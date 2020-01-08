@@ -208,6 +208,20 @@ public:
 
 		assert(offsetRows_.size() > 0);
 		SizeType n = offsetRows_.size() - 1;
+
+		for (SizeType ipatch = 0; ipatch < n; ++ipatch) {
+			SizeType inThisIpatch = 0;
+			for (SizeType jpatch = 0; jpatch < n; ++jpatch) {
+				const MatrixBlockType* mptr = data_(ipatch, jpatch);
+				if (mptr == 0) continue;
+				++inThisIpatch;
+			}
+
+			if (inThisIpatch > 1)
+				err(PsimagLite::String("BlockOffDiagMatrix: toSparse() ") +
+				    "does not support patches with overlapping rows\n");
+		}
+
 		VectorSizeType nonzeroInThisRow(rows_, 0);
 		SizeType count = 0;
 		for (SizeType ipatch = 0; ipatch < n; ++ipatch) {
