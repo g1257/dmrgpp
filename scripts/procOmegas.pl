@@ -14,6 +14,7 @@ my ($siteForSpectrum,$mForQ,$mMax,$wantsRealPart);
 my $zeroAtCenter = 0;
 my $isPeriodic = 0;
 my $nonNegativeOnly = 0;
+my $noFourier = 0;
 
 GetOptions('f=s' => \$templateInput,
            'S:i' => \$siteForSpectrum,
@@ -22,7 +23,8 @@ GetOptions('f=s' => \$templateInput,
            'M:i' => \$mMax,
            'r' => \$wantsRealPart,
 		   'N' => \$nonNegativeOnly,
-           'z' => \$zeroAtCenter) or die "$usage\n";
+           'z' => \$zeroAtCenter,
+           'X' => \$noFourier) or die "$usage\n";
 
 (defined($templateInput) and defined($isPeriodic)) or die "$0: USAGE: $usage\n";
 
@@ -47,7 +49,7 @@ my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaOffset" => \$omegaOffset,
             "#Lx" => \$lx,
             "#Ly" => \$ly,
-            "#options" => \$options,
+	    "#options" => \$options,
             "GeometryKind" => \$geometryName,
             "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,
@@ -115,6 +117,7 @@ close(FOUTSPECTRUM);
 print STDERR "$0: Momentum Spectrum written to $outSpectrum\n";
 close(SPACEOUT);
 print STDERR "$0: Spatial Spectrum written to out.space\n";
+exit(0) if ($noFourier);
 my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
 my $omegaMax = $omega0 + $omegaStep * $omegaTotal;
 
@@ -190,6 +193,8 @@ sub procCommon
 
 	writeSpaceValues($omega, \@spaceValues);
 
+	return if ($noFourier);
+
 	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
 	OmegaUtils::writeFourier($array,\@qValues,$geometry);
@@ -255,8 +260,8 @@ sub correctionVectorReadOpen
 
 		next if ($skip);
 
-		chomp;
-		my @temp = split;
+	chomp;
+	my @temp = split;
 		die "$0: Line $_\n" unless (scalar(@temp)==5);
 
 		my $site = $temp[0];
@@ -446,6 +451,7 @@ sub doCheby
 	my ($ind, $cheby, $omega, $centralSite, $geometry) = @_;
 	my @spaceValues = chebyRealSpace($ind, $cheby);
 
+	return if ($noFourier);
 	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
 
@@ -460,6 +466,7 @@ sub procAllQs
 	my ($ind, $omega, $centralSite, $geometry) = @_;
 	my @array;
 	procCommon(\@array, $ind, $omega, $centralSite, $geometry);
+	return if ($noFourier);
 	die "procAllQs: array is empty\n" if (scalar(@array) == 0);
 	printSpectrum(\@array);
 }
