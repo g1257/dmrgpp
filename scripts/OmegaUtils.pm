@@ -206,6 +206,9 @@ sub getGeometryDetails
 	if ($name eq "chain") {
 		$factor = 0.5;
 		die "$0: Chain does not have ky != 0\n" if (defined($my) and $my != 0)
+	} elsif ($subname eq "GrandCanonical" and $name eq "ladder") {
+		$factor = 0.5;
+		die "$0: Chain does not have ky != 0\n" if (defined($my) and $my != 0);
 	} elsif ($name eq "ladder" || $subname eq "average") {
 		$leg = $geometry->{"leg"};
 		$factor = 0.25;
@@ -252,6 +255,10 @@ sub fourier
 	my $name = $geometry->{"name"};
 	if ($name eq "chain") {
 		return fourierChain($f, $v, $hptr);
+	}
+
+	if ($name eq "ladder" and $subname eq "GrandCanonical") {
+		return fourierChainGC($f, $v, $hptr);
 	}
 
 	if ($name eq "ladder") {
@@ -575,6 +582,45 @@ sub honeyFourierFactor
 	return (cos($arg), sin($arg));
 }
 
+sub fourierChainGC
+{
+	my ($f, $v, $hptr) = @_;
+	my $n = scalar(@$v);
+
+	my $mMax = $hptr->{"mMax"};
+	my $isPeriodic = $hptr->{"isPeriodic"};
+	my $centralSite = $hptr->{"centralSite"};
+	my $nOver2 = int($n/2);
+
+	die "$0: FATAL: ChainGC central site is odd\n" if ($centralSite & 1);
+
+	if (!$isPeriodic) {
+		my $b = ($centralSite != $nOver2);
+		if ($b && $centralSite != $nOver2 - 2) {
+			die "$0: FATAL ChainGC: wrong central site $centralSite\n";
+		}
+	}
+	
+	my $cSite = int($centralSite/2);
+	my $numberOfQs = (defined($mMax)) ? $mMax : $nOver2;
+	for (my $m = 0; $m < $numberOfQs; ++$m) {
+		my @sum = (0,0);
+		my $q = getQ($m, $numberOfQs, $isPeriodic);
+		for (my $ii = 0; $ii < $n; $ii += 2) {
+			my $i = int($ii/2);
+			my $ptr = $v->[$ii];
+			my @temp = @$ptr;
+			my $arg = $q*($i - $cSite);
+			my $carg = cos($arg);
+			my $sarg = sin($q*($i + 1))*sin($q*($cSite + 1));
+			my $cOrSarg = ($isPeriodic) ? $carg : $sarg;
+			$sum[0] += $temp[0]*$cOrSarg;
+			$sum[1] += $temp[1]*$cOrSarg;
+		}
+
+		$f->[$m] = \@sum;
+	}
+}
 
 sub writeFourier
 {
@@ -582,7 +628,7 @@ sub writeFourier
 	my $subname = $geometry->{"subname"};
 	my $isPeriodic = $geometry->{"isPeriodic"};
 
-	if ($geometry->{"name"} eq "chain") {
+	if ($geometry->{"name"} eq "chain" || $subname eq "GrandCanonical") {
 		return writeFourierChain($array,$f, $isPeriodic);
 	}
 

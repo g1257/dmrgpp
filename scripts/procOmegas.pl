@@ -49,7 +49,7 @@ my $hptr = {"#OmegaBegin" => \$omega0,
             "#OmegaOffset" => \$omegaOffset,
             "#Lx" => \$lx,
             "#Ly" => \$ly,
-	    "#options" => \$options,
+            "#options" => \$options,
             "GeometryKind" => \$geometryName,
             "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,
@@ -67,6 +67,7 @@ $centralSite = getCentralSite($templateInput, $isAinur);
 if ($isAinur) {
 	$geometryName =~ s/[\";]//g;
 	$GlobalNumberOfSites =~ s/;//g;
+	$geometrySubName =~ s/[\";]//g;
 }
 
 $hptr->{"isPeriodic"} = $isPeriodic;
@@ -197,6 +198,7 @@ sub procCommon
 
 	my @qValues;
 	OmegaUtils::fourier(\@qValues,\@spaceValues,$geometry,$hptr);
+	print LOGFILEOUT "$0: Number of k values ".scalar(@qValues)."\n";
 	OmegaUtils::writeFourier($array,\@qValues,$geometry);
 }
 
@@ -579,7 +581,7 @@ sub getRealOrImagData
 	my @temp;
 	my $n = scalar(@$d);
 	my $start = 1;
-	if ($geometry->{"name"} eq "ladder") {
+	if ($geometry->{"name"} eq "ladder" and $geometry->{"subname"} ne "GrandCanonical") {
 		my $leg = $geometry->{"leg"};
 		$n = int($n/$leg);
 		$start += $qyIndex*$n;
