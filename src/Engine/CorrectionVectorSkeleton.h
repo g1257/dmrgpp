@@ -90,6 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NoPthreadsNg.h"
 #include "TridiagRixsStatic.h"
 #include "KrylovHelper.h"
+#include "CorrectionVectorAction.h"
 
 namespace Dmrg {
 
@@ -146,84 +147,19 @@ public:
 
 	public:
 
-		class Action {
+		typedef CorrectionVectorAction<ComplexOrRealType, TargetParamsType> ActionType;
 
-		public:
-
-			typedef typename ThisType::ModelType::SolverParamsType SolverParamsType;
-			typedef typename ThisType::MatrixComplexOrRealType MatrixComplexOrRealType;
-			typedef typename ThisType::VectorWithOffsetType VectorWithOffsetType;
-			typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-
-			enum ActionEnum {ACTION_IMAG, ACTION_REAL};
-
-			Action(const TargetParamsType& tstStruct,
-			       RealType E0,
-			       const VectorRealType& eigs)
-			    : tstStruct_(tstStruct),E0_(E0),eigs_(eigs)
-			{}
-
-			RealType operator()(SizeType k) const
-			{
-				if (tstStruct_.omega().first == PsimagLite::FREQ_REAL)
-					return actionWhenReal(k);
-
-				return actionWhenMatsubara(k);
-			}
-
-			void setReal() const
-			{
-				action_ = ACTION_REAL;
-			}
-
-			void setImag() const
-			{
-				action_ = ACTION_IMAG;
-			}
-
-		private:
-
-			RealType actionWhenReal(SizeType k) const
-			{
-				RealType sign = (tstStruct_.type() == 0) ? -1.0 : 1.0;
-				RealType part1 =  (eigs_[k] - E0_)*sign + tstStruct_.omega().second;
-				RealType denom = part1*part1 + tstStruct_.eta()*tstStruct_.eta();
-				return (action_ == ACTION_IMAG) ? tstStruct_.eta()/denom :
-				                                  -part1/denom;
-			}
-
-			RealType actionWhenMatsubara(SizeType k) const
-			{
-				RealType sign = (tstStruct_.type() == 0) ? -1.0 : 1.0;
-				RealType wn = tstStruct_.omega().second;
-				RealType part1 =  (eigs_[k] - E0_)*sign;
-				RealType denom = part1*part1 + wn*wn;
-				return (action_ == ACTION_IMAG) ? wn/denom : -part1 / denom;
-			}
-
-			const TargetParamsType& tstStruct_;
-			RealType E0_;
-			const VectorRealType& eigs_;
-			mutable ActionEnum action_;
-		};
-
-	public:
-
-		typedef Action ActionType;
-
-		CalcR(const TargetParamsType& tstStruct,
-		      RealType E0,
-		      const VectorRealType& eigs)
+		CalcR(const TargetParamsType& tstStruct, RealType E0, const VectorRealType& eigs)
 		    : action_(tstStruct,E0,eigs)
 		{}
 
-		const Action& imag() const
+		const ActionType& imag() const
 		{
 			action_.setImag();
 			return action_;
 		}
 
-		const Action& real() const
+		const ActionType& real() const
 		{
 			action_.setReal();
 			return action_;
@@ -231,10 +167,17 @@ public:
 
 	private:
 
-		Action action_;
+		ActionType action_;
 	};
 
-	typedef KrylovHelper<typename CalcR::ActionType> KrylovHelperType;
+	struct TypeWrapper {
+
+		typedef typename ThisType::MatrixComplexOrRealType MatrixComplexOrRealType;
+		typedef typename ThisType::VectorWithOffsetType VectorWithOffsetType;
+		typedef typename ModelType::SolverParamsType SolverParamsType;
+	};
+
+	typedef KrylovHelper<typename CalcR::ActionType, TypeWrapper> KrylovHelperType;
 
 	CorrectionVectorSkeleton(InputValidatorType& ioIn,
 	                         const TargetParamsType& tstStruct,
@@ -362,6 +305,8 @@ private:
 
 		xi.resize(n);
 		psimag::BLAS::GEMV('N',n,n2,zone,&(V(0,0)),n,&(tmp[0]),1,zzero,&(xi[0]),1);
+
+		if (CalcR::ActionType::isValueComplex()) return;
 
 		krylovHelper_.calcR(r, what.real(), T, V, phi, n2, i0);
 

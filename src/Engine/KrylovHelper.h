@@ -5,15 +5,15 @@
 
 namespace Dmrg {
 
-template<typename ActionType>
+template<typename ActionType, typename TypeWrapperType>
 class KrylovHelper {
 
 public:
 
-	typedef typename ActionType::MatrixComplexOrRealType MatrixComplexOrRealType;
-	typedef typename ActionType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename TypeWrapperType::MatrixComplexOrRealType MatrixComplexOrRealType;
+	typedef typename TypeWrapperType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename ActionType::VectorRealType VectorRealType;
-	typedef typename ActionType::SolverParamsType SolverParamsType;
+	typedef typename TypeWrapperType::SolverParamsType SolverParamsType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 

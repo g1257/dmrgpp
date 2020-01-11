@@ -133,13 +133,17 @@ public:
 
 	struct Action {
 
+		typedef typename ThisType::VectorRealType VectorRealType;
+	};
+
+	struct TypeWrapper {
+
 		typedef typename ThisType::MatrixComplexOrRealType MatrixComplexOrRealType;
 		typedef typename ThisType::VectorWithOffsetType VectorWithOffsetType;
-		typedef typename ThisType::VectorRealType VectorRealType;
 		typedef typename ModelType::SolverParamsType SolverParamsType;
 	};
 
-	typedef KrylovHelper<Action> KrylovHelperType;
+	typedef KrylovHelper<Action, TypeWrapper> KrylovHelperType;
 
 	TimeVectorsKrylov(const SizeType& currentTimeStep,
 	                  const TargetParamsType& tstStruct,
