@@ -2,6 +2,7 @@
 #define CORRECTIONVECTORACTION_H
 #include "Vector.h"
 #include "FreqEnum.h"
+#include "AnsiColors.h"
 
 namespace Dmrg {
 
@@ -21,12 +22,15 @@ public:
 	                           RealType E0,
 	                           const VectorRealType& eigs)
 	    : tstStruct_(tstStruct),E0_(E0),eigs_(eigs)
-	{}
-
-	ComplexOrRealType operator()(SizeType k) const
 	{
-		return (tstStruct_.omega().first == PsimagLite::FREQ_REAL) ? actionWhenFreqReal(k)
-		                                                           : actionWhenMatsubara(k);
+		if (tstStruct_.omega().first == PsimagLite::FREQ_REAL)
+			return; // <--- EARLY EXIT
+		std::cout<<PsimagLite::AnsiColor::red;
+		std::cerr<<PsimagLite::AnsiColor::red;
+		std::cout<<"CorrectionVectorActionBase:: Running matsubara\n";
+		std::cerr<<"CorrectionVectorActionBase:: Running matsubara\n";
+		std::cout<<PsimagLite::AnsiColor::reset;
+		std::cerr<<PsimagLite::AnsiColor::reset;
 	}
 
 	void setReal() const;
@@ -36,8 +40,6 @@ public:
 	static bool isValueComplex() { return isComplex; }
 
 protected:
-
-	ComplexOrRealType actionWhenFreqReal(SizeType k) const;
 
 	RealType actionWhenMatsubara(SizeType k) const
 	{
@@ -109,7 +111,15 @@ public:
 	CorrectionVectorAction(const TargetParamsType& tstStruct,
 	                       RealType E0,
 	                       const typename BaseType::VectorRealType& eigs)
-	    : BaseType(tstStruct, E0, eigs) {}
+	    : BaseType(tstStruct, E0, eigs)
+	{
+		std::cout<<PsimagLite::AnsiColor::red;
+		std::cerr<<PsimagLite::AnsiColor::red;
+		std::cout<<"CorrectionVectorAction:: Complex mode\n";
+		std::cerr<<"CorrectionVectorAction:: Complex mode\n";
+		std::cout<<PsimagLite::AnsiColor::reset;
+		std::cerr<<PsimagLite::AnsiColor::reset;
+	}
 
 	ComplexOrRealType operator()(SizeType k) const
 	{
