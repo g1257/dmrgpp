@@ -206,9 +206,12 @@ public:
 		if (offsetCols_.size() != 0)
 			err("BlockOffDiagMatrix::toSparse() only for square matrix\n");
 
+		static SizeType limitWarn = 0;
+
 		assert(offsetRows_.size() > 0);
 		SizeType n = offsetRows_.size() - 1;
 
+		bool thereWasABug = false;
 		for (SizeType ipatch = 0; ipatch < n; ++ipatch) {
 			SizeType inThisIpatch = 0;
 			for (SizeType jpatch = 0; jpatch < n; ++jpatch) {
@@ -218,9 +221,22 @@ public:
 			}
 
 			if (inThisIpatch > 1)
-				err(PsimagLite::String("BlockOffDiagMatrix: toSparse() ") +
-				    "does not support patches with overlapping rows\n");
+				thereWasABug = true;
 		}
+
+		if (thereWasABug && limitWarn < 10) {
+			PsimagLite::String msg("BlockOffDiagMatrix: toSparse() ");
+			msg += "there used to be a bug here: patches with overlapping rows\n";
+
+			std::cout<<PsimagLite::AnsiColor::red;
+			std::cerr<<PsimagLite::AnsiColor::red;
+			std::cout<<msg;
+			std::cerr<<msg;
+			std::cout<<PsimagLite::AnsiColor::reset;
+			std::cerr<<PsimagLite::AnsiColor::reset;
+			++limitWarn;
+		}
+
 
 		VectorSizeType nonzeroInThisRow(rows_, 0);
 		SizeType count = 0;
@@ -248,18 +264,30 @@ public:
 
 		sparse.setRow(rows_, count);
 
+		// --------------------------------------------------------------
+		// zero out nonzeroInThisRow() in preparation for inserting values
+		// into sparse matrix
+		// --------------------------------------------------------------
+		for(SizeType row = 0; row < rows_; ++row) {
+			nonzeroInThisRow[ row ] = 0;
+		};
+
 		for (SizeType ipatch = 0; ipatch < n; ++ipatch) {
 			for (SizeType jpatch = 0; jpatch < n; ++jpatch) {
 				const MatrixBlockType* mptr = data_(ipatch, jpatch);
 				if (mptr == 0) continue;
 				const MatrixBlockType& m = *mptr;
 				for (SizeType r = 0; r < m.rows(); ++r) {
-					SizeType ip = sparse.getRowPtr(r + offsetRows_[ipatch]);
+					SizeType const row = r + offsetRows_[ipatch];
+					SizeType const ip_start = sparse.getRowPtr(row);
+					SizeType ip = ip_start + nonzeroInThisRow[row];
 					for (SizeType c = 0; c < m.cols(); ++c) {
+						SizeType const col = c + offsetRows_[jpatch];
 						sparse.setValues(ip, m(r, c));
-						sparse.setCol(ip, c + offsetRows_[jpatch]);
+						sparse.setCol(ip, col );
 						++ip;
 					}
+					nonzeroInThisRow[row] += m.cols();
 				}
 			}
 		}
