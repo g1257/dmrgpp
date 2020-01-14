@@ -125,6 +125,8 @@ void *thread_function_wrapper(void *dummyPtr)
 
 	pfh->thread_function_(pfs->threadNum,pfs->blockSize,pfs->total,pfs->mutex);
 
+	int retval = 0;
+	pthread_exit(static_cast<void*>(&retval));
 	return 0;
 }
 

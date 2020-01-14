@@ -62,6 +62,8 @@ void *thread_function_wrapper2(void *dummyPtr)
 		(*pfh)(taskNumber + pfs->start, pfs->threadNum);
 	}
 
+	int retval = 0;
+	pthread_exit(static_cast<void*>(&retval));
 	return 0;
 }
 
