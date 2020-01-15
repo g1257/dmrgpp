@@ -655,13 +655,35 @@ sub compareMatrices
 
 	my $max = 0;
 	for (my $i = 0; $i < $total; ++$i) {
-		my $val = abs($m1->[$i] - $m2->[$i]);
+		next unless ($m1->[$i] && $m2->[$i]);
+		my $val = realOrComplexNorm($m1->[$i], $m2->[$i]);
 		$max = $val if ($max < $val);
 	}
 
 	print "\tMaximum difference= $max\n";
 }
 
+sub realOrComplexNorm
+{
+	my ($x, $y) = @_;
+	die "$0: realOrComplexNorm\n" unless ($x and $y);
+	return abs($x - $y) if (isFloat($x) and isFloat($y));
+	my ($xr, $xi) = getComplexNumberParts($x);
+	my ($yr, $yi) = getComplexNumberParts($y);
+	my $val = ($xr - $yr)**2 + ($xi - $yi)**2;
+	return sqrt($val);
+}
+
+sub getComplexNumberParts
+{
+	my ($x) = @_;
+	die "$0: getComplexNumberParts\n" unless ($x);
+	$x =~ s/\(//;
+	$x =~ s/\)//;
+	my @temp = split/,/, $x;
+	die "$0: getComplexNumberParts $x\n" unless (scalar(@temp) == 2);
+	return ($temp[0], $temp[1]);
+}
 
 sub loadObserveData
 {
