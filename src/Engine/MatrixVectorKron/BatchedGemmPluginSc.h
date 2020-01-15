@@ -83,9 +83,9 @@ public:
 		}
 
 		{
-			PsimagLite::OstringStream msg;
-			msg<<"PLUGIN_SC: is in use, npatches="<<npatches;
-			msg<<" connections="<<nC<<" zeroConnections="<<zeroes;
+			PsimagLite::OstringStream msg(std::cout.precision());
+			msg()<<"PLUGIN_SC: is in use, npatches="<<npatches;
+			msg()<<" connections="<<nC<<" zeroConnections="<<zeroes;
 			progress_.printline(msg,std::cout);
 		}
 

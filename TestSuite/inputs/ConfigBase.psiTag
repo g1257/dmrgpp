@@ -172,4 +172,8 @@ flavor drd = (
 
 flavor helgrind = < flavor drd
 
+flavor pluginsc = (
+< flavor production
+< dependency PluginSc
+)
 
