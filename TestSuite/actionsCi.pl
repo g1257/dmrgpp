@@ -36,6 +36,10 @@ sub runTimeInSituObs
 
 		my $label = $what->[$i];
 
+		if (!($label =~ /^ *\"/)) {
+			$label = "\"$label\"";
+		}
+
 		my $cmd = "perl ../../scripts/betterTimeObs.pl $file $label > timeObservablesInSitu${n}_$i.txt";
 		system($cmd);
 
