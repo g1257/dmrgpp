@@ -131,6 +131,7 @@ for (my $j = 0; $j < $rangesTotal; ++$j) {
 		}
 
 		my $text = join ' ', map{ qq/"$_"/ } @$w;
+		$text =~ s/\"\"/\"/g;
 		my $pcmd = "perl ../actionsCi.pl $ppLabel $n $text\n";
 		$cmd .= $pcmd;
 	}
