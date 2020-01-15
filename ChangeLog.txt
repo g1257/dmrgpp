@@ -1,3 +1,63 @@
+2020-01-14 Version 5.68
+
+Bug fixes: 
+
+* SEVERE bug corrected in observe; see mailing list for details;
+in BlockOffDiag.h::toSparse (Thanks to Max, Jacek, Ed)
+
+* HubbardAncilla: c <---> cdagger
+
+* Recovery: modalStruct restart fix
+
+* Precision -p flag is now honored by all output (Thanks to Bradraj)
+
+Scripts
+
+* procOmegas will NOT do Fourier if -X is given to it. (Thanks to Rahul)
+
+
+TestSuite
+
+* 3511 is now shorter
+
+* postCi can compare complex matrices
+
+New features:
+
+* Custom operators can now be defined in input file;
+operators starting with _ are tracked
+
+* Cheby: can now correct vectors, and accepts
+ChebyshevCorrectVector= awesome predicate to
+control when to correct (Thanks to Alberto)
+
+* ChemicalH work, but not working yet (Alberto)
+
+* CorrectionVectorAction supports complex correction vector
+when useComplex is in use; we need to make sure this
+does not interfere with RIXS KrylovTime experimental feature...
+(Rahul, Alberto)
+
+New Models
+
+* GaugeSpin model to test ChemicalH features (not ready yet)
+
+Engine work
+
+* ModelLinks --> term.push modified API
+
+* OperatorsCache class added, and transposed operators in
+their own class
+
+* BasisWithOperators templated on Basis now.
+
+* ReducedOperators deleted
+
+* Apply Factors deleted, along with other SU(2) stuff
+
+* KroneckerDumper has been unhooked (is anyone using it?)
+
+
 2019-12-09 Version 5.66
 
 User facing
