@@ -1133,7 +1133,7 @@ private:
 	               SizeType cols,
 	               const ManyPointActionType& someAction)
 	{
-		static const bool NO_PRINT = false;
+		static const bool DO_PRINT = true;
 
 		if (hasTimeEvolution_) {
 			printSites();
@@ -1161,14 +1161,14 @@ private:
 		}
 
 		if (braket.points() == 3) {
-			observe_.threePoint(braket, rows, cols, NO_PRINT);
+			observe_.threePoint(braket, rows, cols, DO_PRINT);
 			return;
 		}
 
 		if (braket.points() == 4)
 			return observe_.fourPoint(braket, rows, cols, someAction);
 
-		observe_.anyPoint(braket, NO_PRINT);
+		observe_.anyPoint(braket, DO_PRINT);
 	}
 
 	void resizeStorage(VectorMatrixType& v,
