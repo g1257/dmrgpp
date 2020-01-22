@@ -12,6 +12,8 @@ namespace Dmrg {
 template<typename ModelType>
 class Braket {
 
+public:
+
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<int>::Type VectorIntType;
 	typedef typename OperatorType::PairType PairType;
@@ -21,9 +23,6 @@ class Braket {
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef OperatorSpec<ModelType, OperatorType> OperatorSpecType;
-
-public:
-
 	typedef typename OperatorSpecType::ResultType AlgebraType;
 	typedef typename PsimagLite::Vector<AlgebraType>::Type VectorAlgebraType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
@@ -53,6 +52,12 @@ public:
 		braket_.push_back(vecStr[0].substr(1,vecStr[0].length()-1));
 
 		braket_.push_back(vecStr[2].substr(0,vecStr[2].length()-1));
+
+		if (vecStr[1].length() > 1 && vecStr[1][0] == '!') {
+			opExprName_.resize(1);
+			opExprName_[0] = vecStr[1];
+			return; // early exit <===
+		}
 
 		PsimagLite::split(opExprName_, vecStr[1], ";");
 
@@ -101,6 +106,8 @@ public:
 	}
 
 	PsimagLite::String toString() const { return savedString_; }
+
+	const ModelType& model() const { return model_; }
 
 private:
 

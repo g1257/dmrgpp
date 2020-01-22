@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2014-2019, UT-Battelle, LLC
+Copyright (c) 2009-2014-2019-2020, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ApplyOperatorLocal.h"
 #include "GetBraOrKet.h"
+#include "StringOrderPost.h"
 
 namespace Dmrg {
 
@@ -135,7 +136,16 @@ public:
 		PsimagLite::split(vecStr, list, ",");
 
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
+
 			BraketType braket(model_, vecStr[i]);
+
+			if (braket.points() == 0) {
+				StringOrderPost<ModelType> stringOrderPost(braket);
+				MatrixType m(rows, cols);
+				stringOrderPost.computeMatrix(m);
+				std::cout<<m;
+				continue;
+			}
 
 			if (braket.points() == 1) {
 				measureOnePoint(braket.bra(),
