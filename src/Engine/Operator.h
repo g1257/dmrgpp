@@ -401,6 +401,11 @@ public:
 		data_.clear();
 	}
 
+	void set(ProgramGlobals::FermionOrBosonEnum fOrB)
+	{
+		fermionOrBoson_ = fOrB;
+	}
+
 	void set(ProgramGlobals::FermionOrBosonEnum fOrB,
 	         PairType jm1,
 	         RealType af,

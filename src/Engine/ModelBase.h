@@ -158,6 +158,7 @@ public:
 	typedef OpaqueOp OpForLinkType;
 	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
 	typedef SuperOpHelperBase<SuperGeometryType, ParametersType> SuperOpHelperBaseType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
 	ModelBase(const ParametersType& params,
 	          const SuperGeometryType& superGeometry,
@@ -506,22 +507,32 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return modelLinks_;
 	}
 
-	// should be static
-	const OperatorType& naturalOperator(const PsimagLite::String& what,
-	                                    SizeType kindOfSite, // ignore, legacy
-	                                    SizeType dof) const
+	static OperatorType naturalOperator(const PsimagLite::String& what,
+	                                    SizeType, // ignore, legacy
+	                                    SizeType dof)
 	{
+		static const PsimagLite::String expipi = "exp_i_pi_";
+		static const SizeType l = expipi.length();
+
+		if (what.substr(0, l) == expipi) {
+			const PsimagLite::String what2 = what.substr(l, what.length() - l);
+			OperatorType op = labeledOperators_(what2, dof);
+			SparseMatrixType m2 = op.getCRS();
+			expIpi(m2);
+			op.fromStorage(m2);
+			op.set(ProgramGlobals::FermionOrBosonEnum::BOSON);
+			return op;
+		}
+
 		return labeledOperators_(what, dof);
 	}
 
-	// should be static
-	bool instrospect() const
+	static bool instrospect()
 	{
 		labeledOperators_.instrospect();
 		return true;
 	}
 
-	// should be static
 	void printBasis(SizeType site) const
 	{
 		BlockType block(1, site);
