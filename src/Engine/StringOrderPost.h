@@ -5,11 +5,12 @@
 
 namespace Dmrg {
 
-template<typename ModelType>
+template<typename ObserverType>
 class StringOrderPost {
 
 public:
 
+	typedef typename ObserverType::ModelType ModelType;
 	typedef Braket<ModelType> BraketType;
 	typedef typename BraketType::VectorStringType VectorStringType;
 	typedef typename BraketType::AlgebraType AlgebraType;
@@ -17,8 +18,11 @@ public:
 	typedef typename BraketType::VectorAlgebraType VectorAlgebraType;
 	typedef typename BraketType::VectorIntType VectorIntType;
 	typedef typename BraketType::MatrixType MatrixType;
+	typedef typename BraketType::SparseMatrixType SparseMatrixType;
+	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 
-	StringOrderPost(const BraketType& braket)
+	StringOrderPost(const BraketType& braket, const ObserverType& observe)
+	    : observe_(observe)
 	{
 		static const PsimagLite::String stringop = "!stringorder=";
 		const PsimagLite::String special = braket.opName(0);
@@ -61,6 +65,7 @@ private:
 	}
 
 	VectorAlgebraType op_;
+	const ObserverType& observe_;
 };
 }
 #endif // STRINGORDERPOST_H

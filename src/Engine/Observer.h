@@ -243,9 +243,10 @@ public:
 		twopoint_(m, O1, O2, fermionicSign, bra, ket);
 	}
 
-	void threePoint(const BraketType& braket,
-	                SizeType rows,
-	                SizeType cols)
+	FieldType threePoint(const BraketType& braket,
+	                     SizeType rows,
+	                     SizeType cols,
+	                     bool needsPrinting)
 	{
 		assert(braket.points() == 3);
 
@@ -272,15 +273,19 @@ public:
 		}
 
 		if (flag == 7) {
-			std::cout<<"Fixed all sites\n";
 			typename MatrixType::value_type tmp = fourpoint_.threePoint(braket.site(0),
 			                                                            braket.site(1),
 			                                                            braket.site(2),
 			                                                            braket);
+			if (!needsPrinting) return tmp;
+			std::cout<<"Fixed all sites\n";
 			std::cout<<braket.site(0)<<" ";
 			std::cout<<braket.site(1)<<" "<<braket.site(2)<<"  "<<tmp<<"\n";
-			return;
+			return tmp;
 		}
+
+		if (!needsPrinting)
+			err("Observer::threePoint with !needsPrinting only for all sites fixed\n");
 
 		if (flag == 1) {
 			SizeType site0 = braket.site(0);
@@ -295,8 +300,6 @@ public:
 
 				}
 			}
-
-			return;
 		}
 
 		assert(flag == 0);
@@ -312,6 +315,8 @@ public:
 				}
 			}
 		}
+
+		return 0;
 	}
 
 	const FourPointCorrelationsType& fourpoint() const {return fourpoint_; }
@@ -419,7 +424,7 @@ public:
 		}
 	}
 
-	void anyPoint(const BraketType& braket)
+	FieldType anyPoint(const BraketType& braket, bool needsPrinting)
 	{
 		assert(braket.points() >= 4);
 
@@ -452,11 +457,15 @@ public:
 
 		FieldType tmp = fourpoint_.anyPoint(braket);
 
+		if (!needsPrinting) return tmp; // <<-- early exit
+
 		std::cout<<"Fixed all sites\n";
 		for (SizeType i = 0; i < braket.points(); ++i)
 			std::cout<<braket.site(i)<<" ";
 
 		std::cout<<tmp<<"\n";
+
+		return tmp;
 	}
 
 	void fourPointDeltas(MatrixType& fpd,

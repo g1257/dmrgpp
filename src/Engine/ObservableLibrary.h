@@ -139,15 +139,16 @@ public:
 
 			BraketType braket(model_, vecStr[i]);
 
-			if (braket.points() == 0) {
-				StringOrderPost<ModelType> stringOrderPost(braket);
-				MatrixType m(rows, cols);
-				stringOrderPost.computeMatrix(m);
-				std::cout<<m;
-				continue;
-			}
-
 			if (braket.points() == 1) {
+				const PsimagLite::String opName = braket.opName(0);
+				if (opName.length() > 1 && opName[0] == '!') {
+					StringOrderPost<ObserverType> stringOrderPost(braket, observe_);
+					MatrixType m(rows, cols);
+					stringOrderPost.computeMatrix(m);
+					std::cout<<m;
+					continue;
+				}
+
 				measureOnePoint(braket.bra(),
 				                braket.op(0),
 				                braket.opName(0),
@@ -662,7 +663,7 @@ private:
 	                        SizeType rows,
 	                        SizeType cols,
 	                        PsimagLite::String bra,
-			                PsimagLite::String ket)
+	                        PsimagLite::String ket)
 	{
 		// Two-point Pair
 		MatrixType* m1 = new MatrixType(rows,cols);
@@ -1132,6 +1133,8 @@ private:
 	               SizeType cols,
 	               const ManyPointActionType& someAction)
 	{
+		static const bool NO_PRINT = false;
+
 		if (hasTimeEvolution_) {
 			printSites();
 			std::cout<<"Time="<<observe_.helper().time(0)<<"\n";
@@ -1157,14 +1160,15 @@ private:
 			return;
 		}
 
-		if (braket.points() == 3)
-			return observe_.threePoint(braket,rows,cols);
-
+		if (braket.points() == 3) {
+			observe_.threePoint(braket, rows, cols, NO_PRINT);
+			return;
+		}
 
 		if (braket.points() == 4)
 			return observe_.fourPoint(braket, rows, cols, someAction);
 
-		observe_.anyPoint(braket);
+		observe_.anyPoint(braket, NO_PRINT);
 	}
 
 	void resizeStorage(VectorMatrixType& v,
