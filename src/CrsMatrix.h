@@ -1586,6 +1586,26 @@ bool isZero(const CrsMatrix<T>& A, double eps = 0)
 	return true;
 }
 
+template<typename T>
+typename EnableIf<IsComplexNumber<T>::True, void>::Type
+expIpi(CrsMatrix<T>& A)
+{
+	typedef typename Real<T>::Type RT;
+	if (!isDiagonal(A))
+		throw RuntimeError("expIpi: expected a diagonal matrix\n");
+	for (SizeType i = 0; i < A.nonZeros(); ++i) {
+		RT arg = PsimagLite::real(A.getValue(i))*M_PI;
+		A.setValues(i, std::complex<RT>(cos(arg), sin(arg)));
+	}
+}
+
+template<typename T>
+typename EnableIf<!IsComplexNumber<T>::True, void>::Type
+expIpi(CrsMatrix<T>&)
+{
+	throw RuntimeError("expIpi: only when using complex number\n");
+}
+
 } // namespace PsimagLite
 /*@}*/
 #endif
