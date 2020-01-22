@@ -246,7 +246,7 @@ public:
 	FieldType threePoint(const BraketType& braket,
 	                     SizeType rows,
 	                     SizeType cols,
-	                     bool needsPrinting)
+	                     bool needsPrinting) const
 	{
 		assert(braket.points() == 3);
 
@@ -424,7 +424,7 @@ public:
 		}
 	}
 
-	FieldType anyPoint(const BraketType& braket, bool needsPrinting)
+	FieldType anyPoint(const BraketType& braket, bool needsPrinting) const
 	{
 		assert(braket.points() >= 4);
 
