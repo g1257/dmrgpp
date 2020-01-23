@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <dirent.h>
 #include "Io/IoNg.h"
 #include "PsimagLite.h"
+#include "PredicateAwesome.h"
 
 namespace Dmrg {
 
@@ -98,24 +99,17 @@ class Recovery  {
 	typedef Recovery<ParametersType,int> RecoveryStaticType;
 	typedef typename CheckpointType::ComplexOrRealType ComplexOrRealType;
 
-	enum class OptionEnum {DISABLED, BY_LOOP};
-
 	struct OptionSpec {
 
-		OptionSpec()
-		    : optionEnum(OptionEnum::BY_LOOP), value(1), keepFiles(false), maxFiles(10)
-		{}
+		OptionSpec() : keepFiles(false), maxFiles(10) {}
 
-		OptionEnum optionEnum;
-		SizeType value;
 		bool keepFiles;
 		SizeType maxFiles;
 	};
 
 	struct OpaqueRestart {
 
-		OpaqueRestart() : loopIndex(0), stepCurrent(0)
-		{}
+		OpaqueRestart() : loopIndex(0), stepCurrent(0) {}
 
 		SizeType loopIndex;
 		SizeType stepCurrent;
@@ -132,6 +126,41 @@ public:
 	typedef typename CheckpointType::DiskStackType DiskStackType;
 	typedef PsimagLite::Vector<VectorSizeType>::Type VectorBlockType;
 
+	class SpecOptions {
+
+	public:
+
+		SpecOptions(bool& keepFiles, SizeType& maxFiles)
+		    : keepFiles_(keepFiles), maxFiles_(maxFiles)
+		{}
+
+		void operator()(PsimagLite::String str2)
+		{
+			if (str2.length() < 2) return;
+
+			PsimagLite::String str = str2.substr(1, str2.length() - 1);
+
+			if (str == "keep") {
+				keepFiles_ = true;
+				return;
+			}
+
+			if (str.length() < 3) dieWithError(str);
+
+			if (str[0] == 'M' && str[1] == '=') {
+				PsimagLite::String each = str.substr(2, str.length() - 2);
+				maxFiles_ = atoi(each.c_str());
+				std::cerr<<"Recovery Max files= "<<maxFiles_<<"\n";
+				return;
+			}
+		}
+
+	private:
+
+		bool& keepFiles_;
+		SizeType &maxFiles_;
+	};
+
 	Recovery(const VectorBlockType& siteIndices,
 	         typename IoType::Out& ioOut,
 	         const CheckpointType& checkpoint,
@@ -139,6 +168,7 @@ public:
 	         const BasisWithOperatorsType& pS,
 	         const BasisWithOperatorsType& pE)
 	    : progress_("Recovery"),
+	      predicateAwesome_(nullptr),
 	      siteIndices_(siteIndices),
 	      checkpoint_(checkpoint),
 	      wft_(wft),
@@ -170,6 +200,9 @@ public:
 			if (optionSpec_.keepFiles) continue;
 			unlink(savedName.c_str());
 		}
+
+		delete predicateAwesome_;
+		predicateAwesome_ = nullptr;
 	}
 
 	SizeType indexOfFirstFiniteLoop() const
@@ -185,8 +218,7 @@ public:
 
 	bool byLoop(SizeType loopIndex) const
 	{
-		return (optionSpec_.optionEnum == OptionEnum::BY_LOOP &&
-		        (loopIndex % optionSpec_.value) == 0);
+		return predicateAwesome_->isTrue("%l", loopIndex);
 	}
 
 	void write(const TargetingType& psi,
@@ -227,26 +259,9 @@ public:
 
 private:
 
-	void procOptions()
-	{
-		PsimagLite::String str = checkpoint_.parameters().recoverySave;
-
-		if (str == "") return;
-
-		VectorStringType tokens;
-		PsimagLite::split(tokens, str, ",");
-		for (SizeType i = 0; i < tokens.size(); ++i)
-			procOneOption(tokens[i]);
-	}
-
 	/* PSIDOC RecoverySave
 	  This is a comma-separated list options; whitespace isn't allowed.
 	  Supported options are as follows.
-
-	  l%n, where n is a positive integer, and indicates that save occurs when
-	  the loop index is divisible by n. So, l%1 saves every loop.
-	  CAUTION: Loops that don't end at the end shouldn't be saved, because
-	  the minimum saving unit is a full sweep.
 
 	  no, which disables RecoverySave, and is assumed if RecoverySave= is
 	  absent from the input file. In other words, RecoverySave is disabled by default.
@@ -256,42 +271,18 @@ private:
 
 	  M=n, where n is the maximum number of recovery files that will be saved, before
 	  the oldest file is overwritten. Defaults to 10.
+
+	  Any predicate awesome that can use the loop variable %l
 	 */
-	void procOneOption(PsimagLite::String str)
+	void procOptions()
 	{
-		if (str == "") return;
+		PsimagLite::String str = checkpoint_.parameters().recoverySave;
 
-		if (str == "no") {
-			optionSpec_.optionEnum = OptionEnum::DISABLED;
-			return;
-		}
-
-		if (str == "keep") {
-			optionSpec_.keepFiles = true;
-			return;
-		}
-
-		if (str.length() < 3) dieWithError(str);
-
-		if (str[0] == 'l' && str[1] == '%') {
-			PsimagLite::String each = str.substr(2, str.length() - 2);
-			optionSpec_.optionEnum = OptionEnum::BY_LOOP;
-			optionSpec_.value = atoi(each.c_str());
-			std::cerr<<"Recovery by loop every "<<optionSpec_.value<<" loops\n";
-			return;
-		}
-
-		if (str[0] == 'M' && str[1] == '=') {
-			PsimagLite::String each = str.substr(2, str.length() - 2);
-			optionSpec_.maxFiles = atoi(each.c_str());
-			std::cerr<<"Recovery Max files= "<<optionSpec_.maxFiles<<"\n";
-			return;
-		}
-
-		dieWithError(str);
+		SpecOptions lambda(optionSpec_.keepFiles, optionSpec_.maxFiles);
+		predicateAwesome_ = new PsimagLite::PredicateAwesome<SpecOptions>(str, ',', &lambda);
 	}
 
-	void dieWithError(PsimagLite::String str) const
+	static void dieWithError(PsimagLite::String str)
 	{
 		err("Syntax error for RecoverySave expression " + str + "\n");
 	}
@@ -368,6 +359,7 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
+	PsimagLite::PredicateAwesome<SpecOptions>* predicateAwesome_;
 	OptionSpec optionSpec_;
 	OpaqueRestart opaqueRestart_;
 	const VectorBlockType& siteIndices_;
