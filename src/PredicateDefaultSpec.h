@@ -5,6 +5,9 @@ namespace PsimagLite {
 
 class PredicateDefaultSpec {
 
+public:
+
+    void operator()(PsimagLite::String) const {}
 };
 }
 #endif // PREDICATEDEFAULTSPEC_H

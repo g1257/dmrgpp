@@ -63,7 +63,7 @@ public:
 	typedef Vector<PredicateAnd>::Type VectorPredicateAndType;
 	typedef PredicateAnd::VectorStringType VectorStringType;
 
-	PredicateAwesome(String pred, char orSep = ',')
+	PredicateAwesome(String pred, char orSep = ',', SpecType* spec = nullptr)
 	    : pred_(pred)
 	{
 		if (pred_ == "") return;
@@ -72,8 +72,17 @@ public:
 		orSeparator[0] = orSep;
 		split(tokens, pred, orSeparator);
 		const SizeType n = tokens.size();
-		for (SizeType i = 0; i < n; ++i)
+		for (SizeType i = 0; i < n; ++i) {
+			if (tokens[i].length() > 0 && tokens[i][0] == '@') {
+				if (!spec)
+					throw RuntimeError(String("PredicateAwesome:: with default spec") +
+				                       " cannot handle special options\n");
+				spec->operator()(tokens[i]);
+				continue;
+			}
+
 			predicateAnd_.push_back(PredicateAnd(tokens[i]));
+		}
 	}
 
 	template<typename T>
