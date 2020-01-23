@@ -139,7 +139,9 @@ private:
 		RealType sign = (BaseType::tstStruct_.type() == 0) ? -1.0 : 1.0;
 		RealType part1 =  (BaseType::eigs_[k] - BaseType::E0_)*sign +
 		        BaseType::tstStruct_.omega().second;
-		return ComplexOrRealType(part1, BaseType::tstStruct_.eta());
+		RealType denom = part1*part1 + BaseType::tstStruct_.eta()*BaseType::tstStruct_.eta();
+
+		return ComplexOrRealType(part1/denom, -BaseType::tstStruct_.eta()/denom);
 	}
 };
 

@@ -222,7 +222,7 @@ struct ParametersDmrgSolver {
 	      numberOfExcited(1),
 	      autoRestart(false),
 	      options("SolverOptions=", io),
-	      recoverySave("no"),
+	      recoverySave(""),
 	      adjustQuantumNumbers(0, QnType(false, VectorSizeType(), PairSizeType(0, 0), 0)),
 	      degeneracyMax(1e-12),
 	      denseSparseThreshold(0.2)
