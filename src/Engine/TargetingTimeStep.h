@@ -202,13 +202,17 @@ public:
 		evolveInternal(Eg,direction,block1,loopNumber);
 		SizeType numberOfSites = this->lrs().super().block().size();
 
-		if (site > 1 && site < numberOfSites-2)
-			return;
-		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		if (site > 1 && site < numberOfSites - 2)
 			return;
 
-		SizeType x = (site == 1) ? 0 : numberOfSites-1;
-		BlockType block(1,x);
+		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+			if (site == 1) return;
+		} else {
+			if (site == numberOfSites - 2) return;
+		}
+
+		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
+		BlockType block(1, x);
 		evolveInternal(Eg,direction,block,loopNumber);
 	}
 
