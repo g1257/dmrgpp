@@ -94,6 +94,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include <sstream>
 #include "Options.h"
+#include <sys/types.h>
+#include <unistd.h>
 
 namespace Dmrg {
 
@@ -237,7 +239,7 @@ struct ParametersDmrgSolver {
 			filename = io.filename();
 		}
 
-		filename = filenameFromRootname(filename);
+		filename = filenameFromRootname(filename, options.isSet("addPidToOutputName"));
 
 		if (earlyExit) return;
 
@@ -406,7 +408,7 @@ struct ParametersDmrgSolver {
 				err(tmp + "AND InfiniteLoopKeptStates is an int\n");
 			}
 
-			checkpoint.setFilename(filenameFromRootname(checkpoint.filename()));
+			checkpoint.setFilename(filenameFromRootname(checkpoint.filename(), false));
 			checkRestart(filename, checkpoint.filename(), options);
 			hasRestart = true;
 		} else {
@@ -613,7 +615,8 @@ private:
 		throw PsimagLite::RuntimeError(s + "\n");
 	}
 
-	PsimagLite::String filenameFromRootname(PsimagLite::String f) const
+	static PsimagLite::String filenameFromRootname(PsimagLite::String f,
+	                                               bool addPidToOutputName)
 	{
 		size_t findIndex = f.find(".txt");
 		if (findIndex != PsimagLite::String::npos)
@@ -631,6 +634,7 @@ private:
 		if (findIndex == PsimagLite::String::npos)
 			f += ".hd5";
 
+		if (addPidToOutputName) f += "." + ttos(getpid());
 		return f;
 	}
 };
