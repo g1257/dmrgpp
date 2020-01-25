@@ -99,7 +99,10 @@ public:
 	typedef String RunIdType;
 
 	ApplicationInfo(const PsimagLite::String& name)
-	    : name_(name),runId_(runIdInternal()),isFinalized_(false)
+	    : name_(name),
+	      pid_(getpid()),
+	      runId_(runIdInternal()),
+	      isFinalized_(false)
 	{}
 	
 	void finalize() { isFinalized_ = true;}
@@ -138,6 +141,8 @@ public:
 	{
 		return runId_;
 	}
+
+	unsigned int pid() const { return pid_; }
 
 	void write(String label, IoSerializer& serializer) const
 	{
@@ -227,6 +232,7 @@ private:
 	}
 
 	PsimagLite::String name_;
+	unsigned int pid_;
 	const RunIdType runId_;
 	bool isFinalized_;
 }; // class ApplicationInfo
