@@ -324,6 +324,9 @@ to the main dmrg driver are the following.
 
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
 
+	if (dmrgSolverParams.options.isSet("addPidToOutputName"))
+		options.label += "." + ttos(getpid());
+
 	if (threadsInCmd > 0) dmrgSolverParams.nthreads = threadsInCmd;
 	if (precision > 0) dmrgSolverParams.precision = precision;
 
