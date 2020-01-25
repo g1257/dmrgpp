@@ -119,6 +119,7 @@ public:
 	                  SizeType nf,
 	                  SizeType trail)
 	    : numberOfSites_(numberOfSites),
+	      hasTimeEvolution_(false),
 	      model_(model),
 	      observe_(io, start, nf, trail, model.params())
 	{}

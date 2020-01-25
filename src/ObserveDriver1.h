@@ -111,6 +111,8 @@ bool observeOneFullSweep(IoInputType& io,
 	}
 
 	start = end;
+	delete manyPointAction;
+	manyPointAction = 0;
 	return observerLib.endOfData();
 }
 }
