@@ -140,13 +140,23 @@ int main(int argc,char **argv)
 
 	InputCheck inputCheck;
 
+	bool filenameIsCout = false;
+	static const PsimagLite::String search = "iscout";
+	size_t pos = toolOptions.extraOptions.find(search);
+	if (pos != PsimagLite::String::npos) {
+		toolOptions.extraOptions.erase(pos, search.length());
+		filenameIsCout = true;
+	}
+
 	if (toolOptions.action == "files") {
 		if (toolOptions.extraOptions == "")
 			toolOptions.extraOptions = "list";
 		inputCheck.checkFileOptions(toolOptions.extraOptions);
 	}
 
-	InputFromDataOrNot<InputCheck> inputFromDataOrNot(toolOptions.filename, inputCheck);
+	InputFromDataOrNot<InputCheck> inputFromDataOrNot(toolOptions.filename,
+	                                                  inputCheck,
+	                                                  filenameIsCout);
 	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
 
 	//! Read the parameters for this run
