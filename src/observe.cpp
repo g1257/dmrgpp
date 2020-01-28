@@ -185,7 +185,7 @@ int main(int argc,char **argv)
 
 	//Setup the Geometry
 	InputCheck inputCheck;
-	InputFromDataOrNot<InputCheck> inputFromDataOrNot(filename, inputCheck);
+	InputFromDataOrNot<InputCheck> inputFromDataOrNot(filename, inputCheck, false);
 	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
 
 	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);

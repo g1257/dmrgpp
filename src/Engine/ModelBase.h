@@ -517,10 +517,13 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		if (what.substr(0, l) == expipi) {
 			const PsimagLite::String what2 = what.substr(l, what.length() - l);
 			OperatorType op = labeledOperators_(what2, dof);
-			SparseMatrixType m2 = op.getCRS();
+			if (op.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION)
+				err("Don't know how to exponentiate a fermionic operator\n");
+
+			MatrixType m2 = op.getCRS().toDense();
 			expIpi(m2);
 			op.fromStorage(m2);
-			op.set(ProgramGlobals::FermionOrBosonEnum::BOSON);
+
 			return op;
 		}
 
