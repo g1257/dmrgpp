@@ -302,6 +302,11 @@ public:
 		}
 	}
 
+	void swap(Matrix& m)
+	{
+		m.data_.swap(data_);
+	}
+
 	void setTo(const T& val)
 	{
 		for (SizeType i=0;i<data_.size();i++) data_[i]=val;
@@ -920,6 +925,43 @@ void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
 }
 
 // closures end
+template<typename T>
+typename EnableIf<IsComplexNumber<T>::True, void>::Type
+expIpi(Matrix<T>& A)
+{
+	typedef typename Real<T>::Type RT;
+
+	const SizeType n = A.rows();
+	if (n != A.cols())
+		throw RuntimeError("expIpi: expected a square matrix\n");
+
+	typename Vector<RT>::Type eigs(n);
+	diag(A, eigs, 'V');
+
+	Matrix<T> result(n , n);
+	for (SizeType i = 0; i < n; ++i) {
+		for (SizeType j = 0; j < n; ++j) {
+			std::complex<RT> sum = 0;
+			for (SizeType k = 0; k < n; ++k) {
+				const RT arg = eigs[k]*M_PI;
+				sum += PsimagLite::conj(A(k, i)) *
+				        std::complex<RT>(cos(arg), sin(arg)) *
+				        A(k, j);
+			}
+
+			result(i, j) = sum;
+		}
+	}
+
+	result.swap(A); // basically, A = result
+}
+
+template<typename T>
+typename EnableIf<!IsComplexNumber<T>::True, void>::Type
+expIpi(Matrix<T>&)
+{
+	throw RuntimeError("expIpi: only when using complex number\n");
+}
 
 #ifdef USE_MPI
 namespace MPI {
