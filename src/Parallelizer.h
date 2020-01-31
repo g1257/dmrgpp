@@ -82,17 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CodeSectionParams.h"
 #include "Map.h"
 
-#ifdef USE_PTHREADS_OR_NOT_NG
 #define ActualPthreadsName PthreadsNg
 #define ActualPthreadsN() "PthreadsNg.h"
 #define ActualNoPthreadsName NoPthreadsNg
 #define ActualNoPthreadsN() "NoPthreadsNg.h"
-#else
-#define ActualPthreadsName Pthreads
-#define ActualPthreadsN() "Pthreads.h"
-#define ActualNoPthreadsName NoPthreads
-#define ActualNoPthreadsN() "NoPthreads.h"
-#endif
 
 #ifdef USE_PTHREADS
 
