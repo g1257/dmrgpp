@@ -150,7 +150,7 @@ int main(int argc, char ** argv)
 
 	if (argc < 2)
 		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0])
-	        + " nthreads [nb]\n");
+	        + " nthreads [nb] [debug]\n");
 
 	int nthreads = atoi(argv[1]);
 
