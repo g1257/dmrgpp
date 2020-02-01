@@ -22,9 +22,13 @@ zcomplex make_val<zcomplex>(double const x, double const y) {
 }
 
 template<typename T>
-int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb)
+int test_GEMMR(int const Mmax,
+               int const Nmax,
+               int const Kmax,
+               int const nb,
+               bool needsPrinting)
 {
-	int const idebug = 0;
+	int const idebug = (needsPrinting) ? 1 : 0;
 	int nerrors = 0;
 
 	char const trans_table[3] = {'N', 'T', 'C'};
@@ -32,7 +36,7 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb)
 	T const alpha = make_val<T>(1.1, 2.1);
 	T const beta  = make_val<T>(3.1, 4.1);
 
-	PsimagLite::GemmR<T> gemmR;
+	PsimagLite::GemmR<T> gemmR(needsPrinting, nb);
 
 	for(int k=1; k <= Kmax; k += nb) {
 		for(int n=1; n <= Nmax; n += nb) {
@@ -137,18 +141,27 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb)
 	return(nerrors);
 }
 
-int main()
+int main(int argc, char ** argv)
 {
 	int const Nmax = 300;
 	int const Mmax = 301;
 	int const Kmax = 302;
-	int const nb = 99;
-
 	int nerr_zcomplex = 0;
 
-	int nerr_double = test_GEMMR<double>(Mmax,Nmax,Kmax,nb);
+	if (argc < 2)
+		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0])
+	        + " nthreads [nb]\n");
+
+	int nthreads = atoi(argv[1]);
+
+	int const nb = (argc == 3) ? atoi(argv[2]) : 99;
+	const bool needsPrinting = (argc == 4) ? atoi(argv[3]) > 0 : false;
+
+	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);
+
+	int nerr_double = test_GEMMR<double>(Mmax, Nmax, Kmax, nb, needsPrinting);
 	if (nerr_double == 0) {
-		nerr_zcomplex = test_GEMMR<zcomplex>(Mmax,Nmax,Kmax,nb);
+		nerr_zcomplex = test_GEMMR<zcomplex>(Mmax, Nmax, Kmax, nb, needsPrinting);
 	}
 
 	bool const all_passed = (nerr_double == 0) &&

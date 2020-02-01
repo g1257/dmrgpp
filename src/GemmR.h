@@ -3,6 +3,9 @@
 #include "Vector.h"
 #include <cstdlib>
 #include "BLAS.h"
+#include "Parallelizer2.h"
+
+// Originally written by Ed
 
 namespace PsimagLite {
 
@@ -11,53 +14,71 @@ class GemmR {
 
 public:
 
-	GemmR(SizeType nb = 128) : nb_(nb) {}
+	GemmR(bool idebug, SizeType nb) :  idebug_(idebug), nb_(nb) {}
 
-	void operator()(char const transA, char const transB,
-	                int const m, int const n,int const k,
+	void operator()(char const transA,
+	                char const transB,
+	                int const m,
+	                int const n,
+	                int const k,
 	                T const & alpha,
-	                T const * const A, int const ldA,
-	                T const * const B, int const ldB,
+	                T const * const A,
+	                int const ldA,
+	                T const * const B,
+	                int const ldB,
 	                T const & beta,
-	                T       * const C, int const ldC)
+	                T       * const C,
+	                int const ldC)
 	{
-		GEMMR_template(transA, transB, m, n, k, alpha, A, ldA, B, ldB, beta, C, ldC);
+		if (isSmall(m, n)) {
+			psimag::BLAS::GEMM( transA,
+			                    transB,
+			                    m,
+			                    n,
+			                    k,
+			                    alpha,
+			                    A,
+			                    ldA,
+			                    B,
+			                    ldB,
+			                    beta,
+			                    C,
+			                    ldC );
+			return;
+		}
+
+		bigMatrices(transA,
+		            transB,
+		            m,
+		            n,
+		            k,
+		            alpha,
+		            A,
+		            ldA,
+		            B,
+		            ldB,
+		            beta,
+		            C,
+		            ldC);
 	}
 
 private:
 
-	// ----------------------------
-	void GEMMR_template(char const transA, char const transB,
-	                    int const m, int const n,int const k,
-	                    T const & alpha,
-	                    T const * const A, int const ldA,
-	                    T const * const B, int const ldB,
-	                    T const & beta,
-	                    T       * const C, int const ldC ){
-
-		int const idebug = 0;
-
-		const int nb = nb_;
-		bool const is_small = (m <= nb) && (n <= nb);
-		if (is_small) {
-			if (idebug >= 1) {
-				std::cout << " GEMMR: is_small "
-				          << " m " << m
-				          << " n " << n
-				          << " nb " << nb_
-				          << "\n";
-			}
-
-
-			psimag::BLAS::GEMM( transA, transB,
-			                    m,n,k,
-			                    alpha,
-			                    A, ldA,
-			                    B, ldB,
-			                    beta,
-			                    C, ldC );
-			return;
-		}
+	void bigMatrices(char const transA,
+	                 char const transB,
+	                 int const m,
+	                 int const n,
+	                 int const k,
+	                 T const & alpha,
+	                 T const * const A,
+	                 int const ldA,
+	                 T const * const B,
+	                 int const ldB,
+	                 T const & beta,
+	                 T       * const C,
+	                 int const ldC)
+	{
+		assert(!isSmall(m, n));
 
 		//  -------------------------
 		//  if n = 101, and nb = 100,
@@ -67,8 +88,8 @@ private:
 		//  one call with size 51
 		//  and one call with size 50
 		//  -------------------------
-		int const nblocks_i = (m + (nb_ - 1))/nb_;
-		int const nblocks_j = (n + (nb_ - 1))/nb_;
+		const SizeType nblocks_i = (m + (nb_ - 1))/nb_;
+		const SizeType nblocks_j = (n + (nb_ - 1))/nb_;
 		int const nb_i = ((m % nblocks_i) == 0) ?
 		            (m/nblocks_i) :
 		            ((m/nblocks_i) + 1);
@@ -85,7 +106,7 @@ private:
 		bool const is_notransB = (!is_transB) && (!is_conjB);
 
 
-		if (idebug >= 1) {
+		if (idebug_ >= 1) {
 			std::cout << " GEMMR: "
 			          << " m " << m
 			          << " n " << n
@@ -98,9 +119,12 @@ private:
 			          << "\n";
 		}
 
-		for(int ij_block=0; ij_block < (nblocks_i * nblocks_j); ij_block++) {
-			int const i_block = (ij_block % nblocks_i);
-			int const j_block = (ij_block - i_block)/nblocks_i;
+		auto lambda = [transA, transB, m, n, k, alpha, &A, ldA, &B, ldB, beta, &C, ldC,
+		        nblocks_i, nblocks_j, nb_i, nb_j, is_notransA, is_notransB]
+		        (SizeType ij_block, SizeType)
+		{
+			const SizeType i_block = (ij_block % nblocks_i);
+			const SizeType j_block = (ij_block - i_block)/nblocks_i;
 			assert( (i_block + j_block*nblocks_i) == ij_block );
 
 			int const ic_start = 1 + (i_block)*nb_i;
@@ -141,9 +165,18 @@ private:
 			                    pB, ldB,
 			                    beta,
 			                    pC, ldC);
-		}
+		};
+
+		Parallelizer2<> parallelizer2(Concurrency::codeSectionParams);
+		parallelizer2.parallelFor(0, nblocks_i * nblocks_j, lambda);
 	}
 
+	bool isSmall(SizeType m, SizeType n) const
+	{
+		return ( (m <= nb_) && (n <= nb_) );
+	}
+
+	bool idebug_;
 	SizeType nb_;
 }; // class GemmR
 
