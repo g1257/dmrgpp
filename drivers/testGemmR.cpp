@@ -154,7 +154,7 @@ int main(int argc, char ** argv)
 
 	int nthreads = atoi(argv[1]);
 
-	int const nb = (argc == 3) ? atoi(argv[2]) : 99;
+	int const nb = (argc >= 3) ? atoi(argv[2]) : 99;
 	const bool needsPrinting = (argc == 4) ? atoi(argv[3]) > 0 : false;
 
 	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);
