@@ -167,8 +167,13 @@ private:
 			                    pC, ldC);
 		};
 
+		const SizeType tasks = nblocks_i * nblocks_j;
+		const SizeType threadsSaved = Concurrency::codeSectionParams.npthreads;
+		if (tasks < threadsSaved)
+			Concurrency::codeSectionParams.npthreads = tasks;
 		Parallelizer2<> parallelizer2(Concurrency::codeSectionParams);
-		parallelizer2.parallelFor(0, nblocks_i * nblocks_j, lambda);
+		parallelizer2.parallelFor(0, tasks, lambda);
+		Concurrency::codeSectionParams.npthreads = threadsSaved; // restore value
 	}
 
 	bool isSmall(SizeType m, SizeType n) const
