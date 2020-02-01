@@ -36,7 +36,9 @@ int test_GEMMR(int const Mmax,
 	T const alpha = make_val<T>(1.1, 2.1);
 	T const beta  = make_val<T>(3.1, 4.1);
 
-	PsimagLite::GemmR<T> gemmR(needsPrinting, nb);
+	PsimagLite::GemmR<T> gemmR(needsPrinting,
+	                           nb,
+	                           PsimagLite::Concurrency::codeSectionParams.npthreads);
 
 	for(int k=1; k <= Kmax; k += nb) {
 		for(int n=1; n <= Nmax; n += nb) {

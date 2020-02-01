@@ -14,7 +14,12 @@ class GemmR {
 
 public:
 
-	GemmR(bool idebug, SizeType nb) :  idebug_(idebug), nb_(nb) {}
+	GemmR(bool idebug, SizeType nb, SizeType nthreads)
+	    :  idebug_(idebug), nb_(nb), nthreads_(nthreads)
+	{
+		if (nb_ == 0)
+			throw RuntimeError("GemmR: nb cannot be zero\n");
+	}
 
 	void operator()(char const transA,
 	                char const transB,
@@ -168,12 +173,10 @@ private:
 		};
 
 		const SizeType tasks = nblocks_i * nblocks_j;
-		const SizeType threadsSaved = Concurrency::codeSectionParams.npthreads;
-		if (tasks < threadsSaved)
-			Concurrency::codeSectionParams.npthreads = tasks;
-		Parallelizer2<> parallelizer2(Concurrency::codeSectionParams);
+		CodeSectionParams csp = Concurrency::codeSectionParams;
+		csp.npthreads = std::min(tasks, nthreads_);
+		Parallelizer2<> parallelizer2(csp);
 		parallelizer2.parallelFor(0, tasks, lambda);
-		Concurrency::codeSectionParams.npthreads = threadsSaved; // restore value
 	}
 
 	bool isSmall(SizeType m, SizeType n) const
@@ -183,6 +186,7 @@ private:
 
 	bool idebug_;
 	SizeType nb_;
+	SizeType nthreads_;
 }; // class GemmR
 
 }
