@@ -5,6 +5,7 @@
 #include "ProgramGlobals.h"
 #include <iostream>
 #include <iomanip>
+#include "GemmR.h"
 
 namespace Dmrg {
 
@@ -35,14 +36,19 @@ class WftAccelBlocks {
 		                    const MatrixType& we,
 		                    SizeType volumeOfNk,
 		                    const ProgramGlobals::SysOrEnvEnum sysOrEnv,
-		                    SizeType threads)
+		                    SizeType threads,
+		                    SizeType gemmRnb,
+		                    SizeType threadsForGemmR)
 		    : result_(result),
 		      psi_(psi),
 		      ws_(ws),
 		      we_(we),
 		      volumeOfNk_(volumeOfNk),
 		      sysOrEnv_(sysOrEnv),
-		      storage_(threads)
+		      storage_(threads),
+		      gemmRnb_(gemmRnb),
+		      threadsForGemmR_(threadsForGemmR)
+
 		{}
 
 		SizeType tasks() const { return volumeOfNk_; }
@@ -181,6 +187,10 @@ class WftAccelBlocks {
 			tmp.setTo(0.0);
 			ComplexOrRealType *Ytemp = &(tmp(0,0));
 			const int ldYtemp = nrow_Ytemp;
+			static const bool needsPrinting = false;
+			PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
+			                                           gemmRnb_,
+			                                           threadsForGemmR_);
 
 			if (use_method_1) {
 				// ------------------
@@ -204,7 +214,7 @@ class WftAccelBlocks {
 					assert( nrow_Ytemp == nrow_W_S );
 					assert( ncol_Ytemp == ncol_Yold );
 
-					psimag::BLAS::GEMM( 'N', 'N',
+					gemmR( 'N', 'N',
 					                    mm, nn, kk,
 					                    alpha, W_S, ldW_S, Yold, ldYold,
 					                    beta,  Ytemp, ldYtemp );
@@ -225,7 +235,7 @@ class WftAccelBlocks {
 					assert( ncol_Ynew == ncol_W_E );
 					assert( ncol_Ytemp == nrow_W_E );
 
-					psimag::BLAS::GEMM( 'N', 'N',
+					gemmR( 'N', 'N',
 					                    mm, nn, kk,
 					                    alpha, Ytemp, ldYtemp, W_E, ldW_E,
 					                    beta,  Ynew, ldYnew );
@@ -258,7 +268,7 @@ class WftAccelBlocks {
 					assert( ncol_Ytemp == ncol_W_E );
 					assert( ncol_Yold == nrow_W_E );
 
-					psimag::BLAS::GEMM('N', 'N',
+					gemmR('N', 'N',
 					                   mm, nn, kk,
 					                   alpha, Yold, ldYold, W_E, ldW_E,
 					                   beta, Ytemp, ldYtemp );
@@ -279,7 +289,7 @@ class WftAccelBlocks {
 					assert( ncol_Ynew == ncol_Ytemp);
 					assert( ncol_W_S == nrow_Ytemp );
 
-					psimag::BLAS::GEMM('N', 'N',
+					gemmR('N', 'N',
 					                   mm, nn, kk,
 					                   alpha, W_S, ldW_S, Ytemp, ldYtemp,
 					                   beta, Ynew, ldYnew );
@@ -404,6 +414,10 @@ class WftAccelBlocks {
 
 			ComplexOrRealType *Ytemp = &(tmp(0,0));
 			const int ldYtemp = nrow_Ytemp;
+			static const bool needsPrinting = false;
+			PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
+			                                           gemmRnb_,
+			                                           threadsForGemmR_);
 
 			if (use_method_1) {
 				// ---------------------------
@@ -424,7 +438,7 @@ class WftAccelBlocks {
 					const int nn = ncol_Ytemp;
 					const int kk = nrow_Yold;
 
-					psimag::BLAS::GEMM('C', 'N',
+					gemmR('C', 'N',
 					                   mm,nn,kk,
 					                   alpha, W_S, ldW_S, Yold, ldYold,
 					                   beta,  Ytemp, ldYtemp );
@@ -442,7 +456,7 @@ class WftAccelBlocks {
 					const int nn = ncol_Ynew;
 					const int kk = ncol_Ytemp;
 
-					psimag::BLAS::GEMM('N', 'T',
+					gemmR('N', 'T',
 					                   mm,nn,kk,
 					                   alpha, Ytemp, ldYtemp, W_E, ldW_E,
 					                   beta, Ynew, ldYnew );
@@ -471,7 +485,7 @@ class WftAccelBlocks {
 					const int nn = ncol_Ytemp;
 					const int kk = ncol_Yold;
 
-					psimag::BLAS::GEMM('N', 'T',
+					gemmR('N', 'T',
 					                   mm, nn, kk,
 					                   alpha, Yold, ldYold, W_E,  ldW_E,
 					                   beta, Ytemp, ldYtemp );
@@ -489,7 +503,7 @@ class WftAccelBlocks {
 					const int nn = ncol_Ynew;
 					const int kk = nrow_Ytemp;
 
-					psimag::BLAS::GEMM('C', 'N',
+					gemmR('C', 'N',
 					                   mm, nn, kk,
 					                   alpha, W_S, ldW_S, Ytemp, ldYtemp,
 					                   beta, Ynew, ldYnew);
@@ -524,6 +538,8 @@ class WftAccelBlocks {
 		SizeType volumeOfNk_;
 		const ProgramGlobals::SysOrEnvEnum sysOrEnv_;
 		VectorMatrixType storage_;
+		SizeType gemmRnb_;
+        SizeType threadsForGemmR_;
 	};
 
 public:
@@ -575,7 +591,9 @@ public:
 		                              we,
 		                              volumeOfNk,
 		                              ProgramGlobals::SysOrEnvEnum::ENVIRON,
-		                              threads);
+		                              threads,
+		                              wftOptions_.gemmRnb,
+		                              wftOptions_.threadsForGemmR);
 
 		threadedWft.loopCreate(helperWft);
 
@@ -623,7 +641,9 @@ public:
 		                              we,
 		                              volumeOfNk,
 		                              ProgramGlobals::SysOrEnvEnum::SYSTEM,
-		                              threads);
+		                              threads,
+		                              wftOptions_.gemmRnb,
+		                              wftOptions_.threadsForGemmR);
 
 		threadedWft.loopCreate(helperWft);
 
