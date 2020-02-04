@@ -151,7 +151,8 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
               const MatrixDenseOrSparse<SparseMatrixType>& A,
               const MatrixDenseOrSparse<SparseMatrixType>& B,
               const typename PsimagLite::Real<typename SparseMatrixType::value_type>::Type
-              denseFlopDiscount)
+              denseFlopDiscount,
+              PsimagLite::GemmR<typename SparseMatrixType::value_type>& gemmR)
 {
 	const bool isDenseA = A.isDense();
 	const bool isDenseB = B.isDense();
@@ -166,7 +167,8 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			              offsetY,
 			              xout,
 			              offsetX,
-			              denseFlopDiscount);
+			              denseFlopDiscount,
+			              gemmR);
 		} else  {
 			// B is sparse
 			den_csr_kron_mult(transA,
@@ -177,7 +179,8 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			                  offsetY,
 			                  xout,
 			                  offsetX,
-			                  denseFlopDiscount);
+			                  denseFlopDiscount,
+			                  gemmR);
 		}
 	} else {
 		// A is sparse
@@ -190,7 +193,8 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 			                  offsetY,
 			                  xout,
 			                  offsetX,
-			                  denseFlopDiscount);
+			                  denseFlopDiscount,
+			                  gemmR);
 		} else {
 			// B is sparse
 			csr_kron_mult(transA,

@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Matrix.h"
 #include "Concurrency.h"
+#include "GemmR.h"
 
 namespace Dmrg {
 
@@ -119,6 +120,11 @@ public:
 	{
 		const bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
+		static const bool needsPrinting = false;
+		PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
+		                                           initKron_.gemmRnb(),
+		                                           initKron_.nthreads2());
+
 		SizeType nC = initKron_.connections();
 		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType offsetX = initKron_.offsetForPatches(InitKronType::NEW, outPatch);
@@ -153,7 +159,8 @@ public:
 				         opt,
 				         *Amat,
 				         *Bmat,
-				         initKron_.denseFlopDiscount());
+				         initKron_.denseFlopDiscount(),
+				         gemmR);
 			}
 		}
 	}
@@ -170,7 +177,7 @@ private:
 
 	const InitKronType& initKron_;
 	VectorType& x_;
-	const VectorType& y_;
+	const VectorType& y_;	
 }; //class KronConnections
 
 } // namespace PsimagLite

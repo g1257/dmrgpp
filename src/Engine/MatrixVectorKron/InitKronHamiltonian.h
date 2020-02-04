@@ -146,6 +146,16 @@ public:
 		return model_.params().options.isSet("KronLoadBalance");
 	}
 
+	SizeType gemmRnb() const
+	{
+		return model_.params().gemmRnb;
+	}
+
+	SizeType nthreads2() const
+	{
+		return model_.params().nthreads2;
+	}
+
 	// -------------------
 	// copy vin(:) to yin(:)
 	// -------------------
