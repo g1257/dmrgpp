@@ -51,14 +51,14 @@ template
 void csr_den_kron_mult_method<RealType>(const int imethod,
                               const char transA,
                               const char transB,
-
                               const PsimagLite::CrsMatrix<RealType>& a_,
                               const PsimagLite::Matrix<RealType>& b_,
-
                               const PsimagLite::Vector<RealType>::Type& yin_,
                               SizeType offsetY ,
                               PsimagLite::Vector<RealType>::Type& xout_,
-                              SizeType offsetX);
+                              SizeType offsetX,
+                              PsimagLite::GemmR<RealType>&);
+
 
 template
 bool csr_is_eye<RealType>(const PsimagLite::CrsMatrix<RealType>&);
@@ -209,7 +209,8 @@ void den_csr_kron_mult_method<RealType>(const int imethod,
                               const PsimagLite::Vector<RealType>::Type& yin,
                               SizeType offsetY,
                               PsimagLite::Vector<RealType>::Type& xout_,
-                              SizeType offsetX);
+                              SizeType offsetX,
+                              PsimagLite::GemmR<RealType>&);
 
 template
 void den_zeros<RealType>(const int nrow_A,
@@ -238,7 +239,8 @@ void den_matmul_pre<RealType>(const char trans_A,
                     const PsimagLite::MatrixNonOwned<const RealType>& yin,
                     const int nrow_X,
                     const int ncol_X,
-                    PsimagLite::MatrixNonOwned<RealType>& xout);
+                    PsimagLite::MatrixNonOwned<RealType>& xout,
+                    PsimagLite::GemmR<RealType>&);
 
 template
 void den_matmul_post<RealType>(const char trans_A,
@@ -250,7 +252,8 @@ void den_matmul_post<RealType>(const char trans_A,
                      const PsimagLite::MatrixNonOwned<const RealType>& yin,
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::MatrixNonOwned<RealType>& xout);
+                     PsimagLite::MatrixNonOwned<RealType>& xout,
+                     PsimagLite::GemmR<RealType>&);
 
 template
 void den_kron_submatrix<RealType>(const int nrow_A,
@@ -274,7 +277,8 @@ void den_kron_mult_method<RealType>(const int imethod,
                           const PsimagLite::Vector<RealType>::Type& yin,
                           SizeType offsetY ,
                           PsimagLite::Vector<RealType>::Type& xout,
-                          SizeType offsetX);
+                          SizeType offsetX,
+                          PsimagLite::GemmR<RealType>&);
 
 template
 int den_nnz<RealType>(const PsimagLite::Matrix<RealType>&);

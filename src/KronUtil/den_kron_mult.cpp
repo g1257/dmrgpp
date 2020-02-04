@@ -9,7 +9,8 @@ void den_kron_mult_method(const int imethod,
                           const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin_,
                           SizeType offsetY,
                           typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
-                          SizeType offsetX)
+                          SizeType offsetX,
+                          PsimagLite::GemmR<ComplexOrRealType>& gemmR)
 {
 	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int nrow_A = a_.n_row();
@@ -39,7 +40,7 @@ void den_kron_mult_method(const int imethod,
 	       (imethod == 2) ||
 	       (imethod == 3));
 
-/*
+	/*
  *   -------------------------------------------------------------
  *   A and B in dense matrix format
  *
@@ -74,7 +75,7 @@ void den_kron_mult_method(const int imethod,
 
 	if (imethod == 1) {
 
-	/*
+		/*
 	 *  --------------------------------------------
 	 *  BY(iby,jby) = op(B(ib,jb))*Y(iy,jy)
 	 *
@@ -87,7 +88,7 @@ void den_kron_mult_method(const int imethod,
 		PsimagLite::MatrixNonOwned<ComplexOrRealType> byRef(by_);
 		PsimagLite::MatrixNonOwned<const ComplexOrRealType> byConstRef(by_);
 
-	/*
+		/*
 	 * ---------------
 	 * setup BY(ib,ja)
 	 * ---------------
@@ -114,18 +115,17 @@ void den_kron_mult_method(const int imethod,
 	 */
 			// const char trans = (isTransB) ? 'T' : 'N';
 			const char trans = transB;
-			den_matmul_pre(  trans,
-			                 nrow_B,
-			                 ncol_B,
-			                 b_,
-
-			                 nrow_Y,
-			                 ncol_Y,
-			                 yin,
-
-			                 nrow_BY,
-			                 ncol_BY,
-			                 byRef);
+			den_matmul_pre(trans,
+			               nrow_B,
+			               ncol_B,
+			               b_,
+			               nrow_Y,
+			               ncol_Y,
+			               yin,
+			               nrow_BY,
+			               ncol_BY,
+			               byRef,
+			               gemmR);
 
 		}
 
@@ -141,49 +141,49 @@ void den_kron_mult_method(const int imethod,
 				// transpose( conj( transpose(A) ) ) is conj(A)
 				// perform  conj operation
 				// --------------------------------------------
-                                PsimagLite::Matrix<ComplexOrRealType> a_conj(nrow_A,ncol_A);
+				PsimagLite::Matrix<ComplexOrRealType> a_conj(nrow_A,ncol_A);
 
 				for(int ja=0; ja < ncol_A; ja++) {
-				for(int ia=0; ia < nrow_A; ia++) {
-					a_conj(ia,ja) = PsimagLite::conj( a_(ia,ja) );
+					for(int ia=0; ia < nrow_A; ia++) {
+						a_conj(ia,ja) = PsimagLite::conj( a_(ia,ja) );
+					};
 				};
-				};
 
-			     den_matmul_post(
-			            trans,
-			            nrow_A,
-			            ncol_A,
-			            a_conj,
+				den_matmul_post(trans,
+				                nrow_A,
+				                ncol_A,
+				                a_conj,
 
-			            nrow_BY,
-			            ncol_BY,
-			            byConstRef,
+				                nrow_BY,
+				                ncol_BY,
+				                byConstRef,
 
-			            nrow_X,
-			            ncol_X,
-			            xout);
+				                nrow_X,
+				                ncol_X,
+				                xout,
+				                gemmR);
 			}
 			else {
 
-			     den_matmul_post(
-			            trans,
-			            nrow_A,
-			            ncol_A,
-			            a_,
+				den_matmul_post(trans,
+				                nrow_A,
+				                ncol_A,
+				                a_,
 
-			            nrow_BY,
-			            ncol_BY,
-			            byConstRef,
+				                nrow_BY,
+				                ncol_BY,
+				                byConstRef,
 
-			            nrow_X,
-			            ncol_X,
-			            xout);
+				                nrow_X,
+				                ncol_X,
+				                xout,
+				                gemmR);
 			};
 
 		}
 	}
 	else if (imethod == 2) {
-	/*
+		/*
 	 * ---------------------
 	 * YAt(jb,ia) = Y(jb,ja) * tranpose(A(ia,ja))
 	 * X(ib,ia) += B(ib,jb) * YAt(jb,ia)
@@ -195,7 +195,7 @@ void den_kron_mult_method(const int imethod,
 		PsimagLite::MatrixNonOwned<ComplexOrRealType> yatRef(yat_);
 		PsimagLite::MatrixNonOwned<const ComplexOrRealType> yatConstRef(yat_);
 
-	/*
+		/*
 	 * ----------------
 	 * setup YAt(jb,ia)
 	 * ----------------
@@ -229,43 +229,45 @@ void den_kron_mult_method(const int imethod,
 				// transpose( conj( transpose(A) ) ) is conj(A)
 				// perform in-place conj operation
 				// --------------------------------------------
-                                PsimagLite::Matrix<ComplexOrRealType> a_conj(nrow_A,ncol_A);
+				PsimagLite::Matrix<ComplexOrRealType> a_conj(nrow_A,ncol_A);
 
 				for(int ja=0; ja < ncol_A; ja++) {
-				for(int ia=0; ia < nrow_A; ia++) {
-					a_conj(ia,ja) = PsimagLite::conj( a_(ia,ja) );
+					for(int ia=0; ia < nrow_A; ia++) {
+						a_conj(ia,ja) = PsimagLite::conj( a_(ia,ja) );
+					};
 				};
-				};
 
-			        den_matmul_post( trans,
-			                 nrow_A,
-			                 ncol_A,
-			                 a_conj,
+				den_matmul_post(trans,
+				                nrow_A,
+				                ncol_A,
+				                a_conj,
 
-			                 nrow_Y,
-			                 ncol_Y,
-			                 yin,
+				                nrow_Y,
+				                ncol_Y,
+				                yin,
 
-			                 nrow_YAt,
-			                 ncol_YAt,
-			                 yatRef);
+				                nrow_YAt,
+				                ncol_YAt,
+				                yatRef,
+				                gemmR);
 			}
 			else {
 
 
 
-			        den_matmul_post( trans,
-			                 nrow_A,
-			                 ncol_A,
-			                 a_,
+				den_matmul_post(trans,
+				                nrow_A,
+				                ncol_A,
+				                a_,
 
-			                 nrow_Y,
-			                 ncol_Y,
-			                 yin,
+				                nrow_Y,
+				                ncol_Y,
+				                yin,
 
-			                 nrow_YAt,
-			                 ncol_YAt,
-			                 yatRef);
+				                nrow_YAt,
+				                ncol_YAt,
+				                yatRef,
+				                gemmR);
 			};
 
 
@@ -275,7 +277,7 @@ void den_kron_mult_method(const int imethod,
 
 
 		{
-	/*
+			/*
 	 * ------------
 	 * X(ib,ia) += op(B(ib,jb)) * YAt(jb,ia)
 	 * ------------
@@ -283,23 +285,22 @@ void den_kron_mult_method(const int imethod,
 
 			// const char trans = (isTransB) ? 'T' : 'N';
 			const char trans = transB;
-			den_matmul_pre( trans,
-			                nrow_B,
-			                ncol_B,
-			                b_,
-
-			                nrow_YAt,
-			                ncol_YAt,
-			                yatConstRef,
-
-			                nrow_X,
-			                ncol_X,
-			                xout);
+			den_matmul_pre(trans,
+			               nrow_B,
+			               ncol_B,
+			               b_,
+			               nrow_YAt,
+			               ncol_YAt,
+			               yatConstRef,
+			               nrow_X,
+			               ncol_X,
+			               xout,
+			               gemmR);
 
 		}
 	}
 	else if (imethod == 3) {
-	/*
+		/*
 	* ---------------------------------------------
 	* C = kron(A,B)
 	* C([ib,ia], [jb,ja]) = A(ia,ja)*B(ib,jb)
@@ -374,9 +375,10 @@ void den_kron_mult(const char transA,
                    SizeType offsetY,
                    typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
                    SizeType offsetX,
-                   const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
+                   const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount,
+                   PsimagLite::GemmR<ComplexOrRealType>& gemmR)
 {
-/*
+	/*
  *   -------------------------------------------------------------
  *   A and B in dense matrix format
  *
@@ -431,25 +433,16 @@ void den_kron_mult(const char transA,
 	estimate_kron_cost( nrow_1,ncol_1,nnz_A, nrow_2,ncol_2,nnz_B,
 	                    &kron_nnz, &kron_flops, &imethod, denseFlopDiscount);
 
-
-
-	den_kron_mult_method(
-	            imethod,
-
-	            transA,
-	            transB,
-
-	            a_,
-
-	            b_,
-
-	            yin,
-	            offsetY,
-	            xout,
-	            offsetX);
-
-
-
+	den_kron_mult_method(imethod,
+	                     transA,
+	                     transB,
+	                     a_,
+	                     b_,
+	                     yin,
+	                     offsetY,
+	                     xout,
+	                     offsetX,
+	                     gemmR);
 }
 #undef BY
 #undef YAt

@@ -59,7 +59,8 @@ void csr_den_kron_mult_method<std::complex<RealType> >(const int imethod,
                               const PsimagLite::Vector<std::complex<RealType> >::Type& yin_,
                               SizeType offsetY ,
                               PsimagLite::Vector<std::complex<RealType> >::Type& xout_,
-                              SizeType offsetX);
+                              SizeType offsetX,
+                              PsimagLite::GemmR<std::complex<RealType> >&);
 
 template
 bool csr_is_eye<std::complex<RealType> >(const PsimagLite::CrsMatrix<std::complex<RealType> >&);
@@ -211,7 +212,8 @@ void den_csr_kron_mult_method<std::complex<RealType> >(const int imethod,
                               const PsimagLite::Vector<std::complex<RealType> >::Type& yin,
                               SizeType offsetY,
                               PsimagLite::Vector<std::complex<RealType> >::Type& xout_,
-                              SizeType offsetX);
+                              SizeType offsetX,
+                              PsimagLite::GemmR<std::complex<RealType> >&);
 
 template
 void den_zeros<std::complex<RealType> >(const int nrow_A,
@@ -240,7 +242,8 @@ void den_matmul_pre<std::complex<RealType> >(const char trans_A,
                     const PsimagLite::MatrixNonOwned<const std::complex<RealType> >& yin,
                     const int nrow_X,
                     const int ncol_X,
-                    PsimagLite::MatrixNonOwned<std::complex<RealType> >& xout);
+                    PsimagLite::MatrixNonOwned<std::complex<RealType> >& xout,
+                    PsimagLite::GemmR<std::complex<RealType> >&);
 
 template
 void den_matmul_post<std::complex<RealType> >(const char trans_A,
@@ -252,7 +255,8 @@ void den_matmul_post<std::complex<RealType> >(const char trans_A,
                      const PsimagLite::MatrixNonOwned<const std::complex<RealType> >& yin,
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::MatrixNonOwned<std::complex<RealType> >& xout);
+                     PsimagLite::MatrixNonOwned<std::complex<RealType> >& xout,
+                     PsimagLite::GemmR<std::complex<RealType> >&);
 
 template
 void den_kron_submatrix<std::complex<RealType> >(const int nrow_A,
@@ -276,7 +280,8 @@ void den_kron_mult_method<std::complex<RealType> >(const int imethod,
                           const PsimagLite::Vector<std::complex<RealType> >::Type& yin,
                           SizeType offsetY ,
                           PsimagLite::Vector<std::complex<RealType> >::Type& xout,
-                          SizeType offsetX);
+                          SizeType offsetX,
+                          PsimagLite::GemmR<std::complex<RealType> >&);
 
 template
 int den_nnz<std::complex<RealType> >(const PsimagLite::Matrix<std::complex<RealType> >&);

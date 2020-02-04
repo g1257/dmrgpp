@@ -10,9 +10,10 @@ void den_matmul_pre( const char trans_A,
                      const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
+                     PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout,
+                     PsimagLite::GemmR<ComplexOrRealType>& gemmR)
 {
-/*
+	/*
  * -------------------------------------------------------
  * A in dense matrix format
  *
@@ -37,7 +38,7 @@ void den_matmul_pre( const char trans_A,
 
 
 	if (isTranspose || isConjTranspose) {
-	/*
+		/*
 	*   ----------------------------------------------------------
 	*   X(nrow_X,ncol_X) +=  tranpose(A(nrow_A,ncol_A))*Y(nrow_Y,ncol_Y)
 	*   X(ix,jx) +=  transpose( A(ia,ja) ) * Y(iy,jy)
@@ -66,11 +67,11 @@ void den_matmul_pre( const char trans_A,
 			int ld2 = nrow_Y;
 			int ld3 = nrow_X;
 
-			psimag::BLAS::GEMM(trans1, trans2,
-			                      mm, nn, kk,
-			                      alpha, &(a_(0,0)), ld1,
-			                      &(yin(0,0)), ld2,
-			                      beta,  &(xout(0,0)), ld3 );
+			gemmR(trans1, trans2,
+			      mm, nn, kk,
+			      alpha, &(a_(0,0)), ld1,
+			      &(yin(0,0)), ld2,
+			      beta,  &(xout(0,0)), ld3 );
 
 
 		}
@@ -102,7 +103,7 @@ void den_matmul_pre( const char trans_A,
 
 	}
 	else  {
-	/*
+		/*
 	* ---------------------------------------------
 	* X(nrow_X,ncol_X) += A(nrow_A,ncol_A) * Y(nrow_Y,ncol_Y)
 	* X(ia,jy) += sum( A(ia,ja)*Y(ja,jy), over ja )
@@ -128,14 +129,14 @@ void den_matmul_pre( const char trans_A,
 			int ld2 = nrow_Y;
 			int ld3 = nrow_X;
 
-			psimag::BLAS::GEMM(trans1, trans2,
-			                      mm, nn, kk,
-			                      alpha,  &(a_(0,0)), ld1,
-			                      &(yin(0,0)), ld2,
-			                      beta,   &(xout(0,0)), ld3);
+			gemmR(trans1, trans2,
+			      mm, nn, kk,
+			      alpha,  &(a_(0,0)), ld1,
+			      &(yin(0,0)), ld2,
+			      beta,   &(xout(0,0)), ld3);
 		}
 		else {
-		/*
+			/*
 		* ----------------------------------------------
 		* X(ix,jx) += sum( A(ia,ja) * Y(ja,jy), over ja)
 		* ----------------------------------------------

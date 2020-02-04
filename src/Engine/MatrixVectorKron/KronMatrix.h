@@ -141,8 +141,7 @@ public:
 		}
 
 		KronConnectionsType kc(initKron_);
-		SizeType threads = (initKron_.blasIsThreadSafe()) ? PsimagLite::Concurrency::
-		                                                    codeSectionParams.npthreads : 1 ;
+		SizeType threads = PsimagLite::Concurrency::codeSectionParams.npthreads;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 
 		if (initKron_.loadBalance()) {

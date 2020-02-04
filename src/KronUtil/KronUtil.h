@@ -4,6 +4,7 @@
 #include "Vector.h"
 #include "Matrix.h"
 #include "CrsMatrix.h"
+#include "GemmR.h"
 
 template<typename ComplexOrRealType>
 void csr_kron_mult(const char transA,
@@ -27,7 +28,8 @@ void den_csr_kron_mult(const char transA,
 	                   SizeType offsetY,
 	                   typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
 	                   SizeType offsetX,
-                       const typename PsimagLite::Real<ComplexOrRealType>::Type);
+                       const typename PsimagLite::Real<ComplexOrRealType>::Type,
+                       PsimagLite::GemmR<ComplexOrRealType>&);
 
 //-----------------------------------------------------------------------------------
 
@@ -40,7 +42,8 @@ void den_kron_mult(const char transA,
                    SizeType offsetY,
                    typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
                    SizeType offsetX,
-                   const typename PsimagLite::Real<ComplexOrRealType>::Type);
+                   const typename PsimagLite::Real<ComplexOrRealType>::Type,
+                   PsimagLite::GemmR<ComplexOrRealType>&);
 
 //-----------------------------------------------------------------------------------
 
@@ -53,6 +56,7 @@ void csr_den_kron_mult( const char transA,
 	                    SizeType offsetY,
 	                    typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
 	                    SizeType offsetX,
-                        const typename PsimagLite::Real<ComplexOrRealType>::Type);
+                        const typename PsimagLite::Real<ComplexOrRealType>::Type,
+                        PsimagLite::GemmR<ComplexOrRealType>&);
 #endif
 

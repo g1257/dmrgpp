@@ -146,11 +146,6 @@ public:
 		return model_.params().options.isSet("KronLoadBalance");
 	}
 
-	bool blasIsThreadSafe() const
-	{
-		return !model_.params().options.isSet("blasNotThreadSafe");
-	}
-
 	// -------------------
 	// copy vin(:) to yin(:)
 	// -------------------

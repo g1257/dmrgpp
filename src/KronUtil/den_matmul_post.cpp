@@ -10,10 +10,11 @@ void den_matmul_post(const char trans_A,
                      const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
                      const int nrow_X,
                      const int ncol_X,
-                     PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
+                     PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout,
+                     PsimagLite::GemmR<ComplexOrRealType>& gemmR)
 {
 	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
-/*
+	/*
  * -------------------------------------------------------
  * A in dense matrix format
  *
@@ -38,7 +39,7 @@ void den_matmul_post(const char trans_A,
 	const bool use_blas = true;
 
 	if (isTranspose || isConjTranspose) {
-	/*
+		/*
 	*   ----------------------------------------------------------
 	*   X(nrow_X,ncol_X) +=  Y(nrow_Y,ncol_Y) * transpose(A(nrow_A,ncol_A))
 	*   X(ix,jx) +=  Y(iy,jy) * transpose( A(ia,ja) )
@@ -49,7 +50,7 @@ void den_matmul_post(const char trans_A,
 		assert((nrow_X == nrow_Y) && (ncol_Y == ncol_A) && (ncol_X == nrow_A));
 
 		if (use_blas) {
-		/*
+			/*
 		 * ------------------------
 		 * X = Y * transpose(A) + X
 		 * X(ix,jx) += sum( Y(ix,ja) * A(ia,ja), over ja)
@@ -69,11 +70,11 @@ void den_matmul_post(const char trans_A,
 			int ld2 = nrow_A;
 			int ld3 = nrow_X;
 
-			psimag::BLAS::GEMM(trans1, trans2,
-			                      mm, nn, kk,
-			                      alpha,  &(yin(0,0)), ld1,
-			                      &(a_(0,0)), ld2,
-			                      beta,   &(xout(0,0)), ld3);
+			gemmR(trans1, trans2,
+			      mm, nn, kk,
+			      alpha,  &(yin(0,0)), ld1,
+			      &(a_(0,0)), ld2,
+			      beta,   &(xout(0,0)), ld3);
 
 		}
 		else {
@@ -105,7 +106,7 @@ void den_matmul_post(const char trans_A,
 
 	}
 	else  {
-	/*
+		/*
 	* ---------------------------------------------
 	* X(nrow_X,ncol_X) += Y(nrow_Y,ncol_Y) * A(nrow_A,ncol_A)
 	* X(ix,jx) += sum( Y(iy,ia) * A(ia,ja), over ia )
@@ -114,7 +115,7 @@ void den_matmul_post(const char trans_A,
 		assert((nrow_X == nrow_Y) && (ncol_Y == nrow_A) && (ncol_X == ncol_A));
 
 		if (use_blas) {
-		/*
+			/*
 		 * -------------
 		 * X = Y * A + X
 		 * -------------
@@ -130,11 +131,11 @@ void den_matmul_post(const char trans_A,
 			int ld2 = nrow_A;
 			int ld3 = nrow_X;
 
-			psimag::BLAS::GEMM(trans1, trans2,
-			                      mm, nn, kk,
-			                      alpha,  &(yin(0,0)), ld1,
-			                      &(a_(0,0)), ld2,
-			                      beta,   &(xout(0,0)), ld3);
+			gemmR(trans1, trans2,
+			                   mm, nn, kk,
+			                   alpha,  &(yin(0,0)), ld1,
+			                   &(a_(0,0)), ld2,
+			                   beta,   &(xout(0,0)), ld3);
 
 		}
 		else {
