@@ -261,10 +261,12 @@ public:
 		            lrs_.right().block()[0] - 1 : lrs_.right().block()[0];
 		}
 
-		void transform(SparseMatrixType& ret, const SparseMatrixType& O) const
-		{
+	void transform(SparseMatrixType& ret, const SparseMatrixType& O) const
+	{
 		BlockOffDiagMatrixType m(O, transform_.offsetsRows());
-		m.transform(transform_);
+		static const SizeType gemmRnb = 0; // disable GemmR
+		static const SizeType threadsForGemmR = 1;  // disable GemmR parallel
+		m.transform(transform_, gemmRnb, threadsForGemmR);
 		m.toSparse(ret);
 	}
 

@@ -17,15 +17,17 @@ struct WftOptions {
 	           bool f,
 	           bool b,
 	           RealType d,
-	           bool blasIsThreadSafe_)
+	           SizeType gemmRnb_,
+	           SizeType threadsForGemmR_)
 	    : twoSiteDmrg(options.isSet("twositedmrg")),
 	      kronLoadBalance(options.isSet("KronLoadBalance")),
 	      firstCall(f),
 	      bounce(b),
-	      blasIsThreadSafe(blasIsThreadSafe_),
 	      dir(dir1),
 	      accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES),
-	      denseSparseThreshold(d)
+	      denseSparseThreshold(d),
+	      gemmRnb(gemmRnb_),
+	      threadsForGemmR(threadsForGemmR_)
 	{
 		if (options.isSet("wftAccelPatches"))
 			accel = ACCEL_PATCHES;
@@ -49,6 +51,16 @@ struct WftOptions {
 		io.read(firstCall, label + "/firstCall");
 		io.read(bounce, label + "/bounce");
 		io.read(denseSparseThreshold, label + "/denseSparseThreshold");
+
+		try {
+			io.read(gemmRnb, label + "/gemmRnb");
+			io.read(threadsForGemmR, label + "/threadsForGemmR");
+		} catch (...) {
+			PsimagLite::String msg("WARNING: WFTOptions::read(): ");
+			PsimagLite::String msg2("No gemmRnb or threadsForGemmR\n");
+			std::cout<<msg<<msg2;
+			std::cerr<<msg<<msg2;
+		}
 	}
 
 	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String label) const
@@ -61,16 +73,19 @@ struct WftOptions {
 		io.write(firstCall, label + "/firstCall");
 		io.write(bounce, label + "/bounce");
 		io.write(denseSparseThreshold, label + "/denseSparseThreshold");
+		io.write(gemmRnb, label + "/gemmRnb");
+		io.write(threadsForGemmR, label + "/threadsForGemmR");
 	}
 
 	bool twoSiteDmrg;
 	bool kronLoadBalance;
 	bool firstCall;
 	bool bounce;
-	bool blasIsThreadSafe;
 	ProgramGlobals::DirectionEnum dir;
 	AccelEnum accel;
 	RealType denseSparseThreshold;
+	SizeType gemmRnb;
+	SizeType threadsForGemmR;
 
 private:
 

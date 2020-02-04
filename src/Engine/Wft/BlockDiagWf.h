@@ -4,7 +4,7 @@
 #include "BlockDiagonalMatrix.h"
 #include "LAPACK.h"
 #include "PackIndices.h"
-
+#include "GemmR.h"
 #include <iostream>
 #include <iomanip>
 
@@ -102,7 +102,9 @@ class BlockDiagWf {
 		                       const VectorPairType& patches,
 		                       VectorSizeType& offsetRows,
 		                       VectorSizeType& offsetCols,
-		                       VectorMatrixType& data)
+		                       VectorMatrixType& data,
+		                       SizeType gemmRnb,
+		                       SizeType threadsForGemmR)
 		    : tLeft_(tLeft),
 		      tRight_(tRight),
 		      patchConvertLeft_(tLeft.blocks(), 0),
@@ -113,7 +115,9 @@ class BlockDiagWf {
 		      patches_(patches),
 		      offsetRows_(offsetRows),
 		      offsetCols_(offsetCols),
-		      data_(data)
+		      data_(data),
+		      gemmRnb_(gemmRnb),
+		      threadsForGemmR_(threadsForGemmR)
 		{
 			patchConvert(patchConvertLeft_, (charLeft == 'N'), tLeft);
 			patchConvert(patchConvertRight_, (charRight != 'N'), tRight);
@@ -270,6 +274,10 @@ class BlockDiagWf {
 
 			const ComplexOrRealType d_one = 1.0;
 			const ComplexOrRealType d_zero = 0.0;
+			static const bool needsPrinting = false;
+			PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
+			                                           gemmRnb_,
+			                                           threadsForGemmR_);
 
 			if (use_method_1) {
 				// ---------------------------
@@ -295,10 +303,10 @@ class BlockDiagWf {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					psimag::BLAS::GEMM( transA, transB,
-					                    mm, nn, kk,
-					                    alpha,  W_L, ldW_L, Yold, ldYold,
-					                    beta,   Ytemp, ldYtemp );
+					gemmR( transA, transB,
+					       mm, nn, kk,
+					       alpha,  W_L, ldW_L, Yold, ldYold,
+					       beta,   Ytemp, ldYtemp );
 				}
 
 				// ------------------------------
@@ -321,10 +329,10 @@ class BlockDiagWf {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					psimag::BLAS::GEMM( transA, transB,
-					                    mm, nn, kk,
-					                    alpha, Ytemp, ldYtemp, W_R, ldW_R,
-					                    beta, Ynew, ldYnew );
+					gemmR( transA, transB,
+					       mm, nn, kk,
+					       alpha, Ytemp, ldYtemp, W_R, ldW_R,
+					       beta, Ynew, ldYnew );
 				}
 			}
 			else {
@@ -352,10 +360,10 @@ class BlockDiagWf {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					psimag::BLAS::GEMM( transA, transB,
-					                    mm, nn, kk,
-					                    alpha, Yold, ldYold, W_R, ldW_R,
-					                    beta,  Ytemp, ldYtemp );
+					gemmR( transA, transB,
+					       mm, nn, kk,
+					       alpha, Yold, ldYold, W_R, ldW_R,
+					       beta,  Ytemp, ldYtemp );
 
 				}
 
@@ -378,10 +386,10 @@ class BlockDiagWf {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					psimag::BLAS::GEMM( transA, transB,
-					                    mm, nn, kk,
-					                    alpha, W_L, ldW_L, Ytemp, ldYtemp,
-					                    beta, Ynew, ldYnew );
+					gemmR( transA, transB,
+					       mm, nn, kk,
+					       alpha, W_L, ldW_L, Ytemp, ldYtemp,
+					       beta, Ynew, ldYnew );
 				}
 
 
@@ -447,6 +455,8 @@ class BlockDiagWf {
 		VectorSizeType& offsetRows_;
 		VectorSizeType& offsetCols_;
 		VectorMatrixType& data_;
+		SizeType gemmRnb_;
+		SizeType threadsForGemmR_;
 	};
 
 public:
@@ -490,11 +500,11 @@ public:
 	               char charRight,
 	               const BlockDiagonalMatrixType& tLeft,
 	               const BlockDiagonalMatrixType& tRight,
-	               bool blasIsThreadSafe)
+	               SizeType gemmRnb,
+	               SizeType threadsForGemmR)
 	{
 		SizeType npatches = data_.size();
 		SizeType threads = std::min(npatches, PsimagLite::Concurrency::codeSectionParams.npthreads);
-		if (!blasIsThreadSafe) threads = 1;
 		typedef PsimagLite::Parallelizer<ParallelBlockTransform> ParallelizerType;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		ParallelizerType threadedTransform(codeSectionParams);
@@ -507,7 +517,9 @@ public:
 		                              patches_,
 		                              offsetRows_,
 		                              offsetCols_,
-		                              data_);
+		                              data_,
+		                              gemmRnb,
+		                              threadsForGemmR);
 
 		threadedTransform.loopCreate(helper);
 
