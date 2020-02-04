@@ -45,7 +45,8 @@ sub createMakefile
 	linearPrediction options randomTest svd testLapack threads loadImbalance testIsClass
 	testMemResolv1 sumDecomposition calculator closuresTest base64test checkRunId
 	testLanczos testExcitedLanczos testLanczosMatrixInFile nested testIoNg testIoNgBoolean
-	affinityTest testPredicate isBlasThreaded testParallelizer2 testGemmR testGemmR2);
+	affinityTest testPredicate isBlasThreaded testParallelizer2 testGemmR testGemmR2
+	testParallelSvd);
 
 	my %args;
 	$args{"code"} = "PsimagLite/drivers";
