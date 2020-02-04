@@ -158,6 +158,14 @@ public:
 		}
 	}
 
+	static void setEnv(String name, String value)
+	{
+		int ret = setenv(name.c_str(), value.c_str(), true);
+		if (ret != 0)
+			throw RuntimeError("Could not setenv " + name + "=" + value + "\n");
+		std::cout<<"Set "<<name<<"="<<value<<"\n";
+	}
+
 	friend std::ostream& operator<<(std::ostream& os,
 	                                const ApplicationInfo& ai)
 	{
