@@ -16,10 +16,7 @@ public:
 
 	GemmR(bool idebug, SizeType nb, SizeType nthreads)
 	    :  idebug_(idebug), nb_(nb), nthreads_(nthreads)
-	{
-		if (nb_ == 0)
-			throw RuntimeError("GemmR: nb cannot be zero\n");
-	}
+	{}
 
 	void operator()(char const transA,
 	                char const transB,
@@ -181,7 +178,8 @@ private:
 
 	bool isSmall(SizeType m, SizeType n) const
 	{
-		return ( (m <= nb_) && (n <= nb_) );
+		if (nb_ == 0) return true;
+		return ((m <= nb_) && (n <= nb_) );
 	}
 
 	bool idebug_;

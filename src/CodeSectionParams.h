@@ -6,13 +6,19 @@ namespace PsimagLite {
 
 struct CodeSectionParams {
 
+	CodeSectionParams(SizeType threads)
+	    : npthreads(threads), npthreadsLevelTwo(1), setAffinities(false), stackSize(0)
+	{}
+
 	CodeSectionParams(SizeType threads,
-	            bool a = false,
-	            size_t s = 0)
-	    : npthreads(threads), setAffinities(a), stackSize(s)
+	                  SizeType nthreadsLevel2,
+	                  bool a,
+	                  size_t s)
+	    : npthreads(threads), npthreadsLevelTwo(nthreadsLevel2), setAffinities(a), stackSize(s)
 	{}
 
 	SizeType npthreads;
+	SizeType npthreadsLevelTwo;
 	bool setAffinities;
 	size_t stackSize;
 };

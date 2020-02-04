@@ -202,6 +202,7 @@ public:
 	{
 		FloatingPoint::enableExcept();
 		codeSectionParams.npthreads = nthreads;
+		codeSectionParams.npthreadsLevelTwo = 1;
 		mode = 0;
 #ifdef USE_PTHREADS
 		mode |= 1;
@@ -277,10 +278,12 @@ public:
 	static void setOptions(const CodeSectionParams& cs)
 	{
 		codeSectionParams = cs;
-		if (codeSectionParams.npthreads == 1) return;
+		if (codeSectionParams.npthreads == 1 &&
+		    codeSectionParams.npthreadsLevelTwo == 1) return;
+
 #ifndef USE_PTHREADS
 		PsimagLite::String message1(__FILE__);
-		message1 += " FATAL: You are requesting nthreads>0 but you ";
+		message1 += " FATAL: You are requesting nthreads > 0 but you ";
 		message1 += "did not compile with USE_PTHREADS enabled\n";
 		message1 += " Either set Threads=1 in the input file (you won't ";
 		message1 += "have threads though) or\n";
@@ -289,6 +292,7 @@ public:
 		throw PsimagLite::RuntimeError(message1.c_str());
 #else
 		std::cout<<"Concurrency::npthreads="<<codeSectionParams.npthreads<<"\n";
+		std::cout<<"Concurrency::npthreads2="<<codeSectionParams.npthreadsLevelTwo<<"\n";
 		std::cout<<"Concurrency::setAffinitiesDefault="<<codeSectionParams.setAffinities<<"\n";
 #endif
 	}
