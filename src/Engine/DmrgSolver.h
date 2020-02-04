@@ -170,8 +170,6 @@ public:
 	                ioOut_),
 	      saveData_(!parameters_.options.isSet("noSaveData"))
 	{
-		PsimagLite::ApplicationInfo::setEnv("OPENBLAS_NUM_THREADS", "1");
-
 		std::cout<<appInfo_;
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
