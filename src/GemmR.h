@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include "BLAS.h"
 #include "Parallelizer2.h"
+#include <cstdlib>
 
 // Originally written by Ed
 
@@ -12,11 +13,39 @@ namespace PsimagLite {
 template<typename T>
 class GemmR {
 
+	struct OpenBlasNumThreads {
+		void set()
+		{
+			int ret = setenv("OPENBLAS_NUM_THREADS", "1", true);
+			if (ret != 0)
+				throw RuntimeError("Could not set OPENBLAS_NUM_THREADS=1\n");
+			isSet_ = true;
+			std::cerr<<"Forced OPENBLAS_NUM_THREADS=1\n";
+		}
+
+		bool isSet() const { return isSet_; }
+
+	private:
+
+		bool isSet_;
+	};
+
+	static OpenBlasNumThreads dummy_;
+
 public:
 
 	GemmR(bool idebug, SizeType nb, SizeType nthreads)
 	    :  idebug_(idebug), nb_(nb), nthreads_(nthreads)
-	{}
+	{
+		if (!dummy_.isSet())
+			dummy_.set();
+
+		char* ptr = getenv("OPENBLAS_NUM_THREADS");
+		if (!ptr)
+			throw RuntimeError("Please set OPENBLAS_NUM_THREADS=1 (not set)\n");
+		if (atoi(ptr) != 1)
+			throw RuntimeError("Please set OPENBLAS_NUM_THREADS=1 (set to another value)\n");
+	}
 
 	void operator()(char const transA,
 	                char const transB,
@@ -187,6 +216,8 @@ private:
 	SizeType nthreads_;
 }; // class GemmR
 
+template<typename T>
+typename GemmR<T>::OpenBlasNumThreads GemmR<T>::dummy_;
 }
 
 #endif
