@@ -381,6 +381,7 @@ to the main dmrg driver are the following.
 	} catch (std::exception&) {}
 
 	PsimagLite::CodeSectionParams codeSection(dmrgSolverParams.nthreads,
+	                                          dmrgSolverParams.nthreads2,
 	                                          setAffinities,
 	                                          threadsStackSize);
 	ConcurrencyType::setOptions(codeSection);

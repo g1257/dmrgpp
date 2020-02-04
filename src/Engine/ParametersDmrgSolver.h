@@ -148,6 +148,7 @@ struct ParametersDmrgSolver {
 	typedef Options<InputValidatorType> OptionsType;
 
 	SizeType nthreads;
+	SizeType nthreads2;
 	SizeType sitesPerBlock;
 	SizeType maxMatrixRankStored;
 	SizeType keptStatesInfinite;
@@ -155,6 +156,7 @@ struct ParametersDmrgSolver {
 	SizeType dumperEnd;
 	SizeType precision;
 	SizeType numberOfExcited;
+	SizeType gemmRnb;
 	bool autoRestart;
 	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
@@ -179,10 +181,12 @@ struct ParametersDmrgSolver {
 		ioSerializer.createGroup(root);
 
 		ioSerializer.write(root + "/nthreads", nthreads);
+		ioSerializer.write(root + "/nthreads2", nthreads2);
 		ioSerializer.write(root + "/sitesPerBlock", sitesPerBlock);
 		ioSerializer.write(root + "/maxMatrixRankStored", maxMatrixRankStored);
 		ioSerializer.write(root + "/keptStatesInfinite", keptStatesInfinite);
 		ioSerializer.write(root + "/numberOfExcited", numberOfExcited);
+		ioSerializer.write(root + "/gemmRnb", gemmRnb);
 		ioSerializer.write(root + "/dumperBegin", dumperBegin);
 		ioSerializer.write(root + "/dumperEnd", dumperEnd);
 		ioSerializer.write(root + "/precision", precision);
@@ -215,13 +219,16 @@ struct ParametersDmrgSolver {
 	                     PsimagLite::String sOptions,
 	                     bool earlyExit = false,
 	                     bool isObserveCode = false)
-	    : sitesPerBlock(1),
+	    : nthreads(1),
+	      nthreads2(1),
+	      sitesPerBlock(1),
 	      maxMatrixRankStored(0),
 	      keptStatesInfinite(0),
 	      dumperBegin(0),
 	      dumperEnd(0),
 	      precision(6),
 	      numberOfExcited(1),
+	      gemmRnb(100),
 	      autoRestart(false),
 	      options("SolverOptions=", io),
 	      recoverySave(""),
@@ -288,16 +295,24 @@ struct ParametersDmrgSolver {
 			}
 		} catch (std::exception&) {}
 
-		nthreads=1; // provide a default value
 		try {
-			io.readline(nthreads,"Threads=");
+			io.readline(nthreads, "Threads=");
 		} catch (std::exception&) {}
 
-		if (nthreads==0) {
+
+		try {
+			io.readline(nthreads2, "ThreadsLevelTwo=");
+		} catch (std::exception&) {}
+
+		if (nthreads == 0 || nthreads2 == 0) {
 			PsimagLite::String s (__FILE__);
-			s += "\nFATAL: nthreads cannot be zero\n";
+			s += "\nFATAL: nthreads and nthreads2 cannot be zero\n";
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
+
+		try {
+			io.readline(gemmRnb, "GemmRnb=");
+		} catch (std::exception&) {}
 
 		insitu = "";
 		try {

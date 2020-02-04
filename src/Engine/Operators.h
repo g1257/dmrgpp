@@ -146,12 +146,16 @@ public:
 		       VectorOperatorType& superOps,
 		       ChangeOfBasisType& changeOfBasis,
 		       const BlockDiagonalMatrixType& ftransform1,
-		       const PairSizeSizeType& startEnd)
+		       const PairSizeSizeType& startEnd,
+		       SizeType gemmRnb,
+		       SizeType threadsForGemmR)
 		    : operators_(operators),
 		      superOps_(superOps),
 		      changeOfBasis_(changeOfBasis),
 		      ftransform(ftransform1),
-		      startEnd_(startEnd)
+		      startEnd_(startEnd),
+		      gemmRnb_(gemmRnb),
+		      threadsForGemmR_(threadsForGemmR)
 		{
 			changeOfBasis.update(ftransform);
 		}
@@ -179,7 +183,7 @@ public:
 				return;
 			}
 
-			changeOfBasis_(operators_[k].getStorageNonConst());
+			changeOfBasis_(operators_[k].getStorageNonConst(), gemmRnb_, threadsForGemmR_);
 		}
 
 		void doTaskForSuper(SizeType k)
@@ -189,7 +193,7 @@ public:
 				return;
 			}
 
-			changeOfBasis_(superOps_[k].getStorageNonConst());
+			changeOfBasis_(superOps_[k].getStorageNonConst(), gemmRnb_, threadsForGemmR_);
 		}
 
 		bool isLocalExcluded(SizeType k) const
@@ -211,6 +215,8 @@ public:
 		ChangeOfBasisType& changeOfBasis_;
 		const BlockDiagonalMatrixType& ftransform;
 		const PairSizeSizeType& startEnd_;
+		SizeType gemmRnb_;
+		SizeType threadsForGemmR_;
 	};
 
 	Operators() : progress_("Operators")
@@ -286,20 +292,24 @@ public:
 
 	void changeBasis(const BlockDiagonalMatrixType& ftransform,
 	                 const PairSizeSizeType& startEnd,
-	                 bool blasIsThreadSafe)
+	                 SizeType gemmRnb,
+	                 SizeType threadsForGemmR)
 	{
 		typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
-		SizeType threads = (blasIsThreadSafe) ? PsimagLite::Concurrency::
-		                                        codeSectionParams.npthreads : 1;
-		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		ParallelizerType threadObject(codeSectionParams);
+		ParallelizerType threadObject(PsimagLite::Concurrency::codeSectionParams);
 
-		MyLoop helper(operators_, superOps_, changeOfBasis_, ftransform, startEnd);
+		MyLoop helper(operators_,
+		              superOps_,
+		              changeOfBasis_,
+		              ftransform,
+		              startEnd,
+		              gemmRnb,
+		              threadsForGemmR);
 
 		threadObject.loopCreate(helper); // FIXME: needs weights
 
 		hamiltonian_.checkValidity();
-		ChangeOfBasisType::changeBasis(hamiltonian_, ftransform);
+		ChangeOfBasisType::changeBasis(hamiltonian_, ftransform, gemmRnb, threadsForGemmR);
 	}
 
 	template<typename SomeSuperOperatorHelperType>

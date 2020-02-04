@@ -34,11 +34,13 @@ public:
 		transposeConjugate(oldTtranspose_, oldT_);
 	}
 
-	void operator()(OperatorStorageType& v) const
+	void operator()(OperatorStorageType& v,
+	                SizeType gemmRnb,
+	                SizeType threadsForGemmR) const
 	{
 		if (!ProgramGlobals::oldChangeOfBasis) {
 			BlockOffDiagMatrixType vBlocked(v.getCRS(), transform_.offsetsRows());
-			vBlocked.transform(transform_);
+			vBlocked.transform(transform_, gemmRnb, threadsForGemmR);
 			vBlocked.toSparse(v.getCRSNonConst());
 			return;
 		}
@@ -48,14 +50,16 @@ public:
 	}
 
 	static void changeBasis(OperatorStorageType &v,
-	                        const BlockDiagonalMatrixType& ftransform1)
+	                        const BlockDiagonalMatrixType& ftransform1,
+	                        SizeType gemmRnb,
+	                        SizeType threadsForGemmR)
 	{
 		if (!v.justCRS())
 			err("changeBasis: operatorstorage not justCRS\n");
 
 		if (!ProgramGlobals::oldChangeOfBasis) {
 			BlockOffDiagMatrixType vBlocked(v.getCRS(), ftransform1.offsetsRows());
-			vBlocked.transform(ftransform1);
+			vBlocked.transform(ftransform1, gemmRnb, threadsForGemmR);
 			vBlocked.toSparse(v.getCRSNonConst());
 			return;
 		}

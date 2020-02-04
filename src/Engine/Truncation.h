@@ -302,13 +302,13 @@ private:
 
 		cache.transform.truncate(cache.removedIndices);
 
-		const bool blasIsThreadSafe = !parameters_.options.isSet("blasNotThreadSafe");
-
 		rPrime.truncateBasis(cache.transform,
 		                     cache.eigs,
 		                     cache.removedIndices,
 		                     startEnd,
-		                     blasIsThreadSafe);
+		                     parameters_.gemmRnb,
+		                     PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo);
+
 		LeftRightSuperType* lrs = 0;
 		if (expandSys)
 			lrs = new LeftRightSuperType(rPrime,

@@ -3,6 +3,7 @@
 #include "CrsMatrix.h"
 #include "BlockDiagonalMatrix.h"
 #include "LAPACK.h"
+#include "GemmR.h"
 
 namespace Dmrg {
 
@@ -295,10 +296,15 @@ public:
 		sparse.checkValidity();
 	}
 
-	void transform(const BlockDiagonalMatrixType& f)
+	void transform(const BlockDiagonalMatrixType& f,
+	               SizeType nb,
+	               SizeType nthreadsInner)
 	{
 		if (offsetCols_.size() != 0)
 			err("BlockOffDiagMatrix::transform() only for square matrix\n");
+
+		static const bool needsPrinting = false;
+		PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting, nb, nthreadsInner);
 
 		assert(offsetRows_.size() > 0);
 		SizeType n = offsetRows_.size() - 1;
@@ -320,35 +326,35 @@ public:
 
 				MatrixBlockType tmp(m.rows(), mRight.cols());
 				// tmp = data_[ii] * mRight;
-				psimag::BLAS::GEMM('N',
-				                   'N',
-				                   m.rows(),
-				                   mRight.cols(),
-				                   m.cols(),
-				                   1.0,
-				                   &(m(0,0)),
-				                   m.rows(),
-				                   &(mRight(0,0)),
-				                   mRight.rows(),
-				                   0.0,
-				                   &(tmp(0,0)),
-				                   tmp.rows());
+				gemmR('N',
+				      'N',
+				      m.rows(),
+				      mRight.cols(),
+				      m.cols(),
+				      1.0,
+				      &(m(0,0)),
+				      m.rows(),
+				      &(mRight(0,0)),
+				      mRight.rows(),
+				      0.0,
+				      &(tmp(0,0)),
+				      tmp.rows());
 				// data_[ii] = transposeConjugate(mLeft) * tmp;
 				m.clear();
 				m.resize(mLeft.cols(), mRight.cols());
-				psimag::BLAS::GEMM('C',
-				                   'N',
-				                   mLeft.cols(),
-				                   tmp.cols(),
-				                   tmp.rows(),
-				                   1.0,
-				                   &(mLeft(0,0)),
-				                   mLeft.rows(),
-				                   &(tmp(0,0)),
-				                   tmp.rows(),
-				                   0.0,
-				                   &(m(0,0)),
-				                   m.rows());
+				gemmR('C',
+				      'N',
+				      mLeft.cols(),
+				      tmp.cols(),
+				      tmp.rows(),
+				      1.0,
+				      &(mLeft(0,0)),
+				      mLeft.rows(),
+				      &(tmp(0,0)),
+				      tmp.rows(),
+				      0.0,
+				      &(m(0,0)),
+				      m.rows());
 			}
 
 			offsetRows_ = f.offsetsCols();

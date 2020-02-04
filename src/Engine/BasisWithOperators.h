@@ -189,11 +189,12 @@ public:
 	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
 	                       const VectorSizeType& removedIndices,
 	                       const PairSizeSizeType& startEnd,
-	                       bool blasIsThreadSafe)
+	                       SizeType gemmRnb,
+	                       SizeType threadsForGemmR)
 	{
 		RealType error = BasisType::truncateBasis(eigs, removedIndices);
 
-		operators_.changeBasis(ftransform, startEnd, blasIsThreadSafe);
+		operators_.changeBasis(ftransform, startEnd, gemmRnb, threadsForGemmR);
 
 		return error;
 	}
