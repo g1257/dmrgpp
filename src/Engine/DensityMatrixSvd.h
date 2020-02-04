@@ -110,7 +110,6 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
 	VectorVectorVectorWithOffsetType;
-	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 
 	class GroupsStruct {
 
@@ -363,13 +362,11 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 		ParallelSvd(BlockDiagonalMatrixType& blockDiagonalMatrix,
 		            GroupsStructType& allTargets,
 		            VectorRealType& eigs,
-		            PersistentSvdType& additionalStorage,
-		            const VectorBoolType& isPatchExcluded)
+		            PersistentSvdType& additionalStorage)
 		    : blockDiagonalMatrix_(blockDiagonalMatrix),
 		      allTargets_(allTargets),
 		      eigs_(eigs),
-		      persistentSvd_(additionalStorage),
-		      isPatchExcluded_(isPatchExcluded)
+		      persistentSvd_(additionalStorage)
 		{
 			SizeType oneSide = allTargets.basis().size();
 			eigs_.resize(oneSide);
@@ -378,8 +375,6 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
 		void doTask(SizeType ipatch, SizeType)
 		{
-			if (isPatchExcluded_[ipatch]) return;
-
 			SizeType igroup = allTargets_.groupFromIndex(ipatch);
 			MatrixType& m = allTargets_.matrix(igroup);
 
@@ -417,7 +412,6 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 		GroupsStructType& allTargets_;
 		VectorRealType& eigs_;
 		PersistentSvdType persistentSvd_;
-		const VectorBoolType& isPatchExcluded_;
 	};
 
 public:
@@ -493,24 +487,12 @@ public:
 	void diag(VectorRealType& eigs, char jobz)
 	{
 		PsimagLite::Profiling profiling("DensityMatrixSvdDiag", std::cout);
-
-		const SizeType n = allTargets_.size();
-		PsimagLite::Vector<bool>::Type seen(n, false);
-		VectorBoolType isPatchExcluded(n, false);
-		for (SizeType ipatch = 0; ipatch < n; ++ipatch) {
-			SizeType igroup = allTargets_.groupFromIndex(ipatch);
-			// have we seen this igroup?
-			if (seen[igroup]) isPatchExcluded[ipatch] = true;
-			seen[igroup] = true;
-		}
-
 		typedef PsimagLite::Parallelizer<ParallelSvd> ParallelizerType;
 		ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);
 		ParallelSvd parallelSvd(data_,
 		                        allTargets_,
 		                        eigs,
-		                        persistentSvd_,
-		                        isPatchExcluded);
+		                        persistentSvd_);
 		threaded.loopCreate(parallelSvd);
 		for (SizeType i = 0; i < data_.blocks(); ++i) {
 			SizeType n = data_(i).rows();
