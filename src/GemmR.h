@@ -39,12 +39,6 @@ public:
 	{
 		if (!dummy_.isSet())
 			dummy_.set();
-
-		char* ptr = getenv("OPENBLAS_NUM_THREADS");
-		if (!ptr)
-			throw RuntimeError("Please set OPENBLAS_NUM_THREADS=1 (not set)\n");
-		if (atoi(ptr) != 1)
-			throw RuntimeError("Please set OPENBLAS_NUM_THREADS=1 (set to another value)\n");
 	}
 
 	void operator()(char const transA,
