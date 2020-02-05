@@ -38,17 +38,16 @@ int main(int argc, char ** argv)
 {
 	if (argc < 2)
 		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0])
-	        + " total nthreadsOuter nthreadsInner\n");
+	        + " total nthreadsOuter\n");
 
 	int total = atoi(argv[1]);
 	int nthreadsOuter = atoi(argv[2]);
-	int nthreadsInner = atoi(argv[3]);
 
-	PsimagLite::Concurrency concurrency(&argc, &argv, nthreadsInner);
+	PsimagLite::Concurrency concurrency(&argc, &argv, nthreadsOuter);
 
 	PsimagLite::Random48<RealType> rng(1234);
 
-	auto lambda = [&rng, nthreadsInner](SizeType, SizeType) {
+	auto lambda = [&rng](SizeType, SizeType) {
 		SizeType lda = static_cast<SizeType>(rng()*500) + 10;
 		SizeType cda = lda;
 		PsimagLite::Matrix<RealType> A(lda, cda);
