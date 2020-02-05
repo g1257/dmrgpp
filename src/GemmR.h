@@ -123,7 +123,7 @@ private:
 		}
 
 		auto lambda = [transA, transB, m, n, k, alpha, &A, ldA, &B, ldB, beta, &C, ldC,
-		        nblocks_i, nblocks_j, nb_i, nb_j, is_notransA, is_notransB]
+		        nblocks_i, nb_i, nb_j, is_notransA, is_notransB]
 		        (SizeType ij_block, SizeType)
 		{
 			const SizeType i_block = (ij_block % nblocks_i);

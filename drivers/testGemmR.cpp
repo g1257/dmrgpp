@@ -1,5 +1,4 @@
 #include <iostream>
-#include "omp.h"
 #include "Matrix.h"
 #include "GemmR.h"
 

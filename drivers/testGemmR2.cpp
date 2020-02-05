@@ -50,7 +50,7 @@ int main(int argc, char ** argv)
 
 	PsimagLite::Random48<RealType> rng(1234);
 
-	auto lambda = [&rng, needsPrinting, nb, nthreadsInner](SizeType, SizeType) {
+	auto lambda = [&rng, nthreadsInner](SizeType, SizeType) {
 		PsimagLite::GemmR<RealType> gemmR(needsPrinting, nb, nthreadsInner);
 		SizeType lda = static_cast<SizeType>(rng()*500) + 10;
 		SizeType cda = lda;
