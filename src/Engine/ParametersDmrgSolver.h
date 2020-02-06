@@ -228,7 +228,7 @@ struct ParametersDmrgSolver {
 	      dumperEnd(0),
 	      precision(6),
 	      numberOfExcited(1),
-	      gemmRnb(100),
+	      gemmRnb(0),
 	      autoRestart(false),
 	      options("SolverOptions=", io),
 	      recoverySave(""),
