@@ -267,7 +267,11 @@ private:
 	                     typename EnableIf<Loki::TypeTraits<T>::isIntegral,
 	                     int>::Type = 0) const
 	{
-		t = atoi(label.c_str());
+		try {
+			t = PsimagLite::atoi(label.c_str());
+		} catch (...) {
+			err("FATAL: AinurState: Label " + label + " must be an integer\n");
+		}
 	}
 
 	template<typename T>
@@ -276,7 +280,11 @@ private:
 	                     typename EnableIf<Loki::TypeTraits<T>::isFloat,
 	                     int>::Type = 0) const
 	{
-		t = atof(label.c_str());
+		try {
+			t = PsimagLite::atof(label.c_str());
+		} catch (...) {
+			err("FATAL: AinurState: Label " + label + " must be a real number\n");
+		}
 	}
 
 	void convertInternal(String& t, String label) const

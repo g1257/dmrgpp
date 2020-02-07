@@ -21,6 +21,10 @@ std::istream& operator>>(std::istream&,std::pair<SizeType,SizeType>&);
 
 SizeType log2Integer(SizeType x);
 
+int atoi(String);
+
+int atof(String);
+
 void err(String);
 
 struct MatchPathSeparator {

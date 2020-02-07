@@ -57,6 +57,34 @@ String basename(const String& path)
 	              path.end());
 }
 
+int atoi(String str)
+{
+	const SizeType n = str.length();
+	for (SizeType i = 0; i < n; ++i) {
+		if (isdigit(str[i])) continue;
+		if (str[i] == '-' || str[i] == '+') continue;
+		throw RuntimeError("atoi received a non-digit\n");
+	}
+
+	return std::atoi(str.c_str());
+}
+
+int atof(String str)
+{
+	const SizeType n = str.length();
+	for (SizeType i = 0; i < n; ++i) {
+		if (isdigit(str[i])) continue;
+		if (str[i] == '-' ||
+		        str[i] == '+' ||
+		        str[i] == 'e' ||
+		        str[i] == 'E' ||
+		        str[i] == '.') continue;
+		throw RuntimeError("atof received a non-digit\n");
+	}
+
+	return std::atoi(str.c_str());
+}
+
 const int PsiApp::libSizeOfSizeType_ = sizeof(SizeType);
 
 } // namespace PsimagLite
