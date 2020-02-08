@@ -23,7 +23,7 @@ SizeType log2Integer(SizeType x);
 
 int atoi(String);
 
-int atof(String);
+double atof(String);
 
 void err(String);
 

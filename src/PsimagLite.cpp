@@ -69,7 +69,7 @@ int atoi(String str)
 	return std::atoi(str.c_str());
 }
 
-int atof(String str)
+double atof(String str)
 {
 	const SizeType n = str.length();
 	for (SizeType i = 0; i < n; ++i) {
