@@ -82,7 +82,7 @@ int atof(String str)
 		throw RuntimeError("atof received a non-digit\n");
 	}
 
-	return std::atoi(str.c_str());
+	return std::atof(str.c_str());
 }
 
 const int PsiApp::libSizeOfSizeType_ = sizeof(SizeType);
