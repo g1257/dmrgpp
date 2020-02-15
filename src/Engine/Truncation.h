@@ -244,7 +244,8 @@ private:
 		bool debug = false;
 		bool useSvd = !parameters_.options.isSet("truncationNoSvd");
 		bool enablePersistentSvd = parameters_.options.isSet("EnablePersistentSvd");
-		ParamsDensityMatrixType p(useSvd, direction, debug, enablePersistentSvd);
+		bool serialSvd = parameters_.options.isSet("SerialSvd");
+		ParamsDensityMatrixType p(useSvd, direction, debug, enablePersistentSvd, serialSvd);
 		TruncationCache& cache = (direction == expandSys) ? leftCache_ :
 		                                                    rightCache_;
 

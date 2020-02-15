@@ -487,13 +487,22 @@ public:
 	void diag(VectorRealType& eigs, char jobz)
 	{
 		PsimagLite::Profiling profiling("DensityMatrixSvdDiag", std::cout);
+
 		typedef PsimagLite::Parallelizer<ParallelSvd> ParallelizerType;
-		ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);
+
+		PsimagLite::CodeSectionParams csp = PsimagLite::Concurrency::codeSectionParams;
+
+		if (params_.serialSvd) csp.npthreads = 1;
+
+		ParallelizerType threaded(csp);
+
 		ParallelSvd parallelSvd(data_,
 		                        allTargets_,
 		                        eigs,
 		                        persistentSvd_);
+
 		threaded.loopCreate(parallelSvd);
+
 		for (SizeType i = 0; i < data_.blocks(); ++i) {
 			SizeType n = data_(i).rows();
 			if (n > 0) continue;
