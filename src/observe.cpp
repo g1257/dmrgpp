@@ -202,9 +202,9 @@ int main(int argc,char **argv)
 
 
 	PsimagLite::CodeSectionParams codeSectionParams(dmrgSolverParams.nthreads,
+	                                                dmrgSolverParams.nthreads2,
 	                                                setAffinities,
-	                                                threadsStackSize,
-	                                                dmrgSolverParams.nthreads2);
+	                                                threadsStackSize);
 	ConcurrencyType::setOptions(codeSectionParams);
 
 	bool isComplex = (dmrgSolverParams.options.isSet("useComplex") ||
