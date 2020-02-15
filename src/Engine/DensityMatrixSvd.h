@@ -492,7 +492,10 @@ public:
 
 		PsimagLite::CodeSectionParams csp = PsimagLite::Concurrency::codeSectionParams;
 
-		if (params_.serialSvd) csp.npthreads = 1;
+		if (params_.serialSvd) {
+			csp.npthreads = 1;
+			std::cout<<"DensityMatrixSvd: SerialSvd in force\n";
+		}
 
 		ParallelizerType threaded(csp);
 
