@@ -267,8 +267,8 @@ public:
 				SparseMatrixType O3gt;
 				helper.transform(O3gt, O3g, ptr);
 
-				ns = i4-2;
-				if (ns<0) ns = 0;
+				ns = i4 - 1;
+				if (ns < 0) ns = 0;
 
 				growDirectly4p(Otmp,O3gt,i3+1,braket.op(index0).fermionOrBoson(),ns);
 
@@ -394,6 +394,7 @@ private:
 		if (nt<0) nt=0;
 
 		const ObserverHelperType& helper = skeleton_.helper();
+		const SizeType totalSites = skeleton_.numberOfSites();
 
 		for (SizeType s = nt; s < ns; ++s) {
 			SparseMatrixType Onew(helper.cols(s), helper.cols(s));
@@ -401,10 +402,9 @@ private:
 			                  Odest,
 			                  fermionicSign,
 			                  CorrelationsSkeletonType::GrowDirection::RIGHT,
-			                  true,
+			                  (s < totalSites - 3),
 			                  s);
 			Odest = Onew;
-
 		}
 	}
 

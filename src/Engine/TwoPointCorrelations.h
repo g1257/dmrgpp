@@ -236,7 +236,7 @@ private:
 			}
 
 			SparseMatrixType O1g;
-			skeleton_.growDirectly(O1g,O1m,i,fermionicSign,j-2,true);
+			skeleton_.growDirectly(O1g, O1m, i, fermionicSign, j - 1, false);
 			// j - 2 below is the pointer
 			return skeleton_.bracketRightCorner(O1g, O2m, fermionicSign, j - 2, bra, ket);
 		}

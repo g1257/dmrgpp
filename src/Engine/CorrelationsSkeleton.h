@@ -610,7 +610,7 @@ private:
 	{
 		FieldType sum = 0;
 		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
-		SizeType ni = helper_.leftRightSuper(ptr).left().size()/Bcrs.rows();
+		SizeType ni = helper_.leftRightSuper(ptr).left().size();
 
 		// some sanity checks:
 		if (vec1.size() != vec2.size() ||
@@ -622,7 +622,6 @@ private:
 
 		// ok, we're ready for the main course:
 		PackIndicesType pack1(helper_.leftRightSuper(ptr).left().size());
-		PackIndicesType pack2(ni);
 		for (SizeType x=0;x<vec1.sectors();x++) {
 			SizeType sector = vec1.sector(x);
 			SizeType offset = vec1.offset(sector);
@@ -632,22 +631,19 @@ private:
 
 				pack1.unpack(r,eta,helper_.leftRightSuper(ptr).super().
 				             permutation(t));
-				SizeType r0,r1;
-				pack2.unpack(r0,r1,helper_.leftRightSuper(ptr).left().
-				             permutation(r));
+
 				bool odd = superOddElectrons(t,ptr);
 				odd ^= helper_.leftRightSuper(ptr).right().signs()[eta];
 				const RealType sign = (odd && fermionSign ==
 				                       ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1.0
 				                                                                    : 1.0;
 
-				for (int k=Acrs.getRowPtr(r0);k<Acrs.getRowPtr(r0+1);k++) {
-					SizeType r0prime = Acrs.getCol(k);
+				for (int k=Acrs.getRowPtr(r);k<Acrs.getRowPtr(r+1);k++) {
+					SizeType rprime = Acrs.getCol(k);
 					for (int k2 = Bcrs.getRowPtr(eta);
 					     k2<Bcrs.getRowPtr(eta+1);k2++) {
 						SizeType eta2 = Bcrs.getCol(k2);
-						SizeType rprime = helper_.leftRightSuper(ptr).left().
-						        permutationInverse(r0prime+r1*ni);
+
 						SizeType t2 = helper_.leftRightSuper(ptr).super().
 						        permutationInverse(rprime+eta2*leftSize);
 						if (t2<offset || t2>=total) continue;
