@@ -360,7 +360,8 @@ public:
 			SizeType site0 = braket.site(0);
 			SizeType site1 = braket.site(1);
 			typename FourPointCorrelationsType::SparseMatrixType O2gt;
-			fourpoint_.firstStage(O2gt,'N',site0,'N',site1,braket,0,1);
+			const bool finalTransform = true;
+			fourpoint_.firstStage(O2gt, 'N', site0, 'N', site1, braket, 0, 1, finalTransform);
 			typename MatrixType::value_type tmp = fourpoint_.secondStage(O2gt,
 			                                                             site1,
 			                                                             'N',braket.site(2),
@@ -379,7 +380,8 @@ public:
 			std::cout<<"Fixed site0= "<<site0<<"\n";
 			std::cout<<"Fixed site1= "<<site1<<"\n";
 			typename FourPointCorrelationsType::SparseMatrixType O2gt;
-			fourpoint_.firstStage(O2gt,'N',site0,'N',site1,braket,0,1);
+			const bool finalTransform = true;
+			fourpoint_.firstStage(O2gt, 'N', site0, 'N', site1, braket, 0, 1, finalTransform);
 
 			for (SizeType site2 = site1+1; site2 < rows; ++site2) {
 				for (SizeType site3 = site2+1; site3 < cols; ++site3) {
@@ -400,13 +402,21 @@ public:
 		}
 
 		assert(flag == 0);
+		const bool finalTransform = true;
 		for (SizeType site0 = 0; site0 < rows; ++site0) {
 			for (SizeType site1 = site0+1; site1 < cols; ++site1) {
 				for (SizeType site2 = site1+1; site2 < rows; ++site2) {
 					for (SizeType site3 = site2+1; site3 < cols; ++site3) {
 						if (!myaction(site0, site1, site2, site3)) continue;
 						typename FourPointCorrelationsType::SparseMatrixType O2gt;
-						fourpoint_.firstStage(O2gt,'N',site0,'N',site1,braket,0,1);
+						fourpoint_.firstStage(O2gt,
+						                      'N',
+						                      site0,
+						                      'N',
+						                      site1,
+						                      braket,0,
+						                      1,
+						                      finalTransform);
 						typename MatrixType::value_type tmp = fourpoint_.secondStage(O2gt,
 						                                                             site1,
 						                                                             'N',

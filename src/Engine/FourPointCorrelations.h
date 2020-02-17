@@ -128,7 +128,8 @@ public:
 
 		SparseMatrixType O2gt;
 
-		firstStage(O2gt,'N',i1,'N',i2,braket,0,1);
+		const bool finalTransform = true;
+		firstStage(O2gt, 'N', i1, 'N', i2, braket, 0, 1, finalTransform);
 
 		return secondStage(O2gt, i2, 'C', i3, 'C', i4, braket, 2, 3);
 	}
@@ -147,7 +148,9 @@ public:
 
 		SparseMatrixType O2gt;
 
-		firstStage(O2gt,'N',i1,'N',i2,braket,0,1);
+		const SizeType nsites = skeleton_.numberOfSites();
+		const bool finalTransform = (i3 + 1 != nsites || i2 + 1 != i3);
+		firstStage(O2gt, 'N', i1, 'N', i2, braket, 0, 1, finalTransform);
 
 		return secondStage(O2gt,i2,'N',i3,braket,2);
 	}
@@ -163,6 +166,7 @@ public:
 		checkIndicesForStrictOrdering(braket);
 
 		SparseMatrixType O2gt;
+		const bool finalTransform = true;
 		firstStage(O2gt,
 		           'N',
 		           braket.site(0),
@@ -170,7 +174,8 @@ public:
 		           braket.site(1),
 		           braket,
 		           0,
-		           1);
+		           1,
+		           finalTransform);
 
 		assert(n > 3);
 		SizeType end = n - 2;
@@ -212,7 +217,8 @@ public:
 	                SizeType i2,
 	                const BraketType& braket,
 	                SizeType index0,
-	                SizeType index1) const
+	                SizeType index1,
+	                bool finalTransform) const
 	{
 
 		// Take care of modifiers
@@ -228,7 +234,11 @@ public:
 		skeleton_.growDirectly(O1g,O1m,i1,braket.op(index0).fermionOrBoson(),ns,true);
 
 		SizeType ptr = skeleton_.dmrgMultiply(O2g,O1g,O2m,braket.op(index1).fermionOrBoson(),ns);
-		skeleton_.helper().transform(O2gt, O2g, ptr);
+
+		if (finalTransform)
+			skeleton_.helper().transform(O2gt, O2g, ptr);
+		else
+			O2gt = O2g;
 	}
 
 	//! requires i2<i3<i4
