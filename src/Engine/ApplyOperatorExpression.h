@@ -135,6 +135,7 @@ public:
 	    : progress_("ApplyOperatorExpression"),
 	      targetHelper_(targetHelper),
 	      E0_(0.0),
+	      time_(0.0),
 	      currentTimeStep_(0),
 	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
@@ -463,7 +464,7 @@ public:
 
 	RealType time() const
 	{
-		return (timeVectorsBase_) ? timeVectorsBase_->time() : 0;
+		return time_;
 	}
 
 	SizeType currentTimeStep() const { return currentTimeStep_; }
@@ -473,7 +474,10 @@ public:
 		currentTimeStep_ = t;
 	}
 
-	void timeHasAdvanced() { timeVectorsBase_->timeHasAdvanced(); }
+	void setCurrentTime(RealType t)
+	{
+		time_ = t;
+	}
 
 	void loadEnergy(PsimagLite::IoSelector::In& io,
 	                PsimagLite::String label)
@@ -515,7 +519,8 @@ public:
 		                                              allOperatorsApplied,
 		                                              wftAndAdvanceIfNeeded,
 		                                              block,
-		                                              isLastCall);
+		                                              isLastCall,
+		                                              time_);
 		timeVectorsBase_->calcTimeVectors(indices,
 		                                  Eg,
 		                                  phi,
@@ -590,6 +595,8 @@ public:
 
 		return *(psi_[0][0]);
 	}
+
+	void timeHasAdvanced() { timeVectorsBase_->timeHasAdvanced(time_); }
 
 private:
 
@@ -683,7 +690,7 @@ private:
 			if (i == lastI) {
 				++currentTimeStep_;
 				timesWithoutAdvancement=1;
-				timeVectorsBase_->timeHasAdvanced();
+				timeVectorsBase_->timeHasAdvanced(time_);
 			}
 		} else {
 			if (i == lastI &&
@@ -807,6 +814,7 @@ private:
 	const TargetHelperType& targetHelper_;
 	VectorStageEnumType stage_;
 	RealType E0_;
+	RealType time_;
 	SizeType currentTimeStep_;
 	SizeType indexNoAdvance_;
 	ApplyOperatorType applyOpLocal_;

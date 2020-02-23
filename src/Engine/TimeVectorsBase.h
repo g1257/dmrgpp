@@ -116,12 +116,14 @@ public:
 		          bool allOperatorsApplied_,
 		          bool wftAndAdvanceIfNeeded_,
 		          VectorSizeType block_,
-		          bool isLastCall_)
+		          bool isLastCall_,
+		          RealType time_)
 		    : dir(dir_),
 		      allOperatorsApplied(allOperatorsApplied_),
 		      wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_),
 		      block(block_),
-		      isLastCall(isLastCall_)
+		      isLastCall(isLastCall_),
+		      time(time_)
 		{}
 
 		ProgramGlobals::DirectionEnum dir;
@@ -129,6 +131,7 @@ public:
 		bool wftAndAdvanceIfNeeded;
 		PsimagLite::Vector<SizeType>::Type block;
 		bool isLastCall;
+		RealType time;
 	};
 
 	virtual void calcTimeVectors(const VectorSizeType&,
@@ -136,11 +139,9 @@ public:
 	                             const VectorWithOffsetType&,
 	                             const ExtraData&) = 0;
 
-	virtual RealType time() const = 0;
-
 	virtual ~TimeVectorsBase() {}
 
-	virtual void timeHasAdvanced() {}
+	virtual void timeHasAdvanced(RealType&) {}
 
 protected:
 

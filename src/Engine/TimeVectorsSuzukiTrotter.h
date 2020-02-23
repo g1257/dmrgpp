@@ -257,8 +257,6 @@ public:
 		}
 	}
 
-	RealType time() const { return currentTimeStep_*tstStruct_.tau(); }
-
 	virtual void timeHasAdvanced()
 	{
 		linksSeen_.clear();

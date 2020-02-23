@@ -149,7 +149,7 @@ public:
 	virtual void calcTimeVectors(const VectorSizeType& indices,
 	                             RealType Eg,
 	                             const VectorWithOffsetType& phi,
-	                             const typename BaseType::ExtraData&)
+	                             const typename BaseType::ExtraData& extra)
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -165,11 +165,9 @@ public:
 
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i = phi.sector(ii);
-			calcTimeVectors(indices, Eg, phi, i);
+			calcTimeVectors(indices, Eg, phi, i, extra.time);
 		}
 	}
-
-	RealType time() const { return currentTimeStep_*tstStruct_.tau(); }
 
 private:
 
@@ -217,12 +215,13 @@ private:
 	void calcTimeVectors(const VectorSizeType& indices,
 	                     RealType Eg,
 	                     const VectorWithOffsetType& phi,
-	                     SizeType i0)
+	                     SizeType i0,
+	                     RealType currentTime)
 	{
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi0(total);
 		phi.extract(phi0,i0);
-		FunctionForRungeKutta f(Eg,tstStruct_.timeDirection(),lrs_,time(),model_,phi,i0);
+		FunctionForRungeKutta f(Eg,tstStruct_.timeDirection(),lrs_,currentTime,model_,phi,i0);
 
 		RealType epsForRK = tstStruct_.tau()/(times_.size()-1.0);
 		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType>

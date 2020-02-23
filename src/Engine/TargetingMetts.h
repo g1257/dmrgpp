@@ -478,11 +478,14 @@ private:
 		if (this->common().aoe().allStages(StageEnumType::WFT_NOADVANCE) ||
 		        this->common().aoe().allStages(StageEnumType::WFT_ADVANCE) ||
 		        this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
+
 			SizeType advance = index;
+
 			if (this->common().aoe().allStages(StageEnumType::WFT_ADVANCE)) {
 				advance = indexAdvance;
 				this->common().aoe().timeHasAdvanced();
 			}
+
 			// don't advance the collapsed vector because we'll recompute
 			if (index==weight_.size()-1) advance=index;
 			PsimagLite::OstringStream msgg(std::cout.precision());

@@ -235,7 +235,7 @@ public:
 			targetVectors_[ii] = phi;
 			SizeType prev = indices[i - 1];
 			SizeType prevMinus2 = indices[i - 2];
-			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2, Eg);
+			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2, Eg, extra.time);
 		}
 
 		assert(extra.block.size() > 0);
@@ -245,17 +245,16 @@ public:
 		PredicateAwesomeType pred(correctVectorsAwesomePred_);
 		const bool flagcorrection = pred.isTrue("%s", site, "%c", center, "%n", nsites);
 		if (flagcorrection)
-			correctVectors(indices, Eg);
+			correctVectors(indices, Eg, extra.time);
 
 		timeHasAdvanced_ = false;
 	}
 
-	void timeHasAdvanced()
+	void timeHasAdvanced(RealType& time)
 	{
 		timeHasAdvanced_ = true;
+		time += tstStruct_.tau();
 	}
-
-	RealType time() const { return currentTimeStep_*tstStruct_.tau(); }
 
 private:
 
@@ -263,13 +262,14 @@ private:
 	                      const VectorWithOffsetType& phi,
 	                      SizeType prev,
 	                      SizeType prevMinus2,
-	                      RealType Eg)
+	                      RealType Eg,
+	                      RealType currentTime)
 
 	{
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
-			calcTargetVector(r, phi, prev, prevMinus2, i0, Eg);
+			calcTargetVector(r, phi, prev, prevMinus2, i0, Eg, currentTime);
 			v.setDataInSector(r,i0);
 		}
 	}
@@ -279,13 +279,14 @@ private:
 	                      SizeType prev,
 	                      SizeType prevMinus2,
 	                      SizeType i0,
-	                      RealType Eg)
+	                      RealType Eg,
+	                      RealType currentTime)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
 		                                                 ModelType::modelLinks(),
-		                                                 time(),
+		                                                 currentTime,
 		                                                 model_.superOpHelper());
 		MatrixLanczosType lanczosHelper(model_, hc, aux);
 
@@ -312,7 +313,7 @@ private:
 		}
 	}
 
-	void correctVectors(const VectorSizeType& indices, RealType Eg)
+	void correctVectors(const VectorSizeType& indices, RealType Eg, RealType currentTime)
 	{
 		// take the first vector and compute V and weights
 		const SizeType n = indices.size();
@@ -344,7 +345,7 @@ private:
 		VectorType weights;
 
 		VectorSizeType permutation;
-		computeAuxForCorrection(V, weights, permutation, phi, phi.sector(0), Eg);
+		computeAuxForCorrection(V, weights, permutation, phi, phi.sector(0), Eg, currentTime);
 		if (weights.size() == 0) return;
 		assert(V.size() == 1);
 
@@ -374,13 +375,14 @@ private:
 	                             VectorSizeType& permutation,
 	                             const VectorWithOffsetType& phi,
 	                             SizeType i0,
-	                             RealType Eg) const
+	                             RealType Eg,
+	                             RealType currentTime) const
 	{
 		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
 		                                                 ModelType::modelLinks(),
-		                                                 time(),
+		                                                 currentTime,
 		                                                 model_.superOpHelper());
 		MatrixLanczosType lanczosHelper(model_, hc, aux);
 		ProgramGlobals::VerboseEnum verbose = (model_.params().options.isSet("VerboseCheby"))

@@ -287,6 +287,7 @@ public:
 		}
 
 		aoe_.setCurrentTimeStep(ts->currentTimeStep());
+		aoe_.setCurrentTime(ts->time());
 
 		delete ts;
 		ts = 0;

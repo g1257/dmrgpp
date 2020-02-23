@@ -207,7 +207,7 @@ public:
 
 		typename PsimagLite::Vector<SizeType>::Type steps(phi.sectors());
 
-		triDiag(phi,T,V,steps);
+		triDiag(phi, T, V, steps, extra.time);
 
 		VectorVectorRealType eigs(phi.sectors());
 
@@ -220,14 +220,10 @@ public:
 		if (extra.isLastCall) timeHasAdvanced_ = false;
 	}
 
-	void timeHasAdvanced()
+	void timeHasAdvanced(RealType& time)
 	{
 		timeHasAdvanced_ = true;
-	}
-
-	RealType time() const
-	{
-		return currentTimeStep_*tstStruct_.tau();
+		time += tstStruct_.tau();
 	}
 
 private:
@@ -309,12 +305,13 @@ private:
 	void triDiag(const VectorWithOffsetType& phi,
 	             VectorMatrixFieldType& T,
 	             VectorMatrixFieldType& V,
-	             typename PsimagLite::Vector<SizeType>::Type& steps)
+	             typename PsimagLite::Vector<SizeType>::Type& steps,
+	             RealType currentTime)
 	{
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
-		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,time(),model_,ioIn_);
+		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime,model_,ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}
