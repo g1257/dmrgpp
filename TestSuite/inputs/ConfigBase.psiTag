@@ -31,7 +31,7 @@ CPPFLAGS += -D_GLIBCXX_DEBUG -D_GLIBCXX_PROFILE
 )
 
 # This makes the code use long instead of short integers
-.= CPPFLAGS +=-DUSE_LONG
+uselong = CPPFLAGS +=-DUSE_LONG
 
 # This makes the code use float instead of double
 .= CPPFLAGS += -DUSE_FLOAT
@@ -98,6 +98,7 @@ CPPFLAGS += -DUSE_PTHREADS
 
 default compiler = < compilerCPP GNU
 
+addto basics =
 flavor basic = (
 < default compiler 
 < compilerCPPOptions ansi
@@ -105,6 +106,7 @@ flavor basic = (
 < dependency LAPACK
 < dependency BLAS
 < dependency Boost
+< addto basics
 )
 
 flavor production = (
