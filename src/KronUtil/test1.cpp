@@ -533,15 +533,16 @@ int main()
 									den_zeros( nrow_X, ncol_X, sx3_ );
 
 									imethod =1;
+									const SizeType izero = 0;
 									csr_den_kron_mult_method(imethod,
 									                         transA,
 									                         transB,
 									                         a,
 									                         b_,
 									                         yRef.getVector(),
-									                         0,
+									                         izero,
 									                         sx1Ref.getVector(),
-									                         0,
+									                         izero,
 									                         gemmR);
 
 									imethod =2;
@@ -551,9 +552,9 @@ int main()
 									                         a,
 									                         b_,
 									                         yRef.getVector(),
-									                         0,
+									                         izero,
 									                         sx2Ref.getVector(),
-									                         0,
+									                         izero,
 									                         gemmR);
 
 
@@ -565,9 +566,9 @@ int main()
 									                         a,
 									                         b_,
 									                         yRef.getVector(),
-									                         0,
+									                         izero,
 									                         sx3Ref.getVector(),
-									                         0,
+									                         izero,
 									                         gemmR);
 
 									for(jx=0; jx < ncol_X; jx++) {
