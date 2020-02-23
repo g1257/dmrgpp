@@ -35,7 +35,7 @@ CPPFLAGS += -D_GLIBCXX_DEBUG # -D_GLIBCXX_PROFILE
 )
 
 # This makes the code use long instead of short integers
-.= CPPFLAGS +=-DUSE_LONG
+uselong = CPPFLAGS +=-DUSE_LONG
 
 # This makes the code use float instead of double
 .= CPPFLAGS += -DUSE_FLOAT
@@ -130,10 +130,13 @@ LDFLAGS += -lpthread
 CPPFLAGS += -DUSE_PTHREADS
 )
 
+addto basics = ( )
+
 default flavor = production
 
 default compiler = < compilerCPP GNU
 group basics = (
+< addto basics
 < dependency PsimagLite
 < default compiler
 < compilerCPPOptions ansi
