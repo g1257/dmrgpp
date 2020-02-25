@@ -21,6 +21,8 @@ std::istream& operator>>(std::istream&,std::pair<SizeType,SizeType>&);
 
 SizeType log2Integer(SizeType x);
 
+bool isAfloat(String str);
+
 int atoi(String);
 
 double atof(String);

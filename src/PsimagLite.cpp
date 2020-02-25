@@ -69,7 +69,7 @@ int atoi(String str)
 	return std::atoi(str.c_str());
 }
 
-double atof(String str)
+bool isAfloat(String str)
 {
 	const SizeType n = str.length();
 	for (SizeType i = 0; i < n; ++i) {
@@ -79,8 +79,17 @@ double atof(String str)
 		        str[i] == 'e' ||
 		        str[i] == 'E' ||
 		        str[i] == '.') continue;
-		throw RuntimeError("atof received a non-digit\n");
+		return false;
 	}
+
+	return true;
+}
+
+double atof(String str)
+{
+
+	if (!isAfloat(str))
+		throw RuntimeError("atof received a non-digit " + str + "\n");
 
 	return std::atof(str.c_str());
 }

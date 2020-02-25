@@ -76,7 +76,7 @@ class ExpressionCalculator {
 			for (SizeType i = 0; i < 4; ++i) op[i] = '\0';
 			SizeType l = str.size();
 			if (l == 0) return;
-			if (str[l-1] >= '0' && str[l-1]<='9') {
+			if (isAfloat(str)) {
 				type = NODE_NUMBER;
 				value = atof(str.c_str());
 			} else {
