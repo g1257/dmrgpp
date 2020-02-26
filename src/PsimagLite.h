@@ -23,6 +23,8 @@ SizeType log2Integer(SizeType x);
 
 bool isAfloat(String str);
 
+bool isAnInteger(String str);
+
 int atoi(String);
 
 double atof(String);

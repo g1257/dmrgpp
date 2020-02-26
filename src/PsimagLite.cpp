@@ -69,6 +69,17 @@ int atoi(String str)
 	return std::atoi(str.c_str());
 }
 
+bool isAnInteger(String str)
+{
+	const SizeType n = str.length();
+	for (SizeType i = 0; i < n; ++i) {
+		if (isdigit(str[i])) continue;
+		return false;
+	}
+
+	return true;
+}
+
 bool isAfloat(String str)
 {
 	const SizeType n = str.length();

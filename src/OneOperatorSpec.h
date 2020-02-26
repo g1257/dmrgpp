@@ -1,6 +1,7 @@
 #ifndef ONEOPERATORSPEC_H
 #define ONEOPERATORSPEC_H
 #include "Vector.h"
+#include "PsimagLite.h"
 #include <cstdlib>
 
 namespace PsimagLite {
@@ -29,7 +30,14 @@ struct OneOperatorSpec {
 			err("WRONG op. spec. " + label_ + ", nothing after ?\n");
 
 		label = label_.substr(0, i);
-		dof = atoi(label_.substr(i + 1, label_.length()).c_str());
+		const String numericString = label_.substr(i + 1, label_.length());
+		if (!isAnInteger(numericString)) {
+			throw RuntimeError("FATAL: Syntax Error: The label " + label +
+			                   " must be followed by an integer " +
+			                   "and not " + numericString + "\n");
+		}
+
+		dof = atoi(numericString.c_str());
 	}
 
 	struct SiteSplit {
