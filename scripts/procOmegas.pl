@@ -267,7 +267,7 @@ sub correctionVectorReadOpen
 		die "$0: Line $_\n" unless (scalar(@temp)==5);
 
 		my $site = $temp[0];
-		my $time = $temp[2];
+		my $time = ($hptr->{"isCheby"}) ? $temp[2] : 0;
 		my $c = 0;
 		foreach my $label (@$labels) {
 			++$c;
