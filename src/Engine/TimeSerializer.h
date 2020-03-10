@@ -100,12 +100,14 @@ public:
 	               RealType currentTime,
 	               SizeType site,
 	               const typename PsimagLite::Vector<VectorType>::Type& targetVectors,
-	               const VectorStageEnumType& stages)
+	               const VectorStageEnumType& stages,
+	               PsimagLite::String name)
 	    : currentTimeStep_(currentTimeStep),
 	      currentTime_(currentTime),
 	      site_(site),
 	      targetVectors_(targetVectors),
-	      stages_(stages)
+	      stages_(stages),
+	      name_(name)
 	{}
 
 	TimeSerializer(typename PsimagLite::IoSelector::In& io,
@@ -138,6 +140,13 @@ public:
 
 		s = prefix + "Stages";
 		io.read(stages_, s);
+
+		try {
+			io.read(name_, prefix + "Name");
+		} catch (...) {
+			// reading an old file, set name to LEGACY
+			name_ = "LEGACY";
+		}
 	}
 
 	void write(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
@@ -157,6 +166,7 @@ public:
 		}
 
 		io.write(stages_, prefix + "Stages");
+		io.write(name_, prefix + "Name");
 	}
 
 	SizeType numberOfVectors() const
@@ -168,10 +178,9 @@ public:
 
 	RealType time() const { return currentTime_; }
 
-	SizeType site() const
-	{
-		return  site_;
-	}
+	SizeType site() const { return  site_; }
+
+	PsimagLite::String name() const { return name_; }
 
 	const VectorType& vector(SizeType i) const
 	{
@@ -180,10 +189,7 @@ public:
 		throw PsimagLite::RuntimeError("Not so many time vectors\n");
 	}
 
-	const VectorStageEnumType& stages() const
-	{
-		return stages_;
-	}
+	const VectorStageEnumType& stages() const { return stages_; }
 
 private:
 
@@ -192,6 +198,7 @@ private:
 	SizeType site_;
 	typename PsimagLite::Vector<VectorType>::Type targetVectors_;
 	VectorStageEnumType stages_;
+	PsimagLite::String name_;
 }; // class TimeSerializer
 } // namespace Dmrg 
 

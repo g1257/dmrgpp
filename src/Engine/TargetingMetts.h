@@ -313,7 +313,7 @@ public:
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().readGSandNGSTs(io, prefix);
+		this->common().readGSandNGSTs(io, prefix, "Metts");
 	}
 
 	void write(const VectorSizeType& block,
@@ -329,7 +329,7 @@ public:
 				tv[i].clear();
 		}
 
-		this->common().writeNGSTs(io, block, prefix);
+		this->common().writeNGSTs(io, prefix, block, "Metts");
 	}
 
 	void updateOnSiteForCorners(BasisWithOperatorsType&) const

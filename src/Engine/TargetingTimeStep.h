@@ -224,7 +224,7 @@ public:
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().readGSandNGSTs(io, prefix);
+		this->common().readGSandNGSTs(io, prefix, "TimeStep");
 	}
 
 	void write(const VectorSizeType& block,
@@ -237,7 +237,7 @@ public:
 		progress_.printline(msgg, std::cout);
 
 		this->common().write(io, block, prefix);
-		this->common().writeNGSTs(io, block, prefix);
+		this->common().writeNGSTs(io, prefix, block, "TimeStep");
 	}
 
 private:

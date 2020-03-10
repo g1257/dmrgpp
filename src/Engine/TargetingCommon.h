@@ -203,24 +203,27 @@ public:
 	}
 
 	void writeNGSTs(PsimagLite::IoSelector::Out& io,
-	                const VectorSizeType& block,
 	                PsimagLite::String prefix,
+	                const VectorSizeType& block,
+	                PsimagLite::String name,
 	                const PostProcType& cf) const
 	{
 		cf.write(io, prefix);
-		writeNGSTs(io, block, prefix);
+		writeNGSTs(io, prefix, block, name);
 	}
 
 	void writeNGSTs(PsimagLite::IoSelector::Out& io,
+	                PsimagLite::String prefix,
 	                const VectorSizeType& block,
-	                PsimagLite::String prefix) const
+	                PsimagLite::String name) const
 	{
 		SizeType site = block[0];
 		TimeSerializerType ts(aoe_.currentTimeStep(),
 		                      aoe_.time(),
 		                      site,
 		                      aoe_.targetVectors(),
-		                      aoe_.stages());
+		                      aoe_.stages(),
+		                      name);
 		ts.write(io, prefix);
 	}
 
@@ -233,7 +236,9 @@ public:
 		aoe_.readPsi(io, prefix);
 	}
 
-	void readGSandNGSTs(IoInputType& io, PsimagLite::String prefix)
+	void readGSandNGSTs(IoInputType& io,
+	                    PsimagLite::String prefix,
+	                    PsimagLite::String name)
 	{
 		read(io, prefix);
 
@@ -287,7 +292,7 @@ public:
 		}
 
 		// FIXME TODO check that the NGST name changes instead
-		bool sameNgst = (rtvs == dtvs);
+		bool sameNgst = isThisNgstSameAsPrevious(name, ts->name(), dtvs, rtvs);
 		SizeType cTimeStep = (sameNgst) ? ts->currentTimeStep() : 0;
 		aoe_.setCurrentTimeStep(cTimeStep);
 
@@ -641,6 +646,17 @@ public:
 	}
 
 private:
+
+	bool isThisNgstSameAsPrevious(PsimagLite::String nameThis,
+	                              PsimagLite::String namePrev,
+	                              SizeType tvsThis,
+	                              SizeType tvsPrev) const
+	{
+		if (nameThis != "LEGACY" && namePrev != "LEGACY")
+			return (nameThis == namePrev);
+
+		return (tvsThis == tvsPrev);
+	}
 
 	void setQuantumNumbers(const VectorWithOffsetType& v)
 	{

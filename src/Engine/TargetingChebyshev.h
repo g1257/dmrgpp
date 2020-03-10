@@ -216,7 +216,7 @@ public:
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().readGSandNGSTs(io, prefix);
+		this->common().readGSandNGSTs(io, prefix, "Chebyshev");
 	}
 
 	void write(const VectorSizeType& block,
@@ -231,7 +231,7 @@ public:
 		assert(block.size() > 0);
 
 		this->common().write(io, block, prefix);
-		this->common().writeNGSTs(io, block, prefix);
+		this->common().writeNGSTs(io, prefix, block, "Chebyshev");
 	}
 
 private:

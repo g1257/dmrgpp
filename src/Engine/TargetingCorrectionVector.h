@@ -220,12 +220,12 @@ public:
 	           PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
-		this->common().writeNGSTs(io, block, prefix);
+		this->common().writeNGSTs(io, prefix, block, "CorrectionVector");
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().readGSandNGSTs(io, prefix);
+		this->common().readGSandNGSTs(io, prefix, "CorrectionVector");
 		setWeights();
 	}
 

@@ -219,12 +219,12 @@ public:
 			s2 *= s;
 
 		PostProcType cf(ab_,params);
-		this->common().writeNGSTs(io, block, prefix, cf);
+		this->common().writeNGSTs(io, prefix, block, "Dynamic", cf);
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().readGSandNGSTs(io, prefix);
+		this->common().readGSandNGSTs(io, prefix, "Dynamic");
 	}
 
 private:
