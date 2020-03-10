@@ -286,8 +286,13 @@ public:
 			aoe_.targetVectors(i) = ts->vector(j);
 		}
 
-		aoe_.setCurrentTimeStep(ts->currentTimeStep());
-		aoe_.setCurrentTime(ts->time());
+		// FIXME TODO check that the NGST name changes instead
+		bool sameNgst = (rtvs == dtvs);
+		SizeType cTimeStep = (sameNgst) ? ts->currentTimeStep() : 0;
+		aoe_.setCurrentTimeStep(cTimeStep);
+
+		RealType timeReal = (sameNgst) ? ts->time() : 0;
+		aoe_.setCurrentTime(timeReal);
 
 		delete ts;
 		ts = 0;

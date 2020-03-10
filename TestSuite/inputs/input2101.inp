@@ -35,7 +35,7 @@ FiniteLoops 2
 10 400 2  -10 400 2 
 
 RepeatFiniteLoopsTimes=10
-RecoverySave=l%2,keep,M=100
+RecoverySave=%l%%1,@keep,@M=100
 PrintHamiltonianAverage=s==c
 
 TruncationTolerance=1e-7
