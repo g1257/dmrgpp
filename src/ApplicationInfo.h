@@ -185,6 +185,7 @@ private:
 		os<<"Hostname: "<<ai.hostname()<<"\n";
 		os<<"RunID="<<ai.runId_<<"\n";
 		os<<"UnixTimeStart="<<ai.unixTime(false)<<"\n";
+		os<<"SizeType="<<sizeof(SizeType)<<"\n";
 	}
 
 	static void printFinalLegacy(std::ostream& os, const ApplicationInfo& ai)
