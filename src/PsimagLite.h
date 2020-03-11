@@ -113,7 +113,7 @@ private:
 	void chekSizeType()
 	{
 		if (sizeof(SizeType) == libSizeOfSizeType_) return;
-		std::string msg("PsimagLite compiled with -DUSE_LONG but");
+		std::string msg("PsimagLite compiled with -DUSE_SHORT but");
 		msg += "application without. Or viceversa.\n";
 		throw std::runtime_error(msg);
 	}

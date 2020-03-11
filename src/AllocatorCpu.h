@@ -33,14 +33,15 @@ Please see full open source license included in file LICENSE.
 #include <sstream>
 #include <type_traits>
 #include <cctype>
+#include <cstdint>
 #ifdef USE_CUSTOM_ALLOCATOR
 #include "MemoryCpu.h"
 #endif
 
-#ifdef USE_LONG
-typedef size_t SizeType;
+#ifndef USE_SHORT
+typedef uint64_t SizeType;
 #else
-typedef unsigned int SizeType;
+typedef uint32_t SizeType;
 #endif
 
 namespace PsimagLite {
