@@ -29,8 +29,8 @@ public:
 		msg<<appName<<"\x1b[38;5;124m";
 		msg<<" [features "<<DMRGPP_VERSION<<"] "<<PsimagLite::AnsiColor::reset;
 		PsimagLite::String ctOpts("");
-#ifdef USE_LONG
-		ctOpts += "LONG ";
+#ifdef USE_SHORT
+		ctOpts += "SHORT ";
 #endif
 #ifdef USE_FLOAT
 		ctOpts += "FLOAT ";

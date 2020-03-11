@@ -266,7 +266,9 @@ public:
 			assert(counter == 64);
 		}
 
-		SizeType sum = std::accumulate(basis_.begin(), basis_.end(), 0);
+		SizeType sum = std::accumulate(basis_.begin(),
+		                               basis_.end(),
+		                               static_cast<SizeType>(0));
 		SizeType n = basis_.size();
 		if (sum != n*(n-1)/2)
 			err("ModelFeBasedSc: basis set up wrong\n");

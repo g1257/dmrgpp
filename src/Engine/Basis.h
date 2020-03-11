@@ -185,8 +185,8 @@ public:
 		max <<= shift;
 		if (check >= max) {
 			PsimagLite::String msg("Basis::setToProduct: Basis too large. ");
-			msg += "Current= "+ ttos(check) + " max " + ttos(max) + " ";
-			msg += "Please recompile with -DUSE_LONG\n";
+			msg += "Current= "+ ttos(check) + " max " + ttos(max) + "\n";
+			msg += "Please recompile without -DUSE_SHORT\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 
@@ -793,7 +793,7 @@ private:
 
 		const SizeType n = v.size();
 		const SizeType expected = n*(n - 1);
-		SizeType value = std::accumulate(v.begin(), v.end(), 0);
+		SizeType value = std::accumulate(v.begin(), v.end(), static_cast<SizeType>(0));
 		if (value*2 == expected) return;
 		err("Permutation failed\n");
 	}

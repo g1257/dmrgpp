@@ -341,7 +341,9 @@ private:
 
 		assert(counter == total);
 
-		SizeType sum = std::accumulate(basis.begin(), basis.end(), 0);
+		SizeType sum = std::accumulate(basis.begin(),
+		                               basis.end(),
+		                               static_cast<SizeType>(0));
 		if (sum != total*(total-1)/2)
 			err("Could not set up basis\n");
 	}

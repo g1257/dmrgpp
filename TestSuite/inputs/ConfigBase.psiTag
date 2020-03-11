@@ -35,7 +35,7 @@ CPPFLAGS += -D_GLIBCXX_DEBUG # -D_GLIBCXX_PROFILE
 )
 
 # This makes the code use long instead of short integers
-uselong = CPPFLAGS +=-DUSE_LONG
+useshort = CPPFLAGS +=-DUSE_SHORT
 
 # This makes the code use float instead of double
 .= CPPFLAGS += -DUSE_FLOAT
