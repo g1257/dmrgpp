@@ -524,21 +524,21 @@ private:
 		SparseMatrixType nmatrixAB = nmatrixA*nmatrixB;
 		hmatrix += static_cast<ComplexOrRealType>(0.25)*modelParameters_.pairHopping*nmatrixAB;
 
-		const SparseMatrixType& splusA =
+		const SparseMatrixType splusA =
 		        ModelBaseType::naturalOperator("splus", 0, 0).getCRS(); // splus_a
-		const SparseMatrixType& splusB =
+		const SparseMatrixType splusB =
 		        ModelBaseType::naturalOperator("splus", 0, 1).getCRS(); // splus_b
-		const SparseMatrixType& sminusA =
+		const SparseMatrixType sminusA =
 		        ModelBaseType::naturalOperator("sminus", 0, 0).getCRS(); // sminus_a
-		const SparseMatrixType& sminusB =
+		const SparseMatrixType sminusB =
 		        ModelBaseType::naturalOperator("sminus", 0, 1).getCRS(); // sminus_b
 		SparseMatrixType tmp = splusA*sminusB;
 		tmp += splusB*sminusA;
 		hmatrix += static_cast<ComplexOrRealType>(0.5)*modelParameters_.pairHopping*tmp;
 
-		const SparseMatrixType& szA =
+		const SparseMatrixType szA =
 		        ModelBaseType::naturalOperator("sz", 0, 0).getCRS(); // sz_a
-		const SparseMatrixType& szB =
+		const SparseMatrixType szB =
 		        ModelBaseType::naturalOperator("sz", 0, 1).getCRS(); // sz_b
 		tmp = szA*szB;
 		hmatrix += modelParameters_.pairHopping*tmp;
