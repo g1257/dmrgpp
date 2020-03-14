@@ -1,3 +1,47 @@
+2020-03-13 Version 5.70
+
+Bug fixes:
+
+* BatchedGemm: compilation update
+
+* CorrectionVectorAction with complex correction vector
+
+* TST: Extreme operator application
+
+* observe: Undef variable and tiny memory leak fixed
+
+* observe: fixed rightmost site (Thanks to Max)
+
+* observe 3-point bug fix (Thanks to Max)
+
+* procOmegas.pl: read time only if Cheby (Thanks to Pontus)
+
+Refactoring:
+
+* gemmR replaces GEMM everywhere (Thanks to Ed)
+GemmRnb= is available but disabled 
+
+New features:
+
+* Compilation: addto basics available in psiTags now
+
+* Support changing TSPTau from one run to next
+(Thanks to Pontus)
+
+* observe: special operators use ! (Thanks to Jacek)
+
+* RecoverySave= awesome predicate now (Thanks to Pontus)
+
+* toolboxdmrg can take cout file as input
+
+* SolverOptions= addPidToOutputName is now available (Thanks to Joel)
+
+* ThreadsLevelTwo= now available for nested parallelism
+
+* outSpaceToDos.pl added (Thanks to Bradraj and Rahul)
+
+
+
 2020-01-14 Version 5.68
 
 Bug fixes: 
