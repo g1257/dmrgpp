@@ -1,3 +1,20 @@
+2020-03-13 version 2.70
+
+* Matrix expIpi function (Thanks to Jacek)
+
+* Awesome Predicate: settings start with @
+
+* GEMMR (Thanks to Ed)
+
+* Parallelization at nested level
+
+* Ainur: atoi and atof check their arguments now (Thanks to Pontus)
+
+* OneOperatorSpec: better error reporting (Thanks to Bradraj)
+
+* SizeType is uint64_t by default now
+
+
 2020-01-14 version 2.68
 
 * OstringStream changes done for precision
