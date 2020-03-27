@@ -296,7 +296,7 @@ public:
 		}
 	}
 
-	/* PSIDOC FeAs::fillModelLinks
+	/* PSIDOC Graphene::fillModelLinks
 	  Write DOC here TBW FIXME TODO
 	 */
 	void fillModelLinks()
