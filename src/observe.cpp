@@ -2,6 +2,15 @@
 
 using namespace Dmrg;
 
+bool atLeastOneLoopWithBit0Set(const PsimagLite::Vector<FiniteLoop>::Type& fl)
+{
+	const SizeType n = fl.size();
+	for (SizeType i = 0; i < n; ++i)
+		if (fl[i].saveOption & 1) return true;
+
+	return false;
+
+}
 template<typename GeometryType,
          typename ModelHelperType,
          typename VectorWithOffsetType>
@@ -206,6 +215,9 @@ int main(int argc,char **argv)
 	                                                setAffinities,
 	                                                threadsStackSize);
 	ConcurrencyType::setOptions(codeSectionParams);
+
+	if (!atLeastOneLoopWithBit0Set(dmrgSolverParams.finiteLoop))
+		err("FATAL: At least one loop must have bit 0 set for observe to work\n");
 
 	bool isComplex = (dmrgSolverParams.options.isSet("useComplex") ||
 	                  dmrgSolverParams.options.isSet("TimeStepTargeting"));

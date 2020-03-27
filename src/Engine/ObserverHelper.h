@@ -335,7 +335,7 @@ private:
 	void checkIndex(SizeType ind) const
 	{
 		if (ind >= dSerializerV_.size())
-			err("Index " + ttos(ind) + " bigger than " + ttos(dSerializerV_.size()));
+			err("Index " + ttos(ind) + " greater or equal to " + ttos(dSerializerV_.size()));
 
 		if (dSerializerV_[ind]) return;
 
