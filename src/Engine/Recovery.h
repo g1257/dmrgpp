@@ -225,7 +225,8 @@ public:
 	           SizeType loopIndex,
 	           SizeType stepCurrent,
 	           int lastSign,
-	           typename IoType::Out& ioOutCurrent) const
+	           typename IoType::Out& ioOutCurrent,
+	           PsimagLite::String inputBlob) const
 	{
 		PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());
 		prefix += ttos(counter_++);
@@ -235,6 +236,9 @@ public:
 		//copyFile(savedName.c_str(), ioOutCurrent.filename());
 
 		typename IoType::Out ioOut(savedName, IoType::ACC_TRUNC);
+
+		PsimagLite::PsiBase64::Encode base64encode(inputBlob);
+		ioOut.write(base64encode, "InputBase64Encoded");
 
 		writeEnergies(ioOut, ioOutCurrent.filename());
 
