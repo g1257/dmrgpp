@@ -177,6 +177,7 @@ protected:
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		OpsLabelType& c = this->createOpsLabel("c");
 		OpsLabelType& ll = this->createOpsLabel("l");
+		OpsLabelType& na = this->createOpsLabel("na");
 
 		this->makeTrackable("c");
 		this->makeTrackable("l");
@@ -187,6 +188,7 @@ protected:
 		for (SizeType i=0;i<block.size();i++) {
 			VectorSparseMatrixType vm;
 			HelperHubbardAncillaType::findAllMatrices(vm,i,natBasis);
+			SparseMatrixType naMatrix;
 			for (SizeType sigma = 0; sigma < dofs; ++sigma) {
 				if (!hot && (sigma & 1)) continue;
 				MatrixType tmp;
@@ -210,15 +212,31 @@ protected:
 
 				SparseMatrixType tmpMatrix2;
 				transposeConjugate(tmpMatrix2, tmpMatrix);
+				if (sigma == 0) 
+					naMatrix = tmpMatrix*tmpMatrix2;
+				else if (sigma == 2)
+					naMatrix += tmpMatrix*tmpMatrix2;
+
 				OperatorType myOp(tmpMatrix2,
 				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
 				                  typename OperatorType::PairType(1, m),
 				                  asign,
 				                  su2related);
+
+
 				c.push(myOp);
 			}
 
 			HelperHubbardAncillaType::setLambdaMatrices(ll, vm);
+
+			typename OperatorType::Su2RelatedType su2related2;
+			OperatorType naOp(naMatrix,
+							  ProgramGlobals::FermionOrBosonEnum::BOSON,
+							  typename OperatorType::PairType(0, 0),
+							  1,
+							  su2related2);
+
+			na.push(naOp);
 		}
 	}
 
