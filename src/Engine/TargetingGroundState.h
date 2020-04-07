@@ -168,7 +168,7 @@ public:
 	void read(typename TargetingCommonType::IoInputType& io,
 	          PsimagLite::String prefix)
 	{
-		this->common().read(io, prefix);
+		this->common().readGSandNGSTs(io, prefix, "GroundState");
 	}
 
 private:
