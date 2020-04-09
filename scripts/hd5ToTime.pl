@@ -16,8 +16,21 @@ foreach my $file (@files) {
 		next;
 	}
 
-	$_ = <PIPE>;
-	print "$file $_";
+	my $time;
+	while (<PIPE>) {
+		chomp;
+		if (/\(0\)\: (.*$)/) {
+			$time = $1;
+			last;
+		}
+	}
+
+	if (!$time) {
+		print STDERR "$0: Could not find Time in $file\n";
+		next;
+	}
+
+	print "$file $time\n";
 	close(PIPE);
 }
 
