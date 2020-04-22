@@ -231,6 +231,7 @@ private:
 			canonicalExpression(tmp, pVectors_[i]->toString(), opEmpty, aux);
 			VectorWithOffsetType_& dst = this->common().aoe().targetVectors(i);
 			tmp.finalize(&dst);
+			pVectors_[i]->setString(tmp.string());
 		}
 	}
 
