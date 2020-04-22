@@ -36,7 +36,13 @@ public:
 	    : finalized_(false), aux_(aux), factor_(1.0), vStr_(1, str)
 	{}
 
-	TermForTargetingExpression& operator=(const TermForTargetingExpression&) = delete;
+	TermForTargetingExpression& operator=(const TermForTargetingExpression& other)
+	{
+		finalized_ = other.finalized_;
+		factor_ = other.factor_;
+		vStr_ = other.vStr_;
+		return *this;
+	}
 
 	void finalize()
 	{
@@ -191,6 +197,7 @@ private:
 
 	}
 
+	 // ATTENTION: has assignment operator
 	bool finalized_;
 	const AuxiliaryType& aux_;
 	ComplexOrRealType factor_;
