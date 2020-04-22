@@ -3,7 +3,6 @@
 #include "Vector.h"
 #include "AuxForTargetingExpression.h"
 #include "OneOperatorSpec.h"
-#include "TemporariesForTargetingExpression.h"
 
 namespace Dmrg {
 
@@ -30,20 +29,16 @@ public:
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::BorderEnumType BorderEnumType;
 
-	// in TemporariesForTargetingExpression.h:
-	typedef TemporariesForTargetingExpression<AuxiliaryType> TempsType;
-
 	TermForTargetingExpression(const AuxiliaryType& aux)
-	    : finalized_(false), factor_(1.0), aux_(aux) {}
+	    : finalized_(false), aux_(aux), factor_(1.0) {}
 
 	TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
-	    : finalized_(false),
-	      vStr_(1, str),
-	      factor_(1.0),
-	      aux_(aux)
+	    : finalized_(false), aux_(aux), factor_(1.0), vStr_(1, str)
 	{}
 
-	void finalize(TempsType& temps)
+	TermForTargetingExpression& operator=(const TermForTargetingExpression&) = delete;
+
+	void finalize()
 	{
 		if (finalized_) return;
 
@@ -99,9 +94,12 @@ public:
 			discardedTerms.push_back(i);
 
 			tmp = siteSplit.root;
-			OneOperatorSpecType op = new OneOperatorSpecType(tmp);
+			OneOperatorSpecType opspec(tmp);
 			const PsimagLite::String destKet = tmp + "*" + ket;
-			oneOperator(destKet, ket, op, site, temps);
+			OperatorType* op = new OperatorType(aux_.model().naturalOperator(opspec.label,
+			                                    0, // FIXME TODO SDHS Immm
+			                                    opspec.dof));
+			oneOperator(destKet, ket, *op, site);
 			delete op;
 			op = 0;
 		}
@@ -144,15 +142,14 @@ private:
 	void oneOperator(PsimagLite::String destKet,
 	                 PsimagLite::String srcKet,
 	                 const OperatorType& op,
-	                 SizeType site,
-	                 const TempsType& temps)
+	                 SizeType site)
 	{
 		SizeType currentCoO = getCurrentCoO();
 
 		if (site == currentCoO) {
-			const VectorWithOffsetType& srcVwo = temps.getCurrentVector(srcKet);
-			temps.createTemporaryVector(destKet);
-			VectorWithOffsetType& destVwo = temps.getCurrentVector(destKet);
+			const VectorWithOffsetType& srcVwo = aux_.getCurrentVector(srcKet);
+			aux_.createTemporaryVector(destKet);
+			VectorWithOffsetType& destVwo = aux_.getCurrentVector(destKet);
 			applyInSitu(destVwo, srcVwo, site, op);
 			return;
 		}
@@ -170,31 +167,33 @@ private:
 	                 const OperatorType& A)
 	{
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
-		aux_.model.findOddElectronsOfOneSite(oddElectrons,site);
-		FermionSign fs(aux_.lrs.left(), oddElectrons);
-		bool b1 = (site == 1 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
-		SizeType n = aux_.model.superGeometry().numberOfSites();
+		aux_.model().findOddElectronsOfOneSite(oddElectrons,site);
+		FermionSign fs(aux_.lrs().left(), oddElectrons);
+		bool b1 = (site == 1 &&
+		           aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		SizeType n = aux_.model().superGeometry().numberOfSites();
 		assert(n > 2);
-		bool b2 = (site == n - 2 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		bool b2 = (site == n - 2 &&
+		           aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
 		                                   : BorderEnumType::BORDER_NO;
-		aux_.aoe.applyOpLocal()(dest, src1, A, fs, aux_.direction, border);
+		aux_.aoe().applyOpLocal()(dest, src1, A, fs, aux_.direction(), border);
 	}
 
 	SizeType getCurrentCoO() const
 	{
-		const LeftRightSuperType& lrs = aux_.lrs;
+		const LeftRightSuperType& lrs = aux_.lrs();
 		const SizeType systemBlockSize = lrs.left().block().size();
 		assert(systemBlockSize > 0);
 		const int maxSystemSite = lrs.left().block()[systemBlockSize - 1];
-		return (aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? maxSystemSite
+		return (aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? maxSystemSite
 		                                                                        : maxSystemSite + 1;
 
 	}
 
 	bool finalized_;
-	ComplexOrRealType factor_;
 	const AuxiliaryType& aux_;
+	ComplexOrRealType factor_;
 	VectorStringType vStr_;
 };
 }

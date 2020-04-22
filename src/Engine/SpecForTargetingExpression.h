@@ -31,8 +31,7 @@ public:
 
 	static bool isEmpty(const ResultType& term)
 	{
-		if (term.finalized()) return false;
-		return (term.vStr().size() == 0);
+		return term.isEmpty();
 	}
 };
 }
