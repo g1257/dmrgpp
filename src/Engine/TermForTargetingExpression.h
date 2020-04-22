@@ -1,19 +1,53 @@
 #ifndef TERMFORTARGETINGEXPRESSION_H
 #define TERMFORTARGETINGEXPRESSION_H
+#include "Vector.h"
+#include "AuxForTargetingExpression.h"
+#include "OneOperatorSpec.h"
 
 namespace Dmrg {
 
+template<typename TargetingBaseType>
 class TermForTargetingExpression {
 
-	void finalize(SizeType termIndex)
+public:
+
+	typedef typename TargetingBaseType::ModelType ModelType;
+	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
+	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef AuxForTargetingExpression<TargetingBaseType> AuxiliaryType;
+	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
+	typedef typename PsimagLite::Vector<OneOperatorSpecType*>::Type VectorOneOperatorSpecType;
+	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
+	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef typename ApplyOperatorExpressionType::BorderEnumType BorderEnumType;
+
+	TermForTargetingExpression(const AuxiliaryType& aux)
+	    : finalized_(false), factor_(1.0), aux_(aux) {}
+
+	TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
+	    : finalized_(false),
+	      vStr_(1, str),
+	      factor_(1.0),
+	      aux_(aux)
+	{}
+
+	void finalize()
 	{
-		TermType& term = terms_[termIndex];
-		if (term.isFinalized()) return;
+		if (finalized_) return;
 
 		SizeType n = vStr_.size();
 		if (n == 0)
 			err("AlgebraForTargetingExpression: Cannot finalize an empty object\n");
 
+		const SizeType coo = getCurrentCoO();
 		PsimagLite::String ket;
 		SizeType sitesEqualToCoo = 0;
 		VectorSizeType discardedTerms;
@@ -61,14 +95,14 @@ class TermForTargetingExpression {
 
 			tmp = siteSplit.root;
 			OneOperatorSpecType op = new OneOperatorSpecType(tmp);
-			finalizeInternal(ket, op, site);
+			oneOperator(ket, op, site);
 			delete op;
 			op = 0;
 		}
 
 		// discard discared terms
 		vStr_ = newVstr;
-		finalizedInMult_ = true;
+		finalized_ = true;
 
 		//		const RealType oneReal = 1.0;
 		//		if (factor_ != oneReal)
@@ -85,6 +119,12 @@ class TermForTargetingExpression {
 
 private:
 
+	PsimagLite::String toString() const
+	{
+		PsimagLite::String s;
+		std::accumulate(vStr_.begin(), vStr_.end(), s);
+		return s;
+	}
 
 	void oneOperator(PsimagLite::String ket, const OperatorType& op, SizeType site)
 	{
@@ -109,16 +149,16 @@ private:
 	{
 		err("applyInSitu unimplemented\n");
 
-		typename PsimagLite::Vector<bool>::Type oddElectrons;
-		aux_.model.findOddElectronsOfOneSite(oddElectrons,site);
-		FermionSign fs(aux_.lrs.left(), oddElectrons);
-		bool b1 = (site == 1 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
-		SizeType n = aux_.model.superGeometry().numberOfSites();
-		assert(n > 2);
-		bool b2 = (site == n - 2 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
-		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
-		                                   : BorderEnumType::BORDER_NO;
-		aux_.aoe.applyOpLocal()(fullVector_, src1, A, fs, aux_.direction, border);
+//		typename PsimagLite::Vector<bool>::Type oddElectrons;
+//		aux_.model.findOddElectronsOfOneSite(oddElectrons,site);
+//		FermionSign fs(aux_.lrs.left(), oddElectrons);
+//		bool b1 = (site == 1 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+//		SizeType n = aux_.model.superGeometry().numberOfSites();
+//		assert(n > 2);
+//		bool b2 = (site == n - 2 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+//		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
+//		                                   : BorderEnumType::BORDER_NO;
+//		aux_.aoe.applyOpLocal()(fullVector_, src1, A, fs, aux_.direction, border);
 	}
 
 	const VectorWithOffsetType& getCurrentVector(PsimagLite::String braOrKet) const
@@ -147,6 +187,9 @@ private:
 
 	}
 
+	bool finalized_;
+	ComplexOrRealType factor_;
+	const AuxiliaryType& aux_;
 	VectorStringType vStr_;
 };
 }

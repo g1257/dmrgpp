@@ -216,23 +216,23 @@ private:
 
 	void computePvectors(ProgramGlobals::DirectionEnum dir)
 	{
-		CanonicalExpressionType canonicalExpression(opSpec_);
-		SizeType total = pVectors_.size();
+//		CanonicalExpressionType canonicalExpression(opSpec_);
+//		SizeType total = pVectors_.size();
 
-		AuxForTargetingExpressionType aux(this->common().aoe(),
-		                                  this->model(),
-		                                  this->lrs(),
-		                                  this->common().aoe().psiConst(),
-		                                  this->common().aoe().targetVectors(),
-		                                  dir);
-		const AlgebraType opEmpty(aux);
-		for (SizeType i = 0; i < total; ++i) {
-			AlgebraType tmp(aux);
-			canonicalExpression(tmp, pVectors_[i]->toString(), opEmpty, aux);
-			VectorWithOffsetType_& dst = this->common().aoe().targetVectors(i);
-			tmp.finalize(&dst);
-			pVectors_[i]->setString(tmp.string());
-		}
+//		AuxForTargetingExpressionType aux(this->common().aoe(),
+//		                                  this->model(),
+//		                                  this->lrs(),
+//		                                  this->common().aoe().psiConst(),
+//		                                  this->common().aoe().targetVectors(),
+//		                                  dir);
+//		const AlgebraType opEmpty(aux);
+//		for (SizeType i = 0; i < total; ++i) {
+//			AlgebraType tmp(aux);
+//			canonicalExpression(tmp, pVectors_[i]->toString(), opEmpty, aux);
+//			VectorWithOffsetType_& dst = this->common().aoe().targetVectors(i);
+//			tmp.finalize(&dst);
+//			pVectors_[i]->setString(tmp.string());
+//		}
 	}
 
 	PsimagLite::ProgressIndicator progress_;
