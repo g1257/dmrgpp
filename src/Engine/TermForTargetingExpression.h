@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "AuxForTargetingExpression.h"
 #include "OneOperatorSpec.h"
+#include "TemporariesForTargetingExpression.h"
 
 namespace Dmrg {
 
@@ -29,6 +30,9 @@ public:
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::BorderEnumType BorderEnumType;
 
+	// in TemporariesForTargetingExpression.h:
+	typedef TemporariesForTargetingExpression<AuxiliaryType> TempsType;
+
 	TermForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false), factor_(1.0), aux_(aux) {}
 
@@ -39,7 +43,7 @@ public:
 	      aux_(aux)
 	{}
 
-	void finalize()
+	void finalize(TempsType& temps)
 	{
 		if (finalized_) return;
 
@@ -53,7 +57,8 @@ public:
 		VectorSizeType discardedTerms;
 
 		VectorStringType newVstr;
-		for (SizeType i = 0; i < n; ++i) {
+		for (SizeType ii = 0; ii < n; ++ii) {
+			const SizeType i = n -ii - 1; // read vector backwards
 			PsimagLite::String tmp = vStr_[i];
 			if (tmp[0] == '|') { // it's a vector
 				if (ket != "")
@@ -63,7 +68,7 @@ public:
 					err("Vector is not at the end in " + toString() + "\n");
 
 				newVstr.push_back(tmp);
-				continue; // == break;
+				continue; // == first read
 			}
 
 			// it's a matrix or a scalar
@@ -72,10 +77,10 @@ public:
 			}
 
 			// it's a matrix
-			if (i != n - 2) {
+			if (i != 1) {
 				newVstr.push_back(tmp);
 				continue; // apply in order only IMPORTANT
-			              // the n - 1 is the ket
+				// the 0 is the ket
 			}
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
@@ -95,13 +100,18 @@ public:
 
 			tmp = siteSplit.root;
 			OneOperatorSpecType op = new OneOperatorSpecType(tmp);
-			oneOperator(ket, op, site);
+			const PsimagLite::String destKet = tmp + "*" + ket;
+			oneOperator(destKet, ket, op, site, temps);
 			delete op;
 			op = 0;
 		}
 
-		// discard discared terms
-		vStr_ = newVstr;
+		// discarded terms and inversion
+		const SizeType nnew = newVstr.size();
+		vStr_.clear();
+		for (SizeType i = 0; i < nnew; ++i)
+			vStr_.push_back(newVstr[nnew - i - 1]);
+
 		finalized_ = true;
 
 		//		const RealType oneReal = 1.0;
@@ -117,22 +127,33 @@ public:
 		//		finalized_ = true;
 	}
 
-private:
-
 	PsimagLite::String toString() const
 	{
 		PsimagLite::String s;
-		std::accumulate(vStr_.begin(), vStr_.end(), s);
-		return s;
+		const SizeType n = vStr_.size();
+		if (n == 0)
+			err("toString returns empty\n");
+
+		for (SizeType i = 0; i < n - 1; ++i)
+			s += vStr_[i] + "*";
+		return s + vStr_[n - 1];
 	}
 
-	void oneOperator(PsimagLite::String ket, const OperatorType& op, SizeType site)
+private:
+
+	void oneOperator(PsimagLite::String destKet,
+	                 PsimagLite::String srcKet,
+	                 const OperatorType& op,
+	                 SizeType site,
+	                 const TempsType& temps)
 	{
 		SizeType currentCoO = getCurrentCoO();
 
 		if (site == currentCoO) {
-			const VectorWithOffsetType& srcVwo = getCurrentVector(ket);
-			applyInSitu(srcVwo, site, op);
+			const VectorWithOffsetType& srcVwo = temps.getCurrentVector(srcKet);
+			temps.createTemporaryVector(destKet);
+			VectorWithOffsetType& destVwo = temps.getCurrentVector(destKet);
+			applyInSitu(destVwo, srcVwo, site, op);
 			return;
 		}
 
@@ -143,37 +164,21 @@ private:
 	}
 
 	// returns A|src1>
-	void applyInSitu(const VectorWithOffsetType& src1,
+	void applyInSitu(VectorWithOffsetType& dest,
+	                 const VectorWithOffsetType& src1,
 	                 SizeType site,
 	                 const OperatorType& A)
 	{
-		err("applyInSitu unimplemented\n");
-
-//		typename PsimagLite::Vector<bool>::Type oddElectrons;
-//		aux_.model.findOddElectronsOfOneSite(oddElectrons,site);
-//		FermionSign fs(aux_.lrs.left(), oddElectrons);
-//		bool b1 = (site == 1 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
-//		SizeType n = aux_.model.superGeometry().numberOfSites();
-//		assert(n > 2);
-//		bool b2 = (site == n - 2 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
-//		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
-//		                                   : BorderEnumType::BORDER_NO;
-//		aux_.aoe.applyOpLocal()(fullVector_, src1, A, fs, aux_.direction, border);
-	}
-
-	const VectorWithOffsetType& getCurrentVector(PsimagLite::String braOrKet) const
-	{
-		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
-
-		if (getBraOrKet.isPvector()) {
-			const SizeType pIndex = getBraOrKet.pIndex();
-			if (pIndex >= aux_.pvectors.size())
-				err("getVector: out of range for " + braOrKet + "\n");
-			return aux_.pvectors[pIndex];
-		}
-
-		const SizeType sectorIndex = getBraOrKet.sectorIndex();
-		return *(aux_.psi[sectorIndex][getBraOrKet.levelIndex()]);
+		typename PsimagLite::Vector<bool>::Type oddElectrons;
+		aux_.model.findOddElectronsOfOneSite(oddElectrons,site);
+		FermionSign fs(aux_.lrs.left(), oddElectrons);
+		bool b1 = (site == 1 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		SizeType n = aux_.model.superGeometry().numberOfSites();
+		assert(n > 2);
+		bool b2 = (site == n - 2 && aux_.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
+		                                   : BorderEnumType::BORDER_NO;
+		aux_.aoe.applyOpLocal()(dest, src1, A, fs, aux_.direction, border);
 	}
 
 	SizeType getCurrentCoO() const

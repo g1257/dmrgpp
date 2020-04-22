@@ -26,6 +26,8 @@ public:
 			weight_ = findWeightAndStripIt(str_);
 	}
 
+	void setString(PsimagLite::String newstring) { str_ = newstring; }
+
 	void multiplyWeight(const RealType& factor) { weight_*= factor; }
 
 	const PsimagLite::String& toString() { return str_; }
