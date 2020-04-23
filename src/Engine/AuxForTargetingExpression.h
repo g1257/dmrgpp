@@ -18,6 +18,7 @@ public:
 	typedef typename PsimagLite::Vector<typename
 	PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	AuxForTargetingExpression(const ApplyOperatorExpressionType& aoe,
 	                          const ModelType& model,
@@ -34,25 +35,41 @@ public:
 
 	const ProgramGlobals::DirectionEnum direction() const { return direction_; }
 
-	VectorWithOffsetType& getCurrentVector(PsimagLite::String braOrKet) const
+	const VectorWithOffsetType& getCurrentVectorConst(PsimagLite::String braOrKet) const
 	{
-		throw PsimagLite::RuntimeError("getCurrentVector\n");
-//		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
+		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
+		if (getBraOrKet.isPvector()) {
+			const SizeType pIndex = getBraOrKet.pIndex();
+			if (pIndex >= aoe_.targetVectors().size())
+				err("getVector: out of range for " + braOrKet + "\n");
+			return aoe_.targetVectors()[pIndex];
+		} else if (getBraOrKet.isRvector()) {
+			throw PsimagLite::RuntimeError("reserved vector\n");
+		}
 
-//		if (getBraOrKet.isPvector()) {
-//			const SizeType pIndex = getBraOrKet.pIndex();
-//			if (pIndex >= pvectors.size())
-//				err("getVector: out of range for " + braOrKet + "\n");
-//			return pvectors[pIndex];
-//		}
-
-//		const SizeType sectorIndex = getBraOrKet.sectorIndex();
-//		return *(psi[sectorIndex][getBraOrKet.levelIndex()]);
+		const SizeType sectorIndex = getBraOrKet.sectorIndex();
+		return *(aoe_.psiConst()[sectorIndex][getBraOrKet.levelIndex()]);
 	}
 
-	void createTemporaryVector(PsimagLite::String str) const
+	VectorWithOffsetType& getCurrentVectorNonConst(PsimagLite::String braOrKet) const
 	{
-		err("createTemporaryVector\n");
+		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
+		if (getBraOrKet.isRvector()) {
+			const SizeType pIndex = getBraOrKet.pIndex();
+			if (pIndex >= tempVectors_.size())
+				err("getCurrentVectorNonConst: out of range for " + braOrKet + "\n");
+			return tempVectors_[pIndex];
+		}
+
+		throw PsimagLite::RuntimeError("getCurrentVectorNonConst: psi or tvs cannot be modified\n");
+	}
+
+	PsimagLite::String createTemporaryVector(PsimagLite::String str) const
+	{
+		const SizeType n = tempVectors_.size();
+		tempVectors_.push_back(VectorWithOffsetType());
+		tempNames_.push_back(str);
+		return "R" + ttos(n);
 	}
 
 private:
@@ -61,6 +78,8 @@ private:
 	const ModelType& model_;
 	const LeftRightSuperType lrs_;
 	ProgramGlobals::DirectionEnum direction_;
+	mutable VectorVectorWithOffsetType tempVectors_;
+	mutable VectorStringType tempNames_;
 };
 
 }

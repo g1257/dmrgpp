@@ -44,6 +44,13 @@ public:
 		return *this;
 	}
 
+	void multiply(const TermForTargetingExpression& other)
+	{
+		const SizeType n = other.vStr_.size();
+		for (SizeType i = 0; i < n; ++i)
+			vStr_.push_back(other.vStr_[i]);
+	}
+
 	void finalize()
 	{
 		if (finalized_) return;
@@ -78,10 +85,10 @@ public:
 			}
 
 			// it's a matrix
-			if (i != 1) {
+			if (ii != n - 1) {
 				newVstr.push_back(tmp);
 				continue; // apply in order only IMPORTANT
-				// the 0 is the ket
+				// the last is the ket
 			}
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
@@ -153,9 +160,9 @@ private:
 		SizeType currentCoO = getCurrentCoO();
 
 		if (site == currentCoO) {
-			const VectorWithOffsetType& srcVwo = aux_.getCurrentVector(srcKet);
-			aux_.createTemporaryVector(destKet);
-			VectorWithOffsetType& destVwo = aux_.getCurrentVector(destKet);
+			const VectorWithOffsetType& srcVwo = aux_.getCurrentVectorConst(srcKet);
+			PsimagLite::String internalName = aux_.createTemporaryVector(destKet);
+			VectorWithOffsetType& destVwo = aux_.getCurrentVectorNonConst(internalName);
 			applyInSitu(destVwo, srcVwo, site, op);
 			return;
 		}
