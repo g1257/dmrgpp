@@ -124,18 +124,6 @@ public:
 			vStr_.push_back(newVstr[nnew - i - 1]);
 
 		finalized_ = true;
-
-		//		const RealType oneReal = 1.0;
-		//		if (factor_ != oneReal)
-		//			fullVector_ = factor_*fullVector_;
-		//		factor_ = 1.0;
-
-		//		if (vwo) {
-		//			*vwo = fullVector_;
-		//			fullVector_.clear();
-		//		}
-
-		//		finalized_ = true;
 	}
 
 	PsimagLite::String toString() const

@@ -5,32 +5,46 @@
 
 namespace Dmrg {
 
-template<typename VectorWithOffsetType>
+template<typename ComplexOrRealType>
 class Pvector {
 
 public:
 
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	// |P0>=(c?0[0]'*c?0[1]' +  c?1[0]'*c?1[1] - c?0[1]'*c?0[0] - c?1[1]'*c?1[0])|gs>*weight
 	// The weight is optional
 	Pvector(PsimagLite::String str)
-	    : str_(str), weight_(1.0)
+	    : weight_(1.0)
 	{
 		// find the weight first
 		SizeType l = str.length();
 		if (l < 4) err("Pvector " + str + " string too short\n");
 		SizeType last = l - 1;
-		if (str_[last] != '>')
-			weight_ = findWeightAndStripIt(str_);
+		if (str[last] != '>')
+			weight_ = findWeightAndStripIt(str);
+		vStr_.push_back(str);
 	}
 
-	void setString(PsimagLite::String newstring) { str_ = newstring; }
+	void pushString(PsimagLite::String newstring) { vStr_.push_back(newstring); }
 
 	void multiplyWeight(const RealType& factor) { weight_*= factor; }
 
-	const PsimagLite::String& toString() { return str_; }
+	const PsimagLite::String& firstName()
+	{
+		if (vStr_.size() == 0)
+			err("Pvector has no name\n");
+		return vStr_[0];
+	}
+
+	const PsimagLite::String& lastName()
+	{
+		const SizeType n = vStr_.size();
+		if (n == 0)
+			err("Pvector has no name\n");
+		return vStr_[n - 1];
+	}
 
 	const RealType& weight() const { return weight_; }
 
@@ -59,7 +73,7 @@ private:
 		return (letter > 47 && letter < 58);
 	}
 
-	PsimagLite::String str_;
+	VectorStringType vStr_;
 	RealType weight_;
 };
 }

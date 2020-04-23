@@ -401,6 +401,13 @@ public:
 		return targetVectors_[i];
 	}
 
+	SizeType createPvector(const VectorWithOffsetType& v)
+	{
+		const SizeType n = targetVectors_.size();
+		targetVectors_.push_back(v);
+		return n;
+	}
+
 	void targetVectorsResize(SizeType x)
 	{
 		if (x == 0) targetVectors_.clear();

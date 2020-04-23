@@ -72,6 +72,16 @@ public:
 		return "R" + ttos(n);
 	}
 
+	const VectorVectorWithOffsetType& tempVectors() const
+	{
+		return tempVectors_;
+	}
+
+	const VectorStringType& tempNames() const
+	{
+		return tempNames_;
+	}
+
 private:
 
 	const ApplyOperatorExpressionType& aoe_;
