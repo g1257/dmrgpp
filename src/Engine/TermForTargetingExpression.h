@@ -111,6 +111,8 @@ public:
 			OperatorType* op = new OperatorType(aux_.model().naturalOperator(opspec.label,
 			                                    0, // FIXME TODO SDHS Immm
 			                                    opspec.dof));
+			if (opspec.transpose) op->transpose();
+
 			oneOperator(destKet, ket, *op, site);
 			ket = "|!" + tmp + "*" + ket;
 			delete op;

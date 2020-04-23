@@ -175,11 +175,13 @@ public:
 		assert(block1.size() == 1);
 		const SizeType site = block1[0];
 		const SizeType total = this->common().aoe().targetVectors().size();
-		assert(total == pVectors_.size());
+		assert(total <= pVectors_.size());
 		this->common().aoe().wftSome(site, 0, total);
-		computePvectors(direction);
 
-		SizeType n = pVectors_.size();
+		computePvectors(direction); // may alter the number of tvs
+
+		SizeType n = this->common().aoe().targetVectors().size();
+		assert(n <= pVectors_.size());
 		VectorRealType weight(n);
 		for (SizeType i = 0; i < n; ++i)
 			weight[i] = pVectors_[i]->weight();
@@ -292,7 +294,7 @@ private:
 		}
 
 		PsimagLite::String newpstring = compressExpression(tempExpr);
-		const PsimagLite::String selfName = "|P" + ttos(pVectorIndex);
+		const PsimagLite::String selfName = "|P" + ttos(pVectorIndex) + ">";
 		if (newpstring == selfName) newpstring = "DONE";
 		pVectors_[pVectorIndex]->pushString(newpstring);
 	}
@@ -330,7 +332,7 @@ private:
 				}
 
 				const SizeType ind = findPforThisExpression(buffer);
-				buffer = "|P" + ttos(ind);
+				buffer = "|P" + ttos(ind) + ">";
 				i = j + 1;
 				result += buffer;
 				continue;
