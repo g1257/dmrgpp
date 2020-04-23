@@ -106,13 +106,13 @@ public:
 			++sitesEqualToCoo;
 			discardedTerms.push_back(i);
 
-			tmp = siteSplit.root;
-			OneOperatorSpecType opspec(tmp);
+			OneOperatorSpecType opspec(siteSplit.root);
 			const PsimagLite::String destKet = tmp + "*" + ket;
 			OperatorType* op = new OperatorType(aux_.model().naturalOperator(opspec.label,
 			                                    0, // FIXME TODO SDHS Immm
 			                                    opspec.dof));
 			oneOperator(destKet, ket, *op, site);
+			ket = "|!" + tmp + "*" + ket;
 			delete op;
 			op = 0;
 		}
@@ -122,6 +122,7 @@ public:
 		vStr_.clear();
 		for (SizeType i = 0; i < nnew; ++i)
 			vStr_.push_back(newVstr[nnew - i - 1]);
+		vStr_[nnew - 1] = ket;
 
 		finalized_ = true;
 	}

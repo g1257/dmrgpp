@@ -46,6 +46,14 @@ public:
 		return vStr_[n - 1];
 	}
 
+	bool hasAnyName(PsimagLite::String str) const
+	{
+		const SizeType n = vStr_.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (vStr_[i] == str) return true;
+		return false;
+	}
+
 	const RealType& weight() const { return weight_; }
 
 private:

@@ -172,6 +172,11 @@ public:
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
 
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
+		assert(block1.size() == 1);
+		const SizeType site = block1[0];
+		const SizeType total = this->common().aoe().targetVectors().size();
+		assert(total == pVectors_.size());
+		this->common().aoe().wftSome(site, 0, total);
 		computePvectors(direction);
 
 		SizeType n = pVectors_.size();
@@ -263,10 +268,9 @@ private:
 
 		// find tempNames_ in pVectors_ and trim tempNames_ accordingly
 		VectorBoolType removed_(ntemps);
-		VectorSizeType tempToP(ntemps);
+		VectorSizeType tempToP(ntemps, 10000);
 		for (SizeType i = 0; i < ntemps; ++i) {
-			const PsimagLite::String ename = expandExpression(tempNames[i]);
-			int x = findInOrigNames(ename);
+			int x = findInOrigNames(tempNames[i]);
 			if (x < 0) continue;
 			this->common().aoe().targetVectors(x) = tempVectors[i];
 			pVectors_[x]->pushString("DONE");
@@ -281,14 +285,16 @@ private:
 			tempToP[i] = ind;
 			std::cerr<<"P["<<ind<<"] created\n";
 			std::cout<<"P["<<ind<<"] created\n";
-			const PsimagLite::String ename = expandExpression(tempNames[i]);
+			const PsimagLite::String ename = expandExpression(tempNames[i], tempToP);
 			PvectorType* pnew = new PvectorType(ename);
 			pnew->pushString("DONE");
 			pVectors_.push_back(pnew);
 		}
 
-		PsimagLite::String contracted = contractExpression(tempExpr);
-		pVectors_[pVectorIndex]->pushString(contracted);
+		PsimagLite::String newpstring = compressExpression(tempExpr);
+		const PsimagLite::String selfName = "|P" + ttos(pVectorIndex);
+		if (newpstring == selfName) newpstring = "DONE";
+		pVectors_[pVectorIndex]->pushString(newpstring);
 	}
 
 	bool allOrigPvectorsDone() const
@@ -302,19 +308,81 @@ private:
 	{
 		assert(origPvectors_ <= pVectors_.size());
 		for (SizeType i = 0; i < origPvectors_; ++i)
-			if (pVectors_[i]->firstName() == str) return i;
+			if (pVectors_[i]->hasAnyName(str)) return i;
 
 		return -1;
 	}
 
-	PsimagLite::String contractExpression(PsimagLite::String str) const
+	// replace "|!" + something ==> "|P" + number
+	PsimagLite::String compressExpression(PsimagLite::String str) const
 	{
-		throw PsimagLite::RuntimeError("contractExpression\n");
+		SizeType i = 0;
+		const SizeType len = str.length();
+		if (len < 4) return str;
+		PsimagLite::String result;
+		for (; i < len; ++i) {
+			if (i + 4 < len && str[i] == '|' && str[i + 1] == '!') {
+				SizeType j = i + 2;
+				PsimagLite::String buffer;
+				for (;j < len; ++j) {
+					buffer += str[j];
+					if (str[j] == '>') break;
+				}
+
+				const SizeType ind = findPforThisExpression(buffer);
+				buffer = "|P" + ttos(ind);
+				i = j + 1;
+				result += buffer;
+				continue;
+			}
+
+			result += str[i];
+		}
+
+		return result;
 	}
 
-	PsimagLite::String expandExpression(PsimagLite::String str) const
+	SizeType findPforThisExpression(PsimagLite::String str) const
 	{
-		throw PsimagLite::RuntimeError("expandExpression\n");
+		const SizeType pvectors = pVectors_.size();
+		for (SizeType i = 0; i < pvectors; ++i) {
+			if (!pVectors_[i]->hasAnyName(str)) continue;
+			return i;
+		}
+
+		throw PsimagLite::RuntimeError("findPforThisExpression: P not found\n");
+	}
+
+	// replace "R" + i ==> "P" + tempToP[i]
+	PsimagLite::String expandExpression(PsimagLite::String str,
+	                                    const VectorSizeType& tempToP) const
+	{
+		SizeType i = 0;
+		const SizeType len = str.length();
+		if (len < 4) return str;
+		PsimagLite::String expanded;
+		for (; i < len; ++i) {
+			if (i + 4 < len && str[i] == '|' && str[i + 1] == 'R') {
+				SizeType j = i + 2;
+				PsimagLite::String buffer;
+				for (;j < len; ++j) {
+					if (str[j] == '>') break;
+					buffer += str[j];
+				}
+
+				const SizeType ind = PsimagLite::atoi(buffer);
+				if (ind >= tempToP.size())
+					err("tempToP.size() >= index\n");
+				buffer = "|P" + ttos(tempToP[ind]);
+				i = j + 1;
+				expanded += buffer;
+				continue;
+			}
+
+			expanded += str[i];
+		}
+
+		return expanded;
 	}
 
 	PsimagLite::ProgressIndicator progress_;
