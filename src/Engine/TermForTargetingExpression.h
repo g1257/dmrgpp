@@ -152,6 +152,18 @@ public:
 
 	bool finalized() const { return finalized_; }
 
+	int pIndex() const
+	{
+		if (vStr_.size() != 1) return -1;
+		const PsimagLite::String str = vStr_[0];
+		SizeType last = str.length();
+		if (last < 4) return -1;
+		--last;
+		if (str.substr(0, 2) == "|P" && str[last] == '>')
+			return PsimagLite::atoi(str.substr(2, last - 2));
+		return -1;
+	}
+
 private:
 
 	void oneOperator(PsimagLite::String destKet,

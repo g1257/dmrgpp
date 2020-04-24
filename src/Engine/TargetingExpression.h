@@ -263,6 +263,15 @@ private:
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
 			PsimagLite::String thispAfter = pVectors_[i]->lastName();
 
+			int x = tmp.pIndex();
+			if (x >= 0) {
+				if (static_cast<SizeType>(x) == i) err("Self assigment\n");
+				VectorWithOffsetType_& v0 = this->common().aoe().targetVectors(i);
+				v0 =  this->common().aoe().targetVectors(x);
+				pVectors_[i]->pushString("DONE");
+				continue;
+			}
+
 			if (!tmp.hasSummationKet()) {
 				allpvectors += thispAfter;
 				continue;
@@ -484,9 +493,16 @@ private:
 		for (SizeType i = 0; i < tvs; ++i) {
 			if (used[i]) continue;
 			this->common().aoe().destroyPvector(i);
+			std::cerr<<"P["<<i<<"] destroyed\n";
+			std::cout<<"P["<<i<<"] destroyed\n";
 		}
 
 		this->common().aoe().trimVectors();
+		const SizeType tvsFinal = this->common().aoe().targetVectors().size();
+		if (tvs != tvsFinal) {
+			std::cerr<<"tvs="<<tvsFinal<<" now\n";
+			std::cout<<"tvs="<<tvsFinal<<" now\n";
+		}
 	}
 
 	void findUsedPvectors(VectorBoolType& used, PsimagLite::String str) const
