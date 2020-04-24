@@ -252,20 +252,23 @@ private:
 		bool needsTrimming = false;
 		PsimagLite::String allpvectors;
 		for (SizeType i = 0; i < total; ++i) {
+
 			if (pVectors_[i]->lastName() == "DONE") continue;
+
 			AlgebraType tmp(aux);
 			canonicalExpression(tmp, pVectors_[i]->lastName(), opEmpty, aux);
 			tmp.finalize();
+
 			PsimagLite::String thispBefore = tmp.toString();
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
 			PsimagLite::String thispAfter = pVectors_[i]->lastName();
-			if (thispBefore != thispAfter) {
-				assert(true); // just for placing debugging point
+
+			if (!tmp.hasSummationKet()) {
+				allpvectors += thispAfter;
+				continue;
 			}
 
-			PsimagLite::String thispToSimplify = (tmp.hasSummationKet()) ? thispBefore :
-			                                                               thispAfter;
-			PsimagLite::String newpstring = simplifyTerms(thispToSimplify);
+			PsimagLite::String newpstring = simplifyTerms(thispBefore);
 			if (newpstring != pVectors_[i]->lastName()) {
 				needsTrimming = true;
 				pVectors_[i]->pushString(newpstring);
