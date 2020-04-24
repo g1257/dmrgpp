@@ -408,6 +408,31 @@ public:
 		return n;
 	}
 
+	void destroyPvector(SizeType ind)
+	{
+		if (ind >= targetVectors_.size())
+			err("AOE: destroyPvector\n");
+
+		targetVectors_[ind].clear();
+	}
+
+	void trimVectors()
+	{
+		const SizeType n = targetVectors_.size();
+		SizeType x = 0;
+		for (SizeType ii = 0; ii < n; ++ii) {
+			const SizeType i = n - ii - 1;
+			if (targetVectors_[i].size() == 0) {
+				++x;
+			} else {
+				break;
+			}
+		}
+
+		if (x == 0) return;
+		targetVectorsResize(n - x);
+	}
+
 	void targetVectorsResize(SizeType x)
 	{
 		if (x == 0) targetVectors_.clear();

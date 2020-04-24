@@ -249,17 +249,30 @@ private:
 		                                  this->lrs(),
 		                                  dir);
 		const AlgebraType opEmpty(aux);
+		bool needsTrimming = false;
+		PsimagLite::String allpvectors;
 		for (SizeType i = 0; i < total; ++i) {
 			if (pVectors_[i]->lastName() == "DONE") continue;
 			AlgebraType tmp(aux);
 			canonicalExpression(tmp, pVectors_[i]->lastName(), opEmpty, aux);
-			//VectorWithOffsetType_& dst = this->common().aoe().targetVectors(i);
 			tmp.finalize();
-			finalize(aux.tempVectors(), aux.tempNames(), i, tmp.toString());
-			simplifyTerms(tmp.toString());
+			PsimagLite::String thispBefore = tmp.toString();
+			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
+			PsimagLite::String thispAfter = pVectors_[i]->lastName();
+			if (thispBefore != thispAfter) {
+				std::cerr<<"diff\n";
+			}
+
+			PsimagLite::String newpstring = simplifyTerms(thispAfter);
+			if (newpstring != pVectors_[i]->lastName()) {
+				needsTrimming = true;
+				pVectors_[i]->pushString(newpstring);
+			}
+
+			allpvectors += newpstring;
 		}
 
-		// trimTerms(); <-- FIXME todo
+		if (needsTrimming) trimPvectors(allpvectors);
 	}
 
 	void finalize(const VectorVectorWithOffsetType& tempVectors,
@@ -407,7 +420,7 @@ private:
 					buffer += str[j];
 				}
 
-				const SizeType ind0 = PsimagLite::atoi(buffer);
+				SizeType ind0 = PsimagLite::atoi(buffer);
 				buffer = "";
 				++j;
 				assert(str[j] == 'P');
@@ -417,10 +430,20 @@ private:
 					buffer += str[j];
 				}
 
-				const SizeType ind1 = PsimagLite::atoi(buffer);
+				SizeType ind1 = PsimagLite::atoi(buffer);
+
+				// before reordering ind0 and ind1
+				PsimagLite::String p0PlusP1 = "|P" + ttos(ind0) + ">+|P"+ ttos(ind1) + ">";
 
 				// ask aoe to sum ind0 and ind1 and put it into ind0
-				sumPvectors(ind0, ind1);
+				assert(ind0 != ind1);
+				if (ind0 > ind1) {
+					const SizeType tmp = ind0;
+					ind0 = ind1;
+					ind1 = tmp;
+				}
+
+				sumPvectors(ind0, ind1, p0PlusP1);
 
 				buffer = "|P" + ttos(ind0) + ">";
 				i = j + 1;
@@ -434,9 +457,58 @@ private:
 		return simplified;
 	}
 
-	void sumPvectors(SizeType ind0, SizeType ind1)
+	void sumPvectors(SizeType ind0, SizeType ind1, PsimagLite::String p0PlusP1)
 	{
-		err("sumPvectors\n");
+		assert(ind0 < ind1);
+		VectorWithOffsetType_& v0 = this->common().aoe().targetVectors(ind0);
+		const VectorWithOffsetType_& v1 =  this->common().aoe().targetVectors(ind1);
+		v0 += v1;
+		pVectors_[ind0]->sum(*(pVectors_[ind1]), p0PlusP1);
+	}
+
+	void trimPvectors(PsimagLite::String str)
+	{
+		const SizeType tvs = this->common().aoe().targetVectors().size();
+		VectorBoolType used(tvs, false);
+		assert(origPvectors_ <= tvs);
+		for (SizeType i = 0; i < origPvectors_; ++i)
+			used[i] = true;
+
+		findUsedPvectors(used, str);
+
+		for (SizeType i = 0; i < tvs; ++i) {
+			if (used[i]) continue;
+			this->common().aoe().destroyPvector(i);
+		}
+
+		this->common().aoe().trimVectors();
+	}
+
+	void findUsedPvectors(VectorBoolType& used, PsimagLite::String str) const
+	{
+		const SizeType len = str.size();
+		for (SizeType i = 0; i < len; ++i) {
+
+			if (str.substr(i, 2) != "|P") continue;
+
+			PsimagLite::String buffer;
+			SizeType j = i + 2;
+			for (; j < len; ++j) {
+				if (str[j] >= 48 && str[j] <= 57) {
+					buffer += str[j];
+				} else if (str[j] == '>') {
+					break;
+				} else {
+					buffer = "";
+					break;
+				}
+			}
+
+			i = j;
+			if (buffer == "") continue;
+			const SizeType ind = PsimagLite::atoi(buffer);
+			used[ind] = true;
+		}
 	}
 
 	PsimagLite::ProgressIndicator progress_;

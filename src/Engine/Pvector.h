@@ -31,14 +31,29 @@ public:
 
 	void multiplyWeight(const RealType& factor) { weight_*= factor; }
 
-	const PsimagLite::String& firstName()
+	void sum(const Pvector& other, PsimagLite::String str)
+	{
+		const SizeType n = vStr_.size();
+		if (n == 0 || vStr_[n - 1] != "DONE" || other.vStr_.size() == 0)
+			err("Pvector::sum\n");
+
+		PsimagLite::String def = vStr_[0] + other.vStr_[0];
+		vStr_.clear();
+		vStr_.resize(3);
+		vStr_[0] = def;
+		vStr_[1] = str;
+		vStr_[2] = "DONE";
+		// weights??
+ 	}
+
+	const PsimagLite::String& firstName() const
 	{
 		if (vStr_.size() == 0)
 			err("Pvector has no name\n");
 		return vStr_[0];
 	}
 
-	const PsimagLite::String& lastName()
+	const PsimagLite::String& lastName() const
 	{
 		const SizeType n = vStr_.size();
 		if (n == 0)
