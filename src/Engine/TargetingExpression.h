@@ -260,10 +260,12 @@ private:
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
 			PsimagLite::String thispAfter = pVectors_[i]->lastName();
 			if (thispBefore != thispAfter) {
-				std::cerr<<"diff\n";
+				assert(true); // just for placing debugging point
 			}
 
-			PsimagLite::String newpstring = simplifyTerms(thispAfter);
+			PsimagLite::String thispToSimplify = (tmp.hasSummationKet()) ? thispBefore :
+			                                                               thispAfter;
+			PsimagLite::String newpstring = simplifyTerms(thispToSimplify);
 			if (newpstring != pVectors_[i]->lastName()) {
 				needsTrimming = true;
 				pVectors_[i]->pushString(newpstring);
@@ -403,7 +405,7 @@ private:
 		return expanded;
 	}
 
-	// replace |PX+PY> ==> |PX>, update |PX>,
+	// replace |+PX+PY> ==> |PX>, update |PX>,
 	// FIMXE: ask aoe destroying PY if no longer referencable
 	PsimagLite::String simplifyTerms(PsimagLite::String str)
 	{
@@ -412,7 +414,7 @@ private:
 		if (len < 4) return str;
 		PsimagLite::String simplified;
 		for (; i < len; ++i) {
-			if (i + 4 < len && str.substr(i, 3) == "|!P") {
+			if (i + 4 < len && str.substr(i, 3) == "|+P") {
 				SizeType j = i + 3;
 				PsimagLite::String buffer;
 				for (;j < len; ++j) {
@@ -446,7 +448,7 @@ private:
 				sumPvectors(ind0, ind1, p0PlusP1);
 
 				buffer = "|P" + ttos(ind0) + ">";
-				i = j + 1;
+				i = j;
 				simplified += buffer;
 				continue;
 			}

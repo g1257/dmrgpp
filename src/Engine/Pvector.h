@@ -71,6 +71,8 @@ public:
 
 	const RealType& weight() const { return weight_; }
 
+	SizeType size() const { return vStr_.size(); }
+
 private:
 
 	static RealType findWeightAndStripIt(PsimagLite::String str)
