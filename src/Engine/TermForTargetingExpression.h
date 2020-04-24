@@ -141,6 +141,17 @@ public:
 		return s + vStr_[n - 1];
 	}
 
+	void setString(PsimagLite::String str)
+	{
+		if (vStr_.size() != 1)
+			err("TermForTargetingExpression::setString\n");
+		vStr_[0] = str;
+	}
+
+	SizeType size() const { return vStr_.size(); }
+
+	bool finalized() const { return finalized_; }
+
 private:
 
 	void oneOperator(PsimagLite::String destKet,

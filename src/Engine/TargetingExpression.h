@@ -256,7 +256,10 @@ private:
 			//VectorWithOffsetType_& dst = this->common().aoe().targetVectors(i);
 			tmp.finalize();
 			finalize(aux.tempVectors(), aux.tempNames(), i, tmp.toString());
+			simplifyTerms(tmp.toString());
 		}
+
+		// trimTerms(); <-- FIXME todo
 	}
 
 	void finalize(const VectorVectorWithOffsetType& tempVectors,
@@ -333,7 +336,7 @@ private:
 
 				const SizeType ind = findPforThisExpression(buffer);
 				buffer = "|P" + ttos(ind) + ">";
-				i = j + 1;
+				i = j;
 				result += buffer;
 				continue;
 			}
@@ -385,6 +388,55 @@ private:
 		}
 
 		return expanded;
+	}
+
+	// replace |PX+PY> ==> |PX>, update |PX>,
+	// FIMXE: ask aoe destroying PY if no longer referencable
+	PsimagLite::String simplifyTerms(PsimagLite::String str)
+	{
+		SizeType i = 0;
+		const SizeType len = str.length();
+		if (len < 4) return str;
+		PsimagLite::String simplified;
+		for (; i < len; ++i) {
+			if (i + 4 < len && str.substr(i, 3) == "|!P") {
+				SizeType j = i + 3;
+				PsimagLite::String buffer;
+				for (;j < len; ++j) {
+					if (str[j] == '+') break;
+					buffer += str[j];
+				}
+
+				const SizeType ind0 = PsimagLite::atoi(buffer);
+				buffer = "";
+				++j;
+				assert(str[j] == 'P');
+				++j;
+				for (;j < len; ++j) {
+					if (str[j] == '>') break;
+					buffer += str[j];
+				}
+
+				const SizeType ind1 = PsimagLite::atoi(buffer);
+
+				// ask aoe to sum ind0 and ind1 and put it into ind0
+				sumPvectors(ind0, ind1);
+
+				buffer = "|P" + ttos(ind0) + ">";
+				i = j + 1;
+				simplified += buffer;
+				continue;
+			}
+
+			simplified += str[i];
+		}
+
+		return simplified;
+	}
+
+	void sumPvectors(SizeType ind0, SizeType ind1)
+	{
+		err("sumPvectors\n");
 	}
 
 	PsimagLite::ProgressIndicator progress_;
