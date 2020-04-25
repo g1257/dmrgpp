@@ -190,6 +190,8 @@ public:
 
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
+		std::cerr<<"tvs="<<this->common().aoe().targetVectors().size()<<"\n";
+		std::cout<<"tvs="<<this->common().aoe().targetVectors().size()<<"\n";
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
@@ -272,7 +274,7 @@ private:
 				continue;
 			}
 
-			if (!tmp.hasSummationKet()) {
+			if (!tmp.hasSummationKetAndNoMult()) {
 				allpvectors += thispAfter;
 				continue;
 			}
@@ -345,7 +347,7 @@ private:
 		return -1;
 	}
 
-	// replace "|!" + something ==> "|P" + number
+	// replace "|!m" + something ==> "|P" + number
 	PsimagLite::String compressExpression(PsimagLite::String str) const
 	{
 		SizeType i = 0;
@@ -353,8 +355,8 @@ private:
 		if (len < 4) return str;
 		PsimagLite::String result;
 		for (; i < len; ++i) {
-			if (i + 4 < len && str[i] == '|' && str[i + 1] == '!') {
-				SizeType j = i + 2;
+			if (i + 4 < len && str.substr(i,3) == "|!m") {
+				SizeType j = i + 3;
 				PsimagLite::String buffer;
 				for (;j < len; ++j) {
 					buffer += str[j];
@@ -426,11 +428,11 @@ private:
 		if (len < 4) return str;
 		PsimagLite::String simplified;
 		for (; i < len; ++i) {
-			if (i + 4 < len && str.substr(i, 3) == "|+P") {
-				SizeType j = i + 3;
+			if (i + 4 < len && str.substr(i, 4) == "|!aP") {
+				SizeType j = i + 4;
 				PsimagLite::String buffer;
 				for (;j < len; ++j) {
-					if (str[j] == '+') break;
+					if (str[j] == 'p') break;
 					buffer += str[j];
 				}
 
@@ -447,7 +449,7 @@ private:
 				SizeType ind1 = PsimagLite::atoi(buffer);
 
 				// before reordering ind0 and ind1
-				PsimagLite::String p0PlusP1 = "|P" + ttos(ind0) + ">+|P"+ ttos(ind1) + ">";
+				PsimagLite::String p0PlusP1 = "|P" + ttos(ind0) + ">+|P" + ttos(ind1) + ">";
 
 				// ask aoe to sum ind0 and ind1 and put it into ind0
 				assert(ind0 != ind1);

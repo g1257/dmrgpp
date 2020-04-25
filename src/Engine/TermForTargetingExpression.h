@@ -68,6 +68,7 @@ public:
 		for (SizeType ii = 0; ii < n; ++ii) {
 			const SizeType i = n -ii - 1; // read vector backwards
 			PsimagLite::String tmp = vStr_[i];
+
 			if (tmp[0] == '|') { // it's a vector
 				if (ket != "")
 					err("More than one ket found in " + toString() + "\n");
@@ -114,7 +115,7 @@ public:
 			if (opspec.transpose) op->transpose();
 
 			oneOperator(destKet, ket, *op, site);
-			ket = "|!" + tmp + "*" + ket;
+			ket = "|!m" + tmp + "*" + ket;
 			delete op;
 			op = 0;
 		}
