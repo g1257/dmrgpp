@@ -490,11 +490,13 @@ private:
 
 		findUsedPvectors(used, str);
 
+		//bool destroyEvent = false;
 		for (SizeType i = 0; i < tvs; ++i) {
 			if (used[i]) continue;
 			this->common().aoe().destroyPvector(i);
 			std::cerr<<"P["<<i<<"] destroyed\n";
 			std::cout<<"P["<<i<<"] destroyed\n";
+			//destroyEvent = true;
 		}
 
 		this->common().aoe().trimVectors();
@@ -503,7 +505,31 @@ private:
 			std::cerr<<"tvs="<<tvsFinal<<" now\n";
 			std::cout<<"tvs="<<tvsFinal<<" now\n";
 		}
+
+		//if (destroyEvent) trimPvectors(used);
 	}
+
+//	void trimPvectors(const VectorSizeType& used)
+//	{
+//		return; // IMPORTANT!!!
+
+//		VectorPvectorType pnews;
+//		const SizeType ps = pVectors_.size();
+//		for (SizeType i = 0; i < ps; ++i) {
+//			if (used[i]) {
+//				pnews.push_back(pVectors_[i]);
+//				continue;
+//			}
+
+//			delete pVectors_[i];
+//			pVectors_[i] = 0;
+//			continue;
+
+//			pnews.push_back(pVectors_[i]);
+//		}
+
+//		pVectors_ = pnews;
+//	}
 
 	void findUsedPvectors(VectorBoolType& used, PsimagLite::String str) const
 	{
