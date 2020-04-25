@@ -283,6 +283,12 @@ public:
 
 	SizeType offset() const { return offset_; }
 
+	ThisType& operator*=(const ComplexOrRealType& value)
+	{
+		data_ *= value;
+		return *this;
+	}
+
 	ThisType operator+=(const ThisType& v)
 	{
 		if (size_ == 0 && offset_ == 0 && mAndq_.first == 0) {

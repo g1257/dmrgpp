@@ -497,6 +497,17 @@ public:
 		setIndex2Sector();
 	}
 
+	VectorWithOffsets& operator*=(const ComplexOrRealType& value)
+	{
+		for (SizeType ii = 0; ii < nzMsAndQns_.size(); ++ii) {
+			SizeType i = nzMsAndQns_[ii].first;
+			assert(i < data_.size());
+			data_[i] *= value;
+		}
+
+		return *this;
+	}
+
 	VectorWithOffsets operator+=(const VectorWithOffsets& v)
 	{
 		if (nzMsAndQns_.size()==0) {

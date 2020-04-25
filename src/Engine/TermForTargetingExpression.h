@@ -20,6 +20,7 @@ public:
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef AuxForTargetingExpression<TargetingBaseType> AuxiliaryType;
@@ -40,6 +41,7 @@ public:
 	{
 		finalized_ = other.finalized_;
 		factor_ = other.factor_;
+		strFactor_ = other.strFactor_;
 		vStr_ = other.vStr_;
 		return *this;
 	}
@@ -49,6 +51,23 @@ public:
 		const SizeType n = other.vStr_.size();
 		for (SizeType i = 0; i < n; ++i)
 			vStr_.push_back(other.vStr_[i]);
+	}
+
+	void multiply(ComplexOrRealType val)
+	{
+		factor_ *= val;
+
+		if (PsimagLite::imag(factor_) != 0)
+			err("Cannot multiply by complex number yet\n");
+
+		const RealType f = PsimagLite::real(factor_);
+
+		if (f < 0)
+			strFactor_ = "(" + ttos(f) + ")";
+		else
+			strFactor_ = ttos(f);
+
+		if (f == 1) strFactor_ = "";
 	}
 
 	void finalize()
@@ -116,6 +135,8 @@ public:
 
 			oneOperator(destKet, ket, *op, site);
 			ket = "|!m" + tmp + "*" + ket;
+			factor_ = 1;
+			strFactor_ = "";
 			delete op;
 			op = 0;
 		}
@@ -137,9 +158,11 @@ public:
 		if (n == 0)
 			err("toString returns empty\n");
 
+		PsimagLite::String f  = (strFactor_ != "") ? strFactor_ + "*" : "";
+
 		for (SizeType i = 0; i < n - 1; ++i)
 			s += vStr_[i] + "*";
-		return s + vStr_[n - 1];
+		return f + s + vStr_[n - 1];
 	}
 
 	void setString(PsimagLite::String str)
@@ -179,6 +202,7 @@ private:
 			PsimagLite::String internalName = aux_.createTemporaryVector(destKet);
 			VectorWithOffsetType& destVwo = aux_.getCurrentVectorNonConst(internalName);
 			applyInSitu(destVwo, srcVwo, site, op);
+			destVwo *= factor_;
 			return;
 		}
 
@@ -223,6 +247,7 @@ private:
 	bool finalized_;
 	const AuxiliaryType& aux_;
 	ComplexOrRealType factor_;
+	PsimagLite::String strFactor_;
 	VectorStringType vStr_;
 };
 }
