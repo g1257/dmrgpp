@@ -10,12 +10,17 @@ dir0:Connectors=[1.0];
 hubbardU=[0.0, ...];
 potentialV=[0.0,...];
 Model="HubbardOneBand";
-SolverOptions="twositedmrg";
+SolverOptions="restart,twositedmrg,TargetingExpression,fixLegacyBugs";
+string RestartFilename="data120";
 Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
-OutputFile="data120";
 InfiniteLoopKeptStates=100;
-FiniteLoops=[[7, 200, 0],
-[-14, 200, 0],
-[ 14, 200, 0]];
+FiniteLoops=[
+[-14, 200, 2],
+[ 14, 200, 2]];
 TargetElectronsUp=8;
 TargetElectronsDown=8;
+Pvectors=1;
+string P0="c'[5]*c[6]*|gs>+c'[6]*c[7]*|gs>";
+GsWeight=0.2;
+OutputFile="data121";
+#ci dmrg arguments= -p 12 "<gs|P0>"

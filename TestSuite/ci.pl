@@ -258,6 +258,8 @@ sub getDeepBatchIndex
 	# $from = data??.txt or data??
 	my $copy = $from;
 	$copy =~ s/\.txt$//;
+	$copy =~ s/^\"//;
+	$copy =~ s/\";$//;
 	my $n;
 	if ($copy =~ /(\d+$)/) {
 		$n = $1;

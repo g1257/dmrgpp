@@ -131,8 +131,8 @@ Page* where more or less this feature is used: 2230
 106) A^{-}(q,omega) cut at omega=-1.0 Hubbard Model One Orbital (HuStd-1orb) on a chain (CubicStd1d) for U=6 with 8 sites.
 112) Like 2 but measures while growing environ
 113) Like 2 but measures 2 data sets
-120) TargetingExpresion
-|P0>=(c?0[0]'*c?0[1]' +  c?1[0]'*c?1[1] - c?0[1]'*c?0[0] - c?1[1]'*c?1[0])|gs>
+120) TargetingExpresion: gs
+121) TargetingExpression: sums of products
 #120 to 149 reserved for TargetingExpresion and related
 #150 to 199 reserved for testing the input system
 150) Replacement
