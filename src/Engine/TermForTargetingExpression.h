@@ -105,7 +105,7 @@ public:
 			}
 
 			// it's a matrix
-			if (ii != n - 1) {
+			if (ii != 1) {
 				newVstr.push_back(tmp);
 				continue; // apply in order only IMPORTANT
 				// the last is the ket

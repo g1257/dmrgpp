@@ -419,7 +419,7 @@ private:
 		return expanded;
 	}
 
-	// replace |+PX+PY> ==> |PX>, update |PX>,
+	// replace |+PXpPY> ==> |PX>, update |PX>,
 	// FIMXE: ask aoe destroying PY if no longer referencable
 	PsimagLite::String simplifyTerms(PsimagLite::String str)
 	{
@@ -510,28 +510,6 @@ private:
 
 		//if (destroyEvent) trimPvectors(used);
 	}
-
-//	void trimPvectors(const VectorSizeType& used)
-//	{
-//		return; // IMPORTANT!!!
-
-//		VectorPvectorType pnews;
-//		const SizeType ps = pVectors_.size();
-//		for (SizeType i = 0; i < ps; ++i) {
-//			if (used[i]) {
-//				pnews.push_back(pVectors_[i]);
-//				continue;
-//			}
-
-//			delete pVectors_[i];
-//			pVectors_[i] = 0;
-//			continue;
-
-//			pnews.push_back(pVectors_[i]);
-//		}
-
-//		pVectors_ = pnews;
-//	}
 
 	void findUsedPvectors(VectorBoolType& used, PsimagLite::String str) const
 	{
