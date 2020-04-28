@@ -9,7 +9,7 @@ class GetBraOrKet {
 
 public:
 
-	enum class Kind {E, P};
+	enum class Kind {E, P, R}; // R means reserved for internal use
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 
@@ -36,6 +36,8 @@ public:
 
 	bool isPvector() const { return (kind_ == Kind::P); }
 
+	bool isRvector() const { return (kind_ == Kind::R); }
+
 	SizeType levelIndex() const
 	{
 		checkIfPvector(false);
@@ -58,7 +60,7 @@ private:
 
 	void checkIfPvector(bool b) const
 	{
-		bool isP = (kind_ == Kind::P);
+		bool isP = (kind_ == Kind::P || kind_ == Kind::R);
 		if (isP == b) return;
 		throw PsimagLite::RuntimeError("Internal ERROR: checkIfPpvector\n");
 	}
@@ -80,6 +82,10 @@ private:
 		} else if (str[0] == 'Q') {
 			kind_ = Kind::E;
 			pair_.first = getNumberFrom(str, 1); // modifies str
+		} else if (str[0] == 'R') {
+			kind_ = Kind::R;
+			pair_.first = getNumberFrom(str, 1); // modifies str
+			return;
 		}
 
 		if (str.size() < 2)
