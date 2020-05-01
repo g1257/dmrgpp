@@ -171,7 +171,8 @@ private:
 		        targeting != "CorrectionVectorTargeting" &&
 		        targeting != "TargetingInSitu" &&
 		        targeting != "TargetingRixsStatic" &&
-		        targeting != "TargetingRixsDynamic") {
+		        targeting != "TargetingRixsDynamic" &&
+		        targeting != "TargetingExpression") {
 			err("SolverOptions=useComplex not allowed for " + targeting + "\n");
 		}
 
