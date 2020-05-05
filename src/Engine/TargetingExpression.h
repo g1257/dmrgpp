@@ -243,6 +243,8 @@ private:
 			return;
 		}
 
+		if (dir != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) return;
+
 		CanonicalExpressionType canonicalExpression(opSpec_);
 		SizeType total = pVectors_.size();
 
