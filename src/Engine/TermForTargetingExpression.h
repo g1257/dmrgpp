@@ -78,7 +78,6 @@ public:
 		if (n == 0)
 			err("AlgebraForTargetingExpression: Cannot finalize an empty object\n");
 
-		const SizeType coo = getCurrentCoO();
 		PsimagLite::String ket;
 		SizeType sitesEqualToCoo = 0;
 		VectorSizeType discardedTerms;
@@ -116,21 +115,27 @@ public:
 				err("Each op must have a site\n");
 
 			SizeType site = OneOperatorSpecType::strToNumberOfFail(siteSplit.siteString);
-			if (site != coo) { // can only apply at center of orthogonality (coo)
+			// can only apply at center of orthogonality (coo)
+			if (!siteCanBeApplied(site)) {
 				newVstr.push_back(tmp);
 				continue;
 			}
 
-			if (sitesEqualToCoo >= 1)
-				err("Sites cannot be repeated in term\n");
+			// for now we delay application of more than one site
+			// even if possible at the current coo
+			if (sitesEqualToCoo > 0) {
+				newVstr.push_back(tmp);
+				continue;
+			}
+
 			++sitesEqualToCoo;
 			discardedTerms.push_back(i);
 
 			OneOperatorSpecType opspec(siteSplit.root);
 			const PsimagLite::String destKet = tmp + "*" + ket;
 			OperatorType* op = new OperatorType(aux_.model().naturalOperator(opspec.label,
-			                                    0, // FIXME TODO SDHS Immm
-			                                    opspec.dof));
+			                                                                 0, // FIXME TODO SDHS Immm
+			                                                                 opspec.dof));
 			if (opspec.transpose) op->transpose();
 
 			oneOperator(destKet, ket, *op, site);
@@ -190,26 +195,27 @@ public:
 
 private:
 
+	bool siteCanBeApplied(SizeType site) const
+	{
+		const SizeType currentCoO = getCurrentCoO();
+		const SizeType linSize = aux_.model().superGeometry().numberOfSites();
+		const bool b1 = (currentCoO == 1 && site == 0 && aux_.lrs().left().size() == 1);
+		const bool b2 = (currentCoO == linSize - 2 && site == linSize - 1
+		                 && aux_.lrs().right().size() == linSize - 2);
+		return (b1 || b2 || site == currentCoO);
+	}
+
 	void oneOperator(PsimagLite::String destKet,
 	                 PsimagLite::String srcKet,
 	                 const OperatorType& op,
 	                 SizeType site)
 	{
-		SizeType currentCoO = getCurrentCoO();
-
-		if (site == currentCoO) {
-			const VectorWithOffsetType& srcVwo = aux_.getCurrentVectorConst(srcKet);
-			PsimagLite::String internalName = aux_.createTemporaryVector(destKet);
-			VectorWithOffsetType& destVwo = aux_.getCurrentVectorNonConst(internalName);
-			applyInSitu(destVwo, srcVwo, site, op);
-			destVwo *= factor_;
-			return;
-		}
-
-		err("oneOperator should never reach here\n");
-		// Fetch ket at coo site --> into vec
-		// Apply op to vec ---> vec2
-		// Bring vec2 back to current coo
+		assert(siteCanBeApplied(site));
+		const VectorWithOffsetType& srcVwo = aux_.getCurrentVectorConst(srcKet);
+		PsimagLite::String internalName = aux_.createTemporaryVector(destKet);
+		VectorWithOffsetType& destVwo = aux_.getCurrentVectorNonConst(internalName);
+		applyInSitu(destVwo, srcVwo, site, op);
+		destVwo *= factor_;
 	}
 
 	// returns A|src1>
@@ -239,11 +245,11 @@ private:
 		assert(systemBlockSize > 0);
 		const int maxSystemSite = lrs.left().block()[systemBlockSize - 1];
 		return (aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? maxSystemSite
-		                                                                        : maxSystemSite + 1;
+		                                                                          : maxSystemSite + 1;
 
 	}
 
-	 // ATTENTION: has assignment operator
+	// ATTENTION: has assignment operator
 	bool finalized_;
 	const AuxiliaryType& aux_;
 	ComplexOrRealType factor_;
