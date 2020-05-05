@@ -199,9 +199,11 @@ private:
 	{
 		const SizeType currentCoO = getCurrentCoO();
 		const SizeType linSize = aux_.model().superGeometry().numberOfSites();
-		const bool b1 = (currentCoO == 1 && site == 0 && aux_.lrs().left().size() == 1);
-		const bool b2 = (currentCoO == linSize - 2 && site == linSize - 1
-		                 && aux_.lrs().right().size() == linSize - 2);
+		const bool b1 = (site == 0 && currentCoO == 1 &&
+		                 aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		const bool b2 = (site == linSize - 1 && currentCoO == linSize - 2 &&
+		                 aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+
 		return (b1 || b2 || site == currentCoO);
 	}
 
@@ -227,12 +229,10 @@ private:
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
 		aux_.model().findOddElectronsOfOneSite(oddElectrons,site);
 		FermionSign fs(aux_.lrs().left(), oddElectrons);
-		bool b1 = (site == 0 &&
-		           aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		bool b1 = (site == 0);
 		SizeType n = aux_.model().superGeometry().numberOfSites();
 		assert(n > 2);
-		bool b2 = (site == n - 1 &&
-		           aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		bool b2 = (site == n - 1);
 		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
 		                                   : BorderEnumType::BORDER_NO;
 		aux_.aoe().applyOpLocal()(dest, src1, A, fs, aux_.direction(), border);
