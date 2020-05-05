@@ -180,7 +180,7 @@ public:
 
 		computePvectors(direction); // may alter the number of tvs
 
-		SizeType n = this->common().aoe().targetVectors().size();
+		const SizeType n = this->common().aoe().targetVectors().size();
 		assert(n <= pVectors_.size());
 		VectorRealType weight(n);
 		for (SizeType i = 0; i < n; ++i)
@@ -188,10 +188,8 @@ public:
 
 		this->common().printNormsAndWeights(gsWeight_, weight);
 
-		bool doBorderIfBorder = true;
+		const bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
-		std::cerr<<"tvs="<<this->common().aoe().targetVectors().size()<<"\n";
-		std::cout<<"tvs="<<this->common().aoe().targetVectors().size()<<"\n";
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
@@ -239,7 +237,16 @@ private:
 			if (tvs < origPvectors_)
 				err("TVS could not have decreased ?!\n");
 
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+			msg<<"All user-provided P vectors finished";
+			progress_.printline(msgg, std::cout);
+			std::cerr<<PsimagLite::AnsiColor::green;
+			std::cerr<<"All user-provided P vectors finished\n";
+			std::cerr<<PsimagLite::AnsiColor::reset;
+
 			this->common().aoe().targetVectorsResize(origPvectors_);
+
 			return;
 		}
 
@@ -317,12 +324,15 @@ private:
 			if (removed_[i]) continue;
 			const SizeType ind = this->common().aoe().createPvector(tempVectors[i]);
 			tempToP[i] = ind;
-			std::cerr<<"P["<<ind<<"] created\n";
-			std::cout<<"P["<<ind<<"] created\n";
 			const PsimagLite::String ename = expandExpression(tempNames[i], tempToP);
 			PvectorType* pnew = new PvectorType(ename);
 			pnew->pushString("DONE");
 			pVectors_.push_back(pnew);
+
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+			msg<<"P["<<ind<<"]="<<ename<<" created";
+			progress_.printline(msgg, std::cout);
 		}
 
 		PsimagLite::String newpstring = compressExpression(tempExpr);
@@ -492,23 +502,23 @@ private:
 
 		findUsedPvectors(used, str);
 
-		//bool destroyEvent = false;
 		for (SizeType i = 0; i < tvs; ++i) {
 			if (used[i]) continue;
 			this->common().aoe().destroyPvector(i);
-			std::cerr<<"P["<<i<<"] destroyed\n";
-			std::cout<<"P["<<i<<"] destroyed\n";
-			//destroyEvent = true;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+			msg<<"P["<<i<<"] destroyed";
+			progress_.printline(msgg, std::cout);
 		}
 
 		this->common().aoe().trimVectors();
 		const SizeType tvsFinal = this->common().aoe().targetVectors().size();
 		if (tvs != tvsFinal) {
-			std::cerr<<"tvs="<<tvsFinal<<" now\n";
-			std::cout<<"tvs="<<tvsFinal<<" now\n";
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+			msg<<"Number of target vectors is "<<tvsFinal<<" now";
+			progress_.printline(msgg, std::cout);
 		}
-
-		//if (destroyEvent) trimPvectors(used);
 	}
 
 	void findUsedPvectors(VectorBoolType& used, PsimagLite::String str) const

@@ -437,6 +437,11 @@ public:
 	{
 		if (x == 0) targetVectors_.clear();
 		else targetVectors_.resize(x);
+
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+		msg<<"Number of target vectors is now "<<targetVectors_.size();
+		progress_.printline(msgg, std::cout);
 	}
 
 	void initTimeVectors(const TargetParamsType& tstStruct,
