@@ -203,6 +203,7 @@ public:
 	           PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
+		this->common().writeNGSTs(io, prefix, block, "Expression");
 	}
 
 private:
