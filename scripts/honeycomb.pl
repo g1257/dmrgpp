@@ -437,7 +437,7 @@ sub honeycombZigzagSetNeigh
 					}
 				}
 			} elsif ($dir == 1) {
-				if ($isPeriodicX and !$isLeft and !($iy & 1) and getMatrixElem($ncmatrix, $mx, $my) < $ly*2) {
+				if ($isPeriodicX and !$isLeft and !($iy & 1)) {
 					$mx = int($ix + $lx*2 - 1);
 					$my = int($iy + 1);
 
