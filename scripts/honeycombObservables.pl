@@ -18,9 +18,9 @@ defined($honey) or die "$0: No honey\n";
 my $n1neigh = $honey->{"n1neigh"};
 my $n = $honey->{"info"}->{"n"};
 
-if ($observable eq "je") {
-	my $str = getJe($n1neigh, $n);
-	print "je=$str\n";
+if ($observable eq "jexample") {
+	my $str = getJexample($n1neigh, $n);
+	print "jexample=$str\n";
 	exit(0);
 } elsif ($observable eq "js") {
 	my $str = getJs($n1neigh, $n);
@@ -30,7 +30,7 @@ if ($observable eq "je") {
 	die "$0: Don't know how to print observable $observable\n";
 }
 
-sub getJe
+sub getJexample
 {
 	my ($n1neigh, $n) = @_;
 	# Let $i be a site in the honeycomb lattice, then
@@ -38,7 +38,7 @@ sub getJe
 	# $j = n1neigh->[$i + $dir*$n]
 	# where $dir = 0, 1, or 2.
 	my $sites = scalar(@$n1neigh);
-	
+
 	#Just an example for now
 	# This is \sum_i sz[i] * sz[i+x] * |gs>
 	my $str = "";
