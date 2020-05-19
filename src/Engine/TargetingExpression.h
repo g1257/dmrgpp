@@ -251,7 +251,10 @@ private:
 			return;
 		}
 
-		std::cerr<<"P0="<<pVectors_[0]->lastName()<<"\n";
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+		msg<<"P0="<<pVectors_[0]->lastName();
+		progress_.printline(msgg, std::cout);
 
 		CanonicalExpressionType canonicalExpression(opSpec_);
 		SizeType total = pVectors_.size();
