@@ -37,13 +37,13 @@ sub getJexample
 	# what is the neighbor of $i in direction $dir, it's
 	# $j = n1neigh->[$i + $dir*$n]
 	# where $dir = 0, 1, or 2.
-	my $sites = scalar(@$n1neigh);
 
 	#Just an example for now
 	# This is \sum_i sz[i] * sz[i+x] * |gs>
 	my $str = "";
-	for (my $i = 0; $i < $sites; ++$i) {
+	for (my $i = 0; $i < $n; ++$i) {
 		my $j = $n1neigh->[$i + 0*$n]; # neighbor of $i in the x direction $dir = 0
+
 		$str .= "+" if ($i > 0); # no leading plus
 		$str .= "sz[$i]*sz[$j]*|gs>";
 	}

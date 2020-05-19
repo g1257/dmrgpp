@@ -251,6 +251,8 @@ private:
 			return;
 		}
 
+		std::cerr<<"P0="<<pVectors_[0]->lastName()<<"\n";
+
 		CanonicalExpressionType canonicalExpression(opSpec_);
 		SizeType total = pVectors_.size();
 
@@ -266,6 +268,7 @@ private:
 			if (pVectors_[i]->lastName() == "DONE") continue;
 
 			AlgebraType tmp(aux);
+
 			canonicalExpression(tmp, pVectors_[i]->lastName(), opEmpty, aux);
 			tmp.finalize();
 
@@ -290,7 +293,10 @@ private:
 			PsimagLite::String newpstring = simplifyTerms(thispBefore);
 			if (newpstring != pVectors_[i]->lastName()) {
 				needsTrimming = true;
-				pVectors_[i]->pushString(newpstring);
+				PsimagLite::String compr = compressExpression(newpstring);
+				//checkNoUncompressedExists(compr);
+				pVectors_[i]->pushString(compr);
+				newpstring += compr;
 			}
 
 			allpvectors += newpstring;
@@ -323,6 +329,8 @@ private:
 		// these surviving tempNames_ need storage, add them
 		for (SizeType i = 0; i < ntemps; ++i) {
 			if (removed_[i]) continue;
+			int x = findInAnyNames(tempNames[i]);
+			if (x >= 0) continue;
 			const SizeType ind = this->common().aoe().createPvector(tempVectors[i]);
 			tempToP[i] = ind;
 			const PsimagLite::String ename = expandExpression(tempNames[i], tempToP);
@@ -351,8 +359,18 @@ private:
 
 	int findInOrigNames(PsimagLite::String str) const
 	{
-		assert(origPvectors_ <= pVectors_.size());
-		for (SizeType i = 0; i < origPvectors_; ++i)
+		return findInNames(str, origPvectors_);
+	}
+
+	int findInAnyNames(PsimagLite::String str) const
+	{
+		return findInNames(str, pVectors_.size());
+	}
+
+	int findInNames(PsimagLite::String str, SizeType end) const
+	{
+		assert(end <= pVectors_.size());
+		for (SizeType i = 0; i < end; ++i)
 			if (pVectors_[i]->hasAnyName(str)) return i;
 
 		return -1;
@@ -484,6 +502,17 @@ private:
 		return simplified;
 	}
 
+	static void checkNoUncompressedExists(PsimagLite::String str)
+	{
+		SizeType i = 0;
+		const SizeType len = str.length();
+		if (len < 4) return;
+		for (; i < len; ++i) {
+			if (i + 4 < len && str.substr(i, 3) == "|!m")
+				err("Uncompressed exists in " + str + "\n");
+		}
+	}
+
 	void sumPvectors(SizeType ind0, SizeType ind1, PsimagLite::String p0PlusP1)
 	{
 		assert(ind0 < ind1);
@@ -512,7 +541,10 @@ private:
 			progress_.printline(msgg, std::cout);
 		}
 
-		this->common().aoe().trimVectors();
+		// this line is commented out because then the index of aoe.targetVectors
+		// will be different than the index of pVectors
+		// aoe.targetVectors is resized after all vectors have been computed
+		//this->common().aoe().trimVectors();
 		const SizeType tvsFinal = this->common().aoe().targetVectors().size();
 		if (tvs != tvsFinal) {
 			PsimagLite::OstringStream msgg(std::cout.precision());
