@@ -39,9 +39,6 @@ for (my $i = $offset; $i < $total; ++$i) {
 	print STDERR "$0: About to run for omega = $omega\n";
 	my ($jobid,$outfile) = runThisOmega($i, $omega, $obs, $isAinur);
 	print STDERR "$0: Finished         omega = $omega\n";
-	$jobs .= ":" if ($i > 0);
-	$jobid =~ s/\..*$//;
-	$jobs .= $jobid;
 	push @outfiles, $outfile;
 }
 
