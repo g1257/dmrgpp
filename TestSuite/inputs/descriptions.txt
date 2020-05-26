@@ -68,11 +68,11 @@ Table* (if any): N/A
 Page* where more or less this feature is used: 056706-5
 [* Refers to published version.]
 
-60) t-J one-Orbital (tjOneOrbital) on a chain with t=1 J=1 with 16+16 sites
+60) t-J one-Orbital (TjMultiOrb with Orbitals=1) on a chain with t=1 J=1 with 16+16 sites
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
 
-62) t-J one-Orbital (tjOneOrbital) on a chain with t=-1.0 J=0.25 with 8 sites
-63)  S(q,omega) cut at omega=0.2 for t-J one-Orbital (tjOneOrbital) on a chain with t=-1.0 J=0.25 with 8 sites
+62) t-J one-Orbital (TjMultiOrb with Orbitals=1) on a chain with t=-1.0 J=0.25 with 8 sites
+63)  S(q,omega) cut at omega=0.2 for t-J one-Orbital (TjMultiOrb with Orbitals=1) on a chain with t=-1.0 J=0.25 with 8 sites
 
 65) Paper 29, Table 1, column 1
 InternalControlNumber: 29
