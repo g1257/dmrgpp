@@ -63,7 +63,7 @@ int atoi(String str)
 	for (SizeType i = 0; i < n; ++i) {
 		if (isdigit(str[i])) continue;
 		if (str[i] == '-' || str[i] == '+') continue;
-		throw RuntimeError("atoi received a non-digit\n");
+		throw RuntimeError("atoi received a non-digit: " + str + "\n");
 	}
 
 	return std::atoi(str.c_str());
