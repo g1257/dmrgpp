@@ -39,6 +39,20 @@ public:
 	      solverParams_(solverParams),
 	      modelParams_(io, option == "Ex")
 	{
+		SizeType nsym = this->targetQuantum().sizeOfOther();
+		if (nsym == 0) {
+			std::cout<<"Kondo: Nothing conserved\n";
+		} else if (nsym == 1) {
+			std::cout<<"Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
+			std::cerr<<"Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
+			if (modelParams_.electronHx != 0 || modelParams_.kondoHx != 0)
+				err("Kondo: To use this symmetry electronHx and kondoHx must both be zero\n");
+		} else if (nsym == 2) {
+			std::cout<<"Kondo: Fermionic + Bosonic Sz, and TotalElectrons conserved\n";
+			if (modelParams_.extended)
+				err("Kondo: Extended cannot be used with these symmetries\n");
+		}
+
 		SizeType sitesTimesDof = 2 + modelParams_.twiceTheSpin;
 		SizeType total = (1<<sitesTimesDof);
 		basis_.resize(total);
@@ -224,7 +238,7 @@ private:
 	                                const VectorSizeType& basis) const
 	{
 		qns.resize(basis.size(), QnType::zero());
-		SizeType nsym = (modelParams_.extended) ? 0 : 2;
+		SizeType nsym = this->targetQuantum().sizeOfOther();
 		VectorSizeType other(nsym);
 
 		// bit 0 <--- up electron
@@ -243,7 +257,10 @@ private:
 			SizeType bosonicSz = basis[i];
 			bosonicSz >>= 2; // delete electronic part
 
-			if (other.size() >= 2) {
+			if (other.size() == 1)
+				other[0] = electronsUp + bosonicSz;
+
+			if (other.size() == 2) {
 				other[0] = electrons;
 				other[1] = electronsUp + bosonicSz;
 			}
