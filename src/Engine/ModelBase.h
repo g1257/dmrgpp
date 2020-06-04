@@ -609,7 +609,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return *superOpHelper_;
 	}
 
-protected:
+// protected:
 
 	PsimagLite::String oracle(const RealType& energy,
 	                          const PsimagLite::String formula) const

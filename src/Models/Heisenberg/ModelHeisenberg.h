@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_MODEL_HEISENBERG_HEADER_H
 #define DMRG_MODEL_HEISENBERG_HEADER_H
 
+#include "Aklt.h"
 #include <algorithm>
 #include "ParametersModelHeisenberg.h"
 #include "CrsMatrix.h"
@@ -127,6 +128,7 @@ public:
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef Aklt<ModelBaseType> AkltType;
 
 	ModelHeisenberg(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
@@ -138,7 +140,8 @@ public:
 	      modelParameters_(io),
 	      superGeometry_(geometry),
 	      additional_(additional),
-	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
+	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
+	      aklt_(*this, additional)
 	{
 		SizeType n = superGeometry_.numberOfSites();
 		SizeType m = modelParameters_.magneticFieldV.size();
@@ -303,6 +306,8 @@ protected:
 
 			if (additional_ == "Anisotropic")
 				this->makeTrackable("sx");
+
+			aklt_.fillLabeledOperators(i, myOp.getCRS(), myOp2.getCRS());
 		}
 	}
 
@@ -340,6 +345,8 @@ protected:
 
 			sxsx.push(sx, 'N', sx, 'N', typename ModelTermType::Su2Properties(2, 1, 0));
 		}
+
+		aklt_.fillModelLinks();
 	}
 
 private:
@@ -486,6 +493,7 @@ private:
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	PsimagLite::String additional_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
+	AkltType aklt_;
 }; // class ModelHeisenberg
 
 } // namespace Dmrg
