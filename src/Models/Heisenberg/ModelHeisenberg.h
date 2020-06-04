@@ -291,8 +291,6 @@ protected:
 			this->createOpsLabel("sz").push(myOp2);
 			this->makeTrackable("sz");
 
-			if (additional_ != "Anisotropic") continue; // <--- LOOP SKIP
-
 			// Set the operators S^x_i in the natural basis
 			tmpMatrix = findSxMatrices(i,natBasis);
 			typename OperatorType::Su2RelatedType su2related3;
@@ -302,7 +300,9 @@ protected:
 			                   1.0/sqrt(2.0),
 			                   su2related3);
 			this->createOpsLabel("sx").push(myOp3);
-			this->makeTrackable("sx");
+
+			if (additional_ == "Anisotropic")
+				this->makeTrackable("sx");
 		}
 	}
 
@@ -332,13 +332,14 @@ protected:
 			spsm.push(splus, 'N', splus, 'C', valueModifierTermOther, su2properties);
 		}
 
-		if (additional_ != "Anisotropic") return; // <--- EARLY EXIT HERE
+		if (additional_ == "Anisotropic") {
 
-		ModelTermType& sxsx = ModelBaseType::createTerm("sxsx");
+			ModelTermType& sxsx = ModelBaseType::createTerm("sxsx");
 
-		OpForLinkType sx("sx");
+			OpForLinkType sx("sx");
 
-		sxsx.push(sx, 'N', sx, 'N', typename ModelTermType::Su2Properties(2, 1, 0));
+			sxsx.push(sx, 'N', sx, 'N', typename ModelTermType::Su2Properties(2, 1, 0));
+		}
 	}
 
 private:
