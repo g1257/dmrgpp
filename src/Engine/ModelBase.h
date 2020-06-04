@@ -632,9 +632,9 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		modelLinks_.makeTrackable(name);
 	}
 
-	static ModelTermType& createTerm(PsimagLite::String name)
+	static ModelTermType& createTerm(PsimagLite::String name, bool wantsHermitian = true)
 	{
-		return modelLinks_.createTerm(name);
+		return modelLinks_.createTerm(name, wantsHermitian);
 	}
 
 	virtual SuperOpHelperBaseType* setSuperOpHelper()

@@ -321,6 +321,8 @@ private:
 				lps_.push_back(link2);
 
 				// add h.c. parts if needed
+				if (!term.wantsHermitian()) continue;
+
 				if (manyToTwo.connectionIsHermitian(modelLinks_)) continue;
 
 				link2.value = PsimagLite::conj(tmp);

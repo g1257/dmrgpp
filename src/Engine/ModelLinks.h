@@ -93,9 +93,12 @@ public:
 		typedef typename OneLinkType::LambdaType LambdaType;
 
 		// pair of sites should actually be pair of kinds of sites
-		Term(PsimagLite::String name) // name of term, not name of operator
-		    : name_(name)
+		Term(PsimagLite::String name, bool wantsHermitian = true) // name of term,
+		                                                          // not name of operator
+		    : name_(name), wantsHermitian_(wantsHermitian)
 		{}
+
+		bool wantsHermitian() const { return wantsHermitian_; }
 
 		bool areSitesCompatible(const VectorSizeType& actualSites) const
 		{
@@ -244,6 +247,7 @@ public:
 		Term& operator=(const Term&);
 
 		PsimagLite::String name_; // name of term, not name of operator
+		const bool wantsHermitian_;
 		VectorOneLinkType links_;
 		VectorSizeType vectorKind_;
 	};
@@ -333,7 +337,7 @@ public:
 		trackables_.push_back(what);
 	}
 
-	Term& createTerm(PsimagLite::String name)
+	Term& createTerm(PsimagLite::String name, bool wantsHermitian)
 	{
 		typename VectorTermType::const_iterator x = std::find_if(terms_.begin(),
 		                                                         terms_.end(),
@@ -342,7 +346,7 @@ public:
 		if (x != terms_.end())
 			err("Repeated term " + name + "\n");
 
-		Term* term = new Term(name);
+		Term* term = new Term(name, wantsHermitian);
 		terms_.push_back(term);
 		return *term;
 	}

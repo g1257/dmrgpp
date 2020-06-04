@@ -69,7 +69,7 @@ public:
 	void fillModelLinks()
 	{
 		if (!enabled_) return;
-		ModelTermType& aklt = ModelBaseType::createTerm("Aklt");
+		ModelTermType& aklt = ModelBaseType::createTerm("Aklt", false);
 		const auto su2prop = typename ModelTermType::Su2Properties(1, 0);
 		for (SizeType mu = 0; mu < 3; ++mu) { // mu = 0 is S+, mu = 1 is S-, mu=2 is Sz
 			for (SizeType mup = 0; mup < 3; ++mup) {
