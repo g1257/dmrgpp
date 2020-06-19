@@ -246,7 +246,7 @@ public:
 	{
 		if (braOrKet.isPvector()) {
 			const SizeType pIndex = braOrKet.pIndex();
-			return timeVector(index, pIndex);
+			return timeVector(pIndex, index);
 		}
 
 		return psiConst(index, braOrKet.sectorIndex(), braOrKet.levelIndex());

@@ -24,15 +24,18 @@ while (<FILE>) {
 
 close(FILE);
 
+my $total = 0;
 for (my $y = 0; $y < $ly; ++$y) {
 	for (my $x = 0; $x < $lx; ++$x) {
 		my $ind = $y + $x*$ly;
 		my $tmp = $value[$ind];
 		defined($tmp) or $tmp = "X";
+		$total += $tmp unless ($tmp eq  "X");
 		print "$tmp ";
 	}
 
 	print "\n";
 }
 
+print "#TOTAL=$total\n";
 
