@@ -31,7 +31,8 @@ while (<FIN>) {
 close(FIN);
 
 my $nsites = scalar(@a);
-print STDERR "$0: Found $nsites sites in $file\n";
+my $tt = scalar(keys %times);
+print STDERR "$0: Found $nsites sites and $tt times in $file\n";
 
 for my $time (sort keys %times) {
 	for (my $site = 0; $site < $nsites; ++$site) {
