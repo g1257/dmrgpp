@@ -5,27 +5,35 @@ use warnings;
 use utf8;
 use Math::Trig;
 
+my $pi = Math::Trig::pi;
 my ($file, $wbegin, $wtotal, $wstep, $mode) = @ARGV;
 defined($wstep) or die "USAGE: $0 filename wbegin wtotal wstep [mode]\n";
 defined($mode) or $mode = -1;
 my @data;
 
-loadData(\@data, $file);
+my $tmax = loadData(\@data, $file);
 my $n = scalar(@data);
 print STDERR "$0: Found $n sites\n";
 printLoadedData(\@data, $mode) if ($mode >= 0);
 
 my @omegas = fillOmegas($wbegin, $wtotal, $wstep);
-my @dataOmega = ftTime(\@data, \@omegas);
+my @dataOmega = ftTime(\@data, \@omegas, \&dampFunction);
 printSpaceOmega(\@dataOmega, \@omegas) if ($mode == -2);
 
 my @dataOmegaK = ftSpace(\@dataOmega, scalar(@omegas));
 
 printData(\@dataOmegaK, \@omegas) if ($mode == -1);
 
+sub dampFunction
+{
+	my ($time) = @_;
+	return 0.5*(1.0+cos(($time)*pi/$tmax));
+}
+
 sub loadData
 {
 	my ($data, $file) = @_;
+	my $tmax = 0;
 	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
 	while (<FILE>) {
 		next if (/^#/);
@@ -37,6 +45,8 @@ sub loadData
 		$value = "(0,0)" if ($value eq "-100");
 		my $h = {"time" => $time, "value" => $value};
 
+		$tmax = $time if ($time > $tmax);
+
 		if (defined($data->[$site])) {
 			my $a = $data->[$site];
 			push @$a, $h;
@@ -47,6 +57,7 @@ sub loadData
 	}
 
 	close(FILE);
+	return $tmax;
 }
 
 sub printLoadedData
@@ -101,11 +112,11 @@ sub fillOmegas
 
 sub ftTime
 {
-	my ($data, $omegas) = @_;
+	my ($data, $omegas, $dampF) = @_;
 	my @dataO;
 	for (my $i = 0; $i < $n; ++$i) {
 		my $src = $data->[$i];
-		my @dest = ftTimeOneSite($src, $omegas);
+		my @dest = ftTimeOneSite($src, $omegas, $dampF);
 		$dataO[$i] = \@dest;
 	}
 
@@ -128,7 +139,7 @@ sub printSpaceOmega
 
 sub ftTimeOneSite
 {
-	my ($src, $omegas) = @_;
+	my ($src, $omegas, $dampF) = @_;
 	# a(omega) = \sum_times sin(omega*t) * src[t]
 	my @dest;
 	my $n = scalar(@$omegas);
@@ -142,8 +153,9 @@ sub ftTimeOneSite
 			my $value = $ptr->{"value"};
 			my ($c, $s) = (cos($omega*$time), sin($omega*$time));
 			my ($re, $im) = realImag($value);
-			$sumr += ($c*$re - $s*$im);
-			$sumi += ($c*$im + $s*$re);
+			my $damp = $dampF->($time);
+			$sumr += ($c*$re - $s*$im)*$damp;
+			$sumi += ($c*$im + $s*$re)*$damp;
 		}
 
 		$dest[$i] = "(".$sumr.",".$sumi.")";
@@ -196,7 +208,6 @@ sub ftSpace
 sub printData
 {
 	my ($vals, $omegas) = @_;
-	my $pi = Math::Trig::pi;
 	my $n = scalar(@$omegas);
 	my $sites = scalar(@$vals);
 	for (my $i = 0; $i < $n; ++$i) {

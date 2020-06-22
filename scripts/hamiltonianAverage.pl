@@ -12,7 +12,8 @@ while(<STDIN>) {
 }
 
 while(<STDIN>) {
-	if (/Hamiltonian average at time=([^ ]+) for target=0 sector=[^ ]+ \<phi\(t\)\|H\|phi\(t\)\>=\(([^,]+),[^\)]+\) +\<phi\(t\)\|phi\(t\)\>=\(([^,]+),/) {
+	#if (/Hamiltonian average at time=([^ ]+) for target=0 sector=[^ ]+ \<phi\(t\)\|H\|phi\(t\)\>=\(([^,]+),[^\)]+\) +\<phi\(t\)\|phi\(t\)\>=\(([^,]+),/) {
+	if (/Hamiltonian average at time=([^ ]+) for target=0 sector=[^ ]+ \<phi\(t\)\|H\|phi\(t\)\>=([^ ]+) +\<phi\(t\)\|phi\(t\)\>=([^ ]+)/) {
 		$time = $1;
 		if ($seenTime{$time}) {
 			$val{$time}=0;
