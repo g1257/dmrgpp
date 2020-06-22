@@ -20,7 +20,7 @@ while (<FIN>) {
 	next if (scalar(@tmp) < 5);
 
 	my $site = $tmp[0];
-	my $value = realPartOf($tmp[1]);
+	my $value = $tmp[1];
 	my $time = $tmp[2];
 	my $superdensity = realPartOf($tmp[4]);
 

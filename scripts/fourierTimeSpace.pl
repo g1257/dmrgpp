@@ -34,9 +34,9 @@ sub loadData
 		my $time = $temp[0];
 		my $site = $temp[1];
 		my $value = $temp[2];
-		$value = 0 if ($value == -100);
+		$value = "(0,0)" if ($value eq "-100");
 		my $h = {"time" => $time, "value" => $value};
-		
+
 		if (defined($data->[$site])) {
 			my $a = $data->[$site];
 			push @$a, $h;
@@ -120,8 +120,8 @@ sub printSpaceOmega
 	my $center = int($sites/2);
 	for (my $i = 0; $i < $n; ++$i) {
 		my $omega = $omegas->[$i];
-		my $value = $dataOmega->[$center]->[$i];
-		print "$omega $value\n";
+		my ($re, $im) = realImag($dataOmega->[$center]->[$i]);
+		print "$omega $re $im\n";
 	}
 }
 
@@ -135,24 +135,40 @@ sub ftTimeOneSite
 	my $m = scalar(@$src);
 	for (my $i = 0; $i < $n; ++$i) {
 		my $omega = $omegas->[$i];
-		my $sum = 0;
+		my ($sumr, $sumi) = (0, 0);
 		for (my $j = 0; $j < $m; ++$j) {
 			my $ptr = $src->[$j];
 			my $time = $ptr->{"time"};
 			my $value = $ptr->{"value"};
-			$sum += sin($omega*$time)*$value;
+			my ($c, $s) = (cos($omega*$time), sin($omega*$time));
+			my ($re, $im) = realImag($value);
+			$sumr += ($c*$re - $s*$im);
+			$sumi += ($c*$im + $s*$re);
 		}
 
-		$dest[$i] = $sum;
+		$dest[$i] = "(".$sumr.",".$sumi.")";
 	}
 
 	return @dest;
 }
 
+sub realImag
+{
+	my ($x) = @_;
+	my @temp = split/,/, $x;
+	my $n = scalar(@temp);
+	$n == 2 or die "$0: Complex number $x\n";
+	my $re = $temp[0];
+	my $im = $temp[1];
+	$re =~ s/\(//;
+	$im =~ s/\)//;
+	return ($re, $im);
+}
+
 sub ftSpace
 {
 	my ($src, $omegas) = @_;
-	
+
 	my @dest;
 	my $ks = scalar(@$src);
 	my $sites = $ks;
@@ -160,7 +176,7 @@ sub ftSpace
 		my @dummy;
 		$dest[$k] = \@dummy;
 	}
- 
+
 	for (my $i = 0; $i < $omegas; ++$i) {
 		my @values;
 		for (my $j = 0; $j < $sites; ++$j) {
@@ -168,7 +184,7 @@ sub ftSpace
 		}
 
 		my @tmp = ftSpaceOneOmega(\@values);
-	
+
 		for (my $k = 0; $k < $ks; ++$k) {
 			$dest[$k]->[$i] = $tmp[$k];
 		}
@@ -188,9 +204,10 @@ sub printData
 		for (my $k = 0; $k < $sites; ++$k) {
 			my $kactual = 2*$k*$pi/$sites;
 			my $value = $vals->[$k]->[$i];
-			$value = 0 if (fabs($value) < 1e-4);
-			$value = int($value*1000)/1000;
-			print "$kactual $omega $value\n";
+			my ($re, $im) = realImag($value);
+			#$value = 0 if (fabs($value) < 1e-4);
+			#$value = int($value*1000)/1000;
+			print "$kactual $omega $im\n";
 		}
 
 		print "\n";
@@ -212,15 +229,19 @@ sub ftSpaceOneOmega
 	my $pi = Math::Trig::pi;
 	for (my $k = 0; $k < $n; ++$k) {
 		my $kactual = 2*$k*$pi/$n;
-		my $sum = 0;
+		my ($sumr, $sumi) = (0, 0);
 		for (my $i = 0; $i < $n; ++$i) {
-			$sum += $array->[$i]*cos($kactual*($i-$center));
+			my ($re, $im) = realImag($array->[$i]);
+			my $arg = $kactual*($i-$center);
+			my ($c, $s) = (cos($arg), sin($arg));
+			$sumr += $c*$re - $s*$im;
+			$sumi += $c*$im + $s*$re;
+			#$sum += $array->[$i]*cos($kactual*($i-$center));
 		}
 
-		$dest[$k] = $sum;
+		$dest[$k] = "(".$sumr.",".$sumi.")";
 	}
 
 	return @dest;
 }
-
 
