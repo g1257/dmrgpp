@@ -241,6 +241,8 @@ private:
 		SizeType nsym = this->targetQuantum().sizeOfOther();
 		VectorSizeType other(nsym);
 
+		if (nsym == 1) QnType::ifPresentOther0IsElectrons = false;
+
 		// bit 0 <--- up electron
 		// bit 1 <--- down electron
 		// bit 2 <--- localized spin down

@@ -752,7 +752,7 @@ private:
 		for (SizeType p = 0; p < n; ++p) {
 			SizeType start = offsets_[p];
 			SizeType end = offsets_[p + 1];
-			SizeType expected = (qns_[p].other[0] & 1);
+			bool expected = (qns_[p].other[0] & 1);
 			for (SizeType i = start; i < end; ++i) {
 				if (signs_[i] != expected)
 					err("Unexpected sign\n");
