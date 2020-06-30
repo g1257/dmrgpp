@@ -524,8 +524,15 @@ public:
 		      dummy_("")
 		{
 			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
-			if (inputWriteable.ainurMode())
+			if (inputWriteable.ainurMode()) {
+				if (extensionOf(file_) == "inp") {
+					String w("WARNING: Ainur file but inp file extension\n");
+					std::cout<<AnsiColor::magenta<<w<<AnsiColor::reset;
+					std::cerr<<AnsiColor::magenta<<w<<AnsiColor::reset;
+				}
+
 				ainur_ = new Ainur(inputWriteable.inputCheck().import() + data_);
+			}
 		}
 
 		~Readable()
@@ -935,6 +942,33 @@ public:
 			if (label2.length()>0 && label2!=label) s += " (a.k.a. " + label2 +")";
 			s += " was not found in the input file.\n";
 			throw RuntimeError(s.c_str());
+		}
+
+		static String extensionOf(String s)
+		{
+			const SizeType l = s.length();
+			String buffer;
+			bool flag = false;
+			for (SizeType i = 0; i < l; ++i) {
+				const SizeType j = l - i - 1;
+				if (s[j] == '.') {
+					flag = true;
+					break;
+				}
+
+				buffer += s[j];
+			}
+
+			if (!flag) return "";
+
+			String buffer2 = buffer;
+			const SizeType l2 = buffer.length();
+			for (SizeType i = 0; i < l2; ++i) {
+				const SizeType j = l2 - i - 1;
+				buffer2[j] = buffer[i];
+			}
+
+			return buffer2;
 		}
 
 		//serializr start class InputNgReadable
