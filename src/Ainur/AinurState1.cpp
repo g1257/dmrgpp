@@ -69,7 +69,8 @@ struct MyProxyFor<ComplexOrRealType, true> {
 			buffer += str[i];
 		}
 
-		return ComplexOrRealType(real1, atof(buffer.c_str()));
+		return (flag) ? ComplexOrRealType(real1, atof(buffer.c_str())) :
+		                ComplexOrRealType(atof(buffer.c_str()), 0);
 	}
 };
 
