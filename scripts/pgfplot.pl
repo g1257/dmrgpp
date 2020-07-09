@@ -50,8 +50,8 @@ sub fromTexToTex
 	$dirForTex =~ s/pgfplot\.pl$//;
 	die "$0: Not a directory $dirForTex\n" unless (-d "$dirForTex");
 
-	system("cp $dirForTex/sample.tex .");
-	system("cp $dirForTex/palette.tex .");
+	system("cp $dirForTex/sample.tex .") unless (-r "sample.tex");
+	system("cp $dirForTex/palette.tex .") unless (-r "palette.tex");
 
 	copyAndEdit($fout, $file, $name);
 
