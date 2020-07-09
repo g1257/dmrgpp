@@ -34,7 +34,7 @@ my $nsites = scalar(@a);
 my $tt = scalar(keys %times);
 print STDERR "$0: Found $nsites sites and $tt times in $file\n";
 
-for my $time (sort keys %times) {
+foreach my $time (sort {$a <=> $b} keys %times) {
 	for (my $site = 0; $site < $nsites; ++$site) {
 		my $pair = $a[$site]{"$time"};
 		if (!defined($pair)) {

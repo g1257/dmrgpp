@@ -4,26 +4,27 @@ use strict;
 use warnings;
 use utf8;
 
-my ($uroot, $lOrUp) = @ARGV;
+my ($uroot, $runLatex, $lOrUp) = @ARGV;
 
-defined($uroot) or die "USAGE: $0 root [L | U | sz]\n";
+defined($uroot) or die "USAGE: $0 root [runLatex=1] [L | U | sz]\n";
+defined($runLatex) or $runLatex = 1;
 
 if (!defined($lOrUp)) {
 	my $file = "sample.tex";
 	my $fout = "$uroot.tex";
 	my $name = "$uroot.pgfplots";
-	fromTexToTex($fout, $file, $name);;
+	fromTexToTex($fout, $file, $name, $runLatex);
 	exit(0);
 }
 
 my $root = "$uroot$lOrUp"."_ky";
 
-doFile(0, $root);
-doFile(1, $root);
+doFile(0, $root, $runLatex);
+doFile(1, $root, $runLatex);
 
 sub doFile
 {
-	my ($ind, $root) = @_;
+	my ($ind, $root, $runLatex) = @_;
 
 	my $file = "outSpectrum$ind.pgfplots";
 	return unless (-r "$file");
@@ -38,12 +39,12 @@ sub doFile
 
 	my $name = $fout;
 	$name =~ s/tex$/pgfplots/;
-	fromTexToTex($fout, $file, $name);
+	fromTexToTex($fout, $file, $name, $runLatex);
 }
 
 sub fromTexToTex
 {
-	my ($fout, $file, $name) = @_;
+	my ($fout, $file, $name, $runLatex) = @_;
 
 	my $dirForTex = $0;
 	$dirForTex =~ s/pgfplot\.pl$//;
@@ -53,6 +54,8 @@ sub fromTexToTex
 	system("cp $dirForTex/palette.tex .");
 
 	copyAndEdit($fout, $file, $name);
+
+	return if (!$runLatex);
 
 	my $cmd = "pdflatex $fout";
 	system("$cmd");
