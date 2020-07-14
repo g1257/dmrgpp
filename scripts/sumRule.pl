@@ -15,9 +15,14 @@ printData(\%data);
 sub printData
 {
 	my ($data) = @_;
+	my $sum = 0;
 	foreach my $k (sort {$a <=> $b} keys %$data) {
-		print "$k ".$data->{$k}."\n";
+		my $value = $data->{$k};
+		$sum += $value;
+		print "$k $value\n";
 	}
+	
+	print STDERR "#Sum=$sum\n";
 }
 
 sub loadData
