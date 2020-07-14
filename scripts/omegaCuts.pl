@@ -9,7 +9,7 @@ defined($file) or die "USAGE: $0 filename\n";
 
 my @kvalues = (0, 3.1415927);
 my @data = loadData($file, \@kvalues);
-	die "$0: No k values found in $file\n" if (scalar(@data) == 0);
+die "$0: No k values found in $file\n" if (scalar(@data) == 0);
 
 printData(\@data, \@kvalues);
 
@@ -36,6 +36,7 @@ sub printData
 sub loadData
 {
 	my ($file, $kvalues) = @_;
+	my @data;
 	open(FILE, "<", $file) or die "$0: Cannot open $file : $!\n";
 	while (<FILE>) {
 		chomp;
