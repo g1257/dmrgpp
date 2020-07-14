@@ -31,26 +31,26 @@ while (<FILE>) {
 		if ($n > 0 and !defined($lastTitle)) {
 			die "$0: Saw (\\d+): before DATASET\n";
 		}
-		
+
 		if ($n > 0) {
 			if (defined($lengthOfData) and $lengthOfData != $n) {
 				die "$0: Sets of different sizes for $lastTitle $lengthOfData != $n\n";
 			}
-		
+
 			$lengthOfData = $n;
-			
+
 			my @copy = @buffer;
 			$h{"$lastTitle"} = \@copy;
 			@buffer = ();
 		}
-			
+
 		$lastTitle=$1;
 		$lastTitle=~s/\"//g;
 		$lastTitle=~s/[\{\}]//g;
 		$lastTitle=~s/ //g;
 		next;
 	}
-	
+
 	if (/\(\d+\)\:(.+$)/) {
 		my $tmp = $1;
 		$tmp =~ s/, *$//;
@@ -61,6 +61,17 @@ while (<FILE>) {
 }
 
 close(FILE);
+
+my $n = scalar(@buffer);
+if ($n > 0) {
+	if (defined($lengthOfData) and $lengthOfData != $n) {
+		die "$0: Sets of different sizes for $lastTitle $lengthOfData != $n\n";
+	}
+
+	my @copy = @buffer;
+	$h{"$lastTitle"} = \@copy;
+	@buffer = ();
+}
 
 printHash(\%h, $lengthOfData);
 
@@ -73,9 +84,9 @@ sub printHash
 		foreach my $key (sort {$a <=> $b} keys %$h) {
 			my $ptr = $h->{"$key"};
 			my $m = scalar(@$ptr);
-			print " ".$ptr->[$l];	
+			print " ".$ptr->[$l];
 		}
-		
+
 		print "\n";
 	}
 }
