@@ -10,6 +10,10 @@ defined($uroot) or die "USAGE: $0 root [runLatex=1] [L | U | sz]\n";
 defined($runLatex) or $runLatex = 1;
 
 if (!defined($lOrUp)) {
+	if ($uroot =~ /(^[^\.]+)\.pgfplots/) {
+		$uroot = $1;
+	}
+
 	my $file = "sample.tex";
 	my $fout = "$uroot.tex";
 	my $name = "$uroot.pgfplots";
