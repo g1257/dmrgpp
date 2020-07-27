@@ -77,14 +77,19 @@ bool isAnInteger(String str)
 		return false;
 	}
 
-	return true;
+	return (n > 0);
 }
 
 bool isAfloat(String str)
 {
 	const SizeType n = str.length();
+	bool hasDigit = false;
 	for (SizeType i = 0; i < n; ++i) {
-		if (isdigit(str[i])) continue;
+		if (isdigit(str[i])) {
+			hasDigit = true;
+			continue;
+		}
+
 		if (str[i] == '-' ||
 		        str[i] == '+' ||
 		        str[i] == 'e' ||
@@ -93,7 +98,7 @@ bool isAfloat(String str)
 		return false;
 	}
 
-	return true;
+	return hasDigit;
 }
 
 double atof(String str)
