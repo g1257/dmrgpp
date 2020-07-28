@@ -9,9 +9,12 @@ int main()
 
 	RealType ficticiousBeta = 0.01;
 	SizeType nMatsubara = 100;
-	DispersionType dispersion;
+	SizeType numberOfKpoints = 50;
+	RealType mu = 0.0;
 
-	DmftSolverType dmftSolver(ficticiousBeta, nMatsubara, dispersion);
+	DispersionType dispersion(numberOfKpoints);
+
+	DmftSolverType dmftSolver(ficticiousBeta, nMatsubara, dispersion, mu);
 
 	dmftSolver.selfConsistencyLoop();
 }
