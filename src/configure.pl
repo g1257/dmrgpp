@@ -59,7 +59,7 @@ $args{"configFiles"} = \@configFiles;
 #$args{"additional3"} = "GitRevision.h";
 #$args{"additional4"} = $args{"additional3"};
 
-#system("./createGitRevision.pl GitRevision.h");
+system("./createGitRevision.pl GitRevision.h");
 
 createMakefile(\@drivers, \%args);
 
@@ -71,8 +71,18 @@ sub createMakefile
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
+	local *FH = $fh;
+print FH<<EOF;
+
+.PHONY: GitRevision.h
+
+GitRevision.h:
+	./createGitRevision.pl GitRevision.h
+EOF
 
 	NewMake::main($fh, $args, $drivers);
+	close($fh);
+
 	print STDERR "$0: File Makefile has been written\n";
 }
 

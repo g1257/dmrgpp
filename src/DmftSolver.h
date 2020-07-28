@@ -2,6 +2,7 @@
 #define DMFTSOLVER_H
 #include "FunctionOfFrequency.h"
 #include "Dispersion.h"
+#include "Fit.h"
 
 namespace Dmft {
 
@@ -13,24 +14,28 @@ public:
 	typedef FunctionOfFrequency<ComplexOrRealType> FunctionOfFrequencyType;
 	typedef typename FunctionOfFrequencyType::RealType RealType;
 	typedef Dmft::Dispersion<ComplexOrRealType> DispersionType;
+	typedef Fit<ComplexOrRealType> FitType;
+	typedef typename FitType::MinParams MinParamsType;
 
 	DmftSolver(RealType fictiousBeta,
 	           SizeType nMatsubaras,
 	           const DispersionType& dispersion,
-	           RealType mu)
+	           RealType mu,
+	           SizeType nBath,
+	           const MinParamsType& minParams)
 	    : sigma_(fictiousBeta, nMatsubaras),
 	      latticeG_(fictiousBeta, nMatsubaras),
 	      gammaG_(fictiousBeta, nMatsubaras),
 	      dispersion_(dispersion),
-	      mu_(mu)
+	      mu_(mu),
+	      fit_(nBath, minParams)
 	{}
 
 	void selfConsistencyLoop()
 	{
 		computeLatticeGf();
 
-		fitBathParams();
-
+		fit_.fit();
 	}
 
 private:
@@ -53,16 +58,12 @@ private:
 		}
 	}
 
-	void fitBathParams()
-	{
-
-	}
-
 	FunctionOfFrequencyType sigma_;
 	FunctionOfFrequencyType latticeG_;
 	FunctionOfFrequencyType gammaG_;
 	const DispersionType& dispersion_;
 	RealType mu_;
+	FitType fit_;
 };
 }
 #endif // DMFTSOLVER_H
