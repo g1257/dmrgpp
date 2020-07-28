@@ -20,6 +20,7 @@ public:
 	           RealType mu)
 	    : sigma_(fictiousBeta, nMatsubaras),
 	      latticeG_(fictiousBeta, nMatsubaras),
+	      gammaG_(fictiousBeta, nMatsubaras),
 	      dispersion_(dispersion),
 	      mu_(mu)
 	{}
@@ -27,6 +28,9 @@ public:
 	void selfConsistencyLoop()
 	{
 		computeLatticeGf();
+
+		fitBathParams();
+
 	}
 
 private:
@@ -45,11 +49,18 @@ private:
 			}
 
 			latticeG_(i) = sum/static_cast<RealType>(totalKvalues);
+			gammaG_(i) = wn - 1.0/latticeG_(i) - value;
 		}
+	}
+
+	void fitBathParams()
+	{
+
 	}
 
 	FunctionOfFrequencyType sigma_;
 	FunctionOfFrequencyType latticeG_;
+	FunctionOfFrequencyType gammaG_;
 	const DispersionType& dispersion_;
 	RealType mu_;
 };
