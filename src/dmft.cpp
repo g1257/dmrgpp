@@ -12,7 +12,7 @@ void usage(const PsimagLite::String& name)
 
 int main(int argc, char** argv)
 {
-	PsimagLite::PsiApp application("observe",&argc,&argv,1);
+	PsimagLite::PsiApp application("dmft", &argc, &argv, 1);
 	typedef PsimagLite::InputNg<Dmft::InputCheck> InputNgType;
 	typedef Dmft::DmftSolver<std::complex<double>,  InputNgType> DmftSolverType;
 	typedef DmftSolverType::ParamsDmftSolverType ParamsDmftSolverType;

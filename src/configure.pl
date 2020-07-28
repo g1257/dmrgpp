@@ -44,11 +44,12 @@ if ($lto == 1) {
 my $basicConfig = "ConfigBase.psiTag";
 my @configFiles = NewMake::configFilesList($basicConfig, $config);
 
-my $dotos = "dmft.o";
+my $dotos = "dmft.o Provenance.o";
 
 my %dmftMain = (name => 'dmft', dotos => "$dotos");
+my %provenance = (name => 'Provenance', aux => 1);
 
-my @drivers = (\%dmftMain);
+my @drivers = (\%dmftMain, \%provenance);
 
 my %args;
 $args{"CPPFLAGS"} = $lto;
@@ -56,8 +57,8 @@ $args{"LDFLAGS"} = $lto;
 $args{"flavor"} = $flavor;
 $args{"code"} = "Dmft";
 $args{"configFiles"} = \@configFiles;
-#$args{"additional3"} = "GitRevision.h";
-#$args{"additional4"} = $args{"additional3"};
+$args{"additional3"} = "GitRevision.h";
+$args{"additional4"} = $args{"additional3"};
 
 system("./createGitRevision.pl GitRevision.h");
 

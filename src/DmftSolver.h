@@ -33,7 +33,7 @@ public:
 	{
 		computeLatticeGf();
 
-		fit_.fit();
+		fit_.fit(gammaG_);
 	}
 
 private:
