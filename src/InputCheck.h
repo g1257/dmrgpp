@@ -179,6 +179,13 @@ public:
 		return false;
 	}
 
+	bool check(const PsimagLite::String& label,
+	           const PsimagLite::String& vec,
+	           SizeType line) const
+	{
+		return false;
+	}
+
 	bool checkSimpleLabel(const PsimagLite::String& label,
 	                      SizeType line) const
 	{

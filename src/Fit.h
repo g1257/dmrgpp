@@ -1,6 +1,7 @@
 #ifndef FIT_H
 #define FIT_H
 #include "Minimizer.h"
+#include "MinParams.h"
 
 namespace Dmft {
 
@@ -11,23 +12,13 @@ public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-
-	struct MinParams {
-		MinParams(RealType d, RealType d2, RealType t, SizeType m)
-		    : delta(d), delta2(d2), tolerance(t), maxIter(m)
-		{}
-
-		RealType delta;
-		RealType delta2;
-		RealType tolerance;
-		SizeType maxIter;
-	};
+	typedef MinParams<RealType> MinParamsType;
 
 	class AndersonFunction {
 
 	};
 
-	Fit(SizeType nBath, MinParams& minParams) : results_(2*nBath), minParams_(minParams)
+	Fit(SizeType nBath, const MinParamsType& minParams) : minParams_(minParams), results_(2*nBath)
 	{}
 
 	void fit()
@@ -44,7 +35,7 @@ public:
 
 private:
 
-	const MinParams& minParams_;
+	const MinParamsType& minParams_;
 	VectorRealType results_;
 };
 }

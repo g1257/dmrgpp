@@ -13,10 +13,9 @@ void usage(const PsimagLite::String& name)
 int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("observe",&argc,&argv,1);
-	typedef Dmft::DmftSolver<std::complex<double> > DmftSolverType;
-	typedef DmftSolverType::RealType RealType;
-	typedef DmftSolverType::DispersionType DispersionType;
 	typedef PsimagLite::InputNg<Dmft::InputCheck> InputNgType;
+	typedef Dmft::DmftSolver<std::complex<double>,  InputNgType> DmftSolverType;
+	typedef DmftSolverType::ParamsDmftSolverType ParamsDmftSolverType;
 
 	int opt = 0;
 	bool versionOnly = false;
@@ -60,9 +59,8 @@ int main(int argc, char** argv)
 	InputNgType::Writeable ioWriteable(inputfile, inputCheck);
 	InputNgType::Readable io(ioWriteable);
 
-	DispersionType dispersion(numberOfKpoints);
-
-	DmftSolverType dmftSolver(ficticiousBeta, nMatsubara, dispersion, mu);
+	ParamsDmftSolverType params(io);
+	DmftSolverType dmftSolver(params);
 
 	dmftSolver.selfConsistencyLoop();
 }

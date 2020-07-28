@@ -14,7 +14,7 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 
-	FunctionOfFrequency(RealType& fictBeta, SizeType nMatsubara)
+	FunctionOfFrequency(RealType fictBeta, SizeType nMatsubara)
 	    : fictBeta_(fictBeta),
 	      nMatsubara_(nMatsubara),
 	      matsubaras_(2*nMatsubara),

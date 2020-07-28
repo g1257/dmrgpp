@@ -3,10 +3,11 @@
 #include "FunctionOfFrequency.h"
 #include "Dispersion.h"
 #include "Fit.h"
+#include "ParamsDmftSolver.h"
 
 namespace Dmft {
 
-template<typename ComplexOrRealType>
+template<typename ComplexOrRealType, typename InputNgType>
 class DmftSolver {
 
 public:
@@ -15,20 +16,17 @@ public:
 	typedef typename FunctionOfFrequencyType::RealType RealType;
 	typedef Dmft::Dispersion<ComplexOrRealType> DispersionType;
 	typedef Fit<ComplexOrRealType> FitType;
-	typedef typename FitType::MinParams MinParamsType;
+	typedef typename FitType::MinParamsType MinParamsType;
+	typedef ParamsDmftSolver<ComplexOrRealType, InputNgType> ParamsDmftSolverType;
 
-	DmftSolver(RealType fictiousBeta,
-	           SizeType nMatsubaras,
-	           const DispersionType& dispersion,
-	           RealType mu,
-	           SizeType nBath,
-	           const MinParamsType& minParams)
-	    : sigma_(fictiousBeta, nMatsubaras),
-	      latticeG_(fictiousBeta, nMatsubaras),
-	      gammaG_(fictiousBeta, nMatsubaras),
-	      dispersion_(dispersion),
-	      mu_(mu),
-	      fit_(nBath, minParams)
+	DmftSolver(const ParamsDmftSolverType& params)
+	    : params_(params),
+	      sigma_(params.ficticiousBeta, params.nMatsubaras),
+	      latticeG_(params.ficticiousBeta, params.nMatsubaras),
+	      gammaG_(params.ficticiousBeta, params.nMatsubaras),
+	      dispersion_(params.numberOfKpoints),
+	      mu_(params.mu),
+	      fit_(params.nBath, params.minParams)
 	{}
 
 	void selfConsistencyLoop()
@@ -58,10 +56,11 @@ private:
 		}
 	}
 
+	const ParamsDmftSolverType& params_;
 	FunctionOfFrequencyType sigma_;
 	FunctionOfFrequencyType latticeG_;
 	FunctionOfFrequencyType gammaG_;
-	const DispersionType& dispersion_;
+	DispersionType dispersion_;
 	RealType mu_;
 	FitType fit_;
 };
