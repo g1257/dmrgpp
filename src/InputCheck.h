@@ -39,6 +39,13 @@ public:
 		str += "integer Matsubaras;\n";
 		str += "integer NumberOfKpoints;\n";
 		str += "integer NumberOfBathPoints;\n";
+		str += "integer DmftNumberOfIterations;\n";
+		str += "real DmftTolerance;\n";
+		str += "real MinParamsDelta;\n";
+		str += "real MinParamsDelta2;\n";
+		str += "real MinParamsTolerance;\n";
+		str += "integer MinParamsMaxIter;\n";
+		str += "integer MinParamsVerbose;\n";
 
 		return str;
 	}

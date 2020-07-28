@@ -19,12 +19,16 @@ public:
 
 	Fit(SizeType nBath, const MinParamsType& minParams)
 	    : nBath_(nBath), minParams_(minParams), results_(2*nBath)
-	{}
+	{
+		for (SizeType i = 0; i < 2*nBath_; ++i) results_[i] = 0.1;
+	}
 
 	void fit(const FunctionOfFrequencyType& gammaG)
 	{
 		AndersonFunctionType f(nBath_, gammaG);
-		PsimagLite::Minimizer<RealType, AndersonFunctionType> min(f, minParams_.maxIter);
+		PsimagLite::Minimizer<RealType, AndersonFunctionType> min(f,
+		                                                          minParams_.maxIter,
+		                                                          minParams_.verbose);
 		int iter = min.conjugateGradient(results_,
 		                                 minParams_.delta,
 		                                 minParams_.delta2,
@@ -32,6 +36,8 @@ public:
 		if (iter < 0)
             std::cerr<<"No minimum found\n";
 	}
+
+	const VectorRealType& result() const { return results_; }
 
 private:
 

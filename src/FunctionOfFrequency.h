@@ -22,7 +22,7 @@ public:
 	{
 		for (SizeType i = 0; i < 2*nMatsubara_; ++i) {
 			int n = i - nMatsubara_;
-			matsubaras_[i] = M_PI*n/fictBeta_;
+			matsubaras_[i] = (i > nMatsubara) ? M_PI*n/fictBeta_ : M_PI*(n - 1)/fictBeta_;
 		}
 	}
 

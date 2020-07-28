@@ -20,7 +20,7 @@ public:
 	    : nBath_(nBath), gammaG_(gammaG)
 	{}
 
-	SizeType size() const { return nBath_; }
+	SizeType size() const { return 2*nBath_; }
 
 	RealType operator()(const VectorRealType& args) const
 	{
@@ -32,14 +32,15 @@ public:
 			sum += PsimagLite::real(val*PsimagLite::conj(val));
 		}
 
-		return sum;
+		return sum/totalMatsubaras;
 	}
 
 	void df(VectorRealType& dest, const VectorRealType& src) const
 	{
+		const SizeType totalMatsubaras = gammaG_.totalMatsubaras();
+
 		for (SizeType j = 0; j < 2*nBath_; ++j) {
 			RealType sum = 0.0;
-			const SizeType totalMatsubaras = gammaG_.totalMatsubaras();
 			for (SizeType i = 0; i < totalMatsubaras; ++i) {
 				const ComplexOrRealType iwn(0, gammaG_.omega(i));
 				const ComplexOrRealType val = anderson(src, iwn) - gammaG_(i);
@@ -50,11 +51,9 @@ public:
 				                        valPrime*PsimagLite::conj(val));
 			}
 
-			dest[j] = sum;
+			dest[j] = sum/totalMatsubaras;
 		}
 	}
-
-private:
 
 	ComplexOrRealType anderson(const VectorRealType& args, ComplexOrRealType iwn) const
 	{
@@ -69,19 +68,21 @@ private:
 		return sum;
 	}
 
+	static ComplexOrRealType squareOf(ComplexOrRealType x) { return x*x; }
+
+private:
+
 	ComplexOrRealType andersonPrime(const VectorRealType& args,
 	                                ComplexOrRealType iwn,
 	                                SizeType jnd) const
 	{
 		assert(args.size() == 2*nBath_);
-		assert(jind < 2*nBath_);
+		assert(jnd < 2*nBath_);
 		const RealType valpha = args[jnd];
 		const RealType epsilon = args[jnd + nBath_];
 		return (jnd < nBath_) ? 2.0*valpha/(iwn - epsilon) :
-		                        -squareOf(valpha/(iwn - epsilon));
+		                        squareOf(valpha/(iwn - epsilon));
 	}
-
-	static ComplexOrRealType squareOf(ComplexOrRealType x) { return x*x; }
 
 	SizeType nBath_;
 	const FunctionOfFrequencyType& gammaG_;
