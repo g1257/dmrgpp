@@ -1,7 +1,7 @@
 #ifndef AKLT_H
 #define AKLT_H
 #include "Vector.h"
-#include "ProgramGlobals.h"
+#include "../../Engine/ProgramGlobals.h"
 
 namespace Dmrg {
 

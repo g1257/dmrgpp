@@ -82,7 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERSMODELHEISENBERG_H
 #define PARAMETERSMODELHEISENBERG_H
 #include "Vector.h"
-#include "ParametersModelBase.h"
+#include "../../Engine/ParametersModelBase.h"
 
 namespace Dmrg {
 //! Heisenberg Model Parameters

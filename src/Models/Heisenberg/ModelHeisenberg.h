@@ -84,11 +84,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include "ParametersModelHeisenberg.h"
 #include "CrsMatrix.h"
-#include "VerySparseMatrix.h"
-#include "SpinSquaredHelper.h"
-#include "SpinSquared.h"
-#include "ProgramGlobals.h"
-#include "Utils.h"
+#include "../../Engine/VerySparseMatrix.h"
+#include "../../Engine/SpinSquaredHelper.h"
+#include "../../Engine/SpinSquared.h"
+#include "../../Engine/ProgramGlobals.h"
+#include "../../Engine/Utils.h"
 
 namespace Dmrg {
 
