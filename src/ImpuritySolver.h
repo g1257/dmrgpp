@@ -1,12 +1,22 @@
 #ifndef IMPURITYSOLVER_H
 #define IMPURITYSOLVER_H
-#include "Vector.h"
+
 #include "../../dmrgpp/src/Engine/InputCheck.h"
 #include "../../dmrgpp/src/Engine/Qn.h"
 #include "../../dmrgpp/src/Engine/ProgramGlobals.h"
 #include "../../dmrgpp/src/Engine/SuperGeometry.h"
 #include "../../dmrgpp/src/Engine/ParametersDmrgSolver.h"
+#include "../../dmrgpp/src/Engine/ModelSelector.h"
+#include "../../dmrgpp/src/Engine/ModelHelperLocal.h"
+#include "../../dmrgpp/src/Engine/MatrixVectorKron/MatrixVectorKron.h"
+#include "../../dmrgpp/src/Engine/MatrixVectorOnTheFly.h"
+#include "../../dmrgpp/src/Engine/MatrixVectorStored.h"
+#include "../../dmrgpp/src/Engine/LeftRightSuper.h"
+#include "../../dmrgpp/src/Engine/BasisWithOperators.h"
+
 #include "InputNg.h"
+#include "LanczosSolver.h"
+#include "Vector.h"
 
 namespace Dmft {
 
@@ -86,21 +96,48 @@ private:
 		return buffer;
 	}
 
-
 	void doOneRun(PsimagLite::String data, PsimagLite::String sOptions)
 	{
+		typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
+		typedef Dmrg::Basis<MySparseMatrixComplex> BasisType;
+		typedef Dmrg::BasisWithOperators<BasisType> BasisWithOperatorsType;
+		typedef Dmrg::LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
+		typedef Dmrg::ModelHelperLocal<LeftRightSuperType> ModelHelperType;
+		typedef Dmrg::ModelBase<ModelHelperType,
+		        ParametersDmrgSolverType,
+		        InputNgType::Readable,
+		        SuperGeometryType> ModelBaseType;
+
 		Dmrg::InputCheck inputCheck;
 		InputNgType::Writeable ioWriteable(inputCheck, data);
 		InputNgType::Readable io(ioWriteable);
 
 		ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
 
+		if (dmrgSolverParams.options.isSet("MatrixVectorStored")) {
+			doOneRun2<Dmrg::MatrixVectorStored<ModelBaseType> >(dmrgSolverParams, io);
+		} else if (dmrgSolverParams.options.isSet("MatrixVectorOnTheFly")) {
+			doOneRun2<Dmrg::MatrixVectorOnTheFly<ModelBaseType> >(dmrgSolverParams, io);
+		} else {
+			doOneRun2<Dmrg::MatrixVectorKron<ModelBaseType> >(dmrgSolverParams, io);
+		}
+	}
+
+	template<typename MatrixVectorType>
+	void doOneRun2(const ParametersDmrgSolverType& dmrgSolverParams, InputNgType::Readable& io)
+	{
 		SuperGeometryType geometry(io);
 		if (dmrgSolverParams.options.isSet("printgeometry"))
 			std::cout<<geometry;
 
-//		//! Setup the Model
-//		Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
+		typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
+		        ParametersForSolverType;
+		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
+		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
+		typedef typename SolverType::MatrixType::ModelType ModelBaseType;
+
+		//! Setup the Model
+		Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
 //		const ModelBaseType& model = modelSelector(dmrgSolverParams,io,geometry);
 
 //		//! Setup the dmrg solver:
