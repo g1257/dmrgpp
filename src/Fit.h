@@ -23,6 +23,9 @@ public:
 		for (SizeType i = 0; i < 2*nBath_; ++i) results_[i] = 0.1;
 	}
 
+	// Compute the optimized bath parameters and store them in vector gammaG
+	// See AndersonFunction.h documentation for the fit function, and
+	// for the order of storage of bath parameters
 	void fit(const FunctionOfFrequencyType& gammaG)
 	{
 		AndersonFunctionType f(nBath_, gammaG);
@@ -41,9 +44,9 @@ public:
 
 private:
 
-	SizeType nBath_;
-	const MinParamsType& minParams_;
-	VectorRealType results_;
+	SizeType nBath_;                  // number of bath sites
+	const MinParamsType& minParams_; // parameters for fitting algorithm
+	VectorRealType results_;         // stores bath parameters
 };
 }
 #endif // FIT_H

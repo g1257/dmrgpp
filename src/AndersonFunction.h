@@ -22,6 +22,8 @@ public:
 
 	SizeType size() const { return 2*nBath_; }
 
+	// Returns \sum_n |Anderson(Valpha, eAlpha, iwn) - GammaG(iwn)|^2
+	// See the AndersonFunction below
 	RealType operator()(const VectorRealType& args) const
 	{
 		RealType sum = 0.0;
@@ -35,6 +37,11 @@ public:
 		return sum/totalMatsubaras;
 	}
 
+	// For each 0 <= j < 2*nBath, this function
+	// returns the derivative of the function above with respect
+	// to bath parameter j, evaluated at the bath parameters in src
+	// and stores the result in dest[j]
+	// for the order of bath parameters see AndersonFunction
 	void df(VectorRealType& dest, const VectorRealType& src) const
 	{
 		const SizeType totalMatsubaras = gammaG_.totalMatsubaras();
@@ -55,6 +62,9 @@ public:
 		}
 	}
 
+	// Returns \sum_{0<=j<nBath} V_j^2/(iwn - epsilon_j),
+	// where the V_j are stored in the first half or args,
+	// and the epsilon_j are stored in the last half or args
 	ComplexOrRealType anderson(const VectorRealType& args, ComplexOrRealType iwn) const
 	{
 		assert(args.size() == 2*nBath_);
@@ -72,6 +82,11 @@ public:
 
 private:
 
+	// For any 0 <= jnd < 2*nBath, this function returns the derivative of
+	// the AndersonFunction above with respect to bath parameter jnd,
+	// evaluated at the bath parameters args
+	// The order in which bath parameters are stored is described
+	// under AndersonFunction
 	ComplexOrRealType andersonPrime(const VectorRealType& args,
 	                                ComplexOrRealType iwn,
 	                                SizeType jnd) const
@@ -84,8 +99,8 @@ private:
 		                        squareOf(valpha/(iwn - epsilon));
 	}
 
-	SizeType nBath_;
-	const FunctionOfFrequencyType& gammaG_;
+	SizeType nBath_; // Number of Bath sites
+	const FunctionOfFrequencyType& gammaG_; // Gamma Green Function to fit
 };
 
 }

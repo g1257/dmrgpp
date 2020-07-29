@@ -26,20 +26,27 @@ public:
 		}
 	}
 
+	// Total number of Matsubaras used (includes negatives and positives)
 	SizeType totalMatsubaras() const { return matsubaras_.size(); }
 
+	// Matsubara number i, starts at 0, and the 0th is the most negative.
 	const RealType& omega(SizeType i) const
 	{
 		assert(i < totalMatsubaras());
 		return matsubaras_[i];
 	}
 
+	// Returns the content of this function at point i
+	// the wn at this point is given by omega(i) above
+	// for reading value only
 	const ComplexOrRealType& operator()(SizeType i) const
 	{
 		assert(i < totalMatsubaras());
 		return data_[i];
 	}
 
+	// Same as above, but allows for modification of the value
+	// for writing the value
 	ComplexOrRealType& operator()(SizeType i)
 	{
 		assert(i < totalMatsubaras());
@@ -48,10 +55,10 @@ public:
 
 private:
 
-	RealType fictBeta_;
-	SizeType nMatsubara_;
-	VectorRealType matsubaras_;
-	VectorType data_;
+	RealType fictBeta_;         // ficticious beta
+	SizeType nMatsubara_;       // half the number of matsubaras
+	VectorRealType matsubaras_; // wn starting at 0 with the most negative wn
+	VectorType data_;           // value of this function at each point or omega
 };
 }
 #endif // FUNCTIONOFFREQUENCY_H
