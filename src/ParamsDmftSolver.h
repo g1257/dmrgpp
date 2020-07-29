@@ -6,13 +6,15 @@
 
 namespace Dmft {
 
-template<typename ComplexOrRealType, typename InputNgType>
+template<typename ComplexOrRealType_, typename InputNgType>
 struct ParamsDmftSolver {
 
+	typedef ComplexOrRealType_ ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef MinParams<RealType> MinParamsType;
 
 	ParamsDmftSolver(typename InputNgType::Readable& io)
+	    : echoInput(false)
 	{
 		io.readline(ficticiousBeta, "FicticiousBeta=");
 		io.readline(mu, "ChemicalPotential=");
@@ -23,6 +25,10 @@ struct ParamsDmftSolver {
 		io.readline(dmftError, "DmftTolerance=");
 		io.readline(gsTemplate, "DmrgGsTemplate=");
 		io.readline(omegaTemplate, "DmrgOmegaTemplate=");
+
+		try {
+			io.readline(precision, "Precision=");
+		} catch (std::exception&) {}
 
 		try {
 			io.readline(minParams.delta, "MinParamsDelta=");
@@ -47,6 +53,7 @@ struct ParamsDmftSolver {
 		} catch (std::exception&) {}
 	}
 
+	bool echoInput;
 	RealType ficticiousBeta;
 	RealType mu;
 	RealType dmftError;
@@ -54,6 +61,7 @@ struct ParamsDmftSolver {
 	SizeType numberOfKpoints;
 	SizeType nBath;
 	SizeType dmftIter;
+	SizeType precision;
 	PsimagLite::String gsTemplate;
 	PsimagLite::String omegaTemplate;
 	MinParamsType minParams;

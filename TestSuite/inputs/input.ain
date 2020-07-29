@@ -12,7 +12,7 @@ MinParamsMaxIter=10000;
 MinParamsDelta2=0.001;
 MinParamsTolerance=1;
 MinParamsVerbose=1;
-DmrgGsTemplate="gsTemplate.ain";
+DmrgGsTemplate="../TestSuite/inputs/gsTemplate.ain";
 DmrgOmegaTemplate="omegaTemplate.ain";
 
 

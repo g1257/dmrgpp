@@ -20,7 +20,7 @@ public:
 	typedef Fit<ComplexOrRealType> FitType;
 	typedef typename FitType::MinParamsType MinParamsType;
 	typedef ParamsDmftSolver<ComplexOrRealType, InputNgType> ParamsDmftSolverType;
-	typedef ImpuritySolver<ComplexOrRealType> ImpuritySolverType;
+	typedef ImpuritySolver<ParamsDmftSolverType> ImpuritySolverType;
 
 	DmftSolver(const ParamsDmftSolverType& params)
 	    : params_(params),
@@ -30,9 +30,10 @@ public:
 	      dispersion_(params.numberOfKpoints),
 	      mu_(params.mu),
 	      fit_(params.nBath, params.minParams),
-	      impuritySolver_(params.gsTemplate, params.omegaTemplate)
+	      impuritySolver_(params)
 	{}
 
+	// DMFT Self consistency loop; see Steve Johnston's notes
 	void selfConsistencyLoop()
 	{
 		SizeType iter = 0;
@@ -43,6 +44,7 @@ public:
 
 		for (; iter < params_.dmftIter; ++iter) {
 
+			std::cout<<"SelfConsistLoop iter= "<<iter<<"\n";
 			computeLatticeGf();
 
 			fit_.fit(gammaG_);
@@ -50,6 +52,8 @@ public:
 			impuritySolver_.solve(fit_.result());
 
 			error = computeNewSelfEnergy(fit_.result());
+
+			std::cout<<"SelfConsistLoop error="<<error<<"\n";
 			if (error < params_.dmftError)
 				break;
 		}

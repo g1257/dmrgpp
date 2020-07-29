@@ -16,17 +16,20 @@
 #include "../../dmrgpp/src/Engine/DmrgSolver.h"
 #include "../../dmrgpp/src/Engine/VectorWithOffset.h"
 
+#include "PsiBase64.h"
 #include "InputNg.h"
 #include "LanczosSolver.h"
 #include "Vector.h"
+#include "ParamsDmftSolver.h"
 
 namespace Dmft {
 
-template<typename ComplexOrRealType>
+template<typename ParamsDmftSolverType>
 class ImpuritySolver {
 
 public:
 
+	typedef typename ParamsDmftSolverType::ComplexOrRealType ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
@@ -37,8 +40,8 @@ public:
 	        Dmrg::ProgramGlobals> SuperGeometryType;
 	typedef Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn> VectorWithOffsetType;
 
-	ImpuritySolver(PsimagLite::String gsTemplate, PsimagLite::String omegaTemplate)
-	    : gsTemplate_(gsTemplate), omegaTemplate_(omegaTemplate)
+	ImpuritySolver(const ParamsDmftSolverType& params)
+	    : params_(params)
 	{}
 
 	// bathParams[0-nBath-1] ==> V ==> hoppings impurity --> bath
@@ -47,8 +50,8 @@ public:
 	{
 
 		PsimagLite::String data;
-		InputNgType::Writeable::readFile(data, gsTemplate_);
-		PsimagLite::String data2 = modifyBathParams(data, bathParams);
+		InputNgType::Writeable::readFile(data, params_.gsTemplate);
+		PsimagLite::String data2 = modifyBathParams(data, bathParams, params_.echoInput);
 		PsimagLite::String sOptions = "";
 
 		doOneRun(data2, sOptions);
@@ -56,13 +59,14 @@ public:
 
 	ComplexOrRealType gimp(SizeType i)
 	{
-		return 0.0;
+		throw PsimagLite::RuntimeError("gimp not ready yet\n");
 	}
 
 private:
 
 	static PsimagLite::String modifyBathParams(PsimagLite::String data,
-	                                           const VectorRealType& bathParams)
+	                                           const VectorRealType& bathParams,
+	                                           bool echoInput)
 	{
 		const SizeType nBath = int(bathParams.size() / 2);
 		static const PsimagLite::String label = "dir0:Connectors=";
@@ -96,7 +100,8 @@ private:
 
 		const SizeType len2 = data.length() - pos4 - 1;
 		buffer += data.substr(pos4, len2);
-		std::cerr<<buffer<<"\n";
+		if (echoInput) echoBase64(std::cout, data);
+		else std::cout<<data;
 		return buffer;
 	}
 
@@ -117,6 +122,8 @@ private:
 		InputNgType::Readable io(ioWriteable);
 
 		ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
+
+		if (params_.precision > 0) dmrgSolverParams.precision = params_.precision;
 
 		if (dmrgSolverParams.options.isSet("MatrixVectorStored")) {
 			doOneRun2<Dmrg::MatrixVectorStored<ModelBaseType> >(dmrgSolverParams, io);
@@ -150,6 +157,8 @@ private:
 
 		//! Calculate observables:
 		dmrgSolver.main(geometry);
+
+		std::cout.flush();
 	}
 
 	static PsimagLite::String findBathParams(SizeType start,
@@ -163,8 +172,14 @@ private:
 		return buffer;
 	}
 
-	PsimagLite::String gsTemplate_;
-	PsimagLite::String omegaTemplate_;
+	static void echoBase64(std::ostream& os, const PsimagLite::String& str)
+	{
+		os<<"ImpuritySolver::echoBase64: Echo of [[data]] in base64\n";
+		PsimagLite::PsiBase64::Encode base64(str);
+		os<<base64()<<"\n";
+	}
+
+	const ParamsDmftSolverType& params_;
 };
 }
 #endif // IMPURITYSOLVER_H
