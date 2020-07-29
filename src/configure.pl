@@ -73,6 +73,8 @@ my @drivers = (\%provenanceDriver,\%su2RelatedDriver,
 $dotos = "dmrg.o Provenance.o FiniteLoop.o Utils.o Qn.o ";
 $dotos .= " ProgramGlobals.o Su2Related.o";
 
+my $libUnits = "Provenance.o ProgramGlobals.o Qn.o Utils.o";
+
 my @su2files = DmrgDriver::createTemplates($generateSources);
 my $templates = scalar(@su2files);
 
@@ -130,6 +132,9 @@ testQn: testQn.o Qn.o
 
 libkronutil.a:
 	\$(MAKE) -C KronUtil
+
+libdmrgpp.a: Makefile $libUnits
+\tar rcs libdmrgpp.a $libUnits
 
 ../doc/manual.pdf: ../doc/manual.tex
 	cd ../doc; pdflatex manual.tex; pdflatex manual.tex; pdflatex manual.tex
