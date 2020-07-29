@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include "BoostSerializationHeaders.h"
 #include "Io/IoSerializerStub.h"
+#include "Matrix.h"
 
 namespace PsimagLite {
 
