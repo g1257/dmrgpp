@@ -44,7 +44,7 @@ if ($lto == 1) {
 my $basicConfig = "ConfigBase.psiTag";
 my @configFiles = NewMake::configFilesList($basicConfig, $config);
 
-my $dotos = "dmft.o Provenance.o ../../dmrgpp/src/Qn.o";
+my $dotos = "dmft.o ../../dmrgpp/src/libdmrgpp.a ../../dmrgpp/src/KronUtil/libkronutil.a";
 
 my %dmftMain = (name => 'dmft', dotos => "$dotos");
 my %provenance = (name => 'Provenance', aux => 1);
@@ -58,7 +58,6 @@ $args{"flavor"} = $flavor;
 $args{"code"} = "Dmft";
 $args{"configFiles"} = \@configFiles;
 $args{"additional3"} = "GitRevision.h";
-$args{"additional4"} = $args{"additional3"};
 
 system("./createGitRevision.pl GitRevision.h");
 

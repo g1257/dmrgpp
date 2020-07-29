@@ -13,6 +13,8 @@
 #include "../../dmrgpp/src/Engine/MatrixVectorStored.h"
 #include "../../dmrgpp/src/Engine/LeftRightSuper.h"
 #include "../../dmrgpp/src/Engine/BasisWithOperators.h"
+#include "../../dmrgpp/src/Engine/DmrgSolver.h"
+#include "../../dmrgpp/src/Engine/VectorWithOffset.h"
 
 #include "InputNg.h"
 #include "LanczosSolver.h"
@@ -33,6 +35,7 @@ public:
 	typedef Dmrg::SuperGeometry<ComplexOrRealType,
 	        InputNgType::Readable,
 	        Dmrg::ProgramGlobals> SuperGeometryType;
+	typedef Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn> VectorWithOffsetType;
 
 	ImpuritySolver(PsimagLite::String gsTemplate, PsimagLite::String omegaTemplate)
 	    : gsTemplate_(gsTemplate), omegaTemplate_(omegaTemplate)
@@ -68,7 +71,7 @@ private:
 			err("modifyBathParams(): cannot find " + label + "\n");
 
 		PsimagLite::String connectors = findBathParams(0, nBath, bathParams);
-		PsimagLite::String buffer = data.substr(0, pos1) + label + connectors + ";";
+		PsimagLite::String buffer = data.substr(0, pos1) + label + "[" + connectors + "]";
 
 		size_t pos2 = data.find(";", pos1);
 		if (pos2 < pos1 || pos2 == PsimagLite::String::npos)
@@ -84,7 +87,8 @@ private:
 			err("BathParams not even\n");
 
 		PsimagLite::String potentialV = findBathParams(nBath, 2*nBath, bathParams);
-		buffer += data.substr(pos2 + 1, len) + label2 + potentialV;
+		buffer += data.substr(pos2, len) + label2 + "[0, " + potentialV +
+		        ", 0, " + potentialV + "]";
 
 		size_t pos4 = data.find(";", pos3);
 		if (pos4 < pos3 + 1 || pos4 == PsimagLite::String::npos)
@@ -138,25 +142,24 @@ private:
 
 		//! Setup the Model
 		Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
-//		const ModelBaseType& model = modelSelector(dmrgSolverParams,io,geometry);
+		const ModelBaseType& model = modelSelector(dmrgSolverParams, io, geometry);
 
-//		//! Setup the dmrg solver:
-//		typedef Dmrg::DmrgSolver<SolverType, VectorWithOffsetType> DmrgSolverType;
-//		DmrgSolverType dmrgSolver(model,io);
+		//! Setup the dmrg solver: (vectorwithoffset.h only):
+		typedef Dmrg::DmrgSolver<SolverType, VectorWithOffsetType> DmrgSolverType;
+		DmrgSolverType dmrgSolver(model,io);
 
-//		//! Calculate observables:
-//		dmrgSolver.main(geometry);
+		//! Calculate observables:
+		dmrgSolver.main(geometry);
 	}
 
 	static PsimagLite::String findBathParams(SizeType start,
 	                                         SizeType end,
 	                                         const VectorRealType& bathParams)
 	{
-		PsimagLite::String buffer = "[" + ttos(bathParams[start]);
+		PsimagLite::String buffer = ttos(bathParams[start]);
 		for (SizeType i = start + 1; i < end; ++i)
-			buffer += "," + ttos(bathParams[i + start]);
+			buffer += "," + ttos(bathParams[i]);
 
-		buffer += "]";
 		return buffer;
 	}
 
