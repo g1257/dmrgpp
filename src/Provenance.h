@@ -1,5 +1,5 @@
-#ifndef DMFT_PROVENANCE_H
-#define DMFT_PROVENANCE_H
+#ifndef PROVENANCE_H
+#define PROVENANCE_H
 #include "../../PsimagLite/src/Version.h"
 #include "Version.h"
 #include "AllocatorCpu.h"
@@ -60,5 +60,5 @@ public:
 
 std::ostream& operator<<(std::ostream& os,const Provenance&);
 
-#endif // DMFT_PROVENANCE_H
+#endif // PROVENANCE_H
 

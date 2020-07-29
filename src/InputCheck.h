@@ -46,6 +46,8 @@ public:
 		str += "real MinParamsTolerance;\n";
 		str += "integer MinParamsMaxIter;\n";
 		str += "integer MinParamsVerbose;\n";
+		str += "string DmrgGsTemplate;\n";
+		str += "string DmrgOmegaTemplate;\n";
 
 		return str;
 	}

@@ -30,7 +30,7 @@ public:
 	      dispersion_(params.numberOfKpoints),
 	      mu_(params.mu),
 	      fit_(params.nBath, params.minParams),
-	      impuritySolver_()
+	      impuritySolver_(params.gsTemplate, params.omegaTemplate)
 	{}
 
 	void selfConsistencyLoop()

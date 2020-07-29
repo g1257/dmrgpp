@@ -44,7 +44,7 @@ if ($lto == 1) {
 my $basicConfig = "ConfigBase.psiTag";
 my @configFiles = NewMake::configFilesList($basicConfig, $config);
 
-my $dotos = "dmft.o Provenance.o";
+my $dotos = "dmft.o Provenance.o ../../dmrgpp/src/Qn.o";
 
 my %dmftMain = (name => 'dmft', dotos => "$dotos");
 my %provenance = (name => 'Provenance', aux => 1);

@@ -21,6 +21,8 @@ struct ParamsDmftSolver {
 		io.readline(nBath, "NumberOfBathPoints=");
 		io.readline(dmftIter, "DmftNumberOfIterations=");
 		io.readline(dmftError, "DmftTolerance=");
+		io.readline(gsTemplate, "DmrgGsTemplate=");
+		io.readline(omegaTemplate, "DmrgOmegaTemplate=");
 
 		try {
 			io.readline(minParams.delta, "MinParamsDelta=");
@@ -52,6 +54,8 @@ struct ParamsDmftSolver {
 	SizeType numberOfKpoints;
 	SizeType nBath;
 	SizeType dmftIter;
+	PsimagLite::String gsTemplate;
+	PsimagLite::String omegaTemplate;
 	MinParamsType minParams;
 };
 }

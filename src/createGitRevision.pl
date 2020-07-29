@@ -15,10 +15,14 @@ my $microArch = getMicroArch();
 open(FOUT, ">", $file) or exit(2);
 print FOUT "// DO NOT EDIT. It will be overwritten\n";
 print FOUT "// Created by $0\n";
+print FOUT "#ifndef GIT_REVISION_H\n";
+print FOUT "#define GIT_REVISION_H\n";
+print FOUT "#ifndef PSIMAGLITE_GIT_REV\n";
 print FOUT "#define PSIMAGLITE_GIT_REV \"$hashPsimagLite\"\n";
+print FOUT "#endif\n";
 print FOUT "#define DMFT_GIT_REV \"$hashDmrgpp\"\n";
 print FOUT "#define MICRO_ARCH \"$microArch\"\n";
-print FOUT "\n";
+print FOUT "#endif\n\n";
 close(FOUT);
 
 sub getGitHash
