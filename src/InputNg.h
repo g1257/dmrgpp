@@ -202,9 +202,7 @@ public:
 
 		const InputCheckType& inputCheck() const { return inputCheck_; }
 
-	private:
-
-		void internal(PsimagLite::String file)
+		static void readFile(String& data, String file)
 		{
 			std::ifstream fin(file.c_str());
 			if (!fin || !fin.good() || fin.bad()) {
@@ -213,13 +211,21 @@ public:
 				throw RuntimeError(s.c_str());
 			}
 
-			char c=0;
+			char c = 0;
 			while (!fin.eof()) {
 				fin.get(c);
-				data_ += c;
+				data += c;
 			}
 
 			fin.close();
+		}
+
+	private:
+
+		void internal(PsimagLite::String file)
+		{
+			readFile(data_, file);
+
 			internal();
 		}
 

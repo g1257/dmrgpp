@@ -88,8 +88,8 @@ public:
 	AinurState()
 	{
 		assert(ZERO_CHAR_STRING_.length() == 1);
-		if (ZERO_CHAR_STRING_[0] != ' ')
-			err("Ainur::AinurState should be a singleton\n");
+//		if (ZERO_CHAR_STRING_[0] != ' ')
+//			err("Ainur::AinurState should be a singleton\n");
 
 		ZERO_CHAR_STRING_[0] = 0;
 	}
