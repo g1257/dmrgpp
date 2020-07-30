@@ -43,9 +43,9 @@ FiniteLoops 2
 LanczosEps=1e-9
 LanczosSteps=400
 
-PrintHamiltonianAverage=l%1==0
+PrintHamiltonianAverage=s==c
 RepeatFiniteLoopsTimes=10
-RecoverySave=l%2,keep,M=100
+RecoverySave=%l%%2,@keep,@M=100
 RecoveryMaxFiles=200
 
 TridiagEps=1e-8
