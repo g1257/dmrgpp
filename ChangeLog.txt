@@ -1,3 +1,57 @@
+2020-07-31 Version 5.72
+
+Interface changes:
+
+* observe warns if run didn't set first bit of last triplet.
+
+* libdmrgpp.a is a very light library that is now used
+by cincuenta
+
+Model Specific:
+
+* HubbardAncilla: na operator
+
+* tjOneOrbital was deleted: use TjMultiOrb with Orbitals=1
+
+* Kondo symmetries (Thanks to Jacek H.)
+
+* Heisenberg: Aklt.h added
+
+New Features:
+
+* TargetingExpression (Thanks to Shi F. and Oscar A.)
+
+* Include input blob in Recovery files
+
+Scripts:
+
+* hd5ToTime.pl: gives real time of hd5 file
+
+* honeycomb.pl: armchair mode support periodicx
+
+* honeycomb.pl script: better interface
+
+* manyOmegas.pl: jobid no longer needed
+
+* script for Fourier space AND time
+
+* betterTimeObs.pl: sort times numerically (Thanks to Pontus)
+
+* pgfplot: Do not overwrite palette.tex or sample.tex
+
+* omegaCuts.pl script added
+
+* sumRule.pl script added for dynamics
+
+* sq.pl script added (static correlations in k-space)
+
+TestSuite
+
+* test 1955 fixed Awesome Predicates
+
+* test 5504 fixed for Chebyshev dynamics (Thanks to Alberto)
+
+
 2020-03-13 Version 5.70
 
 Bug fixes:
