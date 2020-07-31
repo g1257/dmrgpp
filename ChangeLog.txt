@@ -1,3 +1,20 @@
+2020-07-31 Version 2.72
+
+* GetBraOrKet: R vectors, like in |R0>, etc,
+are reserved for internal use
+
+* PsimagLite::atoi better error report
+
+* Warn if Ainur file with inp file extension;
+file extensions are still conventions only
+
+* Ainur: bug fix for usecomplex
+
+* isAfloat: bug fix that affected Awesome Predicate
+
+* AinurState.h is no longer a singleton (needed for cincuenta)
+
+
 2020-03-13 version 2.70
 
 * Matrix expIpi function (Thanks to Jacek)
