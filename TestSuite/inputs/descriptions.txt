@@ -344,7 +344,24 @@ the "half filled" case). U=2
 5502) RIXS static
 5503) RIXS dynamic with Krylov    starting from 5502
 5504) RIXS dynamic with Chebyshev starting from 5502
-#5504-5599 reserved for RIXS
+omega' := (omega − b) /a = c*omega+d
+H' := (H − b) /a = c*H+d
+
+a := (E max − E min ) /(2 − ε)
+b := (E max + E min ) /2
+c :=   1/a = (2 − ε)/(Emax − Emin )
+d :=  -b/a = -[(2 − ε)/2]* [(Emax + Emin )/(Emax − Emin )]
+
+epsilon=0.05
+
+For input5500.inp
+
+Emax = 1.45828
+Emin = -2.81233
+
+c===> 0.4566
+d===> 0.3091
+#5505-5599 reserved for RIXS
 5600) ./dmrg -f input.inp 'n$.txt' feature GS
 5601) ./dmrg -f input.inp 'n$.txt' feature
 5700) TargetingCorrection small test

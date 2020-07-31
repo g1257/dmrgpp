@@ -58,8 +58,7 @@ TSPTau=1.0
 TSPTimeSteps=3
 TSPAdvanceEach=12
 TSPAlgorithm=Chebyshev
-ChebyshevEpsilon=0.025
-ChebyshevWstar=20
+ChebyshevTransform 2 0.4566 0.3091
 
 TSPOperator=raw
 RAW_MATRIX
