@@ -28,6 +28,7 @@ int main(int argc, char** argv)
 	int opt = 0;
 	bool versionOnly = false;
 	PsimagLite::String inputfile;
+	PsimagLite::String rootname;
 	PsimagLite::String logfile;
 	SizeType precision = 12;
 	bool unbuffered = false;
@@ -43,6 +44,7 @@ The command line arguments
 to the main dmrg driver are the following.
 	  \begin{itemize}
 	  \item[-f] {[}Mandatory, String{]} Dollarized Input to use.
+	  \item[-O] {[}Optional, String{]} Root of output file to use.
 	  \item[-d] [Optional] Dry run only
 	  \item[-p] [Optional, Integer] Digits of precision for printing.
 	  \item[-l] {[}Optional, String{]} Without this option std::cout is redirected
@@ -54,10 +56,13 @@ to the main dmrg driver are the following.
 	 \item[-V] [Optional] Print version and exit
 	  \end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:p:l:U:dV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:p:l:U:O:dV")) != -1) {
 		switch (opt) {
 		case 'f':
 			inputfile = optarg;
+			break;
+		case 'O':
+			rootname = optarg;
 			break;
 		case 'd':
 			dryrun = true;
@@ -144,5 +149,5 @@ to the main dmrg driver are the following.
 
 	ManyOmegasType manyOmegas(inputfile, precision, echoInput);
 
-	manyOmegas.run(dryrun);
+	manyOmegas.run(dryrun, rootname);
 }

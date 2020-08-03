@@ -32,10 +32,10 @@ public:
 
 		PsimagLite::String data;
 		InputNgType::Writeable::readFile(data, params_.gsTemplate);
-		PsimagLite::String data2 = modifyBathParams(data, bathParams, params_.echoInput);
+		PsimagLite::String data2 = modifyBathParams(data, bathParams);
 		PsimagLite::String sOptions = "";
 
-		runner_.doOneRun(data2, sOptions);
+		runner_.doOneRun(data2, sOptions, params_.echoInput);
 	}
 
 	ComplexOrRealType gimp(SizeType i)
@@ -46,8 +46,7 @@ public:
 private:
 
 	static PsimagLite::String modifyBathParams(PsimagLite::String data,
-	                                           const VectorRealType& bathParams,
-	                                           bool echoInput)
+	                                           const VectorRealType& bathParams)
 	{
 		const SizeType nBath = int(bathParams.size() / 2);
 		static const PsimagLite::String label = "dir0:Connectors=";
@@ -81,8 +80,6 @@ private:
 
 		const SizeType len2 = data.length() - pos4 - 1;
 		buffer += data.substr(pos4, len2);
-		if (echoInput) echoBase64(std::cout, data);
-		else std::cout<<data;
 		return buffer;
 	}
 
@@ -95,13 +92,6 @@ private:
 			buffer += "," + ttos(bathParams[i]);
 
 		return buffer;
-	}
-
-	static void echoBase64(std::ostream& os, const PsimagLite::String& str)
-	{
-		os<<"ImpuritySolver::echoBase64: Echo of [[data]] in base64\n";
-		PsimagLite::PsiBase64::Encode base64(str);
-		os<<base64()<<"\n";
 	}
 
 	const ParamsDmftSolverType& params_;

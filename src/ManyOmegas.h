@@ -52,19 +52,20 @@ public:
 		omegaParams_ = nullptr;
 	}
 
-	void run(bool dryRun)
+	void run(bool dryRun, PsimagLite::String root)
 	{
 		for (SizeType i = omegaParams_->offset; i < omegaParams_->total; ++i) {
-			RealType omega = i*omegaParams_->step + omegaParams_->begin;
+			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
 			PsimagLite::String data2 = modifyOmega(omega);
-			PsimagLite::String sOptions = "";
+			data2 += PsimagLite::String("\nOutputFile=\"") + root + ttos(i) + ";\n";
+			const PsimagLite::String sOptions = "";
 
 			if (dryRun) {
 				std::cerr<<"ManyOmegas.h:: omega = "<<omega<<" NOT done because -d\n";
 				continue;
 			}
 
-			runner_.doOneRun(data2, sOptions);
+			runner_.doOneRun(data2, sOptions, echoInput_);
 		}
 	}
 
@@ -72,14 +73,15 @@ public:
 	{
 		PsimagLite::String data = data_;
 		const PsimagLite::String label = "$omega";
-		size_t pos = data.find(label);
+		const size_t pos = data.find(label);
 		if (pos == PsimagLite::String::npos)
 			err("Could not find " + label + " in " + inputfile_ + "\n");
 
 		PsimagLite::String str = data.substr(0, pos);
-		SizeType len = str.length();
 		str += ttos(omega);
-		str += data.substr(pos + len, data.length() - len - label.length());
+		const SizeType len2 = data.length();
+		assert(len2 > pos + label.length());
+		str += data.substr(pos + label.length(), len2 - pos - label.length());
 		return str;
 	}
 

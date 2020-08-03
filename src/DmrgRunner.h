@@ -35,7 +35,7 @@ public:
 	DmrgRunner(RealType precision) : precision_(precision)
 	{}
 
-	void doOneRun(PsimagLite::String data, PsimagLite::String sOptions)
+	void doOneRun(PsimagLite::String data, PsimagLite::String sOptions, bool echoInput)
 	{
 		typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
 		typedef Dmrg::Basis<MySparseMatrixComplex> BasisType;
@@ -46,6 +46,9 @@ public:
 		        ParametersDmrgSolverType,
 		        InputNgType::Readable,
 		        SuperGeometryType> ModelBaseType;
+
+		if (echoInput) echoBase64(std::cout, data);
+		else std::cout<<data;
 
 		Dmrg::InputCheck inputCheck;
 		InputNgType::Writeable ioWriteable(inputCheck, data);
@@ -63,6 +66,8 @@ public:
 			doOneRun2<Dmrg::MatrixVectorKron<ModelBaseType> >(dmrgSolverParams, io);
 		}
 	}
+
+private:
 
 	template<typename MatrixVectorType>
 	void doOneRun2(const ParametersDmrgSolverType& dmrgSolverParams, InputNgType::Readable& io)
@@ -91,7 +96,12 @@ public:
 		std::cout.flush();
 	}
 
-private:
+	static void echoBase64(std::ostream& os, const PsimagLite::String& str)
+	{
+		os<<"ImpuritySolver::echoBase64: Echo of [[data]] in base64\n";
+		PsimagLite::PsiBase64::Encode base64(str);
+		os<<base64()<<"\n";
+	}
 
 	RealType precision_;
 };
