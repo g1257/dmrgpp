@@ -6,7 +6,7 @@
 #include "LanczosSolver.h"
 #include "Vector.h"
 #include "ParamsDmftSolver.h"
-#include "DmrgRunner.h"
+#include "../../dmrgpp/src/Engine/DmrgRunner.h"
 
 namespace Dmft {
 
