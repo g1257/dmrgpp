@@ -15,6 +15,7 @@
 #include "../../dmrgpp/src/Engine/BasisWithOperators.h"
 #include "../../dmrgpp/src/Engine/DmrgSolver.h"
 #include "../../dmrgpp/src/Engine/VectorWithOffset.h"
+#include "PsimagLite.h"
 
 namespace Dmft {
 
@@ -31,11 +32,15 @@ public:
 	InputNgType::Readable,
 	Dmrg::ProgramGlobals> SuperGeometryType;
 	typedef Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn> VectorWithOffsetType;
+	typedef PsimagLite::PsiApp ApplicationType;
 
-	DmrgRunner(RealType precision) : precision_(precision)
+	DmrgRunner(RealType precision, const ApplicationType& application)
+	    : precision_(precision), application_(application)
 	{}
 
-	void doOneRun(PsimagLite::String data, PsimagLite::String sOptions, bool echoInput)
+	void doOneRun(PsimagLite::String data,
+	              PsimagLite::String insitu,
+	              PsimagLite::String logfile) const
 	{
 		typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
 		typedef Dmrg::Basis<MySparseMatrixComplex> BasisType;
@@ -47,16 +52,27 @@ public:
 		        InputNgType::Readable,
 		        SuperGeometryType> ModelBaseType;
 
-		if (echoInput) echoBase64(std::cout, data);
-		else std::cout<<data;
+		std::streambuf* globalCoutBuffer = std::cout.rdbuf(); //save old buf
+		std::ofstream globalCoutStream(logfile.c_str(), std::ofstream::out);
+		if (!globalCoutStream || globalCoutStream.bad() || !globalCoutStream.good()) {
+			PsimagLite::String str(application_.name());
+			str += ": Could not redirect std::cout to " + logfile + "\n";
+			err(str);
+		}
+
+		std::cout.rdbuf(globalCoutStream.rdbuf()); //redirect std::cout to file
+
+		printOutputChange(logfile, data);
 
 		Dmrg::InputCheck inputCheck;
 		InputNgType::Writeable ioWriteable(inputCheck, data);
 		InputNgType::Readable io(ioWriteable);
 
-		ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
+		ParametersDmrgSolverType dmrgSolverParams(io, "", false);
 
 		if (precision_ > 0) dmrgSolverParams.precision = precision_;
+
+		dmrgSolverParams.insitu = insitu;
 
 		if (dmrgSolverParams.options.isSet("MatrixVectorStored")) {
 			doOneRun2<Dmrg::MatrixVectorStored<ModelBaseType> >(dmrgSolverParams, io);
@@ -65,12 +81,29 @@ public:
 		} else {
 			doOneRun2<Dmrg::MatrixVectorKron<ModelBaseType> >(dmrgSolverParams, io);
 		}
+
+		if (globalCoutBuffer == 0) return;
+		globalCoutStream.close();
+		std::cout.rdbuf(globalCoutBuffer);
+	}
+
+	void printOutputChange(PsimagLite::String logfile, PsimagLite::String data) const
+	{
+		std::cerr<<Provenance::logo(application_.name());
+		std::cerr<<"Standard output sent to ";
+		std::cerr<<logfile<<"\n";
+		std::cerr.flush();
+
+		application_.printCmdLine(std::cout);
+		application_.base64encode(std::cout, data, true);
 	}
 
 private:
 
+
 	template<typename MatrixVectorType>
-	void doOneRun2(const ParametersDmrgSolverType& dmrgSolverParams, InputNgType::Readable& io)
+	void doOneRun2(const ParametersDmrgSolverType& dmrgSolverParams,
+	               InputNgType::Readable& io) const
 	{
 		SuperGeometryType geometry(io);
 		if (dmrgSolverParams.options.isSet("printgeometry"))
@@ -104,6 +137,7 @@ private:
 	}
 
 	RealType precision_;
+	const ApplicationType& application_;
 };
 }
 #endif // DMRGRUNNER_H

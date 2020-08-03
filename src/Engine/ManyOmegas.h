@@ -5,6 +5,7 @@
 #include "InputNg.h"
 #include "LanczosSolver.h"
 #include "Vector.h"
+#include "PsimagLite.h"
 
 namespace Dmft {
 
@@ -17,6 +18,7 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef DmrgRunner<ComplexOrRealType> DmrgRunnerType;
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
+	typedef PsimagLite::PsiApp ApplicationType;
 
 	struct OmegaParams {
 
@@ -39,10 +41,8 @@ public:
 		PsimagLite::String obs;
 	};
 
-	ManyOmegas(PsimagLite::String inputFile,
-	           RealType precision,
-	           bool echoInput)
-	    : inputfile_(inputFile), runner_(precision), echoInput_(echoInput), omegaParams_(0)
+	ManyOmegas(PsimagLite::String inputFile, RealType precision, const ApplicationType& app)
+	    : inputfile_(inputFile), runner_(precision, app), omegaParams_(0)
 	{
 		InputNgType::Writeable::readFile(data_, inputFile);
 		omegaParams_ = new OmegaParams(data_);
@@ -57,20 +57,25 @@ public:
 	void run(bool dryRun, PsimagLite::String root)
 	{
 		const PsimagLite::String obs = omegaParams_->obs;
-		const PsimagLite::String sOptions = "<gs|" + obs + "P1>,<gs|" +
+		const PsimagLite::String insitu = "<gs|" + obs + "|P1>,<gs|" +
 		        obs + "|P2>,<gs|" + obs + "|P3>";
 
 		for (SizeType i = omegaParams_->offset; i < omegaParams_->total; ++i) {
 			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
 			PsimagLite::String data2 = modifyOmega(omega);
-			data2 += PsimagLite::String("\nOutputFile=\"") + root + ttos(i) + "\";\n";
+			PsimagLite::String outputfile = "\nOutputFile=\"" + root + ttos(i) + "\";\n";
+			data2 += outputfile;
+
+			PsimagLite::String logfile = "runForinput" + ttos(i) + ".cout";
 
 			if (dryRun) {
-				std::cerr<<"ManyOmegas.h:: omega = "<<omega<<" NOT done because -d\n";
+				std::cerr<<"ManyOmegas.h:: omega = "<<omega;
+				std::cerr<<" output="<<outputfile;
+				std::cerr<<" logfile="<<logfile<<" NOT done because -d\n";
 				continue;
 			}
 
-			runner_.doOneRun(data2, sOptions, echoInput_);
+			runner_.doOneRun(data2, insitu, logfile);
 		}
 	}
 
@@ -92,7 +97,6 @@ public:
 
 	PsimagLite::String inputfile_;
 	DmrgRunnerType runner_;
-	bool echoInput_;
 	OmegaParams* omegaParams_;
 	PsimagLite::String data_;
 };
