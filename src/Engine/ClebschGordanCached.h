@@ -98,6 +98,7 @@ public:
 	      max2_(((jmax_-1)*(jmax_+2))/2+1),max22_(max2_*max2_),
 	      data_(max22_*jmax_*2,UNDEFINED_VALUE),cgObject_(2)
 	{
+		copies_ = 0;
 		init(jmax,2);
 	}
 

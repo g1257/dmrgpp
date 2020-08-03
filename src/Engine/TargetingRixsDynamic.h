@@ -167,6 +167,8 @@ public:
 	      applied_(false),
 	      appliedFirst_(false)
 	{
+		firstCall_ = true;
+
 		if (!wft.isEnabled())
 			err("TargetingRixsDynamic needs wft\n");
 
@@ -528,8 +530,6 @@ private:
 	                    ProgramGlobals::DirectionEnum direction,
 	                    const VectorSizeType& block1)
 	{
-		static bool firstCall = true;
-
 		if (!applied_ && appliedFirst_) {
 			setWeights(8);
 			return;
@@ -548,7 +548,7 @@ private:
 			                         this->common().aoe().targetVectors(8),
 			                         this->common().aoe().targetVectors(9));
 			setWeights(10);
-			firstCall = false; // unused here but just in case
+			firstCall_ = false; // unused here but just in case
 			return;
 		}
 
@@ -568,9 +568,9 @@ private:
 
 		assert(numberOfWeights > 0);
 		assert(indices.size() > 0 && indices2.size() > 0);
-		calcVectors(indices, Eg, direction, block1, !firstCall, false);
-		calcVectors(indices2, Eg, direction, block1, !firstCall, true);
-		firstCall = false;
+		calcVectors(indices, Eg, direction, block1, !firstCall_, false);
+		calcVectors(indices2, Eg, direction, block1, !firstCall_, true);
+		firstCall_ = false;
 		setWeights(numberOfWeights);
 	}
 
@@ -644,7 +644,12 @@ private:
 	CorrectionVectorSkeletonType skeleton_;
 	bool applied_;
 	bool appliedFirst_;
+	static bool firstCall_;
 }; // class TargetingRixsDynamic
+
+template<typename T1, typename T2>
+bool TargetingRixsDynamic<T1, T2>::firstCall_ = true;
+
 } // namespace
 /*@}*/
 #endif // TARGETING_RIXS_DYNAMIC_H

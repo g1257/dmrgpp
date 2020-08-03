@@ -176,6 +176,8 @@ public:
 	      systemPrev_(),
 	      environPrev_()
 	{
+		timesWithoutAdvancement_ = 0;
+
 		if (!wft.isEnabled()) err(" TargetingMetts needs an enabled wft\n");
 
 		RealType tau = mettsStruct_.tau()/(mettsStruct_.timeSteps()-1);
@@ -391,8 +393,6 @@ private:
 
 	void advanceCounterAndComputeStage(const VectorSizeType& block)
 	{
-		static SizeType timesWithoutAdvancement = 0;
-
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE))
 			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 
@@ -400,13 +400,13 @@ private:
 			if (!allSitesCollapsed()) {
 				if (sitesCollapsed_.size()>2*model_.superGeometry().numberOfSites())
 					throw PsimagLite::RuntimeError("advanceCounterAndComputeStage\n");
-				printAdvancement(timesWithoutAdvancement);
+				printAdvancement(timesWithoutAdvancement_);
 				return;
 			}
 
 			sitesCollapsed_.clear();
 			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
-			timesWithoutAdvancement = 0;
+			timesWithoutAdvancement_ = 0;
 			this->common().aoe().setCurrentTimeStep(0);
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -417,13 +417,13 @@ private:
 			for (SizeType i=0;i<n1;i++)
 				this->common().aoe().targetVectors(i) = this->common().aoe().targetVectors()[n1];
 			this->common().aoe().timeHasAdvanced();
-			printAdvancement(timesWithoutAdvancement);
+			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
-		if (timesWithoutAdvancement < mettsStruct_.advanceEach()) {
-			timesWithoutAdvancement++;
-			printAdvancement(timesWithoutAdvancement);
+		if (timesWithoutAdvancement_ < mettsStruct_.advanceEach()) {
+			++timesWithoutAdvancement_;
+			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
@@ -432,15 +432,15 @@ private:
 			this->common().setAllStagesTo(StageEnumType::WFT_ADVANCE);
 			const SizeType tmp = this->common().aoe().currentTimeStep() + 1;
 			this->common().aoe().setCurrentTimeStep(tmp);
-			timesWithoutAdvancement = 0;
-			printAdvancement(timesWithoutAdvancement);
+			timesWithoutAdvancement_ = 0;
+			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
 		        this->common().aoe().time() >= mettsStruct_.beta &&
 		        block[0]!=block.size()) {
-			printAdvancement(timesWithoutAdvancement);
+			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
@@ -450,8 +450,8 @@ private:
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.timeSteps();
 			this->common().aoe().targetVectors(n1).clear();
-			timesWithoutAdvancement = 0;
-			printAdvancement(timesWithoutAdvancement);
+			timesWithoutAdvancement_ = 0;
+			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 	}
@@ -871,7 +871,12 @@ private:
 	std::pair<TargetVectorType,TargetVectorType> pureVectors_;
 	VectorSizeType sitesCollapsed_;
 	VectorBlockDiagonalMatrixType garbage_;
+	static SizeType timesWithoutAdvancement_;
 };     //class TargetingMetts
+
+template<typename T1, typename T2>
+SizeType TargetingMetts<T1, T2>::timesWithoutAdvancement_ = 0;
+
 } // namespace Dmrg
 
 #endif //DMRG_TARGETING_METTS_H

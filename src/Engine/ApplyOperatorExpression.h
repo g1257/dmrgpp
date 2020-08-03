@@ -144,7 +144,10 @@ public:
 	      wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft()),
 	      multiSiteExprHelper_(targetHelper_.model().superGeometry().numberOfSites() - 2),
 	      correlationsSkel_(multiSiteExprHelper_, false)
-	{}
+	{
+		timesWithoutAdvancement_ = 0;
+		firstSeeLeftCorner_ = false;
+	}
 
 	~ApplyOperatorExpression()
 	{
@@ -689,8 +692,6 @@ private:
 	                SizeType lastI,
 	                const TargetParamsType& tstStruct)
 	{
-		static SizeType timesWithoutAdvancement = 0;
-		static bool firstSeeLeftCorner = false;
 		SizeType advanceEach = tstStruct.advanceEach();
 
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE) {
@@ -722,31 +723,31 @@ private:
 		bool weAreAtBorder = (site < 2 || site >= sites-2);
 		bool dontAdvance = (advanceOnlyAtBorder & !weAreAtBorder);
 
-		if (advanceEach > 0 && timesWithoutAdvancement >= advanceEach && !dontAdvance) {
+		if (advanceEach > 0 && timesWithoutAdvancement_ >= advanceEach && !dontAdvance) {
 			stage_[i] = StageEnum::WFT_ADVANCE;
 			if (i == lastI) {
 				++currentTimeStep_;
-				timesWithoutAdvancement=1;
+				timesWithoutAdvancement_ = 1;
 				timeVectorsBase_->timeHasAdvanced(time_);
 			}
 		} else {
 			if (i == lastI &&
 			        stage_[i] == StageEnum::WFT_NOADVANCE &&
-			        firstSeeLeftCorner)
-				timesWithoutAdvancement++;
+			        firstSeeLeftCorner_)
+				++timesWithoutAdvancement_;
 		}
 
-		if (!firstSeeLeftCorner &&
+		if (!firstSeeLeftCorner_ &&
 		        i==lastI &&
 		        stage_[i] == StageEnum::WFT_NOADVANCE &&
 		        site==1)
-			firstSeeLeftCorner=true;
+			firstSeeLeftCorner_ = true;
 
 		PsimagLite::OstringStream msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
-		msg2<<"Steps without advance: "<<timesWithoutAdvancement;
+		msg2<<"Steps without advance: "<<timesWithoutAdvancement_;
 		msg2<<" site="<<site<<" currenTime="<<time();
-		if (timesWithoutAdvancement>0) progress_.printline(msgg2, std::cout);
+		if (timesWithoutAdvancement_ > 0) progress_.printline(msgg2, std::cout);
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -861,8 +862,15 @@ private:
 	WftHelperType wftHelper_;
 	mutable MultiSiteExpressionHelperType multiSiteExprHelper_;
 	CorrelationsSkeletonType correlationsSkel_;
+	static SizeType timesWithoutAdvancement_;
+	static bool firstSeeLeftCorner_;
 };
 
+template<typename T1, typename T2, typename T3>
+SizeType ApplyOperatorExpression<T1,T2,T3>::timesWithoutAdvancement_ = 0;
+
+template<typename T1, typename T2, typename T3>
+bool ApplyOperatorExpression<T1,T2,T3>::firstSeeLeftCorner_ = false;
 } // namespace Dmrg
 
 #endif // APPLY_OP_EXPRESSION_H

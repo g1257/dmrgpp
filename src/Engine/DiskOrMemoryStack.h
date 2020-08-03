@@ -101,13 +101,14 @@ public:
 		}
 	}
 
+	static bool createFile_;
+
 private:
 
 	DiskOrMemoryStack(const DiskOrMemoryStack&);
 
 	DiskOrMemoryStack& operator=(const DiskOrMemoryStack&);
 
-	static bool createFile_;
 	MemoryStackType memory_;
 	DiskStackType *diskW_;
 	DiskStackType *diskR_;

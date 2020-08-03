@@ -171,6 +171,8 @@ public:
 	      saveData_(!parameters_.options.isSet("noSaveData"))
 	{
 		firstCall_ = true;
+		counter_ = 0;
+
 		std::cout<<appInfo_;
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -609,8 +611,6 @@ obtain ordered
 	           ProgramGlobals::DirectionEnum direction,
 	           SizeType loopIndex)
 	{
-		static SizeType counter = 0;
-
 		if (!saveData_) return;
 
 		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
@@ -643,10 +643,10 @@ obtain ordered
 		        : BasisWithOperatorsType::SaveEnum::PARTIAL;
 		SizeType numberOfSites = model_.superGeometry().numberOfSites();
 		PsimagLite::String prefix("Serializer");
-		ds->write(ioOut_, prefix, saveOption2, numberOfSites, counter);
-		PsimagLite::String prefixForTarget = TargetingType::buildPrefix(ioOut_, counter);
+		ds->write(ioOut_, prefix, saveOption2, numberOfSites, counter_);
+		PsimagLite::String prefixForTarget = TargetingType::buildPrefix(ioOut_, counter_);
 		target.write(sitesIndices_[stepCurrent_], ioOut_, prefixForTarget);
-		++counter;
+		++counter_;
 		delete ds;
 		ds = 0;
 	}
@@ -706,10 +706,14 @@ obtain ordered
 	ObservablesInSituType inSitu_;
 	bool saveData_;
 	static bool firstCall_;
+	static SizeType counter_;
 }; //class DmrgSolver
 
 template<typename T1, typename T2>
 bool DmrgSolver<T1, T2>::firstCall_ = true;
+
+template<typename T1, typename T2>
+SizeType DmrgSolver<T1, T2>::counter_ = 0;
 } // namespace Dmrg
 
 /*@}*/

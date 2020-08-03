@@ -137,6 +137,7 @@ public:
 	      progress_("Truncation"),
 	      error_(0.0)
 	{
+		firstCall_ = true;
 		if (parameters_.truncationControl.first < 0) return;
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -503,15 +504,14 @@ private:
 
 		PsimagLite::String label("DensityMatrixEigenvalues");
 
-		static bool firstCall = true;
-		if (firstCall) {
+		if (firstCall_) {
 			ioOut_.createGroup(label);
 			SizeType n = superGeometry_.numberOfSites();
 			counterVector_.resize(n, 0);
 			ioOut_.write(n, label + "/Size");
 			for (SizeType i = 0; i < n; ++i)
 				ioOut_.createGroup(label + "/" + ttos(i));
-			firstCall = false;
+			firstCall_ = false;
 		}
 
 		assert(index < counterVector_.size());
@@ -538,7 +538,11 @@ private:
 	TruncationCache leftCache_;
 	TruncationCache rightCache_;
 	VectorSizeType counterVector_;
+	static bool firstCall_;
 }; // class Truncation
+
+template<typename T1, typename T2>
+bool Truncation<T1, T2>::firstCall_ = true;
 
 } // namespace
 /*@}*/

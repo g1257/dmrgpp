@@ -207,8 +207,6 @@ public:
 		if (offsetCols_.size() != 0)
 			err("BlockOffDiagMatrix::toSparse() only for square matrix\n");
 
-		static SizeType limitWarn = 0;
-
 		assert(offsetRows_.size() > 0);
 		SizeType n = offsetRows_.size() - 1;
 
@@ -225,7 +223,7 @@ public:
 				thereWasABug = true;
 		}
 
-		if (thereWasABug && limitWarn < 10) {
+		if (thereWasABug && limitWarn_ < 10) {
 			PsimagLite::String msg("BlockOffDiagMatrix: toSparse() ");
 			msg += "there used to be a bug here: patches with overlapping rows\n";
 
@@ -235,7 +233,7 @@ public:
 			std::cerr<<msg;
 			std::cout<<PsimagLite::AnsiColor::reset;
 			std::cerr<<PsimagLite::AnsiColor::reset;
-			++limitWarn;
+			++limitWarn_;
 		}
 
 
@@ -452,6 +450,12 @@ private:
 	SizeType rows_;
 	SizeType cols_;
 	typename PsimagLite::Matrix<MatrixBlockType*> data_;
+	static SizeType limitWarn_;
+
 };
+
+template<typename T1>
+SizeType BlockOffDiagMatrix<T1>::limitWarn_ = 0;
+
 }
 #endif // BLOCKOFFDIAGMATRIX_H

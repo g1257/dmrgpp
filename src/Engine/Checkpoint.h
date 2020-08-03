@@ -134,6 +134,7 @@ public:
 	    energiesFromFile_(nsectors),
 	    dummyBwo_("dummy")
 	{
+		DiskOrMemoryStackType::createFile_ = true;
 		for (SizeType i = 0; i < nsectors; ++i)
 			energiesFromFile_[i].resize(parameters_.numberOfExcited);
 

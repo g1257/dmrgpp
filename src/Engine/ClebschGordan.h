@@ -94,9 +94,11 @@ class ClebschGordan {
 	typedef FieldType LongType;
 public:
 	typedef std::pair<SizeType,SizeType> PairType;
+
 	ClebschGordan(SizeType numberOfFactorials) :
 	    factorial_(numberOfFactorials)
 	{
+		copies_ = 0;
 		init(numberOfFactorials);
 	}
 

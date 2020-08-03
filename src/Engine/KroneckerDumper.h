@@ -47,6 +47,7 @@ public:
 	                ProgramGlobals::DirectionEnum dir)
 	    : enabled_(false),pairCount_(0),disable_(false)
 	{
+		counter_ = 0;
 		if (dir == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
 
