@@ -15,12 +15,14 @@ my $zeroAtCenter = 0;
 my $isPeriodic = 0;
 my $nonNegativeOnly = 0;
 my $noFourier = 0;
+my $comment = "#";
 
 GetOptions('f=s' => \$templateInput,
            'S:i' => \$siteForSpectrum,
            'm:i' => \$mForQ,
            'p' => \$isPeriodic,
            'M:i' => \$mMax,
+		   'c=s' => \$comment,
            'r' => \$wantsRealPart,
 		   'N' => \$nonNegativeOnly,
            'z' => \$zeroAtCenter,
@@ -41,12 +43,12 @@ my $testoutputfile = "runForinput\$";
 my ($lx, $ly) = (0, 0);
 my $options = "";
 
-my $isAinur = OmegaUtils::isAinur($templateInput);
+my $isAinur = OmegaUtils::isAinur  ($templateInput);
 
-my $hptr = {"#OmegaBegin" => \$omega0,
-            "#OmegaTotal" => \$omegaTotal,
-            "#OmegaStep" => \$omegaStep,
-            "#OmegaOffset" => \$omegaOffset,
+my $hptr = {"${comment}OmegaBegin" => \$omega0,
+            "${comment}OmegaTotal" => \$omegaTotal,
+            "${comment}OmegaStep" => \$omegaStep,
+            "${comment}OmegaOffset" => \$omegaOffset,
             "#Lx" => \$lx,
             "#Ly" => \$ly,
             "#options" => \$options,
@@ -54,9 +56,9 @@ my $hptr = {"#OmegaBegin" => \$omega0,
             "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,
             "Orbitals" => \$orbitals,
-            "#ChebyshevC" => \$ChebyC,
-            "#ChebyshevSign" => \$ChebySign,
-            "#JacksonOrLorentz" => \$jacksOrLorentz,
+            "${comment}ChebyshevC" => \$ChebyC,
+            "${comment}ChebyshevSign" => \$ChebySign,
+            "${comment}JacksonOrLorentz" => \$jacksOrLorentz,
             "TotalNumberOfSites" => \$GlobalNumberOfSites,
             "OutputFile" => \$testoutputfile};
 
@@ -68,6 +70,10 @@ if ($isAinur) {
 	$geometryName =~ s/[\";]//g;
 	$GlobalNumberOfSites =~ s/;//g;
 	$geometrySubName =~ s/[\";]//g;
+	$omega0 =~ s/[\";]//g;
+	$omegaTotal =~ s/[\";]//g;
+	$omegaStep =~ s/[\";]//g;
+	$omegaOffset =~ s/[\";]//g;
 }
 
 $hptr->{"isPeriodic"} = $isPeriodic;
