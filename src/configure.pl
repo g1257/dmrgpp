@@ -65,10 +65,14 @@ my %observeDriver0 = (name => 'ObserveDriver0', aux => 1);
 my %observeDriver1 = (name => 'ObserveDriver1', aux => 1);
 my %observeDriver2 = (name => 'ObserveDriver2', aux => 1);
 
+my $libs = "libdmrgpp.a KronUtil/libkronutil.a";
+my %manyOmegas = (name => 'manyOmegas', dotos => "manyOmegas.o $libs");
+
 my @drivers = (\%provenanceDriver,\%su2RelatedDriver,
 \%progGlobalsDriver,\%finiteLoopDriver,\%utilsDriver,
 \%qnDriver, \%observeDriver,\%toolboxDriver,
-\%observeDriver0,\%observeDriver1,\%observeDriver2);
+\%observeDriver0,\%observeDriver1,\%observeDriver2,
+\%manyOmegas);
 
 $dotos = "dmrg.o Provenance.o FiniteLoop.o Utils.o Qn.o ";
 $dotos .= " ProgramGlobals.o Su2Related.o";

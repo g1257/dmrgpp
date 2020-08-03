@@ -5,7 +5,7 @@
 #include "InputNg.h"
 #include "LanczosSolver.h"
 #include "Vector.h"
-#include "ParamsDmftSolver.h"
+
 namespace Dmft {
 
 template<typename ComplexOrRealType>
