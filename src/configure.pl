@@ -44,12 +44,15 @@ if ($lto == 1) {
 my $basicConfig = "ConfigBase.psiTag";
 my @configFiles = NewMake::configFilesList($basicConfig, $config);
 
-my $dotos = "cincuenta.o ../../dmrgpp/src/libdmrgpp.a ../../dmrgpp/src/KronUtil/libkronutil.a";
+
+my $libs = "../../dmrgpp/src/libdmrgpp.a ../../dmrgpp/src/KronUtil/libkronutil.a";
+my $dotos = "cincuenta.o $libs";
 
 my %cincuentaMain = (name => 'cincuenta', dotos => "$dotos");
 my %provenance = (name => 'Provenance', aux => 1);
+my %manyOmegas = (name => 'manyOmegas', dotos => "manyOmegas.o $libs");
 
-my @drivers = (\%cincuentaMain, \%provenance);
+my @drivers = (\%cincuentaMain, \%provenance, \%manyOmegas);
 
 my %args;
 $args{"CPPFLAGS"} = $lto;

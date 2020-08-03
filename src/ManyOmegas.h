@@ -1,20 +1,6 @@
 #ifndef MANYOMEGAS_H
 #define MANYOMEGAS_H
-#include "../../dmrgpp/src/Engine/InputCheck.h"
-#include "../../dmrgpp/src/Engine/Qn.h"
-#include "../../dmrgpp/src/Engine/ProgramGlobals.h"
-#include "../../dmrgpp/src/Engine/SuperGeometry.h"
-#include "../../dmrgpp/src/Engine/ParametersDmrgSolver.h"
-#include "../../dmrgpp/src/Engine/ModelSelector.h"
-#include "../../dmrgpp/src/Engine/ModelHelperLocal.h"
-#include "../../dmrgpp/src/Engine/MatrixVectorKron/MatrixVectorKron.h"
-#include "../../dmrgpp/src/Engine/MatrixVectorOnTheFly.h"
-#include "../../dmrgpp/src/Engine/MatrixVectorStored.h"
-#include "../../dmrgpp/src/Engine/LeftRightSuper.h"
-#include "../../dmrgpp/src/Engine/BasisWithOperators.h"
-#include "../../dmrgpp/src/Engine/DmrgSolver.h"
-#include "../../dmrgpp/src/Engine/VectorWithOffset.h"
-
+#include "DmrgRunner.h"
 #include "PsiBase64.h"
 #include "InputNg.h"
 #include "LanczosSolver.h"
@@ -29,35 +15,78 @@ public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-	typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
-	ParametersDmrgSolverType;
-	typedef Dmrg::SuperGeometry<ComplexOrRealType,
-	        InputNgType::Readable,
-	        Dmrg::ProgramGlobals> SuperGeometryType;
-	typedef Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn> VectorWithOffsetType;
+	typedef DmrgRunner<ComplexOrRealType> DmrgRunnerType;
+	typedef typename DmrgRunnerType::InputNgType InputNgType;
 
-	ManyOmegas manyOmegas(PsimagLite::String inputFile,
-	                      RealType precision,
-	                      bool echoInput)
-	    : inputfile_(inputFile), precision_(precision), echoInput_(echoInput)
+	struct OmegaParams {
+
+		OmegaParams(PsimagLite::String data)
+		{
+			Dmrg::InputCheck inputCheck;
+			typename InputNgType::Writeable ioWriteable(inputCheck, data);
+			typename InputNgType::Readable io(ioWriteable);
+			io.readline(begin, "OmegaBegin=");
+			io.readline(step, "OmegaStep=");
+			io.readline(total, "OmegaTotal=");
+			io.readline(offset, "OmegaOffset=");
+		}
+
+		RealType begin;
+		RealType step;
+		SizeType offset;
+		SizeType total;
+	};
+
+	ManyOmegas(PsimagLite::String inputFile,
+	           RealType precision,
+	           bool echoInput)
+	    : inputfile_(inputFile), runner_(precision), echoInput_(echoInput), omegaParams_(0)
 	{
 		InputNgType::Writeable::readFile(data_, inputFile);
+		omegaParams_ = new OmegaParams(data_);
+	}
+
+	~ManyOmegas()
+	{
+		delete omegaParams_;
+		omegaParams_ = nullptr;
 	}
 
 	void run(bool dryRun)
 	{
-		for (SizeType i = offset; i < total; ++i) {
-			RealType omega = omegas_[i];
-			PsimagLite::String data2 = modifyOmega(data_, omega);
+		for (SizeType i = omegaParams_->offset; i < omegaParams_->total; ++i) {
+			RealType omega = i*omegaParams_->step + omegaParams_->begin;
+			PsimagLite::String data2 = modifyOmega(omega);
 			PsimagLite::String sOptions = "";
-			doOneRun(data2, sOptions);
+
+			if (dryRun) {
+				std::cerr<<"ManyOmegas.h:: omega = "<<omega<<" NOT done because -d\n";
+				continue;
+			}
+
+			runner_.doOneRun(data2, sOptions);
 		}
 	}
 
-	PsimagLite::String inputFile_;
-	RealType precision_;
+	PsimagLite::String modifyOmega(RealType omega) const
+	{
+		PsimagLite::String data = data_;
+		const PsimagLite::String label = "$omega";
+		size_t pos = data.find(label);
+		if (pos == PsimagLite::String::npos)
+			err("Could not find " + label + " in " + inputfile_ + "\n");
+
+		PsimagLite::String str = data.substr(0, pos);
+		SizeType len = str.length();
+		str += ttos(omega);
+		str += data.substr(pos + len, data.length() - len - label.length());
+		return str;
+	}
+
+	PsimagLite::String inputfile_;
+	DmrgRunnerType runner_;
 	bool echoInput_;
+	OmegaParams* omegaParams_;
 	PsimagLite::String data_;
 };
 }

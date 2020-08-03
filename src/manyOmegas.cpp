@@ -23,8 +23,7 @@ void usage(const PsimagLite::String& name)
 int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("manyOmegas", &argc, &argv, 1);
-	typedef PsimagLite::InputNg<Dmft::InputCheck> InputNgType;
-	typedef Dmft::ManyOmegas ManyOmegasType;
+	typedef Dmft::ManyOmegas<std::complex<double> > ManyOmegasType;
 
 	int opt = 0;
 	bool versionOnly = false;
@@ -32,6 +31,8 @@ int main(int argc, char** argv)
 	PsimagLite::String logfile;
 	SizeType precision = 12;
 	bool unbuffered = false;
+	bool dryrun = false;
+
 	/* PSIDOC DmrgDriver
 There is a single input file that is passed as the
 argument to \verb!-f!, like so
@@ -143,5 +144,5 @@ to the main dmrg driver are the following.
 
 	ManyOmegasType manyOmegas(inputfile, precision, echoInput);
 
-	manyOmegas.run(dryRun);
+	manyOmegas.run(dryrun);
 }
