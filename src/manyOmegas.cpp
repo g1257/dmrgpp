@@ -13,7 +13,7 @@ void usage(const PsimagLite::String& name)
 int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("manyOmegas", &argc, &argv, 1);
-	typedef Dmft::ManyOmegas<std::complex<double> > ManyOmegasType;
+	typedef Dmft::ManyOmegas<double> ManyOmegasType;
 
 	int opt = 0;
 	bool versionOnly = false;

@@ -42,7 +42,7 @@ public:
 	              PsimagLite::String insitu,
 	              PsimagLite::String logfile) const
 	{
-		typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
+		typedef  PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrixComplex;
 		typedef Dmrg::Basis<MySparseMatrixComplex> BasisType;
 		typedef Dmrg::BasisWithOperators<BasisType> BasisWithOperatorsType;
 		typedef Dmrg::LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
@@ -52,17 +52,21 @@ public:
 		        InputNgType::Readable,
 		        SuperGeometryType> ModelBaseType;
 
-		std::streambuf* globalCoutBuffer = std::cout.rdbuf(); //save old buf
-		std::ofstream globalCoutStream(logfile.c_str(), std::ofstream::out);
-		if (!globalCoutStream || globalCoutStream.bad() || !globalCoutStream.good()) {
-			PsimagLite::String str(application_.name());
-			str += ": Could not redirect std::cout to " + logfile + "\n";
-			err(str);
+		std::streambuf* globalCoutBuffer = 0;
+		std::ofstream globalCoutStream;
+		if (logfile != "-") {
+			globalCoutBuffer = std::cout.rdbuf(); //save old buf
+			globalCoutStream.open(logfile.c_str(), std::ofstream::out);
+			if (!globalCoutStream || globalCoutStream.bad() || !globalCoutStream.good()) {
+				PsimagLite::String str(application_.name());
+				str += ": Could not redirect std::cout to " + logfile + "\n";
+				err(str);
+			}
+
+			std::cout.rdbuf(globalCoutStream.rdbuf()); //redirect std::cout to file
+
+			printOutputChange(logfile, data);
 		}
-
-		std::cout.rdbuf(globalCoutStream.rdbuf()); //redirect std::cout to file
-
-		printOutputChange(logfile, data);
 
 		Dmrg::InputCheck inputCheck;
 		InputNgType::Writeable ioWriteable(inputCheck, data);
@@ -82,7 +86,7 @@ public:
 			doOneRun2<Dmrg::MatrixVectorKron<ModelBaseType> >(dmrgSolverParams, io);
 		}
 
-		if (globalCoutBuffer == 0) return;
+		if (logfile == "-" || globalCoutBuffer == 0) return;
 		globalCoutStream.close();
 		std::cout.rdbuf(globalCoutBuffer);
 	}
