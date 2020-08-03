@@ -19,7 +19,7 @@ public:
 	typedef typename ParamsDmftSolverType::ComplexOrRealType ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef DmrgRunner<ComplexOrRealType> DmrgRunnerType;
+	typedef Dmrg::DmrgRunner<ComplexOrRealType> DmrgRunnerType;
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
 	typedef PsimagLite::PsiApp ApplicationType;
 
