@@ -7,6 +7,7 @@
 #include "Vector.h"
 #include "ParamsDmftSolver.h"
 #include "../../dmrgpp/src/Engine/DmrgRunner.h"
+#include "PsimagLite.h"
 
 namespace Dmft {
 
@@ -20,9 +21,10 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef DmrgRunner<ComplexOrRealType> DmrgRunnerType;
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
+	typedef PsimagLite::PsiApp ApplicationType;
 
-	ImpuritySolver(const ParamsDmftSolverType& params)
-	    : params_(params), runner_(params_.precision)
+	ImpuritySolver(const ParamsDmftSolverType& params, const ApplicationType& app)
+	    : params_(params), runner_(params_.precision, app)
 	{}
 
 	// bathParams[0-nBath-1] ==> V ==> hoppings impurity --> bath
@@ -35,7 +37,7 @@ public:
 		PsimagLite::String data2 = modifyBathParams(data, bathParams);
 		PsimagLite::String sOptions = "";
 
-		runner_.doOneRun(data2, sOptions, params_.echoInput);
+		runner_.doOneRun(data2, sOptions, "-");
 	}
 
 	ComplexOrRealType gimp(SizeType i)

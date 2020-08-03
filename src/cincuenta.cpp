@@ -145,7 +145,7 @@ to the main dmrg driver are the following.
 	if (precision > 0) params.precision = precision;
 	params.echoInput = echoInput;
 
-	DmftSolverType dmftSolver(params);
+	DmftSolverType dmftSolver(params, application);
 
 	dmftSolver.selfConsistencyLoop();
 }

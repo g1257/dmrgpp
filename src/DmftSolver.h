@@ -21,8 +21,9 @@ public:
 	typedef typename FitType::MinParamsType MinParamsType;
 	typedef ParamsDmftSolver<ComplexOrRealType, InputNgType> ParamsDmftSolverType;
 	typedef ImpuritySolver<ParamsDmftSolverType> ImpuritySolverType;
+	typedef typename ImpuritySolverType::ApplicationType ApplicationType;
 
-	DmftSolver(const ParamsDmftSolverType& params)
+	DmftSolver(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params),
 	      sigma_(params.ficticiousBeta, params.nMatsubaras),
 	      latticeG_(params.ficticiousBeta, params.nMatsubaras),
@@ -30,7 +31,7 @@ public:
 	      dispersion_(params.numberOfKpoints),
 	      mu_(params.mu),
 	      fit_(params.nBath, params.minParams),
-	      impuritySolver_(params)
+	      impuritySolver_(params, app)
 	{}
 
 	// DMFT Self consistency loop; see Steve Johnston's notes
