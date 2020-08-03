@@ -115,6 +115,7 @@ public:
 	void setModelName(PsimagLite::String model)
 	{
 		model_ = model;
+		labels_.clear();
 	}
 
 	Label& createLabel(PsimagLite::String name,

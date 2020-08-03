@@ -288,6 +288,18 @@ public:
 		terms_.clear();
 	}
 
+	void clear()
+	{
+		offsets_.clear();
+		trackables_.clear();
+		SizeType n = terms_.size();
+		for (SizeType i = 0; i < n; ++i)
+			delete terms_[i];
+
+		terms_.clear();
+		hermit_.clear();
+	}
+
 	void postCtor1(const LabeledOperatorsType& labeledOps,
 	               const AtomKindBase* ptr,
 	               SizeType geometryTerms)

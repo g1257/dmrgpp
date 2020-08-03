@@ -170,6 +170,7 @@ public:
 	                ioOut_),
 	      saveData_(!parameters_.options.isSet("noSaveData"))
 	{
+		firstCall_ = true;
 		std::cout<<appInfo_;
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -673,11 +674,9 @@ obtain ordered
 	{
 		if (!saveData_) return;
 
-		static bool firstCall = true;
+		CheckpointType::writeEnergies(firstCall_, "Energies", energies, ioOut_);
 
-		CheckpointType::writeEnergies(firstCall, "Energies", energies, ioOut_);
-
-		firstCall = false;
+		firstCall_ = false;
 	}
 
 	const BlockType& findRightBlock(const VectorBlockType& y,
@@ -706,7 +705,11 @@ obtain ordered
 	TruncationType truncate_;
 	ObservablesInSituType inSitu_;
 	bool saveData_;
+	static bool firstCall_;
 }; //class DmrgSolver
+
+template<typename T1, typename T2>
+bool DmrgSolver<T1, T2>::firstCall_ = true;
 } // namespace Dmrg
 
 /*@}*/

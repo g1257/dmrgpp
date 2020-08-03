@@ -170,6 +170,8 @@ public:
 	      superOpHelper_(nullptr)
 	{
 		labeledOperators_.setModelName(params.model);
+		modelLinks_.clear();
+		qns_.clear();
 	}
 
 	void postCtor()
