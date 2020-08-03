@@ -115,6 +115,13 @@ public:
 	void setModelName(PsimagLite::String model)
 	{
 		model_ = model;
+
+		SizeType n = labels_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			delete labels_[i];
+			labels_[i] = 0;
+		}
+
 		labels_.clear();
 	}
 

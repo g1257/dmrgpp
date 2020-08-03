@@ -1,23 +1,23 @@
 #ifndef DMRGRUNNER_H
 #define DMRGRUNNER_H
 #include "CrsMatrix.h"
-#include "../../dmrgpp/src/Engine/InputCheck.h"
-#include "../../dmrgpp/src/Engine/Qn.h"
-#include "../../dmrgpp/src/Engine/ProgramGlobals.h"
-#include "../../dmrgpp/src/Engine/SuperGeometry.h"
-#include "../../dmrgpp/src/Engine/ParametersDmrgSolver.h"
-#include "../../dmrgpp/src/Engine/ModelSelector.h"
-#include "../../dmrgpp/src/Engine/ModelHelperLocal.h"
-#include "../../dmrgpp/src/Engine/MatrixVectorKron/MatrixVectorKron.h"
-#include "../../dmrgpp/src/Engine/MatrixVectorOnTheFly.h"
-#include "../../dmrgpp/src/Engine/MatrixVectorStored.h"
-#include "../../dmrgpp/src/Engine/LeftRightSuper.h"
-#include "../../dmrgpp/src/Engine/BasisWithOperators.h"
-#include "../../dmrgpp/src/Engine/DmrgSolver.h"
-#include "../../dmrgpp/src/Engine/VectorWithOffset.h"
+#include "InputCheck.h"
+#include "Qn.h"
+#include "ProgramGlobals.h"
+#include "SuperGeometry.h"
+#include "ParametersDmrgSolver.h"
+#include "ModelSelector.h"
+#include "ModelHelperLocal.h"
+#include "MatrixVectorKron/MatrixVectorKron.h"
+#include "MatrixVectorOnTheFly.h"
+#include "MatrixVectorStored.h"
+#include "LeftRightSuper.h"
+#include "BasisWithOperators.h"
+#include "DmrgSolver.h"
+#include "VectorWithOffset.h"
 #include "PsimagLite.h"
 
-namespace Dmft {
+namespace Dmrg {
 
 template<typename  ComplexOrRealType>
 class DmrgRunner {

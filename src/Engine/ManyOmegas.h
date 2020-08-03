@@ -7,7 +7,7 @@
 #include "Vector.h"
 #include "PsimagLite.h"
 
-namespace Dmft {
+namespace Dmrg {
 
 template<typename ComplexOrRealType>
 class ManyOmegas {
