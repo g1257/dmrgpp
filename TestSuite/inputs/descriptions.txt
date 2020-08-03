@@ -279,6 +279,9 @@ correction vector algorithm (type=1).
 3010) Dynamics: Non-local Green's function at sites (15,0) for a one-band Hubbard model for U=10 using
 correction vector algorithm (type=2).
 3011) Dynamics: Non-local Green's function at sites (15,0) for a one-band Hubbard model for U=10 using
+#3100-3299 manyOmegas.cpp
+3100) Ground state for manyOmegas
+#3101 input dollarized
 #3500) Chebyshev test ground state
 #3501) ChebyshevTargeting from 3500
 #correction vector algorithm (type=3).

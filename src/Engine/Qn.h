@@ -55,7 +55,7 @@ public:
 		}
 
 		if (szPlusConst.size() == 0)
-			err("Qn\n");
+			modalStruct.clear();
 	}
 
 	Qn(const Qn& q1, const Qn& q2)

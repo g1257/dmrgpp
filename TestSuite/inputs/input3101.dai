@@ -1,0 +1,53 @@
+##Ainur1.0
+TotalNumberOfSites=32;
+
+NumberOfTerms=2;
+
+gt0:DegreesOfFreedom=1;
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1];
+
+gt1:DegreesOfFreedom=1;
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[1];
+
+Model="Heisenberg";
+integer HeisenbergTwiceS=1;
+
+SolverOptions="twositedmrg,fixLegacyBugs,CorrectionVectorTargeting,restart";
+string RestartFilename="data3100";
+Version="version";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[
+[-30, 200, 2],
+[ 30, 200, 2]];
+integer IsPeriodicX=0;
+integer TargetSzPlusConst=16;
+
+integer TridiagSteps=400;
+real TridiagEps=1e-9;
+string TruncationTolerance="1e-10,100";
+real CorrectionA=0;
+integer DynamicDmrgType=0;
+TSPSites=[16];
+TSPLoops=[0];
+TSPProductOrSum=sum;
+string CorrectionVectorFreqType="Real";
+
+real CorrectionVectorEta=0.05;
+string CorrectionVectorAlgorithm="Krylov";
+Orbitals=1;
+GsWeight=0.1;
+real CorrectionVectorOmega=$omega;
+
+TSPOperator="expression";
+OperatorExpression="sminus";
+
+string Observable="splus";
+real OmegaBegin=0;
+real OmegaStep=0.025;
+integer OmegaTotal=50;
+integer OmegaOffset=0;
+

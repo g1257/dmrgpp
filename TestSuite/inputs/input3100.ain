@@ -1,0 +1,29 @@
+##Ainur1.0
+TotalNumberOfSites=32;
+
+NumberOfTerms=2;
+
+gt0:DegreesOfFreedom=1;
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1];
+
+gt1:DegreesOfFreedom=1;
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[1];
+
+Model="Heisenberg";
+integer HeisenbergTwiceS=1;
+
+SolverOptions="twositedmrg,fixLegacyBugs";
+Version="version";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[
+[15, 150, 0],
+[-30, 200, 0],
+[ 30, 200, 0]];
+integer IsPeriodicX=0;
+OutputFile="data3100";
+integer TargetSzPlusConst=16;
+
