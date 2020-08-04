@@ -16,7 +16,7 @@ public:
 	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda)
 	{
 		for (SizeType i = start; i < end; ++i)
-			lambda(i);
+			lambda(i, 0);
 	}
 
 	SizeType size() const { return 1; }

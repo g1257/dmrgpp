@@ -107,6 +107,8 @@ SizeType commSize(CommType mpiComm);
 
 SizeType commRank(CommType mpiComm);
 
+int barrier(CommType);
+
 template<typename NumericType>
 typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
 void>::Type recv(NumericType& v,int source, int tag, CommType mpiComm = COMM_WORLD)

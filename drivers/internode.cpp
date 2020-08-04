@@ -8,6 +8,7 @@ int main(int argc, char* argv[])
 	}
 
 	const SizeType n = atoi(argv[1]);
+
 	// original
 	for (SizeType i = 0; i < n; ++i) {
 		std::cout<<i;
@@ -18,7 +19,7 @@ int main(int argc, char* argv[])
 	//lambda
 	PsimagLite::InterNode<> internode;
 
-	internode.parallelFor(0, n, [](SizeType i){std::cout << i;});
+	internode.parallelFor(0, n, [](SizeType i, SizeType){std::cout << i;});
 	std::cout<<"\n--------------------------\n";
 
 }
