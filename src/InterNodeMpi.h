@@ -1,50 +1,34 @@
-#ifndef PARALLELIZER2PTHREAD_H
-#define PARALLELIZER2PTHREAD_H
-#include <pthread.h>
+#ifndef INTER_NODE_MPI_H
+#define INTER_NODE_MPI_H
+#include <mpi.h>
 #include <iostream>
 #include <algorithm>
 #include "Vector.h"
 #include <sched.h>
 #include <unistd.h>
 #include "TypeToString.h"
-#include "CodeSectionParams.h"
 #include "LoadBalancerDefault.h"
-
-#ifdef __linux__
-#include <sys/types.h>
-#include <sys/syscall.h>
-#endif
-
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#ifdef _GNU_SOURCE
-#include <errno.h>
-#include <string.h>
-#endif
 
 template<typename SomeLambdaType,
          typename LoadBalancerType=PsimagLite::LoadBalancerDefault
          >
-struct PthreadFunctionStruct2 {
-	PthreadFunctionStruct2()
-	    : pfh(0),loadBalancer(0),threadNum(0),nthreads(0),start(0),end(0),cpu(0)
+struct MpiFunctionStruct {
+	MpiFunctionStruct()
+	    : pfh(0),loadBalancer(0),nsize(0),start(0),end(0)
 	{}
 
 	const SomeLambdaType* pfh;
 	const LoadBalancerType* loadBalancer;
-	int threadNum;
-	SizeType nthreads;
+	SizeType nsize;
 	SizeType start;
 	SizeType end;
-	SizeType cpu;
 };
 
 template<typename SomeLambdaType, typename SomeLoadBalancer>
-void *thread_function_wrapper2(void *dummyPtr)
+void *mpiFunctionWrapper(void *dummyPtr)
 {
-	PthreadFunctionStruct2<SomeLambdaType, SomeLoadBalancer> *pfs =
-	        static_cast<PthreadFunctionStruct2<SomeLambdaType, SomeLoadBalancer> *>(dummyPtr);
+	MpiFunctionStruct<SomeLambdaType, SomeLoadBalancer> *pfs =
+	        static_cast<MpiFunctionStruct<SomeLambdaType, SomeLoadBalancer> *>(dummyPtr);
 
 	const SomeLambdaType* pfh = pfs->pfh;
 
@@ -113,8 +97,8 @@ public:
 	                 const SomeLambdaType& lambda,
 	                 const LoadBalancerType& loadBalancer)
 	{
-		PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>* pfs =
-		new PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>[nthreads_];
+		MpiFunctionStruct<SomeLambdaType, LoadBalancerType>* pfs =
+		new MpiFunctionStruct<SomeLambdaType, LoadBalancerType>[nthreads_];
 		pthread_t* thread_id = new pthread_t[nthreads_];
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 
@@ -143,7 +127,7 @@ public:
 
 			ret = pthread_create(&thread_id[j],
 			                     attr[j],
-			                     thread_function_wrapper2<SomeLambdaType, LoadBalancerType>,
+			                     mpiFunctionWrapper<SomeLambdaType, LoadBalancerType>,
 			                     &pfs[j]);
 			checkForError(ret);
 		}
@@ -173,4 +157,4 @@ private:
 	size_t stackSize_;
 };
 }
-#endif // PARALLELIZER2PTHREAD_H
+#endif // INTER_NODE_MPI_H
