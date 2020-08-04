@@ -73,6 +73,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file Mpi.h
  *
+ * Consider including Concurrency.h instead of this file
+ *
  */
 #ifndef MPI_HEADER_H
 #define MPI_HEADER_H

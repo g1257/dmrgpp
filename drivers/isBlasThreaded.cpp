@@ -46,7 +46,7 @@ public:
 		SizeType mm = a_[ind]->rows();
 		SizeType nn = b_[ind]->cols();
 		SizeType kk = a_[ind]->cols();
-		assert(kk = b_[ind]->rows());
+		assert(kk == b_[ind]->rows());
 		assert(c_[ind]->rows() == mm && c_[ind]->cols() == nn);
 		SizeType lda = a_[ind]->rows();
 		SizeType ldb = b_[ind]->rows();
