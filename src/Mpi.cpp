@@ -135,9 +135,9 @@ SizeType commRank(CommType mpiComm)
 	return tmp;
 }
 
-int barrier(CommType comm);
+int barrier(CommType comm)
 {
-	MPI_Barrier(comm);
+	return MPI_Barrier(comm);
 }
 
 #else

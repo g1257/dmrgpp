@@ -22,7 +22,7 @@ public:
 	    : comm_(comm), mpiSize_(MPI::commSize(comm_)), mpiRank_(MPI::commRank(comm_))
 	{}
 
-	SizeType size() const { return size_; }
+	SizeType size() const { return mpiSize_; }
 
 	String name() const { return "mpi"; }
 
@@ -64,7 +64,7 @@ public:
 			lambda(taskNumber + start, mpiRank_);
 		}
 
-		MPI::barrier();
+		MPI::barrier(comm_);
 	}
 
 private:

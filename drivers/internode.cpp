@@ -1,7 +1,9 @@
 #include "InterNode.h"
+#include "PsimagLite.h"
 
 int main(int argc, char* argv[])
 {
+	PsimagLite::PsiApp psiApp("internode", &argc, &argv, 1);
 	if (argc < 2) {
 		std::cerr<<"USAGE "<<argv[0]<<" number\n";
 		return 1;
@@ -17,7 +19,7 @@ int main(int argc, char* argv[])
 	std::cout<<"\n--------------------------\n";
 
 	//lambda
-	PsimagLite::InterNode<> internode;
+	PsimagLite::InterNode<> internode(MPI::COMM_WORLD);
 
 	internode.parallelFor(0, n, [](SizeType i, SizeType){std::cout << i;});
 	std::cout<<"\n--------------------------\n";
