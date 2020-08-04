@@ -89,19 +89,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifdef USE_PTHREADS
 
-#ifndef USE_MPI
 #include ActualPthreadsN()
-#else
-#include "PthreadsAndMpi.h"
-#endif
 
 #else
 
-#ifdef USE_MPI
-#include "Mpi.h"
-#else 
 #include ActualNoPthreadsN()
-#endif // USE_MPI
 
 #endif // USE_PTHREADS
 
@@ -111,22 +103,12 @@ class Parallelizer
 
 #ifdef USE_PTHREADS
 
-#ifdef USE_MPI
-	: public PthreadsAndMpi<InstanceType> {
-	typedef PthreadsAndMpi<InstanceType> BaseType;
-#else
         : public ActualPthreadsName<InstanceType, LoadBalancerType> {
 	typedef ActualPthreadsName<InstanceType, LoadBalancerType> BaseType;
-#endif
 
-#else
-#ifdef USE_MPI
-        : public Mpi<InstanceType> {
-	typedef Mpi<InstanceType> BaseType;
 #else
         : public ActualNoPthreadsName<InstanceType, LoadBalancerType>  {
 	typedef ActualNoPthreadsName<InstanceType, LoadBalancerType> BaseType;
-#endif
 #endif
 
 public:

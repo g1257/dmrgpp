@@ -93,11 +93,18 @@ public:
 		os<<"PsiApp: CmdLine: "<<cmdLine_<<"\n";
 	}
 
+	static void base64encode(std::ostream& os, String data, bool flag)
+	{
+		if (flag)
+			os<<"PsiApp::echoBase64: Echo of [[data]] in base64\n";
+		PsiBase64::Encode base64(data);
+		os<<base64()<<"\n";
+	}
+
 	static void echoBase64(std::ostream& os, String filename)
 	{
 		os<<"PsiApp::echoBase64: Echo of "<<filename<<" in base64\n";
-		PsiBase64::Encode base64(slurp(filename));
-		os<<base64()<<"\n";
+		base64encode(os, slurp(filename), false);
 	}
 
 	static String slurp(String filename)
