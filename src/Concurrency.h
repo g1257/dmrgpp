@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <unistd.h>
 #include "Vector.h"
 #include "Mpi.h"
+#include "LabelDisabled.h"
 #include "FloatingPoint.h"
 #include "LAPACK.h"
 #include "CodeSectionParams.h"
@@ -90,7 +91,7 @@ namespace PsimagLite {
 
 class Concurrency {
 
-	typedef MpiDisabled MpiDisabledType;
+	typedef LabelDisabled MpiDisabledType;
 
 public:
 

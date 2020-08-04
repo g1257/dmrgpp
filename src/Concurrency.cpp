@@ -3,7 +3,7 @@
 namespace PsimagLite {
 
 SizeType Concurrency::mode = 0;
-MpiDisabled Concurrency::mpiDisabled_;
+LabelDisabled Concurrency::mpiDisabled_;
 CodeSectionParams Concurrency::codeSectionParams(1);
 } // namespace PsimagLite
 
