@@ -75,92 +75,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 
-#include "Mpi.h"
-
-namespace PsimagLite {
-
-namespace MPI {
-
 #ifdef USE_MPI
-CommType COMM_WORLD = MPI_COMM_WORLD;
-
-template<>
-const MPI_Datatype MpiData<unsigned int long>::Type = MPI_LONG;
-
-template<>
-const MPI_Datatype MpiData<unsigned int>::Type = MPI_INTEGER;
-
-template<>
-const MPI_Datatype MpiData<double>::Type = MPI_DOUBLE;
-
-template<>
-const MPI_Datatype MpiData<int>::Type = MPI_INTEGER;
-
-void checkError(int errorCode,PsimagLite::String caller,CommType comm)
-{
-	if (errorCode == MPI_SUCCESS)
-		return;
-
-	char errorMessage[MPI_MAX_ERROR_STRING];
-	int messageLength = 0;
-	MPI_Error_string(errorCode,errorMessage,&messageLength);
-	std::cerr<<"Error in call to "<<caller<<" ";
-	std::cerr<<errorMessage<<"\n";
-	MPI_Abort(comm, -1);
-}
-
-void init(int* argc, char **argv[])
-{
-	MPI_Init(argc,argv);
-}
-
-void finalize()
-{
-	MPI_Finalize();
-}
-
-SizeType commSize(CommType mpiComm)
-{
-	int tmp = 1;
-	if (mpiComm != 0)
-		MPI_Comm_size(mpiComm,&tmp);
-	return tmp;
-}
-
-SizeType commRank(CommType mpiComm)
-{
-	int tmp = 0;
-	if (mpiComm != 0)
-		MPI_Comm_rank(mpiComm,&tmp);
-	return tmp;
-}
-
-int barrier(CommType comm)
-{
-	return MPI_Barrier(comm);
-}
-
+#include "MpiYes.cpp"
 #else
-
-int COMM_WORLD = 0;
-int SUM = 0;
-
-void init(int, char **) {}
-
-void finalize() {}
-
-SizeType commSize(CommType)
-{
-	return 1;
-}
-
-SizeType commRank(CommType)
-{
-	return 0;
-}
-
+#include "MpiNo.cpp"
 #endif
-} // namespace MPI
-
-} // namespace PsimagLite
 

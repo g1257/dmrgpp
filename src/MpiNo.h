@@ -91,9 +91,13 @@ typedef int CommType;
 extern int COMM_WORLD;
 extern int SUM;
 
-void init(int, char **);
+void init(int*, char***);
 
 void finalize();
+
+bool hasMpi();
+
+void info(std::ostream&);
 
 SizeType commSize(CommType);
 

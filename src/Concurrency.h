@@ -159,12 +159,6 @@ public:
 
 #endif
 
-#ifndef USE_MPI
-	typedef int CommType;
-#else
-	typedef MPI::CommType CommType;
-#endif
-
 	enum {SERIAL=0,PTHREADS=1,MPI=2,PTHREADS_AND_MPI=3};
 
 	static SizeType storageSize(SizeType npthreads)
@@ -195,11 +189,7 @@ public:
 		throw RuntimeError("storageIndex: wrong mode\n");
 	}
 
-#ifndef USE_MPI
-	Concurrency(int*, char ***,size_t nthreads)
-#else
 	Concurrency(int* argc, char *** argv,size_t nthreads)
-#endif
 	{
 		FloatingPoint::enableExcept();
 		codeSectionParams.npthreads = nthreads;
@@ -213,10 +203,10 @@ public:
 		if (nthreads != 1)
 			throw RuntimeError("nthreads>1 but no USE_PTHREADS support compiled\n");
 #endif
-#ifdef USE_MPI
-		MPI::init(argc,argv);
-		mode |= 2;
-#endif
+
+		MPI::init(argc, argv);
+		MPI::info(std::cout);
+		if (MPI::hasMpi()) mode |= 2;
 	}
 
 	~Concurrency()

@@ -19,7 +19,7 @@ int main(int argc, char* argv[])
 	std::cout<<"\n--------------------------\n";
 
 	//lambda
-	PsimagLite::InterNode<> internode(MPI::COMM_WORLD);
+	PsimagLite::InterNode<> internode(PsimagLite::MPI::COMM_WORLD);
 
 	internode.parallelFor(0, n, [](SizeType i, SizeType){std::cout << i;});
 	std::cout<<"\n--------------------------\n";

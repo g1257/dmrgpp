@@ -1,6 +1,7 @@
 #ifndef INTER_NODE_SERIAL_H
 #define INTER_NODE_SERIAL_H
 #include "Vector.h"
+#include "Mpi.h"
 
 namespace PsimagLite {
 
@@ -9,7 +10,7 @@ class InterNode {
 
 public:
 
-	InterNode()
+	InterNode(MPI::CommType)
 	{}
 
 	template<typename SomeLambdaType>
