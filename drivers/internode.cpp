@@ -23,5 +23,5 @@ int main(int argc, char* argv[])
 
 	internode.parallelFor(0, n, [](SizeType i, SizeType){std::cout << i;});
 	std::cout<<"\n--------------------------\n";
-
+	system("hostname");
 }

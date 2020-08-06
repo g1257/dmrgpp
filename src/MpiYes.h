@@ -103,6 +103,12 @@ void init(int* argc, char **argv[]);
 
 void finalize();
 
+bool hasMpi();
+
+void info(std::ostream&);
+
+void version(std::ostream&);
+
 SizeType commSize(CommType mpiComm);
 
 SizeType commRank(CommType mpiComm);

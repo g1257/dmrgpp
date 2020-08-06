@@ -179,7 +179,7 @@ void info(std::ostream& os)
 	char* key = new char[MPI_MAX_INFO_KEY + 1];
 	char *value = new char[MPI_MAX_INFO_VAL + 1];
 
-	for (SizeType i = 0; i < nkeys; ++i) {
+	for (int i = 0; i < nkeys; ++i) {
 		ret = MPI_Info_get_nthkey(MPI_INFO_ENV, i, key);
 		checkError(ret, "MPI_Info_get_nthkey");
 
@@ -190,7 +190,7 @@ void info(std::ostream& os)
 
 		if (!flag || valuelen <= 0 || valuelen >= MPI_MAX_INFO_VAL) continue;
 
-		ret = MPI_Info_Get(MPI_INFO_ENV, key, &valuelen, value, &flag);
+		ret = MPI_Info_get(MPI_INFO_ENV, key, valuelen, value, &flag);
 		checkError(ret, "MPI_Info_Get");
 
 		os<<"MPI_INFO_ENV key="<<key<<" value="<<value<<"\n";
