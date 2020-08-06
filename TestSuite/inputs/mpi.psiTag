@@ -1,0 +1,7 @@
+
+default compiler = CXX = /usr/lib64/openmpi/bin/mpic++ 
+addto basics = (
+LDFLAGS +=  -L /usr/lib64/openmpi/lib -lmpi_cxx -lmpi
+CPPFLAGS += -DUSE_MPI -I/usr/include/openmpi-x86_64
+)
+
