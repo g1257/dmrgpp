@@ -70,8 +70,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 */
 /** \ingroup PsimagLite */
 /*@{*/
-
-/*! \file Mpi.cpp
+// This file is meant to be included by Mpi.cpp ONLY
+/*! \file MpiYes.cpp
  *
  */
 
@@ -141,6 +141,33 @@ int barrier(CommType comm)
 	return MPI_Barrier(comm);
 }
 
+void version(std::ostream& os)
+{
+	int version = 0;
+	int subversion = 0;
+	int ret = MPI_Get_version(&version, &subversion);\
+	checkError(ret, "MPI_Get_version");
+
+	os<<"MPI version="<<version<<"."<<subversion<<"\n";
+
+	int resultlen = 0;
+	char* versionstr = new char[MPI_MAX_LIBRARY_VERSION_STRING + 1];
+	ret = MPI_Get_library_version(versionstr, &resultlen);
+	checkError(ret, "MPI_Get_library_version");
+	os<<"MPI_Get_library_version="<<versionstr<<"\n";
+
+	delete[] versionstr;
+	versionstr = nullptr;
+
+	char* name = new char[MPI_MAX_PROCESSOR_NAME + 1];
+	ret = MPI_Get_processor_name(name, &resultlen);
+	checkError(ret, "MPI_Get_processor_name");
+	os<<"MPI_Get_processor_name="<<name<<"\n";
+
+	delete[] name;
+	name = nullptr;
+}
+
 void info(std::ostream& os)
 {
 	int nkeys = 0;
@@ -169,10 +196,10 @@ void info(std::ostream& os)
 		os<<"MPI_INFO_ENV key="<<key<<" value="<<value<<"\n";
 	}
 
-	delete key;
-	key = 0;
-	delete value;
-	value = 0;
+	delete[] key;
+	key = nullptr;
+	delete[] value;
+	value = nullptr;
 }
 
 } // namespace MPI

@@ -99,6 +99,8 @@ bool hasMpi();
 
 void info(std::ostream&);
 
+void version(std::ostream&);
+
 SizeType commSize(CommType);
 
 SizeType commRank(CommType);

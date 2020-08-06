@@ -206,6 +206,8 @@ public:
 
 		MPI::init(argc, argv);
 		MPI::info(std::cout);
+		MPI::version(std::cout);
+
 		if (MPI::hasMpi()) mode |= 2;
 	}
 

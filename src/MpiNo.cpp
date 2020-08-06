@@ -26,6 +26,8 @@ bool hasMpi() { return false; }
 
 void info(std::ostream&) {}
 
+void version(std::ostream&) {}
+
 } // namespace MPI
 
 } // namespace PsimagLite
