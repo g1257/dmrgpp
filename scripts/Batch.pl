@@ -13,7 +13,8 @@ chdir $ENV{"PBS_O_WORKDIR"};
 
 #date
 my $np=4;
-my $h = `../scripts/mpiRoundRobin.pl  \$PBS_NODEFILE $np`;
+my $nodefile = $ENV{"PBS_NODEFILE"};
+my $h = getHostString($nodefile, $np);
 
 #my $realCmd = "hostname";
 my $realCmd = "./internode 4";
@@ -22,10 +23,9 @@ my $command = "LD_LIBRARY_PATH=\${LD_LIBRARY_PATH}:/usr/lib64/openmpi/lib ";
 $command .= "/usr/lib64/openmpi/bin/mpiexec -n $np -host \"$h\"  $realCmd";
 system("$command");
 
-sub mpiRoundRobin
+sub getHostString
 {
-	my ($file, $mpiJobs) = @ARGV;
-	defined($file) or die "USAGE: $0 filename\n";
+	my ($file, $mpiJobs) = @_;
 
 	my %h;
 	my $firstNode;
@@ -50,13 +50,14 @@ sub mpiRoundRobin
 	die "$0: No nodes!\n" if ($nodes == 0 or !defined($firstNode));
 	my $ppn = $h{"$firstNode"};
 	my $repeat = $mpiJobs/$nodes;
-	printStuff($repeat, \%h);
+	return getHostString2($repeat, \%h);
 }
 
-sub printStuff
+sub getHostString2
 {
 	my ($repeat, $h) = @_;
 	my $firstcall = 1;
+	my $str = "";
 	for (my $i = 0; $i < $repeat; ++$i) {
 		foreach my $key (sort keys %$h) {
 			my $n = $h->{"$key"};
@@ -64,11 +65,13 @@ sub printStuff
 			if ($firstcall) {
 				$firstcall = 0;
 			} else {
-				print ",";
+				$str .= ",";
 			}
 
-			print "$key";
+			$str .= "$key";
 		}
 	}
+
+	return $str;
 }
 
