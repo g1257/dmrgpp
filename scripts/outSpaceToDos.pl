@@ -50,6 +50,7 @@ sub readData
 sub plotData
 {
 	my ($h, $site) = @_;
+	my $hasParens = 0;
 	foreach my $omega (sort keys %$h) {
 		my $ptr = $h->{$omega};
 		my $n = scalar(@$ptr);
@@ -60,6 +61,38 @@ sub plotData
 		die "$0: Internal error, expecting 1st element to be $site, got $x\n" if ($x != $site);
 		my $value1 = $ptr2->[1];
 		my $value2 = $ptr2->[2];
+		$hasParens = checkParens($value1, $value2);
+		if ($hasParens) {
+			($value1, $value2) = reIm($value2);
+		}
+
 		print "$omega $value1 $value2\n";
 	}
 }
+
+sub checkParens
+{
+	my ($val1, $val2) = @_;
+	my $flag = hasParens($val1);
+	die "$0: INTERNAL error (parens)\n" if ($flag && !hasParens($val2));
+	return $flag;
+}
+
+sub hasParens
+{
+	my ($val) = @_;
+	return ($val =~ /\(/);
+}
+
+sub reIm
+{
+	my ($val) = @_;
+	my @temp = split/,/, $val;
+	scalar(@temp) == 2 or die "$0: Not a complex value $val\n";
+	my $re = $temp[0];
+	$re =~ s/\(//;
+	my $im = $temp[1];
+	$im =~ s/\)//;
+	return ($re, $im);
+}
+

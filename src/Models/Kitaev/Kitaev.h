@@ -98,7 +98,7 @@ class Kitaev : public ModelBaseType {
 
 	static const int TWICE_THE_SPIN = 1;
 
-	enum InternalDir {DIR_X, DIR_Y, DIR_Z};
+	enum class InternalDir {DIR_X, DIR_Y, DIR_Z, DIR_PLUS, DIR_MINUS};
 
 public:
 
@@ -224,6 +224,9 @@ protected:
 		OpsLabelType& sx = this->createOpsLabel("sx");
 		OpsLabelType& sy = this->createOpsLabel("sy");
 		OpsLabelType& sz = this->createOpsLabel("sz");
+		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sminus = this->createOpsLabel("sminus");
+
 		this->makeTrackable("sx");
 		this->makeTrackable("sy");
 		this->makeTrackable("sz");
@@ -235,7 +238,7 @@ protected:
 			typename OperatorType::Su2RelatedType su2related;
 
 			// Set the operators S^x_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, DIR_X, dummy);
+			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_X, dummy);
 			OperatorType myOp(tmpMatrix,
 			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                  PairType(0, 0),
@@ -244,7 +247,7 @@ protected:
 			sx.push(myOp);
 
 			// Set the operators S^y_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Y, dummy);
+			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_Y, dummy);
 			OperatorType myOp2(tmpMatrix,
 			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(0, 0),
@@ -253,13 +256,26 @@ protected:
 			sy.push(myOp2);
 
 			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, DIR_Z, dummy);
+			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_Z, dummy);
 			OperatorType myOp3(tmpMatrix,
 			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(0, 0),
 			                   1.0,
 			                   su2related);
 			sz.push(myOp3);
+
+			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_PLUS, dummy);
+			OperatorType myOp4(tmpMatrix,
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
+
+			splus.push(myOp4);
+
+			OperatorType myOp5 = myOp4;
+			myOp5.conjugate();
+			sminus.push(myOp5);
 		}
 	}
 
@@ -318,6 +334,14 @@ private:
 		return (counter == 0) ? counter : counter - 1;
 	}
 
+	SparseMatrixType getSplus(const SparseMatrixType&,
+	                          const SparseMatrixType&,
+	                          RealType)
+	{
+		err("Kitaev needs useComplex in SolverOptions in the input file\n");
+		throw PsimagLite::RuntimeError("FATAL\n");
+	}
+
 	SparseMatrixType findSdirMatrices(SizeType,
 	                                  const HilbertBasisType&,
 	                                  InternalDir,
@@ -338,14 +362,18 @@ private:
 		assert(total == TWICE_THE_SPIN + 1);
 		assert(TWICE_THE_SPIN == 1);
 
-		if (dir == DIR_X) {
+		if (dir == InternalDir::DIR_X) {
 			cm(0,1) = cm(1,0) = 0.5;
-		} else if (dir == DIR_Y) {
+		} else if (dir == InternalDir::DIR_Y) {
 			cm(0, 1) = std::complex<RealType>(0.0, -0.5);
 			cm(1, 0) = std::complex<RealType>(0.0, 0.5);
-		} else if (dir == DIR_Z) {
+		} else if (dir == InternalDir::DIR_Z) {
 			cm(0, 0) = 0.5;
 			cm(1, 1) = -0.5;
+		} else if (dir == InternalDir::DIR_PLUS) {
+			cm(0, 1) = 1.0;
+		} else if (dir == InternalDir::DIR_MINUS) {
+			cm(1, 0) = 1.0;
 		} else {
 			assert(false);
 		}
