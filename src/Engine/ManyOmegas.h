@@ -6,6 +6,7 @@
 #include "LanczosSolver.h"
 #include "Vector.h"
 #include "PsimagLite.h"
+#include "InterNode.h"
 
 namespace Dmrg {
 
@@ -60,8 +61,13 @@ public:
 		const PsimagLite::String insitu = "<gs|" + obs + "|P1>,<gs|" +
 		        obs + "|P2>,<gs|" + obs + "|P3>";
 
-		for (SizeType i = omegaParams_->offset; i < omegaParams_->total; ++i) {
-			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
+		//lambda
+		PsimagLite::InterNode<> internode(PsimagLite::MPI::COMM_WORLD);
+
+		internode.parallelFor(omegaParams_->offset,
+		                      omegaParams_->total,
+		                      [this, root, dryRun, insitu](SizeType i, SizeType)
+		{	const RealType omega = i*omegaParams_->step + omegaParams_->begin;
 			PsimagLite::String data2 = modifyOmega(omega);
 			PsimagLite::String outputfile = "\nOutputFile=\"" + root + ttos(i) + "\";\n";
 			data2 += outputfile;
@@ -72,11 +78,11 @@ public:
 				std::cerr<<"ManyOmegas.h:: omega = "<<omega;
 				std::cerr<<" output="<<outputfile;
 				std::cerr<<" logfile="<<logfile<<" NOT done because -d\n";
-				continue;
+				return;
 			}
 
 			runner_.doOneRun(data2, insitu, logfile);
-		}
+		});
 	}
 
 	PsimagLite::String modifyOmega(RealType omega) const
