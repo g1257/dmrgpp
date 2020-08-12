@@ -7,16 +7,16 @@
 #include <sched.h>
 #include <unistd.h>
 #include "TypeToString.h"
-#include "LoadBalancerDefault.h"
+#include "LoadBalancerMpi.h"
 
 namespace PsimagLite {
 
-template<typename LoadBalancerType=LoadBalancerDefault>
+template<typename LoadBalancerType=LoadBalancerMpi>
 class InterNode {
 
 public:
 
-	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
+	typedef LoadBalancerMpi::VectorSizeType VectorSizeType;
 
 	InterNode(MPI::CommType comm)
 	    : comm_(comm), mpiSize_(MPI::commSize(comm_)), mpiRank_(MPI::commRank(comm_))
