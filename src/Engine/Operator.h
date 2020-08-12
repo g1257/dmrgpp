@@ -469,15 +469,6 @@ public:
 		reorder2(v.data_, permutation);
 	}
 
-	friend void bcast2(Operator& op)
-	{
-		bcast(op.data_);
-		PsimagLite::MPI::bcast(op.fermionOrBoson_);
-		PsimagLite::MPI::bcast(op.jm_);
-		PsimagLite::MPI::bcast(op.angularFactor_);
-		bcast(op.su2Related_);
-	}
-
 private:
 
 	void checkNotZeroMatrix(const DenseMatrixType& m) const

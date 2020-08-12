@@ -48,6 +48,6 @@ OperatorExpression="sminus";
 string Observable="splus";
 real OmegaBegin=0;
 real OmegaStep=0.025;
-integer OmegaTotal=50;
+integer OmegaTotal=5;
 integer OmegaOffset=0;
 

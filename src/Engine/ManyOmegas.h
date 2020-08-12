@@ -67,7 +67,8 @@ public:
 		internode.parallelFor(omegaParams_->offset,
 		                      omegaParams_->total,
 		                      [this, root, dryRun, insitu](SizeType i, SizeType)
-		{	const RealType omega = i*omegaParams_->step + omegaParams_->begin;
+		{
+			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
 			PsimagLite::String data2 = modifyOmega(omega);
 			PsimagLite::String outputfile = "\nOutputFile=\"" + root + ttos(i) + "\";\n";
 			data2 += outputfile;
