@@ -308,6 +308,14 @@ protected:
 				this->makeTrackable("sx");
 
 			aklt_.fillLabeledOperators(i, myOp.getCRS(), myOp2.getCRS());
+
+			tmpMatrix = findMaximal(i, natBasis);
+			OperatorType myOp4(tmpMatrix,
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(2, 1),
+			                   1.0/sqrt(2.0),
+			                   su2related3);
+			this->createOpsLabel("maximal").push(myOp4);
 		}
 	}
 
@@ -421,6 +429,36 @@ private:
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
 	}
+
+	//! Find Maximal_i in the natural basis natBasis
+	SparseMatrixType findMaximal(SizeType site,
+	                             const HilbertBasisType& natBasis) const
+	{
+		SizeType total = natBasis.size();
+		MatrixType cm(total,total);
+		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
+		SizeType bits = ProgramGlobals::logBase2(modelParameters_.twiceTheSpin) + 1;
+		SizeType mask = 1;
+		mask <<= bits; // mask = 2^bits
+		assert(mask > 0);
+		mask--;
+		mask <<= (site*bitsForOneSite);
+
+		for (SizeType ii=0;ii<total;ii++) {
+			SizeType ket = natBasis[ii];
+
+			SizeType ketsite = ket & mask;
+			ketsite >>= (site*bitsForOneSite);
+			assert(ketsite == ket);
+			if (ketsite != modelParameters_.twiceTheSpin)
+				continue;
+			cm(ket, ket) = 1;
+		}
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
+	}
+
 
 	SparseMatrixType findSxMatrices(SizeType site,
 	                                const HilbertBasisType& natBasis) const
