@@ -18,38 +18,24 @@ public:
 	typedef PsimagLite::PsiApp ApplicationType;
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 	typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
-	typedef OmegasFourier<RealType, InputNgType::Readable> OmegasFourierType;
+	typedef OmegasFourier<ComplexOrRealType, InputNgType::Readable> OmegasFourierType;
 
 	static const SizeType MAX_LINE_SIZE = 2048;
 
-	ProcOmegas(PsimagLite::String inputFile,
+	ProcOmegas(typename InputNgType::Readable& io,
 	           SizeType precision,
 	           bool skipFourier,
 	           PsimagLite::String rootIname,
 	           PsimagLite::String rootOname)
-	    : inputfile_(inputFile),
-	      rootIname_(rootIname),
+	    : rootIname_(rootIname),
 	      rootOname_(rootOname),
-	      omegaParams_(0),
-	      omegasFourier_(skipFourier),
+	      omegaParams_(io),
+	      omegasFourier_(skipFourier, io),
 	      numberOfSites_(0)
 	{
-		// set precision here
-		PsimagLite::String data;
-		InputNgType::Writeable::readFile(data, inputFile);
-		InputCheck inputCheck;
-		InputNgType::Writeable ioW(inputCheck, data);
-		InputNgType::Readable io(ioW);
+		// set precision here FIXME TODO
 		io.readline(numberOfSites_, "TotalNumberOfSites");
-		omegaParams_ = new OmegaParamsType(data);
-		omegasFourier_.configure(io);
 		//const SizeType centralSite = getCentralSite();
-	}
-
-	~ProcOmegas()
-	{
-		delete omegaParams_;
-		omegaParams_ = nullptr;
 	}
 
 	void run()
@@ -62,8 +48,8 @@ public:
 		if (!fout || fout.bad() || !fout.good())
 			err("writeSpaceValues: Cannot write to " + rootOname_ + "\n");
 
-		for (SizeType i = omegaParams_->offset; i < omegaParams_->total; ++i) {
-			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
+		for (SizeType i = omegaParams_.offset; i < omegaParams_.total; ++i) {
+			const RealType omega = i*omegaParams_.step + omegaParams_.begin;
 
 			procCommon(i, omega, values1, values2, defined, fout);
 		}
@@ -202,7 +188,7 @@ private:
 	PsimagLite::String inputfile_;
 	PsimagLite::String rootIname_;
 	PsimagLite::String rootOname_;
-	OmegaParamsType* omegaParams_;
+	OmegaParamsType omegaParams_;
 	OmegasFourierType omegasFourier_;
 	SizeType numberOfSites_;
 };

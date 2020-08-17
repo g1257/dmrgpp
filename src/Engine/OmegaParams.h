@@ -13,6 +13,16 @@ struct OmegaParams {
 		Dmrg::InputCheck inputCheck;
 		typename InputNgType::Writeable ioWriteable(inputCheck, data);
 		typename InputNgType::Readable io(ioWriteable);
+		configure(io);
+	}
+
+	OmegaParams(typename InputNgType::Readable& io)
+	{
+		configure(io);
+	}
+
+	void configure(typename InputNgType::Readable& io)
+	{
 		io.readline(begin, "OmegaBegin=");
 		io.readline(step, "OmegaStep=");
 		io.readline(total, "OmegaTotal=");

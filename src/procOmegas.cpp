@@ -14,12 +14,14 @@ void usage(const PsimagLite::String& name)
 	std::cerr<<"-I {[}Optional, String{]} Root of input file to use.\n";
 	std::cerr<<"-O {[}Optional, String{]} Root of output file to use.\n";
 	std::cerr<<"-V; Print version and exit\n";
+	std::cerr<<"\nLimitations: Ainur only; No Cheby yet\n";
 }
 
 int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("procOmegas", &argc, &argv, 1);
 	typedef Dmrg::ProcOmegas<double> ProcOmegasType;
+	typedef ProcOmegasType::InputNgType InputNgType;
 
 	int opt = 0;
 	bool versionOnly = false;
@@ -93,7 +95,10 @@ to the main dmrg driver are the following.
 
 	if (versionOnly) return 0;
 
-	ProcOmegasType procOmegas(inputfile,
+	Dmrg::InputCheck inputCheck;
+	InputNgType::Writeable ioW(inputfile, inputCheck);
+	InputNgType::Readable io(ioW);
+	ProcOmegasType procOmegas(io,
 	                          precision,
 	                          skipFourier,
 	                          rootIname,
