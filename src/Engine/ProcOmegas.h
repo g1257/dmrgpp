@@ -63,7 +63,7 @@ private:
 		inFile += rootname + ttos(ind) + ".cout";
 		VectorRealType values1;
 		VectorRealType values2;
-		//SizeType maxSite = correctionVectorRead(values1, values2, inFile);
+		correctionVectorRead(values1, values2, inFile);
 
 		//print STDERR "$0: omega=$omega maxSite=$maxSite\n"; <== LOGFILEOUT
 
@@ -85,15 +85,23 @@ private:
 		if (v2.size() != n)
 			err("writeSpaceValues: v1.size != v2.size\n");
 
-		printToSpaceOut(ttos(omega) + " " + ttos(n) + "\n");
+		PsimagLite::String foutname = "out.space"; // FIXME TODO ??
+
+		std::ofstream fout(foutname);
+		if (!fout || fout.bad() || !fout.good())
+			err("writeSpaceValues: Cannot write to foutname\n");
+
+		printToSpaceOut(fout, ttos(omega) + " " + ttos(n) + "\n");
 
 		for (SizeType i = 0; i < n; ++i)
-			printToSpaceOut(ttos(i) + ttos(v1[i]) + ttos(v2[i]) + "\n");
+			printToSpaceOut(fout, ttos(i) + ttos(v1[i]) + ttos(v2[i]) + "\n");
+
+		fout.close();
 	}
 
-	void printToSpaceOut(PsimagLite::String)
+	void printToSpaceOut(std::ofstream& fout, PsimagLite::String str)
 	{
-		err("printToSpaceOut: unimplemented\n");
+		fout<<str;
 	}
 
 	SizeType correctionVectorRead(VectorRealType& v1, VectorRealType& v2, PsimagLite::String inFile)
@@ -131,20 +139,20 @@ private:
 
 			if (skip) continue;
 
-			PsimagLite::split(tokens, s, ",");
+			PsimagLite::split(tokens, s, " ");
 			if (tokens.size() != 5)
-				err("correctionVectorRead: Not 5 tokens in line in " + inFile + "\n");
+				err("correctionVectorRead: Not 5 tokens in line " + s + "\nFile= " + inFile + "\n");
 
-			SizeType site = tokens[0];
+			SizeType site = PsimagLite::atoi(tokens[0]);
 			SizeType c = 0;
 			for (SizeType i = 0; i < labels.size(); ++i) {
 				++c;
 				if (status != labels[i])
 					continue;
 				if (c == 1)
-					v1[site] = tokens[1];
+					v1[site] = PsimagLite::atof(tokens[1]);
 				else if (c == 2)
-					v2[site] = tokens[1];
+					v2[site] = PsimagLite::atof(tokens[1]);
 				else
 					err("correctionVectorRead: counter c wrong in " + inFile + "\n");
 			}
