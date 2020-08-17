@@ -64,6 +64,7 @@ public:
 		centralSite_ = v[0];
 		io.readline(orbitals_, "Orbitals=");
 
+		data_.resize(numberOfSites_);
 		qValues_.resize(numberOfSites_);
 	}
 
@@ -71,7 +72,9 @@ public:
 	{
 		if (skipFourier_) return;
 
-		//use qvalues_;
+		std::fill(data_.begin(), data_.end(), 0.0);
+
+		//use data_;
 		PsimagLite::String subname = geometry_.subname();
 		if (subname=="average") {
 			return fourierLadderAverage(values1, values2);
@@ -119,6 +122,14 @@ public:
 		err("OmegasFourier: undefined geometry " + name  + "\n");
 	}
 
+	const VectorComplexType& data() { return data_; }
+
+	RealType q(SizeType ind) const
+	{
+		assert(ind < qValues_.size());
+		return qValues_[ind];
+	}
+
 private:
 
 	void fourierChain(const VectorRealType& values1, const VectorRealType& values2)
@@ -133,12 +144,13 @@ private:
 		}
 
 		const SizeType numberOfQs = (M_MAX > 0) ? M_MAX : numberOfSites_;
-		if (qValues_.size() < numberOfQs)
+		if (data_.size() < numberOfQs || qValues_.size() < numberOfQs)
 			err("INTERNAL ERROR at fourierChain\n");
 
 		for (SizeType m = 0; m < numberOfQs; ++m) {
 			ComplexType sum = 0;
 			RealType q = getQ(m, numberOfQs, isPeriodicX_);
+			qValues_[m] = q;
 			for (SizeType i = 0; i < numberOfSites_; ++i) {
 				RealType arg = q*(i - centralSite_);
 				RealType carg = cos(arg);
@@ -147,8 +159,8 @@ private:
 				sum += ComplexType(values1[i]*cOrSarg, values2[i]*cOrSarg);
 			}
 
-			assert(m < qValues_.size());
-			qValues_[m] = sum;
+			assert(m < data_.size());
+			data_[m] = sum;
 		}
 	}
 
@@ -195,7 +207,8 @@ private:
 	SizeType centralSite_;
 	SizeType orbitals_;
 	bool isPeriodicX_;
-	VectorComplexType qValues_;
+	VectorComplexType data_;
+	VectorRealType qValues_;
 };
 }
 #endif // OMEGASFOURIER_H

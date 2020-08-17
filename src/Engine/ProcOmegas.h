@@ -19,8 +19,53 @@ public:
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 	typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
 	typedef OmegasFourier<ComplexOrRealType, InputNgType::Readable> OmegasFourierType;
+	typedef typename OmegasFourierType::VectorComplexType VectorComplexType;
 
 	static const SizeType MAX_LINE_SIZE = 2048;
+
+
+	class Qdata {
+
+	public:
+
+		Qdata(SizeType n) : data_(n, nullptr)
+		{}
+
+		Qdata() {}
+
+		void resize(SizeType n)
+		{
+			if (data_.size() != 0)
+				err("Qdata::resize only supported for empty objects\n");
+			data_.resize(n, nullptr);
+		}
+
+		void set(SizeType ind, const VectorComplexType& v)
+		{
+			if (data_.size() <= ind)
+				err("Qdata::set out of bounds\n");
+
+			if (data_[ind] != nullptr)
+				err("Qdata::set already set\n");
+
+			data_[ind] = new VectorComplexType(v);
+		}
+
+		const VectorComplexType& get(SizeType ind) const
+		{
+			if (data_.size() <= ind)
+				err("Qdata::get out of bounds\n");
+
+			if (data_[ind] == nullptr)
+				err("Qdata::get empty location\n");
+
+			return *data_[ind];
+		}
+
+	private:
+
+		typename PsimagLite::Vector<VectorComplexType*>::Type data_;
+	};
 
 	ProcOmegas(typename InputNgType::Readable& io,
 	           SizeType precision,
@@ -50,10 +95,13 @@ public:
 		if (!fout || !*fout || fout->bad() || !fout->good())
 			err("writeSpaceValues: Cannot write to " + rootOname_ + "\n");
 
+		qData_.resize(omegaParams_.total - omegaParams_.offset);
+
 		for (SizeType i = omegaParams_.offset; i < omegaParams_.total; ++i) {
 			const RealType omega = i*omegaParams_.step + omegaParams_.begin;
 
 			procCommon(i, omega, values1, values2, defined, fout);
+			qData_.set(i - omegaParams_.offset, omegasFourier_.data());
 		}
 
 		if (fout)
@@ -61,6 +109,31 @@ public:
 
 		delete fout;
 		fout = nullptr;
+	}
+
+	void printPgfplots(PsimagLite::String foutname)
+	{
+		std::ofstream fout(foutname);
+		if (!fout || fout.bad() || !fout.good())
+			err("writeSpaceValues: Cannot write to " + foutname + "\n");
+
+		SizeType numberOfQs = 0;
+		for (SizeType i = omegaParams_.offset; i < omegaParams_.total; ++i) {
+			const RealType omega = i*omegaParams_.step + omegaParams_.begin;
+			const VectorComplexType& v = qData_.get(i - omegaParams_.offset);
+
+			if (i == omegaParams_.offset) {
+				assert(numberOfQs == 0);
+				numberOfQs = v.size();
+			} else if (numberOfQs != v.size()) {
+				err("INTERNAL ERROR: Omega set with non equal number of q points\n");
+			}
+
+			for (SizeType m = 0; m < numberOfQs; ++m) {
+				RealType q = omegasFourier_.q(m);
+				fout<<q<<" "<<omega<<" "<<PsimagLite::imag(v[m])<<"\n";
+			}
+		}
 	}
 
 private:
@@ -194,6 +267,7 @@ private:
 	OmegaParamsType omegaParams_;
 	OmegasFourierType omegasFourier_;
 	SizeType numberOfSites_;
+	Qdata qData_;
 };
 }
 #endif // PROCOMEGAS_H

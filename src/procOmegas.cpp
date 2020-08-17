@@ -105,4 +105,6 @@ to the main dmrg driver are the following.
 	                          rootOname);
 
 	procOmegas.run();
+
+	procOmegas.printPgfplots(rootOname + ".pgfplots");
 }
