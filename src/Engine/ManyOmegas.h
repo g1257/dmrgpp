@@ -7,6 +7,7 @@
 #include "Vector.h"
 #include "PsimagLite.h"
 #include "InterNode.h"
+#include "OmegaParams.h"
 
 namespace Dmrg {
 
@@ -20,33 +21,13 @@ public:
 	typedef DmrgRunner<ComplexOrRealType> DmrgRunnerType;
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
 	typedef PsimagLite::PsiApp ApplicationType;
-
-	struct OmegaParams {
-
-		OmegaParams(PsimagLite::String data)
-		{
-			Dmrg::InputCheck inputCheck;
-			typename InputNgType::Writeable ioWriteable(inputCheck, data);
-			typename InputNgType::Readable io(ioWriteable);
-			io.readline(begin, "OmegaBegin=");
-			io.readline(step, "OmegaStep=");
-			io.readline(total, "OmegaTotal=");
-			io.readline(offset, "OmegaOffset=");
-			io.readline(obs, "Observable=");
-		}
-
-		RealType begin;
-		RealType step;
-		SizeType offset;
-		SizeType total;
-		PsimagLite::String obs;
-	};
+	typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
 
 	ManyOmegas(PsimagLite::String inputFile, RealType precision, const ApplicationType& app)
 	    : inputfile_(inputFile), runner_(precision, app), omegaParams_(0)
 	{
 		InputNgType::Writeable::readFile(data_, inputFile);
-		omegaParams_ = new OmegaParams(data_);
+		omegaParams_ = new OmegaParamsType(data_);
 	}
 
 	~ManyOmegas()
@@ -104,7 +85,7 @@ public:
 
 	PsimagLite::String inputfile_;
 	DmrgRunnerType runner_;
-	OmegaParams* omegaParams_;
+	OmegaParamsType* omegaParams_;
 	PsimagLite::String data_;
 };
 }
