@@ -25,11 +25,12 @@ public:
 	ProcOmegas(PsimagLite::String inputFile,
 	           SizeType precision,
 	           bool skipFourier,
-	           PsimagLite::String rootname,
-	           const ApplicationType& app)
+	           PsimagLite::String rootIname,
+	           PsimagLite::String rootOname)
 	    : inputfile_(inputFile),
 	      skipFourier_(skipFourier),
-	      rootname_(rootname),
+	      rootIname_(rootIname),
+	      rootOname_(rootOname),
 	      omegaParams_(0),
 	      omegasFourier_(),
 	      numberOfSites_(0)
@@ -57,11 +58,9 @@ public:
 		VectorRealType values2(numberOfSites_);
 		VectorBoolType defined(numberOfSites_);
 
-		PsimagLite::String foutname = "out.space"; // FIXME TODO ??
-
-		std::ofstream fout(foutname);
+		std::ofstream fout(rootOname_);
 		if (!fout || fout.bad() || !fout.good())
-			err("writeSpaceValues: Cannot write to foutname\n");
+			err("writeSpaceValues: Cannot write to " + rootOname_ + "\n");
 
 		for (SizeType i = omegaParams_->offset; i < omegaParams_->total; ++i) {
 			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
@@ -89,7 +88,7 @@ private:
 	                std::ofstream& fout)
 	{
 		PsimagLite::String inFile("runFor");
-		inFile += rootname_ + ttos(ind) + ".cout";
+		inFile += rootIname_ + ttos(ind) + ".cout";
 
 		correctionVectorRead(values1, values2, defined, inFile);
 
@@ -211,7 +210,8 @@ private:
 
 	PsimagLite::String inputfile_;
 	bool skipFourier_;
-	PsimagLite::String rootname_;
+	PsimagLite::String rootIname_;
+	PsimagLite::String rootOname_;
 	OmegaParamsType* omegaParams_;
 	OmegasFourierType omegasFourier_;
 	SizeType numberOfSites_;
