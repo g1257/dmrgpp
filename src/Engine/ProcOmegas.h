@@ -9,17 +9,25 @@ namespace Dmrg {
 template<typename ComplexOrRealType>
 class ProcOmegas {
 
+public:
+
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::PsiApp ApplicationType;
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
+	typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
+	typedef OmegasFourier<RealType> OmegasFourierType;
 
-	ProcOmegas(PsimagLite::String inputFile, RealType precision, const ApplicationType& app)
-	    : inputfile_(inputFile), runner_(precision, app), omegaParams_(0)
+	static const SizeType MAX_LINE_SIZE = 2048;
+
+	ProcOmegas(PsimagLite::String inputFile, SizeType precision, const ApplicationType& app)
+	    : inputfile_(inputFile), omegaParams_(0), omegasFourier_()
 	{
-		InputNgType::Writeable::readFile(data_, inputFile);
-		omegaParams_ = new OmegaParams(data_);
+		// set precision here
+		PsimagLite::String data;
+		InputNgType::Writeable::readFile(data, inputFile);
+		omegaParams_ = new OmegaParamsType(data);
 		//const SizeType centralSite = getCentralSite();
 	}
 
@@ -29,50 +37,63 @@ class ProcOmegas {
 		omegaParams_ = nullptr;
 	}
 
-	void main()
+	void run(bool skipFourier, PsimagLite::String rootname)
 	{
 		for (SizeType i = omegaParams_->offset; i < omegaParams_->total; ++i) {
 			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
 
-			procCommon(ind, omega);
+			procCommon(i, omega, skipFourier, rootname);
 
-			if (noFourier_) return; // <<===  EARLY EXIT HERE
+			if (skipFourier) return; // <<===  EARLY EXIT HERE
 
-			if (array_.size() == 0)
-				err("procAllQs: array is empty\n");
+//			if (array_.size() == 0)
+//				err("procAllQs: array is empty\n");
 
-			printSpectrum(array_);
+//			printSpectrum(array_);
 		}
 	}
 
-	void procCommon(SizeType ind, RealType omega)
+private:
+
+	void procCommon(SizeType ind, RealType omega, bool skipFourier, PsimagLite::String rootname)
 	{
 		//my $n = $GlobalNumberOfSites;
 
 		PsimagLite::String inFile("runFor");
-		inFile += inputRoot_ + ttos(ind) + ".cout";
-		SizeType maxSite = correctionVectorRead(values1, values2, inFile);
+		inFile += rootname + ttos(ind) + ".cout";
+		VectorRealType values1;
+		VectorRealType values2;
+		//SizeType maxSite = correctionVectorRead(values1, values2, inFile);
 
 		//print STDERR "$0: omega=$omega maxSite=$maxSite\n"; <== LOGFILEOUT
 
-		writeSpaceValues(omega, values1, value2);
+		writeSpaceValues(omega, values1, values2);
 
-		if (noFourier_) return; // <<=== EARLY EXIT HERE
+		if (skipFourier) return; // <<=== EARLY EXIT HERE
 
-		OmegaUtils::fourier(qValues, values1, value2);
+		VectorRealType qValues;
+		omegasFourier_.fourier(qValues, values1, values2);
 		//print LOGFILEOUT "$0: Number of k values ".scalar(@qValues)."\n";
-		OmegaUtils::writeFourier(array, qValues);
+
+		VectorRealType array;
+		omegasFourier_.writeFourier(array, qValues);
 	}
 
 	void writeSpaceValues(RealType omega, VectorRealType& v1, VectorRealType& v2)
 	{
-		const SizeType n = array.size();
+		const SizeType n = v1.size();
+		if (v2.size() != n)
+			err("writeSpaceValues: v1.size != v2.size\n");
+
 		printToSpaceOut(ttos(omega) + " " + ttos(n) + "\n");
-		for (SizeType i = 0; i < n; ++i) {
-			PsimagLite::String vv1 = v1[i];
-			PsimagLite::String vv2 = v2[i];
-			printToSpaceOut(ttos(i) + vv1  + vv2 + "\n");
-		}
+
+		for (SizeType i = 0; i < n; ++i)
+			printToSpaceOut(ttos(i) + ttos(v1[i]) + ttos(v2[i]) + "\n");
+	}
+
+	void printToSpaceOut(PsimagLite::String)
+	{
+		err("printToSpaceOut: unimplemented\n");
 	}
 
 	SizeType correctionVectorRead(VectorRealType& v1, VectorRealType& v2, PsimagLite::String inFile)
@@ -86,17 +107,22 @@ class ProcOmegas {
 
 		VectorStringType labels{"P2", "P3"}; // ORDER IMPORTANT HERE!
 
-		while (fin.getline(s, ns)) {
+		const SizeType ns = MAX_LINE_SIZE;
+		char* ss = new char[ns];
+		VectorStringType tokens;
+		while (fin.getline(ss, ns)) {
 
-			if (s.substr("PsiApp\: +CmdLine/") != PsimagLite::String::npos)
+			PsimagLite::String s(ss);
+
+			if (s.find("PsiApp: CmdLine") != PsimagLite::String::npos)
 				continue;
 
 			bool skip = true;
 			for (SizeType i = 0; i < labels.size(); ++i) {
-				bool isGs = (s.substr("gs") != PsimagLite::String::npos ||
-				        s.substr("X0") != PsimagLite::String::npos);
+				bool isGs = (s.find("gs") != PsimagLite::String::npos ||
+				        s.find("X0") != PsimagLite::String::npos);
 
-				if (s.substr(labels[i]) == PsimagLite::String::npos || !isGs)
+				if (s.find(labels[i]) == PsimagLite::String::npos || !isGs)
 					continue;
 
 				status = labels[i];
@@ -110,7 +136,6 @@ class ProcOmegas {
 				err("correctionVectorRead: Not 5 tokens in line in " + inFile + "\n");
 
 			SizeType site = tokens[0];
-			SizeType time = 0;
 			SizeType c = 0;
 			for (SizeType i = 0; i < labels.size(); ++i) {
 				++c;
@@ -128,11 +153,18 @@ class ProcOmegas {
 			status = "clear";
 		}
 
+		delete[] ss;
+		ss = 0;
+
 		++maxSite;
 		//print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
 
 		return maxSite;
 	}
+
+	PsimagLite::String inputfile_;
+	OmegaParamsType* omegaParams_;
+	OmegasFourierType omegasFourier_;
 };
 }
 #endif // PROCOMEGAS_H
