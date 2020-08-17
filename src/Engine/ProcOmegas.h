@@ -4,6 +4,19 @@
 #include "PsimagLite.h"
 #include "OmegasFourier.h"
 
+/* Limitations and Missing Features
+ *
+ * These may or maynot be implemented in the future
+ *
+ * (1) Ainur only
+ *
+ * (2) Cheby not supported
+ *
+ * (3) Fourier: Many geometries unsupported yet (see OmegasFourier.h)
+ *
+ * (4) Gnuplot output not supported yet
+ *
+ */
 namespace Dmrg {
 
 template<typename ComplexOrRealType>
