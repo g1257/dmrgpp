@@ -18,7 +18,7 @@ public:
 	typedef PsimagLite::PsiApp ApplicationType;
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 	typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
-	typedef OmegasFourier<RealType> OmegasFourierType;
+	typedef OmegasFourier<RealType, InputNgType::Readable> OmegasFourierType;
 
 	static const SizeType MAX_LINE_SIZE = 2048;
 
@@ -28,11 +28,10 @@ public:
 	           PsimagLite::String rootIname,
 	           PsimagLite::String rootOname)
 	    : inputfile_(inputFile),
-	      skipFourier_(skipFourier),
 	      rootIname_(rootIname),
 	      rootOname_(rootOname),
 	      omegaParams_(0),
-	      omegasFourier_(),
+	      omegasFourier_(skipFourier),
 	      numberOfSites_(0)
 	{
 		// set precision here
@@ -43,6 +42,7 @@ public:
 		InputNgType::Readable io(ioW);
 		io.readline(numberOfSites_, "TotalNumberOfSites");
 		omegaParams_ = new OmegaParamsType(data);
+		omegasFourier_.configure(io);
 		//const SizeType centralSite = getCentralSite();
 	}
 
@@ -66,16 +66,11 @@ public:
 			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
 
 			procCommon(i, omega, values1, values2, defined, fout);
-
-			if (skipFourier_) continue;
-
-			//			if (array_.size() == 0)
-			//				err("procAllQs: array is empty\n");
-
-			//			printSpectrum(array_);
 		}
 
 		fout.close();
+
+		omegasFourier_.printGnuplot();
 	}
 
 private:
@@ -96,14 +91,10 @@ private:
 
 		writeSpaceValues(fout, omega, values1, values2);
 
-		if (skipFourier_) return; // <<=== EARLY EXIT HERE
-
-		VectorRealType qValues;
-		omegasFourier_.fourier(qValues, values1, values2);
+		omegasFourier_.fourier(values1, values2);
 		//print LOGFILEOUT "$0: Number of k values ".scalar(@qValues)."\n";
 
-		VectorRealType array;
-		omegasFourier_.writeFourier(array, qValues);
+		omegasFourier_.writeFourier();
 	}
 
 	void writeSpaceValues(std::ofstream& fout,
@@ -209,7 +200,6 @@ private:
 	}
 
 	PsimagLite::String inputfile_;
-	bool skipFourier_;
 	PsimagLite::String rootIname_;
 	PsimagLite::String rootOname_;
 	OmegaParamsType* omegaParams_;
