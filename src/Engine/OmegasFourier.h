@@ -12,10 +12,12 @@ class OmegasFourier {
 
 	public:
 
-		OmegasGeometry(typename InputNgType::Readable& io)
+		OmegasGeometry(typename InputNgType::Readable& io) : subname_("NONE")
 		{
-			io.readline(subname_, "GeometrySubname=");
 			io.readline(name_, "GeometryName=");
+			try {
+			io.readline(subname_, "GeometrySubname=");
+			} catch (std::exception&) {}
 		}
 
 		PsimagLite::String name() const
@@ -49,6 +51,8 @@ public:
 	OmegasFourier(bool skipFourier, typename InputNgType::Readable& io)
 	    : skipFourier_(skipFourier), geometry_(io)
 	{
+		if (skipFourier_) return;
+
 		io.readline(numberOfSites_, "TotalNumberOfSites=");
 		int tmp = 0;
 		io.readline(tmp, "IsPeriodicX=");
@@ -59,6 +63,8 @@ public:
 			err("TSPSites must be a vector of exactly one entry\n");
 		centralSite_ = v[0];
 		io.readline(orbitals_, "Orbitals=");
+
+		qValues_.resize(numberOfSites_);
 	}
 
 	void fourier(const VectorRealType& values1, const VectorRealType& values2)
@@ -113,14 +119,6 @@ public:
 		err("OmegasFourier: undefined geometry " + name  + "\n");
 	}
 
-	void writeFourier()
-	{
-		if (skipFourier_) return;
-		//use qvalues_;
-		//VectorRealType array;
-		err("unimplemented writeFourier\n");
-	}
-
 	void printGnuplot()
 	{
 		if (skipFourier_) return;
@@ -141,6 +139,9 @@ private:
 		}
 
 		const SizeType numberOfQs = (M_MAX > 0) ? M_MAX : numberOfSites_;
+		if (qValues_.size() < numberOfQs)
+			err("INTERNAL ERROR at fourierChain\n");
+
 		for (SizeType m = 0; m < numberOfQs; ++m) {
 			ComplexType sum = 0;
 			RealType q = getQ(m, numberOfQs, isPeriodicX_);
@@ -152,6 +153,7 @@ private:
 				sum += ComplexType(values1[i]*cOrSarg, values2[i]*cOrSarg);
 			}
 
+			assert(m < qValues_.size());
 			qValues_[m] = sum;
 		}
 	}

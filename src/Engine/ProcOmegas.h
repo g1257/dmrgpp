@@ -79,8 +79,6 @@ private:
 
 		omegasFourier_.fourier(values1, values2);
 		//print LOGFILEOUT "$0: Number of k values ".scalar(@qValues)."\n";
-
-		omegasFourier_.writeFourier();
 	}
 
 	void writeSpaceValues(std::ofstream& fout,

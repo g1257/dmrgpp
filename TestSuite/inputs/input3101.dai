@@ -13,6 +13,9 @@ gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[1];
 
+#For the Fourier transform
+string GeometryName="chain";
+
 Model="Heisenberg";
 integer HeisenbergTwiceS=1;
 
