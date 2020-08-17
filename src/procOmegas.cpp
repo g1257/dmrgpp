@@ -86,7 +86,7 @@ to the main dmrg driver are the following.
 
 	if (versionOnly) return 0;
 
-	ProcOmegasType procOmegas(inputfile, precision, application);
+	ProcOmegasType procOmegas(inputfile, precision, skipFourier, rootname, application);
 
-	procOmegas.run(skipFourier, rootname);
+	procOmegas.run();
 }

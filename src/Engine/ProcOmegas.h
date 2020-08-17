@@ -14,6 +14,7 @@ public:
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef PsimagLite::PsiApp ApplicationType;
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 	typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
@@ -21,12 +22,25 @@ public:
 
 	static const SizeType MAX_LINE_SIZE = 2048;
 
-	ProcOmegas(PsimagLite::String inputFile, SizeType precision, const ApplicationType& app)
-	    : inputfile_(inputFile), omegaParams_(0), omegasFourier_()
+	ProcOmegas(PsimagLite::String inputFile,
+	           SizeType precision,
+	           bool skipFourier,
+	           PsimagLite::String rootname,
+	           const ApplicationType& app)
+	    : inputfile_(inputFile),
+	      skipFourier_(skipFourier),
+	      rootname_(rootname),
+	      omegaParams_(0),
+	      omegasFourier_(),
+	      numberOfSites_(0)
 	{
 		// set precision here
 		PsimagLite::String data;
 		InputNgType::Writeable::readFile(data, inputFile);
+		InputCheck inputCheck;
+		InputNgType::Writeable ioW(inputCheck, data);
+		InputNgType::Readable io(ioW);
+		io.readline(numberOfSites_, "TotalNumberOfSites");
 		omegaParams_ = new OmegaParamsType(data);
 		//const SizeType centralSite = getCentralSite();
 	}
@@ -37,39 +51,53 @@ public:
 		omegaParams_ = nullptr;
 	}
 
-	void run(bool skipFourier, PsimagLite::String rootname)
+	void run()
 	{
+		VectorRealType values1(numberOfSites_);
+		VectorRealType values2(numberOfSites_);
+		VectorBoolType defined(numberOfSites_);
+
+		PsimagLite::String foutname = "out.space"; // FIXME TODO ??
+
+		std::ofstream fout(foutname);
+		if (!fout || fout.bad() || !fout.good())
+			err("writeSpaceValues: Cannot write to foutname\n");
+
 		for (SizeType i = omegaParams_->offset; i < omegaParams_->total; ++i) {
 			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
 
-			procCommon(i, omega, skipFourier, rootname);
+			procCommon(i, omega, values1, values2, defined, fout);
 
-			if (skipFourier) return; // <<===  EARLY EXIT HERE
+			if (skipFourier_) continue;
 
-//			if (array_.size() == 0)
-//				err("procAllQs: array is empty\n");
+			//			if (array_.size() == 0)
+			//				err("procAllQs: array is empty\n");
 
-//			printSpectrum(array_);
+			//			printSpectrum(array_);
 		}
+
+		fout.close();
 	}
 
 private:
 
-	void procCommon(SizeType ind, RealType omega, bool skipFourier, PsimagLite::String rootname)
+	void procCommon(SizeType ind,
+	                RealType omega,
+	                VectorRealType& values1,
+	                VectorRealType& values2,
+	                VectorBoolType& defined,
+	                std::ofstream& fout)
 	{
-		//my $n = $GlobalNumberOfSites;
-
 		PsimagLite::String inFile("runFor");
-		inFile += rootname + ttos(ind) + ".cout";
-		VectorRealType values1;
-		VectorRealType values2;
-		correctionVectorRead(values1, values2, inFile);
+		inFile += rootname_ + ttos(ind) + ".cout";
+
+		correctionVectorRead(values1, values2, defined, inFile);
 
 		//print STDERR "$0: omega=$omega maxSite=$maxSite\n"; <== LOGFILEOUT
 
-		writeSpaceValues(omega, values1, values2);
+		writeSpaceValues(fout, omega, values1, values2);
 
-		if (skipFourier) return; // <<=== EARLY EXIT HERE
+		if (skipFourier_) return; // <<=== EARLY EXIT HERE
 
 		VectorRealType qValues;
 		omegasFourier_.fourier(qValues, values1, values2);
@@ -79,35 +107,35 @@ private:
 		omegasFourier_.writeFourier(array, qValues);
 	}
 
-	void writeSpaceValues(RealType omega, VectorRealType& v1, VectorRealType& v2)
+	void writeSpaceValues(std::ofstream& fout,
+	                      RealType omega,
+	                      const VectorRealType& v1,
+	                      const VectorRealType& v2)
 	{
 		const SizeType n = v1.size();
 		if (v2.size() != n)
 			err("writeSpaceValues: v1.size != v2.size\n");
 
-		PsimagLite::String foutname = "out.space"; // FIXME TODO ??
-
-		std::ofstream fout(foutname);
-		if (!fout || fout.bad() || !fout.good())
-			err("writeSpaceValues: Cannot write to foutname\n");
-
 		printToSpaceOut(fout, ttos(omega) + " " + ttos(n) + "\n");
 
 		for (SizeType i = 0; i < n; ++i)
-			printToSpaceOut(fout, ttos(i) + ttos(v1[i]) + ttos(v2[i]) + "\n");
-
-		fout.close();
+			printToSpaceOut(fout,
+			                ttos(i) + " " +
+			                ttos(v1[i]) + " " +
+			                ttos(v2[i]) + "\n");
 	}
 
-	void printToSpaceOut(std::ofstream& fout, PsimagLite::String str)
+	static void printToSpaceOut(std::ofstream& fout, PsimagLite::String str)
 	{
 		fout<<str;
 	}
 
-	SizeType correctionVectorRead(VectorRealType& v1, VectorRealType& v2, PsimagLite::String inFile)
+	void correctionVectorRead(VectorRealType& v1,
+	                          VectorRealType& v2,
+	                          VectorBoolType& defined,
+	                          PsimagLite::String inFile)
 	{
 		PsimagLite::String status("clear");
-		SizeType maxSite = 0;
 		std::ifstream fin(inFile);
 
 		if (!fin || !fin.good() || fin.bad())
@@ -117,7 +145,7 @@ private:
 
 		const SizeType ns = MAX_LINE_SIZE;
 		char* ss = new char[ns];
-		VectorStringType tokens;
+		std::fill(defined.begin(), defined.end(), false);
 		while (fin.getline(ss, ns)) {
 
 			PsimagLite::String s(ss);
@@ -139,6 +167,7 @@ private:
 
 			if (skip) continue;
 
+			VectorStringType tokens;
 			PsimagLite::split(tokens, s, " ");
 			if (tokens.size() != 5)
 				err("correctionVectorRead: Not 5 tokens in line " + s + "\nFile= " + inFile + "\n");
@@ -149,30 +178,43 @@ private:
 				++c;
 				if (status != labels[i])
 					continue;
+
+				if (site >= numberOfSites_)
+					err("correctionVectorRead: Site " + ttos(site) + " is too big\n");
+
 				if (c == 1)
 					v1[site] = PsimagLite::atof(tokens[1]);
 				else if (c == 2)
 					v2[site] = PsimagLite::atof(tokens[1]);
 				else
 					err("correctionVectorRead: counter c wrong in " + inFile + "\n");
+
+				defined[site] = true;
 			}
 
-			if (maxSite < site) maxSite = site;
 			status = "clear";
 		}
 
 		delete[] ss;
 		ss = 0;
-
-		++maxSite;
+		checkSites(defined);
 		//print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
+	}
 
-		return maxSite;
+	void checkSites(const VectorBoolType& defined)
+	{
+		const SizeType n = defined.size();
+		for (SizeType i = 0; i < n; ++i)
+			if (!defined[i])
+				err("Undefined value for site= " + ttos(i) + "\n");
 	}
 
 	PsimagLite::String inputfile_;
+	bool skipFourier_;
+	PsimagLite::String rootname_;
 	OmegaParamsType* omegaParams_;
 	OmegasFourierType omegasFourier_;
+	SizeType numberOfSites_;
 };
 }
 #endif // PROCOMEGAS_H
