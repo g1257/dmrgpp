@@ -119,12 +119,6 @@ public:
 		err("OmegasFourier: undefined geometry " + name  + "\n");
 	}
 
-	void printGnuplot()
-	{
-		if (skipFourier_) return;
-		err("unimplemented writeFourier\n");
-	}
-
 private:
 
 	void fourierChain(const VectorRealType& values1, const VectorRealType& values2)

@@ -44,8 +44,10 @@ public:
 		VectorRealType values2(numberOfSites_);
 		VectorBoolType defined(numberOfSites_);
 
-		std::ofstream fout(rootOname_);
-		if (!fout || fout.bad() || !fout.good())
+		std::ofstream* fout = nullptr;
+
+		if (rootOname_ != "") fout = new std::ofstream(rootOname_);
+		if (!fout || !*fout || fout->bad() || !fout->good())
 			err("writeSpaceValues: Cannot write to " + rootOname_ + "\n");
 
 		for (SizeType i = omegaParams_.offset; i < omegaParams_.total; ++i) {
@@ -54,9 +56,11 @@ public:
 			procCommon(i, omega, values1, values2, defined, fout);
 		}
 
-		fout.close();
+		if (fout)
+			fout->close();
 
-		omegasFourier_.printGnuplot();
+		delete fout;
+		fout = nullptr;
 	}
 
 private:
@@ -66,7 +70,7 @@ private:
 	                VectorRealType& values1,
 	                VectorRealType& values2,
 	                VectorBoolType& defined,
-	                std::ofstream& fout)
+	                std::ofstream* fout)
 	{
 		PsimagLite::String inFile("runFor");
 		inFile += rootIname_ + ttos(ind) + ".cout";
@@ -75,7 +79,8 @@ private:
 
 		//print STDERR "$0: omega=$omega maxSite=$maxSite\n"; <== LOGFILEOUT
 
-		writeSpaceValues(fout, omega, values1, values2);
+		if (fout)
+			writeSpaceValues(*fout, omega, values1, values2);
 
 		omegasFourier_.fourier(values1, values2);
 		//print LOGFILEOUT "$0: Number of k values ".scalar(@qValues)."\n";
