@@ -13,19 +13,25 @@ class OmegasFourier {
 	public:
 
 		OmegasGeometry(typename InputNgType::Readable& io)
-		{}
+		{
+			io.readline(subname_, "GeometrySubname=");
+			io.readline(name_, "GeometryName=");
+		}
 
 		PsimagLite::String name() const
 		{
-			err("unimplemented name\n");
-			return "";
+			return name_;
 		}
 
 		PsimagLite::String subname() const
 		{
-			err("unimplemented subname\n");
-			return "";
+			return subname_;
 		}
+
+	private:
+
+		PsimagLite::String name_;
+		PsimagLite::String subname_;
 	};
 
 public:
