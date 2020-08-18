@@ -2,6 +2,7 @@
 #define FUNCTIONOFFREQUENCY_H
 #include "Vector.h"
 #include <cassert>
+#include "Matsubaras.h"
 
 namespace Dmft {
 
@@ -11,29 +12,21 @@ class FunctionOfFrequency {
 public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
+	typedef Matsubaras<RealType> MatsubarasType;
 
 	FunctionOfFrequency(RealType fictBeta, SizeType nMatsubara)
-	    : fictBeta_(fictBeta),
-	      nMatsubara_(nMatsubara),
-	      matsubaras_(2*nMatsubara),
+	    : matsubaras_(fictBeta, nMatsubara),
 	      data_(2*nMatsubara)
-	{
-		for (SizeType i = 0; i < 2*nMatsubara_; ++i) {
-			int n = i - nMatsubara_;
-			matsubaras_[i] = (i > nMatsubara) ? M_PI*n/fictBeta_ : M_PI*(n - 1)/fictBeta_;
-		}
-	}
+	{}
 
 	// Total number of Matsubaras used (includes negatives and positives)
-	SizeType totalMatsubaras() const { return matsubaras_.size(); }
+	SizeType totalMatsubaras() const { return matsubaras_.total(); }
 
 	// Matsubara number i, starts at 0, and the 0th is the most negative.
 	const RealType& omega(SizeType i) const
 	{
-		assert(i < totalMatsubaras());
-		return matsubaras_[i];
+		return matsubaras_.omega(i);
 	}
 
 	// Returns the content of this function at point i
@@ -55,9 +48,7 @@ public:
 
 private:
 
-	RealType fictBeta_;         // ficticious beta
-	SizeType nMatsubara_;       // half the number of matsubaras
-	VectorRealType matsubaras_; // wn starting at 0 with the most negative wn
+	MatsubarasType matsubaras_;
 	VectorType data_;           // value of this function at each point or omega
 };
 }

@@ -15,7 +15,8 @@ public:
 
 	typedef FunctionOfFrequency<ComplexOrRealType> FunctionOfFrequencyType;
 	typedef typename FunctionOfFrequencyType::RealType RealType;
-	typedef typename FunctionOfFrequencyType::VectorRealType VectorRealType;
+	typedef typename FunctionOfFrequencyType::MatsubarasType MatsubarasType;
+	typedef typename MatsubarasType::VectorRealType VectorRealType;
 	typedef Dmft::Dispersion<ComplexOrRealType> DispersionType;
 	typedef Fit<ComplexOrRealType> FitType;
 	typedef typename FitType::MinParamsType MinParamsType;

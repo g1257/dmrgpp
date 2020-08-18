@@ -7,8 +7,9 @@
 #include "Vector.h"
 #include "ParamsDmftSolver.h"
 #include "../../dmrgpp/src/Engine/DmrgRunner.h"
+#include "../../dmrgpp/src/Engine/ManyOmegas.h"
 #include "PsimagLite.h"
-#include "FunctionOfFrequency.h"
+#include "Matsubaras.h"
 
 namespace Dmft {
 
@@ -23,6 +24,7 @@ public:
 	typedef Dmrg::DmrgRunner<ComplexOrRealType> DmrgRunnerType;
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
 	typedef PsimagLite::PsiApp ApplicationType;
+	typedef Dmrg::ManyOmegas<RealType, Matsubaras<RealType> > ManyOmegasType;
 
 	ImpuritySolver(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params), runner_(params_.precision, app)
@@ -45,13 +47,16 @@ public:
 		PsimagLite::String data4 = modifyBathParams(data3, bathParams);
 		PsimagLite::String insitu2 = "<gs|c'|P2>,<gs|c'|P3>";
 
-		SizeType totalMatsubaras = params_.nMatsubaras;
-		FunctionOfFrequency<ComplexOrRealType> bogus(params_.ficticiousBeta, params_.nMatsubaras);
-		for (SizeType i = 0; i < totalMatsubaras; ++i) {
-			const RealType wn = bogus.omega(i);
-			PsimagLite::String data5 = replaceOmega(data4, wn);
-			runner_.doOneRun(data5, insitu2, "-");
-		}
+		Matsubaras<RealType> matsubaras(params_.ficticiousBeta, params_.nMatsubaras);
+
+		ManyOmegasType manyOmegas(data4,
+		                          params_.precision,
+		                          matsubaras,
+		                          runner_.application());
+
+		const bool dryrun = false;
+		const PsimagLite::String rootname = "dmftDynamics";
+		manyOmegas.run(dryrun, rootname, insitu2);
 	}
 
 	ComplexOrRealType gimp(SizeType i)
