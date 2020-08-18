@@ -14,9 +14,12 @@ class OmegasFourier {
 
 		OmegasGeometry(typename InputNgType::Readable& io) : subname_("NONE")
 		{
-			io.readline(name_, "GeometryName=");
 			try {
-			io.readline(subname_, "GeometrySubname=");
+				io.readline(name_, "GeometryName=");
+			} catch (std::exception&) {}
+
+			try {
+				io.readline(subname_, "GeometrySubname=");
 			} catch (std::exception&) {}
 		}
 
@@ -44,7 +47,6 @@ public:
 	typedef typename PsimagLite::Vector<ComplexType>::Type VectorComplexType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef ProgramGlobals ProgramGlobalsType;
-	//typedef PsimagLite::Geometry<ComplexOrRealType, InputNgType, ProgramGlobalsType> GeometryType;
 
 	static const SizeType M_MAX = 0;
 

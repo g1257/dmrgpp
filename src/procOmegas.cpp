@@ -20,8 +20,6 @@ void usage(const PsimagLite::String& name)
 int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("procOmegas", &argc, &argv, 1);
-	typedef Dmrg::ProcOmegas<double> ProcOmegasType;
-	typedef ProcOmegasType::InputNgType InputNgType;
 
 	int opt = 0;
 	bool versionOnly = false;
@@ -95,14 +93,20 @@ to the main dmrg driver are the following.
 
 	if (versionOnly) return 0;
 
+	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
+	typedef Dmrg::OmegaParams<InputNgType, double> OmegaParamsType;
+	typedef Dmrg::ProcOmegas<double, OmegaParamsType> ProcOmegasType;
+
 	Dmrg::InputCheck inputCheck;
 	InputNgType::Writeable ioW(inputfile, inputCheck);
 	InputNgType::Readable io(ioW);
+	OmegaParamsType omegaParams(io);
 	ProcOmegasType procOmegas(io,
 	                          precision,
 	                          skipFourier,
 	                          rootIname,
-	                          rootOname);
+	                          rootOname,
+	                          omegaParams);
 
 	procOmegas.run();
 

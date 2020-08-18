@@ -19,7 +19,7 @@
  */
 namespace Dmrg {
 
-template<typename ComplexOrRealType>
+template<typename ComplexOrRealType, typename OmegaParamsType>
 class ProcOmegas {
 
 public:
@@ -30,7 +30,7 @@ public:
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef PsimagLite::PsiApp ApplicationType;
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-	typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
+	//typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
 	typedef OmegasFourier<ComplexOrRealType, InputNgType::Readable> OmegasFourierType;
 	typedef typename OmegasFourierType::VectorComplexType VectorComplexType;
 
@@ -84,10 +84,11 @@ public:
 	           SizeType precision,
 	           bool skipFourier,
 	           PsimagLite::String rootIname,
-	           PsimagLite::String rootOname)
+	           PsimagLite::String rootOname,
+	           const OmegaParamsType& omegaParams)
 	    : rootIname_(rootIname),
 	      rootOname_(rootOname),
-	      omegaParams_(io),
+	      omegaParams_(omegaParams),
 	      omegasFourier_(skipFourier, io),
 	      numberOfSites_(0)
 	{
@@ -277,7 +278,7 @@ private:
 	PsimagLite::String inputfile_;
 	PsimagLite::String rootIname_;
 	PsimagLite::String rootOname_;
-	OmegaParamsType omegaParams_;
+	const OmegaParamsType& omegaParams_;
 	OmegasFourierType omegasFourier_;
 	SizeType numberOfSites_;
 	Qdata qData_;
