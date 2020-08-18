@@ -23,12 +23,9 @@ public:
 	typedef PsimagLite::PsiApp ApplicationType;
 	typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
 
-	ManyOmegas(PsimagLite::String inputFile, RealType precision, const ApplicationType& app)
-	    : inputfile_(inputFile), runner_(precision, app), omegaParams_(0)
-	{
-		InputNgType::Writeable::readFile(data_, inputFile);
-		omegaParams_ = new OmegaParamsType(data_);
-	}
+	ManyOmegas(PsimagLite::String data, RealType precision, const ApplicationType& app)
+	    : data_(data), runner_(precision, app), omegaParams_(new OmegaParamsType(data_))
+	{}
 
 	~ManyOmegas()
 	{
@@ -73,7 +70,7 @@ public:
 		const PsimagLite::String label = "$omega";
 		const size_t pos = data.find(label);
 		if (pos == PsimagLite::String::npos)
-			err("Could not find " + label + " in " + inputfile_ + "\n");
+			err("Could not find " + label + " in data\n");
 
 		PsimagLite::String str = data.substr(0, pos);
 		str += ttos(omega);
@@ -83,10 +80,9 @@ public:
 		return str;
 	}
 
-	PsimagLite::String inputfile_;
+	PsimagLite::String data_;
 	DmrgRunnerType runner_;
 	OmegaParamsType* omegaParams_;
-	PsimagLite::String data_;
 };
 }
 #endif // MANYOMEGAS_H

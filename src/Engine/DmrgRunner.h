@@ -102,6 +102,8 @@ public:
 		application_.base64encode(std::cout, data, true);
 	}
 
+	const ApplicationType& application() const { return application_; }
+
 private:
 
 

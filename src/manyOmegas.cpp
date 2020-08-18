@@ -83,7 +83,9 @@ to the main dmrg driver are the following.
 
 	if (versionOnly) return 0;
 
-	ManyOmegasType manyOmegas(inputfile, precision, application);
+	PsimagLite::String data;
+	ManyOmegasType::InputNgType::Writeable::readFile(data, inputfile);
+	ManyOmegasType manyOmegas(data, precision, application);
 
 	manyOmegas.run(dryrun, rootname);
 }
