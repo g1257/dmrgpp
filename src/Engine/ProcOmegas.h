@@ -108,13 +108,13 @@ public:
 		if (!fout || !*fout || fout->bad() || !fout->good())
 			err("writeSpaceValues: Cannot write to " + rootOname_ + "\n");
 
-		qData_.resize(omegaParams_.total - omegaParams_.offset);
+		qData_.resize(omegaParams_.total() - omegaParams_.offset());
 
-		for (SizeType i = omegaParams_.offset; i < omegaParams_.total; ++i) {
-			const RealType omega = i*omegaParams_.step + omegaParams_.begin;
+		for (SizeType i = omegaParams_.offset(); i < omegaParams_.total(); ++i) {
+			const RealType omega = omegaParams_.omega(i);
 
 			procCommon(i, omega, values1, values2, defined, fout);
-			qData_.set(i - omegaParams_.offset, omegasFourier_.data());
+			qData_.set(i - omegaParams_.offset(), omegasFourier_.data());
 		}
 
 		if (fout)
@@ -131,11 +131,11 @@ public:
 			err("writeSpaceValues: Cannot write to " + foutname + "\n");
 
 		SizeType numberOfQs = 0;
-		for (SizeType i = omegaParams_.offset; i < omegaParams_.total; ++i) {
-			const RealType omega = i*omegaParams_.step + omegaParams_.begin;
-			const VectorComplexType& v = qData_.get(i - omegaParams_.offset);
+		for (SizeType i = omegaParams_.offset(); i < omegaParams_.total(); ++i) {
+			const RealType omega = omegaParams_.omega(i);
+			const VectorComplexType& v = qData_.get(i - omegaParams_.offset());
 
-			if (i == omegaParams_.offset) {
+			if (i == omegaParams_.offset()) {
 				assert(numberOfQs == 0);
 				numberOfQs = v.size();
 			} else if (numberOfQs != v.size()) {

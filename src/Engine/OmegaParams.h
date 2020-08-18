@@ -6,7 +6,9 @@
 namespace Dmrg {
 
 template<typename InputNgType, typename RealType_>
-struct OmegaParams {
+class OmegaParams {
+
+public:
 
 	typedef RealType_ RealType;
 
@@ -25,18 +27,31 @@ struct OmegaParams {
 
 	void configure(typename InputNgType::Readable& io)
 	{
-		io.readline(begin, "OmegaBegin=");
-		io.readline(step, "OmegaStep=");
-		io.readline(total, "OmegaTotal=");
-		io.readline(offset, "OmegaOffset=");
-		io.readline(obs, "Observable=");
+		io.readline(begin_, "OmegaBegin=");
+		io.readline(step_, "OmegaStep=");
+		io.readline(total_, "OmegaTotal=");
+		io.readline(offset_, "OmegaOffset=");
+		io.readline(obs_, "Observable=");
 	}
 
-	RealType begin;
-	RealType step;
-	SizeType offset;
-	SizeType total;
-	PsimagLite::String obs;
+	RealType omega(SizeType i) const
+	{
+		return i*step_ + begin_;
+	}
+
+	PsimagLite::String observable() const { return obs_; }
+
+	SizeType offset() const { return offset_; }
+
+	SizeType total() const { return total_; }
+
+private:
+
+	RealType begin_;
+	RealType step_;
+	SizeType offset_;
+	SizeType total_;
+	PsimagLite::String obs_;
 };
 
 }

@@ -23,29 +23,23 @@ public:
 	typedef PsimagLite::PsiApp ApplicationType;
 
 	ManyOmegas(PsimagLite::String data, RealType precision, const ApplicationType& app)
-	    : data_(data), runner_(precision, app), omegaParams_(new OmegaParamsType(data_))
+	    : data_(data), runner_(precision, app), omegaParams_(data_)
 	{}
-
-	~ManyOmegas()
-	{
-		delete omegaParams_;
-		omegaParams_ = nullptr;
-	}
 
 	void run(bool dryRun, PsimagLite::String root)
 	{
-		const PsimagLite::String obs = omegaParams_->obs;
+		const PsimagLite::String obs = omegaParams_.observable();
 		const PsimagLite::String insitu = "<gs|" + obs + "|P1>,<gs|" +
 		        obs + "|P2>,<gs|" + obs + "|P3>";
 
 		//lambda
 		PsimagLite::InterNode<> internode(PsimagLite::MPI::COMM_WORLD);
 
-		internode.parallelFor(omegaParams_->offset,
-		                      omegaParams_->total,
+		internode.parallelFor(omegaParams_.offset(),
+		                      omegaParams_.total(),
 		                      [this, root, dryRun, insitu](SizeType i, SizeType)
 		{
-			const RealType omega = i*omegaParams_->step + omegaParams_->begin;
+			const RealType omega = omegaParams_.omega(i);
 			PsimagLite::String data2 = modifyOmega(omega);
 			PsimagLite::String outputfile = "\nOutputFile=\"" + root + ttos(i) + "\";\n";
 			data2 += outputfile;
@@ -81,7 +75,7 @@ public:
 
 	PsimagLite::String data_;
 	DmrgRunnerType runner_;
-	OmegaParamsType* omegaParams_;
+	OmegaParamsType omegaParams_;
 };
 }
 #endif // MANYOMEGAS_H
