@@ -88,7 +88,12 @@ to the main dmrg driver are the following.
 
 	PsimagLite::String data;
 	ManyOmegasType::InputNgType::Writeable::readFile(data, inputfile);
-	ManyOmegasType manyOmegas(data, precision, application);
+	OmegaParamsType omegaParams(data);
+	ManyOmegasType manyOmegas(data, precision, omegaParams, application);
 
-	manyOmegas.run(dryrun, rootname);
+	const PsimagLite::String obs = omegaParams.observable();
+	const PsimagLite::String insitu = "<gs|" + obs + "|P1>,<gs|" +
+	        obs + "|P2>,<gs|" + obs + "|P3>";
+
+	manyOmegas.run(dryrun, rootname, insitu);
 }

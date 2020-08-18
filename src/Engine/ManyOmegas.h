@@ -22,16 +22,15 @@ public:
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
 	typedef PsimagLite::PsiApp ApplicationType;
 
-	ManyOmegas(PsimagLite::String data, RealType precision, const ApplicationType& app)
-	    : data_(data), runner_(precision, app), omegaParams_(data_)
+	ManyOmegas(PsimagLite::String data,
+	           RealType precision,
+	           const OmegaParamsType& omegaParams,
+	           const ApplicationType& app)
+	    : data_(data), runner_(precision, app), omegaParams_(omegaParams)
 	{}
 
-	void run(bool dryRun, PsimagLite::String root)
+	void run(bool dryRun, PsimagLite::String root, PsimagLite::String insitu)
 	{
-		const PsimagLite::String obs = omegaParams_.observable();
-		const PsimagLite::String insitu = "<gs|" + obs + "|P1>,<gs|" +
-		        obs + "|P2>,<gs|" + obs + "|P3>";
-
 		//lambda
 		PsimagLite::InterNode<> internode(PsimagLite::MPI::COMM_WORLD);
 
@@ -75,7 +74,7 @@ public:
 
 	PsimagLite::String data_;
 	DmrgRunnerType runner_;
-	OmegaParamsType omegaParams_;
+	const OmegaParamsType& omegaParams_;
 };
 }
 #endif // MANYOMEGAS_H
