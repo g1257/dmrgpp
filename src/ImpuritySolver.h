@@ -8,6 +8,7 @@
 #include "ParamsDmftSolver.h"
 #include "../../dmrgpp/src/Engine/DmrgRunner.h"
 #include "PsimagLite.h"
+#include "FunctionOfFrequency.h"
 
 namespace Dmft {
 
@@ -35,9 +36,22 @@ public:
 		PsimagLite::String data;
 		InputNgType::Writeable::readFile(data, params_.gsTemplate);
 		PsimagLite::String data2 = modifyBathParams(data, bathParams);
-		PsimagLite::String sOptions = "";
+		PsimagLite::String insitu = "";
 
-		runner_.doOneRun(data2, sOptions, "-");
+		runner_.doOneRun(data2, insitu, "-");
+
+		PsimagLite::String data3;
+		InputNgType::Writeable::readFile(data3, params_.omegaTemplate);
+		PsimagLite::String data4 = modifyBathParams(data3, bathParams);
+		PsimagLite::String insitu2 = "<gs|c'|P2>,<gs|c'|P3>";
+
+		SizeType totalMatsubaras = params_.nMatsubaras;
+		FunctionOfFrequency<ComplexOrRealType> bogus(params_.ficticiousBeta, params_.nMatsubaras);
+		for (SizeType i = 0; i < totalMatsubaras; ++i) {
+			const RealType wn = bogus.omega(i);
+			PsimagLite::String data5 = replaceOmega(data4, wn);
+			runner_.doOneRun(data5, insitu2, "-");
+		}
 	}
 
 	ComplexOrRealType gimp(SizeType i)
@@ -94,6 +108,15 @@ private:
 			buffer += "," + ttos(bathParams[i]);
 
 		return buffer;
+	}
+
+	static PsimagLite::String replaceOmega(PsimagLite::String data, RealType wn)
+	{
+		const PsimagLite::String omega = "$omega";
+		size_t pos1 = data.find(omega, 0);
+		size_t pos2 = pos1 + omega.length();
+		size_t len2 = data.length() - pos1;
+		return data.substr(0, pos1) + ttos(wn) + data.substr(pos2, len2);
 	}
 
 	const ParamsDmftSolverType& params_;
