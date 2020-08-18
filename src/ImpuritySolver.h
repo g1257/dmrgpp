@@ -17,6 +17,8 @@ namespace Dmft {
 template<typename ParamsDmftSolverType>
 class ImpuritySolver {
 
+	enum class DmrgType {TYPE_0, TYPE_1};
+
 public:
 
 	typedef typename ParamsDmftSolverType::ComplexOrRealType ComplexOrRealType;
@@ -49,11 +51,22 @@ public:
 		PsimagLite::String data3;
 		InputNgType::Writeable::readFile(data3, params_.omegaTemplate);
 		PsimagLite::String data4 = modifyBathParams(data3, bathParams);
-		PsimagLite::String insitu2 = "<gs|c'|P2>,<gs|c'|P3>";
+
+		doType(DmrgType::TYPE_0, data4);
+
+		doType(DmrgType::TYPE_1, data4);
+	}
+
+	void doType(DmrgType t, PsimagLite::String data)
+	{
+		PsimagLite::String obs = (t == DmrgType::TYPE_0) ? "c'" : "c";
+		PsimagLite::String insitu2 = "<gs|" + obs + "|P2>,<gs|" + obs + "|P3>";
+
+		PsimagLite::String data2 = addTypeAndObs(t, data);
 
 		Matsubaras<RealType> matsubaras(params_.ficticiousBeta, params_.nMatsubaras);
 
-		ManyOmegasType manyOmegas(data4,
+		ManyOmegasType manyOmegas(data2,
 		                          params_.precision,
 		                          matsubaras,
 		                          runner_.application());
@@ -67,7 +80,7 @@ public:
 		const bool skipFourier = true;
 
 		Dmrg::InputCheck inputCheck;
-		typename InputNgType::Writeable ioW(inputCheck, data4);
+		typename InputNgType::Writeable ioW(inputCheck, data2);
 		typename InputNgType::Readable io(ioW);
 		ProcOmegasType procOmegas(io,
 		                          params_.precision,
@@ -78,7 +91,7 @@ public:
 
 		procOmegas.run();
 
-		readGimp(rootOname, matsubaras);
+		readGimp(rootOname, matsubaras, t);
 	}
 
 	ComplexOrRealType gimp(SizeType i)
@@ -138,6 +151,14 @@ private:
 		return buffer;
 	}
 
+	static PsimagLite::String addTypeAndObs(DmrgType t, PsimagLite::String data)
+	{
+		const PsimagLite::String obsTc = (t == DmrgType::TYPE_0) ? "c" : "c'";
+		const SizeType tt = (t == DmrgType::TYPE_0) ? 0 : 1;
+		return data +  "integer DynamicDmrgType=" + ttos(tt) + ";\n" +
+		        "OperatorExpression=\"" + obsTc + "\";\n";
+	}
+
 	static PsimagLite::String replaceOmega(PsimagLite::String data, RealType wn)
 	{
 		const PsimagLite::String omega = "$omega";
@@ -147,13 +168,17 @@ private:
 		return data.substr(0, pos1) + ttos(wn) + data.substr(pos2, len2);
 	}
 
-	void readGimp(PsimagLite::String filename, const MatsubarasType& matsubaras)
+	void readGimp(PsimagLite::String filename,
+	              const MatsubarasType& matsubaras,
+	              DmrgType t)
 	{
 		std::ifstream fin(filename);
 		if (!fin || !fin.good() || fin.bad())
 			err("readGimp: Could not open " + filename + "\n");
 
-		gimp_.resize(matsubaras.total());
+		if (t == DmrgType::TYPE_0)
+			gimp_.resize(matsubaras.total());
+
 		SizeType ind = 0;
 		while (!fin.eof()) {
 			RealType val = 0;
@@ -174,7 +199,12 @@ private:
 			if (ind >= gimp_.size())
 				break;
 
-			gimp_[ind++] = ComplexType(val1, val2);
+			if (t == DmrgType::TYPE_0)
+				gimp_[ind] = ComplexType(val1, val2);
+			else
+				gimp_[ind] += ComplexType(val1, val2);
+
+			++ind;
 
 			if (n == 1) continue;
 

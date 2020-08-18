@@ -24,7 +24,6 @@ integer TridiagSteps=400;
 real TridiagEps=1e-9;
 string TruncationTolerance="1e-10,100";
 real CorrectionA=0;
-integer DynamicDmrgType=0;
 TSPSites=[3];
 TSPLoops=[0];
 TSPProductOrSum=sum;
@@ -37,4 +36,3 @@ GsWeight=0.1;
 real CorrectionVectorOmega=$omega;
 
 TSPOperator="expression";
-OperatorExpression="c";
