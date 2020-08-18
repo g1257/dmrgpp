@@ -21,7 +21,9 @@ public:
 
 	typedef typename ParamsDmftSolverType::ComplexOrRealType ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef std::complex<RealType> ComplexType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<ComplexType>::Type VectorComplexType;
 	typedef Dmrg::DmrgRunner<RealType> DmrgRunnerType;
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
 	typedef PsimagLite::PsiApp ApplicationType;
@@ -37,7 +39,6 @@ public:
 	// bathParams[nBath-...] ==> energies on each bath site
 	void solve(const VectorRealType& bathParams)
 	{
-
 		PsimagLite::String data;
 		InputNgType::Writeable::readFile(data, params_.gsTemplate);
 		PsimagLite::String data2 = modifyBathParams(data, bathParams);
@@ -76,11 +77,14 @@ public:
 		                          matsubaras);
 
 		procOmegas.run();
+
+		readGimp(rootOname, matsubaras);
 	}
 
 	ComplexOrRealType gimp(SizeType i)
 	{
-		throw PsimagLite::RuntimeError("gimp not ready yet\n");
+		assert(i < gimp_.size());
+		return gimp_[i];
 	}
 
 private:
@@ -143,8 +147,49 @@ private:
 		return data.substr(0, pos1) + ttos(wn) + data.substr(pos2, len2);
 	}
 
+	void readGimp(PsimagLite::String filename, const MatsubarasType& matsubaras)
+	{
+		std::ifstream fin(filename);
+		if (!fin || !fin.good() || fin.bad())
+			err("readGimp: Could not open " + filename + "\n");
+
+		gimp_.resize(matsubaras.total());
+		SizeType ind = 0;
+		while (!fin.eof()) {
+			RealType val = 0;
+			fin>>val;
+			SizeType n = 0;
+			fin>>n;
+			SizeType site = 0;
+			fin>>site;
+			if (site != 0)
+				err("readGimp: Expecting site 0, but found " + ttos(site) + " instead\n");
+
+			RealType val1 = 0;
+			fin>>val1;
+
+			RealType val2 = 0;
+			fin>>val2;
+
+			if (ind >= gimp_.size())
+				break;
+
+			gimp_[ind++] = ComplexType(val1, val2);
+
+			if (n == 1) continue;
+
+			--n;
+			for (SizeType i = 0; i < 3*n; ++i)
+				fin>>val1;
+		}
+
+		if (ind < gimp_.size())
+			err("readGimp: Not all values computed\n");
+	}
+
 	const ParamsDmftSolverType& params_;
 	DmrgRunnerType runner_;
+	VectorComplexType gimp_;
 };
 }
 #endif // IMPURITYSOLVER_H
