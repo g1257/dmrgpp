@@ -24,7 +24,7 @@ public:
 	typedef Dmrg::DmrgRunner<ComplexOrRealType> DmrgRunnerType;
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
 	typedef PsimagLite::PsiApp ApplicationType;
-	typedef Dmrg::ManyOmegas<RealType, Matsubaras<RealType> > ManyOmegasType;
+	typedef Dmrg::ManyOmegas<ComplexOrRealType, Matsubaras<RealType> > ManyOmegasType;
 
 	ImpuritySolver(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params), runner_(params_.precision, app)
@@ -38,7 +38,7 @@ public:
 		PsimagLite::String data;
 		InputNgType::Writeable::readFile(data, params_.gsTemplate);
 		PsimagLite::String data2 = modifyBathParams(data, bathParams);
-		PsimagLite::String insitu = "";
+		PsimagLite::String insitu = "<gs|nup|gs>";
 
 		runner_.doOneRun(data2, insitu, "-");
 

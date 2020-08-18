@@ -13,7 +13,7 @@ MinParamsDelta2=0.001;
 MinParamsTolerance=1;
 MinParamsVerbose=1;
 DmrgGsTemplate="../TestSuite/inputs/gsTemplate.ain";
-DmrgOmegaTemplate="omegaTemplate.ain";
+DmrgOmegaTemplate="../TestSuite/inputs/omegaTemplate.ain";
 
 
 
