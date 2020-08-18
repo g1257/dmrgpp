@@ -1,0 +1,40 @@
+##Ainur1.0
+TotalNumberOfSites=6;
+NumberOfTerms=1;
+DegreesOfFreedom=1;
+GeometryKind="star";
+GeometryOptions="none";
+dir0:Connectors=[1.0, 1.0, 1.0, 1.0, 1.0];
+
+#Model params
+hubbardU=[0.0, ...];
+potentialV=[0.0,...];
+Model="HubbardOneBand";
+SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,CorrectionVectorTargeting,restart";
+string RestartFilename="gsForDMFT";
+Version="templateForDMFT";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[
+[-4, 100, 2],
+[ 4, 100, 2]];
+TargetElectronsUp=3;
+TargetElectronsDown=3;
+
+integer TridiagSteps=400;
+real TridiagEps=1e-9;
+string TruncationTolerance="1e-10,100";
+real CorrectionA=0;
+integer DynamicDmrgType=0;
+TSPSites=[3];
+TSPLoops=[0];
+TSPProductOrSum=sum;
+string CorrectionVectorFreqType="Matsubara";
+
+real CorrectionVectorEta=0.05;
+string CorrectionVectorAlgorithm="Krylov";
+Orbitals=1;
+GsWeight=0.1;
+real CorrectionVectorOmega=$omega;
+
+TSPOperator="expression";
+OperatorExpression="c";

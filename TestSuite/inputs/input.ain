@@ -1,7 +1,7 @@
 ##Ainur1.0
 FicticiousBeta=50;
 ChemicalPotential=0;
-Matsubaras=100;
+Matsubaras=20;
 NumberOfKpoints=50;
 NumberOfBathPoints=5;
 DmftNumberOfIterations=10;
