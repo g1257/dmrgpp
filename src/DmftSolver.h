@@ -93,7 +93,8 @@ private:
 			const ComplexOrRealType oldValue = sigma_(i);
 			const ComplexOrRealType newValue = iwn - andersonFunction.anderson(bathParams, i) -
 			        1.0/impuritySolver_.gimp(i);
-			sum += PsimagLite::real(FitType::AndersonFunctionType::squareOf(oldValue - newValue));
+			const ComplexOrRealType diff = oldValue - newValue;
+			sum += PsimagLite::real(diff*PsimagLite::conj(diff));
 			sigma_(i) = newValue;
 		}
 

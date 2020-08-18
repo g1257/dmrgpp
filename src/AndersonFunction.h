@@ -93,8 +93,8 @@ private:
 	{
 		assert(args.size() == 2*nBath_);
 		assert(jnd < 2*nBath_);
-		const RealType valpha = args[jnd];
-		const RealType epsilon = args[jnd + nBath_];
+		const RealType valpha = (jnd < nBath_) ? args[jnd] : args[jnd - nBath_];
+		const RealType epsilon = (jnd < nBath_) ? args[jnd + nBath_] : args[jnd];
 		return (jnd < nBath_) ? 2.0*valpha/(iwn - epsilon) :
 		                        squareOf(valpha/(iwn - epsilon));
 	}
