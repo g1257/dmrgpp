@@ -11,7 +11,7 @@
 
 namespace Dmrg {
 
-template<typename ComplexOrRealType>
+template<typename ComplexOrRealType, typename OmegaParamsType>
 class ManyOmegas {
 
 public:
@@ -21,7 +21,6 @@ public:
 	typedef DmrgRunner<ComplexOrRealType> DmrgRunnerType;
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
 	typedef PsimagLite::PsiApp ApplicationType;
-	typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
 
 	ManyOmegas(PsimagLite::String data, RealType precision, const ApplicationType& app)
 	    : data_(data), runner_(precision, app), omegaParams_(new OmegaParamsType(data_))

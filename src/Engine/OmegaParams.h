@@ -5,8 +5,10 @@
 
 namespace Dmrg {
 
-template<typename InputNgType, typename RealType>
+template<typename InputNgType, typename RealType_>
 struct OmegaParams {
+
+	typedef RealType_ RealType;
 
 	OmegaParams(PsimagLite::String data)
 	{

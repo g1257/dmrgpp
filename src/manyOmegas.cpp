@@ -13,7 +13,6 @@ void usage(const PsimagLite::String& name)
 int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("manyOmegas", &argc, &argv, 1);
-	typedef Dmrg::ManyOmegas<double> ManyOmegasType;
 
 	int opt = 0;
 	bool versionOnly = false;
@@ -82,6 +81,10 @@ to the main dmrg driver are the following.
 	}
 
 	if (versionOnly) return 0;
+
+	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
+	typedef Dmrg::OmegaParams<InputNgType, double> OmegaParamsType;
+	typedef Dmrg::ManyOmegas<double, OmegaParamsType> ManyOmegasType;
 
 	PsimagLite::String data;
 	ManyOmegasType::InputNgType::Writeable::readFile(data, inputfile);
