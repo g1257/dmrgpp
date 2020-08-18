@@ -8,6 +8,7 @@
 #include "ParamsDmftSolver.h"
 #include "../../dmrgpp/src/Engine/DmrgRunner.h"
 #include "../../dmrgpp/src/Engine/ManyOmegas.h"
+#include "../../dmrgpp/src/Engine/ProcOmegas.h"
 #include "PsimagLite.h"
 #include "Matsubaras.h"
 
@@ -21,10 +22,12 @@ public:
 	typedef typename ParamsDmftSolverType::ComplexOrRealType ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef Dmrg::DmrgRunner<ComplexOrRealType> DmrgRunnerType;
+	typedef Dmrg::DmrgRunner<RealType> DmrgRunnerType;
 	typedef typename DmrgRunnerType::InputNgType InputNgType;
 	typedef PsimagLite::PsiApp ApplicationType;
-	typedef Dmrg::ManyOmegas<ComplexOrRealType, Matsubaras<RealType> > ManyOmegasType;
+	typedef Matsubaras<RealType> MatsubarasType;
+	typedef Dmrg::ManyOmegas<RealType, MatsubarasType> ManyOmegasType;
+	typedef Dmrg::ProcOmegas<RealType, MatsubarasType> ProcOmegasType;
 
 	ImpuritySolver(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params), runner_(params_.precision, app)
@@ -57,6 +60,22 @@ public:
 		const bool dryrun = false;
 		const PsimagLite::String rootname = "dmftDynamics";
 		manyOmegas.run(dryrun, rootname, insitu2);
+
+		const PsimagLite::String rootIname = "input";
+		const PsimagLite::String rootOname = "OUTPUT";
+		const bool skipFourier = true;
+
+		Dmrg::InputCheck inputCheck;
+		typename InputNgType::Writeable ioW(inputCheck, data4);
+		typename InputNgType::Readable io(ioW);
+		ProcOmegasType procOmegas(io,
+		                          params_.precision,
+		                          skipFourier,
+		                          rootIname,
+		                          rootOname,
+		                          matsubaras);
+
+		procOmegas.run();
 	}
 
 	ComplexOrRealType gimp(SizeType i)
