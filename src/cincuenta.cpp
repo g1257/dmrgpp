@@ -148,4 +148,6 @@ to the main dmrg driver are the following.
 	DmftSolverType dmftSolver(params, application);
 
 	dmftSolver.selfConsistencyLoop();
+
+	dmftSolver.print(std::cout);
 }

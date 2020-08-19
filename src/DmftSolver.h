@@ -60,7 +60,21 @@ public:
 				break;
 		}
 
-		std::cout<<"Converged after "<<iter<<" iterations; error="<<error<<"\n";
+		if (error < params_.dmftError) {
+			std::cout<<"Converged after "<<iter<<" iterations; error="<<error<<"\n";
+			return; // <--- EARLY EXIT HERE
+		}
+
+		std::cout<<"I did "<<iter<<" iterations; but error="<<error;
+		std::cout<<" is greater than the tolerance="<<params_.dmftError;
+		std::cout<<" that was requested\n";
+	}
+
+	void print(std::ostream& os) const
+	{
+		os<<"Sigma\n";
+		os<<sigma_;
+		printBathParams(os);
 	}
 
 private:
@@ -99,6 +113,13 @@ private:
 		}
 
 		return sum;
+	}
+
+	void printBathParams(std::ostream& os) const
+	{
+		os<<"bathParams[0-nBath-1] ==> V ==> hoppings impurity --> bath\n";
+		os<<"bathParams[nBath-...] ==> energies on each bath site\n";
+		os<<fit_.result();
 	}
 
 	const ParamsDmftSolverType& params_;

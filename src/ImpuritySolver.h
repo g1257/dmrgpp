@@ -134,15 +134,6 @@ private:
 		        "OperatorExpression=\"" + obsTc + "\";\n";
 	}
 
-	static PsimagLite::String replaceOmega(PsimagLite::String data, RealType wn)
-	{
-		const PsimagLite::String omega = "$omega";
-		size_t pos1 = data.find(omega, 0);
-		size_t pos2 = pos1 + omega.length();
-		size_t len2 = data.length() - pos1;
-		return data.substr(0, pos1) + ttos(wn) + data.substr(pos2, len2);
-	}
-
 	void readGimp(PsimagLite::String filename,
 	              const MatsubarasType& matsubaras,
 	              DmrgType t)
