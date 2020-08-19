@@ -39,7 +39,7 @@ public:
 		                      [this, root, dryRun, insitu](SizeType i, SizeType)
 		{
 			const RealType omega = omegaParams_.omega(i);
-			PsimagLite::String data2 = modifyOmega(omega);
+			PsimagLite::String data2 = addOmega(omega);
 			PsimagLite::String outputfile = "\nOutputFile=\"" + root + ttos(i) + "\";\n";
 			data2 += outputfile;
 
@@ -56,20 +56,10 @@ public:
 		});
 	}
 
-	PsimagLite::String modifyOmega(RealType omega) const
+	PsimagLite::String addOmega(RealType wn) const
 	{
-		PsimagLite::String data = data_;
-		const PsimagLite::String label = "$omega";
-		const size_t pos = data.find(label);
-		if (pos == PsimagLite::String::npos)
-			err("Could not find " + label + " in data\n");
-
-		PsimagLite::String str = data.substr(0, pos);
-		str += ttos(omega);
-		const SizeType len2 = data.length();
-		assert(len2 > pos + label.length());
-		str += data.substr(pos + label.length(), len2 - pos - label.length());
-		return str;
+		const PsimagLite::String str = "real CorrectionVectorOmega=" + ttos(wn) + ";\n";
+		return data_ + str;
 	}
 
 	PsimagLite::String data_;

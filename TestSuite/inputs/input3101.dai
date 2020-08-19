@@ -43,7 +43,6 @@ real CorrectionVectorEta=0.05;
 string CorrectionVectorAlgorithm="Krylov";
 Orbitals=1;
 GsWeight=0.1;
-real CorrectionVectorOmega=$omega;
 
 TSPOperator="expression";
 OperatorExpression="sminus";
