@@ -7,19 +7,53 @@ use utf8;
 my ($file) = @ARGV;
 defined($file) or die "USAGE: $0 filename\n";
 
+my $pi = 3.14159;
+my $points = 3;
+my $kpoint = $pi;
+
 my %max = maxFromFile($file);
 
-printMax(\%max);
+my @disp = plotMax(\%max, 1);
 
-sub printMax
+my $slope = findSlope(\@disp, $kpoint, $points);
+
+print STDERR "$0: Slope at $kpoint with $points points behind is $slope\n";
+
+sub findSlope
 {
-	my ($h) = @_;
-	
+	my ($a, $kpoint, $points) = @_;
+	my $n = scalar(@$a);
+	for (my $i = 0; $i < $n; ++$i) {
+		my $ptr = $a->[$i];
+		my ($k, $omega) = @$ptr;
+		next if (abs($k - $kpoint) >= 1e-3);
+		
+		my $piIndex = $i;
+		my $firstIndex = $i - $points;
+		if ($firstIndex < 0) {
+			die "$0: Points $points is too big\n";
+		}
+			
+		my $ptr2 = $a->[$firstIndex];
+		my ($k1, $omega1) = @$ptr2;
+		my $slope = ($omega1 - $omega)/($k1 - $k);
+		return $slope;
+	}
+}
+
+sub plotMax
+{
+	my ($h, $print) = @_;
+	my @disp;
+	my $counter = 0;
 	foreach my $k (sort {$a <=> $b} keys %$h) {
 		my $ptr = $h->{$k};
 		my ($omega, $value) = @$ptr;
-		print "$k $omega\n";
+		print "$k $omega\n" if ($print);
+		$disp[$counter++] = [$k, $omega];
 	}
+	
+	return @disp;
 }
 
 sub maxFromFile
