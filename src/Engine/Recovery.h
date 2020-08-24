@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoNg.h"
 #include "PsimagLite.h"
 #include "PredicateAwesome.h"
+#include "OutputFileOrNot.h"
 
 namespace Dmrg {
 
@@ -162,7 +163,6 @@ public:
 	};
 
 	Recovery(const VectorBlockType& siteIndices,
-	         typename IoType::Out& ioOut,
 	         const CheckpointType& checkpoint,
 	         const WaveFunctionTransfType& wft,
 	         const BasisWithOperatorsType& pS,
@@ -225,7 +225,7 @@ public:
 	           SizeType loopIndex,
 	           SizeType stepCurrent,
 	           int lastSign,
-	           typename IoType::Out& ioOutCurrent,
+	           OutputFileOrNot& ioOutCurrent,
 	           PsimagLite::String inputBlob) const
 	{
 		PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());

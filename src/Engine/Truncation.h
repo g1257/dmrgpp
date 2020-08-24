@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoNg.h"
 #include "Profiling.h"
 #include "PredicateAwesome.h"
+#include "OutputFileOrNot.h"
 
 namespace Dmrg {
 
@@ -128,7 +129,7 @@ public:
 	           WaveFunctionTransfType& waveFunctionTransformation,
 	           const ParametersType& parameters,
 	           const SuperGeometryType& geometry,
-	           IoOutType& ioOut)
+	           OutputFileOrNot& ioOut)
 	    : lrs_(lrs),
 	      waveFunctionTransformation_(waveFunctionTransformation),
 	      parameters_(parameters),
@@ -532,7 +533,7 @@ private:
 	WaveFunctionTransfType& waveFunctionTransformation_;
 	const ParametersType& parameters_;
 	const SuperGeometryType& superGeometry_;
-	IoOutType& ioOut_;
+	OutputFileOrNot& ioOut_;
 	ProgressIndicatorType progress_;
 	RealType error_;
 	TruncationCache leftCache_;

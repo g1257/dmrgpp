@@ -91,7 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetSelector.h"
 #include "PsiBase64.h"
 #include "PrinterInDetail.h"
-#include "Io/IoSelector.h"
+#include "OutputFileOrNot.h"
 #include "TargetingBase.h"
 
 namespace Dmrg {
@@ -163,11 +163,7 @@ public:
 	                       quantumSector_,
 	                       wft_,
 	                       checkpoint_.energies()),
-	      truncate_(lrs_,
-	                wft_,
-	                parameters_,
-	                model.superGeometry(),
-	                ioOut_),
+	      truncate_(lrs_, wft_, parameters_, model.superGeometry(), ioOut_),
 	      saveData_(!parameters_.options.isSet("noSaveData"))
 	{
 		firstCall_ = true;
@@ -254,7 +250,7 @@ public:
 			infiniteDmrgLoop(X,Y,E,pS,pE,psi);
 		}
 
-		RecoveryType recovery(sitesIndices_, ioOut_, checkpoint_, wft_, pS, pE);
+		RecoveryType recovery(sitesIndices_, checkpoint_, wft_, pS, pE);
 		finiteDmrgLoops(pS, pE, psi, recovery);
 
 		inSitu_.init(psi,geometry.numberOfSites());
@@ -462,12 +458,14 @@ obtain ordered
 				               ioIn_.data());
 		}
 
-		if (!saveData_) return;
+		if (!saveData_) return; //<<== EARLY EXIT HERE
 
-		checkpoint_.write(pS, pE, ioOut_);
+		if (!ioOut_.nonNull()) return; //<<== EARLY EXIT HERE
+
+		checkpoint_.write(pS, pE, ioOut_.handle());
 
 		ioOut_.createGroup("FinalPsi");
-		psi.write(sitesIndices_[stepCurrent_], ioOut_, "FinalPsi");
+		psi.write(sitesIndices_[stepCurrent_], ioOut_.handle(), "FinalPsi");
 		ioOut_.write(lastSign, "LastLoopSign");
 	}
 
@@ -643,9 +641,13 @@ obtain ordered
 		        : BasisWithOperatorsType::SaveEnum::PARTIAL;
 		SizeType numberOfSites = model_.superGeometry().numberOfSites();
 		PsimagLite::String prefix("Serializer");
-		ds->write(ioOut_, prefix, saveOption2, numberOfSites, counter_);
-		PsimagLite::String prefixForTarget = TargetingType::buildPrefix(ioOut_, counter_);
-		target.write(sitesIndices_[stepCurrent_], ioOut_, prefixForTarget);
+		if (ioOut_.nonNull()) {
+			ds->write(ioOut_.handle(), prefix, saveOption2, numberOfSites, counter_);
+			PsimagLite::String prefixForTarget = TargetingType::buildPrefix(ioOut_.handle(),
+			                                                                counter_);
+			target.write(sitesIndices_[stepCurrent_], ioOut_.handle(), prefixForTarget);
+		}
+
 		++counter_;
 		delete ds;
 		ds = 0;
@@ -672,9 +674,9 @@ obtain ordered
 
 	void printEnergies(const VectorVectorRealType& energies)
 	{
-		if (!saveData_) return;
+		if (!saveData_ || !ioOut_.nonNull()) return;
 
-		CheckpointType::writeEnergies(firstCall_, "Energies", energies, ioOut_);
+		CheckpointType::writeEnergies(firstCall_, "Energies", energies, ioOut_.handle());
 
 		firstCall_ = false;
 	}
@@ -694,7 +696,7 @@ obtain ordered
 	PsimagLite::ApplicationInfo appInfo_;
 	bool verbose_;
 	LeftRightSuperType lrs_;
-	PsimagLite::IoSelector::Out ioOut_;
+	OutputFileOrNot ioOut_;
 	PsimagLite::ProgressIndicator progress_;
 	typename QnType::VectorQnType quantumSector_;
 	int stepCurrent_;
