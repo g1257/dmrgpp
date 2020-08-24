@@ -73,7 +73,10 @@ sub createMakefile
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
+
+	NewMake::main($fh, $args, $drivers);
 	local *FH = $fh;
+
 print FH<<EOF;
 
 .PHONY: GitRevision.h
@@ -82,7 +85,6 @@ GitRevision.h:
 	./createGitRevision.pl GitRevision.h
 EOF
 
-	NewMake::main($fh, $args, $drivers);
 	close($fh);
 
 	print STDERR "$0: File Makefile has been written\n";

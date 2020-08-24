@@ -8,7 +8,7 @@ GeometryOptions="none";
 #Model params
 hubbardU=[0.0, ...];
 Model="HubbardOneBand";
-SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,CorrectionVectorTargeting,restart";
+SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,CorrectionVectorTargeting,restart,minimizeDisk";
 string RestartFilename="gsForDMFT";
 Version="templateForDMFT";
 InfiniteLoopKeptStates=100;
