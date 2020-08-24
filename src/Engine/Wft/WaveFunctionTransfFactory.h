@@ -169,8 +169,12 @@ public:
 	~WaveFunctionTransfFactory()
 	{
 		if (!isEnabled_) return;
-		IoType::Out ioOut(filenameOut_, IoType::ACC_RDW);
-		write(ioOut);
+
+		if (save_) {
+			IoType::Out ioOut(filenameOut_, IoType::ACC_RDW);
+			write(ioOut);
+		}
+
 		delete wftImpl_;
 	}
 
