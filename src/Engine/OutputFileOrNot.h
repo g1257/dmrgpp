@@ -70,6 +70,10 @@ public:
 
 private:
 
+	OutputFileOrNot(const OutputFileOrNot&) = delete;
+
+	OutputFileOrNot& operator=(const OutputFileOrNot&) = delete;
+
 	PsimagLite::String filename_;
 	PsimagLite::IoSelector::Out* ptr_;
 };
