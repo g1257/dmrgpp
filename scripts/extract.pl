@@ -12,9 +12,9 @@ my @labels = qw/Sigma SiteExcludedG LatticeG/;
 defined($root) or $root = getBasename($file);
 
 foreach my $label (@labels) {
-	my $buffer = extract($label, $file);
-	my $fout = $root.$label;
-	writeBuffer($fout, $buffer);
+	my ($buffer, $size) = extract($label, $file);
+	my $fout = $root.".".$label;
+	writeBuffer($fout, $buffer, $size);
 }
 
 sub extract
@@ -34,8 +34,7 @@ sub extract
 
 	my $size = <FILE>;
 	chomp($size);
-	print STDERR "$0: Found size=$size for $label in $file\n";
-
+	
 	my $buffer = "";
 	for (my $i = 0; $i < $size; ++$i) {
 		$_ = <FILE>;
@@ -52,14 +51,23 @@ sub extract
 	}
 
 	close(FILE);
-	return $buffer;
+	return ($buffer, $size);
 }
 
 sub writeBuffer
 {
-	my ($fout, $buffer) = @_;
+	my ($fout, $buffer, $size) = @_;
 	open(FOUT, ">", "$fout") or die "$0: Cannot open $fout for writing : $!\n";
 	print FOUT "$buffer";
 	close(FOUT);
+	print STDERR "$0: File $fout written with $size elements\n";
 }
+
+sub getBasename
+{
+	my ($filename) = @_;
+	$filename =~ s/\.[^\.]+$//;
+	return $filename;
+}
+
 
