@@ -51,6 +51,7 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const FunctionOfFrequency& f)
 	{
 		const SizeType n = f.data_.size();
+		os<<n<<"\n";
 		for (SizeType i = 0; i < n; ++i)
 			os<<f.matsubaras_.omega(i)<<" "<<f.data_[i]<<"\n";
 		return os;
