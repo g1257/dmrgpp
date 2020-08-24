@@ -139,7 +139,7 @@ public:
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),
-	      save_(!params.options.isSet("noSaveWft"))
+	      save_(!params.options.isSet("noSaveWft") && !params.options.isSet("minimizeDisk"))
 	{
 		if (!isEnabled_) return;
 

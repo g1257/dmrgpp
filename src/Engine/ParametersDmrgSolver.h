@@ -236,6 +236,9 @@ struct ParametersDmrgSolver {
 	      degeneracyMax(1e-12),
 	      denseSparseThreshold(0.2)
 	{
+		if (options.isSet("minimizeDisk"))
+			options += ",noSaveWft,noSaveStacks,noSaveData";
+
 		io.readline(model,"Model=");
 		options += sOptions;
 		io.readline(version,"Version=");
