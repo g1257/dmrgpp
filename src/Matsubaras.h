@@ -27,6 +27,8 @@ public:
 		return matsubaras_[i];
 	}
 
+	const RealType& fictitiousBeta() const { return fictBeta_; }
+
 	SizeType offset() const { return 0; }
 
 	SizeType total() const { return matsubaras_.size(); }

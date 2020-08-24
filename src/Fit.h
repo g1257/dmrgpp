@@ -42,6 +42,8 @@ public:
 
 	const VectorRealType& result() const { return results_; }
 
+	SizeType nBath() const { return nBath_; }
+
 private:
 
 	SizeType nBath_;                  // number of bath sites

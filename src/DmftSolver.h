@@ -23,6 +23,7 @@ public:
 	typedef ParamsDmftSolver<ComplexOrRealType, InputNgType> ParamsDmftSolverType;
 	typedef ImpuritySolver<ParamsDmftSolverType> ImpuritySolverType;
 	typedef typename ImpuritySolverType::ApplicationType ApplicationType;
+	typedef typename FitType::AndersonFunctionType AndersonFunctionType;
 
 	DmftSolver(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params),
@@ -74,7 +75,16 @@ public:
 	{
 		os<<"Sigma\n";
 		os<<sigma_;
+
 		printBathParams(os);
+
+		os<<"LatticeG\n";
+		os<<latticeG_;
+
+		FunctionOfFrequencyType siteEx(sigma_.totalMatsubaras(), sigma_.fictitiousBeta());
+		computeSiteExcludedG(siteEx);
+		os<<"SiteExcludedG\n";
+		os<<siteEx;
 	}
 
 private:
@@ -113,6 +123,19 @@ private:
 		}
 
 		return sum;
+	}
+
+	void computeSiteExcludedG(FunctionOfFrequencyType& siteEx) const
+	{
+		const SizeType totalMatsubaras = siteEx.totalMatsubaras();
+		for (SizeType i = 0; i < totalMatsubaras; ++i) {
+			const ComplexOrRealType iwn = ComplexOrRealType(0.0, siteEx.omega(i));
+			const ComplexOrRealType sumOverAlpha = AndersonFunctionType::anderson(fit_.result(),
+			                                                                      iwn,
+			                                                                      fit_.nBath());
+			ComplexOrRealType value = iwn - sumOverAlpha;
+			siteEx(i) = 1.0/value;
+		}
 	}
 
 	void printBathParams(std::ostream& os) const

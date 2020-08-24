@@ -62,16 +62,23 @@ public:
 		}
 	}
 
+	ComplexOrRealType anderson(const VectorRealType& args, ComplexOrRealType iwn) const
+	{
+		return anderson(args, iwn, nBath_);
+	}
+
 	// Returns \sum_{0<=j<nBath} V_j^2/(iwn - epsilon_j),
 	// where the V_j are stored in the first half or args,
 	// and the epsilon_j are stored in the last half or args
-	ComplexOrRealType anderson(const VectorRealType& args, ComplexOrRealType iwn) const
+	static ComplexOrRealType anderson(const VectorRealType& args,
+	                                  ComplexOrRealType iwn,
+	                                  SizeType nBath)
 	{
-		assert(args.size() == 2*nBath_);
+		assert(args.size() == 2*nBath);
 		ComplexOrRealType sum = 0.0;
-		for (SizeType i = 0; i < nBath_; ++i) {
+		for (SizeType i = 0; i < nBath; ++i) {
 			const RealType valpha = args[i];
-			const RealType epsilon = args[i + nBath_];
+			const RealType epsilon = args[i + nBath];
 			sum += valpha*valpha/(iwn - epsilon);
 		}
 

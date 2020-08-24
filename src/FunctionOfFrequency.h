@@ -23,6 +23,8 @@ public:
 	// Total number of Matsubaras used (includes negatives and positives)
 	SizeType totalMatsubaras() const { return matsubaras_.total(); }
 
+	const RealType& fictitiousBeta() const { return matsubaras_.fictitiousBeta(); }
+
 	// Matsubara number i, starts at 0, and the 0th is the most negative.
 	const RealType& omega(SizeType i) const
 	{
