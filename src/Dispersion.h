@@ -13,8 +13,11 @@ public:
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	Dispersion(SizeType N) : ek_(N)
+	Dispersion(PsimagLite::String option, SizeType N) : ek_(N)
 	{
+		if (option != "1D")
+			err("Dispersion only supports 1D, and not " + option + "\n");
+
 		for (SizeType i = 0; i < N; ++i)
 			ek_[i] = -2*cos(2*M_PI*i/N);
 	}

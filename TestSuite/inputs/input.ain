@@ -2,7 +2,8 @@
 FicticiousBeta=50;
 ChemicalPotential=0;
 Matsubaras=20;
-NumberOfKpoints=50;
+# LatticeGf: 50 is the number of K points
+LatticeGf="momentum,1D,50";
 NumberOfBathPoints=5;
 DmftNumberOfIterations=10;
 DmftTolerance=1e-2;

@@ -19,7 +19,7 @@ struct ParamsDmftSolver {
 		io.readline(ficticiousBeta, "FicticiousBeta=");
 		io.readline(mu, "ChemicalPotential=");
 		io.readline(nMatsubaras, "Matsubaras=");
-		io.readline(numberOfKpoints, "NumberOfKpoints=");
+		io.readline(latticeGf, "LatticeGf=");
 		io.readline(nBath, "NumberOfBathPoints=");
 		io.readline(dmftIter, "DmftNumberOfIterations=");
 		io.readline(dmftError, "DmftTolerance=");
@@ -58,7 +58,7 @@ struct ParamsDmftSolver {
 	RealType mu;
 	RealType dmftError;
 	SizeType nMatsubaras;
-	SizeType numberOfKpoints;
+	PsimagLite::String latticeGf;
 	SizeType nBath;
 	SizeType dmftIter;
 	SizeType precision;

@@ -1,10 +1,10 @@
 #ifndef DMFTSOLVER_H
 #define DMFTSOLVER_H
 #include "FunctionOfFrequency.h"
-#include "Dispersion.h"
 #include "Fit.h"
 #include "ParamsDmftSolver.h"
 #include "ImpuritySolver.h"
+#include "LatticeGf.h"
 
 namespace Dmft {
 
@@ -17,21 +17,18 @@ public:
 	typedef typename FunctionOfFrequencyType::RealType RealType;
 	typedef typename FunctionOfFrequencyType::MatsubarasType MatsubarasType;
 	typedef typename MatsubarasType::VectorRealType VectorRealType;
-	typedef Dmft::Dispersion<ComplexOrRealType> DispersionType;
 	typedef Fit<ComplexOrRealType> FitType;
 	typedef typename FitType::MinParamsType MinParamsType;
 	typedef ParamsDmftSolver<ComplexOrRealType, InputNgType> ParamsDmftSolverType;
 	typedef ImpuritySolver<ParamsDmftSolverType> ImpuritySolverType;
+	typedef LatticeGf<ComplexOrRealType> LatticeGfType;
 	typedef typename ImpuritySolverType::ApplicationType ApplicationType;
 	typedef typename FitType::AndersonFunctionType AndersonFunctionType;
 
 	DmftSolver(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params),
 	      sigma_(params.ficticiousBeta, params.nMatsubaras),
-	      latticeG_(params.ficticiousBeta, params.nMatsubaras),
-	      gammaG_(params.ficticiousBeta, params.nMatsubaras),
-	      dispersion_(params.numberOfKpoints),
-	      mu_(params.mu),
+	      latticeG_(sigma_, params.mu, params.latticeGf),
 	      fit_(params.nBath, params.minParams),
 	      impuritySolver_(params, app)
 	{}
@@ -48,9 +45,9 @@ public:
 		for (; iter < params_.dmftIter; ++iter) {
 
 			std::cout<<"SelfConsistLoop iter= "<<iter<<"\n";
-			computeLatticeGf();
+			latticeG_.update();
 
-			fit_.fit(gammaG_);
+			fit_.fit(latticeG_.gammaG());
 
 			impuritySolver_.solve(fit_.result());
 
@@ -79,7 +76,7 @@ public:
 		printBathParams(os);
 
 		os<<"LatticeG\n";
-		os<<latticeG_;
+		os<<latticeG_();
 
 		FunctionOfFrequencyType siteEx(sigma_.totalMatsubaras(), sigma_.fictitiousBeta());
 		computeSiteExcludedG(siteEx);
@@ -89,29 +86,12 @@ public:
 
 private:
 
-	void computeLatticeGf()
-	{
-		SizeType totalMatsubaras = sigma_.totalMatsubaras();
-		SizeType totalKvalues = dispersion_.size();
-		for (SizeType i = 0; i < totalMatsubaras; ++i) {
-			const ComplexOrRealType iwn = ComplexOrRealType(0.0, sigma_.omega(i));
-			const ComplexOrRealType value = sigma_(i);
-			ComplexOrRealType sum = 0.0;
-			for (SizeType j = 0; j < totalKvalues; ++j ) {
-				RealType ek = dispersion_(j);
-				sum += 1.0/(iwn -ek + mu_ - value);
-			}
-
-			latticeG_(i) = sum/static_cast<RealType>(totalKvalues);
-			gammaG_(i) = iwn - 1.0/latticeG_(i) - value;
-		}
-	}
-
 	RealType computeNewSelfEnergy(const VectorRealType& bathParams)
 	{
 		SizeType totalMatsubaras = sigma_.totalMatsubaras();
 		RealType sum = 0;
-		typename FitType::AndersonFunctionType andersonFunction(params_.nBath, gammaG_);
+		typename FitType::AndersonFunctionType andersonFunction(params_.nBath,
+		                                                        latticeG_.gammaG());
 		for (SizeType i = 0; i < totalMatsubaras; ++i) {
 			const ComplexOrRealType iwn = ComplexOrRealType(0.0, sigma_.omega(i));
 			const ComplexOrRealType oldValue = sigma_(i);
@@ -147,10 +127,7 @@ private:
 
 	const ParamsDmftSolverType& params_;
 	FunctionOfFrequencyType sigma_;
-	FunctionOfFrequencyType latticeG_;
-	FunctionOfFrequencyType gammaG_;
-	DispersionType dispersion_;
-	RealType mu_;
+	LatticeGfType latticeG_;
 	FitType fit_;
 	ImpuritySolverType impuritySolver_;
 };

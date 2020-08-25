@@ -37,7 +37,6 @@ public:
 		str += "integer FicticiousBeta;\n";
 		str += "real ChemicalPotential;\n";
 		str += "integer Matsubaras;\n";
-		str += "integer NumberOfKpoints;\n";
 		str += "integer NumberOfBathPoints;\n";
 		str += "integer DmftNumberOfIterations;\n";
 		str += "real DmftTolerance;\n";
@@ -48,6 +47,7 @@ public:
 		str += "integer MinParamsVerbose;\n";
 		str += "string DmrgGsTemplate;\n";
 		str += "string DmrgOmegaTemplate;\n";
+		str += "string LatticeGf;\n";
 
 		return str;
 	}
