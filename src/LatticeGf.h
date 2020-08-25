@@ -3,29 +3,91 @@
 #include "FunctionOfFrequency.h"
 #include "Dispersion.h"
 #include "PsimagLite.h"
+#include "Integrator.h"
 
 namespace Dmft {
 
 template<typename ComplexOrRealType>
 class LatticeGf {
 
-public:
-
 	class DensityOfStates {
 
 	public:
 
-		DensityOfStates(PsimagLite::String option)
+		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+
+		DensityOfStates(PsimagLite::String option, RealType wOverTwo)
+		    : wOverTwo_(wOverTwo)
 		{
-			err("DensityOfStates not yet supported\n");
+			if (option != "semicircular")
+				err("DensityOfStates " + option +
+				    " not yet supported; only semicircular supported.\n");
+
 		}
+
+		RealType lowerBound() const { return -wOverTwo_; }
+
+		RealType upperBound() const { return wOverTwo_; }
+
+		RealType operator()(RealType e) const
+		{
+			const RealType wOverTwoSquared = wOverTwo_*wOverTwo_;
+			return 2.0*sqrt(wOverTwoSquared - e*e)/(wOverTwoSquared*M_PI);
+		}
+
+	private:
+
+		RealType wOverTwo_;
 	};
+
+	class Integrand {
+
+		struct Params {
+
+			Params(DensityOfStates* dos_, ComplexOrRealType iwnMinusSigma_)
+			    : dos(dos_), iwnMinusSigma(iwnMinusSigma_)
+			{}
+
+			Params(const Params&) = delete;
+
+			Params& operator=(const Params&) = delete;
+
+			DensityOfStates* dos;
+			ComplexOrRealType iwnMinusSigma;
+		};
+
+	public:
+
+		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+
+		Integrand(DensityOfStates* dos, ComplexOrRealType iwnMinusSigma)
+		    : p_(dos, iwnMinusSigma)
+		{}
+
+		static RealType function(RealType x, void* vp)
+		{
+			Params* p = static_cast<Params*>(vp);
+			return p->dos->operator()(x)/(p->iwnMinusSigma - x);
+		}
+
+		void update(ComplexOrRealType iwnMinusSigma)
+		{
+			p_.iwnMinusSigma_ = iwnMinusSigma;
+		}
+
+		//Params& params() { return p_; }
+
+	private:
+
+		Params p_;
+	};
+
+public:
 
 	typedef FunctionOfFrequency<ComplexOrRealType> FunctionOfFrequencyType;
 	typedef Dispersion<ComplexOrRealType> DispersionType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef DensityOfStates DensityOfStatesType;
 
 	LatticeGf(const FunctionOfFrequencyType& sigma,
 	          RealType mu,
@@ -53,9 +115,8 @@ public:
 			const SizeType kpoints = PsimagLite::atoi(option2);
 			dispersion_ = new DispersionType(option1, kpoints);
 		} else if (option0 == "energy") {
-			dos_ = new DensityOfStatesType(option1);
-			if (option2 != "")
-				printCoutCerr("LatticeGf: Ignoring extra option" + option2 + "\n");
+			const RealType W = PsimagLite::atof(option2);
+			dos_ = new DensityOfStates(option1, 0.5*W);
 		} else {
 			err("LatticeGf: Unknow option " + option0 +
 			    ". Only momentum or energy allowed\n");
@@ -103,6 +164,23 @@ private:
 		}
 	}
 
+	void updateEnergy()
+	{
+		Integrand integrand(dos_, 0.0);
+		PsimagLite::Integrator<Integrand> integrator(integrand);
+		typename PsimagLite::Vector<RealType>::Type pts(2,0);
+		pts[0] = dos_->lowerBound();
+		pts[1] = dos_->upperBound();
+		SizeType totalMatsubaras = sigma_.totalMatsubaras();
+		for (SizeType i = 0; i < totalMatsubaras; ++i) {
+			const ComplexOrRealType iwn = ComplexOrRealType(0.0, sigma_.omega(i));
+			const ComplexOrRealType value = sigma_(i);
+			integrand.update(iwn - value);
+			latticeG_(i) = integrator(pts);
+			gammaG_(i) = iwn - 1.0/latticeG_(i) - value;
+		}
+	}
+
 	static void printCoutCerr(PsimagLite::String str)
 	{
 		std::cout<<str;
@@ -114,7 +192,7 @@ private:
 	LatticeGf& operator=(const LatticeGf&) = delete;
 
 	DispersionType* dispersion_;
-	DensityOfStatesType* dos_;
+	DensityOfStates* dos_;
 	const FunctionOfFrequencyType& sigma_;
 	RealType mu_;
 	FunctionOfFrequencyType latticeG_;
