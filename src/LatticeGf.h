@@ -89,9 +89,13 @@ public:
 		if (option0 == "momentum") {
 			const SizeType kpoints = PsimagLite::atoi(option2);
 			dispersion_ = new DispersionType(option1, kpoints);
+			std::cout<<"LatticeGf: Using momentum with " + option1 + " and " +
+			           option2 + " k points.\n";
 		} else if (option0 == "energy") {
 			const RealType W = PsimagLite::atof(option2);
 			dos_ = new DensityOfStatesType(option1, 0.5*W);
+			std::cout<<"LatticeGf: Using energy with " + option1 + " and W = " +
+			           option2 + "\n";
 		} else {
 			err("LatticeGf: Unknow option " + option0 +
 			    ". Only momentum or energy allowed\n");
