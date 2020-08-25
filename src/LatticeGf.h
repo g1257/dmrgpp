@@ -2,6 +2,7 @@
 #define LATTICEGF_H
 #include "FunctionOfFrequency.h"
 #include "Dispersion.h"
+#include "DensityOfStates.h"
 #include "PsimagLite.h"
 #include "Integrator.h"
 
@@ -10,42 +11,14 @@ namespace Dmft {
 template<typename ComplexOrRealType>
 class LatticeGf {
 
-	class DensityOfStates {
-
-	public:
-
-		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-
-		DensityOfStates(PsimagLite::String option, RealType wOverTwo)
-		    : wOverTwo_(wOverTwo)
-		{
-			if (option != "semicircular")
-				err("DensityOfStates " + option +
-				    " not yet supported; only semicircular supported.\n");
-
-		}
-
-		RealType lowerBound() const { return -wOverTwo_; }
-
-		RealType upperBound() const { return wOverTwo_; }
-
-		RealType operator()(RealType e) const
-		{
-			const RealType wOverTwoSquared = wOverTwo_*wOverTwo_;
-			return 2.0*sqrt(wOverTwoSquared - e*e)/(wOverTwoSquared*M_PI);
-		}
-
-	private:
-
-		RealType wOverTwo_;
-	};
+	typedef DensityOfStates<ComplexOrRealType> DensityOfStatesType;
 
 	template<int RealOrImg>
 	class Integrand {
 
 		struct Params {
 
-			Params(DensityOfStates* dos_, ComplexOrRealType iwnMinusSigma_)
+			Params(DensityOfStatesType* dos_, ComplexOrRealType iwnMinusSigma_)
 			    : dos(dos_), iwnMinusSigma(iwnMinusSigma_)
 			{}
 
@@ -53,7 +26,7 @@ class LatticeGf {
 
 			Params& operator=(const Params&) = delete;
 
-			DensityOfStates* dos;
+			DensityOfStatesType* dos;
 			ComplexOrRealType iwnMinusSigma;
 		};
 
@@ -61,7 +34,7 @@ class LatticeGf {
 
 		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-		Integrand(DensityOfStates* dos, ComplexOrRealType iwnMinusSigma)
+		Integrand(DensityOfStatesType* dos, ComplexOrRealType iwnMinusSigma)
 		    : p_(dos, iwnMinusSigma)
 		{}
 
@@ -118,7 +91,7 @@ public:
 			dispersion_ = new DispersionType(option1, kpoints);
 		} else if (option0 == "energy") {
 			const RealType W = PsimagLite::atof(option2);
-			dos_ = new DensityOfStates(option1, 0.5*W);
+			dos_ = new DensityOfStatesType(option1, 0.5*W);
 		} else {
 			err("LatticeGf: Unknow option " + option0 +
 			    ". Only momentum or energy allowed\n");
@@ -199,7 +172,7 @@ private:
 	LatticeGf& operator=(const LatticeGf&) = delete;
 
 	DispersionType* dispersion_;
-	DensityOfStates* dos_;
+	DensityOfStatesType* dos_;
 	const FunctionOfFrequencyType& sigma_;
 	RealType mu_;
 	FunctionOfFrequencyType latticeG_;
