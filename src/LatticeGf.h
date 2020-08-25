@@ -40,6 +40,7 @@ class LatticeGf {
 		RealType wOverTwo_;
 	};
 
+	template<int RealOrImg>
 	class Integrand {
 
 		struct Params {
@@ -67,15 +68,16 @@ class LatticeGf {
 		static RealType function(RealType x, void* vp)
 		{
 			Params* p = static_cast<Params*>(vp);
-			return p->dos->operator()(x)/(p->iwnMinusSigma - x);
+			ComplexOrRealType result = p->dos->operator()(x)/(p->iwnMinusSigma - x);
+			return (RealOrImg == 0) ? PsimagLite::real(result) : PsimagLite::imag(result);
 		}
 
 		void update(ComplexOrRealType iwnMinusSigma)
 		{
-			p_.iwnMinusSigma_ = iwnMinusSigma;
+			p_.iwnMinusSigma = iwnMinusSigma;
 		}
 
-		//Params& params() { return p_; }
+		Params& params() { return p_; }
 
 	private:
 
@@ -141,7 +143,7 @@ public:
 		if (dispersion_)
 			updateMomentum();
 		else
-			err("DOS:: Unimplemented\n");
+			updateEnergy();
 	}
 
 private:
@@ -166,8 +168,12 @@ private:
 
 	void updateEnergy()
 	{
-		Integrand integrand(dos_, 0.0);
-		PsimagLite::Integrator<Integrand> integrator(integrand);
+		Integrand<0> integrand0(dos_, 0.0); // real part
+		PsimagLite::Integrator<Integrand<0> > integrator0(integrand0);
+
+		Integrand<1> integrand1(dos_, 0.0); // imag part
+		PsimagLite::Integrator<Integrand<1> > integrator1(integrand1);
+
 		typename PsimagLite::Vector<RealType>::Type pts(2,0);
 		pts[0] = dos_->lowerBound();
 		pts[1] = dos_->upperBound();
@@ -175,8 +181,9 @@ private:
 		for (SizeType i = 0; i < totalMatsubaras; ++i) {
 			const ComplexOrRealType iwn = ComplexOrRealType(0.0, sigma_.omega(i));
 			const ComplexOrRealType value = sigma_(i);
-			integrand.update(iwn - value);
-			latticeG_(i) = integrator(pts);
+			integrand0.update(iwn - value);
+			integrand1.update(iwn - value);
+			latticeG_(i) = ComplexOrRealType(integrator0(pts), integrator1(pts));
 			gammaG_(i) = iwn - 1.0/latticeG_(i) - value;
 		}
 	}

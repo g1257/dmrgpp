@@ -3,7 +3,9 @@ FicticiousBeta=50;
 ChemicalPotential=0;
 Matsubaras=20;
 # LatticeGf: 50 is the number of K points
-LatticeGf="momentum,1D,50";
+#LatticeGf="momentum,1D,50";
+# Here 4 is the bandwidth W
+LatticeGf="energy,semicircular,4";
 NumberOfBathPoints=5;
 DmftNumberOfIterations=10;
 DmftTolerance=1e-2;
