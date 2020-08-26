@@ -158,8 +158,8 @@ public:
 			if (status_) {
 				String gslError(gsl_strerror(status_));
 				String msg("Minimizer::conjugateGradient(...): GSL Error: ");
-				msg += gslError + "\n";
-				throw RuntimeError(msg);
+				std::cerr<<gslError<<"\n";
+				return -iter;
 			}
 
 			status_ = gsl_multimin_test_gradient (gslDs_->gradient, tolerance);
