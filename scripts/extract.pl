@@ -24,7 +24,7 @@ sub extract
 	my $flag = 0;
 	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
 	while (<FILE>) {
-		if (/^$label/) {
+		if (/^$label$/) {
 			$flag = 1;
 			last;
 		}
@@ -34,7 +34,7 @@ sub extract
 
 	my $size = <FILE>;
 	chomp($size);
-	
+
 	my $buffer = "";
 	for (my $i = 0; $i < $size; ++$i) {
 		$_ = <FILE>;
