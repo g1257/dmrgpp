@@ -122,7 +122,8 @@ public:
 	SizeType getVectorSize(SizeType dirId) const
 	{
 		assert(dirId == DIRECTION_X);
-		return linSize_-distance_;
+		const SizeType oneOrZero = (isPeriodic_) ? 1 : 0;
+		return linSize_ - distance_ + oneOrZero;
 	}
 
 	bool connected(SizeType i1,SizeType i2) const
