@@ -28,17 +28,20 @@ sub kompileRig
 	addCodes(\@paths, $codes);
 	my $n = scalar(@paths);
 	for (my $i = 0; $i < $n; ++$i) {
-		kompileRigEach($ind, $paths[$i], $command);
+		kompileRigEach($ind, $paths[$i], $command, $codes->[$i]);
 	}
 }
 
 sub kompileRigEach
 {
-	my ($ind, $path, $command) = @_;
+	my ($ind, $path, $command, $code) = @_;
 	my $psiTag = "../../dmrgpp/TestSuite/inputs/KompileRig.psiTag";
 	my $cmd = "cd $path; perl configure.pl -f KompileRig$ind -c $psiTag";
 	executeAndDieIfNotSuccess($cmd);
 	$cmd = "cd $path; $command";
+	executeAndDieIfNotSuccess($cmd);
+	return if ($code ne "dmrgpp");
+	$cmd = "cd $path; cd ../doc; make manual.pdf";
 	executeAndDieIfNotSuccess($cmd);
 }
 

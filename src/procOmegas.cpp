@@ -29,7 +29,7 @@ int main(int argc, char** argv)
 	SizeType precision = 12;
 	bool skipFourier = false;
 
-	/* PSIDOC DmrgDriver
+	/* PSIDOC DmrgDriverProcOmegas
 There is a single input file that is passed as the
 argument to \verb!-f!, like so
 \begin{lstlisting}

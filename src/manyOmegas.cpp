@@ -21,7 +21,7 @@ int main(int argc, char** argv)
 	SizeType precision = 12;
 	bool dryrun = false;
 
-	/* PSIDOC DmrgDriver
+	/* PSIDOC DmrgDriverManyOmegas
 There is a single input file that is passed as the
 argument to \verb!-f!, like so
 \begin{lstlisting}
