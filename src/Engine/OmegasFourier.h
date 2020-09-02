@@ -5,14 +5,14 @@
 
 namespace Dmrg {
 
-template<typename ComplexOrRealType, typename InputNgType>
+template<typename ComplexOrRealType, typename Readable>
 class OmegasFourier {
 
 	class OmegasGeometry {
 
 	public:
 
-		OmegasGeometry(typename InputNgType::Readable& io) : subname_("NONE")
+		OmegasGeometry(Readable& io) : subname_("NONE")
 		{
 			try {
 				io.readline(name_, "GeometryName=");
@@ -50,7 +50,7 @@ public:
 
 	static const SizeType M_MAX = 0;
 
-	OmegasFourier(bool skipFourier, typename InputNgType::Readable& io)
+	OmegasFourier(bool skipFourier, Readable& io)
 	    : skipFourier_(skipFourier), geometry_(io)
 	{
 		if (skipFourier_) return;
