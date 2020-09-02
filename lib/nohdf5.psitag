@@ -1,0 +1,4 @@
+
+dependency HDF5 = ( )
+
+addto basics = CPPFLAGS += -DUSE_IO_SIMPLE
