@@ -60,7 +60,7 @@ $args{"flavor"} = $flavor;
 $args{"code"} = "Dmft";
 $args{"configFiles"} = \@configFiles;
 $args{"additional3"} = "GitRevision.h";
-$args{"additional4"} = $args{"additional3"};
+#$args{"additional4"} = $args{"additional3"};
 
 system("./createGitRevision.pl GitRevision.h");
 
