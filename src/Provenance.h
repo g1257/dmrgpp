@@ -1,5 +1,5 @@
-#ifndef PROVENANCE_H
-#define PROVENANCE_H
+#ifndef CINC_PROVENANCE_H
+#define CINC_PROVENANCE_H
 #include "../../PsimagLite/src/Version.h"
 #include "Version.h"
 #include "AllocatorCpu.h"
@@ -7,6 +7,8 @@
 #include "AnsiColors.h"
 #include <sstream>
 #include "GitRevision.h"
+
+namespace Dmft {
 
 class Provenance {
 
@@ -59,6 +61,7 @@ public:
 }; // Provenance
 
 std::ostream& operator<<(std::ostream& os,const Provenance&);
+}
 
-#endif // PROVENANCE_H
+#endif // CINC_PROVENANCE_H
 

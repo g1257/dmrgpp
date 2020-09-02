@@ -46,7 +46,7 @@ my @configFiles = NewMake::configFilesList($basicConfig, $config);
 
 
 my $libs = "../../dmrgpp/src/libdmrgpp.a ../../dmrgpp/src/KronUtil/libkronutil.a";
-my $dotos = "cincuenta.o $libs";
+my $dotos = "cincuenta.o Provenance.o $libs";
 
 my %cincuentaMain = (name => 'cincuenta', dotos => "$dotos");
 my %provenance = (name => 'Provenance', aux => 1);
@@ -60,6 +60,7 @@ $args{"flavor"} = $flavor;
 $args{"code"} = "Dmft";
 $args{"configFiles"} = \@configFiles;
 $args{"additional3"} = "GitRevision.h";
+$args{"additional4"} = $args{"additional3"};
 
 system("./createGitRevision.pl GitRevision.h");
 
