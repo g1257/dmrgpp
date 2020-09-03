@@ -15,9 +15,12 @@ public:
 	Matsubaras(RealType fictBeta, SizeType nMatsubara)
 	    : fictBeta_(fictBeta), nMatsubara_(nMatsubara), matsubaras_(2*nMatsubara)
 	{
-		for (SizeType i = 0; i < 2*nMatsubara_; ++i) {
-			int n = i - nMatsubara_;
-			matsubaras_[i] = (i > nMatsubara) ? 2*M_PI*n/fictBeta_ : 2*M_PI*(n - 1)/fictBeta_;
+		for (SizeType i = 0; i < nMatsubara_; ++i) {
+			matsubaras_[i  + nMatsubara_] = M_PI*(2*i + 1)/fictBeta_;
+		}
+
+		for (SizeType i = 0; i < nMatsubara_; ++i) {
+			matsubaras_[i] = -matsubaras_[2*nMatsubara_ - 1 - i];
 		}
 	}
 
