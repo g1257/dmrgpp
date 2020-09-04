@@ -7,7 +7,7 @@
 #include "CrsMatrix.h"
 #include "SparseRow.h"
 #include "BitManip.h"
-#include "ExactDiag/Basis.h"
+#include "ExactDiag/BasisExactDiag.h"
 #include "ExactDiag/ModelParams.h"
 
 namespace Dmft {
@@ -26,7 +26,7 @@ public:
 	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
 	typedef PsimagLite::SparseRow<SparseMatrixType> SparseRowType;
 	typedef long unsigned int WordType;
-	typedef Basis BasisType;
+	typedef BasisExactDiag BasisType;
 	typedef ModelParams<RealType> ModelParamsType;
 
 	ImpuritySolverExactDiag(const ParamsDmftSolverType& params, const ApplicationType& app)

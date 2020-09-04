@@ -53,6 +53,37 @@ public:
 
 	SizeType size() const { return size_; }
 
+	const WordType& operator[](SizeType i) const
+	{
+		return data_[i];
+	}
+
+	static SizeType isThereAnElectronAt(WordType ket,SizeType site)
+	{
+		return (ket & bitmask(site)) ? 1 : 0;
+	}
+
+	static SizeType getN(WordType ket,SizeType site)
+	{
+		return isThereAnElectronAt(ket,site);
+	}
+
+	static const WordType& bitmask(SizeType i)
+	{
+		assert(i < bitmask_.size());
+		return bitmask_[i];
+	}
+
+	SizeType perfectIndex(WordType state) const
+	{
+		SizeType n=0;
+		for (SizeType b=0,c=1;state>0;b++,state>>=1)
+			if (state&1) n += comb_(b,c++);
+
+		assert(n<data_.size());
+		return n;
+	}
+
 private:
 
 	static void doCombinatorial()

@@ -8,6 +8,9 @@
 
 std::streambuf *GlobalCoutBuffer = 0;
 std::ofstream GlobalCoutStream;
+SizeType Dmft::BasisOneSpin::nsite_ = 0;
+PsimagLite::Matrix<SizeType> Dmft::BasisOneSpin::comb_;
+PsimagLite::Vector<Dmft::BasisOneSpin::WordType>::Type Dmft::BasisOneSpin::bitmask_;
 
 void restoreCoutBuffer()
 {
