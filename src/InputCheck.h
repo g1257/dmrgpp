@@ -48,6 +48,7 @@ public:
 		str += "string DmrgGsTemplate;\n";
 		str += "string DmrgOmegaTemplate;\n";
 		str += "string LatticeGf;\n";
+		str += "string ImpuritySolver;\n";
 
 		return str;
 	}

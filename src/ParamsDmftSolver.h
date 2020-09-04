@@ -25,6 +25,7 @@ struct ParamsDmftSolver {
 		io.readline(dmftError, "DmftTolerance=");
 		io.readline(gsTemplate, "DmrgGsTemplate=");
 		io.readline(omegaTemplate, "DmrgOmegaTemplate=");
+		io.readline(impuritySolver, "ImpuritySolver=");
 
 		try {
 			io.readline(precision, "Precision=");
@@ -64,6 +65,7 @@ struct ParamsDmftSolver {
 	SizeType precision;
 	PsimagLite::String gsTemplate;
 	PsimagLite::String omegaTemplate;
+	PsimagLite::String impuritySolver;
 	MinParamsType minParams;
 };
 }

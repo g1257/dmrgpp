@@ -3,7 +3,9 @@
 #include "FunctionOfFrequency.h"
 #include "Fit.h"
 #include "ParamsDmftSolver.h"
-#include "ImpuritySolver.h"
+#include "ImpuritySolverBase.h"
+#include "ImpuritySolverExactDiag.h"
+#include "ImpuritySolverDmrg.h"
 #include "LatticeGf.h"
 
 namespace Dmft {
@@ -20,7 +22,9 @@ public:
 	typedef Fit<ComplexOrRealType> FitType;
 	typedef typename FitType::MinParamsType MinParamsType;
 	typedef ParamsDmftSolver<ComplexOrRealType, InputNgType> ParamsDmftSolverType;
-	typedef ImpuritySolver<ParamsDmftSolverType> ImpuritySolverType;
+	typedef ImpuritySolverBase<ParamsDmftSolverType> ImpuritySolverType;
+	typedef ImpuritySolverExactDiag<ParamsDmftSolverType> ImpuritySolverExactDiagType;
+	typedef ImpuritySolverDmrg<ParamsDmftSolverType> ImpuritySolverDmrgType;
 	typedef LatticeGf<ComplexOrRealType> LatticeGfType;
 	typedef typename ImpuritySolverType::ApplicationType ApplicationType;
 	typedef typename FitType::AndersonFunctionType AndersonFunctionType;
@@ -31,8 +35,15 @@ public:
 	      sigma_(params.ficticiousBeta, params.nMatsubaras),
 	      latticeG_(sigma_, params.mu, params.latticeGf),
 	      fit_(params.nBath, params.minParams),
-	      impuritySolver_(params, app)
-	{}
+	      impuritySolver_(nullptr)
+	{
+		if (params.impuritySolver == "dmrg")
+			impuritySolver_ = new ImpuritySolverDmrgType(params, app);
+		else if (params.impuritySolver == "exactdiag")
+			impuritySolver_ = new ImpuritySolverExactDiagType(params, app);
+		else
+			err("Unknown impurity solver " + params.impuritySolver + "\n");
+	}
 
 	// DMFT Self consistency loop; see Steve Johnston's notes
 	void selfConsistencyLoop()
@@ -50,7 +61,7 @@ public:
 
 			fit_.fit(latticeG_.gammaG());
 
-			impuritySolver_.solve(fit_.result());
+			impuritySolver_->solve(fit_.result());
 
 			error = computeNewSelfEnergy(fit_.result());
 
@@ -77,7 +88,7 @@ public:
 		printBathParams(os);
 
 		os<<"Gimp\n";
-		os<<impuritySolver_.gimp();
+		os<<impuritySolver_->gimp();
 
 		os<<"LatticeG\n";
 		os<<latticeG_();
@@ -97,7 +108,7 @@ private:
 		typename FitType::AndersonFunctionType andersonFunction(params_.nBath,
 		                                                        latticeG_.gammaG());
 
-		const VectorComplexType& gimp = impuritySolver_.gimp();
+		const VectorComplexType& gimp = impuritySolver_->gimp();
 		assert(gimp.size() == totalMatsubaras);
 		for (SizeType i = 0; i < totalMatsubaras; ++i) {
 			const ComplexOrRealType iwn = ComplexOrRealType(0.0, sigma_.omega(i));
@@ -136,7 +147,7 @@ private:
 	FunctionOfFrequencyType sigma_;
 	LatticeGfType latticeG_;
 	FitType fit_;
-	ImpuritySolverType impuritySolver_;
+	ImpuritySolverType* impuritySolver_;
 };
 }
 #endif // DMFTSOLVER_H
