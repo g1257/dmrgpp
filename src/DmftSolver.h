@@ -75,6 +75,8 @@ public:
 
 		printBathParams(os);
 
+		impuritySolver_.printGimp(os);
+
 		os<<"LatticeG\n";
 		os<<latticeG_();
 

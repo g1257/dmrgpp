@@ -94,10 +94,16 @@ public:
 		readGimp(rootOname, matsubaras, t);
 	}
 
-	ComplexOrRealType gimp(SizeType i)
+	const ComplexOrRealType& gimp(SizeType i) const
 	{
 		assert(i < gimp_.size());
 		return gimp_[i];
+	}
+
+	void printGimp(std::ostream& os) const
+	{
+		os<<"Gimp\n";
+		os<<gimp_;
 	}
 
 private:
