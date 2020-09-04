@@ -39,8 +39,8 @@ public:
 		SizeType iter = 0;
 		RealType error = 0;
 
-		const SizeType totalMatsubaras = sigma_.totalMatsubaras();
-		for (SizeType i = 0; i < totalMatsubaras; ++i) sigma_(i) = 1.0/(i+1.0);
+		//const SizeType totalMatsubaras = sigma_.totalMatsubaras();
+		//for (SizeType i = 0; i < totalMatsubaras; ++i) sigma_(i) = 1.0/(i+1.0);
 
 		for (; iter < params_.dmftIter; ++iter) {
 
@@ -104,7 +104,7 @@ private:
 			sigma_(i) = newValue;
 		}
 
-		return sum;
+		return sum/totalMatsubaras;
 	}
 
 	void computeSiteExcludedG(FunctionOfFrequencyType& siteEx) const
