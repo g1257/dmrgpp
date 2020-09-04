@@ -71,8 +71,8 @@ public:
 	      dos_(nullptr),
 	      sigma_(sigma),
 	      mu_(mu),
-	      latticeG_(sigma.fictitiousBeta(), sigma.totalMatsubaras()),
-	      gammaG_(sigma.fictitiousBeta(), sigma.totalMatsubaras())
+	      latticeG_(sigma.fictitiousBeta(), sigma.totalMatsubaras()/2),
+	      gammaG_(sigma.fictitiousBeta(), sigma.totalMatsubaras()/2)
 	{
 		VectorStringType tokens;
 		PsimagLite::split(tokens, option, ",");

@@ -78,7 +78,7 @@ public:
 		os<<"LatticeG\n";
 		os<<latticeG_();
 
-		FunctionOfFrequencyType siteEx(sigma_.totalMatsubaras(), sigma_.fictitiousBeta());
+		FunctionOfFrequencyType siteEx(sigma_.fictitiousBeta(), sigma_.totalMatsubaras()/2);
 		computeSiteExcludedG(siteEx);
 		os<<"SiteExcludedG\n";
 		os<<siteEx;
