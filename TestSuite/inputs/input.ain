@@ -9,7 +9,7 @@ LatticeGf="energy,semicircular,4";
 NumberOfBathPoints=5;
 DmftNumberOfIterations=10;
 DmftTolerance=1e-2;
-ImpuritySolver="dmrg";
+ImpuritySolver="exactdiag";
 
 MinParamsDelta=0.0001;
 MinParamsMaxIter=10000;
