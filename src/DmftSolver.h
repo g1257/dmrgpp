@@ -45,6 +45,12 @@ public:
 			err("Unknown impurity solver " + params.impuritySolver + "\n");
 	}
 
+	~DmftSolver()
+	{
+		delete impuritySolver_;
+		impuritySolver_ = nullptr;
+	}
+
 	// DMFT Self consistency loop; see Steve Johnston's notes
 	void selfConsistencyLoop()
 	{

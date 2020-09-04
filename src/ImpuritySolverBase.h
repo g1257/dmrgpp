@@ -18,6 +18,8 @@ public:
 	typedef typename PsimagLite::Vector<ComplexType>::Type VectorComplexType;
 	typedef PsimagLite::PsiApp ApplicationType;
 
+	virtual ~ImpuritySolverBase() {}
+
 	// bathParams[0-nBath-1] ==> V ==> hoppings impurity --> bath
 	// bathParams[nBath-...] ==> energies on each bath site
 	virtual void solve(const VectorRealType& bathParams) = 0;
