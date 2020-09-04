@@ -24,6 +24,7 @@ public:
 	typedef LatticeGf<ComplexOrRealType> LatticeGfType;
 	typedef typename ImpuritySolverType::ApplicationType ApplicationType;
 	typedef typename FitType::AndersonFunctionType AndersonFunctionType;
+	typedef typename ImpuritySolverType::VectorComplexType VectorComplexType;
 
 	DmftSolver(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params),
@@ -75,7 +76,8 @@ public:
 
 		printBathParams(os);
 
-		impuritySolver_.printGimp(os);
+		os<<"Gimp\n";
+		os<<impuritySolver_.gimp();
 
 		os<<"LatticeG\n";
 		os<<latticeG_();
@@ -94,11 +96,14 @@ private:
 		RealType sum = 0;
 		typename FitType::AndersonFunctionType andersonFunction(params_.nBath,
 		                                                        latticeG_.gammaG());
+
+		const VectorComplexType& gimp = impuritySolver_.gimp();
+		assert(gimp.size() == totalMatsubaras);
 		for (SizeType i = 0; i < totalMatsubaras; ++i) {
 			const ComplexOrRealType iwn = ComplexOrRealType(0.0, sigma_.omega(i));
 			const ComplexOrRealType oldValue = sigma_(i);
 			const ComplexOrRealType newValue = iwn - andersonFunction.anderson(bathParams, i) -
-			        1.0/impuritySolver_.gimp(i);
+			        1.0/gimp[i];
 			const ComplexOrRealType diff = oldValue - newValue;
 			sum += PsimagLite::real(diff*PsimagLite::conj(diff));
 			sigma_(i) = newValue;

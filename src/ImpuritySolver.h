@@ -57,6 +57,42 @@ public:
 		doType(DmrgType::TYPE_1, data4);
 	}
 
+	const VectorComplexType& gimp() const { return gimp_; }
+
+private:
+
+	static PsimagLite::String addBathParams(PsimagLite::String data,
+	                                           const VectorRealType& bathParams)
+	{
+		const SizeType nBath = int(bathParams.size() / 2);
+		const PsimagLite::String connectors = findBathParams(0, nBath, bathParams);
+		const PsimagLite::String label = "dir0:Connectors=[" + connectors + "];\n";
+		const PsimagLite::String potentialV = findBathParams(nBath, 2*nBath, bathParams);
+		const PsimagLite::String label2 = "potentialV=[0, " + potentialV +
+		        ", 0, " + potentialV + "];\n";
+
+		return data + label + label2;
+	}
+
+	static PsimagLite::String findBathParams(SizeType start,
+	                                         SizeType end,
+	                                         const VectorRealType& bathParams)
+	{
+		PsimagLite::String buffer = ttos(bathParams[start]);
+		for (SizeType i = start + 1; i < end; ++i)
+			buffer += "," + ttos(bathParams[i]);
+
+		return buffer;
+	}
+
+	static PsimagLite::String addTypeAndObs(DmrgType t, PsimagLite::String data)
+	{
+		const PsimagLite::String obsTc = (t == DmrgType::TYPE_0) ? "c" : "c'";
+		const SizeType tt = (t == DmrgType::TYPE_0) ? 0 : 1;
+		return data +  "integer DynamicDmrgType=" + ttos(tt) + ";\n" +
+		        "OperatorExpression=\"" + obsTc + "\";\n";
+	}
+
 	void doType(DmrgType t, PsimagLite::String data)
 	{
 		PsimagLite::String obs = (t == DmrgType::TYPE_0) ? "c'" : "c";
@@ -92,52 +128,6 @@ public:
 		procOmegas.run();
 
 		readGimp(rootOname, matsubaras, t);
-	}
-
-	const ComplexOrRealType& gimp(SizeType i) const
-	{
-		assert(i < gimp_.size());
-		return gimp_[i];
-	}
-
-	void printGimp(std::ostream& os) const
-	{
-		os<<"Gimp\n";
-		os<<gimp_;
-	}
-
-private:
-
-	static PsimagLite::String addBathParams(PsimagLite::String data,
-	                                           const VectorRealType& bathParams)
-	{
-		const SizeType nBath = int(bathParams.size() / 2);
-		const PsimagLite::String connectors = findBathParams(0, nBath, bathParams);
-		const PsimagLite::String label = "dir0:Connectors=[" + connectors + "];\n";
-		const PsimagLite::String potentialV = findBathParams(nBath, 2*nBath, bathParams);
-		const PsimagLite::String label2 = "potentialV=[0, " + potentialV +
-		        ", 0, " + potentialV + "];\n";
-
-		return data + label + label2;
-	}
-
-	static PsimagLite::String findBathParams(SizeType start,
-	                                         SizeType end,
-	                                         const VectorRealType& bathParams)
-	{
-		PsimagLite::String buffer = ttos(bathParams[start]);
-		for (SizeType i = start + 1; i < end; ++i)
-			buffer += "," + ttos(bathParams[i]);
-
-		return buffer;
-	}
-
-	static PsimagLite::String addTypeAndObs(DmrgType t, PsimagLite::String data)
-	{
-		const PsimagLite::String obsTc = (t == DmrgType::TYPE_0) ? "c" : "c'";
-		const SizeType tt = (t == DmrgType::TYPE_0) ? 0 : 1;
-		return data +  "integer DynamicDmrgType=" + ttos(tt) + ";\n" +
-		        "OperatorExpression=\"" + obsTc + "\";\n";
 	}
 
 	void readGimp(PsimagLite::String filename,
