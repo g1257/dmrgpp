@@ -33,7 +33,7 @@ public:
 	    : hdf5file_(0), filename_(filename), mode_(mode)
 	{
 #ifdef NDEBUG
-		H5::Exception::dontPrint();
+		dontPrintDebug();
 #endif
 
 		try {
@@ -75,6 +75,11 @@ public:
 		filename_ = "";
 		delete hdf5file_;
 		hdf5file_ = 0;
+	}
+
+	static void dontPrintDebug()
+	{
+		H5::Exception::dontPrint();
 	}
 
 	void open(String filename,

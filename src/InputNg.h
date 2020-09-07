@@ -557,6 +557,8 @@ public:
 
 		void rewind() {}
 
+		bool isAinur() const { return (ainur_ != nullptr); }
+
 		double versionAinur() const { return 2.5; }
 
 		double version() const { return (ainur_) ?  3. : 2.; }

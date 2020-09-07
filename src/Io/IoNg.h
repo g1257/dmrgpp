@@ -130,6 +130,11 @@ public:
 	*/
 	enum OpenMode {ACC_TRUNC, ACC_EXCL, ACC_RDONLY, ACC_RDW};
 
+	static void dontPrintDebug()
+	{
+		IoNgSerializer::dontPrintDebug();
+	}
+
 	class Out {
 
 	public:
