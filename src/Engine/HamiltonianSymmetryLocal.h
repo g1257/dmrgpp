@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define HAM_SYMM_LOCAL_H
 #include "Sort.h"
 #include "ProgramGlobals.h"
+#include "Io/IoSelector.h"
 
 namespace Dmrg {
 template<typename SparseMatrixType>

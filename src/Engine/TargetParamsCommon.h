@@ -190,8 +190,9 @@ public:
 		} catch (std::exception&) {}
 
 		PsimagLite::String prefix = "";
-		for (SizeType i=0;i<sites_.size();i++) {
-			OperatorType myOp(io,model_,OperatorType::MUST_BE_NONZERO, prefix);
+		for (SizeType i = 0; i < sites_.size(); ++i) {
+			PsimagLite::String prefix2 = (io.isAinur()) ? "TSPOp" + ttos(i) + ":" : "";
+			OperatorType myOp(io,model_,OperatorType::MUST_BE_NONZERO, prefix + prefix2);
 			aOperators_.push_back(myOp);
 		}
 
@@ -205,7 +206,7 @@ public:
 		PsimagLite::String tmp;
 		try {
 			io.readline(tmp, "TSPApplyTo=");
-			 hasApplyTo = true;
+			hasApplyTo = true;
 		} catch (std::exception&) {}
 
 		if (hasApplyTo) {
@@ -304,7 +305,7 @@ public:
 	virtual SizeType levelIndex() const { return sectorLevel_.second; }
 
 	void write(PsimagLite::String label,
-	               PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 

@@ -199,6 +199,9 @@ int main(int argc,char **argv)
 
 	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);
 
+	if (dmrgSolverParams.options.isSet("hd5DontPrint"))
+		PsimagLite::IoNg::dontPrintDebug();
+
 	if (threadsInCmd > 0) dmrgSolverParams.nthreads = threadsInCmd;
 	if (precision > 0) dmrgSolverParams.precision = precision;
 

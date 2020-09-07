@@ -3,6 +3,7 @@
 #include "Provenance.h"
 #include "RegisterSignals.h"
 #include "DmrgDriver.h"
+#include "Io/IoNg.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
@@ -323,6 +324,9 @@ to the main dmrg driver are the following.
 	InputNgType::Readable io(ioWriteable);
 
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
+
+	if (dmrgSolverParams.options.isSet("hd5DontPrint"))
+		PsimagLite::IoNg::dontPrintDebug();
 
 	if (dmrgSolverParams.options.isSet("addPidToOutputName"))
 		options.label += "." + ttos(getpid());
