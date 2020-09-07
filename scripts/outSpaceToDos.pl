@@ -51,7 +51,7 @@ sub plotData
 {
 	my ($h, $site) = @_;
 	my $hasParens = 0;
-	foreach my $omega (sort keys %$h) {
+	foreach my $omega (sort {$a <=> $b} keys %$h) {
 		my $ptr = $h->{$omega};
 		my $n = scalar(@$ptr);
 		die "FATAL: $site >= $n\n" if ($site >= $n);
