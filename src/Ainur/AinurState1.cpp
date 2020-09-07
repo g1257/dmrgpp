@@ -180,6 +180,10 @@ void AinurState::assign(String k, String v)
 		err(errLabel(ERR_PARSE_UNDECLARED, k));
 
 	assert(static_cast<SizeType>(x) < values_.size());
+
+	if (values_[x] != "")
+		std::cerr<<"Overwriting label "<<k<<" with "<<v<<"\n";
+
 	values_[x] = v;
 }
 
