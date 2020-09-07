@@ -8,7 +8,7 @@ GeometryOptions="none";
 #Model params
 hubbardU=[4.0, ...];
 Model="HubbardOneBand";
-SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,CorrectionVectorTargeting,restart,minimizeDisk";
+SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,CorrectionVectorTargeting,restart,minimizeDisk,hd5dontprint";
 string RestartFilename="gsForDMFT";
 Version="templateForDMFT";
 InfiniteLoopKeptStates=100;
@@ -31,6 +31,8 @@ real CorrectionVectorEta=0.1;
 string CorrectionVectorAlgorithm="Krylov";
 Orbitals=1;
 GsWeight=0.1;
+
+string Intent="GimpMatsubara";
 
 string TSPOp0:TSPOperator="expression";
 string TSPOp0:OperatorExpression="identity";

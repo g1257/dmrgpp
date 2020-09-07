@@ -8,7 +8,7 @@ GeometryOptions="none";
 #Model params
 hubbardU=[4.0, ...];
 Model="HubbardOneBand";
-SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs";
+SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,hd5dontprint";
 Version="templateForDMFT";
 OutputFile="gsForDMFT";
 InfiniteLoopKeptStates=100;
@@ -17,4 +17,5 @@ FiniteLoops=[
 [ 4, 300, 0]];
 TargetElectronsUp=3;
 TargetElectronsDown=3;
+stirng Intent="GroundState";
 #ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"
