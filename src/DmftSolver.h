@@ -62,7 +62,7 @@ public:
 
 		for (; iter < params_.dmftIter; ++iter) {
 
-			std::cout<<"SelfConsistLoop iter= "<<iter<<"\n";
+			printToStdoutAndStderr("SelfConsistLoop iter= " + ttos(iter) + "\n");
 			latticeG_.update();
 
 			fit_.fit(latticeG_.gammaG());
@@ -71,7 +71,7 @@ public:
 
 			error = computeNewSelfEnergy(fit_.result());
 
-			std::cout<<"SelfConsistLoop error="<<error<<"\n";
+			printToStdoutAndStderr("SelfConsistLoop error=" + ttos(error) + "\n");
 			if (error < params_.dmftError)
 				break;
 		}
@@ -147,6 +147,12 @@ private:
 		os<<"bathParams[0-nBath-1] ==> V ==> hoppings impurity --> bath\n";
 		os<<"bathParams[nBath-...] ==> energies on each bath site\n";
 		os<<fit_.result();
+	}
+
+	static void printToStdoutAndStderr(PsimagLite::String str)
+	{
+		std::cout<<str;
+		std::cerr<<str;
 	}
 
 	const ParamsDmftSolverType& params_;
