@@ -73,6 +73,8 @@ public:
 		InputNgType::Readable io(ioWriteable);
 
 		ParametersDmrgSolverType dmrgSolverParams(io, "", false);
+		if (dmrgSolverParams.options.isSet("hd5DontPrint"))
+			PsimagLite::IoNg::dontPrintDebug();
 
 		if (precision_ > 0) dmrgSolverParams.precision = precision_;
 
