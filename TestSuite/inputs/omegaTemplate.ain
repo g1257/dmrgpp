@@ -6,15 +6,15 @@ GeometryKind="star";
 GeometryOptions="none";
 
 #Model params
-hubbardU=[0.0, ...];
+hubbardU=[4.0, ...];
 Model="HubbardOneBand";
 SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,CorrectionVectorTargeting,restart,minimizeDisk";
 string RestartFilename="gsForDMFT";
 Version="templateForDMFT";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[-4, 100, 2],
-[ 4, 100, 2]];
+[-4, 300, 2],
+[ 4, 300, 2]];
 TargetElectronsUp=3;
 TargetElectronsDown=3;
 
@@ -22,14 +22,19 @@ integer TridiagSteps=400;
 real TridiagEps=1e-9;
 string TruncationTolerance="1e-10,100";
 real CorrectionA=0;
-TSPSites=[3];
-TSPLoops=[0];
-TSPProductOrSum=sum;
+TSPSites=[1, 0];
+TSPLoops=[0, 0];
+TSPProductOrSum="product";
 string CorrectionVectorFreqType="Matsubara";
 
-real CorrectionVectorEta=0.05;
+real CorrectionVectorEta=0.1;
 string CorrectionVectorAlgorithm="Krylov";
 Orbitals=1;
 GsWeight=0.1;
 
-TSPOperator="expression";
+string TSPOp0:TSPOperator="expression";
+string TSPOp0:OperatorExpression="identity";
+
+string TSPOp1:TSPOperator="expression";
+
+

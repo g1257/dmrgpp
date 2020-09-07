@@ -7,14 +7,14 @@ Matsubaras=20;
 # Here 4 is the bandwidth W
 LatticeGf="energy,semicircular,4";
 NumberOfBathPoints=5;
-DmftNumberOfIterations=10;
+DmftNumberOfIterations=3;
 DmftTolerance=1e-2;
-ImpuritySolver="exactdiag";
+ImpuritySolver="dmrg";
 
-MinParamsDelta=0.0001;
+MinParamsDelta=0.01;
 MinParamsMaxIter=10000;
-MinParamsDelta2=0.001;
-MinParamsTolerance=1;
+MinParamsDelta2=0.01;
+MinParamsTolerance=0.01;
 MinParamsVerbose=1;
 DmrgGsTemplate="../TestSuite/inputs/gsTemplate.ain";
 DmrgOmegaTemplate="../TestSuite/inputs/omegaTemplate.ain";

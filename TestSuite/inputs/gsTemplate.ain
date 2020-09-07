@@ -6,15 +6,15 @@ GeometryKind="star";
 GeometryOptions="none";
 
 #Model params
-hubbardU=[0.0, ...];
+hubbardU=[4.0, ...];
 Model="HubbardOneBand";
 SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs";
 Version="templateForDMFT";
 OutputFile="gsForDMFT";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[-4, 100, 0],
-[ 4, 100, 0]];
+[-4, 300, 0],
+[ 4, 300, 0]];
 TargetElectronsUp=3;
 TargetElectronsDown=3;
 #ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"
