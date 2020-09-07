@@ -409,13 +409,6 @@ struct ParametersDmrgSolver {
 				--last;
 				SizeType end = (infLoops[last] == '"') ? last : last + 1;
 				checkpoint.setFilename(infLoops.substr(begin, end - begin));
-			} else {
-				if (keptStatesInfinite > 0) {
-					PsimagLite::String tmp = "WARNING: The numeric value of ";
-					tmp += "InfiniteLoopKeptStates will be ignored\n";
-					std::cerr<<tmp;
-					std::cout<<tmp;
-				}
 			}
 
 			if (hasRestartFrom)

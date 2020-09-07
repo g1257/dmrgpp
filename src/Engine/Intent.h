@@ -12,7 +12,7 @@ class Intent {
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::ParametersType DmrgSolverParamsType;
 
-	enum class IntentEnum {NONE, UNKNOWN, ARPES0, ARPES1, NEUTRONS_SZSZ};
+	enum class IntentEnum {NONE, UNKNOWN, GS, GIMP_MATSUBARA, ARPES0, ARPES1, NEUTRONS_SZSZ};
 
 public:
 
@@ -34,6 +34,9 @@ public:
 			dynTypeShouldBe(0);
 			operatorShouldBe("sz");
 			break;
+		case IntentEnum::GS:
+		case IntentEnum::GIMP_MATSUBARA:
+			break;
 		case IntentEnum::NONE:
 			saySomethingAbout("No intent found");
 			break;
@@ -54,6 +57,8 @@ private:
 			return IntentEnum::NONE;
 		}
 
+		if (intent == "GroundState") return IntentEnum::GS;
+		if (intent == "GimpMatsubara") return IntentEnum::GIMP_MATSUBARA;
 		if (intent == "ARPES0") return IntentEnum::ARPES0;
 		if (intent == "ARPES1") return IntentEnum::ARPES1;
 		if (intent == "NeutronsSzSz") return IntentEnum::NEUTRONS_SZSZ;
