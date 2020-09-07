@@ -307,7 +307,7 @@ sub fourierChain
 	if (!$isPeriodic) {
 		my $b = ($centralSite == int($n/2));
 		if (!$b && ($centralSite != int($n/2) - 1)) {
-			die "$0: Chain of $n sites, but central site is $centralSite, makes no sense!?\n";
+			print STDERR "$0: Chain of $n sites, but central site is $centralSite\n";
 		}
 
 		# FIXME: DOES NOT WORK, CHECK FORMULA BELOW
