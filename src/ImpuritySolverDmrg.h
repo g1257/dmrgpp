@@ -56,6 +56,11 @@ public:
 		doType(DmrgType::TYPE_0, data4);
 
 		doType(DmrgType::TYPE_1, data4);
+
+		scaleGimp();
+
+		std::cerr<<"Sum of Gimp="<<density()<<"\n";
+		//writeGimpForDebugOnly();
 	}
 
 	const VectorComplexType& gimp() const { return gimp_; }
@@ -179,6 +184,40 @@ private:
 		if (ind < gimp_.size())
 			err("readGimp: Not all values computed\n");
 	}
+
+	void scaleGimp()
+	{
+		const SizeType n = gimp_.size();
+		const RealType factor = 0.25; ///M_PI;
+		for (SizeType i = 0; i < n; ++i)
+			gimp_[i] *= factor;
+	}
+
+	RealType density() const
+	{
+		const SizeType n = gimp_.size();
+		RealType sum = 0;
+		for (SizeType i = 0; i < n; ++i)
+			sum += PsimagLite::imag(gimp_[i]);
+
+		return sum;
+
+	}
+//	void writeGimpForDebugOnly() const
+//	{
+//		const SizeType n = gimp_.size();
+//		std::ofstream fout("gimp.debug");
+//		if (!fout || !fout.good())
+//			err("Could not write to gimp.debug\n");
+
+//		Matsubaras<RealType> matsubaras(params_.ficticiousBeta, params_.nMatsubaras);
+
+//		for (SizeType i = 0; i < n; ++i) {
+//			const ComplexType value = gimp_[i];
+//			const RealType omega = matsubaras.omega(i);
+//			fout<<omega<<" "<<PsimagLite::real(value)<<" "<<PsimagLite::imag(value)<<"\n";
+//		}
+//	}
 
 	const ParamsDmftSolverType& params_;
 	DmrgRunnerType runner_;
