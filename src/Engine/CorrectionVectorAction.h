@@ -26,11 +26,8 @@ public:
 		if (tstStruct_.omega().first == PsimagLite::FREQ_REAL)
 			return; // <--- EARLY EXIT
 		std::cout<<PsimagLite::AnsiColor::red;
-		std::cerr<<PsimagLite::AnsiColor::red;
 		std::cout<<"CorrectionVectorActionBase:: Running matsubara\n";
-		std::cerr<<"CorrectionVectorActionBase:: Running matsubara\n";
 		std::cout<<PsimagLite::AnsiColor::reset;
-		std::cerr<<PsimagLite::AnsiColor::reset;
 	}
 
 	void setReal() const;
