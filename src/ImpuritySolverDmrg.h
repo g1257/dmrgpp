@@ -193,12 +193,12 @@ private:
 			gimp_[i] *= factor;
 	}
 
-	RealType density() const
+	ComplexType density() const
 	{
 		const SizeType n = gimp_.size();
-		RealType sum = 0;
+		ComplexType sum = 0;
 		for (SizeType i = 0; i < n; ++i)
-			sum += PsimagLite::imag(gimp_[i]);
+			sum += gimp_[i];
 
 		return sum;
 
