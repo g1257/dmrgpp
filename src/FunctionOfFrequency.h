@@ -52,8 +52,12 @@ public:
 	{
 		const SizeType n = f.data_.size();
 		os<<n<<"\n";
-		for (SizeType i = 0; i < n; ++i)
-			os<<f.matsubaras_.omega(i)<<" "<<f.data_[i]<<"\n";
+		for (SizeType i = 0; i < n; ++i) {
+			const ComplexOrRealType value = f.data_[i];
+			os<<f.matsubaras_.omega(i)<<" "<<PsimagLite::real(value);
+			os<<" "<<PsimagLite::imag(value)<<"\n";
+		}
+
 		return os;
 	}
 

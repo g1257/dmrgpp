@@ -60,7 +60,7 @@ public:
 		scaleGimp();
 
 		std::cerr<<"Sum of Gimp="<<density()<<"\n";
-		//writeGimpForDebugOnly();
+		writeGimpForDebugOnly();
 	}
 
 	const VectorComplexType& gimp() const { return gimp_; }
@@ -93,7 +93,7 @@ private:
 
 	static PsimagLite::String addTypeAndObs(DmrgType t, PsimagLite::String data)
 	{
-		const PsimagLite::String obsTc = (t == DmrgType::TYPE_0) ? "c" : "c'";
+		const PsimagLite::String obsTc = (t == DmrgType::TYPE_0) ? "c'" : "c";
 		const SizeType tt = (t == DmrgType::TYPE_0) ? 0 : 1;
 		return data +  "integer DynamicDmrgType=" + ttos(tt) + ";\n" +
 		        "string TSPOp1:OperatorExpression=\"" + obsTc + "\";\n";
@@ -101,7 +101,7 @@ private:
 
 	void doType(DmrgType t, PsimagLite::String data)
 	{
-		PsimagLite::String obs = (t == DmrgType::TYPE_0) ? "c'" : "c";
+		PsimagLite::String obs = (t == DmrgType::TYPE_0) ? "c" : "c'";
 		PsimagLite::String insitu2 = "<gs|" + obs + "|P2>,<gs|" + obs + "|P3>";
 
 		PsimagLite::String data2 = addTypeAndObs(t, data);
@@ -168,9 +168,9 @@ private:
 				break;
 
 			if (t == DmrgType::TYPE_0)
-				gimp_[ind] = ComplexType(val1, val2);
+				gimp_[ind] = ComplexType(val2, val1);
 			else
-				gimp_[ind] += ComplexType(val1, val2);
+				gimp_[ind] += ComplexType(val2, val1);
 
 			++ind;
 
@@ -188,7 +188,7 @@ private:
 	void scaleGimp()
 	{
 		const SizeType n = gimp_.size();
-		const RealType factor = 0.5; ///M_PI;
+		const RealType factor = -1.0; ///M_PI;
 		for (SizeType i = 0; i < n; ++i)
 			gimp_[i] *= factor;
 	}
@@ -203,21 +203,22 @@ private:
 		return sum;
 
 	}
-//	void writeGimpForDebugOnly() const
-//	{
-//		const SizeType n = gimp_.size();
-//		std::ofstream fout("gimp.debug");
-//		if (!fout || !fout.good())
-//			err("Could not write to gimp.debug\n");
 
-//		Matsubaras<RealType> matsubaras(params_.ficticiousBeta, params_.nMatsubaras);
+	void writeGimpForDebugOnly() const
+	{
+		const SizeType n = gimp_.size();
+		std::ofstream fout("gimp.debug");
+		if (!fout || !fout.good())
+			err("Could not write to gimp.debug\n");
 
-//		for (SizeType i = 0; i < n; ++i) {
-//			const ComplexType value = gimp_[i];
-//			const RealType omega = matsubaras.omega(i);
-//			fout<<omega<<" "<<PsimagLite::real(value)<<" "<<PsimagLite::imag(value)<<"\n";
-//		}
-//	}
+		Matsubaras<RealType> matsubaras(params_.ficticiousBeta, params_.nMatsubaras);
+
+		for (SizeType i = 0; i < n; ++i) {
+			const ComplexType value = gimp_[i];
+			const RealType omega = matsubaras.omega(i);
+			fout<<omega<<" "<<PsimagLite::real(value)<<" "<<PsimagLite::imag(value)<<"\n";
+		}
+	}
 
 	const ParamsDmftSolverType& params_;
 	DmrgRunnerType runner_;

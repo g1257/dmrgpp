@@ -7,8 +7,8 @@ Matsubaras=20;
 # Here 4 is the bandwidth W
 LatticeGf="energy,semicircular,4";
 NumberOfBathPoints=5;
-DmftNumberOfIterations=4;
-DmftTolerance=1e-2;
+DmftNumberOfIterations=10;
+DmftTolerance=1;
 ImpuritySolver="dmrg";
 
 MinParamsDelta=0.01;

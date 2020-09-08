@@ -1,6 +1,7 @@
 #ifndef MATSUBARAS_H
 #define MATSUBARAS_H
 #include "Vector.h"
+#include <cassert>
 
 namespace Dmft {
 

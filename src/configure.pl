@@ -50,8 +50,9 @@ my $dotos = "cincuenta.o Provenance.o $libs";
 
 my %cincuentaMain = (name => 'cincuenta', dotos => "$dotos");
 my %provenance = (name => 'Provenance', aux => 1);
+my %freeGimp = (name =>  'freeGimp', dotos => "freeGimp.o Provenance.o $libs");
 
-my @drivers = (\%cincuentaMain, \%provenance);
+my @drivers = (\%cincuentaMain, \%provenance, \%freeGimp);
 
 my %args;
 $args{"CPPFLAGS"} = $lto;

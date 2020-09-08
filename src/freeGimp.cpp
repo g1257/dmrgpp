@@ -16,9 +16,26 @@ void computeGamma(Dmft::FunctionOfFrequency<ComplexType>& gamma,
 		ComplexType sum = 0;
 		for (SizeType alpha = 0; alpha < nBath; ++alpha)
 			sum += PsimagLite::conj(bath[alpha])*bath[alpha]/
-				ComplexType(bath[alpha + nBath], wn);
+				ComplexType(-bath[alpha + nBath], wn);
 		gamma(i) = sum;
 	}
+}
+
+template<typename ComplexType>
+void computeFreeGimp(Dmft::FunctionOfFrequency<ComplexType>& freeGimp,
+					 const Dmft::FunctionOfFrequency<ComplexType>& gamma)
+{
+	typedef typename PsimagLite::Real<ComplexType>::Type RealType;
+	const SizeType n = gamma.totalMatsubaras();
+	RealType sum = 0;
+	for (SizeType i = 0; i < n; ++i) {
+		const RealType wn = gamma.omega(i);
+		const ComplexType value(0, wn);
+		freeGimp(i) = 1.0/(value - gamma(i));
+		sum += PsimagLite::imag(freeGimp(i));
+	}
+
+	std::cerr<<"Sum of Gimp: "<<sum<<"\n";
 }
 
 int main(int argc, char* argv[])
