@@ -6,7 +6,7 @@ GeometryKind="star";
 GeometryOptions="none";
 
 #Model params
-hubbardU=[4.0, ...];
+hubbardU=[4.0, 0.0, 0.0, 0.0, 0.0, 0.0];
 Model="HubbardOneBand";
 SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,hd5dontprint";
 Version="templateForDMFT";
