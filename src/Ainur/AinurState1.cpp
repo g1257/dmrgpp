@@ -181,8 +181,8 @@ void AinurState::assign(String k, String v)
 
 	assert(static_cast<SizeType>(x) < values_.size());
 
-	if (values_[x] != "")
-		std::cerr<<"Overwriting label "<<k<<" with "<<v<<"\n";
+	//if (values_[x] != "")
+	//	std::cerr<<"Overwriting label "<<k<<" with "<<v<<"\n";
 
 	values_[x] = v;
 }
