@@ -2,6 +2,7 @@
 #define ENTANGLER_H
 #include "Vector.h"
 #include "Matrix.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -30,10 +31,11 @@ public:
 	                           const BarType& bar)
 	{
 		const SizeType n = basis.size();
-		VectorBoolType seen(n);
-		const SizeType nroot = sqrt(n);
+		VectorBoolType seen(n, false);
+		SizeType nroot = sqrt(n);
 		if (nroot*nroot != n)
 			err("Basis is not a perfect square\n");
+		nroot = ProgramGlobals::logBase2(nroot);
 		WordType mask = (1 << nroot) - 1;
 
 		for (SizeType i = 0; i < n; ++i) {
@@ -46,14 +48,16 @@ public:
 			WordType ancKet = ket & mask;
 
 			WordType physBar = bar(physKet);
-			if (physKet != ancKet) continue; // this is a "bad" state
+			if (physBar != ancKet) continue; // this is a "bad" state
 
 			if (physBar == physKet) { // in class C
 				f(i, i) = 1;
 				continue;
 			}
 
-			if (physBar < physKet) continue; // in class B
+			// this is not needed because it's taken care of
+			// by the seen variable
+			//if (physBar < physKet) continue; // in class B
 
 			// in class A
 			WordType barFull = (physKet << nroot);
