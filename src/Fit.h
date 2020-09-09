@@ -29,7 +29,7 @@ public:
 	void fit(const FunctionOfFrequencyType& gammaG)
 	{
 		for (SizeType i = 0; i < results_.size(); ++i)
-			results_[i] = 5.0*rng_();
+			results_[i] = 0.0;
 
 		AndersonFunctionType f(nBath_, gammaG);
 		PsimagLite::Minimizer<RealType, AndersonFunctionType> min(f,

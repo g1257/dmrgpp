@@ -119,7 +119,8 @@ private:
 		for (SizeType i = 0; i < totalMatsubaras; ++i) {
 			const ComplexOrRealType iwn = ComplexOrRealType(0.0, sigma_.omega(i));
 			const ComplexOrRealType oldValue = sigma_(i);
-			const ComplexOrRealType newValue = iwn - andersonFunction.anderson(bathParams, i) -
+			const ComplexOrRealType newValue = iwn -
+			        andersonFunction.anderson(bathParams, iwn) -
 			        1.0/gimp[i];
 			const ComplexOrRealType diff = oldValue - newValue;
 			sum += PsimagLite::real(diff*PsimagLite::conj(diff));
