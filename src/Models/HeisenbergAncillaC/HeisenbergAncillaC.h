@@ -229,8 +229,8 @@ protected:
 		this->makeTrackable("sz");
 		this->makeTrackable("d");
 
-		const SizeType twiceTheSpin = modelParameters_.twiceTheSpin;
-		auto bar = [twiceTheSpin](WordType w){return twiceTheSpin - w;};
+		const WordType twiceTheSpin = modelParameters_.twiceTheSpin;
+		auto bar = [twiceTheSpin] (WordType w)-> WordType {return twiceTheSpin - w;};
 
 		for (SizeType i=0;i<block.size();i++) {
 			// Set the operators S^+_i for orbital a in the natural basis
@@ -298,7 +298,7 @@ protected:
 			}
 
 			// Set the operators \Delta_i in the natural basis
-			PsimagLite::Matrix<SparseElementType> dmatrix;
+			PsimagLite::Matrix<SparseElementType> dmatrix(natBasis.size(), natBasis.size());
 			Entangler<HilbertBasisType, SparseElementType>::setGammaMatrix(dmatrix, natBasis, bar);
 			fullMatrixToCrsMatrix(tmpMatrix, dmatrix);
 

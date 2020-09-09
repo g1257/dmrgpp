@@ -21,17 +21,32 @@ public:
 	{
 		const SizeType n = basis.size();
 		VectorBoolType seen(n);
+		const SizeType nroot = sqrt(n);
+		if (nroot*nroot != n)
+			err("Basis is not a perfect square\n");
+		WordType mask = (1 << nroot) - 1;
+
 		for (SizeType i = 0; i < n; ++i) {
 			if (seen[i]) continue;
 			seen[i] = true;
 			WordType ket = basis[i];
-			WordType bket = bar(ket);
-			if (ket == bket) { // in class C
+
+			WordType physKet = ket & mask;
+			ket >>= nroot;
+			WordType ancKet = ket & mask;
+
+			WordType physBar = bar(physKet);
+			if (physKet != ancKet) continue; // this is a "bad" state
+
+			if (physBar == physKet) { // in class C
 				f(i, i) = 1;
 				continue;
 			}
 
-			auto it = std::find(basis.begin(), basis.end(), bket);
+			WordType barFull = (physKet << nroot);
+			barFull |= physBar;
+
+			auto it = std::find(basis.begin(), basis.end(), barFull);
 			assert(it != std::end(basis));
 			SizeType j = it - basis.begin();
 			assert(j < seen.size());
