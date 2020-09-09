@@ -14,6 +14,16 @@ public:
 	typedef typename HilbertBasisType::value_type WordType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
+	/* F^+ | alpha, \bar{alpha} > = |\bar{alpha}, \alpha> if alpha in A or C.
+	                              = 0 otherwise
+
+	We partition the states of one site in three disjoint classes A, B, C, as follows.
+	We put all states of one-site in a bucket. We take a state alpha out of the bucket,
+	and also \bar{alpha} out of the bucket. If \bar{alpha} = \alpha we put alpha in C.
+	If \bar{alpha} \neq  \alpha, we put alpha in A and \bar{alpha} in B.
+	We proceed like this until there are no more states left in the bucket.
+	*/
+
 	template<typename BarType>
 	static void setGammaMatrix(MatrixType& f,
 	                           const HilbertBasisType& basis,
@@ -43,6 +53,9 @@ public:
 				continue;
 			}
 
+			if (physBar < physKet) continue; // in class B
+
+			// in class A
 			WordType barFull = (physKet << nroot);
 			barFull |= physBar;
 
