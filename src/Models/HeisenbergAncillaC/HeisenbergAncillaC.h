@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "SpinSquared.h"
 #include "ProgramGlobals.h"
+#include "Entangler.h"
 
 namespace Dmrg {
 
@@ -228,6 +229,9 @@ protected:
 		this->makeTrackable("sz");
 		this->makeTrackable("d");
 
+		const SizeType twiceTheSpin = modelParameters_.twiceTheSpin;
+		auto bar = [twiceTheSpin](WordType w){return twiceTheSpin - w;};
+
 		for (SizeType i=0;i<block.size();i++) {
 			// Set the operators S^+_i for orbital a in the natural basis
 			tmpMatrix=findSplusMatrices(i,0,natBasis);
@@ -294,7 +298,11 @@ protected:
 			}
 
 			// Set the operators \Delta_i in the natural basis
-			tmpMatrix = findDeltaMatrices(i,natBasis);
+			//tmpMatrix = findDeltaMatrices(i,natBasis);
+			PsimagLite::Matrix<SparseElementType> dmatrix;
+			Entangler<HilbertBasisType, SparseElementType>::setGammaMatrix(dmatrix, natBasis, bar);
+			fullMatrixToCrsMatrix(tmpMatrix, dmatrix);
+
 			typename OperatorType::Su2RelatedType su2related3;
 			OperatorType myOp3(tmpMatrix,
 			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
