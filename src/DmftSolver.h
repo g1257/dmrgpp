@@ -30,11 +30,13 @@ public:
 	typedef typename FitType::AndersonFunctionType AndersonFunctionType;
 	typedef typename ImpuritySolverType::VectorComplexType VectorComplexType;
 
-	DmftSolver(const ParamsDmftSolverType& params, const ApplicationType& app)
+	DmftSolver(const ParamsDmftSolverType& params,
+	           const typename FitType::InitResults& initResults,
+	           const ApplicationType& app)
 	    : params_(params),
 	      sigma_(params.ficticiousBeta, params.nMatsubaras),
 	      latticeG_(sigma_, params.mu, params.latticeGf),
-	      fit_(params.nBath, params.minParams),
+	      fit_(params.nBath, params.minParams, initResults),
 	      impuritySolver_(nullptr)
 	{
 		if (params.impuritySolver == "dmrg")

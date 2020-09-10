@@ -8,7 +8,7 @@ Matsubaras=20;
 LatticeGf="energy,semicircular,4";
 NumberOfBathPoints=5;
 DmftNumberOfIterations=1;
-DmftTolerance=1;
+DmftTolerance=0.01;
 ImpuritySolver="dmrg";
 
 MinParamsDelta=0.01;
