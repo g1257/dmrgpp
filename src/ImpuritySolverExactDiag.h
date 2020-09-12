@@ -9,6 +9,8 @@
 #include "BitManip.h"
 #include "ExactDiag/BasisExactDiag.h"
 #include "ExactDiag/ModelParams.h"
+#include "InputNg.h"
+#include "../../dmrgpp/src/Engine/InputCheck.h"
 
 namespace Dmft {
 
@@ -28,10 +30,17 @@ public:
 	typedef long unsigned int WordType;
 	typedef BasisExactDiag BasisType;
 	typedef ModelParams<RealType> ModelParamsType;
+	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 
-	ImpuritySolverExactDiag(const ParamsDmftSolverType& params, const ApplicationType& app)
+	ImpuritySolverExactDiag(const ParamsDmftSolverType& params,
+	                        const ApplicationType& app)
 	    : params_(params)
-	{}
+	{
+		Dmrg::InputCheck inputCheck;
+		InputNgType::Writeable ioW(params.gsTemplate, inputCheck);
+		InputNgType::Readable io(ioW);
+		io.read(hubbardU_, "hubbardU");
+	}
 
 	// bathParams[0-nBath-1] ==> V ==> hoppings impurity --> bath
 	// bathParams[nBath-...] ==> energies on each bath site
@@ -106,7 +115,7 @@ private:
 			for (SizeType i = 0; i < nsite; ++i) {
 
 				// Hubbard term U0
-				s += mp.hubbardU[i] *
+				s += hubbardU_[i] *
 				        basis.isThereAnElectronAt(ket1,ket2,i,0,orb) * // SPIN_UP
 				        basis.isThereAnElectronAt(ket1,ket2,i,1,orb); // SPIN_DOWN
 
@@ -188,6 +197,7 @@ private:
 	}
 
 	const ParamsDmftSolverType& params_;
+	VectorRealType hubbardU_;
 	VectorComplexType gimp_;
 };
 }
