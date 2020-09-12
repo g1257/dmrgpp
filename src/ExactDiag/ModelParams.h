@@ -15,10 +15,10 @@ struct ModelParams {
 		SizeType bath = bathParams.size()/2;
 		assert((bathParams.size() & 1) == 0);
 		sites = bath + 1;
-		potentialV.resize(bath);
+		potentialV.resize(sites);
 		hoppings.resize(sites, sites);
 		for (SizeType i = 0; i < bath; ++i) {
-			potentialV[i] = bathParams[i];
+			potentialV[i + 1] = bathParams[i];
 			hoppings(i + 1, 0) = hoppings(0, i + 1) = bathParams[i + bath];
 		}
 	}

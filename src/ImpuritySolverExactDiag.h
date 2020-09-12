@@ -13,6 +13,8 @@
 #include "../../dmrgpp/src/Engine/InputCheck.h"
 #include "LanczosSolver.h"
 #include "MersenneTwister.h"
+#include "BLAS.h"
+#include "Matsubaras.h"
 
 namespace Dmft {
 
@@ -38,10 +40,15 @@ public:
 	LanczosSolverType;
 	typedef BasisType::LabeledOperatorType LabeledOperatorType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef Matsubaras<RealType> MatsubarasType;
 
 	ImpuritySolverExactDiag(const ParamsDmftSolverType& params,
 	                        const ApplicationType& app)
-	    : params_(params), solverParams_(nullptr), rng_(1234)
+	    : params_(params),
+	      solverParams_(nullptr),
+	      rng_(1234),
+	      matsubaras_(params.ficticiousBeta, params.nMatsubaras),
+	      gimp_(matsubaras_.total())
 	{
 		Dmrg::InputCheck inputCheck;
 		InputNgType::Writeable ioW(params.gsTemplate, inputCheck);
@@ -50,6 +57,12 @@ public:
 		io.readline(nup_, "TargetElectronsUp=");
 		io.readline(ndown_, "TargetElectronsDown=");
 		solverParams_ = new SolverParametersType(io, "Lanczos");
+	}
+
+	~ImpuritySolverExactDiag()
+	{
+		delete solverParams_;
+		solverParams_ = nullptr;
 	}
 
 	// bathParams[0-nBath-1] ==> V ==> hoppings impurity --> bath
@@ -80,7 +93,7 @@ public:
 		lanczos.computeOneState(energy, gs, initialVector, 1);
 
 		// compute gimp
-		computeGreenFunction(energy, gs, matrix, basis, mp);
+		computeGreenFunction(energy, gs, basis, mp);
 	}
 
 	const VectorComplexType& gimp() const { return gimp_; }
@@ -133,6 +146,7 @@ private:
 			for (SizeType i = 0; i < nsite; ++i) {
 
 				// Hubbard term U0
+				assert(hubbardU_.size() > i);
 				s += hubbardU_[i] *
 				        basis.isThereAnElectronAt(ket1,ket2,i,0,orb) * // SPIN_UP
 				        basis.isThereAnElectronAt(ket1,ket2,i,1,orb); // SPIN_DOWN
@@ -141,6 +155,7 @@ private:
 				RealType ne = (basis.getN(ket1,ket2,i,0,orb) +// SPIN_UP
 				               basis.getN(ket1,ket2,i,1,orb));// SPIN_DOWN
 
+				assert(mp.potentialV.size() > i);
 				RealType tmp = mp.potentialV[i];
 				if (tmp != 0) s += tmp * ne;
 			}
@@ -217,20 +232,18 @@ private:
 	// <gs|c'(iwn-Hbar)^{-1}c|gs> + <gs|c(iwn+Hbar)^{-1}c'|gs>
 	void computeGreenFunction(RealType energy,
 	                          const VectorComplexType& gs,
-	                          const SparseMatrixType& matrix,
 	                          const BasisType& basis,
 	                          const ModelParamsType& mp)
 	{
-		doType(0, energy, gs, matrix, basis, mp);
+		doType(0, energy, gs, basis, mp);
 
-		doType(1, energy, gs, matrix, basis, mp);
+		doType(1, energy, gs, basis, mp);
 	}
 
-	// <gs|c' or c (iwn+-Hbar)^{-1}c or c'|gs>
+	// <gs|c' (iwn-Hbar)^{-1}c|gs> for what == 0; and the counterpart for what == 1
 	void doType(SizeType what,
 	            RealType energy,
 	            const VectorComplexType& gs,
-	            const SparseMatrixType& matrix,
 	            const BasisType& basis,
 	            const ModelParamsType& mp)
 	{
@@ -243,7 +256,58 @@ private:
 
 		BasisType basisDest(mp.sites, nup, ndown);
 		setOperatorC(cAtCenter, basis, basisDest, center, spin);
-		err("ExactGreenFunction not implemented yet");
+		char trans = (what == 0) ? 'C' : 'N';
+
+		VectorComplexType opGs(basisDest.size());
+		matrixVector(opGs, cAtCenter, gs, trans);
+
+		SparseMatrixType matrix;
+		setupHamiltonian(matrix, basisDest, mp);
+		MatrixType hmatrix = matrix.toDense();
+		MatrixType oneOverMatrix = hmatrix;
+		VectorComplexType correctionVector(basisDest.size());
+		for (SizeType i = 0; i < matsubaras_.total(); ++i) {
+			oneOverMatrix = hmatrix;
+			const RealType wn = matsubaras_.omega(i);
+			RealType sign = createOneOverMatrix(oneOverMatrix, matrix, wn, energy, what);
+			matrixVector(correctionVector, oneOverMatrix, opGs, 'N');
+
+			ComplexOrRealType sum = 0;
+			for (SizeType site = 0; site < mp.sites; ++site) {
+				MatrixType cAtSite;
+				setOperatorC(cAtSite, basis, basisDest, site, spin);
+
+				VectorComplexType opGs2(basisDest.size());
+				matrixVector(opGs2, cAtSite, gs, trans);
+				ComplexOrRealType value = opGs2 * correctionVector;
+				sum += value*sign;
+			}
+
+			if (what == 0)
+				gimp_[i] = sum;
+			else
+				gimp_[i] += sum;
+		}
+	}
+
+	//  -(-iwn + H - E0)  for what == 0
+	//   +iwn + H - E0  for what == 1
+	RealType createOneOverMatrix(MatrixType& oneOverMatrix,
+	                             const SparseMatrixType& matrix,
+	                             RealType energy,
+	                             RealType wn,
+	                             SizeType what) const
+	{
+		oneOverMatrix = matrix.toDense();
+		RealType sign = (what == 0) ? -1 : 1;
+		const SizeType n = oneOverMatrix.rows();
+		for (SizeType i = 0; i < n; ++i) {
+			oneOverMatrix(i, i) += ComplexType(-energy, sign*wn);
+		}
+
+		inverse(oneOverMatrix);
+		// don't multiply oneOverMatrix by minus for what == 0, but keep track of sign instead
+		return sign;
 	}
 
 	SizeType getElectrons(SizeType what,
@@ -252,7 +316,7 @@ private:
 	                      SizeType upOrDown) const
 	{
 		if (spin != upOrDown) return electrons;
-		return (what == 0) ? electrons + 1 : electrons - 1;
+		return (what == 0) ? electrons - 1 : electrons + 1;
 	}
 
 	void setOperatorC(MatrixType& matrix,
@@ -281,9 +345,32 @@ private:
 		}
 	}
 
+	void matrixVector(VectorComplexType& dest,
+	                  const MatrixType& cAtCenter,
+	                  const VectorComplexType& src,
+	                  char trans) const
+	{
+		const ComplexType* gsPtr = &(src[0]);
+		ComplexType* opGsPtr = &(dest[0]);
+
+		//gemv (TRANS, M, N, ALPHA, A, LDA, X, INCX, BETA, Y, INCY)
+		psimag::BLAS::GEMV(trans,
+		                   cAtCenter.rows(),
+		                   cAtCenter.cols(),
+		                   1,
+		                   &(cAtCenter(0,0)),
+		                   cAtCenter.rows(),
+		                   gsPtr,
+		                   1,
+		                   0,
+		                   opGsPtr,
+		                   1);
+	}
+
 	const ParamsDmftSolverType& params_;
 	SolverParametersType* solverParams_;
 	PsimagLite::MersenneTwister rng_;
+	MatsubarasType matsubaras_;
 	VectorRealType hubbardU_;
 	SizeType nup_;
 	SizeType ndown_;
