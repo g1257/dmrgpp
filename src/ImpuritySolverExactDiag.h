@@ -11,7 +11,6 @@
 #include "ExactDiag/ModelParams.h"
 #include "InputNg.h"
 #include "../../dmrgpp/src/Engine/InputCheck.h"
-#include "ExactDiag/ExactGreenFunction.h"
 #include "LanczosSolver.h"
 #include "MersenneTwister.h"
 
@@ -37,6 +36,7 @@ public:
 	typedef PsimagLite::ParametersForSolver<RealType> SolverParametersType;
 	typedef PsimagLite::LanczosSolver<SolverParametersType, SparseMatrixType, VectorComplexType>
 	LanczosSolverType;
+	typedef BasisType::LabeledOperatorType LabeledOperatorType;
 
 	ImpuritySolverExactDiag(const ParamsDmftSolverType& params,
 	                        const ApplicationType& app)
@@ -79,10 +79,10 @@ public:
 		lanczos.computeOneState(energy, gs, initialVector, 1);
 
 		// compute gimp
-		exactGreenFunction_(energy, gs, matrix);
+		computeGreenFunction(energy, gs, matrix, basis);
 	}
 
-	const VectorComplexType& gimp() const { return exactGreenFunction_(); }
+	const VectorComplexType& gimp() const { return gimp_; }
 
 private:
 
@@ -213,13 +213,48 @@ private:
 		return (PsimagLite::BitManip::count(a & mask) & 1) ? -1 : 1;
 	}
 
+	// <gs|c'(iwn-Hbar)^{-1}c|gs> + <gs|c(iwn+Hbar)^{-1}c'|gs>
+	void computeGreenFunction(RealType energy,
+	                          const VectorComplexType& gs,
+	                          const SparseMatrixType& matrix,
+	                          const BasisType& basis)
+	{
+		err("ExactGreenFunction not implemented yet");
+	}
+
+	void setOperatorC(PsimagLite::Matrix<ComplexOrRealType>& matrix,
+	                  const BasisType& basisSrc,
+	                  const BasisType& basisDest,
+	                  SizeType site,
+	                  SizeType spin) const
+	{
+		const SizeType hilbertSrc = basisSrc.size();
+		const SizeType hilbertDest = basisDest.size();
+		LabeledOperatorType lOperator(LabeledOperatorType::Label::OPERATOR_C);
+		SizeType orb = 0;
+
+		matrix.resize(hilbertSrc, hilbertDest);
+
+		for (SizeType ispace = 0; ispace < hilbertSrc; ++ispace) {
+			WordType ket1 = basisSrc(ispace, 0);
+			WordType ket2 = basisSrc(ispace, 0);
+			WordType bra = ket1;
+			// assumes OPERATOR_C
+			bool b = basisSrc.getBra(bra, ket1, ket2, lOperator, site, spin);
+			if (!b) continue;
+			SizeType index = basisDest.perfectIndex(bra, ket2);
+
+			matrix(ispace, index) = basisDest.doSignGf(bra, ket2, site, spin, orb);
+		}
+	}
+
 	const ParamsDmftSolverType& params_;
 	SolverParametersType* solverParams_;
 	PsimagLite::MersenneTwister rng_;
 	VectorRealType hubbardU_;
 	SizeType nup_;
 	SizeType ndown_;
-	ExactGreenFunction<ComplexOrRealType> exactGreenFunction_;
+	VectorComplexType gimp_;
 };
 }
 #endif // IMPURITYSOLVER_EXACTD_H

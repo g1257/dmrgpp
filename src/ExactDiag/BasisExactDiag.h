@@ -10,6 +10,7 @@ class BasisExactDiag {
 public:
 
 	typedef BasisOneSpin::WordType WordType;
+	typedef BasisOneSpin::LabeledOperatorType LabeledOperatorType;
 
 	BasisExactDiag(SizeType sites, SizeType nup,SizeType ndown)
 	    : nup_(nup),
@@ -58,6 +59,52 @@ public:
 		return basis1_.perfectIndex(ket1) +
 		        basis2_.perfectIndex(ket2)*basis1_.size();
 	}
+
+	int doSignGf(WordType a,
+	             WordType b,
+	             SizeType ind,
+	             SizeType sector,
+	             SizeType) const
+	{
+		if (sector == 0) { // spin up
+			if (ind==0) return 1;
+
+			// ind>0 from now on
+			SizeType i = 0;
+			SizeType j = ind;
+			WordType mask = a;
+			mask &= ((1 << (i+1)) - 1) ^ ((1 << j) - 1);
+			int s=(PsimagLite::BitManip::count(mask) & 1) ? -1 : 1;
+			// Is there an up at i?
+			if (bitmask(i) & a) s = -s;
+			return s;
+		}
+
+		int s=(PsimagLite::BitManip::count(a) & 1) ? -1 : 1; // Parity of up
+		if (ind==0) return s;
+
+		// ind>0 from now on
+		SizeType i = 0;
+		SizeType j = ind;
+		WordType mask = b;
+		mask &= ((1 << (i+1)) - 1) ^ ((1 << j) - 1);
+		s=(PsimagLite::BitManip::count(mask) & 1) ? -1 : 1;
+		// Is there a down at i?
+		if (bitmask(i) & b) s = -s;
+		return s;
+	}
+
+	bool getBra(WordType& bra,
+	            WordType ket1,
+	            WordType ket2,
+	            const LabeledOperatorType& lOperator,
+	            SizeType site,
+	            SizeType spin) const
+	{
+		return (spin == 0) ? basis1_.getBra(bra, ket1, lOperator, site) :
+		                         basis2_.getBra(bra, ket2, lOperator, site);
+	}
+
 
 private:
 

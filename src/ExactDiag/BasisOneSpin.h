@@ -2,6 +2,7 @@
 #define CINC_BASIS_ONE_SPIN_H
 #include "Vector.h"
 #include "Matrix.h"
+#include "LabeledOperator.h"
 
 namespace Dmft {
 
@@ -10,6 +11,7 @@ class BasisOneSpin {
 public:
 
 	typedef long unsigned int WordType;
+	typedef LabeledOperator LabeledOperatorType;
 
 	BasisOneSpin(SizeType nsite, SizeType npart)
 	    : npart_(npart)
@@ -82,6 +84,36 @@ public:
 
 		assert(n<data_.size());
 		return n;
+	}
+
+	bool getBra(WordType& bra,
+	            const WordType& ket,
+	            const LabeledOperatorType& lOperator,
+	            SizeType site) const
+	{
+		WordType si=(ket & bitmask(site));
+		if (lOperator.id() == LabeledOperatorType::Label::OPERATOR_C) {
+			if (si>0) {
+				bra = (ket ^ bitmask(site));
+				return true;
+			} else {
+				return false; // cannot destroy, there's nothing
+			}
+		} else if (lOperator.id() == LabeledOperatorType::Label::OPERATOR_CDAGGER) {
+			if (si==0) {
+				bra = (ket ^ bitmask(site));
+				return true;
+			} else {
+				return false; // cannot construct, there's already one
+			}
+		} else if (lOperator.id() == LabeledOperatorType::Label::OPERATOR_N) {
+			if (si==0) return false;
+			bra = ket;
+			return true;
+		}
+
+		PsimagLite::String str = lOperator.unknownOperator();
+		throw std::runtime_error(str.c_str());
 	}
 
 private:

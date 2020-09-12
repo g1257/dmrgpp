@@ -23,7 +23,9 @@ public:
 	// <gs|c'(iwn-Hbar)^{-1}c|gs> + <gs|c(iwn+Hbar)^{-1}c'|gs>
 	void operator()(RealType energy, const VectorComplexType& gs, const SparseMatrixType& sparse)
 	{
+
 		PsimagLite::Matrix<ComplexOrRealType> mdense = sparse.toDense();
+
 		err("ExactGreenFunction not implemented yet");
 	}
 
