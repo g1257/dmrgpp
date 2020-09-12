@@ -11,6 +11,9 @@
 #include "ExactDiag/ModelParams.h"
 #include "InputNg.h"
 #include "../../dmrgpp/src/Engine/InputCheck.h"
+#include "ExactDiag/ExactGreenFunction.h"
+#include "LanczosSolver.h"
+#include "MersenneTwister.h"
 
 namespace Dmft {
 
@@ -31,10 +34,13 @@ public:
 	typedef BasisExactDiag BasisType;
 	typedef ModelParams<RealType> ModelParamsType;
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
+	typedef PsimagLite::ParametersForSolver<RealType> SolverParametersType;
+	typedef PsimagLite::LanczosSolver<SolverParametersType, SparseMatrixType, VectorComplexType>
+	LanczosSolverType;
 
 	ImpuritySolverExactDiag(const ParamsDmftSolverType& params,
 	                        const ApplicationType& app)
-	    : params_(params)
+	    : params_(params), solverParams_(nullptr), rng_(1234)
 	{
 		Dmrg::InputCheck inputCheck;
 		InputNgType::Writeable ioW(params.gsTemplate, inputCheck);
@@ -42,6 +48,7 @@ public:
 		io.read(hubbardU_, "hubbardU");
 		io.readline(nup_, "TargetElectronsUp=");
 		io.readline(ndown_, "TargetElectronsDown=");
+		solverParams_ = new SolverParametersType(io, "Lanczos");
 	}
 
 	// bathParams[0-nBath-1] ==> V ==> hoppings impurity --> bath
@@ -56,17 +63,26 @@ public:
 
 		SparseMatrixType matrix;
 		setupHamiltonian(matrix, basis, mp);
-		// matrix ==> dense
-		PsimagLite::Matrix<ComplexOrRealType> mdense = matrix.toDense();
 
-		VectorRealType eigs(mdense.rows());
-		diag(mdense, eigs, 'V');
+		// Lanczos ==> gs AND Egs
+
+		LanczosSolverType lanczos(matrix, *solverParams_);
+
+		const SizeType n = matrix.rows();
+		VectorComplexType initialVector(n);
+
+		for (SizeType i = 0; i < n; ++i)
+			initialVector[i] = rng_();
+
+		RealType energy = 0;
+		VectorComplexType gs(n);
+		lanczos.computeOneState(energy, gs, initialVector, 1);
 
 		// compute gimp
-		err("Compute gimp unimplemented\n");
+		exactGreenFunction_(energy, gs, matrix);
 	}
 
-	const VectorComplexType& gimp() const { return gimp_; }
+	const VectorComplexType& gimp() const { return exactGreenFunction_(); }
 
 private:
 
@@ -198,10 +214,12 @@ private:
 	}
 
 	const ParamsDmftSolverType& params_;
+	SolverParametersType* solverParams_;
+	PsimagLite::MersenneTwister rng_;
 	VectorRealType hubbardU_;
 	SizeType nup_;
 	SizeType ndown_;
-	VectorComplexType gimp_;
+	ExactGreenFunction<ComplexOrRealType> exactGreenFunction_;
 };
 }
 #endif // IMPURITYSOLVER_EXACTD_H
