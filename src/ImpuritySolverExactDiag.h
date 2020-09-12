@@ -37,6 +37,7 @@ public:
 	typedef PsimagLite::LanczosSolver<SolverParametersType, SparseMatrixType, VectorComplexType>
 	LanczosSolverType;
 	typedef BasisType::LabeledOperatorType LabeledOperatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
 	ImpuritySolverExactDiag(const ParamsDmftSolverType& params,
 	                        const ApplicationType& app)
@@ -79,7 +80,7 @@ public:
 		lanczos.computeOneState(energy, gs, initialVector, 1);
 
 		// compute gimp
-		computeGreenFunction(energy, gs, matrix, basis);
+		computeGreenFunction(energy, gs, matrix, basis, mp);
 	}
 
 	const VectorComplexType& gimp() const { return gimp_; }
@@ -217,12 +218,44 @@ private:
 	void computeGreenFunction(RealType energy,
 	                          const VectorComplexType& gs,
 	                          const SparseMatrixType& matrix,
-	                          const BasisType& basis)
+	                          const BasisType& basis,
+	                          const ModelParamsType& mp)
 	{
+		doType(0, energy, gs, matrix, basis, mp);
+
+		doType(1, energy, gs, matrix, basis, mp);
+	}
+
+	// <gs|c' or c (iwn+-Hbar)^{-1}c or c'|gs>
+	void doType(SizeType what,
+	            RealType energy,
+	            const VectorComplexType& gs,
+	            const SparseMatrixType& matrix,
+	            const BasisType& basis,
+	            const ModelParamsType& mp)
+	{
+		SizeType center = mp.sites/2;
+		SizeType spin = 0;
+
+		MatrixType cAtCenter;
+		SizeType nup = getElectrons(what, spin, nup_, 0);
+		SizeType ndown = getElectrons(what, spin, ndown_, 1);
+
+		BasisType basisDest(mp.sites, nup, ndown);
+		setOperatorC(cAtCenter, basis, basisDest, center, spin);
 		err("ExactGreenFunction not implemented yet");
 	}
 
-	void setOperatorC(PsimagLite::Matrix<ComplexOrRealType>& matrix,
+	SizeType getElectrons(SizeType what,
+	                      SizeType spin,
+	                      SizeType electrons,
+	                      SizeType upOrDown) const
+	{
+		if (spin != upOrDown) return electrons;
+		return (what == 0) ? electrons + 1 : electrons - 1;
+	}
+
+	void setOperatorC(MatrixType& matrix,
 	                  const BasisType& basisSrc,
 	                  const BasisType& basisDest,
 	                  SizeType site,
