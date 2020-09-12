@@ -40,6 +40,8 @@ public:
 		InputNgType::Writeable ioW(params.gsTemplate, inputCheck);
 		InputNgType::Readable io(ioW);
 		io.read(hubbardU_, "hubbardU");
+		io.readline(nup_, "TargetElectronsUp=");
+		io.readline(ndown_, "TargetElectronsDown=");
 	}
 
 	// bathParams[0-nBath-1] ==> V ==> hoppings impurity --> bath
@@ -47,9 +49,8 @@ public:
 	void solve(const VectorRealType& bathParams)
 	{
 		ModelParamsType mp(bathParams);
-		SizeType nup = 0;
-		SizeType ndown = 0;
-		BasisType basis(mp.sites, nup, ndown);
+
+		BasisType basis(mp.sites, nup_, ndown_);
 
 		// setup model params ==> mp_
 
@@ -198,6 +199,8 @@ private:
 
 	const ParamsDmftSolverType& params_;
 	VectorRealType hubbardU_;
+	SizeType nup_;
+	SizeType ndown_;
 	VectorComplexType gimp_;
 };
 }
