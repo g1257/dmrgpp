@@ -256,7 +256,7 @@ private:
 
 		BasisType basisDest(mp.sites, nup, ndown);
 		LabeledOperatorType::Label label = (what == 0) ?
-		            LabeledOperatorType::Label::OPERATOR_CDAGGER :
+		            LabeledOperatorType::Label::OPERATOR_C :
 		            LabeledOperatorType::Label::OPERATOR_CDAGGER;
 		setOperatorC(cAtCenter, basis, basisDest, label, center, spin);
 

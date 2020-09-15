@@ -108,16 +108,14 @@ private:
 		if (isConstant && nonConstant)
 			err("InitResults: Cannot have ra or rb and also a vector of init results\n");
 
-		const RealType constant = (isConstant) ? initResults_.ra*rng_() + initResults_.rb
-		                                       : 0;
-
 		if (nonConstant && initResults_.result.size() != results_.size())
 			err(PsimagLite::String("InitResults: vector of init results has wrong size: ") +
 			    "expected " + ttos(results_.size()) + ", but found " +
 			    ttos(initResults_.result.size()) + "\n");
 
 		for (SizeType i = 0; i < results_.size(); ++i)
-			results_[i] = (isConstant) ? constant : initResults_.result[i];
+			results_[i] = (isConstant) ? initResults_.ra*rng_() + initResults_.rb
+			                           : initResults_.result[i];
 	}
 
 	const SizeType nBath_;                  // number of bath sites

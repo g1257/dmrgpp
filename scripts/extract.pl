@@ -7,7 +7,7 @@ use utf8;
 my ($file, $root) = @ARGV;
 defined($file) or die "USAGE: $0 filename [outputname]\n";
 
-my @labels = qw/Sigma SiteExcludedG LatticeG/;
+my @labels = qw/Sigma SiteExcludedG LatticeG Gimp/;
 
 defined($root) or $root = getBasename($file);
 
@@ -40,8 +40,11 @@ sub extract
 		$_ = <FILE>;
 		die "$0: File $file ended before $size elements where read\n" unless ($_);
 		chomp;
+		s/\(//;
+		s/\)//;
+		s/,/ /;
 		my @temp = split;
-		die "$0: File $file INTERNAL ERROR for $label\n" if (scalar(@temp) != 3);
+		#die "$0: File $file INTERNAL ERROR for $label\n" if (scalar(@temp) != 3);
 		$buffer .= "@temp\n";
 	}
 
