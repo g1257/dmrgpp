@@ -95,8 +95,7 @@ public:
 
 		printBathParams(os);
 
-		os<<"Gimp\n";
-		os<<impuritySolver_->gimp();
+		printGimp(os);
 
 		os<<"LatticeG\n";
 		os<<latticeG_();
@@ -108,6 +107,21 @@ public:
 	}
 
 private:
+
+	void printGimp(std::ostream& os) const
+	{
+		os<<"Gimp\n";
+		const VectorComplexType& gimp = impuritySolver_->gimp();
+		SizeType totalMatsubaras = sigma_.totalMatsubaras();
+		assert(gimp.size() == totalMatsubaras);
+		os<<gimp.size()<<"\n";
+		for (SizeType i = 0; i < totalMatsubaras; ++i) {
+			const RealType wn = sigma_.omega(i);
+			assert(i < gimp.size());
+			const ComplexOrRealType value = gimp[i];
+			os<<wn<<" "<<PsimagLite::real(value)<<" "<<PsimagLite::imag(value)<<"\n";
+		}
+	}
 
 	RealType computeNewSelfEnergy(const VectorRealType& bathParams)
 	{
