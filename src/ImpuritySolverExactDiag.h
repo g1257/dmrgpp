@@ -255,11 +255,13 @@ private:
 		SizeType ndown = getElectrons(what, spin, ndown_, 1);
 
 		BasisType basisDest(mp.sites, nup, ndown);
-		setOperatorC(cAtCenter, basis, basisDest, center, spin);
-		char trans = (what == 0) ? 'C' : 'N';
+		LabeledOperatorType::Label label = (what == 0) ?
+		            LabeledOperatorType::Label::OPERATOR_CDAGGER :
+		            LabeledOperatorType::Label::OPERATOR_CDAGGER;
+		setOperatorC(cAtCenter, basis, basisDest, label, center, spin);
 
 		VectorComplexType opGs(basisDest.size());
-		matrixVector(opGs, cAtCenter, gs, trans);
+		matrixVector(opGs, cAtCenter, gs, 'N');
 
 		SparseMatrixType matrix;
 		setupHamiltonian(matrix, basisDest, mp);
@@ -275,10 +277,10 @@ private:
 			ComplexOrRealType sum = 0;
 			for (SizeType site = 0; site < mp.sites; ++site) {
 				MatrixType cAtSite;
-				setOperatorC(cAtSite, basis, basisDest, site, spin);
+				setOperatorC(cAtSite, basis, basisDest, label, site, spin);
 
 				VectorComplexType opGs2(basisDest.size());
-				matrixVector(opGs2, cAtSite, gs, trans);
+				matrixVector(opGs2, cAtSite, gs, 'N');
 				ComplexOrRealType value = opGs2 * correctionVector;
 				sum += value*sign;
 			}
@@ -322,15 +324,16 @@ private:
 	void setOperatorC(MatrixType& matrix,
 	                  const BasisType& basisSrc,
 	                  const BasisType& basisDest,
+	                  LabeledOperatorType::Label label,
 	                  SizeType site,
 	                  SizeType spin) const
 	{
 		const SizeType hilbertSrc = basisSrc.size();
 		const SizeType hilbertDest = basisDest.size();
-		LabeledOperatorType lOperator(LabeledOperatorType::Label::OPERATOR_C);
+		LabeledOperatorType lOperator(label);
 		SizeType orb = 0;
 
-		matrix.resize(hilbertSrc, hilbertDest);
+		matrix.resize(hilbertDest, hilbertSrc);
 
 		for (SizeType ispace = 0; ispace < hilbertSrc; ++ispace) {
 			WordType ket1 = basisSrc(ispace, 0);
@@ -341,7 +344,7 @@ private:
 			if (!b) continue;
 			SizeType index = basisDest.perfectIndex(bra, ket2);
 
-			matrix(ispace, index) = basisDest.doSignGf(bra, ket2, site, spin, orb);
+			matrix(index, ispace) = basisDest.doSignGf(bra, ket2, site, spin, orb);
 		}
 	}
 
