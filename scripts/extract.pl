@@ -41,13 +41,8 @@ sub extract
 		die "$0: File $file ended before $size elements where read\n" unless ($_);
 		chomp;
 		my @temp = split;
-		die "$0: File $file INTERNAL ERROR for $label\n" if (scalar(@temp) != 2);
-		my $omega = $temp[0];
-		my $value = $temp[1];
-		$value =~ s/\(//;
-		$value =~ s/\)//;
-		$value =~ s/,/ /;
-		$buffer .= "$omega $value\n";
+		die "$0: File $file INTERNAL ERROR for $label\n" if (scalar(@temp) != 3);
+		$buffer .= "@temp\n";
 	}
 
 	close(FILE);
