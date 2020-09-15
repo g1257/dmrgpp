@@ -271,9 +271,10 @@ private:
 		for (SizeType i = 0; i < matsubaras_.total(); ++i) {
 			oneOverMatrix = hmatrix;
 			const RealType wn = matsubaras_.omega(i);
-			RealType sign = createOneOverMatrix(oneOverMatrix, matrix, wn, energy, what);
+			RealType sign2 = createOneOverMatrix(oneOverMatrix, matrix, wn, energy, what);
 			matrixVector(correctionVector, oneOverMatrix, opGs, 'N');
 
+			RealType sign = (sign2 < 0) ? 1 : -1;
 			ComplexOrRealType sum = 0;
 			for (SizeType site = 0; site < mp.sites; ++site) {
 				MatrixType cAtSite;
@@ -296,8 +297,8 @@ private:
 	//   +iwn + H - E0  for what == 1
 	RealType createOneOverMatrix(MatrixType& oneOverMatrix,
 	                             const SparseMatrixType& matrix,
-	                             RealType energy,
 	                             RealType wn,
+	                             RealType energy,
 	                             SizeType what) const
 	{
 		oneOverMatrix = matrix.toDense();
