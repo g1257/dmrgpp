@@ -337,9 +337,8 @@ private:
 
 		for (SizeType ispace = 0; ispace < hilbertSrc; ++ispace) {
 			WordType ket1 = basisSrc(ispace, 0);
-			WordType ket2 = basisSrc(ispace, 0);
+			WordType ket2 = basisSrc(ispace, 1);
 			WordType bra = ket1;
-			// assumes OPERATOR_C
 			bool b = basisSrc.getBra(bra, ket1, ket2, lOperator, site, spin);
 			if (!b) continue;
 			SizeType index = basisDest.perfectIndex(bra, ket2);
