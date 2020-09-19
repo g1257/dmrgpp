@@ -474,7 +474,7 @@ private:
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType cdagger;
 		transposeConjugate(cdagger,c);
-		multiply(tmpMatrix,c,cdagger);
+		multiply(tmpMatrix, cdagger, c);
 
 		return tmpMatrix;
 	}
