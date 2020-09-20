@@ -87,12 +87,18 @@ public:
 		PsimagLite::Minimizer<RealType, AndersonFunctionType> min(f,
 		                                                          minParams_.maxIter,
 		                                                          minParams_.verbose);
-		int iter = min.conjugateGradient(results_,
-		                                 minParams_.delta,
-		                                 minParams_.delta2,
-		                                 minParams_.tolerance);
+		int iter = 0;
+		if (minParams_.method == MinParamsType::Method::CONJUGATE_GRADIENT) {
+			iter = min.conjugateGradient(results_,
+			                             minParams_.delta,
+			                             minParams_.delta2,
+			                             minParams_.tolerance);
+		} else {
+			iter = min.simplex(results_, minParams_.delta, minParams_.tolerance);
+		}
+
 		if (iter < 0)
-            std::cerr<<"No minimum found\n";
+			std::cerr<<"No minimum found\n";
 	}
 
 	const VectorRealType& result() const { return results_; }

@@ -100,13 +100,32 @@ public:
 		os<<"LatticeG\n";
 		os<<latticeG_();
 
+		os<<"Gamma\n";
+		os<<latticeG_.gammaG();
+
 		FunctionOfFrequencyType siteEx(sigma_.fictitiousBeta(), sigma_.totalMatsubaras()/2);
 		computeSiteExcludedG(siteEx);
 		os<<"SiteExcludedG\n";
 		os<<siteEx;
+
+		printAndersonFunction(os);
 	}
 
 private:
+
+	void printAndersonFunction(std::ostream& os) const
+	{
+		SizeType totalMatsubaras = sigma_.totalMatsubaras();
+		os<<"AndersonFunction\n";
+		os<<totalMatsubaras<<"\n";
+		for (SizeType i = 0; i < totalMatsubaras; ++i) {
+			const RealType wn = sigma_.omega(i);
+			const ComplexOrRealType val = AndersonFunctionType::anderson(fit_.result(),
+			                                                             ComplexOrRealType(0, wn),
+			                                                             fit_.nBath());
+			os<<wn<<" "<<val<<"\n";
+		}
+	}
 
 	void printGimp(std::ostream& os) const
 	{

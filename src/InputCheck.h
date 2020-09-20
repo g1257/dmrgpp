@@ -49,6 +49,9 @@ public:
 		str += "string DmrgOmegaTemplate;\n";
 		str += "string LatticeGf;\n";
 		str += "string ImpuritySolver;\n";
+		str += "real InitBathRa;\n";
+		str += "real InitBathRb;\n";
+		str += "string FitMethod;\n";
 
 		return str;
 	}

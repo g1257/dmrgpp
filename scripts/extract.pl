@@ -4,10 +4,10 @@ use strict;
 use warnings;
 use utf8;
 
-my ($file, $root) = @ARGV;
+my ($file,  $root) = @ARGV;
 defined($file) or die "USAGE: $0 filename [outputname]\n";
 
-my @labels = qw/Sigma SiteExcludedG LatticeG Gimp/;
+my @labels = qw/Sigma SiteExcludedG LatticeG Gimp AndersonFunction Gamma/;
 
 defined($root) or $root = getBasename($file);
 

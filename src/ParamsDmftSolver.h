@@ -14,7 +14,7 @@ struct ParamsDmftSolver {
 	typedef MinParams<RealType> MinParamsType;
 
 	ParamsDmftSolver(typename InputNgType::Readable& io)
-	    : echoInput(false)
+	    : echoInput(false), minParams(io)
 	{
 		io.readline(ficticiousBeta, "FicticiousBeta=");
 		io.readline(mu, "ChemicalPotential=");
@@ -31,27 +31,7 @@ struct ParamsDmftSolver {
 			io.readline(precision, "Precision=");
 		} catch (std::exception&) {}
 
-		try {
-			io.readline(minParams.delta, "MinParamsDelta=");
-		} catch (std::exception&) {}
 
-		try {
-			io.readline(minParams.delta2, "MinParamsDelta2=");
-		} catch (std::exception&) {}
-
-		try {
-			io.readline(minParams.tolerance, "MinParamsTolerance=");
-		} catch (std::exception&) {}
-
-		try {
-			io.readline(minParams.maxIter, "MinParamsMaxIter=");}
-		catch (std::exception&) {}
-
-		try {
-			int x = 0;
-			io.readline(x, "MinParamsVerbose=");
-			minParams.verbose = (x > 0);
-		} catch (std::exception&) {}
 	}
 
 	bool echoInput;

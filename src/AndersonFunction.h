@@ -75,6 +75,7 @@ public:
 	                                  SizeType nBath)
 	{
 		assert(args.size() == 2*nBath);
+		assert(PsimagLite::real(iwn) == 0);
 		ComplexOrRealType sum = 0.0;
 		for (SizeType i = 0; i < nBath; ++i) {
 			const RealType valpha = args[i];
