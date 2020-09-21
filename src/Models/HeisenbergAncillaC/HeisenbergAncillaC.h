@@ -229,9 +229,6 @@ protected:
 		this->makeTrackable("sz");
 		this->makeTrackable("d");
 
-		const WordType twiceTheSpin = modelParameters_.twiceTheSpin;
-		auto bar = [twiceTheSpin] (WordType w)-> WordType {return twiceTheSpin - w;};
-
 		for (SizeType i=0;i<block.size();i++) {
 			// Set the operators S^+_i for orbital a in the natural basis
 			tmpMatrix=findSplusMatrices(i,0,natBasis);
@@ -298,9 +295,7 @@ protected:
 			}
 
 			// Set the operators \Delta_i in the natural basis
-			PsimagLite::Matrix<SparseElementType> dmatrix(natBasis.size(), natBasis.size());
-			Entangler<HilbertBasisType, SparseElementType>::setGammaMatrix(dmatrix, natBasis, bar);
-			fullMatrixToCrsMatrix(tmpMatrix, dmatrix);
+			tmpMatrix = findDeltaMatrices(i, natBasis);
 
 			typename OperatorType::Su2RelatedType su2related3;
 			OperatorType myOp3(tmpMatrix,
@@ -424,6 +419,37 @@ private:
 			SizeType ket1 = (orbital == 0) ? ket.first : ket.second;
 			RealType m = ket1 - j;
 			cm(ii,ii) = m;
+		}
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
+	}
+
+	SparseMatrixType findDeltaMatrices(int,const HilbertBasisType& natBasis) const
+	{
+		SizeType total = natBasis.size();
+		MatrixType cm(total,total);
+		RealType j = 0.5*modelParameters_.twiceTheSpin;
+		SizeType total1 = modelParameters_.twiceTheSpin + 1;
+		for (SizeType ii=0;ii<total;ii++) {
+			PairSizeType ket = getOneOrbital(natBasis[ii]);
+
+			SizeType bra1 = ket.first;
+			if (bra1 >= total1) continue;
+
+			SizeType bra2 = ket.second;
+			if (bra2 >= total1) continue;
+			if (bra2 >= bra1) continue;
+
+			PairSizeType bra(bra2,bra1);
+			SizeType jj = getFullIndex(bra);
+			RealType m = bra.first - j;
+			RealType x1 = j*(j+1)-m*(m+1);
+			if (x1 == 0) continue;
+			m = ket.second - j;
+			RealType x2 = j*(j+1)-m*(m+1);
+			if (x2 == 0) continue;
+			cm(ii,jj) = 1.0;
 		}
 
 		SparseMatrixType operatorMatrix(cm);
