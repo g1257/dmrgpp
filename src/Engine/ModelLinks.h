@@ -11,6 +11,8 @@ namespace Dmrg {
 template<typename LabeledOperatorsType, typename SuperGeometryType_>
 class ModelLinks {
 
+public:
+
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 	typedef std::pair<char, char> PairCharType;
 	typedef std::pair<PsimagLite::String, PsimagLite::String> PairStringType;
@@ -25,8 +27,6 @@ class ModelLinks {
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
 	VectorPairStringSizeType;
-
-public:
 
 	class OneLink {
 
@@ -436,6 +436,14 @@ public:
 	{
 		assert(atomKind_);
 		return atomKind_->kindsOfAtoms();
+	}
+
+	const SizeType trackables() const { return trackables_.size(); }
+
+	const PsimagLite::String& trackables(SizeType i) const
+	{
+		assert(i < trackables_.size());
+		return trackables_[i];
 	}
 
 private:

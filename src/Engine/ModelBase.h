@@ -159,6 +159,7 @@ public:
 	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
 	typedef SuperOpHelperBase<SuperGeometryType, ParametersType> SuperOpHelperBaseType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename ModelLinksType::LabelType LabelType;
 
 	ModelBase(const ParametersType& params,
 	          const SuperGeometryType& superGeometry,
@@ -547,10 +548,20 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		std::cout<<"block="<<block;
 		std::cout<<"qq="<<qq;
 
-		SizeType n = cm.size();
+		const SizeType kindOfSite = modelLinks_.siteToAtomKind(site);
+		const SizeType n = modelLinks_.trackables();
 		for (SizeType i = 0; i < n; ++i) {
-			std::cout<<"Matrix "<<i<<"\n";
-			cm[i].write(std::cout);
+			const LabelType& ll = labeledOperators_.findLabel(modelLinks_.trackables(i));
+
+			if (ll.kindOfSite() != kindOfSite)
+				continue;
+
+			const SizeType dofs = ll.dofs();
+			std::cout<<"Operator name="<<ll.name()<<" has "<<dofs<<" dofs\n";
+			for (SizeType j = 0; j < dofs; ++j) {
+				std::cout<<"Operator name="<<ll.name()<<" dof="<<j<<"\n";
+				ll(j).write(std::cout);
+			}
 		}
 	}
 
