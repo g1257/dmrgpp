@@ -427,33 +427,51 @@ private:
 
 	SparseMatrixType findDeltaMatrices(int,const HilbertBasisType& natBasis) const
 	{
-		SizeType total = natBasis.size();
+		const SizeType total = natBasis.size();
 		MatrixType cm(total,total);
-		RealType j = 0.5*modelParameters_.twiceTheSpin;
-		SizeType total1 = modelParameters_.twiceTheSpin + 1;
-		for (SizeType ii=0;ii<total;ii++) {
-			PairSizeType ket = getOneOrbital(natBasis[ii]);
+		for (SizeType i = 0; i < total; ++i) {
+			const WordType ket = natBasis[i];
+			for (SizeType j = 0; j < total; ++j) {
 
-			SizeType bra1 = ket.first;
-			if (bra1 >= total1) continue;
+				if (i == j) continue;
 
-			SizeType bra2 = ket.second;
-			if (bra2 >= total1) continue;
-			if (bra2 >= bra1) continue;
+				const WordType bra = natBasis[j];
 
-			PairSizeType bra(bra2,bra1);
-			SizeType jj = getFullIndex(bra);
-			RealType m = bra.first - j;
-			RealType x1 = j*(j+1)-m*(m+1);
-			if (x1 == 0) continue;
-			m = ket.second - j;
-			RealType x2 = j*(j+1)-m*(m+1);
-			if (x2 == 0) continue;
-			cm(ii,jj) = 1.0;
+				if (!isCorrectlyPaired(ket) || !isCorrectlyPaired(bra))
+					continue;
+
+				cm(i, j) = 1.0;
+			}
 		}
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
+	}
+
+	bool isCorrectlyPaired(const WordType& ket) const
+	{
+		SizeType onesize = highestBit(modelParameters_.twiceTheSpin + 1);
+		const WordType mask = (1 << (onesize + 1)) - 1;
+		const SizeType physKet = (ket & mask);
+		SizeType ancKet = ket;
+		ancKet >>= onesize;
+		return (barFunction(physKet) == ancKet);
+	}
+
+	WordType barFunction(const WordType& w) const
+	{
+		return modelParameters_.twiceTheSpin - w;;
+	}
+
+	static SizeType highestBit(SizeType n)
+	{
+		SizeType counter = 0;
+		while (n > 0) {
+			++counter;
+			n >>= 1;
+		}
+
+		return counter;
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
