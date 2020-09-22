@@ -450,8 +450,8 @@ private:
 
 	bool isCorrectlyPaired(const WordType& ket) const
 	{
-		SizeType onesize = highestBit(modelParameters_.twiceTheSpin + 1);
-		const WordType mask = (1 << (onesize + 1)) - 1;
+		SizeType onesize = ProgramGlobals::logBase2(modelParameters_.twiceTheSpin + 1);
+		const WordType mask = (1 << onesize) - 1;
 		const SizeType physKet = (ket & mask);
 		SizeType ancKet = ket;
 		ancKet >>= onesize;
@@ -461,17 +461,6 @@ private:
 	WordType barFunction(const WordType& w) const
 	{
 		return modelParameters_.twiceTheSpin - w;;
-	}
-
-	static SizeType highestBit(SizeType n)
-	{
-		SizeType counter = 0;
-		while (n > 0) {
-			++counter;
-			n >>= 1;
-		}
-
-		return counter;
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
