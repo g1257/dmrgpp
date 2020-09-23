@@ -314,14 +314,15 @@ protected:
 			OpForLinkType a("a");
 			hopb.push(a, 'C', a, 'N');
 
-			ModelTermType& phononFermion = ModelBaseType::createTerm("PhononFermion");
+			const bool wantsHerm = false;
+			ModelTermType& phononFermion = ModelBaseType::createTerm("PhononFermion", wantsHerm);
 
 			OpForLinkType n("n");
-			phononFermion.push(n, 'N', a, 'N');
+			phononFermion.push(a, 'N', n, 'N');
 
-			ModelTermType& fermionPhonon = ModelBaseType::createTerm("FermionPhonon");
+			ModelTermType& fermionPhonon = ModelBaseType::createTerm("FermionPhonon", wantsHerm);
 
-			fermionPhonon.push(a, 'N', n, 'N');
+			fermionPhonon.push(a, 'C', n, 'N');
 		}
 	}
 
