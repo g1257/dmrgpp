@@ -568,7 +568,8 @@ private:
 	static SizeType modeFromModel(PsimagLite::String model)
 	{
 		if (model == "HubbardAncilla") return 3;
-		if (model == "FeAsBasedSc") return 1;
+		if (model == "FeAsBasedSc" ||
+		        model == "HolsteinThin") return 1;
 		err("Not supported modeFromModel for model= " + model + "\n");
 		return 0;
 	}
