@@ -233,7 +233,7 @@ protected:
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		SparseMatrixType tmpMatrix;
-		MatrixType nmatrix;
+		SparseMatrixType nmatrix;
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
 			tmpMatrix = findOperatorMatrices(sigma, fermionicBasis);
 			int asign = 1;
@@ -256,17 +256,15 @@ protected:
 			c.push(myOp);
 
 			if (sigma == 0)
-				nmatrix = multiplyTc(tmpMatrix, tmpMatrix);
+				nmatrix = n(tmpMatrix);
 			else
-				nmatrix += multiplyTc(tmpMatrix, tmpMatrix);
+				nmatrix += n(tmpMatrix);
 		}
 
 
 		OpsLabelType& n = this->createOpsLabel("n", 1); // 1 == fermionic site
-		SparseMatrixType nmatrixCrs;
-		fullMatrixToCrsMatrix(nmatrixCrs, nmatrix);
 		typename OperatorType::Su2RelatedType su2related;
-		OperatorType myOp(nmatrixCrs,
+		OperatorType myOp(nmatrix,
 		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                  typename OperatorType::PairType(0, 0),
 		                  1,
