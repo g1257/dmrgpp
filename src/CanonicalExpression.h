@@ -1,6 +1,7 @@
 #ifndef PSI_CANONICAL_EXPRESSION_H
 #define PSI_CANONICAL_EXPRESSION_H
 #include "PsimagLite.h"
+#include "QuasiCanonical.h"
 
 namespace PsimagLite {
 
@@ -12,6 +13,7 @@ class CanonicalExpression {
 	typedef typename ItemSpecType::AuxiliaryType AuxiliaryType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef Vector<String>::Type VectorStringType;
+	typedef PsimagLite::QuasiCanonical<ComplexOrRealType> QuasiCanonicalType;
 
 public:
 
@@ -26,14 +28,14 @@ public:
 	{
 		// canonical expressions only for now
 		// expr --> exprCanonical
-		String exprCanonical = expr; // canonicalize here
-		VectorStringType vecStr;
+		QuasiCanonicalType quasiCanonical(expr);
+		//String exprCanonical = expr; // canonicalize here
+		//VectorStringType vecStr;
+		const SizeType numberOfTerms = quasiCanonical.numberOfTerms();
 
-		split(vecStr, exprCanonical, "+");
-
-		for (SizeType i = 0; i < vecStr.size(); ++i) {
+		for (SizeType i = 0; i < numberOfTerms; ++i) {
 			ResultType term = resultEmpty;
-			procCanonicalTerm(term, vecStr[i], aux);
+			procCanonicalTerm(term, quasiCanonical, i, aux);
 			if (!ItemSpecType::metaEqual(term, result))
 				err("CanonicalExpression: metas not equal\n");
 
@@ -50,15 +52,17 @@ public:
 private:
 
 	void procCanonicalTerm(ResultType& term,
-	                       String termCanonical,
+	                       QuasiCanonicalType& quasiCanonical,
+	                       SizeType ind,
 	                       AuxiliaryType& aux) const
 	{
+		String termCanonical = quasiCanonical.term(ind);
 		ComplexOrRealType factor = 1.0;
 		VectorStringType vecStr;
 		split(vecStr, termCanonical, "*");
 
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
-			procCanonicalFactor(term, factor, vecStr[i], aux);
+			procCanonicalFactor(term, factor, vecStr[i], quasiCanonical, aux);
 		}
 
 		if (ItemSpecType::isEmpty(term))
@@ -70,13 +74,19 @@ private:
 	void procCanonicalFactor(ResultType& prev,
 	                         ComplexOrRealType& factor,
 	                         String termStr,
+	                         QuasiCanonicalType& quasiCanonical,
 	                         AuxiliaryType& aux) const
 	{
-		bool isScalar =  isCanonicalScalar(termStr);
-		if (isScalar) {
-			ComplexOrRealType f = findFactor(termStr,
-			                                 false,
-			                                 static_cast<ComplexOrRealType*>(0));
+		bool isCaScalar =  isCanonicalScalar(termStr);
+		if (isCaScalar) {
+			const ComplexOrRealType f = PsimagLite::atof(termStr);
+			factor *= f;
+			return;
+		}
+
+		const int ind = quasiCanonical.scalarIndex(termStr);
+		if (ind >= 0) {
+			const ComplexOrRealType f = quasiCanonical.scalarFromIndex(ind);
 			factor *= f;
 			return;
 		}
@@ -100,46 +110,46 @@ private:
 
 		char c = termStr[0];
 		bool isDigit = (c >= '0' && c <= '9');
-		return (c == '.' || c == '(' || isDigit);
+		return (c == '.' || c == '-' || c == '+' || isDigit);
 	}
 
 	// Deal with complex here, FIXME
-	ComplexOrRealType findFactor(String termStr,
-	                             bool prevHadParens,
-	                             RealType* dummy) const
-	{
-		SizeType l = termStr.length();
-		if (l == 0)
-			err("CanonicalExpression: scalar must no be empty\n");
+//	ComplexOrRealType findFactor(String termStr,
+//	                             bool prevHadParens,
+//	                             RealType* dummy) const
+//	{
+//		SizeType l = termStr.length();
+//		if (l == 0)
+//			err("CanonicalExpression: scalar must no be empty\n");
 
-		char c = termStr[0];
-		bool isDigit = (c >= '0' && c <= '9');
-		if (c == '.') termStr  = "0" + termStr;
-		if (isDigit || c == '.') return atof(termStr.c_str());
+//		char c = termStr[0];
+//		bool isDigit = (c >= '0' && c <= '9');
+//		if (c == '.') termStr  = "0" + termStr;
+//		if (isDigit || c == '.') return atof(termStr.c_str());
 
-		if (c == '-') {
-			if (!prevHadParens)
-				err("Negative scalar must have enclosing parens\n");
+//		if (c == '-') {
+//			if (!prevHadParens)
+//				err("Negative scalar must have enclosing parens\n");
 
-			return atof(termStr.c_str());
-		}
+//			return atof(termStr.c_str());
+//		}
 
-		if (c != '(' || termStr[l-1] != ')')
-			err("CanonicalExpression: expected enclosing parens\n");
+//		if (c != '(' || termStr[l-1] != ')')
+//			err("CanonicalExpression: expected enclosing parens\n");
 
-		String tmp = termStr.substr(1, l-2);
-		return findFactor(tmp, true, dummy);
-	}
+//		String tmp = termStr.substr(1, l-2);
+//		return findFactor(tmp, true, dummy);
+//	}
 
-	ComplexOrRealType findFactor(String termStr,
-	                             bool prevHadParens,
-	                             std::complex<RealType>*) const
-	{
-		std::cerr<<"WARNING: CanonicalExpression: ";
-		std::cerr<<"Complex scalars not yet implemented (sorry)\n";
-		RealType *x = 0;
-		return findFactor(termStr, prevHadParens, x);
-	}
+//	ComplexOrRealType findFactor(String termStr,
+//	                             bool prevHadParens,
+//	                             std::complex<RealType>*) const
+//	{
+//		std::cerr<<"WARNING: CanonicalExpression: ";
+//		std::cerr<<"Complex scalars not yet implemented (sorry)\n";
+//		RealType *x = 0;
+//		return findFactor(termStr, prevHadParens, x);
+//	}
 
 	const ItemSpecType& itemSpec_;
 };
