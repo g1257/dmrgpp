@@ -30,7 +30,8 @@ public:
 			buffer += t[i];
 		}
 
-		value_ = PsimagLite::atof(buffer);
+		if (isImag_ && buffer == "") value_ = 1;
+		else value_ = PsimagLite::atof(buffer);
 	}
 
 	ComplexType value() const

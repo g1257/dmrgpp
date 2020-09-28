@@ -103,6 +103,43 @@ public:
 		return sum;
 	}
 
+	static bool isPureComplex(String t)
+	{
+		if (t == "i") return true;
+
+		const SizeType n = t.length();
+		if (n < 2) return false;
+		String tmp = t.substr(0, n - 1);
+		return isRealScalar(tmp);
+	}
+
+	static ComplexOrRealType pureComplex(String t)
+	{
+		static const bool isComplex = IsComplexNumber<ComplexOrRealType>::True;
+		if (!isComplex)
+			err("i = sqrt(-1) found in code path that is real\n");
+
+		CpmlxOrReal<RealType, (isComplex) ? 1 : 0> cmplxOrReal(t);
+		return cmplxOrReal.value();
+	}
+
+	static bool isRealScalar(String termStr)
+	{
+		const SizeType n = termStr.length();
+		if (n == 0)
+			err("CanonicalExpression: term must not be empty\n");
+
+		for (SizeType i = 0; i < n; ++i) {
+			char c = termStr[i];
+			bool isDigit = (c >= '0' && c <= '9');
+			if (c == '.' || c == '-' || c == '+' || isDigit)
+				continue;
+			return false;
+		}
+
+		return true;
+	}
+
 private:
 
 	static ComplexOrRealType pureRealOrPureImag(String t)

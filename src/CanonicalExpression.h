@@ -77,9 +77,16 @@ private:
 	                         QuasiCanonicalType& quasiCanonical,
 	                         AuxiliaryType& aux) const
 	{
-		bool isCaScalar =  isCanonicalScalar(termStr);
+		bool isCaScalar = QuasiCanonicalType::isRealScalar(termStr);
 		if (isCaScalar) {
 			const ComplexOrRealType f = PsimagLite::atof(termStr);
+			factor *= f;
+			return;
+		}
+
+		bool isPureCmplx = QuasiCanonicalType::isPureComplex(termStr);
+		if (isPureCmplx) {
+			const ComplexOrRealType f = QuasiCanonicalType::pureComplex(termStr);
 			factor *= f;
 			return;
 		}
@@ -102,54 +109,6 @@ private:
 
 		prev *= term;
 	}
-
-	bool isCanonicalScalar(String termStr) const
-	{
-		if (termStr.length() == 0)
-			err("CanonicalExpression: term must no be empty\n");
-
-		char c = termStr[0];
-		bool isDigit = (c >= '0' && c <= '9');
-		return (c == '.' || c == '-' || c == '+' || isDigit);
-	}
-
-	// Deal with complex here, FIXME
-//	ComplexOrRealType findFactor(String termStr,
-//	                             bool prevHadParens,
-//	                             RealType* dummy) const
-//	{
-//		SizeType l = termStr.length();
-//		if (l == 0)
-//			err("CanonicalExpression: scalar must no be empty\n");
-
-//		char c = termStr[0];
-//		bool isDigit = (c >= '0' && c <= '9');
-//		if (c == '.') termStr  = "0" + termStr;
-//		if (isDigit || c == '.') return atof(termStr.c_str());
-
-//		if (c == '-') {
-//			if (!prevHadParens)
-//				err("Negative scalar must have enclosing parens\n");
-
-//			return atof(termStr.c_str());
-//		}
-
-//		if (c != '(' || termStr[l-1] != ')')
-//			err("CanonicalExpression: expected enclosing parens\n");
-
-//		String tmp = termStr.substr(1, l-2);
-//		return findFactor(tmp, true, dummy);
-//	}
-
-//	ComplexOrRealType findFactor(String termStr,
-//	                             bool prevHadParens,
-//	                             std::complex<RealType>*) const
-//	{
-//		std::cerr<<"WARNING: CanonicalExpression: ";
-//		std::cerr<<"Complex scalars not yet implemented (sorry)\n";
-//		RealType *x = 0;
-//		return findFactor(termStr, prevHadParens, x);
-//	}
 
 	const ItemSpecType& itemSpec_;
 };
