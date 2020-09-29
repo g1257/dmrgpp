@@ -244,6 +244,6 @@ with the name being the name of the \code{dataMember} in question.
 \begin{verbatim}
 \ptexReadFile{../LICENSE}
 \end{verbatim}
-\bibliographystyle{plain}
-\bibliography{thesis}
+%\bibliographystyle{plain}
+%\bibliography{thesis}
 \end{document}
