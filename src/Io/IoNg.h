@@ -103,7 +103,7 @@ For example, all native types are written by \code{IoNg} directly into a single 
 \code{std::complex<T>} where \code{T}
 is a native type is written directly by doubling the size of the array into a single dataset.
 */
-// PSIDOC_CODE_START IsRootUnDelegatedCode
+/* PSIDOC_CODE_START IsRootUnDelegatedCode */
 template<typename T>
 struct IsRootUnDelegated {
 	enum {True = Loki::TypeTraits<T>::isArith ||
@@ -114,7 +114,7 @@ struct IsRootUnDelegated {
 		  IsEnumClass<T>::value ||
 		  IsStringLike<T>::True};
 };
-// PSIDOC_CODE_END
+/* PSIDOC_CODE_END */
 
 class IoNg {
 

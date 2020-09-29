@@ -109,6 +109,8 @@ sub loadLabels
 	my $additional = "";
 	my $buffer = "";
 	my $nlines = scalar(@$lines);
+	my $inCodeBlock = 0;
+	my $codeBuffer = "";
 
 	for (my $i = 0; $i < $nlines; ++$i) {
 		$_ = $lines->[$i];
@@ -121,6 +123,37 @@ sub loadLabels
 				die "$0: ERROR: Label $label is duplicate\n";
 			}
 
+			next;
+		}
+
+		if (/\/\* PSIDOC_CODE_START +(.+$)/) {
+			my $rest = $1;
+            chomp($rest);
+			$rest =~ s/\*\/ *$//;
+			if ($inCodeBlock) {
+				die "$0: Nested code blocks not allowed\n";
+			}
+
+			($label, $additional) = procPsidocName($rest);
+			$label =~ s/ //g;
+			print STDERR "ADDING *$label* \n";
+			my $txt = $labels{"$label"};
+			if (defined($txt)) {
+				die "$0: ERROR: Label $label is duplicate\n";
+			}
+
+			$inCodeBlock = 1;
+			next;
+		}
+
+		if (/\/\* PSIDOC_CODE_END \*\//) {
+			if (!$inCodeBlock) {
+				die "$0: Closing code block while none is open\n";
+			}
+
+			$labels{"$label"} = $codeBuffer;
+			$codeBuffer = "";
+			$inCodeBlock = 0;
 			next;
 		}
 
@@ -152,6 +185,9 @@ sub loadLabels
 			$buffer = "";
 			$label = "!DISABLED";
 			$additional = "";
+		} elsif ($inCodeBlock) {
+			$codeBuffer .= $_."\n";
+			next;
 		}
 
 		if ($label ne "!DISABLED") {
