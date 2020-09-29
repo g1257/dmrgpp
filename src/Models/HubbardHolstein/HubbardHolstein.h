@@ -211,6 +211,7 @@ protected:
 		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
+		SparseMatrixType nmatrix;
 		SparseMatrixType tmpMatrix;
 		for (SizeType i=0;i<block.size();i++) {
 			for (int sigma=0;sigma<2;sigma++) {
@@ -233,7 +234,21 @@ protected:
 				                  su2related);
 
 				c.push(myOp);
+				if (sigma == 0)
+					nmatrix = n(tmpMatrix);
+				else
+					nmatrix += n(tmpMatrix);
 			}
+
+			OpsLabelType& n = this->createOpsLabel("n");
+			typename OperatorType::Su2RelatedType su2relatedA;
+			OperatorType myOp(nmatrix,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  typename OperatorType::PairType(0,0),
+			                  1,
+			                  su2relatedA);
+
+			n.push(myOp);
 
 			if (modelParameters_.numberphonons == 0) continue;
 
@@ -532,7 +547,7 @@ private:
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType cdagger;
 		transposeConjugate(cdagger,c);
-		multiply(tmpMatrix,c,cdagger);
+		multiply(tmpMatrix, c, cdagger);
 
 		return tmpMatrix;
 	}
