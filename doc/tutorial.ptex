@@ -77,7 +77,8 @@ add or modify or improve functionality in PsimagLite itself,
 and so your solutions could be included in PsimagLite.
 You are encouraged to git clone PsimagLite and make changes that
 you think are suitable, and request pulls, and discuss in our 
-mailing list.
+mailing list. All corrections are welcomed, and either git pull
+request or emails are OK.
 
 The actual topics to be discussed will become clear once we have
 some lessons typed in. The actual .cpp programs that use and
@@ -102,7 +103,7 @@ the right name for \texttt{PartName}.
 This way we import documentation from each .cpp file
 into this ptex file.
 
-In addition to being sort, the .cpp files for the tutorial
+In addition to being short, the .cpp files for the tutorial
 should include compilation instructions without any \texttt{Makefile},
 so that all includes and library paths and compiler switches
 are visible in the command line. Dependencies must be kept
@@ -117,9 +118,13 @@ again the example should be able to compile without it; it won't run
 though, but display a message saying that the GSL is needed.
 
 \ptexPaste{InputNg_Intro}
-\begin{lstlisting}
-\ptexPaste{InputNg_Includes}
-\end{lstlisting}
+\ptexPaste{InputNg_MyInputCheck}
+\ptexPaste{InputNg_main1}
+\ptexPaste{InputNg_main2}
+\ptexPaste{InputNg_main3}
+\ptexPaste{InputNg_main4}
+\ptexPaste{InputNg_main5}
+\ptexPaste{InputNg_Recap}
 
 \end{document}
 
