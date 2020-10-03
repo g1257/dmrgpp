@@ -17,8 +17,8 @@
 \newcommand{\code}[1]{{\ttfamily #1}}
 
 \fancyhead{}
-\fancyhead[LE]{\leftmark}
-\fancyhead[RO]{\rightmark}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\rightmark}
 \cfoot{}
 \rfoot{\thepage} %exit
 
@@ -67,10 +67,57 @@ keywordstyle=\color{blue}\bfseries,frame=shadowbox}
 
 \end{titlepage}
 %
-\section{Introduction}
-Blah blah this is the intro here.
+\section*{Introduction}
+Why should you read this tutorial?
+The motivation for this tutorial is that you can use PsimagLite in
+your own C++ programs. Another reason to read this tutorial
+is to learn C++. We will pose exercises from beginner to intermediate
+to advanced. Moreover, some of the exercises will ask you to
+add or modify or improve functionality in PsimagLite itself,
+and so your solutions could be included in PsimagLite.
+You are encouraged to git clone PsimagLite and make changes that
+you think are suitable, and request pulls, and discuss in our 
+mailing list.
 
-\ptexPaste{InputNg}
+The actual topics to be discussed will become clear once we have
+some lessons typed in. The actual .cpp programs that use and
+illustrate how to use PsimagLite are going to be in
+\cppFile{drivers/}. We'll try to make them fit in one page including
+error testing, and additional pages of documentation in line.
+The documentation inside the .cpp file will then be split
+in parts, and each part will look like the following.
+\begin{tt}
+\begin{verbatim}
+/* PSIDOC PartName
+   standard latex markup here
+ */
+\end{verbatim}
+\end{tt}
+Note that the \texttt{PartName} will be something descriptive
+of what we are talking about there and must be \emph{unique}.
+Moreover, that part can be included in this document,
+the \cppFile{tutorial.ptex} file, by using the command
+\texttt{$\backslash$ptexPast\{PartName\}}, where you have to use
+the right name for \texttt{PartName}.
+This way we import documentation from each .cpp file
+into this ptex file.
+
+In addition to being sort, the .cpp files for the tutorial
+should include compilation instructions without any \texttt{Makefile},
+so that all includes and library paths and compiler switches
+are visible in the command line. Dependencies must be kept
+minimal; you'll need PsimagLite, of course, and a C++ compiler, but
+other than that, we should really really try not to have dependencies
+unless really needed. 
+What's an acceptable dependency?
+If we are showing how to read an Ainur input then we need BOOST, but should
+still compile without BOOST and run plain old data (POD) input files.
+If we are showing how to integrate a function, then we need the GSL, but
+again the example should be able to compile without it; it won't run
+though, but display a message saying that the GSL is needed.
+
+\ptexPaste{InputNg_Intro}
+\ptexPaste{InputNg_Includes}
 
 \end{document}
 
