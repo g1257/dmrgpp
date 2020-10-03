@@ -1,0 +1,76 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{fancyvrb} %keep
+\usepackage{fancyhdr}
+\usepackage{booktabs} %keep
+\usepackage{mathtools} %keep
+\usepackage{hyperref}
+
+\definecolor{mygray}{HTML}{AAAAAA}
+
+\newcommand{\code}[1]{{\ttfamily #1}}
+
+\fancyhead{}
+\fancyhead[LE]{\leftmark}
+\fancyhead[RO]{\rightmark}
+\cfoot{}
+\rfoot{\thepage} %exit
+
+\hypersetup{colorlinks=true}
+
+
+\newcommand{\cppFile}[1]{\texttt{#1}}
+%% Remove the below command before submission
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+%Format to denote a C++ class name:
+\newcommand{\cppClass}[1]{{\sffamily #1}}
+%Format to denote a C++ variable:
+\newcommand{\cppFunction}[1]{{\tt #1}}
+% for the cover page:
+\newcommand{\HRule}{\noindent\rule{\linewidth}{1.5pt}}
+\newcommand{\ptexPaste}[1]{\fbox{\textcolor{red}{PLEASE RUN ptex.pl on this .ptex source
+to obtain the correct test for tag #1}}}
+\newcommand{\ptexLabel}[1]{\ptexPaste{#1}}
+\newcommand{\ptexInterface}[1]{\ptexPaste{#1}}
+\newcommand{\ptexReadFile}[1]{\ptexPaste{#1}}
+\newcommand{\ptexReadFileVerbatim}[1]{\ptexPaste{#1}}
+
+\hyphenation{Wave-Function-Transformation}
+\lstset{language=c++,basicstyle=\footnotesize\ttfamily,
+keywordstyle=\color{blue}\bfseries,frame=shadowbox}
+\pagestyle{fancy}
+\begin{document}
+
+\begin{titlepage}
+\vspace*{\stretch{1}}
+\HRule
+\begin{flushright}
+\LARGE  PsimagLite v2 Tutorial\\
+\end{flushright}
+\HRule
+\vspace*{\stretch{2}}
+
+%
+\begin{center}
+%\Large Tutorial Version: \today\\
+\end{center}
+
+\begin{center}
+\textsc{Oak Ridge, 2018}
+\end{center}
+
+\end{titlepage}
+%
+\section{Introduction}
+Blah blah this is the intro here.
+
+\ptexPaste{InputNg}
+
+\end{document}
+
