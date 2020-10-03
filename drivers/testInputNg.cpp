@@ -29,10 +29,10 @@ PsimagLite files are usually under src, but in some
 cases subdirectories are used. Here are the includes.
 */
 
-/* PSIDOC_CODE_START InputNg_Includes */
+/* PSIDOC_CODE_START InputNg_Includes nocapture */
 #include "InputNg.h"
 #include "InputCheckBase.h"
-/* PSICODE_CODE_END */
+/* PSIDOC_CODE_END */
 
 class MyInputCheck : public PsimagLite::InputCheckBase {
 

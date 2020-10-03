@@ -111,6 +111,7 @@ sub loadLabels
 	my $nlines = scalar(@$lines);
 	my $inCodeBlock = 0;
 	my $codeBuffer = "";
+	my $capture = 1;
 
 	for (my $i = 0; $i < $nlines; ++$i) {
 		$_ = $lines->[$i];
@@ -118,6 +119,8 @@ sub loadLabels
 			my $rest = $1;
 			chomp($rest);
 			($label, $additional) = procPsidocName($rest);
+			$capture = 1;
+
 			my $txt = $labels{"$label"};
 			if (defined($txt)) {
 				die "$0: ERROR: Label $label is duplicate\n";
@@ -136,7 +139,8 @@ sub loadLabels
 
 			($label, $additional) = procPsidocName($rest);
 			$label =~ s/ //g;
-			print STDERR "ADDING *$label* \n";
+			$capture = ($additional eq "nocapture") ? 0 : 1;
+
 			my $txt = $labels{"$label"};
 			if (defined($txt)) {
 				die "$0: ERROR: Label $label is duplicate\n";
@@ -151,14 +155,14 @@ sub loadLabels
 				die "$0: Closing code block while none is open\n";
 			}
 
-			$labels{"$label"} = $codeBuffer;
+			$labels{"$label"} = [$codeBuffer];
 			$codeBuffer = "";
 			$inCodeBlock = 0;
 			next;
 		}
 
 		if (/\*\//) {
-			if ($label ne "!DISABLED") {
+			if ($label ne "!DISABLED" and $capture) {
 				my $inlabel = $label."::";
 				$buffer =~ s/PSIDOCCOPY \$/PSIDOCCOPY ${inlabel}/g;
 				my @temp = ($buffer);
@@ -184,6 +188,7 @@ sub loadLabels
 
 			$buffer = "";
 			$label = "!DISABLED";
+			$capture = 1;
 			$additional = "";
 		} elsif ($inCodeBlock) {
 			$codeBuffer .= $_."\n";
@@ -193,6 +198,10 @@ sub loadLabels
 		if ($label ne "!DISABLED") {
 			$buffer .= $_."\n";
 		}
+	}
+
+	if ($inCodeBlock) {
+		die "$0: Code block was not closed for label $label\n";
 	}
 
 	my $n = scalar(%labels);
@@ -261,7 +270,7 @@ sub captureFirstFunctionBelow
 		last if ($line =~ /\/\*/);
 		next if ($line =~ /^ *\/\//);
 		$buffer .= "$line\n";
-		
+
 		$markContent .= "$line\n" if ($markName ne "");
 		my $plus = () = $line =~ /\{/g;
 		my $minus = () = $line =~ /\}/g;
