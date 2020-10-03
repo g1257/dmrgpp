@@ -1,3 +1,8 @@
+/* PSIDOC InputNg
+  \section{InputNg}
+  blah blah blah
+ */
+
 #include "InputNg.h"
 #include "InputCheckBase.h"
 
