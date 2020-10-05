@@ -533,9 +533,9 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return labeledOperators_(what, dof);
 	}
 
-	static bool instrospect()
+	static bool introspect()
 	{
-		labeledOperators_.instrospect();
+		labeledOperators_.introspect();
 		return true;
 	}
 
@@ -549,15 +549,20 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		std::cout<<"qq="<<qq;
 
 		const SizeType kindOfSite = modelLinks_.siteToAtomKind(site);
-		const SizeType n = modelLinks_.trackables();
+		const SizeType n = labeledOperators_.size();
 		for (SizeType i = 0; i < n; ++i) {
-			const LabelType& ll = labeledOperators_.findLabel(modelLinks_.trackables(i));
+			const LabelType& ll = labeledOperators_[i];
 
 			if (ll.kindOfSite() != kindOfSite)
 				continue;
 
 			const SizeType dofs = ll.dofs();
-			std::cout<<"Operator name="<<ll.name()<<" has "<<dofs<<" dofs\n";
+			std::cout<<"Operator name="<<ll.name()<<" has "<<dofs<<" dofs";
+			if (ll.isTrackable())
+				std::cout<<" Trackable: YES\n";
+			else
+				std::cout<<" Trackable: NO\n";
+
 			for (SizeType j = 0; j < dofs; ++j) {
 				std::cout<<"Operator name="<<ll.name()<<" dof="<<j;
 				PsimagLite::String desc = ll.description(j);
@@ -624,7 +629,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return *superOpHelper_;
 	}
 
-// protected:
+	// protected:
 
 	PsimagLite::String oracle(const RealType& energy,
 	                          const PsimagLite::String formula) const

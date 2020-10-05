@@ -17,7 +17,7 @@ class LabeledOperators {
 		typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
 
 		Label(PsimagLite::String name, SizeType kindOfSite)
-		    : name_(name), kindOfSite_(kindOfSite) {}
+		    : name_(name), kindOfSite_(kindOfSite), isTrackable_(false) {}
 
 		const OperatorType_& operator()(SizeType dof) const
 		{
@@ -51,7 +51,7 @@ class LabeledOperators {
 			descriptions_.push_back(desc);
 		}
 
-		void instrospect() const
+		void introspect() const
 		{
 			std::cout<<"Label "<<name_<<" kindOfSite="<<kindOfSite_;
 			std::cout<<" with "<<ops_.size()<<" dofs.\n";
@@ -69,6 +69,13 @@ class LabeledOperators {
 
 		SizeType kindOfSite() const { return kindOfSite_; }
 
+		bool isTrackable() const { return isTrackable_; }
+
+		void makeTrackable()
+		{
+			isTrackable_ = true;
+		}
+
 	private:
 
 		Label(const Label&);
@@ -77,6 +84,7 @@ class LabeledOperators {
 
 		PsimagLite::String name_;
 		SizeType kindOfSite_;
+		bool isTrackable_;
 		VectorOperatorType ops_;
 		VectorStringType descriptions_;
 	};
@@ -167,21 +175,21 @@ public:
 		throw PsimagLite::RuntimeError(str);
 	}
 
-	void instrospect() const
+	void introspect() const
 	{
 		SizeType n = labels_.size();
 		std::cout<<"There are "<<n<<" labels available for the "<<model_<<" model\n";
 		for (SizeType i = 0; i < n; ++i)
-			labels_[i]->instrospect();
+			labels_[i]->introspect();
 	}
 
-	void instrospect(PsimagLite::String what) const
+	void introspect(PsimagLite::String what) const
 	{
 		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
 		                                                          labels_.end(),
 		                                                          what);
 		if (x != labels_.end())
-			return labels_[x - labels_.begin()]->instrospect();
+			return labels_[x - labels_.begin()]->introspect();
 
 		PsimagLite::String str("LabeledOperators: model=" + model_);
 		str += " label=" + what + " not found\n";
@@ -191,6 +199,20 @@ public:
 	PsimagLite::String modelName() const { return model_; }
 
 	SizeType size() const { return labels_.size(); }
+
+	const LabelType& operator[](SizeType ind) const
+	{
+		assert(ind < labels_.size());
+		assert(labels_[ind]);
+		return *(labels_[ind]);
+	}
+
+	void makeTrackable(PsimagLite::String name)
+	{
+		const LabelType& label = findLabel(name);
+		LabelType& labelNonConst = const_cast<LabelType&>(label);
+		labelNonConst.makeTrackable();
+	}
 
 private:
 

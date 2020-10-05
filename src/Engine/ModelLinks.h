@@ -291,7 +291,6 @@ public:
 	void clear()
 	{
 		offsets_.clear();
-		trackables_.clear();
 		SizeType n = terms_.size();
 		for (SizeType i = 0; i < n; ++i)
 			delete terms_[i];
@@ -311,10 +310,12 @@ public:
 
 		atomKind_ = ptr;
 		VectorOperatorType cm; // only for hermit
-		SizeType n = trackables_.size();
+		SizeType n = labeledOps.size();
 		VectorSizeType dofsByKind(n);
 		for (SizeType i = 0; i < n; ++i) {
-			const LabelType& ll = labeledOps.findLabel(trackables_[i]);
+			const LabelType& ll = labeledOps[i];
+
+			if (!ll.isTrackable()) continue;
 
 			const SizeType kindOfSite = ll.kindOfSite();
 
@@ -340,13 +341,6 @@ public:
 			SizeType dof = terms_[i]->size();
 			if (dof > maxDofs_) maxDofs_ = dof;
 		}
-	}
-
-	void makeTrackable(PsimagLite::String what)
-	{
-		if (std::find(trackables_.begin(), trackables_.end(), what) != trackables_.end())
-			err("makeTrackable: already called for " + what + "\n");
-		trackables_.push_back(what);
 	}
 
 	Term& createTerm(PsimagLite::String name, bool wantsHermitian)
@@ -383,9 +377,11 @@ public:
 	                         SizeType kindOfSite) const
 	{
 		cm.clear();
-		SizeType n = trackables_.size();
+		SizeType n = labeledOps.size();
 		for (SizeType i = 0; i < n; ++i) {
-			const LabelType& ll = labeledOps.findLabel(trackables_[i]);
+			const LabelType& ll = labeledOps[i];
+
+			if (!ll.isTrackable()) continue;
 
 			if (ll.kindOfSite() != kindOfSite)
 				continue;
@@ -399,9 +395,11 @@ public:
 	SizeType hilbertSize(SizeType kindOfSite,
 	                     const LabeledOperatorsType& labeledOps) const
 	{
-		SizeType n = trackables_.size();
+		SizeType n = labeledOps.size();
 		for (SizeType i = 0; i < n; ++i) {
-			const LabelType& ll = labeledOps.findLabel(trackables_[i]);
+			const LabelType& ll = labeledOps[i];
+
+			if (!ll.isTrackable()) continue;
 
 			if (ll.kindOfSite() != kindOfSite)
 				continue;
@@ -438,14 +436,6 @@ public:
 		return atomKind_->kindsOfAtoms();
 	}
 
-	const SizeType trackables() const { return trackables_.size(); }
-
-	const PsimagLite::String& trackables(SizeType i) const
-	{
-		assert(i < trackables_.size());
-		return trackables_[i];
-	}
-
 private:
 
 	static HermitianEnum getHermitianProperty(const OperatorStorageType& m)
@@ -459,14 +449,10 @@ private:
 	SizeType maxDofs_;
 	const static AtomKindBase* atomKind_;
 	static std::map<PsimagLite::String, SizeType> offsets_;
-	static VectorStringType trackables_;
 };
 
 template<typename T1, typename T2>
 std::map<PsimagLite::String, SizeType> ModelLinks<T1, T2>::offsets_;
-
-template<typename T1, typename T2>
-typename ModelLinks<T1, T2>::VectorStringType ModelLinks<T1, T2>::trackables_;
 
 template<typename T1, typename T2>
 const typename ModelLinks<T1, T2>::AtomKindBase* ModelLinks<T1, T2>::atomKind_ = 0;
