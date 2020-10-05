@@ -34,7 +34,7 @@ public:
 	typedef OmegasFourier<ComplexOrRealType, InputNgType::Readable> OmegasFourierType;
 	typedef typename OmegasFourierType::VectorComplexType VectorComplexType;
 
-	static const SizeType MAX_LINE_SIZE = 2048;
+	static const SizeType MAX_LINE_SIZE = 409600;
 
 
 	class Qdata {
