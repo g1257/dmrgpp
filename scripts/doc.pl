@@ -111,7 +111,7 @@ sub loadLabels
 	my $nlines = scalar(@$lines);
 	my $inCodeBlock = 0;
 	my $codeBuffer = "";
-	my $capture = 1;
+	my $modifyLater = 1;
 
 	for (my $i = 0; $i < $nlines; ++$i) {
 		$_ = $lines->[$i];
@@ -119,7 +119,7 @@ sub loadLabels
 			my $rest = $1;
 			chomp($rest);
 			($label, $additional) = procPsidocName($rest);
-			$capture = 1;
+			$modifyLater = 1;
 
 			my $txt = $labels{"$label"};
 			if (defined($txt)) {
@@ -139,7 +139,7 @@ sub loadLabels
 
 			($label, $additional) = procPsidocName($rest);
 			$label =~ s/ //g;
-			$capture = ($additional eq "nocapture") ? 0 : 1;
+			$modifyLater = ($additional eq "nocapture") ? 0 : 1;
 
 			my $txt = $labels{"$label"};
 			if (defined($txt)) {
@@ -162,7 +162,7 @@ sub loadLabels
 		}
 
 		if (/\*\//) {
-			if ($label ne "!DISABLED" and $capture) {
+			if ($label ne "!DISABLED" and $modifyLater) {
 				my $inlabel = $label."::";
 				$buffer =~ s/PSIDOCCOPY \$/PSIDOCCOPY ${inlabel}/g;
 				my @temp = ($buffer);
@@ -188,7 +188,7 @@ sub loadLabels
 
 			$buffer = "";
 			$label = "!DISABLED";
-			$capture = 1;
+			$modifyLater = 1;
 			$additional = "";
 		} elsif ($inCodeBlock) {
 			$codeBuffer .= $_."\n";

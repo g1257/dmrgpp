@@ -9,7 +9,7 @@
   You can go ahead an compile this example with
 \begin{tiny}
 \begin{verbatim}
-g++ testInputNg.cpp -I ../src/ -I.. -DUSE_BOOST -L ../lib -lpsimaglite -o testInputNg
+g++ testInputNg.cpp -std=c++11 -Wall -I ../src/ -I.. -DUSE_BOOST -L ../lib -lpsimaglite -o testInputNg
 \end{verbatim}
 \end{tiny}
 Note that you need boost-dev or boost-devel and also you
@@ -28,17 +28,15 @@ First, note that we need two includes from PsimagLite.
 PsimagLite files are usually under src, but in some
 cases subdirectories are used. Here are the includes.
 \begin{lstlisting}
-PSIDOCCOPY InputNg_Includes
-\end{lstlisting}
+PSIDOC_CAPTURE
 */
 
-/* PSIDOC_CODE_START InputNg_Includes nocapture */
 #include "InputNg.h"
 #include "InputCheckBase.h"
-/* PSIDOC_CODE_END */
 
 /* PSIDOC InputNg_MyInputCheck
- There is an option to check the inputs, so that
+\end{lstlisting}
+InputNg has an option to check the inputs, so that
  you can define the labels that you expect to find
  in your program. This is optional but recommended.
  For this we create a class, say \texttt{MyInputCheck},

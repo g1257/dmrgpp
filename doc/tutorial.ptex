@@ -62,7 +62,7 @@ keywordstyle=\color{blue}\bfseries,frame=shadowbox}
 \end{center}
 
 \begin{center}
-\textsc{Oak Ridge, 2018}
+\textsc{Oak Ridge, 2020}
 \end{center}
 
 \end{titlepage}
@@ -98,7 +98,7 @@ Note that the \texttt{PartName} will be something descriptive
 of what we are talking about there and must be \emph{unique}.
 Moreover, that part can be included in this document,
 the \cppFile{tutorial.ptex} file, by using the command
-\texttt{$\backslash$ptexPast\{PartName\}}, where you have to use
+\texttt{$\backslash$ptexPaste} \texttt{\{PartName\}}, where you have to use
 the right name for \texttt{PartName}.
 This way we import documentation from each .cpp file
 into this ptex file.
