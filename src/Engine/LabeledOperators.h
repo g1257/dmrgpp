@@ -10,10 +10,10 @@ class LabeledOperators {
 
 	class Label {
 
-		typedef typename PsimagLite::Vector<OperatorType_>::Type VectorOperatorType;
-
 	public:
 
+		typedef typename PsimagLite::Vector<OperatorType_>::Type VectorOperatorType;
+		typedef typename PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 		typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
 
 		Label(PsimagLite::String name, SizeType kindOfSite)
@@ -41,19 +41,26 @@ class LabeledOperators {
 			return ops_[0].data.rows();
 		}
 
-		void push(const OperatorType_& op)
+		void push(const OperatorType_& op, PsimagLite::String desc = "")
 		{
 			const SizeType n = ops_.size();
 			if (n > 0 && ops_[n - 1].getStorage().rows() != op.getStorage().rows())
 				err("LabeledOperators::Label::push: FATAL\n");
 
 			ops_.push_back(op);
+			descriptions_.push_back(desc);
 		}
 
 		void instrospect() const
 		{
 			std::cout<<"Label "<<name_<<" kindOfSite="<<kindOfSite_;
 			std::cout<<" with "<<ops_.size()<<" dofs.\n";
+		}
+
+		PsimagLite::String description(SizeType j) const
+		{
+			assert(j < descriptions_.size());
+			return descriptions_[j];
 		}
 
 		SizeType dofs() const { return ops_.size(); }
@@ -71,6 +78,7 @@ class LabeledOperators {
 		PsimagLite::String name_;
 		SizeType kindOfSite_;
 		VectorOperatorType ops_;
+		VectorStringType descriptions_;
 	};
 
 	typedef typename PsimagLite::Vector<Label*>::Type VectorLabelType;
@@ -181,6 +189,8 @@ public:
 	}
 
 	PsimagLite::String modelName() const { return model_; }
+
+	SizeType size() const { return labels_.size(); }
 
 private:
 

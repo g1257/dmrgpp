@@ -198,7 +198,7 @@ protected:
 			                  asign,
 			                  su2related);
 
-			c.push(myOp);
+			c.push(myOp, (sigma == 0) ? "up" : "down");
 			creationMatrix[sigma] = myOp;
 		}
 

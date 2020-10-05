@@ -559,7 +559,9 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 			const SizeType dofs = ll.dofs();
 			std::cout<<"Operator name="<<ll.name()<<" has "<<dofs<<" dofs\n";
 			for (SizeType j = 0; j < dofs; ++j) {
-				std::cout<<"Operator name="<<ll.name()<<" dof="<<j<<"\n";
+				std::cout<<"Operator name="<<ll.name()<<" dof="<<j;
+				PsimagLite::String desc = ll.description(j);
+				std::cout<<" "<<desc<<"\n";
 				ll(j).write(std::cout);
 			}
 		}
@@ -642,7 +644,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	static void makeTrackable(PsimagLite::String name)
 	{
-		modelLinks_.makeTrackable(name);
+		labeledOperators_.makeTrackable(name);
 	}
 
 	static ModelTermType& createTerm(PsimagLite::String name, bool wantsHermitian = true)

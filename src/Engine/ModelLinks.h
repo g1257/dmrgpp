@@ -345,7 +345,7 @@ public:
 	void makeTrackable(PsimagLite::String what)
 	{
 		if (std::find(trackables_.begin(), trackables_.end(), what) != trackables_.end())
-			err("makeTrackable: cannot find operator " + what + "\n");
+			err("makeTrackable: already called for " + what + "\n");
 		trackables_.push_back(what);
 	}
 
