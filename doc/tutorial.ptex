@@ -119,10 +119,6 @@ though, but display a message saying that the GSL is needed.
 
 \ptexPaste{InputNg_Intro}
 \ptexPaste{InputNg_main1}
-\ptexPaste{InputNg_main2}
-\ptexPaste{InputNg_main3}
-\ptexPaste{InputNg_main4}
-\ptexPaste{InputNg_main5}
 \ptexPaste{InputNg_Recap}
 
 \end{document}

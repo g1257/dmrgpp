@@ -86,11 +86,9 @@ in C++ variable \texttt{filename}. We need to create an
 object of our class MyInputCheck as well.
 We then have the following code so far
 \begin{lstlisting}
-PSIDOCCOPY InputNg_main_part1
-\end{lstlisting}
+PSIDOC_CONTINUE
 */
 
-/* PSIDOC_CODE_START InputNg_main_part1 nocapture */
 int main(int argc, char* argv[])
 {
 	if (argc != 2) {
@@ -102,50 +100,47 @@ int main(int argc, char* argv[])
 
 	std::string filename(argv[1]);
 	MyInputCheck myInputCheck;
-/* PSIDOC_CODE_END */
 
-/* PSIDOC InputNg_main2
+/* PSIDOC_RESUME
+\end{lstlisting}
 We are now ready to read the file, which we do
 with the following two statements
 \begin{lstlisting}
-PSIDOCCOPY InputNg_main_part2
+PSIDOC_CONTINUE
+*/
+
+	InputNgType::Writeable ioWriteable(filename, myInputCheck);
+	InputNgType::Readable io(ioWriteable);
+
+/* PSIDOC_RESUME
 \end{lstlisting}
 From now on, we can forget about the myInputCheck object,
 and the ioWriteable object as well, and consider
 only the io object, which we will use to read labels.
 The data from the file is now in memory, and the file
 does not have to be read or even present anymore.
-*/
-
-/* PSIDOC_CODE_START InputNg_main_part2 nocapture */
-	InputNgType::Writeable ioWriteable(filename, myInputCheck);
-	InputNgType::Readable io(ioWriteable);
-/* PSIDOC_CODE_END */
-
-/* PSIDOC InputNg_main3
 Let's now read some data from the file using the
 io object. (The data is now in memory, and it
 is \emph{not actually} read from the file, but we will use
 that terminology anyway.) We read the scalar first, and
 print it to the terminal with the following code.
 \begin{lstlisting}
-PSIDOCCOPY InputNg_code_main3
-\end{lstlisting}
-The first argument to io.readline will be filled
-with the value from the file that follows the
-label myscalar. Even though the value will be filled,
-it's best practice to initialize it first anyway.
+PSIDOC_CONTINUE
 */
 
-/* PSIDOC_CODE_START InputNg_code_main3 nocapture */
 	int myscalar = 0;
 	io.readline(myscalar, "myscalar=");
 
 	std::cout<<"I've read label myscalar with value ";
 	std::cout<<myscalar<<" from "<<io.filename()<<"\n";
-/* PSIDOC_CODE_END */
 
-/* PSIDOC InputNg_main4
+/* PSIDOC_RESUME
+\end{lstlisting}
+The first argument to io.readline will be filled
+with the value from the file that follows the
+label myscalar. Even though the value will be filled,
+it's best practice to initialize it first anyway.
+
 Let's now read a vector. Note that we use just
 io.read to read vectors (and matrices), whereas we
 use io.readline to read scalars. The vector will
@@ -156,15 +151,13 @@ and you may be able to enter in the input file something
 like myvector=[42, ...]; which will cause your vector
 to be filled with the number 42.
 \begin{lstlisting}
-PSIDOCCOPY InputNg_code_main4
-\end{lstlisting}
+PSIDOC_CONTINUE
 */
-/* PSIDOC_CODE_START InputNg_code_main4 nocapture */
 	std::vector<double> v;
 	io.read(v, "myvector");
-/* PSIDOC_CODE_END */
 
-/* PSIDOC InputNg_main5
+/* PSIDOC_RESUME
+\end{lstlisting}
 The two previous examples required the labels to
 be present in the input file. But what if we want
 to have an \emph{optional} label in the input file?

@@ -26,7 +26,7 @@ recursiveExpand(\%labels);
 
 replaceLabels($file, \%labels);
 
-printLabels(\%labels);
+#printLabels(\%labels);
 
 sub printLabels
 {
@@ -164,13 +164,11 @@ sub loadLabels
 				die "$0: ERROR: Label $label is duplicate\n";
 			}
 
-			print STDERR "Opening $label\n";
 			$inCodeBlock = 1;
 			next;
 		}
 
 		if (/\/\* PSIDOC_CODE_END \*\//) {
-			print STDERR "Closing $label\n";
 			if (!$inCodeBlock) {
 				die "$0: Closing code block while none is open\n";
 			}
@@ -208,7 +206,6 @@ sub loadLabels
 			}
 
 			$buffer = "";
-			print STDERR "Changing $label to !DISABLED\n";
 			$label = "!DISABLED";
 			$modifyLater = 1;
 			$additional = "";
