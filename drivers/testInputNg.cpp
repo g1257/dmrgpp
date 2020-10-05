@@ -186,5 +186,4 @@ will remain ``default'', and no error will be issued.
 \subsection*{Recap}
 In this lesson we have learned, blah blah.
 
-\subsection*{Exercises}
 */
