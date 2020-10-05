@@ -118,7 +118,6 @@ again the example should be able to compile without it; it won't run
 though, but display a message saying that the GSL is needed.
 
 \ptexPaste{InputNg_Intro}
-\ptexPaste{InputNg_MyInputCheck}
 \ptexPaste{InputNg_main1}
 \ptexPaste{InputNg_main2}
 \ptexPaste{InputNg_main3}

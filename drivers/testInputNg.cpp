@@ -28,13 +28,13 @@ First, note that we need two includes from PsimagLite.
 PsimagLite files are usually under src, but in some
 cases subdirectories are used. Here are the includes.
 \begin{lstlisting}
-PSIDOC_CAPTURE
+PSIDOC_CONTINUE
 */
 
 #include "InputNg.h"
 #include "InputCheckBase.h"
 
-/* PSIDOC InputNg_MyInputCheck
+/* PSIDOC_RESUME
 \end{lstlisting}
 InputNg has an option to check the inputs, so that
  you can define the labels that you expect to find

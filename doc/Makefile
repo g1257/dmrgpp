@@ -4,11 +4,11 @@ CXX = g++
 
 all: manual.pdf tutorial.pdf
 
-manual.tex: manual.ptex
+manual.tex: manual.ptex ../scripts/doc.pl
 	find ../src -iname "*.h" -or -iname "*.cpp" |\
               perl ../scripts/doc.pl manual.ptex
 
-tutorial.tex: tutorial.ptex ../src/*h ../drivers/*cpp
+tutorial.tex: tutorial.ptex ../src/*h ../drivers/*cpp ../scripts/doc.pl
 	find ../src ../drivers -iname "*.h" -or -iname "*.cpp" |\
 perl ../scripts/doc.pl tutorial.ptex
 

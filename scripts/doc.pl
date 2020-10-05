@@ -26,6 +26,16 @@ recursiveExpand(\%labels);
 
 replaceLabels($file, \%labels);
 
+printLabels(\%labels);
+
+sub printLabels
+{
+	my ($labels) = @_;
+	foreach my $key (keys %$labels) {
+		print "$key\n";
+	}
+}
+
 sub loadLines
 {
 	my ($lines) = @_;
@@ -112,12 +122,19 @@ sub loadLabels
 	my $inCodeBlock = 0;
 	my $codeBuffer = "";
 	my $modifyLater = 1;
+	my $hasContinue = 0;
 
 	for (my $i = 0; $i < $nlines; ++$i) {
 		$_ = $lines->[$i];
+		if (/\/\* *PSIDOC_RESUME */) {
+			$hasContinue = 0;
+			next;
+		}
+
 		if (/\/\* *PSIDOC +(.+$)/) {
 			my $rest = $1;
 			chomp($rest);
+			checkThatItDoesNotHaveContinue($hasContinue, "PSIDOC $rest");
 			($label, $additional) = procPsidocName($rest);
 			$modifyLater = 1;
 
@@ -132,6 +149,7 @@ sub loadLabels
 		if (/\/\* PSIDOC_CODE_START +(.+$)/) {
 			my $rest = $1;
             chomp($rest);
+			checkThatItDoesNotHaveContinue($hasContinue, "PSIDOC_CODE_START $rest");
 			$rest =~ s/\*\/ *$//;
 			if ($inCodeBlock) {
 				die "$0: Nested code blocks not allowed\n";
@@ -146,11 +164,13 @@ sub loadLabels
 				die "$0: ERROR: Label $label is duplicate\n";
 			}
 
+			print STDERR "Opening $label\n";
 			$inCodeBlock = 1;
 			next;
 		}
 
 		if (/\/\* PSIDOC_CODE_END \*\//) {
+			print STDERR "Closing $label\n";
 			if (!$inCodeBlock) {
 				die "$0: Closing code block while none is open\n";
 			}
@@ -162,6 +182,7 @@ sub loadLabels
 		}
 
 		if (/\*\//) {
+			next if ($hasContinue);
 			if ($label ne "!DISABLED" and $modifyLater) {
 				my $inlabel = $label."::";
 				$buffer =~ s/PSIDOCCOPY \$/PSIDOCCOPY ${inlabel}/g;
@@ -187,11 +208,17 @@ sub loadLabels
 			}
 
 			$buffer = "";
+			print STDERR "Changing $label to !DISABLED\n";
 			$label = "!DISABLED";
 			$modifyLater = 1;
 			$additional = "";
 		} elsif ($inCodeBlock) {
 			$codeBuffer .= $_."\n";
+			next;
+		}
+
+		if (/^[ \t]*PSIDOC_CONTINUE *$/) {
+			$hasContinue = 1;
 			next;
 		}
 
@@ -208,6 +235,13 @@ sub loadLabels
 	print STDERR "$0: $n labels found\n";
 
 	%$a = %labels;
+}
+
+sub checkThatItDoesNotHaveContinue
+{
+	my ($hasContinue, $txt) = @_;
+	return if ($hasContinue == 0);
+	die "$0: Cannot use $txt when has continue\n";
 }
 
 sub procPsidocName
