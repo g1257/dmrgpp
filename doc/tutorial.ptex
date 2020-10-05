@@ -148,5 +148,10 @@ Discuss the private members of your class, their memory usage, and lifetime.
 
 4 Check the tutorial for memory leaks.
 
+5 Define a C++ boolean variable hasTheString and after \verb!try!ing to read
+mystring from the input file, set hasTheString to true if mystring was
+actually present in the input, or false otherwise. Print the variable
+hasTheString at the end of the tutorial. \emph{Hint: Make sure you understand
+	how try/catch works in C++.}
 \end{document}
 
