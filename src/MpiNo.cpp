@@ -22,6 +22,11 @@ SizeType commRank(CommType)
 	return 0;
 }
 
+int barrier(CommType)
+{
+	return 0;
+}
+
 bool hasMpi() { return false; }
 
 void info(std::ostream&) {}

@@ -105,6 +105,8 @@ SizeType commSize(CommType);
 
 SizeType commRank(CommType);
 
+int barrier(CommType);
+
 template<typename T>
 void bcast(T&,int = 0,CommType = COMM_WORLD)
 {}
