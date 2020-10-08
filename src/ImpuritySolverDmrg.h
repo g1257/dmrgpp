@@ -42,12 +42,18 @@ public:
 	// bathParams[nBath-...] ==> energies on each bath site
 	void solve(const VectorRealType& bathParams)
 	{
-		PsimagLite::String data;
-		InputNgType::Writeable::readFile(data, params_.gsTemplate);
-		PsimagLite::String data2 = addBathParams(data, bathParams);
-		PsimagLite::String insitu = "<gs|nup|gs>";
+		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 
-		runner_.doOneRun(data2, insitu, "-");
+		if (mpiRank == 0) {
+			PsimagLite::String data;
+			InputNgType::Writeable::readFile(data, params_.gsTemplate);
+			PsimagLite::String data2 = addBathParams(data, bathParams);
+			PsimagLite::String insitu = "<gs|nup|gs>";
+
+			runner_.doOneRun(data2, insitu, "-");
+		}
+
+		PsimagLite::MPI::barrier(PsimagLite::MPI::COMM_WORLD);
 
 		PsimagLite::String data3;
 		InputNgType::Writeable::readFile(data3, params_.omegaTemplate);
@@ -57,10 +63,14 @@ public:
 
 		doType(DmrgType::TYPE_1, data4);
 
-		scaleGimp();
+		if (mpiRank == 0) {
+			scaleGimp();
 
-		std::cerr<<"Sum of Gimp="<<density()<<"\n";
-		writeGimpForDebugOnly();
+			std::cerr<<"Sum of Gimp="<<density()<<"\n";
+			writeGimpForDebugOnly();
+		}
+
+		PsimagLite::MPI::barrier(PsimagLite::MPI::COMM_WORLD);
 	}
 
 	const VectorComplexType& gimp() const { return gimp_; }
