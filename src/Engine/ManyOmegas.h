@@ -45,10 +45,13 @@ public:
 
 			PsimagLite::String logfile = "runForinput" + ttos(i) + ".cout";
 
+			std::cerr<<"ManyOmegas.h:: omega = "<<omega;
+			std::cerr<<" output="<<outputfile;
+			std::cerr<<" logfile="<<logfile<<" MPI rank=";
+			std::cerr<<PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD)<<"\n";
+
 			if (dryRun) {
-				std::cerr<<"ManyOmegas.h:: omega = "<<omega;
-				std::cerr<<" output="<<outputfile;
-				std::cerr<<" logfile="<<logfile<<" NOT done because -d\n";
+				std::cerr<<"NOT done because -d\n";
 				return;
 			}
 

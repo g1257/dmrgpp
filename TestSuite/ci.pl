@@ -330,7 +330,6 @@ sub submitBatch
 	defined($delay) or die "$0: Please say -delay delay, where delay > 0 in seconds\n";
 	($delay > 0) or die "$0: delay must be positive\n";
 	defined($extra) or $extra = "";
-	sleep(1);
 	print STDERR "$0: Submitted $batch $extra $batch\n";
 
 	my $qsub = $submit->{"command"};
