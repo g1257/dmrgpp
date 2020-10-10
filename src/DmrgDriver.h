@@ -99,6 +99,11 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 			return;
 		}
 
+		if (obsOptions.label == "H") {
+			model.printTerms();
+			return;
+		}
+
 		opC = model.naturalOperator(obsOptions.label, obsOptions.site, obsOptions.dof);
 		std::cerr<<"label="<<obsOptions.label<<" site="<<obsOptions.site;
 		std::cerr<<" dof="<<obsOptions.dof<<"\n";

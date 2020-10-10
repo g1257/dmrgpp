@@ -24,8 +24,8 @@ sub printTotal
 		if ($i > 0 && abs($omega - $prevOmega)>1e-6) {
 			print "\n";
 		}
-		
-		print "@$ptr\n"; 
+
+		print "@$ptr\n";
 		$prevOmega = $omega;
 	}
 }
@@ -41,7 +41,7 @@ sub loadFile
 		die "$0: Incorrect line $_ in $file\n" if (scalar(@temp) != 3);
 		push @$h, \@temp;
 	}
-	
+
 	close(FILE);
 }
 
@@ -54,11 +54,11 @@ sub addFile
 		@$sum = @$array;
 		return;
 	}
-	
+
 	if ($m != $n) {
 		die "$0: Trying to add an array of different size to previous $n != $m\n";
 	}
-	
+
 	for (my $i = 0; $i < $n; ++$i) {
 		my $ptr1 = $array->[$i];
 		my $ptr2 = $sum->[$i];

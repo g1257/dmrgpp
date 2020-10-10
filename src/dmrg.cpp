@@ -231,7 +231,9 @@ to the main dmrg driver are the following.
 	./operator -l c -f input.inp\end{verbatim}
 	See the function naturalOperator for each Model.
 
-	\item[-B] [Optional] Prints the basis
+	\item[-B] [Optional] Prints the basis and all operators for the model
+
+	\item[-H] [Optional] Prints the Hamiltonian terms for the model
 
 	\item[-d] [Optional, Integer] \emph{Deprecated. Use -e.}
 	Degree of freedom (spin, orbital or
@@ -247,7 +249,7 @@ to the main dmrg driver are the following.
 	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:S:tkBUV")) != -1) {
+	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:S:tkBHUV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -282,6 +284,8 @@ to the main dmrg driver are the following.
 		case 'B':
 			options.label = "B";
 			break;
+		case 'H':
+			options.label = "H";
 		case 'U':
 			unbuffered = true;
 			break;

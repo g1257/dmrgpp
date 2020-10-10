@@ -235,11 +235,65 @@ public:
 
 		const PsimagLite::String& name() const { return name_; }
 
+		void print(std::ostream& os, const LabeledOperatorsType& labeledOps) const
+		{
+			os<<"Term Name="<<name_<<" Dofs="<<links_.size()<<"\n";
+			const SizeType n = links_.size();
+			for (SizeType i = 0; i < n; ++i) {
+				const OneLink& onelink = links_[i];
+				const VectorSizeType& indices = onelink.indices;
+				const SizeType m = indices.size();
+				PsimagLite::String fermOrBos = (onelink.fermionOrBoson ==
+				                                ProgramGlobals::FermionOrBosonEnum::FERMION) ?
+				            "[Fermionic]" : "[Bosonic]";
+				os<<"\t"<<fermOrBos<<"    ";
+
+				for (SizeType j = 0; j < m; ++j) {
+					const SizeType index = indices[j];
+
+
+					assert(j < onelink.mods.length());
+					const PairSizeType lPair = findOperatorIndex(index, labeledOps);
+					const PsimagLite::String opName = labeledOps[lPair.first].name();
+					const PsimagLite::String dof = (lPair.second == 0) ? ""
+					                                                   : "?" + ttos(lPair.second);
+					const char modChar = onelink.mods[j];
+					const PsimagLite::String mod = (modChar == 'N') ? "" : "'";
+					const SizeType orbital = onelink.orbs[j];
+					const PsimagLite::String orbitalStr = (orbital == 0) ? ""
+					                                                     : "!" + ttos(orbital);
+					const SizeType kind = labeledOps[lPair.first].kindOfSite();
+					const PsimagLite::String kindStr = (kind == 0) ? "" : "[@" + ttos(kind) + "]";
+					os<<"\t"<<opName<<dof<<orbitalStr<<mod<<kindStr<<" ";
+				}
+
+				os<<"\n";
+			}
+		}
+
 	private:
 
 		SizeType findIndexOfOp(PsimagLite::String name, SizeType dof) const
 		{
 			return offsets_[name] + dof;
+		}
+
+		static PairSizeType findOperatorIndex(SizeType index,
+		                                      const LabeledOperatorsType& labeledOps)
+		{
+			const SizeType n = labeledOps.size();
+			SizeType k = 0;
+			for (SizeType i = 0; i < n; ++i) {
+				if (!labeledOps[i].isTrackable())
+					continue;
+
+				const SizeType dofs = labeledOps[i].dofs();
+				for (SizeType j = 0; j < dofs; ++j)
+					if (k++ == index) return PairSizeType(i, j);
+			}
+
+			throw PsimagLite::RuntimeError("findOperatorName: Not found for index " +
+			                               ttos(index) + "\n");
 		}
 
 		Term(const Term&);
@@ -434,6 +488,16 @@ public:
 	{
 		assert(atomKind_);
 		return atomKind_->kindsOfAtoms();
+	}
+
+	void printTerms(std::ostream& os, const LabeledOperatorsType& labeledOps) const
+	{
+		const SizeType n = terms_.size();
+		os<<"Model "<<labeledOps.modelName()<<" has "<<n<<" Hamiltonian terms\n";
+		for (SizeType i = 0; i < n; ++i) {
+			os<<"Term "<<i<<" ";
+			terms_[i]->print(os, labeledOps);
+		}
 	}
 
 private:

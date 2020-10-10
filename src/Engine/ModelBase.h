@@ -572,6 +572,11 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		}
 	}
 
+	void printTerms() const
+	{
+		modelLinks_.printTerms(std::cout, labeledOperators_);
+	}
+
 	const SuperGeometryType& superGeometry() const
 	{
 		return modelCommon_.superGeometry();
