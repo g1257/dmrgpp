@@ -30,7 +30,7 @@ public:
 
 	SizeType taskNumber(SizeType threadNum, SizeType p) const
 	{
-		return p*blockSize_ + threadNum;
+		return p + threadNum*blockSize_;
 	}
 
 private:
