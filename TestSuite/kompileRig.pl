@@ -11,10 +11,10 @@ main(4, $makeJ, \@ARGV);
 
 sub main
 {
-	my ($items, $makeJ, $codes) = @_;
+	my ($items, $makeJ, $clineCodes) = @_;
 
 	for (my $i = 0; $i < $items; ++$i) {
-		kompileRig($i, $makeJ, $codes);
+		kompileRig($i, $makeJ, $clineCodes);
 	}
 
 	print "---------------------\n";
@@ -22,20 +22,27 @@ sub main
 
 sub kompileRig
 {
-	my ($ind, $makeJ, $codes) = @_;
+	my ($ind, $makeJ, $clineCodes) = @_;
 	my $command = "make clean; make -j $makeJ";
-	my @paths = qw!../../PsimagLite/lib !;
-	addCodes(\@paths, $codes);
+	my @paths;
+	my @codes = addCodes(\@paths, $clineCodes);
 	my $n = scalar(@paths);
+	die "$0: Number of Codes and Paths must be equal but $n != ".scalar(@codes)."\n"
+	if ($n != scalar(@codes));
 	for (my $i = 0; $i < $n; ++$i) {
-		kompileRigEach($ind, $paths[$i], $command, $codes->[$i]);
+		kompileRigEach($ind, $paths[$i], $command, $codes[$i]);
 	}
 }
 
 sub kompileRigEach
 {
 	my ($ind, $path, $command, $code) = @_;
-	my $psiTag = "../../dmrgpp/TestSuite/inputs/KompileRig.psiTag";
+	return if ($code eq "cincuenta" and $ind < 2);
+
+	print STDERR "-------------->> Compiling $code with profile $ind\n";
+	my $psiTag0 = "TestSuite/inputs/KompileRig.psiTag";
+	my $psiTag = "../../dmrgpp/$psiTag0";
+	$psiTag = $psiTag0 if (-r "$path/$psiTag0");
 	my $cmd = "cd $path; perl configure.pl -f KompileRig$ind -c $psiTag";
 	executeAndDieIfNotSuccess($cmd);
 	$cmd = "cd $path; $command";
@@ -47,12 +54,13 @@ sub kompileRigEach
 
 sub addCodes
 {
-	my ($paths, $codes) = @_;
-	addAll($codes);
-	my $n = scalar(@$codes);
+	my ($paths, $clineCodes) = @_;
+	my @codes = addAll($paths, $clineCodes);
+	my $n = scalar(@codes);
 	for (my $i = 0; $i < $n; ++$i) {
-		my $code = $codes->[$i];
-		if ($code eq "dmrgpp") {
+		my $code = $codes[$i];
+		if ($code eq "PsimagLiteLib") {
+		} elsif ($code eq "dmrgpp") {
 			push @$paths, "../src";
 		} elsif ($code eq "LanczosPlusPlus") {
 			push @$paths, "../../LanczosPlusPlus/src";
@@ -62,7 +70,7 @@ sub addCodes
 			push @$paths, "../../FreeFermions/examples";
 		} elsif ($code eq "merapp") {
 			push @$paths, "../../merapp/src";
-		} elsif ($code eq "PsimagLite") {
+		} elsif ($code eq "PsimagLiteDrivers") {
 			push @$paths, " ../../PsimagLite/drivers";
 		} elsif ($code eq "cincuenta") {
 			push @$paths, "../../cincuenta/src";
@@ -70,13 +78,24 @@ sub addCodes
 			die "$0: Unknown code $code\n";
 		}
 	}
+
+	return @codes;
 }
 
 sub addAll
 {
-	my ($codes) = @_;
-	return if (scalar(@$codes) > 0);
-	@$codes = qw/PsimagLite dmrgpp  LanczosPlusPlus cincuenta/; # BetheAnsatz  FreeFermions merapp/;
+	my ($paths, $clineCodes) = @_;
+	push @$paths, "../../PsimagLite/lib ";
+	my @codes = ("PsimagLiteLib");
+	my $n = scalar(@$clineCodes);
+	if ($n > 0) {
+		push @codes, @$clineCodes;
+		return @codes;
+	}
+
+	my @codes2 = qw/PsimagLiteDrivers dmrgpp  LanczosPlusPlus cincuenta/; # BetheAnsatz  FreeFermions merapp/;
+	push @codes, @codes2;
+	return @codes;
 }
 
 sub flattenWithNewLines
