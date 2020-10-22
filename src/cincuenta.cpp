@@ -28,7 +28,14 @@ int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("dmft", &argc, &argv, 1);
 	typedef PsimagLite::InputNg<Dmft::InputCheck> InputNgType;
-	typedef Dmft::DmftSolver<std::complex<double>,  InputNgType> DmftSolverType;
+	typedef
+#ifndef USE_FLOAT
+	double
+#else
+	float
+#endif
+	RealType;
+	typedef Dmft::DmftSolver<std::complex<RealType>,  InputNgType> DmftSolverType;
 	typedef DmftSolverType::ParamsDmftSolverType ParamsDmftSolverType;
 	int opt = 0;
 	bool versionOnly = false;
