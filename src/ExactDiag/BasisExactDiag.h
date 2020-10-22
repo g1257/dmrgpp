@@ -13,9 +13,7 @@ public:
 	typedef BasisOneSpin::LabeledOperatorType LabeledOperatorType;
 
 	BasisExactDiag(SizeType sites, SizeType nup,SizeType ndown)
-	    : nup_(nup),
-	      ndown_(ndown),
-	      basis1_(sites, nup),
+	    : basis1_(sites, nup),
 	      basis2_(sites, ndown)
 	{}
 

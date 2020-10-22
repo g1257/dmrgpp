@@ -14,7 +14,6 @@ public:
 	typedef LabeledOperator LabeledOperatorType;
 
 	BasisOneSpin(SizeType nsite, SizeType npart)
-	    : npart_(npart)
 	{
 		if (nsite_>0 && nsite!=nsite_)
 			err("BasisOneSpin: All basis must have same number of sites\n");
