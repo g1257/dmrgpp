@@ -24,3 +24,4 @@ string P0="c'[5]*c[6]*|gs>+c'[6]*c[7]*|gs>";
 GsWeight=0.2;
 OutputFile="data121";
 #ci dmrg arguments= -p 12 "<gs|P0>"
+#ci CollectBrakets 0

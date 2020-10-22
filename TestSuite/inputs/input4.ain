@@ -28,6 +28,6 @@ TSPSites=[7];
 TSPLoops=[2];
 TSPProductOrSum="product";
 
-TSPOperator=expression;
-OperatorExpression="c";
+string TSPOp0:TSPOperator=expression;
+string TSPOp0:OperatorExpression="c";
 
