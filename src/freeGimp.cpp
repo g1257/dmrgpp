@@ -31,7 +31,7 @@ void computeFreeGimp(Dmft::FunctionOfFrequency<ComplexType>& freeGimp,
 	for (SizeType i = 0; i < n; ++i) {
 		const RealType wn = gamma.omega(i);
 		const ComplexType value(0, wn);
-		freeGimp(i) = 1.0/(value - gamma(i));
+		freeGimp(i) = static_cast<RealType>(1.0)/(value - gamma(i));
 		sum += PsimagLite::imag(freeGimp(i));
 	}
 
@@ -45,7 +45,13 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	typedef double RealType;
+	typedef
+#ifndef USE_FLOAT
+	double
+#else
+	float
+#endif
+	RealType;
 	typedef std::complex<RealType> ComplexType;
 	typedef PsimagLite::InputNg<Dmft::InputCheck> InputNgType;
 	typedef Dmft::ParamsDmftSolver<RealType, InputNgType> ParamsDmftSolverType;
