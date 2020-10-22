@@ -64,7 +64,9 @@ sub addCodes
 			push @$paths, "../../merapp/src";
 		} elsif ($code eq "PsimagLite") {
 			push @$paths, " ../../PsimagLite/drivers";
-		} else {
+		} elsif ($code eq "cincuenta") {
+			push @$paths, "../../cincuenta/src";
+		} else	{
 			die "$0: Unknown code $code\n";
 		}
 	}
@@ -74,7 +76,7 @@ sub addAll
 {
 	my ($codes) = @_;
 	return if (scalar(@$codes) > 0);
-	@$codes = qw/PsimagLite dmrgpp  LanczosPlusPlus/; # BetheAnsatz  FreeFermions merapp/;
+	@$codes = qw/PsimagLite dmrgpp  LanczosPlusPlus cincuenta/; # BetheAnsatz  FreeFermions merapp/;
 }
 
 sub flattenWithNewLines
