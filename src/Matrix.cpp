@@ -211,8 +211,8 @@ void geev(char jobvl,
 }
 
 template<typename T>
-typename std::enable_if<Loki::TypeTraits<T>::isArith, void>::type
-inverse(Matrix<std::complex<T> > &m)
+typename std::enable_if<IsComplexNumber<T>::True, void>::type
+inverse(Matrix<T> &m)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("inverse: NO LAPACK!\n");
@@ -220,13 +220,13 @@ inverse(Matrix<std::complex<T> > &m)
 	int n = m.rows();
 	int info = 0;
 	Vector<int>::Type ipiv(n,0);
-	psimag::LAPACK::GETRF(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
+	psimag::LAPACK::GETRF(n, n, &(m(0,0)), n, &(ipiv[0]), info);
 	int lwork = -1;
-	typename Vector<std::complex<T> >::Type work(2);
-	psimag::LAPACK::GETRI(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	typename Vector<T>::Type work(2);
+	psimag::LAPACK::GETRI(n, &(m(0,0)), n, &(ipiv[0]), &(work[0]), lwork, info);
 	lwork = static_cast<int>(PsimagLite::real(work[0]));
 	work.resize(lwork+2);
-	psimag::LAPACK::GETRI(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	psimag::LAPACK::GETRI(n, &(m(0,0)), n, &(ipiv[0]), &(work[0]), lwork, info);
 	String s = "[cz]getri_ failed\n";
 	if (info!=0) throw RuntimeError(s.c_str());
 #endif
@@ -242,17 +242,25 @@ inverse(Matrix<T> &m)
 	int n = m.rows();
 	int info = 0;
 	Vector<int>::Type ipiv(n,0);
-	psimag::LAPACK::GETRF(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
+	psimag::LAPACK::GETRF( n, n, &(m(0,0)), n, &(ipiv[0]), info);
 	int lwork = -1;
 	typename Vector<T>::Type work(2);
-	psimag::LAPACK::GETRI(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	psimag::LAPACK::GETRI(n, &(m(0,0)), n, &(ipiv[0]), &(work[0]), lwork, info);
 	lwork = static_cast<int>(work[0]);
 	work.resize(lwork+2);
-	psimag::LAPACK::GETRI(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
-	String s = "dgetri_ failed\n";
+	psimag::LAPACK::GETRI(n, &(m(0,0)), n, &(ipiv[0]), &(work[0]), lwork, info);
+	String s = "[sd]getri_ failed\n";
 	if (info!=0) throw RuntimeError(s.c_str());
 #endif
 }
+
+template void inverse<double>(Matrix<double>&);
+
+template void inverse<float>(Matrix<float>&);
+
+template void inverse<std::complex<double> >(Matrix<std::complex<double> >&);
+
+template void inverse<std::complex<float> >(Matrix<std::complex<float> >&);
 
 } // namespace PsimagLite
 
