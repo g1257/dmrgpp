@@ -531,6 +531,10 @@ void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type& eigs,char option
 void inverse(Matrix<std::complex<double> >& m);
 
 void inverse(Matrix<double>& m);
+
+void inverse(Matrix<std::complex<float> >& m);
+
+void inverse(Matrix<float>& m);
 // end in Matrix.cpp
 
 template<typename T>

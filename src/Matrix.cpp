@@ -210,7 +210,9 @@ void geev(char jobvl,
 #endif
 }
 
-void inverse(Matrix<std::complex<double> > &m)
+template<typename T>
+typename std::enable_if<Loki::TypeTraits<T>::isArith, void>::type
+inverse(Matrix<std::complex<T> > &m)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("inverse: NO LAPACK!\n");
@@ -218,19 +220,21 @@ void inverse(Matrix<std::complex<double> > &m)
 	int n = m.rows();
 	int info = 0;
 	Vector<int>::Type ipiv(n,0);
-	psimag::LAPACK::zgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
+	psimag::LAPACK::GETRF(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
 	int lwork = -1;
-	Vector<std::complex<double> >::Type work(2);
-	psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	typename Vector<std::complex<T> >::Type work(2);
+	psimag::LAPACK::GETRI(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
 	lwork = static_cast<int>(PsimagLite::real(work[0]));
 	work.resize(lwork+2);
-	psimag::LAPACK::zgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
-	String s = "zgetri_ failed\n";
+	psimag::LAPACK::GETRI(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	String s = "[cz]getri_ failed\n";
 	if (info!=0) throw RuntimeError(s.c_str());
 #endif
 }
 
-void inverse(Matrix<double> &m)
+template<typename T>
+typename std::enable_if<Loki::TypeTraits<T>::isArith, void>::type
+inverse(Matrix<T> &m)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("inverse: NO LAPACK!\n");
@@ -238,13 +242,13 @@ void inverse(Matrix<double> &m)
 	int n = m.rows();
 	int info = 0;
 	Vector<int>::Type ipiv(n,0);
-	psimag::LAPACK::dgetrf_(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
+	psimag::LAPACK::GETRF(&n,&n,&(m(0,0)),&n,&(ipiv[0]),&info);
 	int lwork = -1;
-	Vector<double>::Type work(2);
-	psimag::LAPACK::dgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	typename Vector<T>::Type work(2);
+	psimag::LAPACK::GETRI(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
 	lwork = static_cast<int>(work[0]);
 	work.resize(lwork+2);
-	psimag::LAPACK::dgetri_(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
+	psimag::LAPACK::GETRI(&n,&(m(0,0)),&n,&(ipiv[0]),&(work[0]),&lwork,&info);
 	String s = "dgetri_ failed\n";
 	if (info!=0) throw RuntimeError(s.c_str());
 #endif

@@ -33,7 +33,11 @@ extern "C" void zgesv_(int*,int*,std::complex<double>*,int*,int*,std::complex<do
 //MSS
 extern "C" int  dgetrf_(int*, int*, double*, int*, int*, int*);
 
+extern "C" int  sgetrf_(int*, int*, float*, int*, int*, int*);
+
 extern "C" int  zgetrf_(int*, int*, std::complex<double>*, int*, int*, int*);
+
+extern "C" int  cgetrf_(int*, int*, std::complex<float>*, int*, int*, int*);
 
 extern "C" int  zgetri_(int*,
                         std::complex<double>*,
@@ -43,7 +47,17 @@ extern "C" int  zgetri_(int*,
                         int*,
                         int*);
 
+extern "C" int  cgetri_(int*,
+                        std::complex<float>*,
+                        int*,
+                        int*,
+                        std::complex<float>*,
+                        int*,
+                        int*);
+
 extern "C" int  dgetri_(int*, double*, int*, int*,  double*, int*, int*);
+
+extern "C" int  sgetri_(int*, float*, int*, int*,  float*, int*, int*);
 
 extern "C" int  dgesdd_(char* jobz,
                         int* m,
@@ -325,6 +339,16 @@ inline void GETRF(int ma,int na,std::complex<double>* a,int lda,int* pivot,int& 
 	zgetrf_(&ma,&na,a,&lda,pivot,&info);
 }
 
+inline void GETRF(int ma, int na, float* a, int lda, int* pivot, int& info)
+{
+	sgetrf_(&ma,&na,a,&lda,pivot,&info);
+}
+
+inline void GETRF(int ma,int na,std::complex<float>* a,int lda,int* pivot,int& info)
+{
+	cgetrf_(&ma,&na,a,&lda,pivot,&info);
+}
+
 inline void GETRI(int na,
                   double* a,
                   int lda,
@@ -346,6 +370,29 @@ inline void GETRI(int na,
 {
 	zgetri_(&na,a,&lda,pivot,work,&lwork,&info);
 }
+
+inline void GETRI(int na,
+                  float* a,
+                  int lda,
+                  int* pivot,
+                  float* work,
+                  int lwork,
+                  int& info)
+{
+	sgetri_(&na,a,&lda,pivot,work,&lwork,&info);
+}
+
+inline void GETRI(int na,
+                  std::complex<float>* a,
+                  int lda,
+                  int* pivot,
+                  std::complex<float>* work,
+                  int lwork,
+                  int& info)
+{
+	cgetri_(&na,a,&lda,pivot,work,&lwork,&info);
+}
+
 
 inline void GESDD(char* jobz,
                   int* m,
