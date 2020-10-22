@@ -83,8 +83,15 @@ to the main dmrg driver are the following.
 	if (versionOnly) return 0;
 
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-	typedef Dmrg::OmegaParams<InputNgType, double> OmegaParamsType;
-	typedef Dmrg::ManyOmegas<double, OmegaParamsType> ManyOmegasType;
+	typedef
+#ifndef USE_FLOAT
+	double
+#else
+	float
+#endif
+	RealType;
+	typedef Dmrg::OmegaParams<InputNgType, RealType> OmegaParamsType;
+	typedef Dmrg::ManyOmegas<RealType, OmegaParamsType> ManyOmegasType;
 
 	PsimagLite::String data;
 	ManyOmegasType::InputNgType::Writeable::readFile(data, inputfile);
