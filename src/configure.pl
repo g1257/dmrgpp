@@ -41,7 +41,7 @@ if ($lto == 1) {
 	$lto = "";
 }
 
-my $basicConfig = "ConfigBase.psiTag";
+my $basicConfig = "../../cincuenta/TestSuite/inputs/ConfigBase.psiTag";
 my @configFiles = NewMake::configFilesList($basicConfig, $config);
 
 
