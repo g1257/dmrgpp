@@ -129,17 +129,18 @@ private:
 
 		SizeType totalMatsubaras = sigma_.totalMatsubaras();
 		SizeType totalKvalues = dispersion_->size();
+		static const RealType one = 1.0; // needed for float
 		for (SizeType i = 0; i < totalMatsubaras; ++i) {
 			const ComplexOrRealType iwn = ComplexOrRealType(0.0, sigma_.omega(i));
 			const ComplexOrRealType value = sigma_(i);
 			ComplexOrRealType sum = 0.0;
 			for (SizeType j = 0; j < totalKvalues; ++j ) {
 				RealType ek = dispersion_->operator ()(j);
-				sum += 1.0/(iwn -ek + mu_ - value);
+				sum += one/(iwn -ek + mu_ - value);
 			}
 
 			latticeG_(i) = sum/static_cast<RealType>(totalKvalues);
-			gammaG_(i) = iwn - 1.0/latticeG_(i) - value;
+			gammaG_(i) = iwn - one/latticeG_(i) - value;
 		}
 	}
 
@@ -154,6 +155,7 @@ private:
 		typename PsimagLite::Vector<RealType>::Type pts(2,0);
 		pts[0] = dos_->lowerBound();
 		pts[1] = dos_->upperBound();
+		static const RealType one = 1.0; // needed for float
 		SizeType totalMatsubaras = sigma_.totalMatsubaras();
 		for (SizeType i = 0; i < totalMatsubaras; ++i) {
 			const ComplexOrRealType iwn = ComplexOrRealType(0.0, sigma_.omega(i));
@@ -161,7 +163,7 @@ private:
 			integrand0.update(iwn - value);
 			integrand1.update(iwn - value);
 			latticeG_(i) = ComplexOrRealType(integrator0(pts), integrator1(pts));
-			gammaG_(i) = iwn - 1.0/latticeG_(i) - value;
+			gammaG_(i) = iwn - one/latticeG_(i) - value;
 		}
 	}
 
