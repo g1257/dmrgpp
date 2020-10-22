@@ -148,7 +148,6 @@ private:
 	static PsimagLite::Matrix<SizeType> comb_;
 	static PsimagLite::Vector<WordType>::Type bitmask_;
 	SizeType size_;
-	SizeType npart_;
 	PsimagLite::Vector<WordType>::Type data_;
 };
 

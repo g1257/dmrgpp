@@ -108,8 +108,6 @@ public:
 
 private:
 
-	SizeType nup_;
-	SizeType ndown_;
 	BasisOneSpin basis1_;
 	BasisOneSpin basis2_;
 };
