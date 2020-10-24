@@ -12,6 +12,7 @@
 #include "PsimagLite.h"
 #include "Matsubaras.h"
 #include "ImpuritySolverBase.h"
+#include "Geometry/Star.h"
 
 namespace Dmft {
 
@@ -33,6 +34,8 @@ public:
 	typedef Matsubaras<RealType> MatsubarasType;
 	typedef Dmrg::ManyOmegas<RealType, MatsubarasType> ManyOmegasType;
 	typedef Dmrg::ProcOmegas<RealType, MatsubarasType> ProcOmegasType;
+
+	static const SizeType CENTER = PsimagLite::Star<ComplexOrRealType,int>::CENTER;
 
 	ImpuritySolverDmrg(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params), runner_(params_.precision, app)
@@ -78,14 +81,13 @@ public:
 private:
 
 	static PsimagLite::String addBathParams(PsimagLite::String data,
-	                                           const VectorRealType& bathParams)
+	                                        const VectorRealType& bathParams)
 	{
 		const SizeType nBath = int(bathParams.size() / 2);
 		const PsimagLite::String connectors = findBathParams(0, nBath, bathParams);
 		const PsimagLite::String label = "dir0:Connectors=[" + connectors + "];\n";
-		const PsimagLite::String potentialV = findBathParams(nBath, 2*nBath, bathParams);
-		const PsimagLite::String label2 = "potentialV=[0, " + potentialV +
-		        ", 0, " + potentialV + "];\n";
+		const PsimagLite::String potentialV = findBathParams2(nBath, 2*nBath, bathParams);
+		const PsimagLite::String label2 = "potentialV=[" + potentialV + "," + potentialV + "];\n";
 
 		return data + label + label2;
 	}
@@ -101,12 +103,29 @@ private:
 		return buffer;
 	}
 
+	static PsimagLite::String findBathParams2(SizeType start,
+	                                          SizeType end,
+	                                          const VectorRealType& bathParams)
+	{
+		PsimagLite::String buffer = ttos(bathParams[start]);
+		SizeType j = start + 1;
+		for (SizeType i = start + 1; i < end + 1; ++i) {
+			assert(j < bathParams.size());
+			PsimagLite::String tmp = ttos(bathParams[j]);
+			if (i - start == CENTER) tmp = "0";
+			else ++j;
+			buffer += "," + tmp;
+		}
+
+		return buffer;
+	}
+
 	static PsimagLite::String addTypeAndObs(DmrgType t, PsimagLite::String data)
 	{
 		const PsimagLite::String obsTc = (t == DmrgType::TYPE_0) ? "c'" : "c";
 		const SizeType tt = (t == DmrgType::TYPE_0) ? 0 : 1;
 		return data +  "integer DynamicDmrgType=" + ttos(tt) + ";\n" +
-		        "string TSPOp1:OperatorExpression=\"" + obsTc + "\";\n";
+		        "string TSPOp0:OperatorExpression=\"" + obsTc + "\";\n";
 	}
 
 	void doType(DmrgType t, PsimagLite::String data)
@@ -163,19 +182,27 @@ private:
 			fin>>val;
 			SizeType n = 0;
 			fin>>n;
-			SizeType site = 0;
-			fin>>site;
-			if (site != 0)
-				err("readGimp: Expecting site 0, but found " + ttos(site) + " instead\n");
 
+			bool centerSeen = false;
 			RealType val1 = 0;
-			fin>>val1;
-
 			RealType val2 = 0;
-			fin>>val2;
 
-			if (ind >= gimp_.size())
-				break;
+			for (SizeType i = 0; i <= CENTER; ++i) {
+				SizeType site = 0;
+				fin>>site;
+
+				fin>>val1;
+
+				fin>>val2;
+
+				if (site == CENTER) {
+					centerSeen = true;
+					break;
+				}
+			}
+
+			if (!centerSeen)
+				err("Internal error: center " + ttos(CENTER) + " not seen, freq id = " + ttos(ind) + "\n");
 
 			if (t == DmrgType::TYPE_0)
 				gimp_[ind] = ComplexType(val2, val1);
@@ -184,9 +211,14 @@ private:
 
 			++ind;
 
+			if (ind >= gimp_.size())
+				break;
+
 			if (n == 1) continue;
 
-			--n;
+			const SizeType tmp = CENTER + 1;
+			n -= tmp;
+
 			for (SizeType i = 0; i < 3*n; ++i)
 				fin>>val1;
 		}

@@ -6,7 +6,7 @@ GeometryKind="star";
 GeometryOptions="none";
 
 #Model params
-hubbardU=[4.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+hubbardU=[0.0, 4.0, 0.0, 0.0, 0.0, 0.0];
 Model="HubbardOneBand";
 SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,CorrectionVectorTargeting,restart,minimizeDisk,hd5dontprint";
 string RestartFilename="gsForDMFT";
@@ -22,8 +22,8 @@ integer TridiagSteps=400;
 real TridiagEps=1e-9;
 string TruncationTolerance="1e-10,100";
 real CorrectionA=0;
-TSPSites=[1, 0];
-TSPLoops=[0, 0];
+TSPSites=[1];
+TSPLoops=[0];
 TSPProductOrSum="product";
 string CorrectionVectorFreqType="Matsubara";
 
@@ -35,8 +35,5 @@ GsWeight=0.1;
 string Intent="GimpMatsubara";
 
 string TSPOp0:TSPOperator="expression";
-string TSPOp0:OperatorExpression="identity";
-
-string TSPOp1:TSPOperator="expression";
 
 
