@@ -88,6 +88,8 @@ public:
 
 	enum { DIRECTION_S};
 
+	static const SizeType CENTER = 1;
+
 	Star() {}
 
 	Star(SizeType linSize,InputType&)
@@ -122,7 +124,7 @@ public:
 	bool connected(SizeType i1,SizeType i2) const
 	{
 		if (i1 == i2) return false;
-		return (i1 == 0 || i2 == 0);
+		return (i1 == CENTER || i2 == CENTER);
 	}
 
 	// assumes i1 and i2 are connected
