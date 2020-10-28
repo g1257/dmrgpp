@@ -1,3 +1,64 @@
+2020-10-27 Version 5.74
+
+User interface:
+
+* hd5 file not created when minimizeDisk is in SolverOptions
+
+* SolverOptions=h5dontPrint disables
+hd5 debugging messages in debug mode
+
+* operator -B -s site
+now prints more information about basis
+and operators, including names and dofs
+
+* operator -H
+now prints Hamiltonian terms
+
+Model Specific:
+
+* Kitaev has splus and sminus now (Shi Feng)
+
+* Heisenberg: operator maximal added (Pontus)
+
+* HolsteinThin: bug fix for operator n (Alberto)
+
+Scripts:
+
+* outSpaceToDos.pl: sort frequencies numerically (Pontus)
+
+* procOmegas.pl: only warn if TSPSite is not center (Alberto)
+
+* procOmegas.pl -c "" for use with manyOmegas C++ driver
+
+* ProcOmegas.h added for cincuenta
+
+* pgfPlot2Sum.pl added: adds two or more
+.pgfplots files
+
+* Pgfplot2max.pl added: For each k, prints
+the omega for which spectrum is maximal.
+
+* vonNeumann.pl to extract entropies from cout file (Shi Feng)
+
+Drivers:
+
+* ManyOmegas added, and MPI support added for it
+
+Engine work:
+
+* Trackable operators refactored
+
+* DmrgRunner.h
+
+* Statics cleared for cincuenta; DMRG++ is reentrant
+(but not yet for observe)
+
+TestSuite and rigs
+
+* kompile rig compiles cincuenta
+
+* tests 4 and 121 fixed
+
 2020-07-31 Version 5.72
 
 Interface changes:
