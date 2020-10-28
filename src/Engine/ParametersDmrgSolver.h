@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "Vector.h"
 #include "Provenance.h"
-#include "BoostSerializationHeaders.h"
 #include "Io/IoSelector.h"
 #include "PsimagLite.h"
 #include "RestartStruct.h"
