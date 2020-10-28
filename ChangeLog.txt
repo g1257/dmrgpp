@@ -1,3 +1,26 @@
+2020-10-27 Version 2.74
+
+* PsimagLite MPI wrapper, called InterNodeMpi, has been added
+(see mailing list for a description)
+
+* LongChain honors IsPeriodicX=1 now
+
+* IoNg::dontPrintDebug() now available,
+which stops canary from singing even in debug mode
+
+* CanonicalExpression supports complex scalars now
+
+* InputCheckBase added
+
+* tutorial with Lesson I: testInputNg
+
+* doc.pl supports code sections
+
+* Matrix inverse supports float and complex<float>
+
+* Star geometry with CENTER == 1
+
+
 2020-07-31 Version 2.72
 
 * GetBraOrKet: R vectors, like in |R0>, etc,
