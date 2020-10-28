@@ -111,16 +111,6 @@ public:
 		if (ladder_) delete ladder_;
 	}
 
-	template<class Archive>
-	void write(Archive & ar, const unsigned int)
-	{
-		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
-		ar & linSize_;
-		ar & bathSitesPerSite_;
-		ar & clusterSize_;
-		ar & ladder_;
-	}
-
 	virtual SizeType dirs() const { return 3; }
 
 	virtual SizeType length(SizeType) const

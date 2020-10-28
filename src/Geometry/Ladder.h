@@ -125,15 +125,6 @@ public:
 			throw RuntimeError("Ladder: leg must divide number of sites\n");
 	}
 
-	template<class Archive>
-	void write(Archive & ar, const unsigned int)
-	{
-		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType,InputType> >(*this);
-		ar & linSize_;
-		ar & leg_;
-		ar & isPeriodicY_;
-	}
-
 	virtual SizeType maxConnections() const { return (isPeriodicX_) ? linSize_ : leg_ + 1; }
 
 	virtual SizeType dirs() const { return 2; }

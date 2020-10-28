@@ -96,13 +96,6 @@ public:
 	    : linSize_(linSize)
 	{}
 
-	template<class Archive>
-	void write(Archive & ar, const unsigned int)
-	{
-		ar & boost::serialization::base_object<GeometryBase<ComplexOrRealType, InputType> >(*this);
-		ar & linSize_;
-	}
-
 	virtual SizeType maxConnections() const
 	{
 		return linSize_ - 1;

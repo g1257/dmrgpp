@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "GeometryTerm.h"
 #include "GeometryEx.h"
-#include "BoostSerializationHeaders.h"
 #include "Io/IoSerializerStub.h"
 
 namespace PsimagLite {
@@ -125,13 +124,6 @@ public:
 			                                         linSize_);
 			terms_[i] = new GeometryTermType(io,aux);
 		}
-	}
-
-	Geometry(String filename)
-	{
-		std::ifstream ifs(filename.c_str());
-		boost::archive::text_iarchive ia(ifs);
-		ia >> (*this);
 	}
 
 	~Geometry()

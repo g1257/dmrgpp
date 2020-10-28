@@ -2,7 +2,6 @@
 #define GEOMETRY_EX_H
 
 #include "Vector.h"
-#include "BoostSerializationHeaders.h"
 
 #ifndef USE_MS_GEOMETRY
 
