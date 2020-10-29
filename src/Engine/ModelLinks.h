@@ -124,19 +124,6 @@ public:
 			return true;
 		}
 
-		bool areSiteKindsEqual() const
-		{
-			const SizeType n = vectorKind_.size();
-			if (n < 2) return true;
-			const SizeType kind0 = vectorKind_[0];
-			for (SizeType i = 1; i < n; ++i) {
-				if (vectorKind_[i] != kind0)
-					return false;
-			}
-
-			return true;
-		}
-
 		template<typename OpaqueOp>
 		void push(const OpaqueOp& op1,
 		          char mod1,
@@ -474,12 +461,6 @@ public:
 		}
 
 		throw PsimagLite::RuntimeError("hilbertSize FATAL: " + ttos(kindOfSite) + "\n");
-	}
-
-	bool areSiteKindsEqual(SizeType termIndex) const
-	{
-		assert(termIndex < terms_.size());
-		return terms_[termIndex]->areSiteKindsEqual();
 	}
 
 	bool areSitesCompatibleForThisTerm(SizeType termIndex,
