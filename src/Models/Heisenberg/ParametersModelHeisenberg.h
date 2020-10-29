@@ -94,8 +94,9 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
 	ParametersModelHeisenberg(IoInputType& io)
-	    : BaseType(io, false)
+	    : BaseType(io, false), twiceTheSpinBorder(0)
 	{
+		PsimagLite::String model;
 		io.readline(model, "Model=");
 
 		io.readline(twiceTheSpin, "HeisenbergTwiceS=");

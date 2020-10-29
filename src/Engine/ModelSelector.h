@@ -77,6 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/UlsOsu/UlsOsu.h"
 #include "../Models/Graphene/Graphene.h"
 #include "../Models/GaugeSpin/GaugeSpin.h"
+#include "../Models/Heisenberg/HeisenbergMix.h"
 
 #endif
 
@@ -118,6 +119,7 @@ class ModelSelector {
 	typedef Graphene<ModelBaseType> GrapheneType;
 	typedef HolsteinThin<ModelBaseType> HolsteinThinType;
 	typedef GaugeSpin<ModelBaseType> GaugeSpinType;
+	typedef HeisenbergMix<ModelBaseType> HeisenbergMixType;
 #endif
 	// end models
 
@@ -206,6 +208,8 @@ public:
 			model_ = new GrapheneType(solverParams, io, geometry);
 		} else if (name_ == "GaugeSpin") {
 			model_ = new GaugeSpinType(solverParams, io, geometry);
+		} if (name_ == "Heisenberg") {
+			model_ = new HeisenbergMixType(solverParams, io, geometry);
 		}
 #endif
 		else {

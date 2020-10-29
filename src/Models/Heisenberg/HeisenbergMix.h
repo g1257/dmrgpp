@@ -147,14 +147,12 @@ public:
 
 	HeisenbergMix(const SolverParamsType& solverParams,
 	              InputValidatorType& io,
-	              const SuperGeometryType& geometry,
-	              PsimagLite::String additional)
+	              const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
 	      superGeometry_(geometry),
-	      additional_(additional),
 	      atomKind_(nullptr)
 	{
 		SizeType n = superGeometry_.numberOfSites();
@@ -280,7 +278,7 @@ protected:
 		fillLabeledOperators(qns, offset, SiteType::SITE_BORDER);
 	}
 
-	SizeType fillLabeledOperators(VectorQnType& qns, SizeType offset, SizeType typeOfSite)
+	SizeType fillLabeledOperators(VectorQnType& qns, SizeType offset, SiteType typeOfSite)
 	{
 		SizeType site = (typeOfSite == SiteType::SITE_MIDDLE) ? 1 : 0;
 		SizeType indOfKindOfSite = (typeOfSite == SiteType::SITE_MIDDLE) ? 0 : 1;
@@ -326,9 +324,6 @@ protected:
 		                   su2related3);
 		this->createOpsLabel("sx", indOfKindOfSite).push(myOp3);
 
-		if (additional_ == "Anisotropic")
-			this->makeTrackable("sx", indOfKindOfSite);
-
 		tmpMatrix = findMaximal(site, natBasis);
 		OperatorType myOp4(tmpMatrix,
 		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -365,25 +360,20 @@ protected:
 			typename ModelTermType::Su2Properties su2properties(2, -1, 2);
 			spsm.push(splus, 'N', splus, 'C', valueModifierTermOther, su2properties);
 		}
-
-		if (additional_ == "Anisotropic") {
-
-			ModelTermType& sxsx = ModelBaseType::createTerm("sxsx");
-
-			OpForLinkType sx("sx");
-
-			sxsx.push(sx, 'N', sx, 'N', typename ModelTermType::Su2Properties(2, 1, 0));
-		}
-
-		aklt_.fillModelLinks();
 	}
 
 private:
 
+	SizeType getSpin(SizeType site) const
+	{
+		const SizeType n = superGeometry_.numberOfSites();
+		return (site == 0 || site == n - 1) ? SiteType::SITE_BORDER : SiteType::SITE_MIDDLE;
+	}
+
 	void setBasis(HilbertBasisType& natBasis, SizeType site) const
 	{
 		const SizeType twiceTheSpin = getSpin(site);
-		const SizeType total = utils::powUint(twiceTheSpin + 1, block.size());
+		const SizeType total = twiceTheSpin + 1;
 		natBasis.resize(total);
 		for (SizeType i = 0; i < total; ++i) natBasis[i] = i;
 	}
@@ -499,7 +489,7 @@ private:
 	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        SizeType offset,
-	                        SizeType sizeType) const
+	                        SiteType) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -508,10 +498,6 @@ private:
 		typedef std::pair<SizeType,SizeType> PairType;
 
 		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 1);
-		if (isCanonical && additional_ == "Anisotropic")
-			err(PsimagLite::String(__FILE__) +
-			    ": Anisotropic sub-model CANNOT be canonical. Please " +
-			    "delete the TargetSzPlusConst= from the input file\n");
 
 		if (isCanonical && modelParameters_.magneticFieldDirection == "x")
 			err(PsimagLite::String(__FILE__) +
@@ -533,7 +519,6 @@ private:
 
 	ParametersModelHeisenberg<RealType, QnType> modelParameters_;
 	const SuperGeometryType& superGeometry_;
-	PsimagLite::String additional_;
 	const AtomKind* atomKind_;
 }; // class HeisenbergMix
 
