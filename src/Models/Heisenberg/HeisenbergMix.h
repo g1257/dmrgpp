@@ -346,29 +346,38 @@ protected:
 
 	void fillModelLinks()
 	{
-		bool isSu2 = BasisType::useSu2Symmetry();
+		if (BasisType::useSu2Symmetry())
+			err("SU(2) not supported\n");
 
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 
 		OpForLinkType splus("splus");
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
-		{ value *= (isSu2) ? -0.5 : 0.5;};
+		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *=  0.5;};
 
 		typename ModelTermType::Su2Properties su2properties(2, -1, 2);
 		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
-		if (!isSu2) {
-			OpForLinkType sz("sz");
-			szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
-		} else {
-			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
-			{ if (isSu2) value = -value;};
-			typename ModelTermType::Su2Properties su2properties(2, -1, 2);
-			spsm.push(splus, 'N', splus, 'C', valueModifierTermOther, su2properties);
-		}
+		OpForLinkType sz("sz");
+		szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
+
+		OpForLinkType splusB("splusB");
+
+		ModelTermType& spsmB1 = ModelBaseType::createTerm("SplusSminusB1");
+		spsmB1.push(splusB, 'N', splus, 'C', valueModiferTerm0, su2properties);
+
+		ModelTermType& spsmB2 = ModelBaseType::createTerm("SplusSminusB2");
+		spsmB2.push(splus, 'N', splusB, 'C', valueModiferTerm0, su2properties);
+
+		OpForLinkType szB("szB");
+
+		ModelTermType& szszB1 = ModelBaseType::createTerm("szszB1");
+		szszB1.push(szB, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
+
+		ModelTermType& szszB2 = ModelBaseType::createTerm("szszB2");
+		szszB2.push(sz, 'N', szB, 'N', typename ModelTermType::Su2Properties(2, 0.5));
 	}
 
 private:

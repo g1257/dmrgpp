@@ -1,0 +1,46 @@
+##Ainur1.0
+TotalNumberOfSites=8;
+NumberOfTerms=6;
+
+# S+S- middle
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1.0];
+
+# SzSz middle
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[1.0];
+
+# S+S- border 0
+gt2:GeometryKind="chain";
+gt2:GeometryOptions="ConstantValues";
+gt2:dir0:Connectors=[1.0];
+
+# S+S- border n - 1
+gt3:GeometryKind="chain";
+gt3:GeometryOptions="ConstantValues";
+gt3:dir0:Connectors=[1.0];
+
+# SzSz border 0
+gt4:GeometryKind="chain";
+gt4:GeometryOptions="ConstantValues";
+gt4:dir0:Connectors=[1.0];
+
+# SzSz border n - 1
+gt5:GeometryKind="chain";
+gt5:GeometryOptions="ConstantValues";
+gt5:dir0:Connectors=[1.0];
+
+Model="HeisenbergMix";
+integer HeisenbergTwiceS=2;
+integer HeisenbergTwiceSborder=1;
+
+SolverOptions="twositedmrg";
+Version="247b335fe1542909b90be8647456bfd8fd56191c";
+OutputFile="data4650";
+InfiniteLoopKeptStates=60;
+FiniteLoops=[[3, 100, 0], [-6, 200, 0], [6, 200, 0]];
+# TargetSzPlusConst = Sz + 1*(N - 2) + 0.5*2
+integer TargetSzPlusConst=7;
+

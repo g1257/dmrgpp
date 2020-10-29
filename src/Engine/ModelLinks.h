@@ -94,7 +94,7 @@ public:
 
 		// pair of sites should actually be pair of kinds of sites
 		Term(PsimagLite::String name, bool wantsHermitian = true) // name of term,
-		                                                          // not name of operator
+		// not name of operator
 		    : name_(name), wantsHermitian_(wantsHermitian)
 		{}
 
@@ -106,6 +106,18 @@ public:
 			assert(n == vectorKind_.size());
 			for (SizeType i = 0; i < n; ++i) {
 				if (vectorKind_[i] != atomKind_->siteToAtomKind(actualSites[i]))
+					return false;
+			}
+
+			return true;
+		}
+
+		bool areSitesCompatible2(const VectorSizeType& kinds) const
+		{
+			const SizeType n = kinds.size();
+			assert(n == vectorKind_.size());
+			for (SizeType i = 0; i < n; ++i) {
+				if (vectorKind_[i] != kinds[i])
 					return false;
 			}
 
@@ -144,7 +156,7 @@ public:
 		,Su2Properties su2properties = Su2Properties())
 		{
 			if (links_.size() > 0) {
-				if (!areSitesCompatible(VectorSizeType{op1.kindOfSite, op2.kindOfSite}))
+				if (!areSitesCompatible2(VectorSizeType{op1.kindOfSite, op2.kindOfSite}))
 					err("Term " + name_ + " incompatible atom kinds at push\n");
 			} else {
 				vectorKind_ = VectorSizeType{op1.kindOfSite, op2.kindOfSite};
@@ -179,13 +191,13 @@ public:
 		           const OpaqueOp& op3, char mod3,
 		           const OpaqueOp& op4, char mod4
 		           ,LambdaType vModifier = [](ComplexOrRealType&) {},
-		           Su2Properties su2properties = Su2Properties())
+		Su2Properties su2properties = Su2Properties())
 		{
 			if (links_.size() > 0) {
-				if (!areSitesCompatible(VectorSizeType{op1.kindOfSite,
-				                        op2.kindOfSite,
-				                        op3.kindOfSite,
-				                        op4.kindOfSite}))
+				if (!areSitesCompatible2(VectorSizeType{op1.kindOfSite,
+				                         op2.kindOfSite,
+				                         op3.kindOfSite,
+				                         op4.kindOfSite}))
 					err("Term " + name_ + " incompatible atom kinds at push\n");
 			} else {
 				vectorKind_ = VectorSizeType{op1.kindOfSite,
