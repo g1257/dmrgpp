@@ -208,7 +208,7 @@ public:
 			model_ = new GrapheneType(solverParams, io, geometry);
 		} else if (name_ == "GaugeSpin") {
 			model_ = new GaugeSpinType(solverParams, io, geometry);
-		} if (name_ == "Heisenberg") {
+		} else if (name_ == "HeisenbergMix") {
 			model_ = new HeisenbergMixType(solverParams, io, geometry);
 		}
 #endif

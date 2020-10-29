@@ -325,6 +325,8 @@ Figure* (if any):
 Page* where more or less this feature is used: Will be given when published
 [* Refers to published version.]
 
+4650) HeisenbergMix: spin 1 middle, spin 1/2 on borders
+
 4700) Hubbard Holstein
 4710) Hubbard Holstein SSH
 4720) Holstein Thin

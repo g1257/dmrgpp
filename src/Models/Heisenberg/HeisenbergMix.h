@@ -137,12 +137,18 @@ public:
 
 	public:
 
+		AtomKind(SizeType n) : n_(n) {}
+
 		virtual SizeType siteToAtomKind(SizeType site) const
 		{
-			return (site & 1);
+			return (site == 0 || site == n_ - 1) ? 1 : 0;
 		}
 
 		virtual SizeType kindsOfAtoms() const { return 2; }
+
+	private:
+
+		SizeType n_;
 	};
 
 	HeisenbergMix(const SolverParamsType& solverParams,
@@ -267,7 +273,7 @@ protected:
 
 	virtual const AtomKindBaseType& getAtomKind()
 	{
-		atomKind_ = new AtomKind();
+		atomKind_ = new AtomKind(superGeometry_.numberOfSites());
 		return *atomKind_;
 	}
 
@@ -278,6 +284,7 @@ protected:
 		fillLabeledOperators(qns, offset, SiteType::SITE_BORDER);
 	}
 
+	// this function can be private
 	SizeType fillLabeledOperators(VectorQnType& qns, SizeType offset, SiteType typeOfSite)
 	{
 		SizeType site = (typeOfSite == SiteType::SITE_MIDDLE) ? 1 : 0;
@@ -292,16 +299,18 @@ protected:
 
 		typename OperatorType::Su2RelatedType su2related;
 
+		PsimagLite::String border = (typeOfSite == SiteType::SITE_BORDER) ? "B" : "";
+
 		OperatorType myOp(tmpMatrix,
 		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                  PairType(2, 2),
 		                  -1,
 		                  su2related);
-		this->createOpsLabel("splus", indOfKindOfSite).push(myOp);
-		this->makeTrackable("splus", indOfKindOfSite);
+		this->createOpsLabel("splus" + border, indOfKindOfSite).push(myOp);
+		this->makeTrackable("splus" + border);
 
 		myOp.dagger();
-		this->createOpsLabel("sminus", indOfKindOfSite).push(myOp);
+		this->createOpsLabel("sminus" + border, indOfKindOfSite).push(myOp);
 
 		// Set the operators S^z_i in the natural basis
 		tmpMatrix = findSzMatrices(site, natBasis);
@@ -311,8 +320,8 @@ protected:
 		                   PairType(2, 1),
 		                   1.0/sqrt(2.0),
 		                   su2related2);
-		this->createOpsLabel("sz", indOfKindOfSite).push(myOp2);
-		this->makeTrackable("sz", indOfKindOfSite);
+		this->createOpsLabel("sz" + border, indOfKindOfSite).push(myOp2);
+		this->makeTrackable("sz" + border);
 
 		// Set the operators S^x_i in the natural basis
 		tmpMatrix = findSxMatrices(site, natBasis);
@@ -322,7 +331,7 @@ protected:
 		                   PairType(2, 1),
 		                   1.0/sqrt(2.0),
 		                   su2related3);
-		this->createOpsLabel("sx", indOfKindOfSite).push(myOp3);
+		this->createOpsLabel("sx" + border, indOfKindOfSite).push(myOp3);
 
 		tmpMatrix = findMaximal(site, natBasis);
 		OperatorType myOp4(tmpMatrix,
@@ -330,7 +339,7 @@ protected:
 		                   PairType(2, 1),
 		                   1.0/sqrt(2.0),
 		                   su2related3);
-		this->createOpsLabel("maximal", indOfKindOfSite).push(myOp4);
+		this->createOpsLabel("maximal" + border, indOfKindOfSite).push(myOp4);
 
 		return natBasis.size();
 	}
@@ -364,10 +373,12 @@ protected:
 
 private:
 
+	// atomKind_ is not setup here yet, so do not call it
 	SizeType getSpin(SizeType site) const
 	{
 		const SizeType n = superGeometry_.numberOfSites();
-		return (site == 0 || site == n - 1) ? SiteType::SITE_BORDER : SiteType::SITE_MIDDLE;
+		return (site == 0 || site == n - 1) ? modelParameters_.twiceTheSpinBorder
+		                                    : modelParameters_.twiceTheSpin;
 	}
 
 	void setBasis(HilbertBasisType& natBasis, SizeType site) const
