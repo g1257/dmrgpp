@@ -96,7 +96,13 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 	ParametersModelHeisenberg(IoInputType& io)
 	    : BaseType(io, false)
 	{
-		io.readline(twiceTheSpin,"HeisenbergTwiceS=");
+		io.readline(model, "Model=");
+
+		io.readline(twiceTheSpin, "HeisenbergTwiceS=");
+
+		if (model == "HeisenbergMix")
+			io.readline(twiceTheSpinBorder, "HeisenbergTwiceSborder=");
+
 		SizeType nsites = 0;
 		io.readline(nsites, "TotalNumberOfSites=");
 
@@ -164,6 +170,7 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 	}
 
 	SizeType twiceTheSpin;
+	SizeType twiceTheSpinBorder;
 	PsimagLite::String magneticFieldDirection;
 	VectorRealType magneticFieldV;
 	VectorRealType anisotropyD;
