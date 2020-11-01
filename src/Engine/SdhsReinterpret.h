@@ -25,17 +25,20 @@ public:
 		if (n != braket.points())
 			err("SdhsReinterpret: braket.points != sites.size()\n");
 
+		PsimagLite::String str("<");
+		str += braket.bra().toString();
+		str += "|";
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opName = braket.opName(i);
-			SizeType kind = braket.model().siteToAtomKind(sites[i]);
-			OpaqueOpType opaque(opName);
-			if (opaque.kindOfSite != kind) {
-				forbidden_ = true;
-				break;
-			}
+			str += opName + "[" + ttos(sites[i])+ "]";
+			if (i < n - 1) str += ";";
 
-			ops_.push_back(braket.op(i));
 		}
+
+		str += "|" + braket.ket().toString() + ">";
+		BraketType braket2(braket.model(), str);
+		for (SizeType i = 0; i < n; ++i)
+			ops_.push_back(braket2.op(i));
 	}
 
 	bool forbidden() const { return forbidden_; }
