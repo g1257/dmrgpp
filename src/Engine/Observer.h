@@ -194,8 +194,6 @@ public:
 			flag |= 2;
 		} catch (std::exception&) {}
 
-		SparseMatrixType m0 = braket.op(0).getCRS();
-		SparseMatrixType m1 = braket.op(1).getCRS();
 		ProgramGlobals::FermionOrBosonEnum fermionSign = braket.op(0).fermionOrBoson();
 
 		SizeType site1 = 0;
@@ -205,14 +203,13 @@ public:
 		switch (flag) {
 
 		case 0: // no sites given
-			return twopoint_(storage, m0, m1, fermionSign, braket.bra(), braket.ket());
+			return twopoint_(storage, braket, fermionSign, braket.bra(), braket.ket());
 
 		case 1: //first site given
 			for (site1 = braket.site(0); site1 < sites; ++site1)
 				storage(braket.site(0),site1) = twopoint_.calcCorrelation(braket.site(0),
 				                                                          site1,
-				                                                          braket.op(0).getCRS(),
-				                                                          braket.op(1).getCRS(),
+				                                                          braket,
 				                                                          fermionSign,
 				                                                          braket.bra(),
 				                                                          braket.ket());
@@ -221,8 +218,7 @@ public:
 		case 3:
 			storage(braket.site(0),braket.site(1)) = twopoint_.calcCorrelation(braket.site(0),
 			                                                                   braket.site(1),
-			                                                                   braket.op(0).getCRS(),
-			                                                                   braket.op(1).getCRS(),
+			                                                                   braket,
 			                                                                   fermionSign,
 			                                                                   braket.bra(),
 			                                                                   braket.ket());
@@ -234,13 +230,12 @@ public:
 	}
 
 	void twoPoint(MatrixType& m,
-	              const SparseMatrixType& O1,
-	              const SparseMatrixType& O2,
+	              const BraketType braket,
 	              ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	              PsimagLite::String bra,
 	              PsimagLite::String ket) const
 	{
-		twopoint_(m, O1, O2, fermionicSign, bra, ket);
+		twopoint_(m, braket, fermionicSign, bra, ket);
 	}
 
 	FieldType threePoint(const BraketType& braket,

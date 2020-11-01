@@ -114,8 +114,7 @@ public:
 	{}
 
 	void operator()(PsimagLite::Matrix<FieldType>& w,
-	                const SparseMatrixType& O1,
-	                const SparseMatrixType& O2,
+	                const BraketType& braket,
 	                ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                const PsimagLite::GetBraOrKet& bra,
 	                const PsimagLite::GetBraOrKet& ket) const
@@ -137,8 +136,7 @@ public:
 		Parallel2PointCorrelationsType helper2Points(w,
 		                                             *this,
 		                                             pairs,
-		                                             O1,
-		                                             O2,
+		                                             braket,
 		                                             fermionicSign,
 		                                             bra,
 		                                             ket);
@@ -152,13 +150,15 @@ public:
 	// Note2: O1 and O2 operators must commute or anti-commute (set fermionicSign accordingly)
 	FieldType calcCorrelation(SizeType i,
 	                          SizeType j,
-	                          const SparseMatrixType& O1,
-	                          const SparseMatrixType& O2,
+	                          const BraketType& braket,
 	                          ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                          const PsimagLite::GetBraOrKet& bra,
-                              const PsimagLite::GetBraOrKet& ket) const
+	                          const PsimagLite::GetBraOrKet& ket) const
 	{
 		FieldType c = 0;
+		const SparseMatrixType& O1 = braket.op(0).getCRS();
+		const SparseMatrixType& O2 = braket.op(1).getCRS();
+
 		if (i==j) {
 			c = calcDiagonalCorrelation(i, O1, O2, fermionicSign, bra, ket);
 		} else if (i>j) {
@@ -177,7 +177,7 @@ private:
 	                                  const SparseMatrixType& O2,
 	                                  ProgramGlobals::FermionOrBosonEnum,
 	                                  const PsimagLite::GetBraOrKet& bra,
-		                              const PsimagLite::GetBraOrKet& ket) const
+	                                  const PsimagLite::GetBraOrKet& ket) const
 	{
 		SizeType n = O1.rows();
 		SparseMatrixType O1new=identity(n);

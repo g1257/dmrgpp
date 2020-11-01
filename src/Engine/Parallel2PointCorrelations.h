@@ -96,20 +96,19 @@ public:
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
+	typedef typename TwoPointCorrelationsType::BraketType BraketType;
 
 	Parallel2PointCorrelations(MatrixType& w,
 	                           const TwoPointCorrelationsType& twopoint,
 	                           const typename PsimagLite::Vector<PairType>::Type& pairs,
-	                           const SparseMatrixType& O1,
-	                           const SparseMatrixType& O2,
+	                           const BraketType& braket,
 	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                           const PsimagLite::GetBraOrKet& bra,
 	                           const PsimagLite::GetBraOrKet& ket)
 	    : w_(w),
 	      twopoint_(twopoint),
 	      pairs_(pairs),
-	      O1_(O1),
-	      O2_(O2),
+	      braket_(braket),
 	      fermionicSign_(fermionicSign),
 	      bra_(bra),
 	      ket_(ket)
@@ -121,8 +120,7 @@ public:
 		SizeType j = pairs_[taskNumber].second;
 		w_(i,j) = twopoint_.calcCorrelation(i,
 		                                    j,
-		                                    O1_,
-		                                    O2_,
+		                                    braket_,
 		                                    fermionicSign_,
 		                                    bra_,
 		                                    ket_);
@@ -135,8 +133,7 @@ private:
 	MatrixType& w_;
 	const TwoPointCorrelationsType& twopoint_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
-	const SparseMatrixType& O1_;
-	const SparseMatrixType& O2_;
+	const BraketType& braket_;
 	const ProgramGlobals::FermionOrBosonEnum fermionicSign_;
 	const PsimagLite::GetBraOrKet& bra_;
 	const PsimagLite::GetBraOrKet& ket_;

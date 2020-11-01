@@ -167,6 +167,8 @@ public:
 	             const ManyPointActionType& manyPointAction,
 	             SizeType orbitals)
 	{
+		const RealType oneF = 1;
+		Su2RelatedType su2Related;
 		// FIXME: No support for site varying operators
 		if (label=="cc") {
 			BraketType braket(model_,"<gs|c?0-;c'?0-|gs>");
@@ -188,9 +190,21 @@ public:
 					multiply(n2,O4,O3); // c_j^{\dagger}.c_j
 
 					PsimagLite::String str = "<gs|n?" + ttos(i) + ";n?" + ttos(j) + "|gs>";
+					BraketType braket(model_, str);
+					OperatorType n1Op(n1,
+					                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+					                  PairSizeType(0, 0),
+					                  oneF,
+					                  su2Related);
+					OperatorType n2Op(n2,
+					                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+					                  PairSizeType(0, 0),
+					                  oneF,
+					                  su2Related);
+
+					braket.forceOperators(n1Op, n2Op);
 					observe_.twoPoint(out,
-					                  n1,
-					                  n2,
+					                  braket,
 					                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 					                  "gs",
 					                  "gs");
@@ -515,6 +529,8 @@ private:
 	           PsimagLite::String bra,
 	           PsimagLite::String ket)
 	{
+		const RealType oneF = 1;
+		Su2RelatedType su2Related;
 		SizeType site = 1;
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
 		assert(!(orbitals & 1));
@@ -531,8 +547,20 @@ private:
 
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
-			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			transposeConjugate(A, B);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			OperatorType opB(B,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
+			braket.forceOperators(opA, opB);
+			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			//std::cout << m;
 			std::cout << "PairPair Correlations S^{l}_{on}" << std::endl;
 			SliceOrbital(m,0,0);
@@ -771,6 +799,8 @@ private:
 	                   PsimagLite::String bra,
 	                   PsimagLite::String ket)
 	{
+		const RealType oneF = 1;
+		Su2RelatedType su2Related;
 		SizeType site = 1;
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
 		assert(!(orbitals & 1));
@@ -788,7 +818,19 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			OperatorType opB(B,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
+			braket.forceOperators(opA, opB);
+			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 
 			std::cout << m;
 		} else if (flag==1) {
@@ -802,7 +844,19 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			OperatorType opB(B,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
+			braket.forceOperators(opA, opB);
+			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==2) {
 			SizeType spin0 = 0; // up
@@ -820,7 +874,19 @@ private:
 			mult1 = 1.0; mult2 = -1.0;
 			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (-1.0)*tmp2 = Singlet
 			transposeConjugate(A,B); // A = transpose(B)
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			OperatorType opB(B,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
+			braket.forceOperators(opA, opB);
+			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==3) {
 			SizeType spin0 = 0; // up
@@ -838,7 +904,19 @@ private:
 			mult1 = 1.0; mult2 = 1.0;
 			operatorPlus(B,tmp1,mult1,tmp2,mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet
 			transposeConjugate(A,B); // A = transpose(B)
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			OperatorType opB(B,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
+			braket.forceOperators(opA, opB);
+			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==4) {
 			SizeType orb0 = 0;  // lower orbital
@@ -851,7 +929,19 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_up,0 . c_up,1
 			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			OperatorType opB(B,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
+			braket.forceOperators(opA, opB);
+			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==5) {
 			SizeType orb0 = 0;  // lower orbital
@@ -864,7 +954,19 @@ private:
 			SparseMatrixType A,B;
 			multiply(B,O1,O2);      // c_dn,0 . c_dn,1
 			transposeConjugate(A,B);
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			OperatorType opB(B,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
+			braket.forceOperators(opA, opB);
+			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else if (flag==6) {
 			SizeType spin0 = 0; // up
@@ -883,7 +985,19 @@ private:
 			// B = 1.0*tmp1 + (1.0)*tmp2 = Triplet = up*up + dn*dn
 			operatorPlus(B,tmp1,mult1,tmp2,mult2);
 			transposeConjugate(A,B); // A = transpose(B)
-			observe_.twoPoint(m, A, B, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			OperatorType opA(A,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			OperatorType opB(B,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
+			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
+			braket.forceOperators(opA, opB);
+			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 			std::cout << m;
 		} else {
 			err("Unknown flag: " + ttos(flag));

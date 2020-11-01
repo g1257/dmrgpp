@@ -109,6 +109,15 @@ public:
 
 	const ModelType& model() const { return model_; }
 
+	// avoid using this function in new code
+	// it's only to support legacy code
+	void forceOperators(const OperatorType& op1, const OperatorType& op2)
+	{
+		op_.resize(2);
+		op_[0] = op1;
+		op_[1] = op2;
+	}
+
 private:
 
 	const ModelType& model_;
