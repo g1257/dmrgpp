@@ -745,7 +745,6 @@ private:
 
 		assert(vec1.size()==helper_.leftRightSuper(ptr).super().size());
 		assert(ni==A1crs.rows());
-		assert(Bcrs.rows()==A2crs.rows());
 
 		// ok, we're ready for the main course:
 		PackIndicesType pack1(helper_.leftRightSuper(ptr).left().size());
