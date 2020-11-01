@@ -365,18 +365,27 @@ protected:
 
 		OpForLinkType splusB("splusB");
 
-		ModelTermType& spsmB1 = ModelBaseType::createTerm("SplusSminusB1");
+		const bool wantsHermit = true;
+		ModelTermType& spsmB1 = ModelBaseType::createTerm("SplusSminusB1",
+		                                                  wantsHermit,
+		                                                  "SplusSminus");
 		spsmB1.push(splusB, 'N', splus, 'C', valueModiferTerm0, su2properties);
 
-		ModelTermType& spsmB2 = ModelBaseType::createTerm("SplusSminusB2");
+		ModelTermType& spsmB2 = ModelBaseType::createTerm("SplusSminusB2",
+		                                                  wantsHermit,
+		                                                  "SplusSminus");
 		spsmB2.push(splus, 'N', splusB, 'C', valueModiferTerm0, su2properties);
 
 		OpForLinkType szB("szB");
 
-		ModelTermType& szszB1 = ModelBaseType::createTerm("szszB1");
+		ModelTermType& szszB1 = ModelBaseType::createTerm("szszB1",
+		                                                  wantsHermit,
+		                                                  "szsz");
 		szszB1.push(szB, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
 
-		ModelTermType& szszB2 = ModelBaseType::createTerm("szszB2");
+		ModelTermType& szszB2 = ModelBaseType::createTerm("szszB2",
+		                                                  wantsHermit,
+		                                                  "szsz");
 		szszB2.push(sz, 'N', szB, 'N', typename ModelTermType::Su2Properties(2, 0.5));
 	}
 

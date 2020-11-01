@@ -396,7 +396,9 @@ public:
 		}
 	}
 
-	Term& createTerm(PsimagLite::String name, bool wantsHermitian)
+	Term& createTerm(PsimagLite::String name,
+	                 bool wantsHermitian,
+	                 PsimagLite::String geometryFrom)
 	{
 		typename VectorTermType::const_iterator x = std::find_if(terms_.begin(),
 		                                                         terms_.end(),
@@ -405,8 +407,18 @@ public:
 		if (x != terms_.end())
 			err("Repeated term " + name + "\n");
 
+		termGeomReplacement_.push_back(terms_.size());
+		if (geometryFrom != "") {
+			typename VectorTermType::const_iterator y = std::find_if(terms_.begin(),
+			                                                         terms_.end(),
+			                                                         IsValue(geometryFrom));
+			termGeomReplacement_[termGeomReplacement_.size() - 1] = y - terms_.begin();
+		}
+
 		Term* term = new Term(name, wantsHermitian);
 		terms_.push_back(term);
+
+		assert(termGeomReplacement_.size() == terms_.size());
 		return *term;
 	}
 
@@ -421,7 +433,8 @@ public:
 
 	SizeType termIndexForGeometry(SizeType termIndex) const
 	{
-		return termIndex;
+		assert(termIndex < termGeomReplacement_.size());
+		return termGeomReplacement_[termIndex];
 	}
 
 	SizeType numberOfTerms() const { return terms_.size(); }
@@ -511,6 +524,7 @@ private:
 	VectorTermType terms_;
 	VectorHermitianEnum hermit_;
 	SizeType maxDofs_;
+	VectorSizeType termGeomReplacement_;
 	const static AtomKindBase* atomKind_;
 	static std::map<PsimagLite::String, SizeType> offsets_;
 };

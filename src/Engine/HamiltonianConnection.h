@@ -350,6 +350,7 @@ private:
 	{
 		const SizeType fromInput = superGeometry_.terms();
 		const SizeType fromModel = modelLinks_.numberOfTerms();
+		bool doPrint = (smax_ == 0);
 
 		// Check if replacements for geometry exist
 		SizeType maxTermForGeom = 0;
@@ -366,21 +367,15 @@ private:
 		if (fromModel > maxTermForGeom) {
 			PsimagLite::String msg("INFO: Replacement for geometry exist ");
 			msg += ttos(maxTermForGeom) + " instead of " + ttos(fromModel) + "\n";
-			std::cerr<<msg;
-			std::cout<<msg;
+			if (doPrint) {
+				std::cerr<<msg;
+				std::cout<<msg;
+			}
 		}
 
 		if (fromInput > fromModel) {
 			err("FATAL: terms from input " + ttos(fromInput) + " > " +
 			    "terms from model = " + ttos(fromModel) + "\n");
-		}
-
-		if (fromInput < fromModel) {
-			PsimagLite::String msg("WARNING: terms from input ");
-			msg += ttos(fromInput) + " < ";
-			msg += "terms from model = " + ttos(fromModel) + "\n";
-			std::cerr<<msg;
-			std::cout<<msg;
 		}
 
 		if (fromInput < maxTermForGeom)
@@ -389,8 +384,10 @@ private:
 		if (fromInput > maxTermForGeom) {
 			PsimagLite::String msg("WARNING: NumberOfTerms in input is ");
 			msg += ttos(fromInput) + " but I was expecting " + ttos(maxTermForGeom) + "\n";
-			std::cerr<<msg;
-			std::cout<<msg;
+			if (doPrint) {
+				std::cerr<<msg;
+				std::cout<<msg;
+			}
 
 			return fromInput;
 		}
