@@ -142,8 +142,11 @@ public:
 	                   smax_,
 	                   emin_,
 	                   modelHelper_.leftRightSuper().super().block()),
-	      totalOnes_(hamAbstract_.items())
+	      totalOnes_(hamAbstract_.items()),
+	      geometryTerms_(0)
 	{
+		geometryTerms_ = getGeometryTerms();
+
 		lps_.reserve(ProgramGlobals::MAX_LPS);
 		SizeType nitems = hamAbstract_.items();
 		for (SizeType x = 0; x < nitems; ++x)
@@ -277,13 +280,14 @@ private:
 		        type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
 
 		SizeType totalOne = 0;
-		SizeType geometryTerms = superGeometry_.terms();
-		for (SizeType termIndex = 0; termIndex < geometryTerms; ++termIndex) {
+
+		for (SizeType termIndex = 0; termIndex < geometryTerms_; ++termIndex) {
 
 			if (!modelLinks_.areSitesCompatibleForThisTerm(termIndex, hItems))
 				continue;
 
 			const typename ModelLinksType::TermType& term = modelLinks_.term(termIndex);
+			const SizeType termIndexForGeom = modelLinks_.termIndexForGeometry(termIndex);
 
 			SizeType dofsTotal = term.size();
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
@@ -294,11 +298,11 @@ private:
 				                                       emin_,
 				                                       hItems,
 				                                       oneLink.orbs,
-				                                       termIndex);
+				                                       termIndexForGeom);
 
 				if (tmp == static_cast<RealType>(0.0)) continue;
 
-				tmp = superGeometry_.vModifier(termIndex, tmp, targetTime_);
+				tmp = superGeometry_.vModifier(termIndexForGeom, tmp, targetTime_);
 
 				oneLink.modifier(tmp);
 
@@ -342,6 +346,58 @@ private:
 		return totalOne;
 	}
 
+	SizeType getGeometryTerms() const
+	{
+		const SizeType fromInput = superGeometry_.terms();
+		const SizeType fromModel = modelLinks_.numberOfTerms();
+
+		// Check if replacements for geometry exist
+		SizeType maxTermForGeom = 0;
+		for (SizeType termIndex = 0; termIndex < fromModel; ++termIndex) {
+			const SizeType termIndexForGeom = modelLinks_.termIndexForGeometry(termIndex) + 1;
+			if (maxTermForGeom < termIndexForGeom) maxTermForGeom = termIndexForGeom;
+		}
+
+		if (fromModel < maxTermForGeom) {
+			err("FATAL:  INTERNAL: NumberOfTerms from model " + ttos(fromInput) +
+			    " is less than max term replacement  " + ttos(maxTermForGeom) + "\n");
+		}
+
+		if (fromModel > maxTermForGeom) {
+			PsimagLite::String msg("INFO: Replacement for geometry exist ");
+			msg += ttos(maxTermForGeom) + " instead of " + ttos(fromModel) + "\n";
+			std::cerr<<msg;
+			std::cout<<msg;
+		}
+
+		if (fromInput > fromModel) {
+			err("FATAL: terms from input " + ttos(fromInput) + " > " +
+			    "terms from model = " + ttos(fromModel) + "\n");
+		}
+
+		if (fromInput < fromModel) {
+			PsimagLite::String msg("WARNING: terms from input ");
+			msg += ttos(fromInput) + " < ";
+			msg += "terms from model = " + ttos(fromModel) + "\n";
+			std::cerr<<msg;
+			std::cout<<msg;
+		}
+
+		if (fromInput < maxTermForGeom)
+			err("Too few terms in input, expected at least " + ttos(maxTermForGeom) + "\n");
+
+		if (fromInput > maxTermForGeom) {
+			PsimagLite::String msg("WARNING: NumberOfTerms in input is ");
+			msg += ttos(fromInput) + " but I was expecting " + ttos(maxTermForGeom) + "\n";
+			std::cerr<<msg;
+			std::cout<<msg;
+
+			return fromInput;
+		}
+
+		return fromModel;
+	}
+
 	static char conjugateChar(char c)
 	{
 		if (c != 'N' && c != 'C')
@@ -364,6 +420,7 @@ private:
 	SizeType emin_;
 	HamiltonianAbstractType hamAbstract_;
 	VectorSizeType totalOnes_;
+	SizeType geometryTerms_;
 }; // class HamiltonianConnection
 } // namespace Dmrg
 

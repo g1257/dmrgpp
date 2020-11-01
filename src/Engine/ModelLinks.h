@@ -419,6 +419,13 @@ public:
 
 	SizeType dofsAllocationSize() const { return maxDofs_; }
 
+	SizeType termIndexForGeometry(SizeType termIndex) const
+	{
+		return termIndex;
+	}
+
+	SizeType numberOfTerms() const { return terms_.size(); }
+
 	const TermType& term(SizeType term) const
 	{
 		assert(term < terms_.size());
