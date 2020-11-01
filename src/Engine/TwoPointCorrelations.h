@@ -88,11 +88,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 #include "ProgramGlobals.h"
 #include "GetBraOrKet.h"
+#include "SdhsReinterpret.h"
 
 namespace Dmrg {
 
 template<typename CorrelationsSkeletonType>
 class TwoPointCorrelations {
+
+public:
 
 	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
 	typedef typename ObserverHelperType::VectorType VectorType;
@@ -101,14 +104,12 @@ class TwoPointCorrelations {
 	typedef typename VectorType::value_type FieldType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> ThisType;
-
-public:
-
 	typedef typename CorrelationsSkeletonType::BraketType BraketType;
 	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
 	typedef typename ObserverHelperType::MatrixType MatrixType;
 	typedef Parallel2PointCorrelations<ThisType> Parallel2PointCorrelationsType;
 	typedef typename Parallel2PointCorrelationsType::PairType PairType;
+	typedef SdhsReinterpret<BraketType> SdhsReinterpretType;
 
 	TwoPointCorrelations(const CorrelationsSkeletonType& skeleton) : skeleton_(skeleton)
 	{}
@@ -156,8 +157,12 @@ public:
 	                          const PsimagLite::GetBraOrKet& ket) const
 	{
 		FieldType c = 0;
-		const SparseMatrixType& O1 = braket.op(0).getCRS();
-		const SparseMatrixType& O2 = braket.op(1).getCRS();
+		SdhsReinterpretType sdhs(braket, {i, j});
+
+		if (sdhs.forbidden()) return sdhs.forbiddenValue();
+
+		const SparseMatrixType& O1 = sdhs.op(0).getCRS();
+		const SparseMatrixType& O2 = sdhs.op(1).getCRS();
 
 		if (i==j) {
 			c = calcDiagonalCorrelation(i, O1, O2, fermionicSign, bra, ket);

@@ -539,6 +539,11 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return true;
 	}
 
+	SizeType siteToAtomKind(SizeType site) const
+	{
+		return modelLinks_.siteToAtomKind(site);
+	}
+
 	void printBasis(SizeType site) const
 	{
 		BlockType block(1, site);

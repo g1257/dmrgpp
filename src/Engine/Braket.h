@@ -9,11 +9,12 @@
 
 namespace Dmrg {
 
-template<typename ModelType>
+template<typename ModelType_>
 class Braket {
 
 public:
 
+	typedef ModelType_ ModelType;
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename PsimagLite::Vector<int>::Type VectorIntType;
 	typedef typename OperatorType::PairType PairType;
