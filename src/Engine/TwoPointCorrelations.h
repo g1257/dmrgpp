@@ -227,8 +227,7 @@ private:
 		if (j == skeleton_.numberOfSites() - 1) {
 			if (i == j - 1) {
 				const SizeType ptr = j - 2;
-				SizeType ni = helper.leftRightSuper(ptr).left().size()/
-				        helper.leftRightSuper(ptr).right().size();
+				SizeType ni = helper.leftRightSuper(ptr).left().size()/O1m.rows();
 
 				SparseMatrixType O1g;
 				O1g.makeDiagonal(ni,1.0);

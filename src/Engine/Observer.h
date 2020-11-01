@@ -155,14 +155,14 @@ public:
 	         SizeType start,
 	         SizeType nf,
 	         SizeType trail,
-	         const ParametersType& params)
+	         const ModelType_& model)
 	    : helper_(io,
 	              start,
 	              nf,
 	              trail,
-	              !params.options.isSet("fixLegacyBugs")),
+	              !model.params().options.isSet("fixLegacyBugs")),
 	      onepoint_(helper_),
-	      skeleton_(helper_, true),
+	      skeleton_(helper_, model, true),
 	      twopoint_(skeleton_),
 	      fourpoint_(skeleton_)
 	{}

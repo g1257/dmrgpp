@@ -121,7 +121,7 @@ public:
 	    : numberOfSites_(numberOfSites),
 	      hasTimeEvolution_(false),
 	      model_(model),
-	      observe_(io, start, nf, trail, model.params())
+	      observe_(io, start, nf, trail, model)
 	{}
 
 	bool endOfData() const { return observe_.helper().endOfData(); }

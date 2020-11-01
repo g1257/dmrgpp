@@ -110,8 +110,10 @@ public:
 
 	enum class GrowDirection {RIGHT, LEFT};
 
-	CorrelationsSkeleton(const ObserverHelperType& helper, bool normalizeResult)
-	    : helper_(helper), normalizeResult_(normalizeResult)
+	CorrelationsSkeleton(const ObserverHelperType& helper,
+	                     const ModelType& model,
+	                     bool normalizeResult)
+	    : helper_(helper), model_(model), normalizeResult_(normalizeResult)
 	{}
 
 	SizeType numberOfSites() const
@@ -731,11 +733,17 @@ private:
 
 		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 
+		SizeType penultimateSite = helper_.leftRightSuper(ptr).super().block().size();
+		assert(penultimateSite > 1);
+		penultimateSite -= 2;
+		typename ModelType::VectorBoolType oddElectrons;
+		model_.findOddElectronsOfOneSite(oddElectrons, penultimateSite);
+
 		SparseMatrixType A1crs(A1);
 		SparseMatrixType A2crs(A2);
 		SparseMatrixType Bcrs(B);
 		FieldType sum=0;
-		SizeType ni = helper_.leftRightSuper(ptr).left().size()/Bcrs.rows();
+		SizeType ni = helper_.leftRightSuper(ptr).left().size()/A2crs.rows();
 		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
 
 		// some sanity checks:
@@ -764,8 +772,8 @@ private:
 				pack2.unpack(r0,
 				             r1,
 				             helper_.leftRightSuper(ptr).left().permutation(r));
-				RealType sign = helper_.leftRightSuper(ptr).right().
-				        fermionicSign(r1,fermionSign);
+				assert(r1 < oddElectrons.size());
+				RealType sign = (oddElectrons[r1]) ? fermionSign : 1;
 
 				for (int k1=A1crs.getRowPtr(r0);k1<A1crs.getRowPtr(r0+1);k1++) {
 					SizeType r0prime = A1crs.getCol(k1);
@@ -802,6 +810,7 @@ private:
 	}
 
 	const ObserverHelperType& helper_;
+	const ModelType& model_;
 	bool normalizeResult_;
 };  //class CorrelationsSkeleton
 } // namespace Dmrg
