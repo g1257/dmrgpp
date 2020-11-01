@@ -380,8 +380,7 @@ public:
 			for (SizeType j = 0; j < ll.dofs(); ++j)
 				cm.push_back(ll(j));
 
-			assert(cm.size() > 0);
-			hilbert_[kindOfSite] = cm[0].getCRS().rows();
+			hilbert_[kindOfSite] = ll(0).getCRS().rows();
 		}
 
 		SizeType m = cm.size();
