@@ -365,6 +365,7 @@ public:
 		VectorOperatorType cm; // only for hermit
 		SizeType n = labeledOps.size();
 		VectorSizeType dofsByKind(n);
+		hilbert_.resize(atomKind_->kindsOfAtoms());
 		for (SizeType i = 0; i < n; ++i) {
 			const LabelType& ll = labeledOps[i];
 
@@ -378,6 +379,9 @@ public:
 
 			for (SizeType j = 0; j < ll.dofs(); ++j)
 				cm.push_back(ll(j));
+
+			assert(cm.size() > 0);
+			hilbert_[kindOfSite] = cm[0].getCRS().rows();
 		}
 
 		SizeType m = cm.size();
@@ -465,22 +469,10 @@ public:
 		}
 	}
 
-	SizeType hilbertSize(SizeType kindOfSite,
-	                     const LabeledOperatorsType& labeledOps) const
+	SizeType hilbertSize(SizeType kindOfSite) const
 	{
-		SizeType n = labeledOps.size();
-		for (SizeType i = 0; i < n; ++i) {
-			const LabelType& ll = labeledOps[i];
-
-			if (!ll.isTrackable()) continue;
-
-			if (ll.kindOfSite() != kindOfSite)
-				continue;
-
-			return ll(0).getStorage().rows();
-		}
-
-		throw PsimagLite::RuntimeError("hilbertSize FATAL: " + ttos(kindOfSite) + "\n");
+		assert(kindOfSite < hilbert_.size());
+		return hilbert_[kindOfSite];
 	}
 
 	bool areSitesCompatibleForThisTerm(SizeType termIndex,
@@ -527,6 +519,7 @@ private:
 	VectorSizeType termGeomReplacement_;
 	const static AtomKindBase* atomKind_;
 	static std::map<PsimagLite::String, SizeType> offsets_;
+	VectorSizeType hilbert_;
 };
 
 template<typename T1, typename T2>

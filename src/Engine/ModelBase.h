@@ -471,7 +471,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	SizeType hilbertSize(SizeType actualSite) const
 	{
 		const SizeType kindOfSite = modelLinks_.siteToAtomKind(actualSite);
-		return modelLinks_.hilbertSize(kindOfSite, labeledOperators_);
+		return modelLinks_.hilbertSize(kindOfSite);
 	}
 
 	// Fill the VectorOperatorType with operators that need to be kept
@@ -496,10 +496,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		for (SizeType i = 0; i < k; ++i) {
 			if (i == kindOfSite)
 				break;
-			start += modelLinks_.hilbertSize(i, labeledOperators_);
+			start += modelLinks_.hilbertSize(i);
 		}
 
-		const SizeType end = start + modelLinks_.hilbertSize(kindOfSite, labeledOperators_);
+		const SizeType end = start + modelLinks_.hilbertSize(kindOfSite);
 
 		qns.resize(end - start, qns_[start]);
 		std::copy(qns_.begin() + start, qns_.begin() + end, qns.begin());
@@ -511,37 +511,35 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	static OperatorType naturalOperator(const PsimagLite::String& what,
-	                                    SizeType, // ignore, legacy
+	                                    SizeType site,
 	                                    SizeType dof)
 	{
 		static const PsimagLite::String expipi = "exp_i_pi_";
 		static const SizeType l = expipi.length();
+		PsimagLite::String what2 = what;
+		OperatorType op;
 
 		if (what.substr(0, l) == expipi) {
-			const PsimagLite::String what2 = what.substr(l, what.length() - l);
-			OperatorType op = labeledOperators_(what2, dof);
+			what2 = what.substr(l, what.length() - l);
+			op = labeledOperators_(what2, dof);
 			if (op.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION)
 				err("Don't know how to exponentiate a fermionic operator\n");
 
 			MatrixType m2 = op.getCRS().toDense();
 			expIpi(m2);
 			op.fromStorage(m2);
-
-			return op;
+		} else {
+			op = labeledOperators_(what, dof);
 		}
 
-		return labeledOperators_(what, dof);
+		invalidateIfNeeded(op, site, what2);
+		return op;
 	}
 
 	static bool introspect()
 	{
 		labeledOperators_.introspect();
 		return true;
-	}
-
-	SizeType siteToAtomKind(SizeType site) const
-	{
-		return modelLinks_.siteToAtomKind(site);
 	}
 
 	void printBasis(SizeType site) const
@@ -675,6 +673,16 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 private:
+
+	static void invalidateIfNeeded(OperatorType& op, SizeType site, PsimagLite::String what)
+	{
+		SizeType siteKind = modelLinks_.siteToAtomKind(site);
+		SizeType opKind = labeledOperators_.findLabel(what).kindOfSite();
+
+		if (siteKind == opKind) return;
+
+		op.clear();
+	}
 
 	static void offsetsFromSizes(std::unordered_map<QnType, SizeType>& offsets,
 	                             std::unordered_map<QnType, SizeType>& sizes,

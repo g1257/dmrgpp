@@ -164,8 +164,10 @@ public:
 		const SparseMatrixType& O1 = sdhs.op(0).getCRS();
 		const SparseMatrixType& O2 = sdhs.op(1).getCRS();
 
-		if (i==j) {
-			c = calcDiagonalCorrelation(i, O1, O2, fermionicSign, bra, ket);
+		if (i == j) {
+			SizeType replacementSite = (i == 0) ? 1 : i - 1;
+			SizeType rowsForIdent = braket.model().hilbertSize(replacementSite);
+			c = calcDiagonalCorrelation(i, O1, O2, rowsForIdent, fermionicSign, bra, ket);
 		} else if (i>j) {
 			c = -calcCorrelation_(j, i, O2, O1, fermionicSign, bra, ket);
 		} else {
@@ -180,25 +182,25 @@ private:
 	FieldType calcDiagonalCorrelation(SizeType i,
 	                                  const SparseMatrixType& O1,
 	                                  const SparseMatrixType& O2,
+	                                  SizeType rowsForIdent,
 	                                  ProgramGlobals::FermionOrBosonEnum,
 	                                  const PsimagLite::GetBraOrKet& bra,
 	                                  const PsimagLite::GetBraOrKet& ket) const
 	{
-		SizeType n = O1.rows();
-		SparseMatrixType O1new=identity(n);
+		SparseMatrixType ident=identity(rowsForIdent);
 
 		SparseMatrixType O2new = O1 * O2;
 		if (i==0) return calcCorrelation_(0,
 		                                  1,
 		                                  O2new,
-		                                  O1new,
+		                                  ident,
 		                                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                                  bra,
 		                                  ket);
 
 		return calcCorrelation_(i - 1,
 		                        i,
-		                        O1new,
+		                        ident,
 		                        O2new,
 		                        ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                        bra,

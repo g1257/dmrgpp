@@ -63,7 +63,7 @@ public:
 			}
 
 			OneOperatorSpecType nos(opLabel);
-			nup = model_.naturalOperator(nos.label,site,nos.dof);
+			nup = model_.naturalOperator(nos.label, site, nos.dof);
 			if (nos.transpose)
 				nup.dagger();
 		}

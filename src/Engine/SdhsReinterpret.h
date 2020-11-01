@@ -17,7 +17,7 @@ public:
 	typedef typename BraketType::AlgebraType OperatorType;
 
 	SdhsReinterpret(const BraketType& braket, const VectorSizeType& sites)
-	   : forbidden_(false) // : braket_(braket), sites_(sites)
+	    : forbidden_(false)
 	{
 		const SizeType n = sites.size();
 		if (n == 0)
@@ -37,8 +37,11 @@ public:
 
 		str += "|" + braket.ket().toString() + ">";
 		BraketType braket2(braket.model(), str);
-		for (SizeType i = 0; i < n; ++i)
+		for (SizeType i = 0; i < n; ++i) {
 			ops_.push_back(braket2.op(i));
+			if (ops_[i].isEmpty())
+				forbidden_ = true;
+		}
 	}
 
 	bool forbidden() const { return forbidden_; }
@@ -55,8 +58,6 @@ private:
 
 	bool forbidden_;
 	VectorOperatorType ops_;
-//	const BraketType& braket_;
-//	const VectorSizeType& sites_;
 };
 }
 #endif // SDHSREINTERPRET_H
