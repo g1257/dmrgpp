@@ -143,7 +143,7 @@ public:
 	      timeVectorsBase_(0),
 	      wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft()),
 	      multiSiteExprHelper_(targetHelper_.model().superGeometry().numberOfSites() - 2),
-	      correlationsSkel_(multiSiteExprHelper_, false)
+	      correlationsSkel_(multiSiteExprHelper_, targetHelper.model(), false)
 	{
 		timesWithoutAdvancement_ = 0;
 		firstSeeLeftCorner_ = false;
@@ -592,6 +592,9 @@ public:
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<"I'm applying a local operator now";
 		progress_.printline(msgg, std::cout);
+
+		const SizeType splitSize = targetHelper_.model().hilbertSize(site);
+
 		typename PsimagLite::Vector<bool>::Type signs;
 		targetHelper_.model().findOddElectronsOfOneSite(signs, site);
 		FermionSign fs(targetHelper_.lrs().left(), signs);
@@ -599,6 +602,7 @@ public:
 		              phiOld,
 		              tstStruct.aOperators()[indexOfOperator],
 		              fs,
+		              splitSize,
 		              systemOrEnviron,
 		              corner);
 
@@ -637,6 +641,8 @@ public:
 	}
 
 	void timeHasAdvanced() { timeVectorsBase_->timeHasAdvanced(time_); }
+
+	const ModelType& model() const { return targetHelper_.model(); }
 
 private:
 
@@ -780,11 +786,14 @@ private:
 			progress_.printline(msgg, std::cout);
 			typename PsimagLite::Vector<bool>::Type signs;
 			targetHelper_.model().findOddElectronsOfOneSite(signs,site);
+
+			const SizeType splitSize = targetHelper_.model().hilbertSize(site);
 			FermionSign fs(targetHelper_.lrs().left(), signs);
 			applyOpLocal_(phiNew,
 			              phiOld,
 			              tstStruct.aOperators()[i],
 			              fs,
+			              splitSize,
 			              systemOrEnviron,corner);
 			RealType norma = norm(phiNew);
 

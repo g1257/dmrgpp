@@ -226,6 +226,8 @@ private:
 	                 SizeType site,
 	                 const OperatorType& A)
 	{
+		const SizeType splitSize = aux_.aoe().model().hilbertSize(site);
+
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
 		aux_.model().findOddElectronsOfOneSite(oddElectrons,site);
 		FermionSign fs(aux_.lrs().left(), oddElectrons);
@@ -235,7 +237,7 @@ private:
 		bool b2 = (site == n - 1);
 		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
 		                                   : BorderEnumType::BORDER_NO;
-		aux_.aoe().applyOpLocal()(dest, src1, A, fs, aux_.direction(), border);
+		aux_.aoe().applyOpLocal()(dest, src1, A, fs, splitSize, aux_.direction(), border);
 	}
 
 	SizeType getCurrentCoO() const

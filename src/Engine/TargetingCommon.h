@@ -479,6 +479,9 @@ public:
 		typename BasisWithOperatorsType::VectorBoolType signs(q.size());
 		for (SizeType i = 0; i < q.size(); ++i) signs[i] = q[i].oddElectrons;
 
+		assert(0 < block1.size());
+		const SizeType splitSize = targetHelper_.model().hilbertSize(block1[0]);
+
 		FermionSign fs(targetHelper_.lrs().left(), signs);
 		for (SizeType j=0;j<creationMatrix.size();j++) {
 			VectorWithOffsetType phiTemp;
@@ -487,6 +490,7 @@ public:
 			                    psi,
 			                    cm,
 			                    fs,
+			                    splitSize,
 			                    direction,
 			                    ApplyOperatorType::BORDER_NO);
 			if (j==0) v = phiTemp;
@@ -579,11 +583,12 @@ public:
 	                               const SomeAlgebraType& A,
 	                               BorderEnumType border) const
 	{
+		const SizeType splitSize = targetHelper_.model().hilbertSize(site);
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
 		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
 		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
 		VectorWithOffsetType dest;
-		aoe_.applyOpLocal()(dest,src1,A,fs,systemOrEnviron,border);
+		aoe_.applyOpLocal()(dest, src1, A, fs, splitSize, systemOrEnviron, border);
 
 		ComplexOrRealType sum = 0.0;
 		for (SizeType ii=0;ii<dest.sectors();ii++) {
