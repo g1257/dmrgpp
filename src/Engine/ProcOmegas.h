@@ -30,7 +30,6 @@ public:
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef PsimagLite::PsiApp ApplicationType;
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-	//typedef OmegaParams<InputNgType, RealType> OmegaParamsType;
 	typedef OmegasFourier<ComplexOrRealType, InputNgType::Readable> OmegasFourierType;
 	typedef typename OmegasFourierType::VectorComplexType VectorComplexType;
 
@@ -263,16 +262,18 @@ private:
 
 		delete[] ss;
 		ss = 0;
-		checkSites(defined);
+		checkSites(defined, inFile);
 		//print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
 	}
 
-	void checkSites(const VectorBoolType& defined)
+	void checkSites(const VectorBoolType& defined,
+	                PsimagLite::String inFile)
 	{
 		const SizeType n = defined.size();
 		for (SizeType i = 0; i < n; ++i)
 			if (!defined[i])
-				err("Undefined value for site= " + ttos(i) + "\n");
+				err("Undefined value for site= " + ttos(i) +
+				    " file= " + inFile + "\n");
 	}
 
 	PsimagLite::String inputfile_;
