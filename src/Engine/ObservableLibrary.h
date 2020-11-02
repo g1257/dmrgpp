@@ -412,11 +412,41 @@ private:
 	                     PsimagLite::String label,
 	                     const PsimagLite::GetBraOrKet& ket)
 	{
-		bool printDone = false;
+		printMatrix(bra, label, ket);
+
 		for (SizeType i0 = 0; i0 < observe_.helper().size(); ++i0) {
 
+			SizeType site = observe_.helper().site(i0);
+
+			cornerLeftOrRight(1, i0, bra, label, ket);
+
 			PsimagLite::String str("<");
-			str += bra.toString() + "|" + label + "[" + ttos(i0) + "]|" + ket.toString() + ">";
+			str += bra.toString() + "|" + label + "[" + ttos(site) + "]|" + ket.toString() + ">";
+			BraketType braket(model_, str);
+
+			const OperatorType& opA = braket.op(0);
+
+			if (opA.isEmpty()) continue;
+
+			FieldType tmp1 = observe_.template onePoint<ApplyOperatorType>
+			        (i0, opA, site, ApplyOperatorType::BORDER_NO, bra, ket);
+			std::cout<<site<<" "<<tmp1;
+			std::cout<<" "<<observe_.helper().time(i0)<<"\n";
+
+			cornerLeftOrRight(numberOfSites_ - 2, i0, bra, label, ket);
+		}
+	}
+
+	void printMatrix(const PsimagLite::GetBraOrKet& bra,
+	                 PsimagLite::String label,
+                     const PsimagLite::GetBraOrKet& ket) const
+	{
+		bool printDone = false;
+
+		for (SizeType i0 = 0; i0 < observe_.helper().size(); ++i0) {
+			SizeType site = observe_.helper().site(i0);
+			PsimagLite::String str("<");
+			str += bra.toString() + "|" + label + "[" + ttos(site) + "]|" + ket.toString() + ">";
 			BraketType braket(model_, str);
 
 			const OperatorType& opA = braket.op(0);
@@ -429,16 +459,8 @@ private:
 				std::cout<<opA.getCRS().toDense();
 				std::cout<<"site <"<<bra.toString()<<"|"<<label;
 				std::cout<<"|"<<ket.toString()<<"> time\n";
+				break;
 			}
-
-			cornerLeftOrRight(1, i0, bra, label, ket);
-
-			FieldType tmp1 = observe_.template
-			        onePoint<ApplyOperatorType>(i0, opA, ApplyOperatorType::BORDER_NO, bra, ket);
-			std::cout<<observe_.helper().site(i0)<<" "<<tmp1;
-			std::cout<<" "<<observe_.helper().time(i0)<<"\n";
-
-			cornerLeftOrRight(numberOfSites_ - 2, i0, bra, label, ket);
 		}
 	}
 
@@ -454,12 +476,13 @@ private:
 
 		if (site == 1 && !atCorner) {
 			PsimagLite::String str("<");
-			str += bra.toString() + "|" + label + "[" + ttos(site) + "]|" + ket.toString() + ">";
+			str += bra.toString() + "|" + label + "[" + ttos(0) + "]|" + ket.toString() + ">";
 			BraketType braket(model_, str);
 
 			const OperatorType& opA = braket.op(0);
 			if (opA.isEmpty())
 				return;
+
 			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr,
 			                                                                          opA,
 			                                                                          bra,
@@ -486,6 +509,7 @@ private:
 		FieldType tmp1 = observe_.template
 		        onePoint<ApplyOperatorType>(ptr,
 		                                    opAcorner,
+		                                    x,
 		                                    ApplyOperatorType::BORDER_YES,
 		                                    bra,
 		                                    ket);

@@ -522,13 +522,14 @@ public:
 	}
 
 	template<typename ApplyOperatorType>
-	FieldType onePoint(SizeType site,
+	FieldType onePoint(SizeType ptr,
 	                   const typename ApplyOperatorType::OperatorType& A,
+	                   SizeType site,
 	                   typename ApplyOperatorType::BorderEnum corner,
 	                   const PsimagLite::GetBraOrKet& bra,
 	                   const PsimagLite::GetBraOrKet& ket) const
 	{
-		return onepoint_.template operator()<ApplyOperatorType>(site, A, corner, bra, ket);
+		return onepoint_.template operator()<ApplyOperatorType>(ptr, A, site, corner, bra, ket);
 	}
 
 	template<typename ApplyOperatorType>

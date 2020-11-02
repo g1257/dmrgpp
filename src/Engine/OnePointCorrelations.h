@@ -107,18 +107,18 @@ public:
 	{}
 
 	template<typename ApplyOperatorType>
-	FieldType operator()(SizeType site,
+	FieldType operator()(SizeType ptr,
 	                     const typename ApplyOperatorType::OperatorType& A,
+	                     SizeType site,
 	                     typename ApplyOperatorType::BorderEnum corner,
 	                     const PsimagLite::GetBraOrKet& bra,
 	                     const PsimagLite::GetBraOrKet& ket) const
 	{
-		const SizeType ptr = site;
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
 			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
-			return onePointInternal<ApplyOperatorType>(A, src1, src2, corner, ptr);
+			return onePointInternal<ApplyOperatorType>(A, site, src1, src2, corner, ptr);
 		} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -152,6 +152,7 @@ private:
 
 	template<typename ApplyOperatorType>
 	FieldType onePointInternal(const typename ApplyOperatorType::OperatorType& A,
+	                           SizeType site,
 	                           const VectorWithOffsetType& src1,
 	                           const VectorWithOffsetType& src2,
 	                           typename ApplyOperatorType::BorderEnum corner,
@@ -159,7 +160,7 @@ private:
 	{
 		if (src1.sectors() == 0 || src2.sectors() == 0) return 0.0;
 
-		SizeType splitSize = model_.hilbertSize(ptr);
+		SizeType splitSize = model_.hilbertSize(site);
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
 		                                helper_.withLegacyBugs());
 		VectorWithOffsetType dest;
