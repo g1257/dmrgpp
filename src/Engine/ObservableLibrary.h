@@ -444,8 +444,7 @@ private:
 	{
 		bool printDone = false;
 
-		for (SizeType i0 = 0; i0 < observe_.helper().size(); ++i0) {
-			SizeType site = observe_.helper().site(i0);
+		for (SizeType site = 0; site < numberOfSites_; ++site) {
 			PsimagLite::String str("<");
 			str += bra.toString() + "|" + label + "[" + ttos(site) + "]|" + ket.toString() + ">";
 			BraketType braket(model_, str);
