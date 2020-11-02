@@ -95,11 +95,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename VectorWithOffsetType_,typename ModelType_,typename IoInputType>
+template<typename VectorWithOffsetType_, typename ModelType_, typename IoInputType>
 class Observer {
 
 public:
 
+	typedef ModelType_ ModelType;
 	typedef typename VectorWithOffsetType_::value_type FieldType;
 	typedef PsimagLite::SparseVector<FieldType> VectorType;
 	typedef typename ModelType_::RealType RealType;
@@ -112,12 +113,11 @@ public:
 	typedef ObserverHelper<IoInputType, MatrixType, VectorType, VectorWithOffsetType_,
 	LeftRightSuperType> ObserverHelperType;
 	typedef CorrelationsSkeleton<ObserverHelperType,ModelType_> CorrelationsSkeletonType;
-	typedef OnePointCorrelations<ObserverHelperType> OnePointCorrelationsType;
+	typedef OnePointCorrelations<ObserverHelperType, ModelType_> OnePointCorrelationsType;
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> TwoPointCorrelationsType;
 	typedef FourPointCorrelations<CorrelationsSkeletonType> FourPointCorrelationsType;
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> MultiPointCorrelationsType;
 	typedef typename CorrelationsSkeletonType::BraketType BraketType;
-	typedef ModelType_ ModelType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
@@ -161,7 +161,7 @@ public:
 	              nf,
 	              trail,
 	              !model.params().options.isSet("fixLegacyBugs")),
-	      onepoint_(helper_),
+	      onepoint_(helper_, model),
 	      skeleton_(helper_, model, true),
 	      twopoint_(skeleton_),
 	      fourpoint_(skeleton_)

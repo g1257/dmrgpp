@@ -135,7 +135,7 @@ public:
 
 	enum BorderEnum {BORDER_NO = false, BORDER_YES = true};
 
-	enum {MIDDLE, LEFT_CORNER, RIGHT_CORNER};
+	enum class LatticePartEnum {MIDDLE, LEFT_CORNER, RIGHT_CORNER};
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -153,6 +153,7 @@ public:
 	                const VectorWithOffsetType& src,
 	                const OperatorType& AA,
 	                const FermionSign& fermionSign,
+	                SizeType splitSize,
 	                ProgramGlobals::DirectionEnum systemOrEnviron,
 	                BorderEnum corner) const
 	{
@@ -161,9 +162,9 @@ public:
 
 		if (corner == BORDER_NO) {
 			if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-				applyLocalOpSystem(dest,src,A,fermionSign);
+				applyLocalOpSystem(dest, src, A, fermionSign, splitSize, LatticePartEnum::MIDDLE);
 			else
-				applyLocalOpEnviron(dest,src,A);
+				applyLocalOpEnviron(dest, src, A, LatticePartEnum::MIDDLE);
 			return;
 		}
 
@@ -242,19 +243,20 @@ private:
 	                        const VectorWithOffsetType& src,
 	                        const OperatorType& A,
 	                        const FermionSign& fermionSign,
-	                        SizeType whichPartOfTheLattice = MIDDLE) const
+	                        SizeType splitSize,
+	                        LatticePartEnum whichPartOfTheLattice) const
 	{
 		TargetVectorType dest2(lrs_.super().size(),0.0);
 
 		for (SizeType ii=0;ii<src.sectors();ii++) {
 			SizeType i = src.sector(ii);
 			switch (whichPartOfTheLattice) {
-			case MIDDLE:
-				applyLocalOpSystem(dest2,src,A,fermionSign,i);
+			case LatticePartEnum::MIDDLE:
+				applyLocalOpSystem(dest2, src, A, fermionSign, splitSize, i);
 				break;
-			case LEFT_CORNER:
-				throw PsimagLite::RuntimeError("applyLocalOpSystem: internal error\n");
-			case RIGHT_CORNER:
+			case LatticePartEnum::LEFT_CORNER:
+				err("applyLocalOpSystem: internal error\n");
+			case LatticePartEnum::RIGHT_CORNER:
 				applyLocalOpRightCorner(dest2,src,A,i);
 				break;
 			}
@@ -268,12 +270,13 @@ private:
 	                        const VectorWithOffsetType& src,
 	                        const OperatorType& A,
 	                        const FermionSign& fermionSign,
+	                        SizeType splitSize,
 	                        SizeType i0) const
 	{
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
 		SizeType ns = lrs_.left().permutationVector().size();
-		SizeType nx = ns/A.getCRS().rows();
+		SizeType nx = ns/splitSize;
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
 
@@ -306,20 +309,20 @@ private:
 	void applyLocalOpEnviron(VectorWithOffsetType& dest,
 	                         const VectorWithOffsetType& src,
 	                         const OperatorType& A,
-	                         SizeType whichPartOfTheLattice = MIDDLE) const
+	                         LatticePartEnum whichPartOfTheLattice) const
 	{
 		TargetVectorType dest2(lrs_.super().size(),0.0);
 
 		for (SizeType ii=0;ii<src.sectors();ii++) {
 			SizeType i = src.sector(ii);
 			switch (whichPartOfTheLattice) {
-			case MIDDLE:
+			case LatticePartEnum::MIDDLE:
 				applyLocalOpEnviron(dest2,src,A,i);
 				break;
-			case LEFT_CORNER:
+			case LatticePartEnum::LEFT_CORNER:
 				applyLocalOpLeftCorner(dest2,src,A,i);
 				break;
-			case RIGHT_CORNER:
+			case LatticePartEnum::RIGHT_CORNER:
 				err("applyLocalOpEnviron: internal error\n");
 			}
 		}
@@ -431,11 +434,12 @@ private:
 	                        const FermionSign& fermionSign) const
 	{
 		if (lrs_.right().size() == A.getCRS().rows()) { // right corner
-			applyLocalOpSystem(dest,src,A,fermionSign,RIGHT_CORNER);
+			SizeType splitSize = A.getCRS().rows(); // FIXME: check for SDHS
+			applyLocalOpSystem(dest, src, A, fermionSign, splitSize, LatticePartEnum::RIGHT_CORNER);
 			return;
 		}
 
-		applyLocalOpEnviron(dest,src,A,LEFT_CORNER);
+		applyLocalOpEnviron(dest, src, A, LatticePartEnum::LEFT_CORNER);
 	}
 
 	const LeftRightSuperType& lrs_;

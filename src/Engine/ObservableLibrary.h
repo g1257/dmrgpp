@@ -151,7 +151,6 @@ public:
 				}
 
 				measureOnePoint(braket.bra(),
-				                braket.op(0),
 				                braket.opName(0),
 				                braket.ket());
 				continue;
@@ -410,34 +409,43 @@ public:
 private:
 
 	void measureOnePoint(const PsimagLite::GetBraOrKet& bra,
-	                     const OperatorType& opA,
 	                     PsimagLite::String label,
 	                     const PsimagLite::GetBraOrKet& ket)
 	{
+		bool printDone = false;
 		for (SizeType i0 = 0; i0 < observe_.helper().size(); ++i0) {
 
-			if (i0==0) {
+			PsimagLite::String str("<");
+			str += bra.toString() + "|" + label + "[" + ttos(i0) + "]|" + ket.toString() + ">";
+			BraketType braket(model_, str);
+
+			const OperatorType& opA = braket.op(0);
+
+			if (opA.isEmpty()) continue;
+
+			if (!printDone) {
+				printDone = true;
 				std::cout<<"Using Matrix A:\n";
 				std::cout<<opA.getCRS().toDense();
 				std::cout<<"site <"<<bra.toString()<<"|"<<label;
 				std::cout<<"|"<<ket.toString()<<"> time\n";
 			}
 
-			cornerLeftOrRight(1, i0, bra, opA, ket);
+			cornerLeftOrRight(1, i0, bra, label, ket);
 
 			FieldType tmp1 = observe_.template
 			        onePoint<ApplyOperatorType>(i0, opA, ApplyOperatorType::BORDER_NO, bra, ket);
 			std::cout<<observe_.helper().site(i0)<<" "<<tmp1;
 			std::cout<<" "<<observe_.helper().time(i0)<<"\n";
 
-			cornerLeftOrRight(numberOfSites_ - 2, i0, bra, opA, ket);
+			cornerLeftOrRight(numberOfSites_ - 2, i0, bra, label, ket);
 		}
 	}
 
 	void cornerLeftOrRight(SizeType site,
 	                       SizeType ptr,
 	                       const PsimagLite::GetBraOrKet& bra,
-	                       const OperatorType& opA,
+	                       PsimagLite::String label,
 	                       const PsimagLite::GetBraOrKet& ket)
 	{
 		if (observe_.helper().site(ptr) != site) return;
@@ -445,6 +453,13 @@ private:
 		bool atCorner = observe_.isAtCorner(numberOfSites_, ptr);
 
 		if (site == 1 && !atCorner) {
+			PsimagLite::String str("<");
+			str += bra.toString() + "|" + label + "[" + ttos(site) + "]|" + ket.toString() + ">";
+			BraketType braket(model_, str);
+
+			const OperatorType& opA = braket.op(0);
+			if (opA.isEmpty())
+				return;
 			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr,
 			                                                                          opA,
 			                                                                          bra,
@@ -460,7 +475,12 @@ private:
 		SizeType x = (observe_.helper().site(ptr) == 1) ? 0 : numberOfSites_ - 1;
 
 		// operator might be site dependent
-		OperatorType opAcorner = opA;
+		PsimagLite::String str("<");
+		str += bra.toString() + "|" + label + "[" + ttos(x) + "]|" + ket.toString() + ">";
+		BraketType braket(model_, str);
+
+		const OperatorType& opAcorner = braket.op(0);
+		if (opAcorner.isEmpty()) return;
 
 		// do the corner case
 		FieldType tmp1 = observe_.template

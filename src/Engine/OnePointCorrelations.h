@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename ObserverHelperType>
+template<typename ObserverHelperType, typename ModelType>
 class OnePointCorrelations {
 
 	typedef typename ObserverHelperType::MatrixType MatrixType;
@@ -101,7 +101,9 @@ class OnePointCorrelations {
 
 public:
 
-	OnePointCorrelations(const ObserverHelperType& helper) : helper_(helper)
+	OnePointCorrelations(const ObserverHelperType& helper,
+	                     const ModelType& model)
+	    : helper_(helper), model_(model)
 	{}
 
 	template<typename ApplyOperatorType>
@@ -156,6 +158,8 @@ private:
 	                           SizeType ptr) const
 	{
 		if (src1.sectors() == 0 || src2.sectors() == 0) return 0.0;
+
+		SizeType splitSize = model_.hilbertSize(ptr);
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
 		                                helper_.withLegacyBugs());
 		VectorWithOffsetType dest;
@@ -163,7 +167,9 @@ private:
 		              src1,
 		              A,
 		              helper_.fermionicSignLeft(ptr),
-		              helper_.direction(ptr),corner);
+		              splitSize,
+		              helper_.direction(ptr),
+		              corner);
 
 		FieldType sum = static_cast<FieldType>(0.0);
 		const VectorWithOffsetType& v1 = dest;
@@ -216,6 +222,7 @@ private:
 	}
 
 	const ObserverHelperType& helper_;
+	const ModelType& model_;
 };  //class OnePointCorrelations
 } // namespace Dmrg
 
