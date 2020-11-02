@@ -533,12 +533,13 @@ public:
 	}
 
 	template<typename ApplyOperatorType>
-	FieldType onePointHookForZero(SizeType site,
+	FieldType onePointHookForZero(SizeType ptr,
 	                              const typename ApplyOperatorType::OperatorType& A,
+	                              SizeType splitSize,
 	                              const PsimagLite::GetBraOrKet& bra,
 	                              const PsimagLite::GetBraOrKet& ket) const
 	{
-		return onepoint_.template hookForZero<ApplyOperatorType>(site, A, bra, ket);
+		return onepoint_.template hookForZero<ApplyOperatorType>(ptr, A, splitSize, bra, ket);
 	}
 
 	template<typename VectorLikeType>

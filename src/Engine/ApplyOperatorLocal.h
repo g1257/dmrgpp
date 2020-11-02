@@ -176,7 +176,7 @@ public:
 	void hookForZero(VectorWithOffsetType& dest,
 	                 const VectorWithOffsetType& src,
 	                 const OperatorType& A,
-	                 const FermionSign& fermionSign,
+	                 SizeType splitSize,
 	                 ProgramGlobals::DirectionEnum systemOrEnviron) const
 	{
 		assert(systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
@@ -185,7 +185,7 @@ public:
 
 		for (SizeType ii = 0; ii < src.sectors(); ++ii) {
 			SizeType i = src.sector(ii);
-			hookForZeroSystem(dest2,src,A,fermionSign,i);
+			hookForZeroSystem(dest2, src, A, splitSize, i);
 		}
 
 		dest.fromFull(dest2,lrs_.super());
@@ -195,7 +195,7 @@ public:
 	void hookForZeroSystem(TargetVectorType& dest2,
 	                       const VectorWithOffsetType& src,
 	                       const OperatorType& AA,
-	                       const FermionSign&,
+	                       SizeType splitSize,
 	                       SizeType i0) const
 	{
 		LegacyBug legacyBug(withLegacyBug_, AA);
@@ -204,7 +204,7 @@ public:
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
 		SizeType ns = lrs_.left().permutationVector().size();
-		SizeType nx = ns/A.getCRS().rows();
+		SizeType nx = ns/splitSize;
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
 

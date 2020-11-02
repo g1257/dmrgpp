@@ -426,12 +426,13 @@ private:
 
 			const OperatorType& opA = braket.op(0);
 
-			if (opA.isEmpty()) continue;
+			if (!opA.isEmpty()) {
 
-			FieldType tmp1 = observe_.template onePoint<ApplyOperatorType>
-			        (i0, opA, site, ApplyOperatorType::BORDER_NO, bra, ket);
-			std::cout<<site<<" "<<tmp1;
-			std::cout<<" "<<observe_.helper().time(i0)<<"\n";
+				FieldType tmp1 = observe_.template onePoint<ApplyOperatorType>
+				        (i0, opA, site, ApplyOperatorType::BORDER_NO, bra, ket);
+				std::cout<<site<<" "<<tmp1;
+				std::cout<<" "<<observe_.helper().time(i0)<<"\n";
+			}
 
 			cornerLeftOrRight(numberOfSites_ - 2, i0, bra, label, ket);
 		}
@@ -439,7 +440,7 @@ private:
 
 	void printMatrix(const PsimagLite::GetBraOrKet& bra,
 	                 PsimagLite::String label,
-                     const PsimagLite::GetBraOrKet& ket) const
+	                 const PsimagLite::GetBraOrKet& ket) const
 	{
 		bool printDone = false;
 
@@ -483,8 +484,10 @@ private:
 			if (opA.isEmpty())
 				return;
 
+			const SizeType splitSize = model_.hilbertSize(1);
 			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr,
 			                                                                          opA,
+			                                                                          splitSize,
 			                                                                          bra,
 			                                                                          ket);
 			std::cout<<"0 "<<tmp1<<" "<<observe_.helper().time(ptr)<<"\n";

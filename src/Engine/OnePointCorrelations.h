@@ -127,17 +127,18 @@ public:
 	}
 
 	template<typename ApplyOperatorType>
-	FieldType hookForZero(SizeType site,
+	FieldType hookForZero(SizeType ptr,
 	                      const typename ApplyOperatorType::OperatorType& A,
+	                      SizeType splitSize,
 	                      const PsimagLite::GetBraOrKet& bra,
 	                      const PsimagLite::GetBraOrKet& ket) const
 	{
-		const SizeType ptr = site;
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
 			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
 			return onePointInternalHookForZero<ApplyOperatorType>(A,
+			                                                      splitSize,
 			                                                      src1,
 			                                                      src2,
 			                                                      ptr);
@@ -191,6 +192,7 @@ private:
 
 	template<typename ApplyOperatorType>
 	FieldType onePointInternalHookForZero(const typename ApplyOperatorType::OperatorType& A,
+	                                      SizeType splitSize,
 	                                      const VectorWithOffsetType& src1,
 	                                      const VectorWithOffsetType& src2,
 	                                      SizeType ptr) const
@@ -202,7 +204,8 @@ private:
 		applyOpLocal1.hookForZero(dest,
 		                          src1,
 		                          A,
-		                          helper_.fermionicSignLeft(ptr),
+		                          splitSize,
+		                          //helper_.fermionicSignLeft(ptr),
 		                          helper_.direction(ptr));
 
 		FieldType sum = static_cast<FieldType>(0.0);
