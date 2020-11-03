@@ -21,7 +21,7 @@ public:
 	    : itemSpec_(itemSpec)
 	{}
 
-	void operator()(ResultType& result,
+	bool operator()(ResultType& result,
 	                String expr,
 	                const ResultType& resultEmpty,
 	                AuxiliaryType& aux) const
@@ -35,7 +35,9 @@ public:
 
 		for (SizeType i = 0; i < numberOfTerms; ++i) {
 			ResultType term = resultEmpty;
-			procCanonicalTerm(term, quasiCanonical, i, aux);
+			bool isNotEmpty = procCanonicalTerm(term, quasiCanonical, i, aux);
+			if (!isNotEmpty)
+				continue;
 			if (!ItemSpecType::metaEqual(term, result))
 				err("CanonicalExpression: metas not equal\n");
 
@@ -45,13 +47,12 @@ public:
 				result += term;
 		}
 
-		if (ItemSpecType::isEmpty(result))
-			err("CanonicalExpression: expression result is empty\n");
+		return (ItemSpecType::isEmpty(result)) ? false : true;
 	}
 
 private:
 
-	void procCanonicalTerm(ResultType& term,
+	bool procCanonicalTerm(ResultType& term,
 	                       QuasiCanonicalType& quasiCanonical,
 	                       SizeType ind,
 	                       AuxiliaryType& aux) const
@@ -66,9 +67,10 @@ private:
 		}
 
 		if (ItemSpecType::isEmpty(term))
-			err("CanonicalExpression: term result is empty\n");
+			return false;
 
 		term *= factor;
+		return true;
 	}
 
 	void procCanonicalFactor(ResultType& prev,
