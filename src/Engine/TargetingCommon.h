@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsimagLite.h"
 #include "GetBraOrKet.h"
 #include "RestartStruct.h"
+#include "SdhsReinterpret.h"
 
 namespace Dmrg {
 
@@ -144,6 +145,7 @@ public:
 	typedef RestartStruct RestartStructType;
 	typedef typename ApplyOperatorExpressionType::VectorVectorVectorWithOffsetType
 	VectorVectorVectorWithOffsetType;
+	typedef SdhsReinterpret<BraketType> SdhsReinterpretType;
 
 	enum class OpLabelCategory { DRESSED, BARE };
 
@@ -342,7 +344,11 @@ public:
 
 			BraketType braket(targetHelper_.model(), opLabel);
 
-			const typename BraketType::AlgebraType& nup = braket.op(0);
+			SdhsReinterpretType sdhs(braket, {site});
+
+			if (sdhs.forbidden()) continue;
+
+			const typename BraketType::AlgebraType& nup = sdhs.op(0);
 
 			const SizeType foundSize = nup.getStorage().rows();
 			if (foundSize != expectedSize) continue;
