@@ -301,14 +301,12 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	// END ^^^^^^^^^^^Functions that each model needs to implement
 
-	virtual void findOddElectronsOfOneSite(VectorBoolType& oddElectrons,
-	                                       SizeType site,
-	                                       ProgramGlobals::DirectionEnum dir) const
+	virtual void findOddElectronsOfOneSite(VectorBoolType& oddElectrons, SizeType site) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type block(1, site);
 		typename PsimagLite::Vector<OperatorType>::Type cm;
 		VectorQnType qq;
-		setOperatorMatrices(cm, qq, block, dir);
+		setOperatorMatrices(cm, qq, block);
 		SizeType n = qq.size();
 		oddElectrons.resize(n);
 		for (SizeType i = 0; i < n; ++i)
@@ -342,6 +340,15 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	{
 		atomKind_ = new AtomKindBaseType();
 		return *atomKind_;
+	}
+
+	// for OneSiteTRUNC only
+	virtual bool setOperatorMatricesEx(VectorOperatorType&,
+	                         VectorQnType&,
+	                         const BlockType&,
+	                         ProgramGlobals::DirectionEnum) const
+	{
+		return false;
 	}
 
 	virtual PsimagLite::String oracle() const { return ""; }
@@ -485,8 +492,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// should be static
 	void setOperatorMatrices(VectorOperatorType& cm,
 	                         VectorQnType& qns,
-	                         const BlockType& block,
-	                         ProgramGlobals::DirectionEnum dir) const
+	                         const BlockType& block) const
 	{
 		assert(block.size() == 1);
 
@@ -544,12 +550,12 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return true;
 	}
 
-	void printBasis(SizeType site, ProgramGlobals::DirectionEnum dir) const
+	void printBasis(SizeType site) const
 	{
 		BlockType block(1, site);
 		typename PsimagLite::Vector<OperatorType>::Type cm;
 		VectorQnType qq;
-		setOperatorMatrices(cm, qq, block, dir);
+		setOperatorMatrices(cm, qq, block);
 		std::cout<<"block="<<block;
 		std::cout<<"qq="<<qq;
 

@@ -177,10 +177,7 @@ public:
 		VectorSizeType test(1,0);
 		VectorQnType qq;
 		// restart run must be from stable
-		model.setOperatorMatrices(creationMatrix,
-		                          qq,
-		                          test,
-		                          ProgramGlobals::DirectionEnum::STABLE);
+		model.setOperatorMatrices(creationMatrix, qq, test);
 
 		if (creationMatrix.size() != operatorsPerSite) {
 			PsimagLite::String msg("CheckPoint: FATAL: Perhaps trying to");

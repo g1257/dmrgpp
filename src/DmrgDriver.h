@@ -96,7 +96,7 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 		canonicalExpression(opC, obsOptions.opexpr, opEmpty, site);
 	} else {
 		if (obsOptions.label == "B") {
-			model.printBasis(obsOptions.site, Dmrg::ProgramGlobals::DirectionEnum::STABLE);
+			model.printBasis(obsOptions.site);
 			return;
 		}
 

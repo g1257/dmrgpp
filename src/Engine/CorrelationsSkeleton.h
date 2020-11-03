@@ -737,9 +737,7 @@ private:
 		assert(penultimateSite > 1);
 		penultimateSite -= 2;
 		typename ModelType::VectorBoolType oddElectrons;
-		model_.findOddElectronsOfOneSite(oddElectrons,
-		                                 penultimateSite,
-		                                 ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		model_.findOddElectronsOfOneSite(oddElectrons, penultimateSite);
 
 		SparseMatrixType A1crs(A1);
 		SparseMatrixType A2crs(A2);

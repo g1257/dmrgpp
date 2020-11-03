@@ -229,7 +229,7 @@ private:
 		const SizeType splitSize = aux_.aoe().model().hilbertSize(site);
 
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
-		aux_.model().findOddElectronsOfOneSite(oddElectrons, site, aux_.direction());
+		aux_.model().findOddElectronsOfOneSite(oddElectrons, site);
 		FermionSign fs(aux_.lrs().left(), oddElectrons);
 		bool b1 = (site == 0);
 		SizeType n = aux_.model().superGeometry().numberOfSites();

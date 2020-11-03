@@ -199,9 +199,7 @@ public:
 	{
 		SizeType site = 0; // FIXME FOR IMMM
 		typename BasisWithOperatorsType::VectorBoolType oddElectrons;
-		model_.findOddElectronsOfOneSite(oddElectrons,
-		                                 site,
-		                                 ProgramGlobals::DirectionEnum::STABLE);
+		model_.findOddElectronsOfOneSite(oddElectrons, site);
 		ioOut_.write(oddElectrons, "OddElectronsOneSite");
 
 		appInfo_.finalize();
