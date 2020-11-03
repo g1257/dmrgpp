@@ -213,87 +213,85 @@ protected:
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		SparseMatrixType nmatrix;
 		SparseMatrixType tmpMatrix;
-		for (SizeType i=0;i<block.size();i++) {
-			for (int sigma=0;sigma<2;sigma++) {
-				tmpMatrix = findOperatorMatrices(i,sigma,natBasis);
-				int asign= 1;
-				if (sigma>0) asign= 1;
-				typename OperatorType::Su2RelatedType su2related;
-				if (sigma==0) {
-					su2related.source.push_back(i);
-					su2related.source.push_back(i+1);
-					su2related.transpose.push_back(-1);
-					su2related.transpose.push_back(-1);
-					su2related.offset = 1;
-				}
-
-				OperatorType myOp(tmpMatrix,
-				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
-				                  typename OperatorType::PairType(1,1-sigma),
-				                  asign,
-				                  su2related);
-
-				c.push(myOp);
-				if (sigma == 0)
-					nmatrix = n(tmpMatrix);
-				else
-					nmatrix += n(tmpMatrix);
+		for (SizeType sigma = 0; sigma < 2; ++sigma) {
+			tmpMatrix = findOperatorMatrices(site, sigma, natBasis);
+			int asign= 1;
+			if (sigma>0) asign= 1;
+			typename OperatorType::Su2RelatedType su2related;
+			if (sigma==0) {
+				su2related.source.push_back(site);
+				su2related.source.push_back(site + 1);
+				su2related.transpose.push_back(-1);
+				su2related.transpose.push_back(-1);
+				su2related.offset = 1;
 			}
 
-			OpsLabelType& n = this->createOpsLabel("n");
-			typename OperatorType::Su2RelatedType su2relatedA;
-			OperatorType myOp(nmatrix,
-			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                  typename OperatorType::PairType(0,0),
-			                  1,
-			                  su2relatedA);
+			OperatorType myOp(tmpMatrix,
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(1,1-sigma),
+			                  asign,
+			                  su2related);
 
-			n.push(myOp);
+			c.push(myOp);
+			if (sigma == 0)
+				nmatrix = n(tmpMatrix);
+			else
+				nmatrix += n(tmpMatrix);
+		}
 
-			if (modelParameters_.numberphonons == 0) continue;
+		OpsLabelType& n = this->createOpsLabel("n");
+		typename OperatorType::Su2RelatedType su2relatedA;
+		OperatorType myOp(nmatrix,
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0,0),
+		                  1,
+		                  su2relatedA);
 
-			tmpMatrix=findPhononadaggerMatrix(i,natBasis);
+		n.push(myOp);
 
-			typename OperatorType::Su2RelatedType su2related2;
-			su2related2.source.push_back(i*2);
-			su2related2.source.push_back(i*2+1);
-			su2related2.source.push_back(i*2);
-			su2related2.transpose.push_back(-1);
-			su2related2.transpose.push_back(-1);
-			su2related2.transpose.push_back(1);
-			su2related2.offset = 1;
-			OperatorType myOp2(tmpMatrix,
-			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                   PairType(2, 2),
-			                   -1,
-			                   su2related2);
-			a.push(myOp2);
+		if (modelParameters_.numberphonons == 0) return; //<<--- EARLY EXIT
 
-			if (!isSsh_) continue; //<<--- EARLY BREAK FROM LOOP
+		tmpMatrix=findPhononadaggerMatrix(site, natBasis);
 
-			// Set the operators c_(i,sigma} * x_i in the natural basis
+		typename OperatorType::Su2RelatedType su2related2;
+		su2related2.source.push_back(site*2);
+		su2related2.source.push_back(site*2+1);
+		su2related2.source.push_back(site*2);
+		su2related2.transpose.push_back(-1);
+		su2related2.transpose.push_back(-1);
+		su2related2.transpose.push_back(1);
+		su2related2.offset = 1;
+		OperatorType myOp2(tmpMatrix,
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 2),
+		                   -1,
+		                   su2related2);
+		a.push(myOp2);
 
-			for (int sigma=0;sigma<2;sigma++) {
-				tmpMatrix = findSSHMatrices(i,sigma,natBasis);
-				int asign= 1;
-				if (sigma>0) asign= 1;
-				typename OperatorType::Su2RelatedType su2related3;
-				if (sigma==0) {
-					su2related3.source.push_back(i);
-					su2related3.source.push_back(i+1);
-					su2related3.transpose.push_back(-1);
-					su2related3.transpose.push_back(-1);
-					su2related3.offset = 1;
-				}
+		if (!isSsh_) return; //<<--- EARLY EXIT
 
-				OperatorType myOp3(tmpMatrix,
-				                   ProgramGlobals::FermionOrBosonEnum::FERMION,
-				                   typename OperatorType::PairType(1,1-sigma),
-				                   asign,
-				                   su2related3);
+		// Set the operators c_(i,sigma} * x_i in the natural basis
 
-				cx.push(myOp3);
+		for (SizeType sigma = 0; sigma < 2; ++sigma) {
+			tmpMatrix = findSSHMatrices(site, sigma, natBasis);
+			int asign= 1;
+			if (sigma>0) asign= 1;
+			typename OperatorType::Su2RelatedType su2related3;
+			if (sigma==0) {
+				su2related3.source.push_back(site);
+				su2related3.source.push_back(site + 1);
+				su2related3.transpose.push_back(-1);
+				su2related3.transpose.push_back(-1);
+				su2related3.offset = 1;
 			}
+
+			OperatorType myOp3(tmpMatrix,
+			                   ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                   typename OperatorType::PairType(1,1-sigma),
+			                   asign,
+			                   su2related3);
+
+			cx.push(myOp3);
 		}
 	}
 
@@ -331,6 +329,85 @@ protected:
 
 		hopSsh.push(cx1, 'C', cdown, 'N', modifier);
 
+	}
+
+	bool setOperatorMatricesEx(VectorOperatorType& ops,
+	                           VectorQnType& qm,
+	                           const BlockType& block,
+	                           ProgramGlobals::DirectionEnum dir) const
+	{
+		if (modelParameters_.oStruncPhonons == 0) return false;
+		if (dir == ProgramGlobals::DirectionEnum::INFINITE) return false;
+
+		assert(block.size() == 1);
+
+		// FIXME add another condition here
+		if (modelParameters_.oStruncSite != block[0]) return false;
+
+		HilbertBasisType natBasis;
+		setBasis(natBasis, block);
+		setSymmetryRelated(qm, natBasis);
+
+		const SizeType ind = 0;
+		SparseMatrixType nmatrix;
+		for (SizeType sigma = 0; sigma < 2; ++sigma) {
+			SparseMatrixType tmpMatrix = findOperatorMatrices(ind, sigma, natBasis);
+			int asign= 1;
+			if (sigma>0) asign= 1;
+			typename OperatorType::Su2RelatedType su2related;
+			if (sigma==0) {
+				su2related.source.push_back(ind);
+				su2related.source.push_back(ind + 1);
+				su2related.transpose.push_back(-1);
+				su2related.transpose.push_back(-1);
+				su2related.offset = 1;
+			}
+
+			OperatorType myOp(tmpMatrix,
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(1,1-sigma),
+			                  asign,
+			                  su2related);
+
+			if (sigma == 0)
+				nmatrix = n(tmpMatrix);
+			else
+				nmatrix += n(tmpMatrix);
+			ops.push_back(myOp);
+		}
+
+		typename OperatorType::Su2RelatedType su2relatedA;
+		OperatorType myOp(nmatrix,
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0,0),
+		                  1,
+		                  su2relatedA);
+
+		ops.push_back(myOp);
+
+		if (modelParameters_.oStruncPhonons == 0) return true;
+
+		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(ind ,natBasis);
+
+		typename OperatorType::Su2RelatedType su2related2;
+		su2related2.source.push_back(ind*2);
+		su2related2.source.push_back(ind*2 + 1);
+		su2related2.source.push_back(ind*2);
+		su2related2.transpose.push_back(-1);
+		su2related2.transpose.push_back(-1);
+		su2related2.transpose.push_back(1);
+		su2related2.offset = 1;
+		OperatorType myOp2(tmpMatrix,
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 2),
+		                   -1,
+		                   su2related2);
+		ops.push_back(myOp2);
+
+		if (isSsh_)
+			err("SSH submodel does not support OneSiteTrunc\n");
+
+		return true;
 	}
 
 private:

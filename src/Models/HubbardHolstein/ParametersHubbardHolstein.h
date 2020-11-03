@@ -97,7 +97,7 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 
 	template<typename IoInputType>
 	ParametersHubbardHolstein(IoInputType& io)
-	    : BaseType(io, false)
+	    : BaseType(io, false), oStruncPhonons(0), oStruncSite(0)
 	{
 
 		SizeType nsites = 0;
@@ -121,6 +121,14 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 			lambdaFP.clear();
 		}
 
+		try {
+			io.read(oStruncPhonons, "OneSiteTruncationPhononsMax=");
+			io.read(oStruncSite, "OneSiteTruncationSite=");
+		} catch (...) {}
+
+		if (oStruncPhonons > 0 && oStruncSite == 0)
+			err("OneSiteTruncationSite cannot be zero\n");
+
 		if (model == "HubbardHolstein" || model == "HubbardHolsteinSSH") {
 			if (!hasLambdaFP)
 				err("HubbardHolstein: must have lambdaFP vector in input file\n");
@@ -128,14 +136,6 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 			if (hasLambdaFP)
 				err("HolsteinThin: lambdaFP should be given as a connection\n");
 		}
-
-		/*
-		for (SizeType i = 0; i < h; ++i) {
-			PsimagLite::Matrix<ComplexOrRealType> m;
-			io.read(m, "hopOnSite");
-			hopOnSite.push_back(m);
-		}
-*/
 	}
 
 	template<typename SomeMemResolvType>
@@ -178,6 +178,8 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 	}
 
 	SizeType numberphonons;
+	SizeType oStruncPhonons;
+	SizeType oStruncSite;
 	VectorRealType hubbardFU;
 	VectorRealType lambdaFP;
 	// Onsite potential values
