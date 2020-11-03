@@ -201,7 +201,7 @@ public:
 		typename BasisWithOperatorsType::VectorBoolType oddElectrons;
 		model_.findOddElectronsOfOneSite(oddElectrons,
 		                                 site,
-		                                 ProgramGlobals::DirectionEnum::INFINITE);
+		                                 ProgramGlobals::DirectionEnum::STABLE);
 		ioOut_.write(oddElectrons, "OddElectronsOneSite");
 
 		appInfo_.finalize();

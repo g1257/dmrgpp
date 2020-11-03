@@ -176,10 +176,11 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorSizeType test(1,0);
 		VectorQnType qq;
+		// restart run must be from stable
 		model.setOperatorMatrices(creationMatrix,
 		                          qq,
 		                          test,
-		                          ProgramGlobals::DirectionEnum::INFINITE);
+		                          ProgramGlobals::DirectionEnum::STABLE);
 
 		if (creationMatrix.size() != operatorsPerSite) {
 			PsimagLite::String msg("CheckPoint: FATAL: Perhaps trying to");

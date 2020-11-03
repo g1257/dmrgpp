@@ -95,7 +95,7 @@ struct ProgramGlobals {
 
 	static const SizeType MAX_LPS = 1000;
 
-	enum class DirectionEnum {INFINITE, EXPAND_ENVIRON, EXPAND_SYSTEM};
+	enum class DirectionEnum {INFINITE, EXPAND_ENVIRON, EXPAND_SYSTEM, STABLE};
 
 	enum class ConnectionEnum {SYSTEM_SYSTEM, SYSTEM_ENVIRON, ENVIRON_SYSTEM, ENVIRON_ENVIRON};
 
