@@ -15,6 +15,8 @@ public:
 	typedef typename BraketType::RealType RealType;
 	typedef typename BraketType::VectorAlgebraType VectorOperatorType;
 	typedef typename BraketType::AlgebraType OperatorType;
+	typedef typename BraketType::OneOperatorSpecType OneOperatorSpecType;
+	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
 
 	SdhsReinterpret(const BraketType& braket, const VectorSizeType& sites)
 	    : forbidden_(false)
@@ -30,7 +32,10 @@ public:
 		str += "|";
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opName = braket.opName(i);
-			str += opName + "[" + ttos(sites[i])+ "]";
+			str += opName;
+			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(opName);
+			if (!siteSplit.hasSiteString)
+				str += "[" + ttos(sites[i])+ "]";
 			if (i < n - 1) str += ";";
 
 		}

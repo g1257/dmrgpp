@@ -25,6 +25,7 @@ public:
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef OperatorSpec<ModelType, OperatorType> OperatorSpecType;
 	typedef typename OperatorSpecType::ResultType AlgebraType;
+	typedef typename OperatorSpecType::OneOperatorSpecType OneOperatorSpecType;
 	typedef typename PsimagLite::Vector<AlgebraType>::Type VectorAlgebraType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::GetBraOrKet GetBraOrKetType;

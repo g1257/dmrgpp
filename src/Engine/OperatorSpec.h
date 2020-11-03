@@ -11,14 +11,13 @@ template<typename ModelType,
          typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType> >
 class OperatorSpec {
 
+public:
+
 	typedef typename ModelType::OperatorType OperatorType;
 	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef LazyAlgebra<typename ModelType::OperatorType> LazyAlgebraType;
 	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
 	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
-
-public:
-
 	typedef AlgebraType ResultType;
 	typedef typename OperatorStorageType::value_type ComplexOrRealType;
 	typedef int AuxiliaryType;
