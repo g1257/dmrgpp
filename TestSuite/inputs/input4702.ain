@@ -15,7 +15,7 @@ gt1:dir0:Connectors=[-1.0];
 vector hubbardFU=[1,...];
 vector potentialFV=[2,...];
 
-integer NumberPhonons=4;
+integer NumberPhonons=1;
 
 vector lambdaFP=[0.2,...];
 

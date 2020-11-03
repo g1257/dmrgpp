@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 #include "Io/IoNg.h"
+#include "ProgramGlobals.h"
 
 namespace Dmrg {
 
@@ -360,7 +361,7 @@ private:
 	{
 		BasisWithOperatorsType Xbasis("Xbasis");
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
-		Xbasis.setOneSite(X, model, time);
+		Xbasis.setOneSite(X, model, time, dir);
 
 		assert(X.size() == 1);
 		SizeType lastS = pS.block().size();

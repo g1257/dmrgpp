@@ -199,7 +199,9 @@ public:
 	{
 		SizeType site = 0; // FIXME FOR IMMM
 		typename BasisWithOperatorsType::VectorBoolType oddElectrons;
-		model_.findOddElectronsOfOneSite(oddElectrons, site);
+		model_.findOddElectronsOfOneSite(oddElectrons,
+		                                 site,
+		                                 ProgramGlobals::DirectionEnum::INFINITE);
 		ioOut_.write(oddElectrons, "OddElectronsOneSite");
 
 		appInfo_.finalize();
@@ -246,8 +248,8 @@ public:
 		} else { // move this block elsewhere:
 
 			RealType time = 0;
-			pE.setOneSite(E, model_, time);
-			pS.setOneSite(S, model_, time);
+			pE.setOneSite(E, model_, time, ProgramGlobals::DirectionEnum::INFINITE);
+			pS.setOneSite(S, model_, time, ProgramGlobals::DirectionEnum::INFINITE);
 
 			infiniteDmrgLoop(X,Y,E,pS,pE,psi);
 		}
@@ -534,13 +536,13 @@ obtain ordered
 				lrs_.growLeftBlock(model_, pS, sitesIndices_[stepCurrent_], time);
 				BasisWithOperatorsType* dummyBwo =
 				        &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::ENVIRON);
-				target.updateOnSiteForCorners(*dummyBwo); // <-- only updates extreme sites
+				target.updateOnSiteForCorners(*dummyBwo, direction); // <-- only updates extreme sites
 				lrs_.right(*dummyBwo);
 			} else {
 				lrs_.growRightBlock(model_, pE, sitesIndices_[stepCurrent_], time);
 				BasisWithOperatorsType* dummyBwo =
 				        &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::SYSTEM);
-				target.updateOnSiteForCorners(*dummyBwo); // <-- only updates extreme sites
+				target.updateOnSiteForCorners(*dummyBwo, direction); // <-- only updates extreme sites
 				lrs_.left(*dummyBwo);
 			}
 

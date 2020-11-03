@@ -302,12 +302,13 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// END ^^^^^^^^^^^Functions that each model needs to implement
 
 	virtual void findOddElectronsOfOneSite(VectorBoolType& oddElectrons,
-	                                       SizeType site) const
+	                                       SizeType site,
+	                                       ProgramGlobals::DirectionEnum dir) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type block(1, site);
 		typename PsimagLite::Vector<OperatorType>::Type cm;
 		VectorQnType qq;
-		setOperatorMatrices(cm, qq, block);
+		setOperatorMatrices(cm, qq, block, dir);
 		SizeType n = qq.size();
 		oddElectrons.resize(n);
 		for (SizeType i = 0; i < n; ++i)
@@ -484,7 +485,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// should be static
 	void setOperatorMatrices(VectorOperatorType& cm,
 	                         VectorQnType& qns,
-	                         const BlockType& block) const
+	                         const BlockType& block,
+	                         ProgramGlobals::DirectionEnum dir) const
 	{
 		assert(block.size() == 1);
 
@@ -542,12 +544,12 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return true;
 	}
 
-	void printBasis(SizeType site) const
+	void printBasis(SizeType site, ProgramGlobals::DirectionEnum dir) const
 	{
 		BlockType block(1, site);
 		typename PsimagLite::Vector<OperatorType>::Type cm;
 		VectorQnType qq;
-		setOperatorMatrices(cm, qq, block);
+		setOperatorMatrices(cm, qq, block, dir);
 		std::cout<<"block="<<block;
 		std::cout<<"qq="<<qq;
 

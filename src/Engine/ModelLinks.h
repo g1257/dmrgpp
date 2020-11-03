@@ -448,9 +448,9 @@ public:
 		return *(terms_[term]);
 	}
 
-	void setOperatorMatrices(VectorOperatorType& cm,
-	                         const LabeledOperatorsType& labeledOps,
-	                         SizeType kindOfSite) const
+	static void setOperatorMatrices(VectorOperatorType& cm,
+	                                const LabeledOperatorsType& labeledOps,
+	                                SizeType kindOfSite)
 	{
 		cm.clear();
 		SizeType n = labeledOps.size();

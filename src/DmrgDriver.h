@@ -24,6 +24,7 @@
 #include "CanonicalExpression.h"
 #include "ModelBase.h"
 #include "SuperGeometry.h"
+#include "ProgramGlobals.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -95,7 +96,7 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 		canonicalExpression(opC, obsOptions.opexpr, opEmpty, site);
 	} else {
 		if (obsOptions.label == "B") {
-			model.printBasis(obsOptions.site);
+			model.printBasis(obsOptions.site, Dmrg::ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 			return;
 		}
 

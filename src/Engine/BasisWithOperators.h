@@ -217,7 +217,8 @@ public:
 	template<typename SomeModelType>
 	void setOneSite(const VectorSizeType& block,
 	                const SomeModelType& model,
-	                RealType time)
+	                RealType time,
+	                ProgramGlobals::DirectionEnum dir)
 	{
 		typename BaseType::VectorQnType qm;
 
@@ -225,7 +226,7 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type ops;
 		SparseMatrixType h;
 
-		model.setOperatorMatrices(ops, qm, block);
+		model.setOperatorMatrices(ops, qm, block, dir);
 		BaseType::setSymmetryRelated(qm);
 
 		model.calcHamiltonian(h, ops, block, time);

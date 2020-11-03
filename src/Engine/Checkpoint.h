@@ -176,7 +176,10 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorSizeType test(1,0);
 		VectorQnType qq;
-		model.setOperatorMatrices(creationMatrix, qq, test);
+		model.setOperatorMatrices(creationMatrix,
+		                          qq,
+		                          test,
+		                          ProgramGlobals::DirectionEnum::INFINITE);
 
 		if (creationMatrix.size() != operatorsPerSite) {
 			PsimagLite::String msg("CheckPoint: FATAL: Perhaps trying to");

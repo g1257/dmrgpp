@@ -220,7 +220,8 @@ public:
 		}
 	}
 
-	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
+	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps,
+	                                    ProgramGlobals::DirectionEnum dir) const
 	{
 		if (BasisWithOperatorsType::useSu2Symmetry()) return;
 
@@ -231,7 +232,7 @@ public:
 		if (X[0] != 0 && X[0] != lrs_.super().block().size()-1)
 			return;
 
-		basisWithOps.setOneSite(X, model_, commonTargeting_.aoe().time());
+		basisWithOps.setOneSite(X, model_, commonTargeting_.aoe().time(), dir);
 	}
 
 	virtual bool end() const

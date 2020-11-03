@@ -596,7 +596,7 @@ public:
 		const SizeType splitSize = targetHelper_.model().hilbertSize(site);
 
 		typename PsimagLite::Vector<bool>::Type signs;
-		targetHelper_.model().findOddElectronsOfOneSite(signs, site);
+		targetHelper_.model().findOddElectronsOfOneSite(signs, site, systemOrEnviron);
 		FermionSign fs(targetHelper_.lrs().left(), signs);
 		applyOpLocal_(phiNew,
 		              phiOld,
@@ -785,7 +785,7 @@ private:
 			msg<<"I'm applying a local operator now";
 			progress_.printline(msgg, std::cout);
 			typename PsimagLite::Vector<bool>::Type signs;
-			targetHelper_.model().findOddElectronsOfOneSite(signs,site);
+			targetHelper_.model().findOddElectronsOfOneSite(signs, site, systemOrEnviron);
 
 			const SizeType splitSize = targetHelper_.model().hilbertSize(site);
 			FermionSign fs(targetHelper_.lrs().left(), signs);

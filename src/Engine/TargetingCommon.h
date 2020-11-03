@@ -480,7 +480,7 @@ public:
 		// operators in the one-site basis:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorQnType q;
-		targetHelper_.model().setOperatorMatrices(creationMatrix, q, block1);
+		targetHelper_.model().setOperatorMatrices(creationMatrix, q, block1, direction);
 
 		typename BasisWithOperatorsType::VectorBoolType signs(q.size());
 		for (SizeType i = 0; i < q.size(); ++i) signs[i] = q[i].oddElectrons;
@@ -591,7 +591,7 @@ public:
 	{
 		const SizeType splitSize = targetHelper_.model().hilbertSize(site);
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
-		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons,site);
+		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons, site, systemOrEnviron);
 		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
 		VectorWithOffsetType dest;
 		aoe_.applyOpLocal()(dest, src1, A, fs, splitSize, systemOrEnviron, border);
