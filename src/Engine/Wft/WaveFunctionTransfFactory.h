@@ -195,6 +195,9 @@ public:
 		case ProgramGlobals::DirectionEnum::EXPAND_SYSTEM:
 		case ProgramGlobals::DirectionEnum::EXPAND_ENVIRON:
 			allow = true;
+			break;
+		case ProgramGlobals::DirectionEnum::STABLE:
+			err("FATAL (internal error): DirectionEnum::STABLE not allowed here\n");
 		}
 
 		// FIXME: Must check the below change when using SU(2)!!
@@ -226,9 +229,12 @@ public:
 			break;
 		case ProgramGlobals::DirectionEnum::EXPAND_SYSTEM:
 			allow=true;
-
+			break;
 		case ProgramGlobals::DirectionEnum::EXPAND_ENVIRON:
 			allow=true;
+			break;
+		case ProgramGlobals::DirectionEnum::STABLE:
+			err("FATAL (internal error): DirectionEnum::STABLE not allowed here\n");
 		}
 
 		// FIXME: Must check the below change when using SU(2)!!
@@ -259,9 +265,12 @@ public:
 			break;
 		case ProgramGlobals::DirectionEnum::EXPAND_SYSTEM:
 			allow=true;
-
+			break;
 		case ProgramGlobals::DirectionEnum::EXPAND_ENVIRON:
 			allow=true;
+			break;
+		case ProgramGlobals::DirectionEnum::STABLE:
+			err("FATAL (internal error): DirectionEnum::STABLE not allowed here\n");
 		}
 
 		// FIXME: Must check the below change when using SU(2)!!

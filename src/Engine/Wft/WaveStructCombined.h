@@ -123,6 +123,9 @@ public:
 				err("EXPAND_SYSTEM but option==1\n");
 			wsStack_.push(wave);
 			break;
+		case ProgramGlobals::DirectionEnum::STABLE:
+			err("FATAL (internal error): DirectionEnum::STABLE not allowed here\n");
+			break;
 		}
 	}
 

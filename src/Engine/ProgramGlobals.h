@@ -206,6 +206,9 @@ struct ProgramGlobals {
 		case DirectionEnum::EXPAND_SYSTEM:
 			return "EXPAND_SYSTEM";
 			break;
+		case DirectionEnum::STABLE:
+			return "STABLE";
+			break;
 		}
 
 		return "UNKNOWN_DIRECTION_ENUM";
