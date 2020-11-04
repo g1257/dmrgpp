@@ -30,3 +30,6 @@ FiniteLoops=[
 TargetElectronsUp=4;
 TargetElectronsDown=4;
 OutputFile="data4702";
+integer OneSiteTruncationPhononsMax=2;
+integer OneSiteTruncationSite=5;
+

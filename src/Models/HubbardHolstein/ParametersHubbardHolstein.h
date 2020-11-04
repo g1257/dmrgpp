@@ -122,8 +122,8 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 		}
 
 		try {
-			io.read(oStruncPhonons, "OneSiteTruncationPhononsMax=");
-			io.read(oStruncSite, "OneSiteTruncationSite=");
+			io.readline(oStruncPhonons, "OneSiteTruncationPhononsMax=");
+			io.readline(oStruncSite, "OneSiteTruncationSite=");
 		} catch (...) {}
 
 		if (oStruncPhonons > 0 && oStruncSite == 0)

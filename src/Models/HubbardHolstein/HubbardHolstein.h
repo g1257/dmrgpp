@@ -142,7 +142,8 @@ public:
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      isSsh_(additional == "SSH")
+	      isSsh_(additional == "SSH"),
+	      oStruncActive_(false)
 	{
 		HilbertSpaceHubbardHolsteinType::setBitPhonons(modelParameters_.numberphonons);
 		if (isSsh_) {
@@ -159,9 +160,14 @@ public:
 	                                const BlockType& block,
 	                                RealType) const
 	{
+		SizeType phonons = (oStruncActive_) ? modelParameters_.oStruncPhonons
+		                                    : modelParameters_.numberphonons;
+		if (phonons == 0)
+			err("addDiagonalsInNaturalBasis fatal error when OSTRUNC active\n");
+
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
-		setBasis(natBasis, block);
+		setBasis(natBasis, block, modelParameters_.numberphonons);
 
 		VectorSparseMatrixType cm;
 		findAllMatrices(cm,0,natBasis);
@@ -175,8 +181,9 @@ public:
 			addPotentialFV(hmatrix, cm, block[i]);
 
 			addPotentialPhononV(hmatrix, cm, block[i]);
-
 		}
+
+		oStruncActive_ = false;
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -207,7 +214,7 @@ protected:
 		}
 
 		HilbertBasisType natBasis;
-		setBasis(natBasis, block);
+		setBasis(natBasis, block, modelParameters_.numberphonons);
 		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
@@ -345,7 +352,7 @@ protected:
 		if (modelParameters_.oStruncSite != block[0]) return false;
 
 		HilbertBasisType natBasis;
-		setBasis(natBasis, block);
+		setBasis(natBasis, block, modelParameters_.oStruncPhonons);
 		setSymmetryRelated(qm, natBasis);
 
 		const SizeType ind = 0;
@@ -414,17 +421,18 @@ private:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	void setBasis(HilbertBasisType& basis,
-	              const VectorSizeType& block) const
+	static void setBasis(HilbertBasisType& basis,
+	                     const VectorSizeType& block,
+	                     SizeType phonons)
 	{
 		SizeType n = block.size();
-		HilbertState total = 4*(modelParameters_.numberphonons + 1);
+		HilbertState total = 4*(phonons + 1);
 		total = pow(total,n);
 
 		basis.resize(total);
 
 		SizeType counter = 0;
-		SizeType npPlusOne = modelParameters_.numberphonons + 1;
+		SizeType npPlusOne = phonons + 1;
 		for (SizeType i = 0; i < 4; ++i) {
 			for (SizeType b = 0; b < npPlusOne; ++b) {
 				basis[counter++] = b*4 + i;
@@ -673,6 +681,7 @@ private:
 
 	ParametersHubbardHolsteinType modelParameters_;
 	bool isSsh_;
+	mutable bool oStruncActive_;
 }; //class HubbardHolstein
 } // namespace Dmrg
 /*@}*/
