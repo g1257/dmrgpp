@@ -62,9 +62,9 @@ public:
 		InputNgType::Writeable::readFile(data3, params_.omegaTemplate);
 		PsimagLite::String data4 = addBathParams(data3, bathParams);
 
-		doType(DmrgType::TYPE_0, data4);
+		doType(DmrgType::TYPE_0, data4, mpiRank);
 
-		doType(DmrgType::TYPE_1, data4);
+		doType(DmrgType::TYPE_1, data4, mpiRank);
 
 		if (mpiRank == 0) {
 			scaleGimp();
@@ -128,7 +128,7 @@ private:
 		        "string TSPOp0:OperatorExpression=\"" + obsTc + "\";\n";
 	}
 
-	void doType(DmrgType t, PsimagLite::String data)
+	void doType(DmrgType t, PsimagLite::String data, SizeType mpiRank)
 	{
 		PsimagLite::String obs = (t == DmrgType::TYPE_0) ? "c" : "c'";
 		PsimagLite::String insitu2 = "<gs|" + obs + "|P2>,<gs|" + obs + "|P3>";
@@ -145,6 +145,8 @@ private:
 		const bool dryrun = false;
 		const PsimagLite::String rootname = "dmftDynamics";
 		manyOmegas.run(dryrun, rootname, insitu2);
+
+		if (mpiRank != 0) return;
 
 		const PsimagLite::String rootIname = "input";
 		const PsimagLite::String rootOname = "OUTPUT";
