@@ -143,7 +143,8 @@ public:
 	Operator(IoInputType& io,
 	         SomeModelType& model,
 	         bool checkNonZero,
-	         PsimagLite::String prefix)
+	         PsimagLite::String prefix,
+	         int site = -1)
 	{
 		/*PSIDOC Operator
 		 \item[TSPOperator] [String] One of \{\verb!cooked!, \verb!raw!,
@@ -202,7 +203,6 @@ public:
 			std::cout<<msg;
 		} else if (s == "expression") {
 			io.readline(s,prefix + "OperatorExpression=");
-			int site = 0;
 			typedef OperatorSpec<SomeModelType, Operator> OperatorSpecType;
 			OperatorSpecType opSpec(model);
 			PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);

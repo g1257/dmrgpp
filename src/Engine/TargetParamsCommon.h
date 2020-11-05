@@ -192,7 +192,11 @@ public:
 		PsimagLite::String prefix = "";
 		for (SizeType i = 0; i < sites_.size(); ++i) {
 			PsimagLite::String prefix2 = (io.isAinur()) ? "TSPOp" + ttos(i) + ":" : "";
-			OperatorType myOp(io,model_,OperatorType::MUST_BE_NONZERO, prefix + prefix2);
+			OperatorType myOp(io,
+			                  model_,
+			                  OperatorType::MUST_BE_NONZERO,
+			                  prefix + prefix2,
+			                  sites_[i]);
 			aOperators_.push_back(myOp);
 		}
 
