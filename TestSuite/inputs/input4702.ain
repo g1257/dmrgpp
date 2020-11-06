@@ -13,7 +13,7 @@ gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[-1.0];
 
 vector hubbardFU=[1,...];
-vector potentialFV=[2,...];
+vector potentialFV=[0,...];
 
 integer NumberPhonons=1;
 
@@ -22,13 +22,13 @@ vector lambdaFP=[0.2,...];
 vector potentialPV=[0.4,...];
 
 Model="HubbardHolstein";
-SolverOptions="MatrixProductStored,nowft";
+SolverOptions="MatrixProductStored";
 Version="version";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[3, 100, 0], [-6, 100, 0]];
-TargetElectronsUp=4;
-TargetElectronsDown=4;
+[3, 100, 8], [-6, 100, 8]];
+TargetElectronsUp=0;
+TargetElectronsDown=0;
 OutputFile="data4702";
 integer OneSiteTruncationPhononsMax=2;
 integer OneSiteTruncationSite=5;
