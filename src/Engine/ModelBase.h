@@ -345,11 +345,14 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// for OneSiteTRUNC only
 	virtual bool setOperatorMatricesEx(VectorOperatorType&,
 	                         VectorQnType&,
-	                         const BlockType&,
-	                         ProgramGlobals::DirectionEnum) const
+	                         const BlockType&) const
 	{
 		return false;
 	}
+
+	// Models may ignore announcements from the engine
+	virtual void announce(PsimagLite::String) const
+	{}
 
 	virtual PsimagLite::String oracle() const { return ""; }
 

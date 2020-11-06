@@ -361,7 +361,7 @@ private:
 	{
 		BasisWithOperatorsType Xbasis("Xbasis");
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
-		Xbasis.setOneSite(X, model, time, dir);
+		Xbasis.setOneSite(X, model, time);
 
 		assert(X.size() == 1);
 		SizeType lastS = pS.block().size();

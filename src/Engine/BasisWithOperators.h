@@ -217,8 +217,7 @@ public:
 	template<typename SomeModelType>
 	void setOneSite(const VectorSizeType& block,
 	                const SomeModelType& model,
-	                RealType time,
-	                ProgramGlobals::DirectionEnum dir)
+	                RealType time)
 	{
 		typename BaseType::VectorQnType qm;
 
@@ -226,7 +225,7 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type ops;
 		SparseMatrixType h;
 
-		if (!model.setOperatorMatricesEx(ops, qm, block, dir))
+		if (!model.setOperatorMatricesEx(ops, qm, block))
 			model.setOperatorMatrices(ops, qm, block);
 
 		BaseType::setSymmetryRelated(qm);

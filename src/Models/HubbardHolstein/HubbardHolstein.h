@@ -143,7 +143,8 @@ public:
 	                    io),
 	      modelParameters_(io),
 	      isSsh_(additional == "SSH"),
-	      oStruncActive_(false)
+	      oStruncActive_(false),
+	      finiteLoop_(false)
 	{
 		HilbertSpaceHubbardHolsteinType::setBitPhonons(modelParameters_.numberphonons);
 		if (isSsh_) {
@@ -338,19 +339,26 @@ protected:
 
 	}
 
+	void announce(PsimagLite::String str) const
+	{
+		if (str == "finite loop")
+			finiteLoop_ = true;
+	}
+
 	bool setOperatorMatricesEx(VectorOperatorType& ops,
 	                           VectorQnType& qm,
-	                           const BlockType& block,
-	                           ProgramGlobals::DirectionEnum dir) const
+	                           const BlockType& block) const
 	{
 		if (modelParameters_.oStruncPhonons == 0) return false;
-		if (dir == ProgramGlobals::DirectionEnum::INFINITE) return false;
+
+		if (!finiteLoop_) return false;
 
 		assert(block.size() == 1);
 
 		// FIXME add another condition here
 		if (modelParameters_.oStruncSite != block[0]) return false;
 
+		oStruncActive_ = true;
 		HilbertBasisType natBasis;
 		setBasis(natBasis, block, modelParameters_.oStruncPhonons);
 		setSymmetryRelated(qm, natBasis);
@@ -682,6 +690,7 @@ private:
 	ParametersHubbardHolsteinType modelParameters_;
 	bool isSsh_;
 	mutable bool oStruncActive_;
+	mutable bool finiteLoop_;
 }; //class HubbardHolstein
 } // namespace Dmrg
 /*@}*/
