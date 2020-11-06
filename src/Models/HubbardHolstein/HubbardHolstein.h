@@ -364,7 +364,6 @@ protected:
 		setSymmetryRelated(qm, natBasis);
 
 		const SizeType ind = 0;
-		SparseMatrixType nmatrix;
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
 			SparseMatrixType tmpMatrix = findOperatorMatrices(ind, sigma, natBasis);
 			int asign= 1;
@@ -384,21 +383,10 @@ protected:
 			                  asign,
 			                  su2related);
 
-			if (sigma == 0)
-				nmatrix = n(tmpMatrix);
-			else
-				nmatrix += n(tmpMatrix);
 			ops.push_back(myOp);
 		}
 
-		typename OperatorType::Su2RelatedType su2relatedA;
-		OperatorType myOp(nmatrix,
-		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                  typename OperatorType::PairType(0,0),
-		                  1,
-		                  su2relatedA);
-
-		ops.push_back(myOp);
+		// operator n should NOT be pushed because it isn't tracked
 
 		if (modelParameters_.oStruncPhonons == 0) return true;
 
