@@ -17,9 +17,9 @@ vector potentialFV=[0,...];
 
 integer NumberPhonons=1;
 
-vector lambdaFP=[0.2,...];
+vector lambdaFP=[0.0,...];
 
-vector potentialPV=[0.4,...];
+vector potentialPV=[0.0,...];
 
 Model="HubbardHolstein";
 SolverOptions="MatrixProductStored";
@@ -30,6 +30,6 @@ FiniteLoops=[
 TargetElectronsUp=0;
 TargetElectronsDown=0;
 OutputFile="data4702";
-integer OneSiteTruncationPhononsMax=2;
+integer OneSiteTruncationPhononsMax=10;
 integer OneSiteTruncationSite=5;
 
