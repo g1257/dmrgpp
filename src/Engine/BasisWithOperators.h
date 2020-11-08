@@ -225,8 +225,7 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type ops;
 		SparseMatrixType h;
 
-		if (!model.setOperatorMatricesEx(ops, qm, block))
-			model.setOperatorMatrices(ops, qm, block);
+		model.setOperatorMatrices(ops, qm, block);
 
 		BaseType::setSymmetryRelated(qm);
 

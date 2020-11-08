@@ -345,18 +345,22 @@ protected:
 			finiteLoop_ = true;
 	}
 
-	bool setOperatorMatricesEx(VectorOperatorType& ops,
-	                           VectorQnType& qm,
-	                           const BlockType& block) const
+	// virtual override
+	void setOperatorMatrices(VectorOperatorType& ops,
+	                         VectorQnType& qm,
+	                         const BlockType& block) const
 	{
-		if (modelParameters_.oStruncPhonons == 0) return false;
-
-		if (!finiteLoop_) return false;
+		const bool b1 = (modelParameters_.oStruncPhonons == 0);
 
 		assert(block.size() == 1);
 
-		// FIXME add another condition here
-		if (modelParameters_.oStruncSite != block[0]) return false;
+		const bool b2 = (modelParameters_.oStruncSite != block[0]);
+
+		// FIXME add another condition here related to loop content
+		const bool b3 = false;
+
+		if (!finiteLoop_ || b1 || b2 || b3)
+			return ModelBaseType::setOperatorMatrices(ops, qm, block);
 
 		oStruncActive_ = true;
 		HilbertBasisType natBasis;
@@ -388,7 +392,7 @@ protected:
 
 		// operator n should NOT be pushed because it isn't tracked
 
-		if (modelParameters_.oStruncPhonons == 0) return true;
+		if (modelParameters_.oStruncPhonons == 0) return;
 
 		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(ind ,natBasis);
 
@@ -409,8 +413,6 @@ protected:
 
 		if (isSsh_)
 			err("SSH submodel does not support OneSiteTrunc\n");
-
-		return true;
 	}
 
 private:

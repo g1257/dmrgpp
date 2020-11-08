@@ -342,12 +342,36 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		return *atomKind_;
 	}
 
-	// for OneSiteTRUNC only
-	virtual bool setOperatorMatricesEx(VectorOperatorType&,
-	                         VectorQnType&,
-	                         const BlockType&) const
+	// No need to override unless doing OneSiteTruncation
+	// Fill the VectorOperatorType with operators that need to be kept
+	// track by the DMRG++ Engine.
+	// Fill VectorQnType with the qns of the one site basis in the order
+	// you chose to give the operators
+	// You can check that block.size() == 1 or throw otherwise
+	// The contents of block MUST be ignored unless your model has a site-dependent
+	// Hilbert space (SDHS)
+	// should be static
+	virtual void setOperatorMatrices(VectorOperatorType& cm,
+	                                 VectorQnType& qns,
+	                                 const BlockType& block) const
 	{
-		return false;
+		assert(block.size() == 1);
+
+		const SizeType kindOfSite = modelLinks_.siteToAtomKind(block[0]);
+		modelLinks_.setOperatorMatrices(cm, labeledOperators_, kindOfSite);
+
+		const SizeType k = modelLinks_.kindsOfAtoms();
+		SizeType start = 0;
+		for (SizeType i = 0; i < k; ++i) {
+			if (i == kindOfSite)
+				break;
+			start += modelLinks_.hilbertSize(i);
+		}
+
+		const SizeType end = start + modelLinks_.hilbertSize(kindOfSite);
+
+		qns.resize(end - start, qns_[start]);
+		std::copy(qns_.begin() + start, qns_.begin() + end, qns.begin());
 	}
 
 	// Models may ignore announcements from the engine
@@ -483,37 +507,6 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	{
 		const SizeType kindOfSite = modelLinks_.siteToAtomKind(actualSite);
 		return modelLinks_.hilbertSize(kindOfSite);
-	}
-
-	// Fill the VectorOperatorType with operators that need to be kept
-	// track by the DMRG++ Engine.
-	// Fill VectorQnType with the qns of the one site basis in the order
-	// you chose to give the operators
-	// You can check that block.size() == 1 or throw otherwise
-	// The contents of block MUST be ignored unless your model has a site-dependent
-	// Hilbert space (SDHS)
-	// should be static
-	void setOperatorMatrices(VectorOperatorType& cm,
-	                         VectorQnType& qns,
-	                         const BlockType& block) const
-	{
-		assert(block.size() == 1);
-
-		const SizeType kindOfSite = modelLinks_.siteToAtomKind(block[0]);
-		modelLinks_.setOperatorMatrices(cm, labeledOperators_, kindOfSite);
-
-		const SizeType k = modelLinks_.kindsOfAtoms();
-		SizeType start = 0;
-		for (SizeType i = 0; i < k; ++i) {
-			if (i == kindOfSite)
-				break;
-			start += modelLinks_.hilbertSize(i);
-		}
-
-		const SizeType end = start + modelLinks_.hilbertSize(kindOfSite);
-
-		qns.resize(end - start, qns_[start]);
-		std::copy(qns_.begin() + start, qns_.begin() + end, qns.begin());
 	}
 
 	static const ModelLinksType& modelLinks()
