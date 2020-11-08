@@ -20,15 +20,15 @@ public:
 	OneSiteTruncation(const LeftRightSuperType& lrs, const ModelType& model)
 	    : lrs_(lrs), model_(model) {}
 
-	void update(bool OneSiteTruncActive,
+	void update(SizeType oneSiteTruncSize,
 	            const VectorWithOffsetType& psi,
 	            ProgramGlobals::DirectionEnum dir)
 	{
-		if (!OneSiteTruncActive) return;
+		if (oneSiteTruncSize == 0) return;
 
 		// compute U ...
-		MatrixType U;
-		computeU(U, psi, dir);
+		MatrixType U(oneSiteTruncSize, oneSiteTruncSize);
+		computeU(U, oneSiteTruncSize, psi, dir);
 
 		// ... and send it to model
 		model_.oneSiteTruncationUpdate(U);
@@ -37,15 +37,15 @@ public:
 private:
 
 	void computeU(MatrixType& U,
+	              SizeType oneSiteTruncSize,
 	              const VectorWithOffsetType& psi,
 	              ProgramGlobals::DirectionEnum dir)
 	{
-		const SizeType oneSiteTotal = findHilbertSize(dir);
 		const SizeType sectors = psi.sectors();
 		const SizeType nsysOrEnv = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-		        ? lrs_.left().size() : lrs_.right().size();
+		        ? lrs_.left().size()/oneSiteTruncSize : oneSiteTruncSize;
 		PackIndicesType pack(nsysOrEnv);
-		PackIndicesType packSuper(lrs_.super().size());
+		PackIndicesType packSuper(lrs_.left().size());
 		for (SizeType i = 0; i < sectors; ++i) {
 			const SizeType sector = psi.sector(i);
 			const SizeType total = psi.effectiveSize(sector);
@@ -59,7 +59,7 @@ private:
 					SizeType x0 = 0;
 					SizeType x1 = 0;
 					pack.unpack(x0, x1, lrs_.left().permutation(x));
-					for (SizeType x1prime = 0; x1prime < oneSiteTotal; ++x1prime) {
+					for (SizeType x1prime = 0; x1prime < oneSiteTruncSize; ++x1prime) {
 						const SizeType xprime = pack.pack(x0,
 						                                  x1prime,
 						                                  lrs_.left().permutationInverse());
@@ -74,7 +74,7 @@ private:
 					SizeType y0 = 0;
 					SizeType y1 = 0;
 					pack.unpack(y0, y1, lrs_.right().permutation(y));
-					for (SizeType y0prime = 0; y0prime < oneSiteTotal; ++y0prime) {
+					for (SizeType y0prime = 0; y0prime < oneSiteTruncSize; ++y0prime) {
 						const SizeType yprime = pack.pack(y0prime,
 						                                  y1,
 						                                  lrs_.right().permutationInverse());
@@ -88,17 +88,6 @@ private:
 				}
 			}
 		}
-	}
-
-	SizeType findHilbertSize(ProgramGlobals::DirectionEnum dir) const
-	{
-		const BasisWithOperatorsType& basis = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-		        ? lrs_.left() : lrs_.right();
-
-		const SizeType ind = basis.numberOfLocalOperators();
-		assert(ind > 0);
-
-		return basis.localOperator(ind - 1).getStorage().rows();
 	}
 
 	const LeftRightSuperType& lrs_;

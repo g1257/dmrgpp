@@ -358,9 +358,9 @@ protected:
 	}
 
 	// virtual override
-	bool setOperatorMatrices(VectorOperatorType& ops,
-	                         VectorQnType& qm,
-	                         const BlockType& block) const
+	SizeType setOperatorMatrices(VectorOperatorType& ops,
+	                             VectorQnType& qm,
+	                             const BlockType& block) const
 	{
 		oStruncActive_ = false;
 
@@ -379,6 +379,8 @@ protected:
 		HilbertBasisType natBasis;
 		setBasis(natBasis, block, modelParameters_.oStruncPhonons);
 		setSymmetryRelated(qm, natBasis);
+
+		const SizeType oneSiteTruncSize = natBasis.size();
 
 		const SizeType ind = 0;
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
@@ -405,7 +407,7 @@ protected:
 
 		// operator n should NOT be pushed because it isn't tracked
 
-		if (modelParameters_.oStruncPhonons == 0) return true;
+		if (modelParameters_.oStruncPhonons == 0) return oneSiteTruncSize;
 
 		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(natBasis,
 		                                                     modelParameters_.oStruncPhonons);
@@ -428,7 +430,7 @@ protected:
 		if (isSsh_)
 			err("SSH submodel does not support OneSiteTrunc\n");
 
-		return true;
+		return oneSiteTruncSize;
 	}
 
 private:
@@ -521,8 +523,8 @@ private:
 			typename HilbertSpaceHubbardHolsteinType::HilbertState ket = natBasis[ii];
 
 			const typename HilbertSpaceHubbardHolsteinType::SpinEnum spin = (sigma == 0)
-			          ? HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_UP
-			          : HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN;
+			        ? HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_UP
+			        : HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN;
 
 			SizeType neSpin = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(ket, spin);
 			if (neSpin == 0) {

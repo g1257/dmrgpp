@@ -183,10 +183,10 @@ public:
 	}
 
 	template<typename SomeModelType>
-	bool growLeftBlock(const SomeModelType& model,
-	                   BasisWithOperatorsType &pS,
-	                   BlockType const &X,
-	                   RealType time)
+	SizeType growLeftBlock(const SomeModelType& model,
+	                       BasisWithOperatorsType &pS,
+	                       BlockType const &X,
+	                       RealType time)
 	{
 		assert(left_);
 		return grow(*left_,
@@ -198,10 +198,10 @@ public:
 	}
 
 	template<typename SomeModelType>
-	bool growRightBlock(const SomeModelType& model,
-	                    BasisWithOperatorsType &pE,
-	                    BlockType const &X,
-	                    RealType time)
+	SizeType growRightBlock(const SomeModelType& model,
+	                        BasisWithOperatorsType &pE,
+	                        BlockType const &X,
+	                        RealType time)
 	{
 		assert(right_);
 		return grow(*right_,
@@ -352,16 +352,16 @@ private:
 		to  \cppFunction{pSprime.setHamiltonian(matrix)}.
 		*/
 	template<typename SomeModelType>
-	bool grow(BasisWithOperatorsType& leftOrRight,
-	          const SomeModelType& model,
-	          BasisWithOperatorsType &pS,
-	          const BlockType& X,
-	          ProgramGlobals::DirectionEnum dir,
-	          RealType time)
+	SizeType grow(BasisWithOperatorsType& leftOrRight,
+	              const SomeModelType& model,
+	              BasisWithOperatorsType &pS,
+	              const BlockType& X,
+	              ProgramGlobals::DirectionEnum dir,
+	              RealType time)
 	{
 		BasisWithOperatorsType Xbasis("Xbasis");
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
-		bool oneSiteTruncActive = Xbasis.setOneSite(X, model, time);
+		SizeType oneSiteTruncSize = Xbasis.setOneSite(X, model, time);
 
 		assert(X.size() == 1);
 		SizeType lastS = pS.block().size();
@@ -383,7 +383,7 @@ private:
 		delete lrs;
 		leftOrRight.setHamiltonian(matrix);
 
-		return oneSiteTruncActive;
+		return oneSiteTruncSize;
 	}
 
 	LeftRightSuper(LeftRightSuper&);

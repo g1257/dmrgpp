@@ -353,9 +353,9 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// The contents of block MUST be ignored unless your model has a site-dependent
 	// Hilbert space (SDHS)
 	// should be static
-	virtual bool setOperatorMatrices(VectorOperatorType& cm,
-	                                 VectorQnType& qns,
-	                                 const BlockType& block) const
+	virtual SizeType setOperatorMatrices(VectorOperatorType& cm,
+	                                     VectorQnType& qns,
+	                                     const BlockType& block) const
 	{
 		assert(block.size() == 1);
 
@@ -374,7 +374,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 		qns.resize(end - start, qns_[start]);
 		std::copy(qns_.begin() + start, qns_.begin() + end, qns.begin());
-		return false;
+		return 0;
 	}
 
 	// Models may ignore announcements from the engine
