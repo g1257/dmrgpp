@@ -353,7 +353,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// The contents of block MUST be ignored unless your model has a site-dependent
 	// Hilbert space (SDHS)
 	// should be static
-	virtual void setOperatorMatrices(VectorOperatorType& cm,
+	virtual bool setOperatorMatrices(VectorOperatorType& cm,
 	                                 VectorQnType& qns,
 	                                 const BlockType& block) const
 	{
@@ -374,6 +374,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 		qns.resize(end - start, qns_[start]);
 		std::copy(qns_.begin() + start, qns_.begin() + end, qns.begin());
+		return false;
 	}
 
 	// Models may ignore announcements from the engine
@@ -384,11 +385,6 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual void oneSiteTruncationUpdate(const MatrixType&) const
 	{}
-
-	virtual bool isOneSiteTruncationActive() const
-	{
-		return false;
-	}
 
 	// END OF VIRTUAL FUNCTIONS
 

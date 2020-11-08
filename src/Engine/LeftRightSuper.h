@@ -183,33 +183,33 @@ public:
 	}
 
 	template<typename SomeModelType>
-	void growLeftBlock(const SomeModelType& model,
+	bool growLeftBlock(const SomeModelType& model,
 	                   BasisWithOperatorsType &pS,
 	                   BlockType const &X,
 	                   RealType time)
 	{
 		assert(left_);
-		grow(*left_,
-		     model,
-		     pS,
-		     X,
-		     ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
-		     time);
+		return grow(*left_,
+		            model,
+		            pS,
+		            X,
+		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
+		            time);
 	}
 
 	template<typename SomeModelType>
-	void growRightBlock(const SomeModelType& model,
+	bool growRightBlock(const SomeModelType& model,
 	                    BasisWithOperatorsType &pE,
 	                    BlockType const &X,
 	                    RealType time)
 	{
 		assert(right_);
-		grow(*right_,
-		     model,
-		     pE,
-		     X,
-		     ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
-		     time);
+		return grow(*right_,
+		            model,
+		            pE,
+		            X,
+		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
+		            time);
 	}
 
 	void printSizes(const PsimagLite::String& label,std::ostream& os) const
@@ -352,7 +352,7 @@ private:
 		to  \cppFunction{pSprime.setHamiltonian(matrix)}.
 		*/
 	template<typename SomeModelType>
-	void grow(BasisWithOperatorsType& leftOrRight,
+	bool grow(BasisWithOperatorsType& leftOrRight,
 	          const SomeModelType& model,
 	          BasisWithOperatorsType &pS,
 	          const BlockType& X,
@@ -361,7 +361,7 @@ private:
 	{
 		BasisWithOperatorsType Xbasis("Xbasis");
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
-		Xbasis.setOneSite(X, model, time);
+		bool oneSiteTruncActive = Xbasis.setOneSite(X, model, time);
 
 		assert(X.size() == 1);
 		SizeType lastS = pS.block().size();
@@ -382,6 +382,8 @@ private:
 		model.addHamiltonianConnection(matrix, *lrs, time);
 		delete lrs;
 		leftOrRight.setHamiltonian(matrix);
+
+		return oneSiteTruncActive;
 	}
 
 	LeftRightSuper(LeftRightSuper&);

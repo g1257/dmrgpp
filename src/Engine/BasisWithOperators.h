@@ -215,7 +215,7 @@ public:
 	}
 
 	template<typename SomeModelType>
-	void setOneSite(const VectorSizeType& block,
+	bool setOneSite(const VectorSizeType& block,
 	                const SomeModelType& model,
 	                RealType time)
 	{
@@ -225,7 +225,7 @@ public:
 		typename PsimagLite::Vector<OperatorType>::Type ops;
 		SparseMatrixType h;
 
-		model.setOperatorMatrices(ops, qm, block);
+		bool oneSiteTruncActive = model.setOperatorMatrices(ops, qm, block);
 
 		BaseType::setSymmetryRelated(qm);
 
@@ -242,6 +242,8 @@ public:
 			operatorsPerSite_.push_back(ops.size()/block.size());
 
 		assert(operatorsPerSite_.size() > 0);
+
+		return oneSiteTruncActive;
 	}
 
 	SizeType localOperatorIndex(SizeType i,SizeType sigma) const

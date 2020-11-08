@@ -26,7 +26,7 @@ SolverOptions="MatrixProductStored,fixLegacyBugs,twositedmrg";
 Version="version";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[1, 100, 8], [-2, 100, 8],
+[1, 100, 40], [-2, 100, 40],
 [2, 100, 8], [-2, 100, 8]];
 TargetElectronsUp=0;
 TargetElectronsDown=0;

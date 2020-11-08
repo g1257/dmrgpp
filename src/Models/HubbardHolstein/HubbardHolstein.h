@@ -354,18 +354,11 @@ protected:
 
 	void oneSiteTruncationUpdate(const MatrixType&) const
 	{
-		if (!oStruncActive_)
-			err("oneSiteTruncationUpdate called but oStruncActive_ is false\n");
 		std::cerr<<"oneSiteTruncationUpdate called, ignoring for now (sorry, todo fixme)\n";
 	}
 
-	bool isOneSiteTruncationActive() const
-	{
-		return oStruncActive_;
-	}
-
 	// virtual override
-	void setOperatorMatrices(VectorOperatorType& ops,
+	bool setOperatorMatrices(VectorOperatorType& ops,
 	                         VectorQnType& qm,
 	                         const BlockType& block) const
 	{
@@ -377,7 +370,7 @@ protected:
 
 		const bool b2 = (modelParameters_.oStruncSite != block[0]);
 
-		const bool b3 = ((finiteLoop_ & 5) == 0);
+		const bool b3 = ((finiteLoop_ & 32) == 0);
 
 		if (b1 || b2 || b3)
 			return ModelBaseType::setOperatorMatrices(ops, qm, block);
@@ -412,7 +405,7 @@ protected:
 
 		// operator n should NOT be pushed because it isn't tracked
 
-		if (modelParameters_.oStruncPhonons == 0) return;
+		if (modelParameters_.oStruncPhonons == 0) return true;
 
 		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(natBasis,
 		                                                     modelParameters_.oStruncPhonons);
@@ -434,6 +427,8 @@ protected:
 
 		if (isSsh_)
 			err("SSH submodel does not support OneSiteTrunc\n");
+
+		return true;
 	}
 
 private:

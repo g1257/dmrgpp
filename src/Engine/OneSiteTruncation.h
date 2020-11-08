@@ -13,9 +13,9 @@ public:
 	OneSiteTruncation(const ModelType& model)
 	    : model_(model) {}
 
-	void update(const VectorWithOffsetType& psi)
+	void update(bool OneSiteTruncActive, const VectorWithOffsetType& psi)
 	{
-		if (!model_.isOneSiteTruncationActive()) return;
+		if (!OneSiteTruncActive) return;
 
 		// compute U ...
 		MatrixType U;

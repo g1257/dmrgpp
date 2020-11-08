@@ -531,15 +531,24 @@ obtain ordered
 				err("stepCurrent_ too large!\n");
 
 			RealType time = target.time();
+			bool oneSiteTruncActive = false;
+
 			printerInDetail.print(std::cout, "finite");
+
 			if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-				lrs_.growLeftBlock(model_, pS, sitesIndices_[stepCurrent_], time);
+				oneSiteTruncActive = lrs_.growLeftBlock(model_,
+				                                             pS,
+				                                             sitesIndices_[stepCurrent_],
+				                                             time);
 				BasisWithOperatorsType* dummyBwo =
 				        &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::ENVIRON);
 				target.updateOnSiteForCorners(*dummyBwo); // <-- only updates extreme sites
 				lrs_.right(*dummyBwo);
 			} else {
-				lrs_.growRightBlock(model_, pE, sitesIndices_[stepCurrent_], time);
+				oneSiteTruncActive = lrs_.growRightBlock(model_,
+				                                         pE,
+				                                         sitesIndices_[stepCurrent_],
+				                                         time);
 				BasisWithOperatorsType* dummyBwo =
 				        &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::SYSTEM);
 				target.updateOnSiteForCorners(*dummyBwo); // <-- only updates extreme sites
@@ -567,7 +576,7 @@ obtain ordered
 
 			assert(target.psiConst().size() > 0);
 			assert(target.psiConst()[0].size() > 0);
-			oneSiteTruncation_.update(*(target.psiConst()[0][0]));
+			oneSiteTruncation_.update(oneSiteTruncActive, *(target.psiConst()[0][0]));
 
 			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,loopIndex);
 
