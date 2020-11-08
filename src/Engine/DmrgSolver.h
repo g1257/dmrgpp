@@ -93,6 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PrinterInDetail.h"
 #include "OutputFileOrNot.h"
 #include "TargetingBase.h"
+#include "OneSiteTruncation.h"
 
 namespace Dmrg {
 
@@ -100,16 +101,14 @@ namespace Dmrg {
 template<typename SolverType, typename VectorWithOffsetType_>
 class DmrgSolver {
 
+public:
+
 	typedef TargetingBase<SolverType,VectorWithOffsetType_> TargetingType;
 	typedef typename TargetingType::ModelType ModelType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef ObservablesInSitu<typename TargetingType::TargetVectorType>
-	ObservablesInSituType;
-
-public:
-
+	typedef ObservablesInSitu<typename TargetingType::TargetVectorType> ObservablesInSituType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType::MyBasis MyBasis;
@@ -142,9 +141,9 @@ public:
 	typedef typename DiagonalizationType::VectorVectorRealType VectorVectorRealType;
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
 	VectorVectorVectorWithOffsetType;
+	typedef OneSiteTruncation<ModelType, VectorWithOffsetType> OneSiteTruncationType;
 
-	DmrgSolver(ModelType const &model,
-	           InputValidatorType& ioIn)
+	DmrgSolver(const ModelType& model, InputValidatorType& ioIn)
 	    : model_(model),
 	      parameters_(model_.params()),
 	      ioIn_(ioIn),
@@ -166,7 +165,8 @@ public:
 	                       wft_,
 	                       checkpoint_.energies()),
 	      truncate_(lrs_, wft_, parameters_, model.superGeometry(), ioOut_),
-	      saveData_(!parameters_.options.isSet("noSaveData"))
+	      saveData_(!parameters_.options.isSet("noSaveData")),
+	      oneSiteTruncation_(model_)
 	{
 		firstCall_ = true;
 		counter_ = 0;
@@ -565,6 +565,10 @@ obtain ordered
 			                 loopIndex);
 			printEnergies(energies);
 
+			assert(target.psiConst().size() > 0);
+			assert(target.psiConst()[0].size() > 0);
+			oneSiteTruncation_.update(*(target.psiConst()[0][0]));
+
 			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,loopIndex);
 
 			if (finalStep(stepLength, stepFinal)) break;
@@ -711,6 +715,7 @@ obtain ordered
 	TruncationType truncate_;
 	ObservablesInSituType inSitu_;
 	bool saveData_;
+	OneSiteTruncationType oneSiteTruncation_;
 	static bool firstCall_;
 	static SizeType counter_;
 }; //class DmrgSolver
