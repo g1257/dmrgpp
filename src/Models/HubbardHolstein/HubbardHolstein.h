@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2015, UT-Battelle, LLC
+Copyright (c) 2009-2015-2020, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -165,20 +165,20 @@ public:
 
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
-		setBasis(natBasis, block, modelParameters_.numberphonons);
+		setBasis(natBasis, block, phonons);
 
 		VectorSparseMatrixType cm;
-		findAllMatrices(cm, natBasis);
+		findAllMatrices(cm, natBasis, phonons);
 
 		for (SizeType i = 0; i < n; ++i) {
 
 			addInteractionFU(hmatrix, cm, block[i]);
 
-			addInteractionFPhonon(hmatrix, cm, block[i]);
+			addInteractionFPhonon(hmatrix, cm, block[i], phonons);
 
 			addPotentialFV(hmatrix, cm, block[i]);
 
-			addPotentialPhononV(hmatrix, cm, block[i]);
+			addPotentialPhononV(hmatrix, cm, block[i], phonons);
 		}
 
 		oStruncActive_ = false;
@@ -205,14 +205,15 @@ protected:
 		OpsLabelType& a = this->createOpsLabel("a");
 		OpsLabelType& cx = this->createOpsLabel("cx");
 		this->makeTrackable("c");
-		if (modelParameters_.numberphonons > 0) {
+		const SizeType phonons = modelParameters_.numberphonons;
+		if (phonons > 0) {
 			this->makeTrackable("a");
 			if (isSsh_)
 				this->makeTrackable("cx");
 		}
 
 		HilbertBasisType natBasis;
-		setBasis(natBasis, block, modelParameters_.numberphonons);
+		setBasis(natBasis, block, phonons);
 		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
@@ -254,9 +255,9 @@ protected:
 
 		n.push(myOp);
 
-		if (modelParameters_.numberphonons == 0) return; //<<--- EARLY EXIT
+		if (phonons == 0) return; //<<--- EARLY EXIT
 
-		tmpMatrix = findPhononadaggerMatrix(natBasis);
+		tmpMatrix = findPhononadaggerMatrix(natBasis, phonons);
 
 		typename OperatorType::Su2RelatedType su2related2;
 		su2related2.source.push_back(site*2);
@@ -278,7 +279,7 @@ protected:
 		// Set the operators c_(i,sigma} * x_i in the natural basis
 
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
-			tmpMatrix = findSSHMatrices(sigma, natBasis);
+			tmpMatrix = findSSHMatrices(sigma, natBasis, phonons);
 			int asign = 1;
 			if (sigma > 0) asign = 1;
 			typename OperatorType::Su2RelatedType su2related3;
@@ -310,7 +311,8 @@ protected:
 		OpForLinkType cdown("c", 1);
 		hopf.push(cdown, 'C', cdown, 'N');
 
-		if (modelParameters_.numberphonons > 0) {
+		const SizeType phonons = modelParameters_.numberphonons;
+		if (phonons > 0) {
 			ModelTermType& hopb = ModelBaseType::createTerm("HoppingBosonic");
 
 			OpForLinkType a("a");
@@ -391,7 +393,8 @@ protected:
 
 		if (modelParameters_.oStruncPhonons == 0) return;
 
-		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(natBasis);
+		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(natBasis,
+		                                                     modelParameters_.oStruncPhonons);
 
 		typename OperatorType::Su2RelatedType su2related2;
 		su2related2.source.push_back(ind*2);
@@ -444,7 +447,8 @@ private:
 	}
 
 	//! Find a^+ in the natural basis natBasis
-	SparseMatrixType findPhononadaggerMatrix(const HilbertBasisType& natBasis) const
+	SparseMatrixType findPhononadaggerMatrix(const HilbertBasisType& natBasis,
+	                                         SizeType phonons) const
 	{
 		const SizeType total = natBasis.size();
 
@@ -455,7 +459,8 @@ private:
 			typename HilbertSpaceHubbardHolsteinType::HilbertState ket = natBasis[ii];
 
 			SizeType nphon = SizeType(HilbertSpaceHubbardHolsteinType::getP(ket));
-			if (nphon >= modelParameters_.numberphonons)
+			assert(nphon <= phonons);
+			if (nphon == phonons)
 				continue;
 
 			typename HilbertSpaceHubbardHolsteinType::HilbertState bra = ket;
@@ -524,10 +529,11 @@ private:
 
 
 	SparseMatrixType findSSHMatrices(SizeType sigma,
-	                                 const HilbertBasisType& natBasis) const
+	                                 const HilbertBasisType& natBasis,
+	                                 SizeType phonons) const
 	{
 		SparseMatrixType csigma_temp = findOperatorMatrices(sigma, natBasis);
-		SparseMatrixType a_temp = findPhononadaggerMatrix(natBasis);
+		SparseMatrixType a_temp = findPhononadaggerMatrix(natBasis, phonons);
 		SparseMatrixType x_temp = displacementOp(a_temp);
 		SparseMatrixType csigma_a;
 		multiply(csigma_a,csigma_temp,x_temp);
@@ -535,15 +541,16 @@ private:
 	}
 
 	void findAllMatrices(VectorSparseMatrixType& vm,
-	                     const HilbertBasisType& natBasis) const
+	                     const HilbertBasisType& natBasis,
+	                     SizeType phonons) const
 	{
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
 			SparseMatrixType m = findOperatorMatrices(sigma, natBasis);
 			vm.push_back(m);
 		}
 
-		if (modelParameters_.numberphonons == 0) return;
-		SparseMatrixType m = findPhononadaggerMatrix(natBasis);
+		if (phonons == 0) return;
+		SparseMatrixType m = findPhononadaggerMatrix(natBasis, phonons);
 		vm.push_back(m);
 	}
 
@@ -593,9 +600,10 @@ private:
 
 	void addPotentialPhononV(SparseMatrixType &hmatrix,
 	                         const VectorSparseMatrixType& cm,
-	                         SizeType actualIndexOfSite) const
+	                         SizeType actualIndexOfSite,
+	                         SizeType phonons) const
 	{
-		if (modelParameters_.numberphonons == 0) return;
+		if (phonons == 0) return;
 		assert(2 < cm.size());
 		SparseMatrixType nphon = n(cm[2]);
 		SizeType iUp = actualIndexOfSite;
@@ -639,9 +647,10 @@ private:
 	//! Term is lambda\sum_{\alpha} (n_{i\alpha} -1) x_{i}
 	void addInteractionFPhonon(SparseMatrixType &hmatrix,
 	                           const VectorSparseMatrixType& cm,
-	                           SizeType actualSite) const
+	                           SizeType actualSite,
+	                           SizeType phonons) const
 	{
-		if (modelParameters_.numberphonons == 0) return;
+		if (phonons == 0) return;
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType m = n(cm[0]); // spin up
 		SparseMatrixType m2 = n(cm[1]); // spin down
