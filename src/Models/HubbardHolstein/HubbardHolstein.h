@@ -352,6 +352,18 @@ protected:
 		finiteLoop_ = PsimagLite::atoi(tokens[1]);
 	}
 
+	void oneSiteTruncationUpdate(const MatrixType&) const
+	{
+		if (!oStruncActive_)
+			err("oneSiteTruncationUpdate called but oStruncActive_ is false\n");
+		std::cerr<<"oneSiteTruncationUpdate called, ignoring for now (sorry, todo fixme)\n";
+	}
+
+	bool isOneSiteTruncationActive() const
+	{
+		return oStruncActive_;
+	}
+
 	// virtual override
 	void setOperatorMatrices(VectorOperatorType& ops,
 	                         VectorQnType& qm,
@@ -365,7 +377,6 @@ protected:
 
 		const bool b2 = (modelParameters_.oStruncSite != block[0]);
 
-		// FIXME add another condition here related to loop content
 		const bool b3 = ((finiteLoop_ & 5) == 0);
 
 		if (b1 || b2 || b3)

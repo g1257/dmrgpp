@@ -191,6 +191,8 @@ public:
 		ProgramGlobals::init(maxElectronsOneSpin());
 	}
 
+	// START OF VIRTUAL FUNCTIONS
+
 	virtual ~ModelBase()
 	{
 		delete atomKind_;
@@ -379,6 +381,17 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	{}
 
 	virtual PsimagLite::String oracle() const { return ""; }
+
+	virtual void oneSiteTruncationUpdate(const MatrixType&) const
+	{}
+
+	virtual bool isOneSiteTruncationActive() const
+	{
+		return false;
+	}
+
+	// END OF VIRTUAL FUNCTIONS
+
 
 	/**
 		The function \cppFunction{addHamiltonianConnection} implements
