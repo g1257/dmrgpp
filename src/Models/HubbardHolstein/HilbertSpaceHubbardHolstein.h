@@ -74,7 +74,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file HilbertSpaceHubbardHolstein.h
  *
  *  This class represents the Hilbert space for the Hubbard Holstein Model
- *  States are represented with binary numbers. N bits per site (2 for the fermions, N-2 for the phonons)
+ *  States are represented with binary numbers. N bits per site
+ * (2 for the fermions, N-2 for the phonons)
  *  Bits meaning:
  *  0....00  empty state
  *  0..1.00  a 1 at location x>2 means state with N-2 maxphonons and zero fermions
@@ -94,193 +95,50 @@ namespace Dmrg {
 template<typename Word>
 class HilbertSpaceHubbardHolstein {
 
-	static SizeType numberBitphonons_;
-
 public:
 
 	typedef Word HilbertState;
 
-	enum {SPIN_UP=0,SPIN_DOWN=1};
+	enum class SpinEnum {SPIN_UP, SPIN_DOWN};
 
-	static void setBitPhonons(SizeType numberphonons)
+	// Get electronic state from combined electron and phonon ket a
+	static Word getF(Word a)
 	{
-		numberBitphonons_ =utils::bitSizeOfInteger(numberphonons);
+		return (a & 3);
 	}
 
-	// Get full electronic and phononic state on site "j" in binary number "a"
-	static Word get(Word const &a,SizeType j)
-	{
-		SizeType dofs = 2+numberBitphonons_;
-		SizeType k=dofs*j;
-		SizeType ones = (1<<(dofs))-1;
-		Word mask=(ones<<k);
-
-		mask &= a;
-		mask >>= k;
-		return mask;
-
+	// Get phononic state from combined electron and phonon ket a
+	static Word getP(Word a)
+	{	
+		return (a >> 2);
 	}
 
-	// Get electronic state on site "j" in binary number "a"
-	static Word getF(Word const &a,SizeType j)
+	// Create electron with internal dof "sigma" in binary number "a"
+	static void createF(Word& a, SizeType sigma)
 	{
-		SizeType dofs = 2+numberBitphonons_;
-		SizeType k=dofs*j;
-		Word mask=(3<<k);
-
-		mask &= a;
-		mask >>= k;
-		return mask;
-
-	}
-
-	// Get phononic state on site "j" in binary number "a"
-	static Word getP(Word const &a,SizeType j)
-	{
-		SizeType dofs = 2+numberBitphonons_;
-		SizeType k=dofs*j;
-		SizeType onesP = (~3);
-		Word mask=(onesP<<k);
-
-		mask &= a;
-		mask >>= k;
-		mask >>= 2; // Shitf by the Fermionic State
-		return mask;
-
-	}
-	// Create electron with internal dof "sigma" on site "j" in binary number "a"
-	static void createF(Word &a,SizeType j,SizeType sigma)
-	{
-		SizeType dofs = 2+numberBitphonons_;
-		SizeType k=dofs*j;
-		Word mask=(1<<(k+sigma));
+		Word mask = (1<<sigma);
+		assert ((a & mask) == 0);
 		a |= mask;
 	}
-	// Create phonon on site "j"
-	static void createP(Word &a,SizeType j)
-	{
-		SizeType dofs = 2+numberBitphonons_;
-		SizeType k=dofs*j;
-		SizeType nphonons = 0;
-		if (isNonZeroP(a,j))
-			nphonons = int(getP(a,j));
 
-		Word stateP = 1+nphonons;
-		Word maskP = (stateP<<2);
-		Word maskF = getF(a,j);
-		Word maskU = maskP | maskF;
-		a = (maskU<<k);
+	// Create phonon
+	static void createP(Word& a)
+	{
+		const SizeType nphonons = getP(a);
+		const Word stateP = 1 + nphonons;
+		const Word maskP = (stateP<<2);
+		const Word maskF = getF(a);
+		assert(maskF < 4);
+		a = (maskP | maskF);
 	}
 
-	// Destroy electron with internal dof "sigma" on site "j" in binary number "a"
-	static void destroyF(Word &a,SizeType j,SizeType sigma)
+	static SizeType electronsWithGivenSpin(Word a, SpinEnum spin)
 	{
-		SizeType dofs = 2+numberBitphonons_;
-		SizeType k=dofs*j;
-		Word mask=(1<<(k+sigma));
-		a &= (~mask);
+		const SizeType f = getF(a);
+		return (spin == SpinEnum::SPIN_UP) ? (f & 1) : (f >> 1);
 	}
-
-	// Is there a phonon on site "i" in binary number "ket"?
-	static bool isNonZeroP(Word const &ket,SizeType i)
-	{
-
-		Word tmp=getP(ket,i);
-		SizeType counter = 0;
-		while (tmp) {
-			if (tmp & 1) counter++;
-			tmp >>=1;
-		}
-		if (counter) return true;
-
-		return false;
-	}
-
-	// Is there an electron with internal dof "sigma" on site "i" in binary number "ket"?
-	static bool isNonZeroF(Word const &ket,SizeType i,SizeType sigma)
-	{
-
-		Word tmp=getF(ket,i);
-		if (tmp & (1<<sigma)) return true;
-
-		return false;
-	}
-
-	//! returns the number of electrons of internal dof "sigma" in binary number "data"
-	static int getNofDigits(Word const &data,SizeType sigma)
-	{
-		SizeType dofs = 2+numberBitphonons_;
-		int ret=0;
-		Word data2=data;
-		SizeType i=0;
-		do {
-			if ( (data & (1<<(dofs*i+sigma))) ) ret++;
-			i++;
-		} while (data2>>=dofs);
-
-		return ret;
-	}
-
-	//! Number of electrons with spin spin (sums over sites)
-	static int electronsWithGivenSpin(Word const &data,SizeType spin)
-	{
-		SizeType sum=0;
-		Word data2 = data;
-		SizeType shift = 2+numberBitphonons_;
-		while (data2 > 0) {
-			if (data2 & (spin+1)) sum++;
-			data2 >>= shift;
-		}
-
-		return sum;
-
-	}
-
-	//! Number of electrons in binary number "data" (sum over all spins)
-	static SizeType electrons(const Word& data)
-	{
-		SizeType sum=0;
-		SizeType dofs = 2;
-		for (SizeType spin=0;spin<dofs;spin++)
-			sum += calcNofElectrons(data,spin);
-
-		return sum;
-
-	}
-	//! Number of electrons with spin spin between i and j excluding
-	//! i and j in binary number "ket"
-	//!  intended for when i<j
-
-	static int calcNofElectrons(Word const &ket,SizeType i,SizeType j,SizeType spin)
-	{
-		SizeType dofs = 2+numberBitphonons_;
-		SizeType ii=i+1;
-		if (ii>=j) return 0;
-		Word m=0;
-		for (SizeType k=dofs*ii;k<dofs*j;k++) m |= (1<<k);
-		m = m & ket;
-		return getNofDigits(m,spin);
-	}
-
-	//! Number of electrons with spin spin in binary number "ket"
-	static int calcNofElectrons(Word const &ket,SizeType spin)
-	{
-		SizeType dofs = 2+numberBitphonons_;
-		Word ket2 = ket;
-		SizeType digit = spin+1;
-		int sum = 0;
-		while (ket2 > 0) {
-			if (ket2 & digit) sum++;
-			ket2 >>= dofs;
-		}
-
-		return sum;
-	}
-
 }; // class HilbertSpaceHubbardHolstein
 
-template<typename Word>
-SizeType HilbertSpaceHubbardHolstein<Word>::numberBitphonons_ = 1;
 } // namespace Dmrg
 /*@}*/
 #endif

@@ -130,9 +130,7 @@ public:
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	static const int FERMION_SIGN = -1;
-	static const int SPIN_UP=HilbertSpaceHubbardHolsteinWordType::SPIN_UP;
-	static const int SPIN_DOWN=HilbertSpaceHubbardHolsteinWordType::SPIN_DOWN;
-	static SizeType const ORBITALS  = 2;
+	static SizeType const ORBITALS = 2;
 
 	HubbardHolstein(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
@@ -146,7 +144,6 @@ public:
 	      oStruncActive_(false),
 	      finiteLoop_(false)
 	{
-		HilbertSpaceHubbardHolsteinType::setBitPhonons(modelParameters_.numberphonons);
 		if (isSsh_) {
 			PsimagLite::String warning("HubbardHolstein: ");
 			warning += "SSH term in use.\n";
@@ -171,9 +168,9 @@ public:
 		setBasis(natBasis, block, modelParameters_.numberphonons);
 
 		VectorSparseMatrixType cm;
-		findAllMatrices(cm,0,natBasis);
+		findAllMatrices(cm, natBasis);
 
-		for (SizeType i=0;i<n;i++) {
+		for (SizeType i = 0; i < n; ++i) {
 
 			addInteractionFU(hmatrix, cm, block[i]);
 
@@ -222,11 +219,11 @@ protected:
 		SparseMatrixType nmatrix;
 		SparseMatrixType tmpMatrix;
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
-			tmpMatrix = findOperatorMatrices(site, sigma, natBasis);
-			int asign= 1;
-			if (sigma>0) asign= 1;
+			tmpMatrix = findOperatorMatrices(sigma, natBasis);
+			int asign = 1;
+			if (sigma > 0) asign = 1;
 			typename OperatorType::Su2RelatedType su2related;
-			if (sigma==0) {
+			if (sigma == 0) {
 				su2related.source.push_back(site);
 				su2related.source.push_back(site + 1);
 				su2related.transpose.push_back(-1);
@@ -259,7 +256,7 @@ protected:
 
 		if (modelParameters_.numberphonons == 0) return; //<<--- EARLY EXIT
 
-		tmpMatrix=findPhononadaggerMatrix(site, natBasis);
+		tmpMatrix = findPhononadaggerMatrix(natBasis);
 
 		typename OperatorType::Su2RelatedType su2related2;
 		su2related2.source.push_back(site*2);
@@ -281,11 +278,11 @@ protected:
 		// Set the operators c_(i,sigma} * x_i in the natural basis
 
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
-			tmpMatrix = findSSHMatrices(site, sigma, natBasis);
-			int asign= 1;
-			if (sigma>0) asign= 1;
+			tmpMatrix = findSSHMatrices(sigma, natBasis);
+			int asign = 1;
+			if (sigma > 0) asign = 1;
 			typename OperatorType::Su2RelatedType su2related3;
-			if (sigma==0) {
+			if (sigma == 0) {
 				su2related3.source.push_back(site);
 				su2related3.source.push_back(site + 1);
 				su2related3.transpose.push_back(-1);
@@ -369,9 +366,9 @@ protected:
 
 		const SizeType ind = 0;
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
-			SparseMatrixType tmpMatrix = findOperatorMatrices(ind, sigma, natBasis);
-			int asign= 1;
-			if (sigma>0) asign= 1;
+			SparseMatrixType tmpMatrix = findOperatorMatrices(sigma, natBasis);
+			int asign = 1;
+			if (sigma > 0) asign = 1;
 			typename OperatorType::Su2RelatedType su2related;
 			if (sigma==0) {
 				su2related.source.push_back(ind);
@@ -394,7 +391,7 @@ protected:
 
 		if (modelParameters_.oStruncPhonons == 0) return;
 
-		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(ind ,natBasis);
+		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(natBasis);
 
 		typename OperatorType::Su2RelatedType su2related2;
 		su2related2.source.push_back(ind*2);
@@ -446,39 +443,34 @@ private:
 			err("Could not set up basis\n");
 	}
 
-	//! Find a^+_site in the natural basis natBasis
-	SparseMatrixType findPhononadaggerMatrix(SizeType site,
-	                                         const HilbertBasisType& natBasis) const
+	//! Find a^+ in the natural basis natBasis
+	SparseMatrixType findPhononadaggerMatrix(const HilbertBasisType& natBasis) const
 	{
-		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		typename HilbertSpaceHubbardHolsteinType::HilbertState bra,ket;
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			bra=ket=natBasis[ii];
-			if (HilbertSpaceHubbardHolsteinType::isNonZeroP(ket,site)) {
-				SizeType nphon = SizeType(HilbertSpaceHubbardHolsteinType::getP(ket,site));
-				if (modelParameters_.numberphonons<=1 || nphon >= modelParameters_.numberphonons)
-					continue;
-				HilbertSpaceHubbardHolsteinType::createP(bra,site);
-				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
-				RealType x = int(HilbertSpaceHubbardHolsteinType::getP(bra,site));
-				assert(x>=0);
-				if (jj<0)
-					throw PsimagLite::RuntimeError("findOperatorMatrices\n");
-				cm(ii,jj) = sqrt(x);
-			} else {
-				HilbertSpaceHubbardHolsteinType::createP(bra,site);
-				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
-				RealType x = 1;
-				assert(x>=0);
-				if (jj<0)
-					throw PsimagLite::RuntimeError("findOperatorMatrices\n");
-				cm(ii,jj) = sqrt(x);
-			}
-		}
+		const SizeType total = natBasis.size();
 
-		// print cm matrix
-		//		std::cerr<<cm;
+		MatrixType cm(total, total);
+
+		for (SizeType ii = 0;ii < total; ++ii) {
+
+			typename HilbertSpaceHubbardHolsteinType::HilbertState ket = natBasis[ii];
+
+			SizeType nphon = SizeType(HilbertSpaceHubbardHolsteinType::getP(ket));
+			if (nphon >= modelParameters_.numberphonons)
+				continue;
+
+			typename HilbertSpaceHubbardHolsteinType::HilbertState bra = ket;
+			HilbertSpaceHubbardHolsteinType::createP(bra);
+
+			const int jj = PsimagLite::indexOrMinusOne(natBasis, bra);
+			if (jj < 0)
+				err("findOperatorMatrices\n");
+
+			const RealType x = HilbertSpaceHubbardHolsteinType::getP(bra);
+
+			assert(x >= 0);
+
+			cm(ii, jj) = sqrt(x);
+		}
 
 		SparseMatrixType operatorMatrix(cm);
 		SparseMatrixType temp;
@@ -488,51 +480,39 @@ private:
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
-	RealType sign(typename HilbertSpaceHubbardHolsteinType::HilbertState const &ket,
-	              int i,
-	              int sigma) const
+	RealType sign(typename HilbertSpaceHubbardHolsteinType::HilbertState ket) const
 	{
-		int value=0;
-		value += HilbertSpaceHubbardHolsteinType::calcNofElectrons(ket,0,i,0);
-		value += HilbertSpaceHubbardHolsteinType::calcNofElectrons(ket,0,i,1);
-		int tmp1 = HilbertSpaceHubbardHolsteinType::getF(ket,0) &1;
-		int tmp2 = HilbertSpaceHubbardHolsteinType::getF(ket,0) &2;
-		if (i>0 && tmp1>0) value++;
-		if (i>0 && tmp2>0) value++;
+		const SizeType ndown = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin
+		        (ket, HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN);
 
-		if (sigma==1) { // spin down
-			if ((HilbertSpaceHubbardHolsteinType::getF(ket,i) &1)) value++;
-
-		}
-		if (value%2==0) return 1.0;
-
-		return FERMION_SIGN;
+		return (ndown%2 == 0) ? 1 : FERMION_SIGN;
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(int i,
-	                                      int sigma,
+	SparseMatrixType findOperatorMatrices(SizeType sigma,
 	                                      const HilbertBasisType& natBasis) const
 	{
-		typename HilbertSpaceHubbardHolsteinType::HilbertState bra,ket;
-		int n = natBasis.size();
-		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+		const SizeType n = natBasis.size();
+		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			bra=ket=natBasis[ii];
-			if (HilbertSpaceHubbardHolsteinType::isNonZeroF(ket,i,sigma)) {
+		for (SizeType ii = 0; ii < n; ++ii) {
 
-			} else {
-				HilbertSpaceHubbardHolsteinType::createF(bra,i,sigma);
-				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
-				if (jj<0)
-					throw PsimagLite::RuntimeError("findOperatorMatrices\n");
-				cm(ii,jj) =sign(ket,i,sigma);
+			typename HilbertSpaceHubbardHolsteinType::HilbertState ket = natBasis[ii];
+
+			const typename HilbertSpaceHubbardHolsteinType::SpinEnum spin = (sigma == 0)
+			          ? HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_UP
+			          : HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN;
+
+			SizeType neSpin = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(ket, spin);
+			if (neSpin == 0) {
+				typename HilbertSpaceHubbardHolsteinType::HilbertState bra = ket;
+				HilbertSpaceHubbardHolsteinType::createF(bra, sigma);
+				const int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
+				if (jj < 0)
+					err("findOperatorMatrices\n");
+				cm(ii, jj) = sign(ket);
 			}
 		}
-
-		// print cm matrix
-		//		std::cerr<<cm;
 
 		SparseMatrixType creationMatrix(cm);
 		SparseMatrixType temp;
@@ -543,12 +523,11 @@ private:
 	}
 
 
-	SparseMatrixType findSSHMatrices(int site,
-	                                 int sigma,
+	SparseMatrixType findSSHMatrices(SizeType sigma,
 	                                 const HilbertBasisType& natBasis) const
 	{
-		SparseMatrixType csigma_temp = findOperatorMatrices(site,sigma,natBasis);
-		SparseMatrixType a_temp = findPhononadaggerMatrix(site,natBasis);
+		SparseMatrixType csigma_temp = findOperatorMatrices(sigma, natBasis);
+		SparseMatrixType a_temp = findPhononadaggerMatrix(natBasis);
 		SparseMatrixType x_temp = displacementOp(a_temp);
 		SparseMatrixType csigma_a;
 		multiply(csigma_a,csigma_temp,x_temp);
@@ -556,16 +535,15 @@ private:
 	}
 
 	void findAllMatrices(VectorSparseMatrixType& vm,
-	                     SizeType i,
 	                     const HilbertBasisType& natBasis) const
 	{
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
-			SparseMatrixType m = findOperatorMatrices(i,sigma,natBasis);
+			SparseMatrixType m = findOperatorMatrices(sigma, natBasis);
 			vm.push_back(m);
 		}
 
 		if (modelParameters_.numberphonons == 0) return;
-		SparseMatrixType m = findPhononadaggerMatrix(i,natBasis);
+		SparseMatrixType m = findPhononadaggerMatrix(natBasis);
 		vm.push_back(m);
 	}
 
@@ -583,11 +561,11 @@ private:
 			PairType jmpair = PairType(0,0);
 
 			// nup
-			SizeType electronsUp = HilbertSpaceHubbardHolsteinType::getNofDigits(basis[i],
-			                                                                     SPIN_UP);
+			SizeType electronsUp = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin
+			        (basis[i], HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_UP);
 			// ndown
-			SizeType electronsDown = HilbertSpaceHubbardHolsteinType::getNofDigits(basis[i],
-			                                                                       SPIN_DOWN);
+			SizeType electronsDown = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin
+			        (basis[i], HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN);
 
 			SizeType electrons = electronsUp + electronsDown;
 			other[0] = electrons;
@@ -601,8 +579,8 @@ private:
 	                    const VectorSparseMatrixType& cm,
 	                    SizeType actualIndexOfSite) const
 	{
-		SparseMatrixType nup = n(cm[SPIN_UP]);
-		SparseMatrixType ndown = n(cm[SPIN_DOWN]);
+		SparseMatrixType nup = n(cm[0]); // spin up
+		SparseMatrixType ndown = n(cm[1]); // spin down
 
 		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
 		SizeType iUp = actualIndexOfSite;
@@ -650,8 +628,8 @@ private:
 	                      SizeType actualSite) const
 	{
 		SparseMatrixType tmpMatrix;
-		SparseMatrixType m1=cm[SPIN_UP];
-		SparseMatrixType m2=cm[SPIN_DOWN];
+		SparseMatrixType m1=cm[0]; // spin up
+		SparseMatrixType m2=cm[1]; // spin down
 
 		multiply(tmpMatrix,n(m1),n(m2));
 		assert(actualSite < modelParameters_.hubbardFU.size());
@@ -665,9 +643,9 @@ private:
 	{
 		if (modelParameters_.numberphonons == 0) return;
 		SparseMatrixType tmpMatrix;
-		SparseMatrixType m=n(cm[SPIN_UP]);
-		SparseMatrixType m2=n(cm[SPIN_DOWN]);
-		m+=m2;
+		SparseMatrixType m = n(cm[0]); // spin up
+		SparseMatrixType m2 = n(cm[1]); // spin down
+		m += m2;
 		assert(2 < cm.size());
 		SparseMatrixType x = displacementOp(cm[2]);
 
