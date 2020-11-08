@@ -166,7 +166,7 @@ public:
 	                       checkpoint_.energies()),
 	      truncate_(lrs_, wft_, parameters_, model.superGeometry(), ioOut_),
 	      saveData_(!parameters_.options.isSet("noSaveData")),
-	      oneSiteTruncation_(model_)
+	      oneSiteTruncation_(lrs_, model_)
 	{
 		firstCall_ = true;
 		counter_ = 0;
@@ -576,7 +576,7 @@ obtain ordered
 
 			assert(target.psiConst().size() > 0);
 			assert(target.psiConst()[0].size() > 0);
-			oneSiteTruncation_.update(oneSiteTruncActive, *(target.psiConst()[0][0]));
+			oneSiteTruncation_.update(oneSiteTruncActive, *(target.psiConst()[0][0]), direction);
 
 			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,loopIndex);
 
