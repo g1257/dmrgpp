@@ -422,8 +422,6 @@ obtain ordered
 
 		stepCurrent_ = recovery.stepCurrent(direction);
 
-		model_.announce("finite loop");
-
 		for (SizeType i = indexOfFirstFiniteLoop; i < loopsTotal; ++i)  {
 
 			lastSign = (parameters_.finiteLoop[i].stepLength < 0) ? -1 : 1;
@@ -448,6 +446,8 @@ obtain ordered
 					            pS);
 				}
 			}
+
+			model_.announce("finite loop;" + ttos(parameters_.finiteLoop[i].saveOption));
 
 			finiteStep(pS, pE, i, psi);
 

@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Geometry/GeometryDca.h"
 #include <cstdlib>
 #include <numeric>
+#include "PsimagLite.h"
 
 namespace Dmrg {
 template<typename ModelBaseType>
@@ -142,7 +143,7 @@ public:
 	      modelParameters_(io),
 	      isSsh_(additional == "SSH"),
 	      oStruncActive_(false),
-	      finiteLoop_(false)
+	      finiteLoop_(0)
 	{
 		if (isSsh_) {
 			PsimagLite::String warning("HubbardHolstein: ");
@@ -180,8 +181,6 @@ public:
 
 			addPotentialPhononV(hmatrix, cm, block[i], phonons);
 		}
-
-		oStruncActive_ = false;
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -340,8 +339,17 @@ protected:
 
 	void announce(PsimagLite::String str) const
 	{
-		if (str == "finite loop")
-			finiteLoop_ = true;
+		const PsimagLite::String msg("finite loop");
+		const SizeType l = msg.length();
+
+		if (str.substr(0, l) != msg) return;
+
+		PsimagLite::Vector<PsimagLite::String>::Type tokens;
+		PsimagLite::split(tokens, str, ";");
+		if (tokens.size() != 2)
+			err("Model::announce()\n");
+
+		finiteLoop_ = PsimagLite::atoi(tokens[1]);
 	}
 
 	// virtual override
@@ -349,6 +357,8 @@ protected:
 	                         VectorQnType& qm,
 	                         const BlockType& block) const
 	{
+		oStruncActive_ = false;
+
 		const bool b1 = (modelParameters_.oStruncPhonons == 0);
 
 		assert(block.size() == 1);
@@ -356,9 +366,9 @@ protected:
 		const bool b2 = (modelParameters_.oStruncSite != block[0]);
 
 		// FIXME add another condition here related to loop content
-		const bool b3 = false;
+		const bool b3 = ((finiteLoop_ & 5) == 0);
 
-		if (!finiteLoop_ || b1 || b2 || b3)
+		if (b1 || b2 || b3)
 			return ModelBaseType::setOperatorMatrices(ops, qm, block);
 
 		oStruncActive_ = true;
@@ -667,7 +677,7 @@ private:
 	ParametersHubbardHolsteinType modelParameters_;
 	bool isSsh_;
 	mutable bool oStruncActive_;
-	mutable bool finiteLoop_;
+	mutable SizeType finiteLoop_;
 }; //class HubbardHolstein
 } // namespace Dmrg
 /*@}*/
