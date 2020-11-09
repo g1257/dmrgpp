@@ -383,11 +383,14 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual PsimagLite::String oracle() const { return ""; }
 
-	virtual void oneSiteTruncationUpdate(const MatrixType&) const
-	{}
+	virtual void oneSiteTruncationUpdate(const MatrixType& U)
+	{
+		qns_.clear();
+		labeledOperators_.clear();
+		fillLabeledOperators(qns_);
+	}
 
 	// END OF VIRTUAL FUNCTIONS
-
 
 	/**
 		The function \cppFunction{addHamiltonianConnection} implements

@@ -143,7 +143,7 @@ public:
 	VectorVectorVectorWithOffsetType;
 	typedef OneSiteTruncation<ModelType, VectorWithOffsetType> OneSiteTruncationType;
 
-	DmrgSolver(const ModelType& model, InputValidatorType& ioIn)
+	DmrgSolver(ModelType& model, InputValidatorType& ioIn)
 	    : model_(model),
 	      parameters_(model_.params()),
 	      ioIn_(ioIn),
@@ -166,7 +166,7 @@ public:
 	                       checkpoint_.energies()),
 	      truncate_(lrs_, wft_, parameters_, model.superGeometry(), ioOut_),
 	      saveData_(!parameters_.options.isSet("noSaveData")),
-	      oneSiteTruncation_(lrs_, model_)
+	      oneSiteTruncation_(lrs_, model)
 	{
 		firstCall_ = true;
 		counter_ = 0;

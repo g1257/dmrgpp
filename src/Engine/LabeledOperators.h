@@ -128,6 +128,11 @@ public:
 		}
 	}
 
+	void clear()
+	{
+		labels_.clear();
+	}
+
 	void setModelName(PsimagLite::String model)
 	{
 		model_ = model;

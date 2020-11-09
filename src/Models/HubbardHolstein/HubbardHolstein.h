@@ -352,9 +352,10 @@ protected:
 		wantsOneSiteTruncation_ = PsimagLite::atoi(tokens[1]);
 	}
 
-	void oneSiteTruncationUpdate(const MatrixType&) const
+	void oneSiteTruncationUpdate(const MatrixType& U) const
 	{
-		std::cerr<<"oneSiteTruncationUpdate called, ignoring for now (sorry, todo fixme)\n";
+		U_ = U;
+		ModelBaseType::oneSiteTruncationUpdate(U);
 	}
 
 	// virtual override
@@ -686,6 +687,7 @@ private:
 	bool isSsh_;
 	mutable bool oStruncActive_;
 	mutable SizeType wantsOneSiteTruncation_;
+	mutable MatrixType U_;
 }; //class HubbardHolstein
 } // namespace Dmrg
 /*@}*/

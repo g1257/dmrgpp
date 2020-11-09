@@ -104,8 +104,8 @@ class ModelSelector {
 	typedef Immm<ModelBaseType> ImmmType;
 	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
 	typedef TjAnisotropic<ModelBaseType> TjAnisotropicType;
-    typedef UlsOsu<ModelBaseType> UlsOsuType;
-    typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
+	typedef UlsOsu<ModelBaseType> UlsOsuType;
+	typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
 	typedef TjAncillaC<ModelBaseType> TjAncillaCType;
 	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
 	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
@@ -134,9 +134,9 @@ public:
 		if (model_) delete model_;
 	}
 
-	const ModelBaseType& operator()(const SolverParamsType& solverParams,
-	                                InputValidatorType& io,
-	                                const SuperGeometryType& geometry)
+	ModelBaseType& operator()(const SolverParamsType& solverParams,
+	                          InputValidatorType& io,
+	                          const SuperGeometryType& geometry)
 	{
 		if (model_) return *model_;
 
@@ -166,8 +166,8 @@ public:
 			model_ = new TjMultiOrbType(solverParams,io,geometry);
 		} else if (name_ == "TjAnisotropic") {
 			model_ = new TjAnisotropicType(solverParams,io,geometry);
-        } else if (name_ == "UlsOsu") {
-            model_ = new UlsOsuType(solverParams, io, geometry);
+		} else if (name_ == "UlsOsu") {
+			model_ = new UlsOsuType(solverParams, io, geometry);
 		} else if (name_ == "TjAncillaC2") {
 			model_ = new TjAncillaC2Type(solverParams,io,geometry);
 		} else if (name_ == "TjAncillaC") {

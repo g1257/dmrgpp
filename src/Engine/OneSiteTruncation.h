@@ -18,7 +18,7 @@ public:
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 
-	OneSiteTruncation(const LeftRightSuperType& lrs, const ModelType& model)
+	OneSiteTruncation(const LeftRightSuperType& lrs, ModelType& model)
 	    : lrs_(lrs), model_(model) {}
 
 	void update(SizeType oneSiteTruncSize,
@@ -101,7 +101,7 @@ private:
 	}
 
 	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
+	ModelType& model_;
 };
 }
 #endif // ONESITETRUNCATION_H

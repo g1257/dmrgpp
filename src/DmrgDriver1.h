@@ -13,7 +13,7 @@ void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType& ge
 
 	//! Setup the Model
 	Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
-	const ModelBaseType& model = modelSelector(dmrgSolverParams,io,geometry);
+	ModelBaseType& model = modelSelector(dmrgSolverParams,io,geometry);
 
 	if (opOptions.enabled) {
 		operatorDriver(model,opOptions);
@@ -22,7 +22,7 @@ void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType& ge
 
 	//! Setup the dmrg solver:
 	typedef Dmrg::DmrgSolver<SolverType, VectorWithOffsetType> DmrgSolverType;
-	DmrgSolverType dmrgSolver(model,io);
+	DmrgSolverType dmrgSolver(model, io);
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry);
