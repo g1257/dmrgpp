@@ -72,7 +72,7 @@ Remember that at least one site must remain for the system part of the lattice.
 So on a 16 site chain, when you start the finite loops you're at the middle, you
 can go forward at most 7 sites, and backwards at most 7 sites.
 
-There is some checking done to the finite loops input, see PTEXREF{139},
+There is some checking done to the finite loops input,
 but you might find that it's not comprehensive.
 */
 class FiniteLoop {
@@ -135,14 +135,18 @@ private:
 				flag = true;
 			}
 		}
+
+		bool wantsOneSiteTrunc = (bitField_ & 32);
+		if (wantsOneSiteTrunc && !(bitField_ & 8))
+			err(PsimagLite::String("A finite loop that wants one site truncation must also want")
+			    + " random guess.\nIn other words, if bit 5 is set so must bit 3.\n");
 	}
 
 	int stepLength_; // how much to go right (+) or left (-)
 	SizeType keptStates_; // kept states
-	SizeType bitField_; //
+	SizeType bitField_;
 };
 
 } // namespace Dmrg
 
 #endif // DMRG_FINITELOOP_H
-
