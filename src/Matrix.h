@@ -30,6 +30,7 @@ Please see full open source license included in file LICENSE.
 #include "Mpi.h"
 #include "Io/IoSerializerStub.h"
 #include <fstream>
+#include "BLAS.h"
 
 namespace PsimagLite {
 
@@ -792,6 +793,46 @@ bool isZero(const Matrix<T>& m)
 		for (SizeType j=0;j<m.cols();j++)
 			if (fabs(m(i,j))>0) return false;
 	return true;
+}
+
+template<typename T>
+void rotate(Matrix<T>& m, const Matrix<T>& transform)
+{
+	Matrix<T> C(transform.cols(), m.cols());
+
+	// C = transform^\dagger * m
+	psimag::BLAS::GEMM('C',
+	                   'N',
+	                   transform.cols(),
+	                   m.cols(),
+	                   m.rows(),
+	                   1.0,
+	                   &(transform(0, 0)),
+	                   transform.rows(),
+	                   &(m(0, 0)),
+	                   m.rows(),
+	                   0.0,
+	                   &(C(0, 0)),
+	                   C.rows());
+
+
+	// m = C * transform
+	m.clear();
+	m.resize(C.rows(), transform.cols());
+	psimag::BLAS::GEMM('N',
+	                   'N',
+	                   C.rows(),
+	                   transform.cols(),
+	                   transform.rows(),
+	                   1.0,
+	                   &(C(0, 0)),
+	                   C.rows(),
+	                   &(transform(0, 0)),
+	                   transform.rows(),
+	                   0.0,
+	                   &(m(0, 0)),
+	                   m.rows());
+
 }
 
 // closures start

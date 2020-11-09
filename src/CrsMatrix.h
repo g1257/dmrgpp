@@ -854,6 +854,8 @@ externalProduct(CrsMatrix<T>& B,
 	// -------------------------------------------------
 	std::vector<int> nnz_B_row( nrow_B );
 
+	assert(nrow_A*nrow_eye <= permutationFull.size());
+
 	for( SizeType ia=0; ia < nrow_A; ia++) {
 
 		SizeType nnz_row = A.getRowPtr(ia+1) - A.getRowPtr(ia);
