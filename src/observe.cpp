@@ -6,7 +6,7 @@ bool atLeastOneLoopWithBit0Set(const PsimagLite::Vector<FiniteLoop>::Type& fl)
 {
 	const SizeType n = fl.size();
 	for (SizeType i = 0; i < n; ++i)
-		if (fl[i].saveOption & 1) return true;
+		if (fl[i].wantsSave()) return true;
 
 	return false;
 

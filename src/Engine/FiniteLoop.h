@@ -4,6 +4,7 @@
 #include "Vector.h"
 #include <iostream>
 #include "Io/IoSerializerStub.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 /* PSIDOC FiniteLoop
@@ -140,10 +141,6 @@ private:
 	SizeType keptStates_; // kept states
 	SizeType bitField_; //
 };
-
-std::istream &operator>>(std::istream& is,FiniteLoop& fl);
-
-std::ostream &operator<<(std::ostream& os,const FiniteLoop& fl);
 
 } // namespace Dmrg
 
