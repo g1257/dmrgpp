@@ -143,7 +143,7 @@ public:
 	      modelParameters_(io),
 	      isSsh_(additional == "SSH"),
 	      oStruncActive_(false),
-	      finiteLoop_(0)
+	      wantsOneSiteTruncation_(0)
 	{
 		if (isSsh_) {
 			PsimagLite::String warning("HubbardHolstein: ");
@@ -349,7 +349,7 @@ protected:
 		if (tokens.size() != 2)
 			err("Model::announce()\n");
 
-		finiteLoop_ = PsimagLite::atoi(tokens[1]);
+		wantsOneSiteTruncation_ = PsimagLite::atoi(tokens[1]);
 	}
 
 	void oneSiteTruncationUpdate(const MatrixType&) const
@@ -370,7 +370,7 @@ protected:
 
 		const bool b2 = (modelParameters_.oStruncSite != block[0]);
 
-		const bool b3 = ((finiteLoop_ & 32) == 0);
+		const bool b3 = (wantsOneSiteTruncation_ == 0);
 
 		if (b1 || b2 || b3)
 			return ModelBaseType::setOperatorMatrices(ops, qm, block);
@@ -685,7 +685,7 @@ private:
 	ParametersHubbardHolsteinType modelParameters_;
 	bool isSsh_;
 	mutable bool oStruncActive_;
-	mutable SizeType finiteLoop_;
+	mutable SizeType wantsOneSiteTruncation_;
 }; //class HubbardHolstein
 } // namespace Dmrg
 /*@}*/

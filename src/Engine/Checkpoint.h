@@ -418,11 +418,11 @@ private:
 		PsimagLite::String loops = "";
 		int x = lastSite;
 
-		if (finiteLoop[0].stepLength<0 && !checkPoint) x++;
+		if (finiteLoop[0].stepLength() < 0 && !checkPoint) x++;
 
 		SizeType sopt = 0; // have we started saving yet?
 		for (SizeType i=0;i<finiteLoop.size();i++)  {
-			SizeType thisSaveOption = (finiteLoop[i].saveOption & 1);
+			SizeType thisSaveOption = (finiteLoop[i].wantsSave());
 			if (sopt == 1 && !(thisSaveOption&1)) {
 				s = "Error for finite loop number " + ttos(i) + "\n";
 				s += "Once you say 1 on a finite loop, then all";
@@ -431,7 +431,7 @@ private:
 			}
 
 			// naive location:
-			int delta = finiteLoop[i].stepLength;
+			int delta = finiteLoop[i].stepLength();
 			x += delta;
 			loops = loops + ttos(delta) + " ";
 
@@ -466,10 +466,10 @@ private:
 	                  SizeType hilbertOneSite) const
 	{
 		for (SizeType i = 0;i < finiteLoop.size(); ++i)  {
-			if (finiteLoop[i].keptStates >= hilbertOneSite)
+			if (finiteLoop[i].keptStates() >= hilbertOneSite)
 				continue;
 			PsimagLite::String str("FATAL: Finite loop number ");
-			str += ttos(i) +" has keptStates= " + ttos(finiteLoop[i].keptStates);
+			str += ttos(i) +" has keptStates= " + ttos(finiteLoop[i].keptStates());
 			str += " < " + ttos(hilbertOneSite) + "\n";
 			throw PsimagLite::RuntimeError(str);
 		}
@@ -548,4 +548,3 @@ private:
 
 /*@}*/
 #endif
-

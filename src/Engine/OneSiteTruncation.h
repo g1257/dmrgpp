@@ -14,6 +14,7 @@ public:
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename ModelType::MatrixType MatrixType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
+	typedef typename ModelType::VectorRealType VectorRealType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 
@@ -88,6 +89,15 @@ private:
 				}
 			}
 		}
+
+		VectorRealType eigs(U.rows());
+		diag(U, eigs, 'V');
+		truncateU(U, eigs);
+	}
+
+	void truncateU(MatrixType& U, const VectorRealType& eigs) const
+	{
+		std::cerr<<"truncateU: unimplemented, sorry, todo, fixme\n";
 	}
 
 	const LeftRightSuperType& lrs_;

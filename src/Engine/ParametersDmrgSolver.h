@@ -512,12 +512,12 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(repeat,"RepeatFiniteLoopsTimes=");
-		}  catch (std::exception& e) {}
+		}  catch (std::exception&) {}
 
 		SizeType fromFl = 0;
 		try {
 			io.readline(fromFl,"RepeatFiniteLoopsFrom=");
-		}  catch (std::exception& e) {}
+		}  catch (std::exception&) {}
 
 		if (vfl.size() == 0) {
 			std::cerr<<"WARNING: No finite loops found\n";
@@ -576,8 +576,8 @@ private:
 	static void warnIfFiniteMlessThanMin(const VectorFiniteLoopType& vfl, SizeType minM)
 	{
 		for (SizeType i = 0; i < vfl.size(); ++i) {
-			if (vfl[i].keptStates >= minM) continue;
-			std::cout<<"WARNING: Triplet number "<<i<<" has m= "<<vfl[i].keptStates;
+			if (vfl[i].keptStates() >= minM) continue;
+			std::cout<<"WARNING: Triplet number "<<i<<" has m= "<<vfl[i].keptStates();
 			std::cout<<" which is less than minimum m = "<<minM;
 			std::cout<<" as found in TruncationTolerance\n";
 		}

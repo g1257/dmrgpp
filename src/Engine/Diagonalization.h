@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersForSolver.h"
 #include "Concurrency.h"
 #include "Profiling.h"
+#include "FiniteLoop.h"
 
 namespace Dmrg {
 
@@ -128,6 +129,7 @@ public:
 	TargetVectorType> LanczosSolverType;
 	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
+	typedef FiniteLoop FiniteLoopType;
 
 	Diagonalization(const ParametersType& parameters,
 	                const ModelType& model,
@@ -179,26 +181,6 @@ public:
 		wft_.triggerOff(target.lrs());
 	}
 
-	static void checkSaveOption(const SizeType original)
-	{
-		// Only 1 bit of bit 1, bit 2, and bit 3 may be set
-		SizeType saveOption = original;
-		bool flag = false;
-		for (SizeType i = 0; i < 3; ++i) {
-			saveOption >>= 1; // ATTENTION: Discards bit 0 when i === 0
-			if (!(saveOption & 1)) continue;
-			if (flag) {
-				PsimagLite::OstringStream msgg(std::cout.precision());
-				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-				msg<<"Triplet 3rd: Only one bit of bit 1, bit 2, and bit 3 may be set";
-				msg<<" VALUE= "<<original<<"\n";
-				err(msg.str());
-			} else {
-				flag = true;
-			}
-		}
-	}
-
 private:
 
 	void targetedSymmetrySectors(VectorSizeType& mVector,
@@ -230,14 +212,13 @@ private:
 		wft_.triggerOn();
 
 		SizeType numberOfExcited = parameters_.numberOfExcited;
-		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
-		checkSaveOption(saveOption);
+		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 
 		bool onlyWft = false;
 		if (direction != ProgramGlobals::DirectionEnum::INFINITE)
-			onlyWft = ((saveOption & 2)>0);
+			onlyWft = finiteLoop.wantsOnlyFastWft();
 
-		bool noguess = ((saveOption & 8) > 0); // bit 3 set means guess is random vector
+		bool noguess = finiteLoop.wantsRandomGuess();
 
 		if (parameters_.options.isSet("MettsTargeting"))
 			return;
@@ -464,10 +445,10 @@ private:
 		                             targetTime,
 		                             model_.superOpHelper());
 
-		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 		typename ModelHelperType::Aux aux(partitionIndex, lrs);
 
-		if (options.isSet("debugmatrix") && !(saveOption & 4) ) {
+		if (options.isSet("debugmatrix") && !finiteLoop.wantsOnlySlowWft()) {
 			SparseMatrixType fullm;
 
 			model_.fullHamiltonian(fullm, hc, aux);
@@ -487,7 +468,7 @@ private:
 			if (options.isSet("test"))
 				throw std::logic_error("Exiting due to option test in the input\n");
 
-			if (options.isSet("exactdiag") && (saveOption & 4) == 0) {
+			if (options.isSet("exactdiag") && !finiteLoop.wantsOnlySlowWft()) {
 				SizeType nexcited = std::min(energyTmp.size(), eigs.size());
 				for (SizeType excited = 0; excited < nexcited; ++excited) {
 					energyTmp[excited] = eigs[excited];
@@ -527,9 +508,7 @@ private:
 		                                                             hc,
 		                                                             aux);
 
-		const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
-
-		if ((saveOption & 4)>0) {
+		if (parameters_.finiteLoop[loopIndex].wantsOnlySlowWft()) {
 			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();

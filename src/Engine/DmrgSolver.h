@@ -186,13 +186,7 @@ public:
 
 		const SizeType n = model_.targetQuantum().size();
 		for (SizeType i = 0; i < n; ++i)
-			quantumSector_.push_back(model_.targetQuantum().qn(i));
-
-		const SizeType totalFiniteLoops = parameters_.finiteLoop.size();
-		for (SizeType loopIndex = 0; loopIndex < totalFiniteLoops; ++loopIndex) {
-			const SizeType saveOption = parameters_.finiteLoop[loopIndex].saveOption;
-			DiagonalizationType::checkSaveOption(saveOption);
-		}
+			quantumSector_.push_back(model_.targetQuantum().qn(i));		
 	}
 
 	~DmrgSolver()
@@ -414,7 +408,7 @@ obtain ordered
 		// let us set the initial direction first:
 		assert(indexOfFirstFiniteLoop < parameters_.finiteLoop.size());
 		ProgramGlobals::DirectionEnum direction =
-		        (parameters_.finiteLoop[indexOfFirstFiniteLoop].stepLength < 0) ?
+		        (parameters_.finiteLoop[indexOfFirstFiniteLoop].stepLength() < 0) ?
 		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON :
 		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
 
@@ -424,22 +418,22 @@ obtain ordered
 
 		for (SizeType i = indexOfFirstFiniteLoop; i < loopsTotal; ++i)  {
 
-			lastSign = (parameters_.finiteLoop[i].stepLength < 0) ? -1 : 1;
+			lastSign = (parameters_.finiteLoop[i].stepLength() < 0) ? -1 : 1;
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Finite loop number "<<i;
-			msg<<" with l="<<parameters_.finiteLoop[i].stepLength;
-			msg<<" keptStates="<<parameters_.finiteLoop[i].keptStates;
+			msg<<" with l="<<parameters_.finiteLoop[i].stepLength();
+			msg<<" keptStates="<<parameters_.finiteLoop[i].keptStates();
 			msg<<". "<<(parameters_.finiteLoop.size()-i)<<" more loops to go.";
 			progress_.printline(msgg, std::cout);
 
 			if (i > 0) {
-				int signPrev = parameters_.finiteLoop[i - 1].stepLength;
-				int signThis = parameters_.finiteLoop[i].stepLength;
+				int signPrev = parameters_.finiteLoop[i - 1].stepLength();
+				int signThis = parameters_.finiteLoop[i].stepLength();
 				int sign = signPrev*signThis;
 				if (sign > 0) {
-					if (parameters_.finiteLoop[i].stepLength > 0) stepCurrent_++;
-					if (parameters_.finiteLoop[i].stepLength < 0) stepCurrent_--;
+					if (parameters_.finiteLoop[i].stepLength() > 0) stepCurrent_++;
+					if (parameters_.finiteLoop[i].stepLength() < 0) stepCurrent_--;
 				} else { // has bounced
 					checkForWft((signThis > 0) ? ProgramGlobals::SysOrEnvEnum::SYSTEM :
 					                             ProgramGlobals::SysOrEnvEnum::ENVIRON,
@@ -447,7 +441,9 @@ obtain ordered
 				}
 			}
 
-			model_.announce("finite loop;" + ttos(parameters_.finiteLoop[i].saveOption));
+			const SizeType wantsOneSiteTrunc = (parameters_.finiteLoop[i].wantsOneSiteTruncation())
+			        ? 1 : 0;
+			model_.announce("finite loop;" + ttos(wantsOneSiteTrunc));
 
 			finiteStep(pS, pE, i, psi);
 
@@ -506,8 +502,8 @@ obtain ordered
 	{
 		const bool extendedPrint = parameters_.options.isSet("extendedPrint");
 		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
-		int stepLength = parameters_.finiteLoop[loopIndex].stepLength;
-		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates;
+		int stepLength = parameters_.finiteLoop[loopIndex].stepLength();
+		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates();
 
 		const SizeType ten = 10;
 		const SizeType initialSizeOfHashTable = std::max(ten, keptStates);
@@ -628,9 +624,9 @@ obtain ordered
 	{
 		if (!saveData_) return;
 
-		int saveOption = parameters_.finiteLoop[loopIndex].saveOption;
+		const FiniteLoop& finiteLoop = parameters_.finiteLoop[loopIndex];
 
-		if (!(saveOption & 1) && !(saveOption & 16)) return;
+		if (!finiteLoop.wantsSave() && !finiteLoop.wantsMultiSitePush()) return;
 
 
 		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
@@ -648,12 +644,12 @@ obtain ordered
 		                                                psi,
 		                                                transform,
 		                                                direction);
-		if (saveOption & 16) {
+		if (finiteLoop.wantsMultiSitePush()) {
 			target.multiSitePush(ds);
 			return;
 		}
 
-		typename BasisWithOperatorsType::SaveEnum saveOption2 = (saveOption & 4)
+		typename BasisWithOperatorsType::SaveEnum saveOption2 = (finiteLoop.wantsOnlySlowWft())
 		        ? BasisWithOperatorsType::SaveEnum::ALL
 		        : BasisWithOperatorsType::SaveEnum::PARTIAL;
 		SizeType numberOfSites = model_.superGeometry().numberOfSites();
@@ -738,4 +734,3 @@ SizeType DmrgSolver<T1, T2>::counter_ = 0;
 
 /*@}*/
 #endif
-

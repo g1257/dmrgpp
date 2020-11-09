@@ -44,6 +44,7 @@ first bit means save or don't save, the second bit
 compute the g.s. or WFT it without eigenvalue or eigenvector updates,
 and the third bit compute the g.s. of WFT it updating eigenvalue and eigenvector.
 It is a fatal error to have both bits 1 and 2 set.
+If bit 5 is set then so must bit 3.
 \begin{table}
 \begin{tabular}{ll}\toprule
 Bit & What Happens if Set\\
@@ -51,6 +52,8 @@ Bit & What Happens if Set\\
 1       & WFTs the ground state in a fast way instead of computing it\\
 2       & WFTs the ground state slowly  instead of computing it\\
 3       & Forces random guess for ground state\\
+4       & MultiSitePush (whatever that means)\\
+5       & OneSiteTruncation\\
 \end{tabular}
 \caption{Meaning of each bit of the third number in the
 finite loop triplet. It is a fatal error to have both bits 1 and 2 set.}
@@ -71,17 +74,15 @@ can go forward at most 7 sites, and backwards at most 7 sites.
 There is some checking done to the finite loops input, see PTEXREF{139},
 but you might find that it's not comprehensive.
 */
-struct FiniteLoop {
-	int stepLength; // how much to go right (+) or left (-)
-	unsigned int keptStates; // kept states
-	int saveOption; // to save or not to save
+class FiniteLoop {
 
-	FiniteLoop() : stepLength(0),keptStates(0),saveOption(0)
-	{}
+public:
 
-	FiniteLoop(int sl,unsigned int ks,int so)
-	    : stepLength(sl),keptStates(ks),saveOption(so)
-	{}
+	FiniteLoop(int sl, SizeType ks, SizeType so)
+	    : stepLength_(sl), keptStates_(ks), bitField_(so)
+	{
+		checkBitField();
+	}
 
 	void write(PsimagLite::String label,
 	           PsimagLite::IoSerializer& ioSerializer,
@@ -92,29 +93,52 @@ struct FiniteLoop {
 
 		if (mode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			ioSerializer.createGroup(root);
-		ioSerializer.write(root + "/stepLength", stepLength, mode);
-		ioSerializer.write(root + "/keptStates", keptStates, mode);
-		ioSerializer.write(root + "/saveOption", saveOption, mode);
+		ioSerializer.write(root + "/stepLength", stepLength_, mode);
+		ioSerializer.write(root + "/keptStates", keptStates_, mode);
+		ioSerializer.write(root + "/saveOption", bitField_, mode);
 	}
 
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x,
-	                   PsimagLite::String msg = "") const
+	int stepLength() const { return stepLength_; }
+
+	SizeType keptStates() const { return keptStates_; }
+
+	bool wantsSave() const { return (bitField_ & 1); }
+
+	bool wantsOnlyFastWft() const { return (bitField_ & 2); }
+
+	bool wantsOnlySlowWft() const { return (bitField_ & 4); }
+
+	bool wantsRandomGuess() const { return (bitField_ & 8); }
+
+	bool wantsMultiSitePush() const { return (bitField_ & 16); }
+
+	bool wantsOneSiteTruncation() const { return (bitField_ & 32); }
+
+private:
+
+	void checkBitField() const
 	{
-		PsimagLite::String str = msg;
-		str += "FiniteLoop";
-		const char* start = (const char *)&stepLength;
-		const char* end = (const char*)&keptStates;
-		SizeType total = mres.memResolv(&stepLength,end-start,str + " stepLength");
-
-		start = end;
-		end = (const char*)&saveOption;
-		total += mres.memResolv(&keptStates,end-start,str + " keptStates");
-		total += mres.memResolv(&saveOption,sizeof(*this)-total,str + " saveOption");
-
-		return total;
+		// Only 1 bit of bit 1, bit 2, and bit 3 may be set
+		SizeType saveOption = bitField_;
+		bool flag = false;
+		for (SizeType i = 0; i < 3; ++i) {
+			saveOption >>= 1; // ATTENTION: Discards bit 0 when i === 0
+			if (!(saveOption & 1)) continue;
+			if (flag) {
+				PsimagLite::OstringStream msgg(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+				msg<<"Triplet 3rd: Only one bit of bit 1, bit 2, and bit 3 may be set";
+				msg<<" VALUE= "<<bitField_<<"\n";
+				err(msg.str());
+			} else {
+				flag = true;
+			}
+		}
 	}
+
+	int stepLength_; // how much to go right (+) or left (-)
+	SizeType keptStates_; // kept states
+	SizeType bitField_; //
 };
 
 std::istream &operator>>(std::istream& is,FiniteLoop& fl);
