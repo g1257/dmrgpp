@@ -139,11 +139,11 @@ private:
 
 	void saySomethingAbout(PsimagLite::String what) const
 	{
-		std::cerr<<"\x1b[38;5;124m";
+		std::cerr<<PsimagLite::AnsiColor::blue;
 		std::cerr<<"WARNING: "<<what<<" (given your Intent)\n";
 		std::cerr<<PsimagLite::AnsiColor::reset;
 
-		std::cout<<"\x1b[38;5;124m";
+		std::cout<<PsimagLite::AnsiColor::blue;
 		std::cout<<"WARNING: "<<what<<" (given your Intent)\n";
 		std::cout<<PsimagLite::AnsiColor::reset;
 	}

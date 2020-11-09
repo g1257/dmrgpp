@@ -383,7 +383,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual PsimagLite::String oracle() const { return ""; }
 
-	virtual void oneSiteTruncationUpdate(const MatrixType& U)
+	virtual void oneSiteTruncationUpdate(const MatrixType&)
 	{
 		qns_.clear();
 		labeledOperators_.clear();

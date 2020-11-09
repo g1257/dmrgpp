@@ -159,8 +159,8 @@ public:
 	                                const BlockType& block,
 	                                RealType) const
 	{
-		SizeType phonons = (oStruncActive_) ? modelParameters_.oStruncPhonons
-		                                    : modelParameters_.numberphonons;
+		SizeType phonons = (oStruncActive_ || U_.rows() > 0) ? modelParameters_.oStruncPhonons
+		                                                     : modelParameters_.numberphonons;
 		if (phonons == 0)
 			err("addDiagonalsInNaturalBasis fatal error when OSTRUNC active\n");
 
@@ -204,7 +204,8 @@ protected:
 		OpsLabelType& a = this->createOpsLabel("a");
 		OpsLabelType& cx = this->createOpsLabel("cx");
 		this->makeTrackable("c");
-		const SizeType phonons = modelParameters_.numberphonons;
+		const SizeType phonons = (U_.rows() > 0) ? modelParameters_.oStruncPhonons
+		                                         : modelParameters_.numberphonons;
 		if (phonons > 0) {
 			this->makeTrackable("a");
 			if (isSsh_)
@@ -220,6 +221,12 @@ protected:
 		SparseMatrixType tmpMatrix;
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
 			tmpMatrix = findOperatorMatrices(sigma, natBasis);
+
+			if (sigma == 0)
+				nmatrix = n(tmpMatrix);
+			else
+				nmatrix += n(tmpMatrix);
+
 			int asign = 1;
 			if (sigma > 0) asign = 1;
 			typename OperatorType::Su2RelatedType su2related;
@@ -231,6 +238,8 @@ protected:
 				su2related.offset = 1;
 			}
 
+			transformByU(tmpMatrix);
+
 			OperatorType myOp(tmpMatrix,
 			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
 			                  typename OperatorType::PairType(1,1-sigma),
@@ -238,14 +247,13 @@ protected:
 			                  su2related);
 
 			c.push(myOp);
-			if (sigma == 0)
-				nmatrix = n(tmpMatrix);
-			else
-				nmatrix += n(tmpMatrix);
 		}
 
 		OpsLabelType& n = this->createOpsLabel("n");
 		typename OperatorType::Su2RelatedType su2relatedA;
+
+		transformByU(nmatrix);
+
 		OperatorType myOp(nmatrix,
 		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                  typename OperatorType::PairType(0,0),
@@ -266,6 +274,9 @@ protected:
 		su2related2.transpose.push_back(-1);
 		su2related2.transpose.push_back(1);
 		su2related2.offset = 1;
+
+		transformByU(tmpMatrix);
+
 		OperatorType myOp2(tmpMatrix,
 		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                   PairType(2, 2),
@@ -289,6 +300,8 @@ protected:
 				su2related3.transpose.push_back(-1);
 				su2related3.offset = 1;
 			}
+
+			transformByU(tmpMatrix);
 
 			OperatorType myOp3(tmpMatrix,
 			                   ProgramGlobals::FermionOrBosonEnum::FERMION,
@@ -352,7 +365,7 @@ protected:
 		wantsOneSiteTruncation_ = PsimagLite::atoi(tokens[1]);
 	}
 
-	void oneSiteTruncationUpdate(const MatrixType& U) const
+	void oneSiteTruncationUpdate(const MatrixType& U)
 	{
 		U_ = U;
 		ModelBaseType::oneSiteTruncationUpdate(U);
@@ -681,6 +694,20 @@ private:
 		tmpMatrix.checkValidity();
 		assert(actualSite < modelParameters_.lambdaFP.size());
 		hmatrix += modelParameters_.lambdaFP[actualSite]*tmpMatrix;
+	}
+
+	void transformByU(SparseMatrixType& m) const
+	{
+		if (U_.rows() == 0) return;
+		if (U_.rows() != U_.cols())
+			err("HubbardHolstein::transformByU(): Truncation not yet supported\n");
+		if (U_.rows() != m.rows())
+			err("HubbardHolstein::transformByU(): wrong sizes\n");
+
+		MatrixType mdense;
+		crsMatrixToFullMatrix(mdense, m);
+		rotate(mdense, U_);
+		fullMatrixToCrsMatrix(m, mdense);
 	}
 
 	ParametersHubbardHolsteinType modelParameters_;

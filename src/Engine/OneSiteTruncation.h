@@ -95,9 +95,13 @@ private:
 		truncateU(U, eigs);
 	}
 
-	void truncateU(MatrixType& U, const VectorRealType& eigs) const
+	void truncateU(MatrixType&, const VectorRealType&) const
 	{
-		std::cerr<<"truncateU: unimplemented, sorry, todo, fixme\n";
+		std::cerr<<PsimagLite::AnsiColor::red;
+		PsimagLite::String msg("truncateU: unimplemented, sorry, todo, fixme\n");
+		std::cout<<msg;
+		std::cerr<<msg;
+		std::cerr<<PsimagLite::AnsiColor::reset;
 	}
 
 	const LeftRightSuperType& lrs_;
