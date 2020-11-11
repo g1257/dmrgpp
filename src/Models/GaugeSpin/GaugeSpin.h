@@ -134,7 +134,8 @@ public:
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
-	      modelParameters_(io)
+	      modelParameters_(io),
+	      superOpHelperPlaquette_(nullptr)
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -230,7 +231,9 @@ protected:
 
 	virtual SuperOpHelperBaseType* setSuperOpHelper()
 	{
-		return new SuperOpHelperPlaquetteType(ModelBaseType::superGeometry());
+		if (!superOpHelperPlaquette_)
+			superOpHelperPlaquette_ = new SuperOpHelperPlaquetteType(ModelBaseType::superGeometry());
+		return superOpHelperPlaquette_;
 	}
 
 private:
@@ -338,7 +341,12 @@ private:
 		}
 	}
 
+	GaugeSpin(const GaugeSpin&) = delete;
+
+	GaugeSpin& operator=(const GaugeSpin&) = delete;
+
 	ParametersGaugeSpin<RealType, QnType> modelParameters_;
+	SuperOpHelperPlaquetteType* superOpHelperPlaquette_;
 }; // class GaugeSpin
 
 } // namespace Dmrg

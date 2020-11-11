@@ -209,7 +209,8 @@ protected:
 
 	virtual const AtomKindBaseType& getAtomKind()
 	{
-		atomKind_ = new AtomKind();
+		if (!atomKind_)
+			atomKind_ = new AtomKind();
 		return *atomKind_;
 	}
 

@@ -332,14 +332,7 @@ public:
 
 	ModelLinks() : maxDofs_(0) {}
 
-	~ModelLinks()
-	{
-		SizeType n = terms_.size();
-		for (SizeType i = 0; i < n; ++i)
-			delete terms_[i];
-
-		terms_.clear();
-	}
+	~ModelLinks() { clear(); }
 
 	void clear()
 	{

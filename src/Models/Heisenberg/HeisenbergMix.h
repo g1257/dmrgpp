@@ -273,7 +273,8 @@ protected:
 
 	virtual const AtomKindBaseType& getAtomKind()
 	{
-		atomKind_ = new AtomKind(superGeometry_.numberOfSites());
+		if (!atomKind_)
+			atomKind_ = new AtomKind(superGeometry_.numberOfSites());
 		return *atomKind_;
 	}
 

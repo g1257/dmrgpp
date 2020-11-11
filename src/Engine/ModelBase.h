@@ -340,7 +340,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual const AtomKindBaseType& getAtomKind()
 	{
-		atomKind_ = new AtomKindBaseType();
+		if (!atomKind_)
+			atomKind_ = new AtomKindBaseType();
 		return *atomKind_;
 	}
 
@@ -387,7 +388,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	{
 		qns_.clear();
 		labeledOperators_.clear();
-		fillLabeledOperators(qns_);
+		modelLinks_.clear();
+		// we could also clear atomKind and superOpHelper here if needed (?)
+
+		postCtor();
 	}
 
 	// END OF VIRTUAL FUNCTIONS
@@ -685,7 +689,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual SuperOpHelperBaseType* setSuperOpHelper()
 	{
-		return new SuperOpHelperBaseType(modelCommon_.superGeometry());
+		return (superOpHelper_) ? superOpHelper_
+		                        : new SuperOpHelperBaseType(modelCommon_.superGeometry());
 	}
 
 private:

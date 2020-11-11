@@ -117,8 +117,13 @@ struct ProgramGlobals {
 	static void init(SizeType maxElectronsOneSpin_)
 	{
 		if (maxElectronsOneSpin == maxElectronsOneSpin_) return;
-		if (maxElectronsOneSpin != 0)
-			throw PsimagLite::RuntimeError("ProgramGlobals::init(...)\n");
+		if (maxElectronsOneSpin != 0) {
+			std::cerr<<PsimagLite::AnsiColor::blue;
+			PsimagLite::String msg("ProgramGlobals::init(...) replayed\n");
+			std::cout<<msg;
+			std::cerr<<msg;
+			std::cerr<<PsimagLite::AnsiColor::reset;
+		}
 
 		maxElectronsOneSpin = maxElectronsOneSpin_;
 	}
