@@ -130,6 +130,12 @@ public:
 
 	void clear()
 	{
+		const SizeType n = labels_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			delete labels_[i];
+			labels_[i] = nullptr;
+		}
+
 		labels_.clear();
 	}
 

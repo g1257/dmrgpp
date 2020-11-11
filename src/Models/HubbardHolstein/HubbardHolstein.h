@@ -578,11 +578,13 @@ private:
 	{
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
 			SparseMatrixType m = findOperatorMatrices(sigma, natBasis);
+			transformByU(m);
 			vm.push_back(m);
 		}
 
 		if (phonons == 0) return;
 		SparseMatrixType m = findPhononadaggerMatrix(natBasis, phonons);
+		transformByU(m);
 		vm.push_back(m);
 	}
 

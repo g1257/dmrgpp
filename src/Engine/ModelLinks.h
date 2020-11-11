@@ -336,13 +336,15 @@ public:
 
 	void clear()
 	{
-		offsets_.clear();
+		//offsets_.clear();
 		SizeType n = terms_.size();
 		for (SizeType i = 0; i < n; ++i)
 			delete terms_[i];
 
 		terms_.clear();
 		hermit_.clear();
+		termGeomReplacement_.clear();
+		hilbert_.clear();
 	}
 
 	void postCtor1(const LabeledOperatorsType& labeledOps,

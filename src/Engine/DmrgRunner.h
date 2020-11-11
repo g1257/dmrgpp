@@ -108,7 +108,6 @@ public:
 
 private:
 
-
 	template<typename MatrixVectorType>
 	void doOneRun2(const ParametersDmrgSolverType& dmrgSolverParams,
 	               InputNgType::Readable& io) const
@@ -125,7 +124,7 @@ private:
 
 		//! Setup the Model
 		Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
-		const ModelBaseType& model = modelSelector(dmrgSolverParams, io, geometry);
+		ModelBaseType& model = modelSelector(dmrgSolverParams, io, geometry);
 
 		//! Setup the dmrg solver: (vectorwithoffset.h only):
 		typedef Dmrg::DmrgSolver<SolverType, VectorWithOffsetType> DmrgSolverType;
