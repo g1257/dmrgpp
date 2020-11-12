@@ -367,7 +367,7 @@ protected:
 
 	void oneSiteTruncationUpdate(const MatrixType& U)
 	{
-		U_ = U;
+		transposeConjugate(U_, U);
 		ModelBaseType::oneSiteTruncationUpdate(U);
 	}
 
