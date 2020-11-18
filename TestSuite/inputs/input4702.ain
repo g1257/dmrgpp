@@ -10,9 +10,9 @@ gt0:dir0:Connectors=[-1.0];
 
 gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
-gt1:dir0:Connectors=[-1.0];
+gt1:dir0:Connectors=[0.0];
 
-vector hubbardFU=[1,...];
+vector hubbardFU=[0,...];
 vector potentialFV=[0,...];
 
 integer NumberPhonons=1;
@@ -27,9 +27,9 @@ Version="version";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
 [3, 100, 40], [-6, 100, 8], [6, 100, 0]];
-TargetElectronsUp=0;
+TargetElectronsUp=1;
 TargetElectronsDown=0;
 OutputFile="data4702";
-integer OneSiteTruncationPhononsMax=10;
+integer OneSiteTruncationPhononsMax=5;
 integer OneSiteTruncationSite=5;
 
