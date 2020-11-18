@@ -166,7 +166,9 @@ public:
 	                       checkpoint_.energies()),
 	      truncate_(lrs_, wft_, parameters_, model.superGeometry(), ioOut_),
 	      saveData_(!parameters_.options.isSet("noSaveData")),
-	      oneSiteTruncation_(lrs_, model)
+	      oneSiteTruncation_(lrs_,
+	                         model,
+	                         ioIn)
 	{
 		firstCall_ = true;
 		counter_ = 0;

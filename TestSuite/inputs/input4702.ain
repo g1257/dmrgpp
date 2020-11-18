@@ -32,4 +32,4 @@ TargetElectronsDown=0;
 OutputFile="data4702";
 integer OneSiteTruncationPhononsMax=5;
 integer OneSiteTruncationSite=5;
-
+integer OneSiteTruncationM=10;

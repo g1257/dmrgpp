@@ -3,6 +3,8 @@
 #include "Vector.h"
 #include "ProgramGlobals.h"
 #include "PackIndices.h"
+#include "InputNg.h"
+#include "InputCheck.h"
 
 namespace Dmrg {
 
@@ -16,10 +18,25 @@ public:
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType::VectorRealType VectorRealType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename PsimagLite::InputNg<InputCheck>::Readable ReadableType;
 
-	OneSiteTruncation(const LeftRightSuperType& lrs, ModelType& model)
-	    : lrs_(lrs), model_(model) {}
+	OneSiteTruncation(const LeftRightSuperType& lrs,
+	                  ModelType& model,
+	                  ReadableType& io)
+	    : lrs_(lrs), model_(model), m_(0), tolerance_(0)
+	{
+		try {
+			io.readline(m_, "OneSiteTruncationM=");
+			std::cout<<"OneSiteTruncationM="<<m_<<"\n";
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(tolerance_, "OneSiteTruncationTolerance=");
+			std::cout<<"OneSiteTruncationTolerance="<<tolerance_<<"\n";
+		} catch (std::exception&) {}
+	}
 
 	void update(SizeType oneSiteTruncSize,
 	            const VectorWithOffsetType& psi,
@@ -95,17 +112,48 @@ private:
 		truncateU(U, eigs);
 	}
 
-	void truncateU(MatrixType&, const VectorRealType&) const
+	void truncateU(MatrixType& U, const VectorRealType& eigs) const
 	{
+		const SizeType cutoff = computeCutoff(eigs);
+		if (cutoff == 0) return;
+
+		const SizeType nrows = U.rows();
+		const SizeType ncols = U.cols();
+		MatrixType Unew(nrows, cutoff);
+		for (SizeType row = 0; row < nrows; ++row)
+			for (SizeType col = 0; col < cutoff; ++col)
+				Unew(row, col) = U(row, col);
+
+		U = Unew;
+
 		std::cerr<<PsimagLite::AnsiColor::red;
-		PsimagLite::String msg("truncateU: unimplemented, sorry, todo, fixme\n");
+		PsimagLite::String msg("truncateU: from " + ttos(ncols) + " ==> " + ttos(cutoff) + "\n");
 		std::cout<<msg;
 		std::cerr<<msg;
 		std::cerr<<PsimagLite::AnsiColor::reset;
 	}
 
+	SizeType computeCutoff(const VectorRealType& eigs) const
+	{
+		if (tolerance_ <= 0) return m_;
+
+		const SizeType n = eigs.size();
+		SizeType row = 0;
+		RealType sum = 0;
+		for (; row < n; ++row) {
+			sum += fabs(eigs[row]);
+			if (sum >= tolerance_) break;
+		}
+
+		assert(row <= n);
+
+		return (row < m_) ? m_ : row;
+	}
+
 	const LeftRightSuperType& lrs_;
 	ModelType& model_;
+	SizeType m_;
+	RealType tolerance_;
 };
 }
 #endif // ONESITETRUNCATION_H

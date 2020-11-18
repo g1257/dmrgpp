@@ -704,8 +704,7 @@ private:
 	void transformByU(SparseMatrixType& m) const
 	{
 		if (U_.rows() == 0) return;
-		if (U_.rows() != U_.cols())
-			err("HubbardHolstein::transformByU(): Truncation not yet supported\n");
+
 		if (U_.rows() != m.rows())
 			err("HubbardHolstein::transformByU(): wrong sizes\n");
 
@@ -736,4 +735,3 @@ private:
 } // namespace Dmrg
 /*@}*/
 #endif
-
