@@ -715,7 +715,6 @@ private:
 		fullMatrixToCrsMatrix(m, mdense);
 	}
 
-	// unoptimized
 	void notReallySortU(const MatrixType& U)
 	{
 		const SizeType site = 0;
@@ -725,71 +724,7 @@ private:
 		setBasis(natBasis, block, phonons);
 		VectorQnType qns;
 		setSymmetryRelated(qns, natBasis);
-		const SizeType ncols = U.cols();
-		VectorQnType qnsSeen;
-		typedef typename PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
-		VectorVectorSizeType m;
-		for (SizeType col = 0; col < ncols; ++col) {
-			QnType qForThisColumn = computeQforThisColumn(U, qns, col);
-			typename VectorQnType::const_iterator it = std::find(qnsSeen.begin(),
-			                                                     qnsSeen.end(),
-			                                                     qForThisColumn);
-			if (it == qnsSeen.end()) {
-				// we haven't seen this qn yet
-				qnsSeen.push_back(qForThisColumn);
-				VectorSizeType v={col};
-				m.push_back(v);
-				continue;
-			}
-
-			// we have already seen this qn
-			const SizeType qIndex = it - qnsSeen.begin();
-			assert(qIndex < m.size());
-			m[qIndex].push_back(col);
-		}
-
-		const SizeType qindices = m.size();
-		assert(qindices <= qns.size());
-		SizeType counter = 0;
-		VectorSizeType perm(ncols);
-		for (SizeType i = 0; i < qindices; ++i) {
-			const SizeType jsize = m[i].size();
-			for (SizeType j = 0; j < jsize; ++j) {
-				assert(counter < ncols);
-				perm[counter++] = m[i][j];
-			}
-		}
-
-		assert(counter == ncols);
-		const SizeType nrows = U.rows();
-		U_.resize(nrows, ncols);
-		for (SizeType row = 0; row < nrows; ++row)
-			for (SizeType col = 0; col < ncols; ++col)
-				U_(row, col) = U(row, perm[col]);
-	}
-
-	QnType computeQforThisColumn(const MatrixType& U,
-	                             VectorQnType& qns,
-	                             SizeType col) const
-	{
-		const SizeType nrows = U.rows();
-		assert(nrows == qns.size());
-		bool nonZeroSeen = false;
-		assert(qns.size() > 0);
-		QnType qnSaved = qns[0];
-		for (SizeType row = 0; row < nrows; ++row) {
-			if (PsimagLite::norm(U(row, col)) < 1e-5) continue;
-			if (!nonZeroSeen) {
-				nonZeroSeen = true;
-				qnSaved = qns[row];
-				continue;
-			}
-
-			if (qnSaved != qns[row])
-				err("computeQforThisColumn: U does not respect symmetries !?\n");
-		}
-
-		return qnSaved;
+		BasisType::notReallySortU(U_, U, qns);
 	}
 
 	ParametersHubbardHolsteinType modelParameters_;
