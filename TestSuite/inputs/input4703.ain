@@ -27,7 +27,7 @@ string RestartFilename="data4702";
 Version="version";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[-6, 100, 2], [6, 100, 2]];
+[-6, 100, 2], [6, 100, 3]];
 TargetElectronsUp=1;
 TargetElectronsDown=0;
 OutputFile="data4703";

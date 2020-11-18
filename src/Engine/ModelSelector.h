@@ -219,14 +219,26 @@ public:
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
-		bool isRestart = solverParams.options.isSet("restart");
-		PsimagLite::String restartFilename = solverParams.checkpoint.filename();
-		model_->postCtor((isRestart) ? restartFilename : "");
+		PsimagLite::String hdf5fileIfAny = findHdf5FileIfAny(solverParams);
+		model_->postCtor(hdf5fileIfAny);
 
 		return *model_;
 	}
 
 private:
+
+	PsimagLite::String findHdf5FileIfAny(const SolverParamsType& solverParams) const
+	{
+		// check first for observe
+		bool isObserve = solverParams.options.isSet("observe");
+		if (isObserve) return solverParams.filename;
+
+		// then for restart
+		bool isRestart = solverParams.options.isSet("restart");
+		if (isRestart) return solverParams.checkpoint.filename();
+
+		return "";
+	}
 
 	PsimagLite::String name_;
 	ModelBaseType* model_;

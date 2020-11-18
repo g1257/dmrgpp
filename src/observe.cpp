@@ -138,7 +138,7 @@ int main(int argc,char **argv)
 	int precision = 0;
 	SizeType threadsInCmd = 0;
 	bool versionOnly = false;
-	PsimagLite::String sOptions("");
+	PsimagLite::String sOptions(",observe");
 
 	while ((opt = getopt(argc, argv,"f:p:o:F:S:V")) != -1) {
 		switch (opt) {
@@ -197,7 +197,7 @@ int main(int argc,char **argv)
 	InputFromDataOrNot<InputCheck> inputFromDataOrNot(filename, inputCheck, false);
 	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
 
-	ParametersDmrgSolverType dmrgSolverParams(io,sOptions,false,true);
+	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false, true);
 
 	if (dmrgSolverParams.options.isSet("hd5DontPrint"))
 		PsimagLite::IoNg::dontPrintDebug();

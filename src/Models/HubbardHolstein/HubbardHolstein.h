@@ -191,6 +191,11 @@ public:
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
 		modelParameters_.write(label, io);
+
+		if (U_.rows() > 0) {
+			U_.write("OneSiteTruncationU", io);
+			io.write("OsTruncPhonons", modelParameters_.oStruncPhonons);
+		}
 	}
 
 protected:
