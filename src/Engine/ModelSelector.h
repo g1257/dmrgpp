@@ -120,6 +120,7 @@ class ModelSelector {
 	typedef HolsteinThin<ModelBaseType> HolsteinThinType;
 	typedef GaugeSpin<ModelBaseType> GaugeSpinType;
 	typedef HeisenbergMix<ModelBaseType> HeisenbergMixType;
+
 #endif
 	// end models
 
@@ -218,7 +219,9 @@ public:
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
-		model_->postCtor();
+		bool isRestart = solverParams.options.isSet("restart");
+		PsimagLite::String restartFilename = solverParams.checkpoint.filename();
+		model_->postCtor((isRestart) ? restartFilename : "");
 
 		return *model_;
 	}

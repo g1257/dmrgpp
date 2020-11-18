@@ -373,10 +373,32 @@ protected:
 		std::cout<<"U UPDATED\n";
 		std::cout<<U_;
 		std::cout<<"--------\n";
-		if (firstCall)
+		if (firstCall) {
 			ioOut.write(U_, "OneSiteTruncationU");
-		else
+			ioOut.write(modelParameters_.oStruncPhonons, "OsTruncPhonons");
+		} else {
 			ioOut.overwrite(U_, "OneSiteTruncationU");
+			ioOut.write(modelParameters_.oStruncPhonons,
+			            "OsTruncPhonons",
+			            PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
+		}
+	}
+
+	void restartHook(PsimagLite::String restartFilename)
+	{
+		if (restartFilename == "") return;
+
+		PsimagLite::IoSelector::In io(restartFilename);
+		try {
+			io.read(U_, "OneSiteTruncationU");
+			std::cout<<"OneSiteTruncationU = "<<U_.rows()<<" x "<<U_.cols();
+			std::cout<<" read from "<<restartFilename<<"\n";
+		} catch (...) {}
+
+		if (U_.rows() > 0) {
+			io.read(modelParameters_.oStruncPhonons, "OsTruncPhonons");
+			std::cout<<"OsTruncPhonons set to "<<modelParameters_.oStruncPhonons<<"\n";
+		}
 	}
 
 	// virtual override

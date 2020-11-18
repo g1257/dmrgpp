@@ -23,14 +23,11 @@ vector potentialPV=[0.0,...];
 
 Model="HubbardHolstein";
 SolverOptions="MatrixProductStored,restart";
-RestartFilename="data4702";
+string RestartFilename="data4702";
 Version="version";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[3, 100, 40], [-6, 100, 8], [6, 100, 0]];
+[-6, 100, 2], [6, 100, 2]];
 TargetElectronsUp=1;
 TargetElectronsDown=0;
-OutputFile="data4702";
-integer OneSiteTruncationPhononsMax=5;
-integer OneSiteTruncationSite=5;
-integer OneSiteTruncationM=10;
+OutputFile="data4703";
