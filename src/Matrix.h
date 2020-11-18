@@ -158,6 +158,14 @@ public:
 		ioSerializer.write(label + "/data_", data_);
 	}
 
+	void overwrite(String label, IoSerializer& ioSerializer) const
+	{
+		ioSerializer.write(label + "/nrow_", nrow_, IoSerializer::ALLOW_OVERWRITE);
+		ioSerializer.write(label + "/ncol_", ncol_, IoSerializer::ALLOW_OVERWRITE);
+		if (nrow_ == 0 || ncol_ == 0) return;
+		ioSerializer.write(label + "/data_", data_, IoSerializer::ALLOW_OVERWRITE);
+	}
+
 	void print(int fd) const
 	{
 		::write(fd,(const void*)&ncol_,sizeof(ncol_));
