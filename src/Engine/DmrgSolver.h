@@ -168,7 +168,8 @@ public:
 	      saveData_(!parameters_.options.isSet("noSaveData")),
 	      oneSiteTruncation_(lrs_,
 	                         model,
-	                         ioIn)
+	                         ioIn,
+	                         ioOut_)
 	{
 		firstCall_ = true;
 		counter_ = 0;

@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelHamiltonianConnection.h"
 #include "Braket.h"
 #include "SuperOpHelperBase.h"
+#include "OutputFileOrNot.h"
 
 namespace Dmrg {
 
@@ -384,7 +385,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual PsimagLite::String oracle() const { return ""; }
 
-	virtual void oneSiteTruncationUpdate(const MatrixType&)
+	virtual void oneSiteTruncationUpdate(OutputFileOrNot&, const MatrixType&)
 	{
 		qns_.clear();
 		labeledOperators_.clear();

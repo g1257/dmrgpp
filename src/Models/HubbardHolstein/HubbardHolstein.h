@@ -365,13 +365,18 @@ protected:
 		wantsOneSiteTruncation_ = PsimagLite::atoi(tokens[1]);
 	}
 
-	void oneSiteTruncationUpdate(const MatrixType& U)
+	void oneSiteTruncationUpdate(OutputFileOrNot& ioOut, const MatrixType& U)
 	{
+		bool firstCall = (U_.rows() == 0);
 		notReallySortU(U);
-		ModelBaseType::oneSiteTruncationUpdate(U);
+		ModelBaseType::oneSiteTruncationUpdate(ioOut, U);
 		std::cout<<"U UPDATED\n";
 		std::cout<<U_;
 		std::cout<<"--------\n";
+		if (firstCall)
+			ioOut.write(U_, "OneSiteTruncationU");
+		else
+			ioOut.overwrite(U_, "OneSiteTruncationU");
 	}
 
 	// virtual override

@@ -5,6 +5,7 @@
 #include "PackIndices.h"
 #include "InputNg.h"
 #include "InputCheck.h"
+#include "OutputFileOrNot.h"
 
 namespace Dmrg {
 
@@ -24,8 +25,9 @@ public:
 
 	OneSiteTruncation(const LeftRightSuperType& lrs,
 	                  ModelType& model,
-	                  ReadableType& io)
-	    : lrs_(lrs), model_(model), m_(0), tolerance_(0)
+	                  ReadableType& io,
+	                  OutputFileOrNot& ioOut)
+	    : lrs_(lrs), model_(model), m_(0), tolerance_(0), ioOut_(ioOut)
 	{
 		try {
 			io.readline(m_, "OneSiteTruncationM=");
@@ -49,7 +51,7 @@ public:
 		computeU(U, oneSiteTruncSize, psi, dir);
 
 		// ... and send it to model
-		model_.oneSiteTruncationUpdate(U);
+		model_.oneSiteTruncationUpdate(ioOut_, U);
 	}
 
 private:
@@ -154,6 +156,7 @@ private:
 	ModelType& model_;
 	SizeType m_;
 	RealType tolerance_;
+	OutputFileOrNot& ioOut_;
 };
 }
 #endif // ONESITETRUNCATION_H

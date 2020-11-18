@@ -42,6 +42,13 @@ public:
 		ptr_->write(t, str);
 	}
 
+	template<typename T>
+	void overwrite(const T& t, PsimagLite::String str)
+	{
+		if (!ptr_) return;
+		ptr_->overwrite(t, str);
+	}
+
 	void write(SizeType c,
 	           PsimagLite::String str,
 	           PsimagLite::IoNg::Out::Serializer::WriteMode mode)
