@@ -369,6 +369,9 @@ protected:
 	{
 		notReallySortU(U);
 		ModelBaseType::oneSiteTruncationUpdate(U);
+		std::cout<<"U UPDATED\n";
+		std::cout<<U_;
+		std::cout<<"--------\n";
 	}
 
 	// virtual override
