@@ -1,16 +1,16 @@
 ##Ainur1.0
 
-TotalNumberOfSites=8;
+TotalNumberOfSites=4;
 
 NumberOfTerms=2;
 
 gt0:GeometryKind="chain";
 gt0:GeometryOptions="ConstantValues";
-gt0:dir0:Connectors=[-1.0];
+gt0:dir0:Connectors=[0.0];
 
 gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
-gt1:dir0:Connectors=[0.0];
+gt1:dir0:Connectors=[-1.0];
 
 vector hubbardFU=[0,...];
 vector potentialFV=[0,...];
@@ -22,15 +22,15 @@ vector lambdaFP=[0.0,...];
 vector potentialPV=[0.0,...];
 
 Model="HubbardHolstein";
-SolverOptions="MatrixProductStored,restart";
-RestartFilename="data4702";
+SolverOptions="MatrixProductStored,fixLegacyBugs,twositedmrg";
 Version="version";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[3, 100, 40], [-6, 100, 8], [6, 100, 0]];
-TargetElectronsUp=1;
+[1, 100, 40], [-2, 100, 40],
+[2, 100, 8], [-2, 100, 8]];
+TargetElectronsUp=0;
 TargetElectronsDown=0;
-OutputFile="data4702";
-integer OneSiteTruncationPhononsMax=5;
-integer OneSiteTruncationSite=5;
-integer OneSiteTruncationM=10;
+OutputFile="data4703";
+integer OneSiteTruncationPhononsMax=10;
+integer OneSiteTruncationSite=2;
+
