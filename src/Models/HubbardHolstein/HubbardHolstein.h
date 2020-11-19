@@ -478,8 +478,33 @@ protected:
 		                   su2related2);
 		ops.push_back(myOp2);
 
-		if (isSsh_)
-			err("SSH submodel does not support OneSiteTrunc\n");
+		if (!isSsh_) return oneSiteTruncSize; //<<--- EARLY EXIT
+
+		// Set the operators c_(i,sigma} * x_i in the natural basis
+
+		for (SizeType sigma = 0; sigma < 2; ++sigma) {
+			tmpMatrix = findSSHMatrices(sigma, natBasis, modelParameters_.oStruncPhonons);
+			int asign = 1;
+			if (sigma > 0) asign = 1;
+			typename OperatorType::Su2RelatedType su2related3;
+			if (sigma == 0) {
+				su2related3.source.push_back(ind);
+				su2related3.source.push_back(ind + 1);
+				su2related3.transpose.push_back(-1);
+				su2related3.transpose.push_back(-1);
+				su2related3.offset = 1;
+			}
+
+			transformByU(tmpMatrix);
+
+			OperatorType myOp3(tmpMatrix,
+			                   ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                   typename OperatorType::PairType(1,1-sigma),
+			                   asign,
+			                   su2related3);
+
+			ops.push_back(myOp3);
+		}
 
 		return oneSiteTruncSize;
 	}
