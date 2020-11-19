@@ -635,14 +635,19 @@ public:
 
 	// not optimized, used for OneSiteTruncation
 	static void notReallySortU(MatrixType& UnonConst,
+	                           VectorSizeType& perm,
 	                           const MatrixType& Uconst,
-	                           const VectorQnType& qns)
+	                           const VectorQnType& qns,
+	                           SizeType start)
 	{
 		const SizeType ncols = Uconst.cols();
+		if (start >= ncols)
+			err("notReallySortU: wrong start\n");
+
 		VectorQnType qnsSeen;
 		typedef typename PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
 		VectorVectorSizeType m;
-		for (SizeType col = 0; col < ncols; ++col) {
+		for (SizeType col = start; col < ncols; ++col) {
 			QnType qForThisColumn = computeQforThisColumn(Uconst, qns, col);
 			typename VectorQnType::const_iterator it = std::find(qnsSeen.begin(),
 			                                                     qnsSeen.end(),
@@ -664,20 +669,20 @@ public:
 		const SizeType qindices = m.size();
 		assert(qindices <= qns.size());
 		SizeType counter = 0;
-		VectorSizeType perm(ncols);
+		perm.resize(ncols - start);
 		for (SizeType i = 0; i < qindices; ++i) {
 			const SizeType jsize = m[i].size();
 			for (SizeType j = 0; j < jsize; ++j) {
-				assert(counter < ncols);
+				assert(counter + start < ncols);
 				perm[counter++] = m[i][j];
 			}
 		}
 
-		assert(counter == ncols);
+		assert(counter == ncols - start);
 		const SizeType nrows = Uconst.rows();
-		UnonConst.resize(nrows, ncols);
+		UnonConst.resize(nrows, ncols - start);
 		for (SizeType row = 0; row < nrows; ++row)
-			for (SizeType col = 0; col < ncols; ++col)
+			for (SizeType col = 0; col < ncols - start; ++col)
 				UnonConst(row, col) = Uconst(row, perm[col]);
 	}
 

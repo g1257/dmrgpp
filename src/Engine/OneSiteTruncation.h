@@ -48,18 +48,18 @@ public:
 
 		// compute U ...
 		MatrixType U(oneSiteTruncSize, oneSiteTruncSize);
-		computeU(U, oneSiteTruncSize, psi, dir);
+		SizeType start = computeU(U, oneSiteTruncSize, psi, dir);
 
 		// ... and send it to model
-		model_.oneSiteTruncationUpdate(ioOut_, U);
+		model_.oneSiteTruncationUpdate(ioOut_, U, start);
 	}
 
 private:
 
-	void computeU(MatrixType& U,
-	              SizeType oneSiteTruncSize,
-	              const VectorWithOffsetType& psi,
-	              ProgramGlobals::DirectionEnum dir)
+	SizeType computeU(MatrixType& U,
+	                  SizeType oneSiteTruncSize,
+	                  const VectorWithOffsetType& psi,
+	                  ProgramGlobals::DirectionEnum dir)
 	{
 		const SizeType sectors = psi.sectors();
 		const SizeType nsysOrEnv = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -111,32 +111,7 @@ private:
 
 		VectorRealType eigs(U.rows());
 		diag(U, eigs, 'V');
-		truncateU(U, eigs);
-	}
-
-	void truncateU(MatrixType& U, const VectorRealType& eigs) const
-	{
-		const SizeType nrows = U.rows();
-		const SizeType ncols = U.cols();
-
-		assert(nrows == ncols);
-
-		const SizeType start = computeStart(eigs);
-		if (start == 0 || start >= ncols) return;
-
-		MatrixType Unew(nrows, ncols - start);
-		for (SizeType row = 0; row < nrows; ++row)
-			for (SizeType col = start; col < ncols; ++col)
-				Unew(row, col - start) = U(row, col);
-
-		U = Unew;
-
-		std::cerr<<PsimagLite::AnsiColor::red;
-		PsimagLite::String msg("truncateU: from " + ttos(ncols) + " ==> "
-		                       + ttos(U.cols()) + "\n");
-		std::cout<<msg;
-		std::cerr<<msg;
-		std::cerr<<PsimagLite::AnsiColor::reset;
+		return computeStart(eigs);
 	}
 
 	SizeType computeStart(const VectorRealType& eigs) const

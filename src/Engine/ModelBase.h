@@ -374,6 +374,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 		const SizeType end = start + modelLinks_.hilbertSize(kindOfSite);
 
+		assert(end >= start);
+		assert(start < qns_.size());
 		qns.resize(end - start, qns_[start]);
 		std::copy(qns_.begin() + start, qns_.begin() + end, qns.begin());
 		return 0;
@@ -385,7 +387,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	virtual PsimagLite::String oracle() const { return ""; }
 
-	virtual void oneSiteTruncationUpdate(OutputFileOrNot&, const MatrixType&)
+	virtual void oneSiteTruncationUpdate(OutputFileOrNot&, const MatrixType&, SizeType)
 	{
 		qns_.clear();
 		labeledOperators_.clear();

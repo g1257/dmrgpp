@@ -197,6 +197,7 @@ public:
 
 		if (U_.rows() > 0) {
 			U_.write("OneSiteTruncationU", io);
+			io.write("OneSiteTruncationPerm", perm_);
 			io.write("OsTruncPhonons", modelParameters_.oStruncPhonons);
 		}
 	}
@@ -223,6 +224,8 @@ protected:
 		HilbertBasisType natBasis;
 		setBasis(natBasis, block, phonons);
 		setSymmetryRelated(qns, natBasis);
+
+		transformByPerm(qns);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		SparseMatrixType nmatrix;
@@ -373,19 +376,32 @@ protected:
 		wantsOneSiteTruncation_ = PsimagLite::atoi(tokens[1]);
 	}
 
-	void oneSiteTruncationUpdate(OutputFileOrNot& ioOut, const MatrixType& U)
+	void oneSiteTruncationUpdate(OutputFileOrNot& ioOut, const MatrixType& U, SizeType start)
 	{
 		bool firstCall = (U_.rows() == 0);
-		notReallySortU(U);
-		ModelBaseType::oneSiteTruncationUpdate(ioOut, U);
-		std::cout<<"U UPDATED\n";
-		std::cout<<U_;
-		std::cout<<"--------\n";
+		assert(!firstCall || perm_.size() == 0);
+
+		notReallySortU(U, start);
+		ModelBaseType::oneSiteTruncationUpdate(ioOut, U, start);
+
+		static const bool verbose = true;
+		if (verbose) {
+			std::cout<<"U UPDATED\n";
+			std::cout<<U_;
+			std::cout<<"--------\n";
+			std::cout<<perm_;
+			std::cout<<"-------\n";
+		}
+
 		if (firstCall) {
 			ioOut.write(U_, "OneSiteTruncationU");
+			ioOut.write(perm_, "OneSiteTruncationPerm");
 			ioOut.write(modelParameters_.oStruncPhonons, "OsTruncPhonons");
 		} else {
 			ioOut.overwrite(U_, "OneSiteTruncationU");
+			ioOut.write(perm_,
+			            "OneSiteTruncationPerm",
+			            PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
 			ioOut.write(modelParameters_.oStruncPhonons,
 			            "OsTruncPhonons",
 			            PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
@@ -732,7 +748,22 @@ private:
 		fullMatrixToCrsMatrix(m, mdense);
 	}
 
-	void notReallySortU(const MatrixType& U)
+	void transformByPerm(VectorQnType& qns) const
+	{
+		const SizeType n = perm_.size();
+		if (n == 0) return;
+
+		assert(qns.size() > 0);
+		VectorQnType qnsNew(n, qns[0]);
+		for (SizeType i = 0; i < n; ++i) {
+			assert(perm_[i] < qns.size());
+			qnsNew[i] = qns[perm_[i]];
+		}
+
+		qns = qnsNew;
+	}
+
+	void notReallySortU(const MatrixType& U, SizeType start)
 	{
 		const SizeType site = 0;
 		BlockType block(1, site);
@@ -741,7 +772,7 @@ private:
 		setBasis(natBasis, block, phonons);
 		VectorQnType qns;
 		setSymmetryRelated(qns, natBasis);
-		BasisType::notReallySortU(U_, U, qns);
+		BasisType::notReallySortU(U_, perm_, U, qns, start);
 	}
 
 	void restartHook(PsimagLite::String restartFilename)
@@ -751,6 +782,7 @@ private:
 		PsimagLite::IoSelector::In io(restartFilename);
 		try {
 			io.read(U_, "OneSiteTruncationU");
+			io.read(perm_, "OneSiteTruncationPerm");
 			std::cout<<"OneSiteTruncationU = "<<U_.rows()<<" x "<<U_.cols();
 			std::cout<<" read from "<<restartFilename<<"\n";
 		} catch (...) {}
@@ -758,6 +790,8 @@ private:
 		if (U_.rows() > 0) {
 			io.read(modelParameters_.oStruncPhonons, "OsTruncPhonons");
 			std::cout<<"OsTruncPhonons set to "<<modelParameters_.oStruncPhonons<<"\n";
+			if (U_.cols() != perm_.size())
+				err("restartHook: Permutation size wrong in file " + restartFilename + "\n");
 		}
 	}
 
@@ -766,6 +800,7 @@ private:
 	mutable bool oStruncActive_;
 	mutable SizeType wantsOneSiteTruncation_;
 	mutable MatrixType U_;
+	mutable VectorSizeType perm_;
 }; //class HubbardHolstein
 } // namespace Dmrg
 /*@}*/

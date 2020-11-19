@@ -43,6 +43,16 @@ public:
 	}
 
 	template<typename T>
+	void write(const T& t,
+	           PsimagLite::String str,
+	           PsimagLite::IoNg::Out::Serializer::WriteMode mode,
+	           typename std::enable_if<PsimagLite::IsVectorLike<T>::True, int>::type = 0)
+	{
+		if (!ptr_) return;
+		ptr_->write(t, str, mode);
+	}
+
+	template<typename T>
 	void overwrite(const T& t, PsimagLite::String str)
 	{
 		if (!ptr_) return;
