@@ -109,8 +109,11 @@ private:
 			}
 		}
 
+		assert(isHermitian(U));
+
 		VectorRealType eigs(U.rows());
 		diag(U, eigs, 'V');
+
 		return computeStart(eigs);
 	}
 
