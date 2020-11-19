@@ -658,44 +658,6 @@ private:
 
 	class LoopLengthSpec {
 
-//		class MyContainer {
-
-//		public:
-
-//			explicit MyContainer(FieldType x) : x_(x) {}
-
-//			FieldType value() const { return x_; }
-
-//			MyContainer& operator+=(const MyContainer& other)
-//			{
-//				x_ += other.x_;
-//				return *this;
-//			}
-
-//			MyContainer& operator*=(const MyContainer& other)
-//			{
-//				x_ *= other.x_;
-//				return *this;
-//			}
-
-//			MyContainer& operator*=(FieldType x)
-//			{
-//				x_ *= x;
-//				return *this;
-//			}
-
-//			bool operator==(const MyContainer& other) const
-//			{
-//				return (x_ == other.x_);
-//			}
-
-//			bool isEmpty() const { return (x_ == 0); }
-
-//		private:
-
-//			FieldType x_;
-//		};
-
 	public:
 
 		typedef FieldType ResultType;
