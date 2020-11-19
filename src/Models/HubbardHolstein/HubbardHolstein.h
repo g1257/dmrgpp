@@ -136,7 +136,8 @@ public:
 	HubbardHolstein(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
 	                const SuperGeometryType& geometry,
-	                PsimagLite::String additional)
+	                PsimagLite::String additional,
+	                PsimagLite::String hdf5fileIfAny)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
@@ -151,6 +152,8 @@ public:
 			std::cout<<warning;
 			std::cerr<<warning;
 		}
+
+		restartHook(hdf5fileIfAny);
 	}
 
 	void print(std::ostream& os) const { operator<<(os,modelParameters_); }
@@ -386,23 +389,6 @@ protected:
 			ioOut.write(modelParameters_.oStruncPhonons,
 			            "OsTruncPhonons",
 			            PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
-		}
-	}
-
-	void restartHook(PsimagLite::String restartFilename)
-	{
-		if (restartFilename == "") return;
-
-		PsimagLite::IoSelector::In io(restartFilename);
-		try {
-			io.read(U_, "OneSiteTruncationU");
-			std::cout<<"OneSiteTruncationU = "<<U_.rows()<<" x "<<U_.cols();
-			std::cout<<" read from "<<restartFilename<<"\n";
-		} catch (...) {}
-
-		if (U_.rows() > 0) {
-			io.read(modelParameters_.oStruncPhonons, "OsTruncPhonons");
-			std::cout<<"OsTruncPhonons set to "<<modelParameters_.oStruncPhonons<<"\n";
 		}
 	}
 
@@ -756,6 +742,23 @@ private:
 		VectorQnType qns;
 		setSymmetryRelated(qns, natBasis);
 		BasisType::notReallySortU(U_, U, qns);
+	}
+
+	void restartHook(PsimagLite::String restartFilename)
+	{
+		if (restartFilename == "") return;
+
+		PsimagLite::IoSelector::In io(restartFilename);
+		try {
+			io.read(U_, "OneSiteTruncationU");
+			std::cout<<"OneSiteTruncationU = "<<U_.rows()<<" x "<<U_.cols();
+			std::cout<<" read from "<<restartFilename<<"\n";
+		} catch (...) {}
+
+		if (U_.rows() > 0) {
+			io.read(modelParameters_.oStruncPhonons, "OsTruncPhonons");
+			std::cout<<"OsTruncPhonons set to "<<modelParameters_.oStruncPhonons<<"\n";
+		}
 	}
 
 	ParametersHubbardHolsteinType modelParameters_;

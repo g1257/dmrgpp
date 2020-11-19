@@ -141,6 +141,8 @@ public:
 	{
 		if (model_) return *model_;
 
+		PsimagLite::String hdf5fileIfAny = findHdf5FileIfAny(solverParams);
+
 		if (name_ == "Heisenberg") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"");
 		} else if (name_ == "HeisenbergAnisotropic") {
@@ -194,9 +196,9 @@ public:
 		} else if (name_ == "ModelHubbardMultiBand") {
 			model_ = new ModelHubbardMultiBandType(solverParams,io,geometry);
 		} else if (name_ == "HubbardHolstein") {
-			model_ = new HubbardHolsteinType(solverParams, io, geometry, "");
+			model_ = new HubbardHolsteinType(solverParams, io, geometry, "", hdf5fileIfAny);
 		} else if (name_ == "HubbardHolsteinSSH") {
-			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH");
+			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH", hdf5fileIfAny);
 		} else if (name_ == "HolsteinThin") {
 			model_ = new HolsteinThinType(solverParams, io, geometry, "");
 		} else if (name_ == "Kondo") {
@@ -219,8 +221,7 @@ public:
 			throw PsimagLite::RuntimeError(s.c_str());
 		}
 
-		PsimagLite::String hdf5fileIfAny = findHdf5FileIfAny(solverParams);
-		model_->postCtor(hdf5fileIfAny);
+		model_->postCtor();
 
 		return *model_;
 	}

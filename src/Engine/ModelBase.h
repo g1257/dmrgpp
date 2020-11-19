@@ -176,9 +176,8 @@ public:
 		qns_.clear();
 	}
 
-	void postCtor(PsimagLite::String restartFilename)
+	void postCtor()
 	{
-		restartHook(restartFilename);
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
 		modelLinks_.postCtor1(labeledOperators_,
 		                      &getAtomKind(),
@@ -393,12 +392,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		modelLinks_.clear();
 		// we could also clear atomKind and superOpHelper here if needed (?)
 
-		postCtor("");
+		postCtor();
 	}
-
-	// Only used for one site truncation OneSiteTruncation
-	virtual void restartHook(PsimagLite::String)
-	{}
 
 	// END OF VIRTUAL FUNCTIONS
 
