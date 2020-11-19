@@ -671,16 +671,14 @@ private:
 		ResultType operator()(PsimagLite::String str, FieldType numberOfSites) const
 		{
 			if (str == "%lh")
-				return ResultType(numberOfSites - 2);
+				return numberOfSites - 2;
 
-			FieldType x = PsimagLite::atof(str);
-			return ResultType(x);
+			return PsimagLite::atof(str);
 		}
 	};
 
 	static int procLength(PsimagLite::String val, FieldType numberOfSites)
 	{
-
 		if (val == "-%lh") val = "(-1.0)*%lh";
 
 		LoopLengthSpec loopLengthSpec;
@@ -688,6 +686,8 @@ private:
 		typename LoopLengthSpec::ResultType opEmpty(0);
 		typename LoopLengthSpec::ResultType p(1);
 		canonicalExpression(p, val, opEmpty, numberOfSites);
+		if (p != static_cast<int>(p))
+			err("FiniteLoop with string value " + val + " yields non integer\n");
 		return p;
 	}
 };

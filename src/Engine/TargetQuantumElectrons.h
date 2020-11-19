@@ -220,8 +220,8 @@ private:
 			SizeType electronsUp = 0;
 			SizeType electronsDown = 0;
 			try {
-				io.readline(electronsUp,"TargetElectronsUp" + label + "=");
-				io.readline(electronsDown,"TargetElectronsDown" + label + "=");
+				electronsUp = readNumberOrExpression(io, "TargetElectronsUp" + label + "=");
+				electronsDown = readNumberOrExpression(io, "TargetElectronsDown" + label + "=");
 				SizeType tmp = electronsUp + electronsDown;
 				qn.oddElectrons = (tmp & 1);
 				qnOther.push_back(tmp);
@@ -231,16 +231,14 @@ private:
 		}
 
 		try {
-			SizeType tmp = 0;
-			io.readline(tmp, "TargetElectronsTotal" + label + "=");
+			SizeType tmp = readNumberOrExpression(io, "TargetElectronsTotal" + label + "=");
 			qn.oddElectrons = (tmp & 1);
 			qnOther.push_back(tmp);
 			ready++;
 		} catch (std::exception&) {}
 
 		try {
-			SizeType szPlusConst = 0;
-			io.readline(szPlusConst,"TargetSzPlusConst" + label + "=");
+			SizeType szPlusConst = readNumberOrExpression(io, "TargetSzPlusConst" + label + "=");
 			qnOther.push_back(szPlusConst);
 		} catch (std::exception&) {}
 
@@ -251,8 +249,7 @@ private:
 
 		bool flag = false;
 		try {
-			int dummy = 0;
-			io.readline(dummy, "TargetExtra" + label + "=");
+			readNumberOrExpression(io, "TargetExtra" + label + "=");
 			flag = true;
 		} catch (std::exception&) {}
 
@@ -276,6 +273,48 @@ private:
 			qn.oddElectrons = (totalNumberOfSites_ & 1);
 
 		vqn_.push_back(qn);
+	}
+
+	class TargetAlgebra {
+
+	public:
+
+		typedef RealType ResultType;
+		typedef RealType ComplexOrRealType;
+		typedef RealType AuxiliaryType;
+
+		static bool isEmpty(ResultType x) { return (x == 0); }
+
+		static bool metaEqual(ResultType, ResultType) { return true; }
+
+		ResultType operator()(PsimagLite::String str, RealType numberOfSites) const
+		{
+			if (str == "%n")
+				return numberOfSites;
+
+			return PsimagLite::atof(str);
+		}
+	};
+
+	template<typename IoInputType>
+	SizeType readNumberOrExpression(IoInputType& io, PsimagLite::String fullLabel)
+	{
+		PsimagLite::String val;
+		io.readline(val, fullLabel);
+
+		TargetAlgebra targetAlgebra;
+		PsimagLite::CanonicalExpression<TargetAlgebra> canonicalExpression(targetAlgebra);
+		typename TargetAlgebra::ResultType opEmpty(0);
+		typename TargetAlgebra::ResultType p(1);
+		RealType numberOfSites = totalNumberOfSites_;
+		canonicalExpression(p, val, opEmpty, numberOfSites);
+		if (p != static_cast<SizeType>(p)) {
+			std::cerr<<"Target number for "<<fullLabel;
+			std::cerr<<" with string value "<<val<<" yields non integer\n";
+			throw "Abnormal Exception\n";
+		}
+
+		return p;
 	}
 
 	SizeType totalNumberOfSites_;

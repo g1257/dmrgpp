@@ -24,7 +24,7 @@ FiniteLoops=[
 	[-%lh, 200, 0],
 	[%lh,  200, 0]];
 
-TargetSzPlusConst=4;
+TargetSzPlusConst=0.5*%n;
 
 Threads=1;
 SolverOptions="twositedmrg";
