@@ -658,76 +658,75 @@ private:
 
 	class LoopLengthSpec {
 
-		class MyContainer {
+//		class MyContainer {
 
-		public:
+//		public:
 
-			explicit MyContainer(int x) : x_(x) {}
+//			explicit MyContainer(FieldType x) : x_(x) {}
 
-			int value() const { return x_; }
+//			FieldType value() const { return x_; }
 
-			MyContainer& operator+=(const MyContainer& other)
-			{
-				x_ += other.x_;
-				return *this;
-			}
+//			MyContainer& operator+=(const MyContainer& other)
+//			{
+//				x_ += other.x_;
+//				return *this;
+//			}
 
-			MyContainer& operator*=(const MyContainer& other)
-			{
-				x_ *= other.x_;
-				return *this;
-			}
+//			MyContainer& operator*=(const MyContainer& other)
+//			{
+//				x_ *= other.x_;
+//				return *this;
+//			}
 
-			MyContainer& operator*=(int x)
-			{
-				x_ *= x;
-				return *this;
-			}
+//			MyContainer& operator*=(FieldType x)
+//			{
+//				x_ *= x;
+//				return *this;
+//			}
 
-			bool operator==(const MyContainer& other) const
-			{
-				return (x_ == other.x_);
-			}
+//			bool operator==(const MyContainer& other) const
+//			{
+//				return (x_ == other.x_);
+//			}
 
-			bool isEmpty() const { return (x_ == 0); }
+//			bool isEmpty() const { return (x_ == 0); }
 
-		private:
+//		private:
 
-			int x_;
-		};
+//			FieldType x_;
+//		};
 
 	public:
 
-		typedef MyContainer ResultType;
+		typedef FieldType ResultType;
 		typedef FieldType ComplexOrRealType;
-		typedef int AuxiliaryType;
+		typedef FieldType AuxiliaryType;
 
-		static bool isEmpty(ResultType x) { return x.isEmpty(); }
+		static bool isEmpty(ResultType x) { return (x == 0); }
 
-		static bool metaEqual(ResultType x, ResultType y) { return (x == y); }
+		static bool metaEqual(ResultType, ResultType) { return true; }
 
-		ResultType operator()(PsimagLite::String str, int numberOfSites) const
+		ResultType operator()(PsimagLite::String str, FieldType numberOfSites) const
 		{
-			if (str == "%lh") {
-				int nOver2 = numberOfSites/2;
-				if (numberOfSites & 1)
-					err("%lh cannot be used when TotalNumberOfSites is odd\n");
-				return ResultType(nOver2 - 1);
-			}
+			if (str == "%lh")
+				return ResultType(numberOfSites - 2);
 
-			int x = PsimagLite::atoi(str);
+			FieldType x = PsimagLite::atof(str);
 			return ResultType(x);
 		}
 	};
 
-	static int procLength(PsimagLite::String val, int numberOfSites)
+	static int procLength(PsimagLite::String val, FieldType numberOfSites)
 	{
+
+		if (val == "-%lh") val = "(-1.0)*%lh";
+
 		LoopLengthSpec loopLengthSpec;
 		PsimagLite::CanonicalExpression<LoopLengthSpec> canonicalExpression(loopLengthSpec);
 		typename LoopLengthSpec::ResultType opEmpty(0);
 		typename LoopLengthSpec::ResultType p(1);
 		canonicalExpression(p, val, opEmpty, numberOfSites);
-		return p.value();
+		return p;
 	}
 };
 } // namespace Dmrg
