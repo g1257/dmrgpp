@@ -116,40 +116,47 @@ private:
 
 	void truncateU(MatrixType& U, const VectorRealType& eigs) const
 	{
-		const SizeType cutoff = computeCutoff(eigs);
-		if (cutoff == 0) return;
-
 		const SizeType nrows = U.rows();
 		const SizeType ncols = U.cols();
-		MatrixType Unew(nrows, cutoff);
+
+		assert(nrows == ncols);
+
+		const SizeType start = computeStart(eigs);
+		if (start == 0 || start >= ncols) return;
+
+		MatrixType Unew(nrows, ncols - start);
 		for (SizeType row = 0; row < nrows; ++row)
-			for (SizeType col = 0; col < cutoff; ++col)
-				Unew(row, col) = U(row, col);
+			for (SizeType col = start; col < ncols; ++col)
+				Unew(row, col - start) = U(row, col);
 
 		U = Unew;
 
 		std::cerr<<PsimagLite::AnsiColor::red;
-		PsimagLite::String msg("truncateU: from " + ttos(ncols) + " ==> " + ttos(cutoff) + "\n");
+		PsimagLite::String msg("truncateU: from " + ttos(ncols) + " ==> "
+		                       + ttos(U.cols()) + "\n");
 		std::cout<<msg;
 		std::cerr<<msg;
 		std::cerr<<PsimagLite::AnsiColor::reset;
 	}
 
-	SizeType computeCutoff(const VectorRealType& eigs) const
+	SizeType computeStart(const VectorRealType& eigs) const
 	{
-		if (tolerance_ <= 0) return m_;
-
 		const SizeType n = eigs.size();
+
+		if (tolerance_ <= 0)
+			return (n > m_) ? n - m_ : 0;
+
 		SizeType row = 0;
 		RealType sum = 0;
 		for (; row < n; ++row) {
-			sum += fabs(eigs[row]);
+			sum += fabs(eigs[n - row - 1]);
 			if (sum >= tolerance_) break;
 		}
 
 		assert(row <= n);
-
-		return (row < m_) ? m_ : row;
+		const SizeType start1 = n - row;
+		const SizeType start2 = (n > m_) ? n - m_ : 0;
+		return (start1 < start2) ? start1 : start2;
 	}
 
 	const LeftRightSuperType& lrs_;
