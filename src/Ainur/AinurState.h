@@ -237,15 +237,15 @@ private:
 	}
 
 
-	template<typename T>
-	void convertInternal(T& t,
-	                     String value,
-	                     typename EnableIf<!Loki::TypeTraits<T>::isIntegral
-	                     && !Loki::TypeTraits<T>::isFloat,
-	                     int>::Type = 0) const
-	{
-		err("convertInternal generic type value = " + value + "\n");
-	}
+//	template<typename T>
+//	void convertInternal(T& t,
+//	                     String value,
+//	                     typename EnableIf<!Loki::TypeTraits<T>::isIntegral
+//	                     && !Loki::TypeTraits<T>::isFloat,
+//	                     int>::Type = 0) const
+//	{
+//		err("convertInternal generic type value = " + value + "\n");
+//	}
 
 	template<typename T>
 	void convertInternal(std::vector<T>& t,
@@ -256,10 +256,7 @@ private:
 
 	template<typename T>
 	void convertInternal(Matrix<T>& t,
-	                     String value,
-	                     typename EnableIf<Loki::TypeTraits<T>::isArith ||
-	                     IsComplexNumber<T>::True,
-	                     int>::Type = 0) const;
+	                     String value) const;
 
 	template<typename T>
 	void convertInternal(T& t,

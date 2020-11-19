@@ -257,10 +257,7 @@ AinurState::Action<T>::operator()(A& attr,
 
 template<typename T>
 void AinurState::convertInternal(Matrix<T>& t,
-                                 String value,
-                                 typename EnableIf<Loki::TypeTraits<T>::isArith ||
-                                 IsComplexNumber<T>::True,
-                                 int>::Type) const
+                                 String value) const
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
@@ -324,11 +321,12 @@ void AinurState::convertInternal(std::vector<T>& t,
 		std::cerr << "vector parsing: unmatched part exists\n";
 }
 
-template void AinurState::convertInternal(Matrix<DoubleOrFloatType>&,String, int) const;
+template void AinurState::convertInternal(Matrix<DoubleOrFloatType>&,String) const;
 
 template void AinurState::convertInternal(Matrix<std::complex<DoubleOrFloatType> >&,
-String,
-int) const;
+String) const;
+
+template void AinurState::convertInternal(Matrix<String>&, String) const;
 
 template void AinurState::convertInternal(std::vector<DoubleOrFloatType>&, String, int) const;
 

@@ -841,6 +841,14 @@ public:
 			}
 		}
 
+		void read(Matrix<String>& m, const String& label)
+		{
+			if (ainur_)
+				return ainur_->readValue(m, label);
+
+			throw RuntimeError("InputNg: Matrix<String> not supported in POD inputs\n");
+		}
+
 		const String& filename() const
 		{
 			return file_;
