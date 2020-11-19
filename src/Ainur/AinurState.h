@@ -236,17 +236,6 @@ private:
 		return it - keys_.begin();
 	}
 
-
-//	template<typename T>
-//	void convertInternal(T& t,
-//	                     String value,
-//	                     typename EnableIf<!Loki::TypeTraits<T>::isIntegral
-//	                     && !Loki::TypeTraits<T>::isFloat,
-//	                     int>::Type = 0) const
-//	{
-//		err("convertInternal generic type value = " + value + "\n");
-//	}
-
 	template<typename T>
 	void convertInternal(std::vector<T>& t,
 	                     String value,
