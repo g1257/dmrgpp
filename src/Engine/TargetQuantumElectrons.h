@@ -314,6 +314,7 @@ private:
 			throw "Abnormal Exception\n";
 		}
 
+		std::cout<<fullLabel<<p<<"\n";
 		return p;
 	}
 

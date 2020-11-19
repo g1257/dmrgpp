@@ -500,14 +500,18 @@ struct ParametersDmrgSolver {
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
+		std::cout<<"FiniteLoops=[";
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
 			const int length = procLength(tmpMat(i, 0), numberOfSites);
 			SizeType m = PsimagLite::atof(tmpMat(i, 1));
 			SizeType bits = PsimagLite::atof(tmpMat(i, 2));
 			FiniteLoop fl(length, m, bits);
+			std::cout<<"["<<length<<","<<m<<","<<bits<<"]";
+			if (i + 1 < tmpMat.rows()) std::cout<<",\n";
 			vfl.push_back(fl);
 		}
 
+		std::cout<<"]\n";
 		readFiniteLoops_(io, vfl);
 	}
 
