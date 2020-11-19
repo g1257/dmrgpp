@@ -255,8 +255,9 @@ private:
 	{
 		try {
 			t = PsimagLite::atoi(label.c_str());
-		} catch (...) {
-			err("FATAL: AinurState: Label " + label + " must be an integer\n");
+		} catch (std::exception& e) {
+			std::cerr<<"FATAL: AinurState: Label " + label + " must be an integer\n";
+			throw e.what();
 		}
 	}
 
