@@ -250,6 +250,9 @@ public:
 		str += "integer TargetSpinTimesTwo;\n";
 		str += "integer UseSu2Symmetry;\n";
 		str += "integer Pvectors;\n";
+		str += "string TruncationTolerance;\n";
+		str += "integer HeisenbergTwiceS;\n";
+		str += "integer TargetSzPlusConst;\n";
 		return str;
 	}
 

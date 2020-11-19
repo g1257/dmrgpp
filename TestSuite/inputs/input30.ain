@@ -1,0 +1,33 @@
+##Ainur1.0
+
+TotalNumberOfSites=8;
+NumberOfTerms=2;
+
+gt0:GeometryKind="ladder";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1.0];
+gt0:dir1:Connectors=[1.0];
+gt0:LadderLeg=2;
+
+gt1:GeometryKind="ladder";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[1.0];
+gt1:dir1:Connectors=[1.0];
+gt1:LadderLeg=2;
+
+Model="Heisenberg";
+HeisenbergTwiceS=1;
+
+InfiniteLoopKeptStates=128;
+FiniteLoops=[
+	[0.5*%lh, 200, 0],
+	[-%lh, 200, 0],
+	[%lh,  200, 0]];
+
+TargetSzPlusConst=4;
+
+Threads=1;
+SolverOptions="twositedmrg";
+Version="version";
+TruncationTolerance="1e-7";
+
