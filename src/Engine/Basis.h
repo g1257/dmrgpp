@@ -635,7 +635,6 @@ public:
 
 	// not optimized, used for OneSiteTruncation
 	static void notReallySortU(MatrixType& UnonConst,
-	                           VectorSizeType& perm,
 	                           const MatrixType& Uconst,
 	                           const VectorQnType& qns,
 	                           SizeType start)
@@ -667,10 +666,30 @@ public:
 		}
 
 		const SizeType qindices = m.size();
+		const SizeType qnsSize = qns.size();
+		PsimagLite::Vector<int>::Type perm2(qindices, -1);
+		SizeType counter1 = 0;
+		for (SizeType i = 0; i < qnsSize; ++i) {
+			typename VectorQnType::const_iterator it = std::find(qnsSeen.begin(),
+			                                                     qnsSeen.end(),
+			                                                     qns[i]);
+			if (it == qnsSeen.end()) continue;
+			const SizeType qIndex = it - qnsSeen.begin();
+			if (perm2[qIndex] < 0)
+				perm2[qIndex] = counter1++;
+		}
+
+		assert(counter1 == qindices);
+
+		VectorSizeType perm3(qindices);
+		for (SizeType i = 0; i < qindices; ++i)
+			perm3[perm2[i]] = i;
+
 		assert(qindices <= qns.size());
 		SizeType counter = 0;
-		perm.resize(ncols - start);
-		for (SizeType i = 0; i < qindices; ++i) {
+		VectorSizeType perm(ncols - start);
+		for (SizeType i2 = 0; i2 < qindices; ++i2) {
+			SizeType i = perm3[i2];
 			const SizeType jsize = m[i].size();
 			for (SizeType j = 0; j < jsize; ++j) {
 				assert(counter + start < ncols);
