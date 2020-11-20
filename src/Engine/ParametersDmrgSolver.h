@@ -506,12 +506,9 @@ struct ParametersDmrgSolver {
 			SizeType m = PsimagLite::atof(tmpMat(i, 1));
 			SizeType bits = PsimagLite::atof(tmpMat(i, 2));
 			FiniteLoop fl(length, m, bits);
-			std::cout<<"["<<length<<","<<m<<","<<bits<<"]";
-			if (i + 1 < tmpMat.rows()) std::cout<<",\n";
 			vfl.push_back(fl);
 		}
 
-		std::cout<<"]\n";
 		readFiniteLoops_(io, vfl);
 	}
 
@@ -687,7 +684,7 @@ private:
 
 		LoopLengthSpec loopLengthSpec;
 		PsimagLite::CanonicalExpression<LoopLengthSpec> canonicalExpression(loopLengthSpec);
-		typename LoopLengthSpec::ResultType opEmpty(0);
+		typename LoopLengthSpec::ResultType opEmpty(1);
 		typename LoopLengthSpec::ResultType p(1);
 		canonicalExpression(p, val, opEmpty, numberOfSites);
 		if (p != static_cast<int>(p))

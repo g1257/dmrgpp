@@ -115,6 +115,11 @@ public:
 
 	bool wantsOneSiteTruncation() const { return (bitField_ & 32); }
 
+	void print(std::ostream& os) const
+	{
+		os<<stepLength_<<" "<<keptStates_<<" "<<bitField_;
+	}
+
 private:
 
 	void checkBitField() const

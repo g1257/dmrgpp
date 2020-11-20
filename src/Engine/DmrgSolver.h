@@ -181,6 +181,8 @@ public:
 		progress_.printline(msgg, std::cout);
 		ioOut_.write(appInfo_, "ApplicationInfo");
 
+		printFiniteLoops(std::cout);
+
 		PsimagLite::PsiBase64::Encode base64encode(ioIn.data());
 		ioOut_.write(base64encode, "InputBase64Encoded");
 		ioOut_.write(parameters_, "PARAMETERS");
@@ -704,6 +706,18 @@ obtain ordered
 		if (step < y.size()) return y[step];
 
 		return E;
+	}
+
+	void printFiniteLoops(std::ostream& os) const
+	{
+		const SizeType n = parameters_.finiteLoop.size();
+		os<<"FiniteLoops printing starts\n";
+		for (SizeType i = 0; i < n; ++i) {
+			parameters_.finiteLoop[i].print(os);
+			std::cout<<"\n";
+		}
+
+		os<<"FiniteLoops printing ends\n";
 	}
 
 	const ModelType& model_;

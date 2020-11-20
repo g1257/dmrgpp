@@ -304,7 +304,7 @@ private:
 
 		TargetAlgebra targetAlgebra;
 		PsimagLite::CanonicalExpression<TargetAlgebra> canonicalExpression(targetAlgebra);
-		typename TargetAlgebra::ResultType opEmpty(0);
+		typename TargetAlgebra::ResultType opEmpty(1);
 		typename TargetAlgebra::ResultType p(1);
 		RealType numberOfSites = totalNumberOfSites_;
 		canonicalExpression(p, val, opEmpty, numberOfSites);
