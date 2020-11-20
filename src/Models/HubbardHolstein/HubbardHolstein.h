@@ -224,8 +224,6 @@ protected:
 		setBasis(natBasis, block, phonons);
 		setSymmetryRelated(qns, natBasis);
 
-		transformByPerm(qns);
-
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		SparseMatrixType nmatrix;
 		SparseMatrixType tmpMatrix;
@@ -763,10 +761,6 @@ private:
 		crsMatrixToFullMatrix(mdense, m);
 		rotate(mdense, U_);
 		fullMatrixToCrsMatrix(m, mdense);
-	}
-
-	void transformByPerm(VectorQnType& qns) const
-	{
 	}
 
 	void notReallySortU(const MatrixType& U, SizeType start)
