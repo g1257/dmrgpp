@@ -449,11 +449,9 @@ private:
 
 	bool isCorrectlyPaired(const WordType& ket) const
 	{
-		SizeType onesize = ProgramGlobals::logBase2(modelParameters_.twiceTheSpin + 1);
-		const WordType mask = (1 << onesize) - 1;
-		const SizeType physKet = (ket & mask);
-		SizeType ancKet = ket;
-		ancKet >>= onesize;
+		PairSizeType pair = getOneOrbital(ket);
+		const SizeType physKet = pair.first;
+		SizeType ancKet = pair.second;
 		return (barFunction(physKet) == ancKet);
 	}
 
