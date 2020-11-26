@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TargetQuantumElectrons_H
 #include "Vector.h"
 #include "ProgramGlobals.h"
+#include "AlgebraicStringToNumber.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
@@ -275,44 +276,18 @@ private:
 		vqn_.push_back(qn);
 	}
 
-	class TargetAlgebra {
-
-	public:
-
-		typedef RealType ResultType;
-		typedef RealType ComplexOrRealType;
-		typedef RealType AuxiliaryType;
-
-		static bool isEmpty(ResultType x) { return (x == 0); }
-
-		static bool metaEqual(ResultType, ResultType) { return true; }
-
-		ResultType operator()(PsimagLite::String str, RealType numberOfSites) const
-		{
-			if (str == "%n")
-				return numberOfSites;
-
-			return PsimagLite::atof(str);
-		}
-	};
-
 	template<typename IoInputType>
 	SizeType readNumberOrExpression(IoInputType& io, PsimagLite::String fullLabel)
 	{
+		typedef AlgebraicStringToNumber<RealType> AlgebraicStringToNumberType;
+
 		PsimagLite::String val;
 		io.readline(val, fullLabel);
 
-		TargetAlgebra targetAlgebra;
-		PsimagLite::CanonicalExpression<TargetAlgebra> canonicalExpression(targetAlgebra);
-		typename TargetAlgebra::ResultType opEmpty(1);
-		typename TargetAlgebra::ResultType p(1);
-		RealType numberOfSites = totalNumberOfSites_;
-		canonicalExpression(p, val, opEmpty, numberOfSites);
-		if (p != static_cast<SizeType>(p)) {
-			std::cerr<<"Target number for "<<fullLabel;
-			std::cerr<<" with string value "<<val<<" yields non integer\n";
-			throw "Abnormal Exception\n";
-		}
+		const PsimagLite::String msg = "Target number for " + fullLabel;
+		AlgebraicStringToNumberType algebraicStringToNumber(msg, totalNumberOfSites_);
+
+		SizeType p = algebraicStringToNumber.procLength(val);
 
 		std::cout<<fullLabel<<p<<"\n";
 		return p;

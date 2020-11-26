@@ -95,7 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Options.h"
 #include <sys/types.h>
 #include <unistd.h>
-#include "CanonicalExpression.h"
+#include "AlgebraicStringToNumber.h"
 
 namespace Dmrg {
 
@@ -501,8 +501,10 @@ struct ParametersDmrgSolver {
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
 		std::cout<<"FiniteLoops=[";
+		typedef AlgebraicStringToNumber<FieldType> AlgebraicStringToNumberType;
+		AlgebraicStringToNumberType algebraicStringToNumber("FiniteLoops", numberOfSites);
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
-			const int length = procLength(tmpMat(i, 0), numberOfSites);
+			const int length = algebraicStringToNumber.procLength(tmpMat(i, 0));
 			SizeType m = PsimagLite::atof(tmpMat(i, 1));
 			SizeType bits = PsimagLite::atof(tmpMat(i, 2));
 			FiniteLoop fl(length, m, bits);
@@ -655,41 +657,6 @@ private:
 
 		if (addPidToOutputName) f += "." + ttos(getpid());
 		return f;
-	}
-
-	class LoopLengthSpec {
-
-	public:
-
-		typedef FieldType ResultType;
-		typedef FieldType ComplexOrRealType;
-		typedef FieldType AuxiliaryType;
-
-		static bool isEmpty(ResultType x) { return (x == 0); }
-
-		static bool metaEqual(ResultType, ResultType) { return true; }
-
-		ResultType operator()(PsimagLite::String str, FieldType numberOfSites) const
-		{
-			if (str == "%lh")
-				return numberOfSites - 2;
-
-			return PsimagLite::atof(str);
-		}
-	};
-
-	static int procLength(PsimagLite::String val, FieldType numberOfSites)
-	{
-		if (val == "-%lh") val = "(-1.0)*%lh";
-
-		LoopLengthSpec loopLengthSpec;
-		PsimagLite::CanonicalExpression<LoopLengthSpec> canonicalExpression(loopLengthSpec);
-		typename LoopLengthSpec::ResultType opEmpty(1);
-		typename LoopLengthSpec::ResultType p(1);
-		canonicalExpression(p, val, opEmpty, numberOfSites);
-		if (p != static_cast<int>(p))
-			err("FiniteLoop with string value " + val + " yields non integer\n");
-		return p;
 	}
 };
 } // namespace Dmrg

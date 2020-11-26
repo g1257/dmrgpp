@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsBase.h"
 #include "Io/IoSerializerStub.h"
 #include "ProgramGlobals.h"
+#include "AlgebraicStringToNumber.h"
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
@@ -104,6 +105,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	TargetParamsCommon(InputValidatorType& io,
 	                   PsimagLite::String targeting,
@@ -142,7 +144,9 @@ public:
 		\item[TSPEnergyForExp] [RealType] Energy to use as origin for the exponential
 		in the time evolution.
 		*/
-		io.read(sites_,"TSPSites");
+		VectorStringType sitesStr;
+		io.read(sitesStr, "TSPSites");
+		vecstringToVecnumbers(sites_, sitesStr);
 		checkSites();
 		io.read(startingLoops_,"TSPLoops");
 		io.readline(gsWeight_,"GsWeight=");
@@ -427,6 +431,18 @@ private:
 		PsimagLite::String str("ERROR: Operators at border site: Please ");
 		str += "add the identity operator at site " + ttos(site2) + "\n";
 		throw PsimagLite::RuntimeError(str);
+	}
+
+	void vecstringToVecnumbers(VectorSizeType& nums, const VectorStringType& strs)
+	{
+		typedef AlgebraicStringToNumber<RealType> AlgebraicStringToNumberType;
+		const SizeType numberOfSites = model_.superGeometry().numberOfSites();
+		const SizeType n = strs.size();
+		nums.resize(n);
+
+		AlgebraicStringToNumberType algebraicStringToNumber("TSPSites", numberOfSites);
+		for (SizeType i = 0; i < n; ++i)
+			nums[i] = algebraicStringToNumber.procLength(strs[i]);
 	}
 
 	VectorSizeType sites_;
