@@ -926,11 +926,19 @@ public:
 		}
 
 		template<typename ComplexOrRealType>
-		typename EnableIf<!IsComplexNumber<ComplexOrRealType>::True,
+		typename EnableIf<!IsComplexNumber<ComplexOrRealType>::True &&
+		Loki::TypeTraits<ComplexOrRealType>::isArith,
 		typename Real<ComplexOrRealType>::Type>::Type
 		stringToComplexOrReal(const String& s) const
 		{
 			return static_cast<typename Real<ComplexOrRealType>::Type>(stringToReal(s));
+		}
+
+		template<typename ComplexOrRealType>
+		typename EnableIf<TypesEqual<ComplexOrRealType,String>::True, String>::Type
+		stringToComplexOrReal(const String& s) const
+		{
+			return s;
 		}
 
 		double stringToReal(const String& s) const

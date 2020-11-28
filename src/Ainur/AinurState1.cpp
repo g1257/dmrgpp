@@ -292,7 +292,8 @@ template<typename T>
 void AinurState::convertInternal(std::vector<T>& t,
                                  String value,
                                  typename EnableIf<Loki::TypeTraits<T>::isArith ||
-                                 IsComplexNumber<T>::True,
+                                 IsComplexNumber<T>::True ||
+                                 TypesEqual<T, String>::True,
                                  int>::Type) const
 {
 	namespace qi = boost::spirit::qi;
@@ -337,4 +338,6 @@ int) const;
 template void AinurState::convertInternal(std::vector<SizeType>&, String, int) const;
 
 template void AinurState::convertInternal(std::vector<int>&, String, int) const;
+
+template void AinurState::convertInternal(std::vector<String>&, String, int) const;
 } // namespace PsimagLite

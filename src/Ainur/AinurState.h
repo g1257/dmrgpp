@@ -240,7 +240,8 @@ private:
 	void convertInternal(std::vector<T>& t,
 	                     String value,
 	                     typename EnableIf<Loki::TypeTraits<T>::isArith ||
-	                     IsComplexNumber<T>::True,
+	                     IsComplexNumber<T>::True ||
+	                     TypesEqual<T, String>::True,
 	                     int>::Type = 0) const;
 
 	template<typename T>
