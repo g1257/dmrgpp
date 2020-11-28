@@ -128,46 +128,10 @@ exit(0) if ($noFourier);
 my $wantsRealOrImag = (defined($wantsRealPart)) ? "real" : "imag";
 my $omegaMax = $omega0 + $omegaStep * $omegaTotal;
 
-printSpectrumToColor($outSpectrum,$wantsRealOrImag,$geometry,$omegaMax);
 OmegaUtils::printGnuplot($outSpectrum, $geometry, $isPeriodic, $zeroAtCenter, $nonNegativeOnly);
 
 close(LOGFILEOUT);
 print STDERR "$0: Log written to $logFile\n";
-
-sub printSpectrumToColor
-{
-	my ($inFile,$what,$geometry,$omegaMax) = @_;
-	my ($factor, $fileIndices, $leg) = OmegaUtils::getGeometryDetails($geometry);
-
-	foreach my $fileIndex (@$fileIndices) {
-		my $outSpectrum = "outSpectrum$fileIndex.color";
-		my @colorData;
-		my ($counter,$size) = spectrumToColor(\@colorData,
-		                                      $inFile,
-		                                      $what,
-		                                      $geometry,
-		                                      $fileIndex);
-
-		open(FOUTSPECTRUM, ">", "$outSpectrum")
-			or die "$0: Cannot write to $outSpectrum : $!\n";
-		print FOUTSPECTRUM "$counter $size $omegaMax\n";
-
-		my $rows = scalar(@colorData);
-		for (my $i = 0; $i < $rows; ++$i) {
-			my @thisRow = @{$colorData[$i]};
-			my $cols = scalar(@thisRow);
-			for (my $j = 0; $j < $cols; ++$j) {
-				my $value = int($thisRow[$j]);
-				print FOUTSPECTRUM $value." ";
-			}
-
-			print FOUTSPECTRUM "\n";
-		}
-
-		close(FOUTSPECTRUM);
-		print STDERR "$0: Color spectrum written to $outSpectrum\n";
-	}
-}
 
 sub printSpectrum
 {
@@ -294,10 +258,16 @@ sub correctionVectorWrite
 
 	for (my $i = 0; $i < $maxSite; ++$i) {
 		my $vv1 = $v1->[$i];
-		my $vv2 = $v2->[$i];
+
 		if (!defined($vv1)) {
-			print STDERR "$0: Undefined value for site = $i and omega = $omega\n";
-			$vv1 = $vv2 = 0.0;
+			print STDERR "$0: P3: Undefined value for site = $i and omega = $omega\n";
+			$vv1 = 0.0;
+		}
+
+		my $vv2 = $v2->[$i];
+		if (!defined($vv2)) {
+			print STDERR "$0: P2: Undefined value for site = $i and omega = $omega\n";
+			$vv2 = 0.0;
 		}
 
 		$array->[$i] = [$vv1, $vv2];
@@ -500,108 +470,6 @@ sub extractValue
 	}
 
 	die "$0: No q=$q found in array\n";
-}
-
-sub spectrumToColor
-{
-	my ($data,$file,$realOrImag,$geometry,$qyIndex) = @_;
-	my $counter = 0;
-	my $size;
-	my $finalSize;
-
-	open(FIN, "<", $file) or die "$0: Cannot open file $file : $!\n";
-	while (<FIN>) {
-		next if (/^#/);
-		chomp;
-		my @temp = split;
-		my $n = scalar(@temp);
-		next if ($n < 2);
-		if (!defined($size)) {
-			$size = $n;
-			print STDERR "$0: File $file at line $. has set size to $size\n";
-		} else {
-			($size == $n) or die "$0: Wrong line $_ (expected size $size)\n";
-		}
-
-		my @temp2 = getRealOrImagData(\@temp,$realOrImag,$geometry,$qyIndex);
-		$finalSize = scalar(@temp2) if (!defined($finalSize));
-		$data->[$counter++] = \@temp2;
-	}
-
-	close(FIN);
-
-	die "No data found in $file\n" if ($counter == 0);
-	print LOGFILEOUT "$0: Read $counter lines size=$size for $realOrImag from $file\n";
-
-	my ($min,$max) = minMaxData($data);
-	print LOGFILEOUT "$0: Data min = $min, max = $max\n";
-
-	scaleData($data,$min,$max);
-	return ($counter,$finalSize);
-}
-
-sub minMaxData
-{
-	my ($a) = @_;
-	my $rows = scalar(@$a);
-	die "minMaxData, rows=0\n" if ($rows == 0);
-	my ($min,$max) = ($a->[0]->[1],$a->[0]->[1]);
-	for (my $i = 0; $i < $rows; ++$i) {
-		my @thisRow = @{$a->[$i]};
-		my $cols = scalar(@thisRow);
-		for (my $j = 0; $j < $cols; ++$j) {
-			my $thisValue = $thisRow[$j];
-			#next if ($thisValue<0);
-			$min = $thisValue if ($min > $thisValue);
-			$max = $thisValue if ($max < $thisValue);
-		}
-}
-
-	return ($min,$max);
-}
-
-sub scaleData
-{
-	my ($a,$min,$max) = @_;
-	my $afactor = 255/($max-$min);
-	my $bfactor = -$afactor*$min;
-	my $rows = scalar(@$a);
-	for (my $i = 0; $i < $rows; ++$i) {
-		my @thisRow = @{$a->[$i]};
-		my $cols = scalar(@thisRow);
-		for (my $j = 0; $j < $cols; ++$j) {
-			my $value = $a->[$i]->[$j];
-			#if ($value < 0) {
-			#	$a->[$i]->[$j] = 0;
-			#	next;
-			#}
-
-			$a->[$i]->[$j] = $afactor*$value + $bfactor;
-		}
-	}
-}
-
-sub getRealOrImagData
-{
-	my ($d,$realOrImag,$geometry,$qyIndex) = @_;
-	my @temp;
-	my $n = scalar(@$d);
-	my $start = 1;
-	if ($geometry->{"name"} eq "ladder" and $geometry->{"subname"} ne "GrandCanonical") {
-		my $leg = $geometry->{"leg"};
-		$n = int($n/$leg);
-		$start += $qyIndex*$n;
-		$n *= (1+$qyIndex);
-	}
-
-	my $j = 0;
-	for (my $i = $start; $i < $n; ++$i) {
-		next if ($realOrImag eq "imag" && ($i & 1));
-		next if ($realOrImag eq "real" && !($i & 1));
-		$temp[$j++] = $d->[$i];
-	}
-
-	return @temp;
 }
 
 sub findIfWeAreCheby
