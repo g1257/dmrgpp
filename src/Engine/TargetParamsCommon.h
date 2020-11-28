@@ -441,8 +441,14 @@ private:
 		nums.resize(n);
 
 		AlgebraicStringToNumberType algebraicStringToNumber("TSPSites", numberOfSites);
-		for (SizeType i = 0; i < n; ++i)
+		std::cout<<"TSPSites=[";
+		for (SizeType i = 0; i < n; ++i) {
 			nums[i] = algebraicStringToNumber.procLength(strs[i]);
+			std::cout<<nums[i];
+			if (i + 1 < n) std::cout<<", ";
+		}
+
+		std::cout<<"];\n";
 	}
 
 	VectorSizeType sites_;

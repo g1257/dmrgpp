@@ -140,12 +140,12 @@ private:
 	void saySomethingAbout(PsimagLite::String what) const
 	{
 		std::cerr<<PsimagLite::AnsiColor::blue;
-		std::cerr<<"WARNING: "<<what<<" (given your Intent)\n";
-		std::cerr<<PsimagLite::AnsiColor::reset;
+		std::cerr<<"WARNING: "<<what<<" (given your Intent)";
+		std::cerr<<PsimagLite::AnsiColor::reset<<"\n";
 
 		std::cout<<PsimagLite::AnsiColor::blue;
-		std::cout<<"WARNING: "<<what<<" (given your Intent)\n";
-		std::cout<<PsimagLite::AnsiColor::reset;
+		std::cout<<"WARNING: "<<what<<" (given your Intent)";
+		std::cout<<PsimagLite::AnsiColor::reset<<"\n";
 	}
 
 	void suggest(PsimagLite::String what) const

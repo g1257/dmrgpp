@@ -40,6 +40,7 @@ Tests *with* SU(2) symmetry:
 28)  Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8 sites
 29) S(q,omega) cut at omega=2.0 for Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8 sites
 30) Implicit loops
+32) TSPSites=[%c]
 #27 to 39 are reserved for Heisenberg spin 1/2
 40) Fe-based Superconductors model (HuFeAS-2orb) on a ladder (LadderFeAs) with U=0 J=0 with 4+4 sites
 	 INF(60)+7(100)-7(100)-7(100)+7(100)
