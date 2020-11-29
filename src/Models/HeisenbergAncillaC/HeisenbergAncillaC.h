@@ -294,7 +294,7 @@ protected:
 			}
 
 			// Set the operators \Delta_i in the natural basis
-			tmpMatrix = findDeltaMatrices(i, natBasis);
+			tmpMatrix = findDeltaMatrices2(i, natBasis);
 
 			typename OperatorType::Su2RelatedType su2related3;
 			OperatorType myOp3(tmpMatrix,
@@ -441,6 +441,35 @@ private:
 
 				cm(i, j) = 1.0;
 			}
+		}
+
+		SparseMatrixType operatorMatrix(cm);
+		return operatorMatrix;
+	}
+
+	SparseMatrixType findDeltaMatrices2(int,const HilbertBasisType& natBasis) const
+	{
+		SizeType total = natBasis.size();
+		MatrixType cm(total,total);
+		RealType j = 0.5*modelParameters_.twiceTheSpin;
+		for (SizeType ii=0;ii<total;ii++) {
+			PairSizeType ket = getOneOrbital(natBasis[ii]);
+
+			SizeType bra1 = ket.first;
+			if (bra1 >= modelParameters_.twiceTheSpin) continue;
+
+			SizeType bra2 = ket.second;
+			if (bra2 == 0) continue;
+
+			PairSizeType bra(bra1 + 1, bra2 - 1);
+			SizeType jj = getFullIndex(bra);
+			RealType m = ket.first - j;
+			RealType x1 = j*(j+1)-m*(1+m); // m = j yields 0
+			assert(x1>=0);
+			m = ket.second - j;
+			RealType x2 = j*(j+1)+m*(1-m); // m = -j yields 0
+			assert(x2>=0);
+			cm(ii,jj) = sqrt(x1)*sqrt(x2);
 		}
 
 		SparseMatrixType operatorMatrix(cm);
