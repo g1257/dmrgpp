@@ -294,7 +294,7 @@ protected:
 			}
 
 			// Set the operators \Delta_i in the natural basis
-			tmpMatrix = findDeltaMatrices2(i, natBasis);
+			tmpMatrix = findDeltaMatrices(i, natBasis);
 
 			typename OperatorType::Su2RelatedType su2related3;
 			OperatorType myOp3(tmpMatrix,
