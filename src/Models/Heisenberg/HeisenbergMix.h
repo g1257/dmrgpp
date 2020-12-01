@@ -207,7 +207,7 @@ public:
 		modelParameters_.write(label, io);
 	}
 
-	/* PSIDOC Heisenberg::addDiagonalsInNaturalBasis
+	/* PSIDOC HeisenbergMix::addDiagonalsInNaturalBasis
 	 We describe only the addition of a Zeeman term to the Heisenberg model here; note
 	 that this function is more complicated.
 	 Please look carefully at the following C++ lines:
