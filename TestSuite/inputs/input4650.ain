@@ -13,7 +13,7 @@ gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[1.0];
 
 Model="HeisenbergMix";
-integer HeisenbergTwiceS=2;
+HeisenbergTwiceS=2;
 integer HeisenbergTwiceSborder=1;
 
 SolverOptions="twositedmrg";
@@ -22,5 +22,5 @@ OutputFile="data4650";
 InfiniteLoopKeptStates=60;
 FiniteLoops=[[3, 100, 0], [-6, 200, 0], [6, 200, 1]];
 # TargetSzPlusConst = Sz + 1*(N - 2) + 0.5*2
-integer TargetSzPlusConst=7;
+TargetSzPlusConst=7;
 
