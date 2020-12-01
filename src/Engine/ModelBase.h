@@ -178,10 +178,9 @@ public:
 
 	void postCtor()
 	{
+		modelLinks_.setAtomKind(&getAtomKind());
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
-		modelLinks_.postCtor1(labeledOperators_,
-		                      &getAtomKind(),
-		                      modelCommon_.superGeometry().terms());
+		modelLinks_.postCtor1(labeledOperators_, modelCommon_.superGeometry().terms());
 		fillModelLinks(); // fills modelLinks_
 		customOperators();
 		modelLinks_.postCtor2();

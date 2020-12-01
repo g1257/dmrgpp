@@ -347,8 +347,12 @@ public:
 		hilbert_.clear();
 	}
 
+	void setAtomKind(const AtomKindBase* ptr)
+	{
+		atomKind_ = ptr;
+	}
+
 	void postCtor1(const LabeledOperatorsType& labeledOps,
-	               const AtomKindBase* ptr,
 	               SizeType geometryTerms)
 	{
 		if (terms_.size() > geometryTerms) {
@@ -356,7 +360,6 @@ public:
 			err(str + ttos(terms_.size()) + " in input file for this model\n");
 		}
 
-		atomKind_ = ptr;
 		VectorOperatorType cm; // only for hermit
 		SizeType n = labeledOps.size();
 		VectorSizeType dofsByKind(n);
