@@ -575,9 +575,13 @@ obtain ordered
 			                 loopIndex);
 			printEnergies(energies);
 
-			assert(target.psiConst().size() > 0);
-			assert(target.psiConst()[0].size() > 0);
-			oneSiteTruncation_.update(oneSiteTruncSize, *(target.psiConst()[0][0]), direction);
+			assert(target.psiConst().size() > 0 || oneSiteTruncSize == 0);
+
+			// METTS may not have a g.s.
+			if (target.psiConst().size() > 0) {
+				assert(target.psiConst()[0].size() > 0);
+				oneSiteTruncation_.update(oneSiteTruncSize, *(target.psiConst()[0][0]), direction);
+			}
 
 			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,loopIndex);
 
