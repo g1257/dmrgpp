@@ -1,3 +1,45 @@
+2020-12-02 Version 5.76
+
+* ScalingInputFeature: For FiniteLoops, for 
+Target quantum numbers, for TSPSites
+
+* HeisenbergMix: new model: spin 1/2 on the border sites
+
+* HubbardHolstein supports OneSiteTruncation now
+
+* HeisenbergAncillaC: spin > 1/2 bug fix, but
+Entangler still wrong in paper and pencil
+
+* procOmegas: When undefined value for site, file
+is also printed for better debugging
+
+* procOmegas: supports missing P3
+
+* ci: 4702-4706 HubbardHolstein one site trunc.
+
+* SDHS: two point observe supported
+(SDHS means site-dependent Hilbert spaces or models
+with different kinds of atoms)
+
+* SDHS: one point observations supported
+
+* SDHS: in-situ measurements supported
+
+* OneSiteTruncation in Engine
+
+* ModelBase::postCtor now reentrant
+
+* Model terms can now be cloned
+
+* Model Hilbert size now cached
+
+* FiniteLoop now a class proper and FiniteLoop.cpp deleted
+
+* Entangler.h deleted
+
+* Changes due to boost serialization headers deleted
+
+
 2020-10-27 Version 5.74
 
 User interface:
