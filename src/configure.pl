@@ -89,7 +89,7 @@ for (my $i = 0; $i < $templates; ++$i) {
 	$dotos .= " $name.o ";
 }
 
-my %dmrgMain = (name => 'dmrg', dotos => "$dotos", libs => "kronutil");
+my %dmrgMain = (name => 'dmrg', dotos => "$dotos KronUtil/libkronutil.a");
 
 push @drivers,\%dmrgMain;
 
@@ -133,7 +133,7 @@ operator: dmrg
 testQn: testQn.o Qn.o
 	\$(CXX) Qn.o testQn.o \$(LDFLAGS) -o testQn
 
-libkronutil.a:
+KronUtil/libkronutil.a:
 	\$(MAKE) -C KronUtil
 
 libdmrgpp.a: Makefile $libUnits
