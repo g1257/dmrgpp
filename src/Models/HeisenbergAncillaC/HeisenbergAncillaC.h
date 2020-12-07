@@ -294,7 +294,7 @@ protected:
 			}
 
 			// Set the operators \Delta_i in the natural basis
-			tmpMatrix = findDeltaMatrices(i, natBasis);
+			tmpMatrix = findDeltaMatrix(i, natBasis);
 
 			typename OperatorType::Su2RelatedType su2related3;
 			OperatorType myOp3(tmpMatrix,
@@ -303,6 +303,18 @@ protected:
 			                   1.0,
 			                   su2related3);
 			d.push(myOp3);
+
+			SparseMatrixType tmpMatrix2 = tmpMatrix;
+			for (SizeType p = 1; p < modelParameters_.twiceTheSpin; ++p) {
+				tmpMatrix2 = tmpMatrix2*tmpMatrix;
+				typename OperatorType::Su2RelatedType su2related4;
+				OperatorType myOp4(tmpMatrix2,
+				                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                   PairType(0, 0),
+				                   1.0,
+				                   su2related4);
+				d.push(myOp4);
+			}
 		}
 	}
 
@@ -358,8 +370,13 @@ protected:
 		}
 
 		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
-		OpForLinkType d("d");
+		OpForLinkType d("d", 0);
 		ancilla.push(d, 'N', d, 'C', typename ModelTermType::Su2Properties(2, 1, 0));
+
+		for (SizeType p = 1; p < modelParameters_.twiceTheSpin; ++p) {
+			OpForLinkType dd("d", p);
+			ancilla.push(dd, 'N', dd, 'C', typename ModelTermType::Su2Properties(2, 1, 0));
+		}
 	}
 
 private:
@@ -424,34 +441,10 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findDeltaMatrices(int,const HilbertBasisType& natBasis) const
-	{
-		const SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		for (SizeType i = 0; i < total; ++i) {
-			const WordType ket = natBasis[i];
-			for (SizeType j = 0; j < total; ++j) {
-
-				if (i == j) continue;
-
-				const WordType bra = natBasis[j];
-
-				if (!isCorrectlyPaired(ket) || !isCorrectlyPaired(bra))
-					continue;
-
-				cm(i, j) = 1.0;
-			}
-		}
-
-		SparseMatrixType operatorMatrix(cm);
-		return operatorMatrix;
-	}
-
-	SparseMatrixType findDeltaMatrices2(int,const HilbertBasisType& natBasis) const
+	SparseMatrixType findDeltaMatrix(int,const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
-		RealType j = 0.5*modelParameters_.twiceTheSpin;
 		for (SizeType ii=0;ii<total;ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 
@@ -463,13 +456,14 @@ private:
 
 			PairSizeType bra(bra1 + 1, bra2 - 1);
 			SizeType jj = getFullIndex(bra);
-			RealType m = ket.first - j;
-			RealType x1 = j*(j+1)-m*(1+m); // m = j yields 0
-			assert(x1>=0);
-			m = ket.second - j;
-			RealType x2 = j*(j+1)+m*(1-m); // m = -j yields 0
-			assert(x2>=0);
-			cm(ii,jj) = sqrt(x1)*sqrt(x2);
+			//RealType m = ket.first - j;
+			//RealType x1 = j*(j+1)-m*(1+m); // m = j yields 0
+			//assert(x1 > 0);
+			//m = ket.second - j;
+			//RealType x2 = j*(j+1)+m*(1-m); // m = -j yields 0
+			//assert(x2 > 0);
+			//cm(ii,jj) = sqrt(x1)*sqrt(x2);
+			cm(ii, jj) = 1;
 		}
 
 		SparseMatrixType operatorMatrix(cm);
