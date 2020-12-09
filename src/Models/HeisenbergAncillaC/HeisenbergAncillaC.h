@@ -294,21 +294,10 @@ protected:
 			}
 
 			// Set the operators \Delta_i in the natural basis
-			tmpMatrix = findDeltaMatrix(i, natBasis);
-
-			typename OperatorType::Su2RelatedType su2related3;
-			OperatorType myOp3(tmpMatrix,
-			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                   PairType(0, 0),
-			                   1.0,
-			                   su2related3);
-			d.push(myOp3);
-
-			SparseMatrixType tmpMatrix2 = tmpMatrix;
-			for (SizeType p = 1; p < modelParameters_.twiceTheSpin; ++p) {
-				tmpMatrix2 = tmpMatrix2*tmpMatrix;
+			for (SizeType p = 0; p < modelParameters_.twiceTheSpin; ++p) {
+				tmpMatrix = findDeltaMatrix(natBasis, p);
 				typename OperatorType::Su2RelatedType su2related4;
-				OperatorType myOp4(tmpMatrix2,
+				OperatorType myOp4(tmpMatrix,
 				                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 				                   PairType(0, 0),
 				                   1.0,
@@ -441,7 +430,7 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findDeltaMatrix(int,const HilbertBasisType& natBasis) const
+	SparseMatrixType findDeltaMatrix(const HilbertBasisType& natBasis, SizeType p) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
@@ -449,12 +438,12 @@ private:
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 
 			SizeType bra1 = ket.first;
-			if (bra1 >= modelParameters_.twiceTheSpin) continue;
+			if (bra1 + p + 1 > modelParameters_.twiceTheSpin) continue;
 
 			SizeType bra2 = ket.second;
-			if (bra2 == 0) continue;
+			if (bra2 < p + 1) continue;
 
-			PairSizeType bra(bra1 + 1, bra2 - 1);
+			PairSizeType bra(bra1 + p + 1, bra2 - p - 1);
 			SizeType jj = getFullIndex(bra);
 			//RealType m = ket.first - j;
 			//RealType x1 = j*(j+1)-m*(1+m); // m = j yields 0
