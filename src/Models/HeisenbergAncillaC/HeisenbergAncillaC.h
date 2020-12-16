@@ -362,10 +362,14 @@ protected:
 		OpForLinkType d("d", 0);
 		ancilla.push(d, 'N', d, 'C', typename ModelTermType::Su2Properties(2, 1, 0));
 
-		for (SizeType p = 1; p < modelParameters_.twiceTheSpin; ++p) {
-			OpForLinkType dd("d", p);
+		if (modelParameters_.twiceTheSpin > 2)
+			err("HeisenbergAncillaC only support spin=1/2 and spin=1\n");
+
+		if (modelParameters_.twiceTheSpin == 2) {
+			OpForLinkType dd("d", 1);
 			ancilla.push(dd, 'N', dd, 'C', typename ModelTermType::Su2Properties(2, 1, 0));
 		}
+
 	}
 
 private:
@@ -430,29 +434,33 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findDeltaMatrix(const HilbertBasisType& natBasis, SizeType p) const
+	SparseMatrixType findDeltaMatrix(const HilbertBasisType& natBasis, SizeType pp) const
 	{
+		const RealType j = 0.5*modelParameters_.twiceTheSpin;
+		if (pp > 0 && modelParameters_.twiceTheSpin != 2)
+			err("findDeltaMatrix: internal error\n");
+
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
 		for (SizeType ii=0;ii<total;ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 
 			SizeType bra1 = ket.first;
-			if (bra1 + p + 1 > modelParameters_.twiceTheSpin) continue;
+			if (bra1 + 1 > modelParameters_.twiceTheSpin) continue;
 
 			SizeType bra2 = ket.second;
-			if (bra2 < p + 1) continue;
+			if (bra2 < 1) continue;
 
-			PairSizeType bra(bra1 + p + 1, bra2 - p - 1);
+			PairSizeType bra(bra1 + 1, bra2 - 1);
 			SizeType jj = getFullIndex(bra);
-			//RealType m = ket.first - j;
+			RealType m = (pp == 0) ? 1 : ket.first - j;
 			//RealType x1 = j*(j+1)-m*(1+m); // m = j yields 0
 			//assert(x1 > 0);
 			//m = ket.second - j;
 			//RealType x2 = j*(j+1)+m*(1-m); // m = -j yields 0
 			//assert(x2 > 0);
 			//cm(ii,jj) = sqrt(x1)*sqrt(x2);
-			cm(ii, jj) = 1;
+			cm(ii, jj) = m;
 		}
 
 		SparseMatrixType operatorMatrix(cm);
