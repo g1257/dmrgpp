@@ -6,15 +6,24 @@ use utf8;
 
 use OmegaUtils;
 
-my ($file, $l) = @ARGV;
-defined($l) or die "USAGE: $0 filename l\n";
+my ($file, $l, $whatLeg) = @ARGV;
+defined($whatLeg) or die "USAGE: $0 filename l whatLeg\n";
+
+my $upperLeg = 0;
+if ($whatLeg eq "upper") {
+	$upperLeg = 1;
+} elsif ($whatLeg eq "lower") {
+	$upperLeg = 0;
+} else {
+	die "USAGE: $0 filename l upper | lower\n";
+}
 
 my @array = loadValues($file);
-ft(\@array, $l);
+ft(\@array, $l, $upperLeg);
 
 sub ft
 {
-	my ($a, $l) = @_;
+	my ($a, $l, $upperLeg) = @_;
 	my ($isPeriodic, $zeroAtCenter, $nonNegativeOnly) = (1, 0, 0);
 	my $omegas = scalar(@$a);
 	my $centralSite = $l;
@@ -35,7 +44,12 @@ sub ft
 		my $counter = 0;
 		for (my $i = 0; $i < $sites; ++$i) {
 			my $y = $i % 4;
-			next if ($y > 1);
+			if ($upperLeg) {
+				next if ($y > 1);
+			} else {
+				next if ($y < 2);
+			}
+
 			$v[$counter++] = $ptr2->[$i];
 		}
 
