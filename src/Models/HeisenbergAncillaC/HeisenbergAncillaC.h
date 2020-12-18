@@ -207,6 +207,14 @@ public:
 		return ModelBaseType::oracle(energy, "-Nup*Ndown");
 	}
 
+	bool isCorrectlyPaired(SizeType ket) const
+	{
+		PairSizeType pair = getOneOrbital(ket);
+		const SizeType physKet = pair.first;
+		SizeType ancKet = pair.second;
+		return (barFunction(physKet) == ancKet);
+	}
+
 protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
@@ -465,14 +473,6 @@ private:
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
-	}
-
-	bool isCorrectlyPaired(const WordType& ket) const
-	{
-		PairSizeType pair = getOneOrbital(ket);
-		const SizeType physKet = pair.first;
-		SizeType ancKet = pair.second;
-		return (barFunction(physKet) == ancKet);
 	}
 
 	WordType barFunction(const WordType& w) const

@@ -396,6 +396,12 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		postCtor();
 	}
 
+	// for models with entanglers only
+	virtual bool isCorrectlyPaired(SizeType) const
+	{
+		throw PsimagLite::RuntimeError("This model does not support entanglers\n");
+	}
+
 	// END OF VIRTUAL FUNCTIONS
 
 	/**

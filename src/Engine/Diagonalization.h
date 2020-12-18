@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Profiling.h"
 #include "FiniteLoop.h"
+#include "PackIndices.h"
 
 namespace Dmrg {
 
@@ -297,6 +298,15 @@ private:
 		for (SizeType j = 0; j < totalSectors; ++j) {
 
 			SizeType i = sectors[j];
+
+			if (parameters_.options.isSet("entangler")) {
+				assert(j < vecSaved.size());
+				assert(vecSaved[j].size() == 1);
+				doEntangler(vecSaved[j][0], lrs, block[0], direction, i);
+				target.set(vecSaved, sectors, lrs.super());
+				energies = energySaved;
+				return;
+			}
 
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -616,6 +626,61 @@ private:
 
 		if (parameters_.options.isSet("debugmatrix"))
 			std::cout<<"VECTOR: Printing of BlockOffDiagMatrix not supported\n";
+	}
+
+	void doEntangler(TargetVectorType& v,
+	                 const LeftRightSuperType& lrs,
+	                 SizeType site,
+	                 ProgramGlobals::DirectionEnum direction,
+	                 SizeType p)
+	{
+		const SizeType offset = lrs.super().partition(p);
+		const SizeType bs = lrs.super().partition(p + 1) - offset;
+		PsimagLite::PackIndices packSuper(lrs.left().size());
+		const SizeType h = model_.hilbertSize(site);
+		const SizeType leftLeftSize = lrs.left().size()/h;
+		PsimagLite::PackIndices packLeft(leftLeftSize);
+		PsimagLite::PackIndices packRight(h);
+		RealType sum = 0;
+		bool breakLeft = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM ||
+		                  direction == ProgramGlobals::DirectionEnum::INFINITE);
+		bool breakRight = (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON ||
+		                   direction == ProgramGlobals::DirectionEnum::INFINITE);
+		bool firstCall = (direction == ProgramGlobals::DirectionEnum::INFINITE
+		                  && leftLeftSize == h && lrs.right().size() == h*h);
+
+		v.resize(bs);
+		for (SizeType i = 0; i < bs; ++i) {
+			SizeType la = 0;
+			SizeType br = 0;
+			packSuper.unpack(la, br, lrs.super().permutation(i + offset));
+
+			SizeType a = 0;
+			SizeType b = 0;
+
+			if (breakLeft) {
+				SizeType l = 0;
+				packLeft.unpack(l, a, lrs.left().permutation(la));
+				if (firstCall && !model_.isCorrectlyPaired(l)) continue;
+			}
+
+			if (breakRight) {
+				SizeType r = 0;
+				packRight.unpack(b, r, lrs.right().permutation(br));
+				if (firstCall && !model_.isCorrectlyPaired(r)) continue;
+			}
+
+			if (breakLeft && !model_.isCorrectlyPaired(a)) continue;
+			if (breakRight && !model_.isCorrectlyPaired(b)) continue;
+
+			v[i] = 1.0;
+			sum += 1.0;
+		}
+
+		assert(sum > 0);
+		const RealType factor = 1.0/sqrt(sum);
+		for (SizeType i = 0; i < bs; ++i)
+			v[i] *= factor;
 	}
 
 	const ParametersType& parameters_;
