@@ -39,7 +39,7 @@ Please see full open source license included in file LICENSE.
 #endif
 
 #ifndef USE_SHORT
-typedef uint64_t SizeType;
+typedef long unsigned int SizeType;
 #else
 typedef uint32_t SizeType;
 #endif
