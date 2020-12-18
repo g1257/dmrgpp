@@ -31,21 +31,6 @@
 #pragma warning( disable : 4180 ) //qualifier applied to function type has no meaning; ignored
 #endif
 
-template<typename T>
-struct LongLong {
-	static const int value = 0;
-};
-
-template<>
-struct LongLong<int long long> {
-	static const int value = 1;
-};
-
-template<>
-struct LongLong<unsigned int long long> {
-	static const int value = 1;
-};
-
 namespace Loki
 {
 ////////////////////////////////////////////////////////////////////////////////
@@ -2225,7 +2210,7 @@ namespace Loki
         enum { isSignedInt      = isStdSignedInt || IsCustomSignedInt<UnqualifiedType>::value };
         enum { isIntegral       = isStdIntegral || isUnsignedInt || isSignedInt };
         enum { isFloat          = isStdFloat || IsCustomFloat<UnqualifiedType>::value };
-        enum { isArith          = isIntegral || isFloat || LongLong<T>::value};
+        enum { isArith          = isIntegral || isFloat };
         enum { isFundamental    = isStdFundamental || isArith };
         
         typedef typename Select<isStdArith || isPointer || isMemberPointer, T, 
