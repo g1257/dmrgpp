@@ -2223,9 +2223,9 @@ namespace Loki
             
         enum { isUnsignedInt    = isStdUnsignedInt || IsCustomUnsignedInt<UnqualifiedType>::value };
         enum { isSignedInt      = isStdSignedInt || IsCustomSignedInt<UnqualifiedType>::value };
-        enum { isIntegral       = isStdIntegral || isUnsignedInt || isSignedInt || LongLong<T>::value};
+        enum { isIntegral       = isStdIntegral || isUnsignedInt || isSignedInt };
         enum { isFloat          = isStdFloat || IsCustomFloat<UnqualifiedType>::value };
-        enum { isArith          = isIntegral || isFloat };
+        enum { isArith          = isIntegral || isFloat || LongLong<T>::value};
         enum { isFundamental    = isStdFundamental || isArith };
         
         typedef typename Select<isStdArith || isPointer || isMemberPointer, T, 
