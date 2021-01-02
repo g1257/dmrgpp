@@ -178,7 +178,7 @@ public:
 		return (!es && helper_.site(ptr) == 1);
 	}
 
-	void twoPoint(MatrixType& storage, const BraketType& braket) const
+	void twoPoint(MatrixType& storage, const BraketType& braket, bool needsPrinting) const
 	{
 		assert(braket.points() == 2);
 
@@ -198,22 +198,32 @@ public:
 
 		SizeType site1 = 0;
 		SizeType sites= storage.n_col();
-		PsimagLite::String str("twopoint: Give no site, first site, or all sites\n");
 
 		switch (flag) {
 
 		case 0: // no sites given
-			return twopoint_(storage, braket, fermionSign, braket.bra(), braket.ket());
+			twopoint_(storage, braket, fermionSign, braket.bra(), braket.ket());
+			if (needsPrinting)
+				std::cout<<(storage);
+
+			break;
 
 		case 1: //first site given
-			for (site1 = braket.site(0); site1 < sites; ++site1)
+			for (site1 = braket.site(0); site1 < sites; ++site1) {
 				storage(braket.site(0),site1) = twopoint_.calcCorrelation(braket.site(0),
 				                                                          site1,
 				                                                          braket,
 				                                                          fermionSign,
 				                                                          braket.bra(),
 				                                                          braket.ket());
-			return;
+				if (needsPrinting)
+					std::cout<<storage(braket.site(0), site1)<<" ";
+			}
+
+			if (needsPrinting)
+				std::cout<<"\n";
+
+			break;
 
 		case 3:
 			storage(braket.site(0),braket.site(1)) = twopoint_.calcCorrelation(braket.site(0),
@@ -222,10 +232,13 @@ public:
 			                                                                   fermionSign,
 			                                                                   braket.bra(),
 			                                                                   braket.ket());
-			return;
+			if (needsPrinting)
+				std::cout<<storage(braket.site(0), braket.site(1))<<"\n";;
+
+			break;
 
 		default:
-			err(str);
+			err("twopoint: Give no site, first site, or all sites\n");
 		}
 	}
 

@@ -1310,10 +1310,9 @@ private:
 				storage = new MatrixType(rows,cols);
 			}
 
-			observe_.twoPoint(*storage,braket);
+			observe_.twoPoint(*storage, braket, needsPrinting);
 
 			if (needsPrinting) {
-				std::cout<<(*storage);
 				delete storage;
 				storage = 0;
 			}
