@@ -219,6 +219,12 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
+
+		if (modelParameters_.twiceTheSpin > 2)
+			err("Spin > 1 not supported by this model yet\n");
+
+		const SizeType numberOfDs = (modelParameters_.twiceTheSpin == 1) ? 1 : 4;
+
 		SizeType site = 0;
 		BlockType block(1, site);
 		HilbertBasisType natBasis;
@@ -301,8 +307,10 @@ protected:
 				sz.push(myOp2);
 			}
 
+
+
 			// Set the operators \Delta_i in the natural basis
-			for (SizeType p = 0; p < modelParameters_.twiceTheSpin; ++p) {
+			for (SizeType p = 0; p < numberOfDs; ++p) {
 				tmpMatrix = findDeltaMatrix(natBasis, p);
 				typename OperatorType::Su2RelatedType su2related4;
 				OperatorType myOp4(tmpMatrix,
@@ -368,7 +376,53 @@ protected:
 
 		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
 		OpForLinkType d("d", 0);
-		ancilla.push(d, 'N', d, 'C', typename ModelTermType::Su2Properties(2, 1, 0));
+		const SizeType twiceTheSpin = modelParameters_.twiceTheSpin;
+		auto modifierTermD0 = [twiceTheSpin](SparseElementType& value)
+		{RealType factor = (twiceTheSpin == 2) ? 3 : 1; value *= factor; };
+		ancilla.push(d,
+		             'N',
+		             d,
+		             'C',
+		             modifierTermD0,
+		             typename ModelTermType::Su2Properties(2, 1, 0));
+
+		if (modelParameters_.twiceTheSpin == 1) return;
+
+		if (modelParameters_.twiceTheSpin != 2)
+			err("Spin > 1 not supported by this model yet\n");
+
+		for (SizeType p = 1; p < 4; ++p) {
+			auto modifierTermD = [p](SparseElementType& value)
+			{RealType factor = (p > 1) ? 2 : 3; value *= factor; };
+
+			OpForLinkType dd("d", p);
+			ancilla.push(dd,
+			             'N',
+			             dd,
+			             'C',
+			             modifierTermD,
+			             typename ModelTermType::Su2Properties(2, 1, 0));
+		}
+
+		auto modifierTermDoff = [twiceTheSpin](SparseElementType& value)
+		{RealType factor = -1; value *= factor; };
+		OpForLinkType d0("d", 0);
+		OpForLinkType d1("d", 1);
+		OpForLinkType d2("d", 2);
+		OpForLinkType d3("d", 3);
+		ancilla.push(d0,
+		             'N',
+		             d2,
+		             'C',
+		             modifierTermDoff,
+		             typename ModelTermType::Su2Properties(2, 1, 0));
+
+		ancilla.push(d1,
+		             'N',
+		             d3,
+		             'C',
+		             modifierTermDoff,
+		             typename ModelTermType::Su2Properties(2, 1, 0));
 	}
 
 private:
@@ -414,9 +468,7 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(int,
-	                                SizeType orbital,
-	                                const HilbertBasisType& natBasis) const
+	MatrixType findSzDense(SizeType orbital, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
@@ -429,43 +481,64 @@ private:
 			cm(ii,ii) = m;
 		}
 
+		return cm;
+	}
+
+	SparseMatrixType findSzMatrices(int,
+	                                SizeType orbital,
+	                                const HilbertBasisType& natBasis) const
+	{
+
+		MatrixType cm = findSzDense(orbital, natBasis);
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
 	}
 
+	// pp = 0 S^+
+	// pp = 1 S^+2
+	// pp = 2 S^+Sz
+	// pp = 2 S^+2Sz
 	SparseMatrixType findDeltaMatrix(const HilbertBasisType& natBasis, SizeType pp) const
 	{
-		if (pp > 0)
-			err("findDeltaMatrix: internal error\n");
+		if (modelParameters_.twiceTheSpin > 2)
+			err("Spin > 1 not supported by this model yet\n");
+
+		if (pp > 3)
+			err("findDeltaMatrix: pp > 3\n");
+
+		if (pp > 0 && modelParameters_.twiceTheSpin == 1)
+			err("findDeltaMatrix: pp > 0 for spin = 1/2\n");
+
+		const SizeType step = 1 + (pp & 1);
 
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
 		for (SizeType ii=0;ii<total;ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 
-			SizeType bra1 = ket.first + 1;
+			SizeType bra1 = ket.first + step;
 			SizeType bra2 = ket.second;
 
-			// if impossible, flip them
-			if (bra1 > modelParameters_.twiceTheSpin || bra2 == 0) {
-				bra2 = ket.first;
-				bra1 = ket.second;
-			} else {
-				--bra2;
-			}
+			// if impossible, skip
+			if (bra1 > modelParameters_.twiceTheSpin || bra2 < step)
+				continue;
+
+			bra2 -= step;
 
 			PairSizeType bra(bra1, bra2);
 			SizeType jj = getFullIndex(bra);
-			//RealType x1 = j*(j+1)-m*(1+m); // m = j yields 0
-			//assert(x1 > 0);
-			//m = ket.second - j;
-			//RealType x2 = j*(j+1)+m*(1-m); // m = -j yields 0
-			//assert(x2 > 0);
-			//cm(ii,jj) = sqrt(x1)*sqrt(x2);
 			cm(ii, jj) = 1;
 		}
 
-		SparseMatrixType operatorMatrix(cm);
+		MatrixType cm2 = cm;
+
+		const bool hasSz = (pp > 1);
+		if (hasSz) {
+			MatrixType szDense = findSzDense(0, natBasis);
+			cm2 = cm*szDense;
+		}
+
+		SparseMatrixType operatorMatrix(cm2);
 		return operatorMatrix;
 	}
 
