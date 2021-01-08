@@ -208,6 +208,7 @@ public:
 			VectorType tmpVector;
 			io.read(tmpVector,"TSPOperatorMultiplier");
 			multiplyOperators(tmpVector);
+			std::cout<<"TSPOperatorMultiplier found with "<<tmpVector.size()<<" entries.\n";
 		} catch (std::exception&) {}
 
 		bool hasApplyTo = false;
