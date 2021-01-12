@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/VerySparseMatrix.h"
 #include "../../Engine/ProgramGlobals.h"
 #include "../../Engine/Utils.h"
+#include "ParametersSpinOrbital.h"
 
 namespace Dmrg {
 
@@ -122,7 +123,9 @@ public:
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelLinksType ModelLinksType;
-	typedef Aklt<ModelBaseType> AkltType;
+	typedef ParametersSpinOrbital<RealType, QnType> ParametersSpinOrbitalType;
+
+	//typedef Aklt<ModelBaseType> AkltType;
 
 	SpinOrbitalModel(const SolverParamsType& solverParams,
 	              InputValidatorType& io,
@@ -130,7 +133,7 @@ public:
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
-	      modelParameters_(io),
+	      modelParams_(io),
 	      superGeometry_(geometry)
 	{
 	}
@@ -142,7 +145,7 @@ public:
 
 		PsimagLite::String label = label1 + "/" + this->params().model;
 		io.createGroup(label);
-		modelParameters_.write(label, io);
+		modelParams_.write(label, io);
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
@@ -154,49 +157,23 @@ public:
 
 		for (SizeType i = 0; i < n; ++i) {
 
-			// PSIDOCMARK_BEGIN MagneticField
 			SizeType site = block[i];
 
 			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
 			const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
 
-			if (modelParameters_.magneticFieldV.size() == linSize) {
+			if (modelParams_.magneticFieldV.size() == linSize) {
 
-				RealType tmp = modelParameters_.magneticFieldV[site];
+				RealType tmp = modelParams_.magneticFieldV[site];
 				const OperatorType& sminus = ModelBaseType::naturalOperator("sminus", site, 0);
 
-				if (modelParameters_.magneticFieldDirection == "z") {
+				if (modelParams_.magneticFieldDirection == "z") {
 					hmatrix += tmp*sz.getCRS();
-				} else if (modelParameters_.magneticFieldDirection == "x") {
+				} else if (modelParams_.magneticFieldDirection == "x") {
 					static const RealType zeroPointFive = 0.5;
 					hmatrix += zeroPointFive*tmp*splus.getCRS();
 					hmatrix += zeroPointFive*tmp*sminus.getCRS();
 				}
-			}
-
-			// PSIDOCMARK_END
-
-			// anisotropyD
-			if (modelParameters_.anisotropyD.size() == linSize) {
-				SparseMatrixType Szsquare;
-				RealType tmp = modelParameters_.anisotropyD[site];
-				multiply(Szsquare, sz.getCRS(), sz.getCRS());
-				hmatrix += tmp*Szsquare;
-
-			}
-
-			// anisotropyE
-			if (modelParameters_.anisotropyE.size() == linSize) {
-
-				SparseMatrixType splusSquared;
-
-				RealType tmp = 0.5*modelParameters_.anisotropyE[site];
-				multiply(splusSquared, splus.getCRS(), splus.getCRS());
-				hmatrix += tmp*splusSquared;
-
-				SparseMatrixType sminusSquared;
-				transposeConjugate(sminusSquared, splusSquared);
-				hmatrix += tmp*sminusSquared;
 			}
 		}
 	}
@@ -219,11 +196,10 @@ protected:
 	//
 	//
 	// Basis is (S, L)
-	// 0   -1 -1
-	// 1   -1 0
-	// 2   -1  1
+	// 0                  -s     -l
+	// 1                  -s     -l + 1
 	// ...
-	// 8    1 1
+	// (2s + 1)(2l + 1)    s      l
 	//
 	void fillLabeledOperators(VectorQnType& qns)
 	{
@@ -350,78 +326,61 @@ private:
 
 	void setBasis(HilbertBasisType& natBasis, SizeType site) const
 	{
-		const SizeType twiceTheSpin = getSpin(site);
-		const SizeType total = twiceTheSpin + 1;
+		const SizeType total1 = modelParams_.twiceS + 1;
+		const SizeType total2 = modelParams_.twiceL + 1;
+		const SizeType total = total1*total2;
 		natBasis.resize(total);
 		for (SizeType i = 0; i < total; ++i) natBasis[i] = i;
 	}
 
 	//! Find S^+_site in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(SizeType site,
-	                                   const HilbertBasisType& natBasis) const
+	MatrixType findSplusMatrices(const HilbertBasisType& natBasis, SizeType orbital) const
 	{
 		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		const SizeType twiceTheSpin = getSpin(site);
+		MatrixType cm(total, total);
+		const SizeType twiceTheSpin = (orbital == 0) ? modelParams_.twiceS : modelParams_.twiceL;
 		RealType j = 0.5*twiceTheSpin;
-		SizeType bits = 1 + ProgramGlobals::logBase2(twiceTheSpin);
-		SizeType mask = 1;
-		mask <<= bits; // mask = 2^bits
-		assert(mask > 0);
-		mask--;
 
-		for (SizeType ii=0;ii<total;ii++) {
+		for (SizeType ii = 0; ii < total; ++ii) {
 			SizeType ket = natBasis[ii];
 
-			SizeType ketsite = ket & mask;
+			int bra = plusToKet(ket, orbital);
 
-			assert(ketsite == ket);
-			SizeType brasite = ketsite + 1;
-			if (brasite >= twiceTheSpin + 1) continue;
+			if (bra < 0) continue;
 
-			SizeType bra = ket & (~mask);
-			assert(bra == 0);
-			bra |= brasite;
-			assert(bra == brasite);
+			RealType mPlusJ = mPlusJ(ket, orbital);
+			RealType m = mPlusJ - j;
+			RealType x = j*(j + 1) - m*(m + 1);
+			assert(x >= 0);
 
-			RealType m = ketsite - j;
-			RealType x = j*(j+1)-m*(m+1);
-			assert(x>=0);
-
-			cm(ket,bra) = sqrt(x);
+			cm(ket, bra) = sqrt(x);
 		}
 
-		SparseMatrixType operatorMatrix(cm);
-		return operatorMatrix;
+		return cm;
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
+	MatrixType findSzMatrices(const HilbertBasisType& natBasis, SizeType orbital) const
 	{
 		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		const SizeType twiceTheSpin = getSpin(site);
+		MatrixType cm(total, total);
+		const SizeType twiceTheSpin = (orbital == 0) ? modelParams_.twiceS : modelParams_.twiceL;
 		RealType j = 0.5*twiceTheSpin;
-		SizeType bits = ProgramGlobals::logBase2(twiceTheSpin) + 1;
-		SizeType mask = 1;
-		mask <<= bits; // mask = 2^bits
-		assert(mask > 0);
-		mask--;
 
-		for (SizeType ii=0;ii<total;ii++) {
+		for (SizeType ii = 0; ii < total; ++ii) {
 			SizeType ket = natBasis[ii];
 
-			SizeType ketsite = ket & mask;
-			assert(ketsite == ket);
-			RealType m = ketsite - j;
-			cm(ket,ket) = m;
+			RealType mPlusJ = mPlusJ(ket, orbital);
+			RealType m = mPlusJ - j;
+			cm(ket ,ket) = m;
 		}
 
-		SparseMatrixType operatorMatrix(cm);
-		return operatorMatrix;
+		return cm;
 	}
 
+	// Here the conserved quantity is (sz + s) + (lz + l)
+	// Note that sz + s is always an integer, even if s is half integer
+	// Note that lz + l is always an integer, even if l is half integer
 	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
@@ -432,25 +391,24 @@ private:
 
 		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 1);
 
-		if (isCanonical && modelParameters_.magneticFieldDirection == "x")
-			err(PsimagLite::String(__FILE__) +
-			    ": magneticFieldDirection == x CANNOT be canonical. Please " +
-			    "delete the TargetSzPlusConst= from the input file\n");
+		if (!isCanonical)
+			err(PsimagLite::String(__FILE__) + ": must have exactly one symmetry\n");
 
 		VectorSizeType other;
-		if (isCanonical) other.resize(1, 0);
+		other.resize(1, 0);
 		QnType::ifPresentOther0IsElectrons = false;
-		qns.resize(basis.size() + offset, QnType::zero());
+		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0, 0);
-			if (isCanonical)
-				other[0] = basis[i];
+			SizeType mOfSpinPlusJ = mPlusJ(ket, 0);
+			SizeType mOfOrbitalPlusJ = mPlusJ(ket, 1);
+			other[0] = mOfSpinPlusJ + mOfOrbitalPlusJ;
 			SizeType flavor = 1;
 			qns[i + offset] = QnType(false, other, jmpair, flavor);
 		}
 	}
 
-	ParametersModelHeisenberg<RealType, QnType> modelParameters_;
+	ParametersSpinOrbitalType modelParams_;
 	const SuperGeometryType& superGeometry_;
 }; // class SpinOrbitalModel
 
