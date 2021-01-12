@@ -308,26 +308,28 @@ protected:
 	// HC means Hermitian conjugate
 	// Class is a letter starting with a
 	//
-	// a        0 0      .5
-	// a        1 1
+	// a        S+ S+      N C    .5
+	// a        Sz Sz      N N
 	//
-	// b        2 2      .5
-	// b        3 3
+	// b        L+ L+      N C    .5
+	// b        Lz Lz      N N
 	//
-	// c        4 4      .5
-	// c        5 5
-	// c        2 5      .5
-	// c (HC)   5 2      .5
-	// c        6 6
+	// c        L+2 L+2    N C    .5
+	// c        L+Lz L+Lz  N C
+	// c        L+ L+Lz    N C    .5
+	// c (HC)   of the above
+	// c        Lz2 Lz2    N N
 	//
-	// d        7 7      .25
-	// d        8 8      .5
-	// d        9 9      .5
-	// d       10 10
+	// d        S+L+ S+L+  N C      .25
+	// d        S+Lz S+Lz  N C      .5
+	// d        SzL+ SzL+  N C      .5
+	// d        SzLz SzLz  N N
 	//
 	// more will be needed for J3L term
 	void fillModelLinks()
 	{
+		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *=  0.5;};
+
 		// this creates connections a and b
 		for (SizeType orbital = 0; orbital < 2; ++orbital) {
 			PsimagLite::String sOrL = (orbital == 0) ? "s" : "l";
@@ -335,29 +337,45 @@ protected:
 
 			OpForLinkType splus(sOrL + "plus");
 
-			auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *=  0.5;};
-
-			typename ModelTermType::Su2Properties su2properties(2, -1, 2);
-			sdotS.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
+			sdotS.push(splus, 'N', splus, 'C', valueModiferTerm0);
 
 			OpForLinkType sz(sOrL + "z");
-			sdotS.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
+			sdotS.push(sz, 'N', sz, 'N');
 		}
 
-		//		OpForLinkType splusB("splusB");
+		// this creates connections in c listed above
+		ModelTermType& ldotLSquared = ModelBaseType::createTerm("ldotLSquared");
 
-		//		const bool wantsHermit = true;
-		//		ModelTermType& spsmB1 = ModelBaseType::createTerm("SplusSminusB1",
-		//		                                                  wantsHermit,
-		//		                                                  "SplusSminus");
-		//		spsmB1.push(splusB, 'N', splus, 'C', valueModiferTerm0, su2properties);
+		OpForLinkType lplusSquared("lplusSquared");
+		ldotLSquared.push(lplusSquared, 'N', lplusSquared, 'C', valueModiferTerm0);
 
-		//		ModelTermType& spsmB2 = ModelBaseType::createTerm("SplusSminusB2",
-		//		                                                  wantsHermit,
-		//		                                                  "SplusSminus");
-		//		spsmB2.push(splus, 'N', splusB, 'C', valueModiferTerm0, su2properties);
+		OpForLinkType lplusLz("lplusLz");
+		ldotLSquared.push(lplusLz, 'N', lplusLz, 'C');
 
-		//		OpForLinkType szB("szB");
+		OpForLinkType lplus("lplus");
+		// H.C. will be added automatically to his one:
+		ldotLSquared.push(lplus, 'N', lplusLz, 'C', valueModiferTerm0);
+
+		OpForLinkType lzSquared("lzSquared");
+		ldotLSquared.push(lzSquared, 'N', lzSquared, 'N');
+
+
+		// this creates connections in d listed above
+		ModelTermType& ldotLsDotS = ModelBaseType::createTerm("ldotLsDotS");
+
+		OpForLinkType spluslplus("spluslplus");
+		auto valueModiferTerm1 = [](ComplexOrRealType& value) { value *=  0.25;};
+		ldotLsDotS.push(spluslplus, 'N', spluslplus, 'C', valueModiferTerm1);
+
+		OpForLinkType spluslz("spluslz");
+		ldotLsDotS.push(spluslz, 'N', spluslz, 'C', valueModiferTerm0);
+
+		OpForLinkType szlplus("szlplus");
+		// H.C. will be added automatically to his one:
+		ldotLsDotS.push(szlplus, 'N', szlplus, 'C', valueModiferTerm0);
+
+		OpForLinkType szlz("szlz");
+		ldotLsDotS.push(szlz, 'N', szlz, 'N');
 	}
 
 private:
