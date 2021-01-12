@@ -73,26 +73,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ParametersSpinOrbit.h
+/*! \file ParametersSpinOrbital.h
  *
  *  Contains the parameters for the Heisenberg model and function
  *  to read them from a file
  *
  */
-#ifndef DMRG_PARAMS_SPIN_ORBIT_H
-#define DMRG_PARAMS_SPIN_ORBIT_H
+#ifndef DMRG_PARAMS_SPIN_ORBITAL_H
+#define DMRG_PARAMS_SPIN_ORBITAL_H
 #include "Vector.h"
 #include "../../Engine/ParametersModelBase.h"
 
 namespace Dmrg {
 template<typename RealType, typename QnType>
-struct ParametersSpinOrbit : public ParametersModelBase<RealType, QnType> {
+struct ParametersSpinOrbital : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
-	ParametersSpinOrbit(IoInputType& io)
+	ParametersSpinOrbital(IoInputType& io)
 	    : BaseType(io, false)
 	{
 		io.readline(twiceS, "SpinTwiceS=");
@@ -105,7 +105,7 @@ struct ParametersSpinOrbit : public ParametersModelBase<RealType, QnType> {
 	void write(PsimagLite::String label1,
 	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
-		PsimagLite::String label = label1 + "/ParametersSpinOrbit";
+		PsimagLite::String label = label1 + "/ParametersSpinOrbital";
 		io.createGroup(label);
 		BaseType::write(label, io);
 		io.write(label + "/SpinTwiceS", twiceS);
@@ -116,7 +116,7 @@ struct ParametersSpinOrbit : public ParametersModelBase<RealType, QnType> {
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream &os,
-	                                const ParametersSpinOrbit& parameters)
+	                                const ParametersSpinOrbital& parameters)
 	{
 		os<<"SpinTwiceS="<<parameters.twiceS<<"\n";
 		os<<"OrbitalTwiceS="<<parameters.twiceL<<"\n";
