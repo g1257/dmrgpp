@@ -83,7 +83,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_SPIN_ORBITAL_MODEL_H
 
 #include <algorithm>
-#include "ParametersModelHeisenberg.h"
 #include "CrsMatrix.h"
 #include "../../Engine/VerySparseMatrix.h"
 #include "../../Engine/ProgramGlobals.h"
@@ -94,12 +93,7 @@ namespace Dmrg {
 template<typename ModelBaseType>
 class SpinOrbitalModel : public ModelBaseType {
 
-	static const int NUMBER_OF_ORBITALS=1;
-	static const int DEGREES_OF_FREEDOM=2; // spin up and down
-
 public:
-
-	enum class SiteType {SITE_MIDDLE, SITE_BORDER};
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::BasisType BasisType;
@@ -131,25 +125,6 @@ public:
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelLinksType ModelLinksType;
 	typedef Aklt<ModelBaseType> AkltType;
-	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
-
-	class AtomKind : public AtomKindBaseType {
-
-	public:
-
-		AtomKind(SizeType n) : n_(n) {}
-
-		virtual SizeType siteToAtomKind(SizeType site) const
-		{
-			return (site == 0 || site == n_ - 1) ? 1 : 0;
-		}
-
-		virtual SizeType kindsOfAtoms() const { return 2; }
-
-	private:
-
-		SizeType n_;
-	};
 
 	SpinOrbitalModel(const SolverParamsType& solverParams,
 	              InputValidatorType& io,
@@ -158,43 +133,8 @@ public:
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      superGeometry_(geometry),
-	      atomKind_(nullptr)
+	      superGeometry_(geometry)
 	{
-		SizeType n = superGeometry_.numberOfSites();
-		SizeType m = modelParameters_.magneticFieldV.size();
-		SizeType md = modelParameters_.anisotropyD.size();
-		SizeType me = modelParameters_.anisotropyE.size();
-
-		if (m > 0 && m != n) {
-			PsimagLite::String msg("SpinOrbitalModel: If provided, ");
-			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
-			err(msg);
-		}
-
-		if (md > 0 && md != n) {
-			PsimagLite::String msg("SpinOrbitalModel: If provided, ");
-			msg += " AnisotropyD must be a vector of " + ttos(n) + " entries.\n";
-			throw PsimagLite::RuntimeError(msg);
-		}
-
-		if (me > 0 && me != n) {
-			PsimagLite::String msg("SpinOrbitalModel: If provided, ");
-			msg += " AnisotropyE must be a vector of " + ttos(n) + " entries.\n";
-			throw PsimagLite::RuntimeError(msg);
-		}
-
-		if (BasisType::useSu2Symmetry()) {
-			PsimagLite::String msg("SpinOrbitalModel: SU(2) symmetry ");
-			msg += "is not implemented yet.\n";
-			throw PsimagLite::RuntimeError(msg);
-		}
-	}
-
-	~SpinOrbitalModel()
-	{
-		delete atomKind_;
-		atomKind_ = nullptr;
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -207,13 +147,7 @@ public:
 		modelParameters_.write(label, io);
 	}
 
-	/* PSIDOC SpinOrbitalModel::addDiagonalsInNaturalBasis
-	 We describe only the addition of a Zeeman term to the Heisenberg model here; note
-	 that this function is more complicated.
-	 Please look carefully at the following C++ lines:
-	 PSIDOCCOPY $FirstFunctionBelow::MagneticField
-	 */
-	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
+	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType& block,
 	                                RealType) const
 	{
@@ -271,29 +205,34 @@ public:
 
 protected:
 
-	virtual const AtomKindBaseType& getAtomKind()
-	{
-		if (!atomKind_)
-			atomKind_ = new AtomKind(superGeometry_.numberOfSites());
-		return *atomKind_;
-	}
-
+	// Trackable Operators are
+	// 0   S+
+	// 1   Sz
+	// 2   L+
+	// 3   Lz
+	// 4   L+2
+	// 5   L+Lz
+	// 6   Lz2
+	// 7   S+L+
+	// 8   S+Lz
+	// 9   SzL+
+	// 10  SzLz
+	// more will be needed for J3L term
+	//
+	//
+	// Basis is (S, L)
+	// 0   -1 -1
+	// 1   -1 0
+	// 2   -1  1
+	// ...
+	// 8    1 1
+	//
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		qns.clear();
-		SizeType offset = fillLabeledOperators(qns, 0, SiteType::SITE_MIDDLE);
-		fillLabeledOperators(qns, offset, SiteType::SITE_BORDER);
-	}
-
-	// this function can be private
-	SizeType fillLabeledOperators(VectorQnType& qns, SizeType offset, SiteType typeOfSite)
-	{
-		SizeType site = (typeOfSite == SiteType::SITE_MIDDLE) ? 1 : 0;
-		SizeType indOfKindOfSite = (typeOfSite == SiteType::SITE_MIDDLE) ? 0 : 1;
 		HilbertBasisType natBasis;
 		setBasis(natBasis, site);
 
-		setSymmetryRelated(qns, natBasis, offset, typeOfSite);
+		setSymmetryRelated(qns, natBasis);
 
 		// Set the operators S^+_i in the natural basis
 		SparseMatrixType tmpMatrix = findSplusMatrices(site, natBasis);
@@ -345,11 +284,30 @@ protected:
 		return natBasis.size();
 	}
 
+	// Connectors and Factors (if factor is missing, 1 is assumed)
+	// HC means Hermitian conjugate
+	// Class is a letter starting with a
+	//
+	// a        0 0      .5
+	// a        1 1
+	//
+	// b        2 2      .5
+	// b        3 3
+	//
+	// c        4 4      .5
+	// c        5 5
+	// c        2 5      .5
+	// c (HC)   5 2      .5
+	// c        6 6
+	//
+	// d        7 7      .25
+	// d        8 8      .5
+	// d        9 9      .5
+	// d       10 10
+	//
+	// more will be needed for J3L term
 	void fillModelLinks()
 	{
-		if (BasisType::useSu2Symmetry())
-			err("SU(2) not supported\n");
-
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 
 		OpForLinkType splus("splus");
@@ -391,14 +349,6 @@ protected:
 	}
 
 private:
-
-	// atomKind_ is not setup here yet, so do not call it
-	SizeType getSpin(SizeType site) const
-	{
-		const SizeType n = superGeometry_.numberOfSites();
-		return (site == 0 || site == n - 1) ? modelParameters_.twiceTheSpinBorder
-		                                    : modelParameters_.twiceTheSpin;
-	}
 
 	void setBasis(HilbertBasisType& natBasis, SizeType site) const
 	{
@@ -474,52 +424,7 @@ private:
 		return operatorMatrix;
 	}
 
-	//! Find Maximal_i in the natural basis natBasis
-	SparseMatrixType findMaximal(SizeType site,
-	                             const HilbertBasisType& natBasis) const
-	{
-		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		const SizeType twiceTheSpin = getSpin(site);
-		SizeType bits = ProgramGlobals::logBase2(twiceTheSpin) + 1;
-		SizeType mask = 1;
-		mask <<= bits; // mask = 2^bits
-		assert(mask > 0);
-		mask--;
-
-		for (SizeType ii=0;ii<total;ii++) {
-			SizeType ket = natBasis[ii];
-
-			SizeType ketsite = ket & mask;
-			assert(ketsite == ket);
-			if (ketsite != twiceTheSpin)
-				continue;
-			cm(ket, ket) = 1;
-		}
-
-		SparseMatrixType operatorMatrix(cm);
-		return operatorMatrix;
-	}
-
-
-	SparseMatrixType findSxMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
-	{
-		SparseMatrixType Splus_temp = findSplusMatrices(site, natBasis);
-		SparseMatrixType Sminus_temp,Sx;
-		transposeConjugate(Sminus_temp,Splus_temp);
-		RealType tmp=0.5;
-
-		Sx = tmp*Splus_temp;
-		Sx += tmp*Sminus_temp;
-
-		return Sx;
-	}
-
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        SizeType offset,
-	                        SiteType) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -549,7 +454,6 @@ private:
 
 	ParametersModelHeisenberg<RealType, QnType> modelParameters_;
 	const SuperGeometryType& superGeometry_;
-	const AtomKind* atomKind_;
 }; // class SpinOrbitalModel
 
 } // namespace Dmrg
