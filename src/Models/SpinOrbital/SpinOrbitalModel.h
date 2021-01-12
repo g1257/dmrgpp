@@ -188,7 +188,7 @@ protected:
 		for (SizeType orbital = 0; orbital < 2; ++orbital) {
 			PsimagLite::String sOrL = (orbital == 0) ? "s" : "l";
 			// Set the operators S^+_i in the natural basis
-			MatrixType tmpMatrix = findSplusMatrices(natBasis, 0);
+			MatrixType tmpMatrix = findSplusMatrices(natBasis, orbital);
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmpMatrix),
 			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -202,7 +202,7 @@ protected:
 			this->createOpsLabel(sOrL + "minus").push(myOp);
 
 			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSzMatrices(natBasis, 0);
+			tmpMatrix = findSzMatrices(natBasis, orbital);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(SparseMatrixType(tmpMatrix),
 			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -211,6 +211,96 @@ protected:
 			                   su2related2);
 			this->createOpsLabel(sOrL + "z").push(myOp2);
 			this->makeTrackable(sOrL + "z");
+		}
+
+		MatrixType lplus = findSplusMatrices(natBasis, 1); //lplus
+		MatrixType lplusSquared = lplus*lplus;
+		MatrixType lz = findSzMatrices(natBasis, 1); // lz
+		MatrixType lplusLz = lplus*lz;
+		MatrixType lzSquared = lz*lz;
+
+		{
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(lplusSquared),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
+			this->createOpsLabel("lplusSquared").push(myOp);
+			this->makeTrackable("lplusSquared");
+		}
+
+		{
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(lplusLz),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
+			this->createOpsLabel("lplusLz").push(myOp);
+			this->makeTrackable("lplusLz");
+		}
+
+		{
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(lzSquared),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
+			this->createOpsLabel("lzSquared").push(myOp);
+			this->makeTrackable("lzSquared");
+		}
+
+		MatrixType splus = findSplusMatrices(natBasis, 0); //splus
+		MatrixType sz = findSzMatrices(natBasis, 0); // sz
+		MatrixType spluslplus = splus*lplus;
+		MatrixType spluslz = splus*lz;
+		MatrixType szlplus = sz*lplus;
+		MatrixType szlz = sz*lz;
+
+		{
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(spluslplus),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
+			this->createOpsLabel("spluslplus").push(myOp);
+			this->makeTrackable("spluslplus");
+		}
+
+		{
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(spluslz),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
+			this->createOpsLabel("spluslz").push(myOp);
+			this->makeTrackable("spluslz");
+		}
+
+		{
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(szlplus),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
+			this->createOpsLabel("szlplus").push(myOp);
+			this->makeTrackable("szlplus");
+		}
+
+		{
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(szlz),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
+			this->createOpsLabel("szlz").push(myOp);
+			this->makeTrackable("szlz");
 		}
 	}
 
@@ -241,19 +331,17 @@ protected:
 		// this creates connections a and b
 		for (SizeType orbital = 0; orbital < 2; ++orbital) {
 			PsimagLite::String sOrL = (orbital == 0) ? "s" : "l";
-			ModelTermType& spsm = ModelBaseType::createTerm(sOrL + "plus" + sOrL + "minus");
+			ModelTermType& sdotS = ModelBaseType::createTerm(sOrL + "Dot" + sOrL);
 
 			OpForLinkType splus(sOrL + "plus");
 
 			auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *=  0.5;};
 
 			typename ModelTermType::Su2Properties su2properties(2, -1, 2);
-			spsm.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
-
-			ModelTermType& szsz = ModelBaseType::createTerm(sOrL + "z" + sOrL + "z");
+			sdotS.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
 
 			OpForLinkType sz(sOrL + "z");
-			szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
+			sdotS.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
 		}
 
 		//		OpForLinkType splusB("splusB");
@@ -294,9 +382,13 @@ private:
 		for (SizeType ii = 0; ii < total; ++ii) {
 			SizeType ket = natBasis[ii];
 
-			SizeType bra = mPlusJ(ket, orbital) + 1;
+			if (mPlusJ(ket, orbital) > twiceTheSpin)
+				continue;
 
-			if (bra > twiceTheSpin) continue;
+			SizeType mPlusj0 = mPlusJ(ket, 0);
+			SizeType mPlusj1 = mPlusJ(ket, 1);
+			SizeType bra = (orbital == 0) ? packM(mPlusj0 + 1, mPlusj1)
+			                              : packM(mPlusj0, mPlusj1 + 1);
 
 			RealType mPlusj = mPlusJ(ket, orbital);
 			RealType m = mPlusj - j;
@@ -335,6 +427,11 @@ private:
 		return (orbital == 0) ? q.rem : q.quot;
 	}
 
+	SizeType packM(SizeType szp, SizeType lzp) const
+	{
+		return szp + lzp*(modelParams_.twiceS + 1);
+	}
+
 	// Here the conserved quantity is (sz + s) + (lz + l)
 	// Note that sz + s is always an integer, even if s is half integer
 	// Note that lz + l is always an integer, even if l is half integer
@@ -351,8 +448,7 @@ private:
 		if (!isCanonical)
 			err(PsimagLite::String(__FILE__) + ": must have exactly one symmetry\n");
 
-		VectorSizeType other;
-		other.resize(1, 0);
+		VectorSizeType other(1);
 		QnType::ifPresentOther0IsElectrons = false;
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
