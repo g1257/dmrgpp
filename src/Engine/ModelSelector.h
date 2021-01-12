@@ -78,6 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/Graphene/Graphene.h"
 #include "../Models/GaugeSpin/GaugeSpin.h"
 #include "../Models/Heisenberg/HeisenbergMix.h"
+#include "../Models/SpinOrbital/SpinOrbitalModel.h"
 
 #endif
 
@@ -120,7 +121,7 @@ class ModelSelector {
 	typedef HolsteinThin<ModelBaseType> HolsteinThinType;
 	typedef GaugeSpin<ModelBaseType> GaugeSpinType;
 	typedef HeisenbergMix<ModelBaseType> HeisenbergMixType;
-
+	typedef SpinOrbitalModel <ModelBaseType> SpinOrbitalModelType;
 #endif
 	// end models
 
@@ -213,6 +214,8 @@ public:
 			model_ = new GaugeSpinType(solverParams, io, geometry);
 		} else if (name_ == "HeisenbergMix") {
 			model_ = new HeisenbergMixType(solverParams, io, geometry);
+		} else if (name_ == "SpinOrbital") {
+			model_ = new SpinOrbitalModelType(solverParams, io, geometry);
 		}
 #endif
 		else {

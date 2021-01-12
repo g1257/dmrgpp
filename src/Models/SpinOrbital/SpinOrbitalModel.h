@@ -128,15 +128,14 @@ public:
 	//typedef Aklt<ModelBaseType> AkltType;
 
 	SpinOrbitalModel(const SolverParamsType& solverParams,
-	              InputValidatorType& io,
-	              const SuperGeometryType& geometry)
+	                 InputValidatorType& io,
+	                 const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParams_(io),
 	      superGeometry_(geometry)
-	{
-	}
+	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -152,30 +151,7 @@ public:
 	                                const BlockType& block,
 	                                RealType) const
 	{
-		SizeType linSize = superGeometry_.numberOfSites();
-		SizeType n = block.size();
-
-		for (SizeType i = 0; i < n; ++i) {
-
-			SizeType site = block[i];
-
-			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
-			const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
-
-			if (modelParams_.magneticFieldV.size() == linSize) {
-
-				RealType tmp = modelParams_.magneticFieldV[site];
-				const OperatorType& sminus = ModelBaseType::naturalOperator("sminus", site, 0);
-
-				if (modelParams_.magneticFieldDirection == "z") {
-					hmatrix += tmp*sz.getCRS();
-				} else if (modelParams_.magneticFieldDirection == "x") {
-					static const RealType zeroPointFive = 0.5;
-					hmatrix += zeroPointFive*tmp*splus.getCRS();
-					hmatrix += zeroPointFive*tmp*sminus.getCRS();
-				}
-			}
-		}
+		err("addDiagonalsInNaturalBasis unimplemented yet\n");
 	}
 
 protected:
@@ -204,58 +180,38 @@ protected:
 	void fillLabeledOperators(VectorQnType& qns)
 	{
 		HilbertBasisType natBasis;
-		setBasis(natBasis, site);
+		setBasis(natBasis);
 
 		setSymmetryRelated(qns, natBasis);
 
-		// Set the operators S^+_i in the natural basis
-		SparseMatrixType tmpMatrix = findSplusMatrices(site, natBasis);
+		// this creates trackables 0 to 3
+		for (SizeType orbital = 0; orbital < 2; ++orbital) {
+			PsimagLite::String sOrL = (orbital == 0) ? "s" : "l";
+			// Set the operators S^+_i in the natural basis
+			MatrixType tmpMatrix = findSplusMatrices(natBasis, 0);
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmpMatrix),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
+			this->createOpsLabel(sOrL + "plus").push(myOp);
+			this->makeTrackable(sOrL + "plus");
 
-		typename OperatorType::Su2RelatedType su2related;
+			myOp.dagger();
+			this->createOpsLabel(sOrL + "minus").push(myOp);
 
-		PsimagLite::String border = (typeOfSite == SiteType::SITE_BORDER) ? "B" : "";
-
-		OperatorType myOp(tmpMatrix,
-		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                  PairType(2, 2),
-		                  -1,
-		                  su2related);
-		this->createOpsLabel("splus" + border, indOfKindOfSite).push(myOp);
-		this->makeTrackable("splus" + border);
-
-		myOp.dagger();
-		this->createOpsLabel("sminus" + border, indOfKindOfSite).push(myOp);
-
-		// Set the operators S^z_i in the natural basis
-		tmpMatrix = findSzMatrices(site, natBasis);
-		typename OperatorType::Su2RelatedType su2related2;
-		OperatorType myOp2(tmpMatrix,
-		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                   PairType(2, 1),
-		                   1.0/sqrt(2.0),
-		                   su2related2);
-		this->createOpsLabel("sz" + border, indOfKindOfSite).push(myOp2);
-		this->makeTrackable("sz" + border);
-
-		// Set the operators S^x_i in the natural basis
-		tmpMatrix = findSxMatrices(site, natBasis);
-		typename OperatorType::Su2RelatedType su2related3;
-		OperatorType myOp3(tmpMatrix,
-		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                   PairType(2, 1),
-		                   1.0/sqrt(2.0),
-		                   su2related3);
-		this->createOpsLabel("sx" + border, indOfKindOfSite).push(myOp3);
-
-		tmpMatrix = findMaximal(site, natBasis);
-		OperatorType myOp4(tmpMatrix,
-		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                   PairType(2, 1),
-		                   1.0/sqrt(2.0),
-		                   su2related3);
-		this->createOpsLabel("maximal" + border, indOfKindOfSite).push(myOp4);
-
-		return natBasis.size();
+			// Set the operators S^z_i in the natural basis
+			tmpMatrix = findSzMatrices(natBasis, 0);
+			typename OperatorType::Su2RelatedType su2related2;
+			OperatorType myOp2(SparseMatrixType(tmpMatrix),
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(2, 1),
+			                   1.0/sqrt(2.0),
+			                   su2related2);
+			this->createOpsLabel(sOrL + "z").push(myOp2);
+			this->makeTrackable(sOrL + "z");
+		}
 	}
 
 	// Connectors and Factors (if factor is missing, 1 is assumed)
@@ -282,49 +238,43 @@ protected:
 	// more will be needed for J3L term
 	void fillModelLinks()
 	{
-		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
+		// this creates connections a and b
+		for (SizeType orbital = 0; orbital < 2; ++orbital) {
+			PsimagLite::String sOrL = (orbital == 0) ? "s" : "l";
+			ModelTermType& spsm = ModelBaseType::createTerm(sOrL + "plus" + sOrL + "minus");
 
-		OpForLinkType splus("splus");
+			OpForLinkType splus(sOrL + "plus");
 
-		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *=  0.5;};
+			auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *=  0.5;};
 
-		typename ModelTermType::Su2Properties su2properties(2, -1, 2);
-		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
+			typename ModelTermType::Su2Properties su2properties(2, -1, 2);
+			spsm.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
 
-		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+			ModelTermType& szsz = ModelBaseType::createTerm(sOrL + "z" + sOrL + "z");
 
-		OpForLinkType sz("sz");
-		szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
+			OpForLinkType sz(sOrL + "z");
+			szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
+		}
 
-		OpForLinkType splusB("splusB");
+		//		OpForLinkType splusB("splusB");
 
-		const bool wantsHermit = true;
-		ModelTermType& spsmB1 = ModelBaseType::createTerm("SplusSminusB1",
-		                                                  wantsHermit,
-		                                                  "SplusSminus");
-		spsmB1.push(splusB, 'N', splus, 'C', valueModiferTerm0, su2properties);
+		//		const bool wantsHermit = true;
+		//		ModelTermType& spsmB1 = ModelBaseType::createTerm("SplusSminusB1",
+		//		                                                  wantsHermit,
+		//		                                                  "SplusSminus");
+		//		spsmB1.push(splusB, 'N', splus, 'C', valueModiferTerm0, su2properties);
 
-		ModelTermType& spsmB2 = ModelBaseType::createTerm("SplusSminusB2",
-		                                                  wantsHermit,
-		                                                  "SplusSminus");
-		spsmB2.push(splus, 'N', splusB, 'C', valueModiferTerm0, su2properties);
+		//		ModelTermType& spsmB2 = ModelBaseType::createTerm("SplusSminusB2",
+		//		                                                  wantsHermit,
+		//		                                                  "SplusSminus");
+		//		spsmB2.push(splus, 'N', splusB, 'C', valueModiferTerm0, su2properties);
 
-		OpForLinkType szB("szB");
-
-		ModelTermType& szszB1 = ModelBaseType::createTerm("szszB1",
-		                                                  wantsHermit,
-		                                                  "szsz");
-		szszB1.push(szB, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
-
-		ModelTermType& szszB2 = ModelBaseType::createTerm("szszB2",
-		                                                  wantsHermit,
-		                                                  "szsz");
-		szszB2.push(sz, 'N', szB, 'N', typename ModelTermType::Su2Properties(2, 0.5));
+		//		OpForLinkType szB("szB");
 	}
 
 private:
 
-	void setBasis(HilbertBasisType& natBasis, SizeType site) const
+	void setBasis(HilbertBasisType& natBasis) const
 	{
 		const SizeType total1 = modelParams_.twiceS + 1;
 		const SizeType total2 = modelParams_.twiceL + 1;
@@ -344,12 +294,12 @@ private:
 		for (SizeType ii = 0; ii < total; ++ii) {
 			SizeType ket = natBasis[ii];
 
-			int bra = plusToKet(ket, orbital);
+			SizeType bra = mPlusJ(ket, orbital) + 1;
 
-			if (bra < 0) continue;
+			if (bra > twiceTheSpin) continue;
 
-			RealType mPlusJ = mPlusJ(ket, orbital);
-			RealType m = mPlusJ - j;
+			RealType mPlusj = mPlusJ(ket, orbital);
+			RealType m = mPlusj - j;
 			RealType x = j*(j + 1) - m*(m + 1);
 			assert(x >= 0);
 
@@ -370,12 +320,19 @@ private:
 		for (SizeType ii = 0; ii < total; ++ii) {
 			SizeType ket = natBasis[ii];
 
-			RealType mPlusJ = mPlusJ(ket, orbital);
-			RealType m = mPlusJ - j;
+			RealType mPlusj = mPlusJ(ket, orbital);
+			RealType m = mPlusj - j;
 			cm(ket ,ket) = m;
 		}
 
 		return cm;
+	}
+
+	// ket = sz' + lz'*(2s + 1)
+	SizeType mPlusJ(SizeType ket, SizeType orbital) const
+	{
+		div_t q = div(ket, modelParams_.twiceS + 1);
+		return (orbital == 0) ? q.rem : q.quot;
 	}
 
 	// Here the conserved quantity is (sz + s) + (lz + l)
@@ -400,11 +357,11 @@ private:
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0, 0);
-			SizeType mOfSpinPlusJ = mPlusJ(ket, 0);
-			SizeType mOfOrbitalPlusJ = mPlusJ(ket, 1);
+			SizeType mOfSpinPlusJ = mPlusJ(basis[i], 0);
+			SizeType mOfOrbitalPlusJ = mPlusJ(basis[i], 1);
 			other[0] = mOfSpinPlusJ + mOfOrbitalPlusJ;
 			SizeType flavor = 1;
-			qns[i + offset] = QnType(false, other, jmpair, flavor);
+			qns[i] = QnType(false, other, jmpair, flavor);
 		}
 	}
 
