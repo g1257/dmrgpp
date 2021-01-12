@@ -73,9 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file SpinOrbitalModel.h
  *
- *  An implementation of the Quantum Heisenberg Model
- *  with spin 1 and with spin 1/2 on the border sites
- *  (to be used with DmrgSolver)
+ *  TBW
  *
  */
 
