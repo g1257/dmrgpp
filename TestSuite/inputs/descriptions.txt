@@ -181,6 +181,8 @@ Page* where more or less this feature is used: Page 4
 hence non-trivial.
 1200) Tj 1 orb with hopping = 1 and J = 0.3 dens = 0.5
 1201) Tj 1 orb with hopping = 1 and J = 0.3 and W = -0.4 dens = 0.25
+1300) SpinOrbitalModel 
+#1301-1400 reserved for SpinOrbitalModel
 1500) Figure 1 of METTS paper
 InternalControlNumber: 40
 Walltime (in seconds, approx.): 430

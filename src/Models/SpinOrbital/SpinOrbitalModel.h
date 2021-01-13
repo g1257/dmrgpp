@@ -428,7 +428,7 @@ private:
 		for (SizeType ii = 0; ii < total; ++ii) {
 			SizeType ket = natBasis[ii];
 
-			if (mPlusJ(ket, orbital) > twiceTheSpin)
+			if (mPlusJ(ket, orbital) >= twiceTheSpin)
 				continue;
 
 			SizeType mPlusj0 = mPlusJ(ket, 0);

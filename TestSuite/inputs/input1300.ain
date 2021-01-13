@@ -1,0 +1,42 @@
+##Ainur1.0
+TotalNumberOfSites=8;
+NumberOfTerms=4;
+
+# S.S
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1.0];
+
+# L.L
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[1.0];
+
+# (L.L)^2
+gt2:GeometryKind="chain";
+gt2:GeometryOptions="ConstantValues";
+gt2:dir0:Connectors=[1.0];
+
+# (L.L)(S.S)
+gt3:GeometryKind="chain";
+gt3:GeometryOptions="ConstantValues";
+gt3:dir0:Connectors=[1.0];
+
+# For now J3SL=0
+
+#Model params
+Model="SpinOrbital";
+SpinTwiceS=2;
+OrbitalTwiceS=2;
+LambdaOne=0.123;
+LambdaTwo=0.456;
+
+SolverOptions="twositedmrg";
+Version="5.77";
+OutputFile="data1300";
+InfiniteLoopKeptStates=50;
+FiniteLoops=[[3, 100, 0],
+[-6, 100, 0],
+[ 6, 100, 0]];
+# TargetSz = Sz + Lz + (s + l)*N
+TargetSzPlusConst=16;

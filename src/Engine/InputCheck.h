@@ -253,6 +253,10 @@ public:
 		str += "string TruncationTolerance;\n";
 		str += "integer HeisenbergTwiceS;\n";
 		str += "integer TargetSzPlusConst;\n";
+		str += "integer SpinTwiceS;\n";
+		str += "integer OrbitalTwiceS;\n";
+		str += "real LambdaOne;\n";
+		str += "real LambdaTwo;\n";
 		return str;
 	}
 
