@@ -135,7 +135,25 @@ public:
 	                    io),
 	      modelParams_(io),
 	      superGeometry_(geometry)
-	{}
+	{
+		HilbertBasisType natBasis;
+		setBasis(natBasis);
+
+		MatrixType splus = findSplusMatrices(natBasis, 0);
+		MatrixType lplus = findSplusMatrices(natBasis, 1);
+		MatrixType lminus;
+		transposeConjugate(lminus, lplus);
+		MatrixType tmp = splus*lminus;
+		MatrixType tmp2;
+		transposeConjugate(tmp2, tmp);
+		MatrixType tmp3 = tmp;
+		tmp3 += tmp2;
+		tmp3 *= 0.5;
+		MatrixType sz = findSzMatrices(natBasis, 0);
+		MatrixType lz = findSzMatrices(natBasis, 1);
+		tmp = sz*lz;
+		sDotL_ = tmp3 + tmp;
+	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -151,7 +169,17 @@ public:
 	                                const BlockType& block,
 	                                RealType) const
 	{
-		err("addDiagonalsInNaturalBasis unimplemented yet\n");
+		assert(block.size() == 1);
+//		SizeType site = block[0]; // lambda1 and lambda2 have no site depedence
+		MatrixType tmp = sDotL_;
+		tmp *= modelParams_.lambda1;
+
+		MatrixType sdotlSquared = modelParams_.lambda2*sDotL_*sDotL_;
+
+		tmp += sdotlSquared;
+
+		SparseMatrixType tmp3(tmp);
+		hmatrix += tmp3;
 	}
 
 protected:
@@ -481,6 +509,7 @@ private:
 
 	ParametersSpinOrbitalType modelParams_;
 	const SuperGeometryType& superGeometry_;
+	MatrixType sDotL_;
 }; // class SpinOrbitalModel
 
 } // namespace Dmrg
