@@ -190,12 +190,13 @@ protected:
 	// 2   L+
 	// 3   Lz
 	// 4   L+2
-	// 5   L+Lz
-	// 6   Lz2
-	// 7   S+L+
-	// 8   S+Lz
-	// 9   SzL+
-	// 10  SzLz
+	// 5   L+L-
+	// 6   L+Lz
+	// 7   Lz2
+	// 8   S+L+
+	// 9   S+Lz
+	// 10   SzL+
+	// 11  SzLz
 	// more will be needed for J3L term
 	//
 	//
@@ -242,6 +243,9 @@ protected:
 		}
 
 		MatrixType lplus = findSplusMatrices(natBasis, 1); //lplus
+		MatrixType lminus;
+		transposeConjugate(lminus, lplus);
+		MatrixType lpluslminus = lplus*lminus;
 		MatrixType lplusSquared = lplus*lplus;
 		MatrixType lz = findSzMatrices(natBasis, 1); // lz
 		MatrixType lplusLz = lplus*lz;
@@ -256,6 +260,17 @@ protected:
 			                  su2related);
 			this->createOpsLabel("lplusSquared").push(myOp);
 			this->makeTrackable("lplusSquared");
+		}
+
+		{
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(lpluslminus),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(2, 2),
+			                  -1,
+			                  su2related);
+			this->createOpsLabel("lpluslminus").push(myOp);
+			this->makeTrackable("lpluslminus");
 		}
 
 		{
@@ -343,9 +358,11 @@ protected:
 	// b        Lz Lz      N N
 	//
 	// c        L+2 L+2    N C    .5
-	// c        L+Lz L+Lz  N C
-	// c        L+ L+Lz    N C    .5
-	// c (HC)   of the above
+	// c        L+L- L+L-  N C    .5
+	// c        L+Lz L+Lz  N C    2.0
+	// c        L+Lz L+    N C    1.5
+	// c (HC)   of the above      1.5
+	// c        L+   L+    N C
 	// c        Lz2 Lz2    N N
 	//
 	// d        S+L+ S+L+  N C      .25
@@ -377,16 +394,23 @@ protected:
 		OpForLinkType lplusSquared("lplusSquared");
 		ldotLSquared.push(lplusSquared, 'N', lplusSquared, 'C', valueModiferTerm0);
 
+		OpForLinkType lpluslminus("lpluslminus");
+		ldotLSquared.push(lpluslminus, 'N', lpluslminus, 'C', valueModiferTerm0);
+
+		auto valueModiferTerm2 = [](ComplexOrRealType& value) { value *=  2.0;};
+
 		OpForLinkType lplusLz("lplusLz");
-		ldotLSquared.push(lplusLz, 'N', lplusLz, 'C');
+		ldotLSquared.push(lplusLz, 'N', lplusLz, 'C', valueModiferTerm2);
 
 		OpForLinkType lplus("lplus");
+		auto valueModiferTerm3 = [](ComplexOrRealType& value) { value *=  1.5;};
 		// H.C. will be added automatically to his one:
-		ldotLSquared.push(lplus, 'N', lplusLz, 'C', valueModiferTerm0);
+		ldotLSquared.push(lplusLz, 'N', lplus, 'C', valueModiferTerm3);
+
+		ldotLSquared.push(lplus, 'N', lplus, 'C');
 
 		OpForLinkType lzSquared("lzSquared");
 		ldotLSquared.push(lzSquared, 'N', lzSquared, 'N');
-
 
 		// this creates connections in d listed above
 		ModelTermType& ldotLsDotS = ModelBaseType::createTerm("ldotLsDotS");
