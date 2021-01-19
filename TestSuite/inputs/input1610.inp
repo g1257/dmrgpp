@@ -1,0 +1,75 @@
+TotalNumberOfSites=8
+NumberOfTerms=8
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+	1
+	1.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.0
+
+DegreesOfFreedom=1
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.0
+
+
+
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+    1
+    0.123
+
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.456
+
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.789
+
+GeometryKind=chain
+GeometryOptions=ConstantValues
+Connectors
+        1
+        0.101112
+
+kondoJ 8 0 0 0 0 0 0 0 0
+hubbardU 8 0 0 0 0 0 0 0 0
+potentialV	 16     0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+			0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
+Model=KondoEx2
+HeisenbergTwiceS=1
+SolverOptions=none
+Version=5.27
+OutputFile=data1600
+InfiniteLoopKeptStates=50
+FiniteLoops 3
+ 3 60 0
+-6 70 0 6 70 0
+
+KondoHx=0.123
+ElectronHx=0.456
+PairingField=0.789
+
