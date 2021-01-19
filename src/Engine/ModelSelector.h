@@ -202,10 +202,10 @@ public:
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH", hdf5fileIfAny);
 		} else if (name_ == "HolsteinThin") {
 			model_ = new HolsteinThinType(solverParams, io, geometry, "");
-		} else if (name_ == "Kondo") {
-			model_ = new KondoType(solverParams, io, geometry, "");
-		} else if (name_ == "KondoEx") {
-			model_ = new KondoType(solverParams, io, geometry, "Ex");
+		} else if (name_.substr(0, 5) == "Kondo") {
+			PsimagLite::String tmp = (name_.length() == 5) ? ""
+			                                               : name_.substr(5, name_.length() - 5);
+			model_ = new KondoType(solverParams, io, geometry, tmp);
 		} else if (name_ == "HubbardOneBandRashbaSOC") {
 			model_ = new ModelHubbardType(solverParams, io, geometry, "RashbaSOC");
 		} else if (name_ == "Graphene") {

@@ -37,7 +37,7 @@ public:
 	      PsimagLite::String option)
 	    : ModelBaseType(solverParams, geometry, io),
 	      solverParams_(solverParams),
-	      modelParams_(io, option == "Ex")
+	      modelParams_(io, option)
 	{
 		SizeType nsym = this->targetQuantum().sizeOfOther();
 		if (nsym == 0) {
@@ -49,7 +49,7 @@ public:
 				err("Kondo: To use this symmetry electronHx and kondoHx must both be zero\n");
 		} else if (nsym == 2) {
 			std::cout<<"Kondo: Fermionic + Bosonic Sz, and TotalElectrons conserved\n";
-			if (modelParams_.extended)
+			if (modelParams_.extended != ParametersKondoType::ExtEnum::NONE)
 				err("Kondo: Extended cannot be used with these symmetries\n");
 		}
 
@@ -131,7 +131,8 @@ public:
 			assert(ind < modelParams_.kondoJ.size());
 			hmatrix += modelParams_.kondoJ[ind] * kondoOnSite(ind, niup, nidown);
 
-			if (!modelParams_.extended) continue; // EARLY CONTINUE HERE
+			 // EARLY CONTINUE HERE
+			if (modelParams_.extended == ParametersKondoType::ExtEnum::NONE) continue;
 
 			const OperatorType& Splus = ModelBaseType::naturalOperator("Splus", 0, 0);
 			hmatrix += modelParams_.kondoHx*Splus.getCRS();
@@ -230,6 +231,27 @@ protected:
 		}
 
 		ninj.push(n, 'N', n, 'N');
+
+
+		// pairing terms added on January 18th, 2021
+		// EARLY EXIT HERE
+		if (modelParams_.extended != ParametersKondoType::ExtEnum::EXTENDED2)
+			return;
+
+		OpForLinkType cup("c", 0);
+		OpForLinkType cdown("c", 1);
+
+		ModelTermType& pud = ModelBaseType::createTerm("pairingud");
+		pud.push(cup, 'C', cdown, 'C');
+
+		ModelTermType& pdu = ModelBaseType::createTerm("pairingdu");
+		pdu.push(cdown, 'C', cup, 'C');
+
+		ModelTermType& puu = ModelBaseType::createTerm("pairinguu");
+		puu.push(cup, 'C', cup, 'C');
+
+		ModelTermType& pdd = ModelBaseType::createTerm("pairingdd");
+		pdd.push(cdown, 'C', cdown, 'C');
 	}
 
 private:
