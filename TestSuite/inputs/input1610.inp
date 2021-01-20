@@ -61,7 +61,7 @@ potentialV	 16     0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 			0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=KondoEx2
 HeisenbergTwiceS=1
-SolverOptions=none
+SolverOptions=none,MatrixVectorStored,debugmatrix,test
 Version=5.27
 OutputFile=data1600
 InfiniteLoopKeptStates=50
