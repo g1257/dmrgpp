@@ -387,6 +387,7 @@ protected:
 	void fillModelLinks()
 	{
 		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *=  0.5;};
+		auto valueModiferTerm1 = [](ComplexOrRealType& value) { value *=  0.25;};
 
 		// this creates connections a and b
 		for (SizeType orbital = 0; orbital < 2; ++orbital) {
@@ -402,24 +403,27 @@ protected:
 		}
 
 		// this creates connections in c listed above
-		ModelTermType& ldotLSquared = ModelBaseType::createTerm("ldotLSquared");
+		ModelTermType& ldotLSquared = ModelBaseType::createTerm("ldotLSquared", false);
 
 		OpForLinkType lplusSquared("lplusSquared");
-		ldotLSquared.push(lplusSquared, 'N', lplusSquared, 'C', valueModiferTerm0);
+		ldotLSquared.push(lplusSquared, 'N', lplusSquared, 'C', valueModiferTerm1);
+		ldotLSquared.push(lplusSquared, 'C', lplusSquared, 'N', valueModiferTerm1);
 
 		OpForLinkType lpluslminus("lpluslminus");
-		// H.C. will be added automatically to his one:
-		ldotLSquared.push(lpluslminus, 'N', lminuslplus, 'N', valueModiferTerm0);
-
-		auto valueModiferTerm2 = [](ComplexOrRealType& value) { value *=  2.0;};
+		OpForLinkType lminuslplus("lminuslplus");
+		ldotLSquared.push(lpluslminus, 'N', lminuslplus, 'N', valueModiferTerm1);
+		ldotLSquared.push(lminuslplus, 'N', lpluslminus, 'N', valueModiferTerm1);
 
 		OpForLinkType lplusLz("lplusLz");
-		ldotLSquared.push(lplusLz, 'N', lplusLz, 'C', valueModiferTerm2);
+		ldotLSquared.push(lplusLz, 'N', lplusLz, 'C');
+		ldotLSquared.push(lplusLz, 'C', lplusLz, 'N');
 
 		OpForLinkType lplus("lplus");
-		auto valueModiferTerm3 = [](ComplexOrRealType& value) { value *=  1.5;};
-		// H.C. will be added automatically to his one:
-		ldotLSquared.push(lplusLz, 'N', lplus, 'C', valueModiferTerm3);
+		ldotLSquared.push(lplusLz, 'N', lplus, 'C', valueModiferTerm0);
+		ldotLSquared.push(lplus, 'N', lplusLz, 'C', valueModiferTerm0);
+
+		ldotLSquared.push(lplusLz, 'C', lplus, 'N', valueModiferTerm0);
+		ldotLSquared.push(lplus, 'C', lplusLz, 'N', valueModiferTerm0);
 
 		OpForLinkType lzSquared("lzSquared");
 		ldotLSquared.push(lzSquared, 'N', lzSquared, 'N');
@@ -428,7 +432,6 @@ protected:
 		ModelTermType& ldotLsDotS = ModelBaseType::createTerm("ldotLsDotS");
 
 		OpForLinkType spluslplus("spluslplus");
-		auto valueModiferTerm1 = [](ComplexOrRealType& value) { value *=  0.25;};
 		ldotLsDotS.push(spluslplus, 'N', spluslplus, 'C', valueModiferTerm1);
 
 		OpForLinkType spluslz("spluslz");
