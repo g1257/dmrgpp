@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/ProgramGlobals.h"
 #include "../../Engine/Utils.h"
 #include "ParametersSpinOrbital.h"
+#include "Sort.h"
 
 namespace Dmrg {
 
@@ -455,6 +456,8 @@ private:
 		const SizeType total = total1*total2;
 		natBasis.resize(total);
 		for (SizeType i = 0; i < total; ++i) natBasis[i] = i;
+
+		orderOneSiteBasis(natBasis);
 	}
 
 	//! Find S^+_site in the natural basis natBasis
@@ -549,6 +552,28 @@ private:
 			SizeType flavor = 1;
 			qns[i] = QnType(false, other, jmpair, flavor);
 		}
+	}
+
+	void orderOneSiteBasis(HilbertBasisType& basis) const
+	{
+		const SizeType n = basis.size();
+		VectorSizeType symm(n);
+		for (SizeType i = 0; i < n; ++i) {
+			SizeType mOfSpinPlusJ = mPlusJ(basis[i], 0);
+			SizeType mOfOrbitalPlusJ = mPlusJ(basis[i], 1);
+			symm[i] = mOfSpinPlusJ + mOfOrbitalPlusJ;
+		}
+
+		PsimagLite::Sort<VectorSizeType> sort;
+		VectorSizeType iperm(n);
+		sort.sort(symm, iperm);
+
+		HilbertBasisType basisSorted(n);
+		for (SizeType i = 0; i < n; ++i) {
+			basisSorted[i] = basis[iperm[i]];
+		}
+
+		basisSorted.swap(basis);
 	}
 
 	ParametersSpinOrbitalType modelParams_;
