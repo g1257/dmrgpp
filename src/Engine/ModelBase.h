@@ -180,6 +180,7 @@ public:
 	{
 		modelLinks_.setAtomKind(&getAtomKind());
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
+		checkThatQnsAreNotReallySorted();
 		modelLinks_.postCtor1(labeledOperators_, modelCommon_.superGeometry().terms());
 		fillModelLinks(); // fills modelLinks_
 		customOperators();
@@ -760,6 +761,33 @@ private:
 		c.push(braket.op(0));
 		if (firstChar == '_')
 			this->makeTrackable(tokens[0]);
+	}
+
+	void checkThatQnsAreNotReallySorted()
+	{
+#ifdef NDEBUG
+		return;
+#endif
+
+		const SizeType n = qns_.size();
+		if (n == 0) return;
+		QnType qprev = qns_[0];
+		VectorQnType qunique(1, qprev);
+		for (SizeType i = 1; i < n; ++i) {
+			QnType thisq = qns_[i];
+			if (thisq == qprev) continue;
+			qunique.push_back(thisq);
+			qprev = thisq;
+		}
+
+		const SizeType m = qunique.size();
+		for (SizeType i = 0; i < m; ++i) {
+			const QnType thisq = qunique[i];
+			for (SizeType j = i + 1; j < m; ++j) {
+				if (thisq != qunique[j]) continue;
+				err("QNS of one site: not ordered: Model must order QNS\n");
+			}
+		}
 	}
 
 	ModelCommonType modelCommon_;
