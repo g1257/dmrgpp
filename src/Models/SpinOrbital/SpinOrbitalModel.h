@@ -196,9 +196,10 @@ protected:
 	// 7   L+Lz
 	// 8   Lz2
 	// 9   S+L+
-	// 10  S+Lz
-	// 11  SzL+
-	// 12  SzLz
+	// 10  S+L-
+	// 11  S+Lz
+	// 12  L+Sz
+	// 13  SzLz
 	// more will be needed for J3L term
 	//
 	//
@@ -312,8 +313,9 @@ protected:
 		MatrixType splus = findSplusMatrices(natBasis, 0); //splus
 		MatrixType sz = findSzMatrices(natBasis, 0); // sz
 		MatrixType spluslplus = splus*lplus;
-		MatrixType spluslz = splus*lz;
-		MatrixType szlplus = sz*lplus;
+		MatrixType spluslminus = splus*lminus;
+		MatrixType splusLz = splus*lz;
+		MatrixType lplusSz = lplus*sz;
 		MatrixType szlz = sz*lz;
 
 		{
@@ -329,24 +331,35 @@ protected:
 
 		{
 			typename OperatorType::Su2RelatedType su2related;
-			OperatorType myOp(SparseMatrixType(spluslz),
+			OperatorType myOp(SparseMatrixType(spluslminus),
 			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                  PairType(0, 0),
 			                  1,
 			                  su2related);
-			this->createOpsLabel("spluslz").push(myOp);
-			this->makeTrackable("spluslz");
+			this->createOpsLabel("spluslminus").push(myOp);
+			this->makeTrackable("spluslminus");
 		}
 
 		{
 			typename OperatorType::Su2RelatedType su2related;
-			OperatorType myOp(SparseMatrixType(szlplus),
+			OperatorType myOp(SparseMatrixType(splusLz),
 			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                  PairType(0, 0),
 			                  1,
 			                  su2related);
-			this->createOpsLabel("szlplus").push(myOp);
-			this->makeTrackable("szlplus");
+			this->createOpsLabel("splusLz").push(myOp);
+			this->makeTrackable("splusLz");
+		}
+
+		{
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(lplusSz),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("lplusSz").push(myOp);
+			this->makeTrackable("lplusSz");
 		}
 
 		{
@@ -371,17 +384,24 @@ protected:
 	// b        L+ L+      N C    .5
 	// b        Lz Lz      N N
 	//
-	// c        L+2 L+2    N C    .5
-	// c        L+L- L-L+  N N    .25
-	// c (HC)   of the above
-	// c        L+Lz L+Lz  N C    2.0
+	// c        L+2 L+2    N C    .25
+	// c        L+L- L+L-  N N    .25
+	// c        L-L+ L-L+  N N    .25
+	// c        L+Lz L+Lz  N C
 	// c        L+Lz L+    N C    0.5
+	// c (HC)   of the above      0.5
+	// c        L+   L+Lz  N C    0.5
 	// c (HC)   of the above      0.5
 	// c        Lz2 Lz2    N N
 	//
 	// d        S+L+ S+L+  N C      .25
+	// d  (HC) of the above
+	// d        S+L- S+L-  N C      .25
+	// d  (HC) of the above
 	// d        S+Lz S+Lz  N C      .5
-	// d        SzL+ SzL+  N C      .5
+	// d  (HC) of the above
+	// d        L+Sz L+Sz  N C      .5
+	// d  (HC) of the above
 	// d        SzLz SzLz  N N
 	//
 	// more will be needed for J3L term
@@ -431,17 +451,23 @@ protected:
 		ldotLSquared.push(lzSquared, 'N', lzSquared, 'N');
 
 		// this creates connections in d listed above
-		ModelTermType& ldotLsDotS = ModelBaseType::createTerm("ldotLsDotS");
+		ModelTermType& ldotLsDotS = ModelBaseType::createTerm("ldotLsDotS", false);
 
 		OpForLinkType spluslplus("spluslplus");
 		ldotLsDotS.push(spluslplus, 'N', spluslplus, 'C', valueModiferTerm1);
+		ldotLsDotS.push(spluslplus, 'C', spluslplus, 'N', valueModiferTerm1);
 
-		OpForLinkType spluslz("spluslz");
-		ldotLsDotS.push(spluslz, 'N', spluslz, 'C', valueModiferTerm0);
+		OpForLinkType spluslminus("spluslminus");
+		ldotLsDotS.push(spluslminus, 'N', spluslminus, 'C', valueModiferTerm1);
+		ldotLsDotS.push(spluslminus, 'C', spluslminus, 'N', valueModiferTerm1);
 
-		OpForLinkType szlplus("szlplus");
-		// H.C. will be added automatically to his one:
-		ldotLsDotS.push(szlplus, 'N', szlplus, 'C', valueModiferTerm0);
+		OpForLinkType splusLz("splusLz");
+		ldotLsDotS.push(splusLz, 'N', splusLz, 'C', valueModiferTerm0);
+		ldotLsDotS.push(splusLz, 'C', splusLz, 'N', valueModiferTerm0);
+
+		OpForLinkType lplusSz("lplusSz");
+		ldotLsDotS.push(lplusSz, 'N', lplusSz, 'C', valueModiferTerm0);
+		ldotLsDotS.push(lplusSz, 'C', lplusSz, 'N', valueModiferTerm0);
 
 		OpForLinkType szlz("szlz");
 		ldotLsDotS.push(szlz, 'N', szlz, 'N');
