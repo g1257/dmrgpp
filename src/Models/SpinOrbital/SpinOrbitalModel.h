@@ -451,23 +451,19 @@ protected:
 		ldotLSquared.push(lzSquared, 'N', lzSquared, 'N');
 
 		// this creates connections in d listed above
-		ModelTermType& ldotLsDotS = ModelBaseType::createTerm("ldotLsDotS", false);
+		ModelTermType& ldotLsDotS = ModelBaseType::createTerm("ldotLsDotS");
 
 		OpForLinkType spluslplus("spluslplus");
 		ldotLsDotS.push(spluslplus, 'N', spluslplus, 'C', valueModiferTerm1);
-		ldotLsDotS.push(spluslplus, 'C', spluslplus, 'N', valueModiferTerm1);
 
 		OpForLinkType spluslminus("spluslminus");
 		ldotLsDotS.push(spluslminus, 'N', spluslminus, 'C', valueModiferTerm1);
-		ldotLsDotS.push(spluslminus, 'C', spluslminus, 'N', valueModiferTerm1);
 
 		OpForLinkType splusLz("splusLz");
 		ldotLsDotS.push(splusLz, 'N', splusLz, 'C', valueModiferTerm0);
-		ldotLsDotS.push(splusLz, 'C', splusLz, 'N', valueModiferTerm0);
 
 		OpForLinkType lplusSz("lplusSz");
 		ldotLsDotS.push(lplusSz, 'N', lplusSz, 'C', valueModiferTerm0);
-		ldotLsDotS.push(lplusSz, 'C', lplusSz, 'N', valueModiferTerm0);
 
 		OpForLinkType szlz("szlz");
 		ldotLsDotS.push(szlz, 'N', szlz, 'N');
@@ -562,19 +558,20 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 1);
+		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 2);
 
 		if (!isCanonical)
 			err(PsimagLite::String(__FILE__) + ": must have exactly one symmetry\n");
 
-		VectorSizeType other(1);
+		VectorSizeType other(2);
 		QnType::ifPresentOther0IsElectrons = false;
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0, 0);
 			SizeType mOfSpinPlusJ = mPlusJ(basis[i], 0);
 			SizeType mOfOrbitalPlusJ = mPlusJ(basis[i], 1);
-			other[0] = mOfSpinPlusJ + mOfOrbitalPlusJ;
+			other[0] = mOfSpinPlusJ;
+		        other[1] = mOfOrbitalPlusJ;
 			SizeType flavor = 1;
 			qns[i] = QnType(false, other, jmpair, flavor);
 		}
@@ -587,7 +584,7 @@ private:
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType mOfSpinPlusJ = mPlusJ(basis[i], 0);
 			SizeType mOfOrbitalPlusJ = mPlusJ(basis[i], 1);
-			symm[i] = mOfSpinPlusJ + mOfOrbitalPlusJ;
+			symm[i] = mOfSpinPlusJ + mOfOrbitalPlusJ*(modelParams_.twiceS + 1);
 		}
 
 		PsimagLite::Sort<VectorSizeType> sort;

@@ -473,6 +473,7 @@ private:
 				throw PsimagLite::RuntimeError("Not hermitian matrix block\n");
 
 			typename PsimagLite::Vector<RealType>::Type eigs(fullm2.rows());
+			std::cerr<<"Diagonalizing full matrix of rank "<<fullm2.rows()<<"\n";
 			PsimagLite::diag(fullm2,eigs,'V');
 			std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
 			if (options.isSet("test"))
