@@ -558,21 +558,36 @@ private:
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 
-		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 2);
+		const SizeType nsymms = ModelBaseType::targetQuantum().sizeOfOther();
 
-		if (!isCanonical)
-			err(PsimagLite::String(__FILE__) + ": must have exactly one symmetry\n");
+		if (nsymms > 2)
+			err(PsimagLite::String(__FILE__) + ": must have 0, 1, or 2 symmetries " +
+					"not " + ttos(nsymms) + " symmetries.\n");
 
-		VectorSizeType other(2);
+		if (nsymms == 2) {
+			if (modelParams_.lambda1 != 0 || modelParams_.lambda2 != 0)
+				err(PsimagLite::String(__FILE__) + ": SpinOrbit present; cannot conserve " +
+						"S and L separately\n");
+		}
+
+		VectorSizeType other;
+		if (nsymms > 0) other.resize(nsymms);
 		QnType::ifPresentOther0IsElectrons = false;
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0, 0);
 			SizeType mOfSpinPlusJ = mPlusJ(basis[i], 0);
 			SizeType mOfOrbitalPlusJ = mPlusJ(basis[i], 1);
-			other[0] = mOfSpinPlusJ;
-		        other[1] = mOfOrbitalPlusJ;
-			SizeType flavor = 1;
+			if (nsymms == 1) {
+				other[0] = mOfSpinPlusJ + mOfOrbitalPlusJ;
+			} else if (nsymms == 2) {
+				other[0] = mOfSpinPlusJ;
+				other[1] = mOfOrbitalPlusJ;
+			} else {
+				assert(nsymms == 0);
+			}
+
+			SizeType flavor = 0;
 			qns[i] = QnType(false, other, jmpair, flavor);
 		}
 	}
@@ -584,7 +599,7 @@ private:
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType mOfSpinPlusJ = mPlusJ(basis[i], 0);
 			SizeType mOfOrbitalPlusJ = mPlusJ(basis[i], 1);
-			symm[i] = mOfSpinPlusJ + mOfOrbitalPlusJ*(modelParams_.twiceS + 1);
+			symm[i] = mOfSpinPlusJ + mOfOrbitalPlusJ;
 		}
 
 		PsimagLite::Sort<VectorSizeType> sort;
