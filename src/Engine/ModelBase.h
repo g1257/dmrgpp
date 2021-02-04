@@ -763,7 +763,7 @@ private:
 			this->makeTrackable(tokens[0]);
 	}
 
-	void checkThatQnsAreNotReallySorted()
+	void checkThatQnsAreNotReallySorted() const
 	{
 #ifdef NDEBUG
 		return;

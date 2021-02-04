@@ -171,7 +171,7 @@ public:
 	                                RealType) const
 	{
 		assert(block.size() == 1);
-//		SizeType site = block[0]; // lambda1 and lambda2 have no site depedence
+		//		SizeType site = block[0]; // lambda1 and lambda2 have no site depedence
 		MatrixType tmp = sDotL_;
 		tmp *= modelParams_.lambda1;
 
@@ -491,13 +491,13 @@ private:
 		RealType j = 0.5*twiceTheSpin;
 
 		for (SizeType ii = 0; ii < total; ++ii) {
-			SizeType ket = natBasis[ii];
+			const SizeType ket = natBasis[ii];
 
 			if (mPlusJ(ket, orbital) >= twiceTheSpin)
 				continue;
 
-			SizeType mPlusj0 = mPlusJ(ket, 0);
-			SizeType mPlusj1 = mPlusJ(ket, 1);
+			const SizeType mPlusj0 = mPlusJ(ket, 0);
+			const SizeType mPlusj1 = mPlusJ(ket, 1);
 			SizeType bra = (orbital == 0) ? packM(mPlusj0 + 1, mPlusj1)
 			                              : packM(mPlusj0, mPlusj1 + 1);
 
@@ -506,7 +506,13 @@ private:
 			RealType x = j*(j + 1) - m*(m + 1);
 			assert(x >= 0);
 
-			cm(bra, ket) = sqrt(x);
+			// bra = natBasis[jj];
+			typename HilbertBasisType::const_iterator it = std::find(natBasis.begin(),
+			                                                         natBasis.end(),
+			                                                         bra);
+			assert(it != natBasis.end());
+			const SizeType jj = it - natBasis.begin();
+			cm(jj, ii) = sqrt(x);
 		}
 
 		return cm;
@@ -525,7 +531,7 @@ private:
 
 			RealType mPlusj = mPlusJ(ket, orbital);
 			RealType m = mPlusj - j;
-			cm(ket ,ket) = m;
+			cm(ii, ii) = m;
 		}
 
 		return cm;
@@ -562,12 +568,12 @@ private:
 
 		if (nsymms > 2)
 			err(PsimagLite::String(__FILE__) + ": must have 0, 1, or 2 symmetries " +
-					"not " + ttos(nsymms) + " symmetries.\n");
+			    "not " + ttos(nsymms) + " symmetries.\n");
 
 		if (nsymms == 2) {
 			if (modelParams_.lambda1 != 0 || modelParams_.lambda2 != 0)
 				err(PsimagLite::String(__FILE__) + ": SpinOrbit present; cannot conserve " +
-						"S and L separately\n");
+				    "S and L separately\n");
 		}
 
 		VectorSizeType other;
@@ -607,9 +613,8 @@ private:
 		sort.sort(symm, iperm);
 
 		HilbertBasisType basisSorted(n);
-		for (SizeType i = 0; i < n; ++i) {
+		for (SizeType i = 0; i < n; ++i)
 			basisSorted[i] = basis[iperm[i]];
-		}
 
 		basisSorted.swap(basis);
 	}
