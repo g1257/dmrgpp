@@ -40,5 +40,5 @@ FiniteLoops=[[1, 80, 0],
 [ 2, 150, 0]];
 # TargetSz = Sz + Lz + (s + l)*N
 TargetSzPlusConst=4;
-TargetExtra=[4];
+vector TargetExtra=[4];
 
