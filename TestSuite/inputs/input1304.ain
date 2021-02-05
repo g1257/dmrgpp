@@ -28,8 +28,8 @@ gt3:dir0:Connectors=[0.7];
 Model="SpinOrbital";
 SpinTwiceS=2;
 OrbitalTwiceS=2;
-LambdaOne=0.123;
-LambdaTwo=0.456;
+LambdaOne=0;
+LambdaTwo=0;
 
 SolverOptions="twositedmrg";
 Version="5.77";
