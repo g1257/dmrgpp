@@ -372,6 +372,150 @@ protected:
 			this->createOpsLabel("szlz").push(myOp);
 			this->makeTrackable("szlz");
 		}
+
+		{
+			MatrixType tmp = splus*lplusSquared;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("d0").push(myOp);
+			this->makeTrackable("d0");
+		}
+
+		{
+			MatrixType tmp = spluslminus*lminus;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("d1").push(myOp);
+			this->makeTrackable("d1");
+		}
+
+		{
+			MatrixType tmp = splus*lplusLz;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("d2").push(myOp);
+			this->makeTrackable("d2");
+		}
+
+		{
+			MatrixType tmp = splusLz*lminus;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("d3").push(myOp);
+			this->makeTrackable("d3");
+		}
+
+		{
+			MatrixType tmp = splus*lpluslminus;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("f0").push(myOp);
+			this->makeTrackable("f0");
+		}
+
+		{
+			MatrixType tmp = splus*lminuslplus;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("f1").push(myOp);
+			this->makeTrackable("f1");
+		}
+
+		{
+			MatrixType tmp = splus*lzSquared;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("g0").push(myOp);
+			this->makeTrackable("g0");
+		}
+
+		{
+			MatrixType tmp = sz*lplusSquared;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("g1").push(myOp);
+			this->makeTrackable("g1");
+		}
+
+		{
+			MatrixType tmp = sz*lplusLz;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("wprime").push(myOp);
+			this->makeTrackable("wprime");
+		}
+
+		{
+			MatrixType tmp = sz*lpluslminus;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("vprime").push(myOp);
+			this->makeTrackable("vprime");
+		}
+
+		{
+			MatrixType tmp = sz*lminuslplus;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("xprime").push(myOp);
+			this->makeTrackable("xprime");
+		}
+
+		{
+			MatrixType tmp = sz*lzSquared;
+			typename OperatorType::Su2RelatedType su2related;
+			OperatorType myOp(SparseMatrixType(tmp),
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("z").push(myOp);
+			this->makeTrackable("z");
+		}
 	}
 
 	// Connectors and Factors (if factor is missing, 1 is assumed)
@@ -467,6 +611,54 @@ protected:
 
 		OpForLinkType szlz("szlz");
 		ldotLsDotS.push(szlz, 'N', szlz, 'N');
+
+		// this creates connections in e listed above
+		auto valueModiferTerm2 = [](ComplexOrRealType& value) { value *=  0.125;};
+
+		ModelTermType& sdotSlDotLSquared = ModelBaseType::createTerm("sdotSlDotLSquared");
+		OpForLinkType d0("d0");
+		sdotSlDotLSquared.push(d0, 'N', d0, 'C', valueModiferTerm2);
+
+		OpForLinkType d1("d1");
+		sdotSlDotLSquared.push(d1, 'N', d1, 'C', valueModiferTerm2);
+
+		OpForLinkType d2("d1");
+		sdotSlDotLSquared.push(d2, 'N', d2, 'C', valueModiferTerm0);
+
+		OpForLinkType d3("d3");
+		sdotSlDotLSquared.push(d3, 'N', d3, 'C', valueModiferTerm0);
+
+		OpForLinkType f0("f0");
+		OpForLinkType f1("f1");
+		sdotSlDotLSquared.push(f0, 'N', f1, 'C', valueModiferTerm2);
+
+		sdotSlDotLSquared.push(f1, 'N', f0, 'C', valueModiferTerm2);
+
+		sdotSlDotLSquared.push(d2, 'N', spluslplus, 'C', valueModiferTerm2);
+
+		sdotSlDotLSquared.push(d3, 'N', spluslminus, 'C', valueModiferTerm2);
+
+		OpForLinkType g0("g0");
+		sdotSlDotLSquared.push(g0, 'N', g0, 'C', valueModiferTerm0);
+
+		OpForLinkType g1("g1");
+		sdotSlDotLSquared.push(g1, 'N', g1, 'C', valueModiferTerm1);
+
+		OpForLinkType vprime("vprime");
+		OpForLinkType xprime("xprime");
+		sdotSlDotLSquared.push(vprime, 'N', xprime, 'N', valueModiferTerm1);
+
+		sdotSlDotLSquared.push(xprime, 'N', vprime, 'N', valueModiferTerm1);
+
+		OpForLinkType wprime("wprime");
+		sdotSlDotLSquared.push(wprime, 'N', wprime, 'C');
+
+		sdotSlDotLSquared.push(wprime, 'N', lplusSz, 'N', valueModiferTerm0);
+
+		sdotSlDotLSquared.push(lplusSz, 'N', wprime, 'N', valueModiferTerm0);
+
+		OpForLinkType z("z");
+		sdotSlDotLSquared.push(z, 'N', z, 'N');
 	}
 
 private:

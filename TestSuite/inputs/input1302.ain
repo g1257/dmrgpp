@@ -1,6 +1,6 @@
 ##Ainur1.0
 TotalNumberOfSites=4;
-NumberOfTerms=4;
+NumberOfTerms=5;
 
 # S.S
 gt0:GeometryKind="chain";
@@ -22,7 +22,9 @@ gt3:GeometryKind="chain";
 gt3:GeometryOptions="ConstantValues";
 gt3:dir0:Connectors=[0.7];
 
-# For now J3SL=0
+gt4:GeometryKind="chain";
+gt4:GeometryOptions="ConstantValues";
+gt4:dir0:Connectors=[0];
 
 #Model params
 Model="SpinOrbital";
