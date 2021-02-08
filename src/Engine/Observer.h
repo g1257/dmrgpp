@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include "ExpressionCalculator.h"
 #include "PredicateAwesome.h"
+#include "ManyPointAction.h"
 
 namespace Dmrg {
 
@@ -121,35 +122,7 @@ public:
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
-
-	class ManyPointAction {
-
-	public:
-
-		typedef PsimagLite::ExpressionCalculator<int> ExpressionCalculatorType;
-		typedef PsimagLite::PrepassData<int> PrepassDataType;
-		typedef PsimagLite::ExpressionPrepass<PrepassDataType> ExpressionPrepassType;
-
-		ManyPointAction(bool hasNonTrivialAction,
-		                PsimagLite::String actionString)
-		    : nonTrivial_(hasNonTrivialAction),
-		      actionString_(actionString)
-		{}
-
-		bool operator()(SizeType s0, SizeType s1, SizeType s2, SizeType s3) const
-		{
-			if (!nonTrivial_) return true;
-
-			PredicateAwesomeType pred(actionString_, '~');
-			return pred.isTrue("%0", s0, "%1", s1, "%2", s2, "%3", s3);
-		}
-
-	private:
-
-		bool nonTrivial_;
-		PsimagLite::String actionString_;
-	};
+	typedef ManyPointAction ManyPointActionType;
 
 	Observer(IoInputType& io,
 	         SizeType start,

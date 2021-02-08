@@ -184,6 +184,7 @@ hence non-trivial.
 1300) SpinOrbitalModel 
 1302) 4 sites one symmetry
 1304) 4 sites two symmetries
+1306) Spinorbital: (Si.Sj)(Li.Lj)^2
 #1301-1400 reserved for SpinOrbitalModel
 1500) Figure 1 of METTS paper
 InternalControlNumber: 40
