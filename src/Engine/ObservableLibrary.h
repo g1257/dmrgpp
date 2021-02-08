@@ -206,7 +206,8 @@ public:
 					                  braket,
 					                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 					                  "gs",
-					                  "gs");
+					                  "gs",
+					                  manyPointAction);
 					std::cout << str << std::endl;
 					std::cout << out;
 				}
@@ -606,7 +607,13 @@ private:
 			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
-			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			ManyPointActionType emptyAction(false, "");
+			observe_.twoPoint(m,
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			//std::cout << m;
 			std::cout << "PairPair Correlations S^{l}_{on}" << std::endl;
 			SliceOrbital(m,0,0);
@@ -851,6 +858,7 @@ private:
 		SizeType orbitals = logBase2(model_.hilbertSize(site));
 		assert(!(orbitals & 1));
 		orbitals /= 2;
+		ManyPointActionType emptyAction(false, "");
 
 		if (flag==0) {
 			SizeType orb1 = 0;  // lower orbital
@@ -876,7 +884,12 @@ private:
 			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
-			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			observe_.twoPoint(m,
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 
 			std::cout << m;
 		} else if (flag==1) {
@@ -902,7 +915,12 @@ private:
 			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
-			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			observe_.twoPoint(m,
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag==2) {
 			SizeType spin0 = 0; // up
@@ -932,7 +950,12 @@ private:
 			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
-			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			observe_.twoPoint(m,
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag==3) {
 			SizeType spin0 = 0; // up
@@ -962,7 +985,12 @@ private:
 			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
-			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			observe_.twoPoint(m,
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag==4) {
 			SizeType orb0 = 0;  // lower orbital
@@ -987,7 +1015,12 @@ private:
 			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
-			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			observe_.twoPoint(m,
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag==5) {
 			SizeType orb0 = 0;  // lower orbital
@@ -1012,7 +1045,12 @@ private:
 			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
-			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			observe_.twoPoint(m,
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag==6) {
 			SizeType spin0 = 0; // up
@@ -1043,7 +1081,12 @@ private:
 			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
-			observe_.twoPoint(m, braket, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
+			observe_.twoPoint(m,
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else {
 			err("Unknown flag: " + ttos(flag));
@@ -1310,7 +1353,7 @@ private:
 				storage = new MatrixType(rows,cols);
 			}
 
-			observe_.twoPoint(*storage, braket, needsPrinting);
+			observe_.twoPoint(*storage, braket, needsPrinting, someAction);
 
 			if (needsPrinting) {
 				delete storage;

@@ -28,6 +28,8 @@ public:
 		return pred.isTrue("%0", s0, "%1", s1, "%2", s2, "%3", s3);
 	}
 
+	bool nonTrivial() const { return nonTrivial_; }
+
 private:
 
 	bool nonTrivial_;

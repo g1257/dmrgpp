@@ -151,7 +151,10 @@ public:
 		return (!es && helper_.site(ptr) == 1);
 	}
 
-	void twoPoint(MatrixType& storage, const BraketType& braket, bool needsPrinting) const
+	void twoPoint(MatrixType& storage,
+	              const BraketType& braket,
+	              bool needsPrinting,
+	              const ManyPointActionType& action) const
 	{
 		assert(braket.points() == 2);
 
@@ -175,13 +178,16 @@ public:
 		switch (flag) {
 
 		case 0: // no sites given
-			twopoint_(storage, braket, fermionSign, braket.bra(), braket.ket());
+			twopoint_(storage, braket, fermionSign, braket.bra(), braket.ket(), action);
 			if (needsPrinting)
 				std::cout<<(storage);
 
 			break;
 
 		case 1: //first site given
+			if (action.nonTrivial())
+				err("For non trivial action, give no sites\n");
+
 			for (site1 = braket.site(0); site1 < sites; ++site1) {
 				storage(braket.site(0),site1) = twopoint_.calcCorrelation(braket.site(0),
 				                                                          site1,
@@ -199,6 +205,9 @@ public:
 			break;
 
 		case 3:
+			if (action.nonTrivial())
+				err("For non trivial action, give no sites\n");
+
 			storage(braket.site(0),braket.site(1)) = twopoint_.calcCorrelation(braket.site(0),
 			                                                                   braket.site(1),
 			                                                                   braket,
@@ -219,9 +228,10 @@ public:
 	              const BraketType braket,
 	              ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	              PsimagLite::String bra,
-	              PsimagLite::String ket) const
+	              PsimagLite::String ket,
+	              const ManyPointActionType& action) const
 	{
-		twopoint_(m, braket, fermionicSign, bra, ket);
+		twopoint_(m, braket, fermionicSign, bra, ket, action);
 	}
 
 	FieldType threePoint(const BraketType& braket,

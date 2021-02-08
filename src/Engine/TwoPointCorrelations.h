@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "GetBraOrKet.h"
 #include "SdhsReinterpret.h"
+#include "ManyPointAction.h"
 
 namespace Dmrg {
 
@@ -110,6 +111,7 @@ public:
 	typedef Parallel2PointCorrelations<ThisType> Parallel2PointCorrelationsType;
 	typedef typename Parallel2PointCorrelationsType::PairType PairType;
 	typedef SdhsReinterpret<BraketType> SdhsReinterpretType;
+	typedef ManyPointAction ManyPointActionType;
 
 	TwoPointCorrelations(const CorrelationsSkeletonType& skeleton) : skeleton_(skeleton)
 	{}
@@ -118,7 +120,8 @@ public:
 	                const BraketType& braket,
 	                ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                const PsimagLite::GetBraOrKet& bra,
-	                const PsimagLite::GetBraOrKet& ket) const
+	                const PsimagLite::GetBraOrKet& ket,
+	                const ManyPointActionType& action) const
 	{
 		SizeType rows = w.n_row();
 		SizeType cols = w.n_col();
