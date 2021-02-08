@@ -28,6 +28,14 @@ public:
 		return pred.isTrue("%0", s0, "%1", s1, "%2", s2, "%3", s3);
 	}
 
+	bool operator()(SizeType s0, SizeType s1) const
+	{
+		if (!nonTrivial_) return true;
+
+		PredicateAwesomeType pred(actionString_, '~');
+		return pred.isTrue("%0", s0, "%1", s1);
+	}
+
 	bool nonTrivial() const { return nonTrivial_; }
 
 private:

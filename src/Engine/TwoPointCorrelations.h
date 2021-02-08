@@ -130,6 +130,7 @@ public:
 		for (SizeType i=0;i<rows;i++) {
 			for (SizeType j=i;j<cols;j++) {
 				if (i>j) continue;
+				if (!action(i, j)) continue;
 				pairs.push_back(PairType(i,j));
 			}
 		}
