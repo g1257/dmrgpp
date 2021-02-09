@@ -37,7 +37,7 @@ SolverOptions="CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart,fixLeg
 Version="5.77";
 OutputFile="data1305";
 InfiniteLoopKeptStates=50;
-FiniteLoops=[[1, 80, 0],
+FiniteLoops=[
 [-2, 150, 2],
 [ 2, 150, 2]];
 # TargetSz = Sz + Lz + (s + l)*N
@@ -45,7 +45,7 @@ TargetSzPlusConst=4;
 vector TargetExtra=[4];
 
 # This has been added for CV:
-real CorrectionA=0;
+CorrectionA=0;
 RestartFilename="data1304";
 TruncationTolerance=1e-7;
 LanczosEps=1e-7;
@@ -66,6 +66,6 @@ CorrectionVectorOmega=0.275;
 
 Intent="NeutronsSzSz";
 
-TSPOperator="expression";
-OperatorExpression="sz*lz";
+string TSPOp0:TSPOperator="expression";
+string TSPOp0:OperatorExpression="sz*lz";
 

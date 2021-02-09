@@ -257,6 +257,16 @@ public:
 		str += "integer OrbitalTwiceS;\n";
 		str += "real LambdaOne;\n";
 		str += "real LambdaTwo;\n";
+		str += "real CorrectionA;\n";
+		str += "string RestartFilename;\n";
+		str += "real LanczosEps;\n";
+		str += "real TridiagonalEps;\n";
+		str += "integer DynamicDmrgType;\n";
+		str += "real CorrectionVectorFreqType;\n";
+		str += "real CorrectionVectorEta;\n";
+		str += "string CorrectionVectorAlgorithm;\n";
+		str += "real CorrectionVectorOmega;\n";
+		str += "string Intent;\n";
 		return str;
 	}
 
