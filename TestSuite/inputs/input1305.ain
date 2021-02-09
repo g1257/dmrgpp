@@ -1,0 +1,71 @@
+##Ainur1.0
+TotalNumberOfSites=4;
+NumberOfTerms=5;
+
+# S.S
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[0.2];
+
+# L.L
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[0.3];
+
+# (L.L)^2
+gt2:GeometryKind="chain";
+gt2:GeometryOptions="ConstantValues";
+gt2:dir0:Connectors=[0.5];
+
+# (L.L)(S.S)
+gt3:GeometryKind="chain";
+gt3:GeometryOptions="ConstantValues";
+gt3:dir0:Connectors=[0.7];
+
+gt4:GeometryKind="chain";
+gt4:GeometryOptions="ConstantValues";
+gt4:dir0:Connectors=[0];
+
+#Model params
+Model="SpinOrbital";
+SpinTwiceS=2;
+OrbitalTwiceS=2;
+LambdaOne=0;
+LambdaTwo=0;
+
+SolverOptions="CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart,fixLegacyBugs";
+Version="5.77";
+OutputFile="data1305";
+InfiniteLoopKeptStates=50;
+FiniteLoops=[[1, 80, 0],
+[-2, 150, 2],
+[ 2, 150, 2]];
+# TargetSz = Sz + Lz + (s + l)*N
+TargetSzPlusConst=4;
+vector TargetExtra=[4];
+
+# This has been added for CV:
+real CorrectionA=0;
+RestartFilename="data1304";
+TruncationTolerance=1e-7;
+LanczosEps=1e-7;
+TridiagonalEps=1e-7;
+
+DynamicDmrgType=0;
+TSPSites=[2];
+TSPLoops=[0];
+TSPProductOrSum="sum";
+CorrectionVectorFreqType="Real";
+
+CorrectionVectorEta=0.08;
+CorrectionVectorAlgorithm="Krylov";
+Orbitals=1;
+
+GsWeight=0.1;
+CorrectionVectorOmega=0.275;
+
+Intent="NeutronsSzSz";
+
+TSPOperator="expression";
+OperatorExpression="sz*lz";
+
