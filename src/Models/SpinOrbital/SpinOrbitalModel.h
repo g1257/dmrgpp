@@ -634,9 +634,13 @@ protected:
 
 		sdotSlDotLSquared.push(f1, 'N', f0, 'C', valueModiferTerm2);
 
-		sdotSlDotLSquared.push(d2, 'N', spluslplus, 'C', valueModiferTerm2);
+		sdotSlDotLSquared.push(d2, 'N', spluslplus, 'C', valueModiferTerm1);
 
-		sdotSlDotLSquared.push(d3, 'N', spluslminus, 'C', valueModiferTerm2);
+		sdotSlDotLSquared.push(d3, 'N', spluslminus, 'C', valueModiferTerm1);
+
+		sdotSlDotLSquared.push(spluslplus, 'N', d2, 'C', valueModiferTerm1);
+
+		sdotSlDotLSquared.push(spluslminus, 'N', d3, 'C', valueModiferTerm1);
 
 		OpForLinkType g0("g0");
 		sdotSlDotLSquared.push(g0, 'N', g0, 'C', valueModiferTerm0);
@@ -653,9 +657,9 @@ protected:
 		OpForLinkType wprime("wprime");
 		sdotSlDotLSquared.push(wprime, 'N', wprime, 'C');
 
-		sdotSlDotLSquared.push(wprime, 'N', lplusSz, 'N', valueModiferTerm0);
+		sdotSlDotLSquared.push(wprime, 'N', lplusSz, 'C', valueModiferTerm0);
 
-		sdotSlDotLSquared.push(lplusSz, 'N', wprime, 'N', valueModiferTerm0);
+		sdotSlDotLSquared.push(lplusSz, 'N', wprime, 'C', valueModiferTerm0);
 
 		OpForLinkType z("z");
 		sdotSlDotLSquared.push(z, 'N', z, 'N');

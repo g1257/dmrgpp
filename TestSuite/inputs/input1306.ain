@@ -24,8 +24,8 @@ gt3:dir0:Connectors=[0];
 
 # (S.S)(L.L)^2
 gt4:GeometryKind="chain";
-gt4:GeometryOptions="ConstantValues";
-gt4:dir0:Connectors=[1];
+gt4:GeometryOptions="none";
+gt4:dir0:Connectors=[1, 0, 0];
 
 #Model params
 Model="SpinOrbital";
