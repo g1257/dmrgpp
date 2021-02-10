@@ -476,6 +476,12 @@ private:
 			std::cerr<<"Diagonalizing full matrix of rank "<<fullm2.rows()<<"\n";
 			PsimagLite::diag(fullm2,eigs,'V');
 			std::cerr<<"eigs[0]="<<eigs[0]<<"\n";
+			if (options.isSet("printmatrix")) {
+				for (SizeType i = 0; i < eigs.size(); ++i)
+					std::cout<<eigs[i]<<" ";
+				std::cout<<"\n";
+			}
+
 			if (options.isSet("test"))
 				throw std::logic_error("Exiting due to option test in the input\n");
 

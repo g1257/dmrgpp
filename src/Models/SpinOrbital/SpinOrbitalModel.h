@@ -622,7 +622,7 @@ protected:
 		OpForLinkType d1("d1");
 		sdotSlDotLSquared.push(d1, 'N', d1, 'C', valueModiferTerm2);
 
-		OpForLinkType d2("d1");
+		OpForLinkType d2("d2");
 		sdotSlDotLSquared.push(d2, 'N', d2, 'C', valueModiferTerm0);
 
 		OpForLinkType d3("d3");
