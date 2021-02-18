@@ -126,16 +126,16 @@ public:
 	typedef typename ModelBaseType::ModelLinksType ModelLinksType;
 	typedef ParametersSpinOrbital<RealType, QnType> ParametersSpinOrbitalType;
 
-	//typedef Aklt<ModelBaseType> AkltType;
-
 	SpinOrbitalModel(const SolverParamsType& solverParams,
 	                 InputValidatorType& io,
-	                 const SuperGeometryType& geometry)
+	                 const SuperGeometryType& geometry,
+	                 PsimagLite::String option)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
 	      modelParams_(io),
-	      superGeometry_(geometry)
+	      superGeometry_(geometry),
+	      hasLastTerm_(true)
 	{
 		HilbertBasisType natBasis;
 		setBasis(natBasis);
@@ -154,6 +154,12 @@ public:
 		MatrixType lz = findSzMatrices(natBasis, 1);
 		tmp = sz*lz;
 		sDotL_ = tmp3 + tmp;
+
+		if (option == "NoLastTerm")
+			hasLastTerm_ = false;
+		else if (option != "")
+			err(PsimagLite::String("SpinOrbitalModel or SpinOrbitalModelNoLastTerm ") +
+			    "but not " + option + "\n");
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -372,6 +378,8 @@ protected:
 			this->createOpsLabel("szlz").push(myOp);
 			this->makeTrackable("szlz");
 		}
+
+		if (!hasLastTerm_) return; // <--- EARLY EXIT HERE
 
 		{
 			MatrixType tmp = splus*lplusSquared;
@@ -613,6 +621,9 @@ protected:
 		ldotLsDotS.push(szlz, 'N', szlz, 'N');
 
 		// this creates connections in e listed above
+
+		if (!hasLastTerm_) return; // <--- EARLY EXIT HERE
+
 		auto valueModiferTerm2 = [](ComplexOrRealType& value) { value *=  0.125;};
 
 		ModelTermType& sdotSlDotLSquared = ModelBaseType::createTerm("sdotSlDotLSquared");
@@ -818,6 +829,7 @@ private:
 	ParametersSpinOrbitalType modelParams_;
 	const SuperGeometryType& superGeometry_;
 	MatrixType sDotL_;
+	bool hasLastTerm_;
 }; // class SpinOrbitalModel
 
 } // namespace Dmrg

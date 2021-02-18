@@ -214,8 +214,10 @@ public:
 			model_ = new GaugeSpinType(solverParams, io, geometry);
 		} else if (name_ == "HeisenbergMix") {
 			model_ = new HeisenbergMixType(solverParams, io, geometry);
-		} else if (name_ == "SpinOrbital") {
-			model_ = new SpinOrbitalModelType(solverParams, io, geometry);
+		} else if (name_.substr(0, 11) == "SpinOrbital") {
+			PsimagLite::String tmp = (name_.length() == 11) ? ""
+			                                               : name_.substr(11, name_.length() - 11);
+			model_ = new SpinOrbitalModelType(solverParams, io, geometry, tmp);
 		}
 #endif
 		else {
