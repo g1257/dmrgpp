@@ -18,9 +18,9 @@ Version=version
 OutputFile=data250
 InfiniteLoopKeptStates=100
 FiniteLoops 3
-  7 100 8
--14 100 8
- 14 100 8
+  7 100 0 
+-14 100 0
+ 14 100 0
 NumberOfTargetQns=2
 TargetElectronsUp0=8
 TargetElectronsDown0=8

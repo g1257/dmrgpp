@@ -314,6 +314,10 @@ private:
 
 		xr.resize(n);
 		psimag::BLAS::GEMV('N',n,n2,zone,&(V(0,0)),n,&(tmp[0]),1,zzero,&(xr[0]),1);
+
+		typename LanczosSolverType::ParametersSolverType params(ioIn_, "Tridiag");
+		bool b1 = (params.options.find("printritz") != PsimagLite::String::npos);
+		if (b1) printRitz(eigs, i0);
 	}
 
 	void triDiag(const VectorWithOffsetType& phi,
@@ -345,6 +349,15 @@ private:
 			sum += tmp*tmp;
 		}
 		return sum;
+	}
+
+	static void printRitz(const VectorRealType& eigs, SizeType i0)
+	{
+		std::cout<<"RitzEigenvalues: index="<<i0<<"|";
+		const SizeType n = eigs.size();
+		for (SizeType i = 0; i < n; ++i)
+			std::cout<<eigs[i]<<" ";
+		std::cout<<"\n";
 	}
 
 	InputValidatorType& ioIn_;
