@@ -292,6 +292,10 @@ private:
 		if (T.n_col()!=T.n_row()) throw PsimagLite::RuntimeError("T is not square\n");
 		if (V.n_col()!=T.n_col()) throw PsimagLite::RuntimeError("V is not nxn2\n");
 
+		typename LanczosSolverType::ParametersSolverType params(ioIn_, "Tridiag");
+		bool b1 = (params.options.find("printritz") != PsimagLite::String::npos);
+		if (b1) printRitz(eigs, i0);
+
 		ComplexOrRealType zone = 1.0;
 		ComplexOrRealType zzero = 0.0;
 
@@ -314,10 +318,6 @@ private:
 
 		xr.resize(n);
 		psimag::BLAS::GEMV('N',n,n2,zone,&(V(0,0)),n,&(tmp[0]),1,zzero,&(xr[0]),1);
-
-		typename LanczosSolverType::ParametersSolverType params(ioIn_, "Tridiag");
-		bool b1 = (params.options.find("printritz") != PsimagLite::String::npos);
-		if (b1) printRitz(eigs, i0);
 	}
 
 	void triDiag(const VectorWithOffsetType& phi,
