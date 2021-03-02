@@ -17,6 +17,16 @@ public:
 		throw PsimagLite::RuntimeError("getMatrix: not implemented yet\n");
 	}
 
+	SizeType t3OfState(SizeType) const
+	{
+		throw PsimagLite::RuntimeError("t3OfState: not implemented yet\n");
+	}
+
+	SizeType t8OfState(SizeType) const
+	{
+		throw PsimagLite::RuntimeError("t8OfState: not implemented yet\n");
+	}
+
 	SizeType size() const { return 3; }
 };
 

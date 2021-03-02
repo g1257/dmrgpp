@@ -13,7 +13,11 @@ public:
 
 	virtual ~Su3RepresentationBase() {}
 
-	virtual void getMatrix(MatrixType& m, SizeType n) const = 0;
+	virtual void getMatrix(MatrixType&, SizeType) const = 0;
+
+	virtual SizeType t3OfState(SizeType) const = 0;
+
+	virtual SizeType t8OfState(SizeType) const = 0;
 
 	virtual SizeType size() const = 0;
 };

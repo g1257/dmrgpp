@@ -248,8 +248,8 @@ private:
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0, 0);
-			other[0] = su3Rep_.t3OfState(i);
-			other[1] = su3Rep_.t8OfState(i);
+			other[0] = su3Rep_->t3OfState(i);
+			other[1] = su3Rep_->t8OfState(i);
 			SizeType flavor = 1;
 			qns[i] = QnType(false, other, jmpair, flavor);
 		}
