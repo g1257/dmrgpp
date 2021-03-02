@@ -726,7 +726,7 @@ private:
 		const bool advanceOnlyAtBorder = !options.isSet("advanceUnrestricted");
 
 		SizeType sites = targetHelper_.model().superGeometry().numberOfSites();
-		bool weAreAtBorder = (site < 2 || site >= sites-2);
+		bool weAreAtBorder = (site < 1 || site >= sites-1);
 		bool dontAdvance = (advanceOnlyAtBorder & !weAreAtBorder);
 
 		if (advanceEach > 0 && timesWithoutAdvancement_ >= advanceEach && !dontAdvance) {
