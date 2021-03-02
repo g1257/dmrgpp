@@ -747,7 +747,7 @@ private:
 	// ket = sz' + lz'*(2s + 1)
 	SizeType mPlusJ(SizeType ket, SizeType orbital) const
 	{
-		div_t q = div(ket, modelParams_.twiceS + 1);
+		div_t q = div(static_cast<int>(ket), static_cast<int>(modelParams_.twiceS + 1));
 		assert(static_cast<SizeType>(q.rem) <= modelParams_.twiceS);
 		assert(static_cast<SizeType>(q.quot) <= modelParams_.twiceL);
 		return (orbital == 0) ? q.rem : q.quot;
