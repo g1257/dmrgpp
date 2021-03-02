@@ -93,7 +93,7 @@ public:
 			           option2 + " k points.\n";
 		} else if (option0 == "energy") {
 			const RealType W = PsimagLite::atof(option2);
-			dos_ = new DensityOfStatesType(option1, 0.5*W);
+			dos_ = new DensityOfStatesType(option1, 0.5*W, mu_);
 			std::cout<<"LatticeGf: Using energy with " + option1 + " and W = " +
 			           option2 + "\n";
 		} else {

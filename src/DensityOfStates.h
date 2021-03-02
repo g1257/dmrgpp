@@ -11,8 +11,8 @@ public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-	DensityOfStates(PsimagLite::String option, RealType wOverTwo)
-	    : wOverTwo_(wOverTwo)
+	DensityOfStates(PsimagLite::String option, RealType wOverTwo, RealType mu)
+	    : wOverTwo_(wOverTwo), mu_(mu)
 	{
 		if (option != "semicircular")
 			err("DensityOfStates " + option +
@@ -22,7 +22,7 @@ public:
 
 	RealType lowerBound() const { return -wOverTwo_; }
 
-	RealType upperBound() const { return wOverTwo_; }
+	RealType upperBound() const { return mu_; }
 
 	RealType operator()(RealType e) const
 	{
@@ -33,6 +33,7 @@ public:
 private:
 
 	RealType wOverTwo_;
+	RealType mu_;
 };
 
 }
