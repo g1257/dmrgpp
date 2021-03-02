@@ -97,6 +97,7 @@ struct ParametersSu3 : public ParametersModelBase<RealType, QnType> {
 	    : BaseType(io, false)
 	{
 		io.readline(mass, "Mass=");
+		io.readline(p, "Su3RepresentationP=");
 	}
 
 	void write(PsimagLite::String label1,
@@ -106,9 +107,12 @@ struct ParametersSu3 : public ParametersModelBase<RealType, QnType> {
 		io.createGroup(label);
 		BaseType::write(label, io);
 		io.write(label + "/mass", mass);
+		io.write(label + "/Su3RepresentationP", p);
+
 	}
 
 	RealType mass;
+	SizeType p;
 };
 } // namespace Dmrg
 

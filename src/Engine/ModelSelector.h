@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/GaugeSpin/GaugeSpin.h"
 #include "../Models/Heisenberg/HeisenbergMix.h"
 #include "../Models/SpinOrbital/SpinOrbitalModel.h"
+#include "../Models/Su3/Su3Model.h"
 
 #endif
 
@@ -121,7 +122,8 @@ class ModelSelector {
 	typedef HolsteinThin<ModelBaseType> HolsteinThinType;
 	typedef GaugeSpin<ModelBaseType> GaugeSpinType;
 	typedef HeisenbergMix<ModelBaseType> HeisenbergMixType;
-	typedef SpinOrbitalModel <ModelBaseType> SpinOrbitalModelType;
+	typedef SpinOrbitalModel<ModelBaseType> SpinOrbitalModelType;
+	typedef Su3Model<ModelBaseType> Su3ModelType;
 #endif
 	// end models
 
@@ -218,6 +220,8 @@ public:
 			PsimagLite::String tmp = (name_.length() == 11) ? ""
 			                                               : name_.substr(11, name_.length() - 11);
 			model_ = new SpinOrbitalModelType(solverParams, io, geometry, tmp);
+		} else if (name_ == "Su3Model") {
+			model_ = new Su3ModelType(solverParams, io, geometry);
 		}
 #endif
 		else {

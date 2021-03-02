@@ -81,11 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_SU3_MODEL_H
 
 #include <algorithm>
-#include "ParametersSu3Model.h"
+#include "ParametersSu3.h"
 #include "CrsMatrix.h"
 #include "../../Engine/VerySparseMatrix.h"
 #include "../../Engine/ProgramGlobals.h"
 #include "../../Engine/Utils.h"
+#include "Su3RepresentationP1.h"
 
 namespace Dmrg {
 
@@ -122,6 +123,9 @@ public:
 	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef ParametersSu3<RealType, QnType> ParametersSu3Type;
+	typedef Su3RepresentationBase<ComplexOrRealType> Su3RepresentationBaseType;
+	typedef Su3RepresentationP1<ComplexOrRealType> Su3RepresentationP1Type;
 
 	Su3Model(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
@@ -129,9 +133,23 @@ public:
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
+	      superGeometry_(geometry),
 	      modelParameters_(io),
-	      superGeometry_(geometry)
-	{}
+	      su3Rep_(nullptr)
+	{
+		if (modelParameters_.p == 1) {
+			su3Rep_ = new Su3RepresentationP1Type();
+		} else {
+			err("Implementation for p = " + ttos(modelParameters_.p) +
+			    " has not been implemented\n");
+		}
+	}
+
+	~Su3Model()
+	{
+		delete su3Rep_;
+		su3Rep_ = nullptr;
+	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -150,8 +168,11 @@ public:
 	{
 		assert(block.size() == 1);
 
-		su3Rep_.getMatrix(m3, 2);
-		su3Rep_.getMatrix(m8, 7);
+		MatrixType m3;
+		su3Rep_->getMatrix(m3, 2);
+
+		MatrixType m8;
+		su3Rep_->getMatrix(m8, 7);
 
 		MatrixType m = m3*m3;
 		m *= modelParameters_.mass;
@@ -167,7 +188,7 @@ protected:
 	{
 		SizeType site = 0;
 		BlockType block(1, site);
-		SizeType total = su2Rep_.size();
+		SizeType total = su3Rep_->size();
 		HilbertBasisType natBasis(total);
 		for (SizeType i = 0; i < total; ++i) natBasis[i] = i;
 
@@ -177,7 +198,7 @@ protected:
 
 			MatrixType m;
 
-			su2Rep_.getMatrix(m, a);
+			su3Rep_->getMatrix(m, a);
 
 			SparseMatrixType sparseMatrix(m);
 
@@ -208,7 +229,7 @@ protected:
 
 			OpForLinkType aOpForLink("T" + ttos(a + 1));
 
-			jOne.push(aOpForLink, 'N', aOpForLink, 'C');
+			jTwo.push(aOpForLink, 'N', aOpForLink, 'C');
 		}
 	}
 
@@ -235,6 +256,8 @@ private:
 	}
 
 	const SuperGeometryType& superGeometry_;
+	ParametersSu3Type modelParameters_;
+	Su3RepresentationBaseType* su3Rep_;
 }; // class Su3Model
 
 } // namespace Dmrg
