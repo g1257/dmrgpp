@@ -4,27 +4,106 @@
 #include "Matrix.h"
 #include "Su3RepresentationBase.h"
 
-template<typename ComplexOrRealType>
+template<typename ComplexOrRealType, bool>
 class Su3RepresentationP1 : public Su3RepresentationBase<ComplexOrRealType> {
 
 public:
 
-	//typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
 	void getMatrix(MatrixType& m, SizeType n) const
 	{
-		throw PsimagLite::RuntimeError("getMatrix: not implemented yet\n");
+		err("Su3RepresentationP1: Please useComplex\n");
 	}
 
-	SizeType t3OfState(SizeType) const
+	SizeType t3OfState(SizeType ind) const
 	{
-		throw PsimagLite::RuntimeError("t3OfState: not implemented yet\n");
+		throw PsimagLite::RuntimeError("Su3RepresentationP1: Please useComplex\n");
 	}
 
-	SizeType t8OfState(SizeType) const
+	SizeType t8OfState(SizeType ind) const
 	{
-		throw PsimagLite::RuntimeError("t8OfState: not implemented yet\n");
+		throw PsimagLite::RuntimeError("Su3RepresentationP1: Please useComplex\n");
+	}
+
+	SizeType size() const
+	{
+		throw PsimagLite::RuntimeError("Su3RepresentationP1: Please useComplex\n");
+	}
+};
+
+template<typename ComplexOrRealType>
+class Su3RepresentationP1<ComplexOrRealType, true>
+        : public Su3RepresentationBase<ComplexOrRealType> {
+
+public:
+
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+
+	void getMatrix(MatrixType& m, SizeType n) const
+	{
+		m.resize(3, 3);
+
+		if (n == 0) {
+			m(0, 1) = m(1, 0) = 0.5;
+			return;
+		}
+
+		if (n == 1) {
+			m(0, 1) = std::complex<RealType>(0, -0.5);
+			m(1, 0) = -m(0, 1);
+			return;
+		}
+
+		if (n == 2) {
+			m(0, 0) = 0.5;
+			m(1, 1) = -0.5;
+			return;
+		}
+
+		if (n == 3) {
+			m(0, 2) = m(2, 0) = 0.5;
+			return;
+		}
+
+		if (n == 4) {
+			m(0, 2) = std::complex<RealType>(0, -0.5);
+			m(2, 0) = -m(0, 2);
+			return;
+		}
+
+		if (n == 5) {
+			m(1, 2) = m(2, 1) = 0.5;
+			return;
+		}
+
+		if (n == 6) {
+			m(1, 2) = std::complex<RealType>(0, -0.5);
+			m(2, 1) = -m(1, 2);
+			return;
+		}
+
+		assert(n == 7);
+		static const RealType oneOverSqrt3 = 1.0/sqrt(3.0);
+		m(0, 0) = m(1, 1) = 0.5*oneOverSqrt3;
+		m(2, 2) = -oneOverSqrt3;
+	}
+
+	// diagonal 1 -1 0  ==> 2 0 1
+	SizeType t3OfState(SizeType ind) const
+	{
+		if (ind == 0) return 2;
+		if (ind == 1) return 0;
+		assert(ind == 2);
+		return 1;
+	}
+
+	// diagonal 1 1 -2 ==> 3 3 0
+	SizeType t8OfState(SizeType ind) const
+	{
+		assert(ind < 3);
+		return (ind < 2) ? 3 : 0;
 	}
 
 	SizeType size() const { return 3; }

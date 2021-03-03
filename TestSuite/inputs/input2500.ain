@@ -15,11 +15,11 @@ Model="Su3Model";
 int Su3RepresentationP=1;
 real Mass=1.42;
 
-SolverOptions="twositedmrg";
+SolverOptions="twositedmrg,usecomplex";
 Version="version";
 OutputFile="data2500";
 InfiniteLoopKeptStates=60;
 FiniteLoops=[[3, 100, 0],[-6, 100, 0]];
-TargetSzPlusConst=4;
+TargetSzPlusConst=12;
 int TargetElectronsTotal=4;
 

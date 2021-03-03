@@ -125,7 +125,8 @@ public:
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef ParametersSu3<RealType, QnType> ParametersSu3Type;
 	typedef Su3RepresentationBase<ComplexOrRealType> Su3RepresentationBaseType;
-	typedef Su3RepresentationP1<ComplexOrRealType> Su3RepresentationP1Type;
+	typedef Su3RepresentationP1<ComplexOrRealType,
+	PsimagLite::IsComplexNumber<ComplexOrRealType>::True> Su3RepresentationP1Type;
 
 	Su3Model(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
