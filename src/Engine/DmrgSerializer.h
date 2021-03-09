@@ -205,7 +205,7 @@ public:
 		for (SizeType i = 0; i < nsectors; ++i) {
 			const SizeType nexcited = wavefunction_[i].size();
 			io.createGroup(prefix + "/WaveFunction/" + ttos(i));
-			io.write(nsectors, prefix + "/WaveFunction/" + ttos(i) + "/Size");
+			io.write(nexcited, prefix + "/WaveFunction/" + ttos(i) + "/Size");
 			for (SizeType j = 0; j < nexcited; ++j)
 				wavefunction_[i][j]->write(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
 		}
