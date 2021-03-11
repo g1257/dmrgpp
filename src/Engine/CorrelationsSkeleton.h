@@ -565,14 +565,12 @@ private:
 
 				pack.unpack(r,eta,helper_.leftRightSuper(ptr).super().
 				            permutation(t));
-				if (eta>=A.rows()) throw PsimagLite::RuntimeError("Error\n");
 
 				for (int k=A.getRowPtr(eta);k<A.getRowPtr(eta+1);k++) {
 					SizeType eta2 = A.getCol(k);
 					SizeType t2 = helper_.leftRightSuper(ptr).super().
 					        permutationInverse(r+eta2*leftSize);
-					if (t2<offset || t2>=total) continue;
-					sum += A.getValue(k)*PsimagLite::conj(vec1.slowAccess(t))*
+					sum += A.getValue(k)*PsimagLite::conj(vec1.fastAccess(sector, t - offset))*
 					        vec2.slowAccess(t2)*sign;
 				}
 			}
