@@ -615,7 +615,10 @@ private:
 	template<typename SomeType>
 	void overwrite(String name, const void* ptr, hsize_t dims[], SizeType ndims)
 	{
-		hdf5file_->unlink(name);
+		try {
+			hdf5file_->unlink(name);
+		} catch (...) {}
+
 		internalWrite<SomeType>(name, ptr, dims, ndims);
 	}
 
