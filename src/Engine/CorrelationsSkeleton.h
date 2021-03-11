@@ -645,9 +645,8 @@ private:
 
 						SizeType t2 = helper_.leftRightSuper(ptr).super().
 						        permutationInverse(rprime+eta2*leftSize);
-						if (t2<offset || t2>=total) continue;
 						sum += Acrs.getValue(k)*Bcrs.getValue(k2)*
-						        PsimagLite::conj(vec1.slowAccess(t))*
+						        PsimagLite::conj(vec1.fastAccess(sector, t - offset))*
 						        vec2.slowAccess(t2)*sign;
 					}
 				}
@@ -705,9 +704,8 @@ private:
 						        permutationInverse(r0+r1prime*ni);
 						SizeType t2 = helper_.leftRightSuper(ptr).super().
 						        permutationInverse(eta2+rprime*leftSize);
-						if (t2<offset || t2>=total) continue;
 						sum += PsimagLite::conj(Acrs.getValue(k))*Bcrs.getValue(k2)*
-						        PsimagLite::conj(vec1.slowAccess(t))*
+						        PsimagLite::conj(vec1.fastAccess(sector, t - offset))*
 						        vec2.slowAccess(t2)*sign;
 					}
 				}
@@ -782,10 +780,9 @@ private:
 							        permutationInverse(r0prime+r1prime*ni);
 							SizeType t2 = helper_.leftRightSuper(ptr).super().
 							        permutationInverse(rprime+eta2*leftSize);
-							if (t2<offset || t2>=total) continue;
 							sum +=  A1crs.getValue(k1)*A2crs.getValue(k2)*
 							        Bcrs.getValue(k3)*
-							        PsimagLite::conj(vec1.slowAccess(t))*
+							        PsimagLite::conj(vec1.fastAccess(sector, t - offset))*
 							        vec2.slowAccess(t2)*sign;
 						}
 					}
