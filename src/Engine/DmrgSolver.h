@@ -358,7 +358,7 @@ obtain ordered
 			                                           parameters_.adjustQuantumNumbers);
 
 			assert(0 < quantumSector_.size()); // used only for SU(2)
-			lrs_.setToProduct(quantumSector_[0], initialSizeOfHashTable);
+			lrs_.setToProduct(initialSizeOfHashTable);
 
 			const BlockType& ystep = findRightBlock(Y,step,E);
 
@@ -566,7 +566,7 @@ obtain ordered
 			                                           parameters_.adjustQuantumNumbers);
 
 			assert(0 < quantumSector_.size()); // used only for SU(2)
-			lrs_.setToProduct(quantumSector_[0], initialSizeOfHashTable);
+			lrs_.setToProduct(initialSizeOfHashTable);
 
 			diagonalization_(target,
 			                 energies,

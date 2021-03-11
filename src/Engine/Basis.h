@@ -164,7 +164,6 @@ public:
 		*/
 	void setToProduct(const ThisType& basis1,
 	                  const ThisType& basis2,
-	                  const QnType* pseudoQn = 0,
 	                  SizeType initialSizeOfHashTable = 10)
 	{
 		if (useSu2Symmetry_)

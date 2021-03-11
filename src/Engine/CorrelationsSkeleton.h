@@ -532,8 +532,7 @@ private:
 					SizeType r2 = A.getCol(k);
 					SizeType t2 = helper_.leftRightSuper(ptr).super().
 					        permutationInverse(r2+eta*A.cols());
-					if (t2<offset || t2>=total) continue;
-					sum += A.getValue(k)*PsimagLite::conj(vec1.slowAccess(t))*
+					sum += A.getValue(k)*PsimagLite::conj(vec1.fastAccess(sector, t - offset))*
 					        vec2.slowAccess(t2);
 				}
 			}

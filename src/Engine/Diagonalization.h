@@ -159,8 +159,6 @@ public:
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction == ProgramGlobals::DirectionEnum::INFINITE);
 		SizeType loopIndex = 0;
-		VectorSizeType sectors;
-		targetedSymmetrySectors(sectors,target.lrs());
 		internalMain_(target, energies, direction, loopIndex, blockLeft);
 		//  targeting:
 		target.evolve(energies[0], direction, blockLeft, blockRight, loopIndex);
@@ -184,20 +182,32 @@ public:
 
 private:
 
-	void targetedSymmetrySectors(VectorSizeType& mVector,
-	                             const LeftRightSuperType& lrs) const
+	SizeType targetedSymmetrySectors(VectorSizeType& mVector,
+	                                 VectorSizeType& compactedWeights,
+	                                 bool findSymmetrySector,
+	                                 const LeftRightSuperType& lrs) const
 	{
-		SizeType total = lrs.super().partition()-1;
-		for (SizeType i = 0; i < total; ++i) {
-			bool flag = false;
-			for (SizeType j = 0; j < quantumSector_.size(); ++j)
-				if (lrs.super().pseudoQn(i) == quantumSector_[j]) {
-					flag = true;
-					break;
-				}
+		const SizeType total = lrs.super().partition() - 1;
+		SizeType sum = 0;
+		for (SizeType j = 0; j < quantumSector_.size(); ++j) {
+			for (SizeType i = 0; i < total; ++i) {
 
-			if (flag) mVector.push_back(i);
+				if (j == 0 && verbose_)
+					std::cerr<<lrs.super().qnEx(i);
+
+				const bool b1 =  (lrs.super().pseudoQn(i) != quantumSector_[j] ||
+				        std::find(mVector.begin(), mVector.end(), i) != mVector.end());
+
+				if (b1 && !findSymmetrySector) continue;
+
+				SizeType bs = lrs.super().partition(i + 1) - lrs.super().partition(i);
+				mVector.push_back(i);
+				compactedWeights.push_back(bs);
+				sum += bs;
+			}
 		}
+
+		return sum;
 	}
 
 	void internalMain_(TargetingType& target,
@@ -232,33 +242,12 @@ private:
 		msg0<<"Setting up Hamiltonian basis of size="<<lrs.super().size();
 		progress_.printline(msgg0, std::cout);
 
-		SizeType total = lrs.super().partition()-1;
-		SizeType weightsTotal = 0;
 		VectorSizeType sectors;
 		VectorSizeType compactedWeights;
-		for (SizeType i = 0; i < total; ++i) {
-			SizeType bs = lrs.super().partition(i+1)-lrs.super().partition(i);
-			if (verbose_)
-				std::cerr<<lrs.super().qnEx(i);
-
-			// Do only one sector unless doing su(2) with j>0, then do all m's
-			bool flag = false;
-			for (SizeType ii = 0; ii < quantumSector_.size(); ++ii) {
-				if (lrs.super().pseudoQn(i) == quantumSector_[ii]) {
-					flag = true;
-					break;
-				}
-			}
-
-			if (!flag && !findSymmetrySector) {
-				bs = 0;
-			} else {
-				sectors.push_back(i);
-				compactedWeights.push_back(bs);
-			}
-
-			weightsTotal += bs;
-		}
+		const SizeType weightsTotal = targetedSymmetrySectors(sectors,
+		                                                      compactedWeights,
+		                                                      findSymmetrySector,
+		                                                      lrs);
 
 		if (weightsTotal == 0) {
 			PsimagLite::String msg("Diagonalization: ");

@@ -234,12 +234,12 @@ public:
 	}
 
 	/*!PTEX_LABEL{setToProductLrs} */
-	void setToProduct(QnType quantumSector, SizeType initialSizeOfHashTable)
+	void setToProduct(SizeType initialSizeOfHashTable)
 	{
 		assert(left_);
 		assert(right_);
 		assert(super_);
-		super_->setToProduct(*left_, *right_, &quantumSector, initialSizeOfHashTable);
+		super_->setToProduct(*left_, *right_, initialSizeOfHashTable);
 	}
 
 	void write(PsimagLite::IoNg::Out& io,
