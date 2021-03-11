@@ -163,7 +163,7 @@ private:
 
 		SizeType splitSize = model_.hilbertSize(site);
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
-		                                helper_.withLegacyBugs());
+		                                true);
 		VectorWithOffsetType dest;
 		applyOpLocal1(dest,
 		              src1,
@@ -199,7 +199,7 @@ private:
 	{
 
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
-		                                helper_.withLegacyBugs());
+		                                true);
 		VectorWithOffsetType dest;
 		applyOpLocal1.hookForZero(dest,
 		                          src1,
