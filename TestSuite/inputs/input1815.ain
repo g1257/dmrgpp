@@ -1,6 +1,6 @@
 ##Ainur1.0
 
-TotalNumberOfSites=6;
+TotalNumberOfSites=4;
 
 NumberOfTerms=3;
 
@@ -25,11 +25,12 @@ Version="version";
 OutputFile="data1815";
 InfiniteLoopKeptStates=60;
 FiniteLoops=[
-[-4, 200, 0],
-[4, 200, 1]];
+[-2, 400, 0],
+[ 2, 400, 0]];
 RepeatFiniteLoopsTimes=4;
-integer TargetElectronsTotal=6;
-TargetSzPlusConst=12;
+
+integer TargetElectronsTotal=4;
+TargetSzPlusConst=8;
 
 string PrintHamiltonianAverage="s==c";
 GsWeight=0.1;
@@ -37,7 +38,7 @@ TSPTau=0.1;
 TSPTimeSteps=5;
 TSPAdvanceEach=4000;
 TSPAlgorithm="Krylov";
-TSPSites=[3];
+TSPSites=[2];
 TSPLoops=[0];
 TSPProductOrSum="product";
 
