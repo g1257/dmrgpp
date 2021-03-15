@@ -1,0 +1,32 @@
+##Ainur1.0
+
+TotalNumberOfSites=4;
+
+NumberOfTerms=3;
+
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[0.0];
+
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[0.0];
+
+gt2:GeometryKind="LongRange";
+gt2:GeometryOptions="none";
+integer gt2:Orbitals=1;
+real gt2:GeometryEntangler=-1;
+
+Model="HeisenbergAncillaC";
+HeisenbergTwiceS=2;
+
+SolverOptions="twositedmrg,MatrixVectorOnTheFly";
+Version="version";
+OutputFile="data1816";
+InfiniteLoopKeptStates=60;
+FiniteLoops=[
+[ 1, 400, 8],
+[-2, 400, 8],
+[2, 400, 0]];
+integer TargetElectronsTotal=4;
+TargetSzPlusConst=8;

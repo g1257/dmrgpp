@@ -1,0 +1,56 @@
+##Ainur1.0
+
+TotalNumberOfSites=4;
+
+NumberOfTerms=3;
+
+gt0:GeometryKind="LongRange";
+gt0:GeometryOptions="none";
+integer gt0:GeometryMaxConnections=0;
+matrix gt0:Connectors=[
+	[0, -1, 0, -1],
+	[-1, 0, -1, 0],
+	[0, -1, 0, -1],
+	[-1, 0, -1, 0]];
+
+gt1:GeometryKind="LongRange";
+gt1:GeometryOptions="none";
+integer gt1:GeometryMaxConnections=0;
+matrix gt1:Connectors=[
+	[0, -1, 0, -1],
+    [-1, 0, -1, 0],
+    [0, -1, 0, -1],
+    [-1, 0, -1, 0]];
+
+gt2:GeometryKind="chain";
+gt2:GeometryOptions="ConstantValues";
+gt2:dir0:Connectors=[0.0];
+
+Model="HeisenbergAncillaC";
+HeisenbergTwiceS=2;
+
+SolverOptions="twositedmrg,restart,TargetingAncilla";
+RestartFilename="data1815";
+Version="version";
+OutputFile="data1816";
+InfiniteLoopKeptStates=60;
+FiniteLoops=[
+[-2, 400, 0],
+[ 2, 400, 0]];
+RepeatFiniteLoopsTimes=4;
+
+integer TargetElectronsTotal=4;
+TargetSzPlusConst=8;
+
+string PrintHamiltonianAverage="s==c";
+GsWeight=0.1;
+TSPTau=0.1;
+TSPTimeSteps=5;
+TSPAdvanceEach=4000;
+TSPAlgorithm="Krylov";
+TSPSites=[2];
+TSPLoops=[0];
+TSPProductOrSum="product";
+
+string TSPOp0:TSPOperator="expression";
+string TSPOp0:OperatorExpression="identity";
