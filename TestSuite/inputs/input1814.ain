@@ -13,7 +13,7 @@ gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[0.0];
 
 gt2:GeometryKind="LongRange";
-gt2:GeometryOptions="twositedmrg";
+gt2:GeometryOptions="none";
 integer gt2:Orbitals=1;
 real gt2:GeometryEntangler=-1;
 
@@ -27,8 +27,6 @@ InfiniteLoopKeptStates=60;
 FiniteLoops=[
 [ 2, 100, 0],
 [-4, 100, 0],
-[4, 100, 1]];
-integer TargetElectronsTotal=3;
-TargetSzPlusConst=6;
-
-
+[4, 100, 0]];
+integer TargetElectronsTotal=6;
+TargetSzPlusConst=12;
