@@ -1,26 +1,16 @@
 ##Ainur1.0
 
-TotalNumberOfSites=4;
+TotalNumberOfSites=8;
 
 NumberOfTerms=3;
 
-gt0:GeometryKind="LongRange";
-gt0:GeometryOptions="none";
-integer gt0:GeometryMaxConnections=0;
-matrix gt0:Connectors=[
-	[0, -1, 0, -1],
-	[-1, 0, -1, 0],
-	[0, -1, 0, -1],
-	[-1, 0, -1, 0]];
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1.0];
 
-gt1:GeometryKind="LongRange";
-gt1:GeometryOptions="none";
-integer gt1:GeometryMaxConnections=0;
-matrix gt1:Connectors=[
-	[0, -1, 0, -1],
-    [-1, 0, -1, 0],
-    [0, -1, 0, -1],
-    [-1, 0, -1, 0]];
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[1.0];
 
 gt2:GeometryKind="chain";
 gt2:GeometryOptions="ConstantValues";
@@ -30,17 +20,17 @@ Model="HeisenbergAncillaC";
 HeisenbergTwiceS=2;
 
 SolverOptions="twositedmrg,restart,TargetingAncilla";
-RestartFilename="data1816";
+RestartFilename="data1818";
 Version="version";
-OutputFile="data1817";
+OutputFile="data1819";
 InfiniteLoopKeptStates=60;
 FiniteLoops=[
-[-2, 400, 2],
-[ 2, 400, 2]];
+[-6, 400, 2],
+[ 6, 400, 2]];
 RepeatFiniteLoopsTimes=4;
 
-integer TargetElectronsTotal=4;
-TargetSzPlusConst=8;
+integer TargetElectronsTotal=8;
+TargetSzPlusConst=16;
 
 string PrintHamiltonianAverage="s==c";
 GsWeight=0.1;
@@ -48,7 +38,7 @@ TSPTau=0.1;
 TSPTimeSteps=5;
 TSPAdvanceEach=4000;
 TSPAlgorithm="Krylov";
-TSPSites=[2];
+TSPSites=[3];
 TSPLoops=[0];
 TSPProductOrSum="product";
 
