@@ -316,9 +316,11 @@ protected:
 	void fillModelLinksReal()
 	{
 		ModelTermType& jOnepm = ModelBaseType::createTerm("jOne_pm");
+		auto multiplyByZeroPointFive = [](ComplexOrRealType& value) { value *= 0.5;};
+
 		for (SizeType a = 0; a < 3; ++a) {
 			OpForLinkType aOpForLink("Tplus" + ttos(a + 1));
-			jOnepm.push(aOpForLink, 'N', aOpForLink, 'C', 0.5);
+			jOnepm.push(aOpForLink, 'N', aOpForLink, 'C', multiplyByZeroPointFive);
 		}
 
 		ModelTermType& jOne33 = ModelBaseType::createTerm("jOne_33");
