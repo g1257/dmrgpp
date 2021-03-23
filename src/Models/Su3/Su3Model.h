@@ -128,6 +128,8 @@ public:
 	typedef Su3RepresentationP1<ComplexOrRealType,
 	PsimagLite::IsComplexNumber<ComplexOrRealType>::True> Su3RepresentationP1Type;
 
+	static const bool IS_REAL = !PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+
 	Su3Model(const SolverParamsType& solverParams,
 	         InputValidatorType& io,
 	         const SuperGeometryType& geometry)
@@ -170,14 +172,17 @@ public:
 		assert(block.size() == 1);
 
 		MatrixType m3;
-//		su3Rep_->getMatrix(m3, 2);
-		su3Rep_->getRealMatrix(m3, 3);
+		su3Rep_->getMatrix(m3, (IS_REAL) ? 3 : 2);
+
 		MatrixType m8;
-//		su3Rep_->getMatrix(m8, 7);
-		su3Rep_->getRealMatrix(m8, 4);
+		su3Rep_->getMatrix(m8, (IS_REAL) ? 4 : 7);
 		MatrixType m = m3*m3;
-		MatrixType mtemp = m8*m8;
-		m += mtemp;
+
+		if (IS_REAL) {
+			MatrixType mtemp = m8*m8;
+			m += mtemp;
+		}
+
 		m *= modelParameters_.mass;
 
 		SparseMatrixType mSparse(m);
@@ -187,8 +192,15 @@ public:
 
 protected:
 
-/*
 	void fillLabeledOperators(VectorQnType& qns)
+	{
+		if (IS_REAL)
+			fillLabeledOperatorsReal(qns);
+		else
+			fillLabeledOperatorsComplex(qns);
+	}
+
+	void fillLabeledOperatorsComplex(VectorQnType& qns)
 	{
 		SizeType site = 0;
 		BlockType block(1, site);
@@ -217,8 +229,8 @@ protected:
 			this->makeTrackable("T" + ttos(a + 1));
 		}
 	}
-*/
-	void fillLabeledOperators(VectorQnType& qns)
+
+	void fillLabeledOperatorsReal(VectorQnType& qns)
 	{
 		SizeType site = 0;
 		BlockType block(1, site);
@@ -232,7 +244,7 @@ protected:
 
 			MatrixType m;
 
-			su3Rep_->getRealMatrix(m, a);
+			su3Rep_->getMatrix(m, a);
 
 			SparseMatrixType sparseMatrix(m);
 
@@ -253,7 +265,7 @@ protected:
 
 			MatrixType m;
 
-			su3Rep_->getRealMatrix(m, a);
+			su3Rep_->getMatrix(m, a);
 
 			SparseMatrixType sparseMatrix(m);
 
@@ -273,8 +285,16 @@ protected:
 			}
 		}
 	}
-/*
+
 	void fillModelLinks()
+	{
+		if (IS_REAL)
+			fillModelLinksReal();
+		else
+			fillModelLinksComplex();
+	}
+
+	void fillModelLinksComplex()
 	{
 		ModelTermType& jOne = ModelBaseType::createTerm("jOne");
 		for (SizeType a = 0; a < 8; ++a) {
@@ -292,8 +312,8 @@ protected:
 			jTwo.push(aOpForLink, 'N', aOpForLink, 'C');
 		}
 	}
-*/
-	void fillModelLinks()
+
+	void fillModelLinksReal()
 	{
 		ModelTermType& jOnepm = ModelBaseType::createTerm("jOne_pm");
 		for (SizeType a = 0; a < 3; ++a) {

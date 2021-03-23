@@ -8,14 +8,11 @@ class Su3RepresentationBase {
 
 public:
 
-	//typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
 	virtual ~Su3RepresentationBase() {}
 
 	virtual void getMatrix(MatrixType&, SizeType) const = 0;
-
-	virtual void getRealMatrix(MatrixType&, SizeType) const = 0;
 
 	virtual SizeType t3OfState(SizeType) const = 0;
 

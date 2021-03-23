@@ -13,28 +13,57 @@ public:
 
 	void getMatrix(MatrixType& m, SizeType n) const
 	{
-		err("Su3RepresentationP1: Please useComplex\n");
+		m.resize(3, 3);
+
+		// Tplus1
+		if (n == 0) {
+			m(0, 1) = 0.5;
+			return;
+		}
+
+		// Tplus2
+		if (n == 1) {
+			m(0, 2) = 0.5;
+			return;
+		}
+
+		// Tplus3
+		if (n == 2) {
+			m(1, 2) = 0.5;
+			return;
+		}
+
+		// T3
+		if (n == 3) {
+			m(0, 0) = 0.5;
+			m(1, 1) = -0.5;
+			return;
+		}
+
+		// T8
+		assert(n == 4);
+		static const ComplexOrRealType oneOverSqrt3 = 1.0/sqrt(3.0);
+		m(0, 0) = m(1, 1) = 0.5*oneOverSqrt3;
+		m(2, 2) = -oneOverSqrt3;
 	}
 
-	void getRealMatrix(MatrixType& m, SizeType n) const
-	{
-		err("Su3RepresentationP1: Please don't useComplex\n");
-	}
-
+	// diagonal 1 -1 0  ==> 2 0 1
 	SizeType t3OfState(SizeType ind) const
 	{
-		throw PsimagLite::RuntimeError("Su3RepresentationP1: Please useComplex\n");
+		if (ind == 0) return 2;
+		if (ind == 1) return 0;
+		assert(ind == 2);
+		return 1;
 	}
 
+	// diagonal 1 1 -2 ==> 3 3 0
 	SizeType t8OfState(SizeType ind) const
 	{
-		throw PsimagLite::RuntimeError("Su3RepresentationP1: Please useComplex\n");
+		assert(ind < 3);
+		return (ind < 2) ? 3 : 0;
 	}
 
-	SizeType size() const
-	{
-		throw PsimagLite::RuntimeError("Su3RepresentationP1: Please useComplex\n");
-	}
+	SizeType size() const { return 3; }
 };
 
 template<typename ComplexOrRealType>
@@ -90,38 +119,6 @@ public:
 		}
 
 		assert(n == 7);
-		static const RealType oneOverSqrt3 = 1.0/sqrt(3.0);
-		m(0, 0) = m(1, 1) = 0.5*oneOverSqrt3;
-		m(2, 2) = -oneOverSqrt3;
-	}
-
-	void getRealMatrix(MatrixType& m, SizeType n) const
-	{
-		m.resize(3, 3);
-
-		// Tplus1
-		if (n == 0) {
-			m(0, 1) = 0.5;
-			return;
-		}
-		// Tplus2
-		if (n == 1) {
-			m(0, 2) = 0.5;
-			return;
-		}
-		// Tplus3
-		if (n == 2) {
-			m(1, 2) = 0.5;
-			return;
-		}
-		// T3
-		if (n == 3) {
-			m(0, 0) = 0.5;
-			m(1, 1) = -0.5;
-			return;
-		}
-		// T8
-		assert(n == 4);
 		static const RealType oneOverSqrt3 = 1.0/sqrt(3.0);
 		m(0, 0) = m(1, 1) = 0.5*oneOverSqrt3;
 		m(2, 2) = -oneOverSqrt3;
