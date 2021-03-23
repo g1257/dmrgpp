@@ -129,8 +129,8 @@ public:
 	PsimagLite::IsComplexNumber<ComplexOrRealType>::True> Su3RepresentationP1Type;
 
 	Su3Model(const SolverParamsType& solverParams,
-	                InputValidatorType& io,
-	                const SuperGeometryType& geometry)
+	         InputValidatorType& io,
+	         const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
 	                    geometry,
 	                    io),
@@ -170,12 +170,14 @@ public:
 		assert(block.size() == 1);
 
 		MatrixType m3;
-		su3Rep_->getMatrix(m3, 2);
-
+//		su3Rep_->getMatrix(m3, 2);
+		su3Rep_->getRealMatrix(m3, 3);
 		MatrixType m8;
-		su3Rep_->getMatrix(m8, 7);
-
+//		su3Rep_->getMatrix(m8, 7);
+		su3Rep_->getRealMatrix(m8, 4);
 		MatrixType m = m3*m3;
+		MatrixType mtemp = m8*m8;
+		m += mtemp;
 		m *= modelParameters_.mass;
 
 		SparseMatrixType mSparse(m);
@@ -185,6 +187,7 @@ public:
 
 protected:
 
+/*
 	void fillLabeledOperators(VectorQnType& qns)
 	{
 		SizeType site = 0;
@@ -214,7 +217,63 @@ protected:
 			this->makeTrackable("T" + ttos(a + 1));
 		}
 	}
+*/
+	void fillLabeledOperators(VectorQnType& qns)
+	{
+		SizeType site = 0;
+		BlockType block(1, site);
+		SizeType total = su3Rep_->size();
+		HilbertBasisType natBasis(total);
+		for (SizeType i = 0; i < total; ++i) natBasis[i] = i;
 
+		setSymmetryRelated(qns, natBasis, block.size());
+
+		for (SizeType a = 0; a < 3; ++a) {
+
+			MatrixType m;
+
+			su3Rep_->getRealMatrix(m, a);
+
+			SparseMatrixType sparseMatrix(m);
+
+			typename OperatorType::Su2RelatedType su2related;
+
+			OperatorType myOp(sparseMatrix,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			this->createOpsLabel("Tplus" + ttos(a + 1)).push(myOp);
+			this->makeTrackable("Tplus" + ttos(a + 1));
+			myOp.dagger();
+			this->createOpsLabel("Tminus" + ttos(a + 1)).push(myOp);
+		}
+
+		for (SizeType a = 3; a < 5; ++a) {
+
+			MatrixType m;
+
+			su3Rep_->getRealMatrix(m, a);
+
+			SparseMatrixType sparseMatrix(m);
+
+			typename OperatorType::Su2RelatedType su2related;
+
+			OperatorType myOp(sparseMatrix,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
+			if (a==4) {
+				this->createOpsLabel("T8").push(myOp);
+				this->makeTrackable("T8");
+			} else {
+				this->createOpsLabel("T" + ttos(a)).push(myOp);
+				this->makeTrackable("T" + ttos(a));
+			}
+		}
+	}
+/*
 	void fillModelLinks()
 	{
 		ModelTermType& jOne = ModelBaseType::createTerm("jOne");
@@ -233,10 +292,27 @@ protected:
 			jTwo.push(aOpForLink, 'N', aOpForLink, 'C');
 		}
 	}
+*/
+	void fillModelLinks()
+	{
+		ModelTermType& jOnepm = ModelBaseType::createTerm("jOne_pm");
+		for (SizeType a = 0; a < 3; ++a) {
+			OpForLinkType aOpForLink("Tplus" + ttos(a + 1));
+			jOnepm.push(aOpForLink, 'N', aOpForLink, 'C', 0.5);
+		}
 
+		ModelTermType& jOne33 = ModelBaseType::createTerm("jOne_33");
+		OpForLinkType aOpForLink3("T3");
+		jOne33.push(aOpForLink3, 'N', aOpForLink3, 'C');
+
+		ModelTermType& jOne88 = ModelBaseType::createTerm("jOne_88");
+		OpForLinkType aOpForLink8("T8");
+		jOne88.push(aOpForLink8, 'N', aOpForLink8, 'C');
+
+	}
 private:
 
-	// \sum_i T3(i) and \sum_i T4(i) are conserved separately
+	// \sum_i T3(i) and \sum_i T8(i) are conserved separately
 	// We delegate to the representation the actual values and computation
 	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
