@@ -267,6 +267,7 @@ hence non-trivial. (Krylov)
 #2103-2199 --> Reserved for hot spectra
 2300) Graphene
 2500) Su3Model
+2510) Real version of 2500
 3000) Dynamics: Local Green's function at site 8 for a non-interacting one-band Hubbard model using
 correction vector algorithm (type=0).
 3001) Dynamics: Local Green's function at site 8 for a non-interacting one-band Hubbard model using

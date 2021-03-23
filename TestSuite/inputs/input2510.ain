@@ -1,0 +1,29 @@
+##Ainur 1.0
+
+TotalNumberOfSites=8;
+NumberOfTerms=3;
+
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1.0];
+
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[1.0];
+
+gt2:GeometryKind="chain";
+gt2:GeometryOptions="ConstantValues";
+gt2:dir0:Connectors=[1.0];
+
+Model="Su3Model";
+int Su3RepresentationP=1;
+real Mass=1.42;
+
+SolverOptions="twositedmrg";
+Version="version";
+OutputFile="data2510";
+InfiniteLoopKeptStates=60;
+FiniteLoops=[[3, 100, 0],[-6, 100, 0]];
+TargetSzPlusConst=12;
+int TargetElectronsTotal=4;
+
