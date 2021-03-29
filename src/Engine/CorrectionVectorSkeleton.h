@@ -312,6 +312,8 @@ private:
 
 		if (CalcR::ActionType::isValueComplex()) return;
 
+		if (model_.params().options.isSet("correctionvectorimagonly")) return;
+
 		krylovHelper_.calcR(r, what.real(), T, V, phi, n2, i0);
 
 		psimag::BLAS::GEMV('N',n2,n2,zone,&(T(0,0)),n2,&(r[0]),1,zzero,&(tmp[0]),1);
