@@ -144,11 +144,12 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 			}
 		}
 
-		void deleteMatrix(SizeType i)
+		void deleteMatrix(SizeType igroup)
 		{
-			assert(i < m_.size());
-			delete m_[i];
-			m_[i] = nullptr;
+			SizeType index = groupIndex(igroup);
+			assert(index < m_.size());
+			delete m_[index];
+			m_[index] = nullptr;
 		}
 
 		void push(SizeType igroup,
