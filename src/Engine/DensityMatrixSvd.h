@@ -140,8 +140,15 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 			SizeType n = m_.size();
 			for (SizeType i = 0; i < n; ++i) {
 				delete m_[i];
-				m_[i] = 0;
+				m_[i] = nullptr;
 			}
+		}
+
+		void deleteMatrix(SizeType i)
+		{
+			assert(i < m.size());
+			delete m_[i];
+			m_[i] = nullptr;
 		}
 
 		void push(SizeType igroup,
@@ -391,6 +398,11 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 			assert(m.rows() == partSize);
 			assert(m.rows() == m.cols());
 			blockDiagonalMatrix_.setBlock(igroup, offset, m);
+
+
+			// DO NOT USE m after this line
+			allTargets_.deleteMatrix(igroup);
+
 			SizeType x = eigsOnePatch.size();
 			if (x > partSize) x = partSize;
 			assert(x + offset <= eigs_.size());
