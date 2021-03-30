@@ -146,7 +146,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
 		void deleteMatrix(SizeType i)
 		{
-			assert(i < m.size());
+			assert(i < m_.size());
 			delete m_[i];
 			m_[i] = nullptr;
 		}
