@@ -237,6 +237,11 @@ public:
 		reorthoIfNecessary(V2, iter);
 	}
 
+	void needsDelete(bool b)
+	{
+		needsDelete_ = b;
+	}
+
 private:
 
 	void reorthoIfNecessary(VectorType& V2, SizeType iter) const

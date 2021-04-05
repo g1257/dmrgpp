@@ -274,6 +274,7 @@ public:
 		if (!ptr)
 			throw RuntimeError("LanczosCore::lanczosVectors() called but no data stored\n");
 
+		lanczosVectors_.needsDelete(false);
 		ptr->swap(V);
 	}
 
