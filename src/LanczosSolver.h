@@ -91,9 +91,9 @@ public:
 		return ls_.decomposition(initVector, ab, 1);
 	}
 
-	const typename LanczosCoreType::DenseMatrixType& lanczosVectors() const
+	void lanczosVectorsSwap(typename LanczosCoreType::DenseMatrixType& V)
 	{
-		return ls_.lanczosVectors();
+		ls_.lanczosVectorsSwap(V);
 	}
 
 	SizeType steps() const {return ls_.steps(); }

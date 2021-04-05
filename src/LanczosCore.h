@@ -268,13 +268,13 @@ public:
 
 	SizeType steps() const {return steps_; }
 
-	const DenseMatrixType& lanczosVectors() const
+	void lanczosVectorsSwap(DenseMatrixType& V)
 	{
-		const DenseMatrixType* ptr = lanczosVectors_.data();
+		DenseMatrixType* ptr = lanczosVectors_.data();
 		if (!ptr)
 			throw RuntimeError("LanczosCore::lanczosVectors() called but no data stored\n");
 
-		return *(ptr);
+		ptr->swap(V);
 	}
 
 	const MatrixType& matrix() const { return mat_; }
