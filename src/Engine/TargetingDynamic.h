@@ -294,7 +294,7 @@ private:
 
 		lanczosSolver.decomposition(sv,ab_);
 
-		V = lanczosSolver.lanczosVectors();
+		lanczosSolver.lanczosVectorsSwap(V);
 	}
 
 	void setVectors(const DenseMatrixType& V,

@@ -154,7 +154,7 @@ private:
 		lanczosSolver.decomposition(phi2,ab);
 		ab.buildDenseMatrix(T);
 
-		V = lanczosSolver.lanczosVectors();
+		lanczosSolver.lanczosVectorsSwap(V);
 
 		return lanczosSolver.steps();
 	}
