@@ -240,7 +240,6 @@ public:
 		DenseMatrixType* ptr = lanczosVectors_.data();
 		if (!ptr)
 			err("LanczosSolver::lanczosVectors() called but no data stored\n");
-		lanczosVectors_.needsDelete(false);
 		return ptr->swap(V);
 	}
 
