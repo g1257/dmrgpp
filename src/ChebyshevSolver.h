@@ -235,12 +235,12 @@ public:
 
 	SizeType steps() const {return params_.steps; }
 
-	const DenseMatrixType& lanczosVectors() const
+	void lanczosVectorsSwap(DenseMatrixType& V)
 	{
-		const DenseMatrixType* ptr = lanczosVectors_.data();
+		DenseMatrixType* ptr = lanczosVectors_.data();
 		if (!ptr)
 			err("LanczosSolver::lanczosVectors() called but no data stored\n");
-		return *(ptr);
+		return ptr->swap(V);
 	}
 
 private:
