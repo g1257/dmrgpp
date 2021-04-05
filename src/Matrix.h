@@ -314,6 +314,12 @@ public:
 	void swap(Matrix& m)
 	{
 		m.data_.swap(data_);
+		SizeType row = m.nrow_;
+		SizeType col = m.ncol_;
+		m.nrow_ = nrow_;
+		m.ncol_ = ncol_;
+		nrow_ = row;
+		ncol_ = col;
 	}
 
 	void setTo(const T& val)
