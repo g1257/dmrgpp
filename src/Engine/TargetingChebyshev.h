@@ -210,29 +210,20 @@ public:
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
 
-		bool doBorderIfBorder = false;
-		if (site > 1 && site < numberOfSites - 2) {
-			this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
+		if (site > 1 && site < numberOfSites - 2)
 			return;
-		}
 
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			if (site == 1) {
-				this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
-				return;
-			}
+			if (site == 1) return;
 		} else {
-			if (site == numberOfSites - 2) {
-				this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
-				return;
-			}
+			if (site == numberOfSites - 2) return;
 		}
 
 		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1, x);
 		evolveInternal(Eg, direction, block, loopNumber);
 
-		doBorderIfBorder = true;
+		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
 	}
 
