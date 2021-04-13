@@ -91,6 +91,17 @@ public:
 		}
 	}
 
+	void read(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io)
+	{
+		err("read\n");
+	}
+
+	void write(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io) const
+	{
+		err("write\n");
+	}
+
+
 	template<typename StackType1,typename StackType2>
 	static void loadStack(StackType1& stackInMemory, StackType2& stackInDisk)
 	{

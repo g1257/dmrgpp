@@ -3,6 +3,7 @@
 #include "Io/IoNg.h"
 #include "WaveStructSvd.h"
 #include "ProgramGlobals.h"
+#include "../DiskOrMemoryStack.h"
 
 namespace Dmrg {
 
@@ -20,10 +21,15 @@ public:
 	typedef typename WaveStructSvdType::VectorQnType VectorQnType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::BlockType VectorSizeType;
-	typedef typename PsimagLite::Stack<WaveStructSvdType>::Type WftStackType;
+	typedef DiskOrMemoryStack<WaveStructSvdType> WftStackType;
 
-	WaveStructCombined()
-	    : lrs_("pSE", "pSprime", "pEprime"), needsPop_(false)
+	WaveStructCombined(bool onDisk,
+	                   const PsimagLite::String filename,
+	                   bool isObserveCode)
+	    : lrs_("pSE", "pSprime", "pEprime"),
+	      wsStack_(onDisk, filename, "system", isObserveCode),
+	      weStack_(onDisk, filename, "environ", isObserveCode),
+	      needsPop_(false)
 	{}
 
 	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix)
@@ -36,10 +42,10 @@ public:
 	void write(PsimagLite::IoNg::Out& io, PsimagLite::String prefix) const
 	{
 		writePartial(io, prefix);
-		WftStackType wsStack = wsStack_;
-		io.write(wsStack, prefix + "/wsStack");
-		WftStackType weStack = weStack_;
-		io.write(weStack, prefix + "/weStack");
+//		WftStackType wsStack = wsStack_;
+		io.write(wsStack_, prefix + "/wsStack");
+//		WftStackType weStack = weStack_;
+		io.write(weStack_, prefix + "/weStack");
 	}
 
 	void write(PsimagLite::IoNg::Out& io, PsimagLite::String prefix)

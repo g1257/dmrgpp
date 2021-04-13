@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define WAVE_STRUCT_SVD_H
 #include "ProgramGlobals.h"
 #include "Vector.h"
+#include "Io/IoNg.h"
 
 namespace Dmrg {
 
@@ -101,8 +102,16 @@ struct WaveStructSvd {
 	typedef typename PsimagLite::Matrix<SparseElementType> MatrixType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
+	typedef typename PsimagLite::IoNg::In IoInType;
+
+	enum class SaveEnum {ALL};
 
 	WaveStructSvd() {}
+
+	WaveStructSvd(IoInType& io, PsimagLite::String label, bool)
+	{
+		read(label, io.serializer());
+	}
 
 	WaveStructSvd(const BlockDiagonalMatrixType& u,
 	                   const VectorMatrixType& vts,
@@ -135,7 +144,10 @@ struct WaveStructSvd {
 		QnType::readVector(qns_, prefix + "/qns", io);
 	}
 
-	void write(PsimagLite::IoNg::Out& io, PsimagLite::String prefix) const
+	void write(PsimagLite::IoNg::Out& io,
+	           PsimagLite::String prefix,
+	           PsimagLite::IoNgSerializer::WriteMode writeMode,
+	           SaveEnum) const
 	{
 		io.createGroup(prefix);
 		io.write(u_, prefix + "/u");
