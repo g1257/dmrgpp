@@ -212,6 +212,15 @@ public:
 		}
 
 		template<typename T>
+		void write(const T& what,
+		           String name2,
+		           IoNgSerializer::WriteMode mode,
+		           typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
+		{
+			what.write(name2, ioNgSerializer_, mode);
+		}
+
+		template<typename T>
 		void overwrite(const T& what,
 		               String name2,
 		               typename EnableIf<IsRootUnDelegated<T>::True, int*>::Type = 0)

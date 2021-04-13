@@ -149,8 +149,13 @@ public:
 		ioSerializer.read(data_, label + "/data_");
 	}
 
-	void write(String label, IoSerializer& ioSerializer) const
+	void write(String label,
+	           IoSerializer& ioSerializer,
+	           IoSerializer::WriteMode wM = IoSerializer::NO_OVERWRITE) const
 	{
+		if (wM == IoSerializer::ALLOW_OVERWRITE)
+			return overwrite(label, ioSerializer);
+
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/nrow_", nrow_);
 		ioSerializer.write(label + "/ncol_", ncol_);

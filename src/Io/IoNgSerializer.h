@@ -282,12 +282,12 @@ public:
 	           typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith,
 	           int*>::Type = 0)
 	{
-		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
-		createGroup(name2);
-		write(name2 + "/Size", n);
+		if (allowOverwrite != ALLOW_OVERWRITE)
+			createGroup(name2);
+		write(name2 + "/Size", n, allowOverwrite);
 		for (SizeType i = 0; i < n; ++i)
-			write(name2 + "/" + typeToString(i), what[i]);
+			write(name2 + "/" + typeToString(i), what[i], allowOverwrite);
 	}
 
 	template<typename T1, typename T2>
@@ -309,7 +309,6 @@ public:
 	template<typename T>
 	void write(String name2,
 	           const std::vector<T>& what,
-	           WriteMode = NO_OVERWRITE,
 	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
 	           && !IsPairLike<T>::True && !IsEnumClass<T>::value, int*>::Type = 0)
 	{
@@ -318,6 +317,21 @@ public:
 		write(name2 + "/Size", n);
 		for (SizeType i = 0; i < n; ++i)
 			what[i].write(name2 + "/" + typeToString(i), *this);
+	}
+
+	template<typename T>
+	void write(String name2,
+	           const std::vector<T>& what,
+	           WriteMode allowOverwrite,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	           && !IsPairLike<T>::True && !IsEnumClass<T>::value, int*>::Type = 0)
+	{
+		SizeType n = what.size();
+		if (allowOverwrite != ALLOW_OVERWRITE)
+			createGroup(name2);
+		write(name2 + "/Size", n, allowOverwrite);
+		for (SizeType i = 0; i < n; ++i)
+			what[i].write(name2 + "/" + typeToString(i), *this, allowOverwrite);
 	}
 
 	template<typename T>
