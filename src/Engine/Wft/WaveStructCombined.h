@@ -42,17 +42,15 @@ public:
 	void write(PsimagLite::IoNg::Out& io, PsimagLite::String prefix) const
 	{
 		writePartial(io, prefix);
-//		WftStackType wsStack = wsStack_;
-		io.write(wsStack_, prefix + "/wsStack");
-//		WftStackType weStack = weStack_;
-		io.write(weStack_, prefix + "/weStack");
+		wsStack_.write(prefix + "/wsStack", io.serializer());
+		weStack_.write(prefix + "/weStack", io.serializer());
 	}
 
 	void write(PsimagLite::IoNg::Out& io, PsimagLite::String prefix)
 	{
 		writePartial(io, prefix);
-		io.write(wsStack_, prefix + "/wsStack");
-		io.write(weStack_, prefix + "/weStack");
+		wsStack_.write(prefix + "/wsStack", io.serializer());
+		weStack_.write(prefix + "/weStack", io.serializer());
 	}
 
 	void beforeWft(ProgramGlobals::DirectionEnum dir,

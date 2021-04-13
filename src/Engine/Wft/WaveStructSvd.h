@@ -149,11 +149,12 @@ struct WaveStructSvd {
 	           PsimagLite::IoNgSerializer::WriteMode writeMode,
 	           SaveEnum) const
 	{
-		io.createGroup(prefix);
-		io.write(u_, prefix + "/u");
-		io.write(vts_, prefix + "/vts");
-		io.write(s_, prefix + "/s");
-		io.write(qns_, prefix + "/qns");
+		if (writeMode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+			io.createGroup(prefix);
+		io.write(u_, prefix + "/u", writeMode);
+		io.write(vts_, prefix + "/vts", writeMode);
+		io.write(s_, prefix + "/s", writeMode);
+		io.write(qns_, prefix + "/qns", writeMode);
 	}
 
 	void write(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io) const

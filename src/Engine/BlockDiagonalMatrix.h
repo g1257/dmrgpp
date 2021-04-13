@@ -141,13 +141,16 @@ public:
 	}
 
 	template<typename IoOutputType>
-	void write(PsimagLite::String label1, IoOutputType& io) const
+	void write(PsimagLite::String label1,
+	           IoOutputType& io,
+	           PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
-		io.createGroup(label1);
-		io.write(isSquare_, label1 + "/isSquare_");
-		io.write(offsetsRows_, label1 + "/offsetRows_");
-		io.write(offsetsCols_, label1 + "/offsetCols_");
-		io.write(data_, label1 + "/data_");
+		if (wM != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+			io.createGroup(label1);
+		io.write(isSquare_, label1 + "/isSquare_", wM);
+		io.write(offsetsRows_, label1 + "/offsetRows_", wM);
+		io.write(offsetsCols_, label1 + "/offsetCols_", wM);
+		io.write(data_, label1 + "/data_", wM);
 	}
 
 	void setTo(ComplexOrRealType value)
@@ -312,13 +315,16 @@ public:
 		ioSerializer.read(data_, label + "/data");
 	}
 
-	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label,
+	           PsimagLite::IoSerializer& ioSerializer,
+	           PsimagLite::IoSerializer::WriteMode wM = PsimagLite::IoSerializer::NO_OVERWRITE) const
 	{
-		ioSerializer.createGroup(label);
-		ioSerializer.write(label + "/isSquare", isSquare_);
-		ioSerializer.write(label + "/offsetsRows", offsetsRows_);
-		ioSerializer.write(label + "/offsetsCols", offsetsCols_);
-		ioSerializer.write(label + "/data", data_);
+		if (wM != PsimagLite::IoSerializer::ALLOW_OVERWRITE)
+			ioSerializer.createGroup(label);
+		ioSerializer.write(label + "/isSquare", isSquare_, wM);
+		ioSerializer.write(label + "/offsetsRows", offsetsRows_, wM);
+		ioSerializer.write(label + "/offsetsCols", offsetsCols_, wM);
+		ioSerializer.write(label + "/data", data_, wM);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const BlockDiagonalMatrix& m)

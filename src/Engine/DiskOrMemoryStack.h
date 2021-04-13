@@ -93,14 +93,34 @@ public:
 
 	void read(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io)
 	{
-		err("read\n");
+		if (diskW_) {
+			assert(diskR_);
+			err("read\n");
+		}
+
+		io.read(memory_, prefix);
 	}
 
 	void write(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io) const
 	{
-		err("write\n");
+		if (diskW_) {
+			assert(diskR_);
+			err("write\n");
+		}
+
+		MemoryStackType m = memory_;
+		io.write(prefix, m);
 	}
 
+	void write(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io)
+	{
+		if (diskW_) {
+			assert(diskR_);
+			err("write\n");
+		}
+
+		io.write(prefix, memory_);
+	}
 
 	template<typename StackType1,typename StackType2>
 	static void loadStack(StackType1& stackInMemory, StackType2& stackInDisk)
@@ -120,7 +140,7 @@ private:
 
 	DiskOrMemoryStack& operator=(const DiskOrMemoryStack&);
 
-	MemoryStackType memory_;
+	mutable MemoryStackType memory_;
 	DiskStackType *diskW_;
 	DiskStackType *diskR_;
 };

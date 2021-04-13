@@ -25,11 +25,14 @@ public:
 			io.read(extra, str + "/extra");
 		}
 
-		void write(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
+		void write(PsimagLite::String str,
+		           PsimagLite::IoNgSerializer& io,
+		           typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 		{
-			io.createGroup(str);
-			io.write(str+ "/modalEnum", modalEnum);
-			io.write(str + "/extra", extra);
+			if (wM != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+				io.createGroup(str);
+			io.write(str+ "/modalEnum", modalEnum, wM);
+			io.write(str + "/extra", extra, wM);
 		}
 
 		ModalEnum modalEnum;
@@ -97,7 +100,9 @@ public:
 			err("Qn::read\n");
 	}
 
-	void write(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
+	void write(PsimagLite::String str,
+	           PsimagLite::IoNgSerializer& io,
+	           typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		try {
 			io.read(modalStruct, "modalStruct");
@@ -105,13 +110,14 @@ public:
 			io.write("modalStruct", modalStruct);
 		}
 
-		io.createGroup(str);
-		io.write(str + "/oddElectrons", oddElectrons);
+		if (wM != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
+			io.createGroup(str);
+		io.write(str + "/oddElectrons", oddElectrons, wM);
 		VectorSizeType otherVector;
 		other.toStdVector(otherVector);
-		io.write(str + "/other", otherVector);
-		io.write(str + "/jmPair", jmPair);
-		io.write(str + "/flavors", flavors);
+		io.write(str + "/other", otherVector, wM);
+		io.write(str + "/jmPair", jmPair, wM);
+		io.write(str + "/flavors", flavors, wM);
 	}
 
 	void overwrite(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
