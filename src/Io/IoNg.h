@@ -236,6 +236,8 @@ public:
 			what.overwrite(name2, ioNgSerializer_);
 		}
 
+		IoNgSerializer& serializer() { return ioNgSerializer_; }
+
 	private:
 
 		Out(const Out&);
