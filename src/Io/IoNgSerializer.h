@@ -140,7 +140,7 @@ public:
 	/* write functions START */
 
 	template<typename T>
-	void write(String name2,
+	bool write(String name2,
 	           const T& what,
 	           WriteMode allowOverwrite = NO_OVERWRITE,
 	           typename EnableIf<Loki::TypeTraits<T>::isArith ||
@@ -152,9 +152,10 @@ public:
 		dims[0] = 1;
 
 		if (allowOverwrite)
-			overwrite<T>(name, ptr, dims, 1);
+			return overwrite<T>(name, ptr, dims, 1);
 		else
 			internalWrite<T>(name, ptr, dims, 1);
+		return true;
 	}
 
 	void write(String name2, String what, WriteMode allowOverwrite = NO_OVERWRITE)
@@ -627,13 +628,21 @@ private:
 	}
 
 	template<typename SomeType>
-	void overwrite(String name, const void* ptr, hsize_t dims[], SizeType ndims)
+	bool overwrite(String name, const void* ptr, hsize_t dims[], SizeType ndims)
 	{
 		try {
 			hdf5file_->unlink(name);
-		} catch (...) {}
+		} catch (...) {
+			std::cerr<<"Cannot unlink "<<name<<"\n";
+		}
 
-		internalWrite<SomeType>(name, ptr, dims, ndims);
+		try {
+			internalWrite<SomeType>(name, ptr, dims, ndims);
+		} catch (...) {
+			return false;
+		}
+
+		return true;
 	}
 
 	template<typename SomeType>

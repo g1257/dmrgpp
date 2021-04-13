@@ -153,8 +153,11 @@ public:
 	           IoSerializer& ioSerializer,
 	           IoSerializer::WriteMode wM = IoSerializer::NO_OVERWRITE) const
 	{
+		bool flag = false;
 		if (wM == IoSerializer::ALLOW_OVERWRITE)
-			return overwrite(label, ioSerializer);
+			flag = overwrite(label, ioSerializer);
+
+		if (flag) return;
 
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/nrow_", nrow_);
@@ -163,12 +166,17 @@ public:
 		ioSerializer.write(label + "/data_", data_);
 	}
 
-	void overwrite(String label, IoSerializer& ioSerializer) const
+	bool overwrite(String label, IoSerializer& ioSerializer) const
 	{
-		ioSerializer.write(label + "/nrow_", nrow_, IoSerializer::ALLOW_OVERWRITE);
-		ioSerializer.write(label + "/ncol_", ncol_, IoSerializer::ALLOW_OVERWRITE);
-		if (nrow_ == 0 || ncol_ == 0) return;
+		bool b = ioSerializer.write(label + "/nrow_", nrow_, IoSerializer::ALLOW_OVERWRITE);
+		if (!b) return b;
+
+		b = ioSerializer.write(label + "/ncol_", ncol_, IoSerializer::ALLOW_OVERWRITE);
+		if (!b) return b;
+
+		if (nrow_ == 0 || ncol_ == 0) return b;
 		ioSerializer.write(label + "/data_", data_, IoSerializer::ALLOW_OVERWRITE);
+		return true;
 	}
 
 	void print(int fd) const
