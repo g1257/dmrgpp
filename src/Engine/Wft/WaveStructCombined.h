@@ -27,8 +27,8 @@ public:
 	                   const PsimagLite::String filename,
 	                   bool isObserveCode)
 	    : lrs_("pSE", "pSprime", "pEprime"),
-	      wsStack_(onDisk, filename, "system", isObserveCode),
-	      weStack_(onDisk, filename, "environ", isObserveCode),
+	      wsStack_(onDisk, filename, "Wstacks", "system", isObserveCode),
+	      weStack_(onDisk, filename, "Wstacks", "environ", isObserveCode),
 	      needsPop_(false)
 	{}
 

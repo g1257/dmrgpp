@@ -16,14 +16,15 @@ public:
 
 	DiskOrMemoryStack(bool onDisk,
 	                  const PsimagLite::String filename,
+	                  const PsimagLite::String post,
 	                  PsimagLite::String label,
 	                  bool isObserveCode)
-	    : diskW_(0), diskR_(0)
+	    : isObserveCode_(isObserveCode), diskW_(0), diskR_(0)
 	{
 		if (!onDisk) return;
 
 		size_t lastindex = filename.find_last_of(".");
-		PsimagLite::String file = filename.substr(0, lastindex) + "Stacks.hd5";
+		PsimagLite::String file = filename.substr(0, lastindex) + post + ".hd5";
 
 		if (createFile_) {
 			PsimagLite::IoNg::Out out(file, PsimagLite::IoNg::ACC_TRUNC);
@@ -105,21 +106,13 @@ public:
 	{
 		if (diskW_) {
 			assert(diskR_);
-			err("write\n");
+			std::cerr<<__FILE__<<": write(): not writing, cannot restart\n";
+			std::cout<<__FILE__<<": write(): not writing, cannot restart\n";
+			return;
 		}
 
 		MemoryStackType m = memory_;
 		io.write(prefix, m);
-	}
-
-	void write(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io)
-	{
-		if (diskW_) {
-			assert(diskR_);
-			err("write\n");
-		}
-
-		io.write(prefix, memory_);
 	}
 
 	template<typename StackType1,typename StackType2>
@@ -140,6 +133,7 @@ private:
 
 	DiskOrMemoryStack& operator=(const DiskOrMemoryStack&);
 
+	bool isObserveCode_;
 	mutable MemoryStackType memory_;
 	DiskStackType *diskW_;
 	DiskStackType *diskR_;
