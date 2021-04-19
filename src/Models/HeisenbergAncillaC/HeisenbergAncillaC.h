@@ -404,7 +404,7 @@ protected:
 			             typename ModelTermType::Su2Properties(2, 1, 0));
 		}
 
-		auto modifierTermDoff = [twiceTheSpin](SparseElementType& value)
+		auto modifierTermDoff = [](SparseElementType& value)
 		{RealType factor = -1; value *= factor; };
 		OpForLinkType d0("d", 0);
 		OpForLinkType d1("d", 1);
