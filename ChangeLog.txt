@@ -1,3 +1,69 @@
+2021-04-22 Version 6.00
+
+bug fixes:
+
+* DmrgSerializer: bug fix in write
+
+* CorrelationsSkeleton: bug fix when ket != bra
+
+user interface:
+
+* SolverOptions=correctionvectorimagonly added (Alberto Nocera)
+
+* SolverOptions=wftstacksondisk added, but cannot
+restart or observe if this features is on
+
+* InputCheck: Work in progress to define all Ainur variables
+
+* TSPOperatorMultiplier is now announced
+
+* TridiagOptions now understands printritz (Shi Feng)
+
+scripts:
+
+* ritz.pl script for processing Ritz eigenvalues (Shi Feng)
+
+* fourleg.pl for processing 2+2 ladders.
+
+observe:
+
+* observe: Printing for two-points now can output
+a number, vector, or matrix (Bradraj Pandey)
+
+* observe: ManyPointAction in separate file
+
+* OnePointCorrelations: keep legacy bugs to be consistent
+with other correlations
+
+* TwoPointCorrelations: actions implemented
+
+new models:
+
+* HeisenbergAncillaC spin = 1 work in progress
+
+* SpinOrbitalModel added (Nitin Kaushal)
+
+* SU(3) model added (Alberto N.)
+
+* KondoEx2: same as KondoEx but with four more
+connections (Jacek Herbrych)
+
+TestSuite:
+
+* ci 1610 for KondoEx (Jacek H.)
+
+* ci 1305: dynamics for spin orbit
+
+* ci 20 and 21: time evolution of the Heisenberg model
+
+* ci 61: observes <Q0|c?0';c?1'|Q1> (Alberto N.)
+
+Engine:
+
+* ModelBase: in debug mode now checks
+order of one site basis
+
+
 2020-12-02 Version 5.76
 
 * ScalingInputFeature: For FiniteLoops, for 
