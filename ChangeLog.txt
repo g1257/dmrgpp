@@ -1,3 +1,18 @@
+2021-04-22 Version 3.00
+
+* SizeType defaults to long int unsigned
+
+* stringToReal supports E uppercase, so that 1E-1 is a
+valid number
+
+* IoNg: overwrite allows unlink to fail
+
+* Lanczos and Chebyshev Vectors: swap don't copy
+
+* Matrix::swap now with correct semantics
+
+* IoNg: various additions to the API
+
 2020-12-02 Version 2.76
 
 * Boost serialization headers deleted
