@@ -180,7 +180,8 @@ public:
 	{
 		modelLinks_.setAtomKind(&getAtomKind());
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
-		checkThatQnsAreNotReallySorted();
+		if (modelLinks_.kindsOfAtoms() == 1)
+			checkThatQnsAreNotReallySorted();
 		modelLinks_.postCtor1(labeledOperators_, modelCommon_.superGeometry().terms());
 		fillModelLinks(); // fills modelLinks_
 		customOperators();
