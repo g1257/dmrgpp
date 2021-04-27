@@ -342,21 +342,24 @@ private:
 
 
 		VectorMatrixFieldType V(phi.sectors());
+		VectorMatrixFieldType T(phi.sectors());
 		VectorType weights;
 
 		VectorSizeType permutation;
-		computeAuxForCorrection(V, weights, permutation, phi, phi.sector(0), Eg, currentTime);
+		computeAuxForCorrection(V, T, weights, permutation,
+		                        phi, phi.sector(0), Eg, currentTime);
 		if (weights.size() == 0) return;
 		assert(V.size() == 1);
 
 		// correct all vectors based on the same V and weights
 		const SizeType nvectors = indices.size(); // = 3
 		for (SizeType i = 0; i < nvectors; ++i)
-			correctVectors(targetVectors_[indices[i]], V[0], weights, permutation);
+			correctVectors(targetVectors_[indices[i]], V[0], T[0], weights, permutation);
 	}
 
 	void correctVectors(VectorWithOffsetType& phi,
 	                    const MatrixRealType& Vmatrix,
+	                    const MatrixRealType& Tmatrix,
 	                    const VectorType& weights,
 	                    const VectorSizeType& permutation)
 
@@ -365,12 +368,13 @@ private:
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
 			phi.extract(r, i0);
-			correctVector(r, Vmatrix, weights, permutation);
+			correctVector(r, Vmatrix, Tmatrix, weights, permutation);
 			phi.setDataInSector(r, i0);
 		}
 	}
 
 	void computeAuxForCorrection(VectorMatrixFieldType& V,
+	                             VectorMatrixFieldType& T,
 	                             VectorType& weights,
 	                             VectorSizeType& permutation,
 	                             const VectorWithOffsetType& phi,
@@ -396,7 +400,7 @@ private:
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
 
-		VectorMatrixFieldType T(phi.sectors());
+		//		VectorMatrixFieldType T(phi.sectors());
 		VectorSizeType steps(phi.sectors());
 
 		ParallelTriDiagType helperTriDiag(phi,
@@ -422,6 +426,7 @@ private:
 			veigs[i] = -fabs(veigs[i]);
 
 		const MatrixRealType& Vmatrix = V[0];
+		const MatrixRealType& Tmatrix = T[0]; // contains rotation matrix after diag
 
 		const SizeType small = Vmatrix.cols();
 		const SizeType big = Vmatrix.rows();
@@ -442,28 +447,37 @@ private:
 		phi.extract(sv, i0);
 
 		for (SizeType alpha = 0; alpha < nbad; ++alpha) {
+			SizeType ind = permutation[alpha];
 			ComplexOrRealType sum = 0.0;
-			for (SizeType j = 0; j < big; ++j)
-				sum += PsimagLite::conj(Vmatrix(j, permutation[alpha]))*sv[j];
+			for (SizeType alphap = 0; alphap < small; ++alphap) {
+				for (SizeType j = 0; j < big; ++j)
+					sum += PsimagLite::conj(Vmatrix(j, alphap)*Tmatrix(ind,alphap))*sv[j];
+			}
 			weights[alpha] = sum;
 		}
 	}
 
 	void correctVector(VectorType& r,
 	                   const MatrixRealType& Vmatrix,
+	                   const MatrixRealType& Tmatrix,
 	                   const VectorType& weights,
 	                   const VectorSizeType& permutation) const
 	{
 
 		const SizeType big = Vmatrix.rows();
+		const SizeType small = Vmatrix.cols();
 		const SizeType nbad = weights.size();
 		ComplexOrRealType sum = 0;
 		ComplexOrRealType sumOld = 0;
 
 		for (SizeType i = 0; i < big; ++i) {
 			sumOld += r[i]*PsimagLite::conj(r[i]);
-			for (SizeType alpha = 0; alpha < nbad; ++alpha)
-				r[i] -= weights[alpha] * Vmatrix(i, permutation[alpha]);
+			for (SizeType alpha = 0; alpha < nbad; ++alpha) {
+				SizeType ind = permutation[alpha];
+				for (SizeType alphap = 0; alphap < small; ++alphap) {
+					r[i] -= weights[alpha] * Vmatrix(i, alphap)*Tmatrix(alphap,ind);
+				}
+			}
 			sum += r[i]*PsimagLite::conj(r[i]);
 		}
 
