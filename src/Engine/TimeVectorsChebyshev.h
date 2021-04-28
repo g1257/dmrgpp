@@ -451,7 +451,7 @@ private:
 			ComplexOrRealType sum = 0.0;
 			for (SizeType alphap = 0; alphap < small; ++alphap) {
 				for (SizeType j = 0; j < big; ++j)
-					sum += PsimagLite::conj(Vmatrix(j, alphap)*Tmatrix(ind,alphap))*sv[j];
+					sum += PsimagLite::conj(Vmatrix(j, alphap)*Tmatrix(alphap,ind))*sv[j];
 			}
 			weights[alpha] = sum;
 		}
