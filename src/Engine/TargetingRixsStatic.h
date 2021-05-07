@@ -338,19 +338,18 @@ private:
 						appliedFirst_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
 						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-						msg<<"Applied first operator";
+						msg<<"PROD: Applied First Operator";
 						progress_.printline(msgg, std::cout);
 					}
 				}
 				if (site == tstStruct_.sites(1)) {
-					VectorWithOffsetType tmpV1 = this->common().aoe().targetVectors(3);
 					VectorWithOffsetType tmpV2;
 					SizeType indexOfOperator = 1;
 					this->common().aoe().applyOneOperator(loopNumber,
 					                                indexOfOperator,
 					                                site,
 					                                tmpV2,
-					                                tmpV1,
+					                                this->common().aoe().targetVectors(3),
 					                                direction,
 					                                tstStruct_);
 					if (tmpV2.size() > 0) {
@@ -358,7 +357,7 @@ private:
 						applied_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
 						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-						msg<<"Applied second operator";
+						msg<<"PROD: Applied Second Operator";
 						progress_.printline(msgg, std::cout);
 					}
 				}
