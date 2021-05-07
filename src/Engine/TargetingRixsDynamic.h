@@ -288,8 +288,11 @@ public:
 			if (max == 1)
 				doMax1(site, direction, loopNumber);
 
-			if (max == 2)
-				doMax2(site, direction, loopNumber);
+			if (max == 2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::SUM)
+				doMax2Sum(site, direction, loopNumber);
+
+			if (max == 2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::PRODUCT)
+				doMax2Prod(site, direction, loopNumber);
 		}
 
 		calcDynVectors(Eg, direction, block1); // WEIGHTS ARE SET IN calcDynVectors()
@@ -385,7 +388,7 @@ private:
 		}
 	}
 
-	void doMax2(SizeType site,
+	void doMax2Sum(SizeType site,
 	            ProgramGlobals::DirectionEnum direction,
 	            SizeType loopNumber)
 	{
@@ -475,6 +478,76 @@ private:
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 				msg<<"Applied";
+				progress_.printline(msgg, std::cout);
+			}
+		}
+	}
+
+	void doMax2Prod(SizeType site,
+	            ProgramGlobals::DirectionEnum direction,
+	            SizeType loopNumber)
+	{
+
+		if (site == tstStruct_.sites(0)) {
+			VectorWithOffsetType tmpV1;
+			SizeType indexOfOperator = 0;
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
+			           direction);
+
+			if (tmpV1.size() > 0)
+				this->common().aoe().targetVectors(6) = tmpV1;
+
+			VectorWithOffsetType tmpV2;
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV2,                            // phiNew
+			           this->common().aoe().targetVectors(2), // src1 apply op on Re|alpha(C)>
+			           direction);
+
+			if (tmpV2.size() > 0) {
+				this->common().aoe().targetVectors(7) = tmpV2;
+				applied_ = false;
+				appliedFirst_ = true;
+				PsimagLite::OstringStream msgg(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+				msg<<"PROD: First Operator Applied";
+				progress_.printline(msgg, std::cout);
+			}
+		}
+
+		if (site == tstStruct_.sites(1)) {
+
+			VectorWithOffsetType tmpV1;
+			SizeType indexOfOperator = 1;
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->common().aoe().targetVectors(6), // src1 apply op on Im|alpha(C)>
+			           direction);
+
+			if (tmpV1.size() > 0)
+				this->common().aoe().targetVectors(6) = tmpV1;
+
+			VectorWithOffsetType tmpV2;
+			applyOneOp(loopNumber,
+			           indexOfOperator,
+			           site,
+			           tmpV2,                            // phiNew
+			           this->common().aoe().targetVectors(7), // src1 apply op on Re|alpha(C)>
+			           direction);
+
+			if (tmpV2.size() > 0) {
+				this->common().aoe().targetVectors(7) = tmpV2;
+				applied_ = true;
+				PsimagLite::OstringStream msgg(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+				msg<<"PROD: Second Operator Applied";
 				progress_.printline(msgg, std::cout);
 			}
 		}
