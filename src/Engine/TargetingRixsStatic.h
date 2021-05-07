@@ -280,7 +280,7 @@ private:
 					}
 				}
 			}
-			if (max==2) {
+			if (max==2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::SUM) {
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
 					SizeType indexOfOperator = 0;
@@ -313,6 +313,48 @@ private:
 					                                tstStruct_);
 					if (tmpV2.size() > 0) {
 						this->common().aoe().targetVectors(3) += tmpV2;
+						applied_ = true;
+						PsimagLite::OstringStream msgg(std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						msg<<"Applied second operator";
+						progress_.printline(msgg, std::cout);
+					}
+				}
+			}
+			if (max==2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::PRODUCT) {
+				if (site == tstStruct_.sites(0)) {
+					VectorWithOffsetType tmpV1;
+					SizeType indexOfOperator = 0;
+					this->common().aoe().applyOneOperator(loopNumber,
+					                                indexOfOperator,
+					                                site,
+					                                tmpV1,
+					                                psi00,
+					                                direction,
+					                                tstStruct_);
+					if (tmpV1.size() > 0) {
+						this->common().aoe().targetVectors(3) = tmpV1;
+						applied_ = false;
+						appliedFirst_ = true;
+						PsimagLite::OstringStream msgg(std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						msg<<"Applied first operator";
+						progress_.printline(msgg, std::cout);
+					}
+				}
+				if (site == tstStruct_.sites(1)) {
+					VectorWithOffsetType tmpV1 = this->common().aoe().targetVectors(3);
+					VectorWithOffsetType tmpV2;
+					SizeType indexOfOperator = 1;
+					this->common().aoe().applyOneOperator(loopNumber,
+					                                indexOfOperator,
+					                                site,
+					                                tmpV2,
+					                                tmpV1,
+					                                direction,
+					                                tstStruct_);
+					if (tmpV2.size() > 0) {
+						this->common().aoe().targetVectors(3) = tmpV2;
 						applied_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
 						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
