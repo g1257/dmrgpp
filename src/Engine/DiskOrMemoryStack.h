@@ -96,7 +96,7 @@ public:
 	{
 		if (diskW_) {
 			assert(diskR_);
-			err("read\n");
+			readWftStacksOnDisk(prefix, io);
 		}
 
 		io.read(memory_, prefix);
@@ -106,8 +106,7 @@ public:
 	{
 		if (diskW_) {
 			assert(diskR_);
-			std::cerr<<__FILE__<<": write(): not writing, cannot restart\n";
-			std::cout<<__FILE__<<": write(): not writing, cannot restart\n";
+			writeWftStacksOnDisk(prefix, io);
 			return;
 		}
 
@@ -128,6 +127,31 @@ public:
 	static bool createFile_;
 
 private:
+
+	void writeWftStacksOnDisk(PsimagLite::String name,
+	                          PsimagLite::IoNgSerializer& io) const
+	{
+		io.createGroup(name);
+		io.write(name + "/Size", this->size());
+		SizeType i = 0;
+		while (this->size() > 0) {
+			const BasisWithOperatorsType& t = this->top();
+			t.write(name + "/" + ttos(i++), io);
+			DiskOrMemoryStack& thisObject = const_cast<DiskOrMemoryStack&>(*this);
+			thisObject.pop();
+		}
+	}
+
+	void readWftStacksOnDisk(PsimagLite::String name, PsimagLite::IoNgSerializer& io)
+	{
+		SizeType x = 0;
+		io.read(x, name + "/Size");
+		for (SizeType i = 0; i < x; ++i) {
+			BasisWithOperatorsType t;
+			t.read(name + "/" + ttos(x - i - 1), io);
+			this->push(t);
+		}
+	}
 
 	DiskOrMemoryStack(const DiskOrMemoryStack&);
 
