@@ -154,7 +154,8 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	      feAsMode(INT_PAPER33),
 	      coulombV(0),
 	      magneticField(0,0),
-	      jzSymmetry(false)
+	      jzSymmetry(false),
+	      orbDependence(false)
 	{
 		io.readline(orbitals,"Orbitals=");
 		io.read(hubbardU,"hubbardU");
@@ -194,11 +195,28 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 			io.readline(coulombV,"CoulombV=");
 		}
 
+		try {
+			io.readline(orbDependence,"OrbDependence=");
+		} catch (std::exception&) {}
+
 		if (feAsMode == INT_PAPER33 || feAsMode == INT_IMPURITY) {
-			if (hubbardU.size() != 4 && hubbardU.size() != 5) {
-				PsimagLite::String str("FeAsMode: expecting");
-				str +=  " 4 or 5 U values\n";
-				throw PsimagLite::RuntimeError(str);
+			if (!orbDependence){
+				if (hubbardU.size() != 4 && hubbardU.size() != 5) {
+					PsimagLite::String str("FeAsMode: expecting");
+					str +=  " 4 or 5 U values\n";
+					throw PsimagLite::RuntimeError(str);
+				}
+			} else {
+				if (orbitals==2 && hubbardU.size() != 5) {
+					PsimagLite::String str("FeAsMode: expecting");
+					str +=  " 5 U values with OrbDependence and 2 orbitals\n";
+					throw PsimagLite::RuntimeError(str);
+				}
+				if (orbitals==3 && hubbardU.size() != 12) {
+					PsimagLite::String str("FeAsMode: expecting");
+					str +=  " 12 U values with OrbDependence and 3 orbitals\n";
+					throw PsimagLite::RuntimeError(str);
+				}
 			}
 
 			if (hubbardU.size() == 4) {
@@ -206,11 +224,34 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 				hubbardU[4] = hubbardU[2];
 			}
 
-			std::cout<<"U[0]="<<hubbardU[0]<<" U\n";
-			std::cout<<"U[1]="<<hubbardU[1]<<" U'-J/2\n";
-			std::cout<<"U[2]="<<hubbardU[2]<<" -2J for S+S- + S-S+ term\n";
-			std::cout<<"U[3]="<<hubbardU[3]<<" -J\n";
-			std::cout<<"U[4]="<<hubbardU[4]<<" -2J for SzSz term\n";
+			if (!orbDependence){
+				std::cout<<"U[0]="<<hubbardU[0]<<" U\n";
+				std::cout<<"U[1]="<<hubbardU[1]<<" U'-J/2\n";
+				std::cout<<"U[2]="<<hubbardU[2]<<" -2J for S+S- + S-S+ term\n";
+				std::cout<<"U[3]="<<hubbardU[3]<<" -J\n";
+				std::cout<<"U[4]="<<hubbardU[4]<<" -2J for SzSz term\n";
+			} else {
+				if (orbitals==2) {
+					std::cout<<"U[0,0]="<<hubbardU[0]<<" U_0\n";
+					std::cout<<"U[0,1]="<<hubbardU[1]<<" U_1\n";
+					std::cout<<"U[1,0]="<<hubbardU[2]<<" U00\n";
+					std::cout<<"U[2,0]="<<hubbardU[3]<<" S.S\n";
+					std::cout<<"U[3,0]="<<hubbardU[4]<<" PairHop\n";
+				} else {
+					std::cout<<"U[0,0]="<<hubbardU[0]<<" U_0\n";
+					std::cout<<"U[0,1]="<<hubbardU[1]<<" U_1\n";
+					std::cout<<"U[0,2]="<<hubbardU[2]<<" U_2\n";
+					std::cout<<"U[1,0]="<<hubbardU[3]<<" Un0n1\n";
+					std::cout<<"U[1,1]="<<hubbardU[4]<<" Un0n2\n";
+					std::cout<<"U[1,2]="<<hubbardU[5]<<" Un1n2\n";
+					std::cout<<"U[2,0]="<<hubbardU[6]<<" S0S1\n";
+					std::cout<<"U[2,1]="<<hubbardU[7]<<" S0S2\n";
+					std::cout<<"U[2,2]="<<hubbardU[8]<<" S1S2\n";
+					std::cout<<"U[3,0]="<<hubbardU[9]<<" P0P2\n";
+					std::cout<<"U[3,1]="<<hubbardU[10]<<" P1P2\n";
+					std::cout<<"U[3,2]="<<hubbardU[11]<<" P1P3\n";
+				}
+			}
 		}
 
 		if (feAsMode == INT_KSPACE) {
@@ -275,6 +316,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 		magneticField.write(label + "/magneticField", io);
 		spinOrbit.write(label + "/spinOrbit", io);
 		io.write(label + "/jzSymmetry", jzSymmetry);
+		io.write(label + "/orbDependence", orbDependence);
 	}
 
 	//! Function that prints model parameters to stream os
@@ -299,6 +341,10 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 			os<<"using jzSymmetry, works only for 3 orbitals \n";
 			os<<parameters.jzSymmetry;
 		}
+		if (parameters.orbDependence>0) {
+			os<<"using OrbDependence with Orbitals="<<parameters.orbitals<<" \n";
+			os<<parameters.orbDependence;
+		}
 		os<<"FeAsMode=";
 		os<<ParametersModelFeAs<RealType, QnType>::modeString(parameters.feAsMode)<<"\n";
 		if (parameters.feAsMode == ParametersModelFeAs<RealType, QnType>::INT_V)
@@ -321,6 +367,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	PsimagLite::Matrix<RealType> magneticField;
 	PsimagLite::Matrix<ComplexOrRealType> spinOrbit;
 	SizeType jzSymmetry;
+	SizeType orbDependence;
 };
 } // namespace Dmrg
 

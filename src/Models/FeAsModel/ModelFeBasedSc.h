@@ -764,7 +764,38 @@ private:
 		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_PAPER33 ||
 		        modelParameters_.feAsMode == ParamsModelFeAsType::INT_IMPURITY) {
 			assert(index < modelParameters_.hubbardU.size());
-			return modelParameters_.hubbardU[index];
+			if (!modelParameters_.orbDependence) {
+				return modelParameters_.hubbardU[index];
+			} else {
+				if (index == 0)
+					return modelParameters_.hubbardU[orb1];
+				if (index == 1) {
+					SizeType offset = modelParameters_.orbitals;
+					assert(offset+(orb1+orb2)-1 < modelParameters_.hubbardU.size());
+					return modelParameters_.hubbardU[offset+(orb1+orb2)-1];
+				}
+				if (index == 2) {
+					SizeType offset = modelParameters_.orbitals+1;
+					if (modelParameters_.orbitals==3)
+						offset = 2*modelParameters_.orbitals;
+					assert(offset+(orb1+orb2)-1 < modelParameters_.hubbardU.size());
+					return modelParameters_.hubbardU[offset+(orb1+orb2)-1];
+				}
+				if (index == 3) {
+					SizeType offset = 2*modelParameters_.orbitals;
+					if (modelParameters_.orbitals==3)
+						offset = 3*modelParameters_.orbitals;
+					assert(offset+(orb1+orb2)-1 < modelParameters_.hubbardU.size());
+					return modelParameters_.hubbardU[offset+(orb1+orb2)-1];
+				}
+				if (index == 4) { // as index == 2
+					SizeType offset = modelParameters_.orbitals+1;
+					if (modelParameters_.orbitals==3)
+						offset = 2*modelParameters_.orbitals;
+					assert(offset+(orb1+orb2)-1 < modelParameters_.hubbardU.size());
+					return modelParameters_.hubbardU[offset+(orb1+orb2)-1];
+				}
+			}
 		}
 
 		assert(orb1 + orb2*modelParameters_.orbitals < modelParameters_.hubbardU.size());
@@ -814,21 +845,21 @@ private:
 				multiply(tmpMatrix,
 				         spinOperator(orb1, 0),
 				         spinOperator(orb2, 1));
-				val = modelParameters_.hubbardU[2]/val2;
+				val = findHubbardU(2,orb1,orb2)/val2;
 				// this is -2*J
 				hmatrix += val*tmpMatrix;
 
 				multiply(tmpMatrix,
 				         spinOperator(orb1, 1),
 				         spinOperator(orb2, 0));
-				val = modelParameters_.hubbardU[2]/val2;
+				val = findHubbardU(2,orb1,orb2)/val2;
 				// this is -2*J
 				hmatrix += val*tmpMatrix;
 
 				multiply(tmpMatrix,
 				         spinOperator(orb1, 2),
 				         spinOperator(orb2, 2));
-				val = modelParameters_.hubbardU[4]/val3;
+				val = findHubbardU(4,orb1,orb2)/val3;
 				// this is -2*J
 				hmatrix += val*tmpMatrix;
 			}
@@ -848,7 +879,7 @@ private:
 				         nBar(orb1, orb2, SPIN_UP),
 				         nBar(orb1, orb2, SPIN_DOWN));
 				// -J
-				hmatrix += modelParameters_.hubbardU[3]*tmpMatrix;
+				hmatrix += findHubbardU(3,orb1,orb2)*tmpMatrix;
 			}
 		}
 	}
