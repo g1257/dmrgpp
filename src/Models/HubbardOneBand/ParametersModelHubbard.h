@@ -106,6 +106,14 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		}
 
 		try {
+			magneticX.resize(nsites, 0.0);
+			io.read(magneticX,"MagneticFieldX");
+			std::cerr<<"Has MagneticFieldX\n";
+		} catch (std::exception&) {
+			magneticX.clear();
+		}
+
+		try {
 			io.read(potentialT,"PotentialT");
 			std::cerr<<"Has PotentialT\n";
 		} catch (std::exception&) {}
@@ -148,6 +156,7 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		io.write(label + "/hubbardU", hubbardU);
 		io.write(label + "/potentialV", potentialV);
 		io.write(label + "/anisotropy", anisotropy);
+		io.write(label + "/magneticX", magneticX);
 	}
 
 	//! Function that prints model parameters to stream os
@@ -160,6 +169,8 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		os<<"potentialV\n";
 		os<<parameters.potentialV;
 		if (parameters.potentialT.size()==0) return os;
+		if (parameters.magneticX.size()>0)
+			os<<parameters.magneticX;
 
 		// time-dependent stuff
 		os<<"potentialT\n";
@@ -172,6 +183,8 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 	typename PsimagLite::Vector<RealType>::Type anisotropy;
+	typename PsimagLite::Vector<RealType>::Type magneticX;
+
 	// for time-dependent H:
 	typename PsimagLite::Vector<RealType>::Type potentialT;
 	RealType omega;

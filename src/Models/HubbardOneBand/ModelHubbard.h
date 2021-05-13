@@ -160,6 +160,14 @@ public:
 			msg += ttos(2*totalSites) + " entries, got " + ttos(vsize) + "\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
+
+		if (modelParameters_.magneticX.size()>0 && ModelBaseType::targetQuantum().sizeOfOther() == 2) {
+			PsimagLite::String msg("ModelHubbard: Sz not conserved: You should remove ");
+			msg += "TargeteElectronsDown or TargetSzPlusConst from the input file.\n";
+			msg += "TargeteElectronsUp is then interpreted as total number of electrons\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
+
 	}
 
 protected:
@@ -393,7 +401,7 @@ protected:
 	                                RealType time)  const
 	{
 		SizeType n=block.size();
-		SparseMatrixType tmpMatrix,niup,nidown,Szsquare,Szi;
+		SparseMatrixType tmpMatrix,niup,nidown,Szsquare,Szi,Splusi,Sminusi;
 		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
 
 		for (SizeType i = 0; i < n; ++i) {
@@ -407,6 +415,8 @@ protected:
 			//n_i down
 			const OperatorType& cdown = ModelBaseType::naturalOperator("c", site, 1);
 			transposeConjugate(tmpMatrix, cdown.getCRS());
+			multiply(Sminusi, tmpMatrix, cup.getCRS());
+			transposeConjugate(Splusi, Sminusi);
 			multiply(nidown,tmpMatrix, cdown.getCRS());
 
 			multiply(tmpMatrix, niup, nidown);
@@ -431,6 +441,13 @@ protected:
 				assert(block[i*2] < modelParameters_.anisotropy.size());
 				RealType tmp = modelParameters_.anisotropy[block[i*2]]*0.25;
 				hmatrix += tmp*Szsquare;
+			}
+
+			// magneticX
+			if (modelParameters_.magneticX.size() == linSize) {
+				RealType tmp = modelParameters_.magneticX[block[i]]*0.5;
+				hmatrix += tmp*Sminusi;
+				hmatrix += tmp*Splusi;
 			}
 
 			if (modelParameters_.potentialT.size()==0) continue;
