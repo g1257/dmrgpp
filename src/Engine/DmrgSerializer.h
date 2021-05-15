@@ -135,7 +135,7 @@ public:
 	      fE_(io, prefix + "/fE", bogus),
 	      lrs_(io, prefix, isObserveCode),
 	      ownWf_(true),
-	      transform_(io, prefix + "/transform", false)
+	      transform_(io, prefix + "/transform", readOnDemand)
 	{
 		if (bogus) return;
 
@@ -266,10 +266,17 @@ public:
 
 	void transform(SparseMatrixType& ret, const SparseMatrixType& O) const
 	{
-		BlockOffDiagMatrixType m(O, transform_.offsetsRows());
+		transform(ret, O, transform_);
+	}
+
+	static void transform(SparseMatrixType& ret,
+	                      const SparseMatrixType& O,
+	                      const BlockDiagonalMatrixType& transformExternal)
+	{
+		BlockOffDiagMatrixType m(O, transformExternal.offsetsRows());
 		static const SizeType gemmRnb = 0; // disable GemmR
 		static const SizeType threadsForGemmR = 1;  // disable GemmR parallel
-		m.transform(transform_, gemmRnb, threadsForGemmR);
+		m.transform(transformExternal, gemmRnb, threadsForGemmR);
 		m.toSparse(ret);
 	}
 

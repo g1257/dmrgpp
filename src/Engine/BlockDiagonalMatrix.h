@@ -114,10 +114,13 @@ public:
 	typedef PsimagLite::IoSelector::In IoInType;
 
 	BlockDiagonalMatrix()
-	    : isSquare_(true)
+	    : isSquare_(true), readOnDemand_(false)
 	{}
 
-	BlockDiagonalMatrix(IoInType& io, PsimagLite::String label, bool readOnDemand)
+	BlockDiagonalMatrix(IoInType& io,
+	                    PsimagLite::String label,
+	                    bool readOnDemand)
+	    : readOnDemand_(readOnDemand)
 	{
 		io.read(isSquare_, label + "/isSquare_");
 		io.read(offsetsRows_, label + "/offsetRows_");
@@ -133,6 +136,7 @@ public:
 	                    typename PsimagLite::EnableIf<
 	                    IsBasisType<SomeBasisType>::True, int>::Type = 0)
 	    : isSquare_(true),
+	      readOnDemand_(false),
 	      offsetsRows_(basis.partition()),
 	      offsetsCols_(basis.partition()),
 	      data_(basis.partition() - 1)
@@ -456,6 +460,7 @@ private:
 	}
 
 	bool isSquare_;
+	const bool readOnDemand_;
 	VectorSizeType offsetsRows_;
 	VectorSizeType offsetsCols_;
 	typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_;

@@ -110,6 +110,7 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
+	typedef typename DmrgSerializerType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
@@ -136,6 +137,11 @@ public:
 		signsOneSite_.resize(n);
 		for (SizeType i = 0; i < n; ++i)
 			signsOneSite_[i] = (odds[i]) ? -1 : 1;
+
+		if (readOnDemand_) {
+			std::cout<<"ObserverHelper: observeReadOnDemand is ON\n";
+			std::cerr<<"ObserverHelper: observeReadOnDemand is ON\n";
+		}
 
 		if (nf > 0)
 			if (!init(start, start + nf, SaveEnum::YES, readOnDemand))
@@ -171,7 +177,13 @@ public:
 	               SizeType ind) const
 	{
 		checkIndex(ind);
-		return dSerializerV_[ind]->transform(ret, O2);
+
+		if (!readOnDemand_)
+			return dSerializerV_[ind]->transform(ret, O2);
+
+		const PsimagLite::String prefix = "Serializer/" + ttos(ind);
+		BlockDiagonalMatrixType transformStorage(io_, prefix + "/transform", false);
+		DmrgSerializerType::transform(ret, O2, transformStorage);
 	}
 
 	SizeType cols(SizeType ind) const
@@ -230,7 +242,7 @@ public:
 
 		const PsimagLite::String prefix = "Serializer/" + ttos(ind);
 		psiStorage_->read(io_, prefix + "/WaveFunction/" + ttos(levelIndex) +
-		                        "/" + ttos(sectorIndex));
+		                  "/" + ttos(sectorIndex));
 		return *psiStorage_;
 	}
 
@@ -332,7 +344,7 @@ private:
 					delete ts;
 			} catch(...) {}
 
-			std::cerr<<__FILE__<<" read "<<i<<" out of "<<total<<"\n";
+			std::cerr<<__FILE__<<" read "<<i<<" out of "<<(end - start)<<"\n";
 		}
 
 		noMoreData_ = (end == total);
