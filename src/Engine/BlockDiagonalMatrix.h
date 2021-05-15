@@ -460,7 +460,7 @@ private:
 	}
 
 	bool isSquare_;
-	const bool readOnDemand_;
+	bool readOnDemand_;
 	VectorSizeType offsetsRows_;
 	VectorSizeType offsetsCols_;
 	typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_;
