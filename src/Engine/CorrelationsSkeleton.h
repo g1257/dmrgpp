@@ -288,17 +288,17 @@ public:
 	                  const PsimagLite::GetBraOrKet& bra,
 	                  const PsimagLite::GetBraOrKet& ket) const
 	{
-		try {
+		//try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
 			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
 			return bracket_(A,src1,src2,fermionicSign,ptr);
-		} catch (std::exception& e) {
+		/*} catch (std::exception& e) {
 			std::cerr<<"CAUGHT: "<<e.what();
 			std::cerr<<"WARNING: CorrelationsSkeleton::bracket(...):";
 			std::cerr<<" No data seen yet\n";
 			return 0;
-		}
+		}*/
 	}
 
 	FieldType bracketRightCorner(const SparseMatrixType& A,

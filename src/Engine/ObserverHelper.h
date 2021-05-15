@@ -125,8 +125,10 @@ public:
 	               bool readOnDemand)
 	    : io_(io),
 	      withLegacyBugs_(withLegacyBugs),
+	      readOnDemand_(readOnDemand),
 	      noMoreData_(false),
-	      numberOfSites_(0)
+	      numberOfSites_(0),
+	      psiStorage_(nullptr)
 	{
 		typename BasisWithOperatorsType::VectorBoolType odds;
 		io_.read(odds, "OddElectronsOneSite");
@@ -155,6 +157,9 @@ public:
 			delete timeSerializerV_[i];
 			timeSerializerV_[i] = 0;
 		}
+
+		delete psiStorage_;
+		psiStorage_ = nullptr;
 	}
 
 	const SizeType& numberOfSites() const { return numberOfSites_; }
@@ -217,7 +222,16 @@ public:
 	{
 		checkIndex(ind);
 
-		return dSerializerV_[ind]->psiConst(sectorIndex, levelIndex);
+		if (!readOnDemand_)
+			return dSerializerV_[ind]->psiConst(sectorIndex, levelIndex);
+
+		delete psiStorage_;
+		psiStorage_ = new VectorWithOffsetType;
+
+		const PsimagLite::String prefix = "Serializer/" + ttos(ind);
+		psiStorage_->read(io_, prefix + "/WaveFunction/" + ttos(levelIndex) +
+		                        "/" + ttos(sectorIndex));
+		return *psiStorage_;
 	}
 
 	RealType time(SizeType ind) const
@@ -348,9 +362,11 @@ private:
 	typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
 	typename PsimagLite::Vector<TimeSerializerType*>::Type timeSerializerV_;
 	const bool withLegacyBugs_;
+	const bool readOnDemand_;
 	bool noMoreData_;
 	VectorShortIntType signsOneSite_;
 	SizeType numberOfSites_;
+	mutable VectorWithOffsetType* psiStorage_;
 };  // ObserverHelper
 } // namespace Dmrg
 

@@ -135,7 +135,7 @@ public:
 	      fE_(io, prefix + "/fE", bogus),
 	      lrs_(io, prefix, isObserveCode),
 	      ownWf_(true),
-	      transform_(io, prefix + "/transform", readOnDemand)
+	      transform_(io, prefix + "/transform", false)
 	{
 		if (bogus) return;
 

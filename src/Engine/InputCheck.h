@@ -376,6 +376,10 @@ public:
 			to target expressions.
 			\item [calcAndPrintEntropies] Calculate entropies and print to cout file
 			\item [blasNotThreadSafe] TBW
+			\item [observeReadOnDemand]  When this option is set, the observe code will
+	read the wavefunction and transform from the file only as needed.
+    This option only has effect when running the observe
+    code and not the main driver or other drivers.
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -442,6 +446,7 @@ public:
 		registerOpts.push_back("OperatorsChangeAll");
 		registerOpts.push_back("calcAndPrintEntropies");
 		registerOpts.push_back("blasNotThreadSafe");
+		registerOpts.push_back("observeReadOnDemand");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
