@@ -121,7 +121,8 @@ public:
 	               SizeType start,
 	               SizeType nf,
 	               SizeType trail,
-	               bool withLegacyBugs)
+	               bool withLegacyBugs,
+	               bool readOnDemand)
 	    : io_(io),
 	      withLegacyBugs_(withLegacyBugs),
 	      noMoreData_(false),
@@ -135,11 +136,11 @@ public:
 			signsOneSite_[i] = (odds[i]) ? -1 : 1;
 
 		if (nf > 0)
-			if (!init(start, start + nf, SaveEnum::YES))
+			if (!init(start, start + nf, SaveEnum::YES, readOnDemand))
 				return;
 
 		if (trail > 0)
-			if (!init(start, start + trail, SaveEnum::NO))
+			if (!init(start, start + trail, SaveEnum::NO, readOnDemand))
 				return;
 	}
 
@@ -284,7 +285,7 @@ public:
 
 private:
 
-	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
+	bool init(SizeType start, SizeType end, SaveEnum saveOrNot, bool readOnDemand)
 	{
 		PsimagLite::String prefix = "Serializer";
 		SizeType total = 0;
@@ -296,7 +297,8 @@ private:
 			DmrgSerializerType* dSerializer = new DmrgSerializerType(io_,
 			                                                         prefix + "/" + ttos(i),
 			                                                         false,
-			                                                         true);
+			                                                         true,
+			                                                         readOnDemand);
 
 
 			SizeType tmp = dSerializer->leftRightSuper().sites();

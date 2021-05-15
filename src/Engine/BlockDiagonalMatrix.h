@@ -117,11 +117,14 @@ public:
 	    : isSquare_(true)
 	{}
 
-	BlockDiagonalMatrix(IoInType& io, PsimagLite::String label)
+	BlockDiagonalMatrix(IoInType& io, PsimagLite::String label, bool readOnDemand)
 	{
 		io.read(isSquare_, label + "/isSquare_");
 		io.read(offsetsRows_, label + "/offsetRows_");
 		io.read(offsetsCols_, label + "/offsetCols_");
+
+		if (readOnDemand) return;
+
 		io.read(data_, label + "/data_");
 	}
 

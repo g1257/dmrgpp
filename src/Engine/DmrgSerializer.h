@@ -128,13 +128,14 @@ public:
 	               PsimagLite::String prefix,
 	               bool bogus,
 	               bool isObserveCode,
+	               bool readOnDemand,
 	               typename PsimagLite::EnableIf<
 	               PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	    : fS_(io, prefix + "/fS", bogus),
 	      fE_(io, prefix + "/fE", bogus),
 	      lrs_(io, prefix, isObserveCode),
 	      ownWf_(true),
-	      transform_(io, prefix + "/transform")
+	      transform_(io, prefix + "/transform", readOnDemand)
 	{
 		if (bogus) return;
 
@@ -148,7 +149,9 @@ public:
 				wavefunction_[i].resize(nexcited);
 				for (SizeType j = 0; j < nexcited; ++j) {
 					wavefunction_[i][j] = new VectorWithOffsetType;
-					wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
+					if (!readOnDemand)
+						wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) +
+						                          "/" + ttos(j));
 				}
 			}
 		} catch (...) {
