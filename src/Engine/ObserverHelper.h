@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h" // to include norm
 #include "VectorWithOffset.h" // to include norm
 #include "GetBraOrKet.h"
+#include "ProgressIndicator.h"
 
 namespace Dmrg {
 
@@ -127,6 +128,7 @@ public:
 	    : io_(io),
 	      withLegacyBugs_(withLegacyBugs),
 	      readOnDemand_(readOnDemand),
+	      progress_("ObserverHelper"),
 	      noMoreData_(false),
 	      numberOfSites_(0),
 	      psiStorage_(nullptr)
@@ -144,11 +146,11 @@ public:
 		}
 
 		if (nf > 0)
-			if (!init(start, start + nf, SaveEnum::YES, readOnDemand))
+			if (!init(start, start + nf, SaveEnum::YES))
 				return;
 
 		if (trail > 0)
-			if (!init(start, start + trail, SaveEnum::NO, readOnDemand))
+			if (!init(start, start + trail, SaveEnum::NO))
 				return;
 	}
 
@@ -311,7 +313,7 @@ public:
 
 private:
 
-	bool init(SizeType start, SizeType end, SaveEnum saveOrNot, bool readOnDemand)
+	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
 	{
 		PsimagLite::String prefix = "Serializer";
 		SizeType total = 0;
@@ -324,7 +326,7 @@ private:
 			                                                         prefix + "/" + ttos(i),
 			                                                         false,
 			                                                         true,
-			                                                         readOnDemand);
+			                                                         readOnDemand_);
 
 
 			SizeType tmp = dSerializer->leftRightSuper().sites();
@@ -338,6 +340,7 @@ private:
 			try {
 				PsimagLite::String prefix("/TargetingCommon/" + ttos(i));
 				TimeSerializerType* ts = new TimeSerializerType(io_, prefix);
+				std::cerr<<"Read TimeSerializer\n";
 				if (saveOrNot == SaveEnum::YES)
 					timeSerializerV_.push_back(ts);
 				else
@@ -345,6 +348,7 @@ private:
 			} catch(...) {}
 
 			std::cerr<<__FILE__<<" read "<<i<<" out of "<<(end - start)<<"\n";
+			progress_.printMemoryUsage();
 		}
 
 		noMoreData_ = (end == total);
@@ -375,6 +379,7 @@ private:
 	typename PsimagLite::Vector<TimeSerializerType*>::Type timeSerializerV_;
 	const bool withLegacyBugs_;
 	const bool readOnDemand_;
+	PsimagLite::ProgressIndicator progress_;
 	bool noMoreData_;
 	VectorShortIntType signsOneSite_;
 	SizeType numberOfSites_;

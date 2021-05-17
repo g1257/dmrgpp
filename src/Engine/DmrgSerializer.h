@@ -158,7 +158,8 @@ public:
 			wavefunction_.resize(1);
 			wavefunction_[0].resize(1);
 			wavefunction_[0][0] = new VectorWithOffsetType;
-			wavefunction_[0][0]->read(io, prefix + "/WaveFunction");
+			if (!readOnDemand)
+				wavefunction_[0][0]->read(io, prefix + "/WaveFunction");
 		}
 
 		io.read(direction_, prefix + "/direction");

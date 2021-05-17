@@ -122,12 +122,11 @@ public:
 	                    bool readOnDemand)
 	    : readOnDemand_(readOnDemand)
 	{
+		if (readOnDemand_) return;
+
 		io.read(isSquare_, label + "/isSquare_");
 		io.read(offsetsRows_, label + "/offsetRows_");
 		io.read(offsetsCols_, label + "/offsetCols_");
-
-		if (readOnDemand) return;
-
 		io.read(data_, label + "/data_");
 	}
 
