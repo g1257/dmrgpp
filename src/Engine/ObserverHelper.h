@@ -116,6 +116,7 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
 	typedef PsimagLite::GetBraOrKet GetBraOrKetType;
+	typedef std::pair<LeftRightSuperType*, SizeType> PairLeftRightSuperSizeType;
 
 	enum class SaveEnum {YES, NO};
 
@@ -131,7 +132,8 @@ public:
 	      progress_("ObserverHelper"),
 	      noMoreData_(false),
 	      numberOfSites_(0),
-	      psiStorage_(nullptr)
+	      psiStorage_(nullptr),
+	      lrsStorage_(PairLeftRightSuperSizeType(nullptr, 0))
 	{
 		typename BasisWithOperatorsType::VectorBoolType odds;
 		io_.read(odds, "OddElectronsOneSite");
@@ -168,6 +170,9 @@ public:
 
 		delete psiStorage_;
 		psiStorage_ = nullptr;
+
+		delete lrsStorage_.first;
+		lrsStorage_.first = nullptr;
 	}
 
 	const SizeType& numberOfSites() const { return numberOfSites_; }
@@ -221,6 +226,24 @@ public:
 	const LeftRightSuperType& leftRightSuper(SizeType ind) const
 	{
 		checkIndex(ind);
+
+		if (readOnDemand_) {
+			if (ind != lrsStorage_.second) {
+				delete lrsStorage_.first;
+				lrsStorage_.first = nullptr;
+			}
+
+			if (!lrsStorage_.first) {
+				static const bool isObserveCode = true;
+				const PsimagLite::String prefix = "Serializer/" + ttos(ind);
+
+				lrsStorage_.first = new LeftRightSuperType(io_, prefix, isObserveCode);
+				lrsStorage_.second = ind;
+			}
+
+			return *lrsStorage_.first;
+		}
+
 		return dSerializerV_[ind]->leftRightSuper();
 	}
 
@@ -328,9 +351,10 @@ private:
 			                                                         true,
 			                                                         readOnDemand_);
 
-
 			SizeType tmp = dSerializer->leftRightSuper().sites();
 			if (tmp > 0 && numberOfSites_ == 0) numberOfSites_ = tmp;
+
+			if (readOnDemand_) dSerializer->freeLrs();
 
 			if (saveOrNot == SaveEnum::YES)
 				dSerializerV_.push_back(dSerializer);
@@ -349,6 +373,7 @@ private:
 
 			std::cerr<<__FILE__<<" read "<<i<<" out of "<<(end - start)<<"\n";
 			progress_.printMemoryUsage();
+
 		}
 
 		noMoreData_ = (end == total);
@@ -384,6 +409,7 @@ private:
 	VectorShortIntType signsOneSite_;
 	SizeType numberOfSites_;
 	mutable VectorWithOffsetType* psiStorage_;
+	mutable PairLeftRightSuperSizeType lrsStorage_;
 };  // ObserverHelper
 } // namespace Dmrg
 

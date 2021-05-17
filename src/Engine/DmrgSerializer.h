@@ -115,12 +115,13 @@ public:
 	               ProgramGlobals::DirectionEnum direction)
 	    : fS_(fS),
 	      fE_(fE),
-	      lrs_(lrs),
 	      wavefunction_(wf),
 	      ownWf_(false),
 	      transform_(transform),
 	      direction_(direction)
-	{}
+	{
+		lrs_ = new LeftRightSuperType(lrs);
+	}
 
 	// used only by IoNg:
 	template<typename IoInputType>
@@ -133,7 +134,7 @@ public:
 	               PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	    : fS_(io, prefix + "/fS", bogus),
 	      fE_(io, prefix + "/fE", bogus),
-	      lrs_(io, prefix, isObserveCode),
+	      lrs_(new LeftRightSuperType(io, prefix, isObserveCode)),
 	      ownWf_(true),
 	      transform_(io, prefix + "/transform", readOnDemand)
 	{
@@ -167,6 +168,9 @@ public:
 
 	~DmrgSerializer()
 	{
+		delete lrs_;
+		lrs_ = nullptr;
+
 		if (!ownWf_) return;
 		const SizeType nsectors = wavefunction_.size();
 		for (SizeType i = 0; i < nsectors; ++i) {
@@ -176,6 +180,12 @@ public:
 				wavefunction_[i][j] = nullptr;
 			}
 		}
+	}
+
+	void freeLrs()
+	{
+		delete lrs_;
+		lrs_ = nullptr;
 	}
 
 	template<typename SomeIoOutType>
@@ -200,8 +210,9 @@ public:
 
 		fS_.write(io, prefix + "/fS");
 		fE_.write(io, prefix + "/fE");
-		bool minimizeWrite = (lrs_.super().block().size() == numberOfSites);
-		lrs_.write(io, prefix, option, minimizeWrite);
+		assert(lrs_);
+		bool minimizeWrite = (lrs_->super().block().size() == numberOfSites);
+		lrs_->write(io, prefix, option, minimizeWrite);
 
 		io.createGroup(prefix + "/WaveFunction");
 		const SizeType nsectors = wavefunction_.size();
@@ -229,8 +240,9 @@ public:
 	}
 
 	const LeftRightSuperType& leftRightSuper() const
-	{
-		return lrs_;
+	{			
+		assert(lrs_);
+		return *lrs_;
 	}
 
 	const VectorWithOffsetType& psiConst(SizeType sectorIndex,
@@ -261,8 +273,9 @@ public:
 
 	SizeType site() const
 	{
+		assert(lrs_);
 		return (direction_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
-		            lrs_.right().block()[0] - 1 : lrs_.right().block()[0];
+		            lrs_->right().block()[0] - 1 : lrs_->right().block()[0];
 		}
 
 	void transform(SparseMatrixType& ret, const SparseMatrixType& O) const
@@ -283,9 +296,10 @@ public:
 
 	SizeType centerOfOrthogonality() const
 	{
-		SizeType max = lrs_.left().block().size();
+		assert(lrs_);
+		SizeType max = lrs_->left().block().size();
 		assert(max > 0);
-		const SizeType site = lrs_.left().block()[max - 1];
+		const SizeType site = lrs_->left().block()[max - 1];
 		return (direction_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? site : site + 1;
 	}
 
@@ -307,7 +321,7 @@ private:
 
 	FermionSignType fS_;
 	FermionSignType fE_;
-	LeftRightSuperType lrs_;
+	LeftRightSuperType* lrs_;
 	VectorVectorVectorWithOffsetType wavefunction_;
 	bool ownWf_;
 	BlockDiagonalMatrixType transform_;
