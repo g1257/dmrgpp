@@ -132,7 +132,6 @@ public:
 	      progress_("ObserverHelper"),
 	      noMoreData_(false),
 	      numberOfSites_(0),
-	      psiStorage_(nullptr),
 	      lrsStorage_(PairLeftRightSuperSizeType(nullptr, 0))
 	{
 		typename BasisWithOperatorsType::VectorBoolType odds;
@@ -167,9 +166,6 @@ public:
 			delete timeSerializerV_[i];
 			timeSerializerV_[i] = 0;
 		}
-
-		delete psiStorage_;
-		psiStorage_ = nullptr;
 
 		delete lrsStorage_.first;
 		lrsStorage_.first = nullptr;
@@ -259,16 +255,7 @@ public:
 	{
 		checkIndex(ind);
 
-		if (!readOnDemand_)
-			return dSerializerV_[ind]->psiConst(sectorIndex, levelIndex);
-
-		delete psiStorage_;
-		psiStorage_ = new VectorWithOffsetType;
-
-		const PsimagLite::String prefix = "Serializer/" + ttos(ind);
-		psiStorage_->read(io_, prefix + "/WaveFunction/" + ttos(levelIndex) +
-		                  "/" + ttos(sectorIndex));
-		return *psiStorage_;
+		return dSerializerV_[ind]->psiConst(sectorIndex, levelIndex);
 	}
 
 	RealType time(SizeType ind) const
@@ -408,7 +395,6 @@ private:
 	bool noMoreData_;
 	VectorShortIntType signsOneSite_;
 	SizeType numberOfSites_;
-	mutable VectorWithOffsetType* psiStorage_;
 	mutable PairLeftRightSuperSizeType lrsStorage_;
 };  // ObserverHelper
 } // namespace Dmrg

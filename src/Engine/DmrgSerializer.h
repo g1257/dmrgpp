@@ -150,17 +150,16 @@ public:
 				wavefunction_[i].resize(nexcited);
 				for (SizeType j = 0; j < nexcited; ++j) {
 					wavefunction_[i][j] = new VectorWithOffsetType;
-					if (!readOnDemand)
-						wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) +
-						                          "/" + ttos(j));
+					wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) +
+					                          "/" + ttos(j));
 				}
 			}
 		} catch (...) {
 			wavefunction_.resize(1);
 			wavefunction_[0].resize(1);
 			wavefunction_[0][0] = new VectorWithOffsetType;
-			if (!readOnDemand)
-				wavefunction_[0][0]->read(io, prefix + "/WaveFunction");
+			wavefunction_[0][0]->read(io, prefix + "/WaveFunction");
+			std::cerr<<"WARNING: Outdated branch of execution?!\n";
 		}
 
 		io.read(direction_, prefix + "/direction");
@@ -168,10 +167,10 @@ public:
 
 	~DmrgSerializer()
 	{
-		delete lrs_;
-		lrs_ = nullptr;
+		freeLrs();
 
-		if (!ownWf_) return;
+		if (!ownWf_) return; // <<--- EARLY EXIT HERE
+
 		const SizeType nsectors = wavefunction_.size();
 		for (SizeType i = 0; i < nsectors; ++i) {
 			const SizeType nexcited = wavefunction_[i].size();
