@@ -223,15 +223,12 @@ public:
 				thereWasABug = true;
 		}
 
-		if (thereWasABug && limitWarn_ < 10) {
+		if (thereWasABug && limitWarn_ < 3) {
 			PsimagLite::String msg("BlockOffDiagMatrix: toSparse() ");
 			msg += "there used to be a bug here: patches with overlapping rows\n";
 
-			std::cout<<PsimagLite::AnsiColor::red;
 			std::cerr<<PsimagLite::AnsiColor::red;
-			std::cout<<msg;
 			std::cerr<<msg;
-			std::cout<<PsimagLite::AnsiColor::reset;
 			std::cerr<<PsimagLite::AnsiColor::reset;
 			++limitWarn_;
 		}
