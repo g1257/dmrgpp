@@ -4,8 +4,8 @@ use strict;
 use utf8;
 use warnings;
 
-my ($file) = @ARGV;
-defined($file) or die "USAGE: $0 filename\n";
+my ($file, $symmetrize) = @ARGV;
+defined($file) or die "USAGE: $0 filename [symmetrize 0 or 1]\n";
 
 my @entropy = load($file);
 
@@ -20,7 +20,7 @@ sub printEntropy
 	for (my $i = 0; $i < $n; ++$i) {
 		my $value = $entropy->[$i];
 		defined($value) or next;
-		$value = $entropy->[$n - $i] if ($i >= $nOver2);
+		$value = $entropy->[$n - $i] if ($i >= $nOver2 and $symmetrize);
 		print "$i $value\n";
 	}
 }
