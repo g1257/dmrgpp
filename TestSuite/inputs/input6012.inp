@@ -1,0 +1,201 @@
+TotalNumberOfSites=12
+NumberOfTerms=9
+
+Term=SxSx
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 12 12
+0 -1.20710678118655 0 0 0 0 0 0 0 0 0 -0.5 
+-1.20710678118655 0 -0.5 0 0 0 0 0 0 0 0 0 
+0 -0.5 0 -0.5 0 0 0 0 0 0 0 0 
+0 0 -0.5 0 -1.20710678118655 0 0 0 0 0 0 0 
+0 0 0 -1.20710678118655 0 -0.5 0 0 0 0 0 0 
+0 0 0 0 -0.5 0 -0.5 0 0 0 0 0 
+0 0 0 0 0 -0.5 0 -1.20710678118655 0 0 0 0 
+0 0 0 0 0 0 -1.20710678118655 0 -0.5 0 0 0 
+0 0 0 0 0 0 0 -0.5 0 -0.5 0 0 
+0 0 0 0 0 0 0 0 -0.5 0 -1.20710678118655 0 
+0 0 0 0 0 0 0 0 0 -1.20710678118655 0 -0.5 
+-0.5 0 0 0 0 0 0 0 0 0 -0.5 0 
+GeometryMaxConnections=0
+Term=SySy
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 12 12
+0 -0.5 0 0 0 0 0 0 0 0 0 -1.20710678118655 
+-0.5 0 -0.5 0 0 0 0 0 0 0 0 0 
+0 -0.5 0 -1.20710678118655 0 0 0 0 0 0 0 0 
+0 0 -1.20710678118655 0 -0.5 0 0 0 0 0 0 0 
+0 0 0 -0.5 0 -0.5 0 0 0 0 0 0 
+0 0 0 0 -0.5 0 -1.20710678118655 0 0 0 0 0 
+0 0 0 0 0 -1.20710678118655 0 -0.5 0 0 0 0 
+0 0 0 0 0 0 -0.5 0 -0.5 0 0 0 
+0 0 0 0 0 0 0 -0.5 0 -1.20710678118655 0 0 
+0 0 0 0 0 0 0 0 -1.20710678118655 0 -0.5 0 
+0 0 0 0 0 0 0 0 0 -0.5 0 -0.5 
+-1.20710678118655 0 0 0 0 0 0 0 0 0 -0.5 0 
+GeometryMaxConnections=0
+Term=SzSz
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 12 12
+0 -0.5 0 0 0 0 0 0 0 0 0 -0.5 
+-0.5 0 -1.20710678118655 0 0 0 0 0 0 0 0 0 
+0 -1.20710678118655 0 -0.5 0 0 0 0 0 0 0 0 
+0 0 -0.5 0 -0.5 0 0 0 0 0 0 0 
+0 0 0 -0.5 0 -1.20710678118655 0 0 0 0 0 0 
+0 0 0 0 -1.20710678118655 0 -0.5 0 0 0 0 0 
+0 0 0 0 0 -0.5 0 -0.5 0 0 0 0 
+0 0 0 0 0 0 -0.5 0 -1.20710678118655 0 0 0 
+0 0 0 0 0 0 0 -1.20710678118655 0 -0.5 0 0 
+0 0 0 0 0 0 0 0 -0.5 0 -0.5 0 
+0 0 0 0 0 0 0 0 0 -0.5 0 -1.20710678118655 
+-0.5 0 0 0 0 0 0 0 0 0 -1.20710678118655 0 
+GeometryMaxConnections=0
+Term=SySz
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 12 12
+0 -0.707106781186548 0 0 0 0 0 0 0 0 0 0 
+-0.707106781186548 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 -0.707106781186548 0 0 0 0 0 0 0 
+0 0 0 -0.707106781186548 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 -0.707106781186548 0 0 0 0 
+0 0 0 0 0 0 -0.707106781186548 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 -0.707106781186548 0 
+0 0 0 0 0 0 0 0 0 -0.707106781186548 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+GeometryMaxConnections=0
+Term=SzSy
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 12 12
+0 -0.707106781186548 0 0 0 0 0 0 0 0 0 0 
+-0.707106781186548 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 -0.707106781186548 0 0 0 0 0 0 0 
+0 0 0 -0.707106781186548 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 -0.707106781186548 0 0 0 0 
+0 0 0 0 0 0 -0.707106781186548 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 -0.707106781186548 0 
+0 0 0 0 0 0 0 0 0 -0.707106781186548 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+GeometryMaxConnections=0
+Term=SxSz
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 12 12
+0 0 0 0 0 0 0 0 0 0 0 -0.707106781186548 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 -0.707106781186548 0 0 0 0 0 0 0 0 
+0 0 -0.707106781186548 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 -0.707106781186548 0 0 0 0 0 
+0 0 0 0 0 -0.707106781186548 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 -0.707106781186548 0 0 
+0 0 0 0 0 0 0 0 -0.707106781186548 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+-0.707106781186548 0 0 0 0 0 0 0 0 0 0 0 
+GeometryMaxConnections=0
+Term=SzSx
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 12 12
+0 0 0 0 0 0 0 0 0 0 0 -0.707106781186548 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 -0.707106781186548 0 0 0 0 0 0 0 0 
+0 0 -0.707106781186548 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 -0.707106781186548 0 0 0 0 0 
+0 0 0 0 0 -0.707106781186548 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 -0.707106781186548 0 0 
+0 0 0 0 0 0 0 0 -0.707106781186548 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+-0.707106781186548 0 0 0 0 0 0 0 0 0 0 0 
+GeometryMaxConnections=0
+Term=SxSy
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 12 12
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 -0.707106781186548 0 0 0 0 0 0 0 0 0 
+0 -0.707106781186548 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 -0.707106781186548 0 0 0 0 0 0 
+0 0 0 0 -0.707106781186548 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 -0.707106781186548 0 0 0 
+0 0 0 0 0 0 0 -0.707106781186548 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 -0.707106781186548 
+0 0 0 0 0 0 0 0 0 0 -0.707106781186548 0 
+GeometryMaxConnections=0
+Term=SySx
+DegreesOfFreedom=1
+GeometryKind=LongRange
+GeometryOptions=none
+Connectors 12 12
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 -0.707106781186548 0 0 0 0 0 0 0 0 0 
+0 -0.707106781186548 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 -0.707106781186548 0 0 0 0 0 0 
+0 0 0 0 -0.707106781186548 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 -0.707106781186548 0 0 0 
+0 0 0 0 0 0 0 -0.707106781186548 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 0 
+0 0 0 0 0 0 0 0 0 0 0 -0.707106781186548 
+0 0 0 0 0 0 0 0 0 0 -0.707106781186548 0 
+GeometryMaxConnections=0
+Model=KitaevWithGammas
+
+MagneticFieldX 12 
+0 0 0 0 0 0 0 0 0 0 0 0 
+MagneticFieldY 12 
+0 0 0 0 0 0 0 0 0 0 0 0 
+MagneticFieldZ 12 
+0 0 0 0 0 0 0 0 0 0 0 0 
+InfiniteLoopKeptStates=128
+FiniteLoops 4
+-10 800 2 10 800 2
+-10 800 2 10 800 2
+
+Threads=1
+SolverOptions=CorrectionVectorTargeting,useComplex,twositedmrg,restart,fixLegacyBugs
+CorrectionA=0
+Version=version
+RestartFilename=data6011
+TruncationTolerance=1e-7
+OutputFile=data6012
+CorrectionVectorOmega=1
+DynamicDmrgType=0
+TSPProductOrSum=product
+CorrectionVectorFreqType=Real
+CorrectionVectorEta=0.1
+CorrectionVectorAlgorithm=Krylov
+Orbitals=1
+GsWeight=0.1
+TridiagSteps=600
+
+TSPSites 1 5 
+TSPLoops 1 1 
+
+TSPOperator=expression
+OperatorExpression=sz
+

@@ -247,9 +247,9 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 					std::cout<<"U[2,0]="<<hubbardU[6]<<" S0S1\n";
 					std::cout<<"U[2,1]="<<hubbardU[7]<<" S0S2\n";
 					std::cout<<"U[2,2]="<<hubbardU[8]<<" S1S2\n";
-					std::cout<<"U[3,0]="<<hubbardU[9]<<" P0P2\n";
-					std::cout<<"U[3,1]="<<hubbardU[10]<<" P1P2\n";
-					std::cout<<"U[3,2]="<<hubbardU[11]<<" P1P3\n";
+					std::cout<<"U[3,0]="<<hubbardU[9]<<" P0P1\n";
+					std::cout<<"U[3,1]="<<hubbardU[10]<<" P0P2\n";
+					std::cout<<"U[3,2]="<<hubbardU[11]<<" P1P2\n";
 				}
 			}
 		}
