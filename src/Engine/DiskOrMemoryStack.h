@@ -78,7 +78,7 @@ public:
 		return (diskR_) ? diskR_->top() : memory_.top();
 	}
 
-	void toDisk(DiskStackType& disk) const
+	void toDisk(DiskStackType& disk, bool restoreTotal) const
 	{
 		if (diskR_) {
 			SizeType total = diskR_->size();
@@ -86,6 +86,7 @@ public:
 			loadStack(disk, diskNonConst);
 			assert(diskW_);
 			diskW_->restore(total);
+			if (restoreTotal) diskR_->restore(total);
 		} else {
 			MemoryStackType memory = memory_;
 			loadStack(disk, memory);
