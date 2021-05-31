@@ -94,7 +94,6 @@ class DensityMatrixLocal : public DensityMatrixBase<TargetingType> {
 	typedef typename TargetingType::VectorWithOffsetType TargetVectorType;
 	typedef typename TargetingType::TargetVectorType::value_type DensityMatrixElementType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename BasisType::FactorsType FactorsType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 	typedef typename DensityMatrixBase<TargetingType>::Params ParamsType;

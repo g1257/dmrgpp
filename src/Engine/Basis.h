@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include "Sort.h" // in PsimagLite
 #include "HamiltonianSymmetryLocal.h"
-#include "HamiltonianSymmetrySu2.h"
 #include "Profiling.h"
 #include "Qn.h"
 #include "QnHash.h"
@@ -106,11 +105,9 @@ public:
 	typedef RealType_ RealType;
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef Qn QnType;
-	typedef HamiltonianSymmetrySu2<SparseMatrixType_, QnType> HamiltonianSymmetrySu2Type;
-	typedef typename HamiltonianSymmetrySu2Type::FactorsType FactorsType;
-	typedef typename HamiltonianSymmetrySu2Type::PairType PairType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef std::pair<SizeType, SizeType> PairSizeType;
 
 	//! Constructor, s=name of this basis
 	Basis(const PsimagLite::String& s)
@@ -469,42 +466,10 @@ public:
 		return calcError(eigs, removedIndices);
 	}
 
-	//! Returns the factors that mix this basis
-	//! If not using SU(2) this is trivial
-	const FactorsType* getFactors() const
-	{
-		return (useSu2Symmetry_) ? &(symmSu2_.getFactors()) : 0;
-	}
-
 	//! returns the flavor of state i of this basis
 	SizeType getFlavor(SizeType i) const
 	{
-		if (useSu2Symmetry_) return symmSu2_.getFlavor(i);
-		else return  symmLocal_.getFlavor(i);
-	}
-
-	SizeType flavor2Index(SizeType f1,
-	                      SizeType f2,
-	                      SizeType ne1,
-	                      SizeType ne2,
-	                      SizeType j1,
-	                      SizeType j2) const
-	{
-		assert(useSu2Symmetry_);
-		return symmSu2_.flavor2Index(f1,f2,ne1,ne2,j1,j2);
-	}
-
-	void flavor2Index(PsimagLite::Map<SizeType,SizeType>::Type& mm,
-	                  const PairType& jm) const
-	{
-		assert(useSu2Symmetry_);
-		symmSu2_.flavor2Index(mm,jm);
-	}
-
-	const VectorSizeType& flavorsOld() const
-	{
-		assert(useSu2Symmetry_);
-		return symmSu2_.flavorsOld();
+		return  symmLocal_.getFlavor(i);
 	}
 
 	const VectorBoolType& oldSigns() const { return signsOld_; }
@@ -517,10 +482,9 @@ public:
 	}
 
 	//! Returns the (j,m) for state i of this basis
-	PairType jmValue(SizeType i) const
+	PairSizeType jmValue(SizeType i) const
 	{
-		if (!useSu2Symmetry_) return PairType(0,0);
-		return symmSu2_.jmValue(i);
+		return PairSizeType(0, 0);
 	}
 
 	//! Returns true if using SU(2) symmetry or false otherwise
@@ -532,41 +496,6 @@ public:
 	//! Returns true if this basis has been DMRG transformed, or false if it hasn't
 	bool dmrgTransformed() const { return dmrgTransformed_; }
 
-	//! Returns the reduced (by the Wigner Eckart theorem) index corresponding to state i
-	SizeType reducedIndex(SizeType i) const
-	{
-		assert(useSu2Symmetry_);
-		return symmSu2_.reducedIndex(i);
-	}
-
-	//! Returns the size of this basis when reduced (by the Wigner-Eckart theorem)
-	SizeType reducedSize() const
-	{
-		assert(useSu2Symmetry_);
-		return symmSu2_.reducedSize();
-	}
-
-	//! Returns the i-th distinct j value for this basis
-	SizeType jVals(SizeType i) const
-	{
-		assert(useSu2Symmetry_);
-		return symmSu2_.jVals(i);
-	}
-
-	//! Returns the number of distinct j values for this basis
-	SizeType jVals() const
-	{
-		assert(useSu2Symmetry_);
-		return symmSu2_.jVals();
-	}
-
-	//! Returns the maximum j value in this basis
-	SizeType jMax() const
-	{
-		//assert(useSu2Symmetry_);
-		return symmSu2_.jMax();
-	}
-
 	PsimagLite::String pseudoQnToString(SizeType i) const
 	{
 		return "unimplemented";
@@ -574,16 +503,7 @@ public:
 
 	QnType pseudoQn(SizeType i) const
 	{
-		if (useSu2Symmetry_) {
-			assert(i < offsets_.size());
-			SizeType ind = offsets_[i];
-			PairType jmPair(symmSu2_.jmValue(ind).first, 0);
-			assert(ind < signs_.size());
-			QnType q(signs_[ind], VectorSizeType(), jmPair, 0);
-			return q;
-		} else {
-			return qnEx(i);
-		}
+		return qnEx(i);
 	}
 
 	void su2ElectronsBridge(VectorSizeType &v) const
@@ -616,8 +536,7 @@ public:
 		else
 			io.write(qns_, label + "QNShrink");
 
-		if (useSu2Symmetry_) symmSu2_.write(io, label, mode);
-		else symmLocal_.write(io, label, mode);
+		symmLocal_.write(io, label, mode);
 	}
 
 	//! saves this basis to disk
@@ -734,8 +653,6 @@ protected:
 	//! Sets symmetry information for this basis, see SymmetryElectronsSz.h for more
 	void setSymmetryRelated(const VectorQnType& basisData)
 	{
-		if (useSu2Symmetry_) symmSu2_.set(basisData);
-
 		SizeType n = basisData.size();
 		signs_.resize(n);
 		for (SizeType i = 0; i < n; ++i)
@@ -828,10 +745,7 @@ private:
 		QnType::readVector(qns_, prefix + "QNShrink", io);
 		if (!minimizeRead) checkSigns();
 		dmrgTransformed_=false;
-		if (useSu2Symmetry_)
-			symmSu2_.read(io,prefix, minimizeRead);
-		else
-			symmLocal_.read(io,prefix, minimizeRead);
+		symmLocal_.read(io,prefix, minimizeRead);
 	}
 
 
@@ -1045,7 +959,6 @@ these numbers are
 	VectorSizeType permutationVector_;
 	VectorSizeType permInverse_;
 	HamiltonianSymmetryLocalType symmLocal_;
-	HamiltonianSymmetrySu2Type symmSu2_;
 	/* PSIDOC BasisBlock
 		The variable block of a \cppClass{DmrgBasis} object indicates over
 		which sites the basis represented by this object is being built.

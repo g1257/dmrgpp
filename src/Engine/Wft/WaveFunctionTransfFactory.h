@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include "ProgressIndicator.h"
 #include "WaveFunctionTransfLocal.h"
-#include "WaveFunctionTransfSu2.h"
 #include "WaveStructCombined.h"
 #include "Io/IoSelector.h"
 #include "Random48.h"
@@ -108,7 +107,6 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef typename BasisType::FactorsType FactorsType;
 	typedef WaveStructCombined<LeftRightSuperType> WaveStructCombinedType;
 	typedef typename WaveStructCombinedType::VectorVectorRealType VectorVectorRealType;
 	typedef typename WaveStructCombinedType::VectorMatrixType VectorMatrixType;
@@ -118,8 +116,6 @@ public:
 	WaveFunctionTransfBaseType;
 	typedef WaveFunctionTransfLocal<WaveStructCombinedType, VectorWithOffsetType, OptionsType_>
 	WaveFunctionTransfLocalType;
-	typedef WaveFunctionTransfSu2<WaveStructCombinedType, VectorWithOffsetType, OptionsType_>
-	WaveFunctionTransfSu2Type;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
 	typedef typename WaveStructCombinedType::WaveStructSvdType WaveStructSvdType;
 
@@ -160,13 +156,9 @@ public:
 			}
 		}
 
-		if (BasisType::useSu2Symmetry())
-			wftImpl_=new WaveFunctionTransfSu2Type(waveStructCombined_,
-			                                       wftOptions_);
-		else
-			wftImpl_=new WaveFunctionTransfLocalType(waveStructCombined_,
-			                                         wftOptions_,
-			                                         volumeOfSite0);
+		wftImpl_=new WaveFunctionTransfLocalType(waveStructCombined_,
+		                                         wftOptions_,
+		                                         volumeOfSite0);
 	}
 
 	~WaveFunctionTransfFactory()

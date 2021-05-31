@@ -127,7 +127,6 @@ public:
 	typedef typename BasisType::BlockType VectorSizeType;
 	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef BasisWithOperators<BasisType_> ThisType;
-	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename OperatorStorageType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;

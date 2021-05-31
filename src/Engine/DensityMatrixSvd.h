@@ -95,7 +95,6 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 	typedef PsimagLite::Matrix<SizeType> MatrixSizeType;
 	typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename BasisType::FactorsType FactorsType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename BaseType::Params ParamsType;

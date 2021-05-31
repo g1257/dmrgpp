@@ -118,7 +118,6 @@ public:
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
 	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef typename BasisType::FactorsType FactorsType;
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
 	typedef ParallelWftOne<VectorWithOffsetType, DmrgWaveStructType> ParallelWftType;
