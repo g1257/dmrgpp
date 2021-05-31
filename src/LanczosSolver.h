@@ -88,7 +88,7 @@ public:
 	void decomposition(const VectorType& initVector,
 	                   TridiagonalMatrixType& ab)
 	{
-		return ls_.decomposition(initVector, ab, 1);
+		return ls_.decomposition(initVector, ab, ls_.params().eigsForStop);
 	}
 
 	void lanczosVectorsSwap(typename LanczosCoreType::DenseMatrixType& V)

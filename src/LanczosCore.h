@@ -279,6 +279,8 @@ public:
 
 	const MatrixType& matrix() const { return mat_; }
 
+	const SolverParametersType& params() const {return params_; }
+
 private:
 
 	ProgressIndicator progress_;

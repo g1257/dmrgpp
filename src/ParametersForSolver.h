@@ -103,6 +103,7 @@ struct ParametersForSolver {
 	      minSteps(4),
 	      tolerance(1e-12),
 	      stepsForEnergyConvergence(MaxLanczosSteps),
+	      eigsForStop(1),
 	      options(""),
 	      oneOverA(0),
 	      b(0),
@@ -118,6 +119,7 @@ struct ParametersForSolver {
 	      minSteps(4),
 	      tolerance(1e-12),
 	      stepsForEnergyConvergence(MaxLanczosSteps),
+	      eigsForStop(1),
 	      options("none"),
 	      oneOverA(0),
 	      b(0),
@@ -134,6 +136,8 @@ struct ParametersForSolver {
 		rabbitHole(tolerance, prefix, ind, "Eps", io);
 
 		rabbitHole(stepsForEnergyConvergence, prefix, ind, "StepsForEnergyConvergence", io);
+
+		rabbitHole(eigsForStop, prefix, ind, "EigsForStop", io);
 
 		rabbitHole(options, prefix, ind, "Options", io);
 
@@ -193,6 +197,7 @@ struct ParametersForSolver {
 	SizeType minSteps;
 	RealType tolerance;
 	SizeType stepsForEnergyConvergence;
+	SizeType eigsForStop;
 	String options;
 	RealType oneOverA,b;
 	RealType Eg;
