@@ -4,6 +4,7 @@
 #include "RegisterSignals.h"
 #include "DmrgDriver.h"
 #include "Io/IoNg.h"
+#include "RunFinished.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
@@ -340,6 +341,13 @@ to the main dmrg driver are the following.
 
 	bool echoInput = false;
 	if (!options.enabled && options.label != "-") {
+
+		RunFinished runFinished(dmrgSolverParams.options.isSet("noClobber"));
+		if (runFinished.OK(options.label.c_str())) {
+			       runFinished.printTermination(options.label.c_str());
+				   return 1;
+		}
+
 		GlobalCoutStream.open(options.label.c_str(),
 		                      (dmrgSolverParams.autoRestart) ? std::ofstream::app :
 		                                                       std::ofstream::out);
