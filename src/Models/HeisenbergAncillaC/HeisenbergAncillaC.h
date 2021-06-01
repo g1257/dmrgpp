@@ -223,7 +223,7 @@ protected:
 		if (modelParameters_.twiceTheSpin > 2)
 			err("Spin > 1 not supported by this model yet\n");
 
-		const SizeType numberOfDs = (modelParameters_.twiceTheSpin == 1) ? 1 : 4;
+		const SizeType numberOfDs = (modelParameters_.twiceTheSpin == 1) ? 1 : 11;
 
 		SizeType site = 0;
 		BlockType block(1, site);
@@ -375,51 +375,72 @@ protected:
 		}
 
 		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
-		OpForLinkType d("d", 0);
-		const SizeType twiceTheSpin = modelParameters_.twiceTheSpin;
-		auto modifierTermD0 = [twiceTheSpin](SparseElementType& value)
-		{RealType factor = (twiceTheSpin == 2) ? 3 : 1; value *= factor; };
-		ancilla.push(d,
-		             'N',
-		             d,
-		             'C',
-		             modifierTermD0,
-		             typename ModelTermType::Su2Properties(2, 1, 0));
-
-		if (modelParameters_.twiceTheSpin == 1) return;
+		if (modelParameters_.twiceTheSpin == 1) {
+			OpForLinkType d("d", 0);
+			auto modifierTermD0 = [isSu2](SparseElementType& value) {if (isSu2) value = -value;};
+			ancilla.push(d,
+			             'N',
+			             d,
+			             'C',
+			             modifierTermD0,
+			             typename ModelTermType::Su2Properties(2, 1, 0));
+			return;
+		}
 
 		if (modelParameters_.twiceTheSpin != 2)
 			err("Spin > 1 not supported by this model yet\n");
 
-		for (SizeType p = 1; p < 4; ++p) {
-			auto modifierTermD = [p](SparseElementType& value)
-			{RealType factor = (p > 1) ? 2 : 3; value *= factor; };
+		auto modifierTermDoff = [isSu2](SparseElementType& value) {if (isSu2) value = -value;};
+		OpForLinkType N0("d", 0);
+		OpForLinkType N1("d", 1);
+		OpForLinkType N2("d", 2);
+		OpForLinkType M0("d", 3);
+		OpForLinkType M1("d", 4);
+		OpForLinkType M2("d", 5);
+		OpForLinkType T0("d", 6);
+		OpForLinkType W0("d", 7);
+		OpForLinkType T1("d", 8);
+		OpForLinkType W1("d", 9);
+		OpForLinkType T2("d", 10);
 
-			OpForLinkType dd("d", p);
-			ancilla.push(dd,
-			             'N',
-			             dd,
-			             'C',
-			             modifierTermD,
-			             typename ModelTermType::Su2Properties(2, 1, 0));
-		}
-
-		auto modifierTermDoff = [](SparseElementType& value)
-		{RealType factor = -1; value *= factor; };
-		OpForLinkType d0("d", 0);
-		OpForLinkType d1("d", 1);
-		OpForLinkType d2("d", 2);
-		OpForLinkType d3("d", 3);
-		ancilla.push(d0,
+		ancilla.push(N0,
 		             'N',
-		             d2,
+		             M0,
 		             'C',
 		             modifierTermDoff,
 		             typename ModelTermType::Su2Properties(2, 1, 0));
 
-		ancilla.push(d1,
+		ancilla.push(N1,
 		             'N',
-		             d3,
+		             M1,
+		             'C',
+		             modifierTermDoff,
+		             typename ModelTermType::Su2Properties(2, 1, 0));
+
+		ancilla.push(N2,
+		             'N',
+		             M2,
+		             'C',
+		             modifierTermDoff,
+		             typename ModelTermType::Su2Properties(2, 1, 0));
+
+		ancilla.push(T0,
+		             'N',
+		             W0,
+		             'C',
+		             modifierTermDoff,
+		             typename ModelTermType::Su2Properties(2, 1, 0));
+
+		ancilla.push(T1,
+		             'N',
+		             W1,
+		             'C',
+		             modifierTermDoff,
+		             typename ModelTermType::Su2Properties(2, 1, 0));
+
+		ancilla.push(T2,
+		             'N',
+		             T2,
 		             'C',
 		             modifierTermDoff,
 		             typename ModelTermType::Su2Properties(2, 1, 0));
@@ -484,6 +505,83 @@ private:
 		return cm;
 	}
 
+	//! Find Ntilde_i in the natural basis natBasis
+	MatrixType findNtildeDense(SizeType orbital, SizeType which, const HilbertBasisType& natBasis) const
+	{
+		SizeType total = natBasis.size();
+		MatrixType cm(total,total);
+		if (which > 2)
+			err("Ntilde cannot be>2\n");
+
+		assert(which<modelParameters_.twiceTheSpin+1);
+
+		for (SizeType ii=0;ii<total;ii++) {
+			PairSizeType ket = getOneOrbital(natBasis[ii]);
+			SizeType ket1 = (orbital == 0) ? ket.first : ket.second;
+			if (which==ket1)
+				cm(ii,ii) = 1;
+		}
+		return cm;
+	}
+
+	//! Find Mtilde_i in the natural basis natBasis
+	MatrixType findMtildeDense(SizeType orbital, SizeType which, const HilbertBasisType& natBasis) const
+	{
+		SizeType total = natBasis.size();
+		MatrixType cm(total,total);
+		if (which > 2)
+			err("Mtilde cannot be>2\n");
+
+		assert(which<modelParameters_.twiceTheSpin+1);
+
+		for (SizeType ii=0;ii<total;ii++) {
+			PairSizeType ket = getOneOrbital(natBasis[ii]);
+			SizeType ket1 = (orbital == 0) ? ket.first : ket.second;
+			if (which==0) {
+				switch (ket1) {
+				case 0:
+					cm(ii,ii) = 1;
+					break;
+				case 1:
+					cm(ii,ii) = 1.0/2.0;
+					break;
+				case 2:
+					cm(ii,ii) = 1.0/3.0;
+					break;
+				}
+			}
+
+			if (which==1) {
+				switch (ket1) {
+				case 0:
+					cm(ii,ii) = 1.0/2.0;
+					break;
+				case 1:
+					cm(ii,ii) = 1.0/3.0;
+					break;
+				case 2:
+					cm(ii,ii) = 1.0/2.0;
+					break;
+				}
+			}
+
+			if (which==2) {
+				switch (ket1) {
+				case 0:
+					cm(ii,ii) = 1.0/3.0;
+					break;
+				case 1:
+					cm(ii,ii) = 1.0/2.0;
+					break;
+				case 2:
+					cm(ii,ii) = 1.0;
+					break;
+				}
+			}
+		}
+		return cm;
+	}
+
 	SparseMatrixType findSzMatrices(int,
 	                                SizeType orbital,
 	                                const HilbertBasisType& natBasis) const
@@ -494,57 +592,103 @@ private:
 		return operatorMatrix;
 	}
 
-	// pp = 0 S^+
-	// pp = 1 S^+2
-	// pp = 2 S^+Sz
-	// pp = 2 S^+2Sz
 	SparseMatrixType findDeltaMatrix(const HilbertBasisType& natBasis, SizeType pp) const
 	{
 		if (modelParameters_.twiceTheSpin > 2)
 			err("Spin > 1 not supported by this model yet\n");
 
-		if (pp > 3)
-			err("findDeltaMatrix: pp > 3\n");
+		if (pp > 10)
+			err("findDeltaMatrix: pp > 10\n");
 
 		if (pp > 0 && modelParameters_.twiceTheSpin == 1)
 			err("findDeltaMatrix: pp > 0 for spin = 1/2\n");
 
-		const SizeType step = 1 + (pp & 1);
-
+		SizeType step = 1;
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
-		for (SizeType ii=0;ii<total;ii++) {
-			PairSizeType ket = getOneOrbital(natBasis[ii]);
+		if (pp==10)
+			step = 2;
 
-			SizeType bra1 = ket.first + step;
-			SizeType bra2 = ket.second;
+		if (modelParameters_.twiceTheSpin==1 && pp==0) {
 
-			// if impossible, skip
-			if (bra1 > modelParameters_.twiceTheSpin || bra2 < step)
-				continue;
+			for (SizeType ii=0;ii<total;ii++) {
+				PairSizeType ket = getOneOrbital(natBasis[ii]);
 
-			bra2 -= step;
+				SizeType bra1 = ket.first + step;
+				SizeType bra2 = ket.second;
 
-			PairSizeType bra(bra1, bra2);
-			SizeType jj = getFullIndex(bra);
-			cm(ii, jj) = 1;
+				// if impossible, skip
+				if (bra1 > modelParameters_.twiceTheSpin || bra2 < step)
+					continue;
+
+				bra2 -= step;
+
+				PairSizeType bra(bra1, bra2);
+				SizeType jj = getFullIndex(bra);
+				cm(ii, jj) = 1;
+			}
 		}
 
-		MatrixType cm2 = cm;
+		if (modelParameters_.twiceTheSpin==2) {
 
-		const bool hasSz = (pp > 1);
-		if (hasSz) {
-			MatrixType szDense = findSzDense(0, natBasis);
-			cm2 = cm*szDense;
+			if (pp<=2)
+				cm = findNtildeDense(0, pp, natBasis);
+
+			if (pp>2 && pp<=5)
+				cm = findMtildeDense(0, pp-3, natBasis);
+
+			if (pp>=6) {
+				for (SizeType ii=0;ii<total;ii++) {
+					PairSizeType ket = getOneOrbital(natBasis[ii]);
+
+					SizeType bra1 = ket.first + step;
+					SizeType bra2 = ket.second;
+
+					// if impossible, skip
+					if (bra1 > modelParameters_.twiceTheSpin || bra2 < step)
+						continue;
+
+					bra2 -= step;
+
+					PairSizeType bra(bra1, bra2);
+					SizeType jj = getFullIndex(bra);
+					switch (pp) {
+					case 6:
+						if (ket.first==0)
+							cm(ii,jj) = 1.0/2.0;
+						if (ket.first==1)
+							cm(ii,jj) = 1.0/3.0;
+						break;
+					case 7:
+						if (ket.first==0)
+							cm(ii,jj) = 1;
+						break;
+					case 8:
+						if (ket.first==0)
+							cm(ii,jj) = 1.0/3.0;
+						if (ket.first==1)
+							cm(ii,jj) = 1.0/2.0;
+						break;
+					case 9:
+						if (ket.first==1)
+							cm(ii,jj) = 1;
+						break;
+					case 10:
+						if (ket.first==0)
+							cm(ii,jj) = sqrt(1.0/3.0);
+						break;
+					}
+				}
+			}
 		}
 
-		SparseMatrixType operatorMatrix(cm2);
+		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
 	}
 
 	WordType barFunction(const WordType& w) const
 	{
-		return modelParameters_.twiceTheSpin - w;;
+		return modelParameters_.twiceTheSpin - w;
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
