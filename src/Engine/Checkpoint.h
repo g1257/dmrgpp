@@ -261,13 +261,12 @@ public:
 		// taken from dtor
 		sayAboutToWrite();
 		static const bool needsToRead = false;
-		static const bool restoreTotal = true;
 
 		DiskStackType systemDisk(filename, needsToRead, "system", isObserveCode_);
-		systemStack_.toDisk(systemDisk, restoreTotal);
+		systemStack_.toDisk(systemDisk);
 
 		DiskStackType environDisk(filename, needsToRead, "environ", isObserveCode_);
-		envStack_.toDisk(environDisk, restoreTotal);
+		envStack_.toDisk(environDisk);
 		sayWritingDone();
 	}
 
