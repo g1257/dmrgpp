@@ -107,7 +107,10 @@ public:
 	{
 		if (diskW_) {
 			assert(diskR_);
+			const SizeType total = diskR_->size();
 			writeWftStacksOnDisk(prefix, io);
+			diskR_->restore(total);
+			diskW_->restore(total);
 			return;
 		}
 
