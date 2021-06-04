@@ -158,6 +158,7 @@ struct ParametersDmrgSolver {
 	SizeType precision;
 	SizeType numberOfExcited;
 	SizeType gemmRnb;
+	SizeType opOnSiteThreshold;
 	bool autoRestart;
 	PairRealSizeType truncationControl;
 	PsimagLite::String filename;
@@ -205,14 +206,7 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/finiteLoop", finiteLoop);
 		ioSerializer.write(root + "/degeneracyMax", degeneracyMax);
 		ioSerializer.write(root + "/denseSparseThreshold", denseSparseThreshold);
-	}
-
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType x,
-	                   PsimagLite::String msg) const
-	{
-		return 0;
+		ioSerializer.write(root + "/opOnSiteThreshold", opOnSiteThreshold);
 	}
 
 	//! Read Dmrg parameters from inp file
@@ -230,6 +224,7 @@ struct ParametersDmrgSolver {
 	      precision(6),
 	      numberOfExcited(1),
 	      gemmRnb(0),
+	      opOnSiteThreshold(0),
 	      autoRestart(false),
 	      options("SolverOptions=", io),
 	      recoverySave(""),
@@ -392,6 +387,10 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(saveDensityMatrixEigenvalues, "SaveDensityMatrixEigenvalues=");
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(opOnSiteThreshold, "OpOnSiteThreshold=");
 		} catch (std::exception&) {}
 
 		if (options.isSet("restart")) {

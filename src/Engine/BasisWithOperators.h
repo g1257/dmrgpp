@@ -189,11 +189,17 @@ public:
 	                       const VectorSizeType& removedIndices,
 	                       const PairSizeSizeType& startEnd,
 	                       SizeType gemmRnb,
-	                       SizeType threadsForGemmR)
+	                       SizeType threadsForGemmR,
+	                       SizeType opOnSiteThreshold)
 	{
 		RealType error = BasisType::truncateBasis(eigs, removedIndices);
 
-		operators_.changeBasis(ftransform, startEnd, gemmRnb, threadsForGemmR);
+		operators_.changeBasis(ftransform,
+		                       startEnd,
+		                       gemmRnb,
+		                       threadsForGemmR,
+		                       opsPerSiteOrMinusOne(),
+		                       opOnSiteThreshold);
 
 		return error;
 	}
@@ -340,6 +346,16 @@ private:
 		for (SizeType i=0;i<basis3.operatorsPerSite_.size();i++)
 			operatorsPerSite_[i+offset1] =  basis3.operatorsPerSite_[i];
 		assert(operatorsPerSite_.size() > 0);
+	}
+
+	SizeType opsPerSiteOrMinusOne() const
+	{
+		const SizeType n = BasisType::block().size();
+		SizeType result = operatorsPerSite(0);
+		for (SizeType i = 1; i < n; ++i)
+			if (result != operatorsPerSite(i)) return 0;
+
+		return result;
 	}
 
 	// BasisWithOperators(const BasisWithOperators&);

@@ -208,6 +208,7 @@ public:
 		knownLabels_.push_back("Intent");
 		knownLabels_.push_back("PrintHamiltonianAverage");
 		knownLabels_.push_back("SaveDensityMatrixEigenvalues");
+		knownLabels_.push_back("OpOnSiteThreshold");
 
 		for (SizeType i = 0; i < 10; ++i)
 			knownLabels_.push_back("Term" + ttos(i));
@@ -267,6 +268,8 @@ public:
 		str += "string CorrectionVectorAlgorithm;\n";
 		str += "real CorrectionVectorOmega;\n";
 		str += "string Intent;\n";
+		str += "integer OpOnSiteThreshold;\n";
+
 		return str;
 	}
 

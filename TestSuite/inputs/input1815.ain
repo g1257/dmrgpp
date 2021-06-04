@@ -44,3 +44,4 @@ TSPProductOrSum="product";
 
 string TSPOp0:TSPOperator="expression";
 string TSPOp0:OperatorExpression="identity";
+OpOnSiteThreshold=2;

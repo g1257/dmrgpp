@@ -147,7 +147,9 @@ public:
 		       const BlockDiagonalMatrixType& ftransform1,
 		       const PairSizeSizeType& startEnd,
 		       SizeType gemmRnb,
-		       SizeType threadsForGemmR)
+		       SizeType threadsForGemmR,
+		       SizeType opsPerSite,
+		       SizeType opOnSiteThreshold)
 		    : operators_(operators),
 		      superOps_(superOps),
 		      changeOfBasis_(changeOfBasis),
@@ -155,7 +157,9 @@ public:
 		      startEnd_(startEnd),
 		      counter_(PsimagLite::Concurrency::codeSectionParams.npthreads),
 		      gemmRnb_(gemmRnb),
-		      threadsForGemmR_(threadsForGemmR)
+		      threadsForGemmR_(threadsForGemmR),
+		      opsPerSite_(opsPerSite),
+		      opOnSiteThreshold_(opOnSiteThreshold)
 		{
 			changeOfBasis.update(ftransform);
 		}
@@ -211,8 +215,15 @@ public:
 			if (changeAll_ == ChangeAllEnum::TRUE_SET)
 				return false; // <-- this is the safest answer
 
+			// excluded because not needed by geometry
 			if (k < startEnd_.first || k >= startEnd_.second) return true;
-			return false;
+
+			// excluded because not needed by Hamiltonian
+			// (opsPerSite_ == 0 means that model is SDHS and this feature is then not supported)
+			if (opsPerSite_ == 0 || opOnSiteThreshold_ == 0) return false;
+
+			SizeType opNumber = k % opsPerSite_;
+			return (opNumber >= opOnSiteThreshold_);
 		}
 
 		bool isSuperExcluded(SizeType) const
@@ -228,6 +239,8 @@ public:
 		VectorSizeType counter_;
 		SizeType gemmRnb_;
 		SizeType threadsForGemmR_;
+		SizeType opsPerSite_;
+        SizeType opOnSiteThreshold_;
 	};
 
 	Operators() : progress_("Operators")
@@ -304,7 +317,9 @@ public:
 	void changeBasis(const BlockDiagonalMatrixType& ftransform,
 	                 const PairSizeSizeType& startEnd,
 	                 SizeType gemmRnb,
-	                 SizeType threadsForGemmR)
+	                 SizeType threadsForGemmR,
+	                 SizeType opsPerSite,
+	                 SizeType opOnSiteThreshold)
 	{
 		typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
 		ParallelizerType threadObject(PsimagLite::Concurrency::codeSectionParams);
@@ -315,7 +330,9 @@ public:
 		              ftransform,
 		              startEnd,
 		              gemmRnb,
-		              threadsForGemmR);
+		              threadsForGemmR,
+		              opsPerSite,
+		              opOnSiteThreshold);
 
 		threadObject.loopCreate(helper); // FIXME: needs weights
 

@@ -310,7 +310,8 @@ private:
 		                     cache.removedIndices,
 		                     startEnd,
 		                     parameters_.gemmRnb,
-		                     PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo);
+		                     PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo,
+		                     parameters_.opOnSiteThreshold);
 
 		LeftRightSuperType* lrs = 0;
 		if (expandSys)
