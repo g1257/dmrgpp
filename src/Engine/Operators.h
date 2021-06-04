@@ -153,17 +153,18 @@ public:
 		      changeOfBasis_(changeOfBasis),
 		      ftransform(ftransform1),
 		      startEnd_(startEnd),
+		      counter_(PsimagLite::Concurrency::codeSectionParams.npthreads),
 		      gemmRnb_(gemmRnb),
 		      threadsForGemmR_(threadsForGemmR)
 		{
 			changeOfBasis.update(ftransform);
 		}
 
-		void doTask(SizeType taskNumber, SizeType)
+		void doTask(SizeType taskNumber, SizeType threadNum)
 		{
 			const SizeType nLocals =  operators_.size();
 			if (taskNumber < nLocals)
-				doTaskForLocal(taskNumber);
+				doTaskForLocal(taskNumber, threadNum);
 			else
 				doTaskForSuper(taskNumber - nLocals);
 		}
@@ -173,9 +174,18 @@ public:
 			return operators_.size() + superOps_.size();
 		}
 
+		SizeType finalize() const
+		{
+			SizeType sum = 0;
+			for (SizeType i = 0; i < counter_.size(); ++i)
+				sum += counter_[i];
+
+			return sum;
+		}
+
 	private:
 
-		void doTaskForLocal(SizeType k)
+		void doTaskForLocal(SizeType k, SizeType threadNum)
 		{
 			if (isLocalExcluded(k) && k < operators_.size()) {
 				operators_[k].clear();
@@ -183,6 +193,7 @@ public:
 			}
 
 			changeOfBasis_(operators_[k].getStorageNonConst(), gemmRnb_, threadsForGemmR_);
+			++counter_[threadNum];
 		}
 
 		void doTaskForSuper(SizeType k)
@@ -214,6 +225,7 @@ public:
 		ChangeOfBasisType& changeOfBasis_;
 		const BlockDiagonalMatrixType& ftransform;
 		const PairSizeSizeType& startEnd_;
+		VectorSizeType counter_;
 		SizeType gemmRnb_;
 		SizeType threadsForGemmR_;
 	};
@@ -306,6 +318,11 @@ public:
 		              threadsForGemmR);
 
 		threadObject.loopCreate(helper); // FIXME: needs weights
+
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+		msg<<"Operators that were rotated= " + ttos(helper.finalize());
+		progress_.printline(msgg, std::cout);
 
 		hamiltonian_.checkValidity();
 		ChangeOfBasisType::changeBasis(hamiltonian_, ftransform, gemmRnb, threadsForGemmR);
