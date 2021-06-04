@@ -25,9 +25,9 @@ Version="version";
 OutputFile="data1819";
 InfiniteLoopKeptStates=60;
 FiniteLoops=[
-[-6, 400, 2],
-[ 6, 400, 2]];
-RepeatFiniteLoopsTimes=4;
+[-6, 200, 2],
+[ 6, 200, 2]];
+RepeatFiniteLoopsTimes=2;
 
 integer TargetElectronsTotal=8;
 TargetSzPlusConst=16;

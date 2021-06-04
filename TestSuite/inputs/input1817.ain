@@ -8,19 +8,19 @@ gt0:GeometryKind="LongRange";
 gt0:GeometryOptions="none";
 integer gt0:GeometryMaxConnections=0;
 matrix gt0:Connectors=[
-	[0, -1, 0, -1],
-	[-1, 0, -1, 0],
-	[0, -1, 0, -1],
-	[-1, 0, -1, 0]];
+	[0, 1, 0, 1],
+	[1, 0, 1, 0],
+	[0, 1, 0, 1],
+	[1, 0, 1, 0]];
 
 gt1:GeometryKind="LongRange";
 gt1:GeometryOptions="none";
 integer gt1:GeometryMaxConnections=0;
 matrix gt1:Connectors=[
-	[0, -1, 0, -1],
-    [-1, 0, -1, 0],
-    [0, -1, 0, -1],
-    [-1, 0, -1, 0]];
+	[0, 1, 0, 1],
+    [1, 0, 1, 0],
+    [0, 1, 0, 1],
+    [1, 0, 1, 0]];
 
 gt2:GeometryKind="chain";
 gt2:GeometryOptions="ConstantValues";
@@ -30,13 +30,13 @@ Model="HeisenbergAncillaC";
 HeisenbergTwiceS=2;
 
 SolverOptions="twositedmrg,restart,TargetingAncilla";
-RestartFilename="data1816";
+RestartFilename="data1814";
 Version="version";
 OutputFile="data1817";
 InfiniteLoopKeptStates=60;
 FiniteLoops=[
-[-2, 400, 2],
-[ 2, 400, 2]];
+[-2, 200, 2],
+[ 2, 200, 2]];
 RepeatFiniteLoopsTimes=4;
 
 integer TargetElectronsTotal=4;
