@@ -57,17 +57,8 @@ public:
 	{
 		factor_ *= val;
 
-		if (PsimagLite::imag(factor_) != 0)
-			err("Cannot multiply by complex number yet\n");
-
-		const RealType f = PsimagLite::real(factor_);
-
-		if (f < 0)
-			strFactor_ = "(" + ttos(f) + ")";
-		else
-			strFactor_ = ttos(f);
-
-		if (f == 1) strFactor_ = "";
+		return (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) ? finalMultImag()
+		                                                              : finalMultReal();
 	}
 
 	void finalize()
@@ -99,7 +90,7 @@ public:
 			}
 
 			// it's a matrix or a scalar
-			if (tmp[0] == '-' || tmp[0] == '+' || (tmp[0] >= 65 && tmp[0] <= 74)) {
+			if (tmp[0] == '-' || tmp[0] == '+' || tmp[0] == '.' || (tmp[0] >= 48 && tmp[0] <= 57)) {
 				err("Scalars not supported yet\n");
 			}
 
@@ -249,6 +240,30 @@ private:
 		return (aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? maxSystemSite
 		                                                                          : maxSystemSite + 1;
 
+	}
+
+	void finalMultReal()
+	{
+		assert(PsimagLite::imag(factor_) == 0);
+
+		const RealType f = PsimagLite::real(factor_);
+
+		if (f < 0)
+			strFactor_ = "(" + ttos(f) + ")";
+		else
+			strFactor_ = ttos(f);
+
+		if (f == 1) strFactor_ = "";
+	}
+
+	void finalMultImag()
+	{
+		const RealType freal = PsimagLite::real(factor_);
+		const RealType fimag = PsimagLite::real(factor_);
+
+		strFactor_ = "(" + ttos(freal) + "," + ttos(fimag) + ")";
+
+		if (freal == 1 && fimag == 0) strFactor_ = "";
 	}
 
 	// ATTENTION: has assignment operator
