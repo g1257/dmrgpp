@@ -11,8 +11,8 @@ use strict;
 use utf8;
 use MIME::Base64;
 
-my ($root, $label, $total) = @ARGV;
-defined($label) or die "USAGE: $0 runForinput label [total]\n";
+my ($root, $label, $total, $wantsMax) = @ARGV;
+defined($label) or die "USAGE: $0 runForinput label [total] [wantsMax]\n";
 
 #Avoid infinite loops here:
 my $hasTotal = 1;
@@ -22,20 +22,25 @@ if (!defined($total)) {
 }
 
 #\d+.cout
-$root =~ s/\d+\.cout//;
+my $start = 0;
+if ($root =~ /(\d+)\.cout/) {
+	$start = $1;
+	$root =~ s/\d+\.cout//;
+}
 
 print STDERR "#$root $label ";
 print STDERR "$total" if ($hasTotal);
 print STDERR "\n";
 print STDERR "#Note value may take two columns if it is complex\n";
 print STDERR "#Omega Value\n";
-for (my $i = 0; $i < $total; ++$i) {
+for (my $i = $start; $i < $total; ++$i) {
 	my $file = $root."$i".".cout";
 	if (-r "$file") {
 		my $input = loadInputFromCout($file);
 		my $omega = extractOmegaFromInput($input);
-		my $value = extractValueFromCout($file, $label);
-		print "$omega $value\n";
+		my ($value, $max) = extractValueFromCout($file, $label);
+		$max = "" unless ($wantsMax);
+		print "$omega $value $max\n";
 		next;
 	}
 
@@ -48,6 +53,8 @@ sub extractValueFromCout
 	my ($file, $label) = @_;
 	open(FILE, "<", $file) or die "$0: Cannot open $file : $!\n";
 	my $value;
+	my $prev;
+	my $max = 0;
 	while (<FILE>) {
 		chomp;
 		if (/$label/) {
@@ -59,12 +66,19 @@ sub extractValueFromCout
 			$value =~s/\)//;
 			$value =~s/,/ /;
 		}
+
+		if (defined($prev)) {
+			my $diff = findAbsDiff($prev, $value);
+			$max = $diff if ($diff > $max);
+		}
+
+		$prev = $value;
 	}
 
 	close(FILE);
 
 	defined($value) or die "$0: $label not found in $file\n";
-	return $value;
+	return ($value, $max);
 }
 
 sub loadInputFromCout
@@ -100,5 +114,19 @@ sub extractOmegaFromInput
 	}
 
 	die "$0: Did not find CorrectionVectorOmega=\n";
+}
+
+sub findAbsDiff
+{
+	my ($a, $b) = @_;
+	my @temp1 = split/ /, $a;
+	my @temp2 = split/ /, $b;
+	my $n = scalar(@temp1);
+	(scalar(@temp2) == $n) or die "$0: findAbsDiff different sizes for $a and $b\n";
+	($n > 0 and $n < 3) or die "$0: findAbsDiff: sizes not 1 or 2 for $a and $b\n";
+	return abs($a - $b) if ($n == 1);
+	my $x = $temp1[0] - $temp2[0];
+	my $y = $temp1[1] - $temp2[1];
+	return sqrt($x*$x + $y*$y);
 }
 
