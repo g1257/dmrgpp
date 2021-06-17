@@ -22,15 +22,14 @@ Please see full open source license included in file LICENSE.
 #include <fstream>
 #include <iostream>
 #include <cstdlib>
-#include "IoSimple.h"
+#include "Io/IoSimple.h"
 #include "TridiagonalMatrix.h"
 #include "ContinuedFraction.h"
-#include "String.h"
 
 using namespace PsimagLite;
 typedef double RealType;
 typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
-typedef ContinuedFraction<RealType,TridiagonalMatrixType> ContinuedFractionType;
+typedef ContinuedFraction<TridiagonalMatrixType> ContinuedFractionType;
 
 void usage(const char *progName)
 {
@@ -79,8 +78,10 @@ int main(int argc,char *argv[])
 
 	IoSimple::In io(file);
 	ContinuedFractionType cf(io);
+	typedef typename ContinuedFractionType::PlotParamsType PlotParamsType;
 	typename ContinuedFractionType::PlotDataType v;
-	cf.plot(v,wbegin,wend,wstep,delta);
+	PlotParamsType plotParams(wbegin, wend, wstep, delta, 0, 0);
+	cf.plot(v, plotParams);
 	for (SizeType x=0;x<v.size();x++) {
 		std::cout<<v[x].first<<" "<<PsimagLite::real(v[x].second);
 		std::cout<<" "<<PsimagLite::imag(v[x].second)<<"\n";
