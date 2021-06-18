@@ -107,7 +107,7 @@ Makefile.dep: $allCpps $additional
 	\$(CXX) \$(CPPFLAGS) -MM $allCpps  > Makefile.dep
 
 clean::
-	rm -f core* $allExecutables *.o *.dep $additional2
+	rm -f core* $allExecutables *.o *.a *.dep $additional2
 
 include Makefile.dep
 EOF
