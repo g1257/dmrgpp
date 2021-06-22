@@ -207,14 +207,6 @@ public:
 		return ModelBaseType::oracle(energy, "-Nup*Ndown");
 	}
 
-	bool isCorrectlyPaired(SizeType ket) const
-	{
-		PairSizeType pair = getOneOrbital(ket);
-		const SizeType physKet = pair.first;
-		SizeType ancKet = pair.second;
-		return (barFunction(physKet) == ancKet);
-	}
-
 protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
@@ -506,7 +498,9 @@ private:
 	}
 
 	//! Find Ntilde_i in the natural basis natBasis
-	MatrixType findNtildeDense(SizeType orbital, SizeType which, const HilbertBasisType& natBasis) const
+	MatrixType findNtildeDense(SizeType orbital,
+	                           SizeType which,
+	                           const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
@@ -521,11 +515,14 @@ private:
 			if (which==ket1)
 				cm(ii,ii) = 1;
 		}
+
 		return cm;
 	}
 
 	//! Find Mtilde_i in the natural basis natBasis
-	MatrixType findMtildeDense(SizeType orbital, SizeType which, const HilbertBasisType& natBasis) const
+	MatrixType findMtildeDense(SizeType orbital,
+	                           SizeType which,
+	                           const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total,total);
@@ -579,6 +576,7 @@ private:
 				}
 			}
 		}
+
 		return cm;
 	}
 
@@ -684,11 +682,6 @@ private:
 
 		SparseMatrixType operatorMatrix(cm);
 		return operatorMatrix;
-	}
-
-	WordType barFunction(const WordType& w) const
-	{
-		return modelParameters_.twiceTheSpin - w;
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
