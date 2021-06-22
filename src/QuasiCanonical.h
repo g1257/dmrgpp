@@ -54,8 +54,11 @@ public:
 			throw RuntimeError("Unbalanced parens, open\n");
 
 		split(terms_, mainBuffer_, "+");
-		cachedValues_.resize(ats_.size());
-		cachedAvailable_.resize(ats_.size(), false);
+
+		const SizeType nscalars = ats_.size();
+		cachedValues_.resize(nscalars);
+		for (SizeType i = 0; i < nscalars; ++i)
+			cachedValues_[i] = strToRealOrImag(ats_[i]);
 	}
 
 	SizeType numberOfTerms() const { return terms_.size(); }
@@ -82,25 +85,9 @@ public:
 
 	ComplexOrRealType scalarFromIndex(SizeType ind) const
 	{
-		assert(ind < cachedAvailable_.size());
 		assert(ind < cachedValues_.size());
 
-		if (cachedAvailable_[ind])
-			return cachedValues_[ind];
-
-		String content = ats_[ind];
-		VectorStringType terms;
-		split(terms, content, "+");
-		ComplexOrRealType sum = 0;
-		const SizeType n = terms.size();
-		for (SizeType i = 0; i < n; ++i) {
-			sum += pureRealOrPureImag(terms[i]);
-		}
-
-		assert(ind < cachedValues_.size());
-		cachedValues_[ind] = sum;
-		cachedAvailable_[ind] = true;
-		return sum;
+		return cachedValues_[ind];
 	}
 
 	static bool isPureComplex(String t)
@@ -149,12 +136,24 @@ private:
 		return cmplxOrReal.value();
 	}
 
+	static ComplexOrRealType strToRealOrImag(String content)
+	{
+		VectorStringType terms;
+		split(terms, content, "+");
+		ComplexOrRealType sum = 0;
+		const SizeType n = terms.size();
+		for (SizeType i = 0; i < n; ++i) {
+			sum += pureRealOrPureImag(terms[i]);
+		}
+
+		return sum;
+	}
+
 	String str_;
 	String mainBuffer_;
 	VectorStringType ats_;
 	VectorStringType terms_;
-	mutable VectorType cachedValues_;
-	mutable VectorBoolType cachedAvailable_;
+	VectorType cachedValues_;
 };
 }
 #endif // QUASICANONICAL_H
