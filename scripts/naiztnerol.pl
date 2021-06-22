@@ -7,16 +7,63 @@ use utf8;
 #The file to be read has format
 #omega value
 #
-my ($file, $delta) = @ARGV;
-defined($file) or die "USAGE: $0 filename [delta]\n";
-defined($delta) or $delta = 0.1;
+my ($file, $midPointFactor) = @ARGV;
+defined($file) or die "USAGE: $0 filename [midPointFactor]\n";
+defined($midPointFactor) or $midPointFactor = 0.75;
 
 print "#$file \n";
 my @data = loadData($file);
 
 my @data2 = findMaxima(\@data);
 
-printMaxima(\@data2);
+#printMaxima(\@data2);
+naiztnerol(\@data, \@data2);
+
+sub naiztnerol
+{
+	my ($data, $data2) = @_;
+	my $n = scalar(@$data2);
+	 for (my $i = 0; $i < $n; ++$i) {
+		 my $ptr = $data2->[$i];
+		 my $omega = $ptr->[0];
+		 my $val = $ptr->[1];
+		 my $omegaStartIndex = $ptr->[2];
+		 my $midVal = $val*$midPointFactor;
+		 my $omegaMidIndex = findMidOmegaIndex($midVal, $omegaStartIndex, $data);
+		 my $omegaMid = $data->[$omegaMidIndex]->[0];
+		 $midVal = $data->[$omegaMidIndex]->[1]; # recomputed
+		 my ($A, $delta) = findWeightAndDelta($omega, $val, $omegaMid, $midVal);
+		 print "$omega $A $delta\n";
+	 }
+}
+
+sub findWeightAndDelta
+{
+	my ($omegaMax, $maxVal, $omegaMid, $midVal) = @_;
+	my $den = $maxVal/$midVal - 1;
+	die "$0: Negative sqrt arg $den\n" if ($den <= 0);
+	$den = sqrt($den);
+	my $delta = ($omegaMid - $omegaMax)/$den;
+	my $A = $maxVal*$delta*$delta;
+	return ($A, $delta);
+}
+
+sub findMidOmegaIndex
+{
+	my ($midVal, $start, $data) = @_;
+	my $n = scalar(@$data);
+	my $prevVal = 0;
+	for (my $i = $start; $i < $n; ++$i) {
+		my $val = $data->[$i]->[1];
+		if ($prevVal > $midVal and $val < $midVal) {
+			return $i;
+		}
+
+		$prevVal = $val;
+	}
+
+	die "$0: findMidOmegaIndex failed!?\n";
+}
 
 sub printMaxima
 {
@@ -35,7 +82,7 @@ sub findMaxima
 	my ($data) = @_;
 	my $n = scalar(@$data);
 	my @data2;
-	my ($maxVal, $maxOmega, $prevVal) = (0, 0, 0);
+	my ($maxVal, $maxOmega, $maxOmegaIndex, $prevVal) = (0, 0, 0, 0);
 	for (my $i = 0; $i < $n; ++$i) {
 		my $ptr = $data->[$i];
 		my $omega = $ptr->[0];
@@ -46,11 +93,12 @@ sub findMaxima
 			if ($val > $maxVal) {
 				$maxVal = $val;
 				$maxOmega = $omega;
+				$maxOmegaIndex = $i;
 			}
 		} else {
 			#going down
 			if ($maxVal > 0) {
-				push @data2, [$maxOmega, $maxVal];
+				push @data2, [$maxOmega, $maxVal, $maxOmegaIndex];
 				$maxVal = 0;
 			}
 		}
