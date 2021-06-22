@@ -259,7 +259,7 @@ private:
 	void finalMultImag()
 	{
 		const RealType freal = PsimagLite::real(factor_);
-		const RealType fimag = PsimagLite::real(factor_);
+		const RealType fimag = PsimagLite::imag(factor_);
 
 		strFactor_ = "(" + ttos(freal) + "," + ttos(fimag) + ")";
 
