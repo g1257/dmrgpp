@@ -5,8 +5,8 @@ use warnings;
 use utf8;
 
 #The file to be read has format
-#weight0 omega0
-#weight1 omega1
+#omega0 weight0
+#omega1 weight1
 #...
 #
 my ($file, $wbegin, $wtotal, $wstep, $delta, $norm) = @ARGV;
@@ -69,8 +69,8 @@ sub computeValueFor
 	my $total = scalar(@$data);
 	for (my $i = 0; $i < $total; ++$i) {
 		my $ptr = $data->[$i];
-		my $deltaOmega = $omega - $ptr->[1];
-		$sum += $ptr->[0]/($deltaOmega*$deltaOmega + $delta*$delta);
+		my $deltaOmega = $omega - $ptr->[0];
+		$sum += $ptr->[1]/($deltaOmega*$deltaOmega + $delta*$delta);
 	}
 
 	return $sum;
