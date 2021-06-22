@@ -261,7 +261,7 @@ private:
 		const RealType freal = PsimagLite::real(factor_);
 		const RealType fimag = PsimagLite::imag(factor_);
 
-		strFactor_ = "(" + ttos(freal) + "," + ttos(fimag) + ")";
+		strFactor_ = "(" + ttos(freal) + "+" + ttos(fimag) + "i)";
 
 		if (freal == 1 && fimag == 0) strFactor_ = "";
 	}
