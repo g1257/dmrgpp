@@ -316,10 +316,12 @@ void AinurState::convertInternal(std::vector<T>& t,
 
 	//check if we have a match
 	if (!r)
-		err("vector parsing failed\n");
+		err("vector parsing failed near " + stringContext(it, value.begin(), value.end()) + "\n");
 
-	if (it != value.end())
-		std::cerr << "vector parsing: unmatched part exists\n";
+	if (it != value.end()) {
+		std::cerr << "vector parsing: unmatched part exists near ";
+		std::cerr << stringContext(it, value.begin(), value.end())<<"\n";
+	}
 }
 
 template void AinurState::convertInternal(Matrix<DoubleOrFloatType>&,String) const;
