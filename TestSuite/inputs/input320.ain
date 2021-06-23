@@ -1,0 +1,56 @@
+##Ainur1.0
+
+TotalNumberOfSites=8;
+NumberOfTerms=1;
+
+#Only one term: the hopping
+DegreesOfFreedom=2;
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+dir0:Connectors=[
+[-1.0, 0.0],
+[0.0, -1.0]
+];
+
+#There are 4 values of U
+#Taken from ParametersModelFeAs.h
+#std::cout<<"U[0]="<<hubbardU[0]<<" U\n";
+#std::cout<<"U[1]="<<hubbardU[1]<<" U'-J/2\n";
+#std::cout<<"U[2]="<<hubbardU[2]<<" -2J for S+S- + S-S+ term\n";
+#std::cout<<"U[3]="<<hubbardU[3]<<" -J\n";
+hubbardU=[0, 0, 0, 0];
+
+#Taken from  ModelFeBasedSc.h
+#SizeType iUp = site + (orbital + 0*modelParameters_.orbitals)*linSize;
+#hmatrix += V[iUp] * nup;
+#SizeType iDown = site + (orbital + 1*modelParameters_.orbitals)*linSize;
+#hmatrix += V[iDown] * ndown;
+# So site changes first, then orbital, then spin.
+# (There is also a variant for V_{gamma, gamma', sigma} but
+# will not be used here
+#
+# For example,
+# potentialV[0] = site 0, orbital 0, spin 0
+# potentialV[1] = site 1, orbital 0, spin 0
+# ...
+# potentialV[TotalNumberOfSites] = site 0, orbital 1, spin 0
+# ...
+potentialV=[
+0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0];
+
+Model="FeAsBasedSc";
+FeAsMode="INT_PAPER33";
+Orbitals=2;
+SolverOptions="twositedmrg,fixLegacyBugs";
+Version="6.01";
+OutputFile="data320";
+InfiniteLoopKeptStates=60;
+FiniteLoops=[
+[3, 100, 0],
+[-6, 100, 0], [6, 100, 0]
+];
+TargetElectronsUp=8;
+TargetElectronsDown=8;
