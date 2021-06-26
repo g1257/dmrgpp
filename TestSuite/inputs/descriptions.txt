@@ -136,7 +136,9 @@ Page* where more or less this feature is used: 2230
 112) Like 2 but measures while growing environ
 113) Like 2 but measures 2 data sets
 120) TargetingExpresion: gs
-121) TargetingExpression: sums of products
+121) TargetingExpression: sums of products from 120
+126) TargetingExpresion with useComplex: gs
+127) argetingExpresion with useComplex: from 126
 #120 to 149 reserved for TargetingExpresion and related
 #150 to 199 reserved for testing the input system
 150) Replacement

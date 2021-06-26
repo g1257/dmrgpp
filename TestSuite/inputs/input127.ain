@@ -1,0 +1,27 @@
+##Ainur1.0
+TotalNumberOfSites=16;
+NumberOfTerms=1;
+DegreesOfFreedom=1;
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+dir0:Connectors=[1.0];
+
+#Model params
+hubbardU=[0.0, ...];
+potentialV=[0.0,...];
+Model="HubbardOneBand";
+SolverOptions="restart,twositedmrg,TargetingExpression,fixLegacyBugs,useComplex";
+RestartFilename="data126";
+Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[
+[-14, 200, 2],
+[ 14, 200, 2]];
+TargetElectronsUp=8;
+TargetElectronsDown=8;
+Pvectors=1;
+string P0="(2+-4i)*c'[5]*c[6]*|gs>+7.2i*c'[6]*c[7]*|gs>";
+GsWeight=0.2;
+OutputFile="data120";
+#ci dmrg arguments= -p 12 "<gs|P0>"
+#ci CollectBrakets 0
