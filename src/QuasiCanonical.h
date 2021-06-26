@@ -25,7 +25,17 @@ public:
 		const SizeType len = str_.length();
 		String tempBuffer;
 		String status = "closed";
+		char prev = '\0';
 		for (SizeType i = 0; i < len; ++i) {
+
+			if (str_[i] == '-' && i > 0) {
+				if (prev != '(' && prev != '+') {
+					throw RuntimeError("The - sign must be preceded by nothing, parens, or +\n");
+				}
+			}
+
+			prev = str_[i];
+
 			if (str_[i] == '(') {
 				if (status == "open")
 					throw RuntimeError("Too many parens levels (one only supported for now)\n");
