@@ -22,24 +22,63 @@ Please see full open source license included in file LICENSE.
 #define LAPACK_H_
 #include <complex>
 
-extern "C" void   zheev_(char *,char *,int *,std::complex<double> *, int *, double *,
-        std::complex<double> *,int *, double *, int *);
-extern "C" void   cheev_(char *,char *,int *,std::complex<float> *, int *, float *,
-        std::complex<float> *,int *, float *, int *);
-extern "C" void dsyev_(char *,char *,int *,double *,int *, double *,double *,int *,int *);
-extern "C" void ssyev_(char *,char *,int *,float *,int *, float *,float *,int *,int *);
+#ifndef PSI_LAPACK_64
+typedef int IntegerForLapackType;
+#else
+typedef long int IntegerForLapackType;
+#endif
+
+extern "C" void   zheev_(char*,
+                         char*,
+                         IntegerForLapackType*,
+                         std::complex<double>*,
+                         IntegerForLapackType*,
+                         double*,
+                         std::complex<double>*,
+                         IntegerForLapackType*,
+                         double*,
+                         IntegerForLapackType*);
+extern "C" void   cheev_(char*,
+                         char*,
+                         IntegerForLapackType*,
+                         std::complex<float>*,
+                         IntegerForLapackType*,
+                         float*,
+                         std::complex<float>*,
+                         IntegerForLapackType*,
+                         float*,
+                         IntegerForLapackType*);
+extern "C" void dsyev_(char*,
+                       char*,
+                       IntegerForLapackType*,
+                       double*,
+                       IntegerForLapackType*,
+                       double*,
+                       double*,
+                       IntegerForLapackType*,
+                       IntegerForLapackType*);
+extern "C" void ssyev_(char*,
+                       char*,
+                       IntegerForLapackType*,
+                       float*,
+                       IntegerForLapackType*,
+                       float*,
+                       float*,
+                       IntegerForLapackType*,
+                       IntegerForLapackType*);
+
 extern "C" void zgeev_(char*,
                        char*,
-                       int*,
+                       IntegerForLapackType*,
                        std::complex<double>*,
-                       int*,
+                       IntegerForLapackType*,
                        std::complex<double>*,
                        std::complex<double>*,
-                       int*,
+                       IntegerForLapackType*,
                        std::complex<double>*,
-                       int*,
+                       IntegerForLapackType*,
                        std::complex<double>*,
-                       int*,
+                       IntegerForLapackType*,
                        double*,
-                       int*);
+                       IntegerForLapackType*);
 #endif
