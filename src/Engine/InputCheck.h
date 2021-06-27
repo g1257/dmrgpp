@@ -383,6 +383,8 @@ public:
 	read the wavefunction and transform from the file only as needed.
     This option only has effect when running the observe
     code and not the main driver or other drivers.
+	        \item[ciRun] Mark the input for the ci or TestSuite; usually this is
+			set by the ci.pl script automatically
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -450,6 +452,7 @@ public:
 		registerOpts.push_back("calcAndPrintEntropies");
 		registerOpts.push_back("blasNotThreadSafe");
 		registerOpts.push_back("observeReadOnDemand");
+		registerOpts.push_back("ciRun");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);

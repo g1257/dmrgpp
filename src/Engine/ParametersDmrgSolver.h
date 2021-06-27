@@ -239,13 +239,18 @@ struct ParametersDmrgSolver {
 		options += sOptions;
 		io.readline(version,"Version=");
 
+		bool ciRun = options.isSet("ciRun");
+
 		try {
 			io.readline(filename,"OutputFile=");
+			ciRun = false;
 		} catch (std::exception&) {
 			filename = io.filename();
 		}
 
-		filename = filenameFromRootname(filename, options.isSet("addPidToOutputName"));
+		filename = filenameFromRootname(filename,
+		                                options.isSet("addPidToOutputName"),
+		                                ciRun);
 
 		if (earlyExit) return;
 
@@ -419,7 +424,7 @@ struct ParametersDmrgSolver {
 				err(tmp + "AND InfiniteLoopKeptStates is an int\n");
 			}
 
-			checkpoint.setFilename(filenameFromRootname(checkpoint.filename(), false));
+			checkpoint.setFilename(filenameFromRootname(checkpoint.filename(), false, false));
 			checkRestart(filename, checkpoint.filename(), options);
 			hasRestart = true;
 		} else {
@@ -636,7 +641,8 @@ private:
 	}
 
 	static PsimagLite::String filenameFromRootname(PsimagLite::String f,
-	                                               bool addPidToOutputName)
+	                                               bool addPidToOutputName,
+	                                               bool ciRun)
 	{
 		size_t findIndex = f.find(".txt");
 		if (findIndex != PsimagLite::String::npos)
@@ -654,8 +660,39 @@ private:
 		if (findIndex == PsimagLite::String::npos)
 			f += ".hd5";
 
+		if (ciRun) {
+			PsimagLite::String strNumber = findNumber(f);
+			if (strNumber != "")
+				f = "data" + strNumber + ".hd5";
+		}
+
 		if (addPidToOutputName) f += "." + ttos(getpid());
 		return f;
+	}
+
+	static PsimagLite::String findNumber(PsimagLite::String f)
+	{
+		size_t findIndex = f.find(".hd5");
+		if (findIndex == PsimagLite::String::npos)
+			return "";
+
+		PsimagLite::String tmp;
+		for (SizeType i = 0; i < findIndex; ++i) {
+			SizeType j = findIndex - i;
+			if (f[j] >= 48 && f[j] <= 57)
+				tmp += f[j];
+			else
+				break;
+		}
+
+		const SizeType len = tmp.length();
+		PsimagLite::String result = tmp;
+		for (SizeType i = 0; i < len; ++i) {
+			SizeType j = len - i;
+			result[i] = tmp[j];
+		}
+
+		return result;
 	}
 };
 } // namespace Dmrg
