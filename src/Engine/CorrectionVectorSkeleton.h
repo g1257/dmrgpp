@@ -190,7 +190,7 @@ public:
 	      lrs_(lrs),
 	      energy_(energy),
 	      progress_("CorrectionVectorSkeleton"),
-	      krylovHelper_(model.params())
+	      krylovHelper_(model.params(), tstStruct.firstRitz())
 	{}
 
 	void calcDynVectors(const VectorWithOffsetType& tv0,

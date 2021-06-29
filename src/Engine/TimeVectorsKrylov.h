@@ -163,7 +163,7 @@ public:
 	      lrs_(lrs),
 	      ioIn_(ioIn),
 	      timeHasAdvanced_(false),
-	      krylovHelper_(model.params())
+	      krylovHelper_(model.params(), 0)
 	{}
 
 	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,

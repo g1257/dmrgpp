@@ -17,8 +17,8 @@ public:
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 
-	KrylovHelper(const SolverParamsType& params)
-	    : params_(params), progress_("KrylovHelper") {}
+	KrylovHelper(const SolverParamsType& params, SizeType firstRitz)
+	    : params_(params), firstRitz_(firstRitz), progress_("KrylovHelper") {}
 
 	template<typename SomeActionType>
 	void calcR(VectorType& r,
@@ -39,7 +39,7 @@ public:
 			calcVTimesPhiArray[kprime] = calcVTimesPhi(kprime, V, phi, i0);
 
 		ComplexOrRealType sum2 = 0.0;
-		for (SizeType k = 0; k < n2; ++k) {
+		for (SizeType k = firstRitz_; k < n2; ++k) {
 			ComplexOrRealType sum = 0.0;
 			for (SizeType kprime = 0; kprime < n3; ++kprime) {
 				ComplexOrRealType tmp = PsimagLite::conj(T(kprime,k))*
@@ -74,6 +74,7 @@ public:
 private:
 
 	const SolverParamsType& params_;
+	SizeType firstRitz_;
 	PsimagLite::ProgressIndicator progress_;
 };
 }

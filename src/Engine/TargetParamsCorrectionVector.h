@@ -107,6 +107,7 @@ public:
 	                             const ModelType& model)
 	    : BaseType(io, targeting, model),
 	      cgSteps_(1000),
+	      firstRitz_(0),
 	      cgEps_(1e-6)
 	{
 		io.readline(correctionA_,"CorrectionA=");
@@ -144,17 +145,24 @@ public:
 
 		try {
 			io.readline(cgSteps_,"ConjugateGradientSteps=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
-		try {
+        try {
 			io.readline(cgEps_,"ConjugateGradientEps=");
-		} catch (std::exception& e) {}
+		} catch (std::exception&) {}
 
 		try {
 			int x = 0;
 			io.readline(x,"TSPUseQns=");
 			err("TSPUseQns= is no longer needed, please delete it from the input file\n");
 		} catch (std::exception&) {}
+
+		try {
+			io.readline(firstRitz_, "FirstRitz=");
+		} catch (std::exception&) {}
+
+		if (freqEnum == PsimagLite::FREQ_MATSUBARA && firstRitz_ != 0)
+			err("FirstRitz must be 0 for Matsubara\n");
 	}
 
 	virtual RealType correctionA() const
@@ -202,11 +210,14 @@ public:
 		return algorithm_;
 	}
 
+	virtual SizeType firstRitz() const { return firstRitz_; }
+
 private:
 
 	SizeType type_;
 	typename BaseType::AlgorithmEnum algorithm_;
 	SizeType cgSteps_;
+	SizeType firstRitz_;
 	RealType correctionA_;
 	PairFreqType omega_;
 	RealType eta_;
