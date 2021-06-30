@@ -71,7 +71,8 @@ Ainur::Ainur(String str)
 	keywords = +aToZ >> *(ascii::char_("a","z")
 	                      | ascii::char_("A", "Z")
 	                      | ascii::char_("0","9")
-	                      | ascii::char_(":"));
+	                      | ascii::char_(":")
+						  | ascii::char_("_"));
 	statement1   %= keywords >> '=' >> value;
 	statement2 %= typeQualifier >> keywords;
 	statement3 %= typeQualifier >>  keywords >> '=' >> value;
