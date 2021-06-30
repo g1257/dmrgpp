@@ -15,7 +15,7 @@ for (my $d = 1; $d <= $m; ++$d) {
 	my $r1 = factorialOf($m - $d);
 	my $r2 = factorialOf($n + $d - 2*$m);
 	my $den = $r1*$r1*$r2;
-	my $num = $d*$d*$r0;
+	my $num = $d*$r0*combinatorial($n, $d);
 	my $val = $num / $den;
 	$sum += $val;
 }
