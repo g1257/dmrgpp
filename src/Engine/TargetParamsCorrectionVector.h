@@ -108,6 +108,7 @@ public:
 	    : BaseType(io, targeting, model),
 	      cgSteps_(1000),
 	      firstRitz_(0),
+	      nForFraction_(1),
 	      cgEps_(1e-6)
 	{
 		io.readline(correctionA_,"CorrectionA=");
@@ -161,6 +162,10 @@ public:
 			io.readline(firstRitz_, "FirstRitz=");
 		} catch (std::exception&) {}
 
+		try {
+			io.readline(nForFraction_, "nForFraction=");
+		} catch (std::exception&) {}
+
 		if (freqEnum == PsimagLite::FREQ_MATSUBARA && firstRitz_ != 0)
 			err("FirstRitz must be 0 for Matsubara\n");
 	}
@@ -212,12 +217,14 @@ public:
 
 	virtual SizeType firstRitz() const { return firstRitz_; }
 
+	virtual SizeType nForFraction() const { return nForFraction_; }
 private:
 
 	SizeType type_;
 	typename BaseType::AlgorithmEnum algorithm_;
 	SizeType cgSteps_;
 	SizeType firstRitz_;
+	SizeType nForFraction_;
 	RealType correctionA_;
 	PairFreqType omega_;
 	RealType eta_;
@@ -236,6 +243,9 @@ inline std::ostream& operator<<(std::ostream& os,
 	os<<"CorrectionVectorEta="<<t.eta()<<"\n";
 	os<<"ConjugateGradientSteps"<<t.cgSteps()<<"\n";
 	os<<"ConjugateGradientEps"<<t.cgEps()<<"\n";
+	os<<"firstRitz"<<t.firstRitz()<<"\n";
+	os<<"nForFraction"<<t.nForFraction()<<"\n";
+
 	return os;
 }
 } // namespace Dmrg

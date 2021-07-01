@@ -73,15 +73,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <iostream>
 #include "ProgressIndicator.h"
-#include "TargetParamsTimeStep.h"
+#include "TargetParamsCorrectionVector.h"
 #include "ProgramGlobals.h"
 #include "ParametersForSolver.h"
 #include "TimeVectorsKrylov.h"
-#include "TimeVectorsRungeKutta.h"
-#include "TimeVectorsSuzukiTrotter.h"
 #include "TargetingBase.h"
 #include "BlockDiagonalMatrix.h"
 #include "PredicateAwesome.h"
+#include "CorrectionVectorSkeleton.h"
 
 namespace Dmrg {
 
@@ -112,56 +111,47 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef TargetParamsTimeStep<ModelType> TargetParamsType;
+	typedef TargetParamsCorrectionVector<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
+	typedef CorrectionVectorSkeleton<LanczosSolverType,
+	VectorWithOffsetType,
+	BaseType,
+	TargetParamsType> CorrectionVectorSkeletonType;
 
 	TargetingCVEvolution(const LeftRightSuperType& lrs,
-	                  const ModelType& model,
-	                  const WaveFunctionTransfType& wft,
-	                  const QnType&,
-	                  InputValidatorType& ioIn,
-	                  PsimagLite::String targeting)
+	                     const ModelType& model,
+	                     const WaveFunctionTransfType& wft,
+	                     const QnType&,
+	                     InputValidatorType& ioIn)
 	    : BaseType(lrs, model, wft, 0),
-	      tstStruct_(ioIn, targeting, model),
+	      tstStruct_(ioIn, "TargetingCVEvolution", model),
 	      wft_(wft),
-	      progress_(targeting),
-	      times_(tstStruct_.timeSteps()),
-	      weight_(tstStruct_.timeSteps()),
-	      tvEnergy_(times_.size(),0.0),
+	      progress_("TargetingCVEvolution"),
+	      counter_(0),
+	      skeleton_(ioIn, tstStruct_, model, lrs, this->common().aoe().energy()),
+	      weight_(PsimagLite::IsComplexNumber<ComplexOrRealType>::True ? 3 : 5),
 	      gsWeight_(tstStruct_.gsWeight())
 	{
+		if (!PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
+			err("TargetingCVEvolution: only for complex for now (sorry!)\n");
+
 		if (!wft.isEnabled())
 			err("TST needs an enabled wft\n");
+
 		if (tstStruct_.sites() == 0)
 			err("TST needs at least one TSPSite\n");
 
-		RealType tau =tstStruct_.tau();
-		RealType sum = 0;
-		SizeType n = times_.size();
+		if (gsWeight_ < 0 || gsWeight_ >= 1)
+			err("gsWeight_ must be in [0, 1)\n");
 
-		RealType factor = (n+4.0)/(n+2.0);
-		factor *= (1.0 - gsWeight_);
-		for (SizeType i=0;i<n;i++) {
-			times_[i] = i*tau/(n-1);
-			weight_[i] = factor/(n+4);
-			sum += weight_[i];
-		}
-		sum -= weight_[0];
-		sum -= weight_[n-1];
-		weight_[0] = weight_[n-1] = 2*factor/(n+4);
-		sum += weight_[n-1];
-		sum += weight_[0];
-
-		gsWeight_=1.0-sum;
-		sum += gsWeight_;
-		assert(fabs(sum-1.0)<1e-5);
-
-		this->common().aoe().initTimeVectors(tstStruct_, times_, ioIn);
+		SizeType n = weight_.size();
+		RealType factor = (1.0 - gsWeight_)/n;
+		for (SizeType i = 0; i < n; ++i) weight_[i] = factor;
 	}
 
 	SizeType sites() const { return tstStruct_.sites(); }
@@ -258,99 +248,35 @@ private:
 		                            loopNumber,
 		                            tstStruct_);
 
-		PairType startEnd(0,times_.size());
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
-		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
+		this->common().aoe().targetVectors(0) = phiNew;
+		VectorWithOffsetType bogusTv;
 
-		VectorSizeType indices(startEnd.second - startEnd.first);
-		for (SizeType i = 0; i < indices.size(); ++i) indices[i] = i + startEnd.first;
-
-		const bool isLastCall = true;
-		this->common().aoe().calcTimeVectors(indices,
-		                                     Eg,
-		                                     phiNew,
-		                                     direction,
-		                                     allOperatorsApplied,
-		                                     false, // don't wft or advance indices[0]
-		                                     block1,
-		                                     isLastCall);
+		if (counter_ == 0) {
+			skeleton_.calcDynVectors(phiNew,
+			                         this->common().aoe().targetVectors(1),
+			                         bogusTv);
+			skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
+			                         this->common().aoe().targetVectors(2),
+			                         bogusTv);
+		} else {
+			// wft tv1
+			skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
+			                         this->common().aoe().targetVectors(2),
+			                         bogusTv);
+		}
 
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
-		PsimagLite::String predicate = this->model().params().printHamiltonianAverage;
-		const SizeType center = this->model().superGeometry().numberOfSites()/2;
-		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(center));
-		PsimagLite::PredicateAwesome<> pAwesome(predicate);
-		assert(block1.size() > 0);
-		if (pAwesome.isTrue("s", block1[0]))
-			printEnergies(); // in-situ
-
-		const OptionsType& options = this->model().params().options;
-		bool normalizeTimeVectors = (options.isSet("normalizeTimeVectors") ||
-		                             options.isSet("TargetingAncilla"));
-
-		if (options.isSet("neverNormalizeVectors"))
-			normalizeTimeVectors = false;
-
-		if (normalizeTimeVectors)
-			this->common().normalizeTimeVectors();
-
 		this->common().printNormsAndWeights(gsWeight_, weight_);
-	}
-
-	void printEnergies() const
-	{
-		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++)
-			printEnergies(this->common().aoe().targetVectors()[i],i);
-	}
-
-	void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const
-	{
-		for (SizeType ii=0;ii<phi.sectors();ii++) {
-			SizeType i = phi.sector(ii);
-			printEnergies(phi,whatTarget,i);
-		}
-	}
-
-	void printEnergies(const VectorWithOffsetType& phi,
-	                   SizeType whatTarget,
-	                   SizeType i0) const
-	{
-		const SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-		typename ModelHelperType::Aux aux(p, BaseType::lrs());
-		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 ModelType::modelLinks(),
-		                                                 this->common().aoe().time(),
-		                                                 BaseType::model().superOpHelper());
-		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		                                                     hc,
-		                                                     aux);
-
-		const SizeType total = phi.effectiveSize(i0);
-		TargetVectorType phi2(total);
-		phi.extract(phi2,i0);
-		TargetVectorType x(total);
-		lanczosHelper.matrixVectorProduct(x,phi2);
-		PsimagLite::OstringStream msgg(std::cout.precision());
-		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Hamiltonian average at time="<<this->common().aoe().time();
-		msg<<" for target="<<whatTarget;
-		ComplexOrRealType numerator = phi2*x;
-		ComplexOrRealType den = phi2*phi2;
-		ComplexOrRealType division = (PsimagLite::norm(den)<1e-10) ? 0 : numerator/den;
-		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
-		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
-		progress_.printline(msgg, std::cout);
-		tvEnergy_[whatTarget] = PsimagLite::real(division);
 	}
 
 	TargetParamsType tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
-	VectorRealType times_;
+	SizeType counter_;
+	CorrectionVectorSkeletonType skeleton_;
 	VectorRealType weight_;
-	mutable VectorRealType tvEnergy_;
 	RealType gsWeight_;
 };     //class TargetingCVEvolution
 } // namespace Dmrg

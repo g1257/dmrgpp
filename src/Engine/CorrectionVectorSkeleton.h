@@ -197,8 +197,12 @@ public:
 	                    VectorWithOffsetType& tv1,
 	                    VectorWithOffsetType& tv2)
 	{
+		const bool needsTv2 = (!CalcR::ActionType::isValueComplex() || tstStruct_.algorithm() !=
+		        TargetParamsType::BaseType::AlgorithmEnum::KRYLOV);
+
 		const VectorWithOffsetType& phi = tv0;
-		tv1 = tv2 = phi;
+		tv1 = phi;
+		if (needsTv2) tv2 = phi;
 
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());
@@ -231,7 +235,9 @@ public:
 
 			tv1.setDataInSector(xi,i0);
 			//set xr
-			tv2.setDataInSector(xr,i0);
+
+			if (needsTv2)
+				tv2.setDataInSector(xr,i0);
 		}
 
 		weightForContinuedFraction_ = PsimagLite::real(phi*phi);
