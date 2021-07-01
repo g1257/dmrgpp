@@ -156,7 +156,7 @@ public:
 
 	SizeType sites() const { return tstStruct_.sites(); }
 
-	SizeType targets() const { return tstStruct_.timeSteps(); }
+	SizeType targets() const { return weight_.size(); }
 
 	RealType weight(SizeType i) const
 	{
@@ -247,6 +247,8 @@ private:
 		                            site,
 		                            loopNumber,
 		                            tstStruct_);
+
+		if (phiNew.size() == 0) return;
 
 		this->common().aoe().targetVectors(0) = phiNew;
 		VectorWithOffsetType bogusTv;

@@ -1,0 +1,25 @@
+##Ainur1.0
+TotalNumberOfSites=6;
+NumberOfTerms=1;
+
+# hopping 
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+dir0:Connectors=[-1.0];
+
+#Model params
+Model="HubbardOneBand";
+
+hubbardU=[10,...];
+potentialV=[0,...];
+
+SolverOptions="twositedmrg";
+Version="6.01";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[[2, 20, 0],
+[-4, 200, 0],
+[ 4, 200, 0]];
+TargetSzPlusConst=3;
+integer TargetElectronsTotal=6;
+
+

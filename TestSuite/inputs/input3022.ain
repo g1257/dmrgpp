@@ -1,0 +1,49 @@
+##Ainur1.0
+TotalNumberOfSites=6;
+NumberOfTerms=1;
+
+# hopping 
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+dir0:Connectors=[-1.0];
+
+#Model params
+Model="HubbardOneBand";
+
+hubbardU=[10,...];
+potentialV=[0,...];
+
+SolverOptions="CorrectionCVEvolution,twositedmrg,minimizeDisk,restart,fixLegacyBugs";
+Version="6.01";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[
+[-4, 200, 0],
+[ 4, 200, 0]];
+TargetSzPlusConst=3;
+integer TargetElectronsTotal=6;
+
+# This has been added for CV:
+CorrectionA=0;
+RestartFilename="data3020";
+TruncationTolerance=1e-7;
+LanczosEps=1e-7;
+TridiagonalEps=1e-7;
+
+DynamicDmrgType=0;
+TSPSites=[4];
+TSPLoops=[0];
+TSPProductOrSum="sum";
+CorrectionVectorFreqType="Real";
+
+CorrectionVectorEta=0.1;
+CorrectionVectorAlgorithm="Krylov";
+Orbitals=1;
+
+GsWeight=0.1;
+CorrectionVectorOmega=0.275;
+
+Intent="ARPES";
+
+string TSPOp0:TSPOperator="expression";
+string TSPOp0:OperatorExpression="c";
+
