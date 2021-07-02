@@ -44,6 +44,7 @@ Orbitals=1;
 GsWeight=0.1;
 CorrectionVectorOmega=0.275;
 CVnForFraction=2;
+TSPAdvanceEach=4;
 
 Intent="ARPES";
 

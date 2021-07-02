@@ -109,6 +109,7 @@ public:
 	      cgSteps_(1000),
 	      firstRitz_(0),
 	      nForFraction_(1),
+	      advanceEach_(0),
 	      cgEps_(1e-6)
 	{
 		io.readline(correctionA_,"CorrectionA=");
@@ -166,6 +167,9 @@ public:
 			io.readline(nForFraction_, "CVnForFraction=");
 		} catch (std::exception&) {}
 
+		if (nForFraction_ > 1)
+			io.readline(advanceEach_,"TSPAdvanceEach=");
+
 		if (freqEnum == PsimagLite::FREQ_MATSUBARA && firstRitz_ != 0)
 			err("FirstRitz must be 0 for Matsubara\n");
 	}
@@ -218,6 +222,12 @@ public:
 	virtual SizeType firstRitz() const { return firstRitz_; }
 
 	virtual SizeType nForFraction() const { return nForFraction_; }
+
+	virtual SizeType advanceEach() const
+	{
+		return advanceEach_;
+	}
+
 private:
 
 	SizeType type_;
@@ -225,6 +235,7 @@ private:
 	SizeType cgSteps_;
 	SizeType firstRitz_;
 	SizeType nForFraction_;
+	SizeType advanceEach_;
 	RealType correctionA_;
 	PairFreqType omega_;
 	RealType eta_;
