@@ -134,7 +134,7 @@ public:
 	      progress_("TargetingCVEvolution"),
 	      counter_(0),
 	      skeleton_(ioIn, tstStruct_, model, lrs, this->common().aoe().energy()),
-	      weight_(PsimagLite::IsComplexNumber<ComplexOrRealType>::True ? 3 : 5),
+	      weight_(targets()),
 	      gsWeight_(tstStruct_.gsWeight())
 	{
 		if (!PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
@@ -156,7 +156,10 @@ public:
 
 	SizeType sites() const { return tstStruct_.sites(); }
 
-	SizeType targets() const { return weight_.size(); }
+	SizeType targets() const
+	{
+		return PsimagLite::IsComplexNumber<ComplexOrRealType>::True ? 3 : 5;
+	}
 
 	RealType weight(SizeType i) const
 	{
@@ -208,8 +211,7 @@ public:
 
 	bool end() const
 	{
-		return (tstStruct_.maxTime() != 0 &&
-		        this->common().aoe().time() >= tstStruct_.maxTime());
+		return false;
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)

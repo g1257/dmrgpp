@@ -140,7 +140,8 @@ private:
 		                            "TargetingRixsDynamic",
 		                            "TargetingChebyshev",
 		                            "TargetingExpression",
-		                            "TargetingMultiQ"};
+		                            "TargetingMultiQ",
+		                            "TargetingCVEvolution"};
 
 		const SizeType totalTargets = targets.size();
 		SizeType count = 0;
@@ -164,27 +165,8 @@ private:
 		return targeting;
 	}
 
-	void check1(PsimagLite::String targeting) const
-	{
-		if (model_.params().options.isSet("useComplex") &&
-		        targeting != "TimeStepTargeting" &&
-		        targeting != "ChebyshevTargeting" &&
-		        targeting != "GroundStateTargeting" &&
-		        targeting != "TargetingCorrelations" &&
-		        targeting != "CorrectionTargeting" &&
-		        targeting != "CorrectionVectorTargeting" &&
-		        targeting != "TargetingInSitu" &&
-		        targeting != "TargetingRixsStatic" &&
-		        targeting != "TargetingRixsDynamic" &&
-		        targeting != "TargetingExpression") {
-			err("SolverOptions=useComplex not allowed for " + targeting + "\n");
-		}
-
-		if (targeting != "GroundStateTargeting" && BasisType::useSu2Symmetry()) {
-			PsimagLite::String str("SU(2) supports only GroundStateTargeting (sorry!)\n");
-			throw PsimagLite::RuntimeError(str);
-		}
-	}
+	void check1(PsimagLite::String) const
+	{}
 
 	TargetingBaseType* psi_;
 	const LeftRightSuperType& lrs_;
