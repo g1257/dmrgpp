@@ -627,6 +627,13 @@ public:
 		wftHelper_.wftSome(tvs, site, begin, end);
 	}
 
+	void wftOneVector(VectorWithOffsetType& phiNew,
+	                  const VectorWithOffsetType& src,
+	                  SizeType site) const
+	{
+		wftHelper_.wftOneVector(phiNew, src, site);
+	}
+
 	const VectorWithOffsetType& ensureOnlyOnePsi(PsimagLite::String func) const
 	{
 		if (psi_.size() != 1)
@@ -734,7 +741,7 @@ private:
 			if (i == lastI) {
 				++currentTimeStep_;
 				timesWithoutAdvancement_ = 1;
-				timeVectorsBase_->timeHasAdvanced(time_);
+				if (timeVectorsBase_) timeVectorsBase_->timeHasAdvanced(time_);
 			}
 		} else {
 			if (i == lastI &&
@@ -808,7 +815,7 @@ private:
 			const SizeType advanceEach = tstStruct.advanceEach();
 			SizeType advance = indexNoAdvance_;
 
-			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE) {
+			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE && timeVectorsBase_) {
 				SizeType timeSteps = tstStruct.timeSteps();
 				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
 			}
@@ -828,10 +835,11 @@ private:
 				throw PsimagLite::RuntimeError(s);
 			}
 
-			if (site==0 || site==numberOfSites -1)  {
+			if  (site == 0 || site == numberOfSites -1) {
 				// don't wft since we did it before
 				assert(advance < targetVectors_.size());
-				phiNew = src;
+				if (timeVectorsBase_)
+					phiNew = src;
 				return;
 			}
 

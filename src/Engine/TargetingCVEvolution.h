@@ -255,7 +255,8 @@ private:
 		this->common().aoe().targetVectors(0) = phiNew;
 		VectorWithOffsetType bogusTv;
 
-		if (counter_ == 0) {
+		const SizeType currentTimeStep = this->common().aoe().currentTimeStep();
+		if (currentTimeStep == 0) {
 			skeleton_.calcDynVectors(phiNew,
 			                         this->common().aoe().targetVectors(1),
 			                         bogusTv);
@@ -263,11 +264,26 @@ private:
 			                         this->common().aoe().targetVectors(2),
 			                         bogusTv);
 		} else {
+			bool timeHasAdvanced = (counter_ != currentTimeStep &&
+			        currentTimeStep < tstStruct_.nForFraction());
+
+			if (counter_ != currentTimeStep) {
+				std::cout<<counter_<<" "<<currentTimeStep<<" "<<timeHasAdvanced<<"\n";
+				std::cerr<<counter_<<" "<<currentTimeStep<<" "<<timeHasAdvanced<<"\n";
+			}
+
+			const SizeType advanceIndex = (timeHasAdvanced) ? 2 : 1;
 			// wft tv1
+			this->common().aoe().wftOneVector(bogusTv,
+			                                  this->common().aoe().targetVectors(advanceIndex),
+			                                  site);
+			this->common().aoe().targetVectors(1) = bogusTv;
 			skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
 			                         this->common().aoe().targetVectors(2),
 			                         bogusTv);
 		}
+
+		counter_ = currentTimeStep;
 
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
