@@ -163,7 +163,7 @@ public:
 		} catch (std::exception&) {}
 
 		try {
-			io.readline(nForFraction_, "nForFraction=");
+			io.readline(nForFraction_, "CVnForFraction=");
 		} catch (std::exception&) {}
 
 		if (freqEnum == PsimagLite::FREQ_MATSUBARA && firstRitz_ != 0)

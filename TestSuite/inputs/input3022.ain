@@ -22,6 +22,8 @@ FiniteLoops=[
 TargetSzPlusConst=3;
 integer TargetElectronsTotal=6;
 
+RepeatFiniteLoopsTimes=3;
+
 # This has been added for CV:
 CorrectionA=0;
 RestartFilename="data3020";
@@ -41,6 +43,7 @@ Orbitals=1;
 
 GsWeight=0.1;
 CorrectionVectorOmega=0.275;
+CVnForFraction=2;
 
 Intent="ARPES";
 
