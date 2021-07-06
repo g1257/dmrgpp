@@ -329,7 +329,7 @@ public:
 			addInteraction(hmatrix, i, block);
 			addMagneticField(hmatrix, i, block);
 			addSpinOrbit(hmatrix);
-
+			addAnisotropyD(hmatrix);
 			if (modelParameters_.potentialT.size()==0 || time==0) {
 				addPotentialV(hmatrix,
 				              i,
@@ -510,6 +510,7 @@ public:
 					m=1;
 					asign= -1;
 				}
+
 				typename OperatorType::Su2RelatedType su2related;
 				if (sigma <modelParameters_.orbitals) {
 					su2related.source.push_back(i*dofs+sigma);
@@ -1346,6 +1347,15 @@ private:
 		multiply(tmpMatrix,n(m1),n(m2));
 		assert(site < modelParameters_.hubbardU.size());
 		hmatrix += modelParameters_.hubbardU[site]*tmpMatrix;
+	}
+
+	void addAnisotropyD(SparseMatrixType& hmatrix) const
+	{
+		if (modelParameters_.anisotropyD == 0) return;
+		SparseMatrixType tmpMatrix = this->naturalOperator("sz", 0, 0).getCRS();
+		SparseMatrixType szB = this->naturalOperator("sz", 0, 1).getCRS();
+		tmpMatrix += szB;
+		hmatrix +=  modelParameters_.anisotropyD*tmpMatrix*tmpMatrix;
 	}
 
 	void diagTest(const SparseMatrixType& fullm,const PsimagLite::String& str) const

@@ -153,7 +153,8 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	      potentialT(0),
 	      feAsMode(INT_PAPER33),
 	      coulombV(0),
-	      magneticField(0,0),
+	      anisotropyD(0),
+	      magneticField(0, 0),
 	      jzSymmetry(false),
 	      orbDependence(false)
 	{
@@ -291,14 +292,10 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 			err("SpinOrbit matrix found in input but jzSymmetry set to 0\n");
 
 		std::cout<<"JzSymmetry="<<jzSymmetry<<std::endl;
-	}
 
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
+		try {
+			io.readline(anisotropyD, "AnisotropyD=");
+		} catch (std::exception&) {}
 	}
 
 	void write(PsimagLite::String label1,
@@ -313,6 +310,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 		io.write(label + "/potentialT", potentialT);
 		io.write(label + "/feAsMode", feAsMode);
 		io.write(label + "/coulombV", coulombV);
+		io.write(label + "/anisotropyD", anisotropyD);
 		magneticField.write(label + "/magneticField", io);
 		spinOrbit.write(label + "/spinOrbit", io);
 		io.write(label + "/jzSymmetry", jzSymmetry);
@@ -355,6 +353,8 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 			os<<parameters.potentialT;
 		}
 
+		os<<"AnisotropyD="<<parameters.anisotropyD<<"\n";
+
 		return os;
 	}
 
@@ -364,6 +364,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	typename PsimagLite::Vector<RealType>::Type potentialT;
 	IntEnum feAsMode;
 	RealType coulombV;
+	RealType anisotropyD;
 	PsimagLite::Matrix<RealType> magneticField;
 	PsimagLite::Matrix<ComplexOrRealType> spinOrbit;
 	SizeType jzSymmetry;

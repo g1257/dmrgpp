@@ -211,6 +211,7 @@ public:
 		knownLabels_.push_back("OpOnSiteThreshold");
 		knownLabels_.push_back("FirstRitz");
 		knownLabels_.push_back("CVnForFraction");
+		knownLabels_.push_back("AnisotropyD");
 
 		for (SizeType i = 0; i < 10; ++i)
 			knownLabels_.push_back("Term" + ttos(i));
@@ -273,6 +274,7 @@ public:
 		str += "integer OpOnSiteThreshold;\n";
 		str += "integer FirstRitz;\n";
 		str += "integer CVnForFraction;\n";
+		str += "real AnisotropyD;\n";
 
 		return str;
 	}
