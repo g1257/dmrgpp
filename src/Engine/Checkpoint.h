@@ -173,7 +173,7 @@ public:
 				err("Previous run was complex and this one is not (or viceversa)\n");
 		}
 
-		SizeType operatorsPerSite = v[0];
+		SizeType operatorsPerSite = v[0] + parameters_.opOnSiteThreshold;
 
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorSizeType test(1,0);
