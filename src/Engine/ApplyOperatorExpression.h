@@ -561,6 +561,9 @@ public:
 		                                              block,
 		                                              isLastCall,
 		                                              time_);
+		if (!timeVectorsBase_)
+			err("timeVectorsBase_ ptr not setup!?\n");
+
 		timeVectorsBase_->calcTimeVectors(indices,
 		                                  Eg,
 		                                  phi,
@@ -647,7 +650,12 @@ public:
 		return *(psi_[0][0]);
 	}
 
-	void timeHasAdvanced() { timeVectorsBase_->timeHasAdvanced(time_); }
+	void timeHasAdvanced()
+	{
+		if (!timeVectorsBase_)
+			err("timeHasAdvanced(): timeVectorsBase_ ptr not setup!?\n");
+		timeVectorsBase_->timeHasAdvanced(time_);
+	}
 
 	const ModelType& model() const { return targetHelper_.model(); }
 
@@ -838,7 +846,7 @@ private:
 			if  (site == 0 || site == numberOfSites -1) {
 				// don't wft since we did it before
 				assert(advance < targetVectors_.size());
-				if (timeVectorsBase_)
+				if (timeVectorsBase_ || advanceEach == 0)
 					phiNew = src;
 				return;
 			}
