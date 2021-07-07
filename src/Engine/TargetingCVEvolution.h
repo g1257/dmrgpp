@@ -267,9 +267,9 @@ private:
 			bool timeHasAdvanced = (counter_ != currentTimeStep &&
 			        currentTimeStep < tstStruct_.nForFraction());
 
-			if (counter_ != currentTimeStep) {
-				std::cout<<counter_<<" "<<currentTimeStep<<" "<<timeHasAdvanced<<"\n";
-				std::cerr<<counter_<<" "<<currentTimeStep<<" "<<timeHasAdvanced<<"\n";
+			if (counter_ != currentTimeStep && !timeHasAdvanced) {
+				std::cout<<__FILE__<<" is now DONE\n";
+				std::cerr<<__FILE__<<" is now DONE\n";
 			}
 
 			const SizeType advanceIndex = (timeHasAdvanced) ? 2 : 1;
@@ -285,7 +285,7 @@ private:
 
 		counter_ = currentTimeStep;
 
-		bool doBorderIfBorder = false;
+		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
 		this->common().printNormsAndWeights(gsWeight_, weight_);
