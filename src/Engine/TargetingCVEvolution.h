@@ -133,6 +133,7 @@ public:
 	      wft_(wft),
 	      progress_("TargetingCVEvolution"),
 	      counter_(0),
+	      almostDone_(0),
 	      skeleton_(ioIn, tstStruct_, model, lrs, this->common().aoe().energy()),
 	      weight_(targets()),
 	      gsWeight_(tstStruct_.gsWeight())
@@ -211,7 +212,7 @@ public:
 
 	bool end() const
 	{
-		return false;
+		return (almostDone_ >= 2);
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
@@ -270,6 +271,7 @@ private:
 			if (counter_ != currentTimeStep && !timeHasAdvanced) {
 				std::cout<<__FILE__<<" is now DONE\n";
 				std::cerr<<__FILE__<<" is now DONE\n";
+				++almostDone_;
 			}
 
 			const SizeType advanceIndex = (timeHasAdvanced) ? 2 : 1;
@@ -295,6 +297,7 @@ private:
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	SizeType counter_;
+	SizeType almostDone_;
 	CorrectionVectorSkeletonType skeleton_;
 	VectorRealType weight_;
 	RealType gsWeight_;
