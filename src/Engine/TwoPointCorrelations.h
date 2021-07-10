@@ -168,12 +168,14 @@ public:
 		const SparseMatrixType& O1 = sdhs.op(0).getCRS();
 		const SparseMatrixType& O2 = sdhs.op(1).getCRS();
 
+		const RealType fsign = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1
+		                                                                                    : -1;
 		if (i == j) {
 			SizeType replacementSite = (i == 0) ? 1 : i - 1;
 			SizeType rowsForIdent = braket.model().hilbertSize(replacementSite);
 			c = calcDiagonalCorrelation(i, O1, O2, rowsForIdent, fermionicSign, bra, ket);
 		} else if (i>j) {
-			c = -calcCorrelation_(j, i, O2, O1, fermionicSign, bra, ket);
+			c = fsign*calcCorrelation_(j, i, O2, O1, fermionicSign, bra, ket);
 		} else {
 			c = calcCorrelation_(i, j, O1, O2, fermionicSign, bra, ket);
 		}
