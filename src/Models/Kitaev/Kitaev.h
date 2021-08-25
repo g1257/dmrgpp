@@ -139,9 +139,14 @@ public:
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      extended_(additional == "Extended"),
-	      withGammas_(additional == "WithGammas")
+	      extended_(additional.length() > 0 && additional.substr(0, 8) == "Extended"),
+	      withGammas_(additional.length() > 0 && additional.substr(0, 10) == "WithGammas"),
+	      withCharge_(additional.length() > 0 && (additional.substr(8, 10) == "WithCharge" ||
+	                 additional.substr(10, 10) == "WithCharge"))
 	{
+		if (withCharge_ and TWICE_THE_SPIN != 1)
+			err("Kitaev: Charged model only for s=1/2\n");
+
 		SizeType n = geometry.numberOfSites();
 		SizeType mx = modelParameters_.magneticFieldX.size();
 		SizeType my = modelParameters_.magneticFieldY.size();
@@ -277,10 +282,37 @@ protected:
 			myOp5.conjugate();
 			sminus.push(myOp5);
 		}
+
+		if (!withCharge_) return; // <<=== EARLY EXIT HERE
+
+		OpsLabelType& destructionC = this->createOpsLabel("c");
+		this->makeTrackable("c");
+		for (SizeType spin = 0; spin < 2; ++spin) {
+			typename OperatorType::Su2RelatedType su2related;
+
+			tmpMatrix = findDestructionC(natBasis, spin);
+			OperatorType myOpC(tmpMatrix,
+			                   ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
+			destructionC.push(myOpC);
+		}
 	}
 
 	void fillModelLinks()
 	{
+
+		if (withCharge_) {
+			ModelTermType& hop = ModelBaseType::createTerm("hopping");//(A)
+
+			OpForLinkType cup("c", 0); // (B)
+			hop.push(cup, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, 1, 0)); // (C)
+
+			OpForLinkType cdown("c", 1); // (D)
+			hop.push(cdown, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, -1, 1));
+		}
+
 		VectorStringType labels = {"sx", "sy", "sz"};
 
 		for (SizeType i = 0; i < labels.size(); ++i) {
@@ -317,7 +349,10 @@ private:
 	void setBasis(HilbertBasisType& basis,
 	              const VectorSizeType& block) const
 	{
-		SizeType total = utils::powUint(TWICE_THE_SPIN + 1, block.size());
+		const SizeType total1 = (withCharge_) ? 3
+		                                     : TWICE_THE_SPIN + 1;
+
+		SizeType total = utils::powUint(total1, block.size());
 
 		basis.resize(total);
 		for (SizeType i = 0; i < total; ++i) basis[i] = i;
@@ -382,23 +417,58 @@ private:
 		return operatorMatrix;
 	}
 
+	// destruction
+	SparseMatrixType findDestructionC(const HilbertBasisType&, SizeType spin) const
+	{
+		assert(withCharge_);
+		assert(spin == 0 || spin == 1);
+
+		MatrixType m(3, 3);
+
+		if (spin == 0)
+			m(0, 1) = 1;
+		else
+			m(0, 2) = 1;
+		SparseMatrixType operatorMatrix(m);
+		return operatorMatrix;
+	}
+
 	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis,
 	                        int n) const
 	{
 		assert(n == 1);
-		// find j,m and flavors (do it by hand since we assume n==1)
-		// note: we use 2j instead of j
-		// note: we use m+j instead of m
-		// This assures us that both j and m are SizeType
+
+		if (withCharge_)
+			return setSymmetryRelatedWithCharge(qns, basis);
+
 		SizeType nbasis = basis.size();
 
 		qns.resize(nbasis, QnType::zero());
 	}
 
+	void setSymmetryRelatedWithCharge(VectorQnType& qns,
+	                       const HilbertBasisType& basis) const
+	{
+		typedef std::pair<SizeType,SizeType> PairType;
+
+		VectorSizeType other(1);
+		for (SizeType i = 0; i < basis.size(); ++i) {
+			PairType jmpair(0, 0);
+
+			assert(basis[i] == 0 || basis[i] == 1 || basis[i] == 2);
+
+			other[0] = (basis[i] == 0) ? 0 : 1;
+
+			bool sign = other[0] & 1;
+			qns[i] = QnType(sign, other, jmpair, other[0]);
+		}
+	}
+
 	ParametersKitaev<RealType, QnType>  modelParameters_;
-	bool extended_;
-	bool withGammas_;
+	const bool extended_;
+	const bool withGammas_;
+	const bool withCharge_;
 }; // class Kitaev
 
 } // namespace Dmrg

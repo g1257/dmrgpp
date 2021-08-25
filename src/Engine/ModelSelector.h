@@ -190,12 +190,10 @@ public:
 			model_ = new HubbardAncillaExtendedType(solverParams,io,geometry);
 		} else if (name_ == "FermionSpinless") {
 			model_ = new FermionSpinlessType(solverParams,io,geometry);
-		} else if (name_ == "Kitaev") {
-			model_ = new KitaevType(solverParams,io,geometry,"");
-		} else if (name_ == "KitaevExtended") {
-			model_ = new KitaevType(solverParams,io,geometry,"Extended");
-		} else if (name_ == "KitaevWithGammas") {
-			model_ = new KitaevType(solverParams,io,geometry,"WithGammas");
+		} else if (name_.substr(0, 6) == "Kitaev") {
+			PsimagLite::String tmp = (name_.length() == 6) ? ""
+			                                               : name_.substr(6, name_.length() - 6);
+			model_ = new KitaevType(solverParams,io,geometry, tmp);
 		} else if (name_ == "ModelHubbardMultiBand") {
 			model_ = new ModelHubbardMultiBandType(solverParams,io,geometry);
 		} else if (name_ == "HubbardHolstein") {
