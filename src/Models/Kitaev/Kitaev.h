@@ -142,7 +142,8 @@ public:
 	      extended_(additional.length() > 0 && additional.substr(0, 8) == "Extended"),
 	      withGammas_(additional.length() > 0 && additional.substr(0, 10) == "WithGammas"),
 	      withCharge_(additional.length() > 0 && (additional.substr(8, 10) == "WithCharge" ||
-	                 additional.substr(10, 10) == "WithCharge"))
+	                 additional.substr(10, 10) == "WithCharge" ||
+	                                              additional.substr(0, 10) == "WithCharge"))
 	{
 		if (withCharge_ and TWICE_THE_SPIN != 1)
 			err("Kitaev: Charged model only for s=1/2\n");
@@ -439,12 +440,13 @@ private:
 	{
 		assert(n == 1);
 
-		if (withCharge_)
-			return setSymmetryRelatedWithCharge(qns, basis);
-
 		SizeType nbasis = basis.size();
 
 		qns.resize(nbasis, QnType::zero());
+
+		if (!withCharge_) return; // <<---- EARLY EXIT HERE
+
+		setSymmetryRelatedWithCharge(qns, basis);
 	}
 
 	void setSymmetryRelatedWithCharge(VectorQnType& qns,
