@@ -567,6 +567,8 @@ private:
 		// don't forget to set fermion sign and j:
 		operators_[i].set(m.fermionOrBoson(), m.jm(), m.angularFactor());
 		// apply(operators_[i]);
+		if (operators_[i].getStorage().rows() > 0)
+			operators_[i].getStorage().checkValidity();
 	}
 
 	static void printChangeAll()
