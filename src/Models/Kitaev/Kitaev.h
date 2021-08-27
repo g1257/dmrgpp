@@ -393,23 +393,29 @@ private:
 	                                  std::complex<RealType>) const
 	{
 		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		cm.setTo(0.0);
-		assert(total == TWICE_THE_SPIN + 1);
-		assert(TWICE_THE_SPIN == 1);
+		MatrixType cm(total, total);
+		SizeType offset = (withCharge_) ? 1 : 0;
+
+		if (withCharge_) {
+			if (total != 3)
+				err("findSdirMatrices: with charge Hilbert space should be 3\n");
+		} else {
+			if (total != TWICE_THE_SPIN + 1 || TWICE_THE_SPIN != 1)
+				err("findSdirMatrices: only for spin 1/2 AND block of one site\n");
+		}
 
 		if (dir == InternalDir::DIR_X) {
-			cm(0,1) = cm(1,0) = 0.5;
+			cm(0 + offset, 1 + offset) = cm(1 + offset, 0 + offset) = 0.5;
 		} else if (dir == InternalDir::DIR_Y) {
-			cm(0, 1) = std::complex<RealType>(0.0, -0.5);
-			cm(1, 0) = std::complex<RealType>(0.0, 0.5);
+			cm(0 + offset, 1 + offset) = std::complex<RealType>(0.0, -0.5);
+			cm(1 + offset, 0 + offset) = std::complex<RealType>(0.0, 0.5);
 		} else if (dir == InternalDir::DIR_Z) {
-			cm(0, 0) = 0.5;
-			cm(1, 1) = -0.5;
+			cm(0 + offset, 0 + offset) = 0.5;
+			cm(1 + offset, 1 + offset) = -0.5;
 		} else if (dir == InternalDir::DIR_PLUS) {
-			cm(0, 1) = 1.0;
+			cm(0 + offset, 1 + offset) = 1.0;
 		} else if (dir == InternalDir::DIR_MINUS) {
-			cm(1, 0) = 1.0;
+			cm(1 + offset, 0 + offset) = 1.0;
 		} else {
 			assert(false);
 		}
