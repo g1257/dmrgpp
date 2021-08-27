@@ -30,7 +30,7 @@
             enlargelimits=false,
             axis on top,
         ]
-            \addplot [matrix plot*,point meta=explicit] file [meta=index 2] {outSpectrum1.pgfplots};
+			\addplot [matrix plot*,point meta=explicit] table [meta index = {2}] {outSpectrum1.pgfplots};
         \end{axis}
     \end{tikzpicture}
 \end{document}
