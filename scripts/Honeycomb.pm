@@ -34,6 +34,7 @@ sub init
 	my $model = "UNKNOWN";
 	my $dashed = 1;
 	my $withNumbers = 1;
+	my $hoppingsComma = "";
 	my $hopt = {"Model" => \$model,
             "#lx" => \$lx,
             "#ly" => \$ly,
@@ -56,6 +57,7 @@ sub init
             "#gammaPrimeX" => \$gammaPrimeX,
             "#gammaPrimeY" => \$gammaPrimeY,
             "#gammaPrimeZ" => \$gammaPrimeZ,
+            "#Hoppings" => \$hoppingsComma,
             "#printcut" => \$printcut,
             "#dashed" => \$dashed,
             "#withNumbers" => \$withNumbers};
@@ -80,12 +82,16 @@ sub init
 		$replaceMagnetic .= getVector("MagneticField" . uc($letters[$dir]), $n, $magnetic[$dir], $printcut);
 		$replaceMagnetic .= "\n";
 	}
+	
+	my $withCharge = ($model =~ /WithCharge$/);
+	my @hoppingsByDir = getHoppingsByDir($hoppingsComma, $withCharge);
 
 	my $inputStruct = {"Kitaev" => \@Kit,
 	                   "HeisenbergJ" => \@heisenbergJ,
 	                   "HeisenbergJ3" => \@heisenbergJ3,
 	                   "Gammas" => \@Gammas,
 	                   "GammaPrimes" => \@GammaPrimes,
+	                   "Hoppings" => \@hoppingsByDir,
 	                   "model" => $model,
 	                   "dashed" => $dashed,
 	                   "withNumbers" => $withNumbers};
@@ -93,15 +99,19 @@ sub init
 	my ($replaceConnections, $plot) = getConnectionsAndPlot($lx, $ly, $options, $inputStruct);
 
 	my $nOfTerms = 3;
-	if ($model eq "Kitaev") {
+	my $modelRoot = $model;
+	$modelRoot =~ s/WithCharge$//;
+	if ($modelRoot eq "Kitaev") {
 		;
-	} elsif ($model eq "KitaevExtended") {
+	} elsif ($modelRoot eq "KitaevExtended") {
 		$nOfTerms = 5;
-	} elsif ($model eq "KitaevWithGammas") {
+	} elsif ($modelRoot eq "KitaevWithGammas") {
 		$nOfTerms = 9;
 	} else {
 		die "$0: Model $model not supported\n";
 	}
+	
+	++$nOfTerms if ($withCharge);
 
 	$infoToCreateInput = {"n" => $n,
 	                      "replaceMagnetic" => $replaceMagnetic,
@@ -352,15 +362,25 @@ sub getConnectionsAndPlot
 	my $heisenbergJ3 = $inputStruct->{"HeisenbergJ3"};
 	my $Gammas = $inputStruct->{"Gammas"};
 	my $GammaPrimes = $inputStruct->{"GammaPrimes"};
+	my $valueOfHoppings = $inputStruct->{"Hoppings"};
 	my $model = $inputStruct->{"model"};
-
+	my $withCharge = ($model =~ /WithCharge$/);
+	my $total = $n*$n;
+	my @hops;
+	
+	for (my $i = 0; $i < $total; ++$i) {
+		$hops[$i] = 0;
+	}
+		
 	for (my $dir = 0; $dir < 3; ++$dir) {
 		my @kthisdir;
-		my $total = $n*$n;
 		for (my $i = 0; $i < $total; ++$i) {
 			$kthisdir[$i] = 0;
 		}
-
+		
+		if ($withCharge and !defined($valueOfHoppings->[$dir])) {
+			die "$0: You set *WithCharge but did not provide a #Hoppings line\n";
+		}
 
 		for (my $i = 0; $i < $n; ++$i) {
 			#Kitaev
@@ -384,6 +404,11 @@ sub getConnectionsAndPlot
 				next unless (defined($jj) and $i < $jj);
 				addSymmetric(\@kthisdir, $i, $jj, $n, $heisenbergJ3->[$dir2]);
 			}
+			
+			#Hopping
+			if ($withCharge and defined($j) and $i < $j) {
+				addSymmetric(\@hops, $i, $j, $n, $valueOfHoppings->[$dir]);
+			}
 		}
 
 		my $kthismatrix = {"data" => \@kthisdir, "rows" => $n, "cols" => $n};
@@ -391,10 +416,16 @@ sub getConnectionsAndPlot
 		$connections .= getDmrgppMatrix($kthismatrix);
 		$connections .= "\n" unless ($dir == 2);
 	}
-
+	
+	if ($withCharge) {
+		my $hopMatrix = {"data" => \@hops, "rows" => $n, "cols" => $n};
+		my $hoppingConnections = getDmrgppMatrix($hopMatrix);
+		# Place hopping first
+		$connections = $hoppingConnections."\n\n".$connections;
+	}
+	
 	for (my $dir = 0; $dir < 6; ++$dir) {
 		my @gammathisdir;
-		my $total = $n*$n;
 		for (my $i = 0; $i < $total; ++$i) {
 			$gammathisdir[$i] = 0;
 		}
@@ -426,7 +457,7 @@ sub getConnectionsAndPlot
 		$gconnections .= "\n" unless ($dir == 5);
 	}
 
-	if ($model eq "KitaevWithGammas") {
+	if ($model =~ /^KitaevWithGammas/) {
 		$connections .= $gconnections;
 	}
 
@@ -1105,6 +1136,16 @@ sub plotNode
 	}
 
 	return $str;
+}
+
+sub getHoppingsByDir
+{
+	my ($hoppingsComma, $withCharge) = @_;
+	
+	return () if (!$withCharge);
+	
+	my @a = split/,/, $hoppingsComma;
+	return @a;
 }
 
 sub getMatrixElem
