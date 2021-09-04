@@ -36,7 +36,11 @@ sub createInput
 	my $plot = $params->{"plot"};
 
 	while(<FILE>) {
-		next if (/^#/);
+		if (/^#/) {
+			print FOUT;
+			next;
+		}
+
 		if (/\$([a-zA-Z0-9\[\]]+)/) {
 				my $name = $1;
 				my $str = "\$"."params->{\"$name\"}";

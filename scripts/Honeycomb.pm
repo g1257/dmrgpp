@@ -17,6 +17,7 @@ my $infoToCreateInput;
 sub init
 {
 	my ($templateInput) = @_;
+	my $isAinur = isAinur($templateInput);
 	my @letters = ("x", "y", "z");
 	my @magnetic = ("BxBxBx", "ByByBy", "BzBzBz");
 	my @Kit = ("KxKxKx", "KyKyKy", "KzKzKz");
@@ -64,6 +65,11 @@ sub init
 
 	getLabels($hopt, $templateInput);
 
+	$model =~ s/^[ \t]+//;
+	$model =~ s/[ \t]*;*$//;
+	$model =~ s/^\"//;
+	$model =~ s/\"$//;
+
 	@magnetic = ($bx, $by, $bz);
 	@Kit = ($kxkx, $kyky, $kzkz);
 	@Gammas = ($gammaX, $gammaY, $gammaZ);
@@ -79,7 +85,9 @@ sub init
 
 	my $replaceMagnetic;
 	for (my $dir = 0; $dir < 3; ++$dir) {
-		$replaceMagnetic .= getVector("MagneticField" . uc($letters[$dir]), $n, $magnetic[$dir], $printcut);
+		my $upDir = uc($letters[$dir]);
+		my $type = ($isAinur) ? "vector ": "";
+		$replaceMagnetic .= getVector("${type}MagneticField$upDir", $n, $magnetic[$dir], $printcut, $isAinur);
 		$replaceMagnetic .= "\n";
 	}
 	
@@ -96,7 +104,7 @@ sub init
 	                   "dashed" => $dashed,
 	                   "withNumbers" => $withNumbers};
 
-	my ($replaceConnections, $plot) = getConnectionsAndPlot($lx, $ly, $options, $inputStruct);
+	my ($replaceConnections, $plot) = getConnectionsAndPlot($lx, $ly, $options, $inputStruct, $isAinur);
 
 	my $nOfTerms = 3;
 	my $modelRoot = $model;
@@ -342,7 +350,7 @@ sub armchairSetSiteCoordinates
 
 sub getConnectionsAndPlot
 {
-	my ($lx, $ly, $options, $inputStruct) = @_;
+	my ($lx, $ly, $options, $inputStruct, $isAinur) = @_;
 	my $n = 2*$lx*$ly;
 	my $gconnections = "";
 	my $connections = "";
@@ -413,13 +421,14 @@ sub getConnectionsAndPlot
 
 		my $kthismatrix = {"data" => \@kthisdir, "rows" => $n, "cols" => $n};
 
-		$connections .= getDmrgppMatrix($kthismatrix);
+		my $mIndex = ($withCharge) ? $dir + 1: $dir;
+		$connections .= getDmrgppMatrix($kthismatrix, $mIndex, $isAinur);
 		$connections .= "\n" unless ($dir == 2);
 	}
 	
 	if ($withCharge) {
 		my $hopMatrix = {"data" => \@hops, "rows" => $n, "cols" => $n};
-		my $hoppingConnections = getDmrgppMatrix($hopMatrix);
+		my $hoppingConnections = getDmrgppMatrix($hopMatrix, 0, $isAinur);
 		# Place hopping first
 		$connections = $hoppingConnections."\n\n".$connections;
 	}
@@ -452,7 +461,8 @@ sub getConnectionsAndPlot
 		}
 
 		my $gthismatrix = {"data" => \@gammathisdir, "rows" => $n, "cols" => $n};
-		my $someString = getDmrgppMatrix($gthismatrix);
+		my $mIndex = ($withCharge) ? $dir + 3 + 1 : $dir + 3;
+		my $someString = getDmrgppMatrix($gthismatrix, $mIndex, $isAinur);
 		$gconnections .= "$someString";
 		$gconnections .= "\n" unless ($dir == 5);
 	}
@@ -508,49 +518,69 @@ sub addSymmetric
 
 sub getDmrgppMatrix
 {
-	my ($m) = @_;
+	my ($m, $index, $isAinur) = @_;
+	my $maybeSemicolon = ($isAinur) ? ";" : "";
+	my $maybeDoubleQuote = ($isAinur) ? "\"" : "";
+	my $ainurPrefix0 = ($isAinur) ? "gt$index".":" : "";
+	my $ainurPrefix1 = ($isAinur) ? "string $ainurPrefix0" : "";
+	if ($index > 7) { # Artificial maximum; need to FIX DMRG++ not this script
+		$ainurPrefix0 = "$ainurPrefix1";
+	}
+	
 my $str= <<EOF;
-DegreesOfFreedom=1
-GeometryKind=LongRange
-GeometryOptions=none
+${ainurPrefix0}GeometryKind=${maybeDoubleQuote}LongRange${maybeDoubleQuote}$maybeSemicolon
+${ainurPrefix0}GeometryOptions=${maybeDoubleQuote}none${maybeDoubleQuote}$maybeSemicolon
+${ainurPrefix1}GeometryMaxConnections=0$maybeSemicolon
 EOF
-	return $str . getMatrix("Connectors", $m);
+
+	my $ainurPrefix = ($isAinur) ? "matrix gt$index".":" : "";
+	return $str . getMatrix("${ainurPrefix}Connectors", $m, $isAinur);
 }
 
 sub getVector
 {
-	my ($label, $total, $value, $printcut) = @_;
-	my $str = "$label $total\n";
+	my ($label, $total, $value, $printcut, $isAinur) = @_;
+	my $str = ($isAinur) ? "$label=[\n" : "$label $total\n";
+	my $maybeComma = ($isAinur) ? "," : "";
 	for (my $i = 0; $i < $total; ++$i) {
 		$str .= "$value";
 		if (($i + 1) % $printcut == 0) {
 			$str .= "\n";
 		} else {
-			$str .= " " if ($i + 1 != $total);
+			$str .= "$maybeComma " if ($i + 1 != $total);
 		}
 	}
 
+	$str .= ";" if ($isAinur);
 	return "$str\n";
 }
 
 sub getMatrix
 {
-	my ($label, $m) = @_;
+	my ($label, $m, $isAinur) = @_;
 	my $rows = $m->{"rows"};
 	my $cols = $m->{"cols"};
 	my $total = $rows*$cols;
-	my $str = "$label $rows $cols\n";
+	my $str = ($isAinur) ? "$label=[\n" : "$label $rows $cols\n";
+	my $maybeComma = ($isAinur) ? "," : "";
 	for (my $i = 0; $i < $total; ++$i) {
 		my $value = $m->{"data"}->[$i];
 		defined($value) or die "$i\n";
+		$str .= "[" if ($isAinur and ($i % $cols) == 0);
 		$str .= "$value ";
 		if (($i + 1) % $cols == 0) {
+			if ($isAinur) {
+				$str .= "]";
+				$str .= "," if ($i + 1 < $total);
+			}
 			$str .= "\n";
 		} else {
-			$str .= " " if ($i + 1 != $total);
+			$str .= "$maybeComma " if ($i + 1 != $total);
 		}
 	}
 
+	$str .= "];" if ($isAinur);
+	
 	return "$str\n";
 }
 
@@ -1180,6 +1210,16 @@ sub getLabels
 		my $x = ${$hptr->{$key}};
 		defined($x) or die "$0: Could not find $key in $file\n";
 	}
+}
+
+sub isAinur
+{
+	my ($file) = @_;
+	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
+	$_ = <FILE>;
+	close(FILE);
+	chomp;
+	return $_ eq "##Ainur1.0";
 }
 
 1;
