@@ -1,5 +1,5 @@
 TotalNumberOfSites=8
-NumberOfTerms=5
+NumberOfTerms=4
 
 Term0=SxiSxj
 DegreesOfFreedom=1
@@ -24,13 +24,6 @@ DegreesOfFreedom=1
 GeometryKind=chain
 GeometryOptions=ConstantValues
 Connectors    1        1.0
-
-Term4=SyiSxj
-DegreesOfFreedom=1
-GeometryKind=chain
-GeometryOptions=ConstantValues
-Connectors    1        1.0
-
 
 Model=KitaevExtended
 SolverOptions=useComplex,twositedmrg

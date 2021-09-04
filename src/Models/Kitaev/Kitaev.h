@@ -139,9 +139,9 @@ public:
 	                    geometry,
 	                    io),
 	      modelParameters_(io),
-	      extended_(additional.length() > 0 && additional.substr(0, 8) == "Extended"),
-	      withGammas_(additional.length() > 0 && additional.substr(0, 10) == "WithGammas"),
-	      withCharge_(additional.length() > 0 && (additional.substr(8, 10) == "WithCharge" ||
+	      extended_(additional.length() > 7 && additional.substr(0, 8) == "Extended"),
+	      withGammas_(additional.length() > 9 && additional.substr(0, 10) == "WithGammas"),
+	      withCharge_(additional.length() > 9 && (additional.substr(8, 10) == "WithCharge" ||
 	                 additional.substr(10, 10) == "WithCharge" ||
 	                                              additional.substr(0, 10) == "WithCharge"))
 	{
@@ -324,9 +324,12 @@ protected:
 		OpForLinkType sx("sx");
 		OpForLinkType sy("sy");
 
+		const bool wantsHermit = true;
+
 		if (extended_) {
 			ModelBaseType::createTerm("sxsy").push(sx, 'N', sy, 'N');
-			ModelBaseType::createTerm("sysx").push(sy, 'N', sx, 'N');
+			ModelTermType& sysx = ModelBaseType::createTerm("sysx", wantsHermit, "sxsy");
+			sysx.push(sy, 'N', sx, 'N');
 			return; // <<---- EARLY EXIT HERE
 		}
 
@@ -335,13 +338,16 @@ protected:
 		OpForLinkType sz("sz");
 
 		ModelBaseType::createTerm("sysz").push(sy, 'N', sz, 'N');
-		ModelBaseType::createTerm("szsy").push(sz, 'N', sy, 'N');
+		ModelTermType& szsy = ModelBaseType::createTerm("szsy", wantsHermit, "sysz");
+		szsy.push(sz, 'N', sy, 'N');
 
 		ModelBaseType::createTerm("sxsz").push(sx, 'N', sz, 'N');
-		ModelBaseType::createTerm("szsx").push(sz, 'N', sx, 'N');
+		ModelTermType& szsx = ModelBaseType::createTerm("szsx", wantsHermit, "sxsz");
+		szsx.push(sz, 'N', sx, 'N');
 
 		ModelBaseType::createTerm("sxsy").push(sx, 'N', sy, 'N');
-		ModelBaseType::createTerm("sysx").push(sy, 'N', sx, 'N');
+		ModelTermType& sysx = ModelBaseType::createTerm("sysx", wantsHermit, "sxsy");
+		sysx.push(sy, 'N', sx, 'N');
 	}
 
 private:

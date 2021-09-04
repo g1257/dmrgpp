@@ -390,6 +390,31 @@ public:
 
 	void postCtor2()
 	{
+		const SizeType fromModel = terms_.size();
+		VectorStringType input;
+		for (SizeType termIndex = 0; termIndex < fromModel; ++termIndex) {
+			const SizeType termIndexForGeom = termIndexForGeometry(termIndex);
+			if (termIndex == termIndexForGeom) {
+				input.push_back(terms_[termIndex]->name());
+			}
+		}
+
+		VectorSizeType termGeomReplacement(fromModel);
+		for (SizeType termIndex = 0; termIndex < fromModel; ++termIndex) {
+			const SizeType termIndexForGeom = termIndexForGeometry(termIndex);
+			PsimagLite::String name = terms_[termIndexForGeom]->name();
+			typename VectorStringType::const_iterator x = std::find(input.begin(),
+			                                                      input.end(),
+			                                                      name);
+			if (x == input.end())
+				err("ModelLinks: INTERNAL ERROR term " + name + " termIndex= " +
+				    ttos(termIndex) + "\n");
+
+			termGeomReplacement[termIndex] = x - input.begin();
+		}
+
+		termGeomReplacement_.swap(termGeomReplacement);
+
 		SizeType t = terms_.size();
 		for (SizeType i = 0; i < t; ++i) {
 			SizeType dof = terms_[i]->size();

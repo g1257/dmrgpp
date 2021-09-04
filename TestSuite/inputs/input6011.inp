@@ -1,5 +1,5 @@
 TotalNumberOfSites=12
-NumberOfTerms=9
+NumberOfTerms=6
 
 Term=SxSx
 DegreesOfFreedom=1
@@ -38,6 +38,7 @@ Connectors 12 12
 0 0 0 0 0 0 0 0 0 -0.5 0 -0.5 
 -1.20710678118655 0 0 0 0 0 0 0 0 0 -0.5 0 
 GeometryMaxConnections=0
+
 Term=SzSz
 DegreesOfFreedom=1
 GeometryKind=LongRange
@@ -56,6 +57,7 @@ Connectors 12 12
 0 0 0 0 0 0 0 0 0 -0.5 0 -1.20710678118655 
 -0.5 0 0 0 0 0 0 0 0 0 -1.20710678118655 0 
 GeometryMaxConnections=0
+
 Term=SySz
 DegreesOfFreedom=1
 GeometryKind=LongRange
@@ -74,24 +76,7 @@ Connectors 12 12
 0 0 0 0 0 0 0 0 0 -0.707106781186548 0 0 
 0 0 0 0 0 0 0 0 0 0 0 0 
 GeometryMaxConnections=0
-Term=SzSy
-DegreesOfFreedom=1
-GeometryKind=LongRange
-GeometryOptions=none
-Connectors 12 12
-0 -0.707106781186548 0 0 0 0 0 0 0 0 0 0 
--0.707106781186548 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 -0.707106781186548 0 0 0 0 0 0 0 
-0 0 0 -0.707106781186548 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 -0.707106781186548 0 0 0 0 
-0 0 0 0 0 0 -0.707106781186548 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 -0.707106781186548 0 
-0 0 0 0 0 0 0 0 0 -0.707106781186548 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
-GeometryMaxConnections=0
+
 Term=SxSz
 DegreesOfFreedom=1
 GeometryKind=LongRange
@@ -110,24 +95,7 @@ Connectors 12 12
 0 0 0 0 0 0 0 0 0 0 0 0 
 -0.707106781186548 0 0 0 0 0 0 0 0 0 0 0 
 GeometryMaxConnections=0
-Term=SzSx
-DegreesOfFreedom=1
-GeometryKind=LongRange
-GeometryOptions=none
-Connectors 12 12
-0 0 0 0 0 0 0 0 0 0 0 -0.707106781186548 
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 -0.707106781186548 0 0 0 0 0 0 0 0 
-0 0 -0.707106781186548 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 -0.707106781186548 0 0 0 0 0 
-0 0 0 0 0 -0.707106781186548 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 -0.707106781186548 0 0 
-0 0 0 0 0 0 0 0 -0.707106781186548 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
--0.707106781186548 0 0 0 0 0 0 0 0 0 0 0 
-GeometryMaxConnections=0
+
 Term=SxSy
 DegreesOfFreedom=1
 GeometryKind=LongRange
@@ -146,25 +114,6 @@ Connectors 12 12
 0 0 0 0 0 0 0 0 0 0 0 -0.707106781186548 
 0 0 0 0 0 0 0 0 0 0 -0.707106781186548 0 
 GeometryMaxConnections=0
-Term=SySx
-DegreesOfFreedom=1
-GeometryKind=LongRange
-GeometryOptions=none
-Connectors 12 12
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 -0.707106781186548 0 0 0 0 0 0 0 0 0 
-0 -0.707106781186548 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 -0.707106781186548 0 0 0 0 0 0 
-0 0 0 0 -0.707106781186548 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 -0.707106781186548 0 0 0 
-0 0 0 0 0 0 0 -0.707106781186548 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 0 
-0 0 0 0 0 0 0 0 0 0 0 -0.707106781186548 
-0 0 0 0 0 0 0 0 0 0 -0.707106781186548 0 
-GeometryMaxConnections=0
-Model=KitaevWithGammas
 
 MagneticFieldX 12 
 0 0 0 0 0 0 0 0 0 0 0 0 
@@ -182,5 +131,6 @@ Threads=1
 SolverOptions=twositedmrg,useComplex
 Version=version
 TruncationTolerance=1e-9
+Model=KitaevWithGammas
 OutputFile=data6011
 
