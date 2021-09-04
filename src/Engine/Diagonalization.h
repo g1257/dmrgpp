@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "FiniteLoop.h"
 #include "PackIndices.h"
+#include "PredicateAwesome.h"
 
 namespace Dmrg {
 
@@ -195,10 +196,18 @@ private:
 				if (j == 0 && verbose_)
 					std::cerr<<lrs.super().qnEx(i);
 
-				const bool b1 =  (lrs.super().pseudoQn(i) != quantumSector_[j] ||
+				const QnType& qn = lrs.super().pseudoQn(i);
+				const bool b1 =  (qn != quantumSector_[j] ||
 				        std::find(mVector.begin(), mVector.end(), i) != mVector.end());
 
-				if (b1 && !findSymmetrySector) continue;
+
+
+				if (findSymmetrySector) {
+					if (!passSymmetryConstraints(qn, lrs.super().block().size()))
+						continue;
+				} else {
+					if (b1) continue;
+				}
 
 				SizeType bs = lrs.super().partition(i + 1) - lrs.super().partition(i);
 				mVector.push_back(i);
@@ -677,6 +686,23 @@ private:
 		const RealType factor = 1.0/sqrt(sum);
 		for (SizeType i = 0; i < bs; ++i)
 			v[i] *= factor;
+	}
+
+	// FIXME TODO: Write two versions: an unscaled one and an scaled one
+	bool passSymmetryConstraints(const QnType& qn, SizeType superSize) const
+	{
+        //const SizeType latticeSize = model_.superGeometry().numberOfSites();
+		PsimagLite::String predicate = parameters_.findSymmetrySector;
+
+		const SizeType total = qn.other.size();
+
+		for (SizeType ind = 0; ind < total; ++ind) {
+			const SizeType x = qn.other[ind];
+			PsimagLite::PredicateAwesome<>::replaceAll(predicate, "%" + ttos(ind), ttos(x));
+		}
+
+		PsimagLite::PredicateAwesome<> pAwesome(predicate);
+		return pAwesome.isTrue("n", superSize);
 	}
 
 	const ParametersType& parameters_;

@@ -87,7 +87,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Parallelizer.h"
 #include "ScaledHamiltonian.h"
 #include "Sort.h"
-#include "ExpressionCalculator.h"
 #include "PredicateAwesome.h"
 
 namespace Dmrg {

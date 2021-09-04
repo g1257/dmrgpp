@@ -169,6 +169,7 @@ struct ParametersDmrgSolver {
 	PsimagLite::String recoverySave;
 	PsimagLite::String printHamiltonianAverage;
 	PsimagLite::String saveDensityMatrixEigenvalues;
+	PsimagLite::String findSymmetrySector;
 	RestartStruct checkpoint;
 	typename QnType::VectorQnType adjustQuantumNumbers;
 	VectorFiniteLoopType finiteLoop;
@@ -207,6 +208,7 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/degeneracyMax", degeneracyMax);
 		ioSerializer.write(root + "/denseSparseThreshold", denseSparseThreshold);
 		ioSerializer.write(root + "/opOnSiteThreshold", opOnSiteThreshold);
+		ioSerializer.write(root + "/findSymmetrySector", findSymmetrySector);
 	}
 
 	//! Read Dmrg parameters from inp file
@@ -397,6 +399,11 @@ struct ParametersDmrgSolver {
 		try {
 			io.readline(opOnSiteThreshold, "OpOnSiteThreshold=");
 		} catch (std::exception&) {}
+
+		try {
+			io.readline(findSymmetrySector, "FindSymmetrySector=");
+		} catch (std::exception&) {}
+
 
 		if (options.isSet("restart")) {
 			if (!infLoopsIsAnInt and hasRestartFrom) {
