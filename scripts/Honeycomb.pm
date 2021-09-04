@@ -112,9 +112,9 @@ sub init
 	if ($modelRoot eq "Kitaev") {
 		;
 	} elsif ($modelRoot eq "KitaevExtended") {
-		$nOfTerms = 5;
+		$nOfTerms = 4;
 	} elsif ($modelRoot eq "KitaevWithGammas") {
-		$nOfTerms = 9;
+		$nOfTerms = 6;
 	} else {
 		die "$0: Model $model not supported\n";
 	}
@@ -433,13 +433,12 @@ sub getConnectionsAndPlot
 		$connections = $hoppingConnections."\n\n".$connections;
 	}
 	
-	for (my $dir = 0; $dir < 6; ++$dir) {
+	for (my $dirGamma = 0; $dirGamma < 3; ++$dirGamma) {
 		my @gammathisdir;
 		for (my $i = 0; $i < $total; ++$i) {
 			$gammathisdir[$i] = 0;
 		}
 
-		my $dirGamma = int($dir/2);
 		for (my $i = 0; $i < $n; ++$i) {
 			#Gammas
 			my $j = $n1neigh[$i + $dirGamma*$n];
@@ -448,7 +447,7 @@ sub getConnectionsAndPlot
 			}
 
 			#Gamma primes // connects S^dir0 * S^dir1
-			my ($dir0, $dir1) = findGammaDirections($dir);
+			my ($dir0, $dir1) = findGammaDirections($dirGamma);
 			my $jj = $n1neigh[$i + $dir0*$n];
 			if (defined($jj) and $i < $jj) {
 				addSymmetric(\@gammathisdir, $i, $jj, $n, $GammaPrimes->[$dir0]);
@@ -461,10 +460,10 @@ sub getConnectionsAndPlot
 		}
 
 		my $gthismatrix = {"data" => \@gammathisdir, "rows" => $n, "cols" => $n};
-		my $mIndex = ($withCharge) ? $dir + 3 + 1 : $dir + 3;
+		my $mIndex = ($withCharge) ? $dirGamma + 3 + 1 : $dirGamma + 3;
 		my $someString = getDmrgppMatrix($gthismatrix, $mIndex, $isAinur);
 		$gconnections .= "$someString";
-		$gconnections .= "\n" unless ($dir == 5);
+		$gconnections .= "\n" unless ($dirGamma == 2);
 	}
 
 	if ($model =~ /^KitaevWithGammas/) {
@@ -476,8 +475,7 @@ sub getConnectionsAndPlot
 
 sub findGammaDirections
 {
-	my ($dir) = @_;
-	my $dirGamma = int($dir/2);
+	my ($dirGamma) = @_;
 	my @dirs;
 	for (my $d = 0; $d < 3; ++$d) {
 		next if ($d == $dirGamma);
@@ -485,12 +483,7 @@ sub findGammaDirections
 	}
 
 	my $n = scalar(@dirs);
-	($n == 2) or die "$0: findGammaDirections failed for dir=$dir\n";
-	if ($dir & 1) {
-		my $tmp = $dirs[0];
-		$dirs[0] = $dirs[1];
-		$dirs[1] = $tmp;
-	}
+	($n == 2) or die "$0: findGammaDirections failed for dirGamma=$dirGamma\n";
 
 	return @dirs;
 }
