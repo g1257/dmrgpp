@@ -118,17 +118,34 @@ public:
 
 	void resize(SizeType n)
 	{
+		assert(n > 0);
 		a_.resize(n);
 		b_.resize(n);
 	}
 
-	FieldType& a(SizeType i) { return a_[i]; }
+	FieldType& a(SizeType i)
+	{
+		assert(i < a_.size());
+		return a_[i];
+	}
 
-	FieldType& b(SizeType i) { return b_[i]; }
+	FieldType& b(SizeType i)
+	{
+		assert(i < b_.size());
+		return b_[i];
+	}
 
-	const FieldType& a(SizeType i) const { return a_[i]; }
+	const FieldType& a(SizeType i) const
+	{
+		assert(i < a_.size());
+		return a_[i];
+	}
 
-	const FieldType& b(SizeType i) const { return b_[i]; }
+	const FieldType& b(SizeType i) const
+	{
+		assert(i < b_.size());
+		return b_[i];
+	}
 
 	template<typename SomeMatrixType>
 	void buildDenseMatrix(SomeMatrixType& m, SizeType n = 0) const

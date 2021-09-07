@@ -166,8 +166,9 @@ public:
 	(SizeType smax,SizeType emin,
 	 SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
 	{
-		if (smax+1==emin) return terms_[term]->operator()(i1,edof1,i2,edof2);
-		return terms_[term]->operator()(smax,emin,i1,edof1,i2,edof2);
+		assert(term < terms_.size());
+		return (smax + 1 == emin) ? terms_[term]->operator()(i1,edof1,i2,edof2)
+		                          : terms_[term]->operator()(smax,emin,i1,edof1,i2,edof2);
 	}
 
 	ComplexOrRealType operator()

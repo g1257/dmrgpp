@@ -813,6 +813,7 @@ externalProduct(CrsMatrix<T>& B,
                 bool order,
                 const PsimagLite::Vector<SizeType>::Type& permutationFull)
 {
+	if (A.rows() > 0) A.checkValidity();
 	// -------------------------------------
 	//  B = kron(eye, A)   if (is_A_fastest)
 	//  B = kron(A, eye)   otherwise

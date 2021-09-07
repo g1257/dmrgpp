@@ -85,8 +85,18 @@ private:
 		if (op == ">=")
 			return (lv >= rv);
 		if (op == "%%")
-			return ((lv % rv) == 0);
+			return divisibleBy(lv, rv);
 		throw RuntimeError("Unknown operator " + op + "\n");
+	}
+
+	static bool divisibleBy(SizeType lv, SizeType rv)
+	{
+		return ((lv % rv) == 0);
+	}
+
+	static bool divisibleBy(double, double)
+	{
+		throw PsimagLite::RuntimeError("Called DivisibleBy (%%) but args are not integer types\n");
 	}
 
 	static SizeType operatorLength(String op)
