@@ -497,7 +497,8 @@ private:
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"I will now diagonalize a matrix of size="<<hc.modelHelper().size(partitionIndex);
+		const SizeType mSize = hc.modelHelper().size(partitionIndex);
+		msg<<"I will now diagonalize a matrix of size="<<mSize;
 		progress_.printline(msgg, std::cout);
 		diagonaliseOneBlock(energyTmp,
 		                    tmpVec,
@@ -541,13 +542,33 @@ private:
 			lanczosOrDavidson = new LanczosSolverType(lanczosHelper, params);
 		}
 
-		if (lanczosHelper.rows()==0) {
+		if (lanczosHelper.rows() == 0) {
 			static const RealType val = 10000;
 			std::fill(energyTmp.begin(), energyTmp.end(), val);
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"Early exit due to matrix rank being zero.";
 			msg<<" BOGUS energy= "<<val;
+			progress_.printline(msgg, std::cout);
+			if (lanczosOrDavidson) delete lanczosOrDavidson;
+			return;
+		}
+
+		if (lanczosHelper.rows() == 1) {
+			assert(tmpVec.size() == 1);
+
+			tmpVec[0].resize(1);
+			tmpVec[0][0] = 1;
+
+			TargetVectorType tmpVec2(1);
+			lanczosHelper.matrixVectorProduct(tmpVec2, tmpVec[0]);
+			static const RealType val = PsimagLite::real(tmpVec2[0]);
+			energyTmp.resize(1);
+			energyTmp[0] = val;
+			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+			msg<<"Early exit due to matrix rank being one;";
+			msg<<" energy= "<<val;
 			progress_.printline(msgg, std::cout);
 			if (lanczosOrDavidson) delete lanczosOrDavidson;
 			return;
