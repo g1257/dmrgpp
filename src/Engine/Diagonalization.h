@@ -201,14 +201,15 @@ private:
 				const bool b1 =  (qn != quantumSector_[j] ||
 				        std::find(mVector.begin(), mVector.end(), i) != mVector.end());
 
+				const SizeType bs = lrs.super().partition(i + 1) - lrs.super().partition(i);
+
 				if (findSymmetrySector) {
-					if (!passSymmetryConstraints(qn, lrs.super().block().size()))
+					if (!passSymmetryConstraints(qn, lrs.super().block().size(), bs))
 						continue;
 				} else {
 					if (b1) continue;
 				}
 
-				SizeType bs = lrs.super().partition(i + 1) - lrs.super().partition(i);
 				mVector.push_back(i);
 				compactedWeights.push_back(bs);
 				sum += bs;
@@ -706,7 +707,7 @@ private:
 	}
 
 	// FIXME TODO: Write two versions: an unscaled one and an scaled one
-	bool passSymmetryConstraints(const QnType& qn, SizeType superSize) const
+	bool passSymmetryConstraints(const QnType& qn, SizeType superSize, SizeType matrixSize) const
 	{
         //const SizeType latticeSize = model_.superGeometry().numberOfSites();
 		PsimagLite::String predicate = parameters_.findSymmetrySector;
@@ -720,7 +721,9 @@ private:
 
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		const RealType superSizeReal = superSize; // conversion from SizeType to RealType
-		return pAwesome.isTrue("n", superSizeReal);
+		const RealType matrixSizeReal = matrixSize;
+		const RealType oddElectrons = (qn.oddElectrons) ? 1 : 0;
+		return pAwesome.isTrue("n", superSizeReal, "m", matrixSizeReal, "e", oddElectrons);
 	}
 
 	const ParametersType& parameters_;

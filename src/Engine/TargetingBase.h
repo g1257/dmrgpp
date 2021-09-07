@@ -307,11 +307,23 @@ public:
 			end = excited + 1;
 		}
 
+		assert(sectorIndex < psi.size());
+		assert(sectorIndex < compactedWeights.size());
+		assert(sectorIndex < sectors.size());
 		for (SizeType e = start; e < end; ++e) {
+
 
 			VectorWithOffsetType vwo(compactedWeights[sectorIndex],
 			                         sectors[sectorIndex],
 			                         basis);
+
+			assert(e < psi[sectorIndex].size());
+			if (psi[sectorIndex][e] == nullptr) {
+				std::cerr<<__FILE__<<":"<<__LINE__<<" sectorIndex="<<sectorIndex<<" e="<<e<<"\n";
+				std::cout<<__FILE__<<":"<<__LINE__<<" sectorIndex="<<sectorIndex<<" e="<<e<<"\n";
+				noguess = true;
+			}
+
 			commonTargeting_.initialGuess(vwo,
 			                              *(psi[sectorIndex][e]),
 			                              block,
