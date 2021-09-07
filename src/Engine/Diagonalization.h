@@ -185,11 +185,12 @@ private:
 
 	SizeType targetedSymmetrySectors(VectorSizeType& mVector,
 	                                 VectorSizeType& compactedWeights,
-	                                 bool findSymmetrySector,
 	                                 const LeftRightSuperType& lrs) const
 	{
 		const SizeType total = lrs.super().partition() - 1;
 		SizeType sum = 0;
+		const bool findSymmetrySector = (parameters_.findSymmetrySector != "");
+
 		for (SizeType j = 0; j < quantumSector_.size(); ++j) {
 			for (SizeType i = 0; i < total; ++i) {
 
@@ -199,8 +200,6 @@ private:
 				const QnType& qn = lrs.super().pseudoQn(i);
 				const bool b1 =  (qn != quantumSector_[j] ||
 				        std::find(mVector.begin(), mVector.end(), i) != mVector.end());
-
-
 
 				if (findSymmetrySector) {
 					if (!passSymmetryConstraints(qn, lrs.super().block().size()))
@@ -226,8 +225,6 @@ private:
 	                   const VectorSizeType& block)
 
 	{
-		const OptionsType& options = parameters_.options;
-		const bool findSymmetrySector = options.isSet("findSymmetrySector");
 		const LeftRightSuperType& lrs= target.lrs();
 		wft_.triggerOn();
 
@@ -255,7 +252,6 @@ private:
 		VectorSizeType compactedWeights;
 		const SizeType weightsTotal = targetedSymmetrySectors(sectors,
 		                                                      compactedWeights,
-		                                                      findSymmetrySector,
 		                                                      lrs);
 
 		if (weightsTotal == 0) {
@@ -702,7 +698,8 @@ private:
 		}
 
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
-		return pAwesome.isTrue("n", superSize);
+		const RealType superSizeReal = superSize; // conversion from SizeType to RealType
+		return pAwesome.isTrue("n", superSizeReal);
 	}
 
 	const ParametersType& parameters_;

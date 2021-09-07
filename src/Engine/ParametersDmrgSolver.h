@@ -400,10 +400,20 @@ struct ParametersDmrgSolver {
 			io.readline(opOnSiteThreshold, "OpOnSiteThreshold=");
 		} catch (std::exception&) {}
 
+		if (options.isSet("findSymmetrySector"))
+			findSymmetrySector="1==1";
+
+		PsimagLite::String tmpString;
 		try {
-			io.readline(findSymmetrySector, "FindSymmetrySector=");
+			io.readline(tmpString, "FindSymmetrySector=");
 		} catch (std::exception&) {}
 
+		if (findSymmetrySector != "" && tmpString != "")
+			err(PsimagLite::String("Either findSymmetrySector in SolverOptions or ") +
+			    PsimagLite::String("FindSymmetrySector= line or neither of them, but not both\n"));
+
+		if (tmpString != "")
+			findSymmetrySector = tmpString;
 
 		if (options.isSet("restart")) {
 			if (!infLoopsIsAnInt and hasRestartFrom) {
