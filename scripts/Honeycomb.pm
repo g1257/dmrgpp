@@ -5,6 +5,7 @@ use warnings;
 use utf8;
 use List::Util qw( min max );
 use Math::Trig;
+use Math::Round;
 
 package Honeycomb;
 
@@ -33,6 +34,7 @@ sub init
 	my ($jx, $jy, $jz) = (0,0,0);
 	my ($j3x, $j3y, $j3z) = (0,0,0);
 	my $model = "UNKNOWN";
+	my $dopingConcentration = 0;
 	my $dashed = 1;
 	my $withNumbers = 1;
 	my $hoppingsComma = "";
@@ -61,7 +63,8 @@ sub init
             "#Hoppings" => \$hoppingsComma,
             "#printcut" => \$printcut,
             "#dashed" => \$dashed,
-            "#withNumbers" => \$withNumbers};
+            "#withNumbers" => \$withNumbers,
+            "#dopingConcentration" => \$dopingConcentration};
 
 	getLabels($hopt, $templateInput);
 
@@ -126,7 +129,8 @@ sub init
 	                      "replaceConnections" => $replaceConnections,
 	                      "halfNminusOne" => ($n/2 - 1),
 	                      "nMinusTwo" => ($n - 2),
-	                      "nOfTerms" => $nOfTerms};
+	                      "nOfTerms" => $nOfTerms,
+	                      "numberOfElectrons" => Math::Round::round($n*(1-$dopingConcentration))};
 
 	my $honey = {"info" => $infoToCreateInput, 
 	             "plot" => $plot,
