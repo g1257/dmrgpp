@@ -24,7 +24,7 @@ public:
 	{
 		if (!nonTrivial_) return true;
 
-		PredicateAwesomeType pred(actionString_, '~');
+		PredicateAwesomeType pred(actionString_, "~");
 		return pred.isTrue("%0", s0, "%1", s1, "%2", s2, "%3", s3);
 	}
 
@@ -32,7 +32,7 @@ public:
 	{
 		if (!nonTrivial_) return true;
 
-		PredicateAwesomeType pred(actionString_, '~');
+		PredicateAwesomeType pred(actionString_, "~");
 		return pred.isTrue("%0", s0, "%1", s1);
 	}
 

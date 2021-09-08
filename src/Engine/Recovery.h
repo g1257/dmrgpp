@@ -283,7 +283,7 @@ private:
 		PsimagLite::String str = checkpoint_.parameters().recoverySave;
 
 		SpecOptions lambda(optionSpec_.keepFiles, optionSpec_.maxFiles);
-		predicateAwesome_ = new PsimagLite::PredicateAwesome<SpecOptions>(str, ',', &lambda);
+		predicateAwesome_ = new PsimagLite::PredicateAwesome<SpecOptions>(str, ",", "&", &lambda);
 	}
 
 	static void dieWithError(PsimagLite::String str)
