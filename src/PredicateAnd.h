@@ -7,11 +7,11 @@
 namespace PsimagLite {
 
 /* PSIDOC PredicateAnd
- PredicateAnd is a semicolon-separated list of simple predicates,
+ PredicateAnd is a &-separated list of simple predicates,
 
- SimplePredicate0;SimplePredicate1;...
+ SimplePredicate0&SimplePredicate1&...
 
- where ; means to AND the predicates.
+ where & means to AND the predicates.
  */
 class PredicateAnd {
 
@@ -20,11 +20,11 @@ public:
 	typedef Vector<PredicateSimple>::Type VectorPredicateSimpleType;
 	typedef PredicateSimple::VectorStringType VectorStringType;
 
-	PredicateAnd(String pred)
+	PredicateAnd(String pred, PsimagLite::String sep = "&")
 	    : pred_(pred)
 	{
 		VectorStringType tokens;
-		split(tokens, pred, ";");
+		split(tokens, pred, sep);
 		const SizeType n = tokens.size();
 		for (SizeType i = 0; i < n; ++i)
 			vPredicateSimple_.push_back(PredicateSimple(tokens[i]));

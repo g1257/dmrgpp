@@ -21,11 +21,11 @@ namespace PsimagLite {
  S1   /\[a-zA-Z]+/
  S2  /\[a-zA-Z]+=\[a-zA-Z\d\.\-]/
 
- Predicate is a semicolon-separated list of simple predicates,
+ Predicate is a &-separated list of simple predicates,
 
- SimplePredicate0;SimplePredicate1;...
+ SimplePredicate0&SimplePredicate1&...
 
- where ; means to AND the predicates.
+ where & means to AND the predicates.
 
  where SimplePredicate is of the form
  word operator word
@@ -34,7 +34,7 @@ namespace PsimagLite {
  So l%%2 means that the simple predicate is true if l is divisible by 2.
 
  From this rules, the list of items
- M=2,l%%2;l!=0,l>=7,l<11
+ M=2,l%%2&l!=0,l>=7,l<11
  will set M=2 and define a predicate that is true if l
  is in the set {2, 4, 6, 7, 8, 9, 10, 12, 14, 16, 18 ...}
  and false otherwise.
@@ -63,13 +63,11 @@ public:
 	typedef Vector<PredicateAnd>::Type VectorPredicateAndType;
 	typedef PredicateAnd::VectorStringType VectorStringType;
 
-	PredicateAwesome(String pred, char orSep = ',', SpecType* spec = nullptr)
+	PredicateAwesome(String pred, String orSeparator = ",", String andSeparator = "&", SpecType* spec = nullptr)
 	    : pred_(pred)
 	{
 		if (pred_ == "") return;
 		VectorStringType tokens;
-		String orSeparator(",");
-		orSeparator[0] = orSep;
 		split(tokens, pred, orSeparator);
 		const SizeType n = tokens.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -81,7 +79,7 @@ public:
 				continue;
 			}
 
-			predicateAnd_.push_back(PredicateAnd(tokens[i]));
+			predicateAnd_.push_back(PredicateAnd(tokens[i], andSeparator));
 		}
 	}
 

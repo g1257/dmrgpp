@@ -19,8 +19,8 @@ public:
 
 	typedef Vector<String>::Type VectorStringType;
 
-	PredicateSimple(String pred)
-	    : pred_(pred)
+	PredicateSimple(String pred, String separator = ":")
+	    : pred_(pred), separator_(separator)
 	{
 		SizeType length = 0;
 		size_t location = String::npos;
@@ -109,13 +109,13 @@ private:
 	}
 
 	template<typename SomeVectorType>
-	static typename SomeVectorType::value_type getValue(String hs,
-	                                                    const VectorStringType& names,
-	                                                    const SomeVectorType& vals)
+	typename SomeVectorType::value_type getValue(String hs,
+	                                             const VectorStringType& names,
+	                                             const SomeVectorType& vals)
 	{
 		String numericHs = replaceVariables(hs, names, vals);
 		VectorStringType tokens;
-		split(tokens, numericHs, "|");
+		split(tokens, numericHs, separator_);
 		typedef ExpressionCalculator<typename SomeVectorType::value_type> ExpressionCalculatorType;
 		ExpressionCalculatorType expressionCalculator(tokens);
 		return expressionCalculator();
@@ -157,6 +157,7 @@ private:
 
 	static VectorStringType ops_;
 	String pred_;
+	String separator_;
 	String lhs_;
 	String op_;
 	String rhs_;
