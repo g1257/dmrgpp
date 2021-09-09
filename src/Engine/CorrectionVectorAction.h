@@ -110,12 +110,15 @@ public:
 	                       const typename BaseType::VectorRealType& eigs)
 	    : BaseType(tstStruct, E0, eigs)
 	{
-		std::cout<<PsimagLite::AnsiColor::red;
-		std::cerr<<PsimagLite::AnsiColor::red;
-		std::cout<<"CorrectionVectorAction:: Complex mode\n";
-		std::cerr<<"CorrectionVectorAction:: Complex mode\n";
-		std::cout<<PsimagLite::AnsiColor::reset;
-		std::cerr<<PsimagLite::AnsiColor::reset;
+		if (firstCall_) {
+			std::cout<<PsimagLite::AnsiColor::red;
+			std::cerr<<PsimagLite::AnsiColor::red;
+			std::cout<<"CorrectionVectorAction:: Complex mode\n";
+			std::cerr<<"CorrectionVectorAction:: Complex mode\n";
+			std::cout<<PsimagLite::AnsiColor::reset;
+			std::cerr<<PsimagLite::AnsiColor::reset;
+			firstCall_ = false;
+		}
 	}
 
 	ComplexOrRealType operator()(SizeType k) const
@@ -147,7 +150,12 @@ private:
 		return 1.0/pow(cmplx, 1.0/nFraction);
 
 	}
+
+	static bool firstCall_;
 };
+
+template<typename ComplexOrRealType, typename TargetParamsType>
+bool CorrectionVectorAction<ComplexOrRealType, TargetParamsType, true>::firstCall_ = true;
 
 }
 #endif // CORRECTIONVECTORACTION_H
