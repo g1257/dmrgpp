@@ -29,7 +29,7 @@ HoneycombLy=4
 IsPeriodicY=1
 
 Model=Kitaev
-SolverOptions=useComplex
+SolverOptions=none
 Version=version
 OutputFile=data6000.txt
 InfiniteLoopKeptStates=100

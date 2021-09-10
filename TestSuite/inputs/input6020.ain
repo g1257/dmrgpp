@@ -70,6 +70,6 @@ FiniteLoops=[
 [-10, 800, 0], [10, 800, 0],
 [-10, 800, 0], [10, 800, 0]];
 
-SolverOptions="twositedmrg,useComplex,fixLegacyBugs";
+SolverOptions="twositedmrg,fixLegacyBugs";
 Version="version";
 
