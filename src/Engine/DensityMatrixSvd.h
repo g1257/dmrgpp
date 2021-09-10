@@ -476,14 +476,18 @@ public:
 
 		assert(effectiveTargets.size() == x);
 
+		RealType sum = 0;
 		for (SizeType x = 0; x < effectiveTargets.size(); ++x) {
 
 			const VectorWithOffsetType& v = *effectiveTargets[x];
 			const RealType weight = (x < psiTargets) ? target.gsWeight()
 			                                         : target.weight(x - psiTargets);
 
-			addThisTarget2(x, v, sqrt(weight));
+			addThisTarget2(x, v, weight);
+			sum += weight;
 		}
+
+		assert(fabs(sum - 1) < 1e-4);
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
