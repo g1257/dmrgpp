@@ -269,6 +269,8 @@ private:
 		PsimagLite::Sort<VectorRealType> sort;
 		sort.sort(cache.eigs, perm);
 
+		printSumAndCheckEigs(cache.eigs);
+
 		updateKeptStates(keptStates, cache.eigs);
 
 		cache.transform = dmS->operator()();
@@ -354,6 +356,20 @@ private:
 		}
 
 		return max;
+	}
+
+	void printSumAndCheckEigs(const VectorRealType& eigs) const
+	{
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+
+		RealType sum = checkAndSum(eigs);
+
+		msg<<"Sum of Singular Values of the Density Matrix: "<<sum;
+		progress_.printline(msgg, std::cout);
+
+		if (fabs(sum - 1) > 1e-3)
+			err("printSumAndCheckEigs: DM eigs don't amount to one\n");
 	}
 
 	void updateKeptStates(SizeType& keptStates,
@@ -485,9 +501,25 @@ private:
 	                 SizeType x) const
 	{
 		RealType discWeight = 0;
-		for (SizeType i=0;i<x;i++)
+		for (SizeType i = 0; i < x; ++i)
 			discWeight += fabs(eigs[i]);
 		return discWeight;
+	}
+
+	RealType checkAndSum(const VectorRealType& eigs) const
+	{
+		SizeType x = eigs.size();
+		RealType sum = 0;
+		for (SizeType i = 0; i < x; ++i) {
+			const RealType val = eigs[i];
+			if (val < 0)
+				err("checkAndSum: Density Matrix eigenvalue is less than zero\n");
+			if (val > 1)
+				err("checkAndSum: Density Matrix eigenvalue is greater than one\n");
+			sum += eigs[i];
+		}
+
+		return sum;
 	}
 
 	void dumpEigs(const VectorRealType& eigs)
