@@ -228,23 +228,21 @@ protected:
 		setSymmetryRelated(qns, natBasis, block.size());
 
 		OpsLabelType& sx = this->createOpsLabel("sx");
-		OpsLabelType& sy = this->createOpsLabel("sy");
+		OpsLabelType& sybar = this->createOpsLabel("sybar");
 		OpsLabelType& sz = this->createOpsLabel("sz");
 		OpsLabelType& splus = this->createOpsLabel("splus");
 		OpsLabelType& sminus = this->createOpsLabel("sminus");
 
 		this->makeTrackable("sx");
-		this->makeTrackable("sy");
+		this->makeTrackable("sybar"); // Sybar = iSy
 		this->makeTrackable("sz");
-
-		typename MatrixType::value_type dummy = 0.0;
 
 		for (SizeType i=0;i<block.size();i++) {
 
 			typename OperatorType::Su2RelatedType su2related;
 
 			// Set the operators S^x_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_X, dummy);
+			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_X);
 			OperatorType myOp(tmpMatrix,
 			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                  PairType(0, 0),
@@ -253,16 +251,16 @@ protected:
 			sx.push(myOp);
 
 			// Set the operators S^y_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_Y, dummy);
+			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_Y);
 			OperatorType myOp2(tmpMatrix,
 			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(0, 0),
 			                   1.0,
 			                   su2related);
-			sy.push(myOp2);
+			sybar.push(myOp2); // Sybar = iSy
 
 			// Set the operators S^z_i in the natural basis
-			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_Z, dummy);
+			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_Z);
 			OperatorType myOp3(tmpMatrix,
 			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(0, 0),
@@ -270,7 +268,7 @@ protected:
 			                   su2related);
 			sz.push(myOp3);
 
-			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_PLUS, dummy);
+			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_PLUS);
 			OperatorType myOp4(tmpMatrix,
 			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                   PairType(0, 0),
@@ -314,22 +312,28 @@ protected:
 			hop.push(cdown, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, -1, 1));
 		}
 
-		VectorStringType labels = {"sx", "sy", "sz"};
+		VectorStringType labels = {"sx", "sybar", "sz"};
 
 		for (SizeType i = 0; i < labels.size(); ++i) {
 			OpForLinkType smu(labels[i]);
-			ModelBaseType::createTerm(labels[i] + labels[i]).push(smu, 'N', smu, 'N');
+			auto modif = [i] (ComplexOrRealType& value)
+			{
+				ComplexOrRealType x = (i == 1) ? -1 : 1; // sybar * sybar = -sy*sy
+				value *= x;
+			};
+
+			ModelBaseType::createTerm(labels[i] + labels[i]).push(smu, 'N', smu, 'N', modif);
 		}
 
 		OpForLinkType sx("sx");
-		OpForLinkType sy("sy");
+		OpForLinkType sybar("sybar");
 
 		const bool wantsHermit = true;
 
+		typename MatrixType::value_type dummy = 0.0;
+
 		if (extended_) {
-			ModelBaseType::createTerm("sxsy").push(sx, 'N', sy, 'N');
-			ModelTermType& sysx = ModelBaseType::createTerm("sysx", wantsHermit, "sxsy");
-			sysx.push(sy, 'N', sx, 'N');
+			createTermSxSy(sx, sybar, wantsHermit, dummy);
 			return; // <<---- EARLY EXIT HERE
 		}
 
@@ -337,20 +341,82 @@ protected:
 
 		OpForLinkType sz("sz");
 
-		ModelBaseType::createTerm("sysz").push(sy, 'N', sz, 'N');
-		ModelTermType& szsy = ModelBaseType::createTerm("szsy", wantsHermit, "sysz");
-		szsy.push(sz, 'N', sy, 'N');
+		createTermSySz(sybar, sz, wantsHermit, dummy);
 
 		ModelBaseType::createTerm("sxsz").push(sx, 'N', sz, 'N');
 		ModelTermType& szsx = ModelBaseType::createTerm("szsx", wantsHermit, "sxsz");
 		szsx.push(sz, 'N', sx, 'N');
 
-		ModelBaseType::createTerm("sxsy").push(sx, 'N', sy, 'N');
-		ModelTermType& sysx = ModelBaseType::createTerm("sysx", wantsHermit, "sxsy");
-		sysx.push(sy, 'N', sx, 'N');
+		createTermSxSy(sx, sybar, wantsHermit, dummy);
 	}
 
 private:
+
+	void createTermSySz(const OpForLinkType&,
+	                    const OpForLinkType&,
+	                    bool,
+	                    RealType)
+	{
+		PsimagLite::String str = "needs useComplex in SolverOptions in the input\n";
+		err("FATAL: createTermSySz(): This Kitaev variant needs useComplex " + str);
+	}
+
+	void createTermSySz(const OpForLinkType& sybar,
+	                    const OpForLinkType& sz,
+	                    bool wantsHermit,
+	                    std::complex<RealType>)
+	{
+		auto modifMinusSqrtMinusOne = [](ComplexOrRealType& value)
+		{
+			value *= std::complex<RealType>(0, -1);
+		};
+
+		ModelBaseType::createTerm("sysz").push(sybar, 'N', sz, 'N', modifMinusSqrtMinusOne);
+		ModelTermType& szsy = ModelBaseType::createTerm("szsy", wantsHermit, "sysz");
+		szsy.push(sz, 'N', sybar, 'N', modifMinusSqrtMinusOne);
+	}
+
+	void createTermSxSy(const OpForLinkType&,
+	                    const OpForLinkType&,
+	                    bool,
+	                    RealType) const
+	{
+		PsimagLite::String str = "needs useComplex in SolverOptions in the input\n";
+		err("createTermSxSy(): This Kitaev variant " + str);
+	}
+
+	void createTermSxSy(const OpForLinkType& sx,
+	                    const OpForLinkType& sybar,
+	                    bool wantsHermit,
+	                    std::complex<RealType>) const
+	{
+		auto modifMinusSqrtMinusOne = [](ComplexOrRealType& value)
+		{
+			value *= std::complex<RealType>(0, -1);
+		};
+
+		ModelBaseType::createTerm("sxsy").push(sx, 'N', sybar, 'N', modifMinusSqrtMinusOne);
+		ModelTermType& sysx = ModelBaseType::createTerm("sysx", wantsHermit, "sxsy");
+		sysx.push(sybar, 'N', sx, 'N', modifMinusSqrtMinusOne);
+
+		SizeType site = 0;
+		BlockType block(1, site);
+		HilbertBasisType natBasis;
+
+		setBasis(natBasis, block);
+
+		OpsLabelType& sy = this->createOpsLabel("sy");
+		SparseMatrixType tmpMatrix = findSdirMatrices(0, natBasis, InternalDir::DIR_Y);
+		tmpMatrix *= std::complex<RealType>(0, -1); // Sy = -iSybar
+		typename OperatorType::Su2RelatedType su2related;
+		OperatorType myOp2(tmpMatrix,
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(0, 0),
+		                   1.0,
+		                   su2related);
+
+		sy.push(myOp2); // Sybar = iSy
+	}
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
@@ -376,27 +442,9 @@ private:
 		return (counter == 0) ? counter : counter - 1;
 	}
 
-	SparseMatrixType getSplus(const SparseMatrixType&,
-	                          const SparseMatrixType&,
-	                          RealType)
-	{
-		err("Kitaev needs useComplex in SolverOptions in the input file\n");
-		throw PsimagLite::RuntimeError("FATAL\n");
-	}
-
-	SparseMatrixType findSdirMatrices(SizeType,
-	                                  const HilbertBasisType&,
-	                                  InternalDir,
-	                                  RealType) const
-	{
-		err("Kitaev needs useComplex in SolverOptions in the input file\n");
-		throw PsimagLite::RuntimeError("FATAL\n");
-	}
-
 	SparseMatrixType findSdirMatrices(SizeType,// site,
 	                                  const HilbertBasisType& natBasis,
-	                                  InternalDir dir,
-	                                  std::complex<RealType>) const
+	                                  InternalDir dir) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -413,8 +461,8 @@ private:
 		if (dir == InternalDir::DIR_X) {
 			cm(0 + offset, 1 + offset) = cm(1 + offset, 0 + offset) = 0.5;
 		} else if (dir == InternalDir::DIR_Y) {
-			cm(0 + offset, 1 + offset) = std::complex<RealType>(0.0, -0.5);
-			cm(1 + offset, 0 + offset) = std::complex<RealType>(0.0, 0.5);
+			cm(0 + offset, 1 + offset) = 0.5;
+			cm(1 + offset, 0 + offset) = -0.5;
 		} else if (dir == InternalDir::DIR_Z) {
 			cm(0 + offset, 0 + offset) = 0.5;
 			cm(1 + offset, 1 + offset) = -0.5;
