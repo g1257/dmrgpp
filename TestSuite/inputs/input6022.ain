@@ -79,9 +79,8 @@ Model="KitaevWithCharge";
 
 InfiniteLoopKeptStates=128;
 FiniteLoops=[
-[5, 800, 0],
-[-10, 800, 0], [10, 800, 0],
-[-10, 800, 0], [10, 800, 0]];
+[5, 200, 0],
+[-10, 200, 0], [10, 200, 0]];
 
 SolverOptions="twositedmrg,fixLegacyBugs";
 Version="version";
