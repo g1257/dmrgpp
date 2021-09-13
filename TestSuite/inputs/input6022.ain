@@ -77,11 +77,6 @@ integer gt3:GeometryMaxConnections=0;
 
 Model="KitaevWithCharge";
 
-vector MagneticFieldX=[0,...];
-
-vector MagneticFieldY=[0,...];
-
-vector MagneticFieldZ=[0,...];
 InfiniteLoopKeptStates=128;
 FiniteLoops=[
 [5, 800, 0],

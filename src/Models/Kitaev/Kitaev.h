@@ -142,7 +142,7 @@ public:
 	      extended_(additional.length() > 7 && additional.substr(0, 8) == "Extended"),
 	      withGammas_(additional.length() > 9 && additional.substr(0, 10) == "WithGammas"),
 	      withCharge_(additional.length() > 9 && (additional.substr(8, 10) == "WithCharge" ||
-	                 additional.substr(10, 10) == "WithCharge" ||
+	                                              additional.substr(10, 10) == "WithCharge" ||
 	                                              additional.substr(0, 10) == "WithCharge"))
 	{
 		if (withCharge_ and TWICE_THE_SPIN != 1)
@@ -187,31 +187,34 @@ public:
 	                                RealType)  const
 	{
 		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
-		if (modelParameters_.magneticFieldX.size() != linSize)
-			return; // <<---- PLEASE NOTE EARLY EXIT HERE
-		if (modelParameters_.magneticFieldY.size() != linSize)
-			return; // <<---- PLEASE NOTE EARLY EXIT HERE
-		if (modelParameters_.magneticFieldZ.size() != linSize)
-			return; // <<---- PLEASE NOTE EARLY EXIT HERE
+		bool hasX = (modelParameters_.magneticFieldX.size() == linSize);
+		bool hasY = (modelParameters_.magneticFieldY.size() == linSize);
+		bool hasZ = (modelParameters_.magneticFieldZ.size() == linSize);
 
 		SizeType n=block.size();
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType site = block[i];
 
-			// magnetic field x
-			const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, 0);
-			RealType tmp = modelParameters_.magneticFieldX[block[0]];
-			hmatrix += tmp*sx.getCRS();
+			if (hasX) {
+				// magnetic field x
+				const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, 0);
+				RealType tmp = modelParameters_.magneticFieldX[block[0]];
+				hmatrix += tmp*sx.getCRS();
+			}
 
-			// magnetic field y
-			const OperatorType& sy = ModelBaseType::naturalOperator("sy", site, 0);
-			tmp = modelParameters_.magneticFieldY[block[0]];
-			hmatrix += tmp*sy.getCRS();
+			if (hasY) {
+				// magnetic field y
+				const OperatorType& sy = ModelBaseType::naturalOperator("sy", site, 0);
+				tmp = modelParameters_.magneticFieldY[block[0]];
+				hmatrix += tmp*sy.getCRS();
+			}
 
-			// magnetic field z
-			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
-			tmp = modelParameters_.magneticFieldZ[block[0]];
-			hmatrix += tmp*sz.getCRS();
+			if (hasZ) {
+				// magnetic field z
+				const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
+				tmp = modelParameters_.magneticFieldZ[block[0]];
+				hmatrix += tmp*sz.getCRS();
+			}
 		}
 	}
 
@@ -423,7 +426,7 @@ private:
 	              const VectorSizeType& block) const
 	{
 		const SizeType total1 = (withCharge_) ? 3
-		                                     : TWICE_THE_SPIN + 1;
+		                                      : TWICE_THE_SPIN + 1;
 
 		SizeType total = utils::powUint(total1, block.size());
 
@@ -510,7 +513,7 @@ private:
 	}
 
 	void setSymmetryRelatedWithCharge(VectorQnType& qns,
-	                       const HilbertBasisType& basis) const
+	                                  const HilbertBasisType& basis) const
 	{
 		typedef std::pair<SizeType,SizeType> PairType;
 
