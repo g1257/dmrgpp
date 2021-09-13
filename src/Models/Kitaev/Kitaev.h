@@ -205,14 +205,14 @@ public:
 			if (hasY) {
 				// magnetic field y
 				const OperatorType& sy = ModelBaseType::naturalOperator("sy", site, 0);
-				tmp = modelParameters_.magneticFieldY[block[0]];
+				RealType tmp = modelParameters_.magneticFieldY[block[0]];
 				hmatrix += tmp*sy.getCRS();
 			}
 
 			if (hasZ) {
 				// magnetic field z
 				const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
-				tmp = modelParameters_.magneticFieldZ[block[0]];
+				RealType tmp = modelParameters_.magneticFieldZ[block[0]];
 				hmatrix += tmp*sz.getCRS();
 			}
 		}
@@ -325,7 +325,7 @@ protected:
 				value *= x;
 			};
 
-			ModelBaseType::createTerm(labels[i] + labels[i]).push(smu, 'N', smu, 'N', modif);
+			ModelBaseType::createTerm(labels[i] + labels[i], false).push(smu, 'N', smu, 'N', modif);
 		}
 
 		OpForLinkType sx("sx");
