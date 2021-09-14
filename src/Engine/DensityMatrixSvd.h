@@ -480,14 +480,20 @@ public:
 		for (SizeType x = 0; x < effectiveTargets.size(); ++x) {
 
 			const VectorWithOffsetType& v = *effectiveTargets[x];
-			const RealType weight = (x < psiTargets) ? target.gsWeight()
-			                                         : target.weight(x - psiTargets);
+			RealType weight = (x < psiTargets) ? target.gsWeight()
+			                                   : target.weight(x - psiTargets);
+
+			VectorWithOffsetType vNormalized = v; // deep copy
+			if (norm(vNormalized)>0) normalize(vNormalized);
+			if (effectiveTargets.size()==1) weight=1.0;
+			addThisTarget2(x, vNormalized, sqrt(weight));
+			vNormalized.clear(); // clear the vector quickly
 
 			addThisTarget2(x, v, sqrt(weight));
 			sum += weight;
 		}
 
-		assert(fabs(sum - 1) < 1e-4);
+		assert(fabs(sum - 1) < 1e-3);
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();

@@ -552,8 +552,8 @@ public:
 
 	friend void normalize(VectorWithOffsets& v)
 	{
-		ComplexOrRealType norma = PsimagLite::norm(v);
-		ComplexOrRealType eps = 1e-5;
+		RealType norma = norm(v);
+		RealType eps = 1e-5;
 
 		if (fabs(norma-1.0)<eps) return;
 

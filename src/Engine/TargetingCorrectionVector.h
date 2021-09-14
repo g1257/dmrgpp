@@ -106,6 +106,7 @@ public:
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
+	typedef typename BaseType::OptionsType OptionsType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -270,12 +271,22 @@ private:
 
 		RealType sum  = 0;
 		weight_.resize(this->common().aoe().targetVectors().size());
+
 		for (SizeType r=1;r<weight_.size();r++) {
 			weight_[r] = 1;
 			sum += weight_[r];
 		}
-
 		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
+
+		if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
+			sum = 0;
+			for (SizeType r=1;r<weight_.size();r++) {
+				weight_[r] = 1;
+				sum += weight_[r];
+			}
+			weight_[weight_.size()-1] = 0;
+			for (SizeType r=1;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)*r/sum;
+		}
 	}
 
 	RealType dynWeightOf(VectorType& v,const VectorType& w) const
