@@ -180,7 +180,8 @@ public:
 	ComplexType iOfOmega(const ComplexType& z,RealType offset,int isign) const
 
 	{
-		if (weight_==0) return ComplexType(0,0);
+		if (PsimagLite::real(weight_) == 0 && PsimagLite::imag(weight_) == 0)
+			return ComplexType(0,0);
 
 		ComplexType sum = 0;
 		for (SizeType l=0;l<intensity_.size();l++)
@@ -197,7 +198,8 @@ private:
 
 	void diagonalize()
 	{
-		if (weight_==0) return;
+		if (PsimagLite::real(weight_) == 0 && PsimagLite::imag(weight_) == 0) return;
+
 		MatrixType T;
 		ab_.buildDenseMatrix(T);
 		eigs_.resize(T.rows());
@@ -217,7 +219,7 @@ private:
 	FreqEnum freqEnum_;
 	TridiagonalMatrixType ab_;
 	RealType Eg_;
-	RealType weight_;
+	std::complex<RealType> weight_;
 	int isign_;
 	typename Vector<RealType>::Type eigs_;
 	typename Vector<RealType>::Type intensity_;
