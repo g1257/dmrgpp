@@ -381,7 +381,10 @@ template<typename T,typename A>
 T scalarProduct(const vector<T,A>& v1, const vector<T,A>& v2)
 {
 	T result = 0.0;
-	for (SizeType i=0; i < v2.size(); i++)
+	const SizeType n = v1.size();
+	if (n != v2.size())
+		throw PsimagLite::RuntimeError("scalarProduct of vectors of different size\n");
+	for (SizeType i=0; i < n; i++)
 		result += PsimagLite::conj(v1[i]) * v2[i];
 	return result;
 }
