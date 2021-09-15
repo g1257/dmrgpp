@@ -14,7 +14,7 @@ int main(int argc, char **argv)
 	typedef PsimagLite::PrepassData<ComplexOrRealType> PrepassDataType;
 
 	ExpressionCalculatorType::VectorStringType ve;
-	PsimagLite::split(ve, argv[1], ",");
+	PsimagLite::split(ve, argv[1], ":");
 
 
 	PrepassDataType::VectorType vr(1,0.25);
