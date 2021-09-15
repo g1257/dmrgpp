@@ -237,7 +237,7 @@ private:
 	T>::Type eToTheI(T x)
 	{
 		typename Real<T>::Type r = PsimagLite::real(x);
-		return T(cos(r),sin(r));
+		return ::exp(PsimagLite::imag(-x))*T(cos(r),sin(r));
 	}
 
 	static SizeType findAry(PsimagLite::String op)
