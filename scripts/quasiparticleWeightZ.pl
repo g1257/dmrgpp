@@ -3,29 +3,41 @@
 use strict;
 use warnings;
 use utf8;
+use Math::Trig;
 
-my ($file, $momentumK) = @ARGV;
-defined($momentumK) or die "USAGE: $0 filename momentumK\n";
+my ($file) = @ARGV;
+defined($file) or die "USAGE: $0 filename\n";
 
 my $label1 = "site <Q0|c'|Q1> time";
 
 my @cdaggerI = loadVector($file, $label1);
+my $sites = scalar(@cdaggerI);
 
 my $label2 = "<Q0|c;c'|Q0>";
 
 my @cIcDaggerJ = loadMatrix($file, $label2);
 
-my @numerator = ftVector(\@cdaggerI, $momentumK);
+for (my $mForK = 0; $mForK < $sites; ++$mForK) {
+	doOneMomentumK($mForK, $sites, \@cdaggerI, \@cIcDaggerJ);
+}
 
-print "$0: numerator= @numerator\n";
+sub doOneMomentumK
+{
+	my ($mForK, $sites, $cdaggerI, $cIcDaggerJ) = @_;
+	my $momentumK = findMomentumK($mForK, $sites);
+	
+	my @numerator = ftVector($cdaggerI, $momentumK);
 
-my @den = ftMatrix(\@cIcDaggerJ, $momentumK);
+	print STDERR "$0: numerator= @numerator\n";
 
-print "$0: denominator= @den\n";
+	my @den = ftMatrix($cIcDaggerJ, $momentumK);
 
-die "$0: Denominator isn't real\n" if (abs($den[1]) > 1e-5);
+	print STDERR "$0: denominator= @den\n";
 
-print "$0: Z = ".$numerator[0]/$den[0]." ".$numerator[1]/$den[0]."\n";
+	die "$0: Denominator isn't real\n" if (abs($den[1]) > 1e-5);
+
+	print $mForK." ".$numerator[0]/$den[0]." ".$numerator[1]/$den[0]."\n";
+}
 
 sub ftMatrix
 {
@@ -117,4 +129,9 @@ sub loadMatrix
 	return @a;
 }
 
+sub findMomentumK
+{
+	my ($m, $total) = @_;
+	return 2*pi*$m/$total;
+}
 
