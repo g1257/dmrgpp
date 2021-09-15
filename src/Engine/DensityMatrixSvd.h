@@ -483,11 +483,20 @@ public:
 			RealType weight = (x < psiTargets) ? target.gsWeight()
 			                                   : target.weight(x - psiTargets);
 
-			VectorWithOffsetType vNormalized = v; // deep copy
-			if (norm(vNormalized)>0) normalize(vNormalized);
-			if (effectiveTargets.size()==1) weight=1.0;
-			addThisTarget2(x, vNormalized, sqrt(weight));
-			vNormalized.clear(); // clear the vector quickly
+			RealType mynorm = norm(v);
+			bool needsDeepCopy = (fabs(mynorm - 1) > 1e-4);
+			if (needsDeepCopy) {
+				VectorWithOffsetType* vNormalized = new VectorWithOffsetType(v);
+				if (norm(*vNormalized)>0) normalize(*vNormalized);
+				if (effectiveTargets.size()==1) weight=1.0;
+				addThisTarget2(x, *vNormalized, sqrt(weight));
+				delete vNormalized;
+				vNormalized = nullptr;
+			} else {
+				if (effectiveTargets.size()==1) weight=1.0;
+				addThisTarget2(x, v, sqrt(weight));
+			}
+
 
 			addThisTarget2(x, v, sqrt(weight));
 			sum += weight;
