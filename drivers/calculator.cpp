@@ -1,11 +1,17 @@
 #include "ExpressionCalculator.h"
 
+#ifdef USE_COMPLEX
+typedef std::complex<double> ComplexOrRealType;
+#else
+typedef double ComplexOrRealType;
+#endif
+
 int main(int argc, char **argv)
 {
 	if (argc < 2) return 1;
 
-	typedef PsimagLite::ExpressionCalculator<double> ExpressionCalculatorType;
-	typedef PsimagLite::PrepassData<double> PrepassDataType;
+	typedef PsimagLite::ExpressionCalculator<ComplexOrRealType> ExpressionCalculatorType;
+	typedef PsimagLite::PrepassData<ComplexOrRealType> PrepassDataType;
 
 	ExpressionCalculatorType::VectorStringType ve;
 	PsimagLite::split(ve, argv[1], ",");

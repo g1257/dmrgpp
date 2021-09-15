@@ -76,9 +76,10 @@ class ExpressionCalculator {
 			for (SizeType i = 0; i < 4; ++i) op[i] = '\0';
 			SizeType l = str.size();
 			if (l == 0) return;
-			if (isAfloat(str)) {
+			IsAnumberPossiblyComplex<ComplexOrRealType> isAnumberPossiblyComplex(str);
+			if (isAnumberPossiblyComplex()) {
 				type = NODE_NUMBER;
-				value = atof(str.c_str());
+				value = isAnumberPossiblyComplex.value();
 			} else {
 				ary = findAry(str);
 				for (SizeType i = 0; i < 4; ++i)
