@@ -118,6 +118,9 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename BaseType::VectorRealType VectorRealType;
+	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
+	VectorVectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 
 	TargetingGroundState(const LeftRightSuperType& lrs,
 	                     const ModelType& model,
@@ -140,7 +143,22 @@ public:
 
 	RealType gsWeight() const
 	{
-		return 1;
+		const VectorVectorVectorWithOffsetType& v = this->common().aoe().psiConst();
+		const SizeType n = v.size();
+		if (n == 1) return 1;
+
+		RealType sum = 0;
+		for (SizeType i = 0; i < n; ++i) {
+			const VectorVectorWithOffsetType& vv = v[i];
+			const SizeType m = vv.size();
+			for (SizeType j = 0; j < m; ++j) {
+				const VectorWithOffsetType* vvv= vv[j];
+				if (!vvv) continue;
+				if (norm(*vvv) > 1e-3) ++sum;
+			}
+		}
+
+		return 1.0/sum;
 	}
 
 	SizeType size() const

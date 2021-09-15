@@ -483,7 +483,7 @@ public:
 			const RealType weight = (x < psiTargets) ? target.gsWeight()
 			                                         : target.weight(x - psiTargets);
 
-			addThisTarget2(x, v, weight);
+			addThisTarget2(x, v, sqrt(weight));
 			sum += weight;
 		}
 
