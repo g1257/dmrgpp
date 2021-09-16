@@ -152,22 +152,22 @@ public:
 		SizeType mx = modelParameters_.magneticFieldX.size();
 		SizeType my = modelParameters_.magneticFieldY.size();
 		SizeType mz = modelParameters_.magneticFieldZ.size();
-		SizeType m = mz;
 
-		if (mx != my || my != mz || mz != mx ) {
+		if (mx > 0 && mx != n) {
 			PsimagLite::String msg("Kitaev: If provided, ");
-			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
-			msg += " MagneticFieldX, MagneticFieldY, MagneticFieldZ must be ";
-			msg += "provided in all 3 (x,y,z) directions.\n";
+			msg += " MagneticFieldX must be a vector of " + ttos(n) + " entries.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
-
-		if (m > 0 && m != n) {
+		if (mz > 0 && mz != n) {
 			PsimagLite::String msg("Kitaev: If provided, ");
-			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
+			msg += " MagneticFieldZ must be a vector of " + ttos(n) + " entries.\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
-
+		if (my > 0 && my != n) {
+			PsimagLite::String msg("Kitaev: If provided, ");
+			msg += " MagneticFieldY must be a vector of " + ttos(n) + " entries.\n";
+			throw PsimagLite::RuntimeError(msg);
+		}
 		if (BasisType::useSu2Symmetry())
 			err("Kitaev does not have SU(2) symmetry\n");
 	}
