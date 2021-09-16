@@ -497,8 +497,6 @@ public:
 				addThisTarget2(x, v, sqrt(weight));
 			}
 
-
-			addThisTarget2(x, v, sqrt(weight));
 			sum += weight;
 		}
 
