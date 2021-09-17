@@ -1,0 +1,19 @@
+##Ainur1.0
+
+TotalNumberOfSites=16;
+NumberOfTerms=1;
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+dir0:Connectors=[-1.0];
+
+OutputFile="data2080";
+
+hubbardU=[0,...];
+potentialV=[0,...];
+Model="HubbardOneBand";
+SolverOptions="GroundStateTargeting,twositedmrg,useComplex";
+Version="v6.01";
+InfiniteLoopKeptStates=150;
+FiniteLoops=[[7, 200, 0], [-14, 200, 0]];
+TargetElectronsUp=6;
+TargetElectronsDown=6;

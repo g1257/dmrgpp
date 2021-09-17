@@ -1,0 +1,32 @@
+##Ainur1.0
+
+TotalNumberOfSites=16;
+NumberOfTerms=1;
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+dir0:Connectors=[-1.0];
+GeometryValueModifier="ei,*,%t,4.2";
+
+hubbardU=[0,...];
+potentialV=[0,...];
+Model="HubbardOneBand";
+SolverOptions="TimeStepTargeting,twositedmrg,restart,fixLegacyBugs";
+RestartFilename="data2080";
+Version="v6.01";
+InfiniteLoopKeptStates=150;
+FiniteLoops=[[14, 200, 2], [-14, 200, 2]];
+RepeatFiniteLoopsTimes=4;
+TargetElectronsUp=6;
+TargetElectronsDown=6;
+
+GsWeight=0.1;
+TSPTau=0.1;
+TSPTimeSteps=5;
+TSPAdvanceEach=14;
+TSPAlgorithm="Krylov";
+TSPSites=[8];
+TSPLoops=[0];
+TSPProductOrSum="product";
+
+string TSPOp0:TSPOperator=expression;
+string TSPOp0:OperatorExpression="c";
