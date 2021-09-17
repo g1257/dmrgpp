@@ -62,7 +62,6 @@ my $hptr = {"${comment}OmegaBegin" => \$omega0,
             "TotalNumberOfSites" => \$GlobalNumberOfSites,
             "OutputFile" => \$testoutputfile};
 
-$geometryLeg =~ s/;//;
 OmegaUtils::getLabels($hptr, $templateInput);
 
 $centralSite = getCentralSite($templateInput, $isAinur);
@@ -75,6 +74,7 @@ if ($isAinur) {
 	$omegaTotal =~ s/[\";]//g;
 	$omegaStep =~ s/[\";]//g;
 	$omegaOffset =~ s/[\";]//g;
+	$geometryLeg =~ s/;//;
 }
 
 $hptr->{"isPeriodic"} = $isPeriodic;
