@@ -234,14 +234,17 @@ public:
 	{
 		String str("");
 
-		for (SizeType i = 0; i < 9; ++i) {
-			String istr = (i < 8) ? "gt" + ttos(i) + ":" : "";
+		static const SizeType maxTerms = 10;
+		// last term is used to define entities without the prefix gt0:
+		for (SizeType i = 0; i < maxTerms; ++i) {
+			String istr = (i + 1 < maxTerms) ? "gt" + ttos(i) + ":" : "";
 			str += "integer " + istr + "DegreesOfFreedom;\n";
 			str += "string " + istr + "GeometryKind;\n";
 			str += "string " + istr + "GeometryOptions;\n";
 			str += "integer " + istr + "LadderLeg;\n";
 			str += "integer " + istr + "LongChainDistance;\n";
 			str += "integer " + istr + "BathSitesPerSite;\n";
+			str += "string " + istr + "GeometryValueModifier;\n";
 			for (SizeType j = 0; j < 9; ++j) {
 				String jstr = "dir" + ttos(j) + ":";
 				str += "vector " + istr + jstr + "Connectors;\n";
