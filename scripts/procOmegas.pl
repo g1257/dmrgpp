@@ -62,6 +62,7 @@ my $hptr = {"${comment}OmegaBegin" => \$omega0,
             "TotalNumberOfSites" => \$GlobalNumberOfSites,
             "OutputFile" => \$testoutputfile};
 
+$geometryLeg =~ s/;//;
 OmegaUtils::getLabels($hptr, $templateInput);
 
 $centralSite = getCentralSite($templateInput, $isAinur);
