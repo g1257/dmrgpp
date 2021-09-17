@@ -557,9 +557,6 @@ public:
 
 		if (fabs(norma-1.0)<eps) return;
 
-		PsimagLite::String s(__FILE__);
-		s += " " + ttos(__LINE__);
-		std::cerr<<s<<" norm= "<<norma<<"\n";
 		assert(fabs(norma)>eps);
 
 		for (SizeType i=0;i<v.data_.size();i++)
