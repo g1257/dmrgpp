@@ -16,6 +16,10 @@ void partiallyReadSomething(const PsimagLite::Ainur& ainur)
 	PsimagLite::String m;
 	ainur.readValue(m, "Model");
 	std::cout<<m<<"\n";
+
+	std::vector<std::complex<double> > v2(10);
+	ainur.readValue(v2, "myv2");
+	std::cout<<v2;
 }
 
 int main(int argc, char** argv)

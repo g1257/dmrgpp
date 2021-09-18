@@ -32,6 +32,18 @@ struct MyProxyFor<ComplexOrRealType, true> {
 	static void copy(std::vector<ComplexOrRealType>& dest,
 	                 const std::vector<Type>& src)
 	{
+		const SizeType ndest = dest.size();
+		// ellipsis for complex vectors goes here:
+		if (src.size() == 2 && src[1] == "...") {
+			if (ndest == 0)
+				err("Vector of unknown size cannot use ellipsis\n");
+			const std::string copystr = src[0];
+			ComplexOrRealType val = toComplex(copystr);
+			for (SizeType i = 0; i < ndest; ++i)
+				dest[i] = val;
+			return;
+		}
+
 		dest.clear();
 		const SizeType n = src.size();
 		if (n == 0) return;
@@ -136,7 +148,7 @@ ruleElipsis<DoubleOrFloatType>()
 {
 	return  "[" >> boost::spirit::DoubleOrFloatUnderscore  >> "," >> "..." >> "]";
 }
-
+// Needed but apparently does not match
 template<>
 boost::spirit::qi::rule<std::string::iterator,
 std::string(),
