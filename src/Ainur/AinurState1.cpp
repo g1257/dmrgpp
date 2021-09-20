@@ -9,6 +9,26 @@ namespace PsimagLite {
 
 struct MyProxyFor {
 
+	static void convert(long unsigned int& t, std::string str)
+	{
+		t = PsimagLite::atoi(str);
+	}
+
+	static void convert(unsigned int& t, std::string str)
+	{
+		t = PsimagLite::atoi(str);
+	}
+
+	static void convert(long int& t, std::string str)
+	{
+		t = PsimagLite::atoi(str);
+	}
+
+	static void convert(int& t, std::string str)
+	{
+		t = PsimagLite::atoi(str);
+	}
+
 	static void convert(double& t, std::string str)
 	{
 		t = PsimagLite::atof(str);
@@ -23,6 +43,11 @@ struct MyProxyFor {
 	static void convert(std::complex<T>& t, std::string str)
 	{
 		t = toComplex<T>(str);
+	}
+
+	static void convert(String& t, std::string str)
+	{
+		t = str;
 	}
 
 	template<typename T>
