@@ -62,6 +62,7 @@ private:
 
 };
 
+//---------
 
 boost::spirit::qi::rule<std::string::iterator,
 std::vector<std::string>(),
@@ -91,6 +92,8 @@ void AinurState::assign(String k, String v)
 	values_[x] = v;
 }
 
+//---------
+
 template <typename T>
 template <typename A, typename ContextType>
 typename EnableIf<!TypesEqual<std::vector<std::vector<T> >, A>::True,void>::Type
@@ -102,13 +105,12 @@ AinurState::ActionMatrix<T>::operator()(A& attr,
 	if (rows == 0) return;
 	SizeType cols = attr[0].size();
 	t_.resize(rows, cols);
-	std::cerr<<"Here ActionMatrix type A neq type T\n";
-	//	for (SizeType i = 0; i < rows; ++i) {
-	//		if (attr[i].size() != cols)
-	//			err("Ainur: Problem reading matrix\n");
-	//		for (SizeType j = 0; j < cols; ++j)
-	//			t_(i, j) = MyProxyFor<T, true>::toComplex(attr[i][j]);
-	//	}
+	for (SizeType i = 0; i < rows; ++i) {
+		if (attr[i].size() != cols)
+			err("Ainur: Problem reading matrix\n");
+		for (SizeType j = 0; j < cols; ++j)
+			MyProxyFor::convert(t_(i, j), attr[i][j]);
+	}
 }
 
 template <typename T>
@@ -129,6 +131,8 @@ AinurState::ActionMatrix<T>::operator()(A& attr,
 			t_(i, j) = attr[i][j];
 	}
 }
+
+//---------
 
 template <typename T>
 template <typename A, typename ContextType>
@@ -185,6 +189,8 @@ AinurState::Action<T>::operator()(A& attr,
 	for (SizeType i = 0; i < n; ++i)
 		MyProxyFor::convert(t_[i], attr[i]);
 }
+
+//---------
 
 template<typename T>
 void AinurState::convertInternal(Matrix<T>& t,
@@ -250,6 +256,8 @@ void AinurState::convertInternal(std::vector<T>& t,
 		std::cerr << stringContext(it, value.begin(), value.end())<<"\n";
 	}
 }
+
+//---------
 
 template void AinurState::convertInternal(Matrix<DoubleOrFloatType>&,String) const;
 
