@@ -53,7 +53,8 @@ struct MyProxyFor {
 	template<typename T>
 	static void convert(T& t, std::string str)
 	{
-		throw RuntimeError("complex not implemented yet\n");
+		String msg("Unknown type ");
+		throw RuntimeError("convert(): " + msg + typeid(t).name() + " for " + str + "\n");
 	}
 
 private:
