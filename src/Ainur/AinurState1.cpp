@@ -7,61 +7,36 @@
 
 namespace PsimagLite {
 
-template<typename ComplexOrRealType, bool>
 struct MyProxyFor {
-	typedef ComplexOrRealType Type;
 
-	static void copy(ComplexOrRealType& dest, const ComplexOrRealType& src)
+	static void convert(double& t, std::string str)
 	{
-		dest = src;
+		t = PsimagLite::atof(str);
 	}
 
-	static void copy(std::vector<ComplexOrRealType>& dest,
-	                 const std::vector<ComplexOrRealType>& src)
+	static void convert(float& t, std::string str)
 	{
-		dest = src;
-	}
-};
-
-template<typename ComplexOrRealType>
-struct MyProxyFor<ComplexOrRealType, true> {
-
-	typedef std::string Type;
-	typedef typename Real<ComplexOrRealType>::Type RealType;
-
-	static void copy(std::vector<ComplexOrRealType>& dest,
-	                 const std::vector<Type>& src)
-	{
-		const SizeType ndest = dest.size();
-		// ellipsis for complex vectors goes here:
-		if (src.size() == 2 && src[1] == "...") {
-			if (ndest == 0)
-				err("Vector of unknown size cannot use ellipsis\n");
-			const std::string copystr = src[0];
-			ComplexOrRealType val = toComplex(copystr);
-			for (SizeType i = 0; i < ndest; ++i)
-				dest[i] = val;
-			return;
-		}
-
-		dest.clear();
-		const SizeType n = src.size();
-		if (n == 0) return;
-		dest.resize(n);
-		for (SizeType i = 0; i < n; ++i) {
-			std::string copystr = src[i];
-			dest[i] = toComplex(copystr);
-		}
+		t = PsimagLite::atof(str);
 	}
 
-	static void copy(std::vector<ComplexOrRealType>& dest,
-	                 const Type& src)
+	template<typename T>
+	static void convert(std::complex<T>& t, std::string str)
 	{
-		dest.push_back(toComplex(src));
+		t = toComplex<T>(str);
 	}
 
-	static ComplexOrRealType toComplex(std::string str)
+	template<typename T>
+	static void convert(T& t, std::string str)
 	{
+		throw RuntimeError("complex not implemented yet\n");
+	}
+
+private:
+
+	template<typename RealType>
+	static std::complex<RealType> toComplex(std::string str)
+	{
+		typedef std::complex<RealType> ComplexType;
 		String buffer;
 		bool flag = false;
 		const SizeType n = str.length();
@@ -81,106 +56,23 @@ struct MyProxyFor<ComplexOrRealType, true> {
 			buffer += str[i];
 		}
 
-		return (flag) ? ComplexOrRealType(real1, atof(buffer.c_str())) :
-		                ComplexOrRealType(atof(buffer.c_str()), 0);
+		return (flag) ? ComplexType(real1, atof(buffer.c_str())) :
+		                ComplexType(atof(buffer.c_str()), 0);
 	}
+
 };
 
-template<typename T>
-boost::spirit::qi::rule<std::string::iterator,
-std::vector<T>(),
-boost::spirit::qi::space_type>
-ruleRows();
 
-template<>
-boost::spirit::qi::rule<std::string::iterator,
-std::vector<DoubleOrFloatType>(),
-boost::spirit::qi::space_type>
-ruleRows<DoubleOrFloatType>()
-{
-	return "[" >> -(boost::spirit::DoubleOrFloatUnderscore % ",") >> "]";
-}
-
-template<>
 boost::spirit::qi::rule<std::string::iterator,
 std::vector<std::string>(),
 boost::spirit::qi::space_type>
-ruleRows<std::string>()
+ruleRows()
 {
-	//auto fl = boost::spirit::DoubleOrFloatUnderscore;
 	boost::spirit::qi::rule<std::string::iterator,
-	std::vector<std::string>(),
-	boost::spirit::qi::space_type> myrule =  "[" >> (+~boost::spirit::qi::char_(",[]"))
-	                                                % ',' >> "]";
+	        std::vector<std::string>(),
+	        boost::spirit::qi::space_type> myrule =  "[" >> (+~boost::spirit::qi::char_(",[]"))
+	                                                        % ',' >> "]";
 	return myrule;
-}
-
-template<>
-boost::spirit::qi::rule<std::string::iterator,
-std::vector<SizeType>(),
-boost::spirit::qi::space_type>
-ruleRows<SizeType>()
-{
-	return "[" >> -(boost::spirit::int_ % ",") >> "]";
-}
-
-template<>
-boost::spirit::qi::rule<std::string::iterator,
-std::vector<int>(),
-boost::spirit::qi::space_type>
-ruleRows<int>()
-{
-	return "[" >> -(boost::spirit::int_ % ",") >> "]";
-}
-
-//---------
-template<typename T>
-boost::spirit::qi::rule<std::string::iterator,
-T(),
-boost::spirit::qi::space_type>
-ruleElipsis();
-
-template<>
-boost::spirit::qi::rule<std::string::iterator,
-DoubleOrFloatType(),
-boost::spirit::qi::space_type>
-ruleElipsis<DoubleOrFloatType>()
-{
-	return  "[" >> boost::spirit::DoubleOrFloatUnderscore  >> "," >> "..." >> "]";
-}
-// Needed but apparently does not match
-template<>
-boost::spirit::qi::rule<std::string::iterator,
-std::string(),
-boost::spirit::qi::space_type>
-ruleElipsis<std::string>()
-{
-	auto fl = boost::spirit::DoubleOrFloatUnderscore;
-	boost::spirit::qi::rule<std::string::iterator,
-	std::string(),
-	boost::spirit::qi::space_type> myrule =  "[" >> (fl |
-	                (fl >> "i" >> fl) |
-	                ("i" >> fl))
-	            >> "," >> "..." >> "]";
-	return myrule;
-}
-
-template<>
-boost::spirit::qi::rule<std::string::iterator,
-SizeType(),
-boost::spirit::qi::space_type>
-ruleElipsis<SizeType>()
-{
-	return "[" >> boost::spirit::int_ >> "," >> "..." >> "]";
-}
-
-template<>
-boost::spirit::qi::rule<std::string::iterator,
-int(),
-boost::spirit::qi::space_type>
-ruleElipsis<int>()
-{
-	return "[" >> boost::spirit::int_ >> "," >> "..." >> "]";
 }
 
 //---------
@@ -210,12 +102,13 @@ AinurState::ActionMatrix<T>::operator()(A& attr,
 	if (rows == 0) return;
 	SizeType cols = attr[0].size();
 	t_.resize(rows, cols);
-	for (SizeType i = 0; i < rows; ++i) {
-		if (attr[i].size() != cols)
-			err("Ainur: Problem reading matrix\n");
-		for (SizeType j = 0; j < cols; ++j)
-			t_(i, j) = MyProxyFor<T, true>::toComplex(attr[i][j]);
-	}
+	std::cerr<<"Here ActionMatrix type A neq type T\n";
+	//	for (SizeType i = 0; i < rows; ++i) {
+	//		if (attr[i].size() != cols)
+	//			err("Ainur: Problem reading matrix\n");
+	//		for (SizeType j = 0; j < cols; ++j)
+	//			t_(i, j) = MyProxyFor<T, true>::toComplex(attr[i][j]);
+	//	}
 }
 
 template <typename T>
@@ -264,7 +157,33 @@ AinurState::Action<T>::operator()(A& attr,
                                   ContextType&,
                                   bool&) const
 {
-	MyProxyFor<T, IsComplexNumber<T>::True>::copy(t_, attr);
+	const SizeType n = attr.size();
+	if (n == 2 && attr[1] == "...") {
+		const SizeType m = t_.size();
+		if (m == 0)
+			err("Cannot use ellipsis for vector of unknown size\n");
+		MyProxyFor::convert(t_[0], attr[0]);
+		for (SizeType i = 1; i < m; ++i)
+			t_[i] = t_[0];
+		return;
+	}
+
+	if (n == 2 && attr[1].length() > 4 && attr[1].substr(0, 4) == "...x") {
+		const SizeType m = t_.size();
+		const SizeType l = attr[1].length();
+		const SizeType mm = PsimagLite::atoi(attr[1].substr(4, l - 4));
+		if (m != 0)
+			std::cout<<"Resizing vector to "<<mm<<"\n";
+		t_.resize(mm);
+		MyProxyFor::convert(t_[0], attr[0]);
+		for (SizeType i = 1; i < mm; ++i)
+			t_[i] = t_[0];
+		return;
+	}
+
+	t_.resize(n);
+	for (SizeType i = 0; i < n; ++i)
+		MyProxyFor::convert(t_[i], attr[i]);
 }
 
 template<typename T>
@@ -273,14 +192,13 @@ void AinurState::convertInternal(Matrix<T>& t,
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
-	typedef typename MyProxyFor<T, IsComplexNumber<T>::True>::Type MyProxyForType;
-	typedef std::vector<MyProxyForType> LocalVectorType;
-	typedef std::vector<LocalVectorType> LocalVectorVectorType;
+	typedef std::vector<std::string> VectorStringType;
+	typedef std::vector<VectorStringType> VectorVectorVectorType;
 
 	IteratorType it = value.begin();
-	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows = ruleRows<MyProxyForType>();
+	qi::rule<IteratorType, VectorStringType(), qi::space_type> ruRows = ruleRows();
 
-	qi::rule<IteratorType, LocalVectorVectorType(), qi::space_type> full =
+	qi::rule<IteratorType, VectorVectorVectorType(), qi::space_type> full =
 	        "[" >> -(ruRows  % ",") >> "]";
 
 	ActionMatrix<T> actionMatrix("matrix", t);
@@ -310,20 +228,17 @@ void AinurState::convertInternal(std::vector<T>& t,
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
-	typedef typename MyProxyFor<T, IsComplexNumber<T>::True>::Type MyProxyForType;
-	typedef std::vector<MyProxyForType> LocalVectorType;
+	typedef std::vector<std::string> VectorStringType;
 
 	IteratorType it = value.begin();
-	qi::rule<IteratorType, LocalVectorType(), qi::space_type> ruRows = ruleRows<MyProxyForType>();
-	qi::rule<IteratorType, MyProxyForType(), qi::space_type> ruElipsis =
-	        ruleElipsis<MyProxyForType>();
+	qi::rule<IteratorType, VectorStringType(), qi::space_type> ruRows = ruleRows();
 
 	Action<T> actionRows("rows", t);
-	Action<T> actionElipsis("elipsis", t);
+	//Action<T> actionElipsis("elipsis", t);
 
 	bool r = qi::phrase_parse(it,
 	                          value.end(),
-	                          ruRows [actionRows] | ruElipsis[actionElipsis],
+	                          ruRows [actionRows],// | ruElipsis[actionElipsis],
 	                          qi::space);
 
 	//check if we have a match
