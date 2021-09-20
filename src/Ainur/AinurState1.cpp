@@ -96,10 +96,9 @@ void AinurState::assign(String k, String v)
 
 template <typename T>
 template <typename A, typename ContextType>
-typename EnableIf<!TypesEqual<std::vector<std::vector<T> >, A>::True,void>::Type
-AinurState::ActionMatrix<T>::operator()(A& attr,
-                                        ContextType&,
-                                        bool&) const
+void AinurState::ActionMatrix<T>::operator()(A& attr,
+                                             ContextType&,
+                                             bool&) const
 {
 	SizeType rows = attr.size();
 	if (rows == 0) return;
@@ -113,53 +112,13 @@ AinurState::ActionMatrix<T>::operator()(A& attr,
 	}
 }
 
-template <typename T>
-template <typename A, typename ContextType>
-typename EnableIf<TypesEqual<std::vector<std::vector<T> >, A>::True,void>::Type
-AinurState::ActionMatrix<T>::operator()(A& attr,
-                                        ContextType&,
-                                        bool&) const
-{
-	SizeType rows = attr.size();
-	if (rows == 0) return;
-	SizeType cols = attr[0].size();
-	t_.resize(rows, cols);
-	for (SizeType i = 0; i < rows; ++i) {
-		if (attr[i].size() != cols)
-			err("Ainur: Problem reading matrix\n");
-		for (SizeType j = 0; j < cols; ++j)
-			t_(i, j) = attr[i][j];
-	}
-}
-
 //---------
 
 template <typename T>
 template <typename A, typename ContextType>
-typename EnableIf<TypesEqual<A,T>::True,void>::Type
-AinurState::Action<T>::operator()(A& attr,
-                                  ContextType&,
-                                  bool&) const
-{
-	if (name_ == "elipsis") {
-		SizeType total = t_.size();
-		if (total == 0)
-			err("Elipsis cannot be used for this vector, because size is unknown\n");
-
-		for (SizeType i = 0; i < total; ++i)
-			t_[i] = attr;
-		return;
-	}
-
-	t_.push_back(attr);
-}
-
-template <typename T>
-template <typename A, typename ContextType>
-typename EnableIf<!TypesEqual<A,T>::True, void>::Type
-AinurState::Action<T>::operator()(A& attr,
-                                  ContextType&,
-                                  bool&) const
+void AinurState::Action<T>::operator()(A& attr,
+                                       ContextType&,
+                                       bool&) const
 {
 	const SizeType n = attr.size();
 	if (n == 2 && attr[1] == "...") {
@@ -240,11 +199,10 @@ void AinurState::convertInternal(std::vector<T>& t,
 	qi::rule<IteratorType, VectorStringType(), qi::space_type> ruRows = ruleRows();
 
 	Action<T> actionRows("rows", t);
-	//Action<T> actionElipsis("elipsis", t);
 
 	bool r = qi::phrase_parse(it,
 	                          value.end(),
-	                          ruRows [actionRows],// | ruElipsis[actionElipsis],
+	                          ruRows [actionRows],
 	                          qi::space);
 
 	//check if we have a match

@@ -32,16 +32,9 @@ class AinurState {
 		{}
 
 		template <typename A, typename ContextType>
-		typename EnableIf<TypesEqual<A,T>::True, void>::Type
-		operator()(A& attr,
-		           ContextType&,
-		           bool&) const;
-
-		template <typename A, typename ContextType>
-		typename EnableIf<!TypesEqual<A,T>::True, void>::Type
-		operator()(A& attr,
-		           ContextType& context,
-		           bool& hit) const;
+		void operator()(A& attr,
+		                ContextType&,
+		                bool&) const;
 
 	private:
 
@@ -57,16 +50,9 @@ class AinurState {
 		{}
 
 		template <typename A, typename ContextType>
-		typename EnableIf<!TypesEqual<std::vector<std::vector<T> >, A>::True,void>::Type
-		operator()(A& attr,
-		           ContextType&,
-		           bool&) const;
-
-		template <typename A, typename ContextType>
-		typename EnableIf<TypesEqual<std::vector<std::vector<T> >, A>::True,void>::Type
-		operator()(A& attr,
-		           ContextType&,
-		           bool&) const;
+		void operator()(A& attr,
+		                ContextType&,
+		                bool&) const;
 
 	private:
 
@@ -88,8 +74,8 @@ public:
 	AinurState()
 	{
 		assert(ZERO_CHAR_STRING_.length() == 1);
-//		if (ZERO_CHAR_STRING_[0] != ' ')
-//			err("Ainur::AinurState should be a singleton\n");
+		//		if (ZERO_CHAR_STRING_[0] != ' ')
+		//			err("Ainur::AinurState should be a singleton\n");
 
 		ZERO_CHAR_STRING_[0] = 0;
 	}
