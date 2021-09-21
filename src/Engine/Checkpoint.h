@@ -157,6 +157,7 @@ public:
 		if (!isRestart_) return;
 
 		VectorSizeType v;
+		SizeType prevOpOnSiteThresh = 0;
 
 		{
 			IoType::In ioIn2(parameters_.checkpoint.filename());
@@ -166,6 +167,7 @@ public:
 			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
 			if (v.size() == 0) return;
 
+			ioIn2.read(prevOpOnSiteThresh, "PARAMETERS/opOnSiteThreshold");
 			bool iscomplex = false;
 			ioIn2.read(iscomplex, "IsComplex");
 			ioIn2.close();
@@ -173,7 +175,8 @@ public:
 				err("Previous run was complex and this one is not (or viceversa)\n");
 		}
 
-		SizeType operatorsPerSite = v[0] + parameters_.opOnSiteThreshold;
+		// opOnSiteThreshold of the previous run
+		SizeType operatorsPerSite = v[0] + prevOpOnSiteThresh;
 
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorSizeType test(1,0);
