@@ -33,7 +33,7 @@ public:
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
-	const ProgramGlobals::DirectionEnum direction() const { return direction_; }
+	ProgramGlobals::DirectionEnum direction() const { return direction_; }
 
 	const VectorWithOffsetType& getCurrentVectorConst(PsimagLite::String braOrKet) const
 	{
