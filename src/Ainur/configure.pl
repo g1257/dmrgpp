@@ -39,7 +39,7 @@ sub createMakefile
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
 
 	local *FH = $fh;
-	my @units = qw(test);
+	my @units = qw(test testReal);
 	my $combinedUnits = combine("",\@units,".o ");
 	my $combinedUnits2 = combine("./",\@units,".cpp ");
 
