@@ -513,9 +513,9 @@ private:
 		for (SizeType i = 0; i < x; ++i) {
 			const RealType val = eigs[i];
 			if (val < 0)
-				err("checkAndSum: Density Matrix eigenvalue is less than zero\n");
+				std::cout<<"checkAndSum: Density Matrix eigenvalue "<<val<<" ("<<i<<") is less than zero\n";
 			if (val > 1)
-				err("checkAndSum: Density Matrix eigenvalue is greater than one\n");
+				std::cout<<"checkAndSum: Density Matrix eigenvalue "<<val<<" ("<<i<<") is greater than one\n";
 			sum += eigs[i];
 		}
 
