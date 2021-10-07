@@ -31,7 +31,7 @@ sub createSdotS
 	my ($szsz, $spsm) = @_;
 	my @sDotS;
 	my $rows = scalar(@$szsz);
-	if ($rows != scalar(@spsm)) {
+	if ($rows != scalar(@$spsm)) {
 		die "$0: Sz.Sz and Sp.Sm arrays have different row sizes\n";
 	}
 

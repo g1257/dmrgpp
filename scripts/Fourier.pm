@@ -89,6 +89,7 @@ sub loadMatrix
 		die "$0: Expected $rows rows but found $r instead\n";
 	}
 
+	print STDERR "$0: Read matrix $label from $file with $rows rows and $cols columns.\n";
 	return @m;
 }
 
