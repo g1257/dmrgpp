@@ -25,7 +25,7 @@ Fourier::printArray(\@nq);
 sub correctNqZero
 {
 	my ($nq, $average) = @_;
-	my $val = $nq->[0];
+	my $val = $nq->[0]->[0];
 	if (!defined($val)) {
 		print STDERR "$0: Could not correct nq[0], it does not exist\n";
 		return;
@@ -33,7 +33,7 @@ sub correctNqZero
 	
 	my $nsites = scalar(@$nq);
 	my $correction = $nsites*$average*$average;
-	$nq->[0] = $val - $correction;
+	$nq->[0]->[0] = $val - $correction;
 }
 
 sub loadVector

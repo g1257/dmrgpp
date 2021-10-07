@@ -15,7 +15,7 @@ sub printArray
 	my $n = scalar(@$array);
 	for (my $m = 0; $m < $n; ++$m) {
 		my $q = 2*$pi*$m/$n;
-		print "$q ".$array->[$m]."\n";
+		print "$q ".$array->[$m]->[0]." ".$array->[$m]->[1]."\n";
 	}
 }
 
@@ -27,20 +27,23 @@ sub fourierTransform
 	my $c = int($n/2);
 	for (my $m = 0; $m < $n; ++$m) {
 
-		my $sum = 0;
+		my ($sumReal, $sumImag) = (0, 0);
 
 		for (my $i = 0; $i < $n; ++$i) {
 			my $ptr1 = $array->[$i];
-			my $ptr2 = $array->[$c];
-			die "$0: undefined for $i \n" if (!defined($ptr1));
-			die "$0: undefined for $c \n" if (!defined($ptr2));
+			for (my $c = 0; $c < $n; ++$c) {
+				my $ptr2 = $array->[$c];
+				die "$0: undefined for $i \n" if (!defined($ptr1));
+				die "$0: undefined for $c \n" if (!defined($ptr2));
 
-			my $value = ($i < $c) ? $array->[$i]->[$c] : $array->[$c]->[$i];
+				my $value = ($i < $c) ? $array->[$i]->[$c] : $array->[$c]->[$i];
 
-			$sum += cos(2*$pi*($i-$c)*$m/$n)*$value;
+				$sumReal += cos(2*$pi*($i-$c)*$m/$n)*$value;
+				$sumImag += sin(2*$pi*($i-$c)*$m/$n)*$value;
+			}
 		}
 
-		$sq[$m] = $sum;
+		$sq[$m] = [$sumReal/$n, $sumImag/$n];
 	}
 
 	return @sq;
