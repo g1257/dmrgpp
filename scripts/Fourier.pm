@@ -57,7 +57,7 @@ sub loadMatrix
 	my $found = 0;
 	while (<FILE>) {
 		next if (/cmdline:/i);
-		if (/^$label/) {
+		if (/^\Q$label/) {
 			$found = 1;
 			last;
 		}
@@ -83,10 +83,13 @@ sub loadMatrix
 		chomp;
 		my @temp = split;
 		last if (scalar(@temp) != $cols);
+		#print @temp;
+		#print "\n";
 		push @m, \@temp;
 	}
 
 	close(FILE);
+	#print "----------\n";
 	my $r = scalar(@m);
 	if ($r != $rows) {
 		die "$0: Expected $rows rows but found $r instead\n";
