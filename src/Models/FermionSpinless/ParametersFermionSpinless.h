@@ -87,6 +87,7 @@ template<typename RealType, typename QnType>
 struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	template<typename IoInputType>
 	ParametersFermionSpinless(IoInputType& io) : BaseType(io, false)
@@ -94,36 +95,8 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 		io.read(potentialV,"potentialV");
 
 		try {
-			io.read(potentialT,"PotentialT");
+			io.read(delta, "Delta");
 		} catch (std::exception&) {}
-
-		bool hasT = (potentialT.size() > 0);
-
-		omega=0;
-		try {
-			io.readline(omega,"omega=");
-			if (!hasT) {
-				std::cerr<<"ParametersFermionSpinless: ";
-				std::cerr<<"omega will be ignored as no PotentialT present\n";
-			}
-		} catch (std::exception&) {}
-
-		phase=0;
-		try {
-			io.readline(phase,"phase=");
-			if (!hasT) {
-				std::cerr<<"ParametersFermionSpinless: ";
-				std::cerr<<"phase will be ignored as no PotentialT present\n";
-			}
-		} catch (std::exception&) {}
-	}
-
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
 	}
 
 	void write(PsimagLite::String label1,
@@ -133,9 +106,7 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 		io.createGroup(label);
 		BaseType::write(label, io);
 		io.write(label + "/potentialV", potentialV);
-		io.write(label + "/potentialT", potentialT);
-		io.write(label + "/omega", omega);
-		io.write(label + "/phase", phase);
+		io.write(label + "/delta", delta);
 	}
 
 	//! Function that prints model parameters to stream os
@@ -145,21 +116,13 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 		os<<parameters.targetQuantum;
 		os<<"potentialV\n";
 		os<<parameters.potentialV;
-		if (parameters.potentialT.size()==0) return os;
-
-		// time-dependent stuff
-		os<<"potentialT\n";
-		os<<parameters.potentialT;
-		os<<"omega="<<parameters.omega<<"\n";
-		os<<"phase="<<parameters.phase<<"\n";
+		os<<"Delta\n";
+		os<<parameters.delta;
 		return os;
 	}
 
-	typename PsimagLite::Vector<RealType>::Type potentialV;
-	// for time-dependent H:
-	typename PsimagLite::Vector<RealType>::Type potentialT;
-	RealType omega;
-	RealType phase;
+	VectorRealType potentialV;
+	VectorRealType delta;
 };
 } // namespace Dmrg
 

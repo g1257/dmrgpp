@@ -162,24 +162,29 @@ public:
 	                                const BlockType& block,
 	                                RealType time)  const
 	{
-		SizeType n=block.size();
+		SizeType n = block.size();
+		if (n != 1)
+			err("addDiagonalsInNaturalBasis: block.size() != 1\n");
 
-		for (SizeType i = 0; i < n; ++i) {
-			SizeType site = block[i];
-			const OperatorType& niupop = ModelBaseType::naturalOperator("n", site, 0);
-			const SparseMatrixType& niup = niupop.getCRS();
+		const SizeType numberOfSites = this->superGeometry().numberOfSites();
+		const SizeType site = block[0];
+		const OperatorType& niupop = ModelBaseType::naturalOperator("n", site, 0);
+		const SparseMatrixType& niup = niupop.getCRS();
 
-			// V_iup term
-			RealType tmp = modelParameters_.potentialV[block[i]];
-			hmatrix += tmp*niup;
+		// V_iup term
+		RealType tmp = modelParameters_.potentialV[site];
+		hmatrix += tmp*niup;
 
-			if (modelParameters_.potentialT.size()==0) continue;
-			RealType cosarg = cos(time*modelParameters_.omega +
-			                      modelParameters_.phase);
-			// VT_iup term
-			tmp = modelParameters_.potentialT[block[i]];
-			tmp *= cosarg;
-			hmatrix += tmp*niup;
+		// Delta C^\dagger_i C^\dagger_i
+		if (modelParameters_.delta.size() == numberOfSites) {
+			const SparseMatrixType& ci = ModelBaseType::naturalOperator("c", site, 0).getCRS();
+			SparseMatrixType cici = ci*ci;
+			assert(site < modelParameters_.delta.size());
+			tmp = modelParameters_.delta[site];
+			hmatrix += tmp*cici;
+			SparseMatrixType ciDaggerCiDagger;
+			transposeConjugate(ciDaggerCiDagger, cici);
+			hmatrix += tmp*cici;
 		}
 	}
 
