@@ -240,6 +240,7 @@ public:
 		str += "integer RepeatFiniteLoopsTimes;\n";
 		str += "integer TargetElectronsUp;\n";
 		str += "integer TargetElectronsDown;\n";
+		str += "integer TargetElectronsTotal;\n";
 		str += "real GsWeight;\n";
 		str += "real TSPTau;\n";
 		str += "integer TSPTimeSteps;\n";

@@ -92,6 +92,10 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 	template<typename IoInputType>
 	ParametersFermionSpinless(IoInputType& io) : BaseType(io, false)
 	{
+		SizeType numberOfSites = 0;
+		io.readline(numberOfSites, "TotalNumberOfSites=");
+		potentialV.resize(numberOfSites);
+
 		io.read(potentialV,"potentialV");
 
 		try {

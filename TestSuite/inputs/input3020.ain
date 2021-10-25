@@ -20,6 +20,6 @@ FiniteLoops=[[2, 20, 0],
 [-4, 200, 0],
 [ 4, 200, 0]];
 TargetSzPlusConst=3;
-integer TargetElectronsTotal=6;
+TargetElectronsTotal=6;
 
 

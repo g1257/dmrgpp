@@ -137,12 +137,7 @@ public:
 	      offset_(offset),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
 	{
-		SizeType expected = geometry.numberOfSites();
-		SizeType found = modelParameters_.potentialV.size();
-		if (expected == found) return;
-		PsimagLite::String str("FermionSpinless: potentialV: expected ");
-		str += ttos(expected) + " values, but found " + ttos(found) + "\n";
-		throw PsimagLite::RuntimeError(str);
+		assert(geometry.numberOfSites() == modelParameters_.potentialV.size());
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -245,11 +240,8 @@ protected:
 		ModelTermType& hop = ModelBaseType::createTerm("hopping");
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
 
-		OpForLinkType cup("c", 0);
+		OpForLinkType cup("c");
 		hop.push(cup, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, 1, 0));
-
-		OpForLinkType cdown("c", 1);
-		hop.push(cdown, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, -1, 1));
 
 		OpForLinkType n("n");
 		ninj.push(n, 'N', n, 'N');

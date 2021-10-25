@@ -21,5 +21,5 @@ OutputFile="data2500";
 InfiniteLoopKeptStates=60;
 FiniteLoops=[[3, 100, 0],[-6, 100, 0]];
 TargetSzPlusConst=12;
-int TargetElectronsTotal=4;
+TargetElectronsTotal=4;
 

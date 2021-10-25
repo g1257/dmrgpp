@@ -84,5 +84,5 @@ FiniteLoops=[
 
 SolverOptions="twositedmrg,fixLegacyBugs";
 Version="version";
-integer TargetElectronsTotal=10;
+TargetElectronsTotal=10;
 

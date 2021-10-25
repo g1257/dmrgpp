@@ -29,7 +29,7 @@ FiniteLoops=[
 [ 2, 200, 2]];
 RepeatFiniteLoopsTimes=4;
 
-integer TargetElectronsTotal=4;
+TargetElectronsTotal=4;
 TargetSzPlusConst=8;
 
 string PrintHamiltonianAverage="s==c";

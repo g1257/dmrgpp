@@ -28,5 +28,5 @@ FiniteLoops=[
 [ 1, 100, 8],
 [-2, 100, 8],
 [2, 100, 0]];
-integer TargetElectronsTotal=4;
+TargetElectronsTotal=4;
 TargetSzPlusConst=8;
