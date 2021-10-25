@@ -143,8 +143,8 @@ Page* where more or less this feature is used: 2230
 #150 to 199 reserved for testing the input system
 150) Replacement
 170) FermionSpinless
-171) FermionSpinless with Delta
-#171-189 reserved for FermionSpinless
+172) FermionSpinless with Delta
+#170-189 reserved for FermionSpinless
 200) Time Evolution preparation ground state
 201) Time Evolution proper
 250) MultiTargeting

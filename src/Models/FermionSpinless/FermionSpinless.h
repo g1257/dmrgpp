@@ -172,7 +172,7 @@ public:
 
 		// Delta C^\dagger_i C^\dagger_i
 		if (modelParameters_.delta.size() == numberOfSites) {
-			const SparseMatrixType& ci = ModelBaseType::naturalOperator("c", site, 0).getCRS();
+			const SparseMatrixType ci = ModelBaseType::naturalOperator("c", site, 0).getCRS();
 			SparseMatrixType cici = ci*ci;
 			assert(site < modelParameters_.delta.size());
 			tmp = modelParameters_.delta[site];
