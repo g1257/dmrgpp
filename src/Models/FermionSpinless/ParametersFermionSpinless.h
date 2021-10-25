@@ -90,7 +90,8 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	template<typename IoInputType>
-	ParametersFermionSpinless(IoInputType& io) : BaseType(io, false)
+	ParametersFermionSpinless(IoInputType& io)
+	    : BaseType(io, false), hasDelta(false)
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
@@ -98,8 +99,11 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 
 		io.read(potentialV,"potentialV");
 
+		delta.resize(numberOfSites);
+
 		try {
 			io.read(delta, "Delta");
+			hasDelta = true;
 		} catch (std::exception&) {}
 	}
 
@@ -127,6 +131,7 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 
 	VectorRealType potentialV;
 	VectorRealType delta;
+	bool hasDelta;
 };
 } // namespace Dmrg
 

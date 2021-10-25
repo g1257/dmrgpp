@@ -300,19 +300,44 @@ protected:
 	void setSymmetryRelated(VectorQnType& qns,
 	                        const HilbertBasisType& basis) const
 	{
+		const SizeType localSymms = ModelBaseType::targetQuantum().sizeOfOther();
+		if (localSymms == 0) {
+			if (!modelParameters_.hasDelta) {
+				PsimagLite::String msg(__FILE__);
+				msg += ": You should be using one local symmetry, not zero\n";
+				std::cerr<<msg;
+				std::cerr<<msg;
+			}
+		} else if (localSymms == 1) {
+			if (modelParameters_.hasDelta) {
+				PsimagLite::String msg(__FILE__);
+				err(msg + ": You should be using zero local symmetry, not one\n");
+			}
+		} else {
+			PsimagLite::String msg(__FILE__);
+			err(msg + ": Two many local symmetries in input file\n");
+		}
+
+
+		const bool isCanonical = (localSymms == 1);
+
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType,SizeType> PairType;
 		qns.resize(basis.size(), QnType::zero());
+		VectorSizeType other;
+		if (isCanonical) other.resize(1);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmValue<PairType>(basis[i]);
 			SizeType electrons = HilbertSpaceType::getNofDigits(basis[i],0);
 			SizeType flavor = electrons;
 
 			bool sign = electrons & 1;
-			qns[i] = QnType(sign, VectorSizeType(1, electrons), jmpair, flavor);
+			if (other.size() == 1)
+				other[0] = electrons;
+			qns[i] = QnType(sign, other, jmpair, flavor);
 		}
 	}
 
