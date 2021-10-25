@@ -16,7 +16,7 @@ potentialV=[0.0,...];
 Model="FermionSpinless";
 SolverOptions="none";
 Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
-OutputFile="data2";
+OutputFile="data170";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[[3, 100, 0],
 [-6, 100, 0],
