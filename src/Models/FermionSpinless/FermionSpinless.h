@@ -161,7 +161,6 @@ public:
 		if (n != 1)
 			err("addDiagonalsInNaturalBasis: block.size() != 1\n");
 
-		const SizeType numberOfSites = this->superGeometry().numberOfSites();
 		const SizeType site = block[0];
 		const OperatorType& niupop = ModelBaseType::naturalOperator("n", site, 0);
 		const SparseMatrixType& niup = niupop.getCRS();
@@ -169,18 +168,6 @@ public:
 		// V_iup term
 		RealType tmp = modelParameters_.potentialV[site];
 		hmatrix += tmp*niup;
-
-		// Delta C^\dagger_i C^\dagger_i
-		if (modelParameters_.delta.size() == numberOfSites) {
-			const SparseMatrixType ci = ModelBaseType::naturalOperator("c", site, 0).getCRS();
-			SparseMatrixType cici = ci*ci;
-			assert(site < modelParameters_.delta.size());
-			tmp = modelParameters_.delta[site];
-			hmatrix += tmp*cici;
-			SparseMatrixType ciDaggerCiDagger;
-			transposeConjugate(ciDaggerCiDagger, cici);
-			hmatrix += tmp*cici;
-		}
 	}
 
 protected:
@@ -301,15 +288,16 @@ protected:
 	                        const HilbertBasisType& basis) const
 	{
 		const SizeType localSymms = ModelBaseType::targetQuantum().sizeOfOther();
+		const bool hasDelta = false;
 		if (localSymms == 0) {
-			if (!modelParameters_.hasDelta) {
+			if (hasDelta) {
 				PsimagLite::String msg(__FILE__);
 				msg += ": You should be using one local symmetry, not zero\n";
 				std::cerr<<msg;
 				std::cerr<<msg;
 			}
 		} else if (localSymms == 1) {
-			if (modelParameters_.hasDelta) {
+			if (hasDelta) {
 				PsimagLite::String msg(__FILE__);
 				err(msg + ": You should be using zero local symmetry, not one\n");
 			}

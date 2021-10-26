@@ -91,20 +91,13 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 
 	template<typename IoInputType>
 	ParametersFermionSpinless(IoInputType& io)
-	    : BaseType(io, false), hasDelta(false)
+	    : BaseType(io, false)
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
 		potentialV.resize(numberOfSites);
 
 		io.read(potentialV,"potentialV");
-
-		delta.resize(numberOfSites);
-
-		try {
-			io.read(delta, "Delta");
-			hasDelta = true;
-		} catch (std::exception&) {}
 	}
 
 	void write(PsimagLite::String label1,
@@ -114,7 +107,6 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 		io.createGroup(label);
 		BaseType::write(label, io);
 		io.write(label + "/potentialV", potentialV);
-		io.write(label + "/delta", delta);
 	}
 
 	//! Function that prints model parameters to stream os
@@ -124,14 +116,10 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 		os<<parameters.targetQuantum;
 		os<<"potentialV\n";
 		os<<parameters.potentialV;
-		os<<"Delta\n";
-		os<<parameters.delta;
 		return os;
 	}
 
 	VectorRealType potentialV;
-	VectorRealType delta;
-	bool hasDelta;
 };
 } // namespace Dmrg
 

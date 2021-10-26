@@ -14,7 +14,7 @@ gt1:dir0:Connectors=[0.0];
 #Model params
 potentialV=[0.0,...];
 Model="FermionSpinless";
-SolverOptions="none";
+SolverOptions="none,MatrixVectorStored";
 Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
 OutputFile="data172";
 InfiniteLoopKeptStates=100;
@@ -22,5 +22,5 @@ FiniteLoops=[[3, 100, 0],
 [-6, 100, 0],
 [ 6, 100, 0]];
 
-Delta=[-1,-1,-1,-1,0,0,0,0];
+Delta=[-1,-1,-1,-1,-1,-1,-1,-1];
 
