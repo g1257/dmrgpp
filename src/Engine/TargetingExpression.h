@@ -154,13 +154,19 @@ public:
 	RealType weight(SizeType i) const
 	{
 		assert(this->common().aoe().noStageIs(StageEnumType::DISABLED));
-		assert(i < pVectors_.size());
-		return pVectors_[i]->weight();
+		VectorRealType weights;
+		RealType gsWeight = 0;
+		computeAllWeights(gsWeight, weights);
+		assert(i < weights.size());
+		return weights[i];
 	}
 
 	RealType gsWeight() const
 	{
-		return (this->common().aoe().noStageIs(StageEnumType::DISABLED)) ? gsWeight_ : 1.0;
+		VectorRealType weights;
+		RealType gsWeight = 0;
+		computeAllWeights(gsWeight, weights);
+		return gsWeight;
 	}
 
 	void evolve(const VectorRealType&,
@@ -180,13 +186,10 @@ public:
 
 		computePvectors(direction); // may alter the number of tvs
 
-		const SizeType n = this->common().aoe().targetVectors().size();
-		assert(n <= pVectors_.size());
-		VectorRealType weight(n);
-		for (SizeType i = 0; i < n; ++i)
-			weight[i] = pVectors_[i]->weight();
-
-		this->common().printNormsAndWeights(gsWeight_, weight);
+		VectorRealType weight;
+		RealType gsWeight = 0;
+		computeAllWeights(gsWeight, weight);
+		this->common().printNormsAndWeights(gsWeight, weight);
 
 		const bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
@@ -582,6 +585,32 @@ private:
 			const SizeType ind = PsimagLite::atoi(buffer);
 			used[ind] = true;
 		}
+	}
+
+	void computeAllWeights(RealType& gsWeight, VectorRealType& weight) const
+	{
+		const SizeType n = this->common().aoe().targetVectors().size();
+		assert(n <= pVectors_.size());
+		weight.resize(n);
+		std::fill(weight.begin(), weight.end(), 0);
+		RealType sum = 0;
+		for (SizeType i = 0; i < n; ++i) {
+			RealType norma = norm(this->common().aoe().targetVectors()[i]);
+			if (norma < 1e-6) continue;
+			weight[i] = pVectors_[i]->weight()/norma;
+			sum += weight[i];
+		}
+
+		gsWeight = 1 - sum;
+
+		if (gsWeight >= gsWeight_) return; // <--- EARLY EXIT HERE
+
+		assert(sum > 1e-6);
+		RealType factor = (1 - gsWeight_)/sum;
+		for (SizeType i = 0; i < n; ++i)
+			weight[i] *= factor;
+
+		gsWeight = gsWeight_;
 	}
 
 	PsimagLite::ProgressIndicator progress_;
