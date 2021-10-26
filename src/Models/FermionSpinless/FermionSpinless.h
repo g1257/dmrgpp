@@ -131,12 +131,16 @@ public:
 	FermionSpinless(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
 	                const SuperGeometryType& geometry,
-	                SizeType offset = DEGREES_OF_FREEDOM)
+	                PsimagLite::String extra)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      offset_(offset),
-	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM)
+	      offset_(DEGREES_OF_FREEDOM),
+	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
+	      hasDelta_(extra == "WithDelta")
 	{
+		if (extra != "" && extra != "WithDelta")
+			err("FermionSpinLess can only be followed by WithDelta and not " + extra + "\n");
+
 		assert(geometry.numberOfSites() == modelParameters_.potentialV.size());
 	}
 
@@ -232,6 +236,11 @@ protected:
 
 		OpForLinkType n("n");
 		ninj.push(n, 'N', n, 'N');
+
+		if (hasDelta_) {
+			ModelTermType& cicj = ModelBaseType::createTerm("delta");
+			cicj.push(cup, 'N', cup, 'N');
+		}
 	}
 
 	void setBasis(HilbertBasisType& basis,
@@ -288,16 +297,15 @@ protected:
 	                        const HilbertBasisType& basis) const
 	{
 		const SizeType localSymms = ModelBaseType::targetQuantum().sizeOfOther();
-		const bool hasDelta = false;
 		if (localSymms == 0) {
-			if (hasDelta) {
+			if (hasDelta_) {
 				PsimagLite::String msg(__FILE__);
 				msg += ": You should be using one local symmetry, not zero\n";
 				std::cerr<<msg;
 				std::cerr<<msg;
 			}
 		} else if (localSymms == 1) {
-			if (hasDelta) {
+			if (hasDelta_) {
 				PsimagLite::String msg(__FILE__);
 				err(msg + ": You should be using zero local symmetry, not one\n");
 			}
@@ -305,7 +313,6 @@ protected:
 			PsimagLite::String msg(__FILE__);
 			err(msg + ": Two many local symmetries in input file\n");
 		}
-
 
 		const bool isCanonical = (localSymms == 1);
 
@@ -373,6 +380,7 @@ protected:
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
+	const bool hasDelta_;
 };	//class FermionSpinless
 
 } // namespace Dmrg

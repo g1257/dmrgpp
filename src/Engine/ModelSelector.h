@@ -189,7 +189,9 @@ public:
 		} else if (name_ == "HubbardAncillaExtended") {
 			model_ = new HubbardAncillaExtendedType(solverParams,io,geometry);
 		} else if (name_ == "FermionSpinless") {
-			model_ = new FermionSpinlessType(solverParams,io,geometry);
+			model_ = new FermionSpinlessType(solverParams, io, geometry, "");
+		} else if (name_ == "FermionSpinlessWithDelta") {
+			model_ = new FermionSpinlessType(solverParams, io, geometry, "WithDelta");
 		} else if (name_.substr(0, 6) == "Kitaev") {
 			PsimagLite::String tmp = (name_.length() == 6) ? ""
 			                                               : name_.substr(6, name_.length() - 6);

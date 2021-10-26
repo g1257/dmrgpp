@@ -1,7 +1,7 @@
 ##Ainur1.0
 TotalNumberOfSites=8;
 
-NumberOfTerms=2;
+NumberOfTerms=3;
 
 gt0:GeometryKind="chain";
 gt0:GeometryOptions="ConstantValues";
@@ -11,9 +11,13 @@ gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[0.0];
 
+gt2:GeometryKind="chain";
+gt2:GeometryOptions="ConstantValues";
+gt2:dir0:Connectors=[-1];
+
 #Model params
 potentialV=[0.0,...];
-Model="FermionSpinless";
+Model="FermionSpinlessWithDelta";
 SolverOptions="none,MatrixVectorStored";
 Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
 OutputFile="data172";
@@ -22,5 +26,4 @@ FiniteLoops=[[3, 100, 0],
 [-6, 100, 0],
 [ 6, 100, 0]];
 
-Delta=[-1,-1,-1,-1,-1,-1,-1,-1];
 
