@@ -123,6 +123,7 @@ public:
 	                    const QnType&,
 	                    InputValidatorType& io)
 	    : BaseType(lrs,model,wft,0),
+	      gsWeight_(1 - tstStruct_.correctionA()),
 	      tstStruct_(io, "TargetingCorrection"),
 	      progress_("TargetingCorrection")
 	{}
@@ -140,12 +141,18 @@ public:
 	RealType weight(SizeType) const
 	{
 		assert(this->common().aoe().noStageIs(StageEnumType::DISABLED));
-		return tstStruct_.correctionA();
+		RealType gsWeight = 1;
+		RealType weight1 = 0;
+		computeAllWeights(gsWeight, weight1);
+		return weight1;
 	}
 
 	RealType gsWeight() const
 	{
-		return 1;
+		RealType gsWeight = 1;
+		RealType weight = 0;
+		computeAllWeights(gsWeight, weight);
+		return gsWeight;
 	}
 
 	void evolve(const VectorRealType&,
@@ -178,6 +185,25 @@ public:
 
 private:
 
+	void computeAllWeights(RealType& gsWeight, RealType& weight) const
+	{
+		assert(1 == this->common().aoe().targetVectors().size());
+
+		RealType norma = norm(this->common().aoe().targetVectors()[0]);
+		weight = (norma > 1e-6) ? tstStruct_.correctionA() : 0;
+
+		gsWeight = 1 - weight;
+
+		if (gsWeight >= gsWeight_) return; // <--- EARLY EXIT HERE
+
+		assert(weight > 1e-6);
+		RealType factor = (1 - gsWeight_)/weight;
+		weight *= factor;
+
+		gsWeight = gsWeight_;
+	}
+
+	const RealType gsWeight_;
 	TargetParamsType tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
 };     //class TargetingCorrection
