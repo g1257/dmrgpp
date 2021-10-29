@@ -138,9 +138,6 @@ public:
 	      weight_(targets()),
 	      gsWeight_(tstStruct_.gsWeight())
 	{
-		if (!PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
-			err("TargetingCVEvolution: only for complex for now (sorry!)\n");
-
 		if (!wft.isEnabled())
 			err("TST needs an enabled wft\n");
 
@@ -159,7 +156,7 @@ public:
 
 	SizeType targets() const
 	{
-		return PsimagLite::IsComplexNumber<ComplexOrRealType>::True ? 3 : 5;
+		return 3;
 	}
 
 	RealType weight(SizeType i) const
