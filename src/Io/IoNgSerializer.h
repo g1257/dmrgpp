@@ -270,10 +270,13 @@ public:
 		hsize_t dims[1];
 		dims[0] = 2*what.size();
 
-		if (allowOverwrite == ALLOW_OVERWRITE)
-			overwrite<T>(name, ptr, dims, 1);
-		else
+		if (allowOverwrite == ALLOW_OVERWRITE) {
+			writeComplexOrReal(name, ALLOW_OVERWRITE);
+			overwrite<T>(name2, ptr, dims, 1);
+		} else {
+			writeComplexOrReal(name2, NO_OVERWRITE);
 			internalWrite<T>(name, ptr, dims, 1);
+		}
 	}
 
 	template<typename T>
@@ -612,7 +615,31 @@ private:
 		if (dims[0] == 0)
 			throw RuntimeError("IoNgSerializer: problem reading vector<arith> (dims)\n");
 
-		SizeType complexSize = getComplexSize<typename SomeVectorType::value_type>(dims[0]);
+		static const bool isComplex = IsComplexNumber<typename SomeVectorType::value_type>::True;
+		const bool inDiskComplex = isInDiskComplex(name);
+
+		SizeType complexSize = 0;
+		if (isComplex) {
+			if (inDiskComplex) {
+				complexSize = getHalfSize(dims[0]);
+			} else {
+				// this type is complex; but what's on disk is real
+				typename Vector<UnderlyingType>::Type temporary(dims[0]);
+				void* ptr2 = static_cast<void *>(&(temporary[0]));
+				dataset->read(ptr2, typeToH5<UnderlyingType>());
+				what.resize(dims[0]);
+				for (SizeType i = 0; i < dims[0]; ++i)
+					what[i] = temporary[i]; // real to complex
+				delete[] dims;
+				delete dataset;
+				return;
+			}
+		} else {
+			if (inDiskComplex)
+				throw RuntimeError("This type is real but trying to read from complex on disk\n");
+			else
+				complexSize = dims[0];
+		}
 
 		what.resize(complexSize, 0);
 		void* ptr = static_cast<void *>(&(what[0]));
@@ -801,21 +828,29 @@ private:
 		return tmp;
 	}
 
-	template<typename T>
-	static typename EnableIf<!IsComplexNumber<T>::True, hsize_t>::Type
-	getComplexSize(hsize_t x)
-	{
-		return x;
-	}
-
-	template<typename T>
-	static typename EnableIf<IsComplexNumber<T>::True, hsize_t>::Type
-	getComplexSize(hsize_t x)
+	static hsize_t getHalfSize(hsize_t x)
 	{
 		if (x&1)
 			throw RuntimeError("FATAL: Complex vector with uneven fp size\n");
 
 		return x/2;
+	}
+
+	void writeComplexOrReal(String name2, WriteMode)
+	{
+		String nameComplexOrReal = name2 + "ComplexOrReal";
+		String content = "C";
+		write(nameComplexOrReal, content, NO_OVERWRITE);
+	}
+
+	bool isInDiskComplex(String name2)
+	{
+		const String nameComplexOrReal = "Def/" + name2 + "ComplexOrReal";
+		String tmp;
+		try {
+			read(tmp, nameComplexOrReal);
+		} catch (...) {}
+		return (tmp == "C");
 	}
 
 	H5::H5File* hdf5file_;
