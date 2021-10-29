@@ -169,10 +169,11 @@ public:
 
 			ioIn2.read(prevOpOnSiteThresh, "PARAMETERS/opOnSiteThreshold");
 			bool iscomplex = false;
-			ioIn2.read(iscomplex, "IsComplex");
+			ioIn2.read(iscomplex, "IsComplex"); // previous run
 			ioIn2.close();
-			if (iscomplex != PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
-				err("Previous run was complex and this one is not (or viceversa)\n");
+
+			if (iscomplex && iscomplex != PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
+				err("Previous run was complex and this one is not\n");
 		}
 
 		// opOnSiteThreshold of the previous run
