@@ -22,7 +22,7 @@ typedef Dmrg::MatrixVectorKron<
 typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance20Type::RealType>,
 	MatrixVector20Type, MatrixVector20Type::VectorType> LanczosSolver20Type;
 
-template void mainLoop4<LanczosSolver20Type,Dmrg::VectorWithOffset<std::complex<RealType> , Dmrg::Qn> >
+template void mainLoop4<LanczosSolver20Type,Dmrg::VectorWithOffset<RealType, Dmrg::Qn> >
 (LanczosSolver20Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
@@ -46,7 +46,7 @@ typedef Dmrg::MatrixVectorOnTheFly<
 typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance21Type::RealType>,
 	MatrixVector21Type, MatrixVector21Type::VectorType> LanczosSolver21Type;
 
-template void mainLoop4<LanczosSolver21Type,Dmrg::VectorWithOffsets<std::complex<RealType> , Dmrg::Qn> >
+template void mainLoop4<LanczosSolver21Type,Dmrg::VectorWithOffsets<RealType, Dmrg::Qn> >
 (LanczosSolver21Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,

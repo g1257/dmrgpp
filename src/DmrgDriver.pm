@@ -12,9 +12,8 @@ my $cppEach = 2;
 
 my @lanczos = ("LanczosSolver","ChebyshevSolver");
 my @matrixVector = ("MatrixVectorOnTheFly","MatrixVectorStored","MatrixVectorKron");
-my @modelHelpers = ("Local");
 my @vecWithOffsets = ("","s");
-my @complexOrReal = ("RealType","std::complex<RealType> ");
+my @complexOrReal = (0, 1, 2, 3); 
 
 my @values;
 my $cppFiles = 0;
@@ -24,31 +23,29 @@ my $target = "TargetingBase";
 my @su2files;
 foreach my $complexOrNot (@complexOrReal) {
 	foreach my $lanczos (@lanczos) {
-		foreach my $modelHelper (@modelHelpers) {
-			foreach my $vecWithOffset (@vecWithOffsets) {
-				foreach my $matrixVector (@matrixVector) {
-					if ($counter == 0 or $counter % $cppEach == 0) {
-						if ($counter > 0 and $generateSources) {
-							close(FOUT);
-							print STDERR "$0: File $fout written\n";
-						}
-
-						$fout = "DmrgDriver$cppFiles.cpp";
-						$su2files[$cppFiles++] = ($modelHelper eq "Su2") ? 1 : 0;
-
-						if ($generateSources) {
-							open(FOUT,"> $fout") or die "$0: Cannot write to $fout : $!\n";
-							printHeader();
-						}
+		foreach my $vecWithOffset (@vecWithOffsets) {
+			foreach my $matrixVector (@matrixVector) {
+				if ($counter == 0 or $counter % $cppEach == 0) {
+					if ($counter > 0 and $generateSources) {
+						close(FOUT);
+						print STDERR "$0: File $fout written\n";
 					}
+
+					$fout = "DmrgDriver$cppFiles.cpp";
+					$su2files[$cppFiles++] = 0;
 
 					if ($generateSources) {
-						printInstance($counter,$target,$lanczos,$matrixVector,$modelHelper,
-					$vecWithOffset,$complexOrNot,\@values);
+						open(FOUT,"> $fout") or die "$0: Cannot write to $fout : $!\n";
+						printHeader();
 					}
-
-					$counter++;
 				}
+
+				if ($generateSources) {
+					printInstance($counter,$target,$lanczos,$matrixVector,
+				$vecWithOffset,$complexOrNot,\@values);
+				}
+
+				$counter++;
 			}
 		}
 	}
@@ -65,7 +62,7 @@ return @su2files;
 
 sub printInstance
 {
-	my ($counter,$target,$lanczos,$matrixVector,$modelHelper,$vecWithOffset,$complexOrNot,
+	my ($counter,$target,$lanczos,$matrixVector,$vecWithOffset,$complexOrNot,
 	$values) = @_;
 	my $sparseMatrix = "SparseMatrixInstance${counter}Type";
 	my $basisWithout = "Dmrg::Basis<$sparseMatrix>";
@@ -77,15 +74,16 @@ sub printInstance
 	my $lrs = "Dmrg::LeftRightSuper<$basisWith,$basisSuperBlock >";
 	my $lanczosType = "LanczosSolver${counter}Type";
 	my $matrixVectorType = "MatrixVector${counter}Type";
-	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$complexOrNot, Dmrg::Qn> ";
+	my ($complexOrReal1, $complexOrReal2) = getDualRealComplex($complexOrNot);
+	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$complexOrReal2, Dmrg::Qn> ";
 	print FOUT<<EOF;
 
-typedef PsimagLite::CrsMatrix<$complexOrNot> $sparseMatrix;
-typedef Dmrg::SuperGeometry<$complexOrNot,$inputNg,Dmrg::ProgramGlobals> $geometry;
+typedef PsimagLite::CrsMatrix<$complexOrReal1> $sparseMatrix;
+typedef Dmrg::SuperGeometry<$complexOrReal1,$inputNg,Dmrg::ProgramGlobals> $geometry;
 
 typedef Dmrg::$matrixVector<
  Dmrg::ModelBase<
-  Dmrg::ModelHelper$modelHelper<
+  Dmrg::ModelHelperLocal<
    $lrs
   >,
   ParametersDmrgSolverType,
@@ -105,7 +103,7 @@ const OperatorOptions&);
 
 EOF
 
-my $value = "$modelHelper$complexOrNot";
+my $value = "Local$complexOrNot";
 
 my $seen  = 0;
 foreach my $item (@$values) {
@@ -149,6 +147,18 @@ sub printHeader
 #include "DmrgDriver1.h"
 
 EOF
+}
+
+sub getDualRealComplex
+{
+	my ($n) = @_;
+	return (getOneRealComplex($n & 1), getOneRealComplex($n & 2));
+}
+
+sub getOneRealComplex
+{
+	my ($n) = @_;
+	return ($n == 0) ? "RealType" : "std::complex<RealType> ";
 }
 
 1;

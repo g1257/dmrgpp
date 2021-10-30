@@ -66,27 +66,45 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
 	}
 }
 
-template<typename MatrixVectorType>
+template<typename MatrixVectorType, typename ComplexOrRealType2>
 void mainLoop2(typename MatrixVectorType::ModelType::SuperGeometryType& geometry,
                const ParametersDmrgSolverType& dmrgSolverParams,
                InputNgType::Readable& io,
                const OperatorOptions& opOptions)
 {
-	typedef typename MatrixVectorType::ComplexOrRealType ComplexOrRealType;
 	typedef typename MatrixVectorType::ModelType::QnType QnType;
 
 	if (dmrgSolverParams.options.isSet("vectorwithoffsets")) {
-		typedef VectorWithOffsets<ComplexOrRealType, QnType> VectorWithOffsetType;
-		mainLoop3<MatrixVectorType,VectorWithOffsetType>(geometry,
+		typedef VectorWithOffsets<ComplexOrRealType2, QnType> VectorWithOffsetType;
+		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
 		                                                 dmrgSolverParams,
 		                                                 io,
 		                                                 opOptions);
 	} else {
-		typedef VectorWithOffset<ComplexOrRealType, QnType> VectorWithOffsetType;
-		mainLoop3<MatrixVectorType,VectorWithOffsetType>(geometry,
+		typedef VectorWithOffset<ComplexOrRealType2, QnType> VectorWithOffsetType;
+		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
 		                                                 dmrgSolverParams,
 		                                                 io,
 		                                                 opOptions);
+	}
+}
+
+template<typename MatrixVectorType>
+void mainLoop1point5(typename MatrixVectorType::ModelType::SuperGeometryType& geometry,
+               const ParametersDmrgSolverType& dmrgSolverParams,
+               InputNgType::Readable& io,
+               const OperatorOptions& opOptions)
+{
+	typedef typename MatrixVectorType::ComplexOrRealType ComplexOrRealType;
+	static const bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+
+	if (dmrgSolverParams.options.isSet("targetComplex")) {
+		if (isComplex)
+			err("No need to set targetComplex, because the whole calculation is complex\n");
+		mainLoop2<MatrixVectorType, RealType>(geometry, dmrgSolverParams, io, opOptions);
+	} else {
+		mainLoop2<MatrixVectorType, ComplexOrRealType>(geometry, dmrgSolverParams, io, opOptions);
 	}
 }
 
@@ -108,19 +126,19 @@ void mainLoop1(SuperGeometryType& geometry,
 	        SuperGeometryType> ModelBaseType;
 
 	if (dmrgSolverParams.options.isSet("MatrixVectorStored")) {
-		mainLoop2<MatrixVectorStored<ModelBaseType> >(geometry,
+		mainLoop1point5<MatrixVectorStored<ModelBaseType> >(geometry,
 		                                              dmrgSolverParams,
 		                                              io,
 		                                              opOptions);
 	} else if (dmrgSolverParams.options.isSet("MatrixVectorOnTheFly") ||
 	           ModelHelperType::isSu2()) {
 
-		mainLoop2<MatrixVectorOnTheFly<ModelBaseType> >(geometry,
+		mainLoop1point5<MatrixVectorOnTheFly<ModelBaseType> >(geometry,
 		                                                dmrgSolverParams,
 		                                                io,
 		                                                opOptions);
 	} else {
-		mainLoop2<MatrixVectorKron<ModelBaseType> >(geometry,
+		mainLoop1point5<MatrixVectorKron<ModelBaseType> >(geometry,
 		                                            dmrgSolverParams,
 		                                            io,
 		                                            opOptions);

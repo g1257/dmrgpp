@@ -533,7 +533,7 @@ public:
 		return (forB == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 	}
 
-	const ComplexOrRealType& inSitu(SizeType site) const
+	const typename VectorWithOffsetType_::value_type& inSitu(SizeType site) const
 	{
 		assert(site < inSitu_.size());
 		return inSitu_[site];

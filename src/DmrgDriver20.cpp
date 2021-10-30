@@ -6,12 +6,12 @@
 
 
 typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance40Type;
-typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance40Type;
+typedef Dmrg::SuperGeometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance40Type;
 
 typedef Dmrg::MatrixVectorStored<
  Dmrg::ModelBase<
   Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance40Type> >  >,Dmrg::Basis<SparseMatrixInstance40Type> >
+   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance40Type> >,Dmrg::Basis<SparseMatrixInstance40Type> >
   >,
   ParametersDmrgSolverType,
   InputNgType::Readable,
@@ -19,23 +19,23 @@ typedef Dmrg::MatrixVectorStored<
  >
 > MatrixVector40Type;
 
-typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance40Type::RealType>,
+typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance40Type::RealType>,
 	MatrixVector40Type, MatrixVector40Type::VectorType> LanczosSolver40Type;
 
 template void mainLoop4<LanczosSolver40Type,Dmrg::VectorWithOffsets<std::complex<RealType> , Dmrg::Qn> >
-(LanczosSolver40Type::MatrixType::ModelType::GeometryType&,
+(LanczosSolver40Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&);
 
 
 typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance41Type;
-typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance41Type;
+typedef Dmrg::SuperGeometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance41Type;
 
 typedef Dmrg::MatrixVectorKron<
  Dmrg::ModelBase<
   Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance41Type> >  >,Dmrg::Basis<SparseMatrixInstance41Type> >
+   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance41Type> >,Dmrg::Basis<SparseMatrixInstance41Type> >
   >,
   ParametersDmrgSolverType,
   InputNgType::Readable,
@@ -43,11 +43,11 @@ typedef Dmrg::MatrixVectorKron<
  >
 > MatrixVector41Type;
 
-typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance41Type::RealType>,
+typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance41Type::RealType>,
 	MatrixVector41Type, MatrixVector41Type::VectorType> LanczosSolver41Type;
 
 template void mainLoop4<LanczosSolver41Type,Dmrg::VectorWithOffsets<std::complex<RealType> , Dmrg::Qn> >
-(LanczosSolver41Type::MatrixType::ModelType::GeometryType&,
+(LanczosSolver41Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&);

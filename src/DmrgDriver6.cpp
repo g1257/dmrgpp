@@ -22,7 +22,7 @@ typedef Dmrg::MatrixVectorOnTheFly<
 typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance12Type::RealType>,
 	MatrixVector12Type, MatrixVector12Type::VectorType> LanczosSolver12Type;
 
-template void mainLoop4<LanczosSolver12Type,Dmrg::VectorWithOffset<std::complex<RealType> , Dmrg::Qn> >
+template void mainLoop4<LanczosSolver12Type,Dmrg::VectorWithOffset<RealType, Dmrg::Qn> >
 (LanczosSolver12Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
@@ -46,7 +46,7 @@ typedef Dmrg::MatrixVectorStored<
 typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance13Type::RealType>,
 	MatrixVector13Type, MatrixVector13Type::VectorType> LanczosSolver13Type;
 
-template void mainLoop4<LanczosSolver13Type,Dmrg::VectorWithOffset<std::complex<RealType> , Dmrg::Qn> >
+template void mainLoop4<LanczosSolver13Type,Dmrg::VectorWithOffset<RealType, Dmrg::Qn> >
 (LanczosSolver13Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,

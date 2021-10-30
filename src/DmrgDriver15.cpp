@@ -5,13 +5,13 @@
 #include "DmrgDriver1.h"
 
 
-typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance30Type;
-typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance30Type;
+typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance30Type;
+typedef Dmrg::SuperGeometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance30Type;
 
 typedef Dmrg::MatrixVectorOnTheFly<
  Dmrg::ModelBase<
-  Dmrg::ModelHelperSu2<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance30Type> >  >,Dmrg::Basis<SparseMatrixInstance30Type> >
+  Dmrg::ModelHelperLocal<
+   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance30Type> >,Dmrg::Basis<SparseMatrixInstance30Type> >
   >,
   ParametersDmrgSolverType,
   InputNgType::Readable,
@@ -19,23 +19,23 @@ typedef Dmrg::MatrixVectorOnTheFly<
  >
 > MatrixVector30Type;
 
-typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance30Type::RealType>,
+typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance30Type::RealType>,
 	MatrixVector30Type, MatrixVector30Type::VectorType> LanczosSolver30Type;
 
 template void mainLoop4<LanczosSolver30Type,Dmrg::VectorWithOffset<std::complex<RealType> , Dmrg::Qn> >
-(LanczosSolver30Type::MatrixType::ModelType::GeometryType&,
+(LanczosSolver30Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&);
 
 
-typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance31Type;
-typedef PsimagLite::Geometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance31Type;
+typedef PsimagLite::CrsMatrix<RealType> SparseMatrixInstance31Type;
+typedef Dmrg::SuperGeometry<RealType,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance31Type;
 
 typedef Dmrg::MatrixVectorStored<
  Dmrg::ModelBase<
-  Dmrg::ModelHelperSu2<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Operators<Dmrg::Basis<SparseMatrixInstance31Type> >  >,Dmrg::Basis<SparseMatrixInstance31Type> >
+  Dmrg::ModelHelperLocal<
+   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance31Type> >,Dmrg::Basis<SparseMatrixInstance31Type> >
   >,
   ParametersDmrgSolverType,
   InputNgType::Readable,
@@ -43,11 +43,11 @@ typedef Dmrg::MatrixVectorStored<
  >
 > MatrixVector31Type;
 
-typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance31Type::RealType>,
+typedef PsimagLite::ChebyshevSolver<PsimagLite::ParametersForSolver<GeometryInstance31Type::RealType>,
 	MatrixVector31Type, MatrixVector31Type::VectorType> LanczosSolver31Type;
 
 template void mainLoop4<LanczosSolver31Type,Dmrg::VectorWithOffset<std::complex<RealType> , Dmrg::Qn> >
-(LanczosSolver31Type::MatrixType::ModelType::GeometryType&,
+(LanczosSolver31Type::MatrixType::ModelType::SuperGeometryType&,
 const ParametersDmrgSolverType&,
 InputNgType::Readable&,
 const OperatorOptions&);

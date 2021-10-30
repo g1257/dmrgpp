@@ -354,7 +354,7 @@ public:
 
 	RealType time() const {return commonTargeting_.aoe().time(); }
 
-	const ComplexOrRealType& inSitu(SizeType i) const
+	const typename VectorWithOffsetType::value_type& inSitu(SizeType i) const
 	{
 		return commonTargeting_.inSitu(i);
 	}
