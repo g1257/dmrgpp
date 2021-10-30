@@ -13,7 +13,7 @@ my $cppEach = 2;
 my @lanczos = ("LanczosSolver","ChebyshevSolver");
 my @matrixVector = ("MatrixVectorOnTheFly","MatrixVectorStored","MatrixVectorKron");
 my @vecWithOffsets = ("","s");
-my @complexOrReal = (0, 1, 2, 3); 
+my @complexOrReal = (0, 3); 
 
 my @values;
 my $cppFiles = 0;

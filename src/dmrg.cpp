@@ -114,12 +114,12 @@ void mainLoop1(InputNgType::Readable& io,
 	        SuperGeometryType> ModelBaseType;
 
 	if (dmrgSolverParams.options.isSet("MatrixVectorStored")) {
-		mainLoop1<MatrixVectorStored<ModelBaseType> >(io, dmrgSolverParams, opOptions);
+		mainLoop2<MatrixVectorStored<ModelBaseType> >(io, dmrgSolverParams, opOptions);
 	} else if (dmrgSolverParams.options.isSet("MatrixVectorOnTheFly")) {
 
-		mainLoop1<MatrixVectorOnTheFly<ModelBaseType> >(io, dmrgSolverParams, opOptions);
+		mainLoop2<MatrixVectorOnTheFly<ModelBaseType> >(io, dmrgSolverParams, opOptions);
 	} else {
-		mainLoop1<MatrixVectorKron<ModelBaseType> >(io, dmrgSolverParams, opOptions);
+		mainLoop2<MatrixVectorKron<ModelBaseType> >(io, dmrgSolverParams, opOptions);
 	}
 }
 
