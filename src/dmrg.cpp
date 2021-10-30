@@ -7,8 +7,8 @@
 #include "RunFinished.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
-typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
+//typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
+//typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
 
 using namespace Dmrg;
 
@@ -66,125 +66,105 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
 	}
 }
 
-template<typename MatrixVectorType, typename ComplexOrRealType2>
-void mainLoop2(typename MatrixVectorType::ModelType::SuperGeometryType& geometry,
+template<typename MatrixVectorType>
+void mainLoop2(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io,
                const OperatorOptions& opOptions)
 {
-	typedef typename MatrixVectorType::ModelType::QnType QnType;
+
+	typedef typename MatrixVectorType::ModelType ModelBaseType;
+	typedef typename ModelBaseType::QnType QnType;
+	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::SparseElementType SparseElementType;
+	typedef SuperGeometry<SparseElementType, InputNgType::Readable, ProgramGlobals> SuperGeometryType;
+
+	SuperGeometryType geometry(io);
+	if (dmrgSolverParams.options.isSet("printgeometry"))
+		std::cout<<geometry;
 
 	if (dmrgSolverParams.options.isSet("vectorwithoffsets")) {
-		typedef VectorWithOffsets<ComplexOrRealType2, QnType> VectorWithOffsetType;
+		typedef VectorWithOffsets<SparseElementType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
-		                                                 dmrgSolverParams,
-		                                                 io,
-		                                                 opOptions);
+		                                                  dmrgSolverParams,
+		                                                  io,
+		                                                  opOptions);
 	} else {
-		typedef VectorWithOffset<ComplexOrRealType2, QnType> VectorWithOffsetType;
+		typedef VectorWithOffset<SparseElementType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
-		                                                 dmrgSolverParams,
-		                                                 io,
-		                                                 opOptions);
+		                                                  dmrgSolverParams,
+		                                                  io,
+		                                                  opOptions);
 	}
 }
 
-template<typename MatrixVectorType>
-void mainLoop1point5(typename MatrixVectorType::ModelType::SuperGeometryType& geometry,
+template<typename ComplexOrRealType>
+void mainLoop1(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io,
                const OperatorOptions& opOptions)
 {
-	typedef typename MatrixVectorType::ComplexOrRealType ComplexOrRealType;
-	static const bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-
-	if (dmrgSolverParams.options.isSet("targetComplex")) {
-		if (isComplex)
-			err("No need to set targetComplex, because the whole calculation is complex\n");
-		mainLoop2<MatrixVectorType, RealType>(geometry, dmrgSolverParams, io, opOptions);
-	} else {
-		mainLoop2<MatrixVectorType, ComplexOrRealType>(geometry, dmrgSolverParams, io, opOptions);
-	}
-}
-
-template<typename SuperGeometryType,
-         template<typename> class ModelHelperTemplate,
-         typename MySparseMatrix>
-void mainLoop1(SuperGeometryType& geometry,
-               const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io,
-               const OperatorOptions& opOptions)
-{
+	typedef SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals> SuperGeometryType;
+	typedef PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrix;
 	typedef Basis<MySparseMatrix> BasisType;
 	typedef BasisWithOperators<BasisType> BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
+	typedef ModelHelperLocal<LeftRightSuperType> ModelHelperType;
 	typedef ModelBase<ModelHelperType,
 	        ParametersDmrgSolverType,
 	        InputNgType::Readable,
 	        SuperGeometryType> ModelBaseType;
 
 	if (dmrgSolverParams.options.isSet("MatrixVectorStored")) {
-		mainLoop1point5<MatrixVectorStored<ModelBaseType> >(geometry,
-		                                              dmrgSolverParams,
-		                                              io,
-		                                              opOptions);
-	} else if (dmrgSolverParams.options.isSet("MatrixVectorOnTheFly") ||
-	           ModelHelperType::isSu2()) {
+		mainLoop1<MatrixVectorStored<ModelBaseType> >(io, dmrgSolverParams, opOptions);
+	} else if (dmrgSolverParams.options.isSet("MatrixVectorOnTheFly")) {
 
-		mainLoop1point5<MatrixVectorOnTheFly<ModelBaseType> >(geometry,
-		                                                dmrgSolverParams,
-		                                                io,
-		                                                opOptions);
+		mainLoop1<MatrixVectorOnTheFly<ModelBaseType> >(io, dmrgSolverParams, opOptions);
 	} else {
-		mainLoop1point5<MatrixVectorKron<ModelBaseType> >(geometry,
-		                                            dmrgSolverParams,
-		                                            io,
-		                                            opOptions);
+		mainLoop1<MatrixVectorKron<ModelBaseType> >(io, dmrgSolverParams, opOptions);
 	}
 }
 
-template<typename MySparseMatrix>
+template<typename T1, typename T2>
+class MixedRealComplex {
+
+public:
+
+	static void run(InputNgType::Readable& io,
+	                const ParametersDmrgSolverType& dmrgSolverParams,
+                    const OperatorOptions& opOptions)
+	{
+		err("Mixed real/complex\n");
+	}
+
+};
+
+template<typename T>
+class MixedRealComplex<T, T> {
+
+public:
+
+	static void run(InputNgType::Readable& io,
+	                const ParametersDmrgSolverType& dmrgSolverParams,
+                    const OperatorOptions& opOptions)
+	{
+		mainLoop1<T>(io, dmrgSolverParams, opOptions);
+	}
+
+};
+template<typename ComplexOrRealType>
 void mainLoop0(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
                const OperatorOptions& opOptions)
 {
-	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef SuperGeometry<ComplexOrRealType,
-	        InputNgType::Readable,
-	        ProgramGlobals> SuperGeometryType;
+	static const bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-	SuperGeometryType geometry(io);
-	if (dmrgSolverParams.options.isSet("printgeometry"))
-		std::cout<<geometry;
-
-	int tmp = 0;
-	try {
-		io.readline(tmp,"UseSu2Symmetry=");
-	} catch (std::exception&) {}
-
-	bool su2 = (tmp > 0);
-
-	if (su2) {
-#ifdef ENABLE_SU2
-		mainLoop1<GeometryType,ModelHelperSu2,MySparseMatrix>(geometry,
-		                                                      dmrgSolverParams,
-		                                                      io,
-		                                                      opOptions);
-#else
-		PsimagLite::String str1("To run with SU(2) you need -DENABLE_SU2 in Config.make\n");
-		PsimagLite::String str2("\n\tYou might also need to run ");
-		str2 += "perl configure.pl production 0 1\n";
-		throw PsimagLite::RuntimeError("FATAL: " + str1 + str2);
-#endif
-		return;
+	if (dmrgSolverParams.options.isSet("targetComplex")) {
+		if (isComplex)
+			err("No need to set targetComplex, because the whole calculation is complex\n");
+		MixedRealComplex<ComplexOrRealType, RealType>::run(io, dmrgSolverParams, opOptions);
+	} else {
+		MixedRealComplex<ComplexOrRealType, ComplexOrRealType>::run(io, dmrgSolverParams, opOptions);
 	}
-
-	mainLoop1<SuperGeometryType,ModelHelperLocal,MySparseMatrix>(geometry,
-	                                                             dmrgSolverParams,
-	                                                             io,
-	                                                             opOptions);
 }
 
 int main(int argc, char **argv)
@@ -362,8 +342,8 @@ to the main dmrg driver are the following.
 
 		RunFinished runFinished(dmrgSolverParams.options.isSet("noClobber"));
 		if (runFinished.OK(options.label.c_str())) {
-			       runFinished.printTermination(options.label.c_str());
-				   return 1;
+			runFinished.printTermination(options.label.c_str());
+			return 1;
 		}
 
 		GlobalCoutStream.open(options.label.c_str(),
@@ -423,12 +403,12 @@ to the main dmrg driver are the following.
 	registerSignals();
 
 	bool isComplex = (dmrgSolverParams.options.isSet("useComplex")); //||
-	                //  dmrgSolverParams.options.isSet("TimeStepTargeting"));
+	//  dmrgSolverParams.options.isSet("TimeStepTargeting"));
 
 	if (isComplex) {
-		mainLoop0<MySparseMatrixComplex>(io, dmrgSolverParams, options);
+		mainLoop0<std::complex<RealType> >(io, dmrgSolverParams, options);
 	} else {
-		mainLoop0<MySparseMatrixReal>(io, dmrgSolverParams, options);
+		mainLoop0<RealType>(io, dmrgSolverParams, options);
 	}
 }
 

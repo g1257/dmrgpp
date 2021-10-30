@@ -76,6 +76,7 @@ sub printInstance
 	my $matrixVectorType = "MatrixVector${counter}Type";
 	my ($complexOrReal1, $complexOrReal2) = getDualRealComplex($complexOrNot);
 	my $vecWithOffsetType = "Dmrg::VectorWithOffset${vecWithOffset}<$complexOrReal2, Dmrg::Qn> ";
+
 	print FOUT<<EOF;
 
 typedef PsimagLite::CrsMatrix<$complexOrReal1> $sparseMatrix;
