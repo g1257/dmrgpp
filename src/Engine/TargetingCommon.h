@@ -358,6 +358,8 @@ public:
 
 			if (!v1 || !v2) continue;
 
+			if (v1->size() == 0 || v2->size() == 0) continue;
+
 			test(*v1, *v2, direction, opLabel, site, nup, border);
 			// don't repeat for border because this is called twice if needed
 		}
