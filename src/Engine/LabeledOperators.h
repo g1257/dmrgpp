@@ -38,7 +38,7 @@ class LabeledOperators {
 		{
 			if (ops_.size() == 0)
 				err("FATAL: LabeledOperators::Label::rows(): Internal Error\n");
-			return ops_[0].data.rows();
+			return ops_[0].getStorage().rows();
 		}
 
 		void push(const OperatorType_& op, PsimagLite::String desc = "")

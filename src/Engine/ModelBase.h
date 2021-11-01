@@ -180,6 +180,7 @@ public:
 	{
 		modelLinks_.setAtomKind(&getAtomKind());
 		fillLabeledOperators(qns_); // fills qns_ and labeledOperators_
+		createIdentity();
 		if (modelLinks_.kindsOfAtoms() == 1)
 			checkThatQnsAreNotReallySorted();
 		modelLinks_.postCtor1(labeledOperators_, modelCommon_.superGeometry().terms());
@@ -789,6 +790,23 @@ private:
 				err("QNS of one site: not ordered: Model must order QNS\n");
 			}
 		}
+	}
+
+	static void createIdentity()
+	{
+		if (labeledOperators_.size() == 0)
+			err("createIdentity: INTERNAL ERROR\n");
+
+		const SizeType n = labeledOperators_[0].rows();
+		MatrixType m(n, n);
+		for (SizeType i = 0; i < n; ++i) m(i, i) = 1;
+		typename OperatorType::Su2RelatedType su2related;
+		OperatorType myOp(SparseMatrixType(m),
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  PairSizeType(0, 0),
+		                  1,
+		                  su2related);
+		createOpsLabel("identity").push(myOp);
 	}
 
 	ModelCommonType modelCommon_;
