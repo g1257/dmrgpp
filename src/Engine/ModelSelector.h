@@ -202,6 +202,8 @@ public:
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "", hdf5fileIfAny);
 		} else if (name_ == "HubbardHolsteinSSH") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH", hdf5fileIfAny);
+		} else if (name_ == "HubbardHolsteinLRH") {
+			model_ = new HubbardHolsteinType(solverParams, io, geometry, "LRH", hdf5fileIfAny);
 		} else if (name_ == "HolsteinThin") {
 			model_ = new HolsteinThinType(solverParams, io, geometry, "");
 		} else if (name_.substr(0, 5) == "Kondo") {

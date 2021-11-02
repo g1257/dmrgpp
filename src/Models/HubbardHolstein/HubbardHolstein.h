@@ -144,6 +144,7 @@ public:
 	                    io),
 	      modelParameters_(io),
 	      isSsh_(additional == "SSH"),
+	      isLrh_(additional == "LRH"),
 	      oStruncActive_(false),
 	      wantsOneSiteTruncation_(0)
 	{
@@ -153,6 +154,13 @@ public:
 			std::cout<<warning;
 			std::cerr<<warning;
 		}
+		if (isLrh_) {
+			PsimagLite::String warning("HubbardHolstein: ");
+			warning += "Long Range Holstein term in use.\n";
+			std::cout<<warning;
+			std::cerr<<warning;
+		}
+
 
 		restartHook(hdf5fileIfAny);
 	}
@@ -372,32 +380,37 @@ protected:
 			                       su2Related2));
 		}
 
-		if (!isSsh_) return; //<<--- EARLY EXIT
+		if (!isSsh_ && !isLrh_) return; //<<--- EARLY EXIT
 
-		// Set the operators c_(i,sigma} * x_i in the natural basis
+		if (isSsh_) {
 
-		for (SizeType sigma = 0; sigma < 2; ++sigma) {
-			tmpMatrix = findSSHMatrices(sigma, natBasis, phonons);
-			int asign = 1;
-			if (sigma > 0) asign = 1;
-			typename OperatorType::Su2RelatedType su2related3;
-			if (sigma == 0) {
-				su2related3.source.push_back(site);
-				su2related3.source.push_back(site + 1);
-				su2related3.transpose.push_back(-1);
-				su2related3.transpose.push_back(-1);
-				su2related3.offset = 1;
+			// Set the operators c_(i,sigma} * x_i in the natural basis
+
+			for (SizeType sigma = 0; sigma < 2; ++sigma) {
+				tmpMatrix = findSSHMatrices(sigma, natBasis, phonons);
+				int asign = 1;
+				if (sigma > 0) asign = 1;
+				typename OperatorType::Su2RelatedType su2related3;
+				if (sigma == 0) {
+					su2related3.source.push_back(site);
+					su2related3.source.push_back(site + 1);
+					su2related3.transpose.push_back(-1);
+					su2related3.transpose.push_back(-1);
+					su2related3.offset = 1;
+				}
+
+				transformByU(tmpMatrix);
+
+				OperatorType myOp3(tmpMatrix,
+				                   ProgramGlobals::FermionOrBosonEnum::FERMION,
+				                   typename OperatorType::PairType(1,1-sigma),
+				                   asign,
+				                   su2related3);
+
+				cx.push(myOp3);
 			}
-
-			transformByU(tmpMatrix);
-
-			OperatorType myOp3(tmpMatrix,
-			                   ProgramGlobals::FermionOrBosonEnum::FERMION,
-			                   typename OperatorType::PairType(1,1-sigma),
-			                   asign,
-			                   su2related3);
-
-			cx.push(myOp3);
+		} else if (isLrh_) {
+				this->makeTrackable("disp");
 		}
 	}
 
@@ -419,22 +432,35 @@ protected:
 			hopb.push(a, 'C', a, 'N');
 		}
 
-		if (!isSsh_) return; // <---- EARLY EXIT HERE
+		if (isSsh_) {
+			ModelTermType& hopSsh = ModelBaseType::createTerm("HoppingSSH");
 
-		ModelTermType& hopSsh = ModelBaseType::createTerm("HoppingSSH");
+			OpForLinkType cx0("cx", 0);
+			OpForLinkType cx1("cx", 1);
 
-		OpForLinkType cx0("cx", 0);
-		OpForLinkType cx1("cx", 1);
+			auto modifier = [](ComplexOrRealType& value) { value *= (-1.0);};
 
-		auto modifier = [](ComplexOrRealType& value) { value *= (-1.0);};
+			hopSsh.push(cup, 'C', cx0, 'N');
 
-		hopSsh.push(cup, 'C', cx0, 'N');
+			hopSsh.push(cx0, 'C', cup, 'N', modifier);
 
-		hopSsh.push(cx0, 'C', cup, 'N', modifier);
+			hopSsh.push(cdown, 'C', cx1, 'N');
 
-		hopSsh.push(cdown, 'C', cx1, 'N');
+			hopSsh.push(cx1, 'C', cdown, 'N', modifier);
 
-		hopSsh.push(cx1, 'C', cdown, 'N', modifier);
+		} else if (isLrh_) {
+			ModelTermType& hopLrh = ModelBaseType::createTerm("LongRangeH");
+
+			OpForLinkType x("disp");
+
+			OpForLinkType n("n");
+
+			hopLrh.push(x, 'N', n, 'N');
+
+		} else {
+			return;
+		}
+
 
 	}
 
@@ -548,7 +574,7 @@ protected:
 		                   su2related2);
 		ops.push_back(myOp2);
 
-		if (!isSsh_) return oneSiteTruncSize; //<<--- EARLY EXIT
+		if (!isSsh_ && !isLrh_) return oneSiteTruncSize; //<<--- EARLY EXIT
 
 		// Set the operators c_(i,sigma} * x_i in the natural basis
 
@@ -874,6 +900,7 @@ private:
 
 	ParametersHubbardHolsteinType modelParameters_;
 	bool isSsh_;
+	bool isLrh_;
 	mutable bool oStruncActive_;
 	mutable SizeType wantsOneSiteTruncation_;
 	mutable MatrixType U_;
