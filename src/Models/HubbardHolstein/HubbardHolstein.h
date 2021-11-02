@@ -108,6 +108,7 @@ public:
 	typedef typename ModelHelperType::RealType RealType;
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
+	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
@@ -270,6 +271,71 @@ protected:
 
 		n.push(myOp);
 
+		SizeType iup = 0;
+		SizeType idown = 1;
+		{
+			OpsLabelType& splus = this->createOpsLabel("splus");
+			OpsLabelType& sminus = this->createOpsLabel("sminus");
+			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, natBasis);
+			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, natBasis);
+			SparseMatrixType tmp1;
+			multiply(tmp1, t1MatrixUp, t1MatrixDown);
+			typename OperatorType::Su2RelatedType su2Related;
+			splus.push(OperatorType(tmp1,
+			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                        typename OperatorType::PairType(0,0),
+			                        1.0,
+			                        su2Related));
+			SparseMatrixType tmp2;
+			transposeConjugate(tmp2, tmp1);
+			sminus.push(OperatorType(tmp2,
+			                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                         typename OperatorType::PairType(0,0),
+			                         1.0,
+			                         su2Related));
+		}
+		{
+			OpsLabelType& sz = this->createOpsLabel("sz");
+			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, natBasis);
+			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, natBasis);
+			PsimagLite::Matrix<SparseElementType> t1 =
+			        multiplyTc(t1MatrixUp,t1MatrixUp);
+			PsimagLite::Matrix<SparseElementType> t2 =
+			        multiplyTc(t1MatrixDown,t1MatrixDown);
+			t1 = 0.5*(t1 - t2);
+			SparseMatrixType szmatrix(t1);
+			typename OperatorType::Su2RelatedType su2Related;
+			sz.push(OperatorType(szmatrix,
+			                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                     typename OperatorType::PairType(0,0),
+			                     1.0,
+			                     su2Related));
+		}
+
+		{
+			OpsLabelType& doubleOcc = this->createOpsLabel("doubleM");
+			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, natBasis);
+			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, natBasis);
+			PsimagLite::Matrix<SparseElementType> t1 =
+			        multiplyTc(t1MatrixUp,t1MatrixUp);
+			PsimagLite::Matrix<SparseElementType> t2 =
+			        multiplyTc(t1MatrixDown,t1MatrixDown);
+			SparseMatrixType nMatrixUp(t1);
+			t1 = t1+t2;
+			SparseMatrixType nMatrixDown(t2);
+			PsimagLite::Matrix<SparseElementType> t3 =
+			        multiplyTc(nMatrixDown,nMatrixUp);
+
+			t1 = t1+(-2.0)*t3;
+			SparseMatrixType tmp4(t1);
+			typename OperatorType::Su2RelatedType su2Related;
+			doubleOcc.push(OperatorType(tmp4,
+			                            ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                            typename OperatorType::PairType(0,0),
+			                            1.0,
+			                            su2Related));
+		}
+
 		if (phonons == 0) return; //<<--- EARLY EXIT
 
 		tmpMatrix = findPhononadaggerMatrix(natBasis, phonons);
@@ -291,6 +357,20 @@ protected:
 		                   -1,
 		                   su2related2);
 		a.push(myOp2);
+
+		{
+			OpsLabelType& disp = this->createOpsLabel("disp");
+			SparseMatrixType tmp1 = findPhononadaggerMatrix(natBasis, phonons);
+			SparseMatrixType tmp2;
+			transposeConjugate(tmp2, tmp1);
+			tmp2 += tmp1;
+			typename OperatorType::Su2RelatedType su2Related2;
+			disp.push(OperatorType(tmp2,
+			                       ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                       typename OperatorType::PairType(0,0),
+			                       1.0,
+			                       su2Related2));
+		}
 
 		if (!isSsh_) return; //<<--- EARLY EXIT
 
