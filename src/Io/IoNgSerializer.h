@@ -250,6 +250,9 @@ public:
 		dims[0] = what.size();
 		assert(0 < what.size());
 		const void* ptr = static_cast<const void*>(&what[0]);
+
+		if (Loki::TypeTraits<T>::isFloat)
+			writeComplexOrReal(name2, 'R');
 		if (allowOverwrite == ALLOW_OVERWRITE)
 			overwrite<T>(name, ptr, dims, 1);
 		else
@@ -270,13 +273,11 @@ public:
 		hsize_t dims[1];
 		dims[0] = 2*what.size();
 
-		if (allowOverwrite == ALLOW_OVERWRITE) {
-			writeComplexOrReal(name, ALLOW_OVERWRITE);
+		writeComplexOrReal(name2, 'C');
+		if (allowOverwrite == ALLOW_OVERWRITE)
 			overwrite<T>(name2, ptr, dims, 1);
-		} else {
-			writeComplexOrReal(name2, NO_OVERWRITE);
+		else
 			internalWrite<T>(name, ptr, dims, 1);
-		}
 	}
 
 	template<typename T>
@@ -370,7 +371,7 @@ public:
 
 		for (SizeType i = min; i < n; ++i) {
 			try {
-			what[i].write(name2 + "/" + typeToString(i), *this);
+				what[i].write(name2 + "/" + typeToString(i), *this);
 			} catch(...) {
 				what[i].overwrite(name2 + "/" + typeToString(i), *this);
 			}
@@ -598,6 +599,20 @@ private:
 
 	IoNgSerializer& operator=(const IoNgSerializer&);
 
+	// We're reading from disk, so we go from type in disk to type in destination
+	// The type of destination is SomeVectorType
+	// The underlying type of destination is SomeVectorType::value_type
+	// Therefore, we have underlying type in disk and underlying type in destination
+	// Let's call floating the set {double, float}
+	// underlying type ut_disk in disk is in {floating, complex, other}
+	// underlying type ut_dest in destination is also in {floating, complex, other}
+	// if ut_disk == ut_dest all is good
+	// if ut_disk != ut_dest we throw unless
+	// ut_disk == floating and ut_dest is std::complex<floating> so
+	// that we can go from floating to complex<floating>
+
+	enum class ReadEnum {FLOATING, COMPLEX, OTHER};
+
 	template<typename SomeVectorType>
 	void readInternal(SomeVectorType& what, String name)
 	{
@@ -607,45 +622,45 @@ private:
 		const H5::DataSpace& dspace = dataset->getSpace();
 		const int ndims = dspace.getSimpleExtentNdims();
 		if (ndims != 1)
-			throw RuntimeError("IoNgSerializer: problem reading vector<arith> (ndims)\n");
+			throw RuntimeError("IoNgSerializer: problem reading vector ndims != 1\n");
 
 		hsize_t* dims = new hsize_t[ndims];
 		dspace.getSimpleExtentDims(dims);
 
-		if (dims[0] == 0)
-			throw RuntimeError("IoNgSerializer: problem reading vector<arith> (dims)\n");
+		const hsize_t n = dims[0];
+		if (n == 0)
+			throw RuntimeError("IoNgSerializer: problem reading vector dims[0] == 0\n");
 
-		static const bool isComplex = IsComplexNumber<typename SomeVectorType::value_type>::True;
-		const bool inDiskComplex = isInDiskComplex(name);
+		const ReadEnum readEnumOnDisk = getReadEnumOnDisk(name);
+		static const ReadEnum readEnumDest =
+		        getReadEnumDestination<typename SomeVectorType::value_type>();
 
-		SizeType complexSize = 0;
-		if (isComplex) {
-			if (inDiskComplex) {
-				complexSize = getHalfSize(dims[0]);
-			} else {
-				// this type is complex; but what's on disk is real
-				typename Vector<UnderlyingType>::Type temporary(dims[0]);
-				void* ptr2 = static_cast<void *>(&(temporary[0]));
-				dataset->read(ptr2, typeToH5<UnderlyingType>());
-				what.resize(dims[0]);
-				for (SizeType i = 0; i < dims[0]; ++i)
-					what[i] = temporary[i]; // real to complex
-				delete[] dims;
-				delete dataset;
-				return;
-			}
-		} else {
-			if (inDiskComplex)
-				throw RuntimeError("This type is real but trying to read from complex on disk\n");
-			else
-				complexSize = dims[0];
+		if (readEnumOnDisk == readEnumDest) {
+			SizeType complexSize = (readEnumDest == ReadEnum::COMPLEX) ? getHalfSize(n)
+			                                                           : n;
+			what.resize(complexSize, 0);
+			void* ptr = static_cast<void *>(&(what[0]));
+			dataset->read(ptr, typeToH5<UnderlyingType>());
+			delete[] dims;
+			delete dataset;
+			return;
 		}
 
-		what.resize(complexSize, 0);
-		void* ptr = static_cast<void *>(&(what[0]));
-		dataset->read(ptr, typeToH5<UnderlyingType>());
-		delete[] dims;
-		delete dataset;
+		// only other case is from real --> complex
+		if (readEnumOnDisk == ReadEnum::FLOATING && readEnumDest == ReadEnum::COMPLEX) {
+			// this type is complex; but what's on disk is real
+			typename Vector<UnderlyingType>::Type temporary(dims[0]);
+			void* ptr2 = static_cast<void *>(&(temporary[0]));
+			dataset->read(ptr2, typeToH5<UnderlyingType>());
+			what.resize(dims[0]);
+			for (SizeType i = 0; i < dims[0]; ++i)
+				what[i] = temporary[i]; // real to complex
+			delete[] dims;
+			delete dataset;
+			return;
+		}
+
+		throw RuntimeError("IoNgSerializer: problem reading vector\n");
 	}
 
 	void overwriteNotSupported(WriteMode mode)
@@ -836,21 +851,30 @@ private:
 		return x/2;
 	}
 
-	void writeComplexOrReal(String name2, WriteMode)
+	void writeComplexOrReal(String name2, char content)
 	{
 		String nameComplexOrReal = name2 + "ComplexOrReal";
-		String content = "C";
-		write(nameComplexOrReal, content, NO_OVERWRITE);
+		write(nameComplexOrReal, content);
 	}
 
-	bool isInDiskComplex(String name2)
+	ReadEnum getReadEnumOnDisk(String name2)
 	{
-		const String nameComplexOrReal = "Def/" + name2 + "ComplexOrReal";
-		String tmp;
+		const String nameComplexOrReal = name2 + "ComplexOrReal";
+		char tmp;
 		try {
 			read(tmp, nameComplexOrReal);
-		} catch (...) {}
-		return (tmp == "C");
+		} catch (...) {
+			return ReadEnum::OTHER;
+		}
+
+		return (tmp == 'C') ? ReadEnum::COMPLEX : ReadEnum::FLOATING;
+	}
+
+	template<typename T>
+	ReadEnum getReadEnumDestination()
+	{
+		if (IsComplexNumber<T>::True) return ReadEnum::COMPLEX;
+		return (Loki::TypeTraits<T>::isFloat) ? ReadEnum::FLOATING : ReadEnum::OTHER;
 	}
 
 	H5::H5File* hdf5file_;
