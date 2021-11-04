@@ -141,7 +141,10 @@ public:
 		if (extra != "" && extra != "WithDelta")
 			err("FermionSpinLess can only be followed by WithDelta and not " + extra + "\n");
 
-		assert(geometry.numberOfSites() == modelParameters_.potentialV.size());
+		const SizeType n = geometry.numberOfSites();
+
+		if (geometry.numberOfSites() != modelParameters_.potentialV.size())
+			err("potentialV must have exactly " + ttos(n) + " entries.\n");
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
