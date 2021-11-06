@@ -156,7 +156,7 @@ public:
 
 	SizeType targets() const
 	{
-		return 3;
+		return PsimagLite::IsComplexNumber<ComplexOrRealType>::True ? 3 : 5;
 	}
 
 	RealType weight(SizeType i) const
@@ -255,12 +255,24 @@ private:
 
 		const SizeType currentTimeStep = this->common().aoe().currentTimeStep();
 		if (currentTimeStep == 0) {
-			skeleton_.calcDynVectors(phiNew,
-			                         this->common().aoe().targetVectors(1),
-			                         bogusTv);
-			skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
-			                         this->common().aoe().targetVectors(2),
-			                         bogusTv);
+			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
+				skeleton_.calcDynVectors(phiNew,
+				                         this->common().aoe().targetVectors(1),
+				                         bogusTv);
+				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
+				                         this->common().aoe().targetVectors(2),
+				                         bogusTv);
+			} else {
+
+				skeleton_.calcDynVectors(phiNew,
+				                         this->common().aoe().targetVectors(1),
+				                         this->common().aoe().targetVectors(2));
+
+				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
+				                         this->common().aoe().targetVectors(2),
+				                         this->common().aoe().targetVectors(3),
+				                         this->common().aoe().targetVectors(4));
+			}
 		} else {
 			bool timeHasAdvanced = (counter_ != currentTimeStep &&
 			        currentTimeStep < tstStruct_.nForFraction());
@@ -271,15 +283,37 @@ private:
 				++almostDone_;
 			}
 
-			const SizeType advanceIndex = (timeHasAdvanced) ? 2 : 1;
-			// wft tv1
-			this->common().aoe().wftOneVector(bogusTv,
-			                                  this->common().aoe().targetVectors(advanceIndex),
-			                                  site);
-			this->common().aoe().targetVectors(1) = bogusTv;
-			skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
-			                         this->common().aoe().targetVectors(2),
-			                         bogusTv);
+			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
+
+				const SizeType advanceIndex = (timeHasAdvanced) ? 2 : 1;
+				// wft tv1
+				this->common().aoe().wftOneVector(bogusTv,
+				                                  this->common().aoe().targetVectors(advanceIndex),
+				                                  site);
+				this->common().aoe().targetVectors(1) = bogusTv;
+				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
+				                         this->common().aoe().targetVectors(2),
+				                         bogusTv);
+			} else {
+
+				VectorWithOffsetType bogusTv2;
+				const SizeType advanceIndex = (timeHasAdvanced) ? 3 : 1;
+
+				this->common().aoe().wftOneVector(bogusTv,
+				                                  this->common().aoe().targetVectors(advanceIndex),
+				                                  site);
+				const SizeType advanceIndexp1 = advanceIndex+1;
+				this->common().aoe().wftOneVector(bogusTv2,
+				                                  this->common().aoe().targetVectors(advanceIndexp1),
+				                                  site);
+				this->common().aoe().targetVectors(1) = bogusTv;
+				this->common().aoe().targetVectors(2) = bogusTv2;
+
+				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
+				                         this->common().aoe().targetVectors(2),
+				                         this->common().aoe().targetVectors(3),
+				                         this->common().aoe().targetVectors(4));
+			}
 		}
 
 		counter_ = currentTimeStep;

@@ -89,9 +89,22 @@ private:
 	{
 		RealType sign = (BaseType::tstStruct_.type() == 0) ? -1.0 : 1.0;
 		RealType part1 =  (BaseType::eigs_[k] - BaseType::E0_)*sign + BaseType::tstStruct_.omega().second;
-		RealType denom = part1*part1 + BaseType::tstStruct_.eta()*BaseType::tstStruct_.eta();
-		return (BaseType::action_ == BaseType::ACTION_IMAG) ? BaseType::tstStruct_.eta()/denom :
-		                                                      -part1/denom;
+		const SizeType nFraction = BaseType::tstStruct_.nForFraction();
+
+		if (nFraction==1) {
+			RealType denom = part1*part1 + BaseType::tstStruct_.eta()*BaseType::tstStruct_.eta();
+			return (BaseType::action_ == BaseType::ACTION_IMAG) ? BaseType::tstStruct_.eta()/denom :
+			                                                      -part1/denom;
+		} else {
+			RealType exponent = 1.0/(2.0*nFraction);
+			RealType denom = pow(part1*part1 + BaseType::tstStruct_.eta()*BaseType::tstStruct_.eta(),
+			                     exponent);
+			RealType denom1 = sqrt(part1*part1 + BaseType::tstStruct_.eta()*BaseType::tstStruct_.eta());
+			RealType cosreal = cos(acos(part1/denom1)/nFraction);
+			RealType sinreal = sin(acos(part1/denom1)/nFraction);
+			return (BaseType::action_ == BaseType::ACTION_IMAG) ? sinreal/denom :
+			                                                      cosreal/denom;
+		}
 	}
 };
 
