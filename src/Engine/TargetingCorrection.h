@@ -123,8 +123,8 @@ public:
 	                    const QnType&,
 	                    InputValidatorType& io)
 	    : BaseType(lrs,model,wft,0),
-	      gsWeight_(1 - tstStruct_.correctionA()),
 	      tstStruct_(io, "TargetingCorrection"),
+	      gsWeight_(1 - tstStruct_.correctionA()),
 	      progress_("TargetingCorrection")
 	{}
 
@@ -203,8 +203,8 @@ private:
 		gsWeight = gsWeight_;
 	}
 
-	const RealType gsWeight_;
 	TargetParamsType tstStruct_;
+	const RealType gsWeight_;
 	PsimagLite::ProgressIndicator progress_;
 };     //class TargetingCorrection
 } // namespace Dmrg

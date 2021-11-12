@@ -160,7 +160,8 @@ private:
 		}
 
 		ComplexOrRealType cmplx(part1, BaseType::tstStruct_.eta());
-		return 1.0/pow(cmplx, 1.0/nFraction);
+		const RealType oneReal = 1.0;
+		return oneReal/pow(cmplx, oneReal/nFraction);
 
 	}
 
