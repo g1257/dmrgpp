@@ -30,7 +30,7 @@ typedef PsimagLite::LinearPrediction<FieldType> LinearPredictionType;
 
 void usage(const char *progName)
 {
-	std::cerr<<"Usage: "<<progName<<" -f file -l label -p n\n";
+	std::cerr<<"Usage: "<<progName<<" -f file -l label -p n -q q[>1]\n";
 }
 
 int main(int argc,char *argv[])
@@ -39,8 +39,9 @@ int main(int argc,char *argv[])
 	PsimagLite::String file="";
 	PsimagLite::String label="";
 	SizeType p = 0;
+	SizeType q = 2;
 	while ((opt = getopt(argc, argv,
-			"f:p:l:")) != -1) {
+	                     "f:p:l:q:")) != -1) {
 		switch (opt) {
 		case 'f':
 			file = optarg;
@@ -51,13 +52,16 @@ int main(int argc,char *argv[])
 		case 'p':
 			p = atoi(optarg);
 			break;
+		case 'q':
+			q = atoi(optarg);
+			break;
 		default:
 			usage(argv[0]);
 			return 1;
 		}
 	}
 	// sanity checks:
-	if (file=="" || label=="" || p==0) {
+	if (file=="" || label=="" || p==0 || q<2) {
 		usage(argv[0]);
 		return 1;
 	}
@@ -67,12 +71,19 @@ int main(int argc,char *argv[])
 	io.read(y,label);
 	SizeType n = y.size();
 	std::cout<<"#Found "<<n<<" points in file "<<file<<"\n";
-	LinearPredictionType linearPrediction(y);
-	linearPrediction.predict(p);
+	LinearPredictionType linearPrediction(y,q);
+	linearPrediction.predict(q);
+
+	for (SizeType i=0;i<p;i++) {
+		linearPrediction.linearPredictionfunction(y,q);
+		linearPrediction.predict(q);
+	}
+
 	for (SizeType i=0;i<p+n;i++) {
-		std::cout<<i<<" "<<linearPrediction(i)<<"\n";
+		std::cout<<linearPrediction(i)<<"\n";
 	}
 }
 
+// Test Function in series.txt is: f[i] = 0.5*(cos((i-1)*pi/100)+cos((i-1)*pi/20))*exp(-(i-1)/100)
 
 
