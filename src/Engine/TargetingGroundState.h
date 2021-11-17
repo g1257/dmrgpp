@@ -145,7 +145,6 @@ public:
 	{
 		const VectorVectorVectorWithOffsetType& v = this->common().aoe().psiConst();
 		const SizeType n = v.size();
-		if (n == 1) return 1;
 
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
