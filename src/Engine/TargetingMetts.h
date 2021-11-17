@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2009-2014-2021, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -170,6 +170,8 @@ public:
 	      wft_(wft),
 	      quantumSector_(quantumSector),
 	      progress_("TargetingMetts"),
+	      betas_(mettsStruct_.timeSteps()),
+	      weight_(betas_.size() + 1),
 	      mettsStochastics_(model,mettsStruct_.rngSeed,mettsStruct_.pure),
 	      mettsCollapse_(mettsStochastics_,lrs,mettsStruct_),
 	      prevDirection_(ProgramGlobals::DirectionEnum::INFINITE),
@@ -180,21 +182,11 @@ public:
 
 		if (!wft.isEnabled()) err(" TargetingMetts needs an enabled wft\n");
 
-		RealType tau = mettsStruct_.tau()/(mettsStruct_.timeSteps()-1);
-		SizeType n1 = mettsStruct_.timeSteps();
-		SizeType n = mettsStruct_.timeSteps() + 1;
+		const RealType tau = mettsStruct_.tau()/(mettsStruct_.timeSteps()-1);
+		for (SizeType i = 0; i< betas_.size(); ++i)
+			betas_[i] = i*tau;
 
-		betas_.resize(n1);
-		weight_.resize(n);
-
-		gsWeight_= 0.0;
-		RealType factor = (1.0 - gsWeight_)/(n1+4);
-		RealType sum = setOneInterval(factor,PairType(0,n1),tau);
-		weight_[n-1] = 2*factor;
-		sum += weight_[n-1];
-
-		sum += gsWeight_;
-		assert(fabs(sum-1.0)<1e-5);
+		setWeights();
 
 		this->common().aoe().initTimeVectors(mettsStruct_, betas_, ioIn);
 	}
@@ -296,6 +288,7 @@ public:
 		if (normalizeTimeVectors)
 			this->common().normalizeTimeVectors();
 
+		setWeights();
 		this->common().printNormsAndWeights(gsWeight_, weight_);
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)) return;
@@ -757,25 +750,6 @@ private:
 		return "undefined";
 	}
 
-	RealType setOneInterval(const RealType& factor,
-	                        const PairType& startEnd,
-	                        const RealType& tau)
-	{
-		RealType sum = 0;
-		for (SizeType i=startEnd.first;i<startEnd.second;i++) {
-			betas_[i] = (i-startEnd.first)*tau;
-			weight_[i] = factor;
-			sum += weight_[i];
-		}
-
-		sum -= weight_[startEnd.first];
-		sum -= weight_[startEnd.second-1];
-		weight_[startEnd.first] = weight_[startEnd.second-1] = 2*factor;
-		sum += weight_[startEnd.second-1];
-		sum += weight_[startEnd.first];
-		return sum;
-	}
-
 	void findElectronsOfOneSite(VectorSizeType& electrons,SizeType site) const
 	{
 		VectorSizeType block(1,site);
@@ -852,6 +826,31 @@ private:
 		garbage_.push_back(m);
 
 		return *m;
+	}
+
+	void setWeights()
+	{
+		gsWeight_= 0;
+		const SizeType n = weight_.size();
+		SizeType sum = 0;
+		for (SizeType i = 0; i < n; ++i) {
+
+			weight_[i] = 0;
+
+			if (i >= this->common().aoe().targetVectors().size()) continue;
+
+			const RealType norma = norm(this->common().aoe().targetVectors()[i]);
+			if (norma < 1e-5) continue;
+
+			weight_[i] = 1;
+			++sum;
+		}
+
+		if (sum == 0) sum = 1;
+		static const RealType one = 1;
+		const RealType factor = one/sum;
+		for (SizeType i = 0; i < n; ++i)
+			weight_[i] *= factor;
 	}
 
 	const ModelType& model_;
