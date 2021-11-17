@@ -1,5 +1,5 @@
 ##Ainur1.0
-TotalNumberOfSites=100;
+TotalNumberOfSites=50;
 NumberOfTerms=2;
 
 ### 1/2(S^+S^- + S^-S^+) part
@@ -23,13 +23,13 @@ SolverOptions="twositedmrg";
 Version="paper89";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[ 49, 100, 8],
-[-98, 100, 8],
-[ 98, 100, 8],
-[-98, 100, 8],
-[ 49, 100, 8],
-[ 49, 100, 2],
-[-98, 100, 2]];
+[ 24, 100, 8],
+[-48, 100, 8],
+[ 48, 100, 8],
+[-48, 100, 8],
+[ 24, 100, 8],
+[ 24, 100, 2],
+[-48, 100, 2]];
 
 # Keep a maximum of 1000 states, but allow truncation
 # with tolerance and minimum states as below
