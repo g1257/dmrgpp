@@ -704,6 +704,36 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		                        : new SuperOpHelperBaseType(modelCommon_.superGeometry());
 	}
 
+	void notReallySort(VectorSizeType& basis, VectorQnType& qns) const
+	{
+		const SizeType n = qns.size();
+		if (n == 0) return;
+		VectorQnType qunique;
+		findQunique(qunique, qns_);
+		assert(qunique.size() > 0);
+
+		VectorQnType qns2;
+		VectorSizeType basis2;
+		VectorBoolType done(n, false);
+		const SizeType m = qunique.size();
+		for (SizeType i = 0; i < m; ++i) {
+			const QnType& thisq = qunique[i];
+			for (SizeType j = 0; j < n; ++j) {
+				if (done[j]) continue;
+
+				// add all qns with thisq
+				if (qns[j] == thisq) {
+					qns2.push_back(thisq);
+					basis2.push_back(basis[j]);
+					done[j] = true;
+				}
+			}
+		}
+
+		basis = basis2;
+		qns = qns2;
+	}
+
 private:
 
 	static void invalidateIfNeeded(OperatorType& op, SizeType site, PsimagLite::String what)
@@ -765,22 +795,30 @@ private:
 			this->makeTrackable(tokens[0]);
 	}
 
+	static void findQunique(VectorQnType& qunique, const VectorQnType& qns)
+	{
+		qunique.clear();
+		const SizeType n = qns.size();
+		if (n == 0) return;
+		QnType qprev = qns[0];
+		qunique.push_back(qprev);
+		for (SizeType i = 1; i < n; ++i) {
+			QnType thisq = qns[i];
+			if (thisq == qprev) continue;
+			qunique.push_back(thisq);
+			qprev = thisq;
+		}
+	}
+
 	void checkThatQnsAreNotReallySorted() const
 	{
 #ifdef NDEBUG
 		return;
 #endif
 
-		const SizeType n = qns_.size();
-		if (n == 0) return;
-		QnType qprev = qns_[0];
-		VectorQnType qunique(1, qprev);
-		for (SizeType i = 1; i < n; ++i) {
-			QnType thisq = qns_[i];
-			if (thisq == qprev) continue;
-			qunique.push_back(thisq);
-			qprev = thisq;
-		}
+		VectorQnType qunique;
+		findQunique(qunique, qns_);
+		if (qunique.size() == 0) return;
 
 		const SizeType m = qunique.size();
 		for (SizeType i = 0; i < m; ++i) {

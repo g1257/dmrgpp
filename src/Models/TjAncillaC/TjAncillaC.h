@@ -162,8 +162,7 @@ protected:
 		BlockType block(1, site);
 		VectorHilbertStateType natBasis;
 		SparseMatrixType tmpMatrix;
-		setBasis(natBasis, block);
-		setSymmetryRelated(qns, natBasis, block.size());
+		setSymmetryRelated(qns, natBasis, block);
 
 		OpsLabelType& c = this->createOpsLabel("c");
 		OpsLabelType& splus = this->createOpsLabel("splus");
@@ -344,6 +343,8 @@ protected:
 private:
 
 	//! find all states in the natural basis for a block of n sites
+	// WARNING: Don't use directly as this isn't NotReallySorted!
+	// Use with setSymmetryRelated
 	void setBasis(HilbertBasisType& basis,
 	              const VectorSizeType& block) const
 	{
@@ -574,11 +575,12 @@ private:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int n) const
+	                        HilbertBasisType& basis,
+	                        const VectorSizeType& block) const
 	{
-		assert(n==1);
+		assert(block.size() == 1);
 
+		setBasis(basis, block);
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
@@ -602,6 +604,8 @@ private:
 			bool sign = other[0] & 1;
 			qns[i] = QnType(sign, other, jmpair, other[0]);
 		}
+
+		ModelBaseType::notReallySort(basis, qns);
 	}
 
 	// note: we use 2j instead of j
