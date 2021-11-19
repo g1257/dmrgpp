@@ -704,12 +704,12 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		                        : new SuperOpHelperBaseType(modelCommon_.superGeometry());
 	}
 
-	void notReallySort(VectorSizeType& basis, VectorQnType& qns) const
+	static void notReallySort(VectorSizeType& basis, VectorQnType& qns)
 	{
 		const SizeType n = qns.size();
 		if (n == 0) return;
 		VectorQnType qunique;
-		findQunique(qunique, qns_);
+		findQunique(qunique, qns);
 		assert(qunique.size() > 0);
 
 		VectorQnType qns2;

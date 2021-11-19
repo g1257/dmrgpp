@@ -142,10 +142,10 @@ public:
 		HilbertState total = (1<<sitesTimesDof);
 		basis_.resize(total);
 		for (HilbertState a = 0; a < total; ++a) basis_[a] = a;
+		setSymmetryRelatedInternal(qq_,basis_,1);
+		ModelBaseType::notReallySort(basis_, qq_);
 
 		setOperatorMatricesInternal(creationMatrix_, block);
-
-		setSymmetryRelatedInternal(qq_,basis_,1);
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
