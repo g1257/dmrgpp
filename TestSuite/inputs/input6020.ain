@@ -61,8 +61,6 @@ Model="Kitaev";
 
 vector MagneticFieldX=[0,...];
 
-vector MagneticFieldY=[0,...];
-
 vector MagneticFieldZ=[0,...];
 InfiniteLoopKeptStates=128;
 FiniteLoops=[

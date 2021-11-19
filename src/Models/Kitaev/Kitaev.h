@@ -459,18 +459,6 @@ private:
 		HilbertBasisType natBasis;
 
 		setBasis(natBasis, block);
-
-		OpsLabelType& sy = this->createOpsLabel("sy");
-		SparseMatrixType tmpMatrix = findSdirMatrices(0, natBasis, InternalDir::DIR_Y);
-		tmpMatrix *= std::complex<RealType>(0, -1); // Sy = -iSybar
-		typename OperatorType::Su2RelatedType su2related;
-		OperatorType myOp2(tmpMatrix,
-		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                   PairType(0, 0),
-		                   1.0,
-		                   su2related);
-
-		sy.push(myOp2); // Sybar = iSy
 	}
 
 	//! find all states in the natural basis for a block of n sites
