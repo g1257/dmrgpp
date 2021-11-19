@@ -93,6 +93,55 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+template<typename ModelBaseType, bool>
+class AddSy {
+
+public:
+
+	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+
+	AddSy(ModelBaseType*) {}
+
+	void operator()(SparseMatrixType) {}
+};
+
+template<typename ModelBaseType>
+class AddSy<ModelBaseType, true> {
+
+public:
+
+	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	typedef typename ModelHelperType::OperatorsType OperatorsType;
+	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename OperatorType::PairType PairType;
+	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+
+	AddSy(ModelBaseType* base) : base_(base) {}
+
+	void operator()(SparseMatrixType tmpMatrix)
+	{
+		typename OperatorType::Su2RelatedType su2related;
+		ComplexOrRealType sqrtOfMinusOne(0, -1);
+		tmpMatrix *= sqrtOfMinusOne;
+		OperatorType myOp2(tmpMatrix,
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(0, 0),
+		                   1.0,
+		                   su2related);
+		OpsLabelType& sy = base_->createOpsLabel("sy");
+		sy.push(myOp2); // Sy = -iSybar
+	}
+
+private:
+
+	ModelBaseType* base_;
+};
+
+
+
 template<typename ModelBaseType>
 class Kitaev : public ModelBaseType {
 
@@ -261,6 +310,9 @@ protected:
 			                   1.0,
 			                   su2related);
 			sybar.push(myOp2); // Sybar = iSy
+
+			AddSy<ModelBaseType, PsimagLite::IsComplexNumber<ComplexOrRealType>::True> addSy(this);
+			addSy(tmpMatrix);
 
 			// Set the operators S^z_i in the natural basis
 			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_Z);
