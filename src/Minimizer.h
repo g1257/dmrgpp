@@ -158,7 +158,7 @@ public:
 			if (status_) {
 				String gslError(gsl_strerror(status_));
 				String msg("Minimizer::conjugateGradient(...): GSL Error: ");
-				std::cerr<<gslError<<"\n";
+				if (verbose_) std::cerr<<msg<<gslError<<"\n";
 				return -iter;
 			}
 
