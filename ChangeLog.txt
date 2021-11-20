@@ -1,3 +1,45 @@
+2021-11-19 Version 3.02
+
+* LinearPrediction now yields correct
+results (by Alberto Nocera)
+
+* LanczosSolver: prefix + EigsForStop= added
+
+* NewMake.pm infrastructure: clears .a
+files (This was affecting KronUtils recompilation
+in DMRG++)
+
+* QuasiCanonical expressions support complex scalars
+
+* lorentzian.pl script added
+
+* naiztnerol.pl scripts added which does
+the reverse of lorentzian.pl
+(Thanks to Bradraj P.)
+
+* Ainur: better error reporting
+
+* Ainur: allows _ for variable names
+
+* Ainur: ellipsis for complex vectors now works
+
+* Ainur: full support for complex numbers
+(Thanks to Pontus L.)
+
+* AwesomePredicate and related predicates have
+changed the characters used for separators and
+logical operators
+
+* ContinuedFraction drivers support complex weights
+
+* ExpressionCalculator now works for complex numbers
+
+* ExpressionCalculator: ei which means exp(i*variable)
+has now been fixed (Thanks to Alberto N.)
+
+* IoNgSerializer: remembers whether floating points
+correspond to real or complex
+
 2021-04-22 Version 3.00
 
 * SizeType defaults to long int unsigned
