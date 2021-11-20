@@ -1,3 +1,116 @@
+2021-11-19 Version 6.02
+
+Bug fixes
+
+* SVD is now normalized
+
+* checkThatQnsAreNotReallySorted has
+been disabled for SDHS (site-dependent
+Hilbert Spaces)
+
+* TargetingExpression fixes (Max Sroda)
+
+* observe: sign of fermionic correlations
+corrected so that i < j and j > i have
+opposite signs.
+
+* termGeometryReplacement bug fix
+(the bug did not affect any models, but
+see KitaevExtended below)
+
+New features
+
+* Restarting from real to complex is now possible
+
+* TargetingExpression complex scalar support
+
+* Targeting Chebyshev vectors: fix to
+correction (Alberto Nocera)
+
+* TargetingRixDynamics: applying two
+operators with product is now possible
+(Alberto N.)
+
+* TargetingCVEvoluion added (Alberto N.)
+
+* FindSymmetrySector= awesome predicated
+added (Pontus L.)
+
+* RecoverySave works with shrinkstacksondisk
+
+* SolverOptions=noClobber
+
+* FirstRitz= line added
+
+* wftstackondisk implemented 
+(in order to decrease RAM)
+
+* observe: readOnDemand in SolverOptions=
+added (in order to decrease RAM)
+
+* OpOnSiteThreshold= added
+(in order to decrease RAM)
+
+Models
+
+* Operator identity available for all models
+(Max Sroda)
+
+* KitaevWithCharge implemented (Bradraj P.)
+
+* HubbardHolstein supports more interactions
+(Alberto N.)
+
+* FeAs: orbital dependence for interactions added
+
+* FeAs: AnistropyD= line added
+
+* HubbardOneBand: Magnetic field along x added
+
+* Entangler for Heisenberg Spin 1 now works 
+
+* KitaevExtended uses termGeometryReplacement now
+
+* FermionSpinless WithDelta added (Bradraj P.)
+
+Refactoring
+
+* We have deleted more SU(2) related code
+
+TestSuite
+
+* KitaevGamma chain has inputs now
+
+* Ancilla Spin 1 inputs added
+
+* tests added for GeometryValueModifier=
+
+Scripts
+
+* quasiParticleWeightZ.pl added
+(Bradraj Pandey)
+
+* vonNeumann.pl support symmetrize by option
+
+* inSituVsOmega.pl added
+
+* matrixRawToAinur.pl added
+
+* procOmegas.pl works with Ainur now
+
+* hubbardEnergyInfiniteT.pl added
+
+* sDotSinKspace.pl added
+
+* nq.pl added
+
+* honeycomb.pl supports WithCharge
+
+* honeycomb.pl supports Ainur and
+can compute electrons (Pontus L.)
+
+
+
 2021-04-22 Version 6.00
 
 bug fixes:
