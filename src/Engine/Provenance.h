@@ -26,8 +26,8 @@ public:
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<appName<<"\x1b[38;5;240";
-		msg<<" [master "<<DMRGPP_VERSION<<"] "<<PsimagLite::AnsiColor::reset;
+		msg<<appName<<"\x1b[38;5;120";
+		msg<<" [features "<<DMRGPP_VERSION<<"] "<<PsimagLite::AnsiColor::reset;
 		PsimagLite::String ctOpts("");
 #ifdef USE_SHORT
 		ctOpts += "SHORT ";

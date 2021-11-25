@@ -2,6 +2,8 @@
 #define OPTIONS_H
 #include "PsimagLite.h"
 #include <cctype>
+#include <algorithm>
+#include <numeric>
 
 namespace Dmrg {
 
@@ -12,51 +14,53 @@ public:
 
 	typedef typename PsimagLite::String::value_type CharType;
 	typedef typename PsimagLite::String::const_iterator StringConstIterator;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	Options(PsimagLite::String label, InputValidatorType& io)
 	{
-		io.readline(data_, label);
+		PsimagLite::String tmp;
+		io.readline(tmp, label);
+		PsimagLite::split(vdata_, tmp, ",");
+		std::transform(vdata_.begin(),
+		               vdata_.end(),
+		               vdata_.begin(),
+		               [](PsimagLite::String s){ return toLower(s); });
 	}
 
 	void operator+=(PsimagLite::String moreData)
 	{
-		data_ += moreData;
+		VectorStringType vmore;
+		PsimagLite::split(vmore, moreData, ",");
+		vdata_.insert(vdata_.end(), vmore.begin(), vmore.end());
 	}
 
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
-		ioSerializer.write(label, data_);
+		const PsimagLite::String tmp = std::accumulate(vdata_.begin(),
+		                                               vdata_.end(),
+		                                               PsimagLite::String(","));
+		ioSerializer.write(label, tmp);
 	}
 
 	bool isSet(PsimagLite::String what) const
 	{
-		return isSubstrCaseInsensitive(data_, what);
+		what = toLower(what);
+		VectorStringType::const_iterator it = std::find(vdata_.begin(),
+		                                                vdata_.end(),
+		                                                what);
+		return (it != vdata_.end());
 	}
 
 private:
 
-	template<typename charT>
-	struct CaseInsensitiveEqual {
-
-		bool operator()(charT ch1, charT ch2) const
-		{
-			return std::toupper(ch1) == std::toupper(ch2);
-		}
-	};
-
-	bool isSubstrCaseInsensitive(const PsimagLite::String& str1,
-	                             const PsimagLite::String& str2) const
+	static PsimagLite::String toLower(PsimagLite::String data)
 	{
-		StringConstIterator it = std::search(str1.begin(),
-		                                     str1.end(),
-		                                     str2.begin(),
-		                                     str2.end(),
-		                                     caseInsensitiveEqual_);
-		return (it != str1.end());
+		std::transform(data.begin(), data.end(), data.begin(),
+		               [](unsigned char c){ return std::tolower(c); });
+		return data;
 	}
 
-	CaseInsensitiveEqual<CharType> caseInsensitiveEqual_;
-	PsimagLite::String data_;
+	VectorStringType vdata_;
 };
 }
 #endif // OPTIONS_H
