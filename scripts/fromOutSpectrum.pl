@@ -10,6 +10,7 @@ defined($templateInput) or die "USAGE: $0 out.spectrum inputFile [isPeriodic] [z
 defined($isPeriodic) or $isPeriodic = 0;
 defined($zeroAtCenter) or $zeroAtCenter = 0;
 
+my $isAinur = OmegaUtils::isAinur($templateInput);
 my $geometryName;
 my $geometrySubName = "";
 my $geometryLeg = 1;
@@ -18,6 +19,12 @@ my $hptr = {"GeometryKind" => \$geometryName,
             "LadderLeg" => \$geometryLeg};
 
 OmegaUtils::getLabels($hptr,$templateInput);
+
+if ($isAinur) {
+	$geometryName =~ s/\"//g;
+	$geometryName =~ s/ *; *$//;
+}
+
 
 my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $geometrySubName};
 

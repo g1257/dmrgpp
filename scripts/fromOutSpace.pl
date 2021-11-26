@@ -9,22 +9,33 @@ my ($outSpace, $templateInput, $isPeriodic, $multicenter) = @ARGV;
 defined($isPeriodic) or die "USAGE: $0 out.space inputFile isPeriodic [multicenter]\n";
 defined($multicenter) or $multicenter = 0;
 
+my $isAinur = OmegaUtils::isAinur($templateInput);
 my $geometryName;
 my $geometrySubName = "";
 my $geometryLeg = 1;
 my $centralSite;
+my $tspSites= ($isAinur) ? "TSPSites" : "TSPSites 1";
+
 my $hptr = {"GeometryKind" => \$geometryName,
             "GeometrySubKind" => \$geometrySubName,
             "LadderLeg" => \$geometryLeg,
-            "TSPSites 1" => \$centralSite};
+            "$tspSites" => \$centralSite};
 
 OmegaUtils::getLabels($hptr,$templateInput);
+
+if ($isAinur) {
+	$geometryName =~ s/\"//g;
+	$geometryName =~ s/ *; *$//;
+	$centralSite =~ s/^ *\[//;
+	$centralSite =~ s/ *\] *; *$//;
+}
 
 my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $geometrySubName};
 
 $hptr->{"centralSite"} = $centralSite;
 $hptr->{"isPeriodic"} = $isPeriodic;
 $hptr->{"multicenter"} = $multicenter;
+$hptr->{"isAinur"} = $isAinur;
 $geometry->{"isPeriodic"} = $isPeriodic;
 
 my %h;
