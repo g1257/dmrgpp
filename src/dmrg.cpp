@@ -7,8 +7,6 @@
 #include "RunFinished.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-//typedef  PsimagLite::CrsMatrix<std::complex<RealType> > MySparseMatrixComplex;
-//typedef  PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
 
 using namespace Dmrg;
 
@@ -120,50 +118,6 @@ void mainLoop1(InputNgType::Readable& io,
 		mainLoop2<MatrixVectorOnTheFly<ModelBaseType> >(io, dmrgSolverParams, opOptions);
 	} else {
 		mainLoop2<MatrixVectorKron<ModelBaseType> >(io, dmrgSolverParams, opOptions);
-	}
-}
-
-template<typename T1, typename T2>
-class MixedRealComplex {
-
-public:
-
-	static void run(InputNgType::Readable& io,
-	                const ParametersDmrgSolverType& dmrgSolverParams,
-                    const OperatorOptions& opOptions)
-	{
-		err("Mixed real/complex\n");
-	}
-
-};
-
-template<typename T>
-class MixedRealComplex<T, T> {
-
-public:
-
-	static void run(InputNgType::Readable& io,
-	                const ParametersDmrgSolverType& dmrgSolverParams,
-                    const OperatorOptions& opOptions)
-	{
-		mainLoop1<T>(io, dmrgSolverParams, opOptions);
-	}
-
-};
-template<typename ComplexOrRealType>
-void mainLoop0(InputNgType::Readable& io,
-               const ParametersDmrgSolverType& dmrgSolverParams,
-               const OperatorOptions& opOptions)
-{
-	static const bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-
-	if (dmrgSolverParams.options.isSet("targetComplex")) {
-		if (isComplex)
-			err("No need to set targetComplex, because the whole calculation is complex\n");
-		MixedRealComplex<ComplexOrRealType, RealType>::run(io, dmrgSolverParams, opOptions);
-	} else {
-		MixedRealComplex<ComplexOrRealType, ComplexOrRealType>::run(io, dmrgSolverParams, opOptions);
 	}
 }
 
@@ -406,9 +360,9 @@ to the main dmrg driver are the following.
 	dmrgSolverParams.options.isSet("TimeStepTargeting"));
 
 	if (isComplex) {
-		mainLoop0<std::complex<RealType> >(io, dmrgSolverParams, options);
+		mainLoop1<std::complex<RealType> >(io, dmrgSolverParams, options);
 	} else {
-		mainLoop0<RealType>(io, dmrgSolverParams, options);
+		mainLoop1<RealType>(io, dmrgSolverParams, options);
 	}
 }
 
