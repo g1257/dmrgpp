@@ -30,6 +30,8 @@ if ($isAinur) {
 	$centralSite =~ s/ *\] *; *$//;
 }
 
+print STDERR "Central site is $centralSite\n";
+
 my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $geometrySubName};
 
 $hptr->{"centralSite"} = $centralSite;
