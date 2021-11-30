@@ -21,10 +21,7 @@ public:
 		PsimagLite::String tmp;
 		io.readline(tmp, label);
 		PsimagLite::split(vdata_, tmp, ",");
-		std::transform(vdata_.begin(),
-		               vdata_.end(),
-		               vdata_.begin(),
-		               [](PsimagLite::String s){ return toLower(s); });
+		lowerAll();
 	}
 
 	void operator+=(PsimagLite::String moreData)
@@ -32,6 +29,7 @@ public:
 		VectorStringType vmore;
 		PsimagLite::split(vmore, moreData, ",");
 		vdata_.insert(vdata_.end(), vmore.begin(), vmore.end());
+		lowerAll();
 	}
 
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
@@ -58,6 +56,14 @@ private:
 		std::transform(data.begin(), data.end(), data.begin(),
 		               [](unsigned char c){ return std::tolower(c); });
 		return data;
+	}
+
+	void lowerAll()
+	{
+		std::transform(vdata_.begin(),
+		               vdata_.end(),
+		               vdata_.begin(),
+		               [](PsimagLite::String s){ return toLower(s); });
 	}
 
 	VectorStringType vdata_;
