@@ -34,14 +34,14 @@ public:
 		if (site2 >= 0 &&
 		        site3Split.hasSiteString &&
 		        static_cast<SizeType>(site2) !=
-		        OneOperatorSpecType::strToNumberOfFail(site3Split.siteString))
+		        OneOperatorSpecType::strToNumberOrFail(site3Split.siteString))
 			err(PsimagLite::String(__FILE__) +
 			    " FATAL , delete site from " + copyOfOpLabel + "\n");
 
 		opLabel = site3Split.root;
 
 		if (site2 < 0 && site3Split.hasSiteString)
-			site2 = OneOperatorSpecType::strToNumberOfFail(site3Split.siteString);
+			site2 = OneOperatorSpecType::strToNumberOrFail(site3Split.siteString);
 
 		SizeType site = (site2 < 0) ? 0 : site2;
 

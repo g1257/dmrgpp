@@ -102,10 +102,15 @@ public:
 			}
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
-			if (!siteSplit.hasSiteString)
-				err("Each op must have a site\n");
+			if (isGlobalOperator(tmp)) {
+				oneGlobalOperator(siteSplit, ket, tmp);
+				continue;
+			}
 
-			SizeType site = OneOperatorSpecType::strToNumberOfFail(siteSplit.siteString);
+			if (!siteSplit.hasSiteString)
+				err("This op must have a site\n");
+
+			SizeType site = OneOperatorSpecType::strToNumberOrFail(siteSplit.siteString);
 			// can only apply at center of orthogonality (coo)
 			if (!siteCanBeApplied(site)) {
 				newVstr.push_back(tmp);
@@ -198,6 +203,19 @@ private:
 		return (b1 || b2 || site == currentCoO);
 	}
 
+	void oneGlobalOperator(const SiteSplitType& siteSplit,
+	                       PsimagLite::String srcKet,
+	                       PsimagLite::String mangledOp)
+	{
+		if (siteSplit.hasSiteString)
+			err("Global operators cannot have a site\n");
+		const PsimagLite::String destKet = mangledOp + "*" + srcKet;
+		const VectorWithOffsetType& srcVwo = aux_.getCurrentVectorConst(srcKet);
+		PsimagLite::String internalName = aux_.createTemporaryVector(destKet);
+		VectorWithOffsetType& destVwo = aux_.getCurrentVectorNonConst(internalName);
+		destVwo = srcVwo; // replace with exp(iHt) TODO FIXME
+	}
+
 	void oneOperator(PsimagLite::String destKet,
 	                 PsimagLite::String srcKet,
 	                 const OperatorType& op,
@@ -264,6 +282,11 @@ private:
 		strFactor_ = "(" + ttos(freal) + "+" + ttos(fimag) + "i)";
 
 		if (freal == 1 && fimag == 0) strFactor_ = "";
+	}
+
+	static bool isGlobalOperator(PsimagLite::String op)
+	{
+		return (op == "TimeEvolve@0@");
 	}
 
 	// ATTENTION: has assignment operator
