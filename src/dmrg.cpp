@@ -47,6 +47,7 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
 {
 	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
 	        ParametersForSolverType;
+#ifndef MIN_COMPILE
 	if (dmrgSolverParams.options.isSet("ChebyshevSolver")) {
 		typedef PsimagLite::ChebyshevSolver<ParametersForSolverType,
 		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
@@ -55,6 +56,9 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
 		                                           io,
 		                                           opOptions);
 	} else {
+#else
+	{
+#endif
 		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
 		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
 		mainLoop4<SolverType,VectorWithOffsetType>(geometry,
@@ -79,6 +83,7 @@ void mainLoop2(InputNgType::Readable& io,
 	SuperGeometryType geometry(io);
 	if (dmrgSolverParams.options.isSet("printgeometry"))
 		std::cout<<geometry;
+#ifndef MIN_COMPILE
 
 	if (dmrgSolverParams.options.isSet("vectorwithoffsets")) {
 		typedef VectorWithOffsets<SparseElementType, QnType> VectorWithOffsetType;
@@ -87,6 +92,9 @@ void mainLoop2(InputNgType::Readable& io,
 		                                                  io,
 		                                                  opOptions);
 	} else {
+#else
+	{
+#endif
 		typedef VectorWithOffset<SparseElementType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
 		                                                  dmrgSolverParams,
@@ -111,14 +119,16 @@ void mainLoop1(InputNgType::Readable& io,
 	        InputNgType::Readable,
 	        SuperGeometryType> ModelBaseType;
 
-	if (dmrgSolverParams.options.isSet("MatrixVectorStored")) {
+#ifndef MIN_COMPILE
+	if (dmrgSolverParams.options.isSet("MatrixVectorStored"))
 		mainLoop2<MatrixVectorStored<ModelBaseType> >(io, dmrgSolverParams, opOptions);
-	} else if (dmrgSolverParams.options.isSet("MatrixVectorOnTheFly")) {
+	else if (dmrgSolverParams.options.isSet("MatrixVectorOnTheFly"))
 
 		mainLoop2<MatrixVectorOnTheFly<ModelBaseType> >(io, dmrgSolverParams, opOptions);
-	} else {
+	else
+#endif
 		mainLoop2<MatrixVectorKron<ModelBaseType> >(io, dmrgSolverParams, opOptions);
-	}
+
 }
 
 int main(int argc, char **argv)
@@ -359,10 +369,9 @@ to the main dmrg driver are the following.
 	bool isComplex = (dmrgSolverParams.options.isSet("useComplex") ||
 	dmrgSolverParams.options.isSet("TimeStepTargeting"));
 
-	if (isComplex) {
+	if (isComplex)
 		mainLoop1<std::complex<RealType> >(io, dmrgSolverParams, options);
-	} else {
+	else
 		mainLoop1<RealType>(io, dmrgSolverParams, options);
-	}
 }
 

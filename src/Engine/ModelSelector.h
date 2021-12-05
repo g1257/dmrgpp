@@ -47,12 +47,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_SELECTOR_H
 #define MODEL_SELECTOR_H
 
-#define ALL_MODELS 1
 #include <stdexcept>
 #include "ProgramGlobals.h"
 #include "Utils.h"
 #include "../Models/Heisenberg/ModelHeisenberg.h"
-#if ALL_MODELS
+#ifndef MIN_MODELS
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
@@ -96,7 +95,7 @@ class ModelSelector {
 
 	// start models here:
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
-#if ALL_MODELS
+#ifndef MIN_MODELS
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
@@ -153,7 +152,7 @@ public:
 		} else if (name_ == "Aklt") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Aklt");
 		}
-#if ALL_MODELS
+#ifndef MIN_MODELS
 		else if (name_ == "HubbardOneBand") {
 			model_ = new ModelHubbardType(solverParams, io, geometry, "");
 		} else if (name_ == "HeisenbergAncillaC") {

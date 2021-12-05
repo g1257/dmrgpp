@@ -39,14 +39,9 @@ public:
 	    : finalized_(false), aux_(aux), factor_(1.0), vStr_(1, str), nonLocal_(aux)
 	{}
 
-	TermForTargetingExpression& operator=(const TermForTargetingExpression& other)
-	{
-		finalized_ = other.finalized_;
-		factor_ = other.factor_;
-		strFactor_ = other.strFactor_;
-		vStr_ = other.vStr_;
-		return *this;
-	}
+	TermForTargetingExpression& operator=(const TermForTargetingExpression& other) = delete;
+
+	TermForTargetingExpression(const TermForTargetingExpression& other) = delete;
 
 	void assignAndDestroy(TermForTargetingExpression& other)
 	{
@@ -300,7 +295,6 @@ private:
 		return (op == "TimeEvolve@0@");
 	}
 
-	// ATTENTION: has assignment operator
 	bool finalized_;
 	const AuxiliaryType& aux_;
 	ComplexOrRealType factor_;

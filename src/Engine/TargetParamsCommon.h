@@ -144,6 +144,9 @@ public:
 		\item[TSPEnergyForExp] [RealType] Energy to use as origin for the exponential
 		in the time evolution.
 		*/
+
+		if (targeting == "TargetingExpression") return;
+
 		VectorStringType sitesStr;
 		io.read(sitesStr, "TSPSites");
 		vecstringToVecnumbers(sites_, sitesStr);

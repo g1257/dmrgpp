@@ -115,6 +115,8 @@ public:
 		Note that SuzukiTrotter is currently very experimental and unsupported.
 		*/
 
+		if (targeting == "TargetingExpression") return;
+
 		io.readline(tau_,"TSPTau=");
 		SizeType timeSteps = 0;
 		io.readline(timeSteps, "TSPTimeSteps=");
