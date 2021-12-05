@@ -90,7 +90,7 @@ struct OneOperatorSpec {
 		                     [](char c) { return !std::isdigit(c); }) == s.end();
 	}
 
-	static SizeType strToNumberOfFail(String s)
+	static SizeType strToNumberOrFail(String s)
 	{
 		if (!isNonNegativeInteger(s))
 			err("string " + s + " is not a NonNegativeInteger\n");

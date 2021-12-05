@@ -6,6 +6,59 @@
 namespace PsimagLite {
 
 template<typename ItemSpecType>
+class AssignAndDestroy {
+
+public:
+
+	typedef typename ItemSpecType::ResultType T;
+	typedef typename ItemSpecType::ComplexOrRealType ComplexOrRealType;
+
+	AssignAndDestroy(const T& t) : t_(t) {}
+
+	void assignBackward(T& t2) const
+	{
+		t2 = t_;
+	}
+
+	void assign(const AssignAndDestroy& t2)
+	{
+		t_ = t2.t_;
+	}
+
+	void plusBackward(T& t2) const
+	{
+		 t2 += t_;
+	}
+
+	void multiply(const AssignAndDestroy& t2)
+	{
+		t_ *= (t2.t_);
+	}
+
+	void multiplyScalar(const ComplexOrRealType& scalar)
+	{
+		t_ *= scalar;
+	}
+
+	const bool isEmpty() const { return ItemSpecType::isEmpty(t_); }
+
+	const bool metaEqual(const T& t2) const
+	{
+		return ItemSpecType::metaEqual(t_, t2);
+	}
+
+	static bool metaEqual(const AssignAndDestroy& t1, const AssignAndDestroy& t2)
+	{
+		return ItemSpecType::metaEqual(t1.t_, t2.t_);
+	}
+
+private:
+
+	T t_;
+};
+
+template<typename ItemSpecType,
+         typename AssignAndDestroyType = AssignAndDestroy<ItemSpecType> >
 class CanonicalExpression {
 
 	typedef typename ItemSpecType::ResultType ResultType;
@@ -33,18 +86,19 @@ public:
 		//VectorStringType vecStr;
 		const SizeType numberOfTerms = quasiCanonical.numberOfTerms();
 
+
 		for (SizeType i = 0; i < numberOfTerms; ++i) {
-			ResultType term = resultEmpty;
-			bool isNotEmpty = procCanonicalTerm(term, quasiCanonical, i, aux);
+			AssignAndDestroyType assignAndDestroy(resultEmpty);// t_ = resultEmpty
+			bool isNotEmpty = procCanonicalTerm(assignAndDestroy, quasiCanonical, i, aux);
 			if (!isNotEmpty)
 				continue;
-			if (!ItemSpecType::metaEqual(term, result))
+			if (!assignAndDestroy.metaEqual(result))
 				err("CanonicalExpression: metas not equal\n");
 
 			if (i == 0)
-				result = term;
+				assignAndDestroy.assignBackward(result);  // result = t_;
 			else
-				result += term;
+				assignAndDestroy.plusBackward(result); // result += t_;
 		}
 
 		return (ItemSpecType::isEmpty(result)) ? false : true;
@@ -52,7 +106,7 @@ public:
 
 private:
 
-	bool procCanonicalTerm(ResultType& term,
+	bool procCanonicalTerm(AssignAndDestroyType& assignAndDestroy,
 	                       QuasiCanonicalType& quasiCanonical,
 	                       SizeType ind,
 	                       AuxiliaryType& aux) const
@@ -63,17 +117,17 @@ private:
 		split(vecStr, termCanonical, "*");
 
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
-			procCanonicalFactor(term, factor, vecStr[i], quasiCanonical, aux);
+			procCanonicalFactor(assignAndDestroy, factor, vecStr[i], quasiCanonical, aux);
 		}
 
-		if (ItemSpecType::isEmpty(term))
+		if (assignAndDestroy.isEmpty())
 			return false;
 
-		term *= factor;
+		assignAndDestroy.multiplyScalar(factor);
 		return true;
 	}
 
-	void procCanonicalFactor(ResultType& prev,
+	void procCanonicalFactor(AssignAndDestroyType& prev,
 	                         ComplexOrRealType& factor,
 	                         String termStr,
 	                         QuasiCanonicalType& quasiCanonical,
@@ -100,16 +154,16 @@ private:
 			return;
 		}
 
-		ResultType term = itemSpec_(termStr, aux);
-		if (ItemSpecType::isEmpty(prev)) {
-			prev = term;
+		AssignAndDestroyType term(itemSpec_(termStr, aux));
+		if (prev.isEmpty()) {
+			prev.assign(term); // prev = term
 			return;
 		}
 
-		if (!ItemSpecType::metaEqual(term, prev))
+		if (!AssignAndDestroyType::metaEqual(term, prev))
 			err("CanonicalExpression: metas not equal\n");
 
-		prev *= term;
+		prev.multiply(term); // prev *= term
 	}
 
 	const ItemSpecType& itemSpec_;
