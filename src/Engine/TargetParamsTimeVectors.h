@@ -98,7 +98,6 @@ public:
 	                        PsimagLite::String targeting,
 	                        const ModelType& model)
 	    : BaseType(io, targeting, model),
-	      timeSteps_(0),
 	      advanceEach_(0),
 	      algorithm_(BaseType::AlgorithmEnum::KRYLOV),
 	      tau_(0),
@@ -117,7 +116,9 @@ public:
 		*/
 
 		io.readline(tau_,"TSPTau=");
-		io.readline(timeSteps_,"TSPTimeSteps=");
+		SizeType timeSteps = 0;
+		io.readline(timeSteps, "TSPTimeSteps=");
+		times_.resize(timeSteps);
 		io.readline(advanceEach_,"TSPAdvanceEach=");
 		PsimagLite::String s="";
 
@@ -138,9 +139,14 @@ public:
 		} catch (std::exception&) {}
 	}
 
-	virtual SizeType timeSteps() const
+	virtual VectorRealType& times()
 	{
-		return timeSteps_;
+		return times_;
+	}
+
+	virtual const VectorRealType& times() const
+	{
+		return times_;
 	}
 
 	virtual SizeType advanceEach() const
@@ -170,7 +176,7 @@ public:
 
 private:
 
-	SizeType timeSteps_;
+	VectorRealType times_;
 	SizeType advanceEach_;
 	typename BaseType::AlgorithmEnum algorithm_;
 	RealType tau_;

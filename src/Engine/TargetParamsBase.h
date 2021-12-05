@@ -209,9 +209,14 @@ public:
 		return unimplemented("maxTime");
 	}
 
-	virtual SizeType timeSteps() const
+	virtual VectorRealType& times()
 	{
-		return unimplementedInt("timeSteps");
+		throw PsimagLite::RuntimeError("times() unimplemented\n");
+	}
+
+	virtual const VectorRealType& times() const
+	{
+		throw PsimagLite::RuntimeError("times() unimplemented\n");
 	}
 
 	virtual bool noOperator() const

@@ -147,7 +147,6 @@ public:
 
 	TimeVectorsKrylov(const SizeType& currentTimeStep,
 	                  const TargetParamsType& tstStruct,
-	                  const VectorRealType& times,
 	                  VectorVectorWithOffsetType& targetVectors,
 	                  const ModelType& model,
 	                  const WaveFunctionTransfType& wft,
@@ -156,7 +155,6 @@ public:
 	    : BaseType(model, lrs, wft),
 	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
-	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
 	      wft_(wft),
@@ -171,6 +169,8 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             const typename BaseType::ExtraData& extra)
 	{
+		const VectorRealType& times = tstStruct_.times();
+
 		if (indices.size() < 2)
 			err("TimeVectorsKrylov: indices.size() must be greater than 1\n");
 
@@ -200,7 +200,7 @@ public:
 		if (ptr0 != ptr1)
 			targetVectors_[indices[0]] = phi;
 
-		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
+		if (times.size() == 1 && fabs(times[0])<1e-10) return;
 
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());
@@ -237,12 +237,14 @@ private:
 	                       const VectorVectorRealType& eigs,
 	                       typename PsimagLite::Vector<SizeType>::Type steps)
 	{
+		const VectorRealType& times = tstStruct_.times();
+
 		for (SizeType i = 1; i < indices.size(); ++i) {
 			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
 			targetVectors_[ii] = phi;
-			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
-			calcTargetVector(targetVectors_[ii], phi, T, V, Eg, eigs, steps, i);
+			// Only time differences here (i.e. extra.times[i] not extra.times[i]+currentTime_)
+			calcTargetVector(targetVectors_[ii], phi, T, V, Eg, eigs, steps, i, times);
 		}
 	}
 
@@ -253,11 +255,12 @@ private:
 	                      RealType Eg,
 	                      const VectorVectorRealType& eigs,
 	                      typename PsimagLite::Vector<SizeType>::Type steps,
-	                      SizeType timeIndex)
+	                      SizeType timeIndex,
+	                      const VectorRealType& times)
 	{
 		v = phi;
 		for (SizeType ii = 0;ii < phi.sectors(); ++ii) {
-			const RealType time = times_[timeIndex];
+			const RealType time = times[timeIndex];
 			const RealType timeDirection = tstStruct_.timeDirection();
 			const VectorRealType& eigsii = eigs[ii];
 			auto action = [eigsii, Eg, time, timeDirection](SizeType k)
@@ -318,7 +321,6 @@ private:
 
 	const SizeType& currentTimeStep_;
 	const TargetParamsType& tstStruct_;
-	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;

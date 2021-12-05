@@ -130,9 +130,8 @@ public:
 	      tstStruct_(ioIn, targeting, model),
 	      wft_(wft),
 	      progress_(targeting),
-	      times_(tstStruct_.timeSteps()),
-	      weight_(tstStruct_.timeSteps()),
-	      tvEnergy_(times_.size(),0.0),
+	      weight_(tstStruct_.times().size()),
+	      tvEnergy_(tstStruct_.times().size(),0.0),
 	      gsWeight_(tstStruct_.gsWeight())
 	{
 		if (!wft.isEnabled())
@@ -142,12 +141,12 @@ public:
 
 		RealType tau =tstStruct_.tau();
 		RealType sum = 0;
-		SizeType n = times_.size();
+		SizeType n = tstStruct_.times().size();
 
 		RealType factor = (n+4.0)/(n+2.0);
 		factor *= (1.0 - gsWeight_);
 		for (SizeType i=0;i<n;i++) {
-			times_[i] = i*tau/(n-1);
+			tstStruct_.times()[i] = i*tau/(n-1);
 			weight_[i] = factor/(n+4);
 			sum += weight_[i];
 		}
@@ -161,12 +160,12 @@ public:
 		sum += gsWeight_;
 		assert(fabs(sum-1.0)<1e-5);
 
-		this->common().aoe().initTimeVectors(tstStruct_, times_, ioIn);
+		this->common().aoe().initTimeVectors(tstStruct_, ioIn);
 	}
 
 	SizeType sites() const { return tstStruct_.sites(); }
 
-	SizeType targets() const { return tstStruct_.timeSteps(); }
+	SizeType targets() const { return tstStruct_.times().size(); }
 
 	RealType weight(SizeType i) const
 	{
@@ -258,7 +257,7 @@ private:
 		                            loopNumber,
 		                            tstStruct_);
 
-		PairType startEnd(0,times_.size());
+		PairType startEnd(0, tstStruct_.times().size());
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
 		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
@@ -348,7 +347,6 @@ private:
 	TargetParamsType tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
-	VectorRealType times_;
 	VectorRealType weight_;
 	mutable VectorRealType tvEnergy_;
 	RealType gsWeight_;

@@ -178,19 +178,17 @@ public:
 
 		tstStruct2_ = new TargetParams2Type(ioIn, "TargetingRixsDynamic", model);
 
-		times_.resize(tstStruct2_->timeSteps());
-
 		RealType tau = tstStruct2_->tau();
-		SizeType n = times_.size();
+		SizeType n = tstStruct2_->times().size();
 		if (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME) {
 			if (n != 5)
 				err("TargetingRixsDynamic with KrylovTime: number of TimeSteps must be 5\n");
 		}
 
 		for (SizeType i = 0; i < n; ++i)
-			times_[i] = i*tau/(n - 1);
+			tstStruct2_->times()[i] = i*tau/(n - 1);
 
-		this->common().aoe().initTimeVectors(*tstStruct2_, times_, ioIn);
+		this->common().aoe().initTimeVectors(*tstStruct2_, ioIn);
 	}
 
 	~TargetingRixsDynamic()
@@ -711,7 +709,6 @@ private:
 	InputValidatorType& ioIn_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	VectorRealType times_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;

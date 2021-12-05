@@ -19,12 +19,14 @@ public:
 	PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef typename TargetingBaseType::TargetParamsType TargetParamsType;
 
 	AuxForTargetingExpression(const ApplyOperatorExpressionType& aoe,
 	                          const ModelType& model,
 	                          const LeftRightSuperType& lrs,
-	                          ProgramGlobals::DirectionEnum dir)
-	    : aoe_(aoe), model_(model), lrs_(lrs), direction_(dir)
+	                          ProgramGlobals::DirectionEnum dir,
+	                          const TargetParamsType& tstStruct)
+	    : aoe_(aoe), model_(model), lrs_(lrs), direction_(dir), tstStruct_(tstStruct)
 	{}
 
 	const ApplyOperatorExpressionType& aoe() const { return aoe_; }
@@ -34,6 +36,8 @@ public:
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
 	ProgramGlobals::DirectionEnum direction() const { return direction_; }
+
+	const TargetParamsType& tstStruct() const { return tstStruct_; }
 
 	const VectorWithOffsetType& getCurrentVectorConst(PsimagLite::String braOrKet) const
 	{
@@ -88,6 +92,7 @@ private:
 	const ModelType& model_;
 	const LeftRightSuperType lrs_;
 	ProgramGlobals::DirectionEnum direction_;
+	const TargetParamsType& tstStruct_;
 	mutable VectorVectorWithOffsetType tempVectors_;
 	mutable VectorStringType tempNames_;
 };

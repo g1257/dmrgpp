@@ -170,8 +170,7 @@ public:
 	      wft_(wft),
 	      quantumSector_(quantumSector),
 	      progress_("TargetingMetts"),
-	      betas_(mettsStruct_.timeSteps()),
-	      weight_(betas_.size() + 1),
+	      weight_(mettsStruct_.times().size() + 1),
 	      mettsStochastics_(model,mettsStruct_.rngSeed,mettsStruct_.pure),
 	      mettsCollapse_(mettsStochastics_,lrs,mettsStruct_),
 	      prevDirection_(ProgramGlobals::DirectionEnum::INFINITE),
@@ -182,13 +181,13 @@ public:
 
 		if (!wft.isEnabled()) err(" TargetingMetts needs an enabled wft\n");
 
-		const RealType tau = mettsStruct_.tau()/(mettsStruct_.timeSteps()-1);
-		for (SizeType i = 0; i< betas_.size(); ++i)
-			betas_[i] = i*tau;
+		const RealType tau = mettsStruct_.tau()/(mettsStruct_.times().size()-1);
+		for (SizeType i = 0; i< mettsStruct_.times().size(); ++i)
+			mettsStruct_.times()[i] = i*tau;
 
 		setWeights();
 
-		this->common().aoe().initTimeVectors(mettsStruct_, betas_, ioIn);
+		this->common().aoe().initTimeVectors(mettsStruct_, ioIn);
 	}
 
 	~TargetingMetts()
@@ -202,7 +201,7 @@ public:
 
 	SizeType sites() const { return mettsStruct_.sites(); }
 
-	SizeType targets() const { return mettsStruct_.timeSteps() + 1; }
+	SizeType targets() const { return mettsStruct_.times().size() + 1; }
 
 	RealType weight(SizeType i) const
 	{
@@ -238,7 +237,7 @@ public:
 			utils::blockUnion(sites,block1,block2);
 		else sites = block1;
 
-		SizeType n1 = mettsStruct_.timeSteps();
+		SizeType n1 = mettsStruct_.times().size();
 
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE) {
 			updateStochastics(block1,block2);
@@ -403,7 +402,7 @@ private:
 			this->common().aoe().setCurrentTimeStep(0);
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			SizeType n1 = mettsStruct_.timeSteps();
+			SizeType n1 = mettsStruct_.times().size();
 			RealType x = norm(this->common().aoe().targetVectors()[n1]);
 			msg<<"Changing direction, setting collapsed with norm="<<x;
 			progress_.printline(msgg, std::cout);
@@ -441,7 +440,7 @@ private:
 		        this->common().aoe().time() >= mettsStruct_.beta) {
 			this->common().setAllStagesTo(StageEnumType::COLLAPSE);
 			sitesCollapsed_.clear();
-			SizeType n1 = mettsStruct_.timeSteps();
+			SizeType n1 = mettsStruct_.times().size();
 			this->common().aoe().targetVectors(n1).clear();
 			timesWithoutAdvancement_ = 0;
 			printAdvancement(timesWithoutAdvancement_);
@@ -859,7 +858,6 @@ private:
 	const WaveFunctionTransfType& wft_;
 	const QnType& quantumSector_;
 	PsimagLite::ProgressIndicator progress_;
-	VectorRealType betas_;
 	VectorRealType weight_;
 	RealType gsWeight_;
 	MettsStochasticsType mettsStochastics_;

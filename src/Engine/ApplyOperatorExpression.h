@@ -448,7 +448,6 @@ public:
 	}
 
 	void initTimeVectors(const TargetParamsType& tstStruct,
-	                     const VectorRealType& times,
 	                     InputValidatorType& ioIn)
 	{
 		const LeftRightSuperType& lrs = targetHelper_.lrs();
@@ -462,7 +461,6 @@ public:
 		case TargetParamsType::AlgorithmEnum::KRYLOV:
 			timeVectorsBase_ = new TimeVectorsKrylovType(currentTimeStep_,
 			                                             tstStruct,
-			                                             times,
 			                                             targetVectors_,
 			                                             model,
 			                                             wft,
@@ -472,7 +470,6 @@ public:
 		case TargetParamsType::AlgorithmEnum::CHEBYSHEV:
 			timeVectorsBase_ = new TimeVectorsChebyshevType(currentTimeStep_,
 			                                                tstStruct,
-			                                                times,
 			                                                targetVectors_,
 			                                                model,
 			                                                wft,
@@ -482,7 +479,6 @@ public:
 		case TargetParamsType::AlgorithmEnum::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTimeStep_,
 			                                                 tstStruct,
-			                                                 times,
 			                                                 targetVectors_,
 			                                                 model,
 			                                                 wft,
@@ -491,7 +487,6 @@ public:
 		case TargetParamsType::AlgorithmEnum::SUZUKI_TROTTER:
 			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(currentTimeStep_,
 			                                                    tstStruct,
-			                                                    times,
 			                                                    targetVectors_,
 			                                                    model,
 			                                                    wft,
@@ -824,7 +819,7 @@ private:
 			SizeType advance = indexNoAdvance_;
 
 			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE && timeVectorsBase_) {
-				SizeType timeSteps = tstStruct.timeSteps();
+				SizeType timeSteps = tstStruct.times().size();
 				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
 			}
 

@@ -3,6 +3,7 @@
 #include "Vector.h"
 #include "AuxForTargetingExpression.h"
 #include "OneOperatorSpec.h"
+#include "NonLocalForTargetingExpression.h"
 
 namespace Dmrg {
 
@@ -29,12 +30,13 @@ public:
 	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::BorderEnumType BorderEnumType;
+	typedef NonLocalForTargetingExpression<TargetingBaseType> NonLocalForTargetingExpressionType;
 
 	TermForTargetingExpression(const AuxiliaryType& aux)
-	    : finalized_(false), aux_(aux), factor_(1.0) {}
+	    : finalized_(false), aux_(aux), factor_(1.0), nonLocal_(aux) {}
 
 	TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
-	    : finalized_(false), aux_(aux), factor_(1.0), vStr_(1, str)
+	    : finalized_(false), aux_(aux), factor_(1.0), vStr_(1, str), nonLocal_(aux)
 	{}
 
 	TermForTargetingExpression& operator=(const TermForTargetingExpression& other)
@@ -43,6 +45,7 @@ public:
 		factor_ = other.factor_;
 		strFactor_ = other.strFactor_;
 		vStr_ = other.vStr_;
+		nonLocal_ = other.nonLocal_;
 		return *this;
 	}
 
@@ -295,6 +298,7 @@ private:
 	ComplexOrRealType factor_;
 	PsimagLite::String strFactor_;
 	VectorStringType vStr_;
+	NonLocalForTargetingExpressionType nonLocal_;
 };
 }
 #endif // TERMFORTARGETINGEXPRESSION_H

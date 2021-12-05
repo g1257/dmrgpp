@@ -142,7 +142,6 @@ public:
 
 	TimeVectorsChebyshev(const SizeType& currentTimeStep,
 	                     const TargetParamsType& tstStruct,
-	                     const VectorRealType& times,
 	                     VectorVectorWithOffsetType& targetVectors,
 	                     const ModelType& model,
 	                     const WaveFunctionTransfType& wft,
@@ -151,7 +150,6 @@ public:
 	    : BaseType(model, lrs, wft),
 	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
-	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
 	      wft_(wft),
@@ -170,6 +168,8 @@ public:
 	                             const VectorWithOffsetType& phi,
 	                             const typename BaseType::ExtraData& extra)
 	{
+		const VectorRealType& times = tstStruct_.times();
+
 		if (extra.wftAndAdvanceIfNeeded) {
 			const SizeType noAdvance = indices[0];
 			VectorWithOffsetType phiNew;
@@ -217,7 +217,7 @@ public:
 		if (ptr0 != ptr1)
 			targetVectors_[indices[0]] = phi;
 
-		if (times_.size() == 1 && fabs(times_[0])<1e-10) return;
+		if (times.size() == 1 && fabs(times[0])<1e-10) return;
 
 		if (timeHasAdvanced_) {
 			for (SizeType i = 0; i < n - 1; ++i) {
@@ -487,7 +487,6 @@ private:
 
 	const SizeType& currentTimeStep_;
 	const TargetParamsType& tstStruct_;
-	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;

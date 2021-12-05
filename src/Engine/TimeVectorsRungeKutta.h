@@ -130,7 +130,6 @@ public:
 
 	TimeVectorsRungeKutta(const SizeType& currentTimeStep,
 	                      const TargetParamsType& tstStruct,
-						  const VectorRealType& times,
 						  typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
 						  const ModelType& model,
 						  const WaveFunctionTransfType& wft,
@@ -139,7 +138,6 @@ public:
 	      progress_("TimeVectorsRungeKutta"),
 	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
-		  times_(times),
 		  targetVectors_(targetVectors),
 		  model_(model),
 		  wft_(wft),
@@ -161,7 +159,7 @@ public:
 		progress_.printline(msgg, std::cout);
 
 		// set non-zero sectors
-		for (SizeType i=0;i<times_.size();i++) targetVectors_[i] = phi;
+		for (SizeType i=0;i<tstStruct_.times().size();i++) targetVectors_[i] = phi;
 
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i = phi.sector(ii);
@@ -218,18 +216,19 @@ private:
 	                     SizeType i0,
 	                     RealType currentTime)
 	{
+		const VectorRealType& times = tstStruct_.times();
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi0(total);
 		phi.extract(phi0,i0);
 		FunctionForRungeKutta f(Eg,tstStruct_.timeDirection(),lrs_,currentTime,model_,phi,i0);
 
-		RealType epsForRK = tstStruct_.tau()/(times_.size()-1.0);
+		RealType epsForRK = tstStruct_.tau()/(times.size()-1.0);
 		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType>
 		        rungeKutta(f,epsForRK);
 
 		typename PsimagLite::Vector<TargetVectorType>::Type result;
-		rungeKutta.solve(result,0.0,times_.size(),phi0);
-		assert(result.size()==times_.size());
+		rungeKutta.solve(result,0.0,times.size(),phi0);
+		assert(result.size()==times.size());
 
 		const SizeType n = indices.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -242,7 +241,6 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	const SizeType& currentTimeStep_;
 	const TargetParamsType& tstStruct_;
-	const VectorRealType& times_;
 	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;

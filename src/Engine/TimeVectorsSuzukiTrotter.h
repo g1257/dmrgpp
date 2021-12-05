@@ -128,7 +128,6 @@ public:
 
 	TimeVectorsSuzukiTrotter(const SizeType& currentTimeStep,
 	                         const TargetParamsType& tstStruct,
-	                         const VectorRealType& times,
 	                         VectorVectorWithOffsetType& targetVectors,
 	                         const ModelType& model,
 	                         const WaveFunctionTransfType& wft,
@@ -137,7 +136,6 @@ public:
 	      progress_("TimeVectorsSuzukiTrotter"),
 	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
-	      times_(times),
 	      targetVectors_(targetVectors),
 	      model_(model),
 	      wft_(wft),
@@ -163,10 +161,10 @@ public:
 		targetVectors_[0] = phi;
 
 		bool returnFlag = false;
-		if (times_.size() != indices.size())
+		if (tstStruct_.times().size() != indices.size())
 			err("TimeVectorsSuzukiTrotter: times.size() != indices.size()\n");
 
-		for (SizeType i = 1; i < times_.size(); ++i) {
+		for (SizeType i = 1; i < tstStruct_.times().size(); ++i) {
 			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
 			if (targetVectors_[ii].size()==0 || !extraData.allOperatorsApplied) {
@@ -243,12 +241,12 @@ public:
 			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
 			VectorWithOffsetType src = targetVectors_[ii];
-			// Only time differences here (i.e. times_[i] not times_[i]+currentTime_)
+			// Only time differences here (i.e. extra.times[i] not extra.times[i]+currentTime_)
 			calcTargetVector(targetVectors_[ii],
 			                 Eg,
 			                 src,
 			                 extraData.dir,
-			                 times_[i],
+			                 tstStruct_.times()[i],
 			                 transformS,
 			                 transformST,
 			                 transformE,
@@ -284,7 +282,7 @@ private:
 
 	void wftAll(const VectorSizeType& block)
 	{
-		for (SizeType i=1;i<times_.size();i++)
+		for (SizeType i=1;i<tstStruct_.times().size();i++)
 			wftOne(i,block);
 	}
 
@@ -588,7 +586,6 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	const SizeType& currentTimeStep_;
 	const TargetParamsType& tstStruct_;
-	const VectorRealType& times_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
