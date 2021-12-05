@@ -5,6 +5,7 @@
 #include "AuxForTargetingExpression.h"
 #include "TermForTargetingExpression.h"
 #include "GetBraOrKet.h"
+#include "PackIndices.h"
 
 namespace Dmrg {
 
@@ -132,7 +133,11 @@ public:
 
 	SizeType size() const { return terms_.size(); }
 
-	const AuxiliaryType& aux() const { return aux_; }
+	AuxiliaryType& aux()
+	{
+		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
+		return *auxPtr;
+	}
 
 	int pIndex() const
 	{

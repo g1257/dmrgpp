@@ -28,8 +28,12 @@ public:
 	public:
 
 		AssignAndDestroy(const AlgebraType& empty)
-		    : t_(new AlgebraType(empty.aux())), isValid_(true)
+		    : isValid_(true)
 		{
+			AlgebraType* emptyPtr = const_cast<AlgebraType*>(&empty);
+
+			t_ = new AlgebraType(emptyPtr->aux());
+
 			if (!empty.isEmpty())
 				err("AssignAndDestroy: Cannot start with non empty algebra\n");
 		}
@@ -108,7 +112,7 @@ public:
 		bool isValid_;
 	};
 
-	PairStringAuxType operator()(PsimagLite::String str, const AuxiliaryType& aux) const
+	PairStringAuxType operator()(PsimagLite::String str, AuxiliaryType& aux) const
 	{
 		return PairStringAuxType(str, aux);
 	}

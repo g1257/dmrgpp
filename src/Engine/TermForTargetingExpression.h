@@ -108,7 +108,7 @@ public:
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
 			if (isGlobalOperator(tmp)) {
-				oneGlobalOperator(siteSplit, ket, tmp);
+				nonLocal_.timeEvolve(siteSplit, ket, tmp, getCurrentCoO());
 				continue;
 			}
 
@@ -207,19 +207,6 @@ private:
 		                 aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 
 		return (b1 || b2 || site == currentCoO);
-	}
-
-	void oneGlobalOperator(const SiteSplitType& siteSplit,
-	                       PsimagLite::String srcKet,
-	                       PsimagLite::String mangledOp)
-	{
-		if (siteSplit.hasSiteString)
-			err("Global operators cannot have a site\n");
-		const PsimagLite::String destKet = mangledOp + "*" + srcKet;
-		const VectorWithOffsetType& srcVwo = aux_.getCurrentVectorConst(srcKet);
-		PsimagLite::String internalName = aux_.createTemporaryVector(destKet);
-		VectorWithOffsetType& destVwo = aux_.getCurrentVectorNonConst(internalName);
-		destVwo = srcVwo; // replace with exp(iHt) TODO FIXME
 	}
 
 	void oneOperator(PsimagLite::String destKet,

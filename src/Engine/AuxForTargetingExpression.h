@@ -23,16 +23,24 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename TargetingBaseType::TargetParamsType TargetParamsType;
 	typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
+	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
 	AuxForTargetingExpression(const ApplyOperatorExpressionType& aoe,
 	                          const LeftRightSuperType& lrs,
 	                          ProgramGlobals::DirectionEnum dir,
 	                          const TargetParamsType& tstStruct,
-	                          InputValidatorType& io)
-	    : aoe_(aoe), lrs_(lrs), direction_(dir), tstStruct_(tstStruct), io_(io)
+	                          RealType Eg)
+	    : aoe_(aoe), lrs_(lrs), direction_(dir), tstStruct_(tstStruct), Eg_(Eg)
 	{}
 
 	const ApplyOperatorExpressionType& aoe() const { return aoe_; }
+
+	ApplyOperatorExpressionType& aoeNonConst()
+	{
+		ApplyOperatorExpressionType* aoePtr = const_cast<ApplyOperatorExpressionType*>(&aoe_);
+		return *aoePtr;
+	}
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
@@ -40,7 +48,7 @@ public:
 
 	const TargetParamsType& tstStruct() const { return tstStruct_; }
 
-	const InputValidatorType& ioIn() const { return io_; }
+	const RealType& Eg() const { return Eg_; }
 
 	const VectorWithOffsetType& getCurrentVectorConst(PsimagLite::String braOrKet) const
 	{
@@ -95,7 +103,7 @@ private:
 	const LeftRightSuperType lrs_;
 	ProgramGlobals::DirectionEnum direction_;
 	const TargetParamsType& tstStruct_;
-	InputValidatorType& io_;
+	RealType Eg_;
 	mutable VectorVectorWithOffsetType tempVectors_;
 	mutable VectorStringType tempNames_;
 };

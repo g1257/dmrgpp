@@ -636,8 +636,6 @@ public:
 
 	const ModelType& model() const { return targetHelper_.model(); }
 
-	const WaveFunctionTransfType& wft() const { return targetHelper_.wft(); }
-
 private:
 
 	// legacy reading, use only as fallback

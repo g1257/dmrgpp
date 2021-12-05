@@ -174,7 +174,7 @@ public:
 		return gsWeight;
 	}
 
-	void evolve(const VectorRealType&,
+	void evolve(const VectorRealType& energies,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,
@@ -189,7 +189,8 @@ public:
 		assert(total <= pVectors_.size());
 		this->common().aoe().wftSome(site, 0, total);
 
-		computePvectors(direction); // may alter the number of tvs
+		assert(energies.size() > 0);
+		computePvectors(direction, energies[0]); // may alter the number of tvs
 
 		VectorRealType weight;
 		RealType gsWeight = 0;
@@ -238,7 +239,7 @@ private:
 		origPvectors_ = pVectors_.size();
 	}
 
-	void computePvectors(ProgramGlobals::DirectionEnum dir)
+	void computePvectors(ProgramGlobals::DirectionEnum dir, RealType Eg)
 	{
 		if (allOrigPvectorsDone()) {
 			const SizeType tvs = this->common().aoe().targetVectors().size();
@@ -271,8 +272,8 @@ private:
 		                                  this->lrs(),
 		                                  dir,
 		                                  tstStruct_,
-		                                  io_);
-		const AlgebraType opEmpty(aux);
+		                                  Eg);
+		AlgebraType opEmpty(aux);
 		bool needsTrimming = false;
 		PsimagLite::String allpvectors;
 		for (SizeType i = 0; i < total; ++i) {

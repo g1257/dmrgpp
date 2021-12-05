@@ -264,7 +264,7 @@ private:
 		VectorSizeType indices(startEnd.second - startEnd.first);
 		for (SizeType i = 0; i < indices.size(); ++i) indices[i] = i + startEnd.first;
 
-		const bool isLastCall = true;
+		static const bool isLastCall = true;
 		this->common().aoe().calcTimeVectors(indices,
 		                                     Eg,
 		                                     phiNew,
