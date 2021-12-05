@@ -45,8 +45,15 @@ public:
 		factor_ = other.factor_;
 		strFactor_ = other.strFactor_;
 		vStr_ = other.vStr_;
-		nonLocal_ = other.nonLocal_;
 		return *this;
+	}
+
+	void assignAndDestroy(TermForTargetingExpression& other)
+	{
+		finalized_ = other.finalized_;
+		factor_ = other.factor_;
+		strFactor_ = other.strFactor_;
+		vStr_ = other.vStr_;
 	}
 
 	void multiply(const TermForTargetingExpression& other)
@@ -132,9 +139,10 @@ public:
 
 			OneOperatorSpecType opspec(siteSplit.root);
 			const PsimagLite::String destKet = tmp + "*" + ket;
-			OperatorType* op = new OperatorType(aux_.model().naturalOperator(opspec.label,
-			                                                                 0, // FIXME TODO SDHS Immm
-			                                                                 opspec.dof));
+			OperatorType* op = new OperatorType(aux_.aoe(). model().
+			                                    naturalOperator(opspec.label,
+			                                                    0, // FIXME TODO SDHS Immm
+			                                                    opspec.dof));
 			if (opspec.transpose) op->transpose();
 
 			oneOperator(destKet, ket, *op, site);
@@ -197,7 +205,7 @@ private:
 	bool siteCanBeApplied(SizeType site) const
 	{
 		const SizeType currentCoO = getCurrentCoO();
-		const SizeType linSize = aux_.model().superGeometry().numberOfSites();
+		const SizeType linSize = aux_.aoe().model().superGeometry().numberOfSites();
 		const bool b1 = (site == 0 && currentCoO == 1 &&
 		                 aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 		const bool b2 = (site == linSize - 1 && currentCoO == linSize - 2 &&
@@ -241,10 +249,10 @@ private:
 		const SizeType splitSize = aux_.aoe().model().hilbertSize(site);
 
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
-		aux_.model().findOddElectronsOfOneSite(oddElectrons, site);
+		aux_.aoe().model().findOddElectronsOfOneSite(oddElectrons, site);
 		FermionSign fs(aux_.lrs().left(), oddElectrons);
 		bool b1 = (site == 0);
-		SizeType n = aux_.model().superGeometry().numberOfSites();
+		SizeType n = aux_.aoe().model().superGeometry().numberOfSites();
 		assert(n > 2);
 		bool b2 = (site == n - 1);
 		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES

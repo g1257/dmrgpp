@@ -3,6 +3,8 @@
 #include "Vector.h"
 #include "GetBraOrKet.h"
 #include "ProgramGlobals.h"
+#include "InputNg.h"
+#include "InputCheck.h"
 
 namespace Dmrg {
 
@@ -20,24 +22,25 @@ public:
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename TargetingBaseType::TargetParamsType TargetParamsType;
+	typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
 
 	AuxForTargetingExpression(const ApplyOperatorExpressionType& aoe,
-	                          const ModelType& model,
 	                          const LeftRightSuperType& lrs,
 	                          ProgramGlobals::DirectionEnum dir,
-	                          const TargetParamsType& tstStruct)
-	    : aoe_(aoe), model_(model), lrs_(lrs), direction_(dir), tstStruct_(tstStruct)
+	                          const TargetParamsType& tstStruct,
+	                          InputValidatorType& io)
+	    : aoe_(aoe), lrs_(lrs), direction_(dir), tstStruct_(tstStruct), io_(io)
 	{}
 
 	const ApplyOperatorExpressionType& aoe() const { return aoe_; }
-
-	const ModelType& model() const { return model_; }
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
 	ProgramGlobals::DirectionEnum direction() const { return direction_; }
 
 	const TargetParamsType& tstStruct() const { return tstStruct_; }
+
+	const InputValidatorType& ioIn() const { return io_; }
 
 	const VectorWithOffsetType& getCurrentVectorConst(PsimagLite::String braOrKet) const
 	{
@@ -89,10 +92,10 @@ public:
 private:
 
 	const ApplyOperatorExpressionType& aoe_;
-	const ModelType& model_;
 	const LeftRightSuperType lrs_;
 	ProgramGlobals::DirectionEnum direction_;
 	const TargetParamsType& tstStruct_;
+	InputValidatorType& io_;
 	mutable VectorVectorWithOffsetType tempVectors_;
 	mutable VectorStringType tempNames_;
 };

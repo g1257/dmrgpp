@@ -41,60 +41,52 @@ public:
 		terms_.push_back(TermType(str, aux));
 	}
 
-	// AlgebraForTargetingExpression(const AlgebraForTargetingExpression&) = delete;
+	AlgebraForTargetingExpression(const AlgebraForTargetingExpression&) = delete;
 
-	AlgebraForTargetingExpression& operator=(const AlgebraForTargetingExpression& other)
+	void assignAndDestroy(AlgebraForTargetingExpression& other)
 	{
 		finalized_ = other.finalized_;
-		terms_ = other.terms_;
-		return *this;
+		const SizeType n = terms_.size();
+		for (SizeType i = 0; i < n; ++i)
+			terms_[i].assignAndDestroy(other.terms_[i]);
 	}
 
-	AlgebraForTargetingExpression& operator+=(const AlgebraForTargetingExpression& other)
+	// other gets destroyed here
+	void plus(AlgebraForTargetingExpression& other)
 	{
 		if (other.terms_.size() != 1)
 			err("Add only one term at a time\n");
-		AlgebraForTargetingExpression otherCopy = other;
 		// finalize each term of this and ...
 		for (SizeType i = 0; i < terms_.size(); ++i)
 			terms_[i].finalize();
 
 		// ... and of otherCopy
-		otherCopy.terms_[0].finalize();
+		other.terms_[0].finalize();
 
 		// add those of otherCopy to this and ...
-		terms_.push_back(otherCopy.terms_[0]);
+		terms_.push_back(other.terms_[0]);
 
 		// ... simplify if possible
 		simplifyTerms();
-
-		return *this;
 	}
 
-	AlgebraForTargetingExpression& operator*=(const AlgebraForTargetingExpression& other)
+	void multiply(const AlgebraForTargetingExpression& other)
 	{
 		if (terms_.size() != 1 && other.terms_.size() != 1)
 			err("Only canonical expressions supported\n");
 
 		terms_[0].multiply(other.terms_[0]);
-
-		return *this;
 	}
 
-	AlgebraForTargetingExpression& operator*=(const ComplexOrRealType& scalar)
+	void multiplyScalar(const ComplexOrRealType& scalar)
 	{
 		if (terms_.size() != 1)
 			err("scalar multiplication\n");
 
 		terms_[0].multiply(scalar);
-
-		return *this;
 	}
 
-	bool isEmpty() const
-	{
-		return (terms_.size() == 0);
-	}
+	bool isEmpty() const { return (terms_.size() == 0); }
 
 	void finalize()
 	{
@@ -118,6 +110,8 @@ public:
 	}
 
 	SizeType size() const { return terms_.size(); }
+
+	const AuxiliaryType& aux() const { return aux_; }
 
 	int pIndex() const
 	{

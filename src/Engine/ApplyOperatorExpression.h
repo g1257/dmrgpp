@@ -292,20 +292,11 @@ public:
 		stage_[ind] = x;
 	}
 
-	const RealType& energy() const
-	{
-		return E0_;
-	}
+	const RealType& energy() const { return E0_; }
 
-	const ApplyOperatorType& applyOpLocal() const
-	{
-		return applyOpLocal_;
-	}
+	const ApplyOperatorType& applyOpLocal() const { return applyOpLocal_; }
 
-	const VectorVectorVectorWithOffsetType& psiConst() const
-	{
-		return psi_;
-	}
+	const VectorVectorVectorWithOffsetType& psiConst() const { return psi_; }
 
 	void setOnlyOnePsi(const VectorWithOffsetType& v)
 	{
@@ -497,22 +488,13 @@ public:
 		}
 	}
 
-	RealType time() const
-	{
-		return time_;
-	}
+	RealType time() const { return time_; }
 
 	SizeType currentTimeStep() const { return currentTimeStep_; }
 
-	void setCurrentTimeStep(SizeType t)
-	{
-		currentTimeStep_ = t;
-	}
+	void setCurrentTimeStep(SizeType t) { currentTimeStep_ = t; }
 
-	void setCurrentTime(RealType t)
-	{
-		time_ = t;
-	}
+	void setCurrentTime(RealType t) { time_ = t; }
 
 	void loadEnergy(PsimagLite::IoSelector::In& io,
 	                PsimagLite::String label)
@@ -653,6 +635,8 @@ public:
 	}
 
 	const ModelType& model() const { return targetHelper_.model(); }
+
+	const WaveFunctionTransfType& wft() const { return targetHelper_.wft(); }
 
 private:
 

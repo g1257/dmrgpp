@@ -108,7 +108,8 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOf
 	typedef typename PsimagLite::Vector<PvectorType*>::Type VectorPvectorType;
 	typedef SpecForTargetingExpression<BaseType> SpecForTargetingExpressionType;
 	typedef typename SpecForTargetingExpressionType::AlgebraType AlgebraType;
-	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType>
+	typedef typename SpecForTargetingExpressionType::AssignAndDestroy AssignAndDestroyType;
+	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType, AssignAndDestroyType>
 	CanonicalExpressionType;
 	typedef AuxForTargetingExpression<BaseType> AuxForTargetingExpressionType;
 	typedef typename TargetingCommonType::VectorRealType VectorRealType;
@@ -126,11 +127,12 @@ public:
 	                    const WaveFunctionTransfType& wft,
 	                    const QnType&,
 	                    InputValidatorType& io)
-	    : BaseType(lrs,model,wft,0),
+	    : BaseType(lrs, model, wft, 0),
 	      progress_("TargetingExpression"),
 	      gsWeight_(0.3),
 	      origPvectors_(0),
-	      tstStruct_(io, "TargetingExpression", model)
+	      tstStruct_(io, "TargetingExpression", model),
+	      io_(io)
 	{
 		io.readline(gsWeight_, "GsWeight=");
 		pvectorsFromInput(io);
@@ -266,10 +268,10 @@ private:
 		SizeType total = pVectors_.size();
 
 		AuxForTargetingExpressionType aux(this->common().aoe(),
-		                                  this->model(),
 		                                  this->lrs(),
 		                                  dir,
-		                                  tstStruct_);
+		                                  tstStruct_,
+		                                  io_);
 		const AlgebraType opEmpty(aux);
 		bool needsTrimming = false;
 		PsimagLite::String allpvectors;
@@ -623,6 +625,7 @@ private:
 	VectorPvectorType pVectors_;
 	SpecForTargetingExpressionType opSpec_;
 	TargetParamsTimeVectorsType tstStruct_;
+	InputValidatorType& io_;
 };     //class TargetingExpression
 } // namespace Dmrg
 /*@}*/
