@@ -137,6 +137,8 @@ Page* where more or less this feature is used: 2230
 113) Like 2 but measures 2 data sets
 120) TargetingExpresion: gs
 121) TargetingExpression: sums of products from 120
+122) TargetingExpression: One time evolution from 120
+123) TargetingExpression: Two time evolutions from 120
 126) TargetingExpresion with useComplex: gs
 127) argetingExpresion with useComplex: from 126
 #120 to 149 reserved for TargetingExpresion and related
