@@ -30,7 +30,7 @@ public:
 
 	void timeEvolve(const SiteSplitType& siteSplit,
 	                PsimagLite::String srcKet,
-	                PsimagLite::String mangledOp,
+	                PsimagLite::String, // mangledOp
 	                SizeType site)
 	{
 		if (siteSplit.hasSiteString)
@@ -45,7 +45,7 @@ public:
 		SizeType timeSteps = 5;
 		VectorSizeType indices(timeSteps);
 		SizeType lastIndex = aux_.aoe().targetVectors().size();
-		aoeTable(indices, lastIndex);
+		aoeTable(indices, lastIndex, srcVwo);
 		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
 		auxPtr->aoeNonConst().calcTimeVectors(indices,
 		                                      aux_.Eg(),
@@ -59,7 +59,7 @@ public:
 
 private:
 
-	void aoeTable(VectorSizeType& indices, SizeType lastIndex) // lastindex = 2
+	void aoeTable(VectorSizeType& indices, SizeType lastIndex, const VectorWithOffsetType& src)
 	{
 		SizeType timeSteps = indices.size();
 		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
@@ -67,7 +67,7 @@ private:
 		aoeTable_.resize(lastIndex + timeSteps);
 		for (SizeType i = 0; i < timeSteps; ++i) {
 			aoeTable_[lastIndex + i] = root + "T" + ttos(i);
-			indices[i] = auxPtr->aoeNonConst().createPvector(aux_.tempVectors()[0]);
+			indices[i] = auxPtr->aoeNonConst().createPvector(src);
 		}
 	}
 
