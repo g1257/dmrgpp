@@ -108,7 +108,8 @@ public:
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
 			if (isGlobalOperator(tmp)) {
-				nonLocal_.timeEvolve(siteSplit, ket, tmp, getCurrentCoO());
+				bool b = nonLocal_.timeEvolve(siteSplit, ket, tmp, getCurrentCoO());
+				if (!b) newVstr.push_back(tmp);
 				continue;
 			}
 
@@ -279,7 +280,9 @@ private:
 
 	static bool isGlobalOperator(PsimagLite::String op)
 	{
-		return (op == "TimeEvolve@0@");
+		static const PsimagLite::String timeEvolve = "TimeEvolve";
+
+		return (op.substr(0, timeEvolve.length()) == timeEvolve);
 	}
 
 	bool finalized_;

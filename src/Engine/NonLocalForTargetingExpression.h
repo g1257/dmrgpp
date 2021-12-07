@@ -28,7 +28,7 @@ public:
 	    : aux_(aux)
 	{}
 
-	void timeEvolve(const SiteSplitType& siteSplit,
+	bool timeEvolve(const SiteSplitType& siteSplit,
 	                PsimagLite::String srcKet,
 	                PsimagLite::String, // mangledOp
 	                SizeType site)
@@ -36,13 +36,14 @@ public:
 		if (siteSplit.hasSiteString)
 			err("Global operators cannot have a site\n");
 		const VectorWithOffsetType& srcVwo = aux_.getCurrentVectorConst(srcKet);
+		if (srcVwo.size() == 0) return false;
 
 		static const bool allOperatorsApplied = true;
 
 		VectorSizeType block1(1, site);
 		static const bool isLastCall = true;
 
-		SizeType timeSteps = 5;
+		SizeType timeSteps = 3;
 		VectorSizeType indices(timeSteps);
 		SizeType lastIndex = aux_.aoe().targetVectors().size();
 		aoeTable(indices, lastIndex, srcVwo);
@@ -55,6 +56,7 @@ public:
 		                                      false, // don't wft or advance indices[0]
 		                                      block1,
 		                                      isLastCall);
+		return true;
 	}
 
 private:
