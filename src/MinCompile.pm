@@ -16,7 +16,7 @@ sub main
 
 	my $capital = $what;
 	$capital =~ s/s$//;
-	$capital =~ s/(^.{1})/\U$1/; 
+	$capital =~ s/(^.{1})/\U$1/;
 	my $file = "Engine/".$capital."Selector.h0";
 	my $foutname = "Engine/".$capital."Selector.h";
 
@@ -41,11 +41,13 @@ sub main
 
 	readAndWriteUntil($fout, "// named $what start", $finput);
 
-	readAndWriteLinesThatMatch($fout, $array, $finput, $what, 1);
+	my $stripElse = ($what eq "models");
+	readAndWriteLinesThatMatch($fout, $array, $finput, $what, $stripElse);
 
 	readAndWriteUntil($fout, "", $finput);
 	close($fout);
 	close($finput);
+	print STDERR "$0: File $foutname has been written.\n";
 }
 
 sub readAndWriteUntil
