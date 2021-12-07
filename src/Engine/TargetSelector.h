@@ -2,6 +2,7 @@
 #define TARGETSELECTOR_H
 #include "TargetingBase.h"
 #include "TargetingGroundState.h"
+// start headers: // DO NOT REMOVE MARK
 #include "TargetingTimeStep.h"
 #include "TargetingDynamic.h"
 #include "TargetingCorrection.h"
@@ -12,6 +13,7 @@
 #include "TargetingRixsDynamic.h"
 #include "TargetingExpression.h"
 #include "TargetingCVEvolution.h"
+// end targets DO NOT REMOVE MARK
 
 namespace Dmrg {
 
@@ -33,6 +35,8 @@ class TargetSelector {
 	typedef typename TargetingBaseType::LanczosSolverType LanczosSolverType;
 	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef TargetingGroundState<LanczosSolverType,VectorWithOffsetType> TargetingGroundStateType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	// start targets here:  DO NOT REMOVE MARK
 	typedef TargetingTimeStep<LanczosSolverType,VectorWithOffsetType> TargetingTimeStepType;
 	typedef TargetingChebyshev<LanczosSolverType,VectorWithOffsetType> TargetingChebyshevType;
 	typedef TargetingDynamic<LanczosSolverType,VectorWithOffsetType> TargetingDynamicType;
@@ -44,7 +48,7 @@ class TargetSelector {
 	typedef TargetingRixsDynamic<LanczosSolverType,VectorWithOffsetType> TargetingRixsDynamicType;
 	typedef TargetingExpression<LanczosSolverType,VectorWithOffsetType> TargetingExpressionType;
 	typedef TargetingCVEvolution<LanczosSolverType,VectorWithOffsetType> TargetingCVEvolutionType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	// end targets DO NOT REMOVE MARK
 
 public:
 
@@ -89,7 +93,10 @@ public:
 
 		assert(0 < quantumSector_.size());
 		const QnType& qn = quantumSector_[0];
-		if (targeting=="TimeStepTargeting" || targeting == "TargetingAncilla") {
+		if (targeting == "GroundStateTargeting") {
+			psi_ = new TargetingGroundStateType(lrs_,model_,wft_,qn,ioIn_);
+			// named targets start  DO NOT REMOVE MARK
+		} else if (targeting=="TimeStepTargeting" || targeting == "TargetingAncilla") {
 			psi_ = new TargetingTimeStepType(lrs_,model_,wft_,qn,ioIn_, targeting);
 		} else if (targeting=="DynamicTargeting") {
 			psi_ = new TargetingDynamicType(lrs_,model_,wft_,qn,ioIn_);
@@ -99,8 +106,6 @@ public:
 			psi_ = new TargetingChebyshevType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting=="CorrectionTargeting") {
 			psi_ = new TargetingCorrectionType(lrs_,model_,wft_,qn,ioIn_);
-		} else if (targeting == "GroundStateTargeting") {
-			psi_ = new TargetingGroundStateType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting == "MettsTargeting") {
 			psi_ = new TargetingMettsType(lrs_,model_,wft_,qn,ioIn_);
 		} else if (targeting == "TargetingRixsStatic") {
@@ -111,6 +116,7 @@ public:
 			psi_ = new TargetingExpressionType(lrs_, model_, wft_, qn, ioIn_);
 		} else if (targeting == "TargetingCVEvolution") {
 			psi_ = new TargetingCVEvolutionType(lrs_, model_, wft_, qn, ioIn_);
+			// end targets DO NOT REMOVE MARK
 		} else {
 			err("Unknown targeting " + targeting + "\n");
 		}
