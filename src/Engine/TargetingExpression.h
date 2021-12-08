@@ -84,6 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Pvector.h"
 #include "SpecForTargetingExpression.h"
 #include "CanonicalExpression.h"
+#include "TimeEvolveForTargetingExpression.h"
 
 namespace Dmrg {
 
@@ -117,6 +118,7 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOf
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename AlgebraType::VectorSizeType VectorSizeType;
 	typedef typename BaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef TimeEvolveForTargetingExpression<Pvectors<BaseType> > TimeEvolveForTeType;
 
 public:
 
@@ -233,7 +235,7 @@ private:
 		CanonicalExpressionType canonicalExpression(opSpec_);
 		SizeType total = pvectors_.targets();
 
-		AuxForTargetingExpressionType aux(pvectors_, dir, Eg);
+		AuxForTargetingExpressionType aux(pvectors_, timeEvolve_, dir, Eg);
 		AlgebraType opEmpty(aux);
 		bool needsTrimming = false;
 		PsimagLite::String allpvectors;
@@ -485,6 +487,7 @@ private:
 	RealType gsWeight_;
 	SpecForTargetingExpressionType opSpec_;
 	Pvectors<BaseType> pvectors_;
+	TimeEvolveForTeType timeEvolve_;
 };     //class TargetingExpression
 } // namespace Dmrg
 /*@}*/
