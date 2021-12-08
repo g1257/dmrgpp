@@ -239,7 +239,7 @@ private:
 		PsimagLite::String allpvectors;
 		for (SizeType i = 0; i < total; ++i) {
 
-			if (pvectors_(i).lastName() == "DONE") continue;
+			if (pvectors_(i).isDone()) continue;
 
 			aux.setPindexOutput(i);
 			AlgebraType tmp(aux);
@@ -310,7 +310,7 @@ private:
 			tempToP[i] = ind;
 			const PsimagLite::String ename = expandExpression(tempNames[i], tempToP);
 			PvectorType* pnew = new PvectorType(ename);
-			pnew->pushString("DONE");
+			pnew->setAsDone();
 			pvectors_.pushBack(pnew);
 
 			PsimagLite::OstringStream msgg(std::cout.precision());
@@ -321,14 +321,16 @@ private:
 
 		PsimagLite::String newpstring = compressExpression(tempExpr);
 		const PsimagLite::String selfName = "|P" + ttos(pVectorIndex) + ">";
-		if (newpstring == selfName) newpstring = "DONE";
-		pvectors_.pushString(pVectorIndex, newpstring);
+		if (newpstring == selfName)
+			pvectors_.setAsDone(pVectorIndex);
+		else
+			pvectors_.pushString(pVectorIndex, newpstring);
 	}
 
 	bool allOrigPvectorsDone() const
 	{
 		for (SizeType i = 0; i < pvectors_.origPvectors(); ++i)
-			if (pvectors_(i).lastName() != "DONE") return false;
+			if (!pvectors_(i).isDone()) return false;
 		return true;
 	}
 

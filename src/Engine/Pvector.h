@@ -27,6 +27,11 @@ public:
 		vStr_.push_back(str);
 	}
 
+	bool isDone() const
+	{
+		return (lastName() == "DONE");
+	}
+
 	void setAsDone() {vStr_.push_back("DONE"); }
 
 	void pushString(PsimagLite::String newstring) { vStr_.push_back(newstring); }
