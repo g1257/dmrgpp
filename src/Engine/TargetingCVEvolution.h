@@ -253,7 +253,7 @@ private:
 		this->common().aoe().targetVectors(0) = phiNew;
 		VectorWithOffsetType bogusTv;
 
-		const SizeType currentTimeStep = this->common().aoe().currentTimeStep();
+		const SizeType currentTimeStep = this->common().aoe().timeVectors().currentTimeStep();
 		if (currentTimeStep == 0) {
 			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
 				skeleton_.calcDynVectors(phiNew,

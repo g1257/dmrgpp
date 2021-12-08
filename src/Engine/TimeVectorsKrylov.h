@@ -145,15 +145,13 @@ public:
 
 	typedef KrylovHelper<Action, TypeWrapper> KrylovHelperType;
 
-	TimeVectorsKrylov(const SizeType& currentTimeStep,
-	                  const TargetParamsType& tstStruct,
+	TimeVectorsKrylov(const TargetParamsType& tstStruct,
 	                  VectorVectorWithOffsetType& targetVectors,
 	                  const ModelType& model,
 	                  const WaveFunctionTransfType& wft,
 	                  const LeftRightSuperType& lrs,
 	                  InputValidatorType& ioIn)
 	    : BaseType(model, lrs, wft),
-	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
 	      targetVectors_(targetVectors),
 	      model_(model),
@@ -188,7 +186,7 @@ public:
 		}
 
 		const SizeType n = indices.size();
-		if (currentTimeStep_ == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
+		if (this->currentTimeStep() == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
 				const SizeType ii = indices[i];
 				targetVectors_[ii] = phi;
@@ -207,7 +205,7 @@ public:
 
 		typename PsimagLite::Vector<SizeType>::Type steps(phi.sectors());
 
-		triDiag(phi, T, V, steps, extra.time);
+		triDiag(phi, T, V, steps);
 
 		VectorVectorRealType eigs(phi.sectors());
 
@@ -220,10 +218,10 @@ public:
 		if (extra.isLastCall) timeHasAdvanced_ = false;
 	}
 
-	void timeHasAdvanced(RealType& time)
+	void timeHasAdvanced()
 	{
 		timeHasAdvanced_ = true;
-		time += tstStruct_.tau();
+		this->advanceCurrentTime(tstStruct_.tau());
 	}
 
 private:
@@ -308,18 +306,16 @@ private:
 	void triDiag(const VectorWithOffsetType& phi,
 	             VectorMatrixFieldType& T,
 	             VectorMatrixFieldType& V,
-	             typename PsimagLite::Vector<SizeType>::Type& steps,
-	             RealType currentTime)
+	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
-		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,currentTime,model_,ioIn_);
+		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,this->time(),model_,ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}
 
-	const SizeType& currentTimeStep_;
 	const TargetParamsType& tstStruct_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;

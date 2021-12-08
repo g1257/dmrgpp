@@ -135,8 +135,6 @@ public:
 	    : progress_("ApplyOperatorExpression"),
 	      targetHelper_(targetHelper),
 	      E0_(0.0),
-	      time_(0.0),
-	      currentTimeStep_(0),
 	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
 	      targetVectors_(0),
@@ -450,8 +448,7 @@ public:
 
 		switch (tstStruct.algorithm()) {
 		case TargetParamsType::AlgorithmEnum::KRYLOV:
-			timeVectorsBase_ = new TimeVectorsKrylovType(currentTimeStep_,
-			                                             tstStruct,
+			timeVectorsBase_ = new TimeVectorsKrylovType(tstStruct,
 			                                             targetVectors_,
 			                                             model,
 			                                             wft,
@@ -459,8 +456,7 @@ public:
 			                                             ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::CHEBYSHEV:
-			timeVectorsBase_ = new TimeVectorsChebyshevType(currentTimeStep_,
-			                                                tstStruct,
+			timeVectorsBase_ = new TimeVectorsChebyshevType(tstStruct,
 			                                                targetVectors_,
 			                                                model,
 			                                                wft,
@@ -468,16 +464,14 @@ public:
 			                                                ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::RUNGE_KUTTA:
-			timeVectorsBase_ = new TimeVectorsRungeKuttaType(currentTimeStep_,
-			                                                 tstStruct,
+			timeVectorsBase_ = new TimeVectorsRungeKuttaType(tstStruct,
 			                                                 targetVectors_,
 			                                                 model,
 			                                                 wft,
 			                                                 lrs);
 			break;
 		case TargetParamsType::AlgorithmEnum::SUZUKI_TROTTER:
-			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(currentTimeStep_,
-			                                                    tstStruct,
+			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(tstStruct,
 			                                                    targetVectors_,
 			                                                    model,
 			                                                    wft,
@@ -488,13 +482,11 @@ public:
 		}
 	}
 
-	RealType time() const { return time_; }
-
-	SizeType currentTimeStep() const { return currentTimeStep_; }
-
-	void setCurrentTimeStep(SizeType t) { currentTimeStep_ = t; }
-
-	void setCurrentTime(RealType t) { time_ = t; }
+	const TimeVectorsBaseType& timeVectors() const
+	{
+		assert(timeVectorsBase_);
+		return *timeVectorsBase_;
+	}
 
 	void loadEnergy(PsimagLite::IoSelector::In& io,
 	                PsimagLite::String label)
@@ -536,8 +528,7 @@ public:
 		                                              allOperatorsApplied,
 		                                              wftAndAdvanceIfNeeded,
 		                                              block,
-		                                              isLastCall,
-		                                              time_);
+		                                              isLastCall);
 		if (!timeVectorsBase_)
 			err("timeVectorsBase_ ptr not setup!?\n");
 
@@ -631,7 +622,7 @@ public:
 	{
 		if (!timeVectorsBase_)
 			err("timeHasAdvanced(): timeVectorsBase_ ptr not setup!?\n");
-		timeVectorsBase_->timeHasAdvanced(time_);
+		timeVectorsBase_->timeHasAdvanced();
 	}
 
 	const ModelType& model() const { return targetHelper_.model(); }
@@ -724,9 +715,9 @@ private:
 		if (advanceEach > 0 && timesWithoutAdvancement_ >= advanceEach && !dontAdvance) {
 			stage_[i] = StageEnum::WFT_ADVANCE;
 			if (i == lastI) {
-				++currentTimeStep_;
+				timeVectorsBase_->advanceCurrentTimeStep();
 				timesWithoutAdvancement_ = 1;
-				if (timeVectorsBase_) timeVectorsBase_->timeHasAdvanced(time_);
+				if (timeVectorsBase_) timeVectorsBase_->timeHasAdvanced();
 			}
 		} else {
 			if (i == lastI &&
@@ -744,7 +735,8 @@ private:
 		PsimagLite::OstringStream msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"Steps without advance: "<<timesWithoutAdvancement_;
-		msg2<<" site="<<site<<" currenTime="<<time();
+		assert(timeVectorsBase_);
+		msg2<<" site="<<site<<" currenTime="<<timeVectorsBase_->time();
 		if (timesWithoutAdvancement_ > 0) progress_.printline(msgg2, std::cout);
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
@@ -854,8 +846,6 @@ private:
 	const TargetHelperType& targetHelper_;
 	VectorStageEnumType stage_;
 	RealType E0_;
-	RealType time_;
-	SizeType currentTimeStep_;
 	SizeType indexNoAdvance_;
 	ApplyOperatorType applyOpLocal_;
 	VectorVectorVectorWithOffsetType psi_;

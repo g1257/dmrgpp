@@ -107,7 +107,7 @@ public:
 	TimeVectorsBase(const ModelType& model,
 	                const LeftRightSuperType& lrs,
 	                const WaveFunctionTransfType& wft)
-	    : wftHelper_(model, lrs, wft)
+	    : wftHelper_(model, lrs, wft), time_(0.0), currentTimeStep_(0)
 	{}
 
 	struct ExtraData {
@@ -116,14 +116,12 @@ public:
 		          bool allOperatorsApplied_,
 		          bool wftAndAdvanceIfNeeded_,
 		          VectorSizeType block_,
-		          bool isLastCall_,
-		          RealType time_)
+		          bool isLastCall_)
 		    : dir(dir_),
 		      allOperatorsApplied(allOperatorsApplied_),
 		      wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_),
 		      block(block_),
-		      isLastCall(isLastCall_),
-		      time(time_)
+		      isLastCall(isLastCall_)
 		{}
 
 		ProgramGlobals::DirectionEnum dir;
@@ -131,7 +129,6 @@ public:
 		bool wftAndAdvanceIfNeeded;
 		PsimagLite::Vector<SizeType>::Type block;
 		bool isLastCall;
-		RealType time;
 	};
 
 	virtual void calcTimeVectors(const VectorSizeType&,
@@ -141,7 +138,19 @@ public:
 
 	virtual ~TimeVectorsBase() {}
 
-	virtual void timeHasAdvanced(RealType&) {}
+	virtual void timeHasAdvanced() {}
+
+	RealType time() const { return time_; }
+
+	SizeType currentTimeStep() const { return currentTimeStep_; }
+
+	void advanceCurrentTime(RealType tau) { time_ += tau; }
+
+	void advanceCurrentTimeStep() { ++currentTimeStep_; }
+
+	void setCurrentTimeStep(SizeType t) { currentTimeStep_ = t; }
+
+	void setCurrentTime(RealType t) { time_ = t; }
 
 protected:
 
@@ -150,6 +159,8 @@ protected:
 private:
 
 	WftHelperType wftHelper_;
+	RealType time_;
+	SizeType currentTimeStep_;
 }; //class TimeVectorsBase
 } // namespace Dmrg
 /*@}*/

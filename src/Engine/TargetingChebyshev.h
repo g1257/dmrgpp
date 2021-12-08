@@ -210,7 +210,7 @@ public:
 	bool end() const
 	{
 		return (tstStruct_.maxTime() != 0 &&
-		        this->common().aoe().time() >= tstStruct_.maxTime());
+		        this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)

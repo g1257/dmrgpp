@@ -140,15 +140,13 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<TargetParamsType,
 
 public:
 
-	TimeVectorsChebyshev(const SizeType& currentTimeStep,
-	                     const TargetParamsType& tstStruct,
+	TimeVectorsChebyshev(const TargetParamsType& tstStruct,
 	                     VectorVectorWithOffsetType& targetVectors,
 	                     const ModelType& model,
 	                     const WaveFunctionTransfType& wft,
 	                     const LeftRightSuperType& lrs,
 	                     InputValidatorType& ioIn)
 	    : BaseType(model, lrs, wft),
-	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
 	      targetVectors_(targetVectors),
 	      model_(model),
@@ -183,7 +181,7 @@ public:
 		}
 
 		SizeType startOfWft = 1;
-		if (currentTimeStep_ == 0) {
+		if (this->currentTimeStep() == 0) {
 			SizeType indexOf1 = indices[startOfWft];
 			assert(indexOf1 < targetVectors_.size());
 			VectorWithOffsetType& tv1 =
@@ -203,7 +201,7 @@ public:
 		}
 
 		assert(n > 0);
-		if (currentTimeStep_ == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
+		if (this->currentTimeStep() == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
 				SizeType ii = indices[i];
 				targetVectors_[ii] = phi;
@@ -234,7 +232,7 @@ public:
 			targetVectors_[ii] = phi;
 			SizeType prev = indices[i - 1];
 			SizeType prevMinus2 = indices[i - 2];
-			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2, Eg, extra.time);
+			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2, Eg);
 		}
 
 		assert(extra.block.size() > 0);
@@ -244,15 +242,15 @@ public:
 		PredicateAwesomeType pred(correctVectorsAwesomePred_);
 		const bool flagcorrection = pred.isTrue("%s", site, "%c", center, "%n", nsites);
 		if (flagcorrection)
-			correctVectors(indices, Eg, extra.time);
+			correctVectors(indices, Eg);
 
 		timeHasAdvanced_ = false;
 	}
 
-	void timeHasAdvanced(RealType& time)
+	void timeHasAdvanced()
 	{
 		timeHasAdvanced_ = true;
-		time += tstStruct_.tau();
+		this->advanceCurrentTime(tstStruct_.tau());
 	}
 
 private:
@@ -261,14 +259,13 @@ private:
 	                      const VectorWithOffsetType& phi,
 	                      SizeType prev,
 	                      SizeType prevMinus2,
-	                      RealType Eg,
-	                      RealType currentTime)
+	                      RealType Eg)
 
 	{
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i0 = phi.sector(ii);
 			TargetVectorType r;
-			calcTargetVector(r, phi, prev, prevMinus2, i0, Eg, currentTime);
+			calcTargetVector(r, phi, prev, prevMinus2, i0, Eg);
 			v.setDataInSector(r,i0);
 		}
 	}
@@ -278,14 +275,13 @@ private:
 	                      SizeType prev,
 	                      SizeType prevMinus2,
 	                      SizeType i0,
-	                      RealType Eg,
-	                      RealType currentTime)
+	                      RealType Eg)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
 		                                                 ModelType::modelLinks(),
-		                                                 currentTime,
+		                                                 this->time(),
 		                                                 model_.superOpHelper());
 		MatrixLanczosType lanczosHelper(model_, hc, aux);
 
@@ -299,7 +295,7 @@ private:
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		r.resize(total);
-		if (currentTimeStep_ == 0) {
+		if (this->currentTimeStep() == 0) {
 			phi.extract(phi2,i0);
 			lanczosHelper2.matrixVectorProduct(r,phi2); // applying Hprime
 		} else {
@@ -312,7 +308,7 @@ private:
 		}
 	}
 
-	void correctVectors(const VectorSizeType& indices, RealType Eg, RealType currentTime)
+	void correctVectors(const VectorSizeType& indices, RealType Eg)
 	{
 		// take the first vector and compute V and weights
 		const SizeType n = indices.size();
@@ -346,7 +342,7 @@ private:
 
 		VectorSizeType permutation;
 		computeAuxForCorrection(V, T, weights, permutation,
-		                        phi, phi.sector(0), Eg, currentTime);
+		                        phi, phi.sector(0), Eg, this->time());
 		if (weights.size() == 0) return;
 		assert(V.size() == 1);
 
@@ -485,7 +481,6 @@ private:
 			r[i] *= factor;
 	}
 
-	const SizeType& currentTimeStep_;
 	const TargetParamsType& tstStruct_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;

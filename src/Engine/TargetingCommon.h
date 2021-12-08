@@ -137,6 +137,7 @@ public:
 	VectorVectorWithOffsetType;
 	typedef typename ApplyOperatorExpressionType::VectorRealType VectorRealType;
 	typedef typename ApplyOperatorExpressionType::PairType PairType;
+	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef Braket<ModelType> BraketType;
 	typedef FermionSign FermionSignType;
@@ -220,8 +221,8 @@ public:
 	                PsimagLite::String name) const
 	{
 		SizeType site = block[0];
-		TimeSerializerType ts(aoe_.currentTimeStep(),
-		                      aoe_.time(),
+		TimeSerializerType ts(aoe_.timeVectors().currentTimeStep(),
+		                      aoe_.timeVectors().time(),
 		                      site,
 		                      aoe_.targetVectors(),
 		                      aoe_.stages(),
@@ -296,10 +297,10 @@ public:
 		// FIXME TODO check that the NGST name changes instead
 		bool sameNgst = isThisNgstSameAsPrevious(name, ts->name(), dtvs, rtvs);
 		SizeType cTimeStep = (sameNgst) ? ts->currentTimeStep() : 0;
-		aoe_.setCurrentTimeStep(cTimeStep);
+		setCurrentTimeStep(cTimeStep);
 
 		RealType timeReal = (sameNgst) ? ts->time() : 0;
-		aoe_.setCurrentTime(timeReal);
+		setCurrentTime(timeReal);
 
 		delete ts;
 		ts = 0;
@@ -650,15 +651,28 @@ public:
 			msg2<<normSquared(i)<<" ";
 		progress_.printline(msgg2, std::cout);
 
-		if (aoe_.currentTimeStep() == 0) return;
+		if (aoe_.timeVectors().currentTimeStep() == 0) return;
 
 		PsimagLite::OstringStream msgg3(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg3 = msgg3();
-		msg3<<"CurrentTime="<<aoe_.time()<<" CurrentTimeStep="<<aoe_.currentTimeStep();
+		msg3<<"CurrentTime="<<aoe_.timeVectors().time();
+		msg3<<" CurrentTimeStep="<<aoe_.timeVectors().currentTimeStep();
 		progress_.printline(msgg3, std::cout);
 	}
 
 private:
+
+	void setCurrentTimeStep(SizeType ts)
+	{
+		TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(&aoe_.timeVectors());
+		ptr->setCurrentTimeStep(ts);
+	}
+
+	void setCurrentTime(RealType t)
+	{
+		TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(&aoe_.timeVectors());
+		ptr->setCurrentTime(t);
+	}
 
 	bool isThisNgstSameAsPrevious(PsimagLite::String nameThis,
 	                              PsimagLite::String namePrev,
@@ -770,7 +784,7 @@ private:
 	          BorderEnumType border) const
 	{
 		ComplexOrRealType sum = test_(src1,src2,systemOrEnviron,site,A,border);
-		std::cout<<site<<" "<<sum<<" "<<aoe_.time();
+		std::cout<<site<<" "<<sum<<" "<<aoe_.timeVectors().time();
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 	}
 

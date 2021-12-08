@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixOrIdentity.h"
 #include "Sort.h"
 #include "Utils.h"
+#include "PackIndices.h"
 
 namespace Dmrg {
 
@@ -126,15 +127,13 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 
 public:
 
-	TimeVectorsSuzukiTrotter(const SizeType& currentTimeStep,
-	                         const TargetParamsType& tstStruct,
+	TimeVectorsSuzukiTrotter(const TargetParamsType& tstStruct,
 	                         VectorVectorWithOffsetType& targetVectors,
 	                         const ModelType& model,
 	                         const WaveFunctionTransfType& wft,
 	                         const LeftRightSuperType& lrs)
 	    : BaseType(model, lrs, wft),
 	      progress_("TimeVectorsSuzukiTrotter"),
-	      currentTimeStep_(currentTimeStep),
 	      tstStruct_(tstStruct),
 	      targetVectors_(targetVectors),
 	      model_(model),
@@ -584,7 +583,6 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
-	const SizeType& currentTimeStep_;
 	const TargetParamsType& tstStruct_;
 	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;

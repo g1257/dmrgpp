@@ -218,7 +218,7 @@ public:
 	bool end() const
 	{
 		return (tstStruct_.maxTime() != 0 &&
-		        this->common().aoe().time() >= tstStruct_.maxTime());
+		        this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
@@ -320,7 +320,7 @@ private:
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
 		                                                 ModelType::modelLinks(),
-		                                                 this->common().aoe().time(),
+		                                                 this->common().aoe().timeVectors().time(),
 		                                                 BaseType::model().superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
 		                                                     hc,
@@ -333,7 +333,7 @@ private:
 		lanczosHelper.matrixVectorProduct(x,phi2);
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Hamiltonian average at time="<<this->common().aoe().time();
+		msg<<"Hamiltonian average at time="<<this->common().aoe().timeVectors().time();
 		msg<<" for target="<<whatTarget;
 		ComplexOrRealType numerator = phi2*x;
 		ComplexOrRealType den = phi2*phi2;

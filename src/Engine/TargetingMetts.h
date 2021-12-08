@@ -143,8 +143,6 @@ public:
 	TargetParamsType> MettsCollapseType;
 	typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
 	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef TimeVectorsBase<TargetParamsType,ModelType,WaveFunctionTransfType,
-	LanczosSolverType,VectorWithOffsetType> TimeVectorsBaseType;
 	typedef TimeVectorsKrylov<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsKrylovType;
 	typedef TimeVectorsRungeKutta<TargetParamsType,ModelType,WaveFunctionTransfType,
@@ -157,6 +155,8 @@ public:
 	typedef typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type
 	VectorBlockDiagonalMatrixType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 
 	TargetingMetts(const LeftRightSuperType& lrs,
 	               const ModelType& model,
@@ -318,7 +318,7 @@ public:
 
 		VectorVectorWithOffsetType& tv = const_cast<VectorVectorWithOffsetType&>
 		        (this->common().aoe().targetVectors());
-		if (mettsStruct_.beta > this->common().aoe().time()) {
+		if (mettsStruct_.beta > this->common().aoe().timeVectors().time()) {
 			for (SizeType i = 0; i < this->common().aoe().targetVectors().size(); ++i)
 				tv[i].clear();
 		}
@@ -399,7 +399,8 @@ private:
 			sitesCollapsed_.clear();
 			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 			timesWithoutAdvancement_ = 0;
-			this->common().aoe().setCurrentTimeStep(0);
+			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(&(this->common().aoe().timeVectors()));
+			ptr->setCurrentTimeStep(0);
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			SizeType n1 = mettsStruct_.times().size();
@@ -420,24 +421,25 @@ private:
 		}
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
-		        this->common().aoe().time() < mettsStruct_.beta) {
+		        this->common().aoe().timeVectors().time() < mettsStruct_.beta) {
 			this->common().setAllStagesTo(StageEnumType::WFT_ADVANCE);
-			const SizeType tmp = this->common().aoe().currentTimeStep() + 1;
-			this->common().aoe().setCurrentTimeStep(tmp);
+			const SizeType tmp = this->common().aoe().timeVectors().currentTimeStep() + 1;
+			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(&(this->common().aoe().timeVectors()));
+			ptr->setCurrentTimeStep(tmp);
 			timesWithoutAdvancement_ = 0;
 			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
-		        this->common().aoe().time() >= mettsStruct_.beta &&
+		        this->common().aoe().timeVectors().time() >= mettsStruct_.beta &&
 		        block[0]!=block.size()) {
 			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) &&
-		        this->common().aoe().time() >= mettsStruct_.beta) {
+		        this->common().aoe().timeVectors().time() >= mettsStruct_.beta) {
 			this->common().setAllStagesTo(StageEnumType::COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.times().size();
@@ -792,7 +794,7 @@ private:
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
 		                                                 BaseType::ModelType::modelLinks(),
-		                                                 this->common().aoe().time(),
+		                                                 this->common().aoe().timeVectors().time(),
 		                                                 model_.superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
 		                                                     hc,
@@ -805,7 +807,7 @@ private:
 		lanczosHelper.matrixVectorProduct(x,phi2);
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Hamiltonian average at time="<<this->common().aoe().time();
+		msg<<"Hamiltonian average at time="<<this->common().aoe().timeVectors().time();
 		msg<<" for target="<<whatTarget;
 		ComplexOrRealType numerator = phi2*x;
 		ComplexOrRealType den = phi2*phi2;
