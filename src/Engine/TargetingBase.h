@@ -231,7 +231,7 @@ public:
 		if (X[0] != 0 && X[0] != lrs_.super().block().size()-1)
 			return;
 
-		basisWithOps.setOneSite(X, model_, commonTargeting_.aoe().timeVectors().time());
+		basisWithOps.setOneSite(X, model_, commonTargeting_.time());
 	}
 
 	virtual bool end() const
@@ -352,7 +352,9 @@ public:
 		return commonTargeting_.aoe().targetVectors()[i];
 	}
 
-	RealType time() const {return commonTargeting_.aoe().timeVectors().time(); }
+	RealType time() const
+	{
+		return commonTargeting_.time(); }
 
 	const typename VectorWithOffsetType::value_type& inSitu(SizeType i) const
 	{

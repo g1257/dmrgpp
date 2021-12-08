@@ -312,6 +312,11 @@ public:
 
 	ApplyOperatorExpressionType& aoe() { return aoe_; }
 
+	RealType time() const
+	{
+		return (aoe_.hasTimeVectors()) ? aoe_.timeVectors().time() : 0;
+	}
+
 	// START Cocoons
 
 	void cocoon(const BlockType& block,
@@ -651,16 +656,21 @@ public:
 			msg2<<normSquared(i)<<" ";
 		progress_.printline(msgg2, std::cout);
 
-		if (aoe_.timeVectors().currentTimeStep() == 0) return;
+		if (currentTimeStep() == 0) return;
 
 		PsimagLite::OstringStream msgg3(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg3 = msgg3();
-		msg3<<"CurrentTime="<<aoe_.timeVectors().time();
-		msg3<<" CurrentTimeStep="<<aoe_.timeVectors().currentTimeStep();
+		msg3<<"CurrentTime="<<time();
+		msg3<<" CurrentTimeStep="<<currentTimeStep();
 		progress_.printline(msgg3, std::cout);
 	}
 
 private:
+
+	SizeType currentTimeStep() const
+	{
+		return (aoe_.hasTimeVectors()) ? aoe_.timeVectors().currentTimeStep() : 0;
+	}
 
 	void setCurrentTimeStep(SizeType ts)
 	{
@@ -784,7 +794,7 @@ private:
 	          BorderEnumType border) const
 	{
 		ComplexOrRealType sum = test_(src1,src2,systemOrEnviron,site,A,border);
-		std::cout<<site<<" "<<sum<<" "<<aoe_.timeVectors().time();
+		std::cout<<site<<" "<<sum<<" "<<time();
 		std::cout<<" "<<label<<" "<<(src1*src2)<<"\n";
 	}
 
