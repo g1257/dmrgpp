@@ -108,8 +108,8 @@ public:
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
 			if (isGlobalOperator(tmp)) {
-				bool b = nonLocal_.timeEvolve(siteSplit, ket, getCurrentCoO());
-				if (!b) newVstr.push_back(tmp);
+				nonLocal_.timeEvolve(siteSplit, ket, getCurrentCoO());
+				newVstr.push_back(tmp);
 				continue;
 			}
 

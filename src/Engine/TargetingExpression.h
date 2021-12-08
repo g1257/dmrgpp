@@ -306,17 +306,12 @@ private:
 			if (removed_[i]) continue;
 			int x = pvectors_.findInAnyNames(tempNames[i]);
 			if (x >= 0) continue;
-			const SizeType ind = this->common().aoe().createPvector(tempVectors[i]);
-			tempToP[i] = ind;
-			const PsimagLite::String ename = expandExpression(tempNames[i], tempToP);
-			PvectorType* pnew = new PvectorType(ename);
-			pnew->setAsDone();
-			pvectors_.pushBack(pnew);
+			auto lambda = [this, i, &tempToP, &tempNames](SizeType ind) {
+				tempToP[i] = ind;
+				return this->expandExpression(tempNames[i], tempToP);
+			};
 
-			PsimagLite::OstringStream msgg(std::cout.precision());
-			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"P["<<ind<<"]="<<ename<<" created";
-			progress_.printline(msgg, std::cout);
+			pvectors_.createNew(tempVectors[i], lambda);
 		}
 
 		PsimagLite::String newpstring = compressExpression(tempExpr);

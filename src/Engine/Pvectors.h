@@ -76,10 +76,19 @@ public:
 		pVectors_[ind]->pushString(str);
 	}
 
-	void pushBack(PvectorType* ptr)
+	template<typename SomeLambdaType>
+	void createNew(const VectorWithOffsetType& src, SomeLambdaType& lambda)
 	{
-		assert(ptr);
-		pVectors_.push_back(ptr);
+		const SizeType ind = aoeNonConst().createPvector(src);
+		const PsimagLite::String ename = lambda(ind);
+		PvectorType* pnew = new PvectorType(ename);
+		pnew->setAsDone();
+		pVectors_.push_back(pnew);
+
+		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+		msg<<"P["<<ind<<"]="<<ename<<" created";
+		progress_.printline(msgg, std::cout);
 	}
 
 	SizeType targets() const { return pVectors_.size(); }

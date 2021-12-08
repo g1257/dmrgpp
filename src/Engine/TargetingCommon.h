@@ -741,7 +741,8 @@ private:
 	{
 		if (getBraOrKet.isPvector()) {
 			const SizeType pIndex = getBraOrKet.pIndex();
-			return &(aoe_.targetVectors(pIndex));
+			return (pIndex >= aoe_.targetVectors().size()) ? nullptr
+			                                               : &(aoe_.targetVectors(pIndex));
 		}
 
 		const SizeType sectorIndex = getBraOrKet.sectorIndex();

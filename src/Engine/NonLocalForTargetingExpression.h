@@ -39,7 +39,12 @@ public:
 			indices[0] = firstIndex;
 			AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux);
 			for (SizeType i = 1; i < timeSteps; ++i) {
-				indices[i] = auxPtr->pVectors().aoeNonConst().createPvector(src);
+				auto lambda = [this, i](SizeType ind) {
+					this->indices[i] = ind;
+					return "|P" + ttos(ind) + ">";
+				};
+
+				auxPtr->pVectors().createNew(src, lambda);
 			}
 		}
 
@@ -118,7 +123,11 @@ private:
 	}
 
 	const AuxiliaryType& aux_;
-	VectorOneTimeEvolutionType vEvolutions_;
+	static VectorOneTimeEvolutionType vEvolutions_;
 };
+
+template<typename T>
+typename NonLocalForTargetingExpression<T>::VectorOneTimeEvolutionType
+NonLocalForTargetingExpression<T>::vEvolutions_;
 }
 #endif // NONLOCALFORTARGETINGEXPRESSION_H
