@@ -108,7 +108,7 @@ public:
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
 			if (isGlobalOperator(tmp)) {
-				bool b = nonLocal_.timeEvolve(siteSplit, ket, tmp, getCurrentCoO());
+				bool b = nonLocal_.timeEvolve(siteSplit, ket, getCurrentCoO());
 				if (!b) newVstr.push_back(tmp);
 				continue;
 			}
@@ -135,7 +135,7 @@ public:
 
 			OneOperatorSpecType opspec(siteSplit.root);
 			const PsimagLite::String destKet = tmp + "*" + ket;
-			OperatorType* op = new OperatorType(aux_.aoe(). model().
+			OperatorType* op = new OperatorType(aux_.pVectors().aoe().model().
 			                                    naturalOperator(opspec.label,
 			                                                    0, // FIXME TODO SDHS Immm
 			                                                    opspec.dof));
@@ -201,7 +201,7 @@ private:
 	bool siteCanBeApplied(SizeType site) const
 	{
 		const SizeType currentCoO = getCurrentCoO();
-		const SizeType linSize = aux_.aoe().model().superGeometry().numberOfSites();
+		const SizeType linSize = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
 		const bool b1 = (site == 0 && currentCoO == 1 &&
 		                 aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 		const bool b2 = (site == linSize - 1 && currentCoO == linSize - 2 &&
@@ -216,7 +216,7 @@ private:
 	                 SizeType site)
 	{
 		assert(siteCanBeApplied(site));
-		const VectorWithOffsetType& srcVwo = aux_.getCurrentVectorConst(srcKet);
+		const VectorWithOffsetType& srcVwo = aux_.pVectors().getCurrentVectorConst(srcKet);
 		PsimagLite::String internalName = aux_.createTemporaryVector(destKet);
 		VectorWithOffsetType& destVwo = aux_.getCurrentVectorNonConst(internalName);
 		applyInSitu(destVwo, srcVwo, site, op);
@@ -229,23 +229,29 @@ private:
 	                 SizeType site,
 	                 const OperatorType& A)
 	{
-		const SizeType splitSize = aux_.aoe().model().hilbertSize(site);
+		const SizeType splitSize = aux_.pVectors().aoe().model().hilbertSize(site);
 
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
-		aux_.aoe().model().findOddElectronsOfOneSite(oddElectrons, site);
-		FermionSign fs(aux_.lrs().left(), oddElectrons);
+		aux_.pVectors().aoe().model().findOddElectronsOfOneSite(oddElectrons, site);
+		FermionSign fs(aux_.pVectors().lrs().left(), oddElectrons);
 		bool b1 = (site == 0);
-		SizeType n = aux_.aoe().model().superGeometry().numberOfSites();
+		SizeType n = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
 		assert(n > 2);
 		bool b2 = (site == n - 1);
 		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
 		                                   : BorderEnumType::BORDER_NO;
-		aux_.aoe().applyOpLocal()(dest, src1, A, fs, splitSize, aux_.direction(), border);
+		aux_.pVectors().aoe().applyOpLocal()(dest,
+		                                     src1,
+		                                     A,
+		                                     fs,
+		                                     splitSize,
+		                                     aux_.direction(),
+		                                     border);
 	}
 
 	SizeType getCurrentCoO() const
 	{
-		const LeftRightSuperType& lrs = aux_.lrs();
+		const LeftRightSuperType& lrs = aux_.pVectors().lrs();
 		const SizeType systemBlockSize = lrs.left().block().size();
 		assert(systemBlockSize > 0);
 		const int maxSystemSite = lrs.left().block()[systemBlockSize - 1];

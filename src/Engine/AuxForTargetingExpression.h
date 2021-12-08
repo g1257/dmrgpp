@@ -5,6 +5,7 @@
 #include "ProgramGlobals.h"
 #include "InputNg.h"
 #include "InputCheck.h"
+#include "Pvectors.h"
 
 namespace Dmrg {
 
@@ -25,46 +26,26 @@ public:
 	typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef Pvectors<TargetingBaseType> PvectorsType;
 
-	AuxForTargetingExpression(const ApplyOperatorExpressionType& aoe,
-	                          const LeftRightSuperType& lrs,
+	AuxForTargetingExpression(PvectorsType& pVectors,
 	                          ProgramGlobals::DirectionEnum dir,
-	                          const TargetParamsType& tstStruct,
 	                          RealType Eg)
-	    : aoe_(aoe), lrs_(lrs), direction_(dir), tstStruct_(tstStruct), Eg_(Eg)
+	    : pVectors_(pVectors),
+	      direction_(dir),
+	      Eg_(Eg),
+	      pIndexOutput_(0)
 	{}
 
-	const ApplyOperatorExpressionType& aoe() const { return aoe_; }
+	PvectorsType& pVectors() const { return pVectors_; }
 
-	ApplyOperatorExpressionType& aoeNonConst()
-	{
-		ApplyOperatorExpressionType* aoePtr = const_cast<ApplyOperatorExpressionType*>(&aoe_);
-		return *aoePtr;
-	}
-
-	const LeftRightSuperType& lrs() const { return lrs_; }
+	void setPindexOutput(SizeType x) { pIndexOutput_ = x; }
 
 	ProgramGlobals::DirectionEnum direction() const { return direction_; }
 
-	const TargetParamsType& tstStruct() const { return tstStruct_; }
-
 	const RealType& Eg() const { return Eg_; }
 
-	const VectorWithOffsetType& getCurrentVectorConst(PsimagLite::String braOrKet) const
-	{
-		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
-		if (getBraOrKet.isPvector()) {
-			const SizeType pIndex = getBraOrKet.pIndex();
-			if (pIndex >= aoe_.targetVectors().size())
-				err("getVector: out of range for " + braOrKet + "\n");
-			return aoe_.targetVectors()[pIndex];
-		} else if (getBraOrKet.isRvector()) {
-			throw PsimagLite::RuntimeError("reserved vector\n");
-		}
-
-		const SizeType sectorIndex = getBraOrKet.sectorIndex();
-		return *(aoe_.psiConst()[sectorIndex][getBraOrKet.levelIndex()]);
-	}
+	const SizeType pIndexOutput() const { return pIndexOutput_; }
 
 	VectorWithOffsetType& getCurrentVectorNonConst(PsimagLite::String braOrKet) const
 	{
@@ -87,23 +68,16 @@ public:
 		return "R" + ttos(n);
 	}
 
-	const VectorVectorWithOffsetType& tempVectors() const
-	{
-		return tempVectors_;
-	}
+	const VectorVectorWithOffsetType& tempVectors() const { return tempVectors_; }
 
-	const VectorStringType& tempNames() const
-	{
-		return tempNames_;
-	}
+	const VectorStringType& tempNames() const { return tempNames_; }
 
 private:
 
-	const ApplyOperatorExpressionType& aoe_;
-	const LeftRightSuperType lrs_;
+	PvectorsType& pVectors_;
 	ProgramGlobals::DirectionEnum direction_;
-	const TargetParamsType& tstStruct_;
 	RealType Eg_;
+	SizeType pIndexOutput_;
 	mutable VectorVectorWithOffsetType tempVectors_;
 	mutable VectorStringType tempNames_;
 };

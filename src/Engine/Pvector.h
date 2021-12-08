@@ -27,6 +27,8 @@ public:
 		vStr_.push_back(str);
 	}
 
+	void setAsDone() {vStr_.push_back("DONE"); }
+
 	void pushString(PsimagLite::String newstring) { vStr_.push_back(newstring); }
 
 	void multiplyWeight(const RealType& factor) { weight_*= factor; }

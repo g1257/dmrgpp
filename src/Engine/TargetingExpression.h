@@ -84,7 +84,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Pvector.h"
 #include "SpecForTargetingExpression.h"
 #include "CanonicalExpression.h"
-#include "TargetParamsTimeVectors.h"
 
 namespace Dmrg {
 
@@ -105,7 +104,6 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOf
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 	typedef Pvector<typename VectorWithOffsetType_::value_type> PvectorType;
-	typedef typename PsimagLite::Vector<PvectorType*>::Type VectorPvectorType;
 	typedef SpecForTargetingExpression<BaseType> SpecForTargetingExpressionType;
 	typedef typename SpecForTargetingExpressionType::AlgebraType AlgebraType;
 	typedef typename SpecForTargetingExpressionType::AssignAndDestroy AssignAndDestroyType;
@@ -118,7 +116,7 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOf
 	VectorVectorWithOffsetType;
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename AlgebraType::VectorSizeType VectorSizeType;
-	typedef TargetParamsTimeVectors<ModelType> TargetParamsTimeVectorsType;
+	typedef typename BaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 
 public:
 
@@ -130,25 +128,14 @@ public:
 	    : BaseType(lrs, model, wft, 0),
 	      progress_("TargetingExpression"),
 	      gsWeight_(0.3),
-	      origPvectors_(0),
-	      tstStruct_(io, "TargetingExpression", model),
-	      io_(io)
+	      pvectors_(io, this->common().aoe(), lrs)
 	{
 		io.readline(gsWeight_, "GsWeight=");
-		pvectorsFromInput(io);
-	}
-
-	~TargetingExpression()
-	{
-		for (SizeType i = 0; i < pVectors_.size(); ++i) {
-			delete pVectors_[i];
-			pVectors_[i] = 0;
-		}
 	}
 
 	SizeType sites() const { return 0; }
 
-	SizeType targets() const { return pVectors_.size(); }
+	SizeType targets() const { return pvectors_.targets(); }
 
 	RealType normSquared(SizeType i) const
 	{
@@ -186,7 +173,7 @@ public:
 		assert(block1.size() == 1);
 		const SizeType site = block1[0];
 		const SizeType total = this->common().aoe().targetVectors().size();
-		assert(total <= pVectors_.size());
+		assert(total <= pvectors_.targets());
 		this->common().aoe().wftSome(site, 0, total);
 
 		assert(energies.size() > 0);
@@ -217,34 +204,12 @@ public:
 
 private:
 
-	void pvectorsFromInput(InputValidatorType& io)
-	{
-		SizeType total = 0;
-		io.readline(total, "Pvectors=");
-		pVectors_.resize(total);
-		PsimagLite::String tmp;
-		RealType sum = 0.0;
-		for (SizeType i = 0; i < total; ++i) {
-			io.readline(tmp, "P" + ttos(i) + "=");
-			pVectors_[i] = new PvectorType(tmp);
-			sum += pVectors_[i]->weight();
-		}
-
-		if (sum == 0.0) return;
-
-		RealType factor = (1.0 - gsWeight_)/sum;
-		for (SizeType i = 0; i < total; ++i)
-			pVectors_[i]->multiplyWeight(factor);
-
-		origPvectors_ = pVectors_.size();
-	}
-
 	void computePvectors(ProgramGlobals::DirectionEnum dir, RealType Eg)
 	{
 		if (allOrigPvectorsDone()) {
 			const SizeType tvs = this->common().aoe().targetVectors().size();
-			if (tvs == origPvectors_) return;
-			if (tvs < origPvectors_)
+			if (tvs == pvectors_.origPvectors()) return;
+			if (tvs < pvectors_.origPvectors())
 				err("TVS could not have decreased ?!\n");
 
 			PsimagLite::OstringStream msgg(std::cout.precision());
@@ -255,46 +220,43 @@ private:
 			std::cerr<<"All user-provided P vectors finished\n";
 			std::cerr<<PsimagLite::AnsiColor::reset;
 
-			this->common().aoe().targetVectorsResize(origPvectors_);
+			this->common().aoe().targetVectorsResize(pvectors_.origPvectors());
 
 			return;
 		}
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"P0="<<pVectors_[0]->lastName();
+		msg<<"P0="<<pvectors_(0).lastName();
 		progress_.printline(msgg, std::cout);
 
 		CanonicalExpressionType canonicalExpression(opSpec_);
-		SizeType total = pVectors_.size();
+		SizeType total = pvectors_.targets();
 
-		AuxForTargetingExpressionType aux(this->common().aoe(),
-		                                  this->lrs(),
-		                                  dir,
-		                                  tstStruct_,
-		                                  Eg);
+		AuxForTargetingExpressionType aux(pvectors_, dir, Eg);
 		AlgebraType opEmpty(aux);
 		bool needsTrimming = false;
 		PsimagLite::String allpvectors;
 		for (SizeType i = 0; i < total; ++i) {
 
-			if (pVectors_[i]->lastName() == "DONE") continue;
+			if (pvectors_(i).lastName() == "DONE") continue;
 
+			aux.setPindexOutput(i);
 			AlgebraType tmp(aux);
 
-			canonicalExpression(tmp, pVectors_[i]->lastName(), opEmpty, aux);
+			canonicalExpression(tmp, pvectors_(i).lastName(), opEmpty, aux);
 			tmp.finalize();
 
 			PsimagLite::String thispBefore = tmp.toString();
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
-			PsimagLite::String thispAfter = pVectors_[i]->lastName();
+			PsimagLite::String thispAfter = pvectors_(i).lastName();
 
 			int x = tmp.pIndex();
 			if (x >= 0) {
 				if (static_cast<SizeType>(x) == i) err("Self assigment\n");
 				VectorWithOffsetType_& v0 = this->common().aoe().targetVectors(i);
 				v0 =  this->common().aoe().targetVectors(x);
-				pVectors_[i]->pushString("DONE");
+				pvectors_.setAsDone(i);
 				continue;
 			}
 
@@ -304,18 +266,18 @@ private:
 			}
 
 			PsimagLite::String newpstring = simplifyTerms(thispBefore);
-			if (newpstring != pVectors_[i]->lastName()) {
+			if (newpstring != pvectors_(i).lastName()) {
 				needsTrimming = true;
 				PsimagLite::String compr = compressExpression(newpstring);
 				//checkNoUncompressedExists(compr);
-				pVectors_[i]->pushString(compr);
+				pvectors_.pushString(i, compr);
 				newpstring += compr;
 			}
 
 			allpvectors += newpstring;
 		}
 
-		if (needsTrimming) trimPvectors(allpvectors);
+		if (needsTrimming) pvectors_.trimPvectors(allpvectors);
 	}
 
 	void finalize(const VectorVectorWithOffsetType& tempVectors,
@@ -331,10 +293,10 @@ private:
 		VectorBoolType removed_(ntemps);
 		VectorSizeType tempToP(ntemps, 10000);
 		for (SizeType i = 0; i < ntemps; ++i) {
-			int x = findInOrigNames(tempNames[i]);
+			int x = pvectors_.findInOrigNames(tempNames[i]);
 			if (x < 0) continue;
 			this->common().aoe().targetVectors(x) = tempVectors[i];
-			pVectors_[x]->pushString("DONE");
+			pvectors_.setAsDone(x);
 			removed_[i] = true;
 			tempToP[i] = x;
 		}
@@ -342,14 +304,14 @@ private:
 		// these surviving tempNames_ need storage, add them
 		for (SizeType i = 0; i < ntemps; ++i) {
 			if (removed_[i]) continue;
-			int x = findInAnyNames(tempNames[i]);
+			int x = pvectors_.findInAnyNames(tempNames[i]);
 			if (x >= 0) continue;
 			const SizeType ind = this->common().aoe().createPvector(tempVectors[i]);
 			tempToP[i] = ind;
 			const PsimagLite::String ename = expandExpression(tempNames[i], tempToP);
 			PvectorType* pnew = new PvectorType(ename);
 			pnew->pushString("DONE");
-			pVectors_.push_back(pnew);
+			pvectors_.pushBack(pnew);
 
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -360,33 +322,14 @@ private:
 		PsimagLite::String newpstring = compressExpression(tempExpr);
 		const PsimagLite::String selfName = "|P" + ttos(pVectorIndex) + ">";
 		if (newpstring == selfName) newpstring = "DONE";
-		pVectors_[pVectorIndex]->pushString(newpstring);
+		pvectors_.pushString(pVectorIndex, newpstring);
 	}
 
 	bool allOrigPvectorsDone() const
 	{
-		for (SizeType i = 0; i < origPvectors_; ++i)
-			if (pVectors_[i]->lastName() != "DONE") return false;
+		for (SizeType i = 0; i < pvectors_.origPvectors(); ++i)
+			if (pvectors_(i).lastName() != "DONE") return false;
 		return true;
-	}
-
-	int findInOrigNames(PsimagLite::String str) const
-	{
-		return findInNames(str, origPvectors_);
-	}
-
-	int findInAnyNames(PsimagLite::String str) const
-	{
-		return findInNames(str, pVectors_.size());
-	}
-
-	int findInNames(PsimagLite::String str, SizeType end) const
-	{
-		assert(end <= pVectors_.size());
-		for (SizeType i = 0; i < end; ++i)
-			if (pVectors_[i]->hasAnyName(str)) return i;
-
-		return -1;
 	}
 
 	// replace "|!m" + something ==> "|P" + number
@@ -405,7 +348,7 @@ private:
 					if (str[j] == '>') break;
 				}
 
-				const SizeType ind = findPforThisExpression(buffer);
+				const SizeType ind = pvectors_.findPforThisExpression(buffer);
 				buffer = "|P" + ttos(ind) + ">";
 				i = j;
 				result += buffer;
@@ -416,17 +359,6 @@ private:
 		}
 
 		return result;
-	}
-
-	SizeType findPforThisExpression(PsimagLite::String str) const
-	{
-		const SizeType pvectors = pVectors_.size();
-		for (SizeType i = 0; i < pvectors; ++i) {
-			if (!pVectors_[i]->hasAnyName(str)) continue;
-			return i;
-		}
-
-		throw PsimagLite::RuntimeError("findPforThisExpression: P not found\n");
 	}
 
 	// replace "R" + i ==> "P" + tempToP[i]
@@ -501,7 +433,7 @@ private:
 					ind1 = tmp;
 				}
 
-				sumPvectors(ind0, ind1, p0PlusP1);
+				pvectors_.sumPvectors(ind0, ind1, p0PlusP1);
 
 				buffer = "|P" + ttos(ind0) + ">";
 				i = j;
@@ -526,85 +458,17 @@ private:
 		}
 	}
 
-	void sumPvectors(SizeType ind0, SizeType ind1, PsimagLite::String p0PlusP1)
-	{
-		assert(ind0 < ind1);
-		VectorWithOffsetType_& v0 = this->common().aoe().targetVectors(ind0);
-		const VectorWithOffsetType_& v1 =  this->common().aoe().targetVectors(ind1);
-		v0 += v1;
-		pVectors_[ind0]->sum(*(pVectors_[ind1]), p0PlusP1);
-	}
-
-	void trimPvectors(PsimagLite::String str)
-	{
-		const SizeType tvs = this->common().aoe().targetVectors().size();
-		VectorBoolType used(tvs, false);
-		assert(origPvectors_ <= tvs);
-		for (SizeType i = 0; i < origPvectors_; ++i)
-			used[i] = true;
-
-		findUsedPvectors(used, str);
-
-		for (SizeType i = 0; i < tvs; ++i) {
-			if (used[i]) continue;
-			this->common().aoe().destroyPvector(i);
-			PsimagLite::OstringStream msgg(std::cout.precision());
-			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"P["<<i<<"] destroyed";
-			progress_.printline(msgg, std::cout);
-		}
-
-		// this line is commented out because then the index of aoe.targetVectors
-		// will be different than the index of pVectors
-		// aoe.targetVectors is resized after all vectors have been computed
-		//this->common().aoe().trimVectors();
-		const SizeType tvsFinal = this->common().aoe().targetVectors().size();
-		if (tvs != tvsFinal) {
-			PsimagLite::OstringStream msgg(std::cout.precision());
-			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"Number of target vectors is "<<tvsFinal<<" now";
-			progress_.printline(msgg, std::cout);
-		}
-	}
-
-	void findUsedPvectors(VectorBoolType& used, PsimagLite::String str) const
-	{
-		const SizeType len = str.size();
-		for (SizeType i = 0; i < len; ++i) {
-
-			if (str.substr(i, 2) != "|P") continue;
-
-			PsimagLite::String buffer;
-			SizeType j = i + 2;
-			for (; j < len; ++j) {
-				if (str[j] >= 48 && str[j] <= 57) {
-					buffer += str[j];
-				} else if (str[j] == '>') {
-					break;
-				} else {
-					buffer = "";
-					break;
-				}
-			}
-
-			i = j;
-			if (buffer == "") continue;
-			const SizeType ind = PsimagLite::atoi(buffer);
-			used[ind] = true;
-		}
-	}
-
 	void computeAllWeights(RealType& gsWeight, VectorRealType& weight) const
 	{
 		const SizeType n = this->common().aoe().targetVectors().size();
-		assert(n <= pVectors_.size());
+		assert(n <= pvectors_.targets());
 		weight.resize(n);
 		std::fill(weight.begin(), weight.end(), 0);
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			RealType norma = norm(this->common().aoe().targetVectors()[i]);
 			if (norma < 1e-6) continue;
-			weight[i] = pVectors_[i]->weight()/norma;
+			weight[i] = pvectors_(i).weight()/norma;
 			sum += weight[i];
 		}
 
@@ -622,11 +486,8 @@ private:
 
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
-	SizeType origPvectors_;
-	VectorPvectorType pVectors_;
 	SpecForTargetingExpressionType opSpec_;
-	TargetParamsTimeVectorsType tstStruct_;
-	InputValidatorType& io_;
+	Pvectors<BaseType> pvectors_;
 };     //class TargetingExpression
 } // namespace Dmrg
 /*@}*/

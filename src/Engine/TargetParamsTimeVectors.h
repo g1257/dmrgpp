@@ -92,6 +92,15 @@ public:
 	typedef TargetParamsCommon<ModelType> BaseType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename BaseType::VectorRealType VectorRealType;
+TargetParamsTimeVectors()
+{
+	VectorRealType times_;
+	SizeType advanceEach_;
+	typename BaseType::AlgorithmEnum algorithm_;
+	RealType tau_;
+	RealType timeDirection_;
+	VectorRealType chebyTransform_;
+}
 
 	template<typename IoInputter>
 	TargetParamsTimeVectors(IoInputter& io,
