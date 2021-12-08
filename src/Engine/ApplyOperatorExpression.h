@@ -439,6 +439,8 @@ public:
 	void initTimeVectors(const TargetParamsType& tstStruct,
 	                     InputValidatorType& ioIn)
 	{
+		delete timeVectorsBase_;
+		timeVectorsBase_ = nullptr;
 		const LeftRightSuperType& lrs = targetHelper_.lrs();
 		const ModelType& model = targetHelper_.model();
 		const WaveFunctionTransfType& wft = targetHelper_.wft();
@@ -596,8 +598,7 @@ public:
 
 	void wftSome(SizeType site, SizeType begin, SizeType end)
 	{
-		VectorVectorWithOffsetType& tvs = const_cast<VectorVectorWithOffsetType&>(targetVectors_);
-		wftHelper_.wftSome(tvs, site, begin, end);
+		wftHelper_.wftSome(targetVectors_, site, begin, end);
 	}
 
 	void wftOneVector(VectorWithOffsetType& phiNew,

@@ -166,9 +166,8 @@ public:
 		}
 	}
 
-	void initTimeVectors(SizeType timeSteps, RealType tau, SizeType advanceEach)
+	void initTimeVectors(SizeType timeSteps, RealType tau)
 	{
-		//tstStruct_.advanceEach() = advanceEach;
 		tstStruct_.times().resize(timeSteps);
 		for (SizeType i = 0; i < timeSteps; ++i)
 			tstStruct_.times()[i] = i*tau/(timeSteps - 1);

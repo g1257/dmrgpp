@@ -48,7 +48,7 @@ public:
 
 		SizeType timeSteps = 3; // Fixme read from string TODO FIXME
 		RealType tau = 0.1; // Fixme read from string TODO FIXME
-		SizeType advanceEach = aux_.pVectors().aoe().model().superGeometry().numberOfSites() - 2;
+		//SizeType advanceEach = aux_.pVectors().aoe().model().superGeometry().numberOfSites() - 2;
 
 		SizeType firstIndex = aux_.pIndexOutput();
 		if (firstIndex >= aux_.pVectors().origPvectors())
@@ -56,8 +56,7 @@ public:
 
 		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
 
-		if (aux_.timeEvolve().size() == 0)
-			auxPtr->pVectors().initTimeVectors(timeSteps, tau, advanceEach);
+		auxPtr->pVectors().initTimeVectors(timeSteps, tau);
 
 		OneTimeEvolutionType* oneTimeEvolution = aux_.timeEvolve().findThisEvolution(firstIndex);
 
