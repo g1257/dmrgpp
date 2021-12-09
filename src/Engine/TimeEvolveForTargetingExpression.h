@@ -14,17 +14,18 @@ class TimeEvolveForTargetingExpression {
 		typedef typename PsimagLite::Vector<ThisType*>::Type VectorOneTimeEvolutionType;
 		typedef typename PvectorsType::VectorWithOffsetType VectorWithOffsetType;
 		typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+		typedef typename PvectorsType::RealType RealType;
 
 		OneTimeEvolution(SizeType firstIndex,
 		                 const VectorWithOffsetType& src,
 		                 SizeType timeSteps,
 		                 PvectorsType& pVectors)
-		    : indices(timeSteps)
+		    : indices_(timeSteps), timesWithoutAdvancement_(0), time_(0)
 		{
-			indices[0] = firstIndex;
+			indices_[0] = firstIndex;
 			for (SizeType i = 1; i < timeSteps; ++i) {
 				auto lambda = [this, i](SizeType ind) {
-					this->indices[i] = ind;
+					indices_[i] = ind;
 					return "|P" + ttos(ind) + ">";
 				};
 
@@ -32,7 +33,35 @@ class TimeEvolveForTargetingExpression {
 			}
 		}
 
-		VectorSizeType indices;
+		const VectorSizeType& indices() const { return indices_; }
+
+		SizeType timesWithoutAdvancement() const
+		{
+			return timesWithoutAdvancement_;
+		}
+
+		RealType time() const { return time_; }
+
+		void advanceTime(RealType tau)
+		{
+			time_ += tau;
+		}
+
+		void resetTimesWithoutAdvancement()
+		{
+			timesWithoutAdvancement_ = 1;
+		}
+
+		void incrementTimesWithoutAdvancement()
+		{
+			++timesWithoutAdvancement_;
+		}
+
+	private:
+
+		VectorSizeType indices_;
+		SizeType timesWithoutAdvancement_;
+		RealType time_;
 	};
 
 public:
@@ -56,7 +85,7 @@ public:
 	{
 		const SizeType n = vEvolutions_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (vEvolutions_[i]->indices[0] == firstIndex) return vEvolutions_[i];
+			if (vEvolutions_[i]->indices()[0] == firstIndex) return vEvolutions_[i];
 
 		return nullptr;
 	}
