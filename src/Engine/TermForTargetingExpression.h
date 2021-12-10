@@ -107,8 +107,8 @@ public:
 			}
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
-			if (isGlobalOperator(tmp)) {
-				nonLocal_.timeEvolve(siteSplit, ket, getCurrentCoO());
+			if (nonLocal_.isGlobalOperator(tmp)) {
+				nonLocal_.timeEvolve(tmp, siteSplit, ket, getCurrentCoO());
 				newVstr.push_back(tmp);
 				continue;
 			}
@@ -282,13 +282,6 @@ private:
 		strFactor_ = "(" + ttos(freal) + "+" + ttos(fimag) + "i)";
 
 		if (freal == 1 && fimag == 0) strFactor_ = "";
-	}
-
-	static bool isGlobalOperator(PsimagLite::String op)
-	{
-		static const PsimagLite::String timeEvolve = "TimeEvolve";
-
-		return (op.substr(0, timeEvolve.length()) == timeEvolve);
 	}
 
 	bool finalized_;

@@ -35,7 +35,8 @@ public:
 	    : aux_(aux), progress_("NonLocalForTargetingExpression")
 	{}
 
-	bool timeEvolve(const SiteSplitType& siteSplit,
+	bool timeEvolve(PsimagLite::String name,
+	                const SiteSplitType& siteSplit,
 	                PsimagLite::String srcKet,
 	                SizeType site)
 	{
@@ -52,8 +53,8 @@ public:
 
 		SizeType timeSteps = 3; // Fixme read from string TODO FIXME
 		RealType tau = 0.1; // Fixme read from string TODO FIXME
-		const SizeType advanceEach = aux_.pVectors().aoe().model().superGeometry().
-		        numberOfSites() - 2;
+		SizeType advanceEach = aux_.pVectors().aoe().model().superGeometry().numberOfSites() - 2;
+		extractParamsFromName(tau, timeSteps, advanceEach, name);
 
 		SizeType firstIndex = aux_.pIndexOutput();
 		if (firstIndex >= aux_.pVectors().origPvectors())
@@ -100,7 +101,19 @@ public:
 		return true;
 	}
 
+	static bool isGlobalOperator(PsimagLite::String opName)
+	{
+		return isTimeEvolution(opName);
+	}
+
 private:
+
+	static bool isTimeEvolution(PsimagLite::String op)
+	{
+		static const PsimagLite::String timeEvolve = "TimeEvolve";
+
+		return (op.substr(0, timeEvolve.length()) == timeEvolve);
+	}
 
 	bool advanceInTimeOrNot(OneTimeEvolutionType& oneTimeEvolution,
 	                        SizeType advanceEach,
@@ -134,6 +147,45 @@ private:
 		if (oneTimeEvolution.timesWithoutAdvancement() > 0)
 			progress_.printline(msgg2, std::cout);
 		return timeHasAdvanced;
+	}
+
+	static void extractParamsFromName(RealType& tau,
+	                                  SizeType& timeSteps,
+	                                  SizeType& advanceEach,
+	                                  PsimagLite::String name)
+	{
+		//TimeEvolve{0.1,5,14}
+		const PsimagLite::String tev = "TimeEvolve";
+		PsimagLite::String te = name.substr(0, tev.length());
+		assert(te == tev);
+		name = name.substr(tev.length(), name.length() - tev.length());
+		PsimagLite::String buffer;
+		const SizeType m = name.length();
+		for (SizeType i = 0; i < m; ++i) {
+			if (name[i] == ' ' || name[i] == '{' || name[i] == '}' ||
+			        name[i] == '(' || name[i] == ')') continue;
+			buffer += name[i];
+		}
+
+		VectorStringType tokens;
+		PsimagLite::split(tokens, buffer, ",");
+		const SizeType n = tokens.size();
+		switch (n) {
+		case 3:
+			advanceEach = PsimagLite::atoi(tokens[2]);
+			// fall through
+		case 2:
+			timeSteps = PsimagLite::atoi(tokens[1]);
+			// fall through
+		case 1:
+			tau = PsimagLite::atof(tokens[0]);
+			break;
+		case 0:
+			break;
+		default:
+			err("Up to three tokens can be given\n");
+			break;
+		}
 	}
 
 	const AuxiliaryType& aux_;
