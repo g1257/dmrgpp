@@ -1,11 +1,11 @@
-#ifndef TIMEEVOLVEFORTARGETINGEXPRESSION_H
-#define TIMEEVOLVEFORTARGETINGEXPRESSION_H
+#ifndef GROUP_OF_ONE_TIME_EVOLUTIONS_H
+#define GROUP_OF_ONE_TIME_EVOLUTIONS_H
 #include "Vector.h"
 
 namespace Dmrg {
 
 template<typename PvectorsType>
-class TimeEvolveForTargetingExpression {
+class GroupOfOneTimeEvolutions {
 	class OneTimeEvolution {
 
 	public:
@@ -69,10 +69,10 @@ public:
 	typedef OneTimeEvolution OneTimeEvolutionType;
 	typedef typename PsimagLite::Vector<OneTimeEvolution*>::Type VectorOneTimeEvolutionType;
 
-	TimeEvolveForTargetingExpression()
+	GroupOfOneTimeEvolutions()
 	{}
 
-	~TimeEvolveForTargetingExpression()
+	~GroupOfOneTimeEvolutions()
 	{
 		const SizeType n = vEvolutions_.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -100,4 +100,4 @@ private:
 
 };
 }
-#endif // TIMEEVOLVEFORTARGETINGEXPRESSION_H
+#endif // GROUP_OF_ONE_TIME_EVOLUTIONS_H

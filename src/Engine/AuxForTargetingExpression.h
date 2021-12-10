@@ -6,7 +6,7 @@
 #include "InputNg.h"
 #include "InputCheck.h"
 #include "Pvectors.h"
-#include "TimeEvolveForTargetingExpression.h"
+#include "GroupOfOneTimeEvolutions.h"
 
 namespace Dmrg {
 
@@ -28,10 +28,10 @@ public:
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef Pvectors<TargetingBaseType> PvectorsType;
-	typedef TimeEvolveForTargetingExpression<PvectorsType> TimeEvolveForTargetingExpressionType;
+	typedef GroupOfOneTimeEvolutions<PvectorsType> GroupOfOneTimeEvolutionsType;
 
 	AuxForTargetingExpression(PvectorsType& pVectors,
-	                          TimeEvolveForTargetingExpressionType& timeEvolve,
+	                          GroupOfOneTimeEvolutionsType& timeEvolve,
 	                          ProgramGlobals::DirectionEnum dir,
 	                          RealType Eg)
 	    : pVectors_(pVectors),
@@ -43,7 +43,7 @@ public:
 
 	PvectorsType& pVectors() const { return pVectors_; }
 
-	TimeEvolveForTargetingExpressionType& timeEvolve() const { return timeEvolve_; }
+	GroupOfOneTimeEvolutionsType& timeEvolve() const { return timeEvolve_; }
 
 	void setPindexOutput(SizeType x) { pIndexOutput_ = x; }
 
@@ -81,7 +81,7 @@ public:
 private:
 
 	PvectorsType& pVectors_;
-	TimeEvolveForTargetingExpressionType& timeEvolve_;
+	GroupOfOneTimeEvolutionsType& timeEvolve_;
 	ProgramGlobals::DirectionEnum direction_;
 	RealType Eg_;
 	SizeType pIndexOutput_;

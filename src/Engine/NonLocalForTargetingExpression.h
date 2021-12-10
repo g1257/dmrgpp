@@ -22,8 +22,8 @@ public:
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 	typedef typename AuxiliaryType::InputValidatorType InputValidatorType;
-	typedef typename AuxiliaryType::TimeEvolveForTargetingExpressionType TimeEvolveForTeType;
-	typedef typename TimeEvolveForTeType::OneTimeEvolutionType OneTimeEvolutionType;
+	typedef typename AuxiliaryType::GroupOfOneTimeEvolutionsType GroupOfOneTimeEvolutionsType;
+	typedef typename GroupOfOneTimeEvolutionsType::OneTimeEvolutionType OneTimeEvolutionType;
 	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
 	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
 	typedef typename ModelType::VectorSizeType VectorSizeType;
