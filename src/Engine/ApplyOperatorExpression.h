@@ -735,11 +735,11 @@ private:
 		        site==1)
 			firstSeeLeftCorner_ = true;
 
+		const RealType time = (timeVectorsBase_) ? timeVectorsBase_->time() : 0;
 		PsimagLite::OstringStream msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"Steps without advance: "<<timesWithoutAdvancement_;
-		assert(timeVectorsBase_);
-		msg2<<" site="<<site<<" currenTime="<<timeVectorsBase_->time();
+		msg2<<" site="<<site<<" currenTime="<<time;
 		if (timesWithoutAdvancement_ > 0) progress_.printline(msgg2, std::cout);
 
 		PsimagLite::OstringStream msgg(std::cout.precision());

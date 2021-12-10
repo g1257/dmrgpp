@@ -221,8 +221,8 @@ public:
 	                PsimagLite::String name) const
 	{
 		SizeType site = block[0];
-		TimeSerializerType ts(aoe_.timeVectors().currentTimeStep(),
-		                      aoe_.timeVectors().time(),
+		TimeSerializerType ts(currentTimeStep(),
+		                      time(),
 		                      site,
 		                      aoe_.targetVectors(),
 		                      aoe_.stages(),
