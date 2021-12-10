@@ -121,7 +121,7 @@ public:
 	                     const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      extendedHubbard_(solverParams,io,geometry)
+	      extendedHubbard_(solverParams,io,geometry, "")
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const

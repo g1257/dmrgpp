@@ -154,9 +154,11 @@ public:
 		} else if (name_ == "HeisenbergAncillaC") {
 			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
 		} else if (name_ == "HubbardOneBandExtended") {
-			model_ = new ModelHubbardExtType(solverParams,io,geometry);
-		} else if (name_ == "HubbardOneBandExtendedSuper") {
-			model_ = new ModelHubbardExtSuperType(solverParams,io,geometry);
+			model_ = new ModelHubbardExtType(solverParams,io,geometry,"");
+		} else if (name_.substr(0, 22) == "HubbardOneBandExtendedSuper") {
+			PsimagLite::String tmp = (name_.length() == 22) ? ""
+			                                               : name_.substr(22, name_.length() - 22);
+			model_ = new ModelHubbardExtSuperType(solverParams, io, geometry, tmp);
 		} else if (name_ == "FeAsBasedSc") {
 			model_ = new FeBasedScType(solverParams,io,geometry);
 		} else if (name_ == "FeAsBasedScExtended") {

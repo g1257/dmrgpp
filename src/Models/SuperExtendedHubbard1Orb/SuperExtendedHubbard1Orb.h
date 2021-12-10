@@ -120,13 +120,14 @@ public:
 
 	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
 	                         InputValidatorType& io,
-	                         const SuperGeometryType& superGeometry)
+	                         const SuperGeometryType& superGeometry,
+	                         PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
 	                    superGeometry,
 	                    io),
 	      modelParameters_(io),
 	      superGeometry_(superGeometry),
-	      extendedHubbard_(solverParams, io, superGeometry)
+	      extendedHubbard_(solverParams, io, superGeometry, extension)
 	{}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
