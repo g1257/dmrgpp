@@ -122,6 +122,11 @@ private:
 			oneTimeEvolution.incrementTimesWithoutAdvancement();
 		}
 
+		// make sure aoe.timeVectors.time_ is in sync with oneTimeEvolution's time
+		TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>
+		        (&aux_.pVectors().aoe().timeVectors());
+		ptr->setCurrentTime(oneTimeEvolution.time());
+
 		PsimagLite::OstringStream msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"Steps without advance: "<<oneTimeEvolution.timesWithoutAdvancement();
