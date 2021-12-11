@@ -152,6 +152,12 @@ public:
 		delete timeVectorsBase_;
 		timeVectorsBase_ = 0;
 		clearPsi();
+
+		const SizeType n = targetVectors_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			delete targetVectors_[i];
+			targetVectors_[i] = nullptr;
+		}
 	}
 
 	virtual void initPsi(SizeType nsectors, SizeType nexcited)
@@ -428,8 +434,26 @@ public:
 
 	void targetVectorsResize(SizeType x)
 	{
-		if (x == 0) targetVectors_.clear();
-		else targetVectors_.resize(x);
+		const SizeType n = targetVectors_.size();
+		if (n == x) return;
+
+		if (n < x) {
+			const SizeType r = x - n;
+			for (SizeType i = 0; i < r; ++i) {
+				VectorWithOffsetType* v = new VectorWithOffsetType();
+				targetVectors_.push_back(v);
+			}
+		} else {
+			assert(n > x);
+			const SizeType r = n - x;
+			for (SizeType i = 0; i < r; ++i) {
+				const SizeType j = n - i - 1;
+				delete targetVectors_[j];
+				targetVectors_[j] = nullptr;
+			}
+
+			targetVectors_.resize(x);
+		}
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
