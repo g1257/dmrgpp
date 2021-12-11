@@ -219,8 +219,8 @@ public:
 	{
 		if (this->common().aoe().allStages(StageEnumType::DISABLED))
 			return 1;
-		SizeType n = this->common().aoe().targetVectors().size();
-		if (this->common().aoe().targetVectors()[n-1].size()==0) n--;
+		SizeType n = this->common().aoe().tvs();
+		if (this->common().aoe().targetVectors(n-1).size()==0) n--;
 		return n;
 	}
 
@@ -262,12 +262,12 @@ public:
 		calcTimeVectors(PairType(0,n1),Eg,direction,block1);
 
 		// Advance or wft  collapsed vector
-		if (this->common().aoe().targetVectors()[n1].size()>0)
+		if (this->common().aoe().targetVectors(n1).size()>0)
 			evolve(n1,n1,n1-1,Eg,direction,sites,loopNumber);
 
-		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++)
-			assert(this->common().aoe().targetVectors()[i].size()==0 ||
-			       this->common().aoe().targetVectors()[i].size()==
+		for (SizeType i=0;i<this->common().aoe().tvs();i++)
+			assert(this->common().aoe().targetVectors(i).size()==0 ||
+			       this->common().aoe().targetVectors(i).size()==
 			       lrs_.super().permutationVector().size());
 
 		bool doBorderIfBorder = true;
@@ -293,8 +293,8 @@ public:
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)) return;
 
 		// collapse
-		bool hasCollapsed = mettsCollapse_(this->common().aoe().targetVectors(n1),
-		                                   this->common().aoe().targetVectors()[n1-1],
+		bool hasCollapsed = mettsCollapse_(this->common().aoe().targetVectorsNonConst(n1),
+		                                   this->common().aoe().targetVectors(n1 - 1),
 		        sites,
 		        direction);
 		if (hasCollapsed) {
@@ -316,11 +316,11 @@ public:
 	{
 		this->common().write(io, block, prefix);
 
-		VectorVectorWithOffsetType& tv = const_cast<VectorVectorWithOffsetType&>
-		        (this->common().aoe().targetVectors());
+		ApplyOperatorExpressionType& aoeNonConst = const_cast<ApplyOperatorExpressionType&>
+		        (this->common().aoe());
 		if (mettsStruct_.beta > this->common().aoe().timeVectors().time()) {
-			for (SizeType i = 0; i < this->common().aoe().targetVectors().size(); ++i)
-				tv[i].clear();
+			for (SizeType i = 0; i < this->common().aoe().tvs(); ++i)
+				aoeNonConst.destroyPvector(i);
 		}
 
 		this->common().writeNGSTs(io, prefix, block, "Metts");
@@ -359,14 +359,14 @@ private:
 	                     ProgramGlobals::DirectionEnum systemOrEnviron,
 	                     const VectorSizeType& block)
 	{
-		const VectorWithOffsetType& phi = this->common().aoe().targetVectors()[startEnd.first];
+		const VectorWithOffsetType& phi = this->common().aoe().targetVectors(startEnd.first);
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<" vector number "<<startEnd.first<<" has norm ";
 		msg<<norm(phi);
 		progress_.printline(msgg, std::cout);
 		if (norm(phi)<1e-6)
-			setFromInfinite(this->common().aoe().targetVectors(startEnd.first),lrs_);
+			setFromInfinite(this->common().aoe().targetVectorsNonConst(startEnd.first),lrs_);
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		VectorSizeType indices(startEnd.second - startEnd.first);
 		for (SizeType i = 0; i < indices.size(); ++i) indices[i] = i + startEnd.first;
@@ -404,11 +404,11 @@ private:
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			SizeType n1 = mettsStruct_.times().size();
-			RealType x = norm(this->common().aoe().targetVectors()[n1]);
+			RealType x = norm(this->common().aoe().targetVectors(n1));
 			msg<<"Changing direction, setting collapsed with norm="<<x;
 			progress_.printline(msgg, std::cout);
 			for (SizeType i=0;i<n1;i++)
-				this->common().aoe().targetVectors(i) = this->common().aoe().targetVectors()[n1];
+				this->common().aoe().targetVectorsNonConst(i) = this->common().aoe().targetVectors(n1);
 			this->common().aoe().timeHasAdvanced();
 			printAdvancement(timesWithoutAdvancement_);
 			return;
@@ -443,7 +443,7 @@ private:
 			this->common().setAllStagesTo(StageEnumType::COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.times().size();
-			this->common().aoe().targetVectors(n1).clear();
+			this->common().aoe().destroyPvector(n1);
 			timesWithoutAdvancement_ = 0;
 			printAdvancement(timesWithoutAdvancement_);
 			return;
@@ -464,8 +464,8 @@ private:
 	                  const ProgramGlobals::DirectionEnum,
 	                  const VectorSizeType& block)
 	{
-		if (this->common().aoe().targetVectors()[index].size()==0) return;
-		assert(norm(this->common().aoe().targetVectors()[index])>1e-6);
+		if (this->common().aoe().targetVectors(index).size() == 0) return;
+		assert(norm(this->common().aoe().targetVectors(index)) > 1e-6);
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk,block);
 
@@ -489,14 +489,14 @@ private:
 
 			VectorWithOffsetType phiNew; // same sectors as g.s.
 			//phiNew.populateSectors(lrs_.super());
-			assert(norm(this->common().aoe().targetVectors()[advance])>1e-6);
+			assert(norm(this->common().aoe().targetVectors(advance))>1e-6);
 
 			phiNew.populateSectors(lrs_.super());
 			// OK, now that we got the partition number right, let's wft:
-			wft_.setInitialVector(phiNew,this->common().aoe().targetVectors()[advance],lrs_,nk);
+			wft_.setInitialVector(phiNew,this->common().aoe().targetVectors(advance),lrs_,nk);
 			phiNew.collapseSectors();
 			assert(norm(phiNew)>1e-6);
-			this->common().aoe().targetVectors(index) = phiNew;
+			this->common().aoe().targetVectorsNonConst(index) = phiNew;
 		} else {
 			assert(false);
 		}
@@ -574,8 +574,8 @@ private:
 		           transformEnviron,
 		           block2);
 		pureVectors_.second = newVector2;
-		setFromInfinite(this->common().aoe().targetVectors(0),lrs_);
-		assert(norm(this->common().aoe().targetVectors()[0])>1e-6);
+		setFromInfinite(this->common().aoe().targetVectorsNonConst(0), lrs_);
+		assert(norm(this->common().aoe().targetVectors(0)) > 1e-6);
 
 		systemPrev_.fixed = alphaFixedVolume;
 		systemPrev_.permutationInverse = lrs_.left().permutationInverse();
@@ -774,8 +774,8 @@ private:
 
 	void printEnergies() const
 	{
-		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++)
-			printEnergies(this->common().aoe().targetVectors()[i],i);
+		for (SizeType i=0;i<this->common().aoe().tvs();i++)
+			printEnergies(this->common().aoe().targetVectors(i), i);
 	}
 
 	void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const
@@ -838,9 +838,9 @@ private:
 
 			weight_[i] = 0;
 
-			if (i >= this->common().aoe().targetVectors().size()) continue;
+			if (i >= this->common().aoe().tvs()) continue;
 
-			const RealType norma = norm(this->common().aoe().targetVectors()[i]);
+			const RealType norma = norm(this->common().aoe().targetVectors(i));
 			if (norma < 1e-5) continue;
 
 			weight_[i] = 1;

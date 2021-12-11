@@ -224,8 +224,7 @@ public:
 		TimeSerializerType ts(currentTimeStep(),
 		                      time(),
 		                      site,
-		                      aoe_.targetVectors(),
-		                      aoe_.stages(),
+		                      aoe_,
 		                      name);
 		ts.write(io, prefix);
 	}
@@ -268,7 +267,7 @@ public:
 			aoe_.setStage(i, stages[i]);
 
 		SizeType rtvs = ts->numberOfVectors();        // read tvs
-		SizeType dtvs = aoe_.targetVectors().size();  // destination tvs
+		SizeType dtvs = aoe_.tvs();  // destination tvs
 
 		int tvForPsi = checkpoint.sourceTvForPsi();
 		if (tvForPsi >= 0) {
@@ -282,6 +281,7 @@ public:
 			aoe_.setOnlyOnePsi(ts->vector(tvForPsiUnsigned));
 		}
 
+		ApplyOperatorExpressionType& aoeNonConst = const_cast<ApplyOperatorExpressionType&>(aoe_);
 		for (SizeType i = 0; i < dtvs; ++i) {
 			const int j = checkpoint.mappingTvs(i);
 			if (j < 0) continue;
@@ -291,7 +291,7 @@ public:
 				    ttos(j) + " >= " + ttos(rtvs) + "\n");
 			}
 
-			aoe_.targetVectors(i) = ts->vector(j);
+			aoeNonConst.targetVectorsNonConst(i) = ts->vector(j);
 		}
 
 		// FIXME TODO check that the NGST name changes instead
@@ -445,7 +445,7 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		const VectorWithOffsetType& v = aoe_.targetVectors()[i];
+		const VectorWithOffsetType& v = aoe_.targetVectors(i);
 		if (v.size() == 0) return 0;
 		// call to mult will conjugate one of the vector
 		return PsimagLite::real(v*v);
@@ -453,7 +453,7 @@ public:
 
 	void normalizeTimeVectors(SizeType start = 0, SizeType end = 0)
 	{
-		SizeType total =  aoe_.targetVectors().size();
+		SizeType total =  aoe_.tvs();
 		if (end == 0) end = total;
 		for (SizeType i = start; i < end; ++i) {
 			RealType factor = normSquared(i);
@@ -483,7 +483,8 @@ public:
 	                       const BlockType& block1)
 	{
 		const VectorWithOffsetType& psi = aoe_.ensureOnlyOnePsi("computeCorrection");
-		VectorWithOffsetType& v = aoe_.targetVectors(0);
+		ApplyOperatorExpressionType& aoeNonConst = const_cast<ApplyOperatorExpressionType&>(aoe_);
+		VectorWithOffsetType& v = aoeNonConst.targetVectorsNonConst(0);
 
 		// operators in the one-site basis:
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
@@ -765,8 +766,8 @@ private:
 	{
 		if (getBraOrKet.isPvector()) {
 			const SizeType pIndex = getBraOrKet.pIndex();
-			return (pIndex >= aoe_.targetVectors().size()) ? nullptr
-			                                               : &(aoe_.targetVectors(pIndex));
+			return (pIndex >= aoe_.tvs()) ? nullptr
+			                              : &(aoe_.targetVectors(pIndex));
 		}
 
 		const SizeType sectorIndex = getBraOrKet.sectorIndex();

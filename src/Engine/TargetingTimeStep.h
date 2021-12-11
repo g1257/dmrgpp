@@ -300,8 +300,8 @@ private:
 
 	void printEnergies() const
 	{
-		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++)
-			printEnergies(this->common().aoe().targetVectors()[i],i);
+		for (SizeType i=0;i<this->common().aoe().tvs();i++)
+			printEnergies(this->common().aoe().targetVectors(i), i);
 	}
 
 	void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const

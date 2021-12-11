@@ -127,7 +127,7 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<TargetParamsType,
 	VectorMatrixFieldType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
+	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type
 	VectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename LanczosSolverType::MatrixType MatrixLanczosType;
@@ -171,12 +171,13 @@ public:
 		if (extra.wftAndAdvanceIfNeeded) {
 			const SizeType noAdvance = indices[0];
 			VectorWithOffsetType phiNew;
-			if (targetVectors_[noAdvance].size() > 0) {
+			assert(targetVectors_[noAdvance]);
+			if (targetVectors_[noAdvance]->size() > 0) {
 				BaseType::wftHelper().wftOneVector(phiNew,
-				                                   targetVectors_[noAdvance],
+				                                   *targetVectors_[noAdvance],
 				                                   extra.block[0]);
 
-				targetVectors_[noAdvance] = phiNew;
+				*targetVectors_[noAdvance] = phiNew;
 			}
 		}
 
@@ -184,9 +185,9 @@ public:
 		if (this->currentTimeStep() == 0) {
 			SizeType indexOf1 = indices[startOfWft];
 			assert(indexOf1 < targetVectors_.size());
-			VectorWithOffsetType& tv1 =
-			        const_cast<VectorWithOffsetType&>(targetVectors_[indexOf1]);
-			tv1  = phi;
+			VectorWithOffsetType* tv1 =
+			        const_cast<VectorWithOffsetType*>(targetVectors_[indexOf1]);
+			*tv1  = phi;
 			startOfWft = 2;
 		}
 
@@ -204,16 +205,16 @@ public:
 		if (this->currentTimeStep() == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
 				SizeType ii = indices[i];
-				targetVectors_[ii] = phi;
+				*targetVectors_[ii] = phi;
 			}
 
 			return;
 		}
 
-		const VectorWithOffsetType* ptr0 = &(targetVectors_[indices[0]]);
+		const VectorWithOffsetType* ptr0 = targetVectors_[indices[0]];
 		const VectorWithOffsetType* ptr1 = &phi;
 		if (ptr0 != ptr1)
-			targetVectors_[indices[0]] = phi;
+			*targetVectors_[indices[0]] = phi;
 
 		if (times.size() == 1 && fabs(times[0])<1e-10) return;
 
@@ -229,10 +230,10 @@ public:
 			SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
 			assert(ii != 1);
-			targetVectors_[ii] = phi;
+			*targetVectors_[ii] = phi;
 			SizeType prev = indices[i - 1];
 			SizeType prevMinus2 = indices[i - 2];
-			calcTargetVector(targetVectors_[ii], phi, prev, prevMinus2, Eg);
+			calcTargetVector(*targetVectors_[ii], phi, prev, prevMinus2, Eg);
 		}
 
 		assert(extra.block.size() > 0);
@@ -300,9 +301,9 @@ private:
 			lanczosHelper2.matrixVectorProduct(r,phi2); // applying Hprime
 		} else {
 			TargetVectorType x2(total);
-			VectorWithOffsetType x = 2.0*targetVectors_[prev];
+			VectorWithOffsetType x = 2.0*(*targetVectors_[prev]);
 			x.extract(x2,i0);
-			targetVectors_[prevMinus2].extract(phi2,i0);
+			targetVectors_[prevMinus2]->extract(phi2,i0);
 			lanczosHelper2.matrixVectorProduct(r,x2); // applying Hprime
 			r += (-1.0)*phi2;
 		}
@@ -322,7 +323,8 @@ private:
 		}
 
 		const SizeType indexToUse = 0;
-		const VectorWithOffsetType& phi = targetVectors_[indices[indexToUse]];
+		assert(targetVectors_[indices[indexToUse]]);
+		const VectorWithOffsetType& phi = *targetVectors_[indices[indexToUse]];
 
 		if (phi.sectors() == 0) {
 			PsimagLite::String msg = "TimeVectorsChebyshev:: correctVectors " +
@@ -349,7 +351,7 @@ private:
 		// correct all vectors based on the same V and weights
 		const SizeType nvectors = indices.size(); // = 3
 		for (SizeType i = 0; i < nvectors; ++i)
-			correctVectors(targetVectors_[indices[i]], V[0], T[0], weights, permutation);
+			correctVectors(*targetVectors_[indices[i]], V[0], T[0], weights, permutation);
 	}
 
 	void correctVectors(VectorWithOffsetType& phi,

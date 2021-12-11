@@ -125,11 +125,12 @@ class TimeVectorsRungeKutta : public  TimeVectorsBase<
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef VectorComplexOrRealType TargetVectorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 
 public:
 
 	TimeVectorsRungeKutta(const TargetParamsType& tstStruct,
-						  typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors,
+						  VectorVectorWithOffsetType& targetVectors,
 						  const ModelType& model,
 						  const WaveFunctionTransfType& wft,
 						  const LeftRightSuperType& lrs)
@@ -157,7 +158,7 @@ public:
 		progress_.printline(msgg, std::cout);
 
 		// set non-zero sectors
-		for (SizeType i=0;i<tstStruct_.times().size();i++) targetVectors_[i] = phi;
+		for (SizeType i=0;i<tstStruct_.times().size();i++) *targetVectors_[i] = phi;
 
 		for (SizeType ii=0;ii<phi.sectors();ii++) {
 			SizeType i = phi.sector(ii);
@@ -237,13 +238,13 @@ private:
 		for (SizeType i = 0; i < n; ++i) {
 			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
-			targetVectors_[ii].setDataInSector(result[i], i0);
+			targetVectors_[ii]->setDataInSector(result[i], i0);
 		}
 	}
 
 	PsimagLite::ProgressIndicator progress_;
 	const TargetParamsType& tstStruct_;
-	typename PsimagLite::Vector<VectorWithOffsetType>::Type& targetVectors_;
+	VectorVectorWithOffsetType& targetVectors_;
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;

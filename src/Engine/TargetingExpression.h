@@ -141,8 +141,8 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		return PsimagLite::real(this->common().aoe().targetVectors()[i]*
-		                        this->common().aoe().targetVectors()[i]);
+		return PsimagLite::real(this->common().aoe().targetVectors(i)*
+		                        this->common().aoe().targetVectors(i));
 	}
 
 	RealType weight(SizeType i) const
@@ -174,7 +174,7 @@ public:
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		assert(block1.size() == 1);
 		const SizeType site = block1[0];
-		const SizeType total = this->common().aoe().targetVectors().size();
+		const SizeType total = this->common().aoe().tvs();
 		assert(total <= pvectors_.targets());
 		this->common().aoe().wftSome(site, 0, total);
 
@@ -209,7 +209,7 @@ private:
 	void computePvectors(ProgramGlobals::DirectionEnum dir, RealType Eg)
 	{
 		if (allOrigPvectorsDone()) {
-			const SizeType tvs = this->common().aoe().targetVectors().size();
+			const SizeType tvs = this->common().aoe().tvs();
 			if (tvs == pvectors_.origPvectors()) return;
 			if (tvs < pvectors_.origPvectors())
 				err("TVS could not have decreased ?!\n");
@@ -256,7 +256,7 @@ private:
 			int x = tmp.pIndex();
 			if (x >= 0) {
 				if (static_cast<SizeType>(x) == i) err("Self assigment\n");
-				VectorWithOffsetType_& v0 = this->common().aoe().targetVectors(i);
+				VectorWithOffsetType_& v0 = this->common().aoe().targetVectorsNonConst(i);
 				v0 =  this->common().aoe().targetVectors(x);
 				pvectors_.setAsDone(i);
 				continue;
@@ -297,7 +297,7 @@ private:
 		for (SizeType i = 0; i < ntemps; ++i) {
 			int x = pvectors_.findInOrigNames(tempNames[i]);
 			if (x < 0) continue;
-			this->common().aoe().targetVectors(x) = tempVectors[i];
+			this->common().aoe().targetVectorsNonConst(x) = tempVectors[i];
 			pvectors_.setAsDone(x);
 			removed_[i] = true;
 			tempToP[i] = x;
@@ -459,13 +459,13 @@ private:
 
 	void computeAllWeights(RealType& gsWeight, VectorRealType& weight) const
 	{
-		const SizeType n = this->common().aoe().targetVectors().size();
+		const SizeType n = this->common().aoe().tvs();
 		assert(n <= pvectors_.targets());
 		weight.resize(n);
 		std::fill(weight.begin(), weight.end(), 0);
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
-			RealType norma = norm(this->common().aoe().targetVectors()[i]);
+			RealType norma = norm(this->common().aoe().targetVectors(i));
 			if (norma < 1e-6) continue;
 			weight[i] = pvectors_(i).weight()/norma;
 			sum += weight[i];

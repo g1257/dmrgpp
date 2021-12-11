@@ -128,7 +128,7 @@ public:
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 
 	struct Action {
@@ -176,12 +176,13 @@ public:
 		if (extra.wftAndAdvanceIfNeeded) {
 			SizeType advance = (timeHasAdvanced_) ? indices[indices.size() - 1] : indices[0];
 			VectorWithOffsetType phiNew;
-			if (targetVectors_[advance].size() > 0) {
+			assert(targetVectors_[advance]);
+			if (targetVectors_[advance]->size() > 0) {
 				BaseType::wftHelper().wftOneVector(phiNew,
-				                                   targetVectors_[advance],
+				                                   *targetVectors_[advance],
 				                                   extra.block[0]);
 
-				targetVectors_[indices[0]] = phiNew;
+				*targetVectors_[indices[0]] = phiNew;
 			}
 		}
 
@@ -189,14 +190,14 @@ public:
 		if (this->currentTimeStep() == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
 				const SizeType ii = indices[i];
-				targetVectors_[ii] = phi;
+				*targetVectors_[ii] = phi;
 			}
 		}
 
-		const VectorWithOffsetType* ptr0 = &(targetVectors_[indices[0]]);
+		const VectorWithOffsetType* ptr0 = targetVectors_[indices[0]];
 		const VectorWithOffsetType* ptr1 = &phi;
 		if (ptr0 != ptr1)
-			targetVectors_[indices[0]] = phi;
+			*targetVectors_[indices[0]] = phi;
 
 		if (times.size() == 1 && fabs(times[0])<1e-10) return;
 
@@ -240,9 +241,9 @@ private:
 		for (SizeType i = 1; i < indices.size(); ++i) {
 			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
-			targetVectors_[ii] = phi;
+			*targetVectors_[ii] = phi;
 			// Only time differences here (i.e. extra.times[i] not extra.times[i]+currentTime_)
-			calcTargetVector(targetVectors_[ii], phi, T, V, Eg, eigs, steps, i, times);
+			calcTargetVector(*targetVectors_[ii], phi, T, V, Eg, eigs, steps, i, times);
 		}
 	}
 

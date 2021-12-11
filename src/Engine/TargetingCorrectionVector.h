@@ -253,10 +253,10 @@ private:
 
 		if (count==0) return;
 
-		this->common().aoe().targetVectors(1) = phiNew;
+		this->common().aoe().targetVectorsNonConst(1) = phiNew;
 		skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
-		                         this->common().aoe().targetVectors(2),
-		                         this->common().aoe().targetVectors(3));
+		                         this->common().aoe().targetVectorsNonConst(2),
+		                         this->common().aoe().targetVectorsNonConst(3));
 
 		setWeights();
 
@@ -270,7 +270,7 @@ private:
 		gsWeight_ = tstStruct_.gsWeight();
 
 		RealType sum  = 0;
-		weight_.resize(this->common().aoe().targetVectors().size());
+		weight_.resize(this->common().aoe().tvs());
 
 		for (SizeType r=1;r<weight_.size();r++) {
 			weight_[r] = 1;

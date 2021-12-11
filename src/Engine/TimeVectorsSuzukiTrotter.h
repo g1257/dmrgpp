@@ -120,7 +120,7 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef VectorComplexOrRealType TargetVectorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
+	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type
 	VectorVectorWithOffsetType;
 	typedef typename ModelType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelType::HilbertBasisType::value_type HilbertStateType;
@@ -157,7 +157,7 @@ public:
 		progress_.printline(msgg, std::cout);
 
 		// set non-zero sectors
-		targetVectors_[0] = phi;
+		*targetVectors_[0] = phi;
 
 		bool returnFlag = false;
 		if (tstStruct_.times().size() != indices.size())
@@ -166,8 +166,8 @@ public:
 		for (SizeType i = 1; i < tstStruct_.times().size(); ++i) {
 			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
-			if (targetVectors_[ii].size()==0 || !extraData.allOperatorsApplied) {
-				targetVectors_[ii] = phi;
+			if (targetVectors_[ii]->size() == 0 || !extraData.allOperatorsApplied) {
+				*targetVectors_[ii] = phi;
 				returnFlag = true;
 			}
 		}
@@ -239,9 +239,9 @@ public:
 		for (SizeType i = 1; i < n; ++i) {
 			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
-			VectorWithOffsetType src = targetVectors_[ii];
+			VectorWithOffsetType src = *targetVectors_[ii];
 			// Only time differences here (i.e. extra.times[i] not extra.times[i]+currentTime_)
-			calcTargetVector(targetVectors_[ii],
+			calcTargetVector(*targetVectors_[ii],
 			                 Eg,
 			                 src,
 			                 extraData.dir,
@@ -250,7 +250,7 @@ public:
 			                 transformST,
 			                 transformE,
 			                 transformET);
-			assert(targetVectors_[ii].size()==targetVectors_[indices[0]].size());
+			assert(targetVectors_[ii]->size() == targetVectors_[indices[0]]->size());
 		}
 	}
 
@@ -287,16 +287,16 @@ private:
 
 	void wftOne(SizeType i,const VectorSizeType& block)
 	{
-		VectorWithOffsetType phiNew = targetVectors_[0];
+		VectorWithOffsetType phiNew = *targetVectors_[0];
 
 		// OK, now that we got the partition number right, let's wft:
 		VectorSizeType nk;
 		setNk(nk,block);
 		// generalize for su(2)
-		wft_.setInitialVector(phiNew,targetVectors_[i],lrs_,nk);
+		wft_.setInitialVector(phiNew,*targetVectors_[i],lrs_,nk);
 		phiNew.collapseSectors();
 		assert(norm(phiNew)>1e-6);
-		targetVectors_[i]=phiNew;
+		*targetVectors_[i]=phiNew;
 	}
 
 	void calcTargetVector(VectorWithOffsetType& target,

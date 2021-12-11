@@ -250,28 +250,28 @@ private:
 
 		if (phiNew.size() == 0) return;
 
-		this->common().aoe().targetVectors(0) = phiNew;
+		this->common().aoe().targetVectorsNonConst(0) = phiNew;
 		VectorWithOffsetType bogusTv;
 
 		const SizeType currentTimeStep = this->common().aoe().timeVectors().currentTimeStep();
 		if (currentTimeStep == 0) {
 			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
 				skeleton_.calcDynVectors(phiNew,
-				                         this->common().aoe().targetVectors(1),
+				                         this->common().aoe().targetVectorsNonConst(1),
 				                         bogusTv);
 				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
-				                         this->common().aoe().targetVectors(2),
+				                         this->common().aoe().targetVectorsNonConst(2),
 				                         bogusTv);
 			} else {
 
 				skeleton_.calcDynVectors(phiNew,
-				                         this->common().aoe().targetVectors(1),
-				                         this->common().aoe().targetVectors(2));
+				                         this->common().aoe().targetVectorsNonConst(1),
+				                         this->common().aoe().targetVectorsNonConst(2));
 
 				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
 				                         this->common().aoe().targetVectors(2),
-				                         this->common().aoe().targetVectors(3),
-				                         this->common().aoe().targetVectors(4));
+				                         this->common().aoe().targetVectorsNonConst(3),
+				                         this->common().aoe().targetVectorsNonConst(4));
 			}
 		} else {
 			bool timeHasAdvanced = (counter_ != currentTimeStep &&
@@ -290,9 +290,9 @@ private:
 				this->common().aoe().wftOneVector(bogusTv,
 				                                  this->common().aoe().targetVectors(advanceIndex),
 				                                  site);
-				this->common().aoe().targetVectors(1) = bogusTv;
+				this->common().aoe().targetVectorsNonConst(1) = bogusTv;
 				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
-				                         this->common().aoe().targetVectors(2),
+				                         this->common().aoe().targetVectorsNonConst(2),
 				                         bogusTv);
 			} else {
 
@@ -306,13 +306,13 @@ private:
 				this->common().aoe().wftOneVector(bogusTv2,
 				                                  this->common().aoe().targetVectors(advanceIndexp1),
 				                                  site);
-				this->common().aoe().targetVectors(1) = bogusTv;
-				this->common().aoe().targetVectors(2) = bogusTv2;
+				this->common().aoe().targetVectorsNonConst(1) = bogusTv;
+				this->common().aoe().targetVectorsNonConst(2) = bogusTv2;
 
 				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
 				                         this->common().aoe().targetVectors(2),
-				                         this->common().aoe().targetVectors(3),
-				                         this->common().aoe().targetVectors(4));
+				                         this->common().aoe().targetVectorsNonConst(3),
+				                         this->common().aoe().targetVectorsNonConst(4));
 			}
 		}
 

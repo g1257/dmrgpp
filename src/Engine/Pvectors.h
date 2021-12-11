@@ -128,7 +128,7 @@ public:
 	void sumPvectors(SizeType ind0, SizeType ind1, PsimagLite::String p0PlusP1)
 	{
 		assert(ind0 < ind1);
-		VectorWithOffsetType& v0 = aoeNonConst().targetVectors(ind0);
+		VectorWithOffsetType& v0 = aoeNonConst().targetVectorsNonConst(ind0);
 		const VectorWithOffsetType& v1 =  aoe_.targetVectors(ind1);
 		v0 += v1;
 		pVectors_[ind0]->sum(*(pVectors_[ind1]), p0PlusP1);
@@ -136,7 +136,7 @@ public:
 
 	void trimPvectors(PsimagLite::String str)
 	{
-		const SizeType tvs = aoe_.targetVectors().size();
+		const SizeType tvs = aoe_.tvs();
 		VectorBoolType used(tvs, false);
 		assert(origPvectors_ <= tvs);
 		for (SizeType i = 0; i < origPvectors_; ++i)
@@ -157,7 +157,7 @@ public:
 		// will be different than the index of pVectors
 		// aoe.targetVectors is resized after all vectors have been computed
 		// aoe().trimVectors();
-		const SizeType tvsFinal = aoe_.targetVectors().size();
+		const SizeType tvsFinal = aoe_.tvs();
 		if (tvs != tvsFinal) {
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -181,9 +181,9 @@ public:
 		PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
 		if (getBraOrKet.isPvector()) {
 			const SizeType pIndex = getBraOrKet.pIndex();
-			if (pIndex >= aoe_.targetVectors().size())
+			if (pIndex >= aoe_.tvs())
 				err("getVector: out of range for " + braOrKet + "\n");
-			return aoe_.targetVectors()[pIndex];
+			return aoe_.targetVectors(pIndex);
 		} else if (getBraOrKet.isRvector()) {
 			throw PsimagLite::RuntimeError("reserved vector\n");
 		}

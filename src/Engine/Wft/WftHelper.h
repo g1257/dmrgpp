@@ -9,7 +9,7 @@ class WftHelper {
 
 public:
 
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -27,11 +27,11 @@ public:
 	{
 		for (SizeType index = begin; index < end; ++index) {
 			assert(index < tvs.size());
-			const VectorWithOffsetType& src = tvs[index];
+			const VectorWithOffsetType& src = *tvs[index];
 			if (src.size() == 0) continue;
 			VectorWithOffsetType phiNew;
 			wftOneVector(phiNew, src, site);
-			tvs[index] = phiNew;
+			*tvs[index] = phiNew;
 		}
 	}
 

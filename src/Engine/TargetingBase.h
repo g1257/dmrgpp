@@ -242,7 +242,7 @@ public:
 	virtual SizeType size() const
 	{
 		if (commonTargeting_.aoe().allStages(StageEnumType::DISABLED)) return 0;
-		return commonTargeting_.aoe().targetVectors().size();
+		return commonTargeting_.aoe().tvs();
 	}
 
 	virtual RealType normSquared(SizeType i) const
@@ -349,7 +349,7 @@ public:
 
 	const VectorWithOffsetType& operator()(SizeType i) const
 	{
-		return commonTargeting_.aoe().targetVectors()[i];
+		return commonTargeting_.aoe().targetVectors(i);
 	}
 
 	RealType time() const

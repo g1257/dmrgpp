@@ -89,29 +89,34 @@ namespace Dmrg {
 template<typename VectorType>
 class TimeSerializer {
 
-	typedef typename VectorType::value_type VectorElementType;
-	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
-
 public:
 
+	typedef typename VectorType::value_type VectorElementType;
+	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 	typedef typename PsimagLite::Vector<StageEnum>::Type VectorStageEnumType;
+	typedef typename PsimagLite::Vector<VectorType*>::Type VectorVectorType;
 
+	template<typename SomeAoeType>
 	TimeSerializer(SizeType currentTimeStep,
 	               RealType currentTime,
 	               SizeType site,
-	               const typename PsimagLite::Vector<VectorType>::Type& targetVectors,
-	               const VectorStageEnumType& stages,
+	               const SomeAoeType& aoe,
 	               PsimagLite::String name)
 	    : currentTimeStep_(currentTimeStep),
 	      currentTime_(currentTime),
 	      site_(site),
-	      targetVectors_(targetVectors),
-	      stages_(stages),
-	      name_(name)
-	{}
+	      targetVectors_(aoe.tvs()),
+	      stages_(aoe.stages()),
+	      name_(name),
+	      owner_(false)
+	{
+		const SizeType n = targetVectors_.size();
+		for (SizeType i = 0; i < n; ++i)
+			targetVectors_[i] = const_cast<VectorType*>(&aoe.targetVectors(i));
+	}
 
 	TimeSerializer(typename PsimagLite::IoSelector::In& io,
-	               PsimagLite::String prefix)
+	               PsimagLite::String prefix) : owner_(true)
 	{
 		prefix += "/TimeSerializer/";
 
@@ -132,10 +137,12 @@ public:
 		io.read(xi, s);
 		if (xi <= 0)
 			err("TimeSerializer:: n. of vectors must be positive\n");
-		targetVectors_.resize(xi);
+		targetVectors_.clear();
 		for (SizeType i = 0; i < targetVectors_.size(); ++i) {
+			VectorType* v = new VectorType();
 			s = prefix + "targetVector"+ttos(i);
-			targetVectors_[i].read(io, s);
+			v->read(io, s);
+			targetVectors_.push_back(v);
 		}
 
 		s = prefix + "Stages";
@@ -146,6 +153,16 @@ public:
 		} catch (...) {
 			// reading an old file, set name to LEGACY
 			name_ = "LEGACY";
+		}
+	}
+
+	~TimeSerializer()
+	{
+		if (!owner_) return;
+		const SizeType n = targetVectors_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			delete targetVectors_[i];
+			targetVectors_[i] = nullptr;
 		}
 	}
 
@@ -162,7 +179,7 @@ public:
 
 		for (SizeType i=0;i<targetVectors_.size();i++) {
 			PsimagLite::String label = "targetVector" + ttos(i);
-			targetVectors_[i].write(io, prefix + label);
+			targetVectors_[i]->write(io, prefix + label);
 		}
 
 		io.write(stages_, prefix + "Stages");
@@ -184,21 +201,27 @@ public:
 
 	const VectorType& vector(SizeType i) const
 	{
-		if (i < targetVectors_.size())
-			return targetVectors_[i];
-		throw PsimagLite::RuntimeError("Not so many time vectors\n");
+		if (i >= targetVectors_.size())
+			err("TimeSerializer: Not so many time vectors\n");
+
+		if (!targetVectors_[i])
+			err("TimeSerializer: FATAL\n");
+
+		return *targetVectors_[i];
 	}
 
 	const VectorStageEnumType& stages() const { return stages_; }
 
 private:
 
+
 	SizeType currentTimeStep_;
 	RealType currentTime_;
 	SizeType site_;
-	typename PsimagLite::Vector<VectorType>::Type targetVectors_;
+	VectorVectorType targetVectors_;
 	VectorStageEnumType stages_;
 	PsimagLite::String name_;
+	bool owner_;
 }; // class TimeSerializer
 } // namespace Dmrg 
 

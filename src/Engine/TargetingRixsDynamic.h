@@ -276,7 +276,7 @@ public:
 
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			this->common().aoe().wftSome(site, 6, this->common().aoe().targetVectors().size());
+			this->common().aoe().wftSome(site, 6, this->common().aoe().tvs());
 		} else {
 			// just to set the stage and currenttime: CHEBY and KRYLOVTIME
 			this->common().aoe().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
@@ -318,7 +318,7 @@ public:
 			err("TargetingRixsDynamic: number of TVs must be 6\n");
 
 		for (SizeType site = 0; site < 6; ++site)
-			this->common().aoe().targetVectors(site) = ts.vector(site);
+			this->common().aoe().targetVectorsNonConst(site) = ts.vector(site);
 	}
 
 private:
@@ -361,7 +361,7 @@ private:
 				addFactor(tmpV1, psi00, densCim);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectors(6) = tmpV1;
+				this->common().aoe().targetVectorsNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 
@@ -376,7 +376,7 @@ private:
 				addFactor(tmpV2, psi00, densCre);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectors(7) = tmpV2;
+				this->common().aoe().targetVectorsNonConst(7) = tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -402,7 +402,7 @@ private:
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectors(6) = tmpV1;
+				this->common().aoe().targetVectorsNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
@@ -413,7 +413,7 @@ private:
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectors(7) = tmpV2;
+				this->common().aoe().targetVectorsNonConst(7) = tmpV2;
 				applied_ = false;
 				appliedFirst_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
@@ -457,7 +457,7 @@ private:
 				addFactor(tmpV1, psi00, densCim);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectors(6) += tmpV1;
+				this->common().aoe().targetVectorsNonConst(6) += tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
@@ -471,7 +471,7 @@ private:
 				addFactor(tmpV2, psi00, densCre);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectors(7) += tmpV2;
+				this->common().aoe().targetVectorsNonConst(7) += tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -497,7 +497,7 @@ private:
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectors(6) = tmpV1;
+				this->common().aoe().targetVectorsNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
@@ -508,7 +508,7 @@ private:
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectors(7) = tmpV2;
+				this->common().aoe().targetVectorsNonConst(7) = tmpV2;
 				applied_ = false;
 				appliedFirst_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
@@ -530,7 +530,7 @@ private:
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectors(6) = tmpV1;
+				this->common().aoe().targetVectorsNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
@@ -541,7 +541,7 @@ private:
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectors(7) = tmpV2;
+				this->common().aoe().targetVectorsNonConst(7) = tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -616,8 +616,8 @@ private:
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			skeleton_.calcDynVectors(this->common().aoe().targetVectors(6),
 			                         this->common().aoe().targetVectors(7),
-			                         this->common().aoe().targetVectors(8),
-			                         this->common().aoe().targetVectors(9));
+			                         this->common().aoe().targetVectorsNonConst(8),
+			                         this->common().aoe().targetVectorsNonConst(9));
 			setWeights(10);
 			firstCall_ = false; // unused here but just in case
 			return;

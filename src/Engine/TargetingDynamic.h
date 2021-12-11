@@ -267,8 +267,8 @@ private:
 			if (i==0) {
 				assert(V.cols() > 0);
 				this->common().aoe().targetVectorsResize(V.cols());
-				for (SizeType j=0;j<this->common().aoe().targetVectors().size();j++)
-					this->common().aoe().targetVectors(j) = phi;
+				for (SizeType j=0;j<this->common().aoe().tvs();j++)
+					this->common().aoe().targetVectorsNonConst(j) = phi;
 			}
 			setVectors(V,i0);
 		}
@@ -300,17 +300,17 @@ private:
 	void setVectors(const DenseMatrixType& V,
 	                SizeType i0)
 	{
-		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++) {
+		for (SizeType i=0;i<this->common().aoe().tvs();i++) {
 			VectorType tmp(V.rows());
 			for (SizeType j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-			this->common().aoe().targetVectors(i).setDataInSector(tmp,i0);
+			this->common().aoe().targetVectorsNonConst(i).setDataInSector(tmp,i0);
 		}
 	}
 
 	void setWeights()
 	{
 		RealType sum  = 0;
-		weight_.resize(this->common().aoe().targetVectors().size());
+		weight_.resize(this->common().aoe().tvs());
 		for (SizeType r=0;r<weight_.size();r++) {
 			weight_[r] = 1.0;
 			sum += weight_[r];

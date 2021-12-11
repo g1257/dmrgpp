@@ -134,8 +134,8 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		return PsimagLite::real(this->common().aoe().targetVectors()[i]*
-		                        this->common().aoe().targetVectors()[i]);
+		return PsimagLite::real(this->common().aoe().targetVectors(i)*
+		                        this->common().aoe().targetVectors(i));
 	}
 
 	RealType weight(SizeType) const
@@ -187,9 +187,9 @@ private:
 
 	void computeAllWeights(RealType& gsWeight, RealType& weight) const
 	{
-		assert(1 == this->common().aoe().targetVectors().size());
+		assert(1 == this->common().aoe().tvs());
 
-		RealType norma = norm(this->common().aoe().targetVectors()[0]);
+		RealType norma = norm(this->common().aoe().targetVectors(0));
 		weight = (norma > 1e-6) ? tstStruct_.correctionA() : 0;
 
 		gsWeight = 1 - weight;

@@ -113,7 +113,7 @@ public:
 	typedef TimeVectorsSuzukiTrotter<TargetParamsType,ModelType,WaveFunctionTransfType,
 	LanczosSolverType,VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef ApplyOperatorLocal<LeftRightSuperType,VectorWithOffsetType> ApplyOperatorType;
@@ -376,27 +376,28 @@ public:
 		}
 	}
 
-	const VectorVectorWithOffsetType& targetVectors() const
-	{
-		return targetVectors_;
-	}
+	const SizeType tvs() const { return targetVectors_.size(); }
 
-	VectorWithOffsetType& targetVectors(SizeType i) // <--- FIXME
+	VectorWithOffsetType& targetVectorsNonConst(SizeType i) // <--- FIXME
 	{
 		assert(i < targetVectors_.size());
-		return targetVectors_[i];
+		assert(targetVectors_[i]);
+		return *targetVectors_[i];
 	}
 
 	const VectorWithOffsetType& targetVectors(SizeType i) const
 	{
 		assert(i < targetVectors_.size());
-		return targetVectors_[i];
+		assert(targetVectors_[i]);
+		return *targetVectors_[i];
 	}
 
-	SizeType createPvector(const VectorWithOffsetType& v)
+	SizeType createPvector(const VectorWithOffsetType& vv)
 	{
 		const SizeType n = targetVectors_.size();
+		VectorWithOffsetType* v = new VectorWithOffsetType();
 		targetVectors_.push_back(v);
+		*targetVectors_[n] = vv;
 		return n;
 	}
 
@@ -405,7 +406,7 @@ public:
 		if (ind >= targetVectors_.size())
 			err("AOE: destroyPvector\n");
 
-		targetVectors_[ind].clear();
+		targetVectors_[ind]->clear();
 	}
 
 	void trimVectors()
@@ -414,7 +415,7 @@ public:
 		SizeType x = 0;
 		for (SizeType ii = 0; ii < n; ++ii) {
 			const SizeType i = n - ii - 1;
-			if (targetVectors_[i].size() == 0) {
+			if (targetVectors_[i]->size() == 0) {
 				++x;
 			} else {
 				break;
@@ -516,7 +517,7 @@ public:
 
 	void multiplyTimeVector(SizeType i,RealType factor)
 	{
-		targetVectors_[i] = factor*targetVectors_[i];
+		*targetVectors_[i] = factor*(*targetVectors_[i]);
 	}
 
 	void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
@@ -807,7 +808,8 @@ private:
 				throw PsimagLite::RuntimeError(s);
 			}
 
-			const VectorWithOffsetType& src = targetVectors_[advance];
+			assert(targetVectors_[advance]);
+			const VectorWithOffsetType& src = *targetVectors_[advance];
 
 			if (src.size() == 0) {
 				PsimagLite::String s(__FILE__);

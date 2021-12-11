@@ -225,7 +225,7 @@ public:
 			err("TargetingRixsStatic: number of TVs must be 4\n");
 
 		for (SizeType site = 0; site < 3; ++site) {
-			this->common().aoe().targetVectors(site) = ts.vector(site + 1);
+			this->common().aoe().targetVectorsNonConst(site) = ts.vector(site + 1);
 		}
 	}
 
@@ -249,7 +249,7 @@ private:
 		// if no apply operator at site and add into targetVectors[3]
 		// also wft everything
 
-		this->common().aoe().wftSome(site, 0, this->common().aoe().targetVectors().size());
+		this->common().aoe().wftSome(site, 0, this->common().aoe().tvs());
 
 		SizeType max = tstStruct_.sites();
 
@@ -271,7 +271,7 @@ private:
 					                                direction,
 					                                tstStruct_);
 					if (tmpV1.size() > 0) {
-						this->common().aoe().targetVectors(3) = tmpV1;
+						this->common().aoe().targetVectorsNonConst(3) = tmpV1;
 						applied_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
 						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -292,7 +292,7 @@ private:
 					                                direction,
 					                                tstStruct_);
 					if (tmpV1.size() > 0) {
-						this->common().aoe().targetVectors(3) = tmpV1;
+						this->common().aoe().targetVectorsNonConst(3) = tmpV1;
 						applied_ = false;
 						appliedFirst_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
@@ -312,7 +312,7 @@ private:
 					                                direction,
 					                                tstStruct_);
 					if (tmpV2.size() > 0) {
-						this->common().aoe().targetVectors(3) += tmpV2;
+						this->common().aoe().targetVectorsNonConst(3) += tmpV2;
 						applied_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
 						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -333,7 +333,7 @@ private:
 					                                direction,
 					                                tstStruct_);
 					if (tmpV1.size() > 0) {
-						this->common().aoe().targetVectors(3) = tmpV1;
+						this->common().aoe().targetVectorsNonConst(3) = tmpV1;
 						applied_ = false;
 						appliedFirst_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
@@ -353,7 +353,7 @@ private:
 					                                direction,
 					                                tstStruct_);
 					if (tmpV2.size() > 0) {
-						this->common().aoe().targetVectors(3) = tmpV2;
+						this->common().aoe().targetVectorsNonConst(3) = tmpV2;
 						applied_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
 						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -384,8 +384,8 @@ private:
 		}
 
 		skeleton_.calcDynVectors(this->common().aoe().targetVectors(3),
-		                         this->common().aoe().targetVectors(4),
-		                         this->common().aoe().targetVectors(5));
+		                         this->common().aoe().targetVectorsNonConst(4),
+		                         this->common().aoe().targetVectorsNonConst(5));
 		//		this->common().aoe().targetVectors(4) = this->common().aoe().targetVectors(1);
 		//		this->common().aoe().targetVectors(5) = this->common().aoe().targetVectors(2);
 
