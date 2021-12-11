@@ -141,8 +141,8 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		return PsimagLite::real(this->common().aoe().targetVectors(i)*
-		                        this->common().aoe().targetVectors(i));
+		return PsimagLite::real(this->tv(i)*
+		                        this->tv(i));
 	}
 
 	RealType weight(SizeType i) const
@@ -256,8 +256,8 @@ private:
 			int x = tmp.pIndex();
 			if (x >= 0) {
 				if (static_cast<SizeType>(x) == i) err("Self assigment\n");
-				VectorWithOffsetType_& v0 = this->common().aoeNonConst().targetVectorsNonConst(i);
-				v0 =  this->common().aoe().targetVectors(x);
+				VectorWithOffsetType_& v0 = this->tvNonConst(i);
+				v0 =  this->tv(x);
 				pvectors_.setAsDone(i);
 				continue;
 			}
@@ -297,7 +297,7 @@ private:
 		for (SizeType i = 0; i < ntemps; ++i) {
 			int x = pvectors_.findInOrigNames(tempNames[i]);
 			if (x < 0) continue;
-			this->common().aoeNonConst().targetVectorsNonConst(x) = tempVectors[i];
+			this->tvNonConst(x) = tempVectors[i];
 			pvectors_.setAsDone(x);
 			removed_[i] = true;
 			tempToP[i] = x;
@@ -465,7 +465,7 @@ private:
 		std::fill(weight.begin(), weight.end(), 0);
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
-			RealType norma = norm(this->common().aoe().targetVectors(i));
+			RealType norma = norm(this->tv(i));
 			if (norma < 1e-6) continue;
 			weight[i] = pvectors_(i).weight()/norma;
 			sum += weight[i];

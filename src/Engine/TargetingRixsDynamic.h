@@ -318,7 +318,7 @@ public:
 			err("TargetingRixsDynamic: number of TVs must be 6\n");
 
 		for (SizeType site = 0; site < 6; ++site)
-			this->common().aoeNonConst().targetVectorsNonConst(site) = ts.vector(site);
+			this->tvNonConst(site) = ts.vector(site);
 	}
 
 private:
@@ -352,7 +352,7 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
+			           this->tv(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
 			const VectorWithOffsetType& psi00 = this->common().aoe().
@@ -361,7 +361,7 @@ private:
 				addFactor(tmpV1, psi00, densCim);
 
 			if (tmpV1.size() > 0)
-				this->common().aoeNonConst().targetVectorsNonConst(6) = tmpV1;
+				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 
@@ -369,14 +369,14 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().aoe().targetVectors(2), // src1 apply op on Re|alpha(C)>
+			           this->tv(2), // src1 apply op on Re|alpha(C)>
 			           direction);
 
 			if (tmpV2.size() > 0)
 				addFactor(tmpV2, psi00, densCre);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoeNonConst().targetVectorsNonConst(7) = tmpV2;
+				this->tvNonConst(7) = tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -398,22 +398,22 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
+			           this->tv(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().aoeNonConst().targetVectorsNonConst(6) = tmpV1;
+				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().aoe().targetVectors(2), // src1 apply op on Re|alpha(C)>
+			           this->tv(2), // src1 apply op on Re|alpha(C)>
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoeNonConst().targetVectorsNonConst(7) = tmpV2;
+				this->tvNonConst(7) = tmpV2;
 				applied_ = false;
 				appliedFirst_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
@@ -447,7 +447,7 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
+			           this->tv(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
 			const VectorWithOffsetType& psi00 = this->common().aoe().
@@ -457,21 +457,21 @@ private:
 				addFactor(tmpV1, psi00, densCim);
 
 			if (tmpV1.size() > 0)
-				this->common().aoeNonConst().targetVectorsNonConst(6) += tmpV1;
+				this->tvNonConst(6) += tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().aoe().targetVectors(2), // src1 apply op on Re|alpha(C)>
+			           this->tv(2), // src1 apply op on Re|alpha(C)>
 			           direction);
 
 			if (tmpV2.size() > 0)
 				addFactor(tmpV2, psi00, densCre);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoeNonConst().targetVectorsNonConst(7) += tmpV2;
+				this->tvNonConst(7) += tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -493,22 +493,22 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().aoe().targetVectors(1), // src1 apply op on Im|alpha(C)>
+			           this->tv(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().aoeNonConst().targetVectorsNonConst(6) = tmpV1;
+				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().aoe().targetVectors(2), // src1 apply op on Re|alpha(C)>
+			           this->tv(2), // src1 apply op on Re|alpha(C)>
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoeNonConst().targetVectorsNonConst(7) = tmpV2;
+				this->tvNonConst(7) = tmpV2;
 				applied_ = false;
 				appliedFirst_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
@@ -526,22 +526,22 @@ private:
 			           indexOfOperator,
 			           site,
 			           tmpV1, // phiNew
-			           this->common().aoe().targetVectors(6), // src1 apply op on Im|alpha(C)>
+			           this->tv(6), // src1 apply op on Im|alpha(C)>
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().aoeNonConst().targetVectorsNonConst(6) = tmpV1;
+				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
 			           indexOfOperator,
 			           site,
 			           tmpV2,                            // phiNew
-			           this->common().aoe().targetVectors(7), // src1 apply op on Re|alpha(C)>
+			           this->tv(7), // src1 apply op on Re|alpha(C)>
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoeNonConst().targetVectorsNonConst(7) = tmpV2;
+				this->tvNonConst(7) = tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -614,10 +614,10 @@ private:
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			skeleton_.calcDynVectors(this->common().aoe().targetVectors(6),
-			                         this->common().aoe().targetVectors(7),
-			                         this->common().aoeNonConst().targetVectorsNonConst(8),
-			                         this->common().aoeNonConst().targetVectorsNonConst(9));
+			skeleton_.calcDynVectors(this->tv(6),
+			                         this->tv(7),
+			                         this->tvNonConst(8),
+			                         this->tvNonConst(9));
 			setWeights(10);
 			firstCall_ = false; // unused here but just in case
 			return;
@@ -655,7 +655,7 @@ private:
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
 		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
-		const VectorWithOffsetType& v0 = this->common().aoe().targetVectors(indices[0]);
+		const VectorWithOffsetType& v0 = this->tv(indices[0]);
 
 		this->common().aoeNonConst().calcTimeVectors(indices,
 		                                     Eg,

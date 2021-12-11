@@ -225,7 +225,7 @@ public:
 			err("TargetingRixsStatic: number of TVs must be 4\n");
 
 		for (SizeType site = 0; site < 3; ++site) {
-			this->common().aoeNonConst().targetVectorsNonConst(site) = ts.vector(site + 1);
+			this->tvNonConst(site) = ts.vector(site + 1);
 		}
 	}
 
@@ -271,7 +271,7 @@ private:
 					                                              direction,
 					                                              tstStruct_);
 					if (tmpV1.size() > 0) {
-						this->common().aoeNonConst().targetVectorsNonConst(3) = tmpV1;
+						this->tvNonConst(3) = tmpV1;
 						applied_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
 						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -292,7 +292,7 @@ private:
 					                                      direction,
 					                                      tstStruct_);
 					if (tmpV1.size() > 0) {
-						this->common().aoeNonConst().targetVectorsNonConst(3) = tmpV1;
+						this->tvNonConst(3) = tmpV1;
 						applied_ = false;
 						appliedFirst_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
@@ -312,7 +312,7 @@ private:
 					                                              direction,
 					                                              tstStruct_);
 					if (tmpV2.size() > 0) {
-						this->common().aoeNonConst().targetVectorsNonConst(3) += tmpV2;
+						this->tvNonConst(3) += tmpV2;
 						applied_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
 						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -333,7 +333,7 @@ private:
 					                                      direction,
 					                                      tstStruct_);
 					if (tmpV1.size() > 0) {
-						this->common().aoeNonConst().targetVectorsNonConst(3) = tmpV1;
+						this->tvNonConst(3) = tmpV1;
 						applied_ = false;
 						appliedFirst_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
@@ -349,11 +349,11 @@ private:
 					                                              indexOfOperator,
 					                                              site,
 					                                              tmpV2,
-					                                              this->common().aoe().targetVectors(3),
+					                                              this->tv(3),
 					                                              direction,
 					                                              tstStruct_);
 					if (tmpV2.size() > 0) {
-						this->common().aoeNonConst().targetVectorsNonConst(3) = tmpV2;
+						this->tvNonConst(3) = tmpV2;
 						applied_ = true;
 						PsimagLite::OstringStream msgg(std::cout.precision());
 						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -383,16 +383,16 @@ private:
 			return;
 		}
 
-		skeleton_.calcDynVectors(this->common().aoe().targetVectors(3),
-		                         this->common().aoeNonConst().targetVectorsNonConst(4),
-		                         this->common().aoeNonConst().targetVectorsNonConst(5));
-		//		this->common().aoe().targetVectors(4) = this->common().aoe().targetVectors(1);
-		//		this->common().aoe().targetVectors(5) = this->common().aoe().targetVectors(2);
+		skeleton_.calcDynVectors(this->tv(3),
+		                         this->tvNonConst(4),
+		                         this->tvNonConst(5));
+		//		this->tv(4) = this->common().aoe().targetVectors(1);
+		//		this->tv(5) = this->common().aoe().targetVectors(2);
 
-		RealType n4 = PsimagLite::real(this->common().aoe().targetVectors(4)*
-		                               this->common().aoe().targetVectors(4));
-		RealType n5 = PsimagLite::real(this->common().aoe().targetVectors(5)*
-		                               this->common().aoe().targetVectors(5));
+		RealType n4 = PsimagLite::real(this->tv(4)*
+		                               this->tv(4));
+		RealType n5 = PsimagLite::real(this->tv(5)*
+		                               this->tv(5));
 		std::cout<<"HERE============> n4="<<n4<<" n5="<<n5;
 		std::cout<<" "<<this->common().aoe().energy()<<"\n";
 		setWeights(6);

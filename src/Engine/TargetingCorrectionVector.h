@@ -253,10 +253,10 @@ private:
 
 		if (count==0) return;
 
-		this->common().aoeNonConst().targetVectorsNonConst(1) = phiNew;
-		skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
-		                         this->common().aoeNonConst().targetVectorsNonConst(2),
-		                         this->common().aoeNonConst().targetVectorsNonConst(3));
+		this->tvNonConst(1) = phiNew;
+		skeleton_.calcDynVectors(this->tv(1),
+		                         this->tvNonConst(2),
+		                         this->tvNonConst(3));
 
 		setWeights();
 

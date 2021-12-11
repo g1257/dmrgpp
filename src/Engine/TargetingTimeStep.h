@@ -301,7 +301,7 @@ private:
 	void printEnergies() const
 	{
 		for (SizeType i=0;i<this->common().aoe().tvs();i++)
-			printEnergies(this->common().aoe().targetVectors(i), i);
+			printEnergies(this->tv(i), i);
 	}
 
 	void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const

@@ -265,20 +265,20 @@ private:
 		                                     block1,
 		                                     isLastCall);
 
-		assert(phiNew.offset(0) == this->common().aoe().targetVectors(1).offset(0));
+		assert(phiNew.offset(0) == this->tv(1).offset(0));
 
 		const OptionsType& options = this->model().params().options;
 		const bool normalizeTimeVectors = (options.isSet("normalizeVectors") &&
 		                                   !options.isSet("neverNormalizeVectors"));
 
-		assert(phiNew.offset(0) == this->common().aoe().targetVectors(1).offset(0));
+		assert(phiNew.offset(0) == this->tv(1).offset(0));
 
 		if (normalizeTimeVectors)
 			this->common().normalizeTimeVectors();
 
 		this->common().printNormsAndWeights(gsWeight_, weight_);
 
-		assert(phiNew.offset(0) == this->common().aoe().targetVectors(1).offset(0));
+		assert(phiNew.offset(0) == this->tv(1).offset(0));
 	}
 
 	void oracleChebyshev(SizeType site, SizeType systemOrEviron) const
@@ -296,8 +296,8 @@ private:
 
 	void printChebyshev() const
 	{
-		for (SizeType i=0;i<this->common().aoe().targetVectors().size();i++)
-			printChebyshev(this->common().aoe().targetVectors()[i],i);
+		for (SizeType i=0;i<this->tv().size();i++)
+			printChebyshev(this->tv()[i],i);
 	}
 
 	void printChebyshev(const VectorWithOffsetType& phi,SizeType whatTarget) const

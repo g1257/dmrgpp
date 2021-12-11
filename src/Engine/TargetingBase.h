@@ -398,6 +398,21 @@ protected:
 		return commonTargeting_;
 	}
 
+	VectorWithOffsetType& tvNonConst(SizeType ind)
+	{
+		return commonTargeting_.aoeNonConst().targetVectorsNonConst(ind);
+	}
+
+	const VectorWithOffsetType& tv(SizeType ind) const
+	{
+		return commonTargeting_.aoe().targetVectors(ind);
+	}
+
+	const SizeType numberOfTvs() const
+	{
+		return commonTargeting_.aoe().numberOfTvs();
+	}
+
 private:
 
 	const LeftRightSuperType& lrs_;
