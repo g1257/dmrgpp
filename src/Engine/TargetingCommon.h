@@ -310,7 +310,7 @@ public:
 
 	const ApplyOperatorExpressionType& aoe() const { return aoe_; }
 
-	ApplyOperatorExpressionType& aoe() { return aoe_; }
+	ApplyOperatorExpressionType& aoeNonConst() { return aoe_; }
 
 	RealType time() const
 	{

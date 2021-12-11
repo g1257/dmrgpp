@@ -238,7 +238,7 @@ private:
 	            SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().aoe().getPhi(&phiNew,
+		SizeType count = this->common().aoeNonConst().getPhi(&phiNew,
 		                                             Eg,
 		                                             direction,
 		                                             site,
@@ -253,10 +253,10 @@ private:
 
 		if (count==0) return;
 
-		this->common().aoe().targetVectorsNonConst(1) = phiNew;
+		this->common().aoeNonConst().targetVectorsNonConst(1) = phiNew;
 		skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
-		                         this->common().aoe().targetVectorsNonConst(2),
-		                         this->common().aoe().targetVectorsNonConst(3));
+		                         this->common().aoeNonConst().targetVectorsNonConst(2),
+		                         this->common().aoeNonConst().targetVectorsNonConst(3));
 
 		setWeights();
 

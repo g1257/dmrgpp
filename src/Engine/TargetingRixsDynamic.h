@@ -188,7 +188,7 @@ public:
 		for (SizeType i = 0; i < n; ++i)
 			tstStruct2_->times()[i] = i*tau/(n - 1);
 
-		this->common().aoe().initTimeVectors(*tstStruct2_, ioIn);
+		this->common().aoeNonConst().initTimeVectors(*tstStruct2_, ioIn);
 	}
 
 	~TargetingRixsDynamic()
@@ -272,14 +272,14 @@ public:
 
 		SizeType site = block1[0];
 
-		this->common().aoe().wftSome(site, 0, 6);
+		this->common().aoeNonConst().wftSome(site, 0, 6);
 
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			this->common().aoe().wftSome(site, 6, this->common().aoe().tvs());
+			this->common().aoeNonConst().wftSome(site, 6, this->common().aoe().tvs());
 		} else {
 			// just to set the stage and currenttime: CHEBY and KRYLOVTIME
-			this->common().aoe().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
+			this->common().aoeNonConst().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
 		}
 
 		if (!applied_) {
@@ -318,7 +318,7 @@ public:
 			err("TargetingRixsDynamic: number of TVs must be 6\n");
 
 		for (SizeType site = 0; site < 6; ++site)
-			this->common().aoe().targetVectorsNonConst(site) = ts.vector(site);
+			this->common().aoeNonConst().targetVectorsNonConst(site) = ts.vector(site);
 	}
 
 private:
@@ -361,7 +361,7 @@ private:
 				addFactor(tmpV1, psi00, densCim);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectorsNonConst(6) = tmpV1;
+				this->common().aoeNonConst().targetVectorsNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 
@@ -376,7 +376,7 @@ private:
 				addFactor(tmpV2, psi00, densCre);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectorsNonConst(7) = tmpV2;
+				this->common().aoeNonConst().targetVectorsNonConst(7) = tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -387,8 +387,8 @@ private:
 	}
 
 	void doMax2Sum(SizeType site,
-	            ProgramGlobals::DirectionEnum direction,
-	            SizeType loopNumber)
+	               ProgramGlobals::DirectionEnum direction,
+	               SizeType loopNumber)
 	{
 
 		if (site == tstStruct_.sites(0)) {
@@ -402,7 +402,7 @@ private:
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectorsNonConst(6) = tmpV1;
+				this->common().aoeNonConst().targetVectorsNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
@@ -413,7 +413,7 @@ private:
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectorsNonConst(7) = tmpV2;
+				this->common().aoeNonConst().targetVectorsNonConst(7) = tmpV2;
 				applied_ = false;
 				appliedFirst_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
@@ -457,7 +457,7 @@ private:
 				addFactor(tmpV1, psi00, densCim);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectorsNonConst(6) += tmpV1;
+				this->common().aoeNonConst().targetVectorsNonConst(6) += tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
@@ -471,7 +471,7 @@ private:
 				addFactor(tmpV2, psi00, densCre);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectorsNonConst(7) += tmpV2;
+				this->common().aoeNonConst().targetVectorsNonConst(7) += tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -482,8 +482,8 @@ private:
 	}
 
 	void doMax2Prod(SizeType site,
-	            ProgramGlobals::DirectionEnum direction,
-	            SizeType loopNumber)
+	                ProgramGlobals::DirectionEnum direction,
+	                SizeType loopNumber)
 	{
 
 		if (site == tstStruct_.sites(0)) {
@@ -497,7 +497,7 @@ private:
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectorsNonConst(6) = tmpV1;
+				this->common().aoeNonConst().targetVectorsNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
@@ -508,7 +508,7 @@ private:
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectorsNonConst(7) = tmpV2;
+				this->common().aoeNonConst().targetVectorsNonConst(7) = tmpV2;
 				applied_ = false;
 				appliedFirst_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
@@ -530,7 +530,7 @@ private:
 			           direction);
 
 			if (tmpV1.size() > 0)
-				this->common().aoe().targetVectorsNonConst(6) = tmpV1;
+				this->common().aoeNonConst().targetVectorsNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
@@ -541,7 +541,7 @@ private:
 			           direction);
 
 			if (tmpV2.size() > 0) {
-				this->common().aoe().targetVectorsNonConst(7) = tmpV2;
+				this->common().aoeNonConst().targetVectorsNonConst(7) = tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -616,8 +616,8 @@ private:
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			skeleton_.calcDynVectors(this->common().aoe().targetVectors(6),
 			                         this->common().aoe().targetVectors(7),
-			                         this->common().aoe().targetVectorsNonConst(8),
-			                         this->common().aoe().targetVectorsNonConst(9));
+			                         this->common().aoeNonConst().targetVectorsNonConst(8),
+			                         this->common().aoeNonConst().targetVectorsNonConst(9));
 			setWeights(10);
 			firstCall_ = false; // unused here but just in case
 			return;
@@ -657,7 +657,7 @@ private:
 
 		const VectorWithOffsetType& v0 = this->common().aoe().targetVectors(indices[0]);
 
-		this->common().aoe().calcTimeVectors(indices,
+		this->common().aoeNonConst().calcTimeVectors(indices,
 		                                     Eg,
 		                                     v0,
 		                                     direction,
@@ -677,21 +677,21 @@ private:
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 
 		if (algo != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV)
-			this->common().aoe().applyOneOperator(loopNumber,
-		                                          indexOfOperator,
-		                                          site,
-		                                          dest, // phiNew
-		                                          src, // src1
-		                                          direction,
-		                                          *tstStruct2_);
+			this->common().aoeNonConst().applyOneOperator(loopNumber,
+		                                                  indexOfOperator,
+		                                                  site,
+		                                                  dest, // phiNew
+		                                                  src, // src1
+		                                                  direction,
+		                                                  *tstStruct2_);
 		else
-			this->common().aoe().applyOneOperator(loopNumber,
-		                                          indexOfOperator,
-		                                          site,
-		                                          dest, // phiNew
-		                                          src, // src1
-		                                          direction,
-		                                          tstStruct_);
+			this->common().aoeNonConst().applyOneOperator(loopNumber,
+		                                                  indexOfOperator,
+		                                                  site,
+		                                                  dest, // phiNew
+		                                                  src, // src1
+		                                                  direction,
+		                                                  tstStruct_);
 	}
 
 	void setWeights(SizeType n)

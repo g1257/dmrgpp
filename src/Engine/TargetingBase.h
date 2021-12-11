@@ -211,11 +211,11 @@ public:
 
 			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 
-				commonTargeting_.aoe().setPsi(sectorIndex,
-				                              excitedIndex,
-				                              inV[sectorIndex][excitedIndex],
-				                              someBasis,
-				                              sectors);
+				commonTargeting_.aoeNonConst().setPsi(sectorIndex,
+				                                      excitedIndex,
+				                                      inV[sectorIndex][excitedIndex],
+				                                      someBasis,
+				                                      sectors);
 			}
 		}
 	}
@@ -252,7 +252,7 @@ public:
 
 	virtual void initPsi(SizeType nsectors, SizeType nexcited)
 	{
-		commonTargeting_.aoe().initPsi(nsectors, nexcited);
+		commonTargeting_.aoeNonConst().initPsi(nsectors, nexcited);
 	}
 
 	// legacy thing for vectorwithoffsets

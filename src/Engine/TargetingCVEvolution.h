@@ -241,7 +241,7 @@ private:
 		VectorWithOffsetType phiNew;
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
-		this->common().aoe().getPhi(&phiNew,
+		this->common().aoeNonConst().getPhi(&phiNew,
 		                            Eg,
 		                            direction,
 		                            site,
@@ -250,28 +250,28 @@ private:
 
 		if (phiNew.size() == 0) return;
 
-		this->common().aoe().targetVectorsNonConst(0) = phiNew;
+		this->common().aoeNonConst().targetVectorsNonConst(0) = phiNew;
 		VectorWithOffsetType bogusTv;
 
 		const SizeType currentTimeStep = this->common().aoe().timeVectors().currentTimeStep();
 		if (currentTimeStep == 0) {
 			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
 				skeleton_.calcDynVectors(phiNew,
-				                         this->common().aoe().targetVectorsNonConst(1),
+				                         this->common().aoeNonConst().targetVectorsNonConst(1),
 				                         bogusTv);
 				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
-				                         this->common().aoe().targetVectorsNonConst(2),
+				                         this->common().aoeNonConst().targetVectorsNonConst(2),
 				                         bogusTv);
 			} else {
 
 				skeleton_.calcDynVectors(phiNew,
-				                         this->common().aoe().targetVectorsNonConst(1),
-				                         this->common().aoe().targetVectorsNonConst(2));
+				                         this->common().aoeNonConst().targetVectorsNonConst(1),
+				                         this->common().aoeNonConst().targetVectorsNonConst(2));
 
 				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
 				                         this->common().aoe().targetVectors(2),
-				                         this->common().aoe().targetVectorsNonConst(3),
-				                         this->common().aoe().targetVectorsNonConst(4));
+				                         this->common().aoeNonConst().targetVectorsNonConst(3),
+				                         this->common().aoeNonConst().targetVectorsNonConst(4));
 			}
 		} else {
 			bool timeHasAdvanced = (counter_ != currentTimeStep &&
@@ -290,9 +290,9 @@ private:
 				this->common().aoe().wftOneVector(bogusTv,
 				                                  this->common().aoe().targetVectors(advanceIndex),
 				                                  site);
-				this->common().aoe().targetVectorsNonConst(1) = bogusTv;
+				this->common().aoeNonConst().targetVectorsNonConst(1) = bogusTv;
 				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
-				                         this->common().aoe().targetVectorsNonConst(2),
+				                         this->common().aoeNonConst().targetVectorsNonConst(2),
 				                         bogusTv);
 			} else {
 
@@ -306,13 +306,13 @@ private:
 				this->common().aoe().wftOneVector(bogusTv2,
 				                                  this->common().aoe().targetVectors(advanceIndexp1),
 				                                  site);
-				this->common().aoe().targetVectorsNonConst(1) = bogusTv;
-				this->common().aoe().targetVectorsNonConst(2) = bogusTv2;
+				this->common().aoeNonConst().targetVectorsNonConst(1) = bogusTv;
+				this->common().aoeNonConst().targetVectorsNonConst(2) = bogusTv2;
 
 				skeleton_.calcDynVectors(this->common().aoe().targetVectors(1),
 				                         this->common().aoe().targetVectors(2),
-				                         this->common().aoe().targetVectorsNonConst(3),
-				                         this->common().aoe().targetVectorsNonConst(4));
+				                         this->common().aoeNonConst().targetVectorsNonConst(3),
+				                         this->common().aoeNonConst().targetVectorsNonConst(4));
 			}
 		}
 

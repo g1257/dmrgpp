@@ -168,7 +168,7 @@ public:
 		sum += gsWeight_;
 		assert(fabs(sum-1.0)<1e-5);
 
-		this->common().aoe().initTimeVectors(tstStruct_, ioIn);
+		this->common().aoeNonConst().initTimeVectors(tstStruct_, ioIn);
 	}
 
 	SizeType sites() const { return tstStruct_.sites(); }
@@ -242,7 +242,7 @@ private:
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
 		VectorWithOffsetType phiNew;
-		this->common().aoe().getPhi(&phiNew, Eg, direction, block1[0], loopNumber, tstStruct_);
+		this->common().aoeNonConst().getPhi(&phiNew, Eg, direction, block1[0], loopNumber, tstStruct_);
 
 		if (phiNew.size() == 0) return;
 
@@ -256,7 +256,7 @@ private:
 		assert(0 < block1.size());
 
 		bool isLastCall = true;
-		this->common().aoe().calcTimeVectors(indices,
+		this->common().aoeNonConst().calcTimeVectors(indices,
 		                                     Eg,
 		                                     phiNew,
 		                                     direction,

@@ -176,7 +176,7 @@ public:
 		const SizeType site = block1[0];
 		const SizeType total = this->common().aoe().tvs();
 		assert(total <= pvectors_.targets());
-		this->common().aoe().wftSome(site, 0, total);
+		this->common().aoeNonConst().wftSome(site, 0, total);
 
 		assert(energies.size() > 0);
 		computePvectors(direction, energies[0]); // may alter the number of tvs
@@ -222,7 +222,7 @@ private:
 			std::cerr<<"All user-provided P vectors finished\n";
 			std::cerr<<PsimagLite::AnsiColor::reset;
 
-			this->common().aoe().targetVectorsResize(pvectors_.origPvectors());
+			this->common().aoeNonConst().targetVectorsResize(pvectors_.origPvectors());
 
 			return;
 		}
@@ -256,7 +256,7 @@ private:
 			int x = tmp.pIndex();
 			if (x >= 0) {
 				if (static_cast<SizeType>(x) == i) err("Self assigment\n");
-				VectorWithOffsetType_& v0 = this->common().aoe().targetVectorsNonConst(i);
+				VectorWithOffsetType_& v0 = this->common().aoeNonConst().targetVectorsNonConst(i);
 				v0 =  this->common().aoe().targetVectors(x);
 				pvectors_.setAsDone(i);
 				continue;
@@ -297,7 +297,7 @@ private:
 		for (SizeType i = 0; i < ntemps; ++i) {
 			int x = pvectors_.findInOrigNames(tempNames[i]);
 			if (x < 0) continue;
-			this->common().aoe().targetVectorsNonConst(x) = tempVectors[i];
+			this->common().aoeNonConst().targetVectorsNonConst(x) = tempVectors[i];
 			pvectors_.setAsDone(x);
 			removed_[i] = true;
 			tempToP[i] = x;

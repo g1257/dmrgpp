@@ -160,7 +160,7 @@ public:
 		sum += gsWeight_;
 		assert(fabs(sum-1.0)<1e-5);
 
-		this->common().aoe().initTimeVectors(tstStruct_, ioIn);
+		this->common().aoeNonConst().initTimeVectors(tstStruct_, ioIn);
 	}
 
 	SizeType sites() const { return tstStruct_.sites(); }
@@ -250,12 +250,12 @@ private:
 		VectorWithOffsetType phiNew;
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
-		this->common().aoe().getPhi(&phiNew,
-		                            Eg,
-		                            direction,
-		                            site,
-		                            loopNumber,
-		                            tstStruct_);
+		this->common().aoeNonConst().getPhi(&phiNew,
+		                                    Eg,
+		                                    direction,
+		                                    site,
+		                                    loopNumber,
+		                                    tstStruct_);
 
 		PairType startEnd(0, tstStruct_.times().size());
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
@@ -265,14 +265,14 @@ private:
 		for (SizeType i = 0; i < indices.size(); ++i) indices[i] = i + startEnd.first;
 
 		static const bool isLastCall = true;
-		this->common().aoe().calcTimeVectors(indices,
-		                                     Eg,
-		                                     phiNew,
-		                                     direction,
-		                                     allOperatorsApplied,
-		                                     false, // don't wft or advance indices[0]
-		                                     block1,
-		                                     isLastCall);
+		this->common().aoeNonConst().calcTimeVectors(indices,
+		                                             Eg,
+		                                             phiNew,
+		                                             direction,
+		                                             allOperatorsApplied,
+		                                             false, // don't wft or advance indices[0]
+		                                             block1,
+		                                             isLastCall);
 
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);

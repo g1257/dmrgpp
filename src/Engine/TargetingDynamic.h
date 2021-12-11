@@ -236,7 +236,7 @@ private:
 	{
 
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().aoe().getPhi(&phiNew,
+		SizeType count = this->common().aoeNonConst().getPhi(&phiNew,
 		                                             Eg,
 		                                             direction,
 		                                             site,
@@ -266,9 +266,9 @@ private:
 			getLanczosVectors(V,sv,p);
 			if (i==0) {
 				assert(V.cols() > 0);
-				this->common().aoe().targetVectorsResize(V.cols());
+				this->common().aoeNonConst().targetVectorsResize(V.cols());
 				for (SizeType j=0;j<this->common().aoe().tvs();j++)
-					this->common().aoe().targetVectorsNonConst(j) = phi;
+					this->common().aoeNonConst().targetVectorsNonConst(j) = phi;
 			}
 			setVectors(V,i0);
 		}
@@ -303,7 +303,7 @@ private:
 		for (SizeType i=0;i<this->common().aoe().tvs();i++) {
 			VectorType tmp(V.rows());
 			for (SizeType j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-			this->common().aoe().targetVectorsNonConst(i).setDataInSector(tmp,i0);
+			this->common().aoeNonConst().targetVectorsNonConst(i).setDataInSector(tmp,i0);
 		}
 	}
 

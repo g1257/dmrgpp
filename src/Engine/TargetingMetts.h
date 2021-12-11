@@ -187,7 +187,7 @@ public:
 
 		setWeights();
 
-		this->common().aoe().initTimeVectors(mettsStruct_, ioIn);
+		this->common().aoeNonConst().initTimeVectors(mettsStruct_, ioIn);
 	}
 
 	~TargetingMetts()
@@ -293,7 +293,7 @@ public:
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)) return;
 
 		// collapse
-		bool hasCollapsed = mettsCollapse_(this->common().aoe().targetVectorsNonConst(n1),
+		bool hasCollapsed = mettsCollapse_(this->common().aoeNonConst().targetVectorsNonConst(n1),
 		                                   this->common().aoe().targetVectors(n1 - 1),
 		        sites,
 		        direction);
@@ -366,13 +366,14 @@ private:
 		msg<<norm(phi);
 		progress_.printline(msgg, std::cout);
 		if (norm(phi)<1e-6)
-			setFromInfinite(this->common().aoe().targetVectorsNonConst(startEnd.first),lrs_);
+			setFromInfinite(this->common().aoeNonConst().targetVectorsNonConst(startEnd.first),
+			                lrs_);
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		VectorSizeType indices(startEnd.second - startEnd.first);
 		for (SizeType i = 0; i < indices.size(); ++i) indices[i] = i + startEnd.first;
 
 		const bool isLastCall = true;
-		this->common().aoe().calcTimeVectors(indices,
+		this->common().aoeNonConst().calcTimeVectors(indices,
 		                                     Eg,
 		                                     phi,
 		                                     systemOrEnviron,
@@ -408,8 +409,9 @@ private:
 			msg<<"Changing direction, setting collapsed with norm="<<x;
 			progress_.printline(msgg, std::cout);
 			for (SizeType i=0;i<n1;i++)
-				this->common().aoe().targetVectorsNonConst(i) = this->common().aoe().targetVectors(n1);
-			this->common().aoe().timeHasAdvanced();
+				this->common().aoeNonConst().targetVectorsNonConst(i) =
+			        this->common().aoe().targetVectors(n1);
+			this->common().aoeNonConst().timeHasAdvanced();
 			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
@@ -443,7 +445,7 @@ private:
 			this->common().setAllStagesTo(StageEnumType::COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.times().size();
-			this->common().aoe().destroyPvector(n1);
+			this->common().aoeNonConst().destroyPvector(n1);
 			timesWithoutAdvancement_ = 0;
 			printAdvancement(timesWithoutAdvancement_);
 			return;
@@ -477,7 +479,7 @@ private:
 
 			if (this->common().aoe().allStages(StageEnumType::WFT_ADVANCE)) {
 				advance = indexAdvance;
-				this->common().aoe().timeHasAdvanced();
+				this->common().aoeNonConst().timeHasAdvanced();
 			}
 
 			// don't advance the collapsed vector because we'll recompute
@@ -496,7 +498,7 @@ private:
 			wft_.setInitialVector(phiNew,this->common().aoe().targetVectors(advance),lrs_,nk);
 			phiNew.collapseSectors();
 			assert(norm(phiNew)>1e-6);
-			this->common().aoe().targetVectorsNonConst(index) = phiNew;
+			this->common().aoeNonConst().targetVectorsNonConst(index) = phiNew;
 		} else {
 			assert(false);
 		}
@@ -574,7 +576,7 @@ private:
 		           transformEnviron,
 		           block2);
 		pureVectors_.second = newVector2;
-		setFromInfinite(this->common().aoe().targetVectorsNonConst(0), lrs_);
+		setFromInfinite(this->common().aoeNonConst().targetVectorsNonConst(0), lrs_);
 		assert(norm(this->common().aoe().targetVectors(0)) > 1e-6);
 
 		systemPrev_.fixed = alphaFixedVolume;
