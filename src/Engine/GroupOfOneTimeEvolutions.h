@@ -57,6 +57,15 @@ class GroupOfOneTimeEvolutions {
 			++timesWithoutAdvancement_;
 		}
 
+		bool hasKet(SizeType ket) const
+		{
+			const SizeType n = indices_.size();
+			for (SizeType i = 0; i < n; ++i)
+				if (indices_[i] == ket) return true;
+
+			return false;
+		}
+
 	private:
 
 		VectorSizeType indices_;
@@ -68,9 +77,13 @@ public:
 
 	typedef OneTimeEvolution OneTimeEvolutionType;
 	typedef typename PsimagLite::Vector<OneTimeEvolution*>::Type VectorOneTimeEvolutionType;
+	typedef typename PvectorsType::RealType RealType;
 
-	GroupOfOneTimeEvolutions()
-	{}
+	GroupOfOneTimeEvolutions() {}
+
+	GroupOfOneTimeEvolutions(const GroupOfOneTimeEvolutions&) = delete;
+
+	GroupOfOneTimeEvolutions& operator=(const GroupOfOneTimeEvolutions&) = delete;
 
 	~GroupOfOneTimeEvolutions()
 	{
@@ -93,6 +106,16 @@ public:
 	void pushBack(OneTimeEvolution* ptr) { vEvolutions_.push_back(ptr); }
 
 	SizeType size() const { return vEvolutions_.size(); }
+
+	RealType getTimeForKet(SizeType ket) const
+	{
+		const SizeType n = vEvolutions_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			if (vEvolutions_[i]->hasKet(ket)) return vEvolutions_[i]->time();
+		}
+
+		return 0;
+	}
 
 private:
 

@@ -96,6 +96,31 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
+template<typename LambdaType>
+class LambdaForTests {
+
+public:
+
+	void operator()(const PsimagLite::GetBraOrKet& bra,
+	                const PsimagLite::GetBraOrKet& ket,
+	                LambdaType* t) const
+	{
+		if (!t) return;
+		t->operator()(bra, ket);
+	}
+};
+
+template<>
+class LambdaForTests<int> {
+
+public:
+
+	void operator()(const PsimagLite::GetBraOrKet&,
+	                const PsimagLite::GetBraOrKet&,
+	                int*) const
+	{}
+};
+
 template<typename TargetHelperType,
          typename VectorWithOffsetType_,
          typename LanczosSolverType_>
@@ -319,9 +344,11 @@ public:
 
 	// START Cocoons
 
+	template<typename SomeLambdaType = int>
 	void cocoon(const BlockType& block,
 	            ProgramGlobals::DirectionEnum direction,
-	            bool doBorderIfBorder) const
+	            bool doBorderIfBorder,
+	            SomeLambdaType* someLambda = nullptr) const
 	{
 		if (aoe_.noStageIs(StageEnumType::DISABLED))
 			std::cout<<"ALL OPERATORS HAVE BEEN APPLIED\n";
@@ -345,6 +372,8 @@ public:
 
 		const SizeType expectedSize = targetHelper_.model().hilbertSize(site);
 
+		LambdaForTests<SomeLambdaType> lambdaForTests;
+
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
 
@@ -366,6 +395,7 @@ public:
 
 			if (v1->size() == 0 || v2->size() == 0) continue;
 
+			lambdaForTests(braket.bra(), braket.ket(), someLambda);
 			test(*v1, *v2, direction, opLabel, site, nup, border);
 			// don't repeat for border because this is called twice if needed
 		}

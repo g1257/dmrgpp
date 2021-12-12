@@ -138,7 +138,7 @@ public:
 	              SizeType indexNoAdvance)
 	    : lrs_(lrs),
 	      model_(model),
-	      commonTargeting_(lrs,model,wft,indexNoAdvance)
+	      commonTargeting_(lrs, model, wft, indexNoAdvance)
 	{
 		Intent<ModelType> intent(model_);
 		intent.check();

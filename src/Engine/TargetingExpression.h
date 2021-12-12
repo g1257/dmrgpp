@@ -187,7 +187,16 @@ public:
 		this->common().printNormsAndWeights(gsWeight, weight);
 
 		const bool doBorderIfBorder = true;
-		this->common().cocoon(block1, direction, doBorderIfBorder); // in-situ
+		auto testLambda = [this](const PsimagLite::GetBraOrKet& bra,
+		        const PsimagLite::GetBraOrKet& ket)
+		{
+			RealType braTime = getTimeForKet(bra);
+			RealType ketTime = getTimeForKet(ket);
+			if (braTime == ketTime) return;
+			err("BraTime= " + ttos(braTime) + " but ketTime= " + ttos(ketTime) + "\n");
+		};
+
+		this->common().cocoon(block1, direction, doBorderIfBorder, &testLambda); // in-situ
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
@@ -202,6 +211,15 @@ public:
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "Expression");
+	}
+
+	RealType getTimeForKet(const PsimagLite::GetBraOrKet& ket) const
+	{
+		if (ket.isPvector())
+			return timeEvolve_.getTimeForKet(ket.pIndex());
+		if (ket.isRvector())
+			throw PsimagLite::RuntimeError("R vectors cannot be tested\n");
+		return 0;
 	}
 
 private:
