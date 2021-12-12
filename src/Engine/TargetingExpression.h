@@ -194,8 +194,14 @@ public:
 
 			RealType braTime = getTimeForKet(bra);
 			RealType ketTime = getTimeForKet(ket);
-			if (braTime == ketTime) return;
-			err("BraTime= " + ttos(braTime) + " but ketTime= " + ttos(ketTime) + "\n");
+			const RealType globalTime = this->common().time();
+
+			if (braTime != ketTime)
+				err("BraTime= " + ttos(braTime) + " but ketTime= " + ttos(ketTime) + "\n");
+
+			if (braTime != globalTime)
+				err("Bra and kets have some time= " + ttos(braTime) +
+				    " but globalTime= " + ttos(globalTime) + "\n");
 		};
 
 		this->common().cocoon(block1, direction, doBorderIfBorder, &testLambda); // in-situ
