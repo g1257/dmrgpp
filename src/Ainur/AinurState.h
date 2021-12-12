@@ -11,6 +11,8 @@ namespace PsimagLite {
 
 class AinurState {
 
+public:
+
 	typedef Vector<SizeType>::Type VectorSizeType;
 	typedef Vector<String>::Type VectorStringType;
 	typedef std::complex<DoubleOrFloatType> ComplexType;
@@ -59,8 +61,6 @@ class AinurState {
 		String name_;
 		Matrix<T>& t_;
 	}; // struct ActionMatrix
-
-public:
 
 	enum ErrorEnum
 	{
@@ -148,6 +148,15 @@ public:
 		assert(static_cast<SizeType>(x) < typesSpec_.size());
 		convertInternal(t, val);
 		used_[x]++;
+	}
+
+	template<typename SomeMapType>
+	void setMap(SomeMapType& map) const
+	{
+		const SizeType n = keys_.size();
+		assert(n == values_.size());
+		for (SizeType i = 0; i < n; ++i)
+			map[keys_[i]] = map[values_[i]];
 	}
 
 	static bool verbose() { return false; }

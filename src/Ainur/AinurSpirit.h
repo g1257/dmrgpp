@@ -60,6 +60,7 @@ public:
 
 	typedef std::string::iterator IteratorType;
 	typedef Vector<char>::Type VectorCharType;
+	typedef AinurState::VectorStringType VectorStringType;
 
 	Ainur(String str);
 
@@ -81,6 +82,12 @@ public:
 	void readValue(SomeType& t, String label) const
 	{
 		state_.readValue(t, dummy_ + label);
+	}
+
+	template<typename SomeMapType>
+	void setMap(SomeMapType& map) const
+	{
+		state_.setMap(map);
 	}
 
 private:

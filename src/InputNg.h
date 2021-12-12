@@ -538,6 +538,7 @@ public:
 				}
 
 				ainur_ = new Ainur(inputWriteable.inputCheck().import() + data_);
+				ainur_->setMap(mapStrStr_);
 			}
 		}
 
@@ -545,14 +546,6 @@ public:
 		{
 			delete ainur_;
 			ainur_ = 0;
-		}
-
-		template<typename SomeMemResolvType>
-		SizeType memResolv(SomeMemResolvType&,
-		                   SizeType,
-		                   String = "") const
-		{
-			return 0;
 		}
 
 		void rewind() {}
@@ -847,6 +840,11 @@ public:
 				return ainur_->readValue(m, label);
 
 			throw RuntimeError("InputNg: Matrix<String> not supported in POD inputs\n");
+		}
+
+		MapStrStrType map() const
+		{
+			return mapStrStr_;
 		}
 
 		const String& filename() const
