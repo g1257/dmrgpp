@@ -101,19 +101,7 @@ public:
 		return true;
 	}
 
-	static bool isGlobalOperator(PsimagLite::String opName)
-	{
-		return isTimeEvolution(opName);
-	}
-
 private:
-
-	static bool isTimeEvolution(PsimagLite::String op)
-	{
-		static const PsimagLite::String timeEvolve = "TimeEvolve";
-
-		return (op.substr(0, timeEvolve.length()) == timeEvolve);
-	}
 
 	bool advanceInTimeOrNot(OneTimeEvolutionType& oneTimeEvolution,
 	                        SizeType advanceEach,

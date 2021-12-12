@@ -216,9 +216,12 @@ public:
 	RealType getTimeForKet(const PsimagLite::GetBraOrKet& ket) const
 	{
 		if (ket.isPvector())
-			return timeEvolve_.getTimeForKet(ket.pIndex());
+			return (pvectors_.hasTimeEvolution(ket.pIndex())) ?
+			            timeEvolve_.getTimeForKet(ket.pIndex()) : 0;
+
 		if (ket.isRvector())
 			throw PsimagLite::RuntimeError("R vectors cannot be tested\n");
+
 		return 0;
 	}
 

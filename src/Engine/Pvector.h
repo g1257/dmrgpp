@@ -80,6 +80,18 @@ public:
 
 	SizeType size() const { return vStr_.size(); }
 
+	const bool hasTimeEvolution() const
+	{
+		return (vStr_.size() > 0 && isTimeEvolution(vStr_[0]));
+	}
+
+	static bool isTimeEvolution(PsimagLite::String op)
+	{
+		static const PsimagLite::String timeEvolve = "TimeEvolve";
+
+		return (op.substr(0, timeEvolve.length()) == timeEvolve);
+	}
+
 private:
 
 	static RealType findWeightAndStripIt(PsimagLite::String str)

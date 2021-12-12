@@ -25,6 +25,7 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef AuxForTargetingExpression<TargetingBaseType> AuxiliaryType;
+	typedef typename AuxiliaryType::PvectorsType PvectorsType;
 	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
 	typedef typename PsimagLite::Vector<OneOperatorSpecType*>::Type VectorOneOperatorSpecType;
 	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
@@ -107,7 +108,7 @@ public:
 			}
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
-			if (nonLocal_.isGlobalOperator(tmp)) {
+			if (isGlobalOperator(tmp)) {
 				nonLocal_.timeEvolve(tmp, siteSplit, ket, getCurrentCoO());
 				newVstr.push_back(tmp);
 				continue;
@@ -197,6 +198,11 @@ public:
 	}
 
 private:
+
+	static bool isGlobalOperator(PsimagLite::String opName)
+	{
+		return PvectorsType::PvectorType::isTimeEvolution(opName);
+	}
 
 	bool siteCanBeApplied(SizeType site) const
 	{

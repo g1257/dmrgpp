@@ -62,6 +62,13 @@ public:
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
+	bool hasTimeEvolution(SizeType ind) const
+	{
+		assert(ind < pVectors_.size());
+		assert(pVectors_[ind]);
+		return pVectors_[ind]->hasTimeEvolution();
+	}
+
 	void setAsDone(SizeType ind)
 	{
 		assert(ind < pVectors_.size());
