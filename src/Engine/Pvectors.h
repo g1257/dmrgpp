@@ -23,6 +23,7 @@ public:
 	typedef Pvector<typename VectorWithOffsetType::value_type> PvectorType;
 	typedef typename PsimagLite::Vector<PvectorType*>::Type VectorPvectorType;
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
+	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	Pvectors(InputValidatorType& io,
 	         const ApplyOperatorExpressionType& aoe,
@@ -203,11 +204,28 @@ private:
 
 	void pvectorsFromInput(InputValidatorType& io)
 	{
+		checkObsolete(io);
+
 		RealType gsWeight = 0;
 		io.readline(gsWeight, "GsWeight=");
 
-		SizeType total = 0;
-		io.readline(total, "Pvectors=");
+		VectorSizeType seen;
+		for (auto it = io.map().begin(); it != io.map().end(); ++it) {
+			int index = getPindex(it->first);
+			if (index < 0) continue;
+			seen.push_back(index);
+		}
+
+		const SizeType total = seen.size();
+		PsimagLite::Sort<VectorSizeType> sort;
+		VectorSizeType iperm(total);
+		sort.sort(seen, iperm);
+
+		for (SizeType i = 0; i < total; ++i) {
+			if (seen[i] == i) continue;
+			err("Pvectors must not have holes\n");
+		}
+
 		pVectors_.resize(total);
 		PsimagLite::String tmp;
 		RealType sum = 0.0;
@@ -224,6 +242,34 @@ private:
 			pVectors_[i]->multiplyWeight(factor);
 
 		origPvectors_ = pVectors_.size();
+	}
+
+	static void checkObsolete(InputValidatorType& io)
+	{
+		bool hasObsolete = false;
+		try {
+			int tmp = 0;
+			io.readline(tmp, "Pvectors=");
+			hasObsolete = true;
+		} catch (std::exception&) {}
+
+		if (hasObsolete)
+			err("Delete the Pvectors= line from the input; it's no longer needed\n");
+	}
+
+	static int getPindex(PsimagLite::String key)
+	{
+		const SizeType n = key.length();
+		if (key.length() < 2) return -1;
+		if (key[0] != 'P') return -1;
+
+		PsimagLite::String buffer;
+		for (SizeType i = 1; i < n; ++i) {
+			if (key[i] < 48 || key[i] > 57) return -1;
+			buffer += key[i];
+		}
+
+		return PsimagLite::atoi(buffer);
 	}
 
 	void findUsedPvectors(VectorBoolType& used, PsimagLite::String str) const
