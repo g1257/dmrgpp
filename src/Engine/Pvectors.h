@@ -209,28 +209,14 @@ private:
 		RealType gsWeight = 0;
 		io.readline(gsWeight, "GsWeight=");
 
-		VectorSizeType seen;
-		for (auto it = io.map().begin(); it != io.map().end(); ++it) {
-			int index = getPindex(it->first);
-			if (index < 0) continue;
-			seen.push_back(index);
-		}
-
-		const SizeType total = seen.size();
-		PsimagLite::Sort<VectorSizeType> sort;
-		VectorSizeType iperm(total);
-		sort.sort(seen, iperm);
-
-		for (SizeType i = 0; i < total; ++i) {
-			if (seen[i] == i) continue;
-			err("Pvectors must not have holes\n");
-		}
+		const SizeType total = getPvectorsTotal(io);
 
 		pVectors_.resize(total);
 		PsimagLite::String tmp;
 		RealType sum = 0.0;
 		for (SizeType i = 0; i < total; ++i) {
 			io.readline(tmp, "P" + ttos(i) + "=");
+			PvectorType::checkSyntaxOfValue(tmp);
 			pVectors_[i] = new PvectorType(tmp);
 			sum += pVectors_[i]->weight();
 		}
@@ -255,6 +241,28 @@ private:
 
 		if (hasObsolete)
 			err("Delete the Pvectors= line from the input; it's no longer needed\n");
+	}
+
+	static SizeType getPvectorsTotal(InputValidatorType& io)
+	{
+		VectorSizeType seen;
+		for (auto it = io.map().begin(); it != io.map().end(); ++it) {
+			int index = getPindex(it->first);
+			if (index < 0) continue;
+			seen.push_back(index);
+		}
+
+		const SizeType total = seen.size();
+		PsimagLite::Sort<VectorSizeType> sort;
+		VectorSizeType iperm(total);
+		sort.sort(seen, iperm);
+
+		for (SizeType i = 0; i < total; ++i) {
+			if (seen[i] == i) continue;
+			err("Pvectors must not have holes\n");
+		}
+
+		return total;
 	}
 
 	static int getPindex(PsimagLite::String key)

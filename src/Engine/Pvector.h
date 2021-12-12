@@ -92,6 +92,23 @@ public:
 		return (op.substr(0, timeEvolve.length()) == timeEvolve);
 	}
 
+	// only checks syntax if there's time evolution
+	// in which case we expect TimeEvolve{...}*|Px>
+	static void checkSyntaxOfValue(PsimagLite::String rhs)
+	{
+		if (!isTimeEvolution(rhs)) return;
+
+		const SizeType n = rhs.length();
+		SizeType countStars = 0;
+		for (SizeType i = 0; i < n; ++i) {
+			if (rhs[i] == '*') ++countStars;
+			if (countStars > 1) break;
+		}
+
+		if (countStars != 1)
+			err("Expected one and only one * in " + rhs + "\n");
+	}
+
 private:
 
 	static RealType findWeightAndStripIt(PsimagLite::String str)
