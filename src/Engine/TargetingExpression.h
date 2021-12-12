@@ -190,6 +190,8 @@ public:
 		auto testLambda = [this](const PsimagLite::GetBraOrKet& bra,
 		        const PsimagLite::GetBraOrKet& ket)
 		{
+			if (!hasTimeEvolution(bra) || !hasTimeEvolution(ket)) return;
+
 			RealType braTime = getTimeForKet(bra);
 			RealType ketTime = getTimeForKet(ket);
 			if (braTime == ketTime) return;
@@ -213,11 +215,15 @@ public:
 		this->common().writeNGSTs(io, prefix, block, "Expression");
 	}
 
+	bool hasTimeEvolution(const PsimagLite::GetBraOrKet& ket) const
+	{
+		return (ket.isPvector()) ? pvectors_.hasTimeEvolution(ket.pIndex()) : false;
+	}
+
 	RealType getTimeForKet(const PsimagLite::GetBraOrKet& ket) const
 	{
 		if (ket.isPvector())
-			return (pvectors_.hasTimeEvolution(ket.pIndex())) ?
-			            timeEvolve_.getTimeForKet(ket.pIndex()) : 0;
+			return timeEvolve_.getTimeForKet(ket.pIndex());
 
 		if (ket.isRvector())
 			throw PsimagLite::RuntimeError("R vectors cannot be tested\n");
