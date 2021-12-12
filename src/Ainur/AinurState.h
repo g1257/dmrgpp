@@ -156,7 +156,7 @@ public:
 		const SizeType n = keys_.size();
 		assert(n == values_.size());
 		for (SizeType i = 0; i < n; ++i)
-			map[keys_[i]] = map[values_[i]];
+			map[keys_[i]] = values_[i];
 	}
 
 	static bool verbose() { return false; }

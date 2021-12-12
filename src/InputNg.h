@@ -517,11 +517,12 @@ public:
 
 	class Readable {
 
-		typedef typename Map<String,String,MyCompareType>::Type::iterator MapStringIteratorType;
+	public:
+
+		typedef typename Map<String, String, MyCompareType>::Type MapStringStringType;
+		typedef typename MapStringStringType::iterator MapStringIteratorType;
 		typedef typename Map<String,Vector<String>::Type,MyCompareType>::Type::iterator
 		MapStringVectorIteratorType;
-
-	public:
 
 		Readable(const Writeable& inputWriteable)
 		    : file_(inputWriteable.filename()),
@@ -998,7 +999,7 @@ public:
 		String file_;
 		String data_;
 		//serializr normal mapStrStr_
-		typename Map<String,String,MyCompareType>::Type mapStrStr_;
+		MapStringStringType mapStrStr_;
 		//serializr normal mapStrVec_
 		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
 		//serializr normal labelsForRemoval_
