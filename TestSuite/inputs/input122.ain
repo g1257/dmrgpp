@@ -20,7 +20,6 @@ FiniteLoops=[
 RepeatFiniteLoopsTimes=4;
 TargetElectronsUp=8;
 TargetElectronsDown=8;
-Pvectors=2;
 string P0="c'[5]*c[6]*|gs>+c'[6]*c[7]*|gs>";
 string P1="TimeEvolve{0.1,5,14}*|P0>";
 GsWeight=0.2;

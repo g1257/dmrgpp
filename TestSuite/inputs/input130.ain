@@ -29,7 +29,6 @@ FiniteLoops=[[7, 110, 0],
 [-14, 180, 0],
 [ 14, 190, 0]];
 int TargetSzPlusConst=8;
-Pvectors=1;
 GsWeight=0.3;
 string P0="splus[8]*|gs>";
 #ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"

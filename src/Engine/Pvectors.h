@@ -246,7 +246,9 @@ private:
 	static SizeType getPvectorsTotal(InputValidatorType& io)
 	{
 		VectorSizeType seen;
-		for (auto it = io.map().begin(); it != io.map().end(); ++it) {
+		const typename InputValidatorType::MapStringStringType& map = io.map();
+
+		for (auto it = map.begin(); it != map.end(); ++it) {
 			int index = getPindex(it->first);
 			if (index < 0) continue;
 			seen.push_back(index);
