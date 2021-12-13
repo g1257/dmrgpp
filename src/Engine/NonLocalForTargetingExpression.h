@@ -28,6 +28,7 @@ public:
 	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
 	typedef typename ModelType::VectorSizeType VectorSizeType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 
@@ -54,7 +55,10 @@ public:
 		SizeType timeSteps = 3; // Fixme read from string TODO FIXME
 		RealType tau = 0.1; // Fixme read from string TODO FIXME
 		SizeType advanceEach = aux_.pVectors().aoe().model().superGeometry().numberOfSites() - 2;
-		extractParamsFromName(tau, timeSteps, advanceEach, name);
+		PsimagLite::String algo = "Krylov";
+		VectorRealType chebyTransform;
+		SizeType disposition = 0;
+		extractParamsFromName(tau, timeSteps, advanceEach, algo, chebyTransform, disposition, name);
 
 		SizeType firstIndex = aux_.pIndexOutput();
 		if (firstIndex >= aux_.pVectors().origPvectors())
@@ -62,13 +66,14 @@ public:
 
 		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
 
-		auxPtr->pVectors().initTimeVectors(timeSteps, tau);
+		auxPtr->pVectors().initTimeVectors(timeSteps, tau, algo, chebyTransform);
 
 		OneTimeEvolutionType* oneTimeEvolution = aux_.timeEvolve().findThisEvolution(firstIndex);
 
 		if (!oneTimeEvolution) {
 			oneTimeEvolution = new OneTimeEvolutionType(firstIndex,
 			                                            *srcVwo,
+			                                            disposition,
 			                                            timeSteps,
 			                                            aux_.pVectors());
 			aux_.timeEvolve().pushBack(oneTimeEvolution);
@@ -140,6 +145,9 @@ private:
 	static void extractParamsFromName(RealType& tau,
 	                                  SizeType& timeSteps,
 	                                  SizeType& advanceEach,
+	                                  PsimagLite::String& algo,
+	                                  VectorRealType& chebyTransform,
+	                                  SizeType& disposition,
 	                                  PsimagLite::String name)
 	{
 		//TimeEvolve{0.1,5,14}
@@ -159,14 +167,25 @@ private:
 		PsimagLite::split(tokens, buffer, ",");
 		const SizeType n = tokens.size();
 		switch (n) {
+		case 5:
+			if (tokens[4] != "~")
+				disposition = PsimagLite::atoi(tokens[4]);
+			// fall through
+		case 4:
+			if (tokens[3] != "~")
+				algo = getChebyIfNeeded(chebyTransform, tokens[3]);
+			// fall through
 		case 3:
-			advanceEach = PsimagLite::atoi(tokens[2]);
+			if (tokens[2] != "~")
+				advanceEach = PsimagLite::atoi(tokens[2]);
 			// fall through
 		case 2:
-			timeSteps = PsimagLite::atoi(tokens[1]);
+			if (tokens[1] != "~")
+				timeSteps = PsimagLite::atoi(tokens[1]);
 			// fall through
 		case 1:
-			tau = PsimagLite::atof(tokens[0]);
+			if (tokens[0] != "~")
+				tau = PsimagLite::atof(tokens[0]);
 			break;
 		case 0:
 			break;
@@ -174,6 +193,23 @@ private:
 			err("Up to three tokens can be given\n");
 			break;
 		}
+	}
+
+	static PsimagLite::String getChebyIfNeeded(VectorRealType& v, PsimagLite::String algo)
+	{
+		static const PsimagLite::String cheby = "Chebyshev";
+		if (algo.substr(0, cheby.length()) != cheby) return algo;
+
+		VectorStringType tokens;
+		PsimagLite::split(tokens, algo, ":");
+		if (tokens.size() != 3 || tokens[0] != cheby)
+			err("Expected Chebyshev:a:b\n");
+
+		v.resize(2);
+		v[0] = PsimagLite::atof(tokens[1]);
+		v[1] = PsimagLite::atof(tokens[2]);
+
+		return algo;
 	}
 
 	const AuxiliaryType& aux_;

@@ -24,6 +24,7 @@ public:
 	typedef typename PsimagLite::Vector<PvectorType*>::Type VectorPvectorType;
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	Pvectors(InputValidatorType& io,
 	         const ApplyOperatorExpressionType& aoe,
@@ -174,12 +175,16 @@ public:
 		}
 	}
 
-	void initTimeVectors(SizeType timeSteps, RealType tau)
+	void initTimeVectors(SizeType timeSteps,
+	                     RealType tau,
+	                     PsimagLite::String algo,
+	                     VectorRealType& chebyTransform)
 	{
 		tstStruct_.times().resize(timeSteps);
 		for (SizeType i = 0; i < timeSteps; ++i)
 			tstStruct_.times()[i] = i*tau/(timeSteps - 1);
 
+		tstStruct_. template setAlgorithm<InputValidatorType>(&chebyTransform, algo, nullptr);
 		ApplyOperatorExpressionType* aoePtr = const_cast<ApplyOperatorExpressionType*>(&aoe_);
 		aoePtr->initTimeVectors(tstStruct_, io_);
 	}

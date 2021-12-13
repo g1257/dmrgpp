@@ -18,9 +18,10 @@ class GroupOfOneTimeEvolutions {
 
 		OneTimeEvolution(SizeType firstIndex,
 		                 const VectorWithOffsetType& src,
+		                 SizeType disposition,
 		                 SizeType timeSteps,
 		                 PvectorsType& pVectors)
-		    : indices_(timeSteps), timesWithoutAdvancement_(0), time_(0)
+		    : indices_(timeSteps), disposition_(disposition), timesWithoutAdvancement_(0), time_(0)
 		{
 			indices_[0] = firstIndex;
 			for (SizeType i = 1; i < timeSteps; ++i) {
@@ -69,6 +70,7 @@ class GroupOfOneTimeEvolutions {
 	private:
 
 		VectorSizeType indices_;
+		SizeType disposition_;
 		SizeType timesWithoutAdvancement_;
 		RealType time_;
 	};

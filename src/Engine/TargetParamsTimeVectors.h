@@ -125,16 +125,7 @@ public:
 		PsimagLite::String s="";
 
 		io.readline(s, "TSPAlgorithm=");
-		if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta")
-			algorithm_ = BaseType::AlgorithmEnum::RUNGE_KUTTA;
-		if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter")
-			algorithm_ = BaseType::AlgorithmEnum::SUZUKI_TROTTER;
-		if (s=="Chebyshev") {
-			algorithm_ = BaseType::AlgorithmEnum::CHEBYSHEV;
-			io.read(chebyTransform_, "ChebyshevTransform");
-			if (chebyTransform_.size() != 2)
-				err("ChebyshevTransform must be a vector of two real entries\n");
-		}
+		setAlgorithm(nullptr, s, &io);
 
 		try {
 			io.readline(timeDirection_,"TSPTimeFactor=");
@@ -174,6 +165,33 @@ public:
 	virtual const VectorRealType& chebyTransform() const
 	{
 		return chebyTransform_;
+	}
+
+	template<typename IoInputter>
+	void setAlgorithm(VectorRealType* chebyTransform,
+	                  PsimagLite::String s,
+	                  IoInputter* io)
+	{
+		if (io && chebyTransform) err("setAlgorithm: incorrect call (1)\n");
+
+		if (!io && !chebyTransform) err("setAlgorithm: incorrect call (2)\n");
+
+		if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta") {
+			algorithm_ = BaseType::AlgorithmEnum::RUNGE_KUTTA;
+		} else if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter") {
+			algorithm_ = BaseType::AlgorithmEnum::SUZUKI_TROTTER;
+		} else if (s=="Chebyshev") {
+			algorithm_ = BaseType::AlgorithmEnum::CHEBYSHEV;
+
+			if (io) io->read(chebyTransform_, "ChebyshevTransform");
+			else chebyTransform_ = *chebyTransform;
+			if (chebyTransform_.size() != 2)
+				err("ChebyshevTransform must be a vector of two real entries\n");
+		} else if (s == "Krylov") {
+			algorithm_ = BaseType::AlgorithmEnum::KRYLOV;
+		} else {
+			err("Unknown algorithm " + s + "\n");
+		}
 	}
 
 private:
