@@ -221,12 +221,6 @@ private:
 			sum += pVectors_[i]->weight();
 		}
 
-		if (sum == 0.0) return;
-
-		RealType factor = (1.0 - gsWeight)/sum;
-		for (SizeType i = 0; i < total; ++i)
-			pVectors_[i]->multiplyWeight(factor);
-
 		origPvectors_ = pVectors_.size();
 	}
 

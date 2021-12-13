@@ -130,6 +130,7 @@ public:
 	    : BaseType(lrs, model, wft, 0),
 	      progress_("TargetingExpression"),
 	      gsWeight_(0.3),
+	      gsWeightActual_(gsWeight_),
 	      pvectors_(io, this->common().aoe(), lrs)
 	{
 		io.readline(gsWeight_, "GsWeight=");
@@ -148,19 +149,13 @@ public:
 	RealType weight(SizeType i) const
 	{
 		assert(this->common().aoe().noStageIs(StageEnumType::DISABLED));
-		VectorRealType weights;
-		RealType gsWeight = 0;
-		computeAllWeights(gsWeight, weights);
-		assert(i < weights.size());
-		return weights[i];
+		assert(i < weights_.size());
+		return weights_[i];
 	}
 
 	RealType gsWeight() const
 	{
-		VectorRealType weights;
-		RealType gsWeight = 0;
-		computeAllWeights(gsWeight, weights);
-		return gsWeight;
+		return gsWeightActual_;
 	}
 
 	void evolve(const VectorRealType& energies,
@@ -181,10 +176,8 @@ public:
 		assert(energies.size() > 0);
 		computePvectors(direction, energies[0]); // may alter the number of tvs
 
-		VectorRealType weight;
-		RealType gsWeight = 0;
-		computeAllWeights(gsWeight, weight);
-		this->common().printNormsAndWeights(gsWeight, weight);
+		computeAllWeights();
+		this->common().printNormsAndWeights(gsWeightActual_, weights_);
 
 		const bool doBorderIfBorder = true;
 		auto testLambda = [this](const PsimagLite::GetBraOrKet& bra,
@@ -490,34 +483,36 @@ private:
 		}
 	}
 
-	void computeAllWeights(RealType& gsWeight, VectorRealType& weight) const
+	void computeAllWeights()
 	{
 		const SizeType n = this->common().aoe().tvs();
 		assert(n <= pvectors_.targets());
-		weight.resize(n);
-		std::fill(weight.begin(), weight.end(), 0);
+		weights_.resize(n);
+		std::fill(weights_.begin(), weights_.end(), 0);
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			RealType norma = norm(this->tv(i));
 			if (norma < 1e-6) continue;
-			weight[i] = pvectors_(i).weight()/norma;
-			sum += weight[i];
+			weights_[i] = pvectors_(i).weight()/norma;
+			sum += weights_[i];
 		}
 
-		gsWeight = 1 - sum;
+		gsWeightActual_ = 1 - sum;
 
-		if (gsWeight >= gsWeight_) return; // <--- EARLY EXIT HERE
+		if (gsWeightActual_ >= gsWeight_) return; // <--- EARLY EXIT HERE
 
 		assert(sum > 1e-6);
 		RealType factor = (1 - gsWeight_)/sum;
 		for (SizeType i = 0; i < n; ++i)
-			weight[i] *= factor;
+			weights_[i] *= factor;
 
-		gsWeight = gsWeight_;
+		gsWeightActual_ = gsWeight_;
 	}
 
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
+	RealType gsWeightActual_;
+	VectorRealType weights_;
 	SpecForTargetingExpressionType opSpec_;
 	Pvectors<BaseType> pvectors_;
 	GroupOfOneTimeEvolutionsType timeEvolve_;
