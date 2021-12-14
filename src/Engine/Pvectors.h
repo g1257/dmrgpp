@@ -4,6 +4,7 @@
 #include "InputCheck.h"
 #include "Pvector.h"
 #include "TargetParamsTimeVectors.h"
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 

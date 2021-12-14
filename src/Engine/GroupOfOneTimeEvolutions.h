@@ -1,6 +1,7 @@
 #ifndef GROUP_OF_ONE_TIME_EVOLUTIONS_H
 #define GROUP_OF_ONE_TIME_EVOLUTIONS_H
 #include "Vector.h"
+#include "GetBraOrKet.h"
 
 namespace Dmrg {
 
@@ -18,10 +19,15 @@ class GroupOfOneTimeEvolutions {
 
 		OneTimeEvolution(SizeType firstIndex,
 		                 const VectorWithOffsetType& src,
+		                 PsimagLite::String srcKet,
 		                 SizeType disposition,
 		                 SizeType timeSteps,
 		                 PvectorsType& pVectors)
-		    : indices_(timeSteps), disposition_(disposition), timesWithoutAdvancement_(0), time_(0)
+		    : indices_(timeSteps),
+		      srcKet_(srcKet),
+		      disposition_(disposition),
+		      timesWithoutAdvancement_(0),
+		      time_(0)
 		{
 			indices_[0] = firstIndex;
 			for (SizeType i = 1; i < timeSteps; ++i) {
@@ -67,9 +73,21 @@ class GroupOfOneTimeEvolutions {
 			return false;
 		}
 
+		int sourceToDestroy() const
+		{
+			return (disposition_ != 2) ? -1 : getPindexOrMinusOne(srcKet_);
+		}
+
 	private:
 
+		static int getPindexOrMinusOne(PsimagLite::String braOrKet)
+		{
+			PsimagLite::GetBraOrKet getBraOrKet(braOrKet);
+			return (getBraOrKet.isPvector()) ? getBraOrKet.pIndex() : -1;
+		}
+
 		VectorSizeType indices_;
+		PsimagLite::String srcKet_;
 		SizeType disposition_;
 		SizeType timesWithoutAdvancement_;
 		RealType time_;

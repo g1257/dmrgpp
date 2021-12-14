@@ -73,6 +73,7 @@ public:
 		if (!oneTimeEvolution) {
 			oneTimeEvolution = new OneTimeEvolutionType(firstIndex,
 			                                            *srcVwo,
+			                                            srcKet,
 			                                            disposition,
 			                                            timeSteps,
 			                                            aux_.pVectors());
@@ -124,6 +125,9 @@ private:
 			oneTimeEvolution.resetTimesWithoutAdvancement();
 			oneTimeEvolution.advanceTime(tau);
 			timeHasAdvanced = true;
+			const int sourceToDestroy = oneTimeEvolution.sourceToDestroy();
+			if (sourceToDestroy >= 0)
+				aux_.pVectors().aoeNonConst().destroyPvector(sourceToDestroy);
 		} else {
 			oneTimeEvolution.incrementTimesWithoutAdvancement();
 		}
