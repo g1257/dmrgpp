@@ -320,12 +320,14 @@ public:
 		}
 
 		// FIXME TODO check that the NGST name changes instead
-		bool sameNgst = isThisNgstSameAsPrevious(name, ts->name(), dtvs, rtvs);
-		SizeType cTimeStep = (sameNgst) ? ts->currentTimeStep() : 0;
-		setCurrentTimeStep(cTimeStep);
+		if (name != "Expression") {
+			bool sameNgst = isThisNgstSameAsPrevious(name, ts->name(), dtvs, rtvs);
+			SizeType cTimeStep = (sameNgst) ? ts->currentTimeStep() : 0;
+			setCurrentTimeStep(cTimeStep);
 
-		RealType timeReal = (sameNgst) ? ts->time() : 0;
-		setCurrentTime(timeReal);
+			RealType timeReal = (sameNgst) ? ts->time() : 0;
+			setCurrentTime(timeReal);
+		}
 
 		delete ts;
 		ts = 0;
