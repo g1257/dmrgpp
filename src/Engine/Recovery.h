@@ -244,6 +244,8 @@ public:
 
 		writeRecovery(ioOut, loopIndex, stepCurrent);
 
+		checkpoint_.parameters().write("PARAMETERS", ioOut.serializer());
+
 		// taken from end of finiteDmrgLoops
 		checkpoint_.write(pS_, pE_, ioOut);
 		ioOut.createGroup("FinalPsi");
