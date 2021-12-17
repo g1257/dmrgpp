@@ -281,9 +281,14 @@ private:
 
 			int x = tmp.pIndex();
 			if (x >= 0) {
-				if (static_cast<SizeType>(x) == i) err("Self assigment\n");
-				VectorWithOffsetType_& v0 = this->tvNonConst(i);
-				v0 =  this->tv(x);
+				if (static_cast<SizeType>(x) != i) {
+					VectorWithOffsetType_& v0 = this->tvNonConst(i);
+					v0 =  this->tv(x);
+				} else {
+					std::cerr<<"Ignoring self assignment P";
+					std::cerr<<i<<"=P"<<x<<"\n";
+				}
+
 				pvectors_.setAsDone(i);
 				continue;
 			}
