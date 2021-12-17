@@ -203,7 +203,7 @@ public:
 	void read(typename TargetingCommonType::IoInputType& io,
 	          PsimagLite::String prefix)
 	{
-		this->common().read(io, prefix);
+		this->common().readGSandNGSTs(io, prefix, "Expression");
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,

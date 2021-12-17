@@ -138,7 +138,7 @@ public:
 		if (xi <= 0)
 			err("TimeSerializer:: n. of vectors must be positive\n");
 		targetVectors_.clear();
-		for (SizeType i = 0; i < targetVectors_.size(); ++i) {
+		for (int i = 0; i < xi; ++i) {
 			VectorType* v = new VectorType();
 			s = prefix + "targetVector"+ttos(i);
 			v->read(io, s);
