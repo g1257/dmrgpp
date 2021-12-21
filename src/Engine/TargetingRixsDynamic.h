@@ -273,12 +273,14 @@ public:
 		SizeType site = block1[0];
 
 		SizeType numberOfSites = this->lrs().super().block().size();
-		if (site!=0 && site!=numberOfSites-1)
+		bool weAreAtBorder = site!=0 && site!=numberOfSites-1;
+		if (!weAreAtBorder)
 			this->common().aoeNonConst().wftSome(site, 0, 6);
 
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			this->common().aoeNonConst().wftSome(site, 6, this->common().aoe().tvs());
+			if (!weAreAtBorder)
+				this->common().aoeNonConst().wftSome(site, 6, this->common().aoe().tvs());
 		} else {
 			// just to set the stage and currenttime: CHEBY and KRYLOVTIME
 			this->common().aoeNonConst().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
