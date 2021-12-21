@@ -189,6 +189,7 @@ public:
 			tstStruct2_->times()[i] = i*tau/(n - 1);
 
 		this->common().aoeNonConst().initTimeVectors(*tstStruct2_, ioIn);
+		setWeights();
 	}
 
 	~TargetingRixsDynamic()
