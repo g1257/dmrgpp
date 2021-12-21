@@ -161,7 +161,7 @@ public:
 	      tstStruct2_(nullptr),
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsDynamic"),
-	      gsWeight_(1.0),
+	      gsWeight_(tstStruct_.gsWeight()),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
 	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().aoe().energy()),
 	      applied_(false),
@@ -171,6 +171,8 @@ public:
 
 		if (!wft.isEnabled())
 			err("TargetingRixsDynamic needs wft\n");
+
+		setWeights();
 
 		if (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			return; // early exit here
@@ -189,7 +191,6 @@ public:
 			tstStruct2_->times()[i] = i*tau/(n - 1);
 
 		this->common().aoeNonConst().initTimeVectors(*tstStruct2_, ioIn);
-		setWeights();
 	}
 
 	~TargetingRixsDynamic()
