@@ -109,7 +109,7 @@ public:
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
 			if (isGlobalOperator(tmp)) {
-				nonLocal_.timeEvolve(tmp, siteSplit, ket, getCurrentCoO());
+				nonLocal_.timeEvolve(tmp, siteSplit, ket, aux_.currentCoO());
 				newVstr.push_back(tmp);
 				continue;
 			}
@@ -206,14 +206,7 @@ private:
 
 	bool siteCanBeApplied(SizeType site) const
 	{
-		const SizeType currentCoO = getCurrentCoO();
-		const SizeType linSize = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
-		const bool b1 = (site == 0 && currentCoO == 1 &&
-		                 aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
-		const bool b2 = (site == linSize - 1 && currentCoO == linSize - 2 &&
-		                 aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
-
-		return (b1 || b2 || site == currentCoO);
+		return (site == aux_.currentCoO());
 	}
 
 	void oneOperator(PsimagLite::String destKet,
@@ -253,17 +246,6 @@ private:
 		                                     splitSize,
 		                                     aux_.direction(),
 		                                     border);
-	}
-
-	SizeType getCurrentCoO() const
-	{
-		const LeftRightSuperType& lrs = aux_.pVectors().lrs();
-		const SizeType systemBlockSize = lrs.left().block().size();
-		assert(systemBlockSize > 0);
-		const int maxSystemSite = lrs.left().block()[systemBlockSize - 1];
-		return (aux_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? maxSystemSite
-		                                                                          : maxSystemSite + 1;
-
 	}
 
 	void finalMultReal()

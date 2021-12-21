@@ -176,7 +176,7 @@ public:
 			this->common().aoeNonConst().wftSome(site, 0, total);
 
 		assert(energies.size() > 0);
-		computePvectors(direction, energies[0]); // may alter the number of tvs
+		computePvectors(direction, energies[0], site); // may alter the number of tvs
 
 		computeAllWeights();
 		this->common().printNormsAndWeights(gsWeightActual_, weights_);
@@ -251,7 +251,7 @@ public:
 
 private:
 
-	void computePvectors(ProgramGlobals::DirectionEnum dir, RealType Eg)
+	void computePvectors(ProgramGlobals::DirectionEnum dir, RealType Eg, SizeType site)
 	{
 		if (allOrigPvectorsDone()) {
 			const SizeType tvs = this->common().aoe().tvs();
@@ -280,7 +280,7 @@ private:
 		CanonicalExpressionType canonicalExpression(opSpec_);
 		SizeType total = pvectors_.targets();
 
-		AuxForTargetingExpressionType aux(pvectors_, timeEvolve_, dir, Eg);
+		AuxForTargetingExpressionType aux(pvectors_, timeEvolve_, dir, Eg, site);
 		AlgebraType opEmpty(aux);
 		bool needsTrimming = false;
 		PsimagLite::String allpvectors;

@@ -33,11 +33,13 @@ public:
 	AuxForTargetingExpression(PvectorsType& pVectors,
 	                          GroupOfOneTimeEvolutionsType& timeEvolve,
 	                          ProgramGlobals::DirectionEnum dir,
-	                          RealType Eg)
+	                          RealType Eg,
+	                          SizeType currentCoo)
 	    : pVectors_(pVectors),
 	      timeEvolve_(timeEvolve),
 	      direction_(dir),
 	      Eg_(Eg),
+	      currentCoo_(currentCoo),
 	      pIndexOutput_(0)
 	{}
 
@@ -50,6 +52,8 @@ public:
 	ProgramGlobals::DirectionEnum direction() const { return direction_; }
 
 	const RealType& Eg() const { return Eg_; }
+
+	SizeType currentCoO() const { return currentCoo_; }
 
 	const SizeType pIndexOutput() const { return pIndexOutput_; }
 
@@ -84,6 +88,7 @@ private:
 	GroupOfOneTimeEvolutionsType& timeEvolve_;
 	ProgramGlobals::DirectionEnum direction_;
 	RealType Eg_;
+	SizeType currentCoo_;
 	SizeType pIndexOutput_;
 	mutable VectorVectorWithOffsetType tempVectors_;
 	mutable VectorStringType tempNames_;
