@@ -169,9 +169,11 @@ public:
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		assert(block1.size() == 1);
 		const SizeType site = block1[0];
+		const SizeType numberOfSites = this->common().aoe().model().superGeometry().numberOfSites();
 		const SizeType total = this->common().aoe().tvs();
 		assert(total <= pvectors_.targets());
-		this->common().aoeNonConst().wftSome(site, 0, total);
+		if (site != 0 && site + 1 != numberOfSites)
+			this->common().aoeNonConst().wftSome(site, 0, total);
 
 		assert(energies.size() > 0);
 		computePvectors(direction, energies[0]); // may alter the number of tvs
@@ -202,8 +204,6 @@ public:
 		// border trigger below
 
 		// avoid self-triggers:
-		assert(block1.size() > 0);
-		const SizeType numberOfSites = this->common().aoe().model().superGeometry().numberOfSites();
 		if (site == 0 || site == numberOfSites - 1) return;
 
 		if (site > 1 && site < numberOfSites - 2) return;
