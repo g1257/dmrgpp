@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  * We read from static tv[i] --> tv[i]
  *
  * the correction vectors are imag  --> tv[8]
- *                            real  --> tv[9]
+ *                     real  --> tv[9]
  *
  */
 
@@ -221,7 +221,7 @@ public:
 
 	RealType gsWeight() const
 	{
-		return gsWeight_;
+		return gsWeightActual_;
 	}
 
 	SizeType size() const
@@ -314,6 +314,7 @@ public:
 		if (site2 == numberOfSites) return;
 		BlockType block(1, site2);
 		evolve(energies, direction, block, block2, loopNumber);
+		setWeights();
 	}
 
 	void write(const VectorSizeType& block,
@@ -621,12 +622,10 @@ private:
 	                    const VectorSizeType& block1)
 	{
 		if (!applied_ && appliedFirst_) {
-			setWeights(8);
 			return;
 		}
 
 		if (!applied_) {
-			setWeights(6);
 			return;
 		}
 
@@ -637,7 +636,6 @@ private:
 			                         this->tv(7),
 			                         this->tvNonConst(8),
 			                         this->tvNonConst(9));
-			setWeights(10);
 			firstCall_ = false; // unused here but just in case
 			return;
 		}
@@ -661,7 +659,6 @@ private:
 		calcVectors(indices, Eg, direction, block1, !firstCall_, false);
 		calcVectors(indices2, Eg, direction, block1, !firstCall_, true);
 		firstCall_ = false;
-		setWeights(numberOfWeights);
 	}
 
 	void calcVectors(const VectorSizeType& indices,
@@ -713,14 +710,28 @@ private:
 		                                                  tstStruct_);
 	}
 
-	void setWeights(SizeType n)
+	void setWeights()
 	{
-		gsWeight_ = tstStruct_.gsWeight();
+		const SizeType n = this->numberOfTvs();
+		weight_.resize(n);
+		std::fill(weight_.begin(), weight_.end(), 0);
+		RealType sum = 0;
+		for (SizeType i = 0; i < n; ++i) {
+			RealType norma = norm(this->tv(i));
+			if (norma < 1e-6) continue;
+			weight_[i] = 1/norma;
+			sum += weight_[i];
+		}
 
-		RealType sum  = n;
-		weight_.resize(n, 1);
+		gsWeightActual_ = 1 - sum;
 
-		for (SizeType r=0;r<weight_.size();r++) weight_[r] = (1.0 - gsWeight_)/sum;
+		if (gsWeightActual_ >= gsWeight_) return; // <--- EARLY EXIT HERE
+
+		assert(sum > 1e-6);
+		RealType factor = (1 - gsWeight_)/sum;
+		for (SizeType i = 0; i < n; ++i)
+			weight_[i] *= factor;
+		gsWeightActual_ = gsWeight_;
 	}
 
 	TargetParamsType tstStruct_;
@@ -728,6 +739,7 @@ private:
 	InputValidatorType& ioIn_;
 	PsimagLite::ProgressIndicator progress_;
 	RealType gsWeight_;
+	RealType gsWeightActual_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
 	CorrectionVectorSkeletonType skeleton_;

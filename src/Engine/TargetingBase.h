@@ -410,7 +410,7 @@ protected:
 
 	const SizeType numberOfTvs() const
 	{
-		return commonTargeting_.aoe().numberOfTvs();
+		return commonTargeting_.aoe().tvs();
 	}
 
 private:
