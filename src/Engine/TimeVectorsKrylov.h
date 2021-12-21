@@ -178,11 +178,14 @@ public:
 			VectorWithOffsetType phiNew;
 			assert(targetVectors_[advance]);
 			if (targetVectors_[advance]->size() > 0) {
-				BaseType::wftHelper().wftOneVector(phiNew,
+				SizeType numberOfSites = lrs_.super().block().size();
+				if (extra.block[0]!=0 && extra.block[0]!=numberOfSites-1) {
+					BaseType::wftHelper().wftOneVector(phiNew,
 				                                   *targetVectors_[advance],
 				                                   extra.block[0]);
 
-				*targetVectors_[indices[0]] = phiNew;
+					*targetVectors_[indices[0]] = phiNew;
+				}
 			}
 		}
 

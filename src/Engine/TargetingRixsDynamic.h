@@ -272,7 +272,9 @@ public:
 
 		SizeType site = block1[0];
 
-		this->common().aoeNonConst().wftSome(site, 0, 6);
+		SizeType numberOfSites = this->lrs().super().block().size();
+		if (site!=0 && site!=numberOfSites-1)
+			this->common().aoeNonConst().wftSome(site, 0, 6);
 
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
@@ -298,6 +300,18 @@ public:
 		cocoon(site, direction);
 
 		this->common().printNormsAndWeights(gsWeight_, weight_);
+
+		//corner case
+		SizeType site2 = numberOfSites;
+
+		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
+			site2 = 0;
+		if (site == numberOfSites - 2 &&
+		        direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+			site2 = numberOfSites - 1;
+		if (site2 == numberOfSites) return;
+		BlockType block(1, site2);
+		evolve(energies, direction, block, block2, loopNumber);
 	}
 
 	void write(const VectorSizeType& block,
@@ -368,7 +382,7 @@ private:
 			applyOneOp(loopNumber,
 			           indexOfOperator,
 			           site,
-			           tmpV2,                            // phiNew
+			           tmpV2,                            // phi
 			           this->tv(2), // src1 apply op on Re|alpha(C)>
 			           direction);
 
@@ -573,7 +587,10 @@ private:
 		const ComplexOrRealType ii =
 		        this->common().rixsCocoon(direction,site,eightOrEleven,4,true);
 
-		const RealType time = this->common().aoe().timeVectors().time();
+		RealType time = 0.0;
+		if (tstStruct_.algorithm() != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
+			time = this->common().aoe().timeVectors().time();
+		}
 		std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
 		std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
 		std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
@@ -658,13 +675,13 @@ private:
 		const VectorWithOffsetType& v0 = this->tv(indices[0]);
 
 		this->common().aoeNonConst().calcTimeVectors(indices,
-		                                     Eg,
-		                                     v0,
-		                                     direction,
-		                                     allOperatorsApplied,
-		                                     wftOrAdvance, // wft and advance indices[0]
-		                                     block1,
-		                                     isLastCall);
+		                                             Eg,
+		                                             v0,
+		                                             direction,
+		                                             allOperatorsApplied,
+		                                             wftOrAdvance, // wft and advance indices[0]
+		                                             block1,
+		                                             isLastCall);
 	}
 
 	void applyOneOp(SizeType loopNumber,
