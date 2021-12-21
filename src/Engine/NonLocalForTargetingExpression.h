@@ -44,8 +44,14 @@ public:
 		if (siteSplit.hasSiteString)
 			err("Global operators cannot have a site\n");
 
+		SizeType firstIndex = aux_.pIndexOutput();
+		if (firstIndex >= aux_.pVectors().origPvectors())
+			err("Cannot set an NGST to a temporary vector\n");
+
+		OneTimeEvolutionType* oneTimeEvolution = aux_.timeEvolve().findThisEvolution(firstIndex);
+
 		const VectorWithOffsetType* srcVwo = &aux_.pVectors().getCurrentVectorConst(srcKet);
-		if (srcVwo->size() == 0) return false;
+		if (srcVwo->size() == 0 && !oneTimeEvolution) return false;
 
 		static const bool allOperatorsApplied = true;
 
@@ -60,15 +66,9 @@ public:
 		SizeType disposition = 0;
 		extractParamsFromName(tau, timeSteps, advanceEach, algo, chebyTransform, disposition, name);
 
-		SizeType firstIndex = aux_.pIndexOutput();
-		if (firstIndex >= aux_.pVectors().origPvectors())
-			err("Cannot set an NGST to a temporary vector\n");
-
 		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
 
 		auxPtr->pVectors().initTimeVectors(timeSteps, tau, algo, chebyTransform);
-
-		OneTimeEvolutionType* oneTimeEvolution = aux_.timeEvolve().findThisEvolution(firstIndex);
 
 		if (!oneTimeEvolution) {
 			oneTimeEvolution = new OneTimeEvolutionType(firstIndex,
