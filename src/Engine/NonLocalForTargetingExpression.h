@@ -114,10 +114,10 @@ private:
 	                        SizeType site,
 	                        RealType tau)
 	{
-		static const bool advanceOnlyAtBorder = 1;
+		static const bool advanceOnlyAtBorder = true;
 		const SizeType sites = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
-		const bool weAreAtBorder = (site == 1 || site == sites - 1);
-		const bool dontAdvance = (advanceOnlyAtBorder & !weAreAtBorder);
+		const bool weAreAtBorder = (site == 0 || site == sites - 1);
+		const bool dontAdvance = (advanceOnlyAtBorder && !weAreAtBorder);
 		bool timeHasAdvanced = false;
 		if (advanceEach > 0 &&
 		        oneTimeEvolution.timesWithoutAdvancement() >= advanceEach

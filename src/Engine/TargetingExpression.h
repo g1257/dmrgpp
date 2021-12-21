@@ -198,6 +198,25 @@ public:
 		};
 
 		this->common().cocoon(block1, direction, doBorderIfBorder, &testLambda); // in-situ
+
+		// border trigger below
+
+		// avoid self-triggers:
+		assert(block1.size() > 0);
+		const SizeType numberOfSites = this->common().aoe().model().superGeometry().numberOfSites();
+		if (site == 0 || site == numberOfSites - 1) return;
+
+		if (site > 1 && site < numberOfSites - 2) return;
+
+		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+			if (site == 1) return;
+		} else {
+			if (site == numberOfSites - 2) return;
+		}
+
+		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
+		BlockType block(1, x);
+		evolve(energies, direction, block, block, 0);
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
