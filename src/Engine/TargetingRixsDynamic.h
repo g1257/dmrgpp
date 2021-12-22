@@ -172,8 +172,6 @@ public:
 		if (!wft.isEnabled())
 			err("TargetingRixsDynamic needs wft\n");
 
-		setWeights();
-
 		if (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			return; // early exit here
 		}
@@ -338,6 +336,8 @@ public:
 
 		for (SizeType site = 0; site < 6; ++site)
 			this->tvNonConst(site) = ts.vector(site);
+
+		setWeights();
 	}
 
 private:
