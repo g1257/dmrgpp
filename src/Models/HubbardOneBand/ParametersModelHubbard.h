@@ -117,14 +117,18 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		}
 
 		VectorStringType tmp = readOldT(io, nsites);
+		PsimagLite::String tmp2;
 
-//		try {
-//			io.readline(onSiteHadd, "OnSiteHamiltonianAdd=");
-//		} catch (std::exception&) {}
+		try {
+			io.readline(tmp2, "AddOnSiteHamiltonian=");
+			onSiteHadd.resize(nsites);
+			stringToVectorOfStrings(onSiteHadd, tmp2);
+		} catch (std::exception&) {}
 
-		if (tmp.size() > 0) {
-//			if (potentialT.size() > 0)
-//				err("PotentialT: You cannot give both legacy and standard entries\n");
+		if (tmp2 != "") {
+			if (tmp.size() > 0)
+				err("AddOnSiteHamiltonian: You cannot give both legacy and standard entries\n");
+		} else {
 			onSiteHadd.swap(tmp);
 		}
 	}
@@ -186,6 +190,86 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		}
 
 		return potentialTv;
+	}
+
+	void stringToVectorOfStrings(VectorStringType& vec, PsimagLite::String str)
+	{
+		if (str[0] == '[') {
+			stringToVectorOfStringsCommaMode(vec, str);
+		} else {
+			stringToVectorOfStringsPlusMode(vec, str);
+		}
+	}
+
+	void stringToVectorOfStringsPlusMode(VectorStringType& vec, PsimagLite::String str)
+	{
+		str = killSpaces(str);
+
+		// break on plus
+		const SizeType nsites = vec.size();
+		VectorStringType tokens;
+		PsimagLite::split(tokens, str, "+");
+		const SizeType n = tokens.size();
+		for (SizeType i = 0; i < n; ++i) {
+			std::pair<PsimagLite::String, SizeType> oneSummand = getSiteAndContent(tokens[i]);
+			const SizeType site = oneSummand.second;
+			if (site >= nsites)
+				err("You provided a site " + ttos(site) + " > " + ttos(nsites) + "\n");
+			vec[site] = oneSummand.first;
+		}
+	}
+
+	std::pair<PsimagLite::String, SizeType> getSiteAndContent(PsimagLite::String str)
+	{
+		const SizeType n = str.length();
+		SizeType status = 0; // 0 = closed, 1 = open
+		SizeType site = 0;
+		bool foundSite = false;
+		PsimagLite::String buffer;
+		PsimagLite::String content;
+		for (SizeType i = 0; i < n; ++i) {
+			const char c = str[i];
+			if (c == '[') {
+				if (status == 1)
+					err("Nested brakets found\n");
+				status = 1; // open
+				continue;
+			} else if (c == ']') {
+				if (status != 1)
+					err("Closing braket without opening one\n");
+				site = PsimagLite::atoi(buffer);
+				buffer = "";
+				foundSite = true;
+				status = 0; // closing
+				continue;
+			}
+
+			if (status == 1) buffer += c;
+			else content += c;
+		}
+
+		if (!foundSite)
+			err("A term for AddOnSiteHamiltonian was given without a site\n");
+
+		return std::pair<PsimagLite::String, SizeType>(content, site);
+	}
+
+	void stringToVectorOfStringsCommaMode(VectorStringType& vec, PsimagLite::String str)
+	{
+		const SizeType last = str.length() - 1;
+		if (str.length() < 3 || str[0] != '[' || str[last] != ']')
+			err("Expected [...] in comma mode\n");
+
+		str = str.substr(1, str.length() - 2); // remove [ and ]
+
+		// break on ,
+		const SizeType nsites = vec.size();
+		VectorStringType tokens;
+		PsimagLite::split(tokens, str, ",");
+		const SizeType n = tokens.size();
+		if (n != nsites)
+			err("Expected " + ttos(nsites) + " entries but got " + ttos(n) + "\n");
+		vec.swap(tokens);
 	}
 
 	typename PsimagLite::Vector<RealType>::Type hubbardU;

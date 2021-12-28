@@ -213,6 +213,7 @@ public:
 		knownLabels_.push_back("CVnForFraction");
 		knownLabels_.push_back("AnisotropyD");
 		knownLabels_.push_back("FindSymmetrySector");
+		knownLabels_.push_back("AddOnSiteHamiltonian");
 
 		for (SizeType i = 0; i < 10; ++i)
 			knownLabels_.push_back("Term" + ttos(i));
@@ -278,6 +279,7 @@ public:
 		str += "integer CVnForFraction;\n";
 		str += "real AnisotropyD;\n";
 		str += "string FindSymmetrySector;\n";
+		str += "string AddOnSiteHamiltonian;\n";
 
 		return str;
 	}

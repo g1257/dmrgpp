@@ -457,11 +457,13 @@ protected:
 			if (modelParameters_.onSiteHadd.size() != ModelBaseType::superGeometry().numberOfSites())
 				continue;
 
+			const PsimagLite::String hOnSite = modelParameters_.onSiteHadd[site];
+			if (hOnSite == "") continue;
+
 			OperatorSpecType opSpec(*this);
 			CanonicalExpressionType canonicalExpression(opSpec);
 			OperatorType hOft;
 			OperatorType opEmpty;
-			const PsimagLite::String hOnSite = modelParameters_.onSiteHadd[site];
 			PsimagLite::String expression = CanonicalExpressionType::replaceAll(hOnSite,
 			                                                                    "%t",
 			                                                                    time).second;
