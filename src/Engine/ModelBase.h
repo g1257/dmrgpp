@@ -772,6 +772,7 @@ protected:
 		PsimagLite::String expression = CanonicalExpressionType::replaceAll(hOnSite,
 		                                                                    "%t",
 		                                                                    time).second;
+		expression = ProgramGlobals::killSpaces(expression);
 		int bogus = 0;
 		canonicalExpression(hOft, expression, opEmpty, bogus);
 		hmatrix += hOft.getStorage().getCRS();

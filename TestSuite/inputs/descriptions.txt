@@ -181,6 +181,7 @@ the observe code.
 Figure* (if any): Figure 1
 Page* where more or less this feature is used: Page 4
 [* Refers to published version.]
+501) AddOnSiteHamiltonian= with %t example
 #550 -- 599 AKLT
 550) AKLT
 600) Test on 6-site chain with U=10, standard Hubbard model.
