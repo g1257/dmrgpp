@@ -1,0 +1,41 @@
+##Ainur1.0
+
+TotalNumberOfSites=8;
+
+NumberOfTerms=1;
+
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+dir0:Connectors=[1.0];
+
+hubbardU=[0,...];
+potentialV=[0,...];
+
+string mycosine = (c:*:0.8:%t);
+AddOnSiteHamiltonian="[zero,-0.77*\mycosine*nup, -0.91*\mycosine*nup, -0.144*\mycosine*nup, -0.144*\mycosine*nup, -0.91*\mycosine*nup, -0.77*\mycosine*nup, zero]";
+#=3, =2, =1, =0]";
+
+Model="HubbardOneBand";
+SolverOptions="TimeStepTargeting";
+Version="v6.03";
+OutputFile="data502";
+InfiniteLoopKeptStates=200;
+FiniteLoops=[[3, 300, 0], 
+	[-6, 300, 0], [6,300, 0]];
+
+RepeatFiniteLoopsTimes=47;
+RepeatFiniteLoopsFrom=1;
+
+TargetElectronsUp=4;
+TargetElectronsDown=0;
+GsWeight=0.1;
+TSPTau=0.1;
+TSPTimeSteps=4;
+TSPAdvanceEach=6;
+TSPAlgorithm="RungeKutta";
+TSPSites=[5];
+TSPLoops=[4];
+TSPProductOrSum="product";
+
+string TSPOp0:TSPOperator="expression";
+string TSPOp0:OperatorExpression="identity";
