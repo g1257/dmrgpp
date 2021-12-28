@@ -173,8 +173,10 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const BlockType& block,
-	                                RealType) const
+	                                RealType time) const
 	{
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		assert(block.size() == 1);
 		const SizeType actualSite = block[0];
 		SiteType kindOfSite = determineKindOfSiteFromSite(actualSite);

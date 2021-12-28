@@ -323,6 +323,9 @@ public:
 	                                const BlockType& block,
 	                                RealType time) const
 	{
+
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		SizeType n=block.size();
 
 		for (SizeType i = 0; i < n; ++i) {

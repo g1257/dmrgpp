@@ -169,8 +169,10 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const BlockType& block,
-	                                RealType) const
+	                                RealType time) const
 	{
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		SizeType phonons = (oStruncActive_ || U_.rows() > 0) ? modelParameters_.oStruncPhonons
 		                                                     : modelParameters_.numberphonons;
 		if (phonons == 0)

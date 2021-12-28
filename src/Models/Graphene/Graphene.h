@@ -166,6 +166,8 @@ public:
 	                                const BlockType& block,
 	                                RealType time) const
 	{
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		SizeType n = block.size();
 		assert(n == 1);
 		for (SizeType i = 0; i < n; ++i) {

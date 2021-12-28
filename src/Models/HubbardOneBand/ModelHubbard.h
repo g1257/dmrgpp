@@ -402,6 +402,8 @@ protected:
 	                                const BlockType& block,
 	                                RealType time)  const
 	{
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		SizeType n=block.size();
 		SparseMatrixType tmpMatrix,niup,nidown,Szsquare,Szi,Splusi,Sminusi;
 		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
@@ -451,8 +453,6 @@ protected:
 				hmatrix += tmp*Sminusi;
 				hmatrix += tmp*Splusi;
 			}
-
-			ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 		}
 	}
 

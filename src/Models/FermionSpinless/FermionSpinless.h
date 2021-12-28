@@ -164,6 +164,8 @@ public:
 	                                const BlockType& block,
 	                                RealType time)  const
 	{
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		SizeType n = block.size();
 		if (n != 1)
 			err("addDiagonalsInNaturalBasis: block.size() != 1\n");

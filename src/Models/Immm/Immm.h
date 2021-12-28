@@ -414,8 +414,10 @@ private:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const BlockType& block,
-	                                RealType) const
+	                                RealType time) const
 	{
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		// on-site potential:
 		SizeType site = block[0];
 		SizeType linSize = superGeometry_.numberOfSites();

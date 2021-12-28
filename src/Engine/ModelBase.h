@@ -754,8 +754,10 @@ protected:
 	                                 const BlockType& block,
 	                                 RealType time) const
 	{
+		if (onSiteHadd_.size() == 0) return;
+
 		if (onSiteHadd_.size() != superGeometry().numberOfSites())
-			return;
+			err("additionalOnSiteHamiltonian: wrong number of entries\n");
 
 		assert(block.size() == 1);
 		const SizeType site = block[0];

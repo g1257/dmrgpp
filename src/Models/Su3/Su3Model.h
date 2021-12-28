@@ -167,8 +167,10 @@ public:
 	// m*T3(i)*T3(i) + m*T8(i)*T8(i)
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType& block,
-	                                RealType) const
+	                                RealType time) const
 	{
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		assert(block.size() == 1);
 
 		MatrixType m3;

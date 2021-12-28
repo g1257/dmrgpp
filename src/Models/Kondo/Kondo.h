@@ -89,8 +89,10 @@ public:
 	// depend on it
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const VectorSizeType& block,
-	                                RealType)  const
+	                                RealType time)  const
 	{
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		SizeType n = block.size();
 		assert(n == 1);
 		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();

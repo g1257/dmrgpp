@@ -376,8 +376,10 @@ private:
 
     void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
                                     const BlockType& block,
-                                    RealType) const
+                                    RealType time) const
     {
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
         SizeType n=block.size();
         SizeType linSize = superGeometry_.numberOfSites();
         if (modelParameters_.magneticFieldX.size() != linSize)

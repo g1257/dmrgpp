@@ -174,8 +174,10 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType& block,
-	                                RealType) const
+	                                RealType time) const
 	{
+		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
+
 		assert(block.size() == 1);
 		//		SizeType site = block[0]; // lambda1 and lambda2 have no site depedence
 		MatrixType tmp = sDotL_;

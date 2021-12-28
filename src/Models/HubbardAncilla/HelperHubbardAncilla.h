@@ -66,7 +66,7 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
 	                                const BlockType& block,
-	                                RealType) const
+	                                RealType time) const
 	{
 		SizeType n=block.size();
 		HilbertBasisType natBasis;
