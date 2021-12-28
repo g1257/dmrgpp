@@ -784,11 +784,15 @@ private:
 	{
 		PsimagLite::String tmp2;
 
+		bool hasOnSite = false;
 		try {
 			io.readline(tmp2, "AddOnSiteHamiltonian=");
-			onSiteHadd_.resize(superGeometry().numberOfSites());
-			stringToVectorOfStrings(onSiteHadd_, tmp2);
+			hasOnSite = true;
 		} catch (std::exception&) {}
+
+		if (!hasOnSite) return;
+		onSiteHadd_.resize(superGeometry().numberOfSites());
+		stringToVectorOfStrings(onSiteHadd_, tmp2);
 	}
 
 	static void stringToVectorOfStrings(VectorStringType& vec, PsimagLite::String str)
