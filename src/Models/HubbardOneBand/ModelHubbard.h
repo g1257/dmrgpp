@@ -88,8 +88,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
 #include "ProgramGlobals.h"
-#include "CanonicalExpression.h"
-#include "OperatorSpec.h"
 
 namespace Dmrg {
 template<typename ModelBaseType> class ExtendedHubbard1Orb;
@@ -132,8 +130,6 @@ public:
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef OperatorSpec<ThisType, OperatorType> OperatorSpecType;
-	typedef PsimagLite::CanonicalExpression<OperatorSpecType> CanonicalExpressionType;
 
 	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
 		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
@@ -454,22 +450,10 @@ protected:
 				hmatrix += tmp*Splusi;
 			}
 
-			if (modelParameters_.onSiteHadd.size() != ModelBaseType::superGeometry().numberOfSites())
-				continue;
-
-			const PsimagLite::String hOnSite = modelParameters_.onSiteHadd[site];
-			if (hOnSite == "") continue;
-
-			OperatorSpecType opSpec(*this);
-			CanonicalExpressionType canonicalExpression(opSpec);
-			OperatorType hOft;
-			OperatorType opEmpty;
-			PsimagLite::String expression = CanonicalExpressionType::replaceAll(hOnSite,
-			                                                                    "%t",
-			                                                                    time).second;
-			int bogus = 0;
-			canonicalExpression(hOft, expression, opEmpty, bogus);
-			hmatrix += hOft.getStorage().getCRS();
+			ModelBaseType::additionalOnSiteHamiltonian(hmatrix,
+			                                           block,
+			                                           time,
+			                                           modelParameters_.onSiteHadd);
 		}
 	}
 

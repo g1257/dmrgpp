@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2018, UT-Battelle, LLC
+Copyright (c) 2009-2018-2021, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -90,6 +90,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Braket.h"
 #include "SuperOpHelperBase.h"
 #include "OutputFileOrNot.h"
+#include "CanonicalExpression.h"
+#include "OperatorSpec.h"
 
 namespace Dmrg {
 
@@ -161,6 +163,8 @@ public:
 	typedef SuperOpHelperBase<SuperGeometryType, ParametersType> SuperOpHelperBaseType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename ModelLinksType::LabelType LabelType;
+	typedef OperatorSpec<ThisType, OperatorType> OperatorSpecType;
+	typedef PsimagLite::CanonicalExpression<OperatorSpecType> CanonicalExpressionType;
 
 	ModelBase(const ParametersType& params,
 	          const SuperGeometryType& superGeometry,
@@ -234,7 +238,6 @@ public:
 	*/
 	virtual void write(PsimagLite::String,
 	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
-
 
 	/* PSIDOC addDiagonalsInNaturalBasis
 	PSIDOCCOPY $FirstProtoBelow
@@ -732,6 +735,34 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 		basis = basis2;
 		qns = qns2;
+	}
+
+protected:
+
+	void additionalOnSiteHamiltonian(SparseMatrixType& hmatrix,
+	                                 const BlockType& block,
+	                                 RealType time,
+	                                 const VectorStringType& onSiteHadd) const
+	{
+		if (onSiteHadd.size() != superGeometry().numberOfSites())
+			return;
+
+		assert(block.size() == 1);
+		const SizeType site = block[0];
+		assert(onSiteHadd.size() > site);
+		const PsimagLite::String hOnSite = onSiteHadd[site];
+		if (hOnSite == "") return;
+
+		OperatorSpecType opSpec(*this);
+		CanonicalExpressionType canonicalExpression(opSpec);
+		OperatorType hOft;
+		OperatorType opEmpty;
+		PsimagLite::String expression = CanonicalExpressionType::replaceAll(hOnSite,
+		                                                                    "%t",
+		                                                                    time).second;
+		int bogus = 0;
+		canonicalExpression(hOft, expression, opEmpty, bogus);
+		hmatrix += hOft.getStorage().getCRS();
 	}
 
 private:

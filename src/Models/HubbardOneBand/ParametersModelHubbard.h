@@ -214,7 +214,7 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 			std::pair<PsimagLite::String, SizeType> oneSummand = getSiteAndContent(tokens[i]);
 			const SizeType site = oneSummand.second;
 			if (site >= nsites)
-				err("You provided a site " + ttos(site) + " > " + ttos(nsites) + "\n");
+				err("You provided a site " + ttos(site) + " >= " + ttos(nsites) + "\n");
 			vec[site] = oneSummand.first;
 		}
 	}
