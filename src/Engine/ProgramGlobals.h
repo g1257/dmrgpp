@@ -216,6 +216,15 @@ struct ProgramGlobals {
 		return "UNKNOWN_DIRECTION_ENUM";
 	}
 
+	static PsimagLite::String killSpaces(PsimagLite::String str)
+	{
+		PsimagLite::String buffer;
+		const SizeType n = str.length();
+		for (SizeType i = 0; i < n; ++i)
+			if (str[i] != ' ') buffer += str[i];
+		return buffer;
+	}
+
 	static PsimagLite::String SYSTEM_STACK_STRING;
 	static PsimagLite::String ENVIRON_STACK_STRING;
 }; // ProgramGlobals

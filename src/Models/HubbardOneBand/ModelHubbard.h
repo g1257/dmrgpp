@@ -145,6 +145,8 @@ public:
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
 	      extension_(extension)
 	{
+		ModelBaseType::onSiteHLegacyFix(modelParameters_.onSiteHaddLegacy);
+
 		SizeType usize = modelParameters_.hubbardU.size();
 		SizeType vsize = modelParameters_.potentialV.size();
 		SizeType totalSites = geometry.numberOfSites();
@@ -450,10 +452,7 @@ protected:
 				hmatrix += tmp*Splusi;
 			}
 
-			ModelBaseType::additionalOnSiteHamiltonian(hmatrix,
-			                                           block,
-			                                           time,
-			                                           modelParameters_.onSiteHadd);
+			ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 		}
 	}
 

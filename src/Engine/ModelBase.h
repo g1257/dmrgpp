@@ -178,6 +178,7 @@ public:
 		labeledOperators_.setModelName(params.model);
 		modelLinks_.clear();
 		qns_.clear();
+		readOnSiteH(io);
 	}
 
 	void postCtor()
@@ -739,18 +740,27 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 protected:
 
+	void onSiteHLegacyFix(const VectorStringType& legacyPotentialT)
+	{
+		if (onSiteHadd_.size() > 0) {
+			if (legacyPotentialT.size() > 0)
+				err("AddOnSiteHamiltonian: You cannot give both legacy and standard entries\n");
+		} else {
+			onSiteHadd_ = legacyPotentialT;
+		}
+	}
+
 	void additionalOnSiteHamiltonian(SparseMatrixType& hmatrix,
 	                                 const BlockType& block,
-	                                 RealType time,
-	                                 const VectorStringType& onSiteHadd) const
+	                                 RealType time) const
 	{
-		if (onSiteHadd.size() != superGeometry().numberOfSites())
+		if (onSiteHadd_.size() != superGeometry().numberOfSites())
 			return;
 
 		assert(block.size() == 1);
 		const SizeType site = block[0];
-		assert(onSiteHadd.size() > site);
-		const PsimagLite::String hOnSite = onSiteHadd[site];
+		assert(onSiteHadd_.size() > site);
+		const PsimagLite::String hOnSite = onSiteHadd_[site];
 		if (hOnSite == "") return;
 
 		OperatorSpecType opSpec(*this);
@@ -766,6 +776,97 @@ protected:
 	}
 
 private:
+
+	void readOnSiteH(InputValidatorType& io)
+	{
+		PsimagLite::String tmp2;
+
+		try {
+			io.readline(tmp2, "AddOnSiteHamiltonian=");
+			onSiteHadd_.resize(superGeometry().numberOfSites());
+			stringToVectorOfStrings(onSiteHadd_, tmp2);
+		} catch (std::exception&) {}
+	}
+
+	static void stringToVectorOfStrings(VectorStringType& vec, PsimagLite::String str)
+	{
+		if (str[0] == '[') {
+			stringToVectorOfStringsCommaMode(vec, str);
+		} else {
+			stringToVectorOfStringsPlusMode(vec, str);
+		}
+	}
+
+	static void stringToVectorOfStringsPlusMode(VectorStringType& vec, PsimagLite::String str)
+	{
+		str = ProgramGlobals::killSpaces(str);
+
+		// break on plus
+		const SizeType nsites = vec.size();
+		VectorStringType tokens;
+		PsimagLite::split(tokens, str, "+");
+		const SizeType n = tokens.size();
+		for (SizeType i = 0; i < n; ++i) {
+			std::pair<PsimagLite::String, SizeType> oneSummand = getSiteAndContent(tokens[i]);
+			const SizeType site = oneSummand.second;
+			if (site >= nsites)
+				err("You provided a site " + ttos(site) + " >= " + ttos(nsites) + "\n");
+			vec[site] = oneSummand.first;
+		}
+	}
+
+	static std::pair<PsimagLite::String, SizeType> getSiteAndContent(PsimagLite::String str)
+	{
+		const SizeType n = str.length();
+		SizeType status = 0; // 0 = closed, 1 = open
+		SizeType site = 0;
+		bool foundSite = false;
+		PsimagLite::String buffer;
+		PsimagLite::String content;
+		for (SizeType i = 0; i < n; ++i) {
+			const char c = str[i];
+			if (c == '[') {
+				if (status == 1)
+					err("Nested brakets found\n");
+				status = 1; // open
+				continue;
+			} else if (c == ']') {
+				if (status != 1)
+					err("Closing braket without opening one\n");
+				site = PsimagLite::atoi(buffer);
+				buffer = "";
+				foundSite = true;
+				status = 0; // closing
+				continue;
+			}
+
+			if (status == 1) buffer += c;
+			else content += c;
+		}
+
+		if (!foundSite)
+			err("A term for AddOnSiteHamiltonian was given without a site\n");
+
+		return std::pair<PsimagLite::String, SizeType>(content, site);
+	}
+
+	static void stringToVectorOfStringsCommaMode(VectorStringType& vec, PsimagLite::String str)
+	{
+		const SizeType last = str.length() - 1;
+		if (str.length() < 3 || str[0] != '[' || str[last] != ']')
+			err("Expected [...] in comma mode\n");
+
+		str = str.substr(1, str.length() - 2); // remove [ and ]
+
+		// break on ,
+		const SizeType nsites = vec.size();
+		VectorStringType tokens;
+		PsimagLite::split(tokens, str, ",");
+		const SizeType n = tokens.size();
+		if (n != nsites)
+			err("Expected " + ttos(nsites) + " entries but got " + ttos(n) + "\n");
+		vec.swap(tokens);
+	}
 
 	static void invalidateIfNeeded(OperatorType& op, SizeType site, PsimagLite::String what)
 	{
@@ -881,6 +982,7 @@ private:
 	ModelCommonType modelCommon_;
 	TargetQuantumElectronsType targetQuantum_;
 	InputValidatorType_& ioIn_;
+	VectorStringType onSiteHadd_;
 	AtomKindBaseType* atomKind_;
 	mutable SuperOpHelperBaseType* superOpHelper_;
 	static LabeledOperatorsType labeledOperators_;
