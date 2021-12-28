@@ -539,6 +539,7 @@ public:
 				}
 
 				ainur_ = new Ainur(inputWriteable.inputCheck().import() + data_);
+				ainur_->expandMacrosRecursively();
 				ainur_->setMap(mapStrStr_);
 			}
 		}

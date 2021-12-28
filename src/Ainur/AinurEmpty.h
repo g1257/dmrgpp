@@ -38,6 +38,12 @@ public:
 		errorMessage();
 	}
 
+	template<typename SomeMapType>
+	void setMap(SomeMapType&) const
+	{
+		errorMessage();
+	}
+
 private:
 
 	void errorMessage() const

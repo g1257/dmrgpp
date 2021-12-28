@@ -90,6 +90,11 @@ public:
 		state_.setMap(map);
 	}
 
+	void expandMacrosRecursively()
+	{
+		state_.expandMacrosRecursively();
+	}
+
 private:
 
 	static bool allEmpty(IteratorType first,IteratorType last)

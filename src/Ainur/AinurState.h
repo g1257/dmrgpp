@@ -150,13 +150,24 @@ public:
 		used_[x]++;
 	}
 
+	void expandMacrosRecursively()
+	{
+		static const SizeType avoidInfMax = 100;
+		SizeType avoidInfCounter = 0;
+		while (expandMacros()) {
+			if (avoidInfCounter++ > avoidInfMax) {
+				err("Recursion limit of " + ttos(avoidInfMax) + " exceeded.\n");
+			}
+		}
+	}
+
 	template<typename SomeMapType>
 	void setMap(SomeMapType& map) const
 	{
 		const SizeType n = keys_.size();
 		assert(n == values_.size());
 		for (SizeType i = 0; i < n; ++i)
-			map[keys_[i]] = values_[i];
+			if (used_[i]) map[keys_[i]] = values_[i];
 	}
 
 	static bool verbose() { return false; }
@@ -284,6 +295,81 @@ private:
 	static bool isEmptyValue(String s)
 	{
 		return (s.length() == 0 || s == ZERO_CHAR_STRING_);
+	}
+
+	bool expandMacros()
+	{
+		const SizeType n = keys_.size();
+		assert(n == values_.size());
+		bool atLeastOneValueHasMacro = false;
+		for (SizeType i = 0; i < n; ++i) {
+			if (!used_[i]) continue;
+			std::pair<bool, PsimagLite::String> macro = expandOneValue(values_[i]);
+
+			if (!macro.first) continue;
+
+			values_[i] = macro.second;
+			atLeastOneValueHasMacro = true;
+		}
+
+		return atLeastOneValueHasMacro;
+	}
+
+	// \[a-zA-Z]+
+	std::pair<bool, PsimagLite::String> expandOneValue(PsimagLite::String value) const
+	{
+		const SizeType n = value.length();
+		PsimagLite::String macroName;
+		PsimagLite::String retString;
+		bool hasAtLeastOneMacro = false;
+		SizeType status = 0; // 0 = outsite a macro, 1 = inside a macro
+		for (SizeType i = 0; i < n; ++i) {
+			const char c = value[i];
+			if (c == '\\') {
+				status = 1;
+				continue;
+			}
+
+			if (status == 0) {
+				retString += c;
+				continue;
+			}
+
+			if (isValidCharForMacroName(c)) {
+				macroName += c;
+			} else {
+
+				int x = storageIndexByName(macroName);
+				if (x < 0) err("No macro named " + macroName + "\n");
+
+				assert(static_cast<SizeType>(x) < values_.size());
+				retString += unquote(values_[x]) + c;
+
+				macroName = "";
+				hasAtLeastOneMacro = true;
+				status = 0;
+			}
+		}
+
+		return std::pair<bool, PsimagLite::String>(hasAtLeastOneMacro, unquote(retString));
+	}
+
+	static bool isValidCharForMacroName(char c)
+	{
+		const bool b1 = (c > 60 && c < 123);
+		const bool b2 = (c > 64 && c < 91);
+		const bool b3 = (c > 47 && c < 58);
+
+		return (b1 || b2 || b3 || c == '_');
+	}
+
+	static PsimagLite::String unquote(PsimagLite::String str)
+	{
+		if (str.length() == 0) return str;
+		if (str[0] == '"') str = str.substr(1, str.length() - 1);
+		if (str.length() == 0) return str;
+		if (str[str.length() - 1] == '"') str = str.substr(0, str.length() - 1);
+		return str;
 	}
 
 	static String ZERO_CHAR_STRING_;
