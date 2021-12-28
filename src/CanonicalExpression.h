@@ -27,7 +27,7 @@ public:
 
 	void plusBackward(T& t2) const
 	{
-		 t2 += t_;
+		t2 += t_;
 	}
 
 	void multiply(const AssignAndDestroy& t2)
@@ -66,7 +66,7 @@ class CanonicalExpression {
 	typedef typename ItemSpecType::AuxiliaryType AuxiliaryType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef Vector<String>::Type VectorStringType;
-	typedef PsimagLite::QuasiCanonical<ComplexOrRealType> QuasiCanonicalType;
+	typedef QuasiCanonical<ComplexOrRealType> QuasiCanonicalType;
 
 public:
 
@@ -102,6 +102,39 @@ public:
 		}
 
 		return (ItemSpecType::isEmpty(result)) ? false : true;
+	}
+
+	template<typename T>
+	static std::pair<bool, String> replaceAll(String str,
+	                                          String label,
+	                                          T value)
+	{
+		std::pair<bool, String> boolString(true, str);
+
+		bool retFlag = false;
+		while (boolString.first) {
+			boolString = replaceOne(boolString.second, label, value);
+			retFlag |= boolString.first;
+		};
+
+		return std::pair<bool, String>(retFlag, boolString.second);
+	}
+
+	template<typename T>
+	static std::pair<bool, String> replaceOne(String str,
+	                                          String label,
+	                                          T value)
+	{
+		// find one occurrence
+		size_t x = str.find(label);
+		if (x == String::npos) return std::pair<bool, String>(false, str);
+
+		String ret = (x == 0) ? "" : str.substr(0, x);
+		ret += ttos(value);
+
+		ret += str.substr(x + label.length(), str.length() - x - label.length());
+
+		return std::pair<bool, String>(true, ret);
 	}
 
 private:

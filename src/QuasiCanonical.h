@@ -2,7 +2,7 @@
 #define QUASICANONICAL_H
 #include "Vector.h"
 #include "PsimagLite.h"
-#include "CmplxOrReal.h"
+#include "ExpressionCalculator.h"
 
 namespace PsimagLite {
 
@@ -67,8 +67,9 @@ public:
 
 		const SizeType nscalars = ats_.size();
 		cachedValues_.resize(nscalars);
-		for (SizeType i = 0; i < nscalars; ++i)
-			cachedValues_[i] = strToRealOrImag(ats_[i]);
+		for (SizeType i = 0; i < nscalars; ++i) {
+			cachedValues_[i] = simpleArithmetics(ats_[i]);
+		}
 	}
 
 	SizeType numberOfTerms() const { return terms_.size(); }
@@ -87,7 +88,7 @@ public:
 			return -1;
 
 		String snumber = str.substr(1, len - 2);
-		SizeType number = PsimagLite::atoi(snumber);
+		SizeType number = atoi(snumber);
 		if (number >= ats_.size())
 			return -1;
 		return number;
@@ -139,24 +140,20 @@ public:
 
 private:
 
-	static ComplexOrRealType pureRealOrPureImag(String t)
+	ComplexOrRealType simpleArithmetics(String str)
 	{
-		static const bool isComplex = IsComplexNumber<ComplexOrRealType>::True;
-		CpmlxOrReal<RealType, (isComplex) ? 1 : 0> cmplxOrReal(t);
-		return cmplxOrReal.value();
-	}
+		typedef ExpressionCalculator<ComplexOrRealType> ExpressionCalculatorType;
+		typedef PrepassData<ComplexOrRealType> PrepassDataType;
 
-	static ComplexOrRealType strToRealOrImag(String content)
-	{
-		VectorStringType terms;
-		split(terms, content, "+");
-		ComplexOrRealType sum = 0;
-		const SizeType n = terms.size();
-		for (SizeType i = 0; i < n; ++i) {
-			sum += pureRealOrPureImag(terms[i]);
-		}
+		typename ExpressionCalculatorType::VectorStringType ve;
+		split(ve, str, ":");
 
-		return sum;
+		PrepassDataType pd("pi", {M_PI});
+
+		ExpressionPrepass<PrepassDataType>::prepass(ve, pd);
+
+		ExpressionCalculatorType ec(ve);
+		return ec();
 	}
 
 	String str_;

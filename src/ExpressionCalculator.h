@@ -9,8 +9,130 @@
 #include "Stack.h"
 #include "../loki/TypeTraits.h"
 #include <cmath>
+#include "CmplxOrReal.h"
 
 namespace PsimagLite {
+
+template<typename ComplexOrRealType, bool isComplex = IsComplexNumber<ComplexOrRealType>::True>
+class IsAnumberPossiblyComplex {};
+
+template<typename ComplexOrRealType>
+class IsAnumberPossiblyComplex<ComplexOrRealType, false> {
+
+public:
+
+	enum class ComplexParensOrI {PARENS, i}; // , AUTO
+
+	IsAnumberPossiblyComplex(String str, ComplexParensOrI = ComplexParensOrI::PARENS)
+	    : flag_(isAfloat(str)), value_(0)
+	{
+		if (flag_) value_ = PsimagLite::atof(str.c_str());
+	}
+
+	bool operator()() const { return flag_; }
+
+	ComplexOrRealType value() const { return value_; }
+
+private:
+
+	bool flag_;
+	ComplexOrRealType value_;
+};
+
+template<typename ComplexOrRealType>
+class IsAnumberPossiblyComplex<ComplexOrRealType, true> {
+
+public:
+
+	typedef typename Real<ComplexOrRealType>::Type RealType;
+	typedef Vector<String>::Type VectorStringType;
+
+	enum class ComplexParensOrI { PARENS, i}; // , AUTO
+
+	IsAnumberPossiblyComplex(String str, ComplexParensOrI mode = ComplexParensOrI::PARENS)
+	    : flag_(false), value_(0)
+	{
+		if (mode == ComplexParensOrI::PARENS) {
+			maybeComplexNumberWithParens(str);
+		} else {
+			value_ = strToRealOrImag(str);
+			flag_ = true;
+		}
+ 	}
+
+	bool operator()() const { return flag_; }
+
+	ComplexOrRealType value() const { return value_; }
+
+private:
+
+	void maybeComplexNumberWithParens(String str)
+	{
+		// (a, b) or (a,b)
+		SizeType l = str.length();
+		if (l < 5) {
+			seeIfItsAfloat(str);
+			return;
+		}
+
+		if (str[0] != '(') {
+			seeIfItsAfloat(str);
+			return;
+		}
+
+		String buffer;
+		String realPart;
+		String imagPart;
+		for (SizeType i = 1; i < l; ++i) {
+			if (str[i] == ',') {
+				realPart = buffer;
+				buffer = "";
+			} else if (str[i] == ')') {
+				imagPart = buffer;
+				buffer = "";
+			} else if (str[i] != ' ') {
+				buffer += str[i];
+			} else {
+				flag_ = false;
+				return;
+			}
+		}
+
+		flag_ = (isAfloat(realPart) && isAfloat(imagPart));
+		if (!flag_) return;
+		value_ = ComplexOrRealType(PsimagLite::atof(realPart), PsimagLite::atof(imagPart));
+	}
+
+	void seeIfItsAfloat(String str)
+	{
+		flag_ = isAfloat(str);
+		if (!flag_) return;
+		value_ = PsimagLite::atof(str);
+	}
+
+	static ComplexOrRealType pureRealOrPureImag(String t)
+	{
+		static const bool isComplex = IsComplexNumber<ComplexOrRealType>::True;
+		CpmlxOrReal<RealType, (isComplex) ? 1 : 0> cmplxOrReal(t);
+		return cmplxOrReal.value();
+	}
+
+	static ComplexOrRealType strToRealOrImag(String content)
+	{
+		VectorStringType terms;
+		split(terms, content, "+");
+		ComplexOrRealType sum = 0;
+		const SizeType n = terms.size();
+		for (SizeType i = 0; i < n; ++i) {
+			sum += pureRealOrPureImag(terms[i]);
+		}
+
+		return sum;
+	}
+
+	bool flag_;
+	ComplexOrRealType value_;
+};
 
 template<typename ComplexOrRealType>
 struct PrepassData {
