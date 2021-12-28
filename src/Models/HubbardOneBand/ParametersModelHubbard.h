@@ -80,6 +80,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PARAMETERSMODELHUBBARD_H
 #define PARAMETERSMODELHUBBARD_H
 #include "ParametersModelBase.h"
+#include "InputNg.h"
+#include "InputCheck.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters
@@ -87,8 +89,9 @@ template<typename RealType, typename QnType>
 struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef PsimagLite::InputNg<InputCheck>::Readable IoInputType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
-	template<typename IoInputType>
 	ParametersModelHubbard(IoInputType& io) : BaseType(io, false)
 	{
 		SizeType nsites = 0;
@@ -113,38 +116,17 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 			magneticX.clear();
 		}
 
-		try {
-			io.read(potentialT,"PotentialT");
-			std::cerr<<"Has PotentialT\n";
-		} catch (std::exception&) {}
+		VectorStringType tmp = readOldT(io, nsites);
 
-		bool hasT = (potentialT.size() > 0);
+//		try {
+//			io.readline(onSiteHadd, "OnSiteHamiltonianAdd=");
+//		} catch (std::exception&) {}
 
-		omega=0;
-		try {
-			io.readline(omega,"omega=");
-			if (!hasT) {
-				std::cerr<<"ParametersModelHubbard: ";
-				std::cerr<<"omega will be ignored as no PotentialT present\n";
-			}
-		} catch (std::exception&) {}
-
-		phase=0;
-		try {
-			io.readline(phase,"phase=");
-			if (!hasT) {
-				std::cerr<<"ParametersModelHubbard: ";
-				std::cerr<<"phase will be ignored as no PotentialT present\n";
-			}
-		} catch (std::exception&) {}
-	}
-
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
+		if (tmp.size() > 0) {
+//			if (potentialT.size() > 0)
+//				err("PotentialT: You cannot give both legacy and standard entries\n");
+			onSiteHadd.swap(tmp);
+		}
 	}
 
 	void write(PsimagLite::String label1,
@@ -159,25 +141,51 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		io.write(label + "/magneticX", magneticX);
 	}
 
-	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream &os,
-	                                const ParametersModelHubbard& parameters)
+	PsimagLite::String killSpaces(PsimagLite::String str)
 	{
-		os<<parameters.targetQuantum;
-		os<<"hubbardU\n";
-		os<<parameters.hubbardU;
-		os<<"potentialV\n";
-		os<<parameters.potentialV;
-		if (parameters.potentialT.size()==0) return os;
-		if (parameters.magneticX.size()>0)
-			os<<parameters.magneticX;
+		PsimagLite::String buffer;
+		const SizeType n = str.length();
+		for (SizeType i = 0; i < n; ++i)
+			if (str[i] != ' ') buffer += str[i];
+		return buffer;
+	}
 
-		// time-dependent stuff
-		os<<"potentialT\n";
-		os<<parameters.potentialT;
-		os<<"omega="<<parameters.omega<<"\n";
-		os<<"phase="<<parameters.phase<<"\n";
-		return os;
+	VectorStringType readOldT(IoInputType& io, SizeType nsites)
+	{
+		typename PsimagLite::Vector<RealType>::Type potentialTlegacy;
+		try {
+			io.read(potentialTlegacy, "PotentialT");
+			std::cerr<<"Has PotentialT\n";
+		} catch (std::exception&) {
+			return VectorStringType();
+		}
+
+		RealType omega = 0;
+		try {
+			io.readline(omega,"omega=");
+		} catch (std::exception&) {}
+
+		RealType phase = 0;
+		try {
+			io.readline(phase,"phase=");
+		} catch (std::exception&) {}
+
+		// c means cosine below
+		const PsimagLite::String function = "*(c:+:*:%t:" +
+		        ttos(omega) + ":" + ttos(phase) + ")*";
+		const PsimagLite::String nup = function + "nup";
+		const PsimagLite::String ndown = function + "ndown";
+
+		VectorStringType potentialTv(nsites);
+		for (SizeType site = 0; site < nsites; ++site) {
+			const RealType val = potentialTlegacy[site];
+			const PsimagLite::String plusSignOrNot = ((val < 0) && (site > 0)) ? "+" : "";
+			PsimagLite::String expression = ttos(val) + nup + " + ";
+			expression += plusSignOrNot + ttos(val) + ndown;
+			potentialTv[site] = killSpaces(expression);
+		}
+
+		return potentialTv;
 	}
 
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
@@ -186,9 +194,7 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 	typename PsimagLite::Vector<RealType>::Type magneticX;
 
 	// for time-dependent H:
-	typename PsimagLite::Vector<RealType>::Type potentialT;
-	RealType omega;
-	RealType phase;
+	VectorStringType onSiteHadd;
 };
 } // namespace Dmrg
 

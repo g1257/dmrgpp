@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2013-2021, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 6.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -88,7 +88,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquared.h"
 #include "VerySparseMatrix.h"
 #include "ProgramGlobals.h"
-#include "MemResolv.h"
+#include "CanonicalExpression.h"
+#include "OperatorSpec.h"
 
 namespace Dmrg {
 template<typename ModelBaseType> class ExtendedHubbard1Orb;
@@ -107,6 +108,7 @@ class ModelHubbard : public ModelBaseType {
 
 public:
 
+	typedef ModelHubbard<ModelBaseType> ThisType;
 	typedef unsigned int long WordType;
 	typedef  HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -130,6 +132,8 @@ public:
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef OperatorSpec<ThisType, OperatorType> OperatorSpecType;
+	typedef PsimagLite::CanonicalExpression<OperatorSpecType> CanonicalExpressionType;
 
 	enum {SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
 		  SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN};
@@ -405,7 +409,7 @@ protected:
 		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
 
 		for (SizeType i = 0; i < n; ++i) {
-			SizeType site = block[i];
+			const SizeType site = block[i];
 
 			// onsite U hubbard
 			//n_i up
@@ -450,18 +454,20 @@ protected:
 				hmatrix += tmp*Splusi;
 			}
 
-			if (modelParameters_.potentialT.size()==0) continue;
-			RealType cosarg = cos(time*modelParameters_.omega +
-			                      modelParameters_.phase);
-			// VT_iup term
-			tmp = modelParameters_.potentialT[block[i]];
-			tmp *= cosarg;
-			hmatrix += tmp*niup;
+			if (modelParameters_.onSiteHadd.size() != ModelBaseType::superGeometry().numberOfSites())
+				continue;
 
-			// VT_idown term
-			tmp = modelParameters_.potentialT[block[i]];
-			tmp *= cosarg;
-			hmatrix += tmp*nidown;
+			OperatorSpecType opSpec(*this);
+			CanonicalExpressionType canonicalExpression(opSpec);
+			OperatorType hOft;
+			OperatorType opEmpty;
+			const PsimagLite::String hOnSite = modelParameters_.onSiteHadd[site];
+			PsimagLite::String expression = CanonicalExpressionType::replaceAll(hOnSite,
+			                                                                    "%t",
+			                                                                    time).second;
+			int bogus = 0;
+			canonicalExpression(hOft, expression, opEmpty, bogus);
+			hmatrix += hOft.getStorage().getCRS();
 		}
 	}
 
