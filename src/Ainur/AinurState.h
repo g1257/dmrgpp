@@ -356,7 +356,7 @@ private:
 
 	static bool isValidCharForMacroName(char c)
 	{
-		const bool b1 = (c > 60 && c < 123);
+		const bool b1 = (c > 96 && c < 123);
 		const bool b2 = (c > 64 && c < 91);
 		const bool b3 = (c > 47 && c < 58);
 
