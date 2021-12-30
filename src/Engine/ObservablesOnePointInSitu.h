@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2014, UT-Battelle, LLC
+Copyright (c) 2009-2014-2021, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 5.]
+[DMRG++, Version 6.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -72,19 +72,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 
-/*! \file ObservablesInSitu.h
+/*! \file ObservablesOnePointInSitu.h
  *
  *  DOC NEEDED FIXME
  */
-#ifndef DMRG_OBS_IN_SITU_H
-#define DMRG_OBS_IN_SITU_H
+#ifndef DMRG_OBS_ONE_POINT_IN_SITU_H
+#define DMRG_OBS_ONE_POINT_IN_SITU_H
 
 #include "ProgramGlobals.h"
 
 namespace Dmrg {
 
 template<typename VectorType>
-class ObservablesInSitu {
+class ObservablesOnePointInSitu {
 
 public:
 
@@ -105,10 +105,10 @@ public:
 private:
 
 	VectorType inSitu_;
-}; // ObservablesInSitu
+}; // ObservablesOnePointInSitu
 
 } // namespace Dmrg
 
 /*@}*/
-#endif // DMRG_OBS_IN_SITU_H
+#endif // DMRG_OBS_ONE_POINT_IN_SITU_H
 

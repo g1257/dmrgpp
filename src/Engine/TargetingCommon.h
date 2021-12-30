@@ -93,6 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GetBraOrKet.h"
 #include "RestartStruct.h"
 #include "SdhsReinterpret.h"
+#include "MultiPointInSitu.h"
 
 namespace Dmrg {
 
@@ -172,6 +173,7 @@ public:
 	typedef typename ApplyOperatorExpressionType::VectorVectorVectorWithOffsetType
 	VectorVectorVectorWithOffsetType;
 	typedef SdhsReinterpret<BraketType> SdhsReinterpretType;
+	typedef MultiPointInSitu<ModelType> MultiPointInSituType;
 
 	enum class OpLabelCategory { DRESSED, BARE };
 
@@ -375,11 +377,17 @@ public:
 		const SizeType expectedSize = targetHelper_.model().hilbertSize(site);
 
 		LambdaForTests<SomeLambdaType> lambdaForTests;
+		MultiPointInSituType multiPointInSitu;
 
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
 
 			BraketType braket(targetHelper_.model(), opLabel);
+
+			if (braket.points() != 1) {
+				multiPointInSitu(braket, site);
+				continue;
+			}
 
 			SdhsReinterpretType sdhs(braket, {site});
 

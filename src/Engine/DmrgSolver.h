@@ -87,7 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "DmrgSerializer.h"
 #include "Recovery.h"
 #include "Truncation.h"
-#include "ObservablesInSitu.h"
+#include "ObservablesOnePointInSitu.h"
 #include "TargetSelector.h"
 #include "PsiBase64.h"
 #include "PrinterInDetail.h"
@@ -108,7 +108,8 @@ public:
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef ObservablesInSitu<typename TargetingType::TargetVectorType> ObservablesInSituType;
+	typedef ObservablesOnePointInSitu<typename TargetingType::TargetVectorType>
+	ObservablesOnePointInSituType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType::MyBasis MyBasis;
@@ -637,7 +638,6 @@ obtain ordered
 
 		if (!finiteLoop.wantsSave() && !finiteLoop.wantsMultiSitePush()) return;
 
-
 		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
 		// FIXME: Serializer will for now save only one psi target
 		const VectorVectorVectorWithOffsetType& psi = target.psiConst();
@@ -739,7 +739,7 @@ obtain ordered
 	VectorBlockType sitesIndices_;
 	DiagonalizationType diagonalization_;
 	TruncationType truncate_;
-	ObservablesInSituType inSitu_;
+	ObservablesOnePointInSituType inSitu_;
 	bool saveData_;
 	OneSiteTruncationType oneSiteTruncation_;
 	static bool firstCall_;
