@@ -173,7 +173,7 @@ public:
 	typedef typename ApplyOperatorExpressionType::VectorVectorVectorWithOffsetType
 	VectorVectorVectorWithOffsetType;
 	typedef SdhsReinterpret<BraketType> SdhsReinterpretType;
-	typedef MultiPointInSitu<ModelType> MultiPointInSituType;
+	typedef MultiPointInSitu<VectorWithOffsetType_, ModelType> MultiPointInSituType;
 
 	enum class OpLabelCategory { DRESSED, BARE };
 
@@ -377,7 +377,7 @@ public:
 		const SizeType expectedSize = targetHelper_.model().hilbertSize(site);
 
 		LambdaForTests<SomeLambdaType> lambdaForTests;
-		MultiPointInSituType multiPointInSitu;
+		MultiPointInSituType multiPointInSitu(aoe_.model());
 
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];

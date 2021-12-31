@@ -96,13 +96,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename VectorWithOffsetType_, typename ModelType_, typename IoInputType>
+template<typename ObserverHelperType, typename ModelType_>
 class Observer {
 
 public:
 
 	typedef ModelType_ ModelType;
-	typedef typename VectorWithOffsetType_::value_type FieldType;
+	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename ObserverHelperType::IoInputType IoInputType;
+	typedef typename VectorWithOffsetType::value_type FieldType;
 	typedef PsimagLite::SparseVector<FieldType> VectorType;
 	typedef typename ModelType_::RealType RealType;
 	typedef PsimagLite::Matrix<FieldType> MatrixType;
@@ -111,15 +113,14 @@ public:
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType_::ParametersType ParametersType;
-	typedef ObserverHelper<IoInputType, MatrixType, VectorType, VectorWithOffsetType_,
-	LeftRightSuperType> ObserverHelperType;
+//	typedef ObserverHelper<IoInputType, MatrixType, VectorType, VectorWithOffsetType_,
+//	LeftRightSuperType> ObserverHelperType;
 	typedef CorrelationsSkeleton<ObserverHelperType,ModelType_> CorrelationsSkeletonType;
 	typedef OnePointCorrelations<ObserverHelperType, ModelType_> OnePointCorrelationsType;
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> TwoPointCorrelationsType;
 	typedef FourPointCorrelations<CorrelationsSkeletonType> FourPointCorrelationsType;
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> MultiPointCorrelationsType;
 	typedef typename CorrelationsSkeletonType::BraketType BraketType;
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef ManyPointAction ManyPointActionType;
