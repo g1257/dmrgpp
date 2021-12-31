@@ -113,8 +113,6 @@ public:
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType_::ParametersType ParametersType;
-//	typedef ObserverHelper<IoInputType, MatrixType, VectorType, VectorWithOffsetType_,
-//	LeftRightSuperType> ObserverHelperType;
 	typedef CorrelationsSkeleton<ObserverHelperType,ModelType_> CorrelationsSkeletonType;
 	typedef OnePointCorrelations<ObserverHelperType, ModelType_> OnePointCorrelationsType;
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> TwoPointCorrelationsType;
