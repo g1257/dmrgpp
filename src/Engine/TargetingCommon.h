@@ -94,6 +94,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "RestartStruct.h"
 #include "SdhsReinterpret.h"
 #include "MultiPointInSitu.h"
+#include "Checkpoint.h"
 
 namespace Dmrg {
 
@@ -174,27 +175,29 @@ public:
 	VectorVectorVectorWithOffsetType;
 	typedef SdhsReinterpret<BraketType> SdhsReinterpretType;
 	typedef MultiPointInSitu<VectorWithOffsetType_, ModelType> MultiPointInSituType;
+	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 
 	enum class OpLabelCategory { DRESSED, BARE };
 
 	TargetingCommon(const LeftRightSuperType& lrs,
-	                const ModelType& model,
+	                const CheckpointType& checkPoint,
 	                const WaveFunctionTransfType& wft,
 	                SizeType indexNoAdvance)
 	    : cocoonType_(OpLabelCategory::DRESSED),
 	      progress_("TargetingCommon"),
-	      targetHelper_(lrs, model, wft),
+	      checkPoint_(checkPoint),
+	      targetHelper_(lrs, checkPoint.model(), wft),
 	      aoe_(targetHelper_, indexNoAdvance),
-	      inSitu_(model.superGeometry().numberOfSites())
+	      inSitu_(checkPoint.model().superGeometry().numberOfSites())
 	{
-		PsimagLite::split(meas_, model.params().insitu, ",");
+		PsimagLite::split(meas_, checkPoint.model().params().insitu, ",");
 		SizeType n = meas_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			const bool isDressed = isOpLabelDressed(meas_[i]);
 
 			// check this early that what's passed makes sense
 			if (isDressed)
-				BraketType(model, meas_[i]);
+				BraketType(checkPoint.model(), meas_[i]);
 
 			OpLabelCategory cocoonExpected = (isDressed) ? OpLabelCategory::DRESSED
 			                                             : OpLabelCategory::BARE;
@@ -377,7 +380,7 @@ public:
 		const SizeType expectedSize = targetHelper_.model().hilbertSize(site);
 
 		LambdaForTests<SomeLambdaType> lambdaForTests;
-		MultiPointInSituType multiPointInSitu(aoe_.model());
+		MultiPointInSituType multiPointInSitu(aoe_.model(), checkPoint_, targetHelper_.wft());
 
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
@@ -385,7 +388,7 @@ public:
 			BraketType braket(targetHelper_.model(), opLabel);
 
 			if (braket.points() != 1) {
-				multiPointInSitu(braket, site);
+				multiPointInSitu(braket, site, direction);
 				continue;
 			}
 
@@ -861,6 +864,7 @@ private:
 	OpLabelCategory cocoonType_;
 	VectorStringType meas_;
 	PsimagLite::ProgressIndicator progress_;
+	const CheckpointType& checkPoint_;
 	TargetHelperType targetHelper_;
 	ApplyOperatorExpressionType aoe_;
 	mutable VectorType inSitu_;

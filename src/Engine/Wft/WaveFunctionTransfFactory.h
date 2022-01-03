@@ -89,7 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Random48.h"
 
 namespace Dmrg {
-template<typename LeftRightSuperType,
+template<typename LeftRightSuperType_,
          typename VectorWithOffsetType_,
          typename OptionsType_>
 class WaveFunctionTransfFactory {
@@ -100,6 +100,7 @@ public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;

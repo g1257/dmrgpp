@@ -21,6 +21,7 @@ template<typename TargetingBaseType>
 class TargetSelector {
 
 	typedef typename TargetingBaseType::MatrixVectorType MatrixVectorType;
+	typedef typename TargetingBaseType::CheckpointType CheckpointType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::ParametersType ParametersType;
 	typedef typename ModelType::RealType RealType;
@@ -53,13 +54,13 @@ class TargetSelector {
 public:
 
 	TargetSelector(const LeftRightSuperType& lrs,
-	               const ModelType& model,
+	               const CheckpointType& checkPoint,
 	               const WaveFunctionTransfType& wft,
 	               const typename QnType::VectorQnType& quantumSector,
 	               InputValidatorType& ioIn)
 	    : psi_(nullptr),
 	      lrs_(lrs),
-	      model_(model),
+	      checkPoint_(checkPoint),
 	      wft_(wft),
 	      quantumSector_(quantumSector),
 	      ioIn_(ioIn)
@@ -79,7 +80,7 @@ public:
 	{
 		if (psi_) return *psi_;
 
-		PsimagLite::String targeting = getTargeting(model_.params().options);
+		PsimagLite::String targeting = getTargeting(checkPoint_.model().params().options);
 		return operator()(targeting);
 	}
 
@@ -94,28 +95,28 @@ public:
 		assert(0 < quantumSector_.size());
 		const QnType& qn = quantumSector_[0];
 		if (targeting == "GroundStateTargeting") {
-			psi_ = new TargetingGroundStateType(lrs_,model_,wft_,qn,ioIn_);
+			psi_ = new TargetingGroundStateType(lrs_,checkPoint_,wft_,qn,ioIn_);
 			// named targets start  DO NOT REMOVE MARK
 		} else if (targeting=="TimeStepTargeting" || targeting == "TargetingAncilla") {
-			psi_ = new TargetingTimeStepType(lrs_,model_,wft_,qn,ioIn_, targeting);
+			psi_ = new TargetingTimeStepType(lrs_,checkPoint_,wft_,qn,ioIn_, targeting);
 		} else if (targeting=="DynamicTargeting") {
-			psi_ = new TargetingDynamicType(lrs_,model_,wft_,qn,ioIn_);
+			psi_ = new TargetingDynamicType(lrs_,checkPoint_,wft_,qn,ioIn_);
 		} else if (targeting=="CorrectionVectorTargeting") {
-			psi_ = new TargetingCorrectionVectorType(lrs_,model_,wft_,qn,ioIn_);
+			psi_ = new TargetingCorrectionVectorType(lrs_,checkPoint_,wft_,qn,ioIn_);
 		} else if (targeting=="TargetingChebyshev") {
-			psi_ = new TargetingChebyshevType(lrs_,model_,wft_,qn,ioIn_);
+			psi_ = new TargetingChebyshevType(lrs_,checkPoint_,wft_,qn,ioIn_);
 		} else if (targeting=="CorrectionTargeting") {
-			psi_ = new TargetingCorrectionType(lrs_,model_,wft_,qn,ioIn_);
+			psi_ = new TargetingCorrectionType(lrs_,checkPoint_,wft_,qn,ioIn_);
 		} else if (targeting == "MettsTargeting") {
-			psi_ = new TargetingMettsType(lrs_,model_,wft_,qn,ioIn_);
+			psi_ = new TargetingMettsType(lrs_,checkPoint_,wft_,qn,ioIn_);
 		} else if (targeting == "TargetingRixsStatic") {
-			psi_ = new TargetingRixsStaticType(lrs_,model_,wft_,qn,ioIn_);
+			psi_ = new TargetingRixsStaticType(lrs_,checkPoint_,wft_,qn,ioIn_);
 		} else if (targeting == "TargetingRixsDynamic") {
-			psi_ = new TargetingRixsDynamicType(lrs_,model_,wft_,qn,ioIn_);
+			psi_ = new TargetingRixsDynamicType(lrs_,checkPoint_,wft_,qn,ioIn_);
 		} else if (targeting == "TargetingExpression") {
-			psi_ = new TargetingExpressionType(lrs_, model_, wft_, qn, ioIn_);
+			psi_ = new TargetingExpressionType(lrs_, checkPoint_, wft_, qn, ioIn_);
 		} else if (targeting == "TargetingCVEvolution") {
-			psi_ = new TargetingCVEvolutionType(lrs_, model_, wft_, qn, ioIn_);
+			psi_ = new TargetingCVEvolutionType(lrs_, checkPoint_, wft_, qn, ioIn_);
 			// end targets DO NOT REMOVE MARK
 		} else {
 			err("Unknown targeting " + targeting + "\n");
@@ -176,7 +177,7 @@ private:
 
 	TargetingBaseType* psi_;
 	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
+	const CheckpointType& checkPoint_;
 	const WaveFunctionTransfType& wft_;
 	const typename QnType::VectorQnType& quantumSector_;
 	InputValidatorType& ioIn_;

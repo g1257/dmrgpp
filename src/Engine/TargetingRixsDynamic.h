@@ -110,6 +110,7 @@ public:
 
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -152,18 +153,18 @@ public:
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingRixsDynamic(const LeftRightSuperType& lrs,
-	                     const ModelType& model,
+	                     const CheckpointType& checkPoint,
 	                     const WaveFunctionTransfType& wft,
 	                     const QnType&,
 	                     InputValidatorType& ioIn)
-	    : BaseType(lrs,model,wft,1),
-	      tstStruct_(ioIn, "TargetingRixsDynamic", model),
+	    : BaseType(lrs,checkPoint,wft,1),
+	      tstStruct_(ioIn, "TargetingRixsDynamic", checkPoint.model()),
 	      tstStruct2_(nullptr),
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsDynamic"),
 	      gsWeight_(tstStruct_.gsWeight()),
 	      paramsForSolver_(ioIn,"DynamicDmrg"),
-	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().aoe().energy()),
+	      skeleton_(ioIn_, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy()),
 	      applied_(false),
 	      appliedFirst_(false)
 	{
@@ -176,7 +177,7 @@ public:
 			return; // early exit here
 		}
 
-		tstStruct2_ = new TargetParams2Type(ioIn, "TargetingRixsDynamic", model);
+		tstStruct2_ = new TargetParams2Type(ioIn, "TargetingRixsDynamic", checkPoint.model());
 
 		RealType tau = tstStruct2_->tau();
 		SizeType n = tstStruct2_->times().size();

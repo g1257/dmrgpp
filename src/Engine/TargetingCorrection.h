@@ -116,13 +116,14 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 	typedef typename BaseType::VectorRealType VectorRealType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
-	                    const ModelType& model,
+	                    const CheckpointType& checkPoint,
 	                    const WaveFunctionTransfType& wft,
 	                    const QnType&,
 	                    InputValidatorType& io)
-	    : BaseType(lrs,model,wft,0),
+	    : BaseType(lrs,checkPoint,wft,0),
 	      tstStruct_(io, "TargetingCorrection"),
 	      gsWeight_(1 - tstStruct_.correctionA()),
 	      progress_("TargetingCorrection")

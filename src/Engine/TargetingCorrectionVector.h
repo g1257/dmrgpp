@@ -107,6 +107,7 @@ public:
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename BaseType::OptionsType OptionsType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -145,17 +146,17 @@ public:
 	typedef typename BasisType::QnType QnType;
 
 	TargetingCorrectionVector(const LeftRightSuperType& lrs,
-	                          const ModelType& model,
+	                          const CheckpointType& checkPoint,
 	                          const WaveFunctionTransfType& wft,
 	                          const QnType&,
 	                          InputValidatorType& ioIn)
-	    : BaseType(lrs, model, wft, 1),
-	      tstStruct_(ioIn, "TargetingCorrectionVector", model),
+	    : BaseType(lrs, checkPoint, wft, 1),
+	      tstStruct_(ioIn, "TargetingCorrectionVector", checkPoint.model()),
 	      ioIn_(ioIn),
 	      progress_("TargetingCorrectionVector"),
 	      gsWeight_(1.0),
 	      correctionEnabled_(false),
-	      skeleton_(ioIn_, tstStruct_, model, lrs, this->common().aoe().energy())
+	      skeleton_(ioIn_, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy())
 	{
 		if (!wft.isEnabled())
 			err("TargetingCorrectionVector needs wft\n");

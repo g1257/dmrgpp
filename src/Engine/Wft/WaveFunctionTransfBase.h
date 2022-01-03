@@ -107,11 +107,6 @@ public:
 	                             const VectorSizeType& nk) const = 0;
 
 	virtual ~WaveFunctionTransfBase() {}
-
-protected:
-
-
-
 }; // class WaveFunctionTransfBase
 } // namespace Dmrg
 

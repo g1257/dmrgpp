@@ -95,6 +95,7 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOf
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename BaseType::ModelType ModelType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -123,11 +124,11 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOf
 public:
 
 	TargetingExpression(const LeftRightSuperType& lrs,
-	                    const ModelType& model,
+	                    const CheckpointType& checkPoint,
 	                    const WaveFunctionTransfType& wft,
 	                    const QnType&,
 	                    InputValidatorType& io)
-	    : BaseType(lrs, model, wft, 0),
+	    : BaseType(lrs, checkPoint, wft, 0),
 	      progress_("TargetingExpression"),
 	      gsWeight_(0.3),
 	      gsWeightActual_(gsWeight_),

@@ -97,6 +97,7 @@ public:
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename BaseType::OptionsType OptionsType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -124,17 +125,17 @@ public:
 	TargetParamsType> CorrectionVectorSkeletonType;
 
 	TargetingCVEvolution(const LeftRightSuperType& lrs,
-	                     const ModelType& model,
+	                     const CheckpointType& checkPoint,
 	                     const WaveFunctionTransfType& wft,
 	                     const QnType&,
 	                     InputValidatorType& ioIn)
-	    : BaseType(lrs, model, wft, 0),
-	      tstStruct_(ioIn, "TargetingCVEvolution", model),
+	    : BaseType(lrs, checkPoint, wft, 0),
+	      tstStruct_(ioIn, "TargetingCVEvolution", checkPoint.model()),
 	      wft_(wft),
 	      progress_("TargetingCVEvolution"),
 	      counter_(0),
 	      almostDone_(0),
-	      skeleton_(ioIn, tstStruct_, model, lrs, this->common().aoe().energy()),
+	      skeleton_(ioIn, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy()),
 	      weight_(targets()),
 	      gsWeight_(tstStruct_.gsWeight())
 	{

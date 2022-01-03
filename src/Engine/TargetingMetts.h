@@ -113,6 +113,7 @@ public:
 	typedef typename BaseType::OptionsType OptionsType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -159,19 +160,19 @@ public:
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 
 	TargetingMetts(const LeftRightSuperType& lrs,
-	               const ModelType& model,
+	               const CheckpointType& checkPoint,
 	               const WaveFunctionTransfType& wft,
 	               const QnType& quantumSector,
 	               InputValidatorType& ioIn)
-	    : BaseType(lrs, model, wft, 0),
-	      model_(model),
+	    : BaseType(lrs, checkPoint, wft, 0),
+	      model_(checkPoint.model()),
 	      lrs_(lrs),
-	      mettsStruct_(ioIn, "TargetingMetts", model),
+	      mettsStruct_(ioIn, "TargetingMetts", checkPoint.model()),
 	      wft_(wft),
 	      quantumSector_(quantumSector),
 	      progress_("TargetingMetts"),
 	      weight_(mettsStruct_.times().size() + 1),
-	      mettsStochastics_(model,mettsStruct_.rngSeed,mettsStruct_.pure),
+	      mettsStochastics_(checkPoint.model(), mettsStruct_.rngSeed, mettsStruct_.pure),
 	      mettsCollapse_(mettsStochastics_,lrs,mettsStruct_),
 	      prevDirection_(ProgramGlobals::DirectionEnum::INFINITE),
 	      systemPrev_(),

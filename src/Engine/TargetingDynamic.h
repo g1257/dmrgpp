@@ -104,6 +104,7 @@ public:
 	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -132,12 +133,12 @@ public:
 	typedef typename BaseType::VectorRealType VectorRealType;
 
 	TargetingDynamic(const LeftRightSuperType& lrs,
-	                 const ModelType& model,
+	                 const CheckpointType& checkPoint,
 	                 const WaveFunctionTransfType& wft,
 	                 const QnType&,
 	                 InputValidatorType& io)
-	    : BaseType(lrs,model,wft,0),
-	      tstStruct_(io, "TargetingDynamic", model),
+	    : BaseType(lrs,checkPoint,wft,0),
+	      tstStruct_(io, "TargetingDynamic", checkPoint.model()),
 	      wft_(wft),
 	      progress_("TargetingDynamic"),
 	      gsWeight_(tstStruct_.gsWeight()),

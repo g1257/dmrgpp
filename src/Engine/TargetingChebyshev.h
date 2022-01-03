@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsChebyshev.h"
 #include "BlockDiagonalMatrix.h"
 #include "OracleChebyshev.h"
+#include "TargetingBase.h"
 
 namespace Dmrg {
 
@@ -95,6 +96,7 @@ public:
 	typedef typename BaseType::OptionsType OptionsType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename ModelType::OperatorsType OperatorsType;
@@ -120,12 +122,12 @@ public:
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingChebyshev(const LeftRightSuperType& lrs,
-	                   const ModelType& model,
+	                   const CheckpointType& checkPoint,
 	                   const WaveFunctionTransfType& wft,
 	                   const QnType&,
 	                   InputValidatorType& ioIn)
-	    : BaseType(lrs, model, wft, 0),
-	      tstStruct_(ioIn, "TargetingChebyshev", model),
+	    : BaseType(lrs, checkPoint, wft, 0),
+	      tstStruct_(ioIn, "TargetingChebyshev", checkPoint.model()),
 	      wft_(wft),
 	      progress_("TargetingChebyshev"),
 	      weight_(tstStruct_.times().size()),
@@ -138,7 +140,7 @@ public:
 			err("TST needs at least one TSPSite\n");
 
 		SizeType nops = tstStruct_.sites();
-		SizeType linSize = model.superGeometry().numberOfSites();
+		SizeType linSize = checkPoint.model().superGeometry().numberOfSites();
 		for (SizeType i = 0; i < nops; ++i)
 			if (tstStruct_.sites(i) == 0 || tstStruct_.sites(i) == linSize - 1)
 				err("TargetingChebyshev: FATAL: No application of operators at borders\n");

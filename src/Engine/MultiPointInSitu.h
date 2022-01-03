@@ -4,6 +4,8 @@
 #include "Observer.h"
 #include "HelperForMultiPointInSitu.h"
 #include "ManyPointAction.h"
+#include "Wft/WaveFunctionTransfFactory.h"
+#include "Checkpoint.h"
 
 namespace Dmrg {
 
@@ -13,22 +15,32 @@ class MultiPointInSitu {
 public:
 
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-	typedef HelperForMultiPointInSitu<VectorWithOffsetType, LeftRightSuperType>
-	HelperForMultiPointInSituType;
+	typedef typename ModelType::ParametersType ParametersType;
+	typedef typename ParametersType::OptionsType OptionsType;
+	typedef WaveFunctionTransfFactory<LeftRightSuperType, VectorWithOffsetType, OptionsType>
+	WaveFunctionTransfType;
+	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
+	typedef HelperForMultiPointInSitu<CheckpointType> HelperForMultiPointInSituType;
 	typedef typename HelperForMultiPointInSituType::BogusInput BogusInputType;
 	typedef typename HelperForMultiPointInSituType::MatrixType MatrixType;
 	typedef Observer<HelperForMultiPointInSituType, ModelType> ObserverType;
 	typedef Braket<ModelType> BraketType;
 
-	MultiPointInSitu(const ModelType& model)
+	MultiPointInSitu(const ModelType& model,
+	                 const CheckpointType& checkpoint,
+	                 const WaveFunctionTransfType& wft)
 	    : model_(model),
-	      bogusInput_(model.superGeometry().numberOfSites()),
+	      bogusInput_(model.superGeometry().numberOfSites(), checkpoint, wft),
 	      observer_(bogusInput_, 0, 0, 0, model)
 	{}
 
 
-	void operator()(const BraketType& braket, SizeType centerOfOrtho) const
+	void operator()(const BraketType& braket,
+	                SizeType centerOfOrtho,
+	                ProgramGlobals::DirectionEnum dir) const
 	{
+		if (dir == ProgramGlobals::DirectionEnum::INFINITE) return;
+
 		// TODO FIXME: Use ObservableLibrary instead of Observer
 		if (braket.points() != 2)
 			err("MultiPointInSitu: only two point for now\n");

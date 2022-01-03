@@ -95,6 +95,7 @@ public:
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef std::pair<SizeType,SizeType> PairType;
 	typedef typename BaseType::OptionsType OptionsType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
@@ -121,13 +122,13 @@ public:
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingTimeStep(const LeftRightSuperType& lrs,
-	                  const ModelType& model,
+	                  const CheckpointType& checkPoint,
 	                  const WaveFunctionTransfType& wft,
 	                  const QnType&,
 	                  InputValidatorType& ioIn,
 	                  PsimagLite::String targeting)
-	    : BaseType(lrs, model, wft, 0),
-	      tstStruct_(ioIn, targeting, model),
+	    : BaseType(lrs, checkPoint, wft, 0),
+	      tstStruct_(ioIn, targeting, checkPoint.model()),
 	      wft_(wft),
 	      progress_(targeting),
 	      weight_(tstStruct_.times().size()),

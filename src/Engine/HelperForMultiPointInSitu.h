@@ -7,33 +7,64 @@
 
 namespace Dmrg {
 
-template<typename VectorWithOffsetType_, typename LeftRightSuperType>
+template<typename CheckpointType>
 class HelperForMultiPointInSitu {
 
 public:
 
-	class BogusInput {
-
-	public:
-
-		BogusInput(SizeType numberOfSites) : numberOfSites_(numberOfSites) {}
-
-		SizeType numberOfSites() const { return numberOfSites_; }
-
-	private:
-
-		SizeType numberOfSites_;
-
-	};
-
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef BogusInput IoInputType;
+	typedef typename CheckpointType::WaveFunctionTransfType WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
+	typedef typename WaveFunctionTransfType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef FermionSign FermionSignType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef typename VectorType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename BasisWithOperatorsType::BasisType BasisType;
+	typedef typename PsimagLite::Vector<LeftRightSuperType*>::Type VectorLeftRightSuperType;
+
+	class BogusInput {
+
+	public:
+
+		BogusInput(SizeType numberOfSites,
+		           const CheckpointType& checkPoint,
+		           const WaveFunctionTransfType& wft)
+		    : numberOfSites_(numberOfSites), checkPoint_(checkPoint), wft_(wft) {}
+
+		~BogusInput()
+		{
+			const SizeType n = garbage_.size();
+			for (SizeType i = 0; i < n; ++i) {
+				delete garbage_[i];
+				garbage_[i] = nullptr;
+			}
+		}
+
+		SizeType numberOfSites() const { return numberOfSites_; }
+
+		const LeftRightSuperType& hookForMultiInSituLrs(SizeType ind)
+		{
+			std::pair<BasisWithOperatorsType, BasisWithOperatorsType> pair =
+			   checkPoint_.hookForMultiInSituLrs(ind);
+
+			BasisType super("superForMultiPointInSitu");
+			super.setToProduct(pair.first, pair.second);
+			LeftRightSuperType* lrsPtr = new LeftRightSuperType(pair.first, pair.second, super);
+			garbage_.push_back(lrsPtr);
+			return *lrsPtr;
+		}
+
+	private:
+
+		SizeType numberOfSites_;
+		const CheckpointType& checkPoint_;
+		const WaveFunctionTransfType& wft_;
+		VectorLeftRightSuperType garbage_;
+	};
+
+	typedef BogusInput IoInputType;
 
 	HelperForMultiPointInSitu(BogusInput& io,
 	                          SizeType start,
@@ -44,9 +75,9 @@ public:
 	    : io_(io)
 	{}
 
-	const LeftRightSuperType& leftRightSuper(SizeType) const
+	const LeftRightSuperType& leftRightSuper(SizeType ind) const
 	{
-		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::lrs() unimplemented\n");
+		return io_.hookForMultiInSituLrs(ind);
 	}
 
 	SizeType numberOfSites() const { return io_.numberOfSites(); }

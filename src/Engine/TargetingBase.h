@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Wft/WaveFunctionTransfFactory.h"
 #include "Io/IoSelector.h"
 #include "Intent.h"
+#include "Checkpoint.h"
 
 namespace Dmrg {
 
@@ -131,14 +132,15 @@ public:
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
 	VectorVectorVectorWithOffsetType;
+	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 
 	TargetingBase(const LeftRightSuperType& lrs,
-	              const ModelType& model,
+	              const CheckpointType& checkPoint,
 	              const WaveFunctionTransfType& wft,
 	              SizeType indexNoAdvance)
 	    : lrs_(lrs),
-	      model_(model),
-	      commonTargeting_(lrs, model, wft, indexNoAdvance)
+	      model_(checkPoint.model()),
+	      commonTargeting_(lrs, checkPoint, wft, indexNoAdvance)
 	{
 		Intent<ModelType> intent(model_);
 		intent.check();

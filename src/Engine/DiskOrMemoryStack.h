@@ -6,12 +6,21 @@
 
 namespace Dmrg {
 
+template<typename T>
+class MemoryStack : public PsimagLite::Stack<T>::Type {
+
+public:
+
+	using PsimagLite::Stack<T>::Type::c;
+
+};
+
 template<typename BasisWithOperatorsType>
 class DiskOrMemoryStack {
 
 public:
 
-	typedef typename PsimagLite::Stack<BasisWithOperatorsType>::Type MemoryStackType;
+	typedef MemoryStack<BasisWithOperatorsType> MemoryStackType;
 	typedef DiskStack<BasisWithOperatorsType> DiskStackType;
 
 	DiskOrMemoryStack(bool onDisk,
@@ -116,6 +125,11 @@ public:
 
 		MemoryStackType m = memory_;
 		io.write(prefix, m);
+	}
+
+	const BasisWithOperatorsType& operator[](SizeType ind) const
+	{
+		return memory_.c[ind];
 	}
 
 	template<typename StackType1,typename StackType2>

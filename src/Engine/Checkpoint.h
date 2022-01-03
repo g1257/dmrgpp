@@ -96,6 +96,7 @@ class Checkpoint {
 public:
 
 	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType::RealType  RealType;
 	typedef typename ModelType::ParametersType ParametersType;
 	typedef typename ModelType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -120,6 +121,7 @@ public:
 	           SizeType nsectors,
 	           bool isObserveCode) :
 	    parameters_(parameters),
+	    model_(model),
 	    isObserveCode_(isObserveCode),
 	    isRestart_(parameters_.options.isSet("restart")),
 	    systemStack_(parameters_.options.isSet("shrinkStacksOnDisk"),
@@ -344,6 +346,16 @@ public:
 
 	const VectorVectorRealType& energies() const { return energiesFromFile_; }
 
+	const ModelType& model() const { return model_; }
+
+
+	std::pair<BasisWithOperatorsType, BasisWithOperatorsType>
+	hookForMultiInSituLrs(SizeType ind) const
+	{
+		return std::pair<BasisWithOperatorsType, BasisWithOperatorsType>(systemStack_[ind],
+		                                                                 envStack_[ind]);
+	}
+
 private:
 
 	// legacy reading (use as fallback only)
@@ -542,6 +554,7 @@ private:
 	}
 
 	const ParametersType& parameters_;
+	const ModelType& model_;
 	bool isObserveCode_;
 	bool isRestart_;
 	DiskOrMemoryStackType systemStack_;

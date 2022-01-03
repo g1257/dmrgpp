@@ -108,6 +108,7 @@ public:
 
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
+	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef typename MatrixVectorType::ModelType ModelType;
 	typedef typename ModelType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -147,16 +148,16 @@ public:
 	typedef typename BasisType::QnType QnType;
 
 	TargetingRixsStatic(const LeftRightSuperType& lrs,
-	                    const ModelType& model,
+	                    const CheckpointType& checkPoint,
 	                    const WaveFunctionTransfType& wft,
 	                    const QnType&,
 	                    InputValidatorType& ioIn)
-	    : BaseType(lrs,model,wft,1),
-	      tstStruct_(ioIn, "TargetingRixsStatic", model),
+	    : BaseType(lrs,checkPoint,wft,1),
+	      tstStruct_(ioIn, "TargetingRixsStatic", checkPoint.model()),
 	      ioIn_(ioIn),
 	      progress_("TargetingRixsStatic"),
 	      gsWeight_(1.0),
-	      skeleton_(ioIn_,tstStruct_,model,lrs,this->common().aoe().energy()),
+	      skeleton_(ioIn_, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy()),
 	      applied_(false),
 	      appliedFirst_(false)
 	{

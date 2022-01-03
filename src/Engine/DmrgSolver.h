@@ -227,7 +227,7 @@ public:
 		for (SizeType i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
 
 		TargetSelector<TargetingType> targetSelector(lrs_,
-		                                             model_,
+		                                             checkpoint_,
 		                                             wft_,
 		                                             quantumSector_,
 		                                             ioIn_);
