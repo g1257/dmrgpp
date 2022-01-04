@@ -159,6 +159,14 @@ public:
 		                                                          : weStack_.size();
 	}
 
+	const BlockDiagonalMatrixType& multiPointGetTransform(SizeType ind,
+	                                                      ProgramGlobals::DirectionEnum dir) const
+	{
+		return (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? wsStack_[ind].u()
+		                                                             : weStack_[ind].u();
+
+	}
+
 private:
 
 	void writePartial(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const

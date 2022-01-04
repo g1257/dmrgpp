@@ -364,6 +364,12 @@ public:
 		waveStructCombined_.write(ioMain, label + "/WaveStructCombined");
 	}
 
+	const BlockDiagonalMatrixType& multiPointGetTransform(SizeType ind,
+	                                                      ProgramGlobals::DirectionEnum dir) const
+	{
+		return waveStructCombined_.multiPointGetTransform(ind, dir);
+	}
+
 private:
 
 	void writePartial(PsimagLite::IoSelector::Out& ioMain,

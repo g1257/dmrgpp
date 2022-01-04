@@ -129,6 +129,9 @@ public:
 
 	const BasisWithOperatorsType& operator[](SizeType ind) const
 	{
+		if (diskW_)
+			err("MultipointInSitu does not support stacks on disk, only on memory\n");
+
 		return memory_.c[ind];
 	}
 

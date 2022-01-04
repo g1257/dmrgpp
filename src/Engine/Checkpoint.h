@@ -348,7 +348,6 @@ public:
 
 	const ModelType& model() const { return model_; }
 
-
 	std::pair<BasisWithOperatorsType, BasisWithOperatorsType>
 	hookForMultiInSituLrs(SizeType ind) const
 	{

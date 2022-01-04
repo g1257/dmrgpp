@@ -89,13 +89,12 @@ namespace Dmrg {
 template<typename LeftRightSuperType,typename VectorWithOffsetType>
 class DmrgSerializer {
 
+public:
+
 	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> ThisType;
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-
-public:
-
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisType::VectorQnType VectorQnType;

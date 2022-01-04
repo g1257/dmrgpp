@@ -4,6 +4,7 @@
 #include "Matrix.h"
 #include "GetBraOrKet.h"
 #include "ProgramGlobals.h"
+#include "DmrgSerializer.h"
 
 namespace Dmrg {
 
@@ -23,6 +24,8 @@ public:
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename PsimagLite::Vector<LeftRightSuperType*>::Type VectorLeftRightSuperType;
+	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
+	typedef typename DmrgSerializerType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 
 	class BogusInput {
 
@@ -47,13 +50,19 @@ public:
 		const LeftRightSuperType& hookForMultiInSituLrs(SizeType ind)
 		{
 			std::pair<BasisWithOperatorsType, BasisWithOperatorsType> pair =
-			   checkPoint_.hookForMultiInSituLrs(ind);
+			        checkPoint_.hookForMultiInSituLrs(ind);
 
 			BasisType super("superForMultiPointInSitu");
 			super.setToProduct(pair.first, pair.second);
 			LeftRightSuperType* lrsPtr = new LeftRightSuperType(pair.first, pair.second, super);
 			garbage_.push_back(lrsPtr);
 			return *lrsPtr;
+		}
+
+		const BlockDiagonalMatrixType& getTransform(SizeType ind,
+		                                            ProgramGlobals::DirectionEnum dir) const
+		{
+			return wft_.multiPointGetTransform(ind, dir);
 		}
 
 	private:
@@ -101,12 +110,13 @@ public:
 		//return transform_.rows();
 	}
 
+	// transform O2 by the transformation in location ind, and put the result in ret
 	void transform(SparseMatrixType& ret,
 	               const SparseMatrixType& O2,
 	               SizeType ind) const
 	{
-		// transform O2 by the transformation in location ind, and put the result in ret
-		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::transform() unimplemented\n");
+		const ProgramGlobals::DirectionEnum dir = direction(ind);
+		DmrgSerializerType::transform(ret, O2, io_.getTransform(ind, dir));
 	}
 
 	ProgramGlobals::DirectionEnum direction(SizeType) const
