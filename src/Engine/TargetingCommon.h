@@ -380,7 +380,10 @@ public:
 		const SizeType expectedSize = targetHelper_.model().hilbertSize(site);
 
 		LambdaForTests<SomeLambdaType> lambdaForTests;
-		MultiPointInSituType multiPointInSitu(aoe_.model(), checkPoint_, targetHelper_.wft());
+		MultiPointInSituType multiPointInSitu(aoe_.model(),
+		                                      checkPoint_,
+		                                      targetHelper_.wft(),
+		                                      direction);
 
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
@@ -388,7 +391,7 @@ public:
 			BraketType braket(targetHelper_.model(), opLabel);
 
 			if (braket.points() != 1) {
-				multiPointInSitu(braket, site, direction);
+				multiPointInSitu(braket, site);
 				continue;
 			}
 

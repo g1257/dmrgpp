@@ -33,8 +33,9 @@ public:
 
 		BogusInput(SizeType numberOfSites,
 		           const CheckpointType& checkPoint,
-		           const WaveFunctionTransfType& wft)
-		    : numberOfSites_(numberOfSites), checkPoint_(checkPoint), wft_(wft) {}
+		           const WaveFunctionTransfType& wft,
+		           ProgramGlobals::DirectionEnum dir)
+		    : numberOfSites_(numberOfSites), checkPoint_(checkPoint), wft_(wft), dir_(dir) {}
 
 		~BogusInput()
 		{
@@ -65,11 +66,15 @@ public:
 			return wft_.multiPointGetTransform(ind, dir);
 		}
 
+		// the direction remains the same for all the stack depth
+		ProgramGlobals::DirectionEnum direction() const { return dir_; }
+
 	private:
 
 		SizeType numberOfSites_;
 		const CheckpointType& checkPoint_;
 		const WaveFunctionTransfType& wft_;
+		ProgramGlobals::DirectionEnum dir_;
 		VectorLeftRightSuperType garbage_;
 	};
 
@@ -81,7 +86,7 @@ public:
 	                          SizeType trail,
 	                          bool withLegacyBugs,
 	                          bool readOnDemand)
-	    : io_(io)
+	    : io_(io), ind_(1 + numberOfSites())
 	{}
 
 	const LeftRightSuperType& leftRightSuper(SizeType ind) const
@@ -98,16 +103,18 @@ public:
 		                               PsimagLite::String("unimplemented\n"));
 	}
 
-	SizeType cols(SizeType) const
+	SizeType cols(SizeType ind) const
 	{
-		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::cols() unimplemented\n");
-		//return transform_.cols();
+		if (ind != ind_)
+			computeAndSaveTransform(ind);
+		return transform_.cols();
 	}
 
-	SizeType rows() const
+	SizeType rows(SizeType ind) const
 	{
-		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::rows() unimplemented\n");
-		//return transform_.rows();
+		if (ind != ind_)
+			computeAndSaveTransform(ind);
+		return transform_.rows();
 	}
 
 	// transform O2 by the transformation in location ind, and put the result in ret
@@ -115,13 +122,14 @@ public:
 	               const SparseMatrixType& O2,
 	               SizeType ind) const
 	{
-		const ProgramGlobals::DirectionEnum dir = direction(ind);
-		DmrgSerializerType::transform(ret, O2, io_.getTransform(ind, dir));
+		if (ind != ind_)
+			computeAndSaveTransform(ind);
+		DmrgSerializerType::transform(ret, O2, transform_);
 	}
 
 	ProgramGlobals::DirectionEnum direction(SizeType) const
 	{
-		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::direction() unimplemented\n");
+		return io_.direction();
 	}
 
 	short int signsOneSite(SizeType) const
@@ -134,9 +142,19 @@ public:
 	{
 		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::fermionicSignLeft() unimplemented\n");
 	}
+
 private:
 
+	void computeAndSaveTransform(SizeType ind) const
+	{
+		const ProgramGlobals::DirectionEnum dir = direction(ind);
+		transform_ = io_.getTransform(ind, dir);
+		ind_ = ind;
+	}
+
 	BogusInput& io_;
+	mutable BlockDiagonalMatrixType transform_;
+	mutable SizeType ind_;
 };
 }
 #endif // HELPERFORMULTIPOINTINSITU_H

@@ -25,21 +25,27 @@ public:
 	typedef typename HelperForMultiPointInSituType::MatrixType MatrixType;
 	typedef Observer<HelperForMultiPointInSituType, ModelType> ObserverType;
 	typedef Braket<ModelType> BraketType;
+	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 
 	MultiPointInSitu(const ModelType& model,
 	                 const CheckpointType& checkpoint,
-	                 const WaveFunctionTransfType& wft)
+	                 const WaveFunctionTransfType& wft,
+	                 ProgramGlobals::DirectionEnum dir)
 	    : model_(model),
-	      bogusInput_(model.superGeometry().numberOfSites(), checkpoint, wft),
+	      bogusInput_(model.superGeometry().numberOfSites(), checkpoint, wft, dir),
 	      observer_(bogusInput_, 0, 0, 0, model)
-	{}
-
-
-	void operator()(const BraketType& braket,
-	                SizeType centerOfOrtho,
-	                ProgramGlobals::DirectionEnum dir) const
 	{
-		if (dir == ProgramGlobals::DirectionEnum::INFINITE) return;
+		if (seen_.size() == 0)
+			seen_.resize(bogusInput_.numberOfSites(), false);
+	}
+
+	void operator()(const BraketType& braket, SizeType centerOfOrtho)
+	{
+		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::INFINITE) return;
+
+		seen_[centerOfOrtho] = true;
+
+		if (!everySiteSeen()) return;
 
 		// TODO FIXME: Use ObservableLibrary instead of Observer
 		if (braket.points() != 2)
@@ -50,7 +56,17 @@ public:
 		const SizeType n = model_.superGeometry().numberOfSites();
 		MatrixType storage(n, n);
 
-		for (SizeType site = 0; site < n; ++site) {
+		SizeType start = 0;
+		SizeType end = 0;
+		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+			start = 0;
+			end = centerOfOrtho;
+		} else {
+			start = centerOfOrtho + 1;;
+			end = n - 1;
+		}
+
+		for (SizeType site = start; site < end; ++site) {
 			if (site == centerOfOrtho) continue;
 			BraketType braket2 = buildBraketWithSites(braket, site, centerOfOrtho);
 			observer_.twoPoint(storage, braket2, needsPrinting, action);
@@ -74,9 +90,20 @@ private:
 		return BraketType(model_, bra + op0 + ";" + op1 + ket);
 	}
 
+	static bool everySiteSeen()
+	{
+		for (auto it = seen_.begin(); it != seen_.end(); ++it)
+			if (!*it) return false;
+		return true;
+	}
+
 	const ModelType& model_;
 	BogusInputType bogusInput_;
 	ObserverType observer_;
+	static VectorBoolType seen_;
 };
+
+template<typename T1, typename T2>
+typename MultiPointInSitu<T1, T2>::VectorBoolType MultiPointInSitu<T1, T2>::seen_;
 }
 #endif // MULTIPOINTINSITU_H
