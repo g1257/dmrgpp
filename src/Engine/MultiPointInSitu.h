@@ -43,9 +43,10 @@ public:
 	{
 		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::INFINITE) return;
 
-		seen_[centerOfOrtho] = true;
-
-		if (!everySiteSeen()) return;
+		if (!everySiteSeen()) {
+			seen_[centerOfOrtho] = true;
+			return;
+		}
 
 		// TODO FIXME: Use ObservableLibrary instead of Observer
 		if (braket.points() != 2)

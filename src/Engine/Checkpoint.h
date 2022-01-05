@@ -351,8 +351,10 @@ public:
 	std::pair<BasisWithOperatorsType, BasisWithOperatorsType>
 	hookForMultiInSituLrs(SizeType ind) const
 	{
-		return std::pair<BasisWithOperatorsType, BasisWithOperatorsType>(systemStack_[ind],
-		                                                                 envStack_[ind]);
+		SizeType sind = systemStack_.size() - ind - 1;
+		SizeType eind = envStack_.size() - ind - 1;
+		return std::pair<BasisWithOperatorsType, BasisWithOperatorsType>(systemStack_[sind],
+		                                                                 envStack_[eind]);
 	}
 
 private:

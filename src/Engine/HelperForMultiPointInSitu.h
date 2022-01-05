@@ -26,6 +26,7 @@ public:
 	typedef typename PsimagLite::Vector<LeftRightSuperType*>::Type VectorLeftRightSuperType;
 	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
 	typedef typename DmrgSerializerType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
+	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
 
 	class BogusInput {
 
@@ -35,10 +36,21 @@ public:
 		           const CheckpointType& checkPoint,
 		           const WaveFunctionTransfType& wft,
 		           ProgramGlobals::DirectionEnum dir)
-		    : numberOfSites_(numberOfSites), checkPoint_(checkPoint), wft_(wft), dir_(dir) {}
+		    : numberOfSites_(numberOfSites), checkPoint_(checkPoint), wft_(wft), dir_(dir), fS_(nullptr)
+		{
+			SizeType site = 0; // FIXME FOR IMMM and SDHS
+			typename BasisWithOperatorsType::VectorBoolType oddElectrons;
+			checkPoint.model().findOddElectronsOfOneSite(oddElectrons, site);
+			SizeType n = oddElectrons.size();
+			signsOneSite_.resize(n);
+			for (SizeType i = 0; i < n; ++i)
+				signsOneSite_[i] = (oddElectrons[i]) ? -1 : 1;
+		}
 
 		~BogusInput()
 		{
+			delete fS_;
+			fS_ = nullptr;
 			const SizeType n = garbage_.size();
 			for (SizeType i = 0; i < n; ++i) {
 				delete garbage_[i];
@@ -60,6 +72,13 @@ public:
 			return *lrsPtr;
 		}
 
+		const FermionSignType& fermionicSignLeft(SizeType ind)
+		{
+			if (fS_) delete fS_;
+			fS_ = new FermionSignType(checkPoint_.hookForMultiInSituLrs(ind).first.signs());
+			return *fS_;
+		}
+
 		const BlockDiagonalMatrixType& getTransform(SizeType ind,
 		                                            ProgramGlobals::DirectionEnum dir) const
 		{
@@ -69,12 +88,20 @@ public:
 		// the direction remains the same for all the stack depth
 		ProgramGlobals::DirectionEnum direction() const { return dir_; }
 
+		short int signsOneSite(SizeType ind) const
+		{
+			assert(ind < signsOneSite_.size());
+			return signsOneSite_[ind];
+		}
+
 	private:
 
 		SizeType numberOfSites_;
 		const CheckpointType& checkPoint_;
 		const WaveFunctionTransfType& wft_;
 		ProgramGlobals::DirectionEnum dir_;
+		VectorShortIntType signsOneSite_;
+		FermionSignType* fS_;
 		VectorLeftRightSuperType garbage_;
 	};
 
@@ -132,15 +159,15 @@ public:
 		return io_.direction();
 	}
 
-	short int signsOneSite(SizeType) const
+	short int signsOneSite(SizeType ind) const
 	{
 		// given site in the one-site basis return the signs on site
-		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::signsOneSite() unimplemented\n");
+		return io_.signsOneSite(ind);
 	}
 
-	const FermionSignType& fermionicSignLeft(SizeType) const
+	const FermionSignType& fermionicSignLeft(SizeType ind) const
 	{
-		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::fermionicSignLeft() unimplemented\n");
+		return io_.fermionicSignLeft(ind);
 	}
 
 private:
