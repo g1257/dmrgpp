@@ -126,6 +126,7 @@ public:
 	typedef typename CheckpointType::DiskOrMemoryStackType DiskOrMemoryStackType;
 	typedef typename CheckpointType::DiskStackType DiskStackType;
 	typedef PsimagLite::Vector<VectorSizeType>::Type VectorBlockType;
+	typedef typename CheckpointType::RealType RealType;
 
 	class SpecOptions {
 
@@ -216,9 +217,9 @@ public:
 		                                                nonRecoveryStepCurrent(direction);
 	}
 
-	bool byLoop(SizeType loopIndex) const
+	bool byLoop(RealType loopIndex, RealType time) const
 	{
-		return predicateAwesome_->isTrue("%l", loopIndex);
+		return predicateAwesome_->isTrue("%l", loopIndex, "%t", time);
 	}
 
 	void write(const TargetingType& psi,
