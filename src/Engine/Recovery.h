@@ -217,9 +217,9 @@ public:
 		                                                nonRecoveryStepCurrent(direction);
 	}
 
-	bool byLoop(RealType loopIndex, RealType time) const
+	bool byLoop(RealType loopIndex, RealType time, RealType loopLength) const
 	{
-		return predicateAwesome_->isTrue("%l", loopIndex, "%t", time);
+		return predicateAwesome_->isTrue("%l", loopIndex, "%t", time, "%ll", loopLength);
 	}
 
 	void write(const TargetingType& psi,

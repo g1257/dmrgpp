@@ -455,7 +455,7 @@ obtain ordered
 
 			if (psi.end()) break;
 
-			if (recovery.byLoop(i, psi.time()))
+			if (recovery.byLoop(i, psi.time(), parameters_.finiteLoop[i].stepLength()))
 				recovery.write(psi,
 				               i + 1,
 				               stepCurrent_,
