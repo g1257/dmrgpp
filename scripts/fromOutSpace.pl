@@ -5,9 +5,8 @@ use warnings;
 use Math::Trig;
 use lib ".";
 use OmegaUtils;
-my ($outSpace, $templateInput, $isPeriodic, $multicenter) = @ARGV;
-defined($isPeriodic) or die "USAGE: $0 out.space inputFile isPeriodic [multicenter]\n";
-defined($multicenter) or $multicenter = 0;
+my ($outSpace, $templateInput, $isPeriodic) = @ARGV;
+defined($isPeriodic) or die "USAGE: $0 out.space inputFile isPeriodic\n";
 
 my $isAinur = OmegaUtils::isAinur($templateInput);
 my $geometryName;
@@ -30,18 +29,22 @@ if ($isAinur) {
 	$centralSite =~ s/ *\] *; *$//;
 }
 
-print STDERR "Central site is $centralSite\n";
-
 my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $geometrySubName};
 
 $hptr->{"centralSite"} = $centralSite;
 $hptr->{"isPeriodic"} = $isPeriodic;
-$hptr->{"multicenter"} = $multicenter;
+$hptr->{"multicenter"} = 0;
 $hptr->{"isAinur"} = $isAinur;
 $geometry->{"isPeriodic"} = $isPeriodic;
 
 my %h;
 readSpaceValues(\%h, $outSpace);
+
+if ($geometrySubName eq "ModifierTakeOddOnly") {
+	OmegaUtils::modifierTakeOddOnly(\%h, \$geometry, $hptr);
+}
+
+print STDERR "Central site is ".$hptr->{"centralSite"}."\n";
 
 my $outSpectrum = $outSpace;
 $outSpectrum =~ s/\.space/\.spectrum/;

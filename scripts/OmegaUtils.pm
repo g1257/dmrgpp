@@ -9,6 +9,35 @@ package OmegaUtils;
 
 my $pi = Math::Trig::pi;
 
+sub modifierTakeOddOnly
+{
+	my ($h, $geometry, $hptr) = @_;
+	my $counter = 0;
+	foreach my $omega (keys %$h) {
+		my $ptr = $h->{"$omega"};
+		my $n = scalar(@$ptr);
+		my $j = 0;
+		my @array;
+		for (my $i = 0; $i < $n; ++$i) {
+			next unless ($i & 1);
+			my $a = $ptr->[$i];
+			my @tempArray = @$a;
+			$array[$j++] = \@tempArray;
+		}
+		
+		$h->{"$omega"} = \@array;
+		++$counter;
+	}
+	
+	$$geometry = {"name" => "chain", "leg" => 1, "subname" => ""};
+	my $center = $hptr->{"centralSite"};
+	if ($center) {
+		die "$0: Expected odd center\n" unless ($center & 1);
+		$hptr->{"centralSite"} = ($center - 1)/2;
+		print STDERR "$0: modifierTakeOddOnly ended up with $counter omega values\n";
+	}																	
+}
+
 sub isAinur
 {
 	my ($file) = @_;

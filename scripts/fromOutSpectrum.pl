@@ -28,4 +28,11 @@ if ($isAinur) {
 
 my $geometry = {"name" => $geometryName, "leg" => $geometryLeg, "subname" => $geometrySubName};
 
+my %modifierActions = ("TakeOddOnly" => \&OmegaUtils::modifierTakeOddOnly );
+
+if ($geometrySubName eq "ModifierTakeOddOnly") {
+	my %h; # bogus
+	OmegaUtils::modifierTakeOddOnly(\%h, \$geometry, $hptr);
+}
+
 OmegaUtils::printGnuplot($outSpectrum, $geometry, $isPeriodic, $zeroAtCenter, $nonNegativeOnly);
