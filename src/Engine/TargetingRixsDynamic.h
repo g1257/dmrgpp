@@ -645,19 +645,19 @@ private:
 
 		VectorSizeType indices;
 		VectorSizeType indices2;
-		SizeType numberOfWeights = 0;
+		//SizeType numberOfWeights = 0;
 
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
 			indices = {6, 8, 9};
 			indices2 = {7, 10, 11};
-			numberOfWeights = 12;
+			//numberOfWeights = 12;
 		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
 			indices = {6, 8, 9, 10, 11};
 			indices2 = {7, 12, 13, 14, 15};
-			numberOfWeights = 16;
+			//numberOfWeights = 16;
 		}
 
-		assert(numberOfWeights > 0);
+		//assert(numberOfWeights > 0);
 		assert(indices.size() > 0 && indices2.size() > 0);
 		calcVectors(indices, Eg, direction, block1, !firstCall_, false);
 		calcVectors(indices2, Eg, direction, block1, !firstCall_, true);
