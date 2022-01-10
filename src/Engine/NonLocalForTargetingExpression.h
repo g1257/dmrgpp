@@ -32,6 +32,21 @@ public:
 	typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 
+	struct TimeParams {
+
+		TimeParams(SizeType nsites)
+		    : timeSteps(3), tau(0.1), advanceEach(nsites - 2), algo("Krylov"), disposition(0)
+		{}
+
+		SizeType timeSteps;
+		RealType tau = 0.1;
+		SizeType advanceEach;
+		PsimagLite::String algo;
+		VectorRealType chebyTransform;
+		SizeType disposition;
+		VectorSizeType depends;
+	};
+
 	NonLocalForTargetingExpression(const AuxiliaryType& aux)
 	    : aux_(aux), progress_("NonLocalForTargetingExpression")
 	{}
@@ -58,29 +73,32 @@ public:
 		VectorSizeType block1(1, site);
 		static const bool isLastCall = true;
 
-		SizeType timeSteps = 3; // Fixme read from string TODO FIXME
-		RealType tau = 0.1; // Fixme read from string TODO FIXME
-		SizeType advanceEach = aux_.pVectors().aoe().model().superGeometry().numberOfSites() - 2;
-		PsimagLite::String algo = "Krylov";
-		VectorRealType chebyTransform;
-		SizeType disposition = 0;
-		extractParamsFromName(tau, timeSteps, advanceEach, algo, chebyTransform, disposition, name);
+		const SizeType nsites = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
+		TimeParams timeParams(nsites);
+		extractParamsFromName(timeParams, name);
 
 		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
 
-		auxPtr->pVectors().initTimeVectors(timeSteps, tau, algo, chebyTransform);
+		auxPtr->pVectors().initTimeVectors(timeParams.timeSteps,
+		                                   timeParams.tau,
+		                                   timeParams.algo,
+		                                   timeParams.chebyTransform);
 
 		if (!oneTimeEvolution) {
 			oneTimeEvolution = new OneTimeEvolutionType(firstIndex,
 			                                            *srcVwo,
 			                                            srcKet,
-			                                            disposition,
-			                                            timeSteps,
+			                                            timeParams.disposition,
+			                                            timeParams.timeSteps,
 			                                            aux_.pVectors());
 			aux_.timeEvolve().pushBack(oneTimeEvolution);
 		}
 
-		bool timeHasAdvanced = advanceInTimeOrNot(*oneTimeEvolution, advanceEach, site, tau);
+		bool timeHasAdvanced = advanceInTimeOrNot(*oneTimeEvolution,
+		                                          timeParams.advanceEach,
+		                                          timeParams.depends,
+		                                          site,
+		                                          timeParams.tau);
 
 		assert(oneTimeEvolution->indices().size() > 1);
 		const SizeType last = oneTimeEvolution->indices().size() - 1;
@@ -111,9 +129,12 @@ private:
 
 	bool advanceInTimeOrNot(OneTimeEvolutionType& oneTimeEvolution,
 	                        SizeType advanceEach,
+	                        const VectorSizeType& depends,
 	                        SizeType site,
 	                        RealType tau)
 	{
+		if (!passDepends(depends)) return false;
+
 		static const bool advanceOnlyAtBorder = true;
 		const SizeType sites = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
 		const bool weAreAtBorder = (site == 0 || site == sites - 1);
@@ -146,13 +167,15 @@ private:
 		return timeHasAdvanced;
 	}
 
-	static void extractParamsFromName(RealType& tau,
-	                                  SizeType& timeSteps,
-	                                  SizeType& advanceEach,
-	                                  PsimagLite::String& algo,
-	                                  VectorRealType& chebyTransform,
-	                                  SizeType& disposition,
-	                                  PsimagLite::String name)
+	bool passDepends(const VectorSizeType& depends)
+	{
+		for (auto it = depends.begin(); it != depends.end(); ++it)
+			if (!aux_.pVectors()(*it).isDone()) return false;
+
+		return true;
+	}
+
+	static void extractParamsFromName(TimeParams& timeParams, PsimagLite::String name)
 	{
 		//TimeEvolve{tau=0.1,steps=5,advanceEach=14,disposition=FIXME,algorithm=FIXME,depends=P1}
 		const PsimagLite::String tev = "TimeEvolve";
@@ -177,16 +200,18 @@ private:
 			getKeyAndValue(key, value, *it);
 			if (value == "~") continue;
 			if (key == "advanceEach" or key == "AdvanceEach" or key == "advanceeach") {
-				advanceEach = PsimagLite::atoi(value);
+				timeParams.advanceEach = PsimagLite::atoi(value);
 			} else if (key == "tau") {
-				tau = PsimagLite::atof(value);
+				timeParams.tau = PsimagLite::atof(value);
 			} else if (key == "disposition") {
-				disposition = PsimagLite::atoi(value);
+				timeParams.disposition = PsimagLite::atoi(value);
 			} else if (key == "steps") {
-				timeSteps = PsimagLite::atoi(value);
+				timeParams.timeSteps = PsimagLite::atoi(value);
 			} else if (key == "algorithm") {
-				algo = getChebyIfNeeded(chebyTransform, value);			}
-			else {
+				timeParams.algo = getChebyIfNeeded(timeParams.chebyTransform, value);
+			} else if (key == "depends") {
+				getDepends(timeParams.depends, value);
+			} else {
 				err("Unrecognized key=" + key + "\n");
 			}
 		}
@@ -209,9 +234,22 @@ private:
 		return algo;
 	}
 
+	static void getDepends(VectorSizeType& depends, PsimagLite::String value)
+	{
+		VectorStringType tokens;
+		PsimagLite::split(tokens,  value, ":");
+		for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+			PsimagLite::String pvector = *it;
+			if (pvector.length() < 2 || pvector[0] != 'P')
+				err("Expecting P followed by number, not " + pvector + "\n");
+			pvector = pvector.substr(1, pvector.length() - 1);
+			depends.push_back(PsimagLite::atoi(pvector));
+		}
+	}
+
 	static void getKeyAndValue(PsimagLite::String& key,
-	                    PsimagLite::String& value,
-	                    PsimagLite::String str)
+	                           PsimagLite::String& value,
+	                           PsimagLite::String str)
 	{
 		VectorStringType tokens;
 		PsimagLite::split(tokens, str, "=");
