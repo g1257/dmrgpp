@@ -154,10 +154,12 @@ private:
 	                                  SizeType& disposition,
 	                                  PsimagLite::String name)
 	{
-		//TimeEvolve{0.1,5,14}
+		//TimeEvolve{tau=0.1,steps=5,advanceEach=14,disposition=FIXME,algorithm=FIXME,depends=P1}
 		const PsimagLite::String tev = "TimeEvolve";
 		PsimagLite::String te = name.substr(0, tev.length());
-		assert(te == tev);
+		if (te != tev)
+			err(ttos(__FILE__) + " Only " + tev + " implemented, not " + te + "\n");
+
 		name = name.substr(tev.length(), name.length() - tev.length());
 		PsimagLite::String buffer;
 		const SizeType m = name.length();
@@ -169,33 +171,24 @@ private:
 
 		VectorStringType tokens;
 		PsimagLite::split(tokens, buffer, ",");
-		const SizeType n = tokens.size();
-		switch (n) {
-		case 5:
-			if (tokens[4] != "~")
-				disposition = PsimagLite::atoi(tokens[4]);
-			// fall through
-		case 4:
-			if (tokens[3] != "~")
-				algo = getChebyIfNeeded(chebyTransform, tokens[3]);
-			// fall through
-		case 3:
-			if (tokens[2] != "~")
-				advanceEach = PsimagLite::atoi(tokens[2]);
-			// fall through
-		case 2:
-			if (tokens[1] != "~")
-				timeSteps = PsimagLite::atoi(tokens[1]);
-			// fall through
-		case 1:
-			if (tokens[0] != "~")
-				tau = PsimagLite::atof(tokens[0]);
-			break;
-		case 0:
-			break;
-		default:
-			err("Up to three tokens can be given\n");
-			break;
+		for (auto it = tokens.begin(); it != tokens.end(); ++it) {
+			PsimagLite::String key;
+			PsimagLite::String value;
+			getKeyAndValue(key, value, *it);
+			if (value == "~") continue;
+			if (key == "advanceEach" or key == "AdvanceEach" or key == "advanceeach") {
+				advanceEach = PsimagLite::atoi(value);
+			} else if (key == "tau") {
+				tau = PsimagLite::atof(value);
+			} else if (key == "disposition") {
+				disposition = PsimagLite::atoi(value);
+			} else if (key == "steps") {
+				timeSteps = PsimagLite::atoi(value);
+			} else if (key == "algorithm") {
+				algo = getChebyIfNeeded(chebyTransform, value);			}
+			else {
+				err("Unrecognized key=" + key + "\n");
+			}
 		}
 	}
 
@@ -214,6 +207,19 @@ private:
 		v[1] = PsimagLite::atof(tokens[2]);
 
 		return algo;
+	}
+
+	static void getKeyAndValue(PsimagLite::String& key,
+	                    PsimagLite::String& value,
+	                    PsimagLite::String str)
+	{
+		VectorStringType tokens;
+		PsimagLite::split(tokens, str, "=");
+		if (tokens.size() != 2)
+			err("Expected key=value, not " + str + "\n");
+
+		key = tokens[0];
+		value = tokens[1];
 	}
 
 	const AuxiliaryType& aux_;
