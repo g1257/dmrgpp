@@ -870,9 +870,26 @@ private:
 		VectorStringType tokens;
 		PsimagLite::split(tokens, str, ",");
 		const SizeType n = tokens.size();
+		if (n == 1) {
+			vec.resize(nsites);
+			vectorGivenByFormula(vec, tokens[0]);
+			return;
+		}
+
 		if (n != nsites)
 			err("Expected " + ttos(nsites) + " entries but got " + ttos(n) + "\n");
 		vec.swap(tokens);
+	}
+
+	static void vectorGivenByFormula(VectorStringType& vec, PsimagLite::String str)
+	{
+
+		const SizeType nsites = vec.size();
+		for (SizeType site = 0; site < nsites; ++site) {
+			vec[site] = CanonicalExpressionType::replaceAll(str,
+			                                                                    "%s",
+			                                                                    site).second;
+		}
 	}
 
 	static void invalidateIfNeeded(OperatorType& op, SizeType site, PsimagLite::String what)
