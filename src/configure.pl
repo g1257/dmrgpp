@@ -89,7 +89,7 @@ for (my $i = 0; $i < $templates; ++$i) {
 	$dotos .= " $name.o ";
 }
 
-my %dmrgMain = (name => 'dmrg', dotos => "$dotos KronUtil/libkronutil.a");
+my %dmrgMain = (name => 'dmrg', dotos => "$dotos ./dmrgppAdditional.so KronUtil/libkronutil.a");
 
 push @drivers,\%dmrgMain;
 
@@ -113,7 +113,7 @@ sub createMakefile
 	my ($drivers, $args) = @_;
 	unlink("Makefile.dep");
 	NewMake::backupMakefile();
-	$args->{"additional3"} = "operator";
+	$args->{"additional3"} = "operator dmrgppAdditional.so";
 
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";
@@ -135,6 +135,12 @@ testQn: testQn.o Qn.o
 
 KronUtil/libkronutil.a:
 	\$(MAKE) -C KronUtil
+
+dmrgppAdditional.o: dmrgppAdditional.cpp Makefile
+	\$(CXX) \$(CPPFLAGS) -fpic -c dmrgppAdditional.cpp
+
+dmrgppAdditional.so: dmrgppAdditional.o Makefile
+	\$(CXX) -shared -o dmrgppAdditional.so dmrgppAdditional.o
 
 libdmrgpp.a: Makefile $libUnits
 \tar rcs libdmrgpp.a $libUnits

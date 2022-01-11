@@ -92,6 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "OutputFileOrNot.h"
 #include "CanonicalExpression.h"
 #include "OperatorSpec.h"
+#include "AdditionalOnSiteHamiltonianExt.h"
 
 namespace Dmrg {
 
@@ -756,6 +757,12 @@ protected:
 	{
 		if (onSiteHadd_.size() == 0) return;
 
+		if (onSiteHadd_.size() == 1 && onSiteHadd_[0] == "!") {
+			assert(block.size() == 1);
+			additionalOnSiteHamiltonianExt(hmatrix, block[0], time);
+			return;
+		}
+
 		if (onSiteHadd_.size() != superGeometry().numberOfSites())
 			err("additionalOnSiteHamiltonian: wrong number of entries\n");
 
@@ -797,8 +804,14 @@ private:
 
 	static void stringToVectorOfStrings(VectorStringType& vec, PsimagLite::String str)
 	{
+		if (str.length() == 0)
+			err("stringToVectorOfStrings: Expecting string of length > 0\n");
+
 		if (str[0] == '[') {
 			stringToVectorOfStringsCommaMode(vec, str);
+		} else if (str == "!") {
+			vec.resize(1); // external mode
+			vec[0] = "!";
 		} else {
 			stringToVectorOfStringsPlusMode(vec, str);
 		}
