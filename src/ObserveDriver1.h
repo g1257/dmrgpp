@@ -12,7 +12,11 @@ bool observeOneFullSweep(IoInputType& io,
                          SizeType orbitals)
 {
 	typedef typename ModelType::SuperGeometryType SuperGeometryType;
-	typedef Observer<VectorWithOffsetType,ModelType,IoInputType> ObserverType;
+	typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename ModelType::MatrixType MatrixType;
+	typedef typename ModelType::VectorType VectorType;
+	typedef ObserverHelper<IoInputType,MatrixType,VectorType,VectorWithOffsetType,LeftRightSuperType> ObserverHelperType;
+	typedef Observer<ObserverHelperType,ModelType> ObserverType;
 	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
 	typedef typename ObservableLibraryType::ManyPointActionType ManyPointActionType;
 	typedef typename PsimagLite::OneOperatorSpec::SiteSplit SiteSplitType;
