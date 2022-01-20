@@ -121,6 +121,7 @@ Table* (if any): 1, column 7
 Page* where more or less this feature is used: 2230
 [* Refers to published version.]
 
+70) ModelHeisenberg2: Jx SxSx - Jy SybarSybar + Jz SzSz
 80) Heisenberg spin 1 with 6 sites
 82) Heisenberg spin 1 with 6 sites AnistropyD=4
 84) Heisenberg spin 1 with 6 sites J = 0 AnistropyE=4
