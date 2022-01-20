@@ -124,6 +124,7 @@ public:
 			return true;
 		}
 
+		// give only su2properties
 		template<typename OpaqueOp>
 		void push(const OpaqueOp& op1,
 		          char mod1,
@@ -134,13 +135,36 @@ public:
 			push(op1, mod1, op2, mod2, [](ComplexOrRealType&) {}, su2properties);
 		}
 
+		// give only lambda
 		template<typename OpaqueOp>
 		void push(const OpaqueOp& op1,
 		          char mod1,
 		          const OpaqueOp& op2,
-		          char mod2
-		          ,LambdaType vModifier = [](ComplexOrRealType&) {}
-		,Su2Properties su2properties = Su2Properties())
+		          char mod2,
+		          LambdaType modifier)
+		{
+			push(op1, mod1, op2, mod2, modifier, Su2Properties());
+		}
+
+		// give nothing
+		template<typename OpaqueOp>
+		void push(const OpaqueOp& op1,
+		          char mod1,
+		          const OpaqueOp& op2,
+		          char mod2)
+		{
+			return push(op1, mod1, op2, mod2,  [](ComplexOrRealType&) {}, Su2Properties());
+
+		}
+
+		// give all
+		template<typename OpaqueOp>
+		void push(const OpaqueOp& op1,
+		          char mod1,
+		          const OpaqueOp& op2,
+		          char mod2,
+		          LambdaType vModifier,
+		          Su2Properties su2properties)
 		{
 			if (links_.size() > 0) {
 				if (!areSitesCompatible2(VectorSizeType{op1.kindOfSite, op2.kindOfSite}))
@@ -404,8 +428,8 @@ public:
 			const SizeType termIndexForGeom = termIndexForGeometry(termIndex);
 			PsimagLite::String name = terms_[termIndexForGeom]->name();
 			typename VectorStringType::const_iterator x = std::find(input.begin(),
-			                                                      input.end(),
-			                                                      name);
+			                                                        input.end(),
+			                                                        name);
 			if (x == input.end())
 				err("ModelLinks: INTERNAL ERROR term " + name + " termIndex= " +
 				    ttos(termIndex) + "\n");
