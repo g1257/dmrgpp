@@ -323,29 +323,19 @@ protected:
 
 	void fillModelLinks()
 	{
-		bool isSu2 = BasisType::useSu2Symmetry();
+		if (BasisType::useSu2Symmetry())
+			err("SU(2) no longer supported\n");
 
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 
 		OpForLinkType splus("splus");
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
-		{ value *= (isSu2) ? -0.5 : 0.5;};
+		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *= 0.5;};
 
 		typename ModelTermType::Su2Properties su2properties(2, -1, 2);
 		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
 
-		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
-
-		if (!isSu2) {
-			OpForLinkType sz("sz");
-			szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
-		} else {
-			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
-			{ if (isSu2) value = -value;};
-			typename ModelTermType::Su2Properties su2properties(2, -1, 2);
-			spsm.push(splus, 'N', splus, 'C', valueModifierTermOther, su2properties);
-		}
+		connectionSzSz();
 
 		if (additional_ == "Anisotropic") {
 
@@ -360,6 +350,14 @@ protected:
 	}
 
 private:
+
+	void connectionSzSz()
+	{
+		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+
+		OpForLinkType sz("sz");
+		szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
+	}
 
 	//! Find S^+_site in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(SizeType site,
