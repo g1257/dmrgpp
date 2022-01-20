@@ -280,7 +280,8 @@ protected:
 			                  -1,
 			                  su2related);
 			this->createOpsLabel("splus").push(myOp);
-			this->makeTrackable("splus");
+			if (additional_ != "2")
+				this->makeTrackable("splus");
 
 			myOp.dagger();
 			this->createOpsLabel("sminus").push(myOp);
@@ -297,7 +298,7 @@ protected:
 			this->makeTrackable("sz");
 
 			// Set the operators S^x_i in the natural basis
-			tmpMatrix = findSxMatrices(i,natBasis);
+			tmpMatrix = findSxOrSyBarMatrices(i,natBasis, "sx");
 			typename OperatorType::Su2RelatedType su2related3;
 			OperatorType myOp3(tmpMatrix,
 			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -306,8 +307,20 @@ protected:
 			                   su2related3);
 			this->createOpsLabel("sx").push(myOp3);
 
-			if (additional_ == "Anisotropic")
+			if (additional_ == "Anisotropic" || additional_ == "2")
 				this->makeTrackable("sx");
+
+			// Set the operators S^ybar_i in the natural basis
+			tmpMatrix = findSxOrSyBarMatrices(i, natBasis, "sybar");
+			OperatorType syBarOp(tmpMatrix,
+			                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                     PairType(0, 0),
+			                     1,
+			                     su2related3);
+			this->createOpsLabel("sybar").push(syBarOp);
+
+			if (additional_ == "2")
+				this->makeTrackable("sybar");
 
 			aklt_.fillLabeledOperators(i, myOp.getCRS(), myOp2.getCRS());
 
@@ -323,6 +336,11 @@ protected:
 
 	void fillModelLinks()
 	{
+		if (additional_ == "2") {
+			fillModelLinks2();
+			return;
+		}
+
 		if (BasisType::useSu2Symmetry())
 			err("SU(2) no longer supported\n");
 
@@ -350,6 +368,20 @@ protected:
 	}
 
 private:
+
+	void fillModelLinks2()
+	{
+		ModelTermType& sxsx = ModelBaseType::createTerm("sxsx");
+		OpForLinkType sx("sx");
+		sxsx.push(sx, 'N', sx, 'N');
+
+		auto sybarsybarModifier = [](ComplexOrRealType& value) { value *= -1.0;};
+		ModelTermType& sybarsybar = ModelBaseType::createTerm("sybarsybar");
+		OpForLinkType sybar("sybar");
+		sybarsybar.push(sybar, 'N', sybar, 'N', sybarsybarModifier);
+
+		connectionSzSz();
+	}
 
 	void connectionSzSz()
 	{
@@ -460,16 +492,21 @@ private:
 	}
 
 
-	SparseMatrixType findSxMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
+	SparseMatrixType findSxOrSyBarMatrices(SizeType site,
+	                                       const HilbertBasisType& natBasis,
+	                                       PsimagLite::String what) const
 	{
+		if (what != "sx" && what != "sybar")
+			err("findSxOrSyBarMatrices: don't know how to calculate " + what + "\n");
+
+		const RealType sign = (what == "sx") ? 1.0 : -1.0;
 		SparseMatrixType Splus_temp=findSplusMatrices(site,natBasis);
 		SparseMatrixType Sminus_temp,Sx;
 		transposeConjugate(Sminus_temp,Splus_temp);
-		RealType tmp=0.5;
+		const RealType tmp = 0.5;
 
 		Sx = tmp*Splus_temp;
-		Sx += tmp*Sminus_temp;
+		Sx += sign*tmp*Sminus_temp;
 
 		return Sx;
 	}

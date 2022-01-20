@@ -254,7 +254,7 @@ public:
 		}
 	}
 
-	virtual void timeHasAdvanced(RealType&)
+	void timeHasAdvanced()
 	{
 		linksSeen_.clear();
 		PsimagLite::OstringStream msgg(std::cout.precision());

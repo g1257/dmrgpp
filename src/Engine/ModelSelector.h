@@ -149,6 +149,8 @@ public:
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Anisotropic");
 		} else if (name_ == "Aklt") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Aklt");
+		} else if (name_ == "Heisenberg2") {
+			model_ = new ModelHeisenbergType(solverParams,io,geometry,"2");
 		} else if (name_ == "HubbardOneBand") {
 			model_ = new ModelHubbardType(solverParams, io, geometry, "");
 		} else if (name_ == "HeisenbergAncillaC") {
