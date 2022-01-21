@@ -24,18 +24,18 @@ sub modifierTakeOddOnly
 			my @tempArray = @$a;
 			$array[$j++] = \@tempArray;
 		}
-		
+
 		$h->{"$omega"} = \@array;
 		++$counter;
 	}
-	
+
 	$$geometry = {"name" => "chain", "leg" => 1, "subname" => ""};
 	my $center = $hptr->{"centralSite"};
 	if ($center) {
 		die "$0: Expected odd center\n" unless ($center & 1);
 		$hptr->{"centralSite"} = ($center - 1)/2;
 		print STDERR "$0: modifierTakeOddOnly ended up with $counter omega values\n";
-	}																	
+	}
 }
 
 sub isAinur
@@ -45,7 +45,7 @@ sub isAinur
 	$_ = <FILE>;
 	close(FILE);
 	chomp;
-	return $_ eq "##Ainur1.0";
+	return ($_ =~ /^##Ainur[ \t]*\d+/);
 }
 
 sub getLabels
@@ -629,7 +629,7 @@ sub fourierChainGC
 			die "$0: FATAL ChainGC: wrong central site $centralSite\n";
 		}
 	}
-	
+
 	my $cSite = int($centralSite/2);
 	my $numberOfQs = (defined($mMax)) ? $mMax : $nOver2;
 	for (my $m = 0; $m < $numberOfQs; ++$m) {
