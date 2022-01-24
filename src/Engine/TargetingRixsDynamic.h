@@ -274,7 +274,7 @@ public:
 		SizeType site = block1[0];
 
 		SizeType numberOfSites = this->lrs().super().block().size();
-		bool weAreAtBorder = site!=0 && site!=numberOfSites-1;
+		bool weAreAtBorder = site==0 || site==numberOfSites-1;
 		if (!weAreAtBorder)
 			this->common().aoeNonConst().wftSome(site, 0, 6);
 
