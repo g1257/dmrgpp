@@ -200,6 +200,7 @@ public:
 		assert(energies.size() > 0);
 		RealType Eg = energies[0];
 		evolveInternal(Eg,direction,block1,loopNumber);
+
 		SizeType numberOfSites = this->lrs().super().block().size();
 
 		if (site > 1 && site < numberOfSites - 2)
@@ -214,6 +215,7 @@ public:
 		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1, x);
 		evolveInternal(Eg,direction,block,loopNumber);
+
 	}
 
 	bool end() const
@@ -251,12 +253,34 @@ private:
 		VectorWithOffsetType phiNew;
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
+
+		SizeType numberOfSites = this->lrs().super().block().size();
+		bool doBorderIfBorder = (site<1 || site>=numberOfSites-1);
+
+		if (doBorderIfBorder) {
+			if (loopNumber >= this->model().params().finiteLoop.size()-1) {
+				if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+					if (site >= numberOfSites - 1) {
+						this->common().cocoon(block1, direction, false);
+						return;
+					}
+				} else {
+					if (site < 1) {
+						this->common().cocoon(block1, direction, false);
+						return;
+					}
+				}
+			}
+			this->common().cocoon(block1, direction, false);
+		}
+
 		this->common().aoeNonConst().getPhi(&phiNew,
 		                                    Eg,
 		                                    direction,
 		                                    site,
 		                                    loopNumber,
 		                                    tstStruct_);
+
 
 		PairType startEnd(0, tstStruct_.times().size());
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
@@ -275,8 +299,7 @@ private:
 		                                             block1,
 		                                             isLastCall);
 
-		bool doBorderIfBorder = false;
-		this->common().cocoon(block1, direction, doBorderIfBorder);
+		this->common().cocoon(block1, direction, false);
 
 		PsimagLite::String predicate = this->model().params().printHamiltonianAverage;
 		const SizeType center = this->model().superGeometry().numberOfSites()/2;

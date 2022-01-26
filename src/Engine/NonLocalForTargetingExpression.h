@@ -34,8 +34,8 @@ public:
 
 	struct TimeParams {
 
-		TimeParams(SizeType nsites)
-		    : timeSteps(3), tau(0.1), advanceEach(nsites - 2), algo("Krylov"), disposition(0)
+		TimeParams(SizeType nsites, RealType Eg1)
+		    : timeSteps(3), tau(0.1), advanceEach(nsites - 2), algo("Krylov"), disposition(0), Eg(Eg1)
 		{}
 
 		SizeType timeSteps;
@@ -45,6 +45,8 @@ public:
 		VectorRealType chebyTransform;
 		SizeType disposition;
 		VectorSizeType depends;
+		RealType Eg;
+
 	};
 
 	NonLocalForTargetingExpression(const AuxiliaryType& aux)
@@ -74,7 +76,7 @@ public:
 		static const bool isLastCall = true;
 
 		const SizeType nsites = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
-		TimeParams timeParams(nsites);
+		TimeParams timeParams(nsites,aux_.Eg());
 		extractParamsFromName(timeParams, name);
 
 		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
@@ -109,7 +111,7 @@ public:
 		        : srcVwo;
 
 		auxPtr->pVectors().aoeNonConst().calcTimeVectors(oneTimeEvolution->indices(),
-		                                                 aux_.Eg(),
+		                                                 timeParams.Eg,
 		                                                 *phi,
 		                                                 aux_.direction(),
 		                                                 allOperatorsApplied,
@@ -209,6 +211,8 @@ private:
 				timeParams.timeSteps = PsimagLite::atoi(value);
 			} else if (key == "algorithm") {
 				timeParams.algo = getChebyIfNeeded(timeParams.chebyTransform, value);
+			} else if (key == "EnergyForExp" or key == "energyforexp") {
+				timeParams.Eg = PsimagLite::atof(value);
 			} else if (key == "depends") {
 				getDepends(timeParams.depends, value);
 			} else {

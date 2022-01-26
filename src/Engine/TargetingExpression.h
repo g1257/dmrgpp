@@ -163,7 +163,7 @@ public:
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType& block1,
 	            const BlockType&,
-	            SizeType)
+	            SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
 
@@ -200,6 +200,16 @@ public:
 				    " but globalTime= " + ttos(globalTime) + "\n");
 		};
 
+		if (loopNumber >=this->model().params().finiteLoop.size()-1) {
+			if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+				if (site >= numberOfSites - 1)
+					return;
+			} else {
+				if (site < 1)
+					return;
+			}
+		}
+
 		this->common().cocoon(block1, direction, doBorderIfBorder, &testLambda); // in-situ
 
 		// border trigger below
@@ -217,7 +227,7 @@ public:
 
 		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1, x);
-		evolve(energies, direction, block, block, 0);
+		evolve(energies, direction, block, block, loopNumber);
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
