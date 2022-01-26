@@ -259,13 +259,16 @@ protected:
 
 			transformByU(tmpMatrix);
 
-			OperatorType myOp(tmpMatrix,
+			SparseMatrixType tmpMatrix2;
+			transposeConjugate(tmpMatrix2, tmpMatrix);
+
+			OperatorType myOp(tmpMatrix2,
 			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
 			                  typename OperatorType::PairType(1,1-sigma),
 			                  asign,
 			                  su2related);
 
-			c.push(myOp);
+			c.push(myOp,(sigma == 0) ? "up" : "down");
 		}
 
 		OpsLabelType& n = this->createOpsLabel("n");
@@ -323,7 +326,8 @@ protected:
 		}
 
 		{
-			OpsLabelType& doubleOcc = this->createOpsLabel("doubleM");
+			OpsLabelType& doubleOcc = this->createOpsLabel("double");
+			OpsLabelType& doubleOccM = this->createOpsLabel("doubleM");
 			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, natBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, natBasis);
 			PsimagLite::Matrix<SparseElementType> t1 =
@@ -337,9 +341,17 @@ protected:
 			        multiplyTc(nMatrixDown,nMatrixUp);
 
 			t1 = t1+(-2.0)*t3;
+
 			SparseMatrixType tmp4(t1);
 			typename OperatorType::Su2RelatedType su2Related;
-			doubleOcc.push(OperatorType(tmp4,
+			doubleOccM.push(OperatorType(tmp4,
+			                            ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                            typename OperatorType::PairType(0,0),
+			                            1.0,
+			                            su2Related));
+
+			SparseMatrixType tmp5(t3);
+			doubleOcc.push(OperatorType(tmp5,
 			                            ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                            typename OperatorType::PairType(0,0),
 			                            1.0,
@@ -361,7 +373,10 @@ protected:
 
 		transformByU(tmpMatrix);
 
-		OperatorType myOp2(tmpMatrix,
+		SparseMatrixType tmpMatrix2;
+		transposeConjugate(tmpMatrix2, tmpMatrix);
+
+		OperatorType myOp2(tmpMatrix2,
 		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
 		                   PairType(2, 2),
 		                   -1,
@@ -403,13 +418,16 @@ protected:
 
 				transformByU(tmpMatrix);
 
-				OperatorType myOp3(tmpMatrix,
+				SparseMatrixType tmpMatrix2;
+				transposeConjugate(tmpMatrix2, tmpMatrix);
+
+				OperatorType myOp3(tmpMatrix2,
 				                   ProgramGlobals::FermionOrBosonEnum::FERMION,
 				                   typename OperatorType::PairType(1,1-sigma),
 				                   asign,
 				                   su2related3);
 
-				cx.push(myOp3);
+				cx.push(myOp3,(sigma == 0) ? "up" : "down");
 			}
 		} else if (isLrh_) {
 				this->makeTrackable("disp");
