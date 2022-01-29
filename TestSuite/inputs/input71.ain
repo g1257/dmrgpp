@@ -1,0 +1,34 @@
+##Ainur 1.0
+
+#H = 1.0*SxSx + 2.0*SySy + 3.0*SzSz
+TotalNumberOfSites=8;
+#There are three terms...
+NumberOfTerms=3;
+
+#... this first one is for SxSx
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1.0];
+
+#... this second one is for SySy
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[2.0];
+
+#... this second one is for SzSz
+gt2:GeometryKind="chain";
+gt2:GeometryOptions="ConstantValues";
+gt2:dir0:Connectors=[3.0];
+
+Model="Heisenberg2";
+HeisenbergTwiceS=1;
+
+SolverOptions="twositedmrg";
+Version="247b335fe1542909b90be8647456bfd8fd56191c";
+OutputFile="data71";
+InfiniteLoopKeptStates=60;
+FiniteLoops=[[3, 100, 0],[-6, 100, 0]];
+
+MagneticFieldX=[0.42,...];
+MagneticFieldZ=[-1.42,...];
+
