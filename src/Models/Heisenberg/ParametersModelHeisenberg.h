@@ -107,25 +107,18 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 		SizeType nsites = 0;
 		io.readline(nsites, "TotalNumberOfSites=");
 
-		bool hasField = false;
 		try {
-			magneticFieldV.resize(nsites);
-			io.read(magneticFieldV, "MagneticField");
-			hasField = true;
-		} catch (std::exception&) {}
+			magneticFieldX.resize(nsites);
+			io.read(magneticFieldX, "MagneticFieldX");
+		} catch (std::exception&) {
+			magneticFieldX.clear();
+		}
 
-		if (hasField) {
-			magneticFieldDirection = "z";
-			try {
-				io.readline(magneticFieldDirection, "MagneticFieldDirection=");
-			} catch (std::exception&) {
-				std::cerr<<"WARNING: MagneticFieldDirection= not given, assuming z\n";
-			}
-
-			if (magneticFieldDirection != "x" && magneticFieldDirection != "z")
-				err("magneticFieldDirection must be in {x, z}\n");
-		} else {
-			magneticFieldV.clear();
+		try {
+			magneticFieldZ.resize(nsites);
+			io.read(magneticFieldZ, "MagneticFieldZ");
+		} catch (std::exception&) {
+			magneticFieldZ.clear();
 		}
 
 		try {
@@ -137,14 +130,6 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 		} catch (std::exception&) {}
 	}
 
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
-	{
-		return 0;
-	}
-
 	void write(PsimagLite::String label1,
 	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -152,18 +137,31 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 		io.createGroup(label);
 		BaseType::write(label, io);
 		io.write(label + "/twiceTheSpin", twiceTheSpin);
-		io.write(label + "/magneticFieldV", magneticFieldV);
-		io.write(label + "/magneticFieldDirection", magneticFieldDirection);
+		io.write(label + "/magneticFieldX", magneticFieldX);
+		io.write(label + "/magneticFieldZ", magneticFieldZ);
 		io.write(label + "/anisotropyD", anisotropyD);
 		io.write(label + "/anisotropyE", anisotropyE);
+	}
+
+	static void checkMagneticField(SizeType s, unsigned char c, SizeType n)
+	{
+		if (s == 0 || s == n) return;
+
+		PsimagLite::String msg("ModelHeisenberg: If provided, ");
+		msg += " MagneticField" + ttos(c) + " must be a vector of " +
+		        ttos(n) + " entries.\n";
+		err(msg);
 	}
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream &os,
 	                                const ParametersModelHeisenberg& parameters)
 	{
-		os<<"MagneticField="<<parameters.magneticFieldV<<"\n";
-		os<<"magneticFieldDirection="<<parameters.magneticFieldDirection<<"\n";
+		if (!parameters.magneticFieldX.empty())
+			os<<"MagneticFieldX="<<parameters.magneticFieldX<<"\n";
+		if (!parameters.magneticFieldZ.empty())
+			os<<"MagneticFieldZ="<<parameters.magneticFieldZ<<"\n";
+
 		os<<"AnisotropyD="<<parameters.anisotropy<<"\n";
 		os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
 		os<<parameters.targetQuantum;
@@ -172,8 +170,8 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 
 	SizeType twiceTheSpin;
 	SizeType twiceTheSpinBorder;
-	PsimagLite::String magneticFieldDirection;
-	VectorRealType magneticFieldV;
+	VectorRealType magneticFieldX;
+	VectorRealType magneticFieldZ;
 	VectorRealType anisotropyD;
 	VectorRealType anisotropyE;
 };

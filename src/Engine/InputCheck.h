@@ -185,7 +185,8 @@ public:
 		knownLabels_.push_back("TruncationTolerance");
 		knownLabels_.push_back("PotentialT");
 		knownLabels_.push_back("omega");
-		knownLabels_.push_back("MagneticField");
+		knownLabels_.push_back("MagneticFieldX");
+		knownLabels_.push_back("MagneticFieldZ");
 		knownLabels_.push_back("SpinOrbit");
 		knownLabels_.push_back("DegeneracyMax");
 		knownLabels_.push_back("JzSymmetry");
@@ -280,6 +281,8 @@ public:
 		str += "real AnisotropyD;\n";
 		str += "string FindSymmetrySector;\n";
 		str += "string AddOnSiteHamiltonian;\n";
+		str += "vector MagneticFieldX;\n";
+		str += "vector MagneticFieldZ;\n";
 
 		return str;
 	}

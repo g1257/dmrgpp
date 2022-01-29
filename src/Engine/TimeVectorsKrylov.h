@@ -185,6 +185,11 @@ public:
 				                                   extra.block[0]);
 
 					*targetVectors_[indices[0]] = phiNew;
+				} else {
+					if (timeHasAdvanced_) {
+						assert(indices[0] != advance);
+						*targetVectors_[indices[0]] = *targetVectors_[advance];
+					}
 				}
 			}
 		}

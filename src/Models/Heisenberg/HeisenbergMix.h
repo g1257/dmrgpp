@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/VerySparseMatrix.h"
 #include "../../Engine/ProgramGlobals.h"
 #include "../../Engine/Utils.h"
+#include "Aklt.h"
 
 namespace Dmrg {
 
@@ -132,6 +133,7 @@ public:
 	typedef typename ModelBaseType::ModelLinksType ModelLinksType;
 	typedef Aklt<ModelBaseType> AkltType;
 	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
+	using ModelParametersType = ParametersModelHeisenberg<RealType, QnType>;
 
 	class AtomKind : public AtomKindBaseType {
 
@@ -162,15 +164,12 @@ public:
 	      atomKind_(nullptr)
 	{
 		SizeType n = superGeometry_.numberOfSites();
-		SizeType m = modelParameters_.magneticFieldV.size();
 		SizeType md = modelParameters_.anisotropyD.size();
 		SizeType me = modelParameters_.anisotropyE.size();
 
-		if (m > 0 && m != n) {
-			PsimagLite::String msg("HeisenbergMix: If provided, ");
-			msg += " MagneticField must be a vector of " + ttos(n) + " entries.\n";
-			err(msg);
-		}
+		ModelParametersType::checkMagneticField(modelParameters_.magneticFieldX.size(), 'X', n);
+
+		ModelParametersType::checkMagneticField(modelParameters_.magneticFieldZ.size(), 'Z', n);
 
 		if (md > 0 && md != n) {
 			PsimagLite::String msg("HeisenbergMix: If provided, ");
@@ -230,19 +229,8 @@ public:
 			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
 			const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
 
-			if (modelParameters_.magneticFieldV.size() == linSize) {
-
-				RealType tmp = modelParameters_.magneticFieldV[site];
-				const OperatorType& sminus = ModelBaseType::naturalOperator("sminus", site, 0);
-
-				if (modelParameters_.magneticFieldDirection == "z") {
-					hmatrix += tmp*sz.getCRS();
-				} else if (modelParameters_.magneticFieldDirection == "x") {
-					static const RealType zeroPointFive = 0.5;
-					hmatrix += zeroPointFive*tmp*splus.getCRS();
-					hmatrix += zeroPointFive*tmp*sminus.getCRS();
-				}
-			}
+			addMagneticField(hmatrix, 'X', site);
+			addMagneticField(hmatrix, 'Z', site);
 
 			// PSIDOCMARK_END
 
@@ -394,6 +382,36 @@ protected:
 
 private:
 
+	void addMagneticField(SparseMatrixType& hmatrix,
+	                      char c,
+	                      SizeType site) const
+	{
+		assert(c == 'X' || c == 'Z');
+
+		const SizeType linSize = superGeometry_.numberOfSites();
+		const VectorRealType& v = (c == 'X') ? modelParameters_.magneticFieldX
+		                                     : modelParameters_.magneticFieldZ;
+
+		if (v.size() != linSize) return;
+
+		assert(site < v.size());
+		RealType tmp = v[site];
+		const OperatorType& sminus = ModelBaseType::naturalOperator("sminus", site, 0);
+
+		const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
+
+		if (c == 'Z') {
+			hmatrix += tmp*sz.getCRS();
+			return;
+		}
+
+		assert(c == 'X');
+		const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
+		constexpr RealType zeroPointFive = 0.5;
+		hmatrix += zeroPointFive*tmp*splus.getCRS();
+		hmatrix += zeroPointFive*tmp*sminus.getCRS();
+	}
+
 	// atomKind_ is not setup here yet, so do not call it
 	SizeType getSpin(SizeType site) const
 	{
@@ -531,9 +549,9 @@ private:
 
 		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 1);
 
-		if (isCanonical && modelParameters_.magneticFieldDirection == "x")
+		if (isCanonical && !modelParameters_.magneticFieldX.empty())
 			err(PsimagLite::String(__FILE__) +
-			    ": magneticFieldDirection == x CANNOT be canonical. Please " +
+			    ": MagneticFieldX CANNOT be canonical. Please " +
 			    "delete the TargetSzPlusConst= from the input file\n");
 
 		VectorSizeType other;
@@ -549,7 +567,7 @@ private:
 		}
 	}
 
-	ParametersModelHeisenberg<RealType, QnType> modelParameters_;
+	ModelParametersType modelParameters_;
 	const SuperGeometryType& superGeometry_;
 	const AtomKind* atomKind_;
 }; // class HeisenbergMix
