@@ -154,11 +154,37 @@ public:
 	      lrs_(lrs),
 	      ioIn_(ioIn),
 	      timeHasAdvanced_(false),
-	      correctVectorsAwesomePred_("0==1") // never correct
+	      correctVectorsAwesomePred_("0==1"), // never correct
+	      isFreqTargeted_(false),
+	      omega_(0.0),
+	      lambda_(1.0)
 	{
 		try {
 			ioIn_.readline(correctVectorsAwesomePred_, "ChebyshevCorrectVector=");
 		} catch (std::exception&) {}
+		try {
+			PsimagLite::String isFreqTargeted;
+			ioIn_.readline(isFreqTargeted, "CorrectionVectorTargeted=");
+			if (isFreqTargeted=="true"||isFreqTargeted=="True")
+				isFreqTargeted_ = true;
+		} catch (std::exception&) {}
+
+		if (isFreqTargeted_) {
+			PsimagLite::String warning("TargetingChebyshev: ");
+			warning += "Frequency omega targeted!\n";
+			std::cout<<warning;
+			std::cerr<<warning;
+			SizeType n = targetVectors_.size();
+			if (n != 4) {
+				PsimagLite::String msg = "TimeVectorsChebyshevFrequency:" +
+				        PsimagLite::String("number of targets must be 4\n");
+				std::cout<<msg;
+				std::cerr<<msg;
+				return;
+			}
+			ioIn_.readline(omega_, "CorrectionVectorOmega=");
+			ioIn_.readline(lambda_, "CorrectionVectorLambda=");
+		}
 	}
 
 	virtual void calcTimeVectors(const VectorSizeType& indices,
@@ -196,10 +222,18 @@ public:
 		assert(0 < extra.block.size());
 		SizeType n = indices.size();
 
-		for (SizeType i = startOfWft; i < n; ++i) {
+		SizeType m = indices.size()-1;
+
+		if (!isFreqTargeted_)
+			m = n;
+
+		for (SizeType i = startOfWft; i < m; ++i) {
 			SizeType ii = indices[i];
 			BaseType::wftHelper().wftSome(targetVectors_, extra.block[0], ii, ii + 1);
 		}
+
+		if (isFreqTargeted_)
+			BaseType::wftHelper().wftSome(targetVectors_, extra.block[0], m, n);
 
 		assert(n > 0);
 		if (this->currentTimeStep() == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
@@ -219,14 +253,14 @@ public:
 		if (times.size() == 1 && fabs(times[0])<1e-10) return;
 
 		if (timeHasAdvanced_) {
-			for (SizeType i = 0; i < n - 1; ++i) {
+			for (SizeType i = 0; i < m - 1; ++i) {
 				SizeType ii = indices[i];
 				SizeType jj = indices[i + 1];
-				targetVectors_[ii] = targetVectors_[jj];
+				*targetVectors_[ii] = *targetVectors_[jj];
 			}
 		}
 
-		for (SizeType i = 2; i < n; ++i) {
+		for (SizeType i = 2; i < m; ++i) {
 			SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
 			assert(ii != 1);
@@ -234,6 +268,13 @@ public:
 			SizeType prev = indices[i - 1];
 			SizeType prevMinus2 = indices[i - 2];
 			calcTargetVector(*targetVectors_[ii], phi, prev, prevMinus2, Eg);
+			if (isFreqTargeted_) {
+				SizeType post = indices[i+1];
+				VectorWithOffsetType phiNew = phi;
+				calcCorrectionVector(phiNew, *targetVectors_[ii],
+				                     prev, prevMinus2, Eg);
+				*targetVectors_[post] += phiNew;
+			}
 		}
 
 		assert(extra.block.size() > 0);
@@ -307,6 +348,72 @@ private:
 			lanczosHelper2.matrixVectorProduct(r,x2); // applying Hprime
 			r += (-1.0)*phi2;
 		}
+	}
+
+	void calcCorrectionVector(VectorWithOffsetType& v,
+	                          const VectorWithOffsetType& phi,
+	                          SizeType prev,
+	                          SizeType prevMinus2,
+	                          RealType Eg)
+
+	{
+		for (SizeType ii=0;ii<phi.sectors();ii++) {
+			SizeType i0 = phi.sector(ii);
+			TargetVectorType r;
+			calcCorrectionVector(r, phi, prev, prevMinus2, i0);
+			v.setDataInSector(r,i0);
+		}
+	}
+	void calcCorrectionVector(TargetVectorType& r,
+	                          const VectorWithOffsetType& phi,
+	                          SizeType prev,
+	                          SizeType prevMinus2,
+	                          SizeType i0)
+	{
+		SizeType total = phi.effectiveSize(i0);
+		TargetVectorType phiAdd(total);
+		r.resize(total);
+
+		RealType c = tstStruct_.chebyTransform()[0];
+
+		if (this->currentTimeStep()==0) {
+
+			RealType factor = computeChebyAndDamping(2,omega_);
+			RealType omegaden = sqrt(1.0-omega_*omega_);
+
+			RealType f = 2.0*c*factor/omegaden;
+			VectorWithOffsetType phi_temp = f*(phi);
+			phi_temp.extract(phiAdd,i0);
+			r += phiAdd;
+
+			factor = computeChebyAndDamping(1,omega_);
+			f = 2.0*c*factor/omegaden;
+			phi_temp = f*(*targetVectors_[prev]);
+			phi_temp.extract(phiAdd,i0);
+			r += phiAdd;
+
+			factor = computeChebyAndDamping(0,omega_);
+			f = c*factor/omegaden;
+			phi_temp = f*(*targetVectors_[prevMinus2]);
+			phi_temp.extract(phiAdd,i0);
+			r += phiAdd;
+		} else {
+			double time = 2+this->currentTimeStep();
+			RealType factor = computeChebyAndDamping(time,omega_);
+			RealType omegaden = sqrt(1.0-omega_*omega_);
+			RealType f = 2.0*c*factor/omegaden;
+			VectorWithOffsetType phi_temp = f*(phi);
+			phi_temp.extract(phiAdd,i0);
+			r += phiAdd;
+		}
+	}
+
+	RealType computeChebyAndDamping(SizeType index, RealType omega)
+	{
+		RealType ChebyPoly = cos(index*acos(omega));
+		RealType Ntotal = 1.0*model_.params().finiteLoop.size()-2.0;
+		RealType DampingFactor = sinh(lambda_*(1.0-index/Ntotal))/sinh(lambda_);
+		return ChebyPoly*DampingFactor;
 	}
 
 	void correctVectors(const VectorSizeType& indices, RealType Eg)
@@ -491,6 +598,9 @@ private:
 	InputValidatorType& ioIn_;
 	bool timeHasAdvanced_;
 	PsimagLite::String correctVectorsAwesomePred_;
+	bool isFreqTargeted_;
+	RealType omega_;
+	RealType lambda_;
 }; //class TimeVectorsChebyshev
 } // namespace Dmrg
 /*@}*/
