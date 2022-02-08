@@ -362,11 +362,10 @@ public:
 	friend void normalize(VectorWithOffset& v)
 	{
 		RealType norma = PsimagLite::norm(v.data_);
-		RealType eps = 1e-5;
 
-		if (fabs(norma-1.0)<eps) return;
+		if (fabs(norma-1.0)<1e-5) return;
 
-		assert(fabs(norma)>eps);
+		assert(fabs(norma)>0);
 
 		for (SizeType i=0;i<v.data_.size();i++)
 			v.data_[i] /= norma;

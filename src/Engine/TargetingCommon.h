@@ -325,7 +325,7 @@ public:
 		}
 
 		// FIXME TODO check that the NGST name changes instead
-		if (name != "Expression") {
+		if (name == "TimeStep") {
 			bool sameNgst = isThisNgstSameAsPrevious(name, ts->name(), dtvs, rtvs);
 			SizeType cTimeStep = (sameNgst) ? ts->currentTimeStep() : 0;
 			setCurrentTimeStep(cTimeStep);
