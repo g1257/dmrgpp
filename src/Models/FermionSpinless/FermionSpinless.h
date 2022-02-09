@@ -136,7 +136,10 @@ public:
 	      modelParameters_(io),
 	      offset_(DEGREES_OF_FREEDOM),
 	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
-	      hasDelta_(extra == "WithDelta")
+	      hasDelta_(extra == "WithDelta"),
+	      hasCalcMu_(false),
+	      tau_(0),
+	      mu_(0)
 	{
 		if (extra != "" && extra != "WithDelta")
 			err("FermionSpinLess can only be followed by WithDelta and not " + extra + "\n");
@@ -145,6 +148,20 @@ public:
 
 		if (geometry.numberOfSites() != modelParameters_.potentialV.size())
 			err("potentialV must have exactly " + ttos(n) + " entries.\n");
+
+		bool hasTau = false;
+		try {
+			io.readline(tau_, "TSPTau=");
+			hasTau = true;
+		} catch (std::exception&) {}
+
+		try {
+			io.readline(mu_, "TSPMu=");
+			hasCalcMu_ = true;
+		} catch (std::exception&) {}
+
+		if (!(hasTau ^ hasCalcMu_))
+			err("FermionSpinless: Both or none of TSPTau= and TSPMu= must appear\n");
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -177,6 +194,13 @@ public:
 		// V_iup term
 		RealType tmp = modelParameters_.potentialV[site];
 		hmatrix += tmp*niup;
+
+		if (hasCalcMu_) {
+			const SizeType nsites = ModelBaseType::superGeometry().numberOfSites();
+			const SizeType currentTimeStep = time/tau_;
+			const RealType effectiveMu = calcMu(site, currentTimeStep, nsites, tau_, mu_);
+			hmatrix += effectiveMu*niup;
+		}
 	}
 
 protected:
@@ -381,11 +405,51 @@ protected:
 		return jm;
 	}
 
+	static RealType calcMu(SizeType site,
+	                       SizeType n,
+	                       SizeType N1,
+	                       RealType tau,
+	                       RealType mu)
+	{
+		//  (nm is the number of steps to increase the onsite
+		//   chemical potential at site i)
+		static SizeType nm = 0;
+		static SizeType rm = 1;   //( steps changes when n=1000)
+
+		++nm;
+
+		if (n%1000 == 0) {
+			++rm;
+			nm = 0;
+
+			std::stringstream msg;
+			msg << "FermionSpinless::calcMu(): nm=0 "
+			<< "site=" << site << " n=" << n
+			<< " tau=" << tau << " mu=" << mu
+			<< " rm=" << rm << "\n";
+			std::cout<<msg.str();
+		}
+
+		if (site + rm < N1) {    //(chemical potential for  i <= end site - rm)
+			return -mu;
+		}
+
+		if (site + rm > N1 ) { //(chemical potential for  i > end site -rm+1)
+			return -64.0;
+		}
+
+		assert(site + rm == N1);     //(chemical potential for  i = end site -rm+1)
+		return -64.0*tau*nm;
+	}
+
 	ParametersFermionSpinless<RealType, QnType>  modelParameters_;
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
 	const bool hasDelta_;
+	bool hasCalcMu_;
+	RealType tau_;
+	RealType mu_;
 };	//class FermionSpinless
 
 } // namespace Dmrg
