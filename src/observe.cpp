@@ -2,11 +2,12 @@
 
 using namespace Dmrg;
 
-bool atLeastOneLoopWithBit0Set(const PsimagLite::Vector<FiniteLoop>::Type& fl)
+template<typename T>
+bool atLeastOneLoopWithBit0Set(const T& fl)
 {
 	const SizeType n = fl.size();
 	for (SizeType i = 0; i < n; ++i)
-		if (fl[i].wantsSave()) return true;
+		if (fl[i].wants("save")) return true;
 
 	return false;
 

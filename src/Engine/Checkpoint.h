@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Io/IoSelector.h"
 #include "DiskOrMemoryStack.h"
+#include "FiniteLoop.h"
 
 namespace Dmrg {
 
@@ -114,6 +115,8 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
+	using FiniteLoopType = FiniteLoop<RealType>;
+	using VectorFiniteLoopType = typename PsimagLite::Vector<FiniteLoopType>::Type;
 
 	Checkpoint(const ParametersType& parameters,
 	           InputValidatorType& ioIn,
@@ -405,7 +408,7 @@ private:
 
 		bool allInSystem = (parameters_.options.isSet("geometryallinsystem"));
 
-		PsimagLite::Vector<FiniteLoop>::Type vfl;
+		VectorFiniteLoopType vfl;
 		int lastSite = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
 		int prevDeltaSign = 1;
 		bool checkPoint = false;
@@ -427,7 +430,7 @@ private:
 		checkMvalues(vfl, hilbertOneSite);
 	}
 
-	void checkFiniteLoops(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
+	void checkFiniteLoops(const VectorFiniteLoopType& finiteLoop,
 	                      SizeType totalSites,
 	                      SizeType lastSite,
 	                      int prevDeltaSign,
@@ -441,7 +444,7 @@ private:
 
 		SizeType sopt = 0; // have we started saving yet?
 		for (SizeType i=0;i<finiteLoop.size();i++)  {
-			SizeType thisSaveOption = (finiteLoop[i].wantsSave());
+			SizeType thisSaveOption = (finiteLoop[i].wants("save"));
 			if (sopt == 1 && !(thisSaveOption&1)) {
 				s = "Error for finite loop number " + ttos(i) + "\n";
 				s += "Once you say 1 on a finite loop, then all";
@@ -481,7 +484,7 @@ private:
 		}
 	}
 
-	void checkMvalues(const PsimagLite::Vector<FiniteLoop>::Type& finiteLoop,
+	void checkMvalues(const VectorFiniteLoopType& finiteLoop,
 	                  SizeType hilbertOneSite) const
 	{
 		for (SizeType i = 0;i < finiteLoop.size(); ++i)  {

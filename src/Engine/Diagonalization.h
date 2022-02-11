@@ -131,7 +131,7 @@ public:
 	TargetVectorType> LanczosSolverType;
 	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
-	typedef FiniteLoop FiniteLoopType;
+	using FiniteLoopType = FiniteLoop<RealType>;
 
 	Diagonalization(const ParametersType& parameters,
 	                const ModelType& model,
@@ -234,9 +234,9 @@ private:
 
 		bool onlyWft = false;
 		if (direction != ProgramGlobals::DirectionEnum::INFINITE)
-			onlyWft = finiteLoop.wantsOnlyFastWft();
+			onlyWft = finiteLoop.wants("onlyfastwft");
 
-		bool noguess = finiteLoop.wantsRandomGuess();
+		bool noguess = finiteLoop.wants("randomguess");
 
 		if (parameters_.options.isSet("MettsTargeting"))
 			return;
@@ -453,7 +453,7 @@ private:
 		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 		typename ModelHelperType::Aux aux(partitionIndex, lrs);
 
-		if (options.isSet("debugmatrix") && !finiteLoop.wantsOnlySlowWft()) {
+		if (options.isSet("debugmatrix") && !finiteLoop.wants("onlyslowwft")) {
 			SparseMatrixType fullm;
 
 			model_.fullHamiltonian(fullm, hc, aux);
@@ -480,7 +480,7 @@ private:
 			if (options.isSet("test"))
 				throw std::logic_error("Exiting due to option test in the input\n");
 
-			if (options.isSet("exactdiag") && !finiteLoop.wantsOnlySlowWft()) {
+			if (options.isSet("exactdiag") && !finiteLoop.wants("onlyslowwft")) {
 				SizeType nexcited = std::min(energyTmp.size(), eigs.size());
 				for (SizeType excited = 0; excited < nexcited; ++excited) {
 					energyTmp[excited] = eigs[excited];
@@ -521,7 +521,7 @@ private:
 		                                                             hc,
 		                                                             aux);
 
-		if (parameters_.finiteLoop[loopIndex].wantsOnlySlowWft()) {
+		if (parameters_.finiteLoop[loopIndex].wants("onlyslowwft")) {
 			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();

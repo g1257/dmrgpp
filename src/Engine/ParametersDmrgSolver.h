@@ -145,7 +145,8 @@ struct ParametersDmrgSolver {
 	typedef PsimagLite::Matrix<PsimagLite::String> MatrixStringType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef std::pair<FieldType, SizeType> PairRealSizeType;
-	typedef typename PsimagLite::Vector<FiniteLoop>::Type VectorFiniteLoopType;
+	using FiniteLoopType = FiniteLoop<FieldType>;
+	typedef typename PsimagLite::Vector<FiniteLoopType>::Type VectorFiniteLoopType;
 	typedef Options<InputValidatorType> OptionsType;
 
 	SizeType nthreads;
@@ -487,7 +488,7 @@ struct ParametersDmrgSolver {
 	                            VectorFiniteLoopType& vfl)
 	{
 		if (io.version() < io.versionAinur()) {
-			VectorFieldType tmpVec;
+			VectorStringType tmpVec;
 			io.read(tmpVec,"FiniteLoops");
 			readFiniteLoops_(io,vfl,tmpVec);
 		} else {
@@ -500,18 +501,19 @@ struct ParametersDmrgSolver {
 	template<typename SomeInputType>
 	static void readFiniteLoops_(SomeInputType& io,
 	                             VectorFiniteLoopType& vfl,
-	                             const VectorFieldType& tmpVec)
+	                             const VectorStringType& tmpVec)
 	{
 		for (SizeType i = 0; i < tmpVec.size(); i += 3) {
-			typename PsimagLite::Vector<int>::Type xTmp(3);
+			typename PsimagLite::Vector<int>::Type xTmp(2);
 			assert(2 + i < tmpVec.size());
 			for (SizeType j = 0; j < xTmp.size(); ++j)
-				xTmp[j] = static_cast<int>(tmpVec[i+j]);
-			FiniteLoop fl(xTmp[0], xTmp[1], xTmp[2]);
+				xTmp[j] = PsimagLite::atoi(tmpVec[i+j]);
+
+			FiniteLoopType fl(xTmp[0], xTmp[1], tmpVec[i + 2]);
 			vfl.push_back(fl);
 		}
 
-		readFiniteLoops_(io, vfl);
+		readFiniteLoopsRepeat(io, vfl);
 	}
 
 	template<typename SomeInputType>
@@ -526,18 +528,17 @@ struct ParametersDmrgSolver {
 		AlgebraicStringToNumberType algebraicStringToNumber("FiniteLoops", numberOfSites);
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
 			const int length = algebraicStringToNumber.procLength(tmpMat(i, 0));
-			SizeType m = PsimagLite::atof(tmpMat(i, 1));
-			SizeType bits = PsimagLite::atof(tmpMat(i, 2));
-			FiniteLoop fl(length, m, bits);
+			SizeType m = PsimagLite::atoi(tmpMat(i, 1));
+			FiniteLoopType fl(length, m, tmpMat(i, 2));
 			vfl.push_back(fl);
 		}
 
-		readFiniteLoops_(io, vfl);
+		readFiniteLoopsRepeat(io, vfl);
 	}
 
 	template<typename SomeInputType>
-	static void readFiniteLoops_(SomeInputType& io,
-	                             VectorFiniteLoopType& vfl)
+	static void readFiniteLoopsRepeat(SomeInputType& io,
+	                                  VectorFiniteLoopType& vfl)
 	{
 		SizeType repeat = 0;
 
@@ -579,7 +580,7 @@ struct ParametersDmrgSolver {
 
 		for (SizeType i=0;i<repeat;i++) {
 			for (SizeType j=fromFl;j<upToFl;j++) {
-				FiniteLoop fl = vfl[j];
+				FiniteLoopType fl = vfl[j];
 				vfl.push_back(fl);
 			}
 		}

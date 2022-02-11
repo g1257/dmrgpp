@@ -1,6 +1,7 @@
 #ifndef OPTIONS_H
 #define OPTIONS_H
 #include "PsimagLite.h"
+#include "ProgramGlobals.h"
 #include <cctype>
 #include <algorithm>
 #include <numeric>
@@ -42,7 +43,7 @@ public:
 
 	bool isSet(PsimagLite::String what) const
 	{
-		what = toLower(what);
+		what = ProgramGlobals::toLower(what);
 		VectorStringType::const_iterator it = std::find(vdata_.begin(),
 		                                                vdata_.end(),
 		                                                what);
@@ -51,19 +52,12 @@ public:
 
 private:
 
-	static PsimagLite::String toLower(PsimagLite::String data)
-	{
-		std::transform(data.begin(), data.end(), data.begin(),
-		               [](unsigned char c){ return std::tolower(c); });
-		return data;
-	}
-
 	void lowerAll()
 	{
 		std::transform(vdata_.begin(),
 		               vdata_.end(),
 		               vdata_.begin(),
-		               [](PsimagLite::String s){ return toLower(s); });
+		               [](PsimagLite::String s){ return ProgramGlobals::toLower(s); });
 	}
 
 	VectorStringType vdata_;

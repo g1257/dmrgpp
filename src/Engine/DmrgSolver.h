@@ -143,6 +143,7 @@ public:
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
 	VectorVectorVectorWithOffsetType;
 	typedef OneSiteTruncation<ModelType, VectorWithOffsetType> OneSiteTruncationType;
+	using FiniteLoopType = FiniteLoop<RealType>;
 
 	DmrgSolver(ModelType& model, InputValidatorType& ioIn)
 	    : model_(model),
@@ -447,7 +448,7 @@ obtain ordered
 				}
 			}
 
-			const SizeType wantsOneSiteTrunc = (parameters_.finiteLoop[i].wantsOneSiteTruncation())
+			const SizeType wantsOneSiteTrunc = (parameters_.finiteLoop[i].wants("OneSiteTruncation"))
 			        ? 1 : 0;
 			model_.announce("finite loop;" + ttos(wantsOneSiteTrunc));
 
@@ -634,9 +635,9 @@ obtain ordered
 	{
 		if (!saveData_) return;
 
-		const FiniteLoop& finiteLoop = parameters_.finiteLoop[loopIndex];
+		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 
-		if (!finiteLoop.wantsSave() && !finiteLoop.wantsMultiSitePush()) return;
+		if (!finiteLoop.wants("save") && !finiteLoop.wants("multisitepush")) return;
 
 		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
 		// FIXME: Serializer will for now save only one psi target
@@ -653,12 +654,12 @@ obtain ordered
 		                                                psi,
 		                                                transform,
 		                                                direction);
-		if (finiteLoop.wantsMultiSitePush()) {
+		if (finiteLoop.wants("multisitepush")) {
 			target.multiSitePush(ds);
 			return;
 		}
 
-		typename BasisWithOperatorsType::SaveEnum saveOption2 = (finiteLoop.wantsOnlySlowWft())
+		typename BasisWithOperatorsType::SaveEnum saveOption2 = (finiteLoop.wants("onlyslowwft"))
 		        ? BasisWithOperatorsType::SaveEnum::ALL
 		        : BasisWithOperatorsType::SaveEnum::PARTIAL;
 		SizeType numberOfSites = model_.superGeometry().numberOfSites();

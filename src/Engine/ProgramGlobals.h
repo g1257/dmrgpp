@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2016-2018, UT-Battelle, LLC
+Copyright (c) 2009-2016-2018-2022, UT-Battelle, LLC
 All rights reserved
 
 [DMRG++, Version 5.]
@@ -82,6 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include "Utils.h"
 #include "../../src/Version.h"
+#include <algorithm>
+#include <numeric>
 
 namespace Dmrg {
 
@@ -223,6 +225,13 @@ struct ProgramGlobals {
 		for (SizeType i = 0; i < n; ++i)
 			if (str[i] != ' ') buffer += str[i];
 		return buffer;
+	}
+
+	static PsimagLite::String toLower(PsimagLite::String data)
+	{
+		std::transform(data.begin(), data.end(), data.begin(),
+		               [](unsigned char c){ return std::tolower(c); });
+		return data;
 	}
 
 	static PsimagLite::String SYSTEM_STACK_STRING;

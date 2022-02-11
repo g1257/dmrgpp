@@ -5,6 +5,8 @@
 #include <iostream>
 #include "Io/IoSerializerStub.h"
 #include "PsimagLite.h"
+#include "ProgramGlobals.h"
+#include <map>
 
 namespace Dmrg {
 /* PSIDOC FiniteLoop
@@ -75,13 +77,25 @@ can go forward at most 7 sites, and backwards at most 7 sites.
 There is some checking done to the finite loops input,
 but you might find that it's not comprehensive.
 */
+template<typename RealType>
 class FiniteLoop {
 
 public:
 
-	FiniteLoop(int sl, SizeType ks, SizeType so)
-	    : stepLength_(sl), keptStates_(ks), bitField_(so)
+	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
+
+	FiniteLoop(int sl, SizeType ks, PsimagLite::String str)
+	    : stepLength_(sl), keptStates_(ks), bitField_(0), mMin_(0), tolerance_(0)
 	{
+		setMap();
+
+		VectorStringType tokens;
+		PsimagLite::split(tokens, str, ",");
+		bool hasBitField = false;
+		bool hasAtField = false;
+		for (SizeType i = 0; i < tokens.size(); ++i)
+			procToken(hasBitField, hasAtField, tokens[i]);
+
 		checkBitField();
 	}
 
@@ -103,17 +117,12 @@ public:
 
 	SizeType keptStates() const { return keptStates_; }
 
-	bool wantsSave() const { return (bitField_ & 1); }
-
-	bool wantsOnlyFastWft() const { return (bitField_ & 2); }
-
-	bool wantsOnlySlowWft() const { return (bitField_ & 4); }
-
-	bool wantsRandomGuess() const { return (bitField_ & 8); }
-
-	bool wantsMultiSitePush() const { return (bitField_ & 16); }
-
-	bool wantsOneSiteTruncation() const { return (bitField_ & 32); }
+	bool wants(PsimagLite::String what) const
+	{
+		PsimagLite::String whatLower = ProgramGlobals::toLower(what);
+		assert(mapNameBit_.find(whatLower) != mapNameBit_.end());
+		return (bitField_ & mapNameBit_.at(whatLower));
+	}
 
 	void print(std::ostream& os) const
 	{
@@ -121,6 +130,75 @@ public:
 	}
 
 private:
+
+	void setMap()
+	{
+		const VectorStringType str = {"save",
+		                              "onlyfastwft",
+		                              "onlyslowwft",
+		                              "randomguess",
+		                              "multisitepush",
+		                              "onesitetruncation"};
+
+		SizeType bit =1;
+		for (SizeType i = 0; i < str.size(); ++i) {
+			mapNameBit_[str[i]] = bit;
+			bit <<= 1;
+		}
+	}
+
+	// either @something or
+	// setting=value
+	void procToken(bool& hasBitField, bool& hasAtField, PsimagLite::String str)
+	{
+		if (isAdigit(str)) {
+			dieIfTrue(hasBitField, "Bit field already set for this finite loop\n");
+			dieIfTrue(hasAtField, "Bit field already set for this finite loop\n");
+			hasBitField = true;
+			bitField_ = PsimagLite::atoi(str);
+			return;
+		}
+
+		if (str.length() < 2)
+			err("FiniteLoop with " + str +" : syntax error (1)\n");
+
+		if (str[0] == '@') {
+			dieIfTrue(hasBitField, "Bit field already set for this finite loop\n");
+			procAtValue(str.substr(1, str.length() - 1));
+			hasAtField = true;
+			return;
+		}
+
+		VectorStringType tokens;
+		PsimagLite::split(tokens, str, "=");
+		if (tokens.size() != 2)
+			err("FiniteLoop wiht " + str + " : syntax error (2)\n");
+
+		setNameValue(tokens[0], tokens[1]);
+	}
+
+	void setNameValue(PsimagLite::String name, PsimagLite::String value)
+	{
+		PsimagLite::String nameLower = ProgramGlobals::toLower(name);
+
+		if (nameLower == "tol" || nameLower == "tolerance")  {
+			tolerance_ = PsimagLite::atof(value);
+			return;
+		}
+
+		if (nameLower == "mmin") {
+			mMin_ = PsimagLite::atoi(value);
+			return;
+		}
+
+		err("FiniteLoop: unknown name " + name + "\n");
+	}
+
+	void procAtValue(PsimagLite::String what)
+	{
+		assert(mapNameBit_.find(what) != mapNameBit_.end());
+		bitField_ |= mapNameBit_.at(what);
+	}
 
 	void checkBitField() const
 	{
@@ -147,11 +225,29 @@ private:
 			    + " random guess.\nIn other words, if bit 5 is set so must bit 3.\n");
 	}
 
-	int stepLength_; // how much to go right (+) or left (-)
-	SizeType keptStates_; // kept states
+	static void dieIfTrue(bool b, PsimagLite::String msg)
+	{
+		if (!b) return;
+		std::cout<<msg;
+	}
+
+	static bool isAdigit(PsimagLite::String str)
+	{
+		for (SizeType i = 0; i < str.length(); ++i)
+			if (!std::isdigit(str[i])) return false;
+		return true;
+	}
+
+	static std::map<PsimagLite::String, SizeType> mapNameBit_;
+	const int stepLength_; // how much to go right (+) or left (-)
+	const SizeType keptStates_; // kept states
 	SizeType bitField_;
+	SizeType mMin_;
+	RealType tolerance_;
 };
 
+template<typename T>
+std::map<PsimagLite::String, SizeType> FiniteLoop<T>::mapNameBit_;
 } // namespace Dmrg
 
 #endif // DMRG_FINITELOOP_H
