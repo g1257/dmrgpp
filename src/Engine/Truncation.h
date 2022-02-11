@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "PredicateAwesome.h"
 #include "OutputFileOrNot.h"
+#include "TruncationControl.h"
 
 namespace Dmrg {
 
@@ -110,12 +111,10 @@ class Truncation  {
 	typedef typename TargetingType::ModelType ModelType;
 	typedef typename ModelType::SuperGeometryType SuperGeometryType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-
-public:
-
 	typedef typename DensityMatrixBaseType::Params ParamsDensityMatrixType;
 	typedef BlockDiagonalMatrixType TransformType;
 	typedef PsimagLite::IoNg::Out IoOutType;
+	using TruncationControlType = TruncationControl<RealType>;
 
 	struct TruncationCache {
 
@@ -124,6 +123,8 @@ public:
 		typename PsimagLite::Vector<SizeType>::Type removedIndices;
 
 	}; // TruncationCache
+
+public:
 
 	Truncation(const LeftRightSuperType& lrs,
 	           WaveFunctionTransfType& waveFunctionTransformation,
@@ -139,31 +140,27 @@ public:
 	      error_(0.0)
 	{
 		firstCall_ = true;
-		if (parameters_.truncationControl.first < 0) return;
-		PsimagLite::OstringStream msgg(std::cout.precision());
-		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"has tolerance= "<<parameters_.truncationControl.first;
-		msg<<" minimum m= "<<parameters_.truncationControl.second;
-		progress_.printline(msgg, std::cout);
+		parameters_.truncationControl.print(std::cout, progress_);
 	}
 
 	void changeBasisFinite(BasisWithOperatorsType& pS,
 	                       BasisWithOperatorsType& pE,
 	                       const TargetingType& target,
 	                       SizeType keptStates,
+	                       const TruncationControlType& truncationControl,
 	                       ProgramGlobals::DirectionEnum direction)
 	{
 		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
 		DensityMatrixBaseType* dmS = 0;
 
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			changeBasis(pS,target,keptStates,direction, &dmS);
+			changeBasis(pS, target, keptStates, truncationControl, direction, &dmS);
 			assert(dmS);
-			truncateBasis(pS,lrs_.right(), *dmS, direction);
+			truncateBasis(pS, lrs_.right(), *dmS, direction);
 		} else {
-			changeBasis(pE,target,keptStates,direction, &dmS);
+			changeBasis(pE, target, keptStates, truncationControl, direction, &dmS);
 			assert(dmS);
-			truncateBasis(pE,lrs_.left(), *dmS, direction);
+			truncateBasis(pE, lrs_.left(), *dmS, direction);
 		}
 
 		delete dmS;
@@ -181,7 +178,8 @@ public:
 	void changeBasisInfinite(BasisWithOperatorsType& sBasis,
 	                         BasisWithOperatorsType& eBasis,
 	                         const TargetingType& target,
-	                         SizeType keptStates)
+	                         SizeType keptStates,
+	                         const TruncationControlType& truncationControl)
 	{
 		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
 
@@ -189,6 +187,7 @@ public:
 		changeBasis(sBasis,
 		            target,
 		            keptStates,
+		            truncationControl,
 		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
 		            &dmS);
 		assert(dmS);
@@ -203,6 +202,7 @@ public:
 		changeBasis(eBasis,
 		            target,
 		            keptStates,
+		            truncationControl,
 		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
 		            &dmE);
 		assert(dmE);
@@ -219,6 +219,7 @@ private:
 	void changeBasis(BasisWithOperatorsType& rSprime,
 	                 const TargetingType& target,
 	                 SizeType keptStates,
+	                 const TruncationControlType& truncationControl,
 	                 ProgramGlobals::DirectionEnum direction,
 	                 DensityMatrixBaseType** dm)
 	{
@@ -271,7 +272,7 @@ private:
 
 		printSumAndCheckEigs(cache.eigs);
 
-		updateKeptStates(keptStates, cache.eigs);
+		updateKeptStates(keptStates, truncationControl, cache.eigs);
 
 		cache.transform = dmS->operator()();
 		if (parameters_.options.isSet("nodmrgtransform")) {
@@ -373,11 +374,12 @@ private:
 	}
 
 	void updateKeptStates(SizeType& keptStates,
+	                      const TruncationControlType& TruncationControl,
 	                      const VectorRealType& eigs)
 	{
 		dumpEigs(eigs);
 
-		SizeType newKeptStates = computeKeptStates(keptStates, eigs);
+		SizeType newKeptStates = computeKeptStates(keptStates, TruncationControl, eigs);
 		SizeType statesToRemove = 0;
 		if (eigs.size()>=newKeptStates)
 			statesToRemove = eigs.size() - newKeptStates;
@@ -464,23 +466,24 @@ private:
 		!PTEX-END */
 	//! eigenvalues are ordered in increasing order
 	SizeType computeKeptStates(SizeType& keptStates,
+	                           const TruncationControlType& truncationControl,
 	                           const VectorRealType& eigs) const
 	{
-		if (parameters_.truncationControl.first < 0) return keptStates;
+		if (truncationControl.tolerance() < 0) return keptStates;
 		int start = eigs.size() - keptStates;
 		if (start<0) start = 0;
-		int maxToRemove = eigs.size()-parameters_.keptStatesInfinite;
+		int maxToRemove = eigs.size() - truncationControl.mMin();
 		if (maxToRemove<0) maxToRemove = 0;
-		SizeType total = parameters_.keptStatesInfinite;
-		RealType discWeight=sumUpTo(eigs,start);
+		SizeType total = truncationControl.mMin();
+		RealType discWeight=sumUpTo(eigs, start);
 		// maybe we should use int instead of SizeType here!!!
 
-		for (int i=start;i<maxToRemove;i++) {
+		for (int i = start; i < maxToRemove; ++i) {
 			// calculate the discarded weight if we keep i states.
 			discWeight += fabs(eigs[i]);
 			// if the discarded weight
 			// gets larger than the tolerance, we break the loop.
-			if (discWeight > parameters_.truncationControl.first) {
+			if (discWeight > truncationControl.tolerance()) {
 				total = eigs.size() - i;
 				discWeight -= fabs(eigs[i]);
 				break;
@@ -491,8 +494,8 @@ private:
 		if (total>=keptStates)
 			return keptStates;
 
-		if (total < parameters_.truncationControl.second)
-			return parameters_.truncationControl.second;
+		if (total < truncationControl.mMin())
+			return truncationControl.mMin();
 
 		return total;
 	}

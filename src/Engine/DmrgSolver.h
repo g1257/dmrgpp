@@ -370,7 +370,11 @@ obtain ordered
 			                 X[step],
 			                 ystep);
 
-			truncate_.changeBasisInfinite(pS, pE, psi, parameters_.keptStatesInfinite);
+			truncate_.changeBasisInfinite(pS,
+			                              pE,
+			                              psi,
+			                              parameters_.keptStatesInfinite,
+			                              parameters_.truncationControl);
 
 			if (needsRightPush) {
 				if (!twoSiteDmrg) checkpoint_.push(pS,pE);
@@ -585,7 +589,7 @@ obtain ordered
 				oneSiteTruncation_.update(oneSiteTruncSize, *(target.psiConst()[0][0]), direction);
 			}
 
-			changeTruncateAndSerialize(pS,pE,target,keptStates,direction,loopIndex);
+			changeTruncateAndSerialize(pS, pE, target, direction, loopIndex);
 
 			if (finalStep(stepLength, stepFinal)) break;
 
@@ -606,16 +610,21 @@ obtain ordered
 	void changeTruncateAndSerialize(MyBasisWithOperators& pS,
 	                                MyBasisWithOperators& pE,
 	                                const TargetingType& target,
-	                                SizeType keptStates,
 	                                ProgramGlobals::DirectionEnum direction,
 	                                SizeType loopIndex)
 	{
 		const bool twoSiteDmrg = parameters_.options.isSet("twositedmrg");
 		FermionSignType fsS(pS.signs());
-
 		FermionSignType fsE(pE.signs());
+		assert(loopIndex < parameters_.finiteLoop.size());
+		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 
-		truncate_.changeBasisFinite(pS, pE, target, keptStates, direction);
+		truncate_.changeBasisFinite(pS,
+		                            pE,
+		                            target,
+		                            finiteLoop.keptStates(),
+		                            finiteLoop.truncationControl(),
+		                            direction);
 
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,

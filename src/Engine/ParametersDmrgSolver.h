@@ -93,9 +93,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include <sstream>
 #include "Options.h"
+#include "TruncationControl.h"
+#include "AlgebraicStringToNumber.h"
 #include <sys/types.h>
 #include <unistd.h>
-#include "AlgebraicStringToNumber.h"
 
 namespace Dmrg {
 
@@ -148,6 +149,7 @@ struct ParametersDmrgSolver {
 	using FiniteLoopType = FiniteLoop<FieldType>;
 	typedef typename PsimagLite::Vector<FiniteLoopType>::Type VectorFiniteLoopType;
 	typedef Options<InputValidatorType> OptionsType;
+	using TruncationControlType = TruncationControl<FieldType>;
 
 	SizeType nthreads;
 	SizeType nthreads2;
@@ -161,7 +163,7 @@ struct ParametersDmrgSolver {
 	SizeType gemmRnb;
 	SizeType opOnSiteThreshold;
 	bool autoRestart;
-	PairRealSizeType truncationControl;
+	TruncationControlType truncationControl;
 	PsimagLite::String filename;
 	PsimagLite::String version;
 	OptionsType options;
@@ -194,7 +196,7 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/dumperBegin", dumperBegin);
 		ioSerializer.write(root + "/dumperEnd", dumperEnd);
 		ioSerializer.write(root + "/precision", precision);
-		ioSerializer.write(root + "/truncationControl", truncationControl);
+		truncationControl.write(root + "/truncationControl", ioSerializer);
 		ioSerializer.write(root + "/filename", filename);
 		ioSerializer.write(root + "/version", version);
 		options.write(root + "/options", ioSerializer);
@@ -257,7 +259,9 @@ struct ParametersDmrgSolver {
 
 		if (earlyExit) return;
 
-		readFiniteLoops(io,finiteLoop);
+		PsimagLite::String infLoops = "0";
+		bool infLoopsIsAnInt = true;
+		readFiniteAndInfiniteLoops(infLoops, infLoopsIsAnInt, io);
 
 		if (options.isSet("hasQuantumNumbers")) {
 			PsimagLite::String s = "*** FATAL: hasQuantumNumbers ";
@@ -285,23 +289,6 @@ struct ParametersDmrgSolver {
 			QnType::adjustQns(adjustQuantumNumbers,
 			                  tmpVector,
 			                  modeFromModel(model));
-
-		truncationControl = PairRealSizeType(-1.0,keptStatesInfinite);
-		try {
-			PsimagLite::String s("");
-			VectorStringType tokens;
-			io.readline(s,"TruncationTolerance=");
-			PsimagLite::split(tokens, s, ",");
-			truncationControl.first = atof(tokens[0].c_str());
-			if (tokens.size() > 1)
-				truncationControl.second = atoi(tokens[1].c_str());
-			warnIfFiniteMlessThanMin(finiteLoop, truncationControl.second);
-			if (!options.isSet("twositedmrg")) {
-				std::cerr<<"WARNING: TruncationTolerance used without twositedmrg\n";
-				std::cout<<"WARNING: TruncationTolerance used without twositedmrg\n";
-			}
-		} catch (std::exception&) {}
-
 		try {
 			io.readline(nthreads, "Threads=");
 		} catch (std::exception&) {}
@@ -378,16 +365,6 @@ struct ParametersDmrgSolver {
 		bool hasRestart = false;
 		PsimagLite::String restartFrom;
 		bool hasRestartFrom = getValueIfPresent(restartFrom, "RestartFilename=", io);
-		PsimagLite::String infLoops = "0";
-		bool infLoopsIsAnInt = true;
-		try {
-			io.readline(infLoops, "InfiniteLoopKeptStates=");
-			std::istringstream iss(infLoops);
-			iss >> keptStatesInfinite;
-			infLoopsIsAnInt = (iss.eof());
-		} catch (std::exception&) {
-			keptStatesInfinite = 0;
-		}
 
 		try {
 			io.readline(printHamiltonianAverage, "PrintHamiltonianAverage=");
@@ -470,10 +447,9 @@ struct ParametersDmrgSolver {
 		}
 	}
 
-	template<typename SomeInputType>
 	static bool getValueIfPresent(PsimagLite::String& str,
 	                              PsimagLite::String label,
-	                              SomeInputType& io)
+	                              InputValidatorType& io)
 	{
 		try {
 			io.readline(str, label);
@@ -483,25 +459,43 @@ struct ParametersDmrgSolver {
 		}
 	}
 
-	template<typename SomeInputType>
-	static void readFiniteLoops(SomeInputType& io,
-	                            VectorFiniteLoopType& vfl)
+	void readFiniteAndInfiniteLoops(PsimagLite::String& infLoops,
+	                                bool& infLoopsIsAnInt,
+	                                InputValidatorType& io)
+	{
+		try {
+			io.readline(infLoops, "InfiniteLoopKeptStates=");
+			std::istringstream iss(infLoops);
+			iss >> keptStatesInfinite;
+			infLoopsIsAnInt = (iss.eof());
+		} catch (std::exception&) {
+			keptStatesInfinite = 0;
+		}
+
+		truncationControl.read(io, keptStatesInfinite, options.isSet("twositedmrg"));
+
+		readFiniteLoops(io, finiteLoop, truncationControl);
+	}
+
+	static void readFiniteLoops(InputValidatorType& io,
+	                            VectorFiniteLoopType& vfl,
+	                            const TruncationControlType& truncationC)
 	{
 		if (io.version() < io.versionAinur()) {
 			VectorStringType tmpVec;
 			io.read(tmpVec,"FiniteLoops");
-			readFiniteLoops_(io,vfl,tmpVec);
+			readFiniteLoops_(io, vfl, tmpVec, truncationC);
 		} else {
 			MatrixStringType tmpMat;
 			io.read(tmpMat, "FiniteLoops");
-			readFiniteLoops_(io, vfl, tmpMat);
+			readFiniteLoops_(io, vfl, tmpMat, truncationC);
 		}
 	}
 
-	template<typename SomeInputType>
-	static void readFiniteLoops_(SomeInputType& io,
+	static void readFiniteLoops_(InputValidatorType& io,
 	                             VectorFiniteLoopType& vfl,
-	                             const VectorStringType& tmpVec)
+	                             const VectorStringType& tmpVec,
+	                             const TruncationControlType& truncationC)
 	{
 		for (SizeType i = 0; i < tmpVec.size(); i += 3) {
 			typename PsimagLite::Vector<int>::Type xTmp(2);
@@ -509,17 +503,17 @@ struct ParametersDmrgSolver {
 			for (SizeType j = 0; j < xTmp.size(); ++j)
 				xTmp[j] = PsimagLite::atoi(tmpVec[i+j]);
 
-			FiniteLoopType fl(xTmp[0], xTmp[1], tmpVec[i + 2]);
+			FiniteLoopType fl(xTmp[0], xTmp[1], tmpVec[i + 2], truncationC);
 			vfl.push_back(fl);
 		}
 
 		readFiniteLoopsRepeat(io, vfl);
 	}
 
-	template<typename SomeInputType>
-	static void readFiniteLoops_(SomeInputType& io,
+	static void readFiniteLoops_(InputValidatorType& io,
 	                             VectorFiniteLoopType& vfl,
-	                             const MatrixStringType& tmpMat)
+	                             const MatrixStringType& tmpMat,
+	                             const TruncationControlType& truncationC)
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
@@ -529,15 +523,14 @@ struct ParametersDmrgSolver {
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
 			const int length = algebraicStringToNumber.procLength(tmpMat(i, 0));
 			SizeType m = PsimagLite::atoi(tmpMat(i, 1));
-			FiniteLoopType fl(length, m, tmpMat(i, 2));
+			FiniteLoopType fl(length, m, tmpMat(i, 2), truncationC);
 			vfl.push_back(fl);
 		}
 
 		readFiniteLoopsRepeat(io, vfl);
 	}
 
-	template<typename SomeInputType>
-	static void readFiniteLoopsRepeat(SomeInputType& io,
+	static void readFiniteLoopsRepeat(InputValidatorType& io,
 	                                  VectorFiniteLoopType& vfl)
 	{
 		SizeType repeat = 0;
@@ -603,16 +596,6 @@ private:
 		        model == "HolsteinThin") return 1;
 		err("Not supported modeFromModel for model= " + model + "\n");
 		return 0;
-	}
-
-	static void warnIfFiniteMlessThanMin(const VectorFiniteLoopType& vfl, SizeType minM)
-	{
-		for (SizeType i = 0; i < vfl.size(); ++i) {
-			if (vfl[i].keptStates() >= minM) continue;
-			std::cout<<"WARNING: Triplet number "<<i<<" has m= "<<vfl[i].keptStates();
-			std::cout<<" which is less than minimum m = "<<minM;
-			std::cout<<" as found in TruncationTolerance\n";
-		}
 	}
 
 	static void checkFilesNotEqual(PsimagLite::String filename1,

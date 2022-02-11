@@ -6,6 +6,7 @@
 #include "Io/IoSerializerStub.h"
 #include "PsimagLite.h"
 #include "ProgramGlobals.h"
+#include "TruncationControl.h"
 #include <map>
 
 namespace Dmrg {
@@ -83,9 +84,13 @@ class FiniteLoop {
 public:
 
 	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
+	using TruncationControlType = TruncationControl<RealType>;
 
-	FiniteLoop(int sl, SizeType ks, PsimagLite::String str)
-	    : stepLength_(sl), keptStates_(ks), bitField_(0), mMin_(0), tolerance_(0)
+	FiniteLoop(int sl,
+	           SizeType ks,
+	           PsimagLite::String str,
+	           const TruncationControlType& truncationControl)
+	    : stepLength_(sl), keptStates_(ks), bitField_(0), truncationControl_(truncationControl)
 	{
 		setMap();
 
@@ -96,6 +101,7 @@ public:
 		for (SizeType i = 0; i < tokens.size(); ++i)
 			procToken(hasBitField, hasAtField, tokens[i]);
 
+		warnIfFiniteMlessThanMin();
 		checkBitField();
 	}
 
@@ -116,6 +122,8 @@ public:
 	int stepLength() const { return stepLength_; }
 
 	SizeType keptStates() const { return keptStates_; }
+
+	const TruncationControlType& truncationControl() const { return truncationControl_; }
 
 	bool wants(PsimagLite::String what) const
 	{
@@ -182,12 +190,12 @@ private:
 		PsimagLite::String nameLower = ProgramGlobals::toLower(name);
 
 		if (nameLower == "tol" || nameLower == "tolerance")  {
-			tolerance_ = PsimagLite::atof(value);
+			truncationControl_.setTolerance(PsimagLite::atof(value));
 			return;
 		}
 
 		if (nameLower == "mmin") {
-			mMin_ = PsimagLite::atoi(value);
+			truncationControl_.setMmin(PsimagLite::atoi(value));
 			return;
 		}
 
@@ -198,6 +206,15 @@ private:
 	{
 		assert(mapNameBit_.find(what) != mapNameBit_.end());
 		bitField_ |= mapNameBit_.at(what);
+	}
+
+	void warnIfFiniteMlessThanMin() const
+	{
+		if (keptStates_ >= truncationControl().mMin()) return;
+
+		std::cout<<"WARNING: Triplet has m= "<<keptStates_;
+		std::cout<<" which is less than its minimum m = "<<truncationControl().mMin();
+		std::cout<<" as found in TruncationTolerance or set only for this loop\n";
 	}
 
 	void checkBitField() const
@@ -242,8 +259,7 @@ private:
 	const int stepLength_; // how much to go right (+) or left (-)
 	const SizeType keptStates_; // kept states
 	SizeType bitField_;
-	SizeType mMin_;
-	RealType tolerance_;
+	TruncationControlType truncationControl_;
 };
 
 template<typename T>

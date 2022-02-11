@@ -422,7 +422,7 @@ private:
 
 		if (totalSites & 1) lastSite++;
 
-		ParametersType::readFiniteLoops(ioIn,vfl);
+		ParametersType::readFiniteLoops(ioIn, vfl, parameters_.truncationControl);
 
 		if (!parameters_.autoRestart)
 			checkFiniteLoops(vfl,totalSites,lastSite,prevDeltaSign,checkPoint);
