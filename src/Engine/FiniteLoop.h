@@ -182,24 +182,7 @@ private:
 		if (tokens.size() != 2)
 			err("FiniteLoop wiht " + str + " : syntax error (2)\n");
 
-		setNameValue(tokens[0], tokens[1]);
-	}
-
-	void setNameValue(PsimagLite::String name, PsimagLite::String value)
-	{
-		PsimagLite::String nameLower = ProgramGlobals::toLower(name);
-
-		if (nameLower == "tol" || nameLower == "tolerance")  {
-			truncationControl_.setTolerance(PsimagLite::atof(value));
-			return;
-		}
-
-		if (nameLower == "mmin") {
-			truncationControl_.setMmin(PsimagLite::atoi(value));
-			return;
-		}
-
-		err("FiniteLoop: unknown name " + name + "\n");
+		truncationControl_.setNameValue(tokens[0], tokens[1]);
 	}
 
 	void procAtValue(PsimagLite::String what)

@@ -53,9 +53,22 @@ public:
 		progress.printline(msgg, os);
 	}
 
-	void setTolerance(RealType tol) { tolerance_ = tol; }
+	void setNameValue(PsimagLite::String name, PsimagLite::String value)
+	{
+		PsimagLite::String nameLower = ProgramGlobals::toLower(name);
 
-	void setMmin(SizeType mMin) { mMin_ = mMin; }
+		if (nameLower == "tol" || nameLower == "tolerance")  {
+			tolerance_ = PsimagLite::atof(value);
+			return;
+		}
+
+		if (nameLower == "mmin") {
+			mMin_ = PsimagLite::atoi(value);
+			return;
+		}
+
+		err("TruncationControl: unknown name " + name + "\n");
+	}
 
 	RealType tolerance() const { return tolerance_; }
 
