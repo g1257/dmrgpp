@@ -44,6 +44,10 @@ public:
 		errorMessage();
 	}
 
+	void expandMacrosRecursively()
+	{
+		errorMessage();
+	}
 private:
 
 	void errorMessage() const
