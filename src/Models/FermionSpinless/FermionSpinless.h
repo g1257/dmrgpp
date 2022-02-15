@@ -160,7 +160,9 @@ public:
 			hasCalcMu_ = true;
 		} catch (std::exception&) {}
 
-		if (!(hasTau ^ hasCalcMu_))
+		bool b1 = (hasTau && !hasCalcMu_);
+		bool b2 = (!hasTau && hasCalcMu_);
+		if (b1 || b2)
 			err("FermionSpinless: Both or none of TSPTau= and TSPMu= must appear\n");
 	}
 
