@@ -127,6 +127,7 @@ public:
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename PsimagLite::Vector<std::pair<RealType, bool> >::Type VectorPairRealBoolType;
 
 	FermionSpinless(const SolverParamsType& solverParams,
 	                InputValidatorType& io,
@@ -139,7 +140,9 @@ public:
 	      hasDelta_(extra == "WithDelta"),
 	      hasCalcMu_(false),
 	      tau_(0),
-	      mu_(0)
+	      mu_(0),
+		  previousTimeStep_(0),
+	      vectorMu_(geometry.numberOfSites())
 	{
 		if (extra != "" && extra != "WithDelta")
 			err("FermionSpinLess can only be followed by WithDelta and not " + extra + "\n");
@@ -183,6 +186,7 @@ public:
 	                                const BlockType& block,
 	                                RealType time)  const
 	{
+		static bool firstCall = true;
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
 		SizeType n = block.size();
@@ -202,6 +206,19 @@ public:
 			const SizeType currentTimeStep = time/tau_;
 			const RealType effectiveMu = calcMu(site, currentTimeStep, nsites, tau_, mu_);
 			hmatrix += effectiveMu*niup;
+			if (previousTimeStep_ != currentTimeStep || firstCall) {
+				printMuOfR(time);
+				previousTimeStep_ = currentTimeStep;
+				firstCall = false;
+				for (SizeType i = 0; i < vectorMu_.size(); ++i)
+					vectorMu_[site].second = false;
+
+				vectorMu_[site].first = effectiveMu;
+				vectorMu_[site].second = true;
+			} else {
+				vectorMu_[site].first = effectiveMu;
+				vectorMu_[site].second = true;
+			}
 		}
 	}
 
@@ -444,6 +461,18 @@ protected:
 		return -64.0*tau*nm;
 	}
 
+	void printMuOfR(RealType time) const
+	{
+		std::cout<<"timeStep="<<previousTimeStep_<<" time="<<time<<" ";
+		std::cout<<"potentialV=[";
+		for (SizeType i = 0; i < vectorMu_.size(); ++i) {
+			RealType value = (vectorMu_[i].second) ? vectorMu_[i].first : -100;
+			std::cout<<value;
+			if (i + 1 < vectorMu_.size()) std::cout<<", ";
+		}
+
+		std::cout<<"];\n";
+	}
 	ParametersFermionSpinless<RealType, QnType>  modelParameters_;
 	SizeType offset_;
 	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
@@ -452,6 +481,9 @@ protected:
 	bool hasCalcMu_;
 	RealType tau_;
 	RealType mu_;
+	mutable SizeType previousTimeStep_;
+	mutable VectorPairRealBoolType vectorMu_;
+
 };	//class FermionSpinless
 
 } // namespace Dmrg
