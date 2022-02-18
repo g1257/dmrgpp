@@ -435,18 +435,20 @@ protected:
 		static SizeType nm = 0;
 		static SizeType rm = 1;   //( steps changes when n=1000)
 
-		++nm;
+		if (site + 1 == N1 || site == 0) {
+			++nm;
 
-		if (n%1000 == 0) {
-			++rm;
-			nm = 0;
+			if (n%1000 == 0) {
+				++rm;
+				nm = 0;
 
-			std::stringstream msg;
-			msg << "FermionSpinless::calcMu(): nm=0 "
-			<< "site=" << site << " n=" << n
-			<< " tau=" << tau << " mu=" << mu
-			<< " rm=" << rm << "\n";
-			std::cout<<msg.str();
+				std::stringstream msg;
+				msg << "FermionSpinless::calcMu(): nm=0 "
+				<< "site=" << site << " n=" << n
+				<< " tau=" << tau << " mu=" << mu
+				<< " rm=" << rm << "\n";
+				std::cout<<msg.str();
+			}
 		}
 
 		if (site + rm < N1) {    //(chemical potential for  i <= end site - rm)
