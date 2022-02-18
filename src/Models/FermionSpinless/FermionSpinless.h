@@ -438,7 +438,7 @@ protected:
 		if (site + 1 == N1 || site == 0) {
 			++nm;
 
-			if (n%1000 == 0) {
+			if (n%1000 == 0 && n > 0) {
 				++rm;
 				nm = 0;
 

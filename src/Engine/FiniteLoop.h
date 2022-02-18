@@ -92,10 +92,13 @@ public:
 	           const TruncationControlType& truncationControl)
 	    : stepLength_(sl), keptStates_(ks), bitField_(0), truncationControl_(truncationControl)
 	{
+		str = removeCharsAtStart(str, "\"");
+		str = removeCharsAtEnd(str, "\"");
+
 		setMap();
 
 		VectorStringType tokens;
-		PsimagLite::split(tokens, str, ",");
+		PsimagLite::split(tokens, str, ":");
 		bool hasBitField = false;
 		bool hasAtField = false;
 		for (SizeType i = 0; i < tokens.size(); ++i)
@@ -180,7 +183,7 @@ private:
 		VectorStringType tokens;
 		PsimagLite::split(tokens, str, "=");
 		if (tokens.size() != 2)
-			err("FiniteLoop wiht " + str + " : syntax error (2)\n");
+			err("FiniteLoop with " + str + " : syntax error (2)\n");
 
 		truncationControl_.setNameValue(tokens[0], tokens[1]);
 	}
@@ -236,6 +239,33 @@ private:
 		for (SizeType i = 0; i < str.length(); ++i)
 			if (!std::isdigit(str[i])) return false;
 		return true;
+	}
+
+	static PsimagLite::String removeCharsAtStart(PsimagLite::String str,
+	                                             PsimagLite::String chars)
+	{
+		const SizeType n = str.length();
+		SizeType i = 0;
+		for (; i < n; ++i) {
+			unsigned char c = str[i];
+			if (std::find(str.begin(), str.end(), c) == chars.end()) break;
+		}
+
+		return str.substr(i, n - i);
+	}
+
+	static PsimagLite::String removeCharsAtEnd(PsimagLite::String str,
+	                                           PsimagLite::String chars)
+	{
+		const SizeType n = str.length();
+		SizeType j = 0;
+		for (SizeType i = 0; i < n; ++i) {
+			j = n - i - 1;
+			unsigned char c = str[j];
+			if (std::find(str.begin(), str.end(), c) == chars.end()) break;
+		}
+
+		return str.substr(0, j + 1);
 	}
 
 	static std::map<PsimagLite::String, SizeType> mapNameBit_;
