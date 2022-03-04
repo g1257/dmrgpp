@@ -16,7 +16,7 @@ potentialV 16
 0 0 0 0 0 0 0 0 
 0 0 0 0 0 0 0 0 
 
-SolverOptions=twositedmrg,fixLegacyBugs
+SolverOptions=twositedmrg
 Version=version
 OutputFile=data61
 InfiniteLoopKeptStates=81

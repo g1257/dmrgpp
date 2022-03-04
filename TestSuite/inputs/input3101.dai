@@ -19,7 +19,7 @@ string GeometryName="chain";
 Model="Heisenberg";
 integer HeisenbergTwiceS=1;
 
-SolverOptions="twositedmrg,fixLegacyBugs,CorrectionVectorTargeting,restart";
+SolverOptions="twositedmrg,CorrectionVectorTargeting,restart";
 string RestartFilename="data3100";
 Version="version";
 InfiniteLoopKeptStates=100;

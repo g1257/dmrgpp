@@ -33,7 +33,7 @@ OrbitalTwiceS=2;
 LambdaOne=0;
 LambdaTwo=0;
 
-SolverOptions="CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart,fixLegacyBugs";
+SolverOptions="CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart";
 Version="5.77";
 OutputFile="data1305";
 InfiniteLoopKeptStates=50;

@@ -82,7 +82,7 @@ FiniteLoops=[
 [5, 200, 0],
 [-10, 200, 0], [10, 200, 0]];
 
-SolverOptions="twositedmrg,fixLegacyBugs";
+SolverOptions="twositedmrg";
 Version="version";
 TargetElectronsTotal=10;
 

@@ -385,7 +385,7 @@ public:
 			\item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
 								batched gemm and might need plugin sc
 			\item [KrylovNoAbridge] TBW
-			\item [fixLegacyBugs] TBW
+			\item [keepLegacyBugs] TBW
 			\item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
  recompute it instead.
 			\item [shrinkStacksOnDisk] Store shrink stacks on disk instead of in memory
@@ -460,7 +460,7 @@ public:
 		registerOpts.push_back("wftAccelPatches");
 		registerOpts.push_back("BatchedGemm");
 		registerOpts.push_back("KrylovNoAbridge");
-		registerOpts.push_back("fixLegacyBugs");
+		registerOpts.push_back("keepLegacyBugs");
 		registerOpts.push_back("KronNoUseLowerPart");
 		registerOpts.push_back("shrinkStacksOnDisk");
 		registerOpts.push_back("OperatorsChangeAll");

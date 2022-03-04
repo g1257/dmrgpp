@@ -22,7 +22,7 @@ vector lambdaFP=[0.0,...];
 vector potentialPV=[0.0,...];
 
 Model="HubbardHolstein";
-SolverOptions="MatrixProductStored,fixLegacyBugs,twositedmrg";
+SolverOptions="MatrixProductStored,twositedmrg";
 Version="version";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[

@@ -135,7 +135,7 @@ FiniteLoops 4
 -10 800 2 10 800 2
 
 Threads=1
-SolverOptions=CorrectionVectorTargeting,useComplex,twositedmrg,restart,fixLegacyBugs
+SolverOptions=CorrectionVectorTargeting,useComplex,twositedmrg,restart
 CorrectionA=0
 Version=version
 RestartFilename=data6011

@@ -132,7 +132,7 @@ public:
 	              start,
 	              nf,
 	              trail,
-	              !model.params().options.isSet("fixLegacyBugs"),
+	              model.params().options.isSet("keepLegacyBugs"),
 	              model.params().options.isSet("observeReadOnDemand")),
 	      onepoint_(helper_, model),
 	      skeleton_(helper_, model, true),

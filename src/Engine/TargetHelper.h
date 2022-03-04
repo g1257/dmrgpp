@@ -109,7 +109,7 @@ public:
 
 	bool withLegacyBugs() const
 	{
-		return !model_.params().options.isSet("fixLegacyBugs");
+		return model_.params().options.isSet("keepLegacyBugs");
 	}
 
 private:

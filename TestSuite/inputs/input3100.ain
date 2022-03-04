@@ -16,7 +16,7 @@ gt1:dir0:Connectors=[1];
 Model="Heisenberg";
 integer HeisenbergTwiceS=1;
 
-SolverOptions="twositedmrg,fixLegacyBugs";
+SolverOptions="twositedmrg";
 Version="version";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[

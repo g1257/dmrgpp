@@ -13,7 +13,7 @@ Model="HubbardOneBand";
 hubbardU=[10,...];
 potentialV=[0,...];
 
-SolverOptions="CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart,fixLegacyBugs,useComplex";
+SolverOptions="CorrectionVectorTargeting,twositedmrg,minimizeDisk,restart,useComplex";
 Version="6.01";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
