@@ -23,5 +23,11 @@ int main(int argc, char* argv[])
 
 	internode.parallelFor(0, n, [](SizeType i, SizeType){std::cout << i;});
 	std::cout<<"\n--------------------------\n";
-	system("hostname");
+	size_t len = 1024;
+	char* name = new char[len + 1];
+	int x = gethostname(name, len);
+	if (x != 0) std::cerr<<argv[0]<<": Could not gethostname\n";
+	else std::cout<<name<<"\n";
+	delete [] name;
+	name = nullptr;
 }
