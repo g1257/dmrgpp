@@ -244,28 +244,15 @@ private:
 	static PsimagLite::String removeCharsAtStart(PsimagLite::String str,
 	                                             PsimagLite::String chars)
 	{
-		const SizeType n = str.length();
-		SizeType i = 0;
-		for (; i < n; ++i) {
-			unsigned char c = str[i];
-			if (std::find(str.begin(), str.end(), c) == chars.end()) break;
-		}
-
-		return str.substr(i, n - i);
+		size_t start = str.find_first_not_of(chars);
+		return (start == PsimagLite::String::npos) ? "" : str.substr(start);
 	}
 
 	static PsimagLite::String removeCharsAtEnd(PsimagLite::String str,
 	                                           PsimagLite::String chars)
 	{
-		const SizeType n = str.length();
-		SizeType j = 0;
-		for (SizeType i = 0; i < n; ++i) {
-			j = n - i - 1;
-			unsigned char c = str[j];
-			if (std::find(str.begin(), str.end(), c) == chars.end()) break;
-		}
-
-		return str.substr(0, j + 1);
+		size_t end = str.find_last_not_of(chars);
+		return (end == PsimagLite::String::npos) ? "" : str.substr(0, end + 1);
 	}
 
 	static std::map<PsimagLite::String, SizeType> mapNameBit_;
