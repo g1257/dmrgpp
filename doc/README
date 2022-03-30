@@ -1,6 +1,17 @@
 
 QUESTIONS ABOUT DMRG++ DOCUMENTATION:
 
+IMPORTANT: You need thesis.bib to compile references for this manual.
+Instructions are as follows:
+
+cd dmrgpp/
+cd ../
+git clone https://code.ornl.gov/gonzalo_3/thesis.git
+cd dmrgpp/doc
+ln -s ../../thesis/thesis.bib
+make
+
+
 Where's manual.tex now?
 When one runs make under dmrgpp/src it should be created automatically.
 If not, one needs to run make in this directory, that is, in dmrgpp/doc.
