@@ -134,7 +134,7 @@ public:
 						  const ModelType& model,
 						  const WaveFunctionTransfType& wft,
 						  const LeftRightSuperType& lrs)
-		: BaseType(model, lrs, wft),
+		: BaseType(model, lrs, wft, "rungekutta"),
 	      progress_("TimeVectorsRungeKutta"),
 	      tstStruct_(tstStruct),
 		  targetVectors_(targetVectors),

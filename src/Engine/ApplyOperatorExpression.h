@@ -138,7 +138,10 @@ public:
 	      indexNoAdvance_(indexNoAdvance),
 	      applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs()),
 	      targetVectors_(0),
-	      timeVectorsBase_(0),
+	      timeVectorsBase_(new TimeVectorsBaseType(targetHelper_.model(),
+	                                               targetHelper_.lrs(),
+	                                               targetHelper_.wft(),
+	                                               "base")),
 	      wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft()),
 	      multiSiteExprHelper_(targetHelper_.model().superGeometry().numberOfSites() - 2),
 	      correlationsSkel_(multiSiteExprHelper_, targetHelper.model(), false)
@@ -461,11 +464,6 @@ public:
 		progress_.printline(msgg, std::cout);
 	}
 
-	void initTimeVectors(TimeVectorsBaseType* tvb)
-	{
-		timeVectorsBase_ = tvb;
-	}
-
 	void initTimeVectors(const TargetParamsType& tstStruct,
 	                     InputValidatorType& ioIn)
 	{
@@ -514,7 +512,7 @@ public:
 		}
 	}
 
-	bool hasTimeVectors() const { return timeVectorsBase_; }
+	bool hasTimeVectors() const { return !timeVectorsBase_->isBase(); }
 
 	const TimeVectorsBaseType& timeVectors() const
 	{
@@ -563,7 +561,7 @@ public:
 		                                              wftAndAdvanceIfNeeded,
 		                                              block,
 		                                              isLastCall);
-		if (!timeVectorsBase_)
+		if (timeVectorsBase_->isBase())
 			err("timeVectorsBase_ ptr not setup!?\n");
 
 		timeVectorsBase_->calcTimeVectors(indices,
@@ -653,8 +651,6 @@ public:
 
 	void timeHasAdvanced()
 	{
-		if (!timeVectorsBase_)
-			err("timeHasAdvanced(): timeVectorsBase_ ptr not setup!?\n");
 		timeVectorsBase_->timeHasAdvanced();
 	}
 
@@ -748,9 +744,9 @@ private:
 		if (advanceEach > 0 && timesWithoutAdvancement_ >= advanceEach && !dontAdvance) {
 			stage_[i] = StageEnum::WFT_ADVANCE;
 			if (i == lastI) {
-				if (timeVectorsBase_) timeVectorsBase_->advanceCurrentTimeStep();
+				timeVectorsBase_->advanceCurrentTimeStep();
 				timesWithoutAdvancement_ = 1;
-				if (timeVectorsBase_) timeVectorsBase_->timeHasAdvanced();
+				timeVectorsBase_->timeHasAdvanced();
 			}
 		} else {
 			if (i == lastI &&
@@ -765,7 +761,7 @@ private:
 		        site==1)
 			firstSeeLeftCorner_ = true;
 
-		const RealType time = (timeVectorsBase_) ? timeVectorsBase_->time() : 0;
+		const RealType time = timeVectorsBase_->time();
 		PsimagLite::OstringStream msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2<<"Steps without advance: "<<timesWithoutAdvancement_;
@@ -825,7 +821,9 @@ private:
 			const SizeType advanceEach = tstStruct.advanceEach();
 			SizeType advance = indexNoAdvance_;
 
-			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE && timeVectorsBase_) {
+			if (advanceEach > 0 &&
+			        stage_[i] == StageEnum::WFT_ADVANCE &&
+			        !timeVectorsBase_->isBase()) {
 				SizeType timeSteps = tstStruct.times().size();
 				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
 			}
@@ -849,7 +847,7 @@ private:
 			if  (site == 0 || site == numberOfSites -1) {
 				// don't wft since we did it before
 				assert(advance < targetVectors_.size());
-				if (timeVectorsBase_ || advanceEach == 0)
+				if (!timeVectorsBase_->isBase() || advanceEach == 0)
 					phiNew = src;
 				return;
 			}

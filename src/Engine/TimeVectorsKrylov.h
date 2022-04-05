@@ -151,7 +151,7 @@ public:
 	                  const WaveFunctionTransfType& wft,
 	                  const LeftRightSuperType& lrs,
 	                  InputValidatorType& ioIn)
-	    : BaseType(model, lrs, wft),
+	    : BaseType(model, lrs, wft, "krylov"),
 	      tstStruct_(tstStruct),
 	      targetVectors_(targetVectors),
 	      model_(model),

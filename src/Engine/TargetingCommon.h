@@ -346,7 +346,7 @@ public:
 
 	RealType time() const
 	{
-		return (aoe_.hasTimeVectors()) ? aoe_.timeVectors().time() : 0;
+		return aoe_.timeVectors().time();
 	}
 
 	// START Cocoons

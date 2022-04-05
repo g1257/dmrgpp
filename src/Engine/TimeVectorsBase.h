@@ -106,8 +106,9 @@ public:
 
 	TimeVectorsBase(const ModelType& model,
 	                const LeftRightSuperType& lrs,
-	                const WaveFunctionTransfType& wft)
-	    : wftHelper_(model, lrs, wft), time_(0.0), currentTimeStep_(0)
+	                const WaveFunctionTransfType& wft,
+	                PsimagLite::String name)
+	    : wftHelper_(model, lrs, wft), name_(name), time_(0.0), currentTimeStep_(0)
 	{}
 
 	struct ExtraData {
@@ -134,7 +135,10 @@ public:
 	virtual void calcTimeVectors(const VectorSizeType&,
 	                             RealType,
 	                             const VectorWithOffsetType&,
-	                             const ExtraData&) = 0;
+	                             const ExtraData&)
+	{
+		err("calcTimeVectors: unimplemented in this base class\n");
+	}
 
 	virtual ~TimeVectorsBase() {}
 
@@ -152,6 +156,8 @@ public:
 
 	void setCurrentTime(RealType t) { time_ = t; }
 
+	bool isBase() const { return (name_ == "base"); }
+
 protected:
 
 	const WftHelperType& wftHelper() const { return wftHelper_; }
@@ -159,6 +165,7 @@ protected:
 private:
 
 	WftHelperType wftHelper_;
+	PsimagLite::String name_;
 	RealType time_;
 	SizeType currentTimeStep_;
 }; //class TimeVectorsBase
