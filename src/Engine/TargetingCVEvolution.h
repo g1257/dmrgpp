@@ -133,7 +133,8 @@ public:
 	      tstStruct_(ioIn, "TargetingCVEvolution", checkPoint.model()),
 	      wft_(wft),
 	      progress_("TargetingCVEvolution"),
-	      counter_(0),
+	      currentTimeStep_(0),
+	      stepsWithoutAdvancement_(0),
 	      almostDone_(0),
 	      skeleton_(ioIn, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy()),
 	      weight_(targets()),
@@ -254,8 +255,21 @@ private:
 		this->tvNonConst(0) = phiNew;
 		VectorWithOffsetType bogusTv;
 
-		const SizeType currentTimeStep = this->common().aoe().timeVectors().currentTimeStep();
-		if (currentTimeStep == 0) {
+		bool timeHasAdvanced = (stepsWithoutAdvancement_ >= tstStruct_.advanceEach() &&
+		        currentTimeStep_ < tstStruct_.nForFraction());
+
+		if (timeHasAdvanced) {
+			++currentTimeStep_;
+			stepsWithoutAdvancement_ = 0;
+		}
+
+		if (currentTimeStep_ >= tstStruct_.nForFraction()) {
+			std::cout<<__FILE__<<" is now DONE\n";
+			std::cerr<<__FILE__<<" is now DONE\n";
+			++almostDone_;
+		}
+
+		if (currentTimeStep_ == 0) {
 			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
 				skeleton_.calcDynVectors(phiNew,
 				                         this->tvNonConst(1),
@@ -275,14 +289,6 @@ private:
 				                         this->tvNonConst(4));
 			}
 		} else {
-			bool timeHasAdvanced = (counter_ != currentTimeStep &&
-			        currentTimeStep < tstStruct_.nForFraction());
-
-			if (counter_ != currentTimeStep && !timeHasAdvanced) {
-				std::cout<<__FILE__<<" is now DONE\n";
-				std::cerr<<__FILE__<<" is now DONE\n";
-				++almostDone_;
-			}
 
 			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
 
@@ -317,7 +323,7 @@ private:
 			}
 		}
 
-		counter_ = currentTimeStep;
+		++stepsWithoutAdvancement_;
 
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
@@ -328,7 +334,8 @@ private:
 	TargetParamsType tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
-	SizeType counter_;
+	SizeType currentTimeStep_;
+	SizeType stepsWithoutAdvancement_;
 	SizeType almostDone_;
 	CorrectionVectorSkeletonType skeleton_;
 	VectorRealType weight_;

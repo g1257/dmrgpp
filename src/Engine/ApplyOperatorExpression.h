@@ -743,7 +743,7 @@ private:
 		if (advanceEach > 0 && timesWithoutAdvancement_ >= advanceEach && !dontAdvance) {
 			stage_[i] = StageEnum::WFT_ADVANCE;
 			if (i == lastI) {
-				timeVectorsBase_->advanceCurrentTimeStep();
+				if (timeVectorsBase_) timeVectorsBase_->advanceCurrentTimeStep();
 				timesWithoutAdvancement_ = 1;
 				if (timeVectorsBase_) timeVectorsBase_->timeHasAdvanced();
 			}
