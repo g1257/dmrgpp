@@ -716,7 +716,7 @@ private:
 
 	SizeType currentTimeStep() const
 	{
-		return (aoe_.hasTimeVectors()) ? aoe_.timeVectors().currentTimeStep() : 0;
+		return aoe_.timeVectors().currentTimeStep();
 	}
 
 	void setCurrentTimeStep(SizeType ts)

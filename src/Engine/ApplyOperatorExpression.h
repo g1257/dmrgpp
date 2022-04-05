@@ -512,8 +512,6 @@ public:
 		}
 	}
 
-	bool hasTimeVectors() const { return !timeVectorsBase_->isBase(); }
-
 	const TimeVectorsBaseType& timeVectors() const
 	{
 		assert(timeVectorsBase_);
