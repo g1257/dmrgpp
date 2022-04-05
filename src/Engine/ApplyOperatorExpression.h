@@ -461,6 +461,11 @@ public:
 		progress_.printline(msgg, std::cout);
 	}
 
+	void initTimeVectors(TimeVectorsBaseType* tvb)
+	{
+		timeVectorsBase_ = tvb;
+	}
+
 	void initTimeVectors(const TargetParamsType& tstStruct,
 	                     InputValidatorType& ioIn)
 	{

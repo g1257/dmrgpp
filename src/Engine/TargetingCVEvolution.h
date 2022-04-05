@@ -115,6 +115,7 @@ public:
 	typedef TargetParamsCorrectionVector<ModelType> TargetParamsType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
+	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BasisType::QnType QnType;
@@ -123,6 +124,23 @@ public:
 	VectorWithOffsetType,
 	BaseType,
 	TargetParamsType> CorrectionVectorSkeletonType;
+
+	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
+
+	class TimeVectorBogus : public TimeVectorsBaseType {
+
+	public:
+
+		TimeVectorBogus(const ModelType& model,
+		                const LeftRightSuperType& lrs,
+		                const WaveFunctionTransfType& wft)
+		    : TimeVectorsBaseType(model, lrs, wft) {}
+
+		virtual void calcTimeVectors(const VectorSizeType&,
+		                             RealType,
+		                             const VectorWithOffsetType&,
+		                             const typename TimeVectorsBaseType::ExtraData&) {}
+	};
 
 	TargetingCVEvolution(const LeftRightSuperType& lrs,
 	                     const CheckpointType& checkPoint,
@@ -133,7 +151,7 @@ public:
 	      tstStruct_(ioIn, "TargetingCVEvolution", checkPoint.model()),
 	      wft_(wft),
 	      progress_("TargetingCVEvolution"),
-	      currentTimeStep_(0),
+	      timeVectorBogus_(checkPoint.model(), lrs, wft),
 	      stepsWithoutAdvancement_(0),
 	      almostDone_(0),
 	      skeleton_(ioIn, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy()),
@@ -152,6 +170,8 @@ public:
 		SizeType n = weight_.size();
 		RealType factor = (1.0 - gsWeight_)/n;
 		for (SizeType i = 0; i < n; ++i) weight_[i] = factor;
+
+		this->common().aoeNonConst().initTimeVectors(&timeVectorBogus_);
 	}
 
 	SizeType sites() const { return tstStruct_.sites(); }
@@ -256,20 +276,21 @@ private:
 		VectorWithOffsetType bogusTv;
 
 		bool timeHasAdvanced = (stepsWithoutAdvancement_ >= tstStruct_.advanceEach() &&
-		        currentTimeStep_ < tstStruct_.nForFraction());
+		        timeVectorBogus_.currentTimeStep() < tstStruct_.nForFraction());
 
 		if (timeHasAdvanced) {
-			++currentTimeStep_;
+			timeVectorBogus_.advanceCurrentTimeStep();
+			timeVectorBogus_.advanceCurrentTime(1);
 			stepsWithoutAdvancement_ = 0;
 		}
 
-		if (currentTimeStep_ >= tstStruct_.nForFraction()) {
+		if (timeVectorBogus_.currentTimeStep() >= tstStruct_.nForFraction()) {
 			std::cout<<__FILE__<<" is now DONE\n";
 			std::cerr<<__FILE__<<" is now DONE\n";
 			++almostDone_;
 		}
 
-		if (currentTimeStep_ == 0) {
+		if (timeVectorBogus_.currentTimeStep() == 0) {
 			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
 				skeleton_.calcDynVectors(phiNew,
 				                         this->tvNonConst(1),
@@ -334,7 +355,7 @@ private:
 	TargetParamsType tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
-	SizeType currentTimeStep_;
+	TimeVectorBogus timeVectorBogus_;
 	SizeType stepsWithoutAdvancement_;
 	SizeType almostDone_;
 	CorrectionVectorSkeletonType skeleton_;
