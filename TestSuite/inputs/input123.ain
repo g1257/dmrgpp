@@ -21,9 +21,9 @@ RepeatFiniteLoopsTimes=4;
 TargetElectronsUp=8;
 TargetElectronsDown=8;
 string P0="c'[5]*c[6]*|gs>+c'[6]*c[7]*|gs>";
-string P1="TimeEvolve{0.1,5,14}*|P0>";
+string P1="TimeEvolve{tau=0.1,steps=5,advanceEach=14}*|P0>";
 string P2="c[3]*|P0>";
-string P3="TimeEvolve{0.1,5,14}*|P2>";
+string P3="TimeEvolve{tau=0.1,steps=5,advanceEach=14}*|P2>";
 GsWeight=0.2;
 OutputFile="data123";
 #ci dmrg arguments= -p 12 "<gs|P0>,<P0|P1>,<gs|c'|P2>,<gs|c'|P3>,<P2|P3>"

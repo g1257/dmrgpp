@@ -61,7 +61,7 @@ potentialV	 16     0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 			0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 Model=KondoEx2
 HeisenbergTwiceS=1
-SolverOptions=none,MatrixVectorStored,debugmatrix,test
+SolverOptions=none,MatrixVectorStored
 Version=5.27
 OutputFile=data1600
 InfiniteLoopKeptStates=50
@@ -72,4 +72,3 @@ FiniteLoops 3
 KondoHx=0.123
 ElectronHx=0.456
 PairingField=0.789
-

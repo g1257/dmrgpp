@@ -34,7 +34,7 @@ OrbitalTwiceS=2;
 LambdaOne=0;
 LambdaTwo=0;
 
-SolverOptions="twositedmrg,MatrixVectorStored,test,debugmatrix";
+SolverOptions="twositedmrg,MatrixVectorStored,debugmatrix";
 Version="5.77";
 OutputFile="data1306";
 InfiniteLoopKeptStates=50;

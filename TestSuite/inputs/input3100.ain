@@ -14,7 +14,7 @@ gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[1];
 
 Model="Heisenberg";
-integer HeisenbergTwiceS=1;
+HeisenbergTwiceS=1;
 
 SolverOptions="twositedmrg";
 Version="version";
@@ -25,5 +25,5 @@ FiniteLoops=[
 [ 30, 200, 0]];
 integer IsPeriodicX=0;
 OutputFile="data3100";
-integer TargetSzPlusConst=16;
+TargetSzPlusConst=16;
 

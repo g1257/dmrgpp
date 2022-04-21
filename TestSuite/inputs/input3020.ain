@@ -16,7 +16,7 @@ potentialV=[0,...];
 SolverOptions="twositedmrg,useComplex";
 Version="6.01";
 InfiniteLoopKeptStates=100;
-FiniteLoops=[[2, 20, 0],
+FiniteLoops=[[2, 100, 0],
 [-4, 200, 0],
 [ 4, 200, 0]];
 TargetSzPlusConst=3;
