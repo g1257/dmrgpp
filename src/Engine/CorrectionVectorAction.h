@@ -159,7 +159,7 @@ private:
 			return ComplexOrRealType(part1/denom, -BaseType::tstStruct_.eta()/denom);
 		}
 
-		ComplexOrRealType cmplx(part1, BaseType::tstStruct_.eta());
+		ComplexOrRealType cmplx(part1, -BaseType::tstStruct_.eta());
 		const RealType oneReal = 1.0;
 		return oneReal/pow(cmplx, oneReal/nFraction);
 
