@@ -233,8 +233,8 @@ sub correctionVectorReadOpen
 
 		next if ($skip);
 
-	chomp;
-	my @temp = split;
+		chomp;
+		my @temp = split;
 		die "$0: Line $_\n" unless (scalar(@temp)==5);
 
 		my $site = $temp[0];
@@ -260,20 +260,54 @@ sub correctionVectorWrite
 	for (my $i = 0; $i < $maxSite; ++$i) {
 		my $vv1 = $v1->[$i];
 
-		if (!defined($vv1)) {
-			print STDERR "$0: P3: Undefined value for site = $i and omega = $omega\n";
-			$vv1 = 0.0;
-		}
-
 		my $vv2 = $v2->[$i];
 		if (!defined($vv2)) {
 			print STDERR "$0: P2: Undefined value for site = $i and omega = $omega\n";
 			$vv2 = 0.0;
 		}
 
+		if (isComplexNumber($vv2)) {
+			($vv1, $vv2) = complexNumberToList($vv2);
+		}
+		
+		if (!defined($vv1)) {
+			print STDERR "$0: P3: Undefined value for site = $i and omega = $omega\n";
+			$vv1 = 0.0;
+		}
+		
 		$array->[$i] = [$vv1, $vv2];
 	}
 }
+
+sub isComplexNumber
+{
+	$_ = shift;
+	if (/^ *\(/) {
+		if (/\) *$/) {
+			return 1;
+		}
+		
+		die "$0: $_ isn't real or complex!?\n";
+	}
+	
+	return 0;
+}
+
+sub complexNumberToList
+{
+	my ($x) = @_;
+	$_ = $x;
+	if (s/^ *\(//) {
+		if (s/\) *$//) {
+			my @temp = split/,/;
+			scalar(@temp) == 2 or notAComplexNumber($x);
+			return @temp;
+		}
+	}
+	
+	die "$0: $x isn't real or complex!?\n";
+}
+
 
 sub procThisOmegaKspace
 {
