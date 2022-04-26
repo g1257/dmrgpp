@@ -60,3 +60,4 @@ FiniteLoops 3
 TargetElectronsUp=8
 TargetElectronsDown=8
 #ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"
+#ci CollectBrakets 0

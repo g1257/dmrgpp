@@ -15,6 +15,7 @@ potentialV=[0,...];
 
 SolverOptions="twositedmrg,useComplex";
 Version="6.01";
+OutputFile="data3020";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[[2, 100, 0],
 [-4, 200, 0],

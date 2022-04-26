@@ -24,7 +24,7 @@ TargetElectronsTotal=6;
 
 # This has been added for CV:
 CorrectionA=0;
-RestartFilename="input3020";
+RestartFilename="data3020";
 TruncationTolerance=1e-7;
 LanczosEps=1e-7;
 TridiagonalEps=1e-7;
