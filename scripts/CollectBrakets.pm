@@ -71,6 +71,9 @@ sub isBraket
 	if ($x =~ /^\<(.+)\|.+\|(.+)\>$/) {
 		$bra = $1;
 		$ket = $2;
+	} elsif ($x =~ /^\<(.+)\|(.+)\>$/) {
+		$bra = $1;
+		$ket = $2;
 	} else {
 		return 0;
 	}
