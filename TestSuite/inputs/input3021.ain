@@ -47,3 +47,6 @@ Intent="ARPES";
 string TSPOp0:TSPOperator="expression";
 string TSPOp0:OperatorExpression="c";
 
+#ci dmrg arguments="<gs|c'|P2>"
+#ci CollectBrakets 0
+ 
