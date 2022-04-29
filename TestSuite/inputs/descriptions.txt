@@ -283,7 +283,7 @@ hence non-trivial. (Krylov)
 2101) Hot Ancilla Phase
 2102) CV Phase
 #2103-2199 --> Reserved for hot spectra
-#2300) Graphene
+2300) Graphene
 2500) Su3Model
 2510) Real version of 2500
 2700) Excited > 1

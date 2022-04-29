@@ -34,7 +34,7 @@ FiniteLoops 4
 TargetElectronsUp=4
 TargetElectronsDown=4
 Threads=1
-SolverOptions=TargetingRixsDynamic,twositedmrg,restart,minimizeDisk
+SolverOptions=TargetingRixsDynamic,twositedmrg,restart,minimizeDisk,keepLegacyBugs
 CorrectionA=0
 Version=version
 RestartFilename=data5502

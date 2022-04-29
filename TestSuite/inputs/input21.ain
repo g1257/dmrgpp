@@ -14,7 +14,7 @@ gt1:dir0:Connectors=[1.0];
 Model="Heisenberg";
 HeisenbergTwiceS=1;
 
-SolverOptions="twositedmrg,TimeStepTargeting,restart,fixLegacyBugs";
+SolverOptions="twositedmrg,TimeStepTargeting,restart";
 Version="247b335fe1542909b90be8647456bfd8fd56191c";
 RestartFilename="data20";
 OutputFile="data21";

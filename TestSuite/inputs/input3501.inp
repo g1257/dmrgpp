@@ -13,7 +13,7 @@ Model=HubbardOneBand
 TargetElectronsUp=4
 TargetElectronsDown=4
 
-SolverOptions=twositedmrg,TargetingChebyshev,restart
+SolverOptions=twositedmrg,TargetingChebyshev,restart,keepLegacyBugs
 Version=version
 OutputFile=data3501
 RestartFilename=data3500
