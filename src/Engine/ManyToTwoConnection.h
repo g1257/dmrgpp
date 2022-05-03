@@ -15,6 +15,7 @@ public:
 	typedef std::pair<char, char> PairCharType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelLinksType::TermType::OneLinkType ModelTermLinkType;
+	typedef typename ModelLinksType::ComplexOrRealType ComplexOrRealType;
 	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
 
 	ManyToTwoConnection(const VectorSizeType& hItems,
@@ -33,8 +34,12 @@ public:
 
 	const PairCharType& finalMods() const { return mods_; }
 
-	bool connectionIsHermitian(const ModelLinksType& modelLinks) const
+	bool connectionIsHermitian(const ModelLinksType& modelLinks,
+	                           ComplexOrRealType value) const
 	{
+		if (std::imag(value) != 0)
+			err("connectionIsHermitian:: Cannot deal yet with a complex valued connection\n");
+
 		return (oneLink_.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ?
 		            linkIsHermitianFermion(modelLinks) : linkIsHermitianBoson(modelLinks);
 	}
