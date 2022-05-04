@@ -32,7 +32,7 @@ Model=TjMultiOrb
 Orbitals=1
 TargetElectronsUp=16
 TargetElectronsDown=16
-SolverOptions=twositedmrg,TargetingChebyshev,restart,minimizeDisk
+SolverOptions=twositedmrg,TargetingChebyshev,restart,minimizeDisk,advanceUnrestricted
 Version=version
 OutputFile=data3532
 RestartFilename=data3530
@@ -56,7 +56,7 @@ TSPLoops 1 0
 TSPProductOrSum=sum
 
 TSPOperator=expression
-OperatorExpression=c?0'
+OperatorExpression=c?0
 
 #ChebyshevC=0.07
 #ChebyshevE0=-6.52419468547

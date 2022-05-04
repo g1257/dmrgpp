@@ -35,13 +35,13 @@ TargetElectronsUp=4
 TargetElectronsDown=4
 Threads=1
 
-SolverOptions=CorrectionVectorTargeting,twositedmrg,restart,keepLegacyBugs
+SolverOptions=CorrectionVectorTargeting,twositedmrg,restart
 CorrectionA=0
 Version=version
 RestartFilename=data5500
 
 OutputFile=data5501
-
+MaxMatrixRankStored=512
 CorrectionVectorOmega=1
 DynamicDmrgType=0
 TSPProductOrSum=sum

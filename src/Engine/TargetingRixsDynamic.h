@@ -273,14 +273,14 @@ public:
 
 		SizeType site = block1[0];
 
-		SizeType numberOfSites = this->lrs().super().block().size();
-		bool weAreAtBorder = site==0 || site==numberOfSites-1;
-		if (!weAreAtBorder)
-			this->common().aoeNonConst().wftSome(site, 0, 6);
+		//SizeType numberOfSites = this->lrs().super().block().size();
+		//		bool weAreAtBorder = site==0 || site==numberOfSites-1;
+		//		if (!weAreAtBorder)
+		this->common().aoeNonConst().wftSome(site, 0, 6);
 
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			if (!weAreAtBorder)
+//			if (!weAreAtBorder)
 				this->common().aoeNonConst().wftSome(site, 6, this->common().aoe().tvs());
 		} else {
 			// just to set the stage and currenttime: CHEBY and KRYLOVTIME
@@ -305,6 +305,7 @@ public:
 		this->common().printNormsAndWeights(gsWeight_, weight_);
 
 		//corner case
+		/*
 		SizeType site2 = numberOfSites;
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
@@ -315,6 +316,7 @@ public:
 		if (site2 == numberOfSites) return;
 		BlockType block(1, site2);
 		evolve(energies, direction, block, block2, loopNumber);
+		*/
 		setWeights();
 	}
 

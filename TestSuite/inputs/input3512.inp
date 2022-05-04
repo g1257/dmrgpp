@@ -16,7 +16,7 @@ HeisenbergTwiceS=1
 
 TargetSzPlusConst=32
 
-SolverOptions=twositedmrg,TargetingChebyshev,restart
+SolverOptions=twositedmrg,TargetingChebyshev,restart,advanceUnrestricted
 Version=version
 OutputFile=data3512
 RestartFilename=data3510

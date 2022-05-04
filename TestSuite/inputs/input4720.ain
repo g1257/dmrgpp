@@ -8,7 +8,7 @@ gt0:DegreesOfFreedom=1;
 gt0:GeometryKind="ladder";
 gt0:GeometryOptions="ConstantValues";
 gt0:LadderLeg=2;
-gt0:dir0:Connectors=[-1.0];
+gt0:dir0:Connectors=[1.0];
 gt0:dir1:Connectors=[0.0];
 
 #Hopping term Bosonic
@@ -43,7 +43,7 @@ OutputFile="data4720";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
 [1, 100, 0], 
-[-2, 100, 0], [2, 100, 0]];
+[-2, 100, 0], [2, 100, 1]];
 
 TargetElectronsUp=1;
 TargetElectronsDown=1;

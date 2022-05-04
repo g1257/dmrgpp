@@ -35,7 +35,7 @@ TargetElectronsUp=4
 TargetElectronsDown=4
 Threads=1
 
-SolverOptions=TargetingRixsStatic,twositedmrg,restart,keepLegacyBugs
+SolverOptions=TargetingRixsStatic,twositedmrg,restart
 CorrectionA=0
 Version=version
 RestartFilename=data5501
