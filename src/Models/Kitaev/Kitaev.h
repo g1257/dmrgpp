@@ -385,7 +385,7 @@ protected:
 		OpForLinkType sx("sx");
 		OpForLinkType sybar("sybar");
 
-		const bool wantsHermit = true;
+		const bool wantsHermit = false;
 
 		typename MatrixType::value_type dummy = 0.0;
 
@@ -400,7 +400,7 @@ protected:
 
 		createTermSySz(sybar, sz, wantsHermit, dummy);
 
-		ModelBaseType::createTerm("sxsz").push(sx, 'N', sz, 'N');
+		ModelBaseType::createTerm("sxsz", false).push(sx, 'N', sz, 'N');
 		ModelTermType& szsx = ModelBaseType::createTerm("szsx", wantsHermit, "sxsz");
 		szsx.push(sz, 'N', sx, 'N');
 
@@ -428,7 +428,7 @@ private:
 			value *= std::complex<RealType>(0, -1);
 		};
 
-		ModelBaseType::createTerm("sysz").push(sybar, 'N', sz, 'N', modifMinusSqrtMinusOne);
+		ModelBaseType::createTerm("sysz", false).push(sybar, 'N', sz, 'N', modifMinusSqrtMinusOne);
 		ModelTermType& szsy = ModelBaseType::createTerm("szsy", wantsHermit, "sysz");
 		szsy.push(sz, 'N', sybar, 'N', modifMinusSqrtMinusOne);
 	}
@@ -452,7 +452,7 @@ private:
 			value *= std::complex<RealType>(0, -1);
 		};
 
-		ModelBaseType::createTerm("sxsy").push(sx, 'N', sybar, 'N', modifMinusSqrtMinusOne);
+		ModelBaseType::createTerm("sxsy", false).push(sx, 'N', sybar, 'N', modifMinusSqrtMinusOne);
 		ModelTermType& sysx = ModelBaseType::createTerm("sysx", wantsHermit, "sxsy");
 		sysx.push(sybar, 'N', sx, 'N', modifMinusSqrtMinusOne);
 

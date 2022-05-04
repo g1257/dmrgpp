@@ -33,6 +33,8 @@ public:
 
 	const PairCharType& finalMods() const { return mods_; }
 
+	// WARNING: It doesn't consider the value of connection, so basically
+	// it's OK only if value of connection is real
 	bool connectionIsHermitian(const ModelLinksType& modelLinks) const
 	{
 		return (oneLink_.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ?
