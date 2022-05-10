@@ -1,3 +1,15 @@
+2022-05-10 Version 3.04
+
+* CanonicalExpression has second optional template
+
+* InputNg returns map of key/value pairs
+
+* QuasiCanonical allows arithmetic of scalars now
+
+* Ainur supports macros now
+
+* internode.cpp uses gethostname systemcall now
+
 2021-11-19 Version 3.02
 
 * LinearPrediction now yields correct
