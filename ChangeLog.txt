@@ -1,3 +1,61 @@
+2022-05-10 Version 6.04
+
+Bug fixes:
+
+* Kitaev: bug fix for SySx and SySz terms.
+Bug introduced on September 9th, 2021.
+
+* SolverOptions honors commas now
+
+* Recovery files contain ParametersDmrgSolver now
+
+Interface changes:
+
+* fixLegacyBugs deleted and used by default; use
+keepLegacyBugs to keep the old bugs
+
+New Features:
+
+* AddOneSiteHamiltonian= available for all models
+
+* RecoverySave= understands %t as time, and %ll as the loop length
+
+* TargetingCVEvolution now available (w. Alberto N.)
+see arXiv:2204:03165
+
+* TargetingExpression supports TimeEvolve{} now
+
+* TimeVectorsChebyshev ready for tests (Alberto N.)
+
+* FiniteLoops's 3rd number of triplet can be more than a number now
+
+Code Refactoring:
+
+* ApplyOperatorExpression: interface to TVs changed
+
+* TargetingBase: interface to ApplyOperatorExpression changed
+
+Models:
+
+* FermionSpinLess accepts a custom calcMu function (Bradraj P.)
+
+* ModelHeisenberg supports MagneticFieldX and MagneticFieldY independently
+
+* ModelHeisenberg2 added with (Jx, Jy, Jz); ci 70 and 71
+
+* HubbardHolstein improved (Alberto N.)
+
+Scripts:
+
+* minCompile.pl added for minimal compilation
+
+* fromOut{Space,Spectrum}.pl supports Ainur now
+
+* OmegaUtils scripts support GeometrySubKind=ModifierTakeOddOnly
+
+* procOmegas.pl supports complex numbers (Pontus L.)
+
+
 2021-11-19 Version 6.02
 
 Bug fixes
