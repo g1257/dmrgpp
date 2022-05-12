@@ -46,7 +46,6 @@ public:
 		SizeType disposition;
 		VectorSizeType depends;
 		RealType Eg;
-		bool needsHamModifer;
 
 	};
 
@@ -88,18 +87,12 @@ public:
 		                                   timeParams.chebyTransform);
 
 		if (!oneTimeEvolution) {
-			HamiltoriModifierType hamModif = nullptr;
-			if (timeParams.needsHamModif) {
-				hamModif = new HamiltoriModifierType(lrs, );
-			}
-
 			oneTimeEvolution = new OneTimeEvolutionType(firstIndex,
 			                                            *srcVwo,
 			                                            srcKet,
 			                                            timeParams.disposition,
 			                                            timeParams.timeSteps,
-			                                            aux_.pVectors(),
-                                                                    hamModif);
+			                                            aux_.pVectors());
 			aux_.timeEvolve().pushBack(oneTimeEvolution);
 		}
 
