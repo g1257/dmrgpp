@@ -71,7 +71,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/Kitaev/Kitaev.h"
 #include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
 #include "../Models/HubbardHolstein/HubbardHolstein.h"
+#include "../Models/HubbardHolsteinSpinless/HubbardHolsteinSpinless.h"
 #include "../Models/HolsteinThin/HolsteinThin.h"
+#include "../Models/HolsteinSpinlessThin/HolsteinSpinlessThin.h"
 #include "../Models/Kondo/Kondo.h"
 #include "../Models/UlsOsu/UlsOsu.h"
 #include "../Models/Graphene/Graphene.h"
@@ -114,9 +116,11 @@ class ModelSelector {
 	typedef Kitaev<ModelBaseType> KitaevType;
 	typedef ModelHubbardMultiBand<ModelBaseType> ModelHubbardMultiBandType;
 	typedef HubbardHolstein<ModelBaseType> HubbardHolsteinType;
+	typedef HubbardHolsteinSpinless<ModelBaseType> HubbardHolsteinSpinlessType;
 	typedef Kondo<ModelBaseType> KondoType;
 	typedef Graphene<ModelBaseType> GrapheneType;
 	typedef HolsteinThin<ModelBaseType> HolsteinThinType;
+	typedef HolsteinSpinlessThin<ModelBaseType> HolsteinSpinlessThinType;
 	typedef GaugeSpin<ModelBaseType> GaugeSpinType;
 	typedef HeisenbergMix<ModelBaseType> HeisenbergMixType;
 	typedef SpinOrbitalModel<ModelBaseType> SpinOrbitalModelType;
@@ -159,7 +163,7 @@ public:
 			model_ = new ModelHubbardExtType(solverParams,io,geometry,"");
 		} else if (name_.substr(0, 27) == "HubbardOneBandExtendedSuper") {
 			PsimagLite::String tmp = (name_.length() == 27) ? ""
-			                                               : name_.substr(27, name_.length() - 27);
+			                                                : name_.substr(27, name_.length() - 27);
 			model_ = new ModelHubbardExtSuperType(solverParams, io, geometry, tmp);
 		} else if (name_ == "FeAsBasedSc") {
 			model_ = new FeBasedScType(solverParams,io,geometry);
@@ -203,8 +207,16 @@ public:
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH", hdf5fileIfAny);
 		} else if (name_ == "HubbardHolsteinLRH") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "LRH", hdf5fileIfAny);
-		} else if (name_ == "HolsteinThin") {
+		} else if (name_ == "HolsteinThin") {		
 			model_ = new HolsteinThinType(solverParams, io, geometry, "");
+		} else if (name_ == "HubbardHolsteinSpinless") {
+			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "", hdf5fileIfAny);
+		} else if (name_ == "HubbardHolsteinSpinlessSSH") {
+			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "SSH", hdf5fileIfAny);
+		} else if (name_ == "HubbardHolsteinSpinlessLRH") {
+			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "LRH", hdf5fileIfAny);
+		} else if (name_ == "HolsteinSpinlessThin") {
+			model_ = new HolsteinSpinlessThinType(solverParams, io, geometry, "");
 		} else if (name_.substr(0, 5) == "Kondo") {
 			PsimagLite::String tmp = (name_.length() == 5) ? ""
 			                                               : name_.substr(5, name_.length() - 5);
@@ -219,7 +231,7 @@ public:
 			model_ = new HeisenbergMixType(solverParams, io, geometry);
 		} else if (name_.substr(0, 11) == "SpinOrbital") {
 			PsimagLite::String tmp = (name_.length() == 11) ? ""
-			                                               : name_.substr(11, name_.length() - 11);
+			                                                : name_.substr(11, name_.length() - 11);
 			model_ = new SpinOrbitalModelType(solverParams, io, geometry, tmp);
 		} else if (name_ == "Su3Model") {
 			model_ = new Su3ModelType(solverParams, io, geometry);
