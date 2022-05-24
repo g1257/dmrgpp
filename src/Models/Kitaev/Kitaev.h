@@ -335,7 +335,7 @@ protected:
 			splus.push(myOp4);
 
 			OperatorType myOp5 = myOp4;
-			myOp5.conjugate();
+			myOp5.dagger();
 			sminus.push(myOp5);
 		}
 
