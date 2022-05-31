@@ -190,9 +190,11 @@ public:
 	      modelParameters_(io),
 	      extended_(additional.length() > 7 && additional.substr(0, 8) == "Extended"),
 	      withGammas_(additional.length() > 9 && additional.substr(0, 10) == "WithGammas"),
-	      withCharge_(additional.length() > 9 && (additional.substr(8, 10) == "WithCharge" ||
+	      withGammasReal_(additional.length() > 13 && additional.substr(0, 14) == "WithGammasReal"),
+	      withCharge_((additional.length() > 9 && (additional.substr(8, 10) == "WithCharge" ||
 	                                              additional.substr(10, 10) == "WithCharge" ||
 	                                              additional.substr(0, 10) == "WithCharge"))
+	                  || (additional.length() > 13 && (additional.substr(14, 10) == "WithCharge")))
 	{
 		if (withCharge_ and TWICE_THE_SPIN != 1)
 			err("Kitaev: Charged model only for s=1/2\n");
@@ -398,13 +400,13 @@ protected:
 
 		OpForLinkType sz("sz");
 
-		createTermSySz(sybar, sz, wantsHermit, dummy);
+		if (!withGammasReal_) createTermSySz(sybar, sz, wantsHermit, dummy);
 
 		ModelBaseType::createTerm("sxsz", false).push(sx, 'N', sz, 'N');
 		ModelTermType& szsx = ModelBaseType::createTerm("szsx", wantsHermit, "sxsz");
 		szsx.push(sz, 'N', sx, 'N');
 
-		createTermSxSy(sx, sybar, wantsHermit, dummy);
+		if (!withGammasReal_) createTermSxSy(sx, sybar, wantsHermit, dummy);
 	}
 
 private:
@@ -575,6 +577,7 @@ private:
 	ParametersKitaev<RealType, QnType>  modelParameters_;
 	const bool extended_;
 	const bool withGammas_;
+	const bool withGammasReal_;
 	const bool withCharge_;
 }; // class Kitaev
 

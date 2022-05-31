@@ -129,6 +129,7 @@ sub init
 	                      "replaceConnections" => $replaceConnections,
 	                      "halfNminusOne" => ($n/2 - 1),
 	                      "nMinusTwo" => ($n - 2),
+	                      "nMinusOne" => ($n - 1),
 	                      "nOfTerms" => $nOfTerms,
 	                      "numberOfElectrons" => Math::Round::round($n*(1-$dopingConcentration))};
 
