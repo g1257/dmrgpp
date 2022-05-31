@@ -412,6 +412,8 @@ d===> 0.3091
 6010) Kitaev with Gammas
 #6010) Kitaev
 6020) Kitaev with Charge
+6024) same as 6010, but with zeroed SxSy and SySz terms
+6025) same as 6024, but with Kitaev with Gammas Real
 6500) Hybrid space-k ladders
 6700) FindSymmetrySector= awesome predicate
 #7000) Chemical H: Gauge spin
