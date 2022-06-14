@@ -3,7 +3,7 @@
 #
 # PsimagLite support is needed by DMRG++
 dependency PsimagLite = (
-LDFLAGS = -L../../PsimagLite/lib -L../../../PsimagLite/lib -lpsimaglite
+LDFLAGS += -L../../PsimagLite/lib -L../../../PsimagLite/lib -lpsimaglite
 )
 
 # Compiler to use. For clang++ see commented out line.
@@ -91,9 +91,8 @@ CPPFLAGS += -DPLUGIN_SC \\
 CPPFLAGS +=    -fopenmp
 
 #This adds linkage for the PLUGIN_SC libraries
-LDFLAGS += -L../../dmrgppPluginSc/src -L../../../dmrgppPluginSc/src
-LDFLAGS +=  -ldmrgppPluginSc
-LDFLAGS +=  -lgomp
+LDFLAGS += ../../dmrgppPluginSc/src/libdmrgppPluginSc.a
+#LDFLAGS +=  -lgomp
 LDFLAGS +=  -fopenmp
 
 )
