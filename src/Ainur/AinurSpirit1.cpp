@@ -67,8 +67,9 @@ Ainur::Ainur(String str)
 	value %= qi::lexeme[+(qi::char_ - qi::char_(";"))];
 	aToZ = ascii::char_("a","z") | ascii::char_("A", "Z");
 	zeroToNine = ascii::char_("0","9");
+
 	typeQualifier %= +(aToZ | ascii::char_(".") | ascii::char_("!"));
-	keywords = +aToZ >> *(ascii::char_("a","z")
+	keywords = *(ascii::char_("_")) >> +aToZ >> *(ascii::char_("a","z")
 	                      | ascii::char_("A", "Z")
 	                      | ascii::char_("0","9")
 	                      | ascii::char_(":")

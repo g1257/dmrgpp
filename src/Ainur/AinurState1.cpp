@@ -63,6 +63,10 @@ private:
 	static std::complex<RealType> toComplex(std::string str)
 	{
 		typedef std::complex<RealType> ComplexType;
+
+		if (str == "i") return ComplexType(0., 1.);
+		if (str == "-i") return ComplexType(0., -1.);
+
 		String buffer;
 		bool flag = false;
 		const SizeType n = str.length();
