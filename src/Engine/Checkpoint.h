@@ -424,8 +424,10 @@ private:
 
 		ParametersType::readFiniteLoops(ioIn, vfl, parameters_.truncationControl);
 
-		if (!parameters_.autoRestart)
+		if (!parameters_.autoRestart) {
 			checkFiniteLoops(vfl,totalSites,lastSite,prevDeltaSign,checkPoint);
+			checkAgainstPartialLoops(vfl, totalSites, lastSite, prevDeltaSign, checkPoint);
+		}
 
 		checkMvalues(vfl, hilbertOneSite);
 	}
@@ -481,6 +483,35 @@ private:
 				s =s + " sites=" + ttos(totalSites);
 				throw PsimagLite::RuntimeError(s.c_str());
 			}
+		}
+	}
+
+	void checkAgainstPartialLoops(const VectorFiniteLoopType& finiteLoop,
+	                              SizeType totalSites,
+	                              SizeType lastSite,
+	                              int prevDeltaSign,
+	                              bool checkPoint) const
+	{
+		int x = lastSite;
+
+		if (finiteLoop[0].stepLength() < 0 && !checkPoint) ++x;
+
+		for (SizeType i = 0; i < finiteLoop.size(); ++i)  {
+
+			// naive location:
+			int delta = finiteLoop[i].stepLength();
+			x += delta;
+
+			// take care of bounces:
+			bool b1 = (checkPoint || (i > 0));
+			if (b1 && delta*prevDeltaSign < 0) {
+				x += prevDeltaSign;
+				if (x != 1 && (static_cast<SizeType>(x) + 2) != totalSites)
+					err("Loops need to go all the way to the left or to the right\n");
+			}
+
+			// update previous sign
+			prevDeltaSign = (delta < 0) ? -1 : 1;
 		}
 	}
 
