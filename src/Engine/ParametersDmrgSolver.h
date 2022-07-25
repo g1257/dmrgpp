@@ -474,12 +474,13 @@ struct ParametersDmrgSolver {
 
 		truncationControl.read(io, keptStatesInfinite, options.isSet("twositedmrg"));
 
-		readFiniteLoops(io, finiteLoop, truncationControl);
+		readFiniteLoops(io, finiteLoop, truncationControl, -1);
 	}
 
 	void readFiniteLoops(InputValidatorType& io,
 	                            VectorFiniteLoopType& vfl,
-	                            const TruncationControlType& truncationC) const
+	                            const TruncationControlType& truncationC,
+	                     int lastSite) const
 	{
 		if (io.version() < io.versionAinur()) {
 			VectorStringType tmpVec;
@@ -488,7 +489,7 @@ struct ParametersDmrgSolver {
 		} else {
 			MatrixStringType tmpMat;
 			io.read(tmpMat, "FiniteLoops");
-			readFiniteLoops_(io, vfl, tmpMat, truncationC);
+			readFiniteLoops_(io, vfl, tmpMat, truncationC, lastSite);
 		}
 	}
 
@@ -513,7 +514,8 @@ struct ParametersDmrgSolver {
 	void readFiniteLoops_(InputValidatorType& io,
 	                             VectorFiniteLoopType& vfl,
 	                             const MatrixStringType& tmpMat,
-	                             const TruncationControlType& truncationC) const
+	                             const TruncationControlType& truncationC,
+	                      int lastSite) const
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
@@ -521,7 +523,7 @@ struct ParametersDmrgSolver {
 		typedef AlgebraicStringToNumber<FieldType> AlgebraicStringToNumberType;
 		AlgebraicStringToNumberType algebraicStringToNumber("FiniteLoops", numberOfSites);
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
-			int length = (tmpMat(i, 0) == "@auto") ? autoNumber(i, numberOfSites)
+			int length = (tmpMat(i, 0) == "@auto") ? autoNumber(i, numberOfSites, lastSite)
 			                                       : algebraicStringToNumber.
 			                                         procLength(tmpMat(i, 0));
 			SizeType m = PsimagLite::atoi(tmpMat(i, 1));
@@ -532,20 +534,36 @@ struct ParametersDmrgSolver {
 		readFiniteLoopsRepeat(io, vfl);
 	}
 
-	int autoNumber(SizeType ind, SizeType numberOfSites) const
+	int autoNumber(SizeType ind, SizeType numberOfSites, int& lastSite) const
 	{
 		bool isRestart = this->options.isSet("restart");
-		if (isRestart)
-			err("@auto cannot be used for restarts yet (sorry)\n");
-
 		bool allinsystem = this->options.isSet("geometryallinsystem");
-		if (allinsystem)
-			err("@auto cannot be used for allinsystem yet (sorry)\n");
+		if (isRestart || allinsystem) {
+			// if lastSite < 0 then this isn't called from checkpoint
+			// so it doesn't matter as it will be overwritten later
+			if (lastSite < 0) return lastSite;
+
+			if (lastSite != 1 && (static_cast<SizeType>(lastSite) + 2) != numberOfSites)
+				err("@auto: Internal error; please report this problem\n");
+
+			int x = (numberOfSites - 2);
+			if (static_cast<SizeType>(lastSite) + 2 == numberOfSites) {
+				x *= (-1);
+				lastSite = 1;
+			} else {
+				lastSite = numberOfSites - 2;
+			}
+
+			return x;
+		}
 
 		SizeType x = (numberOfSites - 2);
-		if (x & 1) ++x;
+		if (ind == 0) {
+			SizeType y = x;
+			if (y & 1) ++y;
+			return y/2;
+		}
 
-		if (ind == 0) return x/2;
 		return (ind & 1) ? -x : x;
 	}
 

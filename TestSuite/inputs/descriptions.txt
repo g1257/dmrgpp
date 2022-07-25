@@ -24,6 +24,7 @@ Tests *with* SU(2) symmetry:
 12) Extended hubbard ladder
 15) LadderBath without time advancement
 16) Like 2 but with implicit sweep movements
+17) Continuation of 16
 18) Time Evolution at U>0 with 6 site chain
 20) Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1 with 16+16 sites
 	INF(60)+7(100)-7(100)-7(100)+7(100)
