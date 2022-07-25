@@ -477,9 +477,9 @@ struct ParametersDmrgSolver {
 		readFiniteLoops(io, finiteLoop, truncationControl);
 	}
 
-	static void readFiniteLoops(InputValidatorType& io,
+	void readFiniteLoops(InputValidatorType& io,
 	                            VectorFiniteLoopType& vfl,
-	                            const TruncationControlType& truncationC)
+	                            const TruncationControlType& truncationC) const
 	{
 		if (io.version() < io.versionAinur()) {
 			VectorStringType tmpVec;
@@ -492,10 +492,10 @@ struct ParametersDmrgSolver {
 		}
 	}
 
-	static void readFiniteLoops_(InputValidatorType& io,
+	void readFiniteLoops_(InputValidatorType& io,
 	                             VectorFiniteLoopType& vfl,
 	                             const VectorStringType& tmpVec,
-	                             const TruncationControlType& truncationC)
+	                             const TruncationControlType& truncationC) const
 	{
 		for (SizeType i = 0; i < tmpVec.size(); i += 3) {
 			typename PsimagLite::Vector<int>::Type xTmp(2);
@@ -510,10 +510,10 @@ struct ParametersDmrgSolver {
 		readFiniteLoopsRepeat(io, vfl);
 	}
 
-	static void readFiniteLoops_(InputValidatorType& io,
+	void readFiniteLoops_(InputValidatorType& io,
 	                             VectorFiniteLoopType& vfl,
 	                             const MatrixStringType& tmpMat,
-	                             const TruncationControlType& truncationC)
+	                             const TruncationControlType& truncationC) const
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
@@ -521,13 +521,32 @@ struct ParametersDmrgSolver {
 		typedef AlgebraicStringToNumber<FieldType> AlgebraicStringToNumberType;
 		AlgebraicStringToNumberType algebraicStringToNumber("FiniteLoops", numberOfSites);
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
-			const int length = algebraicStringToNumber.procLength(tmpMat(i, 0));
+			int length = (tmpMat(i, 0) == "@auto") ? autoNumber(i, numberOfSites)
+			                                       : algebraicStringToNumber.
+			                                         procLength(tmpMat(i, 0));
 			SizeType m = PsimagLite::atoi(tmpMat(i, 1));
 			FiniteLoopType fl(length, m, tmpMat(i, 2), truncationC);
 			vfl.push_back(fl);
 		}
 
 		readFiniteLoopsRepeat(io, vfl);
+	}
+
+	int autoNumber(SizeType ind, SizeType numberOfSites) const
+	{
+		bool isRestart = this->options.isSet("restart");
+		if (isRestart)
+			err("@auto cannot be used for restarts yet (sorry)\n");
+
+		bool allinsystem = this->options.isSet("geometryallinsystem");
+		if (allinsystem)
+			err("@auto cannot be used for allinsystem yet (sorry)\n");
+
+		SizeType x = (numberOfSites - 2);
+		if (x & 1) ++x;
+
+		if (ind == 0) return x/2;
+		return (ind & 1) ? -x : x;
 	}
 
 	static void readFiniteLoopsRepeat(InputValidatorType& io,
