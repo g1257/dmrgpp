@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Vector.h"
 #include "Io/IoNg.h"
+#include "BasisTraits.hh"
 
 namespace Dmrg {
 
@@ -108,7 +109,7 @@ struct WaveStructSvd {
 
 	WaveStructSvd() {}
 
-	WaveStructSvd(IoInType& io, PsimagLite::String label, bool)
+	WaveStructSvd(IoInType& io, PsimagLite::String label, const BasisTraits&)
 	{
 		read(label, io.serializer());
 	}

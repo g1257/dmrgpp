@@ -77,6 +77,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoNg.h"
 #include "ProgressIndicator.h"
 #include <exception>
+#include "BasisTraits.hh"
 
 // A disk stack, similar to std::stack but stores in disk not in memory
 namespace Dmrg {
@@ -91,11 +92,11 @@ public:
 	DiskStack(const PsimagLite::String filename,
 	          bool needsToRead,
 	          PsimagLite::String label,
-	          bool isObserveCode)
+	          const BasisTraits& basisTraits)
 	    : ioOut_((needsToRead) ? 0 : new IoOutType(filename, PsimagLite::IoNg::ACC_RDW)),
 	      ioIn_((needsToRead) ? new IoInType(filename) : 0),
 	      label_("DiskStack" + label),
-	      isObserveCode_(isObserveCode),
+	      basisTraits_(basisTraits),
 	      total_(0),
 	      progress_("DiskStack"),
 	      dt_(0)
@@ -189,7 +190,7 @@ public:
 		dt_ = 0;
 		dt_ = new DataType(*ioIn_,
 		                   label_ + "/" + ttos(total_ - 1),
-		                   isObserveCode_);
+		                   basisTraits_);
 		return *dt_;
 	}
 
@@ -204,7 +205,7 @@ private:
 	IoOutType* ioOut_;
 	IoInType* ioIn_;
 	PsimagLite::String label_;
-	bool isObserveCode_;
+	const BasisTraits& basisTraits_;
 	int total_;
 	PsimagLite::ProgressIndicator progress_;
 	mutable DataType* dt_;

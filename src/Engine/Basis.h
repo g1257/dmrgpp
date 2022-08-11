@@ -86,6 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Qn.h"
 #include "QnHash.h"
 #include "Parallelizer2.h"
+#include "BasisTraits.hh"
 
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
@@ -110,7 +111,7 @@ public:
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 
 	//! Constructor, s=name of this basis
-	Basis(const PsimagLite::String& s)
+	Basis(const PsimagLite::String& s, const BasisTraits&)
 	    : dmrgTransformed_(false), name_(s)
 	{}
 
@@ -118,12 +119,12 @@ public:
 	template<typename IoInputter>
 	Basis(IoInputter& io,
 	      const PsimagLite::String& ss,
-	      bool minimizeRead)
+	      const BasisTraits& traits)
 	    : dmrgTransformed_(false), name_(ss)
 	{
 		correctNameIfNeeded();
 		PsimagLite::String prefix =  ss + "/";
-		loadInternal(io, prefix, minimizeRead);
+		loadInternal(io, prefix, traits.isObserveCode);
 	}
 
 	//! Loads this basis from memory or disk

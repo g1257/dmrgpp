@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "Io/IoNg.h"
 #include "ProgramGlobals.h"
+#include "BasisTraits.hh"
 
 namespace Dmrg {
 
@@ -105,14 +106,12 @@ public:
 	template<typename IoInputter>
 	LeftRightSuper(IoInputter& io,
 	               PsimagLite::String prefix,
-	               bool isObserveCode,
+	               const BasisTraits& basisTraits,
 	               typename PsimagLite::EnableIf<
 	               PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	    : progress_("LeftRightSuper"),
 	      left_(0),right_(0),super_(0),refCounter_(0)
 	{
-		bool minimizeRead = isObserveCode;
-
 		prefix += "/LRS";
 
 		PsimagLite::String nameSuper;
@@ -124,20 +123,23 @@ public:
 		PsimagLite::String nameRight;
 		io.read(nameRight, prefix + "/NameEnviron");
 
-		super_ = new SuperBlockType(io, prefix + "/" + nameSuper, minimizeRead);
-		left_ = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, true);
-		right_ = new BasisWithOperatorsType(io, prefix + "/" + nameRight, true);
+		BasisTraits basisTraits2 = basisTraits;
+		basisTraits2.isObserveCode = true;
+		super_ = new SuperBlockType(io, prefix + "/" + nameSuper, basisTraits);
+		left_ = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, basisTraits2);
+		right_ = new BasisWithOperatorsType(io, prefix + "/" + nameRight, basisTraits2);
 	}
 
 	LeftRightSuper(const PsimagLite::String& slabel,
 	               const PsimagLite::String& elabel,
-	               const PsimagLite::String& selabel)
+	               const PsimagLite::String& selabel,
+	               const BasisTraits& basisTraits)
 	    : progress_("LeftRightSuper"),
 	      left_(0),right_(0),super_(0),refCounter_(0)
 	{
-		left_ = new BasisWithOperatorsType(slabel);
-		right_ = new BasisWithOperatorsType(elabel);
-		super_ = new SuperBlockType(selabel);
+		left_ = new BasisWithOperatorsType(slabel, basisTraits);
+		right_ = new BasisWithOperatorsType(elabel, basisTraits);
+		super_ = new SuperBlockType(selabel, basisTraits);
 	}
 
 	~LeftRightSuper()
@@ -359,7 +361,7 @@ private:
 	              ProgramGlobals::DirectionEnum dir,
 	              RealType time)
 	{
-		BasisWithOperatorsType Xbasis("Xbasis");
+		BasisWithOperatorsType Xbasis("Xbasis", pS.traits());
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
 		SizeType oneSiteTruncSize = Xbasis.setOneSite(X, model, time);
 

@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Basis.h"
 #include "Operators.h"
+#include "BasisTraits.hh"
 
 namespace Dmrg {
 
@@ -134,20 +135,21 @@ public:
 
 	enum class SaveEnum {ALL, PARTIAL};
 
-	BasisWithOperators(const PsimagLite::String& s)
-	    : BasisType(s)
+	BasisWithOperators(const PsimagLite::String& s, const BasisTraits& basisTraits)
+	    : BasisType(s, basisTraits), basisTraits_(basisTraits)
 	{}
 
 	template<typename IoInputter>
 	BasisWithOperators(IoInputter& io,
 	                   const PsimagLite::String& ss,
-	                   bool isObserveCode)
-	    : BasisType(io, ss, false),
-	      operators_(io, ss + "/", isObserveCode)
+	                   const BasisTraits& basisTraits)
+	    : BasisType(io, ss, {false, false}),
+	      basisTraits_(basisTraits),
+	      operators_(io, ss + "/", basisTraits_.isObserveCode)
 	{
 		const PsimagLite::String prefix = ss + "/";
 		io.read(operatorsPerSite_, prefix + "OperatorPerSite");
-	}
+	}	
 
 	template<typename IoInputter>
 	void read(IoInputter& io,
@@ -285,6 +287,8 @@ public:
 		return BasisType::fermionicSign(i, fsign);
 	}
 
+	const BasisTraits& traits() const { return basisTraits_; }
+
 	template<typename SomeOutputType>
 	void write(SomeOutputType& io,
 	           typename SomeOutputType::Serializer::WriteMode mode,
@@ -305,7 +309,7 @@ public:
 	           PsimagLite::IsOutputLike<SomeOutputType>::True, int*>::Type = 0) const
 	{
 		BasisType::write(io, s, mode, false); // parent saves
-		if (option == SaveEnum::ALL)
+		if (option == SaveEnum::ALL && !basisTraits_.noSaveOperators)
 			operators_.write(io, s, mode);
 
 		assert(operatorsPerSite_.size() > 0);
@@ -360,8 +364,7 @@ private:
 
 	// BasisWithOperators(const BasisWithOperators&);
 
-	// BasisWithOperators& operator=(const BasisWithOperators&);
-
+	BasisTraits basisTraits_;
 	OperatorsType operators_;
 	VectorSizeType operatorsPerSite_;
 }; // class BasisWithOperators

@@ -65,7 +65,7 @@ public:
 			std::pair<BasisWithOperatorsType, BasisWithOperatorsType> pair =
 			        checkPoint_.hookForMultiInSituLrs(ind);
 
-			BasisType super("superForMultiPointInSitu");
+			BasisType super("superForMultiPointInSitu", pair.first.traits());
 			super.setToProduct(pair.first, pair.second);
 			LeftRightSuperType* lrsPtr = new LeftRightSuperType(pair.first, pair.second, super);
 			garbage_.push_back(lrsPtr);

@@ -135,7 +135,7 @@ public:
 	      filenameOut_(params.filename),
 	      waveStructCombined_(params.options.isSet("wftstacksondisk"),
 	                          params.filename,
-	                          params.options.isSet("observe")),
+	{params.options.isSet("observe"), params.options.isSet("noSaveOperators")}),
 	      wftImpl_(0),
 	      rng_(3433117),
 	      noLoad_(false),

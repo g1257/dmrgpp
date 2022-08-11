@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "DiskOrMemoryStack.h"
 #include "FiniteLoop.h"
+#include "BasisTraits.hh"
 
 namespace Dmrg {
 
@@ -122,24 +123,24 @@ public:
 	           InputValidatorType& ioIn,
 	           const ModelType& model,
 	           SizeType nsectors,
-	           bool isObserveCode) :
+	           const BasisTraits& basisTraits) :
 	    parameters_(parameters),
 	    model_(model),
-	    isObserveCode_(isObserveCode),
+	    basisTraits_(basisTraits),
 	    isRestart_(parameters_.options.isSet("restart")),
 	    systemStack_(parameters_.options.isSet("shrinkStacksOnDisk"),
 	                 parameters_.filename,
 	                 "Stacks",
 	                 "system",
-	                 isObserveCode),
+	                 basisTraits),
 	    envStack_(systemStack_.onDisk(),
 	              parameters_.filename,
 	              "Stacks",
 	              "environ",
-	              isObserveCode),
+	              basisTraits),
 	    progress_("Checkpoint"),
 	    energiesFromFile_(nsectors),
-	    dummyBwo_("dummy")
+	    dummyBwo_("dummy", basisTraits)
 	{
 		DiskOrMemoryStackType::createFile_ = true;
 		for (SizeType i = 0; i < nsectors; ++i)
@@ -271,10 +272,10 @@ public:
 		sayAboutToWrite();
 		static const bool needsToRead = false;
 
-		DiskStackType systemDisk(filename, needsToRead, "system", isObserveCode_);
+		DiskStackType systemDisk(filename, needsToRead, "system", basisTraits_);
 		systemStack_.toDisk(systemDisk);
 
-		DiskStackType environDisk(filename, needsToRead, "environ", isObserveCode_);
+		DiskStackType environDisk(filename, needsToRead, "environ", basisTraits_);
 		envStack_.toDisk(environDisk);
 		sayWritingDone();
 	}
@@ -301,14 +302,14 @@ public:
 	// Not related to stacks
 	void read(BasisWithOperatorsType &pS,
 	          BasisWithOperatorsType &pE,
-	          bool isObserveCode)
+	          const BasisTraits& basisTraits)
 	{
 		typename PsimagLite::IoSelector::In ioTmp(parameters_.checkpoint.filename());
 
-		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", isObserveCode);
+		BasisWithOperatorsType pS1(ioTmp, "CHKPOINTSYSTEM", basisTraits);
 		pS = pS1;
 
-		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", isObserveCode);
+		BasisWithOperatorsType pE1(ioTmp, "CHKPOINTENVIRON", basisTraits);
 		pE = pE1;
 	}
 
@@ -543,11 +544,11 @@ private:
 		DiskStackType systemDisk(parameters_.checkpoint.filename(),
 		                         isRestart_,
 		                         "system",
-		                         isObserveCode_);
+		                         basisTraits_);
 		DiskStackType envDisk(parameters_.checkpoint.filename(),
 		                      isRestart_,
 		                      "environ",
-		                      isObserveCode_);
+		                      basisTraits_);
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -564,11 +565,11 @@ private:
 		DiskStackType systemDisk(parameters_.filename,
 		                         needsToRead,
 		                         "system",
-		                         isObserveCode_);
+		                         basisTraits_);
 		DiskStackType envDisk(parameters_.filename,
 		                      needsToRead,
 		                      "environ",
-		                      isObserveCode_);
+		                      basisTraits_);
 		sayAboutToWrite();
 		DiskOrMemoryStackType::loadStack(systemDisk, systemStack_);
 		DiskOrMemoryStackType::loadStack(envDisk, envStack_);
@@ -590,7 +591,7 @@ private:
 
 	const ParametersType& parameters_;
 	const ModelType& model_;
-	bool isObserveCode_;
+	const BasisTraits& basisTraits_;
 	bool isRestart_;
 	DiskOrMemoryStackType systemStack_;
 	DiskOrMemoryStackType envStack_;

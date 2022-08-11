@@ -4,6 +4,7 @@
 #include "WaveStructSvd.h"
 #include "ProgramGlobals.h"
 #include "../DiskOrMemoryStack.h"
+#include "BasisTraits.hh"
 
 namespace Dmrg {
 
@@ -25,10 +26,10 @@ public:
 
 	WaveStructCombined(bool onDisk,
 	                   const PsimagLite::String filename,
-	                   bool isObserveCode)
-	    : lrs_("pSE", "pSprime", "pEprime"),
-	      wsStack_(onDisk, filename, "Wstacks", "system", isObserveCode),
-	      weStack_(onDisk, filename, "Wstacks", "environ", isObserveCode),
+	                   const BasisTraits& basisTraits)
+	    : lrs_("pSE", "pSprime", "pEprime", basisTraits),
+	      wsStack_(onDisk, filename, "Wstacks", "system", basisTraits),
+	      weStack_(onDisk, filename, "Wstacks", "environ", basisTraits),
 	      needsPop_(false)
 	{}
 

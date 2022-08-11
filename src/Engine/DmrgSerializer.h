@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "BlockDiagonalMatrix.h"
 #include "BlockOffDiagMatrix.h"
+#include "BasisTraits.hh"
 
 namespace Dmrg {
 // Move also checkpointing from DmrgSolver to here (FIXME)
@@ -127,13 +128,13 @@ public:
 	DmrgSerializer(IoInputType& io,
 	               PsimagLite::String prefix,
 	               bool bogus,
-	               bool isObserveCode,
+	               const BasisTraits& basisTraits,
 	               bool readOnDemand,
 	               typename PsimagLite::EnableIf<
 	               PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
 	    : fS_(io, prefix + "/fS", bogus),
 	      fE_(io, prefix + "/fE", bogus),
-	      lrs_(new LeftRightSuperType(io, prefix, isObserveCode)),
+	      lrs_(new LeftRightSuperType(io, prefix, basisTraits)),
 	      ownWf_(true),
 	      transform_(io, prefix + "/transform", readOnDemand)
 	{

@@ -94,6 +94,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "OutputFileOrNot.h"
 #include "TargetingBase.h"
 #include "OneSiteTruncation.h"
+#include "BasisTraits.hh"
 
 namespace Dmrg {
 
@@ -151,13 +152,17 @@ public:
 	      ioIn_(ioIn),
 	      appInfo_("DmrgSolver:"),
 	      verbose_(parameters_.options.isSet("verbose")),
-	      lrs_("pSprime", "pEprime", "pSE"),
+	      basisTraits_({parameters_.options.isSet("observe"), parameters_.options.isSet("noSaveOperators")}),
+	      lrs_("pSprime",
+	           "pEprime",
+	           "pSE",
+	           basisTraits_),
 	      ioOut_(parameters_.filename,
 	             PsimagLite::IoSelector::ACC_TRUNC,
 	             parameters_.options.isSet("minimizeDisk")),
 	      progress_("DmrgSolver"),
 	      stepCurrent_(0),
-	      checkpoint_(parameters_, ioIn, model, quantumSector_.size(), false),
+	      checkpoint_(parameters_, ioIn, model, quantumSector_.size(), basisTraits_),
 	      wft_(parameters_, model.hilbertSize(0)),
 	      diagonalization_(parameters_,
 	                       model,
@@ -193,7 +198,7 @@ public:
 
 		const SizeType n = model_.targetQuantum().size();
 		for (SizeType i = 0; i < n; ++i)
-			quantumSector_.push_back(model_.targetQuantum().qn(i));		
+			quantumSector_.push_back(model_.targetQuantum().qn(i));
 	}
 
 	~DmrgSolver()
@@ -236,13 +241,13 @@ public:
 
 		ioIn_.printUnused(std::cerr);
 
-		MyBasisWithOperators pS("BasisWithOperators.System");
-		MyBasisWithOperators pE("BasisWithOperators.Environ");
+		MyBasisWithOperators pS("BasisWithOperators.System", basisTraits_);
+		MyBasisWithOperators pE("BasisWithOperators.Environ", basisTraits_);
 
 		if (checkpoint_.isRestart()) {
 			PsimagLite::IoSelector::In io(parameters_.checkpoint.filename());
 
-			checkpoint_.read(pS, pE, false);
+			checkpoint_.read(pS, pE, basisTraits_);
 			psi.read(io, "FinalPsi");
 		} else { // move this block elsewhere:
 
@@ -739,6 +744,7 @@ obtain ordered
 	InputValidatorType& ioIn_;
 	PsimagLite::ApplicationInfo appInfo_;
 	bool verbose_;
+	BasisTraits basisTraits_;
 	LeftRightSuperType lrs_;
 	OutputFileOrNot ioOut_;
 	PsimagLite::ProgressIndicator progress_;

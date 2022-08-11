@@ -27,8 +27,8 @@ public:
 	                  const PsimagLite::String filename,
 	                  const PsimagLite::String post,
 	                  PsimagLite::String label,
-	                  bool isObserveCode)
-	    : isObserveCode_(isObserveCode), diskW_(0), diskR_(0)
+	                  const BasisTraits& basisTraits)
+	    : basisTraits_(basisTraits), diskW_(0), diskR_(0)
 	{
 		if (!onDisk) return;
 
@@ -41,8 +41,8 @@ public:
 			createFile_ = false;
 		}
 
-		diskW_ = new DiskStackType(file, false, label, isObserveCode);
-		diskR_ = new DiskStackType(file, true, label, isObserveCode);
+		diskW_ = new DiskStackType(file, false, label, basisTraits_);
+		diskR_ = new DiskStackType(file, true, label, basisTraits_);
 	}
 
 	~DiskOrMemoryStack()
@@ -178,7 +178,7 @@ private:
 
 	DiskOrMemoryStack& operator=(const DiskOrMemoryStack&);
 
-	bool isObserveCode_;
+	const BasisTraits& basisTraits_;
 	mutable MemoryStackType memory_;
 	DiskStackType *diskW_;
 	DiskStackType *diskR_;

@@ -230,10 +230,9 @@ public:
 			}
 
 			if (!lrsStorage_.first) {
-				static const bool isObserveCode = true;
 				const PsimagLite::String prefix = "Serializer/" + ttos(ind);
 
-				lrsStorage_.first = new LeftRightSuperType(io_, prefix, isObserveCode);
+				lrsStorage_.first = new LeftRightSuperType(io_, prefix, {true, true});
 				lrsStorage_.second = ind;
 			}
 
@@ -335,7 +334,7 @@ private:
 			DmrgSerializerType* dSerializer = new DmrgSerializerType(io_,
 			                                                         prefix + "/" + ttos(i),
 			                                                         false,
-			                                                         true,
+			                                                         {true, true},
 			                                                         readOnDemand_);
 
 			SizeType tmp = dSerializer->leftRightSuper().sites();
