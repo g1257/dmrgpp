@@ -403,7 +403,10 @@ protected:
 		if (!withGammasReal_) createTermSySz(sybar, sz, wantsHermit, dummy);
 
 		ModelBaseType::createTerm("sxsz", false).push(sx, 'N', sz, 'N');
-		ModelTermType& szsx = ModelBaseType::createTerm("szsx", wantsHermit, "sxsz");
+
+		bool noAlias = ModelBaseType::params().options.isSet("notermalias");
+		const PsimagLite::String aliasStr = (noAlias) ? "" : "sxsz";
+		ModelTermType& szsx = ModelBaseType::createTerm("szsx", wantsHermit, aliasStr);
 		szsx.push(sz, 'N', sx, 'N');
 
 		if (!withGammasReal_) createTermSxSy(sx, sybar, wantsHermit, dummy);
@@ -431,7 +434,12 @@ private:
 		};
 
 		ModelBaseType::createTerm("sysz", false).push(sybar, 'N', sz, 'N', modifMinusSqrtMinusOne);
-		ModelTermType& szsy = ModelBaseType::createTerm("szsy", wantsHermit, "sysz");
+
+		bool noAlias = ModelBaseType::params().options.isSet("notermalias");
+		const PsimagLite::String aliasStr = (noAlias) ? "" : "sysz";
+
+		ModelTermType& szsy = ModelBaseType::createTerm("szsy", wantsHermit, aliasStr);
+
 		szsy.push(sz, 'N', sybar, 'N', modifMinusSqrtMinusOne);
 	}
 
@@ -455,7 +463,11 @@ private:
 		};
 
 		ModelBaseType::createTerm("sxsy", false).push(sx, 'N', sybar, 'N', modifMinusSqrtMinusOne);
-		ModelTermType& sysx = ModelBaseType::createTerm("sysx", wantsHermit, "sxsy");
+
+		bool noAlias = ModelBaseType::params().options.isSet("notermalias");
+		const PsimagLite::String aliasStr = (noAlias) ? "" : "sxsy";
+
+		ModelTermType& sysx = ModelBaseType::createTerm("sysx", wantsHermit, aliasStr);
 		sysx.push(sybar, 'N', sx, 'N', modifMinusSqrtMinusOne);
 
 		SizeType site = 0;

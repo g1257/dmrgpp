@@ -400,6 +400,8 @@ public:
     code and not the main driver or other drivers.
 	        \item[ciRun] Mark the input for the ci or TestSuite; usually this is
 			set by the ci.pl script automatically
+			\item[notermalias] If the model being run has term aliasing, disable it; else it has
+			no effect.
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
@@ -468,6 +470,7 @@ public:
 		registerOpts.push_back("blasNotThreadSafe");
 		registerOpts.push_back("observeReadOnDemand");
 		registerOpts.push_back("ciRun");
+		registerOpts.push_back("notermalias");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
 		                                            PsimagLite::Options::Writeable::PERMISSIVE);
