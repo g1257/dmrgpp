@@ -131,7 +131,7 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 
 		if (invalidLabel) {
 			throw PsimagLite::RuntimeError("MagneticField label is no longer supported.\n" +
-			                               PsimagLite::String("Please use MagneticField[XYZ] instead\n"));
+			                               PsimagLite::String("Please use MagneticField[XZ] instead\n"));
 		}
 
 		// throw if supplying MagneticFieldDirection label
@@ -143,7 +143,7 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 
 		if (invalidLabel) {
 			throw PsimagLite::RuntimeError("MagneticFieldDirection label is no longer supported.\n" +
-			                               PsimagLite::String("Please use MagneticField[XYZ] instead\n"));
+			                               PsimagLite::String("Please use MagneticField[XZ] instead\n"));
 		}
 
 		try {
