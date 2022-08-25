@@ -121,6 +121,31 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 			magneticFieldZ.clear();
 		}
 
+		// throw if supplying MagneticField label
+		bool invalidLabel = false;
+		try {
+			VectorRealType tmpVector;
+			io.read(tmpVector, "MagneticField=");
+			invalidLabel = true;
+		} catch (std::exception&) {}
+
+		if (invalidLabel) {
+			throw PsimagLite::RuntimeError("MagneticField label is no longer supported.\n" +
+			                               PsimagLite::String("Please use MagneticField[XYZ] instead\n"));
+		}
+
+		// throw if supplying MagneticFieldDirection label
+		try {
+			PsimagLite::String tmpStr;
+			io.readline(tmpStr, "MagneticFieldDirection=");
+			invalidLabel = true;
+		} catch (std::exception&) {}
+
+		if (invalidLabel) {
+			throw PsimagLite::RuntimeError("MagneticFieldDirection label is no longer supported.\n" +
+			                               PsimagLite::String("Please use MagneticField[XYZ] instead\n"));
+		}
+
 		try {
 			io.read(anisotropyD,"AnisotropyD");
 		} catch (std::exception&) {}
