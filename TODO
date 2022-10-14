@@ -1,4 +1,7 @@
 
+Open issue: Observe should warn if syntax is incorrect
+BEFORE loading data from HDF5 file.
+
 BUGS:
 
 observer: fails if lattice has less than 6 sites.
