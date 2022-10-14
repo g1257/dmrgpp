@@ -141,6 +141,16 @@ public:
 			BraketType braket(model_, vecStr[i]);
 
 			if (braket.points() == 1) {
+				bool hasValidSite = false;
+				try {
+					braket.site(0); // will throw if site[0] == -1
+					hasValidSite = true;
+				} catch (std::exception&) {}
+
+				if (hasValidSite) {
+					throw PsimagLite::RuntimeError("One points cannot have an explicit site\n");
+				}
+
 				const PsimagLite::String opName = braket.opName(0);
 				if (opName.length() > 1 && opName[0] == '!') {
 					StringOrderPost<ObserverType> stringOrderPost(braket, observe_);
