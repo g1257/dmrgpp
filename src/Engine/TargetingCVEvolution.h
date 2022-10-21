@@ -217,7 +217,7 @@ public:
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
-		this->common().readGSandNGSTs(io, prefix, "TimeStep");
+		this->common().readGSandNGSTs(io, prefix, "CVEvolution");
 	}
 
 	void write(const VectorSizeType& block,
