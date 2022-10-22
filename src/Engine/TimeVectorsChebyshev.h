@@ -133,9 +133,6 @@ class TimeVectorsChebyshev : public  TimeVectorsBase<TargetParamsType,
 	typedef typename LanczosSolverType::MatrixType MatrixLanczosType;
 	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType> ScaledMatrixType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef PsimagLite::ExpressionCalculator<int> ExpressionCalculatorType;
-	typedef PsimagLite::PrepassData<int> PrepassDataType;
-	typedef PsimagLite::ExpressionPrepass<PrepassDataType> ExpressionPrepassType;
 	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
 
 public:

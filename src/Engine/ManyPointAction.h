@@ -10,9 +10,6 @@ class ManyPointAction {
 public:
 
 	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
-	typedef PsimagLite::ExpressionCalculator<int> ExpressionCalculatorType;
-	typedef PsimagLite::PrepassData<int> PrepassDataType;
-	typedef PsimagLite::ExpressionPrepass<PrepassDataType> ExpressionPrepassType;
 
 	ManyPointAction(bool hasNonTrivialAction,
 	                PsimagLite::String actionString)

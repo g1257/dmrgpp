@@ -90,7 +90,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Parallelizer.h"
 #include "Utils.h"
-#include "ExpressionCalculator.h"
 #include "PredicateAwesome.h"
 #include "ManyPointAction.h"
 
