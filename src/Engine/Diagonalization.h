@@ -716,7 +716,7 @@ private:
 
 		for (SizeType ind = 0; ind < total; ++ind) {
 			const SizeType x = qn.other[ind];
-			PsimagLite::PredicateAwesome<>::replaceAll(predicate, "%" + ttos(ind), ttos(x));
+			PsimagLite::replaceAll(predicate, "%" + ttos(ind), ttos(x));
 		}
 
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);

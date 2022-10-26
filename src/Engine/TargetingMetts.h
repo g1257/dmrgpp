@@ -276,7 +276,7 @@ public:
 
 		PsimagLite::String predicate = model_.params().printHamiltonianAverage;
 		const SizeType center = model_.superGeometry().numberOfSites()/2;
-		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(center));
+		PsimagLite::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		assert(block1.size() > 0);
 		if (pAwesome.isTrue("s", block1[0]))

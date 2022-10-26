@@ -533,7 +533,7 @@ private:
 
 		PsimagLite::String predicate = parameters_.saveDensityMatrixEigenvalues;
 		const SizeType center = superGeometry_.numberOfSites()/2;
-		PsimagLite::PredicateAwesome<>::replaceAll(predicate, "c", ttos(center));
+		PsimagLite::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 
 		if (!pAwesome.isTrue("s", index))
