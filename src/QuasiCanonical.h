@@ -2,7 +2,9 @@
 #define QUASICANONICAL_H
 #include "Vector.h"
 #include "PsimagLite.h"
-#include "ExpressionCalculator.h"
+#include "AST/ExpressionForAST.h"
+#include "AST/PlusMinusMultiplyDivide.h"
+#include "CmplxOrReal.h"
 
 namespace PsimagLite {
 
@@ -142,18 +144,15 @@ private:
 
 	ComplexOrRealType simpleArithmetics(String str)
 	{
-		typedef ExpressionCalculator<ComplexOrRealType> ExpressionCalculatorType;
-		typedef PrepassData<ComplexOrRealType> PrepassDataType;
+		replaceAll(str, "pi", ttos(M_PI));
 
-		typename ExpressionCalculatorType::VectorStringType ve;
+		VectorStringType ve;
 		split(ve, str, ":");
 
-		PrepassDataType pd("pi", {M_PI});
-
-		ExpressionPrepass<PrepassDataType>::prepass(ve, pd);
-
-		ExpressionCalculatorType ec(ve);
-		return ec();
+		typedef PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
+		PrimitivesType primitives;
+		ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
+		return expresionForAST.exec();
 	}
 
 	String str_;
