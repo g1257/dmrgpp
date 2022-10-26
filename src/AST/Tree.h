@@ -17,7 +17,7 @@ Please see full open source license included in file LICENSE.
 
 #ifndef PSI_TREE_H
 #define PSI_TREE_H
-#include "PsimagLite.h"
+#include "../PsimagLite.h"
 
 namespace PsimagLite {
 

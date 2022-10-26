@@ -59,6 +59,8 @@ void fillRandom(T& v, typename EnableIf<IsVectorLike<T>::True, int>::Type = 0)
 
 void split(Vector<String>::Type& tokens, String str, String delimiters = " ");
 
+void replaceAll(String& str, const String& from, const String& to);
+
 String basename(const String&);
 
 class PsiApp {

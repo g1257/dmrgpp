@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
 	PsimagLite::String str(argv[1]);
-	PsimagLite::PredicateAwesome<>::replaceAll(str, "%t", "0.25");
+	PsimagLite::replaceAll(str, "%t", "0.25");
 	VectorStringType ve;
 	PsimagLite::split(ve, str, ":");
 

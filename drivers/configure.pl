@@ -52,7 +52,7 @@ sub createMakefile
 	$args{"code"} = "PsimagLite/drivers";
 	$args{"configFiles"} = $configFiles;
 	$args{"flavor"} = $flavor;
-
+	$args{"needsPsimagLiteLib"} = 1; 
 	NewMake::backupMakefile();
 	my $fh;
 	open($fh, ">", "Makefile") or die "Cannot open Makefile for writing: $!\n";

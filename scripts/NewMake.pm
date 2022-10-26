@@ -80,13 +80,22 @@ $what.o: $what.cpp  Makefile $additional
 EOF
 
 		if (!$aux) {
-			# FIXME: Support many libs separated by commas here
-			my $libs = ($oldmode) ? "" : $ptr->{"libs"};
 			my $libs1 = "";
 			my $libs2 = "";
-			if (defined($libs) and $libs ne "") {
-				$libs1 = "lib$libs.a";
-				$libs2 = "-l$libs";
+
+			if (!$oldmode) {
+				# FIXME: Support many libs separated by commas here
+				my $libs = $ptr->{"libs"};
+				if (defined($libs) and $libs ne "") {
+					$libs1 = "lib$libs.a";
+					$libs2 = "-l$libs";
+				}
+			} else {
+				my $needsPsimagLiteLib = $a{"needsPsimagLiteLib"};
+				if ($needsPsimagLiteLib) {
+					$libs1 = "$path../../PsimagLite/lib/libpsimaglite.a";
+					$libs2 = "-lpsimaglite";
+				}
 			}
 
 			print FH<<EOF;

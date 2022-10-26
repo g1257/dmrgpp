@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2013,2022, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[PsimagLite, Version 2.]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -92,7 +92,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LongChain.h"
 #include "LongRange.h"
 #include "Honeycomb.h"
-#include "ExpressionCalculator.h"
+#include "AST/ExpressionForAST.h"
+#include "AST/PlusMinusMultiplyDivide.h"
 #include "PsimagLite.h"
 
 namespace PsimagLite {
@@ -284,21 +285,22 @@ public:
 	{
 		if (vModifier_ == "") return value;
 
-		typedef ExpressionCalculator<T> ExpressionCalculatorType;
-		typename ExpressionCalculatorType::VectorStringType ve;
-		split(ve, vModifier_, ",");
+		// We don't want to modify the symbolic modifier, so we make a copy
+		String numericModifier = vModifier_;
 
-		PrepassData<T> pd;
-		typename PrepassData<T>::VectorType vr(2,0);
-		vr[0] = time;
-		vr[1] = value;
-		pd.names = "tv";
-		pd.values = vr;
+		// change %t --> t
+		replaceAll(numericModifier, "%t", ttos(time));
+		// change %v --> value (unmodified connection value)
+		replaceAll(numericModifier, "%v", ttos(value));
 
-		ExpressionPrepass<PrepassData<T> >::prepass(ve,pd);
+		// split by commas
+		Vector<String>::Type ve;
+		split(ve, numericModifier, ",");
 
-		ExpressionCalculatorType ec(ve);
-		return ec();
+		typedef PlusMinusMultiplyDivide<T> PrimitivesType;
+		PrimitivesType primitives;
+		ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
+		return expresionForAST.exec();
 	}
 
 	//assumes 1<smax+1 < emin
