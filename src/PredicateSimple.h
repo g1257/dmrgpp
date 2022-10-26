@@ -2,7 +2,8 @@
 #define PREDICATE_SIMPLE_H
 #include "Vector.h"
 #include "PsimagLite.h"
-#include "ExpressionCalculator.h"
+#include "AST/ExpressionForAST.h"
+#include "AST/PlusMinusMultiplyDivide.h"
 
 /* PSIDOC PredicateSimple
  PredicateSimple is of the form
@@ -112,9 +113,10 @@ private:
 		String numericHs = replaceVariables(hs, names, vals);
 		VectorStringType tokens;
 		split(tokens, numericHs, separator_);
-		typedef ExpressionCalculator<typename SomeVectorType::value_type> ExpressionCalculatorType;
-		ExpressionCalculatorType expressionCalculator(tokens);
-		return expressionCalculator();
+		typedef PlusMinusMultiplyDivide<typename SomeVectorType::value_type> PrimitivesType;
+		PrimitivesType primitives;
+		ExpressionForAST<PrimitivesType> expresionForAST(tokens, primitives);
+		return expresionForAST.exec();
 	}
 
 	template<typename SomeVectorType>
