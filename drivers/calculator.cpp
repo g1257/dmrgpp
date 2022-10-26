@@ -1,4 +1,7 @@
-#include "ExpressionCalculator.h"
+#include "AST/PlusMinusMultiplyDivide.h"
+#include "AST/ExpressionForAST.h"
+#include "PredicateAwesome.h"
+#include "PsimagLite.h"
 
 #ifdef USE_COMPLEX
 typedef std::complex<double> ComplexOrRealType;
@@ -10,19 +13,16 @@ int main(int argc, char **argv)
 {
 	if (argc < 2) return 1;
 
-	typedef PsimagLite::ExpressionCalculator<ComplexOrRealType> ExpressionCalculatorType;
-	typedef PsimagLite::PrepassData<ComplexOrRealType> PrepassDataType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef PsimagLite::PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
+	PsimagLite::String str(argv[1]);
+	PsimagLite::PredicateAwesome<>::replaceAll(str, "%t", "0.25");
+	VectorStringType ve;
+	PsimagLite::split(ve, str, ":");
 
-	ExpressionCalculatorType::VectorStringType ve;
-	PsimagLite::split(ve, argv[1], ":");
+	PrimitivesType primitives;
+	PsimagLite::ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
 
-
-	PrepassDataType::VectorType vr(1,0.25);
-	PrepassDataType pd("t", vr);
-
-	PsimagLite::ExpressionPrepass<PrepassDataType>::prepass(ve,pd);
-
-	ExpressionCalculatorType ec(ve);
-	std::cout<<argv[1]<<"\t"<<ec()<<"\n";
+	std::cout<<argv[1]<<"\t"<<expresionForAST.exec()<<"\n";
 }
 
