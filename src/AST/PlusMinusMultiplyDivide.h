@@ -20,6 +20,7 @@ Please see full open source license included in file LICENSE.
 #include <cassert>
 #include "Node.h"
 #include "../PsimagLite.h"
+#include "AdditionalFunctions.h"
 
 namespace PsimagLite {
 
@@ -35,6 +36,7 @@ public:
 	typedef Minus<VectorValueType> MinusType;
 	typedef Times<VectorValueType> TimesType;
 	typedef DividedBy<VectorValueType> DividedByType;
+	typedef Modulus<VectorValueType> ModulusType;
 	typedef Input<VectorValueType> InputType;
 	typedef ValueType_ ValueType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
@@ -51,9 +53,26 @@ public:
 		NodeType* times = new TimesType();
 		nodes_.push_back(times);
 
-//		NodeType* dividedBy = new DividedByType();
-//		nodes_.push_back(dividedBy);
+		NodeType* dividedBy = new DividedByType();
+		nodes_.push_back(dividedBy);
 
+		NodeType* modulus = new ModulusType();
+		nodes_.push_back(modulus);
+
+		NodeType* sine = new Sine<VectorValueType>();
+		nodes_.push_back(sine);
+
+		NodeType* cosine = new Cosine<VectorValueType>();
+		nodes_.push_back(cosine);
+
+		NodeType* log = new Log<VectorValueType>();
+		nodes_.push_back(log);
+
+		NodeType* exp = new Exp<VectorValueType>();
+		nodes_.push_back(exp);
+
+		NodeType* ternary = new TernaryOp<VectorValueType>();
+		nodes_.push_back(ternary);
 	}
 
 	~PlusMinusMultiplyDivide()
@@ -79,7 +98,13 @@ public:
 
 		// Assume it's an input
 		NodeType* input = new InputType(inputsSoFar_++);
+
+		try {
 		input->set(PsimagLite::atof(code));
+		} catch (std::exception&) {
+			throw RuntimeError("FATAL: No function with code " + code + " was found.\n");
+		}
+
 		nodes_.push_back(input);
 		return *input;
 	}
