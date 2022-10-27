@@ -14,8 +14,8 @@ PARTICULAR PURPOSE ARE DISCLAIMED.
 Please see full open source license included in file LICENSE.
 *********************************************************
 */
-#ifndef PLUS_MINUS_MULT_DIV_H
-#define PLUS_MINUS_MULT_DIV_H
+#ifndef PSI_LUS_MINUS_MULT_DIV_H
+#define PSI_LUS_MINUS_MULT_DIV_H
 #include "../Vector.h"
 #include <cassert>
 #include "Node.h"
@@ -117,4 +117,4 @@ private:
 
 } // namespace PsimagLite
 
-#endif // PLUS_MINUS_MULT_DIV_H
+#endif // PSI_LUS_MINUS_MULT_DIV_H

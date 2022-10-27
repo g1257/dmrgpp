@@ -39,9 +39,15 @@ public:
 
 	virtual ValueType exec(const VectorValueType& v) const
 	{
+		typedef typename Real<ValueType>::Type RealType;
+
 		assert(v.size() == 2);
-		SizeType x = static_cast<SizeType>(v[0]);
-		SizeType y = static_cast<SizeType>(v[1]);
+
+		RealType v0 = PsimagLite::norm(v[0]);
+		RealType v1 = PsimagLite::norm(v[1]);
+
+		SizeType x = static_cast<int>(v0);
+		SizeType y = static_cast<int>(v1);
 
 		ValueType result = (y == 0) ? x : x%y;
 		return result;
@@ -137,7 +143,8 @@ public:
 	virtual ValueType exec(const VectorValueType& v) const
 	{
 		assert(v.size() == 3);
-		return (v[0]) ? v[1] : v[2];
+		SizeType b = static_cast<SizeType>(PsimagLite::norm(v[0]));
+		return (b) ? v[1] : v[2];
 	}
 }; // class TernaryOp
 

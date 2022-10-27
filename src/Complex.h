@@ -86,7 +86,7 @@ typename EnableIf<Loki::TypeTraits<T>::isFloat,std::complex<T> >::Type
 conj(const std::complex<T>& t) { return std::conj(t); }
 
 template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat,T>::Type
+typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
 norm(T t)
 {
 	return fabs(t);
