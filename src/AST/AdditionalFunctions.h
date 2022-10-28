@@ -120,7 +120,7 @@ public:
 	virtual ValueType exec(const VectorValueType& v) const
 	{
 		assert(v.size() == 1);
-		return exp(v[0]);
+		return std::exp(v[0]);
 	}
 }; // class Exp
 
