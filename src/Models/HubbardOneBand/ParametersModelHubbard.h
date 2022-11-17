@@ -109,7 +109,7 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		}
 
 		if (anisotropy.size() > 0 && anisotropy.size() != nsites) {
-			throw PsimagLite::RuntimeError("Anisotropy size must be " + ttos(nsites) + " long if provided.\n");
+			throw PsimagLite::RuntimeError("AnisotropyD size must be " + ttos(nsites) + " entries long, if provided.\n");
 		}
 
 		try {
@@ -118,6 +118,10 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 			std::cerr<<"Has MagneticFieldX\n";
 		} catch (std::exception&) {
 			magneticX.clear();
+		}
+
+		if (magneticX.size() > 0 && magneticX.size() != nsites) {
+			throw PsimagLite::RuntimeError("MagneticFieldX size must be " + ttos(nsites) + " entries long, if provided.\n");
 		}
 
 		onSiteHaddLegacy = readOldT(io, nsites);
