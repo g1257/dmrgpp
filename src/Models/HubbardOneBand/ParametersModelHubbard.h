@@ -108,6 +108,10 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 			anisotropy.clear();
 		}
 
+		if (anisotropy.size() > 0 && anisotropy.size() != nsites) {
+			throw PsimagLite::RuntimeError("Anisotropy size must be " + ttos(nsites) + " long if provided.\n");
+		}
+
 		try {
 			magneticX.resize(nsites, 0.0);
 			io.read(magneticX,"MagneticFieldX");
