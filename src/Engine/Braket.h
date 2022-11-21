@@ -58,6 +58,7 @@ public:
 		if (vecStr[1].length() > 1 && vecStr[1][0] == '!') {
 			opExprName_.resize(1);
 			opExprName_[0] = vecStr[1];
+			sites_.resize(opExprName_.size(),-1);
 			return; // early exit <===
 		}
 
@@ -103,6 +104,7 @@ public:
 
 	SizeType site(SizeType ind) const
 	{
+		assert(ind < sites_.size());
 		if (sites_[ind] >= 0) return sites_[ind];
 		throw PsimagLite::RuntimeError("site is negative\n");
 	}

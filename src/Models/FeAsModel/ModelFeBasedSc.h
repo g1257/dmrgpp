@@ -164,7 +164,7 @@ public:
 			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
 			str += "potentialV length must be 2*orbitals times the number of sites or";
-			str += " 2*orbitals*orbitals times the number of sites\n";
+			str += " 2*orbitals*orbitals times the number of sites, orbitals=" + ttos(modelParameters_.orbitals)+ "\n";
 			err(str.c_str());
 		}
 
