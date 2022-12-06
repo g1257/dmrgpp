@@ -125,7 +125,7 @@ public:
 		} catch (std::exception& e) {
 			if (!hasEntangler) {
 				std::cerr<<"Please add GeometryMaxConnections=0 or some other number\n";
-				throw e.what();
+				throw e;
 			}
 		}
 	}
