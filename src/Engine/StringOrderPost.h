@@ -11,6 +11,7 @@ class StringOrderPost {
 public:
 
 	typedef typename ObserverType::ModelType ModelType;
+	using OperatorType = typename ModelType::OperatorType;
 	typedef Braket<ModelType> BraketType;
 	typedef typename BraketType::VectorStringType VectorStringType;
 	typedef typename BraketType::AlgebraType AlgebraType;
@@ -32,6 +33,10 @@ public:
 		if (special.substr(0, l) == stringop) {
 			PsimagLite::String rest = special.substr(l, special.length() - l);
 			PsimagLite::split(ops_, rest, ":");
+			if (ops_.size() != 3)
+				err(stringop + " expects three ops separated by colon.\n");
+			checkCenterOp(ops_[1]);
+
 			return;
 		}
 
@@ -84,6 +89,28 @@ private:
 		PsimagLite::String str(left + ";" + op1copies + right); // op1copies carries a last ;
 		BraketType braket(braket_.model(), str);
 		return observe_.anyPoint(braket, false);
+	}
+
+	void checkCenterOp(const std::string& opsCenter) const
+	{
+		OperatorSpecType opSpec(braket_.model());
+		OperatorType nup;
+		bool isValid = false;
+		try {
+			int site = -1;
+			nup = opSpec(opsCenter, site);
+			isValid = true;
+		} catch (std::exception& e) {
+			std::cerr<<e.what()<<"\n";
+		}
+
+		if (!isValid) {
+			throw PsimagLite::RuntimeError("Expected only one operator instead of " + opsCenter + "\n");
+		}
+
+		if (!isDiagonal(nup.getCRS())) {
+			throw PsimagLite::RuntimeError("Expected a diagonal operator for " + opsCenter + "\n");
+		}
 	}
 
 	const BraketType& braket_;
