@@ -12,6 +12,7 @@ public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<bool, SizeType> PairBoolSizeType;
+	typedef std::pair<SizeType, SizeType> PairSizeType;
 
 	SuperOpHelperBase(const SuperGeometryType& superGeometry)
 	    : superGeometry_(superGeometry)
@@ -39,14 +40,10 @@ public:
 		return PairBoolSizeType(false, 0);
 	}
 
-	virtual SizeType leftIndex(VectorSizeType&, SizeType) const
+	PairSizeType finalIndices4sites(const VectorSizeType& hItems,
+	                                ProgramGlobals::ConnectionEnum type) const
 	{
-		throw PsimagLite::RuntimeError("SuperOpHelperBase::leftIndex\n");
-	}
-
-	virtual SizeType rightIndex(VectorSizeType&, SizeType) const
-	{
-		throw PsimagLite::RuntimeError("SuperOpHelperBase::rightIndex\n");
+		throw PsimagLite::RuntimeError("SuperOpHelperBase::finalIndices4sites\n");
 	}
 
 	// non virtual below

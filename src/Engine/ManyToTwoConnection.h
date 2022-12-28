@@ -80,7 +80,7 @@ private:
 	{
 		if (hItems.size() == 4) {
 			assert(type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON);
-			return finalIndices4sites(hItems, superOpHelper);
+			return superOpHelper.finalIndices4sites(hItems, type);
 		}
 
 		const ProgramGlobals::SysOrEnvEnum sysOrEnv =
@@ -119,51 +119,6 @@ private:
 		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ?
 		            lrs_.left(). localOperatorIndex(i, sigma) :
 		            lrs_.right().localOperatorIndex(i, sigma);
-	}
-
-	PairSizeType finalIndices4sites(const VectorSizeType& hItems,
-	                                const SuperOpHelperType& superOpHelper) const
-	{
-		SizeType last = lrs_.left().block().size();
-		assert(last > 0);
-		--last;
-		SizeType lmax = lrs_.left().block()[last];
-		VectorSizeType sysSites;
-		VectorSizeType envSites;
-		assert(hItems.size() == 4);
-		for (SizeType i = 0; i < 4; ++i) {
-			if (hItems[i] <= lmax)
-				sysSites.push_back(hItems[i]);
-			else
-				envSites.push_back(hItems[i]);
-		}
-
-		assert(sysSites.size() > 0);
-		assert(envSites.size() > 0);
-
-		SizeType finalLeft = 0;
-		if (sysSites.size() == 1) {
-			SizeType site1Corrected = PsimagLite::indexOrMinusOne(lrs_.super().block(),
-			                                                      sysSites[0]);
-			finalLeft = finalIndex(ProgramGlobals::SysOrEnvEnum::SYSTEM,
-			                       site1Corrected,
-			                       oneLink_.indices[0]);
-		} else {
-			finalLeft = superOpHelper.leftIndex(sysSites, oneLink_.indices[0]);
-		}
-
-		SizeType finalRight = 0;
-		if (envSites.size() == 1) {
-			SizeType jj = PsimagLite::indexOrMinusOne(lrs_.super().block(), envSites[0]);
-			SizeType site2Corrected = jj - lrs_.left().block().size();
-			finalRight = finalIndex(ProgramGlobals::SysOrEnvEnum::ENVIRON,
-			                        site2Corrected,
-			                        oneLink_.indices[1]);
-		} else {
-			finalRight = superOpHelper.rightIndex(envSites, oneLink_.indices[1]);
-		}
-
-		return PairSizeType(finalLeft, finalRight);
 	}
 
 	const ModelTermLinkType& oneLink_;
