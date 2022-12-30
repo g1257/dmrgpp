@@ -24,7 +24,8 @@ public:
 	                    const SuperOpHelperType& superOpHelper)
 	    : oneLink_(oneLink), lrs_(lrs)
 	{
-		finalIndices_ = finalIndices(hItems, type, superOpHelper);
+		finalIndices_ = (hItems.size() == 2) ? finalIndices(hItems, type)
+		                                      : superOpHelper.finalIndices(hItems, type);
 		assert(oneLink.mods.size() == 2);
 		mods_ = PairCharType(oneLink.mods[0], oneLink.mods[1]);
 	}
@@ -75,13 +76,9 @@ private:
 	}
 
 	PairSizeType finalIndices(const VectorSizeType& hItems,
-	                          ProgramGlobals::ConnectionEnum type,
-	                          const SuperOpHelperType& superOpHelper) const
+	                          ProgramGlobals::ConnectionEnum type) const
 	{
-		if (hItems.size() == 4) {
-			assert(type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON);
-			return superOpHelper.finalIndices4sites(hItems, type);
-		}
+		assert(hItems.size() == 2);
 
 		const ProgramGlobals::SysOrEnvEnum sysOrEnv =
 		        (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
@@ -89,8 +86,6 @@ private:
 		const ProgramGlobals::SysOrEnvEnum envOrSys =
 		        (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
-
-		assert(hItems.size() == 2);
 
 		SizeType i = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems[0]);
 		SizeType j = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems[1]);

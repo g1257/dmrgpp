@@ -40,8 +40,8 @@ public:
 		return PairBoolSizeType(false, 0);
 	}
 
-	PairSizeType finalIndices4sites(const VectorSizeType& hItems,
-	                                ProgramGlobals::ConnectionEnum type) const
+	virtual PairSizeType finalIndices(const VectorSizeType&,
+	                                  ProgramGlobals::ConnectionEnum) const
 	{
 		throw PsimagLite::RuntimeError("SuperOpHelperBase::finalIndices4sites\n");
 	}
