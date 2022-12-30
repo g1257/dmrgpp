@@ -13,7 +13,6 @@ class ManyToTwoConnection {
 public:
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
-	typedef std::pair<char, char> PairCharType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelLinksType::TermType::OneLinkType ModelTermLinkType;
 	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
@@ -27,21 +26,23 @@ public:
 	    : oneLink_(oneLink), lrs_(lrs)
 	{
 		if (hItems.size() == 2) {
+			pairMetaOps_.first.site = hItems[0];
+			pairMetaOps_.second.site = hItems[1];
 			assert(oneLink.indices.size() == 2);
-			finalIndices_.first = locationFirst(hItems[0], oneLink.indices[0], type);
-			finalIndices_.second = locationSecond(hItems[1], oneLink.indices[1], type);
+			pairMetaOps_.first.index = locationFirst(hItems[0], oneLink.indices[0], type);
+			pairMetaOps_.second.index = locationSecond(hItems[1], oneLink.indices[1], type);
 			assert(oneLink.mods.size() == 2);
-			mods_ = PairCharType(oneLink.mods[0], oneLink.mods[1]);
+			pairMetaOps_.first.modifier = oneLink.mods[0];
+			pairMetaOps_.second.modifier = oneLink.mods[1];
 		} else {
 			PairMetaOpForConnection finals = superOpHelper.finalIndices(hItems, type);
-			mods_ = PairCharType('N', 'N');
 			convertNonLocals(finals, type);
+			pairMetaOps_.first.modifier = 'N'; // fixme
+			pairMetaOps_.second.modifier = 'N'; // fixme
 		}
 	}
 
-	const PairSizeType& finalIndices() const { return finalIndices_; }
-
-	const PairCharType& finalMods() const { return mods_; }
+	const PairMetaOpForConnection& pairMetaOps() const { return pairMetaOps_; }
 
 	// WARNING: It doesn't consider the value of connection, so basically
 	// it's OK only if value of connection is real
@@ -135,23 +136,22 @@ private:
 	void convertNonLocals(const PairMetaOpForConnection& pairMetas,
 	                      ProgramGlobals::ConnectionEnum type)
 	{
+		pairMetaOps_.first = pairMetas.first;
 		if (pairMetas.first.site >= 0) {
-			finalIndices_.first = locationFirst(pairMetas.first.site, pairMetas.first.index, type);
-		} else {
-			finalIndices_.first = pairMetas.first.index;
+			// Adjust index
+			pairMetaOps_.first.index = locationFirst(pairMetas.first.site, pairMetas.first.index, type);
 		}
 
+		pairMetaOps_.second = pairMetas.second;
 		if (pairMetas.second.site >= 0) {
-			finalIndices_.second = locationSecond(pairMetas.second.site, pairMetas.second.index, type);
-		} else {
-			finalIndices_.second = pairMetas.second.index;
+			// Adjust index
+			pairMetaOps_.second.index = locationSecond(pairMetas.second.site, pairMetas.second.index, type);
 		}
 	}
 
 	const ModelTermLinkType& oneLink_;
 	const LeftRightSuperType& lrs_;
-	PairSizeType finalIndices_;
-	PairCharType mods_;
+	PairMetaOpForConnection pairMetaOps_;
 };
 }
 #endif // MANYTOTWOCONNECTION_H

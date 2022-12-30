@@ -2,6 +2,7 @@
 #define OPERATORSCACHED_H
 #include "ProgramGlobals.h"
 #include "Concurrency.h"
+#include "MetaOpForConnection.hh"
 
 namespace Dmrg {
 
@@ -50,11 +51,12 @@ public:
 		threadSelves_.clear();
 	}
 
-	const OperatorStorageType& reducedOperator(char modifier,
-	                                           SizeType iifirst,
+	const OperatorStorageType& reducedOperator(const MetaOpForConnection& metaOp,
 	                                           const ProgramGlobals::SysOrEnvEnum type) const
 	{
 
+		SizeType iifirst = metaOp.index;
+		char modifier = metaOp.modifier;
 		assert(!BasisType::useSu2Symmetry());
 
 		const OperatorStorageType* m = 0;

@@ -238,11 +238,9 @@ public:
 		        (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
-		*A = &operatorsCached_.reducedOperator(link2.mods.first,
-		                                       link2.finalIndices.first,
+		*A = &operatorsCached_.reducedOperator(link2.pairMetaOps.first,
 		                                       sysOrEnv);
-		*B = &operatorsCached_.reducedOperator(link2.mods.second,
-		                                       link2.finalIndices.second,
+		*B = &operatorsCached_.reducedOperator(link2.pairMetaOps.second,
 		                                       envOrSys);
 
 		assert(isNonZeroMatrix(**A));
@@ -311,11 +309,10 @@ private:
 				                                  modelHelper_.leftRightSuper(),
 				                                  superOpHelper_);
 
-				LinkType link2(manyToTwo.finalIndices(),
+				LinkType link2(manyToTwo.pairMetaOps(),
 				               type,
 				               tmp,
 				               oneLink.fermionOrBoson,
-				               manyToTwo.finalMods(),
 				               oneLink.angularMomentum,
 				               oneLink.angularFactor,
 				               oneLink.category);
@@ -323,26 +320,33 @@ private:
 				++totalOne;
 				lps_.push_back(link2);
 
-				// add h.c. parts if needed
-				if (!term.wantsHermitian()) continue;
-
-				if (manyToTwo.connectionIsHermitian(modelLinks_)) continue;
-
-				link2.value = PsimagLite::conj(tmp);
-
-				if (oneLink.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
-					link2.value *= (-1.0);
-
-				link2.mods.first = conjugateChar(link2.mods.first);
-				link2.mods.second = conjugateChar(link2.mods.second);
-
-				++totalOne;
-				lps_.push_back(link2);
-
+				// Add H.C. parts if needed
+				if (hItems.size() == 2 && term.wantsHermitian()) {
+					totalOne += addHermitianIfNeeded(link2, tmp, manyToTwo, oneLink.fermionOrBoson);
+				}
 			}
 		}
 
 		return totalOne;
+	}
+
+	SizeType addHermitianIfNeeded(LinkType& link2,
+	                          ComplexOrRealType tmp,
+	                          const ManyToTwoConnectionType& manyToTwo,
+	                          ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
+	{
+		if (manyToTwo.connectionIsHermitian(modelLinks_)) return 0;
+
+		link2.value = PsimagLite::conj(tmp);
+
+		if (fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+			link2.value *= (-1.0);
+
+		link2.pairMetaOps.first.modifier = conjugateChar(link2.pairMetaOps.first.modifier);
+		link2.pairMetaOps.second.modifier = conjugateChar(link2.pairMetaOps.second.modifier);
+
+		lps_.push_back(link2);
+		return 1;
 	}
 
 	void checkGeometryTerms() const

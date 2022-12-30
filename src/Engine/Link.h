@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LINK_H
 
 #include "ProgramGlobals.h"
+#include "MetaOpForConnection.hh"
 
 namespace Dmrg {
 
@@ -87,32 +88,29 @@ template<typename FieldType>
 struct Link {
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
-	typedef std::pair<char, char> PairCharType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
+	typedef std::pair<MetaOpForConnection, MetaOpForConnection> PairMetaOForConnectoinType;
 
-	Link(PairSizeType finalIndices1,
+	Link(PairMetaOForConnectoinType finalIndices1,
 	     ProgramGlobals::ConnectionEnum type1,
 	     const FieldType& value1,
 	     ProgramGlobals::FermionOrBosonEnum fOb,
-	     const PairCharType& mods1,
 	     SizeType aM,
 	     RealType aF,
 	     SizeType cat)
-	    : finalIndices(finalIndices1),
+	    : pairMetaOps(finalIndices1),
 	      type(type1),
 	      value(value1),
 	      fermionOrBoson(fOb),
-	      mods(mods1),
 	      angularMomentum(aM),
 	      angularFactor(aF),
 	      category(cat)
 	{}
 
-	PairSizeType finalIndices;
+	PairMetaOForConnectoinType pairMetaOps;
 	ProgramGlobals::ConnectionEnum type;
 	FieldType value;
 	ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
-	PairCharType mods; // operator modifiers
 	SizeType angularMomentum;
 	RealType angularFactor;
 	SizeType category;
