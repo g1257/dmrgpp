@@ -51,14 +51,19 @@ public:
 		threadSelves_.clear();
 	}
 
-	const OperatorStorageType& reducedOperator(const MetaOpForConnection& metaOp,
-	                                           const ProgramGlobals::SysOrEnvEnum type) const
+	const OperatorStorageType& getOpStorage(const MetaOpForConnection& metaOp,
+	                                        const ProgramGlobals::SysOrEnvEnum type) const
 	{
+		return (metaOp.site >= 0) ? getOpStorageLocal(metaOp.index, metaOp.modifier, type)
+		                          : getOpStorageNonLocal(metaOp, type);
+	}
 
-		SizeType iifirst = metaOp.index;
-		char modifier = metaOp.modifier;
-		assert(!BasisType::useSu2Symmetry());
+private:
 
+	const OperatorStorageType& getOpStorageLocal(SizeType iifirst,
+	                                             char modifier,
+	                                             const ProgramGlobals::SysOrEnvEnum type) const
+	{
 		const OperatorStorageType* m = 0;
 		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
 			m = &(lrs_.left().localOperator(iifirst).getStorage());
@@ -98,8 +103,6 @@ public:
 		return *mc;
 	}
 
-private:
-
 	SizeType threadNumberFromSelf(ConcurrencyType::PthreadtType threadSelf) const
 	{
 		ConcurrencyType::mutexLock(&mutex_);
@@ -113,6 +116,16 @@ private:
 		ConcurrencyType::mutexUnlock(&mutex_);
 
 		return threadPreNum;
+	}
+
+	const OperatorStorageType& getOpStorageNonLocal(const MetaOpForConnection& metaOp,
+	                                                const ProgramGlobals::SysOrEnvEnum type) const
+	{
+		// Non local ops cannot have modifier different than 'N'
+		assert(metaOp.modifier == 'N');
+		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ?
+		            lrs_.left().getSuperByIndex(metaOp.index).getStorage() :
+		            lrs_.right().getSuperByIndex(metaOp.index).getStorage();
 	}
 
 	const LeftRightSuperType& lrs_;

@@ -238,10 +238,10 @@ public:
 		        (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
-		*A = &operatorsCached_.reducedOperator(link2.pairMetaOps.first,
-		                                       sysOrEnv);
-		*B = &operatorsCached_.reducedOperator(link2.pairMetaOps.second,
-		                                       envOrSys);
+		*A = &operatorsCached_.getOpStorage(link2.pairMetaOps.first,
+		                                    sysOrEnv);
+		*B = &operatorsCached_.getOpStorage(link2.pairMetaOps.second,
+		                                    envOrSys);
 
 		assert(isNonZeroMatrix(**A));
 		assert(isNonZeroMatrix(**B));
@@ -331,9 +331,9 @@ private:
 	}
 
 	SizeType addHermitianIfNeeded(LinkType& link2,
-	                          ComplexOrRealType tmp,
-	                          const ManyToTwoConnectionType& manyToTwo,
-	                          ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
+	                              ComplexOrRealType tmp,
+	                              const ManyToTwoConnectionType& manyToTwo,
+	                              ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
 	{
 		if (manyToTwo.connectionIsHermitian(modelLinks_)) return 0;
 

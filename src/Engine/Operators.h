@@ -429,12 +429,6 @@ public:
 		return superOps_[ind];
 	}
 
-	SizeType superIndices(const VectorSizeType&, SizeType) const
-	{
-		PsimagLite::String msg(__FILE__);
-		throw PsimagLite::RuntimeError(msg + "::superOperatorIndices() not implemented yet\n");
-	}
-
 private:
 
 	void setToProductLocal(const BasisType& basis2,

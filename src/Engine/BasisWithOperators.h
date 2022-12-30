@@ -269,12 +269,12 @@ public:
 		return operators_.getLocalByIndex(i);
 	}
 
-	SizeType numberOfLocalOperators() const { return operators_.sizeOfLocal(); }
-
-	SizeType superOperatorIndices(const VectorSizeType& sites, SizeType sigma) const
+	const OperatorType& getSuperByIndex(SizeType ind) const
 	{
-		return operators_.superIndices(sites, sigma);
+		return operators_.getSuperByIndex(ind);
 	}
+
+	SizeType numberOfLocalOperators() const { return operators_.sizeOfLocal(); }
 
 	SizeType operatorsPerSite(SizeType i) const
 	{

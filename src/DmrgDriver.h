@@ -7,7 +7,6 @@
 #include "ParametersDmrgSolver.h"
 #include "ModelSelector.h"
 #include "ModelHelperLocal.h"
-#include "ModelHelperSu2.h"
 #include "MatrixVectorOnTheFly.h"
 #include "MatrixVectorStored.h"
 #include "MatrixVectorKron/MatrixVectorKron.h"
