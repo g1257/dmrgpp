@@ -72,7 +72,7 @@ public:
 		if (smaxOrEmin_ + 2 == nsites) {
 			// (n - 4, n - 3, n - 2) x (n - 1)
 			MetaOpForConnection left(NON_LOCAL, encodeNonLocalSys(nsites - 4, 3), 'N');
-			MetaOpForConnection right(hItems[3], nsites - 1, 'N');
+			MetaOpForConnection right(hItems[3], 0, 'N');
 			return PairMetaOpForConnection(left, right);
 		}
 
@@ -88,7 +88,7 @@ public:
 
 		// (s) x (s + 1, s + 2, s + 3)
 		//return PairSizeType(smaxOrEmin_, encodeNonLocalEnv(smaxOrEmin_ + 1, 3));
-		throw PsimagLite::RuntimeError("How to encode two plaquettes?\n");
+		throw PsimagLite::RuntimeError("How to encode two plaquettes: depends on hItems\n");
 	}
 
 	PairBoolSizeType leftOperatorIndex(SizeType) const

@@ -27,15 +27,16 @@ public:
 	    : oneLink_(oneLink), lrs_(lrs)
 	{
 		if (hItems.size() == 2) {
-			finalIndices_ =  finalIndices(hItems, type);
+			assert(oneLink.indices.size() == 2);
+			finalIndices_.first = locationFirst(hItems[0], oneLink.indices[0], type);
+			finalIndices_.second = locationSecond(hItems[1], oneLink.indices[1], type);
+			assert(oneLink.mods.size() == 2);
 			mods_ = PairCharType(oneLink.mods[0], oneLink.mods[1]);
 		} else {
 			PairMetaOpForConnection finals = superOpHelper.finalIndices(hItems, type);
 			mods_ = PairCharType('N', 'N');
 			convertNonLocals(finals, type);
 		}
-
-		assert(oneLink.mods.size() == 2);
 	}
 
 	const PairSizeType& finalIndices() const { return finalIndices_; }
@@ -83,33 +84,40 @@ private:
 		return (isHermit1 && isHermit2);
 	}
 
-	PairSizeType finalIndices(const VectorSizeType& hItems,
-	                          ProgramGlobals::ConnectionEnum type) const
+	SizeType locationFirst(SizeType hItems0,
+	                       SizeType sigma,
+	                       ProgramGlobals::ConnectionEnum type) const
 	{
-		assert(hItems.size() == 2);
-
 		const ProgramGlobals::SysOrEnvEnum sysOrEnv =
 		        (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON;
-		const ProgramGlobals::SysOrEnvEnum envOrSys =
-		        (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
-		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
-		SizeType i = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems[0]);
-		SizeType j = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems[1]);
+		SizeType i = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems0);
 
 		const SizeType offset = lrs_.left().block().size();
 
 		SizeType site1Corrected = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            i : i - offset;
+
+		return finalIndex(sysOrEnv, site1Corrected, sigma);
+	}
+
+	SizeType locationSecond(SizeType hItems1,
+	                       SizeType sigma,
+	                       ProgramGlobals::ConnectionEnum type) const
+	{
+		const ProgramGlobals::SysOrEnvEnum envOrSys =
+		        (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
+		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
+
+		SizeType j = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems1);
+
+		const SizeType offset = lrs_.left().block().size();
+
 		SizeType site2Corrected = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            j - offset : j;
 
-		assert(oneLink_.indices.size() > 1);
-		PairSizeType finalIndex0;
-		finalIndex0.first = finalIndex(sysOrEnv, site1Corrected, oneLink_.indices[0]);
-		finalIndex0.second = finalIndex(envOrSys, site2Corrected, oneLink_.indices[1]);
-		return finalIndex0;
+		return finalIndex(envOrSys, site2Corrected, sigma);
 	}
 
 	SizeType finalIndex(ProgramGlobals::SysOrEnvEnum type,
@@ -128,22 +136,16 @@ private:
 	                      ProgramGlobals::ConnectionEnum type)
 	{
 		if (pairMetas.first.site >= 0) {
-			SizeType nsites = lrs_.super().block().size();
-			SizeType site = pairMetas.first.site;
-			PairSizeType tmp = finalIndices({site, nsites - 1}, type);
-			finalIndices_.first = tmp.first;
+			finalIndices_.first = locationFirst(pairMetas.first.site, pairMetas.first.index, type);
 		} else {
-			throw PsimagLite::RuntimeError("look up non local op in system or environ");
+			finalIndices_.first = pairMetas.first.index;
 		}
 
 		if (pairMetas.second.site >= 0) {
-			SizeType site = pairMetas.second.site;
-			PairSizeType tmp = finalIndices({0, site}, type);
-			finalIndices_.second = tmp.second;
+			finalIndices_.second = locationSecond(pairMetas.second.site, pairMetas.second.index, type);
 		} else {
-			throw PsimagLite::RuntimeError("look up non local op in system or environ");
+			finalIndices_.second = pairMetas.second.index;
 		}
-
 	}
 
 	const ModelTermLinkType& oneLink_;
