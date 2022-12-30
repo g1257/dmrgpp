@@ -32,7 +32,7 @@ public:
 	typedef SuperOpHelperBase<SuperGeometryType, ParamsType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
 	typedef typename BaseType::PairBoolSizeType PairBoolSizeType;
-	typedef typename BaseType::PairSizeType PairSizeType;
+	using PairMetaOpForConnection = typename BaseType::PairMetaOpForConnection;
 
 	SuperOpHelperPlaquette(const SuperGeometryType& superGeometry)
 	    : BaseType(superGeometry), smaxOrEmin_(0), newSite_(0)
@@ -55,31 +55,39 @@ public:
 	// testing devel FIXME TODO
 	SizeType size() const { return 1; }
 
-	PairSizeType finalIndices(const VectorSizeType& hItems,
-	                          ProgramGlobals::ConnectionEnum type) const
+	PairMetaOpForConnection finalIndices(const VectorSizeType& hItems,
+	                                     ProgramGlobals::ConnectionEnum type) const
 	{
+		assert(hItems.size() == 4);
+		constexpr int NON_LOCAL = -1;
 		if (smaxOrEmin_ == 0) {
 			// 0 x (1, 2, 3)
-			return PairSizeType(0, encodeNonLocal(1, 3));
+			MetaOpForConnection left(hItems[0], 0, 'N');
+			MetaOpForConnection right(NON_LOCAL, encodeNonLocalEnv(1, 3), 'N');
+			return PairMetaOpForConnection(left, right);
 		}
 
 		SizeType nsites = BaseType::superGeometry().numberOfSites();
 
 		if (smaxOrEmin_ + 2 == nsites) {
 			// (n - 4, n - 3, n - 2) x (n - 1)
-			return PairSizeType(encodeNonLocal(nsites - 4, 3), nsites - 1);
+			MetaOpForConnection left(NON_LOCAL, encodeNonLocalSys(nsites - 4, 3), 'N');
+			MetaOpForConnection right(hItems[3], nsites - 1, 'N');
+			return PairMetaOpForConnection(left, right);
 		}
 
 		if (smaxOrEmin_ & 1) {
 			// (s - 1, s) x (s + 1, s + 2)
-			return PairSizeType(encodeNonLocal(smaxOrEmin_ - 1, 2),
-			                    encodeNonLocal(smaxOrEmin_ + 1, 2));
+			MetaOpForConnection left(NON_LOCAL, encodeNonLocalSys(smaxOrEmin_ - 1, 2), 'N');
+			MetaOpForConnection right(NON_LOCAL, encodeNonLocalEnv(smaxOrEmin_ + 1, 2), 'N');
+			return PairMetaOpForConnection(left, right);
 		}
 
 		// (s - 2, s - 1, s) x (s + 1)
-		//return PairSizeType(encodeNonLocal(smaxOrEmin_ - 2, 3), smaxOrEmin_ + 1);
+		//return PairSizeType(encodeNonLocalSys(smaxOrEmin_ - 2, 3), smaxOrEmin_ + 1);
 
 		// (s) x (s + 1, s + 2, s + 3)
+		//return PairSizeType(smaxOrEmin_, encodeNonLocalEnv(smaxOrEmin_ + 1, 3));
 		throw PsimagLite::RuntimeError("How to encode two plaquettes?\n");
 	}
 
@@ -111,9 +119,37 @@ public:
 
 private:
 
-	static SizeType encodeNonLocal(SizeType start, SizeType size)
+	/*
+	 *  (0, 1) --> 0
+	 *  (0, 1, 2) --> 1
+	 *  (2, 3) --> 2
+	 *  (2, 3, 4) --> 3
+	 *  (4, 5) --> 4
+	 *  etc.
+	 */
+	SizeType encodeNonLocalSys(SizeType start, SizeType size) const
 	{
-		throw PsimagLite::RuntimeError("encodeNonLocal\n");
+		assert(size == 2 || size == 3);
+		assert((start + 1) & 1);
+		assert(start + size <= smaxOrEmin_ + 1);
+		return (size == 2) ? start : start + 1;
+	}
+
+	/*
+	 *  (n-2, n-1) --> 0
+	 *  (n-3, n-2, n-1) --> 1
+	 *  (n-4, n-3) --> 2
+	 *  (n-5, n-4, n-3) --> 3
+	 *  etc.
+	 */
+	SizeType encodeNonLocalEnv(SizeType start, SizeType size) const
+	{
+		SizeType nsites = BaseType::superGeometry().numberOfSites();
+		assert(size == 2 || size == 3);
+		assert(start > smaxOrEmin_);
+		assert(start + size <= nsites);
+		assert(nsites >= start + 2);
+		return nsites - start - 2;
 	}
 
 	SizeType smaxOrEmin_;

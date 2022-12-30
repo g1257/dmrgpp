@@ -2,6 +2,7 @@
 #define SuperOpHelperBase_H
 #include "ProgramGlobals.h"
 #include "Vector.h"
+#include "MetaOpForConnection.hh"
 
 namespace Dmrg {
 
@@ -12,7 +13,7 @@ public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef std::pair<bool, SizeType> PairBoolSizeType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	using PairMetaOpForConnection = std::pair<MetaOpForConnection, MetaOpForConnection>;
 
 	SuperOpHelperBase(const SuperGeometryType& superGeometry)
 	    : superGeometry_(superGeometry)
@@ -40,8 +41,8 @@ public:
 		return PairBoolSizeType(false, 0);
 	}
 
-	virtual PairSizeType finalIndices(const VectorSizeType&,
-	                                  ProgramGlobals::ConnectionEnum) const
+	virtual PairMetaOpForConnection finalIndices(const VectorSizeType&,
+	                                             ProgramGlobals::ConnectionEnum) const
 	{
 		throw PsimagLite::RuntimeError("SuperOpHelperBase::finalIndices4sites\n");
 	}

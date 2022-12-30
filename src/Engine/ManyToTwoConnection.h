@@ -1,6 +1,7 @@
 #ifndef MANYTOTWOCONNECTION_H
 #define MANYTOTWOCONNECTION_H
 #include "ProgramGlobals.h"
+#include "MetaOpForConnection.hh"
 
 namespace Dmrg {
 
@@ -16,6 +17,7 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelLinksType::TermType::OneLinkType ModelTermLinkType;
 	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
+	using PairMetaOpForConnection = std::pair<MetaOpForConnection, MetaOpForConnection>;
 
 	ManyToTwoConnection(const VectorSizeType& hItems,
 	                    ProgramGlobals::ConnectionEnum type,
@@ -24,10 +26,16 @@ public:
 	                    const SuperOpHelperType& superOpHelper)
 	    : oneLink_(oneLink), lrs_(lrs)
 	{
-		finalIndices_ = (hItems.size() == 2) ? finalIndices(hItems, type)
-		                                      : superOpHelper.finalIndices(hItems, type);
+		if (hItems.size() == 2) {
+			finalIndices_ =  finalIndices(hItems, type);
+			mods_ = PairCharType(oneLink.mods[0], oneLink.mods[1]);
+		} else {
+			PairMetaOpForConnection finals = superOpHelper.finalIndices(hItems, type);
+			mods_ = PairCharType('N', 'N');
+			convertNonLocals(finals, type);
+		}
+
 		assert(oneLink.mods.size() == 2);
-		mods_ = PairCharType(oneLink.mods[0], oneLink.mods[1]);
 	}
 
 	const PairSizeType& finalIndices() const { return finalIndices_; }
@@ -97,7 +105,7 @@ private:
 		SizeType site2Corrected = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
 		            j - offset : j;
 
-		assert(oneLink_.indices.size() == 2);
+		assert(oneLink_.indices.size() > 1);
 		PairSizeType finalIndex0;
 		finalIndex0.first = finalIndex(sysOrEnv, site1Corrected, oneLink_.indices[0]);
 		finalIndex0.second = finalIndex(envOrSys, site2Corrected, oneLink_.indices[1]);
@@ -114,6 +122,28 @@ private:
 		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ?
 		            lrs_.left(). localOperatorIndex(i, sigma) :
 		            lrs_.right().localOperatorIndex(i, sigma);
+	}
+
+	void convertNonLocals(const PairMetaOpForConnection& pairMetas,
+	                      ProgramGlobals::ConnectionEnum type)
+	{
+		if (pairMetas.first.site >= 0) {
+			SizeType nsites = lrs_.super().block().size();
+			SizeType site = pairMetas.first.site;
+			PairSizeType tmp = finalIndices({site, nsites - 1}, type);
+			finalIndices_.first = tmp.first;
+		} else {
+			throw PsimagLite::RuntimeError("look up non local op in system or environ");
+		}
+
+		if (pairMetas.second.site >= 0) {
+			SizeType site = pairMetas.second.site;
+			PairSizeType tmp = finalIndices({0, site}, type);
+			finalIndices_.second = tmp.second;
+		} else {
+			throw PsimagLite::RuntimeError("look up non local op in system or environ");
+		}
+
 	}
 
 	const ModelTermLinkType& oneLink_;
