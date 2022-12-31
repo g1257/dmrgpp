@@ -274,6 +274,11 @@ public:
 		return operators_.getSuperByIndex(ind);
 	}
 
+	void addNewNonLocals(const std::vector<OperatorType>& nonLocals)
+	{
+		operators_.addNewNonLocals(nonLocals);
+	}
+
 	SizeType numberOfLocalOperators() const { return operators_.sizeOfLocal(); }
 
 	SizeType operatorsPerSite(SizeType i) const

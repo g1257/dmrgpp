@@ -382,8 +382,11 @@ private:
 		}
 		//!PTEX_LABEL{295}
 		model.addHamiltonianConnection(matrix, *lrs, time);
+		std::vector<OperatorType> nonLocalOps;
+		model.fillNewNonLocals(nonLocalOps, *lrs, time);
 		delete lrs;
 		leftOrRight.setHamiltonian(matrix);
+		leftOrRight.addNewNonLocals(nonLocalOps);
 
 		return oneSiteTruncSize;
 	}

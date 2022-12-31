@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InitKronBase.h"
 #include "Vector.h"
 #include "Profiling.h"
+#include "OpsForLink.hh"
 
 namespace Dmrg {
 
@@ -257,26 +258,25 @@ private:
 	{
 		SizeType total = hc_.tasks();
 
-		for (SizeType ix=0;ix<total;ix++) {
-			OperatorStorageType const* A = 0;
-			OperatorStorageType const* B = 0;
+		OpsForLink<LeftRightSuperType> opsForLink = hc_.opsForLink();
+		for (SizeType ix = 0; ix < total; ++ix) {
 
-			LinkType link2 = hc_.getKron(&A, &B, ix);
+			opsForLink.setPointer(ix);
+			const OperatorStorageType& A = opsForLink.A();
+			const OperatorStorageType& B = opsForLink.B();
+			const LinkType& link2 = opsForLink.link();
+
 			if (link2.type==ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {
 				LinkType link3 = link2;
 				link3.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
 				if (link3.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 					link3.value *= -1.0;
 
-				assert(A);
-				assert(B);
-				BaseType::addOneConnection(*B, *A, link3.value, link2.fermionOrBoson);
+				BaseType::addOneConnection(B, A, link3.value, link2.fermionOrBoson);
 				continue;
 			}
 
-			assert(A);
-			assert(B);
-			BaseType::addOneConnection(*A, *B, link2.value, link2.fermionOrBoson);
+			BaseType::addOneConnection(A, B, link2.value, link2.fermionOrBoson);
 		}
 	}
 

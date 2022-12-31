@@ -30,26 +30,27 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	OperatorStorage() : justCrs_(true)
+	enum class Type {CRS, NOT_READY};
+
+	OperatorStorage(Type type = Type::CRS) : type_(type)
 	{}
 
 	explicit OperatorStorage(const SparseMatrixType& src)
-	    : justCrs_(true), crs_(src)
+	    : type_(Type::CRS), crs_(src)
 	{}
 
 	void makeDiagonal(SizeType rows, ComplexOrRealType value = 1) // replace this by a ctor
 	{
-		if (!justCrs_)
+		if (!justCRS())
 			throw PsimagLite::RuntimeError("OperatorStorage::makeDiagonal\n");
 
-		justCrs_ = true;
 		crs_.makeDiagonal(rows, value);
 	}
 
 	void read(PsimagLite::String label,
 	          PsimagLite::IoNgSerializer& io)
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.read(label, io);
 
 		throw PsimagLite::RuntimeError("OperatorStorage::read\n");
@@ -60,7 +61,7 @@ public:
 	           PsimagLite::IoSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE)
 	const
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.write(label, io, mode);
 
 		throw PsimagLite::RuntimeError("OperatorStorage::write\n");
@@ -69,7 +70,7 @@ public:
 	void overwrite(PsimagLite::String label,
 	               PsimagLite::IoNgSerializer& io) const
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.overwrite(label, io);
 
 		throw PsimagLite::RuntimeError("OperatorStorage::overwrite\n");
@@ -77,7 +78,7 @@ public:
 
 	OperatorStorage operator+=(const OperatorStorage& other)
 	{
-		if (justCrs_ && other.justCrs_) {
+		if (justCRS() && other.justCRS()) {
 			crs_ += other.crs_;
 			return *this;
 		}
@@ -87,7 +88,7 @@ public:
 
 	OperatorStorage operator*=(const ComplexOrRealType& value)
 	{
-		if (justCrs_) {
+		if (justCRS()) {
 			crs_ *= value;
 			return *this;
 		}
@@ -97,7 +98,7 @@ public:
 
 	void fromDense(const PsimagLite::Matrix<ComplexOrRealType>& m)
 	{
-		if (!justCrs_)
+		if (!justCRS())
 			throw PsimagLite::RuntimeError("OperatorStorage::fromDense()\n");
 
 		fullMatrixToCrsMatrix(crs_, m);
@@ -105,7 +106,7 @@ public:
 
 	void clear()
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.clear();
 
 		throw PsimagLite::RuntimeError("OperatorStorage::clear()\n");
@@ -113,7 +114,7 @@ public:
 
 	void checkValidity() const
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.checkValidity();
 
 		throw PsimagLite::RuntimeError("OperatorStorage::checkValidity\n");
@@ -121,7 +122,7 @@ public:
 
 	void conjugate()
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.conjugate();
 
 		throw PsimagLite::RuntimeError("OperatorStorage::conjugate\n");
@@ -129,7 +130,7 @@ public:
 
 	void transpose()
 	{
-		if (!justCrs_)
+		if (!justCRS())
 			throw PsimagLite::RuntimeError("OperatorStorage::transpose\n");
 
 		// transpose conjugate
@@ -143,7 +144,7 @@ public:
 	void rotate(const PsimagLite::CrsMatrix<ComplexOrRealType>& left,
 	            const PsimagLite::CrsMatrix<ComplexOrRealType>& right)
 	{
-		if (justCrs_) {
+		if (justCRS()) {
 			SparseMatrixType tmp;
 			multiply(tmp, crs_, right);
 			multiply(crs_, left, tmp);
@@ -155,7 +156,7 @@ public:
 
 	MatrixType toDense() const
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.toDense();
 
 		throw PsimagLite::RuntimeError("OperatorStorage::toDense\n");
@@ -163,7 +164,7 @@ public:
 
 	const SparseMatrixType& getCRS() const
 	{
-		if (!justCrs_)
+		if (!justCRS())
 			throw PsimagLite::RuntimeError("OperatorStorage::toCRS\n");
 		return crs_;
 	}
@@ -171,14 +172,14 @@ public:
 	// FIXME TODO DELETE THIS FUNCTION!!
 	SparseMatrixType& getCRSNonConst()
 	{
-		if (!justCrs_)
+		if (!justCRS())
 			throw PsimagLite::RuntimeError("OperatorStorage::toCRS\n");
 		return crs_;
 	}
 
 	SizeType nonZeros() const
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.nonZeros();
 
 		throw PsimagLite::RuntimeError("OperatorStorage::nonZeros\n");
@@ -186,7 +187,7 @@ public:
 
 	SizeType rows() const
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.rows();
 
 		throw PsimagLite::RuntimeError("OperatorStorage::rows()\n");
@@ -194,13 +195,15 @@ public:
 
 	SizeType cols() const
 	{
-		if (justCrs_)
+		if (justCRS())
 			return crs_.cols();
 
 		throw PsimagLite::RuntimeError("OperatorStorage::cols()\n");
 	}
 
-	bool justCRS() const { return justCrs_; }
+	bool justCRS() const { return (type_ == Type::CRS); }
+
+	bool invalid() const { return (type_ == Type::NOT_READY); }
 
 	friend void transposeConjugate(OperatorStorage& dest,
 	                               const OperatorStorage& src)
@@ -214,7 +217,7 @@ public:
 	friend void fromCRS(OperatorStorage& dest,
 	                    const PsimagLite::CrsMatrix<ComplexOrRealType>& src)
 	{
-		if (dest.justCrs_) {
+		if (dest.justCRS()) {
 			dest.crs_ = src;
 			return;
 		}
@@ -224,7 +227,7 @@ public:
 
 	friend void bcast(OperatorStorage& dest)
 	{
-		if (dest.justCrs_)
+		if (dest.justCRS())
 			return bcast(dest.crs_);
 
 		err("OperatorStorage: bcast\n");
@@ -270,7 +273,7 @@ public:
 	friend void fullMatrixToCrsMatrix(OperatorStorage& dest,
 	                                  const PsimagLite::Matrix<ComplexOrRealType>& src)
 	{
-		if (dest.justCrs_)
+		if (dest.justCRS())
 			return fullMatrixToCrsMatrix(dest.crs_, src);
 
 		err("OperatorStorage: fullMatrixToCrsMatrix\n");
@@ -278,7 +281,7 @@ public:
 
 private:
 
-	bool justCrs_;
+	Type type_;
 	SparseMatrixType crs_;
 };
 

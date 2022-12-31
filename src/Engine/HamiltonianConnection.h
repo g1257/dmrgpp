@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "OperatorsCached.h"
 #include "ManyToTwoConnection.h"
 #include "SuperOpHelperBase.h"
+#include "OpsForLink.hh"
 
 namespace Dmrg {
 
@@ -122,6 +123,7 @@ public:
 	typedef SuperOpHelperBase<SuperGeometryType, ParamsForSolverType> SuperOpHelperBaseType;
 	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>
 	ManyToTwoConnectionType;
+	typedef OpsForLink<LeftRightSuperType> OpsForLinkType;
 
 	HamiltonianConnection(const LeftRightSuperType& lrs,
 	                      const ModelLinksType& lpb,
@@ -201,15 +203,19 @@ public:
 		VerySparseMatrixType matrix2(matrixRank, matrixRank);
 		SizeType nitems = totalOnes_.size();
 
+		OpsForLinkType opsForLink(operatorsCached_, lps_);
 		SizeType x = 0;
 		for (SizeType xx = 0; xx < nitems; ++xx) {
 			SparseMatrixType matrixBlock(matrixRank, matrixRank);
 			for (SizeType i = 0; i < totalOnes_[xx]; ++i) {
 				SparseMatrixType mBlock;
-				OperatorStorageType const* A = 0;
-				OperatorStorageType const* B = 0;
-				const LinkType& link2 = getKron(&A, &B, x++);
-				modelHelper_.fastOpProdInter(A->getCRS(), B->getCRS(), mBlock, link2, aux);
+				opsForLink.setPointer(x++);
+				if (opsForLink.invalid()) continue;
+				modelHelper_.fastOpProdInter(opsForLink.A().getCRS(),
+				                             opsForLink.B().getCRS(),
+				                             mBlock,
+				                             opsForLink.link(),
+				                             aux);
 
 				matrixBlock += mBlock;
 			}
@@ -221,36 +227,7 @@ public:
 		matrix += matrix2;
 	}
 
-	const LinkType& getKron(const OperatorStorageType** A,
-	                        const OperatorStorageType** B,
-	                        SizeType xx) const
-	{
-		assert(xx < lps_.size());
-		const LinkType& link2 = lps_[xx];
-
-		assert(link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON ||
-		       link2.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
-
-		const ProgramGlobals::SysOrEnvEnum sysOrEnv =
-		        (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
-		            ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON;
-		const ProgramGlobals::SysOrEnvEnum envOrSys =
-		        (link2.type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
-		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
-
-		*A = &operatorsCached_.getOpStorage(link2.pairMetaOps.first,
-		                                    sysOrEnv);
-		*B = &operatorsCached_.getOpStorage(link2.pairMetaOps.second,
-		                                    envOrSys);
-
-		assert(isNonZeroMatrix(**A));
-		assert(isNonZeroMatrix(**B));
-
-		(*A)->checkValidity();
-		(*B)->checkValidity();
-
-		return link2;
-	}
+	OpsForLinkType opsForLink() const { return OpsForLinkType(operatorsCached_, lps_); }
 
 	const ModelHelperType& modelHelper() const { return modelHelper_; }
 

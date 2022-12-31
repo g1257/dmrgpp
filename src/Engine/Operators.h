@@ -240,10 +240,16 @@ public:
 		SizeType gemmRnb_;
 		SizeType threadsForGemmR_;
 		SizeType opsPerSite_;
-        SizeType opOnSiteThreshold_;
+		SizeType opOnSiteThreshold_;
 	};
 
-	Operators() : progress_("Operators")
+	Operators()
+	    : invalidOp_(OperatorStorageType(OperatorStorageType::Type::NOT_READY),
+	                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+	                 PairType(0, 0),
+	                 0,
+	                 typename OperatorType::Su2RelatedType()),
+	      progress_("Operators")
 	{
 		if (changeAll_ == ChangeAllEnum::UNSET)
 			changeAll_ = ChangeAllEnum::FALSE_SET;
@@ -251,7 +257,12 @@ public:
 
 	template<typename IoInputter>
 	Operators(IoInputter& io, PsimagLite::String prefix, bool isObserveCode)
-	    : progress_("Operators")
+	    : invalidOp_(OperatorStorageType(OperatorStorageType::Type::NOT_READY),
+	                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+	                 PairType(0, 0),
+	                 0,
+	                 typename OperatorType::Su2RelatedType()),
+	      progress_("Operators")
 	{
 		if (changeAll_ == ChangeAllEnum::UNSET)
 			changeAll_ = ChangeAllEnum::FALSE_SET;
@@ -425,16 +436,27 @@ public:
 
 	const OperatorType& getSuperByIndex(SizeType ind) const
 	{
+		if (superOps_.size() == 0) {
+			return invalidOp_;
+		}
+
 		assert(ind < superOps_.size());
 		return superOps_[ind];
+	}
+
+	void addNewNonLocals(const std::vector<OperatorType>& nonLocals)
+	{
+		for (SizeType i = 0; i < nonLocals.size(); ++i) {
+			superOps_.push_back(nonLocals[i]);
+		}
 	}
 
 private:
 
 	void setToProductLocal(const BasisType& basis2,
 	                       const ThisType& ops2,
-		                   const BasisType& basis3,
-		                   const ThisType& ops3,
+	                       const BasisType& basis3,
+	                       const ThisType& ops3,
 	                       const VectorSizeType& permutationInverse)
 	{
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
@@ -487,8 +509,8 @@ private:
 	template<typename SomeSuperOperatorHelperType>
 	void setToProductSuper(const BasisType& basis2,
 	                       const ThisType& ops2,
-		                   const BasisType& basis3,
-		                   const ThisType& ops3,
+	                       const BasisType& basis3,
+	                       const ThisType& ops3,
 	                       const VectorSizeType& permutationInverse,
 	                       const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
@@ -503,11 +525,11 @@ private:
 			const PairBoolSizeType op2Index  = someSuperOpHelper.leftOperatorIndex(i);
 			const PairBoolSizeType op3Index = someSuperOpHelper.rightOperatorIndex(i);
 			const OperatorType& op1 = (!op2Index.first) ? ops2.getLocalByIndex(op2Index.second)
-			                                                   : ops2.getSuperByIndex(op2Index.
-			                                                                          second);
+			                                            : ops2.getSuperByIndex(op2Index.
+			                                                                   second);
 			const OperatorType& op3 = (!op3Index.first) ? ops3.getLocalByIndex(op3Index.second)
-			                                                   : ops3.getSuperByIndex(op3Index.
-			                                                                          second);
+			                                            : ops3.getSuperByIndex(op3Index.
+			                                                                   second);
 			bool isFermion = (op3.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
 
 			if (savedSign != op3.fermionOrBoson() || fermionicSigns.size() == 0) {
@@ -592,6 +614,7 @@ private:
 	}
 
 	static ChangeAllEnum changeAll_;
+	OperatorType invalidOp_;
 	ChangeOfBasisType changeOfBasis_;
 	VectorOperatorType operators_;
 	VectorOperatorType superOps_;

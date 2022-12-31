@@ -2,6 +2,7 @@
 #define PARALLELHAMILTONIANCONNECTION_H
 #include "Concurrency.h"
 #include "Vector.h"
+#include "OpsForLink.hh"
 
 namespace Dmrg {
 
@@ -9,6 +10,7 @@ template<typename HamiltonianConnectionType>
 class ParallelHamiltonianConnection {
 
 	typedef typename HamiltonianConnectionType::ModelHelperType ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -56,14 +58,15 @@ public:
 		assert(taskNumber > 1);
 		taskNumber -= 2;
 
-		OperatorStorageType const* A = 0;
-		OperatorStorageType const* B = 0;
-		const LinkType& link2 = hc_.getKron(&A, &B, taskNumber);
+		OpsForLink<LeftRightSuperType> opsForLink = hc_.opsForLink();
+
+		opsForLink.setPointer(taskNumber);
+
 		hc_.modelHelper().fastOpProdInter(xtemp_[threadNum],
 		                                  y_,
-		                                  A->getCRS(),
-		                                  B->getCRS(),
-		                                  link2,
+		                                  opsForLink.A().getCRS(),
+		                                  opsForLink.B().getCRS(),
+		                                  opsForLink.link(),
 		                                  aux_);
 
 //		hc_.kroneckerDumper().push(A->getCRS(),

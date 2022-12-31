@@ -409,6 +409,11 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		throw PsimagLite::RuntimeError("This model does not support entanglers\n");
 	}
 
+	virtual void fillNewNonLocals(std::vector<OperatorType>& newNonLocals,
+	                              const LeftRightSuperType& lrs,
+	                              RealType currentTime) const
+	{}
+
 	// END OF VIRTUAL FUNCTIONS
 
 	/**
@@ -887,8 +892,8 @@ private:
 		const SizeType nsites = vec.size();
 		for (SizeType site = 0; site < nsites; ++site) {
 			vec[site] = CanonicalExpressionType::replaceAll(str,
-			                                                                    "%s",
-			                                                                    site).second;
+			                                                "%s",
+			                                                site).second;
 		}
 	}
 
