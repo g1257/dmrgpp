@@ -90,12 +90,17 @@ public:
 		state_.setMap(map);
 	}
 
+private:
+
 	void expandMacrosRecursively()
 	{
 		state_.expandMacrosRecursively();
 	}
 
-private:
+	void installNativeMacros()
+	{
+		state_.installNativeMacros();
+	}
 
 	static bool allEmpty(IteratorType first,IteratorType last)
 	{

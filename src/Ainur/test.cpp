@@ -8,17 +8,12 @@ void partiallyReadSomething(const PsimagLite::Ainur& ainur)
 	ainur.readValue(n, "TotalNumberOfSites");
 	std::cout<<"Read: TotalNumberOfSites="<<n<<"\n";
 
-	std::vector<std::complex<double> > v;
-	//std::vector<double> v;
-	ainur.readValue(v, "myv");
-	std::cout<<v;
-
 	PsimagLite::String m;
 	ainur.readValue(m, "Model");
 	std::cout<<m<<"\n";
 
-	std::vector<std::complex<double> > v2(10);
-	ainur.readValue(v2, "myv2");
+	std::string v2;
+	ainur.readValue(v2, "useit");
 	std::cout<<v2;
 }
 

@@ -22,3 +22,8 @@ FiniteLoops=[
 	[7, 100, 0]];
 TargetElectronsUp=8;
 TargetElectronsDown=8;
+
+#string AinurFromFile = blahblah;
+function myfunction = \AinurFromFile("function.txt");
+
+string useit = \myfunction(3.0);

@@ -161,6 +161,11 @@ public:
 		}
 	}
 
+	void installNativeMacros()
+	{
+		declare("function", "AinurFromFile", "AinurFromFile");
+	}
+
 	template<typename SomeMapType>
 	void setMap(SomeMapType& map) const
 	{

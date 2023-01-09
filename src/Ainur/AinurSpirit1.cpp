@@ -70,10 +70,10 @@ Ainur::Ainur(String str)
 
 	typeQualifier %= +(aToZ | ascii::char_(".") | ascii::char_("!"));
 	keywords = *(ascii::char_("_")) >> +aToZ >> *(ascii::char_("a","z")
-	                      | ascii::char_("A", "Z")
-	                      | ascii::char_("0","9")
-	                      | ascii::char_(":")
-						  | ascii::char_("_"));
+	                                              | ascii::char_("A", "Z")
+	                                              | ascii::char_("0","9")
+	                                              | ascii::char_(":")
+	                                              | ascii::char_("_"));
 	statement1   %= keywords >> '=' >> value;
 	statement2 %= typeQualifier >> keywords;
 	statement3 %= typeQualifier >>  keywords >> '=' >> value;
@@ -91,19 +91,24 @@ Ainur::Ainur(String str)
 	                 AINUR_COMMENTS);
 
 	++first;
-	if (first == last || allEmpty(first, last)) return;
+	if (first != last && !allEmpty(first, last)) {
 
-	qi::parse(first,
-	          last,
-	          +('#' >> *(qi::char_ - qi::eol) >> qi::eol
-	            | qi::eol
-	            | qi::space));
+		qi::parse(first,
+		          last,
+		          +('#' >> *(qi::char_ - qi::eol) >> qi::eol
+		            | qi::eol
+		            | qi::space));
 
-	if (first + 1 != last && !allEmpty(first, last)) {
-		IteratorType e = (first + 20 < last) ? first + 20 : last;
-		err(AinurState::errLabel(AinurState::ERR_PARSE_FAILED,
-		                         String(first,e)));
+		if (first + 1 != last && !allEmpty(first, last)) {
+			IteratorType e = (first + 20 < last) ? first + 20 : last;
+			err(AinurState::errLabel(AinurState::ERR_PARSE_FAILED,
+			                         String(first,e)));
+		}
 	}
+
+	// Deal with macros
+	installNativeMacros();
+	expandMacrosRecursively();
 }
 
 String AinurState::ZERO_CHAR_STRING_(1, ' ');
