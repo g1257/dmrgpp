@@ -11,7 +11,7 @@ dir0:Connectors=[1.0];
 hubbardU=[0,...];
 potentialV=[0,...];
 
-string mycosine = (c:*:0.8:%t);
+string mycosine = (cos:*:0.8:%t);
 AddOnSiteHamiltonian="[zero,-0.77*\mycosine*nup, -0.91*\mycosine*nup, -0.144*\mycosine*nup, -0.144*\mycosine*nup, -0.91*\mycosine*nup, -0.77*\mycosine*nup, zero]";
 #=3, =2, =1, =0]";
 
