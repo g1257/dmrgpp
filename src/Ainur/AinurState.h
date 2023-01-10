@@ -7,6 +7,7 @@
 #include "../Matrix.h"
 #include "AinurDoubleOrFloat.h"
 #include "AinurConvert.hh"
+#include "AinurMacros.hh"
 
 namespace PsimagLite {
 
@@ -199,8 +200,6 @@ private:
 		return it - keys_.begin();
 	}
 
-
-
 	static bool isEmptyValue(String s)
 	{
 		return (s.length() == 0 || s == ZERO_CHAR_STRING_);
@@ -208,7 +207,10 @@ private:
 
 	void installNativeMacros()
 	{
-		declare("function", "AinurFromFile", "AinurFromFile");
+		for (SizeType i = 0; i < ainurMacros_.total(); ++i) {
+			const AinurMacros::NativeMacro& nativeMacro = ainurMacros_.nativeMacro(i);
+			declare(nativeMacro.type, nativeMacro.name, nativeMacro.value);
+		}
 	}
 
 	void expandMacrosRecursively()
@@ -232,6 +234,10 @@ private:
 			std::pair<bool, PsimagLite::String> macro = expandOneValue(values_[i]);
 
 			if (!macro.first) continue;
+
+			if (macro.second.size() > 0 && macro.second[0] == '!') {
+				macro.second = ainurMacros_.procNativeMacro(macro.second);
+			}
 
 			values_[i] = macro.second;
 			atLeastOneValueHasMacro = true;
@@ -298,6 +304,7 @@ private:
 	}
 
 	static String ZERO_CHAR_STRING_;
+	AinurMacros ainurMacros_;
 	VectorStringType typesSpec_;
 	VectorStringType keys_;
 	VectorStringType values_;
