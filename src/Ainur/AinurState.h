@@ -83,8 +83,11 @@ public:
 
 	void initMacros()
 	{
-		expandMacrosRecursively();
+		// install native macros first
 		installNativeMacros();
+
+		// then expand
+		expandMacrosRecursively();
 	}
 
 	void printUnused(std::ostream& os) const

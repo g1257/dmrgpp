@@ -87,7 +87,6 @@ private:
 		return (flag) ? ComplexType(real1, atof(buffer.c_str())) :
 		                ComplexType(atof(buffer.c_str()), 0);
 	}
-
 };
 
 }
