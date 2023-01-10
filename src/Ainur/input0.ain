@@ -26,4 +26,4 @@ TargetElectronsDown=8;
 #string AinurFromFile = blahblah;
 function myfunction = \AinurFromFile("function.txt");
 
-string useit = \myfunction(3.0);
+real useit = \myfunction(3.0);
