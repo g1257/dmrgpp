@@ -46,22 +46,22 @@ class AinurConvert {
 public:
 
 	template<typename T>
-	static void convertInternal(std::vector<T>& t,
-	                            String value,
-	                            typename EnableIf<Loki::TypeTraits<T>::isArith ||
-	                            IsComplexNumber<T>::True ||
-	                            TypesEqual<T, String>::True,
-	                            int>::Type = 0);
+	static void convert(std::vector<T>& t,
+	                    String value,
+	                    typename EnableIf<Loki::TypeTraits<T>::isArith ||
+	                    IsComplexNumber<T>::True ||
+	                    TypesEqual<T, String>::True,
+	                    int>::Type = 0);
 
 	template<typename T>
-	static void convertInternal(Matrix<T>& t,
-	                            String value);
+	static void convert(Matrix<T>& t,
+	                    String value);
 
 	template<typename T>
-	static void convertInternal(T& t,
-	                            String label,
-	                            typename EnableIf<Loki::TypeTraits<T>::isIntegral,
-	                            int>::Type = 0)
+	static void convert(T& t,
+	                    String label,
+	                    typename EnableIf<Loki::TypeTraits<T>::isIntegral,
+	                    int>::Type = 0)
 	{
 		try {
 			t = PsimagLite::atoi(label.c_str());
@@ -72,10 +72,10 @@ public:
 	}
 
 	template<typename T>
-	static void convertInternal(T& t,
-	                            String label,
-	                            typename EnableIf<Loki::TypeTraits<T>::isFloat,
-	                            int>::Type = 0)
+	static void convert(T& t,
+	                    String label,
+	                    typename EnableIf<Loki::TypeTraits<T>::isFloat,
+	                    int>::Type = 0)
 	{
 		try {
 			t = PsimagLite::atof(label.c_str());
@@ -84,7 +84,7 @@ public:
 		}
 	}
 
-	static void convertInternal(String& t, String label)
+	static void convert(String& t, String label)
 	{
 		SizeType l = label.size();
 		if (l > 1 && label[0] == '"' && label[l - 1] == '"') {

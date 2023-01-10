@@ -130,7 +130,7 @@ public:
 			err(errLabel(ERR_READ_NO_VALUE, label));
 
 		assert(static_cast<SizeType>(x) < typesSpec_.size());
-		AinurConvert::convertInternal(t, val);
+		AinurConvert::convert(t, val);
 		used_[x]++;
 	}
 

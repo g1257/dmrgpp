@@ -114,8 +114,8 @@ ruleRows()
 template <typename T>
 template <typename A, typename ContextType>
 void AinurConvert::ActionMatrix<T>::operator()(A& attr,
-                                             ContextType&,
-                                             bool&) const
+                                               ContextType&,
+                                               bool&) const
 {
 	SizeType rows = attr.size();
 	if (rows == 0) return;
@@ -134,8 +134,8 @@ void AinurConvert::ActionMatrix<T>::operator()(A& attr,
 template <typename T>
 template <typename A, typename ContextType>
 void AinurConvert::Action<T>::operator()(A& attr,
-                                       ContextType&,
-                                       bool&) const
+                                         ContextType&,
+                                         bool&) const
 {
 	const SizeType n = attr.size();
 	if (n == 2 && attr[1] == "...") {
@@ -169,8 +169,8 @@ void AinurConvert::Action<T>::operator()(A& attr,
 //---------
 
 template<typename T>
-void AinurConvert::convertInternal(Matrix<T>& t,
-                                 String value)
+void AinurConvert::convert(Matrix<T>& t,
+                           String value)
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
@@ -201,12 +201,12 @@ void AinurConvert::convertInternal(Matrix<T>& t,
 }
 
 template<typename T>
-void AinurConvert::convertInternal(std::vector<T>& t,
-                                 String value,
-                                 typename EnableIf<Loki::TypeTraits<T>::isArith ||
-                                 IsComplexNumber<T>::True ||
-                                 TypesEqual<T, String>::True,
-                                 int>::Type)
+void AinurConvert::convert(std::vector<T>& t,
+                           String value,
+                           typename EnableIf<Loki::TypeTraits<T>::isArith ||
+                           IsComplexNumber<T>::True ||
+                           TypesEqual<T, String>::True,
+                           int>::Type)
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
@@ -234,22 +234,22 @@ void AinurConvert::convertInternal(std::vector<T>& t,
 
 //---------
 
-template void AinurConvert::convertInternal(Matrix<DoubleOrFloatType>&,String);
+template void AinurConvert::convert(Matrix<DoubleOrFloatType>&,String);
 
-template void AinurConvert::convertInternal(Matrix<std::complex<DoubleOrFloatType> >&,
+template void AinurConvert::convert(Matrix<std::complex<DoubleOrFloatType> >&,
 String);
 
-template void AinurConvert::convertInternal(Matrix<String>&, String);
+template void AinurConvert::convert(Matrix<String>&, String);
 
-template void AinurConvert::convertInternal(std::vector<DoubleOrFloatType>&, String, int);
+template void AinurConvert::convert(std::vector<DoubleOrFloatType>&, String, int);
 
-template void AinurConvert::convertInternal(std::vector<std::complex<DoubleOrFloatType> >&,
+template void AinurConvert::convert(std::vector<std::complex<DoubleOrFloatType> >&,
 String,
 int);
 
-template void AinurConvert::convertInternal(std::vector<SizeType>&, String, int);
+template void AinurConvert::convert(std::vector<SizeType>&, String, int);
 
-template void AinurConvert::convertInternal(std::vector<int>&, String, int);
+template void AinurConvert::convert(std::vector<int>&, String, int);
 
-template void AinurConvert::convertInternal(std::vector<String>&, String, int);
+template void AinurConvert::convert(std::vector<String>&, String, int);
 } // namespace PsimagLite
