@@ -63,8 +63,8 @@ sub createMakefile
 $configContent
 
 all: libpsimaglite.a
-libpsimaglite.a: Makefile $combinedUnits AinurSpirit.o AinurState.o
-\tar rcs libpsimaglite.a $combinedUnitsModif AinurSpirit.o AinurState.o
+libpsimaglite.a: Makefile $combinedUnits AinurSpirit.o AinurConvert.o
+\tar rcs libpsimaglite.a $combinedUnitsModif AinurSpirit.o AinurConvert.o
 EOF
 
 	foreach my $unit (@units) {
@@ -78,10 +78,10 @@ print FH<<EOF;
 AinurSpirit.o: ../src/Ainur/AinurSpirit.cpp ../src/Ainur/AinurSpirit.h Makefile ../src/Ainur/AinurSpirit1.cpp
 \t\$(CXX) \$(CPPFLAGS) -c ../src/Ainur/AinurSpirit.cpp
 
-AinurState.o: ../src/Ainur/AinurState.cpp ../src/Ainur/AinurState1.cpp ../src/Ainur/AinurState.h Makefile 
-\t\$(CXX) \$(CPPFLAGS) -c ../src/Ainur/AinurState.cpp
+AinurConvert.o: ../src/Ainur/AinurConvert.cpp ../src/Ainur/AinurConvert1.cpp ../src/Ainur/AinurConvert.hh Makefile
+\t\$(CXX) \$(CPPFLAGS) -c ../src/Ainur/AinurConvert.cpp
 
-Makefile.dep: $combinedUnits2 ../src/Ainur/AinurSpirit.cpp ../src/Ainur/AinurState.cpp ../src/Ainur/AinurState1.cpp
+Makefile.dep: $combinedUnits2 ../src/Ainur/AinurSpirit.cpp ../src/Ainur/AinurConvert.cpp ../src/Ainur/AinurConvert1.cpp
 \t\$(CXX) \$(CPPFLAGS) -MM  $combinedUnits2  > Makefile.dep
 
 clean: Makefile.dep

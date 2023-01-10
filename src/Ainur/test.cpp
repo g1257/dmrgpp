@@ -15,6 +15,7 @@ void partiallyReadSomething(const PsimagLite::Ainur& ainur)
 	std::string v2;
 	ainur.readValue(v2, "useit");
 	std::cout<<v2;
+	std::cout<<std::endl;
 }
 
 int main(int argc, char** argv)

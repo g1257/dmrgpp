@@ -107,8 +107,7 @@ Ainur::Ainur(String str)
 	}
 
 	// Deal with macros
-	installNativeMacros();
-	expandMacrosRecursively();
+	initMacros();
 }
 
 String AinurState::ZERO_CHAR_STRING_(1, ' ');

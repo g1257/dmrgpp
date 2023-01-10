@@ -6,6 +6,7 @@
 #include <numeric>
 #include "../Matrix.h"
 #include "AinurDoubleOrFloat.h"
+#include "AinurConvert.hh"
 
 namespace PsimagLite {
 
@@ -26,41 +27,6 @@ public:
 		}
 	};
 
-	template<typename T>
-	struct Action {
-
-		Action(String name, std::vector<T>& t)
-		    : name_(name), t_(t)
-		{}
-
-		template <typename A, typename ContextType>
-		void operator()(A& attr,
-		                ContextType&,
-		                bool&) const;
-
-	private:
-
-		String name_;
-		std::vector<T>& t_;
-	}; // struct Action
-
-	template<typename T>
-	struct ActionMatrix {
-
-		ActionMatrix(String name, Matrix<T>& t)
-		    : name_(name), t_(t)
-		{}
-
-		template <typename A, typename ContextType>
-		void operator()(A& attr,
-		                ContextType&,
-		                bool&) const;
-
-	private:
-
-		String name_;
-		Matrix<T>& t_;
-	}; // struct ActionMatrix
 
 	enum ErrorEnum
 	{
@@ -80,7 +46,19 @@ public:
 		ZERO_CHAR_STRING_[0] = 0;
 	}
 
-	void assign(String k, String v);
+	void assign(String k, String v)
+	{
+		int x = storageIndexByName(k);
+		if (x < 0)
+			err(errLabel(ERR_PARSE_UNDECLARED, k));
+
+		assert(static_cast<SizeType>(x) < values_.size());
+
+		//if (values_[x] != "")
+		//	std::cerr<<"Overwriting label "<<k<<" with "<<v<<"\n";
+
+		values_[x] = v;
+	}
 
 	void declare(String d, String k, String v)
 	{
@@ -101,6 +79,12 @@ public:
 	void declare(String d, String k)
 	{
 		declare(d, k, ZERO_CHAR_STRING_);
+	}
+
+	void initMacros()
+	{
+		expandMacrosRecursively();
+		installNativeMacros();
 	}
 
 	void printUnused(std::ostream& os) const
@@ -146,24 +130,8 @@ public:
 			err(errLabel(ERR_READ_NO_VALUE, label));
 
 		assert(static_cast<SizeType>(x) < typesSpec_.size());
-		convertInternal(t, val);
+		AinurConvert::convertInternal(t, val);
 		used_[x]++;
-	}
-
-	void expandMacrosRecursively()
-	{
-		static const SizeType avoidInfMax = 100;
-		SizeType avoidInfCounter = 0;
-		while (expandMacros()) {
-			if (avoidInfCounter++ > avoidInfMax) {
-				err("Recursion limit of " + ttos(avoidInfMax) + " exceeded.\n");
-			}
-		}
-	}
-
-	void installNativeMacros()
-	{
-		declare("function", "AinurFromFile", "AinurFromFile");
 	}
 
 	template<typename SomeMapType>
@@ -207,25 +175,6 @@ public:
 		}
 	}
 
-	static String stringContext(std::string::iterator it,
-	                            std::string::iterator start,
-	                            std::string::iterator end,
-	                            SizeType before = 5,
-	                            SizeType after = 10)
-	{
-		std::string::iterator alpha = it;
-		SizeType counter = 0;
-		while (alpha != start && counter++ < before)
-			--alpha;
-
-		std::string::iterator omega = it;
-		counter = 0;
-		while (omega != end && counter++ < after)
-			++omega;
-
-		return String(alpha, omega);
-	}
-
 private:
 
 	int assignStorageByName(String key)
@@ -247,59 +196,27 @@ private:
 		return it - keys_.begin();
 	}
 
-	template<typename T>
-	void convertInternal(std::vector<T>& t,
-	                     String value,
-	                     typename EnableIf<Loki::TypeTraits<T>::isArith ||
-	                     IsComplexNumber<T>::True ||
-	                     TypesEqual<T, String>::True,
-	                     int>::Type = 0) const;
 
-	template<typename T>
-	void convertInternal(Matrix<T>& t,
-	                     String value) const;
-
-	template<typename T>
-	void convertInternal(T& t,
-	                     String label,
-	                     typename EnableIf<Loki::TypeTraits<T>::isIntegral,
-	                     int>::Type = 0) const
-	{
-		try {
-			t = PsimagLite::atoi(label.c_str());
-		} catch (std::exception& e) {
-			std::cerr<<"FATAL: AinurState: Label " + label + " must be an integer\n";
-			throw e.what();
-		}
-	}
-
-	template<typename T>
-	void convertInternal(T& t,
-	                     String label,
-	                     typename EnableIf<Loki::TypeTraits<T>::isFloat,
-	                     int>::Type = 0) const
-	{
-		try {
-			t = PsimagLite::atof(label.c_str());
-		} catch (...) {
-			err("FATAL: AinurState: Label " + label + " must be a real number\n");
-		}
-	}
-
-	void convertInternal(String& t, String label) const
-	{
-		SizeType l = label.size();
-		if (l > 1 && label[0] == '"' && label[l - 1] == '"') {
-			t = (l == 2) ? "" : label.substr(1,l - 2);
-			return;
-		}
-
-		t = label;
-	}
 
 	static bool isEmptyValue(String s)
 	{
 		return (s.length() == 0 || s == ZERO_CHAR_STRING_);
+	}
+
+	void installNativeMacros()
+	{
+		declare("function", "AinurFromFile", "AinurFromFile");
+	}
+
+	void expandMacrosRecursively()
+	{
+		static const SizeType avoidInfMax = 100;
+		SizeType avoidInfCounter = 0;
+		while (expandMacros()) {
+			if (avoidInfCounter++ > avoidInfMax) {
+				err("Recursion limit of " + ttos(avoidInfMax) + " exceeded.\n");
+			}
+		}
 	}
 
 	bool expandMacros()

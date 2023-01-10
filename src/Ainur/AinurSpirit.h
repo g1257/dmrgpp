@@ -92,14 +92,9 @@ public:
 
 private:
 
-	void expandMacrosRecursively()
+	void initMacros()
 	{
-		state_.expandMacrosRecursively();
-	}
-
-	void installNativeMacros()
-	{
-		state_.installNativeMacros();
+		state_.initMacros();
 	}
 
 	static bool allEmpty(IteratorType first,IteratorType last)
