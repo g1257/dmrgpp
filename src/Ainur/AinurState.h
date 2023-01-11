@@ -139,8 +139,9 @@ public:
 		int x = storageIndexByName(label);
 		if (x < 0)
 			err(errLabel(ERR_READ_UNDECLARED, label));
-		assert(static_cast<SizeType>(x) < ainurVariables_.size());
-		String val = ainurVariables_[x].value;
+
+		String val = valueAfterMacro(x);
+
 		if (isEmptyValue(val))
 			err(errLabel(ERR_READ_NO_VALUE, label));
 
@@ -211,6 +212,16 @@ private:
 	static bool isEmptyValue(String s)
 	{
 		return (s.length() == 0 || s == ZERO_CHAR_STRING_);
+	}
+
+	std::string valueAfterMacro(SizeType ind) const
+	{
+		assert(ind < ainurVariables_.size());
+
+		const AinurVariable ainurVar = ainurVariables_[ind];
+		const std::string& val = ainurVar.value;
+
+		return (ainurVar.opaque == "MACRO") ? ainurMacros_.valueFromFunction(val) : val;
 	}
 
 	void installNativeMacros()

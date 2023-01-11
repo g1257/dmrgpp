@@ -162,10 +162,36 @@ public:
 			assert(len > start);
 			SizeType rest = len - start;
 			std::string content = line.substr(start, rest);
-			return procAinurFromFile(content);
+			return addAinurFromFile(content);
 		}
 
 		throw RuntimeError("Unknown native macro for " + line + "\n");
+	}
+
+	// Expect ("function.txt") or
+	// ("function.txt")(3.0)
+	std::string valueFromFunction(const std::string& line) const
+	{
+		std::pair<std::string, std::string> nameValue = getFunctionNameValue(line);
+
+		if (nameValue.second == "") {
+			throw RuntimeError("valueFromFunction: syntax error " + line + "\n");
+		}
+
+		// return value
+		std::string functionName = nameValue.first;
+
+		// using and defining in same line not allowed
+		if (functionNameToIndex_.count(functionName) == 0) {
+			throw RuntimeError("valueFromFunction: " + functionName  + " undefined.\n");
+		}
+
+		SizeType index = functionNameToIndex_.at(functionName);
+		assert(index < ainurFunctions_.size());
+		std::string argument = AinurFunction::deleteEnclosing(nameValue.second, '(', ')');
+		double x = PsimagLite::atof(argument);
+		double y = ainurFunctions_[index](x);
+		return std::to_string(y);
 	}
 
 private:
@@ -195,35 +221,8 @@ private:
 			return std::pair<std::string, std::string>(line, "");
 		}
 
-		return std::pair<std::string, std::string>(line.substr(1, i), line.substr(i + 1, length - i - 2));
-	}
-
-	// Expect ("function.txt") or
-	// ("function.txt")(3.0)
-	std::string procAinurFromFile(const std::string& line)
-	{
-		std::pair<std::string, std::string> nameValue = getFunctionNameValue(line);
-		if (nameValue.second == "") {
-			return addAinurFromFile(line);
-		}
-
-		// return value
-		std::string functionName = nameValue.first;
-
-		// using and defining in same line
-		if (functionNameToIndex_.count(functionName) == 0) {
-			// add function first
-			addAinurFromFile(functionName);
-			// recall this function
-			return procAinurFromFile(line);
-		} else {
-			SizeType index = functionNameToIndex_.at(functionName);
-			assert(index < ainurFunctions_.size());
-			std::string argument = AinurFunction::deleteEnclosing(nameValue.second, '(', ')');
-			double x = PsimagLite::atof(argument);
-			double y = ainurFunctions_[index](x);
-			return std::to_string(y);
-		}
+		return std::pair<std::string, std::string>(line.substr(0, i + 1),
+		                                           line.substr(i + 2, length - i - 2));
 	}
 
 	std::string addAinurFromFile(const std::string& content)
