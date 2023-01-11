@@ -28,7 +28,6 @@ public:
 		}
 	};
 
-
 	enum ErrorEnum
 	{
 		ERR_PARSE_UNDECLARED,
@@ -36,6 +35,13 @@ public:
 		ERR_PARSE_FAILED,
 		ERR_READ_UNDECLARED,
 		ERR_READ_NO_VALUE
+	};
+
+	struct AinurVariable {
+		std::string key;
+		std::string value;
+		std::string type;
+		std::string opaque;
 	};
 
 	AinurState()
@@ -53,17 +59,20 @@ public:
 		if (x < 0)
 			err(errLabel(ERR_PARSE_UNDECLARED, k));
 
-		assert(static_cast<SizeType>(x) < values_.size());
+		assert(static_cast<SizeType>(x) < ainurVariables_.size());
 
 		//if (values_[x] != "")
 		//	std::cerr<<"Overwriting label "<<k<<" with "<<v<<"\n";
 
-		values_[x] = v;
+		ainurVariables_[x].value = v;
 	}
 
-	void declare(String d, String k, String v)
+	void declare(String d, String key, String v)
 	{
-		assignStorageByName(k);
+		int x = storageIndexByName(key);
+		if (x >= 0)
+			err(errLabel(ERR_PARSE_DECLARED, key));
+
 		SizeType u = 1;
 		SizeType last = d.length();
 		assert(last > 0);
@@ -72,8 +81,9 @@ public:
 			d = d.substr(0,last - 1);
 		}
 
-		typesSpec_.push_back(d);
-		values_.push_back(v);
+		AinurVariable ainurVar({key, v, d, "NORMAL"});
+		ainurVariables_.emplace_back(ainurVar);
+
 		used_.push_back(u);
 	}
 
@@ -105,21 +115,22 @@ public:
 
 		os<<"Unused keys:\n";
 
-		if (n != keys_.size())
+		if (n != ainurVariables_.size())
 			err("printUnused: internal error\n");
 
 		for (SizeType i = 0; i < n; ++i) {
 			if (used_[i] > 0) continue;
-			os<<keys_[i]<<"\n";
+			os<<ainurVariables_[i].key<<"\n";
 		}
 	}
 
 	void printAll(std::ostream& os) const
 	{
-		SizeType n = keys_.size();
-		assert(n == values_.size());
-		for (SizeType i = 0; i < n; ++i)
-			os<<keys_[i]<<" "<<values_[i]<<"\n";
+		SizeType n = ainurVariables_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			const AinurVariable& ainurVar = ainurVariables_[i];
+			os<<ainurVar.type<<" "<<ainurVar.key<<" "<<ainurVar.value<<"\n";
+		}
 	}
 
 	template<typename SomeType>
@@ -128,23 +139,27 @@ public:
 		int x = storageIndexByName(label);
 		if (x < 0)
 			err(errLabel(ERR_READ_UNDECLARED, label));
-		assert(static_cast<SizeType>(x) < values_.size());
-		String val = values_[x];
+		assert(static_cast<SizeType>(x) < ainurVariables_.size());
+		String val = ainurVariables_[x].value;
 		if (isEmptyValue(val))
 			err(errLabel(ERR_READ_NO_VALUE, label));
 
-		assert(static_cast<SizeType>(x) < typesSpec_.size());
 		AinurConvert::convert(t, val);
+
+		assert(static_cast<SizeType>(x) < used_.size());
 		used_[x]++;
 	}
 
 	template<typename SomeMapType>
 	void setMap(SomeMapType& map) const
 	{
-		const SizeType n = keys_.size();
-		assert(n == values_.size());
-		for (SizeType i = 0; i < n; ++i)
-			if (used_[i]) map[keys_[i]] = values_[i];
+		const SizeType n = ainurVariables_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			if (!used_[i]) continue;
+
+			const AinurVariable& ainurVar = ainurVariables_[i];
+			map[ainurVar.key] = ainurVar.value;
+		}
 	}
 
 	static bool verbose() { return false; }
@@ -181,23 +196,16 @@ public:
 
 private:
 
-	int assignStorageByName(String key)
-	{
-		int x = storageIndexByName(key);
-		if (x >= 0)
-			err(errLabel(ERR_PARSE_DECLARED, key));
-		keys_.push_back(key);
-		return keys_.size() - 1;
-	}
-
 	int storageIndexByName(String key) const
 	{
-		VectorStringType::const_iterator it = std::find(keys_.begin(),
-		                                                keys_.end(),
-		                                                key);
-		if (it == keys_.end())
+		auto it = std::find_if(ainurVariables_.begin(),
+		                       ainurVariables_.end(),
+		                       [&key](const AinurVariable& ainurVar)
+		{return (ainurVar.key == key);});
+
+		if (it == ainurVariables_.end())
 			return -1;
-		return it - keys_.begin();
+		return it - ainurVariables_.begin();
 	}
 
 	static bool isEmptyValue(String s)
@@ -226,12 +234,11 @@ private:
 
 	bool expandMacros()
 	{
-		const SizeType n = keys_.size();
-		assert(n == values_.size());
+		const SizeType n = ainurVariables_.size();
 		bool atLeastOneValueHasMacro = false;
 		for (SizeType i = 0; i < n; ++i) {
 			if (!used_[i]) continue;
-			std::pair<bool, PsimagLite::String> macro = expandOneValue(values_[i]);
+			std::pair<bool, PsimagLite::String> macro = expandOneValue(ainurVariables_[i].value);
 
 			if (!macro.first) continue;
 
@@ -239,7 +246,8 @@ private:
 				macro.second = ainurMacros_.procNativeMacro(macro.second);
 			}
 
-			values_[i] = macro.second;
+			ainurVariables_[i].value = macro.second;
+			ainurVariables_[i].opaque = "MACRO";
 			atLeastOneValueHasMacro = true;
 		}
 
@@ -247,7 +255,7 @@ private:
 	}
 
 	// \[a-zA-Z]+
-	std::pair<bool, PsimagLite::String> expandOneValue(PsimagLite::String value) const
+	std::pair<bool, PsimagLite::String> expandOneValue(const String& value) const
 	{
 		const SizeType n = value.length();
 		PsimagLite::String macroName;
@@ -273,8 +281,8 @@ private:
 				int x = storageIndexByName(macroName);
 				if (x < 0) err("No macro named " + macroName + "\n");
 
-				assert(static_cast<SizeType>(x) < values_.size());
-				retString += unquote(values_[x]) + c;
+				assert(static_cast<SizeType>(x) < ainurVariables_.size());
+				retString += unquote(ainurVariables_[x].value) + c;
 
 				macroName = "";
 				hasAtLeastOneMacro = true;
@@ -305,9 +313,7 @@ private:
 
 	static String ZERO_CHAR_STRING_;
 	AinurMacros ainurMacros_;
-	VectorStringType typesSpec_;
-	VectorStringType keys_;
-	VectorStringType values_;
+	std::vector<AinurVariable> ainurVariables_;
 	mutable VectorSizeType used_;
 };
 
