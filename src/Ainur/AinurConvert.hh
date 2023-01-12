@@ -2,16 +2,24 @@
 #define AINURCONVERT_HH
 #include "../Matrix.h"
 #include "../PsimagLite.h"
+#include "AinurMacros.hh"
 
 namespace PsimagLite {
+
+struct AinurVariable {
+	std::string key;
+	std::string value;
+	std::string type;
+	std::string opaque;
+};
 
 class AinurConvert {
 
 	template<typename T>
 	struct Action {
 
-		Action(String name, std::vector<T>& t)
-		    : name_(name), t_(t)
+		Action(String name, std::vector<T>& t, const AinurMacros& ainurMacros)
+		    : name_(name), t_(t), ainurMacros_(ainurMacros)
 		{}
 
 		template <typename A, typename ContextType>
@@ -23,13 +31,14 @@ class AinurConvert {
 
 		String name_;
 		std::vector<T>& t_;
+		const AinurMacros& ainurMacros_;
 	}; // struct Action
 
 	template<typename T>
 	struct ActionMatrix {
 
-		ActionMatrix(String name, Matrix<T>& t)
-		    : name_(name), t_(t)
+		ActionMatrix(String name, Matrix<T>& t, const AinurMacros& ainurMacros)
+		    : name_(name), t_(t), ainurMacros_(ainurMacros)
 		{}
 
 		template <typename A, typename ContextType>
@@ -41,28 +50,34 @@ class AinurConvert {
 
 		String name_;
 		Matrix<T>& t_;
+		const AinurMacros& ainurMacros_;
 	}; // struct ActionMatrix
 
 public:
 
-	template<typename T>
-	static void convert(std::vector<T>& t,
-	                    String value,
-	                    typename EnableIf<Loki::TypeTraits<T>::isArith ||
-	                    IsComplexNumber<T>::True ||
-	                    TypesEqual<T, String>::True,
-	                    int>::Type = 0);
+	AinurConvert(const AinurMacros& ainurMacros) : ainurMacros_(ainurMacros)
+	{}
 
 	template<typename T>
-	static void convert(Matrix<T>& t,
-	                    String value);
+	void convert(std::vector<T>& t,
+	             const AinurVariable& ainurVariable,
+	             typename EnableIf<Loki::TypeTraits<T>::isArith ||
+	             IsComplexNumber<T>::True ||
+	             TypesEqual<T, String>::True,
+	             int>::Type = 0);
 
 	template<typename T>
-	static void convert(T& t,
-	                    String label,
-	                    typename EnableIf<Loki::TypeTraits<T>::isIntegral,
-	                    int>::Type = 0)
+	void convert(Matrix<T>& t,
+	             const AinurVariable& ainurVariable);
+
+	template<typename T>
+	void convert(T& t,
+	             const AinurVariable& ainurVariable,
+	             typename EnableIf<Loki::TypeTraits<T>::isIntegral,
+	             int>::Type = 0)
 	{
+		String label = ainurMacros_.valueFromFunction(ainurVariable.value);
+
 		try {
 			t = PsimagLite::atoi(label.c_str());
 		} catch (std::exception& e) {
@@ -72,11 +87,13 @@ public:
 	}
 
 	template<typename T>
-	static void convert(T& t,
-	                    String label,
-	                    typename EnableIf<Loki::TypeTraits<T>::isFloat,
-	                    int>::Type = 0)
+	void convert(T& t,
+	             const AinurVariable& ainurVariable,
+	             typename EnableIf<Loki::TypeTraits<T>::isFloat,
+	             int>::Type = 0)
 	{
+		String label = ainurMacros_.valueFromFunction(ainurVariable.value);
+
 		try {
 			t = PsimagLite::atof(label.c_str());
 		} catch (...) {
@@ -84,8 +101,9 @@ public:
 		}
 	}
 
-	static void convert(String& t, String label)
+	void convert(String& t, const AinurVariable& ainurVariable)
 	{
+		String label = ainurMacros_.valueFromFunction(ainurVariable.value);
 		SizeType l = label.size();
 		if (l > 1 && label[0] == '"' && label[l - 1] == '"') {
 			t = (l == 2) ? "" : label.substr(1,l - 2);
@@ -115,6 +133,8 @@ private:
 
 		return String(alpha, omega);
 	}
+
+	const AinurMacros& ainurMacros_;
 };
 }
 #endif // AINURCONVERT_HH

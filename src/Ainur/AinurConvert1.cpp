@@ -33,8 +33,10 @@ void AinurConvert::ActionMatrix<T>::operator()(A& attr,
 	for (SizeType i = 0; i < rows; ++i) {
 		if (attr[i].size() != cols)
 			err("Ainur: Problem reading matrix\n");
-		for (SizeType j = 0; j < cols; ++j)
-			AinurComplex::convert(t_(i, j), attr[i][j]);
+		for (SizeType j = 0; j < cols; ++j) {
+			String attrAfter = ainurMacros_.valueFromFunction(attr[i][j]);
+			AinurComplex::convert(t_(i, j), attrAfter);
+		}
 	}
 }
 
@@ -71,20 +73,24 @@ void AinurConvert::Action<T>::operator()(A& attr,
 	}
 
 	t_.resize(n);
-	for (SizeType i = 0; i < n; ++i)
-		AinurComplex::convert(t_[i], attr[i]);
+	for (SizeType i = 0; i < n; ++i) {
+		String val = ainurMacros_.valueFromFunction(attr[i]);
+		AinurComplex::convert(t_[i], val);
+	}
 }
 
 //---------
 
 template<typename T>
 void AinurConvert::convert(Matrix<T>& t,
-                           String value)
+                           const AinurVariable& ainurVariable)
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
 	typedef std::vector<std::string> VectorStringType;
 	typedef std::vector<VectorStringType> VectorVectorVectorType;
+
+	String value = ainurVariable.value;
 
 	IteratorType it = value.begin();
 	qi::rule<IteratorType, VectorStringType(), qi::space_type> ruRows = ruleRows();
@@ -92,7 +98,7 @@ void AinurConvert::convert(Matrix<T>& t,
 	qi::rule<IteratorType, VectorVectorVectorType(), qi::space_type> full =
 	        "[" >> -(ruRows  % ",") >> "]";
 
-	ActionMatrix<T> actionMatrix("matrix", t);
+	ActionMatrix<T> actionMatrix("matrix", t, ainurMacros_);
 	bool r = qi::phrase_parse(it,
 	                          value.end(),
 	                          full [actionMatrix],
@@ -111,7 +117,7 @@ void AinurConvert::convert(Matrix<T>& t,
 
 template<typename T>
 void AinurConvert::convert(std::vector<T>& t,
-                           String value,
+                           const AinurVariable& ainurVariable,
                            typename EnableIf<Loki::TypeTraits<T>::isArith ||
                            IsComplexNumber<T>::True ||
                            TypesEqual<T, String>::True,
@@ -121,10 +127,11 @@ void AinurConvert::convert(std::vector<T>& t,
 	typedef std::string::iterator IteratorType;
 	typedef std::vector<std::string> VectorStringType;
 
+	String value = ainurVariable.value;
 	IteratorType it = value.begin();
 	qi::rule<IteratorType, VectorStringType(), qi::space_type> ruRows = ruleRows();
 
-	Action<T> actionRows("rows", t);
+	Action<T> actionRows("rows", t, ainurMacros_);
 
 	bool r = qi::phrase_parse(it,
 	                          value.end(),
@@ -143,22 +150,22 @@ void AinurConvert::convert(std::vector<T>& t,
 
 //---------
 
-template void AinurConvert::convert(Matrix<DoubleOrFloatType>&,String);
+template void AinurConvert::convert(Matrix<DoubleOrFloatType>&, const AinurVariable&);
 
 template void AinurConvert::convert(Matrix<std::complex<DoubleOrFloatType> >&,
-String);
+const AinurVariable&);
 
-template void AinurConvert::convert(Matrix<String>&, String);
+template void AinurConvert::convert(Matrix<String>&, const AinurVariable&);
 
-template void AinurConvert::convert(std::vector<DoubleOrFloatType>&, String, int);
+template void AinurConvert::convert(std::vector<DoubleOrFloatType>&, const AinurVariable&, int);
 
 template void AinurConvert::convert(std::vector<std::complex<DoubleOrFloatType> >&,
-String,
+const AinurVariable&,
 int);
 
-template void AinurConvert::convert(std::vector<SizeType>&, String, int);
+template void AinurConvert::convert(std::vector<SizeType>&, const AinurVariable&, int);
 
-template void AinurConvert::convert(std::vector<int>&, String, int);
+template void AinurConvert::convert(std::vector<int>&, const AinurVariable&, int);
 
-template void AinurConvert::convert(std::vector<String>&, String, int);
+template void AinurConvert::convert(std::vector<String>&, const AinurVariable&, int);
 } // namespace PsimagLite

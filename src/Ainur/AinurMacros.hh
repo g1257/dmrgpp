@@ -175,7 +175,7 @@ public:
 		std::pair<std::string, std::string> nameValue = getFunctionNameValue(line);
 
 		if (nameValue.second == "") {
-			throw RuntimeError("valueFromFunction: syntax error " + line + "\n");
+			return nameValue.first;
 		}
 
 		// return value
@@ -201,17 +201,17 @@ private:
 	static std::pair<std::string, std::string> getFunctionNameValue(const std::string& line)
 	{
 		SizeType length = line.size();
-		if (length < 3) {
-			throw RuntimeError("FATAL: getFunctionNameValue " + line + "\n");
+		if (length < 4) {
+			return std::pair<std::string, std::string>(line, "");
 		}
 
 		SizeType last = length - 1;
 
 		if (line[0] != '(' || line[last] != ')') {
-			throw RuntimeError("FATAL: getFunctionNameValue " + line + "\n");
+			return std::pair<std::string, std::string>(line, "");
 		}
 
-		SizeType i = 0;
+		SizeType i = 1;
 		for (; i < line.size(); ++i) {
 			if (line[i] == ')' && line[i +  1] == '(') break;
 		}

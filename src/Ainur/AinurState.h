@@ -37,13 +37,6 @@ public:
 		ERR_READ_NO_VALUE
 	};
 
-	struct AinurVariable {
-		std::string key;
-		std::string value;
-		std::string type;
-		std::string opaque;
-	};
-
 	AinurState()
 	{
 		assert(ZERO_CHAR_STRING_.length() == 1);
@@ -140,12 +133,14 @@ public:
 		if (x < 0)
 			err(errLabel(ERR_READ_UNDECLARED, label));
 
-		String val = valueAfterMacro(x);
+		assert(static_cast<SizeType>(x) < ainurVariables_.size());
 
-		if (isEmptyValue(val))
+		if (isEmptyValue(ainurVariables_[x].value))
 			err(errLabel(ERR_READ_NO_VALUE, label));
 
-		AinurConvert::convert(t, val);
+		AinurConvert ainurConvert(ainurMacros_);
+
+		ainurConvert.convert(t, ainurVariables_[x]);
 
 		assert(static_cast<SizeType>(x) < used_.size());
 		used_[x]++;
@@ -212,16 +207,6 @@ private:
 	static bool isEmptyValue(String s)
 	{
 		return (s.length() == 0 || s == ZERO_CHAR_STRING_);
-	}
-
-	std::string valueAfterMacro(SizeType ind) const
-	{
-		assert(ind < ainurVariables_.size());
-
-		const AinurVariable ainurVar = ainurVariables_[ind];
-		const std::string& val = ainurVar.value;
-
-		return (ainurVar.opaque == "MACRO") ? ainurMacros_.valueFromFunction(val) : val;
 	}
 
 	void installNativeMacros()

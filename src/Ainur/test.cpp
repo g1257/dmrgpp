@@ -16,6 +16,13 @@ void partiallyReadSomething(const PsimagLite::Ainur& ainur)
 	ainur.readValue(v2, "useit");
 	std::cout<<v2;
 	std::cout<<std::endl;
+
+	std::vector<double> v3;
+	ainur.readValue(v3, "myvector");
+	std::cout<<v3.size()<<"\n";
+	if (v3.size() == 2) {
+		std::cout<<v3[0]<<" "<<v3[1]<<"\n";
+	}
 }
 
 int main(int argc, char** argv)
