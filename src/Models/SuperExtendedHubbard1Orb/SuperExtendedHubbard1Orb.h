@@ -75,6 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file SuperExtendedHubbard1Orb.h
  *
  *  Hubbard + V^n_{ij} n_i n_j + V^S_{ij} S_i S_j + V^P_{ij} P^dag_i P_j
+ *  + interaction-assisted hopping
  *
  */
 #ifndef EXTENDED_SUPER_HUBBARD_1ORB_H
@@ -127,6 +128,7 @@ public:
 	                    io),
 	      modelParameters_(io),
 	      superGeometry_(superGeometry),
+	      extension_(extension),
 	      extendedHubbard_(solverParams, io, superGeometry, extension)
 	{}
 
@@ -179,12 +181,19 @@ protected:
 
 		OpsLabelType& p = this->createOpsLabel("pair");
 
-		for (SizeType i = 0; i < block.size(); ++i)
-			setPairi(p, cm, i);
+		setPairi(p, cm);
 
 		this->makeTrackable("splus");
 		this->makeTrackable("sz");
 		this->makeTrackable("pair");
+
+		if (extension_ == "InteractionAssistedHopping") {
+			// cdn_i == c^\dagger_{i \bar{sigma} n_{i sigma}
+			OpsLabelType& cdn = this->createOpsLabel("cdn");
+			for (SizeType i = 0; i < 2; ++i) {
+				setCdn(cdn, cm, i);
+			}
+		}
 	}
 
 	void fillModelLinks()
@@ -215,7 +224,7 @@ protected:
 		          splus,
 		          'C',
 		          [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5;},
-		          typename ModelTermType::Su2Properties(2, -1, 2));
+		typename ModelTermType::Su2Properties(2, -1, 2));
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		OpForLinkType sz("sz");
@@ -225,19 +234,62 @@ protected:
 		          sz,
 		          'N',
 		          [isSu2](SparseElementType& value) { if (isSu2) value = -value; },
-		          typename ModelTermType::Su2Properties(2, 0.5, 1));
+		typename ModelTermType::Su2Properties(2, 0.5, 1));
 
 		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
 		OpForLinkType pair("pair");
 
 		pp.push(pair, 'N', pair, 'C', typename ModelTermType::Su2Properties(2, 1, 2));
+
+		if (extension_ == "InteractionAssistedHopping") {
+			addInteractionAssistedHopping();
+		}
 	}
 
 private:
 
-	void setPairi(OpsLabelType& p,
-	              const VectorOperatorType& cm,
-	              SizeType) const
+	// c^\dagger_{i \bar{sigma} n_{i sigma} c_{j \bar{sigma}}
+	void addInteractionAssistedHopping()
+	{
+		assert(extension_ == "InteractionAssistedHopping");
+		ModelTermType& iah = ModelBaseType::createTerm("InteractionAssistedHopping");
+
+		OpForLinkType cdn0("cdn", 0);
+		OpForLinkType cdn1("cdn", 1);
+		OpForLinkType cup("c", 0);
+		OpForLinkType cdown("c", 1);
+
+		iah.push(cdn0, 'N', cup, 'N');
+		iah.push(cdn1, 'N', cdown, 'N');
+	}
+
+	// cdn_i == c^\dagger_{i \bar{sigma} n_{i sigma}
+	void setCdn(OpsLabelType& p,
+	            const VectorOperatorType& cm,
+	            SizeType sigma) const
+	{
+		typename OperatorType::Su2RelatedType su2related;
+
+
+
+		std::string nSigmaStr = (sigma == 0) ? "nup" : "ndown";
+		SparseMatrixType nSigmaOp = this->naturalOperator(nSigmaStr, 0, 0).getCRS();
+		OperatorType cDaggerBarSigma = cm[1 - sigma];
+		cDaggerBarSigma.dagger();
+
+		SparseMatrixType cdn;
+		multiply(cdn, cDaggerBarSigma.getCRS(), nSigmaOp);
+
+		OperatorType myOp(cdn,
+		                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+		                  typename OperatorType::PairType(0,0),
+		                  1,
+		                  su2related);
+		p.push(myOp);
+	}
+
+
+	void setPairi(OpsLabelType& p, const VectorOperatorType& cm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		SparseMatrixType pair;
@@ -275,6 +327,7 @@ private:
 
 	ParametersModelHubbard<RealType, QnType>  modelParameters_;
 	const SuperGeometryType& superGeometry_;
+	PsimagLite::String extension_;
 	ExtendedHubbard1OrbType extendedHubbard_;
 };	//class ExtendedSuperHubbard1Orb
 
