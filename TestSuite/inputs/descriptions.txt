@@ -185,6 +185,7 @@ the observe code.
 Figure* (if any): Figure 1
 Page* where more or less this feature is used: Page 4
 [* Refers to published version.]
+470) Interaction-assisted Hopping (Nitin)
 501) AddOnSiteHamiltonian= with %t example
 #550 -- 599 AKLT
 550) AKLT
