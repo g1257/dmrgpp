@@ -192,8 +192,6 @@ public:
 			setBasis(bosonicBasis, SiteType::SITE_BOSON);
 			SparseMatrixType tmpMatrix = findPhononadaggerMatrix(bosonicBasis);
 			addPotentialPhononV(hmatrix, tmpMatrix, actualSite);
-			addPotentialPhononDV(hmatrix, tmpMatrix, actualSite);
-
 		}
 	}
 
@@ -472,26 +470,6 @@ private:
 //		fullMatrixToCrsMatrix(temp,cm);
 //		transposeConjugate(operatorMatrix, temp);
 		return operatorMatrix;
-	}
-
-	void addPotentialPhononDV(SparseMatrixType& hmatrix,
-	                         const SparseMatrixType& amatrix,
-	                         SizeType actualIndexOfSite) const
-	{
-		if (modelParameters_.numberphonons == 0) return;
-		SparseMatrixType nphon = displacementOp(amatrix);
-		SizeType iUp = actualIndexOfSite;
-		assert(iUp < modelParameters_.potentialDV.size());
-		hmatrix += modelParameters_.potentialDV[iUp] * nphon;
-	}
-
-	SparseMatrixType displacementOp(const SparseMatrixType& c) const
-	{
-		SparseMatrixType tmpMatrix = c;
-		SparseMatrixType cdagger;
-		transposeConjugate(cdagger,c);
-		tmpMatrix+=cdagger;
-		return tmpMatrix;
 	}
 
 	static SiteType determineKindOfSiteFromSite(SizeType site)
