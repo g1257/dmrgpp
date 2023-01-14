@@ -530,15 +530,22 @@ public:
 		VectorWithOffsetType& v = aoeNonConst.targetVectorsNonConst(0);
 
 		// operators in the one-site basis:
+		SizeType leftSize = targetHelper_.lrs().left().block().size();
+		assert(leftSize > 0);
+		SizeType site2 = targetHelper_.lrs().left().block()[leftSize - 1];
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorQnType q;
-		targetHelper_.model().setOperatorMatrices(creationMatrix, q, block1);
+		targetHelper_.model().setOperatorMatrices(creationMatrix, q, std::vector<SizeType>(site2));
 
 		typename BasisWithOperatorsType::VectorBoolType signs(q.size());
 		for (SizeType i = 0; i < q.size(); ++i) signs[i] = q[i].oddElectrons;
 
 		assert(0 < block1.size());
 		const SizeType splitSize = targetHelper_.model().hilbertSize(block1[0]);
+
+		q.clear();
+		creationMatrix.clear();
+		targetHelper_.model().setOperatorMatrices(creationMatrix, q, block1);
 
 		FermionSign fs(targetHelper_.lrs().left(), signs);
 		for (SizeType j=0;j<creationMatrix.size();j++) {

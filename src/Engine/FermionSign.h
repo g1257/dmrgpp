@@ -102,6 +102,7 @@ public:
 			err("FermionSign: Problem\n");
 
 		SizeType n = basis.oldSigns().size();
+		assert(basis.oldSigns().size() % signs.size() == 0);
 		SizeType nx = basis.oldSigns().size()/signs.size();
 		PackIndicesType pack(nx);
 		signs_.resize(nx);

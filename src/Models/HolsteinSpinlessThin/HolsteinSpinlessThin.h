@@ -395,8 +395,7 @@ private:
 		typedef std::pair<SizeType,SizeType> PairType;
 
 		qns.resize(basis.size() + offset, QnType::zero());
-		static const bool isCanonical = true;
-		VectorSizeType other((isCanonical) ? 2 : 1, 0);
+		VectorSizeType other(1);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 
 			PairType jmpair(0,0);
@@ -408,7 +407,6 @@ private:
 				SizeType electronsUp = HilbertSpaceHubbardType::getNofDigits(basis[i], 0);
 				other[0] = electronsUp;
 
-				if (isCanonical) other[1] = electronsUp;
 				sign = other[0] & 1;
 			}
 
