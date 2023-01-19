@@ -137,7 +137,8 @@ public:
 	      superGeometry_(geometry),
 	      ioOut_(ioOut),
 	      progress_("Truncation"),
-	      error_(0.0)
+	      error_(0.0),
+	      keptStatesPrev_(0)
 	{
 		firstCall_ = true;
 		parameters_.truncationControl.print(std::cout, progress_);
@@ -377,9 +378,17 @@ private:
 	                      const TruncationControlType& TruncationControl,
 	                      const VectorRealType& eigs)
 	{
+		if (keptStates < keptStatesPrev_) {
+			std::cerr<<"WARNING: Nominal kept states have decreased from "<<keptStatesPrev_;
+			std::cerr<<" to "<<keptStates<<"\n";
+		}
+
+		keptStatesPrev_ = keptStates;
+
 		dumpEigs(eigs);
 
 		SizeType newKeptStates = computeKeptStates(keptStates, TruncationControl, eigs);
+
 		SizeType statesToRemove = 0;
 		if (eigs.size()>=newKeptStates)
 			statesToRemove = eigs.size() - newKeptStates;
@@ -575,6 +584,7 @@ private:
 	TruncationCache leftCache_;
 	TruncationCache rightCache_;
 	VectorSizeType counterVector_;
+	SizeType keptStatesPrev_;
 	static bool firstCall_;
 }; // class Truncation
 
