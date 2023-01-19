@@ -120,11 +120,14 @@ public:
 		assert(isHermitian(matrixStored_[0],true));
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"fullHamiltonian has rank="<<matrixStored_[0].rows();
+		SizeType rows = matrixStored_[0].rows();
+		msg<<"fullHamiltonian has rank="<<rows;
 		msg<<" nonzeros="<<matrixStored_[0].nonZeros();
 		progress_.printline(msgg, std::cout);
 		if (debugMatrix)
 			printFullMatrix(matrixStored_[0],"matrix",1);
+		if (rows > 5000)
+			std::cerr<<"WARNING: MatrixVectorStored being used for a large run!\n";
 	}
 
 	SizeType rows() const { return matrixStored_[pointer_].rows(); }
