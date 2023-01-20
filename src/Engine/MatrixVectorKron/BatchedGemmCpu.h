@@ -1,14 +1,18 @@
-#ifndef BATCHEDGEMM_H
-#define BATCHEDGEMM_H
+#ifndef BATCHED_GEMM_CPU_H
+#define BATCHED_GEMM_CPU_H
+// Don't include this file directly; use BatchedGemmInclude.hh
+
 #include "Vector.h"
 #include <numeric>
 #include "BLAS.h"
 #include "ProgressIndicator.h"
+#include "Matrix.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
 template<typename InitKronType>
-class BatchedGemm2 {
+class BatchedGemmCpu {
 
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
@@ -28,7 +32,7 @@ class BatchedGemm2 {
 
 public:
 
-	BatchedGemm2(const InitKronType& initKron)
+	BatchedGemmCpu(const InitKronType& initKron)
 	    : initKron_(initKron), progress_("BatchedGemm")
 	{
 		if (!enabled()) return;
@@ -309,4 +313,4 @@ private:
 	VectorSizeType rightPatchSize_;
 };
 }
-#endif // BATCHEDGEMM_H
+#endif // BATCHED_GEMM_CPU_H

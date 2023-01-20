@@ -7,6 +7,7 @@
 #include "AnsiColors.h"
 #include <sstream>
 #include "../GitRevision.h"
+#include "MatrixVectorKron/BatchedGemmInclude.hh"
 
 class Provenance {
 
@@ -28,9 +29,9 @@ public:
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg<<appName<<"\x1b[38;5;120";
 		msg<<" [features "<<DMRGPP_VERSION<<"] "<<PsimagLite::AnsiColor::reset;
-		PsimagLite::String ctOpts("");
+		PsimagLite::String ctOpts(Dmrg::BatchedGemmInclude::info());
 #ifdef USE_SHORT
-		ctOpts += "SHORT ";
+		ctOpts += " SHORT ";
 #endif
 #ifdef USE_FLOAT
 		ctOpts += "FLOAT ";
@@ -43,9 +44,6 @@ public:
 #endif
 #ifdef USE_BOOST
 		ctOpts += "BOOST ";
-#endif
-#ifdef PLUGIN_SC
-		ctOpts += "PLUGIN_SC ";
 #endif
 #ifndef NDEBUG
 		ctOpts += "DEBUG ";

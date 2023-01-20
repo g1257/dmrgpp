@@ -86,11 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsimagLite.h"
 #include "ProgressIndicator.h"
 #include "LoadBalancerWeights.h"
-#ifdef PLUGIN_SC
-#include "BatchedGemmPluginSc.h"
-#else
-#include "BatchedGemm2.h"
-#endif
+#include "BatchedGemmInclude.hh"
 
 namespace Dmrg {
 
@@ -107,7 +103,7 @@ class KronMatrix {
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename GenIjPatchType::BasisType BasisType;
-	typedef BatchedGemm2<InitKronType> BatchedGemmType;
+	typedef BATCHED_GEMM<InitKronType> BatchedGemmType;
 
 public:
 

@@ -82,6 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../PsimagLite/src/Options.h"
 #include "Geometry/Geometry.h"
 #include "ProgramGlobals.h"
+#include "MatrixVectorKron/BatchedGemmInclude.hh"
 
 namespace Dmrg {
 
@@ -482,9 +483,7 @@ public:
 		if (val.find("BatchedGemm") != PsimagLite::String::npos) {
 			if (notMvk)
 				err("FATAL: BatchedGemm only with MatrixVectorKron\n");
-#ifndef PLUGIN_SC
-			err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
-#endif
+			BatchedGemmInclude::failIfNotSupported();
 		}
 	}
 

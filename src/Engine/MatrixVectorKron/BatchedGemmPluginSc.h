@@ -1,5 +1,7 @@
-#ifndef BATCHEDGEMM_H
-#define BATCHEDGEMM_H
+#ifndef BATCHED_GEMM_PLUGIN_SC_H
+#define BATCHED_GEMM_PLUGIN_SC_H
+// Don't include this file directly; use BatchedGemmInclude.hh
+
 #include <cassert>
 #include <complex>
 #include "Matrix.h"
@@ -12,7 +14,7 @@ typedef PsimagLite::Vector<int>::Type VectorIntType;
 namespace Dmrg {
 
 template<typename InitKronType>
-class BatchedGemm2 {
+class BatchedGemmPluginSc {
 
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
@@ -23,13 +25,13 @@ class BatchedGemm2 {
 	typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
 	typedef typename GenIjPatchType::BasisType BasisType;
-	typedef BatchedGemm<ComplexOrRealType> BatchedGemmPluginScType;
+	typedef BatchedGemm<ComplexOrRealType> BatchedGemmType;
 
 	static const typename InitKronType::WhatBasisEnum DUMMY = InitKronType::OLD;
 
 public:
 
-	BatchedGemm2(const InitKronType& initKron)
+	BatchedGemmPluginSc(const InitKronType& initKron)
 	    :  progress_("BatchedGemm"), initKron_(initKron), batchedGemm_(0)
 	{
 		if (!enabled()) return;
@@ -89,7 +91,7 @@ public:
 			progress_.printline(msg,std::cout);
 		}
 
-		batchedGemm_ = new BatchedGemmPluginScType(nC,
+		batchedGemm_ = new BatchedGemmType(nC,
 		                                           npatches,
 		                                           &(pLeft_[0]),
 		        &(pRight_[0]),
@@ -103,7 +105,7 @@ public:
 		bptr = 0;
 	}
 
-	~BatchedGemm2()
+	~BatchedGemmPluginSc()
 	{
 		delete batchedGemm_;
 		batchedGemm_ = 0;
@@ -149,9 +151,9 @@ private:
 		return const_cast<ComplexOrRealType*>(&(mat.dense()(0,0)));
 	}
 
-	BatchedGemm2(const BatchedGemm2&);
+	BatchedGemmPluginSc(const BatchedGemmPluginSc&) = delete;
 
-	BatchedGemm2& operator=(const BatchedGemm2&);
+	BatchedGemmPluginSc& operator=(const BatchedGemmPluginSc&) = delete;
 
 	PsimagLite::ProgressIndicator progress_;
 	const InitKronType& initKron_;
@@ -161,4 +163,4 @@ private:
 	mutable VectorMatrixType garbage_;
 };
 }
-#endif // BATCHEDGEMM_H
+#endif // BATCHED_GEMM_PLUGIN_SC_H
