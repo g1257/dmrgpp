@@ -38,6 +38,12 @@ public:
 		errorMessage();
 	}
 
+	std::string resolve(const std::string& str) const
+	{
+		errorMessage();
+		return "";
+	}
+
 	template<typename SomeMapType>
 	void setMap(SomeMapType&) const
 	{

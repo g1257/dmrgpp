@@ -34,6 +34,8 @@ Please see full open source license included in file LICENSE.
 #include <type_traits>
 #include <cctype>
 #include <cstdint>
+#include <algorithm>
+
 #ifdef USE_CUSTOM_ALLOCATOR
 #include "MemoryCpu.h"
 #endif

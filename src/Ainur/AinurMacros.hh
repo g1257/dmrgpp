@@ -178,6 +178,10 @@ public:
 			return nameValue.first;
 		}
 
+		if (!isAfloat(nameValue.second)) {
+			return line;
+		}
+
 		// return value
 		std::string functionName = nameValue.first;
 
@@ -222,7 +226,7 @@ private:
 		}
 
 		return std::pair<std::string, std::string>(line.substr(0, i + 1),
-		                                           line.substr(i + 2, length - i - 2));
+		                                           line.substr(i + 2, length - i - 3));
 	}
 
 	std::string addAinurFromFile(const std::string& content)

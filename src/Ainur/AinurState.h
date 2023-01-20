@@ -190,6 +190,11 @@ public:
 		}
 	}
 
+	std::string resolve(const std::string& str) const
+	{
+		return ainurMacros_.valueFromFunction(str);
+	}
+
 private:
 
 	int storageIndexByName(String key) const

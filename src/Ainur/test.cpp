@@ -17,11 +17,20 @@ void partiallyReadSomething(const PsimagLite::Ainur& ainur)
 	std::cout<<v2;
 	std::cout<<std::endl;
 
-	std::vector<double> v3;
+	std::vector<std::string> v3;
 	ainur.readValue(v3, "myvector");
-	std::cout<<v3.size()<<"\n";
-	if (v3.size() == 2) {
-		std::cout<<v3[0]<<" "<<v3[1]<<"\n";
+	double t = 0.3;
+	std::vector<double> v3double(v3.size());
+	for (SizeType i = 0; i < v3.size(); ++i) {
+		PsimagLite::String str = v3[i];
+		PsimagLite::replaceAll(str, "%t", std::to_string(t));
+		str = ainur.resolve(str);
+		v3double[i] = PsimagLite::atof(str);
+	}
+
+	std::cout<<v3double.size()<<"\n";
+	if (v3double.size() == 2) {
+		std::cout<<v3double[0]<<" "<<v3double[1]<<"\n";
 	}
 }
 

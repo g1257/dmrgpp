@@ -26,6 +26,6 @@ TargetElectronsDown=8;
 #string AinurFromFile = blahblah;
 function myfunction = \AinurFromFile("function.txt");
 
-real useit = \myfunction(3.0);
+real useit = \myfunction(%t);
 
 vector myvector = [\useit, \useit];

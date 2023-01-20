@@ -90,6 +90,11 @@ public:
 		state_.setMap(map);
 	}
 
+	std::string resolve(const std::string& str) const
+	{
+		return state_.resolve(str);
+	}
+
 private:
 
 	void initMacros()
