@@ -56,7 +56,8 @@ public:
 	SizeType size() const { return 1; }
 
 	PairMetaOpForConnection finalIndices(const VectorSizeType& hItems,
-	                                     ProgramGlobals::ConnectionEnum type) const
+	                                     ProgramGlobals::ConnectionEnum type,
+	                                     SizeType rightBlockSize) const
 	{
 		assert(hItems.size() == 4);
 		constexpr int NON_LOCAL = -1;
@@ -79,7 +80,8 @@ public:
 		if (smaxOrEmin_ & 1) {
 			// (s - 1, s) x (s + 1, s + 2)
 			MetaOpForConnection left{NON_LOCAL, encodeNonLocalSys(smaxOrEmin_ - 1, 2), 'N'};
-			MetaOpForConnection right{NON_LOCAL, encodeNonLocalEnv(smaxOrEmin_ + 1, 2), 'N'};
+			SizeType start = rightBlockSize + smaxOrEmin_ - 2;
+			MetaOpForConnection right{NON_LOCAL, encodeNonLocalEnv(start, 2), 'N'};
 			return PairMetaOpForConnection(left, right);
 		}
 

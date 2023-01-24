@@ -42,7 +42,8 @@ public:
 	}
 
 	virtual PairMetaOpForConnection finalIndices(const VectorSizeType&,
-	                                             ProgramGlobals::ConnectionEnum) const
+	                                             ProgramGlobals::ConnectionEnum,
+	                                             SizeType) const
 	{
 		throw PsimagLite::RuntimeError("SuperOpHelperBase::finalIndices4sites\n");
 	}

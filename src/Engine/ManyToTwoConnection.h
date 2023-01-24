@@ -35,7 +35,9 @@ public:
 			pairMetaOps_.first.modifier = oneLink.mods[0];
 			pairMetaOps_.second.modifier = oneLink.mods[1];
 		} else {
-			PairMetaOpForConnection finals = superOpHelper.finalIndices(hItems, type);
+			PairMetaOpForConnection finals = superOpHelper.finalIndices(hItems,
+			                                                            type,
+			                                                            lrs.right().block().size());
 			convertNonLocals(finals, type);
 			pairMetaOps_.first.modifier = 'N'; // fixme
 			pairMetaOps_.second.modifier = 'N'; // fixme

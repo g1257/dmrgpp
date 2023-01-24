@@ -242,16 +242,17 @@ protected:
 			assert(nsuper > 0);
 			SizeType last = lrs.super().block()[nsuper - 1];
 			assert(last > 0);
+			assert(lrs.right().block().size() == 1);
 			if (last & 1) {
 				// 0 x 1 (or 2 x 3 etc.)
 				const OperatorType& op1 = lrs.left().localOperator(last - 1);
-				const OperatorType& op2 = lrs.left().localOperator(last);
+				const OperatorType& op2 = lrs.right().localOperator(0);
 				newNonLocals.push_back(op1*op2);
 			} else {
 				// (0,1) x (2) (or (2,3)x(4) etc.)
 				SizeType lastNonLocal = last/2 - 1;
 				const OperatorType& op1 = lrs.left().getSuperByIndex(lastNonLocal);
-				const OperatorType& op2 = lrs.left().localOperator(last);
+				const OperatorType& op2 = lrs.right().localOperator(0);
 				newNonLocals.push_back(op1*op2);
 			}
 		} else {
