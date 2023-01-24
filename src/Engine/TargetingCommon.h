@@ -535,7 +535,7 @@ public:
 		SizeType site2 = targetHelper_.lrs().left().block()[leftSize - 1];
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorQnType q;
-		targetHelper_.model().setOperatorMatrices(creationMatrix, q, std::vector<SizeType>(site2));
+		targetHelper_.model().setOperatorMatrices(creationMatrix, q, std::vector<SizeType>(1, site2));
 
 		typename BasisWithOperatorsType::VectorBoolType signs(q.size());
 		for (SizeType i = 0; i < q.size(); ++i) signs[i] = q[i].oddElectrons;
