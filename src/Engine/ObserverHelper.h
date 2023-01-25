@@ -134,6 +134,12 @@ public:
 	      numberOfSites_(0),
 	      lrsStorage_(PairLeftRightSuperSizeType(nullptr, 0))
 	{
+		bool hasConcurrency = (PsimagLite::Concurrency::codeSectionParams.npthreads > 1 ||
+		                       PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo > 1);
+		if (hasConcurrency && readOnDemand_)
+			err(std::string("ReadOnDemand does not support threading. ") +
+			    "Set Threads=1 in input, or use -S 1 in command line.\n");
+
 		typename BasisWithOperatorsType::VectorBoolType odds;
 		io_.read(odds, "OddElectronsOneSite");
 		SizeType n = odds.size();
@@ -329,8 +335,8 @@ private:
 		            lrs.right().block()[0] - 1 : lrs.right().block()[0];
 		}
 
-	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
-	{
+		bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
+		{
 		PsimagLite::String prefix = "Serializer";
 		SizeType total = 0;
 		io_.read(total, prefix + "/Size");
