@@ -270,13 +270,6 @@ public:
 
 	ProgramGlobals::DirectionEnum direction() const { return direction_; }
 
-	SizeType site() const
-	{
-		assert(lrs_);
-		return (direction_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
-		            lrs_->right().block()[0] - 1 : lrs_->right().block()[0];
-		}
-
 	void transform(SparseMatrixType& ret, const SparseMatrixType& O) const
 	{
 		transform(ret, O, transform_);
@@ -293,6 +286,7 @@ public:
 		m.toSparse(ret);
 	}
 
+	// This is only called from DMRG and so lrs_ has never been freed
 	SizeType centerOfOrthogonality() const
 	{
 		assert(lrs_);

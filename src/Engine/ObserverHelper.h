@@ -269,7 +269,7 @@ public:
 	{
 		if (timeSerializerV_.size() == 0) {
 			checkIndex(ind);
-			return dSerializerV_[ind]->site();
+			return this->siteInternal(this->leftRightSuper(ind), this->direction(ind));
 		}
 
 		assert(ind < timeSerializerV_.size());
@@ -321,6 +321,13 @@ public:
 	}
 
 private:
+
+	SizeType siteInternal(const LeftRightSuperType& lrs,
+	                      ProgramGlobals::DirectionEnum direction) const
+	{
+		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
+		            lrs.right().block()[0] - 1 : lrs.right().block()[0];
+		}
 
 	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
 	{
