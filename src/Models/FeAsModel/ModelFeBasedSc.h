@@ -135,7 +135,8 @@ public:
 
 	ModelFeBasedSc(const SolverParamsType& solverParams,
 	               InputValidatorType& io,
-	               const SuperGeometryType& superGeometry)
+	               const SuperGeometryType& superGeometry,
+	               const PsimagLite::String& extension)
 	    : ModelBaseType(solverParams, superGeometry, io),
 	      reinterpretX_(6),
 	      reinterpretY_(9),
@@ -146,9 +147,16 @@ public:
 	                   modelParameters_.orbitals,
 	                   2*modelParameters_.orbitals),
 	      reinterpret_(!modelParameters_.jzSymmetry),
-	      feAsJzSymmetry_(modelParameters_.jzSymmetry)
+	      feAsJzSymmetry_(modelParameters_.jzSymmetry),
+	      spinDependentHopping_(false)
 	{
 		ProgramGlobals::init(modelParameters_.orbitals*superGeometry_.numberOfSites() + 1);
+
+		if (!extension.empty() && extension != "SpinDependentHopping") {
+			err("ModelFeBasedSc only accepts SpinDependentHopping\n");
+		}
+
+		spinDependentHopping_ = (extension == "SpinDependentHopping");
 
 		PsimagLite::String tspAlgo = "";
 		try {
@@ -473,9 +481,13 @@ public:
 		ModelTermType& hop = ModelBaseType::createTerm("hopping");//(A)
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
-				OpForLinkType c1("C", orb1 + spin*orbitals, orb1); // (B)
+				SizeType dof1 = orb1 + spin*orbitals;
+				SizeType hop1 = (spinDependentHopping_) ? dof1 : orb1;
+				OpForLinkType c1("C", dof1, hop1); // (B)
 				for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
-					OpForLinkType c2("C", orb2 + spin*orbitals, orb2); // (C)
+					SizeType dof2 = orb2 + spin*orbitals;
+					SizeType hop2 = (spinDependentHopping_) ? dof2 : orb2;
+					OpForLinkType c2("C", orb2 + spin*orbitals, hop2); // (C)
 
 					hop.push(c1,
 					         'N',
@@ -1394,6 +1406,7 @@ private:
 	VectorQnType qq_;
 	VectorOperatorType creationMatrix_;
 	FeAsJzSymmetryType feAsJzSymmetry_;
+	bool spinDependentHopping_;
 }; //class ModelFeBasedSc
 } // namespace Dmrg
 /*@}*/

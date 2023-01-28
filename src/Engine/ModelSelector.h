@@ -165,10 +165,14 @@ public:
 			PsimagLite::String tmp = (name_.length() == 27) ? ""
 			                                                : name_.substr(27, name_.length() - 27);
 			model_ = new ModelHubbardExtSuperType(solverParams, io, geometry, tmp);
-		} else if (name_ == "FeAsBasedSc") {
-			model_ = new FeBasedScType(solverParams,io,geometry);
-		} else if (name_ == "FeAsBasedScExtended") {
-			model_ = new FeBasedScExtType(solverParams,io,geometry);
+		} else if (name_.substr(0, 11) == "FeAsBasedSc") {
+			PsimagLite::String tmp = (name_.length() == 11) ? ""
+			                                                : name_.substr(11, name_.length() - 11);
+			model_ = new FeBasedScType(solverParams, io, geometry, tmp);
+		} else if (name_.substr(0, 19) == "FeAsBasedScExtended") {
+			PsimagLite::String tmp = (name_.length() == 19) ? ""
+			                                                : name_.substr(19, name_.length() - 19);
+			model_ = new FeBasedScExtType(solverParams, io, geometry, tmp);
 		} else if (name_ == "Immm") {
 			model_ = new ImmmType(solverParams,io,geometry);
 		} else if (name_ == "TjMultiOrb") {

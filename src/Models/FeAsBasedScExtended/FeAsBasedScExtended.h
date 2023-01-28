@@ -123,10 +123,11 @@ public:
 
 	FeAsBasedScExtended(const SolverParamsType& solverParams,
 	                    InputValidatorType& io,
-	                    const SuperGeometryType& geometry)
+	                    const SuperGeometryType& geometry,
+	                    const PsimagLite::String& extension)
 	    : ModelBaseType(solverParams, geometry, io),
 	      modelParameters_(io),
-	      modelFeAs_(solverParams,io,geometry),
+	      modelFeAs_(solverParams, io, geometry, extension),
 	      orbitals_(modelParameters_.orbitals)
 	{}
 
