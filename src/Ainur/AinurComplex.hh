@@ -76,7 +76,7 @@ private:
 
 			if (isSqrtMinus1) {
 				flag = true;
-				real1 = atof(buffer.c_str());
+				real1 = (buffer == "") ? 0 : atof(buffer.c_str());
 				buffer = "";
 				continue;
 			}

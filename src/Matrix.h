@@ -1053,9 +1053,9 @@ expIpi(Matrix<T>& A)
 			std::complex<RT> sum = 0;
 			for (SizeType k = 0; k < n; ++k) {
 				const RT arg = eigs[k]*M_PI;
-				sum += PsimagLite::conj(A(k, i)) *
+				sum += PsimagLite::conj(A(i, k)) *
 				        std::complex<RT>(cos(arg), sin(arg)) *
-				        A(k, j);
+				        A(j, k);
 			}
 
 			result(i, j) = sum;
