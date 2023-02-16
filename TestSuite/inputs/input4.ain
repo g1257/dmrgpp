@@ -14,9 +14,8 @@ Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
 OutputFile="data4";
 InfiniteLoopKeptStates=64;
 FiniteLoops=[
-	[7, 100, 0],
-	[-7, 100, 0],
-	[-7, 100, 0]];
+	[@auto, 100, 0],
+	[@auto, 100, 0]];
 TargetElectronsUp=8;
 TargetElectronsDown=8;
 GsWeight=0.1;

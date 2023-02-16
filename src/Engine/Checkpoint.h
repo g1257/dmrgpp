@@ -499,6 +499,8 @@ private:
 
 		for (SizeType i = 0; i < finiteLoop.size(); ++i)  {
 
+			bool last = (i + 1 == finiteLoop.size());
+
 			// naive location:
 			int delta = finiteLoop[i].stepLength();
 			x += delta;
@@ -507,7 +509,7 @@ private:
 			bool b1 = (checkPoint || (i > 0));
 			if (b1 && delta*prevDeltaSign < 0) {
 				x += prevDeltaSign;
-				if (x != 1 && (static_cast<SizeType>(x) + 2) != totalSites)
+				if (x != 1 && (static_cast<SizeType>(x) + 2) != totalSites && !last)
 					err("Loops need to go all the way to the left or to the right\n");
 			}
 
