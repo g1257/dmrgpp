@@ -193,6 +193,8 @@ protected:
 			for (SizeType i = 0; i < 2; ++i) {
 				setCdn(cdn, cm, i);
 			}
+
+			this->makeTrackable("cdn");
 		}
 	}
 
@@ -269,8 +271,6 @@ private:
 	            SizeType sigma) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
-
-
 
 		std::string nSigmaStr = (sigma == 0) ? "nup" : "ndown";
 		SparseMatrixType nSigmaOp = this->naturalOperator(nSigmaStr, 0, 0).getCRS();
