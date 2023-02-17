@@ -259,8 +259,8 @@ private:
 		OpForLinkType cup("c", 0);
 		OpForLinkType cdown("c", 1);
 
-		iah.push(cdn0, 'N', cup, 'N');
-		iah.push(cdn1, 'N', cdown, 'N');
+		iah.push(cdn0, 'N', cdown, 'N');
+		iah.push(cdn1, 'N', cup, 'N');
 	}
 
 	// cdn_i == c^\dagger_{i \bar{sigma} n_{i sigma}
