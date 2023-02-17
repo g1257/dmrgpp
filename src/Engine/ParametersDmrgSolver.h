@@ -478,8 +478,8 @@ struct ParametersDmrgSolver {
 	}
 
 	void readFiniteLoops(InputValidatorType& io,
-	                            VectorFiniteLoopType& vfl,
-	                            const TruncationControlType& truncationC,
+	                     VectorFiniteLoopType& vfl,
+	                     const TruncationControlType& truncationC,
 	                     int lastSite) const
 	{
 		if (io.version() < io.versionAinur()) {
@@ -494,9 +494,9 @@ struct ParametersDmrgSolver {
 	}
 
 	void readFiniteLoops_(InputValidatorType& io,
-	                             VectorFiniteLoopType& vfl,
-	                             const VectorStringType& tmpVec,
-	                             const TruncationControlType& truncationC) const
+	                      VectorFiniteLoopType& vfl,
+	                      const VectorStringType& tmpVec,
+	                      const TruncationControlType& truncationC) const
 	{
 		for (SizeType i = 0; i < tmpVec.size(); i += 3) {
 			typename PsimagLite::Vector<int>::Type xTmp(2);
@@ -512,16 +512,20 @@ struct ParametersDmrgSolver {
 	}
 
 	void readFiniteLoops_(InputValidatorType& io,
-	                             VectorFiniteLoopType& vfl,
-	                             const MatrixStringType& tmpMat,
-	                             const TruncationControlType& truncationC,
+	                      VectorFiniteLoopType& vfl,
+	                      const MatrixStringType& tmpMat,
+	                      const TruncationControlType& truncationC,
 	                      int lastSite) const
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
-		std::cout<<"FiniteLoops=[";
+		bool latticeIsOdd = (numberOfSites & 1);
+
 		typedef AlgebraicStringToNumber<FieldType> AlgebraicStringToNumberType;
 		AlgebraicStringToNumberType algebraicStringToNumber("FiniteLoops", numberOfSites);
+
+		std::cout<<"FiniteLoopLengths=[";
+
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
 			int length = (tmpMat(i, 0) == "@auto") ? autoNumber(i, numberOfSites, lastSite)
 			                                       : algebraicStringToNumber.
@@ -529,42 +533,66 @@ struct ParametersDmrgSolver {
 			SizeType m = PsimagLite::atoi(tmpMat(i, 1));
 			FiniteLoopType fl(length, m, tmpMat(i, 2), truncationC);
 			vfl.push_back(fl);
+			if (lastSite >= 0) {
+				lastSite += length;
+				if (latticeIsOdd && lastSite == 1)
+					lastSite = 0;
+			}
+
+			std::cout<<length;
+			if (i + 1 < tmpMat.rows()) {
+				std::cout<<", ";
+			}
 		}
+
+		std::cout<<"];\n";
 
 		readFiniteLoopsRepeat(io, vfl);
 	}
 
-	int autoNumber(SizeType ind, SizeType numberOfSites, int& lastSite) const
+	int autoNumber(SizeType ind, SizeType numberOfSites, int lastSite) const
+	{
+		// if lastSite < 0 then this isn't called from checkpoint
+		// so it doesn't matter as it will be overwritten later
+		if (lastSite < 0) return lastSite;
+
+		return (ind == 0) ? autoNumberFirst(numberOfSites, lastSite)
+		                  : autoNumberAfterFirst(ind, numberOfSites, lastSite);
+	}
+
+	int autoNumberFirst(SizeType numberOfSites, SizeType lastSite) const
 	{
 		bool isRestart = this->options.isSet("restart");
 		bool allinsystem = this->options.isSet("geometryallinsystem");
 		if (isRestart || allinsystem) {
-			// if lastSite < 0 then this isn't called from checkpoint
-			// so it doesn't matter as it will be overwritten later
-			if (lastSite < 0) return lastSite;
 
-			if (lastSite != 1 && (static_cast<SizeType>(lastSite) + 2) != numberOfSites)
+			SizeType oneOrTwo = (numberOfSites & 1) ? 1 : 2;
+			if (lastSite != 1 && (lastSite + oneOrTwo) != numberOfSites)
 				err("@auto: Internal error; please report this problem\n");
 
 			int x = (numberOfSites - 2);
-			if (static_cast<SizeType>(lastSite) + 2 == numberOfSites) {
+			if (lastSite + oneOrTwo == numberOfSites) {
 				x *= (-1);
-				lastSite = 1;
-			} else {
-				lastSite = numberOfSites - 2;
 			}
 
 			return x;
-		}
-
-		SizeType x = (numberOfSites - 2);
-		if (ind == 0) {
-			SizeType y = x;
+		} else {
+			SizeType y = (numberOfSites - 2);
 			if (y & 1) ++y;
 			return y/2;
 		}
+	}
 
-		return (ind & 1) ? -x : x;
+	int autoNumberAfterFirst(SizeType ind, SizeType numberOfSites, SizeType lastSite) const
+	{
+		assert(ind > 0);
+		assert(numberOfSites >= 2);
+		SizeType x = (numberOfSites - 2);
+		if (x & 1) --x;
+		if (lastSite != x && lastSite != 0)
+			err("autoNumberAfterFirst: Internal error, please report to DMRG++ mailing list\n");
+
+		return (lastSite == 0) ? x : -x;
 	}
 
 	static void readFiniteLoopsRepeat(InputValidatorType& io,

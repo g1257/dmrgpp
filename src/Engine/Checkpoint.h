@@ -494,8 +494,8 @@ private:
 	                              bool checkPoint) const
 	{
 		int x = lastSite;
-
-		if (finiteLoop[0].stepLength() < 0 && !checkPoint) ++x;
+		bool isLatticeOdd = (totalSites & 1);
+		if (finiteLoop[0].stepLength() < 0 && !checkPoint && !isLatticeOdd) ++x;
 
 		for (SizeType i = 0; i < finiteLoop.size(); ++i)  {
 
@@ -508,7 +508,7 @@ private:
 			// take care of bounces:
 			bool b1 = (checkPoint || (i > 0));
 			if (b1 && delta*prevDeltaSign < 0) {
-				x += prevDeltaSign;
+				if (!isLatticeOdd) x += prevDeltaSign;
 				if (x != 1 && (static_cast<SizeType>(x) + 2) != totalSites && !last)
 					err("Loops need to go all the way to the left or to the right\n");
 			}
