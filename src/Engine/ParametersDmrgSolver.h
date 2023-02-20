@@ -474,7 +474,16 @@ struct ParametersDmrgSolver {
 
 		truncationControl.read(io, keptStatesInfinite, options.isSet("twositedmrg"));
 
-		readFiniteLoops(io, finiteLoop, truncationControl, -1);
+		bool isRestart = this->options.isSet("restart");
+		int lastSite = -1;
+		if (!isRestart) {
+			SizeType numberOfSites = 0;
+			io.readline(numberOfSites, "TotalNumberOfSites=");
+			bool isAllInSys = this->options.isSet("geometryallinsystem");
+			lastSite = (isAllInSys) ? numberOfSites - 1 : numberOfSites/2 - 1;
+		}
+
+		readFiniteLoops(io, finiteLoop, truncationControl, lastSite);
 	}
 
 	void readFiniteLoops(InputValidatorType& io,
