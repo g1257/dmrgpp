@@ -340,6 +340,18 @@ public:
 		for (SizeType i=0;i<data_.size();i++) data_[i]=val;
 	}
 
+	void setToIdentity()
+	{
+		if (nrow_ != ncol_) {
+			throw RuntimeError("setToIdentity called on a non-square matrix\n");
+		}
+
+		this->setTo(0);
+		for (SizeType i = 0; i < nrow_; ++i) {
+				this->operator()(i, i) = 1;
+		}
+	}
+
 	void send(int root,int tag,MPI::CommType mpiComm)
 	{
 		MPI::send(nrow_,root,tag,mpiComm);
