@@ -169,6 +169,14 @@ public:
 			data_[i].setTo(value);
 	}
 
+	void setToIdentity()
+	{
+		this->setTo(0);
+		SizeType n = data_.size();
+		for (SizeType i = 0; i < n; ++i)
+			data_[i].setToIdentity();
+	}
+
 	void operator+=(const BlockDiagonalMatrix& m)
 	{
 		mustBeSquare("operator+=");

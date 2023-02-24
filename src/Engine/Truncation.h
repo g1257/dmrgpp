@@ -281,7 +281,7 @@ private:
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg<<"SolverOptions=nodmrgtransform, setting transform to identity";
 			progress_.printline(msgg, std::cout);
-			cache.transform.setTo(1.0);
+			cache.transform.setToIdentity();
 		}
 
 		rSprime = pBasis;
