@@ -96,7 +96,7 @@ public:
 		bool hasEntangler = false;
 		typename Real<ComplexOrRealType>::Type entangler = 0;
 
-		try {	
+		try {
 			io.readline(entangler, "GeometryEntangler=");
 			hasEntangler = true;
 		} catch (std::exception&) {}
@@ -111,12 +111,7 @@ public:
 			io.read(matrix_, "Connectors");
 		}
 
-		if (matrix_.rows() != matrix_.cols())
-			std::cerr<<"WARNING: (LongRange) Connectors matrix isn't square\n";
-
-		if (matrix_.rows()%linSize != 0)
-			throw RuntimeError("FATAL: (LongRange) Connectors matrix " +
-			                   String("isn't divisible by number of sites\n"));
+		checkConnectors(matrix_, linSize_);
 
 		orbitals_ = matrix_.rows()/linSize;
 
@@ -219,6 +214,49 @@ private:
 		for (SizeType i = 0; i < n; ++i)
 			for (SizeType j = 0; j < n; ++j)
 				matrix_(i, j) = (i == j) ? 0 : value;
+	}
+
+	static void checkConnectors(const MatrixType& matrix, SizeType linSize)
+	{
+		PsimagLite::String str;
+		if (matrix.rows() != matrix.cols())
+			str = "LongRange: Connectors matrix isn't square\n";
+
+		if (matrix.rows()%linSize != 0)
+			str += "LongRange: Connectors matrix isn't divisible by number of sites\n";
+
+		if (hasDiagonal(matrix)) {
+			str += "LongRange: Connectors matrix has non-zero diagonal value(s)\n";
+		}
+
+		if (hasLowerTriangle(matrix)) {
+			str += "LongRange: Connectors matrix has non-zero(es) in lower triangle\n";
+		}
+
+		if (str.empty()) return;
+		throw RuntimeError(str);
+	}
+
+	static bool hasDiagonal(const MatrixType& matrix)
+	{
+		SizeType n = matrix.rows();
+		if (n != matrix.cols()) return true;
+		for (SizeType i = 0; i < n; ++i) {
+			if (PsimagLite::norm(matrix(i, i)) != 0) return true;
+		}
+
+		return false;
+	}
+
+	static bool hasLowerTriangle(const MatrixType& matrix)
+	{
+		for (SizeType i = 0; i < matrix.rows(); ++i) {
+			for (SizeType j = 0; j < i; ++j) {
+				if (PsimagLite::norm(matrix(i, j)) != 0) return true;
+			}
+		}
+
+		return false;
 	}
 
 	SizeType linSize_;
