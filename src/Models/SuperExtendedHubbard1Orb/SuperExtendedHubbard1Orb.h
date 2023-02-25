@@ -263,6 +263,12 @@ private:
 
 		iah.push(cdn0, 'N', cdown, 'N');
 		iah.push(cdn1, 'N', cup, 'N');
+
+
+		// Because we only consider i<j we need to add the j,i connections
+		// modifier doesn't seem to be needed for fermion sign (?)
+		iah.push(cdown, 'N', cdn0, 'N');
+		iah.push(cup, 'N', cdn1, 'N');
 	}
 
 	// cdn_i == c^\dagger_{i \bar{sigma} n_{i sigma}
