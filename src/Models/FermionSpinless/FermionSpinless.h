@@ -346,7 +346,7 @@ protected:
 	{
 		const SizeType localSymms = ModelBaseType::targetQuantum().sizeOfOther();
 		if (localSymms == 0) {
-			if (hasDelta_) {
+			if (!hasDelta_) {
 				PsimagLite::String msg(__FILE__);
 				msg += ": You should be using one local symmetry, not zero\n";
 				std::cerr<<msg;
