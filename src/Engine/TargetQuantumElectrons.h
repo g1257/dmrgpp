@@ -248,6 +248,20 @@ private:
 			throw PsimagLite::RuntimeError(msg);
 		}
 
+		try {
+			std::string parity;
+			io.readline(parity, "TargetParity=");
+			if (ready != 0) {
+				err("TargetParity cannot be used if you provide TargetElectrons*\n");
+			}
+
+			if (parity != "even" && parity != "odd") {
+				err("TargetParity must be either even or odd, not " + parity + "\n");
+			}
+
+			qn.oddElectrons = (parity == "odd");
+		} catch (std::exception&) {}
+
 		bool flag = false;
 		try {
 			readNumberOrExpression(io, "TargetExtra" + label + "=");
