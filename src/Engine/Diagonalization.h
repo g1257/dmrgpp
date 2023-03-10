@@ -270,15 +270,7 @@ private:
 		if (oldEnergy_.size() != totalSectors)
 			oldEnergy_.resize(totalSectors);
 
-		for (SizeType j = 0; j < totalSectors; ++j) {
-
-			energySaved[j].resize(numberOfExcited);
-
-			if (oldEnergy_[j].size() != numberOfExcited)
-				oldEnergy_[j].resize(numberOfExcited);
-
-			vecSaved[j].resize(numberOfExcited);
-		}
+		resizeSavedVectors(energySaved, vecSaved, numberOfExcited);
 
 		const bool isVwoS = (VectorWithOffsetType::name() == "vectorwithoffsets");
 		VectorVectorType onlyForVwoS;
@@ -380,6 +372,19 @@ private:
 
 		} // end sectors
 
+		calcGsEnergy(sectors, energySaved, vecSaved, lrs);
+
+		target.set(vecSaved, sectors, lrs.super());
+		energies = energySaved;
+	}
+
+	void calcGsEnergy(const VectorSizeType& sectors,
+	                  const VectorVectorRealType& energySaved,
+	                  const VectorVectorVectorType& vecSaved,
+	                  const LeftRightSuperType& lrs)
+	{
+		SizeType totalSectors = sectors.size();
+
 		// calc gs energy
 		if (verbose_ && PsimagLite::Concurrency::root())
 			std::cerr<<"About to calc gs energy\n";
@@ -427,9 +432,23 @@ private:
 			msg4<<" for numberOfExcited="<<parameters_.numberOfExcited;
 			progress_.printline(msgg4, std::cout);
 		}
+	}
 
-		target.set(vecSaved, sectors, lrs.super());
-		energies = energySaved;
+	void resizeSavedVectors(VectorVectorRealType& energySaved,
+	                        VectorVectorVectorType& vecSaved,
+	                        SizeType numberOfExcited)
+	{
+		SizeType totalSectors = energySaved.size();
+		assert(vecSaved.size() == totalSectors);
+		for (SizeType j = 0; j < totalSectors; ++j) {
+
+			energySaved[j].resize(numberOfExcited);
+
+			if (oldEnergy_[j].size() != numberOfExcited)
+				oldEnergy_[j].resize(numberOfExcited);
+
+			vecSaved[j].resize(numberOfExcited);
+		}
 	}
 
 	/** Diagonalise the i-th block of the matrix, return its eigenvectors
@@ -709,7 +728,7 @@ private:
 	// FIXME TODO: Write two versions: an unscaled one and an scaled one
 	bool passSymmetryConstraints(const QnType& qn, SizeType superSize, SizeType matrixSize) const
 	{
-        //const SizeType latticeSize = model_.superGeometry().numberOfSites();
+		//const SizeType latticeSize = model_.superGeometry().numberOfSites();
 		PsimagLite::String predicate = parameters_.findSymmetrySector;
 
 		const SizeType total = qn.other.size();
