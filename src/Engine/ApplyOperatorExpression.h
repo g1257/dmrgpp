@@ -129,6 +129,8 @@ public:
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef typename PsimagLite::Vector<typename
 	PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
+	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
 	                        SizeType indexNoAdvance)
@@ -163,7 +165,7 @@ public:
 		}
 	}
 
-	virtual void initPsi(SizeType nsectors, SizeType nexcited)
+	void initPsi(SizeType nsectors, SizeType nexcited)
 	{
 		if (psi_.size() > 0) {
 			bool flag = true;
@@ -318,28 +320,40 @@ public:
 	}
 
 	template<typename SomeBasisType>
-	void setPsi(SizeType sectorIndex,
-	            SizeType excitedIndex,
-	            VectorType& v,
-	            const SomeBasisType& basis,
-	            const VectorSizeType& sectors)
+	void setPsi(VectorVectorVectorType& inV,
+	            const VectorSizeType& sectors,
+	            const SomeBasisType& someBasis,
+	            SizeType nexcited)
 	{
-		if (psi_.size() == 0) {
-			psi_.resize(sectors.size());
-			const SizeType nexcited = targetHelper_.model().params().numberOfExcited;
-			for (SizeType i = 0; i < psi_.size(); ++i)
-				psi_[i].resize(nexcited);
+		const SizeType nsectors = sectors.size();
+
+		assert(nsectors > 0);
+
+		assert(nexcited > 0);
+
+		if (nsectors != inV.size())
+			err("FATAL: inV.size == " + ttos(inV.size()) + " but params.excited.size= "
+			    + ttos(nsectors) + "\n");
+
+		this->initPsi(nsectors, nexcited);
+
+		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+			if (inV[sectorIndex].size() != nexcited)
+				err("Expected inV[" + ttos(sectorIndex) + "].size == " +
+				    ttos(nexcited) + " but found " + ttos(inV[sectorIndex].size()) +
+				    " instead\n");
+
+			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+
+				if (!psi_[sectorIndex][excitedIndex]) {
+					psi_[sectorIndex][excitedIndex] = new VectorWithOffsetType;
+				}
+
+				psi_[sectorIndex][excitedIndex]->set(inV[sectorIndex][excitedIndex],
+				                                     sectorIndex,
+				                                     someBasis);
+			}
 		}
-
-		assert(sectorIndex < sectors.size());
-		const SizeType sector = sectors[sectorIndex];
-
-		assert(sectorIndex < psi_.size());
-		assert(excitedIndex < psi_[sectorIndex].size());
-
-		if (!psi_[sectorIndex][excitedIndex])
-			psi_[sectorIndex][excitedIndex] = new VectorWithOffsetType;
-		psi_[sectorIndex][excitedIndex]->set(v, sector, basis);
 	}
 
 	void writePsi(PsimagLite::IoSelector::Out& io, PsimagLite::String prefix) const
@@ -863,7 +877,7 @@ private:
 			const SizeType nexcited = psi_[i].size();
 			for (SizeType j = 0; j < nexcited; ++j) {
 				delete psi_[i][j];
-				psi_[i][j] = 0;
+				psi_[i][j] = nullptr;
 			}
 		}
 	}

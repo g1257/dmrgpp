@@ -458,6 +458,7 @@ public:
 
 				for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 					effectiveTargets.push_back(psi[sectorIndex][excitedIndex]);
+					assert(psi[sectorIndex][excitedIndex]);
 					pushOneTarget(*(psi[sectorIndex][excitedIndex]), x++, dir1, dir2);
 					++psiTargets;
 				}

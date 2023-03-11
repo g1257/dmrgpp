@@ -189,7 +189,6 @@ private:
 	{
 		const SizeType total = lrs.super().partition() - 1;
 		SizeType sum = 0;
-		const bool findSymmetrySector = (parameters_.findSymmetrySector != "");
 
 		for (SizeType j = 0; j < quantumSector_.size(); ++j) {
 			for (SizeType i = 0; i < total; ++i) {
@@ -203,7 +202,7 @@ private:
 
 				const SizeType bs = lrs.super().partition(i + 1) - lrs.super().partition(i);
 
-				if (findSymmetrySector) {
+				if (!parameters_.findSymmetrySector.empty()) {
 					if (!passSymmetryConstraints(qn, lrs.super().block().size(), bs))
 						continue;
 				} else {
@@ -374,6 +373,24 @@ private:
 
 		calcGsEnergy(sectors, energySaved, vecSaved, lrs);
 
+		if (!parameters_.findSymmetrySector.empty()) {
+			constexpr SizeType excitedIndex = 0;
+			SizeType lowestSectorIndex = findLowestSectorIndex(energySaved, vecSaved);
+			assert(lowestSectorIndex < sectors.size());
+			assert(0 < sectors.size());
+
+			sectors[0] = sectors[lowestSectorIndex];
+			sectors.resize(1);
+
+			assert(energySaved.size() > 0);
+			energySaved[0][excitedIndex] = energySaved[lowestSectorIndex][excitedIndex];
+			energySaved.resize(1);
+
+			assert(vecSaved.size() > 0);
+			vecSaved[0][excitedIndex] = vecSaved[lowestSectorIndex][excitedIndex];
+			vecSaved.resize(1);
+		}
+
 		target.set(vecSaved, sectors, lrs.super());
 		energies = energySaved;
 	}
@@ -449,6 +466,43 @@ private:
 
 			vecSaved[j].resize(numberOfExcited);
 		}
+	}
+
+	SizeType findLowestSectorIndex(const VectorVectorRealType& energySaved,
+	                               const VectorVectorVectorType& vecSaved) const
+	{
+		constexpr SizeType excitedIndex =  0;
+
+		SizeType totalSectors = energySaved.size();
+		assert(totalSectors == vecSaved.size());
+		if (totalSectors == 0) {
+			err("FindSymmetrySector requires sectors > 0\n");
+		}
+
+		assert(energySaved[0].size() > 0);
+		SizeType lowestSectorIndex = 0;
+		RealType lowestEnergy = energySaved[lowestSectorIndex][excitedIndex];
+		for (SizeType j = 1; j < totalSectors; ++j) {
+			SizeType nexcited = energySaved[j].size();
+			assert(vecSaved[j].size() == nexcited);
+			if (nexcited > 1) {
+				err("FindSymmetrySector only for nexcited==1\n");
+			}
+
+			if (nexcited == 0) {
+				std::string warnStr = "FindSymmetrySector with nexcited=0\n";
+				std::cerr<<warnStr;
+				std::cout<<warnStr;
+				continue;
+			}
+
+			if (lowestEnergy > energySaved[j][excitedIndex]) {
+				lowestEnergy = energySaved[j][excitedIndex];
+				lowestSectorIndex = j;
+			}
+		}
+
+		return lowestSectorIndex;
 	}
 
 	/** Diagonalise the i-th block of the matrix, return its eigenvectors

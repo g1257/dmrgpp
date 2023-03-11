@@ -194,32 +194,10 @@ public:
 	                 const VectorSizeType& sectors,
 	                 const BasisType& someBasis)
 	{
-		const SizeType nsectors = sectors.size();
-		const SizeType nexcited = model_.params().numberOfExcited;
-
-		assert(nsectors > 0);
-
-		assert(nexcited > 0);
-
-		if (nsectors != inV.size())
-			err("FATAL: inV.size == " + ttos(inV.size()) + " but params.excited.size= "
-			    + ttos(nsectors) + "\n");
-
-		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-			if (inV[sectorIndex].size() != nexcited)
-				err("Expected inV[" + ttos(sectorIndex) + "].size == " +
-				    ttos(nexcited) + " but found " + ttos(inV[sectorIndex].size()) +
-				    " instead\n");
-
-			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
-
-				commonTargeting_.aoeNonConst().setPsi(sectorIndex,
-				                                      excitedIndex,
-				                                      inV[sectorIndex][excitedIndex],
-				                                      someBasis,
-				                                      sectors);
-			}
-		}
+		commonTargeting_.aoeNonConst().setPsi(inV,
+		                                      sectors,
+		                                      someBasis,
+		                                      model_.params().numberOfExcited);
 	}
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
