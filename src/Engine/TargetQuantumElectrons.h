@@ -250,13 +250,13 @@ private:
 
 		try {
 			std::string parity;
-			io.readline(parity, "TargetParity=");
+			io.readline(parity, "TargetFermionicParity=");
 			if (ready != 0) {
-				err("TargetParity cannot be used if you provide TargetElectrons*\n");
+				err("TargetFermionicParity cannot be used if you provide TargetElectrons*\n");
 			}
 
 			if (parity != "even" && parity != "odd") {
-				err("TargetParity must be either even or odd, not " + parity + "\n");
+				err("TargetFermionicParity must be either even or odd, not " + parity + "\n");
 			}
 
 			qn.oddElectrons = (parity == "odd");

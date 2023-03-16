@@ -216,7 +216,7 @@ public:
 		knownLabels_.push_back("AnisotropyD");
 		knownLabels_.push_back("FindSymmetrySector");
 		knownLabels_.push_back("AddOnSiteHamiltonian");
-		knownLabels_.push_back("TargetParity");
+		knownLabels_.push_back("TargetFermionicParity");
 
 		for (SizeType i = 0; i < 10; ++i)
 			knownLabels_.push_back("Term" + ttos(i));
@@ -285,7 +285,7 @@ public:
 		str += "string AddOnSiteHamiltonian;\n";
 		str += "vector MagneticFieldX;\n";
 		str += "vector MagneticFieldZ;\n";
-		str += "string TargetParity;\n";
+		str += "string TargetFermionicParity;\n";
 
 		return str;
 	}
