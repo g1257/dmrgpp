@@ -266,9 +266,9 @@ private:
 
 
 		// Because we only consider i<j we need to add the j,i connections
-		// modifier doesn't seem to be needed for fermion sign (?)
-		iah.push(cdown, 'N', cdn0, 'N');
-		iah.push(cup, 'N', cdn1, 'N');
+		auto valueModifer = [](SparseElementType& value) { value *= -1;};
+		iah.push(cdown, 'N', cdn0, 'N', valueModifer);
+		iah.push(cup, 'N', cdn1, 'N', valueModifer);
 	}
 
 	// cdn_i == c^\dagger_{i \bar{sigma} n_{i sigma}
@@ -340,4 +340,3 @@ private:
 } // namespace Dmrg
 /*@}*/
 #endif // EXTENDED_SUPER_HUBBARD_1ORB_H
-
