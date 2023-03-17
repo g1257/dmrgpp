@@ -349,8 +349,9 @@ public:
 					psi_[sectorIndex][excitedIndex] = new VectorWithOffsetType;
 				}
 
+				assert(sectorIndex < sectors.size());
 				psi_[sectorIndex][excitedIndex]->set(inV[sectorIndex][excitedIndex],
-				                                     sectorIndex,
+				                                     sectors[sectorIndex],
 				                                     someBasis);
 			}
 		}
