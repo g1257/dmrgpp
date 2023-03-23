@@ -692,10 +692,19 @@ private:
 	{
 		H5::DataSpace *dataspace = new H5::DataSpace(ndims, dims); // create new dspace
 		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->createDataSet(name,
-		                                                                typeToH5<SomeType>(),
-		                                                                *dataspace,
-		                                                                dsCreatPlist));
+		H5::DataSet* dataset = nullptr;
+		try {
+			dataset = new H5::DataSet(hdf5file_->createDataSet(name,
+			                                                   typeToH5<SomeType>(),
+			                                                   *dataspace,
+			                                                   dsCreatPlist));
+		} catch (H5::Exception& e) {
+			std::cerr<<"H5 Exception createDataSet starts <-------------\n";
+			std::cerr<<e.getDetailMsg()<<"\n";
+			std::cerr<<"H5 Exception createDataSet ends   <-------------\n";
+			return;
+		}
+
 		dataset->write(ptr, typeToH5<SomeType>());
 		delete dataset;
 		delete dataspace;
