@@ -678,17 +678,12 @@ private:
 			std::cerr<<"Cannot unlink "<<name<<"\n";
 		}
 
-		try {
-			internalWrite<SomeType>(name, ptr, dims, ndims);
-		} catch (...) {
-			return false;
-		}
 
-		return true;
+		return internalWrite<SomeType>(name, ptr, dims, ndims);
 	}
 
 	template<typename SomeType>
-	void internalWrite(String name, const void* ptr, hsize_t dims[], SizeType ndims)
+	bool internalWrite(String name, const void* ptr, hsize_t dims[], SizeType ndims)
 	{
 		H5::DataSpace *dataspace = new H5::DataSpace(ndims, dims); // create new dspace
 		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
@@ -702,12 +697,13 @@ private:
 			std::cerr<<"H5 Exception createDataSet starts <-------------\n";
 			std::cerr<<e.getDetailMsg()<<"\n";
 			std::cerr<<"H5 Exception createDataSet ends   <-------------\n";
-			return;
+			return false;
 		}
 
 		dataset->write(ptr, typeToH5<SomeType>());
 		delete dataset;
 		delete dataspace;
+		return true;
 	}
 
 	void writeCanary()
