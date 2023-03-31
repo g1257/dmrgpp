@@ -91,7 +91,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template<typename LeftRightSuperType_,
          typename VectorWithOffsetType_,
-         typename OptionsType_>
+         typename OptionsType_,
+         typename OneSiteSpacesType_>
 class WaveFunctionTransfFactory {
 
 	typedef PsimagLite::IoSelector IoType;
@@ -113,15 +114,22 @@ public:
 	typedef typename WaveStructCombinedType::VectorMatrixType VectorMatrixType;
 	typedef typename WaveStructCombinedType::VectorQnType VectorQnType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef WaveFunctionTransfBase<WaveStructCombinedType, VectorWithOffsetType, OptionsType_>
+	using OneSiteSpacesType = OneSiteSpacesType_;
+	typedef WaveFunctionTransfBase<WaveStructCombinedType,
+	VectorWithOffsetType,
+	OptionsType_,
+	OneSiteSpacesType_>
 	WaveFunctionTransfBaseType;
-	typedef WaveFunctionTransfLocal<WaveStructCombinedType, VectorWithOffsetType, OptionsType_>
+	typedef WaveFunctionTransfLocal<WaveStructCombinedType,
+	VectorWithOffsetType,
+	OptionsType_,
+	OneSiteSpacesType_>
 	WaveFunctionTransfLocalType;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
 	typedef typename WaveStructCombinedType::WaveStructSvdType WaveStructSvdType;
 
 	template<typename SomeParametersType>
-	WaveFunctionTransfFactory(SomeParametersType& params, SizeType volumeOfSite0)
+	WaveFunctionTransfFactory(SomeParametersType& params)
 	    : isEnabled_(!(params.options.isSet("nowft"))),
 	      wftOptions_(ProgramGlobals::DirectionEnum::INFINITE,
 	                  params.options,
@@ -157,9 +165,7 @@ public:
 			}
 		}
 
-		wftImpl_=new WaveFunctionTransfLocalType(waveStructCombined_,
-		                                         wftOptions_,
-		                                         volumeOfSite0);
+		wftImpl_=new WaveFunctionTransfLocalType(waveStructCombined_, wftOptions_);
 	}
 
 	~WaveFunctionTransfFactory()
@@ -214,7 +220,7 @@ public:
 	void setInitialVector(VectorWithOffsetType& dest,
 	                      const VectorWithOffsetType& src,
 	                      const LeftRightSuperType& lrs,
-	                      const VectorSizeType& nk) const
+	                      const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		bool allow=false;
 		switch (wftOptions_.dir) {
@@ -242,7 +248,7 @@ public:
 			if (b) std::cerr<<"norm="<<x<<"\n";
 			assert(!b);
 #endif
-			createVector(dest,src,lrs,nk);
+			createVector(dest, src, lrs, oneSiteSpaces);
 		} else {
 			createRandomVector(dest);
 		}
@@ -417,14 +423,14 @@ private:
 	void createVector(VectorWithOffsetType& psiDest,
 	                  const VectorWithOffsetType& psiSrc,
 	                  const LeftRightSuperType& lrs,
-	                  const VectorSizeType& nk) const
+	                  const OneSiteSpacesType& oneSiteSpaces) const
 	{
 
 		RealType norm1 = norm(psiSrc);
 		if (norm1 < 1e-5)
 			std::cerr<<"WFT Factory: norm1 = " << norm1 << " < 1e-5\n";
 
-		wftImpl_->transformVector(psiDest, psiSrc, lrs, nk);
+		wftImpl_->transformVector(psiDest, psiSrc, lrs, oneSiteSpaces);
 
 		RealType norm2 = norm(psiDest);
 		PsimagLite::OstringStream msgg(std::cout.precision());

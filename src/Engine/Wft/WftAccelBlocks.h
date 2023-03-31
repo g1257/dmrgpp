@@ -25,6 +25,7 @@ class WftAccelBlocks {
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
 	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
+	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
 
 	class ParallelWftInBlocks {
 
@@ -554,7 +555,7 @@ public:
 	                         const VectorWithOffsetType& psiSrc,
 	                         SizeType i0src,
 	                         const LeftRightSuperType& lrs,
-	                         const VectorSizeType& nk) const
+	                         const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		if (lrs.left().block().size() < 2)
 			err("Bounce!?\n");
@@ -605,12 +606,12 @@ public:
 	                        const VectorWithOffsetType& psiSrc,
 	                        SizeType i0src,
 	                        const LeftRightSuperType& lrs,
-	                        const VectorSizeType& nk) const
+	                        const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		if (lrs.right().block().size() < 2)
 			err("Bounce!?\n");
 
-		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
+		SizeType volumeOfNk = oneSiteSpaces.hilbertMain(); // CHECK!
 		MatrixType ws;
 		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toDense(ws);
 

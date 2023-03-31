@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "Intent.h"
 #include "Checkpoint.h"
+#include "OneSiteSpaces.hh"
 
 namespace Dmrg {
 
@@ -113,8 +114,11 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef typename BasisType::QnType QnType;
-	typedef WaveFunctionTransfFactory<LeftRightSuperType, VectorWithOffsetType, OptionsType>
-	WaveFunctionTransfType;
+	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
+	using WaveFunctionTransfType = WaveFunctionTransfFactory<LeftRightSuperType,
+	VectorWithOffsetType,
+	OptionsType,
+	OneSiteSpacesType>;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;
@@ -237,7 +241,7 @@ public:
 
 	// legacy thing for vectorwithoffsets
 	virtual void initialGuess(VectorVectorType& initialVector,
-	                          const VectorSizeType& block,
+	                          const OneSiteSpacesType& oneSiteSpaces,
 	                          bool noguess,
 	                          const VectorSizeType& compactedWeights,
 	                          const VectorSizeType& sectors,
@@ -249,7 +253,7 @@ public:
 		const VectorWithOffsetType& psi00 = commonTargeting_.aoe().
 		        ensureOnlyOnePsi("initialGuess");
 		VectorWithOffsetType vwo(compactedWeights, sectors, basis);
-		commonTargeting_.initialGuess(vwo, psi00, block, noguess);
+		commonTargeting_.initialGuess(vwo, psi00, oneSiteSpaces, noguess);
 		const SizeType n = vwo.sectors();
 		initialVector.resize(n);
 		for (SizeType i = 0; i < n; ++i)
@@ -257,7 +261,7 @@ public:
 	}
 
 	virtual void initialGuess(VectorType& initialVector,
-	                          const VectorSizeType& block,
+	                          const OneSiteSpacesType& oneSiteSpaces,
 	                          bool noguess,
 	                          const VectorSizeType& compactedWeights,
 	                          const VectorSizeType& sectors,
@@ -306,7 +310,7 @@ public:
 
 			commonTargeting_.initialGuess(vwo,
 			                              *(psi[sectorIndex][e]),
-			                              block,
+			                              oneSiteSpaces,
 			                              noguess);
 
 			VectorType tmpVector;

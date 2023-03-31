@@ -89,6 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FiniteLoop.h"
 #include "PackIndices.h"
 #include "PredicateAwesome.h"
+#include "OneSiteSpaces.hh"
 
 namespace Dmrg {
 
@@ -132,6 +133,7 @@ public:
 	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 	using FiniteLoopType = FiniteLoop<RealType>;
+	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 
 	Diagonalization(const ParametersType& parameters,
 	                const ModelType& model,
@@ -225,6 +227,9 @@ private:
 	                   const VectorSizeType& block)
 
 	{
+		assert(block.size() == 1);
+		OneSiteSpacesType oneSiteSpaces(block[0], direction, model_);
+
 		const LeftRightSuperType& lrs= target.lrs();
 		wft_.triggerOn();
 
@@ -273,13 +278,14 @@ private:
 
 		const bool isVwoS = (VectorWithOffsetType::name() == "vectorwithoffsets");
 		VectorVectorType onlyForVwoS;
-		if (isVwoS)
+		if (isVwoS) {
 			target.initialGuess(onlyForVwoS,
-			                    block,
+			                    oneSiteSpaces,
 			                    noguess,
 			                    compactedWeights,
 			                    sectors,
 			                    lrs.super());
+		}
 
 		for (SizeType j = 0; j < totalSectors; ++j) {
 
@@ -306,15 +312,17 @@ private:
 
 			if (onlyWft) {
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
-					if (!isVwoS)
+					if (!isVwoS) {
 						target.initialGuess(*initialBySector,
-						                    block,
+						                    oneSiteSpaces,
 						                    noguess,
 						                    compactedWeights,
 						                    sectors,
 						                    j,
 						                    excitedIndex,
 						                    lrs.super());
+					}
+
 					RealType norma = PsimagLite::norm(*initialBySector);
 
 					if (fabs(norma) < 1e-12) {
@@ -332,15 +340,17 @@ private:
 					progress_.printline(msgg, std::cout);
 				}
 			} else {
-				if (!isVwoS)
+				if (!isVwoS) {
 					target.initialGuess(*initialBySector,
-					                    block,
+					                    oneSiteSpaces,
 					                    noguess,
 					                    compactedWeights,
 					                    sectors,
 					                    j,
 					                    numberOfExcited, // sum all excited
 					                    lrs.super());
+				}
+
 				RealType norma = PsimagLite::norm(*initialBySector);
 
 				if (fabs(norma) >= 1e-12)

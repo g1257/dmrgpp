@@ -1,6 +1,7 @@
 #ifndef WFTHELPER_H
 #define WFTHELPER_H
 #include "Vector.h"
+#include "OneSiteSpaces.hh"
 
 namespace Dmrg {
 
@@ -13,6 +14,7 @@ public:
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 
 	WftHelper(const ModelType& model,
 	                const LeftRightSuperType& lrs,
@@ -42,11 +44,12 @@ public:
 		phiNew.populateFromQns(src, lrs_.super());
 
 		// OK, now that we got the partition number right, let's wft:
-		VectorSizeType nk(1, model_.hilbertSize(site));
+		ProgramGlobals::DirectionEnum dir = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM; // FIXME!
+		OneSiteSpacesType oneSiteSpaces(site, dir, model_);
 		wft_.setInitialVector(phiNew,
 		                      src,
 		                      lrs_,
-		                      nk);
+		                      oneSiteSpaces);
 	}
 
 private:

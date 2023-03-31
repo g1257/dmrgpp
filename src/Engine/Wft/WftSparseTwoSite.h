@@ -12,6 +12,7 @@ class WftSparseTwoSite {
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
 	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename WaveFunctionTransfBaseType::VectorSizeType VectorSizeType;
+	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef typename VectorType::value_type ComplexOrRealType;
@@ -30,8 +31,7 @@ public:
 	                 const DmrgWaveStructType& dmrgWaveStruct,
 	                 const WftOptionsType& wftOptions,
 	                 const LeftRightSuperType& lrs,
-	                 const VectorSizeType& nk,
-	                 SizeType volumeOfSite0,
+	                 const OneSiteSpacesType& oneSiteSpaces,
 	                 const SparseMatrixType& wsT,
 	                 const SparseMatrixType& we,
 	                 const ProgramGlobals::SysOrEnvEnum sysOrEnv)

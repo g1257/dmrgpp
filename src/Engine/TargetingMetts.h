@@ -158,6 +158,7 @@ public:
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
+	using OneSiteSpacesType = typename BaseType::OneSiteSpacesType;
 
 	TargetingMetts(const LeftRightSuperType& lrs,
 	               const CheckpointType& checkPoint,
@@ -464,13 +465,11 @@ private:
 
 	void advanceOrWft(SizeType index,
 	                  SizeType indexAdvance,
-	                  const ProgramGlobals::DirectionEnum,
+	                  const ProgramGlobals::DirectionEnum dir,
 	                  const VectorSizeType& block)
 	{
 		if (this->tv(index).size() == 0) return;
 		assert(norm(this->tv(index)) > 1e-6);
-		VectorSizeType nk;
-		mettsCollapse_.setNk(nk,block);
 
 		if (this->common().aoe().allStages(StageEnumType::WFT_NOADVANCE) ||
 		        this->common().aoe().allStages(StageEnumType::WFT_ADVANCE) ||
@@ -496,7 +495,9 @@ private:
 
 			phiNew.populateSectors(lrs_.super());
 			// OK, now that we got the partition number right, let's wft:
-			wft_.setInitialVector(phiNew,this->tv(advance),lrs_,nk);
+			assert(block.size() == 1);
+			OneSiteSpacesType oneSiteSpaces(block[0], dir, model_);
+			wft_.setInitialVector(phiNew, this->tv(advance), lrs_, oneSiteSpaces);
 			phiNew.collapseSectors();
 			assert(norm(phiNew)>1e-6);
 			this->tvNonConst(index) = phiNew;

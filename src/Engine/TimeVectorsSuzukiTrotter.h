@@ -124,6 +124,7 @@ class TimeVectorsSuzukiTrotter : public  TimeVectorsBase<
 	VectorVectorWithOffsetType;
 	typedef typename ModelType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelType::HilbertBasisType::value_type HilbertStateType;
+	using OneSiteSpacesType = typename WaveFunctionTransfType::OneSiteSpacesType;
 
 public:
 
@@ -292,8 +293,9 @@ private:
 		// OK, now that we got the partition number right, let's wft:
 		VectorSizeType nk;
 		setNk(nk,block);
-		// generalize for su(2)
-		wft_.setInitialVector(phiNew,*targetVectors_[i],lrs_,nk);
+		ProgramGlobals::DirectionEnum dir = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM; // FIXME!
+		OneSiteSpacesType oneSiteSpaces(block[0], dir, model_);
+		wft_.setInitialVector(phiNew,*targetVectors_[i],lrs_,oneSiteSpaces);
 		phiNew.collapseSectors();
 		assert(norm(phiNew)>1e-6);
 		*targetVectors_[i]=phiNew;

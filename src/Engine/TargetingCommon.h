@@ -95,6 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SdhsReinterpret.h"
 #include "MultiPointInSitu.h"
 #include "Checkpoint.h"
+#include "OneSiteSpaces.hh"
 
 namespace Dmrg {
 
@@ -176,6 +177,7 @@ public:
 	typedef SdhsReinterpret<BraketType> SdhsReinterpretType;
 	typedef MultiPointInSitu<VectorWithOffsetType_, ModelType> MultiPointInSituType;
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
+	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 
 	enum class OpLabelCategory { DRESSED, BARE };
 
@@ -509,17 +511,15 @@ public:
 
 	void initialGuess(VectorWithOffsetType& v,
 	                  const VectorWithOffsetType& psi,
-	                  const VectorSizeType& block,
+	                  const OneSiteSpacesType& oneSiteSpaces,
 	                  bool noguess) const
 	{
-		PsimagLite::Vector<SizeType>::Type nk;
-		setNk(nk, block);
 		const WaveFunctionTransfType& wft = targetHelper_.wft();
 
 		if (noguess)
 			wft.createRandomVector(v);
 		else
-			wft.setInitialVector(v, psi, targetHelper_.lrs(), nk);
+			wft.setInitialVector(v, psi, targetHelper_.lrs(), oneSiteSpaces);
 	}
 
 	void computeCorrection(ProgramGlobals::DirectionEnum direction,

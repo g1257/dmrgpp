@@ -83,7 +83,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template<typename VectorWithOffsetType, typename DmrgWaveStructType>
+template<typename VectorWithOffsetType,
+         typename DmrgWaveStructType,
+         typename OneSiteSpacesType>
 class ParallelWftOne {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
@@ -104,14 +106,14 @@ public:
 	               const VectorWithOffsetType& psiSrc,
 	               const LeftRightSuperType& lrs,
 	               SizeType i0,
-	               const VectorSizeType& nk,
+	               const OneSiteSpacesType& oneSiteSpaces,
 	               const DmrgWaveStructType& dmrgWaveStruct,
 	               typename ProgramGlobals::DirectionEnum dir)
 	    : psiDest_(psiDest),
 	      psiSrc_(psiSrc),
 	      lrs_(lrs),
 	      i0_(i0),
-	      nk_(nk),
+	      oneSiteSpaces_(oneSiteSpaces),
 	      dmrgWaveStruct_(dmrgWaveStruct),
 	      dir_(dir),
 	      pack1_(0),
@@ -241,7 +243,7 @@ private:
 	const VectorWithOffsetType& psiSrc_;
 	const LeftRightSuperType& lrs_;
 	SizeType i0_;
-	const VectorSizeType& nk_;
+	const OneSiteSpacesType& oneSiteSpaces_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
 	typename ProgramGlobals::DirectionEnum dir_;
 	SparseMatrixType we_;

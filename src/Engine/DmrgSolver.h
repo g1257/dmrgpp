@@ -163,7 +163,7 @@ public:
 	      progress_("DmrgSolver"),
 	      stepCurrent_(0),
 	      checkpoint_(parameters_, ioIn, model, quantumSector_.size(), basisTraits_),
-	      wft_(parameters_, model.hilbertSize(0)),
+	      wft_(parameters_),
 	      diagonalization_(parameters_,
 	                       model,
 	                       verbose_,

@@ -15,6 +15,7 @@ class WftAccelSvd {
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
 	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename WaveFunctionTransfBaseType::VectorSizeType VectorSizeType;
+	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
 	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef typename VectorType::value_type ComplexOrRealType;
@@ -170,8 +171,7 @@ public:
 	                const VectorWithOffsetType& psiSrc,
 	                SizeType iOld,
 	                const LeftRightSuperType& lrs,
-	                const VectorSizeType& nk,
-	                typename ProgramGlobals::DirectionEnum dir) const
+	                const OneSiteSpacesType& nk) const
 	{
 //		typename ProgramGlobals::SysOrEnvEnum prevPart = (dir == ProgramGlobals::EXPAND_SYSTEM) ?
 //		            ProgramGlobals::SYSTEM : ProgramGlobals::ENVIRON;

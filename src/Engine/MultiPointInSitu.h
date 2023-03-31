@@ -6,6 +6,7 @@
 #include "ManyPointAction.h"
 #include "Wft/WaveFunctionTransfFactory.h"
 #include "Checkpoint.h"
+#include "OneSiteSpaces.hh"
 
 namespace Dmrg {
 
@@ -17,8 +18,10 @@ public:
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType::ParametersType ParametersType;
 	typedef typename ParametersType::OptionsType OptionsType;
-	typedef WaveFunctionTransfFactory<LeftRightSuperType, VectorWithOffsetType, OptionsType>
-	WaveFunctionTransfType;
+	typedef WaveFunctionTransfFactory<LeftRightSuperType,
+	VectorWithOffsetType,
+	OptionsType,
+	OneSiteSpaces<ModelType> > WaveFunctionTransfType;
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 	typedef HelperForMultiPointInSitu<CheckpointType> HelperForMultiPointInSituType;
 	typedef typename HelperForMultiPointInSituType::BogusInput BogusInputType;

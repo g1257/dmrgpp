@@ -87,7 +87,8 @@ namespace Dmrg {
 
 template<typename DmrgWaveStructType_,
          typename VectorWithOffsetType_,
-         typename OptionsType_>
+         typename OptionsType_,
+         typename OneSiteSpacesType_>
 class WaveFunctionTransfBase {
 
 public:
@@ -100,11 +101,12 @@ public:
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef WftOptions<VectorWithOffsetType_, OptionsType_>WftOptionsType;
+	using OneSiteSpacesType = OneSiteSpacesType_;
 
 	virtual void transformVector(VectorWithOffsetType& psiDest,
 	                             const VectorWithOffsetType& psiSrc,
 	                             const LeftRightSuperType& lrs,
-	                             const VectorSizeType& nk) const = 0;
+	                             const OneSiteSpacesType& nk) const = 0;
 
 	virtual ~WaveFunctionTransfBase() {}
 }; // class WaveFunctionTransfBase
