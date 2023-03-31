@@ -2,6 +2,7 @@
 #define WFTSPARSETWOSITE_H
 #include "Matrix.h"
 #include "ProgramGlobals.h"
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -44,20 +45,22 @@ public:
 	      lrs_(lrs),
 	      wsT_(wsT),
 	      we_(we),
-	      volumeOfNk_(oneSiteSpaces.hilbertMain()), // CHECK!
+	      hilbertMain_(oneSiteSpaces.hilbertMain()),
+	      hilbertAux_(oneSiteSpaces.hilbertAux()),
 	      pack1_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
-	             ? lrs.left().permutationInverse().size() :
-	               lrs.super().permutationInverse().size()/
-	               lrs.right().permutationInverse().size()),
+	             ? lrs.left().permutationInverse().size()
+	             : integerDivision(lrs.super().permutationInverse().size(),
+	                               lrs.right().permutationInverse().size())),
 	      pack2_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
-	             ?  lrs.left().permutationInverse().size()/volumeOfNk_ : volumeOfNk_),
+	             ? integerDivision(lrs.left().permutationInverse().size(), hilbertMain_)
+	             : hilbertMain_),
 	      sysOrEnv_(sysOrEnv)
 	{
 		assert(sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM ||
-	           sysOrEnv == ProgramGlobals::SysOrEnvEnum::ENVIRON);
+		       sysOrEnv == ProgramGlobals::SysOrEnvEnum::ENVIRON);
 
 		if (sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
-			assert(lrs.left().permutationInverse().size()/volumeOfNk_ ==
+			assert(integerDivision(lrs.left().permutationInverse().size(), hilbertMain_) ==
 			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
 
 		} else {
@@ -65,7 +68,7 @@ public:
 			assert(lrs.left().permutationInverse().size() == volumeOfSite0 ||
 			       lrs.left().permutationInverse().size() == dmrgWaveStruct_.
 			       getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
-			assert(lrs.right().permutationInverse().size()/volumeOfNk_ ==
+			assert(integerDivision(lrs.right().permutationInverse().size(), hilbertMain_) ==
 			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).cols());
 		}
 	}
@@ -104,8 +107,8 @@ private:
 		SizeType offset = src_.offset(iOld_);
 		SizeType offsetPlusOne = dmrgWaveStruct_.lrs().super().partition(iOld_ + 1);
 		SizeType nalpha=dmrgWaveStruct_.lrs().left().permutationInverse().size();
-		SizeType ni = dmrgWaveStruct_.lrs().right().size()/volumeOfNk_;
-		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>volumeOfNk_,we_);
+		SizeType ni = integerDivision(dmrgWaveStruct_.lrs().right().size(), hilbertAux_);
+		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>hilbertAux_,we_);
 		SizeType start = wsT_.getRowPtr(is);
 		SizeType end = wsT_.getRowPtr(is+1);
 		ComplexOrRealType sum=0;
@@ -114,7 +117,7 @@ private:
 			// jpr < 0 could be due to an m smaller than h, the Hilbert size of one site
 			// this is checked against elsewhere
 			if (jpr < 0) continue;
-			SizeType jp = dmrgWaveStruct_.lrs().right().permutationInverse(jpl + jpr*volumeOfNk_);
+			SizeType jp = dmrgWaveStruct_.lrs().right().permutationInverse(jpl + jpr*hilbertMain_);
 			ComplexOrRealType sum2 = 0;
 			for (SizeType k = start;k < end;k++) {
 				SizeType ip = wsT_.getCol(k);
@@ -139,8 +142,9 @@ private:
 		const SparseMatrixType& ws = wsT_;
 		const SparseMatrixType& weT = we_;
 		SizeType ni= dmrgWaveStruct_.lrs().left().size();
-		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size()/volumeOfNk_;
-		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip>volumeOfNk_, ws);
+		SizeType nip = integerDivision(dmrgWaveStruct_.lrs().left().permutationInverse().size(),
+		                               hilbertMain_);
+		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip > hilbertAux_, ws);
 		SizeType start = weT.getRowPtr(jp);
 		SizeType end = weT.getRowPtr(jp+1);
 		ComplexOrRealType sum=0;
@@ -160,6 +164,11 @@ private:
 		return sum;
 	}
 
+	static SizeType integerDivision(SizeType a, SizeType b)
+	{
+		return PsimagLite::integerDivision(a, b);
+	}
+
 	VectorWithOffsetType& dest_;
 	SizeType i0_;
 	const VectorWithOffsetType& src_;
@@ -169,7 +178,8 @@ private:
 	const LeftRightSuperType& lrs_;
 	const SparseMatrixType& wsT_;
 	const SparseMatrixType& we_;
-	SizeType volumeOfNk_;
+	SizeType hilbertMain_;
+	SizeType hilbertAux_;
 	PackIndicesType pack1_;
 	PackIndicesType pack2_;
 	const ProgramGlobals::SysOrEnvEnum sysOrEnv_;
