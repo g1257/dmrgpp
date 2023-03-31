@@ -15,6 +15,8 @@
 
 namespace PsimagLite {
 
+SizeType integerDivision(SizeType a, SizeType b);
+
 std::ostream& operator<<(std::ostream&,const std::pair<SizeType,SizeType>&);
 
 std::istream& operator>>(std::istream&,std::pair<SizeType,SizeType>&);

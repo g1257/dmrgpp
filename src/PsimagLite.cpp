@@ -2,6 +2,15 @@
 
 namespace PsimagLite {
 
+SizeType integerDivision(SizeType a, SizeType b)
+{
+	if ((a % b) != 0) {
+		throw RuntimeError("integerDivision: failed\n");
+	}
+
+	return a/b;
+}
+
 std::ostream& operator<<(std::ostream& os,const std::pair<SizeType,SizeType>& p)
 {
 	os<<p.first<<" "<<p.second<<" ";
