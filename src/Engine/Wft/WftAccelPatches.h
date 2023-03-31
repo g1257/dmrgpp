@@ -25,7 +25,7 @@ class WftAccelPatches {
 	typedef typename DmrgWaveStructType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType MatrixType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
-	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType> BlockDiagWfType;
+	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType> BlockDiagWfType;
 
 public:
 
@@ -39,8 +39,9 @@ public:
 	                const VectorWithOffsetType& psiSrc,
 	                SizeType iOld,
 	                const LeftRightSuperType& lrs,
-	                const OneSiteSpacesType& oneSiteSpacesType) const
+	                const OneSiteSpacesType& oneSiteSpaces) const
 	{
+		ProgramGlobals::DirectionEnum dir = oneSiteSpaces.direction();
 		char charLeft = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'C' : 'N';
 		char charRight = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'T' : 'N';
 
@@ -55,7 +56,7 @@ public:
 		              wftOptions_.gemmRnb,
 		              wftOptions_.threadsForGemmR);
 
-		psi.toVectorWithOffsets(psiDest, iNew, lrs, nk, dir);
+		psi.toVectorWithOffsets(psiDest, iNew, lrs, oneSiteSpaces);
 	}
 
 private:

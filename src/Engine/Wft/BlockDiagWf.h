@@ -10,7 +10,7 @@
 
 namespace Dmrg {
 
-template<typename GenIjPatchType, typename VectorWithOffsetType>
+template<typename GenIjPatchType, typename VectorWithOffsetType, typename OneSiteSpacesType>
 class BlockDiagWf {
 
 	typedef typename VectorWithOffsetType::VectorType VectorType;
@@ -531,14 +531,14 @@ public:
 	void toVectorWithOffsets(VectorWithOffsetType& dest,
 	                         SizeType iNew,
 	                         const LeftRightSuperType& lrs,
-	                         const VectorSizeType& nk,
-	                         typename ProgramGlobals::DirectionEnum dir) const
+	                         const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		SizeType destIndex = dest.sector(iNew);
-		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-			return toVectorExpandSys(dest, destIndex, lrs, nk);
+		ProgramGlobals::DirectionEnum dir = oneSiteSpaces.direction();
 
-		toVectorExpandEnviron(dest, destIndex, lrs, nk);
+		return (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		        ? toVectorExpandSys(dest, destIndex, lrs, oneSiteSpaces)
+		        : toVectorExpandEnviron(dest, destIndex, lrs, oneSiteSpaces);
 	}
 
 	SizeType rows() const
@@ -556,10 +556,9 @@ private:
 	void toVectorExpandSys(VectorWithOffsetType& dest,
 	                       SizeType destIndex,
 	                       const LeftRightSuperType& lrs,
-	                       const VectorSizeType& nk) const
+	                       const OneSiteSpacesType& oneSiteSpaces) const
 	{
-		assert(nk.size() > 0);
-		SizeType hilbert = nk[0];
+		SizeType hilbert = oneSiteSpaces.hilbertMain(); // CHECK
 
 		SizeType npatches = data_.size();
 		SizeType ns = lrs.left().size();
@@ -607,10 +606,9 @@ private:
 	void toVectorExpandEnviron(VectorWithOffsetType& dest,
 	                           SizeType destIndex,
 	                           const LeftRightSuperType& lrs,
-	                           const VectorSizeType& nk) const
+	                           const OneSiteSpacesType& oneSiteSpaces) const
 	{
-		assert(nk.size() > 0);
-		SizeType hilbert = nk[0];
+		SizeType hilbert = oneSiteSpaces.hilbertMain(); // CHECK!
 
 		SizeType npatches = data_.size();
 		SizeType ns = lrs.left().size();

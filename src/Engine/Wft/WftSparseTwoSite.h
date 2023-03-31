@@ -44,7 +44,7 @@ public:
 	      lrs_(lrs),
 	      wsT_(wsT),
 	      we_(we),
-	      volumeOfNk_(ProgramGlobals::volumeOf(nk)),
+	      volumeOfNk_(oneSiteSpaces.hilbertMain()), // CHECK!
 	      pack1_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
 	             ? lrs.left().permutationInverse().size() :
 	               lrs.super().permutationInverse().size()/
@@ -61,6 +61,7 @@ public:
 			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
 
 		} else {
+			SizeType volumeOfSite0 = oneSiteSpaces.hilbertZero();
 			assert(lrs.left().permutationInverse().size() == volumeOfSite0 ||
 			       lrs.left().permutationInverse().size() == dmrgWaveStruct_.
 			       getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());

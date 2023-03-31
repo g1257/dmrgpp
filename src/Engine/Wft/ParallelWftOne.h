@@ -123,7 +123,7 @@ public:
         dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toSparse(ws_);
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
-		SizeType vOfNk = ProgramGlobals::volumeOf(nk);
+		SizeType vOfNk = oneSiteSpaces.hilbertMain(); // CHECK!
 		if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			assert(dmrgWaveStruct_.lrs().right().permutationInverse().size() ==
 			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).rows());
@@ -161,7 +161,7 @@ public:
 			SizeType jp = 0;
 			pack1_->unpack(alpha,jp,(SizeType)lrs_.super().permutation(taskNumber+start));
 			pack2_->unpack(ip,kp,(SizeType)lrs_.left().permutation(alpha));
-			psiDest_.fastAccess(i0_,taskNumber) = createAux2b(psiSrc_,ip,kp,jp,wsT_,we_,nk_);
+			psiDest_.fastAccess(i0_,taskNumber) = createAux2b(psiSrc_,ip,kp,jp,wsT_,we_);
 		} else {
 			SizeType ip = 0;
 			SizeType beta = 0;
@@ -169,7 +169,7 @@ public:
 			SizeType jp = 0;
 			pack1_->unpack(ip,beta,(SizeType)lrs_.super().permutation(taskNumber+start));
 			pack2_->unpack(kp,jp,(SizeType)lrs_.right().permutation(beta));
-			psiDest_.fastAccess(i0_,taskNumber)=createAux1b(psiSrc_,ip,kp,jp,ws_,weT_,nk_);
+			psiDest_.fastAccess(i0_,taskNumber)=createAux1b(psiSrc_,ip,kp,jp,ws_,weT_);
 		}
 	}
 
@@ -186,14 +186,13 @@ private:
 	                              SizeType kp,
 	                              SizeType jp,
 	                              const SparseMatrixType& wsT,
-	                              const SparseMatrixType& we,
-	                              const VectorSizeType& nk) const
+	                              const SparseMatrixType& we) const
 	{
 		SizeType nalpha=dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		assert(nalpha==wsT.cols());
 
 		SparseElementType sum=0;
-		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
+		SizeType volumeOfNk = oneSiteSpaces_.hilbertMain(); // CHECK!
 		SizeType beta = dmrgWaveStruct_.lrs().right().permutationInverse(kp+jp*volumeOfNk);
 
 		for (int k=wsT.getRowPtr(ip);k<wsT.getRowPtr(ip+1);k++) {
@@ -217,10 +216,9 @@ private:
 	                              SizeType kp,
 	                              SizeType jp,
 	                              const SparseMatrixType& ws,
-	                              const SparseMatrixType& weT,
-	                              const typename PsimagLite::Vector<SizeType>::Type& nk) const
+	                              const SparseMatrixType& weT) const
 	{
-		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
+		SizeType volumeOfNk = oneSiteSpaces_.hilbertMain(); // CHECK!
 		SizeType ni= dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols();
 		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size()/volumeOfNk;
 		SizeType alpha = dmrgWaveStruct_.lrs().left().permutationInverse(ip+kp*nip);

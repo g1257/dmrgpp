@@ -560,7 +560,7 @@ public:
 		if (lrs.left().block().size() < 2)
 			err("Bounce!?\n");
 
-		SizeType volumeOfNk = ProgramGlobals::volumeOf(nk);
+		SizeType volumeOfNk = oneSiteSpaces.hilbertMain(); // CHECK!
 		MatrixType ws;
 		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toDense(ws);
 
