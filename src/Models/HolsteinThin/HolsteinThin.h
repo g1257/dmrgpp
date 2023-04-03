@@ -275,6 +275,86 @@ protected:
 
 		n.push(myOp);
 
+		SizeType iup = 0;
+		SizeType idown = 1;
+		{
+			OpsLabelType& splus = this->createOpsLabel("splus", 1);
+			OpsLabelType& sminus = this->createOpsLabel("sminus", 1);
+			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, fermionicBasis);
+			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, fermionicBasis);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1 =
+			        multiplyTc(t1MatrixUp,t1MatrixDown);
+			typename OperatorType::Su2RelatedType su2Related;
+			SparseMatrixType spmatrix(t1);
+			splus.push(OperatorType(spmatrix,
+			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                        typename OperatorType::PairType(0,0),
+			                        1.0,
+			                        su2Related));
+			SparseMatrixType smmatrix;
+			transposeConjugate(smmatrix, spmatrix);
+			sminus.push(OperatorType(smmatrix,
+			                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                         typename OperatorType::PairType(0,0),
+			                         1.0,
+			                         su2Related));
+		}
+		{
+			OpsLabelType& sz = this->createOpsLabel("sz", 1);
+			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, fermionicBasis);
+			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, fermionicBasis);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1 =
+			        multiplyTc(t1MatrixUp,t1MatrixUp);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t2 =
+			        multiplyTc(t1MatrixDown,t1MatrixDown);
+			t1 = 0.5*(t1 - t2);
+			SparseMatrixType szmatrix(t1);
+			typename OperatorType::Su2RelatedType su2Related;
+			sz.push(OperatorType(szmatrix,
+			                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                     typename OperatorType::PairType(0,0),
+			                     1.0,
+			                     su2Related));
+		}
+
+		{
+			OpsLabelType& doubleOcc = this->createOpsLabel("double", 1);
+			OpsLabelType& doubleOccM = this->createOpsLabel("doubleM", 1);
+			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, fermionicBasis);
+			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, fermionicBasis);
+			SizeType nn = fermionicBasis.size();
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> id(nn,nn);
+			for (SizeType ii=0;ii<fermionicBasis.size();ii++) {
+				id(ii,ii) = 1.0;
+			}
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1 =
+			        multiplyTc(t1MatrixUp,t1MatrixUp);
+			t1=id+(-1.0)*t1;
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t2 =
+			        multiplyTc(t1MatrixDown,t1MatrixDown);
+			t2=id+(-1.0)*t2;
+			SparseMatrixType nMatrixUp(t1);
+			t1 = t1+t2;
+			SparseMatrixType nMatrixDown(t2);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t3 =
+			        multiplyTc(nMatrixDown,nMatrixUp);
+			t1 = t1+(-2.0)*t3;
+			SparseMatrixType tmp4(t1);
+			typename OperatorType::Su2RelatedType su2Related;
+			doubleOccM.push(OperatorType(tmp4,
+			                            ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                            typename OperatorType::PairType(0,0),
+			                            1.0,
+			                            su2Related));
+
+			SparseMatrixType tmp5(t3);
+			doubleOcc.push(OperatorType(tmp5,
+			                            ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                            typename OperatorType::PairType(0,0),
+			                            1.0,
+			                            su2Related));
+		}
+
 		if (modelParameters_.numberphonons == 0) return;
 
 		this->makeTrackable("n");
@@ -295,6 +375,17 @@ protected:
 		                   -1,
 		                   su2related2);
 		a.push(myOp2);
+
+		OpsLabelType& disp = this->createOpsLabel("disp", 0);
+		SparseMatrixType tmp2;
+		transposeConjugate(tmp2, tmpMatrix);
+		tmp2 += tmpMatrix;
+		typename OperatorType::Su2RelatedType su2Related2;
+		disp.push(OperatorType(tmp2,
+		                       ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                       typename OperatorType::PairType(0,0),
+		                       1.0,
+		                       su2Related2));
 	}
 
 	void fillModelLinks()
