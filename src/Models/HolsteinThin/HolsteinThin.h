@@ -500,9 +500,6 @@ private:
 		//		std::cerr<<cm;
 
 		SparseMatrixType operatorMatrix(cm);
-		SparseMatrixType temp;
-		fullMatrixToCrsMatrix(temp,cm);
-		transposeConjugate(operatorMatrix, temp);
 		return operatorMatrix;
 	}
 
