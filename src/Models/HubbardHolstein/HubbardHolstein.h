@@ -291,17 +291,18 @@ protected:
 			OpsLabelType& sminus = this->createOpsLabel("sminus");
 			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, natBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, natBasis);
-			SparseMatrixType tmp1;
-			multiply(tmp1, t1MatrixUp, t1MatrixDown);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1 =
+			        multiplyTc(t1MatrixUp,t1MatrixDown);
 			typename OperatorType::Su2RelatedType su2Related;
-			splus.push(OperatorType(tmp1,
+			SparseMatrixType spmatrix(t1);
+			splus.push(OperatorType(spmatrix,
 			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                        typename OperatorType::PairType(0,0),
 			                        1.0,
 			                        su2Related));
-			SparseMatrixType tmp2;
-			transposeConjugate(tmp2, tmp1);
-			sminus.push(OperatorType(tmp2,
+			SparseMatrixType smmatrix;
+			transposeConjugate(smmatrix, spmatrix);
+			sminus.push(OperatorType(smmatrix,
 			                         ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                         typename OperatorType::PairType(0,0),
 			                         1.0,
