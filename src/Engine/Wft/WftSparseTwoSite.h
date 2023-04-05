@@ -64,8 +64,7 @@ public:
 			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
 
 		} else {
-			SizeType volumeOfSite0 = oneSiteSpaces.hilbertZero();
-			assert(lrs.left().permutationInverse().size() == volumeOfSite0 ||
+			assert(lrs.left().permutationInverse().size() == oneSiteSpaces.hilbertZero() ||
 			       lrs.left().permutationInverse().size() == dmrgWaveStruct_.
 			       getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
 			assert(integerDivision(lrs.right().permutationInverse().size(), hilbertMain_) ==
