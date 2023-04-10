@@ -212,8 +212,8 @@ private:
 	{
 		const SizeType n = matrix_.rows();
 		for (SizeType i = 0; i < n; ++i)
-			for (SizeType j = 0; j < n; ++j)
-				matrix_(i, j) = (i == j) ? 0 : value;
+			for (SizeType j = i + 1; j < n; ++j)
+				matrix_(i, j) = value;
 	}
 
 	static void checkConnectors(const MatrixType& matrix, SizeType linSize)
