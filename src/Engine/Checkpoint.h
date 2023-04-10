@@ -158,7 +158,11 @@ public:
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		checkFiniteLoops(model.superGeometry().numberOfSites(), hilbertOneSite, ioIn);
+		{
+			VectorFiniteLoopType vfl;
+			checkFiniteLoops(vfl, model.superGeometry().numberOfSites(), hilbertOneSite, ioIn);
+			parameters.setFiniteLoops(vfl);
+		}
 
 		if (!isRestart_) return;
 
@@ -400,7 +404,8 @@ private:
 
 	Checkpoint& operator=(const Checkpoint&);
 
-	void checkFiniteLoops(SizeType totalSites,
+	void checkFiniteLoops(VectorFiniteLoopType& vfl,
+	                      SizeType totalSites,
 	                      SizeType hilbertOneSite,
 	                      InputValidatorType& ioIn) const
 	{
@@ -409,7 +414,6 @@ private:
 
 		bool allInSystem = (parameters_.options.isSet("geometryallinsystem"));
 
-		VectorFiniteLoopType vfl;
 		int lastSite = (allInSystem) ? totalSites-2 : totalSites/2-1; // must be signed
 		int prevDeltaSign = 1;
 		bool checkPoint = false;

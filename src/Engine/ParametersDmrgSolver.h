@@ -447,6 +447,13 @@ struct ParametersDmrgSolver {
 		}
 	}
 
+	// ugly function (sorry!)
+	void setFiniteLoops(VectorFiniteLoopType& vfl) const
+	{
+		ThisType* thisType = const_cast<ThisType*>(this);
+		thisType->finiteLoop.swap(vfl);
+	}
+
 	static bool getValueIfPresent(PsimagLite::String& str,
 	                              PsimagLite::String label,
 	                              InputValidatorType& io)
