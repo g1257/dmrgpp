@@ -9,7 +9,7 @@
 
 #ifndef PSIMAG_BLAS
 #define PSIMAG_BLAS
-
+#include "AllocatorCpu.h"
 #include <complex>
 
 /** \file BLAS.h
@@ -1400,6 +1400,20 @@ namespace psimag {
 	                 const std::complex<double>&b,
 	                 std::complex<double>* z,
 	                 IntegerForBlasType sz) {
+		/* When  TRANSA = 'N' or 'n' then
+		        LDA must be at least  max( 1, m ), otherwise  LDA must be at
+                least  max( 1, k ).*/
+
+		if (c1 == 'N' || c1 == 'n') {
+			if (sx < std::max(1, sX)) {
+				throw PsimagLite::RuntimeError("GEMM lda < max(1, m)\n");
+			}
+		} else {
+			if (sx < std::max(1, sZ)) {
+				throw PsimagLite::RuntimeError("GEMM lda < max(1, k)\n");
+			}
+		}
+
 		zgemm_(&c1,
 		       &c2,
 		       &sX,
