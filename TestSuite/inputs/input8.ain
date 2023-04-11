@@ -31,6 +31,6 @@ TSPSites=[10];
 TSPLoops=[0];
 TSPProductOrSum="product";
 
-TSPOperator="expression";
-OperatorExpression="c?0*c?0'*c?1'+(-1.0)*c?1'*c?0'*c?0";
+string TSPOp0:TSPOperator="expression";
+string TSPOp0:OperatorExpression="c?0*c?0'*c?1'+(-1.0)*c?1'*c?0'*c?0";
 
