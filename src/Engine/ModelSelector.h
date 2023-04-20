@@ -52,6 +52,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 // start headers: // DO NOT REMOVE MARK
 #include "../Models/Heisenberg/ModelHeisenberg.h"
+#include "../Models/IsingMultiOrb/ModelIsingMultiOrb.h"
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 #include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
@@ -96,6 +97,7 @@ class ModelSelector {
 
 	// start models here:  DO NOT REMOVE MARK
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
+        typedef ModelIsingMultiOrb<ModelBaseType> ModelIsingMultiOrbType;	
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
@@ -155,6 +157,8 @@ public:
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Aklt");
 		} else if (name_ == "Heisenberg2") {
 			model_ = new ModelHeisenbergType(solverParams,io,geometry,"2");
+                } else if (name_ == "IsingMultiOrb") {
+                        model_ = new ModelIsingMultiOrbType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardOneBand") {
 			model_ = new ModelHubbardType(solverParams, io, geometry, "");
 		} else if (name_ == "HeisenbergAncillaC") {
