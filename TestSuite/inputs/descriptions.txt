@@ -156,7 +156,10 @@ Page* where more or less this feature is used: 2230
 250) MultiTargeting
 320) Fe-based Superconductors model on a chain
 340) A test of the Fe-based Superconductors extended model
-
+350) Transverse-Field Ising MultiOrb (Using Heisenberg, benchmark)
+351) Transverse-Field Ising MultiOrb 1
+352) Transverse-Field Ising MultiOrb 2
+353) Transverse-Field Ising MultiOrb 3
 363) paper63
 InternalControlNumber: 63
 NumberInThisSeries: 0

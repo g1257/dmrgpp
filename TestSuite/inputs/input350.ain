@@ -1,0 +1,23 @@
+##Ainur 1.0
+
+TotalNumberOfSites=4;
+NumberOfTerms=2;
+
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[0.0];
+
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[0.5];
+
+Model="Heisenberg";
+HeisenbergTwiceS=1;
+
+MagneticFieldX=[0.1, 0.1, 0.1, 0.1];
+
+SolverOptions="twositedmrg";
+Version="247b335fe1542909b90be8647456bfd8fd56191c";
+OutputFile="data20";
+InfiniteLoopKeptStates=16;
+FiniteLoops=[[1, 100, 0],[-2, 100, 0]];
