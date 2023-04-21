@@ -76,9 +76,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  This class represents the Hilbert space for the Ising Model
  *  States are represented with binary numbers. N bits per site
  *  Bits meaning:
- *  0.....0  all up spin state
- *  0..1..0  a 1 at location x means spin down on location x
- *  1111...111111  all ones means all down spins
+ *  0.....0  all down spin state
+ *  0..1..0  a 1 at location x means spin up on location x
+ *  1111...111111  all ones means all up spins
  *
  *  Note: this is a static class
  *
@@ -97,6 +97,7 @@ class HilbertSpaceIsingMultiOrb {
 public:
 
 	typedef Word HilbertState;
+	typedef unsigned int long WordType;
 
 	enum {SPIN_UP=0,SPIN_DOWN=1};
 
@@ -105,19 +106,24 @@ public:
 		orbitals_=orbitals;
 	}
 
-	// Get spin state on site "j" in binary number "a"
-	static Word get(Word const &a,SizeType j)
+	static bool isBitZeroAt(SizeType pos, SizeType ket)
 	{
-		SizeType dofs = orbitals_;
-		SizeType k=dofs*j;
-		SizeType ones = (1<<(dofs))-1;
-		Word mask=(ones<<k);
+		SizeType mask = 1ul;
+		bool flag = true;
+		for (SizeType i=1; i<pos; i++)
+			mask<<=1;
 
-		mask &= a;
-		mask >>= k;
-		return mask;
+		SizeType check = ket & mask;
+		if (check>0)
+			flag=false;
 
+		return flag;
+		
 	}
+
+private:
+
+	static PsimagLite::Vector<WordType>::Type bitmask_;
 
 }; // class HilbertSpaceIsingMultiOrb
 

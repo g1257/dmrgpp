@@ -75,7 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file ParametersModelIsingMultiOrb.h
  *
- *  Contains the parameters for the Ising model with many orbitals 
+ *  Contains the parameters for the Ising model with many orbitals
  *
  */
 #ifndef PARAMETERSMODELISINGMULTIORB_H
@@ -90,17 +90,18 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Matrix<RealType> MatrixRealType;
 	// no connectors here, connectors are handled by the geometry
 	template<typename IoInputType>
 	ParametersModelIsingMultiOrb(IoInputType& io)
 	    : BaseType(io, false),
-              magneticFieldX(0, 0),
-              magneticFieldZ(0, 0),
-              onsitelinksSzSz(0, 0)	      
+	      magneticFieldX(0, 0),
+	      magneticFieldZ(0, 0),
+	      onsitelinksSzSz(0,0)
 	{
 		PsimagLite::String model;
 		io.readline(model, "Model=");
-                io.readline(orbitals,"Orbitals=");
+		io.readline(orbitals,"Orbitals=");
 		SizeType nsites = 0;
 		io.readline(nsites, "TotalNumberOfSites=");
 
@@ -108,19 +109,19 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 			io.read(magneticFieldX, "MagneticFieldX");
 		} catch (std::exception&) {}
 
-                if (magneticFieldX.rows()>0 && magneticFieldX.rows()!=orbitals)
-                        throw PsimagLite::RuntimeError("MagneticFieldX: Expecting rows == orbitals\n");
-                if (magneticFieldX.cols()>0 && magneticFieldX.cols()!=nsites)
-                        throw PsimagLite::RuntimeError("MagneticFieldX: Expecting columns == sites\n");	
+		if (magneticFieldX.rows()>0 && magneticFieldX.rows()!=orbitals)
+			throw PsimagLite::RuntimeError("MagneticFieldX: Expecting rows == orbitals\n");
+		if (magneticFieldX.cols()>0 && magneticFieldX.cols()!=nsites)
+			throw PsimagLite::RuntimeError("MagneticFieldX: Expecting columns == sites\n");
 
 		try {
 			io.read(magneticFieldZ, "MagneticFieldZ");
 		} catch (std::exception&) {}
 
-                if (magneticFieldZ.rows()>0 && magneticFieldZ.rows()!=orbitals)
-                        throw PsimagLite::RuntimeError("MagneticFieldZ: Expecting rows == orbitals\n");
-                if (magneticFieldZ.cols()>0 && magneticFieldZ.cols()!=nsites)
-                        throw PsimagLite::RuntimeError("MagneticFieldZ: Expecting columns == sites\n");		
+		if (magneticFieldZ.rows()>0 && magneticFieldZ.rows()!=orbitals)
+			throw PsimagLite::RuntimeError("MagneticFieldZ: Expecting rows == orbitals\n");
+		if (magneticFieldZ.cols()>0 && magneticFieldZ.cols()!=nsites)
+			throw PsimagLite::RuntimeError("MagneticFieldZ: Expecting columns == sites\n");
 
 		// throw if supplying MagneticField label
 		bool invalidLabel = false;
@@ -151,22 +152,21 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 			io.read(onsitelinksSzSz,"OnSiteLinksSzSz");
 		} catch (std::exception&) {}
 
-		SizeType max_terms = combinations(orbitals,2);
 
-                if (onsitelinksSzSz.rows()>0 && onsitelinksSzSz.rows()!=max_terms)
-                        throw PsimagLite::RuntimeError("OnSiteLinksSzSz: Expecting rows == comb(orbitals,2)\n");
-                if (onsitelinksSzSz.cols()>0 && onsitelinksSzSz.cols()!=nsites)
-                        throw PsimagLite::RuntimeError("OnSiteLinksSzSz: Expecting columns == sites\n");
-		
+		const SizeType orbs1 = combinations(orbitals, 2);
+		if (onsitelinksSzSz.cols()>0 && onsitelinksSzSz.cols()!=nsites)
+			throw PsimagLite::RuntimeError("OnSiteLinksSzSz: Expecting cols == sites\n");
+		if (onsitelinksSzSz.rows()>0 && onsitelinksSzSz.rows()!=orbs1)
+			throw PsimagLite::RuntimeError("OnSiteLinksSzSz: Expecting rows == combinations(orbitals,2)\n");
 	}
 
 	static SizeType combinations(SizeType n, SizeType r)
 	{
-    		if (r > n)
-        		return 0;
-    		if (r == 0 || r == n)
-        		return 1;
-    		return combinations(n - 1, r - 1) + combinations(n - 1, r);
+		if (r > n)
+			return 0;
+		if (r == 0 || r == n)
+			return 1;
+		return combinations(n - 1, r - 1) + combinations(n - 1, r);
 	}
 
 	void write(PsimagLite::String label1,
@@ -175,19 +175,30 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 		PsimagLite::String label = label1 + "/ParametersModelIsingMultiOrb";
 		io.createGroup(label);
 		BaseType::write(label, io);
-                io.write(label + "/orbitals", orbitals);
-                magneticFieldX.write(label + "/magneticFieldX", io);
-                magneticFieldZ.write(label + "/magneticFieldZ", io);
-                onsitelinksSzSz.write(label + "/onsitelinksSzSz", io);
+		io.write(label + "/orbitals", orbitals);
+		magneticFieldX.write(label + "/magneticFieldX", io);
+		magneticFieldZ.write(label + "/magneticFieldZ", io);
+		onsitelinksSzSz.write(label + "/onsitelinksSzSz", io);
 	}
 
-	static void checkMagneticField(SizeType s, unsigned char c, SizeType n, SizeType orbs)
+	static void checkMagneticField(unsigned char c, SizeType s, SizeType n, SizeType ss, SizeType orbs)
 	{
 		if (s == 0 || s == n) return;
+		if (ss == 0 || ss == orbs) return;
 
 		PsimagLite::String msg("ModelIsingMultiOrb: If provided, ");
-		msg += " MagneticField" + ttos(c) + " must be a matrix of " +
-		        ttos(orbs) + "orbitals times " + ttos(n) +" entries.\n";
+		msg += " MagneticField" + ttos(c) + " must be a matrix of (rows) " +
+		        ttos(orbs) + "orbitals times (cols) " + ttos(n) +" entries.\n";
+		err(msg);
+	}
+
+	static void checkOnSiteLinksSzSz(SizeType s, SizeType n, SizeType ss, SizeType orbs1)
+	{
+		if (s == 0 || s == n) return;
+		if (ss == 0 || ss == orbs1) return;
+		PsimagLite::String msg("ModelIsingMultiOrb: If provided, ");
+		msg += " OnsiteLinksSzSz must be a matrix of (rows) " +
+		        ttos(orbs1) + "terms times (cols) " + ttos(n) +" entries.\n";
 		err(msg);
 	}
 
@@ -199,17 +210,17 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 			os<<"MagneticFieldX="<<parameters.magneticFieldX<<"\n";
 		if (parameters.magneticFieldZ.cols()>0)
 			os<<"MagneticFieldZ="<<parameters.magneticFieldZ<<"\n";
-                if (parameters.onsitelinksSzSz.cols()>0)
+		if (parameters.onsitelinksSzSz.cols()>0)
 			os<<"OnSiteLinksSzSz="<<parameters.onsitelinksSzSz<<"\n";
 		
 		os<<parameters.targetQuantum;
 		return os;
 	}
 
-        SizeType orbitals;	
-	PsimagLite::Matrix<RealType> magneticFieldX;
-	PsimagLite::Matrix<RealType> magneticFieldZ;
-	PsimagLite::Matrix<RealType> onsitelinksSzSz;
+	SizeType orbitals;
+	MatrixRealType magneticFieldX;
+	MatrixRealType magneticFieldZ;
+	MatrixRealType onsitelinksSzSz;
 };
 } // namespace Dmrg
 

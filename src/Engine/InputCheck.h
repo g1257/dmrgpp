@@ -188,6 +188,7 @@ public:
 		knownLabels_.push_back("omega");
 		knownLabels_.push_back("MagneticFieldX");
 		knownLabels_.push_back("MagneticFieldZ");
+                knownLabels_.push_back("OnSiteLinksSzSz");
 		knownLabels_.push_back("SpinOrbit");
 		knownLabels_.push_back("DegeneracyMax");
 		knownLabels_.push_back("JzSymmetry");
@@ -285,6 +286,7 @@ public:
 		str += "string AddOnSiteHamiltonian;\n";
 		str += "vector MagneticFieldX;\n";
 		str += "vector MagneticFieldZ;\n";
+                str += "matrix.real OnSiteLinksSzSz;\n";		
 		str += "string TargetFermionicParity;\n";
 
 		return str;
