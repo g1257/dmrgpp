@@ -143,8 +143,6 @@ public:
 	      superGeometry_(geometry),
 	      additional_(additional)
 	{
-		ProgramGlobals::init(modelParameters_.orbitals*superGeometry_.numberOfSites() + 1);
-
 		HilbertSpaceIsingMultiOrbType::setOrbitals(modelParameters_.orbitals);
 		
 		const SizeType n = superGeometry_.numberOfSites();
@@ -155,10 +153,8 @@ public:
 		                                        modelParameters_.magneticFieldX.rows(), orbs);
 		ModelParametersType::checkMagneticField('Z', modelParameters_.magneticFieldX.cols(), n,
 		                                        modelParameters_.magneticFieldX.rows(), orbs);
-
 		ModelParametersType::checkOnSiteLinksSzSz(modelParameters_.onsitelinksSzSz.cols(), n,
 		                                          modelParameters_.onsitelinksSzSz.rows(), orbs1);
-
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -172,9 +168,6 @@ public:
 	}
 
 	/* PSIDOC IsingMultiOrb::addDiagonalsInNaturalBasis
-	 We describe only the addition of a Zeeman term to the Ising model here; note
-	 that this function is more complicated.
-	 Please look carefully at the following C++ lines:
 	 PSIDOCCOPY $FirstFunctionBelow::MagneticField
 	 */
 	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
