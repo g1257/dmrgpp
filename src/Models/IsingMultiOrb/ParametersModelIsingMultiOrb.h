@@ -97,7 +97,10 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 	    : BaseType(io, false),
 	      magneticFieldX(0, 0),
 	      magneticFieldZ(0, 0),
-	      onsitelinksSzSz(0,0)
+	      onsitelinksSzSz(0, 0),
+	      TimeSchedule(0, 0),
+	      hasTimeSchedule_(false),
+	      ta(0.0)
 	{
 		PsimagLite::String model;
 		io.readline(model, "Model=");
@@ -158,6 +161,41 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 			throw PsimagLite::RuntimeError("OnSiteLinksSzSz: Expecting cols == sites\n");
 		if (onsitelinksSzSz.rows()>0 && onsitelinksSzSz.rows()!=orbs1)
 			throw PsimagLite::RuntimeError("OnSiteLinksSzSz: Expecting rows == combinations(orbitals,2)\n");
+
+		bool hasTimeSchedule = false;
+		try {
+			io.read(TimeSchedule,"TimeSchedule");
+			hasTimeSchedule = true;
+		} catch (std::exception&) {}
+
+		if (hasTimeSchedule ==true) { // Check Input to see if everything is correct
+
+			if (TimeSchedule.cols()>0 && TimeSchedule.cols()!=3)
+				throw PsimagLite::RuntimeError("TimeSchedule: Expecting cols == 3, [s,Gamma(s),J(s)]\n");
+
+			bool hasta = false;
+			try {
+				io.readline(ta,"ta=");
+				hasta = true;
+			} catch (std::exception&) {}
+
+			RealType tau =0.0;
+			bool hastau = false;
+			try {
+				io.readline(tau, "TSPTau=");
+				hastau = true;
+			} catch (std::exception&) {}
+
+			if (hastau && !hasta)
+				throw PsimagLite::RuntimeError("TimeSchedule: TSPTau is set, "
+			                                   "so you must have ta=something>0 in the input!\n");
+			if (hasta && hastau)
+				if(ta<0 || fabs(ta)<1e-5)
+					throw PsimagLite::RuntimeError("TimeSchedule: ta is negative or too small!\n");
+
+			hasTimeSchedule_ = true;
+		}
+
 	}
 
 	static SizeType combinations(SizeType n, SizeType r)
@@ -221,6 +259,9 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 	MatrixRealType magneticFieldX;
 	MatrixRealType magneticFieldZ;
 	MatrixRealType onsitelinksSzSz;
+	MatrixRealType TimeSchedule;
+	bool hasTimeSchedule_;
+	RealType ta;
 };
 } // namespace Dmrg
 

@@ -141,6 +141,7 @@ public:
 	                    io),
 	      modelParameters_(io),
 	      superGeometry_(geometry),
+	      tau_(0),
 	      additional_(additional)
 	{
 		HilbertSpaceIsingMultiOrbType::setOrbitals(modelParameters_.orbitals);
@@ -148,6 +149,10 @@ public:
 		const SizeType n = superGeometry_.numberOfSites();
 		const SizeType orbs = modelParameters_.orbitals;
 		const SizeType orbs1  = ModelParametersType::combinations(orbs,2);
+
+		try {
+			io.readline(tau_, "TSPTau=");
+		} catch (std::exception&) {}
 
 		ModelParametersType::checkMagneticField('X', modelParameters_.magneticFieldX.cols(), n,
 		                                        modelParameters_.magneticFieldX.rows(), orbs);
@@ -174,6 +179,7 @@ public:
 	                                const BlockType& block,
 	                                RealType time) const
 	{
+		//			ModelBaseType::additionalOnSiteHamiltonianFromFile(hmatrix, block, ii, data);
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
 		SizeType n = block.size();
@@ -183,15 +189,15 @@ public:
 			// PSIDOCMARK_BEGIN MagneticField
 			SizeType site = block[i];
 			for (SizeType orb = 0; orb < orbs; ++orb) {
-				addMagneticField(hmatrix, 'X', site, orb);
-				addMagneticField(hmatrix, 'Z', site, orb);
+				addMagneticField(hmatrix, 'X', site, orb, time);
+				addMagneticField(hmatrix, 'Z', site, orb, time);
 			}
 			// PSIDOCMARK_END
 			SizeType orb = 0;
 			for (SizeType orb1=0;orb1<orbs;orb1++) {
 				for (SizeType orb2=orb1+1;orb2<orbs;orb2++) {
 					// onsitelinksSzSz
-					addonsitelinksSzSz(hmatrix,site,orb1,orb2,orb);
+					addonsitelinksSzSz(hmatrix,site,orb1,orb2,orb, time);
 					orb++;
 				}
 			}
@@ -291,7 +297,8 @@ private:
 	void addMagneticField(SparseMatrixType& hmatrix,
 	                      char c,
 	                      SizeType site,
-	                      SizeType orb) const
+	                      SizeType orb,
+	                      RealType time) const
 	{
 		assert(c == 'X' || c == 'Z');
 
@@ -303,9 +310,69 @@ private:
 		if (v.cols() != linSize || v.rows() != orbs) return;
 
 		assert(site < v.cols());
+
 		RealType tmp = v(orb,site);
 		const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, orb);
 		
+		if (c == 'Z') {
+			hmatrix += tmp*sz.getCRS();
+			return;
+		}
+
+		assert(c == 'X');
+		if (modelParameters_.hasTimeSchedule_) {
+			PsimagLite::Matrix<RealType> data;
+			PsimagLite::InterpolateSchedule(data, modelParameters_.TimeSchedule, modelParameters_.ta, tau_);
+			SizeType ii = SizeType(time/tau_);
+			tmp *= data(ii,1);
+		}
+		const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, orb);
+		hmatrix += tmp*sx.getCRS();
+	}
+
+	void addonsitelinksSzSz(SparseMatrixType& hmatrix,
+	                        SizeType site,
+	                        SizeType orb1,
+	                        SizeType orb2,
+	                        SizeType orb,
+	                        RealType time) const
+	{
+		const SizeType linSize = superGeometry_.numberOfSites();
+		const SizeType orbs = modelParameters_.orbitals;
+		const SizeType orbs1  = ModelParametersType::combinations(orbs,2);
+
+		const PsimagLite::Matrix<RealType>& v = modelParameters_.onsitelinksSzSz;
+
+		if (v.cols() != linSize || v.rows() != orbs1) return;
+		assert(site < v.cols());
+
+		RealType tmp = v(orb,site);
+
+		const OperatorType& sz1 = ModelBaseType::naturalOperator("sz", site, orb1);
+		const OperatorType& sz2 = ModelBaseType::naturalOperator("sz", site, orb2);
+
+		if (modelParameters_.hasTimeSchedule_) {
+			PsimagLite::Matrix<RealType> data;
+			PsimagLite::InterpolateSchedule(data, modelParameters_.TimeSchedule, modelParameters_.ta, tau_);
+			SizeType ii = SizeType(time/tau_);
+			tmp *= data(ii,2);
+		}
+		// Calculate Sz Sz term on site
+		SparseMatrixType tmpMatrix;
+		multiply(tmpMatrix, sz1.getCRS(),sz2.getCRS());
+		hmatrix += tmp*tmpMatrix;
+	}
+
+	void addMagneticFieldSchdedule(SparseMatrixType& hmatrix,
+	                               char c,
+	                               SizeType site,
+	                               SizeType orb,
+	                               RealType tmp) const
+	{
+		assert(c == 'X' || c == 'Z');
+
+		const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, orb);
+
 		if (c == 'Z') {
 			hmatrix += tmp*sz.getCRS();
 			return;
@@ -335,7 +402,22 @@ private:
 
 		const OperatorType& sz1 = ModelBaseType::naturalOperator("sz", site, orb1);
 		const OperatorType& sz2 = ModelBaseType::naturalOperator("sz", site, orb2);
-		
+
+		// Calculate Sz Sz term on site
+		SparseMatrixType tmpMatrix;
+		multiply(tmpMatrix, sz1.getCRS(),sz2.getCRS());
+		hmatrix += tmp*tmpMatrix;
+	}
+
+	void addonsitelinksSzSzSchedule(SparseMatrixType& hmatrix,
+	                                SizeType site,
+	                                SizeType orb1,
+	                                SizeType orb2,
+	                                RealType tmp) const
+	{
+		const OperatorType& sz1 = ModelBaseType::naturalOperator("sz", site, orb1);
+		const OperatorType& sz2 = ModelBaseType::naturalOperator("sz", site, orb2);
+
 		// Calculate Sz Sz term on site
 		SparseMatrixType tmpMatrix;
 		multiply(tmpMatrix, sz1.getCRS(),sz2.getCRS());
@@ -467,6 +549,7 @@ private:
 
 	ModelParametersType  modelParameters_;
 	const SuperGeometryType& superGeometry_;
+	RealType tau_;
 	PsimagLite::String additional_;
 
 }; // class ModelIsingMultiOrb
