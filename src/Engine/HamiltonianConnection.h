@@ -276,8 +276,6 @@ private:
 
 				if (tmp == static_cast<RealType>(0.0)) continue;
 
-				tmp = superGeometry_.vModifier(termIndexForGeom, tmp, targetTime_);
-
 				oneLink.modifier(tmp, targetTime_);
 
 				ManyToTwoConnectionType manyToTwo(hItems,

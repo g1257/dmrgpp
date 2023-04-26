@@ -205,7 +205,6 @@ public:
 		knownLabels_.push_back("DenseSparseThreshold");
 		knownLabels_.push_back("TridiagonalEps");
 		knownLabels_.push_back("HoneycombLy");
-		knownLabels_.push_back("GeometryValueModifier");
 		knownLabels_.push_back("ThreadsStackSize");
 		knownLabels_.push_back("RecoverySave");
 		knownLabels_.push_back("Intent");

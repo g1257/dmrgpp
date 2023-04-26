@@ -8,8 +8,6 @@ GeometryKind="chain";
 GeometryOptions="ConstantValues";
 dir0:Connectors=[[-1.0,0.0],[0.0,-1.0]];
 
-GeometryValueModifier="TimeSchedule";
-
 Model="IsingMultiOrb";
 
 Orbitals=2;

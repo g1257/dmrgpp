@@ -151,14 +151,6 @@ public:
 
 	PsimagLite::String label(SizeType i) const { return geometry_.label(i); }
 
-	template<typename T>
-	typename PsimagLite::EnableIf<PsimagLite::IsComplexNumber<T>::True ||
-	Loki::TypeTraits<T>::isStdFloat,
-	T>::Type vModifier(SizeType term, T value, RealType time) const
-	{
-		return geometry_.vModifier(term, value, time);
-	}
-
 	ComplexOrRealType operator()(SizeType smax,
 	                             SizeType emin,
 	                             const VectorSizeType& hItems,
