@@ -198,32 +198,20 @@ protected:
 		          'N',
 		          splus,
 		          'C',
-		          valueModiferTerm0,
-		          typename ModelTermType::Su2Properties(2, -1, 2));
+		          valueModiferTerm0);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
-		if (!isSu2) {
-			OpForLinkType sz("naturalSz");
-			szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
-		} else {
-			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
-			{ if (isSu2) value = -value;};
-			spsm.push(splus,
-			          'N',
-			          splus,
-			          'C',
-			          valueModifierTermOther,
-			          typename ModelTermType::Su2Properties(2, -1, 2));
-		}
+		OpForLinkType sz("naturalSz");
+		szsz.push(sz, 'N', sz, 'N');
 	}
 
 private:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
-	                                VectorQnType& qns,
-	                                const BlockType& block) const
+	                                 VectorQnType& qns,
+	                                 const BlockType& block) const
 	{
 		blockIsSize1OrThrow(block);
 

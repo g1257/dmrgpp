@@ -169,8 +169,7 @@ protected:
 		          'N',
 		          splus,
 		          'C',
-		          valueModiferTerm0,
-		          typename ModelTermType::Su2Properties(2, -1, 2));
+		          valueModiferTerm0);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
@@ -184,8 +183,7 @@ protected:
 			          'N',
 			          splus,
 			          'C',
-			          valueModifierTermOther,
-			          typename ModelTermType::Su2Properties(2, -1, 2));
+			          valueModifierTermOther);
 		}
 	}
 

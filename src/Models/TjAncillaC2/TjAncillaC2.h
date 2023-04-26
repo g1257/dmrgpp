@@ -319,8 +319,6 @@ protected:
 
 		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
 		{ value *= (isSu2) ? -0.5 : 0.5;};
-		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
-		{ if (isSu2) value = -value;};
 
 		for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
 			OpForLinkType splus1("splus", orb1, orb1);
@@ -336,18 +334,9 @@ protected:
 				          'N',
 				          splus2,
 				          'C',
-				          valueModiferTerm0,
-				          typename ModelTermType::Su2Properties(2, -1, 2));
+				          valueModiferTerm0);
 
-				if (!isSu2)
-					szsz.push(sz1, 'N', sz2, 'N', typename ModelTermType::Su2Properties(2, 0.5));
-				else
-					spsm.push(splus1,
-					          'N',
-					          splus2,
-					          'C',
-					          valueModifierTermOther,
-					          typename ModelTermType::Su2Properties(2, -1, 2));
+				szsz.push(sz1, 'N', sz2, 'N');
 
 				ninj.push(n1, 'N', n2, 'N');
 			}

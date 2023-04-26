@@ -308,8 +308,7 @@ protected:
 		          'N',
 		          splus0,
 		          'C',
-		          modifierTerm0,
-		          typename ModelTermType::Su2Properties(2, -1, 2));
+		          modifierTerm0);
 
 		auto modifierTerm1 = [isSu2](ComplexOrRealType& value) {if (isSu2) value = -value;};
 
@@ -320,8 +319,7 @@ protected:
 		          'N',
 		          sz0,
 		          'C',
-		          modifierTerm1,
-		          typename ModelTermType::Su2Properties(2, 0.5, 1));
+		          modifierTerm1);
 
 		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
 		OpForLinkType d("d");

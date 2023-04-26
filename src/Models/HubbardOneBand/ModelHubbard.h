@@ -364,8 +364,7 @@ protected:
 		               'N',
 		               cup,
 		               'C',
-		               valueModifer,
-		               typename ModelTermType::Su2Properties(1, 0, 0));
+		               valueModifer);
 	}
 
 	/* PSIDOC Hubbard::write

@@ -9,7 +9,6 @@ GeometryOptions="ConstantValues";
 dir0:Connectors=[-1.0];
 dir1:Connectors=[-1.0];
 LadderLeg=2;
-GeometryValueModifier="TimeSchedule";
 
 Model="IsingMultiOrb";
 

@@ -288,6 +288,7 @@ public:
 		str += "vector MagneticFieldZ;\n";
                 str += "matrix.real OnSiteLinksSzSz;\n";		
 		str += "string TargetFermionicParity;\n";
+		str += "matrix TimeSchedule;\n";
 
 		return str;
 	}

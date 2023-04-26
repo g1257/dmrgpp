@@ -311,7 +311,7 @@ private:
 
 		assert(site < v.cols());
 
-		RealType tmp = v(orb,site);
+		ComplexOrRealType tmp = v(orb,site);
 		const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, orb);
 		
 		if (c == 'Z') {
@@ -321,11 +321,9 @@ private:
 
 		assert(c == 'X');
 		if (modelParameters_.hasTimeSchedule_) {
-			PsimagLite::Matrix<RealType> data;
-			PsimagLite::InterpolateSchedule(data, modelParameters_.TimeSchedule, modelParameters_.ta, tau_);
-			SizeType ii = SizeType(time/tau_);
-			tmp *= data(ii,1);
+			tmp = timeDependentConnection(tmp, time, 1);
 		}
+
 		const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, orb);
 		hmatrix += tmp*sx.getCRS();
 	}
@@ -346,17 +344,15 @@ private:
 		if (v.cols() != linSize || v.rows() != orbs1) return;
 		assert(site < v.cols());
 
-		RealType tmp = v(orb,site);
+		ComplexOrRealType tmp = v(orb,site);
 
 		const OperatorType& sz1 = ModelBaseType::naturalOperator("sz", site, orb1);
 		const OperatorType& sz2 = ModelBaseType::naturalOperator("sz", site, orb2);
 
 		if (modelParameters_.hasTimeSchedule_) {
-			PsimagLite::Matrix<RealType> data;
-			PsimagLite::InterpolateSchedule(data, modelParameters_.TimeSchedule, modelParameters_.ta, tau_);
-			SizeType ii = SizeType(time/tau_);
-			tmp *= data(ii,2);
+			tmp = timeDependentConnection(tmp, time, 2);
 		}
+
 		// Calculate Sz Sz term on site
 		SparseMatrixType tmpMatrix;
 		multiply(tmpMatrix, sz1.getCRS(),sz2.getCRS());
@@ -428,11 +424,16 @@ private:
 	{
 		const SizeType orbitals = modelParameters_.orbitals;
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
+
+		auto mylambda = [this] (ComplexOrRealType& coupling, RealType time) {
+			coupling = timeDependentConnection(coupling, time, 2);
+		};
+
 		for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
 			OpForLinkType c1("sz", orb1, orb1);
 			for (SizeType orb2 = 0; orb2 < orbitals; ++orb2) {
 				OpForLinkType c2("sz", orb2, orb2);
-				szsz.push(c1,'N',c2,'N',typename ModelTermType::Su2Properties(2,0.5));
+				szsz.push(c1,'N',c2,'N',mylambda);
 			}
 		}
 	}
@@ -545,6 +546,122 @@ private:
 		}
 
 		return sum;
+	}
+
+	ComplexOrRealType timeDependentConnection(ComplexOrRealType tmp, RealType time, SizeType index) const
+	{
+		PsimagLite::Matrix<RealType> data;
+		interpolateSchedule(data);
+		SizeType ii = static_cast<SizeType>(time/tau_);
+		return tmp * data(ii, index);
+	}
+
+	void interpolateSchedule(PsimagLite::Matrix<RealType>& data) const
+	{
+		RealType sstep = tau_/modelParameters_.ta;
+		SizeType mysize = SizeType(1.0/sstep)+1;
+		data.resize(mysize,3);
+
+		const PsimagLite::Matrix<RealType>& timeSchedule = modelParameters_.timeSchedule;
+
+		for(SizeType kk = 0; kk < mysize;++kk)
+		{
+			RealType s = sstep*kk;
+			// Look for s
+			RealType Gamma  = 0;
+			RealType J  = 0;
+			bool found = false;
+			for(SizeType jj = 0; jj<timeSchedule.rows();++jj) {
+				RealType comp = timeSchedule(jj, 0);
+				if (fabs(s-comp)<1e-6) {
+					found = true;
+					Gamma = timeSchedule(jj,1);
+					J = timeSchedule(jj,2);
+				}
+			}
+			if (!found) {
+				RealType bottom = 0.0;
+				RealType top = 0.0;
+				bool found_bottom = false;
+				SizeType kj = 0;
+				for(SizeType jj = 0; jj<timeSchedule.rows();++jj) {
+					RealType compb = timeSchedule(jj,0);
+					if (!found_bottom && compb>s) {
+						bottom = timeSchedule(jj-1,0);
+						top = timeSchedule(jj,0);
+						found_bottom = true;
+						kj = jj-1;
+					}
+				}
+				// Linear Interpolation for now
+				RealType den = top-bottom;
+				RealType mGamma = (timeSchedule(kj+1,1)-timeSchedule(kj,1))/den;
+				RealType mJ = (timeSchedule(kj+1,2)-timeSchedule(kj,2))/den;
+				RealType qGamma = (timeSchedule(kj,1)*timeSchedule(kj+1,0)-
+				                 timeSchedule(kj+1,1)*timeSchedule(kj,0))/den;
+				RealType qJ = (timeSchedule(kj,2)*timeSchedule(kj+1,0)-
+				             timeSchedule(kj+1,2)*timeSchedule(kj,0))/den;
+				Gamma = mGamma*s+qGamma;
+				J = mJ*s+qJ;
+			}
+			data(kk,0) = s;
+			data(kk,1) = Gamma;
+			data(kk,2) = J;
+		}
+	}
+
+	void interpolateSchedule(PsimagLite::Matrix<std::complex<RealType> >& data) const
+	{
+		RealType sstep = tau_/modelParameters_.ta;
+		SizeType mysize = SizeType(1.0/sstep)+1;
+		data.resize(mysize,3);
+
+		const PsimagLite::Matrix<RealType>& timeSchedule = modelParameters_.timeSchedule;
+
+		for(SizeType kk = 0; kk < mysize;++kk)
+		{
+			RealType s = sstep*kk;
+			// Look for s
+			std::complex<RealType> Gamma  = 0;
+			std::complex<RealType> J  = 0;
+			bool found = false;
+			for(SizeType jj = 0; jj<timeSchedule.rows();++jj) {
+				std::complex<RealType> comp = timeSchedule(jj,0);
+				if (fabs(s-comp)<1e-6) {
+					found = true;
+					Gamma = timeSchedule(jj,1);
+					J = timeSchedule(jj,2);
+				}
+			}
+			if (!found) {
+				std::complex<RealType> bottom = 0.0;
+				std::complex<RealType> top = 0.0;
+				bool found_bottom = false;
+				SizeType kj = 0;
+				for(SizeType jj = 0; jj<timeSchedule.rows();++jj) {
+					std::complex<RealType> compb = timeSchedule(jj,0);
+					if (!found_bottom && std::real(compb)>s) {
+						bottom = timeSchedule(jj-1,0);
+						top = timeSchedule(jj,0);
+						found_bottom = true;
+						kj = jj-1;
+					}
+				}
+				// Linear Interpolation for now
+				std::complex<RealType> den = top-bottom;
+				std::complex<RealType> mGamma = (timeSchedule(kj+1,1)-timeSchedule(kj,1))/den;
+				std::complex<RealType> mJ = (timeSchedule(kj+1,2)-timeSchedule(kj,2))/den;
+				std::complex<RealType> qGamma = (timeSchedule(kj,1)*timeSchedule(kj+1,0)-
+				                 timeSchedule(kj+1,1)*timeSchedule(kj,0))/den;
+				std::complex<RealType> qJ = (timeSchedule(kj,2)*timeSchedule(kj+1,0)-
+				             timeSchedule(kj+1,2)*timeSchedule(kj,0))/den;
+				Gamma = mGamma*s+qGamma;
+				J = mJ*s+qJ;
+			}
+			data(kk,0) = s;
+			data(kk,1) = Gamma;
+			data(kk,2) = J;
+		}
 	}
 
 	ModelParametersType  modelParameters_;

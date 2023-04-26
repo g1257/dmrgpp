@@ -274,8 +274,7 @@ protected:
 			          'N',
 			          splus,
 			          'C',
-			          valueModiferTerm0,
-			          typename ModelTermType::Su2Properties(2, -1, 2));
+			          valueModiferTerm0);
 
 			if (!isSu2)
 				szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
@@ -284,8 +283,7 @@ protected:
 				          'N',
 				          splus,
 				          'C',
-				          valueModifierTermOther,
-				          typename ModelTermType::Su2Properties(2, -1, 2));
+				          valueModifierTermOther);
 
 			ninj.push(n, 'N', n, 'N');
 
@@ -293,8 +291,7 @@ protected:
 			        'N',
 			        pair,
 			        'C',
-			        [](ComplexOrRealType& value) {value *= (-1.0);},
-			        typename ModelTermType::Su2Properties(1, 1, 0));
+			        [](ComplexOrRealType& value) {value *= (-1.0);});
 		}
 	}
 

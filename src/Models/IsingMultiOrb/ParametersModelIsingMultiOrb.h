@@ -98,7 +98,7 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 	      magneticFieldX(0, 0),
 	      magneticFieldZ(0, 0),
 	      onsitelinksSzSz(0, 0),
-	      TimeSchedule(0, 0),
+	      timeSchedule(0, 0),
 	      hasTimeSchedule_(false),
 	      ta(0.0)
 	{
@@ -164,14 +164,14 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 
 		bool hasTimeSchedule = false;
 		try {
-			io.read(TimeSchedule,"TimeSchedule");
+			io.read(timeSchedule, "TimeSchedule");
 			hasTimeSchedule = true;
 		} catch (std::exception&) {}
 
 		if (hasTimeSchedule ==true) { // Check Input to see if everything is correct
 
-			if (TimeSchedule.cols()>0 && TimeSchedule.cols()!=3)
-				throw PsimagLite::RuntimeError("TimeSchedule: Expecting cols == 3, [s,Gamma(s),J(s)]\n");
+			if (timeSchedule.cols()>0 && timeSchedule.cols()!=3)
+				err("TimeSchedule: Expecting cols == 3, [s,Gamma(s),J(s)]\n");
 
 			bool hasta = false;
 			try {
@@ -187,11 +187,10 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 			} catch (std::exception&) {}
 
 			if (hastau && !hasta)
-				throw PsimagLite::RuntimeError("TimeSchedule: TSPTau is set, "
-			                                   "so you must have ta=something>0 in the input!\n");
+				err("TimeSchedule: TSPTau is set, so you must have ta=something>0 in the input!\n");
 			if (hasta && hastau)
-				if(ta<0 || fabs(ta)<1e-5)
-					throw PsimagLite::RuntimeError("TimeSchedule: ta is negative or too small!\n");
+				if (ta<0 || fabs(ta)<1e-5)
+					err("TimeSchedule: ta is negative or too small!\n");
 
 			hasTimeSchedule_ = true;
 		}
@@ -259,7 +258,7 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 	MatrixRealType magneticFieldX;
 	MatrixRealType magneticFieldZ;
 	MatrixRealType onsitelinksSzSz;
-	MatrixRealType TimeSchedule;
+	MatrixRealType timeSchedule;
 	bool hasTimeSchedule_;
 	RealType ta;
 };

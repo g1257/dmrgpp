@@ -329,8 +329,7 @@ protected:
 		          'N',
 		          splus0,
 		          'C',
-		          modifierTerm0,
-		          typename ModelTermType::Su2Properties(2, -1, 2));
+		          modifierTerm0);
 
 		if (hot_) {
 			OpForLinkType splus1("splus", 1, 1);
@@ -338,8 +337,7 @@ protected:
 			          'N',
 			          splus1,
 			          'C',
-			          modifierTerm0,
-			          typename ModelTermType::Su2Properties(2, -1, 2));
+			          modifierTerm0);
 		}
 
 		auto modifierTerm1 = [isSu2](SparseElementType& value) {if (isSu2) value = -value;};
@@ -351,8 +349,7 @@ protected:
 		          'N',
 		          sz0,
 		          'C',
-		          modifierTerm1,
-		          typename ModelTermType::Su2Properties(2, 0.5, 1));
+		          modifierTerm1);
 
 		if (hot_) {
 			OpForLinkType splus1("splus", 1, 1);
@@ -362,10 +359,9 @@ protected:
 				          'N',
 				          splus1,
 				          'C',
-				          modifierTerm1,
-				          typename ModelTermType::Su2Properties(2, 0.5, 1));
+				          modifierTerm1);
 			else
-				szsz.push(sz1, 'N', sz1, 'C', typename ModelTermType::Su2Properties(2, 0.5, 1));
+				szsz.push(sz1, 'N', sz1, 'C');
 		}
 
 		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
@@ -376,8 +372,7 @@ protected:
 			             'N',
 			             d,
 			             'C',
-			             modifierTermD0,
-			             typename ModelTermType::Su2Properties(2, 1, 0));
+			             modifierTermD0);
 			return;
 		}
 
@@ -401,43 +396,37 @@ protected:
 		             'N',
 		             M0,
 		             'C',
-		             modifierTermDoff,
-		             typename ModelTermType::Su2Properties(2, 1, 0));
+		             modifierTermDoff);
 
 		ancilla.push(N1,
 		             'N',
 		             M1,
 		             'C',
-		             modifierTermDoff,
-		             typename ModelTermType::Su2Properties(2, 1, 0));
+		             modifierTermDoff);
 
 		ancilla.push(N2,
 		             'N',
 		             M2,
 		             'C',
-		             modifierTermDoff,
-		             typename ModelTermType::Su2Properties(2, 1, 0));
+		             modifierTermDoff);
 
 		ancilla.push(T0,
 		             'N',
 		             W0,
 		             'C',
-		             modifierTermDoff,
-		             typename ModelTermType::Su2Properties(2, 1, 0));
+		             modifierTermDoff);
 
 		ancilla.push(T1,
 		             'N',
 		             W1,
 		             'C',
-		             modifierTermDoff,
-		             typename ModelTermType::Su2Properties(2, 1, 0));
+		             modifierTermDoff);
 
 		ancilla.push(T2,
 		             'N',
 		             T2,
 		             'C',
-		             modifierTermDoff,
-		             typename ModelTermType::Su2Properties(2, 1, 0));
+		             modifierTermDoff);
 	}
 
 private:

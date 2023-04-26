@@ -225,7 +225,7 @@ protected:
 		          'N',
 		          splus,
 		          'C',
-		          [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5;},
+		          [isSu2](SparseElementType& value, RealType) { value *= (isSu2) ? -0.5 : 0.5;},
 		typename ModelTermType::Su2Properties(2, -1, 2));
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
@@ -235,8 +235,7 @@ protected:
 		          'N',
 		          sz,
 		          'N',
-		          [isSu2](SparseElementType& value) { if (isSu2) value = -value; },
-		typename ModelTermType::Su2Properties(2, 0.5, 1));
+		          [isSu2](SparseElementType& value) { if (isSu2) value = -value; });
 
 		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
 		OpForLinkType pair("pair");

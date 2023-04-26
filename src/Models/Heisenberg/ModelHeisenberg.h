@@ -331,8 +331,7 @@ protected:
 
 		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *= 0.5;};
 
-		typename ModelTermType::Su2Properties su2properties(2, -1, 2);
-		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
+		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 
 		connectionSzSz();
 

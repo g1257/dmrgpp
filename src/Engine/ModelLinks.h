@@ -32,7 +32,8 @@ public:
 
 	public:
 
-		typedef std::function<void(ComplexOrRealType&)> LambdaType;
+		typedef std::function<void(ComplexOrRealType&)> OldLambdaType;
+		typedef std::function<void(ComplexOrRealType&, RealType)> LambdaType;
 
 		OneLink(VectorSizeType indices_,
 		        VectorSizeType orbs_,
@@ -51,6 +52,25 @@ public:
 		      category(category_),
 		      modifier(vModifier_)
 		{}
+
+		OneLink(VectorSizeType indices_,
+		        VectorSizeType orbs_,
+		        ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
+		        PsimagLite::String mods_,
+		        SizeType angularMomentum_,
+		        RealType_ angularFactor_,
+		        SizeType category_,
+		        OldLambdaType vModifier_)
+		    : indices(indices_),
+		      orbs(orbs_),
+		      fermionOrBoson(fermionOrBoson_),
+		      mods(mods_),
+		      angularMomentum(angularMomentum_),
+		      angularFactor(angularFactor_),
+		      category(category_)
+		{
+			modifier = [vModifier_](ComplexOrRealType& value, RealType) { vModifier_(value);};
+		}
 
 		VectorSizeType indices;
 		VectorSizeType orbs;
@@ -132,10 +152,10 @@ public:
 		          char mod2,
 		          Su2Properties su2properties)
 		{
-			push(op1, mod1, op2, mod2, [](ComplexOrRealType&) {}, su2properties);
+			push(op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) {}, su2properties);
 		}
 
-		// give only lambda
+		// give only lambda (new)
 		template<typename OpaqueOp>
 		void push(const OpaqueOp& op1,
 		          char mod1,
@@ -146,6 +166,19 @@ public:
 			push(op1, mod1, op2, mod2, modifier, Su2Properties());
 		}
 
+		// give only lambda (old)
+		template<typename OpaqueOp>
+		void push(const OpaqueOp& op1,
+		          char mod1,
+		          const OpaqueOp& op2,
+		          char mod2,
+		          typename OneLink::OldLambdaType modifier)
+		{
+			LambdaType newModif = [modifier](ComplexOrRealType& value, RealType)
+			{ modifier(value);};
+			push(op1, mod1, op2, mod2, newModif, Su2Properties());
+		}
+
 		// give nothing
 		template<typename OpaqueOp>
 		void push(const OpaqueOp& op1,
@@ -153,7 +186,7 @@ public:
 		          const OpaqueOp& op2,
 		          char mod2)
 		{
-			return push(op1, mod1, op2, mod2,  [](ComplexOrRealType&) {}, Su2Properties());
+			return push(op1, mod1, op2, mod2,  [](ComplexOrRealType&, RealType) {}, Su2Properties());
 
 		}
 
@@ -201,7 +234,7 @@ public:
 		           const OpaqueOp& op2, char mod2,
 		           const OpaqueOp& op3, char mod3,
 		           const OpaqueOp& op4, char mod4
-		           ,LambdaType vModifier = [](ComplexOrRealType&) {},
+		           ,LambdaType vModifier = [](ComplexOrRealType&, RealType) {},
 		Su2Properties su2properties = Su2Properties())
 		{
 			if (links_.size() > 0) {

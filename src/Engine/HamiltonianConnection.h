@@ -278,7 +278,7 @@ private:
 
 				tmp = superGeometry_.vModifier(termIndexForGeom, tmp, targetTime_);
 
-				oneLink.modifier(tmp);
+				oneLink.modifier(tmp, targetTime_);
 
 				ManyToTwoConnectionType manyToTwo(hItems,
 				                                  type,

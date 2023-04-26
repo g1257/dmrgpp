@@ -133,7 +133,7 @@ public:
 			assert(ind < modelParams_.kondoJ.size());
 			hmatrix += modelParams_.kondoJ[ind] * kondoOnSite(ind, niup, nidown);
 
-			 // EARLY CONTINUE HERE
+			// EARLY CONTINUE HERE
 			if (modelParams_.extended == ParametersKondoType::ExtEnum::NONE) continue;
 
 			const OperatorType& Splus = ModelBaseType::naturalOperator("Splus", 0, 0);
@@ -214,26 +214,16 @@ protected:
 
 		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
 		{ value *= (isSu2) ? -0.5 : 0.5;};
-		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
-		{ if (isSu2) value = -value;};
 
 		OpForLinkType splus("Splus");
 		OpForLinkType sz("Sz");
 		OpForLinkType n("n");
 
-		typename ModelTermType::Su2Properties su2properties(2, -1, 2);
-		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0, su2properties);
+		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 
-		if (!isSu2) {
-			typename ModelTermType::Su2Properties su2properties(2, 0.5);
-			szsz.push(sz, 'N', sz, 'N', su2properties);
-		} else {
-			typename ModelTermType::Su2Properties su2properties(2, -1, 2);
-			spsm.push(splus, 'N', splus, 'C', valueModifierTermOther, su2properties);
-		}
+		szsz.push(sz, 'N', sz, 'N');
 
 		ninj.push(n, 'N', n, 'N');
-
 
 		// pairing terms added on January 18th, 2021
 		// EARLY EXIT HERE
