@@ -177,13 +177,6 @@ public:
 		return terms_[term]->operator()(i1,edof1,i2,edof2);
 	}
 
-	template<typename T>
-	typename EnableIf<IsComplexNumber<T>::True || Loki::TypeTraits<T>::isStdFloat,
-	T>::Type vModifier(SizeType term, T value, RealType time) const
-	{
-		return terms_[term]->vModifier(value,time);
-	}
-
 	bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
 	{
 		bool b = false;

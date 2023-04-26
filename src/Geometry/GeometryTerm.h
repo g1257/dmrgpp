@@ -199,9 +199,16 @@ public:
 			directions_.push_back(GeometryDirectionType(io, aux, geometryBase_));
 		}
 
+		bool hasModifier = false;
 		try {
-			io.readline(vModifier_,  "GeometryValueModifier=");
+			String vModifier;
+			io.readline(vModifier,  "GeometryValueModifier=");
+			hasModifier = true;
 		} catch (std::exception&) {}
+
+		if (hasModifier) {
+			throw RuntimeError("GeometryValueModifier is no longer allowed\n");
+		}
 
 		cacheValues();
 
@@ -226,7 +233,6 @@ public:
 		ioSerializer.write(label + "/orbitals_", orbitals_);
 		// geometryBase_->write(label + "/geometryBase_", ioSerializer);
 		ioSerializer.write(label + "/gOptions_", gOptions_);
-		ioSerializer.write(label + "/vModifier_", vModifier_);
 		ioSerializer.write(label + "/directions_", directions_);
 		cachedValues_.write(label + "/cachedValues_", ioSerializer);
 	}
@@ -279,29 +285,6 @@ public:
 		return cachedValues_(k1,k2);
 	}
 
-	template<typename T>
-	typename EnableIf<IsComplexNumber<T>::True || Loki::TypeTraits<T>::isStdFloat,
-	T>::Type vModifier(T value, RealType time) const
-	{
-		if (vModifier_ == "") return value;
-
-		// We don't want to modify the symbolic modifier, so we make a copy
-		String numericModifier = vModifier_;
-
-		// change %t --> t
-		replaceAll(numericModifier, "%t", ttos(time));
-		// change %v --> value (unmodified connection value)
-		replaceAll(numericModifier, "%v", ttos(value));
-
-		// split by commas
-		Vector<String>::Type ve;
-		split(ve, numericModifier, ",");
-
-		typedef PlusMinusMultiplyDivide<T> PrimitivesType;
-		PrimitivesType primitives;
-		ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
-		return expresionForAST.exec();
-	}
 
 	//assumes 1<smax+1 < emin
 	const ComplexOrRealType& operator()(SizeType smax,
@@ -486,7 +469,6 @@ private:
 	SizeType orbitals_;
 	GeometryBaseType* geometryBase_;
 	String gOptions_;
-	String vModifier_;
 	typename Vector<GeometryDirectionType>::Type directions_;
 	Matrix<ComplexOrRealType> cachedValues_;
 }; // class GeometryTerm
