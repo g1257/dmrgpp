@@ -31,22 +31,25 @@ private:
 	{
 		checked_ = true;
 		value_ = false;
-		std::ifstream fin(filename.c_str());
+		std::ifstream fin(filename.c_str(), std::ios::ate);
 		if (!fin || fin.bad() || !fin.good()) {
 			value_ = false;
 			return;
 		}
 
 		char schar1[1024];
-		while (!fin.eof()) {
+		std::streampos size = fin.tellg();
+		int i = 1;
+		while (i<=size) {
+			fin.seekg(-i,std::ios::end);
 			fin.getline(schar1, 1023);
 			PsimagLite::String str(schar1);
 			if (str.find("Turning off the engine.") != PsimagLite::String::npos) {
 				value_ = true;
 				break;
 			}
+			i++;
 		}
-
 		fin.close();
 	}
 
