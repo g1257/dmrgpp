@@ -21,6 +21,8 @@ public:
 		zeroHilbert_ = model.hilbertSize(0);
 	}
 
+	void setDir(ProgramGlobals::DirectionEnum dir) { dir_ = dir; }
+
 	SizeType hilbertMain() const { return mainHilbert_; }
 
 	SizeType hilbertAux() const { return auxHilbert_; }

@@ -192,16 +192,17 @@ private:
 
 		const ProgramGlobals::DirectionEnum dir1 = ProgramGlobals::DirectionEnum::EXPAND_ENVIRON;
 
+		OneSiteSpacesType oneSiteSpaces2(oneSiteSpaces);
+		oneSiteSpaces2.setDir(dir1);
 		for (SizeType ii = 0; ii < psiDest.sectors(); ++ii)
-			transformVectorParallel(psiDest, psiSrc, lrs, ii, oneSiteSpaces, dir1);
+			transformVectorParallel(psiDest, psiSrc, lrs, ii, oneSiteSpaces2);
 	}
 
 	void transformVectorParallel(VectorWithOffsetType& psiDest,
 	                             const VectorWithOffsetType& psiSrc,
 	                             const LeftRightSuperType& lrs,
 	                             SizeType iNew,
-	                             const OneSiteSpacesType& oneSiteSpaces,
-	                             typename ProgramGlobals::DirectionEnum dir) const
+	                             const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		if (wftOptions_.accel == WftOptionsType::ACCEL_PATCHES) {
 			SizeType iOld = findIold(psiSrc, psiDest.qn(iNew));
@@ -222,8 +223,7 @@ private:
 		                          lrs,
 		                          i0,
 		                          oneSiteSpaces,
-		                          dmrgWaveStruct_,
-		                          dir);
+		                          dmrgWaveStruct_);
 
 		threadedWft.loopCreate(helperWft);
 	}
@@ -294,8 +294,11 @@ private:
 			return transformVector2FromInfinite(psiDest,psiSrc,lrs,oneSiteSpaces);
 
 		const ProgramGlobals::DirectionEnum dir2 = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
+		OneSiteSpacesType oneSiteSpaces2(oneSiteSpaces);
+		oneSiteSpaces2.setDir(dir2);
+
 		for (SizeType ii=0;ii<psiDest.sectors();ii++)
-			transformVectorParallel(psiDest,psiSrc,lrs,ii,oneSiteSpaces,dir2);
+			transformVectorParallel(psiDest, psiSrc, lrs, ii, oneSiteSpaces2);
 	}
 
 	void transformVector2FromInfinite(VectorWithOffsetType& psiDest,

@@ -107,15 +107,13 @@ public:
 	               const LeftRightSuperType& lrs,
 	               SizeType i0,
 	               const OneSiteSpacesType& oneSiteSpaces,
-	               const DmrgWaveStructType& dmrgWaveStruct,
-	               typename ProgramGlobals::DirectionEnum dir)
+	               const DmrgWaveStructType& dmrgWaveStruct)
 	    : psiDest_(psiDest),
 	      psiSrc_(psiSrc),
 	      lrs_(lrs),
 	      i0_(i0),
 	      oneSiteSpaces_(oneSiteSpaces),
 	      dmrgWaveStruct_(dmrgWaveStruct),
-	      dir_(dir),
 	      pack1_(0),
 	      pack2_(0)
 	{
@@ -124,7 +122,9 @@ public:
 		transposeConjugate(wsT_,ws_);
 		transposeConjugate(weT_,we_);
 		SizeType vOfNk = oneSiteSpaces.hilbertMain(); // CHECK!
-		if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+		typename ProgramGlobals::DirectionEnum dir = oneSiteSpaces.direction();
+
+		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			assert(dmrgWaveStruct_.lrs().right().permutationInverse().size() ==
 			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).rows());
 			assert(lrs_.left().permutationInverse().size()/vOfNk==
@@ -153,8 +153,9 @@ public:
 	void doTask(SizeType taskNumber, SizeType)
 	{
 		SizeType start = psiDest_.offset(i0_);
+		typename ProgramGlobals::DirectionEnum dir = oneSiteSpaces_.direction();
 
-		if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
+		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			SizeType ip = 0;
 			SizeType alpha = 0;
 			SizeType kp = 0;
@@ -243,7 +244,6 @@ private:
 	SizeType i0_;
 	const OneSiteSpacesType& oneSiteSpaces_;
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	typename ProgramGlobals::DirectionEnum dir_;
 	SparseMatrixType we_;
 	SparseMatrixType ws_;
 	PackIndicesType* pack1_;
