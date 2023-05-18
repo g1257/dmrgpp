@@ -187,6 +187,7 @@ public:
 		knownLabels_.push_back("PotentialT");
 		knownLabels_.push_back("omega");
 		knownLabels_.push_back("MagneticFieldX");
+		knownLabels_.push_back("MagneticFieldY");
 		knownLabels_.push_back("MagneticFieldZ");
                 knownLabels_.push_back("OnSiteLinksSzSz");
 		knownLabels_.push_back("SpinOrbit");
@@ -284,8 +285,9 @@ public:
 		str += "string FindSymmetrySector;\n";
 		str += "string AddOnSiteHamiltonian;\n";
 		str += "vector MagneticFieldX;\n";
+		str += "vector MagneticFieldY;\n";
 		str += "vector MagneticFieldZ;\n";
-                str += "matrix.real OnSiteLinksSzSz;\n";		
+                str += "matrix.real OnSiteLinksSzSz;\n";
 		str += "string TargetFermionicParity;\n";
 		str += "matrix TimeSchedule;\n";
 
