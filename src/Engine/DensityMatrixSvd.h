@@ -401,7 +401,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
 
 			// DO NOT USE m after this line
-			allTargets_.deleteMatrix(igroup);
+			//allTargets_.deleteMatrix(igroup);
 
 			SizeType x = eigsOnePatch.size();
 			if (x > partSize) x = partSize;

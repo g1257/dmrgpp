@@ -187,11 +187,11 @@ public:
 		*this = c;
 	}
 
-	void setBlock(SizeType i,int offset,MatrixInBlockTemplate const &m)
+	void setBlock(SizeType i,int offset,MatrixInBlockTemplate& m)
 	{
 		mustBeSquare("setBlock");
 		assert(i < data_.size());
-		data_[i]=m;
+		data_[i].swap(m);
 		assert(i < offsetsRows_.size() && i < offsetsCols_.size());
 		offsetsRows_[i] = offsetsCols_[i] = offset;
 	}
