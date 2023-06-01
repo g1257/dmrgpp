@@ -48,7 +48,8 @@ void main1(InputNgType::Readable& io,
 
 	typedef Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType> ToolBoxType;
 	ConcurrencyType::codeSectionParams.npthreads = dmrgSolverParams.nthreads;
-	typename ToolBoxType::ParametersForGrepType params(toolOptions.extraOptions,
+	PsimagLite::String label = (toolOptions.action == "energies") ? "lowest" : toolOptions.extraOptions;
+	typename ToolBoxType::ParametersForGrepType params(label,
 	                                                   toolOptions.shortoption);
 	typename ToolBoxType::ActionEnum act = ToolBoxType::actionCanonical(toolOptions.action);
 	if (act == ToolBoxType::ACTION_GREP) {
@@ -141,10 +142,10 @@ int main(int argc,char **argv)
 	InputCheck inputCheck;
 
 	bool filenameIsCout = false;
-	static const PsimagLite::String search = "iscout";
-	size_t pos = toolOptions.extraOptions.find(search);
-	if (pos != PsimagLite::String::npos) {
-		toolOptions.extraOptions.erase(pos, search.length());
+	PsimagLite::String dotCout = ".cout";
+	size_t pos = toolOptions.filename.find(dotCout);
+	if (pos != PsimagLite::String::npos &&
+	        pos + dotCout.size() == toolOptions.filename.size()) {
 		filenameIsCout = true;
 	}
 

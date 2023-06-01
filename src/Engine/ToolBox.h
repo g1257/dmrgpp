@@ -197,8 +197,18 @@ public:
 	static void printGrep(PsimagLite::String inputfile,
 	                      ParametersForGrepType params)
 	{
-		PsimagLite::String coutName = ProgramGlobals::coutName(inputfile);
+		SizeType lenInput = inputfile.size();
+		PsimagLite::String dotcout = ".cout";
+		SizeType lenDotcout = dotcout.size();
+		SizeType loc = (lenInput < lenDotcout) ? 0 : lenInput - lenDotcout;
+		bool isCout = (inputfile.substr(loc, lenDotcout) == dotcout);
+
+		PsimagLite::String coutName = (isCout) ? inputfile : ProgramGlobals::coutName(inputfile);
 		std::ifstream fin(coutName.c_str());
+		if (!fin || fin.bad()) {
+			err("Could not open file " + coutName + "\n");
+		}
+
 		GrepForLabel::hook(fin,"",1,params);
 	}
 
