@@ -542,6 +542,10 @@ struct ParametersDmrgSolver {
 
 		std::cout<<"FiniteLoopLengths=[";
 
+        if (lastSite == 1 && !latticeIsOdd) {
+            lastSite = 0;
+        }
+
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
 			int length = (tmpMat(i, 0) == "@auto") ? autoNumber(i, numberOfSites, lastSite)
 			                                       : algebraicStringToNumber.
@@ -550,9 +554,12 @@ struct ParametersDmrgSolver {
 			FiniteLoopType fl(length, m, tmpMat(i, 2), truncationC);
 			vfl.push_back(fl);
 			if (lastSite >= 0) {
+
 				lastSite += length;
-				if (latticeIsOdd && lastSite == 1)
+
+                if (latticeIsOdd && lastSite == 1) {
 					lastSite = 0;
+                }
 			}
 
 			std::cout<<length;
@@ -583,7 +590,7 @@ struct ParametersDmrgSolver {
 		if (isRestart || allinsystem) {
 
 			SizeType oneOrTwo = (numberOfSites & 1) ? 1 : 2;
-			if (lastSite != 1 && (lastSite + oneOrTwo) != numberOfSites)
+			if (lastSite != 0 && (lastSite + oneOrTwo) != numberOfSites)
 				err("@auto: Internal error; please report this problem\n");
 
 			int x = (numberOfSites - 2);
