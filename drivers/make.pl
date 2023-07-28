@@ -9,7 +9,7 @@ use Make;
 my @drivers = qw/integrator sparseSolverTest testCRSMatrix minimizer
                  combineContinuedFraction continuedFractionCollection range
                  kernelPolynomial linearPrediction options randomTest svd
-		 testLapack threads testIsClass testMemResolv1 sumDecomposition
+		 testLapack threads testIsClass sumDecomposition
 		 calculator closuresTest base64test testIoNg fit/;
 my $fh;
 open($fh, ">", "Makefile") or die "$0: Cannot open Makefile for writing\n";

@@ -89,7 +89,7 @@ template<typename T>
 typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
 norm(T t)
 {
-	return fabs(t);
+	return std::fabs(t);
 }
 
 template<typename T>

@@ -157,7 +157,7 @@ public:
 	virtual ValueType exec(const VectorValueType& v) const
 	{
 		assert(v.size() == 2);
-		if (fabs(v[1]) < 1e-6) return v[0];
+		if (std::fabs(v[1]) < 1e-6) return v[0];
 
 		return v[0] / v[1];
 	}
