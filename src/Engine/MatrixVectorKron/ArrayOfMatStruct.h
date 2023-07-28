@@ -203,13 +203,17 @@ public:
 			for(SizeType ipatch=0; ipatch < ipatchSize; ipatch++) {
 				sum_ipatch_Size += ipatch_Size[ ipatch ];
 			};
-			assert( (0 <= sum_ipatch_Size) && (sum_ipatch_Size <= sparse.rows()) );
+			if (sum_ipatch_Size > sparse.rows()) {
+				err("sum ipatch size failed\n");
+			}
 
 			SizeType sum_jpatch_Size = 0;
 			for(SizeType jpatch=0; jpatch < jpatchSize; jpatch++) {
 				sum_jpatch_Size += jpatch_Size[ jpatch ];
 			};
-			assert( (0 <= sum_jpatch_Size) && (sum_jpatch_Size <= ncols) );
+			if (sum_jpatch_Size > ncols) {
+				err("Sum jpatch size failed\n");
+			}
 
 		};
 

@@ -1,4 +1,5 @@
 #include "util.h"
+#include "PsimagLite.h"
 
 template<typename ComplexOrRealType>
 void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
@@ -88,7 +89,9 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 	for(ib=0; ib < nrow_B; ib++) {
 		total_nnz += nnz[ib];
 	};
-	assert( total_nnz <= max_nnz);
+	if ( total_nnz > max_nnz) {
+		err("Not enough storage for nnz\n");
+	}
 
 	/*
   * ---------------------------------

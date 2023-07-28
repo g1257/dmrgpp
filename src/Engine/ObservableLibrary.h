@@ -589,9 +589,6 @@ private:
 		const RealType oneF = 1;
 		Su2RelatedType su2Related;
 		SizeType site = 1;
-		SizeType orbitals = logBase2(model_.hilbertSize(site));
-		assert(!(orbitals & 1));
-		orbitals /= 2;
 
 		if (flag==0) {
 			SizeType spin0 = 0; // up

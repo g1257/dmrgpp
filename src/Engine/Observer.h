@@ -482,13 +482,9 @@ public:
 		assert(fpd.n_row()==fpd.n_col());
 
 		SizeType hs = model.hilbertSize(0);
-		SizeType nx = 0;
 		while (hs) {
 			hs>>=1;
-			nx++;
 		}
-
-		nx /= 2;
 
 		assert(fpd.n_row()>1);
 		typedef std::pair<SizeType,SizeType> PairType;
