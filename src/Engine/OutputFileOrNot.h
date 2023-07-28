@@ -3,16 +3,19 @@
 #include "Io/IoNg.h"
 #include "Io/IoSelector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-class OutputFileOrNot {
+class OutputFileOrNot
+{
 
 public:
 
 	OutputFileOrNot(PsimagLite::String filename,
-	                PsimagLite::IoNg::OpenMode mode,
-	                bool disabled)
-	    : filename_(filename), ptr_(nullptr)
+	    PsimagLite::IoNg::OpenMode mode,
+	    bool disabled)
+	    : filename_(filename)
+	    , ptr_(nullptr)
 	{
 		if (!disabled)
 			ptr_ = new PsimagLite::IoSelector::Out(filename, mode);
@@ -35,53 +38,60 @@ public:
 		return *ptr_;
 	}
 
-	template<typename T>
+	template <typename T>
 	void write(const T& t, PsimagLite::String str)
 	{
-		if (!ptr_) return;
+		if (!ptr_)
+			return;
 		ptr_->write(t, str);
 	}
 
-	template<typename T>
+	template <typename T>
 	void write(const T& t,
-	           PsimagLite::String str,
-	           PsimagLite::IoNg::Out::Serializer::WriteMode mode,
-	           typename std::enable_if<PsimagLite::IsVectorLike<T>::True, int>::type = 0)
+	    PsimagLite::String str,
+	    PsimagLite::IoNg::Out::Serializer::WriteMode mode,
+	    typename std::enable_if<PsimagLite::IsVectorLike<T>::True, int>::type = 0)
 	{
-		if (!ptr_) return;
+		if (!ptr_)
+			return;
 		ptr_->write(t, str, mode);
 	}
 
-	template<typename T>
+	template <typename T>
 	void overwrite(const T& t, PsimagLite::String str)
 	{
-		if (!ptr_) return;
+		if (!ptr_)
+			return;
 		ptr_->overwrite(t, str);
 	}
 
 	void write(SizeType c,
-	           PsimagLite::String str,
-	           PsimagLite::IoNg::Out::Serializer::WriteMode mode)
+	    PsimagLite::String str,
+	    PsimagLite::IoNg::Out::Serializer::WriteMode mode)
 	{
-		if (!ptr_) return;
+		if (!ptr_)
+			return;
 		ptr_->write(c, str, mode);
 	}
 
 	void flush()
 	{
-		if (!ptr_) return;
+		if (!ptr_)
+			return;
 		ptr_->flush();
 	}
 
 	void close()
 	{
-		if (!ptr_) return;
+		if (!ptr_)
+			return;
 		ptr_->close();
 	}
 
 	void createGroup(PsimagLite::String str)
 	{
-		if (!ptr_) return;
+		if (!ptr_)
+			return;
 		ptr_->createGroup(str);
 	}
 

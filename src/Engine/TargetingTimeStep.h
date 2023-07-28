@@ -71,32 +71,36 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGETING_TIMESTEP_H
 #define TARGETING_TIMESTEP_H
 
-#include <iostream>
+#include "BlockDiagonalMatrix.h"
+#include "ParametersForSolver.h"
+#include "PredicateAwesome.h"
+#include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 #include "TargetParamsTimeStep.h"
-#include "ProgramGlobals.h"
-#include "ParametersForSolver.h"
+#include "TargetingBase.h"
 #include "TimeVectorsKrylov.h"
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
-#include "TargetingBase.h"
-#include "BlockDiagonalMatrix.h"
-#include "PredicateAwesome.h"
+#include <iostream>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingTimeStep : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingTimeStep : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
+{
 
-	enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
+	enum { BORDER_NEITHER,
+		BORDER_LEFT,
+		BORDER_RIGHT };
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef std::pair<SizeType,SizeType> PairType;
+	typedef std::pair<SizeType, SizeType> PairType;
 	typedef typename BaseType::OptionsType OptionsType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -122,44 +126,44 @@ public:
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingTimeStep(const LeftRightSuperType& lrs,
-	                  const CheckpointType& checkPoint,
-	                  const WaveFunctionTransfType& wft,
-	                  const QnType&,
-	                  InputValidatorType& ioIn,
-	                  PsimagLite::String targeting)
-	    : BaseType(lrs, checkPoint, wft, 0),
-	      tstStruct_(ioIn, targeting, checkPoint.model()),
-	      wft_(wft),
-	      progress_(targeting),
-	      weight_(tstStruct_.times().size()),
-	      tvEnergy_(tstStruct_.times().size(),0.0),
-	      gsWeight_(tstStruct_.gsWeight())
+	    const CheckpointType& checkPoint,
+	    const WaveFunctionTransfType& wft,
+	    const QnType&,
+	    InputValidatorType& ioIn,
+	    PsimagLite::String targeting)
+	    : BaseType(lrs, checkPoint, wft, 0)
+	    , tstStruct_(ioIn, targeting, checkPoint.model())
+	    , wft_(wft)
+	    , progress_(targeting)
+	    , weight_(tstStruct_.times().size())
+	    , tvEnergy_(tstStruct_.times().size(), 0.0)
+	    , gsWeight_(tstStruct_.gsWeight())
 	{
 		if (!wft.isEnabled())
 			err("TST needs an enabled wft\n");
 		if (tstStruct_.sites() == 0)
 			err("TST needs at least one TSPSite\n");
 
-		RealType tau =tstStruct_.tau();
+		RealType tau = tstStruct_.tau();
 		RealType sum = 0;
 		SizeType n = tstStruct_.times().size();
 
-		RealType factor = (n+4.0)/(n+2.0);
+		RealType factor = (n + 4.0) / (n + 2.0);
 		factor *= (1.0 - gsWeight_);
-		for (SizeType i=0;i<n;i++) {
-			tstStruct_.times()[i] = i*tau/(n-1);
-			weight_[i] = factor/(n+4);
+		for (SizeType i = 0; i < n; i++) {
+			tstStruct_.times()[i] = i * tau / (n - 1);
+			weight_[i] = factor / (n + 4);
 			sum += weight_[i];
 		}
 		sum -= weight_[0];
-		sum -= weight_[n-1];
-		weight_[0] = weight_[n-1] = 2*factor/(n+4);
-		sum += weight_[n-1];
+		sum -= weight_[n - 1];
+		weight_[0] = weight_[n - 1] = 2 * factor / (n + 4);
+		sum += weight_[n - 1];
 		sum += weight_[0];
 
-		gsWeight_=1.0-sum;
+		gsWeight_ = 1.0 - sum;
 		sum += gsWeight_;
-		assert(fabs(sum-1.0)<1e-5);
+		assert(fabs(sum - 1.0) < 1e-5);
 
 		this->common().aoeNonConst().initTimeVectors(tstStruct_, ioIn);
 	}
@@ -185,21 +189,21 @@ public:
 	{
 		if (!this->common().aoe().noStageIs(StageEnumType::DISABLED))
 			return true;
-		bool b = (fabs(gsWeight_)>1e-6);
+		bool b = (fabs(gsWeight_) > 1e-6);
 		return b;
 	}
 
 	void evolve(const VectorRealType& energies,
-	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
-	            const BlockType&,
-	            SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    const BlockType&,
+	    SizeType loopNumber)
 	{
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
 		assert(energies.size() > 0);
 		RealType Eg = energies[0];
-		evolveInternal(Eg,direction,block1,loopNumber);
+		evolveInternal(Eg, direction, block1, loopNumber);
 
 		SizeType numberOfSites = this->lrs().super().block().size();
 
@@ -207,21 +211,21 @@ public:
 			return;
 
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			if (site == 1) return;
+			if (site == 1)
+				return;
 		} else {
-			if (site == numberOfSites - 2) return;
+			if (site == numberOfSites - 2)
+				return;
 		}
 
 		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1, x);
-		evolveInternal(Eg,direction,block,loopNumber);
-
+		evolveInternal(Eg, direction, block, loopNumber);
 	}
 
 	bool end() const
 	{
-		return (tstStruct_.maxTime() != 0 &&
-		        this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
+		return (tstStruct_.maxTime() != 0 && this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
@@ -230,12 +234,12 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	    PsimagLite::IoSelector::Out& io,
+	    PsimagLite::String prefix) const
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Saving state...";
+		msg << "Saving state...";
 		progress_.printline(msgg, std::cout);
 
 		this->common().write(io, block, prefix);
@@ -245,20 +249,21 @@ public:
 private:
 
 	void evolveInternal(RealType Eg,
-	                    ProgramGlobals::DirectionEnum direction,
-	                    const BlockType& block1,
-	                    SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    SizeType loopNumber)
 	{
-		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
+			return;
 		VectorWithOffsetType phiNew;
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
 
 		SizeType numberOfSites = this->lrs().super().block().size();
-		bool doBorderIfBorder = (site<1 || site>=numberOfSites-1);
+		bool doBorderIfBorder = (site < 1 || site >= numberOfSites - 1);
 
 		if (doBorderIfBorder) {
-			if (loopNumber >= this->model().params().finiteLoop.size()-1) {
+			if (loopNumber >= this->model().params().finiteLoop.size() - 1) {
 				if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 					if (site >= numberOfSites - 1) {
 						this->common().cocoon(block1, direction, false);
@@ -275,34 +280,33 @@ private:
 		}
 
 		this->common().aoeNonConst().getPhi(&phiNew,
-		                                    Eg,
-		                                    direction,
-		                                    site,
-		                                    loopNumber,
-		                                    tstStruct_);
-
+		    Eg,
+		    direction,
+		    site,
+		    loopNumber,
+		    tstStruct_);
 
 		PairType startEnd(0, tstStruct_.times().size());
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
-		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		VectorSizeType indices(startEnd.second - startEnd.first);
-		for (SizeType i = 0; i < indices.size(); ++i) indices[i] = i + startEnd.first;
+		for (SizeType i = 0; i < indices.size(); ++i)
+			indices[i] = i + startEnd.first;
 
 		static const bool isLastCall = true;
 		this->common().aoeNonConst().calcTimeVectors(indices,
-		                                             Eg,
-		                                             phiNew,
-		                                             direction,
-		                                             allOperatorsApplied,
-		                                             false, // don't wft or advance indices[0]
-		                                             block1,
-		                                             isLastCall);
+		    Eg,
+		    phiNew,
+		    direction,
+		    allOperatorsApplied,
+		    false, // don't wft or advance indices[0]
+		    block1,
+		    isLastCall);
 
 		this->common().cocoon(block1, direction, false);
 
 		PsimagLite::String predicate = this->model().params().printHamiltonianAverage;
-		const SizeType center = this->model().superGeometry().numberOfSites()/2;
+		const SizeType center = this->model().superGeometry().numberOfSites() / 2;
 		PsimagLite::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		assert(block1.size() > 0);
@@ -310,8 +314,7 @@ private:
 			printEnergies(); // in-situ
 
 		const OptionsType& options = this->model().params().options;
-		bool normalizeTimeVectors = (options.isSet("normalizeTimeVectors") ||
-		                             options.isSet("TargetingAncilla"));
+		bool normalizeTimeVectors = (options.isSet("normalizeTimeVectors") || options.isSet("TargetingAncilla"));
 
 		if (options.isSet("neverNormalizeVectors"))
 			normalizeTimeVectors = false;
@@ -324,46 +327,46 @@ private:
 
 	void printEnergies() const
 	{
-		for (SizeType i=0;i<this->common().aoe().tvs();i++)
+		for (SizeType i = 0; i < this->common().aoe().tvs(); i++)
 			printEnergies(this->tv(i), i);
 	}
 
-	void printEnergies(const VectorWithOffsetType& phi,SizeType whatTarget) const
+	void printEnergies(const VectorWithOffsetType& phi, SizeType whatTarget) const
 	{
-		for (SizeType ii=0;ii<phi.sectors();ii++) {
+		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
 			SizeType i = phi.sector(ii);
-			printEnergies(phi,whatTarget,i);
+			printEnergies(phi, whatTarget, i);
 		}
 	}
 
 	void printEnergies(const VectorWithOffsetType& phi,
-	                   SizeType whatTarget,
-	                   SizeType i0) const
+	    SizeType whatTarget,
+	    SizeType i0) const
 	{
 		const SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 ModelType::modelLinks(),
-		                                                 this->common().aoe().timeVectors().time(),
-		                                                 BaseType::model().superOpHelper());
+		    ModelType::modelLinks(),
+		    this->common().aoe().timeVectors().time(),
+		    BaseType::model().superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		                                                     hc,
-		                                                     aux);
+		    hc,
+		    aux);
 
 		const SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
-		phi.extract(phi2,i0);
+		phi.extract(phi2, i0);
 		TargetVectorType x(total);
-		lanczosHelper.matrixVectorProduct(x,phi2);
+		lanczosHelper.matrixVectorProduct(x, phi2);
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Hamiltonian average at time="<<this->common().aoe().timeVectors().time();
-		msg<<" for target="<<whatTarget;
-		ComplexOrRealType numerator = phi2*x;
-		ComplexOrRealType den = phi2*phi2;
-		ComplexOrRealType division = (PsimagLite::norm(den)<1e-10) ? 0 : numerator/den;
-		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
-		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
+		msg << "Hamiltonian average at time=" << this->common().aoe().timeVectors().time();
+		msg << " for target=" << whatTarget;
+		ComplexOrRealType numerator = phi2 * x;
+		ComplexOrRealType den = phi2 * phi2;
+		ComplexOrRealType division = (PsimagLite::norm(den) < 1e-10) ? 0 : numerator / den;
+		msg << " sector=" << i0 << " <phi(t)|H|phi(t)>=" << numerator;
+		msg << " <phi(t)|phi(t)>=" << den << " " << division;
 		progress_.printline(msgg, std::cout);
 		tvEnergy_[whatTarget] = PsimagLite::real(division);
 	}
@@ -374,8 +377,7 @@ private:
 	VectorRealType weight_;
 	mutable VectorRealType tvEnergy_;
 	RealType gsWeight_;
-};     //class TargetingTimeStep
+}; // class TargetingTimeStep
 } // namespace Dmrg
 
 #endif
-

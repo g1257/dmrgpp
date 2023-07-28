@@ -79,13 +79,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef HAM_SYMM_LOCAL_H
 #define HAM_SYMM_LOCAL_H
-#include "Sort.h"
-#include "ProgramGlobals.h"
 #include "Io/IoSelector.h"
+#include "ProgramGlobals.h"
+#include "Sort.h"
 
-namespace Dmrg {
-template<typename SparseMatrixType>
-class	HamiltonianSymmetryLocal {
+namespace Dmrg
+{
+template <typename SparseMatrixType>
+class HamiltonianSymmetryLocal
+{
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
@@ -99,43 +101,47 @@ public:
 		return 0; // meaningless
 	}
 
-	template<typename SolverParametersType>
+	template <typename SolverParametersType>
 	void calcRemovedIndices(VectorSizeType& removedIndices,
-	                        const VectorSizeType& perm,
-	                        SizeType kept,
-	                        const SolverParametersType&) const
+	    const VectorSizeType& perm,
+	    SizeType kept,
+	    const SolverParametersType&) const
 	{
 		const SizeType permSize = perm.size();
-		if (permSize <= kept) return;
+		if (permSize <= kept)
+			return;
 
 		SizeType target = permSize - kept;
 
 		removedIndices.clear();
 		for (SizeType i = 0; i < target; ++i) {
-			if (removedIndices.size() >= target) break;
+			if (removedIndices.size() >= target)
+				break;
 			if (PsimagLite::indexOrMinusOne(removedIndices, perm[i]) >= 0)
 				continue;
 			removedIndices.push_back(perm[i]);
 		}
 	}
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	void read(IoInputter&,
-	          PsimagLite::String,
-	          bool,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
-	{}
+	    PsimagLite::String,
+	    bool,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsInputLike<IoInputter>::True,
+		int>::Type
+	    = 0)
+	{
+	}
 
 	void write(PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String label,
-	           PsimagLite::IoNgSerializer::WriteMode mode) const
+	    PsimagLite::String label,
+	    PsimagLite::IoNgSerializer::WriteMode mode) const
 	{
 		io.write(0, label + "FACTORSSIZE", mode);
 	}
-}; //class HamiltonianSymmetryLocal
+}; // class HamiltonianSymmetryLocal
 } // namespace Dmrg
 
 /*@}*/
 #endif
-

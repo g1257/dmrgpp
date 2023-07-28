@@ -1,20 +1,20 @@
 #include "util.h"
 
-template<typename ComplexOrRealType>
-void csr_transpose( const int nrow_A, 
-                    const int ncol_A,
-                    const int arowptr[],
-                    const int acol[],
-                    const ComplexOrRealType aval[],
-                    int atrowptr[],
-                    int atcol[],
-                    ComplexOrRealType atval[] )
+template <typename ComplexOrRealType>
+void csr_transpose(const int nrow_A,
+    const int ncol_A,
+    const int arowptr[],
+    const int acol[],
+    const ComplexOrRealType aval[],
+    int atrowptr[],
+    int atcol[],
+    ComplexOrRealType atval[])
 {
 	/*
- * --------------------------------------------------------
- * At = tranpose(A) where A in sparse compressed row format
- * --------------------------------------------------------
- */
+	 * --------------------------------------------------------
+	 * At = tranpose(A) where A in sparse compressed row format
+	 * --------------------------------------------------------
+	 */
 
 	const int nrow_At = ncol_A;
 
@@ -22,26 +22,25 @@ void csr_transpose( const int nrow_A,
 
 	{
 		int iat = 0;
-		for(iat=0; iat < nrow_At; iat++) {
+		for (iat = 0; iat < nrow_At; iat++) {
 			nnz_row_At[iat] = 0;
 		};
 	}
 
-
 	/*
-  * --------------------------------------
-  * first pass to count number of nonzeros
-  * per row in At = transpose(A)
-  * --------------------------------------
-  */
+	 * --------------------------------------
+	 * first pass to count number of nonzeros
+	 * per row in At = transpose(A)
+	 * --------------------------------------
+	 */
 
 	{
 		int ia = 0;
-		for(ia=0; ia < nrow_A; ia++ ) {
+		for (ia = 0; ia < nrow_A; ia++) {
 			int istart = arowptr[ia];
-			int iend = arowptr[ia+1]-1;
+			int iend = arowptr[ia + 1] - 1;
 			int k = 0;
-			for(k=istart; k <= iend; k++) {
+			for (k = istart; k <= iend; k++) {
 				int ja = acol[k];
 				int iat = ja;
 
@@ -51,35 +50,34 @@ void csr_transpose( const int nrow_A,
 	}
 
 	/*
-  * ---------------------------------------
-  * prefix sum to setup row pointers for At
-  * ---------------------------------------
-  */
+	 * ---------------------------------------
+	 * prefix sum to setup row pointers for At
+	 * ---------------------------------------
+	 */
 	{
 		int iat = 0;
 		atrowptr[0] = 0;
-		for(iat=0; iat < nrow_At; iat++) {
-			atrowptr[iat+1] = atrowptr[iat] + nnz_row_At[iat];
+		for (iat = 0; iat < nrow_At; iat++) {
+			atrowptr[iat + 1] = atrowptr[iat] + nnz_row_At[iat];
 		};
 
-		for(iat=0; iat < nrow_At; iat++) {
+		for (iat = 0; iat < nrow_At; iat++) {
 			nnz_row_At[iat] = 0;
 		};
 	}
 
-
 	/*
-  * ----------------------
-  * second pass to fill At
-  * ----------------------
-  */
+	 * ----------------------
+	 * second pass to fill At
+	 * ----------------------
+	 */
 	{
 		int ia = 0;
-		for(ia=0; ia < nrow_A; ia++) {
+		for (ia = 0; ia < nrow_A; ia++) {
 			int istart = arowptr[ia];
-			int iend = arowptr[ia+1]-1;
+			int iend = arowptr[ia + 1] - 1;
 			int k = 0;
-			for(k=istart; k <= iend; k++) {
+			for (k = istart; k <= iend; k++) {
 				int ja = acol[k];
 				ComplexOrRealType aij = aval[k];
 
@@ -97,5 +95,3 @@ void csr_transpose( const int nrow_A,
 
 	delete[] nnz_row_At;
 }
-
-

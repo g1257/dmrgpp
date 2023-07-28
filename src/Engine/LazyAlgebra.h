@@ -2,10 +2,12 @@
 #define LAZYALGEBRA_H
 #include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename OperatorType>
-class LazyAlgebraFactor {
+template <typename OperatorType>
+class LazyAlgebraFactor
+{
 
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -13,12 +15,19 @@ class LazyAlgebraFactor {
 
 public:
 
-	LazyAlgebraFactor() : ops_(1, OperatorType()), indices_(1, 1), overallFactor_(1.0)
-	{}
+	LazyAlgebraFactor()
+	    : ops_(1, OperatorType())
+	    , indices_(1, 1)
+	    , overallFactor_(1.0)
+	{
+	}
 
 	LazyAlgebraFactor(const OperatorType& op)
-	    : ops_(1, op), indices_(1, 1), overallFactor_(1.0)
-	{}
+	    : ops_(1, op)
+	    , indices_(1, 1)
+	    , overallFactor_(1.0)
+	{
+	}
 
 	const LazyAlgebraFactor& operator*=(const ComplexOrRealType& f)
 	{
@@ -29,12 +38,15 @@ public:
 	SizeType metaDiff(const LazyAlgebraFactor& other) const
 	{
 		const SizeType n = indices_.size();
-		if (other.indices_.size() != n) return 1;
+		if (other.indices_.size() != n)
+			return 1;
 		SizeType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType ind = indices_[i];
-			if (ind != other.indices_[i]) return 2;
-			if (ind == 0) continue;
+			if (ind != other.indices_[i])
+				return 2;
+			if (ind == 0)
+				continue;
 			--ind;
 			assert(ind < ops_.size() && ind < other.ops_.size());
 			sum += ops_[ind].metaDiff(other.ops_[ind]);
@@ -48,17 +60,19 @@ public:
 		const SizeType n = indices_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType ind = indices_[i];
-			if (ind == 0) return false;
+			if (ind == 0)
+				return false;
 			--ind;
 			assert(ind < ops_.size());
-			if (ops_[ind].isEmpty()) continue;
+			if (ops_[ind].isEmpty())
+				continue;
 		}
 
 		return true;
 	}
 
 	friend LazyAlgebraFactor operator*(const LazyAlgebraFactor& a,
-	                                   const LazyAlgebraFactor& b)
+	    const LazyAlgebraFactor& b)
 	{
 		LazyAlgebraFactor c = a;
 		c.overallFactor_ *= b.overallFactor_;
@@ -87,8 +101,9 @@ private:
 	ComplexOrRealType overallFactor_;
 };
 
-template<typename OperatorType>
-class LazyAlgebra {
+template <typename OperatorType>
+class LazyAlgebra
+{
 
 public:
 
@@ -96,11 +111,15 @@ public:
 	typedef typename PsimagLite::Vector<LazyAlgebraFactorType>::Type VectorLazyAlgebraFactorType;
 	typedef typename OperatorType::value_type ComplexOrRealType;
 
-	LazyAlgebra() : factors_(1, OperatorType())
-	{}
+	LazyAlgebra()
+	    : factors_(1, OperatorType())
+	{
+	}
 
-	LazyAlgebra(const OperatorType& op) : factors_(1, op)
-	{}
+	LazyAlgebra(const OperatorType& op)
+	    : factors_(1, op)
+	{
+	}
 
 	const LazyAlgebra& operator+=(const LazyAlgebra& f)
 	{
@@ -126,7 +145,7 @@ public:
 		VectorLazyAlgebraFactorType newFactors;
 		for (SizeType i = 0; i < n; ++i)
 			for (SizeType j = 0; j < m; ++j)
-					newFactors.push_back(factors_[i]*other.factors_[j]);
+				newFactors.push_back(factors_[i] * other.factors_[j]);
 
 		factors_ = newFactors;
 		return *this;
@@ -135,7 +154,8 @@ public:
 	SizeType metaDiff(const LazyAlgebra& other) const
 	{
 		const SizeType n = factors_.size();
-		if (other.factors_.size() != n) return 1;
+		if (other.factors_.size() != n)
+			return 1;
 		SizeType sum = 0;
 		for (SizeType i = 0; i < n; ++i)
 			sum += factors_[i].metaDiff(other.factors_[i]);
@@ -147,7 +167,8 @@ public:
 	{
 		const SizeType n = factors_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (factors_[i].isEmpty()) continue;
+			if (factors_[i].isEmpty())
+				continue;
 
 		return true;
 	}

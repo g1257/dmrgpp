@@ -79,19 +79,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef KRON_MATRIX_HEADER_H
 #define KRON_MATRIX_HEADER_H
 
-#include "Matrix.h"
-#include "KronConnections.h"
-#include "Concurrency.h"
-#include "Parallelizer.h"
-#include "PsimagLite.h"
-#include "ProgressIndicator.h"
-#include "LoadBalancerWeights.h"
 #include "BatchedGemmInclude.hh"
+#include "Concurrency.h"
+#include "KronConnections.h"
+#include "LoadBalancerWeights.h"
+#include "Matrix.h"
+#include "Parallelizer.h"
+#include "ProgressIndicator.h"
+#include "PsimagLite.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename InitKronType>
-class KronMatrix {
+template <typename InitKronType>
+class KronMatrix
+{
 
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -108,16 +110,16 @@ class KronMatrix {
 public:
 
 	KronMatrix(InitKronType& initKron, PsimagLite::String name)
-	    : initKron_(initKron),
-	      progress_("KronMatrix"),
-	      batchedGemm_(initKron)
+	    : initKron_(initKron)
+	    , progress_("KronMatrix")
+	    , batchedGemm_(initKron)
 	{
 		PsimagLite::String str((initKron.loadBalance()) ? "true" : "false");
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"KronMatrix: "<<name<<" sizes="<<initKron.size(InitKronType::NEW);
-		msg<<" "<<initKron.size(InitKronType::OLD);
-		msg<<" loadBalance "<<str;
+		msg << "KronMatrix: " << name << " sizes=" << initKron.size(InitKronType::NEW);
+		msg << " " << initKron.size(InitKronType::OLD);
+		msg << " loadBalance " << str;
 		progress_.printline(msgg, std::cout);
 	}
 
@@ -129,7 +131,7 @@ public:
 			VectorType& xout = initKron_.xout();
 			VectorType xoutTmp(xout.size(), 0.0);
 			batchedGemm_.matrixVector(xoutTmp, initKron_.yin());
-			for(SizeType i = 0; i < xoutTmp.size(); ++i)
+			for (SizeType i = 0; i < xoutTmp.size(); ++i)
 				xout[i] += xoutTmp[i];
 
 			initKron_.copyOut(vout);
@@ -142,7 +144,8 @@ public:
 
 		if (initKron_.loadBalance()) {
 			PsimagLite::Parallelizer<KronConnectionsType,
-			        PsimagLite::LoadBalancerWeights> parallelConnections(codeSectionParams);
+			    PsimagLite::LoadBalancerWeights>
+			    parallelConnections(codeSectionParams);
 			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());
 		} else {
 			PsimagLite::Parallelizer<KronConnectionsType> parallelConnections(codeSectionParams);
@@ -163,7 +166,7 @@ private:
 	InitKronType& initKron_;
 	PsimagLite::ProgressIndicator progress_;
 	BatchedGemmType batchedGemm_;
-}; //class KronMatrix
+}; // class KronMatrix
 
 } // namespace PsimagLite
 

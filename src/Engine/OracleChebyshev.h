@@ -2,10 +2,12 @@
 #define ORACLECHEBYSHEV_H
 #include "ScaledHamiltonian.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename TargetingCommonType, typename TargetParamsType>
-class OracleChebyshev {
+template <typename TargetingCommonType, typename TargetParamsType>
+class OracleChebyshev
+{
 
 public:
 
@@ -24,29 +26,34 @@ public:
 	typedef typename TargetingCommonType::FermionSignType FermionSignType;
 
 	OracleChebyshev(const ModelType& model,
-	                const LeftRightSuperType& lrs,
-	                const RealType& currentTime,
-	                const TargetParamsType& tstStruct,
-	                RealType E0)
-	    : model_(model), lrs_(lrs), currentTime_(currentTime), tstStruct_(tstStruct), E0_(E0)
-	{}
+	    const LeftRightSuperType& lrs,
+	    const RealType& currentTime,
+	    const TargetParamsType& tstStruct,
+	    RealType E0)
+	    : model_(model)
+	    , lrs_(lrs)
+	    , currentTime_(currentTime)
+	    , tstStruct_(tstStruct)
+	    , E0_(E0)
+	{
+	}
 
 	void operator()(SizeType n,
-	                const TargetingCommonType& common,
-	                SizeType systemOrEnviron,
-	                SizeType site,
-	                OperatorType& A,
-	                typename TargetingCommonType::BorderEnumType border)
+	    const TargetingCommonType& common,
+	    SizeType systemOrEnviron,
+	    SizeType site,
+	    OperatorType& A,
+	    typename TargetingCommonType::BorderEnumType border)
 	{
 		VectorWithOffsetType p0;
 		typename TargetingCommonType::ApplyOperatorType applyOpLocal(lrs_,
-		                                                             common.withLegacyBugs());
+		    common.withLegacyBugs());
 		typename PsimagLite::Vector<bool>::Type signs;
 		model_.findOddElectronsOfOneSite(signs, site);
 		FermionSignType fs(lrs_.left(), signs);
 		OperatorType Aprime = A;
 		Aprime.dagger();
-		applyOpLocal(p0,common.psi(),Aprime,fs,systemOrEnviron,border);
+		applyOpLocal(p0, common.psi(), Aprime, fs, systemOrEnviron, border);
 
 		VectorWithOffsetType p1;
 		VectorType r;
@@ -58,12 +65,12 @@ public:
 			p2.fromFull(r, lrs_.super());
 			// <gs|c|p2>;
 			ComplexOrRealType result = common.testRealWork(p2,
-			                                               common.psi(),
-			                                               systemOrEnviron,
-			                                               site,
-			                                               A,
-			                                               border);
-			std::cout<<"OracleChebyshev: <gs|H|p"<<(i+2)<<">= "<<result<<"\n";
+			    common.psi(),
+			    systemOrEnviron,
+			    site,
+			    A,
+			    border);
+			std::cout << "OracleChebyshev: <gs|H|p" << (i + 2) << ">= " << result << "\n";
 			// prepare for next iteration
 			p0 = p1;
 			p1 = p2;
@@ -73,9 +80,9 @@ public:
 private:
 
 	void chebyIteration(VectorType& r,
-	                    const VectorWithOffsetType& p1,
-	                    const VectorWithOffsetType& p0,
-	                    bool firstOne) const
+	    const VectorWithOffsetType& p1,
+	    const VectorWithOffsetType& p0,
+	    bool firstOne) const
 	{
 		SizeType i0 = 0;
 		for (SizeType ii = 0; ii < p1.sectors(); ++ii)
@@ -83,13 +90,13 @@ private:
 
 		SizeType p = lrs_.super().findPartitionNumber(p1.offset(i0));
 		typename ModelType::HamiltonianConnectionType hc(p,
-		                                                 lrs_,
-		                                                 model_.geometry(),
-		                                                 ModelType::modelLinks(),
-		                                                 currentTime_,
-		                                                 0);
+		    lrs_,
+		    model_.geometry(),
+		    ModelType::modelLinks(),
+		    currentTime_,
+		    0);
 		MatrixLanczosType lanczosHelper(model_,
-		                                hc);
+		    hc);
 
 		ScaledHamiltonianType lanczosHelper2(lanczosHelper, tstStruct_, E0_);
 
@@ -97,14 +104,15 @@ private:
 		r.resize(total);
 		VectorType x2(total);
 		const RealType factor = (firstOne) ? 1.0 : 2.0;
-		VectorWithOffsetType x = factor*p1;
+		VectorWithOffsetType x = factor * p1;
 		x.extract(x2, i0);
 		lanczosHelper2.matrixVectorProduct(r, x2); // applying Hprime
-		if (firstOne) return;
+		if (firstOne)
+			return;
 
 		VectorType phi2(total);
 		p0.extract(phi2, i0);
- 		r += (-1.0)*phi2;
+		r += (-1.0) * phi2;
 	}
 
 	const ModelType& model_;

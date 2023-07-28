@@ -78,32 +78,35 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef BLOCK_DIAGONAL_MATRIX_H
 #define BLOCK_DIAGONAL_MATRIX_H
-#include <vector>
-#include <iostream>
-#include "Matrix.h" // in PsimagLite
-#include "ProgramGlobals.h"
 #include "Concurrency.h"
-#include "NoPthreadsNg.h"
 #include "CrsMatrix.h"
-#include "PsimagLite.h"
 #include "EnforcePhase.h"
 #include "Io/IoSelector.h"
+#include "Matrix.h" // in PsimagLite
+#include "NoPthreadsNg.h"
+#include "ProgramGlobals.h"
+#include "PsimagLite.h"
+#include <iostream>
+#include <vector>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename T>
+template <typename T>
 struct IsBasisType {
-	enum {True = false};
+	enum { True = false };
 };
 
 // A block matrix class
 // Blocks can be of any type and are templated with the type MatrixInBlockTemplate
-template<typename MatrixInBlockTemplate>
-class BlockDiagonalMatrix {
+template <typename MatrixInBlockTemplate>
+class BlockDiagonalMatrix
+{
 
 public:
 
-	enum SaveEnum {SAVE_ALL, SAVE_PARTIAL};
+	enum SaveEnum { SAVE_ALL,
+		SAVE_PARTIAL };
 
 	typedef MatrixInBlockTemplate BuildingBlockType;
 	typedef typename BuildingBlockType::value_type ComplexOrRealType;
@@ -114,15 +117,18 @@ public:
 	typedef PsimagLite::IoSelector::In IoInType;
 
 	BlockDiagonalMatrix()
-	    : isSquare_(true), readOnDemand_(false)
-	{}
+	    : isSquare_(true)
+	    , readOnDemand_(false)
+	{
+	}
 
 	BlockDiagonalMatrix(IoInType& io,
-	                    PsimagLite::String label,
-	                    bool readOnDemand)
+	    PsimagLite::String label,
+	    bool readOnDemand)
 	    : readOnDemand_(readOnDemand)
 	{
-		if (readOnDemand_) return;
+		if (readOnDemand_)
+			return;
 
 		io.read(isSquare_, label + "/isSquare_");
 		io.read(offsetsRows_, label + "/offsetRows_");
@@ -130,15 +136,17 @@ public:
 		io.read(data_, label + "/data_");
 	}
 
-	template<typename SomeBasisType>
+	template <typename SomeBasisType>
 	BlockDiagonalMatrix(const SomeBasisType& basis,
-	                    typename PsimagLite::EnableIf<
-	                    IsBasisType<SomeBasisType>::True, int>::Type = 0)
-	    : isSquare_(true),
-	      readOnDemand_(false),
-	      offsetsRows_(basis.partition()),
-	      offsetsCols_(basis.partition()),
-	      data_(basis.partition() - 1)
+	    typename PsimagLite::EnableIf<
+		IsBasisType<SomeBasisType>::True,
+		int>::Type
+	    = 0)
+	    : isSquare_(true)
+	    , readOnDemand_(false)
+	    , offsetsRows_(basis.partition())
+	    , offsetsCols_(basis.partition())
+	    , data_(basis.partition() - 1)
 	{
 		SizeType n = offsetsRows_.size();
 		assert(n == offsetsCols_.size());
@@ -146,10 +154,10 @@ public:
 			offsetsRows_[i] = offsetsCols_[i] = basis.partition(i);
 	}
 
-	template<typename IoOutputType>
+	template <typename IoOutputType>
 	void write(PsimagLite::String label1,
-	           IoOutputType& io,
-	           PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	    IoOutputType& io,
+	    PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		if (wM != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			io.createGroup(label1);
@@ -182,12 +190,13 @@ public:
 		mustBeSquare("operator+=");
 		BlockDiagonalMatrix c;
 		if (offsetsRows_.size() < m.blocks())
-			operatorPlus(c,*this,m);
-		else operatorPlus(c,m,*this);
+			operatorPlus(c, *this, m);
+		else
+			operatorPlus(c, m, *this);
 		*this = c;
 	}
 
-	void setBlock(SizeType i,int offset,MatrixInBlockTemplate& m)
+	void setBlock(SizeType i, int offset, MatrixInBlockTemplate& m)
 	{
 		mustBeSquare("setBlock");
 		assert(i < data_.size());
@@ -196,7 +205,7 @@ public:
 		offsetsRows_[i] = offsetsCols_[i] = offset;
 	}
 
-	void sumBlock(SizeType i,MatrixInBlockTemplate const &m)
+	void sumBlock(SizeType i, MatrixInBlockTemplate const& m)
 	{
 		assert(i < data_.size());
 		data_[i] += m;
@@ -212,7 +221,8 @@ public:
 	// rows aren't affected, columns may be truncated
 	void truncate(const VectorSizeType& removedIndices2)
 	{
-		if (removedIndices2.size() == 0) return;
+		if (removedIndices2.size() == 0)
+			return;
 
 		mustBeSquare("truncate");
 		SizeType n = data_.size();
@@ -267,7 +277,8 @@ public:
 			if (k + 1 < offsetsRows_.size() && offsetsRows_[k + 1] <= i)
 				++k;
 			SizeType end = (k + 1 < offsetsCols_.size()) ? offsetsCols_[k + 1] : c;
-			if (data_[k].rows() == 0 || data_[k].cols() == 0) continue;
+			if (data_[k].rows() == 0 || data_[k].cols() == 0)
+				continue;
 			for (SizeType j = offsetsCols_[k]; j < end; ++j) {
 				ComplexOrRealType val = data_[k](i - offsetsRows_[k], j - offsetsCols_[k]);
 				if (PsimagLite::norm(val) == 0)
@@ -293,7 +304,8 @@ public:
 			if (k + 1 < offsetsRows_.size() && offsetsRows_[k + 1] <= i)
 				++k;
 			SizeType end = (k + 1 < offsetsCols_.size()) ? offsetsCols_[k + 1] : c;
-			if (data_[k].rows() == 0 || data_[k].cols() == 0) continue;
+			if (data_[k].rows() == 0 || data_[k].cols() == 0)
+				continue;
 			for (SizeType j = offsetsCols_[k]; j < end; ++j) {
 				ComplexOrRealType val = data_[k](i - offsetsRows_[k], j - offsetsCols_[k]);
 				fm(i, j) = val;
@@ -330,8 +342,8 @@ public:
 	}
 
 	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer,
-	           PsimagLite::IoSerializer::WriteMode wM = PsimagLite::IoSerializer::NO_OVERWRITE) const
+	    PsimagLite::IoSerializer& ioSerializer,
+	    PsimagLite::IoSerializer::WriteMode wM = PsimagLite::IoSerializer::NO_OVERWRITE) const
 	{
 		if (wM != PsimagLite::IoSerializer::ALLOW_OVERWRITE)
 			ioSerializer.createGroup(label);
@@ -344,12 +356,12 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const BlockDiagonalMatrix& m)
 	{
 		PsimagLite::String str = (m.isSquare_) ? "1" : "0";
-		os<<str<<"\n";
-		os<<m.offsetsRows_;
-		os<<m.offsetsCols_;
-		os<<m.data_.size()<<"\n";
+		os << str << "\n";
+		os << m.offsetsRows_;
+		os << m.offsetsCols_;
+		os << m.data_.size() << "\n";
 		for (SizeType i = 0; i < m.data_.size(); ++i)
-			os<<m.data_[i];
+			os << m.data_[i];
 		return os;
 	}
 
@@ -357,33 +369,33 @@ public:
 	{
 		int x = -1;
 		PsimagLite::String temp;
-		is>>temp;
+		is >> temp;
 		if (temp == "NAME=")
-			is>>x;
+			is >> x;
 		else
 			x = atoi(temp.c_str());
 
 		if (x != 0 && x != 1)
 			err("std::istream& operator>> BlockDiagonalMatrix(1)\n");
 		m.isSquare_ = (x == 1);
-		is>>m.offsetsRows_;
-		is>>m.offsetsCols_;
+		is >> m.offsetsRows_;
+		is >> m.offsetsCols_;
 		int total = 0;
-		is>>total;
+		is >> total;
 		if (total < 0)
 			err("std::istream& operator>> BlockDiagonalMatrix(2)\n");
 		if (total == 0)
 			return is;
 		m.data_.resize(total);
 		for (SizeType i = 0; i < m.data_.size(); ++i)
-			is>>m.data_[i];
+			is >> m.data_[i];
 		return is;
 	}
 
 private:
 
 	void computeRemap(VectorIntType& remap,
-	                  const VectorSizeType& removedIndices2) const
+	    const VectorSizeType& removedIndices2) const
 	{
 		VectorSizeType removedIndices = removedIndices2;
 		PsimagLite::Sort<VectorSizeType> sort;
@@ -404,8 +416,8 @@ private:
 
 	// rows aren't affected, columns may be truncated,
 	void truncate(SizeType ind, // <------ block to truncate
-	              const VectorIntType& remap,
-	              const VectorSizeType& offsetsOld)
+	    const VectorIntType& remap,
+	    const VectorSizeType& offsetsOld)
 	{
 		assert(ind < data_.size());
 		MatrixInBlockTemplate& m = data_[ind];
@@ -440,7 +452,8 @@ private:
 		MatrixInBlockTemplate m2(r, newCols);
 		for (SizeType i = 0; i < r; ++i) {
 			for (SizeType j = 0; j < c; ++j) {
-				if (remap[j + offsetOld] < 0) continue;
+				if (remap[j + offsetOld] < 0)
+					continue;
 				SizeType cPrime = remap[j + offsetOld];
 				assert(offsetNew <= cPrime);
 				m2(i, cPrime - offsetNew) = m(i, j);
@@ -462,7 +475,8 @@ private:
 
 	void mustBeSquare(PsimagLite::String msg) const
 	{
-		if (isSquare_) return;
+		if (isSquare_)
+			return;
 		err("BlockDiagonalMatrix::" + msg + " must be square\n");
 	}
 
@@ -475,28 +489,29 @@ private:
 
 // Companion Functions
 
-template<class MatrixInBlockTemplate>
+template <class MatrixInBlockTemplate>
 bool isUnitary(const BlockDiagonalMatrix<MatrixInBlockTemplate>& B)
 {
-	bool flag=true;
+	bool flag = true;
 	MatrixInBlockTemplate matrixTmp;
 
-	for (SizeType m=0;m<B.blocks();m++) {
+	for (SizeType m = 0; m < B.blocks(); m++) {
 		matrixTmp = B(m);
-		if (!isUnitary(matrixTmp)) flag=false;
+		if (!isUnitary(matrixTmp))
+			flag = false;
 	}
 	return flag;
 }
 
 } // namespace Dmrg
 
-namespace PsimagLite {
-template<typename T>
-struct IsMatrixLike<Dmrg::BlockDiagonalMatrix<T> > {
-	enum {True=true};
+namespace PsimagLite
+{
+template <typename T>
+struct IsMatrixLike<Dmrg::BlockDiagonalMatrix<T>> {
+	enum { True = true };
 };
 } // namespace PsimagLite
 /*@}*/
 
 #endif
-

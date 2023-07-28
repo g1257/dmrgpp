@@ -1,20 +1,20 @@
-#include <unistd.h>
-#include "PsimagLite.h"
-#include "Provenance.h"
-#include "InputCheck.h"
 #include "ProcOmegas.h"
 #include "../../dmrgpp/src/Engine/ProgramGlobals.h"
+#include "InputCheck.h"
+#include "Provenance.h"
+#include "PsimagLite.h"
+#include <unistd.h>
 
 void usage(const PsimagLite::String& name)
 {
-	std::cerr<<"USAGE is "<<name<<" -f filename [other options]\n";
-	std::cerr<<"-f filename; Mandatory template filename\n";
-	std::cerr<<"-p precision; Precision in number of decimals\n";
-	std::cerr<<"-X; Skip Fourier transform and only gather data\n";
-	std::cerr<<"-I {[}Optional, String{]} Root of input file to use.\n";
-	std::cerr<<"-O {[}Optional, String{]} Root of output file to use.\n";
-	std::cerr<<"-V; Print version and exit\n";
-	std::cerr<<"\nLimitations: Ainur only; No Cheby yet\n";
+	std::cerr << "USAGE is " << name << " -f filename [other options]\n";
+	std::cerr << "-f filename; Mandatory template filename\n";
+	std::cerr << "-p precision; Precision in number of decimals\n";
+	std::cerr << "-X; Skip Fourier transform and only gather data\n";
+	std::cerr << "-I {[}Optional, String{]} Root of input file to use.\n";
+	std::cerr << "-O {[}Optional, String{]} Root of output file to use.\n";
+	std::cerr << "-V; Print version and exit\n";
+	std::cerr << "\nLimitations: Ainur only; No Cheby yet\n";
 }
 
 int main(int argc, char** argv)
@@ -46,7 +46,7 @@ to the main dmrg driver are the following.
 	 \item[-V] [Optional] Print version and exit
 	  \end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:p:I:O:XV")) != -1) {
+	while ((opt = getopt(argc, argv, "f:p:I:O:XV")) != -1) {
 		switch (opt) {
 		case 'f':
 			inputfile = optarg;
@@ -86,12 +86,13 @@ to the main dmrg driver are the following.
 	// print license
 	if (ConcurrencyType::root()) {
 		Provenance provenance;
-		std::cout<<provenance;
-		std::cout<<Provenance::logo(application.name())<<"\n";
+		std::cout << provenance;
+		std::cout << Provenance::logo(application.name()) << "\n";
 		application.checkMicroArch(std::cout, Provenance::compiledMicroArch());
 	}
 
-	if (versionOnly) return 0;
+	if (versionOnly)
+		return 0;
 
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 	typedef Dmrg::OmegaParams<InputNgType, double> OmegaParamsType;
@@ -102,11 +103,11 @@ to the main dmrg driver are the following.
 	InputNgType::Readable io(ioW);
 	OmegaParamsType omegaParams(io);
 	ProcOmegasType procOmegas(io,
-	                          precision,
-	                          skipFourier,
-	                          rootIname,
-	                          rootOname,
-	                          omegaParams);
+	    precision,
+	    skipFourier,
+	    rootIname,
+	    rootOname,
+	    omegaParams);
 
 	procOmegas.run();
 

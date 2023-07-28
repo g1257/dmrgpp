@@ -1,17 +1,19 @@
 #ifndef BLOCKDIAGMATRIXWF_H
 #define BLOCKDIAGMATRIXWF_H
-#include "CrsMatrix.h"
 #include "BlockDiagonalMatrix.h"
+#include "CrsMatrix.h"
+#include "GemmR.h"
 #include "LAPACK.h"
 #include "PackIndices.h"
-#include "GemmR.h"
-#include <iostream>
 #include <iomanip>
+#include <iostream>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename GenIjPatchType, typename VectorWithOffsetType, typename OneSiteSpacesType>
-class BlockDiagWf {
+template <typename GenIjPatchType, typename VectorWithOffsetType, typename OneSiteSpacesType>
+class BlockDiagWf
+{
 
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef typename VectorType::value_type ComplexOrRealType;
@@ -28,27 +30,29 @@ class BlockDiagWf {
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
 
-	class ParallelBlockCtor {
+	class ParallelBlockCtor
+	{
 
 	public:
 
 		ParallelBlockCtor(const VectorSizeType& patcheLeft,
-		                  const VectorSizeType& patchesRight,
-		                  const LeftRightSuperType& lrs,
-		                  const VectorWithOffsetType& src,
-		                  SizeType iSrc,
-		                  VectorPairType& patches,
-		                  VectorMatrixType& data)
-		    : patchesLeft_(patcheLeft),
-		      patchesRight_(patchesRight),
-		      lrs_(lrs),
-		      packSuper_(lrs.left().size()),
-		      src_(src),
-		      srcIndex_(src.sector(iSrc)),
-		      offset_(src.offset(srcIndex_)),
-		      patches_(patches),
-		      data_(data)
-		{}
+		    const VectorSizeType& patchesRight,
+		    const LeftRightSuperType& lrs,
+		    const VectorWithOffsetType& src,
+		    SizeType iSrc,
+		    VectorPairType& patches,
+		    VectorMatrixType& data)
+		    : patchesLeft_(patcheLeft)
+		    , patchesRight_(patchesRight)
+		    , lrs_(lrs)
+		    , packSuper_(lrs.left().size())
+		    , src_(src)
+		    , srcIndex_(src.sector(iSrc))
+		    , offset_(src.offset(srcIndex_))
+		    , patches_(patches)
+		    , data_(data)
+		{
+		}
 
 		SizeType tasks() const { return patchesLeft_.size(); }
 
@@ -68,11 +72,11 @@ class BlockDiagWf {
 				for (SizeType c = 0; c < ctotal; ++c) {
 					SizeType col = c + offsetR;
 					SizeType ind = packSuper_.pack(row,
-					                               col,
-					                               lrs_.super().permutationInverse());
+					    col,
+					    lrs_.super().permutationInverse());
 					assert(ind >= offset_);
 					m(r, c) = src_.fastAccess(srcIndex_, ind - offset_);
-					//sum += PsimagLite::conj(m(r, c))*m(r, c);
+					// sum += PsimagLite::conj(m(r, c))*m(r, c);
 				}
 			}
 		}
@@ -90,34 +94,35 @@ class BlockDiagWf {
 		VectorMatrixType& data_;
 	};
 
-	class ParallelBlockTransform {
+	class ParallelBlockTransform
+	{
 
 	public:
 
 		ParallelBlockTransform(const BlockDiagonalMatrixType& tLeft,
-		                       const BlockDiagonalMatrixType& tRight,
-		                       char charLeft,
-		                       char charRight,
-		                       SizeType threads,
-		                       const VectorPairType& patches,
-		                       VectorSizeType& offsetRows,
-		                       VectorSizeType& offsetCols,
-		                       VectorMatrixType& data,
-		                       SizeType gemmRnb,
-		                       SizeType threadsForGemmR)
-		    : tLeft_(tLeft),
-		      tRight_(tRight),
-		      patchConvertLeft_(tLeft.blocks(), 0),
-		      patchConvertRight_(tRight.blocks(), 0),
-		      charLeft_(charLeft),
-		      charRight_(charRight),
-		      storage_(threads),
-		      patches_(patches),
-		      offsetRows_(offsetRows),
-		      offsetCols_(offsetCols),
-		      data_(data),
-		      gemmRnb_(gemmRnb),
-		      threadsForGemmR_(threadsForGemmR)
+		    const BlockDiagonalMatrixType& tRight,
+		    char charLeft,
+		    char charRight,
+		    SizeType threads,
+		    const VectorPairType& patches,
+		    VectorSizeType& offsetRows,
+		    VectorSizeType& offsetCols,
+		    VectorMatrixType& data,
+		    SizeType gemmRnb,
+		    SizeType threadsForGemmR)
+		    : tLeft_(tLeft)
+		    , tRight_(tRight)
+		    , patchConvertLeft_(tLeft.blocks(), 0)
+		    , patchConvertRight_(tRight.blocks(), 0)
+		    , charLeft_(charLeft)
+		    , charRight_(charRight)
+		    , storage_(threads)
+		    , patches_(patches)
+		    , offsetRows_(offsetRows)
+		    , offsetCols_(offsetCols)
+		    , data_(data)
+		    , gemmRnb_(gemmRnb)
+		    , threadsForGemmR_(threadsForGemmR)
 		{
 			patchConvert(patchConvertLeft_, (charLeft == 'N'), tLeft);
 			patchConvert(patchConvertRight_, (charRight != 'N'), tRight);
@@ -137,7 +142,8 @@ class BlockDiagWf {
 #endif
 			MatrixType* mptr = data_[ipatch];
 
-			if (mptr == 0) return;
+			if (mptr == 0)
+				return;
 
 			MatrixType& m = *mptr;
 			SizeType partL = patchConvertLeft_[patches_[ipatch].first];
@@ -148,16 +154,13 @@ class BlockDiagWf {
 				return;
 			}
 
-
 			if (partR >= tRight_.blocks()) {
 				m.clear();
 				return;
 			}
 
-			offsetRows_[ipatch] = (charLeft_ == 'N') ? tLeft_.offsetsRows(partL) :
-			                                           tLeft_.offsetsCols(partL);
-			offsetCols_[ipatch] = (charRight_ == 'N') ? tRight_.offsetsCols(partR) :
-			                                            tRight_.offsetsRows(partR);
+			offsetRows_[ipatch] = (charLeft_ == 'N') ? tLeft_.offsetsRows(partL) : tLeft_.offsetsCols(partL);
+			offsetCols_[ipatch] = (charRight_ == 'N') ? tRight_.offsetsCols(partR) : tRight_.offsetsRows(partR);
 
 			const MatrixType& mRight = getRightMatrix(tRight_(partR), charRight_, threadNum);
 			const MatrixType& mLeft = tLeft_(partL);
@@ -171,7 +174,6 @@ class BlockDiagWf {
 				m.clear();
 				return;
 			}
-
 
 			//  ---------------------------------
 			//  Here W_L = mLeft,  W_R = mRight
@@ -196,26 +198,23 @@ class BlockDiagWf {
 			//
 			const int nrow_W_L = mLeft.rows();
 			const int ncol_W_L = mLeft.cols();
-			const ComplexOrRealType *W_L = &(mLeft(0,0));
+			const ComplexOrRealType* W_L = &(mLeft(0, 0));
 			const int ldW_L = nrow_W_L;
 
 			const int nrow_W_R = mRight.rows();
 			const int ncol_W_R = mRight.cols();
-			const ComplexOrRealType *W_R = &(mRight(0,0));
+			const ComplexOrRealType* W_R = &(mRight(0, 0));
 			const int ldW_R = nrow_W_R;
 
-
-			const bool has_work = (nrow_W_L >= 1) && (ncol_W_L >= 1) &&
-			        (nrow_W_R >= 1) && (ncol_W_R >= 1);
+			const bool has_work = (nrow_W_L >= 1) && (ncol_W_L >= 1) && (nrow_W_R >= 1) && (ncol_W_R >= 1);
 			if (!has_work) {
 				m.clear();
 				return;
 			};
 
-
 			const int nrow_Yold = m.rows();
 			const int ncol_Yold = m.cols();
-			ComplexOrRealType *Yold = &(m(0,0));
+			ComplexOrRealType* Yold = &(m(0, 0));
 			const int ldYold = nrow_Yold;
 
 			const int nrow_Ynew = (charLeft_ == 'N') ? nrow_W_L : ncol_W_L;
@@ -240,18 +239,16 @@ class BlockDiagWf {
 			// (2) Ynew = opL(W_L) * Ytemp
 			// ---------------------------
 
-			assert( (charLeft_ == 'N') || (charLeft_ == 'T') || (charLeft_ == 'C'));
-			assert( (charRight_ == 'N') || (charRight_ == 'T') || (charRight_ == 'C'));
+			assert((charLeft_ == 'N') || (charLeft_ == 'T') || (charLeft_ == 'C'));
+			assert((charRight_ == 'N') || (charRight_ == 'T') || (charRight_ == 'C'));
 
 			nrow_Ytemp = (charLeft_ == 'N') ? nrow_W_L : ncol_W_L;
 			ncol_Ytemp = ncol_Yold;
-			const RealType flops_method_1 = 2.0 * nrow_W_L * ncol_W_L * ncol_Yold +
-			        2.0 * nrow_Ytemp * ncol_Ytemp * ncol_Ynew;
+			const RealType flops_method_1 = 2.0 * nrow_W_L * ncol_W_L * ncol_Yold + 2.0 * nrow_Ytemp * ncol_Ytemp * ncol_Ynew;
 
 			nrow_Ytemp = nrow_Yold;
 			ncol_Ytemp = (charRight_ == 'N') ? ncol_W_R : nrow_W_R;
-			const RealType flops_method_2 = 2.0 * nrow_Yold * ncol_Yold * ncol_Ytemp +
-			        2.0 * nrow_W_L * ncol_W_L * ncol_Ytemp;
+			const RealType flops_method_2 = 2.0 * nrow_Yold * ncol_Yold * ncol_Ytemp + 2.0 * nrow_W_L * ncol_W_L * ncol_Ytemp;
 
 			const bool use_method_1 = (flops_method_1 <= flops_method_2);
 #if 0
@@ -271,13 +268,12 @@ class BlockDiagWf {
 			}
 #endif
 
-
 			const ComplexOrRealType d_one = 1.0;
 			const ComplexOrRealType d_zero = 0.0;
 			static const bool needsPrinting = false;
 			PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
-			                                           gemmRnb_,
-			                                           threadsForGemmR_);
+			    gemmRnb_,
+			    threadsForGemmR_);
 
 			if (use_method_1) {
 				// ---------------------------
@@ -287,8 +283,8 @@ class BlockDiagWf {
 				// ---------------------------
 				nrow_Ytemp = (charLeft_ == 'N') ? nrow_W_L : ncol_W_L;
 				ncol_Ytemp = ncol_Yold;
-				MatrixType tmp(nrow_Ytemp,ncol_Ytemp);
-				ComplexOrRealType *Ytemp = &(tmp(0,0));
+				MatrixType tmp(nrow_Ytemp, ncol_Ytemp);
+				ComplexOrRealType* Ytemp = &(tmp(0, 0));
 				ldYtemp = nrow_Ytemp;
 
 				// ---------------------------
@@ -303,19 +299,15 @@ class BlockDiagWf {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					gemmR( transA, transB,
-					       mm, nn, kk,
-					       alpha,  W_L, ldW_L, Yold, ldYold,
-					       beta,   Ytemp, ldYtemp );
+					gemmR(transA, transB, mm, nn, kk, alpha, W_L, ldW_L, Yold, ldYold, beta, Ytemp, ldYtemp);
 				}
 
 				// ------------------------------
 				// Note Ynew is over-written Yold
 				// ------------------------------
 				m.clear();
-				m.resize( nrow_Ynew, ncol_Ynew);
-				ComplexOrRealType  *Ynew = &(m(0,0));
-
+				m.resize(nrow_Ynew, ncol_Ynew);
+				ComplexOrRealType* Ynew = &(m(0, 0));
 
 				// ---------------------------
 				// (2) Ynew = Ytemp * opR(W_R)
@@ -329,13 +321,9 @@ class BlockDiagWf {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					gemmR( transA, transB,
-					       mm, nn, kk,
-					       alpha, Ytemp, ldYtemp, W_R, ldW_R,
-					       beta, Ynew, ldYnew );
+					gemmR(transA, transB, mm, nn, kk, alpha, Ytemp, ldYtemp, W_R, ldW_R, beta, Ynew, ldYnew);
 				}
-			}
-			else {
+			} else {
 				// ---------------------------
 				// Method 2:
 				// (1) Ytemp = Yold * opR( W_R )
@@ -344,8 +332,8 @@ class BlockDiagWf {
 
 				nrow_Ytemp = nrow_Yold;
 				ncol_Ytemp = (charRight_ == 'N') ? ncol_W_R : nrow_W_R;
-				MatrixType tmp(nrow_Ytemp,ncol_Ytemp);
-				ComplexOrRealType *Ytemp = &(tmp(0,0));
+				MatrixType tmp(nrow_Ytemp, ncol_Ytemp);
+				ComplexOrRealType* Ytemp = &(tmp(0, 0));
 				ldYtemp = nrow_Ytemp;
 
 				// ------------------------------
@@ -360,19 +348,15 @@ class BlockDiagWf {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					gemmR( transA, transB,
-					       mm, nn, kk,
-					       alpha, Yold, ldYold, W_R, ldW_R,
-					       beta,  Ytemp, ldYtemp );
-
+					gemmR(transA, transB, mm, nn, kk, alpha, Yold, ldYold, W_R, ldW_R, beta, Ytemp, ldYtemp);
 				}
 
 				// ------------------------------
 				// Note Ynew over-written by Yold
 				// ------------------------------
 				m.clear();
-				m.resize( nrow_Ynew, ncol_Ynew );
-				ComplexOrRealType *Ynew = &(m(0,0));
+				m.resize(nrow_Ynew, ncol_Ynew);
+				ComplexOrRealType* Ynew = &(m(0, 0));
 
 				// ---------------------------
 				// (2) Ynew = opL(W_L) * Ytemp
@@ -386,22 +370,16 @@ class BlockDiagWf {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					gemmR( transA, transB,
-					       mm, nn, kk,
-					       alpha, W_L, ldW_L, Ytemp, ldYtemp,
-					       beta, Ynew, ldYnew );
+					gemmR(transA, transB, mm, nn, kk, alpha, W_L, ldW_L, Ytemp, ldYtemp, beta, Ynew, ldYnew);
 				}
-
-
 			};
-
 		}
 
 	private:
 
 		static void patchConvert(VectorSizeType& v,
-		                         bool isNeeded,
-		                         const BlockDiagonalMatrixType& b)
+		    bool isNeeded,
+		    const BlockDiagonalMatrixType& b)
 		{
 			SizeType n = b.blocks();
 			assert(v.size() == n);
@@ -420,13 +398,14 @@ class BlockDiagWf {
 
 		const MatrixType& getRightMatrix(const MatrixType& m, char c, SizeType threadNum)
 		{
-			if (c != 'N') return m;
+			if (c != 'N')
+				return m;
 
 			return getRightMatrixT(m, threadNum);
 		}
 
-		const MatrixType& getRightMatrixT(const PsimagLite::Matrix<std::complex<RealType> >& m,
-		                                  SizeType threadNum)
+		const MatrixType& getRightMatrixT(const PsimagLite::Matrix<std::complex<RealType>>& m,
+		    SizeType threadNum)
 		{
 			storage_[threadNum].clear();
 			SizeType rows = m.rows();
@@ -462,11 +441,11 @@ class BlockDiagWf {
 public:
 
 	BlockDiagWf(const VectorWithOffsetType& src,
-	            SizeType iSrc,
-	            const LeftRightSuperType& lrs)
-	    : lrs_(lrs),
-	      rows_(lrs.left().size()),
-	      cols_(lrs.right().size())
+	    SizeType iSrc,
+	    const LeftRightSuperType& lrs)
+	    : lrs_(lrs)
+	    , rows_(lrs.left().size())
+	    , cols_(lrs.right().size())
 	{
 		GenIjPatchType genIjPatch(lrs, src.qn(iSrc));
 		const VectorSizeType& patchesLeft = genIjPatch(GenIjPatchType::LEFT);
@@ -497,11 +476,11 @@ public:
 	}
 
 	void transform(char charLeft,
-	               char charRight,
-	               const BlockDiagonalMatrixType& tLeft,
-	               const BlockDiagonalMatrixType& tRight,
-	               SizeType gemmRnb,
-	               SizeType threadsForGemmR)
+	    char charRight,
+	    const BlockDiagonalMatrixType& tLeft,
+	    const BlockDiagonalMatrixType& tRight,
+	    SizeType gemmRnb,
+	    SizeType threadsForGemmR)
 	{
 		SizeType npatches = data_.size();
 		SizeType threads = std::min(npatches, PsimagLite::Concurrency::codeSectionParams.npthreads);
@@ -510,35 +489,35 @@ public:
 		ParallelizerType threadedTransform(codeSectionParams);
 
 		ParallelBlockTransform helper(tLeft,
-		                              tRight,
-		                              charLeft,
-		                              charRight,
-		                              threads,
-		                              patches_,
-		                              offsetRows_,
-		                              offsetCols_,
-		                              data_,
-		                              gemmRnb,
-		                              threadsForGemmR);
+		    tRight,
+		    charLeft,
+		    charRight,
+		    threads,
+		    patches_,
+		    offsetRows_,
+		    offsetCols_,
+		    data_,
+		    gemmRnb,
+		    threadsForGemmR);
 
 		threadedTransform.loopCreate(helper);
 
-		rows_ = (charLeft == 'N')  ? tLeft.rows() : tLeft.cols();
+		rows_ = (charLeft == 'N') ? tLeft.rows() : tLeft.cols();
 		cols_ = (charRight == 'N') ? tRight.cols() : tRight.rows();
-		//std::cout<<"sum transform "<<sum<<" rowsum="<<rowsum<<" colsum="<<colsum<<"\n";
+		// std::cout<<"sum transform "<<sum<<" rowsum="<<rowsum<<" colsum="<<colsum<<"\n";
 	}
 
 	void toVectorWithOffsets(VectorWithOffsetType& dest,
-	                         SizeType iNew,
-	                         const LeftRightSuperType& lrs,
-	                         const OneSiteSpacesType& oneSiteSpaces) const
+	    SizeType iNew,
+	    const LeftRightSuperType& lrs,
+	    const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		SizeType destIndex = dest.sector(iNew);
 		ProgramGlobals::DirectionEnum dir = oneSiteSpaces.direction();
 
 		return (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-		        ? toVectorExpandSys(dest, destIndex, lrs, oneSiteSpaces)
-		        : toVectorExpandEnviron(dest, destIndex, lrs, oneSiteSpaces);
+		    ? toVectorExpandSys(dest, destIndex, lrs, oneSiteSpaces)
+		    : toVectorExpandEnviron(dest, destIndex, lrs, oneSiteSpaces);
 	}
 
 	SizeType rows() const
@@ -554,24 +533,25 @@ public:
 private:
 
 	void toVectorExpandSys(VectorWithOffsetType& dest,
-	                       SizeType destIndex,
-	                       const LeftRightSuperType& lrs,
-	                       const OneSiteSpacesType& oneSiteSpaces) const
+	    SizeType destIndex,
+	    const LeftRightSuperType& lrs,
+	    const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		SizeType hilbert = oneSiteSpaces.hilbertMain(); // CHECK
 
 		SizeType npatches = data_.size();
 		SizeType ns = lrs.left().size();
 		PackIndicesType packSuper(ns);
-		PackIndicesType packLeft(lrs.left().size()/hilbert);
+		PackIndicesType packLeft(lrs.left().size() / hilbert);
 		PackIndicesType packRight(hilbert);
 		SizeType offset = lrs.super().partition(destIndex);
-		//ComplexOrRealType sum = 0.0;
-		//ComplexOrRealType sumBad = 0.0;
+		// ComplexOrRealType sum = 0.0;
+		// ComplexOrRealType sumBad = 0.0;
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			const MatrixType* mptr = data_[ipatch];
 
-			if (mptr == 0) continue;
+			if (mptr == 0)
+				continue;
 
 			const MatrixType& m = *mptr;
 			SizeType offsetL = offsetRows_[ipatch];
@@ -588,11 +568,11 @@ private:
 					SizeType lind = packLeft.pack(row, k, lrs.left().permutationInverse());
 
 					SizeType ind = packSuper.pack(lind,
-					                              rind,
-					                              lrs.super().permutationInverse());
+					    rind,
+					    lrs.super().permutationInverse());
 					const ComplexOrRealType& value = m(r, c);
-					//sum += PsimagLite::conj(value)*value;
-					//if (ind < offset || ind >= lrs.super().partition(destIndex + 1))
+					// sum += PsimagLite::conj(value)*value;
+					// if (ind < offset || ind >= lrs.super().partition(destIndex + 1))
 					//	sumBad += PsimagLite::conj(value)*value;
 					assert(ind >= offset && ind < lrs.super().partition(destIndex + 1));
 					dest.fastAccess(destIndex, ind - offset) = value;
@@ -600,28 +580,29 @@ private:
 			}
 		}
 
-		//std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
+		// std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
 	}
 
 	void toVectorExpandEnviron(VectorWithOffsetType& dest,
-	                           SizeType destIndex,
-	                           const LeftRightSuperType& lrs,
-	                           const OneSiteSpacesType& oneSiteSpaces) const
+	    SizeType destIndex,
+	    const LeftRightSuperType& lrs,
+	    const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		SizeType hilbert = oneSiteSpaces.hilbertMain(); // CHECK!
 
 		SizeType npatches = data_.size();
 		SizeType ns = lrs.left().size();
 		PackIndicesType packSuper(ns);
-		PackIndicesType packLeft(lrs_.left().permutationInverse().size()/hilbert);
+		PackIndicesType packLeft(lrs_.left().permutationInverse().size() / hilbert);
 		PackIndicesType packRight(hilbert);
 		SizeType offset = lrs.super().partition(destIndex);
-		//ComplexOrRealType sum = 0.0;
-		//ComplexOrRealType sumBad = 0.0;
+		// ComplexOrRealType sum = 0.0;
+		// ComplexOrRealType sumBad = 0.0;
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 			const MatrixType* mptr = data_[ipatch];
 
-			if (mptr == 0) continue;
+			if (mptr == 0)
+				continue;
 
 			const MatrixType& m = *mptr;
 			SizeType offsetL = offsetRows_[ipatch];
@@ -638,11 +619,11 @@ private:
 					SizeType rind = packRight.pack(k, col, lrs.right().permutationInverse());
 
 					SizeType ind = packSuper.pack(lind,
-					                              rind,
-					                              lrs.super().permutationInverse());
+					    rind,
+					    lrs.super().permutationInverse());
 					const ComplexOrRealType& value = m(r, c);
-					//sum += PsimagLite::conj(value)*value;
-					//if (ind < offset || ind >= lrs.super().partition(destIndex + 1))
+					// sum += PsimagLite::conj(value)*value;
+					// if (ind < offset || ind >= lrs.super().partition(destIndex + 1))
 					//	sumBad += PsimagLite::conj(value)*value;
 					assert(ind >= offset && ind < lrs.super().partition(destIndex + 1));
 					dest.fastAccess(destIndex, ind - offset) = value;
@@ -650,7 +631,7 @@ private:
 			}
 		}
 
-		//std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
+		// std::cout<<"sum = "<<sum<<" sumBad= "<<sumBad<<"\n";
 	}
 
 	const LeftRightSuperType& lrs_;

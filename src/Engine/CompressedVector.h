@@ -3,10 +3,12 @@
 #include "Vector.h"
 #include <fstream>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename T>
-class CompressedVector {
+template <typename T>
+class CompressedVector
+{
 
 public:
 
@@ -20,16 +22,17 @@ public:
 
 	void read(std::ifstream& fin)
 	{
-		fin>>size_;
-		if (size_ == 0) return;
+		fin >> size_;
+		if (size_ == 0)
+			return;
 		SizeType tmp;
-		fin>>tmp;
+		fin >> tmp;
 		partition_.resize(tmp);
 		for (SizeType i = 0; i < tmp; ++i)
-			fin>>partition_[i];
-		fin>>tmp;
+			fin >> partition_[i];
+		fin >> tmp;
 		for (SizeType i = 0; i < tmp; ++i)
-			fin>>data_[i];
+			fin >> data_[i];
 	}
 
 	void clear()
@@ -47,7 +50,7 @@ public:
 		partition_[1] = n;
 		size_ = n;
 		data_.clear();
-		data_.resize(1,0);
+		data_.resize(1, 0);
 	}
 
 	SizeType size() const { return size_; }
@@ -70,7 +73,8 @@ private:
 	{
 		assert(ind < size_);
 		for (SizeType i = 1; i < partition_.size(); ++i)
-			if (ind < partition_[i]) return i - 1;
+			if (ind < partition_[i])
+				return i - 1;
 
 		throw PsimagLite::RuntimeError("CompressedVector: findPartition\n");
 	}

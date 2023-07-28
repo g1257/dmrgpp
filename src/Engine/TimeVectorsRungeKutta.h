@@ -79,40 +79,44 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef TIME_VECTORS_RUNGE_KUTTA
 #define TIME_VECTORS_RUNGE_KUTTA
-#include <iostream>
 #include "RungeKutta.h"
 #include "TimeVectorsBase.h"
+#include <iostream>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename RealType>
+template <typename RealType>
 RealType minusOneOrMinusI(RealType)
 {
 	return -1;
 }
 
-template<typename RealType>
+template <typename RealType>
 std::complex<RealType> minusOneOrMinusI(std::complex<RealType>)
 {
-	return std::complex<RealType>(0.0,-1.0);
+	return std::complex<RealType>(0.0, -1.0);
 }
 
-template<typename TargetParamsType,
-		 typename ModelType,
-		 typename WaveFunctionTransfType,
-		 typename LanczosSolverType,
-		 typename VectorWithOffsetType>
-class TimeVectorsRungeKutta : public  TimeVectorsBase<
-		TargetParamsType,
-		ModelType,
-		WaveFunctionTransfType,
-		LanczosSolverType,
-		VectorWithOffsetType> {
+template <typename TargetParamsType,
+    typename ModelType,
+    typename WaveFunctionTransfType,
+    typename LanczosSolverType,
+    typename VectorWithOffsetType>
+class TimeVectorsRungeKutta : public TimeVectorsBase<
+				  TargetParamsType,
+				  ModelType,
+				  WaveFunctionTransfType,
+				  LanczosSolverType,
+				  VectorWithOffsetType>
+{
 
 	typedef TimeVectorsBase<TargetParamsType,
-	ModelType,WaveFunctionTransfType,
-	LanczosSolverType,
-	VectorWithOffsetType> BaseType;
+	    ModelType,
+	    WaveFunctionTransfType,
+	    LanczosSolverType,
+	    VectorWithOffsetType>
+	    BaseType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
@@ -130,37 +134,40 @@ class TimeVectorsRungeKutta : public  TimeVectorsBase<
 public:
 
 	TimeVectorsRungeKutta(const TargetParamsType& tstStruct,
-						  VectorVectorWithOffsetType& targetVectors,
-						  const ModelType& model,
-						  const WaveFunctionTransfType& wft,
-						  const LeftRightSuperType& lrs)
-		: BaseType(model, lrs, wft, "rungekutta"),
-	      progress_("TimeVectorsRungeKutta"),
-	      tstStruct_(tstStruct),
-		  targetVectors_(targetVectors),
-		  model_(model),
-		  wft_(wft),
-		  lrs_(lrs)
-	{}
+	    VectorVectorWithOffsetType& targetVectors,
+	    const ModelType& model,
+	    const WaveFunctionTransfType& wft,
+	    const LeftRightSuperType& lrs)
+	    : BaseType(model, lrs, wft, "rungekutta")
+	    , progress_("TimeVectorsRungeKutta")
+	    , tstStruct_(tstStruct)
+	    , targetVectors_(targetVectors)
+	    , model_(model)
+	    , wft_(wft)
+	    , lrs_(lrs)
+	{
+	}
 
 	virtual void calcTimeVectors(const VectorSizeType& indices,
-	                             RealType Eg,
-	                             const VectorWithOffsetType& phi,
-	                             const typename BaseType::ExtraData&)
+	    RealType Eg,
+	    const VectorWithOffsetType& phi,
+	    const typename BaseType::ExtraData&)
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"using RungeKutta";
+		msg << "using RungeKutta";
 
 		RealType norma = norm(phi);
-		if (norma<1e-10) return;
-		msg<<" Norm of phi= "<<norma;
+		if (norma < 1e-10)
+			return;
+		msg << " Norm of phi= " << norma;
 		progress_.printline(msgg, std::cout);
 
 		// set non-zero sectors
-		for (SizeType i=0;i<tstStruct_.times().size();i++) *targetVectors_[i] = phi;
+		for (SizeType i = 0; i < tstStruct_.times().size(); i++)
+			*targetVectors_[i] = phi;
 
-		for (SizeType ii=0;ii<phi.sectors();ii++) {
+		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
 			SizeType i = phi.sector(ii);
 			calcTimeVectors(indices, Eg, phi, i);
 		}
@@ -168,34 +175,37 @@ public:
 
 private:
 
-	class FunctionForRungeKutta {
+	class FunctionForRungeKutta
+	{
 
 	public:
 
 		FunctionForRungeKutta(const RealType& E0,
-		                      const RealType &timeDirection,
-		                      const LeftRightSuperType& lrs,
-		                      RealType currentTime,
-		                      const ModelType& model,
-		                      const VectorWithOffsetType& phi,
-		                      SizeType i0)
-			: E0_(E0),
-		      timeDirection_(timeDirection),
-			  p_(lrs.super().findPartitionNumber(phi.offset(i0))),
-		      aux_(p_, lrs),
-		      hc_(lrs, ModelType::modelLinks(), currentTime, model.superOpHelper()),
-			  lanczosHelper_(model, hc_, aux_)
-		{}
+		    const RealType& timeDirection,
+		    const LeftRightSuperType& lrs,
+		    RealType currentTime,
+		    const ModelType& model,
+		    const VectorWithOffsetType& phi,
+		    SizeType i0)
+		    : E0_(E0)
+		    , timeDirection_(timeDirection)
+		    , p_(lrs.super().findPartitionNumber(phi.offset(i0)))
+		    , aux_(p_, lrs)
+		    , hc_(lrs, ModelType::modelLinks(), currentTime, model.superOpHelper())
+		    , lanczosHelper_(model, hc_, aux_)
+		{
+		}
 
-		TargetVectorType operator()(const RealType&,const TargetVectorType& y) const
+		TargetVectorType operator()(const RealType&, const TargetVectorType& y) const
 		{
 			TargetVectorType x(y.size());
-			lanczosHelper_.matrixVectorProduct(x,y);
-			for (SizeType i=0;i<x.size();i++) x[i] -= E0_*y[i];
+			lanczosHelper_.matrixVectorProduct(x, y);
+			for (SizeType i = 0; i < x.size(); i++)
+				x[i] -= E0_ * y[i];
 			ComplexOrRealType icomplex = minusOneOrMinusI(static_cast<ComplexOrRealType>(0));
-			ComplexOrRealType tmp2 = timeDirection_*icomplex;
+			ComplexOrRealType tmp2 = timeDirection_ * icomplex;
 			TargetVectorType x2;
-			x2 <= tmp2*x;
+			x2 <= tmp2* x;
 			return x2;
 		}
 
@@ -210,29 +220,29 @@ private:
 	}; // FunctionForRungeKutta
 
 	void calcTimeVectors(const VectorSizeType& indices,
-	                     RealType Eg,
-	                     const VectorWithOffsetType& phi,
-	                     SizeType i0)
+	    RealType Eg,
+	    const VectorWithOffsetType& phi,
+	    SizeType i0)
 	{
 		const VectorRealType& times = tstStruct_.times();
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi0(total);
-		phi.extract(phi0,i0);
+		phi.extract(phi0, i0);
 		FunctionForRungeKutta f(Eg,
-		                        tstStruct_.timeDirection(),
-		                        lrs_,
-		                        this->time(),
-		                        model_,
-		                        phi,
-		                        i0);
+		    tstStruct_.timeDirection(),
+		    lrs_,
+		    this->time(),
+		    model_,
+		    phi,
+		    i0);
 
-		RealType epsForRK = tstStruct_.tau()/(times.size()-1.0);
-		PsimagLite::RungeKutta<RealType,FunctionForRungeKutta,TargetVectorType>
-		        rungeKutta(f,epsForRK);
+		RealType epsForRK = tstStruct_.tau() / (times.size() - 1.0);
+		PsimagLite::RungeKutta<RealType, FunctionForRungeKutta, TargetVectorType>
+		    rungeKutta(f, epsForRK);
 
 		typename PsimagLite::Vector<TargetVectorType>::Type result;
-		rungeKutta.solve(result,0.0,times.size(),phi0);
-		assert(result.size()==times.size());
+		rungeKutta.solve(result, 0.0, times.size(), phi0);
+		assert(result.size() == times.size());
 
 		const SizeType n = indices.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -248,7 +258,7 @@ private:
 	const ModelType& model_;
 	const WaveFunctionTransfType& wft_;
 	const LeftRightSuperType& lrs_;
-}; //class TimeVectorsRungeKutta
+}; // class TimeVectorsRungeKutta
 } // namespace Dmrg
 /*@}*/
 #endif

@@ -1,12 +1,13 @@
 #ifndef RestartStruct_H
 #define RestartStruct_H
 
+#include "InputNg.h"
+#include "Io/IoSerializerStub.h"
 #include "Vector.h"
 #include <iostream>
-#include "Io/IoSerializerStub.h"
-#include "InputNg.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 // no longer a struct
 struct RestartStruct {
@@ -14,8 +15,12 @@ struct RestartStruct {
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
 
 	RestartStruct()
-	    : filename_(""), labelForEnergy_("Energies"), mapStages_(true), sourceTvForPsi_(-1)
-	{}
+	    : filename_("")
+	    , labelForEnergy_("Energies")
+	    , mapStages_(true)
+	    , sourceTvForPsi_(-1)
+	{
+	}
 
 	/* PSIDOC MiscRestartOptions
 
@@ -33,12 +38,13 @@ struct RestartStruct {
 	 Sets the i-th target vector for this targeting to the previous run target
 	 vector number MappingTvs[i], if MappingTvs[i] is non-negative; skips it if negative.
 	 */
-	template<typename SomeInputType>
+	template <typename SomeInputType>
 	void read(SomeInputType& io)
 	{
 		try {
 			io.readline(labelForEnergy_, "RestartLabelForEnergy=");
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			io.readline(sourceTvForPsi_, "RestartSourceTvForPsi=");
@@ -50,11 +56,13 @@ struct RestartStruct {
 			int x = 1;
 			io.readline(x, "RestartMapStages=");
 			mapStages_ = (x > 0);
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			io.read(mappingTvs_, "RestartMappingTvs");
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 	}
 
 	void setFilename(PsimagLite::String f) { filename_ = f; }
@@ -79,7 +87,7 @@ struct RestartStruct {
 	int sourceTvForPsi() const { return sourceTvForPsi_; }
 
 	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer) const
+	    PsimagLite::IoSerializer& ioSerializer) const
 	{
 		PsimagLite::String root = label;
 		ioSerializer.createGroup(root);
@@ -93,15 +101,16 @@ struct RestartStruct {
 
 	friend std::ostream& operator<<(std::ostream& os, const RestartStruct& c)
 	{
-	    if (c.filename_ == "") return os;
+		if (c.filename_ == "")
+			return os;
 
-	    os<<"RestartStruct.filename="<<c.filename_<<"\n";
-	    os<<"RestartStruct.labelForEnergy="<<c.labelForEnergy_<<"\n";
-		os<<"RestartStruct.mapStages="<<c.mapStages_<<"\n";
-		os<<"RestartStruct.sourceTvForPsi="<<c.sourceTvForPsi_<<"\n";
+		os << "RestartStruct.filename=" << c.filename_ << "\n";
+		os << "RestartStruct.labelForEnergy=" << c.labelForEnergy_ << "\n";
+		os << "RestartStruct.mapStages=" << c.mapStages_ << "\n";
+		os << "RestartStruct.sourceTvForPsi=" << c.sourceTvForPsi_ << "\n";
 		if (c.mappingTvs_.size() > 0)
-			os<<"RestartStruct.mappingTvs="<<c.mappingTvs_<<"\n";
-	    return os;
+			os << "RestartStruct.mappingTvs=" << c.mappingTvs_ << "\n";
+		return os;
 	}
 
 private:
@@ -116,4 +125,3 @@ private:
 } // namespace Dmrg
 
 #endif // RestartStruct_H
-

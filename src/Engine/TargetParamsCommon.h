@@ -77,18 +77,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef TARGET_PARAMS_COMMON_H
 #define TARGET_PARAMS_COMMON_H
-#include <vector>
-#include <stdexcept>
-#include <iostream>
-#include "TargetParamsBase.h"
+#include "AlgebraicStringToNumber.h"
 #include "Io/IoSerializerStub.h"
 #include "ProgramGlobals.h"
-#include "AlgebraicStringToNumber.h"
+#include "TargetParamsBase.h"
+#include <iostream>
+#include <stdexcept>
+#include <vector>
 
-namespace Dmrg {
+namespace Dmrg
+{
 // Coordinates reading of TargetSTructure from input file
-template<typename ModelType>
-class TargetParamsCommon : public TargetParamsBase<ModelType> {
+template <typename ModelType>
+class TargetParamsCommon : public TargetParamsBase<ModelType>
+{
 
 public:
 
@@ -108,20 +110,20 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	TargetParamsCommon(InputValidatorType& io,
-	                   PsimagLite::String targeting,
-	                   const ModelType& model)
-	    : BaseType(targeting),
-	      sites_(0),
-	      startingLoops_(0),
-	      concatenation_(BaseType::ConcatEnum::PRODUCT),
-	      noOperator_(false),
-	      skipTimeZero_(false),
-	      isEnergyForExp_(false),
-	      gsWeight_(0.0),
-	      energyForExp_(0.0),
-	      io_(io),
-	      model_(model),
-	      sectorLevel_(PairSizeType(0,0))
+	    PsimagLite::String targeting,
+	    const ModelType& model)
+	    : BaseType(targeting)
+	    , sites_(0)
+	    , startingLoops_(0)
+	    , concatenation_(BaseType::ConcatEnum::PRODUCT)
+	    , noOperator_(false)
+	    , skipTimeZero_(false)
+	    , isEnergyForExp_(false)
+	    , gsWeight_(0.0)
+	    , energyForExp_(0.0)
+	    , io_(io)
+	    , model_(model)
+	    , sectorLevel_(PairSizeType(0, 0))
 	{
 		/*PSIDOC TargetParamsCommon
 		\item[TSPSites] [VectorInteger] The first number is the number of numbers
@@ -145,14 +147,15 @@ public:
 		in the time evolution.
 		*/
 
-		if (targeting == "TargetingExpression") return;
+		if (targeting == "TargetingExpression")
+			return;
 
 		VectorStringType sitesStr;
 		io.read(sitesStr, "TSPSites");
 		vecstringToVecnumbers(sites_, sitesStr);
 		checkSites();
-		io.read(startingLoops_,"TSPLoops");
-		io.readline(gsWeight_,"GsWeight=");
+		io.read(startingLoops_, "TSPLoops");
+		io.readline(gsWeight_, "GsWeight=");
 
 		if (sites_.size() != startingLoops_.size()) {
 			PsimagLite::String str(__FILE__);
@@ -163,7 +166,7 @@ public:
 
 		PsimagLite::String productOrSum = "product";
 		try {
-			io.readline(productOrSum,"TSPProductOrSum=");
+			io.readline(productOrSum, "TSPProductOrSum=");
 		} catch (std::exception&) {
 			PsimagLite::String s(__FILE__);
 			s += "\n FATAL: Must provide TSPProductOrSum=.\n";
@@ -187,38 +190,42 @@ public:
 
 		try {
 			int tmp = 0;
-			io.readline(tmp,"TSPSkipTimeZero=");
+			io.readline(tmp, "TSPSkipTimeZero=");
 			skipTimeZero_ = (tmp > 0);
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
-			io.readline(energyForExp_,"TSPEnergyForExp=");
+			io.readline(energyForExp_, "TSPEnergyForExp=");
 			isEnergyForExp_ = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		for (SizeType i = 0; i < sites_.size(); ++i) {
 			PsimagLite::String prefix2 = (io.isAinur()) ? "TSPOp" + ttos(i) + ":" : "";
 			OperatorType myOp(io,
-			                  model_,
-			                  OperatorType::MUST_BE_NONZERO,
-			                  prefix2,
-			                  sites_[i]);
+			    model_,
+			    OperatorType::MUST_BE_NONZERO,
+			    prefix2,
+			    sites_[i]);
 			aOperators_.push_back(myOp);
 		}
 
 		try {
 			VectorType tmpVector;
-			io.read(tmpVector,"TSPOperatorMultiplier");
+			io.read(tmpVector, "TSPOperatorMultiplier");
 			multiplyOperators(tmpVector);
-			std::cout<<"TSPOperatorMultiplier found with "<<tmpVector.size()<<" entries.\n";
-		} catch (std::exception&) {}
+			std::cout << "TSPOperatorMultiplier found with " << tmpVector.size() << " entries.\n";
+		} catch (std::exception&) {
+		}
 
 		bool hasApplyTo = false;
 		PsimagLite::String tmp;
 		try {
 			io.readline(tmp, "TSPApplyTo=");
 			hasApplyTo = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (hasApplyTo) {
 			PsimagLite::GetBraOrKet gbok(tmp);
@@ -231,8 +238,8 @@ public:
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	    SizeType,
+	    PsimagLite::String = "") const
 	{
 		return 0;
 	}
@@ -250,11 +257,13 @@ public:
 
 	virtual int findIndexOfSite(SizeType site, SizeType start) const
 	{
-		if (start >= sites_.size()) return -1;
+		if (start >= sites_.size())
+			return -1;
 		VectorSizeType::const_iterator it = std::find(sites_.begin() + start,
-		                                              sites_.end(),
-		                                              site);
-		if (it == sites_.end()) return -1;
+		    sites_.end(),
+		    site);
+		if (it == sites_.end())
+			return -1;
 		return it - sites_.begin();
 	}
 
@@ -316,7 +325,7 @@ public:
 	virtual SizeType levelIndex() const { return sectorLevel_.second; }
 
 	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer) const
+	    PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 
@@ -332,16 +341,16 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const TargetParamsCommon& t)
+	    const TargetParamsCommon& t)
 	{
-		os<<"TargetParams.operators="<<t.aOperators_.size()<<"\n";
-		for (SizeType i=0;i<t.aOperators_.size();i++) {
-			os<<"TargetParams.operator "<<i<<"\n";
-			os<<t.aOperators_[i];
+		os << "TargetParams.operators=" << t.aOperators_.size() << "\n";
+		for (SizeType i = 0; i < t.aOperators_.size(); i++) {
+			os << "TargetParams.operator " << i << "\n";
+			os << t.aOperators_[i];
 		}
 
-		os<<"TargetParams.site="<<t.sites_;
-		os<<"TargetParams.startingLoop="<<t.startingLoops_<<"\n";
+		os << "TargetParams.site=" << t.sites_;
+		os << "TargetParams.startingLoop=" << t.startingLoops_ << "\n";
 
 		return os;
 	}
@@ -357,15 +366,16 @@ private:
 			str += " but " + ttos(aOperators_.size()) + " expected.\n";
 		}
 
-		for (SizeType i=0;i<aOperators_.size();i++)
+		for (SizeType i = 0; i < aOperators_.size(); i++)
 			aOperators_[i] *= tmpVector[i];
 	}
 
 	bool isNoOperator() const
 	{
-		if (aOperators_.size()!=1) return false;
+		if (aOperators_.size() != 1)
+			return false;
 		return (isTheIdentity(aOperators_[0].getStorage())
-		        && aOperators_[0].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::BOSON);
+		    && aOperators_[0].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	void checkSizesOfOperators() const
@@ -377,7 +387,7 @@ private:
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		for (SizeType i=0;i<aOperators_.size();i++) {
+		for (SizeType i = 0; i < aOperators_.size(); i++) {
 			SizeType n = aOperators_[i].getStorage().rows();
 			SizeType hilbert = model_.hilbertSize(sites_[i]);
 			if (n != hilbert) {
@@ -391,7 +401,8 @@ private:
 
 	void checkBorderOperators() const
 	{
-		if (sites_.size() == 0) return;
+		if (sites_.size() == 0)
+			return;
 
 		SizeType linSize = model_.superGeometry().numberOfSites();
 
@@ -399,8 +410,8 @@ private:
 			errorBorderOperators(0);
 		}
 
-		if (hasOperatorAt(linSize-1) && !hasOperatorAt(linSize-2)) {
-			errorBorderOperators(linSize-1);
+		if (hasOperatorAt(linSize - 1) && !hasOperatorAt(linSize - 2)) {
+			errorBorderOperators(linSize - 1);
 		}
 	}
 
@@ -412,7 +423,7 @@ private:
 				PsimagLite::String str(__FILE__);
 				str += " TSPSites: The " + ttos(i) + "-th site is ";
 				str += ttos(sites_[i]) + " is larger than the total ";
-				str += "number of sites "+ ttos(linSize) + "\n";
+				str += "number of sites " + ttos(linSize) + "\n";
 				throw PsimagLite::RuntimeError(str);
 			}
 		}
@@ -421,7 +432,8 @@ private:
 	bool hasOperatorAt(SizeType site) const
 	{
 		for (SizeType i = 0; i < sites_.size(); ++i) {
-			if (sites_[i] == site) return true;
+			if (sites_[i] == site)
+				return true;
 		}
 		return false;
 	}
@@ -444,14 +456,15 @@ private:
 		nums.resize(n);
 
 		AlgebraicStringToNumberType algebraicStringToNumber("TSPSites", numberOfSites);
-		std::cout<<"TSPSites=[";
+		std::cout << "TSPSites=[";
 		for (SizeType i = 0; i < n; ++i) {
 			nums[i] = algebraicStringToNumber.procLength(strs[i]);
-			std::cout<<nums[i];
-			if (i + 1 < n) std::cout<<", ";
+			std::cout << nums[i];
+			if (i + 1 < n)
+				std::cout << ", ";
 		}
 
-		std::cout<<"];\n";
+		std::cout << "];\n";
 	}
 
 	VectorSizeType sites_;
@@ -471,4 +484,3 @@ private:
 
 /*@}*/
 #endif // TARGET_PARAMS_COMMON_H
-

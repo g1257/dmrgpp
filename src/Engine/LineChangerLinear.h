@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -76,47 +76,53 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file LineChangerLinear.h
  *
- * 
- * 
+ *
+ *
  */
 #ifndef LINE_CHANGER_LINEAR_H
 #define LINE_CHANGER_LINEAR_H
 
 #include "String.h"
-#include <vector>
 #include "TypeToString.h"
+#include <vector>
 
-namespace Dmrg {
-	template<typename ValueType>
-	class	LineChangerLinear {
-	public:
-		LineChangerLinear(const PsimagLite::String& match,
-		                  ValueType step,
-		                  ValueType init,
-		                  const PsimagLite::String& pre,
-		                  const PsimagLite::String& post)
-		: match_(match),step_(step),init_(init),pre_(pre),post_(post)
-		{
-		}
-		
-		const PsimagLite::String& string() const { return match_; }
-		
-		bool act(SizeType i,PsimagLite::String& line) const
-		{
-			ValueType val = i*step_ + init_;
-			line=match_ + pre_ + ttos(val) + post_;
-			return true;
-		}
+namespace Dmrg
+{
+template <typename ValueType>
+class LineChangerLinear
+{
+public:
 
-	private:
+	LineChangerLinear(const PsimagLite::String& match,
+	    ValueType step,
+	    ValueType init,
+	    const PsimagLite::String& pre,
+	    const PsimagLite::String& post)
+	    : match_(match)
+	    , step_(step)
+	    , init_(init)
+	    , pre_(pre)
+	    , post_(post)
+	{
+	}
 
-		PsimagLite::String match_;
-		ValueType step_,init_;
-		PsimagLite::String pre_,post_;
-	}; // class LineChangerLinear
+	const PsimagLite::String& string() const { return match_; }
+
+	bool act(SizeType i, PsimagLite::String& line) const
+	{
+		ValueType val = i * step_ + init_;
+		line = match_ + pre_ + ttos(val) + post_;
+		return true;
+	}
+
+private:
+
+	PsimagLite::String match_;
+	ValueType step_, init_;
+	PsimagLite::String pre_, post_;
+}; // class LineChangerLinear
 
 } // namespace Dmrg
 
 /*@}*/
 #endif // LINE_CHANGER_LINEAR_H
-

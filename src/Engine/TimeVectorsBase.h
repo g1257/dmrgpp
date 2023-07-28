@@ -79,19 +79,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef TIME_VECTORS_BASE
 #define TIME_VECTORS_BASE
-#include <iostream>
-#include "Vector.h"
 #include "ProgramGlobals.h"
+#include "Vector.h"
 #include "Wft/WftHelper.h"
+#include <iostream>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename TargetParamsType,
-         typename ModelType,
-         typename WaveFunctionTransfType,
-         typename LanczosSolverType,
-         typename VectorWithOffsetType>
-class TimeVectorsBase  {
+template <typename TargetParamsType,
+    typename ModelType,
+    typename WaveFunctionTransfType,
+    typename LanczosSolverType,
+    typename VectorWithOffsetType>
+class TimeVectorsBase
+{
 
 public:
 
@@ -99,31 +101,36 @@ public:
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename TargetParamsType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef std::pair<SizeType,SizeType> PairType;
+	typedef std::pair<SizeType, SizeType> PairType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef WftHelper<ModelType, VectorWithOffsetType, WaveFunctionTransfType> WftHelperType;
 
 	TimeVectorsBase(const ModelType& model,
-	                const LeftRightSuperType& lrs,
-	                const WaveFunctionTransfType& wft,
-	                PsimagLite::String name)
-	    : wftHelper_(model, lrs, wft), name_(name), time_(0.0), currentTimeStep_(0)
-	{}
+	    const LeftRightSuperType& lrs,
+	    const WaveFunctionTransfType& wft,
+	    PsimagLite::String name)
+	    : wftHelper_(model, lrs, wft)
+	    , name_(name)
+	    , time_(0.0)
+	    , currentTimeStep_(0)
+	{
+	}
 
 	struct ExtraData {
 
 		ExtraData(ProgramGlobals::DirectionEnum dir_,
-		          bool allOperatorsApplied_,
-		          bool wftAndAdvanceIfNeeded_,
-		          VectorSizeType block_,
-		          bool isLastCall_)
-		    : dir(dir_),
-		      allOperatorsApplied(allOperatorsApplied_),
-		      wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_),
-		      block(block_),
-		      isLastCall(isLastCall_)
-		{}
+		    bool allOperatorsApplied_,
+		    bool wftAndAdvanceIfNeeded_,
+		    VectorSizeType block_,
+		    bool isLastCall_)
+		    : dir(dir_)
+		    , allOperatorsApplied(allOperatorsApplied_)
+		    , wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_)
+		    , block(block_)
+		    , isLastCall(isLastCall_)
+		{
+		}
 
 		ProgramGlobals::DirectionEnum dir;
 		bool allOperatorsApplied;
@@ -133,16 +140,16 @@ public:
 	};
 
 	virtual void calcTimeVectors(const VectorSizeType&,
-	                             RealType,
-	                             const VectorWithOffsetType&,
-	                             const ExtraData&)
+	    RealType,
+	    const VectorWithOffsetType&,
+	    const ExtraData&)
 	{
 		err("calcTimeVectors: unimplemented in this base class\n");
 	}
 
-	virtual ~TimeVectorsBase() {}
+	virtual ~TimeVectorsBase() { }
 
-	virtual void timeHasAdvanced() {}
+	virtual void timeHasAdvanced() { }
 
 	RealType time() const { return time_; }
 
@@ -168,7 +175,7 @@ private:
 	PsimagLite::String name_;
 	RealType time_;
 	SizeType currentTimeStep_;
-}; //class TimeVectorsBase
+}; // class TimeVectorsBase
 } // namespace Dmrg
 /*@}*/
 #endif

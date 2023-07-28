@@ -81,17 +81,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_PARAMS_SPIN_ORBITAL_H
 #define DMRG_PARAMS_SPIN_ORBITAL_H
-#include "Vector.h"
 #include "../../Engine/ParametersModelBase.h"
+#include "Vector.h"
 
-namespace Dmrg {
-template<typename RealType, typename QnType>
+namespace Dmrg
+{
+template <typename RealType, typename QnType>
 struct ParametersSpinOrbital : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ParametersSpinOrbital(IoInputType& io)
 	    : BaseType(io, false)
 	{
@@ -103,7 +104,7 @@ struct ParametersSpinOrbital : public ParametersModelBase<RealType, QnType> {
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersSpinOrbital";
 		io.createGroup(label);
@@ -115,14 +116,14 @@ struct ParametersSpinOrbital : public ParametersModelBase<RealType, QnType> {
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream &os,
-	                                const ParametersSpinOrbital& parameters)
+	friend std::ostream& operator<<(std::ostream& os,
+	    const ParametersSpinOrbital& parameters)
 	{
-		os<<"SpinTwiceS="<<parameters.twiceS<<"\n";
-		os<<"OrbitalTwiceS="<<parameters.twiceL<<"\n";
-		os<<"LambdaOne="<<parameters.lambda1<<"\n";
-		os<<"LambdaTwo="<<parameters.lambda2<<"\n";
-		os<<parameters.targetQuantum;
+		os << "SpinTwiceS=" << parameters.twiceS << "\n";
+		os << "OrbitalTwiceS=" << parameters.twiceL << "\n";
+		os << "LambdaOne=" << parameters.lambda1 << "\n";
+		os << "LambdaTwo=" << parameters.lambda2 << "\n";
+		os << parameters.targetQuantum;
 		return os;
 	}
 
@@ -135,4 +136,3 @@ struct ParametersSpinOrbital : public ParametersModelBase<RealType, QnType> {
 
 /*@}*/
 #endif
-

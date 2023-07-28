@@ -1,22 +1,33 @@
 #ifndef INTENT_H
 #define INTENT_H
-#include "InputNg.h"
 #include "AnsiColors.h"
+#include "InputNg.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelType>
-class Intent {
+template <typename ModelType>
+class Intent
+{
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::ParametersType DmrgSolverParamsType;
 
-	enum class IntentEnum {NONE, UNKNOWN, GS, GIMP_MATSUBARA, ARPES0, ARPES1, NEUTRONS_SZSZ};
+	enum class IntentEnum { NONE,
+		UNKNOWN,
+		GS,
+		GIMP_MATSUBARA,
+		ARPES0,
+		ARPES1,
+		NEUTRONS_SZSZ };
 
 public:
 
-	Intent(const ModelType& model) : model_(model) {}
+	Intent(const ModelType& model)
+	    : model_(model)
+	{
+	}
 
 	void check() const
 	{
@@ -57,11 +68,16 @@ private:
 			return IntentEnum::NONE;
 		}
 
-		if (intent == "GroundState") return IntentEnum::GS;
-		if (intent == "GimpMatsubara") return IntentEnum::GIMP_MATSUBARA;
-		if (intent == "ARPES0") return IntentEnum::ARPES0;
-		if (intent == "ARPES1") return IntentEnum::ARPES1;
-		if (intent == "NeutronsSzSz") return IntentEnum::NEUTRONS_SZSZ;
+		if (intent == "GroundState")
+			return IntentEnum::GS;
+		if (intent == "GimpMatsubara")
+			return IntentEnum::GIMP_MATSUBARA;
+		if (intent == "ARPES0")
+			return IntentEnum::ARPES0;
+		if (intent == "ARPES1")
+			return IntentEnum::ARPES1;
+		if (intent == "NeutronsSzSz")
+			return IntentEnum::NEUTRONS_SZSZ;
 		return IntentEnum::UNKNOWN;
 	}
 
@@ -70,10 +86,8 @@ private:
 		if (!hasInSolverOptions("restart"))
 			saySomethingAbout(PsimagLite::String("restart") + "in SolverOptions");
 
-		if (!hasInSolverOptions("CorrectionVectorTargeting") &&
-		        !hasInSolverOptions("TargetingChebyshev"))
-			saySomethingAbout(PsimagLite::String("CorrectionVectorTargeting or ") +
-			                  "TargetingChebyshev in SolverOptions");
+		if (!hasInSolverOptions("CorrectionVectorTargeting") && !hasInSolverOptions("TargetingChebyshev"))
+			saySomethingAbout(PsimagLite::String("CorrectionVectorTargeting or ") + "TargetingChebyshev in SolverOptions");
 
 		if (!hasInSolverOptions("minimizeDisk"))
 			suggest("minimizeDisk in SolverOptions");
@@ -110,7 +124,7 @@ private:
 	{
 		const SizeType l = model_.superGeometry().numberOfSites();
 		const SizeType leg = (l & 1) ? 0 : getLeg();
-		const SizeType lOverTwo = l/2;
+		const SizeType lOverTwo = l / 2;
 
 		if (leg == 1) {
 			if (site != lOverTwo)
@@ -139,19 +153,19 @@ private:
 
 	void saySomethingAbout(PsimagLite::String what) const
 	{
-		std::cerr<<PsimagLite::AnsiColor::blue;
-		std::cerr<<"WARNING: "<<what<<" (given your Intent)";
-		std::cerr<<PsimagLite::AnsiColor::reset<<"\n";
+		std::cerr << PsimagLite::AnsiColor::blue;
+		std::cerr << "WARNING: " << what << " (given your Intent)";
+		std::cerr << PsimagLite::AnsiColor::reset << "\n";
 
-		std::cout<<PsimagLite::AnsiColor::blue;
-		std::cout<<"WARNING: "<<what<<" (given your Intent)";
-		std::cout<<PsimagLite::AnsiColor::reset<<"\n";
+		std::cout << PsimagLite::AnsiColor::blue;
+		std::cout << "WARNING: " << what << " (given your Intent)";
+		std::cout << PsimagLite::AnsiColor::reset << "\n";
 	}
 
 	void suggest(PsimagLite::String what) const
 	{
-		std::cerr<<"May I suggest "<<what<<" (given your Intent)\n";
-		std::cout<<"May I suggest "<<what<<" (given your Intent)\n";
+		std::cerr << "May I suggest " << what << " (given your Intent)\n";
+		std::cout << "May I suggest " << what << " (given your Intent)\n";
 	}
 
 	SizeType getLeg() const
@@ -164,9 +178,11 @@ private:
 			name = model_.superGeometry().label(t);
 		}
 
-		if (name == "chain") return 1;
+		if (name == "chain")
+			return 1;
 
-		if (name != "ladder") return 0;
+		if (name != "ladder")
+			return 0;
 
 		SizeType leg = 0;
 		try {
@@ -188,11 +204,10 @@ private:
 			return;
 		}
 
-		if (x == y) return;
+		if (x == y)
+			return;
 
-		saySomethingAbout("DynamicDmrgType should be " + ttos(x) +
-		                  ", but " + ttos(y) + " found instead");
-
+		saySomethingAbout("DynamicDmrgType should be " + ttos(x) + ", but " + ttos(y) + " found instead");
 	}
 
 	void operatorShouldBe(PsimagLite::String x) const
@@ -205,10 +220,10 @@ private:
 			return;
 		}
 
-		if (x == y) return;
+		if (x == y)
+			return;
 
-		saySomethingAbout("OperatorExpression should be " + x +
-		                  ", but " + y + " found instead");
+		saySomethingAbout("OperatorExpression should be " + x + ", but " + y + " found instead");
 	}
 
 	const ModelType& model_;

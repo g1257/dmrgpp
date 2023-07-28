@@ -79,15 +79,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LEFT_RIGHT_SUPER_H
 #define LEFT_RIGHT_SUPER_H
 
-#include "ProgressIndicator.h"
+#include "BasisTraits.hh"
 #include "Io/IoNg.h"
 #include "ProgramGlobals.h"
-#include "BasisTraits.hh"
+#include "ProgressIndicator.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename BasisWithOperatorsType_,typename SuperBlockType>
-class LeftRightSuper {
+template <typename BasisWithOperatorsType_, typename SuperBlockType>
+class LeftRightSuper
+{
 
 public:
 
@@ -100,17 +102,22 @@ public:
 	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
-	typedef  LeftRightSuper<BasisWithOperatorsType_,SuperBlockType> ThisType;
+	typedef LeftRightSuper<BasisWithOperatorsType_, SuperBlockType> ThisType;
 	typedef typename BasisType::QnType QnType;
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	LeftRightSuper(IoInputter& io,
-	               PsimagLite::String prefix,
-	               const BasisTraits& basisTraits,
-	               typename PsimagLite::EnableIf<
-	               PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
-	    : progress_("LeftRightSuper"),
-	      left_(0),right_(0),super_(0),refCounter_(0)
+	    PsimagLite::String prefix,
+	    const BasisTraits& basisTraits,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsInputLike<IoInputter>::True,
+		int>::Type
+	    = 0)
+	    : progress_("LeftRightSuper")
+	    , left_(0)
+	    , right_(0)
+	    , super_(0)
+	    , refCounter_(0)
 	{
 		prefix += "/LRS";
 
@@ -131,11 +138,14 @@ public:
 	}
 
 	LeftRightSuper(const PsimagLite::String& slabel,
-	               const PsimagLite::String& elabel,
-	               const PsimagLite::String& selabel,
-	               const BasisTraits& basisTraits)
-	    : progress_("LeftRightSuper"),
-	      left_(0),right_(0),super_(0),refCounter_(0)
+	    const PsimagLite::String& elabel,
+	    const PsimagLite::String& selabel,
+	    const BasisTraits& basisTraits)
+	    : progress_("LeftRightSuper")
+	    , left_(0)
+	    , right_(0)
+	    , super_(0)
+	    , refCounter_(0)
 	{
 		left_ = new BasisWithOperatorsType(slabel, basisTraits);
 		right_ = new BasisWithOperatorsType(elabel, basisTraits);
@@ -158,14 +168,19 @@ public:
 	}
 
 	LeftRightSuper(BasisWithOperatorsType& left,
-	               BasisWithOperatorsType& right,
-	               SuperBlockType& super)
-	    : progress_("LeftRightSuper"),
-	      left_(&left),right_(&right),super_(&super),refCounter_(1)
-	{}
+	    BasisWithOperatorsType& right,
+	    SuperBlockType& super)
+	    : progress_("LeftRightSuper")
+	    , left_(&left)
+	    , right_(&right)
+	    , super_(&super)
+	    , refCounter_(1)
+	{
+	}
 
 	LeftRightSuper(const ThisType& rls)
-	    : progress_("LeftRightSuper"),refCounter_(1)
+	    : progress_("LeftRightSuper")
+	    , refCounter_(1)
 	{
 		left_ = rls.left_;
 		right_ = rls.right_;
@@ -181,50 +196,51 @@ public:
 		assert(super_);
 		assert(rls.super_);
 		*super_ = *rls.super_;
-		if (refCounter_ > 0) --refCounter_;
+		if (refCounter_ > 0)
+			--refCounter_;
 	}
 
-	template<typename SomeModelType>
+	template <typename SomeModelType>
 	SizeType growLeftBlock(const SomeModelType& model,
-	                       BasisWithOperatorsType &pS,
-	                       BlockType const &X,
-	                       RealType time)
+	    BasisWithOperatorsType& pS,
+	    BlockType const& X,
+	    RealType time)
 	{
 		assert(left_);
 		return grow(*left_,
-		            model,
-		            pS,
-		            X,
-		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
-		            time);
+		    model,
+		    pS,
+		    X,
+		    ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
+		    time);
 	}
 
-	template<typename SomeModelType>
+	template <typename SomeModelType>
 	SizeType growRightBlock(const SomeModelType& model,
-	                        BasisWithOperatorsType &pE,
-	                        BlockType const &X,
-	                        RealType time)
+	    BasisWithOperatorsType& pE,
+	    BlockType const& X,
+	    RealType time)
 	{
 		assert(right_);
 		return grow(*right_,
-		            model,
-		            pE,
-		            X,
-		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
-		            time);
+		    model,
+		    pE,
+		    X,
+		    ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
+		    time);
 	}
 
-	void printSizes(const PsimagLite::String& label,std::ostream& os) const
+	void printSizes(const PsimagLite::String& label, std::ostream& os) const
 	{
 		assert(left_);
 		assert(right_);
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<label<<": left-block basis="<<left_->size();
-		msg<<", right-block basis="<<right_->size();
-		msg<<" sites="<<left_->block().size()<<"+";
-		msg<<right_->block().size();
+		msg << label << ": left-block basis=" << left_->size();
+		msg << ", right-block basis=" << right_->size();
+		msg << " sites=" << left_->block().size() << "+";
+		msg << right_->block().size();
 		progress_.printline(msgg, os);
 	}
 
@@ -245,9 +261,9 @@ public:
 	}
 
 	void write(PsimagLite::IoNg::Out& io,
-	           PsimagLite::String prefix,
-	           typename BasisWithOperatorsType::SaveEnum option,
-	           bool minimizeWrite) const
+	    PsimagLite::String prefix,
+	    typename BasisWithOperatorsType::SaveEnum option,
+	    bool minimizeWrite) const
 	{
 		prefix += "/LRS";
 		io.createGroup(prefix);
@@ -265,7 +281,7 @@ public:
 		right_->write(io, PsimagLite::IoSerializer::NO_OVERWRITE, prefix, option);
 	}
 
-	const BasisWithOperatorsType& left()  const
+	const BasisWithOperatorsType& left() const
 	{
 		assert(left_);
 		return *left_;
@@ -300,7 +316,7 @@ public:
 		if (refCounter_ > 0)
 			err("LeftRightSuper::left(...): not the owner\n");
 		assert(left_);
-		*left_=left; // deep copy
+		*left_ = left; // deep copy
 	}
 
 	void right(const BasisWithOperatorsType& right)
@@ -308,14 +324,16 @@ public:
 		if (refCounter_ > 0)
 			err("LeftRightSuper::right(...): not the owner\n");
 		assert(right_);
-		*right_=right; // deep copy
+		*right_ = right; // deep copy
 	}
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	void read(IoInputType& io,
-	          PsimagLite::String prefix,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
+	    PsimagLite::String prefix,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsInputLike<IoInputType>::True,
+		int>::Type
+	    = 0)
 	{
 		prefix += "/LRS";
 
@@ -326,7 +344,7 @@ public:
 		PsimagLite::String nameEnviron;
 		io.read(nameEnviron, prefix + "/NameEnviron");
 
-		super_->read(io,  prefix + "/" + nameSuper);
+		super_->read(io, prefix + "/" + nameSuper);
 		left_->read(io, prefix + "/" + nameSys);
 		right_->read(io, prefix + "/" + nameEnviron);
 	}
@@ -353,13 +371,13 @@ private:
 		pSprime, is set to contain this full Hamiltonian with the call
 		to  \cppFunction{pSprime.setHamiltonian(matrix)}.
 		*/
-	template<typename SomeModelType>
+	template <typename SomeModelType>
 	SizeType grow(BasisWithOperatorsType& leftOrRight,
-	              const SomeModelType& model,
-	              BasisWithOperatorsType &pS,
-	              const BlockType& X,
-	              ProgramGlobals::DirectionEnum dir,
-	              RealType time)
+	    const SomeModelType& model,
+	    BasisWithOperatorsType& pS,
+	    const BlockType& X,
+	    ProgramGlobals::DirectionEnum dir,
+	    RealType time)
 	{
 		BasisWithOperatorsType Xbasis("Xbasis", pS.traits());
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
@@ -374,13 +392,13 @@ private:
 		SparseMatrixType matrix = leftOrRight.hamiltonian().getCRS();
 
 		LeftRightSuper2Type* lrs;
-		BasisType* leftOrRightL =  &leftOrRight;
+		BasisType* leftOrRightL = &leftOrRight;
 		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			lrs = new LeftRightSuper2Type(pS,Xbasis,*leftOrRightL);
+			lrs = new LeftRightSuper2Type(pS, Xbasis, *leftOrRightL);
 		} else {
-			lrs = new  LeftRightSuper2Type(Xbasis,pS,*leftOrRightL);
+			lrs = new LeftRightSuper2Type(Xbasis, pS, *leftOrRightL);
 		}
-		//!PTEX_LABEL{295}
+		//! PTEX_LABEL{295}
 		model.addHamiltonianConnection(matrix, *lrs, time);
 		std::vector<OperatorType> nonLocalOps;
 		model.fillNewNonLocals(nonLocalOps, *lrs, time);
@@ -406,4 +424,3 @@ private:
 
 /*@}*/
 #endif // LEFT_RIGHT_SUPER_H
-

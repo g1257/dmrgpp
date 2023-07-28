@@ -1,16 +1,18 @@
 #ifndef ALGEBRAFORTARGETINGEXPRESSION_H
 #define ALGEBRAFORTARGETINGEXPRESSION_H
 
-#include "Vector.h"
 #include "AuxForTargetingExpression.h"
-#include "TermForTargetingExpression.h"
 #include "GetBraOrKet.h"
 #include "PackIndices.h"
+#include "TermForTargetingExpression.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename TargetingBaseType>
-class AlgebraForTargetingExpression {
+template <typename TargetingBaseType>
+class AlgebraForTargetingExpression
+{
 
 public:
 
@@ -35,10 +37,14 @@ public:
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
-	    : finalized_(false), aux_(aux) {}
+	    : finalized_(false)
+	    , aux_(aux)
+	{
+	}
 
 	AlgebraForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
-	    : finalized_(false), aux_(aux)
+	    : finalized_(false)
+	    , aux_(aux)
 	{
 		terms_.push_back(new TermType(str, aux));
 	}
@@ -141,7 +147,8 @@ public:
 
 	int pIndex() const
 	{
-		if (terms_.size() != 1) return -1;
+		if (terms_.size() != 1)
+			return -1;
 		return terms_[0]->pIndex();
 	}
 
@@ -151,7 +158,8 @@ public:
 		bool summation = false;
 		bool mult = false;
 		for (SizeType i = 0; i < nterms; ++i) {
-			if (terms_[i]->size() != 1) continue;
+			if (terms_[i]->size() != 1)
+				continue;
 			if (terms_[i]->toString().substr(0, 3) == "|!a")
 				summation = true;
 			if (terms_[i]->toString().substr(0, 3) == "|!m")
@@ -194,13 +202,15 @@ private:
 			++survivingTerms;
 		}
 
-		if (survivingTerms < 2) return;
+		if (survivingTerms < 2)
+			return;
 
 		name += ">";
 		termsNew[survivingTermIndex]->setString(name);
 
 		for (SizeType i = 0; i < nterms; ++i) {
-			if (indices[i]) continue;
+			if (indices[i])
+				continue;
 			delete terms_[i];
 			terms_[i] = nullptr;
 		}

@@ -1,13 +1,13 @@
-#include <unistd.h>
-#include "PsimagLite.h"
-#include "Provenance.h"
-#include "InputCheck.h"
 #include "ManyOmegas.h"
 #include "../../dmrgpp/src/Engine/ProgramGlobals.h"
+#include "InputCheck.h"
+#include "Provenance.h"
+#include "PsimagLite.h"
+#include <unistd.h>
 
 void usage(const PsimagLite::String& name)
 {
-	std::cerr<<"USAGE is "<<name<<" -f filename [-p precision] [-V]\n";
+	std::cerr << "USAGE is " << name << " -f filename [-p precision] [-V]\n";
 }
 
 int main(int argc, char** argv)
@@ -38,7 +38,7 @@ to the main dmrg driver are the following.
 	 \item[-V] [Optional] Print version and exit
 	  \end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:p:O:dV")) != -1) {
+	while ((opt = getopt(argc, argv, "f:p:O:dV")) != -1) {
 		switch (opt) {
 		case 'f':
 			inputfile = optarg;
@@ -75,21 +75,22 @@ to the main dmrg driver are the following.
 	// print license
 	if (ConcurrencyType::root()) {
 		Provenance provenance;
-		std::cout<<provenance;
-		std::cout<<Provenance::logo(application.name())<<"\n";
+		std::cout << provenance;
+		std::cout << Provenance::logo(application.name()) << "\n";
 		application.checkMicroArch(std::cout, Provenance::compiledMicroArch());
 	}
 
-	if (versionOnly) return 0;
+	if (versionOnly)
+		return 0;
 
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 	typedef
 #ifndef USE_FLOAT
-	double
+	    double
 #else
-	float
+	    float
 #endif
-	RealType;
+		RealType;
 	typedef Dmrg::OmegaParams<InputNgType, RealType> OmegaParamsType;
 	typedef Dmrg::ManyOmegas<RealType, OmegaParamsType> ManyOmegasType;
 
@@ -99,8 +100,7 @@ to the main dmrg driver are the following.
 	ManyOmegasType manyOmegas(data, precision, omegaParams, application);
 
 	const PsimagLite::String obs = omegaParams.observable();
-	const PsimagLite::String insitu = "<gs|" + obs + "|P1>,<gs|" +
-	        obs + "|P2>,<gs|" + obs + "|P3>";
+	const PsimagLite::String insitu = "<gs|" + obs + "|P1>,<gs|" + obs + "|P2>,<gs|" + obs + "|P3>";
 
 	manyOmegas.run(dryrun, rootname, insitu);
 }

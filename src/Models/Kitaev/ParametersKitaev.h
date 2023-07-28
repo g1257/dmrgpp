@@ -80,60 +80,60 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERS_KITAEV_H
 #define PARAMETERS_KITAEV_H
-#include "Vector.h"
 #include "ParametersModelBase.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! Kitaev Model Parameters
 // no connectors here, connectors are handled by the geometry
-template<typename RealType, typename QnType>
+template <typename RealType, typename QnType>
 struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ParametersKitaev(IoInputType& io)
-	    : BaseType(io,false)
+	    : BaseType(io, false)
 	{
 		SizeType nsites = 0;
 		io.readline(nsites, "TotalNumberOfSites=");
 		try {
 			magneticFieldX.resize(nsites, 0.0);
-			io.read(magneticFieldX,"MagneticFieldX");
-			std::cerr<<"Has MagneticFieldX \n";
+			io.read(magneticFieldX, "MagneticFieldX");
+			std::cerr << "Has MagneticFieldX \n";
 		} catch (std::exception&) {
 			magneticFieldX.clear();
 		}
 
 		try {
 			magneticFieldY.resize(nsites, 0.0);
-			io.read(magneticFieldY,"MagneticFieldY");
-			std::cerr<<"Has MagneticFieldY \n";
+			io.read(magneticFieldY, "MagneticFieldY");
+			std::cerr << "Has MagneticFieldY \n";
 		} catch (std::exception&) {
 			magneticFieldY.clear();
 		}
 
 		try {
 			magneticFieldZ.resize(nsites, 0.0);
-			io.read(magneticFieldZ,"MagneticFieldZ");
-			std::cerr<<"Has MagneticFieldZ \n";
+			io.read(magneticFieldZ, "MagneticFieldZ");
+			std::cerr << "Has MagneticFieldZ \n";
 		} catch (std::exception&) {
 			magneticFieldZ.clear();
 		}
-
 	}
 
-	template<typename SomeMemResolvType>
+	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	    SizeType,
+	    PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersKitaev";
 		io.createGroup(label);
@@ -143,15 +143,14 @@ struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 		io.write(label + "/magneticFieldZ", magneticFieldZ);
 	}
 
-
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream &os,
-	                                const ParametersKitaev& parameters)
+	friend std::ostream& operator<<(std::ostream& os,
+	    const ParametersKitaev& parameters)
 	{
-		os<<"MagneticFieldX="<<parameters.magneticFieldX<<"\n";
-		os<<"MagneticFieldY="<<parameters.magneticFieldY<<"\n";
-		os<<"MagneticFieldZ="<<parameters.magneticFieldZ<<"\n";
-		os<<parameters.targetQuantum;
+		os << "MagneticFieldX=" << parameters.magneticFieldX << "\n";
+		os << "MagneticFieldY=" << parameters.magneticFieldY << "\n";
+		os << "MagneticFieldZ=" << parameters.magneticFieldZ << "\n";
+		os << parameters.targetQuantum;
 		return os;
 	}
 
@@ -163,4 +162,3 @@ struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 
 /*@}*/
 #endif
-

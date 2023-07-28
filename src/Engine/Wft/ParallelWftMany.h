@@ -71,24 +71,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 /** \file ParallelWftMany.h
-*/
+ */
 
 #ifndef DMRG_PARALLEL_WFT_MANY_H
 #define DMRG_PARALLEL_WFT_MANY_H
 
-#include "Vector.h"
 #include "Concurrency.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename VectorWithOffsetType,
-         typename WaveFunctionTransfType,
-         typename LeftRightSuperType>
-class ParallelWftMany {
+template <typename VectorWithOffsetType,
+    typename WaveFunctionTransfType,
+    typename LeftRightSuperType>
+class ParallelWftMany
+{
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
-	VectorVectorWithOffsetType;
+	    VectorVectorWithOffsetType;
 
 public:
 
@@ -96,31 +98,33 @@ public:
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
 	ParallelWftMany(VectorVectorWithOffsetType& targetVectors,
-	            SizeType nk,
-	            const WaveFunctionTransfType& wft,
-	            const LeftRightSuperType& lrs)
-	    : targetVectors_(targetVectors),
-	      nk_(nk),
-	      wft_(wft),
-	      lrs_(lrs)
-	{}
+	    SizeType nk,
+	    const WaveFunctionTransfType& wft,
+	    const LeftRightSuperType& lrs)
+	    : targetVectors_(targetVectors)
+	    , nk_(nk)
+	    , wft_(wft)
+	    , lrs_(lrs)
+	{
+	}
 
 	void thread_function_(SizeType threadNum,
-	                      SizeType blockSize,
-	                      SizeType total,
-	                      ConcurrencyType::MutexType*)
+	    SizeType blockSize,
+	    SizeType total,
+	    ConcurrencyType::MutexType*)
 	{
 		SizeType nk = nk_;
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
-		ConcurrencyType::mpiDisableIfNeeded(mpiRank,blockSize,"ParallelWftMany",total);
+		ConcurrencyType::mpiDisableIfNeeded(mpiRank, blockSize, "ParallelWftMany", total);
 
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType ix = (threadNum+npthreads*mpiRank)*blockSize + p + 1;
-			if (ix>=targetVectors_.size()) break;
+		for (SizeType p = 0; p < blockSize; p++) {
+			SizeType ix = (threadNum + npthreads * mpiRank) * blockSize + p + 1;
+			if (ix >= targetVectors_.size())
+				break;
 			VectorWithOffsetType phiNew = targetVectors_[0];
-			wft_.setInitialVector(phiNew,targetVectors_[ix],lrs_,nk);
+			wft_.setInitialVector(phiNew, targetVectors_[ix], lrs_, nk);
 			targetVectors_[ix] = phiNew;
 		}
 	}
@@ -136,4 +140,3 @@ private:
 
 /*@}*/
 #endif // DMRG_PARALLEL_WFT_MANY_H
-

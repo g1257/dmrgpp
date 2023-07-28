@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -80,82 +80,85 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef reflectionTRANSFORM_H
 #define reflectionTRANSFORM_H
 
-#include "PackIndices.h" // in PsimagLite
-#include "Matrix.h"
-#include "ProgressIndicator.h"
 #include "LAPACK.h"
-#include "Sort.h"
+#include "Matrix.h"
+#include "PackIndices.h" // in PsimagLite
+#include "ProgressIndicator.h"
 #include "ReflectionBasis.h"
+#include "Sort.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename RealType,typename SparseMatrixType>
-class ReflectionTransform {
+template <typename RealType, typename SparseMatrixType>
+class ReflectionTransform
+{
 
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
-	typedef ReflectionBasis<RealType,SparseMatrixType> ReflectionBasisType;
+	typedef ReflectionBasis<RealType, SparseMatrixType> ReflectionBasisType;
 
 public:
 
 	ReflectionTransform(bool idebug)
-	: idebug_(idebug)
-	{}
+	    : idebug_(idebug)
+	{
+	}
 
 	void update(const SparseMatrixType& sSector)
 	{
-		ReflectionBasisType reflectionBasis(sSector,idebug_);
+		ReflectionBasisType reflectionBasis(sSector, idebug_);
 		plusSector_ = reflectionBasis.R(1.0).rank();
-		computeTransform(Q1_,reflectionBasis,1.0);
-		computeTransform(Qm_,reflectionBasis,-1.0);
-//		SparseMatrixType Q;
-		//computeFullQ(Q,Q1_,Qm_);
-//		split(Q);
-		if (!idebug_) return;
-		printFullMatrix(Q1_,"Q1");
-		printFullMatrix(Qm_,"Qm");
+		computeTransform(Q1_, reflectionBasis, 1.0);
+		computeTransform(Qm_, reflectionBasis, -1.0);
+		//		SparseMatrixType Q;
+		// computeFullQ(Q,Q1_,Qm_);
+		//		split(Q);
+		if (!idebug_)
+			return;
+		printFullMatrix(Q1_, "Q1");
+		printFullMatrix(Qm_, "Qm");
 	}
 
 	void transform(SparseMatrixType& dest1,
-		       SparseMatrixType& destm,
-		       const SparseMatrixType& H) const
+	    SparseMatrixType& destm,
+	    const SparseMatrixType& H) const
 	{
-		SparseMatrixType HQ1,HQm;
-		multiply(HQ1,H,Q1_);
+		SparseMatrixType HQ1, HQm;
+		multiply(HQ1, H, Q1_);
 
-		multiply(HQm,H,Qm_);
+		multiply(HQm, H, Qm_);
 		if (idebug_) {
-			printFullMatrix(H,"OriginalHamiltonian");
-			printFullMatrix(HQm,"HQm");
-			printFullMatrix(HQ1,"HQ1");
+			printFullMatrix(H, "OriginalHamiltonian");
+			printFullMatrix(HQm, "HQm");
+			printFullMatrix(HQ1, "HQ1");
 		}
 
-		SparseMatrixType Q1t,Qmt;
-		transposeConjugate(Q1t,Q1_);
-		transposeConjugate(Qmt,Qm_);
+		SparseMatrixType Q1t, Qmt;
+		transposeConjugate(Q1t, Q1_);
+		transposeConjugate(Qmt, Qm_);
 
-		RealType norm1 = getNorm(Q1t,Q1_);
-		RealType normm = getNorm(Qmt,Qm_);
+		RealType norm1 = getNorm(Q1t, Q1_);
+		RealType normm = getNorm(Qmt, Qm_);
 
-
-		multiply(dest1,Q1t,HQ1);
-		reshape(dest1,plusSector_);
-		dest1 *= (1.0/norm1);
+		multiply(dest1, Q1t, HQ1);
+		reshape(dest1, plusSector_);
+		dest1 *= (1.0 / norm1);
 		assert(isHermitian(dest1));
 
-		SizeType minusSector = H.rank()-plusSector_;
+		SizeType minusSector = H.rank() - plusSector_;
 
-		multiply(destm,Qmt,HQm);
-		reshape(destm,minusSector);
-		destm *= (1.0/normm);
+		multiply(destm, Qmt, HQm);
+		reshape(destm, minusSector);
+		destm *= (1.0 / normm);
 		assert(isHermitian(destm));
 
 		if (idebug_) {
-			std::cerr<<"norm1="<<norm1<<" normm="<<normm<<"\n";
-			std::cerr<<"plusSector="<<plusSector_<<" minusSector="<<minusSector<<"\n";
-			printFullMatrix(dest1,"dest1");
-			printFullMatrix(destm,"destm");
+			std::cerr << "norm1=" << norm1 << " normm=" << normm << "\n";
+			std::cerr << "plusSector=" << plusSector_ << " minusSector=" << minusSector << "\n";
+			printFullMatrix(dest1, "dest1");
+			printFullMatrix(destm, "destm");
 		}
 
 #ifndef NDEBUG
@@ -178,52 +181,57 @@ public:
 #endif
 	}
 
-	bool isThePartialIdentity(const SparseMatrixType& A,SizeType partialSize,const RealType& eps = 1e-6) const
+	bool isThePartialIdentity(const SparseMatrixType& A, SizeType partialSize, const RealType& eps = 1e-6) const
 	{
-		for (SizeType i=0;i<partialSize;i++) {
-			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+		for (SizeType i = 0; i < partialSize; i++) {
+			for (int k = A.getRowPtr(i); k < A.getRowPtr(i + 1); k++) {
 				SizeType col = A.getCol(k);
-				if (col>=partialSize) continue;
+				if (col >= partialSize)
+					continue;
 				ComplexOrRealType val = A.getValue(k);
-				if (i==col && !isAlmostZero(val-1.0,eps)) return false;
-				if (i!=col && !isAlmostZero(val,eps)) return false;
+				if (i == col && !isAlmostZero(val - 1.0, eps))
+					return false;
+				if (i != col && !isAlmostZero(val, eps))
+					return false;
 			}
 		}
 		return true;
 	}
 
-	void setGs(VectorType& gs,const VectorType& v,const RealType& sector) const
+	void setGs(VectorType& gs, const VectorType& v, const RealType& sector) const
 	{
-		const SparseMatrixType& Q = (sector>0) ? Q1_ : Qm_;
-		multiply(gs,Q,v);
+		const SparseMatrixType& Q = (sector > 0) ? Q1_ : Qm_;
+		multiply(gs, Q, v);
 		RealType norma = PsimagLite::norm(gs);
 		gs /= norma;
 	}
 
-	template<typename SomeVectorType>
+	template <typename SomeVectorType>
 	void setInitState(const SomeVectorType& initVector,
-			  SomeVectorType& initVector1,
-			  SomeVectorType& initVector2) const
+	    SomeVectorType& initVector1,
+	    SomeVectorType& initVector2) const
 	{
-		SizeType minusSector = initVector.size()-plusSector_;
+		SizeType minusSector = initVector.size() - plusSector_;
 		initVector1.resize(plusSector_);
 		initVector2.resize(minusSector);
-		for (SizeType i=0;i<initVector.size();i++) {
-			if (i<plusSector_) initVector1[i]=initVector[i];
-			else  initVector2[i-plusSector_]=initVector[i];
+		for (SizeType i = 0; i < initVector.size(); i++) {
+			if (i < plusSector_)
+				initVector1[i] = initVector[i];
+			else
+				initVector2[i - plusSector_] = initVector[i];
 		}
 	}
 
 private:
 
-	RealType getNorm(const SparseMatrixType& A,const SparseMatrixType& B) const
+	RealType getNorm(const SparseMatrixType& A, const SparseMatrixType& B) const
 	{
 		SparseMatrixType C;
-		multiply(C,A,B);
-		for (SizeType i=0;i<C.rank();i++) {
-			for (int k=C.getRowPtr(i);k<C.getRowPtr(i+1);k++) {
+		multiply(C, A, B);
+		for (SizeType i = 0; i < C.rank(); i++) {
+			for (int k = C.getRowPtr(i); k < C.getRowPtr(i + 1); k++) {
 				SizeType col = C.getCol(k);
-				if (col==i) {
+				if (col == i) {
 					return PsimagLite::real(C.getValue(k));
 				}
 			}
@@ -232,17 +240,17 @@ private:
 		return 0;
 	}
 
-	void reshape(SparseMatrixType& A,SizeType n2) const
+	void reshape(SparseMatrixType& A, SizeType n2) const
 	{
-		SparseMatrixType B(n2,n2);
+		SparseMatrixType B(n2, n2);
 		SizeType counter = 0;
-		for (SizeType i=0;i<n2;i++) {
-			B.setRow(i,counter);
-			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+		for (SizeType i = 0; i < n2; i++) {
+			B.setRow(i, counter);
+			for (int k = A.getRowPtr(i); k < A.getRowPtr(i + 1); k++) {
 				SizeType col = A.getCol(k);
 				ComplexOrRealType val = A.getValue(k);
-				if (col>=n2) {
-					assert(isAlmostZero(val,1e-5));
+				if (col >= n2) {
+					assert(isAlmostZero(val, 1e-5));
 					continue;
 				}
 				B.pushCol(col);
@@ -251,103 +259,108 @@ private:
 			}
 		}
 #ifndef NDEBUG
-		for (SizeType i=n2;i<A.rank();i++) {
-			for (int k = A.getRowPtr(i);k<A.getRowPtr(i+1);k++) {
+		for (SizeType i = n2; i < A.rank(); i++) {
+			for (int k = A.getRowPtr(i); k < A.getRowPtr(i + 1); k++) {
 				ComplexOrRealType val = A.getValue(k);
-				assert(isAlmostZero(val,1e-5));
+				assert(isAlmostZero(val, 1e-5));
 			}
 		}
 #endif
-		B.setRow(n2,counter);
+		B.setRow(n2, counter);
 		B.checkValidity();
 		A = B;
 	}
 
-	void checkTransform(const SparseMatrixType& A,const SparseMatrixType& B) const
+	void checkTransform(const SparseMatrixType& A, const SparseMatrixType& B) const
 	{
 		SparseMatrixType C;
-		multiply(C,A,B);
-		bool b = isZero(C,1e-5);
-		if (b) return;
-		printFullMatrix(A,"MatrixA");
-		printFullMatrix(B,"MatrixB");
-		printFullMatrix(C,"MatrixC");
+		multiply(C, A, B);
+		bool b = isZero(C, 1e-5);
+		if (b)
+			return;
+		printFullMatrix(A, "MatrixA");
+		printFullMatrix(B, "MatrixB");
+		printFullMatrix(C, "MatrixC");
 		assert(b);
 	}
 
 	void computeTransform(SparseMatrixType& Q1,
-			      const ReflectionBasisType& reflectionBasis,
-			      const RealType& sector)
+	    const ReflectionBasisType& reflectionBasis,
+	    const RealType& sector)
 	{
 		const SparseMatrixType& R1 = reflectionBasis.R(sector);
 		SparseMatrixType R1Inverse;
-		reflectionBasis.inverseTriangular(R1Inverse,R1,sector);
+		reflectionBasis.inverseTriangular(R1Inverse, R1, sector);
 
 		SparseMatrixType T1;
 
-		buildT1(T1,reflectionBasis,sector);
+		buildT1(T1, reflectionBasis, sector);
 		bool strict = false; // matrices below have different ranks!!
-		multiply(Q1,T1,R1Inverse,strict);
-		if (!idebug_) return;
-		printFullMatrix(R1Inverse,"R1Inverse");
-		printFullMatrix(T1,"T1");
+		multiply(Q1, T1, R1Inverse, strict);
+		if (!idebug_)
+			return;
+		printFullMatrix(R1Inverse, "R1Inverse");
+		printFullMatrix(T1, "T1");
 	}
 
 	void computeFullQ(SparseMatrixType& Q,
-			  const SparseMatrixType& Q1,
-			  const SparseMatrixType& Qm) const
+	    const SparseMatrixType& Q1,
+	    const SparseMatrixType& Qm) const
 	{
 		SizeType n = Q1.rank();
-		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n,0.0);
+		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n, 0.0);
 		SizeType counter = 0;
 		Q.resize(n);
 		SizeType minusSector = n - plusSector_;
-		for (SizeType i=0;i<n;i++) {
-			Q.setRow(i,counter);
+		for (SizeType i = 0; i < n; i++) {
+			Q.setRow(i, counter);
 			// add Q1
-			for (int k = Q1.getRowPtr(i);k<Q1.getRowPtr(i+1);k++) {
+			for (int k = Q1.getRowPtr(i); k < Q1.getRowPtr(i + 1); k++) {
 				SizeType col = Q1.getCol(k);
-				if (col>=plusSector_) continue;
-				ComplexOrRealType val =  Q1.getValue(k);
+				if (col >= plusSector_)
+					continue;
+				ComplexOrRealType val = Q1.getValue(k);
 				Q.pushValue(val);
 				Q.pushCol(col);
-				sum[i] += PsimagLite::conj(val)*val;
+				sum[i] += PsimagLite::conj(val) * val;
 				counter++;
 			}
 			// add Qm
-			for (int k = Qm.getRowPtr(i);k<Qm.getRowPtr(i+1);k++) {
+			for (int k = Qm.getRowPtr(i); k < Qm.getRowPtr(i + 1); k++) {
 				SizeType col = Qm.getCol(k);
-				if (col>=minusSector) continue;
-				ComplexOrRealType val =  Qm.getValue(k);
+				if (col >= minusSector)
+					continue;
+				ComplexOrRealType val = Qm.getValue(k);
 				Q.pushValue(val);
-				Q.pushCol(Qm.getCol(k)+plusSector_);
-				sum[i] += PsimagLite::conj(val)*val;
+				Q.pushCol(Qm.getCol(k) + plusSector_);
+				sum[i] += PsimagLite::conj(val) * val;
 				counter++;
 			}
 		}
-		Q.setRow(Q.rank(),counter);
+		Q.setRow(Q.rank(), counter);
 		// normalize
-//		for (SizeType i=0;i<n;i++) {
-//			if (isAlmostZero(sum[i],1e-10)) continue;
-//			sum[i] = 1.0/sqrt(sum[i]);
-//			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
-//				Q.setValues(k,Q.getValue(k)*sum[i]);
-//			}
-//		}
+		//		for (SizeType i=0;i<n;i++) {
+		//			if (isAlmostZero(sum[i],1e-10)) continue;
+		//			sum[i] = 1.0/sqrt(sum[i]);
+		//			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
+		//				Q.setValues(k,Q.getValue(k)*sum[i]);
+		//			}
+		//		}
 		Q.checkValidity();
 #ifndef NDEBUG
 		SparseMatrixType Qt;
-		transposeConjugate(Qt,Q);
+		transposeConjugate(Qt, Q);
 		SparseMatrixType A;
-		multiply(A,Qt,Q);
-		if (!isTheIdentity(A,1e-5)) {
-			printFullMatrix(Q,"Q");
-			printFullMatrix(A,"A");
+		multiply(A, Qt, Q);
+		if (!isTheIdentity(A, 1e-5)) {
+			printFullMatrix(Q, "Q");
+			printFullMatrix(A, "A");
 			assert(false);
 		}
 #endif
-		if (!idebug_) return;
-		printFullMatrix(Q,"Q");
+		if (!idebug_)
+			return;
+		printFullMatrix(Q, "Q");
 	}
 
 	void split(const SparseMatrixType& Q)
@@ -355,55 +368,58 @@ private:
 		SizeType n = Q.rank();
 		Q1_.resize(n);
 		SizeType counter = 0;
-		for (SizeType i=0;i<n;i++) {
-			Q1_.setRow(i,counter);
-			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
+		for (SizeType i = 0; i < n; i++) {
+			Q1_.setRow(i, counter);
+			for (int k = Q.getRowPtr(i); k < Q.getRowPtr(i + 1); k++) {
 				SizeType col = Q.getCol(k);
-				if (col>=plusSector_) continue;
+				if (col >= plusSector_)
+					continue;
 				Q1_.pushCol(col);
 				Q1_.pushValue(Q.getValue(k));
 				counter++;
 			}
 		}
-		Q1_.setRow(Q1_.rank(),counter);
+		Q1_.setRow(Q1_.rank(), counter);
 
 		counter = 0;
 		Qm_.resize(n);
-		for (SizeType i=0;i<n;i++) {
-			Qm_.setRow(i,counter);
-			for (int k = Q.getRowPtr(i);k<Q.getRowPtr(i+1);k++) {
+		for (SizeType i = 0; i < n; i++) {
+			Qm_.setRow(i, counter);
+			for (int k = Q.getRowPtr(i); k < Q.getRowPtr(i + 1); k++) {
 				SizeType col = Q.getCol(k);
-				if (col<plusSector_) continue;
-				Qm_.pushCol(col-plusSector_);
+				if (col < plusSector_)
+					continue;
+				Qm_.pushCol(col - plusSector_);
 				Qm_.pushValue(Q.getValue(k));
 				counter++;
 			}
 		}
-		Qm_.setRow(Qm_.rank(),counter);
+		Qm_.setRow(Qm_.rank(), counter);
 	}
 
 	void buildT1(SparseMatrixType& T1final,
-		     const ReflectionBasisType& reflectionBasis,
-		     const RealType& sector) const
+	    const ReflectionBasisType& reflectionBasis,
+	    const RealType& sector) const
 	{
 		const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
 		const SparseMatrixType& reflection = reflectionBasis.reflection();
 		SizeType n = reflection.rank();
 
-		SparseMatrixType T1(n,n);
+		SparseMatrixType T1(n, n);
 		SizeType counter = 0;
-		for (SizeType i=0;i<n;i++) {
-			T1.setRow(i,counter);
+		for (SizeType i = 0; i < n; i++) {
+			T1.setRow(i, counter);
 			bool hasDiagonal = false;
-			for (int k = reflection.getRowPtr(i);k<reflection.getRowPtr(i+1);k++) {
+			for (int k = reflection.getRowPtr(i); k < reflection.getRowPtr(i + 1); k++) {
 				SizeType col = reflection.getCol(k);
 				ComplexOrRealType val = reflection.getValue(k);
-				if (col==i) {
+				if (col == i) {
 					val += sector;
-					hasDiagonal=true;
+					hasDiagonal = true;
 				}
 				val *= sector;
-				if (isAlmostZero(val,1e-10)) continue;
+				if (isAlmostZero(val, 1e-10))
+					continue;
 				T1.pushCol(col);
 				T1.pushValue(val);
 				counter++;
@@ -413,54 +429,55 @@ private:
 				T1.pushValue(1.0);
 				counter++;
 			}
-
 		}
-		T1.setRow(n,counter);
+		T1.setRow(n, counter);
 		T1.checkValidity();
 
 		// permute columns now:
-		typename PsimagLite::Vector<int>::Type inversePermutation(n,-1);
-		for (SizeType i=0;i<ipPosOrNeg.size();i++)
-			inversePermutation[ipPosOrNeg[i]]=i;
+		typename PsimagLite::Vector<int>::Type inversePermutation(n, -1);
+		for (SizeType i = 0; i < ipPosOrNeg.size(); i++)
+			inversePermutation[ipPosOrNeg[i]] = i;
 
 		T1final.resize(n);
-		counter=0;
-		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n,0.0);
-		for (SizeType i=0;i<n;i++) {
-			T1final.setRow(i,counter);
-			for (int k = T1.getRowPtr(i);k<T1.getRowPtr(i+1);k++) {
+		counter = 0;
+		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n, 0.0);
+		for (SizeType i = 0; i < n; i++) {
+			T1final.setRow(i, counter);
+			for (int k = T1.getRowPtr(i); k < T1.getRowPtr(i + 1); k++) {
 				int col = inversePermutation[T1.getCol(k)];
-				if (col<0) continue;
+				if (col < 0)
+					continue;
 				ComplexOrRealType val = T1.getValue(k);
-				if (isAlmostZero(val,1e-10)) continue;
-				assert(SizeType(col)<ipPosOrNeg.size());
+				if (isAlmostZero(val, 1e-10))
+					continue;
+				assert(SizeType(col) < ipPosOrNeg.size());
 				T1final.pushCol(col);
 				T1final.pushValue(val);
-				sum[i] += PsimagLite::conj(val)*val;
+				sum[i] += PsimagLite::conj(val) * val;
 				counter++;
 			}
 		}
-		T1final.setRow(n,counter);
+		T1final.setRow(n, counter);
 		T1final.checkValidity();
 
 		// normalize T1
-//		for (SizeType i=0;i<n;i++) {
-//			if (isAlmostZero(sum[i],1e-12)) continue;
-//			sum[i] = 1.0/sqrt(sum[i]);
+		//		for (SizeType i=0;i<n;i++) {
+		//			if (isAlmostZero(sum[i],1e-12)) continue;
+		//			sum[i] = 1.0/sqrt(sum[i]);
 
-//			for (int k = T1final.getRowPtr(i);k<T1final.getRowPtr(i+1);k++)
-//				T1final.setValues(k,T1final.getValue(k) * sum[i]);
+		//			for (int k = T1final.getRowPtr(i);k<T1final.getRowPtr(i+1);k++)
+		//				T1final.setValues(k,T1final.getValue(k) * sum[i]);
 
-//		}
+		//		}
 	}
 
 	bool idebug_;
 	SizeType plusSector_;
-	SparseMatrixType Q1_,Qm_;
+	SparseMatrixType Q1_, Qm_;
 
 }; // class ReflectionTransform
 
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // reflectionTRANSFORM_H

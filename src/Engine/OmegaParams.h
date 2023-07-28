@@ -1,12 +1,14 @@
 #ifndef OMEGAPARAMS_H
 #define OMEGAPARAMS_H
-#include "Vector.h"
 #include "InputCheck.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename InputNgType, typename RealType_>
-class OmegaParams {
+template <typename InputNgType, typename RealType_>
+class OmegaParams
+{
 
 public:
 
@@ -36,7 +38,7 @@ public:
 
 	RealType omega(SizeType i) const
 	{
-		return i*step_ + begin_;
+		return i * step_ + begin_;
 	}
 
 	PsimagLite::String observable() const { return obs_; }

@@ -1,26 +1,32 @@
 #ifndef OMEGASFOURIER_H
 #define OMEGASFOURIER_H
-#include "Vector.h"
 #include "ProgramGlobals.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ComplexOrRealType, typename Readable>
-class OmegasFourier {
+template <typename ComplexOrRealType, typename Readable>
+class OmegasFourier
+{
 
-	class OmegasGeometry {
+	class OmegasGeometry
+	{
 
 	public:
 
-		OmegasGeometry(Readable& io) : subname_("NONE")
+		OmegasGeometry(Readable& io)
+		    : subname_("NONE")
 		{
 			try {
 				io.readline(name_, "GeometryName=");
-			} catch (std::exception&) {}
+			} catch (std::exception&) {
+			}
 
 			try {
 				io.readline(subname_, "GeometrySubname=");
-			} catch (std::exception&) {}
+			} catch (std::exception&) {
+			}
 		}
 
 		PsimagLite::String name() const
@@ -51,9 +57,11 @@ public:
 	static const SizeType M_MAX = 0;
 
 	OmegasFourier(bool skipFourier, Readable& io)
-	    : skipFourier_(skipFourier), geometry_(io)
+	    : skipFourier_(skipFourier)
+	    , geometry_(io)
 	{
-		if (skipFourier_) return;
+		if (skipFourier_)
+			return;
 
 		io.readline(numberOfSites_, "TotalNumberOfSites=");
 		int tmp = 0;
@@ -72,13 +80,14 @@ public:
 
 	void fourier(const VectorRealType& values1, const VectorRealType& values2)
 	{
-		if (skipFourier_) return;
+		if (skipFourier_)
+			return;
 
 		std::fill(data_.begin(), data_.end(), 0.0);
 
-		//use data_;
+		// use data_;
 		PsimagLite::String subname = geometry_.subname();
-		if (subname=="average") {
+		if (subname == "average") {
 			return fourierLadderAverage(values1, values2);
 		}
 
@@ -116,12 +125,12 @@ public:
 			const PsimagLite::String honey = "HoneyComb";
 			if (subname.find(honey) == 0) {
 				PsimagLite::String type = subname.substr(honey.length(),
-				                                         subname.size() - honey.length());
+				    subname.size() - honey.length());
 				return fourierHoneycomb(values1, values2, type);
 			}
 		}
 
-		err("OmegasFourier: undefined geometry " + name  + "\n");
+		err("OmegasFourier: undefined geometry " + name + "\n");
 	}
 
 	const VectorComplexType& data() { return data_; }
@@ -136,12 +145,11 @@ private:
 
 	void fourierChain(const VectorRealType& values1, const VectorRealType& values2)
 	{
-		const SizeType nOverTwo = static_cast<SizeType>(numberOfSites_/2);
+		const SizeType nOverTwo = static_cast<SizeType>(numberOfSites_ / 2);
 		if (!isPeriodicX_) {
 			bool b = (centralSite_ == nOverTwo);
 			if (!b && (centralSite_ != nOverTwo - 1)) {
-				err("Chain of " + ttos(numberOfSites_) + "sites, but central site is " +
-				    ttos(centralSite_) + ", makes no sense!?\n");
+				err("Chain of " + ttos(numberOfSites_) + "sites, but central site is " + ttos(centralSite_) + ", makes no sense!?\n");
 			}
 		}
 
@@ -154,11 +162,11 @@ private:
 			RealType q = getQ(m, numberOfQs, isPeriodicX_);
 			qValues_[m] = q;
 			for (SizeType i = 0; i < numberOfSites_; ++i) {
-				RealType arg = q*(i - centralSite_);
+				RealType arg = q * (i - centralSite_);
 				RealType carg = cos(arg);
-				RealType sarg = sin(q*(i + 1))*sin(q*(centralSite_ + 1));
+				RealType sarg = sin(q * (i + 1)) * sin(q * (centralSite_ + 1));
 				RealType cOrSarg = (isPeriodicX_) ? carg : sarg;
-				sum += ComplexType(values1[i]*cOrSarg, values2[i]*cOrSarg);
+				sum += ComplexType(values1[i] * cOrSarg, values2[i] * cOrSarg);
 			}
 
 			assert(m < data_.size());
@@ -192,15 +200,15 @@ private:
 	}
 
 	void fourierHoneycomb(const VectorRealType& values1,
-	                      const VectorRealType& values2,
-	                      PsimagLite::String type)
+	    const VectorRealType& values2,
+	    PsimagLite::String type)
 	{
 		err("unimplemented fourierLadderAverage\n");
 	}
 
 	static RealType getQ(SizeType m, SizeType n, bool isPeriodic)
 	{
-		return (isPeriodic) ? 2.0*M_PI*m/n : (m + 1.0)*M_PI/(n+1.0);
+		return (isPeriodic) ? 2.0 * M_PI * m / n : (m + 1.0) * M_PI / (n + 1.0);
 	}
 
 	bool skipFourier_;

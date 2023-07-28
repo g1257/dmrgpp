@@ -72,16 +72,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*@{*/
 
 /*! \file BasisWithOperators.h
-*/
+ */
 
 #ifndef BASISWITHOPERATORS_HEADER_H
 #define BASISWITHOPERATORS_HEADER_H
 
 #include "Basis.h"
-#include "Operators.h"
 #include "BasisTraits.hh"
+#include "Operators.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 /* PSIDOC BasisWithOperators
 	A class to represent a Hilbert Space for a strongly correlated electron model
@@ -113,13 +114,14 @@ namespace Dmrg {
 	 local operators in a Hilbert space basis. These include functions to create
 	 an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc.
 	 */
-template<typename BasisType_>
-class BasisWithOperators : public BasisType_ {
+template <typename BasisType_>
+class BasisWithOperators : public BasisType_
+{
 
 public:
 
 	typedef BasisType_ BaseType;
-	typedef std::pair<SizeType,SizeType> PairType;
+	typedef std::pair<SizeType, SizeType> PairType;
 	typedef typename BaseType::RealType RealType;
 	typedef Operators<BasisType_> OperatorsType;
 	typedef typename OperatorsType::PairSizeSizeType PairSizeSizeType;
@@ -133,29 +135,34 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 
-	enum class SaveEnum {ALL, PARTIAL};
+	enum class SaveEnum { ALL,
+		PARTIAL };
 
 	BasisWithOperators(const PsimagLite::String& s, const BasisTraits& basisTraits)
-	    : BasisType(s, basisTraits), basisTraits_(basisTraits)
-	{}
+	    : BasisType(s, basisTraits)
+	    , basisTraits_(basisTraits)
+	{
+	}
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	BasisWithOperators(IoInputter& io,
-	                   const PsimagLite::String& ss,
-	                   const BasisTraits& basisTraits)
-	    : BasisType(io, ss, {false, false}),
-	      basisTraits_(basisTraits),
-	      operators_(io, ss + "/", basisTraits_.isObserveCode)
+	    const PsimagLite::String& ss,
+	    const BasisTraits& basisTraits)
+	    : BasisType(io, ss, { false, false })
+	    , basisTraits_(basisTraits)
+	    , operators_(io, ss + "/", basisTraits_.isObserveCode)
 	{
 		const PsimagLite::String prefix = ss + "/";
 		io.read(operatorsPerSite_, prefix + "OperatorPerSite");
-	}	
+	}
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	void read(IoInputter& io,
-	          PsimagLite::String prefix,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
+	    PsimagLite::String prefix,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsInputLike<IoInputter>::True,
+		int>::Type
+	    = 0)
 	{
 		BasisType::read(io, prefix); // parent loads
 		operators_.read(io, prefix);
@@ -173,10 +180,10 @@ public:
 
 	// set this basis to the outer product of
 	// basis2 and basis3 or basis3 and basis2  depending on dir
-	template<typename SomeSuperOperatorHelperType>
+	template <typename SomeSuperOperatorHelperType>
 	void setToProduct(const ThisType& basis2,
-	                  const ThisType& basis3,
-	                  const SomeSuperOperatorHelperType& someSuperOpHelper)
+	    const ThisType& basis3,
+	    const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
 		if (someSuperOpHelper.dir() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			setToProductInternal(basis2, basis3, someSuperOpHelper);
@@ -187,21 +194,21 @@ public:
 	//! transform this basis by transform
 	//! note: basis change must conserve total number of electrons and all quantum numbers
 	RealType truncateBasis(const BlockDiagonalMatrixType& ftransform,
-	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                       const VectorSizeType& removedIndices,
-	                       const PairSizeSizeType& startEnd,
-	                       SizeType gemmRnb,
-	                       SizeType threadsForGemmR,
-	                       SizeType opOnSiteThreshold)
+	    const typename PsimagLite::Vector<RealType>::Type& eigs,
+	    const VectorSizeType& removedIndices,
+	    const PairSizeSizeType& startEnd,
+	    SizeType gemmRnb,
+	    SizeType threadsForGemmR,
+	    SizeType opOnSiteThreshold)
 	{
 		RealType error = BasisType::truncateBasis(eigs, removedIndices);
 
 		operators_.changeBasis(ftransform,
-		                       startEnd,
-		                       gemmRnb,
-		                       threadsForGemmR,
-		                       opsPerSiteOrMinusOne(),
-		                       opOnSiteThreshold);
+		    startEnd,
+		    gemmRnb,
+		    threadsForGemmR,
+		    opsPerSiteOrMinusOne(),
+		    opOnSiteThreshold);
 
 		return error;
 	}
@@ -221,10 +228,10 @@ public:
 		return operators_.reducedHamiltonian();
 	}
 
-	template<typename SomeModelType>
+	template <typename SomeModelType>
 	SizeType setOneSite(const VectorSizeType& block,
-	                    const SomeModelType& model,
-	                    RealType time)
+	    const SomeModelType& model,
+	    RealType time)
 	{
 		typename BaseType::VectorQnType qm;
 
@@ -246,14 +253,14 @@ public:
 
 		operatorsPerSite_.clear();
 		for (SizeType i = 0; i < block.size(); ++i)
-			operatorsPerSite_.push_back(ops.size()/block.size());
+			operatorsPerSite_.push_back(ops.size() / block.size());
 
 		assert(operatorsPerSite_.size() > 0);
 
 		return oneSiteTruncActive;
 	}
 
-	SizeType localOperatorIndex(SizeType i,SizeType sigma) const
+	SizeType localOperatorIndex(SizeType i, SizeType sigma) const
 	{
 		SizeType sum = 0;
 		assert(i <= operatorsPerSite_.size());
@@ -294,24 +301,28 @@ public:
 
 	const BasisTraits& traits() const { return basisTraits_; }
 
-	template<typename SomeOutputType>
+	template <typename SomeOutputType>
 	void write(SomeOutputType& io,
-	           typename SomeOutputType::Serializer::WriteMode mode,
-	           PsimagLite::String prefix,
-	           SaveEnum option,
-	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<SomeOutputType>::True, int*>::Type = 0) const
+	    typename SomeOutputType::Serializer::WriteMode mode,
+	    PsimagLite::String prefix,
+	    SaveEnum option,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsOutputLike<SomeOutputType>::True,
+		int*>::Type
+	    = 0) const
 	{
 		write(io, prefix + "/" + BasisType::name(), mode, option);
 	}
 
-	template<typename SomeOutputType>
+	template <typename SomeOutputType>
 	void write(SomeOutputType& io,
-	           const PsimagLite::String& s,
-	           typename SomeOutputType::Serializer::WriteMode mode,
-	           SaveEnum option,
-	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<SomeOutputType>::True, int*>::Type = 0) const
+	    const PsimagLite::String& s,
+	    typename SomeOutputType::Serializer::WriteMode mode,
+	    SaveEnum option,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsOutputLike<SomeOutputType>::True,
+		int*>::Type
+	    = 0) const
 	{
 		BasisType::write(io, s, mode, false); // parent saves
 		if (option == SaveEnum::ALL && !basisTraits_.noSaveOperators)
@@ -324,36 +335,35 @@ public:
 private:
 
 	//! set this basis to the outer product of   basis2 and basis3
-	//!PTEX_LABEL{setToProductOps}
-	template<typename SomeSuperOperatorHelperType>
+	//! PTEX_LABEL{setToProductOps}
+	template <typename SomeSuperOperatorHelperType>
 	void setToProductInternal(const ThisType& basis2,
-	                          const ThisType& basis3,
-	                          const SomeSuperOperatorHelperType& someSuperOpHelper)
+	    const ThisType& basis3,
+	    const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
 		// reorder the basis
 		BasisType::setToProduct(basis2, basis3);
 
 		// Do local and super
 		operators_.setToProduct(basis2,
-		                        basis2.operators_,
-		                        basis3,
-		                        basis3.operators_,
-		                        BaseType::permutationInverse(),
-		                        someSuperOpHelper);
-
+		    basis2.operators_,
+		    basis3,
+		    basis3.operators_,
+		    BaseType::permutationInverse(),
+		    someSuperOpHelper);
 
 		//! Calc. hamiltonian
 		operators_.outerProductHamiltonian(basis2.hamiltonian(),
-		                                   basis3.hamiltonian(),
-		                                   BaseType::permutationInverse());
+		    basis3.hamiltonian(),
+		    BaseType::permutationInverse());
 
 		SizeType offset1 = basis2.operatorsPerSite_.size();
-		operatorsPerSite_.resize(offset1+basis3.operatorsPerSite_.size());
-		for (SizeType i=0;i<offset1;i++)
-			operatorsPerSite_[i] =  basis2.operatorsPerSite_[i];
+		operatorsPerSite_.resize(offset1 + basis3.operatorsPerSite_.size());
+		for (SizeType i = 0; i < offset1; i++)
+			operatorsPerSite_[i] = basis2.operatorsPerSite_[i];
 
-		for (SizeType i=0;i<basis3.operatorsPerSite_.size();i++)
-			operatorsPerSite_[i+offset1] =  basis3.operatorsPerSite_[i];
+		for (SizeType i = 0; i < basis3.operatorsPerSite_.size(); i++)
+			operatorsPerSite_[i + offset1] = basis3.operatorsPerSite_[i];
 		assert(operatorsPerSite_.size() > 0);
 	}
 
@@ -362,7 +372,8 @@ private:
 		const SizeType n = BasisType::block().size();
 		SizeType result = operatorsPerSite(0);
 		for (SizeType i = 1; i < n; ++i)
-			if (result != operatorsPerSite(i)) return 0;
+			if (result != operatorsPerSite(i))
+				return 0;
 
 		return result;
 	}
@@ -374,12 +385,11 @@ private:
 	VectorSizeType operatorsPerSite_;
 }; // class BasisWithOperators
 
-template<typename T>
-struct IsBasisType<BasisWithOperators<T> > {
-	enum {True = true};
+template <typename T>
+struct IsBasisType<BasisWithOperators<T>> {
+	enum { True = true };
 };
 } // namespace Dmrg
 
 /*@}*/
 #endif
-

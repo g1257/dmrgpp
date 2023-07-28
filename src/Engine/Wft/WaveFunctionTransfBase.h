@@ -79,17 +79,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef WFT_BASE_H
 #define WFT_BASE_H
-#include "ProgramGlobals.h"
 #include "PackIndices.h"
+#include "ProgramGlobals.h"
 #include "WftOptions.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename DmrgWaveStructType_,
-         typename VectorWithOffsetType_,
-         typename OptionsType_,
-         typename OneSiteSpacesType_>
-class WaveFunctionTransfBase {
+template <typename DmrgWaveStructType_,
+    typename VectorWithOffsetType_,
+    typename OptionsType_,
+    typename OneSiteSpacesType_>
+class WaveFunctionTransfBase
+{
 
 public:
 
@@ -100,18 +102,18 @@ public:
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef WftOptions<VectorWithOffsetType_, OptionsType_>WftOptionsType;
+	typedef WftOptions<VectorWithOffsetType_, OptionsType_> WftOptionsType;
 	using OneSiteSpacesType = OneSiteSpacesType_;
 
 	virtual void transformVector(VectorWithOffsetType& psiDest,
-	                             const VectorWithOffsetType& psiSrc,
-	                             const LeftRightSuperType& lrs,
-	                             const OneSiteSpacesType& nk) const = 0;
+	    const VectorWithOffsetType& psiSrc,
+	    const LeftRightSuperType& lrs,
+	    const OneSiteSpacesType& nk) const
+	    = 0;
 
-	virtual ~WaveFunctionTransfBase() {}
+	virtual ~WaveFunctionTransfBase() { }
 }; // class WaveFunctionTransfBase
 } // namespace Dmrg
 
 /*@}*/
 #endif // WFT_BASE_H
-

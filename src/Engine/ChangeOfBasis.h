@@ -4,10 +4,12 @@
 #include "BlockOffDiagMatrix.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename OperatorStorageType, typename MatrixType>
-class ChangeOfBasis {
+template <typename OperatorStorageType, typename MatrixType>
+class ChangeOfBasis
+{
 
 public:
 
@@ -18,8 +20,9 @@ public:
 
 	ChangeOfBasis()
 	{
-		if (!ProgramGlobals::oldChangeOfBasis) return;
-		std::cout<<"Old ChangeOfBasis in use\n";
+		if (!ProgramGlobals::oldChangeOfBasis)
+			return;
+		std::cout << "Old ChangeOfBasis in use\n";
 	}
 
 	void update(const BlockDiagonalMatrixType& transform)
@@ -35,8 +38,8 @@ public:
 	}
 
 	void operator()(OperatorStorageType& v,
-	                SizeType gemmRnb,
-	                SizeType threadsForGemmR) const
+	    SizeType gemmRnb,
+	    SizeType threadsForGemmR) const
 	{
 		if (!ProgramGlobals::oldChangeOfBasis) {
 			BlockOffDiagMatrixType vBlocked(v.getCRS(), transform_.offsetsRows());
@@ -49,10 +52,10 @@ public:
 		v.rotate(oldTtranspose_, oldT_);
 	}
 
-	static void changeBasis(OperatorStorageType &v,
-	                        const BlockDiagonalMatrixType& ftransform1,
-	                        SizeType gemmRnb,
-	                        SizeType threadsForGemmR)
+	static void changeBasis(OperatorStorageType& v,
+	    const BlockDiagonalMatrixType& ftransform1,
+	    SizeType gemmRnb,
+	    SizeType threadsForGemmR)
 	{
 		if (!v.justCRS())
 			err("changeBasis: operatorstorage not justCRS\n");
@@ -68,7 +71,7 @@ public:
 		SparseMatrixType ftransform;
 		ftransform1.toSparse(ftransform);
 		SparseMatrixType ftransformT;
-		transposeConjugate(ftransformT,ftransform);
+		transposeConjugate(ftransformT, ftransform);
 		v.rotate(ftransformT, ftransform);
 	}
 

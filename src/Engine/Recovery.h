@@ -80,29 +80,35 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_RECOVER_H
 
 #include "Checkpoint.h"
-#include "Vector.h"
+#include "Io/IoNg.h"
+#include "OutputFileOrNot.h"
+#include "PredicateAwesome.h"
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
+#include "PsimagLite.h"
+#include "Vector.h"
+#include <dirent.h>
 #include <fstream>
 #include <sys/types.h>
-#include <dirent.h>
-#include "Io/IoNg.h"
-#include "PsimagLite.h"
-#include "PredicateAwesome.h"
-#include "OutputFileOrNot.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename CheckpointType, typename TargetingType>
-class Recovery  {
+template <typename CheckpointType, typename TargetingType>
+class Recovery
+{
 
 	typedef typename CheckpointType::ParametersType ParametersType;
-	typedef Recovery<ParametersType,int> RecoveryStaticType;
+	typedef Recovery<ParametersType, int> RecoveryStaticType;
 	typedef typename CheckpointType::ComplexOrRealType ComplexOrRealType;
 
 	struct OptionSpec {
 
-		OptionSpec() : keepFiles(false), maxFiles(10) {}
+		OptionSpec()
+		    : keepFiles(false)
+		    , maxFiles(10)
+		{
+		}
 
 		bool keepFiles;
 		SizeType maxFiles;
@@ -110,7 +116,11 @@ class Recovery  {
 
 	struct OpaqueRestart {
 
-		OpaqueRestart() : loopIndex(0), stepCurrent(0) {}
+		OpaqueRestart()
+		    : loopIndex(0)
+		    , stepCurrent(0)
+		{
+		}
 
 		SizeType loopIndex;
 		SizeType stepCurrent;
@@ -128,17 +138,21 @@ public:
 	typedef PsimagLite::Vector<VectorSizeType>::Type VectorBlockType;
 	typedef typename CheckpointType::RealType RealType;
 
-	class SpecOptions {
+	class SpecOptions
+	{
 
 	public:
 
 		SpecOptions(bool& keepFiles, SizeType& maxFiles)
-		    : keepFiles_(keepFiles), maxFiles_(maxFiles)
-		{}
+		    : keepFiles_(keepFiles)
+		    , maxFiles_(maxFiles)
+		{
+		}
 
 		void operator()(PsimagLite::String str2)
 		{
-			if (str2.length() < 2) return;
+			if (str2.length() < 2)
+				return;
 
 			PsimagLite::String str = str2.substr(1, str2.length() - 1);
 
@@ -147,12 +161,13 @@ public:
 				return;
 			}
 
-			if (str.length() < 3) dieWithError(str);
+			if (str.length() < 3)
+				dieWithError(str);
 
 			if (str[0] == 'M' && str[1] == '=') {
 				PsimagLite::String each = str.substr(2, str.length() - 2);
 				maxFiles_ = atoi(each.c_str());
-				std::cerr<<"Recovery Max files= "<<maxFiles_<<"\n";
+				std::cerr << "Recovery Max files= " << maxFiles_ << "\n";
 				return;
 			}
 		}
@@ -160,36 +175,38 @@ public:
 	private:
 
 		bool& keepFiles_;
-		SizeType &maxFiles_;
+		SizeType& maxFiles_;
 	};
 
 	Recovery(const VectorBlockType& siteIndices,
-	         const CheckpointType& checkpoint,
-	         const WaveFunctionTransfType& wft,
-	         const BasisWithOperatorsType& pS,
-	         const BasisWithOperatorsType& pE)
-	    : progress_("Recovery"),
-	      predicateAwesome_(nullptr),
-	      siteIndices_(siteIndices),
-	      checkpoint_(checkpoint),
-	      wft_(wft),
-	      pS_(pS),
-	      pE_(pE),
-	      counter_(0)
+	    const CheckpointType& checkpoint,
+	    const WaveFunctionTransfType& wft,
+	    const BasisWithOperatorsType& pS,
+	    const BasisWithOperatorsType& pE)
+	    : progress_("Recovery")
+	    , predicateAwesome_(nullptr)
+	    , siteIndices_(siteIndices)
+	    , checkpoint_(checkpoint)
+	    , wft_(wft)
+	    , pS_(pS)
+	    , pE_(pE)
+	    , counter_(0)
 	{
 		procOptions();
 
 		if (!checkpoint_.parameters().options.isSet("recoveryEnableRead"))
 			return;
 
-		if (!checkpoint_.parameters().autoRestart) return;
+		if (!checkpoint_.parameters().autoRestart)
+			return;
 
 		readRecovery();
 
 		VectorStringType parts;
 		RecoveryStaticType::makeThreeParts(parts,
-		                                   checkpoint_.parameters().checkpoint.filename());
-		if (parts.size() == 3) counter_ = 1 + atoi(parts[1].c_str());
+		    checkpoint_.parameters().checkpoint.filename());
+		if (parts.size() == 3)
+			counter_ = 1 + atoi(parts[1].c_str());
 	}
 
 	~Recovery()
@@ -198,7 +215,8 @@ public:
 			PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());
 			prefix += ttos(i);
 			PsimagLite::String savedName(prefix + checkpoint_.parameters().filename);
-			if (optionSpec_.keepFiles) continue;
+			if (optionSpec_.keepFiles)
+				continue;
 			unlink(savedName.c_str());
 		}
 
@@ -213,8 +231,7 @@ public:
 
 	SizeType stepCurrent(ProgramGlobals::DirectionEnum direction) const
 	{
-		return (checkpoint_.parameters().autoRestart) ? opaqueRestart_.stepCurrent :
-		                                                nonRecoveryStepCurrent(direction);
+		return (checkpoint_.parameters().autoRestart) ? opaqueRestart_.stepCurrent : nonRecoveryStepCurrent(direction);
 	}
 
 	bool byLoop(RealType loopIndex, RealType time, RealType loopLength) const
@@ -223,18 +240,18 @@ public:
 	}
 
 	void write(const TargetingType& psi,
-	           SizeType loopIndex,
-	           SizeType stepCurrent,
-	           int lastSign,
-	           OutputFileOrNot& ioOutCurrent,
-	           PsimagLite::String inputBlob) const
+	    SizeType loopIndex,
+	    SizeType stepCurrent,
+	    int lastSign,
+	    OutputFileOrNot& ioOutCurrent,
+	    PsimagLite::String inputBlob) const
 	{
 		PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());
 		prefix += ttos(counter_++);
 		PsimagLite::String savedName(prefix + checkpoint_.parameters().filename);
 		ioOutCurrent.flush();
 
-		//copyFile(savedName.c_str(), ioOutCurrent.filename());
+		// copyFile(savedName.c_str(), ioOutCurrent.filename());
 
 		typename IoType::Out ioOut(savedName, IoType::ACC_TRUNC);
 
@@ -261,7 +278,8 @@ public:
 		// checkpoint stacks
 		checkpoint_.checkpointStacks(savedName);
 
-		if (counter_ >= optionSpec_.maxFiles) counter_ = 0;
+		if (counter_ >= optionSpec_.maxFiles)
+			counter_ = 0;
 	}
 
 private:
@@ -304,12 +322,12 @@ private:
 	}
 
 	void writeRecovery(typename IoType::Out& ioOut,
-	                   SizeType loopIndex,
-	                   SizeType stepCurrent) const
+	    SizeType loopIndex,
+	    SizeType stepCurrent) const
 	{
 		ioOut.createGroup("Recovery");
 
-		ioOut.write(loopIndex, "Recovery/loopIndex")	;
+		ioOut.write(loopIndex, "Recovery/loopIndex");
 		ioOut.write(stepCurrent, "Recovery/stepCurrent");
 	}
 
@@ -352,7 +370,7 @@ private:
 	}
 
 	void writeEnergies(typename IoType::Out& ioOut,
-	                   PsimagLite::String file) const
+	    PsimagLite::String file) const
 	{
 		PsimagLite::String energyLabel = checkpoint_.parameters().checkpoint.labelForEnergy();
 		ioOut.flush();
@@ -375,17 +393,18 @@ private:
 	const BasisWithOperatorsType& pS_;
 	const BasisWithOperatorsType& pE_;
 	mutable SizeType counter_;
-}; //class Recovery
+}; // class Recovery
 
-template<typename ParametersType>
-class Recovery<ParametersType, int>  {
+template <typename ParametersType>
+class Recovery<ParametersType, int>
+{
 
 public:
 
 	static PsimagLite::String recoveryFilePrefix() { return "Recovery"; }
 
 	static void checkOptions(PsimagLite::String recoverySave,
-	                         const typename ParametersType::OptionsType& options)
+	    const typename ParametersType::OptionsType& options)
 	{
 		if (recoverySave == "" || recoverySave == "no")
 			return;
@@ -410,26 +429,29 @@ public:
 		// *  add the line RestartFilename= pointing to the data file of the
 		// run to be restarted.
 		params.checkpoint.setFilename(recoveryFile);
-		//params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
+		// params.checkRestart(params.filename, recoveryFile, params.options, "INTERNAL=");
 
 		params.autoRestart = true;
 	}
 
 	static void makeThreeParts(std::vector<PsimagLite::String>& parts,
-	                           PsimagLite::String filename)
+	    PsimagLite::String filename)
 	{
 		const PsimagLite::String prefix = recoveryFilePrefix();
 		const SizeType len = prefix.length();
-		if (filename.substr(0, len) != prefix) return;
+		if (filename.substr(0, len) != prefix)
+			return;
 		parts.push_back(prefix);
 
 		PsimagLite::String buffer("");
 		for (SizeType i = len; i < filename.length(); ++i) {
-			if (isAdigit(filename[i])) buffer += filename[i];
+			if (isAdigit(filename[i]))
+				buffer += filename[i];
 			break;
 		}
 
-		if (buffer == "") return;
+		if (buffer == "")
+			return;
 
 		parts.push_back(buffer);
 
@@ -445,7 +467,7 @@ private:
 	}
 
 	static void listFilesInDirectory(std::vector<PsimagLite::String>& files,
-	                                 PsimagLite::String path)
+	    PsimagLite::String path)
 	{
 		DIR* dir = 0;
 		dirent* ent = 0;
@@ -468,7 +490,8 @@ private:
 		std::vector<PsimagLite::String> files;
 		listFilesInDirectory(files, ".");
 
-		if (files.size() == 0) return "";
+		if (files.size() == 0)
+			return "";
 
 		PsimagLite::String saved("");
 		SizeType max = 0;
@@ -494,7 +517,8 @@ private:
 			PsimagLite::IoNg::In ioIn(file);
 			ioIn.close();
 			return true;
-		} catch (...) {}
+		} catch (...) {
+		}
 
 		return false;
 	}
@@ -502,4 +526,3 @@ private:
 } // namespace Dmrg
 /*@}*/
 #endif
-

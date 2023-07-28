@@ -4,38 +4,50 @@
 #include "Vector.h"
 #include <cstring>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename T>
-class Array {
+template <typename T>
+class Array
+{
 
 public:
 
 	typedef T value_type;
 
-	Array() : size_(0), data_(0) {}
+	Array()
+	    : size_(0)
+	    , data_(0)
+	{
+	}
 
-	Array(SizeType n) : size_(0), data_(0)
+	Array(SizeType n)
+	    : size_(0)
+	    , data_(0)
 	{
 		allocate(n);
 	}
 
-	Array(const Array& other) : size_(0), data_(0)
+	Array(const Array& other)
+	    : size_(0)
+	    , data_(0)
 	{
 		assert(other.data_ || other.size_ == 0);
 		clear();
 		allocate(other.size_);
-		memcpy(data_, other.data_, size_*sizeof(T));
+		memcpy(data_, other.data_, size_ * sizeof(T));
 	}
 
-	Array(const std::vector<T>& other) : size_(0), data_(0)
+	Array(const std::vector<T>& other)
+	    : size_(0)
+	    , data_(0)
 	{
 		fromStdVector(other);
 	}
 
 	~Array()
 	{
-		delete [] data_;
+		delete[] data_;
 		data_ = 0;
 	}
 
@@ -44,20 +56,21 @@ public:
 		assert(other.data_ || other.size_ == 0);
 		clear();
 		allocate(other.size_);
-		memcpy(data_, other.data_, size_*sizeof(T));
+		memcpy(data_, other.data_, size_ * sizeof(T));
 		return *this;
 	}
 
 	void clear()
 	{
 		size_ = 0;
-		delete [] data_;
+		delete[] data_;
 		data_ = 0;
 	}
 
 	void resize(SizeType n)
 	{
-		if (size_ == n) return;
+		if (size_ == n)
+			return;
 		clear();
 		allocate(n);
 	}
@@ -83,16 +96,17 @@ public:
 
 	void toStdVector(std::vector<T>& v) const
 	{
-		if (size_ == 0) return;
+		if (size_ == 0)
+			return;
 		v.resize(size_);
-		memcpy(&(v[0]), data_, sizeof(SizeType)*size_);
+		memcpy(&(v[0]), data_, sizeof(SizeType) * size_);
 	}
 
 	void fromStdVector(const std::vector<T>& v)
 	{
 		clear();
 		allocate(v.size());
-		memcpy(data_, &(v[0]), size_*sizeof(T));
+		memcpy(data_, &(v[0]), size_ * sizeof(T));
 	}
 
 private:

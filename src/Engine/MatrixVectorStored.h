@@ -80,13 +80,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MatrixVectorStored_HEADER_H
 #define MatrixVectorStored_HEADER_H
 
-#include <vector>
-#include "ProgressIndicator.h"
 #include "MatrixVectorBase.h"
+#include "ProgressIndicator.h"
+#include <vector>
 
-namespace Dmrg {
-template<typename ModelType_>
-class MatrixVectorStored : public MatrixVectorBase<ModelType_> {
+namespace Dmrg
+{
+template <typename ModelType_>
+class MatrixVectorStored : public MatrixVectorBase<ModelType_>
+{
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
@@ -105,54 +107,54 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 
 	MatrixVectorStored(const ModelType& model,
-	                   const HamiltonianConnectionType& hc,
-	                   const typename ModelHelperType::Aux& aux)
-	    : model_(model),
-	      matrixStored_(2),
-	      pointer_(0),
-	      progress_("MatrixVectorStored")
+	    const HamiltonianConnectionType& hc,
+	    const typename ModelHelperType::Aux& aux)
+	    : model_(model)
+	    , matrixStored_(2)
+	    , pointer_(0)
+	    , progress_("MatrixVectorStored")
 	{
 		const OptionsType& options = model.params().options;
 		const bool debugMatrix = options.isSet("debugmatrix");
 
 		matrixStored_[0].clear();
 		model.fullHamiltonian(matrixStored_[0], hc, aux);
-		assert(isHermitian(matrixStored_[0],true));
+		assert(isHermitian(matrixStored_[0], true));
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		SizeType rows = matrixStored_[0].rows();
-		msg<<"fullHamiltonian has rank="<<rows;
-		msg<<" nonzeros="<<matrixStored_[0].nonZeros();
+		msg << "fullHamiltonian has rank=" << rows;
+		msg << " nonzeros=" << matrixStored_[0].nonZeros();
 		progress_.printline(msgg, std::cout);
 		if (debugMatrix)
-			printFullMatrix(matrixStored_[0],"matrix",1);
+			printFullMatrix(matrixStored_[0], "matrix", 1);
 		if (rows > 5000)
-			std::cerr<<"WARNING: MatrixVectorStored being used for a large run!\n";
+			std::cerr << "WARNING: MatrixVectorStored being used for a large run!\n";
 	}
 
 	SizeType rows() const { return matrixStored_[pointer_].rows(); }
 
-	template<typename SomeVectorType>
-	void matrixVectorProduct(SomeVectorType &x, SomeVectorType const &y) const
+	template <typename SomeVectorType>
+	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
-		matrixStored_[pointer_].matrixVectorProduct(x,y);
+		matrixStored_[pointer_].matrixVectorProduct(x, y);
 	}
 
-	value_type operator()(SizeType i,SizeType j) const
+	value_type operator()(SizeType i, SizeType j) const
 	{
-		return matrixStored_[pointer_](i,j);
+		return matrixStored_[pointer_](i, j);
 	}
 
 	SizeType reflectionSector() const { return pointer_; }
 
-	void reflectionSector(SizeType p) { pointer_=p; }
+	void reflectionSector(SizeType p) { pointer_ = p; }
 
-	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
+	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
 	{
 		BaseType::fullDiag(eigs,
-		                   fm,
-		                   matrixStored_[pointer_],
-		                   model_.params().maxMatrixRankStored);
+		    fm,
+		    matrixStored_[pointer_],
+		    model_.params().maxMatrixRankStored);
 	}
 
 private:
@@ -166,4 +168,3 @@ private:
 
 /*@}*/
 #endif
-

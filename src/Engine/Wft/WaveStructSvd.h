@@ -78,14 +78,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef WAVE_STRUCT_SVD_H
 #define WAVE_STRUCT_SVD_H
+#include "BasisTraits.hh"
+#include "Io/IoNg.h"
 #include "ProgramGlobals.h"
 #include "Vector.h"
-#include "Io/IoNg.h"
-#include "BasisTraits.hh"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LeftRightSuperType_>
+template <typename LeftRightSuperType_>
 struct WaveStructSvd {
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
@@ -105,9 +106,9 @@ struct WaveStructSvd {
 	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
 	typedef typename PsimagLite::IoNg::In IoInType;
 
-	enum class SaveEnum {ALL};
+	enum class SaveEnum { ALL };
 
-	WaveStructSvd() {}
+	WaveStructSvd() { }
 
 	WaveStructSvd(IoInType& io, PsimagLite::String label, const BasisTraits&)
 	{
@@ -115,14 +116,17 @@ struct WaveStructSvd {
 	}
 
 	WaveStructSvd(const BlockDiagonalMatrixType& u,
-	                   const VectorMatrixType& vts,
-	                   const VectorVectorRealType& s,
-	                   const VectorQnType& qns)
-	    : u_(u),
-	      vts_(vts), // Not yet used, will be used by WftAccelSvd
-	      s_(s),     // Not yet used, will be used by WftAccelSvd
-	      qns_(qns)
-	{}
+	    const VectorMatrixType& vts,
+	    const VectorVectorRealType& s,
+	    const VectorQnType& qns)
+	    : u_(u)
+	    , vts_(vts)
+	    , // Not yet used, will be used by WftAccelSvd
+	    s_(s)
+	    , // Not yet used, will be used by WftAccelSvd
+	    qns_(qns)
+	{
+	}
 
 	const BlockDiagonalMatrixType& u() const { return u_; }
 
@@ -146,9 +150,9 @@ struct WaveStructSvd {
 	}
 
 	void write(PsimagLite::IoNg::Out& io,
-	           PsimagLite::String prefix,
-	           PsimagLite::IoNgSerializer::WriteMode writeMode,
-	           SaveEnum) const
+	    PsimagLite::String prefix,
+	    PsimagLite::IoNgSerializer::WriteMode writeMode,
+	    SaveEnum) const
 	{
 		if (writeMode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			io.createGroup(prefix);
@@ -171,11 +175,11 @@ private:
 
 	BlockDiagonalMatrixType u_;
 	VectorMatrixType vts_;
-    VectorVectorRealType s_;
-    VectorQnType qns_;
+	VectorVectorRealType s_;
+	VectorQnType qns_;
 }; // struct WaveStructSvd
 
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // WAVE_STRUCT_SVD_H

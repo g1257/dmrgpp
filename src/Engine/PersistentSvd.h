@@ -2,11 +2,13 @@
 #define PERSISTENTSVD_H
 #include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 // needef for WFT
-template<typename VectorMatrixType, typename VectorVectorRealType, typename VectorQnType>
-class PersistentSvd {
+template <typename VectorMatrixType, typename VectorVectorRealType, typename VectorQnType>
+class PersistentSvd
+{
 
 public:
 
@@ -15,8 +17,11 @@ public:
 	typedef typename VectorQnType::value_type QnType;
 
 	PersistentSvd(SizeType n)
-	    : vts_(n), s_(n), qns_(n, QnType::zero())
-	{}
+	    : vts_(n)
+	    , s_(n)
+	    , qns_(n, QnType::zero())
+	{
+	}
 
 	void clear()
 	{

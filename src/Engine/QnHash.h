@@ -1,27 +1,31 @@
 #ifndef DMRG_QN_HASH_H
 #define DMRG_QN_HASH_H
 #define USE_PTHREADS_OR_NOT_NG
-#include "Qn.h"
-#include "Vector.h"
-#include <numeric>
-#include "Sort.h"
+#include "Array.h"
 #include "Concurrency.h"
 #include "Parallelizer.h"
+#include "Qn.h"
+#include "Sort.h"
+#include "Vector.h"
+#include <numeric>
 #include <unordered_map>
-#include "Array.h"
 
-namespace std {
+namespace std
+{
 
-template<>
-class hash<Dmrg::Qn> {
+template <>
+class hash<Dmrg::Qn>
+{
 
 public:
 
 	typedef Dmrg::Qn::VectorQnType VectorQnType;
 	typedef Dmrg::Qn::VectorSizeType VectorSizeType;
 
-	hash(bool addOdd) : addOdd_(addOdd)
-	{}
+	hash(bool addOdd)
+	    : addOdd_(addOdd)
+	{
+	}
 
 	SizeType operator()(const Dmrg::Qn& qn) const
 	{
@@ -48,4 +52,3 @@ private:
 } // namespace std
 
 #endif // DMRG_QN_HASH_H
-

@@ -79,34 +79,38 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_BASE_H
 #define MODEL_BASE_H
 
-#include "Vector.h"
-#include "Sort.h"
-#include "MemResolv.h"
-#include "TargetQuantumElectrons.h"
-#include "Io/IoSerializerStub.h"
-#include "ModelCommon.h"
-#include "QnHash.h"
-#include "ParallelHamiltonianConnection.h"
 #include "Braket.h"
-#include "SuperOpHelperBase.h"
-#include "OutputFileOrNot.h"
 #include "CanonicalExpression.h"
+#include "Io/IoSerializerStub.h"
+#include "MemResolv.h"
+#include "ModelCommon.h"
 #include "OperatorSpec.h"
+#include "OutputFileOrNot.h"
+#include "ParallelHamiltonianConnection.h"
+#include "QnHash.h"
+#include "Sort.h"
+#include "SuperOpHelperBase.h"
+#include "TargetQuantumElectrons.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelHelperType_,
-         typename ParametersType_,
-         typename InputValidatorType_,
-         typename SuperGeometryType_>
-class ModelBase  {
+template <typename ModelHelperType_,
+    typename ParametersType_,
+    typename InputValidatorType_,
+    typename SuperGeometryType_>
+class ModelBase
+{
 
 public:
 
 	struct OpaqueOp {
 
 		OpaqueOp(PsimagLite::String name_, SizeType dof_ = 0, SizeType edof_ = 0)
-		    : name(name_), dof(dof_), edof(edof_)
+		    : name(name_)
+		    , dof(dof_)
+		    , edof(edof_)
 		{
 			fermionOrBoson = labeledOperators_(name_, dof_).fermionOrBoson();
 			kindOfSite = labeledOperators_.findLabel(name_).kindOfSite();
@@ -124,7 +128,7 @@ public:
 	typedef ModelHelperType_ ModelHelperType;
 	typedef SuperGeometryType_ SuperGeometryType;
 	typedef ModelBase<ModelHelperType_, ParametersType_, InputValidatorType_, SuperGeometryType>
-	ThisType;
+	    ThisType;
 	typedef Braket<ThisType> BraketType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::BlockType BlockType;
@@ -167,13 +171,13 @@ public:
 	typedef PsimagLite::CanonicalExpression<OperatorSpecType> CanonicalExpressionType;
 
 	ModelBase(const ParametersType& params,
-	          const SuperGeometryType& superGeometry,
-	          InputValidatorType& io)
-	    : modelCommon_(params, superGeometry),
-	      targetQuantum_(io),
-	      ioIn_(io),
-	      atomKind_(nullptr),
-	      superOpHelper_(nullptr)
+	    const SuperGeometryType& superGeometry,
+	    InputValidatorType& io)
+	    : modelCommon_(params, superGeometry)
+	    , targetQuantum_(io)
+	    , ioIn_(io)
+	    , atomKind_(nullptr)
+	    , superOpHelper_(nullptr)
 	{
 		labeledOperators_.setModelName(params.model);
 		modelLinks_.clear();
@@ -238,7 +242,8 @@ public:
 	PSIDOCCOPY Hubbard::write
 	*/
 	virtual void write(PsimagLite::String,
-	                   PsimagLite::IoNg::Out::Serializer&) const = 0;
+	    PsimagLite::IoNg::Out::Serializer&) const
+	    = 0;
 
 	/* PSIDOC addDiagonalsInNaturalBasis
 	PSIDOCCOPY $FirstProtoBelow
@@ -254,8 +259,9 @@ public:
 	PSIDOCCOPY Heisenberg::addDiagonalsInNaturalBasis
 	*/
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType&,
-	                                        const BlockType& block,
-	                                        RealType)  const = 0;
+	    const BlockType& block,
+	    RealType) const
+	    = 0;
 
 	/* PSIDOC fillLabeledOperators
 	PSIDOCCOPY $FirstProtoBelow
@@ -323,14 +329,14 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	//! Full hamiltonian from creation matrices cm
-	virtual void calcHamiltonian(SparseMatrixType &hmatrix,
-	                             const VectorOperatorType& cm,
-	                             const BlockType& block,
-	                             RealType time)  const
+	virtual void calcHamiltonian(SparseMatrixType& hmatrix,
+	    const VectorOperatorType& cm,
+	    const BlockType& block,
+	    RealType time) const
 	{
 		hmatrix.makeDiagonal(cm[0].getStorage().rows());
 
-		modelCommon_.addConnectionsInNaturalBasis(hmatrix,cm,block,time);
+		modelCommon_.addConnectionsInNaturalBasis(hmatrix, cm, block, time);
 
 		addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
@@ -338,11 +344,12 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	virtual SizeType maxElectronsOneSpin() const
 	{
 		SizeType tmp = hilbertSize(0);
-		tmp = static_cast<SizeType>(log(tmp)/log(2.0));
-		SizeType maxElectrons = static_cast<SizeType>(tmp/2);
-		if (tmp & 1) maxElectrons++;
+		tmp = static_cast<SizeType>(log(tmp) / log(2.0));
+		SizeType maxElectrons = static_cast<SizeType>(tmp / 2);
+		if (tmp & 1)
+			maxElectrons++;
 
-		return maxElectrons*modelCommon_.superGeometry().numberOfSites() + 1;
+		return maxElectrons * modelCommon_.superGeometry().numberOfSites() + 1;
 	}
 
 	virtual const AtomKindBaseType& getAtomKind()
@@ -362,8 +369,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// Hilbert space (SDHS)
 	// should be static
 	virtual SizeType setOperatorMatrices(VectorOperatorType& cm,
-	                                     VectorQnType& qns,
-	                                     const BlockType& block) const
+	    VectorQnType& qns,
+	    const BlockType& block) const
 	{
 		assert(block.size() == 1);
 
@@ -389,7 +396,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	// Models may ignore announcements from the engine
 	virtual void announce(PsimagLite::String) const
-	{}
+	{
+	}
 
 	virtual PsimagLite::String oracle() const { return ""; }
 
@@ -410,9 +418,10 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	virtual void fillNewNonLocals(std::vector<OperatorType>& newNonLocals,
-	                              const LeftRightSuperType& lrs,
-	                              RealType currentTime) const
-	{}
+	    const LeftRightSuperType& lrs,
+	    RealType currentTime) const
+	{
+	}
 
 	// END OF VIRTUAL FUNCTIONS
 
@@ -426,23 +435,23 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		This function has a default implementation.
 		*/
 	void addHamiltonianConnection(SparseMatrixType& matrix,
-	                              const LeftRightSuperType& lrs,
-	                              RealType currentTime) const
+	    const LeftRightSuperType& lrs,
+	    RealType currentTime) const
 	{
 		PsimagLite::Profiling profiling("addHamiltonianConnection",
-		                                "",
-		                                std::cout);
+		    "",
+		    std::cout);
 
 		assert(lrs.super().partition() > 0);
-		SizeType total = lrs.super().partition()-1;
+		SizeType total = lrs.super().partition() - 1;
 
 		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total, 0);
 		VectorSizeType nzs(total, 0);
 
 		HamiltonianConnectionType hc(lrs,
-		                             modelLinks_,
-		                             currentTime,
-		                             superOpHelper());
+		    modelLinks_,
+		    currentTime,
+		    superOpHelper());
 
 		for (SizeType m = 0; m < total; ++m) {
 			SizeType offset = lrs.super().partition(m);
@@ -456,7 +465,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 			hc.matrixBond(vsm, aux);
 			nzs[m] = vsm.nonZeros();
-			if (nzs[m] > 0) continue;
+			if (nzs[m] > 0)
+				continue;
 			delete vvsm[m];
 			vvsm[m] = 0;
 		}
@@ -472,7 +482,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 			SizeType m = permutation[i]; // get old index from new index
 
-			if (vvsm[m] == 0) continue;
+			if (vvsm[m] == 0)
+				continue;
 
 			const VerySparseMatrixType& vsm = *(vvsm[m]);
 			SparseMatrixType matrixBlock2;
@@ -482,13 +493,14 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 			SizeType offset = lrs.super().partition(m);
 			SparseMatrixType* full = new SparseMatrixType(matrix.rows(),
-			                                              matrix.cols(),
-			                                              matrixBlock2.nonZeros());
+			    matrix.cols(),
+			    matrixBlock2.nonZeros());
 			fromBlockToFull(*full, matrixBlock2, offset);
 			vectorOfCrs.push_back(full);
 		}
 
-		if (vectorOfCrs.size() == 0) return;
+		if (vectorOfCrs.size() == 0)
+			return;
 
 		vectorOfCrs.push_back(&matrix);
 		SizeType effectiveTotal = vectorOfCrs.size();
@@ -508,16 +520,16 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 
 	/** Let H be the hamiltonian of the  model for basis1 and partition m
 	 * consisting of the external product
-		 * of basis2 \otimes basis3
-		 * This function does x += H*y
-		 * The \cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$.
-		 * This function
-		 * has a default implementation.
-		 */
+	 * of basis2 \otimes basis3
+	 * This function does x += H*y
+	 * The \cppFunction{matrixVectorProduct} function implements the operation $x+=Hy$.
+	 * This function
+	 * has a default implementation.
+	 */
 	void matrixVectorProduct(VectorType& x,
-	                         const VectorType& y,
-	                         const HamiltonianConnectionType& hc,
-	                         const typename ModelHelperType::Aux& aux) const
+	    const VectorType& y,
+	    const HamiltonianConnectionType& hc,
+	    const typename ModelHelperType::Aux& aux) const
 	{
 		typedef PsimagLite::Parallelizer<ParallelHamConnectionType> ParallelizerType;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
@@ -529,8 +541,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	void fullHamiltonian(SparseMatrixType& matrix,
-	                     const HamiltonianConnectionType& hc,
-	                     const typename ModelHelperType::Aux& aux) const
+	    const HamiltonianConnectionType& hc,
+	    const typename ModelHelperType::Aux& aux) const
 	{
 		return modelCommon_.fullHamiltonian(matrix, hc, aux);
 	}
@@ -551,8 +563,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	static OperatorType naturalOperator(const PsimagLite::String& what,
-	                                    SizeType site,
-	                                    SizeType dof)
+	    SizeType site,
+	    SizeType dof)
 	{
 		static const PsimagLite::String expipi = "exp_i_pi_";
 		static const SizeType l = expipi.length();
@@ -588,8 +600,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		typename PsimagLite::Vector<OperatorType>::Type cm;
 		VectorQnType qq;
 		setOperatorMatrices(cm, qq, block);
-		std::cout<<"block="<<block;
-		std::cout<<"qq="<<qq;
+		std::cout << "block=" << block;
+		std::cout << "qq=" << qq;
 
 		const SizeType kindOfSite = modelLinks_.siteToAtomKind(site);
 		const SizeType n = labeledOperators_.size();
@@ -600,16 +612,16 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 				continue;
 
 			const SizeType dofs = ll.dofs();
-			std::cout<<"Operator name="<<ll.name()<<" has "<<dofs<<" dofs";
+			std::cout << "Operator name=" << ll.name() << " has " << dofs << " dofs";
 			if (ll.isTrackable())
-				std::cout<<" Trackable: YES\n";
+				std::cout << " Trackable: YES\n";
 			else
-				std::cout<<" Trackable: NO\n";
+				std::cout << " Trackable: NO\n";
 
 			for (SizeType j = 0; j < dofs; ++j) {
-				std::cout<<"Operator name="<<ll.name()<<" dof="<<j;
+				std::cout << "Operator name=" << ll.name() << " dof=" << j;
 				PsimagLite::String desc = ll.description(j);
-				std::cout<<" "<<desc<<"\n";
+				std::cout << " " << desc << "\n";
 				ll(j).write(std::cout);
 			}
 		}
@@ -644,7 +656,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		for (SizeType i = 0; i < n; ++i) {
 			const QnType& qn = qns[i];
 			++qnSizes[qn];
-			if (seenThisQns[qn] == 1) continue;
+			if (seenThisQns[qn] == 1)
+				continue;
 			seenThisQns[qn] = 1;
 			uniqueQns.push_back(qn);
 		}
@@ -680,7 +693,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	// protected:
 
 	PsimagLite::String oracle(const RealType& energy,
-	                          const PsimagLite::String formula) const
+	    const PsimagLite::String formula) const
 	{
 		if (modelCommon_.params().options.isSet("TargetingAncilla"))
 			return "";
@@ -690,7 +703,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	static OpsLabelType& createOpsLabel(PsimagLite::String name,
-	                                    SizeType kindOfSite = 0)
+	    SizeType kindOfSite = 0)
 	{
 		return labeledOperators_.createLabel(name, kindOfSite);
 	}
@@ -701,8 +714,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	}
 
 	static ModelTermType& createTerm(PsimagLite::String name,
-	                                 bool wantsHermitian = true,
-	                                 PsimagLite::String geometryFrom = "")
+	    bool wantsHermitian = true,
+	    PsimagLite::String geometryFrom = "")
 	{
 		return modelLinks_.createTerm(name, wantsHermitian, geometryFrom);
 	}
@@ -710,13 +723,14 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	virtual SuperOpHelperBaseType* setSuperOpHelper()
 	{
 		return (superOpHelper_) ? superOpHelper_
-		                        : new SuperOpHelperBaseType(modelCommon_.superGeometry());
+					: new SuperOpHelperBaseType(modelCommon_.superGeometry());
 	}
 
 	static void notReallySort(VectorSizeType& basis, VectorQnType& qns)
 	{
 		const SizeType n = qns.size();
-		if (n == 0) return;
+		if (n == 0)
+			return;
 		VectorQnType qunique;
 		findQunique(qunique, qns);
 		assert(qunique.size() > 0);
@@ -728,7 +742,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		for (SizeType i = 0; i < m; ++i) {
 			const QnType& thisq = qunique[i];
 			for (SizeType j = 0; j < n; ++j) {
-				if (done[j]) continue;
+				if (done[j])
+					continue;
 
 				// add all qns with thisq
 				if (qns[j] == thisq) {
@@ -756,10 +771,11 @@ protected:
 	}
 
 	void additionalOnSiteHamiltonian(SparseMatrixType& hmatrix,
-	                                 const BlockType& block,
-	                                 RealType time) const
+	    const BlockType& block,
+	    RealType time) const
 	{
-		if (onSiteHadd_.size() == 0) return;
+		if (onSiteHadd_.size() == 0)
+			return;
 
 		if (onSiteHadd_.size() != superGeometry().numberOfSites())
 			err("additionalOnSiteHamiltonian: wrong number of entries\n");
@@ -768,15 +784,17 @@ protected:
 		const SizeType site = block[0];
 		assert(onSiteHadd_.size() > site);
 		const PsimagLite::String hOnSite = onSiteHadd_[site];
-		if (hOnSite == "") return;
+		if (hOnSite == "")
+			return;
 
 		OperatorSpecType opSpec(*this);
 		CanonicalExpressionType canonicalExpression(opSpec);
 		OperatorType hOft;
 		OperatorType opEmpty;
 		PsimagLite::String expression = CanonicalExpressionType::replaceAll(hOnSite,
-		                                                                    "%t",
-		                                                                    time).second;
+		    "%t",
+		    time)
+						    .second;
 		expression = ProgramGlobals::killSpaces(expression);
 		int bogus = 0;
 		canonicalExpression(hOft, expression, opEmpty, bogus);
@@ -793,9 +811,11 @@ private:
 		try {
 			io.readline(tmp2, "AddOnSiteHamiltonian=");
 			hasOnSite = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
-		if (!hasOnSite) return;
+		if (!hasOnSite)
+			return;
 		onSiteHadd_.resize(superGeometry().numberOfSites());
 		stringToVectorOfStrings(onSiteHadd_, tmp2);
 	}
@@ -852,8 +872,10 @@ private:
 				continue;
 			}
 
-			if (status == 1) buffer += c;
-			else content += c;
+			if (status == 1)
+				buffer += c;
+			else
+				content += c;
 		}
 
 		if (!foundSite)
@@ -892,8 +914,9 @@ private:
 		const SizeType nsites = vec.size();
 		for (SizeType site = 0; site < nsites; ++site) {
 			vec[site] = CanonicalExpressionType::replaceAll(str,
-			                                                "%s",
-			                                                site).second;
+			    "%s",
+			    site)
+					.second;
 		}
 	}
 
@@ -902,14 +925,15 @@ private:
 		SizeType siteKind = modelLinks_.siteToAtomKind(site);
 		SizeType opKind = labeledOperators_.findLabel(what).kindOfSite();
 
-		if (siteKind == opKind) return;
+		if (siteKind == opKind)
+			return;
 
 		op.clear();
 	}
 
 	static void offsetsFromSizes(std::unordered_map<QnType, SizeType>& offsets,
-	                             std::unordered_map<QnType, SizeType>& sizes,
-	                             const VectorQnType& qns)
+	    std::unordered_map<QnType, SizeType>& sizes,
+	    const VectorQnType& qns)
 	{
 		const SizeType total = sizes.size();
 
@@ -918,7 +942,7 @@ private:
 			const QnType& qn = qns[i];
 			const SizeType thisSize = sizes[qn];
 			offsets[qn] = offset;
-			offset  += thisSize;
+			offset += thisSize;
 		}
 	}
 
@@ -946,7 +970,8 @@ private:
 		if (tokens.size() != 2)
 			err("Custom Operator " + opStr + " must have exactly one colon\n");
 
-		if (tokens[0].length() == 0) return;
+		if (tokens[0].length() == 0)
+			return;
 		const char firstChar = tokens[0][0];
 		OpsLabelType& c = this->createOpsLabel(tokens[0]);
 		BraketType braket(*this, "<gs|" + tokens[1] + "|gs>");
@@ -960,12 +985,14 @@ private:
 	{
 		qunique.clear();
 		const SizeType n = qns.size();
-		if (n == 0) return;
+		if (n == 0)
+			return;
 		QnType qprev = qns[0];
 		qunique.push_back(qprev);
 		for (SizeType i = 1; i < n; ++i) {
 			QnType thisq = qns[i];
-			if (thisq == qprev) continue;
+			if (thisq == qprev)
+				continue;
 			qunique.push_back(thisq);
 			qprev = thisq;
 		}
@@ -979,13 +1006,15 @@ private:
 
 		VectorQnType qunique;
 		findQunique(qunique, qns_);
-		if (qunique.size() == 0) return;
+		if (qunique.size() == 0)
+			return;
 
 		const SizeType m = qunique.size();
 		for (SizeType i = 0; i < m; ++i) {
 			const QnType thisq = qunique[i];
 			for (SizeType j = i + 1; j < m; ++j) {
-				if (thisq != qunique[j]) continue;
+				if (thisq != qunique[j])
+					continue;
 				err("QNS of one site: not ordered: Model must order QNS\n");
 			}
 		}
@@ -998,13 +1027,14 @@ private:
 
 		const SizeType n = labeledOperators_[0].rows();
 		MatrixType m(n, n);
-		for (SizeType i = 0; i < n; ++i) m(i, i) = 1;
+		for (SizeType i = 0; i < n; ++i)
+			m(i, i) = 1;
 		typename OperatorType::Su2RelatedType su2related;
 		OperatorType myOp(SparseMatrixType(m),
-		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                  PairSizeType(0, 0),
-		                  1,
-		                  su2related);
+		    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		    PairSizeType(0, 0),
+		    1,
+		    su2related);
 		createOpsLabel("identity").push(myOp);
 	}
 
@@ -1017,16 +1047,16 @@ private:
 	static LabeledOperatorsType labeledOperators_;
 	static ModelLinksType modelLinks_;
 	static VectorQnType qns_;
-}; //class ModelBase
+}; // class ModelBase
 
-template<typename T1, typename T2, typename T3, typename T4>
+template <typename T1, typename T2, typename T3, typename T4>
 typename ModelBase<T1, T2, T3, T4>::LabeledOperatorsType
-ModelBase<T1, T2, T3, T4>::labeledOperators_;
+    ModelBase<T1, T2, T3, T4>::labeledOperators_;
 
-template<typename T1, typename T2, typename T3, typename T4>
+template <typename T1, typename T2, typename T3, typename T4>
 typename ModelBase<T1, T2, T3, T4>::ModelLinksType ModelBase<T1, T2, T3, T4>::modelLinks_;
 
-template<typename T1, typename T2, typename T3, typename T4>
+template <typename T1, typename T2, typename T3, typename T4>
 typename ModelBase<T1, T2, T3, T4>::VectorQnType ModelBase<T1, T2, T3, T4>::qns_;
 } // namespace Dmrg
 /*@}*/

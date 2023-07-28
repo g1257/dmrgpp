@@ -80,40 +80,41 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_PARAMS_HEISENBERG_ANCILLAC_H
 #define DMRG_PARAMS_HEISENBERG_ANCILLAC_H
-#include "Vector.h"
 #include "ParametersModelBase.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! Heisenberg Model Parameters
-template<typename RealType, typename QnType>
+template <typename RealType, typename QnType>
 struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	// no connectors here, connectors are handled by the geometry
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ParametersHeisenbergAncillaC(IoInputType& io)
-	    : BaseType(io,false)
+	    : BaseType(io, false)
 	{
-		io.readline(twiceTheSpin,"HeisenbergTwiceS=");
+		io.readline(twiceTheSpin, "HeisenbergTwiceS=");
 
 		try {
-			io.read(magneticField,"MagneticField");
-		} catch (std::exception&) {}
+			io.read(magneticField, "MagneticField");
+		} catch (std::exception&) {
+		}
 	}
 
-	template<typename SomeMemResolvType>
+	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	    SizeType,
+	    PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHeisenbergAncillaC";
 		io.createGroup(label);
@@ -123,11 +124,11 @@ struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnTyp
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream &os,
-	                                const ParametersHeisenbergAncillaC& parameters)
+	friend std::ostream& operator<<(std::ostream& os,
+	    const ParametersHeisenbergAncillaC& parameters)
 	{
-		os<<"MagneticField="<<parameters.magneticField<<"\n";
-		os<<"HeisenbergTwiceS="<<parameters.twiceTheSpin<<"\n";
+		os << "MagneticField=" << parameters.magneticField << "\n";
+		os << "HeisenbergTwiceS=" << parameters.twiceTheSpin << "\n";
 		return os;
 	}
 
@@ -138,4 +139,3 @@ struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnTyp
 
 /*@}*/
 #endif
-

@@ -4,51 +4,46 @@
 // This file should be commited
 #include "DmrgDriver1.h"
 
-
-typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance38Type;
-typedef Dmrg::SuperGeometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance38Type;
+typedef PsimagLite::CrsMatrix<std::complex<RealType>> SparseMatrixInstance38Type;
+typedef Dmrg::SuperGeometry<std::complex<RealType>, PsimagLite::InputNg<Dmrg::InputCheck>::Readable, Dmrg::ProgramGlobals> GeometryInstance38Type;
 
 typedef Dmrg::MatrixVectorKron<
- Dmrg::ModelBase<
-  Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance38Type> >,Dmrg::Basis<SparseMatrixInstance38Type> >
-  >,
-  ParametersDmrgSolverType,
-  InputNgType::Readable,
-  GeometryInstance38Type
- >
-> MatrixVector38Type;
+    Dmrg::ModelBase<
+	Dmrg::ModelHelperLocal<
+	    Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance38Type>>, Dmrg::Basis<SparseMatrixInstance38Type>>>,
+	ParametersDmrgSolverType,
+	InputNgType::Readable,
+	GeometryInstance38Type>>
+    MatrixVector38Type;
 
 typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance38Type::RealType>,
-	MatrixVector38Type, MatrixVector38Type::VectorType> LanczosSolver38Type;
+    MatrixVector38Type,
+    MatrixVector38Type::VectorType>
+    LanczosSolver38Type;
 
-template void mainLoop4<LanczosSolver38Type,Dmrg::VectorWithOffset<std::complex<RealType> , Dmrg::Qn> >
-(LanczosSolver38Type::MatrixType::ModelType::SuperGeometryType&,
-const ParametersDmrgSolverType&,
-InputNgType::Readable&,
-const OperatorOptions&);
+template void mainLoop4<LanczosSolver38Type, Dmrg::VectorWithOffset<std::complex<RealType>, Dmrg::Qn>>(LanczosSolver38Type::MatrixType::ModelType::SuperGeometryType&,
+    const ParametersDmrgSolverType&,
+    InputNgType::Readable&,
+    const OperatorOptions&);
 
-
-typedef PsimagLite::CrsMatrix<std::complex<RealType> > SparseMatrixInstance39Type;
-typedef Dmrg::SuperGeometry<std::complex<RealType> ,PsimagLite::InputNg<Dmrg::InputCheck>::Readable,Dmrg::ProgramGlobals> GeometryInstance39Type;
+typedef PsimagLite::CrsMatrix<std::complex<RealType>> SparseMatrixInstance39Type;
+typedef Dmrg::SuperGeometry<std::complex<RealType>, PsimagLite::InputNg<Dmrg::InputCheck>::Readable, Dmrg::ProgramGlobals> GeometryInstance39Type;
 
 typedef Dmrg::MatrixVectorOnTheFly<
- Dmrg::ModelBase<
-  Dmrg::ModelHelperLocal<
-   Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance39Type> >,Dmrg::Basis<SparseMatrixInstance39Type> >
-  >,
-  ParametersDmrgSolverType,
-  InputNgType::Readable,
-  GeometryInstance39Type
- >
-> MatrixVector39Type;
+    Dmrg::ModelBase<
+	Dmrg::ModelHelperLocal<
+	    Dmrg::LeftRightSuper<Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixInstance39Type>>, Dmrg::Basis<SparseMatrixInstance39Type>>>,
+	ParametersDmrgSolverType,
+	InputNgType::Readable,
+	GeometryInstance39Type>>
+    MatrixVector39Type;
 
 typedef PsimagLite::LanczosSolver<PsimagLite::ParametersForSolver<GeometryInstance39Type::RealType>,
-	MatrixVector39Type, MatrixVector39Type::VectorType> LanczosSolver39Type;
+    MatrixVector39Type,
+    MatrixVector39Type::VectorType>
+    LanczosSolver39Type;
 
-template void mainLoop4<LanczosSolver39Type,Dmrg::VectorWithOffsets<std::complex<RealType> , Dmrg::Qn> >
-(LanczosSolver39Type::MatrixType::ModelType::SuperGeometryType&,
-const ParametersDmrgSolverType&,
-InputNgType::Readable&,
-const OperatorOptions&);
-
+template void mainLoop4<LanczosSolver39Type, Dmrg::VectorWithOffsets<std::complex<RealType>, Dmrg::Qn>>(LanczosSolver39Type::MatrixType::ModelType::SuperGeometryType&,
+    const ParametersDmrgSolverType&,
+    InputNgType::Readable&,
+    const OperatorOptions&);

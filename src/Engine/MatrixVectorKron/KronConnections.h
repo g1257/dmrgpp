@@ -81,14 +81,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef KRON_CONNECTIONS_H
 #define KRON_CONNECTIONS_H
 
-#include "Matrix.h"
 #include "Concurrency.h"
 #include "GemmR.h"
+#include "Matrix.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename InitKronType>
-class KronConnections {
+template <typename InitKronType>
+class KronConnections
+{
 
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -106,10 +108,11 @@ public:
 	typedef typename InitKronType::RealType RealType;
 
 	KronConnections(InitKronType& initKron)
-	    : initKron_(initKron),
-	      x_(initKron.xout()),
-	      y_(initKron.yin())
-	{}
+	    : initKron_(initKron)
+	    , x_(initKron.xout())
+	    , y_(initKron.yin())
+	{
+	}
 
 	SizeType tasks() const
 	{
@@ -122,50 +125,48 @@ public:
 
 		static const bool needsPrinting = false;
 		PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
-		                                           initKron_.gemmRnb(),
-		                                           initKron_.nthreads2());
+		    initKron_.gemmRnb(),
+		    initKron_.nthreads2());
 
 		SizeType nC = initKron_.connections();
 		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType offsetX = initKron_.offsetForPatches(InitKronType::NEW, outPatch);
 		assert(offsetX < x_.size());
-		for (SizeType inPatch=0;inPatch<total;++inPatch) {
+		for (SizeType inPatch = 0; inPatch < total; ++inPatch) {
 			SizeType offsetY = initKron_.offsetForPatches(InitKronType::OLD, inPatch);
 			assert(offsetY < y_.size());
-			for (SizeType ic=0;ic<nC;++ic) {
+			for (SizeType ic = 0; ic < nC; ++ic) {
 				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 				const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
-				const bool performTranspose = (initKron_.useLowerPart() &&
-				                               (outPatch < inPatch));
+				const bool performTranspose = (initKron_.useLowerPart() && (outPatch < inPatch));
 
-				const MatrixDenseOrSparseType* Amat =  performTranspose ?
-				            xiStruct(inPatch,outPatch): xiStruct(outPatch,inPatch);
+				const MatrixDenseOrSparseType* Amat = performTranspose ? xiStruct(inPatch, outPatch) : xiStruct(outPatch, inPatch);
 
-				const MatrixDenseOrSparseType* Bmat =  performTranspose ?
-				            yiStruct(inPatch,outPatch) : yiStruct(outPatch,inPatch);
+				const MatrixDenseOrSparseType* Bmat = performTranspose ? yiStruct(inPatch, outPatch) : yiStruct(outPatch, inPatch);
 
-				if (!Amat || !Bmat) continue;
+				if (!Amat || !Bmat)
+					continue;
 
 				if (!performTranspose)
 					initKron_.checks(*Amat, *Bmat, outPatch, inPatch);
 
-				const char opt = performTranspose ? (isComplex ? 'c': 't') : 'n';
+				const char opt = performTranspose ? (isComplex ? 'c' : 't') : 'n';
 				kronMult(x_,
-				         offsetX,
-				         y_,
-				         offsetY,
-				         opt,
-				         opt,
-				         *Amat,
-				         *Bmat,
-				         initKron_.denseFlopDiscount(),
-				         gemmR);
+				    offsetX,
+				    y_,
+				    offsetY,
+				    opt,
+				    opt,
+				    *Amat,
+				    *Bmat,
+				    initKron_.denseFlopDiscount(),
+				    gemmR);
 			}
 		}
 	}
 
-	void sync() {}
+	void sync() { }
 
 private:
 
@@ -177,8 +178,8 @@ private:
 
 	const InitKronType& initKron_;
 	VectorType& x_;
-	const VectorType& y_;	
-}; //class KronConnections
+	const VectorType& y_;
+}; // class KronConnections
 
 } // namespace PsimagLite
 

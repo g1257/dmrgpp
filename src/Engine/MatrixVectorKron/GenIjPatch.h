@@ -84,10 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <cassert>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LeftRightSuperType_>
-class GenIjPatch {
+template <typename LeftRightSuperType_>
+class GenIjPatch
+{
 
 public:
 
@@ -96,13 +98,15 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	enum LeftOrRightEnumType {LEFT=0,RIGHT=1};
+	enum LeftOrRightEnumType { LEFT = 0,
+		RIGHT = 1 };
 
 	GenIjPatch(const LeftRightSuperType& lrs, const QnType& target)
-	    : lrs_(lrs), qn_(target)
+	    : lrs_(lrs)
+	    , qn_(target)
 	{
-		for (SizeType i=0;i<lrs.left().partition()-1;i++) {
-			for (SizeType j=0;j<lrs.right().partition()-1;++j) {
+		for (SizeType i = 0; i < lrs.left().partition() - 1; i++) {
+			for (SizeType j = 0; j < lrs.right().partition() - 1; ++j) {
 
 				if (QnType(lrs.left().qnEx(i), lrs.right().qnEx(j)) != target)
 					continue;
@@ -117,7 +121,7 @@ public:
 
 	const VectorSizeType& operator()(LeftOrRightEnumType leftOrRight) const
 	{
-		return (leftOrRight==LEFT) ? patchesLeft_ : patchesRight_;
+		return (leftOrRight == LEFT) ? patchesLeft_ : patchesRight_;
 	}
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
@@ -129,10 +133,9 @@ private:
 	VectorSizeType patchesLeft_;
 	VectorSizeType patchesRight_;
 
-}; //class GenIjPatch
+}; // class GenIjPatch
 } // namespace PsimagLite
 
 /*@}*/
 
 #endif // GEN_IJ_PATCH_HEADER_H
-

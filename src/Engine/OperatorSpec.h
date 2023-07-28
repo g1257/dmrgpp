@@ -1,15 +1,17 @@
 #ifndef OPERATORSPEC_H
 #define OPERATORSPEC_H
-#include "InputNg.h"
 #include "InputCheck.h"
+#include "InputNg.h"
 #include "LazyAlgebra.h"
 #include "OneOperatorSpec.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelType,
-         typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType> >
-class OperatorSpec {
+template <typename ModelType,
+    typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType>>
+class OperatorSpec
+{
 
 public:
 
@@ -24,19 +26,16 @@ public:
 
 	OperatorSpec(const ModelType& model)
 	    : model_(model)
-	{}
+	{
+	}
 
 	ResultType operator()(PsimagLite::String opLabel, int& site2) const
 	{
 		PsimagLite::String copyOfOpLabel = opLabel;
 		SiteSplitType site3Split = OneOperatorSpecType::extractSiteIfAny(opLabel);
 
-		if (site2 >= 0 &&
-		        site3Split.hasSiteString &&
-		        static_cast<SizeType>(site2) !=
-		        OneOperatorSpecType::strToNumberOrFail(site3Split.siteString))
-			err(PsimagLite::String(__FILE__) +
-			    " FATAL , delete site from " + copyOfOpLabel + "\n");
+		if (site2 >= 0 && site3Split.hasSiteString && static_cast<SizeType>(site2) != OneOperatorSpecType::strToNumberOrFail(site3Split.siteString))
+			err(PsimagLite::String(__FILE__) + " FATAL , delete site from " + copyOfOpLabel + "\n");
 
 		opLabel = site3Split.root;
 
@@ -57,7 +56,7 @@ public:
 			nup = findOperator(opLabel, site);
 		} catch (std::exception& e) {
 			if (opLabel[0] == ':') {
-				std::cerr<<e.what();
+				std::cerr << e.what();
 				throw e;
 			}
 
@@ -89,22 +88,22 @@ private:
 		tmp.makeDiagonal(rows, value);
 		typename OperatorType::Su2RelatedType su2Related;
 		return OperatorType(tmp,
-		                    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                    typename OperatorType::PairType(0,0),
-		                    1.0,
-		                    su2Related);
+		    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		    typename OperatorType::PairType(0, 0),
+		    1.0,
+		    su2Related);
 	}
 
 	OperatorType findOperator(const PsimagLite::String& name,
-	                          SizeType site) const
+	    SizeType site) const
 	{
-		if (name.length()<2 || name[0]!=':') {
+		if (name.length() < 2 || name[0] != ':') {
 			PsimagLite::String str("OperatorInterpreter: syntax error for ");
 			str += name + "\n";
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		PsimagLite::String label = name.substr(1,name.length()-1);
+		PsimagLite::String label = name.substr(1, name.length() - 1);
 
 		replaceString(label, ttos(site));
 		InputCheck inputCheck;
@@ -112,15 +111,16 @@ private:
 		PsimagLite::InputNg<InputCheck>::Readable io(ioWriteable);
 
 		PsimagLite::String prefix = "";
-		return OperatorType(io,model_,OperatorType::MUST_BE_NONZERO, prefix);
+		return OperatorType(io, model_, OperatorType::MUST_BE_NONZERO, prefix);
 	}
 
 	void replaceString(PsimagLite::String& str,
-	                   PsimagLite::String substr) const
+	    PsimagLite::String substr) const
 	{
 		/* Locate the substring to replace. */
 		size_t index = str.find('$');
-		if (index == PsimagLite::String::npos) return;
+		if (index == PsimagLite::String::npos)
+			return;
 
 		PsimagLite::String str1 = str.substr(0, index);
 		++index;

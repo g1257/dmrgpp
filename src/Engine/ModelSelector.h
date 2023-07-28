@@ -42,52 +42,54 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup Dmrg */
 /*@{*/
 /** \file ModelSelector.h
-*/
+ */
 
 #ifndef MODEL_SELECTOR_H
 #define MODEL_SELECTOR_H
 
-#include <stdexcept>
 #include "ProgramGlobals.h"
 #include "Utils.h"
+#include <stdexcept>
 // start headers: // DO NOT REMOVE MARK
-#include "../Models/Heisenberg/ModelHeisenberg.h"
-#include "../Models/IsingMultiOrb/ModelIsingMultiOrb.h"
-#include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
-#include "../Models/SuperExtendedHubbard1Orb/SuperExtendedHubbard1Orb.h"
-#include "../Models/FeAsModel/ModelFeBasedSc.h"
 #include "../Models/FeAsBasedScExtended/FeAsBasedScExtended.h"
-#include "../Models/Immm/Immm.h"
-#include "../Models/TjMultiOrb/TjMultiOrb.h"
-#include "../Models/TjAnisotropic/TjAnisotropic.h"
-#include "../Models/TjAncillaC2/TjAncillaC2.h"
-#include "../Models/TjAncillaC/TjAncillaC.h"
-#include "../Models/TjAncillaG/TjAncillaG.h"
-#include "../Models/SuperHubbardExtended/SuperHubbardExtended.h"
+#include "../Models/FeAsModel/ModelFeBasedSc.h"
+#include "../Models/FermionSpinless/FermionSpinless.h"
+#include "../Models/GaugeSpin/GaugeSpin.h"
+#include "../Models/Graphene/Graphene.h"
+#include "../Models/Heisenberg/HeisenbergMix.h"
+#include "../Models/Heisenberg/ModelHeisenberg.h"
+#include "../Models/HeisenbergAncillaC/HeisenbergAncillaC.h"
+#include "../Models/HolsteinSpinlessThin/HolsteinSpinlessThin.h"
+#include "../Models/HolsteinThin/HolsteinThin.h"
 #include "../Models/HubbardAncilla/HubbardAncilla.h"
 #include "../Models/HubbardAncillaExtended/HubbardAncillaExtended.h"
-#include "../Models/FermionSpinless/FermionSpinless.h"
-#include "../Models/Kitaev/Kitaev.h"
-#include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
 #include "../Models/HubbardHolstein/HubbardHolstein.h"
 #include "../Models/HubbardHolsteinSpinless/HubbardHolsteinSpinless.h"
-#include "../Models/HolsteinThin/HolsteinThin.h"
-#include "../Models/HolsteinSpinlessThin/HolsteinSpinlessThin.h"
+#include "../Models/HubbardMultiBand/ModelHubbardMultiBand.h"
+#include "../Models/HubbardOneBand/ModelHubbard.h"
+#include "../Models/Immm/Immm.h"
+#include "../Models/IsingMultiOrb/ModelIsingMultiOrb.h"
+#include "../Models/Kitaev/Kitaev.h"
 #include "../Models/Kondo/Kondo.h"
-#include "../Models/UlsOsu/UlsOsu.h"
-#include "../Models/Graphene/Graphene.h"
-#include "../Models/GaugeSpin/GaugeSpin.h"
-#include "../Models/Heisenberg/HeisenbergMix.h"
 #include "../Models/SpinOrbital/SpinOrbitalModel.h"
 #include "../Models/Su3/Su3Model.h"
+#include "../Models/SuperExtendedHubbard1Orb/SuperExtendedHubbard1Orb.h"
+#include "../Models/SuperHubbardExtended/SuperHubbardExtended.h"
+#include "../Models/TjAncillaC/TjAncillaC.h"
+#include "../Models/TjAncillaC2/TjAncillaC2.h"
+#include "../Models/TjAncillaG/TjAncillaG.h"
+#include "../Models/TjAnisotropic/TjAnisotropic.h"
+#include "../Models/TjMultiOrb/TjMultiOrb.h"
+#include "../Models/UlsOsu/UlsOsu.h"
 // end models DO NOT REMOVE MARK
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelBaseType>
-class ModelSelector {
+template <typename ModelBaseType>
+class ModelSelector
+{
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -97,7 +99,7 @@ class ModelSelector {
 
 	// start models here:  DO NOT REMOVE MARK
 	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
-        typedef ModelIsingMultiOrb<ModelBaseType> ModelIsingMultiOrbType;	
+	typedef ModelIsingMultiOrb<ModelBaseType> ModelIsingMultiOrbType;
 	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
 	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
 	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
@@ -132,90 +134,94 @@ class ModelSelector {
 public:
 
 	ModelSelector(const PsimagLite::String& name)
-	    : name_(name),model_(0)
-	{}
+	    : name_(name)
+	    , model_(0)
+	{
+	}
 
 	~ModelSelector()
 	{
-		if (model_) delete model_;
+		if (model_)
+			delete model_;
 	}
 
 	ModelBaseType& operator()(const SolverParamsType& solverParams,
-	                          InputValidatorType& io,
-	                          const SuperGeometryType& geometry)
+	    InputValidatorType& io,
+	    const SuperGeometryType& geometry)
 	{
-		if (model_) return *model_;
+		if (model_)
+			return *model_;
 
 		PsimagLite::String hdf5fileIfAny = findHdf5FileIfAny(solverParams);
 
 		// named models start  DO NOT REMOVE MARK
 		if (name_ == "Heisenberg") {
-			model_ = new ModelHeisenbergType(solverParams,io,geometry,"");
+			model_ = new ModelHeisenbergType(solverParams, io, geometry, "");
 		} else if (name_ == "HeisenbergAnisotropic") {
-			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Anisotropic");
+			model_ = new ModelHeisenbergType(solverParams, io, geometry, "Anisotropic");
 		} else if (name_ == "Aklt") {
-			model_ = new ModelHeisenbergType(solverParams,io,geometry,"Aklt");
+			model_ = new ModelHeisenbergType(solverParams, io, geometry, "Aklt");
 		} else if (name_ == "Heisenberg2") {
-			model_ = new ModelHeisenbergType(solverParams,io,geometry,"2");
-                } else if (name_ == "IsingMultiOrb") {
-                        model_ = new ModelIsingMultiOrbType(solverParams, io, geometry, "");
+			model_ = new ModelHeisenbergType(solverParams, io, geometry, "2");
+		} else if (name_ == "IsingMultiOrb") {
+			model_ = new ModelIsingMultiOrbType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardOneBand") {
 			model_ = new ModelHubbardType(solverParams, io, geometry, "");
 		} else if (name_ == "HeisenbergAncillaC") {
-			model_ = new HeisenbergAncillaCType(solverParams,io,geometry);
+			model_ = new HeisenbergAncillaCType(solverParams, io, geometry);
 		} else if (name_ == "HubbardOneBandExtended") {
-			model_ = new ModelHubbardExtType(solverParams,io,geometry,"");
+			model_ = new ModelHubbardExtType(solverParams, io, geometry, "");
 		} else if (name_.substr(0, 27) == "HubbardOneBandExtendedSuper") {
 			PsimagLite::String tmp = (name_.length() == 27) ? ""
-			                                                : name_.substr(27, name_.length() - 27);
+									: name_.substr(27, name_.length() - 27);
 			model_ = new ModelHubbardExtSuperType(solverParams, io, geometry, tmp);
 		} else if (name_.substr(0, 11) == "FeAsBasedSc") {
 			PsimagLite::String tmp = (name_.length() == 11) ? ""
-			                                                : name_.substr(11, name_.length() - 11);
+									: name_.substr(11, name_.length() - 11);
 			model_ = new FeBasedScType(solverParams, io, geometry, tmp);
 		} else if (name_.substr(0, 19) == "FeAsBasedScExtended") {
 			PsimagLite::String tmp = (name_.length() == 19) ? ""
-			                                                : name_.substr(19, name_.length() - 19);
+									: name_.substr(19, name_.length() - 19);
 			model_ = new FeBasedScExtType(solverParams, io, geometry, tmp);
 		} else if (name_ == "Immm") {
-			model_ = new ImmmType(solverParams,io,geometry);
+			model_ = new ImmmType(solverParams, io, geometry);
 		} else if (name_ == "TjMultiOrb") {
-			model_ = new TjMultiOrbType(solverParams,io,geometry);
+			model_ = new TjMultiOrbType(solverParams, io, geometry);
 		} else if (name_ == "TjAnisotropic") {
-			model_ = new TjAnisotropicType(solverParams,io,geometry);
+			model_ = new TjAnisotropicType(solverParams, io, geometry);
 		} else if (name_ == "UlsOsu") {
 			model_ = new UlsOsuType(solverParams, io, geometry);
 		} else if (name_ == "TjAncillaC2") {
-			model_ = new TjAncillaC2Type(solverParams,io,geometry);
+			model_ = new TjAncillaC2Type(solverParams, io, geometry);
 		} else if (name_ == "TjAncillaC") {
-			model_ = new TjAncillaCType(solverParams,io,geometry);
+			model_ = new TjAncillaCType(solverParams, io, geometry);
 		} else if (name_ == "TjAncillaG") {
-			model_ = new TjAncillaGType(solverParams,io,geometry);
+			model_ = new TjAncillaGType(solverParams, io, geometry);
 		} else if (name_ == "SuperHubbardExtended") {
-			model_ = new SuperHubbardExtendedType(solverParams,io,geometry);
+			model_ = new SuperHubbardExtendedType(solverParams, io, geometry);
 		} else if (name_ == "KaneMeleHubbard") {
-			model_ = new ModelHubbardType(solverParams,io,geometry,"");
+			model_ = new ModelHubbardType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardAncilla") {
-			model_ = new HubbardAncillaType(solverParams,io,geometry);
+			model_ = new HubbardAncillaType(solverParams, io, geometry);
 		} else if (name_ == "HubbardAncillaExtended") {
-			model_ = new HubbardAncillaExtendedType(solverParams,io,geometry);
+			model_ = new HubbardAncillaExtendedType(solverParams, io, geometry);
 		} else if (name_ == "FermionSpinless") {
 			model_ = new FermionSpinlessType(solverParams, io, geometry, "");
 		} else if (name_ == "FermionSpinlessWithDelta") {
 			model_ = new FermionSpinlessType(solverParams, io, geometry, "WithDelta");
 		} else if (name_.substr(0, 6) == "Kitaev") {
 			PsimagLite::String tmp = (name_.length() == 6) ? ""
-			                                               : name_.substr(6, name_.length() - 6);
-			model_ = new KitaevType(solverParams,io,geometry, tmp);
+								       : name_.substr(6, name_.length() - 6);
+			model_ = new KitaevType(solverParams, io, geometry, tmp);
 		} else if (name_ == "ModelHubbardMultiBand") {
-			model_ = new ModelHubbardMultiBandType(solverParams,io,geometry);
+			model_ = new ModelHubbardMultiBandType(solverParams, io, geometry);
 		} else if (name_ == "HubbardHolstein") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "", hdf5fileIfAny);
 		} else if (name_ == "HubbardHolsteinSSH") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH", hdf5fileIfAny);
 		} else if (name_ == "HubbardHolsteinLRH") {
 			model_ = new HubbardHolsteinType(solverParams, io, geometry, "LRH", hdf5fileIfAny);
-		} else if (name_ == "HolsteinThin") {		
+		} else if (name_ == "HolsteinThin") {
 			model_ = new HolsteinThinType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardHolsteinSpinless") {
 			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "", hdf5fileIfAny);
@@ -227,7 +233,7 @@ public:
 			model_ = new HolsteinSpinlessThinType(solverParams, io, geometry, "");
 		} else if (name_.substr(0, 5) == "Kondo") {
 			PsimagLite::String tmp = (name_.length() == 5) ? ""
-			                                               : name_.substr(5, name_.length() - 5);
+								       : name_.substr(5, name_.length() - 5);
 			model_ = new KondoType(solverParams, io, geometry, tmp);
 		} else if (name_ == "HubbardOneBandRashbaSOC") {
 			model_ = new ModelHubbardType(solverParams, io, geometry, "RashbaSOC");
@@ -239,7 +245,7 @@ public:
 			model_ = new HeisenbergMixType(solverParams, io, geometry);
 		} else if (name_.substr(0, 11) == "SpinOrbital") {
 			PsimagLite::String tmp = (name_.length() == 11) ? ""
-			                                                : name_.substr(11, name_.length() - 11);
+									: name_.substr(11, name_.length() - 11);
 			model_ = new SpinOrbitalModelType(solverParams, io, geometry, tmp);
 		} else if (name_ == "Su3Model") {
 			model_ = new Su3ModelType(solverParams, io, geometry);
@@ -261,11 +267,13 @@ private:
 	{
 		// check first for observe
 		bool isObserve = solverParams.options.isSet("observe");
-		if (isObserve) return solverParams.filename;
+		if (isObserve)
+			return solverParams.filename;
 
 		// then for restart
 		bool isRestart = solverParams.options.isSet("restart");
-		if (isRestart) return solverParams.checkpoint.filename();
+		if (isRestart)
+			return solverParams.checkpoint.filename();
 
 		return "";
 	}
@@ -279,4 +287,3 @@ private:
 
 /*@}*/
 #endif // MODEL_SELECTOR_H
-

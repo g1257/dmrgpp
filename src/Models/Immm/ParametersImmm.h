@@ -80,48 +80,50 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PARAMETERS_IMMM_H
 #include "ParametersModelBase.h"
 
-namespace Dmrg {
-template<typename RealType, typename QnType>
+namespace Dmrg
+{
+template <typename RealType, typename QnType>
 struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 	// no connections here please!!
 	// connections are handled by the geometry
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 
-	template<typename IoInputType>
-	ParametersImmm(IoInputType& io) : BaseType(io, false)
+	template <typename IoInputType>
+	ParametersImmm(IoInputType& io)
+	    : BaseType(io, false)
 	{
 
-		io.read(hubbardU,"hubbardU");
-		io.read(potentialV,"potentialV");
-		io.readline(minOxygenElectrons,"MinOxygenElectrons=");
+		io.read(hubbardU, "hubbardU");
+		io.read(potentialV, "potentialV");
+		io.readline(minOxygenElectrons, "MinOxygenElectrons=");
 	}
 
-	template<typename SomeMemResolvType>
+	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	    SizeType,
+	    PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "ParametersImmm";
 
-		const char* start = reinterpret_cast<const char *>(this);
-		const char* end = reinterpret_cast<const char *>(&potentialV);
-		SizeType total = mres.memResolv(&hubbardU, end-start, str + " hubbardU");
+		const char* start = reinterpret_cast<const char*>(this);
+		const char* end = reinterpret_cast<const char*>(&potentialV);
+		SizeType total = mres.memResolv(&hubbardU, end - start, str + " hubbardU");
 
 		start = end;
-		end = reinterpret_cast<const char *>(&minOxygenElectrons);
-		total += mres.memResolv(&potentialV, end-start, str + " potentialV");
+		end = reinterpret_cast<const char*>(&minOxygenElectrons);
+		total += mres.memResolv(&potentialV, end - start, str + " potentialV");
 
 		total += mres.memResolv(&minOxygenElectrons,
-		                        sizeof(*this) - total,
-		                        str + " minOxygenElectrons");
+		    sizeof(*this) - total,
+		    str + " minOxygenElectrons");
 
 		return total;
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersImmm";
 		io.createGroup(label);
@@ -131,16 +133,15 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 		io.write(label + "/minOxygenElectrons", minOxygenElectrons);
 	}
 
-
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream &os,
-	                                const ParametersImmm& parameters)
+	friend std::ostream& operator<<(std::ostream& os,
+	    const ParametersImmm& parameters)
 	{
-		os<<"hubbardU\n";
-		os<<parameters.hubbardU;
-		os<<"potentialV\n";
-		os<<parameters.potentialV;
-		os<<"MinOxygenElectrons="<<parameters.minOxygenElectrons<<"\n";
+		os << "hubbardU\n";
+		os << parameters.hubbardU;
+		os << "potentialV\n";
+		os << parameters.potentialV;
+		os << "MinOxygenElectrons=" << parameters.minOxygenElectrons << "\n";
 		return os;
 	}
 
@@ -152,4 +153,3 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 
 /*@}*/
 #endif // PARAMETERS_IMMM_H
-

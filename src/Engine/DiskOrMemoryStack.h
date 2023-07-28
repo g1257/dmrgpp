@@ -1,22 +1,24 @@
 #ifndef DISKORMEMORYSTACK_H
 #define DISKORMEMORYSTACK_H
-#include "Stack.h"
 #include "DiskStackNg.h"
 #include "Io/IoNg.h"
+#include "Stack.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename T>
-class MemoryStack : public PsimagLite::Stack<T>::Type {
+template <typename T>
+class MemoryStack : public PsimagLite::Stack<T>::Type
+{
 
 public:
 
 	using PsimagLite::Stack<T>::Type::c;
-
 };
 
-template<typename BasisWithOperatorsType>
-class DiskOrMemoryStack {
+template <typename BasisWithOperatorsType>
+class DiskOrMemoryStack
+{
 
 public:
 
@@ -24,13 +26,16 @@ public:
 	typedef DiskStack<BasisWithOperatorsType> DiskStackType;
 
 	DiskOrMemoryStack(bool onDisk,
-	                  const PsimagLite::String filename,
-	                  const PsimagLite::String post,
-	                  PsimagLite::String label,
-	                  const BasisTraits& basisTraits)
-	    : basisTraits_(basisTraits), diskW_(0), diskR_(0)
+	    const PsimagLite::String filename,
+	    const PsimagLite::String post,
+	    PsimagLite::String label,
+	    const BasisTraits& basisTraits)
+	    : basisTraits_(basisTraits)
+	    , diskW_(0)
+	    , diskR_(0)
 	{
-		if (!onDisk) return;
+		if (!onDisk)
+			return;
 
 		size_t lastindex = filename.find_last_of(".");
 		PsimagLite::String file = filename.substr(0, lastindex) + post + ".hd5";
@@ -135,10 +140,10 @@ public:
 		return memory_.c[ind];
 	}
 
-	template<typename StackType1,typename StackType2>
+	template <typename StackType1, typename StackType2>
 	static void loadStack(StackType1& stackInMemory, StackType2& stackInDisk)
 	{
-		while (stackInDisk.size()>0) {
+		while (stackInDisk.size() > 0) {
 			BasisWithOperatorsType b = stackInDisk.top();
 			stackInMemory.push(b);
 			stackInDisk.pop();
@@ -150,7 +155,7 @@ public:
 private:
 
 	void writeWftStacksOnDisk(PsimagLite::String name,
-	                          PsimagLite::IoNgSerializer& io) const
+	    PsimagLite::IoNgSerializer& io) const
 	{
 		io.createGroup(name);
 		io.write(name + "/Size", this->size());
@@ -180,11 +185,11 @@ private:
 
 	const BasisTraits& basisTraits_;
 	mutable MemoryStackType memory_;
-	DiskStackType *diskW_;
-	DiskStackType *diskR_;
+	DiskStackType* diskW_;
+	DiskStackType* diskR_;
 };
 
-template<typename BasisWithOperatorsType>
+template <typename BasisWithOperatorsType>
 bool DiskOrMemoryStack<BasisWithOperatorsType>::createFile_ = true;
 }
 #endif // DISKORMEMORYSTACK_H

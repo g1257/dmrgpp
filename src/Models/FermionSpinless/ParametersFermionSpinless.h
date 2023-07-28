@@ -81,15 +81,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_PARAMS_FERMIONSPINLESS_H
 #include "ParametersModelBase.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! Hubbard Model Parameters
-template<typename RealType, typename QnType>
+template <typename RealType, typename QnType>
 struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ParametersFermionSpinless(IoInputType& io)
 	    : BaseType(io, false)
 	{
@@ -97,11 +98,11 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 		io.readline(numberOfSites, "TotalNumberOfSites=");
 		potentialV.resize(numberOfSites);
 
-		io.read(potentialV,"potentialV");
+		io.read(potentialV, "potentialV");
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersFermionSpinless";
 		io.createGroup(label);
@@ -110,12 +111,12 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream &os,
-	                                const ParametersFermionSpinless& parameters)
+	friend std::ostream& operator<<(std::ostream& os,
+	    const ParametersFermionSpinless& parameters)
 	{
-		os<<parameters.targetQuantum;
-		os<<"potentialV\n";
-		os<<parameters.potentialV;
+		os << parameters.targetQuantum;
+		os << "potentialV\n";
+		os << parameters.potentialV;
 		return os;
 	}
 
@@ -125,4 +126,3 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 
 /*@}*/
 #endif
-

@@ -79,41 +79,45 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef TIME_VECTORS_KRYLOV
 #define TIME_VECTORS_KRYLOV
+#include "KrylovHelper.h"
+#include "NoPthreadsNg.h"
+#include "ParallelTriDiag.h"
+#include "Parallelizer.h"
+#include "TimeVectorsBase.h"
 #include <iostream>
 #include <vector>
-#include "TimeVectorsBase.h"
-#include "ParallelTriDiag.h"
-#include "NoPthreadsNg.h"
-#include "Parallelizer.h"
-#include "KrylovHelper.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename TargetParamsType,
-         typename ModelType,
-         typename WaveFunctionTransfType,
-         typename LanczosSolverType,
-         typename VectorWithOffsetType_>
-class TimeVectorsKrylov : public  TimeVectorsBase<
-        TargetParamsType,
-        ModelType,
-        WaveFunctionTransfType,
-        LanczosSolverType,
-        VectorWithOffsetType_> {
+template <typename TargetParamsType,
+    typename ModelType,
+    typename WaveFunctionTransfType,
+    typename LanczosSolverType,
+    typename VectorWithOffsetType_>
+class TimeVectorsKrylov : public TimeVectorsBase<
+			      TargetParamsType,
+			      ModelType,
+			      WaveFunctionTransfType,
+			      LanczosSolverType,
+			      VectorWithOffsetType_>
+{
 
 public:
 
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef TimeVectorsBase<TargetParamsType,
-	ModelType,
-	WaveFunctionTransfType,
-	LanczosSolverType,
-	VectorWithOffsetType> BaseType;
+	    ModelType,
+	    WaveFunctionTransfType,
+	    LanczosSolverType,
+	    VectorWithOffsetType>
+	    BaseType;
 	typedef TimeVectorsKrylov<TargetParamsType,
-	ModelType,
-	WaveFunctionTransfType,
-	LanczosSolverType,
-	VectorWithOffsetType> ThisType;
+	    ModelType,
+	    WaveFunctionTransfType,
+	    LanczosSolverType,
+	    VectorWithOffsetType>
+	    ThisType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
@@ -122,7 +126,7 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef ParallelTriDiag<ModelType,LanczosSolverType,VectorWithOffsetType> ParallelTriDiagType;
+	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType> ParallelTriDiagType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
 	typedef typename ParallelTriDiagType::TargetVectorType VectorType;
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
@@ -146,26 +150,27 @@ public:
 	typedef KrylovHelper<Action, TypeWrapper> KrylovHelperType;
 
 	TimeVectorsKrylov(const TargetParamsType& tstStruct,
-	                  VectorVectorWithOffsetType& targetVectors,
-	                  const ModelType& model,
-	                  const WaveFunctionTransfType& wft,
-	                  const LeftRightSuperType& lrs,
-	                  InputValidatorType& ioIn)
-	    : BaseType(model, lrs, wft, "krylov"),
-	      tstStruct_(tstStruct),
-	      targetVectors_(targetVectors),
-	      model_(model),
-	      wft_(wft),
-	      lrs_(lrs),
-	      ioIn_(ioIn),
-	      timeHasAdvanced_(false),
-	      krylovHelper_(model.params(), 0)
-	{}
+	    VectorVectorWithOffsetType& targetVectors,
+	    const ModelType& model,
+	    const WaveFunctionTransfType& wft,
+	    const LeftRightSuperType& lrs,
+	    InputValidatorType& ioIn)
+	    : BaseType(model, lrs, wft, "krylov")
+	    , tstStruct_(tstStruct)
+	    , targetVectors_(targetVectors)
+	    , model_(model)
+	    , wft_(wft)
+	    , lrs_(lrs)
+	    , ioIn_(ioIn)
+	    , timeHasAdvanced_(false)
+	    , krylovHelper_(model.params(), 0)
+	{
+	}
 
 	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
-	                             RealType Eg,
-	                             const VectorWithOffsetType& phi,
-	                             const typename BaseType::ExtraData& extra)
+	    RealType Eg,
+	    const VectorWithOffsetType& phi,
+	    const typename BaseType::ExtraData& extra)
 	{
 		const VectorRealType& times = tstStruct_.times();
 
@@ -179,10 +184,10 @@ public:
 			assert(targetVectors_[advance]);
 			if (targetVectors_[advance]->size() > 0) {
 				SizeType numberOfSites = lrs_.super().block().size();
-				if (extra.block[0]!=0 && extra.block[0]!=numberOfSites-1) {
+				if (extra.block[0] != 0 && extra.block[0] != numberOfSites - 1) {
 					BaseType::wftHelper().wftOneVector(phiNew,
-				                                   *targetVectors_[advance],
-				                                   extra.block[0]);
+					    *targetVectors_[advance],
+					    extra.block[0]);
 
 					*targetVectors_[indices[0]] = phiNew;
 				} else {
@@ -207,7 +212,8 @@ public:
 		if (ptr0 != ptr1)
 			*targetVectors_[indices[0]] = phi;
 
-		if (times.size() == 1 && fabs(times[0])<1e-10) return;
+		if (times.size() == 1 && fabs(times[0]) < 1e-10)
+			return;
 
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());
@@ -218,13 +224,14 @@ public:
 
 		VectorVectorRealType eigs(phi.sectors());
 
-		for (SizeType ii=0;ii<phi.sectors();ii++)
-			PsimagLite::diag(T[ii],eigs[ii],'V');
+		for (SizeType ii = 0; ii < phi.sectors(); ii++)
+			PsimagLite::diag(T[ii], eigs[ii], 'V');
 
 		calcTargetVectors(indices, phi, T, V, Eg, eigs, steps);
 
-		//checkNorms();
-		if (extra.isLastCall) timeHasAdvanced_ = false;
+		// checkNorms();
+		if (extra.isLastCall)
+			timeHasAdvanced_ = false;
 	}
 
 	void timeHasAdvanced()
@@ -237,12 +244,12 @@ private:
 
 	//! Do not normalize states here, it leads to wrong results (!)
 	void calcTargetVectors(typename PsimagLite::Vector<SizeType>::Type indices,
-	                       const VectorWithOffsetType& phi,
-	                       const VectorMatrixFieldType& T,
-	                       const VectorMatrixFieldType& V,
-	                       RealType Eg,
-	                       const VectorVectorRealType& eigs,
-	                       typename PsimagLite::Vector<SizeType>::Type steps)
+	    const VectorWithOffsetType& phi,
+	    const VectorMatrixFieldType& T,
+	    const VectorMatrixFieldType& V,
+	    RealType Eg,
+	    const VectorVectorRealType& eigs,
+	    typename PsimagLite::Vector<SizeType>::Type steps)
 	{
 		const VectorRealType& times = tstStruct_.times();
 
@@ -256,23 +263,22 @@ private:
 	}
 
 	void calcTargetVector(VectorWithOffsetType& v,
-	                      const VectorWithOffsetType& phi,
-	                      const VectorMatrixFieldType& T,
-	                      const VectorMatrixFieldType& V,
-	                      RealType Eg,
-	                      const VectorVectorRealType& eigs,
-	                      typename PsimagLite::Vector<SizeType>::Type steps,
-	                      SizeType timeIndex,
-	                      const VectorRealType& times)
+	    const VectorWithOffsetType& phi,
+	    const VectorMatrixFieldType& T,
+	    const VectorMatrixFieldType& V,
+	    RealType Eg,
+	    const VectorVectorRealType& eigs,
+	    typename PsimagLite::Vector<SizeType>::Type steps,
+	    SizeType timeIndex,
+	    const VectorRealType& times)
 	{
 		v = phi;
-		for (SizeType ii = 0;ii < phi.sectors(); ++ii) {
+		for (SizeType ii = 0; ii < phi.sectors(); ++ii) {
 			const RealType time = times[timeIndex];
 			const RealType timeDirection = tstStruct_.timeDirection();
 			const VectorRealType& eigsii = eigs[ii];
-			auto action = [eigsii, Eg, time, timeDirection](SizeType k)
-			{
-				RealType tmp = (eigsii[k]-Eg)*time*timeDirection;
+			auto action = [eigsii, Eg, time, timeDirection](SizeType k) {
+				RealType tmp = (eigsii[k] - Eg) * time * timeDirection;
 				ComplexOrRealType c = 0.0;
 				PsimagLite::expComplexOrReal(c, -tmp);
 				return c;
@@ -285,42 +291,44 @@ private:
 		}
 	}
 
-	template<typename SomeLambdaType>
+	template <typename SomeLambdaType>
 	void calcTargetVector(VectorType& r,
-	                      const VectorWithOffsetType& phi,
-	                      const MatrixComplexOrRealType& T,
-	                      const MatrixComplexOrRealType& V,
-	                      const SomeLambdaType& action,
-	                      SizeType steps,
-	                      SizeType i0)
+	    const VectorWithOffsetType& phi,
+	    const MatrixComplexOrRealType& T,
+	    const MatrixComplexOrRealType& V,
+	    const SomeLambdaType& action,
+	    SizeType steps,
+	    SizeType i0)
 	{
 		SizeType n2 = steps;
 		SizeType n = V.rows();
-		if (T.cols()!=T.rows()) throw PsimagLite::RuntimeError("T is not square\n");
-		if (V.cols()!=T.cols()) throw PsimagLite::RuntimeError("V is not nxn2\n");
+		if (T.cols() != T.rows())
+			throw PsimagLite::RuntimeError("T is not square\n");
+		if (V.cols() != T.cols())
+			throw PsimagLite::RuntimeError("V is not nxn2\n");
 		// for (SizeType j=0;j<v.size();j++) v[j] = 0; <-- harmful if v is sparse
 		ComplexOrRealType zone = 1.0;
 		ComplexOrRealType zzero = 0.0;
 
-		//check1(phi,i0);
-		//check2(T,V,phi,n2,i0);
+		// check1(phi,i0);
+		// check2(T,V,phi,n2,i0);
 		VectorType tmp(n2);
 		r.resize(n2);
 		krylovHelper_.calcR(r, action, T, V, phi, steps, i0);
-		psimag::BLAS::GEMV('N',n2,n2,zone,&(T(0,0)),n2,&(r[0]),1,zzero,&(tmp[0]),1);
+		psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
 		r.resize(n);
-		psimag::BLAS::GEMV('N',n,n2,zone,&(V(0,0)),n,&(tmp[0]),1,zzero,&(r[0]),1);
+		psimag::BLAS::GEMV('N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(r[0]), 1);
 	}
 
 	void triDiag(const VectorWithOffsetType& phi,
-	             VectorMatrixFieldType& T,
-	             VectorMatrixFieldType& V,
-	             typename PsimagLite::Vector<SizeType>::Type& steps)
+	    VectorMatrixFieldType& T,
+	    VectorMatrixFieldType& V,
+	    typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
-		ParallelTriDiagType helperTriDiag(phi,T,V,steps,lrs_,this->time(),model_,ioIn_);
+		ParallelTriDiagType helperTriDiag(phi, T, V, steps, lrs_, this->time(), model_, ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}
@@ -333,8 +341,7 @@ private:
 	InputValidatorType& ioIn_;
 	bool timeHasAdvanced_;
 	KrylovHelperType krylovHelper_;
-}; //class TimeVectorsKrylov
+}; // class TimeVectorsKrylov
 } // namespace Dmrg
 /*@}*/
 #endif
-

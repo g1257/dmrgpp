@@ -78,14 +78,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMS_HUBBARD_HOLSTEIN_H
 #define PARAMS_HUBBARD_HOLSTEIN_H
-#include <stdexcept>
-#include <vector>
 #include "Matrix.h"
 #include "ParametersModelBase.h"
+#include <stdexcept>
+#include <vector>
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! FeAs Model Parameters
-template<typename ComplexOrRealType, typename QnType>
+template <typename ComplexOrRealType, typename QnType>
 struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType, QnType> {
 	// no connections here please!!
 	// connections are handled by the geometry
@@ -93,11 +94,13 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType> >::Type VectorType;
+	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType>>::Type VectorType;
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ParametersHubbardHolstein(IoInputType& io)
-	    : BaseType(io, false), oStruncPhonons(0), oStruncSite(0)
+	    : BaseType(io, false)
+	    , oStruncPhonons(0)
+	    , oStruncSite(0)
 	{
 
 		SizeType nsites = 0;
@@ -105,17 +108,17 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 		PsimagLite::String model;
 		io.readline(model, "Model=");
 		hubbardFU.resize(nsites, 0.0);
-		potentialFV.resize(2*nsites, 0.0);
+		potentialFV.resize(2 * nsites, 0.0);
 		potentialPV.resize(nsites, 0.0);
-		io.readline(numberphonons,"NumberPhonons=");
-		io.read(hubbardFU,"hubbardFU");
-		io.read(potentialFV,"potentialFV");
-		io.read(potentialPV,"potentialPV");
+		io.readline(numberphonons, "NumberPhonons=");
+		io.read(hubbardFU, "hubbardFU");
+		io.read(potentialFV, "potentialFV");
+		io.read(potentialPV, "potentialPV");
 
 		lambdaFP.resize(nsites, 0.0);
 		bool hasLambdaFP = false;
 		try {
-			io.read(lambdaFP,"lambdaFP");
+			io.read(lambdaFP, "lambdaFP");
 			hasLambdaFP = true;
 		} catch (...) {
 			lambdaFP.clear();
@@ -124,7 +127,8 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 		try {
 			io.readline(oStruncPhonons, "OneSiteTruncationPhononsMax=");
 			io.readline(oStruncSite, "OneSiteTruncationSite=");
-		} catch (...) {}
+		} catch (...) {
+		}
 
 		if (oStruncPhonons > 0 && oStruncSite == 0)
 			err("OneSiteTruncationSite cannot be zero\n");
@@ -138,16 +142,16 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 		}
 	}
 
-	template<typename SomeMemResolvType>
+	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	    SizeType,
+	    PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardHolstein";
 		io.createGroup(label);
@@ -160,20 +164,20 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream &os,
-	                                const ParametersHubbardHolstein& parameters)
+	friend std::ostream& operator<<(std::ostream& os,
+	    const ParametersHubbardHolstein& parameters)
 	{
-		os<<"NumberPhonons="<<parameters.numberphonons<<"\n";
+		os << "NumberPhonons=" << parameters.numberphonons << "\n";
 
-		os<<"hubbardFU\n";
-		os<<parameters.hubbardFU;
-		os<<"lambdaFP\n";
-		os<<parameters.lambdaFP;
+		os << "hubbardFU\n";
+		os << parameters.hubbardFU;
+		os << "lambdaFP\n";
+		os << parameters.lambdaFP;
 
-		os<<"potentialFV\n";
-		os<<parameters.potentialFV;
-		os<<"potentialPV\n";
-		os<<parameters.potentialPV;
+		os << "potentialFV\n";
+		os << parameters.potentialFV;
+		os << "potentialPV\n";
+		os << parameters.potentialPV;
 		return os;
 	}
 
@@ -190,4 +194,3 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 
 /*@}*/
 #endif
-

@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -70,7 +70,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 */
 
-
 /** \ingroup PsimagLite */
 /*@{*/
 
@@ -82,12 +81,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef THREADS_WITH_MPI_H
 #define THREADS_WITH_MPI_H
 
-#include <iostream>
 #include "Concurrency.h"
+#include <iostream>
 
 // bogus: to compile without pthreads
-//typedef  int pthread_mutex_t;
-
+// typedef  int pthread_mutex_t;
 
 // bogus: to compile without pthreads
 void pthread_mutex_lock(int myMutex)
@@ -97,30 +95,33 @@ void pthread_mutex_lock(int myMutex)
 void pthread_mutex_unlock(int myMutex)
 {
 }
-namespace PsimagLite {
-template<typename PthreadFunctionHolderType>
-class ThreadsWithMpi : public Concurrency<typename PthreadFunctionHolderType::RealType> {
+namespace PsimagLite
+{
+template <typename PthreadFunctionHolderType>
+class ThreadsWithMpi : public Concurrency<typename PthreadFunctionHolderType::RealType>
+{
 public:
-	static void setThreads(SizeType dummy) { } // dummy
-	
 
-	template<typename SomeConcurrencyType>
-	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh,SomeConcurrencyType& concurrency)
+	static void setThreads(SizeType dummy) { } // dummy
+
+	template <typename SomeConcurrencyType>
+	void loopCreate(SizeType total, PthreadFunctionHolderType& pfh, SomeConcurrencyType& concurrency)
 	{
-		PsimagLite::Range<SomeConcurrencyType> range(0,total,concurrency);
+		PsimagLite::Range<SomeConcurrencyType> range(0, total, concurrency);
 
 		SizeType np = concurrency.nprocs();
-		SizeType blockSize = total/np; 
-		if (total%np!=0) blockSize++;
+		SizeType blockSize = total / np;
+		if (total % np != 0)
+			blockSize++;
 
-		for (;!range.end();range.next())  {
+		for (; !range.end(); range.next()) {
 			SizeType i = range.index();
-			pfh.thread_function_(i,blocksize,total,0);
+			pfh.thread_function_(i, blocksize, total, 0);
 		}
 	}
 
-	template<typename T,typename SomeConcurrencyType>
-	void reduce(T& x,SomeConcurrencyType& concurrency)
+	template <typename T, typename SomeConcurrencyType>
+	void reduce(T& x, SomeConcurrencyType& concurrency)
 	{
 		concurrency.reduce(x);
 	}
@@ -129,4 +130,3 @@ public:
 } // namespace Dmrg
 /*@}*/
 #endif
-

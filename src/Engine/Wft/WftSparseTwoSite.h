@@ -4,10 +4,12 @@
 #include "ProgramGlobals.h"
 #include "PsimagLite.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename WaveFunctionTransfBaseType, typename MatrixOrIdentityType>
-class WftSparseTwoSite {
+template <typename WaveFunctionTransfBaseType, typename MatrixOrIdentityType>
+class WftSparseTwoSite
+{
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
@@ -26,49 +28,44 @@ class WftSparseTwoSite {
 public:
 
 	WftSparseTwoSite(VectorWithOffsetType& dest,
-	                 SizeType i0,
-	                 const VectorWithOffsetType& src,
-	                 SizeType iOld,
-	                 const DmrgWaveStructType& dmrgWaveStruct,
-	                 const WftOptionsType& wftOptions,
-	                 const LeftRightSuperType& lrs,
-	                 const OneSiteSpacesType& oneSiteSpaces,
-	                 const SparseMatrixType& wsT,
-	                 const SparseMatrixType& we,
-	                 const ProgramGlobals::SysOrEnvEnum sysOrEnv)
-	    : dest_(dest),
-	      i0_(i0),
-	      src_(src),
-	      iOld_(iOld),
-	      dmrgWaveStruct_(dmrgWaveStruct),
-	      wftOptions_(wftOptions),
-	      lrs_(lrs),
-	      wsT_(wsT),
-	      we_(we),
-	      hilbertMain_(oneSiteSpaces.hilbertMain()),
-	      hilbertAux_(oneSiteSpaces.hilbertAux()),
-	      pack1_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
-	             ? lrs.left().permutationInverse().size()
-	             : integerDivision(lrs.super().permutationInverse().size(),
-	                               lrs.right().permutationInverse().size())),
-	      pack2_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
-	             ? integerDivision(lrs.left().permutationInverse().size(), hilbertMain_)
-	             : hilbertMain_),
-	      sysOrEnv_(sysOrEnv)
+	    SizeType i0,
+	    const VectorWithOffsetType& src,
+	    SizeType iOld,
+	    const DmrgWaveStructType& dmrgWaveStruct,
+	    const WftOptionsType& wftOptions,
+	    const LeftRightSuperType& lrs,
+	    const OneSiteSpacesType& oneSiteSpaces,
+	    const SparseMatrixType& wsT,
+	    const SparseMatrixType& we,
+	    const ProgramGlobals::SysOrEnvEnum sysOrEnv)
+	    : dest_(dest)
+	    , i0_(i0)
+	    , src_(src)
+	    , iOld_(iOld)
+	    , dmrgWaveStruct_(dmrgWaveStruct)
+	    , wftOptions_(wftOptions)
+	    , lrs_(lrs)
+	    , wsT_(wsT)
+	    , we_(we)
+	    , hilbertMain_(oneSiteSpaces.hilbertMain())
+	    , hilbertAux_(oneSiteSpaces.hilbertAux())
+	    , pack1_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+		      ? lrs.left().permutationInverse().size()
+		      : integerDivision(lrs.super().permutationInverse().size(),
+			  lrs.right().permutationInverse().size()))
+	    , pack2_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+		      ? integerDivision(lrs.left().permutationInverse().size(), hilbertMain_)
+		      : hilbertMain_)
+	    , sysOrEnv_(sysOrEnv)
 	{
-		assert(sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM ||
-		       sysOrEnv == ProgramGlobals::SysOrEnvEnum::ENVIRON);
+		assert(sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM || sysOrEnv == ProgramGlobals::SysOrEnvEnum::ENVIRON);
 
 		if (sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
-			assert(integerDivision(lrs.left().permutationInverse().size(), hilbertMain_) ==
-			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
+			assert(integerDivision(lrs.left().permutationInverse().size(), hilbertMain_) == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
 
 		} else {
-			assert(lrs.left().permutationInverse().size() == oneSiteSpaces.hilbertZero() ||
-			       lrs.left().permutationInverse().size() == dmrgWaveStruct_.
-			       getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
-			assert(integerDivision(lrs.right().permutationInverse().size(), hilbertMain_) ==
-			       dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).cols());
+			assert(lrs.left().permutationInverse().size() == oneSiteSpaces.hilbertZero() || lrs.left().permutationInverse().size() == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
+			assert(integerDivision(lrs.right().permutationInverse().size(), hilbertMain_) == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).cols());
 		}
 	}
 
@@ -100,31 +97,32 @@ public:
 private:
 
 	ComplexOrRealType createAux2bFromInfinite(SizeType is,
-	                                          SizeType jpl,
-	                                          SizeType jen) const
+	    SizeType jpl,
+	    SizeType jen) const
 	{
 		SizeType offset = src_.offset(iOld_);
 		SizeType offsetPlusOne = dmrgWaveStruct_.lrs().super().partition(iOld_ + 1);
-		SizeType nalpha=dmrgWaveStruct_.lrs().left().permutationInverse().size();
+		SizeType nalpha = dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		SizeType ni = integerDivision(dmrgWaveStruct_.lrs().right().size(), hilbertAux_);
-		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni>hilbertAux_,we_);
+		MatrixOrIdentityType weRef(wftOptions_.twoSiteDmrg && ni > hilbertAux_, we_);
 		SizeType start = wsT_.getRowPtr(is);
-		SizeType end = wsT_.getRowPtr(is+1);
-		ComplexOrRealType sum=0;
-		for (SizeType k2=weRef.getRowPtr(jen);k2<weRef.getRowPtr(jen+1);k2++) {
+		SizeType end = wsT_.getRowPtr(is + 1);
+		ComplexOrRealType sum = 0;
+		for (SizeType k2 = weRef.getRowPtr(jen); k2 < weRef.getRowPtr(jen + 1); k2++) {
 			int jpr = weRef.getColOrExit(k2);
 			// jpr < 0 could be due to an m smaller than h, the Hilbert size of one site
 			// this is checked against elsewhere
-			if (jpr < 0) continue;
-			SizeType jp = dmrgWaveStruct_.lrs().right().permutationInverse(jpl + jpr*hilbertMain_);
+			if (jpr < 0)
+				continue;
+			SizeType jp = dmrgWaveStruct_.lrs().right().permutationInverse(jpl + jpr * hilbertMain_);
 			ComplexOrRealType sum2 = 0;
-			for (SizeType k = start;k < end;k++) {
+			for (SizeType k = start; k < end; k++) {
 				SizeType ip = wsT_.getCol(k);
-				SizeType y = dmrgWaveStruct_.lrs().super().permutationInverse(ip + jp*nalpha);
+				SizeType y = dmrgWaveStruct_.lrs().super().permutationInverse(ip + jp * nalpha);
 				if (y >= offsetPlusOne || y < offset)
 					continue;
 				y -= offset;
-				sum2 += wsT_.getValue(k)*src_.fastAccess(iOld_, y)*weRef.getValue(k2);
+				sum2 += wsT_.getValue(k) * src_.fastAccess(iOld_, y) * weRef.getValue(k2);
 			}
 
 			sum += sum2;
@@ -134,29 +132,30 @@ private:
 	}
 
 	ComplexOrRealType createAux1bFromInfinite(SizeType ip,
-	                                          SizeType kp,
-	                                          SizeType jp) const
+	    SizeType kp,
+	    SizeType jp) const
 	{
 		SizeType offset = src_.offset(iOld_);
 		const SparseMatrixType& ws = wsT_;
 		const SparseMatrixType& weT = we_;
-		SizeType ni= dmrgWaveStruct_.lrs().left().size();
+		SizeType ni = dmrgWaveStruct_.lrs().left().size();
 		SizeType nip = integerDivision(dmrgWaveStruct_.lrs().left().permutationInverse().size(),
-		                               hilbertMain_);
+		    hilbertMain_);
 		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip > hilbertAux_, ws);
 		SizeType start = weT.getRowPtr(jp);
-		SizeType end = weT.getRowPtr(jp+1);
-		ComplexOrRealType sum=0;
-		for (SizeType k3=wsRef2.getRowPtr(ip);k3<wsRef2.getRowPtr(ip+1);k3++) {
+		SizeType end = weT.getRowPtr(jp + 1);
+		ComplexOrRealType sum = 0;
+		for (SizeType k3 = wsRef2.getRowPtr(ip); k3 < wsRef2.getRowPtr(ip + 1); k3++) {
 			int ip2 = wsRef2.getColOrExit(k3);
-			if (ip2<0) continue;
-			SizeType alpha = dmrgWaveStruct_.lrs().left().permutationInverse(ip2+kp*nip);
+			if (ip2 < 0)
+				continue;
+			SizeType alpha = dmrgWaveStruct_.lrs().left().permutationInverse(ip2 + kp * nip);
 
 			for (SizeType k = start; k < end; k++) {
 				SizeType jp2 = weT.getCol(k);
-				SizeType x = dmrgWaveStruct_.lrs().super().permutationInverse(alpha+jp2*ni);
+				SizeType x = dmrgWaveStruct_.lrs().super().permutationInverse(alpha + jp2 * ni);
 				x -= offset;
-				sum += weT.getValue(k)*src_.fastAccess(iOld_, x)*wsRef2.getValue(k3);
+				sum += weT.getValue(k) * src_.fastAccess(iOld_, x) * wsRef2.getValue(k3);
 			}
 		}
 
@@ -182,7 +181,6 @@ private:
 	PackIndicesType pack1_;
 	PackIndicesType pack2_;
 	const ProgramGlobals::SysOrEnvEnum sysOrEnv_;
-
 };
 }
 #endif // WFTSPARSETWOSITE_H

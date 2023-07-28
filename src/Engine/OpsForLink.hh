@@ -1,13 +1,15 @@
 #ifndef OPSFORLINK_HH
 #define OPSFORLINK_HH
-#include "Vector.h"
 #include "Link.h"
 #include "OperatorsCached.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LeftRightSuperType>
-class OpsForLink {
+template <typename LeftRightSuperType>
+class OpsForLink
+{
 
 public:
 
@@ -21,38 +23,35 @@ public:
 	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
 
 	OpsForLink(const OperatorsCachedType& operatorsCached,
-	           const VectorLinkType& lps)
-	    : lps_(lps),
-	      operatorsCached_(operatorsCached),
-	      link2_(nullptr),
-	      A_(nullptr),
-	      B_(nullptr)
-	{}
+	    const VectorLinkType& lps)
+	    : lps_(lps)
+	    , operatorsCached_(operatorsCached)
+	    , link2_(nullptr)
+	    , A_(nullptr)
+	    , B_(nullptr)
+	{
+	}
 
 	void setPointer(SizeType xx)
 	{
 		assert(xx < lps_.size());
 		link2_ = &lps_[xx];
 
-		assert(link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON ||
-		       link2_->type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
+		assert(link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON || link2_->type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
 
-		const ProgramGlobals::SysOrEnvEnum sysOrEnv =
-		        (link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
-		            ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON;
-		const ProgramGlobals::SysOrEnvEnum envOrSys =
-		        (link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ?
-		            ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
+		const ProgramGlobals::SysOrEnvEnum sysOrEnv = (link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON;
+		const ProgramGlobals::SysOrEnvEnum envOrSys = (link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
 		A_ = &operatorsCached_.getOpStorage(link2_->pairMetaOps.first,
-		                                    sysOrEnv);
+		    sysOrEnv);
 		B_ = &operatorsCached_.getOpStorage(link2_->pairMetaOps.second,
-		                                    envOrSys);
+		    envOrSys);
 
 		assert(A_);
 		assert(B_);
 
-		if (A_->invalid() || B_->invalid()) return;
+		if (A_->invalid() || B_->invalid())
+			return;
 
 		assert(isNonZeroMatrix(*A_));
 		assert(isNonZeroMatrix(*B_));

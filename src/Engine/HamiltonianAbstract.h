@@ -1,13 +1,15 @@
 #ifndef HAMILTONIANABSTRACT_H
 #define HAMILTONIANABSTRACT_H
 
-#include "Vector.h"
 #include "ProgramGlobals.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename SuperGeometryType>
-class HamiltonianAbstract {
+template <typename SuperGeometryType>
+class HamiltonianAbstract
+{
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
@@ -15,9 +17,9 @@ class HamiltonianAbstract {
 public:
 
 	HamiltonianAbstract(const SuperGeometryType& superGeometry,
-	                    SizeType smax,
-	                    SizeType emin,
-	                    const VectorSizeType& block)
+	    SizeType smax,
+	    SizeType emin,
+	    const VectorSizeType& block)
 	    : block_(block)
 	{
 		VectorSizeType v(2, 0);
@@ -26,12 +28,13 @@ public:
 			for (SizeType j = i + 1; j < n; ++j) {
 				v[0] = block[i];
 				v[1] = block[j];
-				if (!superGeometry.connected(smax, emin, v)) continue;
+				if (!superGeometry.connected(smax, emin, v))
+					continue;
 
 				ProgramGlobals::ConnectionEnum type = superGeometry.connectionKind(smax, v);
 
-				if (type == ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM ||
-				        type == ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON) continue;
+				if (type == ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM || type == ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON)
+					continue;
 
 				data_.push_back(v);
 			}

@@ -1,12 +1,12 @@
-#include "ProgramGlobals.h"
-#include <iostream>
-#include "InputNg.h"
 #include "InputCheck.h"
+#include "InputFromDataOrNot.h"
+#include "InputNg.h"
 #include "ParametersDmrgSolver.h"
-#include "ToolBox.h"
+#include "ProgramGlobals.h"
 #include "PsimagLite.h"
 #include "Qn.h"
-#include "InputFromDataOrNot.h"
+#include "ToolBox.h"
+#include <iostream>
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -14,20 +14,22 @@ typedef double RealType;
 typedef float RealType;
 #endif
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-typedef Dmrg::ParametersDmrgSolver<RealType,InputNgType::Readable, Dmrg::Qn>
-ParametersDmrgSolverType;
+typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
+    ParametersDmrgSolverType;
 typedef PsimagLite::Concurrency ConcurrencyType;
 
 void usage(const PsimagLite::String& name)
 {
-	std::cerr<<"USAGE is "<<name<<" -f filename -a action [-s] [-p precision]\n";
+	std::cerr << "USAGE is " << name << " -f filename -a action [-s] [-p precision]\n";
 }
 
 struct ToolOptions {
 
 	ToolOptions()
-	    : extraOptions("lowest eigenvalue"), shortoption(false)
-	{}
+	    : extraOptions("lowest eigenvalue")
+	    , shortoption(false)
+	{
+	}
 
 	PsimagLite::String filename;
 	PsimagLite::String action;
@@ -35,36 +37,37 @@ struct ToolOptions {
 	bool shortoption;
 };
 
-template<typename ComplexOrRealType>
+template <typename ComplexOrRealType>
 void main1(InputNgType::Readable& io,
-           PsimagLite::PsiApp application,
-           const ParametersDmrgSolverType& dmrgSolverParams,
-           const ToolOptions& toolOptions)
+    PsimagLite::PsiApp application,
+    const ParametersDmrgSolverType& dmrgSolverParams,
+    const ToolOptions& toolOptions)
 {
 	typedef PsimagLite::Geometry<ComplexOrRealType,
-	        InputNgType::Readable,
-	        Dmrg::ProgramGlobals> GeometryType;
+	    InputNgType::Readable,
+	    Dmrg::ProgramGlobals>
+	    GeometryType;
 	GeometryType geometry(io);
 
 	typedef Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType> ToolBoxType;
 	ConcurrencyType::codeSectionParams.npthreads = dmrgSolverParams.nthreads;
 	PsimagLite::String label = (toolOptions.action == "energies") ? "lowest" : toolOptions.extraOptions;
 	typename ToolBoxType::ParametersForGrepType params(label,
-	                                                   toolOptions.shortoption);
+	    toolOptions.shortoption);
 	typename ToolBoxType::ActionEnum act = ToolBoxType::actionCanonical(toolOptions.action);
 	if (act == ToolBoxType::ACTION_GREP) {
 		ToolBoxType::printGrep(toolOptions.filename, params);
 	} else if (act == ToolBoxType::ACTION_INPUT) {
-		std::cout<<io.data()<<"\n";
+		std::cout << io.data() << "\n";
 	} else if (act == ToolBoxType::ACTION_ANALYSIS) {
 		PsimagLite::String str("Analyzing ");
 		str += toolOptions.filename;
-		std::cout<<str<<"\n";
+		std::cout << str << "\n";
 		ToolBoxType::analize(dmrgSolverParams, geometry, toolOptions.extraOptions);
 	} else {
-		std::cerr<<application.name();
-		std::cerr<<": Unknown action "<<toolOptions.action<<"\n";
-		std::cerr<<"\tSupported actions are "<<ToolBoxType::actions()<<"\n";
+		std::cerr << application.name();
+		std::cerr << ": Unknown action " << toolOptions.action << "\n";
+		std::cerr << "\tSupported actions are " << ToolBoxType::actions() << "\n";
 	}
 }
 
@@ -82,16 +85,16 @@ must be present.
  \item[-V] [Optional] Print version and exit
   \end{itemize}
 */
-int main(int argc,char **argv)
+int main(int argc, char** argv)
 {
 	using namespace Dmrg;
-	PsimagLite::PsiApp application("toolboxdmrg",&argc,&argv,1);
+	PsimagLite::PsiApp application("toolboxdmrg", &argc, &argv, 1);
 	ToolOptions toolOptions;
 	int opt = 0;
 	int precision = 0;
 	bool versionOnly = false;
 	PsimagLite::String sOptions;
-	while ((opt = getopt(argc, argv,"f:p:a:E:o:sV")) != -1) {
+	while ((opt = getopt(argc, argv, "f:p:a:E:o:sV")) != -1) {
 		switch (opt) {
 		case 'f':
 			toolOptions.filename = optarg;
@@ -122,8 +125,8 @@ int main(int argc,char **argv)
 		}
 	}
 
-	//sanity checks here
-	if (toolOptions.filename=="" || toolOptions.action == "") {
+	// sanity checks here
+	if (toolOptions.filename == "" || toolOptions.action == "") {
 		if (!versionOnly) {
 			usage(application.name());
 			return 1;
@@ -132,20 +135,20 @@ int main(int argc,char **argv)
 
 	// print license
 	if (ConcurrencyType::root()) {
-		std::cerr<<ProgramGlobals::license;
+		std::cerr << ProgramGlobals::license;
 		Provenance provenance;
-		std::cout<<provenance;
+		std::cout << provenance;
 	}
 
-	if (versionOnly) return 0;
+	if (versionOnly)
+		return 0;
 
 	InputCheck inputCheck;
 
 	bool filenameIsCout = false;
 	PsimagLite::String dotCout = ".cout";
 	size_t pos = toolOptions.filename.find(dotCout);
-	if (pos != PsimagLite::String::npos &&
-	        pos + dotCout.size() == toolOptions.filename.size()) {
+	if (pos != PsimagLite::String::npos && pos + dotCout.size() == toolOptions.filename.size()) {
 		filenameIsCout = true;
 	}
 
@@ -156,19 +159,19 @@ int main(int argc,char **argv)
 	}
 
 	InputFromDataOrNot<InputCheck> inputFromDataOrNot(toolOptions.filename,
-	                                                  inputCheck,
-	                                                  filenameIsCout);
+	    inputCheck,
+	    filenameIsCout);
 	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
 
 	//! Read the parameters for this run
 	bool earlyExit = true;
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, earlyExit);
 
-	if (precision > 0) dmrgSolverParams.precision = precision;
+	if (precision > 0)
+		dmrgSolverParams.precision = precision;
 
 	if (dmrgSolverParams.options.isSet("useComplex"))
-		main1<std::complex<RealType> >(io, application, dmrgSolverParams, toolOptions);
+		main1<std::complex<RealType>>(io, application, dmrgSolverParams, toolOptions);
 	else
 		main1<RealType>(io, application, dmrgSolverParams, toolOptions);
 } // main
-

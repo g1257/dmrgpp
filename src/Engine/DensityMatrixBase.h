@@ -82,9 +82,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BlockDiagonalMatrix.h"
 #include "PsimagLite.h"
 
-namespace Dmrg {
-template<typename TargetingType>
-class DensityMatrixBase {
+namespace Dmrg
+{
+template <typename TargetingType>
+class DensityMatrixBase
+{
 
 public:
 
@@ -100,16 +102,17 @@ public:
 	struct Params {
 
 		Params(bool u,
-		       ProgramGlobals::DirectionEnum d,
-		       bool de,
-		       bool enablePersistentSvd_,
-		       bool serialSvd_)
-		    : useSvd(u),
-		      direction(d),
-		      debug(de),
-		      enablePersistentSvd(enablePersistentSvd_),
-		      serialSvd(serialSvd_)
-		{}
+		    ProgramGlobals::DirectionEnum d,
+		    bool de,
+		    bool enablePersistentSvd_,
+		    bool serialSvd_)
+		    : useSvd(u)
+		    , direction(d)
+		    , debug(de)
+		    , enablePersistentSvd(enablePersistentSvd_)
+		    , serialSvd(serialSvd_)
+		{
+		}
 
 		bool useSvd;
 		ProgramGlobals::DirectionEnum direction;
@@ -121,9 +124,10 @@ public:
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 
 	virtual ~DensityMatrixBase()
-	{}
+	{
+	}
 
-	virtual const BlockDiagonalMatrixType& operator()()=0;
+	virtual const BlockDiagonalMatrixType& operator()() = 0;
 
 	virtual void diag(typename PsimagLite::Vector<RealType>::Type&, char) = 0;
 
@@ -153,4 +157,3 @@ private:
 
 /*@}*/
 #endif
-

@@ -77,15 +77,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  where x and y are vectors and H is the Hamiltonian matrix
  *
  */
-#ifndef	MATRIX_VECTOR_OTF_H
+#ifndef MATRIX_VECTOR_OTF_H
 #define MATRIX_VECTOR_OTF_H
 
-#include <vector>
 #include "MatrixVectorBase.h"
+#include <vector>
 
-namespace Dmrg {
-template<typename ModelType_>
-class MatrixVectorOnTheFly : public MatrixVectorBase<ModelType_> {
+namespace Dmrg
+{
+template <typename ModelType_>
+class MatrixVectorOnTheFly : public MatrixVectorBase<ModelType_>
+{
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
@@ -103,12 +105,15 @@ public:
 	typedef typename ModelHelperType::Aux AuxType;
 
 	MatrixVectorOnTheFly(const ModelType& model,
-	                     const HamiltonianConnectionType& hc,
-	                     const AuxType& aux)
-	    : model_(model), hc_(hc), aux_(aux)
+	    const HamiltonianConnectionType& hc,
+	    const AuxType& aux)
+	    : model_(model)
+	    , hc_(hc)
+	    , aux_(aux)
 	{
 		int maxMatrixRankStored = model.params().maxMatrixRankStored;
-		if (hc.modelHelper().size(aux_.m()) > maxMatrixRankStored) return;
+		if (hc.modelHelper().size(aux_.m()) > maxMatrixRankStored)
+			return;
 
 		model.fullHamiltonian(matrixStored_, hc, aux_);
 		assert(isHermitian(matrixStored_, true));
@@ -116,21 +121,21 @@ public:
 
 	SizeType rows() const { return hc_.modelHelper().size(aux_.m()); }
 
-	template<typename SomeVectorType>
-	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
+	template <typename SomeVectorType>
+	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
 		if (matrixStored_.rows() > 0)
-			matrixStored_.matrixVectorProduct(x,y);
+			matrixStored_.matrixVectorProduct(x, y);
 		else
 			model_.matrixVectorProduct(x, y, hc_, aux_);
 	}
 
-	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
+	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
 	{
 		int mrs = model_.params().maxMatrixRankStored;
 		if (mrs < static_cast<int>(rows())) {
-			std::cerr<<"Full diag will likely fail, it would need ";
-			std::cerr<<rows()<<" but you gave only "<<mrs<<"\n";
+			std::cerr << "Full diag will likely fail, it would need ";
+			std::cerr << rows() << " but you gave only " << mrs << "\n";
 		}
 
 		BaseType::fullDiag(eigs, fm, matrixStored_, mrs);
@@ -147,4 +152,3 @@ private:
 
 /*@}*/
 #endif
-

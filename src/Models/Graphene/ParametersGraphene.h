@@ -79,15 +79,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRGPP_PARAMETERS_GRAPHENE_H
 #define DMRGPP_PARAMETERS_GRAPHENE_H
-#include <stdexcept>
-#include <vector>
 #include "Matrix.h"
 #include "ParametersModelBase.h"
+#include <stdexcept>
+#include <vector>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 //! FeAs Model Parameters
-template<typename ComplexOrRealType, typename QnType>
+template <typename ComplexOrRealType, typename QnType>
 struct ParametersGraphene : public ParametersModelBase<ComplexOrRealType, QnType> {
 	// no connections here please!!
 	// connections are handled by the geometry
@@ -95,25 +96,25 @@ struct ParametersGraphene : public ParametersModelBase<ComplexOrRealType, QnType
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ParametersGraphene(IoInputType& io)
 	    : BaseType(io, false)
 	{
-		io.readline(orbitals,"Orbitals=");
-		io.readline(hubbardU,"HubbardU=");
+		io.readline(orbitals, "Orbitals=");
+		io.readline(hubbardU, "HubbardU=");
 		io.readline(pairHopping, "PairHopping=");
 	}
 
-	template<typename SomeMemResolvType>
+	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	    SizeType,
+	    PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersGraphene";
 		io.createGroup(label);
@@ -131,4 +132,3 @@ struct ParametersGraphene : public ParametersModelBase<ComplexOrRealType, QnType
 
 /*@}*/
 #endif
-

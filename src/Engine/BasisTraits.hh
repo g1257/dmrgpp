@@ -1,7 +1,8 @@
 #ifndef BASISTRAITS_HH
 #define BASISTRAITS_HH
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 struct BasisTraits {
 

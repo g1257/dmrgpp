@@ -82,10 +82,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define EXTENDED_SUPER_HUBBARD_1ORB_H
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! Super Extended Hubbard for DMRG solver, uses ModelHubbard by containment
-template<typename ModelBaseType>
-class ExtendedSuperHubbard1Orb : public ModelBaseType {
+template <typename ModelBaseType>
+class ExtendedSuperHubbard1Orb : public ModelBaseType
+{
 
 public:
 
@@ -102,8 +104,8 @@ public:
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef	typename ModelBaseType::MyBasis BasisType;
-	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef typename ModelBaseType::MyBasis BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ExtendedHubbard1OrbType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -120,17 +122,18 @@ public:
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
-	                         InputValidatorType& io,
-	                         const SuperGeometryType& superGeometry,
-	                         PsimagLite::String extension)
+	    InputValidatorType& io,
+	    const SuperGeometryType& superGeometry,
+	    PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
-	                    superGeometry,
-	                    io),
-	      modelParameters_(io),
-	      superGeometry_(superGeometry),
-	      extension_(extension),
-	      extendedHubbard_(solverParams, io, superGeometry, extension)
-	{}
+		superGeometry,
+		io)
+	    , modelParameters_(io)
+	    , superGeometry_(superGeometry)
+	    , extension_(extension)
+	    , extendedHubbard_(solverParams, io, superGeometry, extension)
+	{
+	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -143,9 +146,9 @@ public:
 		extendedHubbard_.write(label, io);
 	}
 
-	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const BlockType& block,
-	                                        RealType time)  const
+	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
+	    const BlockType& block,
+	    RealType time) const
 	{
 		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
@@ -166,16 +169,16 @@ protected:
 		// BEGIN define ph operator
 		MatrixType tmp1 = multiplyTc(cm[1].getCRS(), cm[1].getCRS());
 		MatrixType tmp2 = multiplyTc(cm[0].getCRS(), cm[0].getCRS());
-		MatrixType tmp3 = tmp1*tmp2;
+		MatrixType tmp3 = tmp1 * tmp2;
 		SparseMatrixType tmp3crs;
 		fullMatrixToCrsMatrix(tmp3crs, tmp3);
 		OpsLabelType& ph = this->createOpsLabel("ph");
 		typename OperatorType::Su2RelatedType su2related;
 		OperatorType phOp(tmp3crs,
-		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                  typename OperatorType::PairType(0,0),
-		                  1,
-		                  su2related);
+		    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		    typename OperatorType::PairType(0, 0),
+		    1,
+		    su2related);
 		ph.push(phOp);
 		// END define ph operator
 
@@ -221,21 +224,22 @@ protected:
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 		OpForLinkType splus("splus");
 
-		spsm.push(splus,
-		          'N',
-		          splus,
-		          'C',
-		          [isSu2](SparseElementType& value, RealType) { value *= (isSu2) ? -0.5 : 0.5;},
-		typename ModelTermType::Su2Properties(2, -1, 2));
+		spsm.push(
+		    splus,
+		    'N',
+		    splus,
+		    'C',
+		    [isSu2](SparseElementType& value, RealType) { value *= (isSu2) ? -0.5 : 0.5; },
+		    typename ModelTermType::Su2Properties(2, -1, 2));
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		OpForLinkType sz("sz");
 
 		szsz.push(sz,
-		          'N',
-		          sz,
-		          'N',
-		          [isSu2](SparseElementType& value) { if (isSu2) value = -value; });
+		    'N',
+		    sz,
+		    'N',
+		    [isSu2](SparseElementType& value) { if (isSu2) value = -value; });
 
 		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
 		OpForLinkType pair("pair");
@@ -263,17 +267,16 @@ private:
 		iah.push(cdn0, 'N', cdown, 'N');
 		iah.push(cdn1, 'N', cup, 'N');
 
-
 		// Because we only consider i<j we need to add the j,i connections
-		auto valueModifer = [](SparseElementType& value) { value *= -1;};
+		auto valueModifer = [](SparseElementType& value) { value *= -1; };
 		iah.push(cdown, 'N', cdn0, 'N', valueModifer);
 		iah.push(cup, 'N', cdn1, 'N', valueModifer);
 	}
 
 	// cdn_i == c^\dagger_{i \bar{sigma} n_{i sigma}
 	void setCdn(OpsLabelType& p,
-	            const VectorOperatorType& cm,
-	            SizeType sigma) const
+	    const VectorOperatorType& cm,
+	    SizeType sigma) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 
@@ -286,55 +289,57 @@ private:
 		multiply(cdn, cDaggerBarSigma.getCRS(), nSigmaOp);
 
 		OperatorType myOp(cdn,
-		                  ProgramGlobals::FermionOrBosonEnum::FERMION,
-		                  typename OperatorType::PairType(0,0),
-		                  1,
-		                  su2related);
+		    ProgramGlobals::FermionOrBosonEnum::FERMION,
+		    typename OperatorType::PairType(0, 0),
+		    1,
+		    su2related);
 		p.push(myOp);
 	}
-
 
 	void setPairi(OpsLabelType& p, const VectorOperatorType& cm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		SparseMatrixType pair;
-		multiply(pair,cm[0].getCRS(),cm[1].getCRS());
+		multiply(pair, cm[0].getCRS(), cm[1].getCRS());
 
 		OperatorType myOp(pair,
-		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                  typename OperatorType::PairType(0,0),
-		                  1,
-		                  su2related);
+		    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		    typename OperatorType::PairType(0, 0),
+		    1,
+		    su2related);
 		p.push(myOp);
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
-	RealType sign(typename HilbertSpaceHubbardType::HilbertState const &ket,
-	              int i,
-	              int sigma) const
+	RealType sign(typename HilbertSpaceHubbardType::HilbertState const& ket,
+	    int i,
+	    int sigma) const
 	{
-		int value=0;
-		value += HilbertSpaceHubbardType::calcNofElectrons(ket,0,i,0);
-		value += HilbertSpaceHubbardType::calcNofElectrons(ket,0,i,1);
-		int tmp1 = HilbertSpaceHubbardType::get(ket,0) &1;
-		int tmp2 = HilbertSpaceHubbardType::get(ket,0) &2;
-		if (i>0 && tmp1>0) value++;
-		if (i>0 && tmp2>0) value++;
+		int value = 0;
+		value += HilbertSpaceHubbardType::calcNofElectrons(ket, 0, i, 0);
+		value += HilbertSpaceHubbardType::calcNofElectrons(ket, 0, i, 1);
+		int tmp1 = HilbertSpaceHubbardType::get(ket, 0) & 1;
+		int tmp2 = HilbertSpaceHubbardType::get(ket, 0) & 2;
+		if (i > 0 && tmp1 > 0)
+			value++;
+		if (i > 0 && tmp2 > 0)
+			value++;
 
-		if (sigma==1) { // spin down
-			if ((HilbertSpaceHubbardType::get(ket,i) &1)) value++;
-
+		if (sigma == 1) { // spin down
+			if ((HilbertSpaceHubbardType::get(ket, i) & 1))
+				value++;
 		}
-		if (value%2==0) return 1.0;
+		if (value % 2 == 0)
+			return 1.0;
 
 		return -1;
 	}
 
-	ParametersModelHubbard<RealType, QnType>  modelParameters_;
+	ParametersModelHubbard<RealType, QnType> modelParameters_;
 	const SuperGeometryType& superGeometry_;
 	PsimagLite::String extension_;
 	ExtendedHubbard1OrbType extendedHubbard_;
-};	//class ExtendedSuperHubbard1Orb
+}; // class ExtendedSuperHubbard1Orb
 
 } // namespace Dmrg
 /*@}*/

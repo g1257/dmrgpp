@@ -77,15 +77,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef TARGET_PARAMS_BASE_H
 #define TARGET_PARAMS_BASE_H
-#include <vector>
-#include <stdexcept>
-#include "MemResolv.h"
 #include "FreqEnum.h"
+#include "MemResolv.h"
+#include <stdexcept>
+#include <vector>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelType>
-class TargetParamsBase {
+template <typename ModelType>
+class TargetParamsBase
+{
 public:
 
 	typedef typename ModelType::RealType RealType;
@@ -100,13 +102,22 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	enum class ConcatEnum {PRODUCT, SUM};
+	enum class ConcatEnum { PRODUCT,
+		SUM };
 
-	enum class AlgorithmEnum {KRYLOV, CONJUGATE_GRADIENT, CHEBYSHEV, KRYLOVTIME, RUNGE_KUTTA, SUZUKI_TROTTER};
+	enum class AlgorithmEnum { KRYLOV,
+		CONJUGATE_GRADIENT,
+		CHEBYSHEV,
+		KRYLOVTIME,
+		RUNGE_KUTTA,
+		SUZUKI_TROTTER };
 
-	TargetParamsBase(PsimagLite::String targeting) : targeting_(targeting) {}
+	TargetParamsBase(PsimagLite::String targeting)
+	    : targeting_(targeting)
+	{
+	}
 
-	virtual ~TargetParamsBase() {}
+	virtual ~TargetParamsBase() { }
 
 	virtual SizeType sites() const = 0;
 
@@ -277,4 +288,3 @@ private:
 
 /*@}*/
 #endif // TARGET_PARAMS_BASE_H
-

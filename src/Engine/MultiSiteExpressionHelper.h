@@ -3,10 +3,12 @@
 #include "DmrgSerializer.h"
 #include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LeftRightSuperType, typename VectorWithOffsetType_>
-class MultiSiteExpressionHelper {
+template <typename LeftRightSuperType, typename VectorWithOffsetType_>
+class MultiSiteExpressionHelper
+{
 
 public:
 
@@ -17,7 +19,10 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 
-	MultiSiteExpressionHelper(SizeType n) : vds_(n, nullptr) {}
+	MultiSiteExpressionHelper(SizeType n)
+	    : vds_(n, nullptr)
+	{
+	}
 
 	~MultiSiteExpressionHelper()
 	{
@@ -29,7 +34,7 @@ public:
 	}
 
 	void push(DmrgSerializerType const* ds,
-	          const VectorWithOffsetType& psi)
+	    const VectorWithOffsetType& psi)
 	{
 		SizeType coo = ds->centerOfOrthogonality();
 		assert(coo > 0);

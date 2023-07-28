@@ -1,17 +1,19 @@
 #ifndef AUXFORTARGETINGEXPRESSION_H
 #define AUXFORTARGETINGEXPRESSION_H
-#include "Vector.h"
 #include "GetBraOrKet.h"
-#include "ProgramGlobals.h"
-#include "InputNg.h"
-#include "InputCheck.h"
-#include "Pvectors.h"
 #include "GroupOfOneTimeEvolutions.h"
+#include "InputCheck.h"
+#include "InputNg.h"
+#include "ProgramGlobals.h"
+#include "Pvectors.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename TargetingBaseType>
-class AuxForTargetingExpression {
+template <typename TargetingBaseType>
+class AuxForTargetingExpression
+{
 
 public:
 
@@ -19,8 +21,7 @@ public:
 	typedef typename TargetingBaseType::ModelType ModelType;
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename PsimagLite::Vector<typename
-	PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename TargetingBaseType::TargetParamsType TargetParamsType;
@@ -31,17 +32,18 @@ public:
 	typedef GroupOfOneTimeEvolutions<PvectorsType> GroupOfOneTimeEvolutionsType;
 
 	AuxForTargetingExpression(PvectorsType& pVectors,
-	                          GroupOfOneTimeEvolutionsType& timeEvolve,
-	                          ProgramGlobals::DirectionEnum dir,
-	                          RealType Eg,
-	                          SizeType currentCoo)
-	    : pVectors_(pVectors),
-	      timeEvolve_(timeEvolve),
-	      direction_(dir),
-	      Eg_(Eg),
-	      currentCoo_(currentCoo),
-	      pIndexOutput_(0)
-	{}
+	    GroupOfOneTimeEvolutionsType& timeEvolve,
+	    ProgramGlobals::DirectionEnum dir,
+	    RealType Eg,
+	    SizeType currentCoo)
+	    : pVectors_(pVectors)
+	    , timeEvolve_(timeEvolve)
+	    , direction_(dir)
+	    , Eg_(Eg)
+	    , currentCoo_(currentCoo)
+	    , pIndexOutput_(0)
+	{
+	}
 
 	PvectorsType& pVectors() const { return pVectors_; }
 

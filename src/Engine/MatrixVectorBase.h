@@ -77,14 +77,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  where x and y are vectors and H is the Hamiltonian matrix
  *
  */
-#ifndef	DMRG_MATRIX_VECTOR_BASE_H
+#ifndef DMRG_MATRIX_VECTOR_BASE_H
 #define DMRG_MATRIX_VECTOR_BASE_H
 
 #include <vector>
 
-namespace Dmrg {
-template<typename ModelType_>
-class MatrixVectorBase {
+namespace Dmrg
+{
+template <typename ModelType_>
+class MatrixVectorBase
+{
 
 public:
 
@@ -99,14 +101,14 @@ public:
 
 	SizeType reflectionSector() const { return 0; }
 
-	void reflectionSector(SizeType) {  }
+	void reflectionSector(SizeType) { }
 
-	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const;
+	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const;
 
 	static void fullDiag(VectorRealType& eigs,
-	                     FullMatrixType& fm,
-	                     const SparseMatrixType& matrixStored,
-	                     int tmp)
+	    FullMatrixType& fm,
+	    const SparseMatrixType& matrixStored,
+	    int tmp)
 	{
 		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
 
@@ -114,8 +116,7 @@ public:
 			PsimagLite::String str("MatrixVectorBase:fullDiag: no stored matrix\n");
 			str += "\trow= " + ttos(eigs.size()) + " max row= ";
 			str += ttos(maxMatrixRankStored) + "\n";
-			str += "Please add or increase MaxMatrixRankStored=" +
-			        ttos(2 + matrixStored.rows());
+			str += "Please add or increase MaxMatrixRankStored=" + ttos(2 + matrixStored.rows());
 			str += " in your input file\n";
 			err(str);
 		}
@@ -124,18 +125,15 @@ public:
 			PsimagLite::String str("MatrixVectorBase:fullDiag: internal error!\n");
 			str += "\trow= " + ttos(matrixStored.rows()) + " max row= ";
 			str += ttos(maxMatrixRankStored) + "\n";
-			str += "Please add or increase MaxMatrixRankStored= to at least " +
-			        ttos(2 + eigs.size()) + " in your input file\n";
+			str += "Please add or increase MaxMatrixRankStored= to at least " + ttos(2 + eigs.size()) + " in your input file\n";
 			err(str);
 		}
 
-
 		fm = matrixStored.toDense();
-		diag(fm,eigs,'V');
+		diag(fm, eigs, 'V');
 	}
 }; // class MatrixVectorBase
 } // namespace Dmrg
 
 /*@}*/
 #endif
-

@@ -1,8 +1,8 @@
 #ifndef PROCOMEGAS_H
 #define PROCOMEGAS_H
 #include "OmegaParams.h"
-#include "PsimagLite.h"
 #include "OmegasFourier.h"
+#include "PsimagLite.h"
 
 /* Limitations and Missing Features
  *
@@ -17,10 +17,12 @@
  * (4) Gnuplot output not supported yet
  *
  */
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ComplexOrRealType, typename OmegaParamsType>
-class ProcOmegas {
+template <typename ComplexOrRealType, typename OmegaParamsType>
+class ProcOmegas
+{
 
 public:
 
@@ -35,15 +37,17 @@ public:
 
 	static const SizeType MAX_LINE_SIZE = 409600;
 
-
-	class Qdata {
+	class Qdata
+	{
 
 	public:
 
-		Qdata(SizeType n) : data_(n, nullptr)
-		{}
+		Qdata(SizeType n)
+		    : data_(n, nullptr)
+		{
+		}
 
-		Qdata() {}
+		Qdata() { }
 
 		void resize(SizeType n)
 		{
@@ -80,20 +84,20 @@ public:
 	};
 
 	ProcOmegas(typename InputNgType::Readable& io,
-	           SizeType precision,
-	           bool skipFourier,
-	           PsimagLite::String rootIname,
-	           PsimagLite::String rootOname,
-	           const OmegaParamsType& omegaParams)
-	    : rootIname_(rootIname),
-	      rootOname_(rootOname),
-	      omegaParams_(omegaParams),
-	      omegasFourier_(skipFourier, io),
-	      numberOfSites_(0)
+	    SizeType precision,
+	    bool skipFourier,
+	    PsimagLite::String rootIname,
+	    PsimagLite::String rootOname,
+	    const OmegaParamsType& omegaParams)
+	    : rootIname_(rootIname)
+	    , rootOname_(rootOname)
+	    , omegaParams_(omegaParams)
+	    , omegasFourier_(skipFourier, io)
+	    , numberOfSites_(0)
 	{
 		// set precision here FIXME TODO
 		io.readline(numberOfSites_, "TotalNumberOfSites");
-		//const SizeType centralSite = getCentralSite();
+		// const SizeType centralSite = getCentralSite();
 	}
 
 	void run()
@@ -104,7 +108,8 @@ public:
 
 		std::ofstream* fout = nullptr;
 
-		if (rootOname_ != "") fout = new std::ofstream(rootOname_);
+		if (rootOname_ != "")
+			fout = new std::ofstream(rootOname_);
 		if (!fout || !*fout || fout->bad() || !fout->good())
 			err("writeSpaceValues: Cannot write to " + rootOname_ + "\n");
 
@@ -144,7 +149,7 @@ public:
 
 			for (SizeType m = 0; m < numberOfQs; ++m) {
 				RealType q = omegasFourier_.q(m);
-				fout<<q<<" "<<omega<<" "<<PsimagLite::imag(v[m])<<"\n";
+				fout << q << " " << omega << " " << PsimagLite::imag(v[m]) << "\n";
 			}
 		}
 	}
@@ -152,30 +157,30 @@ public:
 private:
 
 	void procCommon(SizeType ind,
-	                RealType omega,
-	                VectorRealType& values1,
-	                VectorRealType& values2,
-	                VectorBoolType& defined,
-	                std::ofstream* fout)
+	    RealType omega,
+	    VectorRealType& values1,
+	    VectorRealType& values2,
+	    VectorBoolType& defined,
+	    std::ofstream* fout)
 	{
 		PsimagLite::String inFile("runFor");
 		inFile += rootIname_ + ttos(ind) + ".cout";
 
 		correctionVectorRead(values1, values2, defined, inFile);
 
-		//print STDERR "$0: omega=$omega maxSite=$maxSite\n"; <== LOGFILEOUT
+		// print STDERR "$0: omega=$omega maxSite=$maxSite\n"; <== LOGFILEOUT
 
 		if (fout)
 			writeSpaceValues(*fout, omega, values1, values2);
 
 		omegasFourier_.fourier(values1, values2);
-		//print LOGFILEOUT "$0: Number of k values ".scalar(@qValues)."\n";
+		// print LOGFILEOUT "$0: Number of k values ".scalar(@qValues)."\n";
 	}
 
 	void writeSpaceValues(std::ofstream& fout,
-	                      RealType omega,
-	                      const VectorRealType& v1,
-	                      const VectorRealType& v2)
+	    RealType omega,
+	    const VectorRealType& v1,
+	    const VectorRealType& v2)
 	{
 		const SizeType n = v1.size();
 		if (v2.size() != n)
@@ -185,20 +190,18 @@ private:
 
 		for (SizeType i = 0; i < n; ++i)
 			printToSpaceOut(fout,
-			                ttos(i) + " " +
-			                ttos(v1[i]) + " " +
-			                ttos(v2[i]) + "\n");
+			    ttos(i) + " " + ttos(v1[i]) + " " + ttos(v2[i]) + "\n");
 	}
 
 	static void printToSpaceOut(std::ofstream& fout, PsimagLite::String str)
 	{
-		fout<<str;
+		fout << str;
 	}
 
 	void correctionVectorRead(VectorRealType& v1,
-	                          VectorRealType& v2,
-	                          VectorBoolType& defined,
-	                          PsimagLite::String inFile)
+	    VectorRealType& v2,
+	    VectorBoolType& defined,
+	    PsimagLite::String inFile)
 	{
 		PsimagLite::String status("clear");
 		std::ifstream fin(inFile);
@@ -206,7 +209,7 @@ private:
 		if (!fin || !fin.good() || fin.bad())
 			err("correctionVectorRead: Cannot read " + inFile + "\n");
 
-		VectorStringType labels{"P2", "P3"}; // ORDER IMPORTANT HERE!
+		VectorStringType labels { "P2", "P3" }; // ORDER IMPORTANT HERE!
 
 		const SizeType ns = MAX_LINE_SIZE;
 		char* ss = new char[ns];
@@ -220,8 +223,7 @@ private:
 
 			bool skip = true;
 			for (SizeType i = 0; i < labels.size(); ++i) {
-				bool isGs = (s.find("gs") != PsimagLite::String::npos ||
-				        s.find("X0") != PsimagLite::String::npos);
+				bool isGs = (s.find("gs") != PsimagLite::String::npos || s.find("X0") != PsimagLite::String::npos);
 
 				if (s.find(labels[i]) == PsimagLite::String::npos || !isGs)
 					continue;
@@ -230,7 +232,8 @@ private:
 				skip = false;
 			}
 
-			if (skip) continue;
+			if (skip)
+				continue;
 
 			VectorStringType tokens;
 			PsimagLite::split(tokens, s, " ");
@@ -263,17 +266,16 @@ private:
 		delete[] ss;
 		ss = 0;
 		checkSites(defined, inFile);
-		//print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
+		// print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
 	}
 
 	void checkSites(const VectorBoolType& defined,
-	                PsimagLite::String inFile)
+	    PsimagLite::String inFile)
 	{
 		const SizeType n = defined.size();
 		for (SizeType i = 0; i < n; ++i)
 			if (!defined[i])
-				err("Undefined value for site= " + ttos(i) +
-				    " file= " + inFile + "\n");
+				err("Undefined value for site= " + ttos(i) + " file= " + inFile + "\n");
 	}
 
 	PsimagLite::String inputfile_;

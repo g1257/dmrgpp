@@ -81,10 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define EXTENDED_HUBBARD_1ORB_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
-template<typename ModelBaseType>
-class ExtendedHubbard1Orb : public ModelBaseType {
+template <typename ModelBaseType>
+class ExtendedHubbard1Orb : public ModelBaseType
+{
 
 public:
 
@@ -101,8 +103,8 @@ public:
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
-	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef typename ModelBaseType::MyBasis MyBasis;
+	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -117,16 +119,17 @@ public:
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 
 	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
-	                    InputValidatorType& io,
-	                    SuperGeometryType const &geometry,
-	                    PsimagLite::String extension)
+	    InputValidatorType& io,
+	    SuperGeometryType const& geometry,
+	    PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io),
-	      modelParameters_(io),
-	      superGeometry_(geometry),
-	      modelHubbard_(solverParams, io, geometry, extension)
-	{}
+		geometry,
+		io)
+	    , modelParameters_(io)
+	    , superGeometry_(geometry)
+	    , modelHubbard_(solverParams, io, geometry, extension)
+	{
+	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -139,13 +142,13 @@ public:
 		modelHubbard_.write(label, io);
 	}
 
-	virtual void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                        const BlockType& block,
-	                                        RealType time)  const
+	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
+	    const BlockType& block,
+	    RealType time) const
 	{
 		modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-		                                         block,
-		                                         time);
+		    block,
+		    time);
 	}
 
 	void fillLabeledOperators(VectorQnType& qns)
@@ -169,30 +172,29 @@ private:
 
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
-	                                      const VectorHilbertStateType& natBasis) const
+	    const VectorHilbertStateType& natBasis) const
 	{
 
 		SizeType n = natBasis.size();
-		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			HilbertState ket=natBasis[ii];
-			cm(ii,ii) = 0.0;
-			for (SizeType sigma=0;sigma<2;sigma++)
-				if (HilbertSpaceHubbardType::isNonZero(ket,i,sigma))
-					cm(ii,ii) += 1.0;
+		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
+			HilbertState ket = natBasis[ii];
+			cm(ii, ii) = 0.0;
+			for (SizeType sigma = 0; sigma < 2; sigma++)
+				if (HilbertSpaceHubbardType::isNonZero(ket, i, sigma))
+					cm(ii, ii) += 1.0;
 		}
 
 		SparseMatrixType creationMatrix(cm);
 		return creationMatrix;
 	}
 
-	ParametersModelHubbard<RealType, QnType>  modelParameters_;
+	ParametersModelHubbard<RealType, QnType> modelParameters_;
 	const SuperGeometryType& superGeometry_;
 	ModelHubbardType modelHubbard_;
-};	//class ExtendedHubbard1Orb
+}; // class ExtendedHubbard1Orb
 
 } // namespace Dmrg
 /*@}*/
 #endif // EXTENDED_HUBBARD_1ORB_H
-

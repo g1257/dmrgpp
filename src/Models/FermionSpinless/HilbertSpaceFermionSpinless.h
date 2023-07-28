@@ -82,37 +82,39 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_HILBERTSPACE_FERMIONSPINLESS_H
 #define DMRG_HILBERTSPACE_FERMIONSPINLESS_H
 
+namespace Dmrg
+{
 
-namespace Dmrg {
-
-template<typename Word>
-class HilbertSpaceFermionSpinless {
+template <typename Word>
+class HilbertSpaceFermionSpinless
+{
 public:
+
 	typedef Word HilbertState;
 
 	//! For state "a" set electron on site "j" to value "value"
-	static void set(Word &a,int j,int value)
+	static void set(Word& a, int j, int value)
 	{
 		Word mask;
 		switch (value) {
 		case 0:
-			mask = (1<<j);
+			mask = (1 << j);
 			a &= (~mask);
 			return;
 		case 1:
-			mask = (1<<j);
+			mask = (1 << j);
 			a |= mask;
 			return;
 		default:
-			std::cerr<<"value="<<value<<"\n";
+			std::cerr << "value=" << value << "\n";
 			throw PsimagLite::RuntimeError("set: invalid value.\n");
 		}
 	}
 
 	// Get electronic state on site "j" in binary number "a"
-	static int get(Word const &a,int j)
+	static int get(Word const& a, int j)
 	{
-		Word mask = (1<<j);
+		Word mask = (1 << j);
 		mask &= a;
 		mask >>= j;
 		assert(mask <= 1);
@@ -120,59 +122,61 @@ public:
 	}
 
 	// Destroy electron with internal dof  "sigma" on site "j" in binary number "a"
-	static void destroy(Word &a,int j,int sigma)
+	static void destroy(Word& a, int j, int sigma)
 	{
 		assert(sigma == 0);
 		Word mask;
 		switch (sigma) {
 		case 0:
-			mask = (1<<j);
+			mask = (1 << j);
 			a &= (~mask);
 			return;
 		default:
-			std::cerr<<"sigma="<<sigma<<"\n";
+			std::cerr << "sigma=" << sigma << "\n";
 			throw PsimagLite::RuntimeError("destroy: invalid value.\n");
 		}
 	}
 
 	// Create electron with internal dof  "sigma" on site "j" in binary number "a"
-	static void create(Word &a,int j,int sigma)
+	static void create(Word& a, int j, int sigma)
 	{
 		assert(sigma == 0);
 		Word mask;
 		switch (sigma) {
 		case 0:
-			mask = (1<<j);
+			mask = (1 << j);
 			a |= mask;
 			return;
 		default:
-			std::cerr<<"sigma="<<sigma<<"\n";
+			std::cerr << "sigma=" << sigma << "\n";
 			throw PsimagLite::RuntimeError("create: invalid value.\n");
 		}
 	}
 
 	// Is there an electron with internal dof
 	// "sigma" on site "i" in binary number "ket"?
-	static bool isNonZero(const Word& ket,int i,int sigma)
+	static bool isNonZero(const Word& ket, int i, int sigma)
 	{
 		assert(sigma == 0);
-		int tmp=get(ket,i);
-		if ((tmp & 1) && sigma==0) return true;
+		int tmp = get(ket, i);
+		if ((tmp & 1) && sigma == 0)
+			return true;
 
 		return false;
 	}
 
 	// returns the number of electrons of internal dof "value" in binary number "data"
-	static int getNofDigits(Word const &data,int value)
+	static int getNofDigits(Word const& data, int value)
 	{
 		assert(value == 0);
-		int ret=0;
-		Word data2=data;
-		int i=0;
+		int ret = 0;
+		Word data2 = data;
+		int i = 0;
 		do {
-			if ( (data & (1<<(i+value))) ) ret++;
+			if ((data & (1 << (i + value))))
+				ret++;
 			i++;
-		} while (data2>>=1);
+		} while (data2 >>= 1);
 
 		return ret;
 	}
@@ -180,17 +184,18 @@ public:
 	// Number of electrons with dof sector between i and
 	// j excluding i and j in binary number "ket"
 	//  intended for when i<j
-	static int calcNofElectrons(Word const &ket,int i,int j,int sector)
+	static int calcNofElectrons(Word const& ket, int i, int j, int sector)
 	{
-		int ii=i+1;
-		if (ii>=j) return 0;
-		Word m=0;
+		int ii = i + 1;
+		if (ii >= j)
+			return 0;
+		Word m = 0;
 		SizeType end = j;
-		for (SizeType k=ii;k<end;k++) m |= (1<<k);
+		for (SizeType k = ii; k < end; k++)
+			m |= (1 << k);
 		m = m & ket;
-		return getNofDigits(m,sector);
+		return getNofDigits(m, sector);
 	}
-
 
 }; // class HilbertSpaceFermionSpinless
 } // namespace Dmrg

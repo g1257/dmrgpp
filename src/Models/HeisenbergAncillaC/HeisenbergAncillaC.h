@@ -80,25 +80,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_HEISENBERG_ANCILLAC_H
 #define DMRG_HEISENBERG_ANCILLAC_H
 
-#include <algorithm>
+#include "CrsMatrix.h"
 #include "ModelBase.h"
 #include "ParametersHeisenbergAncillaC.h"
-#include "CrsMatrix.h"
-#include "VerySparseMatrix.h"
-#include "SpinSquaredHelper.h"
-#include "SpinSquared.h"
 #include "ProgramGlobals.h"
+#include "SpinSquared.h"
+#include "SpinSquaredHelper.h"
+#include "VerySparseMatrix.h"
+#include <algorithm>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 /* Order of the basis
   For S=1/2 and NUMBER_OF_ORBITALS=2 it is
   down A, down B; down A, up B; up A, down B; up A, up B;
   */
-template<typename ModelBaseType>
-class HeisenbergAncillaC : public ModelBaseType {
+template <typename ModelBaseType>
+class HeisenbergAncillaC : public ModelBaseType
+{
 
-	static const int NUMBER_OF_ORBITALS=2;
+	static const int NUMBER_OF_ORBITALS = 2;
 
 public:
 
@@ -109,8 +111,8 @@ public:
 	typedef typename ModelBaseType::LinkType LinkType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
 	typedef typename ModelHelperType::RealType RealType;
-	typedef	typename ModelBaseType::VectorType VectorType;
-	typedef	typename std::pair<SizeType,SizeType> PairSizeType;
+	typedef typename ModelBaseType::VectorType VectorType;
+	typedef typename std::pair<SizeType, SizeType> PairSizeType;
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename QnType::VectorQnType VectorQnType;
 	typedef typename ModelBaseType::BlockType BlockType;
@@ -126,20 +128,20 @@ public:
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef typename OperatorType::PairType PairType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef	typename ModelBaseType::MyBasis MyBasis;
-	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef typename ModelBaseType::MyBasis MyBasis;
+	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
-	                   InputValidatorType& io,
-	                   const SuperGeometryType& geometry)
+	    InputValidatorType& io,
+	    const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io),
-	      modelParameters_(io),
-	      hot_(geometry.orbitals(0,0) > 1)
+		geometry,
+		io)
+	    , modelParameters_(io)
+	    , hot_(geometry.orbitals(0, 0) > 1)
 	{
 		SizeType n = geometry.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();
@@ -158,14 +160,14 @@ public:
 		if (modelParameters_.twiceTheSpin != 1) {
 			PsimagLite::String msg("HeisenbergAncillaC: spin > 1/2");
 			msg += " HIGHLY EXPERIMENTAL!\n";
-			std::cout<<msg;
+			std::cout << msg;
 		}
 
 		if (hot_) {
 			PsimagLite::String msg("HeisenbergAncillaC: Hot ancilla mode is on");
 			msg += " (EXPERIMENTAL feature)\n";
-			std::cout<<msg;
-			std::cerr<<msg;
+			std::cout << msg;
+			std::cerr << msg;
 		}
 	}
 
@@ -180,14 +182,13 @@ public:
 		io.write(label + "/hot_", hot_);
 	}
 
-	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const BlockType& block,
-	                                RealType time)  const
+	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
+	    const BlockType& block,
+	    RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
-		if (modelParameters_.magneticField.size() !=
-		        ModelBaseType::superGeometry().numberOfSites())
+		if (modelParameters_.magneticField.size() != ModelBaseType::superGeometry().numberOfSites())
 			return;
 
 		SizeType n = block.size();
@@ -205,7 +206,7 @@ public:
 	{
 		const RealType nup = ModelBaseType::targetQuantum().qn(0).other[0];
 		const RealType n = ModelBaseType::superGeometry().numberOfSites();
-		RealType energy = -nup*(n - nup);
+		RealType energy = -nup * (n - nup);
 		return ModelBaseType::oracle(energy, "-Nup*Ndown");
 	}
 
@@ -236,24 +237,24 @@ protected:
 		this->makeTrackable("sz");
 		this->makeTrackable("d");
 
-		for (SizeType i=0;i<block.size();i++) {
+		for (SizeType i = 0; i < block.size(); i++) {
 			// Set the operators S^+_i for orbital a in the natural basis
-			tmpMatrix=findSplusMatrices(i,0,natBasis);
+			tmpMatrix = findSplusMatrices(i, 0, natBasis);
 
 			typename OperatorType::Su2RelatedType su2related;
-			su2related.source.push_back(i*2);
-			su2related.source.push_back(i*2+NUMBER_OF_ORBITALS);
-			su2related.source.push_back(i*2);
+			su2related.source.push_back(i * 2);
+			su2related.source.push_back(i * 2 + NUMBER_OF_ORBITALS);
+			su2related.source.push_back(i * 2);
 			su2related.transpose.push_back(-1);
 			su2related.transpose.push_back(-1);
 			su2related.transpose.push_back(1);
 			su2related.offset = NUMBER_OF_ORBITALS;
 
 			OperatorType myOp(tmpMatrix,
-			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                  PairType(2, 2),
-			                  -1,
-			                  su2related);
+			    ProgramGlobals::FermionOrBosonEnum::BOSON,
+			    PairType(2, 2),
+			    -1,
+			    su2related);
 			splus.push(myOp);
 
 			myOp.dagger();
@@ -261,57 +262,55 @@ protected:
 
 			if (hot_) {
 				// Set the operators S^+_i for orbital b in the natural basis
-				tmpMatrix=findSplusMatrices(i,1,natBasis);
+				tmpMatrix = findSplusMatrices(i, 1, natBasis);
 
 				typename OperatorType::Su2RelatedType su2related;
-				su2related.source.push_back(i*2);
-				su2related.source.push_back(i*2+NUMBER_OF_ORBITALS);
-				su2related.source.push_back(i*2);
+				su2related.source.push_back(i * 2);
+				su2related.source.push_back(i * 2 + NUMBER_OF_ORBITALS);
+				su2related.source.push_back(i * 2);
 				su2related.transpose.push_back(-1);
 				su2related.transpose.push_back(-1);
 				su2related.transpose.push_back(1);
 				su2related.offset = NUMBER_OF_ORBITALS;
 
 				OperatorType myOp(tmpMatrix,
-				                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-				                  PairType(2, 2),
-				                  -1,
-				                  su2related);
+				    ProgramGlobals::FermionOrBosonEnum::BOSON,
+				    PairType(2, 2),
+				    -1,
+				    su2related);
 				splus.push(myOp);
 			}
 
 			// Set the operators S^z_i orbital a in the natural basis
-			tmpMatrix = findSzMatrices(i,0,natBasis);
+			tmpMatrix = findSzMatrices(i, 0, natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(tmpMatrix,
-			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                   PairType(2, 1),
-			                   1.0/sqrt(2.0),
-			                   su2related2);
+			    ProgramGlobals::FermionOrBosonEnum::BOSON,
+			    PairType(2, 1),
+			    1.0 / sqrt(2.0),
+			    su2related2);
 			sz.push(myOp2);
 			if (hot_) {
 				// Set the operators S^z_i orbital b in the natural basis
-				tmpMatrix = findSzMatrices(i,1,natBasis);
+				tmpMatrix = findSzMatrices(i, 1, natBasis);
 				typename OperatorType::Su2RelatedType su2related2;
 				OperatorType myOp2(tmpMatrix,
-				                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-				                   PairType(2, 1),
-				                   1.0/sqrt(2.0),
-				                   su2related2);
+				    ProgramGlobals::FermionOrBosonEnum::BOSON,
+				    PairType(2, 1),
+				    1.0 / sqrt(2.0),
+				    su2related2);
 				sz.push(myOp2);
 			}
-
-
 
 			// Set the operators \Delta_i in the natural basis
 			for (SizeType p = 0; p < numberOfDs; ++p) {
 				tmpMatrix = findDeltaMatrix(natBasis, p);
 				typename OperatorType::Su2RelatedType su2related4;
 				OperatorType myOp4(tmpMatrix,
-				                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-				                   PairType(0, 0),
-				                   1.0,
-				                   su2related4);
+				    ProgramGlobals::FermionOrBosonEnum::BOSON,
+				    PairType(0, 0),
+				    1.0,
+				    su2related4);
 				d.push(myOp4);
 			}
 		}
@@ -324,42 +323,42 @@ protected:
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 		OpForLinkType splus0("splus");
 
-		auto modifierTerm0 = [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5;};
+		auto modifierTerm0 = [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5; };
 		spsm.push(splus0,
-		          'N',
-		          splus0,
-		          'C',
-		          modifierTerm0);
+		    'N',
+		    splus0,
+		    'C',
+		    modifierTerm0);
 
 		if (hot_) {
 			OpForLinkType splus1("splus", 1, 1);
 			spsm.push(splus1,
-			          'N',
-			          splus1,
-			          'C',
-			          modifierTerm0);
+			    'N',
+			    splus1,
+			    'C',
+			    modifierTerm0);
 		}
 
-		auto modifierTerm1 = [isSu2](SparseElementType& value) {if (isSu2) value = -value;};
+		auto modifierTerm1 = [isSu2](SparseElementType& value) {if (isSu2) value = -value; };
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		OpForLinkType sz0("sz");
 
 		szsz.push(sz0,
-		          'N',
-		          sz0,
-		          'C',
-		          modifierTerm1);
+		    'N',
+		    sz0,
+		    'C',
+		    modifierTerm1);
 
 		if (hot_) {
 			OpForLinkType splus1("splus", 1, 1);
 			OpForLinkType sz1("sz", 1, 1);
 			if (isSu2)
 				szsz.push(splus1,
-				          'N',
-				          splus1,
-				          'C',
-				          modifierTerm1);
+				    'N',
+				    splus1,
+				    'C',
+				    modifierTerm1);
 			else
 				szsz.push(sz1, 'N', sz1, 'C');
 		}
@@ -367,19 +366,19 @@ protected:
 		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
 		if (modelParameters_.twiceTheSpin == 1) {
 			OpForLinkType d("d", 0);
-			auto modifierTermD0 = [isSu2](SparseElementType& value) {if (isSu2) value = -value;};
+			auto modifierTermD0 = [isSu2](SparseElementType& value) {if (isSu2) value = -value; };
 			ancilla.push(d,
-			             'N',
-			             d,
-			             'C',
-			             modifierTermD0);
+			    'N',
+			    d,
+			    'C',
+			    modifierTermD0);
 			return;
 		}
 
 		if (modelParameters_.twiceTheSpin != 2)
 			err("Spin > 1 not supported by this model yet\n");
 
-		auto modifierTermDoff = [isSu2](SparseElementType& value) {if (isSu2) value = -value;};
+		auto modifierTermDoff = [isSu2](SparseElementType& value) {if (isSu2) value = -value; };
 		OpForLinkType N0("d", 0);
 		OpForLinkType N1("d", 1);
 		OpForLinkType N2("d", 2);
@@ -393,78 +392,80 @@ protected:
 		OpForLinkType T2("d", 10);
 
 		ancilla.push(N0,
-		             'N',
-		             M0,
-		             'C',
-		             modifierTermDoff);
+		    'N',
+		    M0,
+		    'C',
+		    modifierTermDoff);
 
 		ancilla.push(N1,
-		             'N',
-		             M1,
-		             'C',
-		             modifierTermDoff);
+		    'N',
+		    M1,
+		    'C',
+		    modifierTermDoff);
 
 		ancilla.push(N2,
-		             'N',
-		             M2,
-		             'C',
-		             modifierTermDoff);
+		    'N',
+		    M2,
+		    'C',
+		    modifierTermDoff);
 
 		ancilla.push(T0,
-		             'N',
-		             W0,
-		             'C',
-		             modifierTermDoff);
+		    'N',
+		    W0,
+		    'C',
+		    modifierTermDoff);
 
 		ancilla.push(T1,
-		             'N',
-		             W1,
-		             'C',
-		             modifierTermDoff);
+		    'N',
+		    W1,
+		    'C',
+		    modifierTermDoff);
 
 		ancilla.push(T2,
-		             'N',
-		             T2,
-		             'C',
-		             modifierTermDoff);
+		    'N',
+		    T2,
+		    'C',
+		    modifierTermDoff);
 	}
 
 private:
 
 	//! find all states in the natural basis for a block of n sites
 	void setBasis(HilbertBasisType& basis,
-	              const VectorSizeType& block) const
+	    const VectorSizeType& block) const
 	{
-		assert(block.size()==1);
+		assert(block.size() == 1);
 		SizeType total = pow(modelParameters_.twiceTheSpin + 1, NUMBER_OF_ORBITALS);
 
 		basis.resize(total);
-		for (SizeType i = 0; i < total; ++i) basis[i] = i;
+		for (SizeType i = 0; i < total; ++i)
+			basis[i] = i;
 	}
 
 	//! Find S^+_i a in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(int,
-	                                   SizeType orbital,
-	                                   const HilbertBasisType& natBasis) const
+	    SizeType orbital,
+	    const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		RealType j = 0.5*modelParameters_.twiceTheSpin;
+		MatrixType cm(total, total);
+		RealType j = 0.5 * modelParameters_.twiceTheSpin;
 		SizeType total1 = modelParameters_.twiceTheSpin + 1;
-		for (SizeType ii=0;ii<total;ii++) {
+		for (SizeType ii = 0; ii < total; ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 
 			SizeType ket1 = (orbital == 0) ? ket.first : ket.second;
 			SizeType ket2 = (orbital == 0) ? ket.second : ket.first;
 			SizeType bra1 = ket1 + 1;
-			if (bra1 >= total1) continue;
-			PairSizeType bra = (orbital == 0) ? PairSizeType(bra1,ket2) : PairSizeType(ket2,bra1);
+			if (bra1 >= total1)
+				continue;
+			PairSizeType bra = (orbital == 0) ? PairSizeType(bra1, ket2) : PairSizeType(ket2, bra1);
 			SizeType jj = getFullIndex(bra);
 			RealType m = ket1 - j;
 
-			RealType x = j*(j+1)-m*(m+1);
-			assert(x>=0);
-			cm(ii,jj) = sqrt(x);
+			RealType x = j * (j + 1) - m * (m + 1);
+			assert(x >= 0);
+			cm(ii, jj) = sqrt(x);
 		}
 
 		SparseMatrixType operatorMatrix(cm);
@@ -475,14 +476,14 @@ private:
 	MatrixType findSzDense(SizeType orbital, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		RealType j = 0.5*modelParameters_.twiceTheSpin;
+		MatrixType cm(total, total);
+		RealType j = 0.5 * modelParameters_.twiceTheSpin;
 
-		for (SizeType ii=0;ii<total;ii++) {
+		for (SizeType ii = 0; ii < total; ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 			SizeType ket1 = (orbital == 0) ? ket.first : ket.second;
 			RealType m = ket1 - j;
-			cm(ii,ii) = m;
+			cm(ii, ii) = m;
 		}
 
 		return cm;
@@ -490,21 +491,21 @@ private:
 
 	//! Find Ntilde_i in the natural basis natBasis
 	MatrixType findNtildeDense(SizeType orbital,
-	                           SizeType which,
-	                           const HilbertBasisType& natBasis) const
+	    SizeType which,
+	    const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
+		MatrixType cm(total, total);
 		if (which > 2)
 			err("Ntilde cannot be>2\n");
 
-		assert(which<modelParameters_.twiceTheSpin+1);
+		assert(which < modelParameters_.twiceTheSpin + 1);
 
-		for (SizeType ii=0;ii<total;ii++) {
+		for (SizeType ii = 0; ii < total; ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 			SizeType ket1 = (orbital == 0) ? ket.first : ket.second;
-			if (which==ket1)
-				cm(ii,ii) = 1;
+			if (which == ket1)
+				cm(ii, ii) = 1;
 		}
 
 		return cm;
@@ -512,57 +513,57 @@ private:
 
 	//! Find Mtilde_i in the natural basis natBasis
 	MatrixType findMtildeDense(SizeType orbital,
-	                           SizeType which,
-	                           const HilbertBasisType& natBasis) const
+	    SizeType which,
+	    const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
+		MatrixType cm(total, total);
 		if (which > 2)
 			err("Mtilde cannot be>2\n");
 
-		assert(which<modelParameters_.twiceTheSpin+1);
+		assert(which < modelParameters_.twiceTheSpin + 1);
 
-		for (SizeType ii=0;ii<total;ii++) {
+		for (SizeType ii = 0; ii < total; ii++) {
 			PairSizeType ket = getOneOrbital(natBasis[ii]);
 			SizeType ket1 = (orbital == 0) ? ket.first : ket.second;
-			if (which==0) {
+			if (which == 0) {
 				switch (ket1) {
 				case 0:
-					cm(ii,ii) = 1;
+					cm(ii, ii) = 1;
 					break;
 				case 1:
-					cm(ii,ii) = 1.0/2.0;
+					cm(ii, ii) = 1.0 / 2.0;
 					break;
 				case 2:
-					cm(ii,ii) = 1.0/3.0;
+					cm(ii, ii) = 1.0 / 3.0;
 					break;
 				}
 			}
 
-			if (which==1) {
+			if (which == 1) {
 				switch (ket1) {
 				case 0:
-					cm(ii,ii) = 1.0/2.0;
+					cm(ii, ii) = 1.0 / 2.0;
 					break;
 				case 1:
-					cm(ii,ii) = 1.0/3.0;
+					cm(ii, ii) = 1.0 / 3.0;
 					break;
 				case 2:
-					cm(ii,ii) = 1.0/2.0;
+					cm(ii, ii) = 1.0 / 2.0;
 					break;
 				}
 			}
 
-			if (which==2) {
+			if (which == 2) {
 				switch (ket1) {
 				case 0:
-					cm(ii,ii) = 1.0/3.0;
+					cm(ii, ii) = 1.0 / 3.0;
 					break;
 				case 1:
-					cm(ii,ii) = 1.0/2.0;
+					cm(ii, ii) = 1.0 / 2.0;
 					break;
 				case 2:
-					cm(ii,ii) = 1.0;
+					cm(ii, ii) = 1.0;
 					break;
 				}
 			}
@@ -572,8 +573,8 @@ private:
 	}
 
 	SparseMatrixType findSzMatrices(int,
-	                                SizeType orbital,
-	                                const HilbertBasisType& natBasis) const
+	    SizeType orbital,
+	    const HilbertBasisType& natBasis) const
 	{
 
 		MatrixType cm = findSzDense(orbital, natBasis);
@@ -594,13 +595,13 @@ private:
 
 		SizeType step = 1;
 		SizeType total = natBasis.size();
-		MatrixType cm(total,total);
-		if (pp==10)
+		MatrixType cm(total, total);
+		if (pp == 10)
 			step = 2;
 
-		if (modelParameters_.twiceTheSpin==1 && pp==0) {
+		if (modelParameters_.twiceTheSpin == 1 && pp == 0) {
 
-			for (SizeType ii=0;ii<total;ii++) {
+			for (SizeType ii = 0; ii < total; ii++) {
 				PairSizeType ket = getOneOrbital(natBasis[ii]);
 
 				SizeType bra1 = ket.first + step;
@@ -618,16 +619,16 @@ private:
 			}
 		}
 
-		if (modelParameters_.twiceTheSpin==2) {
+		if (modelParameters_.twiceTheSpin == 2) {
 
-			if (pp<=2)
+			if (pp <= 2)
 				cm = findNtildeDense(0, pp, natBasis);
 
-			if (pp>2 && pp<=5)
-				cm = findMtildeDense(0, pp-3, natBasis);
+			if (pp > 2 && pp <= 5)
+				cm = findMtildeDense(0, pp - 3, natBasis);
 
-			if (pp>=6) {
-				for (SizeType ii=0;ii<total;ii++) {
+			if (pp >= 6) {
+				for (SizeType ii = 0; ii < total; ii++) {
 					PairSizeType ket = getOneOrbital(natBasis[ii]);
 
 					SizeType bra1 = ket.first + step;
@@ -643,28 +644,28 @@ private:
 					SizeType jj = getFullIndex(bra);
 					switch (pp) {
 					case 6:
-						if (ket.first==0)
-							cm(ii,jj) = 1.0/2.0;
-						if (ket.first==1)
-							cm(ii,jj) = 1.0/3.0;
+						if (ket.first == 0)
+							cm(ii, jj) = 1.0 / 2.0;
+						if (ket.first == 1)
+							cm(ii, jj) = 1.0 / 3.0;
 						break;
 					case 7:
-						if (ket.first==0)
-							cm(ii,jj) = 1;
+						if (ket.first == 0)
+							cm(ii, jj) = 1;
 						break;
 					case 8:
-						if (ket.first==0)
-							cm(ii,jj) = 1.0/3.0;
-						if (ket.first==1)
-							cm(ii,jj) = 1.0/2.0;
+						if (ket.first == 0)
+							cm(ii, jj) = 1.0 / 3.0;
+						if (ket.first == 1)
+							cm(ii, jj) = 1.0 / 2.0;
 						break;
 					case 9:
-						if (ket.first==1)
-							cm(ii,jj) = 1;
+						if (ket.first == 1)
+							cm(ii, jj) = 1;
 						break;
 					case 10:
-						if (ket.first==0)
-							cm(ii,jj) = sqrt(1.0/3.0);
+						if (ket.first == 0)
+							cm(ii, jj) = sqrt(1.0 / 3.0);
 						break;
 					}
 				}
@@ -676,17 +677,17 @@ private:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int n) const
+	    const HilbertBasisType& basis,
+	    int n) const
 	{
-		if (n!=1)
+		if (n != 1)
 			PsimagLite::RuntimeError("HeisenbergAncillaC::setSymmetryRelated n=1 only\n");
 
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		typedef std::pair<SizeType,SizeType> PairType;
+		typedef std::pair<SizeType, SizeType> PairType;
 		VectorSizeType other(2, 0);
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
@@ -706,14 +707,14 @@ private:
 	{
 		SizeType total1 = modelParameters_.twiceTheSpin + 1;
 		assert(NUMBER_OF_ORBITALS == 2);
-		SizeType first = static_cast<SizeType>(state/total1);
+		SizeType first = static_cast<SizeType>(state / total1);
 		SizeType second = state % total1;
 		return PairSizeType(first, second);
 	}
 
 	SizeType getFullIndex(PairSizeType p) const
 	{
-		return p.first*(modelParameters_.twiceTheSpin + 1) + p.second;
+		return p.first * (modelParameters_.twiceTheSpin + 1) + p.second;
 	}
 
 	ParametersHeisenbergAncillaC<RealType, QnType> modelParameters_;
@@ -722,5 +723,4 @@ private:
 
 } // namespace Dmrg
 /*@}*/
-#endif //DMRG_HEISENBERG_ANCILLAC_H
-
+#endif // DMRG_HEISENBERG_ANCILLAC_H

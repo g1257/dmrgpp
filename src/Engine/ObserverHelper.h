@@ -78,23 +78,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PRECOMPUTED_H
 #define PRECOMPUTED_H
-#include "SparseVector.h"
-#include "ProgramGlobals.h"
-#include "TimeSerializer.h"
 #include "DmrgSerializer.h"
-#include "VectorWithOffsets.h" // to include norm
-#include "VectorWithOffset.h" // to include norm
 #include "GetBraOrKet.h"
+#include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
+#include "SparseVector.h"
+#include "TimeSerializer.h"
+#include "VectorWithOffset.h" // to include norm
+#include "VectorWithOffsets.h" // to include norm
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename IoInputType_,
-         typename MatrixType_,
-         typename VectorType_,
-         typename VectorWithOffsetType_,
-         typename LeftRightSuperType>
-class ObserverHelper {
+template <typename IoInputType_,
+    typename MatrixType_,
+    typename VectorType_,
+    typename VectorWithOffsetType_,
+    typename LeftRightSuperType>
+class ObserverHelper
+{
 
 public:
 
@@ -110,7 +112,7 @@ public:
 	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
+	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
 	typedef typename DmrgSerializerType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -118,27 +120,26 @@ public:
 	typedef PsimagLite::GetBraOrKet GetBraOrKetType;
 	typedef std::pair<LeftRightSuperType*, SizeType> PairLeftRightSuperSizeType;
 
-	enum class SaveEnum {YES, NO};
+	enum class SaveEnum { YES,
+		NO };
 
 	ObserverHelper(IoInputType& io,
-	               SizeType start,
-	               SizeType nf,
-	               SizeType trail,
-	               bool withLegacyBugs,
-	               bool readOnDemand)
-	    : io_(io),
-	      withLegacyBugs_(withLegacyBugs),
-	      readOnDemand_(readOnDemand),
-	      progress_("ObserverHelper"),
-	      noMoreData_(false),
-	      numberOfSites_(0),
-	      lrsStorage_(PairLeftRightSuperSizeType(nullptr, 0))
+	    SizeType start,
+	    SizeType nf,
+	    SizeType trail,
+	    bool withLegacyBugs,
+	    bool readOnDemand)
+	    : io_(io)
+	    , withLegacyBugs_(withLegacyBugs)
+	    , readOnDemand_(readOnDemand)
+	    , progress_("ObserverHelper")
+	    , noMoreData_(false)
+	    , numberOfSites_(0)
+	    , lrsStorage_(PairLeftRightSuperSizeType(nullptr, 0))
 	{
-		bool hasConcurrency = (PsimagLite::Concurrency::codeSectionParams.npthreads > 1 ||
-		                       PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo > 1);
+		bool hasConcurrency = (PsimagLite::Concurrency::codeSectionParams.npthreads > 1 || PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo > 1);
 		if (hasConcurrency && readOnDemand_)
-			err(std::string("ReadOnDemand does not support threading. ") +
-			    "Set Threads=1 in input, or use -S 1 in command line.\n");
+			err(std::string("ReadOnDemand does not support threading. ") + "Set Threads=1 in input, or use -S 1 in command line.\n");
 
 		typename BasisWithOperatorsType::VectorBoolType odds;
 		io_.read(odds, "OddElectronsOneSite");
@@ -148,8 +149,8 @@ public:
 			signsOneSite_[i] = (odds[i]) ? -1 : 1;
 
 		if (readOnDemand_) {
-			std::cout<<"ObserverHelper: observeReadOnDemand is ON\n";
-			std::cerr<<"ObserverHelper: observeReadOnDemand is ON\n";
+			std::cout << "ObserverHelper: observeReadOnDemand is ON\n";
+			std::cerr << "ObserverHelper: observeReadOnDemand is ON\n";
 		}
 
 		if (nf > 0)
@@ -182,8 +183,8 @@ public:
 	bool endOfData() const { return noMoreData_; }
 
 	void transform(SparseMatrixType& ret,
-	               const SparseMatrixType& O2,
-	               SizeType ind) const
+	    const SparseMatrixType& O2,
+	    SizeType ind) const
 	{
 		checkIndex(ind);
 
@@ -238,7 +239,7 @@ public:
 			if (!lrsStorage_.first) {
 				const PsimagLite::String prefix = "Serializer/" + ttos(ind);
 
-				lrsStorage_.first = new LeftRightSuperType(io_, prefix, {true, true});
+				lrsStorage_.first = new LeftRightSuperType(io_, prefix, { true, true });
 				lrsStorage_.second = ind;
 			}
 
@@ -255,8 +256,8 @@ public:
 	}
 
 	const VectorWithOffsetType& psiConst(SizeType ind,
-	                                     SizeType sectorIndex,
-	                                     SizeType levelIndex) const
+	    SizeType sectorIndex,
+	    SizeType levelIndex) const
 	{
 		checkIndex(ind);
 
@@ -265,7 +266,8 @@ public:
 
 	RealType time(SizeType ind) const
 	{
-		if (timeSerializerV_.size() == 0) return 0.0;
+		if (timeSerializerV_.size() == 0)
+			return 0.0;
 		assert(ind < timeSerializerV_.size());
 		assert(timeSerializerV_[ind]);
 		return timeSerializerV_[ind]->time();
@@ -286,7 +288,7 @@ public:
 	SizeType size() const { return dSerializerV_.size(); }
 
 	const VectorWithOffsetType& getVectorFromBracketId(const PsimagLite::GetBraOrKet& braOrKet,
-	                                                   SizeType index) const
+	    SizeType index) const
 	{
 		if (braOrKet.isPvector()) {
 			const SizeType pIndex = braOrKet.pIndex();
@@ -297,7 +299,7 @@ public:
 	}
 
 	const VectorWithOffsetType& timeVector(SizeType braketId,
-	                                       SizeType ind) const
+	    SizeType ind) const
 	{
 		assert(ind < timeSerializerV_.size());
 		assert(timeSerializerV_[ind]);
@@ -311,16 +313,16 @@ public:
 
 	friend std::ostream& operator<<(std::ostream& os, ObserverHelper& p)
 	{
-		for (SizeType i=0;i<p.SpermutationInverse_.size();i++) {
-			os<<"i="<<i<<"\n";
-			os<<"\tS.size="<<p.SpermutationInverse_[i].size();
-			os<<" "<<p.Spermutation_[i].size()<<"\n";
-			os<<"\tSE.size="<<p.SEpermutationInverse_[i].size();
-			os<<" "<<p.SEpermutation_[i].size()<<"\n";
-			os<<"\tElectrons.size="<<p.electrons_[i].size()<<"\n";
-			os<<"\tTransform="<<p.transform_[i].n_row()<<"x";
-			os<<p.transform_[i].n_col()<<"\n";
-			os<<"\tWF.size="<<p.wavefunction_[i].size()<<"\n";
+		for (SizeType i = 0; i < p.SpermutationInverse_.size(); i++) {
+			os << "i=" << i << "\n";
+			os << "\tS.size=" << p.SpermutationInverse_[i].size();
+			os << " " << p.Spermutation_[i].size() << "\n";
+			os << "\tSE.size=" << p.SEpermutationInverse_[i].size();
+			os << " " << p.SEpermutation_[i].size() << "\n";
+			os << "\tElectrons.size=" << p.electrons_[i].size() << "\n";
+			os << "\tTransform=" << p.transform_[i].n_row() << "x";
+			os << p.transform_[i].n_col() << "\n";
+			os << "\tWF.size=" << p.wavefunction_[i].size() << "\n";
 		}
 
 		return os;
@@ -329,31 +331,33 @@ public:
 private:
 
 	SizeType siteInternal(const LeftRightSuperType& lrs,
-	                      ProgramGlobals::DirectionEnum direction) const
+	    ProgramGlobals::DirectionEnum direction) const
 	{
-		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ?
-		            lrs.right().block()[0] - 1 : lrs.right().block()[0];
-		}
+		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.right().block()[0] - 1 : lrs.right().block()[0];
+	}
 
-		bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
-		{
+	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
+	{
 		PsimagLite::String prefix = "Serializer";
 		SizeType total = 0;
 		io_.read(total, prefix + "/Size");
-		if (start >= end || start >= total || end > total) return false;
+		if (start >= end || start >= total || end > total)
+			return false;
 
 		for (SizeType i = start; i < end; ++i) {
 
 			DmrgSerializerType* dSerializer = new DmrgSerializerType(io_,
-			                                                         prefix + "/" + ttos(i),
-			                                                         false,
-			                                                         {true, true},
-			                                                         readOnDemand_);
+			    prefix + "/" + ttos(i),
+			    false,
+			    { true, true },
+			    readOnDemand_);
 
 			SizeType tmp = dSerializer->leftRightSuper().sites();
-			if (tmp > 0 && numberOfSites_ == 0) numberOfSites_ = tmp;
+			if (tmp > 0 && numberOfSites_ == 0)
+				numberOfSites_ = tmp;
 
-			if (readOnDemand_) dSerializer->freeLrs();
+			if (readOnDemand_)
+				dSerializer->freeLrs();
 
 			if (saveOrNot == SaveEnum::YES)
 				dSerializerV_.push_back(dSerializer);
@@ -363,16 +367,16 @@ private:
 			try {
 				PsimagLite::String prefix("/TargetingCommon/" + ttos(i));
 				TimeSerializerType* ts = new TimeSerializerType(io_, prefix);
-				std::cerr<<"Read TimeSerializer\n";
+				std::cerr << "Read TimeSerializer\n";
 				if (saveOrNot == SaveEnum::YES)
 					timeSerializerV_.push_back(ts);
 				else
 					delete ts;
-			} catch(...) {}
+			} catch (...) {
+			}
 
-			std::cerr<<__FILE__<<" read "<<i<<" out of "<<(end - start)<<"\n";
+			std::cerr << __FILE__ << " read " << i << " out of " << (end - start) << "\n";
 			progress_.printMemoryUsage();
-
 		}
 
 		noMoreData_ = (end == total);
@@ -393,7 +397,8 @@ private:
 		if (ind >= dSerializerV_.size())
 			err("Index " + ttos(ind) + " greater or equal to " + ttos(dSerializerV_.size()));
 
-		if (dSerializerV_[ind]) return;
+		if (dSerializerV_[ind])
+			return;
 
 		err("dSerializerV_ at index " + ttos(ind) + " point to 0x0\n");
 	}
@@ -408,7 +413,7 @@ private:
 	VectorShortIntType signsOneSite_;
 	SizeType numberOfSites_;
 	mutable PairLeftRightSuperSizeType lrsStorage_;
-};  // ObserverHelper
+}; // ObserverHelper
 } // namespace Dmrg
 
 /*@}*/

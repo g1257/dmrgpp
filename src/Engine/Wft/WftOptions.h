@@ -2,32 +2,36 @@
 #define WFTOPTIONS_H
 #include "Complex.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename VectorWithOffsetType_, typename OptionsType>
+template <typename VectorWithOffsetType_, typename OptionsType>
 struct WftOptions {
 
 	typedef typename VectorWithOffsetType_::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-	enum AccelEnum {ACCEL_NONE, ACCEL_PATCHES, ACCEL_BLOCKS, ACCEL_SVD};
+	enum AccelEnum { ACCEL_NONE,
+		ACCEL_PATCHES,
+		ACCEL_BLOCKS,
+		ACCEL_SVD };
 
 	WftOptions(ProgramGlobals::DirectionEnum dir1,
-	           const OptionsType& options,
-	           bool f,
-	           bool b,
-	           RealType d,
-	           SizeType gemmRnb_,
-	           SizeType threadsForGemmR_)
-	    : twoSiteDmrg(options.isSet("twositedmrg")),
-	      kronLoadBalance(options.isSet("KronLoadBalance")),
-	      firstCall(f),
-	      bounce(b),
-	      dir(dir1),
-	      accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES),
-	      denseSparseThreshold(d),
-	      gemmRnb(gemmRnb_),
-	      threadsForGemmR(threadsForGemmR_)
+	    const OptionsType& options,
+	    bool f,
+	    bool b,
+	    RealType d,
+	    SizeType gemmRnb_,
+	    SizeType threadsForGemmR_)
+	    : twoSiteDmrg(options.isSet("twositedmrg"))
+	    , kronLoadBalance(options.isSet("KronLoadBalance"))
+	    , firstCall(f)
+	    , bounce(b)
+	    , dir(dir1)
+	    , accel((twoSiteDmrg) ? ACCEL_BLOCKS : ACCEL_PATCHES)
+	    , denseSparseThreshold(d)
+	    , gemmRnb(gemmRnb_)
+	    , threadsForGemmR(threadsForGemmR_)
 	{
 		if (options.isSet("wftAccelPatches"))
 			accel = ACCEL_PATCHES;
@@ -58,8 +62,8 @@ struct WftOptions {
 		} catch (...) {
 			PsimagLite::String msg("WARNING: WFTOptions::read(): ");
 			PsimagLite::String msg2("No gemmRnb or threadsForGemmR\n");
-			std::cout<<msg<<msg2;
-			std::cerr<<msg<<msg2;
+			std::cout << msg << msg2;
+			std::cerr << msg << msg2;
 		}
 	}
 
@@ -96,7 +100,8 @@ private:
 			return;
 		}
 
-		if (x == 0 || twoSiteDmrg) return;
+		if (x == 0 || twoSiteDmrg)
+			return;
 
 		err("WFTOptions: onesitedmrg only with ACCEL_NONE or ACCEL_PATCHES\n");
 	}

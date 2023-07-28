@@ -81,18 +81,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgramGlobals.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename VectorType>
-class ObservablesOnePointInSitu {
+template <typename VectorType>
+class ObservablesOnePointInSitu
+{
 
 public:
 
-	template<typename TargetingType>
+	template <typename TargetingType>
 	void init(const TargetingType& psi,
-	          SizeType sites) // FIXME : Use ctor instead
+	    SizeType sites) // FIXME : Use ctor instead
 	{
-		inSitu_.resize(sites,0);
+		inSitu_.resize(sites, 0);
 		for (SizeType i = 0; i < sites; ++i)
 			inSitu_[i] = psi.inSitu(i);
 	}
@@ -111,4 +113,3 @@ private:
 
 /*@}*/
 #endif // DMRG_OBS_ONE_POINT_IN_SITU_H
-

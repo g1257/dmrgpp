@@ -78,21 +78,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_SERIAL_H
 #define DMRG_SERIAL_H
 
-#include "Io/IoSelector.h"
-#include "FermionSign.h"
-#include "ProgramGlobals.h"
+#include "BasisTraits.hh"
 #include "BlockDiagonalMatrix.h"
 #include "BlockOffDiagMatrix.h"
-#include "BasisTraits.hh"
+#include "FermionSign.h"
+#include "Io/IoSelector.h"
+#include "ProgramGlobals.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 // Move also checkpointing from DmrgSolver to here (FIXME)
-template<typename LeftRightSuperType,typename VectorWithOffsetType>
-class DmrgSerializer {
+template <typename LeftRightSuperType, typename VectorWithOffsetType>
+class DmrgSerializer
+{
 
 public:
 
-	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> ThisType;
+	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> ThisType;
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
@@ -104,41 +106,43 @@ public:
 	typedef typename BasisType::RealType RealType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
-	typedef typename PsimagLite::Vector<typename
-	PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
 
 	DmrgSerializer(const FermionSignType& fS,
-	               const FermionSignType& fE,
-	               const LeftRightSuperType& lrs,
-	               const VectorVectorVectorWithOffsetType& wf,
-	               const BlockDiagonalMatrixType& transform,
-	               ProgramGlobals::DirectionEnum direction)
-	    : fS_(fS),
-	      fE_(fE),
-	      wavefunction_(wf),
-	      ownWf_(false),
-	      transform_(transform),
-	      direction_(direction)
+	    const FermionSignType& fE,
+	    const LeftRightSuperType& lrs,
+	    const VectorVectorVectorWithOffsetType& wf,
+	    const BlockDiagonalMatrixType& transform,
+	    ProgramGlobals::DirectionEnum direction)
+	    : fS_(fS)
+	    , fE_(fE)
+	    , wavefunction_(wf)
+	    , ownWf_(false)
+	    , transform_(transform)
+	    , direction_(direction)
 	{
 		lrs_ = new LeftRightSuperType(lrs);
 	}
 
 	// used only by IoNg:
-	template<typename IoInputType>
+	template <typename IoInputType>
 	DmrgSerializer(IoInputType& io,
-	               PsimagLite::String prefix,
-	               bool bogus,
-	               const BasisTraits& basisTraits,
-	               bool readOnDemand,
-	               typename PsimagLite::EnableIf<
-	               PsimagLite::IsInputLike<IoInputType>::True, int>::Type = 0)
-	    : fS_(io, prefix + "/fS", bogus),
-	      fE_(io, prefix + "/fE", bogus),
-	      lrs_(new LeftRightSuperType(io, prefix, basisTraits)),
-	      ownWf_(true),
-	      transform_(io, prefix + "/transform", readOnDemand)
+	    PsimagLite::String prefix,
+	    bool bogus,
+	    const BasisTraits& basisTraits,
+	    bool readOnDemand,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsInputLike<IoInputType>::True,
+		int>::Type
+	    = 0)
+	    : fS_(io, prefix + "/fS", bogus)
+	    , fE_(io, prefix + "/fE", bogus)
+	    , lrs_(new LeftRightSuperType(io, prefix, basisTraits))
+	    , ownWf_(true)
+	    , transform_(io, prefix + "/transform", readOnDemand)
 	{
-		if (bogus) return;
+		if (bogus)
+			return;
 
 		try {
 			SizeType nsectors = 0;
@@ -150,8 +154,7 @@ public:
 				wavefunction_[i].resize(nexcited);
 				for (SizeType j = 0; j < nexcited; ++j) {
 					wavefunction_[i][j] = new VectorWithOffsetType;
-					wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) +
-					                          "/" + ttos(j));
+					wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
 				}
 			}
 		} catch (...) {
@@ -159,7 +162,7 @@ public:
 			wavefunction_[0].resize(1);
 			wavefunction_[0][0] = new VectorWithOffsetType;
 			wavefunction_[0][0]->read(io, prefix + "/WaveFunction");
-			std::cerr<<"WARNING: Outdated branch of execution?!\n";
+			std::cerr << "WARNING: Outdated branch of execution?!\n";
 		}
 
 		io.read(direction_, prefix + "/direction");
@@ -169,7 +172,8 @@ public:
 	{
 		freeLrs();
 
-		if (!ownWf_) return; // <<--- EARLY EXIT HERE
+		if (!ownWf_)
+			return; // <<--- EARLY EXIT HERE
 
 		const SizeType nsectors = wavefunction_.size();
 		for (SizeType i = 0; i < nsectors; ++i) {
@@ -187,21 +191,23 @@ public:
 		lrs_ = nullptr;
 	}
 
-	template<typename SomeIoOutType>
+	template <typename SomeIoOutType>
 	void write(SomeIoOutType& io,
-	           PsimagLite::String prefix,
-	           typename BasisWithOperatorsType::SaveEnum option,
-	           SizeType numberOfSites,
-	           SizeType counter,
-	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type = 0) const
+	    PsimagLite::String prefix,
+	    typename BasisWithOperatorsType::SaveEnum option,
+	    SizeType numberOfSites,
+	    SizeType counter,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsOutputLike<SomeIoOutType>::True,
+		int>::Type
+	    = 0) const
 	{
-		if (counter == 0) io.createGroup(prefix);
+		if (counter == 0)
+			io.createGroup(prefix);
 
 		io.write(counter + 1,
-		         prefix + "/Size",
-		         (counter == 0) ? SomeIoOutType::Serializer::NO_OVERWRITE :
-		                          SomeIoOutType::Serializer::ALLOW_OVERWRITE);
+		    prefix + "/Size",
+		    (counter == 0) ? SomeIoOutType::Serializer::NO_OVERWRITE : SomeIoOutType::Serializer::ALLOW_OVERWRITE);
 
 		prefix += ("/" + ttos(counter));
 
@@ -239,21 +245,19 @@ public:
 	}
 
 	const LeftRightSuperType& leftRightSuper() const
-	{			
+	{
 		assert(lrs_);
 		return *lrs_;
 	}
 
 	const VectorWithOffsetType& psiConst(SizeType sectorIndex,
-	                                     SizeType levelIndex) const
+	    SizeType levelIndex) const
 	{
 		if (sectorIndex >= wavefunction_.size())
-			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = " +
-			    ttos(sectorIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
+			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = " + ttos(sectorIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
 
 		if (levelIndex >= wavefunction_[sectorIndex].size())
-			err(PsimagLite::String(__FILE__) + "::wavefunction(): levelIndex = " +
-			    ttos(levelIndex) + ">=" + ttos(wavefunction_[sectorIndex].size()) + "\n");
+			err(PsimagLite::String(__FILE__) + "::wavefunction(): levelIndex = " + ttos(levelIndex) + ">=" + ttos(wavefunction_[sectorIndex].size()) + "\n");
 
 		return *(wavefunction_[sectorIndex][levelIndex]);
 	}
@@ -276,12 +280,12 @@ public:
 	}
 
 	static void transform(SparseMatrixType& ret,
-	                      const SparseMatrixType& O,
-	                      const BlockDiagonalMatrixType& transformExternal)
+	    const SparseMatrixType& O,
+	    const BlockDiagonalMatrixType& transformExternal)
 	{
 		BlockOffDiagMatrixType m(O, transformExternal.offsetsRows());
 		static const SizeType gemmRnb = 0; // disable GemmR
-		static const SizeType threadsForGemmR = 1;  // disable GemmR parallel
+		static const SizeType threadsForGemmR = 1; // disable GemmR parallel
 		m.transform(transformExternal, gemmRnb, threadsForGemmR);
 		m.toSparse(ret);
 	}
@@ -301,7 +305,8 @@ private:
 	void fillOffsets(VectorSizeType& v, const BasisType& basis) const
 	{
 		SizeType n = basis.partition();
-		if (n == 0) return;
+		if (n == 0)
+			return;
 		v.resize(n);
 		for (SizeType i = 0; i < n; ++i)
 			v[i] = basis.partition(i);
@@ -320,7 +325,7 @@ private:
 	BlockDiagonalMatrixType transform_;
 	ProgramGlobals::DirectionEnum direction_;
 }; // class DmrgSerializer
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif

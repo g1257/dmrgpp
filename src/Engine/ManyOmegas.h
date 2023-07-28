@@ -1,18 +1,20 @@
 #ifndef MANYOMEGAS_H
 #define MANYOMEGAS_H
 #include "DmrgRunner.h"
-#include "PsiBase64.h"
 #include "InputNg.h"
-#include "LanczosSolver.h"
-#include "Vector.h"
-#include "PsimagLite.h"
 #include "InterNode.h"
+#include "LanczosSolver.h"
 #include "OmegaParams.h"
+#include "PsiBase64.h"
+#include "PsimagLite.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ComplexOrRealType, typename OmegaParamsType>
-class ManyOmegas {
+template <typename ComplexOrRealType, typename OmegaParamsType>
+class ManyOmegas
+{
 
 public:
 
@@ -23,40 +25,42 @@ public:
 	typedef PsimagLite::PsiApp ApplicationType;
 
 	ManyOmegas(PsimagLite::String data,
-	           RealType precision,
-	           const OmegaParamsType& omegaParams,
-	           const ApplicationType& app)
-	    : data_(data), runner_(precision, app), omegaParams_(omegaParams)
-	{}
+	    RealType precision,
+	    const OmegaParamsType& omegaParams,
+	    const ApplicationType& app)
+	    : data_(data)
+	    , runner_(precision, app)
+	    , omegaParams_(omegaParams)
+	{
+	}
 
 	void run(bool dryRun, PsimagLite::String root, PsimagLite::String insitu)
 	{
-		//lambda
+		// lambda
 		PsimagLite::InterNode<> internode(PsimagLite::MPI::COMM_WORLD);
 
 		internode.parallelFor(omegaParams_.offset(),
-		                      omegaParams_.total(),
-		                      [this, root, dryRun, insitu](SizeType i, SizeType)
-		{
-			const RealType omega = omegaParams_.omega(i);
-			PsimagLite::String data2 = addOmega(omega);
-			PsimagLite::String outputfile = "\nOutputFile=\"" + root + ttos(i) + "\";\n";
-			data2 += outputfile;
+		    omegaParams_.total(),
+		    [this, root, dryRun, insitu](SizeType i, SizeType) {
+			    const RealType omega = omegaParams_.omega(i);
+			    PsimagLite::String data2 = addOmega(omega);
+			    PsimagLite::String outputfile = "\nOutputFile=\"" + root + ttos(i) + "\";\n";
+			    data2 += outputfile;
 
-			PsimagLite::String logfile = "runForinput" + ttos(i) + ".cout";
+			    PsimagLite::String logfile = "runForinput" + ttos(i) + ".cout";
 
-			std::cerr<<"ManyOmegas.h:: omega = "<<omega;
-			std::cerr<<" output="<<outputfile;
-			std::cerr<<" logfile="<<logfile<<" MPI rank=";
-			std::cerr<<PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD)<<"\n";
+			    std::cerr << "ManyOmegas.h:: omega = " << omega;
+			    std::cerr << " output=" << outputfile;
+			    std::cerr << " logfile=" << logfile << " MPI rank=";
+			    std::cerr << PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD) << "\n";
 
-			if (dryRun) {
-				std::cerr<<"NOT done because -d\n";
-				return;
-			}
+			    if (dryRun) {
+				    std::cerr << "NOT done because -d\n";
+				    return;
+			    }
 
-			runner_.doOneRun(data2, insitu, logfile);
-		});
+			    runner_.doOneRun(data2, insitu, logfile);
+		    });
 	}
 
 	PsimagLite::String addOmega(RealType wn) const

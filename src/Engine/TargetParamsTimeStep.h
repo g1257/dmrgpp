@@ -80,14 +80,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGET_PARAMS_TIMESTEP_H
 #define TARGET_PARAMS_TIMESTEP_H
 
-#include "TargetParamsTimeVectors.h"
-#include "TargetParamsCommon.h"
 #include "GetBraOrKet.h"
+#include "TargetParamsCommon.h"
+#include "TargetParamsTimeVectors.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 // Coordinates reading of TargetSTructure from input file
-template<typename ModelType>
-class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType> {
+template <typename ModelType>
+class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType>
+{
 
 public:
 
@@ -95,16 +97,17 @@ public:
 	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 	typedef typename ModelType::RealType RealType;
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	TargetParamsTimeStep(IoInputter& io,
-	                     PsimagLite::String targeting,
-	                     const ModelType& model)
-	    : TimeVectorParamsType(io, targeting, model),
-	      maxTime_(0)
+	    PsimagLite::String targeting,
+	    const ModelType& model)
+	    : TimeVectorParamsType(io, targeting, model)
+	    , maxTime_(0)
 	{
 		try {
-			io.readline(maxTime_,"TSPMaxTime=");
-		} catch (std::exception&) {}
+			io.readline(maxTime_, "TSPMaxTime=");
+		} catch (std::exception&) {
+		}
 	}
 
 	virtual RealType maxTime() const
@@ -117,20 +120,20 @@ private:
 	RealType maxTime_;
 }; // class TargetParamsTimeStep
 
-template<typename ModelType>
+template <typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const TargetParamsTimeStep<ModelType>& t)
+operator<<(std::ostream& os, const TargetParamsTimeStep<ModelType>& t)
 {
-	os<<"TargetParams.type=TimeStep\n";
+	os << "TargetParams.type=TimeStep\n";
 
 	const typename TargetParamsTimeStep<ModelType>::TimeVectorParamsType& tp1 = t;
-	os<<tp1;
+	os << tp1;
 
 	const typename TargetParamsTimeStep<ModelType>::TargetParamsCommonType& tp = t;
-	os<<tp;
+	os << tp;
 
 	if (t.maxTime() > 0)
-		os<<"TSPMaxTime="<<t.maxTime()<<"\n";
+		os << "TSPMaxTime=" << t.maxTime() << "\n";
 
 	return os;
 }
@@ -138,4 +141,3 @@ operator<<(std::ostream& os,const TargetParamsTimeStep<ModelType>& t)
 
 /*@}*/
 #endif // TARGET_PARAMS_TIMESTEP_H
-

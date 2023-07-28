@@ -80,20 +80,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef TARGETING_BASE_H
 #define TARGETING_BASE_H
-#include <iostream>
-#include "TargetParamsBase.h"
+#include "Checkpoint.h"
+#include "Intent.h"
+#include "Io/IoSelector.h"
+#include "OneSiteSpaces.hh"
 #include "TargetHelper.h"
+#include "TargetParamsBase.h"
 #include "TargetingCommon.h"
 #include "Wft/WaveFunctionTransfFactory.h"
-#include "Io/IoSelector.h"
-#include "Intent.h"
-#include "Checkpoint.h"
-#include "OneSiteSpaces.hh"
+#include <iostream>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingBase {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingBase
+{
 
 public:
 
@@ -116,16 +118,17 @@ public:
 	typedef typename BasisType::QnType QnType;
 	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 	using WaveFunctionTransfType = WaveFunctionTransfFactory<LeftRightSuperType,
-	VectorWithOffsetType,
-	OptionsType,
-	OneSiteSpacesType>;
+	    VectorWithOffsetType,
+	    OptionsType,
+	    OneSiteSpacesType>;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;
 	typedef TargetHelper<ModelType, WaveFunctionTransfType> TargetHelperType;
 	typedef TargetingCommon<TargetHelperType,
-	VectorWithOffsetType,
-	LanczosSolverType> TargetingCommonType;
+	    VectorWithOffsetType,
+	    LanczosSolverType>
+	    TargetingCommonType;
 	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
@@ -135,34 +138,35 @@ public:
 	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
-	VectorVectorVectorWithOffsetType;
+	    VectorVectorVectorWithOffsetType;
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 
 	TargetingBase(const LeftRightSuperType& lrs,
-	              const CheckpointType& checkPoint,
-	              const WaveFunctionTransfType& wft,
-	              SizeType indexNoAdvance)
-	    : lrs_(lrs),
-	      model_(checkPoint.model()),
-	      commonTargeting_(lrs, checkPoint, wft, indexNoAdvance)
+	    const CheckpointType& checkPoint,
+	    const WaveFunctionTransfType& wft,
+	    SizeType indexNoAdvance)
+	    : lrs_(lrs)
+	    , model_(checkPoint.model())
+	    , commonTargeting_(lrs, checkPoint, wft, indexNoAdvance)
 	{
 		Intent<ModelType> intent(model_);
 		intent.check();
 
 		const SizeType nexcited = model_.params().numberOfExcited;
 
-		if (nexcited == 1) return; // EARLY EXIT
+		if (nexcited == 1)
+			return; // EARLY EXIT
 
 		PsimagLite::String msg = "nexcited = " + ttos(nexcited) + " > 1 is experimental\n";
-		std::cerr<<msg;
-		std::cout<<msg;
+		std::cerr << msg;
+		std::cout << msg;
 	}
 
 	TargetingBase(const TargetingBase&) = delete;
 
 	TargetingBase& operator=(const TargetingBase&) = delete;
 
-	virtual ~TargetingBase() {}
+	virtual ~TargetingBase() { }
 
 	virtual void postCtor()
 	{
@@ -178,41 +182,46 @@ public:
 	virtual RealType weight(SizeType i) const = 0;
 
 	virtual void evolve(const VectorRealType& energies,
-	                    ProgramGlobals::DirectionEnum direction,
-	                    const BlockType& block1,
-	                    const BlockType& block2,
-	                    SizeType loopNumber) = 0;
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    const BlockType& block2,
+	    SizeType loopNumber)
+	    = 0;
 
 	virtual void read(typename TargetingCommonType::IoInputType&,
-	                  PsimagLite::String) = 0;
+	    PsimagLite::String)
+	    = 0;
 
 	virtual void write(const VectorSizeType&,
-	                   PsimagLite::IoSelector::Out&,
-	                   PsimagLite::String) const = 0;
+	    PsimagLite::IoSelector::Out&,
+	    PsimagLite::String) const
+	    = 0;
 
 	// virtuals with default implementation
 
 	virtual bool includeGroundStage() const { return true; }
 
 	virtual void set(VectorVectorVectorType& inV,
-	                 const VectorSizeType& sectors,
-	                 const BasisType& someBasis)
+	    const VectorSizeType& sectors,
+	    const BasisType& someBasis)
 	{
 		commonTargeting_.aoeNonConst().setPsi(inV,
-		                                      sectors,
-		                                      someBasis,
-		                                      model_.params().numberOfExcited);
+		    sectors,
+		    someBasis,
+		    model_.params().numberOfExcited);
 	}
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
 	{
-		if (BasisWithOperatorsType::useSu2Symmetry()) return;
+		if (BasisWithOperatorsType::useSu2Symmetry())
+			return;
 
 		BlockType X = basisWithOps.block();
 
-		if (X.size()!=1) return;
+		if (X.size() != 1)
+			return;
 
-		if (X[0] != 0 && X[0] != lrs_.super().block().size()-1)
+		if (X[0] != 0 && X[0] != lrs_.super().block().size() - 1)
 			return;
 
 		basisWithOps.setOneSite(X, model_, commonTargeting_.time());
@@ -225,7 +234,8 @@ public:
 
 	virtual SizeType size() const
 	{
-		if (commonTargeting_.aoe().allStages(StageEnumType::DISABLED)) return 0;
+		if (commonTargeting_.aoe().allStages(StageEnumType::DISABLED))
+			return 0;
 		return commonTargeting_.aoe().tvs();
 	}
 
@@ -241,17 +251,16 @@ public:
 
 	// legacy thing for vectorwithoffsets
 	virtual void initialGuess(VectorVectorType& initialVector,
-	                          const OneSiteSpacesType& oneSiteSpaces,
-	                          bool noguess,
-	                          const VectorSizeType& compactedWeights,
-	                          const VectorSizeType& sectors,
-	                          const BasisType& basis) const
+	    const OneSiteSpacesType& oneSiteSpaces,
+	    bool noguess,
+	    const VectorSizeType& compactedWeights,
+	    const VectorSizeType& sectors,
+	    const BasisType& basis) const
 	{
 		if (VectorWithOffsetType::name() != "vectorwithoffsets")
 			err("FATAL: Wrong execution path\n");
 
-		const VectorWithOffsetType& psi00 = commonTargeting_.aoe().
-		        ensureOnlyOnePsi("initialGuess");
+		const VectorWithOffsetType& psi00 = commonTargeting_.aoe().ensureOnlyOnePsi("initialGuess");
 		VectorWithOffsetType vwo(compactedWeights, sectors, basis);
 		commonTargeting_.initialGuess(vwo, psi00, oneSiteSpaces, noguess);
 		const SizeType n = vwo.sectors();
@@ -261,13 +270,13 @@ public:
 	}
 
 	virtual void initialGuess(VectorType& initialVector,
-	                          const OneSiteSpacesType& oneSiteSpaces,
-	                          bool noguess,
-	                          const VectorSizeType& compactedWeights,
-	                          const VectorSizeType& sectors,
-	                          SizeType sectorIndex,
-	                          SizeType excited,
-	                          const BasisType& basis) const
+	    const OneSiteSpacesType& oneSiteSpaces,
+	    bool noguess,
+	    const VectorSizeType& compactedWeights,
+	    const VectorSizeType& sectors,
+	    SizeType sectorIndex,
+	    SizeType excited,
+	    const BasisType& basis) const
 	{
 		if (VectorWithOffsetType::name() == "vectorwithoffsets")
 			err("FATAL: Wrong execution path\n");
@@ -281,8 +290,7 @@ public:
 		const SizeType numberOfExcited = psi[sectorIndex].size();
 
 		if (excited > numberOfExcited)
-			err("initialGuess, excited=" + ttos(excited) + " > " +
-			    ttos(numberOfExcited) + "\n");
+			err("initialGuess, excited=" + ttos(excited) + " > " + ttos(numberOfExcited) + "\n");
 
 		SizeType start = 0;
 		SizeType end = numberOfExcited;
@@ -296,22 +304,21 @@ public:
 		assert(sectorIndex < sectors.size());
 		for (SizeType e = start; e < end; ++e) {
 
-
 			VectorWithOffsetType vwo(compactedWeights[sectorIndex],
-			                         sectors[sectorIndex],
-			                         basis);
+			    sectors[sectorIndex],
+			    basis);
 
 			assert(e < psi[sectorIndex].size());
 			if (psi[sectorIndex][e] == nullptr) {
-				std::cerr<<__FILE__<<":"<<__LINE__<<" sectorIndex="<<sectorIndex<<" e="<<e<<"\n";
-				std::cout<<__FILE__<<":"<<__LINE__<<" sectorIndex="<<sectorIndex<<" e="<<e<<"\n";
+				std::cerr << __FILE__ << ":" << __LINE__ << " sectorIndex=" << sectorIndex << " e=" << e << "\n";
+				std::cout << __FILE__ << ":" << __LINE__ << " sectorIndex=" << sectorIndex << " e=" << e << "\n";
 				noguess = true;
 			}
 
 			commonTargeting_.initialGuess(vwo,
-			                              *(psi[sectorIndex][e]),
-			                              oneSiteSpaces,
-			                              noguess);
+			    *(psi[sectorIndex][e]),
+			    oneSiteSpaces,
+			    noguess);
 
 			VectorType tmpVector;
 			vwo.extract(tmpVector, vwo.sector(0));
@@ -338,7 +345,8 @@ public:
 
 	RealType time() const
 	{
-		return commonTargeting_.time(); }
+		return commonTargeting_.time();
+	}
 
 	const typename VectorWithOffsetType::value_type& inSitu(SizeType i) const
 	{
@@ -348,16 +356,16 @@ public:
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
 	static PsimagLite::String buildPrefix(PsimagLite::IoSelector::Out& io,
-	                                      SizeType counter)
+	    SizeType counter)
 	{
 		PsimagLite::String prefix("TargetingCommon");
 		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
-		if (counter == 0) io.createGroup(prefix);
+		if (counter == 0)
+			io.createGroup(prefix);
 
 		io.write(counter + 1,
-		         prefix + "/Size",
-		         (counter == 0) ? SerializerType::NO_OVERWRITE :
-		                          SerializerType::ALLOW_OVERWRITE);
+		    prefix + "/Size",
+		    (counter == 0) ? SerializerType::NO_OVERWRITE : SerializerType::ALLOW_OVERWRITE);
 
 		prefix += ("/" + ttos(counter));
 
@@ -402,9 +410,8 @@ private:
 	const LeftRightSuperType& lrs_;
 	const ModelType& model_;
 	TargetingCommonType commonTargeting_;
-};     //class TargetingBase
+}; // class TargetingBase
 
 } // namespace Dmrg
 /*@}*/
 #endif
-

@@ -81,10 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "TypeToString.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename VectorType>
-class MettsSerializer {
+template <typename VectorType>
+class MettsSerializer
+{
 
 	typedef typename VectorType::value_type VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
@@ -96,10 +98,13 @@ public:
 	MettsSerializer() { }
 
 	MettsSerializer(RealType currentBeta,
-	                SizeType site,
-	                const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
-	    : currentBeta_(currentBeta),site_(site),targetVectors_(targetVectors)
-	{}
+	    SizeType site,
+	    const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
+	    : currentBeta_(currentBeta)
+	    , site_(site)
+	    , targetVectors_(targetVectors)
+	{
+	}
 
 	MettsSerializer(typename PsimagLite::IoSelector::In& io)
 	{
@@ -108,7 +113,7 @@ public:
 
 		io.read(x, s);
 
-		if (x<0)
+		if (x < 0)
 			throw PsimagLite::RuntimeError("MettsSerializer:: time cannot be negative\n");
 
 		currentBeta_ = x;
@@ -116,54 +121,56 @@ public:
 		s = "TargetCentralSite";
 		int xi = 0;
 		io.read(xi, s);
-		if (xi<0)
+		if (xi < 0)
 			throw PsimagLite::RuntimeError("MettsSerializer:: site cannot be negative\n");
 
 		site_ = xi;
 
 		s = "TNUMBEROFVECTORS";
 		io.read(xi, s);
-		if (xi<=0)
+		if (xi <= 0)
 			throw PsimagLite::RuntimeError("MettsSerializer:: n. of vectors must be positive\n");
 
 		targetVectors_.resize(xi);
-		for (SizeType i=0;i<targetVectors_.size();i++) {
-			s = "targetVector"+ttos(i);
-			targetVectors_[i].read(io,s);
+		for (SizeType i = 0; i < targetVectors_.size(); i++) {
+			s = "targetVector" + ttos(i);
+			targetVectors_[i].read(io, s);
 		}
 	}
 
-	SizeType size(SizeType i=0) const
+	SizeType size(SizeType i = 0) const
 	{
-		return  targetVectors_[i].size();
+		return targetVectors_[i].size();
 	}
 
 	RealType beta() const { return currentBeta_; }
 
 	SizeType site() const
 	{
-		return  site_;
+		return site_;
 	}
 
-	const VectorType& vector(SizeType i=0) const
+	const VectorType& vector(SizeType i = 0) const
 	{
 		return targetVectors_[i];
 	}
 
-	template<typename IoOutputter>
+	template <typename IoOutputter>
 	void write(IoOutputter& io,
-	          typename PsimagLite::EnableIf<
-	          PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsOutputLike<IoOutputter>::True,
+		int>::Type
+	    = 0) const
 	{
 		PsimagLite::String s = "BETA=" + ttos(currentBeta_);
 		io.printline(s);
 		s = "TargetCentralSite=" + ttos(site_);
 		io.printline(s);
-		s = "TNUMBEROFVECTORS="+ttos(targetVectors_.size());
+		s = "TNUMBEROFVECTORS=" + ttos(targetVectors_.size());
 		io.printline(s);
-		for (SizeType i=0;i<targetVectors_.size();i++) {
-			PsimagLite::String label = "targetVector"+ttos(i)+"_"+ttos(currentBeta_);
-			targetVectors_[i].write(io,label);
+		for (SizeType i = 0; i < targetVectors_.size(); i++) {
+			PsimagLite::String label = "targetVector" + ttos(i) + "_" + ttos(currentBeta_);
+			targetVectors_[i].write(io, label);
 		}
 	}
 
@@ -173,8 +180,7 @@ private:
 	SizeType site_;
 	typename PsimagLite::Vector<VectorType>::Type targetVectors_;
 }; // class MettsSerializer
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // METTS_SERIALIZER_H
-

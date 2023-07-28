@@ -78,30 +78,33 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef ParametersHubbardAncilla_H
 #define ParametersHubbardAncilla_H
-#include "ParametersModelBase.h"
 #include "../FeAsModel/ParametersModelFeAs.h"
+#include "ParametersModelBase.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! Hubbard Model Parameters
-template<typename RealType, typename QnType>
+template <typename RealType, typename QnType>
 struct ParametersHubbardAncilla : ParametersModelFeAs<RealType, QnType> {
 
 	typedef ParametersModelFeAs<RealType, QnType> BaseType;
 
-	template<typename IoInputType>
-	ParametersHubbardAncilla(IoInputType& io) : BaseType(io)
-	{}
+	template <typename IoInputType>
+	ParametersHubbardAncilla(IoInputType& io)
+	    : BaseType(io)
+	{
+	}
 
-	template<typename SomeMemResolvType>
+	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	    SizeType,
+	    PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardAncilla";
 		io.createGroup(label);
@@ -113,4 +116,3 @@ struct ParametersHubbardAncilla : ParametersModelFeAs<RealType, QnType> {
 
 /*@}*/
 #endif
-

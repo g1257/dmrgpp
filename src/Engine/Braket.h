@@ -1,16 +1,18 @@
 #ifndef DMRG_braket_H
 #define DMRG_braket_H
-#include "Vector.h"
-#include "PsimagLite.h"
-#include "Matrix.h"
-#include "OperatorSpec.h"
 #include "CanonicalExpression.h"
 #include "GetBraOrKet.h"
+#include "Matrix.h"
+#include "OperatorSpec.h"
+#include "PsimagLite.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelType_>
-class Braket {
+template <typename ModelType_>
+class Braket
+{
 
 public:
 
@@ -31,8 +33,9 @@ public:
 	typedef PsimagLite::GetBraOrKet GetBraOrKetType;
 	typedef PsimagLite::Vector<GetBraOrKetType>::Type VectorGetBraOrKetType;
 
-	Braket(const ModelType& model,const PsimagLite::String& braket)
-	    : model_(model), savedString_(braket)
+	Braket(const ModelType& model, const PsimagLite::String& braket)
+	    : model_(model)
+	    , savedString_(braket)
 	{
 		VectorStringType vecStr;
 		PsimagLite::split(vecStr, braket, "|");
@@ -51,20 +54,20 @@ public:
 			throw PsimagLite::RuntimeError(str);
 		}
 
-		braket_.push_back(vecStr[0].substr(1,vecStr[0].length()-1));
+		braket_.push_back(vecStr[0].substr(1, vecStr[0].length() - 1));
 
-		braket_.push_back(vecStr[2].substr(0,vecStr[2].length()-1));
+		braket_.push_back(vecStr[2].substr(0, vecStr[2].length() - 1));
 
 		if (vecStr[1].length() > 1 && vecStr[1][0] == '!') {
 			opExprName_.resize(1);
 			opExprName_[0] = vecStr[1];
-			sites_.resize(opExprName_.size(),-1);
+			sites_.resize(opExprName_.size(), -1);
 			return; // early exit <===
 		}
 
 		PsimagLite::split(opExprName_, vecStr[1], ";");
 
-		sites_.resize(opExprName_.size(),-1);
+		sites_.resize(opExprName_.size(), -1);
 
 		OperatorSpecType opSpec(model);
 		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
@@ -105,7 +108,8 @@ public:
 	SizeType site(SizeType ind) const
 	{
 		assert(ind < sites_.size());
-		if (sites_[ind] >= 0) return sites_[ind];
+		if (sites_[ind] >= 0)
+			return sites_[ind];
 		throw PsimagLite::RuntimeError("site is negative\n");
 	}
 
@@ -135,4 +139,3 @@ private:
 }
 
 #endif // DMRG_braket_H
-

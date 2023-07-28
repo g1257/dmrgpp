@@ -1,16 +1,17 @@
 #ifndef Su3REPRESENTATION_BASE_H
 #define Su3REPRESENTATION_BASE_H
-#include "PsimagLite.h"
 #include "Matrix.h"
+#include "PsimagLite.h"
 
-template<typename ComplexOrRealType>
-class Su3RepresentationBase {
+template <typename ComplexOrRealType>
+class Su3RepresentationBase
+{
 
 public:
 
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
-	virtual ~Su3RepresentationBase() {}
+	virtual ~Su3RepresentationBase() { }
 
 	virtual void getMatrix(MatrixType&, SizeType) const = 0;
 

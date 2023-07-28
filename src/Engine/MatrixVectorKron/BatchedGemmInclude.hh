@@ -8,9 +8,11 @@
 #define BATCHED_GEMM BatchedGemmCpu
 #endif
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-class BatchedGemmInclude {
+class BatchedGemmInclude
+{
 
 public:
 

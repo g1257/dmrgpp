@@ -82,13 +82,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGET_PARAMS_CORRECTION_V_H
 #define TARGET_PARAMS_CORRECTION_V_H
 
-#include "TargetParamsCommon.h"
 #include "FreqEnum.h"
+#include "TargetParamsCommon.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 // Coordinates reading of TargetSTructure from input file
-template<typename ModelType>
-class TargetParamsCorrectionVector : public TargetParamsCommon<ModelType> {
+template <typename ModelType>
+class TargetParamsCorrectionVector : public TargetParamsCommon<ModelType>
+{
 
 public:
 
@@ -101,21 +103,21 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrReal;
 	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	TargetParamsCorrectionVector(IoInputter& io,
-	                             PsimagLite::String targeting,
-	                             const ModelType& model)
-	    : BaseType(io, targeting, model),
-	      cgSteps_(1000),
-	      firstRitz_(0),
-	      nForFraction_(1),
-	      advanceEach_(0),
-	      cgEps_(1e-6)
+	    PsimagLite::String targeting,
+	    const ModelType& model)
+	    : BaseType(io, targeting, model)
+	    , cgSteps_(1000)
+	    , firstRitz_(0)
+	    , nForFraction_(1)
+	    , advanceEach_(0)
+	    , cgEps_(1e-6)
 	{
-		io.readline(correctionA_,"CorrectionA=");
-		io.readline(type_,"DynamicDmrgType=");
+		io.readline(correctionA_, "CorrectionA=");
+		io.readline(type_, "DynamicDmrgType=");
 		PsimagLite::String tmp;
-		io.readline(tmp,"CorrectionVectorFreqType=");
+		io.readline(tmp, "CorrectionVectorFreqType=");
 		PsimagLite::FreqEnum freqEnum = PsimagLite::FREQ_REAL;
 
 		if (tmp == "Matsubara") {
@@ -126,11 +128,11 @@ public:
 		}
 
 		RealType omega;
-		io.readline(omega,"CorrectionVectorOmega=");
-		omega_=PairFreqType(freqEnum, omega);
-		io.readline(eta_,"CorrectionVectorEta=");
+		io.readline(omega, "CorrectionVectorOmega=");
+		omega_ = PairFreqType(freqEnum, omega);
+		io.readline(eta_, "CorrectionVectorEta=");
 
-		io.readline(tmp,"CorrectionVectorAlgorithm=");
+		io.readline(tmp, "CorrectionVectorAlgorithm=");
 		if (tmp == "Krylov") {
 			algorithm_ = BaseType::AlgorithmEnum::KRYLOV;
 		} else if (tmp == "ConjugateGradient") {
@@ -146,29 +148,34 @@ public:
 		}
 
 		try {
-			io.readline(cgSteps_,"ConjugateGradientSteps=");
-		} catch (std::exception&) {}
+			io.readline(cgSteps_, "ConjugateGradientSteps=");
+		} catch (std::exception&) {
+		}
 
-        try {
-			io.readline(cgEps_,"ConjugateGradientEps=");
-		} catch (std::exception&) {}
+		try {
+			io.readline(cgEps_, "ConjugateGradientEps=");
+		} catch (std::exception&) {
+		}
 
 		try {
 			int x = 0;
-			io.readline(x,"TSPUseQns=");
+			io.readline(x, "TSPUseQns=");
 			err("TSPUseQns= is no longer needed, please delete it from the input file\n");
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			io.readline(firstRitz_, "FirstRitz=");
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			io.readline(nForFraction_, "CVnForFraction=");
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (nForFraction_ > 1)
-			io.readline(advanceEach_,"TSPAdvanceEach=");
+			io.readline(advanceEach_, "TSPAdvanceEach=");
 
 		if (freqEnum == PsimagLite::FREQ_MATSUBARA && firstRitz_ != 0)
 			err("FirstRitz must be 0 for Matsubara\n");
@@ -199,9 +206,9 @@ public:
 		return omega_;
 	}
 
-	virtual void omega(PsimagLite::FreqEnum freqEnum,RealType x)
+	virtual void omega(PsimagLite::FreqEnum freqEnum, RealType x)
 	{
-		omega_ = PairFreqType(freqEnum,x);
+		omega_ = PairFreqType(freqEnum, x);
 	}
 
 	virtual RealType eta() const
@@ -242,25 +249,24 @@ private:
 	RealType cgEps_;
 }; // class TargetParamsCorrectionVector
 
-template<typename ModelType>
+template <typename ModelType>
 inline std::ostream& operator<<(std::ostream& os,
-                                const TargetParamsCorrectionVector<ModelType>& t)
+    const TargetParamsCorrectionVector<ModelType>& t)
 {
-	os<<"TargetParams.type=AdaptiveDynamic\n";
+	os << "TargetParams.type=AdaptiveDynamic\n";
 	const TargetParamsCommon<ModelType>& tp = t;
-	os<<tp;
-	os<<"DynamicDmrgType="<<t.type()<<"\n";
-	os<<"CorrectionVectorOmega="<<t.omega()<<"\n";
-	os<<"CorrectionVectorEta="<<t.eta()<<"\n";
-	os<<"ConjugateGradientSteps"<<t.cgSteps()<<"\n";
-	os<<"ConjugateGradientEps"<<t.cgEps()<<"\n";
-	os<<"firstRitz"<<t.firstRitz()<<"\n";
-	os<<"nForFraction"<<t.nForFraction()<<"\n";
+	os << tp;
+	os << "DynamicDmrgType=" << t.type() << "\n";
+	os << "CorrectionVectorOmega=" << t.omega() << "\n";
+	os << "CorrectionVectorEta=" << t.eta() << "\n";
+	os << "ConjugateGradientSteps" << t.cgSteps() << "\n";
+	os << "ConjugateGradientEps" << t.cgEps() << "\n";
+	os << "firstRitz" << t.firstRitz() << "\n";
+	os << "nForFraction" << t.nForFraction() << "\n";
 
 	return os;
 }
 } // namespace Dmrg
 
 /*@}*/
-#endif //TARGET_PARAMS_CORRECTION_V_H
-
+#endif // TARGET_PARAMS_CORRECTION_V_H

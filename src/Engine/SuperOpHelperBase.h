@@ -1,13 +1,15 @@
 #ifndef SuperOpHelperBase_H
 #define SuperOpHelperBase_H
+#include "MetaOpForConnection.hh"
 #include "ProgramGlobals.h"
 #include "Vector.h"
-#include "MetaOpForConnection.hh"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename SuperGeometryType, typename ParametersType>
-class SuperOpHelperBase {
+template <typename SuperGeometryType, typename ParametersType>
+class SuperOpHelperBase
+{
 
 public:
 
@@ -17,9 +19,10 @@ public:
 
 	SuperOpHelperBase(const SuperGeometryType& superGeometry)
 	    : superGeometry_(superGeometry)
-	{}
+	{
+	}
 
-	virtual ~SuperOpHelperBase() {}
+	virtual ~SuperOpHelperBase() { }
 
 	virtual void setToProduct(SizeType, SizeType, ProgramGlobals::DirectionEnum dir)
 	{
@@ -42,8 +45,8 @@ public:
 	}
 
 	virtual PairMetaOpForConnection finalIndices(const VectorSizeType&,
-	                                             ProgramGlobals::ConnectionEnum,
-	                                             SizeType) const
+	    ProgramGlobals::ConnectionEnum,
+	    SizeType) const
 	{
 		throw PsimagLite::RuntimeError("SuperOpHelperBase::finalIndices4sites\n");
 	}

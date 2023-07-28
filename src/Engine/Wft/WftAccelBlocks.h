@@ -1,16 +1,18 @@
 #ifndef WFTACCELBLOCKS_H
 #define WFTACCELBLOCKS_H
-#include "Matrix.h"
 #include "BLAS.h"
-#include "ProgramGlobals.h"
-#include <iostream>
-#include <iomanip>
 #include "GemmR.h"
+#include "Matrix.h"
+#include "ProgramGlobals.h"
+#include <iomanip>
+#include <iostream>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename WaveFunctionTransfBaseType>
-class WftAccelBlocks {
+template <typename WaveFunctionTransfBaseType>
+class WftAccelBlocks
+{
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
@@ -27,30 +29,32 @@ class WftAccelBlocks {
 	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
 	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
 
-	class ParallelWftInBlocks {
+	class ParallelWftInBlocks
+	{
 
 	public:
 
 		ParallelWftInBlocks(VectorMatrixType& result,
-		                    const VectorMatrixType& psi,
-		                    const MatrixType& ws,
-		                    const MatrixType& we,
-		                    SizeType volumeOfNk,
-		                    const ProgramGlobals::SysOrEnvEnum sysOrEnv,
-		                    SizeType threads,
-		                    SizeType gemmRnb,
-		                    SizeType threadsForGemmR)
-		    : result_(result),
-		      psi_(psi),
-		      ws_(ws),
-		      we_(we),
-		      volumeOfNk_(volumeOfNk),
-		      sysOrEnv_(sysOrEnv),
-		      storage_(threads),
-		      gemmRnb_(gemmRnb),
-		      threadsForGemmR_(threadsForGemmR)
+		    const VectorMatrixType& psi,
+		    const MatrixType& ws,
+		    const MatrixType& we,
+		    SizeType volumeOfNk,
+		    const ProgramGlobals::SysOrEnvEnum sysOrEnv,
+		    SizeType threads,
+		    SizeType gemmRnb,
+		    SizeType threadsForGemmR)
+		    : result_(result)
+		    , psi_(psi)
+		    , ws_(ws)
+		    , we_(we)
+		    , volumeOfNk_(volumeOfNk)
+		    , sysOrEnv_(sysOrEnv)
+		    , storage_(threads)
+		    , gemmRnb_(gemmRnb)
+		    , threadsForGemmR_(threadsForGemmR)
 
-		{}
+		{
+		}
 
 		SizeType tasks() const { return volumeOfNk_; }
 
@@ -90,7 +94,6 @@ class WftAccelBlocks {
 			result_[kp].resize(nrow_Ynew, ncol_Ynew);
 			result_[kp].setTo(0.0);
 
-
 			const MatrixType& weModif = getWeModif(we_, threadNum);
 
 #if 0
@@ -99,7 +102,6 @@ class WftAccelBlocks {
 
 			int nrow_Ytemp = 0;
 			int ncol_Ytemp = 0;
-
 
 			// ---------------------------
 			// Compute   Ynew = W_S * Yold * W_E
@@ -117,17 +119,16 @@ class WftAccelBlocks {
 			//      2 * nrow_W_S * ncol_W_S * ncol_Ytemp flops
 			// ---------------------------
 
-
-			const ComplexOrRealType *Yold = &((psi_[kp])(0,0));
+			const ComplexOrRealType* Yold = &((psi_[kp])(0, 0));
 			const int ldYold = nrow_Yold;
 
-			const ComplexOrRealType *W_E = &(weModif(0,0));
+			const ComplexOrRealType* W_E = &(weModif(0, 0));
 			const int ldW_E = nrow_W_E;
 
-			const ComplexOrRealType *W_S = &(ws_(0,0));
+			const ComplexOrRealType* W_S = &(ws_(0, 0));
 			const int ldW_S = nrow_W_S;
 
-			ComplexOrRealType *Ynew = &((result_[kp])(0,0));
+			ComplexOrRealType* Ynew = &((result_[kp])(0, 0));
 			const int ldYnew = nrow_Ynew;
 
 			// ----------------------
@@ -137,8 +138,7 @@ class WftAccelBlocks {
 			// ----------------------
 			nrow_Ytemp = nrow_W_S;
 			ncol_Ytemp = ncol_Yold;
-			const RealType flops_method_1 = 2.0 * nrow_W_S   * ncol_W_S   * ncol_Yold +
-			        2.0 * nrow_Ytemp * ncol_Ytemp * ncol_W_E;
+			const RealType flops_method_1 = 2.0 * nrow_W_S * ncol_W_S * ncol_Yold + 2.0 * nrow_Ytemp * ncol_Ytemp * ncol_W_E;
 
 			// ------------------------
 			// Method 2:
@@ -147,9 +147,7 @@ class WftAccelBlocks {
 			// ------------------------
 			nrow_Ytemp = nrow_Yold;
 			ncol_Ytemp = ncol_W_E;
-			const RealType flops_method_2 =  2.0 * nrow_Yold * ncol_Yold * ncol_W_E +
-			        2.0 * nrow_W_S  * ncol_W_S  * ncol_Ytemp ;
-
+			const RealType flops_method_2 = 2.0 * nrow_Yold * ncol_Yold * ncol_W_E + 2.0 * nrow_W_S * ncol_W_S * ncol_Ytemp;
 
 			const bool use_method_1 = (flops_method_1 <= flops_method_2);
 #if 0
@@ -186,12 +184,12 @@ class WftAccelBlocks {
 
 			MatrixType tmp(nrow_Ytemp, ncol_Ytemp);
 			tmp.setTo(0.0);
-			ComplexOrRealType *Ytemp = &(tmp(0,0));
+			ComplexOrRealType* Ytemp = &(tmp(0, 0));
 			const int ldYtemp = nrow_Ytemp;
 			static const bool needsPrinting = false;
 			PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
-			                                           gemmRnb_,
-			                                           threadsForGemmR_);
+			    gemmRnb_,
+			    threadsForGemmR_);
 
 			if (use_method_1) {
 				// ------------------
@@ -211,14 +209,11 @@ class WftAccelBlocks {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					assert( ncol_W_S == nrow_Yold );
-					assert( nrow_Ytemp == nrow_W_S );
-					assert( ncol_Ytemp == ncol_Yold );
+					assert(ncol_W_S == nrow_Yold);
+					assert(nrow_Ytemp == nrow_W_S);
+					assert(ncol_Ytemp == ncol_Yold);
 
-					gemmR( 'N', 'N',
-					                    mm, nn, kk,
-					                    alpha, W_S, ldW_S, Yold, ldYold,
-					                    beta,  Ytemp, ldYtemp );
+					gemmR('N', 'N', mm, nn, kk, alpha, W_S, ldW_S, Yold, ldYold, beta, Ytemp, ldYtemp);
 				}
 
 				// -------------------
@@ -232,27 +227,19 @@ class WftAccelBlocks {
 					const ComplexOrRealType alpha = d_one;
 					const ComplexOrRealType beta = d_zero;
 
-					assert( nrow_Ynew == nrow_Ytemp );
-					assert( ncol_Ynew == ncol_W_E );
-					assert( ncol_Ytemp == nrow_W_E );
+					assert(nrow_Ynew == nrow_Ytemp);
+					assert(ncol_Ynew == ncol_W_E);
+					assert(ncol_Ytemp == nrow_W_E);
 
-					gemmR( 'N', 'N',
-					                    mm, nn, kk,
-					                    alpha, Ytemp, ldYtemp, W_E, ldW_E,
-					                    beta,  Ynew, ldYnew );
-
-
+					gemmR('N', 'N', mm, nn, kk, alpha, Ytemp, ldYtemp, W_E, ldW_E, beta, Ynew, ldYnew);
 				}
 
-
-			}
-			else {
+			} else {
 				// --------------------
 				// Method 2:
 				// Ytemp = Yold * W_E
 				// Ynew =  W_S * Ytemp
 				// --------------------
-
 
 				//  ------------------
 				//  Ytemp = Yold * W_E
@@ -265,14 +252,11 @@ class WftAccelBlocks {
 					const int nn = ncol_Ytemp;
 					const int kk = ncol_Yold;
 
-					assert( nrow_Ytemp == nrow_Yold );
-					assert( ncol_Ytemp == ncol_W_E );
-					assert( ncol_Yold == nrow_W_E );
+					assert(nrow_Ytemp == nrow_Yold);
+					assert(ncol_Ytemp == ncol_W_E);
+					assert(ncol_Yold == nrow_W_E);
 
-					gemmR('N', 'N',
-					                   mm, nn, kk,
-					                   alpha, Yold, ldYold, W_E, ldW_E,
-					                   beta, Ytemp, ldYtemp );
+					gemmR('N', 'N', mm, nn, kk, alpha, Yold, ldYold, W_E, ldW_E, beta, Ytemp, ldYtemp);
 				}
 
 				// ------------------
@@ -286,15 +270,11 @@ class WftAccelBlocks {
 					const int nn = ncol_Ynew;
 					const int kk = ncol_W_S;
 
-					assert( nrow_Ynew == nrow_W_S);
-					assert( ncol_Ynew == ncol_Ytemp);
-					assert( ncol_W_S == nrow_Ytemp );
+					assert(nrow_Ynew == nrow_W_S);
+					assert(ncol_Ynew == ncol_Ytemp);
+					assert(ncol_W_S == nrow_Ytemp);
 
-					gemmR('N', 'N',
-					                   mm, nn, kk,
-					                   alpha, W_S, ldW_S, Ytemp, ldYtemp,
-					                   beta, Ynew, ldYnew );
-
+					gemmR('N', 'N', mm, nn, kk, alpha, W_S, ldW_S, Ytemp, ldYtemp, beta, Ynew, ldYnew);
 				}
 			};
 		}
@@ -317,8 +297,6 @@ class WftAccelBlocks {
 			const int nrow_W_E = we_.rows();
 			const int ncol_W_E = we_.cols();
 
-
-
 			// -------------------------------------------------
 			// Note Y = kron(A,B) * X  =   B * X * transpose(A)
 			//
@@ -332,23 +310,20 @@ class WftAccelBlocks {
 			int nrow_Ytemp = 0;
 			int ncol_Ytemp = 0;
 
-
 			result_[kp].resize(nrow_Ynew, ncol_Ynew);
 			result_[kp].setTo(0.0);
 
-			const ComplexOrRealType *Yold = &((psi_[kp])(0,0));
+			const ComplexOrRealType* Yold = &((psi_[kp])(0, 0));
 			const int ldYold = nrow_Yold;
 
-			const ComplexOrRealType *W_E = &(we_(0,0));
+			const ComplexOrRealType* W_E = &(we_(0, 0));
 			const int ldW_E = nrow_W_E;
 
-
-			ComplexOrRealType  *Ynew = &((result_[kp])(0,0));
+			ComplexOrRealType* Ynew = &((result_[kp])(0, 0));
 			const int ldYnew = nrow_Ynew;
 
-			const ComplexOrRealType *W_S = &(ws_(0,0));
+			const ComplexOrRealType* W_S = &(ws_(0, 0));
 			const int ldW_S = nrow_W_S;
-
 
 			const ComplexOrRealType d_one = 1.0;
 			const ComplexOrRealType d_zero = 0.0;
@@ -371,7 +346,6 @@ class WftAccelBlocks {
 			//       2.0 * nrow_W_S * ncol_W_S * ncol_Ytemp
 			// ---------------------------------------------------
 
-
 			// ---------------------------------------
 			// Method 1:
 			// (1) Ytemp = conj( transpose(W_S)) * Yold
@@ -379,8 +353,7 @@ class WftAccelBlocks {
 			// ---------------------------------------
 			nrow_Ytemp = ncol_W_S;
 			ncol_Ytemp = ncol_Yold;
-			const RealType flops_method_1 = 2.0 * nrow_W_S * ncol_W_S * ncol_Yold +
-			        2.0 * nrow_Ytemp * ncol_Ytemp * nrow_W_E;
+			const RealType flops_method_1 = 2.0 * nrow_W_S * ncol_W_S * ncol_Yold + 2.0 * nrow_Ytemp * ncol_Ytemp * nrow_W_E;
 
 			// -----------------------
 			// Method 2:
@@ -389,8 +362,7 @@ class WftAccelBlocks {
 			// -----------------------
 			nrow_Ytemp = nrow_Yold;
 			ncol_Ytemp = nrow_W_E;
-			const RealType flops_method_2 = 2.0 * nrow_Yold * ncol_Yold * nrow_W_E +
-			        2.0 * nrow_W_S * ncol_W_S * ncol_Ytemp;
+			const RealType flops_method_2 = 2.0 * nrow_Yold * ncol_Yold * nrow_W_E + 2.0 * nrow_W_S * ncol_W_S * ncol_Ytemp;
 
 			const bool use_method_1 = (flops_method_1 <= flops_method_2);
 
@@ -413,12 +385,12 @@ class WftAccelBlocks {
 			MatrixType tmp(nrow_Ytemp, ncol_Ytemp);
 			tmp.setTo(0.0);
 
-			ComplexOrRealType *Ytemp = &(tmp(0,0));
+			ComplexOrRealType* Ytemp = &(tmp(0, 0));
 			const int ldYtemp = nrow_Ytemp;
 			static const bool needsPrinting = false;
 			PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
-			                                           gemmRnb_,
-			                                           threadsForGemmR_);
+			    gemmRnb_,
+			    threadsForGemmR_);
 
 			if (use_method_1) {
 				// ---------------------------
@@ -426,7 +398,6 @@ class WftAccelBlocks {
 				// (1) Ytemp = conj( transpose(W_S)) * Yold
 				// (2) Ynew = Ytemp * transpose(W_E)
 				// ---------------------------
-
 
 				// -----------------------------------------
 				// (1) Ytemp = conj( transpose(W_S)) * Yold
@@ -439,11 +410,7 @@ class WftAccelBlocks {
 					const int nn = ncol_Ytemp;
 					const int kk = nrow_Yold;
 
-					gemmR('C', 'N',
-					                   mm,nn,kk,
-					                   alpha, W_S, ldW_S, Yold, ldYold,
-					                   beta,  Ytemp, ldYtemp );
-
+					gemmR('C', 'N', mm, nn, kk, alpha, W_S, ldW_S, Yold, ldYold, beta, Ytemp, ldYtemp);
 				}
 
 				// ----------------------------------
@@ -457,17 +424,10 @@ class WftAccelBlocks {
 					const int nn = ncol_Ynew;
 					const int kk = ncol_Ytemp;
 
-					gemmR('N', 'T',
-					                   mm,nn,kk,
-					                   alpha, Ytemp, ldYtemp, W_E, ldW_E,
-					                   beta, Ynew, ldYnew );
-
+					gemmR('N', 'T', mm, nn, kk, alpha, Ytemp, ldYtemp, W_E, ldW_E, beta, Ynew, ldYnew);
 				}
 
-
-
-			}
-			else {
+			} else {
 				// --------------------------------------
 				// Method 2:
 				// (1) Ytemp = Yold * transpose(W_E)
@@ -486,10 +446,7 @@ class WftAccelBlocks {
 					const int nn = ncol_Ytemp;
 					const int kk = ncol_Yold;
 
-					gemmR('N', 'T',
-					                   mm, nn, kk,
-					                   alpha, Yold, ldYold, W_E,  ldW_E,
-					                   beta, Ytemp, ldYtemp );
+					gemmR('N', 'T', mm, nn, kk, alpha, Yold, ldYold, W_E, ldW_E, beta, Ytemp, ldYtemp);
 				}
 
 				// ------------------------------------
@@ -504,11 +461,7 @@ class WftAccelBlocks {
 					const int nn = ncol_Ynew;
 					const int kk = nrow_Ytemp;
 
-					gemmR('C', 'N',
-					                   mm, nn, kk,
-					                   alpha, W_S, ldW_S, Ytemp, ldYtemp,
-					                   beta, Ynew, ldYnew);
-
+					gemmR('C', 'N', mm, nn, kk, alpha, W_S, ldW_S, Ytemp, ldYtemp, beta, Ynew, ldYnew);
 				}
 			};
 		}
@@ -518,8 +471,8 @@ class WftAccelBlocks {
 			return m;
 		}
 
-		const MatrixType& getWeModif(const PsimagLite::Matrix<std::complex<RealType> >& m,
-		                             SizeType threadNum)
+		const MatrixType& getWeModif(const PsimagLite::Matrix<std::complex<RealType>>& m,
+		    SizeType threadNum)
 		{
 			storage_[threadNum].clear();
 			SizeType rows = m.rows();
@@ -540,22 +493,24 @@ class WftAccelBlocks {
 		const ProgramGlobals::SysOrEnvEnum sysOrEnv_;
 		VectorMatrixType storage_;
 		SizeType gemmRnb_;
-        SizeType threadsForGemmR_;
+		SizeType threadsForGemmR_;
 	};
 
 public:
 
 	WftAccelBlocks(const DmrgWaveStructType& dmrgWaveStruct,
-	               const WftOptionsType& wftOptions)
-	    : dmrgWaveStruct_(dmrgWaveStruct), wftOptions_(wftOptions)
-	{}
+	    const WftOptionsType& wftOptions)
+	    : dmrgWaveStruct_(dmrgWaveStruct)
+	    , wftOptions_(wftOptions)
+	{
+	}
 
 	void environFromInfinite(VectorWithOffsetType& psiDest,
-	                         SizeType i0,
-	                         const VectorWithOffsetType& psiSrc,
-	                         SizeType i0src,
-	                         const LeftRightSuperType& lrs,
-	                         const OneSiteSpacesType& oneSiteSpaces) const
+	    SizeType i0,
+	    const VectorWithOffsetType& psiSrc,
+	    SizeType i0src,
+	    const LeftRightSuperType& lrs,
+	    const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		if (lrs.left().block().size() < 2)
 			err("Bounce!?\n");
@@ -581,20 +536,20 @@ public:
 		VectorMatrixType result(volumeOfNk);
 
 		SizeType threads = std::min(volumeOfNk,
-		                            PsimagLite::Concurrency::codeSectionParams.npthreads);
+		    PsimagLite::Concurrency::codeSectionParams.npthreads);
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		ParallelizerType threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
-		                              psi,
-		                              ws,
-		                              we,
-		                              volumeOfNk,
-		                              ProgramGlobals::SysOrEnvEnum::ENVIRON,
-		                              threads,
-		                              wftOptions_.gemmRnb,
-		                              wftOptions_.threadsForGemmR);
+		    psi,
+		    ws,
+		    we,
+		    volumeOfNk,
+		    ProgramGlobals::SysOrEnvEnum::ENVIRON,
+		    threads,
+		    wftOptions_.gemmRnb,
+		    wftOptions_.threadsForGemmR);
 
 		threadedWft.loopCreate(helperWft);
 
@@ -602,11 +557,11 @@ public:
 	}
 
 	void systemFromInfinite(VectorWithOffsetType& psiDest,
-	                        SizeType i0,
-	                        const VectorWithOffsetType& psiSrc,
-	                        SizeType i0src,
-	                        const LeftRightSuperType& lrs,
-	                        const OneSiteSpacesType& oneSiteSpaces) const
+	    SizeType i0,
+	    const VectorWithOffsetType& psiSrc,
+	    SizeType i0src,
+	    const LeftRightSuperType& lrs,
+	    const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		if (lrs.right().block().size() < 2)
 			err("Bounce!?\n");
@@ -637,14 +592,14 @@ public:
 		ParallelizerType threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
-		                              psi,
-		                              ws,
-		                              we,
-		                              volumeOfNk,
-		                              ProgramGlobals::SysOrEnvEnum::SYSTEM,
-		                              threads,
-		                              wftOptions_.gemmRnb,
-		                              wftOptions_.threadsForGemmR);
+		    psi,
+		    ws,
+		    we,
+		    volumeOfNk,
+		    ProgramGlobals::SysOrEnvEnum::SYSTEM,
+		    threads,
+		    wftOptions_.gemmRnb,
+		    wftOptions_.threadsForGemmR);
 
 		threadedWft.loopCreate(helperWft);
 
@@ -654,14 +609,14 @@ public:
 private:
 
 	void environPreparePsi(VectorMatrixType& psi,
-	                       const VectorWithOffsetType& psiSrc,
-	                       SizeType i0src,
-	                       SizeType volumeOfNk) const
+	    const VectorWithOffsetType& psiSrc,
+	    SizeType i0src,
+	    SizeType volumeOfNk) const
 	{
 		SizeType total = psiSrc.effectiveSize(i0src);
 		SizeType offset = psiSrc.offset(i0src);
 		PackIndicesType packSuper(dmrgWaveStruct_.lrs().left().size());
-		PackIndicesType packLeft(dmrgWaveStruct_.lrs().left().size()/volumeOfNk);
+		PackIndicesType packLeft(dmrgWaveStruct_.lrs().left().size() / volumeOfNk);
 
 		for (SizeType x = 0; x < total; ++x) {
 			SizeType alpha = 0;
@@ -675,13 +630,12 @@ private:
 	}
 
 	void environCopyOut(VectorWithOffsetType& psiDest,
-	                    SizeType i0,
-	                    const VectorMatrixType& result,
-	                    const LeftRightSuperType& lrs,
-	                    SizeType volumeOfNk) const
+	    SizeType i0,
+	    const VectorMatrixType& result,
+	    const LeftRightSuperType& lrs,
+	    SizeType volumeOfNk) const
 	{
-		SizeType nip = lrs.super().permutationInverse().size()/
-		        lrs.right().permutationInverse().size();
+		SizeType nip = lrs.super().permutationInverse().size() / lrs.right().permutationInverse().size();
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
 		SizeType total = psiDest.effectiveSize(i0);
@@ -690,7 +644,7 @@ private:
 		for (SizeType x = 0; x < total; ++x) {
 			SizeType ip = 0;
 			SizeType beta = 0;
-			pack1.unpack(ip, beta, lrs.super().permutation(x+start));
+			pack1.unpack(ip, beta, lrs.super().permutation(x + start));
 			SizeType kp = 0;
 			SizeType jp = 0;
 			pack2.unpack(kp, jp, lrs.right().permutation(beta));
@@ -699,9 +653,9 @@ private:
 	}
 
 	void systemPreparePsi(VectorMatrixType& psi,
-	                      const VectorWithOffsetType& psiSrc,
-	                      SizeType i0src,
-	                      SizeType volumeOfNk) const
+	    const VectorWithOffsetType& psiSrc,
+	    SizeType i0src,
+	    SizeType volumeOfNk) const
 	{
 		SizeType total = psiSrc.effectiveSize(i0src);
 		SizeType offset = psiSrc.offset(i0src);
@@ -720,12 +674,12 @@ private:
 	}
 
 	void systemCopyOut(VectorWithOffsetType& psiDest,
-	                   SizeType i0,
-	                   const VectorMatrixType& result,
-	                   const LeftRightSuperType& lrs,
-	                   SizeType volumeOfNk) const
+	    SizeType i0,
+	    const VectorMatrixType& result,
+	    const LeftRightSuperType& lrs,
+	    SizeType volumeOfNk) const
 	{
-		SizeType nip = lrs.left().permutationInverse().size()/volumeOfNk;
+		SizeType nip = lrs.left().permutationInverse().size() / volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();
 		PackIndicesType pack1(nalpha);
 		PackIndicesType pack2(nip);
@@ -735,7 +689,7 @@ private:
 		for (SizeType x = 0; x < total; ++x) {
 			SizeType isn = 0;
 			SizeType jen = 0;
-			pack1.unpack(isn, jen, lrs.super().permutation(x+start));
+			pack1.unpack(isn, jen, lrs.super().permutation(x + start));
 			SizeType is = 0;
 			SizeType jpl = 0;
 			pack2.unpack(is, jpl, lrs.left().permutation(isn));

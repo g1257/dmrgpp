@@ -1,17 +1,19 @@
 #ifndef OPERATORSCACHED_H
 #define OPERATORSCACHED_H
-#include "ProgramGlobals.h"
 #include "Concurrency.h"
 #include "MetaOpForConnection.hh"
+#include "ProgramGlobals.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LeftRightSuperType>
-class OperatorsCached {
+template <typename LeftRightSuperType>
+class OperatorsCached
+{
 
 public:
 
-	typedef std::pair<SizeType,SizeType> PairType;
+	typedef std::pair<SizeType, SizeType> PairType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
 	typedef typename BasisType::BlockType BlockType;
@@ -21,13 +23,13 @@ public:
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename PsimagLite::Vector<OperatorStorageType*>::Type VectorOperatorStorageType;
 	typedef typename PsimagLite::Vector<VectorOperatorStorageType>::Type
-	VectorVectorOperatorStorageType;
+	    VectorVectorOperatorStorageType;
 	typedef BlockType VectorSizeType;
 
 	OperatorsCached(const LeftRightSuperType& lrs)
-	    : lrs_(lrs),
-	      garbage_(ConcurrencyType::codeSectionParams.npthreads),
-	      seen_(ConcurrencyType::codeSectionParams.npthreads)
+	    : lrs_(lrs)
+	    , garbage_(ConcurrencyType::codeSectionParams.npthreads)
+	    , seen_(ConcurrencyType::codeSectionParams.npthreads)
 	{
 		ConcurrencyType::mutexInit(&mutex_);
 	}
@@ -52,32 +54,33 @@ public:
 	}
 
 	const OperatorStorageType& getOpStorage(const MetaOpForConnection& metaOp,
-	                                        const ProgramGlobals::SysOrEnvEnum type) const
+	    const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		return (metaOp.site >= 0) ? getOpStorageLocal(metaOp.index, metaOp.modifier, type)
-		                          : getOpStorageNonLocal(metaOp, type);
+					  : getOpStorageNonLocal(metaOp, type);
 	}
 
 private:
 
 	const OperatorStorageType& getOpStorageLocal(SizeType iifirst,
-	                                             char modifier,
-	                                             const ProgramGlobals::SysOrEnvEnum type) const
+	    char modifier,
+	    const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		const OperatorStorageType* m = 0;
 		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
 			m = &(lrs_.left().localOperator(iifirst).getStorage());
 		} else {
 			assert(type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
-			m =&(lrs_.right().localOperator(iifirst).getStorage());
+			m = &(lrs_.right().localOperator(iifirst).getStorage());
 		}
 
 		m->checkValidity();
-		if (modifier == 'N') return *m;
+		if (modifier == 'N')
+			return *m;
 
 		assert(modifier == 'C');
 		SizeType typeIndex = (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? 0 : 1;
-		SizeType packed = typeIndex + iifirst*2;
+		SizeType packed = typeIndex + iifirst * 2;
 		const ConcurrencyType::PthreadtType threadSelf = ConcurrencyType::threadSelf();
 		const SizeType threadNum = threadNumberFromSelf(threadSelf);
 
@@ -85,8 +88,7 @@ private:
 			err("reducedOperator: FATAL: internal error\n");
 
 		if (garbage_.size() <= threadNum || seen_.size() <= threadNum)
-			err("reducedOperator: FATAL: " + ttos(threadNum) + " >= " +
-			    ttos(garbage_.size()) + "\n");
+			err("reducedOperator: FATAL: " + ttos(threadNum) + " >= " + ttos(garbage_.size()) + "\n");
 
 		int indexOfSeen = PsimagLite::indexOrMinusOne(seen_[threadNum], packed);
 		if (indexOfSeen >= 0) {
@@ -119,13 +121,11 @@ private:
 	}
 
 	const OperatorStorageType& getOpStorageNonLocal(const MetaOpForConnection& metaOp,
-	                                                const ProgramGlobals::SysOrEnvEnum type) const
+	    const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		// Non local ops cannot have modifier different than 'N'
 		assert(metaOp.modifier == 'N');
-		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ?
-		            lrs_.left().getSuperByIndex(metaOp.index).getStorage() :
-		            lrs_.right().getSuperByIndex(metaOp.index).getStorage();
+		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? lrs_.left().getSuperByIndex(metaOp.index).getStorage() : lrs_.right().getSuperByIndex(metaOp.index).getStorage();
 	}
 
 	const LeftRightSuperType& lrs_;

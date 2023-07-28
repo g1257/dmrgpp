@@ -1,13 +1,15 @@
 #ifndef INPUTFROMDATAORNOT_H
 #define INPUTFROMDATAORNOT_H
-#include "Vector.h"
 #include "InputNg.h"
 #include "Io/IoNg.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename InputCheckType>
-class InputFromDataOrNot {
+template <typename InputCheckType>
+class InputFromDataOrNot
+{
 
 public:
 
@@ -15,9 +17,10 @@ public:
 	typedef PsimagLite::IoNg::In IoNgInType;
 
 	InputFromDataOrNot(PsimagLite::String filename,
-	                   const InputCheckType& inputCheck,
-	                   bool filenameIsCout)
-	    : ioWriteable_(0), isData_(false)
+	    const InputCheckType& inputCheck,
+	    bool filenameIsCout)
+	    : ioWriteable_(0)
+	    , isData_(false)
 	{
 
 		if (filenameIsCout)
@@ -26,8 +29,8 @@ public:
 			internal(filename);
 
 		ioWriteable_ = (isData_) ? new typename InputNgType::Writeable(inputCheck, data_)
-		                         : new typename InputNgType::Writeable(filename, inputCheck);
-		//data_ = "";
+					 : new typename InputNgType::Writeable(filename, inputCheck);
+		// data_ = "";
 	}
 
 	~InputFromDataOrNot()
@@ -38,7 +41,8 @@ public:
 
 	const typename InputNgType::Writeable& ioWriteable() const
 	{
-		if (ioWriteable_) return *ioWriteable_;
+		if (ioWriteable_)
+			return *ioWriteable_;
 		throw PsimagLite::RuntimeError("InputFromDataOrNot: INTERNAL ERROR (FATAL)\n");
 	}
 
@@ -76,9 +80,11 @@ private:
 		PsimagLite::String str;
 		bool found = false;
 		while (std::getline(fin, str)) {
-			if (str.substr(0, lsearch) != search) continue;
+			if (str.substr(0, lsearch) != search)
+				continue;
 
-			if (std::getline(fin, str)) found = true;
+			if (std::getline(fin, str))
+				found = true;
 			break;
 		}
 

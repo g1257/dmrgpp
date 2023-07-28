@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -85,33 +85,35 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ClebschGordanCached.h"
 
-namespace Dmrg {
-	
-	template<typename FieldType>
-	struct Su2SymmetryGlobals {
-		typedef ClebschGordanCached<FieldType> ClebschGordanType;
-		static void init(bool hasSu2Symmetry)
-		{
-			if (!hasSu2Symmetry) return;
-			MaximumJValue=20;
-			NumberOfFactorials=100;
-			clebschGordanObject.init(MaximumJValue,NumberOfFactorials);
-		}
-		
-		static SizeType MaximumJValue; // this is the maximum allowed \tile{j}=2j value (j is half this value)
-		static SizeType NumberOfFactorials; // number of factorials for the Clebsch-Gordan coefficients
-		static ClebschGordanType clebschGordanObject;
-	}; // Su2SymmetryGlobals
-	
-	template<typename ClebschGordanType>
-	SizeType Su2SymmetryGlobals<ClebschGordanType>::MaximumJValue = 2;
-	
-	template<typename ClebschGordanType>
-	SizeType Su2SymmetryGlobals<ClebschGordanType>::NumberOfFactorials = 2;
-	
-	template<typename FieldType>
-	ClebschGordanCached<FieldType> Su2SymmetryGlobals<FieldType>::clebschGordanObject(2);
-	
+namespace Dmrg
+{
+
+template <typename FieldType>
+struct Su2SymmetryGlobals {
+	typedef ClebschGordanCached<FieldType> ClebschGordanType;
+	static void init(bool hasSu2Symmetry)
+	{
+		if (!hasSu2Symmetry)
+			return;
+		MaximumJValue = 20;
+		NumberOfFactorials = 100;
+		clebschGordanObject.init(MaximumJValue, NumberOfFactorials);
+	}
+
+	static SizeType MaximumJValue; // this is the maximum allowed \tile{j}=2j value (j is half this value)
+	static SizeType NumberOfFactorials; // number of factorials for the Clebsch-Gordan coefficients
+	static ClebschGordanType clebschGordanObject;
+}; // Su2SymmetryGlobals
+
+template <typename ClebschGordanType>
+SizeType Su2SymmetryGlobals<ClebschGordanType>::MaximumJValue = 2;
+
+template <typename ClebschGordanType>
+SizeType Su2SymmetryGlobals<ClebschGordanType>::NumberOfFactorials = 2;
+
+template <typename FieldType>
+ClebschGordanCached<FieldType> Su2SymmetryGlobals<FieldType>::clebschGordanObject(2);
+
 } // namespace Dmrg
 /*@}*/
-#endif //SU2_GLOBALS_H
+#endif // SU2_GLOBALS_H

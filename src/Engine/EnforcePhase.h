@@ -2,10 +2,12 @@
 #define ENFORCEPHASE_H
 #include "Matrix.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ComplexOrRealType>
-class EnforcePhase {
+template <typename ComplexOrRealType>
+class EnforcePhase
+{
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
@@ -27,7 +29,8 @@ private:
 		SizeType rows = a.rows();
 		for (SizeType j = 0; j < rows; ++j) {
 			RealType val = PsimagLite::norm(a(j, col));
-			if (val < 1e-6) continue;
+			if (val < 1e-6)
+				continue;
 			sign1 = (val > 0) ? 1 : -1;
 			break;
 		}

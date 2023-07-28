@@ -72,18 +72,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 /** \file ParallelTriDiag.h
-*/
+ */
 
 #ifndef PARALLEL_TRIDIAG_H
 #define PARALLEL_TRIDIAG_H
 
-#include "Mpi.h"
 #include "Concurrency.h"
+#include "Mpi.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelType,typename LanczosSolverType, typename VectorWithOffsetType>
-class ParallelTriDiag {
+template <typename ModelType, typename LanczosSolverType, typename VectorWithOffsetType>
+class ParallelTriDiag
+{
 
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -102,47 +104,48 @@ public:
 	typedef typename PsimagLite::Vector<MatrixComplexOrRealType>::Type VectorMatrixFieldType;
 
 	ParallelTriDiag(const VectorWithOffsetType& phi,
-	                VectorMatrixFieldType& T,
-	                VectorMatrixFieldType& V,
-	                typename PsimagLite::Vector<SizeType>::Type& steps,
-	                const LeftRightSuperType& lrs,
-	                RealType currentTime,
-	                const ModelType& model,
-	                InputValidatorType& io)
-	    : phi_(phi),
-	      T_(T),
-	      V_(V),
-	      steps_(steps),
-	      lrs_(lrs),
-	      currentTime_(currentTime),
-	      model_(model),
-	      io_(io)
-	{}
+	    VectorMatrixFieldType& T,
+	    VectorMatrixFieldType& V,
+	    typename PsimagLite::Vector<SizeType>::Type& steps,
+	    const LeftRightSuperType& lrs,
+	    RealType currentTime,
+	    const ModelType& model,
+	    InputValidatorType& io)
+	    : phi_(phi)
+	    , T_(T)
+	    , V_(V)
+	    , steps_(steps)
+	    , lrs_(lrs)
+	    , currentTime_(currentTime)
+	    , model_(model)
+	    , io_(io)
+	{
+	}
 
 	SizeType tasks() const { return phi_.sectors(); }
 
 	void doTask(SizeType ii, SizeType)
 	{
 		SizeType i = phi_.sector(ii);
-		steps_[ii] = triDiag(phi_,T_[ii],V_[ii],i);
+		steps_[ii] = triDiag(phi_, T_[ii], V_[ii], i);
 	}
 
 private:
 
 	SizeType triDiag(const VectorWithOffsetType& phi,
-	                 MatrixComplexOrRealType& T,
-	                 MatrixComplexOrRealType& V,
-	                 SizeType i0)
+	    MatrixComplexOrRealType& T,
+	    MatrixComplexOrRealType& V,
+	    SizeType i0)
 	{
 		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 ModelType::modelLinks(),
-		                                                 currentTime_,
-		                                                 model_.superOpHelper());
+		    ModelType::modelLinks(),
+		    currentTime_,
+		    model_.superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc, aux);
 
-		typename LanczosSolverType::ParametersSolverType params(io_,"Tridiag");
+		typename LanczosSolverType::ParametersSolverType params(io_, "Tridiag");
 		params.lotaMemory = true;
 
 		LanczosSolverType lanczosSolver(lanczosHelper, params);
@@ -150,8 +153,8 @@ private:
 		TridiagonalMatrixType ab;
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
-		phi.extract(phi2,i0);
-		lanczosSolver.decomposition(phi2,ab);
+		phi.extract(phi2, i0);
+		lanczosSolver.decomposition(phi2, ab);
 		ab.buildDenseMatrix(T);
 
 		lanczosSolver.lanczosVectorsSwap(V);
@@ -172,4 +175,3 @@ private:
 
 /*@}*/
 #endif // PARALLEL_TRIDIAG_H
-

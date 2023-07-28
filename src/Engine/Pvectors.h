@@ -1,15 +1,17 @@
 #ifndef PVECTORS_H
 #define PVECTORS_H
-#include "InputNg.h"
+#include "GetBraOrKet.h"
 #include "InputCheck.h"
+#include "InputNg.h"
 #include "Pvector.h"
 #include "TargetParamsTimeVectors.h"
-#include "GetBraOrKet.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename TargetingBaseType>
-class Pvectors {
+template <typename TargetingBaseType>
+class Pvectors
+{
 
 public:
 
@@ -28,14 +30,14 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	Pvectors(InputValidatorType& io,
-	         const ApplyOperatorExpressionType& aoe,
-	         const LeftRightSuperType& lrs)
-	    : io_(io),
-	      aoe_(aoe),
-	      lrs_(lrs),
-	      progress_("Pvectors"),
-	      origPvectors_(0),
-	      tstStruct_(io, "TargetingExpression", aoe_.model())
+	    const ApplyOperatorExpressionType& aoe,
+	    const LeftRightSuperType& lrs)
+	    : io_(io)
+	    , aoe_(aoe)
+	    , lrs_(lrs)
+	    , progress_("Pvectors")
+	    , origPvectors_(0)
+	    , tstStruct_(io, "TargetingExpression", aoe_.model())
 	{
 		pvectorsFromInput(io);
 	}
@@ -86,7 +88,7 @@ public:
 		pVectors_[ind]->pushString(str);
 	}
 
-	template<typename SomeLambdaType>
+	template <typename SomeLambdaType>
 	void createNew(const VectorWithOffsetType& src, SomeLambdaType& lambda)
 	{
 		const SizeType ind = aoeNonConst().createPvector(src);
@@ -97,7 +99,7 @@ public:
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"P["<<ind<<"]="<<ename<<" created";
+		msg << "P[" << ind << "]=" << ename << " created";
 		progress_.printline(msgg, std::cout);
 	}
 
@@ -119,7 +121,8 @@ public:
 	{
 		assert(end <= pVectors_.size());
 		for (SizeType i = 0; i < end; ++i)
-			if (pVectors_[i]->hasAnyName(str)) return i;
+			if (pVectors_[i]->hasAnyName(str))
+				return i;
 
 		return -1;
 	}
@@ -128,7 +131,8 @@ public:
 	{
 		const SizeType pvectors = pVectors_.size();
 		for (SizeType i = 0; i < pvectors; ++i) {
-			if (!pVectors_[i]->hasAnyName(str)) continue;
+			if (!pVectors_[i]->hasAnyName(str))
+				continue;
 			return i;
 		}
 
@@ -139,7 +143,7 @@ public:
 	{
 		assert(ind0 < ind1);
 		VectorWithOffsetType& v0 = aoeNonConst().targetVectorsNonConst(ind0);
-		const VectorWithOffsetType& v1 =  aoe_.targetVectors(ind1);
+		const VectorWithOffsetType& v1 = aoe_.targetVectors(ind1);
 		v0 += v1;
 		pVectors_[ind0]->sum(*(pVectors_[ind1]), p0PlusP1);
 	}
@@ -155,11 +159,12 @@ public:
 		findUsedPvectors(used, str);
 
 		for (SizeType i = 0; i < tvs; ++i) {
-			if (used[i]) continue;
+			if (used[i])
+				continue;
 			aoeNonConst().destroyPvector(i);
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"P["<<i<<"] destroyed";
+			msg << "P[" << i << "] destroyed";
 			progress_.printline(msgg, std::cout);
 		}
 
@@ -171,21 +176,21 @@ public:
 		if (tvs != tvsFinal) {
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"Number of target vectors is "<<tvsFinal<<" now";
+			msg << "Number of target vectors is " << tvsFinal << " now";
 			progress_.printline(msgg, std::cout);
 		}
 	}
 
 	void initTimeVectors(SizeType timeSteps,
-	                     RealType tau,
-	                     PsimagLite::String algo,
-	                     VectorRealType& chebyTransform)
+	    RealType tau,
+	    PsimagLite::String algo,
+	    VectorRealType& chebyTransform)
 	{
 		tstStruct_.times().resize(timeSteps);
 		for (SizeType i = 0; i < timeSteps; ++i)
-			tstStruct_.times()[i] = i*tau/(timeSteps - 1);
+			tstStruct_.times()[i] = i * tau / (timeSteps - 1);
 
-		tstStruct_. template setAlgorithm<InputValidatorType>(&chebyTransform, algo, nullptr);
+		tstStruct_.template setAlgorithm<InputValidatorType>(&chebyTransform, algo, nullptr);
 		ApplyOperatorExpressionType* aoePtr = const_cast<ApplyOperatorExpressionType*>(&aoe_);
 		aoePtr->initTimeVectors(tstStruct_, io_);
 	}
@@ -237,7 +242,8 @@ private:
 			int tmp = 0;
 			io.readline(tmp, "Pvectors=");
 			hasObsolete = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (hasObsolete)
 			err("Delete the Pvectors= line from the input; it's no longer needed\n");
@@ -250,7 +256,8 @@ private:
 
 		for (auto it = map.begin(); it != map.end(); ++it) {
 			int index = getPindex(it->first);
-			if (index < 0) continue;
+			if (index < 0)
+				continue;
 			seen.push_back(index);
 		}
 
@@ -260,7 +267,8 @@ private:
 		sort.sort(seen, iperm);
 
 		for (SizeType i = 0; i < total; ++i) {
-			if (seen[i] == i) continue;
+			if (seen[i] == i)
+				continue;
 			err("Pvectors must not have holes\n");
 		}
 
@@ -270,12 +278,15 @@ private:
 	static int getPindex(PsimagLite::String key)
 	{
 		const SizeType n = key.length();
-		if (key.length() < 2) return -1;
-		if (key[0] != 'P') return -1;
+		if (key.length() < 2)
+			return -1;
+		if (key[0] != 'P')
+			return -1;
 
 		PsimagLite::String buffer;
 		for (SizeType i = 1; i < n; ++i) {
-			if (key[i] < 48 || key[i] > 57) return -1;
+			if (key[i] < 48 || key[i] > 57)
+				return -1;
 			buffer += key[i];
 		}
 
@@ -287,7 +298,8 @@ private:
 		const SizeType len = str.size();
 		for (SizeType i = 0; i < len; ++i) {
 
-			if (str.substr(i, 2) != "|P") continue;
+			if (str.substr(i, 2) != "|P")
+				continue;
 
 			PsimagLite::String buffer;
 			SizeType j = i + 2;
@@ -303,7 +315,8 @@ private:
 			}
 
 			i = j;
-			if (buffer == "") continue;
+			if (buffer == "")
+				continue;
 			const SizeType ind = PsimagLite::atoi(buffer);
 			used[ind] = true;
 		}

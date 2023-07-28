@@ -3,10 +3,12 @@
 #include "ParametersKondo.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelBaseType>
-class Kondo : public ModelBaseType {
+template <typename ModelBaseType>
+class Kondo : public ModelBaseType
+{
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -32,29 +34,29 @@ class Kondo : public ModelBaseType {
 public:
 
 	Kondo(const SolverParamsType& solverParams,
-	      InputValidatorType& io,
-	      const SuperGeometryType& geometry,
-	      PsimagLite::String option)
-	    : ModelBaseType(solverParams, geometry, io),
-	      solverParams_(solverParams),
-	      modelParams_(io, option)
+	    InputValidatorType& io,
+	    const SuperGeometryType& geometry,
+	    PsimagLite::String option)
+	    : ModelBaseType(solverParams, geometry, io)
+	    , solverParams_(solverParams)
+	    , modelParams_(io, option)
 	{
 		SizeType nsym = this->targetQuantum().sizeOfOther();
 		if (nsym == 0) {
-			std::cout<<"Kondo: Nothing conserved\n";
+			std::cout << "Kondo: Nothing conserved\n";
 		} else if (nsym == 1) {
-			std::cout<<"Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
-			std::cerr<<"Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
+			std::cout << "Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
+			std::cerr << "Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
 			if (modelParams_.electronHx != 0 || modelParams_.kondoHx != 0)
 				err("Kondo: To use this symmetry electronHx and kondoHx must both be zero\n");
 		} else if (nsym == 2) {
-			std::cout<<"Kondo: Fermionic + Bosonic Sz, and TotalElectrons conserved\n";
+			std::cout << "Kondo: Fermionic + Bosonic Sz, and TotalElectrons conserved\n";
 			if (modelParams_.extended != ParametersKondoType::ExtEnum::NONE)
 				err("Kondo: Extended cannot be used with these symmetries\n");
 		}
 
 		SizeType sitesTimesDof = 2 + modelParams_.twiceTheSpin;
-		SizeType total = (1<<sitesTimesDof);
+		SizeType total = (1 << sitesTimesDof);
 		basis_.resize(total);
 		for (SizeType a = 0; a < total; ++a)
 			basis_[a] = a;
@@ -70,7 +72,7 @@ public:
 	// String contains the group
 	// Serializer object is second argument
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -88,8 +90,8 @@ public:
 	// The RealType contain the physical time in case your onsite terms
 	// depend on it
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const VectorSizeType& block,
-	                                RealType time)  const
+	    const VectorSizeType& block,
+	    RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -104,56 +106,57 @@ public:
 			SizeType ind = block[i];
 			const OperatorType& cup = ModelBaseType::naturalOperator("c", ind, 0);
 			const OperatorType& cdown = ModelBaseType::naturalOperator("c", ind, 1);
-			assert(ops_.size() > 1 + i*4);
+			assert(ops_.size() > 1 + i * 4);
 
 			// onsite U hubbard
-			//n_i up
+			// n_i up
 			transposeConjugate(tmpMatrix, cup.getCRS());
 			multiply(niup, tmpMatrix, cup.getCRS());
 
-			//n_i down
+			// n_i down
 			transposeConjugate(tmpMatrix, cdown.getCRS());
 			multiply(nidown, tmpMatrix, cdown.getCRS());
 
-			multiply(tmpMatrix,niup,nidown);
+			multiply(tmpMatrix, niup, nidown);
 			assert(ind < modelParams_.hubbardU.size());
 			RealType tmp = modelParams_.hubbardU[ind];
-			hmatrix += tmp*tmpMatrix;
+			hmatrix += tmp * tmpMatrix;
 
 			// V_iup term
-			assert(ind + 1*linSize < modelParams_.potentialV.size());
-			tmp = modelParams_.potentialV[ind + 0*linSize];
-			hmatrix += tmp*niup;
+			assert(ind + 1 * linSize < modelParams_.potentialV.size());
+			tmp = modelParams_.potentialV[ind + 0 * linSize];
+			hmatrix += tmp * niup;
 
 			// V_idown term
-			tmp = modelParams_.potentialV[ind + 1*linSize];
-			hmatrix += tmp*nidown;
+			tmp = modelParams_.potentialV[ind + 1 * linSize];
+			hmatrix += tmp * nidown;
 
 			// Kondo term
 			assert(ind < modelParams_.kondoJ.size());
 			hmatrix += modelParams_.kondoJ[ind] * kondoOnSite(ind, niup, nidown);
 
 			// EARLY CONTINUE HERE
-			if (modelParams_.extended == ParametersKondoType::ExtEnum::NONE) continue;
+			if (modelParams_.extended == ParametersKondoType::ExtEnum::NONE)
+				continue;
 
 			const OperatorType& Splus = ModelBaseType::naturalOperator("Splus", 0, 0);
-			hmatrix += modelParams_.kondoHx*Splus.getCRS();
+			hmatrix += modelParams_.kondoHx * Splus.getCRS();
 			transposeConjugate(tmpMatrix, Splus.getCRS());
-			hmatrix += modelParams_.kondoHx*tmpMatrix;
+			hmatrix += modelParams_.kondoHx * tmpMatrix;
 
 			transposeConjugate(tmpMatrix, cup.getCRS());
 			multiply(niup, tmpMatrix, cdown.getCRS());
-			hmatrix += modelParams_.electronHx*niup;
+			hmatrix += modelParams_.electronHx * niup;
 
 			transposeConjugate(tmpMatrix, cdown.getCRS());
 			multiply(nidown, tmpMatrix, cup.getCRS());
-			hmatrix += modelParams_.electronHx*nidown;
+			hmatrix += modelParams_.electronHx * nidown;
 
 			multiply(niup, cup.getCRS(), cdown.getCRS());
-			hmatrix += modelParams_.pairingField*niup;
+			hmatrix += modelParams_.pairingField * niup;
 
 			transposeConjugate(nidown, niup);
-			hmatrix += modelParams_.pairingField*nidown;
+			hmatrix += modelParams_.pairingField * nidown;
 		}
 	}
 
@@ -183,18 +186,18 @@ protected:
 			SparseMatrixType mdown = ops_[1].getCRS();
 			SparseMatrixType mdownT;
 			transposeConjugate(mdownT, mdown);
-			SparseMatrixType szMatrix = mdownT*mdown;
+			SparseMatrixType szMatrix = mdownT * mdown;
 			szMatrix *= (-1.0);
-			szMatrix += mupT*mup;
+			szMatrix += mupT * mup;
 			szMatrix *= 0.5;
 
 			PairSizeType zeroPair(0, 0);
 			typename OperatorType::Su2RelatedType su2Related;
 			this->createOpsLabel("sz").push(OperatorType(szMatrix,
-			                                             ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                                             zeroPair,
-			                                             1,
-			                                             su2Related));
+			    ProgramGlobals::FermionOrBosonEnum::BOSON,
+			    zeroPair,
+			    1,
+			    su2Related));
 		}
 	}
 
@@ -212,8 +215,7 @@ protected:
 			hop.push(c, 'N', c, 'C', su2properties);
 		}
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
-		{ value *= (isSu2) ? -0.5 : 0.5;};
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
 
 		OpForLinkType splus("Splus");
 		OpForLinkType sz("Sz");
@@ -249,19 +251,20 @@ protected:
 private:
 
 	void setSymmetryRelatedInternal(VectorQnType& qns,
-	                                const VectorSizeType& basis) const
+	    const VectorSizeType& basis) const
 	{
 		qns.resize(basis.size(), QnType::zero());
 		SizeType nsym = this->targetQuantum().sizeOfOther();
 		VectorSizeType other(nsym);
 
-		if (nsym == 1) QnType::ifPresentOther0IsElectrons = false;
+		if (nsym == 1)
+			QnType::ifPresentOther0IsElectrons = false;
 
 		// bit 0 <--- up electron
 		// bit 1 <--- down electron
 		// bit 2 <--- localized spin down
 		for (SizeType i = 0; i < basis.size(); ++i) {
-			PairSizeType jmpair(0,0);
+			PairSizeType jmpair(0, 0);
 
 			// nup
 			SizeType electronsUp = (basis[i] & 1) ? 1 : 0;
@@ -294,10 +297,10 @@ private:
 			SparseMatrixType tmpMatrix = findCmatrix(sigma, basis_);
 
 			OperatorType myOp(tmpMatrix,
-			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
-			                  typename OperatorType::PairType(0, 0),
-			                  1,
-			                  su2related);
+			    ProgramGlobals::FermionOrBosonEnum::FERMION,
+			    typename OperatorType::PairType(0, 0),
+			    1,
+			    su2related);
 
 			ops_.push_back(myOp);
 		}
@@ -305,33 +308,32 @@ private:
 		// now the S+ and Sz for local spins
 		SparseMatrixType m = findSplusMatrix(basis_);
 		OperatorType sp(m,
-		                ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                typename OperatorType::PairType(0, 0),
-		                1,
-		                su2related);
+		    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		    typename OperatorType::PairType(0, 0),
+		    1,
+		    su2related);
 		ops_.push_back(sp);
 
 		m = findSzMatrix(basis_);
 		OperatorType sz(m,
-		                ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                typename OperatorType::PairType(0, 0),
-		                1,
-		                su2related);
+		    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		    typename OperatorType::PairType(0, 0),
+		    1,
+		    su2related);
 		ops_.push_back(sz);
 
 		m = findNmatrix(basis_);
 		OperatorType nm(m,
-		                ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                typename OperatorType::PairType(0, 0),
-		                1,
-		                su2related);
+		    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		    typename OperatorType::PairType(0, 0),
+		    1,
+		    su2related);
 		ops_.push_back(nm);
-
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findCmatrix(SizeType sigma,
-	                             const VectorSizeType& basis) const
+	    const VectorSizeType& basis) const
 	{
 		SizeType n = basis.size();
 		const ComplexOrRealType zero = 0.0;
@@ -355,7 +357,6 @@ private:
 		return creationMatrix;
 	}
 
-
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 	RealType sign(const SizeType& ket, SizeType sigma) const
 	{
@@ -368,7 +369,7 @@ private:
 		SizeType site = 0;
 		SizeType total = basis.size();
 		MatrixType cm(total, total, 0);
-		RealType j = 0.5*modelParams_.twiceTheSpin;
+		RealType j = 0.5 * modelParams_.twiceTheSpin;
 		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParams_.twiceTheSpin);
 		SizeType bits = 1 + ProgramGlobals::logBase2(modelParams_.twiceTheSpin);
 		SizeType mask = 1;
@@ -383,21 +384,22 @@ private:
 			ket >>= 2;
 
 			SizeType ketsite = ket & mask;
-			ketsite >>= (site*bitsForOneSite);
+			ketsite >>= (site * bitsForOneSite);
 
 			assert(ketsite == ket);
 			SizeType brasite = ketsite + 1;
-			if (brasite >= modelParams_.twiceTheSpin + 1) continue;
+			if (brasite >= modelParams_.twiceTheSpin + 1)
+				continue;
 
 			SizeType bra = ket & (~mask);
 			assert(bra == 0);
-			brasite <<= (site*bitsForOneSite);
+			brasite <<= (site * bitsForOneSite);
 			bra |= brasite;
 			assert(bra == brasite);
 
 			RealType m = ketsite - j;
-			RealType x = j*(j+1)-m*(m+1);
-			assert(x>=0);
+			RealType x = j * (j + 1) - m * (m + 1);
+			assert(x >= 0);
 
 			// restore electronic part to bra
 			bra <<= 2;
@@ -418,14 +420,14 @@ private:
 		SizeType site = 0;
 		SizeType total = basis.size();
 		MatrixType cm(total, total, 0);
-		RealType j = 0.5*modelParams_.twiceTheSpin;
+		RealType j = 0.5 * modelParams_.twiceTheSpin;
 		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParams_.twiceTheSpin);
 		SizeType bits = ProgramGlobals::logBase2(modelParams_.twiceTheSpin) + 1;
 		SizeType mask = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);
 		mask--;
-		mask <<= (site*bitsForOneSite);
+		mask <<= (site * bitsForOneSite);
 
 		for (SizeType i = 0; i < total; ++i) {
 			SizeType ket = basis[i];
@@ -433,7 +435,7 @@ private:
 			ket >>= 2;
 
 			SizeType ketsite = ket & mask;
-			ketsite >>= (site*bitsForOneSite);
+			ketsite >>= (site * bitsForOneSite);
 			assert(ketsite == ket);
 			RealType m = ketsite - j;
 
@@ -456,7 +458,8 @@ private:
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType ket = basis[i];
 			for (SizeType sigma = 0; sigma < 2; ++sigma) {
-				if (ket & mask[sigma]) cm(i, i) += 1.0;
+				if (ket & mask[sigma])
+					cm(i, i) += 1.0;
 			}
 		}
 
@@ -465,8 +468,8 @@ private:
 	}
 
 	SparseMatrixType kondoOnSite(SizeType,
-	                             const SparseMatrixType& niup,
-	                             const SparseMatrixType& nidown) const
+	    const SparseMatrixType& niup,
+	    const SparseMatrixType& nidown) const
 	{
 		// cdu[d] is actually cu[d] not cu[d] dagger.
 		const SparseMatrixType& cdu = ops_[0].getCRS();
@@ -480,7 +483,7 @@ private:
 		SparseMatrixType sz = niup;
 		const RealType minusOne = -1.0;
 		const RealType zeroPointFive = 0.5;
-		sz += minusOne*nidown;
+		sz += minusOne * nidown;
 		sz *= zeroPointFive;
 
 		SparseMatrixType cu;
@@ -500,10 +503,10 @@ private:
 		assert(smtest == sm);
 #endif
 
-		SparseMatrixType m = sp*Sm;
-		m += sm*Sp;
+		SparseMatrixType m = sp * Sm;
+		m += sm * Sp;
 		m *= zeroPointFive;
-		m += sz*Sz;
+		m += sz * Sz;
 		return m;
 	}
 

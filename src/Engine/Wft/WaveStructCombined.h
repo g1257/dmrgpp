@@ -1,15 +1,17 @@
 #ifndef WAVESTRUCTCOMBINED_H
 #define WAVESTRUCTCOMBINED_H
-#include "Io/IoNg.h"
-#include "WaveStructSvd.h"
-#include "ProgramGlobals.h"
 #include "../DiskOrMemoryStack.h"
 #include "BasisTraits.hh"
+#include "Io/IoNg.h"
+#include "ProgramGlobals.h"
+#include "WaveStructSvd.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LeftRightSuperType_>
-class WaveStructCombined {
+template <typename LeftRightSuperType_>
+class WaveStructCombined
+{
 
 public:
 
@@ -25,13 +27,14 @@ public:
 	typedef DiskOrMemoryStack<WaveStructSvdType> WftStackType;
 
 	WaveStructCombined(bool onDisk,
-	                   const PsimagLite::String filename,
-	                   const BasisTraits& basisTraits)
-	    : lrs_("pSE", "pSprime", "pEprime", basisTraits),
-	      wsStack_(onDisk, filename, "Wstacks", "system", basisTraits),
-	      weStack_(onDisk, filename, "Wstacks", "environ", basisTraits),
-	      needsPop_(false)
-	{}
+	    const PsimagLite::String filename,
+	    const BasisTraits& basisTraits)
+	    : lrs_("pSE", "pSprime", "pEprime", basisTraits)
+	    , wsStack_(onDisk, filename, "Wstacks", "system", basisTraits)
+	    , weStack_(onDisk, filename, "Wstacks", "environ", basisTraits)
+	    , needsPop_(false)
+	{
+	}
 
 	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix)
 	{
@@ -55,13 +58,12 @@ public:
 	}
 
 	void beforeWft(ProgramGlobals::DirectionEnum dir,
-	               bool twoSiteDmrg,
-	               bool bounce)
+	    bool twoSiteDmrg,
+	    bool bounce)
 	{
 		WftStackType& stack = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_
-		                                                                             : weStack_;
-		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ?
-		            "system" : "environ";
+											     : weStack_;
+		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
 
 		needsPop_ = false;
 
@@ -85,9 +87,8 @@ public:
 	void afterWft(ProgramGlobals::DirectionEnum dir)
 	{
 		WftStackType& stack = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_
-		                                                                             : weStack_;
-		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ?
-		            "system" : "environ";
+											     : weStack_;
+		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
 
 		if (!needsPop_)
 			return;
@@ -101,11 +102,11 @@ public:
 	}
 
 	void push(const BlockDiagonalMatrixType& transform,
-	          ProgramGlobals::DirectionEnum direction,
-	          const VectorMatrixType& vts,
-	          const VectorVectorRealType& s,
-	          const VectorQnType& qns,
-	          ProgramGlobals::DirectionEnum dir)
+	    ProgramGlobals::DirectionEnum direction,
+	    const VectorMatrixType& vts,
+	    const VectorVectorRealType& s,
+	    const VectorQnType& qns,
+	    ProgramGlobals::DirectionEnum dir)
 	{
 		WaveStructSvdType wave(transform, vts, s, qns);
 
@@ -141,7 +142,7 @@ public:
 		assert(sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM || weStack_.size() > 0);
 		assert(sysOrEnv != ProgramGlobals::SysOrEnvEnum::SYSTEM || wsStack_.size() > 0);
 		return (sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? wsStack_.top()
-		                                                          : weStack_.top();
+									  : weStack_.top();
 	}
 
 	const LeftRightSuperType& lrs() const
@@ -157,15 +158,14 @@ public:
 	SizeType size(ProgramGlobals::SysOrEnvEnum sysOrEnv) const
 	{
 		return (sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? wsStack_.size()
-		                                                          : weStack_.size();
+									  : weStack_.size();
 	}
 
 	const BlockDiagonalMatrixType& multiPointGetTransform(SizeType ind,
-	                                                      ProgramGlobals::DirectionEnum dir) const
+	    ProgramGlobals::DirectionEnum dir) const
 	{
 		return (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? wsStack_[ind].u()
-		                                                             : weStack_[ind].u();
-
+									     : weStack_[ind].u();
 	}
 
 private:

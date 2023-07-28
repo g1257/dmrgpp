@@ -83,25 +83,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGETING_DYNAMIC_H
 #define TARGETING_DYNAMIC_H
 
-#include "ProgressIndicator.h"
-#include "ParametersForSolver.h"
-#include "TargetParamsDynamic.h"
-#include "VectorWithOffsets.h"
-#include "TargetingBase.h"
-#include <cassert>
 #include "Concurrency.h"
 #include "Parallelizer.h"
+#include "ParametersForSolver.h"
 #include "ProgramGlobals.h"
+#include "ProgressIndicator.h"
+#include "TargetParamsDynamic.h"
+#include "TargetingBase.h"
+#include "VectorWithOffsets.h"
+#include <cassert>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingDynamic : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingDynamic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
+{
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename BaseType::CheckpointType CheckpointType;
@@ -133,17 +135,17 @@ public:
 	typedef typename BaseType::VectorRealType VectorRealType;
 
 	TargetingDynamic(const LeftRightSuperType& lrs,
-	                 const CheckpointType& checkPoint,
-	                 const WaveFunctionTransfType& wft,
-	                 const QnType&,
-	                 InputValidatorType& io)
-	    : BaseType(lrs,checkPoint,wft,0),
-	      tstStruct_(io, "TargetingDynamic", checkPoint.model()),
-	      wft_(wft),
-	      progress_("TargetingDynamic"),
-	      gsWeight_(tstStruct_.gsWeight()),
-	      paramsForSolver_(io,"DynamicDmrg"),
-	      weightForContinuedFraction_(0)
+	    const CheckpointType& checkPoint,
+	    const WaveFunctionTransfType& wft,
+	    const QnType&,
+	    InputValidatorType& io)
+	    : BaseType(lrs, checkPoint, wft, 0)
+	    , tstStruct_(io, "TargetingDynamic", checkPoint.model())
+	    , wft_(wft)
+	    , progress_("TargetingDynamic")
+	    , gsWeight_(tstStruct_.gsWeight())
+	    , paramsForSolver_(io, "DynamicDmrg")
+	    , weightForContinuedFraction_(0)
 	{
 		if (!wft.isEnabled())
 			err(" TargetingDynamic needs an enabled wft\n");
@@ -167,12 +169,12 @@ public:
 	}
 
 	void evolve(const VectorRealType& energies,
-	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
-	            const BlockType& block2,
-	            SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    const BlockType& block2,
+	    SizeType loopNumber)
 	{
-		if (block1.size()!=1 || block2.size()!=1) {
+		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
 			str += "evolve only blocks of one site supported\n";
@@ -182,44 +184,46 @@ public:
 		assert(energies.size() > 0);
 		RealType Eg = energies[0];
 		SizeType site = block1[0];
-		evolve(Eg,direction,site,loopNumber);
+		evolve(Eg, direction, site, loopNumber);
 
-		//corner case
+		// corner case
 		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType site2 = numberOfSites;
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
 		if (site == numberOfSites - 2
-		        && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		    && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			site2 = numberOfSites - 1;
-		if (site2 == numberOfSites) return;
+		if (site2 == numberOfSites)
+			return;
 		evolve(Eg, direction, site2, loopNumber);
 	}
 
 	void write(const VectorSizeType& block,
-	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	    PsimagLite::IoSelector::Out& io,
+	    PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 
 		SizeType type = tstStruct_.type();
 		int fermionSign = this->common().findFermionSignOfTheOperators(tstStruct_.concatenation(),
-		                                                               tstStruct_.aOperators());
-		int s = (type&1) ? -1 : 1;
-		int s2 = (type>1) ? -1 : 1;
-		int s3 = (type&1) ? -fermionSign : 1;
+		    tstStruct_.aOperators());
+		int s = (type & 1) ? -1 : 1;
+		int s2 = (type > 1) ? -1 : 1;
+		int s3 = (type & 1) ? -fermionSign : 1;
 
-		if (ab_.size() < 2) return;
+		if (ab_.size() < 2)
+			return;
 
 		typename PostProcType::ParametersType params = paramsForSolver_;
 		params.Eg = this->common().aoe().energy();
-		params.weight = s2*weightForContinuedFraction_*s3;
+		params.weight = s2 * weightForContinuedFraction_ * s3;
 		params.isign = s;
 		if (tstStruct_.aOperators()[0].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::BOSON)
 			s2 *= s;
 
-		PostProcType cf(ab_,params);
+		PostProcType cf(ab_, params);
 		this->common().writeNGSTs(io, prefix, block, "Dynamic", cf);
 	}
 
@@ -231,22 +235,23 @@ public:
 private:
 
 	void evolve(RealType Eg,
-	            ProgramGlobals::DirectionEnum direction,
-	            SizeType site,
-	            SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    SizeType site,
+	    SizeType loopNumber)
 	{
 
 		VectorWithOffsetType phiNew;
 		SizeType count = this->common().aoeNonConst().getPhi(&phiNew,
-		                                             Eg,
-		                                             direction,
-		                                             site,
-		                                             loopNumber,
-		                                             tstStruct_);
+		    Eg,
+		    direction,
+		    site,
+		    loopNumber,
+		    tstStruct_);
 
-		if (count==0) return;
+		if (count == 0)
+			return;
 
-		calcLanczosVectors(gsWeight_,weight_,phiNew,direction);
+		calcLanczosVectors(gsWeight_, weight_, phiNew, direction);
 
 		bool doBorderIfBorder = false;
 		VectorSizeType block(1, site);
@@ -254,78 +259,80 @@ private:
 	}
 
 	void calcLanczosVectors(RealType&,
-	                        typename PsimagLite::Vector<RealType>::Type&,
-	                        const VectorWithOffsetType& phi,
-	                        const ProgramGlobals::DirectionEnum)
+	    typename PsimagLite::Vector<RealType>::Type&,
+	    const VectorWithOffsetType& phi,
+	    const ProgramGlobals::DirectionEnum)
 	{
-		for (SizeType i=0;i<phi.sectors();i++) {
+		for (SizeType i = 0; i < phi.sectors(); i++) {
 			VectorType sv;
 			SizeType i0 = phi.sector(i);
-			phi.extract(sv,i0);
+			phi.extract(sv, i0);
 			DenseMatrixType V;
 			SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-			getLanczosVectors(V,sv,p);
-			if (i==0) {
+			getLanczosVectors(V, sv, p);
+			if (i == 0) {
 				assert(V.cols() > 0);
 				this->common().aoeNonConst().targetVectorsResize(V.cols());
-				for (SizeType j=0;j<this->common().aoe().tvs();j++)
+				for (SizeType j = 0; j < this->common().aoe().tvs(); j++)
 					this->tvNonConst(j) = phi;
 			}
-			setVectors(V,i0);
+			setVectors(V, i0);
 		}
 
 		setWeights();
-		if (fabs(weightForContinuedFraction_)<1e-6)
-			weightForContinuedFraction_ = PsimagLite::real(phi*phi);
+		if (fabs(weightForContinuedFraction_) < 1e-6)
+			weightForContinuedFraction_ = PsimagLite::real(phi * phi);
 	}
 
 	void getLanczosVectors(DenseMatrixType& V,
-	                       const VectorType& sv,
-	                       SizeType p)
+	    const VectorType& sv,
+	    SizeType p)
 	{
 		const RealType fakeTime = 0;
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 ModelType::modelLinks(),
-		                                                 fakeTime,
-		                                                 BaseType::model().superOpHelper());
+		    ModelType::modelLinks(),
+		    fakeTime,
+		    BaseType::model().superOpHelper());
 		typename LanczosSolverType::MatrixType h(BaseType::model(), hc, aux);
 		paramsForSolver_.lotaMemory = true;
-		LanczosSolverType lanczosSolver(h,paramsForSolver_);
+		LanczosSolverType lanczosSolver(h, paramsForSolver_);
 
-		lanczosSolver.decomposition(sv,ab_);
+		lanczosSolver.decomposition(sv, ab_);
 
 		lanczosSolver.lanczosVectorsSwap(V);
 	}
 
 	void setVectors(const DenseMatrixType& V,
-	                SizeType i0)
+	    SizeType i0)
 	{
-		for (SizeType i=0;i<this->common().aoe().tvs();i++) {
+		for (SizeType i = 0; i < this->common().aoe().tvs(); i++) {
 			VectorType tmp(V.rows());
-			for (SizeType j=0;j<tmp.size();j++) tmp[j] = V(j,i);
-			this->tvNonConst(i).setDataInSector(tmp,i0);
+			for (SizeType j = 0; j < tmp.size(); j++)
+				tmp[j] = V(j, i);
+			this->tvNonConst(i).setDataInSector(tmp, i0);
 		}
 	}
 
 	void setWeights()
 	{
-		RealType sum  = 0;
+		RealType sum = 0;
 		weight_.resize(this->common().aoe().tvs());
-		for (SizeType r=0;r<weight_.size();r++) {
+		for (SizeType r = 0; r < weight_.size(); r++) {
 			weight_[r] = 1.0;
 			sum += weight_[r];
 		}
 
-		for (SizeType r=0;r<weight_.size();r++) weight_[r] *=(1.0-gsWeight_)/sum;
+		for (SizeType r = 0; r < weight_.size(); r++)
+			weight_[r] *= (1.0 - gsWeight_) / sum;
 	}
 
-	RealType dynWeightOf(VectorType& v,const VectorType& w) const
+	RealType dynWeightOf(VectorType& v, const VectorType& w) const
 	{
 		RealType sum = 0;
-		for (SizeType i=0;i<v.size();i++) {
-			RealType tmp = PsimagLite::real(v[i]*w[i]);
-			sum += tmp*tmp;
+		for (SizeType i = 0; i < v.size(); i++) {
+			RealType tmp = PsimagLite::real(v[i] * w[i]);
+			sum += tmp * tmp;
 		}
 		return sum;
 	}
@@ -342,4 +349,3 @@ private:
 } // namespace
 /*@}*/
 #endif // TARGETING_DYNAMIC_H
-

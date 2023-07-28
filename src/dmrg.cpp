@@ -1,77 +1,83 @@
 #include "BlockDiagonalMatrix.h"
 #include "Concurrency.h"
-#include "Provenance.h"
-#include "RegisterSignals.h"
 #include "DmrgDriver.h"
 #include "Io/IoNg.h"
+#include "Provenance.h"
+#include "RegisterSignals.h"
 #include "RunFinished.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 using namespace Dmrg;
 
-std::streambuf *GlobalCoutBuffer = 0;
+std::streambuf* GlobalCoutBuffer = 0;
 std::ofstream GlobalCoutStream;
 
 typedef PsimagLite::Concurrency ConcurrencyType;
 
 void printLicense(const PsimagLite::PsiApp& app, const OperatorOptions& options)
 {
-	if (!ConcurrencyType::root() || options.enabled) return;
+	if (!ConcurrencyType::root() || options.enabled)
+		return;
 
-	std::cout<<ProgramGlobals::license;
+	std::cout << ProgramGlobals::license;
 	Provenance provenance;
-	std::cout<<provenance;
-	std::cout<<Provenance::logo(app.name())<<"\n";
+	std::cout << provenance;
+	std::cout << Provenance::logo(app.name()) << "\n";
 	app.checkMicroArch(std::cout, Provenance::compiledMicroArch());
 }
 
 void usageOperator()
 {
-	std::cerr<<"USAGE is operator -f filename -e canonical_operator_expression\n";
-	std::cerr<<"Deprecated options are: -l label [-d dof] [-s site] [-t]\n";
+	std::cerr << "USAGE is operator -f filename -e canonical_operator_expression\n";
+	std::cerr << "Deprecated options are: -l label [-d dof] [-s site] [-t]\n";
 }
 
 void restoreCoutBuffer()
 {
-	if (GlobalCoutBuffer == 0) return;
+	if (GlobalCoutBuffer == 0)
+		return;
 	GlobalCoutStream.close();
 	std::cout.rdbuf(GlobalCoutBuffer);
 }
 
-template<typename MatrixVectorType, typename VectorWithOffsetType>
+template <typename MatrixVectorType, typename VectorWithOffsetType>
 void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry,
-               const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io,
-               const OperatorOptions& opOptions)
+    const ParametersDmrgSolverType& dmrgSolverParams,
+    InputNgType::Readable& io,
+    const OperatorOptions& opOptions)
 {
 	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
-	        ParametersForSolverType;
+	    ParametersForSolverType;
 #ifndef MIN_COMPILE
 	if (dmrgSolverParams.options.isSet("ChebyshevSolver")) {
 		typedef PsimagLite::ChebyshevSolver<ParametersForSolverType,
-		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
-		mainLoop4<SolverType,VectorWithOffsetType>(geometry,
-		                                           dmrgSolverParams,
-		                                           io,
-		                                           opOptions);
+		    MatrixVectorType,
+		    typename MatrixVectorType::VectorType>
+		    SolverType;
+		mainLoop4<SolverType, VectorWithOffsetType>(geometry,
+		    dmrgSolverParams,
+		    io,
+		    opOptions);
 	} else {
 #else
 	{
 #endif
 		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-		        MatrixVectorType, typename MatrixVectorType::VectorType> SolverType;
-		mainLoop4<SolverType,VectorWithOffsetType>(geometry,
-		                                           dmrgSolverParams,
-		                                           io,
-		                                           opOptions);
+		    MatrixVectorType,
+		    typename MatrixVectorType::VectorType>
+		    SolverType;
+		mainLoop4<SolverType, VectorWithOffsetType>(geometry,
+		    dmrgSolverParams,
+		    io,
+		    opOptions);
 	}
 }
 
-template<typename MatrixVectorType>
+template <typename MatrixVectorType>
 void mainLoop2(InputNgType::Readable& io,
-               const ParametersDmrgSolverType& dmrgSolverParams,
-               const OperatorOptions& opOptions)
+    const ParametersDmrgSolverType& dmrgSolverParams,
+    const OperatorOptions& opOptions)
 {
 
 	typedef typename MatrixVectorType::ModelType ModelBaseType;
@@ -82,64 +88,65 @@ void mainLoop2(InputNgType::Readable& io,
 
 	SuperGeometryType geometry(io);
 	if (dmrgSolverParams.options.isSet("printgeometry"))
-		std::cout<<geometry;
+		std::cout << geometry;
 #ifndef MIN_COMPILE
 
 	if (dmrgSolverParams.options.isSet("vectorwithoffsets")) {
 		typedef VectorWithOffsets<SparseElementType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
-		                                                  dmrgSolverParams,
-		                                                  io,
-		                                                  opOptions);
+		    dmrgSolverParams,
+		    io,
+		    opOptions);
 	} else {
 #else
 	{
 #endif
 		typedef VectorWithOffset<SparseElementType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
-		                                                  dmrgSolverParams,
-		                                                  io,
-		                                                  opOptions);
+		    dmrgSolverParams,
+		    io,
+		    opOptions);
 	}
 }
 
-template<typename ComplexOrRealType>
+template <typename ComplexOrRealType>
 void mainLoop1(InputNgType::Readable& io,
-               const ParametersDmrgSolverType& dmrgSolverParams,
-               const OperatorOptions& opOptions)
+    const ParametersDmrgSolverType& dmrgSolverParams,
+    const OperatorOptions& opOptions)
 {
 	typedef SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals> SuperGeometryType;
 	typedef PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrix;
 	typedef Basis<MySparseMatrix> BasisType;
 	typedef BasisWithOperators<BasisType> BasisWithOperatorsType;
-	typedef LeftRightSuper<BasisWithOperatorsType,BasisType> LeftRightSuperType;
+	typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
 	typedef ModelHelperLocal<LeftRightSuperType> ModelHelperType;
 	typedef ModelBase<ModelHelperType,
-	        ParametersDmrgSolverType,
-	        InputNgType::Readable,
-	        SuperGeometryType> ModelBaseType;
+	    ParametersDmrgSolverType,
+	    InputNgType::Readable,
+	    SuperGeometryType>
+	    ModelBaseType;
 
 #ifndef MIN_COMPILE
 	if (dmrgSolverParams.options.isSet("MatrixVectorStored"))
-		mainLoop2<MatrixVectorStored<ModelBaseType> >(io, dmrgSolverParams, opOptions);
+		mainLoop2<MatrixVectorStored<ModelBaseType>>(io, dmrgSolverParams, opOptions);
 	else if (dmrgSolverParams.options.isSet("MatrixVectorOnTheFly"))
 
-		mainLoop2<MatrixVectorOnTheFly<ModelBaseType> >(io, dmrgSolverParams, opOptions);
+		mainLoop2<MatrixVectorOnTheFly<ModelBaseType>>(io, dmrgSolverParams, opOptions);
 	else
 #endif
-		mainLoop2<MatrixVectorKron<ModelBaseType> >(io, dmrgSolverParams, opOptions);
-
+		mainLoop2<MatrixVectorKron<ModelBaseType>>(io, dmrgSolverParams, opOptions);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-	PsimagLite::PsiApp application("DMRG++",&argc,&argv,1);
+	PsimagLite::PsiApp application("DMRG++", &argc, &argv, 1);
 	InputCheck inputCheck;
-	PsimagLite::String filename="";
+	PsimagLite::String filename = "";
 	int opt = 0;
 	OperatorOptions options;
 	PsimagLite::String strUsage(application.name());
-	if (utils::basename(argv[0]) == "operator") options.enabled = true;
+	if (utils::basename(argv[0]) == "operator")
+		options.enabled = true;
 	strUsage += " -f filename [-k] [-p precision] [-o solverOptions] [-V] [whatToMeasure]";
 	PsimagLite::String sOptions("");
 	int precision = 0;
@@ -212,7 +219,7 @@ to the main dmrg driver are the following.
 	\begin{verbatim}./operator -l c -t -f input.inp\end{verbatim}
 	\end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:s:l:d:p:e:o:S:tkBHUV")) != -1) {
+	while ((opt = getopt(argc, argv, "f:s:l:d:p:e:o:S:tkBHUV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
@@ -263,7 +270,7 @@ to the main dmrg driver are the following.
 	}
 
 	// sanity checks here
-	if (filename=="" && !versionOnly) {
+	if (filename == "" && !versionOnly) {
 		inputCheck.usageMain(strUsage);
 		return 1;
 	}
@@ -275,7 +282,7 @@ to the main dmrg driver are the following.
 		if (options.label == "" || options.label == "?") {
 			options.label = ProgramGlobals::coutName(filename);
 			if (queryOnly) {
-				std::cout<<options.label<<"\n";
+				std::cout << options.label << "\n";
 				return 0;
 			}
 		}
@@ -298,8 +305,10 @@ to the main dmrg driver are the following.
 	if (dmrgSolverParams.options.isSet("addPidToOutputName"))
 		options.label += "." + ttos(getpid());
 
-	if (threadsInCmd > 0) dmrgSolverParams.nthreads = threadsInCmd;
-	if (precision > 0) dmrgSolverParams.precision = precision;
+	if (threadsInCmd > 0)
+		dmrgSolverParams.nthreads = threadsInCmd;
+	if (precision > 0)
+		dmrgSolverParams.precision = precision;
 
 	bool echoInput = false;
 	if (!options.enabled && options.label != "-") {
@@ -311,10 +320,9 @@ to the main dmrg driver are the following.
 		}
 
 		GlobalCoutStream.open(options.label.c_str(),
-		                      (dmrgSolverParams.autoRestart) ? std::ofstream::app :
-		                                                       std::ofstream::out);
+		    (dmrgSolverParams.autoRestart) ? std::ofstream::app : std::ofstream::out);
 		if (!GlobalCoutStream || GlobalCoutStream.bad()
-		        || !GlobalCoutStream.good()) {
+		    || !GlobalCoutStream.good()) {
 			PsimagLite::String str(application.name());
 			str += ": Could not redirect std::cout to " + options.label + "\n";
 			err(str);
@@ -322,12 +330,12 @@ to the main dmrg driver are the following.
 
 		echoInput = true;
 
-		std::cerr<<Provenance::logo(application.name());
-		std::cerr<<"Standard output sent to ";
-		std::cerr<<options.label<<"\n";
+		std::cerr << Provenance::logo(application.name());
+		std::cerr << "Standard output sent to ";
+		std::cerr << options.label << "\n";
 		std::cerr.flush();
-		GlobalCoutBuffer = std::cout.rdbuf(); //save old buf
-		std::cout.rdbuf(GlobalCoutStream.rdbuf()); //redirect std::cout to file
+		GlobalCoutBuffer = std::cout.rdbuf(); // save old buf
+		std::cout.rdbuf(GlobalCoutStream.rdbuf()); // redirect std::cout to file
 		if (unbuffered) {
 			std::cout.setf(std::ios::unitbuf);
 			GlobalCoutStream.setf(std::ios::unitbuf);
@@ -336,18 +344,19 @@ to the main dmrg driver are the following.
 		atexit(restoreCoutBuffer);
 	}
 
-
 	if (dmrgSolverParams.autoRestart) {
-		std::cout<<"\nAutoRestart possible\n";
-		std::cerr<<"AutoRestart possible\n";
+		std::cout << "\nAutoRestart possible\n";
+		std::cerr << "AutoRestart possible\n";
 	}
 
 	printLicense(application, options);
 
 	application.printCmdLine(std::cout);
-	if (echoInput) application.echoBase64(std::cout, filename);
+	if (echoInput)
+		application.echoBase64(std::cout, filename);
 
-	if (insitu!="") dmrgSolverParams.insitu = insitu;
+	if (insitu != "")
+		dmrgSolverParams.insitu = insitu;
 	if (dmrgSolverParams.options.isSet("minimizeDisk"))
 		dmrgSolverParams.options += ",noSaveWft,noSaveStacks,noSaveData";
 
@@ -356,22 +365,21 @@ to the main dmrg driver are the following.
 	SizeType threadsStackSize = 0;
 	try {
 		io.readline(threadsStackSize, "ThreadsStackSize=");
-	} catch (std::exception&) {}
+	} catch (std::exception&) {
+	}
 
 	PsimagLite::CodeSectionParams codeSection(dmrgSolverParams.nthreads,
-	                                          dmrgSolverParams.nthreads2,
-	                                          setAffinities,
-	                                          threadsStackSize);
+	    dmrgSolverParams.nthreads2,
+	    setAffinities,
+	    threadsStackSize);
 	ConcurrencyType::setOptions(codeSection);
 
 	registerSignals();
 
-	bool isComplex = (dmrgSolverParams.options.isSet("useComplex") ||
-	dmrgSolverParams.options.isSet("TimeStepTargeting"));
+	bool isComplex = (dmrgSolverParams.options.isSet("useComplex") || dmrgSolverParams.options.isSet("TimeStepTargeting"));
 
 	if (isComplex)
-		mainLoop1<std::complex<RealType> >(io, dmrgSolverParams, options);
+		mainLoop1<std::complex<RealType>>(io, dmrgSolverParams, options);
 	else
 		mainLoop1<RealType>(io, dmrgSolverParams, options);
 }
-

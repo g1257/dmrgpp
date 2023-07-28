@@ -79,24 +79,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_FERMION_SPINLESS
 #define DMRG_FERMION_SPINLESS
-#include <cassert>
-#include "Sort.h" // in PsimagLite
-#include "ParametersFermionSpinless.h"
-#include "HilbertSpaceFermionSpinless.h"
 #include "CrsMatrix.h"
-#include "SpinSquaredHelper.h"
-#include "SpinSquared.h"
-#include "VerySparseMatrix.h"
+#include "HilbertSpaceFermionSpinless.h"
+#include "ParametersFermionSpinless.h"
 #include "ProgramGlobals.h"
+#include "Sort.h" // in PsimagLite
+#include "SpinSquared.h"
+#include "SpinSquaredHelper.h"
+#include "VerySparseMatrix.h"
+#include <cassert>
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
-template<typename ModelBaseType>
-class FermionSpinless : public ModelBaseType {
+template <typename ModelBaseType>
+class FermionSpinless : public ModelBaseType
+{
 
 	static const int FERMION_SIGN = -1;
-	static const int DEGREES_OF_FREEDOM=1;
-	static const int NUMBER_OF_ORBITALS=1;
+	static const int DEGREES_OF_FREEDOM = 1;
+	static const int NUMBER_OF_ORBITALS = 1;
 
 public:
 
@@ -112,7 +114,7 @@ public:
 	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef unsigned int long WordType;
-	typedef  HilbertSpaceFermionSpinless<WordType> HilbertSpaceType;
+	typedef HilbertSpaceFermionSpinless<WordType> HilbertSpaceType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
@@ -122,27 +124,27 @@ public:
 	typedef typename HilbertSpaceType::HilbertState HilbertState;
 	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef	typename ModelBaseType::MyBasis BasisType;
-	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef typename ModelBaseType::MyBasis BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef typename PsimagLite::Vector<std::pair<RealType, bool> >::Type VectorPairRealBoolType;
+	typedef typename PsimagLite::Vector<std::pair<RealType, bool>>::Type VectorPairRealBoolType;
 
 	FermionSpinless(const SolverParamsType& solverParams,
-	                InputValidatorType& io,
-	                const SuperGeometryType& geometry,
-	                PsimagLite::String extra)
-	    : ModelBaseType(solverParams, geometry, io),
-	      modelParameters_(io),
-	      offset_(DEGREES_OF_FREEDOM),
-	      spinSquared_(spinSquaredHelper_,NUMBER_OF_ORBITALS,DEGREES_OF_FREEDOM),
-	      hasDelta_(extra == "WithDelta"),
-	      hasCalcMu_(false),
-	      tau_(0),
-	      mu_(0),
-		  previousTimeStep_(0),
-	      vectorMu_(geometry.numberOfSites())
+	    InputValidatorType& io,
+	    const SuperGeometryType& geometry,
+	    PsimagLite::String extra)
+	    : ModelBaseType(solverParams, geometry, io)
+	    , modelParameters_(io)
+	    , offset_(DEGREES_OF_FREEDOM)
+	    , spinSquared_(spinSquaredHelper_, NUMBER_OF_ORBITALS, DEGREES_OF_FREEDOM)
+	    , hasDelta_(extra == "WithDelta")
+	    , hasCalcMu_(false)
+	    , tau_(0)
+	    , mu_(0)
+	    , previousTimeStep_(0)
+	    , vectorMu_(geometry.numberOfSites())
 	{
 		if (extra != "" && extra != "WithDelta")
 			err("FermionSpinLess can only be followed by WithDelta and not " + extra + "\n");
@@ -156,12 +158,14 @@ public:
 		try {
 			io.readline(tau_, "TSPTau=");
 			hasTau = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			io.readline(mu_, "TSPMu=");
 			hasCalcMu_ = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		bool b1 = (hasTau && !hasCalcMu_);
 		bool b2 = (!hasTau && hasCalcMu_);
@@ -182,9 +186,9 @@ public:
 		spinSquared_.write(label, io);
 	}
 
-	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const BlockType& block,
-	                                RealType time)  const
+	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
+	    const BlockType& block,
+	    RealType time) const
 	{
 		static bool firstCall = true;
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
@@ -199,13 +203,13 @@ public:
 
 		// V_iup term
 		RealType tmp = modelParameters_.potentialV[site];
-		hmatrix += tmp*niup;
+		hmatrix += tmp * niup;
 
 		if (hasCalcMu_) {
 			const SizeType nsites = ModelBaseType::superGeometry().numberOfSites();
-			const SizeType currentTimeStep = time/tau_;
+			const SizeType currentTimeStep = time / tau_;
 			const RealType effectiveMu = calcMu(site, currentTimeStep, nsites, tau_, mu_);
-			hmatrix += effectiveMu*niup;
+			hmatrix += effectiveMu * niup;
 			if (previousTimeStep_ != currentTimeStep || firstCall) {
 				printMuOfR(time);
 				previousTimeStep_ = currentTimeStep;
@@ -234,38 +238,39 @@ protected:
 		setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\daggger_{i\sigma} in the natural basis
-		for (SizeType i=0;i<block.size();i++) {
-			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++) {
-				tmpMatrix = findOperatorMatrices(i,sigma,natBasis);
-				int asign= 1;
-				if (sigma>0) asign= 1;
+		for (SizeType i = 0; i < block.size(); i++) {
+			for (int sigma = 0; sigma < DEGREES_OF_FREEDOM; sigma++) {
+				tmpMatrix = findOperatorMatrices(i, sigma, natBasis);
+				int asign = 1;
+				if (sigma > 0)
+					asign = 1;
 				typename OperatorType::Su2RelatedType su2related;
-				if (sigma==0) {
-					su2related.source.push_back(i*offset_);
-					su2related.source.push_back(i*offset_+1);
+				if (sigma == 0) {
+					su2related.source.push_back(i * offset_);
+					su2related.source.push_back(i * offset_ + 1);
 					su2related.transpose.push_back(-1);
 					su2related.transpose.push_back(-1);
 					su2related.offset = NUMBER_OF_ORBITALS;
 				}
 
 				OperatorType myOp(tmpMatrix,
-				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
-				                  typename OperatorType::PairType(1,1-sigma),
-				                  asign,
-				                  su2related);
+				    ProgramGlobals::FermionOrBosonEnum::FERMION,
+				    typename OperatorType::PairType(1, 1 - sigma),
+				    asign,
+				    su2related);
 
 				this->createOpsLabel("c").push(myOp);
 			}
 
-			tmpMatrix = findOperatorMatrices(i,natBasis);
-			RealType angularFactor= 1;
+			tmpMatrix = findOperatorMatrices(i, natBasis);
+			RealType angularFactor = 1;
 			typename OperatorType::Su2RelatedType su2related;
-			su2related.offset = 1; //check FIXME
+			su2related.offset = 1; // check FIXME
 			OperatorType myOp(tmpMatrix,
-			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                  typename OperatorType::PairType(0,0),
-			                  angularFactor,
-			                  su2related);
+			    ProgramGlobals::FermionOrBosonEnum::BOSON,
+			    typename OperatorType::PairType(0, 0),
+			    angularFactor,
+			    su2related);
 
 			this->createOpsLabel("n").push(myOp);
 		}
@@ -292,10 +297,10 @@ protected:
 	}
 
 	void setBasis(HilbertBasisType& basis,
-	              const VectorSizeType& block) const
+	    const VectorSizeType& block) const
 	{
-		int sitesTimesDof=DEGREES_OF_FREEDOM*block.size();
-		HilbertState total = (1<<sitesTimesDof);
+		int sitesTimesDof = DEGREES_OF_FREEDOM * block.size();
+		HilbertState total = (1 << sitesTimesDof);
 
 		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a)
@@ -304,36 +309,37 @@ protected:
 
 	// Calculate fermionic sign when applying operator
 	// c^\dagger_{i\sigma} to basis state ket
-	RealType sign(typename HilbertSpaceType::HilbertState const &ket,
-	              int i,
-	              int sigma) const
+	RealType sign(typename HilbertSpaceType::HilbertState const& ket,
+	    int i,
+	    int sigma) const
 	{
-		int value=0;
-		value += HilbertSpaceType::calcNofElectrons(ket,0,i,0);
-		int tmp1 = HilbertSpaceType::get(ket,0) &1;
-		if (i>0 && tmp1>0) value++;
+		int value = 0;
+		value += HilbertSpaceType::calcNofElectrons(ket, 0, i, 0);
+		int tmp1 = HilbertSpaceType::get(ket, 0) & 1;
+		if (i > 0 && tmp1 > 0)
+			value++;
 
-		return (value%2==0) ? 1.0 : FERMION_SIGN;
+		return (value % 2 == 0) ? 1.0 : FERMION_SIGN;
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
-	                                      int sigma,
-	                                      const HilbertBasisType& natBasis) const
+	    int sigma,
+	    const HilbertBasisType& natBasis) const
 	{
-		typename HilbertSpaceType::HilbertState bra,ket;
+		typename HilbertSpaceType::HilbertState bra, ket;
 		int n = natBasis.size();
-		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			bra=ket=natBasis[ii];
-			if (HilbertSpaceType::isNonZero(ket,i,sigma)) {
+		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
+			bra = ket = natBasis[ii];
+			if (HilbertSpaceType::isNonZero(ket, i, sigma)) {
 
 			} else {
-				HilbertSpaceType::create(bra,i,sigma);
-				int jj = PsimagLite::indexOrMinusOne(natBasis,bra);
+				HilbertSpaceType::create(bra, i, sigma);
+				int jj = PsimagLite::indexOrMinusOne(natBasis, bra);
 				assert(jj >= 0);
-				cm(ii,jj) =sign(ket,i,sigma);
+				cm(ii, jj) = sign(ket, i, sigma);
 			}
 		}
 
@@ -342,15 +348,15 @@ protected:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis) const
+	    const HilbertBasisType& basis) const
 	{
 		const SizeType localSymms = ModelBaseType::targetQuantum().sizeOfOther();
 		if (localSymms == 0) {
 			if (!hasDelta_) {
 				PsimagLite::String msg(__FILE__);
 				msg += ": You should be using one local symmetry, not zero\n";
-				std::cerr<<msg;
-				std::cerr<<msg;
+				std::cerr << msg;
+				std::cerr << msg;
 			}
 		} else if (localSymms == 1) {
 			if (hasDelta_) {
@@ -368,13 +374,14 @@ protected:
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		typedef std::pair<SizeType,SizeType> PairType;
+		typedef std::pair<SizeType, SizeType> PairType;
 		qns.resize(basis.size(), QnType::zero());
 		VectorSizeType other;
-		if (isCanonical) other.resize(1);
+		if (isCanonical)
+			other.resize(1);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmValue<PairType>(basis[i]);
-			SizeType electrons = HilbertSpaceType::getNofDigits(basis[i],0);
+			SizeType electrons = HilbertSpaceType::getNofDigits(basis[i], 0);
 			SizeType flavor = electrons;
 
 			bool sign = electrons & 1;
@@ -386,18 +393,18 @@ protected:
 
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
-	                                      const VectorHilbertStateType& natBasis) const
+	    const VectorHilbertStateType& natBasis) const
 	{
 
 		SizeType n = natBasis.size();
-		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n,n);
+		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
-		for (SizeType ii=0;ii<natBasis.size();ii++) {
-			HilbertState ket=natBasis[ii];
-			cm(ii,ii) = 0.0;
-			for (int sigma=0;sigma<DEGREES_OF_FREEDOM;sigma++)
-				if (HilbertSpaceType::isNonZero(ket,i,sigma))
-					cm(ii,ii) += 1.0;
+		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
+			HilbertState ket = natBasis[ii];
+			cm(ii, ii) = 0.0;
+			for (int sigma = 0; sigma < DEGREES_OF_FREEDOM; sigma++)
+				if (HilbertSpaceType::isNonZero(ket, i, sigma))
+					cm(ii, ii) += 1.0;
 		}
 
 		SparseMatrixType creationMatrix(cm);
@@ -408,77 +415,78 @@ protected:
 	// note: we use m+j instead of m
 	// This assures us that both j and m are SizeType
 	// does not work for 6 or 9
-	template<typename PairType>
+	template <typename PairType>
 	PairType calcJmValue(const HilbertState& ket) const
 	{
-		SizeType site0=0;
-		SizeType site1=0;
+		SizeType site0 = 0;
+		SizeType site1 = 0;
 
-		spinSquared_.doOnePairOfSitesA(ket,site0,site1);
-		spinSquared_.doOnePairOfSitesB(ket,site0,site1);
-		spinSquared_.doDiagonal(ket,site0,site1);
+		spinSquared_.doOnePairOfSitesA(ket, site0, site1);
+		spinSquared_.doOnePairOfSitesB(ket, site0, site1);
+		spinSquared_.doDiagonal(ket, site0, site1);
 
-		RealType sz = spinSquared_.spinZ(ket,site0);
-		PairType jm= spinSquaredHelper_.getJmPair(sz);
+		RealType sz = spinSquared_.spinZ(ket, site0);
+		PairType jm = spinSquaredHelper_.getJmPair(sz);
 
 		return jm;
 	}
 
 	static RealType calcMu(SizeType site,
-	                       SizeType n,
-	                       SizeType N1,
-	                       RealType tau,
-	                       RealType mu)
+	    SizeType n,
+	    SizeType N1,
+	    RealType tau,
+	    RealType mu)
 	{
 		//  (nm is the number of steps to increase the onsite
 		//   chemical potential at site i)
 		static SizeType nm = 0;
-		static SizeType rm = 1;   //( steps changes when n=1000)
+		static SizeType rm = 1; //( steps changes when n=1000)
 
 		if (site + 1 == N1 || site == 0) {
 			++nm;
 
-			if (n%1000 == 0 && n > 0) {
+			if (n % 1000 == 0 && n > 0) {
 				++rm;
 				nm = 0;
 
 				std::stringstream msg;
 				msg << "FermionSpinless::calcMu(): nm=0 "
-				<< "site=" << site << " n=" << n
-				<< " tau=" << tau << " mu=" << mu
-				<< " rm=" << rm << "\n";
-				std::cout<<msg.str();
+				    << "site=" << site << " n=" << n
+				    << " tau=" << tau << " mu=" << mu
+				    << " rm=" << rm << "\n";
+				std::cout << msg.str();
 			}
 		}
 
-		if (site + rm < N1) {    //(chemical potential for  i <= end site - rm)
+		if (site + rm < N1) { //(chemical potential for  i <= end site - rm)
 			return -mu;
 		}
 
-		if (site + rm > N1 ) { //(chemical potential for  i > end site -rm+1)
+		if (site + rm > N1) { //(chemical potential for  i > end site -rm+1)
 			return -64.0;
 		}
 
-		assert(site + rm == N1);     //(chemical potential for  i = end site -rm+1)
-		return -64.0*tau*nm;
+		assert(site + rm == N1); //(chemical potential for  i = end site -rm+1)
+		return -64.0 * tau * nm;
 	}
 
 	void printMuOfR(RealType time) const
 	{
-		std::cout<<"timeStep="<<previousTimeStep_<<" time="<<time<<" ";
-		std::cout<<"potentialV=[";
+		std::cout << "timeStep=" << previousTimeStep_ << " time=" << time << " ";
+		std::cout << "potentialV=[";
 		for (SizeType i = 0; i < vectorMu_.size(); ++i) {
 			RealType value = (vectorMu_[i].second) ? vectorMu_[i].first : -100;
-			std::cout<<value;
-			if (i + 1 < vectorMu_.size()) std::cout<<", ";
+			std::cout << value;
+			if (i + 1 < vectorMu_.size())
+				std::cout << ", ";
 		}
 
-		std::cout<<"];\n";
+		std::cout << "];\n";
 	}
-	ParametersFermionSpinless<RealType, QnType>  modelParameters_;
+	ParametersFermionSpinless<RealType, QnType> modelParameters_;
 	SizeType offset_;
-	SpinSquaredHelper<RealType,WordType> spinSquaredHelper_;
-	SpinSquared<SpinSquaredHelper<RealType,WordType> > spinSquared_;
+	SpinSquaredHelper<RealType, WordType> spinSquaredHelper_;
+	SpinSquared<SpinSquaredHelper<RealType, WordType>> spinSquared_;
 	const bool hasDelta_;
 	bool hasCalcMu_;
 	RealType tau_;
@@ -486,9 +494,8 @@ protected:
 	mutable SizeType previousTimeStep_;
 	mutable VectorPairRealBoolType vectorMu_;
 
-};	//class FermionSpinless
+}; // class FermionSpinless
 
 } // namespace Dmrg
 /*@}*/
 #endif
-

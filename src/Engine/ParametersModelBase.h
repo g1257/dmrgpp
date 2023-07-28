@@ -2,19 +2,22 @@
 #define PARAMETERSMODELBASE_H
 #include "Io/IoNg.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename RealType, typename QnType>
-class ParametersModelBase {
+template <typename RealType, typename QnType>
+class ParametersModelBase
+{
 
 public:
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ParametersModelBase(IoInputType&, bool)
-	{}
+	{
+	}
 
 	void write(PsimagLite::String,
-	           PsimagLite::IoNg::Out::Serializer&) const {}
+	    PsimagLite::IoNg::Out::Serializer&) const { }
 };
 }
 #endif // PARAMETERSMODELBASE_H

@@ -83,11 +83,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "TargetParamsCommon.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 // Coordinates reading of TargetSTructure from input file
-template<typename ModelType>
-class TargetParamsDynamic : public TargetParamsCommon<ModelType> {
+template <typename ModelType>
+class TargetParamsDynamic : public TargetParamsCommon<ModelType>
+{
 public:
+
 	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
 	typedef typename ModelType::RealType RealType;
 
@@ -97,16 +100,16 @@ public:
 	typedef typename SparseMatrixType::value_type ComplexOrReal;
 	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	TargetParamsDynamic(IoInputter& io, PsimagLite::String targeting, const ModelType& model)
 	    : TargetParamsCommonType(io, targeting, model)
 	{
-		io.readline(type_,"DynamicDmrgType=");
+		io.readline(type_, "DynamicDmrgType=");
 	}
 
 	virtual SizeType memResolv(PsimagLite::MemResolv&,
-	                           SizeType,
-	                           PsimagLite::String = "") const
+	    SizeType,
+	    PsimagLite::String = "") const
 	{
 		return 0;
 	}
@@ -122,19 +125,19 @@ private:
 
 }; // class TargetParamsDynamic
 
-template<typename ModelType>
+template <typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const TargetParamsDynamic<ModelType>& t)
+operator<<(std::ostream& os, const TargetParamsDynamic<ModelType>& t)
 {
-	os<<"TargetParams.type=DynamicDmrg\n";
+	os << "TargetParams.type=DynamicDmrg\n";
 	const typename TargetParamsDynamic<ModelType>::TargetParamsCommonType&
-	        tp = t;
-	os<<tp;
-	os<<"DynamicDmrgType="<<t.type()<<"\n";
+	    tp
+	    = t;
+	os << tp;
+	os << "DynamicDmrgType=" << t.type() << "\n";
 	return os;
 }
 } // namespace Dmrg
 
 /*@}*/
-#endif //TARGET_PARAMS_DYNAMIC_H
-
+#endif // TARGET_PARAMS_DYNAMIC_H

@@ -80,18 +80,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef TARGETING_GS_H
 #define TARGETING_GS_H
-#include <iostream>
-#include "TargetParamsGroundState.h"
 #include "ApplyOperatorLocal.h"
-#include <stdexcept>
-#include "PsimagLite.h"
-#include "TargetingBase.h"
 #include "ParametersForSolver.h"
+#include "PsimagLite.h"
+#include "TargetParamsGroundState.h"
+#include "TargetingBase.h"
+#include <iostream>
+#include <stdexcept>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingGroundState : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingGroundState : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
+{
 
 public:
 
@@ -120,18 +122,19 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef typename BaseType::VectorRealType VectorRealType;
 	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
-	VectorVectorVectorWithOffsetType;
+	    VectorVectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 
 	TargetingGroundState(const LeftRightSuperType& lrs,
-	                     const CheckpointType& checkPoint,
-	                     const WaveFunctionTransfType& wft,
-	                     const QnType&,
-	                     InputValidatorType&)
-	    : BaseType(lrs, checkPoint, wft, 0),
-	      tstStruct_("TargetingGroundState"),
-	      progress_("TargetingGroundState")
-	{}
+	    const CheckpointType& checkPoint,
+	    const WaveFunctionTransfType& wft,
+	    const QnType&,
+	    InputValidatorType&)
+	    : BaseType(lrs, checkPoint, wft, 0)
+	    , tstStruct_("TargetingGroundState")
+	    , progress_("TargetingGroundState")
+	{
+	}
 
 	SizeType sites() const { return tstStruct_.sites(); }
 
@@ -152,13 +155,15 @@ public:
 			const VectorVectorWithOffsetType& vv = v[i];
 			const SizeType m = vv.size();
 			for (SizeType j = 0; j < m; ++j) {
-				const VectorWithOffsetType* vvv= vv[j];
-				if (!vvv) continue;
-				if (norm(*vvv) > 1e-3) ++sum;
+				const VectorWithOffsetType* vvv = vv[j];
+				if (!vvv)
+					continue;
+				if (norm(*vvv) > 1e-3)
+					++sum;
 			}
 		}
 
-		return 1.0/sum;
+		return 1.0 / sum;
 	}
 
 	SizeType size() const
@@ -167,24 +172,24 @@ public:
 	}
 
 	void evolve(const VectorRealType&,
-	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
-	            const BlockType&,
-	            SizeType)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    const BlockType&,
+	    SizeType)
 	{
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	    PsimagLite::IoSelector::Out& io,
+	    PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix)
+	    PsimagLite::String prefix)
 	{
 		this->common().readGSandNGSTs(io, prefix, "GroundState");
 	}
@@ -194,8 +199,7 @@ private:
 	TargetParamsType tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
 
-};     //class TargetingGroundState
+}; // class TargetingGroundState
 } // namespace Dmrg
 /*@}*/
 #endif
-

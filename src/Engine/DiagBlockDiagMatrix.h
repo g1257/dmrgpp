@@ -2,34 +2,37 @@
 #define DIAGBLOCKDIAGMATRIX_H
 #include "EnforcePhase.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename BlockDiagonalMatrixType>
-class DiagBlockDiagMatrix {
+template <typename BlockDiagonalMatrixType>
+class DiagBlockDiagMatrix
+{
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 	typedef typename BuildingBlockType::value_type ComplexOrRealType;
 	typedef typename BlockDiagonalMatrixType::VectorRealType VectorRealType;
 
-	class LoopForDiag {
+	class LoopForDiag
+	{
 
 		typedef PsimagLite::Concurrency ConcurrencyType;
 
 	public:
 
 		LoopForDiag(BlockDiagonalMatrixType& C1,
-		            VectorRealType& eigs1,
-		            char option1)
-		    : C(C1),
-		      eigs(eigs1),
-		      option(option1),
-		      eigsForGather(C.blocks()),
-		      weights(C.blocks())
+		    VectorRealType& eigs1,
+		    char option1)
+		    : C(C1)
+		    , eigs(eigs1)
+		    , option(option1)
+		    , eigsForGather(C.blocks())
+		    , weights(C.blocks())
 		{
 
-			for (SizeType m=0;m<C.blocks();m++) {
-				eigsForGather[m].resize(C.offsetsRows(m+1)-C.offsetsRows(m));
-				weights[m] =  C.offsetsRows(m+1)-C.offsetsRows(m);
+			for (SizeType m = 0; m < C.blocks(); m++) {
+				eigsForGather[m].resize(C.offsetsRows(m + 1) - C.offsetsRows(m));
+				weights[m] = C.offsetsRows(m + 1) - C.offsetsRows(m);
 			}
 
 			assert(C.rows() == C.cols());
@@ -44,17 +47,16 @@ class DiagBlockDiagMatrix {
 			SizeType m = taskNumber;
 			VectorRealType eigsTmp;
 			C.diagAndEnforcePhase(m, eigsTmp, option);
-			for (SizeType j = C.offsetsRows(m); j < C.offsetsRows(m+1); ++j)
-				eigsForGather[m][j-C.offsetsRows(m)] = eigsTmp[j-C.offsetsRows(m)];
-
+			for (SizeType j = C.offsetsRows(m); j < C.offsetsRows(m + 1); ++j)
+				eigsForGather[m][j - C.offsetsRows(m)] = eigsTmp[j - C.offsetsRows(m)];
 		}
 
 		void gather()
 		{
 			assert(C.rows() == C.cols());
 			for (SizeType m = 0; m < C.blocks(); ++m) {
-				for (SizeType j = C.offsetsRows(m);j < C.offsetsRows(m+1); ++j)
-					eigs[j]=eigsForGather[m][j-C.offsetsRows(m)];
+				for (SizeType j = C.offsetsRows(m); j < C.offsetsRows(m + 1); ++j)
+					eigs[j] = eigsForGather[m][j - C.offsetsRows(m)];
 			}
 		}
 
@@ -74,8 +76,8 @@ public:
 	//        is needed and LAPACK is not necessarily thread safe.
 	// This function is NOT called by useSvd
 	static void diagonalise(BlockDiagonalMatrixType& C,
-	                        VectorRealType& eigs,
-	                        char option)
+	    VectorRealType& eigs,
+	    char option)
 	{
 		typedef PsimagLite::NoPthreadsNg<LoopForDiag> ParallelizerType;
 		typedef PsimagLite::Concurrency ConcurrencyType;
@@ -83,7 +85,7 @@ public:
 		ConcurrencyType::codeSectionParams.npthreads = 1;
 		ParallelizerType threadObject(ConcurrencyType::codeSectionParams);
 
-		LoopForDiag helper(C,eigs,option);
+		LoopForDiag helper(C, eigs, option);
 
 		threadObject.loopCreate(helper); // FIXME: needs weights
 

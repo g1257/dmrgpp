@@ -80,18 +80,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MATRIX_OR_IDENTITY
 #define MATRIX_OR_IDENTITY
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename SparseMatrixType>
-class MatrixOrIdentity {
+template <typename SparseMatrixType>
+class MatrixOrIdentity
+{
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
 public:
 
-	MatrixOrIdentity(bool enabled,const SparseMatrixType& m)
-	    : enabled_(enabled),m_(m),one_(1.0)
-	{}
+	MatrixOrIdentity(bool enabled, const SparseMatrixType& m)
+	    : enabled_(enabled)
+	    , m_(m)
+	    , one_(1.0)
+	{
+	}
 
 	SizeType getRowPtr(SizeType i) const
 	{
@@ -100,8 +105,10 @@ public:
 
 	int getColOrExit(SizeType i) const
 	{
-		if (enabled_) return m_.getCol(i);
-		if (i < m_.cols()) return i;
+		if (enabled_)
+			return m_.getCol(i);
+		if (i < m_.cols())
+			return i;
 		return -1;
 	}
 
@@ -120,4 +127,3 @@ private:
 } // namespace Dmrg
 /*@}*/
 #endif // MATRIX_OR_IDENTITY
-

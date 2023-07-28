@@ -78,25 +78,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_OBSERVE_H
 #define DMRG_OBSERVE_H
+#include "Concurrency.h"
+#include "CorrelationsSkeleton.h"
+#include "FourPointCorrelations.h"
+#include "ManyPointAction.h"
+#include "MultiPointCorrelations.h"
 #include "ObserverHelper.h"
 #include "OnePointCorrelations.h"
-#include "CorrelationsSkeleton.h"
-#include "TwoPointCorrelations.h"
-#include "FourPointCorrelations.h"
-#include "VectorWithOffsets.h" // for operator*
-#include "VectorWithOffset.h" // for operator*
 #include "Parallel4PointDs.h"
-#include "MultiPointCorrelations.h"
-#include "Concurrency.h"
 #include "Parallelizer.h"
-#include "Utils.h"
 #include "PredicateAwesome.h"
-#include "ManyPointAction.h"
+#include "TwoPointCorrelations.h"
+#include "Utils.h"
+#include "VectorWithOffset.h" // for operator*
+#include "VectorWithOffsets.h" // for operator*
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ObserverHelperType, typename ModelType_>
-class Observer {
+template <typename ObserverHelperType, typename ModelType_>
+class Observer
+{
 
 public:
 
@@ -112,32 +114,33 @@ public:
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType_::ParametersType ParametersType;
-	typedef CorrelationsSkeleton<ObserverHelperType,ModelType_> CorrelationsSkeletonType;
+	typedef CorrelationsSkeleton<ObserverHelperType, ModelType_> CorrelationsSkeletonType;
 	typedef OnePointCorrelations<ObserverHelperType, ModelType_> OnePointCorrelationsType;
 	typedef TwoPointCorrelations<CorrelationsSkeletonType> TwoPointCorrelationsType;
 	typedef FourPointCorrelations<CorrelationsSkeletonType> FourPointCorrelationsType;
 	typedef MultiPointCorrelations<CorrelationsSkeletonType> MultiPointCorrelationsType;
 	typedef typename CorrelationsSkeletonType::BraketType BraketType;
-	typedef Parallel4PointDs<ModelType,FourPointCorrelationsType> Parallel4PointDsType;
+	typedef Parallel4PointDs<ModelType, FourPointCorrelationsType> Parallel4PointDsType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef ManyPointAction ManyPointActionType;
 
 	Observer(IoInputType& io,
-	         SizeType start,
-	         SizeType nf,
-	         SizeType trail,
-	         const ModelType_& model)
+	    SizeType start,
+	    SizeType nf,
+	    SizeType trail,
+	    const ModelType_& model)
 	    : helper_(io,
-	              start,
-	              nf,
-	              trail,
-	              model.params().options.isSet("keepLegacyBugs"),
-	              model.params().options.isSet("observeReadOnDemand")),
-	      onepoint_(helper_, model),
-	      skeleton_(helper_, model, true),
-	      twopoint_(skeleton_),
-	      fourpoint_(skeleton_)
-	{}
+		start,
+		nf,
+		trail,
+		model.params().options.isSet("keepLegacyBugs"),
+		model.params().options.isSet("observeReadOnDemand"))
+	    , onepoint_(helper_, model)
+	    , skeleton_(helper_, model, true)
+	    , twopoint_(skeleton_)
+	    , fourpoint_(skeleton_)
+	{
+	}
 
 	const ObserverHelperType& helper() const { return helper_; }
 
@@ -146,14 +149,15 @@ public:
 	bool isAtCorner(SizeType numberOfSites, SizeType ptr) const
 	{
 		const bool es = (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
-		if (es && helper_.site(ptr) ==  numberOfSites - 2) return true;
+		if (es && helper_.site(ptr) == numberOfSites - 2)
+			return true;
 		return (!es && helper_.site(ptr) == 1);
 	}
 
 	void twoPoint(MatrixType& storage,
-	              const BraketType& braket,
-	              bool needsPrinting,
-	              const ManyPointActionType& action) const
+	    const BraketType& braket,
+	    bool needsPrinting,
+	    const ManyPointActionType& action) const
 	{
 		assert(braket.points() == 2);
 
@@ -162,44 +166,46 @@ public:
 		try {
 			braket.site(0);
 			flag |= 1;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			braket.site(1);
 			flag |= 2;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		ProgramGlobals::FermionOrBosonEnum fermionSign = braket.op(0).fermionOrBoson();
 
 		SizeType site1 = 0;
-		SizeType sites= storage.n_col();
+		SizeType sites = storage.n_col();
 
 		switch (flag) {
 
 		case 0: // no sites given
 			twopoint_(storage, braket, fermionSign, braket.bra(), braket.ket(), action);
 			if (needsPrinting)
-				std::cout<<(storage);
+				std::cout << (storage);
 
 			break;
 
-		case 1: //first site given
+		case 1: // first site given
 			if (action.nonTrivial())
 				err("For non trivial action, give no sites\n");
 
 			for (site1 = braket.site(0); site1 < sites; ++site1) {
-				storage(braket.site(0),site1) = twopoint_.calcCorrelation(braket.site(0),
-				                                                          site1,
-				                                                          braket,
-				                                                          fermionSign,
-				                                                          braket.bra(),
-				                                                          braket.ket());
+				storage(braket.site(0), site1) = twopoint_.calcCorrelation(braket.site(0),
+				    site1,
+				    braket,
+				    fermionSign,
+				    braket.bra(),
+				    braket.ket());
 				if (needsPrinting)
-					std::cout<<storage(braket.site(0), site1)<<" ";
+					std::cout << storage(braket.site(0), site1) << " ";
 			}
 
 			if (needsPrinting)
-				std::cout<<"\n";
+				std::cout << "\n";
 
 			break;
 
@@ -207,14 +213,15 @@ public:
 			if (action.nonTrivial())
 				err("For non trivial action, give no sites\n");
 
-			storage(braket.site(0),braket.site(1)) = twopoint_.calcCorrelation(braket.site(0),
-			                                                                   braket.site(1),
-			                                                                   braket,
-			                                                                   fermionSign,
-			                                                                   braket.bra(),
-			                                                                   braket.ket());
+			storage(braket.site(0), braket.site(1)) = twopoint_.calcCorrelation(braket.site(0),
+			    braket.site(1),
+			    braket,
+			    fermionSign,
+			    braket.bra(),
+			    braket.ket());
 			if (needsPrinting)
-				std::cout<<storage(braket.site(0), braket.site(1))<<"\n";;
+				std::cout << storage(braket.site(0), braket.site(1)) << "\n";
+			;
 
 			break;
 
@@ -224,19 +231,19 @@ public:
 	}
 
 	void twoPoint(MatrixType& m,
-	              const BraketType braket,
-	              ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	              PsimagLite::String bra,
-	              PsimagLite::String ket,
-	              const ManyPointActionType& action) const
+	    const BraketType braket,
+	    ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	    PsimagLite::String bra,
+	    PsimagLite::String ket,
+	    const ManyPointActionType& action) const
 	{
 		twopoint_(m, braket, fermionicSign, bra, ket, action);
 	}
 
 	FieldType threePoint(const BraketType& braket,
-	                     SizeType rows,
-	                     SizeType cols,
-	                     bool needsPrinting) const
+	    SizeType rows,
+	    SizeType cols,
+	    bool needsPrinting) const
 	{
 		assert(braket.points() == 3);
 
@@ -244,17 +251,20 @@ public:
 		try {
 			braket.site(0);
 			flag |= 1;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			braket.site(1);
 			flag |= 2;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			braket.site(2);
 			flag |= 4;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (flag != 0 && flag != 7 && flag != 1) {
 			PsimagLite::String str("threePoint: ");
@@ -264,13 +274,14 @@ public:
 
 		if (flag == 7) {
 			typename MatrixType::value_type tmp = fourpoint_.threePoint(braket.site(0),
-			                                                            braket.site(1),
-			                                                            braket.site(2),
-			                                                            braket);
-			if (!needsPrinting) return tmp;
-			std::cout<<"Fixed all sites\n";
-			std::cout<<braket.site(0)<<" ";
-			std::cout<<braket.site(1)<<" "<<braket.site(2)<<"  "<<tmp<<"\n";
+			    braket.site(1),
+			    braket.site(2),
+			    braket);
+			if (!needsPrinting)
+				return tmp;
+			std::cout << "Fixed all sites\n";
+			std::cout << braket.site(0) << " ";
+			std::cout << braket.site(1) << " " << braket.site(2) << "  " << tmp << "\n";
 			return tmp;
 		}
 
@@ -279,29 +290,28 @@ public:
 
 		if (flag == 1) {
 			SizeType site0 = braket.site(0);
-			std::cout<<"Fixed site0= "<<site0<<"\n";
-			for (SizeType site1 = site0+1; site1 < rows; ++site1) {
-				for (SizeType site2 = site1+1; site2 < cols; ++site2) {
+			std::cout << "Fixed site0= " << site0 << "\n";
+			for (SizeType site1 = site0 + 1; site1 < rows; ++site1) {
+				for (SizeType site2 = site1 + 1; site2 < cols; ++site2) {
 					typename MatrixType::value_type tmp = fourpoint_.threePoint(site0,
-					                                                            site1,
-					                                                            site2,
-					                                                            braket);
-					std::cout<<site1<<" "<<site2<<"  "<<tmp<<"\n";
-
+					    site1,
+					    site2,
+					    braket);
+					std::cout << site1 << " " << site2 << "  " << tmp << "\n";
 				}
 			}
 		}
 
 		assert(flag == 0);
 		for (SizeType site0 = 0; site0 < rows; ++site0) {
-			for (SizeType site1 = site0+1; site1 < rows; ++site1) {
-				for (SizeType site2 = site1+1; site2 < cols; ++site2) {
+			for (SizeType site1 = site0 + 1; site1 < rows; ++site1) {
+				for (SizeType site2 = site1 + 1; site2 < cols; ++site2) {
 
 					typename MatrixType::value_type tmp = fourpoint_.threePoint(site0,
-					                                                            site1,
-					                                                            site2,
-					                                                            braket);
-					std::cout<<site0<<" "<<site1<<" "<<site2<<"  "<<tmp<<"\n";
+					    site1,
+					    site2,
+					    braket);
+					std::cout << site0 << " " << site1 << " " << site2 << "  " << tmp << "\n";
 				}
 			}
 		}
@@ -309,12 +319,12 @@ public:
 		return 0;
 	}
 
-	const FourPointCorrelationsType& fourpoint() const {return fourpoint_; }
+	const FourPointCorrelationsType& fourpoint() const { return fourpoint_; }
 
 	void fourPoint(const BraketType& braket,
-	               SizeType rows,
-	               SizeType cols,
-	               const ManyPointAction& myaction)
+	    SizeType rows,
+	    SizeType cols,
+	    const ManyPointAction& myaction)
 	{
 		assert(braket.points() == 4);
 
@@ -322,22 +332,26 @@ public:
 		try {
 			braket.site(0);
 			flag |= 1;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			braket.site(1);
 			flag |= 2;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			braket.site(2);
 			flag |= 4;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			braket.site(3);
 			flag |= 8;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (flag != 0 && flag != 3 && flag != 15) {
 			PsimagLite::String str("fourPoint: ");
@@ -346,45 +360,47 @@ public:
 		}
 
 		if (flag == 15) {
-			std::cout<<"Fixed all sites\n";
+			std::cout << "Fixed all sites\n";
 			SizeType site0 = braket.site(0);
 			SizeType site1 = braket.site(1);
 			typename FourPointCorrelationsType::SparseMatrixType O2gt;
 			const bool finalTransform = true;
 			fourpoint_.firstStage(O2gt, 'N', site0, 'N', site1, braket, 0, 1, finalTransform);
 			typename MatrixType::value_type tmp = fourpoint_.secondStage(O2gt,
-			                                                             site1,
-			                                                             'N',braket.site(2),
-			                                                             'N',braket.site(3),
-			                                                             braket,
-			                                                             2,
-			                                                             3);
-			std::cout<<site0<<" "<<site1<<" ";
-			std::cout<<braket.site(2)<<" "<<braket.site(3)<<"  "<<tmp<<"\n";
+			    site1,
+			    'N',
+			    braket.site(2),
+			    'N',
+			    braket.site(3),
+			    braket,
+			    2,
+			    3);
+			std::cout << site0 << " " << site1 << " ";
+			std::cout << braket.site(2) << " " << braket.site(3) << "  " << tmp << "\n";
 			return;
 		}
 
 		if (flag == 3) {
 			SizeType site0 = braket.site(0);
 			SizeType site1 = braket.site(1);
-			std::cout<<"Fixed site0= "<<site0<<"\n";
-			std::cout<<"Fixed site1= "<<site1<<"\n";
+			std::cout << "Fixed site0= " << site0 << "\n";
+			std::cout << "Fixed site1= " << site1 << "\n";
 			typename FourPointCorrelationsType::SparseMatrixType O2gt;
 			const bool finalTransform = true;
 			fourpoint_.firstStage(O2gt, 'N', site0, 'N', site1, braket, 0, 1, finalTransform);
 
-			for (SizeType site2 = site1+1; site2 < rows; ++site2) {
-				for (SizeType site3 = site2+1; site3 < cols; ++site3) {
+			for (SizeType site2 = site1 + 1; site2 < rows; ++site2) {
+				for (SizeType site3 = site2 + 1; site3 < cols; ++site3) {
 					typename MatrixType::value_type tmp = fourpoint_.secondStage(O2gt,
-					                                                             site1,
-					                                                             'N',
-					                                                             site2,
-					                                                             'N',
-					                                                             site3,
-					                                                             braket,
-					                                                             2,
-					                                                             3);
-					std::cout<<site2<<" "<<site3<<" "<<tmp<<"\n";
+					    site1,
+					    'N',
+					    site2,
+					    'N',
+					    site3,
+					    braket,
+					    2,
+					    3);
+					std::cout << site2 << " " << site3 << " " << tmp << "\n";
 				}
 			}
 
@@ -394,30 +410,32 @@ public:
 		assert(flag == 0);
 		const bool finalTransform = true;
 		for (SizeType site0 = 0; site0 < rows; ++site0) {
-			for (SizeType site1 = site0+1; site1 < cols; ++site1) {
-				for (SizeType site2 = site1+1; site2 < rows; ++site2) {
-					for (SizeType site3 = site2+1; site3 < cols; ++site3) {
-						if (!myaction(site0, site1, site2, site3)) continue;
+			for (SizeType site1 = site0 + 1; site1 < cols; ++site1) {
+				for (SizeType site2 = site1 + 1; site2 < rows; ++site2) {
+					for (SizeType site3 = site2 + 1; site3 < cols; ++site3) {
+						if (!myaction(site0, site1, site2, site3))
+							continue;
 						typename FourPointCorrelationsType::SparseMatrixType O2gt;
 						fourpoint_.firstStage(O2gt,
-						                      'N',
-						                      site0,
-						                      'N',
-						                      site1,
-						                      braket,0,
-						                      1,
-						                      finalTransform);
+						    'N',
+						    site0,
+						    'N',
+						    site1,
+						    braket,
+						    0,
+						    1,
+						    finalTransform);
 						typename MatrixType::value_type tmp = fourpoint_.secondStage(O2gt,
-						                                                             site1,
-						                                                             'N',
-						                                                             site2,
-						                                                             'N',
-						                                                             site3,
-						                                                             braket,
-						                                                             2,
-						                                                             3);
-						std::cout<<site0<<" "<<site1<<" ";
-						std::cout<<site2<<" "<<site3<<" "<<tmp<<"\n";
+						    site1,
+						    'N',
+						    site2,
+						    'N',
+						    site3,
+						    braket,
+						    2,
+						    3);
+						std::cout << site0 << " " << site1 << " ";
+						std::cout << site2 << " " << site3 << " " << tmp << "\n";
 					}
 				}
 			}
@@ -432,22 +450,26 @@ public:
 		try {
 			braket.site(0);
 			flag |= 1;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			braket.site(1);
 			flag |= 2;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			braket.site(2);
 			flag |= 4;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			braket.site(3);
 			flag |= 8;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (flag != 15) {
 			PsimagLite::String str("fourPoint: ");
@@ -457,91 +479,92 @@ public:
 
 		FieldType tmp = fourpoint_.anyPoint(braket);
 
-		if (!needsPrinting) return tmp; // <<-- early exit
+		if (!needsPrinting)
+			return tmp; // <<-- early exit
 
-		std::cout<<"Fixed all sites\n";
+		std::cout << "Fixed all sites\n";
 		for (SizeType i = 0; i < braket.points(); ++i)
-			std::cout<<braket.site(i)<<" ";
+			std::cout << braket.site(i) << " ";
 
-		std::cout<<tmp<<"\n";
+		std::cout << tmp << "\n";
 
 		return tmp;
 	}
 
 	void fourPointDeltas(MatrixType& fpd,
-	                     const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	                     const ModelType& model)
+	    const typename PsimagLite::Vector<SizeType>::Type& gammas,
+	    const ModelType& model)
 	{
-		if (gammas.size()!=4) {
-			std::cerr<<"Observer: fourPointDeltas(...):  wrong number of gammas ";
-			std::cerr<<" expected "<<4<<" got "<<gammas.size()<<"\n";
+		if (gammas.size() != 4) {
+			std::cerr << "Observer: fourPointDeltas(...):  wrong number of gammas ";
+			std::cerr << " expected " << 4 << " got " << gammas.size() << "\n";
 			throw PsimagLite::RuntimeError("Observer::fourPointDeltas(...)\n");
 		}
 
-		SizeType nsites = 2*fpd.n_row();
-		assert(fpd.n_row()==fpd.n_col());
+		SizeType nsites = 2 * fpd.n_row();
+		assert(fpd.n_row() == fpd.n_col());
 
 		SizeType hs = model.hilbertSize(0);
 		while (hs) {
-			hs>>=1;
+			hs >>= 1;
 		}
 
-		assert(fpd.n_row()>1);
-		typedef std::pair<SizeType,SizeType> PairType;
+		assert(fpd.n_row() > 1);
+		typedef std::pair<SizeType, SizeType> PairType;
 
 		typename PsimagLite::Vector<PairType>::Type pairs;
-		for (SizeType i=0;i<fpd.n_row();i++) {
-			if (2*i+1>=nsites) continue;
-			for (SizeType j=i+1;j<fpd.n_col();j++) {
-				if (2*j+1>=nsites) continue;
-				pairs.push_back(PairType(i,j));
+		for (SizeType i = 0; i < fpd.n_row(); i++) {
+			if (2 * i + 1 >= nsites)
+				continue;
+			for (SizeType j = i + 1; j < fpd.n_col(); j++) {
+				if (2 * j + 1 >= nsites)
+					continue;
+				pairs.push_back(PairType(i, j));
 			}
 		}
-
 
 		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
 		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel4PointDsType helper4PointDs(fpd,
-		                                    fourpoint_,
-		                                    model,
-		                                    gammas,
-		                                    pairs,
-		                                    Parallel4PointDsType::MODE_NORMAL);
+		    fourpoint_,
+		    model,
+		    gammas,
+		    pairs,
+		    Parallel4PointDsType::MODE_NORMAL);
 
 		threaded4PointDs.loopCreate(helper4PointDs);
 	}
 
-	template<typename ApplyOperatorType>
+	template <typename ApplyOperatorType>
 	FieldType onePoint(SizeType ptr,
-	                   const typename ApplyOperatorType::OperatorType& A,
-	                   SizeType site,
-	                   typename ApplyOperatorType::BorderEnum corner,
-	                   const PsimagLite::GetBraOrKet& bra,
-	                   const PsimagLite::GetBraOrKet& ket) const
+	    const typename ApplyOperatorType::OperatorType& A,
+	    SizeType site,
+	    typename ApplyOperatorType::BorderEnum corner,
+	    const PsimagLite::GetBraOrKet& bra,
+	    const PsimagLite::GetBraOrKet& ket) const
 	{
 		return onepoint_.template operator()<ApplyOperatorType>(ptr, A, site, corner, bra, ket);
 	}
 
-	template<typename ApplyOperatorType>
+	template <typename ApplyOperatorType>
 	FieldType onePointHookForZero(SizeType ptr,
-	                              const typename ApplyOperatorType::OperatorType& A,
-	                              SizeType splitSize,
-	                              const PsimagLite::GetBraOrKet& bra,
-	                              const PsimagLite::GetBraOrKet& ket) const
+	    const typename ApplyOperatorType::OperatorType& A,
+	    SizeType splitSize,
+	    const PsimagLite::GetBraOrKet& bra,
+	    const PsimagLite::GetBraOrKet& ket) const
 	{
 		return onepoint_.template hookForZero<ApplyOperatorType>(ptr, A, splitSize, bra, ket);
 	}
 
-	template<typename VectorLikeType>
-	typename PsimagLite::EnableIf
-	<PsimagLite::IsVectorLike<VectorLikeType>::True,void>::Type
+	template <typename VectorLikeType>
+	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<VectorLikeType>::True, void>::Type
 	multiCorrelations(VectorLikeType& result,
-	                  const SparseMatrixType& O,
-	                  SizeType rows,
-	                  SizeType cols,
-	                  PsimagLite::String bra,
-	                  PsimagLite::String ket)
+	    const SparseMatrixType& O,
+	    SizeType rows,
+	    SizeType cols,
+	    PsimagLite::String bra,
+	    PsimagLite::String ket)
 	{
 		MultiPointCorrelationsType multi(skeleton_);
 		multi(result, O, rows, cols, bra, ket);
@@ -554,9 +577,8 @@ private:
 	const CorrelationsSkeletonType skeleton_;
 	const TwoPointCorrelationsType twopoint_;
 	const FourPointCorrelationsType fourpoint_;
-};  //class Observer
+}; // class Observer
 } // namespace Dmrg
 
 /*@}*/
 #endif
-

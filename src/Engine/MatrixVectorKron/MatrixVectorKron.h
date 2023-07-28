@@ -77,17 +77,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  where x and y are vectors and H is the Hamiltonian matrix
  *
  */
-#ifndef	MATRIX_VECTOR_KRON_H
+#ifndef MATRIX_VECTOR_KRON_H
 #define MATRIX_VECTOR_KRON_H
 
-#include "Vector.h"
 #include "InitKronHamiltonian.h"
 #include "KronMatrix.h"
 #include "MatrixVectorBase.h"
+#include "Vector.h"
 
-namespace Dmrg {
-template<typename ModelType_>
-class MatrixVectorKron : public MatrixVectorBase<ModelType_> {
+namespace Dmrg
+{
+template <typename ModelType_>
+class MatrixVectorKron : public MatrixVectorBase<ModelType_>
+{
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
@@ -110,45 +112,46 @@ public:
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
 	MatrixVectorKron(const ModelType& model,
-	                 const HamiltonianConnectionType& hc,
-	                 const typename ModelHelperType::Aux& aux)
-	    : params_(model.params()),
-	      initKron_(model, hc, aux),
-	      kronMatrix_(initKron_, "Hamiltonian"),
-	      time_(0, 0)
+	    const HamiltonianConnectionType& hc,
+	    const typename ModelHelperType::Aux& aux)
+	    : params_(model.params())
+	    , initKron_(model, hc, aux)
+	    , kronMatrix_(initKron_, "Hamiltonian")
+	    , time_(0, 0)
 	{
 		int maxMatrixRankStored = model.params().maxMatrixRankStored;
-		if (hc.modelHelper().size(aux.m()) > maxMatrixRankStored) return;
+		if (hc.modelHelper().size(aux.m()) > maxMatrixRankStored)
+			return;
 
 		model.fullHamiltonian(matrixStored_, hc, aux);
-		assert(isHermitian(matrixStored_,true));
+		assert(isHermitian(matrixStored_, true));
 
 		checkKron();
 	}
 
 	~MatrixVectorKron()
 	{
-		std::cout<<"DeltaClock matrixVectorProduct "<<time_.millis()<<"\n";
+		std::cout << "DeltaClock matrixVectorProduct " << time_.millis() << "\n";
 	}
 
 	SizeType rows() const { return initKron_.size(InitKronType::NEW); }
 
-	template<typename SomeVectorType>
-	void matrixVectorProduct(SomeVectorType &x,SomeVectorType const &y) const
+	template <typename SomeVectorType>
+	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
 		const PsimagLite::MemoryUsage::TimeHandle time1 = PsimagLite::ProgressIndicator::time();
 
 		if (matrixStored_.rows() > 0)
-			matrixStored_.matrixVectorProduct(x,y);
+			matrixStored_.matrixVectorProduct(x, y);
 		else
-			kronMatrix_.matrixVectorProduct(x,y);
+			kronMatrix_.matrixVectorProduct(x, y);
 
 		const PsimagLite::MemoryUsage::TimeHandle time2 = PsimagLite::ProgressIndicator::time();
 		const PsimagLite::MemoryUsage::TimeHandle deltaTime = time2 - time1;
 		time_ += deltaTime;
 	}
 
-	void fullDiag(VectorRealType& eigs,FullMatrixType& fm) const
+	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
 	{
 		BaseType::fullDiag(eigs, fm, matrixStored_, params_.maxMatrixRankStored);
 	}
@@ -165,23 +168,22 @@ private:
 #endif
 
 		SizeType n = rows();
-		std::cout<<n<<"\n";
+		std::cout << n << "\n";
 		FullMatrixType m(n, n);
 		for (SizeType i = 0; i < n; ++i) {
 			VectorType e(n, 0.0);
 			e[i] = 1.0;
 			VectorType ey(n, 0.0);
-			kronMatrix_.matrixVectorProduct(ey,e);
+			kronMatrix_.matrixVectorProduct(ey, e);
 			for (SizeType j = 0; j < n; ++j)
 				m(i, j) = ey[j];
-
 		}
 
-		std::cout<<"Matrix as thought of by Kron\n";
-		std::cout<<m;
+		std::cout << "Matrix as thought of by Kron\n";
+		std::cout << m;
 		assert(isHermitian(m));
-		std::cout<<"Correct matrix\n";
-		std::cout<<matrixStored_;
+		std::cout << "Correct matrix\n";
+		std::cout << matrixStored_;
 	}
 
 	const ParametersType& params_;
@@ -194,4 +196,3 @@ private:
 
 /*@}*/
 #endif
-

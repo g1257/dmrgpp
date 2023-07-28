@@ -82,21 +82,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define MODEL_COMMON_H
 #include <iostream>
 
-#include "Su2SymmetryGlobals.h"
-#include "InputNg.h"
-#include "InputCheck.h"
-#include "ProgressIndicator.h"
-#include "NoPthreads.h"
-#include "Sort.h"
-#include "Profiling.h"
-#include "ModelLinks.h"
 #include "HamiltonianConnection.h"
+#include "InputCheck.h"
+#include "InputNg.h"
 #include "LabeledOperators.h"
+#include "ModelLinks.h"
+#include "NoPthreads.h"
+#include "Profiling.h"
+#include "ProgressIndicator.h"
+#include "Sort.h"
+#include "Su2SymmetryGlobals.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ParametersType, typename SuperGeometryType, typename ModelHelperType>
-class ModelCommon  {
+template <typename ParametersType, typename SuperGeometryType, typename ModelHelperType>
+class ModelCommon
+{
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -115,7 +117,7 @@ public:
 	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
 	typedef ModelLinks<LabeledOperatorsType, SuperGeometryType> ModelLinksType;
 	typedef HamiltonianConnection<ModelLinksType, ModelHelperType, ParametersType>
-	HamiltonianConnectionType;
+	    HamiltonianConnectionType;
 	typedef typename HamiltonianConnectionType::VectorLinkType VectorLinkType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -124,10 +126,10 @@ public:
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 
 	ModelCommon(const ParametersType& params,
-	            const SuperGeometryType& superGeometry)
-	    : params_(params),
-	      superGeometry_(superGeometry),
-	      progress_("ModelCommon")
+	    const SuperGeometryType& superGeometry)
+	    : params_(params)
+	    , superGeometry_(superGeometry)
+	    , progress_("ModelCommon")
 	{
 		Su2SymmetryGlobals<RealType>::init(ModelHelperType::isSu2());
 		MyBasis::useSu2Symmetry(ModelHelperType::isSu2());
@@ -140,9 +142,9 @@ public:
 	const SuperGeometryType& superGeometry() const { return superGeometry_; }
 
 	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                  const VectorOperatorType& cm,
-	                                  const Block& block,
-	                                  RealType time) const
+	    const VectorOperatorType& cm,
+	    const Block& block,
+	    RealType time) const
 	{
 		if (block.size() != 1)
 			err("addConnectionsInNaturalBasis(): unimplemented\n");
@@ -154,8 +156,8 @@ public:
 		Note: Used only for debugging purposes
 		*/
 	void fullHamiltonian(SparseMatrixType& matrix,
-	                     const HamiltonianConnectionType& hc,
-	                     const typename ModelHelperType::Aux& aux) const
+	    const HamiltonianConnectionType& hc,
+	    const typename ModelHelperType::Aux& aux) const
 	{
 		SparseMatrixType matrixBlock;
 
@@ -180,7 +182,7 @@ private:
 	const ParametersType& params_;
 	const SuperGeometryType& superGeometry_;
 	PsimagLite::ProgressIndicator progress_;
-}; //class ModelCommon
+}; // class ModelCommon
 } // namespace Dmrg
 /*@}*/
 #endif

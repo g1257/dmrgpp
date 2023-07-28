@@ -77,16 +77,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef INITKRON_HAMILTONIAN_H
 #define INITKRON_HAMILTONIAN_H
-#include "ProgramGlobals.h"
 #include "InitKronBase.h"
-#include "Vector.h"
-#include "Profiling.h"
 #include "OpsForLink.hh"
+#include "Profiling.h"
+#include "ProgramGlobals.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelType_>
-class InitKronHamiltonian : public InitKronBase<typename ModelType_::LeftRightSuperType> {
+template <typename ModelType_>
+class InitKronHamiltonian : public InitKronBase<typename ModelType_::LeftRightSuperType>
+{
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
@@ -110,18 +112,18 @@ public:
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 
 	InitKronHamiltonian(const ModelType& model,
-	                    const HamiltonianConnectionType& hc,
-	                    const typename ModelHelperType::Aux& aux)
+	    const HamiltonianConnectionType& hc,
+	    const typename ModelHelperType::Aux& aux)
 	    : BaseType(hc.modelHelper().leftRightSuper(),
-	               aux.m(),
-	               hc.modelHelper().quantumNumber(aux.m()),
-	               model.params().denseSparseThreshold,
-	               !model.params().options.isSet("KronNoUseLowerPart")
-	               && !model.params().options.isSet("BatchedGemm")),
-	      model_(model),
-	      hc_(hc),
-	      vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1),
-	      offsetForPatches_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
+		aux.m(),
+		hc.modelHelper().quantumNumber(aux.m()),
+		model.params().denseSparseThreshold,
+		!model.params().options.isSet("KronNoUseLowerPart")
+		    && !model.params().options.isSet("BatchedGemm"))
+	    , model_(model)
+	    , hc_(hc)
+	    , vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
+	    , offsetForPatches_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
 	{
 		addHlAndHr();
 
@@ -140,7 +142,7 @@ public:
 		BaseType::computeOffsets(offsetForPatches_, BaseType::NEW);
 	}
 
-	bool isWft() const {return false; }
+	bool isWft() const { return false; }
 
 	bool loadBalance() const
 	{
@@ -161,7 +163,7 @@ public:
 	// copy vin(:) to yin(:)
 	// -------------------
 	void copyIn(const VectorType& vout,
-	            const VectorType& vin)
+	    const VectorType& vin)
 	{
 		VectorType& xout = xout_;
 		VectorType& yin = yin_;
@@ -175,22 +177,22 @@ public:
 		const BasisType& left = BaseType::lrs(BaseType::NEW).left();
 		const BasisType& right = BaseType::lrs(BaseType::NEW).right();
 
-		for (SizeType ipatch=0; ipatch < npatches; ++ipatch) {
+		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 
 			SizeType igroup = BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
 			SizeType jgroup = BaseType::patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
 
-			assert(left.partition(igroup+1) >= left.partition(igroup));
-			SizeType sizeLeft =  left.partition(igroup+1) - left.partition(igroup);
+			assert(left.partition(igroup + 1) >= left.partition(igroup));
+			SizeType sizeLeft = left.partition(igroup + 1) - left.partition(igroup);
 
-			assert(right.partition(jgroup+1) >= right.partition(jgroup));
-			SizeType sizeRight = right.partition(jgroup+1) - right.partition(jgroup);
+			assert(right.partition(jgroup + 1) >= right.partition(jgroup));
+			SizeType sizeRight = right.partition(jgroup + 1) - right.partition(jgroup);
 
 			SizeType left_offset = left.partition(igroup);
 			SizeType right_offset = right.partition(jgroup);
 
-			for (SizeType ileft=0; ileft < sizeLeft; ++ileft) {
-				for (SizeType iright=0; iright < sizeRight; ++iright) {
+			for (SizeType ileft = 0; ileft < sizeLeft; ++ileft) {
+				for (SizeType iright = 0; iright < sizeRight; ++iright) {
 
 					SizeType i = ileft + left_offset;
 					SizeType j = iright + right_offset;
@@ -202,15 +204,15 @@ public:
 
 					assert(ij < permInverse.size());
 
-					SizeType r = permInverse[ ij ];
+					SizeType r = permInverse[ij];
 					assert(!((r < offset) || (r >= (offset + BaseType::size(BaseType::NEW)))));
 
 					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
 					assert(ip < yin.size());
 
-					assert( (r >= offset) && ((r-offset) < vin.size()) );
-					yin[ip] = vin[r-offset];
-					xout[ip] = vout[r-offset];
+					assert((r >= offset) && ((r - offset) < vin.size()));
+					yin[ip] = vin[r - offset];
+					xout[ip] = vout[r - offset];
 				}
 			}
 		}
@@ -229,10 +231,10 @@ public:
 	VectorType& xout() { return xout_; }
 
 	const SizeType& offsetForPatches(typename BaseType::WhatBasisEnum,
-	                                 SizeType ind) const
+	    SizeType ind) const
 	{
 		assert(ind < offsetForPatches_.size());
-		return  offsetForPatches_[ind];
+		return offsetForPatches_[ind];
 	}
 
 	bool batchedGemm() const
@@ -250,8 +252,8 @@ private:
 		identityL_.makeDiagonal(aL.rows(), value);
 		identityR_.makeDiagonal(aR.rows(), value);
 
-		BaseType::addOneConnection(aL,identityR_, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
-		BaseType::addOneConnection(identityL_,aR, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
+		BaseType::addOneConnection(aL, identityR_, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
+		BaseType::addOneConnection(identityL_, aR, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	void convertXcYcArrays()
@@ -266,7 +268,7 @@ private:
 			const OperatorStorageType& B = opsForLink.B();
 			const LinkType& link2 = opsForLink.link();
 
-			if (link2.type==ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {
+			if (link2.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM) {
 				LinkType link3 = link2;
 				link3.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
 				if (link3.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)

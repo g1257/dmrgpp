@@ -78,20 +78,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef TARGETING_EXPRESSION_H
 #define TARGETING_EXPRESSION_H
-#include <iostream>
-#include "TargetingBase.h"
-#include <stdexcept>
-#include "Pvector.h"
-#include "SpecForTargetingExpression.h"
 #include "CanonicalExpression.h"
 #include "GroupOfOneTimeEvolutions.h"
+#include "Pvector.h"
+#include "SpecForTargetingExpression.h"
+#include "TargetingBase.h"
+#include <iostream>
+#include <stdexcept>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
+{
 
-	typedef TargetingBase<LanczosSolverType_,VectorWithOffsetType_> BaseType;
+	typedef TargetingBase<LanczosSolverType_, VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
 	typedef typename BaseType::ModelType ModelType;
@@ -110,29 +112,29 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_,VectorWithOf
 	typedef typename SpecForTargetingExpressionType::AlgebraType AlgebraType;
 	typedef typename SpecForTargetingExpressionType::AssignAndDestroy AssignAndDestroyType;
 	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType, AssignAndDestroyType>
-	CanonicalExpressionType;
+	    CanonicalExpressionType;
 	typedef AuxForTargetingExpression<BaseType> AuxForTargetingExpressionType;
 	typedef typename TargetingCommonType::VectorRealType VectorRealType;
 	typedef typename AuxForTargetingExpressionType::VectorStringType VectorStringType;
 	typedef typename AuxForTargetingExpressionType::VectorVectorWithOffsetType
-	VectorVectorWithOffsetType;
+	    VectorVectorWithOffsetType;
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 	typedef typename AlgebraType::VectorSizeType VectorSizeType;
 	typedef typename BaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef GroupOfOneTimeEvolutions<Pvectors<BaseType> > GroupOfOneTimeEvolutionsType;
+	typedef GroupOfOneTimeEvolutions<Pvectors<BaseType>> GroupOfOneTimeEvolutionsType;
 
 public:
 
 	TargetingExpression(const LeftRightSuperType& lrs,
-	                    const CheckpointType& checkPoint,
-	                    const WaveFunctionTransfType& wft,
-	                    const QnType&,
-	                    InputValidatorType& io)
-	    : BaseType(lrs, checkPoint, wft, 0),
-	      progress_("TargetingExpression"),
-	      gsWeight_(0.3),
-	      gsWeightActual_(gsWeight_),
-	      pvectors_(io, this->common().aoe(), lrs)
+	    const CheckpointType& checkPoint,
+	    const WaveFunctionTransfType& wft,
+	    const QnType&,
+	    InputValidatorType& io)
+	    : BaseType(lrs, checkPoint, wft, 0)
+	    , progress_("TargetingExpression")
+	    , gsWeight_(0.3)
+	    , gsWeightActual_(gsWeight_)
+	    , pvectors_(io, this->common().aoe(), lrs)
 	{
 		io.readline(gsWeight_, "GsWeight=");
 	}
@@ -143,8 +145,7 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		return PsimagLite::real(this->tv(i)*
-		                        this->tv(i));
+		return PsimagLite::real(this->tv(i) * this->tv(i));
 	}
 
 	RealType weight(SizeType i) const
@@ -160,12 +161,13 @@ public:
 	}
 
 	void evolve(const VectorRealType& energies,
-	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
-	            const BlockType&,
-	            SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    const BlockType&,
+	    SizeType loopNumber)
 	{
-		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
+			return;
 
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		assert(block1.size() == 1);
@@ -184,9 +186,9 @@ public:
 
 		const bool doBorderIfBorder = true;
 		auto testLambda = [this](const PsimagLite::GetBraOrKet& bra,
-		        const PsimagLite::GetBraOrKet& ket)
-		{
-			if (!hasTimeEvolution(bra) || !hasTimeEvolution(ket)) return;
+				      const PsimagLite::GetBraOrKet& ket) {
+			if (!hasTimeEvolution(bra) || !hasTimeEvolution(ket))
+				return;
 
 			RealType braTime = getTimeForKet(bra);
 			RealType ketTime = getTimeForKet(ket);
@@ -196,11 +198,10 @@ public:
 				err("BraTime= " + ttos(braTime) + " but ketTime= " + ttos(ketTime) + "\n");
 
 			if (braTime != globalTime)
-				err("Bra and kets have some time= " + ttos(braTime) +
-				    " but globalTime= " + ttos(globalTime) + "\n");
+				err("Bra and kets have some time= " + ttos(braTime) + " but globalTime= " + ttos(globalTime) + "\n");
 		};
 
-		if (loopNumber >=this->model().params().finiteLoop.size()-1) {
+		if (loopNumber >= this->model().params().finiteLoop.size() - 1) {
 			if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				if (site >= numberOfSites - 1)
 					return;
@@ -215,14 +216,18 @@ public:
 		// border trigger below
 
 		// avoid self-triggers:
-		if (site == 0 || site == numberOfSites - 1) return;
+		if (site == 0 || site == numberOfSites - 1)
+			return;
 
-		if (site > 1 && site < numberOfSites - 2) return;
+		if (site > 1 && site < numberOfSites - 2)
+			return;
 
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			if (site == 1) return;
+			if (site == 1)
+				return;
 		} else {
-			if (site == numberOfSites - 2) return;
+			if (site == numberOfSites - 2)
+				return;
 		}
 
 		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
@@ -231,14 +236,14 @@ public:
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix)
+	    PsimagLite::String prefix)
 	{
 		this->common().readGSandNGSTs(io, prefix, "Expression");
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	    PsimagLite::IoSelector::Out& io,
+	    PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "Expression");
@@ -266,17 +271,18 @@ private:
 	{
 		if (allOrigPvectorsDone()) {
 			const SizeType tvs = this->common().aoe().tvs();
-			if (tvs == pvectors_.origPvectors()) return;
+			if (tvs == pvectors_.origPvectors())
+				return;
 			if (tvs < pvectors_.origPvectors())
 				err("TVS could not have decreased ?!\n");
 
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"All user-provided P vectors finished";
+			msg << "All user-provided P vectors finished";
 			progress_.printline(msgg, std::cout);
-			std::cerr<<PsimagLite::AnsiColor::green;
-			std::cerr<<"All user-provided P vectors finished\n";
-			std::cerr<<PsimagLite::AnsiColor::reset;
+			std::cerr << PsimagLite::AnsiColor::green;
+			std::cerr << "All user-provided P vectors finished\n";
+			std::cerr << PsimagLite::AnsiColor::reset;
 
 			this->common().aoeNonConst().targetVectorsResize(pvectors_.origPvectors());
 
@@ -285,7 +291,7 @@ private:
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"P0="<<pvectors_(0).lastName();
+		msg << "P0=" << pvectors_(0).lastName();
 		progress_.printline(msgg, std::cout);
 
 		CanonicalExpressionType canonicalExpression(opSpec_);
@@ -297,7 +303,8 @@ private:
 		PsimagLite::String allpvectors;
 		for (SizeType i = 0; i < total; ++i) {
 
-			if (pvectors_(i).isDone()) continue;
+			if (pvectors_(i).isDone())
+				continue;
 
 			aux.setPindexOutput(i);
 			AlgebraType tmp(aux);
@@ -313,10 +320,10 @@ private:
 			if (x >= 0) {
 				if (static_cast<SizeType>(x) != i) {
 					VectorWithOffsetType_& v0 = this->tvNonConst(i);
-					v0 =  this->tv(x);
+					v0 = this->tv(x);
 				} else {
-					std::cerr<<"Ignoring self assignment P";
-					std::cerr<<i<<"=P"<<x<<"\n";
+					std::cerr << "Ignoring self assignment P";
+					std::cerr << i << "=P" << x << "\n";
 				}
 
 				pvectors_.setAsDone(i);
@@ -332,7 +339,7 @@ private:
 			if (newpstring != pvectors_(i).lastName()) {
 				needsTrimming = true;
 				PsimagLite::String compr = compressExpression(newpstring);
-				//checkNoUncompressedExists(compr);
+				// checkNoUncompressedExists(compr);
 				pvectors_.pushString(i, compr);
 				newpstring += compr;
 			}
@@ -340,24 +347,27 @@ private:
 			allpvectors += newpstring;
 		}
 
-		if (needsTrimming) pvectors_.trimPvectors(allpvectors);
+		if (needsTrimming)
+			pvectors_.trimPvectors(allpvectors);
 	}
 
 	void finalize(const VectorVectorWithOffsetType& tempVectors,
-	              const VectorStringType& tempNames,
-	              SizeType pVectorIndex,
-	              PsimagLite::String tempExpr)
+	    const VectorStringType& tempNames,
+	    SizeType pVectorIndex,
+	    PsimagLite::String tempExpr)
 	{
 		const SizeType ntemps = tempNames.size();
 
-		if (ntemps == 0) return;
+		if (ntemps == 0)
+			return;
 
 		// find tempNames_ in pVectors_ and trim tempNames_ accordingly
 		VectorBoolType removed_(ntemps);
 		VectorSizeType tempToP(ntemps, 10000);
 		for (SizeType i = 0; i < ntemps; ++i) {
 			int x = pvectors_.findInOrigNames(tempNames[i]);
-			if (x < 0) continue;
+			if (x < 0)
+				continue;
 			this->tvNonConst(x) = tempVectors[i];
 			pvectors_.setAsDone(x);
 			removed_[i] = true;
@@ -366,9 +376,11 @@ private:
 
 		// these surviving tempNames_ need storage, add them
 		for (SizeType i = 0; i < ntemps; ++i) {
-			if (removed_[i]) continue;
+			if (removed_[i])
+				continue;
 			int x = pvectors_.findInAnyNames(tempNames[i]);
-			if (x >= 0) continue;
+			if (x >= 0)
+				continue;
 			auto lambda = [this, i, &tempToP, &tempNames](SizeType ind) {
 				tempToP[i] = ind;
 				return this->expandExpression(tempNames[i], tempToP);
@@ -388,7 +400,8 @@ private:
 	bool allOrigPvectorsDone() const
 	{
 		for (SizeType i = 0; i < pvectors_.origPvectors(); ++i)
-			if (!pvectors_(i).isDone()) return false;
+			if (!pvectors_(i).isDone())
+				return false;
 		return true;
 	}
 
@@ -397,15 +410,17 @@ private:
 	{
 		SizeType i = 0;
 		const SizeType len = str.length();
-		if (len < 4) return str;
+		if (len < 4)
+			return str;
 		PsimagLite::String result;
 		for (; i < len; ++i) {
-			if (i + 4 < len && str.substr(i,3) == "|!m") {
+			if (i + 4 < len && str.substr(i, 3) == "|!m") {
 				SizeType j = i + 3;
 				PsimagLite::String buffer;
-				for (;j < len; ++j) {
+				for (; j < len; ++j) {
 					buffer += str[j];
-					if (str[j] == '>') break;
+					if (str[j] == '>')
+						break;
 				}
 
 				const SizeType ind = pvectors_.findPforThisExpression(buffer);
@@ -423,18 +438,20 @@ private:
 
 	// replace "R" + i ==> "P" + tempToP[i]
 	PsimagLite::String expandExpression(PsimagLite::String str,
-	                                    const VectorSizeType& tempToP) const
+	    const VectorSizeType& tempToP) const
 	{
 		SizeType i = 0;
 		const SizeType len = str.length();
-		if (len < 4) return str;
+		if (len < 4)
+			return str;
 		PsimagLite::String expanded;
 		for (; i < len; ++i) {
 			if (i + 4 < len && str[i] == '|' && str[i + 1] == 'R') {
 				SizeType j = i + 2;
 				PsimagLite::String buffer;
-				for (;j < len; ++j) {
-					if (str[j] == '>') break;
+				for (; j < len; ++j) {
+					if (str[j] == '>')
+						break;
 					buffer += str[j];
 				}
 
@@ -459,14 +476,16 @@ private:
 	{
 		SizeType i = 0;
 		const SizeType len = str.length();
-		if (len < 4) return str;
+		if (len < 4)
+			return str;
 		PsimagLite::String simplified;
 		for (; i < len; ++i) {
 			if (i + 4 < len && str.substr(i, 4) == "|!aP") {
 				SizeType j = i + 4;
 				PsimagLite::String buffer;
-				for (;j < len; ++j) {
-					if (str[j] == 'p') break;
+				for (; j < len; ++j) {
+					if (str[j] == 'p')
+						break;
 					buffer += str[j];
 				}
 
@@ -475,8 +494,9 @@ private:
 				++j;
 				assert(str[j] == 'P');
 				++j;
-				for (;j < len; ++j) {
-					if (str[j] == '>') break;
+				for (; j < len; ++j) {
+					if (str[j] == '>')
+						break;
 					buffer += str[j];
 				}
 
@@ -511,7 +531,8 @@ private:
 	{
 		SizeType i = 0;
 		const SizeType len = str.length();
-		if (len < 4) return;
+		if (len < 4)
+			return;
 		for (; i < len; ++i) {
 			if (i + 4 < len && str.substr(i, 3) == "|!m")
 				err("Uncompressed exists in " + str + "\n");
@@ -527,17 +548,19 @@ private:
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			RealType norma = norm(this->tv(i));
-			if (norma < 1e-6) continue;
-			weights_[i] = pvectors_(i).weight()/norma;
+			if (norma < 1e-6)
+				continue;
+			weights_[i] = pvectors_(i).weight() / norma;
 			sum += weights_[i];
 		}
 
 		gsWeightActual_ = 1 - sum;
 
-		if (gsWeightActual_ >= gsWeight_) return; // <--- EARLY EXIT HERE
+		if (gsWeightActual_ >= gsWeight_)
+			return; // <--- EARLY EXIT HERE
 
 		assert(sum > 1e-6);
-		RealType factor = (1 - gsWeight_)/sum;
+		RealType factor = (1 - gsWeight_) / sum;
 		for (SizeType i = 0; i < n; ++i)
 			weights_[i] *= factor;
 
@@ -551,8 +574,7 @@ private:
 	SpecForTargetingExpressionType opSpec_;
 	Pvectors<BaseType> pvectors_;
 	GroupOfOneTimeEvolutionsType timeEvolve_;
-};     //class TargetingExpression
+}; // class TargetingExpression
 } // namespace Dmrg
 /*@}*/
 #endif
-

@@ -1,16 +1,18 @@
 #ifndef ONESITETRUNCATION_H
 #define ONESITETRUNCATION_H
-#include "Vector.h"
-#include "ProgramGlobals.h"
-#include "PackIndices.h"
-#include "InputNg.h"
 #include "InputCheck.h"
+#include "InputNg.h"
 #include "OutputFileOrNot.h"
+#include "PackIndices.h"
+#include "ProgramGlobals.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelType, typename VectorWithOffsetType>
-class OneSiteTruncation {
+template <typename ModelType, typename VectorWithOffsetType>
+class OneSiteTruncation
+{
 
 public:
 
@@ -24,27 +26,34 @@ public:
 	typedef typename PsimagLite::InputNg<InputCheck>::Readable ReadableType;
 
 	OneSiteTruncation(const LeftRightSuperType& lrs,
-	                  ModelType& model,
-	                  ReadableType& io,
-	                  OutputFileOrNot& ioOut)
-	    : lrs_(lrs), model_(model), m_(0), tolerance_(0), ioOut_(ioOut)
+	    ModelType& model,
+	    ReadableType& io,
+	    OutputFileOrNot& ioOut)
+	    : lrs_(lrs)
+	    , model_(model)
+	    , m_(0)
+	    , tolerance_(0)
+	    , ioOut_(ioOut)
 	{
 		try {
 			io.readline(m_, "OneSiteTruncationM=");
-			std::cout<<"OneSiteTruncationM="<<m_<<"\n";
-		} catch (std::exception&) {}
+			std::cout << "OneSiteTruncationM=" << m_ << "\n";
+		} catch (std::exception&) {
+		}
 
 		try {
 			io.readline(tolerance_, "OneSiteTruncationTolerance=");
-			std::cout<<"OneSiteTruncationTolerance="<<tolerance_<<"\n";
-		} catch (std::exception&) {}
+			std::cout << "OneSiteTruncationTolerance=" << tolerance_ << "\n";
+		} catch (std::exception&) {
+		}
 	}
 
 	void update(SizeType oneSiteTruncSize,
-	            const VectorWithOffsetType& psi,
-	            ProgramGlobals::DirectionEnum dir)
+	    const VectorWithOffsetType& psi,
+	    ProgramGlobals::DirectionEnum dir)
 	{
-		if (oneSiteTruncSize == 0) return;
+		if (oneSiteTruncSize == 0)
+			return;
 
 		// compute U ...
 		MatrixType U(oneSiteTruncSize, oneSiteTruncSize);
@@ -57,13 +66,14 @@ public:
 private:
 
 	SizeType computeU(MatrixType& U,
-	                  SizeType oneSiteTruncSize,
-	                  const VectorWithOffsetType& psi,
-	                  ProgramGlobals::DirectionEnum dir)
+	    SizeType oneSiteTruncSize,
+	    const VectorWithOffsetType& psi,
+	    ProgramGlobals::DirectionEnum dir)
 	{
 		const SizeType sectors = psi.sectors();
 		const SizeType nsysOrEnv = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-		        ? lrs_.left().size()/oneSiteTruncSize : oneSiteTruncSize;
+		    ? lrs_.left().size() / oneSiteTruncSize
+		    : oneSiteTruncSize;
 		PackIndicesType pack(nsysOrEnv);
 		PackIndicesType packSuper(lrs_.left().size());
 		for (SizeType i = 0; i < sectors; ++i) {
@@ -81,14 +91,15 @@ private:
 					pack.unpack(x0, x1, lrs_.left().permutation(x));
 					for (SizeType x1prime = 0; x1prime < oneSiteTruncSize; ++x1prime) {
 						const SizeType xprime = pack.pack(x0,
-						                                  x1prime,
-						                                  lrs_.left().permutationInverse());
-						const SizeType sWithOffsetprime =
-						        packSuper.pack(xprime, y, lrs_.super().permutationInverse());
-						if (sWithOffsetprime < offset) continue; // respect all symmetries
+						    x1prime,
+						    lrs_.left().permutationInverse());
+						const SizeType sWithOffsetprime = packSuper.pack(xprime, y, lrs_.super().permutationInverse());
+						if (sWithOffsetprime < offset)
+							continue; // respect all symmetries
 						const SizeType sprime = sWithOffsetprime - offset;
-						if (sprime >= total) continue; // respect all symmetries
-						U(x1, x1prime) += PsimagLite::conj(psi.fastAccess(sector, sprime))*value;
+						if (sprime >= total)
+							continue; // respect all symmetries
+						U(x1, x1prime) += PsimagLite::conj(psi.fastAccess(sector, sprime)) * value;
 					}
 				} else {
 					SizeType y0 = 0;
@@ -96,14 +107,15 @@ private:
 					pack.unpack(y0, y1, lrs_.right().permutation(y));
 					for (SizeType y0prime = 0; y0prime < oneSiteTruncSize; ++y0prime) {
 						const SizeType yprime = pack.pack(y0prime,
-						                                  y1,
-						                                  lrs_.right().permutationInverse());
-						const SizeType sWithOffsetprime =
-						        packSuper.pack(x, yprime, lrs_.super().permutationInverse());
-						if (sWithOffsetprime < offset) continue; // respect all symmetries
+						    y1,
+						    lrs_.right().permutationInverse());
+						const SizeType sWithOffsetprime = packSuper.pack(x, yprime, lrs_.super().permutationInverse());
+						if (sWithOffsetprime < offset)
+							continue; // respect all symmetries
 						const SizeType sprime = sWithOffsetprime - offset;
-						if (sprime >= total) continue; // respect all symmetries
-						U(y0, y0prime) += PsimagLite::conj(psi.fastAccess(sector, sprime))*value;
+						if (sprime >= total)
+							continue; // respect all symmetries
+						U(y0, y0prime) += PsimagLite::conj(psi.fastAccess(sector, sprime)) * value;
 					}
 				}
 			}
@@ -128,7 +140,8 @@ private:
 		RealType sum = 0;
 		for (; row < n; ++row) {
 			sum += fabs(eigs[n - row - 1]);
-			if (sum >= tolerance_) break;
+			if (sum >= tolerance_)
+				break;
 		}
 
 		assert(row <= n);

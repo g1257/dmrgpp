@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -85,235 +85,237 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 
-namespace Dmrg { 	
-	template<typename BasisType,typename BasisWithOperatorsType,typename SparseMatrixType>
-	class RightLeftLocal {
-	public:	
-		typedef typename SparseMatrixType::value_type MatrixElementType;
-		typedef psimag::Matrix<MatrixElementType> MatrixType;
-		
-		RightLeftLocal(int m,const BasisType& basis1,  const BasisWithOperatorsType& basis2,
-			 const BasisWithOperatorsType& basis3,SizeType orbitals,bool useReflection=false) 
-		:
-			m_(m),
-			basis1_(basis1),
-			basis2_(basis2),
-			basis3_(basis3),
-			alpha_(basis1_.size()),
-			beta_(basis1_.size()),
-			leftPermInv_(basis2.size()),
-			rightPermInv_(basis3.size())
-		{
-			init();
-			createAlphaAndBeta();
+namespace Dmrg
+{
+template <typename BasisType, typename BasisWithOperatorsType, typename SparseMatrixType>
+class RightLeftLocal
+{
+public:
+
+	typedef typename SparseMatrixType::value_type MatrixElementType;
+	typedef psimag::Matrix<MatrixElementType> MatrixType;
+
+	RightLeftLocal(int m, const BasisType& basis1, const BasisWithOperatorsType& basis2, const BasisWithOperatorsType& basis3, SizeType orbitals, bool useReflection = false)
+	    : m_(m)
+	    , basis1_(basis1)
+	    , basis2_(basis2)
+	    , basis3_(basis3)
+	    , alpha_(basis1_.size())
+	    , beta_(basis1_.size())
+	    , leftPermInv_(basis2.size())
+	    , rightPermInv_(basis3.size())
+	{
+		init();
+		createAlphaAndBeta();
+	}
+
+	~RightLeftLocal()
+	{
+		// for (SizeType i=0;i<bMatrix_.size();i++) delete bMatrix_[i];
+		// for (SizeType i=0;i<aMatrix_.size();i++) delete aMatrix_[i];
+	}
+
+	//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
+	//! Has been changed to accomodate for reflection symmetry
+	void fastOpProdInter(typename PsimagLite::Vector<MatrixElementType>::Type& x,
+	    typename PsimagLite::Vector<MatrixElementType> const ::Type& y,
+	    SparseMatrixType const& A,
+	    SparseMatrixType const& B,
+	    int type,
+	    MatrixElementType& hop,
+	    bool operatorsAreFermions = true,
+	    SizeType angularMomentum = 1,
+	    MatrixElementType angularSign = -1.0,
+	    SizeType category = 0,
+	    bool dummy2 = false) const
+	{
+		int const SystemEnviron = 1, EnvironSystem = 2;
+		int fermionSign = (operatorsAreFermions) ? -1 : 1;
+
+		if (type == EnvironSystem) {
+			MatrixElementType hop2 = hop * fermionSign;
+			fastOpProdInter(x, y, B, A, SystemEnviron, hop2, operatorsAreFermions);
+			return;
+		}
+		SizeType leftSize = leftPerm_.size();
+		SizeType rightSize = rightPerm_.size();
+		// static const typename PsimagLite::Vector<MatrixElementType>*::Type yAddress = 0;
+
+		// if (yAddress!=&y) {
+		preparePhi(yMatrix_, y);
+		prepareB(bMatrix_, B);
+		prepareA(aMatrix_, A, operatorsAreFermions);
+		//	yAddress = &y;
+		//}
+
+		MatrixType* bm = &bMatrix_;
+		/*int ib = PsimagLite\:\:isInVector(addressesB_,&B);
+
+		if (ib<0) {
+			bm = new MatrixType(rightSize,rightSize);
+			prepareB(*bm,B);
+			bMatrix_.push_back(bm);
+			addressesB_.push_back(&B);
+		} else {
+			bm =  bMatrix_[ib];
 		}
 
-		~RightLeftLocal()
-		{
-			//for (SizeType i=0;i<bMatrix_.size();i++) delete bMatrix_[i];
-			//for (SizeType i=0;i<aMatrix_.size();i++) delete aMatrix_[i];
+		int ia = PsimagLite\:\:isInVector(addressesA_,&A);*/
+		MatrixType* am = &aMatrix_;
+		/*if (ia<0) {
+			am = new MatrixType(leftSize,leftSize);
+			prepareA(*am,A,operatorsAreFermions);
+			aMatrix_.push_back(am);
+			addressesA_.push_back(&A);
+		} else {
+			am =  aMatrix_[ia];
+		}*/
+
+		//! multiply all here:
+
+		psimag::BLAS::GEMM('N', 'C', rightSize, leftSize, rightSize, hop, &(bm->operator()(0, 0)), rightSize, &(yMatrix_(0, 0)), leftSize, 0.0, &(cMatrix_(0, 0)), rightSize);
+		psimag::BLAS::GEMM('N', 'C', leftSize, rightSize, leftSize, 1.0, &(am->operator()(0, 0)), leftSize, &(cMatrix_(0, 0)), rightSize, 0.0, &(tmpMatrix_(0, 0)), leftSize);
+
+		//! revert order
+		unpreparePhi(x, tmpMatrix_);
+	}
+
+private:
+
+	int m_;
+	const BasisType& basis1_;
+	const BasisWithOperatorsType& basis2_;
+	const BasisWithOperatorsType& basis3_;
+	typename PsimagLite::Vector<SizeType>::Type alpha_, beta_;
+	typename PsimagLite::Vector<SizeType>::Type leftPermInv_, rightPermInv_;
+	typename PsimagLite::Vector<SizeType>::Type leftPerm_, rightPerm_;
+	mutable MatrixType bMatrix_;
+	mutable MatrixType aMatrix_;
+	mutable MatrixType cMatrix_, tmpMatrix_, yMatrix_;
+	// mutable typename PsimagLite::Vector<const::Type SparseMatrixType*> addressesA_;
+	// mutable typename PsimagLite::Vector<const::Type SparseMatrixType*> addressesB_;
+
+	void init()
+	{
+		SizeType ns = basis2_.size();
+		SizeType ne = basis3_.size();
+		int offset = basis1_.partition(m_);
+		int total = basis1_.partition(m_ + 1) - offset;
+
+		for (SizeType alphaPrime = 0; alphaPrime < ns; alphaPrime++) {
+			for (SizeType betaPrime = 0; betaPrime < ne; betaPrime++) {
+				int tmp = basis1_.permutationInverse(alphaPrime + betaPrime * ns) - offset;
+				if (tmp >= total || tmp < 0)
+					continue;
+				int x = PsimagLite\:\: isInVector(leftPerm_, alphaPrime);
+				if (x < 0)
+					leftPerm_.push_back(alphaPrime);
+				int y = PsimagLite\:\: isInVector(rightPerm_, betaPrime);
+				if (y < 0)
+					rightPerm_.push_back(betaPrime);
+			}
 		}
 
-		//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
-		//! Has been changed to accomodate for reflection symmetry
-		void fastOpProdInter(	typename PsimagLite::Vector<MatrixElementType>  ::Type&x,
-					typename PsimagLite::Vector<MatrixElementType>  const ::Type&y,
-					SparseMatrixType const &A,
-					SparseMatrixType const &B,
-					int type,
-					MatrixElementType  &hop,
-					bool operatorsAreFermions=true,SizeType angularMomentum=1,MatrixElementType angularSign= -1.0,SizeType category=0,bool dummy2=false) const
-		{
-			int const SystemEnviron=1,EnvironSystem=2;
-			int fermionSign =  (operatorsAreFermions) ? -1 : 1;
-			
-			
-			if (type==EnvironSystem)  {
-				MatrixElementType hop2 =hop*fermionSign;
-				fastOpProdInter(x,y,B,A,SystemEnviron,hop2,operatorsAreFermions);
-				return;
-			}
-			SizeType leftSize = leftPerm_.size();
-			SizeType rightSize = rightPerm_.size();
-			//static const typename PsimagLite::Vector<MatrixElementType>*::Type yAddress = 0;
-			
-			//if (yAddress!=&y) {
-				preparePhi(yMatrix_,y);
-				prepareB(bMatrix_,B);
-				prepareA(aMatrix_,A,operatorsAreFermions);
-			//	yAddress = &y;
-			//}
-			
-			MatrixType* bm = &bMatrix_;
-			/*int ib = PsimagLite\:\:isInVector(addressesB_,&B);
-			
-			if (ib<0) {
-				bm = new MatrixType(rightSize,rightSize);
-				prepareB(*bm,B);
-				bMatrix_.push_back(bm);
-				addressesB_.push_back(&B);
-			} else {
-				bm =  bMatrix_[ib];
-			}
-			
-			int ia = PsimagLite\:\:isInVector(addressesA_,&A);*/
-			MatrixType* am = &aMatrix_;
-			/*if (ia<0) {
-				am = new MatrixType(leftSize,leftSize);
-				prepareA(*am,A,operatorsAreFermions);
-				aMatrix_.push_back(am);
-				addressesA_.push_back(&A);
-			} else {
-				am =  aMatrix_[ia];
-			}*/
-			
-			
-			//! multiply all here:
-			
-			psimag::BLAS::GEMM('N','C',rightSize,leftSize,rightSize,hop,
-					   &(bm->operator()(0,0)),rightSize,&(yMatrix_(0,0)),leftSize,0.0,&(cMatrix_(0,0)),rightSize);
-			psimag::BLAS::GEMM('N','C',leftSize,rightSize,leftSize,1.0,
-					   &(am->operator()(0,0)),leftSize,&(cMatrix_(0,0)),rightSize,0.0,&(tmpMatrix_(0,0)),leftSize);
-			
-			//! revert order
-			unpreparePhi(x,tmpMatrix_);
-		}
+		for (SizeType i = 0; i < rightPerm_.size(); i++)
+			rightPermInv_[rightPerm_[i]] = i;
 
-	private:
-		int m_;
-		const BasisType&  basis1_;
-		const BasisWithOperatorsType& basis2_;
-		const BasisWithOperatorsType& basis3_;
-		typename PsimagLite::Vector<SizeType>::Type alpha_,beta_;
-		typename PsimagLite::Vector<SizeType>::Type leftPermInv_,rightPermInv_;
-		typename PsimagLite::Vector<SizeType>::Type leftPerm_,rightPerm_;
-		mutable MatrixType bMatrix_;
-		mutable MatrixType aMatrix_;
-		mutable MatrixType cMatrix_,tmpMatrix_,yMatrix_;
-		//mutable typename PsimagLite::Vector<const::Type SparseMatrixType*> addressesA_;
-		//mutable typename PsimagLite::Vector<const::Type SparseMatrixType*> addressesB_;
-		
-		
-		void init()
-		{
-			SizeType ns=basis2_.size();
-			SizeType ne=basis3_.size();
-			int offset = basis1_.partition(m_);
-			int total = basis1_.partition(m_+1) - offset;
+		for (SizeType i = 0; i < leftPerm_.size(); i++)
+			leftPermInv_[leftPerm_[i]] = i;
 
-			for (SizeType alphaPrime=0;alphaPrime<ns;alphaPrime++) {
-				for (SizeType betaPrime=0;betaPrime<ne;betaPrime++) {	
-					int tmp =basis1_.permutationInverse(alphaPrime + betaPrime*ns) - offset;
-					if (tmp>=total || tmp<0) continue;
-					int x = PsimagLite\:\:isInVector(leftPerm_,alphaPrime);
-					if (x<0) leftPerm_.push_back(alphaPrime);
-					int y = PsimagLite\:\:isInVector(rightPerm_,betaPrime);
-					if (y<0) rightPerm_.push_back(betaPrime);
-				}
-			}
-			
-			
-			for (SizeType i=0;i<rightPerm_.size();i++) rightPermInv_[rightPerm_[i]]=i;
-			
-			for (SizeType i=0;i<leftPerm_.size();i++) leftPermInv_[leftPerm_[i]]=i;
-			
-			SizeType leftSize = leftPerm_.size();
-			SizeType rightSize = rightPerm_.size();
-			
-			yMatrix_.resize(leftSize,rightSize);
-			cMatrix_.resize(rightSize,leftSize);
-			tmpMatrix_.resize(leftSize,rightSize);
-			aMatrix_.resize(leftSize,leftSize);
-			bMatrix_.resize(rightSize,rightSize);
-			
-		}
-		
-		void preparePhi(MatrixType& m,typename PsimagLite::Vector<MatrixElementType>  const ::Type&v) const
-		{
-			int offset = basis1_.partition(m_);
-			int total = basis1_.partition(m_+1) - offset;
-			/*for (SizeType i=0;i<leftPerm_.size();i++) {
-				SizeType x = leftPerm_[i];
-				for (SizeType j=0;j<rightPerm_.size();j++) {
-					SizeType y = rightPerm_[j];
-					int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
-					if (ii<0 || ii>=total) continue;
-					m(i,j) = v[ii];
-				}
-			}*/
-			
-			//SizeType ns = basis2_.size();
-			for (int i=0;i<total;i++) {
-				//SizeType alpha,beta;
-				//utils::getCoordinates(alpha,beta,basis1_.permutation(i+offset),ns);
-				m(leftPermInv_[alpha_[i]],rightPermInv_[beta_[i]])=v[i];
-			}
-		}
-		
-		void unpreparePhi(typename PsimagLite::Vector<MatrixElementType>::Type& v,MatrixType& m) const
-		{
-			int offset = basis1_.partition(m_);
-			int total = basis1_.partition(m_+1) - offset;
-			/*for (SizeType i=0;i<leftPerm_.size();i++) {
-				SizeType x = leftPerm_[i];
-				for (SizeType j=0;j<rightPerm_.size();j++) {
-					SizeType y = rightPerm_[j];
-					int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
-					if (ii<0 || ii>=total) continue;
-					//MatrixElementType a =v[ii];
-					//a+=2.0;
-					 v[ii] += m(i,j);
-				}
-			}*/
-			
-			SizeType ns = basis2_.size();
-			for (int i=0;i<total;i++) {
-				SizeType alpha,beta;
-				utils::getCoordinates(alpha,beta,basis1_.permutation(i+offset),ns);
-				v[i] =m(leftPermInv_[alpha_[i]],rightPermInv_[beta_[i]]);
-			}
-		}
-		
-		void prepareB(MatrixType& m,SparseMatrixType const &B) const
-		{
-			for (SizeType i=0;i<rightPerm_.size();i++) {
-				SizeType x = rightPerm_[i];
-				for (SizeType j=0;j<rightPerm_.size();j++) {
-					SizeType y = rightPerm_[j];
-					m(i,j) = B(x,y);
-				}
-			}
-		}
-		
-		void prepareA(MatrixType& m,SparseMatrixType const &A,
-			      bool operatorsAreFermions) const
-		{
-			int fermionSign =  (operatorsAreFermions) ? -1 : 1;
-			for (SizeType i=0;i<leftPerm_.size();i++) {
-				SizeType x = leftPerm_[i];
-				MatrixElementType tmp = basis2_.fermionicSign(x,fermionSign);
-				for (SizeType j=0;j<leftPerm_.size();j++) {
-					SizeType y = leftPerm_[j];
-					m(i,j) = A(x,y)*tmp;
-				}
-			}
-		}
-		
-		void createAlphaAndBeta()
-		{
-			SizeType ns=basis2_.size();
-			int offset = basis1_.partition(m_);
-			int total = basis1_.partition(m_+1) - offset;
+		SizeType leftSize = leftPerm_.size();
+		SizeType rightSize = rightPerm_.size();
 
-			for (int i=0;i<total;i++) {
-				// row i of the ordered product basis
-				utils::getCoordinates(alpha_[i],beta_[i],basis1_.permutation(i+offset),ns);
+		yMatrix_.resize(leftSize, rightSize);
+		cMatrix_.resize(rightSize, leftSize);
+		tmpMatrix_.resize(leftSize, rightSize);
+		aMatrix_.resize(leftSize, leftSize);
+		bMatrix_.resize(rightSize, rightSize);
+	}
+
+	void preparePhi(MatrixType& m, typename PsimagLite::Vector<MatrixElementType> const ::Type& v) const
+	{
+		int offset = basis1_.partition(m_);
+		int total = basis1_.partition(m_ + 1) - offset;
+		/*for (SizeType i=0;i<leftPerm_.size();i++) {
+			SizeType x = leftPerm_[i];
+			for (SizeType j=0;j<rightPerm_.size();j++) {
+				SizeType y = rightPerm_[j];
+				int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
+				if (ii<0 || ii>=total) continue;
+				m(i,j) = v[ii];
+			}
+		}*/
+
+		// SizeType ns = basis2_.size();
+		for (int i = 0; i < total; i++) {
+			// SizeType alpha,beta;
+			// utils::getCoordinates(alpha,beta,basis1_.permutation(i+offset),ns);
+			m(leftPermInv_[alpha_[i]], rightPermInv_[beta_[i]]) = v[i];
+		}
+	}
+
+	void unpreparePhi(typename PsimagLite::Vector<MatrixElementType>::Type& v, MatrixType& m) const
+	{
+		int offset = basis1_.partition(m_);
+		int total = basis1_.partition(m_ + 1) - offset;
+		/*for (SizeType i=0;i<leftPerm_.size();i++) {
+			SizeType x = leftPerm_[i];
+			for (SizeType j=0;j<rightPerm_.size();j++) {
+				SizeType y = rightPerm_[j];
+				int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
+				if (ii<0 || ii>=total) continue;
+				//MatrixElementType a =v[ii];
+				//a+=2.0;
+				 v[ii] += m(i,j);
+			}
+		}*/
+
+		SizeType ns = basis2_.size();
+		for (int i = 0; i < total; i++) {
+			SizeType alpha, beta;
+			utils::getCoordinates(alpha, beta, basis1_.permutation(i + offset), ns);
+			v[i] = m(leftPermInv_[alpha_[i]], rightPermInv_[beta_[i]]);
+		}
+	}
+
+	void prepareB(MatrixType& m, SparseMatrixType const& B) const
+	{
+		for (SizeType i = 0; i < rightPerm_.size(); i++) {
+			SizeType x = rightPerm_[i];
+			for (SizeType j = 0; j < rightPerm_.size(); j++) {
+				SizeType y = rightPerm_[j];
+				m(i, j) = B(x, y);
 			}
 		}
-		
-	}; // class RightLeftLocal
+	}
+
+	void prepareA(MatrixType& m, SparseMatrixType const& A, bool operatorsAreFermions) const
+	{
+		int fermionSign = (operatorsAreFermions) ? -1 : 1;
+		for (SizeType i = 0; i < leftPerm_.size(); i++) {
+			SizeType x = leftPerm_[i];
+			MatrixElementType tmp = basis2_.fermionicSign(x, fermionSign);
+			for (SizeType j = 0; j < leftPerm_.size(); j++) {
+				SizeType y = leftPerm_[j];
+				m(i, j) = A(x, y) * tmp;
+			}
+		}
+	}
+
+	void createAlphaAndBeta()
+	{
+		SizeType ns = basis2_.size();
+		int offset = basis1_.partition(m_);
+		int total = basis1_.partition(m_ + 1) - offset;
+
+		for (int i = 0; i < total; i++) {
+			// row i of the ordered product basis
+			utils::getCoordinates(alpha_[i], beta_[i], basis1_.permutation(i + offset), ns);
+		}
+	}
+
+}; // class RightLeftLocal
 } // namespace Dmrg
 /*@}*/
 
 #endif
-

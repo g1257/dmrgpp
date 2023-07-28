@@ -77,13 +77,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef FEMION_SIGN_H
 #define FEMION_SIGN_H
-#include <vector>
-#include <stdexcept>
 #include "PackIndices.h"
+#include <stdexcept>
+#include <vector>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-class FermionSign {
+class FermionSign
+{
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -93,20 +95,22 @@ public:
 
 	FermionSign(const VectorBoolType& signs)
 	    : signs_(signs)
-	{}
+	{
+	}
 
-	template<typename SomeBasisType>
-	FermionSign(const SomeBasisType& basis,const VectorBoolType& signs)
+	template <typename SomeBasisType>
+	FermionSign(const SomeBasisType& basis, const VectorBoolType& signs)
 	{
 		if (basis.oldSigns().size() != basis.permutationInverse().size())
 			err("FermionSign: Problem\n");
 
 		SizeType n = basis.oldSigns().size();
 		assert(basis.oldSigns().size() % signs.size() == 0);
-		SizeType nx = basis.oldSigns().size()/signs.size();
+		SizeType nx = basis.oldSigns().size() / signs.size();
 		PackIndicesType pack(nx);
 		signs_.resize(nx);
-		if (nx <= 1) return;
+		if (nx <= 1)
+			return;
 		for (SizeType x = 0; x < n; ++x) {
 			SizeType x0 = 0;
 			SizeType x1 = 0;
@@ -119,28 +123,33 @@ public:
 		}
 	}
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	FermionSign(IoInputter& io,
-	            PsimagLite::String prefix,
-	            bool bogus,
-	            typename PsimagLite::EnableIf<
-	            PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
+	    PsimagLite::String prefix,
+	    bool bogus,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsInputLike<IoInputter>::True,
+		int>::Type
+	    = 0)
 	{
-		if (bogus) return;
+		if (bogus)
+			return;
 		io.read(signs_, prefix);
 	}
 
-	int operator()(SizeType i,int f) const
+	int operator()(SizeType i, int f) const
 	{
-		assert(i<signs_.size());
+		assert(i < signs_.size());
 		return (signs_[i]) ? f : 1;
 	}
 
-	template<typename IoOutputter>
+	template <typename IoOutputter>
 	void write(IoOutputter& io,
-	           PsimagLite::String prefix,
-	           typename PsimagLite::EnableIf<
-	           PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type = 0) const
+	    PsimagLite::String prefix,
+	    typename PsimagLite::EnableIf<
+		PsimagLite::IsOutputLike<IoOutputter>::True,
+		int>::Type
+	    = 0) const
 	{
 		io.write(signs_, prefix);
 	}
@@ -155,4 +164,3 @@ private:
 
 /*@}*/
 #endif // FEMION_SIGN_H
-

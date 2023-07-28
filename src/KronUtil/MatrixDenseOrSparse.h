@@ -1,14 +1,16 @@
 #ifndef MATRIXDENSEORSPARSE_H
 #define MATRIXDENSEORSPARSE_H
-#include "Vector.h"
+#include "CrsMatrix.h"
 #include "KronUtilWrapper.h"
 #include "Matrix.h"
-#include "CrsMatrix.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename SparseMatrixType>
-class MatrixDenseOrSparse {
+template <typename SparseMatrixType>
+class MatrixDenseOrSparse
+{
 
 public:
 
@@ -19,11 +21,9 @@ public:
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
 
 	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse,
-	                             const RealType& threshold)
-	    : isDense_(sparse.nonZeros() > static_cast<SizeType>(threshold*
-	                                                         sparse.rows()*
-	                                                         sparse.cols())),
-	      sparseMatrix_(sparse)
+	    const RealType& threshold)
+	    : isDense_(sparse.nonZeros() > static_cast<SizeType>(threshold * sparse.rows() * sparse.cols()))
+	    , sparseMatrix_(sparse)
 	{
 		sparseMatrix_.checkValidity();
 
@@ -32,33 +32,34 @@ public:
 	}
 
 	explicit MatrixDenseOrSparse(const SizeType nrows,
-	                             const SizeType ncols,
-	                             bool  isDense_in )
-	    : isDense_( isDense_in ), sparseMatrix_(nrows,ncols), denseMatrix_(0,0)
+	    const SizeType ncols,
+	    bool isDense_in)
+	    : isDense_(isDense_in)
+	    , sparseMatrix_(nrows, ncols)
+	    , denseMatrix_(0, 0)
 	{
 		if (isDense_) {
 			denseMatrix_.clear();
-			denseMatrix_.resize(nrows,ncols );
-		}
-		else  {
-			sparseMatrix_.resize(nrows,ncols);
+			denseMatrix_.resize(nrows, ncols);
+		} else {
+			sparseMatrix_.resize(nrows, ncols);
 		};
 	}
 
-
 	explicit MatrixDenseOrSparse(const SizeType nrows,
-	                             const SizeType ncols,
-	                             bool  isDense_in,
-                                     SizeType nonzeros )
-	    : isDense_( isDense_in ), sparseMatrix_(nrows,ncols), denseMatrix_(0,0)
+	    const SizeType ncols,
+	    bool isDense_in,
+	    SizeType nonzeros)
+	    : isDense_(isDense_in)
+	    , sparseMatrix_(nrows, ncols)
+	    , denseMatrix_(0, 0)
 	{
 		if (isDense_) {
 			denseMatrix_.clear();
-			denseMatrix_.resize(nrows,ncols );
-		}
-		else  {
-			sparseMatrix_.resize(nrows,ncols);
-                        sparseMatrix_.reserve( nonzeros );
+			denseMatrix_.resize(nrows, ncols);
+		} else {
+			sparseMatrix_.resize(nrows, ncols);
+			sparseMatrix_.reserve(nonzeros);
 		};
 	}
 
@@ -100,8 +101,7 @@ public:
 
 	bool isZero() const
 	{
-		return (isDense_) ? PsimagLite::isZero(denseMatrix_)  :
-		                    PsimagLite::isZero(sparseMatrix_);
+		return (isDense_) ? PsimagLite::isZero(denseMatrix_) : PsimagLite::isZero(sparseMatrix_);
 	}
 
 	SparseMatrixType toSparse() const
@@ -111,28 +111,27 @@ public:
 
 	const PsimagLite::CrsMatrix<ComplexOrRealType>& getSparse() const
 	{
-		assert( !isDense_ );
-		return( sparseMatrix_ );
+		assert(!isDense_);
+		return (sparseMatrix_);
 	}
 
 	PsimagLite::CrsMatrix<ComplexOrRealType>& getSparse()
 	{
-		assert( !isDense_ );
-		return( sparseMatrix_ );
+		assert(!isDense_);
+		return (sparseMatrix_);
 	}
 
 	const PsimagLite::Matrix<ComplexOrRealType>& getDense() const
 	{
-		assert( isDense_ );
-		return( denseMatrix_ );
+		assert(isDense_);
+		return (denseMatrix_);
 	}
 
 	PsimagLite::Matrix<ComplexOrRealType>& getDense()
 	{
-		assert( isDense_ );
-		return( denseMatrix_ );
+		assert(isDense_);
+		return (denseMatrix_);
 	}
-
 
 private:
 
@@ -141,18 +140,18 @@ private:
 	PsimagLite::Matrix<ComplexOrRealType> denseMatrix_;
 }; // class MatrixDenseOrSparse
 
-template<typename SparseMatrixType>
+template <typename SparseMatrixType>
 void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& xout,
-              SizeType offsetX,
-              const typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& yin,
-              SizeType offsetY,
-              char transA,
-              char transB,
-              const MatrixDenseOrSparse<SparseMatrixType>& A,
-              const MatrixDenseOrSparse<SparseMatrixType>& B,
-              const typename PsimagLite::Real<typename SparseMatrixType::value_type>::Type
-              denseFlopDiscount,
-              PsimagLite::GemmR<typename SparseMatrixType::value_type>& gemmR)
+    SizeType offsetX,
+    const typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& yin,
+    SizeType offsetY,
+    char transA,
+    char transB,
+    const MatrixDenseOrSparse<SparseMatrixType>& A,
+    const MatrixDenseOrSparse<SparseMatrixType>& B,
+    const typename PsimagLite::Real<typename SparseMatrixType::value_type>::Type
+	denseFlopDiscount,
+    PsimagLite::GemmR<typename SparseMatrixType::value_type>& gemmR)
 {
 	const bool isDenseA = A.isDense();
 	const bool isDenseB = B.isDense();
@@ -160,52 +159,52 @@ void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>
 	if (isDenseA) {
 		if (isDenseB) {
 			den_kron_mult(transA,
-			              transB,
-			              A.dense(),
-			              B.dense(),
-			              yin,
-			              offsetY,
-			              xout,
-			              offsetX,
-			              denseFlopDiscount,
-			              gemmR);
-		} else  {
+			    transB,
+			    A.dense(),
+			    B.dense(),
+			    yin,
+			    offsetY,
+			    xout,
+			    offsetX,
+			    denseFlopDiscount,
+			    gemmR);
+		} else {
 			// B is sparse
 			den_csr_kron_mult(transA,
-			                  transB,
-			                  A.dense(),
-			                  B.sparse(),
-			                  yin,
-			                  offsetY,
-			                  xout,
-			                  offsetX,
-			                  denseFlopDiscount,
-			                  gemmR);
+			    transB,
+			    A.dense(),
+			    B.sparse(),
+			    yin,
+			    offsetY,
+			    xout,
+			    offsetX,
+			    denseFlopDiscount,
+			    gemmR);
 		}
 	} else {
 		// A is sparse
 		if (isDenseB) {
 			csr_den_kron_mult(transA,
-			                  transB,
-			                  A.sparse(),
-			                  B.dense(),
-			                  yin,
-			                  offsetY,
-			                  xout,
-			                  offsetX,
-			                  denseFlopDiscount,
-			                  gemmR);
+			    transB,
+			    A.sparse(),
+			    B.dense(),
+			    yin,
+			    offsetY,
+			    xout,
+			    offsetX,
+			    denseFlopDiscount,
+			    gemmR);
 		} else {
 			// B is sparse
 			csr_kron_mult(transA,
-			              transB,
-			              A.sparse(),
-			              B.sparse(),
-			              yin,
-			              offsetY,
-			              xout,
-			              offsetX,
-			              denseFlopDiscount);
+			    transB,
+			    A.sparse(),
+			    B.sparse(),
+			    yin,
+			    offsetY,
+			    xout,
+			    offsetX,
+			    denseFlopDiscount);
 		};
 	};
 } // kron_mult

@@ -79,31 +79,33 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERSMODELHUBBARD_H
 #define PARAMETERSMODELHUBBARD_H
-#include "ParametersModelBase.h"
-#include "InputNg.h"
 #include "InputCheck.h"
+#include "InputNg.h"
+#include "ParametersModelBase.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! Hubbard Model Parameters
-template<typename RealType, typename QnType>
+template <typename RealType, typename QnType>
 struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef PsimagLite::InputNg<InputCheck>::Readable IoInputType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
-	ParametersModelHubbard(IoInputType& io) : BaseType(io, false)
+	ParametersModelHubbard(IoInputType& io)
+	    : BaseType(io, false)
 	{
 		SizeType nsites = 0;
 		io.readline(nsites, "TotalNumberOfSites=");
 		hubbardU.resize(nsites, 0.0);
-		potentialV.resize(2*nsites, 0.0);
-		io.read(hubbardU,"hubbardU");
-		io.read(potentialV,"potentialV");
+		potentialV.resize(2 * nsites, 0.0);
+		io.read(hubbardU, "hubbardU");
+		io.read(potentialV, "potentialV");
 		try {
 			anisotropy.resize(nsites, 0.0);
-			io.read(anisotropy,"AnisotropyD");
-			std::cerr<<"Has AnisotropyD\n";
+			io.read(anisotropy, "AnisotropyD");
+			std::cerr << "Has AnisotropyD\n";
 		} catch (std::exception&) {
 			anisotropy.clear();
 		}
@@ -114,8 +116,8 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 
 		try {
 			magneticX.resize(nsites, 0.0);
-			io.read(magneticX,"MagneticFieldX");
-			std::cerr<<"Has MagneticFieldX\n";
+			io.read(magneticX, "MagneticFieldX");
+			std::cerr << "Has MagneticFieldX\n";
 		} catch (std::exception&) {
 			magneticX.clear();
 		}
@@ -128,7 +130,7 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelHubbard";
 		io.createGroup(label);
@@ -144,24 +146,25 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		typename PsimagLite::Vector<RealType>::Type potentialTlegacy;
 		try {
 			io.read(potentialTlegacy, "PotentialT");
-			std::cerr<<"Has PotentialT\n";
+			std::cerr << "Has PotentialT\n";
 		} catch (std::exception&) {
 			return VectorStringType();
 		}
 
 		RealType omega = 0;
 		try {
-			io.readline(omega,"omega=");
-		} catch (std::exception&) {}
+			io.readline(omega, "omega=");
+		} catch (std::exception&) {
+		}
 
 		RealType phase = 0;
 		try {
-			io.readline(phase,"phase=");
-		} catch (std::exception&) {}
+			io.readline(phase, "phase=");
+		} catch (std::exception&) {
+		}
 
 		// c means cosine below
-		const PsimagLite::String function = "*(c:+:*:%t:" +
-		        ttos(omega) + ":" + ttos(phase) + ")*";
+		const PsimagLite::String function = "*(c:+:*:%t:" + ttos(omega) + ":" + ttos(phase) + ")*";
 		const PsimagLite::String nup = function + "nup";
 		const PsimagLite::String ndown = function + "ndown";
 
@@ -189,4 +192,3 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 
 /*@}*/
 #endif
-

@@ -70,9 +70,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_MODELHELPER_H
 #define DMRG_MODELHELPER_H
 
-#include "PackIndices.h" // in PsimagLite
-#include "Link.h"
 #include "Concurrency.h"
+#include "Link.h"
+#include "PackIndices.h" // in PsimagLite
 #include "Vector.h"
 
 /** \ingroup DMRG */
@@ -85,9 +85,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 
-namespace Dmrg {
-template<typename LeftRightSuperType_>
-class ModelHelperLocal {
+namespace Dmrg
+{
+template <typename LeftRightSuperType_>
+class ModelHelperLocal
+{
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 
@@ -109,12 +111,14 @@ public:
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 	typedef typename BasisType::QnType QnType;
 
-	class Aux {
+	class Aux
+	{
 
 	public:
 
-		Aux(SizeType m, const LeftRightSuperType& lrs) :
-		    m_(m), buffer_(lrs.left().size())
+		Aux(SizeType m, const LeftRightSuperType& lrs)
+		    : m_(m)
+		    , buffer_(lrs.left().size())
 
 		{
 			createBuffer(lrs);
@@ -161,16 +165,16 @@ public:
 			SizeType ns = lrs.left().size();
 			SizeType ne = lrs.right().size();
 			int offset = lrs.super().partition(m_);
-			int total = lrs.super().partition(m_+1) - offset;
+			int total = lrs.super().partition(m_ + 1) - offset;
 
-			typename PsimagLite::Vector<int>::Type  tmpBuffer(ne);
-			for (SizeType alphaPrime=0;alphaPrime<ns;alphaPrime++) {
-				for (SizeType betaPrime=0;betaPrime<ne;betaPrime++) {
-					tmpBuffer[betaPrime] = lrs.super().
-					        permutationInverse(alphaPrime + betaPrime*ns) -offset;
-					if (tmpBuffer[betaPrime]>=total) tmpBuffer[betaPrime]= -1;
+			typename PsimagLite::Vector<int>::Type tmpBuffer(ne);
+			for (SizeType alphaPrime = 0; alphaPrime < ns; alphaPrime++) {
+				for (SizeType betaPrime = 0; betaPrime < ne; betaPrime++) {
+					tmpBuffer[betaPrime] = lrs.super().permutationInverse(alphaPrime + betaPrime * ns) - offset;
+					if (tmpBuffer[betaPrime] >= total)
+						tmpBuffer[betaPrime] = -1;
 				}
-				buffer_[alphaPrime]=tmpBuffer;
+				buffer_[alphaPrime] = tmpBuffer;
 			}
 		}
 
@@ -178,16 +182,16 @@ public:
 		{
 			SizeType ns = lrs.left().size();
 			int offset = lrs.super().partition(m_);
-			int total = lrs.super().partition(m_+1) - offset;
+			int total = lrs.super().partition(m_ + 1) - offset;
 
 			PackIndicesType pack(ns);
 			alpha_.resize(total);
 			beta_.resize(total);
 			fermionSigns_.resize(total);
-			for (int i=0;i<total;i++) {
+			for (int i = 0; i < total; i++) {
 				// row i of the ordered product basis
-				pack.unpack(alpha_[i],beta_[i],lrs.super().permutation(i+offset));
-				int fs = lrs.left().fermionicSign(alpha_[i],-1);
+				pack.unpack(alpha_[i], beta_[i], lrs.super().permutation(i + offset));
+				int fs = lrs.left().fermionicSign(alpha_[i], -1);
 				fermionSigns_[i] = (fs < 0) ? true : false;
 			}
 		}
@@ -199,15 +203,17 @@ public:
 		typename PsimagLite::Vector<bool>::Type fermionSigns_;
 	};
 
-	ModelHelperLocal(const LeftRightSuperType& lrs) : lrs_(lrs)
-	{}
+	ModelHelperLocal(const LeftRightSuperType& lrs)
+	    : lrs_(lrs)
+	{
+	}
 
 	static bool isSu2() { return false; }
 
 	int size(SizeType mm) const
 	{
 		int tmp = lrs_.super().partition(mm + 1) - lrs_.super().partition(mm);
-		return tmp; //reflection_.size(tmp);
+		return tmp; // reflection_.size(tmp);
 	}
 
 	const QnType& quantumNumber(SizeType mm) const
@@ -217,17 +223,18 @@ public:
 
 	//! Does matrixBlock= (AB), A belongs to pSprime and B
 	// belongs to pEprime or viceversa (inter)
-	void fastOpProdInter(SparseMatrixType const &A,
-	                     SparseMatrixType const &B,
-	                     SparseMatrixType &matrixBlock,
-	                     const LinkType& link,
-	                     const Aux& aux) const
+	void fastOpProdInter(SparseMatrixType const& A,
+	    SparseMatrixType const& B,
+	    SparseMatrixType& matrixBlock,
+	    const LinkType& link,
+	    const Aux& aux) const
 	{
 		RealType fermionSign = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
-		        ? -1 : 1;
+		    ? -1
+		    : 1;
 
 		//! work only on partition m
-		if (link.type==ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {
+		if (link.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM) {
 			LinkType link2 = link;
 			link2.value *= fermionSign;
 			link2.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
@@ -238,32 +245,33 @@ public:
 		SizeType m = aux.m();
 		int offset = lrs_.super().partition(m);
 		int total = lrs_.super().partition(m + 1) - offset;
-		int counter=0;
-		matrixBlock.resize(total,total);
+		int counter = 0;
+		matrixBlock.resize(total, total);
 
 		int i;
-		for (i=0;i<total;i++) {
+		for (i = 0; i < total; i++) {
 			// row i of the ordered product basis
-			matrixBlock.setRow(i,counter);
+			matrixBlock.setRow(i, counter);
 			int alpha = aux.alpha(i);
 			int beta = aux.beta(i);
 
 			SparseElementType fsValue = (fermionSign < 0 && aux.fermionSigns(i))
-			        ? -link.value
-			        : link.value;
+			    ? -link.value
+			    : link.value;
 
-			for (int k=A.getRowPtr(alpha);k<A.getRowPtr(alpha+1);k++) {
+			for (int k = A.getRowPtr(alpha); k < A.getRowPtr(alpha + 1); k++) {
 				int alphaPrime = A.getCol(k);
-				for (int kk=B.getRowPtr(beta);kk<B.getRowPtr(beta+1);kk++) {
+				for (int kk = B.getRowPtr(beta); kk < B.getRowPtr(beta + 1); kk++) {
 					int betaPrime = B.getCol(kk);
 					int j = aux.buffer(alphaPrime, betaPrime);
-					if (j<0) continue;
+					if (j < 0)
+						continue;
 					/* fermion signs note:
 					here the environ is applied first and has to "cross"
 					the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 					*/
-					SparseElementType tmp = A.getValue(k) * B.getValue(kk)*fsValue;
-					//if (tmp==static_cast<MatrixElementType>(0.0)) continue;
+					SparseElementType tmp = A.getValue(k) * B.getValue(kk) * fsValue;
+					// if (tmp==static_cast<MatrixElementType>(0.0)) continue;
 					matrixBlock.pushCol(j);
 					matrixBlock.pushValue(tmp);
 					counter++;
@@ -271,23 +279,24 @@ public:
 			}
 		}
 
-		matrixBlock.setRow(i,counter);
+		matrixBlock.setRow(i, counter);
 	}
 
 	// Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or
 	// viceversa (inter)
 	// Has been changed to accomodate for reflection symmetry
 	void fastOpProdInter(VectorSparseElementType& x,
-	                     const VectorSparseElementType& y,
-	                     const SparseMatrixType& A,
-	                     const SparseMatrixType& B,
-	                     const LinkType& link,
-	                     const Aux& aux) const
+	    const VectorSparseElementType& y,
+	    const SparseMatrixType& A,
+	    const SparseMatrixType& B,
+	    const LinkType& link,
+	    const Aux& aux) const
 	{
-		RealType fermionSign =  (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
-		        ? -1 : 1;
+		RealType fermionSign = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+		    ? -1
+		    : 1;
 
-		if (link.type==ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM)  {
+		if (link.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM) {
 			LinkType link2 = link;
 			link2.value *= fermionSign;
 			link2.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
@@ -300,34 +309,34 @@ public:
 		int offset = lrs_.super().partition(m);
 		int total = lrs_.super().partition(m + 1) - offset;
 
-		for (int i=0;i<total;++i) {
+		for (int i = 0; i < total; ++i) {
 			// row i of the ordered product basis
 			int alpha = aux.alpha(i);
 			int beta = aux.beta(i);
 			SparseElementType sum = 0.0;
 			int startkk = B.getRowPtr(beta);
-			int endkk = B.getRowPtr(beta+1);
+			int endkk = B.getRowPtr(beta + 1);
 			int startk = A.getRowPtr(alpha);
-			int endk = A.getRowPtr(alpha+1);
+			int endk = A.getRowPtr(alpha + 1);
 			/* fermion signs note:
 			 * here the environ is applied first and has to "cross"
 			 * the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 			 */
 
 			SparseElementType fsValue = (fermionSign < 0 && aux.fermionSigns(i))
-			        ? -link.value
-			        : link.value;
+			    ? -link.value
+			    : link.value;
 
-			for (int k=startk;k<endk;++k) {
+			for (int k = startk; k < endk; ++k) {
 				int alphaPrime = A.getCol(k);
-				SparseElementType tmp2 = A.getValue(k) *fsValue;
-				const typename PsimagLite::Vector<int>::Type& bufferTmp =
-				        aux.buffer(alphaPrime);
+				SparseElementType tmp2 = A.getValue(k) * fsValue;
+				const typename PsimagLite::Vector<int>::Type& bufferTmp = aux.buffer(alphaPrime);
 
-				for (int kk=startkk;kk<endkk;++kk) {
-					int betaPrime= B.getCol(kk);
+				for (int kk = startkk; kk < endkk; ++kk) {
+					int betaPrime = B.getCol(kk);
 					int j = bufferTmp[betaPrime];
-					if (j<0) continue;
+					if (j < 0)
+						continue;
 
 					SparseElementType tmp = tmp2 * B.getValue(kk);
 					sum += tmp * y[j];
@@ -345,27 +354,28 @@ public:
 	// This is a performance critical function
 	// Has been changed to accomodate for reflection symmetry
 	void hamiltonianLeftProduct(VectorSparseElementType& x,
-	                            const VectorSparseElementType& y,
-	                            const Aux& aux) const
+	    const VectorSparseElementType& y,
+	    const Aux& aux) const
 	{
 		int m = aux.m();
 		int offset = lrs_.super().partition(m);
-		int i,k,alphaPrime;
-		int bs = lrs_.super().partition(m+1)-offset;
+		int i, k, alphaPrime;
+		int bs = lrs_.super().partition(m + 1) - offset;
 		const SparseMatrixType& hamiltonian = lrs_.left().hamiltonian().getCRS();
 		SizeType ns = lrs_.left().size();
 		SparseElementType sum = 0.0;
 		PackIndicesType pack(ns);
-		for (i=0;i<bs;i++) {
-			SizeType r,beta;
-			pack.unpack(r,beta,lrs_.super().permutation(i+offset));
+		for (i = 0; i < bs; i++) {
+			SizeType r, beta;
+			pack.unpack(r, beta, lrs_.super().permutation(i + offset));
 
 			// row i of the ordered product basis
-			for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
+			for (k = hamiltonian.getRowPtr(r); k < hamiltonian.getRowPtr(r + 1); k++) {
 				alphaPrime = hamiltonian.getCol(k);
 				int j = aux.buffer(alphaPrime, beta);
-				if (j<0) continue;
-				sum += hamiltonian.getValue(k)*y[j];
+				if (j < 0)
+					continue;
+				sum += hamiltonian.getValue(k) * y[j];
 			}
 
 			x[i] += sum;
@@ -379,26 +389,27 @@ public:
 	// Then, this function does x += H_m * y
 	// This is a performance critical function
 	void hamiltonianRightProduct(VectorSparseElementType& x,
-	                             const VectorSparseElementType& y,
-	                             const Aux& aux) const
+	    const VectorSparseElementType& y,
+	    const Aux& aux) const
 	{
 		int m = aux.m();
 		int offset = lrs_.super().partition(m);
-		int i,k;
-		int bs = lrs_.super().partition(m+1)-offset;
+		int i, k;
+		int bs = lrs_.super().partition(m + 1) - offset;
 		const SparseMatrixType& hamiltonian = lrs_.right().hamiltonian().getCRS();
 		SizeType ns = lrs_.left().size();
 		SparseElementType sum = 0.0;
 		PackIndicesType pack(ns);
-		for (i=0;i<bs;i++) {
-			SizeType alpha,r;
-			pack.unpack(alpha,r,lrs_.super().permutation(i+offset));
+		for (i = 0; i < bs; i++) {
+			SizeType alpha, r;
+			pack.unpack(alpha, r, lrs_.super().permutation(i + offset));
 
 			// row i of the ordered product basis
-			for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
+			for (k = hamiltonian.getRowPtr(r); k < hamiltonian.getRowPtr(r + 1); k++) {
 				int j = aux.buffer(alpha, hamiltonian.getCol(k));
-				if (j < 0) continue;
-				sum += hamiltonian.getValue(k)*y[j];
+				if (j < 0)
+					continue;
+				sum += hamiltonian.getValue(k) * y[j];
 			}
 
 			x[i] += sum;
@@ -412,15 +423,15 @@ public:
 	// basis2.hamiltonian_{beta,beta'} \delta_{alpha,alpha'}
 	// returns the m-th block (in the ordering of basis1) of H
 	// Note: USed only for debugging
-	void calcHamiltonianPart(SparseMatrixType &matrixBlock,
-	                         bool option,
-	                         const Aux& aux) const
+	void calcHamiltonianPart(SparseMatrixType& matrixBlock,
+	    bool option,
+	    const Aux& aux) const
 	{
-		int m  = aux.m();
+		int m = aux.m();
 		SizeType offset = lrs_.super().partition(m);
-		int k,alphaPrime=0,betaPrime=0;
-		int bs = lrs_.super().partition(m+1)-offset;
-		SizeType ns=lrs_.left().size();
+		int k, alphaPrime = 0, betaPrime = 0;
+		int bs = lrs_.super().partition(m + 1) - offset;
+		SizeType ns = lrs_.left().size();
 		SparseMatrixType hamiltonian;
 		if (option) {
 			hamiltonian = lrs_.left().hamiltonian().getCRS();
@@ -428,43 +439,46 @@ public:
 			hamiltonian = lrs_.right().hamiltonian().getCRS();
 		}
 
-		matrixBlock.resize(bs,bs);
+		matrixBlock.resize(bs, bs);
 
-		int counter=0;
+		int counter = 0;
 		PackIndicesType pack(ns);
-		for (SizeType i=offset;i<lrs_.super().partition(m+1);i++) {
-			matrixBlock.setRow(i-offset,counter);
-			SizeType alpha,beta;
-			pack.unpack(alpha,beta,lrs_.super().permutation(i));
-			SizeType r=beta;
+		for (SizeType i = offset; i < lrs_.super().partition(m + 1); i++) {
+			matrixBlock.setRow(i - offset, counter);
+			SizeType alpha, beta;
+			pack.unpack(alpha, beta, lrs_.super().permutation(i));
+			SizeType r = beta;
 			if (option) {
-				betaPrime=beta;
+				betaPrime = beta;
 				r = alpha;
 			} else {
-				alphaPrime=alpha;
-				r=beta;
+				alphaPrime = alpha;
+				r = beta;
 			}
 
-			assert(r<hamiltonian.rows());
+			assert(r < hamiltonian.rows());
 			// row i of the ordered product basis
-			for (k=hamiltonian.getRowPtr(r);k<hamiltonian.getRowPtr(r+1);k++) {
+			for (k = hamiltonian.getRowPtr(r); k < hamiltonian.getRowPtr(r + 1); k++) {
 
-				if (option) alphaPrime = hamiltonian.getCol(k);
-				else 	    betaPrime  = hamiltonian.getCol(k);
-				SizeType j = lrs_.super().permutationInverse(alphaPrime + betaPrime*ns);
-				if (j<offset || j>=lrs_.super().partition(m+1)) continue;
+				if (option)
+					alphaPrime = hamiltonian.getCol(k);
+				else
+					betaPrime = hamiltonian.getCol(k);
+				SizeType j = lrs_.super().permutationInverse(alphaPrime + betaPrime * ns);
+				if (j < offset || j >= lrs_.super().partition(m + 1))
+					continue;
 				SparseElementType tmp = hamiltonian.getValue(k);
-				matrixBlock.pushCol(j-offset);
+				matrixBlock.pushCol(j - offset);
 				matrixBlock.pushValue(tmp);
 				counter++;
 			}
 		}
 
-		matrixBlock.setRow(lrs_.super().partition(m+1)-offset,counter);
+		matrixBlock.setRow(lrs_.super().partition(m + 1) - offset, counter);
 
 #ifndef NDEBUG
 		if (!isHermitian(matrixBlock)) {
-			std::cerr<<matrixBlock.toDense();
+			std::cerr << matrixBlock.toDense();
 			PsimagLite::String lOrR = (option) ? "Left" : "Right";
 			err(lOrR + " Hamiltonian Matrix not Hermitian\n");
 		}
@@ -484,4 +498,3 @@ private:
 /*@}*/
 
 #endif
-

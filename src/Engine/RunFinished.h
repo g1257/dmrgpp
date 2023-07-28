@@ -2,27 +2,35 @@
 #define RUNFINISHED_H
 #include "PsimagLite.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-class RunFinished {
+class RunFinished
+{
 
 public:
 
-	RunFinished(bool enabled) : enabled_(enabled), checked_(false), value_(false) {}
+	RunFinished(bool enabled)
+	    : enabled_(enabled)
+	    , checked_(false)
+	    , value_(false)
+	{
+	}
 
 	bool OK(PsimagLite::String filename)
 	{
-		if (!enabled_) return false;
-		if (!checked_) checkRun(filename);
+		if (!enabled_)
+			return false;
+		if (!checked_)
+			checkRun(filename);
 		return value_;
 	}
 
 	void printTermination(PsimagLite::String filename)
 	{
-		static const PsimagLite::String str = "File " + filename + " exists, " +
-		        "and you chose no clobber. Refusing to run\n";
-		std::cerr<<str;
-		std::cout<<str;
+		static const PsimagLite::String str = "File " + filename + " exists, " + "and you chose no clobber. Refusing to run\n";
+		std::cerr << str;
+		std::cout << str;
 	}
 
 private:
@@ -40,8 +48,8 @@ private:
 		char schar1[1024];
 		std::streampos size = fin.tellg();
 		int i = 1;
-		while (i<=size) {
-			fin.seekg(-i,std::ios::end);
+		while (i <= size) {
+			fin.seekg(-i, std::ios::end);
 			fin.getline(schar1, 1023);
 			PsimagLite::String str(schar1);
 			if (str.find("Turning off the engine.") != PsimagLite::String::npos) {

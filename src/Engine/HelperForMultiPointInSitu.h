@@ -1,15 +1,17 @@
 #ifndef HELPERFORMULTIPOINTINSITU_H
 #define HELPERFORMULTIPOINTINSITU_H
-#include "FermionSign.h"
-#include "Matrix.h"
-#include "GetBraOrKet.h"
-#include "ProgramGlobals.h"
 #include "DmrgSerializer.h"
+#include "FermionSign.h"
+#include "GetBraOrKet.h"
+#include "Matrix.h"
+#include "ProgramGlobals.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename CheckpointType>
-class HelperForMultiPointInSitu {
+template <typename CheckpointType>
+class HelperForMultiPointInSitu
+{
 
 public:
 
@@ -28,15 +30,20 @@ public:
 	typedef typename DmrgSerializerType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
 
-	class BogusInput {
+	class BogusInput
+	{
 
 	public:
 
 		BogusInput(SizeType numberOfSites,
-		           const CheckpointType& checkPoint,
-		           const WaveFunctionTransfType& wft,
-		           ProgramGlobals::DirectionEnum dir)
-		    : numberOfSites_(numberOfSites), checkPoint_(checkPoint), wft_(wft), dir_(dir), fS_(nullptr)
+		    const CheckpointType& checkPoint,
+		    const WaveFunctionTransfType& wft,
+		    ProgramGlobals::DirectionEnum dir)
+		    : numberOfSites_(numberOfSites)
+		    , checkPoint_(checkPoint)
+		    , wft_(wft)
+		    , dir_(dir)
+		    , fS_(nullptr)
 		{
 			SizeType site = 0; // FIXME FOR IMMM and SDHS
 			typename BasisWithOperatorsType::VectorBoolType oddElectrons;
@@ -62,8 +69,7 @@ public:
 
 		const LeftRightSuperType& hookForMultiInSituLrs(SizeType ind)
 		{
-			std::pair<BasisWithOperatorsType, BasisWithOperatorsType> pair =
-			        checkPoint_.hookForMultiInSituLrs(ind);
+			std::pair<BasisWithOperatorsType, BasisWithOperatorsType> pair = checkPoint_.hookForMultiInSituLrs(ind);
 
 			BasisType super("superForMultiPointInSitu", pair.first.traits());
 			super.setToProduct(pair.first, pair.second);
@@ -74,13 +80,14 @@ public:
 
 		const FermionSignType& fermionicSignLeft(SizeType ind)
 		{
-			if (fS_) delete fS_;
+			if (fS_)
+				delete fS_;
 			fS_ = new FermionSignType(checkPoint_.hookForMultiInSituLrs(ind).first.signs());
 			return *fS_;
 		}
 
 		const BlockDiagonalMatrixType& getTransform(SizeType ind,
-		                                            ProgramGlobals::DirectionEnum dir) const
+		    ProgramGlobals::DirectionEnum dir) const
 		{
 			return wft_.multiPointGetTransform(ind, dir);
 		}
@@ -108,13 +115,15 @@ public:
 	typedef BogusInput IoInputType;
 
 	HelperForMultiPointInSitu(BogusInput& io,
-	                          SizeType start,
-	                          SizeType nf,
-	                          SizeType trail,
-	                          bool withLegacyBugs,
-	                          bool readOnDemand)
-	    : io_(io), ind_(1 + numberOfSites())
-	{}
+	    SizeType start,
+	    SizeType nf,
+	    SizeType trail,
+	    bool withLegacyBugs,
+	    bool readOnDemand)
+	    : io_(io)
+	    , ind_(1 + numberOfSites())
+	{
+	}
 
 	const LeftRightSuperType& leftRightSuper(SizeType ind) const
 	{
@@ -124,10 +133,9 @@ public:
 	SizeType numberOfSites() const { return io_.numberOfSites(); }
 
 	const VectorWithOffsetType& getVectorFromBracketId(const PsimagLite::GetBraOrKet& braOrKet,
-	                                                   SizeType index) const
+	    SizeType index) const
 	{
-		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::getVectorFromBracketId() " +
-		                               PsimagLite::String("unimplemented\n"));
+		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::getVectorFromBracketId() " + PsimagLite::String("unimplemented\n"));
 	}
 
 	SizeType cols(SizeType ind) const
@@ -146,8 +154,8 @@ public:
 
 	// transform O2 by the transformation in location ind, and put the result in ret
 	void transform(SparseMatrixType& ret,
-	               const SparseMatrixType& O2,
-	               SizeType ind) const
+	    const SparseMatrixType& O2,
+	    SizeType ind) const
 	{
 		if (ind != ind_)
 			computeAndSaveTransform(ind);

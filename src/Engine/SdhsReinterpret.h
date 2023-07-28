@@ -2,10 +2,12 @@
 #define SDHSREINTERPRET_H
 #include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename BraketType>
-class SdhsReinterpret {
+template <typename BraketType>
+class SdhsReinterpret
+{
 
 public:
 
@@ -35,9 +37,9 @@ public:
 			str += opName;
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(opName);
 			if (!siteSplit.hasSiteString)
-				str += "[" + ttos(sites[i])+ "]";
-			if (i < n - 1) str += ";";
-
+				str += "[" + ttos(sites[i]) + "]";
+			if (i < n - 1)
+				str += ";";
 		}
 
 		str += "|" + braket.ket().toString() + ">";

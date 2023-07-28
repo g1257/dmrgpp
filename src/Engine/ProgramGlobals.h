@@ -78,14 +78,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PROGRAM_LIMITS_H
 #define PROGRAM_LIMITS_H
-#include "PsimagLite.h"
-#include "Vector.h"
-#include "Utils.h"
 #include "../../src/Version.h"
+#include "PsimagLite.h"
+#include "Utils.h"
+#include "Vector.h"
 #include <algorithm>
 #include <numeric>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 struct ProgramGlobals {
 
@@ -97,42 +98,52 @@ struct ProgramGlobals {
 
 	static const SizeType MAX_LPS = 1000;
 
-	enum class DirectionEnum {INFINITE, EXPAND_ENVIRON, EXPAND_SYSTEM};
+	enum class DirectionEnum { INFINITE,
+		EXPAND_ENVIRON,
+		EXPAND_SYSTEM };
 
-	enum class ConnectionEnum {SYSTEM_SYSTEM, SYSTEM_ENVIRON, ENVIRON_SYSTEM, ENVIRON_ENVIRON};
+	enum class ConnectionEnum { SYSTEM_SYSTEM,
+		SYSTEM_ENVIRON,
+		ENVIRON_SYSTEM,
+		ENVIRON_ENVIRON };
 
-	enum class SysOrEnvEnum {SYSTEM, ENVIRON};
+	enum class SysOrEnvEnum { SYSTEM,
+		ENVIRON };
 
-	enum class FermionOrBosonEnum {FERMION, BOSON};
+	enum class FermionOrBosonEnum { FERMION,
+		BOSON };
 
-	enum class VerboseEnum {NO, YES};
+	enum class VerboseEnum { NO,
+		YES };
 
 	static FermionOrBosonEnum multipy(const FermionOrBosonEnum& a,
-	                                  const FermionOrBosonEnum& b)
+	    const FermionOrBosonEnum& b)
 	{
-		if (a == FermionOrBosonEnum::BOSON) return b;
+		if (a == FermionOrBosonEnum::BOSON)
+			return b;
 
 		return (b == FermionOrBosonEnum::BOSON) ? FermionOrBosonEnum::FERMION
-		                                        : FermionOrBosonEnum::BOSON;
+							: FermionOrBosonEnum::BOSON;
 	}
 
 	static void init(SizeType maxElectronsOneSpin_)
 	{
-		if (maxElectronsOneSpin == maxElectronsOneSpin_) return;
+		if (maxElectronsOneSpin == maxElectronsOneSpin_)
+			return;
 		if (maxElectronsOneSpin != 0) {
-			std::cerr<<PsimagLite::AnsiColor::blue;
+			std::cerr << PsimagLite::AnsiColor::blue;
 			PsimagLite::String msg("ProgramGlobals::init(...) replayed\n");
-			std::cout<<msg;
-			std::cerr<<msg;
-			std::cerr<<PsimagLite::AnsiColor::reset;
+			std::cout << msg;
+			std::cerr << msg;
+			std::cerr << PsimagLite::AnsiColor::reset;
 		}
 
 		maxElectronsOneSpin = maxElectronsOneSpin_;
 	}
 
 	static int findBorderSiteFrom(SizeType site,
-	                              DirectionEnum direction,
-	                              SizeType n)
+	    DirectionEnum direction,
+	    SizeType n)
 	{
 		if (site == 1 && direction == DirectionEnum::EXPAND_ENVIRON)
 			return 0;
@@ -146,9 +157,9 @@ struct ProgramGlobals {
 	static PsimagLite::String rootName(PsimagLite::String filename)
 	{
 		PsimagLite::String rootname = filename;
-		size_t index =rootname.find(".", 0);
+		size_t index = rootname.find(".", 0);
 		if (index != PsimagLite::String::npos) {
-			rootname.erase(index,filename.length());
+			rootname.erase(index, filename.length());
 		}
 
 		return rootname;
@@ -157,9 +168,9 @@ struct ProgramGlobals {
 	static PsimagLite::String coutName(PsimagLite::String filename)
 	{
 		PsimagLite::String rootname = utils::basename(filename);
-		size_t index =rootname.find(".", 0);
+		size_t index = rootname.find(".", 0);
 		if (index != PsimagLite::String::npos) {
-			rootname.erase(index,filename.length());
+			rootname.erase(index, filename.length());
 		}
 
 		return "runFor" + rootname + ".cout";
@@ -178,9 +189,10 @@ struct ProgramGlobals {
 
 	static SizeType volumeOf(const PsimagLite::Vector<SizeType>::Type& v)
 	{
-		assert(v.size()>0);
+		assert(v.size() > 0);
 		SizeType ret = v[0];
-		for (SizeType i=1;i<v.size();i++) ret *= v[i];
+		for (SizeType i = 1; i < v.size(); i++)
+			ret *= v[i];
 		return ret;
 	}
 
@@ -223,14 +235,14 @@ struct ProgramGlobals {
 		PsimagLite::String buffer;
 		const SizeType n = str.length();
 		for (SizeType i = 0; i < n; ++i)
-			if (str[i] != ' ') buffer += str[i];
+			if (str[i] != ' ')
+				buffer += str[i];
 		return buffer;
 	}
 
 	static PsimagLite::String toLower(PsimagLite::String data)
 	{
-		std::transform(data.begin(), data.end(), data.begin(),
-		               [](unsigned char c){ return std::tolower(c); });
+		std::transform(data.begin(), data.end(), data.begin(), [](unsigned char c) { return std::tolower(c); });
 		return data;
 	}
 
@@ -241,4 +253,3 @@ struct ProgramGlobals {
 } // namespace Dmrg
 /*@}*/
 #endif
-

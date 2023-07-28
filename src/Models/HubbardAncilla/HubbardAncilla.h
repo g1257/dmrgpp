@@ -79,20 +79,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_HUBBARD_ANCILLA_H
 #define DMRG_HUBBARD_ANCILLA_H
+#include "CrsMatrix.h"
+#include "Geometry/GeometryDca.h"
+#include "HelperHubbardAncilla.h"
 #include "ModelBase.h"
 #include "ParametersHubbardAncilla.h"
-#include "CrsMatrix.h"
-#include "SpinSquaredHelper.h"
-#include "SpinSquared.h"
-#include "VerySparseMatrix.h"
 #include "ProgramGlobals.h"
-#include "Geometry/GeometryDca.h"
+#include "SpinSquared.h"
+#include "SpinSquaredHelper.h"
+#include "VerySparseMatrix.h"
 #include <cstdlib>
-#include "HelperHubbardAncilla.h"
 
-namespace Dmrg {
-template<typename ModelBaseType>
-class HubbardAncilla : public ModelBaseType {
+namespace Dmrg
+{
+template <typename ModelBaseType>
+class HubbardAncilla : public ModelBaseType
+{
 
 public:
 
@@ -114,42 +116,43 @@ public:
 	typedef typename ModelHelperType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
 	typedef typename ModelBaseType::VectorType VectorType;
-	typedef	typename ModelBaseType::MyBasis BasisType;
-	typedef	typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef typename ModelBaseType::MyBasis BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 	typedef ParametersHubbardAncilla<RealType, QnType> ParametersHubbardAncillaType;
-	typedef std::pair<SizeType,SizeType> PairType;
+	typedef std::pair<SizeType, SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
 	typedef HelperHubbardAncilla<ModelBaseType, ParametersHubbardAncillaType>
-	HelperHubbardAncillaType;
+	    HelperHubbardAncillaType;
 	typedef typename HelperHubbardAncillaType::HilbertSpaceFeAsType HilbertSpaceFeAsType;
 
-	static const int SPIN_UP=HilbertSpaceFeAsType::SPIN_UP;
-	static const int SPIN_DOWN=HilbertSpaceFeAsType::SPIN_DOWN;
+	static const int SPIN_UP = HilbertSpaceFeAsType::SPIN_UP;
+	static const int SPIN_DOWN = HilbertSpaceFeAsType::SPIN_DOWN;
 	static SizeType const ORBITALS = 2;
 
 	HubbardAncilla(const SolverParamsType& solverParams,
-	               InputValidatorType& io,
-	               const SuperGeometryType& geometry)
-	    : ModelBaseType(solverParams, geometry, io),
-	      modelParameters_(io),
-	      superGeometry_(geometry),
-	      helperHubbardAncilla_(superGeometry_, modelParameters_)
-	{}
+	    InputValidatorType& io,
+	    const SuperGeometryType& geometry)
+	    : ModelBaseType(solverParams, geometry, io)
+	    , modelParameters_(io)
+	    , superGeometry_(geometry)
+	    , helperHubbardAncilla_(superGeometry_, modelParameters_)
+	{
+	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		helperHubbardAncilla_.write(label1, io, this->params().model);
 	}
 
-	void addDiagonalsInNaturalBasis(SparseMatrixType &hmatrix,
-	                                const BlockType& block,
-	                                RealType t) const
+	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
+	    const BlockType& block,
+	    RealType t) const
 	{
 		helperHubbardAncilla_.addDiagonalsInNaturalBasis(hmatrix, block, t);
 	}
@@ -160,7 +163,7 @@ public:
 		const RealType nup = ModelBaseType::targetQuantum().qn(0).other[1];
 		const RealType ndown = ne - nup;
 		const RealType n = ModelBaseType::superGeometry().numberOfSites();
-		RealType energy = -nup*(n - nup) - ndown*(n - ndown);
+		RealType energy = -nup * (n - nup) - ndown * (n - ndown);
 		return ModelBaseType::oracle(energy, " -Nup*(L-Nup) -Ndown*(L-Ndown)");
 	}
 
@@ -184,27 +187,28 @@ protected:
 
 		const bool hot = helperHubbardAncilla_.isHot();
 
-		SizeType dofs = 2*ORBITALS;
-		for (SizeType i=0;i<block.size();i++) {
+		SizeType dofs = 2 * ORBITALS;
+		for (SizeType i = 0; i < block.size(); i++) {
 			VectorSparseMatrixType vm;
-			HelperHubbardAncillaType::findAllMatrices(vm,i,natBasis);
+			HelperHubbardAncillaType::findAllMatrices(vm, i, natBasis);
 			SparseMatrixType naMatrix;
 			for (SizeType sigma = 0; sigma < dofs; ++sigma) {
-				if (!hot && (sigma & 1)) continue;
+				if (!hot && (sigma & 1))
+					continue;
 				MatrixType tmp;
-				HelperHubbardAncillaType::findOperatorMatrices(tmp,i,sigma,natBasis);
+				HelperHubbardAncillaType::findOperatorMatrices(tmp, i, sigma, natBasis);
 				SparseMatrixType tmpMatrix(tmp);
-				SizeType m=0;
-				int asign=1;
-				if (sigma>ORBITALS-1) {
-					m=1;
-					asign= -1;
+				SizeType m = 0;
+				int asign = 1;
+				if (sigma > ORBITALS - 1) {
+					m = 1;
+					asign = -1;
 				}
 
 				typename OperatorType::Su2RelatedType su2related;
-				if (sigma <ORBITALS) {
-					su2related.source.push_back(i*dofs+sigma);
-					su2related.source.push_back(i*dofs+sigma + ORBITALS);
+				if (sigma < ORBITALS) {
+					su2related.source.push_back(i * dofs + sigma);
+					su2related.source.push_back(i * dofs + sigma + ORBITALS);
 					su2related.transpose.push_back(-1);
 					su2related.transpose.push_back(-1);
 					su2related.offset = ORBITALS;
@@ -212,17 +216,16 @@ protected:
 
 				SparseMatrixType tmpMatrix2;
 				transposeConjugate(tmpMatrix2, tmpMatrix);
-				if (sigma == 0) 
-					naMatrix = tmpMatrix*tmpMatrix2;
+				if (sigma == 0)
+					naMatrix = tmpMatrix * tmpMatrix2;
 				else if (sigma == 2)
-					naMatrix += tmpMatrix*tmpMatrix2;
+					naMatrix += tmpMatrix * tmpMatrix2;
 
 				OperatorType myOp(tmpMatrix2,
-				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
-				                  typename OperatorType::PairType(1, m),
-				                  asign,
-				                  su2related);
-
+				    ProgramGlobals::FermionOrBosonEnum::FERMION,
+				    typename OperatorType::PairType(1, m),
+				    asign,
+				    su2related);
 
 				c.push(myOp);
 			}
@@ -231,10 +234,10 @@ protected:
 
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType naOp(naMatrix,
-							  ProgramGlobals::FermionOrBosonEnum::BOSON,
-							  typename OperatorType::PairType(0, 0),
-							  1,
-							  su2related2);
+			    ProgramGlobals::FermionOrBosonEnum::BOSON,
+			    typename OperatorType::PairType(0, 0),
+			    1,
+			    su2related2);
 
 			na.push(naOp);
 		}
@@ -249,13 +252,13 @@ protected:
 
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
-				OpForLinkType c("c", orb + spin*orbitals, orb);
+				OpForLinkType c("c", orb + spin * orbitals, orb);
 
 				hop.push(c,
-				         'N',
-				         c,
-				         'C',
-				         typename ModelTermType::Su2Properties(1, (spin == 1) ? -1 : 1, spin));
+				    'N',
+				    c,
+				    'C',
+				    typename ModelTermType::Su2Properties(1, (spin == 1) ? -1 : 1, spin));
 			}
 
 			OpForLinkType l("l", spin);
@@ -266,11 +269,10 @@ protected:
 
 private:
 
-	ParametersHubbardAncillaType  modelParameters_;
+	ParametersHubbardAncillaType modelParameters_;
 	const SuperGeometryType& superGeometry_;
 	HelperHubbardAncillaType helperHubbardAncilla_;
-}; //class HubbardAncilla
+}; // class HubbardAncilla
 } // namespace Dmrg
 /*@}*/
 #endif
-

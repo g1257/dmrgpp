@@ -77,14 +77,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef TargetQuantumElectrons_H
 #define TargetQuantumElectrons_H
-#include "Vector.h"
-#include "ProgramGlobals.h"
 #include "AlgebraicStringToNumber.h"
+#include "ProgramGlobals.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! Hubbard Model Parameters
-template<typename RealType, typename QnType>
-class TargetQuantumElectrons {
+template <typename RealType, typename QnType>
+class TargetQuantumElectrons
+{
 
 public:
 
@@ -92,16 +94,17 @@ public:
 	typedef typename QnType::PairSizeType PairSizeType;
 	typedef typename QnType::VectorQnType VectorQnType;
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io)
-	    : totalNumberOfSites_(0),
-	      isSu2_(false)
+	    : totalNumberOfSites_(0)
+	    , isSu2_(false)
 	{
 		io.readline(totalNumberOfSites_, "TotalNumberOfSites=");
 		int tmp = 0;
 		try {
-			io.readline(tmp,"UseSu2Symmetry=");
-		} catch (std::exception&) {}
+			io.readline(tmp, "UseSu2Symmetry=");
+		} catch (std::exception&) {
+		}
 
 		isSu2_ = (tmp > 0);
 
@@ -110,7 +113,8 @@ public:
 		try {
 			io.readline(nqns, "NumberOfTargetQns=");
 			hasNqns = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (!hasNqns) {
 			readOneTarget(io, "");
@@ -124,10 +128,12 @@ public:
 	SizeType sizeOfOther() const
 	{
 		const SizeType n = vqn_.size();
-		if (n == 0) return 0;
+		if (n == 0)
+			return 0;
 		const SizeType answer = vqn_[0].other.size();
 		for (SizeType i = 1; i < n; ++i) {
-			if (vqn_[i].other.size() == answer) continue;
+			if (vqn_[i].other.size() == answer)
+				continue;
 			err("sizeOfOther must be the same for all target qns\n");
 		}
 
@@ -143,16 +149,14 @@ public:
 	}
 
 	void updateQuantumSector(VectorQnType& quantumSector,
-	                         SizeType sites,
-	                         ProgramGlobals::DirectionEnum direction,
-	                         SizeType step,
-	                         const VectorQnType& adjustQuantumNumbers) const
+	    SizeType sites,
+	    ProgramGlobals::DirectionEnum direction,
+	    SizeType step,
+	    const VectorQnType& adjustQuantumNumbers) const
 	{
 		const SizeType maxSites = totalNumberOfSites_;
 
-		if (direction == ProgramGlobals::DirectionEnum::INFINITE &&
-		        sites < maxSites &&
-		        adjustQuantumNumbers.size() > step) {
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE && sites < maxSites && adjustQuantumNumbers.size() > step) {
 			if (quantumSector.size() != 1)
 				err("adjustQuantumNumbers only with single target\n");
 			quantumSector[0] = adjustQuantumNumbers[step];
@@ -165,13 +169,13 @@ public:
 
 		for (SizeType i = 0; i < n; ++i)
 			quantumSector[i].scale(sites,
-			                       totalNumberOfSites_,
-			                       direction,
-			                       isSu2_);
+			    totalNumberOfSites_,
+			    direction,
+			    isSu2_);
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/TargetQuantumElectrons";
 		io.createGroup(label);
@@ -181,17 +185,18 @@ public:
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream &os,
-	                                const TargetQuantumElectrons& p)
+	friend std::ostream& operator<<(std::ostream& os,
+	    const TargetQuantumElectrons& p)
 	{
-		if (p.vqn_.size() == 0) return os;
+		if (p.vqn_.size() == 0)
+			return os;
 		const QnType& qn = p.vqn_[0];
-		os<<"TargetElectronsTotal="<<p.totalElectrons<<"\n";
-		os<<"TargetOther="<<p.other<<"\n";
+		os << "TargetElectronsTotal=" << p.totalElectrons << "\n";
+		os << "TargetOther=" << p.other << "\n";
 		if (p.isSu2)
-			os<<"TargetSpinTimesTwo="<<p.twiceJ<<"\n";
+			os << "TargetSpinTimesTwo=" << p.twiceJ << "\n";
 		if (p.vqn_.size() > 1)
-			os<<"FIXME TODO: More than one qn found\n";
+			os << "FIXME TODO: More than one qn found\n";
 		return os;
 	}
 
@@ -201,9 +206,9 @@ private:
 
 	TargetQuantumElectrons& operator=(const TargetQuantumElectrons&);
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	void readOneTarget(IoInputType& io,
-	                   const PsimagLite::String label)
+	    const PsimagLite::String label)
 	{
 		QnType qn(QnType::zero());
 		VectorSizeType qnOther;
@@ -214,7 +219,8 @@ private:
 		try {
 			io.readline(qn.jmPair.first, "TargetSpinTimesTwo" + label + "=");
 			hasTwiceJ = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		SizeType ready = 0;
 		if (allowUpDown) {
@@ -228,7 +234,8 @@ private:
 				qnOther.push_back(tmp);
 				qnOther.push_back(electronsUp);
 				ready = 2;
-			} catch (std::exception&) {}
+			} catch (std::exception&) {
+			}
 		}
 
 		try {
@@ -236,12 +243,14 @@ private:
 			qn.oddElectrons = (tmp & 1);
 			qnOther.push_back(tmp);
 			ready++;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		try {
 			SizeType szPlusConst = readNumberOrExpression(io, "TargetSzPlusConst" + label + "=");
 			qnOther.push_back(szPlusConst);
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (ready == 3) {
 			msg += "Provide either up/down or total/sz but not both.\n";
@@ -260,22 +269,26 @@ private:
 			}
 
 			qn.oddElectrons = (parity == "odd");
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		bool flag = false;
 		try {
 			readNumberOrExpression(io, "TargetExtra" + label + "=");
 			flag = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
-		if (flag) err("Instead of TargetExtra" + label + "= please use a vector\n");
+		if (flag)
+			err("Instead of TargetExtra" + label + "= please use a vector\n");
 
 		try {
 			VectorSizeType extra;
-			io.read(extra,"TargetExtra" + label);
+			io.read(extra, "TargetExtra" + label);
 			for (SizeType i = 0; i < extra.size(); ++i)
 				qnOther.push_back(extra[i]);
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		qn.other.fromStdVector(qnOther);
 
@@ -290,7 +303,7 @@ private:
 		vqn_.push_back(qn);
 	}
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	SizeType readNumberOrExpression(IoInputType& io, PsimagLite::String fullLabel)
 	{
 		typedef AlgebraicStringToNumber<RealType> AlgebraicStringToNumberType;
@@ -303,7 +316,7 @@ private:
 
 		SizeType p = algebraicStringToNumber.procLength(val);
 
-		std::cout<<fullLabel<<p<<"\n";
+		std::cout << fullLabel << p << "\n";
 		return p;
 	}
 
@@ -315,4 +328,3 @@ private:
 
 /*@}*/
 #endif
-

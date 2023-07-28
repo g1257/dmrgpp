@@ -81,20 +81,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef CORRECTION_TARGETING_H
 #define CORRECTION_TARGETING_H
-#include <iostream>
 #include "TargetParamsCorrection.h"
 #include "TargetingBase.h"
+#include <iostream>
 #include <stdexcept>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingCorrection : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingCorrection : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
+{
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -119,15 +121,16 @@ public:
 	typedef typename BaseType::CheckpointType CheckpointType;
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
-	                    const CheckpointType& checkPoint,
-	                    const WaveFunctionTransfType& wft,
-	                    const QnType&,
-	                    InputValidatorType& io)
-	    : BaseType(lrs,checkPoint,wft,0),
-	      tstStruct_(io, "TargetingCorrection"),
-	      gsWeight_(1 - tstStruct_.correctionA()),
-	      progress_("TargetingCorrection")
-	{}
+	    const CheckpointType& checkPoint,
+	    const WaveFunctionTransfType& wft,
+	    const QnType&,
+	    InputValidatorType& io)
+	    : BaseType(lrs, checkPoint, wft, 0)
+	    , tstStruct_(io, "TargetingCorrection")
+	    , gsWeight_(1 - tstStruct_.correctionA())
+	    , progress_("TargetingCorrection")
+	{
+	}
 
 	SizeType sites() const { return tstStruct_.sites(); }
 
@@ -135,8 +138,7 @@ public:
 
 	RealType normSquared(SizeType i) const
 	{
-		return PsimagLite::real(this->tv(i)*
-		                        this->tv(i));
+		return PsimagLite::real(this->tv(i) * this->tv(i));
 	}
 
 	RealType weight(SizeType) const
@@ -157,32 +159,32 @@ public:
 	}
 
 	void evolve(const VectorRealType&,
-	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
-	            const BlockType&,
-	            SizeType)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    const BlockType&,
+	    SizeType)
 	{
-		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
+			return;
 
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
-		this->common().computeCorrection(direction,block1);
+		this->common().computeCorrection(direction, block1);
 		bool doBorderIfBorder = false;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix)
+	    PsimagLite::String prefix)
 	{
 		this->common().read(io, prefix);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	    PsimagLite::IoSelector::Out& io,
+	    PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 	}
-
 
 private:
 
@@ -195,10 +197,11 @@ private:
 
 		gsWeight = 1 - weight;
 
-		if (gsWeight >= gsWeight_) return; // <--- EARLY EXIT HERE
+		if (gsWeight >= gsWeight_)
+			return; // <--- EARLY EXIT HERE
 
 		assert(weight > 1e-6);
-		RealType factor = (1 - gsWeight_)/weight;
+		RealType factor = (1 - gsWeight_) / weight;
 		weight *= factor;
 
 		gsWeight = gsWeight_;
@@ -207,8 +210,7 @@ private:
 	TargetParamsType tstStruct_;
 	const RealType gsWeight_;
 	PsimagLite::ProgressIndicator progress_;
-};     //class TargetingCorrection
+}; // class TargetingCorrection
 } // namespace Dmrg
 /*@}*/
 #endif
-

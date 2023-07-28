@@ -3,20 +3,20 @@
 
 #include "DmrgDriver.h"
 
-template<typename SolverType, typename VectorWithOffsetType>
+template <typename SolverType, typename VectorWithOffsetType>
 void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType& geometry,
-               const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io,
-               const OperatorOptions& opOptions)
+    const ParametersDmrgSolverType& dmrgSolverParams,
+    InputNgType::Readable& io,
+    const OperatorOptions& opOptions)
 {
 	typedef typename SolverType::MatrixType::ModelType ModelBaseType;
 
 	//! Setup the Model
 	Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
-	ModelBaseType& model = modelSelector(dmrgSolverParams,io,geometry);
+	ModelBaseType& model = modelSelector(dmrgSolverParams, io, geometry);
 
 	if (opOptions.enabled) {
-		operatorDriver(model,opOptions);
+		operatorDriver(model, opOptions);
 		return;
 	}
 
@@ -29,4 +29,3 @@ void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType& ge
 }
 
 #endif // DMRG_DMRGDRIVER_1_H
-

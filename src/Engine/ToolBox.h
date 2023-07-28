@@ -78,29 +78,34 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef DMRG_TOOLBOX_H
 #define DMRG_TOOLBOX_H
-#include "Vector.h"
-#include "ProgramGlobals.h"
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
 #include "Geometry/Geometry.h"
+#include "ProgramGlobals.h"
 #include "PsimagLite.h"
+#include "Vector.h"
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename DmrgParametersType, typename GeometryType>
-class ToolBox  {
+template <typename DmrgParametersType, typename GeometryType>
+class ToolBox
+{
 
 	typedef std::pair<SizeType, PsimagLite::String> PairSizeStringType;
 
-	class GrepForLabel {
+	class GrepForLabel
+	{
 
 		typedef long int LongType;
 
 		struct InternalName {
 			InternalName(PsimagLite::String label_, bool cooked_)
-			    : cooked(cooked_),label(label_)
-			{}
+			    : cooked(cooked_)
+			    , label(label_)
+			{
+			}
 
 			bool cooked;
 			PsimagLite::String label;
@@ -111,37 +116,39 @@ class ToolBox  {
 		typedef InternalName ParametersType;
 
 		static void hook(std::ifstream& fin,
-		                 PsimagLite::String,
-		                 LongType len,
-		                 const ParametersType& params)
+		    PsimagLite::String,
+		    LongType len,
+		    const ParametersType& params)
 		{
 			LongType len2 = len;
 			LongType bufferLen = 1;
 			std::stringstream ss;
-			char *buffer = new char[bufferLen];
+			char* buffer = new char[bufferLen];
 			while (len2 >= bufferLen && !fin.eof()) {
-				fin.read(buffer,bufferLen);
-				ss<<buffer[0];
+				fin.read(buffer, bufferLen);
+				ss << buffer[0];
 				if (buffer[0] == '\n') {
-					procLine(ss.str(),params);
+					procLine(ss.str(), params);
 					ss.str("");
 				}
 
-				if (len > 1) len2 -= bufferLen;
+				if (len > 1)
+					len2 -= bufferLen;
 			}
 
-			delete [] buffer;
+			delete[] buffer;
 		}
 
 	private:
 
 		static void procLine(PsimagLite::String line, const ParametersType& params)
 		{
-			if (line.find(params.label) == PsimagLite::String::npos) return;
+			if (line.find(params.label) == PsimagLite::String::npos)
+				return;
 			if (params.cooked)
 				cookThisLine(line);
 			else
-				std::cout<<line;
+				std::cout << line;
 		}
 
 		static void cookThisLine(PsimagLite::String line)
@@ -149,23 +156,23 @@ class ToolBox  {
 			size_t index = line.find(" after");
 			PsimagLite::String line2 = line;
 			if (index != PsimagLite::String::npos)
-				line2 = line.erase(index,line.length());
+				line2 = line.erase(index, line.length());
 			line = line2;
 			PsimagLite::String magic = "eigenvalue= ";
 			index = line.find(magic);
 			if (index != PsimagLite::String::npos)
-				line.erase(0,index + magic.length());
-			std::cout<<line<<"\n";
+				line.erase(0, index + magic.length());
+			std::cout << line << "\n";
 		}
 	}; // GrepForLabel
 
 public:
 
-	enum ActionEnum {ACTION_UNKNOWN,
-		             ACTION_GREP,
-		             ACTION_FILES,
-		             ACTION_INPUT,
-		             ACTION_ANALYSIS};
+	enum ActionEnum { ACTION_UNKNOWN,
+		ACTION_GREP,
+		ACTION_FILES,
+		ACTION_INPUT,
+		ACTION_ANALYSIS };
 
 	typedef typename GrepForLabel::ParametersType ParametersForGrepType;
 
@@ -182,10 +189,14 @@ public:
 	static ActionEnum actionCanonical(PsimagLite::String action)
 	{
 		if (action == "energy" || action == "Energy" || action == "energies"
-		        || action == "Energies" || action == "grep") return ACTION_GREP;
-		if (action == "files") return ACTION_FILES;
-		if (action == "input") return ACTION_INPUT;
-		if (action == "analysis" || action == "analyze") return ACTION_ANALYSIS;
+		    || action == "Energies" || action == "grep")
+			return ACTION_GREP;
+		if (action == "files")
+			return ACTION_FILES;
+		if (action == "input")
+			return ACTION_INPUT;
+		if (action == "analysis" || action == "analyze")
+			return ACTION_ANALYSIS;
 		return ACTION_UNKNOWN;
 	}
 
@@ -195,7 +206,7 @@ public:
 	}
 
 	static void printGrep(PsimagLite::String inputfile,
-	                      ParametersForGrepType params)
+	    ParametersForGrepType params)
 	{
 		SizeType lenInput = inputfile.size();
 		PsimagLite::String dotcout = ".cout";
@@ -209,17 +220,17 @@ public:
 			err("Could not open file " + coutName + "\n");
 		}
 
-		GrepForLabel::hook(fin,"",1,params);
+		GrepForLabel::hook(fin, "", 1, params);
 	}
 
 	static void analize(const DmrgParametersType& solverParams,
-	                    const GeometryType& geometry,
-	                    PsimagLite::String extraOptions)
+	    const GeometryType& geometry,
+	    PsimagLite::String extraOptions)
 	{
 		PairSizeStringType g = findLargestGeometry(geometry);
 		SizeType m = neededKeptStates(g, geometry, solverParams);
-		std::cout<<"Geometry= "<<g<<"\n";
-		std::cout<<"Needed m="<<m<<"\n";
+		std::cout << "Geometry= " << g << "\n";
+		std::cout << "Needed m=" << m << "\n";
 	}
 
 private:
@@ -243,14 +254,15 @@ private:
 
 	static bool geometryGreater(PsimagLite::String g1, PsimagLite::String g2)
 	{
-		if (g1 == "longchain") return false;
-		std::cerr<<g1<<" "<<g2<<"\n";
+		if (g1 == "longchain")
+			return false;
+		std::cerr << g1 << " " << g2 << "\n";
 		return true;
 	}
 
 	static SizeType neededKeptStates(PairSizeStringType g,
-	                                 const GeometryType& geometry,
-	                                 const DmrgParametersType& solverParams)
+	    const GeometryType& geometry,
+	    const DmrgParametersType& solverParams)
 	{
 		SizeType m = 0;
 		SizeType modelFactor = getModelFactor(solverParams.model);
@@ -261,7 +273,7 @@ private:
 			SizeType Lx = geometry.length(0, g.first);
 			SizeType Ly = geometry.length(1, g.first);
 			SizeType TwoToTheLy = (1 << Ly);
-			m = modelFactor*Lx*TwoToTheLy; // modelFactor * Lx * 2^Ly
+			m = modelFactor * Lx * TwoToTheLy; // modelFactor * Lx * 2^Ly
 		} else {
 			err("neededKeptStates: unknown geometry" + g.second + "\n");
 		}
@@ -279,9 +291,8 @@ private:
 		return 0;
 	}
 
-}; //class ToolBox
+}; // class ToolBox
 
 } // namespace Dmrg
 /*@}*/
 #endif
-

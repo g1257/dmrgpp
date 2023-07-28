@@ -81,47 +81,55 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CONJ_GRAD_H
 
 #include "Matrix.h"
-#include "Vector.h"
 #include "ProgressIndicator.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename MatrixType>
-class	ConjugateGradient {
+template <typename MatrixType>
+class ConjugateGradient
+{
 	typedef typename MatrixType::value_type FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
 public:
-	ConjugateGradient(SizeType max,RealType eps)
-	    : progress_("ConjugateGradient"), max_(max), eps_(eps) {}
+
+	ConjugateGradient(SizeType max, RealType eps)
+	    : progress_("ConjugateGradient")
+	    , max_(max)
+	    , eps_(eps)
+	{
+	}
 
 	//! A and b, the result x, and also the initial solution x0
 	void operator()(VectorType& x,
-	                const MatrixType& A,
-	                const VectorType& b) const
+	    const MatrixType& A,
+	    const VectorType& b) const
 	{
-		VectorType v = multiply(A,x);
+		VectorType v = multiply(A, x);
 		VectorType p(b.size());
 		VectorType rprev(b.size());
 		VectorType rnext;
-		for (SizeType i=0;i<rprev.size();i++) {
+		for (SizeType i = 0; i < rprev.size(); i++) {
 			rprev[i] = b[i] - v[i];
 			p[i] = rprev[i];
 		}
 
 		SizeType k = 0;
-		while (k<max_) {
-			VectorType tmp = multiply(A,p);
-			FieldType scalarrprev = scalarProduct(rprev,rprev);
-			FieldType val = scalarrprev/scalarProduct(p,tmp);
-			v <= x + val * p;
+		while (k < max_) {
+			VectorType tmp = multiply(A, p);
+			FieldType scalarrprev = scalarProduct(rprev, rprev);
+			FieldType val = scalarrprev / scalarProduct(p, tmp);
+			v <= x + val* p;
 			x = v;
-			v <= rprev - val * tmp;
+			v <= rprev - val* tmp;
 			rnext = v;
-			if (PsimagLite::norm(rnext)<eps_) break;
-			val = scalarProduct(rnext,rnext)/scalarrprev;
-			v <= rnext - val*p;
+			if (PsimagLite::norm(rnext) < eps_)
+				break;
+			val = scalarProduct(rnext, rnext) / scalarrprev;
+			v <= rnext - val* p;
 			p = v;
 			rprev = rnext;
 			k++;
@@ -129,33 +137,35 @@ public:
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Finished after "<<k<<" steps out of "<<max_;
-		msg<<" requested eps= "<<eps_;
+		msg << "Finished after " << k << " steps out of " << max_;
+		msg << " requested eps= " << eps_;
 		RealType finalEps = PsimagLite::norm(rnext);
-		msg<<" actual eps= "<<finalEps;
+		msg << " actual eps= " << finalEps;
 		progress_.printline(msgg, std::cout);
 
-		if (finalEps <= eps_) return;
+		if (finalEps <= eps_)
+			return;
 
 		PsimagLite::OstringStream msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
-		msg2<<"WARNING: actual eps "<<finalEps<<" greater than requested eps= "<<eps_;
+		msg2 << "WARNING: actual eps " << finalEps << " greater than requested eps= " << eps_;
 		progress_.printline(msgg2, std::cout);
 	}
 
 private:
 
-	FieldType scalarProduct(const VectorType& v1,const VectorType& v2) const
+	FieldType scalarProduct(const VectorType& v1, const VectorType& v2) const
 	{
 		FieldType sum = 0;
-		for (SizeType i=0;i<v1.size();i++) sum += PsimagLite::conj(v1[i])*v2[i];
+		for (SizeType i = 0; i < v1.size(); i++)
+			sum += PsimagLite::conj(v1[i]) * v2[i];
 		return sum;
 	}
 
-	VectorType multiply(const MatrixType& A,const VectorType& v) const
+	VectorType multiply(const MatrixType& A, const VectorType& v) const
 	{
-		VectorType y(A.rows(),0);
-		A.matrixVectorProduct(y,v);
+		VectorType y(A.rows(), 0);
+		A.matrixVectorProduct(y, v);
 		return y;
 	}
 
@@ -168,4 +178,3 @@ private:
 
 /*@}*/
 #endif // CONJ_GRAD_H
-

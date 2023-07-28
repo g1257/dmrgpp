@@ -1,18 +1,20 @@
 #ifndef SPECFORTARGETINGEXPRESSION_H
 #define SPECFORTARGETINGEXPRESSION_H
-#include "Vector.h"
-#include "OneOperatorSpec.h"
-#include "CanonicalExpression.h"
-#include <numeric>
-#include "GetBraOrKet.h"
-#include "ProgramGlobals.h"
-#include "PackIndices.h"
 #include "AlgebraForTargetingExpression.h"
+#include "CanonicalExpression.h"
+#include "GetBraOrKet.h"
+#include "OneOperatorSpec.h"
+#include "PackIndices.h"
+#include "ProgramGlobals.h"
+#include "Vector.h"
+#include <numeric>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename TargetingBaseType>
-class SpecForTargetingExpression {
+template <typename TargetingBaseType>
+class SpecForTargetingExpression
+{
 
 public:
 
@@ -23,7 +25,8 @@ public:
 	typedef typename AlgebraType::AuxiliaryType AuxiliaryType;
 	typedef std::pair<PsimagLite::String, AuxiliaryType> PairStringAuxType;
 
-	class AssignAndDestroy {
+	class AssignAndDestroy
+	{
 
 	public:
 
@@ -39,8 +42,10 @@ public:
 		}
 
 		AssignAndDestroy(const PairStringAuxType& pair)
-		    : t_(new AlgebraType(pair.first, pair.second)), isValid_(true)
-		{}
+		    : t_(new AlgebraType(pair.first, pair.second))
+		    , isValid_(true)
+		{
+		}
 
 		~AssignAndDestroy()
 		{
@@ -74,7 +79,7 @@ public:
 		void multiply(AssignAndDestroy& t2) const
 		{
 			makeSureItsValid();
-			t_->multiply(*t2.t_);  // t_ *= t2
+			t_->multiply(*t2.t_); // t_ *= t2
 		}
 
 		void multiplyScalar(const ComplexOrRealType& scalar)
@@ -83,7 +88,11 @@ public:
 			t_->multiplyScalar(scalar);
 		}
 
-		const bool isEmpty() const { makeSureItsValid(); return t_->isEmpty(); }
+		const bool isEmpty() const
+		{
+			makeSureItsValid();
+			return t_->isEmpty();
+		}
 
 		const bool metaEqual(const AlgebraType&) const
 		{
@@ -104,7 +113,8 @@ public:
 
 		void makeSureItsValid() const
 		{
-			if (isValid_) return;
+			if (isValid_)
+				return;
 			err("AssignAndDestroy: invalidated object!\n");
 		}
 

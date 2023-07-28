@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -88,71 +88,77 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef REFLECTION_COLOR_H
 #define REFLECTION_COLOR_H
 
-#include "PackIndices.h" // in PsimagLite
-#include "Matrix.h"
-#include "ProgressIndicator.h"
 #include "LAPACK.h"
+#include "Matrix.h"
+#include "PackIndices.h" // in PsimagLite
+#include "ProgressIndicator.h"
 #include "Sort.h"
 #include "SparseVector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 // FIXME: MOVE ELSEWHERE:
-template<typename RealType>
-bool isAlmostZero(const RealType& x,RealType eps = 1e-20)
+template <typename RealType>
+bool isAlmostZero(const RealType& x, RealType eps = 1e-20)
 {
-	return (fabs(x)<eps);
+	return (fabs(x) < eps);
 }
 
 // FIXME: MOVE ELSEWHERE:
-template<typename RealType>
-bool isAlmostZero(const std::complex<RealType>& x,RealType eps = 1e-20)
+template <typename RealType>
+bool isAlmostZero(const std::complex<RealType>& x, RealType eps = 1e-20)
 {
-	return (fabs(real(x)*real(x)+imag(x)*imag(x))<eps);
+	return (fabs(real(x) * real(x) + imag(x) * imag(x)) < eps);
 }
 
-template<typename RealType,typename SparseMatrixType>
-class ReflectionColor {
+template <typename RealType, typename SparseMatrixType>
+class ReflectionColor
+{
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
 
-	enum {AVAILABLE,NOT_AVAILABLE,COLOR};
+	enum { AVAILABLE,
+		NOT_AVAILABLE,
+		COLOR };
 
 public:
 
-	ReflectionColor(const SparseMatrixType& reflection,bool idebug)
-	: reflection_(reflection),idebug_(idebug)
+	ReflectionColor(const SparseMatrixType& reflection, bool idebug)
+	    : reflection_(reflection)
+	    , idebug_(idebug)
 	{
-//		printFullMatrix(reflection,"reflection");
+		//		printFullMatrix(reflection,"reflection");
 		findIsolated();
 
 		printInfo();
-//		std::cerr<<"Isolated nodes="<<ipIsolated_.size()<<"\n";
-//		std::cerr<<"Connected nodes="<<ipConnected_.size()<<"\n";
+		//		std::cerr<<"Isolated nodes="<<ipIsolated_.size()<<"\n";
+		//		std::cerr<<"Connected nodes="<<ipConnected_.size()<<"\n";
 
 		SizeType firstColor = 2;
-		//SparseMatrixType A;
-		//generateAmatrix(A,ipConnected_);
-		SizeType ncolor = gencolorLabel(reflection,firstColor);
+		// SparseMatrixType A;
+		// generateAmatrix(A,ipConnected_);
+		SizeType ncolor = gencolorLabel(reflection, firstColor);
 
-//		for (SizeType i=0ilabel(ip_isolated) = 0;
+		//		for (SizeType i=0ilabel(ip_isolated) = 0;
 
 		//		% print statistics
 		//		% ----------------
-		printInfo2(ncolor,firstColor);
+		printInfo2(ncolor, firstColor);
 
-		//gencolorCheck(ilabel_,ncolor);
+		// gencolorCheck(ilabel_,ncolor);
 
-		//gencolorPerm(ilabel_,firstColor,ncolor);
+		// gencolorPerm(ilabel_,firstColor,ncolor);
 
-		for (SizeType i=0;i<ipIsolated_.size();i++)
-			ilabel_[ipIsolated_[i]]=AVAILABLE;
+		for (SizeType i = 0; i < ipIsolated_.size(); i++)
+			ilabel_[ipIsolated_[i]] = AVAILABLE;
 
-		for (SizeType i=0;i<ilabel_.size();i++)
-			if (ilabel_[i]==firstColor) ipcolor_.push_back(i);
+		for (SizeType i = 0; i < ilabel_.size(); i++)
+			if (ilabel_[i] == firstColor)
+				ipcolor_.push_back(i);
 	}
 
 	const typename PsimagLite::Vector<SizeType>::Type& ipcolor() const { return ipcolor_; }
@@ -163,90 +169,98 @@ private:
 
 	void printInfo() const
 	{
-		if (!idebug_) return;
-		std::cout<<"ipIsolated ";
-		for (SizeType i=0;i<ipIsolated_.size();i++)
-			std::cout<<ipIsolated_[i]<<" ";
-		std::cout<<"\n";
-		for (SizeType i=0;i<ipConnected_.size();i++)
-			std::cout<<ipConnected_[i]<<" ";
-		std::cout<<"\n";
+		if (!idebug_)
+			return;
+		std::cout << "ipIsolated ";
+		for (SizeType i = 0; i < ipIsolated_.size(); i++)
+			std::cout << ipIsolated_[i] << " ";
+		std::cout << "\n";
+		for (SizeType i = 0; i < ipConnected_.size(); i++)
+			std::cout << ipConnected_[i] << " ";
+		std::cout << "\n";
 	}
 
-	void printInfo2(SizeType ncolor,SizeType firstColor) const
+	void printInfo2(SizeType ncolor, SizeType firstColor) const
 	{
-		if (!idebug_) return;
-		std::cout<<"ncolor="<<ncolor<<"\n";
-		for (SizeType icolor=firstColor;icolor<=ncolor;icolor++) {
+		if (!idebug_)
+			return;
+		std::cout << "ncolor=" << ncolor << "\n";
+		for (SizeType icolor = firstColor; icolor <= ncolor; icolor++) {
 			typename PsimagLite::Vector<SizeType>::Type ilist;
-			findWithLabel(ilist,ilabel_,icolor);
-			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
+			findWithLabel(ilist, ilabel_, icolor);
+			std::cout << "color=" << icolor << " size=" << ilist.size() << "\n";
 		}
 	}
 
-	void generateAmatrix(SparseMatrixType& A,const typename PsimagLite::Vector<SizeType>::Type& ipConnected) const
+	void generateAmatrix(SparseMatrixType& A, const typename PsimagLite::Vector<SizeType>::Type& ipConnected) const
 	{
 		A.resize(ipConnected.size());
-		SizeType counter=0;
-		typename PsimagLite::Vector<int>::Type ipConnectedInverse(reflection_.rank(),-1);
-		for (SizeType i=0;i<ipConnected.size();i++)
-			ipConnectedInverse[ipConnected[i]]=i;
+		SizeType counter = 0;
+		typename PsimagLite::Vector<int>::Type ipConnectedInverse(reflection_.rank(), -1);
+		for (SizeType i = 0; i < ipConnected.size(); i++)
+			ipConnectedInverse[ipConnected[i]] = i;
 
-		for (SizeType i=0;i<ipConnected.size();i++) {
-			A.setRow(i,counter);
+		for (SizeType i = 0; i < ipConnected.size(); i++) {
+			A.setRow(i, counter);
 			SizeType ii = ipConnected[i];
-			for (int k=reflection_.getRowPtr(ii);k<reflection_.getRowPtr(ii+1);k++) {
+			for (int k = reflection_.getRowPtr(ii); k < reflection_.getRowPtr(ii + 1); k++) {
 				ComplexOrRealType val = reflection_.getValue(k);
 				int col = ipConnectedInverse[reflection_.getCol(k)];
-				if (col<0) continue;
+				if (col < 0)
+					continue;
 				A.pushCol(col);
 				A.pushValue(val);
 				counter++;
 			}
 		}
-		A.setRow(A.rank(),counter);
+		A.setRow(A.rank(), counter);
 		A.checkValidity();
 	}
 
 	void findIsolated()
 	{
-		for (SizeType i=0;i<reflection_.rank();i++) {
+		for (SizeType i = 0; i < reflection_.rank(); i++) {
 			SizeType nz = 0;
 			bool hasDiagonal = false;
-			for (int k=reflection_.getRowPtr(i);k<reflection_.getRowPtr(i+1);k++) {
+			for (int k = reflection_.getRowPtr(i); k < reflection_.getRowPtr(i + 1); k++) {
 				ComplexOrRealType val = reflection_.getValue(k);
 				SizeType col = reflection_.getCol(k);
-				if (i==col) {
+				if (i == col) {
 					val = val + 1.0;
-					hasDiagonal=true;
+					hasDiagonal = true;
 				}
-				if (isAlmostZero(val,1e-4)) continue;
+				if (isAlmostZero(val, 1e-4))
+					continue;
 				nz++;
 			}
-			if (!hasDiagonal) nz++;
-			if (nz==1) ipIsolated_.push_back(i);
-			else ipConnected_.push_back(i);
+			if (!hasDiagonal)
+				nz++;
+			if (nz == 1)
+				ipIsolated_.push_back(i);
+			else
+				ipConnected_.push_back(i);
 		}
 	}
 
-	SizeType gencolorLabel(const SparseMatrixType& A,SizeType firstColor)
+	SizeType gencolorLabel(const SparseMatrixType& A, SizeType firstColor)
 	{
-		ilabel_.assign(A.rank(),AVAILABLE);
+		ilabel_.assign(A.rank(), AVAILABLE);
 
-		SizeType ncolor = firstColor-1;
+		SizeType ncolor = firstColor - 1;
 		typename PsimagLite::Vector<SizeType>::Type ilist;
 		RealType eps = 1e-3;
 
-		//while (any( ilabel == unlabeled))
-		for (SizeType ii=0;ii<ilabel_.size();ii++) {
-			if (ilabel_[ii]!=AVAILABLE) continue;
+		// while (any( ilabel == unlabeled))
+		for (SizeType ii = 0; ii < ilabel_.size(); ii++) {
+			if (ilabel_[ii] != AVAILABLE)
+				continue;
 			ncolor++;
 			SizeType icolor = ncolor;
 			ilist.clear();
-			findWithLabel(ilist,ilabel_,AVAILABLE);
+			findWithLabel(ilist, ilabel_, AVAILABLE);
 			SizeType ifound = 0;
-			for (SizeType i=0;i<ilist.size();i++) {
-//				if (ifound >= maxsize) break;
+			for (SizeType i = 0; i < ilist.size(); i++) {
+				//				if (ifound >= maxsize) break;
 
 				SizeType ni = ilist[i];
 				if (ilabel_[ni] == AVAILABLE) {
@@ -256,9 +270,9 @@ private:
 					// mark neighbors
 					// --------------
 					typename PsimagLite::Vector<SizeType>::Type jlist;
-					findConnected(jlist,ni,A,eps);
+					findConnected(jlist, ni, A, eps);
 					//					jlist = find( A(ni,:) );
-					for (SizeType j=0;j<jlist.size();j++) {
+					for (SizeType j = 0; j < jlist.size(); j++) {
 						SizeType nj = jlist[j];
 						if (ilabel_[nj] == AVAILABLE) {
 							ilabel_[nj] = NOT_AVAILABLE;
@@ -267,9 +281,9 @@ private:
 				}
 			}
 			ilist.clear();
-			findWithLabel(ilist,ilabel_,NOT_AVAILABLE);
+			findWithLabel(ilist, ilabel_, NOT_AVAILABLE);
 			//			ilist = find( ilabel == isseen);
-			for (SizeType jj=0;jj<ilist.size();jj++) {
+			for (SizeType jj = 0; jj < ilist.size(); jj++) {
 				ilabel_[ilist[jj]] = AVAILABLE;
 			}
 			//			if (ilist.size() >= 1) {
@@ -280,90 +294,93 @@ private:
 	}
 
 	void findConnected(typename PsimagLite::Vector<SizeType>::Type& jlist,
-			   SizeType ni,
-			   const SparseMatrixType& A,
-			   const RealType& eps) const
+	    SizeType ni,
+	    const SparseMatrixType& A,
+	    const RealType& eps) const
 	{
 		bool hasDiagonal = false;
-		for (int k=A.getRowPtr(ni);k<A.getRowPtr(ni+1);k++) {
+		for (int k = A.getRowPtr(ni); k < A.getRowPtr(ni + 1); k++) {
 			ComplexOrRealType val = A.getValue(k);
 			SizeType col = A.getCol(k);
-			if (ni==col) {
-				hasDiagonal=true;
+			if (ni == col) {
+				hasDiagonal = true;
 				val += 1.0;
 			}
-			if (isAlmostZero(val,eps)) continue;
+			if (isAlmostZero(val, eps))
+				continue;
 			jlist.push_back(col);
 		}
-		if (!hasDiagonal) jlist.push_back(ni);
+		if (!hasDiagonal)
+			jlist.push_back(ni);
 	}
 
-	void gencolorCheck(const typename PsimagLite::Vector<SizeType>::Type& ilabel,SizeType ncolor) const
+	void gencolorCheck(const typename PsimagLite::Vector<SizeType>::Type& ilabel, SizeType ncolor) const
 	{
 		// ------------
 		// RealType check
 		// ------------
 		typename PsimagLite::Vector<SizeType>::Type ilist;
-		findWithLabel(ilist,ilabel,ncolor);
-//		isok = max( ilabel == ncolor);
-		SizeType isok = *std::max(ilist.begin(),ilist.end());
-		if (isok==0) {
+		findWithLabel(ilist, ilabel, ncolor);
+		//		isok = max( ilabel == ncolor);
+		SizeType isok = *std::max(ilist.begin(), ilist.end());
+		if (isok == 0) {
 			PsimagLite::String s = "ncolor " + ttos(ncolor) + " max(ilabel) " + ttos(isok) + "\n";
-			//throw PsimagLite::RuntimeError(s.c_str());
+			// throw PsimagLite::RuntimeError(s.c_str());
 		}
 	}
 
 	void findWithLabel(typename PsimagLite::Vector<SizeType>::Type& ilist,
-			   const typename PsimagLite::Vector<SizeType>::Type& ilabel,
-			   SizeType icolor) const
+	    const typename PsimagLite::Vector<SizeType>::Type& ilabel,
+	    SizeType icolor) const
 	{
-		for (SizeType i=0;i<ilabel.size();i++)
-			if (ilabel[i]==icolor) ilist.push_back(i);
+		for (SizeType i = 0; i < ilabel.size(); i++)
+			if (ilabel[i] == icolor)
+				ilist.push_back(i);
 	}
 
-//	void gencolorPerm(const typename PsimagLite::Vector<SizeType>::Type& ilabel,
-//			  SizeType firstColor,
-//			  SizeType ncolor)
-//	{
-//		// find size:
-//		typename PsimagLite::Vector<SizeType>::Type ilist;
-//		SizeType ip = 0;
-//		iperm_.resize(reflection_.rank());
+	//	void gencolorPerm(const typename PsimagLite::Vector<SizeType>::Type& ilabel,
+	//			  SizeType firstColor,
+	//			  SizeType ncolor)
+	//	{
+	//		// find size:
+	//		typename PsimagLite::Vector<SizeType>::Type ilist;
+	//		SizeType ip = 0;
+	//		iperm_.resize(reflection_.rank());
 
-//		for (SizeType icolor=firstColor;icolor<=ncolor;icolor++) {
-//			//			ilist = find( ilabel == icolor);
-//			ilist.clear();
-//			findWithLabel(ilist,ilabel,icolor);
-//			SizeType nc = ilist.size();
-//			//			nc = length(ilist);
-//			for (SizeType j=ip;j<ip+nc;j++) iperm_[j]=ilist[j-ip];
+	//		for (SizeType icolor=firstColor;icolor<=ncolor;icolor++) {
+	//			//			ilist = find( ilabel == icolor);
+	//			ilist.clear();
+	//			findWithLabel(ilist,ilabel,icolor);
+	//			SizeType nc = ilist.size();
+	//			//			nc = length(ilist);
+	//			for (SizeType j=ip;j<ip+nc;j++) iperm_[j]=ilist[j-ip];
 
-//			// omitting check
-//			ip += nc;
-//		}
-//		if (!idebug_) return;
+	//			// omitting check
+	//			ip += nc;
+	//		}
+	//		if (!idebug_) return;
 
-//		//		% ----------------
-//		//		% print statistics
-//		//		% ----------------
-//		std::cout<<"ncolor="<<ncolor<<"\n";
-//		for (SizeType icolor=firstColor;icolor<ncolor;icolor++) {
-//			ilist.clear();
-//			findWithLabel(ilist,ilabel,icolor);
-//			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
-//		}
+	//		//		% ----------------
+	//		//		% print statistics
+	//		//		% ----------------
+	//		std::cout<<"ncolor="<<ncolor<<"\n";
+	//		for (SizeType icolor=firstColor;icolor<ncolor;icolor++) {
+	//			ilist.clear();
+	//			findWithLabel(ilist,ilabel,icolor);
+	//			std::cout<<"color="<<icolor<<" size="<<ilist.size()<<"\n";
+	//		}
 
-//	}
+	//	}
 
 	const SparseMatrixType& reflection_;
 	bool idebug_;
-	typename PsimagLite::Vector<SizeType>::Type ipIsolated_,ipConnected_;
+	typename PsimagLite::Vector<SizeType>::Type ipIsolated_, ipConnected_;
 	typename PsimagLite::Vector<SizeType>::Type ilabel_;
-//	typename PsimagLite::Vector<SizeType>::Type iperm_;
+	//	typename PsimagLite::Vector<SizeType>::Type iperm_;
 	typename PsimagLite::Vector<SizeType>::Type ipcolor_;
 }; // class ReflectionColor
 
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // REFLECTION_COLOR_H

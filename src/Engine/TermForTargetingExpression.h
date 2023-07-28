@@ -1,14 +1,16 @@
 #ifndef TERMFORTARGETINGEXPRESSION_H
 #define TERMFORTARGETINGEXPRESSION_H
-#include "Vector.h"
 #include "AuxForTargetingExpression.h"
-#include "OneOperatorSpec.h"
 #include "NonLocalForTargetingExpression.h"
+#include "OneOperatorSpec.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename TargetingBaseType>
-class TermForTargetingExpression {
+template <typename TargetingBaseType>
+class TermForTargetingExpression
+{
 
 public:
 
@@ -34,11 +36,21 @@ public:
 	typedef NonLocalForTargetingExpression<TargetingBaseType> NonLocalForTargetingExpressionType;
 
 	TermForTargetingExpression(const AuxiliaryType& aux)
-	    : finalized_(false), aux_(aux), factor_(1.0), nonLocal_(aux) {}
+	    : finalized_(false)
+	    , aux_(aux)
+	    , factor_(1.0)
+	    , nonLocal_(aux)
+	{
+	}
 
 	TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
-	    : finalized_(false), aux_(aux), factor_(1.0), vStr_(1, str), nonLocal_(aux)
-	{}
+	    : finalized_(false)
+	    , aux_(aux)
+	    , factor_(1.0)
+	    , vStr_(1, str)
+	    , nonLocal_(aux)
+	{
+	}
 
 	TermForTargetingExpression& operator=(const TermForTargetingExpression& other) = delete;
 
@@ -64,12 +76,13 @@ public:
 		factor_ *= val;
 
 		return (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) ? finalMultImag()
-		                                                              : finalMultReal();
+									      : finalMultReal();
 	}
 
 	void finalize()
 	{
-		if (finalized_) return;
+		if (finalized_)
+			return;
 
 		SizeType n = vStr_.size();
 		if (n == 0)
@@ -81,7 +94,7 @@ public:
 
 		VectorStringType newVstr;
 		for (SizeType ii = 0; ii < n; ++ii) {
-			const SizeType i = n -ii - 1; // read vector backwards
+			const SizeType i = n - ii - 1; // read vector backwards
 			PsimagLite::String tmp = vStr_[i];
 
 			if (tmp[0] == '|') { // it's a vector
@@ -136,11 +149,11 @@ public:
 
 			OneOperatorSpecType opspec(siteSplit.root);
 			const PsimagLite::String destKet = tmp + "*" + ket;
-			OperatorType* op = new OperatorType(aux_.pVectors().aoe().model().
-			                                    naturalOperator(opspec.label,
-			                                                    0, // FIXME TODO SDHS Immm
-			                                                    opspec.dof));
-			if (opspec.transpose) op->transpose();
+			OperatorType* op = new OperatorType(aux_.pVectors().aoe().model().naturalOperator(opspec.label,
+			    0, // FIXME TODO SDHS Immm
+			    opspec.dof));
+			if (opspec.transpose)
+				op->transpose();
 
 			oneOperator(destKet, ket, *op, site);
 			ket = "|!m" + tmp + "*" + ket;
@@ -167,7 +180,7 @@ public:
 		if (n == 0)
 			err("toString returns empty\n");
 
-		PsimagLite::String f  = (strFactor_ != "") ? strFactor_ + "*" : "";
+		PsimagLite::String f = (strFactor_ != "") ? strFactor_ + "*" : "";
 
 		for (SizeType i = 0; i < n - 1; ++i)
 			s += vStr_[i] + "*";
@@ -187,10 +200,12 @@ public:
 
 	int pIndex() const
 	{
-		if (vStr_.size() != 1) return -1;
+		if (vStr_.size() != 1)
+			return -1;
 		const PsimagLite::String str = vStr_[0];
 		SizeType last = str.length();
-		if (last < 4) return -1;
+		if (last < 4)
+			return -1;
 		--last;
 		if (str.substr(0, 2) == "|P" && str[last] == '>')
 			return PsimagLite::atoi(str.substr(2, last - 2));
@@ -210,9 +225,9 @@ private:
 	}
 
 	void oneOperator(PsimagLite::String destKet,
-	                 PsimagLite::String srcKet,
-	                 const OperatorType& op,
-	                 SizeType site)
+	    PsimagLite::String srcKet,
+	    const OperatorType& op,
+	    SizeType site)
 	{
 		assert(siteCanBeApplied(site));
 		const VectorWithOffsetType& srcVwo = aux_.pVectors().getCurrentVectorConst(srcKet);
@@ -224,9 +239,9 @@ private:
 
 	// returns A|src1>
 	void applyInSitu(VectorWithOffsetType& dest,
-	                 const VectorWithOffsetType& src1,
-	                 SizeType site,
-	                 const OperatorType& A)
+	    const VectorWithOffsetType& src1,
+	    SizeType site,
+	    const OperatorType& A)
 	{
 		const SizeType splitSize = aux_.pVectors().aoe().model().hilbertSize(site);
 
@@ -238,14 +253,14 @@ private:
 		assert(n > 2);
 		bool b2 = (site == n - 1);
 		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
-		                                   : BorderEnumType::BORDER_NO;
+						   : BorderEnumType::BORDER_NO;
 		aux_.pVectors().aoe().applyOpLocal()(dest,
-		                                     src1,
-		                                     A,
-		                                     fs,
-		                                     splitSize,
-		                                     aux_.direction(),
-		                                     border);
+		    src1,
+		    A,
+		    fs,
+		    splitSize,
+		    aux_.direction(),
+		    border);
 	}
 
 	void finalMultReal()
@@ -259,7 +274,8 @@ private:
 		else
 			strFactor_ = ttos(f);
 
-		if (f == 1) strFactor_ = "";
+		if (f == 1)
+			strFactor_ = "";
 	}
 
 	void finalMultImag()
@@ -269,7 +285,8 @@ private:
 
 		strFactor_ = "(" + ttos(freal) + "+" + ttos(fimag) + "i)";
 
-		if (freal == 1 && fimag == 0) strFactor_ = "";
+		if (freal == 1 && fimag == 0)
+			strFactor_ = "";
 	}
 
 	bool finalized_;

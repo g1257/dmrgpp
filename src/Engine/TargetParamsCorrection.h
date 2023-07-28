@@ -79,13 +79,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGET_PARAMS_CORRECTION_H
 #define TARGET_PARAMS_CORRECTION_H
 
-#include <vector>
 #include "TargetParamsBase.h"
+#include <vector>
 
-namespace Dmrg {
+namespace Dmrg
+{
 // Coordinates reading of TargetSTructure from input file
-template<typename ModelType>
-class TargetParamsCorrection : public TargetParamsBase<ModelType> {
+template <typename ModelType>
+class TargetParamsCorrection : public TargetParamsBase<ModelType>
+{
 
 	typedef TargetParamsBase<ModelType> BaseType;
 
@@ -93,16 +95,16 @@ public:
 
 	typedef typename BaseType::RealType RealType;
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	TargetParamsCorrection(IoInputter& io, PsimagLite::String targeting)
 	    : BaseType(targeting)
 	{
-		io.readline(correctionA_,"CorrectionA=");
+		io.readline(correctionA_, "CorrectionA=");
 	}
 
 	virtual SizeType memResolv(PsimagLite::MemResolv&,
-	                           SizeType,
-	                           PsimagLite::String = "") const
+	    SizeType,
+	    PsimagLite::String = "") const
 	{
 		return 0;
 	}
@@ -125,7 +127,7 @@ public:
 	}
 
 	void write(PsimagLite::String label,
-	               PsimagLite::IoSerializer& ioSerializer) const
+	    PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/correctionA_", correctionA_);
@@ -136,16 +138,15 @@ private:
 	RealType correctionA_;
 }; // class TargetParamsCorrection
 
-template<typename ModelType>
+template <typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const TargetParamsCorrection<ModelType>& t)
+operator<<(std::ostream& os, const TargetParamsCorrection<ModelType>& t)
 {
-	os<<"TargetParams.type=correction\n";
-	os<<"TargetCorrection.correctionA="<<t.correctionA()<<"\n";
+	os << "TargetParams.type=correction\n";
+	os << "TargetCorrection.correctionA=" << t.correctionA() << "\n";
 	return os;
 }
 } // namespace Dmrg
 
 /*@}*/
 #endif // TARGET_PARAMS_CORRECTION_H
-

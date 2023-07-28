@@ -1,29 +1,29 @@
 #ifndef DMRGDRIVER_H
 #define DMRGDRIVER_H
 #define USE_PTHREADS_OR_NOT_NG
+#include "BasisWithOperators.h"
+#include "CanonicalExpression.h"
+#include "ChebyshevSolver.h"
+#include "CrsMatrix.h"
 #include "DmrgSolver.h"
-#include "InputNg.h"
 #include "InputCheck.h"
-#include "ParametersDmrgSolver.h"
-#include "ModelSelector.h"
-#include "ModelHelperLocal.h"
+#include "InputNg.h"
+#include "LanczosSolver.h"
+#include "LeftRightSuper.h"
+#include "MatrixVectorKron/MatrixVectorKron.h"
 #include "MatrixVectorOnTheFly.h"
 #include "MatrixVectorStored.h"
-#include "MatrixVectorKron/MatrixVectorKron.h"
+#include "ModelBase.h"
+#include "ModelHelperLocal.h"
+#include "ModelSelector.h"
+#include "OperatorSpec.h"
+#include "Operators.h"
+#include "ParametersDmrgSolver.h"
+#include "ProgramGlobals.h"
+#include "SuperGeometry.h"
 #include "TargetingBase.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
-#include "BasisWithOperators.h"
-#include "LeftRightSuper.h"
-#include "LanczosSolver.h"
-#include "ChebyshevSolver.h"
-#include "Operators.h"
-#include "CrsMatrix.h"
-#include "OperatorSpec.h"
-#include "CanonicalExpression.h"
-#include "ModelBase.h"
-#include "SuperGeometry.h"
-#include "ProgramGlobals.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;
@@ -34,14 +34,15 @@ typedef float RealType;
 struct OperatorOptions {
 
 	OperatorOptions()
-	    : site(0),
-	      dof(0),
-	      label(""),
-	      opexpr(""),
-	      hasOperatorExpression(false),
-	      transpose(false),
-	      enabled(false)
-	{}
+	    : site(0)
+	    , dof(0)
+	    , label("")
+	    , opexpr("")
+	    , hasOperatorExpression(false)
+	    , transpose(false)
+	    , enabled(false)
+	{
+	}
 
 	SizeType site;
 	SizeType dof;
@@ -54,12 +55,13 @@ struct OperatorOptions {
 
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 typedef Dmrg::ParametersDmrgSolver<RealType,
-InputNgType::Readable,
-Dmrg::Qn> ParametersDmrgSolverType;
+    InputNgType::Readable,
+    Dmrg::Qn>
+    ParametersDmrgSolverType;
 
 void usageOperator();
 
-template<typename ModelBaseType>
+template <typename ModelBaseType>
 void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOptions)
 {
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -68,8 +70,8 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 	typedef Dmrg::OperatorSpec<ModelBaseType, OperatorType> OperatorSpecType;
 
 	if (obsOptions.hasOperatorExpression && obsOptions.label != "") {
-		std::cerr<<"You must provide exactly one option: -l or -e;";
-		std::cerr<<" both were given\n";
+		std::cerr << "You must provide exactly one option: -l or -e;";
+		std::cerr << " both were given\n";
 		usageOperator();
 		return;
 	}
@@ -78,8 +80,8 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 		if (model.introspect())
 			return;
 
-		std::cerr<<"You must provide exactly one option: -l or -e;";
-		std::cerr<<" none were given\n";
+		std::cerr << "You must provide exactly one option: -l or -e;";
+		std::cerr << " none were given\n";
 		usageOperator();
 		return;
 	}
@@ -105,20 +107,20 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 		}
 
 		opC = model.naturalOperator(obsOptions.label, obsOptions.site, obsOptions.dof);
-		std::cerr<<"label="<<obsOptions.label<<" site="<<obsOptions.site;
-		std::cerr<<" dof="<<obsOptions.dof<<"\n";
+		std::cerr << "label=" << obsOptions.label << " site=" << obsOptions.site;
+		std::cerr << " dof=" << obsOptions.dof << "\n";
 	}
 
-	if (obsOptions.transpose) opC.dagger();
+	if (obsOptions.transpose)
+		opC.dagger();
 
 	opC.write(std::cout);
 }
 
-template<typename SolverType, typename VectorWithOffsetType>
+template <typename SolverType, typename VectorWithOffsetType>
 void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType&,
-               const ParametersDmrgSolverType&,
-               InputNgType::Readable&,
-               const OperatorOptions&);
+    const ParametersDmrgSolverType&,
+    InputNgType::Readable&,
+    const OperatorOptions&);
 
 #endif // DMRGDRIVER_H
-

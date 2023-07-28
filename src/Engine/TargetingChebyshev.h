@@ -71,30 +71,34 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGETING_CHEBYSHEV_H
 #define TARGETING_CHEBYSHEV_H
 
-#include <iostream>
-#include "ProgressIndicator.h"
-#include "TargetParamsTimeStep.h"
-#include "ProgramGlobals.h"
-#include "ParametersForSolver.h"
-#include "TimeVectorsChebyshev.h"
 #include "BlockDiagonalMatrix.h"
 #include "OracleChebyshev.h"
+#include "ParametersForSolver.h"
+#include "ProgramGlobals.h"
+#include "ProgressIndicator.h"
+#include "TargetParamsTimeStep.h"
 #include "TargetingBase.h"
+#include "TimeVectorsChebyshev.h"
+#include <iostream>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingChebyshev : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingChebyshev : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
+{
 
-	enum {BORDER_NEITHER, BORDER_LEFT, BORDER_RIGHT};
+	enum { BORDER_NEITHER,
+		BORDER_LEFT,
+		BORDER_RIGHT };
 
 public:
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
 	typedef typename BaseType::OptionsType OptionsType;
-	typedef std::pair<SizeType,SizeType> PairType;
+	typedef std::pair<SizeType, SizeType> PairType;
 	typedef typename BaseType::MatrixVectorType MatrixVectorType;
 	typedef typename BaseType::CheckpointType CheckpointType;
 	typedef typename MatrixVectorType::ModelType ModelType;
@@ -122,17 +126,17 @@ public:
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingChebyshev(const LeftRightSuperType& lrs,
-	                   const CheckpointType& checkPoint,
-	                   const WaveFunctionTransfType& wft,
-	                   const QnType&,
-	                   InputValidatorType& ioIn)
-	    : BaseType(lrs, checkPoint, wft, 0),
-	      tstStruct_(ioIn, "TargetingChebyshev", checkPoint.model()),
-	      wft_(wft),
-	      progress_("TargetingChebyshev"),
-	      weight_(tstStruct_.times().size()),
-	      tvEnergy_(weight_.size(),0.0),
-	      gsWeight_(tstStruct_.gsWeight())
+	    const CheckpointType& checkPoint,
+	    const WaveFunctionTransfType& wft,
+	    const QnType&,
+	    InputValidatorType& ioIn)
+	    : BaseType(lrs, checkPoint, wft, 0)
+	    , tstStruct_(ioIn, "TargetingChebyshev", checkPoint.model())
+	    , wft_(wft)
+	    , progress_("TargetingChebyshev")
+	    , weight_(tstStruct_.times().size())
+	    , tvEnergy_(weight_.size(), 0.0)
+	    , gsWeight_(tstStruct_.gsWeight())
 	{
 		if (!wft.isEnabled())
 			err("TST needs an enabled wft\n");
@@ -152,23 +156,23 @@ public:
 		if (n < 3)
 			throw PsimagLite::RuntimeError("At least 3 Chebyshev vectors need to be targets\n");
 
-		RealType factor = (n+4.0)/(n+2.0);
+		RealType factor = (n + 4.0) / (n + 2.0);
 		factor *= (1.0 - gsWeight_);
-		for (SizeType i=0;i<n;i++) {
-			tstStruct_.times()[i] = i*tau/(n-1);
-			weight_[i] = factor/(n+4);
+		for (SizeType i = 0; i < n; i++) {
+			tstStruct_.times()[i] = i * tau / (n - 1);
+			weight_[i] = factor / (n + 4);
 			sum += weight_[i];
 		}
 
 		sum -= weight_[0];
-		sum -= weight_[n-1];
-		weight_[0] = weight_[n-1] = 2*factor/(n+4);
-		sum += weight_[n-1];
+		sum -= weight_[n - 1];
+		weight_[0] = weight_[n - 1] = 2 * factor / (n + 4);
+		sum += weight_[n - 1];
 		sum += weight_[0];
 
-		gsWeight_=1.0-sum;
+		gsWeight_ = 1.0 - sum;
 		sum += gsWeight_;
-		assert(fabs(sum-1.0)<1e-5);
+		assert(fabs(sum - 1.0) < 1e-5);
 
 		this->common().aoeNonConst().initTimeVectors(tstStruct_, ioIn);
 	}
@@ -185,22 +189,24 @@ public:
 
 	RealType gsWeight() const
 	{
-		if (this->common().aoe().allStages(StageEnumType::DISABLED)) return 1.0;
+		if (this->common().aoe().allStages(StageEnumType::DISABLED))
+			return 1.0;
 		return gsWeight_;
 	}
 
 	bool includeGroundStage() const
 	{
-		if (!this->common().aoe().noStageIs(StageEnumType::DISABLED)) return true;
-		bool b = (fabs(gsWeight_)>1e-6);
+		if (!this->common().aoe().noStageIs(StageEnumType::DISABLED))
+			return true;
+		bool b = (fabs(gsWeight_) > 1e-6);
 		return b;
 	}
 
 	void evolve(const VectorRealType& energies,
-	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
-	            const BlockType&,
-	            SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    const BlockType&,
+	    SizeType loopNumber)
 	{
 		assert(energies.size() > 0);
 		RealType Eg = energies[0];
@@ -211,8 +217,7 @@ public:
 
 	bool end() const
 	{
-		return (tstStruct_.maxTime() != 0 &&
-		        this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
+		return (tstStruct_.maxTime() != 0 && this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
@@ -221,12 +226,12 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	    PsimagLite::IoSelector::Out& io,
+	    PsimagLite::String prefix) const
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Saving state...";
+		msg << "Saving state...";
 		progress_.printline(msgg, std::cout);
 
 		assert(block.size() > 0);
@@ -238,40 +243,40 @@ public:
 private:
 
 	void evolveInternal(RealType Eg,
-	                    ProgramGlobals::DirectionEnum direction,
-	                    const BlockType& block1,
-	                    SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    SizeType loopNumber)
 	{
-		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
+			return;
 		VectorWithOffsetType phiNew;
 		this->common().aoeNonConst().getPhi(&phiNew, Eg, direction, block1[0], loopNumber, tstStruct_);
 
-		if (phiNew.size() == 0) return;
+		if (phiNew.size() == 0)
+			return;
 
 		VectorSizeType indices(tstStruct_.times().size());
 		for (SizeType i = 0; i < tstStruct_.times().size(); ++i)
 			indices[i] = i;
 
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
-		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		assert(0 < block1.size());
 
 		bool isLastCall = true;
 		this->common().aoeNonConst().calcTimeVectors(indices,
-		                                     Eg,
-		                                     phiNew,
-		                                     direction,
-		                                     allOperatorsApplied,
-		                                     false, // don't wft or advance indices[0]
-		                                     block1,
-		                                     isLastCall);
+		    Eg,
+		    phiNew,
+		    direction,
+		    allOperatorsApplied,
+		    false, // don't wft or advance indices[0]
+		    block1,
+		    isLastCall);
 
 		assert(phiNew.offset(0) == this->tv(1).offset(0));
 
 		const OptionsType& options = this->model().params().options;
-		const bool normalizeTimeVectors = (options.isSet("normalizeVectors") &&
-		                                   !options.isSet("neverNormalizeVectors"));
+		const bool normalizeTimeVectors = (options.isSet("normalizeVectors") && !options.isSet("neverNormalizeVectors"));
 
 		assert(phiNew.offset(0) == this->tv(1).offset(0));
 
@@ -287,10 +292,10 @@ private:
 	{
 		typedef OracleChebyshev<TargetingCommonType, TargetParamsType> OracleChebyshevType;
 		OracleChebyshevType oracle(BaseType::model(),
-		                           BaseType::lrs(),
-		                           this->common().aoe().currentTime(),
-		                           tstStruct_,
-		                           this->common().aoe().energy());
+		    BaseType::lrs(),
+		    this->common().aoe().currentTime(),
+		    tstStruct_,
+		    this->common().aoe().energy());
 
 		OperatorType A = BaseType::model().naturalOperator("c", 0, 0);
 		oracle(3, this->common(), systemOrEviron, site, A, ApplyOperatorType::BORDER_NO);
@@ -298,46 +303,46 @@ private:
 
 	void printChebyshev() const
 	{
-		for (SizeType i=0;i<this->tv().size();i++)
-			printChebyshev(this->tv()[i],i);
+		for (SizeType i = 0; i < this->tv().size(); i++)
+			printChebyshev(this->tv()[i], i);
 	}
 
-	void printChebyshev(const VectorWithOffsetType& phi,SizeType whatTarget) const
+	void printChebyshev(const VectorWithOffsetType& phi, SizeType whatTarget) const
 	{
-		for (SizeType ii=0;ii<phi.sectors();ii++) {
+		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
 			SizeType i = phi.sector(ii);
-			printChebyshev(phi,whatTarget,i);
+			printChebyshev(phi, whatTarget, i);
 		}
 	}
 
 	void printChebyshev(const VectorWithOffsetType& phi,
-	                    SizeType whatTarget,
-	                    SizeType i0) const
+	    SizeType whatTarget,
+	    SizeType i0) const
 	{
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::HamiltonianConnectionType hc(p,
-		                                                 BaseType::lrs(),
-		                                                 BaseType::model().geometry(),
-		                                                 BaseType::model().modelLinks(),
-		                                                 this->common().aoe().currentTime(),
-		                                                 0);
+		    BaseType::lrs(),
+		    BaseType::model().geometry(),
+		    BaseType::model().modelLinks(),
+		    this->common().aoe().currentTime(),
+		    0);
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		                                                     hc);
+		    hc);
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
-		phi.extract(phi2,i0);
+		phi.extract(phi2, i0);
 		TargetVectorType x(total);
-		lanczosHelper.matrixVectorProduct(x,phi2);
+		lanczosHelper.matrixVectorProduct(x, phi2);
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Hamiltonian average at Che-time="<<this->common().aoe().currentTime();
-		msg<<" for target="<<whatTarget;
-		ComplexOrRealType numerator = phi2*x;
-		ComplexOrRealType den = phi2*phi2;
-		ComplexOrRealType division = (PsimagLite::norm(den)<1e-10) ? 0 : numerator/den;
-		msg<<" sector="<<i0<<" <phi(t)|H|phi(t)>="<<numerator;
-		msg<<" <phi(t)|phi(t)>="<<den<<" "<<division;
+		msg << "Hamiltonian average at Che-time=" << this->common().aoe().currentTime();
+		msg << " for target=" << whatTarget;
+		ComplexOrRealType numerator = phi2 * x;
+		ComplexOrRealType den = phi2 * phi2;
+		ComplexOrRealType division = (PsimagLite::norm(den) < 1e-10) ? 0 : numerator / den;
+		msg << " sector=" << i0 << " <phi(t)|H|phi(t)>=" << numerator;
+		msg << " <phi(t)|phi(t)>=" << den << " " << division;
 		progress_.printline(msgg, std::cout);
 		tvEnergy_[whatTarget] = PsimagLite::real(division);
 	}
@@ -348,8 +353,7 @@ private:
 	VectorRealType weight_;
 	mutable VectorRealType tvEnergy_;
 	RealType gsWeight_;
-};     //class TargetingChebyshev
+}; // class TargetingChebyshev
 } // namespace Dmrg
 
 #endif
-

@@ -81,21 +81,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CORRECTION_V_FUNCTION_H
 #include "ConjugateGradient.h"
 
-namespace Dmrg {
-template<typename MatrixType,typename InfoType>
-class	CorrectionVectorFunction {
+namespace Dmrg
+{
+template <typename MatrixType, typename InfoType>
+class CorrectionVectorFunction
+{
 
 	typedef typename MatrixType::value_type FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
-	class InternalMatrix {
+	class InternalMatrix
+	{
 
 	public:
 
-		typedef FieldType value_type ;
-		InternalMatrix(const MatrixType& m,const InfoType& info,RealType E0)
-		    : m_(m),info_(info),E0_(E0)
+		typedef FieldType value_type;
+		InternalMatrix(const MatrixType& m, const InfoType& info, RealType E0)
+		    : m_(m)
+		    , info_(info)
+		    , E0_(E0)
 		{
 			if (info_.omega().first != PsimagLite::FREQ_REAL)
 				throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
@@ -103,22 +108,21 @@ class	CorrectionVectorFunction {
 
 		SizeType rows() const { return m_.rows(); }
 
-		void matrixVectorProduct(VectorType& x,const VectorType& y) const
+		void matrixVectorProduct(VectorType& x, const VectorType& y) const
 		{
 			RealType eta = info_.eta();
 			RealType omegaMinusE0 = info_.omega().second + E0_;
-			VectorType xTmp(x.size(),0);
-			m_.matrixVectorProduct(xTmp,y); // xTmp = Hy
-			VectorType x2(x.size(),0);
-			m_.matrixVectorProduct(x2,xTmp); // x2 = H^2 y
+			VectorType xTmp(x.size(), 0);
+			m_.matrixVectorProduct(xTmp, y); // xTmp = Hy
+			VectorType x2(x.size(), 0);
+			m_.matrixVectorProduct(x2, xTmp); // x2 = H^2 y
 			const RealType f1 = (-2.0);
 			// this needs fixing
 			// preferred:
 			// x <= x2 + f1*omegaMinusE0*xTmp + (omegaMinusE0*omegaMinusE0 + eta*eta)*y;
 			// equivalent
 			for (SizeType i = 0; i < x.size(); ++i)
-				x[i] = x2[i] + f1*omegaMinusE0*xTmp[i] +
-				        (omegaMinusE0*omegaMinusE0 + eta*eta)*y[i];
+				x[i] = x2[i] + f1 * omegaMinusE0 * xTmp[i] + (omegaMinusE0 * omegaMinusE0 + eta * eta) * y[i];
 
 			x /= (-eta);
 		}
@@ -134,16 +138,18 @@ class	CorrectionVectorFunction {
 
 public:
 
-	CorrectionVectorFunction(const MatrixType& m,const InfoType& info,RealType E0)
-	    : im_(m,info,E0),cg_(info.cgSteps(),info.cgEps())
-	{}
-
-	void getXi(VectorType& result,const VectorType& sv) const
+	CorrectionVectorFunction(const MatrixType& m, const InfoType& info, RealType E0)
+	    : im_(m, info, E0)
+	    , cg_(info.cgSteps(), info.cgEps())
 	{
-		VectorType x0(result.size(),0.0);
+	}
+
+	void getXi(VectorType& result, const VectorType& sv) const
+	{
+		VectorType x0(result.size(), 0.0);
 
 		result = x0; // initial ansatz
-		cg_(result,im_,sv);
+		cg_(result, im_, sv);
 	}
 
 private:
@@ -155,4 +161,3 @@ private:
 
 /*@}*/
 #endif // CORRECTION_V_FUNCTION_H
-

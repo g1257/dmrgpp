@@ -72,20 +72,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /** \ingroup DMRG */
 /*@{*/
 /** \file ParallelDensityMatrix.h
-*/
+ */
 
 #ifndef PARALLEL_DENSITY_MATRIX_H
 #define PARALLEL_DENSITY_MATRIX_H
 
-#include "ProgramGlobals.h"
 #include "Concurrency.h"
+#include "ProgramGlobals.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename BlockMatrixType,
-         typename BasisWithOperatorsType,
-         typename TargetVectorType>
-class ParallelDensityMatrix {
+template <typename BlockMatrixType,
+    typename BasisWithOperatorsType,
+    typename TargetVectorType>
+class ParallelDensityMatrix
+{
 
 	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 	typedef typename TargetVectorType::value_type DensityMatrixElementType;
@@ -97,112 +99,115 @@ public:
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
 	ParallelDensityMatrix(const TargetVectorType& target,
-	                      const BasisWithOperatorsType& pBasis,
-	                      const BasisWithOperatorsType& pBasisSummed,
-	                      const BasisType& pSE,
-	                      ProgramGlobals::DirectionEnum direction,
-	                      SizeType m,
-	                      RealType weight,
-	                      BuildingBlockType& matrixBlock)
-	    : target_(target),
-	      pBasis_(pBasis),
-	      pBasisSummed_(pBasisSummed),
-	      pSE_(pSE),
-	      direction_(direction),
-	      m_(m),
-	      weight_(weight),
-	      matrixBlock_(matrixBlock),
-	      hasMpi_(PsimagLite::Concurrency::hasMpi())
-	{}
+	    const BasisWithOperatorsType& pBasis,
+	    const BasisWithOperatorsType& pBasisSummed,
+	    const BasisType& pSE,
+	    ProgramGlobals::DirectionEnum direction,
+	    SizeType m,
+	    RealType weight,
+	    BuildingBlockType& matrixBlock)
+	    : target_(target)
+	    , pBasis_(pBasis)
+	    , pBasisSummed_(pBasisSummed)
+	    , pSE_(pSE)
+	    , direction_(direction)
+	    , m_(m)
+	    , weight_(weight)
+	    , matrixBlock_(matrixBlock)
+	    , hasMpi_(PsimagLite::Concurrency::hasMpi())
+	{
+	}
 
 	SizeType tasks() const
 	{
-		return pBasis_.partition(m_+1) - pBasis_.partition(m_);
+		return pBasis_.partition(m_ + 1) - pBasis_.partition(m_);
 	}
 
 	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
 		SizeType start = pBasis_.partition(m_);
-		SizeType length = pBasis_.partition(m_+1) - start;
+		SizeType length = pBasis_.partition(m_ + 1) - start;
 
 		SizeType ieff = taskNumber + start;
 		for (SizeType j = 0; j < length; ++j) {
-			matrixBlock_(taskNumber,j) += densityMatrixExpand(direction_,
-			                                          ieff,
-			                                          j+start,
-			                                          target_)*weight_;
+			matrixBlock_(taskNumber, j) += densityMatrixExpand(direction_,
+							   ieff,
+							   j + start,
+							   target_)
+			    * weight_;
 		}
 	}
 
 private:
 
 	DensityMatrixElementType densityMatrixExpand(ProgramGlobals::DirectionEnum direction,
-	                                             SizeType alpha1,
-	                                             SizeType alpha2,
-	                                             const TargetVectorType& v)
+	    SizeType alpha1,
+	    SizeType alpha2,
+	    const TargetVectorType& v)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			return densityMatrixExpandSystem(alpha1,
-			                                 alpha2,
-			                                 v);
+			    alpha2,
+			    v);
 		else
 			return densityMatrixExpandEnviron(alpha1,
-			                                  alpha2,
-			                                  v);
-
+			    alpha2,
+			    v);
 	}
 
 	DensityMatrixElementType densityMatrixExpandEnviron(SizeType alpha1,
-	                                                    SizeType alpha2,
-	                                                    const TargetVectorType& v)
+	    SizeType alpha2,
+	    const TargetVectorType& v)
 	{
 		SizeType ns = pBasisSummed_.size();
 		SizeType total = pBasisSummed_.size();
-		DensityMatrixElementType sum=0;
+		DensityMatrixElementType sum = 0;
 
-		SizeType x2 = alpha2*ns;
-		SizeType x1 = alpha1*ns;
-		for (SizeType beta=0;beta<total;beta++) {
+		SizeType x2 = alpha2 * ns;
+		SizeType x1 = alpha1 * ns;
+		for (SizeType beta = 0; beta < total; beta++) {
 			SizeType ii = pSE_.permutationInverse(beta + x1);
 			int sector1 = v.index2Sector(ii);
-			if (sector1 < 0) continue;
+			if (sector1 < 0)
+				continue;
 			SizeType start1 = v.offset(sector1);
 
 			SizeType jj = pSE_.permutationInverse(beta + x2);
 			int sector2 = v.index2Sector(jj);
-			if (sector2 < 0) continue;
+			if (sector2 < 0)
+				continue;
 			SizeType start2 = v.offset(sector2);
 
-			sum += v.fastAccess(sector1,ii-start1)*
-			        PsimagLite::conj(v.fastAccess(sector2,jj-start2));
+			sum += v.fastAccess(sector1, ii - start1) * PsimagLite::conj(v.fastAccess(sector2, jj - start2));
 		}
 		return sum;
 	}
 
 	DensityMatrixElementType densityMatrixExpandSystem(SizeType alpha1,
-	                                                   SizeType alpha2,
-	                                                   const TargetVectorType& v)
+	    SizeType alpha2,
+	    const TargetVectorType& v)
 	{
 		SizeType ne = pBasisSummed_.size();
-		SizeType ns = pSE_.size()/ne;
+		SizeType ns = pSE_.size() / ne;
 		SizeType total = pBasisSummed_.size();
-		DensityMatrixElementType sum=0;
+		DensityMatrixElementType sum = 0;
 
 		SizeType totalNs = total * ns;
 
-		for (SizeType betaNs=0;betaNs<totalNs;betaNs+=ns) {
-			SizeType ii = pSE_.permutationInverse(alpha1+betaNs);
+		for (SizeType betaNs = 0; betaNs < totalNs; betaNs += ns) {
+			SizeType ii = pSE_.permutationInverse(alpha1 + betaNs);
 			int sector1 = v.index2Sector(ii);
-			if (sector1 < 0) continue;
+			if (sector1 < 0)
+				continue;
 			SizeType start1 = v.offset(sector1);
 
-			SizeType jj = pSE_.permutationInverse(alpha2+betaNs);
+			SizeType jj = pSE_.permutationInverse(alpha2 + betaNs);
 			int sector2 = v.index2Sector(jj);
-			if (sector2 < 0) continue;
+			if (sector2 < 0)
+				continue;
 			SizeType start2 = v.offset(sector2);
 
-			sum += v.fastAccess(sector1,ii-start1)*
-			        PsimagLite::conj(v.fastAccess(sector2,jj-start2));
+			sum += v.fastAccess(sector1, ii - start1) * PsimagLite::conj(v.fastAccess(sector2, jj - start2));
 		}
 
 		return sum;
@@ -222,4 +227,3 @@ private:
 
 /*@}*/
 #endif // PARALLEL_DENSITY_MATRIX_H
-

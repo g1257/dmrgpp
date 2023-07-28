@@ -77,23 +77,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef INPUT_CHECK_H
 #define INPUT_CHECK_H
-#include <vector>
-#include <stdexcept>
 #include "../../PsimagLite/src/Options.h"
 #include "Geometry/Geometry.h"
-#include "ProgramGlobals.h"
 #include "MatrixVectorKron/BatchedGemmInclude.hh"
+#include "ProgramGlobals.h"
+#include <stdexcept>
+#include <vector>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-class InputCheck {
+class InputCheck
+{
 
 	typedef PsimagLite::Options::Readable OptionsReadableType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 public:
 
-	InputCheck() : optsReadable_(0)
+	InputCheck()
+	    : optsReadable_(0)
 	{
 		allowedFileOptions_.push_back("");
 		allowedFileOptions_.push_back("DELETE");
@@ -189,7 +192,7 @@ public:
 		knownLabels_.push_back("MagneticFieldX");
 		knownLabels_.push_back("MagneticFieldY");
 		knownLabels_.push_back("MagneticFieldZ");
-                knownLabels_.push_back("OnSiteLinksSzSz");
+		knownLabels_.push_back("OnSiteLinksSzSz");
 		knownLabels_.push_back("SpinOrbit");
 		knownLabels_.push_back("DegeneracyMax");
 		knownLabels_.push_back("JzSymmetry");
@@ -225,12 +228,13 @@ public:
 
 	~InputCheck()
 	{
-		if (optsReadable_!=0) delete optsReadable_;
+		if (optsReadable_ != 0)
+			delete optsReadable_;
 	}
 
 	PsimagLite::String import() const
 	{
-		PsimagLite::String str = PsimagLite::Geometry<int,int,ProgramGlobals>::import();
+		PsimagLite::String str = PsimagLite::Geometry<int, int, ProgramGlobals>::import();
 
 		str += "vector hubbardU;\n";
 		str += "vector potentialV;\n";
@@ -287,7 +291,7 @@ public:
 		str += "vector MagneticFieldX;\n";
 		str += "vector MagneticFieldY;\n";
 		str += "vector MagneticFieldZ;\n";
-                str += "matrix.real OnSiteLinksSzSz;\n";
+		str += "matrix.real OnSiteLinksSzSz;\n";
 		str += "string TargetFermionicParity;\n";
 		str += "matrix TimeSchedule;\n";
 
@@ -295,24 +299,27 @@ public:
 	}
 
 	bool check(const PsimagLite::String& label,
-	           const PsimagLite::Vector<PsimagLite::String>::Type& vec,
-	           SizeType line) const
+	    const PsimagLite::Vector<PsimagLite::String>::Type& vec,
+	    SizeType line) const
 	{
-		if (label=="JMVALUES" || label=="RS:JMVALUES") {
-			if (vec.size()!=3) return error1("JMVALUES",line);
+		if (label == "JMVALUES" || label == "RS:JMVALUES") {
+			if (vec.size() != 3)
+				return error1("JMVALUES", line);
 			return true;
-		} else if (label=="RAW_MATRIX" || label=="RS:RAW_MATRIX" || label == "SpinOrbit") {
-			if (!checkForMatrix(vec)) return error1(label,line);
+		} else if (label == "RAW_MATRIX" || label == "RS:RAW_MATRIX" || label == "SpinOrbit") {
+			if (!checkForMatrix(vec))
+				return error1(label, line);
 			return true;
 		} else if (label == "Connectors" || label == "hopOnSite") {
 			if (!checkForMatrix(vec) && !checkForVector(vec))
-				return error1(label,line);
+				return error1(label, line);
 			return true;
 		} else if (label == "MagneticField") {
 			return true;
-		} else if (label=="FiniteLoops") {
+		} else if (label == "FiniteLoops") {
 			SizeType n = atoi(vec[0].c_str());
-			if (vec.size()!=3*n+1)  return error1("FiniteLoops",line);
+			if (vec.size() != 3 * n + 1)
+				return error1("FiniteLoops", line);
 			return true;
 		}
 
@@ -320,13 +327,14 @@ public:
 	}
 
 	bool checkSimpleLabel(const PsimagLite::String& label,
-	                      SizeType line) const
+	    SizeType line) const
 	{
 		for (SizeType i = 0; i < knownLabels_.size(); ++i)
-			if (knownLabels_[i] == label) return true;
-		PsimagLite::String msg("WARNING: Unknown label " + label +"\n");
-		std::cout<<msg;
-		std::cerr<<msg;
+			if (knownLabels_[i] == label)
+				return true;
+		PsimagLite::String msg("WARNING: Unknown label " + label + "\n");
+		std::cout << msg;
+		std::cerr << msg;
 		return false;
 	}
 
@@ -405,17 +413,18 @@ public:
 	read the wavefunction and transform from the file only as needed.
     This option only has effect when running the observe
     code and not the main driver or other drivers.
-	        \item[ciRun] Mark the input for the ci or TestSuite; usually this is
+		\item[ciRun] Mark the input for the ci or TestSuite; usually this is
 			set by the ci.pl script automatically
 			\item[notermalias] If the model being run has term aliasing, disable it; else it has
 			no effect.
 		\end{itemize}
 		*/
 	void check(const PsimagLite::String& label,
-	           const PsimagLite::String& val,
-	           SizeType)
+	    const PsimagLite::String& val,
+	    SizeType)
 	{
-		if (label!="SolverOptions") return;
+		if (label != "SolverOptions")
+			return;
 		PsimagLite::Vector<PsimagLite::String>::Type registerOpts;
 
 		registerOpts.push_back("restart");
@@ -480,11 +489,11 @@ public:
 		registerOpts.push_back("notermalias");
 
 		PsimagLite::Options::Writeable optWriteable(registerOpts,
-		                                            PsimagLite::Options::Writeable::PERMISSIVE);
-		optsReadable_ = new  OptionsReadableType(optWriteable,val);
+		    PsimagLite::Options::Writeable::PERMISSIVE);
+		optsReadable_ = new OptionsReadableType(optWriteable, val);
 
-		bool mvs =  (val.find("MatrixVectorStored") != PsimagLite::String::npos);
-		bool mvo =  (val.find("MatrixVectorOnTheFly") != PsimagLite::String::npos);
+		bool mvs = (val.find("MatrixVectorStored") != PsimagLite::String::npos);
+		bool mvo = (val.find("MatrixVectorOnTheFly") != PsimagLite::String::npos);
 		bool notMvk = (mvs || mvo);
 		if (val.find("BatchedGemm") != PsimagLite::String::npos) {
 			if (notMvk)
@@ -500,12 +509,13 @@ public:
 
 	void usageMain(const PsimagLite::String& name) const
 	{
-		std::cerr<<"USAGE is "<<name<<"\n";
+		std::cerr << "USAGE is " << name << "\n";
 	}
 
 	void checkFileOptions(PsimagLite::String fileOption)
 	{
-		if (passesFileOptions(fileOption)) return;
+		if (passesFileOptions(fileOption))
+			return;
 		throw PsimagLite::RuntimeError("Option " + fileOption + " not understood\n");
 	}
 
@@ -515,34 +525,36 @@ private:
 	{
 		for (SizeType i = 0; i < allowedFileOptions_.size(); ++i)
 			if (std::find(allowedFileOptions_.begin(),
-			              allowedFileOptions_.end(),
-			              fileOption) == allowedFileOptions_.end())
+				allowedFileOptions_.end(),
+				fileOption)
+			    == allowedFileOptions_.end())
 				return false;
 		return true;
 	}
 
 	bool checkForVector(const PsimagLite::Vector<PsimagLite::String>::Type& vec) const
 	{
-		if (vec.size() == 0) return false;
+		if (vec.size() == 0)
+			return false;
 		SizeType n = atoi(vec[0].c_str());
-		return (vec.size() == n+1);
+		return (vec.size() == n + 1);
 	}
 
 	bool checkForMatrix(const PsimagLite::Vector<PsimagLite::String>::Type& vec) const
 	{
-		if (vec.size() < 2) return false;
+		if (vec.size() < 2)
+			return false;
 		SizeType row = atoi(vec[0].c_str());
 		SizeType col = atoi(vec[1].c_str());
-		SizeType n = row*col;
-		return (vec.size() == n+2);
+		SizeType n = row * col;
+		return (vec.size() == n + 2);
 	}
 
-	bool error1(const PsimagLite::String& message,SizeType line) const
+	bool error1(const PsimagLite::String& message, SizeType line) const
 	{
 		PsimagLite::String s(__FILE__);
 		s += " : Input error for label " + message + " near line " + ttos(line) + "\n";
 		throw PsimagLite::RuntimeError(s.c_str());
-
 	}
 
 	OptionsReadableType* optsReadable_;
@@ -553,4 +565,3 @@ private:
 
 /*@}*/
 #endif
-

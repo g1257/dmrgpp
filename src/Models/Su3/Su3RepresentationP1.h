@@ -1,11 +1,12 @@
 #ifndef SU3REPRESENTATIONP1_H
 #define SU3REPRESENTATIONP1_H
-#include "PsimagLite.h"
 #include "Matrix.h"
+#include "PsimagLite.h"
 #include "Su3RepresentationBase.h"
 
-template<typename ComplexOrRealType, bool>
-class Su3RepresentationP1 : public Su3RepresentationBase<ComplexOrRealType> {
+template <typename ComplexOrRealType, bool>
+class Su3RepresentationP1 : public Su3RepresentationBase<ComplexOrRealType>
+{
 
 public:
 
@@ -42,16 +43,18 @@ public:
 
 		// T8
 		assert(n == 4);
-		static const ComplexOrRealType oneOverSqrt3 = 1.0/sqrt(3.0);
-		m(0, 0) = m(1, 1) = 0.5*oneOverSqrt3;
+		static const ComplexOrRealType oneOverSqrt3 = 1.0 / sqrt(3.0);
+		m(0, 0) = m(1, 1) = 0.5 * oneOverSqrt3;
 		m(2, 2) = -oneOverSqrt3;
 	}
 
 	// diagonal 1 -1 0  ==> 2 0 1
 	SizeType t3OfState(SizeType ind) const
 	{
-		if (ind == 0) return 2;
-		if (ind == 1) return 0;
+		if (ind == 0)
+			return 2;
+		if (ind == 1)
+			return 0;
 		assert(ind == 2);
 		return 1;
 	}
@@ -66,9 +69,10 @@ public:
 	SizeType size() const { return 3; }
 };
 
-template<typename ComplexOrRealType>
+template <typename ComplexOrRealType>
 class Su3RepresentationP1<ComplexOrRealType, true>
-        : public Su3RepresentationBase<ComplexOrRealType> {
+    : public Su3RepresentationBase<ComplexOrRealType>
+{
 
 public:
 
@@ -119,16 +123,18 @@ public:
 		}
 
 		assert(n == 7);
-		static const RealType oneOverSqrt3 = 1.0/sqrt(3.0);
-		m(0, 0) = m(1, 1) = 0.5*oneOverSqrt3;
+		static const RealType oneOverSqrt3 = 1.0 / sqrt(3.0);
+		m(0, 0) = m(1, 1) = 0.5 * oneOverSqrt3;
 		m(2, 2) = -oneOverSqrt3;
 	}
 
 	// diagonal 1 -1 0  ==> 2 0 1
 	SizeType t3OfState(SizeType ind) const
 	{
-		if (ind == 0) return 2;
-		if (ind == 1) return 0;
+		if (ind == 0)
+			return 2;
+		if (ind == 1)
+			return 0;
 		assert(ind == 2);
 		return 1;
 	}

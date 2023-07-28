@@ -79,12 +79,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef LINK_H
 #define LINK_H
 
-#include "ProgramGlobals.h"
 #include "MetaOpForConnection.hh"
+#include "ProgramGlobals.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename FieldType>
+template <typename FieldType>
 struct Link {
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
@@ -92,20 +93,21 @@ struct Link {
 	typedef std::pair<MetaOpForConnection, MetaOpForConnection> PairMetaOForConnectoinType;
 
 	Link(PairMetaOForConnectoinType finalIndices1,
-	     ProgramGlobals::ConnectionEnum type1,
-	     const FieldType& value1,
-	     ProgramGlobals::FermionOrBosonEnum fOb,
-	     SizeType aM,
-	     RealType aF,
-	     SizeType cat)
-	    : pairMetaOps(finalIndices1),
-	      type(type1),
-	      value(value1),
-	      fermionOrBoson(fOb),
-	      angularMomentum(aM),
-	      angularFactor(aF),
-	      category(cat)
-	{}
+	    ProgramGlobals::ConnectionEnum type1,
+	    const FieldType& value1,
+	    ProgramGlobals::FermionOrBosonEnum fOb,
+	    SizeType aM,
+	    RealType aF,
+	    SizeType cat)
+	    : pairMetaOps(finalIndices1)
+	    , type(type1)
+	    , value(value1)
+	    , fermionOrBoson(fOb)
+	    , angularMomentum(aM)
+	    , angularFactor(aF)
+	    , category(cat)
+	{
+	}
 
 	PairMetaOForConnectoinType pairMetaOps;
 	ProgramGlobals::ConnectionEnum type;
@@ -115,7 +117,7 @@ struct Link {
 	RealType angularFactor;
 	SizeType category;
 }; // struct Link
-} // namespace Dmrg 
+} // namespace Dmrg
 
 /*@}*/
 #endif // LINK_H

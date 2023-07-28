@@ -1,12 +1,14 @@
 #ifndef STRINGORDERPOST_H
 #define STRINGORDERPOST_H
-#include "Vector.h"
 #include "Braket.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ObserverType>
-class StringOrderPost {
+template <typename ObserverType>
+class StringOrderPost
+{
 
 public:
 
@@ -24,7 +26,8 @@ public:
 	typedef typename BraketType::ComplexOrRealType ComplexOrRealType;
 
 	StringOrderPost(const BraketType& braket, const ObserverType& observe)
-	    : braket_(braket), observe_(observe)
+	    : braket_(braket)
+	    , observe_(observe)
 	{
 		static const PsimagLite::String stringop = "!stringorder=";
 		const PsimagLite::String special = braket.opName(0);
@@ -101,7 +104,7 @@ private:
 			nup = opSpec(opsCenter, site);
 			isValid = true;
 		} catch (std::exception& e) {
-			std::cerr<<e.what()<<"\n";
+			std::cerr << e.what() << "\n";
 		}
 
 		if (!isValid) {

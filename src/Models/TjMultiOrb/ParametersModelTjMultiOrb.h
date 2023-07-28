@@ -81,23 +81,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_PARAMS_TJMULTIORB_H
 #include "ParametersModelBase.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 //! ModelTjMultiOrb Parameters
-template<typename RealType, typename QnType>
+template <typename RealType, typename QnType>
 struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ParametersModelTjMultiOrb(IoInputType& io)
-	    : BaseType(io, false),reinterpretAndTruncate(0)
+	    : BaseType(io, false)
+	    , reinterpretAndTruncate(0)
 	{
-		io.read(potentialV,"potentialV");
-		io.readline(orbitals,"Orbitals=");
+		io.read(potentialV, "potentialV");
+		io.readline(orbitals, "Orbitals=");
 
 		try {
-			io.readline(reinterpretAndTruncate,"JHundInfinity=");
-		} catch (std::exception&) {}
+			io.readline(reinterpretAndTruncate, "JHundInfinity=");
+		} catch (std::exception&) {
+		}
 
 		if (orbitals != 2 && reinterpretAndTruncate > 0)
 			throw PsimagLite::RuntimeError("JHundInfinity>0 only possible for orbitals==2\n");
@@ -106,16 +109,16 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 			throw PsimagLite::RuntimeError("JHundInfinity must be less or equal to 3\n");
 	}
 
-	template<typename SomeMemResolvType>
+	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	    SizeType,
+	    PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	    PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelTjMultiOrb";
 		io.createGroup(label);
@@ -126,13 +129,13 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream &os,
-	                                const ParametersModelTjMultiOrb& parameters)
+	friend std::ostream& operator<<(std::ostream& os,
+	    const ParametersModelTjMultiOrb& parameters)
 	{
-		os<<"potentialV\n";
-		os<<parameters.potentialV;
-		os<<"orbitals="<<parameters.orbitals<<"\n";
-		os<<"JHundInfinity="<<parameters.reinterpretAndTruncate<<"\n";
+		os << "potentialV\n";
+		os << parameters.potentialV;
+		os << "orbitals=" << parameters.orbitals << "\n";
+		os << "JHundInfinity=" << parameters.reinterpretAndTruncate << "\n";
 		return os;
 	}
 
@@ -145,4 +148,3 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 
 /*@}*/
 #endif
-

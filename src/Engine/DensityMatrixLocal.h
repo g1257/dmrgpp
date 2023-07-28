@@ -71,20 +71,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef DENSITY_MATRIX_LOCAL_H
 #define DENSITY_MATRIX_LOCAL_H
+#include "BlockDiagonalMatrix.h"
+#include "Concurrency.h"
+#include "DensityMatrixBase.h"
+#include "DiagBlockDiagMatrix.h"
+#include "NoPthreads.h"
+#include "ParallelDensityMatrix.h"
+#include "Parallelizer.h"
 #include "ProgressIndicator.h"
 #include "TypeToString.h"
-#include "BlockDiagonalMatrix.h"
-#include "DensityMatrixBase.h"
-#include "ParallelDensityMatrix.h"
-#include "NoPthreads.h"
-#include "Concurrency.h"
-#include "Parallelizer.h"
-#include "DiagBlockDiagMatrix.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename TargetingType>
-class DensityMatrixLocal : public DensityMatrixBase<TargetingType> {
+template <typename TargetingType>
+class DensityMatrixLocal : public DensityMatrixBase<TargetingType>
+{
 
 	typedef DensityMatrixBase<TargetingType> BaseType;
 	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
@@ -103,44 +105,39 @@ public:
 	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 	typedef ParallelDensityMatrix<BlockDiagonalMatrixType,
-	BasisWithOperatorsType,
-	TargetVectorType> ParallelDensityMatrixType;
+	    BasisWithOperatorsType,
+	    TargetVectorType>
+	    ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
-	VectorVectorVectorWithOffsetType;
+	    VectorVectorVectorWithOffsetType;
 
 	DensityMatrixLocal(const TargetingType& target,
-	                   const LeftRightSuperType& lrs,
-	                   const ParamsType& p)
-	    :
-	      progress_("DensityMatrixLocal"),
-	      data_((p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() :
-	                                                                            lrs.right()),
-	      direction_(p.direction),
-	      debug_(p.debug)
+	    const LeftRightSuperType& lrs,
+	    const ParamsType& p)
+	    : progress_("DensityMatrixLocal")
+	    , data_((p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() : lrs.right())
+	    , direction_(p.direction)
+	    , debug_(p.debug)
 	{
 		{
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"Init partition for all targets";
+			msg << "Init partition for all targets";
 			progress_.printline(msgg, std::cout);
 		}
 
-		const BasisWithOperatorsType& pBasis =
-		        (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() :
-		                                                                        lrs.right();
+		const BasisWithOperatorsType& pBasis = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() : lrs.right();
 
-		const BasisWithOperatorsType& pBasisSummed =
-		        (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.right() :
-		                                                                        lrs.left();
+		const BasisWithOperatorsType& pBasisSummed = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.right() : lrs.left();
 
-		//loop over all partitions:
-		for (SizeType m=0;m<pBasis.partition()-1;m++) {
+		// loop over all partitions:
+		for (SizeType m = 0; m < pBasis.partition() - 1; m++) {
 			// size of this partition
-			SizeType bs = pBasis.partition(m+1)-pBasis.partition(m);
+			SizeType bs = pBasis.partition(m + 1) - pBasis.partition(m);
 
 			// density matrix block for this partition:
-			BuildingBlockType matrixBlock(bs,bs);
+			BuildingBlockType matrixBlock(bs, bs);
 
 			// weight of the ground state:
 			RealType w = target.gsWeight();
@@ -156,13 +153,13 @@ public:
 					for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 
 						initPartition(matrixBlock,
-						              pBasis,
-						              m,
-						              *(psi[sectorIndex][excitedIndex]),
-						              pBasisSummed,
-						              lrs.super(),
-						              p.direction,
-						              w);
+						    pBasis,
+						    m,
+						    *(psi[sectorIndex][excitedIndex]),
+						    pBasisSummed,
+						    lrs.super(),
+						    p.direction,
+						    w);
 					}
 				}
 			}
@@ -170,29 +167,29 @@ public:
 			// target all other states if any:
 			for (SizeType ix = 0; ix < target.size(); ++ix) {
 				RealType wnorm = target.normSquared(ix);
-				if (fabs(wnorm) < 1e-6) continue;
-				RealType w = target.weight(ix)/wnorm;
+				if (fabs(wnorm) < 1e-6)
+					continue;
+				RealType w = target.weight(ix) / wnorm;
 				initPartition(matrixBlock,
-				              pBasis,
-				              m,
-				              target(ix),
-				              pBasisSummed,
-				              lrs.super(),
-				              p.direction,
-				              w);
+				    pBasis,
+				    m,
+				    target(ix),
+				    pBasisSummed,
+				    lrs.super(),
+				    p.direction,
+				    w);
 			}
 
 			// set this matrix block into data_
-			data_.setBlock(m,pBasis.partition(m),matrixBlock);
+			data_.setBlock(m, pBasis.partition(m), matrixBlock);
 		}
 
 		{
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"Done with init partition";
+			msg << "Done with init partition";
 			progress_.printline(msgg, std::cout);
 		}
-
 	}
 
 	virtual const BlockDiagonalMatrixType& operator()()
@@ -200,18 +197,18 @@ public:
 		return data_;
 	}
 
-	void diag(typename PsimagLite::Vector<RealType>::Type& eigs,char jobz)
+	void diag(typename PsimagLite::Vector<RealType>::Type& eigs, char jobz)
 	{
-		DiagBlockDiagMatrix<BlockDiagonalMatrixType>::diagonalise(data_,eigs,jobz);
+		DiagBlockDiagMatrix<BlockDiagonalMatrixType>::diagonalise(data_, eigs, jobz);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const DensityMatrixLocal& dm)
+	    const DensityMatrixLocal& dm)
 	{
 		for (SizeType m = 0; m < dm.data_.blocks(); ++m) {
 			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
-			os<<" ne="<<ne<<"\n";
-			os<<dm.data_(m)<<"\n";
+			os << " ne=" << ne << "\n";
+			os << dm.data_(m) << "\n";
 		}
 
 		return os;
@@ -220,25 +217,24 @@ public:
 private:
 
 	void initPartition(BuildingBlockType& matrixBlock,
-	                   BasisWithOperatorsType const &pBasis,
-	                   SizeType m,
-	                   const TargetVectorType& v,
-	                   BasisWithOperatorsType const &pBasisSummed,
-	                   BasisType const &pSE,
-	                   ProgramGlobals::DirectionEnum direction,
-	                   RealType weight)
+	    BasisWithOperatorsType const& pBasis,
+	    SizeType m,
+	    const TargetVectorType& v,
+	    BasisWithOperatorsType const& pBasisSummed,
+	    BasisType const& pSE,
+	    ProgramGlobals::DirectionEnum direction,
+	    RealType weight)
 	{
 		ParallelDensityMatrixType helperDm(v,
-		                                   pBasis,
-		                                   pBasisSummed,
-		                                   pSE,
-		                                   direction,
-		                                   m,
-		                                   weight,
-		                                   matrixBlock);
+		    pBasis,
+		    pBasisSummed,
+		    pSE,
+		    direction,
+		    m,
+		    weight,
+		    matrixBlock);
 		ParallelizerType threadedDm(ConcurrencyType::codeSectionParams);
 		threadedDm.loopCreate(helperDm);
-
 	}
 
 	ProgressIndicatorType progress_;
@@ -250,4 +246,3 @@ private:
 } // namespace Dmrg
 
 #endif
-

@@ -1,17 +1,19 @@
 #ifndef MULTIPOINTINSITU_H
 #define MULTIPOINTINSITU_H
 #include "Braket.h"
-#include "Observer.h"
+#include "Checkpoint.h"
 #include "HelperForMultiPointInSitu.h"
 #include "ManyPointAction.h"
-#include "Wft/WaveFunctionTransfFactory.h"
-#include "Checkpoint.h"
+#include "Observer.h"
 #include "OneSiteSpaces.hh"
+#include "Wft/WaveFunctionTransfFactory.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename VectorWithOffsetType, typename ModelType>
-class MultiPointInSitu {
+template <typename VectorWithOffsetType, typename ModelType>
+class MultiPointInSitu
+{
 
 public:
 
@@ -19,9 +21,10 @@ public:
 	typedef typename ModelType::ParametersType ParametersType;
 	typedef typename ParametersType::OptionsType OptionsType;
 	typedef WaveFunctionTransfFactory<LeftRightSuperType,
-	VectorWithOffsetType,
-	OptionsType,
-	OneSiteSpaces<ModelType> > WaveFunctionTransfType;
+	    VectorWithOffsetType,
+	    OptionsType,
+	    OneSiteSpaces<ModelType>>
+	    WaveFunctionTransfType;
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 	typedef HelperForMultiPointInSitu<CheckpointType> HelperForMultiPointInSituType;
 	typedef typename HelperForMultiPointInSituType::BogusInput BogusInputType;
@@ -31,12 +34,12 @@ public:
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 
 	MultiPointInSitu(const ModelType& model,
-	                 const CheckpointType& checkpoint,
-	                 const WaveFunctionTransfType& wft,
-	                 ProgramGlobals::DirectionEnum dir)
-	    : model_(model),
-	      bogusInput_(model.superGeometry().numberOfSites(), checkpoint, wft, dir),
-	      observer_(bogusInput_, 0, 0, 0, model)
+	    const CheckpointType& checkpoint,
+	    const WaveFunctionTransfType& wft,
+	    ProgramGlobals::DirectionEnum dir)
+	    : model_(model)
+	    , bogusInput_(model.superGeometry().numberOfSites(), checkpoint, wft, dir)
+	    , observer_(bogusInput_, 0, 0, 0, model)
 	{
 		if (seen_.size() == 0)
 			seen_.resize(bogusInput_.numberOfSites(), false);
@@ -44,7 +47,8 @@ public:
 
 	void operator()(const BraketType& braket, SizeType centerOfOrtho)
 	{
-		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::INFINITE) return;
+		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::INFINITE)
+			return;
 
 		if (!everySiteSeen()) {
 			seen_[centerOfOrtho] = true;
@@ -66,12 +70,14 @@ public:
 			start = 0;
 			end = centerOfOrtho;
 		} else {
-			start = centerOfOrtho + 1;;
+			start = centerOfOrtho + 1;
+			;
 			end = n - 1;
 		}
 
 		for (SizeType site = start; site < end; ++site) {
-			if (site == centerOfOrtho) continue;
+			if (site == centerOfOrtho)
+				continue;
 			BraketType braket2 = buildBraketWithSites(braket, site, centerOfOrtho);
 			observer_.twoPoint(storage, braket2, needsPrinting, action);
 		}
@@ -97,7 +103,8 @@ private:
 	static bool everySiteSeen()
 	{
 		for (auto it = seen_.begin(); it != seen_.end(); ++it)
-			if (!*it) return false;
+			if (!*it)
+				return false;
 		return true;
 	}
 
@@ -107,7 +114,7 @@ private:
 	static VectorBoolType seen_;
 };
 
-template<typename T1, typename T2>
+template <typename T1, typename T2>
 typename MultiPointInSitu<T1, T2>::VectorBoolType MultiPointInSitu<T1, T2>::seen_;
 }
 #endif // MULTIPOINTINSITU_H

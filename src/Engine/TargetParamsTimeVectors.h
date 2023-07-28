@@ -82,10 +82,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGET_PARAMS_TIME_VECTORS_H
 #include "TargetParamsCommon.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 // Coordinates reading of TargetSTructure from input file
-template<typename ModelType>
-class TargetParamsTimeVectors : public TargetParamsCommon<ModelType> {
+template <typename ModelType>
+class TargetParamsTimeVectors : public TargetParamsCommon<ModelType>
+{
 
 public:
 
@@ -93,15 +95,15 @@ public:
 	typedef typename ModelType::RealType RealType;
 	typedef typename BaseType::VectorRealType VectorRealType;
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	TargetParamsTimeVectors(IoInputter& io,
-	                        PsimagLite::String targeting,
-	                        const ModelType& model)
-	    : BaseType(io, targeting, model),
-	      advanceEach_(0),
-	      algorithm_(BaseType::AlgorithmEnum::KRYLOV),
-	      tau_(0),
-	      timeDirection_(1.0)
+	    PsimagLite::String targeting,
+	    const ModelType& model)
+	    : BaseType(io, targeting, model)
+	    , advanceEach_(0)
+	    , algorithm_(BaseType::AlgorithmEnum::KRYLOV)
+	    , tau_(0)
+	    , timeDirection_(1.0)
 	{
 		/*PSIDOC TargetParamsTimeVectors
 		\item[TSPTau] [RealType], $\tau$ for the Krylov,
@@ -115,21 +117,23 @@ public:
 		Note that SuzukiTrotter is currently very experimental and unsupported.
 		*/
 
-		if (targeting == "TargetingExpression") return;
+		if (targeting == "TargetingExpression")
+			return;
 
-		io.readline(tau_,"TSPTau=");
+		io.readline(tau_, "TSPTau=");
 		SizeType timeSteps = 0;
 		io.readline(timeSteps, "TSPTimeSteps=");
 		times_.resize(timeSteps);
-		io.readline(advanceEach_,"TSPAdvanceEach=");
-		PsimagLite::String s="";
+		io.readline(advanceEach_, "TSPAdvanceEach=");
+		PsimagLite::String s = "";
 
 		io.readline(s, "TSPAlgorithm=");
 		setAlgorithm(nullptr, s, &io);
 
 		try {
-			io.readline(timeDirection_,"TSPTimeFactor=");
-		} catch (std::exception&) {}
+			io.readline(timeDirection_, "TSPTimeFactor=");
+		} catch (std::exception&) {
+		}
 	}
 
 	virtual VectorRealType& times()
@@ -167,24 +171,28 @@ public:
 		return chebyTransform_;
 	}
 
-	template<typename IoInputter>
+	template <typename IoInputter>
 	void setAlgorithm(VectorRealType* chebyTransform,
-	                  PsimagLite::String s,
-	                  IoInputter* io)
+	    PsimagLite::String s,
+	    IoInputter* io)
 	{
-		if (io && chebyTransform) err("setAlgorithm: incorrect call (1)\n");
+		if (io && chebyTransform)
+			err("setAlgorithm: incorrect call (1)\n");
 
-		if (!io && !chebyTransform) err("setAlgorithm: incorrect call (2)\n");
+		if (!io && !chebyTransform)
+			err("setAlgorithm: incorrect call (2)\n");
 
-		if (s=="RungeKutta" || s=="rungeKutta" || s=="rungekutta") {
+		if (s == "RungeKutta" || s == "rungeKutta" || s == "rungekutta") {
 			algorithm_ = BaseType::AlgorithmEnum::RUNGE_KUTTA;
-		} else if (s=="SuzukiTrotter" || s=="suzukiTrotter" || s=="suzukitrotter") {
+		} else if (s == "SuzukiTrotter" || s == "suzukiTrotter" || s == "suzukitrotter") {
 			algorithm_ = BaseType::AlgorithmEnum::SUZUKI_TROTTER;
-		} else if (s=="Chebyshev") {
+		} else if (s == "Chebyshev") {
 			algorithm_ = BaseType::AlgorithmEnum::CHEBYSHEV;
 
-			if (io) io->read(chebyTransform_, "ChebyshevTransform");
-			else chebyTransform_ = *chebyTransform;
+			if (io)
+				io->read(chebyTransform_, "ChebyshevTransform");
+			else
+				chebyTransform_ = *chebyTransform;
 			if (chebyTransform_.size() != 2)
 				err("ChebyshevTransform must be a vector of two real entries\n");
 		} else if (s == "Krylov") {
@@ -204,20 +212,19 @@ private:
 	VectorRealType chebyTransform_;
 }; // class TargetParamsTimeVectors
 
-template<typename ModelType>
+template <typename ModelType>
 inline std::ostream&
-operator<<(std::ostream& os,const TargetParamsTimeVectors<ModelType>& t)
+operator<<(std::ostream& os, const TargetParamsTimeVectors<ModelType>& t)
 {
-	os<<"TargetParams.type=TimeVectors";
-	os<<"TargetParams.tau="<<t.tau()<<"\n";
-	os<<"TargetParams.timeSteps="<<t.timeSteps()<<"\n";
-	os<<"TargetParams.advanceEach="<<t.advanceEach()<<"\n";
-	os<<"TargetParams.algorithm="<<t.algorithm()<<"\n";
-	os<<"TargetParams.timeDirection="<<t.timeDirection()<<"\n";
+	os << "TargetParams.type=TimeVectors";
+	os << "TargetParams.tau=" << t.tau() << "\n";
+	os << "TargetParams.timeSteps=" << t.timeSteps() << "\n";
+	os << "TargetParams.advanceEach=" << t.advanceEach() << "\n";
+	os << "TargetParams.algorithm=" << t.algorithm() << "\n";
+	os << "TargetParams.timeDirection=" << t.timeDirection() << "\n";
 	return os;
 }
 } // namespace Dmrg
 
 /*@}*/
 #endif // TARGET_PARAMS_TIME_VECTORS_H
-

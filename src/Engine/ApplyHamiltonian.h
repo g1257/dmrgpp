@@ -1,13 +1,15 @@
 #ifndef DMRG_APPLYHAMILTONIAN_H
 #define DMRG_APPLYHAMILTONIAN_H
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 // ApplyHamiltonian, with Nsl = Not so local
-template<typename ApplyOperatorLocalType,
-         typename ModelType,
-         typename LanczosSolverType>
-class ApplyHamiltonian {
+template <typename ApplyOperatorLocalType,
+    typename ModelType,
+    typename LanczosSolverType>
+class ApplyHamiltonian
+{
 
 public:
 
@@ -21,11 +23,12 @@ public:
 	typedef typename BasisWithOperatorsType::RealType RealType;
 
 	ApplyHamiltonian(const LeftRightSuperType& lrs,
-	                 const ModelType& model,
-	                 const RealType& physicalTime)
-	    : model_(model),
-	      physicalTime_(physicalTime)
-	{}
+	    const ModelType& model,
+	    const RealType& physicalTime)
+	    : model_(model)
+	    , physicalTime_(physicalTime)
+	{
+	}
 
 	//! FIXME: we need to make a fast version for when we're just
 	//! figuring out where the (non-zero) partition is
@@ -44,16 +47,16 @@ public:
 private:
 
 	void internal_(VectorType& r,
-	               const VectorWithOffsetType& phi,
-	               SizeType i0) const
+	    const VectorWithOffsetType& phi,
+	    SizeType i0) const
 	{
 		SizeType p = applyOpLocal_.lrs().super().findPartitionNumber(phi.offset(i0));
 		HamiltonianConnectionType hc(p,
-		                             applyOpLocal_.lrs(),
-		                             model_.geometry(),
-		                             model_.modelLinks(),
-		                             physicalTime_,
-		                             0);
+		    applyOpLocal_.lrs(),
+		    model_.geometry(),
+		    model_.modelLinks(),
+		    physicalTime_,
+		    0);
 		MatrixForApplicationType lanczosHelper(model_, hc);
 
 		SizeType total = phi.effectiveSize(i0);

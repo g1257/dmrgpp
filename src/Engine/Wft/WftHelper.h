@@ -1,12 +1,14 @@
 #ifndef WFTHELPER_H
 #define WFTHELPER_H
-#include "Vector.h"
 #include "OneSiteSpaces.hh"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ModelType, typename VectorWithOffsetType, typename WaveFunctionTransfType>
-class WftHelper {
+template <typename ModelType, typename VectorWithOffsetType, typename WaveFunctionTransfType>
+class WftHelper
+{
 
 public:
 
@@ -17,20 +19,24 @@ public:
 	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 
 	WftHelper(const ModelType& model,
-	                const LeftRightSuperType& lrs,
-	                const WaveFunctionTransfType& wft)
-	    : model_(model), lrs_(lrs), wft_(wft)
-	{}
+	    const LeftRightSuperType& lrs,
+	    const WaveFunctionTransfType& wft)
+	    : model_(model)
+	    , lrs_(lrs)
+	    , wft_(wft)
+	{
+	}
 
 	void wftSome(VectorVectorWithOffsetType& tvs,
-	             SizeType site,
-	             SizeType begin,
-	             SizeType end) const
+	    SizeType site,
+	    SizeType begin,
+	    SizeType end) const
 	{
 		for (SizeType index = begin; index < end; ++index) {
 			assert(index < tvs.size());
 			const VectorWithOffsetType& src = *tvs[index];
-			if (src.size() == 0) continue;
+			if (src.size() == 0)
+				continue;
 			VectorWithOffsetType phiNew;
 			wftOneVector(phiNew, src, site);
 			*tvs[index] = phiNew;
@@ -38,8 +44,8 @@ public:
 	}
 
 	void wftOneVector(VectorWithOffsetType& phiNew,
-	                  const VectorWithOffsetType& src,
-	                  SizeType site) const
+	    const VectorWithOffsetType& src,
+	    SizeType site) const
 	{
 		phiNew.populateFromQns(src, lrs_.super());
 
@@ -47,9 +53,9 @@ public:
 		ProgramGlobals::DirectionEnum dir = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM; // FIXME!
 		OneSiteSpacesType oneSiteSpaces(site, dir, model_);
 		wft_.setInitialVector(phiNew,
-		                      src,
-		                      lrs_,
-		                      oneSiteSpaces);
+		    src,
+		    lrs_,
+		    oneSiteSpaces);
 	}
 
 private:

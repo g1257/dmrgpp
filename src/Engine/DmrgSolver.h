@@ -81,38 +81,40 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define SOLVER_DMRG_HEADER_H
 
 #include "ApplicationInfo.h"
-#include "ParametersDmrgSolver.h"
-#include "Diagonalization.h"
-#include "ProgressIndicator.h"
-#include "DmrgSerializer.h"
-#include "Recovery.h"
-#include "Truncation.h"
-#include "ObservablesOnePointInSitu.h"
-#include "TargetSelector.h"
-#include "PsiBase64.h"
-#include "PrinterInDetail.h"
-#include "OutputFileOrNot.h"
-#include "TargetingBase.h"
-#include "OneSiteTruncation.h"
 #include "BasisTraits.hh"
+#include "Diagonalization.h"
+#include "DmrgSerializer.h"
+#include "ObservablesOnePointInSitu.h"
+#include "OneSiteTruncation.h"
+#include "OutputFileOrNot.h"
+#include "ParametersDmrgSolver.h"
+#include "PrinterInDetail.h"
+#include "ProgressIndicator.h"
+#include "PsiBase64.h"
+#include "Recovery.h"
+#include "TargetSelector.h"
+#include "TargetingBase.h"
+#include "Truncation.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 //  A class to represent a generic solver for the Dmrg method
-template<typename SolverType, typename VectorWithOffsetType_>
-class DmrgSolver {
+template <typename SolverType, typename VectorWithOffsetType_>
+class DmrgSolver
+{
 
 public:
 
-	typedef TargetingBase<SolverType,VectorWithOffsetType_> TargetingType;
+	typedef TargetingBase<SolverType, VectorWithOffsetType_> TargetingType;
 	typedef typename TargetingType::ModelType ModelType;
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef typename ModelType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::OperatorType OperatorType;
 	typedef ObservablesOnePointInSitu<typename TargetingType::TargetVectorType>
-	ObservablesOnePointInSituType;
+	    ObservablesOnePointInSituType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef typename  OperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename ModelType::MyBasis MyBasis;
 	typedef typename MyBasis::RealType RealType;
 	typedef typename MyBasis::BlockType BlockType;
@@ -123,10 +125,10 @@ public:
 	typedef typename TargetingType::TargetParamsType TargetParamsType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::SolverParamsType ParametersType;
-	typedef Diagonalization<ParametersType,TargetingType> DiagonalizationType;
+	typedef Diagonalization<ParametersType, TargetingType> DiagonalizationType;
 	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef Truncation<ParametersType,TargetingType> TruncationType;
-	typedef DmrgSerializer<LeftRightSuperType,VectorWithOffsetType> DmrgSerializerType;
+	typedef Truncation<ParametersType, TargetingType> TruncationType;
+	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
 	typedef typename ModelType::SuperGeometryType SuperGeometryType;
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 	typedef Recovery<CheckpointType, TargetingType> RecoveryType;
@@ -142,49 +144,49 @@ public:
 	typedef typename DiagonalizationType::VectorRealType VectorRealType;
 	typedef typename DiagonalizationType::VectorVectorRealType VectorVectorRealType;
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
-	VectorVectorVectorWithOffsetType;
+	    VectorVectorVectorWithOffsetType;
 	typedef OneSiteTruncation<ModelType, VectorWithOffsetType> OneSiteTruncationType;
 	using FiniteLoopType = FiniteLoop<RealType>;
 
 	DmrgSolver(ModelType& model, InputValidatorType& ioIn)
-	    : model_(model),
-	      parameters_(model_.params()),
-	      ioIn_(ioIn),
-	      appInfo_("DmrgSolver:"),
-	      verbose_(parameters_.options.isSet("verbose")),
-	      basisTraits_({parameters_.options.isSet("observe"), parameters_.options.isSet("noSaveOperators")}),
-	      lrs_("pSprime",
-	           "pEprime",
-	           "pSE",
-	           basisTraits_),
-	      ioOut_(parameters_.filename,
-	             PsimagLite::IoSelector::ACC_TRUNC,
-	             parameters_.options.isSet("minimizeDisk")),
-	      progress_("DmrgSolver"),
-	      stepCurrent_(0),
-	      checkpoint_(parameters_, ioIn, model, quantumSector_.size(), basisTraits_),
-	      wft_(parameters_),
-	      diagonalization_(parameters_,
-	                       model,
-	                       verbose_,
-	                       ioIn,
-	                       quantumSector_,
-	                       wft_,
-	                       checkpoint_.energies()),
-	      truncate_(lrs_, wft_, parameters_, model.superGeometry(), ioOut_),
-	      saveData_(!parameters_.options.isSet("noSaveData")),
-	      oneSiteTruncation_(lrs_,
-	                         model,
-	                         ioIn,
-	                         ioOut_)
+	    : model_(model)
+	    , parameters_(model_.params())
+	    , ioIn_(ioIn)
+	    , appInfo_("DmrgSolver:")
+	    , verbose_(parameters_.options.isSet("verbose"))
+	    , basisTraits_({ parameters_.options.isSet("observe"), parameters_.options.isSet("noSaveOperators") })
+	    , lrs_("pSprime",
+		  "pEprime",
+		  "pSE",
+		  basisTraits_)
+	    , ioOut_(parameters_.filename,
+		  PsimagLite::IoSelector::ACC_TRUNC,
+		  parameters_.options.isSet("minimizeDisk"))
+	    , progress_("DmrgSolver")
+	    , stepCurrent_(0)
+	    , checkpoint_(parameters_, ioIn, model, quantumSector_.size(), basisTraits_)
+	    , wft_(parameters_)
+	    , diagonalization_(parameters_,
+		  model,
+		  verbose_,
+		  ioIn,
+		  quantumSector_,
+		  wft_,
+		  checkpoint_.energies())
+	    , truncate_(lrs_, wft_, parameters_, model.superGeometry(), ioOut_)
+	    , saveData_(!parameters_.options.isSet("noSaveData"))
+	    , oneSiteTruncation_(lrs_,
+		  model,
+		  ioIn,
+		  ioOut_)
 	{
 		firstCall_ = true;
 		counter_ = 0;
 
-		std::cout<<appInfo_;
+		std::cout << appInfo_;
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Turning the engine on";
+		msg << "Turning the engine on";
 		progress_.printline(msgg, std::cout);
 		ioOut_.write(appInfo_, "ApplicationInfo");
 
@@ -214,7 +216,7 @@ public:
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<"Turning off the engine.";
+		msg << "Turning off the engine.";
 		progress_.printline(msgg, std::cout);
 	}
 
@@ -222,21 +224,22 @@ public:
 	{
 		ioOut_.write(geometry, "GEOMETRY");
 
-		BlockType S,E;
-		VectorBlockType X,Y;
+		BlockType S, E;
+		VectorBlockType X, Y;
 
 		const bool allInSystem = (parameters_.options.isSet("geometryallinsystem"));
 
-		geometry.split(parameters_.sitesPerBlock,S,X,Y,E,allInSystem);
-		for (SizeType i=0;i<X.size();i++)
+		geometry.split(parameters_.sitesPerBlock, S, X, Y, E, allInSystem);
+		for (SizeType i = 0; i < X.size(); i++)
 			sitesIndices_.push_back(X[i]);
-		for (SizeType i=0;i<Y.size();i++) sitesIndices_.push_back(Y[Y.size()-i-1]);
+		for (SizeType i = 0; i < Y.size(); i++)
+			sitesIndices_.push_back(Y[Y.size() - i - 1]);
 
 		TargetSelector<TargetingType> targetSelector(lrs_,
-		                                             checkpoint_,
-		                                             wft_,
-		                                             quantumSector_,
-		                                             ioIn_);
+		    checkpoint_,
+		    wft_,
+		    quantumSector_,
+		    ioIn_);
 		TargetingType& psi = targetSelector();
 
 		ioIn_.printUnused(std::cerr);
@@ -255,13 +258,13 @@ public:
 			pE.setOneSite(E, model_, time);
 			pS.setOneSite(S, model_, time);
 
-			infiniteDmrgLoop(X,Y,E,pS,pE,psi);
+			infiniteDmrgLoop(X, Y, E, pS, pE, psi);
 		}
 
 		RecoveryType recovery(sitesIndices_, checkpoint_, wft_, pS, pE);
 		finiteDmrgLoops(pS, pE, psi, recovery);
 
-		inSitu_.init(psi,geometry.numberOfSites());
+		inSitu_.init(psi, geometry.numberOfSites());
 	}
 
 	const ComplexOrRealType& inSitu(SizeType i) const
@@ -321,11 +324,11 @@ obtain ordered
 		and continue with the growth phase of the algorithm.
 		*/
 	void infiniteDmrgLoop(const VectorBlockType& X,
-	                      const VectorBlockType& Y,
-	                      BlockType const &E,
-	                      MyBasisWithOperators &pS,
-	                      MyBasisWithOperators &pE,
-	                      TargetingType& psi)
+	    const VectorBlockType& Y,
+	    BlockType const& E,
+	    MyBasisWithOperators& pS,
+	    MyBasisWithOperators& pE,
+	    TargetingType& psi)
 	{
 		bool twoSiteDmrg = parameters_.options.isSet("twositedmrg");
 		bool extendedPrint = parameters_.options.isSet("extendedPrint");
@@ -333,18 +336,18 @@ obtain ordered
 
 		lrs_.left(pS);
 		lrs_.right(pE);
-		checkpoint_.push(pS,pE);
+		checkpoint_.push(pS, pE);
 
 		const SizeType ten = 10;
 		const SizeType initialSizeOfHashTable = std::max(ten, parameters_.keptStatesInfinite);
 
 		RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
 		VectorVectorRealType energies;
-		for (SizeType step=0;step<X.size();step++) {
+		for (SizeType step = 0; step < X.size(); step++) {
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"Infinite-loop: step="<<step<<" ( of "<<X.size()<<"), ";
-			msg<<" size of blk. added="<<X[step].size();
+			msg << "Infinite-loop: step=" << step << " ( of " << X.size() << "), ";
+			msg << " size of blk. added=" << X[step].size();
 			progress_.printline(msgg, std::cout);
 			printerInDetail.print(std::cout, "infinite");
 
@@ -355,44 +358,46 @@ obtain ordered
 				needsRightPush = true;
 			}
 
-			progress_.print("Growth done.\n",std::cout);
-			lrs_.printSizes("Infinite",std::cout);
+			progress_.print("Growth done.\n", std::cout);
+			lrs_.printSizes("Infinite", std::cout);
 
 			model_.targetQuantum().updateQuantumSector(quantumSector_,
-			                                           lrs_.sites(),
-			                                           ProgramGlobals::DirectionEnum::INFINITE,
-			                                           step,
-			                                           parameters_.adjustQuantumNumbers);
+			    lrs_.sites(),
+			    ProgramGlobals::DirectionEnum::INFINITE,
+			    step,
+			    parameters_.adjustQuantumNumbers);
 
 			assert(0 < quantumSector_.size()); // used only for SU(2)
 			lrs_.setToProduct(initialSizeOfHashTable);
 
-			const BlockType& ystep = findRightBlock(Y,step,E);
+			const BlockType& ystep = findRightBlock(Y, step, E);
 
 			diagonalization_(psi,
-			                 energies,
-			                 ProgramGlobals::DirectionEnum::INFINITE,
-			                 X[step],
-			                 ystep);
+			    energies,
+			    ProgramGlobals::DirectionEnum::INFINITE,
+			    X[step],
+			    ystep);
 
 			truncate_.changeBasisInfinite(pS,
-			                              pE,
-			                              psi,
-			                              parameters_.keptStatesInfinite,
-			                              parameters_.truncationControl);
+			    pE,
+			    psi,
+			    parameters_.keptStatesInfinite,
+			    parameters_.truncationControl);
 
 			if (needsRightPush) {
-				if (!twoSiteDmrg) checkpoint_.push(pS,pE);
-				else checkpoint_.push(lrs_.left(),lrs_.right());
+				if (!twoSiteDmrg)
+					checkpoint_.push(pS, pE);
+				else
+					checkpoint_.push(lrs_.left(), lrs_.right());
 			} else {
 				checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,
-				                 ProgramGlobals::SysOrEnvEnum::SYSTEM);
+				    ProgramGlobals::SysOrEnvEnum::SYSTEM);
 			}
 
 			progress_.printMemoryUsage();
 		}
 
-		progress_.print("Infinite dmrg loop has been done!\n",std::cout);
+		progress_.print("Infinite dmrg loop has been done!\n", std::cout);
 	}
 
 	/* PSIDOC DmrgSolverFiniteDmrgLoops
@@ -405,10 +410,10 @@ obtain ordered
 		constant allowing for a formulation
 		of DMRG as a variational method in a basis of matrix product states.
   */
-	void finiteDmrgLoops(MyBasisWithOperators &pS,
-	                     MyBasisWithOperators &pE,
-	                     TargetingType& psi,
-	                     RecoveryType& recovery)
+	void finiteDmrgLoops(MyBasisWithOperators& pS,
+	    MyBasisWithOperators& pE,
+	    TargetingType& psi,
+	    RecoveryType& recovery)
 	{
 		if (parameters_.options.isSet("nofiniteloops"))
 			return;
@@ -423,60 +428,62 @@ obtain ordered
 
 		// let us set the initial direction first:
 		assert(indexOfFirstFiniteLoop < parameters_.finiteLoop.size());
-		ProgramGlobals::DirectionEnum direction =
-		        (parameters_.finiteLoop[indexOfFirstFiniteLoop].stepLength() < 0) ?
-		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON :
-		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
+		ProgramGlobals::DirectionEnum direction = (parameters_.finiteLoop[indexOfFirstFiniteLoop].stepLength() < 0) ? ProgramGlobals::DirectionEnum::EXPAND_ENVIRON : ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
 
 		int lastSign = 1;
 
 		stepCurrent_ = recovery.stepCurrent(direction);
 
-		for (SizeType i = indexOfFirstFiniteLoop; i < loopsTotal; ++i)  {
+		for (SizeType i = indexOfFirstFiniteLoop; i < loopsTotal; ++i) {
 
 			lastSign = (parameters_.finiteLoop[i].stepLength() < 0) ? -1 : 1;
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-			msg<<"Finite loop number "<<i;
-			msg<<" with l="<<parameters_.finiteLoop[i].stepLength();
-			msg<<" keptStates="<<parameters_.finiteLoop[i].keptStates();
-			msg<<". "<<(parameters_.finiteLoop.size()-i)<<" more loops to go.";
+			msg << "Finite loop number " << i;
+			msg << " with l=" << parameters_.finiteLoop[i].stepLength();
+			msg << " keptStates=" << parameters_.finiteLoop[i].keptStates();
+			msg << ". " << (parameters_.finiteLoop.size() - i) << " more loops to go.";
 			progress_.printline(msgg, std::cout);
 
 			if (i > 0) {
 				int signPrev = parameters_.finiteLoop[i - 1].stepLength();
 				int signThis = parameters_.finiteLoop[i].stepLength();
-				int sign = signPrev*signThis;
+				int sign = signPrev * signThis;
 				if (sign > 0) {
-					if (parameters_.finiteLoop[i].stepLength() > 0) stepCurrent_++;
-					if (parameters_.finiteLoop[i].stepLength() < 0) stepCurrent_--;
+					if (parameters_.finiteLoop[i].stepLength() > 0)
+						stepCurrent_++;
+					if (parameters_.finiteLoop[i].stepLength() < 0)
+						stepCurrent_--;
 				} else { // has bounced
-					checkForWft((signThis > 0) ? ProgramGlobals::SysOrEnvEnum::SYSTEM :
-					                             ProgramGlobals::SysOrEnvEnum::ENVIRON,
-					            pS);
+					checkForWft((signThis > 0) ? ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON,
+					    pS);
 				}
 			}
 
 			const SizeType wantsOneSiteTrunc = (parameters_.finiteLoop[i].wants("OneSiteTruncation"))
-			        ? 1 : 0;
+			    ? 1
+			    : 0;
 			model_.announce("finite loop;" + ttos(wantsOneSiteTrunc));
 
 			finiteStep(pS, pE, i, psi);
 
-			if (psi.end()) break;
+			if (psi.end())
+				break;
 
 			if (recovery.byLoop(i, psi.time(), parameters_.finiteLoop[i].stepLength()))
 				recovery.write(psi,
-				               i + 1,
-				               stepCurrent_,
-				               lastSign,
-				               ioOut_,
-				               ioIn_.data());
+				    i + 1,
+				    stepCurrent_,
+				    lastSign,
+				    ioOut_,
+				    ioIn_.data());
 		}
 
-		if (!saveData_) return; //<<== EARLY EXIT HERE
+		if (!saveData_)
+			return; //<<== EARLY EXIT HERE
 
-		if (!ioOut_.nonNull()) return; //<<== EARLY EXIT HERE
+		if (!ioOut_.nonNull())
+			return; //<<== EARLY EXIT HERE
 
 		checkpoint_.write(pS, pE, ioOut_.handle());
 
@@ -486,7 +493,7 @@ obtain ordered
 	}
 
 	void checkForWft(ProgramGlobals::SysOrEnvEnum what,
-	                 const MyBasis& pS) const
+	    const MyBasis& pS) const
 	{
 		SizeType numberOfSites = model_.superGeometry().numberOfSites();
 		assert(numberOfSites > 2);
@@ -495,26 +502,25 @@ obtain ordered
 		SizeType lastSiteOfSystem = pS.block()[--last];
 		PsimagLite::String lOrR = "";
 
-		if (what == ProgramGlobals::SysOrEnvEnum::SYSTEM &&
-		        lastSiteOfSystem != 0)
+		if (what == ProgramGlobals::SysOrEnvEnum::SYSTEM && lastSiteOfSystem != 0)
 			lOrR = "right";
 
-		if (what == ProgramGlobals::SysOrEnvEnum::ENVIRON &&
-		        lastSiteOfSystem != numberOfSites - 2)
+		if (what == ProgramGlobals::SysOrEnvEnum::ENVIRON && lastSiteOfSystem != numberOfSites - 2)
 			lOrR = "left";
 
-		if (lOrR == "") return;
+		if (lOrR == "")
+			return;
 
 		PsimagLite::String msg = "WARNING: To-the-" + lOrR;
 		msg += " movement from middle of lattice not supported\n";
-		std::cout<<msg;
-		std::cerr<<msg;
+		std::cout << msg;
+		std::cerr << msg;
 	}
 
-	void finiteStep(MyBasisWithOperators &pS,
-	                MyBasisWithOperators &pE,
-	                SizeType loopIndex,
-	                TargetingType& target)
+	void finiteStep(MyBasisWithOperators& pS,
+	    MyBasisWithOperators& pE,
+	    SizeType loopIndex,
+	    TargetingType& target)
 	{
 		const bool extendedPrint = parameters_.options.isSet("extendedPrint");
 		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
@@ -524,16 +530,14 @@ obtain ordered
 		const SizeType ten = 10;
 		const SizeType initialSizeOfHashTable = std::max(ten, keptStates);
 
-		ProgramGlobals::DirectionEnum direction = (stepLength < 0) ?
-		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON :
-		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
+		ProgramGlobals::DirectionEnum direction = (stepLength < 0) ? ProgramGlobals::DirectionEnum::EXPAND_ENVIRON : ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
 
 		wft_.setStage(direction);
 
 		SizeType sitesPerBlock = parameters_.sitesPerBlock;
-		int stepLengthCorrected = int((stepLength+1-sitesPerBlock)/sitesPerBlock);
-		if (stepLength<0)
-			stepLengthCorrected = int((stepLength+sitesPerBlock-1)/sitesPerBlock);
+		int stepLengthCorrected = int((stepLength + 1 - sitesPerBlock) / sitesPerBlock);
+		if (stepLength < 0)
+			stepLengthCorrected = int((stepLength + sitesPerBlock - 1) / sitesPerBlock);
 		int stepFinal = stepCurrent_ + stepLengthCorrected;
 
 		VectorVectorRealType energies;
@@ -549,41 +553,38 @@ obtain ordered
 
 			if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				oneSiteTruncSize = lrs_.growLeftBlock(model_,
-				                                      pS,
-				                                      sitesIndices_[stepCurrent_],
-				                                      time);
-				BasisWithOperatorsType* dummyBwo =
-				        &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::ENVIRON);
+				    pS,
+				    sitesIndices_[stepCurrent_],
+				    time);
+				BasisWithOperatorsType* dummyBwo = &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::ENVIRON);
 				target.updateOnSiteForCorners(*dummyBwo); // <-- only updates extreme sites
 				lrs_.right(*dummyBwo);
 			} else {
 				oneSiteTruncSize = lrs_.growRightBlock(model_,
-				                                       pE,
-				                                       sitesIndices_[stepCurrent_],
-				                                       time);
-				BasisWithOperatorsType* dummyBwo =
-				        &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::SYSTEM);
+				    pE,
+				    sitesIndices_[stepCurrent_],
+				    time);
+				BasisWithOperatorsType* dummyBwo = &checkpoint_.shrink(ProgramGlobals::SysOrEnvEnum::SYSTEM);
 				target.updateOnSiteForCorners(*dummyBwo); // <-- only updates extreme sites
 				lrs_.left(*dummyBwo);
 			}
 
-
-			lrs_.printSizes("finite",std::cout);
+			lrs_.printSizes("finite", std::cout);
 
 			model_.targetQuantum().updateQuantumSector(quantumSector_,
-			                                           lrs_.sites(),
-			                                           direction,
-			                                           stepCurrent_,
-			                                           parameters_.adjustQuantumNumbers);
+			    lrs_.sites(),
+			    direction,
+			    stepCurrent_,
+			    parameters_.adjustQuantumNumbers);
 
 			assert(0 < quantumSector_.size()); // used only for SU(2)
 			lrs_.setToProduct(initialSizeOfHashTable);
 
 			diagonalization_(target,
-			                 energies,
-			                 direction,
-			                 sitesIndices_[stepCurrent_],
-			                 loopIndex);
+			    energies,
+			    direction,
+			    sitesIndices_[stepCurrent_],
+			    loopIndex);
 			printEnergies(energies);
 
 			assert(target.psiConst().size() > 0 || oneSiteTruncSize == 0);
@@ -596,14 +597,16 @@ obtain ordered
 
 			changeTruncateAndSerialize(pS, pE, target, direction, loopIndex);
 
-			if (finalStep(stepLength, stepFinal)) break;
+			if (finalStep(stepLength, stepFinal))
+				break;
 
 			if (stepCurrent_ < 0)
 				err("DmrgSolver::finiteStep() currentStep_ is negative\n");
 
 			progress_.printMemoryUsage();
 
-			if (target.end()) break;
+			if (target.end())
+				break;
 		}
 
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -613,10 +616,10 @@ obtain ordered
 	}
 
 	void changeTruncateAndSerialize(MyBasisWithOperators& pS,
-	                                MyBasisWithOperators& pE,
-	                                const TargetingType& target,
-	                                ProgramGlobals::DirectionEnum direction,
-	                                SizeType loopIndex)
+	    MyBasisWithOperators& pE,
+	    const TargetingType& target,
+	    ProgramGlobals::DirectionEnum direction,
+	    SizeType loopIndex)
 	{
 		const bool twoSiteDmrg = parameters_.options.isSet("twositedmrg");
 		FermionSignType fsS(pS.signs());
@@ -625,33 +628,35 @@ obtain ordered
 		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 
 		truncate_.changeBasisFinite(pS,
-		                            pE,
-		                            target,
-		                            finiteLoop.keptStates(),
-		                            finiteLoop.truncationControl(),
-		                            direction);
+		    pE,
+		    target,
+		    finiteLoop.keptStates(),
+		    finiteLoop.truncationControl(),
+		    direction);
 
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			checkpoint_.push((twoSiteDmrg) ? lrs_.left() : pS,
-			                 ProgramGlobals::SysOrEnvEnum::SYSTEM);
+			    ProgramGlobals::SysOrEnvEnum::SYSTEM);
 		else
 			checkpoint_.push((twoSiteDmrg) ? lrs_.right() : pE,
-			                 ProgramGlobals::SysOrEnvEnum::ENVIRON);
+			    ProgramGlobals::SysOrEnvEnum::ENVIRON);
 
-		write(fsS,fsE,target,direction,loopIndex);
+		write(fsS, fsE, target, direction, loopIndex);
 	}
 
 	void write(const FermionSignType& fsS,
-	           const FermionSignType& fsE,
-	           const TargetingType& target,
-	           ProgramGlobals::DirectionEnum direction,
-	           SizeType loopIndex)
+	    const FermionSignType& fsE,
+	    const TargetingType& target,
+	    ProgramGlobals::DirectionEnum direction,
+	    SizeType loopIndex)
 	{
-		if (!saveData_) return;
+		if (!saveData_)
+			return;
 
 		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 
-		if (!finiteLoop.wants("save") && !finiteLoop.wants("multisitepush")) return;
+		if (!finiteLoop.wants("save") && !finiteLoop.wants("multisitepush"))
+			return;
 
 		const BlockDiagonalMatrixType& transform = truncate_.transform(direction);
 		// FIXME: Serializer will for now save only one psi target
@@ -663,25 +668,25 @@ obtain ordered
 			err("No psi[0] targets?\n");
 
 		DmrgSerializerType* ds = new DmrgSerializerType(fsS,
-		                                                fsE,
-		                                                lrs_,
-		                                                psi,
-		                                                transform,
-		                                                direction);
+		    fsE,
+		    lrs_,
+		    psi,
+		    transform,
+		    direction);
 		if (finiteLoop.wants("multisitepush")) {
 			target.multiSitePush(ds);
 			return;
 		}
 
 		typename BasisWithOperatorsType::SaveEnum saveOption2 = (finiteLoop.wants("onlyslowwft"))
-		        ? BasisWithOperatorsType::SaveEnum::ALL
-		        : BasisWithOperatorsType::SaveEnum::PARTIAL;
+		    ? BasisWithOperatorsType::SaveEnum::ALL
+		    : BasisWithOperatorsType::SaveEnum::PARTIAL;
 		SizeType numberOfSites = model_.superGeometry().numberOfSites();
 		PsimagLite::String prefix("Serializer");
 		if (ioOut_.nonNull()) {
 			ds->write(ioOut_.handle(), prefix, saveOption2, numberOfSites, counter_);
 			PsimagLite::String prefixForTarget = TargetingType::buildPrefix(ioOut_.handle(),
-			                                                                counter_);
+			    counter_);
 			target.write(sitesIndices_[stepCurrent_], ioOut_.handle(), prefixForTarget);
 		}
 
@@ -690,28 +695,28 @@ obtain ordered
 		ds = 0;
 	}
 
-	bool finalStep(int stepLength,int stepFinal)
+	bool finalStep(int stepLength, int stepFinal)
 	{
-		if (stepLength<0) {
+		if (stepLength < 0) {
 			stepCurrent_--;
-			if (stepCurrent_<=stepFinal) {
+			if (stepCurrent_ <= stepFinal) {
 				stepCurrent_++; // revert
 				return true;
 			}
 			return false;
 		}
 		stepCurrent_++;
-		if (stepCurrent_>=stepFinal) {
-			stepCurrent_--; //revert
+		if (stepCurrent_ >= stepFinal) {
+			stepCurrent_--; // revert
 			return true;
-
 		}
 		return false;
 	}
 
 	void printEnergies(const VectorVectorRealType& energies)
 	{
-		if (!saveData_ || !ioOut_.nonNull()) return;
+		if (!saveData_ || !ioOut_.nonNull())
+			return;
 
 		CheckpointType::writeEnergies(firstCall_, "Energies", energies, ioOut_.handle());
 
@@ -719,10 +724,11 @@ obtain ordered
 	}
 
 	const BlockType& findRightBlock(const VectorBlockType& y,
-	                                SizeType step,
-	                                const BlockType& E) const
+	    SizeType step,
+	    const BlockType& E) const
 	{
-		if (step < y.size()) return y[step];
+		if (step < y.size())
+			return y[step];
 
 		return E;
 	}
@@ -730,13 +736,13 @@ obtain ordered
 	void printFiniteLoops(std::ostream& os) const
 	{
 		const SizeType n = parameters_.finiteLoop.size();
-		os<<"FiniteLoops printing starts\n";
+		os << "FiniteLoops printing starts\n";
 		for (SizeType i = 0; i < n; ++i) {
 			parameters_.finiteLoop[i].print(os);
-			std::cout<<"\n";
+			std::cout << "\n";
 		}
 
-		os<<"FiniteLoops printing ends\n";
+		os << "FiniteLoops printing ends\n";
 	}
 
 	const ModelType& model_;
@@ -760,12 +766,12 @@ obtain ordered
 	OneSiteTruncationType oneSiteTruncation_;
 	static bool firstCall_;
 	static SizeType counter_;
-}; //class DmrgSolver
+}; // class DmrgSolver
 
-template<typename T1, typename T2>
+template <typename T1, typename T2>
 bool DmrgSolver<T1, T2>::firstCall_ = true;
 
-template<typename T1, typename T2>
+template <typename T1, typename T2>
 SizeType DmrgSolver<T1, T2>::counter_ = 0;
 } // namespace Dmrg
 

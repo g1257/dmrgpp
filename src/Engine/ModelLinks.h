@@ -1,15 +1,17 @@
 #ifndef MODEL_LINKS_H
 #define MODEL_LINKS_H
-#include "Vector.h"
 #include "ProgramGlobals.h"
 #include "PsimagLite.h"
+#include "Vector.h"
 #include <functional>
 #include <map>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LabeledOperatorsType, typename SuperGeometryType_>
-class ModelLinks {
+template <typename LabeledOperatorsType, typename SuperGeometryType_>
+class ModelLinks
+{
 
 public:
 
@@ -26,9 +28,10 @@ public:
 	typedef typename OperatorType::StorageType OperatorStorageType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
-	VectorPairStringSizeType;
+	    VectorPairStringSizeType;
 
-	class OneLink {
+	class OneLink
+	{
 
 	public:
 
@@ -36,40 +39,41 @@ public:
 		typedef std::function<void(ComplexOrRealType&, RealType)> LambdaType;
 
 		OneLink(VectorSizeType indices_,
-		        VectorSizeType orbs_,
-		        ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
-		        PsimagLite::String mods_,
-		        SizeType angularMomentum_,
-		        RealType_ angularFactor_,
-		        SizeType category_,
-		        LambdaType vModifier_)
-		    : indices(indices_),
-		      orbs(orbs_),
-		      fermionOrBoson(fermionOrBoson_),
-		      mods(mods_),
-		      angularMomentum(angularMomentum_),
-		      angularFactor(angularFactor_),
-		      category(category_),
-		      modifier(vModifier_)
-		{}
+		    VectorSizeType orbs_,
+		    ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
+		    PsimagLite::String mods_,
+		    SizeType angularMomentum_,
+		    RealType_ angularFactor_,
+		    SizeType category_,
+		    LambdaType vModifier_)
+		    : indices(indices_)
+		    , orbs(orbs_)
+		    , fermionOrBoson(fermionOrBoson_)
+		    , mods(mods_)
+		    , angularMomentum(angularMomentum_)
+		    , angularFactor(angularFactor_)
+		    , category(category_)
+		    , modifier(vModifier_)
+		{
+		}
 
 		OneLink(VectorSizeType indices_,
-		        VectorSizeType orbs_,
-		        ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
-		        PsimagLite::String mods_,
-		        SizeType angularMomentum_,
-		        RealType_ angularFactor_,
-		        SizeType category_,
-		        OldLambdaType vModifier_)
-		    : indices(indices_),
-		      orbs(orbs_),
-		      fermionOrBoson(fermionOrBoson_),
-		      mods(mods_),
-		      angularMomentum(angularMomentum_),
-		      angularFactor(angularFactor_),
-		      category(category_)
+		    VectorSizeType orbs_,
+		    ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
+		    PsimagLite::String mods_,
+		    SizeType angularMomentum_,
+		    RealType_ angularFactor_,
+		    SizeType category_,
+		    OldLambdaType vModifier_)
+		    : indices(indices_)
+		    , orbs(orbs_)
+		    , fermionOrBoson(fermionOrBoson_)
+		    , mods(mods_)
+		    , angularMomentum(angularMomentum_)
+		    , angularFactor(angularFactor_)
+		    , category(category_)
 		{
-			modifier = [vModifier_](ComplexOrRealType& value, RealType) { vModifier_(value);};
+			modifier = [vModifier_](ComplexOrRealType& value, RealType) { vModifier_(value); };
 		}
 
 		VectorSizeType indices;
@@ -82,18 +86,20 @@ public:
 		LambdaType modifier;
 	}; // OneLink
 
-	class AtomKindBase {
+	class AtomKindBase
+	{
 
 	public:
 
-		virtual ~AtomKindBase() {}
+		virtual ~AtomKindBase() { }
 
-		virtual SizeType siteToAtomKind(SizeType) const  { return 0; }
+		virtual SizeType siteToAtomKind(SizeType) const { return 0; }
 
 		virtual SizeType kindsOfAtoms() const { return 1; }
 	};
 
-	class Term {
+	class Term
+	{
 
 		typedef typename PsimagLite::Vector<OneLink>::Type VectorOneLinkType;
 
@@ -101,8 +107,11 @@ public:
 
 		struct Su2Properties {
 			Su2Properties(SizeType a = 0, RealType_ f = 1.0, SizeType c = 0)
-			    : angularMomentum(a), angularFactor(f), category(c)
-			{}
+			    : angularMomentum(a)
+			    , angularFactor(f)
+			    , category(c)
+			{
+			}
 
 			SizeType angularMomentum;
 			RealType_ angularFactor;
@@ -114,9 +123,11 @@ public:
 
 		// pair of sites should actually be pair of kinds of sites
 		Term(PsimagLite::String name, bool wantsHermitian = true) // name of term,
-		// not name of operator
-		    : name_(name), wantsHermitian_(wantsHermitian)
-		{}
+		    // not name of operator
+		    : name_(name)
+		    , wantsHermitian_(wantsHermitian)
+		{
+		}
 
 		bool wantsHermitian() const { return wantsHermitian_; }
 
@@ -145,109 +156,112 @@ public:
 		}
 
 		// give only su2properties
-		template<typename OpaqueOp>
+		template <typename OpaqueOp>
 		void push(const OpaqueOp& op1,
-		          char mod1,
-		          const OpaqueOp& op2,
-		          char mod2,
-		          Su2Properties su2properties)
+		    char mod1,
+		    const OpaqueOp& op2,
+		    char mod2,
+		    Su2Properties su2properties)
 		{
-			push(op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) {}, su2properties);
+			push(
+			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) {}, su2properties);
 		}
 
 		// give only lambda (new)
-		template<typename OpaqueOp>
+		template <typename OpaqueOp>
 		void push(const OpaqueOp& op1,
-		          char mod1,
-		          const OpaqueOp& op2,
-		          char mod2,
-		          LambdaType modifier)
+		    char mod1,
+		    const OpaqueOp& op2,
+		    char mod2,
+		    LambdaType modifier)
 		{
 			push(op1, mod1, op2, mod2, modifier, Su2Properties());
 		}
 
 		// give only lambda (old)
-		template<typename OpaqueOp>
+		template <typename OpaqueOp>
 		void push(const OpaqueOp& op1,
-		          char mod1,
-		          const OpaqueOp& op2,
-		          char mod2,
-		          typename OneLink::OldLambdaType modifier)
+		    char mod1,
+		    const OpaqueOp& op2,
+		    char mod2,
+		    typename OneLink::OldLambdaType modifier)
 		{
-			LambdaType newModif = [modifier](ComplexOrRealType& value, RealType)
-			{ modifier(value);};
+			LambdaType newModif = [modifier](ComplexOrRealType& value, RealType) { modifier(value); };
 			push(op1, mod1, op2, mod2, newModif, Su2Properties());
 		}
 
 		// give nothing
-		template<typename OpaqueOp>
+		template <typename OpaqueOp>
 		void push(const OpaqueOp& op1,
-		          char mod1,
-		          const OpaqueOp& op2,
-		          char mod2)
+		    char mod1,
+		    const OpaqueOp& op2,
+		    char mod2)
 		{
-			return push(op1, mod1, op2, mod2,  [](ComplexOrRealType&, RealType) {}, Su2Properties());
-
+			return push(
+			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) {}, Su2Properties());
 		}
 
 		// give all
-		template<typename OpaqueOp>
+		template <typename OpaqueOp>
 		void push(const OpaqueOp& op1,
-		          char mod1,
-		          const OpaqueOp& op2,
-		          char mod2,
-		          LambdaType vModifier,
-		          Su2Properties su2properties)
+		    char mod1,
+		    const OpaqueOp& op2,
+		    char mod2,
+		    LambdaType vModifier,
+		    Su2Properties su2properties)
 		{
 			if (links_.size() > 0) {
-				if (!areSitesCompatible2(VectorSizeType{op1.kindOfSite, op2.kindOfSite}))
+				if (!areSitesCompatible2(VectorSizeType { op1.kindOfSite, op2.kindOfSite }))
 					err("Term " + name_ + " incompatible atom kinds at push\n");
 			} else {
-				vectorKind_ = VectorSizeType{op1.kindOfSite, op2.kindOfSite};
+				vectorKind_ = VectorSizeType { op1.kindOfSite, op2.kindOfSite };
 			}
 
 			SizeType index1 = findIndexOfOp(op1.name, op1.dof);
 			SizeType index2 = findIndexOfOp(op2.name, op2.dof);
 
-			ProgramGlobals::FermionOrBosonEnum fermionOrBoson =
-			        ProgramGlobals::FermionOrBosonEnum::BOSON;
-			if (op1.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION &&
-			        op2.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+			ProgramGlobals::FermionOrBosonEnum fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::BOSON;
+			if (op1.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION && op2.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 				fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::FERMION;
 			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
 
 			PsimagLite::String modStr("NN");
 			modStr[0] = mod1;
 			modStr[1] = mod2;
-			links_.push_back(OneLink(VectorSizeType{index1, index2},
-			                         VectorSizeType{op1.edof, op2.edof},
-			                         fermionOrBoson,
-			                         modStr,
-			                         su2properties.angularMomentum,
-			                         su2properties.angularFactor,
-			                         su2properties.category,
-			                         vModifier));
+			links_.push_back(OneLink(VectorSizeType { index1, index2 },
+			    VectorSizeType { op1.edof, op2.edof },
+			    fermionOrBoson,
+			    modStr,
+			    su2properties.angularMomentum,
+			    su2properties.angularFactor,
+			    su2properties.category,
+			    vModifier));
 		}
 
-		template<typename OpaqueOp>
-		void push4(const OpaqueOp& op1, char mod1,
-		           const OpaqueOp& op2, char mod2,
-		           const OpaqueOp& op3, char mod3,
-		           const OpaqueOp& op4, char mod4
-		           ,LambdaType vModifier = [](ComplexOrRealType&, RealType) {},
-		Su2Properties su2properties = Su2Properties())
+		template <typename OpaqueOp>
+		void push4(
+		    const OpaqueOp& op1,
+		    char mod1,
+		    const OpaqueOp& op2,
+		    char mod2,
+		    const OpaqueOp& op3,
+		    char mod3,
+		    const OpaqueOp& op4,
+		    char mod4,
+		    LambdaType vModifier = [](ComplexOrRealType&, RealType) {},
+		    Su2Properties su2properties = Su2Properties())
 		{
 			if (links_.size() > 0) {
-				if (!areSitesCompatible2(VectorSizeType{op1.kindOfSite,
-				                         op2.kindOfSite,
-				                         op3.kindOfSite,
-				                         op4.kindOfSite}))
+				if (!areSitesCompatible2(VectorSizeType { op1.kindOfSite,
+					op2.kindOfSite,
+					op3.kindOfSite,
+					op4.kindOfSite }))
 					err("Term " + name_ + " incompatible atom kinds at push\n");
 			} else {
-				vectorKind_ = VectorSizeType{op1.kindOfSite,
-				        op2.kindOfSite,
-				        op3.kindOfSite,
-				        op4.kindOfSite};
+				vectorKind_ = VectorSizeType { op1.kindOfSite,
+					op2.kindOfSite,
+					op3.kindOfSite,
+					op4.kindOfSite };
 			}
 
 			SizeType index1 = findIndexOfOp(op1.name, op1.dof);
@@ -255,13 +269,9 @@ public:
 			SizeType index3 = findIndexOfOp(op3.name, op2.dof);
 			SizeType index4 = findIndexOfOp(op3.name, op2.dof);
 
-			ProgramGlobals::FermionOrBosonEnum fermionOrBoson =
-			        ProgramGlobals::FermionOrBosonEnum::BOSON;
+			ProgramGlobals::FermionOrBosonEnum fermionOrBoson = ProgramGlobals::FermionOrBosonEnum::BOSON;
 			// FIXME:
-			if (op1.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION ||
-			        op2.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION ||
-			        op3.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION ||
-			        op4.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+			if (op1.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION || op2.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION || op3.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION || op4.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 				err(PsimagLite::String(__FILE__) + "::push4(): Unsupported fermionic ops\n");
 
 			// can we also infer angularMomentum, angularFactor, and category? FIXME TODO
@@ -271,14 +281,14 @@ public:
 			modStr[1] = mod2;
 			modStr[2] = mod3;
 			modStr[3] = mod4;
-			links_.push_back(OneLink(VectorSizeType{index1, index2, index3, index4},
-			                         VectorSizeType{op1.edof, op2.edof, op3.edof, op4.edof},
-			                         fermionOrBoson,
-			                         modStr,
-			                         su2properties.angularMomentum,
-			                         su2properties.angularFactor,
-			                         su2properties.category,
-			                         vModifier));
+			links_.push_back(OneLink(VectorSizeType { index1, index2, index3, index4 },
+			    VectorSizeType { op1.edof, op2.edof, op3.edof, op4.edof },
+			    fermionOrBoson,
+			    modStr,
+			    su2properties.angularMomentum,
+			    su2properties.angularFactor,
+			    su2properties.category,
+			    vModifier));
 		}
 
 		SizeType size() const { return links_.size(); }
@@ -293,37 +303,34 @@ public:
 
 		void print(std::ostream& os, const LabeledOperatorsType& labeledOps) const
 		{
-			os<<"Term Name="<<name_<<" Dofs="<<links_.size()<<"\n";
+			os << "Term Name=" << name_ << " Dofs=" << links_.size() << "\n";
 			const SizeType n = links_.size();
 			for (SizeType i = 0; i < n; ++i) {
 				const OneLink& onelink = links_[i];
 				const VectorSizeType& indices = onelink.indices;
 				const SizeType m = indices.size();
-				PsimagLite::String fermOrBos = (onelink.fermionOrBoson ==
-				                                ProgramGlobals::FermionOrBosonEnum::FERMION) ?
-				            "[Fermionic]" : "[Bosonic]";
-				os<<"\t"<<fermOrBos<<"    ";
+				PsimagLite::String fermOrBos = (onelink.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? "[Fermionic]" : "[Bosonic]";
+				os << "\t" << fermOrBos << "    ";
 
 				for (SizeType j = 0; j < m; ++j) {
 					const SizeType index = indices[j];
-
 
 					assert(j < onelink.mods.length());
 					const PairSizeType lPair = findOperatorIndex(index, labeledOps);
 					const PsimagLite::String opName = labeledOps[lPair.first].name();
 					const PsimagLite::String dof = (lPair.second == 0) ? ""
-					                                                   : "?" + ttos(lPair.second);
+											   : "?" + ttos(lPair.second);
 					const char modChar = onelink.mods[j];
 					const PsimagLite::String mod = (modChar == 'N') ? "" : "'";
 					const SizeType orbital = onelink.orbs[j];
 					const PsimagLite::String orbitalStr = (orbital == 0) ? ""
-					                                                     : "!" + ttos(orbital);
+											     : "!" + ttos(orbital);
 					const SizeType kind = labeledOps[lPair.first].kindOfSite();
 					const PsimagLite::String kindStr = (kind == 0) ? "" : "[@" + ttos(kind) + "]";
-					os<<"\t"<<opName<<dof<<orbitalStr<<mod<<kindStr<<" ";
+					os << "\t" << opName << dof << orbitalStr << mod << kindStr << " ";
 				}
 
-				os<<"\n";
+				os << "\n";
 			}
 		}
 
@@ -335,7 +342,7 @@ public:
 		}
 
 		static PairSizeType findOperatorIndex(SizeType index,
-		                                      const LabeledOperatorsType& labeledOps)
+		    const LabeledOperatorsType& labeledOps)
 		{
 			const SizeType n = labeledOps.size();
 			SizeType k = 0;
@@ -345,11 +352,11 @@ public:
 
 				const SizeType dofs = labeledOps[i].dofs();
 				for (SizeType j = 0; j < dofs; ++j)
-					if (k++ == index) return PairSizeType(i, j);
+					if (k++ == index)
+						return PairSizeType(i, j);
 			}
 
-			throw PsimagLite::RuntimeError("findOperatorName: Not found for index " +
-			                               ttos(index) + "\n");
+			throw PsimagLite::RuntimeError("findOperatorName: Not found for index " + ttos(index) + "\n");
 		}
 
 		Term(const Term&);
@@ -362,12 +369,15 @@ public:
 		VectorSizeType vectorKind_;
 	};
 
-	class IsValue {
+	class IsValue
+	{
 
 	public:
 
 		IsValue(PsimagLite::String name)
-		    : name_(name) {}
+		    : name_(name)
+		{
+		}
 
 		bool operator()(const Term* term) const
 		{
@@ -379,7 +389,9 @@ public:
 		PsimagLite::String name_;
 	};
 
-	enum HermitianEnum { HERMIT_NEITHER, HERMIT_PLUS, HERMIT_MINUS};
+	enum HermitianEnum { HERMIT_NEITHER,
+		HERMIT_PLUS,
+		HERMIT_MINUS };
 
 	typedef SuperGeometryType_ SuperGeometryType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
@@ -387,13 +399,16 @@ public:
 	typedef typename PsimagLite::Vector<Term*>::Type VectorTermType;
 	typedef Term TermType;
 
-	ModelLinks() : maxDofs_(0) {}
+	ModelLinks()
+	    : maxDofs_(0)
+	{
+	}
 
 	~ModelLinks() { clear(); }
 
 	void clear()
 	{
-		//offsets_.clear();
+		// offsets_.clear();
 		SizeType n = terms_.size();
 		for (SizeType i = 0; i < n; ++i)
 			delete terms_[i];
@@ -410,7 +425,7 @@ public:
 	}
 
 	void postCtor1(const LabeledOperatorsType& labeledOps,
-	               SizeType geometryTerms)
+	    SizeType geometryTerms)
 	{
 		if (terms_.size() > geometryTerms) {
 			PsimagLite::String str("ModelBase: NumberOfTerms must be ");
@@ -424,7 +439,8 @@ public:
 		for (SizeType i = 0; i < n; ++i) {
 			const LabelType& ll = labeledOps[i];
 
-			if (!ll.isTrackable()) continue;
+			if (!ll.isTrackable())
+				continue;
 
 			const SizeType kindOfSite = ll.kindOfSite();
 
@@ -439,7 +455,8 @@ public:
 		}
 
 		SizeType m = cm.size();
-		if (m == 0) return;
+		if (m == 0)
+			return;
 		hermit_.resize(m);
 		for (SizeType i = 0; i < m; ++i)
 			hermit_[i] = getHermitianProperty(cm[i].getStorage());
@@ -461,11 +478,10 @@ public:
 			const SizeType termIndexForGeom = termIndexForGeometry(termIndex);
 			PsimagLite::String name = terms_[termIndexForGeom]->name();
 			typename VectorStringType::const_iterator x = std::find(input.begin(),
-			                                                        input.end(),
-			                                                        name);
+			    input.end(),
+			    name);
 			if (x == input.end())
-				err("ModelLinks: INTERNAL ERROR term " + name + " termIndex= " +
-				    ttos(termIndex) + "\n");
+				err("ModelLinks: INTERNAL ERROR term " + name + " termIndex= " + ttos(termIndex) + "\n");
 
 			termGeomReplacement[termIndex] = x - input.begin();
 		}
@@ -475,17 +491,18 @@ public:
 		SizeType t = terms_.size();
 		for (SizeType i = 0; i < t; ++i) {
 			SizeType dof = terms_[i]->size();
-			if (dof > maxDofs_) maxDofs_ = dof;
+			if (dof > maxDofs_)
+				maxDofs_ = dof;
 		}
 	}
 
 	Term& createTerm(PsimagLite::String name,
-	                 bool wantsHermitian,
-	                 PsimagLite::String geometryFrom)
+	    bool wantsHermitian,
+	    PsimagLite::String geometryFrom)
 	{
 		typename VectorTermType::const_iterator x = std::find_if(terms_.begin(),
-		                                                         terms_.end(),
-		                                                         IsValue(name));
+		    terms_.end(),
+		    IsValue(name));
 
 		if (x != terms_.end())
 			err("Repeated term " + name + "\n");
@@ -493,8 +510,8 @@ public:
 		termGeomReplacement_.push_back(terms_.size());
 		if (geometryFrom != "") {
 			typename VectorTermType::const_iterator y = std::find_if(terms_.begin(),
-			                                                         terms_.end(),
-			                                                         IsValue(geometryFrom));
+			    terms_.end(),
+			    IsValue(geometryFrom));
 			termGeomReplacement_[termGeomReplacement_.size() - 1] = y - terms_.begin();
 		}
 
@@ -529,15 +546,16 @@ public:
 	}
 
 	static void setOperatorMatrices(VectorOperatorType& cm,
-	                                const LabeledOperatorsType& labeledOps,
-	                                SizeType kindOfSite)
+	    const LabeledOperatorsType& labeledOps,
+	    SizeType kindOfSite)
 	{
 		cm.clear();
 		SizeType n = labeledOps.size();
 		for (SizeType i = 0; i < n; ++i) {
 			const LabelType& ll = labeledOps[i];
 
-			if (!ll.isTrackable()) continue;
+			if (!ll.isTrackable())
+				continue;
 
 			if (ll.kindOfSite() != kindOfSite)
 				continue;
@@ -555,7 +573,7 @@ public:
 	}
 
 	bool areSitesCompatibleForThisTerm(SizeType termIndex,
-	                                   const VectorSizeType& actualSites) const
+	    const VectorSizeType& actualSites) const
 	{
 		assert(atomKind_);
 		assert(termIndex < terms_.size());
@@ -577,9 +595,9 @@ public:
 	void printTerms(std::ostream& os, const LabeledOperatorsType& labeledOps) const
 	{
 		const SizeType n = terms_.size();
-		os<<"Model "<<labeledOps.modelName()<<" has "<<n<<" Hamiltonian terms\n";
+		os << "Model " << labeledOps.modelName() << " has " << n << " Hamiltonian terms\n";
 		for (SizeType i = 0; i < n; ++i) {
-			os<<"Term "<<i<<" ";
+			os << "Term " << i << " ";
 			terms_[i]->print(os, labeledOps);
 		}
 	}
@@ -588,7 +606,8 @@ private:
 
 	static HermitianEnum getHermitianProperty(const OperatorStorageType& m)
 	{
-		if (isHermitian(m)) return HERMIT_PLUS;
+		if (isHermitian(m))
+			return HERMIT_PLUS;
 		return (isAntiHermitian(m)) ? HERMIT_MINUS : HERMIT_NEITHER;
 	}
 
@@ -601,10 +620,10 @@ private:
 	VectorSizeType hilbert_;
 };
 
-template<typename T1, typename T2>
+template <typename T1, typename T2>
 std::map<PsimagLite::String, SizeType> ModelLinks<T1, T2>::offsets_;
 
-template<typename T1, typename T2>
+template <typename T1, typename T2>
 const typename ModelLinks<T1, T2>::AtomKindBase* ModelLinks<T1, T2>::atomKind_ = 0;
 }
 #endif // MODEL_LINKS_H

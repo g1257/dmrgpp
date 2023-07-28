@@ -1,15 +1,16 @@
 #ifndef DMRG_FINITELOOP_H
 #define DMRG_FINITELOOP_H
 
+#include "Io/IoSerializerStub.h"
+#include "ProgramGlobals.h"
+#include "PsimagLite.h"
+#include "TruncationControl.h"
 #include "Vector.h"
 #include <iostream>
-#include "Io/IoSerializerStub.h"
-#include "PsimagLite.h"
-#include "ProgramGlobals.h"
-#include "TruncationControl.h"
 #include <map>
 
-namespace Dmrg {
+namespace Dmrg
+{
 /* PSIDOC FiniteLoop
 \subsection{Enabling finite loops}
 
@@ -78,8 +79,9 @@ can go forward at most 7 sites, and backwards at most 7 sites.
 There is some checking done to the finite loops input,
 but you might find that it's not comprehensive.
 */
-template<typename RealType>
-class FiniteLoop {
+template <typename RealType>
+class FiniteLoop
+{
 
 public:
 
@@ -87,10 +89,13 @@ public:
 	using TruncationControlType = TruncationControl<RealType>;
 
 	FiniteLoop(int sl,
-	           SizeType ks,
-	           PsimagLite::String str,
-	           const TruncationControlType& truncationControl)
-	    : stepLength_(sl), keptStates_(ks), bitField_(0), truncationControl_(truncationControl)
+	    SizeType ks,
+	    PsimagLite::String str,
+	    const TruncationControlType& truncationControl)
+	    : stepLength_(sl)
+	    , keptStates_(ks)
+	    , bitField_(0)
+	    , truncationControl_(truncationControl)
 	{
 		str = removeCharsAtStart(str, "\"");
 		str = removeCharsAtEnd(str, "\"");
@@ -109,9 +114,8 @@ public:
 	}
 
 	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer,
-	           PsimagLite::IoNgSerializer::WriteMode mode =
-	        PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	    PsimagLite::IoSerializer& ioSerializer,
+	    PsimagLite::IoNgSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		PsimagLite::String root = label;
 
@@ -137,21 +141,21 @@ public:
 
 	void print(std::ostream& os) const
 	{
-		os<<stepLength_<<" "<<keptStates_<<" "<<bitField_;
+		os << stepLength_ << " " << keptStates_ << " " << bitField_;
 	}
 
 private:
 
 	void setMap()
 	{
-		const VectorStringType str = {"save",
-		                              "onlyfastwft",
-		                              "onlyslowwft",
-		                              "randomguess",
-		                              "multisitepush",
-		                              "onesitetruncation"};
+		const VectorStringType str = { "save",
+			"onlyfastwft",
+			"onlyslowwft",
+			"randomguess",
+			"multisitepush",
+			"onesitetruncation" };
 
-		SizeType bit =1;
+		SizeType bit = 1;
 		for (SizeType i = 0; i < str.size(); ++i) {
 			mapNameBit_[str[i]] = bit;
 			bit <<= 1;
@@ -171,7 +175,7 @@ private:
 		}
 
 		if (str.length() < 2)
-			err("FiniteLoop with " + str +" : syntax error (1)\n");
+			err("FiniteLoop with " + str + " : syntax error (1)\n");
 
 		if (str[0] == '@') {
 			dieIfTrue(hasBitField, "Bit field already set for this finite loop\n");
@@ -196,11 +200,12 @@ private:
 
 	void warnIfFiniteMlessThanMin() const
 	{
-		if (keptStates_ >= truncationControl().mMin()) return;
+		if (keptStates_ >= truncationControl().mMin())
+			return;
 
-		std::cout<<"WARNING: Triplet has m= "<<keptStates_;
-		std::cout<<" which is less than its minimum m = "<<truncationControl().mMin();
-		std::cout<<" as found in TruncationTolerance or set only for this loop\n";
+		std::cout << "WARNING: Triplet has m= " << keptStates_;
+		std::cout << " which is less than its minimum m = " << truncationControl().mMin();
+		std::cout << " as found in TruncationTolerance or set only for this loop\n";
 	}
 
 	void checkBitField() const
@@ -210,12 +215,13 @@ private:
 		bool flag = false;
 		for (SizeType i = 0; i < 3; ++i) {
 			saveOption >>= 1; // ATTENTION: Discards bit 0 when i === 0
-			if (!(saveOption & 1)) continue;
+			if (!(saveOption & 1))
+				continue;
 			if (flag) {
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-				msg<<"Triplet 3rd: Only one bit of bit 1, bit 2, and bit 3 may be set";
-				msg<<" VALUE= "<<bitField_<<"\n";
+				msg << "Triplet 3rd: Only one bit of bit 1, bit 2, and bit 3 may be set";
+				msg << " VALUE= " << bitField_ << "\n";
 				err(msg.str());
 			} else {
 				flag = true;
@@ -230,26 +236,28 @@ private:
 
 	static void dieIfTrue(bool b, PsimagLite::String msg)
 	{
-		if (!b) return;
-		std::cout<<msg;
+		if (!b)
+			return;
+		std::cout << msg;
 	}
 
 	static bool isAdigit(PsimagLite::String str)
 	{
 		for (SizeType i = 0; i < str.length(); ++i)
-			if (!std::isdigit(str[i])) return false;
+			if (!std::isdigit(str[i]))
+				return false;
 		return true;
 	}
 
 	static PsimagLite::String removeCharsAtStart(PsimagLite::String str,
-	                                             PsimagLite::String chars)
+	    PsimagLite::String chars)
 	{
 		size_t start = str.find_first_not_of(chars);
 		return (start == PsimagLite::String::npos) ? "" : str.substr(start);
 	}
 
 	static PsimagLite::String removeCharsAtEnd(PsimagLite::String str,
-	                                           PsimagLite::String chars)
+	    PsimagLite::String chars)
 	{
 		size_t end = str.find_last_not_of(chars);
 		return (end == PsimagLite::String::npos) ? "" : str.substr(0, end + 1);
@@ -262,7 +270,7 @@ private:
 	TruncationControlType truncationControl_;
 };
 
-template<typename T>
+template <typename T>
 std::map<PsimagLite::String, SizeType> FiniteLoop<T>::mapNameBit_;
 } // namespace Dmrg
 

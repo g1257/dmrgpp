@@ -1,8 +1,8 @@
 #ifndef SuperOpHelperPlaquette_H
 #define SuperOpHelperPlaquette_H
 #include "ProgramGlobals.h"
-#include "Vector.h"
 #include "SuperOpHelperBase.h"
+#include "Vector.h"
 /*
  * Non local ops.
  *
@@ -22,10 +22,12 @@
  * etc.
  *
  */
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename SuperGeometryType, typename ParamsType>
-class SuperOpHelperPlaquette : public SuperOpHelperBase<SuperGeometryType, ParamsType> {
+template <typename SuperGeometryType, typename ParamsType>
+class SuperOpHelperPlaquette : public SuperOpHelperBase<SuperGeometryType, ParamsType>
+{
 
 public:
 
@@ -35,12 +37,15 @@ public:
 	using PairMetaOpForConnection = typename BaseType::PairMetaOpForConnection;
 
 	SuperOpHelperPlaquette(const SuperGeometryType& superGeometry)
-	    : BaseType(superGeometry), smaxOrEmin_(0), newSite_(0)
-	{}
+	    : BaseType(superGeometry)
+	    , smaxOrEmin_(0)
+	    , newSite_(0)
+	{
+	}
 
 	void setToProduct(SizeType smaxOrEmin,
-	                  SizeType newSite,
-	                  ProgramGlobals::DirectionEnum dir)
+	    SizeType newSite,
+	    ProgramGlobals::DirectionEnum dir)
 	{
 		smaxOrEmin_ = smaxOrEmin;
 		newSite_ = newSite;
@@ -56,15 +61,15 @@ public:
 	SizeType size() const { return 1; }
 
 	PairMetaOpForConnection finalIndices(const VectorSizeType& hItems,
-	                                     ProgramGlobals::ConnectionEnum type,
-	                                     SizeType rightBlockSize) const
+	    ProgramGlobals::ConnectionEnum type,
+	    SizeType rightBlockSize) const
 	{
 		assert(hItems.size() == 4);
 		constexpr int NON_LOCAL = -1;
 		if (smaxOrEmin_ == 0) {
 			// 0 x (1, 2, 3)
-			MetaOpForConnection left{static_cast<int>(hItems[0]), 0, 'N'};
-			MetaOpForConnection right{NON_LOCAL, encodeNonLocalEnv(1, 3), 'N'};
+			MetaOpForConnection left { static_cast<int>(hItems[0]), 0, 'N' };
+			MetaOpForConnection right { NON_LOCAL, encodeNonLocalEnv(1, 3), 'N' };
 			return PairMetaOpForConnection(left, right);
 		}
 
@@ -72,24 +77,24 @@ public:
 
 		if (smaxOrEmin_ + 2 == nsites) {
 			// (n - 4, n - 3, n - 2) x (n - 1)
-			MetaOpForConnection left{NON_LOCAL, encodeNonLocalSys(nsites - 4, 3), 'N'};
-			MetaOpForConnection right{static_cast<int>(hItems[3]), 0, 'N'};
+			MetaOpForConnection left { NON_LOCAL, encodeNonLocalSys(nsites - 4, 3), 'N' };
+			MetaOpForConnection right { static_cast<int>(hItems[3]), 0, 'N' };
 			return PairMetaOpForConnection(left, right);
 		}
 
 		if (smaxOrEmin_ & 1) {
 			// (s - 1, s) x (s + 1, s + 2)
-			MetaOpForConnection left{NON_LOCAL, encodeNonLocalSys(smaxOrEmin_ - 1, 2), 'N'};
+			MetaOpForConnection left { NON_LOCAL, encodeNonLocalSys(smaxOrEmin_ - 1, 2), 'N' };
 			SizeType start = rightBlockSize + smaxOrEmin_ - 2;
-			MetaOpForConnection right{NON_LOCAL, encodeNonLocalEnv(start, 2), 'N'};
+			MetaOpForConnection right { NON_LOCAL, encodeNonLocalEnv(start, 2), 'N' };
 			return PairMetaOpForConnection(left, right);
 		}
 
 		// (s - 2, s - 1, s) x (s + 1)
-		//return PairSizeType(encodeNonLocalSys(smaxOrEmin_ - 2, 3), smaxOrEmin_ + 1);
+		// return PairSizeType(encodeNonLocalSys(smaxOrEmin_ - 2, 3), smaxOrEmin_ + 1);
 
 		// (s) x (s + 1, s + 2, s + 3)
-		//return PairSizeType(smaxOrEmin_, encodeNonLocalEnv(smaxOrEmin_ + 1, 3));
+		// return PairSizeType(smaxOrEmin_, encodeNonLocalEnv(smaxOrEmin_ + 1, 3));
 		throw PsimagLite::RuntimeError("How to encode two plaquettes: depends on hItems\n");
 	}
 

@@ -2,10 +2,12 @@
 #define PRINTERINDETAIL_H
 #include <iostream>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LeftRightSuperType>
-class PrinterInDetail {
+template <typename LeftRightSuperType>
+class PrinterInDetail
+{
 
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::QnType QnType;
@@ -15,12 +17,15 @@ class PrinterInDetail {
 public:
 
 	PrinterInDetail(const LeftRightSuperType& lrs, bool extended)
-	    : lrs_(lrs), extended_(extended)
-	{}
+	    : lrs_(lrs)
+	    , extended_(extended)
+	{
+	}
 
 	void print(std::ostream& os, PsimagLite::String msg) const
 	{
-		if (!extended_) return;
+		if (!extended_)
+			return;
 		printOneSide(os, "left", lrs_.left());
 		printOneSide(os, "right", lrs_.right());
 	}
@@ -28,24 +33,24 @@ public:
 private:
 
 	void printOneSide(std::ostream& os,
-	                  PsimagLite::String msg,
-	                  const BasisWithOperatorsType& basis) const
+	    PsimagLite::String msg,
+	    const BasisWithOperatorsType& basis) const
 	{
 		SizeType sites = basis.block().size();
-		os<<"Side="<<msg<<"\n";
-		os<<"SitesOnThisSide ";
+		os << "Side=" << msg << "\n";
+		os << "SitesOnThisSide ";
 		for (SizeType i = 0; i < sites; ++i) {
-			os<<basis.block()[i]<<" ";
+			os << basis.block()[i] << " ";
 		}
 
-		os<<"\n";
+		os << "\n";
 
 		SizeType n = basis.partition();
-		os<<"Partitions "<<n<<"\n";
+		os << "Partitions " << n << "\n";
 		for (SizeType i = 0; i < n - 1; ++i) {
 			SizeType s = basis.partition(i + 1) - basis.partition(i);
 			const typename BasisWithOperatorsType::QnType& j = basis.qnEx(i);
-			os<<j<<" "<<s<<"\n";
+			os << j << " " << s << "\n";
 		}
 
 		assert(sites > 0);
@@ -57,12 +62,12 @@ private:
 			siteC = site - basis.block()[0];
 		}
 
-		os<<"Operators at site "<<site<<" ("<<siteC<<")\n";
+		os << "Operators at site " << site << " (" << siteC << ")\n";
 		for (SizeType sigma = 0; sigma < end; ++sigma) {
 			const OperatorType& myop = basis.localOperator(basis.localOperatorIndex(siteC,
-			                                                                        sigma));
-			os<<sigma<<" non-zeroes=";
-			os<<myop.getStorage().nonZeros()<<" rows="<<myop.getStorage().rows()<<"\n";
+			    sigma));
+			os << sigma << " non-zeroes=";
+			os << myop.getStorage().nonZeros() << " rows=" << myop.getStorage().rows() << "\n";
 		}
 	}
 

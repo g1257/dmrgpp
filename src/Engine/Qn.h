@@ -1,24 +1,31 @@
 #ifndef QN_H
 #define QN_H
-#include "Vector.h"
-#include "ProgramGlobals.h"
-#include "Profiling.h"
-#include "Io/IoNg.h"
 #include "Array.h"
+#include "Io/IoNg.h"
+#include "Profiling.h"
+#include "ProgramGlobals.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-class Qn {
+class Qn
+{
 
 public:
 
-	enum ModalEnum { MODAL_SUM, MODAL_MODULO};
+	enum ModalEnum { MODAL_SUM,
+		MODAL_MODULO };
 
 	struct ModalStruct {
 
-		ModalStruct() : modalEnum(MODAL_SUM), extra(0) {}
+		ModalStruct()
+		    : modalEnum(MODAL_SUM)
+		    , extra(0)
+		{
+		}
 
-		template<typename SomeInputType>
+		template <typename SomeInputType>
 		void read(PsimagLite::String str, SomeInputType& io)
 		{
 			io.read(modalEnum, str + "/modalEnum");
@@ -26,12 +33,12 @@ public:
 		}
 
 		void write(PsimagLite::String str,
-		           PsimagLite::IoNgSerializer& io,
-		           typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+		    PsimagLite::IoNgSerializer& io,
+		    typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 		{
 			if (wM != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 				io.createGroup(str);
-			io.write(str+ "/modalEnum", modalEnum, wM);
+			io.write(str + "/modalEnum", modalEnum, wM);
 			io.write(str + "/extra", extra, wM);
 		}
 
@@ -45,7 +52,10 @@ public:
 	typedef PsimagLite::Vector<ModalStruct>::Type VectorModalStructType;
 
 	Qn(bool odd, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor)
-	    : oddElectrons(odd), other(szPlusConst), jmPair(j), flavors(flavor)
+	    : oddElectrons(odd)
+	    , other(szPlusConst)
+	    , jmPair(j)
+	    , flavors(flavor)
 	{
 		if (modalStruct.size() == szPlusConst.size()) {
 			modularize();
@@ -80,7 +90,7 @@ public:
 		flavors = q1.flavors; // ???
 	}
 
-	template<typename SomeInputType>
+	template <typename SomeInputType>
 	void read(PsimagLite::String str, SomeInputType& io)
 	{
 		io.read(oddElectrons, str + "/oddElectrons");
@@ -88,7 +98,8 @@ public:
 			VectorSizeType otherVector;
 			io.read(otherVector, str + "/other");
 			other.fromStdVector(otherVector);
-		} catch (...) {}
+		} catch (...) {
+		}
 
 		io.read(jmPair, str + "/jmPair");
 		io.read(flavors, str + "/flavors");
@@ -101,12 +112,12 @@ public:
 	}
 
 	void write(PsimagLite::String str,
-	           PsimagLite::IoNgSerializer& io,
-	           typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	    PsimagLite::IoNgSerializer& io,
+	    typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		try {
 			io.read(modalStruct, "modalStruct");
-		} catch(...) {
+		} catch (...) {
 			io.write("modalStruct", modalStruct);
 		}
 
@@ -122,8 +133,7 @@ public:
 
 	void overwrite(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
 	{
-		const PsimagLite::IoNgSerializer::WriteMode mode =
-		        PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
+		const PsimagLite::IoNgSerializer::WriteMode mode = PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
 		io.write(str + "/oddElectrons", oddElectrons, mode);
 		VectorSizeType otherVector;
 		other.toStdVector(otherVector);
@@ -134,14 +144,11 @@ public:
 
 	bool operator==(const Qn& a) const
 	{
-		return (compare(a.other) &&
-		        a.oddElectrons == oddElectrons
+		return (compare(a.other) && a.oddElectrons == oddElectrons
 #ifndef ENABLE_SU2
-		        );
+		);
 #else
-		        &&
-		        pairEqual(a.jmPair) &&
-		        flavors == a.flavors);
+		    && pairEqual(a.jmPair) && flavors == a.flavors);
 #endif
 	}
 
@@ -151,9 +158,9 @@ public:
 	}
 
 	void scale(SizeType sites,
-	           SizeType totalSites,
-	           ProgramGlobals::DirectionEnum direction,
-	           bool isSu2)
+	    SizeType totalSites,
+	    ProgramGlobals::DirectionEnum direction,
+	    bool isSu2)
 	{
 		Qn original = *this;
 		SizeType mode = other.size();
@@ -163,49 +170,51 @@ public:
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE) {
 			double ts = totalSites;
 			for (SizeType x = 0; x < mode; ++x) {
-				double flp = original.other[x]*sites;
-				other[x] = static_cast<SizeType>(round(flp/ts));
+				double flp = original.other[x] * sites;
+				other[x] = static_cast<SizeType>(round(flp / ts));
 			}
 
-			double flp = original.jmPair.first*sites;
-			jmPair.first =  static_cast<SizeType>(round(flp/ts));
+			double flp = original.jmPair.first * sites;
+			jmPair.first = static_cast<SizeType>(round(flp / ts));
 		}
 
 		if (ifPresentOther0IsElectrons && other.size() > 0)
 			oddElectrons = (other[0] & 1);
 
-		if (!isSu2) return;
+		if (!isSu2)
+			return;
 
 		assert(ifPresentOther0IsElectrons && other.size() > 0);
 
-		SizeType tmp =jmPair.first;
+		SizeType tmp = jmPair.first;
 		PsimagLite::String str("SymmetryElectronsSz: FATAL: Impossible parameters ");
 		bool flag = false;
 		if (original.oddElectrons) {
 			if (!(tmp & 1)) {
 				flag = true;
 				str += "oddElectrons= " + ttos(original.oddElectrons) + " is odd ";
-				str += "and 2j= " +  ttos(tmp) + " is even.";
+				str += "and 2j= " + ttos(tmp) + " is even.";
 				tmp++;
 			}
 		} else {
 			if (tmp & 1) {
 				flag = true;
 				str += "oddElectrons= " + ttos(original.oddElectrons) + " is even ";
-				str += "and 2j= " +  ttos(tmp) + " is odd.";
+				str += "and 2j= " + ttos(tmp) + " is odd.";
 				tmp++;
 			}
 		}
 
-		if (flag && sites == totalSites) throw PsimagLite::RuntimeError(str);
+		if (flag && sites == totalSites)
+			throw PsimagLite::RuntimeError(str);
 
 		jmPair.first = tmp;
 	}
 
-	template<typename SomeIoInType>
-    static void readVector(VectorQnType& vqns,
-	                       PsimagLite::String prefix,
-	                       SomeIoInType& io)
+	template <typename SomeIoInType>
+	static void readVector(VectorQnType& vqns,
+	    PsimagLite::String prefix,
+	    SomeIoInType& io)
 	{
 		SizeType aSize = 0;
 		io.read(aSize, prefix + "/Size");
@@ -216,8 +225,8 @@ public:
 	}
 
 	static void adjustQns(VectorQnType& outQns,
-	                      const VectorSizeType& ints,
-	                      SizeType mode)
+	    const VectorSizeType& ints,
+	    SizeType mode)
 	{
 		SizeType modePlusOne = mode + 1;
 		SizeType n = ints.size();
@@ -230,16 +239,16 @@ public:
 		outQns.resize(n, Qn(false, VectorSizeType(modePlusOne), PairSizeType(0, 0), 0));
 
 		for (SizeType i = 0; i < n; ++i) {
-			assert(1 + i*modePlusOne < ints.size());
-			SizeType tmp = ints[1 + i*modePlusOne];
+			assert(1 + i * modePlusOne < ints.size());
+			SizeType tmp = ints[1 + i * modePlusOne];
 			assert(outQns[i].other.size() > 0);
 			outQns[i].other[0] = tmp;
 			outQns[i].oddElectrons = (tmp & 1);
 			for (SizeType j = 1; j < modePlusOne; ++j) {
 				SizeType k = (j == 1) ? 0 : j;
-				assert(k + i*modePlusOne < ints.size());
+				assert(k + i * modePlusOne < ints.size());
 				assert(j < outQns[i].other.size());
-				outQns[i].other[j] = ints[k + i*modePlusOne];
+				outQns[i].other[j] = ints[k + i * modePlusOne];
 			}
 		}
 	}
@@ -248,10 +257,11 @@ public:
 	{
 		SizeType n = other.size();
 		SizeType value = 1;
-		SizeType total = sizeof(value)*8 - 1;
+		SizeType total = sizeof(value) * 8 - 1;
 		value <<= total;
 		for (SizeType i = 0; i < n; ++i)
-			if (other[i] == value) return false;
+			if (other[i] == value)
+				return false;
 
 		return true;
 	}
@@ -264,7 +274,7 @@ public:
 	}
 
 	static void su2ElectronsBridge(VectorSizeType& v,
-	                               const VectorQnType& qns)
+	    const VectorQnType& qns)
 	{
 		SizeType n = qns.size();
 		v.resize(n);
@@ -275,18 +285,18 @@ public:
 	static Qn zero()
 	{
 		SizeType value = 1;
-		SizeType total = sizeof(value)*8 - 1;
+		SizeType total = sizeof(value) * 8 - 1;
 		value <<= total;
 		return Qn(false, VectorSizeType(modalStruct.size(), value), PairSizeType(0, 0), 0);
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const Qn& qn)
 	{
-		os<<"oddElectrons="<<qn.oddElectrons<<" ";
-		os<<"other=";
+		os << "oddElectrons=" << qn.oddElectrons << " ";
+		os << "other=";
 		for (SizeType i = 0; i < qn.other.size(); ++i)
-			os<<qn.other[i]<<",";
-		os<<"  jmPair="<<qn.jmPair;
+			os << qn.other[i] << ",";
+		os << "  jmPair=" << qn.jmPair;
 		return os;
 	}
 
@@ -306,7 +316,8 @@ private:
 		runChecks(n);
 
 		for (SizeType i = 0; i < n; ++i)
-			if (otherOther[i] != other[i]) return false;
+			if (otherOther[i] != other[i])
+				return false;
 
 		return true;
 	}
@@ -320,8 +331,7 @@ private:
 
 	bool pairEqual(const PairSizeType& otherJm) const
 	{
-		return (otherJm.first == jmPair.first &&
-		        otherJm.second == jmPair.second);
+		return (otherJm.first == jmPair.first && otherJm.second == jmPair.second);
 	}
 
 	void modularize()

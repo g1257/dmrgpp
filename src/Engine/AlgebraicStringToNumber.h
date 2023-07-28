@@ -1,14 +1,17 @@
 #ifndef ALGEBRAICSTRINGTONUMBER_H
 #define ALGEBRAICSTRINGTONUMBER_H
-#include "Vector.h"
 #include "CanonicalExpression.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename FieldType>
-class AlgebraicStringToNumber {
+template <typename FieldType>
+class AlgebraicStringToNumber
+{
 
-	class LoopLengthSpec {
+	class LoopLengthSpec
+	{
 
 	public:
 
@@ -16,9 +19,12 @@ class AlgebraicStringToNumber {
 		typedef FieldType ComplexOrRealType;
 		typedef FieldType AuxiliaryType;
 
-		LoopLengthSpec(SizeType n) : n_(n), c_(n/2)
+		LoopLengthSpec(SizeType n)
+		    : n_(n)
+		    , c_(n / 2)
 		{
-			if (n % 2 == 1) c_ = 0;
+			if (n % 2 == 1)
+				c_ = 0;
 		}
 
 		static bool isEmpty(ResultType x) { return (x == 0); }
@@ -34,7 +40,8 @@ class AlgebraicStringToNumber {
 				return n_;
 
 			if (str == "%c") {
-				if (c_ == 0) err("%c cannot be used with odd number of sites\n");
+				if (c_ == 0)
+					err("%c cannot be used with odd number of sites\n");
 				return c_;
 			}
 
@@ -43,7 +50,8 @@ class AlgebraicStringToNumber {
 
 		PsimagLite::String convertVal(PsimagLite::String val) const
 		{
-			if (val == "-%lh") return "(-1.0)*%lh";
+			if (val == "-%lh")
+				return "(-1.0)*%lh";
 			return val;
 		}
 
@@ -56,7 +64,10 @@ class AlgebraicStringToNumber {
 public:
 
 	AlgebraicStringToNumber(PsimagLite::String msg, SizeType numberOfSites)
-	    : msg_(msg), numberOfSites_(numberOfSites) {}
+	    : msg_(msg)
+	    , numberOfSites_(numberOfSites)
+	{
+	}
 
 	int procLength(PsimagLite::String val)
 	{

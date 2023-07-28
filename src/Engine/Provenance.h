@@ -1,15 +1,16 @@
 #ifndef PROVENANCE_H
 #define PROVENANCE_H
 #include "../../PsimagLite/src/Version.h"
+#include "../GitRevision.h"
 #include "../Version.h"
 #include "AllocatorCpu.h"
-#include <iostream>
 #include "AnsiColors.h"
-#include <sstream>
-#include "../GitRevision.h"
 #include "MatrixVectorKron/BatchedGemmInclude.hh"
+#include <iostream>
+#include <sstream>
 
-class Provenance {
+class Provenance
+{
 
 public:
 
@@ -27,8 +28,8 @@ public:
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<appName<<"\x1b[38;5;120";
-		msg<<" [features "<<DMRGPP_VERSION<<"] "<<PsimagLite::AnsiColor::reset;
+		msg << appName << "\x1b[38;5;120";
+		msg << " [features " << DMRGPP_VERSION << "] " << PsimagLite::AnsiColor::reset;
 		PsimagLite::String ctOpts(Dmrg::BatchedGemmInclude::info());
 #ifdef USE_SHORT
 		ctOpts += " SHORT ";
@@ -50,13 +51,12 @@ public:
 #endif
 
 		if (ctOpts != "")
-			msg<<"["<<ctOpts<<"]";
+			msg << "[" << ctOpts << "]";
 
 		return msg.str();
 	}
 }; // Provenance
 
-std::ostream& operator<<(std::ostream& os,const Provenance&);
+std::ostream& operator<<(std::ostream& os, const Provenance&);
 
 #endif // PROVENANCE_H
-

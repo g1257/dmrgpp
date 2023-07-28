@@ -88,23 +88,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGETING_RIXS_DYNAMIC_H
 #define TARGETING_RIXS_DYNAMIC_H
 
+#include "CorrectionVectorSkeleton.h"
+#include "FreqEnum.h"
+#include "ParallelTriDiag.h"
+#include "ParametersForSolver.h"
 #include "ProgressIndicator.h"
 #include "TargetParamsCorrectionVector.h"
 #include "TargetParamsTimeStep.h"
-#include "VectorWithOffsets.h"
 #include "TargetingBase.h"
-#include "ParametersForSolver.h"
-#include "ParallelTriDiag.h"
-#include "FreqEnum.h"
-#include "CorrectionVectorSkeleton.h"
+#include "VectorWithOffsets.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingRixsDynamic : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingRixsDynamic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
+{
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
 
 public:
 
@@ -135,38 +137,39 @@ public:
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
-	typedef CorrectionVectorFunction<LanczosMatrixType,TargetParamsType>
-	CorrectionVectorFunctionType;
-	typedef ParallelTriDiag<ModelType,LanczosSolverType,VectorWithOffsetType>
-	ParallelTriDiagType;
+	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
+	    CorrectionVectorFunctionType;
+	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
+	    ParallelTriDiagType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	VectorWithOffsetType,
-	BaseType,
-	TargetParamsType> CorrectionVectorSkeletonType;
+	    VectorWithOffsetType,
+	    BaseType,
+	    TargetParamsType>
+	    CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetParamsType::BaseType::AlgorithmEnum AlgorithmEnumType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingRixsDynamic(const LeftRightSuperType& lrs,
-	                     const CheckpointType& checkPoint,
-	                     const WaveFunctionTransfType& wft,
-	                     const QnType&,
-	                     InputValidatorType& ioIn)
-	    : BaseType(lrs,checkPoint,wft,1),
-	      tstStruct_(ioIn, "TargetingRixsDynamic", checkPoint.model()),
-	      tstStruct2_(nullptr),
-	      ioIn_(ioIn),
-	      progress_("TargetingRixsDynamic"),
-	      gsWeight_(tstStruct_.gsWeight()),
-	      paramsForSolver_(ioIn,"DynamicDmrg"),
-	      skeleton_(ioIn_, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy()),
-	      applied_(false),
-	      appliedFirst_(false)
+	    const CheckpointType& checkPoint,
+	    const WaveFunctionTransfType& wft,
+	    const QnType&,
+	    InputValidatorType& ioIn)
+	    : BaseType(lrs, checkPoint, wft, 1)
+	    , tstStruct_(ioIn, "TargetingRixsDynamic", checkPoint.model())
+	    , tstStruct2_(nullptr)
+	    , ioIn_(ioIn)
+	    , progress_("TargetingRixsDynamic")
+	    , gsWeight_(tstStruct_.gsWeight())
+	    , paramsForSolver_(ioIn, "DynamicDmrg")
+	    , skeleton_(ioIn_, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy())
+	    , applied_(false)
+	    , appliedFirst_(false)
 	{
 		firstCall_ = true;
 
@@ -187,7 +190,7 @@ public:
 		}
 
 		for (SizeType i = 0; i < n; ++i)
-			tstStruct2_->times()[i] = i*tau/(n - 1);
+			tstStruct2_->times()[i] = i * tau / (n - 1);
 
 		this->common().aoeNonConst().initTimeVectors(*tstStruct2_, ioIn);
 	}
@@ -198,9 +201,7 @@ public:
 		tstStruct2_ = nullptr;
 	}
 
-	SizeType sites() const { return (tstStruct_.algorithm() ==
-		                             TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) ?
-		            tstStruct_.sites() : tstStruct2_->sites(); }
+	SizeType sites() const { return (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) ? tstStruct_.sites() : tstStruct2_->sites(); }
 
 	SizeType targets() const
 	{
@@ -227,7 +228,8 @@ public:
 
 	SizeType size() const
 	{
-		if (!applied_ && appliedFirst_) return 8;
+		if (!applied_ && appliedFirst_)
+			return 8;
 
 		SizeType tenOrTwelveOrSixteen;
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
@@ -250,19 +252,20 @@ public:
 	// tv[9] = Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[6]>
 	// + Re of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
 	void evolve(const VectorRealType& energies,
-	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
-	            const BlockType& block2,
-	            SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    const BlockType& block2,
+	    SizeType loopNumber)
 	{
-		if (block1.size()!=1 || block2.size()!=1) {
+		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
 			str += "evolve only blocks of one site supported\n";
 			throw PsimagLite::RuntimeError(str.c_str());
 		}
 
-		if (direction == ProgramGlobals::DirectionEnum::INFINITE) return;
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
+			return;
 
 		assert(energies.size() > 0);
 		const RealType Eg = energies[0];
@@ -273,15 +276,15 @@ public:
 
 		SizeType site = block1[0];
 
-		//SizeType numberOfSites = this->lrs().super().block().size();
+		// SizeType numberOfSites = this->lrs().super().block().size();
 		//		bool weAreAtBorder = site==0 || site==numberOfSites-1;
 		//		if (!weAreAtBorder)
 		this->common().aoeNonConst().wftSome(site, 0, 6);
 
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-//			if (!weAreAtBorder)
-				this->common().aoeNonConst().wftSome(site, 6, this->common().aoe().tvs());
+			//			if (!weAreAtBorder)
+			this->common().aoeNonConst().wftSome(site, 6, this->common().aoe().tvs());
 		} else {
 			// just to set the stage and currenttime: CHEBY and KRYLOVTIME
 			this->common().aoeNonConst().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
@@ -304,14 +307,14 @@ public:
 
 		this->common().printNormsAndWeights(gsWeight_, weight_);
 
-		//corner case
+		// corner case
 		/*
 		SizeType site2 = numberOfSites;
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
 		if (site == numberOfSites - 2 &&
-		        direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+			direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			site2 = numberOfSites - 1;
 		if (site2 == numberOfSites) return;
 		BlockType block(1, site2);
@@ -321,8 +324,8 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	    PsimagLite::IoSelector::Out& io,
+	    PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "RixsDynamic");
@@ -346,39 +349,38 @@ public:
 private:
 
 	void doMax1(SizeType site,
-	            ProgramGlobals::DirectionEnum direction,
-	            SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    SizeType loopNumber)
 	{
 		if (site == tstStruct_.sites(0)) {
 
-			ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,1,0,false);
-			std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
-			std::cout<<" <P1|P0> 1\n";   // 1 here is the "superdensity"
+			ComplexOrRealType densCim = this->common().rixsCocoon(direction, site, 1, 0, false);
+			std::cout << site << " " << densCim << " 0"; // 0 here is the currentTime
+			std::cout << " <P1|P0> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,2,0,false);
-			std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
-			std::cout<<" <P2|P0> 1\n";   // 1 here is the "superdensity"
+			ComplexOrRealType densCre = this->common().rixsCocoon(direction, site, 2, 0, false);
+			std::cout << site << " " << densCre << " 0"; // 0 here is the currentTime
+			std::cout << " <P2|P0> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,4,3,false);
-			std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
-			std::cout<<" <P4|P3> 1\n";   // 1 here is the "superdensity"
+			ComplexOrRealType densjim = this->common().rixsCocoon(direction, site, 4, 3, false);
+			std::cout << site << " " << densjim << " 0"; // 0 here is the currentTime
+			std::cout << " <P4|P3> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,5,3,false);
-			std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
-			std::cout<<" <P5|P3> 1\n";   // 1 here is the "superdensity"
+			ComplexOrRealType densjre = this->common().rixsCocoon(direction, site, 5, 3, false);
+			std::cout << site << " " << densjre << " 0"; // 0 here is the currentTime
+			std::cout << " <P5|P3> 1\n"; // 1 here is the "superdensity"
 
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 0;
 
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV1, // phiNew
-			           this->tv(1), // src1 apply op on Im|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV1, // phiNew
+			    this->tv(1), // src1 apply op on Im|alpha(C)>
+			    direction);
 
-			const VectorWithOffsetType& psi00 = this->common().aoe().
-			        ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax1"));
+			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax1"));
 			if (tmpV1.size() > 0)
 				addFactor(tmpV1, psi00, densCim);
 
@@ -388,11 +390,11 @@ private:
 			VectorWithOffsetType tmpV2;
 
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV2,                            // phi
-			           this->tv(2), // src1 apply op on Re|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV2, // phi
+			    this->tv(2), // src1 apply op on Re|alpha(C)>
+			    direction);
 
 			if (tmpV2.size() > 0)
 				addFactor(tmpV2, psi00, densCre);
@@ -402,37 +404,37 @@ private:
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-				msg<<"Applied";
+				msg << "Applied";
 				progress_.printline(msgg, std::cout);
 			}
 		}
 	}
 
 	void doMax2Sum(SizeType site,
-	               ProgramGlobals::DirectionEnum direction,
-	               SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    SizeType loopNumber)
 	{
 
 		if (site == tstStruct_.sites(0)) {
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 0;
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV1, // phiNew
-			           this->tv(1), // src1 apply op on Im|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV1, // phiNew
+			    this->tv(1), // src1 apply op on Im|alpha(C)>
+			    direction);
 
 			if (tmpV1.size() > 0)
 				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV2,                            // phiNew
-			           this->tv(2), // src1 apply op on Re|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV2, // phiNew
+			    this->tv(2), // src1 apply op on Re|alpha(C)>
+			    direction);
 
 			if (tmpV2.size() > 0) {
 				this->tvNonConst(7) = tmpV2;
@@ -440,40 +442,39 @@ private:
 				appliedFirst_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-				msg<<"First Operator Applied";
+				msg << "First Operator Applied";
 				progress_.printline(msgg, std::cout);
 			}
 		}
 
 		if (site == tstStruct_.sites(1)) {
 
-			ComplexOrRealType densCim = this->common().rixsCocoon(direction,site,1,0,false);
-			std::cout<<site<<" "<<densCim<<" 0"; // 0 here is the currentTime
-			std::cout<<" <P1|P0> 1\n";   // 1 here is the "superdensity"
+			ComplexOrRealType densCim = this->common().rixsCocoon(direction, site, 1, 0, false);
+			std::cout << site << " " << densCim << " 0"; // 0 here is the currentTime
+			std::cout << " <P1|P0> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densCre = this->common().rixsCocoon(direction,site,2,0,false);
-			std::cout<<site<<" "<<densCre<<" 0"; // 0 here is the currentTime
-			std::cout<<" <P2|P0> 1\n";   // 1 here is the "superdensity"
+			ComplexOrRealType densCre = this->common().rixsCocoon(direction, site, 2, 0, false);
+			std::cout << site << " " << densCre << " 0"; // 0 here is the currentTime
+			std::cout << " <P2|P0> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densjim = this->common().rixsCocoon(direction,site,4,3,false);
-			std::cout<<site<<" "<<densjim<<" 0"; // 0 here is the currentTime
-			std::cout<<" <P4|P3> 1\n";   // 1 here is the "superdensity"
+			ComplexOrRealType densjim = this->common().rixsCocoon(direction, site, 4, 3, false);
+			std::cout << site << " " << densjim << " 0"; // 0 here is the currentTime
+			std::cout << " <P4|P3> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densjre = this->common().rixsCocoon(direction,site,5,3,false);
-			std::cout<<site<<" "<<densjre<<" 0"; // 0 here is the currentTime
-			std::cout<<" <P5|P3> 1\n";   // 1 here is the "superdensity"
+			ComplexOrRealType densjre = this->common().rixsCocoon(direction, site, 5, 3, false);
+			std::cout << site << " " << densjre << " 0"; // 0 here is the currentTime
+			std::cout << " <P5|P3> 1\n"; // 1 here is the "superdensity"
 
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 1;
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV1, // phiNew
-			           this->tv(1), // src1 apply op on Im|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV1, // phiNew
+			    this->tv(1), // src1 apply op on Im|alpha(C)>
+			    direction);
 
-			const VectorWithOffsetType& psi00 = this->common().aoe().
-			        ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax2"));
+			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax2"));
 
 			if (tmpV1.size() > 0)
 				addFactor(tmpV1, psi00, densCim);
@@ -483,11 +484,11 @@ private:
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV2,                            // phiNew
-			           this->tv(2), // src1 apply op on Re|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV2, // phiNew
+			    this->tv(2), // src1 apply op on Re|alpha(C)>
+			    direction);
 
 			if (tmpV2.size() > 0)
 				addFactor(tmpV2, psi00, densCre);
@@ -497,37 +498,37 @@ private:
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-				msg<<"Applied";
+				msg << "Applied";
 				progress_.printline(msgg, std::cout);
 			}
 		}
 	}
 
 	void doMax2Prod(SizeType site,
-	                ProgramGlobals::DirectionEnum direction,
-	                SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    SizeType loopNumber)
 	{
 
 		if (site == tstStruct_.sites(0)) {
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 0;
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV1, // phiNew
-			           this->tv(1), // src1 apply op on Im|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV1, // phiNew
+			    this->tv(1), // src1 apply op on Im|alpha(C)>
+			    direction);
 
 			if (tmpV1.size() > 0)
 				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV2,                            // phiNew
-			           this->tv(2), // src1 apply op on Re|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV2, // phiNew
+			    this->tv(2), // src1 apply op on Re|alpha(C)>
+			    direction);
 
 			if (tmpV2.size() > 0) {
 				this->tvNonConst(7) = tmpV2;
@@ -535,7 +536,7 @@ private:
 				appliedFirst_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-				msg<<"PROD: First Operator Applied";
+				msg << "PROD: First Operator Applied";
 				progress_.printline(msgg, std::cout);
 			}
 		}
@@ -545,29 +546,29 @@ private:
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 1;
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV1, // phiNew
-			           this->tv(6), // src1 apply op on Im|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV1, // phiNew
+			    this->tv(6), // src1 apply op on Im|alpha(C)>
+			    direction);
 
 			if (tmpV1.size() > 0)
 				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
-			           indexOfOperator,
-			           site,
-			           tmpV2,                            // phiNew
-			           this->tv(7), // src1 apply op on Re|alpha(C)>
-			           direction);
+			    indexOfOperator,
+			    site,
+			    tmpV2, // phiNew
+			    this->tv(7), // src1 apply op on Re|alpha(C)>
+			    direction);
 
 			if (tmpV2.size() > 0) {
 				this->tvNonConst(7) = tmpV2;
 				applied_ = true;
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-				msg<<"PROD: Second Operator Applied";
+				msg << "PROD: Second Operator Applied";
 				progress_.printline(msgg, std::cout);
 			}
 		}
@@ -586,45 +587,41 @@ private:
 			eightOrEleven = 8;
 		}
 
-		const ComplexOrRealType rr =
-		        this->common().rixsCocoon(direction,site,nineOrTenOrFifteen,5,true);
-		const ComplexOrRealType ri =
-		        this->common().rixsCocoon(direction,site,nineOrTenOrFifteen,4,true);
-		const ComplexOrRealType ir =
-		        this->common().rixsCocoon(direction,site,eightOrEleven,5,true);
-		const ComplexOrRealType ii =
-		        this->common().rixsCocoon(direction,site,eightOrEleven,4,true);
+		const ComplexOrRealType rr = this->common().rixsCocoon(direction, site, nineOrTenOrFifteen, 5, true);
+		const ComplexOrRealType ri = this->common().rixsCocoon(direction, site, nineOrTenOrFifteen, 4, true);
+		const ComplexOrRealType ir = this->common().rixsCocoon(direction, site, eightOrEleven, 5, true);
+		const ComplexOrRealType ii = this->common().rixsCocoon(direction, site, eightOrEleven, 4, true);
 
 		RealType time = 0.0;
 		if (tstStruct_.algorithm() != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			time = this->common().aoe().timeVectors().time();
 		}
-		std::cout<<site<<" "<<(ri-ir)<<" "<<time; // time here is the currentTime
-		std::cout<<" <gs|A|P2> 1\n";   // 1 here is the "superdensity"
-		std::cout<<site<<" "<<(rr+ii)<<" "<<time; // time here is the currentTime
-		std::cout<<" <gs|A|P3> 1\n";   // 1 here is the "superdensity"
+		std::cout << site << " " << (ri - ir) << " " << time; // time here is the currentTime
+		std::cout << " <gs|A|P2> 1\n"; // 1 here is the "superdensity"
+		std::cout << site << " " << (rr + ii) << " " << time; // time here is the currentTime
+		std::cout << " <gs|A|P3> 1\n"; // 1 here is the "superdensity"
 	}
 
 	void addFactor(VectorWithOffsetType& phiNew,
-	               const VectorWithOffsetType& psiSrc2,
-	               ComplexOrRealType factor) const
+	    const VectorWithOffsetType& psiSrc2,
+	    ComplexOrRealType factor) const
 	{
 		// CHECK if psiSrc2 and phiNew have the same offset!
 		if (psiSrc2.offset(0) == phiNew.offset(0))
-			phiNew += (-factor)*psiSrc2;
+			phiNew += (-factor) * psiSrc2;
 
 		RealType norma = norm(phiNew);
-		if (norma<1e-6) {
+		if (norma < 1e-6) {
 			PsimagLite::OstringStream msgg2(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
-			msg2<<"Norm of phi is zero\n";
+			msg2 << "Norm of phi is zero\n";
 			progress_.printline(msgg2, std::cout);
 		}
 	}
 
 	void calcDynVectors(RealType Eg,
-	                    ProgramGlobals::DirectionEnum direction,
-	                    const VectorSizeType& block1)
+	    ProgramGlobals::DirectionEnum direction,
+	    const VectorSizeType& block1)
 	{
 		if (!applied_ && appliedFirst_) {
 			return;
@@ -638,28 +635,28 @@ private:
 
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			skeleton_.calcDynVectors(this->tv(6),
-			                         this->tv(7),
-			                         this->tvNonConst(8),
-			                         this->tvNonConst(9));
+			    this->tv(7),
+			    this->tvNonConst(8),
+			    this->tvNonConst(9));
 			firstCall_ = false; // unused here but just in case
 			return;
 		}
 
 		VectorSizeType indices;
 		VectorSizeType indices2;
-		//SizeType numberOfWeights = 0;
+		// SizeType numberOfWeights = 0;
 
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::CHEBYSHEV) {
-			indices = {6, 8, 9};
-			indices2 = {7, 10, 11};
-			//numberOfWeights = 12;
-		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME){
-			indices = {6, 8, 9, 10, 11};
-			indices2 = {7, 12, 13, 14, 15};
-			//numberOfWeights = 16;
+			indices = { 6, 8, 9 };
+			indices2 = { 7, 10, 11 };
+			// numberOfWeights = 12;
+		} else if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME) {
+			indices = { 6, 8, 9, 10, 11 };
+			indices2 = { 7, 12, 13, 14, 15 };
+			// numberOfWeights = 16;
 		}
 
-		//assert(numberOfWeights > 0);
+		// assert(numberOfWeights > 0);
 		assert(indices.size() > 0 && indices2.size() > 0);
 		calcVectors(indices, Eg, direction, block1, !firstCall_, false);
 		calcVectors(indices2, Eg, direction, block1, !firstCall_, true);
@@ -667,52 +664,51 @@ private:
 	}
 
 	void calcVectors(const VectorSizeType& indices,
-	                 RealType Eg,
-	                 ProgramGlobals::DirectionEnum direction,
-	                 const VectorSizeType& block1,
-	                 bool wftOrAdvance,
-	                 bool isLastCall)
+	    RealType Eg,
+	    ProgramGlobals::DirectionEnum direction,
+	    const VectorSizeType& block1,
+	    bool wftOrAdvance,
+	    bool isLastCall)
 	{
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) &&
-		                            this->common().aoe().noStageIs(StageEnumType::OPERATOR));
+		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		const VectorWithOffsetType& v0 = this->tv(indices[0]);
 
 		this->common().aoeNonConst().calcTimeVectors(indices,
-		                                             Eg,
-		                                             v0,
-		                                             direction,
-		                                             allOperatorsApplied,
-		                                             wftOrAdvance, // wft and advance indices[0]
-		                                             block1,
-		                                             isLastCall);
+		    Eg,
+		    v0,
+		    direction,
+		    allOperatorsApplied,
+		    wftOrAdvance, // wft and advance indices[0]
+		    block1,
+		    isLastCall);
 	}
 
 	void applyOneOp(SizeType loopNumber,
-	                SizeType indexOfOperator,
-	                SizeType site,
-	                VectorWithOffsetType& dest,
-	                const VectorWithOffsetType& src,
-	                ProgramGlobals::DirectionEnum direction)
+	    SizeType indexOfOperator,
+	    SizeType site,
+	    VectorWithOffsetType& dest,
+	    const VectorWithOffsetType& src,
+	    ProgramGlobals::DirectionEnum direction)
 	{
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 
 		if (algo != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV)
 			this->common().aoeNonConst().applyOneOperator(loopNumber,
-		                                                  indexOfOperator,
-		                                                  site,
-		                                                  dest, // phiNew
-		                                                  src, // src1
-		                                                  direction,
-		                                                  *tstStruct2_);
+			    indexOfOperator,
+			    site,
+			    dest, // phiNew
+			    src, // src1
+			    direction,
+			    *tstStruct2_);
 		else
 			this->common().aoeNonConst().applyOneOperator(loopNumber,
-		                                                  indexOfOperator,
-		                                                  site,
-		                                                  dest, // phiNew
-		                                                  src, // src1
-		                                                  direction,
-		                                                  tstStruct_);
+			    indexOfOperator,
+			    site,
+			    dest, // phiNew
+			    src, // src1
+			    direction,
+			    tstStruct_);
 	}
 
 	void setWeights()
@@ -723,17 +719,19 @@ private:
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			RealType norma = norm(this->tv(i));
-			if (norma < 1e-6) continue;
-			weight_[i] = 1/norma;
+			if (norma < 1e-6)
+				continue;
+			weight_[i] = 1 / norma;
 			sum += weight_[i];
 		}
 
 		gsWeightActual_ = 1 - sum;
 
-		if (gsWeightActual_ >= gsWeight_) return; // <--- EARLY EXIT HERE
+		if (gsWeightActual_ >= gsWeight_)
+			return; // <--- EARLY EXIT HERE
 
 		assert(sum > 1e-6);
-		RealType factor = (1 - gsWeight_)/sum;
+		RealType factor = (1 - gsWeight_) / sum;
 		for (SizeType i = 0; i < n; ++i)
 			weight_[i] *= factor;
 		gsWeightActual_ = gsWeight_;
@@ -753,7 +751,7 @@ private:
 	static bool firstCall_;
 }; // class TargetingRixsDynamic
 
-template<typename T1, typename T2>
+template <typename T1, typename T2>
 bool TargetingRixsDynamic<T1, T2>::firstCall_ = true;
 
 } // namespace

@@ -1,13 +1,16 @@
 #ifndef GROUP_OF_ONE_TIME_EVOLUTIONS_H
 #define GROUP_OF_ONE_TIME_EVOLUTIONS_H
-#include "Vector.h"
 #include "GetBraOrKet.h"
+#include "Vector.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename PvectorsType>
-class GroupOfOneTimeEvolutions {
-	class OneTimeEvolution {
+template <typename PvectorsType>
+class GroupOfOneTimeEvolutions
+{
+	class OneTimeEvolution
+	{
 
 	public:
 
@@ -18,16 +21,16 @@ class GroupOfOneTimeEvolutions {
 		typedef typename PvectorsType::RealType RealType;
 
 		OneTimeEvolution(SizeType firstIndex,
-		                 const VectorWithOffsetType& src,
-		                 PsimagLite::String srcKet,
-		                 SizeType disposition,
-		                 SizeType timeSteps,
-		                 PvectorsType& pVectors)
-		    : indices_(timeSteps),
-		      srcKet_(srcKet),
-		      disposition_(disposition),
-		      timesWithoutAdvancement_(0),
-		      time_(0)
+		    const VectorWithOffsetType& src,
+		    PsimagLite::String srcKet,
+		    SizeType disposition,
+		    SizeType timeSteps,
+		    PvectorsType& pVectors)
+		    : indices_(timeSteps)
+		    , srcKet_(srcKet)
+		    , disposition_(disposition)
+		    , timesWithoutAdvancement_(0)
+		    , time_(0)
 		{
 			indices_[0] = firstIndex;
 			for (SizeType i = 1; i < timeSteps; ++i) {
@@ -68,7 +71,8 @@ class GroupOfOneTimeEvolutions {
 		{
 			const SizeType n = indices_.size();
 			for (SizeType i = 0; i < n; ++i)
-				if (indices_[i] == ket) return true;
+				if (indices_[i] == ket)
+					return true;
 
 			return false;
 		}
@@ -99,7 +103,7 @@ public:
 	typedef typename PsimagLite::Vector<OneTimeEvolution*>::Type VectorOneTimeEvolutionType;
 	typedef typename PvectorsType::RealType RealType;
 
-	GroupOfOneTimeEvolutions() {}
+	GroupOfOneTimeEvolutions() { }
 
 	GroupOfOneTimeEvolutions(const GroupOfOneTimeEvolutions&) = delete;
 
@@ -118,7 +122,8 @@ public:
 	{
 		const SizeType n = vEvolutions_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (vEvolutions_[i]->indices()[0] == firstIndex) return vEvolutions_[i];
+			if (vEvolutions_[i]->indices()[0] == firstIndex)
+				return vEvolutions_[i];
 
 		return nullptr;
 	}
@@ -131,7 +136,8 @@ public:
 	{
 		const SizeType n = vEvolutions_.size();
 		for (SizeType i = 0; i < n; ++i) {
-			if (vEvolutions_[i]->hasKet(ket)) return vEvolutions_[i]->time();
+			if (vEvolutions_[i]->hasKet(ket))
+				return vEvolutions_[i]->time();
 		}
 
 		return 0;
@@ -140,7 +146,6 @@ public:
 private:
 
 	VectorOneTimeEvolutionType vEvolutions_;
-
 };
 }
 #endif // GROUP_OF_ONE_TIME_EVOLUTIONS_H

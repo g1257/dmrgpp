@@ -81,24 +81,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGETING_CORRECTION_VECTOR_H
 #define TARGETING_CORRECTION_VECTOR_H
 
-#include "ProgressIndicator.h"
-#include "TargetParamsCorrectionVector.h"
-#include "VectorWithOffsets.h"
 #include "CorrectionVectorFunction.h"
-#include "TargetingBase.h"
-#include "ParametersForSolver.h"
-#include "ParallelTriDiag.h"
+#include "CorrectionVectorSkeleton.h"
 #include "FreqEnum.h"
 #include "NoPthreadsNg.h"
-#include "CorrectionVectorSkeleton.h"
+#include "ParallelTriDiag.h"
+#include "ParametersForSolver.h"
+#include "ProgressIndicator.h"
+#include "TargetParamsCorrectionVector.h"
+#include "TargetingBase.h"
+#include "VectorWithOffsets.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_,VectorWithOffsetType_> {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_>
+class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
+{
 
 	typedef LanczosSolverType_ LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType,VectorWithOffsetType_> BaseType;
+	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
 
 public:
 
@@ -130,33 +132,36 @@ public:
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
-	TargetParamsType> CorrectionVectorFunctionType;
+	    TargetParamsType>
+	    CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType,
-	LanczosSolverType,
-	VectorWithOffsetType> ParallelTriDiagType;
+	    LanczosSolverType,
+	    VectorWithOffsetType>
+	    ParallelTriDiagType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	VectorWithOffsetType,
-	BaseType,
-	TargetParamsType> CorrectionVectorSkeletonType;
+	    VectorWithOffsetType,
+	    BaseType,
+	    TargetParamsType>
+	    CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 
 	TargetingCorrectionVector(const LeftRightSuperType& lrs,
-	                          const CheckpointType& checkPoint,
-	                          const WaveFunctionTransfType& wft,
-	                          const QnType&,
-	                          InputValidatorType& ioIn)
-	    : BaseType(lrs, checkPoint, wft, 1),
-	      tstStruct_(ioIn, "TargetingCorrectionVector", checkPoint.model()),
-	      ioIn_(ioIn),
-	      progress_("TargetingCorrectionVector"),
-	      gsWeight_(1.0),
-	      correctionEnabled_(false),
-	      skeleton_(ioIn_, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy())
+	    const CheckpointType& checkPoint,
+	    const WaveFunctionTransfType& wft,
+	    const QnType&,
+	    InputValidatorType& ioIn)
+	    : BaseType(lrs, checkPoint, wft, 1)
+	    , tstStruct_(ioIn, "TargetingCorrectionVector", checkPoint.model())
+	    , ioIn_(ioIn)
+	    , progress_("TargetingCorrectionVector")
+	    , gsWeight_(1.0)
+	    , correctionEnabled_(false)
+	    , skeleton_(ioIn_, tstStruct_, checkPoint.model(), lrs, this->common().aoe().energy())
 	{
 		if (!wft.isEnabled())
 			err("TargetingCorrectionVector needs wft\n");
@@ -174,23 +179,25 @@ public:
 
 	RealType gsWeight() const
 	{
-		if (!correctionEnabled_) return 1.0;
+		if (!correctionEnabled_)
+			return 1.0;
 		return gsWeight_;
 	}
 
 	SizeType size() const
 	{
-		if (!correctionEnabled_) return 0;
+		if (!correctionEnabled_)
+			return 0;
 		return BaseType::size();
 	}
 
 	void evolve(const VectorRealType& energies,
-	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
-	            const BlockType& block2,
-	            SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    const BlockType& block1,
+	    const BlockType& block2,
+	    SizeType loopNumber)
 	{
-		if (block1.size()!=1 || block2.size()!=1) {
+		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
 			str += " " + ttos(__LINE__) + "\n";
 			str += "evolve only blocks of one site supported\n";
@@ -200,26 +207,26 @@ public:
 		assert(energies.size() > 0);
 		RealType Eg = energies[0];
 		SizeType site = block1[0];
-		evolve(Eg,direction,site,loopNumber);
+		evolve(Eg, direction, site, loopNumber);
 
 		this->common().printNormsAndWeights(gsWeight_, weight_);
 
-		//corner case
+		// corner case
 		SizeType numberOfSites = this->lrs().super().block().size();
 		SizeType site2 = numberOfSites;
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
-		if (site == numberOfSites - 2 &&
-		        direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		if (site == numberOfSites - 2 && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			site2 = numberOfSites - 1;
-		if (site2 == numberOfSites) return;
+		if (site2 == numberOfSites)
+			return;
 		evolve(Eg, direction, site2, loopNumber);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	    PsimagLite::IoSelector::Out& io,
+	    PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "CorrectionVector");
@@ -234,30 +241,31 @@ public:
 private:
 
 	void evolve(RealType Eg,
-	            ProgramGlobals::DirectionEnum direction,
-	            SizeType site,
-	            SizeType loopNumber)
+	    ProgramGlobals::DirectionEnum direction,
+	    SizeType site,
+	    SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;
 		SizeType count = this->common().aoeNonConst().getPhi(&phiNew,
-		                                             Eg,
-		                                             direction,
-		                                             site,
-		                                             loopNumber,
-		                                             tstStruct_);
+		    Eg,
+		    direction,
+		    site,
+		    loopNumber,
+		    tstStruct_);
 
 		if (direction != ProgramGlobals::DirectionEnum::INFINITE) {
-			correctionEnabled_=true;
-			typename PsimagLite::Vector<SizeType>::Type block1(1,site);
-			addCorrection(direction,block1);
+			correctionEnabled_ = true;
+			typename PsimagLite::Vector<SizeType>::Type block1(1, site);
+			addCorrection(direction, block1);
 		}
 
-		if (count==0) return;
+		if (count == 0)
+			return;
 
 		this->tvNonConst(1) = phiNew;
 		skeleton_.calcDynVectors(this->tv(1),
-		                         this->tvNonConst(2),
-		                         this->tvNonConst(3));
+		    this->tvNonConst(2),
+		    this->tvNonConst(3));
 
 		setWeights();
 
@@ -270,43 +278,46 @@ private:
 	{
 		gsWeight_ = tstStruct_.gsWeight();
 
-		RealType sum  = 0;
+		RealType sum = 0;
 		weight_.resize(this->common().aoe().tvs());
 
-		for (SizeType r=1;r<weight_.size();r++) {
+		for (SizeType r = 1; r < weight_.size(); r++) {
 			weight_[r] = 1;
 			sum += weight_[r];
 		}
-		for (SizeType r=0;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)/sum;
+		for (SizeType r = 0; r < weight_.size(); r++)
+			weight_[r] *= (1.0 - gsWeight_) / sum;
 
 		if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
 			sum = 0;
-			for (SizeType r=1;r<weight_.size();r++) {
+			for (SizeType r = 1; r < weight_.size(); r++) {
 				weight_[r] = 1;
 				sum += weight_[r];
 			}
-			weight_[weight_.size()-1] = 0;
-			for (SizeType r=1;r<weight_.size();r++) weight_[r] *= (1.0 - gsWeight_)*r/sum;
+			weight_[weight_.size() - 1] = 0;
+			for (SizeType r = 1; r < weight_.size(); r++)
+				weight_[r] *= (1.0 - gsWeight_) * r / sum;
 		}
 	}
 
-	RealType dynWeightOf(VectorType& v,const VectorType& w) const
+	RealType dynWeightOf(VectorType& v, const VectorType& w) const
 	{
 		RealType sum = 0;
-		for (SizeType i=0;i<v.size();i++) {
-			RealType tmp = PsimagLite::real(v[i]*w[i]);
-			sum += tmp*tmp;
+		for (SizeType i = 0; i < v.size(); i++) {
+			RealType tmp = PsimagLite::real(v[i] * w[i]);
+			sum += tmp * tmp;
 		}
 		return sum;
 	}
 
-	void addCorrection(ProgramGlobals::DirectionEnum direction,const BlockType& block1)
+	void addCorrection(ProgramGlobals::DirectionEnum direction, const BlockType& block1)
 	{
-		if (tstStruct_.correctionA() == 0) return;
+		if (tstStruct_.correctionA() == 0)
+			return;
 		weight_.resize(1);
-		weight_[0]=tstStruct_.correctionA();
-		this->common().computeCorrection(direction,block1);
-		gsWeight_ = 1.0-weight_[0];
+		weight_[0] = tstStruct_.correctionA();
+		this->common().computeCorrection(direction, block1);
+		gsWeight_ = 1.0 - weight_[0];
 	}
 
 	TargetParamsType tstStruct_;
@@ -320,4 +331,3 @@ private:
 } // namespace
 /*@}*/
 #endif // TARGETING_CORRECTION_VECTOR_H
-

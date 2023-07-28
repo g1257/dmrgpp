@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -77,40 +77,44 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 /*! \file Runner.h
  *
  *  A class to help repeating a task multiple times
- * 
+ *
  */
 #ifndef RUNNER_HEADER_H
 #define RUNNER_HEADER_H
 
 #include "String.h"
+#include "TypeToString.h"
+#include <cstdlib>
 #include <fstream>
 #include <iostream>
 #include <vector>
-#include "TypeToString.h"
-#include <cstdlib>
 
-namespace Dmrg {
-	class	Runner {
-	public:
-		Runner(const PsimagLite::String& exec,
-		       const PsimagLite::String& inputRoot,
-		       const PsimagLite::String& ext)
-		: exec_(exec),inputRoot_(inputRoot),ext_(ext)
-		{
-		}
-		
-		void operator()(SizeType i) const
-		{
-			PsimagLite::String s = exec_ + " " + inputRoot_ + ttos(i) + ext_;
-			system(s.c_str());
-		}
+namespace Dmrg
+{
+class Runner
+{
+public:
 
-	private:
+	Runner(const PsimagLite::String& exec,
+	    const PsimagLite::String& inputRoot,
+	    const PsimagLite::String& ext)
+	    : exec_(exec)
+	    , inputRoot_(inputRoot)
+	    , ext_(ext)
+	{
+	}
 
-		PsimagLite::String exec_,inputRoot_,ext_;
-	}; // class Runner
+	void operator()(SizeType i) const
+	{
+		PsimagLite::String s = exec_ + " " + inputRoot_ + ttos(i) + ext_;
+		system(s.c_str());
+	}
+
+private:
+
+	PsimagLite::String exec_, inputRoot_, ext_;
+}; // class Runner
 } // namespace Dmrg
 
 /*@}*/
 #endif // RUNNER_HEADER_H
-

@@ -3,10 +3,12 @@
 #include "Vector.h"
 #include <cstdlib>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ComplexOrRealType>
-class Pvector {
+template <typename ComplexOrRealType>
+class Pvector
+{
 
 public:
 
@@ -20,7 +22,8 @@ public:
 	{
 		// find the weight first
 		SizeType l = str.length();
-		if (l < 4) err("Pvector " + str + " string too short\n");
+		if (l < 4)
+			err("Pvector " + str + " string too short\n");
 		SizeType last = l - 1;
 		if (str[last] != '>')
 			weight_ = findWeightAndStripIt(str);
@@ -32,11 +35,11 @@ public:
 		return (lastName() == "DONE");
 	}
 
-	void setAsDone() {vStr_.push_back("DONE"); }
+	void setAsDone() { vStr_.push_back("DONE"); }
 
 	void pushString(PsimagLite::String newstring) { vStr_.push_back(newstring); }
 
-	void multiplyWeight(const RealType& factor) { weight_*= factor; }
+	void multiplyWeight(const RealType& factor) { weight_ *= factor; }
 
 	void sum(const Pvector& other, PsimagLite::String str)
 	{
@@ -51,7 +54,7 @@ public:
 		vStr_[1] = str;
 		vStr_[2] = "DONE";
 		// weights??
- 	}
+	}
 
 	const PsimagLite::String& firstName() const
 	{
@@ -72,7 +75,8 @@ public:
 	{
 		const SizeType n = vStr_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (vStr_[i] == str) return true;
+			if (vStr_[i] == str)
+				return true;
 		return false;
 	}
 
@@ -96,13 +100,16 @@ public:
 	// in which case we expect TimeEvolve{...}*|Px>
 	static void checkSyntaxOfValue(PsimagLite::String rhs)
 	{
-		if (!isTimeEvolution(rhs)) return;
+		if (!isTimeEvolution(rhs))
+			return;
 
 		const SizeType n = rhs.length();
 		SizeType countStars = 0;
 		for (SizeType i = 0; i < n; ++i) {
-			if (rhs[i] == '*') ++countStars;
-			if (countStars > 1) break;
+			if (rhs[i] == '*')
+				++countStars;
+			if (countStars > 1)
+				break;
 		}
 
 		if (countStars != 1)
@@ -114,12 +121,14 @@ private:
 	static RealType findWeightAndStripIt(PsimagLite::String str)
 	{
 		const SizeType l = str.length();
-		if (l < 4) err("Pvector " + str + " string too short\n");
+		if (l < 4)
+			err("Pvector " + str + " string too short\n");
 		PsimagLite::String buffer("");
 		for (SizeType i = 0; i < l; ++i) {
 			const SizeType j = l - i - 1;
 			const unsigned char letter = str[j];
-			if (letter == '*') break;
+			if (letter == '*')
+				break;
 			if (!isAdigit(letter) && letter != '.' && letter != '+' && letter != '-')
 				err("Wrong weight for vector " + str + "\n");
 

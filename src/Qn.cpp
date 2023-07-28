@@ -1,6 +1,7 @@
 #include "Qn.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 Qn::VectorModalStructType Qn::modalStruct;
 bool Qn::ifPresentOther0IsElectrons = true;
