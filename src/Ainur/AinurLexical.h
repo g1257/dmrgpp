@@ -1,5 +1,6 @@
 #ifndef AINURLEXICAL_H
 #define AINURLEXICAL_H
+#include "../PsimagLite.h"
 #include "../Vector.h"
 
 /* This class only checks whether input file contains valid characters

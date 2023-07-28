@@ -17,6 +17,7 @@ Please see full open source license included in file LICENSE.
 #ifndef PSI_NODE_H
 #define PSI_NODE_H
 #include "../Vector.h"
+#include <cassert>
 
 namespace PsimagLite
 {
