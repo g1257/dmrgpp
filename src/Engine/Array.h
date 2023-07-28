@@ -2,6 +2,7 @@
 #define ARRAY_H
 #include "AllocatorCpu.h"
 #include "Vector.h"
+#include <cassert>
 #include <cstring>
 
 namespace Dmrg

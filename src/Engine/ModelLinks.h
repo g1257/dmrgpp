@@ -123,7 +123,7 @@ public:
 
 		// pair of sites should actually be pair of kinds of sites
 		Term(PsimagLite::String name, bool wantsHermitian = true) // name of term,
-		    // not name of operator
+									  // not name of operator
 		    : name_(name)
 		    , wantsHermitian_(wantsHermitian)
 		{

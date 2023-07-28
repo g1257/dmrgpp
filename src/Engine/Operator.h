@@ -87,6 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputNg.h"
 #include "Io/IoSelector.h"
 #include "Io/IoSerializerStub.h"
+#include "OperatorSpec.h"
 #include "OperatorStorage.h"
 #include "ProgramGlobals.h"
 #include "Su2Related.h"

@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef BASIS_HEADER_H
 #define BASIS_HEADER_H
 #include "BasisTraits.hh"
+#include "BlockDiagonalMatrix.h"
 #include "HamiltonianSymmetryLocal.h"
 #include "Parallelizer2.h"
 #include "Profiling.h"
