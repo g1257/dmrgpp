@@ -1,41 +1,31 @@
 #ifndef IO_SERIALIZER_EMPTY_H
 #define IO_SERIALIZER_EMPTY_H
-#include "../Vector.h"
+#include "../Complex.h"
 #include "../TypeToString.h"
+#include "../Vector.h"
 #include <cassert>
 #include <stack>
-#include "../Complex.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class IoSerializerEmpty {
+class IoSerializerEmpty
+{
 
 	typedef std::vector<unsigned char> VectorOfBoolInternalType;
 
 public:
 
+	enum WriteMode { NO_OVERWRITE,
+		ALLOW_OVERWRITE };
 
-	enum WriteMode {NO_OVERWRITE, ALLOW_OVERWRITE};
+	IoSerializerEmpty(String, unsigned int) { errorPrint("ctor"); }
 
-	IoSerializerEmpty(String, unsigned int)
-	{
-		errorPrint("ctor");
-	}
+	void open(String, unsigned int) { errorPrint("open"); }
 
-	void open(String, unsigned int)
-	{
-		errorPrint("open");
-	}
+	void close() { errorPrint("close"); }
 
-	void close()
-	{
-		errorPrint("close");
-	}
-
-	void flush()
-	{
-		errorPrint("flush");
-	}
+	void flush() { errorPrint("flush"); }
 
 	String filename() const
 	{
@@ -43,10 +33,7 @@ public:
 		return "";
 	}
 
-	void createGroup(String)
-	{
-		errorPrint("createGroup");
-	}
+	void createGroup(String) { errorPrint("createGroup"); }
 
 	bool doesGroupExist(String)
 	{
@@ -56,33 +43,23 @@ public:
 
 	/* write functions START */
 
-	template<typename T>
+	template <typename T>
 	void write(String, const T&, WriteMode = NO_OVERWRITE)
 	{
 		errorPrint("write");
 	}
 
 	// Note: THIS WILL EMPTY THE STACK OBJECT!
-	template<typename T>
-	void write(String,
-	           std::stack<T>&,
-	           WriteMode = NO_OVERWRITE,
-	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith,
-	           int*>::Type = 0)
+	template <typename T>
+	void write(String, std::stack<T>&, WriteMode = NO_OVERWRITE, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith, int*>::Type = 0)
 	{
 		errorPrint("write");
 	}
 
-	template<typename T>
-	void read(T&, String)
-	{
-		errorPrint("read");
-	}
+	template <typename T>
+	void read(T&, String) { errorPrint("read"); }
 
-	static void unitTest(std::vector<bool>&)
-	{
-		errorPrint("unitTest");
-	}
+	static void unitTest(std::vector<bool>&) { errorPrint("unitTest"); }
 
 	// read functions END
 
@@ -94,11 +71,9 @@ private:
 
 	static void errorPrint(String fname)
 	{
-		throw RuntimeError("FATAL: You called IoSerializer::" + fname
-		                   + " but you compiled with USE_IO_SIMPLE."
-		                   + " Please delete USE_IO_SIMPLE from Makefile and"
-		                   + " enable HDF5 support.\n");
+		throw RuntimeError(
+		    "FATAL: You called IoSerializer::" + fname + " but you compiled with USE_IO_SIMPLE." + " Please delete USE_IO_SIMPLE from Makefile and" + " enable HDF5 support.\n");
 	}
 };
-}
+} // namespace PsimagLite
 #endif // IO_SERIALIZER_EMPTY_H

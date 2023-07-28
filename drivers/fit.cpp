@@ -1,12 +1,13 @@
-#include "Vector.h"
-#include <fstream>
-#include <cstdlib>
 #include "Minimizer.h"
-#include <cassert>
 #include "PsimagLite.h"
+#include "Vector.h"
+#include <cassert>
+#include <cstdlib>
+#include <fstream>
 
-template<typename RealType_>
-class OracleData {
+template <typename RealType_>
+class OracleData
+{
 
 public:
 
@@ -34,7 +35,8 @@ public:
 			values_.push_back(value);
 		}
 
-		std::cerr<<"#Found "<<omegas_.size()<<" omega values for kf="<<kf<<"\n";
+		std::cerr << "#Found " << omegas_.size() << " omega values for kf=" << kf
+			  << "\n";
 		if (omegas_.size() == 0)
 			err("No data found in " + file + "\n");
 	}
@@ -45,10 +47,7 @@ public:
 		return values_[i];
 	}
 
-	const VectorRealType& omegas() const
-	{
-		return omegas_;
-	}
+	const VectorRealType& omegas() const { return omegas_; }
 
 private:
 
@@ -57,26 +56,27 @@ private:
 	VectorRealType values_;
 };
 
-template<typename RealType>
-class FitData {
+template <typename RealType>
+class FitData
+{
 
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 public:
 
 	FitData(const VectorRealType& omegas, RealType mu, RealType kf, int ky)
-	    : omegas_(omegas),
-	      mu_(mu),
-	      ekf_(dispersion(kf, ky*M_PI) - mu),
-	      initDelta_(1),
-	      initGamma_(0.1),
-	      anorm_(1.0)
+	    : omegas_(omegas)
+	    , mu_(mu)
+	    , ekf_(dispersion(kf, ky * M_PI) - mu)
+	    , initDelta_(1)
+	    , initGamma_(0.1)
+	    , anorm_(1.0)
 	{
-		//anorm_ = 1.0/sum();
-		std::cerr<<"#FitData ctor(): ekf_= "<<ekf_;
-		std::cerr<<" initDelta_= "<<initDelta_<<" initGamma_= "<<initGamma_;
-		std::cerr<<" mu= "<<mu<<"\n";
-		std::cout<<"anorm="<<anorm_<<"\n";
+		// anorm_ = 1.0/sum();
+		std::cerr << "#FitData ctor(): ekf_= " << ekf_;
+		std::cerr << " initDelta_= " << initDelta_ << " initGamma_= " << initGamma_;
+		std::cerr << " mu= " << mu << "\n";
+		std::cout << "anorm=" << anorm_ << "\n";
 	}
 
 	RealType operator()(SizeType i, const VectorRealType& v) const
@@ -94,7 +94,8 @@ public:
 		const RealType& omega = omegas_[i];
 		const RealType& delta = v[0];
 		const RealType& gamma = v[1];
-		return (j == 0) ? dfDelta(omega, delta, gamma) : dfGamma(omega, delta, gamma);
+		return (j == 0) ? dfDelta(omega, delta, gamma)
+				: dfGamma(omega, delta, gamma);
 	}
 
 	SizeType size() const { return 2; }
@@ -110,39 +111,39 @@ private:
 
 	RealType finternal(RealType omega, RealType delta, RealType gamma) const
 	{
-		RealType gaom = gamma*omega;
-		RealType num = (omega + ekf_)*gaom*2.0*anorm_/M_PI;
-		RealType omega2 = omega*omega;
-		RealType phi2 = ekf_*ekf_ + gamma*gamma + delta*delta;
-		RealType den = square(omega2 - phi2) + 4*gaom*gaom;
-		return num/den;
+		RealType gaom = gamma * omega;
+		RealType num = (omega + ekf_) * gaom * 2.0 * anorm_ / M_PI;
+		RealType omega2 = omega * omega;
+		RealType phi2 = ekf_ * ekf_ + gamma * gamma + delta * delta;
+		RealType den = square(omega2 - phi2) + 4 * gaom * gaom;
+		return num / den;
 	}
 
 	RealType dfDelta(RealType omega, RealType delta, RealType gamma) const
 	{
-		RealType gaom = gamma*omega;
-		RealType num = (omega + ekf_)*gaom*2.0*anorm_/M_PI;
-		RealType omega2 = omega*omega;
-		RealType phi2 = ekf_*ekf_ + gamma*gamma + delta*delta;
-		RealType den = square(omega2 - phi2) + 4*gaom*gaom;
-		RealType numd = 4.0*delta*(phi2 - omega2);
-		return -num*numd/square(den);
+		RealType gaom = gamma * omega;
+		RealType num = (omega + ekf_) * gaom * 2.0 * anorm_ / M_PI;
+		RealType omega2 = omega * omega;
+		RealType phi2 = ekf_ * ekf_ + gamma * gamma + delta * delta;
+		RealType den = square(omega2 - phi2) + 4 * gaom * gaom;
+		RealType numd = 4.0 * delta * (phi2 - omega2);
+		return -num * numd / square(den);
 	}
 
 	RealType dfGamma(RealType omega, RealType delta, RealType gamma) const
 	{
-		RealType gaom = gamma*omega;
-		RealType num0 = (omega + ekf_)*omega*2.0*anorm_/M_PI;
-		RealType omega2 = omega*omega;
-		RealType phi2 = ekf_*ekf_ + gamma*gamma + delta*delta;
-		RealType den = square(omega2 - phi2) + 4.0*gaom*gaom;
-		RealType num = -num0*gamma*(4*(phi2 - omega2)*gamma + 8*gamma*omega2);
-		return num0/den - num/square(den);
+		RealType gaom = gamma * omega;
+		RealType num0 = (omega + ekf_) * omega * 2.0 * anorm_ / M_PI;
+		RealType omega2 = omega * omega;
+		RealType phi2 = ekf_ * ekf_ + gamma * gamma + delta * delta;
+		RealType den = square(omega2 - phi2) + 4.0 * gaom * gaom;
+		RealType num = -num0 * gamma * (4 * (phi2 - omega2) * gamma + 8 * gamma * omega2);
+		return num0 / den - num / square(den);
 	}
 
 	RealType dispersion(RealType kx, RealType ky) const
 	{
-		return -2*cos(kx) - cos(ky);
+		return -2 * cos(kx) - cos(ky);
 	}
 
 	RealType sum() const
@@ -154,7 +155,7 @@ private:
 		return sum;
 	}
 
-	static RealType square(RealType x) { return x*x; }
+	static RealType square(RealType x) { return x * x; }
 
 	VectorRealType omegas_;
 	RealType mu_;
@@ -164,35 +165,39 @@ private:
 	RealType anorm_;
 };
 
-template<typename OracleType, typename FitDataType>
-class Fitter {
+template <typename OracleType, typename FitDataType>
+class Fitter
+{
 
 	typedef typename OracleType::RealType RealType;
 	typedef typename OracleType::VectorRealType VectorRealType;
 
-	class MyFunctionTest {
+	class MyFunctionTest
+	{
 
 	public:
 
 		typedef RealType FieldType;
 
 		MyFunctionTest(const OracleType& od, const FitDataType& fd)
-		    : od_(od), fd_(fd)
-		{}
+		    : od_(od)
+		    , fd_(fd)
+		{
+		}
 
-		RealType operator()(const VectorRealType &v) const
+		RealType operator()(const VectorRealType& v) const
 		{
 			RealType sum = 0.0;
 			SizeType n = od_.omegas().size();
 			for (SizeType i = 0; i < n; ++i) {
 				RealType x = fabs(od_(i) - fd_(i, v));
-				sum += x*x;
+				sum += x * x;
 			}
 
 			return sum;
 		}
 
-		void df(VectorRealType& result, const VectorRealType &v) const
+		void df(VectorRealType& result, const VectorRealType& v) const
 		{
 			assert(result.size() == size());
 			for (SizeType j = 0; j < size(); ++j) {
@@ -200,15 +205,15 @@ class Fitter {
 				SizeType n = od_.omegas().size();
 				for (SizeType i = 0; i < n; ++i) {
 					// FIXME CHECK SIGN OF DERIVATIVE HERE
-					RealType x = (fd_(i, v) - od_(i))*fd_.df(i,v,j);
+					RealType x = (fd_(i, v) - od_(i)) * fd_.df(i, v, j);
 					sum += x;
 				}
 
-				result[j] = sum*2.0;
+				result[j] = sum * 2.0;
 			}
 		}
 
-		SizeType size() const { return  2; }
+		SizeType size() const { return 2; }
 
 	private:
 
@@ -219,21 +224,24 @@ class Fitter {
 public:
 
 	Fitter(const OracleType& od, const FitDataType& fd)
-	    : od_(od), fd_(fd), results_(fd.size(), 0)
-	{}
+	    : od_(od)
+	    , fd_(fd)
+	    , results_(fd.size(), 0)
+	{
+	}
 
 	void fit(SizeType maxIter)
 	{
 		FitDataType::init(results_);
 
 		MyFunctionTest f(od_, fd_);
-		PsimagLite::Minimizer<RealType,MyFunctionTest> min(f, maxIter);
+		PsimagLite::Minimizer<RealType, MyFunctionTest> min(f, maxIter);
 
 		int iter = min.simplex(results_, 1e-5, 1e-7);
-		if (iter<0)
-			std::cerr<<"No minimum found\n";
-		std::cerr<<"#Converged after "<<iter<<" iterations.\n";
-		std::cerr<<"#Minimum is "<<f(results_)<<"\n";
+		if (iter < 0)
+			std::cerr << "No minimum found\n";
+		std::cerr << "#Converged after " << iter << " iterations.\n";
+		std::cerr << "#Minimum is " << f(results_) << "\n";
 		std::ofstream of("test.out");
 		printComparison(of);
 	}
@@ -243,11 +251,11 @@ public:
 		FitDataType::init(results_);
 
 		MyFunctionTest f(od_, fd_);
-		PsimagLite::Minimizer<RealType,MyFunctionTest> min(f, maxIter);
+		PsimagLite::Minimizer<RealType, MyFunctionTest> min(f, maxIter);
 
 		int iter = min.conjugateGradient(results_, 1e-3, 1e-3, 1e-3);
-		if (iter<0)
-			std::cerr<<"No minimum found\n";
+		if (iter < 0)
+			std::cerr << "No minimum found\n";
 	}
 
 	void print(std::ostream& os) const
@@ -255,8 +263,8 @@ public:
 		if (results_.size() != 2)
 			err("print results not size 2\n");
 
-		os<<"delta="<<results_[0]<<"\n";
-		os<<"gamma="<<results_[1]<<"\n";
+		os << "delta=" << results_[0] << "\n";
+		os << "gamma=" << results_[1] << "\n";
 	}
 
 private:
@@ -265,7 +273,7 @@ private:
 	{
 		SizeType n = od_.omegas().size();
 		for (SizeType i = 0; i < n; ++i)
-			os << od_.omegas()[i] << " " << od_(i) << " " << fd_(i, results_)<<"\n";
+			os << od_.omegas()[i] << " " << od_(i) << " " << fd_(i, results_) << "\n";
 	}
 
 	const OracleType& od_;
@@ -276,7 +284,7 @@ private:
 int main(int argc, char** argv)
 {
 	if (argc != 5) {
-		std::cerr<<"USAGE: "<<argv[0]<<" filename.gnuplot mu kf ky\n";
+		std::cerr << "USAGE: " << argv[0] << " filename.gnuplot mu kf ky\n";
 		return 1;
 	}
 
@@ -287,7 +295,7 @@ int main(int argc, char** argv)
 
 	FitData<double> fit(od.omegas(), mu, kf, ky);
 
-	Fitter<OracleData<double>, FitData<double> > fitter(od, fit);
+	Fitter<OracleData<double>, FitData<double>> fitter(od, fit);
 
 	SizeType maxIter = 1000;
 	fitter.fit(maxIter);

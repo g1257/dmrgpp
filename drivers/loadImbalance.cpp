@@ -16,13 +16,14 @@ Please see full open source license included in file LICENSE.
 
 */
 #include "Concurrency.h"
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 #define USE_PTHREADS_OR_NOT_NG
-#include "Parallelizer.h"
 #include "LoadBalancerWeights.h"
+#include "Parallelizer.h"
 
-class MyHelper {
+class MyHelper
+{
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -30,25 +31,22 @@ class MyHelper {
 public:
 
 	MyHelper(SizeType ntasks, SizeType nthreads)
-	    : weight_(ntasks),
-	      x_(nthreads,0)
+	    : weight_(ntasks)
+	    , x_(nthreads, 0)
 	{
 		srand48(1234);
 		for (SizeType i = 0; i < ntasks; ++i) {
-			double x = 10*drand48();
+			double x = 10 * drand48();
 			weight_[i] = 1 + static_cast<SizeType>(x);
-			std::cout<<weight_[i]<<" ";
+			std::cout << weight_[i] << " ";
 		}
 
-		std::cout<<"\n";
+		std::cout << "\n";
 	}
 
 	SizeType tasks() const { return weight_.size(); }
 
-	int result() const
-	{
-		return x_[0];
-	}
+	int result() const { return x_[0]; }
 
 	const VectorSizeType& weights() { return weight_; }
 
@@ -70,31 +68,30 @@ private:
 	VectorSizeType x_;
 }; // class MyHelper
 
-
-int main(int argc,char *argv[])
+int main(int argc, char* argv[])
 {
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
-	if (argc!=3) {
-		std::cout<<"USAGE: "<<argv[0]<<" nthreads ntasks\n";
+	if (argc != 3) {
+		std::cout << "USAGE: " << argv[0] << " nthreads ntasks\n";
 		return 1;
 	}
 
-	SizeType nthreads  = atoi(argv[1]);
+	SizeType nthreads = atoi(argv[1]);
 	SizeType ntasks = atoi(argv[2]);
 
-	ConcurrencyType concurrency(&argc,&argv,nthreads);
+	ConcurrencyType concurrency(&argc, &argv, nthreads);
 
 	typedef MyHelper HelperType;
-	typedef PsimagLite::Parallelizer<HelperType, PsimagLite::LoadBalancerWeights> ParallelizerType;
+	typedef PsimagLite::Parallelizer<HelperType, PsimagLite::LoadBalancerWeights>
+	    ParallelizerType;
 	ParallelizerType threadObject(ConcurrencyType::codeSectionParams);
 
 	HelperType helper(ntasks, nthreads);
 
-	std::cout<<"Using "<<threadObject.name();
-	std::cout<<" with "<<nthreads<<" threads.\n";
+	std::cout << "Using " << threadObject.name();
+	std::cout << " with " << nthreads << " threads.\n";
 	threadObject.loopCreate(helper, helper.weights());
 	helper.sync();
-	std::cout<<"Sum of all tasks= "<<helper.result()<<"\n";
+	std::cout << "Sum of all tasks= " << helper.result() << "\n";
 }
-

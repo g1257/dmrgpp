@@ -2,16 +2,21 @@
 #define DEEPCOPYORNOT_H
 #include "Vector.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename UnderlyingType> // UnderlyingType must have copy ctor
-class DeepCopyOrNot {
+template <typename UnderlyingType> // UnderlyingType must have copy ctor
+class DeepCopyOrNot
+{
 
 public:
 
 	typedef typename Vector<UnderlyingType*>::Type VectorUnderlyingType;
 
-	DeepCopyOrNot(bool isDeep) : isDeep_(isDeep) {}
+	DeepCopyOrNot(bool isDeep)
+	    : isDeep_(isDeep)
+	{
+	}
 
 	~DeepCopyOrNot()
 	{
@@ -24,7 +29,8 @@ public:
 
 	const UnderlyingType& operator()(const UnderlyingType& other)
 	{
-		if (!isDeep_) return other;
+		if (!isDeep_)
+			return other;
 
 		UnderlyingType* tmp = new UnderlyingType(other);
 		garbage_.push_back(tmp);
@@ -40,5 +46,5 @@ private:
 	bool isDeep_;
 	VectorUnderlyingType garbage_;
 };
-}
+} // namespace PsimagLite
 #endif // DEEPCOPYORNOT_H

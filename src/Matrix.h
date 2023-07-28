@@ -18,191 +18,203 @@ Please see full open source license included in file LICENSE.
 #ifndef MATRIX_H_
 #define MATRIX_H_
 
-#include <unistd.h>
-#include "Vector.h"
-#include <stdexcept>
-#include <iostream>
-#include "LapackExtra.h"
-#include "LAPACK.h"
-#include "Complex.h"
-#include <cassert>
-#include "TypeToString.h"
-#include "Mpi.h"
-#include "Io/IoSerializerStub.h"
-#include <fstream>
 #include "BLAS.h"
+#include "Complex.h"
+#include "Io/IoSerializerStub.h"
+#include "LAPACK.h"
+#include "LapackExtra.h"
+#include "Mpi.h"
+#include "TypeToString.h"
+#include "Vector.h"
+#include <cassert>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
+#include <unistd.h>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename RealType>
-void expComplexOrReal(RealType& x,const RealType& y)
+template <typename RealType>
+void expComplexOrReal(RealType& x, const RealType& y)
 {
 	x = exp(y);
 }
 
-template<typename RealType>
-void expComplexOrReal(std::complex<RealType>& x,const RealType& y)
+template <typename RealType>
+void expComplexOrReal(std::complex<RealType>& x, const RealType& y)
 {
-	x = std::complex<RealType>(cos(y),sin(y));
+	x = std::complex<RealType>(cos(y), sin(y));
 }
 
-template<typename T2>
+template <typename T2>
 class MatrixNonOwned;
 
-template<typename T>
-class  Matrix  {
+template <typename T>
+class Matrix
+{
 public:
+
 	typedef T value_type; // legacy name
 
 	Matrix()
-	    : nrow_(0), ncol_(0)
-	{}
-
-	Matrix(SizeType nrow,SizeType ncol)
-	    : nrow_(nrow),
-	      ncol_(ncol),
-	      data_(nrow*ncol)
-	{}
-
-	Matrix(SizeType nrow, SizeType ncol, const T& value)
-	    : nrow_(nrow),
-	      ncol_(ncol),
-	      data_(nrow*ncol, value)
-	{}
-
-	Matrix(const typename Vector<T>::Type& data,
-	       SizeType nrow,
-	       SizeType ncol)
-	    : nrow_(nrow),ncol_(ncol),data_(data)
+	    : nrow_(0)
+	    , ncol_(0)
 	{
-		if (data.size() < nrow*ncol)
-			throw RuntimeError("Matrix::ctor failed\n");
-
-		data_.resize(nrow*ncol);
 	}
 
-	template<typename RealType>
-	Matrix(const Matrix<RealType>& m,
-	       typename EnableIf<!IsComplexNumber<RealType>::True,int>::Type = 0)
+	Matrix(SizeType nrow, SizeType ncol)
+	    : nrow_(nrow)
+	    , ncol_(ncol)
+	    , data_(nrow * ncol)
 	{
-		nrow_=m.rows();
-		ncol_=m.cols();
-		data_.resize(nrow_*ncol_);
-		for (SizeType i=0;i<nrow_;i++)
-			for (SizeType j=0;j<ncol_;j++)
-				data_[i+j*nrow_] = m(i,j);
+	}
+
+	Matrix(SizeType nrow, SizeType ncol, const T& value)
+	    : nrow_(nrow)
+	    , ncol_(ncol)
+	    , data_(nrow * ncol, value)
+	{
+	}
+
+	Matrix(const typename Vector<T>::Type& data, SizeType nrow, SizeType ncol)
+	    : nrow_(nrow)
+	    , ncol_(ncol)
+	    , data_(data)
+	{
+		if (data.size() < nrow * ncol)
+			throw RuntimeError("Matrix::ctor failed\n");
+
+		data_.resize(nrow * ncol);
+	}
+
+	template <typename RealType>
+	Matrix(
+	    const Matrix<RealType>& m,
+	    typename EnableIf<!IsComplexNumber<RealType>::True, int>::Type = 0)
+	{
+		nrow_ = m.rows();
+		ncol_ = m.cols();
+		data_.resize(nrow_ * ncol_);
+		for (SizeType i = 0; i < nrow_; i++)
+			for (SizeType j = 0; j < ncol_; j++)
+				data_[i + j * nrow_] = m(i, j);
 	}
 
 	Matrix(std::ifstream& io)
 	{
-		io>>nrow_;
-		io>>ncol_;
+		io >> nrow_;
+		io >> ncol_;
 		if (nrow_ <= 0 || ncol_ <= 0)
-			throw RuntimeError("Matrix::nrows or ncols negative: cannot construct\n");
+			throw RuntimeError("Matrix::nrows or ncols negative: "
+					   "cannot construct\n");
 
-		data_.resize(nrow_*ncol_);
+		data_.resize(nrow_ * ncol_);
 		for (SizeType i = 0; i < nrow_; ++i)
 			for (SizeType j = 0; j < ncol_; ++j)
-				io >> data_[i + j*nrow_];
+				io >> data_[i + j * nrow_];
 	}
 
 	// ctor closures
-	Matrix(const std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_MULT>& c)
+	Matrix(const std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_MULT>& c)
 	{
 		const T f1 = 1.0;
-		matrixMatrix(c.r1,c.r2,f1);
+		matrixMatrix(c.r1, c.r2, f1);
 	}
 
-	template<typename T1>
+	template <typename T1>
 	Matrix(const std::ClosureOperator<
-	       std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>,
-	       Matrix,
-	       std::ClosureOperations::OP_MULT>& c,
-	       typename EnableIf<Loki::TypeTraits<T1>::isArith,int>::Type = 0)
+		   std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
+		   Matrix,
+		   std::ClosureOperations::OP_MULT>& c,
+	    typename EnableIf<Loki::TypeTraits<T1>::isArith, int>::Type = 0)
 	{
-		*this = c.r1.r1*c.r1.r2*c.r2;
+		*this = c.r1.r1 * c.r1.r2 * c.r2;
 	}
 
-	template<typename T1>
-	Matrix(const std::ClosureOperator<T1,
-	       std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_PLUS>,
-	       std::ClosureOperations::OP_MULT>& c,
-	       typename EnableIf<Loki::TypeTraits<T1>::isArith,int>::Type = 0)
+	template <typename T1>
+	Matrix(const std::ClosureOperator<
+		   T1,
+		   std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_PLUS>,
+		   std::ClosureOperations::OP_MULT>& c,
+	    typename EnableIf<Loki::TypeTraits<T1>::isArith, int>::Type = 0)
 	{
-		*this = c.r1*(c.r2.r1+c.r2.r2);
+		*this = c.r1 * (c.r2.r1 + c.r2.r2);
 	}
 	// end all ctors
 
 	void read(int fd)
 	{
-		::read(fd,&ncol_,sizeof(ncol_));
-		::read(fd,&nrow_,sizeof(nrow_));
-		data_.resize(nrow_*ncol_);
-		::read(fd,&(data_[0]),sizeof(T)*nrow_*ncol_);
+		::read(fd, &ncol_, sizeof(ncol_));
+		::read(fd, &nrow_, sizeof(nrow_));
+		data_.resize(nrow_ * ncol_);
+		::read(fd, &(data_[0]), sizeof(T) * nrow_ * ncol_);
 	}
 
 	void read(String label, IoSerializer& ioSerializer)
 	{
 		ioSerializer.read(nrow_, label + "/nrow_");
 		ioSerializer.read(ncol_, label + "/ncol_");
-		if (nrow_ == 0 || ncol_ == 0) return;
+		if (nrow_ == 0 || ncol_ == 0)
+			return;
 		ioSerializer.read(data_, label + "/data_");
 	}
 
-	void write(String label,
-	           IoSerializer& ioSerializer,
-	           IoSerializer::WriteMode wM = IoSerializer::NO_OVERWRITE) const
+	void
+	write(String label, IoSerializer& ioSerializer, IoSerializer::WriteMode wM = IoSerializer::NO_OVERWRITE) const
 	{
 		bool flag = false;
 		if (wM == IoSerializer::ALLOW_OVERWRITE)
 			flag = overwrite(label, ioSerializer);
 
-		if (flag) return;
+		if (flag)
+			return;
 
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/nrow_", nrow_);
 		ioSerializer.write(label + "/ncol_", ncol_);
-		if (nrow_ == 0 || ncol_ == 0) return;
+		if (nrow_ == 0 || ncol_ == 0)
+			return;
 		ioSerializer.write(label + "/data_", data_);
 	}
 
 	bool overwrite(String label, IoSerializer& ioSerializer) const
 	{
 		bool b = ioSerializer.write(label + "/nrow_", nrow_, IoSerializer::ALLOW_OVERWRITE);
-		if (!b) return b;
+		if (!b)
+			return b;
 
 		b = ioSerializer.write(label + "/ncol_", ncol_, IoSerializer::ALLOW_OVERWRITE);
-		if (!b) return b;
+		if (!b)
+			return b;
 
-		if (nrow_ == 0 || ncol_ == 0) return b;
+		if (nrow_ == 0 || ncol_ == 0)
+			return b;
 		ioSerializer.write(label + "/data_", data_, IoSerializer::ALLOW_OVERWRITE);
 		return true;
 	}
 
 	void print(int fd) const
 	{
-		::write(fd,(const void*)&ncol_,sizeof(ncol_));
-		::write(fd,(const void*)&nrow_,sizeof(nrow_));
-		::write(fd,(const void*)&(data_[0]),sizeof(T)*nrow_*ncol_);
-
+		::write(fd, (const void*)&ncol_, sizeof(ncol_));
+		::write(fd, (const void*)&nrow_, sizeof(nrow_));
+		::write(fd, (const void*)&(data_[0]), sizeof(T) * nrow_ * ncol_);
 	}
 
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType,
-	                   String msg) const
+	template <typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, String msg) const
 	{
 		String str = msg;
 		str += "Matrix";
-		const char* start = (const char *)&nrow_;
+		const char* start = (const char*)&nrow_;
 		const char* end = (const char*)&ncol_;
-		SizeType total = mres.memResolv(&nrow_,end-start,str + " nrow_");
+		SizeType total = mres.memResolv(&nrow_, end - start, str + " nrow_");
 
 		start = end;
 		end = (const char*)&data_;
-		total += mres.memResolv(&ncol_,end-start,str + " ncol_");
+		total += mres.memResolv(&ncol_, end - start, str + " ncol_");
 
-		total += mres.memResolv(&data_,sizeof(*this)-total, str+" data_");
+		total += mres.memResolv(&data_, sizeof(*this) - total, str + " data_");
 
 		return total;
 	}
@@ -225,71 +237,74 @@ public:
 	SizeType nonZeros() const
 	{
 		const T zval = 0.0;
-		SizeType n = nrow_*ncol_;
+		SizeType n = nrow_ * ncol_;
 		assert(data_.size() >= n);
 		SizeType count = 0;
 		for (SizeType i = 0; i < n; ++i)
-			if (data_[i] != zval) ++count;
+			if (data_[i] != zval)
+				++count;
 
 		return count;
 	}
 
 #ifndef NO_DEPRECATED_ALLOWED
-	SizeType n_row() const { return nrow_; } // legacy name
+	SizeType n_row() const
+	{
+		return nrow_;
+	} // legacy name
 
 	SizeType n_col() const { return ncol_; } // legacy name
 #endif
 
-	SizeType rows() const { return nrow_; }
+	SizeType rows() const
+	{
+		return nrow_;
+	}
 
 	SizeType cols() const { return ncol_; }
 
-	const typename Vector<T>::Type data() const
+	const typename Vector<T>::Type data() const { return data_; }
+
+	const T& operator()(SizeType i, SizeType j) const
 	{
-		return data_;
+		assert(i < nrow_ && j < ncol_);
+		assert(i + j * nrow_ < data_.size());
+		return data_[i + j * nrow_];
 	}
 
-	const T& operator()(SizeType i,SizeType j) const
+	T& operator()(SizeType i, SizeType j)
 	{
-		assert(i<nrow_ && j<ncol_);
-		assert(i+j*nrow_<data_.size());
-		return data_[i+j*nrow_];
-	}
-
-	T& operator()(SizeType i,SizeType j)
-	{
-		assert(i<nrow_ && j<ncol_);
-		assert(i+j*nrow_<data_.size());
-		return data_[i+j*nrow_];
+		assert(i < nrow_ && j < ncol_);
+		assert(i + j * nrow_ < data_.size());
+		return data_[i + j * nrow_];
 	}
 
 	bool operator==(const Matrix<T>& other) const
 	{
-		return (nrow_ == other.nrow_ &&
-		        ncol_ == other.ncol_ &&
-		        data_ == other.data_);
+		return (nrow_ == other.nrow_ && ncol_ == other.ncol_ && data_ == other.data_);
 	}
 
 	void resize(SizeType nrow, SizeType ncol, const T& val)
 	{
 		nrow_ = nrow;
 		ncol_ = ncol;
-		data_.resize(nrow*ncol, val);
+		data_.resize(nrow * ncol, val);
 	}
 
 	void resize(SizeType nrow, SizeType ncol)
 	{
 		if (nrow_ > 0 && nrow_ != nrow)
-			throw RuntimeError("Matrix::resize: not allowed to change rows from non-zero\n");
+			throw RuntimeError("Matrix::resize: not allowed to "
+					   "change rows from non-zero\n");
 
 		nrow_ = nrow;
 		ncol_ = ncol;
-		data_.resize(nrow*ncol);
+		data_.resize(nrow * ncol);
 	}
 
 	Matrix<T>& operator+=(const Matrix<T>& other)
 	{
-		assert(data_.size() == ncol_*nrow_);
+		assert(data_.size() == ncol_ * nrow_);
 		SizeType total = std::min(data_.size(), other.data_.size());
 		for (SizeType i = 0; i < total; ++i)
 			data_[i] += other.data_[i];
@@ -299,28 +314,29 @@ public:
 	Matrix<T>& operator-=(const Matrix<T>& other)
 	{
 		// domain checking ???
-		for (SizeType i=0;i<ncol_*nrow_;i++)
+		for (SizeType i = 0; i < ncol_ * nrow_; i++)
 			data_[i] -= other.data_[i];
 		return *this;
 	}
 
 	Matrix<T>& operator*=(const T& value)
 	{
-		for (SizeType i=0;i<ncol_*nrow_;i++)
+		for (SizeType i = 0; i < ncol_ * nrow_; i++)
 			data_[i] *= value;
 		return *this;
 	}
 
-	void print(std::ostream& os,const double& eps) const
+	void print(std::ostream& os, const double& eps) const
 	{
-		os<<nrow_<<" "<<ncol_<<"\n";
-		for (SizeType i=0;i<nrow_;i++) {
-			for (SizeType j=0;j<ncol_;j++) {
-				T val = data_[i+j*nrow_];
-				if (PsimagLite::norm(val)<eps) val=0.0;
-				os<<val<<" ";
+		os << nrow_ << " " << ncol_ << "\n";
+		for (SizeType i = 0; i < nrow_; i++) {
+			for (SizeType j = 0; j < ncol_; j++) {
+				T val = data_[i + j * nrow_];
+				if (PsimagLite::norm(val) < eps)
+					val = 0.0;
+				os << val << " ";
 			}
-			os<<"\n";
+			os << "\n";
 		}
 	}
 
@@ -337,102 +353,117 @@ public:
 
 	void setTo(const T& val)
 	{
-		for (SizeType i=0;i<data_.size();i++) data_[i]=val;
+		for (SizeType i = 0; i < data_.size(); i++)
+			data_[i] = val;
 	}
 
 	void setToIdentity()
 	{
 		if (nrow_ != ncol_) {
-			throw RuntimeError("setToIdentity called on a non-square matrix\n");
+			throw RuntimeError(
+			    "setToIdentity called on a non-square matrix\n");
 		}
 
 		this->setTo(0);
 		for (SizeType i = 0; i < nrow_; ++i) {
-				this->operator()(i, i) = 1;
+			this->operator()(i, i) = 1;
 		}
 	}
 
-	void send(int root,int tag,MPI::CommType mpiComm)
+	void send(int root, int tag, MPI::CommType mpiComm)
 	{
-		MPI::send(nrow_,root,tag,mpiComm);
-		MPI::send(ncol_,root,tag+1,mpiComm);
-		MPI::send(data_,root,tag+2,mpiComm);
+		MPI::send(nrow_, root, tag, mpiComm);
+		MPI::send(ncol_, root, tag + 1, mpiComm);
+		MPI::send(data_, root, tag + 2, mpiComm);
 	}
 
-	void recv(int root,int tag,MPI::CommType mpiComm)
+	void recv(int root, int tag, MPI::CommType mpiComm)
 	{
-		MPI::recv(nrow_,root,tag,mpiComm);
-		MPI::recv(ncol_,root,tag+1,mpiComm);
-		MPI::recv(data_,root,tag+2,mpiComm);
+		MPI::recv(nrow_, root, tag, mpiComm);
+		MPI::recv(ncol_, root, tag + 1, mpiComm);
+		MPI::recv(data_, root, tag + 2, mpiComm);
 	}
 
-	void bcast(int root,MPI::CommType mpiComm)
+	void bcast(int root, MPI::CommType mpiComm)
 	{
-		MPI::bcast(nrow_,root,mpiComm);
-		MPI::bcast(ncol_,root,mpiComm);
-		MPI::bcast(data_,root,mpiComm);
+		MPI::bcast(nrow_, root, mpiComm);
+		MPI::bcast(ncol_, root, mpiComm);
+		MPI::bcast(data_, root, mpiComm);
 	}
 
 	// start closure members
 
-	template<typename T1>
-	Matrix& operator+=(const std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>& c)
+	template <typename T1>
+	Matrix& operator+=(const std::ClosureOperator<
+	    T1,
+	    Matrix,
+	    std::ClosureOperations::OP_MULT>& c)
 	{
 		nrow_ = c.r2.nrow_;
 		ncol_ = c.r2.ncol_;
 
-		const SizeType cSize =  c.r2.data_.size();
+		const SizeType cSize = c.r2.data_.size();
 		resizeIfNeeded(cSize);
 
-		this->data_ += c.r1*c.r2.data_;
+		this->data_ += c.r1 * c.r2.data_;
 		return *this;
 	}
 
-	template<typename T1>
-	Matrix& operator+=(const std::ClosureOperator<Matrix,T1,std::ClosureOperations::OP_MULT>& c)
+	template <typename T1>
+	Matrix& operator+=(const std::ClosureOperator<
+	    Matrix,
+	    T1,
+	    std::ClosureOperations::OP_MULT>& c)
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
 
-		const SizeType cSize =  c.r1.data_.size();
+		const SizeType cSize = c.r1.data_.size();
 		resizeIfNeeded(cSize);
 
-		this->data_ += c.r2*c.r1.data_;
+		this->data_ += c.r2 * c.r1.data_;
 		return *this;
 	}
 
-	template<typename T1>
-	Matrix& operator=(const std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>& c)
-	{
-		nrow_ = c.r2.nrow_;
-		ncol_ = c.r2.ncol_;
-		this->data_ <= c.r1*c.r2.data_;
-		return *this;
-	}
-
-	template<typename T1>
-	Matrix& operator=(const std::ClosureOperator<Matrix,T1,std::ClosureOperations::OP_MULT>& c)
-	{
-		nrow_ = c.r1.nrow_;
-		ncol_ = c.r1.ncol_;
-		this->data_ <= c.r2*c.r1.data_;
-		return *this;
-	}
-
-	template<typename T1>
+	template <typename T1>
 	Matrix& operator=(const std::ClosureOperator<
-	                  std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>,
-	                  Matrix,
-	                  std::ClosureOperations::OP_MULT>& c)
+	    T1,
+	    Matrix,
+	    std::ClosureOperations::OP_MULT>& c)
 	{
-		matrixMatrix(c.r1.r2,c.r2,c.r1.r1);
+		nrow_ = c.r2.nrow_;
+		ncol_ = c.r2.ncol_;
+		this->data_ <= c.r1* c.r2.data_;
 		return *this;
 	}
 
-	template<typename T1>
-	Matrix& operator=(const std::ClosureOperator<T1,
-	                  std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_PLUS>,
-	                  std::ClosureOperations::OP_MULT>& c)
+	template <typename T1>
+	Matrix& operator=(const std::ClosureOperator<
+	    Matrix,
+	    T1,
+	    std::ClosureOperations::OP_MULT>& c)
+	{
+		nrow_ = c.r1.nrow_;
+		ncol_ = c.r1.ncol_;
+		this->data_ <= c.r2* c.r1.data_;
+		return *this;
+	}
+
+	template <typename T1>
+	Matrix& operator=(const std::ClosureOperator<
+	    std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
+	    Matrix,
+	    std::ClosureOperations::OP_MULT>& c)
+	{
+		matrixMatrix(c.r1.r2, c.r2, c.r1.r1);
+		return *this;
+	}
+
+	template <typename T1>
+	Matrix& operator=(const std::ClosureOperator<
+	    T1,
+	    std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_PLUS>,
+	    std::ClosureOperations::OP_MULT>& c)
 	{
 		this->nrow_ = c.r2.r1.nrow_;
 		this->ncol_ = c.r2.r1.ncol_;
@@ -440,10 +471,12 @@ public:
 		return *this;
 	}
 
-	template<typename T1>
-	Matrix& operator=(const std::ClosureOperator<T1,
-	                  std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_MINUS>,
-	                  std::ClosureOperations::OP_MULT>& c)
+	template <typename T1>
+	Matrix&
+	operator=(const std::ClosureOperator<
+	    T1,
+	    std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_MINUS>,
+	    std::ClosureOperations::OP_MULT>& c)
 	{
 		this->nrow_ = c.r2.r1.nrow_;
 		this->ncol_ = c.r2.r1.ncol_;
@@ -451,8 +484,10 @@ public:
 		return *this;
 	}
 
-	Matrix& operator=
-	(const std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_PLUS>& c)
+	Matrix& operator=(const std::ClosureOperator<
+	    Matrix,
+	    Matrix,
+	    std::ClosureOperations::OP_PLUS>& c)
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
@@ -462,8 +497,10 @@ public:
 		return *this;
 	}
 
-	Matrix& operator=
-	(const std::ClosureOperator<Matrix,Matrix,std::ClosureOperations::OP_MINUS>& c)
+	Matrix& operator=(const std::ClosureOperator<
+	    Matrix,
+	    Matrix,
+	    std::ClosureOperations::OP_MINUS>& c)
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
@@ -473,49 +510,48 @@ public:
 		return *this;
 	}
 
-	template<typename T1>
-	Matrix& operator=
-	(const std::ClosureOperator<Matrix,
-	 std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>,
-	 std::ClosureOperations::OP_PLUS>& c)
+	template <typename T1>
+	Matrix& operator=(const std::ClosureOperator<
+	    Matrix,
+	    std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
+	    std::ClosureOperations::OP_PLUS>& c)
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
 		assert(nrow_ == c.r2.r2.nrow_);
 		assert(ncol_ == c.r2.r2.ncol_);
-		this->data_ <= c.r1.data_ + c.r2.r1*c.r2.r2.data_;
+		this->data_ <= c.r1.data_ + c.r2.r1* c.r2.r2.data_;
 		return *this;
 	}
 
-	template<typename T1>
-	Matrix& operator=
-	(const std::ClosureOperator<
-	 std::ClosureOperator<T1,Matrix,std::ClosureOperations::OP_MULT>,
-	 Matrix,
-	 std::ClosureOperations::OP_PLUS>& c)
+	template <typename T1>
+	Matrix& operator=(const std::ClosureOperator<
+	    std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
+	    Matrix,
+	    std::ClosureOperations::OP_PLUS>& c)
 	{
 		nrow_ = c.r2.nrow_;
 		ncol_ = c.r2.ncol_;
 		assert(nrow_ == c.r1.r2.nrow_);
 		assert(ncol_ == c.r1.r2.ncol_);
-		this->data_ <= c.r2.data_ + c.r1.r1*c.r1.r2.data_;
+		this->data_ <= c.r2.data_ + c.r1.r1* c.r1.r2.data_;
 		return *this;
 	}
 
-	Matrix& operator=
-	(const std::ClosureOperator<Matrix<T>,Matrix,std::ClosureOperations::OP_MULT>& c)
+	Matrix& operator=(
+	    const std::ClosureOperator<Matrix<T>, Matrix, std::ClosureOperations::OP_MULT>& c)
 	{
 		const Matrix<T>& a = c.r1;
 		const Matrix<T>& b = c.r2;
 		const T f1 = 1.0;
-		matrixMatrix(a,b,f1);
+		matrixMatrix(a, b, f1);
 
 		return *this;
 	}
 
 	// end closure members
 
-	template<typename T2>
+	template <typename T2>
 	friend class MatrixNonOwned;
 
 private:
@@ -523,24 +559,25 @@ private:
 	void resizeIfNeeded(const SizeType cSize)
 	{
 		if (this->data_.size() > 0 && cSize != this->data_.size())
-			throw RuntimeError("operator+= matrices of different sizes\n");
+			throw RuntimeError(
+			    "operator+= matrices of different sizes\n");
 		if (this->data_.size() == 0)
 			this->data_.resize(cSize);
 	}
 
-	template<typename T1>
+	template <typename T1>
 	void matrixMatrix(const Matrix<T>& a, const Matrix<T>& b, const T1& t1)
 	{
 		Matrix<T> m(a.rows(), b.cols());
-		assert(a.cols()==b.rows());
-		for (SizeType i=0;i<a.rows();i++) {
-			for (SizeType j=0;j<b.cols();j++) {
+		assert(a.cols() == b.rows());
+		for (SizeType i = 0; i < a.rows(); i++) {
+			for (SizeType j = 0; j < b.cols(); j++) {
 				T sum = 0.0;
-				for (SizeType k=0;k<a.cols();k++) {
-					sum += a(i,k) * b(k,j);
+				for (SizeType k = 0; k < a.cols(); k++) {
+					sum += a(i, k) * b(k, j);
 				}
 
-				m(i,j) = sum*t1;
+				m(i, j) = sum * t1;
 			}
 		}
 
@@ -553,198 +590,205 @@ private:
 }; // class Matrix
 
 // start in Matrix.cpp
-void geev(char jobvl,
-          char jobvr,
-          Matrix<std::complex<double> >& a,
-          Vector<std::complex<double> >::Type & w,
-          Matrix<std::complex<double> >& vl,
-          Matrix<std::complex<double> >& vr);
+void geev(char jobvl, char jobvr, Matrix<std::complex<double>>& a, Vector<std::complex<double>>::Type& w, Matrix<std::complex<double>>& vl, Matrix<std::complex<double>>& vr);
 
-void diag(Matrix<double> &m,Vector<double> ::Type& eigs,char option);
+void diag(Matrix<double>& m, Vector<double>::Type& eigs, char option);
 
-void diag(Matrix<std::complex<double> > &m,Vector<double> ::Type&eigs,char option);
+void diag(Matrix<std::complex<double>>& m, Vector<double>::Type& eigs, char option);
 
-void diag(Matrix<float> &m,Vector<float> ::Type& eigs,char option);
+void diag(Matrix<float>& m, Vector<float>::Type& eigs, char option);
 
-void diag(Matrix<std::complex<float> > &m,Vector<float> ::Type& eigs,char option);
+void diag(Matrix<std::complex<float>>& m, Vector<float>::Type& eigs, char option);
 
-template<typename T>
+template <typename T>
 typename std::enable_if<IsComplexNumber<T>::True, void>::type
-inverse(Matrix<T> &m)
+inverse(Matrix<T>& m)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("inverse: NO LAPACK!\n");
 #else
 	int n = m.rows();
 	int info = 0;
-	Vector<int>::Type ipiv(n,0);
-	psimag::LAPACK::GETRF(n, n, &(m(0,0)), n, &(ipiv[0]), info);
+	Vector<int>::Type ipiv(n, 0);
+	psimag::LAPACK::GETRF(n, n, &(m(0, 0)), n, &(ipiv[0]), info);
 	int lwork = -1;
 	typename Vector<T>::Type work(2);
-	psimag::LAPACK::GETRI(n, &(m(0,0)), n, &(ipiv[0]), &(work[0]), lwork, info);
+	psimag::LAPACK::GETRI(n, &(m(0, 0)), n, &(ipiv[0]), &(work[0]), lwork, info);
 	lwork = static_cast<int>(PsimagLite::real(work[0]));
-	work.resize(lwork+2);
-	psimag::LAPACK::GETRI(n, &(m(0,0)), n, &(ipiv[0]), &(work[0]), lwork, info);
+	work.resize(lwork + 2);
+	psimag::LAPACK::GETRI(n, &(m(0, 0)), n, &(ipiv[0]), &(work[0]), lwork, info);
 	String s = "[cz]getri_ failed\n";
-	if (info!=0) throw RuntimeError(s.c_str());
+	if (info != 0)
+		throw RuntimeError(s.c_str());
 #endif
 }
 
-template<typename T>
+template <typename T>
 typename std::enable_if<Loki::TypeTraits<T>::isArith, void>::type
-inverse(Matrix<T> &m)
+inverse(Matrix<T>& m)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("inverse: NO LAPACK!\n");
 #else
 	int n = m.rows();
 	int info = 0;
-	Vector<int>::Type ipiv(n,0);
-	psimag::LAPACK::GETRF( n, n, &(m(0,0)), n, &(ipiv[0]), info);
+	Vector<int>::Type ipiv(n, 0);
+	psimag::LAPACK::GETRF(n, n, &(m(0, 0)), n, &(ipiv[0]), info);
 	int lwork = -1;
 	typename Vector<T>::Type work(2);
-	psimag::LAPACK::GETRI(n, &(m(0,0)), n, &(ipiv[0]), &(work[0]), lwork, info);
+	psimag::LAPACK::GETRI(n, &(m(0, 0)), n, &(ipiv[0]), &(work[0]), lwork, info);
 	lwork = static_cast<int>(work[0]);
-	work.resize(lwork+2);
-	psimag::LAPACK::GETRI(n, &(m(0,0)), n, &(ipiv[0]), &(work[0]), lwork, info);
+	work.resize(lwork + 2);
+	psimag::LAPACK::GETRI(n, &(m(0, 0)), n, &(ipiv[0]), &(work[0]), lwork, info);
 	String s = "[sd]getri_ failed\n";
-	if (info!=0) throw RuntimeError(s.c_str());
+	if (info != 0)
+		throw RuntimeError(s.c_str());
 #endif
 }
 
 // end in Matrix.cpp
 
-template<typename T>
-class IsMatrixLike {
-public:
-	enum { True = false};
-};
-
-template<typename T>
-class IsMatrixLike<Matrix<T> > {
-public:
-	enum { True = true};
-};
-
-template<typename T>
-std::ostream &operator<<(std::ostream &os,Matrix<T> const &A)
+template <typename T>
+class IsMatrixLike
 {
-	SizeType i,j;
-	os<<A.rows()<<" "<<A.cols()<<"\n";
-	for (i=0;i<A.rows();i++) {
-		for (j=0;j<A.cols();j++) os<<A(i,j)<<" ";
-		os<<"\n";
+public:
+
+	enum { True = false };
+};
+
+template <typename T>
+class IsMatrixLike<Matrix<T>>
+{
+public:
+
+	enum { True = true };
+};
+
+template <typename T>
+std::ostream& operator<<(std::ostream& os, Matrix<T> const& A)
+{
+	SizeType i, j;
+	os << A.rows() << " " << A.cols() << "\n";
+	for (i = 0; i < A.rows(); i++) {
+		for (j = 0; j < A.cols(); j++)
+			os << A(i, j) << " ";
+		os << "\n";
 	}
 	return os;
 }
 
-template<typename T>
-void mathematicaPrint(std::ostream& os,const Matrix<T>& A)
+template <typename T>
+void mathematicaPrint(std::ostream& os, const Matrix<T>& A)
 {
-	os<<"m:={";
-	for (SizeType i=0;i<A.rows();i++) {
-		os<<"{";
-		for (SizeType j=0;j<A.cols();j++) {
-			os<<A(i,j);
-			if (j+1<A.cols()) os<<",";
+	os << "m:={";
+	for (SizeType i = 0; i < A.rows(); i++) {
+		os << "{";
+		for (SizeType j = 0; j < A.cols(); j++) {
+			os << A(i, j);
+			if (j + 1 < A.cols())
+				os << ",";
 		}
-		os<<"}";
-		if (i+1<A.rows()) os<<",\n";
+		os << "}";
+		if (i + 1 < A.rows())
+			os << ",\n";
 	}
-	os<<"}\n";
+	os << "}\n";
 }
 
-template<typename T>
-void symbolicPrint(std::ostream& os,const Matrix<T>& A)
+template <typename T>
+void symbolicPrint(std::ostream& os, const Matrix<T>& A)
 {
-	SizeType i,j;
-	os<<A.rows()<<" "<<A.cols()<<"\n";
+	SizeType i, j;
+	os << A.rows() << " " << A.cols() << "\n";
 	typename Vector<T>::Type values;
 	String s = "symbolicPrint: Not enough characters\n";
 	SizeType maxCharacters = 25;
-	for (i=0;i<A.rows();i++) {
-		for (j=0;j<A.cols();j++) {
+	for (i = 0; i < A.rows(); i++) {
+		for (j = 0; j < A.cols(); j++) {
 
-			const T& val = A(i,j);
-			if (PsimagLite::norm(val)<1e-6) {
-				os<<" 0 ";
+			const T& val = A(i, j);
+			if (PsimagLite::norm(val) < 1e-6) {
+				os << " 0 ";
 				continue;
 			}
 
-			SizeType k=0;
-			for (;k<values.size();k++)
-				if (PsimagLite::norm(values[k]-val)<1e-6) break;
-			bool b1 = (k==values.size());
+			SizeType k = 0;
+			for (; k < values.size(); k++)
+				if (PsimagLite::norm(values[k] - val) < 1e-6)
+					break;
+			bool b1 = (k == values.size());
 
 			SizeType k2 = 0;
-			for (;k2<values.size();k2++)
-				if (PsimagLite::norm(values[k2]+val)<1e-6) break;
+			for (; k2 < values.size(); k2++)
+				if (PsimagLite::norm(values[k2] + val) < 1e-6)
+					break;
 
-			bool b2 = (k2==values.size());
+			bool b2 = (k2 == values.size());
 
 			if (b1) {
 				if (b2) {
 					values.push_back(val);
-					if (values.size()>maxCharacters)
+					if (values.size() > maxCharacters)
 						throw RuntimeError(s.c_str());
 					char chark = k + 65;
-					os<<" "<<chark<<" ";
+					os << " " << chark << " ";
 				} else {
 					char chark = k2 + 65;
-					os<<"-"<<chark<<" ";
+					os << "-" << chark << " ";
 				}
 			} else {
 				char chark = k + 65;
-				os<<" "<<chark<<" ";
+				os << " " << chark << " ";
 			}
 		}
-		os<<"\n";
+		os << "\n";
 	}
-	os<<"---------------------------\n";
-	for (SizeType i=0;i<values.size();i++) {
+	os << "---------------------------\n";
+	for (SizeType i = 0; i < values.size(); i++) {
 		char chari = i + 65;
-		os<<chari<<"="<<values[i]<<" ";
+		os << chari << "=" << values[i] << " ";
 	}
-	os<<"\n";
+	os << "\n";
 }
 
-template<typename T>
-void printNonZero(const Matrix<T>& m,std::ostream& os)
+template <typename T>
+void printNonZero(const Matrix<T>& m, std::ostream& os)
 {
-	os<<"#size="<<m.rows()<<"x"<<m.cols()<<"\n";
-	for (SizeType i=0;i<m.rows();i++) {
+	os << "#size=" << m.rows() << "x" << m.cols() << "\n";
+	for (SizeType i = 0; i < m.rows(); i++) {
 		SizeType nonzero = 0;
-		for (SizeType j=0;j<m.cols();j++) {
-			const T& val = m(i,j);
-			if (val!=static_cast<T>(0)) {
-				os<<val<<" ";
+		for (SizeType j = 0; j < m.cols(); j++) {
+			const T& val = m(i, j);
+			if (val != static_cast<T>(0)) {
+				os << val << " ";
 				nonzero++;
 			}
 		}
-		if (nonzero>0) os<<"\n";
+		if (nonzero > 0)
+			os << "\n";
 	}
-	os<<"#diagonal non-zero\n";
-	for (SizeType i=0;i<m.rows();i++) {
-		const T& val = m(i,i);
-		if (val!=static_cast<T>(0)) {
-			os<<val<<" ";
+	os << "#diagonal non-zero\n";
+	for (SizeType i = 0; i < m.rows(); i++) {
+		const T& val = m(i, i);
+		if (val != static_cast<T>(0)) {
+			os << val << " ";
 		}
 	}
-	os<<"\n";
+	os << "\n";
 }
 
-template<typename T>
+template <typename T>
 std::istream& operator>>(std::istream& is, Matrix<T>& A)
 {
-	SizeType nrow=0,ncol=0;
+	SizeType nrow = 0, ncol = 0;
 	is >> nrow;
 	is >> ncol;
 
 	if (is) {
 		A.resize(nrow, ncol);
-		for (SizeType j=0; j<A.rows(); j++)
-			for (SizeType i=0; i<A.cols(); i++)
-				is >> A(j,i);
+		for (SizeType j = 0; j < A.rows(); j++)
+			for (SizeType i = 0; i < A.cols(); i++)
+				is >> A(j, i);
 	} else {
 		String str("ERROR istream& operator >> ");
 		str += "(std::istream&, Matrix<T>&): read past end stream";
@@ -754,38 +798,45 @@ std::istream& operator>>(std::istream& is, Matrix<T>& A)
 	return is;
 }
 
-template<typename T>
-bool isHermitian(Matrix<T> const &A,bool verbose=false)
-{
-	SizeType n=A.rows();
-	double eps=1e-6;
-	if (n!=A.cols())
-		throw RuntimeError("isHermitian called on a non-square matrix.\n");
-	for (SizeType i=0;i<n;i++) for (SizeType j=0;j<n;j++) {
-		if (PsimagLite::norm(A(i,j)-PsimagLite::conj(A(j,i)))>eps) {
-			if (verbose) {
-				std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j);
-				std::cerr<<" A("<<j<<","<<i<<")="<<A(j,i)<<"\n";
-			}
-			return false;
-		}
-	}
-	return true;
-}
-
-template<typename T>
-bool isAntiHermitian(const Matrix<T>& A, bool verbose=false)
+template <typename T>
+bool isHermitian(Matrix<T> const& A, bool verbose = false)
 {
 	SizeType n = A.rows();
 	double eps = 1e-6;
 	if (n != A.cols())
-		throw RuntimeError("isHermitian called on a non-square matrix.\n");
+		throw RuntimeError(
+		    "isHermitian called on a non-square matrix.\n");
+	for (SizeType i = 0; i < n; i++)
+		for (SizeType j = 0; j < n; j++) {
+			if (PsimagLite::norm(A(i, j) - PsimagLite::conj(A(j, i))) > eps) {
+				if (verbose) {
+					std::cerr << "A(" << i << "," << j
+						  << ")=" << A(i, j);
+					std::cerr << " A(" << j << "," << i
+						  << ")=" << A(j, i) << "\n";
+				}
+				return false;
+			}
+		}
+	return true;
+}
+
+template <typename T>
+bool isAntiHermitian(const Matrix<T>& A, bool verbose = false)
+{
+	SizeType n = A.rows();
+	double eps = 1e-6;
+	if (n != A.cols())
+		throw RuntimeError(
+		    "isHermitian called on a non-square matrix.\n");
 	for (SizeType i = 0; i < n; ++i) {
 		for (SizeType j = 0; j < n; ++j) {
 			if (PsimagLite::norm(A(i, j) + PsimagLite::conj(A(j, i))) > eps) {
 				if (verbose) {
-					std::cerr<<"A("<<i<<","<<j<<")="<<A(i,j);
-					std::cerr<<" A("<<j<<","<<i<<")="<<A(j,i)<<"\n";
+					std::cerr << "A(" << i << "," << j
+						  << ")=" << A(i, j);
+					std::cerr << " A(" << j << "," << i
+						  << ")=" << A(j, i) << "\n";
 				}
 
 				return false;
@@ -796,259 +847,233 @@ bool isAntiHermitian(const Matrix<T>& A, bool verbose=false)
 	return true;
 }
 
-template<typename T>
-bool isTheIdentity(Matrix<T> const &a)
+template <typename T>
+bool isTheIdentity(Matrix<T> const& a)
 {
 
-	for (SizeType i=0;i<a.rows();i++) {
-		for (SizeType j=0;j<a.cols();j++) {
-			if (i!=j && PsimagLite::norm(a(i,j))>1e-6)  {
-				std::cerr<<"a("<<i<<","<<j<<")="<<a(i,j)<<"\n";
+	for (SizeType i = 0; i < a.rows(); i++) {
+		for (SizeType j = 0; j < a.cols(); j++) {
+			if (i != j && PsimagLite::norm(a(i, j)) > 1e-6) {
+				std::cerr << "a(" << i << "," << j
+					  << ")=" << a(i, j) << "\n";
 				return false;
 			}
 		}
 	}
 
-	for (SizeType i=0;i<a.rows();i++)
-		if (PsimagLite::norm(a(i,i)-static_cast<T>(1.0))>1e-6) return false;
+	for (SizeType i = 0; i < a.rows(); i++)
+		if (PsimagLite::norm(a(i, i) - static_cast<T>(1.0)) > 1e-6)
+			return false;
 
 	return true;
 }
 
-template<typename T>
-bool isZero(Matrix<std::complex<T> > const &a)
+template <typename T>
+bool isZero(Matrix<std::complex<T>> const& a)
 {
 
-	for (SizeType i=0;i<a.rows();i++)
-		for (SizeType j=0;j<a.cols();j++)
-			if (PsimagLite::norm(a(i,j))>0) return false;
+	for (SizeType i = 0; i < a.rows(); i++)
+		for (SizeType j = 0; j < a.cols(); j++)
+			if (PsimagLite::norm(a(i, j)) > 0)
+				return false;
 	return true;
 }
 
-template<typename T>
+template <typename T>
 bool isZero(const Matrix<T>& m)
 {
-	for (SizeType i=0;i<m.rows();i++)
-		for (SizeType j=0;j<m.cols();j++)
-			if (fabs(m(i,j))>0) return false;
+	for (SizeType i = 0; i < m.rows(); i++)
+		for (SizeType j = 0; j < m.cols(); j++)
+			if (fabs(m(i, j)) > 0)
+				return false;
 	return true;
 }
 
-template<typename T>
+template <typename T>
 void rotate(Matrix<T>& m, const Matrix<T>& transform)
 {
 	Matrix<T> C(transform.cols(), m.cols());
 
 	// C = transform^\dagger * m
-	psimag::BLAS::GEMM('C',
-	                   'N',
-	                   transform.cols(),
-	                   m.cols(),
-	                   m.rows(),
-	                   1.0,
-	                   &(transform(0, 0)),
-	                   transform.rows(),
-	                   &(m(0, 0)),
-	                   m.rows(),
-	                   0.0,
-	                   &(C(0, 0)),
-	                   C.rows());
-
+	psimag::BLAS::GEMM('C', 'N', transform.cols(), m.cols(), m.rows(), 1.0, &(transform(0, 0)), transform.rows(), &(m(0, 0)), m.rows(), 0.0, &(C(0, 0)), C.rows());
 
 	// m = C * transform
 	m.clear();
 	m.resize(C.rows(), transform.cols());
-	psimag::BLAS::GEMM('N',
-	                   'N',
-	                   C.rows(),
-	                   transform.cols(),
-	                   transform.rows(),
-	                   1.0,
-	                   &(C(0, 0)),
-	                   C.rows(),
-	                   &(transform(0, 0)),
-	                   transform.rows(),
-	                   0.0,
-	                   &(m(0, 0)),
-	                   m.rows());
-
+	psimag::BLAS::GEMM('N', 'N', C.rows(), transform.cols(), transform.rows(), 1.0, &(C(0, 0)), C.rows(), &(transform(0, 0)), transform.rows(), 0.0, &(m(0, 0)), m.rows());
 }
 
 // closures start
 
-template<typename T1,typename T2>
-typename EnableIf<(IsMatrixLike<T1>::True || IsMatrixLike<T2>::True)
-&& !std::IsClosureLike<T1>::True && !std::IsClosureLike<T2>::True,
-std::ClosureOperator<T1,T2,std::ClosureOperations::OP_MULT> >::Type operator*(const T1& a,
-                                                                              const T2& b)
+template <typename T1, typename T2>
+typename EnableIf<
+    (IsMatrixLike<T1>::True || IsMatrixLike<T2>::True) && !std::IsClosureLike<T1>::True && !std::IsClosureLike<T2>::True,
+    std::ClosureOperator<T1, T2, std::ClosureOperations::OP_MULT>>::Type
+operator*(const T1& a, const T2& b)
 {
-	return std::ClosureOperator<T1,T2,std::ClosureOperations::OP_MULT>(a,b);
+	return std::ClosureOperator<T1, T2, std::ClosureOperations::OP_MULT>(a,
+	    b);
 }
 
-template<typename T>
-std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>
-operator+(const Matrix<T>& a,const Matrix<T>& b)
+template <typename T>
+std::ClosureOperator<Matrix<T>, Matrix<T>, std::ClosureOperations::OP_PLUS>
+operator+(const Matrix<T>& a, const Matrix<T>& b)
 {
-	return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_PLUS>(a,b);
+	return std::ClosureOperator<Matrix<T>, Matrix<T>, std::ClosureOperations::OP_PLUS>(a, b);
 }
 
-template<typename T>
-std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>
-operator-(const Matrix<T>& a,const Matrix<T>& b)
+template <typename T>
+std::ClosureOperator<Matrix<T>, Matrix<T>, std::ClosureOperations::OP_MINUS>
+operator-(const Matrix<T>& a, const Matrix<T>& b)
 {
-	return std::ClosureOperator<Matrix<T>,Matrix<T>,std::ClosureOperations::OP_MINUS>(a,b);
+	return std::ClosureOperator<Matrix<T>, Matrix<T>, std::ClosureOperations::OP_MINUS>(a, b);
 }
 
-template<typename T,typename A>
-void operator<=(std::vector<T,A>& v, const std::ClosureOperator<Matrix<T>,
-                std::vector<T,A>,
-                std::ClosureOperations::OP_MULT>& c)
+template <typename T, typename A>
+void operator<=(std::vector<T, A>& v,
+    const std::ClosureOperator<Matrix<T>, std::vector<T, A>, std::ClosureOperations::OP_MULT>& c)
 {
-	const std::vector<T,A>& b = c.r2;
+	const std::vector<T, A>& b = c.r2;
 	const Matrix<T>& a = c.r1;
-	assert(a.cols()==b.size());
+	assert(a.cols() == b.size());
 	v.resize(a.rows());
-	for (SizeType i=0;i<a.rows();i++) {
+	for (SizeType i = 0; i < a.rows(); i++) {
 		T sum = 0;
-		for (SizeType j=0;j<b.size();j++) sum += a(i,j)*b[j];
+		for (SizeType j = 0; j < b.size(); j++)
+			sum += a(i, j) * b[j];
 		v[i] = sum;
 	}
 }
 
-template<typename T,typename A>
-void operator<=(std::vector<T,A>& v, const std::ClosureOperator<std::vector<T,A>,
-                Matrix<T>,
-                std::ClosureOperations::OP_MULT>& c)
+template <typename T, typename A>
+void operator<=(std::vector<T, A>& v,
+    const std::ClosureOperator<std::vector<T, A>, Matrix<T>, std::ClosureOperations::OP_MULT>& c)
 {
-	const std::vector<T,A>& b = c.r1;
+	const std::vector<T, A>& b = c.r1;
 	const Matrix<T>& a = c.r2;
-	assert(a.rows()==b.size());
+	assert(a.rows() == b.size());
 	v.resize(a.cols());
-	for (SizeType i=0;i<a.cols();i++) {
+	for (SizeType i = 0; i < a.cols(); i++) {
 		T sum = 0;
-		for (SizeType j=0;j<b.size();j++) sum += b[j] * a(j,i);
+		for (SizeType j = 0; j < b.size(); j++)
+			sum += b[j] * a(j, i);
 		v[i] = sum;
 	}
 }
 
-template<typename T>
-Matrix<T> multiplyTransposeConjugate(const Matrix<T>& O1,
-                                     const Matrix<T>& O2,
-                                     char modifier='C')
+template <typename T>
+Matrix<T> multiplyTransposeConjugate(const Matrix<T>& O1, const Matrix<T>& O2, char modifier = 'C')
 {
-	SizeType n=O1.rows();
-	Matrix<T> ret(n,n);
-	if (modifier=='C') {
-		for (SizeType s=0;s<n;s++)
-			for (SizeType t=0;t<n;t++)
-				for (SizeType w=0;w<n;w++)
-					ret(s,t) += PsimagLite::conj(O1(w,s))*O2(w,t);
+	SizeType n = O1.rows();
+	Matrix<T> ret(n, n);
+	if (modifier == 'C') {
+		for (SizeType s = 0; s < n; s++)
+			for (SizeType t = 0; t < n; t++)
+				for (SizeType w = 0; w < n; w++)
+					ret(s, t) += PsimagLite::conj(O1(w, s)) * O2(w, t);
 	} else {
-		for (SizeType s=0;s<n;s++)
-			for (SizeType t=0;t<n;t++)
-				for (SizeType w=0;w<n;w++)
-					ret(s,t) += O1(w,s)*O2(w,t);
+		for (SizeType s = 0; s < n; s++)
+			for (SizeType t = 0; t < n; t++)
+				for (SizeType w = 0; w < n; w++)
+					ret(s, t) += O1(w, s) * O2(w, t);
 	}
 	return ret;
 }
 
-template<class T>
-void transposeConjugate(Matrix<T>& m2,const Matrix<T>& m)
+template <class T>
+void transposeConjugate(Matrix<T>& m2, const Matrix<T>& m)
 {
-	m2.resize(m.cols(),m.rows());
-	for (SizeType i=0;i<m2.rows();i++)
-		for (SizeType j=0;j<m2.cols();j++)
-			m2(i,j)=PsimagLite::conj(m(j,i));
-
+	m2.resize(m.cols(), m.rows());
+	for (SizeType i = 0; i < m2.rows(); i++)
+		for (SizeType j = 0; j < m2.cols(); j++)
+			m2(i, j) = PsimagLite::conj(m(j, i));
 }
 
-template<class T>
-void transpose(Matrix<T>& m2,const Matrix<T>& m)
+template <class T>
+void transpose(Matrix<T>& m2, const Matrix<T>& m)
 {
-	m2.resize(m.cols(),m.rows());
-	for (SizeType i=0;i<m2.rows();++i)
-		for (SizeType j=0;j<m2.cols();++j)
-			m2(i,j) = m(j,i);
+	m2.resize(m.cols(), m.rows());
+	for (SizeType i = 0; i < m2.rows(); ++i)
+		for (SizeType j = 0; j < m2.cols(); ++j)
+			m2(i, j) = m(j, i);
 }
 
-template<typename T>
+template <typename T>
 Matrix<T> transposeConjugate(const Matrix<T>& A)
 {
-	Matrix<T> ret(A.cols(),A.rows());
-	for (SizeType i=0;i<A.cols();i++)
-		for (SizeType j=0;j<A.rows();j++)
-			ret(i,j)=PsimagLite::conj(A(j,i));
+	Matrix<T> ret(A.cols(), A.rows());
+	for (SizeType i = 0; i < A.cols(); i++)
+		for (SizeType j = 0; j < A.rows(); j++)
+			ret(i, j) = PsimagLite::conj(A(j, i));
 	return ret;
 }
 
-template<typename T>
+template <typename T>
 void exp(Matrix<T>& m)
 {
 	SizeType n = m.rows();
 	typename Vector<typename Real<T>::Type>::Type eigs(n);
-	diag(m,eigs,'V');
-	Matrix<T> expm(n,n);
-	for (SizeType i=0;i<n;i++) {
-		for (SizeType j=0;j<n;j++) {
+	diag(m, eigs, 'V');
+	Matrix<T> expm(n, n);
+	for (SizeType i = 0; i < n; i++) {
+		for (SizeType j = 0; j < n; j++) {
 			T sum = 0;
-			for (SizeType k=0;k<n;k++) {
+			for (SizeType k = 0; k < n; k++) {
 				typename Real<T>::Type alpha = eigs[k];
 				T tmp = 0.0;
-				expComplexOrReal(tmp,alpha);
-				sum+= PsimagLite::conj(m(i,k))*m(j,k)*tmp;
+				expComplexOrReal(tmp, alpha);
+				sum += PsimagLite::conj(m(i, k)) * m(j, k) * tmp;
 			}
-			expm(i,j) = sum;
+			expm(i, j) = sum;
 		}
 	}
 	m = expm;
-
 }
 
-template<typename T>
+template <typename T>
 T norm2(const Matrix<T>& m)
 {
 	T sum = 0;
-	for (SizeType i=0;i<m.rows();i++)
-		for (SizeType j=0;j<m.cols();j++)
-			sum += m(i,j) * m(i,j);
+	for (SizeType i = 0; i < m.rows(); i++)
+		for (SizeType j = 0; j < m.cols(); j++)
+			sum += m(i, j) * m(i, j);
 	return sum;
 }
 
-template<typename T>
-T norm2(const Matrix<std::complex<T> >& m)
+template <typename T>
+T norm2(const Matrix<std::complex<T>>& m)
 {
 	T sum = 0;
-	for (SizeType i=0;i<m.rows();i++)
-		for (SizeType j=0;j<m.cols();j++)
-			sum += PsimagLite::real(PsimagLite::conj(m(i,j)) * m(i,j));
+	for (SizeType i = 0; i < m.rows(); i++)
+		for (SizeType j = 0; j < m.cols(); j++)
+			sum += PsimagLite::real(PsimagLite::conj(m(i, j)) * m(i, j));
 	return sum;
 }
 
-template<typename T>
+template <typename T>
 T scalarProduct(const Matrix<T>& A, const Matrix<T>& B)
 {
 	return A.data_ * B.data_;
 }
 
-template<typename T>
-void outerProduct(Matrix<T>& A,const Matrix<T>& B,const Matrix<T>& C)
+template <typename T>
+void outerProduct(Matrix<T>& A, const Matrix<T>& B, const Matrix<T>& C)
 {
 	SizeType ni = B.rows();
 	SizeType nj = B.cols();
 
-	A.resize(B.rows()*C.rows(),B.cols()*C.cols());
+	A.resize(B.rows() * C.rows(), B.cols() * C.cols());
 
 	for (SizeType i1 = 0; i1 < B.rows(); ++i1)
 		for (SizeType j1 = 0; j1 < B.cols(); ++j1)
 			for (SizeType i2 = 0; i2 < C.rows(); ++i2)
 				for (SizeType j2 = 0; j2 < C.cols(); ++j2)
-					A(i1+i2*ni,j1+j2*nj) = B(i1,j1) * C(i2,j2);
+					A(i1 + i2 * ni, j1 + j2 * nj) = B(i1, j1) * C(i2, j2);
 }
 
 // closures end
-template<typename T>
-typename EnableIf<IsComplexNumber<T>::True, void>::Type
-expIpi(Matrix<T>& A)
+template <typename T>
+typename EnableIf<IsComplexNumber<T>::True, void>::Type expIpi(Matrix<T>& A)
 {
 	typedef typename Real<T>::Type RT;
 
@@ -1059,15 +1084,13 @@ expIpi(Matrix<T>& A)
 	typename Vector<RT>::Type eigs(n);
 	diag(A, eigs, 'V');
 
-	Matrix<T> result(n , n);
+	Matrix<T> result(n, n);
 	for (SizeType i = 0; i < n; ++i) {
 		for (SizeType j = 0; j < n; ++j) {
 			std::complex<RT> sum = 0;
 			for (SizeType k = 0; k < n; ++k) {
-				const RT arg = eigs[k]*M_PI;
-				sum += PsimagLite::conj(A(i, k)) *
-				        std::complex<RT>(cos(arg), sin(arg)) *
-				        A(j, k);
+				const RT arg = eigs[k] * M_PI;
+				sum += PsimagLite::conj(A(i, k)) * std::complex<RT>(cos(arg), sin(arg)) * A(j, k);
 			}
 
 			result(i, j) = sum;
@@ -1077,45 +1100,43 @@ expIpi(Matrix<T>& A)
 	result.swap(A); // basically, A = result
 }
 
-template<typename T>
-typename EnableIf<!IsComplexNumber<T>::True, void>::Type
-expIpi(Matrix<T>&)
+template <typename T>
+typename EnableIf<!IsComplexNumber<T>::True, void>::Type expIpi(Matrix<T>&)
 {
 	throw RuntimeError("expIpi: only when using complex number\n");
 }
 
 #ifdef USE_MPI
-namespace MPI {
-
-template<typename SomeMatrixType>
-typename EnableIf<IsMatrixLike<SomeMatrixType>::True &
-Loki::TypeTraits<typename SomeMatrixType::value_type>::isArith,
-void>::Type allReduce(SomeMatrixType& v,
-                      MPI_Op op = MPI_SUM,
-                      CommType mpiComm = MPI_COMM_WORLD)
+namespace MPI
 {
-	SomeMatrixType recvbuf = v;
-	MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type>::Type;
-	SizeType total = v.rows() * v.cols();
-	int errorCode = MPI_Allreduce(&(v(0,0)),&(recvbuf(0,0)),total,datatype,op,mpiComm);
-	checkError(errorCode,"MPI_Allreduce",mpiComm);
-	v = recvbuf;
-}
 
-template<typename SomeMatrixType>
-typename EnableIf<IsMatrixLike<SomeMatrixType>::True &
-IsComplexNumber<typename SomeMatrixType::value_type>::True,
-void>::Type allReduce(SomeMatrixType& v,
-                      MPI_Op op = MPI_SUM,
-                      CommType mpiComm = MPI_COMM_WORLD)
-{
-	SomeMatrixType recvbuf = v;
-	MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type::value_type>::Type;
-	SizeType total = v.rows() * v.cols();
-	int errorCode = MPI_Allreduce(&(v(0,0)),&(recvbuf(0,0)),2*total,datatype,op,mpiComm);
-	checkError(errorCode,"MPI_Allreduce",mpiComm);
-	v = recvbuf;
-}
+	template <typename SomeMatrixType>
+	typename EnableIf<
+	    IsMatrixLike<SomeMatrixType>::True & Loki::TypeTraits<typename SomeMatrixType::value_type>::isArith,
+	    void>::Type
+	allReduce(SomeMatrixType& v, MPI_Op op = MPI_SUM, CommType mpiComm = MPI_COMM_WORLD)
+	{
+		SomeMatrixType recvbuf = v;
+		MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type>::Type;
+		SizeType total = v.rows() * v.cols();
+		int errorCode = MPI_Allreduce(&(v(0, 0)), &(recvbuf(0, 0)), total, datatype, op, mpiComm);
+		checkError(errorCode, "MPI_Allreduce", mpiComm);
+		v = recvbuf;
+	}
+
+	template <typename SomeMatrixType>
+	typename EnableIf<
+	    IsMatrixLike<SomeMatrixType>::True & IsComplexNumber<typename SomeMatrixType::value_type>::True,
+	    void>::Type
+	allReduce(SomeMatrixType& v, MPI_Op op = MPI_SUM, CommType mpiComm = MPI_COMM_WORLD)
+	{
+		SomeMatrixType recvbuf = v;
+		MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type::value_type>::Type;
+		SizeType total = v.rows() * v.cols();
+		int errorCode = MPI_Allreduce(&(v(0, 0)), &(recvbuf(0, 0)), 2 * total, datatype, op, mpiComm);
+		checkError(errorCode, "MPI_Allreduce", mpiComm);
+		v = recvbuf;
+	}
 
 } // namespace MPI
 #endif // USE_MPI

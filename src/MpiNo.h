@@ -78,58 +78,56 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef MPINO_HEADER_H
 #define MPINO_HEADER_H
-#include <stdexcept>
-#include <algorithm>
-#include "Vector.h"
 #include "../loki/TypeTraits.h"
+#include "Vector.h"
+#include <algorithm>
+#include <stdexcept>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-namespace MPI {
+namespace MPI
+{
 
-typedef int CommType;
-extern int COMM_WORLD;
-extern int SUM;
+	typedef int CommType;
+	extern int COMM_WORLD;
+	extern int SUM;
 
-void init(int*, char***);
+	void init(int*, char***);
 
-void finalize();
+	void finalize();
 
-bool hasMpi();
+	bool hasMpi();
 
-void info(std::ostream&);
+	void info(std::ostream&);
 
-void version(std::ostream&);
+	void version(std::ostream&);
 
-SizeType commSize(CommType);
+	SizeType commSize(CommType);
 
-SizeType commRank(CommType);
+	SizeType commRank(CommType);
 
-int barrier(CommType);
+	int barrier(CommType);
 
-template<typename T>
-void bcast(T&,int = 0,CommType = COMM_WORLD)
-{}
+	template <typename T>
+	void bcast(T&, int = 0, CommType = COMM_WORLD) { }
 
-template<typename T>
-void recv(T&,int, int, CommType = COMM_WORLD)
-{}
+	template <typename T>
+	void recv(T&, int, int, CommType = COMM_WORLD) { }
 
-template<typename T>
-void send(T&,int, int, CommType = COMM_WORLD)
-{}
+	template <typename T>
+	void send(T&, int, int, CommType = COMM_WORLD) { }
 
-template<typename T>
-void pointByPointGather(T&,int = 0, CommType = COMM_WORLD)
-{}
+	template <typename T>
+	void pointByPointGather(T&, int = 0, CommType = COMM_WORLD)
+	{
+	}
 
-template<typename T>
-void reduce(T&,int = 0,int = 0,int = 0)
-{}
+	template <typename T>
+	void reduce(T&, int = 0, int = 0, int = 0) { }
 
-template<typename T>
-void allReduce(T&)
-{}
+	template <typename T>
+	void allReduce(T&) { }
 
 } // namespace MPI
 
@@ -137,4 +135,3 @@ void allReduce(T&)
 
 /*@}*/
 #endif
-

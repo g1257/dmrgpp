@@ -80,24 +80,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef NO_PTHREADS_HEADER_H
 #define NO_PTHREADS_HEADER_H
 
-#include <iostream>
 #include <cassert>
+#include <iostream>
 
-namespace PsimagLite {
-template<typename PthreadFunctionHolderType>
-class NoPthreads {
+namespace PsimagLite
+{
+template <typename PthreadFunctionHolderType>
+class NoPthreads
+{
 
 public:
 
-	NoPthreads(SizeType npthreads=1,int = 0)
+	NoPthreads(SizeType npthreads = 1, int = 0)
 	{
-		std::cerr<<"NoPthreads is deprecated, please use NoPthreadsNg\n";
-		assert(npthreads==1);
+		std::cerr
+		    << "NoPthreads is deprecated, please use NoPthreadsNg\n";
+		assert(npthreads == 1);
 	}
 
-	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
+	void loopCreate(SizeType total, PthreadFunctionHolderType& pfh)
 	{
-		pfh.thread_function_(0,total,total,0);
+		pfh.thread_function_(0, total, total, 0);
 	}
 
 	String name() const { return "nopthreads"; }
@@ -107,7 +110,6 @@ public:
 	SizeType mpiProcs() const { return 1; }
 
 }; // NoPthreads
-} // namespace Dmrg
+} // namespace PsimagLite
 /*@}*/
 #endif
-

@@ -36,49 +36,57 @@ René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 #ifndef PSIBASE64_H
 #define PSIBASE64_H
 
-#include "Vector.h"
 #include "Io/IoSerializerStub.h"
+#include "Vector.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class PsiBase64 {
+class PsiBase64
+{
 
 	static const String base64Chars_;
 
 public:
 
-	class Encode {
+	class Encode
+	{
 
 	public:
 
 		Encode(const String& str)
 		{
-			encode_(reinterpret_cast<const unsigned char*>(str.c_str()),str.length());
+			encode_(reinterpret_cast<const unsigned char*>(
+				    str.c_str()),
+			    str.length());
 		}
 
 		Encode(unsigned char const* bytesToEncode, unsigned int inLen)
 		{
-			encode_(bytesToEncode,inLen);
+			encode_(bytesToEncode, inLen);
 		}
 
 		const String& operator()() const { return buffer_; }
 
-		void write(String label, PsimagLite::IoSerializer& ioSerializer) const
+		void write(String label,
+		    PsimagLite::IoSerializer& ioSerializer) const
 		{
 			ioSerializer.write(label, buffer_);
 		}
 
-		friend std::ostream& operator<<(std::ostream& os, const Encode& encode)
+		friend std::ostream& operator<<(std::ostream& os,
+		    const Encode& encode)
 		{
-			os<<"#InputStartsHere\n";
-			os<<encode.buffer_;
-			os<<"\n#InputEndsHere\n";
+			os << "#InputStartsHere\n";
+			os << encode.buffer_;
+			os << "\n#InputEndsHere\n";
 			return os;
 		}
 
 	private:
 
-		void encode_(unsigned char const* bytesToEncode, unsigned int inLen)
+		void encode_(unsigned char const* bytesToEncode,
+		    unsigned int inLen)
 		{
 			buffer_ = "";
 			int i = 0;
@@ -90,11 +98,11 @@ public:
 				charArray3[i++] = *(bytesToEncode++);
 				if (i == 3) {
 					charArray4[0] = (charArray3[0] & 0xfc) >> 2;
-					charArray4[1] = ((charArray3[0] & 0x03)<<4) + ((charArray3[1] & 0xf0)>>4);
-					charArray4[2] = ((charArray3[1] & 0x0f)<<2) + ((charArray3[2] & 0xc0)>>6);
+					charArray4[1] = ((charArray3[0] & 0x03) << 4) + ((charArray3[1] & 0xf0) >> 4);
+					charArray4[2] = ((charArray3[1] & 0x0f) << 2) + ((charArray3[2] & 0xc0) >> 6);
 					charArray4[3] = charArray3[2] & 0x3f;
 
-					for (i = 0; (i <4) ; i++)
+					for (i = 0; (i < 4); i++)
 						buffer_ += base64Chars_[charArray4[i]];
 					i = 0;
 				}
@@ -112,14 +120,16 @@ public:
 				for (j = 0; (j < i + 1); j++)
 					buffer_ += base64Chars_[charArray4[j]];
 
-				while ((i++ < 3)) buffer_ += '=';
+				while ((i++ < 3))
+					buffer_ += '=';
 			}
 		}
 
 		String buffer_;
 	}; // class Encode
 
-	class Decode {
+	class Decode
+	{
 
 	public:
 
@@ -133,10 +143,12 @@ public:
 			unsigned char charArray4[4], charArray3[3];
 
 			while (inLen-- && (encodedString[in_] != '=') && isBase64(encodedString[in_])) {
-				charArray4[i++] = encodedString[in_]; in_++;
-				if (i ==4) {
-					for (i = 0; i <4; i++)
-						charArray4[i] = base64Chars_.find(charArray4[i]);
+				charArray4[i++] = encodedString[in_];
+				in_++;
+				if (i == 4) {
+					for (i = 0; i < 4; i++)
+						charArray4[i] = base64Chars_.find(
+						    charArray4[i]);
 
 					charArray3[0] = (charArray4[0] << 2) + ((charArray4[1] & 0x30) >> 4);
 					charArray3[1] = ((charArray4[1] & 0xf) << 4) + ((charArray4[2] & 0x3c) >> 2);
@@ -149,17 +161,18 @@ public:
 			}
 
 			if (i) {
-				for (j = i; j <4; j++)
+				for (j = i; j < 4; j++)
 					charArray4[j] = 0;
 
-				for (j = 0; j <4; j++)
+				for (j = 0; j < 4; j++)
 					charArray4[j] = base64Chars_.find(charArray4[j]);
 
 				charArray3[0] = (charArray4[0] << 2) + ((charArray4[1] & 0x30) >> 4);
 				charArray3[1] = ((charArray4[1] & 0xf) << 4) + ((charArray4[2] & 0x3c) >> 2);
 				charArray3[2] = ((charArray4[2] & 0x3) << 6) + charArray4[3];
 
-				for (j = 0; (j < i - 1); j++) buffer_ += charArray3[j];
+				for (j = 0; (j < i - 1); j++)
+					buffer_ += charArray3[j];
 			}
 		}
 
@@ -167,14 +180,14 @@ public:
 
 	private:
 
-		static bool isBase64(unsigned char c) {
+		static bool isBase64(unsigned char c)
+		{
 			return (isalnum(c) || (c == '+') || (c == '/'));
 		}
 
 		String buffer_;
 	}; // class Decode
 }; // class PsiBase64
-}
+} // namespace PsimagLite
 
 #endif // PSIBASE64_H
-

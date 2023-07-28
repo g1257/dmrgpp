@@ -76,11 +76,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARALLELIZER_H
 #define PARALLELIZER_H
-#include <stdexcept>
-#include "Vector.h"
-#include "Concurrency.h"
 #include "CodeSectionParams.h"
+#include "Concurrency.h"
 #include "Map.h"
+#include "Vector.h"
+#include <stdexcept>
 
 #define ActualPthreadsName PthreadsNg
 #define ActualPthreadsN() "PthreadsNg.h"
@@ -97,17 +97,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #endif // USE_PTHREADS
 
-namespace PsimagLite {
-template<typename InstanceType, typename LoadBalancerType=LoadBalancerDefault>
+namespace PsimagLite
+{
+template <typename InstanceType,
+    typename LoadBalancerType = LoadBalancerDefault>
 class Parallelizer
 
 #ifdef USE_PTHREADS
 
-        : public ActualPthreadsName<InstanceType, LoadBalancerType> {
+    : public ActualPthreadsName<InstanceType, LoadBalancerType>
+{
 	typedef ActualPthreadsName<InstanceType, LoadBalancerType> BaseType;
 
 #else
-        : public ActualNoPthreadsName<InstanceType, LoadBalancerType>  {
+    : public ActualNoPthreadsName<InstanceType, LoadBalancerType>
+{
 	typedef ActualNoPthreadsName<InstanceType, LoadBalancerType> BaseType;
 #endif
 
@@ -115,11 +119,13 @@ public:
 
 	Parallelizer(const CodeSectionParams& cs)
 	    : BaseType(cs)
-	{}
+	{
+	}
 
 	Parallelizer(String codeSectionParams)
 	    : BaseType(codeSectionParamss_[codeSectionParams])
-	{}
+	{
+	}
 
 	static bool exists(String name)
 	{
@@ -137,7 +143,7 @@ private:
 
 	static Map<String, CodeSectionParams>::Type codeSectionParamss_;
 };
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif

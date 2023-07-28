@@ -79,18 +79,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PROGRESS_INDICATOR_H
 #define PROGRESS_INDICATOR_H
 
-#include <iostream>
-#include <sstream>
-#include <vector>
 #include "Concurrency.h"
 #include "MemoryUsage.h"
+#include "TypeToString.h"
+#include <iostream>
+#include <sstream>
 #include <sys/types.h>
 #include <unistd.h>
-#include "TypeToString.h"
+#include <vector>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class ProgressIndicator {
+class ProgressIndicator
+{
 
 	static MemoryUsage musage_;
 	static OstringStream buffer_;
@@ -98,10 +100,12 @@ class ProgressIndicator {
 
 public:
 
-	ProgressIndicator(String caller,SizeType threadId = 0)
-	    : threadId_(threadId), rank_(0)
+	ProgressIndicator(String caller, SizeType threadId = 0)
+	    : threadId_(threadId)
+	    , rank_(0)
 	{
-		if (threadId_ != 0) return;
+		if (threadId_ != 0)
+			return;
 
 		caller_ = caller;
 		rank_ = Concurrency::rank();
@@ -115,7 +119,7 @@ public:
 			outName += ttos(p);
 			outName += ".txt";
 			std::ofstream fout(outName.c_str());
-			fout<<buffer_().str()<<"\n";
+			fout << buffer_().str() << "\n";
 			fout.close();
 			buffer_().str("");
 		}
@@ -123,51 +127,60 @@ public:
 		bufferActive_ = !bufferActive_;
 
 		String bufferActive = (bufferActive_) ? "active" : "inactive";
-		std::cerr<<"ProgressIndicator: signal "<<signal<<" received.";
-		std::cerr<<" buffer is now "<<bufferActive<<"\n";
-
+		std::cerr << "ProgressIndicator: signal " << signal
+			  << " received.";
+		std::cerr << " buffer is now " << bufferActive << "\n";
 	}
 
-	template<typename SomeOutputType>
-	void printline(const String &s,SomeOutputType& os) const
+	template <typename SomeOutputType>
+	void printline(const String& s, SomeOutputType& os) const
 	{
-		if (threadId_ != 0) return;
-		if (rank_!=0) return;
+		if (threadId_ != 0)
+			return;
+		if (rank_ != 0)
+			return;
 		prefix(os);
-		os<<s<<"\n";
+		os << s << "\n";
 
-		if (!bufferActive_) return;
+		if (!bufferActive_)
+			return;
 
 		prefix(buffer_);
-		buffer_()<<s<<"\n";
+		buffer_() << s << "\n";
 	}
 
 	void printline(OstringStream& s, std::ostream& os) const
 	{
-		if (threadId_ != 0) return;
-		if (rank_!=0) return;
+		if (threadId_ != 0)
+			return;
+		if (rank_ != 0)
+			return;
 		prefix(os);
-		os<<s().str()<<"\n";
+		os << s().str() << "\n";
 		s().seekp(std::ios_base::beg);
 
-		if (!bufferActive_) return;
+		if (!bufferActive_)
+			return;
 
 		prefix(buffer_);
-		buffer_()<<s().str()<<"\n";
+		buffer_() << s().str() << "\n";
 		s().seekp(std::ios_base::beg);
 	}
 
 	void print(const String& something, std::ostream& os) const
 	{
-		if (threadId_ != 0) return;
-		if (rank_!=0) return;
+		if (threadId_ != 0)
+			return;
+		if (rank_ != 0)
+			return;
 		prefix(os);
-		os<<something;
+		os << something;
 
-		if (!bufferActive_) return;
+		if (!bufferActive_)
+			return;
 
 		prefix(buffer_);
-		buffer_()<<something;
+		buffer_() << something;
 	}
 
 	void printMemoryUsage()
@@ -176,12 +189,15 @@ public:
 		String vmPeak = musage_.findEntry("VmPeak:");
 		String vmSize = musage_.findEntry("VmSize:");
 		OstringStream msg(std::cout.precision());
-		msg()<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
+		msg() << "Current virtual memory is " << vmSize
+		      << " maximum was " << vmPeak;
 		printline(msg, std::cout);
 
-		if (!bufferActive_) return;
+		if (!bufferActive_)
+			return;
 
-		buffer_()<<"Current virtual memory is "<<vmSize<<" maximum was "<<vmPeak;
+		buffer_() << "Current virtual memory is " << vmSize
+			  << " maximum was " << vmPeak;
 		printline(buffer_, std::cout);
 	}
 
@@ -189,13 +205,14 @@ public:
 
 private:
 
-	template<typename SomeOutputStreamType>
+	template <typename SomeOutputStreamType>
 	void prefix(SomeOutputStreamType& os) const
 	{
 		const MemoryUsage::TimeHandle t = musage_.time();
 		const double seconds = t.millis();
 		const SizeType prec = os.precision(3);
-		prefixHelper(os)<<caller_<<" "<<"["<<std::fixed<<seconds<<"]: ";
+		prefixHelper(os) << caller_ << " "
+				 << "[" << std::fixed << seconds << "]: ";
 		os.precision(prec);
 	}
 
@@ -204,7 +221,7 @@ private:
 		return os();
 	}
 
-	template<typename SomeOutputStreamType>
+	template <typename SomeOutputStreamType>
 	SomeOutputStreamType& prefixHelper(SomeOutputStreamType& os) const
 	{
 		return os;
@@ -219,4 +236,3 @@ private:
 
 /*@}*/
 #endif
-

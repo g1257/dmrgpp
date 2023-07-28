@@ -78,24 +78,31 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PSI_GEOMETRY_HONEYCOMB_H
 #define PSI_GEOMETRY_HONEYCOMB_H
 
-#include <stdexcept>
 #include "GeometryBase.h"
 #include <cstdlib>
+#include <stdexcept>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType, typename InputType>
-class Honeycomb : public GeometryBase<ComplexOrRealType, InputType> {
+template <typename ComplexOrRealType, typename InputType>
+class Honeycomb : public GeometryBase<ComplexOrRealType, InputType>
+{
 
 public:
 
-	enum Dir {DIR_X = 0, DIR_Y = 1, DIR_Z = 2};
-	enum GeLe {GREATER_OR_EQUAL, LESS_OR_EQUAL};
+	enum Dir { DIR_X = 0,
+		DIR_Y = 1,
+		DIR_Z = 2 };
+	enum GeLe { GREATER_OR_EQUAL,
+		LESS_OR_EQUAL };
 
 	Honeycomb(SizeType linSize, InputType& io)
-	    : linSize_(linSize), periodicY_(false), periodicX_(false)
+	    : linSize_(linSize)
+	    , periodicY_(false)
+	    , periodicX_(false)
 	{
-		io.readline(ly_,"HoneycombLy=");
+		io.readline(ly_, "HoneycombLy=");
 		int x = 0;
 		io.readline(x, "IsPeriodicY=");
 		periodicY_ = (x > 0);
@@ -103,7 +110,8 @@ public:
 		try {
 			io.readline(x, "IsPeriodicX=");
 			periodicX_ = (x > 0);
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 	}
 
 	virtual SizeType maxConnections() const
@@ -119,14 +127,15 @@ public:
 		return this->unimplemented("length");
 	}
 
-	virtual SizeType translate(SizeType,SizeType,SizeType) const
+	virtual SizeType translate(SizeType, SizeType, SizeType) const
 	{
 		return this->unimplemented("translate");
 	}
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
-		throw RuntimeError("Honeycomb::getVectorSize() unimplemented\n");
+		throw RuntimeError(
+		    "Honeycomb::getVectorSize() unimplemented\n");
 	}
 
 	bool connected(SizeType i1, SizeType i2) const
@@ -142,7 +151,7 @@ public:
 		return bdir.second;
 	}
 
-	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const
 	{
 		if (i <= smax)
 			return isThereAneighbor(i, emin, linSize_);
@@ -154,36 +163,35 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType handle(SizeType i1,SizeType i2) const
+	SizeType handle(SizeType i1, SizeType i2) const
 	{
 		throw RuntimeError("Honeycomb::handle() unimplemented\n");
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
 	{
-		throw RuntimeError("Honeycomb::getSubstituteSite() unimplemented\n");
+		throw RuntimeError(
+		    "Honeycomb::getSubstituteSite() unimplemented\n");
 	}
 
-	String label() const
-	{
-		return "Honeycomb";
-	}
+	String label() const { return "Honeycomb"; }
 
 	SizeType findReflection(SizeType) const
 	{
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
 
-	template<class Archive>
-	void write(Archive &, const unsigned int) {}
+	template <class Archive>
+	void write(Archive&, const unsigned int) { }
 
 private:
 
 	std::pair<bool, Dir> connectedInternal(SizeType ii1, SizeType ii2) const
 	{
 		std::pair<bool, Dir> falseDir(false, DIR_X);
-		if (ii1 == ii2) return falseDir;
+		if (ii1 == ii2)
+			return falseDir;
 
 		bool normal = (ii1 < ii2);
 		SizeType i1 = (normal) ? ii1 : ii2;
@@ -219,12 +227,15 @@ private:
 	// assumes i1 < i2
 	bool isDirectionZ(SizeType x1, SizeType y1, SizeType x2, SizeType y2) const
 	{
-		if (x1 != x2) return false;
+		if (x1 != x2)
+			return false;
 		assert(y1 < y2);
 		SizeType d = y2 - y1;
-		if ((d == 1) && (y1 & 1)) return true;
+		if ((d == 1) && (y1 & 1))
+			return true;
 
-		if (!periodicY_) return false;
+		if (!periodicY_)
+			return false;
 
 		// periodic in y direction
 		return (d + 1 == ly_);
@@ -245,10 +256,11 @@ private:
 		if ((dx == 1) && isMultipleOf3(y1) && (y2 < y1))
 			return true;
 
-		if (!periodicX_) return false;
+		if (!periodicX_)
+			return false;
 
 		// periodic in x direction
-		SizeType lx = linSize_/ly_;
+		SizeType lx = linSize_ / ly_;
 		if (dx + 1 != lx)
 			return false;
 
@@ -270,10 +282,11 @@ private:
 		if ((dx == 1) && isMultipleOf4(y1) && (y1 < y2))
 			return true;
 
-		if (!periodicX_) return false;
+		if (!periodicX_)
+			return false;
 
 		// periodic in x direction
-		SizeType lx = linSize_/ly_;
+		SizeType lx = linSize_ / ly_;
 		if (dx + 1 != lx)
 			return false;
 
@@ -284,7 +297,8 @@ private:
 	{
 		assert(y1 < y2);
 		SizeType dy = y2 - y1;
-		if (dy == 1 && isMultipleOf4(y1)) return true;
+		if (dy == 1 && isMultipleOf4(y1))
+			return true;
 		return (periodicY_ && (dy + 1 == ly_) && isMultipleOf4(y2));
 	}
 
@@ -292,32 +306,29 @@ private:
 	{
 		assert(y1 < y2);
 		SizeType dy = y2 - y1;
-		if (dy == 1 && is4nPlus2(y1)) return true;
+		if (dy == 1 && is4nPlus2(y1))
+			return true;
 		return (periodicY_ && (dy + 1 == ly_) && is4nPlus2(y2));
 	}
 
 	bool isThereAneighbor(SizeType ind, SizeType start, SizeType end) const
 	{
 		for (SizeType i = start; i < end; ++i) {
-			if (connectedInternal(ind, i).first) return true;
+			if (connectedInternal(ind, i).first)
+				return true;
 		}
 
 		return false;
 	}
 
-	static bool isMultipleOf3(SizeType y)
-	{
-		return ((y % 3) == 0);
-	}
+	static bool isMultipleOf3(SizeType y) { return ((y % 3) == 0); }
 
-	static bool isMultipleOf4(SizeType y)
-	{
-		return ((y % 4) == 0);
-	}
+	static bool isMultipleOf4(SizeType y) { return ((y % 4) == 0); }
 
 	static bool is4nPlus2(SizeType y)
 	{
-		if (y < 2) return false;
+		if (y < 2)
+			return false;
 		y -= 2;
 		return ((y % 4) == 0);
 	}
@@ -331,4 +342,3 @@ private:
 
 /*@}*/
 #endif // GEOMETRY_H
-

@@ -3,22 +3,25 @@
 
 #include <cassert>
 
-namespace PsimagLite {
-template<typename T>
-class Optional {
+namespace PsimagLite
+{
+template <typename T>
+class Optional
+{
 
 public:
 
-	Optional(T& t) : t_(&t)
-	{}
-
-	Optional(int) : t_(0)
-	{}
-
-	bool nonNull() const
+	Optional(T& t)
+	    : t_(&t)
 	{
-		return (t_);
 	}
+
+	Optional(int)
+	    : t_(0)
+	{
+	}
+
+	bool nonNull() const { return (t_); }
 
 	T& operator()()
 	{
@@ -30,6 +33,6 @@ private:
 
 	T* t_;
 };
-}
+} // namespace PsimagLite
 
 #endif // PSI_OPTIONAL_H

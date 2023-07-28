@@ -80,9 +80,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PTHREADS_HEADER_H
 #define PTHREADS_HEADER_H
 
-#include <pthread.h>
-#include <iostream>
 #include "AllocatorCpu.h"
+#include <iostream>
+#include <pthread.h>
 #include <sched.h>
 #include <unistd.h>
 #ifdef PTHREAD_ASSIGN_AFFINITIES
@@ -95,11 +95,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <string.h>
 #endif
 
-template<typename PthreadFunctionHolderType>
+template <typename PthreadFunctionHolderType>
 struct PthreadFunctionStruct {
 	PthreadFunctionStruct()
-	    : pfh(0),threadNum(0),blockSize(0),total(0),mutex(0),cpu(0)
-	{}
+	    : pfh(0)
+	    , threadNum(0)
+	    , blockSize(0)
+	    , total(0)
+	    , mutex(0)
+	    , cpu(0)
+	{
+	}
 
 	PthreadFunctionHolderType* pfh;
 	int threadNum;
@@ -109,92 +115,97 @@ struct PthreadFunctionStruct {
 	SizeType cpu;
 };
 
-template<typename PthreadFunctionHolderType>
-void *thread_function_wrapper(void *dummyPtr)
+template <typename PthreadFunctionHolderType>
+void* thread_function_wrapper(void* dummyPtr)
 {
-	PthreadFunctionStruct<PthreadFunctionHolderType> *pfs =
-	        (PthreadFunctionStruct<PthreadFunctionHolderType> *) dummyPtr;
+	PthreadFunctionStruct<PthreadFunctionHolderType>* pfs = (PthreadFunctionStruct<PthreadFunctionHolderType>*)dummyPtr;
 
-	PthreadFunctionHolderType *pfh = pfs->pfh;
+	PthreadFunctionHolderType* pfh = pfs->pfh;
 
 	int s = 0;
 #ifdef __linux___
 	s = sched_getcpu();
 #endif
-	if (s >= 0) pfs->cpu = s;
+	if (s >= 0)
+		pfs->cpu = s;
 
-	pfh->thread_function_(pfs->threadNum,pfs->blockSize,pfs->total,pfs->mutex);
+	pfh->thread_function_(pfs->threadNum, pfs->blockSize, pfs->total, pfs->mutex);
 
 	int retval = 0;
 	pthread_exit(static_cast<void*>(&retval));
 	return 0;
 }
 
-namespace PsimagLite {
-template<typename PthreadFunctionHolderType>
-class Pthreads  {
+namespace PsimagLite
+{
+template <typename PthreadFunctionHolderType>
+class Pthreads
+{
 
 public:
 
-	Pthreads(SizeType npthreads,int = 0)
-	    : nthreads_(npthreads),cores_(1)
+	Pthreads(SizeType npthreads, int = 0)
+	    : nthreads_(npthreads)
+	    , cores_(1)
 	{
-		std::cerr<<"Pthreads is deprecated, please use PthreadsNg\n";
+		std::cerr << "Pthreads is deprecated, please use PthreadsNg\n";
 		int cores = sysconf(_SC_NPROCESSORS_ONLN);
 		cores_ = (cores > 0) ? cores : 1;
 	}
 
-	void loopCreate(SizeType total,PthreadFunctionHolderType& pfh)
+	void loopCreate(SizeType total, PthreadFunctionHolderType& pfh)
 	{
 		PthreadFunctionStruct<PthreadFunctionHolderType>* pfs;
-		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
+		pfs = new PthreadFunctionStruct<
+		    PthreadFunctionHolderType>[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
 		pthread_t* thread_id = new pthread_t[nthreads_];
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 
-		for (SizeType j=0; j <nthreads_; j++) {
+		for (SizeType j = 0; j < nthreads_; j++) {
 			pfs[j].threadNum = j;
 			pfs[j].pfh = &pfh;
 			pfs[j].total = total;
-			pfs[j].blockSize = total/nthreads_;
-			if (total%nthreads_!=0) pfs[j].blockSize++;
+			pfs[j].blockSize = total / nthreads_;
+			if (total % nthreads_ != 0)
+				pfs[j].blockSize++;
 			pfs[j].mutex = &mutex_;
 
 			attr[j] = new pthread_attr_t;
 			int ret = pthread_attr_init(attr[j]);
 			checkForError(ret);
 
-			setAffinity(attr[j],j,cores_);
+			setAffinity(attr[j], j, cores_);
 
-			ret = pthread_create(&thread_id[j],
-			                     attr[j],
-			                     thread_function_wrapper<PthreadFunctionHolderType>,
-			                     &pfs[j]);
+			ret = pthread_create(
+			    &thread_id[j], attr[j], thread_function_wrapper<PthreadFunctionHolderType>, &pfs[j]);
 			checkForError(ret);
 		}
 
-		for (SizeType j=0; j <nthreads_; ++j) pthread_join(thread_id[j], 0);
-		for (SizeType j=0; j <nthreads_; ++j) {
+		for (SizeType j = 0; j < nthreads_; ++j)
+			pthread_join(thread_id[j], 0);
+		for (SizeType j = 0; j < nthreads_; ++j) {
 			int ret = pthread_attr_destroy(attr[j]);
 			checkForError(ret);
 			delete attr[j];
 			attr[j] = 0;
 		}
 
-		delete [] attr;
+		delete[] attr;
 
 #ifndef NDEBUG
 #ifdef __linux__
-		for (SizeType j=0; j <nthreads_; j++) {
-			std::cout<<"Pthreads: Pthread number "<<j<<" runs on core number ";
-			std::cout<<pfs[j].cpu<<"\n";
+		for (SizeType j = 0; j < nthreads_; j++) {
+			std::cout << "Pthreads: Pthread number " << j
+				  << " runs on core number ";
+			std::cout << pfs[j].cpu << "\n";
 		}
 #endif
 #endif
 
 		pthread_mutex_destroy(&mutex_);
-		delete [] thread_id;
-		delete [] pfs;
+		delete[] thread_id;
+		delete[] pfs;
 	}
 
 	String name() const { return "pthreads"; }
@@ -205,18 +216,16 @@ public:
 
 private:
 
-	void setAffinity(pthread_attr_t* attr,
-	                 SizeType threadNum,
-	                 SizeType cores) const
+	void setAffinity(pthread_attr_t* attr, SizeType threadNum, SizeType cores) const
 	{
 #ifdef PTHREAD_ASSIGN_AFFINITIES
 #ifndef __APPLE__
 		cpu_set_t* cpuset = new cpu_set_t;
 		int cpu = threadNum % cores;
 		CPU_ZERO(cpuset);
-		CPU_SET(cpu,cpuset);
+		CPU_SET(cpu, cpuset);
 		std::size_t cpusetsize = sizeof(cpu_set_t);
-		int ret = pthread_attr_setaffinity_np(attr,cpusetsize,cpuset);
+		int ret = pthread_attr_setaffinity_np(attr, cpusetsize, cpuset);
 		checkForError(ret);
 		// clean up
 		delete cpuset;
@@ -227,9 +236,10 @@ private:
 
 	void checkForError(int ret) const
 	{
-		if (ret == 0) return;
+		if (ret == 0)
+			return;
 #ifdef _GNU_SOURCE
-		std::cerr<<"Pthreads ERROR: "<<strerror(ret)<<"\n";
+		std::cerr << "Pthreads ERROR: " << strerror(ret) << "\n";
 #endif
 	}
 
@@ -238,8 +248,7 @@ private:
 	pthread_mutex_t mutex_;
 }; // Pthreads class
 
-} // namespace Dmrg
+} // namespace PsimagLite
 
 /*@}*/
 #endif
-

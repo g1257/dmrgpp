@@ -27,38 +27,40 @@ Please see full open source license included in file LICENSE.
 
 #ifndef LINE_MARKER_H
 #define LINE_MARKER_H
-#include <iostream>
 #include "AllocatorCpu.h"
+#include <iostream>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-	class LineMarker  {
-	public:
+class LineMarker
+{
+public:
 
+	LineMarker(const String& name)
+	    : name_(name + "=0")
+	{
+	}
 
-		LineMarker(const String& name) : name_(name+"=0")
-		{
-		}
+	template <typename IoInputType>
+	LineMarker(IoInputType& io, const String& name, SizeType level = 0)
+	{
+		name_ = name + "=0";
+		SizeType x = 0; // bogus
+		io.readline(x, name_, level);
+	}
 
-		template<typename IoInputType>
-		LineMarker(IoInputType& io,const String& name,SizeType level = 0)
-		{
-			name_ = name + "=0";
-			SizeType x = 0; // bogus
-			io.readline(x,name_,level);
+	template <typename IoOutputType>
+	void save(IoOutputType& io) const
+	{
+		io.printline(name_);
+	}
 
-		}
+private:
 
-		template<typename IoOutputType>
-		void save(IoOutputType& io) const
-		{
-			io.printline(name_);
-		}
+	String name_;
 
-	private:
-		String name_;
-
-	}; // class LineMarker
+}; // class LineMarker
 } // namespace PsimagLite
 /*@}*/
-#endif  //LINE_MARKER_H
+#endif // LINE_MARKER_H

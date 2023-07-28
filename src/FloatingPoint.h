@@ -81,9 +81,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <fenv.h>
 #endif
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class FloatingPoint {
+class FloatingPoint
+{
 
 public:
 
@@ -99,4 +101,3 @@ public:
 
 /*@}*/
 #endif
-

@@ -1,11 +1,12 @@
 #ifndef PREDICATE_AWESOME_H
 #define PREDICATE_AWESOME_H
 
-#include "Vector.h"
 #include "PredicateAnd.h"
 #include "PredicateDefaultSpec.h"
+#include "Vector.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
 /* PSIDOC PredicateAwesome
  Comma-separated list of items, don't leave spaces:
@@ -55,8 +56,9 @@ namespace PsimagLite {
  etc. Can we do this with varargs templates?? FIXME TODO
  */
 
-template<typename SpecType = PredicateDefaultSpec>
-class PredicateAwesome {
+template <typename SpecType = PredicateDefaultSpec>
+class PredicateAwesome
+{
 
 public:
 
@@ -66,70 +68,72 @@ public:
 	PredicateAwesome(String pred, String orSeparator = ",", String andSeparator = "&", SpecType* spec = nullptr)
 	    : pred_(pred)
 	{
-		if (pred_ == "") return;
+		if (pred_ == "")
+			return;
 		VectorStringType tokens;
 		split(tokens, pred, orSeparator);
 		const SizeType n = tokens.size();
 		for (SizeType i = 0; i < n; ++i) {
 			if (tokens[i].length() > 0 && tokens[i][0] == '@') {
 				if (!spec)
-					throw RuntimeError(String("PredicateAwesome:: with default spec") +
-				                       " cannot handle special options\n");
+					throw RuntimeError(
+					    String("PredicateAwesome:: with "
+						   "default spec")
+					    + " cannot handle special options\n");
 				spec->operator()(tokens[i]);
 				continue;
 			}
 
-			predicateAnd_.push_back(PredicateAnd(tokens[i], andSeparator));
+			predicateAnd_.push_back(
+			    PredicateAnd(tokens[i], andSeparator));
 		}
 	}
 
-	template<typename T>
+	template <typename T>
 	bool isTrue(String name, T val)
 	{
-		if (pred_ == "") return false;
+		if (pred_ == "")
+			return false;
 		SizeType n = predicateAnd_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (predicateAnd_[i].isTrue(name, val)) return true;
+			if (predicateAnd_[i].isTrue(name, val))
+				return true;
 		return false;
 	}
 
-	template<typename T1, typename T2>
+	template <typename T1, typename T2>
 	bool isTrue(String name1, T1 val1, String name2, T2 val2)
 	{
-		if (pred_ == "") return false;
+		if (pred_ == "")
+			return false;
 		SizeType n = predicateAnd_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (predicateAnd_[i].isTrue(name1, val1, name2, val2)) return true;
+			if (predicateAnd_[i].isTrue(name1, val1, name2, val2))
+				return true;
 		return false;
 	}
 
-	template<typename T1, typename T2>
-	bool isTrue(String name1, T1 val1,
-	            String name2, T2 val2,
-	            String name3, T1 val3)
+	template <typename T1, typename T2>
+	bool isTrue(String name1, T1 val1, String name2, T2 val2, String name3, T1 val3)
 	{
-		if (pred_ == "") return false;
+		if (pred_ == "")
+			return false;
 		SizeType n = predicateAnd_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (predicateAnd_[i].isTrue(name1, val1,
-			                            name2, val2,
-			                            name3, val3)) return true;
+			if (predicateAnd_[i].isTrue(name1, val1, name2, val2, name3, val3))
+				return true;
 		return false;
 	}
 
-	template<typename T1, typename T2>
-	bool isTrue(String name1, T1 val1,
-	            String name2, T2 val2,
-	            String name3, T1 val3,
-	            String name4, T2 val4)
+	template <typename T1, typename T2>
+	bool isTrue(String name1, T1 val1, String name2, T2 val2, String name3, T1 val3, String name4, T2 val4)
 	{
-		if (pred_ == "") return false;
+		if (pred_ == "")
+			return false;
 		SizeType n = predicateAnd_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (predicateAnd_[i].isTrue(name1, val1,
-			                            name2, val2,
-			                            name3, val3,
-			                            name4, val4)) return true;
+			if (predicateAnd_[i].isTrue(name1, val1, name2, val2, name3, val3, name4, val4))
+				return true;
 		return false;
 	}
 
@@ -138,5 +142,5 @@ private:
 	String pred_;
 	VectorPredicateAndType predicateAnd_;
 };
-}
+} // namespace PsimagLite
 #endif // PREDICATE_AWESOME_H

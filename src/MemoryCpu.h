@@ -25,36 +25,38 @@ Please see full open source license included in file LICENSE.
 #ifndef MEMORY_CPU_H
 #define MEMORY_CPU_H
 
-#include <vector>
-#include <stdexcept>
+#include <cassert>
 #include <cstdlib>
 #include <iostream>
-#include <cassert>
-#include <string>
 #include <sstream>
+#include <stdexcept>
+#include <string>
+#include <vector>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class MemoryCpu {
+class MemoryCpu
+{
 
 public:
 
-	void deallocate(void *p)
+	void deallocate(void* p)
 	{
 		assert(p);
 		free(p);
 		std::ostringstream msg;
-		msg<<"// Freed "<<p;
-		std::cout<<msg.str()<<"\n";
-		p=0;
+		msg << "// Freed " << p;
+		std::cout << msg.str() << "\n";
+		p = 0;
 	}
 
 	void* allocate(size_t x)
 	{
-		void *p = malloc(x);
+		void* p = malloc(x);
 		std::ostringstream msg;
-		msg<<"// Allocated starting at "<<p<<" "<<x<<" bytes";
-		std::cout<<msg.str()<<"\n";
+		msg << "// Allocated starting at " << p << " " << x << " bytes";
+		std::cout << msg.str() << "\n";
 		return p;
 	}
 
@@ -65,4 +67,3 @@ MemoryCpu globalMemoryCpu;
 
 /*@}*/
 #endif // MEMORY_CPU_H
-

@@ -4,7 +4,8 @@
 #include "../PsimagLite.h"
 #include "AinurMacros.hh"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
 struct AinurVariable {
 	std::string key;
@@ -13,19 +14,21 @@ struct AinurVariable {
 	std::string opaque;
 };
 
-class AinurConvert {
+class AinurConvert
+{
 
-	template<typename T>
+	template <typename T>
 	struct Action {
 
 		Action(String name, std::vector<T>& t, const AinurMacros& ainurMacros)
-		    : name_(name), t_(t), ainurMacros_(ainurMacros)
-		{}
+		    : name_(name)
+		    , t_(t)
+		    , ainurMacros_(ainurMacros)
+		{
+		}
 
 		template <typename A, typename ContextType>
-		void operator()(A& attr,
-		                ContextType&,
-		                bool&) const;
+		void operator()(A& attr, ContextType&, bool&) const;
 
 	private:
 
@@ -34,17 +37,18 @@ class AinurConvert {
 		const AinurMacros& ainurMacros_;
 	}; // struct Action
 
-	template<typename T>
+	template <typename T>
 	struct ActionMatrix {
 
 		ActionMatrix(String name, Matrix<T>& t, const AinurMacros& ainurMacros)
-		    : name_(name), t_(t), ainurMacros_(ainurMacros)
-		{}
+		    : name_(name)
+		    , t_(t)
+		    , ainurMacros_(ainurMacros)
+		{
+		}
 
 		template <typename A, typename ContextType>
-		void operator()(A& attr,
-		                ContextType&,
-		                bool&) const;
+		void operator()(A& attr, ContextType&, bool&) const;
 
 	private:
 
@@ -55,42 +59,36 @@ class AinurConvert {
 
 public:
 
-	AinurConvert(const AinurMacros& ainurMacros) : ainurMacros_(ainurMacros)
-	{}
+	AinurConvert(const AinurMacros& ainurMacros)
+	    : ainurMacros_(ainurMacros)
+	{
+	}
 
-	template<typename T>
-	void convert(std::vector<T>& t,
-	             const AinurVariable& ainurVariable,
-	             typename EnableIf<Loki::TypeTraits<T>::isArith ||
-	             IsComplexNumber<T>::True ||
-	             TypesEqual<T, String>::True,
-	             int>::Type = 0);
+	template <typename T>
+	void convert(std::vector<T>& t, const AinurVariable& ainurVariable, typename EnableIf<Loki::TypeTraits<T>::isArith || IsComplexNumber<T>::True || TypesEqual<T, String>::True, int>::Type = 0);
 
-	template<typename T>
-	void convert(Matrix<T>& t,
-	             const AinurVariable& ainurVariable);
+	template <typename T>
+	void convert(Matrix<T>& t, const AinurVariable& ainurVariable);
 
-	template<typename T>
-	void convert(T& t,
-	             const AinurVariable& ainurVariable,
-	             typename EnableIf<Loki::TypeTraits<T>::isIntegral,
-	             int>::Type = 0)
+	template <typename T>
+	void convert(
+	    T& t,
+	    const AinurVariable& ainurVariable,
+	    typename EnableIf<Loki::TypeTraits<T>::isIntegral, int>::Type = 0)
 	{
 		String label = ainurMacros_.valueFromFunction(ainurVariable.value);
 
 		try {
 			t = PsimagLite::atoi(label.c_str());
 		} catch (std::exception& e) {
-			std::cerr<<"FATAL: AinurState: Label " + label + " must be an integer\n";
+			std::cerr << "FATAL: AinurState: Label " + label + " must be an integer\n";
 			throw e.what();
 		}
 	}
 
-	template<typename T>
-	void convert(T& t,
-	             const AinurVariable& ainurVariable,
-	             typename EnableIf<Loki::TypeTraits<T>::isFloat,
-	             int>::Type = 0)
+	template <typename T>
+	void
+	convert(T& t, const AinurVariable& ainurVariable, typename EnableIf<Loki::TypeTraits<T>::isFloat, int>::Type = 0)
 	{
 		String label = ainurMacros_.valueFromFunction(ainurVariable.value);
 
@@ -106,7 +104,7 @@ public:
 		String label = ainurMacros_.valueFromFunction(ainurVariable.value);
 		SizeType l = label.size();
 		if (l > 1 && label[0] == '"' && label[l - 1] == '"') {
-			t = (l == 2) ? "" : label.substr(1,l - 2);
+			t = (l == 2) ? "" : label.substr(1, l - 2);
 			return;
 		}
 
@@ -116,10 +114,10 @@ public:
 private:
 
 	static String stringContext(std::string::iterator it,
-	                            std::string::iterator start,
-	                            std::string::iterator end,
-	                            SizeType before = 5,
-	                            SizeType after = 10)
+	    std::string::iterator start,
+	    std::string::iterator end,
+	    SizeType before = 5,
+	    SizeType after = 10)
 	{
 		std::string::iterator alpha = it;
 		SizeType counter = 0;
@@ -136,5 +134,5 @@ private:
 
 	const AinurMacros& ainurMacros_;
 };
-}
+} // namespace PsimagLite
 #endif // AINURCONVERT_HH

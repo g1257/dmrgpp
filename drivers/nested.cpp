@@ -16,12 +16,13 @@ Please see full open source license included in file LICENSE.
 
 */
 #include "../src/Concurrency.h"
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 #define USE_PTHREADS_OR_NOT_NG
 #include "../src/Parallelizer.h"
 
-class InnerHelper {
+class InnerHelper
+{
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -29,15 +30,15 @@ class InnerHelper {
 public:
 
 	InnerHelper(SizeType ntasks, SizeType nthreads, int outerTask)
-	    : ntasks_(ntasks), x_(nthreads,0), offset_(outerTask*ntasks)
-	{}
+	    : ntasks_(ntasks)
+	    , x_(nthreads, 0)
+	    , offset_(outerTask * ntasks)
+	{
+	}
 
 	SizeType tasks() const { return ntasks_; }
 
-	int result() const
-	{
-		return x_[0];
-	}
+	int result() const { return x_[0]; }
 
 	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
@@ -57,29 +58,25 @@ private:
 	SizeType offset_;
 }; // class InnerHelper
 
-class MyHelper {
+class MyHelper
+{
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
-	MyHelper(SizeType ntasks,
-	         SizeType nthreadsOuter,
-	         SizeType ntasksInner,
-	         SizeType nthreadsInner)
-	    : ntasks_(ntasks),
-	      x_(nthreadsOuter,0),
-	      ntasksInner_(ntasksInner),
-	      nthreadsInner_(nthreadsInner)
-	{}
+	MyHelper(SizeType ntasks, SizeType nthreadsOuter, SizeType ntasksInner, SizeType nthreadsInner)
+	    : ntasks_(ntasks)
+	    , x_(nthreadsOuter, 0)
+	    , ntasksInner_(ntasksInner)
+	    , nthreadsInner_(nthreadsInner)
+	{
+	}
 
 	SizeType tasks() const { return ntasks_; }
 
-	int result() const
-	{
-		return x_[0];
-	}
+	int result() const { return x_[0]; }
 
 	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
@@ -106,23 +103,22 @@ private:
 	SizeType nthreadsInner_;
 }; // class MyHelper
 
-
-int main(int argc,char *argv[])
+int main(int argc, char* argv[])
 {
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
-
 	if (argc != 5) {
-		std::cout<<"USAGE: "<<argv[0]<<" threadsOuter tasksOuter threadsInner tasksInner\n";
+		std::cout << "USAGE: " << argv[0]
+			  << " threadsOuter tasksOuter threadsInner tasksInner\n";
 		return 1;
 	}
 
-	SizeType nthreadsOuter  = atoi(argv[1]);
+	SizeType nthreadsOuter = atoi(argv[1]);
 	SizeType ntasks = atoi(argv[2]);
-	SizeType nthreadsInner  = atoi(argv[3]);
+	SizeType nthreadsInner = atoi(argv[3]);
 	SizeType ntasksInner = atoi(argv[4]);
 
-	ConcurrencyType concurrency(&argc,&argv,1);
+	ConcurrencyType concurrency(&argc, &argv, 1);
 
 	typedef MyHelper HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
@@ -131,10 +127,9 @@ int main(int argc,char *argv[])
 
 	HelperType helper(ntasks, nthreadsOuter, ntasksInner, nthreadsInner);
 
-	std::cout<<"Using "<<threadObject.name();
-	std::cout<<" with "<<nthreadsOuter<<" threads.\n";
+	std::cout << "Using " << threadObject.name();
+	std::cout << " with " << nthreadsOuter << " threads.\n";
 	threadObject.loopCreate(helper);
 	helper.sync();
-	std::cout<<"Sum of all tasks= "<<helper.result()<<"\n";
+	std::cout << "Sum of all tasks= " << helper.result() << "\n";
 }
-

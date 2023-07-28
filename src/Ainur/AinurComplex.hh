@@ -3,7 +3,8 @@
 
 #include "../PsimagLite.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
 struct AinurComplex {
 
@@ -37,18 +38,15 @@ struct AinurComplex {
 		t = PsimagLite::atof(str);
 	}
 
-	template<typename T>
+	template <typename T>
 	static void convert(std::complex<T>& t, std::string str)
 	{
 		t = toComplex<T>(str);
 	}
 
-	static void convert(String& t, std::string str)
-	{
-		t = str;
-	}
+	static void convert(String& t, std::string str) { t = str; }
 
-	template<typename T>
+	template <typename T>
 	static void convert(T& t, std::string str)
 	{
 		String msg("Unknown type ");
@@ -57,13 +55,15 @@ struct AinurComplex {
 
 private:
 
-	template<typename RealType>
+	template <typename RealType>
 	static std::complex<RealType> toComplex(std::string str)
 	{
 		typedef std::complex<RealType> ComplexType;
 
-		if (str == "i") return ComplexType(0., 1.);
-		if (str == "-i") return ComplexType(0., -1.);
+		if (str == "i")
+			return ComplexType(0., 1.);
+		if (str == "-i")
+			return ComplexType(0., -1.);
 
 		String buffer;
 		bool flag = false;
@@ -84,10 +84,10 @@ private:
 			buffer += str[i];
 		}
 
-		return (flag) ? ComplexType(real1, atof(buffer.c_str())) :
-		                ComplexType(atof(buffer.c_str()), 0);
+		return (flag) ? ComplexType(real1, atof(buffer.c_str()))
+			      : ComplexType(atof(buffer.c_str()), 0);
 	}
 };
 
-}
+} // namespace PsimagLite
 #endif // AINURCOMPLEX_HH

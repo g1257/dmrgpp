@@ -77,33 +77,40 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef KTWONIFFOUR_H
 #define KTWONIFFOUR_H
-#include <stdexcept>
-#include <cassert>
 #include "GeometryBase.h"
+#include <cassert>
+#include <stdexcept>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType, typename InputType>
-class KTwoNiFFour : public GeometryBase<ComplexOrRealType, InputType> {
+template <typename ComplexOrRealType, typename InputType>
+class KTwoNiFFour : public GeometryBase<ComplexOrRealType, InputType>
+{
 
-	enum SubtypeEnum {SUBTYPE_X,SUBTYPE_Y};
+	enum SubtypeEnum { SUBTYPE_X,
+		SUBTYPE_Y };
 
-	enum {DIR_X,DIR_Y,DIR_XPY,DIR_XMY};
+	enum { DIR_X,
+		DIR_Y,
+		DIR_XPY,
+		DIR_XMY };
 
 public:
 
-	enum TypeEnum {TYPE_O, TYPE_C};
+	enum TypeEnum { TYPE_O,
+		TYPE_C };
 
 	typedef std::pair<TypeEnum, SubtypeEnum> PairType;
 	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
 
-	KTwoNiFFour() {}
+	KTwoNiFFour() { }
 
-	KTwoNiFFour(SizeType linSize,InputType& io)
+	KTwoNiFFour(SizeType linSize, InputType& io)
 	    : linSize_(linSize)
 	{
-		io.readline(signChange_,"SignChange=");
-		std::cout<<"KTwoNiFFour: SIGN CHANGE="<<signChange_<<"\n";
+		io.readline(signChange_, "SignChange=");
+		std::cout << "KTwoNiFFour: SIGN CHANGE=" << signChange_ << "\n";
 	}
 
 	SizeType getVectorSize(SizeType) const
@@ -119,168 +126,176 @@ public:
 		return this->unimplemented("length");
 	}
 
-	virtual SizeType translate(SizeType,SizeType,SizeType) const
+	virtual SizeType translate(SizeType, SizeType, SizeType) const
 	{
 		return this->unimplemented("translate");
 	}
 
-	bool connected(SizeType i1,SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const
 	{
-		if (i1==i2) return false;
+		if (i1 == i2)
+			return false;
 		PairType type1 = findTypeOfSite(i1);
 		PairType type2 = findTypeOfSite(i2);
 		//! 4 possibilities
 		//! c-c
-		if (type1.first == type2.first && type1.first == TYPE_C) return false;
+		if (type1.first == type2.first && type1.first == TYPE_C)
+			return false;
 		//! o-o
 		if (type1.first == type2.first && type1.first == TYPE_O) {
-			if (type1.second==type2.second) return false;
-			SizeType newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
-			SizeType newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
-			if (newi1>newi2) {
-				assert(newi1>=4);
-				if (newi1-2==newi2 || newi1-3==newi2) return true;
+			if (type1.second == type2.second)
+				return false;
+			SizeType newi1 = (type1.second == SUBTYPE_X) ? i1 : i2;
+			SizeType newi2 = (type1.second == SUBTYPE_X) ? i2 : i1;
+			if (newi1 > newi2) {
+				assert(newi1 >= 4);
+				if (newi1 - 2 == newi2 || newi1 - 3 == newi2)
+					return true;
 				return false;
 			}
-			if (newi2-1==newi1) return true;
-			if (newi2>=2 && newi2-2==newi1) return true;
+			if (newi2 - 1 == newi1)
+				return true;
+			if (newi2 >= 2 && newi2 - 2 == newi1)
+				return true;
 			return false;
 		}
 		//! o-c or c-o
-		SizeType newi1 = (type1.first==TYPE_O) ? i1 : i2;
-		SizeType newi2 = (type1.first==TYPE_O) ? i2 : i1;
-		assert(newi2>=3);
-		if (newi2-1==newi1 || newi2-2==newi1 || newi2-3==newi1 || newi2+1==newi1)
+		SizeType newi1 = (type1.first == TYPE_O) ? i1 : i2;
+		SizeType newi2 = (type1.first == TYPE_O) ? i2 : i1;
+		assert(newi2 >= 3);
+		if (newi2 - 1 == newi1 || newi2 - 2 == newi1 || newi2 - 3 == newi1 || newi2 + 1 == newi1)
 			return true;
 		return false;
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType i1,SizeType i2) const
+	SizeType calcDir(SizeType i1, SizeType i2) const
 	{
 		PairType type1 = findTypeOfSite(i1);
 		PairType type2 = findTypeOfSite(i2);
 		//! o-o
 		if (type1.first == type2.first && type1.first == TYPE_O) {
-			assert(type1.second!=type2.second);
-			SizeType newi1 = (type1.second==SUBTYPE_X) ? i1 : i2;
-			SizeType newi2 = (type1.second==SUBTYPE_X) ? i2 : i1;
-			if (newi1>newi2) {
-				assert(newi1>=4);
-				SizeType distance = newi1-newi2;
-				if (distance==2) return DIR_XPY;
-				assert(distance==3);
+			assert(type1.second != type2.second);
+			SizeType newi1 = (type1.second == SUBTYPE_X) ? i1 : i2;
+			SizeType newi2 = (type1.second == SUBTYPE_X) ? i2 : i1;
+			if (newi1 > newi2) {
+				assert(newi1 >= 4);
+				SizeType distance = newi1 - newi2;
+				if (distance == 2)
+					return DIR_XPY;
+				assert(distance == 3);
 				return DIR_XMY;
 			}
-			SizeType distance = newi2-newi1;
-			if (distance==1)  return DIR_XPY;
-			assert(distance==2);
+			SizeType distance = newi2 - newi1;
+			if (distance == 1)
+				return DIR_XPY;
+			assert(distance == 2);
 			return DIR_XMY;
 		}
 		//! o-c or c-o
-		SizeType newi1 = (type1.first==TYPE_O) ? i1 : i2;
+		SizeType newi1 = (type1.first == TYPE_O) ? i1 : i2;
 		type1 = findTypeOfSite(newi1);
-		return (type1.second==SUBTYPE_X) ? DIR_X : DIR_Y;
+		return (type1.second == SUBTYPE_X) ? DIR_X : DIR_Y;
 	}
 
-	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const
 	{
-		SizeType r = smax%4;
+		SizeType r = smax % 4;
 		switch (r) {
 		case 0:
-			return fringe0(i,smax,emin);
+			return fringe0(i, smax, emin);
 		case 1:
-			return fringe1(i,smax,emin);
+			return fringe1(i, smax, emin);
 		case 2:
-			return fringe2(i,smax,emin);
+			return fringe2(i, smax, emin);
 		case 3:
-			return fringe3(i,smax,emin);
+			return fringe3(i, smax, emin);
 		}
 		assert(false);
 		return false;
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType handle(SizeType,SizeType) const
+	SizeType handle(SizeType, SizeType) const
 	{
 		assert(false);
 		return 0;
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
 	{
-		SizeType r = smax%4;
+		SizeType r = smax % 4;
 		switch (r) {
 		case 0:
-			return subs0(smax,emin,siteNew2);
+			return subs0(smax, emin, siteNew2);
 		case 1:
-			return subs1(smax,emin,siteNew2);
+			return subs1(smax, emin, siteNew2);
 		case 2:
-			return subs2(smax,emin,siteNew2);
+			return subs2(smax, emin, siteNew2);
 		case 3:
-			return subs3(smax,emin,siteNew2);
+			return subs3(smax, emin, siteNew2);
 		}
 		assert(false);
 		return 0;
 	}
 
-	String label() const
-	{
-		return "KTwoNiFFour";
-	}
+	String label() const { return "KTwoNiFFour"; }
 
-	SizeType maxConnections() const
-	{
-		return 6;
-	}
+	SizeType maxConnections() const { return 6; }
 
 	SizeType findReflection(SizeType) const
 	{
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
 
-	SizeType matrixRank(SizeType,SizeType) const
+	SizeType matrixRank(SizeType, SizeType) const
 	{
 		SizeType sites = linSize_;
 		SizeType no = 0;
 		SizeType nc = 0;
-		for (SizeType i=0;i<sites;i++) {
+		for (SizeType i = 0; i < sites; i++) {
 			SizeType type1 = findTypeOfSite(i).first;
-			if (type1==TYPE_C) nc++;
-			else no++;
+			if (type1 == TYPE_C)
+				nc++;
+			else
+				no++;
 		}
-		return 2*no+nc;
+		return 2 * no + nc;
 	}
 
 	// FIXME: GENERALIZE by using orbitals per type of site
-	int index(SizeType i,SizeType orb,SizeType) const
+	int index(SizeType i, SizeType orb, SizeType) const
 	{
 		SizeType type1 = findTypeOfSite(i).first;
-		if (type1==TYPE_C && orb>0) return -1;
-		if (type1==TYPE_C || orb==0) return i;
+		if (type1 == TYPE_C && orb > 0)
+			return -1;
+		if (type1 == TYPE_C || orb == 0)
+			return i;
 		SizeType sites = linSize_;
-		SizeType tmp = (i+1)/4;
-		assert(sites+i>=tmp);
-		return sites+i-tmp;
+		SizeType tmp = (i + 1) / 4;
+		assert(sites + i >= tmp);
+		return sites + i - tmp;
 	}
 
-	int signChange(SizeType i1,SizeType i2) const
+	int signChange(SizeType i1, SizeType i2) const
 	{
 		// change the sign of Cu-O
-		SizeType newi1 = std::min(i1,i2);
-		SizeType newi2 = std::max(i1,i2);
+		SizeType newi1 = std::min(i1, i2);
+		SizeType newi2 = std::max(i1, i2);
 		PairType type1 = findTypeOfSite(newi1);
 		PairType type2 = findTypeOfSite(newi2);
 		int sign1 = 1;
-		if (type1.first!=type2.first) {
+		if (type1.first != type2.first) {
 
-			int diff =  newi2-newi1;
-			assert(diff==1 || diff==2 || diff==3);
-			if (diff<2) sign1 = -1;
+			int diff = newi2 - newi1;
+			assert(diff == 1 || diff == 2 || diff == 3);
+			if (diff < 2)
+				sign1 = -1;
 		}
 
-		if (isInverted(i1) || isInverted(i2)) return signChange_*sign1;
+		if (isInverted(i1) || isInverted(i2))
+			return signChange_ * sign1;
 		return sign1;
 	}
 
@@ -296,67 +311,71 @@ public:
 	static PairType findTypeOfSite(SizeType site)
 	{
 		SizeType sitePlusOne = site + 1;
-		SizeType r = sitePlusOne%4;
-		if (r==0) return PairType(TYPE_C, SUBTYPE_X);
+		SizeType r = sitePlusOne % 4;
+		if (r == 0)
+			return PairType(TYPE_C, SUBTYPE_X);
 
-		return (r == 1) ? PairType(TYPE_O, SUBTYPE_X) :
-		                  PairType(TYPE_O, SUBTYPE_Y);
+		return (r == 1) ? PairType(TYPE_O, SUBTYPE_X)
+				: PairType(TYPE_O, SUBTYPE_Y);
 	}
 
 private:
 
 	bool isInverted(SizeType i) const
 	{
-		SizeType j = i+4;
-		return ((j%8)==0);
+		SizeType j = i + 4;
+		return ((j % 8) == 0);
 	}
 
-	bool fringe0(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe0(SizeType i, SizeType smax, SizeType emin) const
 	{
-		return (i==smax || i==emin);
+		return (i == smax || i == emin);
 	}
 
-	SizeType subs0(SizeType smax,SizeType,SizeType) const
+	SizeType subs0(SizeType smax, SizeType, SizeType) const
 	{
-		return smax+3;
+		return smax + 3;
 	}
 
-	bool fringe1(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe1(SizeType i, SizeType smax, SizeType emin) const
 	{
-		bool b1 = (i==smax || i==smax-1);
-		bool b2 = (i==emin || i==emin+1 || i==emin+2);
+		bool b1 = (i == smax || i == smax - 1);
+		bool b2 = (i == emin || i == emin + 1 || i == emin + 2);
 		return (b1 || b2);
 	}
 
-	SizeType subs1(SizeType smax,SizeType emin,SizeType i) const
+	SizeType subs1(SizeType smax, SizeType emin, SizeType i) const
 	{
-		if (i==emin) return smax+3;
-		if (i==emin+1) return smax+2;
-		if (i==emin+2) return smax+4;
+		if (i == emin)
+			return smax + 3;
+		if (i == emin + 1)
+			return smax + 2;
+		if (i == emin + 2)
+			return smax + 4;
 		assert(false);
 		return 0;
 	}
 
-	bool fringe2(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe2(SizeType i, SizeType smax, SizeType emin) const
 	{
-		return (i==smax-2 || i==emin+2);
+		return (i == smax - 2 || i == emin + 2);
 	}
 
-	SizeType subs2(SizeType smax,SizeType emin,SizeType i) const
+	SizeType subs2(SizeType smax, SizeType emin, SizeType i) const
 	{
-		assert(i==emin+2);
-		return smax+1;
+		assert(i == emin + 2);
+		return smax + 1;
 	}
 
-	bool fringe3(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe3(SizeType i, SizeType smax, SizeType emin) const
 	{
-		return (i==emin || i==smax || i==smax-1 || i==smax-2);
+		return (i == emin || i == smax || i == smax - 1 || i == smax - 2);
 	}
 
-	SizeType subs3(SizeType smax,SizeType emin,SizeType i) const
+	SizeType subs3(SizeType smax, SizeType emin, SizeType i) const
 	{
-		assert(i==emin);
-		return smax+1;
+		assert(i == emin);
+		return smax + 1;
 	}
 
 	SizeType linSize_;
@@ -366,4 +385,3 @@ private:
 
 /*@}*/
 #endif // KTWONIFFOUR_H
-

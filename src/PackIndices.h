@@ -81,38 +81,40 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PACK_INDICES_H
 #include <cstdlib>
 
-namespace PsimagLite {
-class PackIndices {
+namespace PsimagLite
+{
+class PackIndices
+{
 
 public:
 
-	PackIndices(SizeType n) : n_(n) { }
+	PackIndices(SizeType n)
+	    : n_(n)
+	{
+	}
 
 	//! given ind and n, get x and y such that ind = x + y*n
-	void unpack(SizeType& x,SizeType& y,SizeType ind) const
+	void unpack(SizeType& x, SizeType& y, SizeType ind) const
 	{
-		//y  = ind/n;
-		//x = ind - y*n;
-		//x= ind % n;
+		// y  = ind/n;
+		// x = ind - y*n;
+		// x= ind % n;
 		div_t q = PsimagLite::div(ind, n_);
 		y = q.quot;
 		x = q.rem;
 	}
 
-	SizeType pack(SizeType x0,
-	              SizeType x1,
-	              const Vector<SizeType>::Type& permutationInverse) const
+	SizeType pack(SizeType x0, SizeType x1, const Vector<SizeType>::Type& permutationInverse) const
 	{
-		assert(x0+n_*x1<permutationInverse.size());
-		return permutationInverse[x0+n_*x1];
+		assert(x0 + n_ * x1 < permutationInverse.size());
+		return permutationInverse[x0 + n_ * x1];
 	}
 
 private:
 
 	SizeType n_;
 }; // class PackIndices
-} // namespace PsimagLite 
+} // namespace PsimagLite
 
-/*@}*/	
+/*@}*/
 #endif // PACK_INDICES_H
-

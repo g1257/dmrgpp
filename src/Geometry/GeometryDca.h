@@ -18,13 +18,15 @@ Please see full open source license included in file LICENSE.
 
 #ifndef LANCZOS_GEOMETRY_DCA_H
 #define LANCZOS_GEOMETRY_DCA_H
-#include "Vector.h"
 #include "Io/IoNg.h"
+#include "Vector.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename RealType_,typename GeometryType_>
-class GeometryDca {
+template <typename RealType_, typename GeometryType_>
+class GeometryDca
+{
 
 public:
 
@@ -32,23 +34,25 @@ public:
 	typedef RealType_ RealType;
 
 	GeometryDca(const GeometryType& g, SizeType orbitals)
-	    : enabled_(false),
-	      message_(g.label(0) + " with " + ttos(orbitals))
+	    : enabled_(false)
+	    , message_(g.label(0) + " with " + ttos(orbitals))
 	{
 		if (g.label(0) == "star" && orbitals == 4)
-			enabled_=true;
+			enabled_ = true;
 	}
 
 	SizeType kSum(SizeType k1, SizeType k2) const
 	{
-		if (!enabled_) printErrorAndDie("kSum");
-		return (k1^k2);
+		if (!enabled_)
+			printErrorAndDie("kSum");
+		return (k1 ^ k2);
 	}
 
 	SizeType kSustract(SizeType k1, SizeType k2) const
 	{
-		if (!enabled_) printErrorAndDie("kSustract");
-		return (k1^k2);
+		if (!enabled_)
+			printErrorAndDie("kSustract");
+		return (k1 ^ k2);
 	}
 
 	void write(String label1, IoNg::Out::Serializer& io) const
@@ -76,4 +80,3 @@ private:
 } // namespace PsimagLite
 
 #endif
-

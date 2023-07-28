@@ -4,9 +4,11 @@
 #include "AllocatorCpu.h"
 #include <fstream>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class MicroArchitecture {
+class MicroArchitecture
+{
 
 public:
 
@@ -44,7 +46,8 @@ private:
 
 		fin.close();
 
-		if (!flag) return "";
+		if (!flag)
+			return "";
 		return line;
 	}
 
@@ -52,14 +55,15 @@ private:
 	{
 		std::string literal = ":";
 		size_t it = vendorId.find(literal);
-		if (it == String::npos) return "";
+		if (it == String::npos)
+			return "";
 
 		SizeType index = it + 1;
 		SizeType ind = index;
 		SizeType total = vendorId.length();
 		for (; ind < total; ++ind)
-			if (vendorId[ind] != ' ' && vendorId[ind] != '\t') break;
-
+			if (vendorId[ind] != ' ' && vendorId[ind] != '\t')
+				break;
 
 		String tmp1 = vendorId.substr(ind, total - ind);
 		return tmp1;
@@ -67,5 +71,5 @@ private:
 
 	String vendorId_;
 };
-}
+} // namespace PsimagLite
 #endif // MICROARCHITECTURE_H

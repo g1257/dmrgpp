@@ -3,18 +3,25 @@
 #include "Vector.h"
 #include <cstdlib>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class GetBraOrKet {
+class GetBraOrKet
+{
 
 public:
 
-	enum class Kind {E, P, R}; // R means reserved for internal use
+	enum class Kind { E,
+		P,
+		R }; // R means reserved for internal use
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 
 	GetBraOrKet(String braOrKet)
-	    : isKet_(true), braOrKet_(braOrKet), kind_(Kind::E), pair_(0, 0)
+	    : isKet_(true)
+	    , braOrKet_(braOrKet)
+	    , kind_(Kind::E)
+	    , pair_(0, 0)
 	{
 		const SizeType l = braOrKet.length();
 		if (l < 2)
@@ -61,8 +68,10 @@ private:
 	void checkIfPvector(bool b) const
 	{
 		bool isP = (kind_ == Kind::P || kind_ == Kind::R);
-		if (isP == b) return;
-		throw PsimagLite::RuntimeError("Internal ERROR: checkIfPpvector\n");
+		if (isP == b)
+			return;
+		throw PsimagLite::RuntimeError(
+		    "Internal ERROR: checkIfPpvector\n");
 	}
 
 	void getKind(String str)
@@ -104,13 +113,15 @@ private:
 		SizeType i = start;
 		for (; i < str.length(); ++i) {
 			unsigned char x = str[i];
-			if (x < 48 || x > 57) break;
+			if (x < 48 || x > 57)
+				break;
 			number += str[i];
 		}
 
 		if (number == "")
-			RuntimeError("getNumberFrom: no number after character location " + ttos(start) +
-			             " for string " + str + "\n");
+			RuntimeError("getNumberFrom: no number after character "
+				     "location "
+			    + ttos(start) + " for string " + str + "\n");
 
 		str = str.substr(i, str.length() - i);
 
@@ -122,5 +133,5 @@ private:
 	Kind kind_;
 	PairSizeType pair_;
 };
-}
+} // namespace PsimagLite
 #endif // GETBRAORKET_H

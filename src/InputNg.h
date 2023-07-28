@@ -81,117 +81,141 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef INPUT_NG_H
 #define INPUT_NG_H
 
-#include <stdexcept>
-#include <fstream>
-#include <iostream>
-#include <cassert>
-#include "Vector.h"
-#include <cstdlib>
-#include <algorithm>
+#include "Ainur/Ainur.h"
 #include "Map.h"
 #include "Matrix.h"
-#include "loki/TypeTraits.h"
 #include "PsiBase64.h"
-#include "Ainur/Ainur.h"
+#include "Vector.h"
+#include "loki/TypeTraits.h"
+#include <algorithm>
+#include <cassert>
+#include <cstdlib>
+#include <fstream>
+#include <iostream>
+#include <stdexcept>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename InputCheckType>
-class InputNg {
+template <typename InputCheckType>
+class InputNg
+{
 
-	class MyCompare {
+	class MyCompare
+	{
 
-		enum {FIRST,SECOND};
+		enum { FIRST,
+			SECOND };
 
-		typedef std::pair<String,SizeType> PairType;
+		typedef std::pair<String, SizeType> PairType;
 
 	public:
 
-		bool operator()(const String& x1,const String& x2) const
+		bool operator()(const String& x1, const String& x2) const
 		{
 			PairType p1 = mysplit(x1);
 			PairType p2 = mysplit(x2);
-			if (p1.second==0 && p2.second==0)
-				return (x1<x2);
-			if (p1.second==0) return true;
-			if (p2.second==0) return false;
-			if (p1.first!=p2.first) return (x1<x2);
-			return (p1.second<p2.second);
+			if (p1.second == 0 && p2.second == 0)
+				return (x1 < x2);
+			if (p1.second == 0)
+				return true;
+			if (p2.second == 0)
+				return false;
+			if (p1.first != p2.first)
+				return (x1 < x2);
+			return (p1.second < p2.second);
 		}
 
 	private:
 
 		PairType mysplit(const String& x) const
 		{
-			SizeType mode=FIRST;
+			SizeType mode = FIRST;
 			String xfirst = "";
 			String xsecond = "";
-			for (SizeType i=0;i<x.length();i++) {
-				if (x[i]=='@') {
-					mode=SECOND;
+			for (SizeType i = 0; i < x.length(); i++) {
+				if (x[i] == '@') {
+					mode = SECOND;
 					continue;
 				}
-				if (mode==FIRST) xfirst += x[i];
-				else xsecond += x[i];
+				if (mode == FIRST)
+					xfirst += x[i];
+				else
+					xsecond += x[i];
 			}
-			if (xsecond=="") return PairType(xfirst,0);
-			return PairType(xfirst,atoi(xsecond.c_str()));
+			if (xsecond == "")
+				return PairType(xfirst, 0);
+			return PairType(xfirst, atoi(xsecond.c_str()));
 		}
 	};
 
 	typedef MyCompare MyCompareType;
 
-	typedef typename Map<String,String,MyCompareType>::Type MapStrStrType;
-	typedef typename Map<String,Vector<String>::Type,MyCompareType>::Type MapStrVecType;
+	typedef typename Map<String, String, MyCompareType>::Type MapStrStrType;
+	typedef typename Map<String, Vector<String>::Type, MyCompareType>::Type
+	    MapStrVecType;
 
 public:
 
-	class Writeable {
+	class Writeable
+	{
 
-		enum {WHITESPACE,ENDOFLINE,EQUALSIGN,ALPHA_CHAR,NUMERIC_CHAR,COMMENT};
+		enum {
+			WHITESPACE,
+			ENDOFLINE,
+			EQUALSIGN,
+			ALPHA_CHAR,
+			NUMERIC_CHAR,
+			COMMENT
+		};
 
-		enum {IN_LABEL,IN_VALUE_OR_LABEL,IN_VALUE_TEXT,IN_VALUE_NUMERIC,IN_COMMENT};
+		enum {
+			IN_LABEL,
+			IN_VALUE_OR_LABEL,
+			IN_VALUE_TEXT,
+			IN_VALUE_NUMERIC,
+			IN_COMMENT
+		};
 
 	public:
 
 		typedef Vector<String>::Type VectorStringType;
 
 		Writeable(const InputCheckType& inputCheck, String data)
-		    : data_(data),
-		      line_(0),
-		      state_(IN_LABEL),
-		      numericVector_(0),
-		      lastLabel_(""),
-		      file_(""),
-		      inputCheck_(inputCheck),
-		      verbose_(false),
-		      ainurMode_(false)
+		    : data_(data)
+		    , line_(0)
+		    , state_(IN_LABEL)
+		    , numericVector_(0)
+		    , lastLabel_("")
+		    , file_("")
+		    , inputCheck_(inputCheck)
+		    , verbose_(false)
+		    , ainurMode_(false)
 		{
 			internal();
 		}
 
-		Writeable(const String& file,const InputCheckType& inputCheck)
-		    : data_(""),
-		      line_(0),
-		      state_(IN_LABEL),
-		      numericVector_(0),
-		      lastLabel_(""),
-		      file_(file),
-		      inputCheck_(inputCheck),
-		      verbose_(false),
-		      ainurMode_(false)
+		Writeable(const String& file, const InputCheckType& inputCheck)
+		    : data_("")
+		    , line_(0)
+		    , state_(IN_LABEL)
+		    , numericVector_(0)
+		    , lastLabel_("")
+		    , file_(file)
+		    , inputCheck_(inputCheck)
+		    , verbose_(false)
+		    , ainurMode_(false)
 		{
 			internal(file);
 		}
 
-		void set(MapStrStrType& mapStrStr,
-		         MapStrVecType& mapStrVec,
-		         Vector<String>::Type& labelsForRemoval) const
+		void set(MapStrStrType& mapStrStr, MapStrVecType& mapStrVec, Vector<String>::Type& labelsForRemoval) const
 		{
-			if (ainurMode_) return;
-			mapStrStr=mapStrStr_;
-			mapStrVec=mapStrVec_,
-			        labelsForRemoval=labelsForRemoval_;
+			if (ainurMode_)
+				return;
+			mapStrStr = mapStrStr_;
+			mapStrVec = mapStrVec_,
+			labelsForRemoval = labelsForRemoval_;
 		}
 
 		const String& filename() const { return file_; }
@@ -237,11 +261,11 @@ public:
 			changeAndParse();
 
 			if (verbose_ && !ainurMode_) {
-				std::cout<<"START\n";
-				printMap(mapStrStr_,"StrStr");
-				std::cout<<"END\nSTART\n";
-				printMap(mapStrVec_,"StrVec");
-				std::cout<<"END\n";
+				std::cout << "START\n";
+				printMap(mapStrStr_, "StrStr");
+				std::cout << "END\nSTART\n";
+				printMap(mapStrVec_, "StrVec");
+				std::cout << "END\n";
 			}
 		}
 
@@ -249,7 +273,8 @@ public:
 		{
 			changeDataIfNeeded();
 
-			if (ainurMode_) return;
+			if (ainurMode_)
+				return;
 
 			parseInternal();
 		}
@@ -291,35 +316,42 @@ public:
 		// The semicolon is used only in ainurMode
 		String replaceLine(String line) const
 		{
-			if (line[0] != '!') return line + "\n";
+			if (line[0] != '!')
+				return line + "\n";
 
 			const SizeType n = line.length();
 			SizeType ind = 1;
 			String a;
 			for (; ind < n; ++ind) {
-				if (line[ind] == '$') break;
+				if (line[ind] == '$')
+					break;
 				a += line[ind];
 			}
 
 			++ind;
 			if (ind >= n)
-				throw RuntimeError("replaceLine: syntax error near " + line + "\n");
+				throw RuntimeError(
+				    "replaceLine: syntax error near " + line + "\n");
 
 			if (line[ind] != 'i')
-				throw RuntimeError("replaceLine: syntax error near " + line + "\n");
+				throw RuntimeError(
+				    "replaceLine: syntax error near " + line + "\n");
 
 			++ind;
 			String b;
 			for (; ind < n; ++ind) {
-				if (line[ind] == ' ' || line[ind] == '\t') break;
+				if (line[ind] == ' ' || line[ind] == '\t')
+					break;
 				b += line[ind];
 			}
 
 			++ind;
 			String rest;
-			for (; ind < n; ++ind) rest += line[ind];
+			for (; ind < n; ++ind)
+				rest += line[ind];
 			if (rest == "")
-				throw RuntimeError("replaceLine: syntax error near " + line + "\n");
+				throw RuntimeError(
+				    "replaceLine: syntax error near " + line + "\n");
 
 			VectorStringType tokens;
 			split(tokens, rest, " ");
@@ -328,7 +360,8 @@ public:
 			String newline;
 			for (SizeType i = 0; i < m; ++i) {
 				newline += a + ttos(i) + b + "=" + tokens[i];
-				if (ainurMode_) newline += ";";
+				if (ainurMode_)
+					newline += ";";
 				newline += "\n";
 			}
 
@@ -337,29 +370,32 @@ public:
 
 		void parseInternal()
 		{
-			String buffer="";
-			for (SizeType i=0;i<data_.length();i++) {
+			String buffer = "";
+			for (SizeType i = 0; i < data_.length(); i++) {
 				SizeType type = findTypeOf(data_.at(i));
 				if (state_ == IN_COMMENT && type != ENDOFLINE)
 					continue;
-				switch(type) {
+				switch (type) {
 				case ENDOFLINE:
 					line_++;
-					if (state_==IN_COMMENT) {
+					if (state_ == IN_COMMENT) {
 						state_ = IN_LABEL;
 						break;
 					}
-					if (buffer=="") break;
-					saveBuffer(buffer,ENDOFLINE);
-					buffer="";
+					if (buffer == "")
+						break;
+					saveBuffer(buffer, ENDOFLINE);
+					buffer = "";
 					break;
 				case WHITESPACE:
-					if (buffer=="" || state_==IN_COMMENT) break;
-					saveBuffer(buffer,WHITESPACE);
-					buffer="";
+					if (buffer == "" || state_ == IN_COMMENT)
+						break;
+					saveBuffer(buffer, WHITESPACE);
+					buffer = "";
 					break;
 				case EQUALSIGN:
-					if (buffer=="" || state_==IN_COMMENT) break;
+					if (buffer == "" || state_ == IN_COMMENT)
+						break;
 
 					// support = sign in value text
 					if (state_ == IN_VALUE_TEXT) {
@@ -367,20 +403,20 @@ public:
 						break;
 					}
 
-					saveBuffer(buffer,EQUALSIGN);
-					buffer="";
+					saveBuffer(buffer, EQUALSIGN);
+					buffer = "";
 					break;
 				case COMMENT:
-					state_=IN_COMMENT;
+					state_ = IN_COMMENT;
 					break;
 				default:
-					if (state_==IN_VALUE_OR_LABEL) {
-						if (type==ALPHA_CHAR) {
+					if (state_ == IN_VALUE_OR_LABEL) {
+						if (type == ALPHA_CHAR) {
 							checkNumbers();
 							numericVector_.clear();
-							state_=IN_LABEL;
+							state_ = IN_LABEL;
 						} else {
-							state_=IN_VALUE_NUMERIC;
+							state_ = IN_VALUE_NUMERIC;
 						}
 					}
 
@@ -388,116 +424,145 @@ public:
 					break;
 				}
 			}
-			if (numericVector_.size()>0) checkNumbers();
+			if (numericVector_.size() > 0)
+				checkNumbers();
 		}
 
-		void saveBuffer(const String& buffer,SizeType whatchar)
+		void saveBuffer(const String& buffer, SizeType whatchar)
 		{
 			String s(__FILE__);
-			String adjLabel="";
-			switch(state_) {
+			String adjLabel = "";
+			switch (state_) {
 			case IN_LABEL:
-				if (verbose_) std::cout<<"Read label="<<buffer<<"\n";
-				lastLabel_=buffer;
-				inputCheck_.checkSimpleLabel(lastLabel_,line_);
-				if (whatchar==EQUALSIGN) state_=IN_VALUE_TEXT;
-				else state_=IN_VALUE_NUMERIC;
+				if (verbose_)
+					std::cout << "Read label=" << buffer
+						  << "\n";
+				lastLabel_ = buffer;
+				inputCheck_.checkSimpleLabel(lastLabel_, line_);
+				if (whatchar == EQUALSIGN)
+					state_ = IN_VALUE_TEXT;
+				else
+					state_ = IN_VALUE_NUMERIC;
 				break;
 			case IN_VALUE_OR_LABEL:
-				std::cerr<<"Line="<<line_<<"\n";
+				std::cerr << "Line=" << line_ << "\n";
 				s += "Error while buffer=" + buffer;
 				s += String(" and current line=") + String("\n");
 				break;
 			case IN_VALUE_TEXT:
-				if (verbose_) std::cout<<"Read text value="<<buffer<<"\n";
-				adjLabel = adjLabelForDuplicates(lastLabel_,mapStrStr_);
+				if (verbose_)
+					std::cout
+					    << "Read text value=" << buffer
+					    << "\n";
+				adjLabel = adjLabelForDuplicates(lastLabel_,
+				    mapStrStr_);
 				mapStrStr_[adjLabel] = buffer;
-				state_=IN_LABEL;
-				inputCheck_.check(adjLabel,buffer,line_);
+				state_ = IN_LABEL;
+				inputCheck_.check(adjLabel, buffer, line_);
 				break;
 			case IN_VALUE_NUMERIC:
-				if (verbose_) std::cout<<"Read numeric value="<<buffer<<"\n";
+				if (verbose_)
+					std::cout
+					    << "Read numeric value=" << buffer
+					    << "\n";
 				numericVector_.push_back(buffer);
-				state_=IN_VALUE_OR_LABEL;
+				state_ = IN_VALUE_OR_LABEL;
 				break;
 			}
 		}
 
 		SizeType findTypeOf(char c) const
 		{
-			if (c=='\n') return ENDOFLINE;
-			if (c==' ' || c=='\t') return WHITESPACE;
-			if (c=='=') return EQUALSIGN;
-			if (c>=48 && c<=58) return NUMERIC_CHAR;
-			if (c=='.' || c=='+' || c=='-') return NUMERIC_CHAR;
-			if (c=='(' || c==')' || c==',') return NUMERIC_CHAR;
-			if (c=='#') return COMMENT;
+			if (c == '\n')
+				return ENDOFLINE;
+			if (c == ' ' || c == '\t')
+				return WHITESPACE;
+			if (c == '=')
+				return EQUALSIGN;
+			if (c >= 48 && c <= 58)
+				return NUMERIC_CHAR;
+			if (c == '.' || c == '+' || c == '-')
+				return NUMERIC_CHAR;
+			if (c == '(' || c == ')' || c == ',')
+				return NUMERIC_CHAR;
+			if (c == '#')
+				return COMMENT;
 			return ALPHA_CHAR;
 		}
 
 		void checkNumbers()
 		{
-			if (numericVector_.size()==1) {
+			if (numericVector_.size() == 1) {
 				String s(__FILE__);
-				s += " use equal sign instead of space in line "+ttos(line_) + "\n";
+				s += " use equal sign instead of space in "
+				     "line "
+				    + ttos(line_) + "\n";
 				throw RuntimeError(s.c_str());
 			}
 
 			String s(__FILE__);
-			if (numericVector_.size()==0) {
-				std::cerr<<"Line="<<line_<<"\n";
+			if (numericVector_.size() == 0) {
+				std::cerr << "Line=" << line_ << "\n";
 				throw RuntimeError(s.c_str());
 			}
 			SizeType adjExpected = atoi(numericVector_[0].c_str());
 
-			if (!inputCheck_.check(lastLabel_,numericVector_,line_) &&
-			        numericVector_.size()!=adjExpected+1) {
-				std::cout<<" Number of numbers to follow is wrong, expected ";
-				std::cout<<adjExpected<<" got ";
-				std::cout<<(numericVector_.size()-1)<<"\n";
-				std::cerr<<"Line="<<line_<<"\n";
+			if (!inputCheck_.check(lastLabel_, numericVector_, line_) && numericVector_.size() != adjExpected + 1) {
+				std::cout << " Number of numbers to follow is "
+					     "wrong, expected ";
+				std::cout << adjExpected << " got ";
+				std::cout << (numericVector_.size() - 1)
+					  << "\n";
+				std::cerr << "Line=" << line_ << "\n";
 				throw RuntimeError(s.c_str());
 			}
 
-			String adjLabel=adjLabelForDuplicates(lastLabel_,mapStrVec_);
-			mapStrVec_[adjLabel]=numericVector_;
-
+			String adjLabel = adjLabelForDuplicates(lastLabel_, mapStrVec_);
+			mapStrVec_[adjLabel] = numericVector_;
 		}
 
-		template<typename SomeMapType>
-		String adjLabelForDuplicates(const String& label,SomeMapType& mymap)
+		template <typename SomeMapType>
+		String adjLabelForDuplicates(const String& label,
+		    SomeMapType& mymap)
 		{
 			String rootLabel = findRootLabel(label);
-			int x = findLastOccurrence(rootLabel,mymap);
-			if (x<0) return label;
+			int x = findLastOccurrence(rootLabel, mymap);
+			if (x < 0)
+				return label;
 			labelsForRemoval_.push_back(rootLabel);
 			x++;
 			String newlabel = rootLabel + "@" + ttos(x);
-			if (verbose_) std::cerr<<"NEWLABEL=*"<<newlabel<<"*\n";
+			if (verbose_)
+				std::cerr << "NEWLABEL=*" << newlabel << "*\n";
 			return newlabel;
 		}
 
-		template<typename SomeMapType>
-		int findLastOccurrence(const String& root1,SomeMapType& mymap)
+		template <typename SomeMapType>
+		int findLastOccurrence(const String& root1, SomeMapType& mymap)
 		{
 			int x = -1;
-			for (typename SomeMapType::iterator it=mymap.begin();it!=mymap.end();++it) {
+			for (typename SomeMapType::iterator it = mymap.begin();
+			     it != mymap.end();
+			     ++it) {
 				String root2 = findRootLabel(it->first);
-				if (root1==root2) x++;
+				if (root1 == root2)
+					x++;
 			}
 			return x;
 		}
 
-		template<typename MapType>
-		typename EnableIf<IsMapLike<MapType>::True,void>::Type
-		printMap(MapType& mp,const String& label)
+		template <typename MapType>
+		typename EnableIf<IsMapLike<MapType>::True, void>::Type
+		printMap(MapType& mp, const String& label)
 		{
-			//			typedef typename MapType::key_type KeyType;
-			//			typedef typename MapType::mapped_type MappedType;
-			std::cout<<label<<"\n";
+			//			typedef typename
+			// MapType::key_type KeyType; 			typedef
+			// typename MapType::mapped_type MappedType;
+			std::cout << label << "\n";
 			typename MapType::iterator it;
-			for (it=mp.begin();it!=mp.end();++it) {
-				std::cout<<it->first<<" "<<it->second<<"\n";
+			for (it = mp.begin(); it != mp.end(); ++it) {
+				std::cout << it->first << " " << it->second
+					  << "\n";
 			}
 		}
 
@@ -510,35 +575,43 @@ public:
 		InputCheckType inputCheck_;
 		bool verbose_;
 		bool ainurMode_;
-		typename Map<String,String,MyCompareType>::Type mapStrStr_;
-		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
+		typename Map<String, String, MyCompareType>::Type mapStrStr_;
+		typename Map<String, Vector<String>::Type, MyCompareType>::Type
+		    mapStrVec_;
 		Vector<String>::Type labelsForRemoval_;
 	}; // class Writeable
 
-	class Readable {
+	class Readable
+	{
 
 	public:
 
-		typedef typename Map<String, String, MyCompareType>::Type MapStringStringType;
-		typedef typename MapStringStringType::iterator MapStringIteratorType;
-		typedef typename Map<String,Vector<String>::Type,MyCompareType>::Type::iterator
-		MapStringVectorIteratorType;
+		typedef typename Map<String, String, MyCompareType>::Type
+		    MapStringStringType;
+		typedef typename MapStringStringType::iterator
+		    MapStringIteratorType;
+		typedef typename Map<String, Vector<String>::Type, MyCompareType>::Type::iterator
+		    MapStringVectorIteratorType;
 
 		Readable(const Writeable& inputWriteable)
-		    : file_(inputWriteable.filename()),
-		      data_(inputWriteable.data()),
-		      ainur_(0),
-		      dummy_("")
+		    : file_(inputWriteable.filename())
+		    , data_(inputWriteable.data())
+		    , ainur_(0)
+		    , dummy_("")
 		{
-			inputWriteable.set(mapStrStr_,mapStrVec_,labelsForRemoval_);
+			inputWriteable.set(mapStrStr_, mapStrVec_, labelsForRemoval_);
 			if (inputWriteable.ainurMode()) {
 				if (extensionOf(file_) == "inp") {
-					String w("WARNING: Ainur file but inp file extension\n");
-					std::cout<<AnsiColor::magenta<<w<<AnsiColor::reset;
-					std::cerr<<AnsiColor::magenta<<w<<AnsiColor::reset;
+					String w("WARNING: Ainur file but inp "
+						 "file extension\n");
+					std::cout << AnsiColor::magenta << w
+						  << AnsiColor::reset;
+					std::cerr << AnsiColor::magenta << w
+						  << AnsiColor::reset;
 				}
 
-				ainur_ = new Ainur(inputWriteable.inputCheck().import() + data_);
+				ainur_ = new Ainur(
+				    inputWriteable.inputCheck().import() + data_);
 				ainur_->setMap(mapStrStr_);
 			}
 		}
@@ -549,17 +622,18 @@ public:
 			ainur_ = 0;
 		}
 
-		void rewind() {}
+		void rewind() { }
 
 		bool isAinur() const { return (ainur_ != nullptr); }
 
 		double versionAinur() const { return 2.5; }
 
-		double version() const { return (ainur_) ?  3. : 2.; }
+		double version() const { return (ainur_) ? 3. : 2.; }
 
 		void printUnused(std::ostream& os) const
 		{
-			if (!ainur_) return;
+			if (!ainur_)
+				return;
 			ainur_->printUnused(os);
 		}
 
@@ -575,10 +649,7 @@ public:
 			return (ainur_) ? ainur_->prefix() : "";
 		}
 
-		void readline(String& val,
-		              const String& label,
-		              bool clean = true,
-		              bool forceRemoval = false)
+		void readline(String& val, const String& label, bool clean = true, bool forceRemoval = false)
 		{
 			if (ainur_) {
 				String label2 = label;
@@ -593,17 +664,20 @@ public:
 			}
 
 			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
+			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			if (it == mapStrStr_.end())
+				throwWithMessage(label, label2);
 
-			val= it->second.c_str();
+			val = it->second.c_str();
 
-			if (clean) cleanLabelsIfNeeded(label2,mapStrStr_,it,forceRemoval);
+			if (clean)
+				cleanLabelsIfNeeded(label2, mapStrStr_, it, forceRemoval);
 		}
 
-		template<typename FloatingType>
-		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
-		readline(FloatingType& val,const String& label)
+		template <typename FloatingType>
+		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,
+		    void>::Type
+		readline(FloatingType& val, const String& label)
 		{
 			if (ainur_) {
 				String label2 = label;
@@ -618,15 +692,16 @@ public:
 			}
 
 			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
+			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			if (it == mapStrStr_.end())
+				throwWithMessage(label, label2);
 
-			val= atof(it->second.c_str());
+			val = atof(it->second.c_str());
 
-			cleanLabelsIfNeeded(label2,mapStrStr_,it);
+			cleanLabelsIfNeeded(label2, mapStrStr_, it);
 		}
 
-		void readline(long int& val,const String& label)
+		void readline(long int& val, const String& label)
 		{
 			if (ainur_) {
 				String label2 = label;
@@ -641,15 +716,16 @@ public:
 			}
 
 			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
+			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			if (it == mapStrStr_.end())
+				throwWithMessage(label, label2);
 
-			val= atoi(it->second.c_str());
+			val = atoi(it->second.c_str());
 
-			cleanLabelsIfNeeded(label2,mapStrStr_,it);
+			cleanLabelsIfNeeded(label2, mapStrStr_, it);
 		}
 
-		void readline(SizeType& val,const String& label)
+		void readline(SizeType& val, const String& label)
 		{
 			if (ainur_) {
 				String label2 = label;
@@ -664,15 +740,16 @@ public:
 			}
 
 			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
+			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			if (it == mapStrStr_.end())
+				throwWithMessage(label, label2);
 
-			val= atoi(it->second.c_str());
+			val = atoi(it->second.c_str());
 
-			cleanLabelsIfNeeded(label2,mapStrStr_,it);
+			cleanLabelsIfNeeded(label2, mapStrStr_, it);
 		}
 
-		void readline(int& val,const String& label)
+		void readline(int& val, const String& label)
 		{
 			if (ainur_) {
 				String label2 = label;
@@ -687,52 +764,58 @@ public:
 			}
 
 			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
+			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			if (it == mapStrStr_.end())
+				throwWithMessage(label, label2);
 
-			val= atoi(it->second.c_str());
+			val = atoi(it->second.c_str());
 
-			cleanLabelsIfNeeded(label2,mapStrStr_,it);
+			cleanLabelsIfNeeded(label2, mapStrStr_, it);
 		}
 
-		void read(SizeType& val,const String& label)
+		void read(SizeType& val, const String& label)
 		{
 			if (ainur_)
 				err("Read not supported. Label= " + label + "\n");
 
 			String label2 = label2label(label);
 
-			MapStringIteratorType it =  findFirstValueForLabel(label2,mapStrStr_);
-			if (it==mapStrStr_.end()) throwWithMessage(label,label2);
+			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			if (it == mapStrStr_.end())
+				throwWithMessage(label, label2);
 
-			val= atoi(it->second.c_str());
+			val = atoi(it->second.c_str());
 
-			cleanLabelsIfNeeded(label2,mapStrStr_,it);
+			cleanLabelsIfNeeded(label2, mapStrStr_, it);
 		}
 
-		template<typename VectorLikeType>
-		typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
-		read(VectorLikeType& val,const String& label)
+		template <typename VectorLikeType>
+		typename EnableIf<IsVectorLike<VectorLikeType>::True,
+		    void>::Type
+		read(VectorLikeType& val, const String& label)
 		{
 			if (ainur_)
 				return ainur_->readValue(val, label);
 
 			String label2 = label2label(label);
 			typedef typename VectorLikeType::value_type NumericType;
-			MapStringVectorIteratorType it = findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
+			MapStringVectorIteratorType it = findFirstValueForLabel(label2, mapStrVec_);
+			if (it == mapStrVec_.end())
+				throwWithMessage(label, label2);
 
-			SizeType len =  it->second.size();
-			assert(len>1);
-			val.resize(len-1);
-			for (SizeType i=0;i<len-1;i++) {
-				val[i]=stringToComplexOrReal<NumericType>(it->second[i+1].c_str());
+			SizeType len = it->second.size();
+			assert(len > 1);
+			val.resize(len - 1);
+			for (SizeType i = 0; i < len - 1; i++) {
+				val[i] = stringToComplexOrReal<NumericType>(
+				    it->second[i + 1].c_str());
 			}
-			cleanLabelsIfNeeded(label2,mapStrVec_,it);
+			cleanLabelsIfNeeded(label2, mapStrVec_, it);
 		}
 
-		template<typename FloatingType>
-		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
+		template <typename FloatingType>
+		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,
+		    void>::Type
 		read(Matrix<FloatingType>& m, const String& label)
 		{
 			if (ainur_)
@@ -740,8 +823,9 @@ public:
 
 			String label2 = label2label(label);
 
-			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
+			MapStringVectorIteratorType it = findFirstValueForLabel(label2, mapStrVec_);
+			if (it == mapStrVec_.end())
+				throwWithMessage(label, label2);
 
 			bool b1 = (it->second.size() < 2);
 			bool b2 = (atoi(it->second[0].c_str()) <= 0);
@@ -755,34 +839,35 @@ public:
 
 			SizeType nrow = SizeType(atoi(it->second[0].c_str()));
 			SizeType ncol = SizeType(atoi(it->second[1].c_str()));
-			m.resize(nrow,ncol);
-			if (it->second.size()<2+nrow*ncol) {
+			m.resize(nrow, ncol);
+			if (it->second.size() < 2 + nrow * ncol) {
 				String s(__FILE__);
 				s += " reading a matrix: \n";
 				throw RuntimeError(s.c_str());
 			}
 			SizeType k = 2;
-			for (SizeType i=0;i<m.rows();i++)
-				for (SizeType j=0;j<m.cols();j++)
-					m(i,j) = atof(it->second[k++].c_str());
+			for (SizeType i = 0; i < m.rows(); i++)
+				for (SizeType j = 0; j < m.cols(); j++)
+					m(i, j) = atof(it->second[k++].c_str());
 
-			cleanLabelsIfNeeded(label2,mapStrVec_,it);
+			cleanLabelsIfNeeded(label2, mapStrVec_, it);
 		}
 
-		template<typename FloatingType>
-		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
-		read(Matrix<std::complex<FloatingType> >& m, const String& label)
+		template <typename FloatingType>
+		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,
+		    void>::Type
+		read(Matrix<std::complex<FloatingType>>& m, const String& label)
 		{
 			if (ainur_)
 				return ainur_->readValue(m, label);
 
 			String label2 = label2label(label);
 
-			MapStringVectorIteratorType it =  findFirstValueForLabel(label2,mapStrVec_);
-			if (it==mapStrVec_.end()) throwWithMessage(label,label2);
+			MapStringVectorIteratorType it = findFirstValueForLabel(label2, mapStrVec_);
+			if (it == mapStrVec_.end())
+				throwWithMessage(label, label2);
 
-			if (it->second.size()<2 || atoi(it->second[0].c_str())<=0 ||
-			        atoi(it->second[1].c_str())<=0) {
+			if (it->second.size() < 2 || atoi(it->second[0].c_str()) <= 0 || atoi(it->second[1].c_str()) <= 0) {
 				String s(__FILE__);
 				s += " reading a matrix: \n";
 				throw RuntimeError(s.c_str());
@@ -790,47 +875,52 @@ public:
 
 			SizeType nrow = SizeType(atoi(it->second[0].c_str()));
 			SizeType ncol = SizeType(atoi(it->second[1].c_str()));
-			m.resize(nrow,ncol);
-			if (it->second.size()<2+nrow*ncol) {
+			m.resize(nrow, ncol);
+			if (it->second.size() < 2 + nrow * ncol) {
 				String s(__FILE__);
 				s += " reading a matrix: \n";
 				throw RuntimeError(s.c_str());
 			}
 			SizeType k = 2;
-			for (SizeType i=0;i<m.rows();i++) {
-				for (SizeType j=0;j<m.cols();j++) {
+			for (SizeType i = 0; i < m.rows(); i++) {
+				for (SizeType j = 0; j < m.cols(); j++) {
 					IstringStream is(it->second[k++]);
-					is >> m(i,j);
+					is >> m(i, j);
 				}
 			}
-			cleanLabelsIfNeeded(label2,mapStrVec_,it);
+			cleanLabelsIfNeeded(label2, mapStrVec_, it);
 		}
 
-		template<typename MapLikeType>
-		typename EnableIf<IsMapLike<MapLikeType>::True,void>::Type
-		read(MapLikeType& val,const String& label)
+		template <typename MapLikeType>
+		typename EnableIf<IsMapLike<MapLikeType>::True, void>::Type
+		read(MapLikeType& val, const String& label)
 		{
 			if (ainur_)
 				err("Read not supported. Label= " + label + "\n");
 
 			String label2 = label2label(label);
 
-			typedef typename Map<String,String,MyCompareType>::Type::iterator MyIteratorType;
-			for (MyIteratorType it=mapStrStr_.begin();it!=mapStrStr_.end();++it) {
+			typedef typename Map<String, String, MyCompareType>::Type::iterator
+			    MyIteratorType;
+			for (MyIteratorType it = mapStrStr_.begin();
+			     it != mapStrStr_.end();
+			     ++it) {
 				String mystr = it->first;
 				long unsigned int it0 = mystr.find(label2);
-				if (it0 == String::npos) continue;
-				String::iterator it1 = find(mystr.begin(),mystr.end(),'[');
-				if (it1 == mystr.end()) continue;
-				String::iterator it2 = find(mystr.begin(),mystr.end(),']');
+				if (it0 == String::npos)
+					continue;
+				String::iterator it1 = find(mystr.begin(), mystr.end(), '[');
+				if (it1 == mystr.end())
+					continue;
+				String::iterator it2 = find(mystr.begin(), mystr.end(), ']');
 				if (it2 == mystr.end()) {
 					String str("Malformed ");
 					str += mystr + " entry\n";
 					throw RuntimeError(str);
 				}
 				String mystr2 = mystr;
-				mystr2.erase(0,label2.length()+1);
-				mystr2.erase(mystr2.length()-1,1);
+				mystr2.erase(0, label2.length() + 1);
+				mystr2.erase(mystr2.length() - 1, 1);
 				val[mystr2] = atof(it->second.c_str());
 			}
 		}
@@ -840,65 +930,65 @@ public:
 			if (ainur_)
 				return ainur_->readValue(m, label);
 
-			throw RuntimeError("InputNg: Matrix<String> not supported in POD inputs\n");
+			throw RuntimeError("InputNg: Matrix<String> not "
+					   "supported in POD inputs\n");
 		}
 
-		MapStrStrType map() const
-		{
-			return mapStrStr_;
-		}
+		MapStrStrType map() const { return mapStrStr_; }
 
-		const String& filename() const
-		{
-			return file_;
-		}
+		const String& filename() const { return file_; }
 
 	private:
 
-		template<typename SomeMapType>
+		template <typename SomeMapType>
 		void cleanLabelsIfNeeded(const String& label,
-		                         SomeMapType& mymap,
-		                         typename SomeMapType::iterator& it,
-		                         bool forceRemoval = false)
+		    SomeMapType& mymap,
+		    typename SomeMapType::iterator& it,
+		    bool forceRemoval = false)
 		{
 			Vector<String>::Type::iterator it2 = find(labelsForRemoval_.begin(),
-			                                          labelsForRemoval_.end(),
-			                                          label);
-			if (it2!=labelsForRemoval_.end() || forceRemoval) mymap.erase(it);
+			    labelsForRemoval_.end(),
+			    label);
+			if (it2 != labelsForRemoval_.end() || forceRemoval)
+				mymap.erase(it);
 		}
 
 		String label2label(const String& label)
 		{
 			SizeType len = label.length();
-			if (len==0) {
+			if (len == 0) {
 				String s(__FILE__);
 				s += " readline: label cannot be null\n";
 				throw RuntimeError(s.c_str());
 			}
-			if (label.at(len-1)=='=') len--;
-			return label.substr(0,len);
+			if (label.at(len - 1) == '=')
+				len--;
+			return label.substr(0, len);
 		}
 
-		template<typename SomeMapType>
-		typename SomeMapType::iterator findFirstValueForLabel(const String& label,
-		                                                      SomeMapType& mymap)
+		template <typename SomeMapType>
+		typename SomeMapType::iterator
+		findFirstValueForLabel(const String& label, SomeMapType& mymap)
 		{
-			for (typename SomeMapType::iterator it=mymap.begin();it!=mymap.end();++it) {
+			for (typename SomeMapType::iterator it = mymap.begin();
+			     it != mymap.end();
+			     ++it) {
 				String root2 = findRootLabel(it->first);
-				if (label==root2) {
+				if (label == root2) {
 					return it;
 				}
 			}
 			return mymap.end();
 		}
 
-		template<typename ComplexOrRealType>
-		typename EnableIf<IsComplexNumber<ComplexOrRealType>::True,ComplexOrRealType>::Type
+		template <typename ComplexOrRealType>
+		typename EnableIf<IsComplexNumber<ComplexOrRealType>::True,
+		    ComplexOrRealType>::Type
 		stringToComplexOrReal(const String& s) const
 		{
 			typedef typename Real<ComplexOrRealType>::Type RealType;
 
-			if (s[0]!='(') {
+			if (s[0] != '(') {
 				return stringToReal(s.c_str());
 			}
 
@@ -906,7 +996,8 @@ public:
 			SizeType start = 0;
 			for (SizeType i = 1; i < s.length(); ++i) {
 				start = i;
-				if (s[i] == ',') break;
+				if (s[i] == ',')
+					break;
 				buffer += s[i];
 			}
 
@@ -915,26 +1006,30 @@ public:
 			start++;
 			buffer = "";
 			for (SizeType i = start; i < s.length(); ++i) {
-				if (s[i] == ')') break;
+				if (s[i] == ')')
+					break;
 				buffer += s[i];
 			}
 
 			RealType img = stringToReal(buffer);
 
-			return ComplexOrRealType(r,img);
+			return ComplexOrRealType(r, img);
 		}
 
-		template<typename ComplexOrRealType>
-		typename EnableIf<!IsComplexNumber<ComplexOrRealType>::True &&
-		Loki::TypeTraits<ComplexOrRealType>::isArith,
-		typename Real<ComplexOrRealType>::Type>::Type
+		template <typename ComplexOrRealType>
+		typename EnableIf<
+		    !IsComplexNumber<ComplexOrRealType>::True && Loki::TypeTraits<ComplexOrRealType>::isArith,
+		    typename Real<ComplexOrRealType>::Type>::Type
 		stringToComplexOrReal(const String& s) const
 		{
-			return static_cast<typename Real<ComplexOrRealType>::Type>(stringToReal(s));
+			return static_cast<
+			    typename Real<ComplexOrRealType>::Type>(
+			    stringToReal(s));
 		}
 
-		template<typename ComplexOrRealType>
-		typename EnableIf<TypesEqual<ComplexOrRealType,String>::True, String>::Type
+		template <typename ComplexOrRealType>
+		typename EnableIf<TypesEqual<ComplexOrRealType, String>::True,
+		    String>::Type
 		stringToComplexOrReal(const String& s) const
 		{
 			return s;
@@ -944,11 +1039,12 @@ public:
 		{
 			for (SizeType i = 0; i < s.length(); ++i) {
 				char c = s[i];
-				bool b1 = (c<48 || c>57);
+				bool b1 = (c < 48 || c > 57);
 				bool b2 = (c != '.' && c != '-' && c != '+' && c != 'e' && c != 'E');
 				if (b1 && b2) {
-					String str = s +" is not a real number\n";
-					str += "Suggestion: Add -DUSE_COMPLEX to your Makefile.\n";
+					String str = s + " is not a real number\n";
+					str += "Suggestion: Add -DUSE_COMPLEX "
+					       "to your Makefile.\n";
 					throw RuntimeError(str);
 				}
 			}
@@ -956,13 +1052,15 @@ public:
 			return atof(s.c_str());
 		}
 
-		void throwWithMessage(const String& label,const String& label2="")
+		void throwWithMessage(const String& label,
+		    const String& label2 = "")
 		{
 			String s("Message issued by: ");
 			s += String(__FILE__) + "\n";
 			s += "ATTENTION: ERROR MESSAGE, PLEASE READ: ";
 			s += " The (probably) mandatory label: " + label;
-			if (label2.length()>0 && label2!=label) s += " (a.k.a. " + label2 +")";
+			if (label2.length() > 0 && label2 != label)
+				s += " (a.k.a. " + label2 + ")";
 			s += " was not found in the input file.\n";
 			throw RuntimeError(s.c_str());
 		}
@@ -982,7 +1080,8 @@ public:
 				buffer += s[j];
 			}
 
-			if (!flag) return "";
+			if (!flag)
+				return "";
 
 			String buffer2 = buffer;
 			const SizeType l2 = buffer.length();
@@ -994,15 +1093,16 @@ public:
 			return buffer2;
 		}
 
-		//serializr start class InputNgReadable
-		//serializr normal file_
+		// serializr start class InputNgReadable
+		// serializr normal file_
 		String file_;
 		String data_;
-		//serializr normal mapStrStr_
+		// serializr normal mapStrStr_
 		MapStringStringType mapStrStr_;
-		//serializr normal mapStrVec_
-		typename Map<String,Vector<String>::Type,MyCompareType>::Type mapStrVec_;
-		//serializr normal labelsForRemoval_
+		// serializr normal mapStrVec_
+		typename Map<String, Vector<String>::Type, MyCompareType>::Type
+		    mapStrVec_;
+		// serializr normal labelsForRemoval_
 		Vector<String>::Type labelsForRemoval_;
 		Ainur* ainur_;
 		String dummy_;
@@ -1010,22 +1110,24 @@ public:
 
 	static String findRootLabel(const String& label)
 	{
-		String buffer="";
+		String buffer = "";
 		SizeType len = label.length();
-		for (SizeType i=0;i<len;i++) {
-			if (label.at(i)=='@') break;
+		for (SizeType i = 0; i < len; i++) {
+			if (label.at(i) == '@')
+				break;
 			buffer += label.at(i);
 		}
 		return buffer;
 	}
 
-}; //InputNg
+}; // InputNg
 
-class InputEmptyCheck {};
+class InputEmptyCheck
+{
+};
 
 } // namespace PsimagLite
 
 /*@}*/
 
 #endif // INPUT_NG_H
-

@@ -1,9 +1,9 @@
 #ifndef PREDICATE_SIMPLE_H
 #define PREDICATE_SIMPLE_H
-#include "Vector.h"
-#include "PsimagLite.h"
 #include "AST/ExpressionForAST.h"
 #include "AST/PlusMinusMultiplyDivide.h"
+#include "PsimagLite.h"
+#include "Vector.h"
 
 /* PSIDOC PredicateSimple
  PredicateSimple is of the form
@@ -12,22 +12,27 @@
  with the usual meaning, and %% means divisible by.
  So l%%2 means that the simple predicate is true if l is divisible by 2.
  */
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class PredicateSimple {
+class PredicateSimple
+{
 
 public:
 
 	typedef Vector<String>::Type VectorStringType;
 
 	PredicateSimple(String pred, String separator = ":")
-	    : pred_(pred), separator_(separator)
+	    : pred_(pred)
+	    , separator_(separator)
 	{
 		SizeType length = 0;
 		size_t location = String::npos;
 
 		SizeType n = pred.length();
-		if (n < 3) err("PredicateSimple: pred must have at least 3 characters\n");
+		if (n < 3)
+			err("PredicateSimple: pred must have at least 3 "
+			    "characters\n");
 
 		for (SizeType i = 0; i < n - 1; ++i) {
 
@@ -57,7 +62,7 @@ public:
 			err("Left or right expression is empty\n");
 	}
 
-	template<typename SomeVectorType>
+	template <typename SomeVectorType>
 	bool isTrue(const VectorStringType& names, const SomeVectorType& vals)
 	{
 		typedef typename SomeVectorType::value_type SomeValueType;
@@ -68,7 +73,7 @@ public:
 
 private:
 
-	template<typename T>
+	template <typename T>
 	static bool compareOnOp(T lv, String op, T rv)
 	{
 		// {==, <, >, <=, >=, %%}
@@ -90,8 +95,11 @@ private:
 		throw RuntimeError("Unknown operator " + op + "\n");
 	}
 
-	template<typename T>
-	static bool divisibleBy(SizeType lv, SizeType rv, typename std::enable_if<Loki::TypeTraits<T>::isArith, int*>::type = 0)
+	template <typename T>
+	static bool divisibleBy(
+	    SizeType lv,
+	    SizeType rv,
+	    typename std::enable_if<Loki::TypeTraits<T>::isArith, int*>::type = 0)
 	{
 		return ((lv % rv) == 0);
 	}
@@ -100,29 +108,30 @@ private:
 	{
 		const SizeType n = ops_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (op == ops_[i]) return op.length();
+			if (op == ops_[i])
+				return op.length();
 
 		return 0;
 	}
 
-	template<typename SomeVectorType>
-	typename SomeVectorType::value_type getValue(String hs,
-	                                             const VectorStringType& names,
-	                                             const SomeVectorType& vals)
+	template <typename SomeVectorType>
+	typename SomeVectorType::value_type
+	getValue(String hs, const VectorStringType& names, const SomeVectorType& vals)
 	{
 		String numericHs = replaceVariables(hs, names, vals);
 		VectorStringType tokens;
 		split(tokens, numericHs, separator_);
-		typedef PlusMinusMultiplyDivide<typename SomeVectorType::value_type> PrimitivesType;
+		typedef PlusMinusMultiplyDivide<
+		    typename SomeVectorType::value_type>
+		    PrimitivesType;
 		PrimitivesType primitives;
-		ExpressionForAST<PrimitivesType> expresionForAST(tokens, primitives);
+		ExpressionForAST<PrimitivesType> expresionForAST(tokens,
+		    primitives);
 		return expresionForAST.exec();
 	}
 
-	template<typename SomeVectorType>
-	static String replaceVariables(String hs,
-	                               const VectorStringType& names,
-	                               const SomeVectorType& vals)
+	template <typename SomeVectorType>
+	static String replaceVariables(String hs, const VectorStringType& names, const SomeVectorType& vals)
 	{
 		const SizeType n = names.size();
 		assert(n == vals.size());
@@ -134,19 +143,19 @@ private:
 		return buffer;
 	}
 
-	template<typename T>
-	static String replaceVariable(String hs,
-	                              String name,
-	                              T val)
+	template <typename T>
+	static String replaceVariable(String hs, String name, T val)
 	{
 		const String valString = ttos(val);
 		const SizeType nameLength = name.length();
 
 		while (true) {
 			size_t index = hs.find(name);
-			if (index == String::npos) return hs;
+			if (index == String::npos)
+				return hs;
 			String part1 = (index == 0) ? "" : hs.substr(0, index);
-			String part2 = hs.substr(index + nameLength, hs.length() - nameLength - index);
+			String part2 = hs.substr(index + nameLength,
+			    hs.length() - nameLength - index);
 			hs = part1 + valString + part2;
 		}
 
@@ -160,5 +169,5 @@ private:
 	String op_;
 	String rhs_;
 };
-}
+} // namespace PsimagLite
 #endif // PREDICATE_SIMPLE_H

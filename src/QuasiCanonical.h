@@ -1,17 +1,19 @@
 #ifndef QUASICANONICAL_H
 #define QUASICANONICAL_H
-#include "Vector.h"
-#include "PsimagLite.h"
 #include "AST/ExpressionForAST.h"
 #include "AST/PlusMinusMultiplyDivide.h"
 #include "CmplxOrReal.h"
+#include "PsimagLite.h"
+#include "Vector.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
 // level one parens only
 // TODO FIXME : Generalize to multiple levels
-template<typename ComplexOrRealType>
-class QuasiCanonical {
+template <typename ComplexOrRealType>
+class QuasiCanonical
+{
 
 public:
 
@@ -32,7 +34,9 @@ public:
 
 			if (str_[i] == '-' && i > 0) {
 				if (prev != '(' && prev != '+') {
-					throw RuntimeError("The - sign must be preceded by nothing, parens, or +\n");
+					throw RuntimeError(
+					    "The - sign must be preceded by "
+					    "nothing, parens, or +\n");
 				}
 			}
 
@@ -40,14 +44,17 @@ public:
 
 			if (str_[i] == '(') {
 				if (status == "open")
-					throw RuntimeError("Too many parens levels (one only supported for now)\n");
+					throw RuntimeError(
+					    "Too many parens levels (one only "
+					    "supported for now)\n");
 				status = "open";
 				continue;
 			}
 
 			if (str_[i] == ')') {
 				if (status == "closed")
-					throw RuntimeError("Unbalanced parens, closed\n");
+					throw RuntimeError(
+					    "Unbalanced parens, closed\n");
 				status = "closed";
 				mainBuffer_ += "@" + ttos(ats_.size()) + "@";
 				ats_.push_back(tempBuffer);
@@ -85,7 +92,8 @@ public:
 	int scalarIndex(String str) const
 	{
 		const SizeType len = str.length();
-		if (len < 3) return -1;
+		if (len < 3)
+			return -1;
 		if (str[0] != '@' || str[len - 1] != '@')
 			return -1;
 
@@ -105,10 +113,12 @@ public:
 
 	static bool isPureComplex(String t)
 	{
-		if (t == "i") return true;
+		if (t == "i")
+			return true;
 
 		const SizeType n = t.length();
-		if (n < 2) return false;
+		if (n < 2)
+			return false;
 		String tmp = t.substr(0, n - 1);
 		return isRealScalar(tmp);
 	}
@@ -149,9 +159,11 @@ private:
 		VectorStringType ve;
 		split(ve, str, ":");
 
-		typedef PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
+		typedef PlusMinusMultiplyDivide<ComplexOrRealType>
+		    PrimitivesType;
 		PrimitivesType primitives;
-		ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
+		ExpressionForAST<PrimitivesType> expresionForAST(ve,
+		    primitives);
 		return expresionForAST.exec();
 	}
 
@@ -161,5 +173,5 @@ private:
 	VectorStringType terms_;
 	VectorType cachedValues_;
 };
-}
+} // namespace PsimagLite
 #endif // QUASICANONICAL_H

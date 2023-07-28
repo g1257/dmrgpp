@@ -36,11 +36,10 @@ René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 
 #include "PsiBase64.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-const String PsiBase64::base64Chars_ =
-        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        "abcdefghijklmnopqrstuvwxyz"
-        "0123456789+/";
+const String PsiBase64::base64Chars_ = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+				       "abcdefghijklmnopqrstuvwxyz"
+				       "0123456789+/";
 }
-

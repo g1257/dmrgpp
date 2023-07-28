@@ -20,62 +20,54 @@ Please see full open source license included in file LICENSE.
 #ifndef PROFILING_H_
 #define PROFILING_H_
 
-#include <iostream>
 #include "MemoryUsage.h"
-#include "PsimagLite.h"
 #include "ProgressIndicator.h"
+#include "PsimagLite.h"
+#include <iostream>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class  Profiling {
+class Profiling
+{
 
-	double diff(double x1,double x2) const
-	{
-		return x1 - x2;
-	}
+	double diff(double x1, double x2) const { return x1 - x2; }
 
 public:
 
-	Profiling(String caller,
-	          String additional,
-	          std::ostream& os)
-	    : progressIndicator_(caller),
-	      memoryUsage_("/proc/self/stat"),
-	      isDead_(false),
-	      os_(os)
+	Profiling(String caller, String additional, std::ostream& os)
+	    : progressIndicator_(caller)
+	    , memoryUsage_("/proc/self/stat")
+	    , isDead_(false)
+	    , os_(os)
 	{
 		OstringStream msg(std::cout.precision());
 		msg() << "starting clock " << additional;
 		progressIndicator_.printline(msg, os);
 	}
 
-	Profiling(String caller,
-	          std::ostream& os)
-	    : progressIndicator_(caller),
-	      memoryUsage_("/proc/self/stat"),
-	      isDead_(false),
-	      os_(os)
+	Profiling(String caller, std::ostream& os)
+	    : progressIndicator_(caller)
+	    , memoryUsage_("/proc/self/stat")
+	    , isDead_(false)
+	    , os_(os)
 	{
 		OstringStream msg(std::cout.precision());
-		msg() << "starting clock";;
+		msg() << "starting clock";
+		;
 		progressIndicator_.printline(msg, os);
 	}
 
-	~Profiling()
-	{
-		killIt("");
-	}
+	~Profiling() { killIt(""); }
 
-	void end(String message)
-	{
-		killIt(message);
-	}
+	void end(String message) { killIt(message); }
 
 private:
 
 	void killIt(String message)
 	{
-		if (isDead_) return;
+		if (isDead_)
+			return;
 		OstringStream msg(std::cout.precision());
 		msg() << "stopping clock " << message;
 		progressIndicator_.printline(msg, os_);
@@ -87,7 +79,6 @@ private:
 	bool isDead_;
 	std::ostream& os_;
 }; // Profiling
-} // PsimagLite
+} // namespace PsimagLite
 
 #endif
-

@@ -79,41 +79,44 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef APPLICATION_INFO_H
 #define APPLICATION_INFO_H
 
-#include <sys/time.h>
-#include <time.h>
-#include "Vector.h"
-#include "MersenneTwister.h"
-#include <sys/types.h>
-#include <unistd.h>
 #include "BitManip.h"
-#include <cstdlib>
-#include <cassert>
 #include "Io/IoSerializerStub.h"
+#include "MersenneTwister.h"
+#include "Vector.h"
+#include <cassert>
+#include <cstdlib>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <time.h>
+#include <unistd.h>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class ApplicationInfo {
+class ApplicationInfo
+{
 
 public:
 
 	typedef String RunIdType;
 
 	ApplicationInfo(const PsimagLite::String& name)
-	    : name_(name),
-	      pid_(getpid()),
-	      runId_(runIdInternal()),
-	      isFinalized_(false)
-	{}
-	
-	void finalize() { isFinalized_ = true;}
+	    : name_(name)
+	    , pid_(getpid())
+	    , runId_(runIdInternal())
+	    , isFinalized_(false)
+	{
+	}
 
-	time_t unixTime(bool arg  = false) const
+	void finalize() { isFinalized_ = true; }
+
+	time_t unixTime(bool arg = false) const
 	{
 		struct timeval tv;
-		gettimeofday(&tv,0);
+		gettimeofday(&tv, 0);
 		return (arg) ? tv.tv_usec : tv.tv_sec;
 	}
-	
+
 	String getTimeDate() const
 	{
 		time_t tt = unixTime();
@@ -124,7 +127,7 @@ public:
 	{
 		int len = 1024;
 		char* name = new char[len];
-		int ret = gethostname(name,len);
+		int ret = gethostname(name, len);
 		String retString;
 		if (ret != 0) {
 			retString = "UNKNOWN";
@@ -137,10 +140,7 @@ public:
 		return retString;
 	}
 
-	const RunIdType runId() const
-	{
-		return runId_;
-	}
+	const RunIdType runId() const { return runId_; }
 
 	unsigned int pid() const { return pid_; }
 
@@ -152,9 +152,11 @@ public:
 
 			serializer.write(root + "/Name", name_);
 			serializer.write(root + "/RunId", runId_);
-			serializer.write(root + "/UnixTimeStart", unixTime(false));
+			serializer.write(root + "/UnixTimeStart",
+			    unixTime(false));
 		} else {
-			serializer.write(root + "/UnixTimeEnd", unixTime(false));
+			serializer.write(root + "/UnixTimeEnd",
+			    unixTime(false));
 		}
 	}
 
@@ -163,11 +165,11 @@ public:
 		int ret = setenv(name.c_str(), value.c_str(), true);
 		if (ret != 0)
 			throw RuntimeError("Could not setenv " + name + "=" + value + "\n");
-		std::cout<<"Set "<<name<<"="<<value<<"\n";
+		std::cout << "Set " << name << "=" << value << "\n";
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	                                const ApplicationInfo& ai)
+	    const ApplicationInfo& ai)
 	{
 		if (ai.isFinalized_)
 			printFinalLegacy(os, ai);
@@ -181,25 +183,27 @@ private:
 
 	static void printInit(std::ostream& os, const ApplicationInfo& ai)
 	{
-		os<<ai.getTimeDate();
-		os<<"Hostname: "<<ai.hostname()<<"\n";
-		os<<"RunID="<<ai.runId_<<"\n";
-		os<<"UnixTimeStart="<<ai.unixTime(false)<<"\n";
-		os<<"SizeType="<<sizeof(SizeType)<<"\n";
+		os << ai.getTimeDate();
+		os << "Hostname: " << ai.hostname() << "\n";
+		os << "RunID=" << ai.runId_ << "\n";
+		os << "UnixTimeStart=" << ai.unixTime(false) << "\n";
+		os << "SizeType=" << sizeof(SizeType) << "\n";
 	}
 
-	static void printFinalLegacy(std::ostream& os, const ApplicationInfo& ai)
+	static void printFinalLegacy(std::ostream& os,
+	    const ApplicationInfo& ai)
 	{
 		OstringStream msg(std::cout.precision());
-		msg()<<ai.name_<<"\nsizeof(SizeType)="<<sizeof(SizeType)<<"\n";
+		msg() << ai.name_ << "\nsizeof(SizeType)=" << sizeof(SizeType)
+		      << "\n";
 #ifdef USE_FLOAT
-		msg()<<ai.name_<<" using float\n";
+		msg() << ai.name_ << " using float\n";
 #else
-		msg()<<ai.name_<<" using double\n";
+		msg() << ai.name_ << " using double\n";
 #endif
-		msg()<<"UnixTimeEnd="<<ai.unixTime(false)<<"\n";
-		msg()<<ai.getTimeDate();
-		os<<msg().str();
+		msg() << "UnixTimeEnd=" << ai.unixTime(false) << "\n";
+		msg() << ai.getTimeDate();
+		os << msg().str();
 	}
 
 	RunIdType runIdInternal() const
@@ -210,17 +214,18 @@ private:
 		unsigned int x = tt ^ mt.random();
 		OstringStream msgg(std::cout.precision());
 		OstringStream::OstringStreamType& msg = msgg();
-		msg<<x;
+		msg << x;
 		x = p ^ mt.random();
-		msg<<x;
+		msg << x;
 		unsigned long int y = atol(msg.str().c_str());
 		y ^= mt.random();
 		x = BitManip::countKernighan(y);
 		OstringStream msgg2(std::cout.precision());
 		OstringStream::OstringStreamType& msg2 = msgg2();
-		msg2<<y;
-		if (x < 10) msg2<<"0";
-		msg2<<x;
+		msg2 << y;
+		if (x < 10)
+			msg2 << "0";
+		msg2 << x;
 		return msg2.str();
 	}
 
@@ -233,7 +238,7 @@ private:
 
 		for (int i = 0; i < l; ++i) {
 			unsigned int c = str[l - i - 1] - 48;
-			sum += prod*c;
+			sum += prod * c;
 			prod *= 10;
 		}
 
@@ -246,10 +251,9 @@ private:
 	bool isFinalized_;
 }; // class ApplicationInfo
 
-std::ostream& operator<<(std::ostream& os,const ApplicationInfo& ai);
+std::ostream& operator<<(std::ostream& os, const ApplicationInfo& ai);
 
 } // namespace PsimagLite
 
 /*@}*/
 #endif // APPLICATION_INFO_H
-

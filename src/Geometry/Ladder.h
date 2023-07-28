@@ -81,179 +81,204 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "GeometryBase.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType, typename InputType>
-class Ladder : public GeometryBase<ComplexOrRealType,InputType> {
+template <typename ComplexOrRealType, typename InputType>
+class Ladder : public GeometryBase<ComplexOrRealType, InputType>
+{
 
 public:
 
-	enum {DIRECTION_X,DIRECTION_Y};
+	enum { DIRECTION_X,
+		DIRECTION_Y };
 
-	Ladder() {}
+	Ladder() { }
 
-	Ladder(SizeType linSize,InputType& io)
-	    : linSize_(linSize),isPeriodicX_(false)
+	Ladder(SizeType linSize, InputType& io)
+	    : linSize_(linSize)
+	    , isPeriodicX_(false)
 	{
 
-		io.readline(leg_,"LadderLeg=");
-		if (leg_!=2) {
-			std::cerr<<"WARNING: LadderLeg!=2 is experimental!\n";
+		io.readline(leg_, "LadderLeg=");
+		if (leg_ != 2) {
+			std::cerr << "WARNING: LadderLeg!=2 is experimental!\n";
 		}
 
 		try {
 			int x = 0;
-			io.readline(x,"IsPeriodicX=");
+			io.readline(x, "IsPeriodicX=");
 			isPeriodicX_ = (x > 0) ? true : false;
-			std::cerr<<"INFO: IsPeriodicX="<<isPeriodicX_<<"\n";
-		} catch (std::exception&) {}
+			std::cerr << "INFO: IsPeriodicX=" << isPeriodicX_
+				  << "\n";
+		} catch (std::exception&) {
+		}
 
 		try {
 			int x = 0;
-			io.readline(x,"IsPeriodicY=");
+			io.readline(x, "IsPeriodicY=");
 			isPeriodicY_ = (x > 0) ? true : false;
-			if (leg_==2) throw RuntimeError("LadderLeg==2 cannot have IsPeriodicY set\n");
-			std::cerr<<"INFO: IsPeriodicY="<<isPeriodicY_<<"\n";
+			if (leg_ == 2)
+				throw RuntimeError("LadderLeg==2 cannot have "
+						   "IsPeriodicY set\n");
+			std::cerr << "INFO: IsPeriodicY=" << isPeriodicY_
+				  << "\n";
 		} catch (std::exception& e) {
-			if (leg_>2) throw RuntimeError("LadderLeg>2 must have IsPeriodicY= line\n");
+			if (leg_ > 2)
+				throw RuntimeError("LadderLeg>2 must have "
+						   "IsPeriodicY= line\n");
 		}
 
 		if (leg_ == 2)
 			isPeriodicY_ = false;
 
 		if (linSize % leg_ != 0)
-			throw RuntimeError("Ladder: leg must divide number of sites\n");
+			throw RuntimeError(
+			    "Ladder: leg must divide number of sites\n");
 	}
 
-	virtual SizeType maxConnections() const { return (isPeriodicX_) ? linSize_ : leg_ + 1; }
+	virtual SizeType maxConnections() const
+	{
+		return (isPeriodicX_) ? linSize_ : leg_ + 1;
+	}
 
 	virtual SizeType dirs() const { return 2; }
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
-		if (dirId==DIRECTION_X)
+		if (dirId == DIRECTION_X)
 			return (isPeriodicX_) ? linSize_ : linSize_ - leg_;
-		else if (dirId==DIRECTION_Y)
-			return (isPeriodicY_) ? linSize_ : linSize_ - linSize_/leg_;
+		else if (dirId == DIRECTION_Y)
+			return (isPeriodicY_) ? linSize_
+					      : linSize_ - linSize_ / leg_;
 
 		throw RuntimeError("Unknown direction\n");
 	}
 
 	bool connected(SizeType i1, SizeType i2) const
 	{
-		if (i1==i2) return false;
-		SizeType c1 = i1/leg_;
-		SizeType c2 = i2/leg_;
-		SizeType r1 = i1%leg_;
-		SizeType r2 = i2%leg_;
-		if (c1==c2)
-			return this->neighbors(r1,r2,isPeriodicY_,leg_-1);
-		if (r1==r2)
-			return this->neighbors(c1, c2, isPeriodicX_, linSize_/leg_ - 1);
+		if (i1 == i2)
+			return false;
+		SizeType c1 = i1 / leg_;
+		SizeType c2 = i2 / leg_;
+		SizeType r1 = i1 % leg_;
+		SizeType r2 = i2 % leg_;
+		if (c1 == c2)
+			return this->neighbors(r1, r2, isPeriodicY_, leg_ - 1);
+		if (r1 == r2)
+			return this->neighbors(c1, c2, isPeriodicX_, linSize_ / leg_ - 1);
 		return false;
 	}
 
-	SizeType calcDir(SizeType i1,SizeType i2) const
+	SizeType calcDir(SizeType i1, SizeType i2) const
 	{
-		assert(connected(i1,i2));
-		return (sameColumn(i1,i2)) ? DIRECTION_Y : DIRECTION_X;
+		assert(connected(i1, i2));
+		return (sameColumn(i1, i2)) ? DIRECTION_Y : DIRECTION_X;
 	}
 
-	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const
 	{
 		SizeType c = smax % leg_;
-		SizeType r = 2 + 2*c;
-		if (c>=leg_/2) r = r - leg_;
+		SizeType r = 2 + 2 * c;
+		if (c >= leg_ / 2)
+			r = r - leg_;
 
-		if (smax+1 == emin) r = leg_; // finite loops
+		if (smax + 1 == emin)
+			r = leg_; // finite loops
 
-		bool a = (i<emin && i>=smax - r + 1);
-		bool b = (i>smax && i<=emin + r - 1);
+		bool a = (i < emin && i >= smax - r + 1);
+		bool b = (i > smax && i <= emin + r - 1);
 		return (a || b);
 	}
 
 	// siteEnv is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteEnv) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteEnv) const
 	{
-		if (smax+1 == emin) return siteEnv; // finite loops
+		if (smax + 1 == emin)
+			return siteEnv; // finite loops
 
 		SizeType c = smax % leg_;
-		SizeType s = int(emin/leg_) - int(smax/leg_);
-		assert(s>0);
-		if (c>=leg_/2) s--;
-		return  siteEnv - s*leg_;
+		SizeType s = int(emin / leg_) - int(smax / leg_);
+		assert(s > 0);
+		if (c >= leg_ / 2)
+			s--;
+		return siteEnv - s * leg_;
 	}
 
-	SizeType handle(SizeType i1,SizeType i2) const
+	SizeType handle(SizeType i1, SizeType i2) const
 	{
-		const SizeType dir = calcDir(i1,i2);
+		const SizeType dir = calcDir(i1, i2);
 		const SizeType imin = (i1 < i2) ? i1 : i2;
 		const SizeType imax = (i1 < i2) ? i2 : i1;
-		const SizeType y = imin/leg_;
-		switch(dir) {
+		const SizeType y = imin / leg_;
+		switch (dir) {
 		case DIRECTION_X:
-			if (!isPeriodicX_) return imin;
-			return (imin < leg_ && imax == imin + linSize_ - leg_) ? imax : imin;
+			if (!isPeriodicX_)
+				return imin;
+			return (imin < leg_ && imax == imin + linSize_ - leg_)
+			    ? imax
+			    : imin;
 		case DIRECTION_Y:
-			if (!isPeriodicY_) return imin - y;
-			return (imin % leg_ == 0 && imax == imin + leg_ -1) ? imax : imin;
+			if (!isPeriodicY_)
+				return imin - y;
+			return (imin % leg_ == 0 && imax == imin + leg_ - 1)
+			    ? imax
+			    : imin;
 		}
 
 		throw RuntimeError("handle: Unknown direction\n");
 	}
 
-	bool sameColumn(SizeType i1,SizeType i2) const
+	bool sameColumn(SizeType i1, SizeType i2) const
 	{
-		SizeType c1 = i1/leg_;
-		SizeType c2 = i2/leg_;
-		if (c1 == c2) return true;
+		SizeType c1 = i1 / leg_;
+		SizeType c2 = i2 / leg_;
+		if (c1 == c2)
+			return true;
 		return false;
 	}
 
-	bool sameRow(SizeType i1,SizeType i2) const
+	bool sameRow(SizeType i1, SizeType i2) const
 	{
-		SizeType c1 = i1%leg_;
-		SizeType c2 = i2%leg_;
-		if (c1 == c2) return true;
+		SizeType c1 = i1 % leg_;
+		SizeType c2 = i2 % leg_;
+		if (c1 == c2)
+			return true;
 		return false;
 	}
 
-	String label() const
-	{
-		return "ladder";
-	}
+	String label() const { return "ladder"; }
 
 	SizeType length(SizeType i) const
 	{
-		assert(i<2);
-		return (i == 1) ? leg_ : SizeType(linSize_/leg_);
+		assert(i < 2);
+		return (i == 1) ? leg_ : SizeType(linSize_ / leg_);
 	}
 
-	SizeType leg() const
-	{
-		return leg_;
-	}
+	SizeType leg() const { return leg_; }
 
-	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	SizeType translate(SizeType site, SizeType dir, SizeType amount) const
 	{
-		assert(dir<2);
-		SizeType x = SizeType(site/leg_);
+		assert(dir < 2);
+		SizeType x = SizeType(site / leg_);
 		SizeType y = site % leg_;
-		SizeType lx = SizeType(linSize_/leg_);
-		if (dir==DIRECTION_X) x = translateInternal(x,lx,amount);
-		else y = translateInternal(y,leg_,amount);
-		SizeType ind = y + x*leg_;
-		assert(ind<linSize_);
+		SizeType lx = SizeType(linSize_ / leg_);
+		if (dir == DIRECTION_X)
+			x = translateInternal(x, lx, amount);
+		else
+			y = translateInternal(y, leg_, amount);
+		SizeType ind = y + x * leg_;
+		assert(ind < linSize_);
 		return ind;
 	}
 
 	SizeType findReflection(SizeType site) const
 	{
-		SizeType x = SizeType(site/leg_);
+		SizeType x = SizeType(site / leg_);
 		SizeType y = site % leg_;
-		SizeType lx = SizeType(linSize_/leg_);
-		SizeType ind = y + (lx-x-1)*leg_;
-		assert(ind<linSize_);
+		SizeType lx = SizeType(linSize_ / leg_);
+		SizeType ind = y + (lx - x - 1) * leg_;
+		assert(ind < linSize_);
 		return ind;
 	}
 
@@ -263,10 +288,11 @@ public:
 
 private:
 
-	SizeType translateInternal(SizeType c,SizeType l,SizeType amount) const
+	SizeType translateInternal(SizeType c, SizeType l, SizeType amount) const
 	{
 		c += amount;
-		while (c>=l) c-=l;
+		while (c >= l)
+			c -= l;
 		return c;
 	}
 
@@ -279,4 +305,3 @@ private:
 
 /*@}*/
 #endif // LADDER_H
-

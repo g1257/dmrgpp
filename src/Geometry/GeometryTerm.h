@@ -81,28 +81,31 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_TERM_H
 #define GEOMETRY_TERM_H
 
-#include "GeometryDirection.h"
-#include "GeometryBase.h"
-#include <cassert>
-#include "Ladder.h"
-#include "LadderX.h"
-#include "LadderBath.h"
-#include "KTwoNiFFour.h"
-#include "Star.h"
-#include "LongChain.h"
-#include "LongRange.h"
-#include "Honeycomb.h"
 #include "AST/ExpressionForAST.h"
 #include "AST/PlusMinusMultiplyDivide.h"
+#include "GeometryBase.h"
+#include "GeometryDirection.h"
+#include "Honeycomb.h"
+#include "KTwoNiFFour.h"
+#include "Ladder.h"
+#include "LadderBath.h"
+#include "LadderX.h"
+#include "LongChain.h"
+#include "LongRange.h"
 #include "PsimagLite.h"
+#include "Star.h"
+#include <cassert>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType,typename InputType>
-class GeometryTerm {
+template <typename ComplexOrRealType, typename InputType>
+class GeometryTerm
+{
 
 	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
-	typedef GeometryDirection<ComplexOrRealType,GeometryBaseType> GeometryDirectionType;
+	typedef GeometryDirection<ComplexOrRealType, GeometryBaseType>
+	    GeometryDirectionType;
 
 public:
 
@@ -112,15 +115,21 @@ public:
 	struct Auxiliary {
 
 		Auxiliary(bool d, SizeType t, SizeType n, SizeType l)
-		    : debug(d), termId(t), numberOfTerms(n), linSize(l)
-		{}
+		    : debug(d)
+		    , termId(t)
+		    , numberOfTerms(n)
+		    , linSize(l)
+		{
+		}
 
-		void write(PsimagLite::String label, IoSerializer& ioSerializer) const
+		void write(PsimagLite::String label,
+		    IoSerializer& ioSerializer) const
 		{
 			ioSerializer.createGroup(label);
 			ioSerializer.write(label + "/debug", debug);
 			ioSerializer.write(label + "/termId", termId);
-			ioSerializer.write(label + "/numberOfTerms", numberOfTerms);
+			ioSerializer.write(label + "/numberOfTerms",
+			    numberOfTerms);
 			ioSerializer.write(label + "/linSize", linSize);
 		}
 
@@ -131,62 +140,82 @@ public:
 	}; // Auxiliary
 
 	GeometryTerm()
-	    : orbitals_(0),geometryBase_(0)
-	{}
+	    : orbitals_(0)
+	    , geometryBase_(0)
+	{
+	}
 
 	/** @class hide_geometry2
-	 - DegreesOfFreedom=integer Degrees of freedom on which the connectors depend on.
-	 - GeometryKind=string One of chain, chainEx, ladder, ladderx, ladderbath, ktwoniffour,
-	   or star.
-	 - GeometryOptions=string Either none or ConstantValues needs to explain more FIXME
+	 - DegreesOfFreedom=integer Degrees of freedom on which the connectors
+	 depend on.
+	 - GeometryKind=string One of chain, chainEx, ladder, ladderx,
+	 ladderbath, ktwoniffour, or star.
+	 - GeometryOptions=string Either none or ConstantValues needs to explain
+	 more FIXME
 	*/
-	GeometryTerm(InputType& io,
-	             const Auxiliary& aux)
-	    : aux_(aux), orbitals_(1), geometryBase_(0), gOptions_("none")
+	GeometryTerm(InputType& io, const Auxiliary& aux)
+	    : aux_(aux)
+	    , orbitals_(1)
+	    , geometryBase_(0)
+	    , gOptions_("none")
 	{
 		String savedPrefix = io.prefix();
-		io.prefix() += (aux.numberOfTerms > 1) ? "gt" + ttos(aux.termId) + ":" : "";
+		io.prefix() += (aux.numberOfTerms > 1)
+		    ? "gt" + ttos(aux.termId) + ":"
+		    : "";
 
 		InternalDofEnum idof = GeometryDirectionType::SPECIFIC;
 
 		// legacy input files:
 		SizeType x = orbitals_;
 		try {
-			io.readline(x,   "DegreesOfFreedom=");
+			io.readline(x, "DegreesOfFreedom=");
 			orbitals_ = x;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
-		if (orbitals_  == 0)
+		if (orbitals_ == 0)
 			throw RuntimeError("DegreesOfFreedom=0 not allowed\n");
 
 		String s;
-		io.readline(s,  "GeometryKind=");
+		io.readline(s, "GeometryKind=");
 
 		io.readline(gOptions_, "GeometryOptions=");
 		bool constantValues = (gOptions_.find("ConstantValues") != String::npos);
 
-		if (s == "chain" || s=="longchain") {
-			geometryBase_ = new LongChain<ComplexOrRealType, InputType>(aux.linSize,io);
+		if (s == "chain" || s == "longchain") {
+			geometryBase_ = new LongChain<ComplexOrRealType, InputType>(
+			    aux.linSize, io);
 		} else if (s == "chainEx") {
-			throw RuntimeError("GeometryTerm::ctor(): ChainEx: no longer supported.\n");
-		} else if (s=="ladder") {
-			geometryBase_ = new Ladder<ComplexOrRealType, InputType>(aux.linSize,io);
-		} else if (s=="ladderx") {
-			geometryBase_ = new LadderX<ComplexOrRealType, InputType>(aux.linSize,io);
-		} else if (s=="ladderbath") {
-			geometryBase_ = new LadderBath<ComplexOrRealType, InputType>(aux.linSize,io);
-		} else if (s=="ktwoniffour") {
-			geometryBase_ = new KTwoNiFFour<ComplexOrRealType, InputType>(aux.linSize,io);
-		} else if (s=="star") {
-			geometryBase_ = new Star<ComplexOrRealType, InputType>(aux.linSize,io);
+			throw RuntimeError("GeometryTerm::ctor(): ChainEx: no "
+					   "longer supported.\n");
+		} else if (s == "ladder") {
+			geometryBase_ = new Ladder<ComplexOrRealType, InputType>(
+			    aux.linSize, io);
+		} else if (s == "ladderx") {
+			geometryBase_ = new LadderX<ComplexOrRealType, InputType>(
+			    aux.linSize, io);
+		} else if (s == "ladderbath") {
+			geometryBase_ = new LadderBath<ComplexOrRealType, InputType>(
+			    aux.linSize, io);
+		} else if (s == "ktwoniffour") {
+			geometryBase_ = new KTwoNiFFour<ComplexOrRealType, InputType>(
+			    aux.linSize, io);
+		} else if (s == "star") {
+			geometryBase_ = new Star<ComplexOrRealType, InputType>(
+			    aux.linSize, io);
 		} else if (s == "LongRange" || s == "General") {
-			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(aux.linSize,io);
+			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(
+			    aux.linSize, io);
 			idof = GeometryDirectionType::GENERAL;
 		} else if (s == "Honeycomb") {
-			geometryBase_ = new Honeycomb<ComplexOrRealType, InputType>(aux.linSize,io);
+			geometryBase_ = new Honeycomb<ComplexOrRealType, InputType>(
+			    aux.linSize, io);
 		} else if (s.substr(0, 5) == "Super") {
-			std::cout<<__FILE__<<" SuperGeometry "<<s<<" detected\n";
-			std::cerr<<__FILE__<<" SuperGeometry "<<s<<" detected\n";
+			std::cout << __FILE__ << " SuperGeometry " << s
+				  << " detected\n";
+			std::cerr << __FILE__ << " SuperGeometry " << s
+				  << " detected\n";
 			gOptions_ = s;
 		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
@@ -194,20 +223,24 @@ public:
 
 		const SizeType ndirs = (geometryBase_) ? geometryBase_->dirs() : 0;
 		for (SizeType i = 0; i < ndirs; ++i) {
-			typename GeometryDirectionType::Auxiliary aux(constantValues, i, idof, orbitals_);
+			typename GeometryDirectionType::Auxiliary aux(
+			    constantValues, i, idof, orbitals_);
 
-			directions_.push_back(GeometryDirectionType(io, aux, geometryBase_));
+			directions_.push_back(
+			    GeometryDirectionType(io, aux, geometryBase_));
 		}
 
 		bool hasModifier = false;
 		try {
 			String vModifier;
-			io.readline(vModifier,  "GeometryValueModifier=");
+			io.readline(vModifier, "GeometryValueModifier=");
 			hasModifier = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (hasModifier) {
-			throw RuntimeError("GeometryValueModifier is no longer allowed\n");
+			throw RuntimeError(
+			    "GeometryValueModifier is no longer allowed\n");
 		}
 
 		cacheValues();
@@ -215,15 +248,16 @@ public:
 		io.prefix() = savedPrefix;
 
 		if (aux.debug) {
-			std::cerr<<"Cached values:\n";
-			std::cerr<<cachedValues_;
-			std::cerr<<"-----------\n";
+			std::cerr << "Cached values:\n";
+			std::cerr << cachedValues_;
+			std::cerr << "-----------\n";
 		}
 	}
 
 	~GeometryTerm()
 	{
-		if (geometryBase_) delete geometryBase_;
+		if (geometryBase_)
+			delete geometryBase_;
 	}
 
 	void write(PsimagLite::String label, IoSerializer& ioSerializer) const
@@ -261,76 +295,65 @@ public:
 		return str;
 	}
 
-	template<class Archive>
-	void write(Archive &, const unsigned int)
-	{}
+	template <class Archive>
+	void write(Archive&, const unsigned int) { }
 
-	template<typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   String) const
+	template <typename SomeMemResolvType>
+	SizeType memResolv(SomeMemResolvType&, SizeType, String) const
 	{
 		return 0;
 	}
 
-	const ComplexOrRealType& operator()(SizeType i1,
-	                                    SizeType edof1,
-	                                    SizeType i2,
-	                                    SizeType edof2) const
+	const ComplexOrRealType& operator()(SizeType i1, SizeType edof1, SizeType i2, SizeType edof2) const
 	{
 		assert(geometryBase_);
-		int k1 = geometryBase_->index(i1,edof1,orbitals_);
-		int k2 = geometryBase_->index(i2,edof2,orbitals_);
-		assert(k1>=0 && k2>=0);
-		return cachedValues_(k1,k2);
+		int k1 = geometryBase_->index(i1, edof1, orbitals_);
+		int k2 = geometryBase_->index(i2, edof2, orbitals_);
+		assert(k1 >= 0 && k2 >= 0);
+		return cachedValues_(k1, k2);
 	}
 
-
-	//assumes 1<smax+1 < emin
-	const ComplexOrRealType& operator()(SizeType smax,
-	                                    SizeType emin,
-	                                    SizeType i1,
-	                                    SizeType edof1,
-	                                    SizeType i2,
-	                                    SizeType edof2) const
+	// assumes 1<smax+1 < emin
+	const ComplexOrRealType& operator()(SizeType smax, SizeType emin, SizeType i1, SizeType edof1, SizeType i2, SizeType edof2) const
 	{
 		assert(geometryBase_);
-		bool bothFringe = (geometryBase_->fringe(i1,smax,emin) &&
-		                   geometryBase_->fringe(i2,smax,emin));
+		bool bothFringe = (geometryBase_->fringe(i1, smax, emin) && geometryBase_->fringe(i2, smax, emin));
 		SizeType siteNew1 = i1;
 		SizeType siteNew2 = i2;
 		SizeType edofNew1 = edof1;
 		SizeType edofNew2 = edof2;
 		if (bothFringe) {
-			if (i2<i1) {
+			if (i2 < i1) {
 				siteNew1 = i2;
 				siteNew2 = i1;
 				edofNew1 = edof2;
 				edofNew2 = edof1;
 			}
 
-			siteNew2 = geometryBase_->getSubstituteSite(smax,emin,siteNew2);
+			siteNew2 = geometryBase_->getSubstituteSite(smax, emin, siteNew2);
 		}
 
-		return operator()(siteNew1,edofNew1,siteNew2,edofNew2);
+		return operator()(siteNew1, edofNew1, siteNew2, edofNew2);
 	}
 
-	bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
+	bool connected(SizeType smax, SizeType emin, SizeType i1, SizeType i2) const
 	{
-		if (i1==i2) return false;
+		if (i1 == i2)
+			return false;
 
 		assert(geometryBase_);
-		bool bothFringe = (geometryBase_->fringe(i1,smax,emin) &&
-		                   geometryBase_->fringe(i2,smax,emin));
+		bool bothFringe = (geometryBase_->fringe(i1, smax, emin) && geometryBase_->fringe(i2, smax, emin));
 
-		if (!bothFringe) return geometryBase_->connected(i1,i2);
-		//std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
+		if (!bothFringe)
+			return geometryBase_->connected(i1, i2);
+		// std::cerr<<"fringe= "<<i1<<" "<<i2<<"\n";
 		return true;
 	}
 
-	bool connected(SizeType i1,SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const
 	{
-		return (geometryBase_) ? geometryBase_->connected(i1,i2) : false;
+		return (geometryBase_) ? geometryBase_->connected(i1, i2)
+				       : false;
 	}
 
 	String label() const
@@ -356,32 +379,34 @@ public:
 		return geometryBase_->length(i);
 	}
 
-	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	SizeType translate(SizeType site, SizeType dir, SizeType amount) const
 	{
 		assert(geometryBase_);
-		return geometryBase_->translate(site,dir,amount);
+		return geometryBase_->translate(site, dir, amount);
 	}
 
 	void print(std::ostream& os) const
 	{
 		SizeType linSize = aux_.linSize;
 
-		os<<"#orbital changes first\n";
-		for (SizeType i=0;i<linSize;i++) {
+		os << "#orbital changes first\n";
+		for (SizeType i = 0; i < linSize; i++) {
 			SizeType dofsi = orbitals(i);
-			for (SizeType dof1=0;dof1<dofsi;dof1++) {
-				for (SizeType j=0;j<linSize;j++) {
+			for (SizeType dof1 = 0; dof1 < dofsi; dof1++) {
+				for (SizeType j = 0; j < linSize; j++) {
 					SizeType dofsj = orbitals(j);
-					for (SizeType dof2=0;dof2<dofsj;dof2++) {
-						if (!connected(i,j)) {
-							os<<0<<" ";
+					for (SizeType dof2 = 0; dof2 < dofsj;
+					     dof2++) {
+						if (!connected(i, j)) {
+							os << 0 << " ";
 							continue;
 						}
-						os<<operator()(i,dof1,j,dof2)<<" ";
+						os << operator()(i, dof1, j, dof2)
+						   << " ";
 					}
 				}
 
-				os<<"\n";
+				os << "\n";
 			}
 		}
 	}
@@ -389,7 +414,7 @@ public:
 	SizeType handle(SizeType ind, SizeType jnd) const
 	{
 		assert(geometryBase_);
-		return geometryBase_->handle(ind,jnd);
+		return geometryBase_->handle(ind, jnd);
 	}
 
 	SizeType directions() const
@@ -400,18 +425,17 @@ public:
 	SizeType calcDir(SizeType i, SizeType j) const
 	{
 		assert(geometryBase_);
-		return geometryBase_->calcDir(i,j);
+		return geometryBase_->calcDir(i, j);
 	}
 
-	String options() const
-	{
-		return gOptions_;
-	}
+	String options() const { return gOptions_; }
 
-	friend std::ostream& operator<<(std::ostream& os, const GeometryTerm& gt)
+	friend std::ostream& operator<<(std::ostream& os,
+	    const GeometryTerm& gt)
 	{
-		os<<"#GeometryDirections="<<gt.directions_.size()<<"\n";
-		for (SizeType i=0;i<gt.directions_.size();i++) os<<gt.directions_[i];
+		os << "#GeometryDirections=" << gt.directions_.size() << "\n";
+		for (SizeType i = 0; i < gt.directions_.size(); i++)
+			os << gt.directions_[i];
 		gt.print(os);
 		return os;
 	}
@@ -426,39 +450,46 @@ private:
 
 	void cacheValues()
 	{
-		if (!geometryBase_) return;
+		if (!geometryBase_)
+			return;
 
 		SizeType linSize = aux_.linSize;
 		SizeType matrixRank = geometryBase_->matrixRank(linSize, orbitals_);
-		cachedValues_.resize(matrixRank,matrixRank);
+		cachedValues_.resize(matrixRank, matrixRank);
 
 		for (SizeType i1 = 0; i1 < linSize; ++i1) {
 			for (SizeType i2 = 0; i2 < linSize; ++i2) {
-				if (!geometryBase_->connected(i1,i2)) continue;
-				for (SizeType edof1=0;edof1<orbitals_;edof1++) {
-					int k1 = geometryBase_->index(i1,edof1,orbitals_);
-					if (k1<0) continue;
-					for (SizeType edof2=0;edof2<orbitals_;edof2++) {
-						int k2 = geometryBase_->index(i2,edof2,orbitals_);
-						if (k2<0) continue;
-						cachedValues_(k1,k2)=calcValue(i1,edof1,i2,edof2);
+				if (!geometryBase_->connected(i1, i2))
+					continue;
+				for (SizeType edof1 = 0; edof1 < orbitals_;
+				     edof1++) {
+					int k1 = geometryBase_->index(
+					    i1, edof1, orbitals_);
+					if (k1 < 0)
+						continue;
+					for (SizeType edof2 = 0;
+					     edof2 < orbitals_;
+					     edof2++) {
+						int k2 = geometryBase_->index(
+						    i2, edof2, orbitals_);
+						if (k2 < 0)
+							continue;
+						cachedValues_(k1, k2) = calcValue(i1, edof1, i2, edof2);
 					}
 				}
 			}
 		}
 	}
 
-	ComplexOrRealType calcValue(SizeType i1,
-	                            SizeType edof1,
-	                            SizeType i2,
-	                            SizeType edof2) const
+	ComplexOrRealType calcValue(SizeType i1, SizeType edof1, SizeType i2, SizeType edof2) const
 	{
 		assert(geometryBase_);
-		if (!geometryBase_->connected(i1,i2)) return 0.0;
+		if (!geometryBase_->connected(i1, i2))
+			return 0.0;
 
-		SizeType dir = geometryBase_->calcDir(i1,i2);
-		assert(dir<directions_.size());
-		return directions_[dir](i1,edof1,i2,edof2);
+		SizeType dir = geometryBase_->calcDir(i1, i2);
+		assert(dir < directions_.size());
+		return directions_[dir](i1, edof1, i2, edof2);
 	}
 
 	GeometryTerm(const GeometryTerm&);
@@ -476,4 +507,3 @@ private:
 
 /*@}*/
 #endif // GEOMETRY_TERM_H
-

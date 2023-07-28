@@ -7,35 +7,31 @@ void createVector(std::vector<bool>& v)
 		v[i] = (drand48() < 0.5);
 }
 
-void saveAll(PsimagLite::String filename,
-             const std::vector<bool>& v1,
-             PsimagLite::String vname1,
-             const std::vector<bool>& v2,
-             PsimagLite::String vname2)
+void saveAll(PsimagLite::String filename, const std::vector<bool>& v1, PsimagLite::String vname1, const std::vector<bool>& v2, PsimagLite::String vname2)
 {
 	PsimagLite::IoNg::Out io(filename, PsimagLite::IoNg::ACC_TRUNC);
 	io.write(v1, vname1);
 	io.write(v2, vname2);
 }
 
-void compare(const std::vector<bool>& v,
-             const std::vector<bool>& w)
+void compare(const std::vector<bool>& v, const std::vector<bool>& w)
 {
 	SizeType n = v.size();
 	if (n != w.size())
-		std::cerr<<"DIFFER on SIZE!!!\n";
+		std::cerr << "DIFFER on SIZE!!!\n";
 
 	for (SizeType i = 0; i < n; ++i) {
-		if (v[i] == w[i]) continue;
-		std::cerr<<"DIFFER!!!\n";
+		if (v[i] == w[i])
+			continue;
+		std::cerr << "DIFFER!!!\n";
 	}
 
-	std::cerr<<"OK\n";
-
+	std::cerr << "OK\n";
 }
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-	if (argc < 2) return 1;
+	if (argc < 2)
+		return 1;
 	SizeType n = atoi(argv[1]);
 	std::vector<bool> v1(n, false);
 	createVector(v1);
@@ -54,5 +50,3 @@ int main(int argc, char **argv)
 	compare(v1, w1);
 	compare(v2, w2);
 }
-
-

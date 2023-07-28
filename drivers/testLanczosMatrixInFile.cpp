@@ -1,13 +1,13 @@
+#include "CrsMatrix.h"
 #include "LanczosSolver.h"
 #include "Matrix.h"
-#include "CrsMatrix.h"
-#include <fstream>
 #include "PsimagLite.h"
+#include <fstream>
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	if (argc != 2) {
-		std::cerr<<"Expected filename\n";
+		std::cerr << "Expected filename\n";
 		return 1;
 	}
 
@@ -24,16 +24,16 @@ int main(int argc, char **argv)
 		throw PsimagLite::RuntimeError("Could not open file " + file + "\n");
 
 	SizeType tmp = 0;
-	fin>>tmp;
+	fin >> tmp;
 	SizeType n = 1;
-	fin>>n;
+	fin >> n;
 	if (tmp != n)
 		throw PsimagLite::RuntimeError("Matrix in file " + file + " is not square\n");
 
-	m.resize(n, n , 0);
+	m.resize(n, n, 0);
 	for (SizeType i = 0; i < n; ++i)
 		for (SizeType j = 0; j < n; ++j)
-			fin>>m(i, j);
+			fin >> m(i, j);
 
 	PsimagLite::CrsMatrix<ComplexType> msparse(m);
 
@@ -42,8 +42,11 @@ int main(int argc, char **argv)
 	params.tolerance = -1;
 	params.options = "reortho";
 
-	typedef PsimagLite::LanczosSolver<SolverParametersType,
-	        PsimagLite::CrsMatrix<ComplexType>,VectorType> LanczosSolverType;
+	typedef PsimagLite::LanczosSolver<
+	    SolverParametersType,
+	    PsimagLite::CrsMatrix<ComplexType>,
+	    VectorType>
+	    LanczosSolverType;
 
 	LanczosSolverType lanczosSolver(msparse, params);
 
@@ -52,19 +55,19 @@ int main(int argc, char **argv)
 
 	VectorRealType eigs(n);
 	PsimagLite::diag(m, eigs, 'V');
-	std::cout<<"\nEXACT: ";
+	std::cout << "\nEXACT: ";
 	for (SizeType excited = 0; excited < n; ++excited)
-		std::cout<<eigs[excited]<<" ";
-	std::cout<<"\n";
+		std::cout << eigs[excited] << " ";
+	std::cout << "\n";
 
-	std::cout<<"LANCZ: ";
+	std::cout << "LANCZ: ";
 	LanczosSolverType::VectorVectorType zz;
 	lanczosSolver.computeAllStatesBelow(eigs, zz, initial, n);
 
-	std::cout<<"LANCZOS: \n";
+	std::cout << "LANCZOS: \n";
 	for (SizeType excited = 0; excited < n; ++excited) {
-		std::cout<< "<E>_" << excited << " = " << eigs[excited] <<"  \n";
+		std::cout << "<E>_" << excited << " = " << eigs[excited] << "  \n";
 	}
 
-	std::cout<<"\n";
+	std::cout << "\n";
 }

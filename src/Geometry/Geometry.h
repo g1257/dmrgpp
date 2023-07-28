@@ -78,58 +78,64 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef GEOMETRY_H
 #define GEOMETRY_H
 
-#include "GeometryTerm.h"
 #include "GeometryEx.h"
+#include "GeometryTerm.h"
 #include "Io/IoSerializerStub.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType_,typename InputType_, typename ProgramGlobalsType>
-class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType_> {
+template <typename ComplexOrRealType_, typename InputType_, typename ProgramGlobalsType>
+class Geometry
+    : public GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType_>
+{
 
 public:
 
 	typedef ComplexOrRealType_ ComplexOrRealType;
 	typedef InputType_ InputType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
-	typedef GeometryTerm<ComplexOrRealType,InputType> GeometryTermType;
+	typedef GeometryTerm<ComplexOrRealType, InputType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type VectorSizeType;
-	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type,InputType> GeometryExType;
-
+	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType>
+	    GeometryExType;
 
 	/** @class hide_geometry1
-		- TotalNumberOfSites=integer This is the total number of sites including bath sites
-		  (if any) and all system and environment sites.
-		- NumberOfTerms=integer This is the number of Hamiltonian off-site terms. This number
-		  must match the model's expected number of terms. Note that each Hamiltonian off-site
-		  term can have a different geometry!
+		- TotalNumberOfSites=integer This is the total number of sites
+	   including bath sites (if any) and all system and environment sites.
+		- NumberOfTerms=integer This is the number of Hamiltonian
+	   off-site terms. This number must match the model's expected number of
+	   terms. Note that each Hamiltonian off-site term can have a different
+	   geometry!
 	*/
-	Geometry(InputType& io,bool debug=false,SizeType meshPoints=0)
-	    : GeometryExType(io,meshPoints)
+	Geometry(InputType& io, bool debug = false, SizeType meshPoints = 0)
+	    : GeometryExType(io, meshPoints)
 	{
 		int x;
-		io.readline(x,"TotalNumberOfSites=");
-		if (x<0) throw RuntimeError("TotalNumberOfSites<0 is an error\n");
+		io.readline(x, "TotalNumberOfSites=");
+		if (x < 0)
+			throw RuntimeError(
+			    "TotalNumberOfSites<0 is an error\n");
 		linSize_ = x;
 
-		io.readline(x,"NumberOfTerms=");
-		if (x<0) throw RuntimeError("NumberOfTerms<0 is an error\n");
+		io.readline(x, "NumberOfTerms=");
+		if (x < 0)
+			throw RuntimeError("NumberOfTerms<0 is an error\n");
 
-		terms_.resize(x,0);
+		terms_.resize(x, 0);
 
-		for (SizeType i=0;i<terms_.size();i++) {
-			typename GeometryTermType::Auxiliary aux(false,
-			                                         i,
-			                                         terms_.size(),
-			                                         linSize_);
-			terms_[i] = new GeometryTermType(io,aux);
+		for (SizeType i = 0; i < terms_.size(); i++) {
+			typename GeometryTermType::Auxiliary aux(
+			    false, i, terms_.size(), linSize_);
+			terms_[i] = new GeometryTermType(io, aux);
 		}
 	}
 
 	~Geometry()
 	{
-		for (SizeType i=0;i<terms_.size();i++)
-			if (terms_[i]) delete terms_[i];
+		for (SizeType i = 0; i < terms_.size(); i++)
+			if (terms_[i])
+				delete terms_[i];
 	}
 
 	static String import()
@@ -151,44 +157,47 @@ public:
 
 	String label(SizeType i) const { return terms_[i]->label(); }
 
-	typename ProgramGlobalsType::ConnectionEnum connectionKind(SizeType smax,
-	                                                           SizeType ind,
-	                                                           SizeType jnd) const
+	typename ProgramGlobalsType::ConnectionEnum
+	connectionKind(SizeType smax, SizeType ind, SizeType jnd) const
 	{
 		SizeType middle = smax + 1;
-		if (ind<middle && jnd>=middle) return ProgramGlobalsType::ConnectionEnum::SYSTEM_ENVIRON;
-		if (jnd<middle && ind>=middle) return ProgramGlobalsType::ConnectionEnum::ENVIRON_SYSTEM;
-		return (ind < middle) ? ProgramGlobalsType::ConnectionEnum::SYSTEM_SYSTEM
-		                      : ProgramGlobalsType::ConnectionEnum::ENVIRON_ENVIRON;
+		if (ind < middle && jnd >= middle)
+			return ProgramGlobalsType::ConnectionEnum::
+			    SYSTEM_ENVIRON;
+		if (jnd < middle && ind >= middle)
+			return ProgramGlobalsType::ConnectionEnum::
+			    ENVIRON_SYSTEM;
+		return (ind < middle)
+		    ? ProgramGlobalsType::ConnectionEnum::SYSTEM_SYSTEM
+		    : ProgramGlobalsType::ConnectionEnum::
+			ENVIRON_ENVIRON;
 	}
 
-	ComplexOrRealType operator()
-	(SizeType smax,SizeType emin,
-	 SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
+	ComplexOrRealType operator()(SizeType smax, SizeType emin, SizeType i1, SizeType edof1, SizeType i2, SizeType edof2, SizeType term) const
 	{
 		assert(term < terms_.size());
-		return (smax + 1 == emin) ? terms_[term]->operator()(i1,edof1,i2,edof2)
-		                          : terms_[term]->operator()(smax,emin,i1,edof1,i2,edof2);
+		return (smax + 1 == emin)
+		    ? terms_[term]->operator()(i1, edof1, i2, edof2)
+		    : terms_[term]->operator()(smax, emin, i1, edof1, i2, edof2);
 	}
 
-	ComplexOrRealType operator()
-	(SizeType i1,SizeType edof1,SizeType i2, SizeType edof2,SizeType term) const
+	ComplexOrRealType operator()(SizeType i1, SizeType edof1, SizeType i2, SizeType edof2, SizeType term) const
 	{
-		return terms_[term]->operator()(i1,edof1,i2,edof2);
+		return terms_[term]->operator()(i1, edof1, i2, edof2);
 	}
 
-	bool connected(SizeType smax,SizeType emin,SizeType i1,SizeType i2) const
+	bool connected(SizeType smax, SizeType emin, SizeType i1, SizeType i2) const
 	{
 		bool b = false;
 
-		if (smax+1==emin) {
+		if (smax + 1 == emin) {
 			for (SizeType t = 0; t < terms_.size(); ++t)
-				b |= terms_[t]->connected(i1,i2);
+				b |= terms_[t]->connected(i1, i2);
 			return b;
 		}
 
 		for (SizeType t = 0; t < terms_.size(); ++t)
-			b |= terms_[t]->connected(smax,emin,i1,i2);
+			b |= terms_[t]->connected(smax, emin, i1, i2);
 		return b;
 	}
 
@@ -202,22 +211,18 @@ public:
 		return terms_[term]->orbitals(site);
 	}
 
-	void split(SizeType sitesPerBlock,
-	           VectorSizeType& S,
-	           typename Vector<VectorSizeType>::Type& X,
-	           typename Vector<VectorSizeType>::Type& Y,
-	           VectorSizeType& E,
-	           bool allInSystem = false) const
+	void split(SizeType sitesPerBlock, VectorSizeType& S, typename Vector<VectorSizeType>::Type& X, typename Vector<VectorSizeType>::Type& Y, VectorSizeType& E, bool allInSystem = false) const
 	{
-		SizeType middle = linSize_/2;
+		SizeType middle = linSize_ / 2;
 		if (linSize_ & 1) {
-			std::cerr<<"EXPERIMENTAL: Geometry::split(...): ";
-			std::cerr<<" Lattice is odd (it has "<<linSize_<<" sites).\n";
+			std::cerr << "EXPERIMENTAL: Geometry::split(...): ";
+			std::cerr << " Lattice is odd (it has " << linSize_
+				  << " sites).\n";
 			middle++;
 		}
 
 		bool b1 = ((linSize_ % sitesPerBlock) != 0);
-		b1  |= (static_cast<SizeType>(linSize_/sitesPerBlock) < 3);
+		b1 |= (static_cast<SizeType>(linSize_ / sitesPerBlock) < 3);
 		bool b2 = (sitesPerBlock > 1);
 		if (b1 && b2) {
 			String str(__FILE__);
@@ -227,37 +232,39 @@ public:
 			throw RuntimeError(str.c_str());
 		}
 
-		SizeType i=0;
-		while (i<sitesPerBlock) {
+		SizeType i = 0;
+		while (i < sitesPerBlock) {
 			S.push_back(i);
 			i++;
 		}
 
-		while (i<middle) {
+		while (i < middle) {
 			typename Vector<SizeType>::Type tmpV(sitesPerBlock);
-			for (SizeType j=0;j<sitesPerBlock;j++)
-				tmpV[j] = i+j;
+			for (SizeType j = 0; j < sitesPerBlock; j++)
+				tmpV[j] = i + j;
 			X.push_back(tmpV);
-			i+=sitesPerBlock;
+			i += sitesPerBlock;
 		}
 
-		SizeType lastMiddle=linSize_-sitesPerBlock;
-		while (i<lastMiddle) {
+		SizeType lastMiddle = linSize_ - sitesPerBlock;
+		while (i < lastMiddle) {
 			typename Vector<SizeType>::Type tmpV(sitesPerBlock);
 			typename Vector<SizeType>::Type tmpV2(sitesPerBlock);
-			for (SizeType j=0;j<sitesPerBlock;j++) {
-				SizeType jj = sitesPerBlock-1-j;
-				tmpV[j] = (linSize_-1-i-jj)+(middle-sitesPerBlock);
+			for (SizeType j = 0; j < sitesPerBlock; j++) {
+				SizeType jj = sitesPerBlock - 1 - j;
+				tmpV[j] = (linSize_ - 1 - i - jj) + (middle - sitesPerBlock);
 				tmpV2[j] = jj + i;
-				assert(tmpV[j]<linSize_);
+				assert(tmpV[j] < linSize_);
 			}
 
-			if (allInSystem) X.push_back(tmpV2);
-			else Y.push_back(tmpV);
-			i+=sitesPerBlock;
+			if (allInSystem)
+				X.push_back(tmpV2);
+			else
+				Y.push_back(tmpV);
+			i += sitesPerBlock;
 		}
 
-		while (i<linSize_) {
+		while (i < linSize_) {
 			E.push_back(i);
 			i++;
 		}
@@ -277,30 +284,30 @@ public:
 		return result;
 	}
 
-	SizeType findReflection(SizeType site,SizeType termId) const
+	SizeType findReflection(SizeType site, SizeType termId) const
 	{
 		return terms_[termId]->findReflection(site);
 	}
 
-	SizeType length(SizeType i,SizeType termId) const
+	SizeType length(SizeType i, SizeType termId) const
 	{
 		return terms_[termId]->length(i);
 	}
 
-	SizeType translate(SizeType site,SizeType dir, SizeType amount,SizeType termId) const
+	SizeType translate(SizeType site, SizeType dir, SizeType amount, SizeType termId) const
 	{
-		return terms_[termId]->translate(site,dir,amount);
+		return terms_[termId]->translate(site, dir, amount);
 	}
 
 	void print(std::ostream& os) const
 	{
-		for (SizeType i=0;i<terms_.size();i++)
-			terms_[i]->print(os,linSize_);
+		for (SizeType i = 0; i < terms_.size(); i++)
+			terms_[i]->print(os, linSize_);
 	}
 
-	SizeType handle(SizeType t,SizeType ind, SizeType jnd) const
+	SizeType handle(SizeType t, SizeType ind, SizeType jnd) const
 	{
-		return terms_[t]->handle(ind,jnd);
+		return terms_[t]->handle(ind, jnd);
 	}
 
 	SizeType directions(SizeType term) const
@@ -311,7 +318,7 @@ public:
 	SizeType calcDir(SizeType term, SizeType i, SizeType j) const
 	{
 		assert(term < terms_.size());
-		return terms_[term]->calcDir(i,j);
+		return terms_[term]->calcDir(i, j);
 	}
 
 	String options(SizeType term) const
@@ -323,9 +330,10 @@ public:
 	// extended functions in GeometryEx
 
 	// friends
-	template<typename RealType2,typename InputType2, typename PgType>
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const Geometry<RealType2,InputType2,PgType>& g);
+	template <typename RealType2, typename InputType2, typename PgType>
+	friend std::ostream&
+	operator<<(std::ostream& os,
+	    const Geometry<RealType2, InputType2, PgType>& g);
 
 private:
 
@@ -333,17 +341,18 @@ private:
 	typename Vector<GeometryTermType*>::Type terms_;
 }; // class Geometry
 
-template<typename ComplexOrRealType,typename InputType,typename PgType>
-std::ostream& operator<<(std::ostream& os,
-                         const Geometry<ComplexOrRealType,InputType,PgType>& g)
+template <typename ComplexOrRealType, typename InputType, typename PgType>
+std::ostream&
+operator<<(std::ostream& os,
+    const Geometry<ComplexOrRealType, InputType, PgType>& g)
 {
-	os<<"#GeometrySize="<<g.linSize_<<"\n";
-	os<<"#GeometryTerms="<<g.terms_.size()<<"\n";
-	for (SizeType i=0;i<g.terms_.size();i++) os<<*(g.terms_[i]);
+	os << "#GeometrySize=" << g.linSize_ << "\n";
+	os << "#GeometryTerms=" << g.terms_.size() << "\n";
+	for (SizeType i = 0; i < g.terms_.size(); i++)
+		os << *(g.terms_[i]);
 	return os;
 }
 } // namespace PsimagLite
 
 /*@}*/
 #endif // GEOMETRY_H
-

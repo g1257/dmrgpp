@@ -1,7 +1,8 @@
 #ifndef AINURDOUBLEORFLOAT_H
 #define AINURDOUBLEORFLOAT_H
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
 #ifdef USE_FLOAT
 #define DoubleOrFloatType float
@@ -11,5 +12,5 @@ namespace PsimagLite {
 #define DoubleOrFloatUnderscore double_
 #endif
 
-}
+} // namespace PsimagLite
 #endif // AINURDOUBLEORFLOAT_H

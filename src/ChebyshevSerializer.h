@@ -32,40 +32,45 @@ Please see full open source license included in file LICENSE.
 
 #ifndef CHEBYSHEV_SERIALIZER_H
 #define CHEBYSHEV_SERIALIZER_H
-#include <iostream>
-#include "TypeToString.h"
-#include "ProgressIndicator.h"
-#include "Random48.h"
-#include <stdexcept>
-#include "ParametersForSolver.h"
-#include "PlotParams.h"
 #include "ChebyshevFunction.h"
-#include <cassert>
 #include "Io/IoSelector.h"
 #include "Io/IoSimple.h"
-#include <typeinfo>
+#include "ParametersForSolver.h"
+#include "PlotParams.h"
+#include "ProgressIndicator.h"
+#include "Random48.h"
 #include "TridiagonalMatrix.h"
+#include "TypeToString.h"
+#include <cassert>
+#include <iostream>
+#include <stdexcept>
+#include <typeinfo>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename RealType>
+template <typename RealType>
 struct KernelPolynomialParameters {
 
-	enum {JACKSON,LORENTZ,DIRICHLET};
+	enum { JACKSON,
+		LORENTZ,
+		DIRICHLET };
 
-	KernelPolynomialParameters(SizeType type1,
-	                           SizeType cutoff1,
-	                           const RealType& lambda1)
-	    : type(type1),cutoff(cutoff1),lambda(lambda1)
-	{}
+	KernelPolynomialParameters(SizeType type1, SizeType cutoff1, const RealType& lambda1)
+	    : type(type1)
+	    , cutoff(cutoff1)
+	    , lambda(lambda1)
+	{
+	}
 
 	SizeType type;
 	SizeType cutoff;
 	RealType lambda;
 }; // struct KernelPolynomialParameters
 
-template<typename VectorType_>
-class ChebyshevSerializer  {
+template <typename VectorType_>
+class ChebyshevSerializer
+{
 
 	typedef typename VectorType_::value_type VectorElementType;
 	typedef typename Real<VectorElementType>::Type RealType;
@@ -77,7 +82,8 @@ public:
 	typedef VectorType_ VectorType;
 	typedef typename VectorType::value_type FieldType;
 	typedef Matrix<FieldType> MatrixType;
-	typedef typename Vector<std::pair<RealType,RealType> >::Type PlotDataType;
+	typedef
+	    typename Vector<std::pair<RealType, RealType>>::Type PlotDataType;
 	typedef PlotParams<RealType> PlotParamsType;
 	typedef ParametersForSolver<RealType> ParametersType;
 	typedef KernelPolynomialParameters<RealType> KernelParametersType;
@@ -85,31 +91,33 @@ public:
 	typedef typename TridiagonalMatrixType::VectorRealType VectorRealType;
 
 	ChebyshevSerializer(const TridiagonalMatrixType& ab,
-	                    const ParametersType& params)
-	    : progress_("ChebyshevSerializer"),
-	      moments_(ab),
-	      params_(params)
-	{}
+	    const ParametersType& params)
+	    : progress_("ChebyshevSerializer")
+	    , moments_(ab)
+	    , params_(params)
+	{
+	}
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ChebyshevSerializer(IoInputType& io)
-	    : progress_("ChebyshevSerializer"),params_(io,"#Chebyshev")
+	    : progress_("ChebyshevSerializer")
+	    , params_(io, "#Chebyshev")
 	{
 		VectorRealType tmp;
-		io.read(tmp,"#ChebyshevMoments");
-		SizeType n = tmp.size()/2;
+		io.read(tmp, "#ChebyshevMoments");
+		SizeType n = tmp.size() / 2;
 		for (SizeType i = 0; i < n; ++i) {
-			moments_.a(i) = tmp[2*i];
-			moments_.b(i) = tmp[2*i + 1];
+			moments_.a(i) = tmp[2 * i];
+			moments_.b(i) = tmp[2 * i + 1];
 		}
 	}
 
-	template<typename SomeIoOutputType>
+	template <typename SomeIoOutputType>
 	void write(SomeIoOutputType&, String) const
 	{
 		String name(typeid(SomeIoOutputType).name());
-		std::cerr<<"WARNING: cannot save ChebyshevSerializer";
-		std::cerr<<"to output type "<<name<<"\n";
+		std::cerr << "WARNING: cannot save ChebyshevSerializer";
+		std::cerr << "to output type " << name << "\n";
 	}
 
 	void write(IoSimple::Out& io, String) const
@@ -118,37 +126,39 @@ public:
 		io.write(params_.Eg, "#ChebyshevEnergy=");
 		io.write(params_.oneOverA, "#ChebyshevOneOverA=");
 		io.write(params_.b, "#ChebyshevB=");
-		io.write(moments_,"#ChebyshevMoments");
+		io.write(moments_, "#ChebyshevMoments");
 	}
 
 	static const String& stringMarker() { return stringMarker_; }
 
-	void plot(PlotDataType& result,
-	          const PlotParamsType& params,
-	          const KernelParametersType& kernelParams) const
+	void plot(PlotDataType& result, const PlotParamsType& params, const KernelParametersType& kernelParams) const
 	{
 		SizeType cutoff = kernelParams.cutoff;
-		if (cutoff==0 || moments_.size()<cutoff) cutoff = moments_.size();
-		VectorRealType gn(cutoff,1.0);
-		initKernel(gn,kernelParams);
+		if (cutoff == 0 || moments_.size() < cutoff)
+			cutoff = moments_.size();
+		VectorRealType gn(cutoff, 1.0);
+		initKernel(gn, kernelParams);
 
 		VectorRealType gnmun(gn.size());
-		computeGnMuN(gnmun,gn);
+		computeGnMuN(gnmun, gn);
 
 		SizeType counter = 0;
-		SizeType n = SizeType((params.omega2 - params.omega1)/params.deltaOmega);
-		if (result.size()==0) result.resize(n);
+		SizeType n = SizeType((params.omega2 - params.omega1) / params.deltaOmega);
+		if (result.size() == 0)
+			result.resize(n);
 		RealType offset = params_.Eg;
-		std::cerr<<"gn[0]="<<gn[0]<<" gn[5]="<<gn[5]<<"\n";
-		for (RealType omega=params.omega1;omega<params.omega2;omega+=params.deltaOmega) {
-			RealType x = (omega+offset-params_.b)*params_.oneOverA;
+		std::cerr << "gn[0]=" << gn[0] << " gn[5]=" << gn[5] << "\n";
+		for (RealType omega = params.omega1; omega < params.omega2;
+		     omega += params.deltaOmega) {
+			RealType x = (omega + offset - params_.b) * params_.oneOverA;
 
-			RealType den = (x>1.0 || x<-1.0) ? 0.0 : sqrt(1.0 - x*x);
-			RealType tmp = (fabs(den)>1e-6) ? calcF(x,gnmun)/den : 0.0;
-			std::pair<RealType,RealType> p(omega,tmp);
+			RealType den = (x > 1.0 || x < -1.0) ? 0.0 : sqrt(1.0 - x * x);
+			RealType tmp = (fabs(den) > 1e-6) ? calcF(x, gnmun) / den : 0.0;
+			std::pair<RealType, RealType> p(omega, tmp);
 			result[counter++] = p;
 
-			if (counter>=result.size()) break;
+			if (counter >= result.size())
+				break;
 		}
 	}
 
@@ -167,33 +177,32 @@ public:
 
 private:
 
-	RealType calcF(const RealType& x,
-	               const VectorRealType& gnmn) const
+	RealType calcF(const RealType& x, const VectorRealType& gnmn) const
 	{
-		RealType sum = 0.5*gnmn[0];
-		for (SizeType i=1;i<gnmn.size();i++) sum += gnmn[i]*chebyshev_(i,x);
-		return 2.0*sum;
+		RealType sum = 0.5 * gnmn[0];
+		for (SizeType i = 1; i < gnmn.size(); i++)
+			sum += gnmn[i] * chebyshev_(i, x);
+		return 2.0 * sum;
 	}
 
-	void computeGnMuN(VectorRealType& gnmn,
-	                  VectorRealType& gn) const
+	void computeGnMuN(VectorRealType& gnmn, VectorRealType& gn) const
 	{
 		for (SizeType i = 0; i < gnmn.size(); ++i) {
-			const SizeType j = (i & 1) ? (i - 1)/2 : i/2;
+			const SizeType j = (i & 1) ? (i - 1) / 2 : i / 2;
 			const RealType& tmp = (i & 1) ? moments_.b(j) : moments_.a(j);
 			gnmn[i] = tmp * gn[i];
 		}
 	}
 
 	void initKernel(VectorRealType& gn,
-	                const KernelParametersType& kernelParams) const
+	    const KernelParametersType& kernelParams) const
 	{
 		switch (kernelParams.type) {
 		case KernelParametersType::JACKSON:
 			initKernelJackson(gn);
 			break;
 		case KernelParametersType::LORENTZ:
-			initKernelLorentz(gn,kernelParams.lambda);
+			initKernelLorentz(gn, kernelParams.lambda);
 			break;
 		case KernelParametersType::DIRICHLET:
 			break;
@@ -204,21 +213,20 @@ private:
 
 	void initKernelJackson(VectorRealType& gn) const
 	{
-		SizeType nPlus1 = gn.size()+1;
-		RealType cot1 = 1.0/tan(M_PI/nPlus1);
-		for (SizeType i=0;i<gn.size();i++) {
-			gn[i] = (nPlus1-i)*cos(M_PI*i/nPlus1)+sin(M_PI*i/nPlus1)*cot1;
+		SizeType nPlus1 = gn.size() + 1;
+		RealType cot1 = 1.0 / tan(M_PI / nPlus1);
+		for (SizeType i = 0; i < gn.size(); i++) {
+			gn[i] = (nPlus1 - i) * cos(M_PI * i / nPlus1) + sin(M_PI * i / nPlus1) * cot1;
 			gn[i] /= nPlus1;
 		}
 	}
 
-	void initKernelLorentz(VectorRealType& gn,
-	                       const RealType& lambda) const
+	void initKernelLorentz(VectorRealType& gn, const RealType& lambda) const
 	{
 		RealType nreal = gn.size();
 		RealType sinhlambda = sinh(lambda);
-		for (SizeType i=0;i<gn.size();i++) {
-			gn[i] = sinh(lambda*(1-i/nreal))/sinhlambda;
+		for (SizeType i = 0; i < gn.size(); i++) {
+			gn[i] = sinh(lambda * (1 - i / nreal)) / sinhlambda;
 		}
 	}
 
@@ -228,8 +236,8 @@ private:
 	ChebyshevFunction<RealType> chebyshev_;
 }; // class ChebyshevSerializer
 
-template<typename VectorType>
+template <typename VectorType>
 const String ChebyshevSerializer<VectorType>::stringMarker_ = "#ChebyshevSerializerMarker";
 } // namespace PsimagLite
 /*@}*/
-#endif  //CHEBYSHEV_SERIALIZER_H
+#endif // CHEBYSHEV_SERIALIZER_H

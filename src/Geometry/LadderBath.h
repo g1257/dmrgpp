@@ -81,34 +81,40 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Ladder.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType, typename InputType>
-class LadderBath : public GeometryBase<ComplexOrRealType, InputType> {
+template <typename ComplexOrRealType, typename InputType>
+class LadderBath : public GeometryBase<ComplexOrRealType, InputType>
+{
 
-	typedef std::pair<int,int> PairType;
+	typedef std::pair<int, int> PairType;
 	typedef Ladder<ComplexOrRealType, InputType> LadderType;
 
 public:
 
-	enum {DIRECTION_X=LadderType::DIRECTION_X,
-		  DIRECTION_Y=LadderType::DIRECTION_Y,
-		  DIRECTION_BATH};
+	enum {
+		DIRECTION_X = LadderType::DIRECTION_X,
+		DIRECTION_Y = LadderType::DIRECTION_Y,
+		DIRECTION_BATH
+	};
 
-	LadderBath() {}
+	LadderBath() { }
 
-	LadderBath(SizeType linSize,InputType& io)
-	    : linSize_(linSize),ladder_(0)
+	LadderBath(SizeType linSize, InputType& io)
+	    : linSize_(linSize)
+	    , ladder_(0)
 	{
-		io.readline(bathSitesPerSite_,"BathSitesPerSite=");
-		clusterSize_ = linSize_/(1+bathSitesPerSite_);
+		io.readline(bathSitesPerSite_, "BathSitesPerSite=");
+		clusterSize_ = linSize_ / (1 + bathSitesPerSite_);
 
-		ladder_ = new LadderType(clusterSize_,io);
+		ladder_ = new LadderType(clusterSize_, io);
 	}
 
 	~LadderBath()
 	{
-		if (ladder_) delete ladder_;
+		if (ladder_)
+			delete ladder_;
 	}
 
 	virtual SizeType dirs() const { return 3; }
@@ -118,83 +124,92 @@ public:
 		return this->unimplemented("length");
 	}
 
-	virtual SizeType translate(SizeType,SizeType,SizeType) const
+	virtual SizeType translate(SizeType, SizeType, SizeType) const
 	{
 		return this->unimplemented("translate");
 	}
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
-		if (dirId==DIRECTION_BATH) return bathSitesPerSite_*clusterSize_;
+		if (dirId == DIRECTION_BATH)
+			return bathSitesPerSite_ * clusterSize_;
 		return ladder_->getVectorSize(dirId);
 	}
 
-	bool connected(SizeType i1,SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const
 	{
-		if (i1==i2) return false;
+		if (i1 == i2)
+			return false;
 		int c1 = getClusterSite(i1).first;
 		int c2 = getClusterSite(i2).first;
-		//4 possibilites
-		// 1. both in the cluster
-		if (c1<0 && c2<0) return connectedInCluster(i1,i2);
+		// 4 possibilites
+		//  1. both in the cluster
+		if (c1 < 0 && c2 < 0)
+			return connectedInCluster(i1, i2);
 		// both in the bath:
-		if (c1>=0 && c2>=0) return false;
+		if (c1 >= 0 && c2 >= 0)
+			return false;
 		// cluster - bath
-		if (c1<0) {
-			return (SizeType(c2)==i1) ? true : false;
+		if (c1 < 0) {
+			return (SizeType(c2) == i1) ? true : false;
 		}
 		// bath - cluster
-		return (SizeType(c1)==i2) ? true : false;
+		return (SizeType(c1) == i2) ? true : false;
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType i1,SizeType i2) const
+	SizeType calcDir(SizeType i1, SizeType i2) const
 	{
 		int c1 = getClusterSite(i1).first;
 		int c2 = getClusterSite(i2).first;
 		// two possibilities
 		// 1. both in the cluster
-		if (c1<0 && c2<0) return calcDirInCluster(i1,i2);
+		if (c1 < 0 && c2 < 0)
+			return calcDirInCluster(i1, i2);
 		// cluster - bath or bath cluster:
 		return DIRECTION_BATH;
 	}
 
-	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const
 	{
 		int c = getClusterSite(i).first;
-		if (c>=0) return false; // no bath site is ever fringe
-		return fringeInCluster(i,smax,emin);
+		if (c >= 0)
+			return false; // no bath site is ever fringe
+		return fringeInCluster(i, smax, emin);
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType handle(SizeType i1,SizeType i2) const
+	SizeType handle(SizeType i1, SizeType i2) const
 	{
 		PairType c1 = getClusterSite(i1);
 		PairType c2 = getClusterSite(i2);
 		// two possibilities
 		// 1. both in the cluster
-		if (c1.first<0 && c2.first<0) return handleInCluster(i1,i2);
+		if (c1.first < 0 && c2.first < 0)
+			return handleInCluster(i1, i2);
 		// cluster - bath or bath cluster
-		PairType x =  (c1.first<0) ? c2 : c1;
-		if (x.first<0 || x.second<0) throw RuntimeError("Internal error in handle\n");
-		SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+		PairType x = (c1.first < 0) ? c2 : c1;
+		if (x.first < 0 || x.second < 0)
+			throw RuntimeError("Internal error in handle\n");
+		SizeType firstClusterSite = (clusterSize_ / 2) * bathSitesPerSite_;
 		x.first -= firstClusterSite;
 
-		return x.first*bathSitesPerSite_+x.second;
+		return x.first * bathSitesPerSite_ + x.second;
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew) const
 	{
 		PairType c1 = getClusterSite(siteNew);
 
 		// in the cluster
 		if (c1.first < 0) {
-			SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+			SizeType firstClusterSite = (clusterSize_ / 2) * bathSitesPerSite_;
 			SizeType siteNewCluster = siteNew - firstClusterSite;
 			SizeType smaxCluster = smax - firstClusterSite;
 			SizeType eminCluster = emin - firstClusterSite;
-			SizeType siteSubs = ladder_->getSubstituteSite(smaxCluster,eminCluster,siteNewCluster);
+			SizeType siteSubs = ladder_->getSubstituteSite(
+			    smaxCluster, eminCluster, siteNewCluster);
 			return siteSubs + firstClusterSite;
 		}
 
@@ -203,15 +218,9 @@ public:
 		throw RuntimeError(str);
 	}
 
-	String label() const
-	{
-		return "ladderbath";
-	}
+	String label() const { return "ladderbath"; }
 
-	SizeType maxConnections() const
-	{
-		return clusterSize_+1;
-	}
+	SizeType maxConnections() const { return clusterSize_ + 1; }
 
 	SizeType findReflection(SizeType) const
 	{
@@ -225,57 +234,58 @@ private:
 	// of this bath site as a pair (c,b)
 	PairType getClusterSite(SizeType i) const
 	{
-		SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+		SizeType firstClusterSite = (clusterSize_ / 2) * bathSitesPerSite_;
 		SizeType lastP1ClusterSite = firstClusterSite + clusterSize_;
-		if (i>=firstClusterSite && i<lastP1ClusterSite) return PairType(-1,-1);
+		if (i >= firstClusterSite && i < lastP1ClusterSite)
+			return PairType(-1, -1);
 
-		SizeType middle = linSize_/2;
-		SizeType cs = clusterSize_/2;
+		SizeType middle = linSize_ / 2;
+		SizeType cs = clusterSize_ / 2;
 		// now i is in the bath:
-		if (i<middle) { // i is in the system
-			return PairType(i%cs + firstClusterSite,i/cs);
+		if (i < middle) { // i is in the system
+			return PairType(i % cs + firstClusterSite, i / cs);
 		}
 		// is in the bath and in the environ:
 		SizeType iprime = i - lastP1ClusterSite;
 		SizeType offset = lastP1ClusterSite - cs;
-		return PairType(iprime%cs + offset,iprime/cs);
+		return PairType(iprime % cs + offset, iprime / cs);
 	}
 
 	// assumes i1 and i2 are in the cluster
 	// if connected return true, else false
-	bool connectedInCluster(SizeType i1,SizeType i2) const
+	bool connectedInCluster(SizeType i1, SizeType i2) const
 	{
-		ladderize(i1,i2);
-		return ladder_->connected(i1,i2);
+		ladderize(i1, i2);
+		return ladder_->connected(i1, i2);
 	}
 
 	// assumes i1 and i2 are connected and in the cluster
-	SizeType calcDirInCluster(SizeType i1,SizeType i2) const
+	SizeType calcDirInCluster(SizeType i1, SizeType i2) const
 	{
-		ladderize(i1,i2);
-		return ladder_->calcDir(i1,i2);
+		ladderize(i1, i2);
+		return ladder_->calcDir(i1, i2);
 	}
 
 	// assumes i1 and i2 are in the cluster
-	bool fringeInCluster(SizeType i,SizeType smax,SizeType emin) const
+	bool fringeInCluster(SizeType i, SizeType smax, SizeType emin) const
 	{
-		SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+		SizeType firstClusterSite = (clusterSize_ / 2) * bathSitesPerSite_;
 		i -= firstClusterSite;
 		smax -= firstClusterSite;
 		emin -= firstClusterSite;
-		return ladder_->fringe(i,smax,emin);
+		return ladder_->fringe(i, smax, emin);
 	}
 
 	// assumes i1 and i2 are connected and in the cluster
-	SizeType handleInCluster(SizeType i1,SizeType i2) const
+	SizeType handleInCluster(SizeType i1, SizeType i2) const
 	{
-		ladderize(i1,i2);
-		return ladder_->handle(i1,i2);
+		ladderize(i1, i2);
+		return ladder_->handle(i1, i2);
 	}
 
-	void ladderize(SizeType& i1,SizeType& i2) const
+	void ladderize(SizeType& i1, SizeType& i2) const
 	{
-		SizeType firstClusterSite = (clusterSize_/2)*bathSitesPerSite_;
+		SizeType firstClusterSite = (clusterSize_ / 2) * bathSitesPerSite_;
 		i1 -= firstClusterSite;
 		i2 -= firstClusterSite;
 	}
@@ -289,4 +299,3 @@ private:
 
 /*@}*/
 #endif // GEOMETRY_H
-

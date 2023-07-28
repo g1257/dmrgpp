@@ -81,16 +81,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef PARAMETERS_FOR_SOLVER_H
 #define PARAMETERS_FOR_SOLVER_H
-#include "ProgressIndicator.h"
-#include "TridiagonalMatrix.h"
-#include "Vector.h"
 #include "Matrix.h"
+#include "ProgressIndicator.h"
 #include "Random48.h"
+#include "TridiagonalMatrix.h"
 #include "TypeToString.h"
+#include "Vector.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename RealType_>
+template <typename RealType_>
 struct ParametersForSolver {
 
 	typedef RealType_ RealType;
@@ -99,34 +100,35 @@ struct ParametersForSolver {
 	static const SizeType LanczosSteps = 200; // max number of external Lanczos steps
 
 	ParametersForSolver()
-	    : steps(LanczosSteps),
-	      minSteps(4),
-	      tolerance(1e-12),
-	      stepsForEnergyConvergence(MaxLanczosSteps),
-	      eigsForStop(1),
-	      options(""),
-	      oneOverA(0),
-	      b(0),
-	      Eg(0),
-	      weight(0),
-	      isign(0),
-	      lotaMemory(false)
-	{}
+	    : steps(LanczosSteps)
+	    , minSteps(4)
+	    , tolerance(1e-12)
+	    , stepsForEnergyConvergence(MaxLanczosSteps)
+	    , eigsForStop(1)
+	    , options("")
+	    , oneOverA(0)
+	    , b(0)
+	    , Eg(0)
+	    , weight(0)
+	    , isign(0)
+	    , lotaMemory(false)
+	{
+	}
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	ParametersForSolver(IoInputType& io, String prefix, int ind = -1)
-	    : steps(LanczosSteps),
-	      minSteps(4),
-	      tolerance(1e-12),
-	      stepsForEnergyConvergence(MaxLanczosSteps),
-	      eigsForStop(1),
-	      options("none"),
-	      oneOverA(0),
-	      b(0),
-	      Eg(0),
-	      weight(0),
-	      isign(0),
-	      lotaMemory(true)
+	    : steps(LanczosSteps)
+	    , minSteps(4)
+	    , tolerance(1e-12)
+	    , stepsForEnergyConvergence(MaxLanczosSteps)
+	    , eigsForStop(1)
+	    , options("none")
+	    , oneOverA(0)
+	    , b(0)
+	    , Eg(0)
+	    , weight(0)
+	    , isign(0)
+	    , lotaMemory(true)
 	{
 
 		rabbitHole(steps, prefix, ind, "Steps", io);
@@ -152,7 +154,7 @@ struct ParametersForSolver {
 		lotaMemory = (x > 0) ? 0 : 1;
 	}
 
-	template<typename T, typename IoInputType>
+	template <typename T, typename IoInputType>
 	static void rabbitHole(T& t, String prefix, int ind, String postfix, IoInputType& io)
 	{
 		if (ind >= 0) {
@@ -162,32 +164,37 @@ struct ParametersForSolver {
 		}
 	}
 
-	template<typename T, typename IoInputType>
+	template <typename T, typename IoInputType>
 	static void hare(T& t, String prefix, String postfix, IoInputType& io)
 	{
 		// if prefix + postfix exists use it
 		try {
 			io.readline(t, prefix + postfix + "=");
 			return;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 	}
 
-	template<typename T, typename IoInputType>
+	template <typename T, typename IoInputType>
 	static void bunnie(T& t, String prefix, SizeType ind, String postfix, IoInputType& io)
 	{
 		// if prefix + ind + postfix exists --> use it and return
 		try {
 			io.readline(t, prefix + ttos(ind) + postfix + "=");
 			return;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
-		// if prefix + jnd + postfix exists with jnd < ind --> use the largest jnd and return
+		// if prefix + jnd + postfix exists with jnd < ind --> use the
+		// largest jnd and return
 		for (SizeType i = 0; i < ind; ++i) {
 			const SizeType jnd = ind - i - 1;
 			try {
-				io.readline(t, prefix + ttos(jnd) + postfix + "=");
+				io.readline(t,
+				    prefix + ttos(jnd) + postfix + "=");
 				return;
-			} catch (std::exception&) {}
+			} catch (std::exception&) {
+			}
 		}
 
 		hare(t, prefix, postfix, io);
@@ -199,7 +206,7 @@ struct ParametersForSolver {
 	SizeType stepsForEnergyConvergence;
 	SizeType eigsForStop;
 	String options;
-	RealType oneOverA,b;
+	RealType oneOverA, b;
 	RealType Eg;
 	RealType weight;
 	int isign;
@@ -208,5 +215,4 @@ struct ParametersForSolver {
 } // namespace PsimagLite
 
 /*@}*/
-#endif //PARAMETERS_FOR_SOLVER_H
-
+#endif // PARAMETERS_FOR_SOLVER_H

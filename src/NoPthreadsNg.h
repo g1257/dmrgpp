@@ -78,13 +78,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PSI_NOPTHREADS_NG_H
 #define PSI_NOPTHREADS_NG_H
-#include "LoadBalancerDefault.h"
 #include "CodeSectionParams.h"
+#include "LoadBalancerDefault.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename PthreadFunctionHolderType, typename LoadBalancerType=LoadBalancerDefault>
-class NoPthreadsNg  {
+template <typename PthreadFunctionHolderType,
+    typename LoadBalancerType = LoadBalancerDefault>
+class NoPthreadsNg
+{
 
 public:
 
@@ -93,14 +96,16 @@ public:
 	NoPthreadsNg(const CodeSectionParams& cs)
 	{
 		if (cs.npthreads != 1)
-			throw PsimagLite::RuntimeError("NoPthreadsNg: ctor with threads != 1\n");
+			throw PsimagLite::RuntimeError(
+			    "NoPthreadsNg: ctor with threads != 1\n");
 	}
 
 	bool affinities() const { return false; }
 
 	size_t stackSize() const { return 0; }
 
-	// no weights, no balancer ==> create weights, set all weigths to 1, delegate
+	// no weights, no balancer ==> create weights, set all weigths to 1,
+	// delegate
 	void loopCreate(PthreadFunctionHolderType& pfh)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(pfh.tasks(), 1);
@@ -110,20 +115,22 @@ public:
 	}
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
-	void loopCreate(PthreadFunctionHolderType& pfh, const VectorSizeType& weights)
+	void loopCreate(PthreadFunctionHolderType& pfh,
+	    const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, 1);
-		loopCreate(pfh,*loadBalancer);
+		loopCreate(pfh, *loadBalancer);
 		delete loadBalancer;
 		loadBalancer = 0;
 	}
 
 	// balancer (includes weights)
 	void loopCreate(PthreadFunctionHolderType& pfh,
-	                const LoadBalancerType&)
+	    const LoadBalancerType&)
 	{
 		SizeType ntasks = pfh.tasks();
-		for (SizeType taskNumber = 0; taskNumber < ntasks; ++taskNumber) {
+		for (SizeType taskNumber = 0; taskNumber < ntasks;
+		     ++taskNumber) {
 			pfh.doTask(taskNumber, 0);
 		}
 	}
@@ -134,10 +141,10 @@ public:
 
 	SizeType mpiProcs() const { return 1; }
 
-	void setAffinities(bool) {}
+	void setAffinities(bool) { }
 }; // NoPthreadsNg class
 
-} // namespace Dmrg
+} // namespace PsimagLite
 
 /*@}*/
 #endif

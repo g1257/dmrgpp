@@ -80,45 +80,57 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef OPTIONS_HEADER_H
 #define OPTIONS_HEADER_H
 
-#include "Vector.h"
-#include <cassert>
-#include <stdexcept>
-#include <algorithm>
-#include <iostream>
 #include "PsimagLite.h"
+#include "Vector.h"
+#include <algorithm>
+#include <cassert>
+#include <iostream>
+#include <stdexcept>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class Options {
+class Options
+{
 
 public:
 
-	class Writeable {
+	class Writeable
+	{
 
 		typedef Vector<String>::Type VectorStringType;
 
 	public:
 
-		enum {DISABLED,PERMISSIVE,STRICT};
+		enum { DISABLED,
+			PERMISSIVE,
+			STRICT };
 
-		Writeable(VectorStringType& registeredOptions,SizeType mode)
-		    : registeredOptions_(registeredOptions),mode_(mode)
-		{}
-
-		void set(Vector<String>::Type& optsThatAreSet,String opts)
+		Writeable(VectorStringType& registeredOptions, SizeType mode)
+		    : registeredOptions_(registeredOptions)
+		    , mode_(mode)
 		{
-			if (mode_==DISABLED) return;
+		}
+
+		void set(Vector<String>::Type& optsThatAreSet, String opts)
+		{
+			if (mode_ == DISABLED)
+				return;
 			split(optsThatAreSet, opts, ",");
-			for (SizeType i=0;i<optsThatAreSet.size();i++) {
+			for (SizeType i = 0; i < optsThatAreSet.size(); i++) {
 				bool b = (find(registeredOptions_.begin(),
-				               registeredOptions_.end(),
-				               optsThatAreSet[i])==registeredOptions_.end());
-				if (!b) continue;
+					      registeredOptions_.end(),
+					      optsThatAreSet[i])
+				    == registeredOptions_.end());
+				if (!b)
+					continue;
 
 				String s(__FILE__);
 				s += ": Unknown option " + optsThatAreSet[i] + "\n";
-				if (mode_==PERMISSIVE) std::cerr<<" *** WARNING **: "<<s;
-				if (mode_==STRICT) throw RuntimeError(s.c_str());
+				if (mode_ == PERMISSIVE)
+					std::cerr << " *** WARNING **: " << s;
+				if (mode_ == STRICT)
+					throw RuntimeError(s.c_str());
 			}
 		}
 
@@ -128,20 +140,22 @@ public:
 		SizeType mode_;
 	}; // class Writeable
 
-	class Readable {
+	class Readable
+	{
 
 	public:
 
-		Readable(Writeable& optsWrite,const String& optsString)
+		Readable(Writeable& optsWrite, const String& optsString)
 		{
-			optsWrite.set(optsThatAreSet_,optsString);
+			optsWrite.set(optsThatAreSet_, optsString);
 		}
 
 		bool isSet(const String& thisOption) const
 		{
 			bool b = (find(optsThatAreSet_.begin(),
-			               optsThatAreSet_.end(),
-			               thisOption)==optsThatAreSet_.end());
+				      optsThatAreSet_.end(),
+				      thisOption)
+			    == optsThatAreSet_.end());
 			return (!b);
 		}
 
@@ -155,4 +169,3 @@ public:
 } // namespace PsimagLite
 /*@}*/
 #endif // OPTIONS_HEADER_H
-

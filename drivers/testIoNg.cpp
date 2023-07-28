@@ -17,11 +17,7 @@ void test1()
 
 	ioIn.read(w, "MyVector");
 
-	std::cout<<w;
+	std::cout << w;
 }
 
-
-int main(int argc, char** argv)
-{
-	test1();
-}
+int main(int argc, char** argv) { test1(); }

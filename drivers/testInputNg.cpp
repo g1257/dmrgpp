@@ -9,12 +9,10 @@
   You can go ahead an compile this example with
 \begin{tiny}
 \begin{verbatim}
-g++ testInputNg.cpp -std=c++11 -Wall -I ../src/ -I.. -DUSE_BOOST -L ../lib -lpsimaglite -o testInputNg
-\end{verbatim}
-\end{tiny}
-Note that you need boost-dev or boost-devel and also you
-must have lib/libsimaglite.a already compiled.
-You can already go ahead an run it with the provided simple input
+g++ testInputNg.cpp -std=c++11 -Wall -I ../src/ -I.. -DUSE_BOOST -L ../lib
+-lpsimaglite -o testInputNg \end{verbatim} \end{tiny} Note that you need
+boost-dev or boost-devel and also you must have lib/libsimaglite.a already
+compiled. You can already go ahead an run it with the provided simple input
 \begin{verbatim}
 ./testInputNg testInput.ain
 \end{verbatim}
@@ -31,8 +29,8 @@ cases subdirectories are used. Here are the includes.
 PSIDOC_CONTINUE
 */
 
-#include "InputNg.h"
 #include "InputCheckBase.h"
+#include "InputNg.h"
 
 /* PSIDOC_RESUME
 \end{lstlisting}
@@ -58,7 +56,8 @@ the writer of the input may add other labels.
 */
 
 /* PSIDOC_CODE_START InputNg_Class_MyInputCheck nocapture */
-class MyInputCheck : public PsimagLite::InputCheckBase {
+class MyInputCheck : public PsimagLite::InputCheckBase
+{
 
 public:
 
@@ -92,7 +91,7 @@ PSIDOC_CONTINUE
 int main(int argc, char* argv[])
 {
 	if (argc != 2) {
-		std::cerr<<"USAGE "<<argv[0]<<" filename\n";
+		std::cerr << "USAGE " << argv[0] << " filename\n";
 		return 1;
 	}
 
@@ -101,83 +100,83 @@ int main(int argc, char* argv[])
 	std::string filename(argv[1]);
 	MyInputCheck myInputCheck;
 
-/* PSIDOC_RESUME
-\end{lstlisting}
-We are now ready to read the file, which we do
-with the following two statements
-\begin{lstlisting}
-PSIDOC_CONTINUE
-*/
+	/* PSIDOC_RESUME
+	\end{lstlisting}
+	We are now ready to read the file, which we do
+	with the following two statements
+	\begin{lstlisting}
+	PSIDOC_CONTINUE
+	*/
 
 	InputNgType::Writeable ioWriteable(filename, myInputCheck);
 	InputNgType::Readable io(ioWriteable);
 
-/* PSIDOC_RESUME
-\end{lstlisting}
-From now on, we can forget about the myInputCheck object,
-and the ioWriteable object as well, and consider
-only the io object, which we will use to read labels.
-The data from the file is now in memory, and the file
-does not have to be read or even present anymore.
-Let's now read some data from the file using the
-io object. (The data is now in memory, and it
-is \emph{not actually} read from the file, but we will use
-that terminology anyway.) We read the scalar first, and
-print it to the terminal with the following code.
-\begin{lstlisting}
-PSIDOC_CONTINUE
-*/
+	/* PSIDOC_RESUME
+	\end{lstlisting}
+	From now on, we can forget about the myInputCheck object,
+	and the ioWriteable object as well, and consider
+	only the io object, which we will use to read labels.
+	The data from the file is now in memory, and the file
+	does not have to be read or even present anymore.
+	Let's now read some data from the file using the
+	io object. (The data is now in memory, and it
+	is \emph{not actually} read from the file, but we will use
+	that terminology anyway.) We read the scalar first, and
+	print it to the terminal with the following code.
+	\begin{lstlisting}
+	PSIDOC_CONTINUE
+	*/
 
 	int myscalar = 0;
 	io.readline(myscalar, "myscalar=");
 
-	std::cout<<"I've read label myscalar with value ";
-	std::cout<<myscalar<<" from "<<io.filename()<<"\n";
+	std::cout << "I've read label myscalar with value ";
+	std::cout << myscalar << " from " << io.filename() << "\n";
 
-/* PSIDOC_RESUME
-\end{lstlisting}
-The first argument to io.readline will be filled
-with the value from the file that follows the
-label myscalar. Even though the value will be filled,
-it's best practice to initialize it first anyway.
+	/* PSIDOC_RESUME
+	\end{lstlisting}
+	The first argument to io.readline will be filled
+	with the value from the file that follows the
+	label myscalar. Even though the value will be filled,
+	it's best practice to initialize it first anyway.
 
-Let's now read a vector. Note that we use just
-io.read to read vectors (and matrices), whereas we
-use io.readline to read scalars. The vector will
-be resized for you as needed, so you do not need
-to size it. If you choose to size it, then Ainur
-format will be able to use ellipsis to fill the vector
-and you may be able to enter in the input file something
-like myvector=[42, ...]; which will cause your vector
-to be filled with the number 42.
-\begin{lstlisting}
-PSIDOC_CONTINUE
-*/
+	Let's now read a vector. Note that we use just
+	io.read to read vectors (and matrices), whereas we
+	use io.readline to read scalars. The vector will
+	be resized for you as needed, so you do not need
+	to size it. If you choose to size it, then Ainur
+	format will be able to use ellipsis to fill the vector
+	and you may be able to enter in the input file something
+	like myvector=[42, ...]; which will cause your vector
+	to be filled with the number 42.
+	\begin{lstlisting}
+	PSIDOC_CONTINUE
+	*/
 	std::vector<double> v;
 	io.read(v, "myvector");
 
-/* PSIDOC_RESUME
-\end{lstlisting}
-The two previous examples required the labels to
-be present in the input file. But what if we want
-to have an \emph{optional} label in the input file?
-To deal with that we put the io.readline statement
-inside a try and catch block, as follows.
-\begin{lstlisting}
-PSIDOCCOPY InputNg_code_main5
-\end{lstlisting}
-This way if the user provides the label mystring
-then the C++ variable mystr will have the value
-the user provided. Otherwise, the value of mystr
-will remain ``default'', and no error will be issued.
-*/
+	/* PSIDOC_RESUME
+	\end{lstlisting}
+	The two previous examples required the labels to
+	be present in the input file. But what if we want
+	to have an \emph{optional} label in the input file?
+	To deal with that we put the io.readline statement
+	inside a try and catch block, as follows.
+	\begin{lstlisting}
+	PSIDOCCOPY InputNg_code_main5
+	\end{lstlisting}
+	This way if the user provides the label mystring
+	then the C++ variable mystr will have the value
+	the user provided. Otherwise, the value of mystr
+	will remain ``default'', and no error will be issued.
+	*/
 
-/* PSIDOC_CODE_START InputNg_code_main5 nocapture */
+	/* PSIDOC_CODE_START InputNg_code_main5 nocapture */
 	std::string mystr("default");
 	try {
 		io.readline(mystr, "mystring=");
-	} catch (std::exception&)
-	{}
+	} catch (std::exception&) {
+	}
 }
 /* PSIDOC_CODE_END */
 

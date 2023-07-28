@@ -1,5 +1,5 @@
-#include "AST/PlusMinusMultiplyDivide.h"
 #include "AST/ExpressionForAST.h"
+#include "AST/PlusMinusMultiplyDivide.h"
 #include "PredicateAwesome.h"
 #include "PsimagLite.h"
 
@@ -9,9 +9,10 @@ typedef std::complex<double> ComplexOrRealType;
 typedef double ComplexOrRealType;
 #endif
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
-	if (argc < 2) return 1;
+	if (argc < 2)
+		return 1;
 
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
@@ -23,6 +24,5 @@ int main(int argc, char **argv)
 	PrimitivesType primitives;
 	PsimagLite::ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
 
-	std::cout<<argv[1]<<"\t"<<expresionForAST.exec()<<"\n";
+	std::cout << argv[1] << "\t" << expresionForAST.exec() << "\n";
 }
-

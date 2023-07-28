@@ -1,28 +1,30 @@
 #ifndef PSI_IS_CLASS_H
 #define PSI_IS_CLASS_H
-#include<iostream>
+#include <iostream>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename T>
-class IsClass {
+template <typename T>
+class IsClass
+{
 
 	typedef char One;
-	typedef struct { char a[2]; } Two;
+	typedef struct {
+		char a[2];
+	} Two;
 
-	template<typename C>
+	template <typename C>
 	static One test(int C::*);
 
-	template<typename C>
+	template <typename C>
 	static Two test(...);
 
 public:
 
 	enum { value = sizeof(IsClass<T>::template test<T>(0)) == sizeof(One) };
-
 };
 
-}
+} // namespace PsimagLite
 
 #endif
-

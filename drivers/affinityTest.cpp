@@ -16,12 +16,13 @@ Please see full open source license included in file LICENSE.
 
 */
 #include "Concurrency.h"
-#include <iostream>
 #include <cstdlib>
+#include <iostream>
 #define USE_PTHREADS_OR_NOT_NG
 #include "Parallelizer.h"
 
-class MyHelper {
+class MyHelper
+{
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -29,15 +30,14 @@ class MyHelper {
 public:
 
 	MyHelper(SizeType ntasks, SizeType nthreads)
-	    : ntasks_(ntasks), x_(nthreads,0)
-	{}
+	    : ntasks_(ntasks)
+	    , x_(nthreads, 0)
+	{
+	}
 
 	SizeType tasks() const { return ntasks_; }
 
-	int result() const
-	{
-		return x_[0];
-	}
+	int result() const { return x_[0]; }
 
 	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
@@ -56,21 +56,19 @@ private:
 	VectorSizeType x_;
 }; // class MyHelper
 
-
-int main(int argc,char *argv[])
+int main(int argc, char* argv[])
 {
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
-
-	if (argc!=3) {
-		std::cout<<"USAGE: "<<argv[0]<<" nthreads ntasks\n";
+	if (argc != 3) {
+		std::cout << "USAGE: " << argv[0] << " nthreads ntasks\n";
 		return 1;
 	}
 
-	SizeType nthreads  = atoi(argv[1]);
+	SizeType nthreads = atoi(argv[1]);
 	SizeType ntasks = atoi(argv[2]);
 
-	ConcurrencyType concurrency(&argc,&argv,nthreads);
+	ConcurrencyType concurrency(&argc, &argv, nthreads);
 
 	typedef MyHelper HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
@@ -80,10 +78,9 @@ int main(int argc,char *argv[])
 
 	HelperType helper(ntasks, nthreads);
 
-	std::cout<<"Using "<<threadObject.name();
-	std::cout<<" with "<<nthreads<<" threads.\n";
+	std::cout << "Using " << threadObject.name();
+	std::cout << " with " << nthreads << " threads.\n";
 	threadObject.loopCreate(helper);
 	helper.sync();
-	std::cout<<"Sum of all tasks= "<<helper.result()<<"\n";
+	std::cout << "Sum of all tasks= " << helper.result() << "\n";
 }
-

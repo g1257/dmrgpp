@@ -19,19 +19,18 @@ Please see full open source license included in file LICENSE.
 #define ADDITIONALFUNCTIONS_H
 #include "Node.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename VectorValueType>
-class Modulus : public Node<VectorValueType> {
+template <typename VectorValueType>
+class Modulus : public Node<VectorValueType>
+{
 
 	typedef typename VectorValueType::value_type ValueType;
 
 public:
 
-	Modulus* clone() const
-	{
-		return new Modulus(*this);
-	}
+	Modulus* clone() const { return new Modulus(*this); }
 
 	virtual PsimagLite::String code() const { return "%"; }
 
@@ -49,23 +48,21 @@ public:
 		SizeType x = static_cast<int>(v0);
 		SizeType y = static_cast<int>(v1);
 
-		ValueType result = (y == 0) ? x : x%y;
+		ValueType result = (y == 0) ? x : x % y;
 		return result;
 	}
 
 }; // class Modulus
 
-template<typename VectorValueType>
-class Cosine : public Node<VectorValueType> {
+template <typename VectorValueType>
+class Cosine : public Node<VectorValueType>
+{
 
 	typedef typename VectorValueType::value_type ValueType;
 
 public:
 
-	Cosine* clone() const
-	{
-		return new Cosine(*this);
-	}
+	Cosine* clone() const { return new Cosine(*this); }
 
 	virtual PsimagLite::String code() const { return "cos"; }
 
@@ -78,17 +75,15 @@ public:
 	}
 }; // class Cosine
 
-template<typename VectorValueType>
-class Sine : public Node<VectorValueType> {
+template <typename VectorValueType>
+class Sine : public Node<VectorValueType>
+{
 
 	typedef typename VectorValueType::value_type ValueType;
 
 public:
 
-	Sine* clone() const
-	{
-		return new Sine(*this);
-	}
+	Sine* clone() const { return new Sine(*this); }
 
 	virtual PsimagLite::String code() const { return "sin"; }
 
@@ -101,17 +96,15 @@ public:
 	}
 }; // class Sine
 
-template<typename VectorValueType>
-class Exp : public Node<VectorValueType> {
+template <typename VectorValueType>
+class Exp : public Node<VectorValueType>
+{
 
 	typedef typename VectorValueType::value_type ValueType;
 
 public:
 
-	Exp* clone() const
-	{
-		return new Exp(*this);
-	}
+	Exp* clone() const { return new Exp(*this); }
 
 	virtual PsimagLite::String code() const { return "exp"; }
 
@@ -124,17 +117,15 @@ public:
 	}
 }; // class Exp
 
-template<typename VectorValueType>
-class TernaryOp : public Node<VectorValueType> {
+template <typename VectorValueType>
+class TernaryOp : public Node<VectorValueType>
+{
 
 	typedef typename VectorValueType::value_type ValueType;
 
 public:
 
-	TernaryOp* clone() const
-	{
-		return new TernaryOp(*this);
-	}
+	TernaryOp* clone() const { return new TernaryOp(*this); }
 
 	virtual PsimagLite::String code() const { return "?"; }
 
@@ -148,18 +139,15 @@ public:
 	}
 }; // class TernaryOp
 
-
-template<typename VectorValueType>
-class Log : public Node<VectorValueType> {
+template <typename VectorValueType>
+class Log : public Node<VectorValueType>
+{
 
 	typedef typename VectorValueType::value_type ValueType;
 
 public:
 
-	Log* clone() const
-	{
-		return new Log(*this);
-	}
+	Log* clone() const { return new Log(*this); }
 
 	virtual PsimagLite::String code() const { return "log"; }
 
@@ -171,6 +159,6 @@ public:
 		return log(v[0]);
 	}
 }; // class Log
-}
+} // namespace PsimagLite
 
 #endif // ADDITIONALFUNCTIONS_H

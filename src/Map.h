@@ -24,37 +24,44 @@ Please see full open source license included in file LICENSE.
  */
 #ifndef MAP_HEADER_H
 #define MAP_HEADER_H
-#include <map>
 #include "AllocatorCpu.h"
+#include <map>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename Key,typename T,typename Compare = std::less<Key> >
-class Map {
+template <typename Key, typename T, typename Compare = std::less<Key>>
+class Map
+{
 public:
 
-	typedef std::map<Key,T,Compare,typename Allocator<std::pair<const Key,T> >::Type> Type;
+	typedef std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type>
+	    Type;
 }; // class Map
 
-template<typename T>
-class IsMapLike {
+template <typename T>
+class IsMapLike
+{
 public:
-	enum {True = false};
+
+	enum { True = false };
 };
 
-template<typename Key,typename T,typename Compare>
-class IsMapLike<std::map<Key,T,Compare,typename Allocator<std::pair<const Key,T> >::Type> > {
+template <typename Key, typename T, typename Compare>
+class IsMapLike<std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type>>
+{
 public:
-	enum {True = true};
+
+	enum { True = true };
 };
 
-template<typename MapType>
-typename EnableIf<IsMapLike<MapType>::True,void>::Type
-printMap(std::ostream& os, const MapType& x,const String& label)
+template <typename MapType>
+typename EnableIf<IsMapLike<MapType>::True, void>::Type
+printMap(std::ostream& os, const MapType& x, const String& label)
 {
 	typedef typename MapType::const_iterator MapIteratorType;
-	for (MapIteratorType it = x.begin();it!=x.end();++it) {
-		os<<label<<"["<<it->first<<"]="<<it->second<<"\n";
+	for (MapIteratorType it = x.begin(); it != x.end(); ++it) {
+		os << label << "[" << it->first << "]=" << it->second << "\n";
 	}
 }
 
@@ -62,4 +69,3 @@ printMap(std::ostream& os, const MapType& x,const String& label)
 
 /*@}*/
 #endif // MAP_HEADER_H
-

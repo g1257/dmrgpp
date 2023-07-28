@@ -79,68 +79,64 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_STAR_H
 #include "GeometryBase.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType, typename InputType>
-class Star : public GeometryBase<ComplexOrRealType, InputType> {
+template <typename ComplexOrRealType, typename InputType>
+class Star : public GeometryBase<ComplexOrRealType, InputType>
+{
 
 public:
 
-	enum { DIRECTION_S};
+	enum { DIRECTION_S };
 
 	static const SizeType CENTER = 1;
 
-	Star() {}
+	Star() { }
 
-	Star(SizeType linSize,InputType&)
+	Star(SizeType linSize, InputType&)
 	    : linSize_(linSize)
-	{}
-
-	virtual SizeType maxConnections() const
 	{
-		return linSize_ - 1;
 	}
+
+	virtual SizeType maxConnections() const { return linSize_ - 1; }
 
 	virtual SizeType dirs() const { return 1; }
 
-	SizeType handle(SizeType i,SizeType j) const
+	SizeType handle(SizeType i, SizeType j) const
 	{
-		return (i<j) ? j-1 : i-1;
+		return (i < j) ? j - 1 : i - 1;
 	}
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
-		if (dirId!=DIRECTION_S) throw RuntimeError("Star must have direction 0\n");
-		return linSize_-1;
+		if (dirId != DIRECTION_S)
+			throw RuntimeError("Star must have direction 0\n");
+		return linSize_ - 1;
 	}
 
-	bool connected(SizeType i1,SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const
 	{
-		if (i1 == i2) return false;
+		if (i1 == i2)
+			return false;
 		return (i1 == CENTER || i2 == CENTER);
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType,SizeType) const
-	{
-		return DIRECTION_S;
-	}
+	SizeType calcDir(SizeType, SizeType) const { return DIRECTION_S; }
 
-	bool fringe(SizeType i,SizeType,SizeType emin) const
+	bool fringe(SizeType i, SizeType, SizeType emin) const
 	{
 		return (i == emin);
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType,SizeType,SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType, SizeType, SizeType siteNew2) const
 	{
 		return siteNew2;
 	}
 
-	String label() const
-	{
-		return "star";
-	}
+	String label() const { return "star"; }
 
 	SizeType findReflection(SizeType) const
 	{
@@ -149,13 +145,13 @@ public:
 
 	SizeType length(SizeType i) const
 	{
-		assert(i==0);
+		assert(i == 0);
 		return linSize_;
 	}
 
-	SizeType translate(SizeType,SizeType dir,SizeType) const
+	SizeType translate(SizeType, SizeType dir, SizeType) const
 	{
-		assert(dir==0);
+		assert(dir == 0);
 
 		throw RuntimeError("translate\n");
 	}
@@ -168,4 +164,3 @@ private:
 
 /*@}*/
 #endif // GEOMETRY_STAR_H
-

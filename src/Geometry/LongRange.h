@@ -79,19 +79,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PSI_GEOM_LONG_RANGE_H
 #include "GeometryBase.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType, typename InputType>
-class LongRange : public GeometryBase<ComplexOrRealType, InputType> {
+template <typename ComplexOrRealType, typename InputType>
+class LongRange : public GeometryBase<ComplexOrRealType, InputType>
+{
 
 	typedef Matrix<ComplexOrRealType> MatrixType;
 
 public:
 
-	LongRange() : linSize_(0), orbitals_(0), maxConnections_(0) {}
+	LongRange()
+	    : linSize_(0)
+	    , orbitals_(0)
+	    , maxConnections_(0)
+	{
+	}
 
 	LongRange(SizeType linSize, InputType& io)
-	    : linSize_(linSize), maxConnections_(0)
+	    : linSize_(linSize)
+	    , maxConnections_(0)
 	{
 		bool hasEntangler = false;
 		typename Real<ComplexOrRealType>::Type entangler = 0;
@@ -99,12 +107,13 @@ public:
 		try {
 			io.readline(entangler, "GeometryEntangler=");
 			hasEntangler = true;
-		} catch (std::exception&) {}
+		} catch (std::exception&) {
+		}
 
 		if (hasEntangler) {
 			SizeType orbitals = 0;
 			io.readline(orbitals, "Orbitals=");
-			const SizeType n = orbitals*linSize;
+			const SizeType n = orbitals * linSize;
 			matrix_.resize(n, n);
 			setEntangler(entangler);
 		} else {
@@ -113,13 +122,15 @@ public:
 
 		checkConnectors(matrix_, linSize_);
 
-		orbitals_ = matrix_.rows()/linSize;
+		orbitals_ = matrix_.rows() / linSize;
 
 		try {
-			io.readline(maxConnections_,"GeometryMaxConnections=");
+			io.readline(maxConnections_, "GeometryMaxConnections=");
 		} catch (std::exception& e) {
 			if (!hasEntangler) {
-				std::cerr<<"Please add GeometryMaxConnections=0 or some other number\n";
+				std::cerr
+				    << "Please add GeometryMaxConnections=0 or "
+				       "some other number\n";
 				throw e;
 			}
 		}
@@ -129,78 +140,70 @@ public:
 	{
 		m = matrix_;
 		if (orbitals != orbitals_)
-			throw RuntimeError("General geometry connectors: wrong size\n");
+			throw RuntimeError(
+			    "General geometry connectors: wrong size\n");
 	}
 
 	virtual SizeType maxConnections() const
 	{
-		return (maxConnections_ == 0) ? linSize_*linSize_*0.25 : maxConnections_;
+		return (maxConnections_ == 0) ? linSize_ * linSize_ * 0.25
+					      : maxConnections_;
 	}
 
 	virtual SizeType dirs() const { return 1; }
 
-	SizeType handle(SizeType i,SizeType j) const
+	SizeType handle(SizeType i, SizeType j) const
 	{
-		return (i<j) ? i : j;
+		return (i < j) ? i : j;
 	}
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
 		assert(dirId == 0);
-		throw RuntimeError("LongRange::getVectorSize(): unimplemented\n");
+		throw RuntimeError(
+		    "LongRange::getVectorSize(): unimplemented\n");
 	}
 
-	bool connected(SizeType i1,SizeType i2) const
-	{
-		return true;
-	}
+	bool connected(SizeType i1, SizeType i2) const { return true; }
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType,SizeType) const
-	{
-		return 0;
-	}
+	SizeType calcDir(SizeType, SizeType) const { return 0; }
 
-	bool fringe(SizeType,SizeType,SizeType) const
-	{
-		return true;
-	}
+	bool fringe(SizeType, SizeType, SizeType) const { return true; }
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
 	{
 		assert(siteNew2 >= emin);
-		SizeType tmp = siteNew2 - emin + smax+1;
+		SizeType tmp = siteNew2 - emin + smax + 1;
 		assert(tmp < linSize_);
 		return tmp;
 	}
 
-	String label() const
-	{
-		return "LongRange";
-	}
+	String label() const { return "LongRange"; }
 
 	SizeType findReflection(SizeType site) const
 	{
-		return linSize_ - site -1;
+		return linSize_ - site - 1;
 	}
 
 	SizeType length(SizeType i) const
 	{
-		assert(i==0);
+		assert(i == 0);
 		return linSize_;
 	}
 
-	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	SizeType translate(SizeType site, SizeType dir, SizeType amount) const
 	{
-		assert(dir==0);
+		assert(dir == 0);
 
-		site+=amount;
-		while (site>=linSize_) site -= linSize_;
+		site += amount;
+		while (site >= linSize_)
+			site -= linSize_;
 		return site;
 	}
 
-	template<class Archive>
+	template <class Archive>
 	void write(Archive&, const unsigned int)
 	{
 		throw RuntimeError("LongRange::write(): unimplemented\n");
@@ -222,27 +225,33 @@ private:
 		if (matrix.rows() != matrix.cols())
 			str = "LongRange: Connectors matrix isn't square\n";
 
-		if (matrix.rows()%linSize != 0)
-			str += "LongRange: Connectors matrix isn't divisible by number of sites\n";
+		if (matrix.rows() % linSize != 0)
+			str += "LongRange: Connectors matrix isn't divisible "
+			       "by number of sites\n";
 
 		if (hasDiagonal(matrix)) {
-			str += "LongRange: Connectors matrix has non-zero diagonal value(s)\n";
+			str += "LongRange: Connectors matrix has non-zero "
+			       "diagonal value(s)\n";
 		}
 
 		if (hasLowerTriangle(matrix)) {
-			str += "LongRange: Connectors matrix has non-zero(es) in lower triangle\n";
+			str += "LongRange: Connectors matrix has non-zero(es) "
+			       "in lower triangle\n";
 		}
 
-		if (str.empty()) return;
+		if (str.empty())
+			return;
 		throw RuntimeError(str);
 	}
 
 	static bool hasDiagonal(const MatrixType& matrix)
 	{
 		SizeType n = matrix.rows();
-		if (n != matrix.cols()) return true;
+		if (n != matrix.cols())
+			return true;
 		for (SizeType i = 0; i < n; ++i) {
-			if (PsimagLite::norm(matrix(i, i)) != 0) return true;
+			if (PsimagLite::norm(matrix(i, i)) != 0)
+				return true;
 		}
 
 		return false;
@@ -252,7 +261,8 @@ private:
 	{
 		for (SizeType i = 0; i < matrix.rows(); ++i) {
 			for (SizeType j = 0; j < i; ++j) {
-				if (PsimagLite::norm(matrix(i, j)) != 0) return true;
+				if (PsimagLite::norm(matrix(i, j)) != 0)
+					return true;
 			}
 		}
 
@@ -268,4 +278,3 @@ private:
 
 /*@}*/
 #endif // LADDER_H
-

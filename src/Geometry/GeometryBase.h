@@ -83,44 +83,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "InputNg.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType, typename InputType>
-class GeometryBase {
+template <typename ComplexOrRealType, typename InputType>
+class GeometryBase
+{
 
-	typedef std::pair<SizeType,SizeType> PairType;
+	typedef std::pair<SizeType, SizeType> PairType;
 	typedef Matrix<ComplexOrRealType> MatrixType;
 
 public:
 
-	virtual ~GeometryBase()
-	{}
+	virtual ~GeometryBase() { }
 
-	template<class Archive>
-	void write(Archive&, const unsigned int)
-	{}
+	template <class Archive>
+	void write(Archive&, const unsigned int) { }
 
 	virtual SizeType dirs() const = 0;
 
-	virtual SizeType handle(SizeType i,SizeType j) const = 0;
+	virtual SizeType handle(SizeType i, SizeType j) const = 0;
 
 	virtual SizeType getVectorSize(SizeType dirId) const = 0;
 
-	virtual bool connected(SizeType i1,SizeType i2) const = 0;
+	virtual bool connected(SizeType i1, SizeType i2) const = 0;
 
-	virtual SizeType calcDir(SizeType i1,SizeType i2) const = 0;
+	virtual SizeType calcDir(SizeType i1, SizeType i2) const = 0;
 
-	virtual bool fringe(SizeType i,SizeType smax,SizeType emin) const = 0;
+	virtual bool fringe(SizeType i, SizeType smax, SizeType emin) const = 0;
 
-	virtual SizeType getSubstituteSite(SizeType smax,
-	                                   SizeType emin,
-	                                   SizeType siteNew2) const = 0;
+	virtual SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const = 0;
 
 	virtual String label() const = 0;
 
 	virtual SizeType length(SizeType i) const = 0;
 
-	virtual SizeType translate(SizeType site,SizeType dir,SizeType amount) const = 0;
+	virtual SizeType translate(SizeType site, SizeType dir, SizeType amount) const = 0;
 
 	virtual SizeType maxConnections() const = 0;
 
@@ -128,24 +126,22 @@ public:
 
 	virtual void set(MatrixType&, SizeType) const
 	{
-		throw RuntimeError("GeometryBase::set() unimplemented for derived class\n");
+		throw RuntimeError(
+		    "GeometryBase::set() unimplemented for derived class\n");
 	}
 
-	virtual int index(SizeType i1,SizeType edof1,SizeType edofTotal) const
+	virtual int index(SizeType i1, SizeType edof1, SizeType edofTotal) const
 	{
 		assert(edof1 < edofTotal);
-		return edof1+i1*edofTotal;
+		return edof1 + i1 * edofTotal;
 	}
 
-	virtual SizeType matrixRank(SizeType linSize,SizeType maxEdof) const
+	virtual SizeType matrixRank(SizeType linSize, SizeType maxEdof) const
 	{
-		return linSize*maxEdof;
+		return linSize * maxEdof;
 	}
 
-	virtual int signChange(SizeType, SizeType) const
-	{
-		return 1;
-	}
+	virtual int signChange(SizeType, SizeType) const { return 1; }
 
 	virtual SizeType orbitals(SizeType orbs, SizeType) const
 	{
@@ -160,16 +156,14 @@ protected:
 		throw RuntimeError(str2);
 	}
 
-	bool neighbors(SizeType i1,
-	               SizeType i2,
-	               bool periodic,
-	               SizeType period) const
+	bool neighbors(SizeType i1, SizeType i2, bool periodic, SizeType period) const
 	{
-		SizeType imin = (i1<i2) ? i1 : i2;
-		SizeType imax = (i1>i2) ? i1 : i2;
-		bool b = (imax-imin==1);
-		if (!periodic) return b;
-		bool b2 = (imax-imin == period);
+		SizeType imin = (i1 < i2) ? i1 : i2;
+		SizeType imax = (i1 > i2) ? i1 : i2;
+		bool b = (imax - imin == 1);
+		if (!periodic)
+			return b;
+		bool b2 = (imax - imin == period);
 		return (b || b2);
 	}
 }; // class GeometryBase
@@ -177,4 +171,3 @@ protected:
 
 /*@}*/
 #endif // GEOMETRY_BASE_H
-

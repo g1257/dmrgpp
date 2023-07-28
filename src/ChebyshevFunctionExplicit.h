@@ -31,13 +31,15 @@ Please see full open source license included in file LICENSE.
 #include "ChebyshevFunction.h"
 #include <cmath>
 
-namespace PsimagLite {
-template<typename RealType>
-class ChebyshevFunctionExplicit  {
+namespace PsimagLite
+{
+template <typename RealType>
+class ChebyshevFunctionExplicit
+{
 
 public:
 
-	RealType operator()(int m,const RealType& x) const
+	RealType operator()(int m, const RealType& x) const
 	{
 
 		switch (m) {
@@ -47,37 +49,36 @@ public:
 			return x;
 		}
 
-		RealType x1 = x*x;
+		RealType x1 = x * x;
 		switch (m) {
 		case 2:
-			return 2*x1-1;
+			return 2 * x1 - 1;
 		case 3:
-			return 4*x1*x-3*x;
+			return 4 * x1 * x - 3 * x;
 		case 4:
-			return 8*x1*x1-8*x1+1;
+			return 8 * x1 * x1 - 8 * x1 + 1;
 		case 5:
-			return 16*x1*x1*x-20*x1*x+5*x;
+			return 16 * x1 * x1 * x - 20 * x1 * x + 5 * x;
 		}
 
-		RealType x2 = x1*x1;
+		RealType x2 = x1 * x1;
 		switch (m) {
 		case 6:
-			return 32*x2*x1-48*x2+18*x1-1;
+			return 32 * x2 * x1 - 48 * x2 + 18 * x1 - 1;
 		case 7:
-			return 64*x2*x1*x-112*x2*x+56*x1*x-7*x;
+			return 64 * x2 * x1 * x - 112 * x2 * x + 56 * x1 * x - 7 * x;
 		}
 
-		if (m&1) {
-			int p=(m-1)/2;
-			return (2*this->operator()(p,x)*this->operator()(p+1,x)-x);
+		if (m & 1) {
+			int p = (m - 1) / 2;
+			return (2 * this->operator()(p, x) * this->operator()(p + 1, x) - x);
 		}
 
-		int pp = m/2;
-		RealType tmp=this->operator()(pp,x);
-		return (2*tmp*tmp-1);
+		int pp = m / 2;
+		RealType tmp = this->operator()(pp, x);
+		return (2 * tmp * tmp - 1);
 	}
 }; // class ChebyshevFunctionExplicit
 } // namespace PsimagLite
 /*@}*/
-#endif  //CHEBYSHEV_F_EXPLICIT_H
-
+#endif // CHEBYSHEV_F_EXPLICIT_H

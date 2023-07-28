@@ -1,9 +1,11 @@
 #include "IsClass.h"
 #include <vector>
 
-class A {};
+class A
+{
+};
 
-template<typename T>
+template <typename T>
 int testIsClass()
 {
 	return PsimagLite::IsClass<T>::value;
@@ -11,10 +13,9 @@ int testIsClass()
 
 int main()
 {
-	std::cout<<testIsClass<A>()<<"\n";
-	std::cout<<testIsClass<double>()<<"\n";
-	std::cout<<testIsClass<int>()<<"\n";
-	std::cout<<testIsClass<std::vector<double> >()<<"\n";
-	std::cout<<testIsClass<char>()<<"\n";
+	std::cout << testIsClass<A>() << "\n";
+	std::cout << testIsClass<double>() << "\n";
+	std::cout << testIsClass<int>() << "\n";
+	std::cout << testIsClass<std::vector<double>>() << "\n";
+	std::cout << testIsClass<char>() << "\n";
 }
-

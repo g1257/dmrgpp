@@ -27,16 +27,18 @@
 #include <iostream>
 #include <unistd.h>
 
-class MyLoop {
+class MyLoop
+{
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
 public:
 
 	MyLoop(SizeType nthreads, SizeType total)
-	    : sum_(ConcurrencyType::storageSize(nthreads)),
-	      v_(total,0)
-	{}
+	    : sum_(ConcurrencyType::storageSize(nthreads))
+	    , v_(total, 0)
+	{
+	}
 
 	SizeType tasks() const { return v_.size(); }
 
@@ -71,10 +73,7 @@ public:
 		return sum_[0];
 	}
 
-	const PsimagLite::Vector<SizeType>::Type& v() const
-	{
-		return v_;
-	}
+	const PsimagLite::Vector<SizeType>::Type& v() const { return v_; }
 
 private:
 
@@ -82,25 +81,27 @@ private:
 	PsimagLite::Vector<SizeType>::Type v_;
 };
 
-int main(int argc,char *argv[])
+int main(int argc, char* argv[])
 {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
 	SizeType nthreads = 1;
-	if (argc == 3) nthreads = atoi(argv[2]);
+	if (argc == 3)
+		nthreads = atoi(argv[2]);
 
-	ConcurrencyType concurrency(&argc,&argv,nthreads);
+	ConcurrencyType concurrency(&argc, &argv, nthreads);
 
 	typedef MyLoop HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
 	ParallelizerType threadObject(ConcurrencyType::codeSectionParams);
 
-	if (argc < 2) return 1;
+	if (argc < 2)
+		return 1;
 
 	SizeType total = atoi(argv[1]);
 
-	HelperType helper(nthreads,total);
+	HelperType helper(nthreads, total);
 
 	threadObject.loopCreate(helper);
 
@@ -109,11 +110,11 @@ int main(int argc,char *argv[])
 	SizeType sum = helper.sum();
 
 	if (ConcurrencyType::root()) {
-		std::cout<<"Using "<<threadObject.name()<<" mode= "<<ConcurrencyType::mode;
-		std::cout<<" with "<<nthreads;
-		std::cout<<" threads or mpi procs.\n";
-		std::cout<<"sum="<<sum<<"\n";
-		std::cout<<helper.v();
+		std::cout << "Using " << threadObject.name()
+			  << " mode= " << ConcurrencyType::mode;
+		std::cout << " with " << nthreads;
+		std::cout << " threads or mpi procs.\n";
+		std::cout << "sum=" << sum << "\n";
+		std::cout << helper.v();
 	}
-
 }

@@ -1,27 +1,31 @@
-#include "Matrix.h"
-#include <cstdlib> // for atoi
 #include "BLAS.h"
+#include "Matrix.h"
 #include "Random48.h"
+#include <cstdlib> // for atoi
 #define USE_PTHREADS_OR_NOT_NG
 #include "Parallelizer.h"
 
 typedef double MyRealType;
 typedef PsimagLite::Matrix<MyRealType> MatrixType;
 
-class MyBlasWrapper {
+class MyBlasWrapper
+{
 
 public:
 
 	typedef PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
 
 	MyBlasWrapper(SizeType m, SizeType n, SizeType k, SizeType total)
-	    : a_(total), b_(total), c_(total), myrandom48_(1234)
+	    : a_(total)
+	    , b_(total)
+	    , c_(total)
+	    , myrandom48_(1234)
 	{
 		for (SizeType i = 0; i < total; ++i) {
 			SizeType factor = (i & 1) ? 2 : 1;
-			a_[i] = new MatrixType(m*factor, k*factor);
-			b_[i] = new MatrixType(k*factor, n*factor);
-			c_[i] = new MatrixType(m*factor, n*factor);
+			a_[i] = new MatrixType(m * factor, k * factor);
+			b_[i] = new MatrixType(k * factor, n * factor);
+			c_[i] = new MatrixType(m * factor, n * factor);
 			fillMatrix(*(a_[i]));
 			fillMatrix(*(b_[i]));
 		}
@@ -51,23 +55,22 @@ public:
 		SizeType lda = a_[ind]->rows();
 		SizeType ldb = b_[ind]->rows();
 		SizeType ldc = c_[ind]->rows();
-		MyRealType* aptr = &(a_[ind]->operator()(0,0));
-		MyRealType* bptr = &(b_[ind]->operator()(0,0));
-		MyRealType* cptr = &(c_[ind]->operator()(0,0));
+		MyRealType* aptr = &(a_[ind]->operator()(0, 0));
+		MyRealType* bptr = &(b_[ind]->operator()(0, 0));
+		MyRealType* cptr = &(c_[ind]->operator()(0, 0));
 
-		psimag::BLAS::GEMM( 'N',
-		                    'N',
-		                    mm, // rows of op(A)
-		                    nn, // columns of op(B)
-		                    kk, // columns of op(A)
-		                    1.0,
-		                    aptr,
-		                    lda, // first dimension of A
-		                    bptr,
-		                    ldb, // first dimension of B
-		                    0.0,
-		                    cptr,
-		                    ldc); // first dimension of C
+		psimag::BLAS::GEMM('N', 'N',
+		    mm, // rows of op(A)
+		    nn, // columns of op(B)
+		    kk, // columns of op(A)
+		    1.0,
+		    aptr,
+		    lda, // first dimension of A
+		    bptr,
+		    ldb, // first dimension of B
+		    0.0,
+		    cptr,
+		    ldc); // first dimension of C
 
 		*(a_[ind]) = *(b_[ind]);
 		*(b_[ind]) = *(c_[ind]);
@@ -88,10 +91,10 @@ private:
 	PsimagLite::Random48<MyRealType> myrandom48_;
 };
 
-int main(int argc, char**argv)
+int main(int argc, char** argv)
 {
 	if (argc < 6) {
-		std::cerr<<"USAGE: "<<argv[0]<<" m k n total threads\n";
+		std::cerr << "USAGE: " << argv[0] << " m k n total threads\n";
 		return 1;
 	}
 

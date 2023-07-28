@@ -18,26 +18,28 @@ Please see full open source license included in file LICENSE.
 
 #ifndef RANDOM48_H
 #define RANDOM48_H
+#include "Vector.h"
 #include <cstdlib>
 #include <iostream>
-#include "Vector.h"
 
-namespace PsimagLite {
-template<typename T>
-class  Random48 {
+namespace PsimagLite
+{
+template <typename T>
+class Random48
+{
 
 public:
 
 	typedef long int LongType;
 	typedef T value_type; // legacy name
 
-	Random48(LongType seed,SizeType rank = 0,SizeType nprocs = 1)
+	Random48(LongType seed, SizeType rank = 0, SizeType nprocs = 1)
 	{
 		srand48(seed);
 		Vector<LongType>::Type vOfSeeds(nprocs);
-		for (SizeType i=0;i<vOfSeeds.size();i++)
-			vOfSeeds[i] = static_cast<LongType>(10000.0*drand48());
-		seed_=vOfSeeds[rank];
+		for (SizeType i = 0; i < vOfSeeds.size(); i++)
+			vOfSeeds[i] = static_cast<LongType>(10000.0 * drand48());
+		seed_ = vOfSeeds[rank];
 		srand48(seed_);
 	}
 
@@ -59,4 +61,3 @@ private:
 } // namespace PsimagLite
 
 #endif // RANDOM48_H
-

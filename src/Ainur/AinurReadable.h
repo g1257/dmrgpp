@@ -1,11 +1,13 @@
 #ifndef AINURREADABLE_H
 #define AINURREADABLE_H
-#include "AinurStore.h"
 #include "AinurDoubleOrFloat.h"
+#include "AinurStore.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class AinurReadable {
+class AinurReadable
+{
 
 public:
 
@@ -17,15 +19,15 @@ public:
 	typedef std::complex<RealType> ComplexType;
 
 	AinurReadable(const VectorStringType& names,
-	              const VectorStoreType& storage)
-	    : names_(names), storage_(storage)
-	{}
+	    const VectorStoreType& storage)
+	    : names_(names)
+	    , storage_(storage)
+	{
+	}
 
 	int storageIndexByName(String name) const
 	{
-		VectorStringType::const_iterator it = std::find(names_.begin(),
-		                                                names_.end(),
-		                                                name);
+		VectorStringType::const_iterator it = std::find(names_.begin(), names_.end(), name);
 		if (it == names_.end())
 			return -1;
 		return it - names_.begin();
@@ -42,7 +44,7 @@ public:
 			if (storage_[i].used() > 0 || storage_[i].valueSize() == 0)
 				continue;
 			assert(i < names_.size());
-			os<<"WARNING: Unused label "<<names_[i]<<"\n";
+			os << "WARNING: Unused label " << names_[i] << "\n";
 		}
 	}
 
@@ -100,8 +102,8 @@ public:
 	}
 
 	// read vectors
-	template<typename VectorLikeType>
-	typename EnableIf<IsVectorLike<VectorLikeType>::True,void>::Type
+	template <typename VectorLikeType>
+	typename EnableIf<IsVectorLike<VectorLikeType>::True, void>::Type
 	readValue(VectorLikeType& v, String sOrig) const
 	{
 		String s = prefix_ + sOrig;
@@ -112,7 +114,8 @@ public:
 		const Store& store = storage_[x];
 
 		if (store.type() == Store::MATRIX) {
-			std::cerr<<"readValue: "<<s<<" coerced into vector\n";
+			std::cerr << "readValue: " << s
+				  << " coerced into vector\n";
 			Matrix<typename VectorLikeType::value_type> m;
 			readValue(m, sOrig);
 			v = m.data();
@@ -132,17 +135,22 @@ public:
 		String tmp = (n == 2) ? store.value(1, names_[x]) : "";
 		AinurLexicalType::removeTrailingBlanks(tmp);
 		size_t start = tmp.find("...");
-		SizeType times = (start != String::npos && tmp.length() > 3)  ?
-		            atoi(tmp.substr(start + 3, tmp.length() - 3).c_str()) : 0;
+		SizeType times = (start != String::npos && tmp.length() > 3)
+		    ? atoi(tmp.substr(start + 3, tmp.length() - 3).c_str())
+		    : 0;
 
 		if (n == 2 && start != String::npos) {
 			assert(static_cast<SizeType>(x) < names_.size());
 			if (v.size() < 3 && times == 0)
-				err("Ellipsis cannot be used for this vector, " + names_[x] + "\n");
-			if (times > 0) v.resize(times);
+				err("Ellipsis cannot be used for this "
+				    "vector, "
+				    + names_[x] + "\n");
+			if (times > 0)
+				v.resize(times);
 			n = v.size();
 			for (SizeType i = 0; i < n; ++i)
-				getEntryFromString(v[i], store.value(0, names_[x]));
+				getEntryFromString(v[i],
+				    store.value(0, names_[x]));
 			return;
 		}
 
@@ -156,8 +164,8 @@ public:
 	}
 
 	// read matrices
-	template<typename FloatingType>
-	typename EnableIf<Loki::TypeTraits<FloatingType>::isArith,void>::Type
+	template <typename FloatingType>
+	typename EnableIf<Loki::TypeTraits<FloatingType>::isArith, void>::Type
 	readValue(Matrix<FloatingType>& m, String s) const
 	{
 		s = prefix_ + s;
@@ -178,24 +186,28 @@ public:
 		SizeType cols = atoi(store.value(1, names_[x]).c_str());
 
 		m.clear();
-		if (rows == 0 && cols == 0) return;
-		if (rows*cols == 0)
-			err("Matrix with one of {rows, cols} 0 must have both 0\n");
+		if (rows == 0 && cols == 0)
+			return;
+		if (rows * cols == 0)
+			err("Matrix with one of {rows, cols} 0 must have both "
+			    "0\n");
 
 		m.resize(rows, cols);
 
-		if (rows*cols +2 != n)
+		if (rows * cols + 2 != n)
 			err("In input, matrix " + s + " internal storage error II\n");
 
 		for (SizeType i = 0; i < rows; ++i)
 			for (SizeType j = 0; j < cols; ++j)
-				getEntryFromString(m(i,j), store.value(i + j*rows + 2, names_[x]));
+				getEntryFromString(
+				    m(i, j),
+				    store.value(i + j * rows + 2, names_[x]));
 	}
 
 	// read matrices
-	template<typename FloatingType>
-	typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,void>::Type
-	readValue(Matrix<std::complex<FloatingType> >& m, String s) const
+	template <typename FloatingType>
+	typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat, void>::Type
+	readValue(Matrix<std::complex<FloatingType>>& m, String s) const
 	{
 		err("AinurReadable: Complex matrices not implemented\n");
 	}

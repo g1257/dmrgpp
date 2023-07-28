@@ -1,25 +1,29 @@
 #ifndef TEST_MEM_RESOLV_1_H
 #define TEST_MEM_RESOLV_1_H
-#include <iostream>
-#include <cstdlib>
-#include "MemResolv.h"
 #include "IsClass.h"
+#include "MemResolv.h"
+#include <cstdlib>
+#include <iostream>
 
 typedef PsimagLite::MemResolv MemResolv;
 
-template<typename T>
-class TestMemResolv1 {
+template <typename T>
+class TestMemResolv1
+{
 
 	static const bool IS_CLASS = PsimagLite::IsClass<T>::value;
 	typedef std::vector<T> VectorType;
-	typedef PsimagLite::ResolveFinalOrNot<VectorType,IS_CLASS> ResolveFinalOrNotType;
+	typedef PsimagLite::ResolveFinalOrNot<VectorType, IS_CLASS>
+	    ResolveFinalOrNotType;
 	typedef TestMemResolv1<T> ThisType;
 
 public:
 
 	TestMemResolv1(int size)
-	: size_(size),data_(size)
-	{}
+	    : size_(size)
+	    , data_(size)
+	{
+	}
 
 	void setTo(T x)
 	{
@@ -27,26 +31,22 @@ public:
 			data_[i] = x;
 	}
 
-	const T& get(int i) const
-	{
-		return data_[i];
-	}
+	const T& get(int i) const { return data_[i]; }
 
-	SizeType memResolv(MemResolv& vmptr,
-	                   SizeType = 0,
-	                   PsimagLite::String msg = "") const
+	SizeType memResolv(MemResolv& vmptr, SizeType = 0, PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		msg += "TestMemResolv1 ";
 		const char* start = (const char*)&size_;
 		const char* end = (const char*)&data_;
-		SizeType total = vmptr.memResolv(&size_,end - start,str + "size");
-		total += vmptr.memResolv(&data_,size_,str + "size");
+		SizeType total = vmptr.memResolv(&size_, end - start, str + "size");
+		total += vmptr.memResolv(&data_, size_, str + "size");
 		return total;
 	}
 
-	template<typename T2>
-	friend std::ostream& operator<<(std::ostream& os, const TestMemResolv1<T2>& mt);
+	template <typename T2>
+	friend std::ostream& operator<<(std::ostream& os,
+	    const TestMemResolv1<T2>& mt);
 
 private:
 
@@ -58,15 +58,14 @@ private:
 	VectorType data_;
 };
 
-template<typename T>
+template <typename T>
 std::ostream& operator<<(std::ostream& os, const TestMemResolv1<T>& mt)
 {
-	os<<"TestMemResolv1 size= "<<mt.size_<<"\n";
+	os << "TestMemResolv1 size= " << mt.size_ << "\n";
 	for (SizeType i = 0; i < mt.size_; ++i)
-		os<<mt.data_[i]<<" ";
-	os<<"\n";
+		os << mt.data_[i] << " ";
+	os << "\n";
 	return os;
 }
 
 #endif
-

@@ -80,55 +80,72 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef IOSIMPLE_HEADER_H
 #define IOSIMPLE_HEADER_H
 
+#include "Concurrency.h"
+#include "Map.h"
+#include "Matrix.h"
+#include "Stack.h"
+#include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <vector>
-#include <fstream>
-#include "Matrix.h"
-#include <cstdlib>
-#include "Map.h"
-#include "Concurrency.h"
-#include "Stack.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 //! IoSimple class handles Input/Output (IO) for the Dmrg++ program
-class IoSimple {
+class IoSimple
+{
 
-	template<typename T>
+	template <typename T>
 	struct PrintWithEqualSign {
-		enum { True = Loki::TypeTraits<T>::isArith || std::is_enum<T>::value ||
-		     IsComplexNumber<T>::True};
+		enum {
+			True = Loki::TypeTraits<T>::isArith || std::is_enum<T>::value || IsComplexNumber<T>::True
+		};
 	};
 
 public:
 
-	class Out {
+	class Out
+	{
 
 	public:
 
-		Out()  : rank_(0),fout_(0) {}
-
-		Out(std::ostream& os) : rank_(0), filename_("OSTREAM")
+		Out()
+		    : rank_(0)
+		    , fout_(0)
 		{
-			fout_=(std::ofstream *)&os;
+		}
+
+		Out(std::ostream& os)
+		    : rank_(0)
+		    , filename_("OSTREAM")
+		{
+			fout_ = (std::ofstream*)&os;
 		}
 
 		Out(const String& fn)
-		    : rank_(Concurrency::rank()),filename_(fn),fout_(0)
+		    : rank_(Concurrency::rank())
+		    , filename_(fn)
+		    , fout_(0)
 		{
-			if (rank_!=0) return;
-			if (!fout_) fout_=new std::ofstream;
+			if (rank_ != 0)
+				return;
+			if (!fout_)
+				fout_ = new std::ofstream;
 #ifdef PSI_PUBSETBUF
-			fout_->rdbuf()->pubsetbuf(0,0);
+			fout_->rdbuf()->pubsetbuf(0, 0);
 #endif
 			fout_->open(fn.c_str());
 			if (!(*fout_) || !fout_->good())
-				throw RuntimeError("Out: error while opening file!\n");
+				throw RuntimeError(
+				    "Out: error while opening file!\n");
 		}
 
 		~Out()
 		{
-			if (rank_!=0) return;
-			if (filename_=="OSTREAM" || !fout_) return;
+			if (rank_ != 0)
+				return;
+			if (filename_ == "OSTREAM" || !fout_)
+				return;
 			fout_->close();
 			delete fout_;
 		}
@@ -137,92 +154,93 @@ public:
 
 		const String& filename() const { return filename_; }
 
-		void open(String const &fn,
-		          std::ios_base::openmode mode)
+		void open(String const& fn, std::ios_base::openmode mode)
 		{
-			if (rank_!=0) return;
-			if (filename_=="OSTREAM")
+			if (rank_ != 0)
+				return;
+			if (filename_ == "OSTREAM")
 				throw RuntimeError("open: not possible\n");
-			filename_=fn;
-			if (!fout_) fout_=new std::ofstream;
+			filename_ = fn;
+			if (!fout_)
+				fout_ = new std::ofstream;
 #ifdef PSI_PUBSETBUF
-			fout_->rdbuf()->pubsetbuf(0,0);
+			fout_->rdbuf()->pubsetbuf(0, 0);
 #endif
-			fout_->open(fn.c_str(),mode);
+			fout_->open(fn.c_str(), mode);
 			if (!(*fout_) || !fout_->good())
-				throw RuntimeError("Out: error while opening file!\n");
+				throw RuntimeError(
+				    "Out: error while opening file!\n");
 		}
 
 		void close()
 		{
-			if (filename_=="OSTREAM")
+			if (filename_ == "OSTREAM")
 				throw RuntimeError("close: not possible\n");
 			fout_->close();
 		}
 
-		template<typename T>
-		void writeline(T,
-		               PsimagLite::String,
-		               PsimagLite::OstringStream& msg,
-		               SizeType)
+		template <typename T>
+		void writeline(T, PsimagLite::String, PsimagLite::OstringStream& msg, SizeType)
 		{
 			printline(msg);
 		}
 
-		void printline(const String &s)
+		void printline(const String& s)
 		{
-			if (rank_!=0) return;
-			(*fout_)<<s<<"\n";
+			if (rank_ != 0)
+				return;
+			(*fout_) << s << "\n";
 		}
 
 		void printline(OstringStream& s)
 		{
-			if (rank_!=0) return;
-			(*fout_)<<s().str()<<"\n";
+			if (rank_ != 0)
+				return;
+			(*fout_) << s().str() << "\n";
 			s().flush();
 			s().seekp(std::ios_base::beg);
 		}
 
-		template<typename T>
-		void write(const T&x,
-		           const String& label,
-		           typename EnableIf<PrintWithEqualSign<T>::True, int>::Type = 0)
+		template <typename T>
+		void write(const T& x, const String& label, typename EnableIf<PrintWithEqualSign<T>::True, int>::Type = 0)
 		{
-			(*fout_)<<label<<"="<<x<<"\n";
+			(*fout_) << label << "=" << x << "\n";
 		}
 
-		template<class T>
-		void write(const T& something,
-		           const String& label,
-		           typename EnableIf<!PrintWithEqualSign<T>::True, int>::Type = 0)
+		template <class T>
+		void write(const T& something, const String& label, typename EnableIf<!PrintWithEqualSign<T>::True, int>::Type = 0)
 		{
-			if (rank_!=0) return;
+			if (rank_ != 0)
+				return;
 			if (!(*fout_) || !fout_->good())
 				throw RuntimeError("Out: file not open!\n");
-			(*fout_)<<label<<"\n";
-			(*fout_)<<something<<"\n";
+			(*fout_) << label << "\n";
+			(*fout_) << something << "\n";
 		}
 
 		int rank() { return rank_; }
 
 		void setPrecision(SizeType x)
 		{
-			if (!fout_) return;
+			if (!fout_)
+				return;
 			fout_->precision(x);
 		}
 
 		SizeType precision(SizeType x)
 		{
-			if (!fout_) return x;
+			if (!fout_)
+				return x;
 			fout_->precision(x);
 			return x;
 		}
 
-		template<typename X>
+		template <typename X>
 		friend Out& operator<<(Out& io, const X& t)
 		{
-			if (io.rank_!=0) return io;
-			(*(io.fout_))<<t;
+			if (io.rank_ != 0)
+				return io;
+			(*(io.fout_)) << t;
 			return io;
 		}
 
@@ -233,7 +251,8 @@ public:
 		std::ofstream* fout_;
 	};
 
-	class In {
+	class In
+	{
 
 	public:
 
@@ -244,169 +263,163 @@ public:
 
 		In() { }
 
-		In(String const &fn) : filename_(fn), fin_(fn.c_str())
+		In(String const& fn)
+		    : filename_(fn)
+		    , fin_(fn.c_str())
 		{
 			if (!fin_ || !fin_.good() || fin_.bad()) {
-				String s = "IoSimple::ctor(...): Can't open file "
-				        +filename_+"\n";
+				String s = "IoSimple::ctor(...): Can't open file " + filename_ + "\n";
 				throw RuntimeError(s.c_str());
 			}
 		}
 
-		~In()
-		{
-			fin_.close();
-		}
+		~In() { fin_.close(); }
 
 		bool ng() const { return false; }
 
-		void open(String const &fn)
+		void open(String const& fn)
 		{
-			filename_=fn;
+			filename_ = fn;
 			fin_.open(fn.c_str());
 			if (!fin_ || !fin_.good() || fin_.bad()) {
-				String s = "IoSimpleIn::open(...) failed for file "
-				        + filename_ + "\n";
+				String s = "IoSimpleIn::open(...) failed for file " + filename_ + "\n";
 				throw RuntimeError(s.c_str());
 			}
 		}
 
-		void close()
-		{
-			fin_.close();
-		}
+		void close() { fin_.close(); }
 
-		template<typename X>
-		SizeType readline(X &x,const String &s,LongIntegerType level=0)
+		template <typename X>
+		SizeType readline(X& x, const String& s, LongIntegerType level = 0)
 		{
 			String temp;
-			bool found=false;
-			bool foundOnce =false;
-			LongSizeType counter=0;
-			if (fin_.bad() || !fin_.good()) throw RuntimeError("Readline\n");
+			bool found = false;
+			bool foundOnce = false;
+			LongSizeType counter = 0;
+			if (fin_.bad() || !fin_.good())
+				throw RuntimeError("Readline\n");
 			while (!fin_.eof()) {
-				fin_>>temp;
-				if (fin_.eof()) break;
-				if (temp.substr(0,s.size())==s) {
-					foundOnce =true;
-					IstringStream temp2(temp.substr(s.size(),
-					                                temp.size()));
+				fin_ >> temp;
+				if (fin_.eof())
+					break;
+				if (temp.substr(0, s.size()) == s) {
+					foundOnce = true;
+					IstringStream temp2(
+					    temp.substr(s.size(), temp.size()));
 					temp2 >> x;
-					if (level>=0 && counter==LongSizeType(level)) {
-						found=true;
+					if (level >= 0 && counter == LongSizeType(level)) {
+						found = true;
 						break;
 					}
 					counter++;
 				}
 			}
 
-			if (!foundOnce || (!found && level!=LAST_INSTANCE)) {
-				String emessage =
-				        "IoSimple::In::readline(): Not found "+s+
-				        " in file "+filename_;
+			if (!foundOnce || (!found && level != LAST_INSTANCE)) {
+				String emessage = "IoSimple::In::readline(): Not found " + s + " in file " + filename_;
 				throw RuntimeError(emessage.c_str());
 			}
 
-			if (level==LAST_INSTANCE) {
+			if (level == LAST_INSTANCE) {
 				fin_.close();
 				fin_.open(filename_.c_str());
-				readline(x,s,counter-1);
+				readline(x, s, counter - 1);
 			}
 
 			return counter;
-
 		}
 
-		template<typename X>
-		typename EnableIf<IsVectorLike<X>::True,std::pair<String,SizeType> >::Type
-		read(X &x,
-		     String const &s,
-		     LongIntegerType level=0,
-		     bool beQuiet = false)
+		template <typename X>
+		typename EnableIf<IsVectorLike<X>::True,
+		    std::pair<String, SizeType>>::Type
+		read(X& x, String const& s, LongIntegerType level = 0, bool beQuiet = false)
 		{
-			std::pair<String,SizeType> sc = advance(s,level,beQuiet);
+			std::pair<String, SizeType> sc = advance(s, level, beQuiet);
 			int xsize;
-			fin_>>xsize;
-			if (xsize == 0) return sc;
+			fin_ >> xsize;
+			if (xsize == 0)
+				return sc;
 			x.resize(xsize);
-			for (int i=0;i<xsize;i++) {
+			for (int i = 0; i < xsize; i++) {
 				typename X::value_type tmp;
-				fin_>>tmp;
-				x[i]=tmp;
+				fin_ >> tmp;
+				x[i] = tmp;
 			}
 			return sc;
 		}
 
-		template<typename X>
-		void read(X &mat,
-		          String const &s,
-		          LongIntegerType level= 0,
-		          typename EnableIf<IsMatrixLike<X>::True, int>::Type  = 0)
+		template <typename X>
+		void
+		read(X& mat, String const& s, LongIntegerType level = 0, typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
 		{
-			advance(s,level);
-			fin_>>mat;
+			advance(s, level);
+			fin_ >> mat;
 		}
 
-		template<typename X>
-		typename EnableIf<IsStackLike<X>::True,std::pair<String,SizeType> >::Type
-		read(X &x,
-		     String const &s,
-		     LongIntegerType level=0,
-		     bool beQuiet = false)
+		template <typename X>
+		typename EnableIf<IsStackLike<X>::True,
+		    std::pair<String, SizeType>>::Type
+		read(X& x, String const& s, LongIntegerType level = 0, bool beQuiet = false)
 		{
-			std::pair<String,SizeType> sc = advance(s,level,beQuiet);
+			std::pair<String, SizeType> sc = advance(s, level, beQuiet);
 			fin_ >> x;
 			return sc;
 		}
 
-		std::pair<String,SizeType> advance(String const &s,
-		                                   LongIntegerType level=0,
-		                                   bool beQuiet=false)
+		std::pair<String, SizeType> advance(String const& s,
+		    LongIntegerType level = 0,
+		    bool beQuiet = false)
 		{
 
-			String temp="NOTFOUND";
-			String tempSaved="NOTFOUND";
-			LongSizeType counter=0;
-			bool found=false;
+			String temp = "NOTFOUND";
+			String tempSaved = "NOTFOUND";
+			LongSizeType counter = 0;
+			bool found = false;
 
 			while (!fin_.eof()) {
-				fin_>>temp;
-				if (fin_.eof() || !fin_.good() || fin_.bad()) break;
+				fin_ >> temp;
+				if (fin_.eof() || !fin_.good() || fin_.bad())
+					break;
 
-				if (temp.substr(0,s.size())==s) {
+				if (temp.substr(0, s.size()) == s) {
 					tempSaved = temp;
-					if (level>=0 && counter==LongSizeType(level)) {
-						found=true;
+					if (level >= 0 && counter == LongSizeType(level)) {
+						found = true;
 						break;
 					}
 					counter++;
 				}
 			}
 
-			if (level==LAST_INSTANCE && tempSaved!="NOTFOUND") {
+			if (level == LAST_INSTANCE && tempSaved != "NOTFOUND") {
 				fin_.close();
 				fin_.open(filename_.c_str());
-				if (counter>1) advance(s,counter-2);
-				return std::pair<String,SizeType>(tempSaved,counter);
+				if (counter > 1)
+					advance(s, counter - 2);
+				return std::pair<String, SizeType>(tempSaved,
+				    counter);
 			}
 
-			if (!found && tempSaved=="NOTFOUND") {
+			if (!found && tempSaved == "NOTFOUND") {
 				if (!beQuiet) {
-					std::cerr<<"Not found "<<s<<" in file "<<filename_;
-					std::cerr<<" level="<<level<<" counter="<<counter<<"\n";
+					std::cerr << "Not found " << s
+						  << " in file " << filename_;
+					std::cerr << " level=" << level
+						  << " counter=" << counter
+						  << "\n";
 				}
 				throw RuntimeError("IoSimple::In::read()\n");
 			}
 
-			return std::pair<String,SizeType>(tempSaved,counter);
+			return std::pair<String, SizeType>(tempSaved, counter);
 		}
 
 		SizeType count(const String& s)
 		{
 			SizeType i = 0;
-			while (i<1000) {
+			while (i < 1000) {
 				try {
-					advance(s,0,true);
+					advance(s, 0, true);
 					i++;
 				} catch (std::exception& e) {
 					rewind();
@@ -414,24 +427,23 @@ public:
 				}
 			}
 
-			String ss = "IoSimple::count(...): too many "
-			        +s+" in file "+filename_+"\n";
+			String ss = "IoSimple::count(...): too many " + s + " in file " + filename_ + "\n";
 			throw RuntimeError(s.c_str());
-
 		}
 
 		void rewind()
 		{
 			fin_.clear(); // forget we hit the end of file
-			fin_.seekg(0, std::ios::beg); // move to the start of the file
+			fin_.seekg(
+			    0, std::ios::beg); // move to the start of the file
 		}
 
 		bool eof() const { return fin_.eof(); }
 
-		template<typename X>
+		template <typename X>
 		friend void operator>>(In& io, X& t)
 		{
-			(io.fin_)>>t;
+			(io.fin_) >> t;
 		}
 
 	private:
@@ -439,30 +451,33 @@ public:
 		String filename_;
 		std::ifstream fin_;
 	};
-}; //class IoSimple
+}; // class IoSimple
 
-template<>
+template <>
 struct IsInputLike<IoSimple::In> {
-	enum {True = true};
+	enum { True = true };
 };
 
-template<>
+template <>
 struct IsOutputLike<IoSimple::Out> {
-	enum {True = true};
+	enum { True = true };
 };
 
 } // namespace PsimagLite
 
-namespace Spf {
+namespace Spf
+{
 
-class IoSimpleIn : public PsimagLite::IoSimple::In {
+class IoSimpleIn : public PsimagLite::IoSimple::In
+{
 
 public:
 
-	IoSimpleIn(const char* fn) : PsimagLite::IoSimple::In(PsimagLite::String(fn))
-	{}
+	IoSimpleIn(const char* fn)
+	    : PsimagLite::IoSimple::In(PsimagLite::String(fn))
+	{
+	}
 };
-}
+} // namespace Spf
 /*@}*/
 #endif
-

@@ -16,16 +16,18 @@ Please see full open source license included in file LICENSE.
 */
 #ifndef PSI_LUS_MINUS_MULT_DIV_H
 #define PSI_LUS_MINUS_MULT_DIV_H
-#include "../Vector.h"
-#include <cassert>
-#include "Node.h"
 #include "../PsimagLite.h"
+#include "../Vector.h"
 #include "AdditionalFunctions.h"
+#include "Node.h"
+#include <cassert>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ValueType_>
-class PlusMinusMultiplyDivide {
+template <typename ValueType_>
+class PlusMinusMultiplyDivide
+{
 
 public:
 
@@ -42,7 +44,8 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	PlusMinusMultiplyDivide() : inputsSoFar_(0)
+	PlusMinusMultiplyDivide()
+	    : inputsSoFar_(0)
 	{
 		NodeType* plus = new PlusType();
 		nodes_.push_back(plus);
@@ -83,24 +86,23 @@ public:
 		nodes_.clear();
 	}
 
-	const VectorNodeType& nodesSerial() const
-	{
-		return nodes_;
-	}
+	const VectorNodeType& nodesSerial() const { return nodes_; }
 
 	const NodeType& findNodeFromCode(const String& code)
 	{
 		SizeType n = nodes_.size();
 		for (SizeType i = 0; i < n; ++i) {
-			if (nodes_[i]->isInput()) continue;
-			if (nodes_[i]->code() == code) return *nodes_[i];
+			if (nodes_[i]->isInput())
+				continue;
+			if (nodes_[i]->code() == code)
+				return *nodes_[i];
 		}
 
 		// Assume it's an input
 		NodeType* input = new InputType(inputsSoFar_++);
 
 		try {
-		input->set(PsimagLite::atof(code));
+			input->set(PsimagLite::atof(code));
 		} catch (std::exception&) {
 			throw RuntimeError("FATAL: No function with code " + code + " was found.\n");
 		}

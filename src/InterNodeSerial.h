@@ -1,19 +1,20 @@
 #ifndef INTER_NODE_SERIAL_H
 #define INTER_NODE_SERIAL_H
-#include "Vector.h"
 #include "Mpi.h"
+#include "Vector.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename = int>
-class InterNode {
+template <typename = int>
+class InterNode
+{
 
 public:
 
-	InterNode(MPI::CommType)
-	{}
+	InterNode(MPI::CommType) { }
 
-	template<typename SomeLambdaType>
+	template <typename SomeLambdaType>
 	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda)
 	{
 		for (SizeType i = start; i < end; ++i)
@@ -24,5 +25,5 @@ public:
 
 	String name() const { return "serial"; }
 };
-}
+} // namespace PsimagLite
 #endif // INTER_NODE_SERIAL_H

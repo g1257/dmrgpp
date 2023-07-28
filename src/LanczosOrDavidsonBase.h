@@ -81,10 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LANCZOS_OR_DAVIDSON_BASE_H
 #include <cassert>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename SolverParametersType,typename MatrixType_,typename VectorType>
-class LanczosOrDavidsonBase {
+template <typename SolverParametersType, typename MatrixType_, typename VectorType>
+class LanczosOrDavidsonBase
+{
 
 public:
 
@@ -98,10 +100,7 @@ public:
 
 	virtual void computeOneState(RealType&, VectorType&, const VectorType&, SizeType) = 0;
 
-	virtual void computeAllStatesBelow(VectorRealType&,
-	                                   VectorVectorType&,
-	                                   const VectorType&,
-	                                   SizeType) = 0;
+	virtual void computeAllStatesBelow(VectorRealType&, VectorVectorType&, const VectorType&, SizeType) = 0;
 
 	static bool isReorthoEnabled(const SolverParametersType& params)
 	{
@@ -111,8 +110,10 @@ public:
 		bool canReortho = (params.lotaMemory);
 
 		if (!canReortho) {
-			PsimagLite::String str("LanczosOrDavidsonBase: Reortho requested but cannot");
-			str += "Suggestion: Delete reortho from input or set lotaMemory=true\n";
+			PsimagLite::String str("LanczosOrDavidsonBase: Reortho "
+					       "requested but cannot");
+			str += "Suggestion: Delete reortho from input or set "
+			       "lotaMemory=true\n";
 			throw PsimagLite::RuntimeError(str);
 		}
 
@@ -125,4 +126,3 @@ public:
 
 /*@}*/
 #endif // LANCZOS_OR_DAVIDSON_BASE_H
-

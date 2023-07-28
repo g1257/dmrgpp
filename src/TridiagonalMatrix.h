@@ -79,10 +79,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TRIDIAGONAL_MATRIX_H
 #include "Matrix.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename FieldType>
-class TridiagonalMatrix {
+template <typename FieldType>
+class TridiagonalMatrix
+{
 
 	typedef typename Real<FieldType>::Type RealType;
 
@@ -94,26 +96,27 @@ public:
 	typedef typename Vector<RealType>::Type VectorRealType;
 	typedef FieldType value_type;
 
-	TridiagonalMatrix()  { }
+	TridiagonalMatrix() { }
 
-	template<typename IoInputType>
+	template <typename IoInputType>
 	TridiagonalMatrix(IoInputType& io)
 	{
-		io.read(a_,"#Avector");
-		io.read(b_,"#Bvector");
+		io.read(a_, "#Avector");
+		io.read(b_, "#Bvector");
 	}
 
-	template<typename IoOutputType>
+	template <typename IoOutputType>
 	void write(IoOutputType& io) const
 	{
-		io.write(a_,"#Avector");
-		io.write(b_,"#Bvector");
+		io.write(a_, "#Avector");
+		io.write(b_, "#Bvector");
 	}
 
-	void resize(SizeType n,FieldType value)
+	void resize(SizeType n, FieldType value)
 	{
 		resize(n);
-		for (SizeType i=0;i<n;i++) a_[i]=b_[i]=value;
+		for (SizeType i = 0; i < n; i++)
+			a_[i] = b_[i] = value;
 	}
 
 	void resize(SizeType n)
@@ -147,10 +150,11 @@ public:
 		return b_[i];
 	}
 
-	template<typename SomeMatrixType>
+	template <typename SomeMatrixType>
 	void buildDenseMatrix(SomeMatrixType& m, SizeType n = 0) const
 	{
-		if (n == 0) n = a_.size();
+		if (n == 0)
+			n = a_.size();
 		m.resize(n, n, 0);
 		for (SizeType i = 0; i < n - 1; ++i) {
 			m(i, i) = a_[i];
@@ -158,7 +162,7 @@ public:
 			m(i + 1, i) = PsimagLite::conj(b_[i + 1]);
 		}
 
-		m(n - 1, n - 1) = a_[n-1];
+		m(n - 1, n - 1) = a_[n - 1];
 	}
 
 	void diag(VectorRealType& eigs, SizeType nn) const
@@ -169,7 +173,7 @@ public:
 			ground(eigs, nn);
 	}
 
-	void push(const FieldType& a,const FieldType& b)
+	void push(const FieldType& a, const FieldType& b)
 	{
 		a_.push_back(a);
 		b_.push_back(b);
@@ -197,31 +201,33 @@ private:
 		}
 
 		RealType s = 0;
-		long int intCounter=0;
+		long int intCounter = 0;
 		int m = 0;
 		int l = 0;
 		for (; l < n; l++) {
 			do {
 				intCounter++;
 				if (intCounter > maxCounter) {
-					std::cerr<<"lanczos: ground: premature exit ";
-					std::cerr<<"(may indicate an internal error)\n";
+					std::cerr << "lanczos: ground: "
+						     "premature exit ";
+					std::cerr << "(may indicate an "
+						     "internal error)\n";
 					break;
 				}
 
 				for (m = l; m < n - 1; m++) {
 					RealType dd = fabs(groundD[m]) + fabs(groundD[m + 1]);
-					if ((fabs(groundE_[m]) + dd) == dd) break;
+					if ((fabs(groundE_[m]) + dd) == dd)
+						break;
 				}
 
 				if (m != l) {
-					RealType g = (groundD[l + 1] - groundD[l])/(2.0*groundE_[l]);
-					RealType r = sqrt(g*g + 1.0);
-					g = groundD[m] - groundD[l] + groundE_[l]/
-					        (g + (g >= 0 ? fabs(r) : -fabs(r)));
+					RealType g = (groundD[l + 1] - groundD[l]) / (2.0 * groundE_[l]);
+					RealType r = sqrt(g * g + 1.0);
+					g = groundD[m] - groundD[l] + groundE_[l] / (g + (g >= 0 ? fabs(r) : -fabs(r)));
 					RealType p = 0.0;
 					RealType c = 1.0;
-					int i = m -1;
+					int i = m - 1;
 					for (s = 1.0; i >= l; i--) {
 						RealType f = s * groundE_[i];
 						RealType h = c * groundE_[i];
@@ -240,7 +246,8 @@ private:
 						g = c * r - h;
 					}
 
-					if (r == 0.0 && i >= l) continue;
+					if (r == 0.0 && i >= l)
+						continue;
 					groundD[l] -= p;
 					groundE_[l] = g;
 					groundE_[m] = 0.0;
@@ -270,4 +277,3 @@ private:
 
 /*@}*/
 #endif
-

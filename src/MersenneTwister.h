@@ -1,13 +1,15 @@
 #ifndef MERSENNETWISTER_H
 #define MERSENNETWISTER_H
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class MersenneTwister {
+class MersenneTwister
+{
 
 public:
 
-	MersenneTwister(unsigned,int,int);
+	MersenneTwister(unsigned, int, int);
 
 	MersenneTwister(unsigned);
 
@@ -15,7 +17,7 @@ public:
 
 	unsigned random();
 
-	double operator() ();
+	double operator()();
 
 	static unsigned max() { return keepLast32BitMask_; }
 
@@ -47,4 +49,3 @@ private:
  */
 
 #endif // MERSENNETWISTER_H
-

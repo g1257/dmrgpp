@@ -39,7 +39,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -85,89 +85,95 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include <cassert>
 
-namespace PsimagLite {
-	
-	template<typename CrsMatrixType>
-	class SparseRowCached {
+namespace PsimagLite
+{
 
-	public:
+template <typename CrsMatrixType>
+class SparseRowCached
+{
 
-		typedef typename CrsMatrixType::value_type ValueType;
-		typedef typename Vector<SizeType>::Type ColumnsType;
-		typedef typename Vector<ValueType>::Type VectorType;
-	
-		SparseRowCached(SizeType cacheSize)
-		: cols_(cacheSize),values_(cacheSize),counter_(0)
-		{}
+public:
 
-		void add(SizeType col,ValueType value)
-		{
-/*			cols_.push_back(col);
-			values_.push_back(value);*/
-			SizeType cacheSize = cols_.size();
-			if (counter_>=cacheSize) {
-				cacheSize *= 2;
-				cols_.resize(cacheSize);
-				values_.resize(cacheSize);
-			}
+	typedef typename CrsMatrixType::value_type ValueType;
+	typedef typename Vector<SizeType>::Type ColumnsType;
+	typedef typename Vector<ValueType>::Type VectorType;
 
-			cols_[counter_]=col;
-			values_[counter_]=value;
-			counter_++;
+	SparseRowCached(SizeType cacheSize)
+	    : cols_(cacheSize)
+	    , values_(cacheSize)
+	    , counter_(0)
+	{
+	}
+
+	void add(SizeType col, ValueType value)
+	{
+		/*			cols_.push_back(col);
+					values_.push_back(value);*/
+		SizeType cacheSize = cols_.size();
+		if (counter_ >= cacheSize) {
+			cacheSize *= 2;
+			cols_.resize(cacheSize);
+			values_.resize(cacheSize);
 		}
 
-		ValueType matrixVectorProduct(const VectorType& y)
-		{
-			ValueType sum = 0;
-			for (SizeType i=0;i<counter_;i++)
-				sum += values_[i]*y[cols_[i]];
-			counter_=0;
-			return sum;
-		}
-//		void clear()
-//		{
-//			cols_.clear();
-//			values_.clear();
-//		}
+		cols_[counter_] = col;
+		values_[counter_] = value;
+		counter_++;
+	}
 
-		SizeType finalize(CrsMatrixType& matrix)
-		{
-			//assert(cols_.size()==values_.size());
-			if (counter_==0) return 0;
+	ValueType matrixVectorProduct(const VectorType& y)
+	{
+		ValueType sum = 0;
+		for (SizeType i = 0; i < counter_; i++)
+			sum += values_[i] * y[cols_[i]];
+		counter_ = 0;
+		return sum;
+	}
+	//		void clear()
+	//		{
+	//			cols_.clear();
+	//			values_.clear();
+	//		}
 
-			Sort<ColumnsType> s;
-			ColumnsType iperm(counter_);
-			s.sort(cols_,iperm,counter_);
-			SizeType prevCol = cols_[0];
-			SizeType counter = 0;
-			ValueType value = 0;
-			for (SizeType i=0;i<counter_;i++) {
-				if (cols_[i]==prevCol) {
-					value += values_[iperm[i]];
-					continue;
-				}
-				matrix.pushCol(prevCol);
-				matrix.pushValue(value);
-				counter++;
-				value = values_[iperm[i]];
-				prevCol = cols_[i];
+	SizeType finalize(CrsMatrixType& matrix)
+	{
+		// assert(cols_.size()==values_.size());
+		if (counter_ == 0)
+			return 0;
+
+		Sort<ColumnsType> s;
+		ColumnsType iperm(counter_);
+		s.sort(cols_, iperm, counter_);
+		SizeType prevCol = cols_[0];
+		SizeType counter = 0;
+		ValueType value = 0;
+		for (SizeType i = 0; i < counter_; i++) {
+			if (cols_[i] == prevCol) {
+				value += values_[iperm[i]];
+				continue;
 			}
 			matrix.pushCol(prevCol);
 			matrix.pushValue(value);
 			counter++;
-			counter_=0;
-			return counter;
+			value = values_[iperm[i]];
+			prevCol = cols_[i];
 		}
+		matrix.pushCol(prevCol);
+		matrix.pushValue(value);
+		counter++;
+		counter_ = 0;
+		return counter;
+	}
 
-	private:
+private:
 
-		ColumnsType cols_;
-		typename Vector<ValueType>::Type values_;
-		SizeType counter_;
-			
-	}; // class SparseRowCached
+	ColumnsType cols_;
+	typename Vector<ValueType>::Type values_;
+	SizeType counter_;
 
-} // namespace Dmrg 
+}; // class SparseRowCached
+
+} // namespace PsimagLite
 
 /*@}*/
 #endif // SPARSE_ROW_CACHED_H

@@ -1,39 +1,31 @@
 // To be included by Mpi.cpp ONLY
 #include "MpiNo.h"
 
-namespace PsimagLite {
-
-namespace MPI {
-
-int COMM_WORLD = 0;
-int SUM = 0;
-
-void init(int*, char ***) {}
-
-void finalize() {}
-
-SizeType commSize(CommType)
+namespace PsimagLite
 {
-	return 1;
-}
 
-SizeType commRank(CommType)
+namespace MPI
 {
-	return 0;
-}
 
-int barrier(CommType)
-{
-	return 0;
-}
+	int COMM_WORLD = 0;
+	int SUM = 0;
 
-bool hasMpi() { return false; }
+	void init(int*, char***) { }
 
-void info(std::ostream&) {}
+	void finalize() { }
 
-void version(std::ostream&) {}
+	SizeType commSize(CommType) { return 1; }
+
+	SizeType commRank(CommType) { return 0; }
+
+	int barrier(CommType) { return 0; }
+
+	bool hasMpi() { return false; }
+
+	void info(std::ostream&) { }
+
+	void version(std::ostream&) { }
 
 } // namespace MPI
 
 } // namespace PsimagLite
-

@@ -82,38 +82,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef DAVIDSON_SOLVER_H
 #define DAVIDSON_SOLVER_H
-#include "LanczosVectors.h"
-#include "ProgressIndicator.h"
-#include "TridiagonalMatrix.h"
-#include <cassert>
-#include "Vector.h"
-#include "Matrix.h"
-#include "Random48.h"
 #include "LanczosOrDavidsonBase.h"
+#include "LanczosVectors.h"
+#include "Matrix.h"
+#include "ProgressIndicator.h"
+#include "Random48.h"
+#include "TridiagonalMatrix.h"
+#include "Vector.h"
+#include <cassert>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename SolverParametersType,typename MatrixType,typename VectorType>
-class DavidsonSolver : public LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> {
+template <typename SolverParametersType, typename MatrixType, typename VectorType>
+class DavidsonSolver
+    : public LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType>
+{
 
 	typedef typename SolverParametersType::RealType RealType;
-	typedef LanczosOrDavidsonBase<SolverParametersType,MatrixType,VectorType> BaseType;
+	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType>
+	    BaseType;
 	typedef typename VectorType::value_type ComplexOrRealType;
 	typedef typename BaseType::VectorRealType VectorRealType;
 	typedef typename BaseType::VectorVectorType VectorVectorType;
 
 public:
 
-	DavidsonSolver(MatrixType const &mat,
-	               const SolverParametersType& params)
-	    : progress_("DavidsonSolver"),
-	      mat_(mat),
-	      steps_(params.steps),
-	      eps_(params.tolerance)
+	DavidsonSolver(MatrixType const& mat,
+	    const SolverParametersType& params)
+	    : progress_("DavidsonSolver")
+	    , mat_(mat)
+	    , steps_(params.steps)
+	    , eps_(params.tolerance)
 	{
 		OstringStream msg(std::cout.precision());
-		msg()<<"Constructing... mat.rank="<<mat_.rows();
-		msg()<<" steps="<<steps_<<" eps="<<eps_;
+		msg() << "Constructing... mat.rank=" << mat_.rows();
+		msg() << " steps=" << steps_ << " eps=" << eps_;
 		progress_.printline(msg, std::cout);
 	}
 
@@ -124,10 +128,7 @@ public:
 		throw RuntimeError(s.c_str());
 	}
 
-	void computeAllStatesBelow(VectorRealType&,
-	                           VectorVectorType&,
-	                           const VectorType&,
-	                           SizeType)
+	void computeAllStatesBelow(VectorRealType&, VectorVectorType&, const VectorType&, SizeType)
 	{
 		String s(__FILE__);
 		s += " Unimplemented\n";
@@ -136,21 +137,24 @@ public:
 
 private:
 
-	void algorithm4_14(VectorType& t,const typename Vector<VectorType>::Type& v)
+	void algorithm4_14(VectorType& t,
+	    const typename Vector<VectorType>::Type& v)
 	{
 		SizeType m = v.size();
-		if (m==0) return;
+		if (m == 0)
+			return;
 		// select a value for k less than 1
 		RealType k = 0.25;
-		RealType tauin= PsimagLite::real(t*t);
-		for (SizeType i=0;i<m;i++) {
-			ComplexOrRealType tmp = scalarProduct(v[i],t);
-			t=t-tmp*t;
+		RealType tauin = PsimagLite::real(t * t);
+		for (SizeType i = 0; i < m; i++) {
+			ComplexOrRealType tmp = scalarProduct(v[i], t);
+			t = t - tmp * t;
 		}
-		if (PsimagLite::real(t*t)/tauin>k) return;
-		for (SizeType i=0;i<m;i++) {
-			ComplexOrRealType tmp = scalarProduct(v[i],t);
-			t=t-tmp*v[i];
+		if (PsimagLite::real(t * t) / tauin > k)
+			return;
+		for (SizeType i = 0; i < m; i++) {
+			ComplexOrRealType tmp = scalarProduct(v[i], t);
+			t = t - tmp * v[i];
 		}
 	}
 
@@ -161,9 +165,7 @@ private:
 		throw RuntimeError(s.c_str());
 	}
 
-	void largestEigenpair(RealType& theta,
-	                      VectorType& s,
-	                      const Matrix<ComplexOrRealType>& M)
+	void largestEigenpair(RealType& theta, VectorType& s, const Matrix<ComplexOrRealType>& M)
 	{
 		String st(__FILE__);
 		st += " Unimplemented\n";
@@ -179,4 +181,3 @@ private:
 
 /*@}*/
 #endif // DAVIDSON_SOLVER_H
-

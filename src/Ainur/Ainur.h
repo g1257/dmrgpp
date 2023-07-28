@@ -7,5 +7,4 @@
 #include "AinurEmpty.h"
 #endif
 
-
 #endif // _AINUR_H_

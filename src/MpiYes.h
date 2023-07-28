@@ -78,388 +78,400 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef MPIYES_HEADER_H
 #define MPIYES_HEADER_H
-#include <stdexcept>
-#include <algorithm>
-#include "Vector.h"
-#include <mpi.h>
 #include "../loki/TypeTraits.h"
+#include "Vector.h"
+#include <algorithm>
+#include <mpi.h>
+#include <stdexcept>
 
-namespace PsimagLite {
-
-namespace MPI {
-
-typedef MPI_Comm CommType;
-extern CommType COMM_WORLD;
-
-template<typename T>
-struct MpiData
+namespace PsimagLite
 {
-	static const MPI_Datatype Type;
-};
 
-void checkError(int errorCode,String caller,CommType comm = COMM_WORLD);
-
-void init(int* argc, char **argv[]);
-
-void finalize();
-
-bool hasMpi();
-
-void info(std::ostream&);
-
-void version(std::ostream&);
-
-SizeType commSize(CommType mpiComm);
-
-SizeType commRank(CommType mpiComm);
-
-int barrier(CommType);
-
-template<typename NumericType>
-typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
-void>::Type recv(NumericType& v,int source, int tag, CommType mpiComm = COMM_WORLD)
+namespace MPI
 {
-	String name = "MPI_Recv";
-	MPI_Datatype datatype = MpiData<NumericType>::Type;
-	MPI_Status status;
-	int errorCode = MPI_Recv(&v,1,datatype,source,tag,mpiComm,&status);
-	checkError(errorCode,name,mpiComm);
-}
 
-template<typename T1,typename T2>
-void recv(std::pair<T1,T2>& p,int source, int tag, CommType mpiComm = COMM_WORLD)
-{
-	recv(p.first,source,tag,mpiComm);
-	recv(p.second,source,2*tag,mpiComm);
-}
+	typedef MPI_Comm CommType;
+	extern CommType COMM_WORLD;
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
-void>::Type recv(SomeVectorType& v,int source, int tag, CommType mpiComm = COMM_WORLD)
-{
-	typedef typename SomeVectorType::value_type NumericType;
-	String name = "MPI_Send";
-	MPI_Datatype datatype = MpiData<NumericType>::Type;
-	MPI_Status status;
-	SizeType total = v.size();
-	recv(total,source,tag,mpiComm);
-	if (v.size() != total) v.resize(total);
-	int errorCode = MPI_Recv(&(v[0]),v.size(),datatype,source,tag,mpiComm,&status);
-	checkError(errorCode,name,mpiComm);
-}
+	template <typename T>
+	struct MpiData {
+		static const MPI_Datatype Type;
+	};
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-IsComplexNumber<typename SomeVectorType::value_type>::True,
-void>::Type recv(SomeVectorType& v,int source, int tag, CommType mpiComm = COMM_WORLD)
-{
-	typedef typename SomeVectorType::value_type NumericType;
-	String name = "MPI_Send";
-	MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
-	MPI_Status status;
-	SizeType total = v.size();
-	recv(total,source,tag,mpiComm);
-	if (v.size() != total) v.resize(total);
-	int errorCode = MPI_Recv(&(v[0]),2*v.size(),datatype,source,tag,mpiComm,&status);
-	checkError(errorCode,name,mpiComm);
-}
+	void checkError(int errorCode, String caller, CommType comm = COMM_WORLD);
 
-template<typename NumericType>
-typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
-void>::Type send(NumericType& v,int dest, int tag, CommType mpiComm = COMM_WORLD)
-{
-	String name = "MPI_Send";
-	MPI_Datatype datatype = MpiData<NumericType>::Type;
-	int errorCode = MPI_Send(&v,1,datatype,dest,tag,mpiComm);
-	checkError(errorCode,name,mpiComm);
-}
+	void init(int* argc, char** argv[]);
 
-template<typename T1,typename T2>
-void send(std::pair<T1,T2>& p,int dest, int tag, CommType mpiComm = COMM_WORLD)
-{
-	send(p.first,dest,tag,mpiComm);
-	send(p.second,dest,2*tag,mpiComm);
-}
+	void finalize();
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
-void>::Type send(SomeVectorType& v,int dest, int tag, CommType mpiComm = COMM_WORLD)
-{
-	typedef typename SomeVectorType::value_type NumericType;
-	String name = "MPI_Send";
-	MPI_Datatype datatype = MpiData<NumericType>::Type;
-	int total = v.size();
-	send(total,dest,tag,mpiComm);
-	int errorCode = MPI_Send(&(v[0]),v.size(),datatype,dest,tag,mpiComm);
-	checkError(errorCode,name,mpiComm);
-}
+	bool hasMpi();
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-IsComplexNumber<typename SomeVectorType::value_type>::True,
-void>::Type send(SomeVectorType& v,int dest, int tag, CommType mpiComm = COMM_WORLD)
-{
-	typedef typename SomeVectorType::value_type NumericType;
-	String name = "MPI_Send";
-	MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
-	int total = v.size();
-	send(total,dest,tag,mpiComm);
-	int errorCode = MPI_Send(&(v[0]),2*v.size(),datatype,dest,tag,mpiComm);
-	checkError(errorCode,name,mpiComm);
-}
+	void info(std::ostream&);
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-(Loki::TypeTraits<typename SomeVectorType::value_type>::isArith |
- IsVectorLike<typename SomeVectorType::value_type>::True),
-void>::Type pointByPointGather(SomeVectorType& v,
-                               int root = 0,
-                               CommType mpiComm = COMM_WORLD)
-{
-	typedef typename SomeVectorType::value_type NumericType;
-	int mpiRank = MPI::commRank(mpiComm);
-	int nprocs = MPI::commSize(mpiComm);
-	SizeType blockSize = static_cast<SizeType>(v.size()/nprocs);
-	if (v.size() % nprocs != 0) blockSize++;
+	void version(std::ostream&);
 
-	if (mpiRank != root) {
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType taskNumber = mpiRank*blockSize + p;
-			if (taskNumber >= v.size()) break;
-			MPI::send(v[taskNumber],0,taskNumber);
-		}
-	} else {
-		for (int r=0;r<nprocs;r++) {
-			if (r == root) continue;
-			for (SizeType p=0;p<blockSize;p++) {
-				SizeType taskNumber = r*blockSize + p;
-				if (taskNumber >= v.size()) break;
-				NumericType value;
-				MPI::recv(value,r,taskNumber);
-				v[taskNumber] = value;
+	SizeType commSize(CommType mpiComm);
+
+	SizeType commRank(CommType mpiComm);
+
+	int barrier(CommType);
+
+	template <typename NumericType>
+	typename EnableIf<Loki::TypeTraits<NumericType>::isArith, void>::Type
+	recv(NumericType& v, int source, int tag, CommType mpiComm = COMM_WORLD)
+	{
+		String name = "MPI_Recv";
+		MPI_Datatype datatype = MpiData<NumericType>::Type;
+		MPI_Status status;
+		int errorCode = MPI_Recv(&v, 1, datatype, source, tag, mpiComm, &status);
+		checkError(errorCode, name, mpiComm);
+	}
+
+	template <typename T1, typename T2>
+	void recv(std::pair<T1, T2>& p, int source, int tag, CommType mpiComm = COMM_WORLD)
+	{
+		recv(p.first, source, tag, mpiComm);
+		recv(p.second, source, 2 * tag, mpiComm);
+	}
+
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
+	    void>::Type
+	recv(SomeVectorType& v, int source, int tag, CommType mpiComm = COMM_WORLD)
+	{
+		typedef typename SomeVectorType::value_type NumericType;
+		String name = "MPI_Send";
+		MPI_Datatype datatype = MpiData<NumericType>::Type;
+		MPI_Status status;
+		SizeType total = v.size();
+		recv(total, source, tag, mpiComm);
+		if (v.size() != total)
+			v.resize(total);
+		int errorCode = MPI_Recv(&(v[0]), v.size(), datatype, source, tag, mpiComm, &status);
+		checkError(errorCode, name, mpiComm);
+	}
+
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & IsComplexNumber<typename SomeVectorType::value_type>::True,
+	    void>::Type
+	recv(SomeVectorType& v, int source, int tag, CommType mpiComm = COMM_WORLD)
+	{
+		typedef typename SomeVectorType::value_type NumericType;
+		String name = "MPI_Send";
+		MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
+		MPI_Status status;
+		SizeType total = v.size();
+		recv(total, source, tag, mpiComm);
+		if (v.size() != total)
+			v.resize(total);
+		int errorCode = MPI_Recv(&(v[0]), 2 * v.size(), datatype, source, tag, mpiComm, &status);
+		checkError(errorCode, name, mpiComm);
+	}
+
+	template <typename NumericType>
+	typename EnableIf<Loki::TypeTraits<NumericType>::isArith, void>::Type
+	send(NumericType& v, int dest, int tag, CommType mpiComm = COMM_WORLD)
+	{
+		String name = "MPI_Send";
+		MPI_Datatype datatype = MpiData<NumericType>::Type;
+		int errorCode = MPI_Send(&v, 1, datatype, dest, tag, mpiComm);
+		checkError(errorCode, name, mpiComm);
+	}
+
+	template <typename T1, typename T2>
+	void send(std::pair<T1, T2>& p, int dest, int tag, CommType mpiComm = COMM_WORLD)
+	{
+		send(p.first, dest, tag, mpiComm);
+		send(p.second, dest, 2 * tag, mpiComm);
+	}
+
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
+	    void>::Type
+	send(SomeVectorType& v, int dest, int tag, CommType mpiComm = COMM_WORLD)
+	{
+		typedef typename SomeVectorType::value_type NumericType;
+		String name = "MPI_Send";
+		MPI_Datatype datatype = MpiData<NumericType>::Type;
+		int total = v.size();
+		send(total, dest, tag, mpiComm);
+		int errorCode = MPI_Send(&(v[0]), v.size(), datatype, dest, tag, mpiComm);
+		checkError(errorCode, name, mpiComm);
+	}
+
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & IsComplexNumber<typename SomeVectorType::value_type>::True,
+	    void>::Type
+	send(SomeVectorType& v, int dest, int tag, CommType mpiComm = COMM_WORLD)
+	{
+		typedef typename SomeVectorType::value_type NumericType;
+		String name = "MPI_Send";
+		MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
+		int total = v.size();
+		send(total, dest, tag, mpiComm);
+		int errorCode = MPI_Send(&(v[0]), 2 * v.size(), datatype, dest, tag, mpiComm);
+		checkError(errorCode, name, mpiComm);
+	}
+
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True&(
+		Loki::TypeTraits<typename SomeVectorType::value_type>::isArith | IsVectorLike<typename SomeVectorType::value_type>::True),
+	    void>::Type
+	pointByPointGather(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		typedef typename SomeVectorType::value_type NumericType;
+		int mpiRank = MPI::commRank(mpiComm);
+		int nprocs = MPI::commSize(mpiComm);
+		SizeType blockSize = static_cast<SizeType>(v.size() / nprocs);
+		if (v.size() % nprocs != 0)
+			blockSize++;
+
+		if (mpiRank != root) {
+			for (SizeType p = 0; p < blockSize; p++) {
+				SizeType taskNumber = mpiRank * blockSize + p;
+				if (taskNumber >= v.size())
+					break;
+				MPI::send(v[taskNumber], 0, taskNumber);
+			}
+		} else {
+			for (int r = 0; r < nprocs; r++) {
+				if (r == root)
+					continue;
+				for (SizeType p = 0; p < blockSize; p++) {
+					SizeType taskNumber = r * blockSize + p;
+					if (taskNumber >= v.size())
+						break;
+					NumericType value;
+					MPI::recv(value, r, taskNumber);
+					v[taskNumber] = value;
+				}
 			}
 		}
 	}
-}
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-!IsVectorLike<typename SomeVectorType::value_type>::True &
-!Loki::TypeTraits<typename SomeVectorType::value_type>::isArith &
-!IsPairLike<typename SomeVectorType::value_type>::True,
-void>::Type pointByPointGather(SomeVectorType& v,
-                               int root = 0,
-                               CommType mpiComm = COMM_WORLD)
-{
-	int mpiRank = MPI::commRank(mpiComm);
-	int nprocs = MPI::commSize(mpiComm);
-	SizeType blockSize = static_cast<SizeType>(v.size()/nprocs);
-	if (v.size() % nprocs != 0) blockSize++;
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & !IsVectorLike<typename SomeVectorType::value_type>::True & !Loki::TypeTraits<typename SomeVectorType::value_type>::isArith & !IsPairLike<typename SomeVectorType::value_type>::True,
+	    void>::Type
+	pointByPointGather(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		int mpiRank = MPI::commRank(mpiComm);
+		int nprocs = MPI::commSize(mpiComm);
+		SizeType blockSize = static_cast<SizeType>(v.size() / nprocs);
+		if (v.size() % nprocs != 0)
+			blockSize++;
 
-	if (mpiRank != root) {
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType taskNumber = mpiRank*blockSize + p;
-			if (taskNumber >= v.size()) break;
-			v[taskNumber].send(0,taskNumber,mpiComm);
-		}
-	} else {
-		for (int r=0;r<nprocs;r++) {
-			if (r == root) continue;
-			for (SizeType p=0;p<blockSize;p++) {
-				SizeType taskNumber = r*blockSize + p;
-				if (taskNumber >= v.size()) break;
-				v[taskNumber].recv(r,taskNumber,mpiComm);
+		if (mpiRank != root) {
+			for (SizeType p = 0; p < blockSize; p++) {
+				SizeType taskNumber = mpiRank * blockSize + p;
+				if (taskNumber >= v.size())
+					break;
+				v[taskNumber].send(0, taskNumber, mpiComm);
+			}
+		} else {
+			for (int r = 0; r < nprocs; r++) {
+				if (r == root)
+					continue;
+				for (SizeType p = 0; p < blockSize; p++) {
+					SizeType taskNumber = r * blockSize + p;
+					if (taskNumber >= v.size())
+						break;
+					v[taskNumber].recv(r, taskNumber, mpiComm);
+				}
 			}
 		}
 	}
-}
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-IsPairLike<typename SomeVectorType::value_type>::True,
-void>::Type pointByPointGather(SomeVectorType& v,
-                               int root = 0,
-                               CommType mpiComm = COMM_WORLD)
-{
-	int mpiRank = MPI::commRank(mpiComm);
-	int nprocs = MPI::commSize(mpiComm);
-	SizeType blockSize = static_cast<SizeType>(v.size()/nprocs);
-	if (v.size() % nprocs != 0) blockSize++;
+	template <typename SomeVectorType>
+	typename EnableIf<IsVectorLike<SomeVectorType>::True & IsPairLike<typename SomeVectorType::value_type>::True,
+	    void>::Type
+	pointByPointGather(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		int mpiRank = MPI::commRank(mpiComm);
+		int nprocs = MPI::commSize(mpiComm);
+		SizeType blockSize = static_cast<SizeType>(v.size() / nprocs);
+		if (v.size() % nprocs != 0)
+			blockSize++;
 
-	if (mpiRank != root) {
-		for (SizeType p=0;p<blockSize;p++) {
-			SizeType taskNumber = mpiRank*blockSize + p;
-			if (taskNumber >= v.size()) break;
-			send(v[taskNumber],0,taskNumber,mpiComm);
-		}
-	} else {
-		for (int r=0;r<nprocs;r++) {
-			if (r == root) continue;
-			for (SizeType p=0;p<blockSize;p++) {
-				SizeType taskNumber = r*blockSize + p;
-				if (taskNumber >= v.size()) break;
-				recv(v[taskNumber],r,taskNumber,mpiComm);
+		if (mpiRank != root) {
+			for (SizeType p = 0; p < blockSize; p++) {
+				SizeType taskNumber = mpiRank * blockSize + p;
+				if (taskNumber >= v.size())
+					break;
+				send(v[taskNumber], 0, taskNumber, mpiComm);
+			}
+		} else {
+			for (int r = 0; r < nprocs; r++) {
+				if (r == root)
+					continue;
+				for (SizeType p = 0; p < blockSize; p++) {
+					SizeType taskNumber = r * blockSize + p;
+					if (taskNumber >= v.size())
+						break;
+					recv(v[taskNumber], r, taskNumber, mpiComm);
+				}
 			}
 		}
 	}
-}
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-IsVectorLike<typename SomeVectorType::value_type>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type::value_type>::isArith,
-void>::Type bcast(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
-{
-	typedef typename SomeVectorType::value_type DataType;
-	String name = "MPI_Bcast";
-	for (SizeType i=0;i<v.size();i++) {
-		DataType& vv = v[i];
-		int total = vv.size();
-		int errorCode = MPI_Bcast(&total,1,MPI_INTEGER,root,mpiComm);
-		checkError(errorCode,name,mpiComm);
-		if (static_cast<SizeType>(total) != vv.size()) vv.resize(total);
-		MPI_Datatype datatype = MpiData<typename DataType::value_type>::Type;
-		errorCode = MPI_Bcast(&(vv[0]),vv.size(),datatype,root,mpiComm);
-		checkError(errorCode,name,mpiComm);
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & IsVectorLike<typename SomeVectorType::value_type>::True & Loki::TypeTraits<typename SomeVectorType::value_type::value_type>::isArith,
+	    void>::Type
+	bcast(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		typedef typename SomeVectorType::value_type DataType;
+		String name = "MPI_Bcast";
+		for (SizeType i = 0; i < v.size(); i++) {
+			DataType& vv = v[i];
+			int total = vv.size();
+			int errorCode = MPI_Bcast(&total, 1, MPI_INTEGER, root, mpiComm);
+			checkError(errorCode, name, mpiComm);
+			if (static_cast<SizeType>(total) != vv.size())
+				vv.resize(total);
+			MPI_Datatype datatype = MpiData<typename DataType::value_type>::Type;
+			errorCode = MPI_Bcast(&(vv[0]), vv.size(), datatype, root, mpiComm);
+			checkError(errorCode, name, mpiComm);
+		}
 	}
-}
 
-template<typename NumericType>
-typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
-void>::Type bcast(NumericType& v,int root = 0, CommType mpiComm = COMM_WORLD)
-{
-	MPI_Datatype datatype = MpiData<NumericType>::Type;
-	int errorCode = MPI_Bcast(&v,1,datatype,root,mpiComm);
-	checkError(errorCode,"MPI_Bcast",mpiComm);
-}
-
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
-void>::Type bcast(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
-{
-	SizeType total = v.size();
-	bcast(total,root,mpiComm);
-	if (total != v.size()) v.resize(total,0);
-	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
-	int errorCode = MPI_Bcast(&(v[0]),v.size(),datatype,root,mpiComm);
-	checkError(errorCode,"MPI_Bcast",mpiComm);
-}
-
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-IsComplexNumber<typename SomeVectorType::value_type>::True,
-void>::Type bcast(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
-{
-	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
-	int errorCode = MPI_Bcast(&(v[0]),2*v.size(),datatype,root,mpiComm);
-	checkError(errorCode,"MPI_Bcast",mpiComm);
-}
-
-template<typename T1,typename T2>
-typename EnableIf<Loki::TypeTraits<T1>::isArith &
-Loki::TypeTraits<T2>::isArith,
-void>::Type bcast(std::pair<T1,T2>& p,int root = 0, CommType mpiComm = COMM_WORLD)
-{
-	T1 t1 = p.first;
-	MPI_Datatype datatype = MpiData<T1>::Type;
-	int errorCode = MPI_Bcast(&t1,1,datatype,root,mpiComm);
-
-	T2 t2 = p.second;
-	MPI_Datatype datatype2 = MpiData<T2>::Type;
-	errorCode = MPI_Bcast(&t2,1,datatype2,root,mpiComm);
-
-	p = std::pair<T1,T2>(t1,t2);
-}
-
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-!IsVectorLike<typename SomeVectorType::value_type>::True &
-!Loki::TypeTraits<typename SomeVectorType::value_type>::isArith &
-!IsComplexNumber<typename SomeVectorType::value_type>::True,
-void>::Type bcast(SomeVectorType& v,int root = 0, CommType mpiComm = COMM_WORLD)
-{
-	for (SizeType i=0;i<v.size();i++) {
-		v[i].bcast(root,mpiComm);
+	template <typename NumericType>
+	typename EnableIf<Loki::TypeTraits<NumericType>::isArith, void>::Type
+	bcast(NumericType& v, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		MPI_Datatype datatype = MpiData<NumericType>::Type;
+		int errorCode = MPI_Bcast(&v, 1, datatype, root, mpiComm);
+		checkError(errorCode, "MPI_Bcast", mpiComm);
 	}
-}
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
-void>::Type reduce(SomeVectorType& v,
-                   MPI_Op op = MPI_SUM,
-                   int root = 0,
-                   CommType mpiComm = COMM_WORLD)
-{
-	SomeVectorType w(v.size());
-	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
-	int errorCode = (mpiComm == 0) ? MPI_SUCCESS :
-	                 MPI_Reduce(&(v[0]),&(w[0]),v.size(),datatype,op,root,mpiComm);
-	checkError(errorCode,"MPI_Reduce",mpiComm);
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
+	    void>::Type
+	bcast(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		SizeType total = v.size();
+		bcast(total, root, mpiComm);
+		if (total != v.size())
+			v.resize(total, 0);
+		MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
+		int errorCode = MPI_Bcast(&(v[0]), v.size(), datatype, root, mpiComm);
+		checkError(errorCode, "MPI_Bcast", mpiComm);
+	}
 
-	if (mpiComm && commRank(mpiComm) == static_cast<SizeType>(root))
-		v = w;
-}
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & IsComplexNumber<typename SomeVectorType::value_type>::True,
+	    void>::Type
+	bcast(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
+		int errorCode = MPI_Bcast(&(v[0]), 2 * v.size(), datatype, root, mpiComm);
+		checkError(errorCode, "MPI_Bcast", mpiComm);
+	}
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-IsComplexNumber<typename SomeVectorType::value_type>::True,
-void>::Type reduce(SomeVectorType& v,
-                   MPI_Op op = MPI_SUM,
-                   int root = 0,
-                   CommType mpiComm = COMM_WORLD)
-{
-	SomeVectorType w(v.size());
-	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
-	int errorCode = (mpiComm == 0) ? MPI_SUCCESS :
-	                 MPI_Reduce(&(v[0]),&(w[0]),2*v.size(),datatype,op,root,mpiComm);
-	checkError(errorCode,"MPI_Reduce",mpiComm);
+	template <typename T1, typename T2>
+	typename EnableIf<Loki::TypeTraits<T1>::isArith & Loki::TypeTraits<T2>::isArith,
+	    void>::Type
+	bcast(std::pair<T1, T2>& p, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		T1 t1 = p.first;
+		MPI_Datatype datatype = MpiData<T1>::Type;
+		int errorCode = MPI_Bcast(&t1, 1, datatype, root, mpiComm);
 
-	if (mpiComm && commRank(mpiComm) == static_cast<SizeType>(root))
-		v = w;
-}
+		T2 t2 = p.second;
+		MPI_Datatype datatype2 = MpiData<T2>::Type;
+		errorCode = MPI_Bcast(&t2, 1, datatype2, root, mpiComm);
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
-void>::Type allReduce(SomeVectorType& v,
-                      MPI_Op op = MPI_SUM,
-                      CommType mpiComm = COMM_WORLD)
-{
-	SomeVectorType recvbuf = v;
-	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
-	int errorCode = MPI_Allreduce(&(v[0]),&(recvbuf[0]),v.size(),datatype,op,mpiComm);
-	checkError(errorCode,"MPI_Allreduce",mpiComm);
-	v = recvbuf;
-}
+		p = std::pair<T1, T2>(t1, t2);
+	}
 
-template<typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True &
-IsComplexNumber<typename SomeVectorType::value_type>::True,
-void>::Type allReduce(SomeVectorType& v,
-                      MPI_Op op = MPI_SUM,
-                      CommType mpiComm = COMM_WORLD)
-{
-	SomeVectorType recvbuf = v;
-	MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
-	int errorCode = MPI_Allreduce(&(v[0]),&(recvbuf[0]),2*v.size(),datatype,op,mpiComm);
-	checkError(errorCode,"MPI_Allreduce",mpiComm);
-	v = recvbuf;
-}
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & !IsVectorLike<typename SomeVectorType::value_type>::True & !Loki::TypeTraits<typename SomeVectorType::value_type>::isArith & !IsComplexNumber<typename SomeVectorType::value_type>::True,
+	    void>::Type
+	bcast(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		for (SizeType i = 0; i < v.size(); i++) {
+			v[i].bcast(root, mpiComm);
+		}
+	}
 
-template<typename NumericType>
-typename EnableIf<Loki::TypeTraits<NumericType>::isArith,
-void>::Type allReduce(NumericType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
-{
-	int result = 0;
-	MPI_Datatype datatype = MpiData<NumericType>::Type;
-	int errorCode = MPI_Allreduce(&v,&result,1,datatype,op,mpiComm);
-	checkError(errorCode,"MPI_Allreduce",mpiComm);
-	v = result;
-}
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
+	    void>::Type
+	reduce(SomeVectorType& v, MPI_Op op = MPI_SUM, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		SomeVectorType w(v.size());
+		MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
+		int errorCode = (mpiComm == 0)
+		    ? MPI_SUCCESS
+		    : MPI_Reduce(&(v[0]), &(w[0]), v.size(), datatype, op, root, mpiComm);
+		checkError(errorCode, "MPI_Reduce", mpiComm);
+
+		if (mpiComm && commRank(mpiComm) == static_cast<SizeType>(root))
+			v = w;
+	}
+
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & IsComplexNumber<typename SomeVectorType::value_type>::True,
+	    void>::Type
+	reduce(SomeVectorType& v, MPI_Op op = MPI_SUM, int root = 0, CommType mpiComm = COMM_WORLD)
+	{
+		SomeVectorType w(v.size());
+		MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
+		int errorCode = (mpiComm == 0)
+		    ? MPI_SUCCESS
+		    : MPI_Reduce(&(v[0]), &(w[0]), 2 * v.size(), datatype, op, root, mpiComm);
+		checkError(errorCode, "MPI_Reduce", mpiComm);
+
+		if (mpiComm && commRank(mpiComm) == static_cast<SizeType>(root))
+			v = w;
+	}
+
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & Loki::TypeTraits<typename SomeVectorType::value_type>::isArith,
+	    void>::Type
+	allReduce(SomeVectorType& v, MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
+	{
+		SomeVectorType recvbuf = v;
+		MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type>::Type;
+		int errorCode = MPI_Allreduce(&(v[0]), &(recvbuf[0]), v.size(), datatype, op, mpiComm);
+		checkError(errorCode, "MPI_Allreduce", mpiComm);
+		v = recvbuf;
+	}
+
+	template <typename SomeVectorType>
+	typename EnableIf<
+	    IsVectorLike<SomeVectorType>::True & IsComplexNumber<typename SomeVectorType::value_type>::True,
+	    void>::Type
+	allReduce(SomeVectorType& v, MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
+	{
+		SomeVectorType recvbuf = v;
+		MPI_Datatype datatype = MpiData<typename SomeVectorType::value_type::value_type>::Type;
+		int errorCode = MPI_Allreduce(&(v[0]), &(recvbuf[0]), 2 * v.size(), datatype, op, mpiComm);
+		checkError(errorCode, "MPI_Allreduce", mpiComm);
+		v = recvbuf;
+	}
+
+	template <typename NumericType>
+	typename EnableIf<Loki::TypeTraits<NumericType>::isArith, void>::Type
+	allReduce(NumericType& v, MPI_Op op = MPI_SUM, CommType mpiComm = COMM_WORLD)
+	{
+		int result = 0;
+		MPI_Datatype datatype = MpiData<NumericType>::Type;
+		int errorCode = MPI_Allreduce(&v, &result, 1, datatype, op, mpiComm);
+		checkError(errorCode, "MPI_Allreduce", mpiComm);
+		v = result;
+	}
 
 } // namespace MPI
 
@@ -467,4 +479,3 @@ void>::Type allReduce(NumericType& v,MPI_Op op = MPI_SUM, CommType mpiComm = COM
 
 /*@}*/
 #endif
-

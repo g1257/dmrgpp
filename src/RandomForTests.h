@@ -9,7 +9,7 @@ THE SOFTWARE IS SUPPLIED BY THE COPYRIGHT HOLDERS AND
 CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
 WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-PARTICULAR PURPOSE ARE DISCLAIMED. 
+PARTICULAR PURPOSE ARE DISCLAIMED.
 
 Please see full open source license included in file LICENSE.
 *********************************************************
@@ -29,12 +29,14 @@ Please see full open source license included in file LICENSE.
 #define RANDOM_FOR_TESTS_H
 #include <cstdlib>
 #include <iostream>
-#include <string>
 #include <stdexcept>
+#include <string>
 
-namespace PsimagLite {
-template<typename T>
-class  RandomForTests {
+namespace PsimagLite
+{
+template <typename T>
+class RandomForTests
+{
 
 public:
 
@@ -43,13 +45,16 @@ public:
 
 	RandomForTests(int seed)
 	    : next_(seed)
-	{}
+	{
+	}
 
 	T operator()()
 	{
 		next_ = 16807 * (next_ % 127773) - 2836 * (next_ / 127773);
-		if (next_ <= 0) next_ += 2147483647;
-		if (next_ >= 2147483647) next_=1;
+		if (next_ <= 0)
+			next_ += 2147483647;
+		if (next_ >= 2147483647)
+			next_ = 1;
 		return static_cast<T>(next_) / 2147483647.0;
 	}
 
@@ -61,4 +66,3 @@ private:
 
 /*@}*/
 #endif // RANDOM_FOR_TESTS_H
-

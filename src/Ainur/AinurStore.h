@@ -1,25 +1,41 @@
 #ifndef AINURSTORE_H
 #define AINURSTORE_H
-#include "Vector.h"
 #include "AinurLexical.h"
+#include "Vector.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class Store {
+class Store
+{
 
 public:
 
 	typedef AinurLexical AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 
-	enum Type {UNKNOWN, SCALAR, VECTOR, MATRIX}; // HASH, FUNCTION
+	enum Type { UNKNOWN,
+		SCALAR,
+		VECTOR,
+		MATRIX }; // HASH, FUNCTION
 
-	enum SubType {UNDEFINED, INTEGER, REAL, COMPLEX, STRING, CHAR, GROUP};
+	enum SubType { UNDEFINED,
+		INTEGER,
+		REAL,
+		COMPLEX,
+		STRING,
+		CHAR,
+		GROUP };
 
-	enum Attribute {NONE, REQUIRED, CONST};
+	enum Attribute { NONE,
+		REQUIRED,
+		CONST };
 
 	Store(String s, String a)
-	    : type_(UNKNOWN), subType_(UNDEFINED), attr_(NONE), used_(0)
+	    : type_(UNKNOWN)
+	    , subType_(UNDEFINED)
+	    , attr_(NONE)
+	    , used_(0)
 	{
 		setTypeOf(s);
 		if (a != "")
@@ -40,7 +56,8 @@ public:
 			setMatrixValue(rhs, name);
 			break;
 		default:
-			std::cerr<<"setRhs not implemented, rhs= "<<rhs<<"\n";
+			std::cerr << "setRhs not implemented, rhs= " << rhs
+				  << "\n";
 			break;
 		}
 	}
@@ -83,7 +100,8 @@ private:
 
 		VectorStringType words;
 		split(words, s, ".");
-		if (words.size() == 0) return;
+		if (words.size() == 0)
+			return;
 
 		if (words[0] == "vector") {
 			type_ = VECTOR;
@@ -102,12 +120,18 @@ private:
 
 	static SubType subTypeFromString(String s)
 	{
-		if (s == "integer") return INTEGER;
-		if (s == "real") return REAL;
-		if (s == "complex") return COMPLEX;
-		if (s == "char") return CHAR;
-		if (s == "string") return STRING;
-		if (s == "group") return GROUP;
+		if (s == "integer")
+			return INTEGER;
+		if (s == "real")
+			return REAL;
+		if (s == "complex")
+			return COMPLEX;
+		if (s == "char")
+			return CHAR;
+		if (s == "string")
+			return STRING;
+		if (s == "group")
+			return GROUP;
 		return UNDEFINED;
 	}
 
@@ -136,7 +160,7 @@ private:
 		if (rhs[0] != '[' || rhs[last] != ']')
 			err("Vector must be enclosed in brakets, name= " + name + "\n");
 
-		rhs = (last < 2 ) ? "" : rhs.substr(1,last - 1);
+		rhs = (last < 2) ? "" : rhs.substr(1, last - 1);
 		AinurLexicalType::removeTrailingBlanks(rhs);
 		last = rhs.length();
 		if (last > 1 && rhs[0] == '[' && rhs[--last] == ']') {
@@ -160,7 +184,7 @@ private:
 		if (rhs[0] != '[' || rhs[last] != ']')
 			err("Matrix must be enclosed in brakets " + rhs + "\n");
 		assert(last > 2);
-		rhs =  rhs.substr(1,last - 1);
+		rhs = rhs.substr(1, last - 1);
 		AinurLexicalType::removeTrailingBlanks(rhs);
 		VectorStringType tmp;
 		split(tmp, rhs, "[");
@@ -184,7 +208,7 @@ private:
 			SizeType thisCol = v.size();
 			if (row == 0) {
 				cols = thisCol;
-				value_.resize(rows*cols + 2);
+				value_.resize(rows * cols + 2);
 				value_[0] = ttos(rows);
 				value_[1] = ttos(cols);
 			} else if (cols != thisCol) {
@@ -196,9 +220,7 @@ private:
 		}
 	}
 
-	void appendToVecStr(VectorStringType& dest,
-	                    const VectorStringType& src,
-	                    SizeType offset) const
+	void appendToVecStr(VectorStringType& dest, const VectorStringType& src, SizeType offset) const
 	{
 		SizeType n = src.size();
 		assert(offset + n <= dest.size());
@@ -212,5 +234,5 @@ private:
 	VectorStringType value_;
 	mutable SizeType used_;
 };
-}
+} // namespace PsimagLite
 #endif // AINURSTORE_H

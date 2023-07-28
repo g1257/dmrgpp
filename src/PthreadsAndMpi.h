@@ -80,22 +80,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PTHREADS_AND_MPI_H
 #define PTHREADS_AND_MPI_H
 
-#include <pthread.h>
-#include <iostream>
 #include "Mpi.h"
 #include "Pthreads.h"
+#include <iostream>
+#include <pthread.h>
 
-namespace PsimagLite {
-template<typename PthreadFunctionHolderType>
-class PthreadsAndMpi : public Pthreads<PthreadFunctionHolderType>  {
+namespace PsimagLite
+{
+template <typename PthreadFunctionHolderType>
+class PthreadsAndMpi : public Pthreads<PthreadFunctionHolderType>
+{
 
 	typedef Pthreads<PthreadFunctionHolderType> BaseType;
 
 public:
 
-	PthreadsAndMpi(SizeType npthreads,MPI::CommType comm = MPI::COMM_WORLD)
-	    : BaseType(npthreads),nthreads_(npthreads),comm_(comm)
-	{}
+	PthreadsAndMpi(SizeType npthreads, MPI::CommType comm = MPI::COMM_WORLD)
+	    : BaseType(npthreads)
+	    , nthreads_(npthreads)
+	    , comm_(comm)
+	{
+	}
 
 	String name() const { return "pthreadsandmpi"; }
 
@@ -111,8 +116,7 @@ private:
 
 }; // PthreadsAndMpi class
 
-} // namespace Dmrg
+} // namespace PsimagLite
 
 /*@}*/
 #endif
-

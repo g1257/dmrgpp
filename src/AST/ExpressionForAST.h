@@ -20,10 +20,12 @@ Please see full open source license included in file LICENSE.
 #include "Node.h"
 #include "Tree.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename PrimitivesType>
-class ExpressionForAST {
+template <typename PrimitivesType>
+class ExpressionForAST
+{
 public:
 
 	typedef typename PrimitivesType::VectorValueType VectorValueType;
@@ -33,7 +35,8 @@ public:
 	typedef Node<VectorValueType> NodeType;
 	typedef typename Vector<TreeType*>::Type VectorTreeType;
 
-	ExpressionForAST(const VectorStringType& vecStr, PrimitivesType& primitives)
+	ExpressionForAST(const VectorStringType& vecStr,
+	    PrimitivesType& primitives)
 	{
 		constexpr bool verbose = false; // FIXME
 		SizeType effectiveSize = vecStr.size();
@@ -44,24 +47,24 @@ public:
 			PsimagLite::String cStr = vecStr[i];
 			const NodeType& node = primitives.findNodeFromCode(cStr);
 
-
 			SizeType a = node.arity();
 			sumOfA += (a - 1);
-			TreeType* tree = new TreeType(primitives,
-			                              node,
-			                              verbose);
+			TreeType* tree = new TreeType(primitives, node, verbose);
 
 			va.push_back(a);
 			vecTree_.push_back(tree);
-			if (sumOfA == 0) break;
+			if (sumOfA == 0)
+				break;
 		}
 
 		SizeType k = 0;
 		for (SizeType i = 0; i < vecTree_.size(); i++) {
 			SizeType a = va[i];
-			if (a == 0 || !vecTree_[i]) continue;
-			for (SizeType j = k+1; j < k+a+1; j++) {
-				if (j >= vecTree_.size()) continue;
+			if (a == 0 || !vecTree_[i])
+				continue;
+			for (SizeType j = k + 1; j < k + a + 1; j++) {
+				if (j >= vecTree_.size())
+					continue;
 				vecTree_[i]->setDescendants(*vecTree_[j]);
 			}
 

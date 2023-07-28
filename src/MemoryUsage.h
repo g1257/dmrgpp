@@ -77,19 +77,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef MEMORY_USAGE_H
 #define MEMORY_USAGE_H
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sys/time.h>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class MemoryUsage {
+class MemoryUsage
+{
 
 	static const SizeType MY_MAX_LINE = 40240;
 
 public:
 
-	class TimeHandle {
+	class TimeHandle
+	{
 
 	public:
 
@@ -126,8 +129,8 @@ public:
 
 		double millis() const
 		{
-			const double tmp = startTime_.tv_usec/1000. + startTime_.tv_sec*1000.;
-			return tmp/1000.;
+			const double tmp = startTime_.tv_usec / 1000. + startTime_.tv_sec * 1000.;
+			return tmp / 1000.;
 		}
 
 	private:
@@ -136,16 +139,19 @@ public:
 	};
 
 	MemoryUsage(const String& myself = "")
-	    : data_(""), myself_(myself)
+	    : data_("")
+	    , myself_(myself)
 	{
-		if (myself_ == "") myself_ = "/proc/self/status";
+		if (myself_ == "")
+			myself_ = "/proc/self/status";
 		update();
 	}
 
 	void update()
 	{
 		std::ifstream ifp(myself_.c_str());
-		if (!ifp || !ifp.good() || ifp.bad()) return;
+		if (!ifp || !ifp.good() || ifp.bad())
+			return;
 		char tmp[MY_MAX_LINE];
 		data_ = "";
 		while (!ifp.eof()) {
@@ -166,7 +172,8 @@ public:
 		x += label.length();
 		long unsigned int y = data_.find("\n", x);
 		SizeType len = y - x;
-		if (y == String::npos) len = data_.length() - x;
+		if (y == String::npos)
+			len = data_.length() - x;
 		String s2 = data_.substr(x, len);
 		x = 0;
 		const SizeType n = s2.length();
@@ -178,7 +185,8 @@ public:
 				break;
 		}
 
-		if (x > 0) --x;
+		if (x > 0)
+			--x;
 		len = s2.length() - x;
 		return s2.substr(x, len);
 	}
@@ -200,4 +208,3 @@ private:
 
 /*@}*/
 #endif // MEMORY_USAGE_H
-

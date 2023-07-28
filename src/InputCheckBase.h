@@ -77,38 +77,37 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PSI_INPUTCHECK_BASE_H
 #define PSI_INPUTCHECK_BASE_H
-#include <vector>
 #include <stdexcept>
+#include <vector>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class InputCheckBase {
+class InputCheckBase
+{
 
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 public:
 
-	PsimagLite::String import() const
-	{
-		return "";
-	}
+	PsimagLite::String import() const { return ""; }
 
 	bool check(const PsimagLite::String& label,
-	           const PsimagLite::Vector<PsimagLite::String>::Type& vec,
-	           SizeType line) const
+	    const PsimagLite::Vector<PsimagLite::String>::Type& vec,
+	    SizeType line) const
 	{
 		return false;
 	}
 
 	void check(const PsimagLite::String& label,
-               const PsimagLite::String& val,
-               SizeType)
+	    const PsimagLite::String& val,
+	    SizeType)
 	{
 		return;
 	}
 
 	bool checkSimpleLabel(const PsimagLite::String& label,
-	                              SizeType line) const
+	    SizeType line) const
 	{
 		return false;
 	}
@@ -118,4 +117,3 @@ public:
 
 /*@}*/
 #endif
-

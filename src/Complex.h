@@ -19,95 +19,114 @@ Please see full open source license included in file LICENSE.
 #ifndef PSICOMPLEX_H_
 #define PSICOMPLEX_H_
 
-#include <complex>
 #include "../loki/TypeTraits.h"
 #include "AllocatorCpu.h"
+#include <complex>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType>
-class Real {
+template <typename ComplexOrRealType>
+class Real
+{
 public:
+
 	typedef ComplexOrRealType Type;
 };
 
-template<typename RealType>
-class Real<std::complex<RealType> > {
+template <typename RealType>
+class Real<std::complex<RealType>>
+{
 public:
+
 	typedef RealType Type;
 };
 
-template<typename T>
-class IsComplexNumber {
+template <typename T>
+class IsComplexNumber
+{
 public:
-	enum OpaqueEnum { True = false};
+
+	enum OpaqueEnum { True = false };
 };
 
-template<typename T>
-class IsComplexNumber<std::complex<T> > {
+template <typename T>
+class IsComplexNumber<std::complex<T>>
+{
 public:
+
 	enum OpaqueEnum { True = Loki::TypeTraits<T>::isArith };
 };
 
-
-template<typename T>
+template <typename T>
 struct IsNumber {
-	enum {True = (IsComplexNumber<T>::True || Loki::TypeTraits<T>::isArith)};
+	enum {
+		True = (IsComplexNumber<T>::True || Loki::TypeTraits<T>::isArith)
+	};
 };
 
-template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
-real(T t) { return t; }
+template <typename T>
+typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type real(T t)
+{
+	return t;
+}
 
-template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
+template <typename T>
+typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type
 real(const std::complex<T>& t)
 {
 	return std::real(t);
 }
 
-template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
-imag(T) { return 0.0; }
+template <typename T>
+typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type imag(T)
+{
+	return 0.0;
+}
 
-template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
+template <typename T>
+typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type
 imag(const std::complex<T>& t)
 {
 	return std::imag(t);
 }
 
-template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat,T>::Type
-conj(T t) { return t; }
+template <typename T>
+typename EnableIf<Loki::TypeTraits<T>::isFloat, T>::Type conj(T t)
+{
+	return t;
+}
 
-template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat,std::complex<T> >::Type
-conj(const std::complex<T>& t) { return std::conj(t); }
+template <typename T>
+typename EnableIf<Loki::TypeTraits<T>::isFloat, std::complex<T>>::Type
+conj(const std::complex<T>& t)
+{
+	return std::conj(t);
+}
 
-template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith,T>::Type
-norm(T t)
+template <typename T>
+typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type norm(T t)
 {
 	return std::fabs(t);
 }
 
-template<typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat,T>::Type
+template <typename T>
+typename EnableIf<Loki::TypeTraits<T>::isFloat, T>::Type
 norm(const std::complex<T>& t)
 {
 	return std::norm(t);
 }
 } // namespace PsimagLite
 
-namespace std {
-template<typename T>
-typename PsimagLite::EnableIf<Loki::TypeTraits<T>::isFloat,std::complex<T> >::Type
-operator*(int x,const std::complex<T>& y)
+namespace std
 {
-	return std::complex<T>(real(y)*x,imag(y)*x);
+template <typename T>
+typename PsimagLite::EnableIf<Loki::TypeTraits<T>::isFloat,
+    std::complex<T>>::Type
+operator*(int x, const std::complex<T>& y)
+{
+	return std::complex<T>(real(y) * x, imag(y) * x);
 }
 } // namespace std
 
 #endif // PSICOMPLEX_H_
-

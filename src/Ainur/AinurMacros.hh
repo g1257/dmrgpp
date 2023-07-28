@@ -1,12 +1,14 @@
 #ifndef AINURMACROS_HH
 #define AINURMACROS_HH
-#include <string>
 #include "../PsimagLite.h"
 #include <map>
+#include <string>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-class AinurMacros {
+class AinurMacros
+{
 
 public:
 
@@ -16,22 +18,27 @@ public:
 		std::string value;
 	};
 
-	class AinurFunction {
+	class AinurFunction
+	{
 
 		static constexpr SizeType MAX_LINE = 2048;
 
 	public:
 
 		AinurFunction(const std::string& args)
-		    : separator_("space"), columnX_(0), columnY_(1)
+		    : separator_("space")
+		    , columnX_(0)
+		    , columnY_(1)
 		{
 			std::string csl = deleteEnclosing(args, '(', ')');
 			std::vector<std::string> tokens;
 			split(tokens, csl, ",");
 			if (tokens.size() == 0) {
-				throw RuntimeError("Parse error for " + args +
-				                   ". Expected (filename, separator, column_x, column_y)," +
-				                   " where separator and columns are optional.\n");
+				throw RuntimeError(
+				    "Parse error for " + args + ". Expected (filename, separator, "
+								"column_x, column_y),"
+				    + " where separator and columns are "
+				      "optional.\n");
 			}
 
 			filename_ = deleteEnclosing(tokens[0], '\"');
@@ -58,20 +65,26 @@ public:
 
 		const double& operator()(const double& x) const
 		{
-			auto it = std::find_if(data_.begin(), data_.end(), [&x](const std::pair<double, double>& pair)
-			{return (pair.first == x);});
+			auto it = std::find_if(
+			    data_.begin(), data_.end(), [&x](const std::pair<double, double>& pair) {
+				    return (pair.first == x);
+			    });
 			return it->second;
 		}
 
-		static std::string deleteEnclosing(const std::string& content, char b)
+		static std::string deleteEnclosing(const std::string& content,
+		    char b)
 		{
 			return deleteEnclosing(content, b, b);
 		}
 
-		static std::string deleteEnclosing(const std::string& content, char b, char e)
+		static std::string deleteEnclosing(const std::string& content,
+		    char b,
+		    char e)
 		{
 			SizeType length = content.size();
-			if (length == 0) return content;
+			if (length == 0)
+				return content;
 			SizeType last = length - 1;
 			SizeType total = length;
 			SizeType start = 0;
@@ -90,7 +103,8 @@ public:
 
 	private:
 
-		static std::string setSeparatorForSplit(const std::string& separator)
+		static std::string
+		setSeparatorForSplit(const std::string& separator)
 		{
 			if (separator == "space") {
 				return " ";
@@ -104,7 +118,8 @@ public:
 		static bool emptyLine(const std::string& s)
 		{
 			for (SizeType i = 0; i < s.size(); ++i) {
-				if (s[i] != ' ' || s[i] != '\t') return false;
+				if (s[i] != ' ' || s[i] != '\t')
+					return false;
 			}
 
 			return true;
@@ -119,7 +134,8 @@ public:
 			char s[MAX_LINE];
 			while (!fin.eof()) {
 				fin.getline(s, MAX_LINE);
-				if (emptyLine(std::string(s))) continue;
+				if (emptyLine(std::string(s)))
+					continue;
 				std::vector<std::string> tokens;
 				split(tokens, s);
 				if (columnX_ > tokens.size() || columnY_ > tokens.size()) {
@@ -138,12 +154,14 @@ public:
 		std::string separatorForSplit_;
 		SizeType columnX_;
 		SizeType columnY_;
-		std::vector<std::pair<double, double> > data_;
+		std::vector<std::pair<double, double>> data_;
 	};
 
-	AinurMacros() : AINUR_FROM_FILE("AinurFromFile")
+	AinurMacros()
+	    : AINUR_FROM_FILE("AinurFromFile")
 	{
-		nativeMacros_.push_back({"function", AINUR_FROM_FILE, "!" + AINUR_FROM_FILE});
+		nativeMacros_.push_back(
+		    { "function", AINUR_FROM_FILE, "!" + AINUR_FROM_FILE });
 	}
 
 	SizeType total() const { return nativeMacros_.size(); }
@@ -187,7 +205,7 @@ public:
 
 		// using and defining in same line not allowed
 		if (functionNameToIndex_.count(functionName) == 0) {
-			throw RuntimeError("valueFromFunction: " + functionName  + " undefined.\n");
+			throw RuntimeError("valueFromFunction: " + functionName + " undefined.\n");
 		}
 
 		SizeType index = functionNameToIndex_.at(functionName);
@@ -202,7 +220,8 @@ private:
 
 	// Expect ("function.txt") or
 	// ("function.txt")(3.0)
-	static std::pair<std::string, std::string> getFunctionNameValue(const std::string& line)
+	static std::pair<std::string, std::string>
+	getFunctionNameValue(const std::string& line)
 	{
 		SizeType length = line.size();
 		if (length < 4) {
@@ -217,7 +236,8 @@ private:
 
 		SizeType i = 1;
 		for (; i < line.size(); ++i) {
-			if (line[i] == ')' && line[i +  1] == '(') break;
+			if (line[i] == ')' && line[i + 1] == '(')
+				break;
 		}
 
 		// no value found
@@ -225,8 +245,8 @@ private:
 			return std::pair<std::string, std::string>(line, "");
 		}
 
-		return std::pair<std::string, std::string>(line.substr(0, i + 1),
-		                                           line.substr(i + 2, length - i - 3));
+		return std::pair<std::string, std::string>(
+		    line.substr(0, i + 1), line.substr(i + 2, length - i - 3));
 	}
 
 	std::string addAinurFromFile(const std::string& content)
@@ -247,5 +267,5 @@ private:
 	std::vector<AinurFunction> ainurFunctions_;
 };
 
-}
+} // namespace PsimagLite
 #endif // AINURMACROS_HH

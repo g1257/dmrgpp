@@ -79,57 +79,62 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef PSIMAGLITE_STACK_H_
 #define PSIMAGLITE_STACK_H_
-#include <stack>
 #include "AllocatorCpu.h"
 #include "Vector.h"
+#include <stack>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename T>
-class Stack {
+template <typename T>
+class Stack
+{
 
-	typedef std::deque<T,typename Allocator<T>::Type> DequeType_;
+	typedef std::deque<T, typename Allocator<T>::Type> DequeType_;
 
 public:
 
-	typedef std::stack<T,DequeType_> Type;
+	typedef std::stack<T, DequeType_> Type;
 }; // class Stack
 
-template<typename T>
-class IsStackLike {
+template <typename T>
+class IsStackLike
+{
 public:
-	enum {True = false};
+
+	enum { True = false };
 };
 
-template<typename T>
-class IsStackLike<std::stack<T,std::deque<T,typename Allocator<T>::Type> > > {
+template <typename T>
+class IsStackLike<std::stack<T, std::deque<T, typename Allocator<T>::Type>>>
+{
 public:
-	enum {True = true};
+
+	enum { True = true };
 };
 
-template<typename StackType>
-typename EnableIf<IsStackLike<StackType>::True,std::ostream>::Type&
-operator<<(std::ostream& os,const StackType& st)
+template <typename StackType>
+typename EnableIf<IsStackLike<StackType>::True, std::ostream>::Type&
+operator<<(std::ostream& os, const StackType& st)
 {
 	StackType st2 = st;
-	os<<st2.size()<<"\n";
-	while(!st2.empty()) {
+	os << st2.size() << "\n";
+	while (!st2.empty()) {
 		typename StackType::value_type x = st2.top();
-		os<<x<<"\n";
+		os << x << "\n";
 		st2.pop();
 	}
 	return os;
-
 }
 
-template<typename StackType>
-typename EnableIf<IsStackLike<StackType>::True,std::istream>::Type&
-operator>>(std::istream& is,StackType& x)
+template <typename StackType>
+typename EnableIf<IsStackLike<StackType>::True, std::istream>::Type&
+operator>>(std::istream& is, StackType& x)
 {
 	typedef typename StackType::value_type ValueType;
 	typename Vector<ValueType>::Type tmpVec;
-	is>>tmpVec;
-	for (int i=tmpVec.size()-1;i>=0;i--) {
+	is >> tmpVec;
+	for (int i = tmpVec.size() - 1; i >= 0; i--) {
 		x.push(tmpVec[i]);
 	}
 	return is;

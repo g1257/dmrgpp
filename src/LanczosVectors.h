@@ -80,17 +80,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #ifndef LANCZOS_VECTORS_HEADER_H
 #define LANCZOS_VECTORS_HEADER_H
-#include "ProgressIndicator.h"
-#include <cassert>
-#include "Vector.h"
-#include "Matrix.h"
-#include "Random48.h"
 #include "ContinuedFraction.h"
+#include "Matrix.h"
+#include "ProgressIndicator.h"
+#include "Random48.h"
+#include "Vector.h"
+#include <cassert>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename MatrixType_,typename VectorType_>
-class LanczosVectors {
+template <typename MatrixType_, typename VectorType_>
+class LanczosVectors
+{
 
 	typedef typename VectorType_::value_type ComplexOrRealType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
@@ -107,24 +109,25 @@ public:
 	typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 
-	enum {WITH_INFO=1,DEBUG=2,ALLOWS_ZERO=4};
+	enum { WITH_INFO = 1,
+		DEBUG = 2,
+		ALLOWS_ZERO = 4 };
 
-	LanczosVectors(const MatrixType& mat,
-	               bool lotaMemory,
-	               SizeType steps,
-	               bool isReorthoEnabled)
-	    : progress_("LanczosVectors"),
-	      mat_(mat),
-	      lotaMemory_(lotaMemory),
-	      isReorthoEnabled_(isReorthoEnabled),
-	      dummy_(0),
-	      needsDelete_(false),
-	      ysaved_(0),
-	      data_(0),
-	      overlap_(0)
+	LanczosVectors(const MatrixType& mat, bool lotaMemory, SizeType steps, bool isReorthoEnabled)
+	    : progress_("LanczosVectors")
+	    , mat_(mat)
+	    , lotaMemory_(lotaMemory)
+	    , isReorthoEnabled_(isReorthoEnabled)
+	    , dummy_(0)
+	    , needsDelete_(false)
+	    , ysaved_(0)
+	    , data_(0)
+	    , overlap_(0)
 	{
 		if (!lotaMemory)
-			throw RuntimeError("LanczosVectors: support for lotaMemory=false has been removed\n");
+			throw RuntimeError(
+			    "LanczosVectors: support for lotaMemory=false has "
+			    "been removed\n");
 
 		dealWithOverlapStorage(steps);
 	}
@@ -134,7 +137,8 @@ public:
 		delete overlap_;
 		overlap_ = 0;
 
-		if (!needsDelete_) return;
+		if (!needsDelete_)
+			return;
 
 		delete data_;
 		data_ = 0;
@@ -142,7 +146,8 @@ public:
 
 	void saveVector(const VectorType& y, SizeType j)
 	{
-		if (!lotaMemory_) return;
+		if (!lotaMemory_)
+			return;
 
 		SizeType rows = data_->rows();
 		for (SizeType i = 0; i < rows; ++i)
@@ -151,7 +156,8 @@ public:
 
 	void prepareMemory(SizeType rows, SizeType steps)
 	{
-		if (!lotaMemory_) return;
+		if (!lotaMemory_)
+			return;
 
 		dealWithStorageOfV(rows, steps);
 
@@ -167,15 +173,9 @@ public:
 		data_->resize(rows, x);
 	}
 
-	const DenseMatrixType* data() const
-	{
-		return data_;
-	}
+	const DenseMatrixType* data() const { return data_; }
 
-	DenseMatrixType* data()
-	{
-		return data_;
-	}
+	DenseMatrixType* data() { return data_; }
 
 	VectorElementType data(SizeType i, SizeType j)
 	{
@@ -188,118 +188,116 @@ public:
 
 	bool lotaMemory() const { return lotaMemory_; }
 
-	void saveInitialVector(const VectorType& y)
-	{
-		ysaved_ = y;
-	}
+	void saveInitialVector(const VectorType& y) { ysaved_ = y; }
 
 	void excitedVector(VectorType& z, const DenseMatrixType& ritz, SizeType excited) const
 	{
 		SizeType small = data_->cols();
 		SizeType big = data_->rows();
-		for (SizeType j = 0; j <small; j++) {
+		for (SizeType j = 0; j < small; j++) {
 			ComplexOrRealType ctmp = ritz(j, excited);
 			for (SizeType i = 0; i < big; i++)
 				z[i] += ctmp * data_->operator()(i, j);
 		}
 	}
 
-	void oneStepDecomposition(VectorType& V0,
-	                          VectorType& V1,
-	                          VectorType& V2,
-	                          TridiagonalMatrixType& ab,
-	                          SizeType iter) const
+	void oneStepDecomposition(VectorType& V0, VectorType& V1, VectorType& V2, TridiagonalMatrixType& ab, SizeType iter) const
 	{
 		SizeType nn = V1.size();
-		for (SizeType h = 0; h < nn; h++) V2[h] = 0.0;
+		for (SizeType h = 0; h < nn; h++)
+			V2[h] = 0.0;
 		mat_.matrixVectorProduct(V2, V1); // V2 = H|V1>
 
 		RealType atmp = 0.0;
 		for (SizeType h = 0; h < nn; h++)
-			atmp += PsimagLite::real(V2[h]*PsimagLite::conj(V1[h])); // <V1|V2>
+			atmp += PsimagLite::real(
+			    V2[h] * PsimagLite::conj(V1[h])); // <V1|V2>
 		ab.a(iter) = atmp;
 
 		RealType btmp = 0.0;
 		for (SizeType h = 0; h < nn; h++) {
-			V2[h] = V2[h] - ab.a(iter)*V1[h] - ab.b(iter)*V0[h];  // V2 = V2 - alpha*V1 - beta*V0;
-			btmp += PsimagLite::real(V2[h]*PsimagLite::conj(V2[h]));
+			V2[h] = V2[h] - ab.a(iter) * V1[h] - ab.b(iter) * V0[h]; // V2 = V2 - alpha*V1 - beta*V0;
+			btmp += PsimagLite::real(V2[h] * PsimagLite::conj(V2[h]));
 		}
 
 		btmp = sqrt(btmp);
 		if (iter + 1 < ab.size())
-			ab.b(iter + 1) = btmp;	// beta = sqrt(V2*V2)
+			ab.b(iter + 1) = btmp; // beta = sqrt(V2*V2)
 
 		if (btmp > 0) {
-			btmp = 1.0/btmp;
-			for (SizeType i = 0; i < nn; i++) V2[i] *= btmp; // normalize V2
+			btmp = 1.0 / btmp;
+			for (SizeType i = 0; i < nn; i++)
+				V2[i] *= btmp; // normalize V2
 		}
 
 		reorthoIfNecessary(V2, iter);
 	}
 
-	void needsDelete(bool b)
-	{
-		needsDelete_ = b;
-	}
+	void needsDelete(bool b) { needsDelete_ = b; }
 
 private:
 
 	void reorthoIfNecessary(VectorType& V2, SizeType iter) const
 	{
-		if (!isReorthoEnabled_) return;
+		if (!isReorthoEnabled_)
+			return;
 
 		if (!overlap_ || overlap_->size() <= iter)
 			throw RuntimeError("reorthoIfNecessary failed\n");
 
 		SizeType nn = V2.size();
-		//cout << "  Re-orthogonalization " << endl;
-		for(SizeType i=0; i<iter+1; i++) {
+		// cout << "  Re-orthogonalization " << endl;
+		for (SizeType i = 0; i < iter + 1; i++) {
 
-			VectorElementType rij=0.0;
-			for(SizeType h=0; h<nn; h++)
-				rij += PsimagLite::conj(data_->operator()(h,i))*V2[h];
+			VectorElementType rij = 0.0;
+			for (SizeType h = 0; h < nn; h++)
+				rij += PsimagLite::conj(data_->operator()(h, i)) * V2[h];
 
 			// V2 = V2 - <Vi|V2> Vi -- gram-schmid
-			for (SizeType h=0; h<nn; h++)
-				V2[h] = V2[h] - data_->operator()(h,i)*rij;
+			for (SizeType h = 0; h < nn; h++)
+				V2[h] = V2[h] - data_->operator()(h, i) * rij;
 		}
 
 		RealType ntmp = 0.0;
-		for (SizeType h=0;h<nn;h++)
-			ntmp += PsimagLite::real(V2[h]*PsimagLite::conj(V2[h]));
+		for (SizeType h = 0; h < nn; h++)
+			ntmp += PsimagLite::real(V2[h] * PsimagLite::conj(V2[h]));
 
-		ntmp = 1.0/sqrt(ntmp);
-		for (SizeType h=0; h<nn; h++) V2[h] = V2[h]*ntmp;
+		ntmp = 1.0 / sqrt(ntmp);
+		for (SizeType h = 0; h < nn; h++)
+			V2[h] = V2[h] * ntmp;
 	}
 
 	void dealWithStorageOfV(SizeType rows, SizeType cols)
 	{
-		if (!lotaMemory_) return;
+		if (!lotaMemory_)
+			return;
 
 		if (data_) {
 			if (rows != data_->rows() || cols != data_->cols())
-				throw RuntimeError("LanczosVectors: data has already been set!\n");
+				throw RuntimeError("LanczosVectors: data has "
+						   "already been set!\n");
 			return;
 		}
 
 		data_ = new DenseMatrixType(rows, cols);
 		needsDelete_ = true;
 		OstringStream msg(std::cout.precision());
-		msg()<<"lotaMemory_=true";
+		msg() << "lotaMemory_=true";
 		progress_.printline(msg, std::cout);
 	}
 
 	void dealWithOverlapStorage(SizeType steps)
 	{
-		if (!isReorthoEnabled_) return;
+		if (!isReorthoEnabled_)
+			return;
 
 		OstringStream msg(std::cout.precision());
-		msg()<<"Reortho enabled";
-		progress_.printline(msg,std::cout);
+		msg() << "Reortho enabled";
+		progress_.printline(msg, std::cout);
 		return;
 
-		SizeType maxNstep = std::min(steps , mat_.rows());
-		overlap_  = new VectorType(maxNstep, 0);
+		SizeType maxNstep = std::min(steps, mat_.rows());
+		overlap_ = new VectorType(maxNstep, 0);
 	}
 
 	//! copy ctor and assigment operator are invalid
@@ -323,4 +321,3 @@ private:
 
 /*@}*/
 #endif // LANCZOS_VECTORS_HEADER_H
-

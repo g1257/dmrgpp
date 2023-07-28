@@ -38,7 +38,7 @@ must include the following acknowledgment:
 "This product includes software produced by UT-Battelle,
 LLC under Contract No. DE-AC05-00OR22725  with the
 Department of Energy."
- 
+
 *********************************************************
 DISCLAIMER
 
@@ -82,81 +82,87 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include <cassert>
 
-namespace PsimagLite {
-	
-	template<typename CrsMatrixType>
-	class SparseRow {
-	public:
-		typedef typename CrsMatrixType::value_type ValueType;
-		typedef typename Vector<SizeType>::Type ColumnsType;
-		typedef typename Vector<ValueType>::Type VectorType;
+namespace PsimagLite
+{
 
-		void add(SizeType col,ValueType value)
-		{
-			cols_.push_back(col);
-			values_.push_back(value);
-		}
+template <typename CrsMatrixType>
+class SparseRow
+{
+public:
 
-		ValueType matrixVectorProduct(const VectorType& y) const
-		{
-			ValueType sum = 0;
-			for (SizeType i=0;i<cols_.size();i++)
-				sum += values_[i]*y[cols_[i]];
-			return sum;
-		}
-//		void clear()
-//		{
-//			cols_.clear();
-//			values_.clear();
-//		}
+	typedef typename CrsMatrixType::value_type ValueType;
+	typedef typename Vector<SizeType>::Type ColumnsType;
+	typedef typename Vector<ValueType>::Type VectorType;
 
-		SizeType finalize(CrsMatrixType& matrix)
-		{
-			assert(cols_.size()==values_.size());
-			if (cols_.size()==0) return 0;
+	void add(SizeType col, ValueType value)
+	{
+		cols_.push_back(col);
+		values_.push_back(value);
+	}
 
-			Sort<ColumnsType> s;
-			ColumnsType iperm(cols_.size());
-			s.sort(cols_,iperm);
-			SizeType prevCol = cols_[0];
-			SizeType counter = 0;
-			ValueType value = 0;
-			for (SizeType i=0;i<cols_.size();i++) {
-				assert(cols_[i]<matrix.cols());
-				if (cols_[i]==prevCol) {
-					value += values_[iperm[i]];
-					continue;
-				}
-				matrix.pushCol(prevCol);
-				matrix.pushValue(value);
-				counter++;
-				value = values_[iperm[i]];
-				prevCol = cols_[i];
+	ValueType matrixVectorProduct(const VectorType& y) const
+	{
+		ValueType sum = 0;
+		for (SizeType i = 0; i < cols_.size(); i++)
+			sum += values_[i] * y[cols_[i]];
+		return sum;
+	}
+	//		void clear()
+	//		{
+	//			cols_.clear();
+	//			values_.clear();
+	//		}
+
+	SizeType finalize(CrsMatrixType& matrix)
+	{
+		assert(cols_.size() == values_.size());
+		if (cols_.size() == 0)
+			return 0;
+
+		Sort<ColumnsType> s;
+		ColumnsType iperm(cols_.size());
+		s.sort(cols_, iperm);
+		SizeType prevCol = cols_[0];
+		SizeType counter = 0;
+		ValueType value = 0;
+		for (SizeType i = 0; i < cols_.size(); i++) {
+			assert(cols_[i] < matrix.cols());
+			if (cols_[i] == prevCol) {
+				value += values_[iperm[i]];
+				continue;
 			}
 			matrix.pushCol(prevCol);
 			matrix.pushValue(value);
 			counter++;
-			return counter;
+			value = values_[iperm[i]];
+			prevCol = cols_[i];
 		}
+		matrix.pushCol(prevCol);
+		matrix.pushValue(value);
+		counter++;
+		return counter;
+	}
 
-		ValueType finalize(const VectorType& y)
-		{
-			assert(cols_.size()==values_.size());
-			if (cols_.size()==0) return 0;
+	ValueType finalize(const VectorType& y)
+	{
+		assert(cols_.size() == values_.size());
+		if (cols_.size() == 0)
+			return 0;
 
-			ValueType sum = 0.0;
-			for (SizeType i=0;i<cols_.size();i++)
-				sum += values_[i] * y[cols_[i]];
-			return sum;
-		}
+		ValueType sum = 0.0;
+		for (SizeType i = 0; i < cols_.size(); i++)
+			sum += values_[i] * y[cols_[i]];
+		return sum;
+	}
 
-	private:
-		ColumnsType cols_;
-		VectorType values_;
-			
-	}; // class SparseRow
+private:
 
-} // namespace Dmrg 
+	ColumnsType cols_;
+	VectorType values_;
+
+}; // class SparseRow
+
+} // namespace PsimagLite
 
 /*@}*/
 #endif // SPARSE_ROW_H

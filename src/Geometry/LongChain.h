@@ -79,44 +79,59 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PSI_GEOM_LONG_CHAIN_H
 #include "GeometryBase.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename ComplexOrRealType, typename InputType>
-class LongChain : public GeometryBase<ComplexOrRealType, InputType> {
+template <typename ComplexOrRealType, typename InputType>
+class LongChain : public GeometryBase<ComplexOrRealType, InputType>
+{
 
 public:
 
 	enum { DIRECTION_X };
 
-	LongChain() : linSize_(0),isPeriodic_(false),distance_(1) {}
+	LongChain()
+	    : linSize_(0)
+	    , isPeriodic_(false)
+	    , distance_(1)
+	{
+	}
 
-	LongChain(SizeType linSize,InputType& io)
-	    : linSize_(linSize),isPeriodic_(false),distance_(1)
+	LongChain(SizeType linSize, InputType& io)
+	    : linSize_(linSize)
+	    , isPeriodic_(false)
+	    , distance_(1)
 	{
 		try {
 			int x = 0;
-			io.readline(x,"IsPeriodicX=");
+			io.readline(x, "IsPeriodicX=");
 			isPeriodic_ = (x > 0) ? true : false;
-			if (isPeriodic_) std::cerr<<"LongChain::ctor(): periodic\n";
-		} catch (std::exception& e) {}
+			if (isPeriodic_)
+				std::cerr << "LongChain::ctor(): periodic\n";
+		} catch (std::exception& e) {
+		}
 
 		try {
 			int x = 0;
-			io.readline(x,"LongChainDistance=");
+			io.readline(x, "LongChainDistance=");
 			distance_ = x;
-		} catch (std::exception& e) {}
+		} catch (std::exception& e) {
+		}
 
 		if (linSize_ <= distance_)
 			RuntimeError("LongChain::ctor()\n");
 	}
 
-	virtual SizeType maxConnections() const { return (isPeriodic_) ? linSize_ : 1; }
+	virtual SizeType maxConnections() const
+	{
+		return (isPeriodic_) ? linSize_ : 1;
+	}
 
 	virtual SizeType dirs() const { return 1; }
 
-	SizeType handle(SizeType i,SizeType j) const
+	SizeType handle(SizeType i, SizeType j) const
 	{
-		return (i<j) ? i : j;
+		return (i < j) ? i : j;
 	}
 
 	SizeType getVectorSize(SizeType dirId) const
@@ -126,24 +141,23 @@ public:
 		return linSize_ - distance_ + oneOrZero;
 	}
 
-	bool connected(SizeType i1,SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const
 	{
-		if (i1==i2) return false;
-		SizeType imin = (i1<i2) ? i1 : i2;
-		SizeType imax = (i1>i2) ? i1 : i2;
-		bool b = (imax-imin==distance_);
-		if (!isPeriodic_) return b;
-		bool b2 = (imax-imin == linSize_ - distance_);
+		if (i1 == i2)
+			return false;
+		SizeType imin = (i1 < i2) ? i1 : i2;
+		SizeType imax = (i1 > i2) ? i1 : i2;
+		bool b = (imax - imin == distance_);
+		if (!isPeriodic_)
+			return b;
+		bool b2 = (imax - imin == linSize_ - distance_);
 		return (b || b2);
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType,SizeType) const
-	{
-		return DIRECTION_X;
-	}
+	SizeType calcDir(SizeType, SizeType) const { return DIRECTION_X; }
 
-	bool fringe(SizeType i,SizeType smax,SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const
 	{
 		SizeType emin2 = smax + 1;
 		if (i <= smax) {
@@ -155,40 +169,38 @@ public:
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax,SizeType emin,SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
 	{
 		assert(siteNew2 >= emin);
-		SizeType tmp = siteNew2 - emin + smax+1;
+		SizeType tmp = siteNew2 - emin + smax + 1;
 		assert(tmp < linSize_);
 		return tmp;
 	}
 
-	String label() const
-	{
-		return "longchain";
-	}
+	String label() const { return "longchain"; }
 
 	SizeType findReflection(SizeType site) const
 	{
-		return linSize_ - site -1;
+		return linSize_ - site - 1;
 	}
 
 	SizeType length(SizeType i) const
 	{
-		assert(i==0);
+		assert(i == 0);
 		return linSize_;
 	}
 
-	SizeType translate(SizeType site,SizeType dir,SizeType amount) const
+	SizeType translate(SizeType site, SizeType dir, SizeType amount) const
 	{
-		assert(dir==0);
+		assert(dir == 0);
 
-		site+=amount;
-		while (site>=linSize_) site -= linSize_;
+		site += amount;
+		while (site >= linSize_)
+			site -= linSize_;
 		return site;
 	}
 
-	template<class Archive>
+	template <class Archive>
 	void write(Archive&, const unsigned int)
 	{
 		throw RuntimeError("LongChain::write(): unimplemented\n");
@@ -204,4 +216,3 @@ private:
 
 /*@}*/
 #endif // LADDER_H
-

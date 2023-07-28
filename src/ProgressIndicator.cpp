@@ -76,11 +76,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ProgressIndicator.h"
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
 MemoryUsage ProgressIndicator::musage_;
 OstringStream ProgressIndicator::buffer_(std::cout.precision());
 bool ProgressIndicator::bufferActive_ = false;
 
 } // namespace PsimagLite
-

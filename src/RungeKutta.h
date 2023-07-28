@@ -83,15 +83,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef RUNGE_KUTTA_H
 #define RUNGE_KUTTA_H
 
-#include <cassert>
 #include "Complex.h"
-#include "Vector.h"
 #include "Matrix.h"
+#include "Vector.h"
+#include <cassert>
 
-namespace PsimagLite {
+namespace PsimagLite
+{
 
-template<typename RealType, typename FunctionType, typename ArrayType = Vector<RealType> >
-class RungeKutta {
+template <typename RealType, typename FunctionType, typename ArrayType = Vector<RealType>>
+class RungeKutta
+{
 
 	typedef typename ArrayType::value_type ComplexOrRealType;
 	typedef typename Vector<ComplexOrRealType>::Type VectorType;
@@ -99,60 +101,59 @@ class RungeKutta {
 public:
 
 	RungeKutta(const FunctionType& f, const RealType& h)
-	    : f_(f),h_(h),verbose_(false)
-	{ }
-
-	void solveEx(typename Vector<VectorType>::Type& result,
-	             RealType t0,
-	             RealType t,
-	             const ArrayType& y0) const
+	    : f_(f)
+	    , h_(h)
+	    , verbose_(false)
 	{
-		SizeType N = static_cast<SizeType>(PsimagLite::real((t - t0)/h_));
-		solve(result,t0,N,y0);
 	}
 
-	void solve(typename Vector<VectorType>::Type& result,
-	           RealType t0,
-	           SizeType N,
-	           const ArrayType& y0) const
+	void solveEx(typename Vector<VectorType>::Type& result, RealType t0, RealType t, const ArrayType& y0) const
+	{
+		SizeType N = static_cast<SizeType>(PsimagLite::real((t - t0) / h_));
+		solve(result, t0, N, y0);
+	}
+
+	void solve(typename Vector<VectorType>::Type& result, RealType t0, SizeType N, const ArrayType& y0) const
 	{
 		ArrayType k1(y0), k2(y0), k3(y0), k4(y0);
-		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1, wtotInverse = 1.0/6.0;
+		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1,
+			 wtotInverse = 1.0 / 6.0;
 
 		RealType ti = t0;
 		ArrayType yi = y0;
 		ArrayType tmp;
 		RealType f1 = 0.5;
 		for (SizeType i = 0; i < N; i++) {
-			k1 <= h_ * f_(ti, yi);
-			tmp <= yi + k1*f1;
-			k2 <= h_ * f_(ti + h_*f1, tmp);
-			tmp <= yi + k2*f1;
-			k3 <= h_ * f_(ti + h_*f1, tmp);
+			k1 <= h_* f_(ti, yi);
+			tmp <= yi + k1* f1;
+			k2 <= h_* f_(ti + h_ * f1, tmp);
+			tmp <= yi + k2* f1;
+			k3 <= h_* f_(ti + h_ * f1, tmp);
 			tmp <= yi + k3;
-			k4 <= h_ * f_(ti + h_, tmp);
+			k4 <= h_* f_(ti + h_, tmp);
 
 			VectorType myresult(findSizeOf(yi));
-			for (SizeType j=0;j<myresult.size();j++) myresult[j] = findValueOf(yi,j);
+			for (SizeType j = 0; j < myresult.size(); j++)
+				myresult[j] = findValueOf(yi, j);
 			result.push_back(myresult);
 			ti += h_;
-			tmp <= (w1*k1 + w2*k2 + w3*k3 + w4*k4);
-			yi +=  tmp*wtotInverse;
-			checkNorm(yi,y0);
+			tmp <= (w1 * k1 + w2 * k2 + w3 * k3 + w4 * k4);
+			yi += tmp * wtotInverse;
+			checkNorm(yi, y0);
 		}
 	}
 
 private:
 
-	ComplexOrRealType findValueOf(const VectorType& yi,SizeType j) const
+	ComplexOrRealType findValueOf(const VectorType& yi, SizeType j) const
 	{
 		return yi[j];
 	}
 
 	ComplexOrRealType findValueOf(const Matrix<ComplexOrRealType>& yi,
-	                              SizeType j) const
+	    SizeType j) const
 	{
-		return yi(j,j);
+		return yi(j, j);
 	}
 
 	SizeType findSizeOf(const VectorType& yi) const { return yi.size(); }
@@ -163,17 +164,18 @@ private:
 	}
 
 	void checkNorm(const Matrix<ComplexOrRealType>&,
-	               const Matrix<ComplexOrRealType>&)const
-	{}
+	    const Matrix<ComplexOrRealType>&) const
+	{
+	}
 
-	void checkNorm(const VectorType& yi,const VectorType& y0) const
+	void checkNorm(const VectorType& yi, const VectorType& y0) const
 	{
 		String s(__FILE__);
-		s+= " Norma not preserved\n";
+		s += " Norma not preserved\n";
 		RealType norma = norm(yi);
 		RealType originalNorm = norm(y0);
-		if (fabs(norma-originalNorm)>1e-4)
-			std::cerr<<s;
+		if (fabs(norma - originalNorm) > 1e-4)
+			std::cerr << s;
 	}
 
 	const FunctionType& f_;
@@ -181,8 +183,7 @@ private:
 	bool verbose_;
 }; // class RungeKutta
 
-} // namespace Dmrg
+} // namespace PsimagLite
 
 /*@}*/
 #endif // RUNGE_KUTTA
-
