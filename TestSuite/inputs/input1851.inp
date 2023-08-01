@@ -36,8 +36,7 @@ Version=version
 OutputFile=data1851.txt
 
 InfiniteLoopKeptStates=64
-FiniteLoops 3 
-2 800 0
+FiniteLoops 2
 -4 800 0 4 800 0
 
 RepeatFiniteLoopsFrom=1

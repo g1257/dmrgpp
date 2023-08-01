@@ -8,9 +8,8 @@ SolverOptions=twositedmrg
 Version=version
 OutputFile=data4300.txt
 InfiniteLoopKeptStates=100
-FiniteLoops 5
-3 200 0 -3 300 0 -3 300 0 3 300 1
-3 300 1
+FiniteLoops 3
+3 200 0 -6 300 0 6 300 1
 
 TruncationTolerance=1e-4
 TargetElectronsUp=8

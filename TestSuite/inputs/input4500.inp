@@ -43,9 +43,6 @@ Connectors 8 8
 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
 
-MagneticField 8
-0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0
-
 Model=HeisenbergAnisotropic
 HeisenbergTwiceS=1
 

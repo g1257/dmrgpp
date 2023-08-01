@@ -22,6 +22,6 @@ SolverOptions=twositedmrg,MatrixVectorOnTheFly
 Version=version
 OutputFile=data1800.txt
 InfiniteLoopKeptStates=60
-FiniteLoops 3  5 100 0 -10 100 0  5 100 0 
+FiniteLoops 3  5 100 0 -10 100 0  10 100 0 
 TargetSzPlusConst=6
 

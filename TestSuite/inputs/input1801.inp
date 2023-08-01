@@ -23,8 +23,8 @@ SolverOptions=twositedmrg,restart,TargetingAncilla
 Version=version
 OutputFile=data1801.txt
 InfiniteLoopKeptStates=64
-FiniteLoops 3 
-5 800 2 -10 800 2   5 800 2
+FiniteLoops 2 
+-10 800 2   10 800 2
 
 RepeatFiniteLoopsFrom=0
 RepeatFiniteLoopsTimes=10

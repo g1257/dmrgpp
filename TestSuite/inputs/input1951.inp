@@ -20,8 +20,8 @@ SolverOptions=twositedmrg,restart,TargetingAncilla
 Version=version
 OutputFile=data1951.txt
 InfiniteLoopKeptStates=100
-FiniteLoops 4
-2 150 0 -2 150 0 -2 150 0 2 150 0 
+FiniteLoops 2 
+-4 150 0  4 150 0
 
 RepeatFiniteLoopsFrom=0
 RepeatFiniteLoopsTimes=10
