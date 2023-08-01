@@ -17,8 +17,8 @@ SolverOptions=TimeStepTargeting,lanczosAllowsZero
 Version=version
 OutputFile=data2045.txt
 InfiniteLoopKeptStates=256
-FiniteLoops 5   3 400 0 
-               -3 400 2 -3 400 2 3 400 2 3 400 2
+FiniteLoops 3   3 400 0 
+               -6 400 2 6 400 2
 RepeatFiniteLoopsFrom=1
 RepeatFiniteLoopsTimes=2
 GsWeight=0.1

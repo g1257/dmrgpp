@@ -13,8 +13,8 @@ SolverOptions=TimeStepTargeting,vectorwithoffsets
 Version=version
 OutputFile=data2061.txt
 InfiniteLoopKeptStates=200
-FiniteLoops 5          2 200 0 
-                      -2 200 2 -2 200 2  2 200 2 2 200 2
+FiniteLoops 3          2 200 0 
+                      -4 200 2   4 200 2
 RepeatFiniteLoopsFrom=1
 RepeatFiniteLoopsTimes=20
 

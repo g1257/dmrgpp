@@ -13,8 +13,8 @@ SolverOptions=TimeStepTargeting
 Version=version
 OutputFile=data2029.txt
 InfiniteLoopKeptStates=200 
-FiniteLoops 5    7 200 0 
-                -7 200 0 -7 200 0 7 200 0 7 200 0 
+FiniteLoops 3    7 200 0 
+                -14 200 0 14 200 0 
 RepeatFiniteLoopsFrom=1
 RepeatFiniteLoopsTimes=4
 

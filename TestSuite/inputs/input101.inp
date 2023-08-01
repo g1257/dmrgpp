@@ -15,7 +15,7 @@ SolverOptions=nowft
 Version=356c507fd063201fd29fe86afaa269d0cad94162
 OutputFile=data101.txt
 InfiniteLoopKeptStates=60
-FiniteLoops 4  7 100 0 -7 100 0 -7 100 0 7 100 0 
+FiniteLoops 3  7 100 0  -14 100 0 7 100 0 
 TargetElectronsUp=8
 TargetElectronsDown=8
 TargetSpinTimesTwo=0

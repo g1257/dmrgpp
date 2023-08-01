@@ -27,8 +27,7 @@ FiniteLoops=[
 [-48, 100, 8],
 [ 48, 100, 8],
 [-48, 100, 8],
-[ 24, 100, 8],
-[ 24, 100, 2],
+[ 48, 100, 2],
 [-48, 100, 2]];
 
 # Keep a maximum of 1000 states, but allow truncation

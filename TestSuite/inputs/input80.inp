@@ -18,6 +18,6 @@ SolverOptions=none
 Version=version
 OutputFile=data80
 InfiniteLoopKeptStates=100
-FiniteLoops 4  2 200 0 -2 200 0 -2 200 0 2 200 0
+FiniteLoops 3  2 200 0 -4 200 0  2 200 0
 TargetSzPlusConst=6
 

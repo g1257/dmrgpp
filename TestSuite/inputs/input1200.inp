@@ -37,6 +37,6 @@ SolverOptions=none
 Version=v2.6
 OutputFile=data1200.txt
 InfiniteLoopKeptStates=100
-FiniteLoops 4  3 100 0 -3 100 0 -3 100 0 3 100 0
+FiniteLoops 3  3 100 0 -6 100 0  3 100 0
 TargetElectronsUp=4
 TargetElectronsDown=4 

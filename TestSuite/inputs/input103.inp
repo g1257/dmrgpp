@@ -17,8 +17,8 @@ SolverOptions=none
 Version=aec8964f7a782d87d587c27276acd41760808139
 OutputFile=data103.txt
 InfiniteLoopKeptStates=100
-FiniteLoops 5  15 400 0 -15 400 0 -15 400 0 15 400 1 
-	15 400 1 
+FiniteLoops 3  15 400 0 -30 400 0 
+	30 400 1 
 TargetElectronsUp=16
 TargetElectronsDown=16
 TargetSpinTimesTwo=0

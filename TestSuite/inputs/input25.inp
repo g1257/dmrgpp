@@ -18,6 +18,6 @@ SolverOptions=none
 Version=247b335fe1542909b90be8647456bfd8fd56191c
 OutputFile=data25.txt
 InfiniteLoopKeptStates=60
-FiniteLoops 4  7 100 0 -7 100 0 -7 100 0 7 100 0 
+FiniteLoops 3  7 100 0 -14 100 0 7 100 0 
 TargetSzPlusConst=8
  

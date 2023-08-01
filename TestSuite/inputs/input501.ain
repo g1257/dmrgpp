@@ -11,7 +11,7 @@ dir0:Connectors=[1.0];
 hubbardU=[0,...];
 potentialV=[0,...];
 
-AddOnSiteHamiltonian="[zero,-0.77*(c:*:0.8:%t)*nup, -0.91*(c:*:0.8:%t)*nup, -0.144*(c:*:0.8:%t)*nup, -0.144*(c:*:0.8:%t)*nup, -0.91*(c:*:0.8:%t)*nup, -0.77*(c:*:0.8:%t)*nup, zero]";
+AddOnSiteHamiltonian="[zero,-0.77*(cos:*:0.8:%t)*nup, -0.91*(cos:*:0.8:%t)*nup, -0.144*(cos:*:0.8:%t)*nup, -0.144*(cos:*:0.8:%t)*nup, -0.91*(cos:*:0.8:%t)*nup, -0.77*(cos:*:0.8:%t)*nup, zero]";
 #=3, =2, =1, =0]";
 
 Model="HubbardOneBand";
