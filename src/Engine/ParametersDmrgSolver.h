@@ -562,7 +562,7 @@ struct ParametersDmrgSolver {
 
 		std::cout << "FiniteLoopLengths=[";
 
-		if (lastSite == 1 && !latticeIsOdd) {
+        if (lastSite == 1 && !latticeIsOdd && numberOfSites > 4) {
 			lastSite = 0;
 		}
 
