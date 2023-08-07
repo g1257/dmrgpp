@@ -39,7 +39,6 @@ InfiniteLoopKeptStates=64
 FiniteLoops 2
 -4 800 0 4 800 0
 
-RepeatFiniteLoopsFrom=1
 RepeatFiniteLoopsTimes=20
 
 TargetElectronsUp=4
