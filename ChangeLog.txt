@@ -1,3 +1,69 @@
+2023-08-08 Version 6.06
+
+Bug Fixes
+
+* Kitaev: bug fix for sminus operator (Jacek H.)
+
+* Bug Fix: root-N Krylov restart (Alberto N.)
+
+* Braket: resize sites_ fix for !stringorder (Jacek H.)
+
+* <gs|!stringorder=A:B:C|gs> now checks op B (Jacek H.)
+
+* TargetingCorrectionA: bug fix
+
+* observe's readOnDemand: bug fix (Pontus L.)
+
+* observe's readOnDemand doesn't support threads > 1
+
+* nodmrgtransform SolverOptions: bug fix (Bradraj P.)
+
+* FermionSpinless: Warning Corrected
+
+* noClobber fix: reading .cout backwards (Alberto N.)
+
+* toolboxdmrg: fixes
+
+New features
+
+* KitaevWithGammasReal, WithCharge (Pontus L.)
+
+* FiniteLoop @auto
+
+* SolverOptions=noTermAlias
+
+* HubbardHolsteinSpinless added (Alberto N.)
+
+* Interaction-assisted hopping added (Nitin K.)
+	see ci 470
+
+* FeBasedSc has extension SpinDependentHopping (Nitin K.)
+
+* TargetFermionicParity=even or odd (Bradraj P.)
+
+* IsingMultiOrb model added (Alberto N.)
+
+* Model Connections lambda accepts time now (Alberto N.)
+
+Refactoring and Improvements
+
+* GeometryValueModifier deleted (Alberto N.)
+
+* Partial work on SDHS (Alberto N.)
+
+* FindSymmetrySector collapses sectors now
+
+* Diagonalization: refactored
+
+* checks against partial sweeps
+
+* ExpressionCalculator deleted in PsimagLite
+
+* Truncation: warn if nominal m decreased during run
+
+* clang format configuration file added
+
+
 2022-05-10 Version 6.04
 
 Bug fixes:
