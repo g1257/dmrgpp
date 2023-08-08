@@ -1,3 +1,18 @@
+2023-08-08 Version 3.06
+
+* expIpi: bug fix
+
+* ExpressionForAST replaces ExpressionCalculator
+
+* Ainur: Complex numbers now supported
+
+* Ainur: Native macros now supported
+
+* Geometry: GeometryValueModifier deleted
+
+* clang_format added
+
+
 2022-05-10 Version 3.04
 
 * CanonicalExpression has second optional template
