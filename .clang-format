@@ -2,10 +2,10 @@
 # We'll use defaults from the LLVM style, but with 4 columns indentation.
 BasedOnStyle: WebKit
 Language: Cpp
-UseTab: ForContinuationAndIndentation
+UseTab: ForIndentation
 TabWidth: 8
 IndentWidth: 8
-BreakBeforeBraces: Linux
+BreakBeforeBraces: Stroustrup
 IndentAccessModifiers: false
 AccessModifierOffset: -8
 EmptyLineAfterAccessModifier: Always
@@ -20,7 +20,6 @@ BraceWrapping:
   AfterObjCDeclaration: true
   AfterStruct:     true
   AfterUnion:      true
-  AfterExternBlock: false
   BeforeCatch:     true
   BeforeElse:      true
   BeforeLambdaBody: true
@@ -29,8 +28,11 @@ BraceWrapping:
   SplitEmptyRecord: true
   SplitEmptyNamespace: true
 
-BinPackArguments: false
+BinPackArguments: false 
 BinPackParameters: false
 ExperimentalAutoDetectBinPacking: false
 AllowAllParametersOfDeclarationOnNextLine: false
+AlignAfterOpenBracket: Align
+  #AlignConsecutiveDeclarations: true
+  #AlignConsecutiveAssignments: true
 ---

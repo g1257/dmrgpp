@@ -93,7 +93,19 @@ public:
 		node_.set(values[index]);
 	}
 
-	void setDescendants(const TreeType& n0) { descendants_.push_back(&n0); }
+	bool isLinearTree() const
+	{
+		if (descendants_.size() > 1) return false;
+
+		if (descendants_.size() == 0) return true;
+
+		return descendants_[0]->isLinearTree();
+	}
+
+	void setDescendants(const TreeType& n0)
+	{
+		descendants_.push_back(&n0);
+	}
 
 	void setDescendants(const TreeType& n0, const TreeType& n1)
 	{
