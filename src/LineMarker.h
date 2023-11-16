@@ -30,11 +30,9 @@ Please see full open source license included in file LICENSE.
 #include "AllocatorCpu.h"
 #include <iostream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class LineMarker
-{
+class LineMarker {
 public:
 
 	LineMarker(const String& name)

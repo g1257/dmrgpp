@@ -4,8 +4,7 @@
 #include "../PsimagLite.h"
 #include "AinurMacros.hh"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 struct AinurVariable {
 	std::string key;
@@ -14,8 +13,7 @@ struct AinurVariable {
 	std::string opaque;
 };
 
-class AinurConvert
-{
+class AinurConvert {
 
 	template <typename T>
 	struct Action {
@@ -80,7 +78,8 @@ public:
 
 		try {
 			t = PsimagLite::atoi(label.c_str());
-		} catch (std::exception& e) {
+		}
+		catch (std::exception& e) {
 			std::cerr << "FATAL: AinurState: Label " + label + " must be an integer\n";
 			throw e.what();
 		}
@@ -94,7 +93,8 @@ public:
 
 		try {
 			t = PsimagLite::atof(label.c_str());
-		} catch (...) {
+		}
+		catch (...) {
 			err("FATAL: AinurState: Label " + label + " must be a real number\n");
 		}
 	}
@@ -114,10 +114,10 @@ public:
 private:
 
 	static String stringContext(std::string::iterator it,
-	    std::string::iterator start,
-	    std::string::iterator end,
-	    SizeType before = 5,
-	    SizeType after = 10)
+	                            std::string::iterator start,
+	                            std::string::iterator end,
+	                            SizeType before = 5,
+	                            SizeType after = 10)
 	{
 		std::string::iterator alpha = it;
 		SizeType counter = 0;

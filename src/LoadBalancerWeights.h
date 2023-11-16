@@ -3,11 +3,9 @@
 #include "Sort.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class LoadBalancerWeights
-{
+class LoadBalancerWeights {
 
 public:
 
@@ -15,7 +13,7 @@ public:
 
 	LoadBalancerWeights(SizeType ntasks, SizeType nthreads)
 	    : LoadBalancerWeights(VectorSizeType(ntasks, 1),
-		nthreads) // ctor delegation
+	                          nthreads) // ctor delegation
 	{
 	}
 
@@ -46,7 +44,7 @@ public:
 		for (SizeType i = 0; i < nthreads; ++i) {
 			SizeType n = taskNumber_[i].size();
 			std::cout << n << " Indices allocated to thread " << i
-				  << ": ";
+			          << ": ";
 			for (SizeType j = 0; j < n; ++j)
 				std::cout << taskNumber_[i][j] << " ";
 			std::cout << "\n";

@@ -24,8 +24,8 @@ int main()
 	params.lotaMemory = true;
 
 	PsimagLite::LanczosSolver<SolverParametersType,
-	    PsimagLite::CrsMatrix<ComplexType>,
-	    VectorType>
+	                          PsimagLite::CrsMatrix<ComplexType>,
+	                          VectorType>
 	    lanczosSolver(msparse, params);
 
 	double e = 0;

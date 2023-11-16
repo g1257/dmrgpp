@@ -15,13 +15,11 @@
  MSS
  */
 
-namespace psimag
-{
+namespace psimag {
 
 /** \brief Namespace encapsulating psimag wrappers of LAPACK functions.
  */
-namespace LAPACK
-{
+namespace LAPACK {
 
 #ifndef PSI_LAPACK_64
 	typedef int IntegerForLapackType;
@@ -185,168 +183,168 @@ namespace LAPACK
 	}
 
 	inline void GESDD(char* jobz, IntegerForLapackType* m, IntegerForLapackType* n, double* a,
-	    // T*,
-	    IntegerForLapackType* lda,
-	    double* s,
-	    double* u,
-	    // T*,
-	    IntegerForLapackType* ldu,
-	    double* vt,
-	    // T*,
-	    IntegerForLapackType* ldvt,
-	    double* work,
-	    // T*,
-	    IntegerForLapackType* lwork,
-	    double*,
-	    // nothing
-	    IntegerForLapackType* iwork,
+	                  // T*,
+	                  IntegerForLapackType* lda,
+	                  double* s,
+	                  double* u,
+	                  // T*,
+	                  IntegerForLapackType* ldu,
+	                  double* vt,
+	                  // T*,
+	                  IntegerForLapackType* ldvt,
+	                  double* work,
+	                  // T*,
+	                  IntegerForLapackType* lwork,
+	                  double*,
+	                  // nothing
+	                  IntegerForLapackType* iwork,
 
-	    IntegerForLapackType* info)
+	                  IntegerForLapackType* info)
 	{
 		dgesdd_(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, iwork, info);
 	}
 
 	inline void GESDD(char* jobz, IntegerForLapackType* m, IntegerForLapackType* n, float* a,
-	    // T*,
-	    IntegerForLapackType* lda,
-	    float* s,
-	    float* u,
-	    // T*,
-	    IntegerForLapackType* ldu,
-	    float* vt,
-	    // T*,
-	    IntegerForLapackType* ldvt,
-	    float* work,
-	    // T*,
-	    IntegerForLapackType* lwork,
-	    float*,
-	    // nothing
-	    IntegerForLapackType* iwork,
+	                  // T*,
+	                  IntegerForLapackType* lda,
+	                  float* s,
+	                  float* u,
+	                  // T*,
+	                  IntegerForLapackType* ldu,
+	                  float* vt,
+	                  // T*,
+	                  IntegerForLapackType* ldvt,
+	                  float* work,
+	                  // T*,
+	                  IntegerForLapackType* lwork,
+	                  float*,
+	                  // nothing
+	                  IntegerForLapackType* iwork,
 
-	    IntegerForLapackType* info)
+	                  IntegerForLapackType* info)
 	{
 		sgesdd_(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, iwork, info);
 	}
 
 	inline void GESDD(char* jobz, IntegerForLapackType* m, IntegerForLapackType* n, std::complex<double>* a,
-	    // T*,
-	    IntegerForLapackType* lda,
-	    double* s,
-	    std::complex<double>* u,
-	    // T*,
-	    IntegerForLapackType* ldu,
-	    std::complex<double>* vt,
-	    // T*,
-	    IntegerForLapackType* ldvt,
-	    std::complex<double>* work,
-	    // T*,
-	    IntegerForLapackType* lwork,
-	    double* rwork,
-	    // nothing
-	    IntegerForLapackType* iwork,
-	    IntegerForLapackType* info)
+	                  // T*,
+	                  IntegerForLapackType* lda,
+	                  double* s,
+	                  std::complex<double>* u,
+	                  // T*,
+	                  IntegerForLapackType* ldu,
+	                  std::complex<double>* vt,
+	                  // T*,
+	                  IntegerForLapackType* ldvt,
+	                  std::complex<double>* work,
+	                  // T*,
+	                  IntegerForLapackType* lwork,
+	                  double* rwork,
+	                  // nothing
+	                  IntegerForLapackType* iwork,
+	                  IntegerForLapackType* info)
 	{
 		zgesdd_(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, iwork, info);
 	}
 
 	inline void GESDD(char* jobz, IntegerForLapackType* m, IntegerForLapackType* n, std::complex<float>* a,
-	    // T*,
-	    IntegerForLapackType* lda,
+	                  // T*,
+	                  IntegerForLapackType* lda,
 
-	    float* s,
-	    std::complex<float>* u,
-	    // T*,
-	    IntegerForLapackType* ldu,
-	    std::complex<float>* vt,
-	    // T*,
-	    IntegerForLapackType* ldvt,
-	    std::complex<float>* work,
-	    // T*,
-	    IntegerForLapackType* lwork,
-	    float* rwork,
-	    // nothing
-	    IntegerForLapackType* iwork,
-	    IntegerForLapackType* info)
+	                  float* s,
+	                  std::complex<float>* u,
+	                  // T*,
+	                  IntegerForLapackType* ldu,
+	                  std::complex<float>* vt,
+	                  // T*,
+	                  IntegerForLapackType* ldvt,
+	                  std::complex<float>* work,
+	                  // T*,
+	                  IntegerForLapackType* lwork,
+	                  float* rwork,
+	                  // nothing
+	                  IntegerForLapackType* iwork,
+	                  IntegerForLapackType* info)
 	{
 		cgesdd_(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, iwork, info);
 	}
 
 	inline void GESVD(char* jobz, char* jobvt, IntegerForLapackType* m, IntegerForLapackType* n, double* a,
-	    // T*,
-	    IntegerForLapackType* lda,
-	    double* s,
-	    double* u,
-	    // T*,
-	    IntegerForLapackType* ldu,
-	    double* vt,
-	    // T*,
-	    IntegerForLapackType* ldvt,
-	    double* work,
-	    // T*,
-	    IntegerForLapackType* lwork,
-	    double*,
-	    // nothing
-	    IntegerForLapackType* info)
+	                  // T*,
+	                  IntegerForLapackType* lda,
+	                  double* s,
+	                  double* u,
+	                  // T*,
+	                  IntegerForLapackType* ldu,
+	                  double* vt,
+	                  // T*,
+	                  IntegerForLapackType* ldvt,
+	                  double* work,
+	                  // T*,
+	                  IntegerForLapackType* lwork,
+	                  double*,
+	                  // nothing
+	                  IntegerForLapackType* info)
 	{
 		dgesvd_(jobz, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, info);
 	}
 
 	inline void GESVD(char* jobz, char* jobvt, IntegerForLapackType* m, IntegerForLapackType* n, float* a,
-	    // T*,
-	    IntegerForLapackType* lda,
-	    float* s,
-	    float* u,
-	    // T*,
-	    IntegerForLapackType* ldu,
-	    float* vt,
-	    // T*,
-	    IntegerForLapackType* ldvt,
-	    float* work,
-	    // T*,
-	    IntegerForLapackType* lwork,
-	    float*,
-	    // nothing
-	    IntegerForLapackType* info)
+	                  // T*,
+	                  IntegerForLapackType* lda,
+	                  float* s,
+	                  float* u,
+	                  // T*,
+	                  IntegerForLapackType* ldu,
+	                  float* vt,
+	                  // T*,
+	                  IntegerForLapackType* ldvt,
+	                  float* work,
+	                  // T*,
+	                  IntegerForLapackType* lwork,
+	                  float*,
+	                  // nothing
+	                  IntegerForLapackType* info)
 	{
 		sgesvd_(jobz, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, info);
 	}
 
 	inline void GESVD(char* jobz, char* jobvt, IntegerForLapackType* m, IntegerForLapackType* n, std::complex<double>* a,
-	    // T*,
-	    IntegerForLapackType* lda,
-	    double* s,
-	    std::complex<double>* u,
-	    // T*,
-	    IntegerForLapackType* ldu,
-	    std::complex<double>* vt,
-	    // T*,
-	    IntegerForLapackType* ldvt,
-	    std::complex<double>* work,
-	    // T*,
-	    IntegerForLapackType* lwork,
-	    double* rwork,
-	    // nothing
-	    IntegerForLapackType* info)
+	                  // T*,
+	                  IntegerForLapackType* lda,
+	                  double* s,
+	                  std::complex<double>* u,
+	                  // T*,
+	                  IntegerForLapackType* ldu,
+	                  std::complex<double>* vt,
+	                  // T*,
+	                  IntegerForLapackType* ldvt,
+	                  std::complex<double>* work,
+	                  // T*,
+	                  IntegerForLapackType* lwork,
+	                  double* rwork,
+	                  // nothing
+	                  IntegerForLapackType* info)
 	{
 		zgesvd_(jobz, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info);
 	}
 
 	inline void GESVD(char* jobz, char* jobvt, IntegerForLapackType* m, IntegerForLapackType* n, std::complex<float>* a,
-	    // T*,
-	    IntegerForLapackType* lda,
-	    float* s,
-	    std::complex<float>* u,
-	    // T*,
-	    IntegerForLapackType* ldu,
-	    std::complex<float>* vt,
-	    // T*,
-	    IntegerForLapackType* ldvt,
-	    std::complex<float>* work,
-	    // T*,
-	    IntegerForLapackType* lwork,
-	    float* rwork,
-	    // nothing
-	    IntegerForLapackType* info)
+	                  // T*,
+	                  IntegerForLapackType* lda,
+	                  float* s,
+	                  std::complex<float>* u,
+	                  // T*,
+	                  IntegerForLapackType* ldu,
+	                  std::complex<float>* vt,
+	                  // T*,
+	                  IntegerForLapackType* ldvt,
+	                  std::complex<float>* work,
+	                  // T*,
+	                  IntegerForLapackType* lwork,
+	                  float* rwork,
+	                  // nothing
+	                  IntegerForLapackType* info)
 	{
 		cgesvd_(jobz, jobvt, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info);
 	}

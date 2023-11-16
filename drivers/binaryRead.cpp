@@ -22,6 +22,6 @@ int main(int argc, char* argv[])
 		fin.readCheckTotalAndType(check, total, type);
 		int check1 = check;
 		std::cout << "check=" << check1 << " total=" << total
-			  << " type=" << fin.nameOfType(type) << "\n";
+		          << " type=" << fin.nameOfType(type) << "\n";
 	}
 }

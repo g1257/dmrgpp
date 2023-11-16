@@ -9,8 +9,7 @@
 // authored by K.A.A
 
 template <typename RealType, typename VectorType, typename MatrixType>
-class GammaCiCj
-{
+class GammaCiCj {
 
 	typedef typename MatrixType::value_type ComplexOrRealType;
 

@@ -8,8 +8,7 @@
 #include <boost/spirit/include/phoenix_operator.hpp>
 #include <boost/spirit/include/qi.hpp>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename A, typename ContextType>
 void Ainur::Action::operator()(A& attr, ContextType&, bool&) const
@@ -18,11 +17,13 @@ void Ainur::Action::operator()(A& attr, ContextType&, bool&) const
 		String v1 = boost::fusion::at_c<0>(attr);
 		String v2 = boost::fusion::at_c<1>(attr);
 		state_.assign(v1, v2);
-	} else if (name_ == "statement2") {
+	}
+	else if (name_ == "statement2") {
 		String v1 = boost::fusion::at_c<0>(attr);
 		String v2 = boost::fusion::at_c<1>(attr);
 		state_.declare(v1, v2);
-	} else {
+	}
+	else {
 		err("Ainur: bad action name " + name_ + "\n");
 	}
 }
@@ -90,7 +91,7 @@ Ainur::Ainur(String str)
 		if (first + 1 != last && !allEmpty(first, last)) {
 			IteratorType e = (first + 20 < last) ? first + 20 : last;
 			err(AinurState::errLabel(AinurState::ERR_PARSE_FAILED,
-			    String(first, e)));
+			                         String(first, e)));
 		}
 	}
 

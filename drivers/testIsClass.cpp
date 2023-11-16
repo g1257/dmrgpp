@@ -1,8 +1,7 @@
 #include "IsClass.h"
 #include <vector>
 
-class A
-{
+class A {
 };
 
 template <typename T>

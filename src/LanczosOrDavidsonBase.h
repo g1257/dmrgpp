@@ -81,12 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define LANCZOS_OR_DAVIDSON_BASE_H
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename SolverParametersType, typename MatrixType_, typename VectorType>
-class LanczosOrDavidsonBase
-{
+class LanczosOrDavidsonBase {
 
 public:
 
@@ -111,7 +109,7 @@ public:
 
 		if (!canReortho) {
 			PsimagLite::String str("LanczosOrDavidsonBase: Reortho "
-					       "requested but cannot");
+			                       "requested but cannot");
 			str += "Suggestion: Delete reortho from input or set "
 			       "lotaMemory=true\n";
 			throw PsimagLite::RuntimeError(str);

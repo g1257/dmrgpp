@@ -9,11 +9,9 @@
 #include <cassert>
 #include <numeric>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class AinurState
-{
+class AinurState {
 
 public:
 
@@ -168,12 +166,12 @@ public:
 		switch (e) {
 		case ERR_PARSE_UNDECLARED:
 			return "FATAL parse error: Undeclared " + key + "\n" + "You provided a label in the " + "input file that was not recognized.\n" + "Please check the spelling. If you intended " + "to introduce a temporary label,\nyou must "
-																									  "declare "
+			                                                                                                                                                                                  "declare "
 			    + "it first; please see Ainur input format "
 			      "documentation.\n";
 		case ERR_PARSE_DECLARED:
 			return "FATAL parse error: Already declared " + key + "\n" + "You tried to re-declare a variable that was "
-										     "already declared.\n"
+			                                                             "already declared.\n"
 			    + "If you intended to just provide a value for " + key + " then please remove the declaration word.\n";
 		case ERR_PARSE_FAILED:
 			return "FATAL parse error: Parsing failed near " + key + "\n" + "This is probably a syntax error.\n";
@@ -277,7 +275,8 @@ private:
 
 			if (isValidCharForMacroName(c)) {
 				macroName += c;
-			} else {
+			}
+			else {
 
 				int x = storageIndexByName(macroName);
 				if (x < 0)
@@ -293,7 +292,7 @@ private:
 		}
 
 		return std::pair<bool, PsimagLite::String>(hasAtLeastOneMacro,
-		    unquote(retString));
+		                                           unquote(retString));
 	}
 
 	static bool isValidCharForMacroName(char c)

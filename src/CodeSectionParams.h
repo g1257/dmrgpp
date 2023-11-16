@@ -2,8 +2,7 @@
 #define CODESECTION_PARAMS_H
 #include "AllocatorCpu.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 struct CodeSectionParams {
 

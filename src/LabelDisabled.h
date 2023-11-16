@@ -2,11 +2,9 @@
 #define LABEL_DISABLED_H
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class LabelDisabled
-{
+class LabelDisabled {
 
 	typedef Vector<String>::Type VectorStringType;
 

@@ -81,13 +81,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CodeSectionParams.h"
 #include "LoadBalancerDefault.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename PthreadFunctionHolderType,
-    typename LoadBalancerType = LoadBalancerDefault>
-class NoPthreadsNg
-{
+          typename LoadBalancerType = LoadBalancerDefault>
+class NoPthreadsNg {
 
 public:
 
@@ -116,7 +114,7 @@ public:
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
 	void loopCreate(PthreadFunctionHolderType& pfh,
-	    const VectorSizeType& weights)
+	                const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, 1);
 		loopCreate(pfh, *loadBalancer);
@@ -126,7 +124,7 @@ public:
 
 	// balancer (includes weights)
 	void loopCreate(PthreadFunctionHolderType& pfh,
-	    const LoadBalancerType&)
+	                const LoadBalancerType&)
 	{
 		SizeType ntasks = pfh.tasks();
 		for (SizeType taskNumber = 0; taskNumber < ntasks;

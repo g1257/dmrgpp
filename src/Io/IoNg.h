@@ -90,8 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <typeinfo>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 /* PSIDOC IsRootUnDelegated
 Root-undelegated types are one of the following.
@@ -113,29 +112,27 @@ struct IsRootUnDelegated {
 };
 /* PSIDOC_CODE_END */
 
-class IoNg
-{
+class IoNg {
 
 public:
 
 	/*
-		H5F_ACC_TRUNC - Truncate file, if it already exists,
-		erasing all data previously stored in the file.
-		H5F_ACC_EXCL - Fail if file already exists. H5F_ACC_TRUNC
-		and H5F_ACC_EXCL are mutually exclusive
-		H5F_ACC_RDONLY - Open file as read-only, if it already exists,
+	        H5F_ACC_TRUNC - Truncate file, if it already exists,
+	        erasing all data previously stored in the file.
+	        H5F_ACC_EXCL - Fail if file already exists. H5F_ACC_TRUNC
+	        and H5F_ACC_EXCL are mutually exclusive
+	        H5F_ACC_RDONLY - Open file as read-only, if it already exists,
 	   and fail, otherwise H5F_ACC_RDWR - Open file for read/write, if it
 	   already exists, and fail, otherwise
 	*/
 	enum OpenMode { ACC_TRUNC,
-		ACC_EXCL,
-		ACC_RDONLY,
-		ACC_RDW };
+		        ACC_EXCL,
+		        ACC_RDONLY,
+		        ACC_RDW };
 
 	static void dontPrintDebug() { IoNgSerializer::dontPrintDebug(); }
 
-	class Out
-	{
+	class Out {
 
 	public:
 
@@ -240,8 +237,7 @@ public:
 		IoNgSerializer ioNgSerializer_;
 	};
 
-	class In
-	{
+	class In {
 
 	public:
 

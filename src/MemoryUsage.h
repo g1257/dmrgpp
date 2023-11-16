@@ -81,18 +81,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <sys/time.h>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class MemoryUsage
-{
+class MemoryUsage {
 
 	static const SizeType MY_MAX_LINE = 40240;
 
 public:
 
-	class TimeHandle
-	{
+	class TimeHandle {
 
 	public:
 

@@ -39,11 +39,9 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 #include <typeinfo>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename TridiagonalMatrixType_>
-class ContinuedFraction
-{
+class ContinuedFraction {
 public:
 
 	typedef TridiagonalMatrixType_ TridiagonalMatrixType;
@@ -59,7 +57,7 @@ public:
 	typedef ParametersForSolver<RealType> ParametersType;
 
 	ContinuedFraction(const TridiagonalMatrixType& ab,
-	    const ParametersType& params)
+	                  const ParametersType& params)
 	    : progress_("ContinuedFraction")
 	    , freqEnum_(FREQ_REAL)
 	    , ab_(ab)
@@ -88,7 +86,8 @@ public:
 		String f;
 		try {
 			io.readline(f, "#FreqEnum=");
-		} catch (std::exception& e) {
+		}
+		catch (std::exception& e) {
 			std::cerr
 			    << "ContinuedFraction: FreqEnum assumed REAL\n";
 			f = "Real";
@@ -172,7 +171,7 @@ public:
 	}
 
 	void plotMatsubara(PlotDataType& result,
-	    const PlotParamsType& params) const
+	                   const PlotParamsType& params) const
 	{
 		SizeType counter = 0;
 		SizeType n = params.numberOfMatsubaras;
@@ -182,10 +181,10 @@ public:
 		     omegaIndex < params.numberOfMatsubaras;
 		     ++omegaIndex) {
 			ComplexType z(params.delta,
-			    matsubara(omegaIndex, params));
+			              matsubara(omegaIndex, params));
 			ComplexType res = iOfOmega(z, Eg_, isign_);
 			std::pair<RealType, ComplexType> p(PsimagLite::imag(z),
-			    res);
+			                                   res);
 			result[counter++] = p;
 			if (counter >= result.size())
 				break;

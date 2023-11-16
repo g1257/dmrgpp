@@ -7,8 +7,7 @@
 #include "AllocatorCpu.h"
 #include <sstream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <class T>
 String typeToString(T t)
 {

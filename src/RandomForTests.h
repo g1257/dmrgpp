@@ -32,11 +32,9 @@ Please see full open source license included in file LICENSE.
 #include <stdexcept>
 #include <string>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename T>
-class RandomForTests
-{
+class RandomForTests {
 
 public:
 

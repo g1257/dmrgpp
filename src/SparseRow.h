@@ -82,12 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename CrsMatrixType>
-class SparseRow
-{
+class SparseRow {
 public:
 
 	typedef typename CrsMatrixType::value_type ValueType;

@@ -4,8 +4,7 @@
 #include "Vector.h"
 #include <cstdlib>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 struct OneOperatorSpec {
 
 	OneOperatorSpec(PsimagLite::String label_)
@@ -59,8 +58,8 @@ struct OneOperatorSpec {
 	};
 
 	static SiteSplit extractSiteIfAny(PsimagLite::String name,
-	    const char cBegin = '[',
-	    const char cEnd = ']')
+	                                  const char cBegin = '[',
+	                                  const char cEnd = ']')
 	{
 		int firstIndex = -1;
 		int lastIndex = -1;
@@ -93,8 +92,9 @@ struct OneOperatorSpec {
 	static bool isNonNegativeInteger(const String& s)
 	{
 		return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) {
-			return !std::isdigit(c);
-		}) == s.end();
+			                     return !std::isdigit(c);
+		                     })
+		    == s.end();
 	}
 
 	static SizeType strToNumberOrFail(String s)

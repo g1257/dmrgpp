@@ -1,8 +1,7 @@
 #include "Integrator.h"
 
 template <typename RealType_>
-class SquareFunction
-{
+class SquareFunction {
 
 	struct Params {
 		Params(RealType_ p_)

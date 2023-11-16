@@ -27,12 +27,10 @@ Please see full open source license included in file LICENSE.
 #include "AllocatorCpu.h"
 #include <map>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename Key, typename T, typename Compare = std::less<Key>>
-class Map
-{
+class Map {
 public:
 
 	typedef std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type>
@@ -40,16 +38,14 @@ public:
 }; // class Map
 
 template <typename T>
-class IsMapLike
-{
+class IsMapLike {
 public:
 
 	enum { True = false };
 };
 
 template <typename Key, typename T, typename Compare>
-class IsMapLike<std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type>>
-{
+class IsMapLike<std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type>> {
 public:
 
 	enum { True = true };

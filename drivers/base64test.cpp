@@ -40,7 +40,7 @@ René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 int main()
 {
 	const PsimagLite::String s = "ADP GmbH\nAnalyse Design & Programmierung"
-				     "\nGesellschaft mit beschränkter Haftung";
+	                             "\nGesellschaft mit beschränkter Haftung";
 
 	PsimagLite::PsiBase64::Encode base64encode(s);
 	PsimagLite::String encoded = base64encode();

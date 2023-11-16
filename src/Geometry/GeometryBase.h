@@ -83,12 +83,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "InputNg.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType>
-class GeometryBase
-{
+class GeometryBase {
 
 	typedef std::pair<SizeType, SizeType> PairType;
 	typedef Matrix<ComplexOrRealType> MatrixType;

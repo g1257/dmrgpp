@@ -2,8 +2,7 @@
 #define PSI_SPECIAL_FUNCTIONS_H
 #include "GslWrapper.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 std::complex<double> LnGammaFunction(const std::complex<double>&);
 

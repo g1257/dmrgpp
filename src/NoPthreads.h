@@ -83,11 +83,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include <iostream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename PthreadFunctionHolderType>
-class NoPthreads
-{
+class NoPthreads {
 
 public:
 

@@ -1,7 +1,6 @@
 #include "Concurrency.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 SizeType Concurrency::mode = 0;
 LabelDisabled Concurrency::mpiDisabled_;

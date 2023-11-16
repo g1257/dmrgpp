@@ -83,12 +83,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <stack>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename T>
-class Stack
-{
+class Stack {
 
 	typedef std::deque<T, typename Allocator<T>::Type> DequeType_;
 
@@ -98,16 +96,14 @@ public:
 }; // class Stack
 
 template <typename T>
-class IsStackLike
-{
+class IsStackLike {
 public:
 
 	enum { True = false };
 };
 
 template <typename T>
-class IsStackLike<std::stack<T, std::deque<T, typename Allocator<T>::Type>>>
-{
+class IsStackLike<std::stack<T, std::deque<T, typename Allocator<T>::Type>>> {
 public:
 
 	enum { True = true };

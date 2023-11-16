@@ -7,12 +7,10 @@
 
 // Originally written by Ed
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename T>
-class GemmR
-{
+class GemmR {
 
 public:
 
@@ -50,9 +48,9 @@ private:
 		const SizeType nblocks_i = (m + (nb_ - 1)) / nb_;
 		const SizeType nblocks_j = (n + (nb_ - 1)) / nb_;
 		int const nb_i = ((m % nblocks_i) == 0) ? (m / nblocks_i)
-							: ((m / nblocks_i) + 1);
+		                                        : ((m / nblocks_i) + 1);
 		int const nb_j = ((n % nblocks_j) == 0) ? (n / nblocks_j)
-							: ((n / nblocks_j) + 1);
+		                                        : ((n / nblocks_j) + 1);
 
 		bool const is_transA = (transA == 'T') || (transA == 't');
 		bool const is_conjA = (transA == 'C') || (transA == 'c');
@@ -64,11 +62,11 @@ private:
 
 		if (idebug_ >= 1) {
 			std::cout << " GEMMR: "
-				  << " m " << m << " n " << n << " k " << k
-				  << " nb " << nb_ << " nb_i " << nb_i
-				  << " nb_j " << nb_j << " nblocks_i "
-				  << nblocks_i << " nblocks_j " << nblocks_j
-				  << "\n";
+			          << " m " << m << " n " << n << " k " << k
+			          << " nb " << nb_ << " nb_i " << nb_i
+			          << " nb_j " << nb_j << " nblocks_i "
+			          << nblocks_i << " nblocks_j " << nblocks_j
+			          << "\n";
 		}
 
 		auto lambda = [transA, transB, m, n, k, alpha, &A, ldA, &B, ldB, beta, &C, ldC, nblocks_i, nb_i, nb_j, is_notransA, is_notransB](SizeType ij_block, SizeType) {

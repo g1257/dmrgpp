@@ -1,11 +1,9 @@
 // To be included by Mpi.cpp ONLY
 #include "MpiNo.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-namespace MPI
-{
+namespace MPI {
 
 	int COMM_WORLD = 0;
 	int SUM = 0;

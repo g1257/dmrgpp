@@ -96,12 +96,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Star.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType>
-class GeometryTerm
-{
+class GeometryTerm {
 
 	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
 	typedef GeometryDirection<ComplexOrRealType, GeometryBaseType>
@@ -123,13 +121,13 @@ public:
 		}
 
 		void write(PsimagLite::String label,
-		    IoSerializer& ioSerializer) const
+		           IoSerializer& ioSerializer) const
 		{
 			ioSerializer.createGroup(label);
 			ioSerializer.write(label + "/debug", debug);
 			ioSerializer.write(label + "/termId", termId);
 			ioSerializer.write(label + "/numberOfTerms",
-			    numberOfTerms);
+			                   numberOfTerms);
 			ioSerializer.write(label + "/linSize", linSize);
 		}
 
@@ -171,7 +169,8 @@ public:
 		try {
 			io.readline(x, "DegreesOfFreedom=");
 			orbitals_ = x;
-		} catch (std::exception&) {
+		}
+		catch (std::exception&) {
 		}
 
 		if (orbitals_ == 0)
@@ -186,38 +185,48 @@ public:
 		if (s == "chain" || s == "longchain") {
 			geometryBase_ = new LongChain<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		} else if (s == "chainEx") {
+		}
+		else if (s == "chainEx") {
 			throw RuntimeError("GeometryTerm::ctor(): ChainEx: no "
-					   "longer supported.\n");
-		} else if (s == "ladder") {
+			                   "longer supported.\n");
+		}
+		else if (s == "ladder") {
 			geometryBase_ = new Ladder<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		} else if (s == "ladderx") {
+		}
+		else if (s == "ladderx") {
 			geometryBase_ = new LadderX<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		} else if (s == "ladderbath") {
+		}
+		else if (s == "ladderbath") {
 			geometryBase_ = new LadderBath<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		} else if (s == "ktwoniffour") {
+		}
+		else if (s == "ktwoniffour") {
 			geometryBase_ = new KTwoNiFFour<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		} else if (s == "star") {
+		}
+		else if (s == "star") {
 			geometryBase_ = new Star<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		} else if (s == "LongRange" || s == "General") {
+		}
+		else if (s == "LongRange" || s == "General") {
 			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
 			idof = GeometryDirectionType::GENERAL;
-		} else if (s == "Honeycomb") {
+		}
+		else if (s == "Honeycomb") {
 			geometryBase_ = new Honeycomb<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		} else if (s.substr(0, 5) == "Super") {
+		}
+		else if (s.substr(0, 5) == "Super") {
 			std::cout << __FILE__ << " SuperGeometry " << s
-				  << " detected\n";
+			          << " detected\n";
 			std::cerr << __FILE__ << " SuperGeometry " << s
-				  << " detected\n";
+			          << " detected\n";
 			gOptions_ = s;
-		} else {
+		}
+		else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}
 
@@ -235,7 +244,8 @@ public:
 			String vModifier;
 			io.readline(vModifier, "GeometryValueModifier=");
 			hasModifier = true;
-		} catch (std::exception&) {
+		}
+		catch (std::exception&) {
 		}
 
 		if (hasModifier) {
@@ -353,7 +363,7 @@ public:
 	bool connected(SizeType i1, SizeType i2) const
 	{
 		return (geometryBase_) ? geometryBase_->connected(i1, i2)
-				       : false;
+		                       : false;
 	}
 
 	String label() const
@@ -431,7 +441,7 @@ public:
 	String options() const { return gOptions_; }
 
 	friend std::ostream& operator<<(std::ostream& os,
-	    const GeometryTerm& gt)
+	                                const GeometryTerm& gt)
 	{
 		os << "#GeometryDirections=" << gt.directions_.size() << "\n";
 		for (SizeType i = 0; i < gt.directions_.size(); i++)

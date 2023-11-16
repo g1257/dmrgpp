@@ -2,8 +2,7 @@
 #define DMRG_MATRIX_NON_OWNED_H
 #include "Matrix.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename T>
 struct VectorConstOrNot {
@@ -16,8 +15,7 @@ struct VectorConstOrNot<const T> {
 };
 
 template <typename T>
-class MatrixNonOwned
-{
+class MatrixNonOwned {
 
 public:
 

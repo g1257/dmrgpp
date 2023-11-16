@@ -4,11 +4,9 @@
 #include <map>
 #include <string>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class AinurMacros
-{
+class AinurMacros {
 
 public:
 
@@ -18,8 +16,7 @@ public:
 		std::string value;
 	};
 
-	class AinurFunction
-	{
+	class AinurFunction {
 
 		static constexpr SizeType MAX_LINE = 2048;
 
@@ -36,7 +33,7 @@ public:
 			if (tokens.size() == 0) {
 				throw RuntimeError(
 				    "Parse error for " + args + ". Expected (filename, separator, "
-								"column_x, column_y),"
+				                                "column_x, column_y),"
 				    + " where separator and columns are "
 				      "optional.\n");
 			}
@@ -73,14 +70,14 @@ public:
 		}
 
 		static std::string deleteEnclosing(const std::string& content,
-		    char b)
+		                                   char b)
 		{
 			return deleteEnclosing(content, b, b);
 		}
 
 		static std::string deleteEnclosing(const std::string& content,
-		    char b,
-		    char e)
+		                                   char b,
+		                                   char e)
 		{
 			SizeType length = content.size();
 			if (length == 0)
@@ -108,7 +105,8 @@ public:
 		{
 			if (separator == "space") {
 				return " ";
-			} else if (separator == "comma") {
+			}
+			else if (separator == "comma") {
 				return ",";
 			}
 

@@ -90,8 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 /** MatrixType must have the following interface:
  * RealType type to indicate the matrix type
@@ -107,8 +106,7 @@ namespace PsimagLite
  *
  */
 template <typename SolverParametersType, typename MatrixType_, typename VectorType>
-class ChebyshevSolver
-{
+class ChebyshevSolver {
 
 	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType>
 	    NotBaseType;
@@ -129,8 +127,8 @@ public:
 	typedef PsimagLite::Random48<RealType> RngType;
 
 	enum { WITH_INFO = 1,
-		DEBUG = 2,
-		ALLOWS_ZERO = 4 };
+	       DEBUG = 2,
+	       ALLOWS_ZERO = 4 };
 
 	ChebyshevSolver(MatrixType const& mat, SolverParametersType& params)
 	    : progress_("ChebyshevSolver")
@@ -165,7 +163,7 @@ public:
 	}
 
 	void buildDenseMatrix(DenseMatrixType&,
-	    const TridiagonalMatrixType&) const
+	                      const TridiagonalMatrixType&) const
 	{
 		unimplemented("buildDenseMatrix");
 	}
@@ -179,7 +177,7 @@ public:
 	//! ab.a contains the even moments
 	//! ab.b contains the odd moments
 	void decomposition(const VectorType& initVector,
-	    TridiagonalMatrixType& ab)
+	                   TridiagonalMatrixType& ab)
 	{
 		VectorType x(initVector.size(), 0.0);
 		VectorType y = initVector;
@@ -286,8 +284,7 @@ private:
 		unimplemented("computeGroundStateTest");
 	}
 
-	class InternalMatrix
-	{
+	class InternalMatrix {
 	public:
 
 		InternalMatrix(const MatrixType& mat)
@@ -299,7 +296,7 @@ private:
 		SizeType rows() const { return matx_.rows(); }
 
 		void matrixVectorProduct(VectorType& x,
-		    const VectorType& y) const
+		                         const VectorType& y) const
 		{
 			for (SizeType i = 0; i < y_.size(); i++)
 				y_[i] = -y[i];

@@ -21,8 +21,7 @@ Please see full open source license included in file LICENSE.
 #define USE_PTHREADS_OR_NOT_NG
 #include "../src/Parallelizer.h"
 
-class InnerHelper
-{
+class InnerHelper {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -58,8 +57,7 @@ private:
 	SizeType offset_;
 }; // class InnerHelper
 
-class MyHelper
-{
+class MyHelper {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -109,7 +107,7 @@ int main(int argc, char* argv[])
 
 	if (argc != 5) {
 		std::cout << "USAGE: " << argv[0]
-			  << " threadsOuter tasksOuter threadsInner tasksInner\n";
+		          << " threadsOuter tasksOuter threadsInner tasksInner\n";
 		return 1;
 	}
 

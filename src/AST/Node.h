@@ -19,12 +19,10 @@ Please see full open source license included in file LICENSE.
 #include "../Vector.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename VectorValueType, typename AnglesType_ = int>
-class Node
-{
+class Node {
 
 public:
 
@@ -43,8 +41,8 @@ public:
 	virtual ValueType exec(const VectorValueType&) const = 0;
 
 	virtual ValueType exec(const VectorValueType&,
-	    const VectorAnglesType*,
-	    SizeType&) const
+	                       const VectorAnglesType*,
+	                       SizeType&) const
 	{
 		throw PsimagLite::RuntimeError("node::exec() long form\n");
 	}
@@ -68,8 +66,7 @@ public:
 }; // class Node
 
 template <typename VectorValueType>
-class Plus : public Node<VectorValueType>
-{
+class Plus : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -90,8 +87,7 @@ public:
 }; // class Plus
 
 template <typename VectorValueType>
-class Minus : public Node<VectorValueType>
-{
+class Minus : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -112,8 +108,7 @@ public:
 }; // class Minus
 
 template <typename VectorValueType>
-class Times : public Node<VectorValueType>
-{
+class Times : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -134,8 +129,7 @@ public:
 }; // class Times
 
 template <typename VectorValueType>
-class DividedBy : public Node<VectorValueType>
-{
+class DividedBy : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -159,8 +153,7 @@ public:
 }; // class DividedBy
 
 template <typename VectorValueType>
-class IfGtZero : public Node<VectorValueType>
-{
+class IfGtZero : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -182,8 +175,7 @@ public:
 }; // class IfGtZero
 
 template <typename VectorValueType>
-class Int : public Node<VectorValueType>
-{
+class Int : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -206,8 +198,7 @@ public:
 }; // class Int
 
 template <typename VectorValueType>
-class Input : public Node<VectorValueType>
-{
+class Input : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 

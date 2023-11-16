@@ -88,8 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 //! MatrixType must have the following interface:
 //! 	RealType type to indicate the matrix type
@@ -99,8 +98,7 @@ namespace PsimagLite
 //!    	   member function that implements the operation x += Hy
 
 template <typename SolverParametersType, typename MatrixType, typename VectorType_>
-class LanczosCore
-{
+class LanczosCore {
 
 	typedef LanczosVectors<MatrixType, VectorType_> LanczosVectorsType;
 
@@ -147,8 +145,8 @@ public:
 	 *            |               .     .  b[j-2]  a[j-1] |
 	 */
 	void decomposition(const VectorType& initVector,
-	    TridiagonalMatrixType& ab,
-	    SizeType excitedForStop)
+	                   TridiagonalMatrixType& ab,
+	                   SizeType excitedForStop)
 	{
 		SizeType& max_nstep = steps_;
 		SizeType matsize = mat_.rows();
@@ -222,7 +220,7 @@ public:
 			lanczosVectors_.oneStepDecomposition(V0, V1, V2, ab, j);
 			ab.diag(tmpEigs, j + 1);
 			const SizeType eigsForError = std::min(excitedForStop,
-			    static_cast<SizeType>(tmpEigs.size()));
+			                                       static_cast<SizeType>(tmpEigs.size()));
 
 			deltaMax = 0;
 			for (SizeType ii = 0; ii < eigsForError; ++ii) {
@@ -285,7 +283,7 @@ public:
 		DenseMatrixType* ptr = lanczosVectors_.data();
 		if (!ptr)
 			throw RuntimeError("LanczosCore::lanczosVectors() "
-					   "called but no data stored\n");
+			                   "called but no data stored\n");
 
 		ptr->swap(V);
 	}

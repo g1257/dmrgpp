@@ -3,11 +3,9 @@
 #include "AinurDoubleOrFloat.h"
 #include "AinurStore.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class AinurReadable
-{
+class AinurReadable {
 
 public:
 
@@ -19,7 +17,7 @@ public:
 	typedef std::complex<RealType> ComplexType;
 
 	AinurReadable(const VectorStringType& names,
-	    const VectorStoreType& storage)
+	              const VectorStoreType& storage)
 	    : names_(names)
 	    , storage_(storage)
 	{
@@ -115,7 +113,7 @@ public:
 
 		if (store.type() == Store::MATRIX) {
 			std::cerr << "readValue: " << s
-				  << " coerced into vector\n";
+			          << " coerced into vector\n";
 			Matrix<typename VectorLikeType::value_type> m;
 			readValue(m, sOrig);
 			v = m.data();
@@ -150,7 +148,7 @@ public:
 			n = v.size();
 			for (SizeType i = 0; i < n; ++i)
 				getEntryFromString(v[i],
-				    store.value(0, names_[x]));
+				                   store.value(0, names_[x]));
 			return;
 		}
 

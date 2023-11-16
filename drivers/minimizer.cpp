@@ -7,7 +7,7 @@ T square(const T& t1) { return t1 * t1; }
 
 template <typename T>
 std::ostream& operator<<(std::ostream& os,
-    const typename PsimagLite::Vector<T>::Type& v)
+                         const typename PsimagLite::Vector<T>::Type& v)
 {
 	os << v.size() << "\n";
 	for (SizeType i = 0; i < v.size(); i++)
@@ -19,8 +19,7 @@ std::ostream& operator<<(std::ostream& os,
 using namespace PsimagLite;
 typedef double RealType;
 
-class MyFunctionTest
-{
+class MyFunctionTest {
 public:
 
 	typedef double FieldType;

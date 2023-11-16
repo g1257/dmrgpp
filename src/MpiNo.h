@@ -83,11 +83,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include <stdexcept>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-namespace MPI
-{
+namespace MPI {
 
 	typedef int CommType;
 	extern int COMM_WORLD;

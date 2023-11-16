@@ -46,15 +46,14 @@ Please see full open source license included in file LICENSE.
 #include <stdexcept>
 #include <typeinfo>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename RealType>
 struct KernelPolynomialParameters {
 
 	enum { JACKSON,
-		LORENTZ,
-		DIRICHLET };
+	       LORENTZ,
+	       DIRICHLET };
 
 	KernelPolynomialParameters(SizeType type1, SizeType cutoff1, const RealType& lambda1)
 	    : type(type1)
@@ -69,8 +68,7 @@ struct KernelPolynomialParameters {
 }; // struct KernelPolynomialParameters
 
 template <typename VectorType_>
-class ChebyshevSerializer
-{
+class ChebyshevSerializer {
 
 	typedef typename VectorType_::value_type VectorElementType;
 	typedef typename Real<VectorElementType>::Type RealType;
@@ -91,7 +89,7 @@ public:
 	typedef typename TridiagonalMatrixType::VectorRealType VectorRealType;
 
 	ChebyshevSerializer(const TridiagonalMatrixType& ab,
-	    const ParametersType& params)
+	                    const ParametersType& params)
 	    : progress_("ChebyshevSerializer")
 	    , moments_(ab)
 	    , params_(params)
@@ -195,7 +193,7 @@ private:
 	}
 
 	void initKernel(VectorRealType& gn,
-	    const KernelParametersType& kernelParams) const
+	                const KernelParametersType& kernelParams) const
 	{
 		switch (kernelParams.type) {
 		case KernelParametersType::JACKSON:

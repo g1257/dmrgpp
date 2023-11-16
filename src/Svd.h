@@ -5,12 +5,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType>
-class Svd
-{
+class Svd {
 
 public:
 
@@ -74,8 +72,8 @@ public:
 				throw RuntimeError(String(__FILE__) + ": " + ttos(__LINE__) + " info= " + ttos(info));
 			if (info > 0)
 				std::cerr << "WARNING " << __FILE__ << ": "
-					  << __LINE__ << " info= " << info
-					  << "\n";
+				          << __LINE__ << " info= " << info
+				          << "\n";
 		}
 
 		a = u;
@@ -84,24 +82,26 @@ public:
 private:
 
 	void mycall(char* jobz, int* m, int* n,
-	    ComplexOrRealType* a, // T*,
-	    int* lda,
-	    RealType* s,
-	    ComplexOrRealType* u, // T*,
-	    int* ldu,
-	    ComplexOrRealType* vt, // T*,
-	    int* ldvt,
-	    ComplexOrRealType* work, // T*,
-	    int* lwork,
-	    RealType* rwork, // nothing
-	    int* iwork,
-	    int* info)
+	            ComplexOrRealType* a, // T*,
+	            int* lda,
+	            RealType* s,
+	            ComplexOrRealType* u, // T*,
+	            int* ldu,
+	            ComplexOrRealType* vt, // T*,
+	            int* ldvt,
+	            ComplexOrRealType* work, // T*,
+	            int* lwork,
+	            RealType* rwork, // nothing
+	            int* iwork,
+	            int* info)
 	{
 		if (name_ == "gesdd") {
 			psimag::LAPACK::GESDD(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, iwork, info);
-		} else if (name_ == "gesvd") {
+		}
+		else if (name_ == "gesvd") {
 			psimag::LAPACK::GESVD(jobz, jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info);
-		} else {
+		}
+		else {
 			throw PsimagLite::RuntimeError("Unknown backend " + name_ + "\n");
 		}
 	}

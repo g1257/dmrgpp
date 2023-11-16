@@ -79,12 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PSI_GEOM_LONG_RANGE_H
 #include "GeometryBase.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType>
-class LongRange : public GeometryBase<ComplexOrRealType, InputType>
-{
+class LongRange : public GeometryBase<ComplexOrRealType, InputType> {
 
 	typedef Matrix<ComplexOrRealType> MatrixType;
 
@@ -107,7 +105,8 @@ public:
 		try {
 			io.readline(entangler, "GeometryEntangler=");
 			hasEntangler = true;
-		} catch (std::exception&) {
+		}
+		catch (std::exception&) {
 		}
 
 		if (hasEntangler) {
@@ -116,7 +115,8 @@ public:
 			const SizeType n = orbitals * linSize;
 			matrix_.resize(n, n);
 			setEntangler(entangler);
-		} else {
+		}
+		else {
 			io.read(matrix_, "Connectors");
 		}
 
@@ -126,7 +126,8 @@ public:
 
 		try {
 			io.readline(maxConnections_, "GeometryMaxConnections=");
-		} catch (std::exception& e) {
+		}
+		catch (std::exception& e) {
 			if (!hasEntangler) {
 				std::cerr
 				    << "Please add GeometryMaxConnections=0 or "
@@ -147,7 +148,7 @@ public:
 	virtual SizeType maxConnections() const
 	{
 		return (maxConnections_ == 0) ? linSize_ * linSize_ * 0.25
-					      : maxConnections_;
+		                              : maxConnections_;
 	}
 
 	virtual SizeType dirs() const { return 1; }

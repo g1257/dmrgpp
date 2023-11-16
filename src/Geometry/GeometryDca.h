@@ -21,12 +21,10 @@ Please see full open source license included in file LICENSE.
 #include "Io/IoNg.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename RealType_, typename GeometryType_>
-class GeometryDca
-{
+class GeometryDca {
 
 public:
 

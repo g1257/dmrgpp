@@ -27,8 +27,7 @@
 #include <iostream>
 #include <unistd.h>
 
-class MyLoop
-{
+class MyLoop {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 
@@ -111,7 +110,7 @@ int main(int argc, char* argv[])
 
 	if (ConcurrencyType::root()) {
 		std::cout << "Using " << threadObject.name()
-			  << " mode= " << ConcurrencyType::mode;
+		          << " mode= " << ConcurrencyType::mode;
 		std::cout << " with " << nthreads;
 		std::cout << " threads or mpi procs.\n";
 		std::cout << "sum=" << sum << "\n";

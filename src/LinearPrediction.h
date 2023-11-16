@@ -93,12 +93,10 @@ extern "C" {
 }
 #endif
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename FieldType>
-class LinearPrediction
-{
+class LinearPrediction {
 	typedef Matrix<FieldType> MatrixType;
 
 public:
@@ -123,7 +121,7 @@ public:
 	const FieldType& operator()(SizeType i) const { return y_[i]; }
 
 	void linearPredictionfunction(const typename Vector<FieldType>::Type& y,
-	    SizeType p)
+	                              SizeType p)
 	{
 		SizeType ysize = y.size();
 		if (ysize & 1)

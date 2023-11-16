@@ -85,11 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <pthread.h>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename PthreadFunctionHolderType>
-class PthreadsAndMpi : public Pthreads<PthreadFunctionHolderType>
-{
+class PthreadsAndMpi : public Pthreads<PthreadFunctionHolderType> {
 
 	typedef Pthreads<PthreadFunctionHolderType> BaseType;
 

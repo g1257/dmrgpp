@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
 	typedef PsimagLite::ChebyshevSerializer<VectorType> ChebyshevSerializerType;
 
 	io.advance(ChebyshevSerializerType::stringMarker(),
-	    PsimagLite::IoSimple::In::LAST_INSTANCE);
+	           PsimagLite::IoSimple::In::LAST_INSTANCE);
 
 	ChebyshevSerializerType chebyshevSerializer(io);
 

@@ -79,12 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TRIDIAGONAL_MATRIX_H
 #include "Matrix.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename FieldType>
-class TridiagonalMatrix
-{
+class TridiagonalMatrix {
 
 	typedef typename Real<FieldType>::Type RealType;
 
@@ -209,9 +207,9 @@ private:
 				intCounter++;
 				if (intCounter > maxCounter) {
 					std::cerr << "lanczos: ground: "
-						     "premature exit ";
+					             "premature exit ";
 					std::cerr << "(may indicate an "
-						     "internal error)\n";
+					             "internal error)\n";
 					break;
 				}
 

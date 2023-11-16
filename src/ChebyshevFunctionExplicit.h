@@ -31,11 +31,9 @@ Please see full open source license included in file LICENSE.
 #include "ChebyshevFunction.h"
 #include <cmath>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename RealType>
-class ChebyshevFunctionExplicit
-{
+class ChebyshevFunctionExplicit {
 
 public:
 

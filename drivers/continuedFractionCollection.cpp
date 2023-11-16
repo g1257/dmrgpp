@@ -42,7 +42,7 @@ void usage(const char* progName)
 }
 
 void plotAll(const ContinuedFractionCollectionType& cfCollection,
-    const PlotParamsType& params)
+             const PlotParamsType& params)
 {
 	ContinuedFractionCollectionType::PlotDataType v;
 	cfCollection.plot(v, params);
@@ -54,7 +54,7 @@ void plotAll(const ContinuedFractionCollectionType& cfCollection,
 }
 
 void plotOneByOne(const ContinuedFractionCollectionType& cfCollection,
-    const PlotParamsType& params)
+                  const PlotParamsType& params)
 {
 
 	std::cout.precision(12);

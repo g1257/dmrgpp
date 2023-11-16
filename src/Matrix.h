@@ -32,8 +32,7 @@ Please see full open source license included in file LICENSE.
 #include <stdexcept>
 #include <unistd.h>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename RealType>
 void expComplexOrReal(RealType& x, const RealType& y)
@@ -51,8 +50,7 @@ template <typename T2>
 class MatrixNonOwned;
 
 template <typename T>
-class Matrix
-{
+class Matrix {
 public:
 
 	typedef T value_type; // legacy name
@@ -107,7 +105,7 @@ public:
 		io >> ncol_;
 		if (nrow_ <= 0 || ncol_ <= 0)
 			throw RuntimeError("Matrix::nrows or ncols negative: "
-					   "cannot construct\n");
+			                   "cannot construct\n");
 
 		data_.resize(nrow_ * ncol_);
 		for (SizeType i = 0; i < nrow_; ++i)
@@ -124,20 +122,20 @@ public:
 
 	template <typename T1>
 	Matrix(const std::ClosureOperator<
-		   std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
-		   Matrix,
-		   std::ClosureOperations::OP_MULT>& c,
-	    typename EnableIf<Loki::TypeTraits<T1>::isArith, int>::Type = 0)
+	           std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
+	           Matrix,
+	           std::ClosureOperations::OP_MULT>& c,
+	       typename EnableIf<Loki::TypeTraits<T1>::isArith, int>::Type = 0)
 	{
 		*this = c.r1.r1 * c.r1.r2 * c.r2;
 	}
 
 	template <typename T1>
 	Matrix(const std::ClosureOperator<
-		   T1,
-		   std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_PLUS>,
-		   std::ClosureOperations::OP_MULT>& c,
-	    typename EnableIf<Loki::TypeTraits<T1>::isArith, int>::Type = 0)
+	           T1,
+	           std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_PLUS>,
+	           std::ClosureOperations::OP_MULT>& c,
+	       typename EnableIf<Loki::TypeTraits<T1>::isArith, int>::Type = 0)
 	{
 		*this = c.r1 * (c.r2.r1 + c.r2.r2);
 	}
@@ -295,7 +293,7 @@ public:
 	{
 		if (nrow_ > 0 && nrow_ != nrow)
 			throw RuntimeError("Matrix::resize: not allowed to "
-					   "change rows from non-zero\n");
+			                   "change rows from non-zero\n");
 
 		nrow_ = nrow;
 		ncol_ = ncol;
@@ -395,9 +393,9 @@ public:
 
 	template <typename T1>
 	Matrix& operator+=(const std::ClosureOperator<
-	    T1,
-	    Matrix,
-	    std::ClosureOperations::OP_MULT>& c)
+	                   T1,
+	                   Matrix,
+	                   std::ClosureOperations::OP_MULT>& c)
 	{
 		nrow_ = c.r2.nrow_;
 		ncol_ = c.r2.ncol_;
@@ -411,9 +409,9 @@ public:
 
 	template <typename T1>
 	Matrix& operator+=(const std::ClosureOperator<
-	    Matrix,
-	    T1,
-	    std::ClosureOperations::OP_MULT>& c)
+	                   Matrix,
+	                   T1,
+	                   std::ClosureOperations::OP_MULT>& c)
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
@@ -427,9 +425,9 @@ public:
 
 	template <typename T1>
 	Matrix& operator=(const std::ClosureOperator<
-	    T1,
-	    Matrix,
-	    std::ClosureOperations::OP_MULT>& c)
+	                  T1,
+	                  Matrix,
+	                  std::ClosureOperations::OP_MULT>& c)
 	{
 		nrow_ = c.r2.nrow_;
 		ncol_ = c.r2.ncol_;
@@ -439,9 +437,9 @@ public:
 
 	template <typename T1>
 	Matrix& operator=(const std::ClosureOperator<
-	    Matrix,
-	    T1,
-	    std::ClosureOperations::OP_MULT>& c)
+	                  Matrix,
+	                  T1,
+	                  std::ClosureOperations::OP_MULT>& c)
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
@@ -451,9 +449,9 @@ public:
 
 	template <typename T1>
 	Matrix& operator=(const std::ClosureOperator<
-	    std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
-	    Matrix,
-	    std::ClosureOperations::OP_MULT>& c)
+	                  std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
+	                  Matrix,
+	                  std::ClosureOperations::OP_MULT>& c)
 	{
 		matrixMatrix(c.r1.r2, c.r2, c.r1.r1);
 		return *this;
@@ -461,9 +459,9 @@ public:
 
 	template <typename T1>
 	Matrix& operator=(const std::ClosureOperator<
-	    T1,
-	    std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_PLUS>,
-	    std::ClosureOperations::OP_MULT>& c)
+	                  T1,
+	                  std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_PLUS>,
+	                  std::ClosureOperations::OP_MULT>& c)
 	{
 		this->nrow_ = c.r2.r1.nrow_;
 		this->ncol_ = c.r2.r1.ncol_;
@@ -474,9 +472,9 @@ public:
 	template <typename T1>
 	Matrix&
 	operator=(const std::ClosureOperator<
-	    T1,
-	    std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_MINUS>,
-	    std::ClosureOperations::OP_MULT>& c)
+	          T1,
+	          std::ClosureOperator<Matrix, Matrix, std::ClosureOperations::OP_MINUS>,
+	          std::ClosureOperations::OP_MULT>& c)
 	{
 		this->nrow_ = c.r2.r1.nrow_;
 		this->ncol_ = c.r2.r1.ncol_;
@@ -485,9 +483,9 @@ public:
 	}
 
 	Matrix& operator=(const std::ClosureOperator<
-	    Matrix,
-	    Matrix,
-	    std::ClosureOperations::OP_PLUS>& c)
+	                  Matrix,
+	                  Matrix,
+	                  std::ClosureOperations::OP_PLUS>& c)
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
@@ -498,9 +496,9 @@ public:
 	}
 
 	Matrix& operator=(const std::ClosureOperator<
-	    Matrix,
-	    Matrix,
-	    std::ClosureOperations::OP_MINUS>& c)
+	                  Matrix,
+	                  Matrix,
+	                  std::ClosureOperations::OP_MINUS>& c)
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
@@ -512,9 +510,9 @@ public:
 
 	template <typename T1>
 	Matrix& operator=(const std::ClosureOperator<
-	    Matrix,
-	    std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
-	    std::ClosureOperations::OP_PLUS>& c)
+	                  Matrix,
+	                  std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
+	                  std::ClosureOperations::OP_PLUS>& c)
 	{
 		nrow_ = c.r1.nrow_;
 		ncol_ = c.r1.ncol_;
@@ -526,9 +524,9 @@ public:
 
 	template <typename T1>
 	Matrix& operator=(const std::ClosureOperator<
-	    std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
-	    Matrix,
-	    std::ClosureOperations::OP_PLUS>& c)
+	                  std::ClosureOperator<T1, Matrix, std::ClosureOperations::OP_MULT>,
+	                  Matrix,
+	                  std::ClosureOperations::OP_PLUS>& c)
 	{
 		nrow_ = c.r2.nrow_;
 		ncol_ = c.r2.ncol_;
@@ -649,16 +647,14 @@ inverse(Matrix<T>& m)
 // end in Matrix.cpp
 
 template <typename T>
-class IsMatrixLike
-{
+class IsMatrixLike {
 public:
 
 	enum { True = false };
 };
 
 template <typename T>
-class IsMatrixLike<Matrix<T>>
-{
+class IsMatrixLike<Matrix<T>> {
 public:
 
 	enum { True = true };
@@ -732,11 +728,13 @@ void symbolicPrint(std::ostream& os, const Matrix<T>& A)
 						throw RuntimeError(s.c_str());
 					char chark = k + 65;
 					os << " " << chark << " ";
-				} else {
+				}
+				else {
 					char chark = k2 + 65;
 					os << "-" << chark << " ";
 				}
-			} else {
+			}
+			else {
 				char chark = k + 65;
 				os << " " << chark << " ";
 			}
@@ -789,7 +787,8 @@ std::istream& operator>>(std::istream& is, Matrix<T>& A)
 		for (SizeType j = 0; j < A.rows(); j++)
 			for (SizeType i = 0; i < A.cols(); i++)
 				is >> A(j, i);
-	} else {
+	}
+	else {
 		String str("ERROR istream& operator >> ");
 		str += "(std::istream&, Matrix<T>&): read past end stream";
 		throw RangeError(str);
@@ -811,9 +810,9 @@ bool isHermitian(Matrix<T> const& A, bool verbose = false)
 			if (PsimagLite::norm(A(i, j) - PsimagLite::conj(A(j, i))) > eps) {
 				if (verbose) {
 					std::cerr << "A(" << i << "," << j
-						  << ")=" << A(i, j);
+					          << ")=" << A(i, j);
 					std::cerr << " A(" << j << "," << i
-						  << ")=" << A(j, i) << "\n";
+					          << ")=" << A(j, i) << "\n";
 				}
 				return false;
 			}
@@ -834,9 +833,9 @@ bool isAntiHermitian(const Matrix<T>& A, bool verbose = false)
 			if (PsimagLite::norm(A(i, j) + PsimagLite::conj(A(j, i))) > eps) {
 				if (verbose) {
 					std::cerr << "A(" << i << "," << j
-						  << ")=" << A(i, j);
+					          << ")=" << A(i, j);
 					std::cerr << " A(" << j << "," << i
-						  << ")=" << A(j, i) << "\n";
+					          << ")=" << A(j, i) << "\n";
 				}
 
 				return false;
@@ -855,7 +854,7 @@ bool isTheIdentity(Matrix<T> const& a)
 		for (SizeType j = 0; j < a.cols(); j++) {
 			if (i != j && PsimagLite::norm(a(i, j)) > 1e-6) {
 				std::cerr << "a(" << i << "," << j
-					  << ")=" << a(i, j) << "\n";
+				          << ")=" << a(i, j) << "\n";
 				return false;
 			}
 		}
@@ -912,7 +911,7 @@ typename EnableIf<
 operator*(const T1& a, const T2& b)
 {
 	return std::ClosureOperator<T1, T2, std::ClosureOperations::OP_MULT>(a,
-	    b);
+	                                                                     b);
 }
 
 template <typename T>
@@ -931,7 +930,7 @@ operator-(const Matrix<T>& a, const Matrix<T>& b)
 
 template <typename T, typename A>
 void operator<=(std::vector<T, A>& v,
-    const std::ClosureOperator<Matrix<T>, std::vector<T, A>, std::ClosureOperations::OP_MULT>& c)
+                const std::ClosureOperator<Matrix<T>, std::vector<T, A>, std::ClosureOperations::OP_MULT>& c)
 {
 	const std::vector<T, A>& b = c.r2;
 	const Matrix<T>& a = c.r1;
@@ -947,7 +946,7 @@ void operator<=(std::vector<T, A>& v,
 
 template <typename T, typename A>
 void operator<=(std::vector<T, A>& v,
-    const std::ClosureOperator<std::vector<T, A>, Matrix<T>, std::ClosureOperations::OP_MULT>& c)
+                const std::ClosureOperator<std::vector<T, A>, Matrix<T>, std::ClosureOperations::OP_MULT>& c)
 {
 	const std::vector<T, A>& b = c.r1;
 	const Matrix<T>& a = c.r2;
@@ -971,7 +970,8 @@ Matrix<T> multiplyTransposeConjugate(const Matrix<T>& O1, const Matrix<T>& O2, c
 			for (SizeType t = 0; t < n; t++)
 				for (SizeType w = 0; w < n; w++)
 					ret(s, t) += PsimagLite::conj(O1(w, s)) * O2(w, t);
-	} else {
+	}
+	else {
 		for (SizeType s = 0; s < n; s++)
 			for (SizeType t = 0; t < n; t++)
 				for (SizeType w = 0; w < n; w++)
@@ -1107,8 +1107,7 @@ typename EnableIf<!IsComplexNumber<T>::True, void>::Type expIpi(Matrix<T>&)
 }
 
 #ifdef USE_MPI
-namespace MPI
-{
+namespace MPI {
 
 	template <typename SomeMatrixType>
 	typename EnableIf<

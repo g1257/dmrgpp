@@ -1,7 +1,6 @@
 #include "TridiagonalMatrix.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <>
 void TridiagonalMatrix<double>::diag2(

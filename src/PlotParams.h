@@ -29,8 +29,7 @@ Please see full open source license included in file LICENSE.
 #ifndef PLOT_PARAMS_H
 #define PLOT_PARAMS_H
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename RealType>
 struct PlotParams {
 

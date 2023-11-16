@@ -79,12 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define GEOMETRY_STAR_H
 #include "GeometryBase.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType>
-class Star : public GeometryBase<ComplexOrRealType, InputType>
-{
+class Star : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 

@@ -13,11 +13,9 @@
 #include "Matrix.h"
 #include "ProgressIndicator.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename FunctionType>
-class RootFindingBisection
-{
+class RootFindingBisection {
 	typedef typename FunctionType::RealType RealType;
 
 public:
@@ -58,7 +56,8 @@ public:
 			if (sign(tmp) == sign(functionAtA)) {
 				a = c;
 				functionAtA = tmp;
-			} else {
+			}
+			else {
 				b = c;
 			}
 		}

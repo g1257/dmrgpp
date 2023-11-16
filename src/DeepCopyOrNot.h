@@ -2,12 +2,10 @@
 #define DEEPCOPYORNOT_H
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename UnderlyingType> // UnderlyingType must have copy ctor
-class DeepCopyOrNot
-{
+class DeepCopyOrNot {
 
 public:
 

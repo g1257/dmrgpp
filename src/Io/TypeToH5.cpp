@@ -2,8 +2,7 @@
 
 #include "TypeToH5.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <>
 H5::PredType typeToH5<char>() { return H5::PredType::NATIVE_CHAR; }

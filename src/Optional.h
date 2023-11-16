@@ -3,11 +3,9 @@
 
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename T>
-class Optional
-{
+class Optional {
 
 public:
 

@@ -3,12 +3,10 @@
 
 #include "GslWrapper.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename FunctionType>
-class Integrator
-{
+class Integrator {
 
 public:
 
@@ -17,7 +15,7 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	enum IntegrationEnum { INTEG_QAG,
-		INTEG_QAGP };
+		               INTEG_QAGP };
 
 	Integrator(FunctionType& function, RealType epsabs = 1e-9, RealType epsrel = 1e-9, SizeType limit = 1000000)
 	    : epsabs_(epsabs)
@@ -26,7 +24,7 @@ public:
 	    , result_(0)
 	    , abserr_(0)
 	    , workspace_(
-		  gslWrapper_.gsl_integration_workspace_alloc(limit_ + 2))
+	          gslWrapper_.gsl_integration_workspace_alloc(limit_ + 2))
 	{
 		f_.function = &FunctionType::function;
 
@@ -39,8 +37,8 @@ public:
 	}
 
 	RealType operator()(VectorRealType& pts,
-	    IntegrationEnum integ = INTEG_QAG,
-	    int key = 4)
+	                    IntegrationEnum integ = INTEG_QAG,
+	                    int key = 4)
 	{
 		switch (integ) {
 		default:

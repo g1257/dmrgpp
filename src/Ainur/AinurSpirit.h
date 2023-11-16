@@ -9,11 +9,9 @@
 #include <iostream>
 #include <string>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class Ainur
-{
+class Ainur {
 
 	struct Action {
 

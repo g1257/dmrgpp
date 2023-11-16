@@ -5,11 +5,9 @@
 
 /* This class only checks whether input file contains valid characters
  * and throws if not */
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class AinurLexical
-{
+class AinurLexical {
 
 public:
 

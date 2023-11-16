@@ -31,11 +31,9 @@ Please see full open source license included in file LICENSE.
 #include "TypeToString.h"
 #include <iostream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename RealType>
-class ChebyshevFunction
-{
+class ChebyshevFunction {
 
 public:
 

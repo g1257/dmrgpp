@@ -88,8 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename RealType_>
 struct ParametersForSolver {
@@ -159,7 +158,8 @@ struct ParametersForSolver {
 	{
 		if (ind >= 0) {
 			bunnie(t, prefix, ind, postfix, io);
-		} else {
+		}
+		else {
 			hare(t, prefix, postfix, io);
 		}
 	}
@@ -171,7 +171,8 @@ struct ParametersForSolver {
 		try {
 			io.readline(t, prefix + postfix + "=");
 			return;
-		} catch (std::exception&) {
+		}
+		catch (std::exception&) {
 		}
 	}
 
@@ -182,7 +183,8 @@ struct ParametersForSolver {
 		try {
 			io.readline(t, prefix + ttos(ind) + postfix + "=");
 			return;
-		} catch (std::exception&) {
+		}
+		catch (std::exception&) {
 		}
 
 		// if prefix + jnd + postfix exists with jnd < ind --> use the
@@ -191,9 +193,10 @@ struct ParametersForSolver {
 			const SizeType jnd = ind - i - 1;
 			try {
 				io.readline(t,
-				    prefix + ttos(jnd) + postfix + "=");
+				            prefix + ttos(jnd) + postfix + "=");
 				return;
-			} catch (std::exception&) {
+			}
+			catch (std::exception&) {
 			}
 		}
 

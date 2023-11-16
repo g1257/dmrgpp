@@ -24,7 +24,7 @@
 #endif
 
 template <typename SomeLambdaType,
-    typename LoadBalancerType = PsimagLite::LoadBalancerDefault>
+          typename LoadBalancerType = PsimagLite::LoadBalancerDefault>
 struct PthreadFunctionStruct2 {
 	PthreadFunctionStruct2()
 	    : pfh(0)
@@ -76,12 +76,10 @@ void* thread_function_wrapper2(void* dummyPtr)
 	return 0;
 }
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename LoadBalancerType = LoadBalancerDefault>
-class Parallelizer2
-{
+class Parallelizer2 {
 
 public:
 
@@ -123,7 +121,7 @@ public:
 	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda, const LoadBalancerType& loadBalancer)
 	{
 		PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>* pfs = new PthreadFunctionStruct2<SomeLambdaType,
-		    LoadBalancerType>[nthreads_];
+		                                                                                           LoadBalancerType>[nthreads_];
 		pthread_t* thread_id = new pthread_t[nthreads_];
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
 
@@ -142,8 +140,8 @@ public:
 			if (ret != 0) {
 				std::cerr << __FILE__;
 				std::cerr << "\tpthread_attr_setstacksize() "
-					     "has returned non-zero "
-					  << ret << "\n";
+				             "has returned non-zero "
+				          << ret << "\n";
 				std::cerr
 				    << "\tIt is possible (but no certain) that "
 				       "the following error";
@@ -153,7 +151,7 @@ public:
 				std::cerr
 				    << "PTHREAD_STACK_MIN (16384) bytes.\n";
 				std::cerr << "\tI will ignore this error and "
-					     "let you continue\n";
+				             "let you continue\n";
 			}
 
 			ret = pthread_attr_init(attr[j]);

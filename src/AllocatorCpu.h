@@ -46,8 +46,7 @@ typedef long unsigned int SizeType;
 typedef uint32_t SizeType;
 #endif
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename T, bool B = std::is_enum<T>::value>
 struct IsEnumClass : std::false_type {
@@ -56,18 +55,17 @@ struct IsEnumClass : std::false_type {
 template <typename T>
 struct IsEnumClass<T, true>
     : std::integral_constant<
-	  bool,
-	  !std::is_convertible<
-	      T,
-	      typename std::underlying_type<T>::type>::value> {
+          bool,
+          !std::is_convertible<
+              T,
+              typename std::underlying_type<T>::type>::value> {
 };
 
 inline div_t div(int a, int b) { return std::div(a, b); }
 
 #ifdef USE_CUSTOM_ALLOCATOR
 template <typename T, int templateParamFlags>
-class AllocatorCpu : public std::allocator<T>
-{
+class AllocatorCpu : public std::allocator<T> {
 	typedef typename std::allocator<T> BaseType;
 
 	typedef MemoryCpu MemoryCpuType;
@@ -90,7 +88,7 @@ public:
 	}
 
 	typename BaseType::pointer allocate(typename BaseType::size_type n,
-	    void* = 0)
+	                                    void* = 0)
 	{
 		if (n > this->max_size())
 			throw std::runtime_error("Bad allocation\n");
@@ -102,7 +100,7 @@ public:
 	}
 
 	void deallocate(typename BaseType::pointer p,
-	    typename BaseType::size_type n)
+	                typename BaseType::size_type n)
 	{
 		globalMemoryCpu.deallocate(p);
 	}
@@ -111,8 +109,7 @@ public:
 #endif
 
 template <typename T>
-class Allocator
-{
+class Allocator {
 public:
 
 #ifdef USE_CUSTOM_ALLOCATOR
@@ -123,13 +120,11 @@ public:
 }; // class Allocator
 
 template <bool b, typename T>
-class EnableIf
-{
+class EnableIf {
 };
 
 template <typename T>
-class EnableIf<true, T>
-{
+class EnableIf<true, T> {
 public:
 
 	typedef T Type;
@@ -160,8 +155,7 @@ typedef std::basic_string<char, std::char_traits<char>, Allocator<char>::Type>
 typedef std::basic_istringstream<char, std::char_traits<char>, Allocator<char>::Type>
     IstringStream;
 
-class OstringStream
-{
+class OstringStream {
 public:
 
 	typedef std::basic_ostringstream<char, std::char_traits<char>, Allocator<char>::Type>
@@ -178,8 +172,7 @@ private:
 	OstringStreamType data_;
 };
 
-class RuntimeError : public std::runtime_error
-{
+class RuntimeError : public std::runtime_error {
 public:
 
 	explicit RuntimeError(const String& what_arg)
@@ -188,8 +181,7 @@ public:
 	}
 };
 
-class RangeError : public std::range_error
-{
+class RangeError : public std::range_error {
 public:
 
 	explicit RangeError(const String& what_arg)
@@ -198,8 +190,7 @@ public:
 	}
 };
 
-class LogicError : public std::logic_error
-{
+class LogicError : public std::logic_error {
 public:
 
 	explicit LogicError(const String& what_arg)

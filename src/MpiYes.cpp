@@ -77,11 +77,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "MpiYes.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-namespace MPI
-{
+namespace MPI {
 
 	CommType COMM_WORLD = MPI_COMM_WORLD;
 

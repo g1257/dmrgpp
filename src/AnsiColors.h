@@ -2,11 +2,9 @@
 #define ANSICOLORS_H
 #include "AllocatorCpu.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-namespace AnsiColor
-{
+namespace AnsiColor {
 
 	static const String red = "\x1b[31m";
 

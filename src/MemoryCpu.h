@@ -33,11 +33,9 @@ Please see full open source license included in file LICENSE.
 #include <string>
 #include <vector>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class MemoryCpu
-{
+class MemoryCpu {
 
 public:
 

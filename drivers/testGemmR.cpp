@@ -69,7 +69,7 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 						for (int j = 0; j < nC; j++) {
 							for (int i = 0; i < mC; i++) {
 								T cij = make_val<T>(1.0 * (i + j) / (mC + nC),
-								    1.0 * i * j / (mC * nC));
+								                    1.0 * i * j / (mC * nC));
 								C(i, j) = cij;
 								C_gemmr(i, j) = cij;
 							}
@@ -85,7 +85,7 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 						for (int j = 0; j < nB; j++) {
 							for (int i = 0; i < mB; i++) {
 								T bij = make_val<T>(1.0 * (i + j + 1) / (mB * nB),
-								    -1.0 * (j - i + 1) / (mB * nB));
+								                    -1.0 * (j - i + 1) / (mB * nB));
 								B(i, j) = bij;
 							}
 						}
@@ -111,8 +111,8 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 						}
 						if ((!isok) || (idebug >= 1)) {
 							std::cout << " transA " << transA << " transB " << transB << " m "
-								  << m << " n " << n << " k " << k << " max_err "
-								  << max_err << " c_norm " << c_norm << "\n";
+							          << m << " n " << n << " k " << k << " max_err "
+							          << max_err << " c_norm " << c_norm << "\n";
 						}
 					}
 				}
@@ -148,9 +148,10 @@ int main(int argc, char** argv)
 	bool const all_passed = (nerr_double == 0) && (nerr_zcomplex == 0);
 	if (all_passed) {
 		std::cout << "ALL PASSED "
-			  << "\n";
-	} else {
+		          << "\n";
+	}
+	else {
 		std::cout << " nerr_double = " << nerr_double
-			  << " nerr_zcomplex = " << nerr_zcomplex << "\n";
+		          << " nerr_zcomplex = " << nerr_zcomplex << "\n";
 	}
 }

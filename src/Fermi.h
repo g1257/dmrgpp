@@ -80,8 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define FERMI_H_
 #include <cmath>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename FieldType>
 FieldType fermi(const FieldType& x)

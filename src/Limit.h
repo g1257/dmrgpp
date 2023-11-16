@@ -7,11 +7,9 @@
 #include <sys/time.h>
 #include <utility>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class Limit
-{
+class Limit {
 
 public:
 

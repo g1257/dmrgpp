@@ -89,11 +89,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 //! IoSimple class handles Input/Output (IO) for the Dmrg++ program
-class IoSimple
-{
+class IoSimple {
 
 	template <typename T>
 	struct PrintWithEqualSign {
@@ -104,8 +102,7 @@ class IoSimple
 
 public:
 
-	class Out
-	{
+	class Out {
 
 	public:
 
@@ -251,8 +248,7 @@ public:
 		std::ofstream* fout_;
 	};
 
-	class In
-	{
+	class In {
 
 	public:
 
@@ -331,7 +327,7 @@ public:
 
 		template <typename X>
 		typename EnableIf<IsVectorLike<X>::True,
-		    std::pair<String, SizeType>>::Type
+		                  std::pair<String, SizeType>>::Type
 		read(X& x, String const& s, LongIntegerType level = 0, bool beQuiet = false)
 		{
 			std::pair<String, SizeType> sc = advance(s, level, beQuiet);
@@ -358,7 +354,7 @@ public:
 
 		template <typename X>
 		typename EnableIf<IsStackLike<X>::True,
-		    std::pair<String, SizeType>>::Type
+		                  std::pair<String, SizeType>>::Type
 		read(X& x, String const& s, LongIntegerType level = 0, bool beQuiet = false)
 		{
 			std::pair<String, SizeType> sc = advance(s, level, beQuiet);
@@ -367,8 +363,8 @@ public:
 		}
 
 		std::pair<String, SizeType> advance(String const& s,
-		    LongIntegerType level = 0,
-		    bool beQuiet = false)
+		                                    LongIntegerType level = 0,
+		                                    bool beQuiet = false)
 		{
 
 			String temp = "NOTFOUND";
@@ -397,16 +393,16 @@ public:
 				if (counter > 1)
 					advance(s, counter - 2);
 				return std::pair<String, SizeType>(tempSaved,
-				    counter);
+				                                   counter);
 			}
 
 			if (!found && tempSaved == "NOTFOUND") {
 				if (!beQuiet) {
 					std::cerr << "Not found " << s
-						  << " in file " << filename_;
+					          << " in file " << filename_;
 					std::cerr << " level=" << level
-						  << " counter=" << counter
-						  << "\n";
+					          << " counter=" << counter
+					          << "\n";
 				}
 				throw RuntimeError("IoSimple::In::read()\n");
 			}
@@ -421,7 +417,8 @@ public:
 				try {
 					advance(s, 0, true);
 					i++;
-				} catch (std::exception& e) {
+				}
+				catch (std::exception& e) {
 					rewind();
 					return i;
 				}
@@ -465,11 +462,9 @@ struct IsOutputLike<IoSimple::Out> {
 
 } // namespace PsimagLite
 
-namespace Spf
-{
+namespace Spf {
 
-class IoSimpleIn : public PsimagLite::IoSimple::In
-{
+class IoSimpleIn : public PsimagLite::IoSimple::In {
 
 public:
 

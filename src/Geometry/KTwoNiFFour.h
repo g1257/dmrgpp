@@ -81,25 +81,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include <stdexcept>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType>
-class KTwoNiFFour : public GeometryBase<ComplexOrRealType, InputType>
-{
+class KTwoNiFFour : public GeometryBase<ComplexOrRealType, InputType> {
 
 	enum SubtypeEnum { SUBTYPE_X,
-		SUBTYPE_Y };
+		           SUBTYPE_Y };
 
 	enum { DIR_X,
-		DIR_Y,
-		DIR_XPY,
-		DIR_XMY };
+	       DIR_Y,
+	       DIR_XPY,
+	       DIR_XMY };
 
 public:
 
 	enum TypeEnum { TYPE_O,
-		TYPE_C };
+		        TYPE_C };
 
 	typedef std::pair<TypeEnum, SubtypeEnum> PairType;
 	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
@@ -316,7 +314,7 @@ public:
 			return PairType(TYPE_C, SUBTYPE_X);
 
 		return (r == 1) ? PairType(TYPE_O, SUBTYPE_X)
-				: PairType(TYPE_O, SUBTYPE_Y);
+		                : PairType(TYPE_O, SUBTYPE_Y);
 	}
 
 private:

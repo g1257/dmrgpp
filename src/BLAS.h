@@ -17,13 +17,11 @@
 
 /** \brief Namespace encapsulating all PsiMag tools.
  */
-namespace psimag
-{
+namespace psimag {
 
 /** \brief Namespace for psimag wrappers of BLAS functions
  */
-namespace BLAS
-{
+namespace BLAS {
 
 #ifndef PSI_BLAS_64
 	typedef int IntegerForBlasType;
@@ -377,7 +375,7 @@ namespace BLAS
 	inline void GEMM(char c1, char c2, IntegerForBlasType sX, IntegerForBlasType sY, IntegerForBlasType sZ, const std::complex<double>& a, const std::complex<double>* x, IntegerForBlasType sx, const std::complex<double>* y, IntegerForBlasType sy, const std::complex<double>& b, std::complex<double>* z, IntegerForBlasType sz)
 	{
 		/* When  TRANSA = 'N' or 'n' then
-			LDA must be at least  max( 1, m ), otherwise  LDA must be at
+		        LDA must be at least  max( 1, m ), otherwise  LDA must be at
 		least  max( 1, k ).*/
 
 		if (c1 == 'N' || c1 == 'n') {
@@ -385,7 +383,8 @@ namespace BLAS
 				throw PsimagLite::RuntimeError(
 				    "GEMM lda < max(1, m)\n");
 			}
-		} else {
+		}
+		else {
 			if (sx < std::max(1, sZ)) {
 				throw PsimagLite::RuntimeError(
 				    "GEMM lda < max(1, k)\n");
@@ -787,40 +786,40 @@ namespace BLAS
 	// ****************************************************************************
 	inline void SYR2(char uplo, IntegerForBlasType n, const float& alpha, const float* x,
 
-	    IntegerForBlasType incx,
-	    const float* y,
-	    IntegerForBlasType incy,
-	    float* a,
-	    IntegerForBlasType lda)
+	                 IntegerForBlasType incx,
+	                 const float* y,
+	                 IntegerForBlasType incy,
+	                 float* a,
+	                 IntegerForBlasType lda)
 	{
 		ssyr2_(&uplo, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
 	inline void SYR2(char uplo, IntegerForBlasType n, const double& alpha, const double* x,
 
-	    IntegerForBlasType incx,
-	    const double* y,
-	    IntegerForBlasType incy,
-	    double* a,
-	    IntegerForBlasType lda)
+	                 IntegerForBlasType incx,
+	                 const double* y,
+	                 IntegerForBlasType incy,
+	                 double* a,
+	                 IntegerForBlasType lda)
 	{
 		dsyr2_(&uplo, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
 	// ****************************************************************************
 	inline void SPR2(char uplo, IntegerForBlasType n, const float& alpha, const float* x,
 
-	    IntegerForBlasType incx,
-	    const float* y,
-	    IntegerForBlasType incy,
-	    float* ap)
+	                 IntegerForBlasType incx,
+	                 const float* y,
+	                 IntegerForBlasType incy,
+	                 float* ap)
 	{
 		sspr2_(&uplo, &n, &alpha, x, &incx, y, &incy, ap);
 	}
 	inline void SPR2(char uplo, IntegerForBlasType n, const double& alpha, const double* x,
 
-	    IntegerForBlasType incx,
-	    const double* y,
-	    IntegerForBlasType incy,
-	    double* ap)
+	                 IntegerForBlasType incx,
+	                 const double* y,
+	                 IntegerForBlasType incy,
+	                 double* ap)
 	{
 		dspr2_(&uplo, &n, &alpha, x, &incx, y, &incy, ap);
 	}
@@ -839,16 +838,16 @@ namespace BLAS
 
 	inline void AXPY(IntegerForBlasType size, const std::complex<float>& a, const std::complex<float>* x, IntegerForBlasType sx,
 
-	    std::complex<float>* y,
-	    IntegerForBlasType sy)
+	                 std::complex<float>* y,
+	                 IntegerForBlasType sy)
 	{
 		caxpy_(&size, &a, x, &sx, y, &sy);
 	}
 
 	inline void AXPY(IntegerForBlasType size, const std::complex<double>& a, const std::complex<double>* x, IntegerForBlasType sx,
 
-	    std::complex<double>* y,
-	    IntegerForBlasType sy)
+	                 std::complex<double>* y,
+	                 IntegerForBlasType sy)
 	{
 		zaxpy_(&size, &a, x, &sx, y, &sy);
 	}

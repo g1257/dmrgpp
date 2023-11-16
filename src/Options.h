@@ -87,24 +87,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <stdexcept>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class Options
-{
+class Options {
 
 public:
 
-	class Writeable
-	{
+	class Writeable {
 
 		typedef Vector<String>::Type VectorStringType;
 
 	public:
 
 		enum { DISABLED,
-			PERMISSIVE,
-			STRICT };
+		       PERMISSIVE,
+		       STRICT };
 
 		Writeable(VectorStringType& registeredOptions, SizeType mode)
 		    : registeredOptions_(registeredOptions)
@@ -119,9 +116,9 @@ public:
 			split(optsThatAreSet, opts, ",");
 			for (SizeType i = 0; i < optsThatAreSet.size(); i++) {
 				bool b = (find(registeredOptions_.begin(),
-					      registeredOptions_.end(),
-					      optsThatAreSet[i])
-				    == registeredOptions_.end());
+				               registeredOptions_.end(),
+				               optsThatAreSet[i])
+				          == registeredOptions_.end());
 				if (!b)
 					continue;
 
@@ -140,8 +137,7 @@ public:
 		SizeType mode_;
 	}; // class Writeable
 
-	class Readable
-	{
+	class Readable {
 
 	public:
 
@@ -153,9 +149,9 @@ public:
 		bool isSet(const String& thisOption) const
 		{
 			bool b = (find(optsThatAreSet_.begin(),
-				      optsThatAreSet_.end(),
-				      thisOption)
-			    == optsThatAreSet_.end());
+			               optsThatAreSet_.end(),
+			               thisOption)
+			          == optsThatAreSet_.end());
 			return (!b);
 		}
 

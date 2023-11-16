@@ -101,7 +101,7 @@ void createRandomCrs(PsimagLite::CrsMatrix<T>& crs, SizeType seed, SizeType nonZ
 
 template <typename T>
 bool checkCrs(const PsimagLite::CrsMatrix<T>& m,
-    const PsimagLite::Matrix<T>& fm)
+              const PsimagLite::Matrix<T>& fm)
 {
 	PsimagLite::Matrix<T> mf;
 	crsMatrixToFullMatrix(mf, m);

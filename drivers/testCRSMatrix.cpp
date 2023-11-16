@@ -80,7 +80,8 @@ int main(int argc, char* argv[])
 		std::cout << m;
 
 		testMultiply(m, maxValue);
-	} else if (argc == 2) {
+	}
+	else if (argc == 2) {
 		std::ifstream fin(argv[1]);
 		Matrix<RealType> mdense(fin);
 		fin.close();
@@ -92,7 +93,8 @@ int main(int argc, char* argv[])
 		std::cout << m;
 		std::cout << "----------\n";
 		std::cout << m.toDense();
-	} else {
+	}
+	else {
 		throw RuntimeError("Wrong number of arguments\n");
 	}
 }

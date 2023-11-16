@@ -8,8 +8,7 @@
 typedef PsimagLite::MemResolv MemResolv;
 
 template <typename T>
-class TestMemResolv1
-{
+class TestMemResolv1 {
 
 	static const bool IS_CLASS = PsimagLite::IsClass<T>::value;
 	typedef std::vector<T> VectorType;
@@ -46,7 +45,7 @@ public:
 
 	template <typename T2>
 	friend std::ostream& operator<<(std::ostream& os,
-	    const TestMemResolv1<T2>& mt);
+	                                const TestMemResolv1<T2>& mt);
 
 private:
 

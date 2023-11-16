@@ -87,8 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <utility>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename FieldType>
 struct SparseVector {
 public:
@@ -110,8 +109,8 @@ public:
 	}
 
 	void fromChunk(const typename Vector<FieldType>::Type& v,
-	    SizeType offset,
-	    SizeType total)
+	               SizeType offset,
+	               SizeType total)
 	{
 		resize(total);
 		for (SizeType i = 0; i < v.size(); i++) {
@@ -167,7 +166,7 @@ public:
 			PairType firstLast = findFirstLast();
 			if (i0 > firstLast.first || i0 + total < firstLast.second)
 				throw RuntimeError("SparseVector::toChunk(...)"
-						   " check failed\n");
+				                   " check failed\n");
 		}
 		dest.resize(total);
 		for (SizeType i = 0; i < indices_.size(); i++)
@@ -176,7 +175,7 @@ public:
 
 	template <typename SomeBasisType>
 	SizeType toChunk(typename Vector<FieldType>::Type& dest,
-	    const SomeBasisType& parts) const
+	                 const SomeBasisType& parts) const
 	{
 		SizeType part = findPartition(parts);
 		SizeType offset = parts.partition(part);
@@ -197,7 +196,8 @@ public:
 		for (SizeType i = 0; i < parts.partition(); i++) {
 			if (firstLast.first >= parts.partition(i)) {
 				ret = i;
-			} else {
+			}
+			else {
 				break;
 			}
 		}
@@ -205,7 +205,8 @@ public:
 		for (SizeType i = 0; i < parts.partition(); i++) {
 			if (firstLast.second > parts.partition(i)) {
 				ret2 = i;
-			} else {
+			}
+			else {
 				break;
 			}
 		}
@@ -311,7 +312,8 @@ public:
 				}
 				sum = values[i];
 				prevIndex = indices_[i];
-			} else {
+			}
+			else {
 				sum += values[i];
 			}
 		}
@@ -332,7 +334,7 @@ public:
 
 	template <typename T, typename T2>
 	friend SparseVector<T2> operator*(const T& val,
-	    const SparseVector<T2>& sv);
+	                                  const SparseVector<T2>& sv);
 
 private:
 
@@ -372,8 +374,7 @@ T operator*(const SparseVector<T>& v1, const SparseVector<T>& v2)
 }
 } // namespace PsimagLite
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename FieldType>
 inline FieldType norm(const SparseVector<FieldType>& v)
 {

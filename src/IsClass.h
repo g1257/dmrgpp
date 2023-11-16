@@ -2,12 +2,10 @@
 #define PSI_IS_CLASS_H
 #include <iostream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename T>
-class IsClass
-{
+class IsClass {
 
 	typedef char One;
 	typedef struct {

@@ -90,13 +90,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include <fstream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 //! A Sparse Matrix in Compressed Row Storage (CRS) format.
 /**
-	The CRS format puts the subsequent nonzero elements of the matrix rows
-	in contiguous memory locations. We create 3 vectors: one for complex
+        The CRS format puts the subsequent nonzero elements of the matrix rows
+        in contiguous memory locations. We create 3 vectors: one for complex
    numbers containing the values of the matrix entries and the other two for
    integers ($colind$ and $rowptr$). The vector $values$ stores the values of
    the non-zero elements of the matrix, as they are traversed in a row-wise
@@ -107,28 +106,27 @@ namespace PsimagLite
    convention, we define $rowptr[N_{dim}]$ to be equal to the number of non-zero
    elements, $n_z$, in the matrix. The storage savings of this approach are
    significant because instead of
-	storing $N_{dim}^2$ elements, we need only $2n_z + N_{dim} + 1$ storage
+        storing $N_{dim}^2$ elements, we need only $2n_z + N_{dim} + 1$ storage
    locations.\\ To illustrate how the CRS format works, consider the
    non-symmetric matrix defined by \begin{equation}
-		A=\left[\begin{tabular}{llllll}
+                A=\left[\begin{tabular}{llllll}
 
-		10 &  0 & 0 & 0  & -2 & 0 \\
-		3 &  9 &  0 &  0 &  0 &  3 \\
-		0 &  7 &  8 &  7 &  0 &  0 \\
-		3 &  0 &  8 &  7  & 5 &  0 \\
-		0 &   8 &  0 &  9 &  9 & 13 \\
-		0 &  4 &  0 &  0 &  2&  -1 \\
-	\end{tabular}\right]\end{equation}
-	The CRS format for this matrix is then specified by the arrays:\\
-	\begin{tt}
-		values = [10 -2  3  9  3  7  8  7  3 ... 9 13  4  2 -1 ]\\
-		colind = [ 0  4  0  1  5  1  2  3  0 ... 4  5  1  4  5 ]\\
-		rowptr = [ 0  2  5  8 12 16 19 ]\\
-	\end{tt}
-	*/
+                10 &  0 & 0 & 0  & -2 & 0 \\
+                3 &  9 &  0 &  0 &  0 &  3 \\
+                0 &  7 &  8 &  7 &  0 &  0 \\
+                3 &  0 &  8 &  7  & 5 &  0 \\
+                0 &   8 &  0 &  9 &  9 & 13 \\
+                0 &  4 &  0 &  0 &  2&  -1 \\
+        \end{tabular}\right]\end{equation}
+        The CRS format for this matrix is then specified by the arrays:\\
+        \begin{tt}
+                values = [10 -2  3  9  3  7  8  7  3 ... 9 13  4  2 -1 ]\\
+                colind = [ 0  4  0  1  5  1  2  3  0 ... 4  5  1  4  5 ]\\
+                rowptr = [ 0  2  5  8 12 16 19 ]\\
+        \end{tt}
+        */
 template <class T>
-class CrsMatrix
-{
+class CrsMatrix {
 
 public:
 
@@ -199,9 +197,9 @@ public:
 	}
 
 	CrsMatrix(SizeType rank, // square matrix ONLY for now
-	    const Vector<SizeType>::Type& rows2,
-	    const Vector<SizeType>::Type& cols,
-	    const typename Vector<T>::Type& vals)
+	          const Vector<SizeType>::Type& rows2,
+	          const Vector<SizeType>::Type& cols,
+	          const typename Vector<T>::Type& vals)
 	    : rowptr_(rank + 1)
 	    , nrow_(rank)
 	    , ncol_(rank)
@@ -232,9 +230,9 @@ public:
 	// start closure ctors
 
 	CrsMatrix(const std::ClosureOperator<
-	    CrsMatrix,
-	    CrsMatrix,
-	    std::ClosureOperations::OP_MULT>& c)
+	          CrsMatrix,
+	          CrsMatrix,
+	          std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix& x = *this;
 		const CrsMatrix& y = c.r1;
@@ -243,9 +241,9 @@ public:
 	}
 
 	CrsMatrix(const std::ClosureOperator<
-	    T,
-	    CrsMatrix,
-	    std::ClosureOperations::OP_MULT>& c)
+	          T,
+	          CrsMatrix,
+	          std::ClosureOperations::OP_MULT>& c)
 	{
 		*this = c.r2;
 		this->values_ *= c.r1;
@@ -334,7 +332,8 @@ public:
 	{
 		if (((size_t)n) == (colind_.size() + 1)) {
 			colind_.push_back(v);
-		} else {
+		}
+		else {
 			colind_[n] = v;
 		};
 	}
@@ -345,7 +344,8 @@ public:
 	{
 		if (((size_t)n) == (values_.size() + 1)) {
 			values_.push_back(v);
-		} else {
+		}
+		else {
 			values_[n] = v;
 		};
 	}
@@ -359,7 +359,7 @@ public:
 
 	template <typename VerySparseMatrixType>
 	typename EnableIf<!std::IsClosureLike<VerySparseMatrixType>::True,
-	    void>::Type
+	                  void>::Type
 	operator=(const VerySparseMatrixType& m)
 	{
 		if (!m.sorted())
@@ -402,7 +402,8 @@ public:
 			assert(static_cast<SizeType>(rowptr_[nrow_]) == values_.size());
 
 			return colind_.size();
-		} else {
+		}
+		else {
 			return 0;
 		};
 	}
@@ -412,7 +413,7 @@ public:
 	 ** row-compressed format */
 	template <typename VectorLikeType>
 	void matrixVectorProduct(VectorLikeType& x,
-	    const VectorLikeType& y) const
+	                         const VectorLikeType& y) const
 	{
 		assert(x.size() == y.size());
 		for (SizeType i = 0; i < y.size(); i++) {
@@ -535,11 +536,11 @@ public:
 
 	template <typename T1>
 	typename EnableIf<Loki::TypeTraits<T1>::isArith || IsComplexNumber<T1>::True,
-	    CrsMatrix>::Type
+	                  CrsMatrix>::Type
 	operator=(const std::ClosureOperator<
-	    T1,
-	    CrsMatrix,
-	    std::ClosureOperations::OP_MULT>& c)
+	          T1,
+	          CrsMatrix,
+	          std::ClosureOperations::OP_MULT>& c)
 	{
 		*this = c.r2;
 		this->values_ *= c.r1;
@@ -548,11 +549,11 @@ public:
 
 	template <typename T1>
 	typename EnableIf<Loki::TypeTraits<T1>::isArith || IsComplexNumber<T1>::True,
-	    CrsMatrix>::Type
+	                  CrsMatrix>::Type
 	operator+=(const std::ClosureOperator<
-	    T1,
-	    CrsMatrix,
-	    std::ClosureOperations::OP_MULT>& c)
+	           T1,
+	           CrsMatrix,
+	           std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix s;
 		add(s, c.r2, c.r1);
@@ -562,11 +563,11 @@ public:
 
 	template <typename T1>
 	typename EnableIf<Loki::TypeTraits<T1>::isArith || IsComplexNumber<T1>::True,
-	    CrsMatrix>::Type
+	                  CrsMatrix>::Type
 	operator+=(const std::ClosureOperator<
-	    std::ClosureOperator<T1, CrsMatrix, std::ClosureOperations::OP_MULT>,
-	    CrsMatrix,
-	    std::ClosureOperations::OP_MULT>& c)
+	           std::ClosureOperator<T1, CrsMatrix, std::ClosureOperations::OP_MULT>,
+	           CrsMatrix,
+	           std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix s;
 		multiply(s, c.r1.r2, c.r2);
@@ -642,7 +643,7 @@ public:
 
 	template <typename S>
 	friend std::ostream& operator<<(std::ostream& os,
-	    const CrsMatrix<S>& m);
+	                                const CrsMatrix<S>& m);
 
 	template <class S>
 	friend void difference(const CrsMatrix<S>& A, const CrsMatrix<S>& B);
@@ -658,7 +659,7 @@ public:
 
 	template <typename CrsMatrixType>
 	friend std::istream& operator>>(std::istream& is,
-	    CrsMatrix<CrsMatrixType>& m);
+	                                CrsMatrix<CrsMatrixType>& m);
 
 	template <typename S>
 	friend void bcast(CrsMatrix<S>& m);
@@ -753,8 +754,7 @@ std::istream& operator>>(std::istream& is, CrsMatrix<T>& m)
 }
 
 template <typename T>
-class IsMatrixLike<CrsMatrix<T>>
-{
+class IsMatrixLike<CrsMatrix<T>> {
 public:
 
 	enum { True = true };
@@ -802,7 +802,8 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 		// ------------------------------
 		crsMatrix.resize(rows, cols);
 		crsMatrix.reserve(nonZeros);
-	} else {
+	}
+	else {
 		crsMatrix.resize(rows, cols, nonZeros);
 	};
 
@@ -817,7 +818,8 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 			if (use_push) {
 				crsMatrix.pushValue(val);
 				crsMatrix.pushCol(j);
-			} else {
+			}
+			else {
 				crsMatrix.setValues(counter, val);
 				crsMatrix.setCol(counter, j);
 			};
@@ -830,10 +832,10 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 }
 
 /** If order==false then
-		creates B such that
+                creates B such that
    B_{i1+j1*nout,i2+j2*nout)=A(j1,j2)\delta_{i1,i2} if order==true then creates
    B such that B_{i1+j1*na,i2+j2*na)=A(i1,i2)\delta_{j1,j2} where na=rank(A)
-	  */
+          */
 
 template <typename T, typename VectorLikeType>
 typename EnableIf<
@@ -964,11 +966,11 @@ externalProduct(CrsMatrix<T>& B, const CrsMatrix<T>& A, SizeType nout, const Vec
 //-------
 
 /** If order==false then
-		creates C such that C_{i1+j1*nout,i2+j2*nout)=A(j1,j2)B_{i1,i2}
-		if order==true then
-		creates C such that C_{i1+j1*na,i2+j2*na)=A(i1,i2)B_{j1,j2}
-		where na=rank(A) and nout = rank(B)
-	  */
+                creates C such that C_{i1+j1*nout,i2+j2*nout)=A(j1,j2)B_{i1,i2}
+                if order==true then
+                creates C such that C_{i1+j1*na,i2+j2*na)=A(i1,i2)B_{j1,j2}
+                where na=rank(A) and nout = rank(B)
+          */
 
 template <typename T, typename VectorLikeType>
 typename EnableIf<
@@ -1024,13 +1026,14 @@ void printFullMatrix(const CrsMatrix<T>& s, const String& name, SizeType how = 0
 	crsMatrixToFullMatrix(fullm, s);
 	std::cout << "--------->   " << name;
 	std::cout << " rank=" << s.rows() << "x" << s.cols()
-		  << " <----------\n";
+	          << " <----------\n";
 	try {
 		if (how == 1)
 			mathematicaPrint(std::cout, fullm);
 		if (how == 2)
 			symbolicPrint(std::cout, fullm);
-	} catch (std::exception& e) {
+	}
+	catch (std::exception& e) {
 	}
 
 	if (how == 0)
@@ -1069,7 +1072,8 @@ void multiply(CrsMatrix<S>& C, CrsMatrix<S3> const& A, CrsMatrix<S2> const& B)
 					temp[ptr[jbk]] = tmp;
 					index[ptr[jbk]] = jbk;
 					itemp++;
-				} else {
+				}
+				else {
 					temp[ptr[jbk]] += tmp;
 				}
 			}
@@ -1416,7 +1420,8 @@ void sum(CrsMatrix<T>& A, const std::vector<const CrsMatrix<T>*>& Bmats, const s
 
 				if (is_examined_already[jcol]) {
 					valueTmp[jcol] += (bij * b1);
-				} else {
+				}
+				else {
 					// ------------------------------------
 					// new column entry not examined before
 					// ------------------------------------
@@ -1494,7 +1499,8 @@ void fromBlockToFull(CrsMatrix<T>& Bfull, const CrsMatrix<T>& B, SizeType offset
 	if (use_push) {
 		Bfull.resize(nrows_Bfull, ncols_Bfull);
 		Bfull.reserve(nnz_Bfull);
-	} else {
+	}
+	else {
 		Bfull.resize(nrows_Bfull, ncols_Bfull, nnz_Bfull);
 	};
 
@@ -1511,7 +1517,8 @@ void fromBlockToFull(CrsMatrix<T>& Bfull, const CrsMatrix<T>& B, SizeType offset
 			if (use_push) {
 				Bfull.pushCol(j);
 				Bfull.pushValue(tmp);
-			} else {
+			}
+			else {
 				Bfull.setCol(counter, j);
 				Bfull.setValues(counter, tmp);
 			};

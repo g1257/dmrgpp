@@ -23,36 +23,31 @@ Please see full open source license included in file LICENSE.
 #include "AllocatorCpu.h"
 #include <complex>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType>
-class Real
-{
+class Real {
 public:
 
 	typedef ComplexOrRealType Type;
 };
 
 template <typename RealType>
-class Real<std::complex<RealType>>
-{
+class Real<std::complex<RealType>> {
 public:
 
 	typedef RealType Type;
 };
 
 template <typename T>
-class IsComplexNumber
-{
+class IsComplexNumber {
 public:
 
 	enum OpaqueEnum { True = false };
 };
 
 template <typename T>
-class IsComplexNumber<std::complex<T>>
-{
+class IsComplexNumber<std::complex<T>> {
 public:
 
 	enum OpaqueEnum { True = Loki::TypeTraits<T>::isArith };
@@ -118,11 +113,10 @@ norm(const std::complex<T>& t)
 }
 } // namespace PsimagLite
 
-namespace std
-{
+namespace std {
 template <typename T>
 typename PsimagLite::EnableIf<Loki::TypeTraits<T>::isFloat,
-    std::complex<T>>::Type
+                              std::complex<T>>::Type
 operator*(int x, const std::complex<T>& y)
 {
 	return std::complex<T>(real(y) * x, imag(y) * x);

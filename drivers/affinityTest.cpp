@@ -21,8 +21,7 @@ Please see full open source license included in file LICENSE.
 #define USE_PTHREADS_OR_NOT_NG
 #include "Parallelizer.h"
 
-class MyHelper
-{
+class MyHelper {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;

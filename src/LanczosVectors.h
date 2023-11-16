@@ -87,12 +87,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename MatrixType_, typename VectorType_>
-class LanczosVectors
-{
+class LanczosVectors {
 
 	typedef typename VectorType_::value_type ComplexOrRealType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
@@ -110,8 +108,8 @@ public:
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 
 	enum { WITH_INFO = 1,
-		DEBUG = 2,
-		ALLOWS_ZERO = 4 };
+	       DEBUG = 2,
+	       ALLOWS_ZERO = 4 };
 
 	LanczosVectors(const MatrixType& mat, bool lotaMemory, SizeType steps, bool isReorthoEnabled)
 	    : progress_("LanczosVectors")
@@ -275,7 +273,7 @@ private:
 		if (data_) {
 			if (rows != data_->rows() || cols != data_->cols())
 				throw RuntimeError("LanczosVectors: data has "
-						   "already been set!\n");
+				                   "already been set!\n");
 			return;
 		}
 

@@ -7,19 +7,17 @@
 #include <iostream>
 #include <numeric>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class SumDecomposition
-{
+class SumDecomposition {
 
 	typedef Vector<SizeType>::Type VectorSizeType;
 
 public:
 
 	enum SelEnum { SEL_ALL,
-		SEL_SIZE,
-		SEL_INDEX };
+		       SEL_SIZE,
+		       SEL_INDEX };
 
 	SumDecomposition(SizeType total, SizeType sum, SelEnum sel = SEL_ALL, int selection = 0)
 	    : sum_(sum)

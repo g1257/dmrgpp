@@ -3,12 +3,10 @@
 #include "CodeSectionParams.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename = int>
-class Parallelizer2
-{
+class Parallelizer2 {
 
 public:
 

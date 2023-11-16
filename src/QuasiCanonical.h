@@ -6,14 +6,12 @@
 #include "PsimagLite.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 // level one parens only
 // TODO FIXME : Generalize to multiple levels
 template <typename ComplexOrRealType>
-class QuasiCanonical
-{
+class QuasiCanonical {
 
 public:
 
@@ -64,7 +62,8 @@ public:
 
 			if (status == "closed") {
 				mainBuffer_ += str_[i];
-			} else {
+			}
+			else {
 				tempBuffer += str_[i];
 			}
 		}
@@ -163,7 +162,7 @@ private:
 		    PrimitivesType;
 		PrimitivesType primitives;
 		ExpressionForAST<PrimitivesType> expresionForAST(ve,
-		    primitives);
+		                                                 primitives);
 		return expresionForAST.exec();
 	}
 

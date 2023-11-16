@@ -8,11 +8,9 @@
 #include <cassert>
 #include <stack>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class IoNgSerializer
-{
+class IoNgSerializer {
 
 	typedef std::vector<unsigned char> VectorOfBoolInternalType;
 
@@ -21,17 +19,17 @@ class IoNgSerializer
 public:
 
 	/*
-		H5F_ACC_TRUNC - Truncate file, if it already exists,
-		erasing all data previously stored in the file.
-		H5F_ACC_EXCL - Fail if file already exists. H5F_ACC_TRUNC
-		and H5F_ACC_EXCL are mutually exclusive
-		H5F_ACC_RDONLY - Open file as read-only, if it already exists,
+	        H5F_ACC_TRUNC - Truncate file, if it already exists,
+	        erasing all data previously stored in the file.
+	        H5F_ACC_EXCL - Fail if file already exists. H5F_ACC_TRUNC
+	        and H5F_ACC_EXCL are mutually exclusive
+	        H5F_ACC_RDONLY - Open file as read-only, if it already exists,
 	   and fail, otherwise H5F_ACC_RDWR - Open file for read/write, if it
 	   already exists, and fail, otherwise
 	*/
 
 	enum WriteMode { NO_OVERWRITE,
-		ALLOW_OVERWRITE };
+		         ALLOW_OVERWRITE };
 
 	IoNgSerializer(String filename, unsigned int mode)
 	    : hdf5file_(0)
@@ -44,7 +42,8 @@ public:
 
 		try {
 			hdf5file_ = new H5::H5File(filename, mode);
-		} catch (H5::Exception& e) {
+		}
+		catch (H5::Exception& e) {
 			delete hdf5file_;
 			hdf5file_ = 0;
 			throw e;
@@ -53,7 +52,8 @@ public:
 		if (mode == H5F_ACC_TRUNC) {
 			try {
 				createGroup("");
-			} catch (H5::Exception& e) {
+			}
+			catch (H5::Exception& e) {
 				filename_ = "";
 				delete hdf5file_;
 				hdf5file_ = 0;
@@ -64,7 +64,8 @@ public:
 		if (mode == H5F_ACC_RDONLY) {
 			try {
 				readCanary();
-			} catch (H5::Exception& e) {
+			}
+			catch (H5::Exception& e) {
 				filename_ = "";
 				delete hdf5file_;
 				hdf5file_ = 0;
@@ -130,7 +131,8 @@ public:
 		try {
 			H5::Group group = hdf5file_->openGroup(groupName.c_str());
 			group.close();
-		} catch (...) {
+		}
+		catch (...) {
 			return false;
 		}
 
@@ -266,7 +268,7 @@ public:
 	    const std::vector<std::vector<T>>& what,
 	    WriteMode allowOverwrite = NO_OVERWRITE,
 	    typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith,
-		int*>::Type
+	                      int*>::Type
 	    = 0)
 	{
 		SizeType n = what.size();
@@ -337,10 +339,11 @@ public:
 		for (SizeType i = min; i < n; ++i) {
 			try {
 				what[i].write(name2 + "/" + typeToString(i),
-				    *this);
-			} catch (...) {
+				              *this);
+			}
+			catch (...) {
 				what[i].overwrite(name2 + "/" + typeToString(i),
-				    *this);
+				                  *this);
 			}
 		}
 	}
@@ -508,7 +511,7 @@ public:
 		std::cout << "\nOutput: ";
 		for (SizeType i = 0; i < y.size(); ++i)
 			std::cout << static_cast<unsigned short int>(y[i])
-				  << " ";
+			          << " ";
 		std::cout << "\n\nconvertToBoolean\n";
 		x.clear();
 		convertToBoolean(x, y);
@@ -538,8 +541,8 @@ private:
 	// complex<floating>
 
 	enum class ReadEnum { FLOATING,
-		COMPLEX,
-		OTHER };
+		              COMPLEX,
+		              OTHER };
 
 	template <typename SomeVectorType>
 	void readInternal(SomeVectorType& what, String name)
@@ -552,7 +555,7 @@ private:
 		const int ndims = dspace.getSimpleExtentNdims();
 		if (ndims != 1)
 			throw RuntimeError("IoNgSerializer: problem reading "
-					   "vector ndims != 1\n");
+			                   "vector ndims != 1\n");
 
 		hsize_t* dims = new hsize_t[ndims];
 		dspace.getSimpleExtentDims(dims);
@@ -560,7 +563,7 @@ private:
 		const hsize_t n = dims[0];
 		if (n == 0)
 			throw RuntimeError("IoNgSerializer: problem reading "
-					   "vector dims[0] == 0\n");
+			                   "vector dims[0] == 0\n");
 
 		const ReadEnum readEnumOnDisk = getReadEnumOnDisk(name);
 		static const ReadEnum readEnumDest = getReadEnumDestination<
@@ -568,7 +571,7 @@ private:
 
 		if (readEnumOnDisk == readEnumDest) {
 			SizeType complexSize = (readEnumDest == ReadEnum::COMPLEX) ? getHalfSize(n)
-										   : n;
+			                                                           : n;
 			what.resize(complexSize, 0);
 			void* ptr = static_cast<void*>(&(what[0]));
 			dataset->read(ptr, typeToH5<UnderlyingType>());
@@ -607,7 +610,8 @@ private:
 	{
 		try {
 			hdf5file_->unlink(name);
-		} catch (...) {
+		}
+		catch (...) {
 			std::cerr << "Cannot unlink " << name << "\n";
 		}
 
@@ -624,12 +628,13 @@ private:
 		try {
 			dataset = new H5::DataSet(
 			    hdf5file_->createDataSet(name, typeToH5<SomeType>(), *dataspace, dsCreatPlist));
-		} catch (H5::Exception& e) {
+		}
+		catch (H5::Exception& e) {
 			std::cerr << "H5 Exception createDataSet starts "
-				     "<-------------\n";
+			             "<-------------\n";
 			std::cerr << e.getDetailMsg() << "\n";
 			std::cerr << "H5 Exception createDataSet ends   "
-				     "<-------------\n";
+			             "<-------------\n";
 			return false;
 		}
 
@@ -651,7 +656,8 @@ private:
 
 		try {
 			dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		} catch (H5::Exception&) {
+		}
+		catch (H5::Exception&) {
 			dataset = new H5::DataSet(hdf5file_->createDataSet(
 			    name, typeToH5<unsigned char>(), *dataspace, dsCreatPlist));
 		}
@@ -671,14 +677,14 @@ private:
 		const int ndims = dspace.getSimpleExtentNdims();
 		if (ndims != 1)
 			throw RuntimeError("IoNgSerializer: problem reading "
-					   "vector<arith> (ndims)\n");
+			                   "vector<arith> (ndims)\n");
 
 		hsize_t* dims = new hsize_t[ndims];
 		dspace.getSimpleExtentDims(dims);
 
 		if (dims[0] == 0)
 			throw RuntimeError("IoNgSerializer: problem reading "
-					   "vector<arith> (dims)\n");
+			                   "vector<arith> (dims)\n");
 
 		unsigned char c = 0;
 		void* ptr = static_cast<void*>(&c);
@@ -728,7 +734,7 @@ private:
 	}
 
 	static void convertToBoolean(std::vector<bool>& dest,
-	    const VectorOfBoolInternalType& x)
+	                             const VectorOfBoolInternalType& x)
 	{
 		typedef VectorOfBoolInternalType::value_type ValueType;
 		SizeType numberOfBits = sizeof(ValueType) * 8 * x.size();
@@ -760,7 +766,7 @@ private:
 	}
 
 	static void encodeBooleanSize(VectorOfBoolInternalType& x,
-	    SizeType total)
+	                              SizeType total)
 	{
 		static short int byteSize = 256;
 		assert(x.size() >= booleanEncodedSize_);
@@ -809,7 +815,8 @@ private:
 		char tmp;
 		try {
 			read(tmp, nameComplexOrReal);
-		} catch (...) {
+		}
+		catch (...) {
 			return ReadEnum::OTHER;
 		}
 
@@ -822,7 +829,7 @@ private:
 		if (IsComplexNumber<T>::True)
 			return ReadEnum::COMPLEX;
 		return (Loki::TypeTraits<T>::isFloat) ? ReadEnum::FLOATING
-						      : ReadEnum::OTHER;
+		                                      : ReadEnum::OTHER;
 	}
 
 	H5::H5File* hdf5file_;

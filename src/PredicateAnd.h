@@ -4,8 +4,7 @@
 #include "PsimagLite.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 /* PSIDOC PredicateAnd
  PredicateAnd is a &-separated list of simple predicates,
@@ -14,8 +13,7 @@ namespace PsimagLite
 
  where & means to AND the predicates.
  */
-class PredicateAnd
-{
+class PredicateAnd {
 
 public:
 

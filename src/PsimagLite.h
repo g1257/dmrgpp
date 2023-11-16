@@ -13,8 +13,7 @@
 #include <sstream>
 #include <utility>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 SizeType integerDivision(SizeType a, SizeType b);
 
@@ -65,8 +64,7 @@ void replaceAll(String& str, const String& from, const String& to);
 
 String basename(const String&);
 
-class PsiApp
-{
+class PsiApp {
 
 public:
 
@@ -84,7 +82,7 @@ public:
 	}
 
 	void checkMicroArch(std::ostream& os,
-	    PsimagLite::String compiledArch) const
+	                    PsimagLite::String compiledArch) const
 	{
 		os << "Compiled MicroArchitecture is " << compiledArch << "\n";
 		os << "Running on MicroArchitecture " << microArch_ << "\n";

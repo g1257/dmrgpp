@@ -14,8 +14,7 @@ extern "C" {
 #include <gsl/gsl_multimin.h>
 }
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename FunctionType>
 typename FunctionType::FieldType myFunction(const gsl_vector* v, void* params)
@@ -47,8 +46,7 @@ void myFdFunction(const gsl_vector* v, void* params, double* f, gsl_vector* df)
 }
 
 template <typename RealType, typename FunctionType>
-class Minimizer
-{
+class Minimizer {
 
 	typedef typename FunctionType::FieldType FieldType;
 	typedef typename Vector<FieldType>::Type VectorType;
@@ -57,7 +55,7 @@ class Minimizer
 public:
 
 	enum { GSL_SUCCESS = ::GSL_SUCCESS,
-		GSL_CONTINUE = ::GSL_CONTINUE };
+	       GSL_CONTINUE = ::GSL_CONTINUE };
 
 	Minimizer(FunctionType& function, SizeType maxIter, bool verbose = false)
 	    : function_(function)
@@ -120,9 +118,9 @@ public:
 				RealType thisValue = function_(v);
 				RealType diff = fabs(thisValue - prevValue);
 				std::cerr << "simplex: " << iter << " "
-					  << thisValue << " diff= " << diff;
+				          << thisValue << " diff= " << diff;
 				std::cerr << " status= " << status_
-					  << " size=" << size << "\n";
+				          << " size=" << size << "\n";
 				prevValue = thisValue;
 			}
 
@@ -161,27 +159,27 @@ public:
 			if (status_) {
 				String gslError(gsl_strerror(status_));
 				String msg("Minimizer::conjugateGradient(...): "
-					   "GSL Error: ");
+				           "GSL Error: ");
 				if (verbose_)
 					std::cerr << msg << gslError << "\n";
 				return -iter;
 			}
 
 			status_ = gsl_multimin_test_gradient(gslDs_->gradient,
-			    tolerance);
+			                                     tolerance);
 
 			if (verbose_) {
 				typename Vector<
 				    typename FunctionType::FieldType>::Type
 				    v(gslDs_->x->data,
-					gslDs_->x->data + func.n);
+				      gslDs_->x->data + func.n);
 				RealType thisValue = function_(v);
 				RealType diff = fabs(thisValue - prevValue);
 				std::cerr << "conjugateGradient: " << iter
-					  << " " << thisValue;
+				          << " " << thisValue;
 				std::cerr << " diff= " << diff;
 				std::cerr << " gradientNorm= "
-					  << gradientNorm(gslDs_->x);
+				          << gradientNorm(gslDs_->x);
 				std::cerr << " status= " << status_ << "\n";
 				prevValue = thisValue;
 			}
@@ -259,12 +257,10 @@ private:
 
 #else
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename RealType, typename FunctionType>
-class Minimizer
-{
+class Minimizer {
 
 	typedef typename FunctionType::FieldType FieldType;
 	typedef typename Vector<FieldType>::Type VectorType;
@@ -272,7 +268,7 @@ class Minimizer
 public:
 
 	enum { GSL_SUCCESS = 0,
-		GSL_CONTINUE = 1 };
+	       GSL_CONTINUE = 1 };
 
 	Minimizer(FunctionType&, SizeType, bool = false)
 	{

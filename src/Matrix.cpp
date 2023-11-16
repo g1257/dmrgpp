@@ -1,7 +1,6 @@
 #include "Matrix.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 void checkBlasStatus(int info, PsimagLite::String msg)
 {

@@ -81,12 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename GeometryBaseType>
-class GeometryDirection
-{
+class GeometryDirection {
 
 	typedef Matrix<ComplexOrRealType> MatrixType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
@@ -94,7 +92,7 @@ class GeometryDirection
 public:
 
 	enum InternalDofEnum { GENERAL,
-		SPECIFIC };
+		               SPECIFIC };
 
 	struct Auxiliary {
 
@@ -107,11 +105,11 @@ public:
 		}
 
 		void write(PsimagLite::String label,
-		    IoSerializer& ioSerializer) const
+		           IoSerializer& ioSerializer) const
 		{
 			ioSerializer.createGroup(label);
 			ioSerializer.write(label + "/constantValues",
-			    constantValues);
+			                   constantValues);
 			ioSerializer.write(label + "/dirId", dirId);
 			ioSerializer.write(label + "/edof", idof);
 		}
@@ -154,7 +152,8 @@ public:
 					    "rows=cols= "
 					    + ttos(aux.orbitals) + "\n");
 			}
-		} else {
+		}
+		else {
 			io.read(dataNumbers_, connectors);
 			if (dataNumbers_.size() != n) {
 				String s(__FILE__);
@@ -211,7 +210,7 @@ public:
 		assert(b || (dataMatrices_[h].rows() > edof2 && dataMatrices_[h].cols() > edof1));
 
 		ComplexOrRealType tmp = (b) ? dataMatrices_[h](edof1, edof2)
-					    : dataMatrices_[h](edof2, edof1);
+		                            : dataMatrices_[h](edof2, edof1);
 		int signChange = geometryBase_->signChange(i, j);
 		return tmp * static_cast<RealType>(signChange);
 	}
@@ -228,7 +227,7 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	    const GeometryDirection& gd)
+	                                const GeometryDirection& gd)
 	{
 		os << "#GeometryDirectionAuxiliary\n";
 		os << gd.aux_;
@@ -243,7 +242,8 @@ public:
 				os << gd.dataNumbers_[i] << " ";
 			}
 			os << "\n";
-		} else {
+		}
+		else {
 			os << "#GeometryMatrixSize=" << gd.dataMatrices_.size()
 			   << "\n";
 			for (SizeType i = 0; i < gd.dataMatrices_.size(); i++)

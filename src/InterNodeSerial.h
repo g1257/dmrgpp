@@ -3,12 +3,10 @@
 #include "Mpi.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename = int>
-class InterNode
-{
+class InterNode {
 
 public:
 

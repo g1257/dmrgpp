@@ -82,20 +82,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 #include <stdexcept>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType>
-class Honeycomb : public GeometryBase<ComplexOrRealType, InputType>
-{
+class Honeycomb : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
 	enum Dir { DIR_X = 0,
-		DIR_Y = 1,
-		DIR_Z = 2 };
+		   DIR_Y = 1,
+		   DIR_Z = 2 };
 	enum GeLe { GREATER_OR_EQUAL,
-		LESS_OR_EQUAL };
+		    LESS_OR_EQUAL };
 
 	Honeycomb(SizeType linSize, InputType& io)
 	    : linSize_(linSize)
@@ -110,7 +108,8 @@ public:
 		try {
 			io.readline(x, "IsPeriodicX=");
 			periodicX_ = (x > 0);
-		} catch (std::exception&) {
+		}
+		catch (std::exception&) {
 		}
 	}
 

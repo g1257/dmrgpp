@@ -4,8 +4,7 @@
 #ifndef USE_IO_SIMPLE
 
 #include "IoNgSerializer.h"
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 typedef IoNgSerializer IoSerializer;
 
@@ -15,8 +14,7 @@ typedef IoNgSerializer IoSerializer;
 
 #include "IoSerializerEmpty.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 typedef IoSerializerEmpty IoSerializer;
 

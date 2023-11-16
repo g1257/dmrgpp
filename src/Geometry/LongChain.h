@@ -79,12 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PSI_GEOM_LONG_CHAIN_H
 #include "GeometryBase.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType>
-class LongChain : public GeometryBase<ComplexOrRealType, InputType>
-{
+class LongChain : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
@@ -108,14 +106,16 @@ public:
 			isPeriodic_ = (x > 0) ? true : false;
 			if (isPeriodic_)
 				std::cerr << "LongChain::ctor(): periodic\n";
-		} catch (std::exception& e) {
+		}
+		catch (std::exception& e) {
 		}
 
 		try {
 			int x = 0;
 			io.readline(x, "LongChainDistance=");
 			distance_ = x;
-		} catch (std::exception& e) {
+		}
+		catch (std::exception& e) {
 		}
 
 		if (linSize_ <= distance_)

@@ -81,17 +81,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "GeometryBase.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType>
-class Ladder : public GeometryBase<ComplexOrRealType, InputType>
-{
+class Ladder : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
 	enum { DIRECTION_X,
-		DIRECTION_Y };
+	       DIRECTION_Y };
 
 	Ladder() { }
 
@@ -110,8 +108,9 @@ public:
 			io.readline(x, "IsPeriodicX=");
 			isPeriodicX_ = (x > 0) ? true : false;
 			std::cerr << "INFO: IsPeriodicX=" << isPeriodicX_
-				  << "\n";
-		} catch (std::exception&) {
+			          << "\n";
+		}
+		catch (std::exception&) {
 		}
 
 		try {
@@ -120,13 +119,14 @@ public:
 			isPeriodicY_ = (x > 0) ? true : false;
 			if (leg_ == 2)
 				throw RuntimeError("LadderLeg==2 cannot have "
-						   "IsPeriodicY set\n");
+				                   "IsPeriodicY set\n");
 			std::cerr << "INFO: IsPeriodicY=" << isPeriodicY_
-				  << "\n";
-		} catch (std::exception& e) {
+			          << "\n";
+		}
+		catch (std::exception& e) {
 			if (leg_ > 2)
 				throw RuntimeError("LadderLeg>2 must have "
-						   "IsPeriodicY= line\n");
+				                   "IsPeriodicY= line\n");
 		}
 
 		if (leg_ == 2)
@@ -150,7 +150,7 @@ public:
 			return (isPeriodicX_) ? linSize_ : linSize_ - leg_;
 		else if (dirId == DIRECTION_Y)
 			return (isPeriodicY_) ? linSize_
-					      : linSize_ - linSize_ / leg_;
+			                      : linSize_ - linSize_ / leg_;
 
 		throw RuntimeError("Unknown direction\n");
 	}

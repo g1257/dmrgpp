@@ -4,11 +4,9 @@
 #include "AllocatorCpu.h"
 #include <fstream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class MicroArchitecture
-{
+class MicroArchitecture {
 
 public:
 
@@ -17,7 +15,8 @@ public:
 		vendorId_ = readLabel("/proc/cpuinfo", "vendor_id");
 		if (vendorId_.find("Intel") != String::npos) {
 			vendorId_ = "Intel";
-		} else {
+		}
+		else {
 			if (vendorId_.find("AMD") != String::npos)
 				vendorId_ = "AMD";
 			else

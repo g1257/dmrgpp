@@ -80,9 +80,9 @@ int main(int argc, char* argv[])
 			SizeType j = range2.index();
 			sum[i] += v[j];
 			std::cout << "i=" << i << " j=" << j
-				  << " comm1.rank=" << concurrency.rank(comm.first);
+			          << " comm1.rank=" << concurrency.rank(comm.first);
 			std::cout << " comm2.rank=" << concurrency.rank(comm.second)
-				  << " world.rank=" << concurrency.rank() << "\n";
+			          << " world.rank=" << concurrency.rank() << "\n";
 			range2.next();
 		}
 		concurrency.reduce(sum, comm.first);

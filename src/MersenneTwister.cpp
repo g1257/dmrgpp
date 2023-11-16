@@ -1,7 +1,6 @@
 #include "MersenneTwister.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 MersenneTwister::MersenneTwister(unsigned s)
     : index_(0)

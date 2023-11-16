@@ -12,11 +12,9 @@
  with the usual meaning, and %% means divisible by.
  So l%%2 means that the simple predicate is true if l is divisible by 2.
  */
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class PredicateSimple
-{
+class PredicateSimple {
 
 public:
 
@@ -126,7 +124,7 @@ private:
 		    PrimitivesType;
 		PrimitivesType primitives;
 		ExpressionForAST<PrimitivesType> expresionForAST(tokens,
-		    primitives);
+		                                                 primitives);
 		return expresionForAST.exec();
 	}
 
@@ -155,7 +153,7 @@ private:
 				return hs;
 			String part1 = (index == 0) ? "" : hs.substr(0, index);
 			String part2 = hs.substr(index + nameLength,
-			    hs.length() - nameLength - index);
+			                         hs.length() - nameLength - index);
 			hs = part1 + valString + part2;
 		}
 

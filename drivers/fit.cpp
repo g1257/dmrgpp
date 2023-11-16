@@ -6,8 +6,7 @@
 #include <fstream>
 
 template <typename RealType_>
-class OracleData
-{
+class OracleData {
 
 public:
 
@@ -36,7 +35,7 @@ public:
 		}
 
 		std::cerr << "#Found " << omegas_.size() << " omega values for kf=" << kf
-			  << "\n";
+		          << "\n";
 		if (omegas_.size() == 0)
 			err("No data found in " + file + "\n");
 	}
@@ -57,8 +56,7 @@ private:
 };
 
 template <typename RealType>
-class FitData
-{
+class FitData {
 
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
@@ -95,7 +93,7 @@ public:
 		const RealType& delta = v[0];
 		const RealType& gamma = v[1];
 		return (j == 0) ? dfDelta(omega, delta, gamma)
-				: dfGamma(omega, delta, gamma);
+		                : dfGamma(omega, delta, gamma);
 	}
 
 	SizeType size() const { return 2; }
@@ -166,14 +164,12 @@ private:
 };
 
 template <typename OracleType, typename FitDataType>
-class Fitter
-{
+class Fitter {
 
 	typedef typename OracleType::RealType RealType;
 	typedef typename OracleType::VectorRealType VectorRealType;
 
-	class MyFunctionTest
-	{
+	class MyFunctionTest {
 
 	public:
 

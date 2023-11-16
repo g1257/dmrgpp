@@ -5,8 +5,7 @@
 // source:
 // https://stackoverflow.com/questions/257288/is-it-possible-to-write-a-template-to-check-for-a-functions-existence
 template <typename T>
-class has_helloworld
-{
+class has_helloworld {
 	typedef char one;
 	struct two {
 		char x[2];
@@ -22,15 +21,13 @@ public:
 	enum { value = sizeof(test<T>(0)) == sizeof(char) };
 };
 
-class A
-{
+class A {
 public:
 
 	int helloworld() const { return 42; }
 };
 
-class B
-{
+class B {
 };
 
 template <typename T>

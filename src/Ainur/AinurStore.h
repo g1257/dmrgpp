@@ -3,11 +3,9 @@
 #include "AinurLexical.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class Store
-{
+class Store {
 
 public:
 
@@ -15,21 +13,21 @@ public:
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 
 	enum Type { UNKNOWN,
-		SCALAR,
-		VECTOR,
-		MATRIX }; // HASH, FUNCTION
+		    SCALAR,
+		    VECTOR,
+		    MATRIX }; // HASH, FUNCTION
 
 	enum SubType { UNDEFINED,
-		INTEGER,
-		REAL,
-		COMPLEX,
-		STRING,
-		CHAR,
-		GROUP };
+		       INTEGER,
+		       REAL,
+		       COMPLEX,
+		       STRING,
+		       CHAR,
+		       GROUP };
 
 	enum Attribute { NONE,
-		REQUIRED,
-		CONST };
+		         REQUIRED,
+		         CONST };
 
 	Store(String s, String a)
 	    : type_(UNKNOWN)
@@ -57,7 +55,7 @@ public:
 			break;
 		default:
 			std::cerr << "setRhs not implemented, rhs= " << rhs
-				  << "\n";
+			          << "\n";
 			break;
 		}
 	}
@@ -211,7 +209,8 @@ private:
 				value_.resize(rows * cols + 2);
 				value_[0] = ttos(rows);
 				value_[1] = ttos(cols);
-			} else if (cols != thisCol) {
+			}
+			else if (cols != thisCol) {
 				err("Malformed matrix, " + name + "\n");
 			}
 

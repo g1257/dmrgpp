@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
 	m(1, 1) = m(2, 2) = 0.25;
 
 	std::cout << "matrix\n"
-		  << m << "\n";
+	          << m << "\n";
 
 	PsimagLite::CrsMatrix<ComplexType> msparse(m);
 
@@ -36,8 +36,8 @@ int main(int argc, char* argv[])
 	params.tolerance = -1;
 	params.options = "reortho";
 	PsimagLite::LanczosSolver<SolverParametersType,
-	    PsimagLite::CrsMatrix<ComplexType>,
-	    VectorComplexType>
+	                          PsimagLite::CrsMatrix<ComplexType>,
+	                          VectorComplexType>
 	    lanczosSolver(msparse, params);
 
 	PsimagLite::Random48<double> myrng(time(0));

@@ -87,11 +87,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/syscall.h>
 #include <unistd.h>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class Concurrency
-{
+class Concurrency {
 
 	typedef LabelDisabled MpiDisabledType;
 
@@ -156,9 +154,9 @@ public:
 #endif
 
 	enum { SERIAL = 0,
-		PTHREADS = 1,
-		MPI = 2,
-		PTHREADS_AND_MPI = 3 };
+	       PTHREADS = 1,
+	       MPI = 2,
+	       PTHREADS_AND_MPI = 3 };
 
 	static SizeType storageSize(SizeType npthreads)
 	{
@@ -202,7 +200,7 @@ public:
 #else
 		if (nthreads != 1)
 			throw RuntimeError("nthreads>1 but no USE_PTHREADS "
-					   "support compiled\n");
+			                   "support compiled\n");
 #endif
 
 		MPI::init(argc, argv);
@@ -280,11 +278,11 @@ public:
 		throw PsimagLite::RuntimeError(message1.c_str());
 #else
 		std::cout << "Concurrency::npthreads="
-			  << codeSectionParams.npthreads << "\n";
+		          << codeSectionParams.npthreads << "\n";
 		std::cout << "Concurrency::npthreads2="
-			  << codeSectionParams.npthreadsLevelTwo << "\n";
+		          << codeSectionParams.npthreadsLevelTwo << "\n";
 		std::cout << "Concurrency::setAffinitiesDefault="
-			  << codeSectionParams.setAffinities << "\n";
+		          << codeSectionParams.setAffinities << "\n";
 #endif
 	}
 

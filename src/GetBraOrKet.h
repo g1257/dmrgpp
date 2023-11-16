@@ -3,17 +3,15 @@
 #include "Vector.h"
 #include <cstdlib>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class GetBraOrKet
-{
+class GetBraOrKet {
 
 public:
 
 	enum class Kind { E,
-		P,
-		R }; // R means reserved for internal use
+		          P,
+		          R }; // R means reserved for internal use
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 
@@ -82,16 +80,20 @@ private:
 		if (str[0] == 'P') {
 			kind_ = Kind::P;
 			pair_.first = getNumberFrom(str, 1); // modifies str
-		} else if (str == "gs") {
+		}
+		else if (str == "gs") {
 			kind_ = Kind::E;
 			return;
-		} else if (str == "time") { // legacy name
+		}
+		else if (str == "time") { // legacy name
 			kind_ = Kind::P;
 			return;
-		} else if (str[0] == 'Q') {
+		}
+		else if (str[0] == 'Q') {
 			kind_ = Kind::E;
 			pair_.first = getNumberFrom(str, 1); // modifies str
-		} else if (str[0] == 'R') {
+		}
+		else if (str[0] == 'R') {
 			kind_ = Kind::R;
 			pair_.first = getNumberFrom(str, 1); // modifies str
 			return;
@@ -102,7 +104,8 @@ private:
 
 		if (str[0] == 'X') {
 			pair_.second = getNumberFrom(str, 1); // modifies str
-		} else {
+		}
+		else {
 			err("A vector spec can only start with P, gs, X or Q " + str + "\n");
 		}
 	}
@@ -120,8 +123,8 @@ private:
 
 		if (number == "")
 			RuntimeError("getNumberFrom: no number after character "
-				     "location "
-			    + ttos(start) + " for string " + str + "\n");
+			             "location "
+			             + ttos(start) + " for string " + str + "\n");
 
 		str = str.substr(i, str.length() - i);
 

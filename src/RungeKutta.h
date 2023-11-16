@@ -88,12 +88,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename RealType, typename FunctionType, typename ArrayType = Vector<RealType>>
-class RungeKutta
-{
+class RungeKutta {
 
 	typedef typename ArrayType::value_type ComplexOrRealType;
 	typedef typename Vector<ComplexOrRealType>::Type VectorType;
@@ -117,7 +115,7 @@ public:
 	{
 		ArrayType k1(y0), k2(y0), k3(y0), k4(y0);
 		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1,
-			 wtotInverse = 1.0 / 6.0;
+		         wtotInverse = 1.0 / 6.0;
 
 		RealType ti = t0;
 		ArrayType yi = y0;
@@ -151,7 +149,7 @@ private:
 	}
 
 	ComplexOrRealType findValueOf(const Matrix<ComplexOrRealType>& yi,
-	    SizeType j) const
+	                              SizeType j) const
 	{
 		return yi(j, j);
 	}
@@ -164,7 +162,7 @@ private:
 	}
 
 	void checkNorm(const Matrix<ComplexOrRealType>&,
-	    const Matrix<ComplexOrRealType>&) const
+	               const Matrix<ComplexOrRealType>&) const
 	{
 	}
 

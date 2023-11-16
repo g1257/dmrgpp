@@ -22,11 +22,9 @@ Please see full open source license included in file LICENSE.
 #include <cstdlib>
 #include <iostream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename T>
-class Random48
-{
+class Random48 {
 
 public:
 

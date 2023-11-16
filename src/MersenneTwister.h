@@ -1,11 +1,9 @@
 #ifndef MERSENNETWISTER_H
 #define MERSENNETWISTER_H
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class MersenneTwister
-{
+class MersenneTwister {
 
 public:
 

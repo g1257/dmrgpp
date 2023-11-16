@@ -136,11 +136,9 @@ void* thread_function_wrapper(void* dummyPtr)
 	return 0;
 }
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename PthreadFunctionHolderType>
-class Pthreads
-{
+class Pthreads {
 
 public:
 
@@ -197,7 +195,7 @@ public:
 #ifdef __linux__
 		for (SizeType j = 0; j < nthreads_; j++) {
 			std::cout << "Pthreads: Pthread number " << j
-				  << " runs on core number ";
+			          << " runs on core number ";
 			std::cout << pfs[j].cpu << "\n";
 		}
 #endif

@@ -1,7 +1,6 @@
 #include "MemResolv.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 bool operator==(const MemoryPointer& a, const MemoryPointer& b)
 {

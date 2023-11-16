@@ -25,11 +25,9 @@ Please see full open source license included in file LICENSE.
 #include "PsimagLite.h"
 #include <iostream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class Profiling
-{
+class Profiling {
 
 	double diff(double x1, double x2) const { return x1 - x2; }
 

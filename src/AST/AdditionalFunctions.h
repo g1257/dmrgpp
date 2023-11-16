@@ -19,12 +19,10 @@ Please see full open source license included in file LICENSE.
 #define ADDITIONALFUNCTIONS_H
 #include "Node.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename VectorValueType>
-class Modulus : public Node<VectorValueType>
-{
+class Modulus : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -55,8 +53,7 @@ public:
 }; // class Modulus
 
 template <typename VectorValueType>
-class Cosine : public Node<VectorValueType>
-{
+class Cosine : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -76,8 +73,7 @@ public:
 }; // class Cosine
 
 template <typename VectorValueType>
-class Sine : public Node<VectorValueType>
-{
+class Sine : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -97,8 +93,7 @@ public:
 }; // class Sine
 
 template <typename VectorValueType>
-class Exp : public Node<VectorValueType>
-{
+class Exp : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -118,8 +113,7 @@ public:
 }; // class Exp
 
 template <typename VectorValueType>
-class TernaryOp : public Node<VectorValueType>
-{
+class TernaryOp : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -140,8 +134,7 @@ public:
 }; // class TernaryOp
 
 template <typename VectorValueType>
-class Log : public Node<VectorValueType>
-{
+class Log : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 

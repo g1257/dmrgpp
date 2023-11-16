@@ -5,14 +5,12 @@
 #include "Profiling.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename SolverParametersType, typename MatrixType_, typename VectorType_>
 class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,
-			  MatrixType_,
-			  VectorType_>
-{
+                                                   MatrixType_,
+                                                   VectorType_> {
 
 public:
 
@@ -91,7 +89,7 @@ public:
 	}
 
 	void decomposition(const VectorType& initVector,
-	    TridiagonalMatrixType& ab)
+	                   TridiagonalMatrixType& ab)
 	{
 		return ls_.decomposition(initVector, ab, ls_.params().eigsForStop);
 	}

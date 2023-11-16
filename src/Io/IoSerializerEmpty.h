@@ -6,18 +6,16 @@
 #include <cassert>
 #include <stack>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class IoSerializerEmpty
-{
+class IoSerializerEmpty {
 
 	typedef std::vector<unsigned char> VectorOfBoolInternalType;
 
 public:
 
 	enum WriteMode { NO_OVERWRITE,
-		ALLOW_OVERWRITE };
+		         ALLOW_OVERWRITE };
 
 	IoSerializerEmpty(String, unsigned int) { errorPrint("ctor"); }
 

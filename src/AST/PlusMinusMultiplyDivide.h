@@ -22,12 +22,10 @@ Please see full open source license included in file LICENSE.
 #include "Node.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ValueType_>
-class PlusMinusMultiplyDivide
-{
+class PlusMinusMultiplyDivide {
 
 public:
 
@@ -103,7 +101,8 @@ public:
 
 		try {
 			input->set(PsimagLite::atof(code));
-		} catch (std::exception&) {
+		}
+		catch (std::exception&) {
 			throw RuntimeError("FATAL: No function with code " + code + " was found.\n");
 		}
 

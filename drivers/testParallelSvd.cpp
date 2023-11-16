@@ -17,8 +17,8 @@ void fillRandom(PsimagLite::Matrix<RealType>& m, RealType min, RealType max, Som
 }
 
 bool equalMatrices(PsimagLite::Matrix<RealType>& a,
-    PsimagLite::Matrix<RealType>& b,
-    RealType tolerance)
+                   PsimagLite::Matrix<RealType>& b,
+                   RealType tolerance)
 {
 	const SizeType rows = a.rows();
 	const SizeType cols = b.cols();

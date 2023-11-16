@@ -3,11 +3,9 @@
 #include "Sort.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class LoadBalancerMpi
-{
+class LoadBalancerMpi {
 
 public:
 

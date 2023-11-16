@@ -6,11 +6,9 @@
 #include <fstream>
 #include <iostream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class Ainur
-{
+class Ainur {
 
 public:
 

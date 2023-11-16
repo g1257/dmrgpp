@@ -5,8 +5,7 @@
 #include "PredicateDefaultSpec.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 /* PSIDOC PredicateAwesome
  Comma-separated list of items, don't leave spaces:
@@ -57,8 +56,7 @@ namespace PsimagLite
  */
 
 template <typename SpecType = PredicateDefaultSpec>
-class PredicateAwesome
-{
+class PredicateAwesome {
 
 public:
 
@@ -78,7 +76,7 @@ public:
 				if (!spec)
 					throw RuntimeError(
 					    String("PredicateAwesome:: with "
-						   "default spec")
+					           "default spec")
 					    + " cannot handle special options\n");
 				spec->operator()(tokens[i]);
 				continue;

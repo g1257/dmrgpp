@@ -8,8 +8,7 @@
 typedef double MyRealType;
 typedef PsimagLite::Matrix<MyRealType> MatrixType;
 
-class MyBlasWrapper
-{
+class MyBlasWrapper {
 
 public:
 
@@ -60,17 +59,17 @@ public:
 		MyRealType* cptr = &(c_[ind]->operator()(0, 0));
 
 		psimag::BLAS::GEMM('N', 'N',
-		    mm, // rows of op(A)
-		    nn, // columns of op(B)
-		    kk, // columns of op(A)
-		    1.0,
-		    aptr,
-		    lda, // first dimension of A
-		    bptr,
-		    ldb, // first dimension of B
-		    0.0,
-		    cptr,
-		    ldc); // first dimension of C
+		                   mm, // rows of op(A)
+		                   nn, // columns of op(B)
+		                   kk, // columns of op(A)
+		                   1.0,
+		                   aptr,
+		                   lda, // first dimension of A
+		                   bptr,
+		                   ldb, // first dimension of B
+		                   0.0,
+		                   cptr,
+		                   ldc); // first dimension of C
 
 		*(a_[ind]) = *(b_[ind]);
 		*(b_[ind]) = *(c_[ind]);

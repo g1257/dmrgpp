@@ -3,12 +3,10 @@
 #include "PsimagLite.h"
 #include "QuasiCanonical.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ItemSpecType>
-class AssignAndDestroy
-{
+class AssignAndDestroy {
 
 public:
 
@@ -38,7 +36,7 @@ public:
 	}
 
 	static bool metaEqual(const AssignAndDestroy& t1,
-	    const AssignAndDestroy& t2)
+	                      const AssignAndDestroy& t2)
 	{
 		return ItemSpecType::metaEqual(t1.t_, t2.t_);
 	}
@@ -49,9 +47,8 @@ private:
 };
 
 template <typename ItemSpecType,
-    typename AssignAndDestroyType = AssignAndDestroy<ItemSpecType>>
-class CanonicalExpression
-{
+          typename AssignAndDestroyType = AssignAndDestroy<ItemSpecType>>
+class CanonicalExpression {
 
 	typedef typename ItemSpecType::ResultType ResultType;
 	typedef typename ItemSpecType::ComplexOrRealType ComplexOrRealType;
@@ -123,7 +120,7 @@ public:
 		ret += ttos(value);
 
 		ret += str.substr(x + label.length(),
-		    str.length() - x - label.length());
+		                  str.length() - x - label.length());
 
 		return std::pair<bool, String>(true, ret);
 	}
@@ -131,9 +128,9 @@ public:
 private:
 
 	bool procCanonicalTerm(AssignAndDestroyType& assignAndDestroy,
-	    QuasiCanonicalType& quasiCanonical,
-	    SizeType ind,
-	    AuxiliaryType& aux) const
+	                       QuasiCanonicalType& quasiCanonical,
+	                       SizeType ind,
+	                       AuxiliaryType& aux) const
 	{
 		String termCanonical = quasiCanonical.term(ind);
 		ComplexOrRealType factor = 1.0;
@@ -152,10 +149,10 @@ private:
 	}
 
 	void procCanonicalFactor(AssignAndDestroyType& prev,
-	    ComplexOrRealType& factor,
-	    String termStr,
-	    QuasiCanonicalType& quasiCanonical,
-	    AuxiliaryType& aux) const
+	                         ComplexOrRealType& factor,
+	                         String termStr,
+	                         QuasiCanonicalType& quasiCanonical,
+	                         AuxiliaryType& aux) const
 	{
 		bool isCaScalar = QuasiCanonicalType::isRealScalar(termStr);
 		if (isCaScalar) {

@@ -94,18 +94,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <stdexcept>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename InputCheckType>
-class InputNg
-{
+class InputNg {
 
-	class MyCompare
-	{
+	class MyCompare {
 
 		enum { FIRST,
-			SECOND };
+		       SECOND };
 
 		typedef std::pair<String, SizeType> PairType;
 
@@ -157,8 +154,7 @@ class InputNg
 
 public:
 
-	class Writeable
-	{
+	class Writeable {
 
 		enum {
 			WHITESPACE,
@@ -299,7 +295,8 @@ public:
 				if (data_[i] == '\n') {
 					vlines.push_back(buffer);
 					buffer = "";
-				} else {
+				}
+				else {
 					buffer += data_[i];
 				}
 			}
@@ -415,7 +412,8 @@ public:
 							checkNumbers();
 							numericVector_.clear();
 							state_ = IN_LABEL;
-						} else {
+						}
+						else {
 							state_ = IN_VALUE_NUMERIC;
 						}
 					}
@@ -436,7 +434,7 @@ public:
 			case IN_LABEL:
 				if (verbose_)
 					std::cout << "Read label=" << buffer
-						  << "\n";
+					          << "\n";
 				lastLabel_ = buffer;
 				inputCheck_.checkSimpleLabel(lastLabel_, line_);
 				if (whatchar == EQUALSIGN)
@@ -455,7 +453,7 @@ public:
 					    << "Read text value=" << buffer
 					    << "\n";
 				adjLabel = adjLabelForDuplicates(lastLabel_,
-				    mapStrStr_);
+				                                 mapStrStr_);
 				mapStrStr_[adjLabel] = buffer;
 				state_ = IN_LABEL;
 				inputCheck_.check(adjLabel, buffer, line_);
@@ -509,10 +507,10 @@ public:
 
 			if (!inputCheck_.check(lastLabel_, numericVector_, line_) && numericVector_.size() != adjExpected + 1) {
 				std::cout << " Number of numbers to follow is "
-					     "wrong, expected ";
+				             "wrong, expected ";
 				std::cout << adjExpected << " got ";
 				std::cout << (numericVector_.size() - 1)
-					  << "\n";
+				          << "\n";
 				std::cerr << "Line=" << line_ << "\n";
 				throw RuntimeError(s.c_str());
 			}
@@ -523,7 +521,7 @@ public:
 
 		template <typename SomeMapType>
 		String adjLabelForDuplicates(const String& label,
-		    SomeMapType& mymap)
+		                             SomeMapType& mymap)
 		{
 			String rootLabel = findRootLabel(label);
 			int x = findLastOccurrence(rootLabel, mymap);
@@ -562,7 +560,7 @@ public:
 			typename MapType::iterator it;
 			for (it = mp.begin(); it != mp.end(); ++it) {
 				std::cout << it->first << " " << it->second
-					  << "\n";
+				          << "\n";
 			}
 		}
 
@@ -581,8 +579,7 @@ public:
 		Vector<String>::Type labelsForRemoval_;
 	}; // class Writeable
 
-	class Readable
-	{
+	class Readable {
 
 	public:
 
@@ -603,11 +600,11 @@ public:
 			if (inputWriteable.ainurMode()) {
 				if (extensionOf(file_) == "inp") {
 					String w("WARNING: Ainur file but inp "
-						 "file extension\n");
+					         "file extension\n");
 					std::cout << AnsiColor::magenta << w
-						  << AnsiColor::reset;
+					          << AnsiColor::reset;
 					std::cerr << AnsiColor::magenta << w
-						  << AnsiColor::reset;
+					          << AnsiColor::reset;
 				}
 
 				ainur_ = new Ainur(
@@ -676,7 +673,7 @@ public:
 
 		template <typename FloatingType>
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,
-		    void>::Type
+		                  void>::Type
 		readline(FloatingType& val, const String& label)
 		{
 			if (ainur_) {
@@ -791,7 +788,7 @@ public:
 
 		template <typename VectorLikeType>
 		typename EnableIf<IsVectorLike<VectorLikeType>::True,
-		    void>::Type
+		                  void>::Type
 		read(VectorLikeType& val, const String& label)
 		{
 			if (ainur_)
@@ -815,7 +812,7 @@ public:
 
 		template <typename FloatingType>
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,
-		    void>::Type
+		                  void>::Type
 		read(Matrix<FloatingType>& m, const String& label)
 		{
 			if (ainur_)
@@ -855,7 +852,7 @@ public:
 
 		template <typename FloatingType>
 		typename EnableIf<Loki::TypeTraits<FloatingType>::isFloat,
-		    void>::Type
+		                  void>::Type
 		read(Matrix<std::complex<FloatingType>>& m, const String& label)
 		{
 			if (ainur_)
@@ -931,7 +928,7 @@ public:
 				return ainur_->readValue(m, label);
 
 			throw RuntimeError("InputNg: Matrix<String> not "
-					   "supported in POD inputs\n");
+			                   "supported in POD inputs\n");
 		}
 
 		MapStrStrType map() const { return mapStrStr_; }
@@ -942,13 +939,13 @@ public:
 
 		template <typename SomeMapType>
 		void cleanLabelsIfNeeded(const String& label,
-		    SomeMapType& mymap,
-		    typename SomeMapType::iterator& it,
-		    bool forceRemoval = false)
+		                         SomeMapType& mymap,
+		                         typename SomeMapType::iterator& it,
+		                         bool forceRemoval = false)
 		{
 			Vector<String>::Type::iterator it2 = find(labelsForRemoval_.begin(),
-			    labelsForRemoval_.end(),
-			    label);
+			                                          labelsForRemoval_.end(),
+			                                          label);
 			if (it2 != labelsForRemoval_.end() || forceRemoval)
 				mymap.erase(it);
 		}
@@ -983,7 +980,7 @@ public:
 
 		template <typename ComplexOrRealType>
 		typename EnableIf<IsComplexNumber<ComplexOrRealType>::True,
-		    ComplexOrRealType>::Type
+		                  ComplexOrRealType>::Type
 		stringToComplexOrReal(const String& s) const
 		{
 			typedef typename Real<ComplexOrRealType>::Type RealType;
@@ -1029,7 +1026,7 @@ public:
 
 		template <typename ComplexOrRealType>
 		typename EnableIf<TypesEqual<ComplexOrRealType, String>::True,
-		    String>::Type
+		                  String>::Type
 		stringToComplexOrReal(const String& s) const
 		{
 			return s;
@@ -1053,7 +1050,7 @@ public:
 		}
 
 		void throwWithMessage(const String& label,
-		    const String& label2 = "")
+		                      const String& label2 = "")
 		{
 			String s("Message issued by: ");
 			s += String(__FILE__) + "\n";
@@ -1122,8 +1119,7 @@ public:
 
 }; // InputNg
 
-class InputEmptyCheck
-{
+class InputEmptyCheck {
 };
 
 } // namespace PsimagLite

@@ -81,12 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Ladder.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType>
-class LadderBath : public GeometryBase<ComplexOrRealType, InputType>
-{
+class LadderBath : public GeometryBase<ComplexOrRealType, InputType> {
 
 	typedef std::pair<int, int> PairType;
 	typedef Ladder<ComplexOrRealType, InputType> LadderType;

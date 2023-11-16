@@ -9,12 +9,10 @@
 #include <sched.h>
 #include <unistd.h>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename LoadBalancerType = LoadBalancerMpi>
-class InterNode
-{
+class InterNode {
 
 public:
 

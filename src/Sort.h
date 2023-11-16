@@ -6,17 +6,14 @@
 #include <cassert>
 #include <iostream>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename ContainerType>
-class Sort
-{
+class Sort {
 public:
 
 	typedef typename ContainerType::value_type FieldType;
 	typedef std::pair<FieldType, SizeType> PairType;
-	class Compare
-	{
+	class Compare {
 
 	public:
 

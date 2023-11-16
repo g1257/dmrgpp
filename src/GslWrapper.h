@@ -90,12 +90,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <stdexcept>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 #ifndef USE_GSL
-class GslWrapper
-{
+class GslWrapper {
 public:
 
 	typedef int DummyType;
@@ -184,8 +182,7 @@ private:
 
 #else
 
-class GslWrapper
-{
+class GslWrapper {
 public:
 
 	typedef ::gsl_integration_workspace gsl_integration_workspace;
@@ -195,7 +192,7 @@ public:
 	void printError(int status) const
 	{
 		std::cerr << "GslWrapper: error: " << gsl_strerror(status)
-			  << "\n";
+		          << "\n";
 	}
 
 	gsl_error_handler_t*

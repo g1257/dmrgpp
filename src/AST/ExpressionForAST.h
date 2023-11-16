@@ -20,12 +20,10 @@ Please see full open source license included in file LICENSE.
 #include "Node.h"
 #include "Tree.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename PrimitivesType>
-class ExpressionForAST
-{
+class ExpressionForAST {
 public:
 
 	typedef typename PrimitivesType::VectorValueType VectorValueType;
@@ -36,7 +34,7 @@ public:
 	typedef typename Vector<TreeType*>::Type VectorTreeType;
 
 	ExpressionForAST(const VectorStringType& vecStr,
-	    PrimitivesType& primitives)
+	                 PrimitivesType& primitives)
 	{
 		constexpr bool verbose = false; // FIXME
 		SizeType effectiveSize = vecStr.size();

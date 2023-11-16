@@ -80,12 +80,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename T>
-class SampleCRSMatrix
-{
+class SampleCRSMatrix {
 
 public:
 
@@ -135,7 +133,7 @@ public:
 	void pushValue(const T& value) { values_.push_back(value); }
 
 	void matrixVectorProduct(typename Vector<T>::Type& x,
-	    const typename Vector<T>::Type& y) const
+	                         const typename Vector<T>::Type& y) const
 	{
 		for (SizeType i = 0; i < y.size(); i++)
 			for (SizeType j = rowptr_[i]; j < rowptr_[i + 1]; j++)
@@ -199,8 +197,8 @@ private:
 	}
 
 	void fillMatrix(typename Vector<SizeType>::Type& rows,
-	    typename Vector<SizeType>::Type& cols,
-	    typename Vector<T>::Type& vals)
+	                typename Vector<SizeType>::Type& cols,
+	                typename Vector<T>::Type& vals)
 	{
 		Sort<typename Vector<SizeType>::Type> s;
 		typename Vector<SizeType>::Type iperm(rows.size());

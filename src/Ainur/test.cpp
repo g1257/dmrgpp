@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 		fin.seekg(0, std::ios::beg);
 
 		str2.assign((std::istreambuf_iterator<char>(fin)),
-		    std::istreambuf_iterator<char>());
+		            std::istreambuf_iterator<char>());
 		fin.close();
 
 		str += str2;

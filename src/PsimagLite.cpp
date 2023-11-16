@@ -1,7 +1,6 @@
 #include "PsimagLite.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 SizeType integerDivision(SizeType a, SizeType b)
 {
@@ -13,7 +12,7 @@ SizeType integerDivision(SizeType a, SizeType b)
 }
 
 std::ostream& operator<<(std::ostream& os,
-    const std::pair<SizeType, SizeType>& p)
+                         const std::pair<SizeType, SizeType>& p)
 {
 	os << p.first << " " << p.second << " ";
 	return os;
@@ -60,7 +59,7 @@ String basename(const String& path)
 {
 	return String(
 	    std::find_if(path.rbegin(), path.rend(), MatchPathSeparator())
-		.base(),
+	        .base(),
 	    path.end());
 }
 
@@ -127,7 +126,7 @@ void replaceAll(String& str, const String& from, const String& to)
 	while ((start_pos = str.find(from, start_pos)) != String::npos) {
 		str.replace(start_pos, from.length(), to);
 		start_pos += to.length(); // In case 'to' contains 'from', like
-					  // replacing 'x' with 'yx'
+		                          // replacing 'x' with 'yx'
 	}
 }
 

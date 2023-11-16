@@ -105,8 +105,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PTHREAD_STACK_MIN 16384
 #endif
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename PthreadFunctionHolderType, typename LoadBalancerType>
 struct PthreadFunctionStruct {
@@ -132,7 +131,7 @@ template <typename PthreadFunctionHolderType, typename LoadBalancerType>
 void* thread_function_wrapper(void* dummyPtr)
 {
 	PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>* pfs = static_cast<PthreadFunctionStruct<PthreadFunctionHolderType,
-	    LoadBalancerType>*>(
+	                                                                                                            LoadBalancerType>*>(
 	    dummyPtr);
 
 	PthreadFunctionHolderType* pfh = pfs->pfh;
@@ -159,9 +158,8 @@ void* thread_function_wrapper(void* dummyPtr)
 }
 
 template <typename PthreadFunctionHolderType,
-    typename LoadBalancerType = LoadBalancerDefault>
-class PthreadsNg
-{
+          typename LoadBalancerType = LoadBalancerDefault>
+class PthreadsNg {
 
 	static const int MAX_CPUS = 1024;
 
@@ -194,7 +192,7 @@ public:
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
 	void loopCreate(PthreadFunctionHolderType& pfh,
-	    const VectorSizeType& weights)
+	                const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, nthreads_);
 		loopCreate(pfh, *loadBalancer);
@@ -204,14 +202,14 @@ public:
 
 	// balancer (includes weights)
 	void loopCreate(PthreadFunctionHolderType& pfh,
-	    const LoadBalancerType& loadBalancer)
+	                const LoadBalancerType& loadBalancer)
 	{
 		SizeType ntasks = pfh.tasks();
 		SizeType actualThreads = std::min(nthreads_, ntasks);
 		PthreadFunctionStruct<PthreadFunctionHolderType,
-		    LoadBalancerType>* pfs;
+		                      LoadBalancerType>* pfs;
 		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType,
-		    LoadBalancerType>[actualThreads];
+		                                LoadBalancerType>[actualThreads];
 		pthread_t* thread_id = new pthread_t[actualThreads];
 		pthread_attr_t** attr = new pthread_attr_t*[actualThreads];
 
@@ -245,8 +243,8 @@ public:
 			if (ret != 0) {
 				std::cerr << __FILE__;
 				std::cerr << "\tpthread_attr_setstacksize() "
-					     "has returned non-zero "
-					  << ret << "\n";
+				             "has returned non-zero "
+				          << ret << "\n";
 				std::cerr
 				    << "\tIt is possible (but no certain) that "
 				       "the following error";
@@ -256,7 +254,7 @@ public:
 				std::cerr
 				    << "PTHREAD_STACK_MIN (16384) bytes.\n";
 				std::cerr << "\tI will ignore this error and "
-					     "let you continue\n";
+				             "let you continue\n";
 			}
 
 			ret = pthread_attr_init(attr[j]);

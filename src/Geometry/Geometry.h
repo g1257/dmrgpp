@@ -82,13 +82,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GeometryTerm.h"
 #include "Io/IoSerializerStub.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ComplexOrRealType_, typename InputType_, typename ProgramGlobalsType>
 class Geometry
-    : public GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType_>
-{
+    : public GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType_> {
 
 public:
 
@@ -101,9 +99,9 @@ public:
 	    GeometryExType;
 
 	/** @class hide_geometry1
-		- TotalNumberOfSites=integer This is the total number of sites
+	        - TotalNumberOfSites=integer This is the total number of sites
 	   including bath sites (if any) and all system and environment sites.
-		- NumberOfTerms=integer This is the number of Hamiltonian
+	        - NumberOfTerms=integer This is the number of Hamiltonian
 	   off-site terms. This number must match the model's expected number of
 	   terms. Note that each Hamiltonian off-site term can have a different
 	   geometry!
@@ -170,7 +168,7 @@ public:
 		return (ind < middle)
 		    ? ProgramGlobalsType::ConnectionEnum::SYSTEM_SYSTEM
 		    : ProgramGlobalsType::ConnectionEnum::
-			ENVIRON_ENVIRON;
+		        ENVIRON_ENVIRON;
 	}
 
 	ComplexOrRealType operator()(SizeType smax, SizeType emin, SizeType i1, SizeType edof1, SizeType i2, SizeType edof2, SizeType term) const
@@ -217,7 +215,7 @@ public:
 		if (linSize_ & 1) {
 			std::cerr << "EXPERIMENTAL: Geometry::split(...): ";
 			std::cerr << " Lattice is odd (it has " << linSize_
-				  << " sites).\n";
+			          << " sites).\n";
 			middle++;
 		}
 
@@ -333,7 +331,7 @@ public:
 	template <typename RealType2, typename InputType2, typename PgType>
 	friend std::ostream&
 	operator<<(std::ostream& os,
-	    const Geometry<RealType2, InputType2, PgType>& g);
+	           const Geometry<RealType2, InputType2, PgType>& g);
 
 private:
 
@@ -344,7 +342,7 @@ private:
 template <typename ComplexOrRealType, typename InputType, typename PgType>
 std::ostream&
 operator<<(std::ostream& os,
-    const Geometry<ComplexOrRealType, InputType, PgType>& g)
+           const Geometry<ComplexOrRealType, InputType, PgType>& g)
 {
 	os << "#GeometrySize=" << g.linSize_ << "\n";
 	os << "#GeometryTerms=" << g.terms_.size() << "\n";

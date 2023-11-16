@@ -39,26 +39,23 @@ René Nyffenegger rene.nyffenegger@adp-gmbh.ch
 #include "Io/IoSerializerStub.h"
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class PsiBase64
-{
+class PsiBase64 {
 
 	static const String base64Chars_;
 
 public:
 
-	class Encode
-	{
+	class Encode {
 
 	public:
 
 		Encode(const String& str)
 		{
 			encode_(reinterpret_cast<const unsigned char*>(
-				    str.c_str()),
-			    str.length());
+			            str.c_str()),
+			        str.length());
 		}
 
 		Encode(unsigned char const* bytesToEncode, unsigned int inLen)
@@ -69,13 +66,13 @@ public:
 		const String& operator()() const { return buffer_; }
 
 		void write(String label,
-		    PsimagLite::IoSerializer& ioSerializer) const
+		           PsimagLite::IoSerializer& ioSerializer) const
 		{
 			ioSerializer.write(label, buffer_);
 		}
 
 		friend std::ostream& operator<<(std::ostream& os,
-		    const Encode& encode)
+		                                const Encode& encode)
 		{
 			os << "#InputStartsHere\n";
 			os << encode.buffer_;
@@ -86,7 +83,7 @@ public:
 	private:
 
 		void encode_(unsigned char const* bytesToEncode,
-		    unsigned int inLen)
+		             unsigned int inLen)
 		{
 			buffer_ = "";
 			int i = 0;
@@ -128,8 +125,7 @@ public:
 		String buffer_;
 	}; // class Encode
 
-	class Decode
-	{
+	class Decode {
 
 	public:
 

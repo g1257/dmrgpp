@@ -9,8 +9,7 @@
 #include "IoNg.h"
 #endif
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 #ifdef USE_IO_SIMPLE
 typedef PsimagLite::IoSimple IoSelector;

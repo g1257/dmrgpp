@@ -2,17 +2,14 @@
 #define CMPLX_OR_REAL_H
 #include "Vector.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename RealType, int>
-class CpmlxOrReal
-{
+class CpmlxOrReal {
 };
 
 template <typename RealType>
-class CpmlxOrReal<RealType, 1>
-{
+class CpmlxOrReal<RealType, 1> {
 
 public:
 
@@ -55,8 +52,7 @@ private:
 };
 
 template <typename RealType>
-class CpmlxOrReal<RealType, 0>
-{
+class CpmlxOrReal<RealType, 0> {
 
 public:
 

@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 
 	/*
 	for (SizeType i = 0; i < n; ++i) {
-		v[i] = i + 42;
+	        v[i] = i + 42;
 	}
 	*/
 

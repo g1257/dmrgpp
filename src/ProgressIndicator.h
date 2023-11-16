@@ -88,11 +88,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <unistd.h>
 #include <vector>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class ProgressIndicator
-{
+class ProgressIndicator {
 
 	static MemoryUsage musage_;
 	static OstringStream buffer_;
@@ -128,7 +126,7 @@ public:
 
 		String bufferActive = (bufferActive_) ? "active" : "inactive";
 		std::cerr << "ProgressIndicator: signal " << signal
-			  << " received.";
+		          << " received.";
 		std::cerr << " buffer is now " << bufferActive << "\n";
 	}
 
@@ -197,7 +195,7 @@ public:
 			return;
 
 		buffer_() << "Current virtual memory is " << vmSize
-			  << " maximum was " << vmPeak;
+		          << " maximum was " << vmPeak;
 		printline(buffer_, std::cout);
 	}
 
@@ -212,7 +210,7 @@ private:
 		const double seconds = t.millis();
 		const SizeType prec = os.precision(3);
 		prefixHelper(os) << caller_ << " "
-				 << "[" << std::fixed << seconds << "]: ";
+		                 << "[" << std::fixed << seconds << "]: ";
 		os.precision(prec);
 	}
 

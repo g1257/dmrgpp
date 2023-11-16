@@ -85,12 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename CrsMatrixType>
-class SparseRowCached
-{
+class SparseRowCached {
 
 public:
 
@@ -108,7 +106,7 @@ public:
 	void add(SizeType col, ValueType value)
 	{
 		/*			cols_.push_back(col);
-					values_.push_back(value);*/
+		                        values_.push_back(value);*/
 		SizeType cacheSize = cols_.size();
 		if (counter_ >= cacheSize) {
 			cacheSize *= 2;

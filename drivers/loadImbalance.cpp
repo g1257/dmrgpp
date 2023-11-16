@@ -22,8 +22,7 @@ Please see full open source license included in file LICENSE.
 #include "LoadBalancerWeights.h"
 #include "Parallelizer.h"
 
-class MyHelper
-{
+class MyHelper {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;

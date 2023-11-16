@@ -84,11 +84,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <mpi.h>
 #include <stdexcept>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-namespace MPI
-{
+namespace MPI {
 
 	typedef MPI_Comm CommType;
 	extern CommType COMM_WORLD;
@@ -220,7 +218,7 @@ namespace MPI
 	template <typename SomeVectorType>
 	typename EnableIf<
 	    IsVectorLike<SomeVectorType>::True&(
-		Loki::TypeTraits<typename SomeVectorType::value_type>::isArith | IsVectorLike<typename SomeVectorType::value_type>::True),
+	        Loki::TypeTraits<typename SomeVectorType::value_type>::isArith | IsVectorLike<typename SomeVectorType::value_type>::True),
 	    void>::Type
 	pointByPointGather(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
 	{
@@ -238,7 +236,8 @@ namespace MPI
 					break;
 				MPI::send(v[taskNumber], 0, taskNumber);
 			}
-		} else {
+		}
+		else {
 			for (int r = 0; r < nprocs; r++) {
 				if (r == root)
 					continue;
@@ -273,7 +272,8 @@ namespace MPI
 					break;
 				v[taskNumber].send(0, taskNumber, mpiComm);
 			}
-		} else {
+		}
+		else {
 			for (int r = 0; r < nprocs; r++) {
 				if (r == root)
 					continue;
@@ -289,7 +289,7 @@ namespace MPI
 
 	template <typename SomeVectorType>
 	typename EnableIf<IsVectorLike<SomeVectorType>::True & IsPairLike<typename SomeVectorType::value_type>::True,
-	    void>::Type
+	                  void>::Type
 	pointByPointGather(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
 	{
 		int mpiRank = MPI::commRank(mpiComm);
@@ -305,7 +305,8 @@ namespace MPI
 					break;
 				send(v[taskNumber], 0, taskNumber, mpiComm);
 			}
-		} else {
+		}
+		else {
 			for (int r = 0; r < nprocs; r++) {
 				if (r == root)
 					continue;
@@ -377,7 +378,7 @@ namespace MPI
 
 	template <typename T1, typename T2>
 	typename EnableIf<Loki::TypeTraits<T1>::isArith & Loki::TypeTraits<T2>::isArith,
-	    void>::Type
+	                  void>::Type
 	bcast(std::pair<T1, T2>& p, int root = 0, CommType mpiComm = COMM_WORLD)
 	{
 		T1 t1 = p.first;

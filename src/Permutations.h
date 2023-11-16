@@ -82,12 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Complex.h" // in PsimagLite
 #include "Sort.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename ContainerType>
-class Permutations
-{
+class Permutations {
 	typedef typename ContainerType::value_type FieldType;
 
 public:

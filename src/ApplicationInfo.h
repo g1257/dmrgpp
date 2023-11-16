@@ -90,11 +90,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <time.h>
 #include <unistd.h>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
-class ApplicationInfo
-{
+class ApplicationInfo {
 
 public:
 
@@ -131,7 +129,8 @@ public:
 		String retString;
 		if (ret != 0) {
 			retString = "UNKNOWN";
-		} else {
+		}
+		else {
 			retString = name;
 		}
 
@@ -153,10 +152,11 @@ public:
 			serializer.write(root + "/Name", name_);
 			serializer.write(root + "/RunId", runId_);
 			serializer.write(root + "/UnixTimeStart",
-			    unixTime(false));
-		} else {
+			                 unixTime(false));
+		}
+		else {
 			serializer.write(root + "/UnixTimeEnd",
-			    unixTime(false));
+			                 unixTime(false));
 		}
 	}
 
@@ -169,7 +169,7 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ApplicationInfo& ai)
+	                                const ApplicationInfo& ai)
 	{
 		if (ai.isFinalized_)
 			printFinalLegacy(os, ai);
@@ -191,7 +191,7 @@ private:
 	}
 
 	static void printFinalLegacy(std::ostream& os,
-	    const ApplicationInfo& ai)
+	                             const ApplicationInfo& ai)
 	{
 		OstringStream msg(std::cout.precision());
 		msg() << ai.name_ << "\nsizeof(SizeType)=" << sizeof(SizeType)

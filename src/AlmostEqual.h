@@ -83,11 +83,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define ALMOST_EQUAL_H
 #include "Matrix.h"
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename RealType>
-class AlmostEqual
-{
+class AlmostEqual {
 public:
 
 	AlmostEqual(const RealType& eps)

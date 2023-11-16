@@ -3,8 +3,7 @@
 #include "../AllocatorCpu.h"
 #include <H5Cpp.h>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename T>
 typename EnableIf<!std::is_enum<T>::value, H5::PredType>::Type typeToH5();

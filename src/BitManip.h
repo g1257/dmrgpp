@@ -2,10 +2,8 @@
 #define BIT_MANIP_H
 #include "AllocatorCpu.h"
 
-namespace PsimagLite
-{
-namespace BitManip
-{
+namespace PsimagLite {
+namespace BitManip {
 	// Counting bits set, Brian Kernighan's way
 	typedef unsigned int long WordType;
 	inline SizeType countKernighan(WordType v)

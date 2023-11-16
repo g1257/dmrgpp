@@ -56,8 +56,7 @@ the writer of the input may add other labels.
 */
 
 /* PSIDOC_CODE_START InputNg_Class_MyInputCheck nocapture */
-class MyInputCheck : public PsimagLite::InputCheckBase
-{
+class MyInputCheck : public PsimagLite::InputCheckBase {
 
 public:
 
@@ -175,7 +174,8 @@ int main(int argc, char* argv[])
 	std::string mystr("default");
 	try {
 		io.readline(mystr, "mystring=");
-	} catch (std::exception&) {
+	}
+	catch (std::exception&) {
 	}
 }
 /* PSIDOC_CODE_END */

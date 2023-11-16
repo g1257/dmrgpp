@@ -91,13 +91,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <cassert>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 
 template <typename SolverParametersType, typename MatrixType, typename VectorType>
 class DavidsonSolver
-    : public LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType>
-{
+    : public LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType> {
 
 	typedef typename SolverParametersType::RealType RealType;
 	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType>
@@ -109,7 +107,7 @@ class DavidsonSolver
 public:
 
 	DavidsonSolver(MatrixType const& mat,
-	    const SolverParametersType& params)
+	               const SolverParametersType& params)
 	    : progress_("DavidsonSolver")
 	    , mat_(mat)
 	    , steps_(params.steps)
@@ -138,7 +136,7 @@ public:
 private:
 
 	void algorithm4_14(VectorType& t,
-	    const typename Vector<VectorType>::Type& v)
+	                   const typename Vector<VectorType>::Type& v)
 	{
 		SizeType m = v.size();
 		if (m == 0)
