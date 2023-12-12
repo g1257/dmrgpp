@@ -341,8 +341,12 @@ private:
 		PsimagLite::String prefix = "Serializer";
 		SizeType total = 0;
 		io_.read(total, prefix + "/Size");
-		if (start >= end || start >= total || end > total)
+		if (start >= end || start >= total)
 			return false;
+
+		if (end > total) {
+			end = total;
+		}
 
 		for (SizeType i = start; i < end; ++i) {
 

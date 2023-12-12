@@ -465,7 +465,7 @@ private:
 
 			if (!printDone) {
 				printDone = true;
-				std::cout << "Using Matrix A:\n";
+				std::cout << "Using Matrix " << label << " :\n";
 				std::cout << opA.getCRS().toDense();
 				std::cout << "site <" << bra.toString() << "|" << label;
 				std::cout << "|" << ket.toString() << "> time\n";
