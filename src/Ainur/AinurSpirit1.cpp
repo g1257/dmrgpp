@@ -4,8 +4,8 @@
 #include <boost/fusion/include/at.hpp>
 #include <boost/fusion/mpl.hpp>
 #include <boost/fusion/sequence/intrinsic/at.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/operator.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 namespace PsimagLite {

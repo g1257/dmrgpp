@@ -2,8 +2,8 @@
 #include "AinurConvert.hh"
 #include "AinurDoubleOrFloat.h"
 #include <boost/config/warning_disable.hpp>
-#include <boost/spirit/include/phoenix_core.hpp>
-#include <boost/spirit/include/phoenix_operator.hpp>
+#include <boost/phoenix/core.hpp>
+#include <boost/phoenix/operator.hpp>
 #include <boost/spirit/include/qi.hpp>
 
 namespace PsimagLite {
