@@ -998,7 +998,7 @@ externalProduct(CrsMatrix<T>& C, const CrsMatrix<T>& A, const CrsMatrix<T>& B, c
 	for (SizeType i = 0; i < nfull; ++i) {
 		C.setRow(i, counter);
 		const SizeType ind = perm[i];
-		div_t q = div(ind, noutOrNa);
+		ldiv_t q = std::ldiv(ind, noutOrNa);
 		for (int k1 = BorA.getRowPtr(q.rem);
 		     k1 < BorA.getRowPtr(q.rem + 1);
 		     ++k1) {

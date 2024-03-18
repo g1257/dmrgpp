@@ -1,8 +1,8 @@
 #ifndef AINURCOMPLEX_HH
 #define AINURCOMPLEX_HH
 
-#include <typeinfo>
 #include "../PsimagLite.h"
+#include <typeinfo>
 
 namespace PsimagLite {
 

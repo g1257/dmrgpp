@@ -97,7 +97,7 @@ public:
 		// y  = ind/n;
 		// x = ind - y*n;
 		// x= ind % n;
-		div_t q = PsimagLite::div(ind, n_);
+		ldiv_t q = std::ldiv(ind, n_);
 		y = q.quot;
 		x = q.rem;
 	}
