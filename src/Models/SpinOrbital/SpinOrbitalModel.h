@@ -753,7 +753,7 @@ private:
 	// ket = sz' + lz'*(2s + 1)
 	SizeType mPlusJ(SizeType ket, SizeType orbital) const
 	{
-		div_t q = div(static_cast<int>(ket), static_cast<int>(modelParams_.twiceS + 1));
+		ldiv_t q = std::ldiv(static_cast<long int>(ket), static_cast<long int>(modelParams_.twiceS + 1));
 		assert(static_cast<SizeType>(q.rem) <= modelParams_.twiceS);
 		assert(static_cast<SizeType>(q.quot) <= modelParams_.twiceL);
 		return (orbital == 0) ? q.rem : q.quot;

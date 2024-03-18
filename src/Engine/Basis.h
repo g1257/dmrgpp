@@ -899,7 +899,7 @@ private:
 
 		void doTask(SizeType ji, SizeType)
 		{
-			div_t q = div(static_cast<int>(ji), static_cast<int>(rightSize_));
+			ldiv_t q = std::ldiv(static_cast<long int>(ji), static_cast<long int>(rightSize_));
 			const SizeType ileftOffset = basis1OffsetsPs_ + q.quot;
 			const SizeType irightOffset = basis2OffsetsPe_ + q.rem;
 			const SizeType iglobalState = ileftOffset + irightOffset * basisLeftSize_;

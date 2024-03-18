@@ -596,7 +596,7 @@ private:
 	{
 		// return helper_.leftRightSuper(ptr).super().electrons(t);
 		SizeType tmp = helper_.leftRightSuper(ptr).super().permutation(t);
-		div_t mydiv = PsimagLite::div(tmp, helper_.leftRightSuper(ptr).left().size());
+		ldiv_t mydiv = std::ldiv(tmp, helper_.leftRightSuper(ptr).left().size());
 		return helper_.leftRightSuper(ptr).right().signs()[mydiv.quot] ^ helper_.leftRightSuper(ptr).left().signs()[mydiv.rem];
 	}
 
