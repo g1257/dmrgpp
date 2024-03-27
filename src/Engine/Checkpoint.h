@@ -500,8 +500,7 @@ private:
 	    bool checkPoint) const
 	{
 		int x = lastSite;
-		bool isLatticeOdd = (totalSites & 1);
-		if (finiteLoop[0].stepLength() < 0 && !checkPoint && !isLatticeOdd)
+		if (finiteLoop[0].stepLength() < 0 && !checkPoint)
 			++x;
 
 		for (SizeType i = 0; i < finiteLoop.size(); ++i) {
