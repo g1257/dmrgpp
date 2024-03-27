@@ -507,7 +507,7 @@ struct ParametersDmrgSolver {
 			SizeType numberOfSites = 0;
 			io.readline(numberOfSites, "TotalNumberOfSites=");
 			bool isAllInSys = this->options.isSet("geometryallinsystem");
-			lastSite = (isAllInSys) ? numberOfSites - 1 : numberOfSites / 2 - 1;
+			lastSite = (isAllInSys) ? numberOfSites - 2 : numberOfSites / 2 - 1;
 		}
 
 		readFiniteLoops(io, finiteLoop, truncationControl, lastSite);
@@ -562,7 +562,7 @@ struct ParametersDmrgSolver {
 
 		std::cout << "FiniteLoopLengths=[";
 
-		if (lastSite == 1 && !latticeIsOdd && numberOfSites > 4) {
+		if (lastSite == 1 && numberOfSites > 4) {
 			lastSite = 0;
 		}
 
@@ -609,12 +609,11 @@ struct ParametersDmrgSolver {
 		bool allinsystem = this->options.isSet("geometryallinsystem");
 		if (isRestart || allinsystem) {
 
-			SizeType oneOrTwo = (numberOfSites & 1) ? 1 : 2;
-			if (lastSite != 0 && (lastSite + oneOrTwo) != numberOfSites)
+			if (lastSite != 0 && (lastSite + 2) != numberOfSites)
 				err("@auto: Internal error; please report this problem\n");
 
 			int x = (numberOfSites - 2);
-			if (lastSite + oneOrTwo == numberOfSites) {
+			if (lastSite + 2 == numberOfSites) {
 				x *= (-1);
 			}
 
@@ -632,8 +631,7 @@ struct ParametersDmrgSolver {
 		assert(ind > 0);
 		assert(numberOfSites >= 2);
 		SizeType x = (numberOfSites - 2);
-		if (x & 1)
-			--x;
+
 		if (lastSite != x && lastSite != 0)
 			err("autoNumberAfterFirst: Internal error, please report to DMRG++ mailing list\n");
 
