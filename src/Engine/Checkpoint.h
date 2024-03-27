@@ -427,9 +427,6 @@ private:
 			checkPoint = true;
 		}
 
-		if (totalSites & 1)
-			lastSite++;
-
 		parameters_.readFiniteLoops(ioIn, vfl, parameters_.truncationControl, lastSite);
 
 		if (!parameters_.autoRestart) {
@@ -518,8 +515,7 @@ private:
 			// take care of bounces:
 			bool b1 = (checkPoint || (i > 0));
 			if (b1 && delta * prevDeltaSign < 0) {
-				if (!isLatticeOdd)
-					x += prevDeltaSign;
+				x += prevDeltaSign;
 				if (x != 1 && (static_cast<SizeType>(x) + 2) != totalSites && !last)
 					err("Loops need to go all the way to the left or to the right\n");
 			}
