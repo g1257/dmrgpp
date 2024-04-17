@@ -126,13 +126,47 @@ public:
 		op_[1] = op2;
 	}
 
+	void reorder(const std::vector<SizeType>& permutation)
+	{
+		SizeType n = permutation.size();
+		if (n != op_.size()) {
+			err("Braket::reorder() size mismatch\n");
+		}
+
+		if (op_.size() != sites_.size()) {
+			err("Braket::reorder() size mismatch; consistency error\n");
+		}
+
+		if (n == 1) return;
+
+		std::string str = "<" + braket_[0].toString() + "|";
+		VectorAlgebraType opNew(n);
+		VectorIntType sitesNew(n);
+		VectorStringType opExprNameNew(n);
+		for (SizeType i = 0; i < n; ++i) {
+			opNew[i] = op_[permutation[i]];
+			sitesNew[i] = sites_[permutation[i]];
+			opExprNameNew[i] = opExprName_[permutation[i]];
+			str += opName(i);
+			if (i + 1 < n) str += std::string(";");
+		}
+
+		str += braket_[1].toString() + ">";
+
+		// actual changes
+		savedString_ = str;
+		op_ = opNew;
+		sites_ = sitesNew;
+		opExprName_ = opExprNameNew;
+		// braket_ does not change because bra and ket don't change
+	}
+
 private:
 
 	const ModelType& model_;
-	VectorGetBraOrKetType braket_;
+	VectorGetBraOrKetType braket_; // convert to pair?
 	PsimagLite::String savedString_;
 	VectorStringType opExprName_;
-	SizeType type_;
 	VectorAlgebraType op_;
 	VectorIntType sites_;
 }; // class Braket

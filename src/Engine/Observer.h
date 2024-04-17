@@ -361,21 +361,26 @@ public:
 
 		if (flag == 15) {
 			std::cout << "Fixed all sites\n";
-			SizeType site0 = braket.site(0);
-			SizeType site1 = braket.site(1);
+			BraketType braketOrdered = braket;
+			int sign = orderBraketIfNeeded(braketOrdered);
+			SizeType site0 = braketOrdered.site(0);
+			SizeType site1 = braketOrdered.site(1);
 			typename FourPointCorrelationsType::SparseMatrixType O2gt;
 			const bool finalTransform = true;
-			fourpoint_.firstStage(O2gt, 'N', site0, 'N', site1, braket, 0, 1, finalTransform);
+			fourpoint_.firstStage(O2gt, 'N', site0, 'N', site1, braketOrdered, 0, 1, finalTransform);
 			typename MatrixType::value_type tmp = fourpoint_.secondStage(O2gt,
 			    site1,
 			    'N',
-			    braket.site(2),
+			    braketOrdered.site(2),
 			    'N',
-			    braket.site(3),
-			    braket,
+			    braketOrdered.site(3),
+			    braketOrdered,
 			    2,
 			    3);
-			std::cout << site0 << " " << site1 << " ";
+
+			// sign due to reordering
+			tmp *= static_cast<RealType>(sign);
+			std::cout << braket.site(0) << " " << braket.site(1) << " ";
 			std::cout << braket.site(2) << " " << braket.site(3) << "  " << tmp << "\n";
 			return;
 		}
@@ -571,6 +576,71 @@ public:
 	}
 
 private:
+
+	static int orderBraketIfNeeded(BraketType& braket)
+	{
+		SizeType nsites = braket.points();
+		if (nsites == 1) return 1;
+
+		std::vector<SizeType> sites(nsites);
+		for (SizeType i = 0; i < nsites; ++i) {
+			sites[i] = braket.site(i);
+		}
+
+		PsimagLite::Sort<std::vector<SizeType> > sort;
+		std::vector<SizeType> sitesSorted = sites;
+		std::vector<SizeType> iperm(sites.size());
+		sort.sort(sitesSorted, iperm);
+
+		if (sites == sitesSorted) return 1;
+
+		// throws if mixed fermion or boson
+		ProgramGlobals::FermionOrBosonEnum statistics = getStatistics(braket);
+
+		braket.reorder(iperm);
+
+		return (statistics == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : parityOfPermutation(iperm);
+	}
+
+	static ProgramGlobals::FermionOrBosonEnum getStatistics(const BraketType& braket)
+	{
+		SizeType nsites = braket.points();
+		if (nsites == 0) return ProgramGlobals::FermionOrBosonEnum::BOSON;
+
+		ProgramGlobals::FermionOrBosonEnum statistics = braket.op(0).fermionOrBoson();
+		for (SizeType i = 1; i < nsites; ++i) {
+			 ProgramGlobals::FermionOrBosonEnum tmp = braket.op(i).fermionOrBoson();
+			if (tmp != statistics)
+				 err("Inconsistent statistics for braket\n");
+		}
+
+		return statistics;
+	}
+
+	static int parityOfPermutation(const std::vector<SizeType>& perm)
+	{
+		return (swapCountSmall(perm) & 1) ? -1 : 1;
+	}
+
+	// Inspired by
+	// https://stackoverflow.com/questions/20702782/efficiently-determine-the-parity-of-a-permutation
+	static SizeType swapCountSmall(const std::vector<SizeType>& perm)
+	{
+		SizeType n = perm.size();
+		SizeType swaps=0;
+		unsigned long int seen=0;
+		for (SizeType i=0; i<n; ++i) {
+			unsigned long int  mask=(1L<<i);
+			if ((seen&mask)!=0) continue;
+			seen|=mask;
+			for (SizeType j=perm[i]; (seen&(1L<<j))==0; j=perm[j]) {
+				seen|=(1L<<j);
+				++swaps;
+			}
+		}
+
+		return swaps;
+	}
 
 	const ObserverHelperType helper_;
 	const OnePointCorrelationsType onepoint_;
