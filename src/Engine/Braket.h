@@ -137,7 +137,8 @@ public:
 			err("Braket::reorder() size mismatch; consistency error\n");
 		}
 
-		if (n == 1) return;
+		if (n == 1)
+			return;
 
 		std::string str = "<" + braket_[0].toString() + "|";
 		VectorAlgebraType opNew(n);
@@ -148,7 +149,8 @@ public:
 			sitesNew[i] = sites_[permutation[i]];
 			opExprNameNew[i] = opExprName_[permutation[i]];
 			str += opName(i);
-			if (i + 1 < n) str += std::string(";");
+			if (i + 1 < n)
+				str += std::string(";");
 		}
 
 		str += braket_[1].toString() + ">";

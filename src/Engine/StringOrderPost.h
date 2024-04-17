@@ -91,7 +91,7 @@ private:
 
 		PsimagLite::String str(left + ";" + op1copies + right); // op1copies carries a last ;
 		BraketType braket(braket_.model(), str);
-		std::cout<<"stringorder rewritten to "<<str<<"\n";
+		std::cout << "stringorder rewritten to " << str << "\n";
 		return observe_.anyPoint(braket, false);
 	}
 

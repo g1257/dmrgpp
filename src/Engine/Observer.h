@@ -580,19 +580,21 @@ private:
 	static int orderBraketIfNeeded(BraketType& braket)
 	{
 		SizeType nsites = braket.points();
-		if (nsites == 1) return 1;
+		if (nsites == 1)
+			return 1;
 
 		std::vector<SizeType> sites(nsites);
 		for (SizeType i = 0; i < nsites; ++i) {
 			sites[i] = braket.site(i);
 		}
 
-		PsimagLite::Sort<std::vector<SizeType> > sort;
+		PsimagLite::Sort<std::vector<SizeType>> sort;
 		std::vector<SizeType> sitesSorted = sites;
 		std::vector<SizeType> iperm(sites.size());
 		sort.sort(sitesSorted, iperm);
 
-		if (sites == sitesSorted) return 1;
+		if (sites == sitesSorted)
+			return 1;
 
 		// throws if mixed fermion or boson
 		ProgramGlobals::FermionOrBosonEnum statistics = getStatistics(braket);
@@ -605,13 +607,14 @@ private:
 	static ProgramGlobals::FermionOrBosonEnum getStatistics(const BraketType& braket)
 	{
 		SizeType nsites = braket.points();
-		if (nsites == 0) return ProgramGlobals::FermionOrBosonEnum::BOSON;
+		if (nsites == 0)
+			return ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		ProgramGlobals::FermionOrBosonEnum statistics = braket.op(0).fermionOrBoson();
 		for (SizeType i = 1; i < nsites; ++i) {
-			 ProgramGlobals::FermionOrBosonEnum tmp = braket.op(i).fermionOrBoson();
+			ProgramGlobals::FermionOrBosonEnum tmp = braket.op(i).fermionOrBoson();
 			if (tmp != statistics)
-				 err("Inconsistent statistics for braket\n");
+				err("Inconsistent statistics for braket\n");
 		}
 
 		return statistics;
@@ -627,14 +630,15 @@ private:
 	static SizeType swapCountSmall(const std::vector<SizeType>& perm)
 	{
 		SizeType n = perm.size();
-		SizeType swaps=0;
-		unsigned long int seen=0;
-		for (SizeType i=0; i<n; ++i) {
-			unsigned long int  mask=(1L<<i);
-			if ((seen&mask)!=0) continue;
-			seen|=mask;
-			for (SizeType j=perm[i]; (seen&(1L<<j))==0; j=perm[j]) {
-				seen|=(1L<<j);
+		SizeType swaps = 0;
+		unsigned long int seen = 0;
+		for (SizeType i = 0; i < n; ++i) {
+			unsigned long int mask = (1L << i);
+			if ((seen & mask) != 0)
+				continue;
+			seen |= mask;
+			for (SizeType j = perm[i]; (seen & (1L << j)) == 0; j = perm[j]) {
+				seen |= (1L << j);
 				++swaps;
 			}
 		}
