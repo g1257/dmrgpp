@@ -47,6 +47,10 @@ public:
 
 	void operator()(const BraketType& braket, SizeType centerOfOrtho)
 	{
+		if (!model_.params().options.isSet("observe")) {
+			err(std::string("FATAL: You are trying to calculate ") + "multi-points in-situ\n");
+		}
+
 		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
 

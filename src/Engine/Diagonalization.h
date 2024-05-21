@@ -240,6 +240,7 @@ private:
 		wft_.triggerOn();
 
 		SizeType numberOfExcited = parameters_.numberOfExcited;
+		assert(loopIndex < parameters_.finiteLoop.size());
 		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 
 		bool onlyWft = false;
