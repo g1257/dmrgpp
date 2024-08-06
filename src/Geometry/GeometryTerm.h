@@ -212,7 +212,7 @@ public:
 		}
 		else if (s == "LongRange" || s == "General") {
 			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(
-			    aux.linSize, io);
+			    aux.linSize, gOptions_, io);
 			idof = GeometryDirectionType::GENERAL;
 		}
 		else if (s == "Honeycomb") {
