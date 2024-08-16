@@ -91,7 +91,7 @@ public:
 
 	LongRange()
 	    : linSize_(0)
-	    , orbitals_(0)
+	    , dofs_(0)
 	    , maxConnections_(0)
 	{
 	}
@@ -110,10 +110,10 @@ public:
 		catch (std::exception&) {
 		}
 
-		io.readline(orbitals_, "Orbitals=");
+		io.readline(dofs_, "DegreesOfFreedom=");
 
 		if (hasEntangler) {
-			const SizeType n = orbitals_ * linSize;
+			const SizeType n = dofs_ * linSize;
 			matrix_.resize(n, n);
 			setEntangler(entangler);
 		}
@@ -129,7 +129,7 @@ public:
 			reinterpretMatrix();
 		}
 		else {
-			if (orbitals_ != matrix_.rows() / linSize) {
+			if (dofs_ != matrix_.rows() / linSize) {
 				throw RuntimeError("Wrong Connectors matrix size\n");
 			}
 		}
@@ -152,7 +152,7 @@ public:
 	virtual void set(MatrixType& m, SizeType orbitals) const
 	{
 		m = matrix_;
-		if (orbitals != orbitals_)
+		if (orbitals != dofs_)
 			throw RuntimeError(
 			    "General geometry connectors: wrong size\n");
 	}
@@ -291,11 +291,11 @@ private:
 	{
 		MatrixType values = matrix_;
 		assert(linSize_ > 0);
-		assert(orbitals_ > 0);
-		SizeType n = linSize_ * orbitals_;
+		assert(dofs_ > 0);
+		SizeType n = linSize_ * dofs_;
 		matrix_.clear();
 		matrix_.resize(n, n);
-		if (orbitals_ > 1) {
+		if (dofs_ > 1) {
 			assert(values.cols() == 5);
 			for (SizeType i = 0; i < values.rows(); ++i) {
 				SizeType counter = 0;
@@ -303,7 +303,7 @@ private:
 				SizeType orb0 = complexToInteger(values(i, counter++));
 				SizeType site1 = complexToInteger(values(i, counter++));
 				SizeType orb1 = complexToInteger(values(i, counter++));
-				matrix_(orb0 + site0 * orbitals_, orb1 + site1 * orbitals_) = values(i, counter++);
+				matrix_(orb0 + site0 * dofs_, orb1 + site1 * dofs_) = values(i, counter++);
 			}
 		}
 		else {
@@ -344,7 +344,7 @@ private:
 	}
 
 	SizeType linSize_;
-	SizeType orbitals_;
+	SizeType dofs_;
 	SizeType maxConnections_;
 	MatrixType matrix_;
 }; // class LongRange
