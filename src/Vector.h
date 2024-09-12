@@ -432,6 +432,7 @@ T scalarProduct(const vector<T, A>& v1, const vector<T, A>& v2)
 	return result;
 }
 
+#ifndef USE_XACC
 template <class X, typename A>
 ostream& operator<<(ostream& s, const vector<X, A>& v)
 {
@@ -449,6 +450,7 @@ ostream& operator<<(ostream& s, const vector<pair<X, Y>, A>& v)
 		s << v[i].first << " " << v[i].second << "\n";
 	return s;
 }
+#endif
 
 template <typename FieldType, typename A>
 istream& operator>>(istream& is, vector<FieldType, A>& v)

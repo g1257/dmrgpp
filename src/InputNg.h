@@ -553,15 +553,18 @@ public:
 		typename EnableIf<IsMapLike<MapType>::True, void>::Type
 		printMap(MapType& mp, const String& label)
 		{
+#ifndef USE_XACC
 			//			typedef typename
 			// MapType::key_type KeyType; 			typedef
 			// typename MapType::mapped_type MappedType;
 			std::cout << label << "\n";
 			typename MapType::iterator it;
+
 			for (it = mp.begin(); it != mp.end(); ++it) {
 				std::cout << it->first << " " << it->second
 				          << "\n";
 			}
+#endif
 		}
 
 		String data_;
