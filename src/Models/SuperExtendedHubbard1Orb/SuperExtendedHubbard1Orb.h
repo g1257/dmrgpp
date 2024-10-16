@@ -126,8 +126,8 @@ public:
 	    const SuperGeometryType& superGeometry,
 	    PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
-		superGeometry,
-		io)
+		  superGeometry,
+		  io)
 	    , modelParameters_(io)
 	    , superGeometry_(superGeometry)
 	    , extension_(extension)

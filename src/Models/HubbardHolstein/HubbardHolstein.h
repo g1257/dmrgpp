@@ -142,8 +142,8 @@ public:
 	    PsimagLite::String additional,
 	    PsimagLite::String hdf5fileIfAny)
 	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+		  geometry,
+		  io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
 	    , isLrh_(additional == "LRH")

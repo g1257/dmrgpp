@@ -123,8 +123,8 @@ public:
 	    SuperGeometryType const& geometry,
 	    PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+		  geometry,
+		  io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , modelHubbard_(solverParams, io, geometry, extension)

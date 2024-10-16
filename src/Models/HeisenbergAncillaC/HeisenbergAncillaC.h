@@ -138,8 +138,8 @@ public:
 	    InputValidatorType& io,
 	    const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+		  geometry,
+		  io)
 	    , modelParameters_(io)
 	    , hot_(geometry.orbitals(0, 0) > 1)
 	{

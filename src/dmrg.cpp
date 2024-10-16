@@ -3,15 +3,13 @@
 #include "DmrgDriver.h"
 #include "Io/IoNg.h"
 #include "Provenance.h"
+#include "RedirectOutput.hh"
 #include "RegisterSignals.h"
 #include "RunFinished.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 using namespace Dmrg;
-
-std::streambuf* GlobalCoutBuffer = 0;
-std::ofstream GlobalCoutStream;
 
 typedef PsimagLite::Concurrency ConcurrencyType;
 
@@ -31,14 +29,6 @@ void usageOperator()
 {
 	std::cerr << "USAGE is operator -f filename -e canonical_operator_expression\n";
 	std::cerr << "Deprecated options are: -l label [-d dof] [-s site] [-t]\n";
-}
-
-void restoreCoutBuffer()
-{
-	if (GlobalCoutBuffer == 0)
-		return;
-	GlobalCoutStream.close();
-	std::cout.rdbuf(GlobalCoutBuffer);
 }
 
 template <typename MatrixVectorType, typename VectorWithOffsetType>
@@ -319,29 +309,14 @@ to the main dmrg driver are the following.
 			return 1;
 		}
 
-		GlobalCoutStream.open(options.label.c_str(),
-		    (dmrgSolverParams.autoRestart) ? std::ofstream::app : std::ofstream::out);
-		if (!GlobalCoutStream || GlobalCoutStream.bad()
-		    || !GlobalCoutStream.good()) {
-			PsimagLite::String str(application.name());
-			str += ": Could not redirect std::cout to " + options.label + "\n";
-			err(str);
-		}
-
 		echoInput = true;
 
-		std::cerr << Provenance::logo(application.name());
-		std::cerr << "Standard output sent to ";
-		std::cerr << options.label << "\n";
-		std::cerr.flush();
-		GlobalCoutBuffer = std::cout.rdbuf(); // save old buf
-		std::cout.rdbuf(GlobalCoutStream.rdbuf()); // redirect std::cout to file
-		if (unbuffered) {
-			std::cout.setf(std::ios::unitbuf);
-			GlobalCoutStream.setf(std::ios::unitbuf);
-		}
+		PsimagLite::RedirectOutput::setAppName(application.name(),
+		    Provenance::logo(application.name()));
 
-		atexit(restoreCoutBuffer);
+		std::ios_base::openmode open_mode = (dmrgSolverParams.autoRestart) ? std::ofstream::app : std::ofstream::out;
+
+		PsimagLite::RedirectOutput::doIt(options.label, open_mode, unbuffered);
 	}
 
 	if (dmrgSolverParams.autoRestart) {

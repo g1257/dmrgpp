@@ -164,8 +164,8 @@ public:
 	    InputValidatorType& io,
 	    const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+		  geometry,
+		  io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , atomKind_(nullptr)

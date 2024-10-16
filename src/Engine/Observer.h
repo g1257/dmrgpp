@@ -130,11 +130,11 @@ public:
 	    SizeType trail,
 	    const ModelType_& model)
 	    : helper_(io,
-		start,
-		nf,
-		trail,
-		model.params().options.isSet("keepLegacyBugs"),
-		model.params().options.isSet("observeReadOnDemand"))
+		  start,
+		  nf,
+		  trail,
+		  model.params().options.isSet("keepLegacyBugs"),
+		  model.params().options.isSet("observeReadOnDemand"))
 	    , onepoint_(helper_, model)
 	    , skeleton_(helper_, model, true)
 	    , twopoint_(skeleton_)

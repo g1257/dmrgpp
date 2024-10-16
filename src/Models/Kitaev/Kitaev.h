@@ -194,8 +194,8 @@ public:
 	    const SuperGeometryType& geometry,
 	    PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+		  geometry,
+		  io)
 	    , modelParameters_(io)
 	    , extended_(additional.length() > 7 && additional.substr(0, 8) == "Extended")
 	    , withGammas_(additional.length() > 9 && additional.substr(0, 10) == "WithGammas")

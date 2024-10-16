@@ -252,10 +252,10 @@ public:
 
 	Operators()
 	    : invalidOp_(OperatorStorageType(OperatorStorageType::Type::NOT_READY),
-		ProgramGlobals::FermionOrBosonEnum::BOSON,
-		PairType(0, 0),
-		0,
-		typename OperatorType::Su2RelatedType())
+		  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		  PairType(0, 0),
+		  0,
+		  typename OperatorType::Su2RelatedType())
 	    , progress_("Operators")
 	{
 		if (changeAll_ == ChangeAllEnum::UNSET)
@@ -265,10 +265,10 @@ public:
 	template <typename IoInputter>
 	Operators(IoInputter& io, PsimagLite::String prefix, bool isObserveCode)
 	    : invalidOp_(OperatorStorageType(OperatorStorageType::Type::NOT_READY),
-		ProgramGlobals::FermionOrBosonEnum::BOSON,
-		PairType(0, 0),
-		0,
-		typename OperatorType::Su2RelatedType())
+		  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		  PairType(0, 0),
+		  0,
+		  typename OperatorType::Su2RelatedType())
 	    , progress_("Operators")
 	{
 		if (changeAll_ == ChangeAllEnum::UNSET)

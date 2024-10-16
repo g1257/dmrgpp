@@ -137,8 +137,8 @@ public:
 	    InputValidatorType& io,
 	    const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+		  geometry,
+		  io)
 	    , superGeometry_(geometry)
 	    , modelParameters_(io)
 	    , su3Rep_(nullptr)

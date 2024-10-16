@@ -133,8 +133,8 @@ public:
 	    const SuperGeometryType& geometry,
 	    PsimagLite::String option)
 	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+		  geometry,
+		  io)
 	    , modelParams_(io)
 	    , superGeometry_(geometry)
 	    , hasLastTerm_(true)

@@ -52,7 +52,7 @@ public:
 	    , pack1_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
 		      ? lrs.left().permutationInverse().size()
 		      : integerDivision(lrs.super().permutationInverse().size(),
-			  lrs.right().permutationInverse().size()))
+			    lrs.right().permutationInverse().size()))
 	    , pack2_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
 		      ? integerDivision(lrs.left().permutationInverse().size(), hilbertMain_)
 		      : hilbertMain_)

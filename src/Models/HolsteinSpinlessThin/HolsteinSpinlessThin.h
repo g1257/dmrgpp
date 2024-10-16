@@ -156,8 +156,8 @@ public:
 	    const SuperGeometryType& geometry,
 	    PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+		  geometry,
+		  io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
 	    , atomKind_(0)

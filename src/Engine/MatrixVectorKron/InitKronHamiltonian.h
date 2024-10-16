@@ -115,11 +115,11 @@ public:
 	    const HamiltonianConnectionType& hc,
 	    const typename ModelHelperType::Aux& aux)
 	    : BaseType(hc.modelHelper().leftRightSuper(),
-		aux.m(),
-		hc.modelHelper().quantumNumber(aux.m()),
-		model.params().denseSparseThreshold,
-		!model.params().options.isSet("KronNoUseLowerPart")
-		    && !model.params().options.isSet("BatchedGemm"))
+		  aux.m(),
+		  hc.modelHelper().quantumNumber(aux.m()),
+		  model.params().denseSparseThreshold,
+		  !model.params().options.isSet("KronNoUseLowerPart")
+		      && !model.params().options.isSet("BatchedGemm"))
 	    , model_(model)
 	    , hc_(hc)
 	    , vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)

@@ -269,6 +269,8 @@ private:
 			}
 
 			qn.oddElectrons = (parity == "odd");
+			std::cout << "Using TargetFermionicParity=" << qn.oddElectrons << "\n";
+			std::cerr << "Using TargetFermionicParity=" << qn.oddElectrons << "\n";
 		} catch (std::exception&) {
 		}
 

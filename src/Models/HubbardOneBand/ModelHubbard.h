@@ -142,8 +142,8 @@ public:
 	    const SuperGeometryType& geometry,
 	    PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+		  geometry,
+		  io)
 	    , modelParameters_(io)
 	    , spinSquared_(spinSquaredHelper_, NUMBER_OF_ORBITALS, DEGREES_OF_FREEDOM)
 	    , extension_(extension)
