@@ -46,7 +46,7 @@ sub createMakefile
 	sumDecomposition calculator closuresTest base64test checkRunId
 	testLanczos testExcitedLanczos testLanczosMatrixInFile nested testIoNg testIoNgBoolean
 	affinityTest testPredicate isBlasThreaded testParallelizer2 testGemmR testGemmR2
-	testParallelSvd internode);
+	testParallelSvd internode test_redirect_output);
 
 	my %args;
 	$args{"code"} = "PsimagLite/drivers";
