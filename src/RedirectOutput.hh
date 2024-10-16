@@ -4,7 +4,7 @@
 #include <fstream>
 #include "PsimagLite.h"
 
-namespace Gep {
+namespace PsimagLite {
 
 class RedirectOutput {
 
@@ -12,7 +12,14 @@ public:
 
 	static void setAppName(const std::string& app_name)
 	{
+		setAppName(app_name, app_name);
+	}
+
+	static void setAppName(const std::string& app_name,
+	                       const std::string& app_name2)
+	{
 		app_name_ = app_name;
+		app_name2_ = app_name2;
 	}
 
 	//  std::ofstream::app or std::ofstream::out
@@ -28,7 +35,7 @@ public:
 			err(str);
 		}
 
-		std::cerr << app_name_ << ": Standard output sent to ";
+		std::cerr << app_name2_ << ": Standard output sent to ";
 		std::cerr << label << "\n";
 		std::cerr.flush();
 		cout_buffer_ = std::cout.rdbuf(); // save old buf
@@ -57,12 +64,14 @@ private:
 	}
 
 	static std::string app_name_;
+	static std::string app_name2_;
 	static std::streambuf* cout_buffer_;
 	static std::ofstream cout_stream_;
 	static bool redirected_;
 };
 
 std::string RedirectOutput::app_name_;
+std::string RedirectOutput::app_name2_;
 std::streambuf* RedirectOutput::cout_buffer_ = nullptr;
 std::ofstream RedirectOutput::cout_stream_;
 bool RedirectOutput::redirected_ = false;
