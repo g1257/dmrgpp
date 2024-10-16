@@ -89,15 +89,6 @@ ostream& operator<<(std::ostream& os, const pair<T1, T2>& p)
 namespace utils
 {
 
-struct UnixPathSeparator {
-	bool operator()(char ch) const
-	{
-		return ch == '/';
-	}
-};
-
-PsimagLite::String basename(PsimagLite::String pathname);
-
 PsimagLite::String pathPrepend(PsimagLite::String, PsimagLite::String);
 
 template <template <typename, typename> class SomeVectorTemplate,

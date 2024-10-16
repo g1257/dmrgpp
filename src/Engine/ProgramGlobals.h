@@ -167,7 +167,7 @@ struct ProgramGlobals {
 
 	static PsimagLite::String coutName(PsimagLite::String filename)
 	{
-		PsimagLite::String rootname = utils::basename(filename);
+		PsimagLite::String rootname = PsimagLite::basename(filename);
 		size_t index = rootname.find(".", 0);
 		if (index != PsimagLite::String::npos) {
 			rootname.erase(index, filename.length());

@@ -75,15 +75,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace utils
 {
 
-PsimagLite::String basename(PsimagLite::String pathname)
-{
-	return PsimagLite::String(std::find_if(pathname.rbegin(),
-				      pathname.rend(),
-				      UnixPathSeparator())
-				      .base(),
-	    pathname.end());
-}
-
 PsimagLite::String pathPrepend(PsimagLite::String pre, PsimagLite::String pathname)
 {
 	bool addDotDot = false;

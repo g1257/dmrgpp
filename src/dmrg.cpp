@@ -135,7 +135,7 @@ int main(int argc, char** argv)
 	int opt = 0;
 	OperatorOptions options;
 	PsimagLite::String strUsage(application.name());
-	if (utils::basename(argv[0]) == "operator")
+	if (PsimagLite::basename(argv[0]) == "operator")
 		options.enabled = true;
 	strUsage += " -f filename [-k] [-p precision] [-o solverOptions] [-V] [whatToMeasure]";
 	PsimagLite::String sOptions("");
