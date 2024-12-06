@@ -949,8 +949,11 @@ public:
 			Vector<String>::Type::iterator it2 = find(labelsForRemoval_.begin(),
 			                                          labelsForRemoval_.end(),
 			                                          label);
-			if (it2 != labelsForRemoval_.end() || forceRemoval)
+
+			if (it2 != labelsForRemoval_.end() || forceRemoval) {
 				mymap.erase(it);
+				labelsForRemoval_.erase(it2);
+			}
 		}
 
 		String label2label(const String& label)
