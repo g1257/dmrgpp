@@ -419,6 +419,9 @@ public:
 			    su2Related));
 		}
 
+		if (spinDependentHopping_)
+			this->makeTrackable("n");
+
 		OpsLabelType& c = this->createOpsLabel("c");
 		OpsLabelType& cc = this->createOpsLabel("C");
 		for (SizeType dof = 0; dof < 2 * modelParameters_.orbitals; ++dof) {
@@ -503,6 +506,13 @@ public:
 				}
 			}
 		}
+
+		if (!spinDependentHopping_)
+			return; // <--- EARLY EXIT HERE
+
+		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
+		OpForLinkType n_operator("n");
+		ninj.push(n_operator, 'N', n_operator, 'N');
 	}
 
 	void setQns(VectorQnType& qns) const
