@@ -99,18 +99,33 @@ public:
 		// Assume it's an input
 		NodeType* input = new InputType(inputsSoFar_++);
 
-		try {
-			input->set(PsimagLite::atof(code));
-		}
-		catch (std::exception&) {
-			throw RuntimeError("FATAL: No function with code " + code + " was found.\n");
-		}
+
+		typename NodeType::ValueType dummy = 0;
+		setInputRealOrComplex(input, code, dummy);
+
 
 		nodes_.push_back(input);
 		return *input;
 	}
 
 private:
+
+	static void setInputRealOrComplex(NodeType* input, const String& code, const std::complex<double>& dummy)
+	{
+		std::complex<double> val = stringToComplex(code);
+
+		input->set(val);
+	}
+
+	static void setInputRealOrComplex(NodeType* input, const String& code, const double& dummy)
+	{
+		if (code.find("i") != std::string::npos) {
+			err("Not compiled for complex in code " + code + "\n");
+		}
+
+		input->set(PsimagLite::atof(code));
+	}
+
 
 	VectorNodeType nodes_;
 	SizeType inputsSoFar_;

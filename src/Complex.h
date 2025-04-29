@@ -111,6 +111,35 @@ norm(const std::complex<T>& t)
 {
 	return std::norm(t);
 }
+
+inline std::complex<double> stringToComplex(const std::string& str) {
+	double real = 0;
+	double imag = 0;
+	char dummy = 0;
+	std::stringstream ss(str);
+
+	if (str.find('+') != std::string::npos || str.find('-') != std::string::npos) {
+		ss >> real >> dummy >> imag >> dummy;
+		if (str.back() != 'i') {
+			imag = 0;
+		}
+		if (str[str.find('+') + 1] == '-') {
+			imag = -imag;
+		}
+	} else if (str.find('i') != std::string::npos) {
+		ss >> imag >> dummy;
+		real = 0;
+		if (str.back() != 'i') {
+			imag = 0;
+		}
+	}
+	else {
+		ss >> real;
+		imag = 0;
+	}
+
+	return std::complex<double>(real, imag);
+}
 } // namespace PsimagLite
 
 namespace std {
