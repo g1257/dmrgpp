@@ -145,11 +145,16 @@ public:
 		return *auxPtr;
 	}
 
-	int pIndex() const
+	int pIndex(SizeType ind) const
 	{
-		if (terms_.size() != 1)
-			return -1;
-		return terms_[0]->pIndex();
+		assert(ind < terms_.size());
+		return terms_[ind]->pIndex();
+	}
+
+	const ComplexOrRealType& factor(SizeType ind) const
+	{
+		assert(ind < terms_.size());
+		return terms_[ind]->factor();
 	}
 
 	bool hasSummationKetAndNoMult() const
@@ -201,7 +206,7 @@ private:
 				continue;
 			}
 
-			SizeType pIndex = pIndexInt;
+ 			SizeType pIndex = pIndexInt;
 
 			for (SizeType j = 0; j < simpleTerms.size(); ++j) {
 				if (!simpleTerms[j].enabled || simpleTerms[j].pIndex != pIndex) {

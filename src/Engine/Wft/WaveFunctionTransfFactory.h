@@ -249,15 +249,15 @@ public:
 			allow = false;
 
 		if (isEnabled_ && allow) {
-#ifndef NDEBUG
 			RealType eps = 1e-12;
 			RealType x = norm(src);
 			bool b = (x < eps);
-			if (b)
-				std::cerr << "norm=" << x << "\n";
-			assert(!b);
-#endif
+			if (b) {
+				err(std::string("An important vector has norm=") + ttos(x) + " which is too small\n");
+			}
+
 			createVector(dest, src, lrs, oneSiteSpaces);
+
 		} else {
 			createRandomVector(dest);
 		}

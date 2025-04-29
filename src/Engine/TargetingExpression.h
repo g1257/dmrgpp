@@ -316,12 +316,12 @@ private:
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
 			PsimagLite::String thispAfter = pvectors_(i).lastName();
 
-			int x = tmp.pIndex();
-			if (x >= 0) {
-				if (static_cast<SizeType>(x) != i) {
+			if (tmp.size() == 1) {
+				SizeType x = tmp.pIndex(0);
+				if (x != i) {
 					VectorWithOffsetType_& v0 = this->tvNonConst(i);
 					v0 = this->tv(x);
-					v0 *= tmp.factor();
+					v0 *= tmp.factor(0);
 				} else {
 					std::cerr << "Ignoring self assignment P";
 					std::cerr << i << "=P" << x << "\n";
