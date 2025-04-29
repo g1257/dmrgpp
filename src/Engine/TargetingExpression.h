@@ -321,6 +321,7 @@ private:
 				if (static_cast<SizeType>(x) != i) {
 					VectorWithOffsetType_& v0 = this->tvNonConst(i);
 					v0 = this->tv(x);
+					v0 *= tmp.factor();
 				} else {
 					std::cerr << "Ignoring self assignment P";
 					std::cerr << i << "=P" << x << "\n";

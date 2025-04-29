@@ -173,6 +173,83 @@ private:
 
 	void simplifyTerms()
 	{
+		simpleSimplification();
+		complicatedSimplification();
+	}
+
+	void simpleSimplification()
+	{
+		struct SimpleTerm {
+			SizeType index = 0;
+			SizeType pIndex = 0;
+			bool enabled = false;
+			ComplexOrRealType factor = 0.;
+		};
+
+		const SizeType nterms = terms_.size();
+
+		std::vector<SimpleTerm> simpleTerms;
+		std::vector<int> term_mapping(nterms, -1);
+
+		for (SizeType i = 0; i < nterms; ++i) {
+			if (!isTermSimplifiable(i)) {
+				continue;
+			}
+
+			int pIndexInt = terms_[i]->pIndex();
+			if (pIndexInt < 0) {
+				continue;
+			}
+
+			SizeType pIndex = pIndexInt;
+
+			for (SizeType j = 0; j < simpleTerms.size(); ++j) {
+				if (!simpleTerms[j].enabled || simpleTerms[j].pIndex != pIndex) {
+					continue;
+				}
+
+				simpleTerms[j].factor += terms_[i]->factor();
+				term_mapping[i] = -2; //ignore because i-th summed to j-th
+				break;
+			}
+
+			if (term_mapping[i] == -1) {
+				SimpleTerm st;
+				st.index = i;
+				st.enabled = true;
+				st.factor = terms_[i]->factor();
+				st.pIndex = pIndex;
+				term_mapping[i] = simpleTerms.size();
+				simpleTerms.push_back(st);
+			}
+		}
+
+		VectorTermType newterms;
+
+		for (SizeType i = 0; i < nterms; ++i) {
+			if (term_mapping[i] == -2) {
+				delete terms_[i];
+				terms_[i] = nullptr;
+				continue;
+			} else if (term_mapping[i] == -1) {
+				newterms.push_back(terms_[i]);
+			} else {
+				assert(term_mapping[i] >= 0);
+				SizeType ind = term_mapping[i];
+				SizeType index = newterms.size();
+				newterms.push_back(terms_[i]);
+				assert(static_cast<SizeType>(term_mapping[i]) < simpleTerms.size());
+				const SimpleTerm& st = simpleTerms[ind];
+				assert(st.enabled);
+				newterms[index]->setFactor(st.factor);
+			}
+		}
+
+		terms_ = newterms;
+	}
+
+	void complicatedSimplification()
+	{
 		PsimagLite::String name;
 		VectorTermType termsNew;
 		const SizeType nterms = terms_.size();
@@ -187,8 +264,11 @@ private:
 				continue;
 			}
 
-			PsimagLite::GetBraOrKet ket(terms_[i]->toString());
-			const SizeType pIndex = ket.pIndex();
+			int pIndex = terms_[i]->pIndex();
+			if (pIndex < 0) {
+				err("Internal Error: pIndex < for for " +
+				    terms_[i]->toString() + "\n");
+			}
 
 			if (survivingTerms == 0) {
 				survivingTermIndex = termsNew.size();
@@ -222,7 +302,7 @@ private:
 	{
 		if (terms_[i]->size() != 1 || !terms_[i]->finalized())
 			return false;
-		PsimagLite::String str = terms_[i]->toString();
+		PsimagLite::String str = terms_[i]->component(0);
 		return (str.substr(0, 2) != "|!");
 	}
 

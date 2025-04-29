@@ -71,13 +71,21 @@ public:
 			vStr_.push_back(other.vStr_[i]);
 	}
 
-	void multiply(ComplexOrRealType val)
+	void multiply(const ComplexOrRealType& val)
 	{
 		factor_ *= val;
-
 		return (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) ? finalMultImag()
 									      : finalMultReal();
 	}
+
+	void setFactor(const ComplexOrRealType& val)
+	{
+		factor_ = val;
+		return (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) ? finalMultImag()
+									      : finalMultReal();
+	}
+
+	const ComplexOrRealType& factor() const { return factor_; }
 
 	void finalize()
 	{
@@ -157,8 +165,8 @@ public:
 
 			oneOperator(destKet, ket, *op, site);
 			ket = "|!m" + tmp + "*" + ket;
-			factor_ = 1;
-			strFactor_ = "";
+			//factor_ = 1;
+			//strFactor_ = "";
 			delete op;
 			op = 0;
 		}
@@ -195,6 +203,12 @@ public:
 	}
 
 	SizeType size() const { return vStr_.size(); }
+
+	const std::string& component(SizeType ind) const
+	{
+		assert(ind < vStr_.size());
+		return vStr_[ind];
+	}
 
 	bool finalized() const { return finalized_; }
 
