@@ -147,13 +147,19 @@ public:
 
 	int pIndex(SizeType ind) const
 	{
-		assert(ind < terms_.size());
+		if (ind >= terms_.size()) {
+			err("pIndex(): ind >= terms.size()\n");
+		}
+
 		return terms_[ind]->pIndex();
 	}
 
 	const ComplexOrRealType& factor(SizeType ind) const
 	{
-		assert(ind < terms_.size());
+		if (ind >= terms_.size()) {
+			err("factor(): ind >= terms.size()\n");
+		}
+
 		return terms_[ind]->factor();
 	}
 

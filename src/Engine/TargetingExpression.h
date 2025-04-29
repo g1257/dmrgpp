@@ -316,8 +316,9 @@ private:
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
 			PsimagLite::String thispAfter = pvectors_(i).lastName();
 
-			if (tmp.size() == 1) {
-				SizeType x = tmp.pIndex(0);
+			int pIndexOrMinusOne = (tmp.size() == 1) ?  tmp.pIndex(0): -1;
+			if (pIndexOrMinusOne >= 0) {
+				SizeType x = pIndexOrMinusOne;
 				if (x != i) {
 					VectorWithOffsetType_& v0 = this->tvNonConst(i);
 					v0 = this->tv(x);
