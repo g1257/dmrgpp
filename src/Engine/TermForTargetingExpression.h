@@ -165,8 +165,8 @@ public:
 
 			oneOperator(destKet, ket, *op, site);
 			ket = "|!m" + tmp + "*" + ket;
-			//factor_ = 1;
-			//strFactor_ = "";
+			// factor_ = 1;
+			// strFactor_ = "";
 			delete op;
 			op = 0;
 		}
@@ -248,7 +248,6 @@ private:
 		PsimagLite::String internalName = aux_.createTemporaryVector(destKet);
 		VectorWithOffsetType& destVwo = aux_.getCurrentVectorNonConst(internalName);
 		applyInSitu(destVwo, srcVwo, site, op);
-		destVwo *= factor_;
 	}
 
 	// returns A|src1>
