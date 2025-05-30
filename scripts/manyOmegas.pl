@@ -6,10 +6,11 @@ use Math::Trig;
 use lib ".";
 use OmegaUtils;
 
-my ($templateInput,$templateBatch,$parallel) = @ARGV;
-my $usage = "dollarizedInput dollarizedBatch howToSubmit\n";
-$usage .="\t howToSubmit is one of nobatch  submit  test";
+my ($templateInput,$templateBatch,$parallel,$submitCommand) = @ARGV;
+my $usage = "dollarizedInput dollarizedBatch howToSubmit submitCommand\n";
+$usage .="\t howToSubmit is one of nobatch  submit  test\n\tsubmitCommand defaults to qsub";
 defined($parallel) or die "USAGE: $0 $usage\n";
+defined($submitCommand) or $submitCommand="qsub";
 
 my ($omega0,$total,$omegaStep,$obs,$GlobalNumberOfSites);
 my $offset = 0;
@@ -53,7 +54,7 @@ sub runThisOmega
 	$outfile =~ s/\.$ext//;
 	$outfile .= ".cout";
 	my $batch = createBatch($ind, $omega, $input, $obs);
-	$jobid = submitBatch($batch, $parallel);
+	$jobid = submitBatch($batch, $parallel, $submitCommand);
 	#system("echo '#omega=$omega' >> $outfile") if ($submit eq "nobatch");
 	return ($jobid,$outfile);
 }
@@ -164,11 +165,11 @@ sub createBatch
 
 sub submitBatch
 {
-	my ($batch, $doIt) = @_;
+	my ($batch, $doIt, $submitCommand) = @_;
 	return if ($doIt ne "nobatch" and $doIt ne "submit");
 	sleep(1);
 	print STDERR "$0: Submitted $batch \n";
-	my $execCommand = ($doIt eq "nobatch") ? "env PBS_O_WORKDIR=. /usr/bin/bash" : "qsub";
+	my $execCommand = ($doIt eq "nobatch") ? "env PBS_O_WORKDIR=. /usr/bin/bash" : $submitCommand;
 	my $ret = `$execCommand $batch`;
 	chomp($ret);
 	return $ret;
