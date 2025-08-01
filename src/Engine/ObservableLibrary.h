@@ -184,9 +184,9 @@ public:
 		Su2RelatedType su2Related;
 		// FIXME: No support for site varying operators
 		if (label == "cc") {
-			BraketType braket(model_, "<gs|c?0-;c'?0-|gs>");
+			BraketType braket(model_, "<gs|c?0;c?0'|gs>");
 			manyPoint(0, braket, rows, cols, manyPointAction); // c_{0,0} spin down
-			BraketType braket2(model_, "<gs|c?1-;c'?1-|gs>");
+			BraketType braket2(model_, "<gs|c?1;c?1'|gs>");
 			manyPoint(0, braket2, rows, cols, manyPointAction); // c_{0,0} spin down
 		} else if (label == "nn") {
 			MatrixType out(rows, cols);
