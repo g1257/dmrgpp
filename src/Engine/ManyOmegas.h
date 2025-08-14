@@ -65,7 +65,7 @@ public:
 
 	PsimagLite::String addOmega(RealType wn) const
 	{
-		const PsimagLite::String str = "real CorrectionVectorOmega=" + ttos(wn) + ";\n";
+		const PsimagLite::String str = "CorrectionVectorOmega=" + ttos(wn) + ";\n";
 		return data_ + str;
 	}
 
