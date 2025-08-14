@@ -392,7 +392,7 @@ protected:
 		}
 
 		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
-
+		auto modifierForninj = [](ComplexOrRealType& value) { value *= -0.25; };
 		for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
 			OpForLinkType splus1("splus", orb1, orb1);
 			OpForLinkType sz1("sz", orb1, orb1);
@@ -411,7 +411,7 @@ protected:
 
 				szsz.push(sz1, 'N', sz2, 'N');
 
-				ninj.push(n1, 'N', n2, 'N');
+				ninj.push(n1, 'N', n2, 'N', modifierForninj);
 			}
 		}
 	}

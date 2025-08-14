@@ -6,7 +6,6 @@ Orbitals=2
 hubbardU 4            4.50660 1.68998 -2.25330 -1.12665
 SolverOptions=twositedmrg
 Version=version
-OutputFile=data363.txt
 InfiniteLoopKeptStates=100
 FiniteLoops 7
  3 100 0
