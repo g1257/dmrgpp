@@ -106,6 +106,11 @@ public:
 	void fromStdVector(const std::vector<T>& v)
 	{
 		clear();
+
+		if (v.empty()) {
+			return;
+		}
+
 		allocate(v.size());
 		memcpy(data_, &(v[0]), size_ * sizeof(T));
 	}

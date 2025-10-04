@@ -184,22 +184,6 @@ public:
 		vqn_.write(label + "/qn", io);
 	}
 
-	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const TargetQuantumElectrons& p)
-	{
-		if (p.vqn_.size() == 0)
-			return os;
-		const QnType& qn = p.vqn_[0];
-		os << "TargetElectronsTotal=" << p.totalElectrons << "\n";
-		os << "TargetOther=" << p.other << "\n";
-		if (p.isSu2)
-			os << "TargetSpinTimesTwo=" << p.twiceJ << "\n";
-		if (p.vqn_.size() > 1)
-			os << "FIXME TODO: More than one qn found\n";
-		return os;
-	}
-
 private:
 
 	TargetQuantumElectrons(const TargetQuantumElectrons&);

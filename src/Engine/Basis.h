@@ -635,25 +635,6 @@ public:
 				UnonConst(row, col) = Uconst(row, perm[col]);
 	}
 
-	//! The operator<< is a friend
-	friend std::ostream& operator<<(std::ostream& os,
-	    const Basis<SparseMatrixType>& x)
-	{
-		os << "dmrgTransformed=" << x.dmrgTransformed_ << "\n";
-		os << "name=" << x.name_ << "\n";
-		os << "quantumNumbers\n";
-		os << x.quantumNumbers_;
-		os << "electrons\n";
-		os << x.electrons_;
-		os << "partition\n";
-		os << x.offsets_;
-		os << "permutation\n";
-		os << x.permutationVector_;
-		os << "block\n";
-		os << x.block_;
-		return os;
-	}
-
 	friend std::istream& operator>>(std::istream& is,
 	    Basis<SparseMatrixType>&)
 	{

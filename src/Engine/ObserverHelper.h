@@ -311,23 +311,6 @@ public:
 		return withLegacyBugs_;
 	}
 
-	friend std::ostream& operator<<(std::ostream& os, ObserverHelper& p)
-	{
-		for (SizeType i = 0; i < p.SpermutationInverse_.size(); i++) {
-			os << "i=" << i << "\n";
-			os << "\tS.size=" << p.SpermutationInverse_[i].size();
-			os << " " << p.Spermutation_[i].size() << "\n";
-			os << "\tSE.size=" << p.SEpermutationInverse_[i].size();
-			os << " " << p.SEpermutation_[i].size() << "\n";
-			os << "\tElectrons.size=" << p.electrons_[i].size() << "\n";
-			os << "\tTransform=" << p.transform_[i].n_row() << "x";
-			os << p.transform_[i].n_col() << "\n";
-			os << "\tWF.size=" << p.wavefunction_[i].size() << "\n";
-		}
-
-		return os;
-	}
-
 private:
 
 	SizeType siteInternal(const LeftRightSuperType& lrs,
