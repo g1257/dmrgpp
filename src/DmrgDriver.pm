@@ -8,7 +8,7 @@ sub createTemplates
 {
 	my ($generateSources) = @_;
 
-my $cppEach = 1;
+my $cppEach = 2;
 
 my @lanczos = ("LanczosSolver","ChebyshevSolver");
 my @matrixVector = ("MatrixVectorOnTheFly","MatrixVectorStored","MatrixVectorKron");

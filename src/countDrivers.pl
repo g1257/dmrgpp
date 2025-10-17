@@ -25,6 +25,6 @@ use DmrgDriver;
 
 # This returns an array of 0's length number of files that would be
 # created.
-my $templates = DmrgDriver::createTemplates(1);
-
+my $templates = DmrgDriver::createTemplates(0);
+print STDERR "FILES_CREATED: $templates\n"
 # compare $i to the number of members of templates
