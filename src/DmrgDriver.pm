@@ -8,12 +8,12 @@ sub createTemplates
 {
 	my ($generateSources) = @_;
 
-my $cppEach = 2;
+my $cppEach = 1;
 
 my @lanczos = ("LanczosSolver","ChebyshevSolver");
 my @matrixVector = ("MatrixVectorOnTheFly","MatrixVectorStored","MatrixVectorKron");
 my @vecWithOffsets = ("","s");
-my @complexOrReal = (0, 3); 
+my @complexOrReal = (0, 3);
 
 my @values;
 my $cppFiles = 0;
@@ -163,4 +163,3 @@ sub getOneRealComplex
 }
 
 1;
-

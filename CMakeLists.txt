@@ -22,5 +22,8 @@ endif()
 
 include(HandleHDF5)
 
+find_package(BLAS)
+find_package(LAPACK)
+
 add_subdirectory(src)
-add_subdirectory(doc)
+# add_subdirectory(doc)
