@@ -20,29 +20,22 @@ target_include_directories(
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Io>
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Ainur>
          $<INSTALL_INTERFACE:include>)
+
+target_link_libraries(psimaglite PUBLIC loki)
 target_link_libraries(psimaglite PRIVATE HDF5::HDF5)
-
-export(
-  TARGETS psimaglite
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/PsimagLite.cmake"
-  NAMESPACE PSIMAGLITE::)
-
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/PsimagLiteConfig.cmake"
-     "include(\"\${CMAKE_CURRENT_LIST_DIR}/PsimagLite.cmake\")")
 
 install(
   TARGETS psimaglite
-  EXPORT PsimagLite
+  EXPORT PsimagLiteTargets
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
   RUNTIME DESTINATION bin
   INCLUDES
   DESTINATION include)
 
-install(
-  EXPORT PsimagLite
-  FILE PsimagLite.cmake
-  NAMESPACE PSIMAGLITE::
-  DESTINATION lib/cmake/psimaglite)
-
-install(DIRECTORY include/ DESTINATION include)
+export(
+  TARGETS psimaglite
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/PsimagLiteTargets.cmake"
+  NAMESPACE psimaglite::
+  APPEND # Important: append to existing export set
+)

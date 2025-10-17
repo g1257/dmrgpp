@@ -27,5 +27,33 @@ include(AddRPATH)
 
 include(HandleHDF5)
 
+add_subdirectory(loki)
 add_subdirectory(src)
 # add_subdirector(drivers) add_subdirectory(doc)
+
+export(
+  EXPORT PsimagLiteTargets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/PsimagLiteTargets.cmake"
+  NAMESPACE psimaglite::)
+
+# Generate config for build tree
+file(
+  WRITE "${CMAKE_CURRENT_BINARY_DIR}/PsimagLiteConfig.cmake"
+  "
+include(\"\${CMAKE_CURRENT_LIST_DIR}/PsimagLiteTargets.cmake\")
+")
+
+install(
+  EXPORT PsimagLiteTargets
+  FILE PsimagLiteTargets.cmake
+  NAMESPACE psimaglite::
+  DESTINATION lib/cmake/psimaglite)
+
+include(CMakePackageConfigHelpers)
+configure_package_config_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/CMake/PsimagLiteConfig.cmake.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/PsimagLiteConfig.cmake"
+  INSTALL_DESTINATION lib/cmake/PsimagLite)
+
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/PsimagLiteConfig.cmake"
+        DESTINATION lib/cmake/PsimagLite)
