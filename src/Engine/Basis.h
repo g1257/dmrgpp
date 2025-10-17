@@ -642,9 +642,9 @@ public:
 		os << "dmrgTransformed=" << x.dmrgTransformed_ << "\n";
 		os << "name=" << x.name_ << "\n";
 		os << "quantumNumbers\n";
-		os << x.quantumNumbers_;
+		os << x.qns_;
 		os << "electrons\n";
-		os << x.electrons_;
+		os << x.signs_;
 		os << "partition\n";
 		os << x.offsets_;
 		os << "permutation\n";
