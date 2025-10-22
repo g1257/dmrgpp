@@ -28,15 +28,12 @@ execute_process(
   ERROR_VARIABLE perl_error
   RESULT_VARIABLE perl_result
   OUTPUT_STRIP_TRAILING_WHITESPACE)
-message("perl error ${perl_error}")
 string(REGEX MATCH "([0-9]+)" match_result ${perl_error})
 set(NUM_DRIVER_FILES ${CMAKE_MATCH_1})
-message("NUM_DRIVER_FILES ${NUM_DRIVER_FILES}")
 
 set(driver_list)
 # configure time math string(STRIP "${NUM_DRIVER_FILES}" NUM_DRIVER_FILES_CLEAN)
 math(EXPR NUM_DRIVER_FILES_MINUS_ONE "${NUM_DRIVER_FILES} - 1")
-message("minus one ${NUM_DRIVER_FILES_MINUS_ONE}")
 foreach(i RANGE 0 ${NUM_DRIVER_FILES_MINUS_ONE})
   list(APPEND driver_list "DmrgDriver${i}.cpp;")
 endforeach()
