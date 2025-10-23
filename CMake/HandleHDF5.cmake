@@ -27,7 +27,7 @@ else()
   set(HDF5_USE_STATIC_LIBRARIES off)
 endif()
 
-find_package(HDF5 COMPONENTS C CXX HL) # Note: minimum version check is done
+find_package(HDF5 COMPONENTS C CXX HL MODULE) # Note: minimum version check is done
                                        # below to bypass find_package
 # and HDF5 version compatibility subtleties
 

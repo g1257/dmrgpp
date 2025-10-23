@@ -1,13 +1,11 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.28)
 
 project(
   dmrgpp
   VERSION 1.1
   LANGUAGES CXX)
 
-set(PROJECT_CMAKE ${dmrgpp_SOURCE_DIR}/CMake)
-message("Project CMake: ${PROJECT_CMAKE}")
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_CMAKE})
+list(APPEND CMAKE_MODULE_PATH ${dmrgpp_SOURCE_DIR/CMake})
 
 set(QMC_CXX_STANDARD
     11
