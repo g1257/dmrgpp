@@ -4,7 +4,6 @@
 #include "NonLocalForTargetingExpression.h"
 #include "OneOperatorSpec.h"
 #include "Vector.h"
-#include "FactorForTargetingExpression.hh"
 #include "KetForTargetingExpression.hh"
 
 namespace Dmrg
@@ -37,12 +36,11 @@ public:
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::BorderEnumType BorderEnumType;
 	typedef NonLocalForTargetingExpression<TargetingBaseType> NonLocalForTargetingExpressionType;
-	using FactorForTargetingExpressionType = FactorForTargetingExpression<ComplexOrRealType>;
+	using KetType = KetForTargetingExpression<ComplexOrRealType>;
 
 	TermForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false)
 	    , aux_(aux)
-	    , factor_(1.0)
 	    , nonLocal_(aux)
 	{
 	}
@@ -64,7 +62,6 @@ public:
 	void assignAndDestroy(TermForTargetingExpression& other)
 	{
 		finalized_ = other.finalized_;
-		factor_ = other.factor_;
 		ops_ = other.ops_;
 		ket_ = other.ket_;
 	}
@@ -78,22 +75,17 @@ public:
 
 	void multiply(const ComplexOrRealType& val)
 	{
-		factor_.multiply(val);
+		ket_.multiply(val);
 	}
 
 	void sum(const TermForTargetingExpression& other)
 	{
-		err("sum of terms unimplemented\n");
+		ket_.sum(other.ket());
 	}
 
 	void setFactor(const ComplexOrRealType& val)
 	{
-		factor_.set(val);
-	}
-
-	void setFactor(const VectorType& vec)
-	{
-		factor_.set(vec);
+		ket_.setFactor(val);
 	}
 
 	void finalize()
@@ -231,9 +223,7 @@ public:
 		return ket_.isSummable();
 	}
 
-	ComplexOrRealType factor() const { return factor_.value(); }
-
-	const KetForTargetingExpression& ket() const { return ket_; }
+	const KetType& ket() const { return ket_; }
 
 	bool finalized() const { return finalized_; }
 
@@ -242,6 +232,11 @@ public:
 		if (ops_.size() > 0)
 			return -1;
 		return ket_.pIndex();
+	}
+
+	bool isPureKet() const
+	{
+		return (ops_.empty());
 	}
 
 private:
@@ -296,9 +291,8 @@ private:
 
 	bool finalized_;
 	const AuxiliaryType& aux_;
-	FactorForTargetingExpressionType factor_;
 	VectorStringType ops_;
-	KetForTargetingExpression ket_;
+	KetType ket_;
 	NonLocalForTargetingExpressionType nonLocal_;
 };
 }

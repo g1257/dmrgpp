@@ -35,6 +35,7 @@ public:
 	typedef TermForTargetingExpression<TargetingBaseType> TermType;
 	typedef typename PsimagLite::Vector<TermType*>::Type VectorTermType;
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
+	using KetType = typename TermType::KetType;
 
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false)
@@ -173,23 +174,23 @@ public:
 		return *terms_[ind];
 	}
 
-	// bool hasSummationKetAndNoMult() const
-	// {
-	// 	const SizeType nterms = terms_.size();
-	// 	bool summation = false;
-	// 	bool mult = false;
-	// 	for (SizeType i = 0; i < nterms; ++i) {
-	// 		if (terms_[i]->size() != 1)
-	// 			continue;
-	// 		std::string tmp_str = terms_[i]->component(0);
-	// 		if (tmp_str.substr(0, 3) == "|!a")
-	// 			summation = true;
-	// 		if (tmp_str.substr(0, 3) == "|!m")
-	// 			mult = true;
-	// 	}
+	bool hasSummationKetAndNoMult() const
+	{
+		const SizeType nterms = terms_.size();
+		bool summation = false;
+		bool mult = false;
+		for (SizeType i = 0; i < nterms; ++i) {
+			if (!terms_[i]->isPureKet())
+				continue;
+			const KetType& ket = terms_[i]->ket();
+			if (ket.kind() == KetType::Kind::S)
+				summation = true;
+			if (ket.kind() == KetType::Kind::M)
+				mult = true;
+		}
 
-	// 	return (summation && !mult);
-	// }
+		return (summation && !mult);
+	}
 
 private:
 
@@ -214,7 +215,8 @@ private:
 		std::vector<int> term_mapping(nterms, -1);
 
 		for (SizeType i = 0; i < nterms; ++i) {
-			if (!isTermSimplifiable(i)) {
+			const TermType& term = *terms_[i];
+			if (!term.isSummable()) {
 				continue;
 			}
 
@@ -286,26 +288,13 @@ private:
 			}
 
 			combined_term->sum(term);
-			if (survivingTerms == 0) {
-				combined_term = term;
-				combine_term.add()
-				name = "|!aP" + ttos(pIndex);
-			} else {
-				name += "pP" + ttos(pIndex);
-			}
-
-			++survivingTerms;
 		}
 
-		if (survivingTerms < 2) {
+		if (!combined_term->canSumBeFinished()) {
 			delete combined_term;
 			combined_term = nullptr;
 			return;
 		}
-
-		name += ">";
-		combined_term->setString(name);
-                combined_term->setFactor(factors);
 
 		VectorTermType termsNew;
 		for (SizeType i = 0; i < nterms; ++i) {

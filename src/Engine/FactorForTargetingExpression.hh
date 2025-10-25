@@ -42,13 +42,6 @@ public:
 		setStr(0);
 	}
 
-	void set(const VectorType& vec)
-	{
-		factors_ = vec;
-		strFactors_.resize(vec.size());
-		setStr();
-	}
-
 	void push(const ComplexOrRealType& val)
 	{
 		SizeType index = factors_.size();

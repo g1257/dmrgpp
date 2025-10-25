@@ -123,7 +123,9 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithO
 	typedef typename AlgebraType::VectorSizeType VectorSizeType;
 	typedef typename BaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef GroupOfOneTimeEvolutions<Pvectors<BaseType>> GroupOfOneTimeEvolutionsType;
-	using KetType = KetForTargetingExpression;
+	using ComplexOrRealType = typename ModelType::ComplexOrRealType;
+	using KetType = KetForTargetingExpression<ComplexOrRealType>;
+	using TermType = typename AlgebraType::TermType;
 
 public:
 
@@ -318,13 +320,13 @@ private:
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
 			PsimagLite::String thispAfter = pvectors_(i).lastName();
 
-			int pIndexOrMinusOne = (tmp.size() == 1) ?  tmp.pIndex(0): -1;
+			int pIndexOrMinusOne = (tmp.size() == 1) ?  tmp.term(0).pIndex(): -1;
 			if (pIndexOrMinusOne >= 0) {
 				SizeType x = pIndexOrMinusOne;
 				if (x != i) {
 					VectorWithOffsetType_& v0 = this->tvNonConst(i);
 					v0 = this->tv(x);
-					v0 *= tmp.term(0).factor();
+					v0 *= tmp.term(0).ket().factor();
 				} else {
 					std::cerr << "Ignoring self assignment P";
 					std::cerr << i << "=P" << x << "\n";
@@ -458,59 +460,25 @@ private:
 
 	// replace |+PXpPY> ==> |PX>, update |PX>,
 	// FIMXE: ask aoe destroying PY if no longer referencable
-	PsimagLite::String simplifyTerms(const AlgebraType& expr)
+	void simplifyTerms(AlgebraType& expr)
 	{
-		SizeType i = 0;
-		const SizeType len = str.length();
-		if (len < 4)
-			return str;
-		PsimagLite::String simplified;
-		for (; i < len; ++i) {
-			if (i + 4 < len && str.substr(i, 4) == "|!aP") {
-				SizeType j = i + 4;
-				PsimagLite::String buffer;
-				for (; j < len; ++j) {
-					if (str[j] == 'p')
-						break;
-					buffer += str[j];
-				}
-
-				SizeType ind0 = PsimagLite::atoi(buffer);
-				buffer = "";
-				++j;
-				assert(str[j] == 'P');
-				++j;
-				for (; j < len; ++j) {
-					if (str[j] == '>')
-						break;
-					buffer += str[j];
-				}
-
-				SizeType ind1 = PsimagLite::atoi(buffer);
-
-				// before reordering ind0 and ind1
-				PsimagLite::String p0PlusP1 = "|P" + ttos(ind0) + ">+|P" + ttos(ind1) + ">";
-
-				// ask aoe to sum ind0 and ind1 and put it into ind0
-				assert(ind0 != ind1);
-				if (ind0 > ind1) {
-					const SizeType tmp = ind0;
-					ind0 = ind1;
-					ind1 = tmp;
-				}
-
-				pvectors_.sumPvectors(ind0, ind1, p0PlusP1);
-
-				buffer = "|P" + ttos(ind0) + ">";
-				i = j;
-				simplified += buffer;
+		SizeType n = expr.size();
+		for (SizeType i = 0; i < n; ++i) {
+			const KetType& ket = expr.term(i).ket();
+			if (ket.kind() != KetType::Kind::S) {
 				continue;
 			}
 
-			simplified += str[i];
-		}
+			auto opaque = ket.fillSumStruct();
 
-		return simplified;
+			pvectors_.sumPvectors(opaque[0].first,
+			    opaque[0].second,
+			    opaque[1].first,
+			    opaque[1].second,
+			    ket.name());
+
+			expr.setKet(i,  "|P" + ttos(opaque[0].first) + ">");
+		}
 	}
 
 	static void checkNoUncompressedExists(PsimagLite::String str)
