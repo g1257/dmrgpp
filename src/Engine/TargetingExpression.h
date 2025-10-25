@@ -341,16 +341,15 @@ private:
 				continue;
 			}
 
-			AlgebraType newpstring = simplifyTerms(thispBefore);
-			if (newpstring != pvectors_(i).lastName()) {
+			simplifyTerms(thispBefore);
+			if (thispBefore.toString() != pvectors_(i).lastName()) {
 				needsTrimming = true;
-				PsimagLite::String compr = compressExpression(newpstring);
+                                compressExpression(thispBefore);
 				// checkNoUncompressedExists(compr);
-				pvectors_.pushString(i, compr);
-				newpstring += compr;
+				pvectors_.pushString(i, thispBefore.toString());
 			}
 
-			allpvectors += newpstring;
+			allpvectors += thispBefore.toString();
 		}
 
 		if (needsTrimming)
