@@ -394,12 +394,13 @@ private:
 			pvectors_.createNew(tempVectors[i], lambda);
 		}
 
-		PsimagLite::String newpstring = compressExpression(tempExpr);
+		AlgebraType newexpr(tempExpr);
+		compressExpression(newexpr);
 		const PsimagLite::String selfName = "|P" + ttos(pVectorIndex) + ">";
-		if (newpstring == selfName)
+		if (newexpr.toString() == selfName)
 			pvectors_.setAsDone(pVectorIndex);
 		else
-			pvectors_.pushString(pVectorIndex, newpstring);
+			pvectors_.pushString(pVectorIndex, newexpr.toString());
 	}
 
 	bool allOrigPvectorsDone() const

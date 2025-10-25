@@ -80,6 +80,23 @@ public:
 		return factors_[0];
 	}
 
+	ComplexOrRealType value(SizeType ind) const
+	{
+		assert(ind < factors_.size());
+		return factors_[ind];
+	}
+
+	void swap()
+	{
+		if (factors_.size() != 2)
+			err("Cannot call swap without 2 factors\n");
+
+		ComplexOrRealType f = factors_[0];
+		factors_[0] = factors_[1];
+		factors_[1] = f;
+		setStr();
+	}
+
 private:
 
 	void setStr()

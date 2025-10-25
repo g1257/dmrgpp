@@ -45,19 +45,24 @@ public:
 	{
 	}
 
-	// TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
-	//     : finalized_(false)
-	//     , aux_(aux)
-	//     , type_(E)
-	//     , factor_(1.0)
-	//     , vStr_(1, str)
-	//     , nonLocal_(aux)
-	// {
-	// }
+	TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
+	    : finalized_(false)
+	    , aux_(aux)
+	    , ket_(str)
+	    , nonLocal_(aux)
+	{
+	}
 
 	TermForTargetingExpression& operator=(const TermForTargetingExpression& other) = delete;
 
-	TermForTargetingExpression(const TermForTargetingExpression& other) = delete;
+	TermForTargetingExpression(const TermForTargetingExpression& other)
+	    : finalized_(other.finalized_)
+	    , aux_(other.aux_)
+	    , nonLocal_(other.aux_)
+	{
+		ops_ = other.ops_;
+		ket_ = other.ket_;
+	}
 
 	void assignAndDestroy(TermForTargetingExpression& other)
 	{
@@ -71,6 +76,9 @@ public:
 		const SizeType n = other.ops_.size();
 		for (SizeType i = 0; i < n; ++i)
 			ops_.push_back(other.ops_[i]);
+
+		if (n > 0) finalized_ = false;
+
 	}
 
 	void multiply(const ComplexOrRealType& val)
@@ -129,7 +137,7 @@ public:
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
 			if (isGlobalOperator(tmp)) {
-				nonLocal_.timeEvolve(tmp, siteSplit, ket, aux_.currentCoO());
+				nonLocal_.timeEvolve(tmp, siteSplit, ket_.name(), aux_.currentCoO());
 				newVstr.push_back(tmp);
 				continue;
 			}
@@ -186,19 +194,10 @@ public:
 
 	// Constant functions below
 
-	// PsimagLite::String toString() const
-	// {
-	// 	PsimagLite::String s;
-	// 	const SizeType n = ops_.size();
-	// 	if (n == 0)
-	// 		err("toString returns empty\n");
-
-	// 	PsimagLite::String f = factor_.toString();
-
-	// 	for (SizeType i = 0; i < n - 1; ++i)
-	// 		s += ops_[i] + "*";
-	// 	return f + s + ket_.toString();
-	// }
+	PsimagLite::String toString() const
+	{
+		return ket_.toString(ops_);
+	}
 
 	// void setString(PsimagLite::String str)
 	// {

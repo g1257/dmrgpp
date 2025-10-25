@@ -19,6 +19,11 @@ public:
 
 	KetForTargetingExpression() : factor_(1.0), kind_(Kind::U) {}
 
+	KetForTargetingExpression(const std::string& str) : factor_(1.0), kind_(Kind::U)
+	{
+		set(str);
+	}
+
 	void set(const std::string& str)
 	{
 		str_ = str;
@@ -66,6 +71,18 @@ public:
 
 	// constant member below
 
+	std::string toString(const std::vector<std::string>& ops) const
+	{
+		PsimagLite::String s;
+
+		PsimagLite::String f = factor_.toString();
+
+		const SizeType n = ops.size();
+		for (SizeType i = 0; i < n - 1; ++i)
+			s += ops[i] + "*";
+		return f + s + this->name();
+	}
+
 	std::string name() const
 	{
 		if (kind_ == Kind::M) {
@@ -106,25 +123,26 @@ public:
 		return (kind_ == Kind::S && pVectors_to_sum_.size() > 1);
 	}
 
-	const ComplexOrRealType& factor() const
+        ComplexOrRealType factor() const
 	{
 		return factor_.value();
 	}
 
-	SumStruct fillSumStruct()
+	SumStruct fillSumStruct() const
 	{
 		assert(pVectors_to_sum_.size() == 2);
 		SizeType ind0 = pVectors_to_sum_[0];
 		SizeType ind1 = pVectors_to_sum_[1];
 
 		assert(ind0 != ind1);
+		FactorForTargetingExpressionType f = factor_;
 		if (ind0 > ind1) {
 			std::swap(ind0, ind1);
-			factor_.swap();
+			f.swap();
 		}
 
-		PairType p0(ind0, factor_.value(0));
-		PairType p1(ind1, factor_.value(1));
+		PairType p0(ind0, f.value(0));
+		PairType p1(ind1, f.value(1));
 		return {p0, p1};
 	}
 private:

@@ -136,10 +136,12 @@ public:
 	void setKet(SizeType ind, const std::string& ket)
 	{
 		assert(ind < terms_.size());
-		terms_[ind].setKet(ket);
+		terms_[ind]->setKet(ket);
 	}
 
 	// Constant functions below
+
+	bool isEmpty() const { return (terms_.size() == 0); }
 
 	PsimagLite::String toString() const
 	{
@@ -232,7 +234,7 @@ private:
 					continue;
 				}
 
-				simpleTerms[j].factor += terms_[i]->factor();
+				simpleTerms[j].factor += terms_[i]->ket().factor();
 				term_mapping[i] = -2; //ignore because i-th summed to j-th
 				break;
 			}
@@ -241,7 +243,7 @@ private:
 				SimpleTerm st;
 				st.index = i;
 				st.enabled = true;
-				st.factor = terms_[i]->factor();
+				st.factor = terms_[i]->ket().factor();
 				st.pIndex = pIndex;
 				term_mapping[i] = simpleTerms.size();
 				simpleTerms.push_back(st);
@@ -290,7 +292,7 @@ private:
 			combined_term->sum(term);
 		}
 
-		if (!combined_term->canSumBeFinished()) {
+		if (!combined_term->ket().canSumBeFinished()) {
 			delete combined_term;
 			combined_term = nullptr;
 			return;
