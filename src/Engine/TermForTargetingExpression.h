@@ -203,21 +203,6 @@ public:
 		return ket_.toString(ops_);
 	}
 
-	// void setString(PsimagLite::String str)
-	// {
-	// 	if (vStr_.size() != 1)
-	// 		err("TermForTargetingExpression::setString\n");
-	// 	vStr_[0] = str;
-	// }
-
-	// SizeType size() const { return ops_.size() + 1; }
-
-	// const std::string& component(SizeType ind) const
-	// {
-	// 	assert(ind < vStr_.size());
-	// 	return vStr_[ind];
-	// }
-
 	bool isSummable() const
 	{
 		if (!ops_.empty() || !finalized_)

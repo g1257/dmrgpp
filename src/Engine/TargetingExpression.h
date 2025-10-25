@@ -478,6 +478,7 @@ private:
 			    ket.name());
 
 			expr.setKet(i,  "|P" + ttos(opaque[0].first) + ">");
+			expr.setFactor(i, 1.);
 		}
 	}
 

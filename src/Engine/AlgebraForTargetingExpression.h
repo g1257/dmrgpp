@@ -139,6 +139,12 @@ public:
 		terms_[ind]->setKet(ket);
 	}
 
+	void setFactor(SizeType ind, const ComplexOrRealType& val)
+	{
+		assert(ind < terms_.size());
+		terms_[ind]->setFactor(val);
+	}
+
 	// Constant functions below
 
 	bool isEmpty() const { return (terms_.size() == 0); }

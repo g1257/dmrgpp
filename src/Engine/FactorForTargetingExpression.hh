@@ -33,13 +33,10 @@ public:
 
 	void set(const ComplexOrRealType& val)
 	{
-		if (factors_.size() != 1) {
-			err("FactorForTargetingExpression: Cannot set vector to a scalar\n");
-		}
-
+		factors_.resize(1);
 
 		factors_[0] = val;
-		setStr(0);
+		setStr();
 	}
 
 	void push(const ComplexOrRealType& val)
@@ -101,6 +98,7 @@ private:
 
 	void setStr()
 	{
+		strFactors_.resize(factors_.size());
 		unsigned int n = strFactors_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			setStr(i);
