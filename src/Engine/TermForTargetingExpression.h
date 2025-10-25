@@ -48,9 +48,13 @@ public:
 	TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
 	    : finalized_(false)
 	    , aux_(aux)
-	    , ket_(str)
 	    , nonLocal_(aux)
 	{
+		if (str.substr(0, 1) == "|") {
+			ket_.set(str);
+		} else {
+			ops_.push_back(str);
+		}
 	}
 
 	TermForTargetingExpression& operator=(const TermForTargetingExpression& other) = delete;
@@ -77,6 +81,17 @@ public:
 		for (SizeType i = 0; i < n; ++i)
 			ops_.push_back(other.ops_[i]);
 
+		bool thisNoKet = this->ket_.name().empty();
+		bool otherNoKet = other.ket().name().empty();
+
+		if (!otherNoKet) {
+			if (!thisNoKet) {
+				err("Cannot multiply two vectors, only matrix times vector\n");
+			}
+
+			ket_ = other.ket();
+		}
+
 		if (n > 0) finalized_ = false;
 
 	}
@@ -102,8 +117,10 @@ public:
 			return;
 
 		SizeType n = ops_.size();
-		if (n == 0)
-			err("AlgebraForTargetingExpression: Cannot finalize an empty object\n");
+		if (n == 0) {
+			finalized_ = true;
+			return;
+		}
 
 		SizeType sitesEqualToCoo = 0;
 		VectorSizeType discardedTerms;
@@ -114,22 +131,9 @@ public:
 			const SizeType i = n - ii - 1; // read vector backwards
 			PsimagLite::String tmp = ops_[i];
 			reading_buffer += ops_[i] + "*";
-			if (tmp[0] == '|') { // it's a vector
-				if (!ket_.name().empty())
-					err("More than one ket found in " + reading_buffer + "\n");
-				ket_.set(tmp);
-				if (i + 1 != n)
-					err("Vector is not at the end in " + reading_buffer + "\n");
-				continue; // == first read
-			}
-
-			// it's a matrix or a scalar
-			if (tmp[0] == '-' || tmp[0] == '+' || tmp[0] == '.' || (tmp[0] >= 48 && tmp[0] <= 57)) {
-				err("Scalars not supported yet\n");
-			}
 
 			// it's a matrix
-			if (ii != 1) {
+			if (ii != 0) {
 				newVstr.push_back(tmp);
 				continue; // apply in order only IMPORTANT
 				// the last is the ket

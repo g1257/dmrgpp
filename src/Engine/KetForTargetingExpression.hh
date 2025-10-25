@@ -15,7 +15,7 @@ public:
 
 	using FactorForTargetingExpressionType = FactorForTargetingExpression<ComplexOrRealType>;
 
-	enum class Kind {U, P, M, S};
+	enum class Kind {U, X, P, M, S};
 
 	KetForTargetingExpression() : factor_(1.0), kind_(Kind::U) {}
 
@@ -78,7 +78,7 @@ public:
 		PsimagLite::String f = factor_.toString();
 
 		const SizeType n = ops.size();
-		for (SizeType i = 0; i < n - 1; ++i)
+		for (SizeType i = 0; i < n; ++i)
 			s += ops[i] + "*";
 		return f + s + this->name();
 	}
@@ -151,6 +151,11 @@ private:
 	{
 		SizeType last = str_.length();
 		if (last < 4) return;
+
+		if (str_ == "|gs>") {
+			kind_ = Kind::X;
+			return;
+		}
 
 		--last;
 		if (str_.substr(0, 2) == "|P" && str_[last] == '>') {
