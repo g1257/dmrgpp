@@ -42,13 +42,40 @@ public:
 		setStr(0);
 	}
 
+	void set(const VectorType& vec)
+	{
+		factors_ = vec;
+		strFactors_.resize(vec.size());
+		setStr();
+	}
+
+	void push(const ComplexOrRealType& val)
+	{
+		SizeType index = factors_.size();
+		factors_.push_back(val);
+		strFactors_.push_back("");
+		setStr(index);
+	}
+
 	std::string toString() const
 	{
-		if (factors_.size() != 1) {
-			err("FactorForTargetingExpression: Cannot convert vector to string\n");
+		SizeType n = strFactors_.size();
+		if (n == 0) {
+			return "";
 		}
 
-		return (strFactors_[0] != "") ? strFactors_[0] + "*" : "";
+		if (n == 1) {
+			return (strFactors_[0] != "") ? strFactors_[0] + "*" : "";
+		}
+
+		std::string buffer("[");
+		buffer += strFactors_[0];
+		for (SizeType i = 1; i < n; ++i) {
+			buffer += "," + strFactors_[i];
+		}
+
+		buffer += "]*";
+		return buffer;
 	}
 
 	ComplexOrRealType value() const
@@ -61,6 +88,14 @@ public:
 	}
 
 private:
+
+	void setStr()
+	{
+		unsigned int n = strFactors_.size();
+		for (SizeType i = 0; i < n; ++i) {
+			setStr(i);
+		}
+	}
 
 	void setStr(SizeType ind)
 	{

@@ -85,6 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include <iostream>
 #include <stdexcept>
+#include "KetForTargetingExpression.hh"
 
 namespace Dmrg
 {
@@ -122,6 +123,7 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithO
 	typedef typename AlgebraType::VectorSizeType VectorSizeType;
 	typedef typename BaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef GroupOfOneTimeEvolutions<Pvectors<BaseType>> GroupOfOneTimeEvolutionsType;
+	using KetType = KetForTargetingExpression;
 
 public:
 
@@ -312,7 +314,7 @@ private:
 			canonicalExpression(tmp, pvectors_(i).lastName(), opEmpty, aux);
 			tmp.finalize();
 
-			PsimagLite::String thispBefore = tmp.toString();
+			AlgebraType thispBefore(tmp);
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
 			PsimagLite::String thispAfter = pvectors_(i).lastName();
 
@@ -322,7 +324,7 @@ private:
 				if (x != i) {
 					VectorWithOffsetType_& v0 = this->tvNonConst(i);
 					v0 = this->tv(x);
-					v0 *= tmp.factor(0);
+					v0 *= tmp.term(0).factor();
 				} else {
 					std::cerr << "Ignoring self assignment P";
 					std::cerr << i << "=P" << x << "\n";
@@ -337,7 +339,7 @@ private:
 				continue;
 			}
 
-			PsimagLite::String newpstring = simplifyTerms(thispBefore);
+			AlgebraType newpstring = simplifyTerms(thispBefore);
 			if (newpstring != pvectors_(i).lastName()) {
 				needsTrimming = true;
 				PsimagLite::String compr = compressExpression(newpstring);
@@ -356,7 +358,7 @@ private:
 	void finalize(const VectorVectorWithOffsetType& tempVectors,
 	    const VectorStringType& tempNames,
 	    SizeType pVectorIndex,
-	    PsimagLite::String tempExpr)
+	    const AlgebraType& tempExpr)
 	{
 		const SizeType ntemps = tempNames.size();
 
@@ -408,34 +410,16 @@ private:
 	}
 
 	// replace "|!m" + something ==> "|P" + number
-	PsimagLite::String compressExpression(PsimagLite::String str) const
+	void compressExpression(AlgebraType& expr) const
 	{
-		SizeType i = 0;
-		const SizeType len = str.length();
-		if (len < 4)
-			return str;
-		PsimagLite::String result;
-		for (; i < len; ++i) {
-			if (i + 4 < len && str.substr(i, 3) == "|!m") {
-				SizeType j = i + 3;
-				PsimagLite::String buffer;
-				for (; j < len; ++j) {
-					buffer += str[j];
-					if (str[j] == '>')
-						break;
-				}
-
-				const SizeType ind = pvectors_.findPforThisExpression(buffer);
-				buffer = "|P" + ttos(ind) + ">";
-				i = j;
-				result += buffer;
-				continue;
+		SizeType n = expr.size();
+		for (SizeType i = 0; i < n; ++i) {
+			const KetType& ket = expr.term(i).ket();
+			if (ket.kind() == KetType::Kind::M) {
+				const SizeType ind = pvectors_.findPforThisExpression(ket.name());
+				expr.setKet(i, "|P" + ttos(ind) + ">");
 			}
-
-			result += str[i];
 		}
-
-		return result;
 	}
 
 	// replace "R" + i ==> "P" + tempToP[i]
@@ -474,7 +458,7 @@ private:
 
 	// replace |+PXpPY> ==> |PX>, update |PX>,
 	// FIMXE: ask aoe destroying PY if no longer referencable
-	PsimagLite::String simplifyTerms(PsimagLite::String str)
+	PsimagLite::String simplifyTerms(const AlgebraType& expr)
 	{
 		SizeType i = 0;
 		const SizeType len = str.length();

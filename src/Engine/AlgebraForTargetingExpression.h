@@ -58,7 +58,16 @@ public:
 		}
 	}
 
-	AlgebraForTargetingExpression(const AlgebraForTargetingExpression&) = delete;
+	AlgebraForTargetingExpression(const AlgebraForTargetingExpression& other)
+	    : finalized_(other.finalized_)
+	    , aux_(other.aux_)
+	{
+		SizeType n = other.size();
+		terms_.resize(n, nullptr);
+		for (SizeType i = 0; i < n; ++i) {
+			terms_[i] = new TermType(other.term(i));
+		}
+	}
 
 	AlgebraForTargetingExpression& operator=(const AlgebraForTargetingExpression&) = delete;
 
@@ -114,8 +123,6 @@ public:
 		terms_[0]->multiply(scalar);
 	}
 
-	bool isEmpty() const { return (terms_.size() == 0); }
-
 	void finalize()
 	{
 		const SizeType nterms = terms_.size();
@@ -124,6 +131,14 @@ public:
 	}
 
 	bool finalized() const { return finalized_; }
+
+	void setKet(SizeType ind, const std::string& ket)
+	{
+		assert(ind < terms_.size());
+		terms_[ind].setKet(ket);
+	}
+
+	// Constant functions below
 
 	PsimagLite::String toString() const
 	{
@@ -145,40 +160,36 @@ public:
 		return *auxPtr;
 	}
 
-	int pIndex(SizeType ind) const
+	const TermType& term(SizeType ind) const
 	{
 		if (ind >= terms_.size()) {
 			err("pIndex(): ind >= terms.size()\n");
 		}
 
-		return terms_[ind]->pIndex();
-	}
-
-	ComplexOrRealType factor(SizeType ind) const
-	{
-		if (ind >= terms_.size()) {
-			err("factor(): ind >= terms.size()\n");
+		if (!terms_[ind]) {
+			err("Term is null\n");
 		}
 
-		return terms_[ind]->factor();
+		return *terms_[ind];
 	}
 
-	bool hasSummationKetAndNoMult() const
-	{
-		const SizeType nterms = terms_.size();
-		bool summation = false;
-		bool mult = false;
-		for (SizeType i = 0; i < nterms; ++i) {
-			if (terms_[i]->size() != 1)
-				continue;
-			if (terms_[i]->toString().substr(0, 3) == "|!a")
-				summation = true;
-			if (terms_[i]->toString().substr(0, 3) == "|!m")
-				mult = true;
-		}
+	// bool hasSummationKetAndNoMult() const
+	// {
+	// 	const SizeType nterms = terms_.size();
+	// 	bool summation = false;
+	// 	bool mult = false;
+	// 	for (SizeType i = 0; i < nterms; ++i) {
+	// 		if (terms_[i]->size() != 1)
+	// 			continue;
+	// 		std::string tmp_str = terms_[i]->component(0);
+	// 		if (tmp_str.substr(0, 3) == "|!a")
+	// 			summation = true;
+	// 		if (tmp_str.substr(0, 3) == "|!m")
+	// 			mult = true;
+	// 	}
 
-		return (summation && !mult);
-	}
+	// 	return (summation && !mult);
+	// }
 
 private:
 
@@ -262,29 +273,22 @@ private:
 	void complicatedSimplification()
 	{
 		PsimagLite::String name;
-		VectorTermType termsNew;
 		const SizeType nterms = terms_.size();
 		VectorBoolType indices(nterms, false);
-		SizeType survivingTermIndex = nterms + 1000;
-		SizeType survivingTerms = 0;
+		TermType* combined_term = new TermType(aux_);
+		//VectorType factors;
 
 		for (SizeType i = 0; i < nterms; ++i) {
-			if (!isTermSimplifiable(i)) {
-				termsNew.push_back(terms_[i]);
+			const TermType& term = *terms_[i];
+			if (!term.isSummable()) {
 				indices[i] = true;
 				continue;
 			}
 
-			int pIndex = terms_[i]->pIndex();
-			if (pIndex < 0) {
-				err("Internal Error: pIndex < for for " +
-				    terms_[i]->toString() + "\n");
-			}
-
+			combined_term->sum(term);
 			if (survivingTerms == 0) {
-				survivingTermIndex = termsNew.size();
-				termsNew.push_back(terms_[i]);
-				indices[i] = true;
+				combined_term = term;
+				combine_term.add()
 				name = "|!aP" + ttos(pIndex);
 			} else {
 				name += "pP" + ttos(pIndex);
@@ -293,28 +297,29 @@ private:
 			++survivingTerms;
 		}
 
-		if (survivingTerms < 2)
+		if (survivingTerms < 2) {
+			delete combined_term;
+			combined_term = nullptr;
 			return;
-
-		name += ">";
-		termsNew[survivingTermIndex]->setString(name);
-
-		for (SizeType i = 0; i < nterms; ++i) {
-			if (indices[i])
-				continue;
-			delete terms_[i];
-			terms_[i] = nullptr;
 		}
 
-		terms_.swap(termsNew);
-	}
+		name += ">";
+		combined_term->setString(name);
+                combined_term->setFactor(factors);
 
-	bool isTermSimplifiable(SizeType i) const
-	{
-		if (terms_[i]->size() != 1 || !terms_[i]->finalized())
-			return false;
-		PsimagLite::String str = terms_[i]->component(0);
-		return (str.substr(0, 2) != "|!");
+		VectorTermType termsNew;
+		for (SizeType i = 0; i < nterms; ++i) {
+			if (indices[i]) {
+				termsNew.push_back(terms_[i]);
+			} else {
+                                delete terms_[i];
+                                terms_[i] = nullptr;
+			}
+		}
+
+		termsNew.push_back(combined_term);
+
+		terms_.swap(termsNew);
 	}
 
 	// important: needs operator=

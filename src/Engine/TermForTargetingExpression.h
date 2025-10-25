@@ -5,6 +5,7 @@
 #include "OneOperatorSpec.h"
 #include "Vector.h"
 #include "FactorForTargetingExpression.hh"
+#include "KetForTargetingExpression.hh"
 
 namespace Dmrg
 {
@@ -25,6 +26,7 @@ public:
 	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	using VectorType = std::vector<ComplexOrRealType>;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef AuxForTargetingExpression<TargetingBaseType> AuxiliaryType;
@@ -45,14 +47,15 @@ public:
 	{
 	}
 
-	TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
-	    : finalized_(false)
-	    , aux_(aux)
-	    , factor_(1.0)
-	    , vStr_(1, str)
-	    , nonLocal_(aux)
-	{
-	}
+	// TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
+	//     : finalized_(false)
+	//     , aux_(aux)
+	//     , type_(E)
+	//     , factor_(1.0)
+	//     , vStr_(1, str)
+	//     , nonLocal_(aux)
+	// {
+	// }
 
 	TermForTargetingExpression& operator=(const TermForTargetingExpression& other) = delete;
 
@@ -62,14 +65,15 @@ public:
 	{
 		finalized_ = other.finalized_;
 		factor_ = other.factor_;
-		vStr_ = other.vStr_;
+		ops_ = other.ops_;
+		ket_ = other.ket_;
 	}
 
 	void multiply(const TermForTargetingExpression& other)
 	{
-		const SizeType n = other.vStr_.size();
+		const SizeType n = other.ops_.size();
 		for (SizeType i = 0; i < n; ++i)
-			vStr_.push_back(other.vStr_[i]);
+			ops_.push_back(other.ops_[i]);
 	}
 
 	void multiply(const ComplexOrRealType& val)
@@ -77,39 +81,45 @@ public:
 		factor_.multiply(val);
 	}
 
+	void sum(const TermForTargetingExpression& other)
+	{
+		err("sum of terms unimplemented\n");
+	}
+
 	void setFactor(const ComplexOrRealType& val)
 	{
 		factor_.set(val);
 	}
 
-	ComplexOrRealType factor() const { return factor_.value(); }
+	void setFactor(const VectorType& vec)
+	{
+		factor_.set(vec);
+	}
 
 	void finalize()
 	{
 		if (finalized_)
 			return;
 
-		SizeType n = vStr_.size();
+		SizeType n = ops_.size();
 		if (n == 0)
 			err("AlgebraForTargetingExpression: Cannot finalize an empty object\n");
 
-		PsimagLite::String ket;
 		SizeType sitesEqualToCoo = 0;
 		VectorSizeType discardedTerms;
 
 		VectorStringType newVstr;
+		std::string reading_buffer;
 		for (SizeType ii = 0; ii < n; ++ii) {
 			const SizeType i = n - ii - 1; // read vector backwards
-			PsimagLite::String tmp = vStr_[i];
-
+			PsimagLite::String tmp = ops_[i];
+			reading_buffer += ops_[i] + "*";
 			if (tmp[0] == '|') { // it's a vector
-				if (ket != "")
-					err("More than one ket found in " + toString() + "\n");
-				ket = tmp;
+				if (!ket_.name().empty())
+					err("More than one ket found in " + reading_buffer + "\n");
+				ket_.set(tmp);
 				if (i + 1 != n)
-					err("Vector is not at the end in " + toString() + "\n");
-
-				newVstr.push_back(tmp);
+					err("Vector is not at the end in " + reading_buffer + "\n");
 				continue; // == first read
 			}
 
@@ -153,74 +163,85 @@ public:
 			discardedTerms.push_back(i);
 
 			OneOperatorSpecType opspec(siteSplit.root);
-			const PsimagLite::String destKet = tmp + "*" + ket;
+			std::string ket_src = ket_.name();
+			ket_.multiply(tmp);
+			std::string ket_dest = ket_.name();
 			OperatorType* op = new OperatorType(aux_.pVectors().aoe().model().naturalOperator(opspec.label,
 			    0, // FIXME TODO SDHS Immm
 			    opspec.dof));
 			if (opspec.transpose)
 				op->transpose();
 
-			oneOperator(destKet, ket, *op, site);
-			ket = "|!m" + tmp + "*" + ket;
-			// factor_ = 1;
-			// strFactor_ = "";
+			oneOperator(ket_dest, ket_src, *op, site);
+
 			delete op;
 			op = 0;
 		}
 
 		// discarded terms and inversion
 		const SizeType nnew = newVstr.size();
-		vStr_.clear();
+		ops_.clear();
 		for (SizeType i = 0; i < nnew; ++i)
-			vStr_.push_back(newVstr[nnew - i - 1]);
-		vStr_[nnew - 1] = ket;
+			ops_.push_back(newVstr[nnew - i - 1]);
 
 		finalized_ = true;
 	}
 
-	PsimagLite::String toString() const
+	void setKet(const std::string& ket)
 	{
-		PsimagLite::String s;
-		const SizeType n = vStr_.size();
-		if (n == 0)
-			err("toString returns empty\n");
-
-		PsimagLite::String f = factor_.toString();
-
-		for (SizeType i = 0; i < n - 1; ++i)
-			s += vStr_[i] + "*";
-		return f + s + vStr_[n - 1];
+		ket_.set(ket);
 	}
 
-	void setString(PsimagLite::String str)
+	// Constant functions below
+
+	// PsimagLite::String toString() const
+	// {
+	// 	PsimagLite::String s;
+	// 	const SizeType n = ops_.size();
+	// 	if (n == 0)
+	// 		err("toString returns empty\n");
+
+	// 	PsimagLite::String f = factor_.toString();
+
+	// 	for (SizeType i = 0; i < n - 1; ++i)
+	// 		s += ops_[i] + "*";
+	// 	return f + s + ket_.toString();
+	// }
+
+	// void setString(PsimagLite::String str)
+	// {
+	// 	if (vStr_.size() != 1)
+	// 		err("TermForTargetingExpression::setString\n");
+	// 	vStr_[0] = str;
+	// }
+
+	// SizeType size() const { return ops_.size() + 1; }
+
+	// const std::string& component(SizeType ind) const
+	// {
+	// 	assert(ind < vStr_.size());
+	// 	return vStr_[ind];
+	// }
+
+	bool isSummable() const
 	{
-		if (vStr_.size() != 1)
-			err("TermForTargetingExpression::setString\n");
-		vStr_[0] = str;
+		if (!ops_.empty() || !finalized_)
+			return false;
+
+		return ket_.isSummable();
 	}
 
-	SizeType size() const { return vStr_.size(); }
+	ComplexOrRealType factor() const { return factor_.value(); }
 
-	const std::string& component(SizeType ind) const
-	{
-		assert(ind < vStr_.size());
-		return vStr_[ind];
-	}
+	const KetForTargetingExpression& ket() const { return ket_; }
 
 	bool finalized() const { return finalized_; }
 
 	int pIndex() const
 	{
-		if (vStr_.size() != 1)
+		if (ops_.size() > 0)
 			return -1;
-		const PsimagLite::String str = vStr_[0];
-		SizeType last = str.length();
-		if (last < 4)
-			return -1;
-		--last;
-		if (str.substr(0, 2) == "|P" && str[last] == '>')
-			return PsimagLite::atoi(str.substr(2, last - 2));
-		return -1;
+		return ket_.pIndex();
 	}
 
 private:
@@ -276,7 +297,8 @@ private:
 	bool finalized_;
 	const AuxiliaryType& aux_;
 	FactorForTargetingExpressionType factor_;
-	VectorStringType vStr_;
+	VectorStringType ops_;
+	KetForTargetingExpression ket_;
 	NonLocalForTargetingExpressionType nonLocal_;
 };
 }

@@ -139,11 +139,18 @@ public:
 		throw PsimagLite::RuntimeError("findPforThisExpression: P not found\n");
 	}
 
-	void sumPvectors(SizeType ind0, SizeType ind1, PsimagLite::String p0PlusP1)
+	void sumPvectors(SizeType ind0,
+	    const ComplexOrRealType& val0,
+	    SizeType ind1,
+	    const ComplexOrRealType& val1,
+	    PsimagLite::String p0PlusP1)
 	{
 		assert(ind0 < ind1);
-		VectorWithOffsetType& v0 = aoeNonConst().targetVectorsNonConst(ind0);
-		const VectorWithOffsetType& v1 = aoe_.targetVectors(ind1);
+		VectorWithOffsetType v0 = aoeNonConst().targetVectorsNonConst(ind0);
+                VectorWithOffsetType v1 = aoe_.targetVectors(ind1);
+		v0 *= val0;
+		v1 *= val1;
+
 		v0 += v1;
 		pVectors_[ind0]->sum(*(pVectors_[ind1]), p0PlusP1);
 	}
