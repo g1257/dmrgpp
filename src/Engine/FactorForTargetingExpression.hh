@@ -1,0 +1,104 @@
+#ifndef FACTORFORTARGETINGEXPRESSION_HH
+#define FACTORFORTARGETINGEXPRESSION_HH
+#include "Vector.h"
+#include <string>
+
+namespace Dmrg {
+
+template<typename ComplexOrRealType>
+class FactorForTargetingExpression {
+
+	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorType = std::vector<ComplexOrRealType>;
+	using VecStringType = std::vector<std::string>;
+
+public:
+	FactorForTargetingExpression(const ComplexOrRealType& value)
+	{
+		factors_.push_back(value);
+		strFactors_.push_back("");
+		setStr(0);
+	}
+
+	void multiply(const ComplexOrRealType& val)
+	{
+		if (factors_.size() != 1) {
+			err("FactorForTargetingExpression: Cannot multiply vector by scalar\n");
+		}
+
+
+                factors_[0] *= val;
+		setStr(0);
+	}
+
+	void set(const ComplexOrRealType& val)
+	{
+		if (factors_.size() != 1) {
+			err("FactorForTargetingExpression: Cannot set vector to a scalar\n");
+		}
+
+
+		factors_[0] = val;
+		setStr(0);
+	}
+
+	std::string toString() const
+	{
+		if (factors_.size() != 1) {
+			err("FactorForTargetingExpression: Cannot convert vector to string\n");
+		}
+
+		return (strFactors_[0] != "") ? strFactors_[0] + "*" : "";
+	}
+
+	ComplexOrRealType value() const
+	{
+		if (factors_.size() != 1) {
+			err("FactorForTargetingExpression: Cannot convert vector to string\n");
+		}
+
+		return factors_[0];
+	}
+
+private:
+
+	void setStr(SizeType ind)
+	{
+		return (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) ? setStrImagOne(ind)
+									      : setStrRealOne(ind);
+	}
+
+	void setStrRealOne(SizeType ind)
+	{
+		assert(factors_.size() == strFactors_.size());
+		assert(ind < factors_.size());
+
+		assert(PsimagLite::imag(factors_[ind]) == 0);
+
+		const RealType f = PsimagLite::real(factors_[ind]);
+
+		if (f < 0)
+			strFactors_[ind] = "(" + ttos(f) + ")";
+		else
+			strFactors_[ind] = ttos(f);
+
+		if (f == 1)
+			strFactors_[ind] = "";
+	}
+
+	void setStrImagOne(SizeType ind)
+	{
+		const RealType freal = PsimagLite::real(factors_[ind]);
+		const RealType fimag = PsimagLite::imag(factors_[ind]);
+
+		strFactors_[ind] = "(" + ttos(freal) + "+" + ttos(fimag) + "i)";
+
+		if (freal == 1 && fimag == 0)
+			strFactors_[ind] = "";
+	}
+
+	VectorType factors_;
+	VecStringType strFactors_;
+};
+}
+#endif // FACTORFORTARGETINGEXPRESSION_HH

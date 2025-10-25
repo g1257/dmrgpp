@@ -4,6 +4,7 @@
 #include "NonLocalForTargetingExpression.h"
 #include "OneOperatorSpec.h"
 #include "Vector.h"
+#include "FactorForTargetingExpression.hh"
 
 namespace Dmrg
 {
@@ -34,6 +35,7 @@ public:
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::BorderEnumType BorderEnumType;
 	typedef NonLocalForTargetingExpression<TargetingBaseType> NonLocalForTargetingExpressionType;
+	using FactorForTargetingExpressionType = FactorForTargetingExpression<ComplexOrRealType>;
 
 	TermForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false)
@@ -60,7 +62,6 @@ public:
 	{
 		finalized_ = other.finalized_;
 		factor_ = other.factor_;
-		strFactor_ = other.strFactor_;
 		vStr_ = other.vStr_;
 	}
 
@@ -73,19 +74,15 @@ public:
 
 	void multiply(const ComplexOrRealType& val)
 	{
-		factor_ *= val;
-		return (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) ? finalMultImag()
-									      : finalMultReal();
+		factor_.multiply(val);
 	}
 
 	void setFactor(const ComplexOrRealType& val)
 	{
-		factor_ = val;
-		return (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) ? finalMultImag()
-									      : finalMultReal();
+		factor_.set(val);
 	}
 
-	const ComplexOrRealType& factor() const { return factor_; }
+	ComplexOrRealType factor() const { return factor_.value(); }
 
 	void finalize()
 	{
@@ -188,7 +185,7 @@ public:
 		if (n == 0)
 			err("toString returns empty\n");
 
-		PsimagLite::String f = (strFactor_ != "") ? strFactor_ + "*" : "";
+		PsimagLite::String f = factor_.toString();
 
 		for (SizeType i = 0; i < n - 1; ++i)
 			s += vStr_[i] + "*";
@@ -276,36 +273,9 @@ private:
 		    border);
 	}
 
-	void finalMultReal()
-	{
-		assert(PsimagLite::imag(factor_) == 0);
-
-		const RealType f = PsimagLite::real(factor_);
-
-		if (f < 0)
-			strFactor_ = "(" + ttos(f) + ")";
-		else
-			strFactor_ = ttos(f);
-
-		if (f == 1)
-			strFactor_ = "";
-	}
-
-	void finalMultImag()
-	{
-		const RealType freal = PsimagLite::real(factor_);
-		const RealType fimag = PsimagLite::imag(factor_);
-
-		strFactor_ = "(" + ttos(freal) + "+" + ttos(fimag) + "i)";
-
-		if (freal == 1 && fimag == 0)
-			strFactor_ = "";
-	}
-
 	bool finalized_;
 	const AuxiliaryType& aux_;
-	ComplexOrRealType factor_;
-	PsimagLite::String strFactor_;
+	FactorForTargetingExpressionType factor_;
 	VectorStringType vStr_;
 	NonLocalForTargetingExpressionType nonLocal_;
 };

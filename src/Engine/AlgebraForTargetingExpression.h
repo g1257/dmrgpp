@@ -154,7 +154,7 @@ public:
 		return terms_[ind]->pIndex();
 	}
 
-	const ComplexOrRealType& factor(SizeType ind) const
+	ComplexOrRealType factor(SizeType ind) const
 	{
 		if (ind >= terms_.size()) {
 			err("factor(): ind >= terms.size()\n");
