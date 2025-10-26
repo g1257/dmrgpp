@@ -24,6 +24,7 @@
 #include "TargetingBase.h"
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
+#include "Qn.h"
 
 #ifndef USE_FLOAT
 typedef double RealType;

@@ -635,10 +635,23 @@ public:
 				UnonConst(row, col) = Uconst(row, perm[col]);
 	}
 
-	friend std::istream& operator>>(std::istream& is,
-	    Basis<SparseMatrixType>&)
+	//! The operator<< is a friend
+	friend std::ostream& operator<<(std::ostream& os,
+	    const Basis<SparseMatrixType>& x)
 	{
-		throw PsimagLite::RuntimeError("Unimplemented >>");
+		os << "dmrgTransformed=" << x.dmrgTransformed_ << "\n";
+		os << "name=" << x.name_ << "\n";
+		os << "quantumNumbers\n";
+		os << x.qns_;
+		os << "electrons\n";
+		os << x.signs_;
+		os << "partition\n";
+		os << x.offsets_;
+		os << "permutation\n";
+		os << x.permutationVector_;
+		os << "block\n";
+		os << x.block_;
+		return os;
 	}
 
 protected:

@@ -88,7 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "Sort.h"
 #include "TruncationControl.h"
-
+#include "BasisWithOperators.h"
 namespace Dmrg
 {
 

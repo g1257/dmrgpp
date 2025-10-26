@@ -1,7 +1,7 @@
 #ifndef PROVENANCE_H
 #define PROVENANCE_H
 #include "../../PsimagLite/src/Version.h"
-#include "../GitRevision.h"
+#include "GitRevision.h"
 #include "../Version.h"
 #include "AllocatorCpu.h"
 #include "AnsiColors.h"
