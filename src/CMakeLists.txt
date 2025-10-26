@@ -5,6 +5,14 @@ find_package(PsimagLite REQUIRED CONFIG)
 # Add -Wextra in the future
 add_compile_options(-Wall -DUSE_BOOST)
 
+# Not sure where to put the build types
+string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
+if (build_type STREQUAL debug)
+	add_compile_options(-g3 -Werror)
+else()
+	add_compile_options(-O3 -DNDEBUG)
+endif()
+
 add_custom_command(
   OUTPUT GitRevision.h
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/createGitRevision.pl GitRevision.h
