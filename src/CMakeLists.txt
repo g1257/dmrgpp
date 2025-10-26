@@ -1,6 +1,41 @@
-cmake_minimum_required(VERSION 3.4)
-project(PsimagLite)
+add_library(
+  psimaglite STATIC
+  MersenneTwister.cpp
+  Matrix.cpp
+  Mpi.cpp
+  Concurrency.cpp
+  ProgressIndicator.cpp
+  MemResolv.cpp
+  PsimagLite.cpp
+  PsiBase64.cpp
+  SpecialFunctions.cpp
+  Io/TypeToH5.cpp
+  TridiagonalMatrix.cpp
+  PredicateSimple.cpp
+  Ainur/AinurSpirit.cpp
+  Ainur/AinurConvert.cpp)
+target_include_directories(
+  psimaglite
+  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Io>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Ainur>
+         $<INSTALL_INTERFACE:include>)
 
-add_library(PsimagLite STATIC MersenneTwister.cpp Matrix.cpp Mpi.cpp ApplicationInfo.cpp Concurrency.cpp ProgressIndicator.cpp MemResolv.cpp PsimagLite.cpp PsiBase64.cpp SpecialFunctions.cpp)
+target_link_libraries(psimaglite PUBLIC loki)
+target_link_libraries(psimaglite PRIVATE HDF5::HDF5)
 
-target_link_libraries( PsimagLite ${CMAKE_THREAD_LIBS_INIT} )
+install(
+  TARGETS psimaglite
+  EXPORT PsimagLiteTargets
+  LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
+  RUNTIME DESTINATION bin
+  INCLUDES
+  DESTINATION include)
+
+export(
+  TARGETS psimaglite
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/PsimagLiteTargets.cmake"
+  NAMESPACE psimaglite::
+  APPEND # Important: append to existing export set
+)
