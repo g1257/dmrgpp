@@ -111,7 +111,8 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		}
 
 		if (anisotropy.size() > 0 && anisotropy.size() != nsites) {
-			throw PsimagLite::RuntimeError("AnisotropyD size must be " + ttos(nsites) + " entries long, if provided.\n");
+			throw PsimagLite::RuntimeError("AnisotropyD size must be " + ttos(nsites) +
+			    " entries long, if provided.\n");
 		}
 
 		try {
@@ -122,8 +123,14 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 			magneticX.clear();
 		}
 
+		try {
+			io.readline(potentialA, "PotentialA=");
+			std::cout<<"PotentialA="<<potentialA<<"\n";
+		} catch (std::exception&) {}
+
 		if (magneticX.size() > 0 && magneticX.size() != nsites) {
-			throw PsimagLite::RuntimeError("MagneticFieldX size must be " + ttos(nsites) + " entries long, if provided.\n");
+			throw PsimagLite::RuntimeError("MagneticFieldX size must be " +
+			    ttos(nsites) + " entries long, if provided.\n");
 		}
 
 		onSiteHaddLegacy = readOldT(io, nsites);
@@ -184,6 +191,7 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 	typename PsimagLite::Vector<RealType>::Type anisotropy;
 	typename PsimagLite::Vector<RealType>::Type magneticX;
+	RealType potentialA = 0.;
 
 	// for time-dependent H:
 	VectorStringType onSiteHaddLegacy;

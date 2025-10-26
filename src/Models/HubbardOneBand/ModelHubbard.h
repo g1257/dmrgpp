@@ -88,6 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "VerySparseMatrix.h"
 #include <cassert>
+#include "PeierlsHopping.hh"
 
 namespace Dmrg
 {
@@ -338,11 +339,20 @@ protected:
 	{
 		ModelTermType& hop = ModelBaseType::createTerm("hopping"); //(A)
 
-		OpForLinkType cup("c", 0); // (B)
-		hop.push(cup, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, 1, 0)); // (C)
+		auto su2_up = typename ModelTermType::Su2Properties(1, 1, 0);
+		auto su2_do =  typename ModelTermType::Su2Properties(1, -1, 1);
 
+		OpForLinkType cup("c", 0); // (B)
 		OpForLinkType cdown("c", 1); // (D)
-		hop.push(cdown, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, -1, 1)); // (E)
+
+		if (extension_ ==  "Peierls") {
+			auto peierls = BuildPierls<SparseElementType>::lambda(modelParameters_.potentialA);
+			hop.push(cup, 'N', cup, 'C', peierls, su2_up); // (C)
+			hop.push(cdown, 'N', cdown, 'C', peierls, su2_do);
+		} else {
+			hop.push(cup, 'N', cup, 'C', su2_up); // (C)
+			hop.push(cdown, 'N', cdown, 'C', su2_do);
+		}
 
 		if (extension_ != "RashbaSOC")
 			return;
