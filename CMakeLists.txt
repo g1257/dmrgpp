@@ -5,7 +5,7 @@ project(
   VERSION 1.1
   LANGUAGES CXX)
 
-list(APPEND CMAKE_MODULE_PATH ${dmrgpp_SOURCE_DIR/CMake})
+list(APPEND CMAKE_MODULE_PATH ${dmrgpp_SOURCE_DIR}/CMake)
 
 set(QMC_CXX_STANDARD
     11
