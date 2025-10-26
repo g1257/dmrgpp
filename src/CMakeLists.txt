@@ -91,6 +91,7 @@ target_link_libraries(
   psimaglite::psimaglite
   HDF5::HDF5
   BLAS::BLAS
+  LAPACK::LAPACK
   ${ADDITIONAL_LIBRARIES})
 target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
