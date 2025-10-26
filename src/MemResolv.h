@@ -665,7 +665,7 @@ private:
 		return len;
 	}
 
-	void adjustPointers(unsigned char* ptr, long int offset) const
+	void adjustPointers(unsigned char*, long int) const
 	{
 		/*VectorPairType offsetsForHoles(0);
 		RefFunctionType f = &PsimagLite::conj;

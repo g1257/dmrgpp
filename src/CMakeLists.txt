@@ -1,3 +1,6 @@
+# Add -Wextra in the future
+add_compile_options(-Wall -Wextra -DUSE_BOOST)
+
 add_library(
   psimaglite STATIC
   MersenneTwister.cpp
