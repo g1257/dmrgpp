@@ -56,3 +56,13 @@ https://g1257.github.com/hashes.html
 Latest commit should always be signed.
 Keys at https://g1257.github.com/keys.html
 
+## Building
+git clone https://github.com/g1257/PsimagLite
+cd PsimagLite/
+git checkout features
+git pull origin features
+mkdir build
+cd build
+cmake ..
+make -j number_here
+
