@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.21)
 
 find_package(PsimagLite REQUIRED CONFIG)
 
+# Add -Wextra in the future
+add_compile_options(-Wall -DUSE_BOOST)
+
 add_custom_command(
   OUTPUT GitRevision.h
   COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/createGitRevision.pl GitRevision.h
