@@ -23,7 +23,7 @@ target_include_directories(
          $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(psimaglite PUBLIC loki)
-target_link_libraries(psimaglite PRIVATE HDF5::HDF5)
+target_link_libraries(psimaglite PUBLIC HDF5::HDF5)
 
 find_package(Boost)
 if(Boost_FOUND)

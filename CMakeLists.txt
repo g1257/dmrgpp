@@ -29,7 +29,8 @@ include(HandleHDF5)
 
 add_subdirectory(loki)
 add_subdirectory(src)
-# add_subdirector(drivers) add_subdirectory(doc)
+add_subdirectory(examples)
+#add_subdirectory(doc)
 
 export(
   EXPORT PsimagLiteTargets
