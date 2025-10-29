@@ -78,7 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Concurrency.h"
 #include "Matrix.h"
-#include "Mpi.h"
+#include "NotMpi.h"
 
 namespace Dmrg
 {

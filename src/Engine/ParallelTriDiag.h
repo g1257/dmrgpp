@@ -78,7 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PARALLEL_TRIDIAG_H
 
 #include "Concurrency.h"
-#include "Mpi.h"
+#include "NotMpi.h"
 
 namespace Dmrg
 {
