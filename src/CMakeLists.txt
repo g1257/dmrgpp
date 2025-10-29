@@ -1,16 +1,19 @@
 cmake_minimum_required(VERSION 3.21)
 
 find_package(PsimagLite REQUIRED CONFIG)
+find_package(Boost REQUIRED CONFIG)
 
 # Add -Wextra in the future
 add_compile_options(-Wall -DUSE_BOOST)
 
 # Not sure where to put the build types
-string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
-if (build_type STREQUAL debug)
-	add_compile_options(-g3 -Werror)
-else()
-	add_compile_options(-O3 -DNDEBUG)
+if (NOT  ${CMAKE_BUILD_TYPE}  STREQUAL "")
+  string(TOLOWER ${CMAKE_BUILD_TYPE} build_type)
+  if (build_type STREQUAL debug)
+    add_compile_options(-g3 -Werror)
+  else()
+    add_compile_options(-O3 -DNDEBUG)
+  endif()
 endif()
 
 add_custom_command(
@@ -78,6 +81,7 @@ add_custom_command(
 # Dmrg executable (main executable)
 add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related>
                     ${driver_templates} Qn.cpp dmrg.cpp)
+target_compile_definitions(dmrg PUBLIC USE_BOOST)
 
 target_link_libraries(
   dmrg
@@ -95,6 +99,7 @@ add_executable(observe observe.cpp ProgramGlobals.cpp Provenance.cpp Utils.cpp
 	           Su2Related.cpp Qn.cpp  ObserveDriver0.cpp ObserveDriver1.cpp
 			   ObserveDriver2.cpp)
 target_include_directories(observe PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
+target_compile_definitions(observe PUBLIC USE_BOOST)
 target_link_libraries(
   observe
   kronutil
@@ -116,6 +121,7 @@ target_include_directories(toolboxdmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 add_executable(omegas $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related>
                     Qn.cpp manyOmegas.cpp)
 target_include_directories(omegas PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
+target_compile_definitions(omegas PUBLIC USE_BOOST)
 target_link_libraries(
   omegas
   kronutil
