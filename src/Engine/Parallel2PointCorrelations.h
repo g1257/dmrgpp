@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "GetBraOrKet.h"
 #include "Matrix.h"
-#include "Mpi.h"
+#include "NotMpi.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg
