@@ -83,7 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Complex.h"
 #include "Io/IoSerializerStub.h"
 #include "Matrix.h"
-#include "Mpi.h"
+#include "NotMpi.h"
 #include "Sort.h"
 #include "loki/TypeTraits.h"
 #include <algorithm>

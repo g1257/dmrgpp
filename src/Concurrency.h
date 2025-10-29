@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FloatingPoint.h"
 #include "LAPACK.h"
 #include "LabelDisabled.h"
-#include "Mpi.h"
+#include "NotMpi.h"
 #include "Vector.h"
 #include <cassert>
 #include <stdexcept>

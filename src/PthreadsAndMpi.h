@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef PTHREADS_AND_MPI_H
 #define PTHREADS_AND_MPI_H
 
-#include "Mpi.h"
+#include "NotMpi.h"
 #include "Pthreads.h"
 #include <iostream>
 #include <pthread.h>

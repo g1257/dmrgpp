@@ -23,7 +23,7 @@ Please see full open source license included in file LICENSE.
 #include "Io/IoSerializerStub.h"
 #include "LAPACK.h"
 #include "LapackExtra.h"
-#include "Mpi.h"
+#include "NotMpi.h"
 #include "TypeToString.h"
 #include "Vector.h"
 #include <cassert>
