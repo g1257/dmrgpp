@@ -28,8 +28,7 @@ target_link_libraries(psimaglite PRIVATE HDF5::HDF5)
 find_package(Boost)
 if(Boost_FOUND)
   target_compile_definitions(psimaglite PUBLIC USE_BOOST)
-# We are only using headers from Boost; no linkage needed
-# target_link_libraries(psimaglite PUBLIC Boost::boost)
+  target_link_libraries(psimaglite PUBLIC Boost::boost)
 endif()
 
 
