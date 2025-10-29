@@ -90,7 +90,9 @@ public:
 	static void enableExcept()
 	{
 #ifndef NDEBUG
+#ifndef __APPLE__
 		feenableexcept(FE_DIVBYZERO | FE_INVALID);
+#endif
 #endif
 	}
 }; // class FloatingPoint
