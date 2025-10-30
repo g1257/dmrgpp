@@ -25,8 +25,6 @@ endif()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(AddRPATH)
 
-include(HandleHDF5)
-
 add_subdirectory(loki)
 add_subdirectory(src)
 add_subdirectory(examples)

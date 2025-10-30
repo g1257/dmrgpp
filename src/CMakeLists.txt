@@ -23,7 +23,18 @@ target_include_directories(
          $<INSTALL_INTERFACE:include>)
 
 target_link_libraries(psimaglite PUBLIC loki)
-target_link_libraries(psimaglite PUBLIC HDF5::HDF5)
+
+set(HDF5_PREFER_PARALLEL ON)
+find_package(HDF5 COMPONENTS C CXX HL MODULE)
+if(HDF5_FOUND AND HDF5_IS_PARALLEL)
+  message(STATUS "HDF5 enabled")
+  target_link_libraries(psimaglite PUBLIC HDF5::HDF5)
+else()
+  if(HDF5_FOUND)
+    message(WARNING "HDF5 that was found \(${HDF5_DIR}\) is not parallel and cannot be used")
+  endif()
+  target_compile_definitions(psimaglite PUBLIC USE_IO_SIMPLE)
+endif()
 
 find_package(Boost)
 if(Boost_FOUND)
