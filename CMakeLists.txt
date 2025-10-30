@@ -27,6 +27,8 @@ include(AddRPATH)
 
 include(HandleHDF5)
 
+include(CTest)
+
 add_subdirectory(loki)
 add_subdirectory(src)
 add_subdirectory(examples)
