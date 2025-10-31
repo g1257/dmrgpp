@@ -25,7 +25,7 @@ target_include_directories(
 target_link_libraries(psimaglite PUBLIC loki)
 
 set(HDF5_PREFER_PARALLEL ON)
-find_package(HDF5 COMPONENTS C CXX HL MODULE)
+find_package(HDF5 COMPONENTS CXX HL MODULE)
 if(HDF5_FOUND AND HDF5_IS_PARALLEL)
   message(STATUS "HDF5 enabled")
   target_link_libraries(psimaglite PUBLIC HDF5::HDF5)
