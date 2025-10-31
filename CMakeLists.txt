@@ -9,17 +9,6 @@ set(PROJECT_CMAKE ${psimaglite_SOURCE_DIR}/CMake)
 message("Project CMake: ${PROJECT_CMAKE}")
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_CMAKE})
 
-set(QMC_CXX_STANDARD
-    11
-    CACHE STRING "PsiMaglite C++ language standard")
-if(NOT QMC_CXX_STANDARD EQUAL 11)
-  message(
-    WARNING
-      "C++11 is the only language standard officially supported by psimaglite. "
-      "Using other versions of the C++ standard is unsupported and done entirely at user's own risk."
-  )
-endif()
-
 # add the automatically determined parts of the RPATH which point to directories
 # outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
