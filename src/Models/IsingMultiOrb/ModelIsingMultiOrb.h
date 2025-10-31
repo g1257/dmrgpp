@@ -429,7 +429,7 @@ private:
 		const SizeType orbitals = modelParameters_.orbitals;
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
-		auto mylambda = [this](ComplexOrRealType& coupling, RealType time) {
+		auto mylambda = [this](ComplexOrRealType& coupling, RealType time, SizeType) {
 			coupling = timeDependentConnection(coupling, time, 2);
 		};
 

@@ -89,9 +89,10 @@ namespace Dmrg
 template <typename RealType, typename QnType>
 struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
-	typedef PsimagLite::InputNg<InputCheck>::Readable IoInputType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	using BaseType = ParametersModelBase<RealType, QnType>;
+	using IoInputType = PsimagLite::InputNg<InputCheck>::Readable;
+	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorRealType = std::vector<RealType>;
 
 	ParametersModelHubbard(IoInputType& io)
 	    : BaseType(io, false)
@@ -123,9 +124,11 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		}
 
 		try {
-			io.readline(potentialA, "PotentialA=");
-			std::cout << "PotentialA=" << potentialA << "\n";
+			potentialA.resize(nsites, 0.0);
+			io.read(potentialA, "PotentialA");
+			std::cout << "Has PotentialA\n";
 		} catch (std::exception&) {
+			potentialA.clear();
 		}
 
 		if (magneticX.size() > 0 && magneticX.size() != nsites) {
@@ -149,7 +152,7 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 
 	VectorStringType readOldT(IoInputType& io, SizeType nsites)
 	{
-		typename PsimagLite::Vector<RealType>::Type potentialTlegacy;
+		VectorRealType potentialTlegacy;
 		try {
 			io.read(potentialTlegacy, "PotentialT");
 			std::cerr << "Has PotentialT\n";
@@ -186,11 +189,11 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		return potentialTv;
 	}
 
-	typename PsimagLite::Vector<RealType>::Type hubbardU;
-	typename PsimagLite::Vector<RealType>::Type potentialV;
-	typename PsimagLite::Vector<RealType>::Type anisotropy;
-	typename PsimagLite::Vector<RealType>::Type magneticX;
-	RealType potentialA = 0.;
+	VectorRealType hubbardU;
+	VectorRealType potentialV;
+	VectorRealType anisotropy;
+	VectorRealType magneticX;
+	VectorRealType potentialA;
 
 	// for time-dependent H:
 	VectorStringType onSiteHaddLegacy;

@@ -1,9 +1,9 @@
 #ifndef MODEL_LINKS_H
 #define MODEL_LINKS_H
+#include "OneLink.hh"
 #include "ProgramGlobals.h"
 #include "PsimagLite.h"
 #include "Vector.h"
-#include <functional>
 #include <map>
 
 namespace Dmrg
@@ -29,62 +29,7 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
 	    VectorPairStringSizeType;
-
-	class OneLink
-	{
-
-	public:
-
-		typedef std::function<void(ComplexOrRealType&)> OldLambdaType;
-		typedef std::function<void(ComplexOrRealType&, RealType)> LambdaType;
-
-		OneLink(VectorSizeType indices_,
-		    VectorSizeType orbs_,
-		    ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
-		    PsimagLite::String mods_,
-		    SizeType angularMomentum_,
-		    RealType_ angularFactor_,
-		    SizeType category_,
-		    LambdaType vModifier_)
-		    : indices(indices_)
-		    , orbs(orbs_)
-		    , fermionOrBoson(fermionOrBoson_)
-		    , mods(mods_)
-		    , angularMomentum(angularMomentum_)
-		    , angularFactor(angularFactor_)
-		    , category(category_)
-		    , modifier(vModifier_)
-		{
-		}
-
-		OneLink(VectorSizeType indices_,
-		    VectorSizeType orbs_,
-		    ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
-		    PsimagLite::String mods_,
-		    SizeType angularMomentum_,
-		    RealType_ angularFactor_,
-		    SizeType category_,
-		    OldLambdaType vModifier_)
-		    : indices(indices_)
-		    , orbs(orbs_)
-		    , fermionOrBoson(fermionOrBoson_)
-		    , mods(mods_)
-		    , angularMomentum(angularMomentum_)
-		    , angularFactor(angularFactor_)
-		    , category(category_)
-		{
-			modifier = [vModifier_](ComplexOrRealType& value, RealType) { vModifier_(value); };
-		}
-
-		VectorSizeType indices;
-		VectorSizeType orbs;
-		ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
-		PsimagLite::String mods;
-		SizeType angularMomentum;
-		RealType_ angularFactor;
-		SizeType category;
-		LambdaType modifier;
-	}; // OneLink
+	using OneLinkType = OneLink<ComplexOrRealType>;
 
 	class AtomKindBase
 	{
@@ -101,7 +46,7 @@ public:
 	class Term
 	{
 
-		typedef typename PsimagLite::Vector<OneLink>::Type VectorOneLinkType;
+		using VectorOneLinkType = std::vector<OneLinkType>;
 
 	public:
 
@@ -118,8 +63,8 @@ public:
 			SizeType category;
 		};
 
-		typedef OneLink OneLinkType;
-		typedef typename OneLinkType::LambdaType LambdaType;
+		using LambdaType = typename OneLinkType::LambdaType;
+		using OldLambdaType = typename OneLinkType::OldLambdaType;
 
 		// pair of sites should actually be pair of kinds of sites
 		Term(PsimagLite::String name, bool wantsHermitian = true) // name of term,
@@ -164,7 +109,7 @@ public:
 		    Su2Properties su2properties)
 		{
 			push(
-			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) { }, su2properties);
+			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType, SizeType) { }, su2properties);
 		}
 
 		// give only lambda (new)
@@ -184,9 +129,9 @@ public:
 		    char mod1,
 		    const OpaqueOp& op2,
 		    char mod2,
-		    typename OneLink::OldLambdaType modifier)
+		    OldLambdaType modifier)
 		{
-			LambdaType newModif = [modifier](ComplexOrRealType& value, RealType) { modifier(value); };
+			LambdaType newModif = [modifier](ComplexOrRealType& value, RealType, SizeType) { modifier(value); };
 			push(op1, mod1, op2, mod2, newModif, Su2Properties());
 		}
 
@@ -198,7 +143,7 @@ public:
 		    char mod2)
 		{
 			return push(
-			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) { }, Su2Properties());
+			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType, SizeType) { }, Su2Properties());
 		}
 
 		// give all
@@ -248,7 +193,7 @@ public:
 		    char mod3,
 		    const OpaqueOp& op4,
 		    char mod4,
-		    LambdaType vModifier = [](ComplexOrRealType&, RealType) { },
+		    OldLambdaType vModifier = [](ComplexOrRealType&) { },
 		    Su2Properties su2properties = Su2Properties())
 		{
 			if (links_.size() > 0) {
@@ -306,7 +251,7 @@ public:
 			os << "Term Name=" << name_ << " Dofs=" << links_.size() << "\n";
 			const SizeType n = links_.size();
 			for (SizeType i = 0; i < n; ++i) {
-				const OneLink& onelink = links_[i];
+				const OneLinkType& onelink = links_[i];
 				const VectorSizeType& indices = onelink.indices;
 				const SizeType m = indices.size();
 				PsimagLite::String fermOrBos = (onelink.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? "[Fermionic]" : "[Bosonic]";

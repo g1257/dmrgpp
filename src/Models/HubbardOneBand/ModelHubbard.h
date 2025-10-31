@@ -337,6 +337,7 @@ protected:
 	*/
 	void fillModelLinks()
 	{
+		constexpr bool isComplex = PsimagLite::IsComplexNumber<SparseElementType>::True;
 		ModelTermType& hop = ModelBaseType::createTerm("hopping"); //(A)
 
 		auto su2_up = typename ModelTermType::Su2Properties(1, 1, 0);
@@ -346,7 +347,7 @@ protected:
 		OpForLinkType cdown("c", 1); // (D)
 
 		if (extension_ == "Peierls") {
-			auto peierls = BuildPierls<SparseElementType>::lambda(modelParameters_.potentialA);
+			auto peierls = BuildPierls<SuperGeometryType, isComplex>::lambda(modelParameters_.potentialA);
 			hop.push(cup, 'N', cup, 'C', peierls, su2_up); // (C)
 			hop.push(cdown, 'N', cdown, 'C', peierls, su2_do);
 		} else {

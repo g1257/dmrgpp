@@ -121,7 +121,6 @@ public:
 	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
 	typedef typename ModelHelperType::Aux AuxType;
 	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
-	typedef typename ModelLinksType::TermType::OneLinkType OneLinkType;
 	typedef SuperOpHelperBase<SuperGeometryType, ParamsForSolverType> SuperOpHelperBaseType;
 	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>
 	    ManyToTwoConnectionType;
@@ -132,7 +131,6 @@ public:
 	    RealType targetTime,
 	    const SuperOpHelperBaseType& superOpHelper)
 	    : modelHelper_(lrs)
-	    , superGeometry_(superOpHelper.superGeometry())
 	    , modelLinks_(lpb)
 	    , targetTime_(targetTime)
 	    , superOpHelper_(superOpHelper)
@@ -142,7 +140,7 @@ public:
 	    , envBlock_(modelHelper_.leftRightSuper().right().block())
 	    , smax_(*std::max_element(systemBlock_.begin(), systemBlock_.end()))
 	    , emin_(*std::min_element(envBlock_.begin(), envBlock_.end()))
-	    , hamAbstract_(superGeometry_,
+	    , hamAbstract_(superOpHelper.superGeometry(),
 		  smax_,
 		  emin_,
 		  modelHelper_.leftRightSuper().super().block())
@@ -158,7 +156,7 @@ public:
 		SizeType last = lrs.super().block().size();
 		assert(last > 0);
 		--last;
-		SizeType numberOfSites = superGeometry_.numberOfSites();
+		SizeType numberOfSites = hamAbstract_.superGeometry().numberOfSites();
 		assert(numberOfSites > 0);
 		bool superIsReallySuper = (lrs.super().block()[0] == 0 && lrs.super().block()[last] == numberOfSites - 1);
 
@@ -229,11 +227,20 @@ public:
 		matrix += matrix2;
 	}
 
-	OpsForLinkType opsForLink() const { return OpsForLinkType(operatorsCached_, lps_); }
+	OpsForLinkType opsForLink() const
+	{
+		return OpsForLinkType(operatorsCached_, lps_);
+	}
 
-	const ModelHelperType& modelHelper() const { return modelHelper_; }
+	const ModelHelperType& modelHelper() const
+	{
+		return modelHelper_;
+	}
 
-	SizeType tasks() const { return lps_.size(); }
+	SizeType tasks() const
+	{
+		return lps_.size();
+	}
 
 	void clearThreadSelves() const
 	{
@@ -249,9 +256,10 @@ private:
 		if (hItems.size() == 0)
 			return 0;
 
-		assert(superGeometry_.connected(smax_, emin_, hItems));
+		const SuperGeometryType& superGeometry = hamAbstract_.superGeometry();
+		assert(superGeometry.connected(smax_, emin_, hItems));
 
-		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
+		ProgramGlobals::ConnectionEnum type = superGeometry.connectionKind(smax_, hItems);
 
 		assert(type != ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM && type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
 
@@ -268,18 +276,15 @@ private:
 			SizeType dofsTotal = term.size();
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
 
-				const OneLinkType& oneLink = term(dofs);
+				const OneLink<ComplexOrRealType>& oneLink = term(dofs);
 
-				ComplexOrRealType tmp = superGeometry_(smax_,
-				    emin_,
-				    hItems,
-				    oneLink.orbs,
-				    termIndexForGeom);
+				ComplexOrRealType tmp = hamAbstract_.connectionValue(hItems,
+				    oneLink,
+				    termIndexForGeom,
+				    targetTime_);
 
 				if (tmp == static_cast<RealType>(0.0))
 					continue;
-
-				oneLink.modifier(tmp, targetTime_);
 
 				ManyToTwoConnectionType manyToTwo(hItems,
 				    type,
@@ -330,7 +335,7 @@ private:
 
 	void checkGeometryTerms() const
 	{
-		const SizeType fromInput = superGeometry_.terms();
+		const SizeType fromInput = hamAbstract_.superGeometry().terms();
 		const SizeType fromModel = modelLinks_.numberOfTerms();
 		bool doPrint = (smax_ == 0);
 
@@ -376,7 +381,6 @@ private:
 	}
 
 	const ModelHelperType modelHelper_;
-	const SuperGeometryType& superGeometry_;
 	const ModelLinksType& modelLinks_;
 	RealType targetTime_;
 	const SuperOpHelperBaseType& superOpHelper_;
@@ -385,8 +389,8 @@ private:
 	VectorLinkType lps_;
 	const VectorSizeType& systemBlock_;
 	const VectorSizeType& envBlock_;
-	SizeType smax_;
-	SizeType emin_;
+	const SizeType smax_;
+	const SizeType emin_;
 	HamiltonianAbstractType hamAbstract_;
 	VectorSizeType totalOnes_;
 }; // class HamiltonianConnection
