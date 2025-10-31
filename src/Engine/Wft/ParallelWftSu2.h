@@ -186,12 +186,12 @@ public:
 			SizeType kp = 0;
 			SizeType jp = 0;
 			for (int kI = factorsInvSE_.getRowPtr(xx);
-			     kI < factorsInvSE_.getRowPtr(xx + 1);
-			     kI++) {
+			    kI < factorsInvSE_.getRowPtr(xx + 1);
+			    kI++) {
 				pack1_->unpack(alpha, jp, static_cast<SizeType>(factorsInvSE_.getCol(kI)));
 				for (int k2I = factorsInvS_.getRowPtr(alpha);
-				     k2I < factorsInvS_.getRowPtr(alpha + 1);
-				     k2I++) {
+				    k2I < factorsInvS_.getRowPtr(alpha + 1);
+				    k2I++) {
 					pack2_->unpack(ip, kp, static_cast<SizeType>(factorsInvS_.getCol(k2I)));
 					psiDest_.fastAccess(i0_, taskNumber) += factorsInvSE_.getValue(kI) * factorsInvS_.getValue(k2I) * createAux2b(psiSrc_, ip, kp, jp, wsT_, we_, nk_);
 				}
@@ -202,12 +202,12 @@ public:
 			SizeType kp = 0;
 			SizeType jp = 0;
 			for (int kI = factorsInvSE_.getRowPtr(xx);
-			     kI < factorsInvSE_.getRowPtr(xx + 1);
-			     kI++) {
+			    kI < factorsInvSE_.getRowPtr(xx + 1);
+			    kI++) {
 				pack1_->unpack(ip, beta, static_cast<SizeType>(factorsInvSE_.getCol(kI)));
 				for (int k2I = factorsInvE_.getRowPtr(beta);
-				     k2I < factorsInvE_.getRowPtr(beta + 1);
-				     k2I++) {
+				    k2I < factorsInvE_.getRowPtr(beta + 1);
+				    k2I++) {
 					pack2_->unpack(kp, jp, static_cast<SizeType>(factorsInvE_.getCol(k2I)));
 					psiDest_.fastAccess(i0_, taskNumber) += factorsInvSE_.getValue(kI) * factorsInvE_.getValue(k2I) * createAux1b(psiSrc_, ip, kp, jp, ws_, weT_, nk_);
 				}

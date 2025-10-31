@@ -504,8 +504,7 @@ private:
 };
 
 template <typename SparseMatrixType,
-    template <typename, typename>
-    class SomeVectorTemplate,
+    template <typename, typename> class SomeVectorTemplate,
     typename SomeAllocator1Type,
     typename SomeAllocator2Type>
 void fillOperator(SomeVectorTemplate<SparseMatrixType*, SomeAllocator1Type>& data_,

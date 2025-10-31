@@ -228,7 +228,7 @@ public:
 			PsimagLite::String tmp = getExtension("Kondo");
 			model_ = new KondoType(solverParams, io, geometry, tmp);
 		} else if (name_.substr(0, 14) == "HubbardOneBand") {
-                        PsimagLite::String tmp = getExtension("HubbardOneBand");
+			PsimagLite::String tmp = getExtension("HubbardOneBand");
 			model_ = new ModelHubbardType(solverParams, io, geometry, tmp);
 		} else if (name_ == "Graphene") {
 			model_ = new GrapheneType(solverParams, io, geometry);
@@ -255,7 +255,7 @@ public:
 
 private:
 
-        std::string getExtension(const std::string& str) const
+	std::string getExtension(const std::string& str) const
 	{
 		SizeType l = str.length();
 		SizeType namel = name_.length();

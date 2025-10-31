@@ -80,12 +80,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGETING_EXPRESSION_H
 #include "CanonicalExpression.h"
 #include "GroupOfOneTimeEvolutions.h"
+#include "KetForTargetingExpression.hh"
 #include "Pvector.h"
 #include "SpecForTargetingExpression.h"
 #include "TargetingBase.h"
 #include <iostream>
 #include <stdexcept>
-#include "KetForTargetingExpression.hh"
 
 namespace Dmrg
 {
@@ -320,7 +320,7 @@ private:
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
 			PsimagLite::String thispAfter = pvectors_(i).lastName();
 
-			int pIndexOrMinusOne = (tmp.size() == 1) ?  tmp.term(0).pIndex(): -1;
+			int pIndexOrMinusOne = (tmp.size() == 1) ? tmp.term(0).pIndex() : -1;
 			if (pIndexOrMinusOne >= 0) {
 				SizeType x = pIndexOrMinusOne;
 				if (x != i) {
@@ -344,7 +344,7 @@ private:
 			simplifyTerms(thispBefore);
 			if (thispBefore.toString() != pvectors_(i).lastName()) {
 				needsTrimming = true;
-                                compressExpression(thispBefore);
+				compressExpression(thispBefore);
 				// checkNoUncompressedExists(compr);
 				pvectors_.pushString(i, thispBefore.toString());
 			}
@@ -477,7 +477,7 @@ private:
 			    opaque[1].second,
 			    ket.name());
 
-			expr.setKet(i,  "|P" + ttos(opaque[0].first) + ">");
+			expr.setKet(i, "|P" + ttos(opaque[0].first) + ">");
 			expr.setFactor(i, 1.);
 		}
 	}

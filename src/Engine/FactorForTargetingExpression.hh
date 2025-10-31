@@ -3,16 +3,19 @@
 #include "Vector.h"
 #include <string>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ComplexOrRealType>
-class FactorForTargetingExpression {
+template <typename ComplexOrRealType>
+class FactorForTargetingExpression
+{
 
 	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 	using VectorType = std::vector<ComplexOrRealType>;
 	using VecStringType = std::vector<std::string>;
 
 public:
+
 	FactorForTargetingExpression(const ComplexOrRealType& value)
 	{
 		factors_.push_back(value);
@@ -26,8 +29,7 @@ public:
 			err("FactorForTargetingExpression: Cannot multiply vector by scalar\n");
 		}
 
-
-                factors_[0] *= val;
+		factors_[0] *= val;
 		setStr(0);
 	}
 

@@ -233,7 +233,7 @@ private:
 				continue;
 			}
 
- 			SizeType pIndex = pIndexInt;
+			SizeType pIndex = pIndexInt;
 
 			for (SizeType j = 0; j < simpleTerms.size(); ++j) {
 				if (!simpleTerms[j].enabled || simpleTerms[j].pIndex != pIndex) {
@@ -241,7 +241,7 @@ private:
 				}
 
 				simpleTerms[j].factor += terms_[i]->ket().factor();
-				term_mapping[i] = -2; //ignore because i-th summed to j-th
+				term_mapping[i] = -2; // ignore because i-th summed to j-th
 				break;
 			}
 
@@ -286,7 +286,7 @@ private:
 		const SizeType nterms = terms_.size();
 		VectorBoolType indices(nterms, false);
 		TermType* combined_term = new TermType(aux_);
-		//VectorType factors;
+		// VectorType factors;
 
 		for (SizeType i = 0; i < nterms; ++i) {
 			const TermType& term = *terms_[i];
@@ -309,8 +309,8 @@ private:
 			if (indices[i]) {
 				termsNew.push_back(terms_[i]);
 			} else {
-                                delete terms_[i];
-                                terms_[i] = nullptr;
+				delete terms_[i];
+				terms_[i] = nullptr;
 			}
 		}
 

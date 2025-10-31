@@ -434,8 +434,8 @@ private:
 					    y2,
 					    oldLrs.right().permutationInverse());
 					for (SizeType k2 = transform1.getRowPtr(yfull2);
-					     k2 < transform1.getRowPtr(yfull2 + 1);
-					     k2++) {
+					    k2 < transform1.getRowPtr(yfull2 + 1);
+					    k2++) {
 						int y = transform1.getColOrExit(k2);
 						if (y < 0)
 							y = yfull2;
@@ -501,8 +501,8 @@ private:
 					    x2,
 					    oldLrs.left().permutationInverse());
 					for (SizeType k2 = transform1.getRowPtr(xfull2);
-					     k2 < transform1.getRowPtr(xfull2 + 1);
-					     k2++) {
+					    k2 < transform1.getRowPtr(xfull2 + 1);
+					    k2++) {
 						int x = transform1.getColOrExit(k2);
 						if (x < 0)
 							x = xfull2;

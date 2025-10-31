@@ -2,30 +2,31 @@
 #define PEIERLSHOPPING_HH
 #include "Complex.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ComplexOrRealType>
+template <typename ComplexOrRealType>
 class BuildPierls
 {
 public:
+
 	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 
 	static auto lambda(const RealType& A)
 	{
 		err("Cannot run Peierls Hubbard with reals; say usecomplex in SolverOptions\n");
-                return [A](ComplexOrRealType&, RealType) {};
+		return [A](ComplexOrRealType&, RealType) { };
 	}
 };
 
-template<typename RealType>
+template <typename RealType>
 class BuildPierls<std::complex<RealType>>
 {
 public:
 
 	static auto lambda(const RealType& A)
 	{
-		return [A](std::complex<RealType>& hop, RealType t)
-		{
+		return [A](std::complex<RealType>& hop, RealType t) {
 			RealType arg = A * t;
 			hop *= std::complex<RealType>(cos(arg), sin(arg));
 		};
