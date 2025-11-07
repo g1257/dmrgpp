@@ -56,6 +56,10 @@ if(Boost_FOUND)
   target_link_libraries(psimaglite PUBLIC Boost::boost)
 endif()
 
+find_package(BLAS REQUIRED)
+find_package(LAPACK REQUIRED)
+target_link_libraries(psimaglite PUBLIC BLAS::BLAS)
+target_link_libraries(psimaglite PUBLIC LAPACK::LAPACK)
 
 install(
   TARGETS psimaglite
