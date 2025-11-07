@@ -14,6 +14,8 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_CMAKE})
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 include(AddRPATH)
 
+include(CTest)
+
 add_subdirectory(loki)
 add_subdirectory(src)
 add_subdirectory(examples)

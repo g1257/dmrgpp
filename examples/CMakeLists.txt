@@ -11,3 +11,5 @@ target_link_libraries(
   BLAS::BLAS
   LAPACK::LAPACK
 )
+
+add_test(NAME testLanczos COMMAND testLanczos)
