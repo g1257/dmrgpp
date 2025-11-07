@@ -51,8 +51,7 @@ void mainLoop(GeometryType& geometry,
 }
 
 template <typename GeometryType,
-    template <typename>
-    class ModelHelperTemplate,
+    template <typename> class ModelHelperTemplate,
     typename MySparseMatrix>
 void mainLoop1(GeometryType& geometry,
     InputNgType::Readable& io,

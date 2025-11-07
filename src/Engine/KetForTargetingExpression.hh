@@ -1,12 +1,14 @@
 #ifndef KETFORTARGETINGEXPRESSION_HH
 #define KETFORTARGETINGEXPRESSION_HH
-#include "PsimagLite.h"
 #include "FactorForTargetingExpression.hh"
+#include "PsimagLite.h"
 
-namespace Dmrg {
+namespace Dmrg
+{
 
-template<typename ComplexOrRealType>
-class KetForTargetingExpression {
+template <typename ComplexOrRealType>
+class KetForTargetingExpression
+{
 
 	using PairType = std::pair<SizeType, ComplexOrRealType>;
 	using SumStruct = std::vector<PairType>;
@@ -15,11 +17,21 @@ public:
 
 	using FactorForTargetingExpressionType = FactorForTargetingExpression<ComplexOrRealType>;
 
-	enum class Kind {U, X, P, M, S};
+	enum class Kind { U,
+		X,
+		P,
+		M,
+		S };
 
-	KetForTargetingExpression() : factor_(1.0), kind_(Kind::U) {}
+	KetForTargetingExpression()
+	    : factor_(1.0)
+	    , kind_(Kind::U)
+	{
+	}
 
-	KetForTargetingExpression(const std::string& str) : factor_(1.0), kind_(Kind::U)
+	KetForTargetingExpression(const std::string& str)
+	    : factor_(1.0)
+	    , kind_(Kind::U)
 	{
 		set(str);
 	}
@@ -87,7 +99,7 @@ public:
 	{
 		if (kind_ == Kind::M) {
 			assert(!op_.empty());
-			return  op_ + "*" + str_;
+			return op_ + "*" + str_;
 		} else if (kind_ == Kind::S) {
 			SizeType n = pVectors_to_sum_.size();
 			assert(n > 0);
@@ -106,10 +118,9 @@ public:
 	int pIndex() const
 	{
 		return pIndex_;
-
 	}
 
-	Kind kind() const {return kind_; }
+	Kind kind() const { return kind_; }
 
 	const std::string op() const { return op_; }
 
@@ -123,7 +134,7 @@ public:
 		return (kind_ == Kind::S && pVectors_to_sum_.size() > 1);
 	}
 
-        ComplexOrRealType factor() const
+	ComplexOrRealType factor() const
 	{
 		return factor_.value();
 	}
@@ -143,14 +154,16 @@ public:
 
 		PairType p0(ind0, f.value(0));
 		PairType p1(ind1, f.value(1));
-		return {p0, p1};
+		return { p0, p1 };
 	}
+
 private:
 
 	void setKind()
 	{
 		SizeType last = str_.length();
-		if (last < 4) return;
+		if (last < 4)
+			return;
 
 		if (str_ == "|gs>") {
 			kind_ = Kind::X;

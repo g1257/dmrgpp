@@ -79,6 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_TRUNCATION_H
 #define DMRG_TRUNCATION_H
 
+#include "BasisWithOperators.h"
 #include "Concurrency.h"
 #include "DensityMatrixLocal.h"
 #include "DensityMatrixSvd.h"
@@ -88,7 +89,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "Sort.h"
 #include "TruncationControl.h"
-#include "BasisWithOperators.h"
 namespace Dmrg
 {
 

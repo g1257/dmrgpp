@@ -164,7 +164,7 @@ public:
 		    Su2Properties su2properties)
 		{
 			push(
-			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) {}, su2properties);
+			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) { }, su2properties);
 		}
 
 		// give only lambda (new)
@@ -198,7 +198,7 @@ public:
 		    char mod2)
 		{
 			return push(
-			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) {}, Su2Properties());
+			    op1, mod1, op2, mod2, [](ComplexOrRealType&, RealType) { }, Su2Properties());
 		}
 
 		// give all
@@ -248,7 +248,7 @@ public:
 		    char mod3,
 		    const OpaqueOp& op4,
 		    char mod4,
-		    LambdaType vModifier = [](ComplexOrRealType&, RealType) {},
+		    LambdaType vModifier = [](ComplexOrRealType&, RealType) { },
 		    Su2Properties su2properties = Su2Properties())
 		{
 			if (links_.size() > 0) {

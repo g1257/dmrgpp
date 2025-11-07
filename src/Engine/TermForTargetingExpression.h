@@ -1,10 +1,10 @@
 #ifndef TERMFORTARGETINGEXPRESSION_H
 #define TERMFORTARGETINGEXPRESSION_H
 #include "AuxForTargetingExpression.h"
+#include "KetForTargetingExpression.hh"
 #include "NonLocalForTargetingExpression.h"
 #include "OneOperatorSpec.h"
 #include "Vector.h"
-#include "KetForTargetingExpression.hh"
 
 namespace Dmrg
 {
@@ -92,8 +92,8 @@ public:
 			ket_ = other.ket();
 		}
 
-		if (n > 0) finalized_ = false;
-
+		if (n > 0)
+			finalized_ = false;
 	}
 
 	void multiply(const ComplexOrRealType& val)

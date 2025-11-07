@@ -147,7 +147,7 @@ public:
 	{
 		assert(ind0 < ind1);
 		VectorWithOffsetType& v0 = aoeNonConst().targetVectorsNonConst(ind0);
-                VectorWithOffsetType v1 = aoe_.targetVectors(ind1);
+		VectorWithOffsetType v1 = aoe_.targetVectors(ind1);
 		v0 *= val0;
 		v1 *= val1;
 

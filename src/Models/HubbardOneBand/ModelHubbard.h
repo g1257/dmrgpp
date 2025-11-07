@@ -82,13 +82,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "HilbertSpaceHubbard.h"
 #include "ParametersModelHubbard.h"
+#include "PeierlsHopping.hh"
 #include "ProgramGlobals.h"
 #include "Sort.h" // in PsimagLite
 #include "SpinSquared.h"
 #include "SpinSquaredHelper.h"
 #include "VerySparseMatrix.h"
 #include <cassert>
-#include "PeierlsHopping.hh"
 
 namespace Dmrg
 {
@@ -340,12 +340,12 @@ protected:
 		ModelTermType& hop = ModelBaseType::createTerm("hopping"); //(A)
 
 		auto su2_up = typename ModelTermType::Su2Properties(1, 1, 0);
-		auto su2_do =  typename ModelTermType::Su2Properties(1, -1, 1);
+		auto su2_do = typename ModelTermType::Su2Properties(1, -1, 1);
 
 		OpForLinkType cup("c", 0); // (B)
 		OpForLinkType cdown("c", 1); // (D)
 
-		if (extension_ ==  "Peierls") {
+		if (extension_ == "Peierls") {
 			auto peierls = BuildPierls<SparseElementType>::lambda(modelParameters_.potentialA);
 			hop.push(cup, 'N', cup, 'C', peierls, su2_up); // (C)
 			hop.push(cdown, 'N', cdown, 'C', peierls, su2_do);

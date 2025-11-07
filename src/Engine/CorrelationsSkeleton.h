@@ -637,8 +637,8 @@ private:
 				for (int k = Acrs.getRowPtr(r); k < Acrs.getRowPtr(r + 1); k++) {
 					SizeType rprime = Acrs.getCol(k);
 					for (int k2 = Bcrs.getRowPtr(eta);
-					     k2 < Bcrs.getRowPtr(eta + 1);
-					     k2++) {
+					    k2 < Bcrs.getRowPtr(eta + 1);
+					    k2++) {
 						SizeType eta2 = Bcrs.getCol(k2);
 
 						SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(rprime + eta2 * leftSize);
@@ -692,8 +692,8 @@ private:
 				for (int k = Acrs.getRowPtr(r1); k < Acrs.getRowPtr(r1 + 1); k++) {
 					SizeType r1prime = Acrs.getCol(k);
 					for (int k2 = Bcrs.getRowPtr(eta);
-					     k2 < Bcrs.getRowPtr(eta + 1);
-					     k2++) {
+					    k2 < Bcrs.getRowPtr(eta + 1);
+					    k2++) {
 						SizeType eta2 = Bcrs.getCol(k2);
 						SizeType rprime = helper_.leftRightSuper(ptr).right().permutationInverse(r0 + r1prime * ni);
 						SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(eta2 + rprime * leftSize);
