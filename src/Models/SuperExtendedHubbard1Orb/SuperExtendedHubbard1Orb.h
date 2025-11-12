@@ -229,7 +229,7 @@ protected:
 		    'N',
 		    splus,
 		    'C',
-		    [isSu2](SparseElementType& value, RealType) { value *= (isSu2) ? -0.5 : 0.5; },
+		    [isSu2](SparseElementType& value, RealType, SizeType) { value *= (isSu2) ? -0.5 : 0.5; },
 		    typename ModelTermType::Su2Properties(2, -1, 2));
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");

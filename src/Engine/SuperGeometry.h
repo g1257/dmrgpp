@@ -10,11 +10,14 @@ namespace Dmrg
 template <typename ComplexOrRealType_, typename InputType_, typename ProgramGlobalsType>
 class SuperGeometry
 {
+public:
 
 	typedef PsimagLite::Geometry<ComplexOrRealType_, InputType_, ProgramGlobalsType> GeometryType;
 	typedef typename GeometryType::ComplexOrRealType ComplexOrRealType;
 	typedef typename GeometryType::VectorSizeType VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
+
+private:
 
 	class SuperPlaquette
 	{

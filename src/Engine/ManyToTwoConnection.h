@@ -1,6 +1,7 @@
 #ifndef MANYTOTWOCONNECTION_H
 #define MANYTOTWOCONNECTION_H
 #include "MetaOpForConnection.hh"
+#include "OneLink.hh"
 #include "ProgramGlobals.h"
 
 namespace Dmrg
@@ -16,7 +17,8 @@ public:
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelLinksType::TermType::OneLinkType ModelTermLinkType;
+	using ComplexOrRealType = typename ModelLinksType::ComplexOrRealType;
+	using ModelTermLinkType = OneLink<ComplexOrRealType>;
 	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
 	using PairMetaOpForConnection = std::pair<MetaOpForConnection, MetaOpForConnection>;
 

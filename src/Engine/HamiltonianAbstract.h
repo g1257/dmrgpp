@@ -1,6 +1,7 @@
 #ifndef HAMILTONIANABSTRACT_H
 #define HAMILTONIANABSTRACT_H
 
+#include "OneLink.hh"
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
@@ -10,9 +11,11 @@ namespace Dmrg
 template <typename SuperGeometryType>
 class HamiltonianAbstract
 {
-
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
+	using VectorSizeType = std::vector<SizeType>;
+	using VectorVectorSizeType = std::vector<VectorSizeType>;
+	using ComplexOrRealType = typename SuperGeometryType::ComplexOrRealType;
+	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using OneLinkType = OneLink<ComplexOrRealType>;
 
 public:
 
@@ -20,7 +23,10 @@ public:
 	    SizeType smax,
 	    SizeType emin,
 	    const VectorSizeType& block)
-	    : block_(block)
+	    : superGeometry_(superGeometry)
+	    , smax_(smax)
+	    , emin_(emin)
+	    , block_(block)
 	{
 		VectorSizeType v(2, 0);
 		SizeType n = block.size();
@@ -43,6 +49,17 @@ public:
 		superGeometry.addSuperConnections(data_, smax, emin);
 	}
 
+	ComplexOrRealType connectionValue(const VectorSizeType& hItems,
+	    const OneLinkType& oneLink,
+	    SizeType termIndexForGeom,
+	    const RealType& targetTime)
+	{
+		ComplexOrRealType value = superGeometry_(smax_, emin_, hItems, oneLink.orbs, termIndexForGeom);
+		SizeType site = findSite(hItems);
+		oneLink.modifier(value, targetTime, site);
+		return value;
+	}
+
 	SizeType items() const { return data_.size(); }
 
 	VectorSizeType item(SizeType ind) const
@@ -53,8 +70,20 @@ public:
 
 	const VectorSizeType& block() const { return block_; }
 
+	const SuperGeometryType& superGeometry() const { return superGeometry_; }
+
 private:
 
+	SizeType findSite(const VectorSizeType& hItems) const
+	{
+		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
+		assert(type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON || type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
+		return (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? hItems[0] : hItems[1];
+	}
+
+	const SuperGeometryType& superGeometry_;
+	const SizeType smax_;
+	const SizeType emin_;
 	const VectorSizeType& block_;
 	VectorVectorSizeType data_;
 };
