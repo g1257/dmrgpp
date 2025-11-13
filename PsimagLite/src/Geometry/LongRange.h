@@ -254,7 +254,7 @@ private:
 
 		if (str.empty())
 			return;
-		std::cerr<<"WARNING: "<<str;
+		std::cerr << "WARNING: " << str;
 	}
 
 	static bool hasDiagonal(const MatrixType& matrix)

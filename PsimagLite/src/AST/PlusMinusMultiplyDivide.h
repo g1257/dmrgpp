@@ -99,10 +99,8 @@ public:
 		// Assume it's an input
 		NodeType* input = new InputType(inputsSoFar_++);
 
-
 		typename NodeType::ValueType dummy = 0;
 		setInputRealOrComplex(input, code, dummy);
-
 
 		nodes_.push_back(input);
 		return *input;
@@ -125,7 +123,6 @@ private:
 
 		input->set(PsimagLite::atof(code));
 	}
-
 
 	VectorNodeType nodes_;
 	SizeType inputsSoFar_;

@@ -112,7 +112,8 @@ norm(const std::complex<T>& t)
 	return std::norm(t);
 }
 
-inline std::complex<double> stringToComplex(const std::string& str) {
+inline std::complex<double> stringToComplex(const std::string& str)
+{
 	double real = 0;
 	double imag = 0;
 	char dummy = 0;
@@ -126,7 +127,8 @@ inline std::complex<double> stringToComplex(const std::string& str) {
 		if (str[str.find('+') + 1] == '-') {
 			imag = -imag;
 		}
-	} else if (str.find('i') != std::string::npos) {
+	}
+	else if (str.find('i') != std::string::npos) {
 		ss >> imag >> dummy;
 		real = 0;
 		if (str.back() != 'i') {

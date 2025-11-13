@@ -168,7 +168,7 @@ public:
 		return (ind < middle)
 		    ? ProgramGlobalsType::ConnectionEnum::SYSTEM_SYSTEM
 		    : ProgramGlobalsType::ConnectionEnum::
-		        ENVIRON_ENVIRON;
+		          ENVIRON_ENVIRON;
 	}
 
 	ComplexOrRealType operator()(SizeType smax, SizeType emin, SizeType i1, SizeType edof1, SizeType i2, SizeType edof2, SizeType term) const

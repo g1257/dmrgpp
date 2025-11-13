@@ -1,8 +1,8 @@
 #ifndef REDIRECTOUTPUT_HH
 #define REDIRECTOUTPUT_HH
-#include <iostream>
-#include <fstream>
 #include "PsimagLite.h"
+#include <fstream>
+#include <iostream>
 
 namespace PsimagLite {
 
