@@ -182,7 +182,7 @@ public:
 		if (!b)
 			return b;
 
-		b = ioSerializer.write(label + "/ncol_", ncol_, IoSerializer::ALLOW_OVERWRITE);
+		ioSerializer.write(label + "/ncol_", ncol_, IoSerializer::ALLOW_OVERWRITE);
 		if (!b)
 			return b;
 

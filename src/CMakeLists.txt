@@ -1,11 +1,9 @@
-cmake_minimum_required(VERSION 3.21)
-
-find_package(PsimagLite REQUIRED CONFIG)
 find_package(Boost REQUIRED CONFIG)
 
 add_custom_command(
-  OUTPUT GitRevision.h
-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/createGitRevision.pl GitRevision.h
+  OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/createGitRevision.pl
+          ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/createGitRevision.pl
   COMMENT "Generating Git Revision File"
   VERBATIM)
@@ -14,12 +12,11 @@ add_subdirectory(KronUtil)
 
 add_library(Common OBJECT ProgramGlobals.cpp Provenance.cpp Utils.cpp)
 target_sources(Common PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_link_libraries(Common PRIVATE psimaglite::psimaglite psimaglite::loki
-                                     HDF5::HDF5)
+target_link_libraries(Common PRIVATE psimaglite loki HDF5::HDF5)
 target_include_directories(Common PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 add_library(Su2Related OBJECT Su2Related.cpp)
-target_link_libraries(Su2Related PRIVATE psimaglite::psimaglite HDF5::HDF5)
+target_link_libraries(Su2Related PRIVATE psimaglite HDF5::HDF5)
 target_include_directories(Su2Related PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
                                               Engine)
 
@@ -70,9 +67,8 @@ add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related>
                     ${driver_templates} Qn.cpp dmrg.cpp)
 target_compile_definitions(dmrg PUBLIC USE_BOOST)
 
-target_link_libraries(
-  dmrg PUBLIC kronutil psimaglite::psimaglite HDF5::HDF5 BLAS::BLAS
-              LAPACK::LAPACK ${ADDITIONAL_LIBRARIES})
+target_link_libraries(dmrg PUBLIC kronutil psimaglite HDF5::HDF5 BLAS::BLAS
+                                  LAPACK::LAPACK ${ADDITIONAL_LIBRARIES})
 target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 
@@ -93,12 +89,14 @@ add_executable(
   ObserveDriver0.cpp
   ObserveDriver1.cpp
   ObserveDriver2.cpp)
+
 target_include_directories(observe PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_compile_definitions(observe PUBLIC USE_BOOST)
+target_sources(observe PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_link_libraries(
   observe
   kronutil
-  psimaglite::psimaglite
+  psimaglite
   HDF5::HDF5
   BLAS::BLAS
   LAPACK::LAPACK
@@ -107,8 +105,7 @@ target_link_libraries(
 # Toolbox executable now
 add_executable(toolboxdmrg toolboxdmrg.cpp Qn.cpp ProgramGlobals.cpp
                            Provenance.cpp)
-target_link_libraries(toolboxdmrg psimaglite::psimaglite HDF5::HDF5
-                      ${ADDITIONAL_LIBRARIES})
+target_link_libraries(toolboxdmrg psimaglite HDF5::HDF5 ${ADDITIONAL_LIBRARIES})
 target_sources(toolboxdmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(toolboxdmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
                                                Engine)
@@ -121,7 +118,7 @@ target_compile_definitions(omegas PUBLIC USE_BOOST)
 target_link_libraries(
   omegas
   kronutil
-  psimaglite::psimaglite
+  psimaglite
   HDF5::HDF5
   BLAS::BLAS
   LAPACK::LAPACK
