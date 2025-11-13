@@ -24,25 +24,34 @@ target_include_directories(
 
 target_link_libraries(psimaglite PUBLIC loki)
 
-find_package(MPI COMPONENTS CXX)
+# find_package(MPI COMPONENTS CXX)
 if(MPI_FOUND)
   target_compile_definitions(psimaglite PUBLIC USE_MPI)
   target_link_libraries(psimaglite PUBLIC MPI::MPI_CXX)
 
   # Require HDF5 parallel when MPI is enabled
   set(HDF5_PREFER_PARALLEL ON)
-  find_package(HDF5 COMPONENTS CXX HL MODULE)
+  find_package(
+    HDF5
+    COMPONENTS CXX HL
+    MODULE)
   if(HDF5_FOUND AND HDF5_IS_PARALLEL)
     message(STATUS "HDF5 enabled")
     target_link_libraries(psimaglite PUBLIC HDF5::HDF5)
   else()
     if(HDF5_FOUND)
-      message(WARNING "HDF5 that was found \(${HDF5_DIR}\) is not parallel and cannot be used")
+      message(
+        WARNING
+          "HDF5 that was found \(${HDF5_DIR}\) is not parallel and cannot be used"
+      )
     endif()
     target_compile_definitions(psimaglite PUBLIC USE_IO_SIMPLE)
   endif()
 else() # MPI-NOTFOUND
-  find_package(HDF5 COMPONENTS CXX HL MODULE)
+  find_package(
+    HDF5
+    COMPONENTS CXX HL
+    MODULE)
   if(HDF5_FOUND)
     target_link_libraries(psimaglite PUBLIC HDF5::HDF5)
   else()
