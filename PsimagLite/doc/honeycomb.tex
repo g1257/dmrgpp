@@ -1,0 +1,64 @@
+\documentclass{standalone}
+%\usepackage{fontspec}
+\usepackage[T1]{fontenc}
+\usepackage{tikz}
+\usetikzlibrary{calc}
+\usepackage{calligra}
+\definecolor{myred}{HTML}{ff4136}
+%\definecolor{myorange}{HTML}{ff851b}
+\definecolor{mypurple}{HTML}{b10dc9}
+\definecolor{myolive}{HTML}{3d9970}
+
+\def\a{1.8}
+\def\c{.86602540378443864676}
+\def\s{.5}
+
+\begin{document}
+	\newcounter{mycounter};
+	\setcounter{mycounter}{0}
+	\begin{tikzpicture}[
+	ystyle/.style={myred, thick},
+	zstyle/.style={mypurple, thick},
+	xstyle/.style={myolive, thick},
+	nstyle/.style={circle, draw=black, thick}]
+	
+	\foreach \x in {0,...,4} {
+		\def\y{4*\x}
+		\node[nstyle] (0\x) at (2*\a*\c*\x,0) {\themycounter};
+		\stepcounter{mycounter}
+		\node[nstyle] (1\x) at (2*\a*\c*\x-\a*\c, -\a*\s) {\themycounter};
+		\stepcounter{mycounter}
+		\node[nstyle] (2\x) at (2*\a*\c*\x-\a*\c, -\a-\a*\s) {\themycounter};
+		\stepcounter{mycounter}
+		\node[nstyle] (3\x) at (2*\a*\c*\x, -\a-2*\a*\s) {\themycounter};
+		\stepcounter{mycounter}
+	
+	\node[nstyle] (4\x) at (2*\a*\c*\x, -2*\a-2*\a*\s) {\themycounter};
+	\stepcounter{mycounter}
+	\node[nstyle] (5\x) at (2*\a*\c*\x-\a*\c, -2*\a-3*\a*\s) {\themycounter};
+	\stepcounter{mycounter}
+	\node[nstyle] (6\x) at (2*\a*\c*\x-\a*\c, -3*\a-3*\a*\s) {\themycounter};
+	\stepcounter{mycounter}
+	\node[nstyle] (7\x) at (2*\a*\c*\x, -3*\a-4*\a*\s) {\themycounter};
+	\stepcounter{mycounter}
+	
+		\draw[ystyle] (0\x) -- (1\x);
+		\draw[zstyle] (1\x) -- (2\x);
+		\draw[xstyle] (2\x) -- (3\x);
+		\draw[zstyle] (3\x) -- (4\x);
+		
+		\draw[ystyle] (4\x) -- (5\x);
+		\draw[zstyle] (5\x) -- (6\x);
+		\draw[xstyle] (6\x) -- (7\x);
+	}
+
+	\foreach \x in {1,...,4} {
+		\pgfmathtruncatemacro{\xminusone}{\x - 1}
+		\draw[xstyle] (0\xminusone) -- (1\x);
+		\draw[ystyle] (2\x) -- (3\xminusone);
+		\draw[xstyle] (5\x) -- (4\xminusone);
+		\draw[ystyle] (6\x) -- (7\xminusone);
+	}
+	
+	\end{tikzpicture}
+\end{document}

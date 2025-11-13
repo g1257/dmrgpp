@@ -71,20 +71,28 @@ add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related>
 target_compile_definitions(dmrg PUBLIC USE_BOOST)
 
 target_link_libraries(
-  dmrg
-  kronutil
-  psimaglite::psimaglite
-  HDF5::HDF5
-  BLAS::BLAS
-  LAPACK::LAPACK
-  ${ADDITIONAL_LIBRARIES})
+  dmrg PUBLIC kronutil psimaglite::psimaglite HDF5::HDF5 BLAS::BLAS
+              LAPACK::LAPACK ${ADDITIONAL_LIBRARIES})
 target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 
+if(MPI_FOUND)
+  target_compile_definitions(dmrg PUBLIC USE_MPI)
+  target_link_libraries(dmrg PUBLIC MPI::MPI_CXX)
+endif()
+
 # Observe executable below
-add_executable(observe observe.cpp ProgramGlobals.cpp Provenance.cpp Utils.cpp
-	           Su2Related.cpp Qn.cpp  ObserveDriver0.cpp ObserveDriver1.cpp
-			   ObserveDriver2.cpp)
+add_executable(
+  observe
+  observe.cpp
+  ProgramGlobals.cpp
+  Provenance.cpp
+  Utils.cpp
+  Su2Related.cpp
+  Qn.cpp
+  ObserveDriver0.cpp
+  ObserveDriver1.cpp
+  ObserveDriver2.cpp)
 target_include_directories(observe PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_compile_definitions(observe PUBLIC USE_BOOST)
 target_link_libraries(
@@ -97,7 +105,8 @@ target_link_libraries(
   ${ADDITIONAL_LIBRARIES})
 
 # Toolbox executable now
-add_executable(toolboxdmrg toolboxdmrg.cpp Qn.cpp ProgramGlobals.cpp Provenance.cpp)
+add_executable(toolboxdmrg toolboxdmrg.cpp Qn.cpp ProgramGlobals.cpp
+                           Provenance.cpp)
 target_link_libraries(toolboxdmrg psimaglite::psimaglite HDF5::HDF5
                       ${ADDITIONAL_LIBRARIES})
 target_sources(toolboxdmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
@@ -106,7 +115,7 @@ target_include_directories(toolboxdmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
 
 # Many omegas executable
 add_executable(omegas $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related>
-                    Qn.cpp manyOmegas.cpp)
+                      Qn.cpp manyOmegas.cpp)
 target_include_directories(omegas PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_compile_definitions(omegas PUBLIC USE_BOOST)
 target_link_libraries(

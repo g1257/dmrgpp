@@ -1,0 +1,179 @@
+#
+# Format of psiTag files is described in PsimagLite/scripts/PsiTag.pm
+#
+# PsimagLite support is needed by DMRG++
+dependency PsimagLite = (
+LDFLAGS = -L../../PsimagLite/lib -L../../../PsimagLite/lib -lpsimaglite
+)
+
+# Compiler to use. For clang++ see commented out line.
+# Note that -mtune=native -march=native should not be
+# used if you intend your executable to run in machines
+# other than the one your are compiling on
+compilerCPP GNU = CXX = g++ -frecord-gcc-switches
+
+compilerCPP CLANG = CXX = clang++
+
+compilerCPPOptions ansi = (
+
+# We're using ansi C++
+CPPFLAGS += -pedantic -std=c++11
+
+# Enable warnings and treat warnings as errors
+CPPFLAGS += -Wall -Wendif-labels
+
+)
+
+# Treat warnings as errors
+# (hdf5 on Ubuntu does not pass this, so it's
+# commented out by default now)
+compilerCPPOptions Werror = CPPFLAGS += -Werror
+
+# This enables additional debugging
+compilerCPPOptions AdditionalDebugging = (
+CPPFLAGS += -D_GLIBCXX_DEBUG # -D_GLIBCXX_PROFILE
+)
+
+# This makes the code use long instead of short integers
+.= CPPFLAGS +=-DUSE_LONG
+
+# This makes the code use float instead of double
+.= CPPFLAGS += -DUSE_FLOAT
+
+# This enables signals
+.= CPPFLAGS +=-DUSE_SIGNALS
+
+# This enables gsl support
+dependency GSL = (
+CPPFLAGS +=-DUSE_GSL
+LDFLAGS += -lgsl -lgslcblas
+)
+
+# This enables the custom allocator (use only for debugging)
+compilerCPPOptions USE_CUSTOM_ALLOCATOR = (
+CPPFLAGS += -DUSE_CUSTOM_ALLOCATOR
+)
+
+# Disable KronUtil
+compilerCPPOptions NotKronUtil = (
+CPPFLAGS += -DDO_NOT_USE_KRON_UTIL
+)
+
+#Add directory to linker where libkronutil.a resides
+linkerOptions KronUtil = (
+LDFLAGS += -LKronUtil
+)
+
+#Enable SU(2)
+#You will also need to run perl configure.pl production 0 1
+#to rebuild the Makefile
+.= CPPFLAGS += -DENABLE_SU2
+
+#IoNg needs HDF5 libraries
+dependency HDF5 = (
+CPPFLAGS += -I/usr/include/hdf5/serial
+LDFLAGS += -L/usr/lib/x86_64-linux-gnu/hdf5/serial/
+LDFLAGS += -lhdf5_hl_cpp -lhdf5_cpp -lhdf5_hl -lhdf5
+)
+
+#This enables boost support that is needed for Ainur
+dependency Boost = (
+CPPFLAGS += -DUSE_BOOST
+)
+
+#This enables the PLUGIN_SC repository
+dependency PluginSc = (
+CPPFLAGS += -DPLUGIN_SC \\
+    -I ../../../dmrgppPluginSc/src \\
+    -I ../../dmrgppPluginSc/src \\
+    -I ../../../dmrgppPluginSc/include \\
+    -I ../../dmrgppPluginSc/include
+CPPFLAGS +=    -fopenmp
+
+#This adds linkage for the PLUGIN_SC libraries
+LDFLAGS += -L../../dmrgppPluginSc/src -L../../../dmrgppPluginSc/src
+LDFLAGS +=  -ldmrgppPluginSc
+LDFLAGS +=  -lgomp
+LDFLAGS +=  -fopenmp
+
+)
+
+# This disables debugging
+compilerCPPOptions NDEBUG = CPPFLAGS += -DNDEBUG
+
+# Optimization level here
+compilerCPPOptions Optimize3 = (
+CPPFLAGS += -O3
+)
+
+# This enables partial debugging (make sure to comment out previous line)
+compilerCPPOptions Symbols3 = (
+CPPFLAGS +=   -g3
+)
+
+# Here add your lapack and blas libraries or say NO_LAPACK
+dependency LAPACK = (
+# If on MacOs please say LDFLAGS += -framework Accelerate
+LDFLAGS += -llapack
+)
+
+dependency BLAS = (
+LDFLAGS += -lblas
+)
+
+dependency pthreads = (
+# Here add -lpthread if threading is needed and also 
+# set -DUSE_PTHREADS below
+LDFLAGS += -lpthread
+
+# Enable pthreads
+CPPFLAGS += -DUSE_PTHREADS
+)
+
+default flavor = production
+
+default compiler = < compilerCPP GNU
+group basics = (
+< dependency PsimagLite
+< default compiler
+< compilerCPPOptions ansi
+< linkerOptions KronUtil
+< dependency HDF5
+< dependency LAPACK
+< dependency BLAS
+< dependency Boost
+STRIP_COMMAND = strip
+)
+
+flavor production = (
+< group basics
+< dependency pthreads
+< compilerCPPOptions Optimize3
+< compilerCPPOptions NDEBUG
+)
+
+flavor debug = (
+< group basics
+STRIP_COMMAND = gdb-add-index
+< compilerCPPOptions Symbols3
+< compilerCPPOptions Werror
+)
+
+flavor callgrind = (
+< flavor debug
+< compilerCPPOptions Optimize3
+< compilerCPPOptions NDEBUG
+)
+
+flavor drd = (
+< flavor debug
+< dependency pthreads
+)
+
+flavor helgrind = < flavor drd
+
+flavor pluginsc = (
+< flavor production
+< dependency PluginSc
+)
+
