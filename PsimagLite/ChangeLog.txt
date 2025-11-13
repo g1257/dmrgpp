@@ -1,0 +1,630 @@
+2023-08-08 Version 3.06
+
+* expIpi: bug fix
+
+* ExpressionForAST replaces ExpressionCalculator
+
+* Ainur: Complex numbers now supported
+
+* Ainur: Native macros now supported
+
+* Geometry: GeometryValueModifier deleted
+
+* clang_format added
+
+
+2022-05-10 Version 3.04
+
+* CanonicalExpression has second optional template
+
+* InputNg returns map of key/value pairs
+
+* QuasiCanonical allows arithmetic of scalars now
+
+* Ainur supports macros now
+
+* internode.cpp uses gethostname systemcall now
+
+2021-11-19 Version 3.02
+
+* LinearPrediction now yields correct
+results (by Alberto Nocera)
+
+* LanczosSolver: prefix + EigsForStop= added
+
+* NewMake.pm infrastructure: clears .a
+files (This was affecting KronUtils recompilation
+in DMRG++)
+
+* QuasiCanonical expressions support complex scalars
+
+* lorentzian.pl script added
+
+* naiztnerol.pl scripts added which does
+the reverse of lorentzian.pl
+(Thanks to Bradraj P.)
+
+* Ainur: better error reporting
+
+* Ainur: allows _ for variable names
+
+* Ainur: ellipsis for complex vectors now works
+
+* Ainur: full support for complex numbers
+(Thanks to Pontus L.)
+
+* AwesomePredicate and related predicates have
+changed the characters used for separators and
+logical operators
+
+* ContinuedFraction drivers support complex weights
+
+* ExpressionCalculator now works for complex numbers
+
+* ExpressionCalculator: ei which means exp(i*variable)
+has now been fixed (Thanks to Alberto N.)
+
+* IoNgSerializer: remembers whether floating points
+correspond to real or complex
+
+2021-04-22 Version 3.00
+
+* SizeType defaults to long int unsigned
+
+* stringToReal supports E uppercase, so that 1E-1 is a
+valid number
+
+* IoNg: overwrite allows unlink to fail
+
+* Lanczos and Chebyshev Vectors: swap don't copy
+
+* Matrix::swap now with correct semantics
+
+* IoNg: various additions to the API
+
+2020-12-02 Version 2.76
+
+* Boost serialization headers deleted
+
+* CanonicalExpression: do not throw on empty result
+to accomodate scalar algebra
+
+* Matrix::rotate() added
+
+* Matrix::overwrite to hdf5 added
+
+* Ainur: throw corrected, and vector of string added
+
+2020-10-27 Version 2.74
+
+* PsimagLite MPI wrapper, called InterNodeMpi, has been added
+(see mailing list for a description)
+
+* LongChain honors IsPeriodicX=1 now
+
+* IoNg::dontPrintDebug() now available,
+which stops canary from singing even in debug mode
+
+* CanonicalExpression supports complex scalars now
+
+* InputCheckBase added
+
+* tutorial with Lesson I: testInputNg
+
+* doc.pl supports code sections
+
+* Matrix inverse supports float and complex<float>
+
+* Star geometry with CENTER == 1
+
+
+2020-07-31 Version 2.72
+
+* GetBraOrKet: R vectors, like in |R0>, etc,
+are reserved for internal use
+
+* PsimagLite::atoi better error report
+
+* Warn if Ainur file with inp file extension;
+file extensions are still conventions only
+
+* Ainur: bug fix for usecomplex
+
+* isAfloat: bug fix that affected Awesome Predicate
+
+* AinurState.h is no longer a singleton (needed for cincuenta)
+
+
+2020-03-13 version 2.70
+
+* Matrix expIpi function (Thanks to Jacek)
+
+* Awesome Predicate: settings start with @
+
+* GEMMR (Thanks to Ed)
+
+* Parallelization at nested level
+
+* Ainur: atoi and atof check their arguments now (Thanks to Pontus)
+
+* OneOperatorSpec: better error reporting (Thanks to Bradraj)
+
+* SizeType is uint64_t by default now
+
+
+2020-01-14 version 2.68
+
+* OstringStream changes done for precision
+
+* PredicateAwesome supports 3 name/value pairs
+
+* Geometry fillAdditionalData deleted
+
+* GeometryBase nullptr means super connections
+
+* CrsMatrix: A cross B added; other improvements
+
+* pthread_exit now called explicitly to help profiling tools
+
+2019-12-09 version 2.66
+
+* GetBraOrKet: Quantum sector before excited level
+
+* LanczosSolver: early exit has new algorithm for excited states
+
+* OneOperatorSpec has generalization
+
+* PredicateAwesome: bug fix and new features
+
+* CrsMatrix: performance improvements by Ed
+
+* Ainur supports complex numbers now
+
+2019-11-08 version 2.64
+
+* libpsimaglite can now be built without HDF5
+
+* GetBraOrKet has new interface
+
+2019-09-23 version 2.62
+
+new drivers
+
+* isBlasThreaded and openBlasConfig
+
+new features and interfaces
+
+* PredicateAwesome supports constants
+
+* Parallelizer2 replaces Parallelizer
+
+* sfinae examples started
+
+2019-08-13 Version 2.60
+
+bug fixes
+
+* Matrix::operator+= : resize if needed
+
+* Ainur: still not working for Complex matrices
+
+performance
+
+* externalProduct now permutes rows and cols on-the-fly
+
+new features
+
+* PredicateAwesome
+
+2019-06-25 Version 2.58
+
+* GetBraOrKet now in PsimagLite
+
+* Geometry LongRange supports Entangler
+
+* InputNg::Writeable can take data in string, and in file
+
+2019-05-20 Version 2.56
+
+* OneOperatorSpec moved to PsimagLite so that Lanczos++ can use it
+
+* Changes needed by YaSpinWave
+
+* PsiScript.pl6 added to execute scripts
+
+* PsiTag now supports append, delete, and strict modes
+
+* PsiTag proposal for modifiers
+
+* Ladder geometry now supports odd legs
+
+* Ladder geometry now honors IsPeriodicX=1
+
+* LongRange geometry now requires GeometryMaxConnections=
+(set to 0 if in doubt)
+
+2019-04-02 Version 2.54
+
+Bug fixes:
+
+* ContinuedFractionCollection driver: write fixed
+
+New features:
+
+* InputNg: supports replacements
+
+* ParametersForLanczosSolver: rabbit hole algorithm used now
+
+Refactoring
+
+* basenameOf now available
+
+2019-03-07 Version 2.52
+
+* PthreadsNg compiles on MacOS
+
+* Ainur: better error reporting
+
+* CanonicalExpression no longer needs
+default ctor for ResultType
+
+2019-01-31 Version 2.50
+
+* IsEnumClass predicate
+
+* IoNg: read/write enum class
+
+* PsiApp: microarchitecture compile vs. runtime check
+
+* All programs that need PsimagLite must use C++11 now
+
+2019-01-22 Version 2.48
+
+* PthreadsNg: setAffinities with new algorithm
+
+* TridiagonalMatrix.cpp: bug fix in dstedc_
+
+* Svd.h: no fallback on failure; warning printed
+
+2019-01-03 Version 2.46
+
+* C++11 required
+
+* Geometry::AdditionalData is a vector of unsigned ints
+
+* DegreesOfFreedom= creates orbitals per term
+
+* PsiDoc: capture first proto and first function 
+with marks inside functions
+
+2018-12-19 Version 2.44
+
+* boost-spirit now needed to compile
+(only headers used; the boost runtime is NOT used)
+
+2018-12-10 Version 2.42
+
+New features:
+
+* PsiApp::echoBase64
+
+* PsiApp:;printCmdLine
+
+* PsiTag: PSITAG_CONFIG_USER env variable
+
+2018-10-25 Version 2.40
+
+Bug fixes
+
+* LanczosCore can now handle matrices of rows = cols = 1
+
+New features:
+
+* IoNg: more overwrites possible
+
+Refactoring:
+
+* TimeHandle class
+
+2018-09-27 Version 2.38
+
+* new LanczosSolver by Nirav
+
+* ProgressIndicator prints to milliseconds
+
+2018-09-11 Version 2.36
+
+* IoNgSerializer: bug fix in reading/writing a single boolean
+
+* added test drivers for Lanczos
+
+* MemoryUsage and ProgressIndicator can track time in microseconds
+
+2018-08-30 Version 2.34
+
+* IMPORTANT: BUG FIX in saving and reading booleans with IoNgSerializer
+
+* IoNg::In can return serializer object
+
+* testIoNgBoolean driver added
+
+* DeepCopyOrNot helper class added
+
+2018-08-21 Version 2.32
+
+* Geometry::AdditionalData simplified
+
+* isAntiHermitian available for CRS and Matrix
+
+2018-08-09 Version 2.30
+
+* ConfigBase.psiTag: can override default compiler
+
+* Compiles on a MAC
+
+2018-07-31 Version 2.28
+
+* configure.pl uses PsiTag
+
+2018-07-24 Version 2.26
+
+* PsiTag: recursive behavior
+
+* indexOrMinusOne
+
+* NewMake improvments
+
+* Profiling takes message strings
+
+* Matrix::reset gone, Matrix::resize changed
+Matrix ctor added. Thanks to Ed for suggestions
+
+* LanczosVectors changes to matrix allocation
+
+2018-07-12 Version 2.24
+
+* prints GEOMETRY with IoNg
+
+* IoNgSerializer doesGroupExist
+
+* IoNgSerializer ctor can be inside try/catch block
+
+* PsiTag
+
+* new build system
+
+* TypesEqual and IndexOfItem added
+
+* CrsMatrix::conjugate() added
+
+2018-06-28 Version 2.22
+
+* USE_IO_NG deleted, USE_IO_SIMPLE added
+
+* ProgressIndicator::time() added
+
+* IoSimple and IoNg cleanup
+
+* IoNg holds filename and mode
+
+* IoNg improvements
+
+* IoNg: bug fixed in writeVectorEntry
+
+* IoNg: has canary, but can be improved
+
+
+2018-06-19 Version 2.20
+
+* myApp01.cpp sample PsimagLite app
+
+* IoNg: pairs read/write
+
+2018-05-21 Version 2.18
+
+* IoNg fixes
+
+* USE_IO_NG enabled by default
+
+* compiler switches, supports clang++
+
+* testIoNg compiles
+
+* CRS: sum function for multiple
+matrices (Contributed by Ed)
+
+* Profiling class changed
+
+2018-05-08 Version 2.16
+
+* IoNg for bool and std::vector<bool>
+
+* CrsMatrix fullMatrixToCrsMatrix preallocates
+memory
+
+* Matrix: svd fallback
+
+* Parallelizer API changes
+
+* PsimagLite manual started
+
+2018-04-24 Version 2.14
+
+* IoNg work
+
+* src/Io/ directory
+
+2018-04-16 Version 2.12
+
+* IoNg work in progress
+
+2018-04-06 Version 2.10
+
+* Honeycomb geometry added
+ supports periodicity in x and y
+ HoneycombLy must be a multiple of 4
+
+* serialization selection and
+  serialization with IoNg
+
+* svd with float
+
+* float compilation
+
+* clang++ compilation
+
+* -Werror not set by default in production
+  But please report compilation warnings
+  so that they can be corrected
+
+2018-03-22 Version 2.08
+
+* IoNg work in progress
+
+* minimizer test compiles
+
+* Ainur: added test inputs
+
+* DependenciesTest.txt added
+  for testing dependencies
+
+2018-02-27 Version 2.06
+
+* CRS: Many improvements suggested by Ed,
+  including memory preallocation in many
+  functions
+
+2018-02-20 Version 2.04
+
+* make.pl for drivers updated
+
+* IoNg work started
+
+* CRS: unneeded externalProducts commented out
+
+2018-02-08 Version 2.02
+
+* LanczosVectors storage managed internally
+
+* PSI_PUBSETBUF should be set for lustre filesystem
+  to disable buffering.
+
+2018-01-25 Version 2.00
+
+* Lanczos Solver reortho now possible
+
+2017-01-03 Version 1.80
+
+* IoSimple: unbuffered output
+
+2017-12-20 Version 1.78
+
+* Nested pthreads example added
+
+2017-11-30 Version 1.76
+
+* LanczosSolver: clean up
+
+2017-11-27 Version 1.74
+
+* LanczosSolver: initialize finalize hooks
+
+2017-11-09 Version 1.72
+
+* Ainur improvements
+
+* clang compilation fix
+
+2017-09-20 Version 1.70
+
+* scripts: perl open with 3 arguments
+
+* Ainur: reads non-complex inputs
+
+2017-08-28 Version 1.68
+
+* Ainur: boost-spirit backend
+
+* USE_BOOST: optional compilation with boost
+
+* deleted gitrev
+
+* rows() and cols() for most matrix types
+
+2017-08-07 Version 1.66
+
+* Matrix class: new ctor, clear and data members
+
+* NO_DEPRECATED_ALLOWED preprocessor flag
+
+* CrsMatrix isZero default optional arg. is 0
+
+* LAPACK: print if not thread safe
+
+* Ainur new input system: very early implementation
+
+* Ainur new input system: hooked up
+
+* IsInputLike and IsOutputLike predicates for EnableIf
+
+* Make.pm: clean target may be appended to
+
+* some "template constraints" added
+
+2017-06-15 Version 1.64
+
+* Domain checks for operator+= in Matrix
+
+* Make.pm, newMake function takes pointer to hash
+  as third argument
+
+2017-06-08 Version 1.62
+
+* faster isZero function for CrsMatrix
+
+* transpose of Matrix added (without conjugate)
+ 
+2017-05-25 Version 1.60
+
+* Lanczos: saves LanczosVectors by the default
+    
+    Internally lotaMemory=true is the default
+    prefix + NoSaveLanczosVectors=1
+    should be used to have Lanczos not save vectors
+
+* svd: complex version and optimal lwork
+
+2017-05-18 version 1.58
+
+* PTHREAD_ASSIGN_AFFINITIES removed, now a runtime option
+
+* LanczosSolver: checks for success of memory alloc.
+
+* svd implementation now in Matrix.cpp
+
+2017-05-11 version 1.56
+
+* PthreadsNg: LoadBalancerDefault assigns largest weight first
+
+* err function added
+
+2017-05-04 Version 1.54
+
+* JSON Library removed
+
+* PsiApp class added
+
+* Make.pm takes path
+
+* log2Integer function added
+
+* LAPACK algorithm for lwork changed
+
+2017-04-24 Version 1.52
+
+* Geometry: Ladder: Reads IsPeriodicX/Y
+
+* Makefile: -lblas -llapack
+
+* Matrices: rows() cols() interface
+

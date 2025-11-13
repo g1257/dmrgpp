@@ -1,0 +1,29 @@
+include ../TestSuite/inputs/ConfigBase.make
+
+# PsimagLite support is needed by PsimagLite drivers
+LDFLAGS += -L../../PsimagLite/lib -lpsimaglite
+
+# Here add your lapack and blas libraries or say NO_LAPACK
+# CPPFLAGS += -DNO_LAPACK
+# If on MacOs please say LDFLAGS += -framework Accelerate
+LDFLAGS += -llapack -lblas
+
+# Here add -lpthread if threading is needed and also
+# set -DUSE_PTHREADS below
+LDFLAGS += -lpthread
+
+# Enable pthreads
+CPPFLAGS += -DUSE_PTHREADS
+
+# Enable warnings and treat warnings as errors
+CPPFLAGS += -Wall -Werror
+
+# This disables debugging
+CPPFLAGS += -DNDEBUG
+
+# Optimization level here
+CPPFLAGS += -O3
+
+# Specify the strip command to use (or use true to disable)
+STRIP_COMMAND = strip
+
