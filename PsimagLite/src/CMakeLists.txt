@@ -22,6 +22,8 @@ target_include_directories(
          $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Ainur>
          $<INSTALL_INTERFACE:include>)
 
+add_library(psimaglite::psimaglite ALIAS psimaglite)
+
 target_link_libraries(psimaglite PUBLIC loki)
 
 # find_package(MPI COMPONENTS CXX)

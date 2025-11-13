@@ -1,6 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
 
-find_package(PsimagLite REQUIRED CONFIG)
 find_package(Boost REQUIRED CONFIG)
 
 add_custom_command(
@@ -14,7 +13,7 @@ add_subdirectory(KronUtil)
 
 add_library(Common OBJECT ProgramGlobals.cpp Provenance.cpp Utils.cpp)
 target_sources(Common PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_link_libraries(Common PRIVATE psimaglite::psimaglite psimaglite::loki
+target_link_libraries(Common PRIVATE psimaglite::psimaglite
                                      HDF5::HDF5)
 target_include_directories(Common PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
