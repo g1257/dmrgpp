@@ -16,11 +16,8 @@ add_library(
   Ainur/AinurSpirit.cpp
   Ainur/AinurConvert.cpp)
 target_include_directories(
-  psimaglite
-  PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Io>
-         $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/Ainur>
-         $<INSTALL_INTERFACE:include>)
+  psimaglite PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Io
+                    ${CMAKE_CURRENT_SOURCE_DIR}/Ainur)
 
 target_link_libraries(psimaglite PUBLIC loki)
 
@@ -69,19 +66,3 @@ find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
 target_link_libraries(psimaglite PUBLIC BLAS::BLAS)
 target_link_libraries(psimaglite PUBLIC LAPACK::LAPACK)
-
-install(
-  TARGETS psimaglite
-  EXPORT PsimagLiteTargets
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES
-  DESTINATION include)
-
-export(
-  TARGETS psimaglite
-  FILE "${CMAKE_CURRENT_BINARY_DIR}/PsimagLiteTargets.cmake"
-  NAMESPACE psimaglite::
-  APPEND # Important: append to existing export set
-)
