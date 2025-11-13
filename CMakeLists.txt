@@ -18,12 +18,7 @@ if(NOT QMC_CXX_STANDARD EQUAL 11)
   )
 endif()
 
-find_package(MPI COMPONENTS CXX)
-
-include(HandleHDF5)
-
-find_package(BLAS)
-find_package(LAPACK)
+include (CTest)
 
 add_subdirectory(PsimagLite)
 add_subdirectory(src)

@@ -26,7 +26,7 @@ add_library(psimaglite::psimaglite ALIAS psimaglite)
 
 target_link_libraries(psimaglite PUBLIC loki)
 
-# find_package(MPI COMPONENTS CXX)
+find_package(MPI COMPONENTS CXX)
 if(MPI_FOUND)
   target_compile_definitions(psimaglite PUBLIC USE_MPI)
   target_link_libraries(psimaglite PUBLIC MPI::MPI_CXX)
