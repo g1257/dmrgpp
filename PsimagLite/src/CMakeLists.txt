@@ -15,9 +15,8 @@ add_library(
   PredicateSimple.cpp
   Ainur/AinurSpirit.cpp
   Ainur/AinurConvert.cpp)
-target_include_directories(
-  psimaglite PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Io
-                    ${CMAKE_CURRENT_SOURCE_DIR}/Ainur)
+target_include_directories(psimaglite PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Io
+                                             ${CMAKE_CURRENT_SOURCE_DIR}/Ainur)
 
 target_link_libraries(psimaglite PUBLIC loki)
 
@@ -37,10 +36,7 @@ if(MPI_FOUND)
     target_link_libraries(psimaglite PUBLIC HDF5::HDF5)
   else()
     if(HDF5_FOUND)
-      message(
-        WARNING
-          "HDF5 that was found \(${HDF5_DIR}\) is not parallel and cannot be used"
-      )
+      message(WARNING "HDF5 that was found \(${HDF5_DIR}\) is not parallel and cannot be used")
     endif()
     target_compile_definitions(psimaglite PUBLIC USE_IO_SIMPLE)
   endif()
