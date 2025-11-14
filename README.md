@@ -139,16 +139,28 @@ git pull origin features
 </pre>
 Please also read https://g1257.github.io/availabilityOfSoftware.html
 
-### Running cmake
+### Configure, Build, and Test
 
-cd dmrgpp
-mkdir build
-cd build
-PsimagLite_DIR=/path/to/PsimagLite/build cmake -DCMAKE_MODULE_PATH=/path/to/PsimagLite/CMake  ..
+Use the following command to configure DMRG++
+```
+cmake -B builddir [<options...>]
+```
+`-B builddir` creates a build directory named `builddir` (you can choose a
+different name if you prefer).
 
-### Compiling and Linking DMRG++
+The `[<options...>]` part is where you specify other configuration options, in
+particular to guide CMake when searching for external packages. 
+For instance, you may pass `-DMPI_ROOT=/path/to/mpi` to find a specific MPI
+installed at `/path/to/mpi`.
 
-make -j number_here
+After the configuration step succeeded, build using
+```
+cmake --build builddir
+```
+and test with
+```
+ctest --test-dir builddir --output-on-failure
+```
 
 ### Running DMRG++
 
