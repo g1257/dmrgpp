@@ -66,3 +66,5 @@ find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
 target_link_libraries(psimaglite PUBLIC BLAS::BLAS)
 target_link_libraries(psimaglite PUBLIC LAPACK::LAPACK)
+
+add_subdirectory(tests)
