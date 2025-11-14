@@ -3,3 +3,8 @@ repos:
     rev: 182152eb8c5ce1cf5299b956b04392c86bd8a126 # v20.1.8
     hooks:
     - id: clang-format
+
+  - repo: https://github.com/cheshirekow/cmake-format-precommit
+    rev: e2c2116d86a80e72e7146a06e68b7c228afc6319 # v0.6.13
+    hooks:
+    - id: cmake-format
