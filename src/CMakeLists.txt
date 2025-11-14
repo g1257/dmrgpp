@@ -2,8 +2,7 @@ find_package(Boost REQUIRED CONFIG)
 
 add_custom_command(
   OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h
-  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/createGitRevision.pl
-          ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h
+  COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/createGitRevision.pl ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h
   DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/createGitRevision.pl
   COMMENT "Generating Git Revision File"
   VERBATIM)
@@ -17,8 +16,7 @@ target_include_directories(Common PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 add_library(Su2Related OBJECT Su2Related.cpp)
 target_link_libraries(Su2Related PRIVATE psimaglite HDF5::HDF5)
-target_include_directories(Su2Related PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-                                              Engine)
+target_include_directories(Su2Related PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 execute_process(
   COMMAND perl -I${CMAKE_CURRENT_SOURCE_DIR} countDrivers.pl
@@ -44,8 +42,7 @@ message("driver_list: ${driver_list}")
 
 add_custom_command(
   OUTPUT ${driver_templates}
-  COMMAND perl -I ${CMAKE_CURRENT_SOURCE_DIR}
-          ${CMAKE_CURRENT_SOURCE_DIR}/generateDrivers.pl
+  COMMAND perl -I ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/generateDrivers.pl
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMENT "Generating driver files"
   # VERBATIM
@@ -63,12 +60,10 @@ add_custom_command(
 # link everything.
 
 # Dmrg executable (main executable)
-add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related>
-                    ${driver_templates} Qn.cpp dmrg.cpp)
+add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> ${driver_templates} Qn.cpp dmrg.cpp)
 target_compile_definitions(dmrg PUBLIC USE_BOOST)
 
-target_link_libraries(dmrg PUBLIC kronutil psimaglite HDF5::HDF5 BLAS::BLAS
-                                  LAPACK::LAPACK ${ADDITIONAL_LIBRARIES})
+target_link_libraries(dmrg PUBLIC kronutil psimaglite HDF5::HDF5 BLAS::BLAS LAPACK::LAPACK ${ADDITIONAL_LIBRARIES})
 target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 
@@ -103,16 +98,13 @@ target_link_libraries(
   ${ADDITIONAL_LIBRARIES})
 
 # Toolbox executable now
-add_executable(toolboxdmrg toolboxdmrg.cpp Qn.cpp ProgramGlobals.cpp
-                           Provenance.cpp)
+add_executable(toolboxdmrg toolboxdmrg.cpp Qn.cpp ProgramGlobals.cpp Provenance.cpp)
 target_link_libraries(toolboxdmrg psimaglite HDF5::HDF5 ${ADDITIONAL_LIBRARIES})
 target_sources(toolboxdmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_include_directories(toolboxdmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-                                               Engine)
+target_include_directories(toolboxdmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 # Many omegas executable
-add_executable(omegas $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related>
-                      Qn.cpp manyOmegas.cpp)
+add_executable(omegas $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> Qn.cpp manyOmegas.cpp)
 target_include_directories(omegas PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_compile_definitions(omegas PUBLIC USE_BOOST)
 target_link_libraries(
