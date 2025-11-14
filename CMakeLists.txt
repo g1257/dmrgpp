@@ -15,6 +15,9 @@ include(HandleHDF5)
 find_package(BLAS)
 find_package(LAPACK)
 
+add_subdirectory(external/Catch2)
+include(Catch)
+
 add_subdirectory(PsimagLite)
 add_subdirectory(src)
 # add_subdirectory(doc)
