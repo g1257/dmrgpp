@@ -2,8 +2,7 @@
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 using Approx = Catch::Approx;
 
 TEST_CASE("AkimaSpline_from_std_vector", "[psimaglite]")
