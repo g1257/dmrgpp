@@ -7,7 +7,8 @@
 #include <utility>
 
 //! A class to interpolate using akima spline
-namespace PsimagLite {
+namespace PsimagLite
+{
 
 template <typename VectorType>
 class AkimaSpline {
