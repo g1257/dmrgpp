@@ -139,16 +139,57 @@ git pull origin features
 </pre>
 Please also read https://g1257.github.io/availabilityOfSoftware.html
 
-### Running cmake
+### Configure
 
-cd dmrgpp
-mkdir build
-cd build
-PsimagLite_DIR=/path/to/PsimagLite/build cmake -DCMAKE_MODULE_PATH=/path/to/PsimagLite/CMake  ..
+Use the following command to configure DMRG++
+```
+cmake -B builddir [<options...>]
+```
+`-B builddir` creates a build directory named `builddir` (you can choose a
+different name if you prefer).
 
-### Compiling and Linking DMRG++
+The `[<options...>]` part is where you specify other configuration options. 
 
-make -j number_here
+#### Common CMake Options
+These options are generally useful for any CMake project:
+
+* `-DCMAKE_CXX_COMPILER=<compiler>`: Specifies the full path to the C++
+  compiler.
+
+  Example: `-DCMAKE_CXX_COMPILER=clang++`
+ 
+* `-DCMAKE_CXX_STANDARD=<standard>`: Sets the C++ standard. The default is `17`.
+
+  Example: `-DCMAKE_CXX_STANDARD=20`
+
+* `-DCMAKE_BUILD_TYPE=<type>`: Controls optimization level and debugging
+  information. Common options are `Debug`, `Release`, `RelWithDebInfo`
+  (default), and `MinSizeRel`.
+
+* `-G<generator>`: Specifies the generator to create a native build system
+  (e.g., `"Unix Makefiles"` for standard UNIX makefiles, `"Ninja"` for
+  `build.ninja`  or `"Visual Studio 17 2022"` for Visual Studio.
+
+  Example: `-GNinja`
+
+#### External dependencies (Third-Party Libraries)
+To control where the project should find external dependencies installed on
+your system, you may pass `-D<PackageName>_ROOT=/path/to/package/install` to
+find a specific `<PackageName>` installed at `/path/to/package/install`.
+
+External dependencies are: `Boost`, `MPI`, `HDF5`, `BLAS`, and `LAPACK`.
+
+Example: `-DBoost_ROOT=/path/to/boost`
+
+### Build and Test
+After the configuration step succeeded, build using
+```
+cmake --build builddir
+```
+and test with
+```
+ctest --test-dir builddir --output-on-failure
+```
 
 ### Running DMRG++
 
