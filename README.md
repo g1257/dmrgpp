@@ -139,7 +139,7 @@ git pull origin features
 </pre>
 Please also read https://g1257.github.io/availabilityOfSoftware.html
 
-### Configure, Build, and Test
+### Configure
 
 Use the following command to configure DMRG++
 ```
@@ -181,6 +181,7 @@ External dependencies are: `Boost`, `MPI`, `HDF5`, `BLAS`, and `LAPACK`.
 
 Example: `-DBoost_ROOT=/path/to/boost`
 
+### Build and Test
 After the configuration step succeeded, build using
 ```
 cmake --build builddir
