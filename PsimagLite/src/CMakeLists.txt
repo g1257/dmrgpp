@@ -20,6 +20,8 @@ target_include_directories(psimaglite PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE
 
 target_link_libraries(psimaglite PUBLIC loki)
 
+add_library(psimaglite::psimaglite ALIAS psimaglite)
+
 # find_package(MPI COMPONENTS CXX)
 if(MPI_FOUND)
   target_compile_definitions(psimaglite PUBLIC USE_MPI)
