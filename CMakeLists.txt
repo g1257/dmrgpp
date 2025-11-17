@@ -20,6 +20,7 @@ FetchContent_Declare(
   Catch2
   GIT_REPOSITORY https://github.com/catchorg/Catch2.git
   GIT_TAG v3.11.0
+  SYSTEM
   FIND_PACKAGE_ARGS NAMES Catch2)
 FetchContent_MakeAvailable(Catch2)
 include(Catch)
