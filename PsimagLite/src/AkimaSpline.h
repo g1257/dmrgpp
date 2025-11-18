@@ -1,11 +1,13 @@
 #ifndef AKIMA_H_
 #define AKIMA_H_
 
+#include "AllocatorCpu.h"
+#include "Vector.h"
 #include <cmath>
-#include <stdexcept>
 #include <utility>
 
 //! A class to interpolate using akima spline
+namespace PsimagLite {
 template <typename VectorType>
 class AkimaSpline {
 
@@ -112,5 +114,5 @@ private:
 	typename Vector<AkimaStruct>::Type akimaStruct_;
 	IntervalType interval_;
 };
-
+}
 #endif // AKIMA_H_
