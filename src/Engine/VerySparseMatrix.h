@@ -447,11 +447,8 @@ private:
 			return;
 
 		// pre-alloc memory:
-		VectorPairType newcoord(coordinates_.size());
-		VectorComplexOrRealType newvals(coordinates_.size());
-
-		newcoord.reserve(coordinates_.size() + other.coordinates_.size());
-		newvals.reserve(coordinates_.size() + other.coordinates_.size());
+		VectorPairType newcoord(coordinates_.size() + other.coordinates_.size());
+		VectorComplexOrRealType newvals(coordinates_.size()  + other.coordinates_.size());
 
 		// ----------------------------
 		// check coordinates are sorted
