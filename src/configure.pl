@@ -20,7 +20,7 @@ use warnings;
 use strict;
 
 use Getopt::Long qw(:config no_ignore_case);
-use lib "../../PsimagLite/scripts";
+use lib "../../dmrgpp/PsimagLite/scripts";
 use NewMake;
 use lib ".";
 use PsiTag;
@@ -45,18 +45,18 @@ my $basicConfig = "../../cincuenta/TestSuite/inputs/ConfigBase.psiTag";
 my @configFiles = NewMake::configFilesList($basicConfig, $config);
 
 
-my $libs = "../../dmrgpp/src/libdmrgpp.a ../../dmrgpp/src/KronUtil/libkronutil.a";
-my $dotos = "cincuenta.o Provenance.o $libs";
+my $libs = "-ldmrgpp -lkronutil -lextralinkage";
+my $dotos = "cincuenta.o Provenance.o";
 
 my %cincuentaMain = (name => 'cincuenta', dotos => "$dotos");
 my %provenance = (name => 'Provenance', aux => 1);
-my %freeGimp = (name =>  'freeGimp', dotos => "freeGimp.o Provenance.o $libs");
+my %freeGimp = (name =>  'freeGimp', dotos => "freeGimp.o Provenance.o");
 
 my @drivers = (\%cincuentaMain, \%provenance, \%freeGimp);
 
 my %args;
 $args{"CPPFLAGS"} = $lto;
-$args{"LDFLAGS"} = $lto;
+$args{"LDFLAGS"} = " $libs $lto";
 $args{"flavor"} = $flavor;
 $args{"code"} = "Dmft";
 $args{"configFiles"} = \@configFiles;

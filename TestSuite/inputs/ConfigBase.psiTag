@@ -3,7 +3,13 @@
 #
 # PsimagLite support is needed by DMRG++
 dependency PsimagLite = (
-LDFLAGS = -L../../PsimagLite/lib -L../../../PsimagLite/lib -lpsimaglite
+CPPFLAGS = -I../../dmrgpp/PsimagLite/src -I../../dmrgpp/PsimagLite
+LDFLAGS = -L../../dmrgpp/build/PsimagLite/src -lpsimaglite
+)
+
+# DMRG++ includes
+dependency dmrgpp = (
+CPPFLAGS += -I../../dmrgpp -I../../dmrgpp/src -I../../dmrgpp/src/Engine -L../../dmrgpp/build/src/KronUtil -L../../dmrgpp/build/src
 )
 
 # Compiler to use. For clang++ see commented out line.
@@ -17,7 +23,7 @@ compilerCPP CLANG = CXX = clang++
 compilerCPPOptions ansi = (
 
 # We're using ansi C++
-CPPFLAGS += -pedantic -std=c++11
+CPPFLAGS += -pedantic -std=c++17
 
 # Enable warnings and treat warnings as errors
 CPPFLAGS += -Wall -Wendif-labels
@@ -136,9 +142,9 @@ default flavor = production
 
 default compiler = < compilerCPP GNU
 group basics = (
-CPPFLAGS += -I ../../dmrgpp/src/Engine
 < addto basics
 < dependency PsimagLite
+< dependency dmrgpp
 < default compiler
 < compilerCPPOptions ansi
 < linkerOptions KronUtil
