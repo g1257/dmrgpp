@@ -17,5 +17,5 @@ FiniteLoops=[
 [ 4, 300, 0]];
 TargetElectronsUp=3;
 TargetElectronsDown=3;
-stirng Intent="GroundState";
+Intent="GroundState";
 #ci observe arguments="<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>"

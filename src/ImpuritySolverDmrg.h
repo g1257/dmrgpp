@@ -124,7 +124,7 @@ private:
 	{
 		const PsimagLite::String obsTc = (t == DmrgType::TYPE_0) ? "c'" : "c";
 		const SizeType tt = (t == DmrgType::TYPE_0) ? 0 : 1;
-		return data +  "integer DynamicDmrgType=" + ttos(tt) + ";\n" +
+		return data +  "DynamicDmrgType=" + ttos(tt) + ";\n" +
 		        "string TSPOp0:OperatorExpression=\"" + obsTc + "\";\n";
 	}
 
