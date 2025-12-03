@@ -74,9 +74,9 @@ endif()
 
 # DMRG++ as a library so cincuenta can use it
 # We may instead bring cincuenta into this repo
-add_library(dmrgpp STATIC $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related>)
-add_library(extralinkage STATIC Qn.cpp ProgramGlobals.cpp)
-target_include_directories(extralinkage PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine ../PsimagLite ../PsimagLite/src)
+add_library(dmrgpp STATIC $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> Qn.cpp ProgramGlobals.cpp)
+target_include_directories(dmrgpp PRIVATE Engine)
+target_link_libraries(dmrgpp PUBLIC psimaglite)
 
 # Observe executable below
 add_executable(
