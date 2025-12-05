@@ -1,5 +1,5 @@
 ##Ainur1.0
-TotalNumberOfSites=16;
+TotalNumberOfSites=8;
 NumberOfTerms=1;
 DegreesOfFreedom=1;
 GeometryKind="chain";
@@ -15,13 +15,13 @@ RestartFilename="data120";
 Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
 InfiniteLoopKeptStates=50;
 FiniteLoops=[
-[-14, 100, 2],
-[ 14, 100, 2]];
+[@auto, 100, 2],
+[@auto, 100, 2]];
 RepeatFiniteLoopsTimes=4;
-TargetElectronsUp=8;
-TargetElectronsDown=8;
-string P0="c'[5]*c[6]*|gs>+c'[6]*c[7]*|gs>";
-string P1="TimeEvolve{tau=0.1,steps=5,advanceEach=14}*|P0>";
+TargetElectronsUp=4;
+TargetElectronsDown=4;
+string P0="c'[3]*c[4]*|gs>+c'[5]*c[6]*|gs>";
+string P1="TimeEvolve{tau=0.1,steps=5,advanceEach=6}*|P0>";
 GsWeight=0.2;
 OutputFile="data122";
 #ci dmrg arguments= -p 12 "<gs|P0>,<gs|P1>,<P0|P1>"

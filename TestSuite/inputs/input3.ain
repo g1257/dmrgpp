@@ -13,12 +13,11 @@ Model="HubbardOneBand";
 SolverOptions="none";
 Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
 OutputFile="data3";
-InfiniteLoopKeptStates=100;
+InfiniteLoopKeptStates=50;
 FiniteLoops=[
-	[@auto, 400, 0],
-	[@auto, 400, 0],
-	[@auto, 400, 1],
-	[-1,400,1]];
+	[@auto, 100, 0],
+	[@auto, 150, 0],
+	[@auto, 200, 1]];
 TargetElectronsUp=8;
 TargetElectronsDown=8;
 

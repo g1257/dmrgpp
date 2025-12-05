@@ -65,11 +65,10 @@ Model="Kitaev";
 MagneticFieldX=[0,...];
 
 MagneticFieldZ=[0,...];
-InfiniteLoopKeptStates=128;
+InfiniteLoopKeptStates=50;
 FiniteLoops=[
-[5, 800, 0],
-[-10, 800, 0], [10, 800, 0],
-[-10, 800, 0], [10, 800, 0]];
+[5, 100, 0],
+[-10, 100, 0], [10, 150, 0]];
 
 SolverOptions="twositedmrg";
 Version="version";
