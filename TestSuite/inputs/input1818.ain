@@ -12,6 +12,7 @@ gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[0.0];
 
+gt2:DegreesOfFreedom=1;
 gt2:GeometryKind="LongRange";
 gt2:GeometryOptions="none";
 integer gt2:Orbitals=1;

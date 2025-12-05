@@ -4,6 +4,7 @@ TotalNumberOfSites=4;
 
 NumberOfTerms=3;
 
+gt0:DegreesOfFreedom=1;
 gt0:GeometryKind="LongRange";
 gt0:GeometryOptions="none";
 integer gt0:GeometryMaxConnections=0;
@@ -13,6 +14,7 @@ matrix gt0:Connectors=[
 	[0, 1, 0, 1],
 	[1, 0, 1, 0]];
 
+gt1:DegreesOfFreedom=1;
 gt1:GeometryKind="LongRange";
 gt1:GeometryOptions="none";
 integer gt1:GeometryMaxConnections=0;
