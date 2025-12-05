@@ -4,6 +4,7 @@ TotalNumberOfSites=12;
 NumberOfTerms=3;
 
 #Term=SxSx
+gt0:DegreesOfFreedom=1;
 gt0:GeometryKind="LongRange";
 gt0:GeometryOptions="none";
 matrix gt0:Connectors=[
@@ -22,6 +23,7 @@ matrix gt0:Connectors=[
 integer gt0:GeometryMaxConnections=0;
 
 #Term=SySy
+gt1:DegreesOfFreedom=1;
 gt1:GeometryKind="LongRange";
 gt1:GeometryOptions="none";
 matrix gt1:Connectors=[
@@ -40,6 +42,7 @@ matrix gt1:Connectors=[
 integer gt1:GeometryMaxConnections=0;
 
 #Term=SzSz
+gt2:DegreesOfFreedom=1;
 gt2:GeometryKind="LongRange";
 gt2:GeometryOptions="none";
 matrix gt2:Connectors=[
