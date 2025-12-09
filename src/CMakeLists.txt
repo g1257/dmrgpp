@@ -11,11 +11,11 @@ add_subdirectory(KronUtil)
 
 add_library(Common OBJECT ProgramGlobals.cpp Provenance.cpp Utils.cpp)
 target_sources(Common PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_link_libraries(Common PRIVATE psimaglite loki HDF5::HDF5)
+target_link_libraries(Common PRIVATE psimaglite loki)
 target_include_directories(Common PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 add_library(Su2Related OBJECT Su2Related.cpp)
-target_link_libraries(Su2Related PRIVATE psimaglite HDF5::HDF5)
+target_link_libraries(Su2Related PRIVATE psimaglite)
 target_include_directories(Su2Related PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 execute_process(
@@ -63,7 +63,7 @@ add_custom_command(
 add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> ${driver_templates} Qn.cpp dmrg.cpp)
 target_compile_definitions(dmrg PUBLIC USE_BOOST)
 
-target_link_libraries(dmrg PUBLIC kronutil psimaglite HDF5::HDF5 BLAS::BLAS LAPACK::LAPACK ${ADDITIONAL_LIBRARIES})
+target_link_libraries(dmrg PUBLIC kronutil psimaglite BLAS::BLAS LAPACK::LAPACK ${ADDITIONAL_LIBRARIES})
 target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 
@@ -98,14 +98,13 @@ target_link_libraries(
   observe
   kronutil
   psimaglite::psimaglite
-  HDF5::HDF5
   BLAS::BLAS
   LAPACK::LAPACK
   ${ADDITIONAL_LIBRARIES})
 
 # Toolbox executable now
 add_executable(toolboxdmrg toolboxdmrg.cpp Qn.cpp ProgramGlobals.cpp Provenance.cpp)
-target_link_libraries(toolboxdmrg psimaglite::psimaglite HDF5::HDF5 ${ADDITIONAL_LIBRARIES})
+target_link_libraries(toolboxdmrg psimaglite::psimaglite ${ADDITIONAL_LIBRARIES})
 target_sources(toolboxdmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(toolboxdmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
@@ -117,7 +116,6 @@ target_link_libraries(
   omegas
   kronutil
   psimaglite::psimaglite
-  HDF5::HDF5
   BLAS::BLAS
   LAPACK::LAPACK
   ${ADDITIONAL_LIBRARIES})
