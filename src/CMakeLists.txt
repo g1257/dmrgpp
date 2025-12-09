@@ -11,7 +11,7 @@ add_subdirectory(KronUtil)
 
 add_library(Common OBJECT ProgramGlobals.cpp Provenance.cpp Utils.cpp)
 target_sources(Common PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_link_libraries(Common PRIVATE psimaglite loki)
+target_link_libraries(Common PRIVATE psimaglite)
 target_include_directories(Common PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 add_library(Su2Related OBJECT Su2Related.cpp)
