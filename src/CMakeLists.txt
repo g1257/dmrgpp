@@ -146,11 +146,13 @@ add_test(NAME input32 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input32.ain)
 add_test(NAME input70 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input70.ain)
 add_test(NAME input71 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input71.ain)
 add_test(NAME input120 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input120.ain)
-add_test(NAME input121 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input121.ain  -p 12 "<gs|P0>")
-add_test(NAME input122 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input122.ain  -p 12 "<gs|P0>,<gs|P1>,<P0|P1>")
-add_test(NAME input123 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input123.ain  -p 12 "<gs|P0>,<P0|P1>,<gs|c'|P2>,<gs|c'|P3>,<P2|P3>")
+add_test(NAME input121 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input121.ain -p 12 "<gs|P0>")
+add_test(NAME input122 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input122.ain -p 12
+                               "<gs|P0>,<gs|P1>,<P0|P1>")
+add_test(NAME input123 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input123.ain -p 12
+                               "<gs|P0>,<P0|P1>,<gs|c'|P2>,<gs|c'|P3>,<P2|P3>")
 add_test(NAME input126 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input126.ain)
-add_test(NAME input127 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input127.ain  -p 12 "<gs|P0>")
+add_test(NAME input127 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input127.ain -p 12 "<gs|P0>")
 add_test(NAME input170 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input170.ain)
 add_test(NAME input172 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input172.ain)
 add_test(NAME input320 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input320.ain)
@@ -170,7 +172,8 @@ add_test(NAME input2510 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2510.ain)
 # needs -DUSE_PTHREADS
 # add_test(NAME input2700 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2700.ain)
 add_test(NAME input3020 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3020.ain)
-add_test(NAME input3021 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3021.ain "<gs|c'|P2>")
+add_test(NAME input3021 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3021.ain
+                                "<gs|c'|P2>")
 add_test(NAME input3100 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3100.ain)
 # SDHS will remain disabled for a while
 # add_test(NAME input4650 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4650.ain)
