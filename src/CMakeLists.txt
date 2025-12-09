@@ -129,7 +129,6 @@ target_link_libraries(
 set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)
 
 add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
-# Enable this test after the bug fix applied to vsm
 add_test(NAME input3 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3.ain)
 add_test(NAME input4 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4.ain)
 add_test(NAME input5 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input5.ain)
@@ -153,7 +152,6 @@ add_test(NAME input123 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input123.ain  -p 12 "
 add_test(NAME input126 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input126.ain)
 add_test(NAME input127 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input127.ain  -p 12 "<gs|P0>")
 add_test(NAME input170 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input170.ain)
-# Enable this test after the bug fix applied to vsm
 add_test(NAME input172 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input172.ain)
 add_test(NAME input320 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input320.ain)
 add_test(NAME input501 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input501.ain)
