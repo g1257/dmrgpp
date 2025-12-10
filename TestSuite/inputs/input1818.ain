@@ -12,6 +12,7 @@ gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[0.0];
 
+gt2:DegreesOfFreedom=1;
 gt2:GeometryKind="LongRange";
 gt2:GeometryOptions="none";
 integer gt2:Orbitals=1;
@@ -23,9 +24,9 @@ HeisenbergTwiceS=2;
 SolverOptions="twositedmrg,MatrixVectorOnTheFly";
 Version="version";
 OutputFile="data1818";
-InfiniteLoopKeptStates=60;
+InfiniteLoopKeptStates=30;
 FiniteLoops=[
-[ 3, 100, 8],
+[ 3, 50, 8],
 [-6, 100, 8],
 [6, 100, 0]];
 TargetElectronsTotal=8;

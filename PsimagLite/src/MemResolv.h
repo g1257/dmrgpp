@@ -314,7 +314,7 @@ public:
 
 	template <typename SomeVectorType>
 	typename EnableIf<
-	    IsVectorLike<SomeVectorType>::True & !IsClass<typename SomeVectorType::value_type>::value,
+	    IsVectorLike<SomeVectorType>::True && !IsClass<typename SomeVectorType::value_type>::value,
 	    SizeType>::Type
 	memResolv(const SomeVectorType* v, SizeType = 0, String msg = "")
 	{
@@ -340,7 +340,7 @@ public:
 
 	template <typename SomeVectorType>
 	typename EnableIf<
-	    IsVectorLike<SomeVectorType>::True & IsClass<typename SomeVectorType::value_type>::value,
+	    IsVectorLike<SomeVectorType>::True && IsClass<typename SomeVectorType::value_type>::value,
 	    SizeType>::Type
 	memResolv(const SomeVectorType* v, SizeType = 0, String msg = "")
 	{
@@ -363,7 +363,7 @@ public:
 
 	template <typename SomeVectorType>
 	typename EnableIf<
-	    IsVectorLike<SomeVectorType>::True & !IsClass<typename SomeVectorType::value_type>::value,
+	    IsVectorLike<SomeVectorType>::True && !IsClass<typename SomeVectorType::value_type>::value,
 	    SizeType>::Type
 	memResolvPtr(const SomeVectorType* v, SizeType = 0, String msg = "")
 	{
@@ -395,7 +395,7 @@ public:
 	}
 
 	template <typename SomeClassType>
-	typename EnableIf<!IsVectorLike<SomeClassType>::True & !IsPairLike<SomeClassType>::True & !IsMapLike<SomeClassType>::True & !IsComplexNumber<SomeClassType>::True & IsClass<SomeClassType>::value,
+	typename EnableIf<!IsVectorLike<SomeClassType>::True && !IsPairLike<SomeClassType>::True && !IsMapLike<SomeClassType>::True && !IsComplexNumber<SomeClassType>::True && IsClass<SomeClassType>::value,
 	                  SizeType>::Type
 	memResolv(const SomeClassType* c, SizeType x = 0, String msg = "")
 	{

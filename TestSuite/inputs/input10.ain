@@ -12,13 +12,11 @@ Model="HubbardOneBand";
 SolverOptions="TimeStepTargeting,vectorwithoffsets";
 Version="6ce41a4b7dfa08978e53fa756f7f139e2fb18251";
 OutputFile="data10";
-InfiniteLoopKeptStates=150;
+InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[  7, 200, 0],
-[-14, 200, 1],
-[ 14, 200, 1],
-[-14, 200, 1],
-[ 14, 200, 1]];
+[  7, 150, 0],
+[-14, 150, 1],
+[ 14, 150, 1]];
 TargetElectronsUp=8;
 TargetElectronsDown=8;
 

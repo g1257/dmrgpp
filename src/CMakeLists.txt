@@ -107,3 +107,62 @@ add_executable(omegas $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> Qn.c
 target_include_directories(omegas PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_compile_definitions(omegas PUBLIC USE_BOOST)
 target_link_libraries(omegas kronutil psimaglite::psimaglite BLAS::BLAS LAPACK::LAPACK ${ADDITIONAL_LIBRARIES})
+
+# Tests below for all executables
+# Pipeline tests for all executables here
+
+# For dmrg main executable
+set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)
+
+add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
+add_test(NAME input3 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3.ain)
+add_test(NAME energy2to3 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../PsimagLite/scripts/checkValueOfLabel.pl
+                                 ${CMAKE_CURRENT_BINARY_DIR}/src)
+add_test(NAME input4 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4.ain)
+add_test(NAME input5 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input5.ain)
+add_test(NAME input7 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input7.ain)
+# input8 is too slow (disabled)
+# add_test(NAME input8 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input8.ain)
+add_test(NAME input10 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input10.ain)
+# input11 and input12 need -DUSE_PTHREADS
+# add_test(NAME input11 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input11.ain)
+# add_test(NAME input12 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input12.ain)
+add_test(NAME input20 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input20.ain)
+add_test(NAME input21 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input21.ain)
+add_test(NAME input30 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input30.ain)
+add_test(NAME input32 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input32.ain)
+add_test(NAME input70 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input70.ain)
+add_test(NAME input71 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input71.ain)
+add_test(NAME input120 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input120.ain)
+add_test(NAME input121 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input121.ain -p 12 "<gs|P0>")
+add_test(NAME input122 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input122.ain -p 12 "<gs|P0>,<gs|P1>,<P0|P1>")
+add_test(NAME input123 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input123.ain -p 12
+                               "<gs|P0>,<P0|P1>,<gs|c'|P2>,<gs|c'|P3>,<P2|P3>")
+add_test(NAME input126 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input126.ain)
+add_test(NAME input127 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input127.ain -p 12 "<gs|P0>")
+add_test(NAME input170 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input170.ain)
+add_test(NAME input172 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input172.ain)
+add_test(NAME input320 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input320.ain)
+add_test(NAME input501 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input501.ain)
+add_test(NAME input1300 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1300.ain)
+add_test(NAME input1302 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1302.ain)
+add_test(NAME input1304 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1304.ain)
+add_test(NAME input1306 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1306.ain)
+add_test(NAME input1814 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1814.ain)
+add_test(NAME input1815 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1815.ain)
+add_test(NAME input1817 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1817.ain)
+# input1818 and 1819 --> too slow (disabled)
+# add_test(NAME input1818 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1818.ain)
+# add_test(NAME input1819 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1819.ain)
+add_test(NAME input2500 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2500.ain)
+add_test(NAME input2510 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2510.ain)
+# needs -DUSE_PTHREADS
+# add_test(NAME input2700 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2700.ain)
+add_test(NAME input3020 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3020.ain)
+add_test(NAME input3021 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3021.ain "<gs|c'|P2>")
+add_test(NAME input3100 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3100.ain)
+# SDHS will remain disabled for a while
+# add_test(NAME input4650 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4650.ain)
+add_test(NAME input4720 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4720.ain)
+add_test(NAME input6020 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input6020.ain)
+add_test(NAME input6700 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input6700.ain)

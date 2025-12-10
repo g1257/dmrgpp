@@ -1111,7 +1111,7 @@ namespace MPI {
 
 	template <typename SomeMatrixType>
 	typename EnableIf<
-	    IsMatrixLike<SomeMatrixType>::True & Loki::TypeTraits<typename SomeMatrixType::value_type>::isArith,
+	    IsMatrixLike<SomeMatrixType>::True && Loki::TypeTraits<typename SomeMatrixType::value_type>::isArith,
 	    void>::Type
 	allReduce(SomeMatrixType& v, MPI_Op op = MPI_SUM, CommType mpiComm = MPI_COMM_WORLD)
 	{
@@ -1125,7 +1125,7 @@ namespace MPI {
 
 	template <typename SomeMatrixType>
 	typename EnableIf<
-	    IsMatrixLike<SomeMatrixType>::True & IsComplexNumber<typename SomeMatrixType::value_type>::True,
+	    IsMatrixLike<SomeMatrixType>::True && IsComplexNumber<typename SomeMatrixType::value_type>::True,
 	    void>::Type
 	allReduce(SomeMatrixType& v, MPI_Op op = MPI_SUM, CommType mpiComm = MPI_COMM_WORLD)
 	{
