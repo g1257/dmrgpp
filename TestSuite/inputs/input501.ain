@@ -18,9 +18,9 @@ Model="HubbardOneBand";
 SolverOptions="TimeStepTargeting";
 Version="v6.03";
 OutputFile="data501";
-InfiniteLoopKeptStates=200;
-FiniteLoops=[[3, 300, 0], 
-	[-6, 300, 0], [6,300, 0]];
+InfiniteLoopKeptStates=50;
+FiniteLoops=[[3, 100, 0],
+	[-6, 150, 0], [6,200, 0]];
 
 RepeatFiniteLoopsTimes=47;
 RepeatFiniteLoopsFrom=1;

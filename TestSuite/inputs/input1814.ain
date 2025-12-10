@@ -14,6 +14,7 @@ gt1:dir0:Connectors=[0.0];
 
 gt2:GeometryKind="LongRange";
 gt2:GeometryOptions="none";
+gt2:DegreesOfFreedom=1;
 integer gt2:Orbitals=1;
 real gt2:GeometryEntangler=-1;
 
