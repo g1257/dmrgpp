@@ -8,8 +8,9 @@ my ($dir) = @_;
 defined($dir) or $dir = ".";
 my ($EC_UNDEFINED, $EC_NUMERIC, $EC_STRING) = (-1, -2, -3);
 my $test2 = {n => 2, 'Found lowest eigenvalue' => -19.6759};
+my $test3 = {n => 3, 'Found lowest eigenvalue' => -21.5102};
 
-my @tests = ($test2);
+my @tests = ($test2, $test3);
 
 my $flag = 0;
 for my $test (@tests) {
