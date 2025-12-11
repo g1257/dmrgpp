@@ -181,6 +181,18 @@ External dependencies are: `Boost`, `MPI`, `HDF5`, `BLAS`, and `LAPACK`.
 
 Example: `-DBoost_ROOT=/path/to/boost`
 
+> **Note on Catch2:**
+> We use the Catch2 library as our unit test framework. By default, our CMake
+> is setup to use `FetchContent` to download the library if it is not found on
+> your system.
+>
+> To force the use of a locally installed Catch2 and disable the automatic
+> download fallback, use the following options:
+>
+> ```bash
+> -DCMAKE_REQUIRE_FIND_PACKAGE_Catch2=ON -DCatch2_ROOT=/path/to/catch2
+> ```
+
 ### Build and Test
 After the configuration step succeeded, build using
 ```
