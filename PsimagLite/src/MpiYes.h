@@ -384,6 +384,7 @@ namespace MPI {
 		T1 t1 = p.first;
 		MPI_Datatype datatype = MpiData<T1>::Type;
 		int errorCode = MPI_Bcast(&t1, 1, datatype, root, mpiComm);
+		(void)errorCode;
 
 		T2 t2 = p.second;
 		MPI_Datatype datatype2 = MpiData<T2>::Type;
