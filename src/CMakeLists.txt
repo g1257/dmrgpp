@@ -59,7 +59,7 @@ add_custom_command(
 
 # Dmrg executable (main executable)
 add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> ${driver_templates} Qn.cpp dmrg.cpp)
-target_link_libraries(dmrg PUBLIC kronutil psimaglite::psimaglite ${ADDITIONAL_LIBRARIES})
+target_link_libraries(dmrg PUBLIC kronutil psimaglite::psimaglite)
 target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 
@@ -84,18 +84,18 @@ add_executable(
 
 target_include_directories(observe PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_sources(observe PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_link_libraries(observe kronutil psimaglite::psimaglite ${ADDITIONAL_LIBRARIES})
+target_link_libraries(observe kronutil psimaglite::psimaglite)
 
 # Toolbox executable now
 add_executable(toolboxdmrg toolboxdmrg.cpp Qn.cpp ProgramGlobals.cpp Provenance.cpp)
-target_link_libraries(toolboxdmrg psimaglite::psimaglite ${ADDITIONAL_LIBRARIES})
+target_link_libraries(toolboxdmrg psimaglite::psimaglite)
 target_sources(toolboxdmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(toolboxdmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 # Many omegas executable
 add_executable(omegas $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> Qn.cpp manyOmegas.cpp)
 target_include_directories(omegas PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
-target_link_libraries(omegas kronutil psimaglite::psimaglite ${ADDITIONAL_LIBRARIES})
+target_link_libraries(omegas kronutil psimaglite::psimaglite)
 
 # Tests below for all executables
 # Pipeline tests for all executables here
