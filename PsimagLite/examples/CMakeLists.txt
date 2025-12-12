@@ -67,9 +67,6 @@ target_link_libraries(randomTest psimaglite)
 add_executable(range range.cpp)
 target_link_libraries(range psimaglite)
 
-add_executable(rungeKuttaTest rungeKuttaTest.cpp)
-target_link_libraries(rungeKuttaTest psimaglite)
-
 add_executable(sfinaeHasMember sfinaeHasMember.cpp)
 target_link_libraries(sfinaeHasMember psimaglite)
 
@@ -134,42 +131,51 @@ target_link_libraries(threads psimaglite)
 
 # PsimagLite tests
 # This will be converted into unit tests using Catch2
-add_test(NAME affinityTest COMMAND affinityTest)
-add_test(NAME akimaSpline COMMAND akimaSpline)
+
+set(INPUTS_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+
+# affiniteTest needs -DUSE_PTHREADS
+# add_test(NAME affinityTest COMMAND affinityTest 4 14)
+add_test(NAME akimaSpline COMMAND akimaSpline ${INPUTS_DIR}/dataForAkimaSpline.txt 0.5 1.2 10)
 add_test(NAME base64test COMMAND base64test)
-add_test(NAME binaryIoTest COMMAND binaryIoTest)
-add_test(NAME binaryRead COMMAND binaryRead)
-add_test(NAME calculator COMMAND calculator)
-add_test(NAME checkRunId COMMAND checkRunId)
+add_test(NAME calculator COMMAND calculator "-:4.2:*:%t:3.3")
+add_test(NAME checkRunId COMMAND checkRunId -g 4)
 add_test(NAME closuresTest COMMAND closuresTest)
-add_test(NAME combineContinuedFraction COMMAND combineContinuedFraction)
-add_test(NAME concurrencyTest COMMAND concurrencyTest)
-add_test(NAME continuedFraction COMMAND continuedFraction)
-add_test(NAME continuedFractionCollection COMMAND continuedFractionCollection)
-add_test(NAME fit COMMAND fit)
-add_test(NAME integrator COMMAND integrator)
-add_test(NAME internode COMMAND internode)
-add_test(NAME isBlasThreaded COMMAND isBlasThreaded)
-add_test(NAME kernelPolynomial COMMAND kernelPolynomial)
-add_test(NAME linearPrediction COMMAND linearPrediction)
-add_test(NAME loadImbalance COMMAND loadImbalance)
-add_test(NAME minimizer COMMAND minimizer)
+# These continued fraction three tests need data; may test in the future
+# add_test(NAME combineContinuedFraction COMMAND combineContinuedFraction)
+# add_test(NAME continuedFraction COMMAND continuedFraction)
+# add_test(NAME continuedFractionCollection COMMAND continuedFractionCollection)
+# The fit test needs data
+# add_test(NAME fit COMMAND fit)
+# Integration need the GSL as a TPL
+# add_test(NAME integrator COMMAND integrator)
+add_test(NAME internode COMMAND internode 4)
+# Needs -DUSE_PTHREADS
+# add_test(NAME isBlasThreaded COMMAND isBlasThreaded)
+# needs input data
+# add_test(NAME kernelPolynomial COMMAND kernelPolynomial)
+add_test(NAME linearPrediction COMMAND linearPrediction -f ${INPUTS_DIR}/series.txt -l Series -p 3 -q 10)
+# loadImabalance needs -DUSE_PTHREADS
+# add_test(NAME loadImbalance COMMAND loadImbalance)
+# minimizer needs the GSL
+# add_test(NAME minimizer COMMAND minimizer)
 add_test(NAME myApp01 COMMAND myApp01)
-add_test(NAME nested COMMAND nested)
-add_test(NAME openblasConfig COMMAND openblasConfig)
-add_test(NAME options COMMAND options)
-add_test(NAME randomTest COMMAND randomTest)
-add_test(NAME range COMMAND range)
-add_test(NAME rungeKuttaTest COMMAND rungeKuttaTest)
+# nested parallelization needs -DUSE_PTHREADS
+# add_test(NAME nested COMMAND nested)
+add_test(NAME options COMMAND options "verbose,fast")
+add_test(NAME randomTest COMMAND randomTest 1234)
+# range makes sense to test when using -DUSE_PTHREADS
+# add_test(NAME range COMMAND range)
 add_test(NAME sfinaeHasMember COMMAND sfinaeHasMember)
-add_test(NAME sparseSolverTest COMMAND sparseSolverTest)
-add_test(NAME sumDecomposition COMMAND sumDecomposition)
+add_test(NAME sparseSolverTest COMMAND sparseSolverTest -n 20)
+add_test(NAME sumDecomposition COMMAND sumDecomposition 4 3)
 add_test(NAME svd COMMAND svd)
-add_test(NAME testCRSMatrix COMMAND testCRSMatrix)
-add_test(NAME testExcitedLanczos COMMAND testExcitedLanczos)
-add_test(NAME testGemmR COMMAND testGemmR)
-add_test(NAME testGemmR2 COMMAND testGemmR2)
-add_test(NAME testInputNg COMMAND testInputNg)
+add_test(NAME testCRSMatrix COMMAND testCRSMatrix 10 0.3)
+add_test(NAME testExcitedLanczos COMMAND testExcitedLanczos 2)
+# testGemmR[2] both need -DUSE_PTHREADS to make sense
+# add_test(NAME testGemmR COMMAND testGemmR)
+# add_test(NAME testGemmR2 COMMAND testGemmR2)
+add_test(NAME testInputNg COMMAND testInputNg ${INPUTS_DIR}/testInput.ain)
 add_test(NAME testIoNg COMMAND testIoNg)
 add_test(NAME testIoNgBoolean COMMAND testIoNgBoolean)
 add_test(NAME testIsClass COMMAND testIsClass)

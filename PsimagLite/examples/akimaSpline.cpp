@@ -19,6 +19,7 @@ Please see full open source license included in file LICENSE.
 // END LICENSE BLOCK
 
 #include "AkimaSpline.h"
+#include "Concurrency.h"
 #include "Vector.h"
 #include <cstdlib>
 #include <fstream>
@@ -55,7 +56,15 @@ void readTwoColumnData(const std::string& file, VectorType& v0, VectorType& v1)
 
 int main(int argc, char* argv[])
 {
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency(&argc, &argv, nthreads);
 	VectorType x, s;
+
+	if (argc != 5) {
+		std::cerr << "USAGE: " << argv[0] << " filename start end total\n";
+		return 1;
+	}
+
 	readTwoColumnData(argv[1], x, s);
 
 	AkimaSplineType akimaSpline(x, s);
