@@ -11,6 +11,9 @@ int main(int argc, char* argv[])
 	typedef PsimagLite::Vector<ComplexType>::Type VectorComplexType;
 	typedef PsimagLite::Vector<RealType>::Type VectorRealType;
 
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency(&argc, &argv, nthreads);
+
 	if (argc != 2) {
 		std::cout << "USAGE: " << argv[0] << " excited\n";
 		return 1;
