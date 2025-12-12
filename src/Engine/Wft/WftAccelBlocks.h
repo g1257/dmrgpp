@@ -1,6 +1,5 @@
 #ifndef WFTACCELBLOCKS_H
 #define WFTACCELBLOCKS_H
-#include "BLAS.h"
 #include "GemmR.h"
 #include "Matrix.h"
 #include "ProgramGlobals.h"
