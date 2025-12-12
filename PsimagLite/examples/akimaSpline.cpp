@@ -58,13 +58,13 @@ int main(int argc, char* argv[])
 {
 	constexpr unsigned int nthreads = 1;
 	PsimagLite::Concurrency(&argc, &argv, nthreads);
-	VectorType x, s;
 
 	if (argc != 5) {
 		std::cerr << "USAGE: " << argv[0] << " filename start end total\n";
 		return 1;
 	}
 
+	VectorType x, s;
 	readTwoColumnData(argv[1], x, s);
 
 	AkimaSplineType akimaSpline(x, s);

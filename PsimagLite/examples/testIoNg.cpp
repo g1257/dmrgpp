@@ -1,3 +1,4 @@
+#include "Concurrency.h"
 #include "Io/IoNg.h"
 
 void test1()
@@ -9,8 +10,6 @@ void test1()
 
 	ioOut.close();
 
-	sleep(1);
-
 	PsimagLite::IoNg::In ioIn("hello.hdf5");
 
 	std::vector<double> w;
@@ -20,4 +19,10 @@ void test1()
 	std::cout << w;
 }
 
-int main(int argc, char** argv) { test1(); }
+int main(int argc, char* argv[])
+{
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency(&argc, &argv, nthreads);
+
+	test1();
+}

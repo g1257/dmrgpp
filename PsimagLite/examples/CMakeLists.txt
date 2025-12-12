@@ -177,13 +177,20 @@ add_test(NAME testExcitedLanczos COMMAND testExcitedLanczos 2)
 # add_test(NAME testGemmR2 COMMAND testGemmR2)
 add_test(NAME testInputNg COMMAND testInputNg ${INPUTS_DIR}/testInput.ain)
 add_test(NAME testIoNg COMMAND testIoNg)
-add_test(NAME testIoNgBoolean COMMAND testIoNgBoolean)
+add_test(NAME testIoNgBoolean0 COMMAND testIoNgBoolean 0)
+add_test(NAME testIoNgBoolean1 COMMAND testIoNgBoolean 1)
 add_test(NAME testIsClass COMMAND testIsClass)
 add_test(NAME testLanczos COMMAND testLanczos)
-add_test(NAME testLanczosMatrixInFile COMMAND testLanczosMatrixInFile)
+add_test(NAME testLanczosMatrixInFile COMMAND testLanczosMatrixInFile ${INPUTS_DIR}/matrix.txt)
 add_test(NAME testLapack COMMAND testLapack)
-add_test(NAME testParallelSvd COMMAND testParallelSvd)
-add_test(NAME testParallelizer2 COMMAND testParallelizer2)
-add_test(NAME testPredicate COMMAND testPredicate)
+# I leave this test on for now but it really needs -DUSE_PTHREADS
+# the first number (4) is the matrix rank and the next number (1) is the
+# number of pthreads to use
+# The same is true for testParallelizer2
+add_test(NAME testParallelSvd COMMAND testParallelSvd 4 1)
+add_test(NAME testParallelizer2 COMMAND testParallelizer2 10 1)
+add_test(NAME testPredicateTrue COMMAND testPredicate "+:c:l==8" 3)
+add_test(NAME testPredicateFalse COMMAND testPredicate "+:c:l==8" 7)
 add_test(NAME test_redirect_output COMMAND test_redirect_output)
-add_test(NAME threads COMMAND threads)
+# See testParallelSvd for use of -DUSE_PTHREADS
+add_test(NAME threads COMMAND threads 1 4)
