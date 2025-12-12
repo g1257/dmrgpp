@@ -67,11 +67,6 @@ target_link_libraries(dmrg PUBLIC kronutil psimaglite::psimaglite BLAS::BLAS LAP
 target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 
-if(MPI_FOUND)
-  target_compile_definitions(dmrg PUBLIC USE_MPI)
-  target_link_libraries(dmrg PUBLIC MPI::MPI_CXX)
-endif()
-
 # DMRG++ as a library so cincuenta can use it
 # We may instead bring cincuenta into this repo
 add_library(dmrgpp STATIC $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> Qn.cpp ProgramGlobals.cpp)

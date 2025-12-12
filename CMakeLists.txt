@@ -5,10 +5,8 @@ project(
   VERSION 1.1
   LANGUAGES CXX)
 
-find_package(MPI COMPONENTS CXX)
 include(CTest)
 
-find_package(MPI COMPONENTS CXX)
 find_package(BLAS)
 find_package(LAPACK)
 
