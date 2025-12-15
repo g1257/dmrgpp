@@ -12,7 +12,8 @@ int main(int argc, char* argv[])
 	typedef PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	constexpr unsigned int nthreads = 1;
-	PsimagLite::Concurrency(&argc, &argv, nthreads);
+	// Needs to create a object for the RAII to work
+	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);
 
 	if (argc != 2) {
 		std::cout << "USAGE: " << argv[0] << " excited\n";

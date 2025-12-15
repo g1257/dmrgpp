@@ -51,7 +51,7 @@ void usage(const char* progName)
 int main(int argc, char* argv[])
 {
 	constexpr unsigned int nthreads = 1;
-	PsimagLite::Concurrency(&argc, &argv, nthreads);
+	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);
 
 	int opt = 0;
 	bool useDavidson = false;
