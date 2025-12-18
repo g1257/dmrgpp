@@ -7,9 +7,6 @@ project(
 
 include(CTest)
 
-find_package(BLAS)
-find_package(LAPACK)
-
 include(FetchContent)
 FetchContent_Declare(
   Catch2
