@@ -105,7 +105,7 @@ set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)
 
 add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
 add_test(NAME input3 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3.ain)
-add_test(NAME energy2to3 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../PsimagLite/scripts/checkValueOfLabel.pl
+add_test(NAME energy2to3 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../PsimagLite/scripts/postDmrgChecks.pl
                                  ${CMAKE_CURRENT_BINARY_DIR}/src)
 add_test(NAME input4 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4.ain)
 add_test(NAME input5 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input5.ain)
