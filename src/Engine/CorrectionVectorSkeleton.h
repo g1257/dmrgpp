@@ -80,7 +80,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CORRECTION_VECTOR_SKEL_H
 #define CORRECTION_VECTOR_SKEL_H
 
-#include "BLAS.h"
 #include "CorrectionVectorAction.h"
 #include "CorrectionVectorFunction.h"
 #include "FreqEnum.h"

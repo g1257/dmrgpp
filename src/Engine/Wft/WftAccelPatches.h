@@ -1,6 +1,5 @@
 #ifndef WFTACCELPATCHES_H
 #define WFTACCELPATCHES_H
-#include "BLAS.h"
 #include "BlockDiagWf.h"
 #include "Matrix.h"
 #include "MatrixVectorKron/GenIjPatch.h"

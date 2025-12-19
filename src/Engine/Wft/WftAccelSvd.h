@@ -1,6 +1,5 @@
 #ifndef WFT_ACCEL_SVD_H
 #define WFT_ACCEL_SVD_H
-#include "BLAS.h"
 #include "ProgramGlobals.h"
 #include "Vector.h"
 #include <limits>

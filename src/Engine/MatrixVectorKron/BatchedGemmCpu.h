@@ -2,7 +2,6 @@
 #define BATCHED_GEMM_CPU_H
 // Don't include this file directly; use BatchedGemmInclude.hh
 
-#include "BLAS.h"
 #include "Matrix.h"
 #include "ProgressIndicator.h"
 #include "PsimagLite.h"

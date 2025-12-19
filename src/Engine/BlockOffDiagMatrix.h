@@ -3,7 +3,6 @@
 #include "BlockDiagonalMatrix.h"
 #include "CrsMatrix.h"
 #include "GemmR.h"
-#include "LAPACK.h"
 
 namespace Dmrg
 {

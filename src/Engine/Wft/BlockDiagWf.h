@@ -3,7 +3,6 @@
 #include "BlockDiagonalMatrix.h"
 #include "CrsMatrix.h"
 #include "GemmR.h"
-#include "LAPACK.h"
 #include "PackIndices.h"
 #include <iomanip>
 #include <iostream>
