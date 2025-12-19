@@ -157,3 +157,8 @@ add_test(NAME input6020 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input6020.ain)
 add_test(NAME input6700 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input6700.ain)
 
 # Tests for the observe executable
+# FIXME TODO read and compare produced values
+add_test(NAME observe0002 COMMAND ./observe -f ${PATH_TO_INPUTS}/input2.ain
+                                  "<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>")
+add_test(NAME observe6700 COMMAND ./observe -f ${PATH_TO_INPUTS}/input6700.ain
+                                  "<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>")
