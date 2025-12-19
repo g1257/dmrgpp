@@ -98,7 +98,6 @@ target_include_directories(omegas PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_link_libraries(omegas kronutil psimaglite::psimaglite)
 
 # Tests below for all executables
-# Pipeline tests for all executables here
 
 # For dmrg main executable
 set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)

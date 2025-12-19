@@ -85,7 +85,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include <numeric>
 
-namespace Dmrg {
+namespace Dmrg
+{
 
 struct ProgramGlobals {
 
@@ -93,50 +94,36 @@ struct ProgramGlobals {
 
 	static bool oldChangeOfBasis;
 
-	static const PsimagLite::String license;
+	static const std::string license;
 
 	static const SizeType MAX_LPS = 1000;
 
-	enum class DirectionEnum
-	{
-		INFINITE,
+	enum class DirectionEnum { INFINITE,
 		EXPAND_ENVIRON,
-		EXPAND_SYSTEM
-	};
+		EXPAND_SYSTEM };
 
-	enum class ConnectionEnum
-	{
-		SYSTEM_SYSTEM,
+	enum class ConnectionEnum { SYSTEM_SYSTEM,
 		SYSTEM_ENVIRON,
 		ENVIRON_SYSTEM,
-		ENVIRON_ENVIRON
-	};
+		ENVIRON_ENVIRON };
 
-	enum class SysOrEnvEnum
-	{
-		SYSTEM,
-		ENVIRON
-	};
+	enum class SysOrEnvEnum { SYSTEM,
+		ENVIRON };
 
-	enum class FermionOrBosonEnum
-	{
-		FERMION,
-		BOSON
-	};
+	enum class FermionOrBosonEnum { FERMION,
+		BOSON };
 
-	enum class VerboseEnum
-	{
-		NO,
-		YES
-	};
+	enum class VerboseEnum { NO,
+		YES };
 
-	static FermionOrBosonEnum multipy(const FermionOrBosonEnum& a, const FermionOrBosonEnum& b)
+	static FermionOrBosonEnum multipy(const FermionOrBosonEnum& a,
+	    const FermionOrBosonEnum& b)
 	{
 		if (a == FermionOrBosonEnum::BOSON)
 			return b;
 
 		return (b == FermionOrBosonEnum::BOSON) ? FermionOrBosonEnum::FERMION
-		                                        : FermionOrBosonEnum::BOSON;
+							: FermionOrBosonEnum::BOSON;
 	}
 
 	static void init(SizeType maxElectronsOneSpin_)
@@ -145,7 +132,7 @@ struct ProgramGlobals {
 			return;
 		if (maxElectronsOneSpin != 0) {
 			std::cerr << PsimagLite::AnsiColor::blue;
-			PsimagLite::String msg("ProgramGlobals::init(...) replayed\n");
+			std::string msg("ProgramGlobals::init(...) replayed\n");
 			std::cout << msg;
 			std::cerr << msg;
 			std::cerr << PsimagLite::AnsiColor::reset;
@@ -154,7 +141,9 @@ struct ProgramGlobals {
 		maxElectronsOneSpin = maxElectronsOneSpin_;
 	}
 
-	static int findBorderSiteFrom(SizeType site, DirectionEnum direction, SizeType n)
+	static int findBorderSiteFrom(SizeType site,
+	    DirectionEnum direction,
+	    SizeType n)
 	{
 		if (site == 1 && direction == DirectionEnum::EXPAND_ENVIRON)
 			return 0;
@@ -165,26 +154,29 @@ struct ProgramGlobals {
 		return -1;
 	}
 
-	static PsimagLite::String rootName(PsimagLite::String filename)
+	static std::string rootName(std::string filename)
 	{
-		PsimagLite::String rootname = filename;
-		size_t             index    = rootname.find(".", 0);
-		if (index != PsimagLite::String::npos) {
+		std::string rootname = filename;
+		size_t index = rootname.find(".", 0);
+		if (index != std::string::npos) {
 			rootname.erase(index, filename.length());
 		}
 
 		return rootname;
 	}
 
-	static PsimagLite::String coutName(PsimagLite::String filename)
+	static std::string coutName(std::string filename,
+	    std::string app_name)
 	{
-		PsimagLite::String rootname = PsimagLite::basename(filename);
-		size_t             index    = rootname.find(".", 0);
-		if (index != PsimagLite::String::npos) {
+		std::string rootname = PsimagLite::basename(filename);
+		size_t index = rootname.find(".", 0);
+		if (index != std::string::npos) {
 			rootname.erase(index, filename.length());
 		}
 
-		return "runFor" + rootname + ".cout";
+		std::string maybe_app_name = (app_name == "observe") ? app_name : "";
+
+		return "runFor" + maybe_app_name + rootname + ".cout";
 	}
 
 	static SizeType logBase2(SizeType x)
@@ -224,7 +216,7 @@ struct ProgramGlobals {
 		return is;
 	}
 
-	static PsimagLite::String toString(const DirectionEnum d)
+	static std::string toString(const DirectionEnum d)
 	{
 		switch (d) {
 		case DirectionEnum::INFINITE:
@@ -241,27 +233,24 @@ struct ProgramGlobals {
 		return "UNKNOWN_DIRECTION_ENUM";
 	}
 
-	static PsimagLite::String killSpaces(PsimagLite::String str)
+	static std::string killSpaces(std::string str)
 	{
-		PsimagLite::String buffer;
-		const SizeType     n = str.length();
+		std::string buffer;
+		const SizeType n = str.length();
 		for (SizeType i = 0; i < n; ++i)
 			if (str[i] != ' ')
 				buffer += str[i];
 		return buffer;
 	}
 
-	static PsimagLite::String toLower(PsimagLite::String data)
+	static std::string toLower(std::string data)
 	{
-		std::transform(data.begin(),
-		               data.end(),
-		               data.begin(),
-		               [](unsigned char c) { return std::tolower(c); });
+		std::transform(data.begin(), data.end(), data.begin(), [](unsigned char c) { return std::tolower(c); });
 		return data;
 	}
 
-	static PsimagLite::String SYSTEM_STACK_STRING;
-	static PsimagLite::String ENVIRON_STACK_STRING;
+	static std::string SYSTEM_STACK_STRING;
+	static std::string ENVIRON_STACK_STRING;
 }; // ProgramGlobals
 
 } // namespace Dmrg
