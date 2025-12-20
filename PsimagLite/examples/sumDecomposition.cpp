@@ -1,9 +1,16 @@
 #include "SumDecomposition.h"
+#include "Concurrency.h"
 
 int main(int argc, char* argv[])
 {
-	if (argc < 3)
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency(&argc, &argv, nthreads);
+
+	if (argc < 3) {
+		std::cerr << "USAGE: " << argv[0] << " total sum [selection]\n";
 		return 1;
+	}
+
 	int total = atoi(argv[1]);
 	int sum = atoi(argv[2]);
 	int selection = (argc > 3) ? atoi(argv[3]) : 0;

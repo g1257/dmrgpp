@@ -11,8 +11,13 @@ typedef double ComplexOrRealType;
 
 int main(int argc, char** argv)
 {
-	if (argc < 2)
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency(&argc, &argv, nthreads);
+
+	if (argc != 2) {
+		std::cerr << "USAGE: " << argv[0] << " expression\n";
 		return 1;
+	}
 
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef PsimagLite::PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;

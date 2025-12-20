@@ -1,7 +1,9 @@
 // #include "CrsMatrix.h"
+#include "Concurrency.h"
 #include "CrsMatrix.h"
 #include <cstdlib>
 #include <fstream>
+
 using namespace PsimagLite;
 typedef double RealType;
 
@@ -46,11 +48,9 @@ void testMultiply(const CrsMatrix<T>& m, RealType maxValue)
 template <typename T>
 CrsMatrix<T> createRandomCrs(SizeType rank, SizeType seed, SizeType nonZeros, T maxValue)
 {
-	typename Vector<SizeType>::Type rows;
-	typename Vector<SizeType>::Type cols;
-	typename Vector<T>::Type vals;
-
 	srand48(seed);
+
+	PsimagLite::Matrix<T> m(rank, rank);
 	for (SizeType i = 0; i < nonZeros; ++i) {
 		// pick a row
 		const SizeType row = SizeType(drand48() * rank);
@@ -58,17 +58,17 @@ CrsMatrix<T> createRandomCrs(SizeType rank, SizeType seed, SizeType nonZeros, T 
 		const SizeType col = SizeType(drand48() * rank);
 		// and a value
 		const T val = drand48() * maxValue;
-		rows.push_back(row);
-		cols.push_back(col);
-		vals.push_back(val);
+		m(row, col) = val;
 	}
 
 	// fill the matrix with this data:
-	return CrsMatrix<T>(rank, rows, cols, vals);
+	return CrsMatrix<T>(m);
 }
 
 int main(int argc, char* argv[])
 {
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency(&argc, &argv, nthreads);
 
 	if (argc == 3) {
 		SizeType rank = std::atoi(argv[1]);

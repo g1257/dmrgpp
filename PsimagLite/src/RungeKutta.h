@@ -90,7 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename RealType, typename FunctionType, typename ArrayType = Vector<RealType>>
+template <typename RealType, typename FunctionType, typename ArrayType = std::vector<RealType>>
 class RungeKutta {
 
 	typedef typename ArrayType::value_type ComplexOrRealType;

@@ -6,6 +6,9 @@
 
 int main(int argc, char** argv)
 {
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);
+
 	if (argc != 2) {
 		std::cerr << "Expected filename\n";
 		return 1;

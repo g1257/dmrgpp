@@ -1,3 +1,4 @@
+#include "Concurrency.h"
 #include "Io/IoNg.h"
 
 void createVector(std::vector<bool>& v)
@@ -30,8 +31,14 @@ void compare(const std::vector<bool>& v, const std::vector<bool>& w)
 }
 int main(int argc, char** argv)
 {
-	if (argc < 2)
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency(&argc, &argv, nthreads);
+
+	if (argc != 2) {
+		std::cerr << "USAGE: " << argv[0] << " n\n";
 		return 1;
+	}
+
 	SizeType n = atoi(argv[1]);
 	std::vector<bool> v1(n, false);
 	createVector(v1);

@@ -1,11 +1,17 @@
+#include "Concurrency.h"
 #include "LoadBalancerWeights.h"
 #include "Parallelizer2.h"
 #include "Vector.h"
 
 int main(int argc, char** argv)
 {
-	if (argc < 3)
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency(&argc, &argv, nthreads);
+
+	if (argc != 3) {
+		std::cerr << "USAGE: " << argv[0] << " n n_threads\n";
 		return 1;
+	}
 
 	const SizeType n = atoi(argv[1]);
 	const SizeType threads = atoi(argv[2]);

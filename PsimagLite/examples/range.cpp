@@ -83,22 +83,20 @@ private:
 int main(int argc, char* argv[])
 {
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	using ConcurrencyType = PsimagLite::Concurrency;
 
-	SizeType nthreads = 1;
-	if (argc == 3)
-		nthreads = atoi(argv[2]);
+	if (argc != 3) {
+		std::cerr << "USAGE: " << argv[0] << " total n_threads\n";
+		return 1;
+	}
 
-	ConcurrencyType concurrency(&argc, &argv, nthreads);
+	SizeType total = atoi(argv[1]);
+	SizeType nthreads = atoi(argv[2]);
+	ConcurrencyType(&argc, &argv, nthreads);
 
 	typedef MyLoop HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
 	ParallelizerType threadObject(ConcurrencyType::codeSectionParams);
-
-	if (argc < 2)
-		return 1;
-
-	SizeType total = atoi(argv[1]);
 
 	HelperType helper(nthreads, total);
 

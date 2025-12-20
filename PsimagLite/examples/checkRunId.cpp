@@ -1,5 +1,6 @@
 #include "ApplicationInfo.h"
 #include "BitManip.h"
+#include "Concurrency.h"
 #include <cstdlib>
 #include <iostream>
 
@@ -34,6 +35,9 @@ bool checkRunId(PsimagLite::String id, PsimagLite::String progName)
 
 int main(int argc, char** argv)
 {
+	constexpr unsigned int nthreads = 1;
+	PsimagLite::Concurrency(&argc, &argv, nthreads);
+
 	int opt = 0;
 	int g = 0;
 	PsimagLite::String id;

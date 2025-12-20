@@ -84,28 +84,28 @@ namespace PsimagLite {
 
 class InputCheckBase {
 
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	using VectorStringType = std::vector<std::string>;
 
 public:
 
-	PsimagLite::String import() const { return ""; }
+	std::string import() const { return ""; }
 
-	bool check(const PsimagLite::String& label,
-	           const PsimagLite::Vector<PsimagLite::String>::Type& vec,
-	           SizeType line) const
+	bool check(const std::string& label,
+	           const VectorStringType& vec,
+	           unsigned int) const
 	{
 		return false;
 	}
 
-	void check(const PsimagLite::String& label,
-	           const PsimagLite::String& val,
-	           SizeType)
+	void check(const std::string& label,
+	           const std::string& val,
+	           unsigned int)
 	{
 		return;
 	}
 
-	bool checkSimpleLabel(const PsimagLite::String& label,
-	                      SizeType line) const
+	bool checkSimpleLabel(const std::string& label,
+	                      unsigned int line) const
 	{
 		return false;
 	}
