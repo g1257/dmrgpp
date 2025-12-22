@@ -98,6 +98,12 @@ template <typename ParametersType, typename TargetingType>
 class Diagonalization
 {
 
+	struct LoopSiteDirection {
+		SizeType loopIndex;
+		SizeType site;
+		ProgramGlobals::DirectionEnum direction;
+	};
+
 public:
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
@@ -168,7 +174,9 @@ public:
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction == ProgramGlobals::DirectionEnum::INFINITE);
 		SizeType loopIndex = 0;
-		internalMain_(target, energies, direction, loopIndex, blockLeft);
+		assert(blockLeft.size() == 1);
+		LoopSiteDirection loop_site_dir = { loopIndex, blockLeft[0], direction };
+		internalMain_(target, energies, loop_site_dir);
 		//  targeting:
 		target.evolve(energies[0], direction, blockLeft, blockRight, loopIndex);
 		wft_.triggerOff(target.lrs());
@@ -183,7 +191,9 @@ public:
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction != ProgramGlobals::DirectionEnum::INFINITE);
 
-		internalMain_(target, energies, direction, loopIndex, block);
+		assert(block.size() == 1);
+		LoopSiteDirection loop_site_dir = { loopIndex, block[0], direction };
+		internalMain_(target, energies, loop_site_dir);
 		//  targeting:
 		target.evolve(energies[0], direction, block, block, loopIndex);
 		wft_.triggerOff(target.lrs());
@@ -228,24 +238,22 @@ private:
 
 	void internalMain_(TargetingType& target,
 	    VectorVectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType loopIndex,
-	    const VectorSizeType& block)
+	    const LoopSiteDirection& loop_site_dir)
 
 	{
-		assert(block.size() == 1);
-		OneSiteSpacesType oneSiteSpaces(block[0], direction, model_);
+		OneSiteSpacesType oneSiteSpaces(loop_site_dir.site, loop_site_dir.direction, model_);
 
 		const LeftRightSuperType& lrs = target.lrs();
 		wft_.triggerOn();
 
 		SizeType numberOfExcited = parameters_.numberOfExcited;
-		assert(loopIndex < parameters_.finiteLoop.size());
-		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
+		assert(loop_site_dir.loopIndex < parameters_.finiteLoop.size());
+		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loop_site_dir.loopIndex];
 
 		bool onlyWft = false;
-		if (direction != ProgramGlobals::DirectionEnum::INFINITE)
+		if (loop_site_dir.direction != ProgramGlobals::DirectionEnum::INFINITE) {
 			onlyWft = finiteLoop.wants("onlyfastwft");
+		}
 
 		bool noguess = finiteLoop.wants("randomguess");
 
@@ -301,7 +309,7 @@ private:
 			if (parameters_.options.isSet("entangler")) {
 				assert(j < vecSaved.size());
 				assert(vecSaved[j].size() == 1);
-				doEntangler(vecSaved[j][0], lrs, block[0], direction, i);
+				doEntangler(vecSaved[j][0], lrs, loop_site_dir.site, loop_site_dir.direction, i);
 				target.set(vecSaved, sectors, lrs.super());
 				energies = energySaved;
 				return;
@@ -373,7 +381,7 @@ private:
 				    lrs,
 				    target.time(),
 				    *initialBySector,
-				    loopIndex);
+				    loop_site_dir);
 
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
 					energySaved[j][excitedIndex] = myEnergy[excitedIndex];
@@ -530,7 +538,7 @@ private:
 	    const LeftRightSuperType& lrs,
 	    RealType targetTime,
 	    const TargetVectorType& initialVector,
-	    SizeType loopIndex)
+	    const LoopSiteDirection& loop_site_dir)
 	{
 		const OptionsType& options = parameters_.options;
 
@@ -539,49 +547,19 @@ private:
 		    targetTime,
 		    model_.superOpHelper());
 
-		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
+		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loop_site_dir.loopIndex];
 		typename ModelHelperType::Aux aux(partitionIndex, lrs);
 
 		if (options.isSet("debugmatrix") && !finiteLoop.wants("onlyslowwft")) {
 			SparseMatrixType fullm;
-
 			model_.fullHamiltonian(fullm, hc, aux);
 
-			PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
-			crsMatrixToFullMatrix(fullm2, fullm);
-			if (PsimagLite::isZero(fullm2))
-				std::cerr << "Matrix is zero\n";
-			if (options.isSet("printmatrix"))
-				printFullMatrix(fullm, "matrix", 1);
-
-			if (!isHermitian(fullm, true))
-				throw PsimagLite::RuntimeError("Not hermitian matrix block\n");
-
-			typename PsimagLite::Vector<RealType>::Type eigs(fullm2.rows());
-			std::cerr << "Diagonalizing full matrix of rank " << fullm2.rows() << "\n";
-			PsimagLite::diag(fullm2, eigs, 'V');
-			std::cerr << "eigs[0]=" << eigs[0] << "\n";
-			if (options.isSet("printmatrix")) {
-				for (SizeType i = 0; i < eigs.size(); ++i)
-					std::cout << eigs[i] << " ";
-				std::cout << "\n";
-			}
+			bool early_exit = debugMatrix(energyTmp, tmpVec, fullm);
 
 			if (options.isSet("test"))
 				throw std::logic_error("Exiting due to option test in the input\n");
 
-			if (options.isSet("exactdiag") && !finiteLoop.wants("onlyslowwft")) {
-				SizeType nexcited = std::min(energyTmp.size(), eigs.size());
-				for (SizeType excited = 0; excited < nexcited; ++excited) {
-					energyTmp[excited] = eigs[excited];
-					for (SizeType i = 0; i < tmpVec.size(); ++i)
-						tmpVec[excited][i] = fullm2(i, excited);
-					PsimagLite::OstringStream msgg(std::cout.precision());
-					PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-					msg << "Uses exact due to user request. ";
-					msg << "Found lowest eigenvalue= " << energyTmp[0];
-					progress_.printline(msgg, std::cout);
-				}
+			if (early_exit) {
 				return;
 			}
 		}
@@ -595,7 +573,7 @@ private:
 		    tmpVec,
 		    hc,
 		    initialVector,
-		    loopIndex,
+		    loop_site_dir,
 		    aux);
 	}
 
@@ -603,7 +581,7 @@ private:
 	    VectorVectorType& tmpVec,
 	    HamiltonianConnectionType& hc,
 	    const TargetVectorType& initialVector,
-	    SizeType loopIndex,
+	    const LoopSiteDirection& loop_site_dir,
 	    const typename ModelHelperType::Aux& aux)
 	{
 		const SizeType nexcited = energyTmp.size();
@@ -611,7 +589,7 @@ private:
 		    hc,
 		    aux);
 
-		if (parameters_.finiteLoop[loopIndex].wants("onlyslowwft")) {
+		if (parameters_.finiteLoop[loop_site_dir.loopIndex].wants("onlyslowwft")) {
 			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -622,7 +600,7 @@ private:
 			return;
 		}
 
-		ParametersForSolverType params(io_, "Lanczos", loopIndex);
+		ParametersForSolverType params(io_, "Lanczos", loop_site_dir.loopIndex);
 		LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
 		const bool useDavidson = parameters_.options.isSet("useDavidson");
@@ -819,6 +797,67 @@ private:
 		const RealType matrixSizeReal = matrixSize;
 		const RealType oddElectrons = (qn.oddElectrons) ? 1 : 0;
 		return pAwesome.isTrue("n", superSizeReal, "m", matrixSizeReal, "e", oddElectrons);
+	}
+
+	/*!
+	 * \brief Debug matrix, optionally using exact diag.
+	 *
+	 * \param[out] energyTmp The eigenvalues of H
+	 * \param[out] tmpVec    The eigenvectors of H
+	 * \param[in]  fullm     The Hamiltonian in CRS format
+	 *
+	 * \returns Whether the output params were written to
+	 */
+	bool debugMatrix(VectorRealType& energyTmp, VectorVectorType& tmpVec, const SparseMatrixType& fullm) const
+	{
+		const OptionsType& options = parameters_.options;
+
+		if (PsimagLite::isZero(fullm)) {
+			std::cerr << "Matrix is zero\n";
+		}
+
+		if (options.isSet("printmatrix")) {
+			printFullMatrix(fullm, "matrix", 1);
+		}
+
+		// Check Hermiticity after printing
+		if (!isHermitian(fullm, true)) {
+			throw PsimagLite::RuntimeError("Not hermitian matrix block\n");
+		}
+
+		std::vector<RealType> eigs;
+		PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
+
+		if (options.isSet("testdensematrix") || options.isSet("exactdiag")) {
+			crsMatrixToFullMatrix(fullm2, fullm);
+			eigs.resize(fullm2.rows());
+			std::cerr << "Diagonalizing full matrix of rank " << fullm2.rows() << "\n";
+			PsimagLite::diag(fullm2, eigs, 'V');
+			std::cerr << "eigs[0]=" << eigs[0] << "\n";
+			if (options.isSet("printmatrix")) {
+				for (SizeType i = 0; i < eigs.size(); ++i)
+					std::cout << eigs[i] << " ";
+				std::cout << "\n";
+			}
+		}
+
+		if (options.isSet("exactdiag")) {
+			SizeType nexcited = std::min(energyTmp.size(), eigs.size());
+			for (SizeType excited = 0; excited < nexcited; ++excited) {
+				energyTmp[excited] = eigs[excited];
+				for (SizeType i = 0; i < tmpVec.size(); ++i)
+					tmpVec[excited][i] = fullm2(i, excited);
+				PsimagLite::OstringStream msgg(std::cout.precision());
+				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+				msg << "Uses exact due to user request. ";
+				msg << "Found lowest eigenvalue= " << energyTmp[0];
+				progress_.printline(msgg, std::cout);
+			}
+
+			return true;
+		}
+
+		return false;
 	}
 
 	const ParametersType& parameters_;
