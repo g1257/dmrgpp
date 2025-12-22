@@ -12,7 +12,7 @@ potentialV=[0.0,...];
 Model="HubbardOneBand";
 SolverOptions="twositedmrg";
 Version="53725d9b8f22615ccccc782082f4cd6f51a4e374";
-OutputFile="data2";
+OutputFile="data6700";
 InfiniteLoopKeptStates=50;
 FiniteLoops=[[@auto, 100, 8], [@auto, 150, 8], [@auto, 200, 8],
 [@auto, 200, 9]];
