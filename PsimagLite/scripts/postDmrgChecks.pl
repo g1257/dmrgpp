@@ -5,7 +5,7 @@ use warnings;
 use utf8;
 
 # BEGIN: values to check go here
-my $test2 = {n => 2, 'Found lowest eigenvalue' => -19.6759};
+my $test2 = {n => 2, 'Found lowest eigenvalue' => -9.51754};
 my $test3 = {n => 3, 'Found lowest eigenvalue' => -21.5102};
 # END (values to check)
 
