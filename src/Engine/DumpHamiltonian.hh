@@ -68,7 +68,10 @@ public:
 		fout_ << "Instance=" << counter_ << "\n";
 		fout_ << "Loop=" << loop_site_dir.loopIndex << "\n";
 		fout_ << "Site=" << loop_site_dir.site << "\n";
-
+		fout_ << "CRS_Matrix_follows\n";
+		fout_ << crs;
+		fout_ << "InitVector_follows\n";
+		fout_ << initial_vector;
 		++counter_;
 	}
 
