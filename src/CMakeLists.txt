@@ -160,7 +160,7 @@ add_test(NAME observe0002 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input2.
                                   "<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>")
 add_test(NAME observe0002_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
                                     ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput2.cout)
-add_test(NAME observe6700 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input6700.ain
-                                  "<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>")
+add_test(NAME observe6700 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input20.ain
+                                  "<gs|sz;sz|gs>,<gs|splus;sminus|gs>")
 add_test(NAME observe6700_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
-                                    ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput6700.cout)
+                                    ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput20.cout)

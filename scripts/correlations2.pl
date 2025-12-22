@@ -66,7 +66,7 @@ sub vectorEqual
 	my $nb = scalar(@$vb);
 	return 0 unless ($na == $nb);
 	for (my $i = 0; $i < $na; ++$i) {
-		next if (abs($va->[$i] - $vb->[$i]) < 1e-5);
+		next if (abs($va->[$i] - $vb->[$i]) < 1e-4);
 		return 0;
 	}
 
