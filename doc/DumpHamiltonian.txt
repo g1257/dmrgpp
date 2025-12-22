@@ -1,0 +1,27 @@
+[Needs integration into manual]
+
+See input8800.ain
+
+Note that
+SolverOptions=debugmatrix
+
+this enables computing the CRS
+at every step
+
+then set
+DumpHamiltonian="predicate";
+
+where predicate is explained
+at the beginning of file
+PsimagLite/src/PredicateAwesome.h
+and in this case it can use two
+variables
+s for sites
+l for loopIndex
+
+The filename will be
+$root followed by _dump.txt
+For example, running
+dmrg -f input8800.ain
+will create
+runForinput8800_dump.txt
