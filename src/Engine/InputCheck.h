@@ -295,6 +295,7 @@ public:
 		str += "string TargetFermionicParity;\n";
 		str += "matrix TimeSchedule;\n";
 		str += "string DefineOperators;\n";
+		str += "string DumpHamiltonian;\n";
 
 		return str;
 	}

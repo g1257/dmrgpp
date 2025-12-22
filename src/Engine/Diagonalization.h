@@ -79,8 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DIAGONALIZATION_HEADER_H
 #include "Concurrency.h"
 #include "DavidsonSolver.h"
+#include "DumpHamiltonian.hh"
 #include "FiniteLoop.h"
 #include "LanczosSolver.h"
+#include "LoopSiteDirection.hh"
 #include "OneSiteSpaces.hh"
 #include "PackIndices.h"
 #include "ParametersForSolver.h"
@@ -97,13 +99,6 @@ namespace Dmrg
 template <typename ParametersType, typename TargetingType>
 class Diagonalization
 {
-
-	struct LoopSiteDirection {
-		SizeType loopIndex;
-		SizeType site;
-		ProgramGlobals::DirectionEnum direction;
-	};
-
 public:
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
@@ -161,6 +156,7 @@ public:
 	    , quantumSector_(quantumSector)
 	    , wft_(waveFunctionTransformation)
 	    , oldEnergy_(oldEnergy)
+	    , dumpHamiltonian_(parameters)
 	{
 	}
 
@@ -554,7 +550,7 @@ private:
 			SparseMatrixType fullm;
 			model_.fullHamiltonian(fullm, hc, aux);
 
-			bool early_exit = debugMatrix(energyTmp, tmpVec, fullm);
+			bool early_exit = debugMatrix(energyTmp, tmpVec, fullm, initialVector, loop_site_dir);
 
 			if (options.isSet("test"))
 				throw std::logic_error("Exiting due to option test in the input\n");
@@ -808,7 +804,11 @@ private:
 	 *
 	 * \returns Whether the output params were written to
 	 */
-	bool debugMatrix(VectorRealType& energyTmp, VectorVectorType& tmpVec, const SparseMatrixType& fullm) const
+	bool debugMatrix(VectorRealType& energyTmp,
+	    VectorVectorType& tmpVec,
+	    const SparseMatrixType& fullm,
+	    const TargetVectorType& initial_vector,
+	    const LoopSiteDirection& loop_site_dir)
 	{
 		const OptionsType& options = parameters_.options;
 
@@ -824,6 +824,8 @@ private:
 		if (!isHermitian(fullm, true)) {
 			throw PsimagLite::RuntimeError("Not hermitian matrix block\n");
 		}
+
+		dumpHamiltonian_.save(fullm, initial_vector, loop_site_dir);
 
 		std::vector<RealType> eigs;
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
@@ -869,6 +871,7 @@ private:
 	const typename QnType::VectorQnType& quantumSector_;
 	WaveFunctionTransfType& wft_;
 	VectorVectorRealType oldEnergy_;
+	DumpHamiltonian<ParametersType, ComplexOrRealType> dumpHamiltonian_;
 }; // class Diagonalization
 } // namespace Dmrg
 

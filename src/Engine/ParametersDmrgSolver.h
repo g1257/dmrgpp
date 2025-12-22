@@ -179,6 +179,7 @@ struct ParametersDmrgSolver {
 	VectorFiniteLoopType finiteLoop;
 	FieldType degeneracyMax;
 	FieldType denseSparseThreshold;
+	std::string dumpHamiltonian;
 
 	void write(PsimagLite::String label,
 	    PsimagLite::IoSerializer& ioSerializer) const
@@ -353,6 +354,15 @@ struct ParametersDmrgSolver {
 		try {
 			io.readline(dumperEnd, "KroneckerDumperEnd=");
 		} catch (std::exception&) {
+		}
+
+		try {
+			io.readline(dumpHamiltonian, "DumpHamiltonian=");
+		} catch (std::exception&) {
+		}
+
+		if (!dumpHamiltonian.empty() && !options.isSet("debugmatrix")) {
+			err("FATAL: DumpHamiltonian set without debugmatrix option\n");
 		}
 
 		if (options.isSet("KroneckerDumper")) {
