@@ -3,12 +3,10 @@
 #include "Vector.h"
 #include <string>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType>
-class FactorForTargetingExpression
-{
+class FactorForTargetingExpression {
 
 	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 	using VectorType = std::vector<ComplexOrRealType>;
@@ -110,7 +108,7 @@ private:
 	void setStr(SizeType ind)
 	{
 		return (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) ? setStrImagOne(ind)
-									      : setStrRealOne(ind);
+		                                                              : setStrRealOne(ind);
 	}
 
 	void setStrRealOne(SizeType ind)

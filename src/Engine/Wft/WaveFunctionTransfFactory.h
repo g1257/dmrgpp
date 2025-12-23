@@ -88,14 +88,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WaveFunctionTransfLocal.h"
 #include "WaveStructCombined.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename LeftRightSuperType_,
-    typename VectorWithOffsetType_,
-    typename OptionsType_,
-    typename OneSiteSpacesType_>
-class WaveFunctionTransfFactory
-{
+          typename VectorWithOffsetType_,
+          typename OptionsType_,
+          typename OneSiteSpacesType_>
+class WaveFunctionTransfFactory {
 
 	typedef PsimagLite::IoSelector IoType;
 
@@ -118,14 +116,14 @@ public:
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	using OneSiteSpacesType = OneSiteSpacesType_;
 	typedef WaveFunctionTransfBase<WaveStructCombinedType,
-	    VectorWithOffsetType,
-	    OptionsType_,
-	    OneSiteSpacesType_>
+	                               VectorWithOffsetType,
+	                               OptionsType_,
+	                               OneSiteSpacesType_>
 	    WaveFunctionTransfBaseType;
 	typedef WaveFunctionTransfLocal<WaveStructCombinedType,
-	    VectorWithOffsetType,
-	    OptionsType_,
-	    OneSiteSpacesType_>
+	                                VectorWithOffsetType,
+	                                OptionsType_,
+	                                OneSiteSpacesType_>
 	    WaveFunctionTransfLocalType;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
 	typedef typename WaveStructCombinedType::WaveStructSvdType WaveStructSvdType;
@@ -134,18 +132,18 @@ public:
 	WaveFunctionTransfFactory(SomeParametersType& params)
 	    : isEnabled_(!(params.options.isSet("nowft")))
 	    , wftOptions_(ProgramGlobals::DirectionEnum::INFINITE,
-		  params.options,
-		  true,
-		  true,
-		  params.denseSparseThreshold,
-		  params.gemmRnb,
-		  params.nthreads2)
+	                  params.options,
+	                  true,
+	                  true,
+	                  params.denseSparseThreshold,
+	                  params.gemmRnb,
+	                  params.nthreads2)
 	    , progress_("WaveFunctionTransf")
 	    , filenameIn_(params.checkpoint.filename())
 	    , filenameOut_(params.filename)
 	    , waveStructCombined_(params.options.isSet("wftstacksondisk"),
-		  params.filename,
-		  { params.options.isSet("observe"), params.options.isSet("noSaveOperators") })
+	                          params.filename,
+	                          { params.options.isSet("observe"), params.options.isSet("noSaveOperators") })
 	    , wftImpl_(0)
 	    , rng_(3433117)
 	    , noLoad_(false)
@@ -215,8 +213,8 @@ public:
 			return;
 
 		waveStructCombined_.beforeWft(wftOptions_.dir,
-		    wftOptions_.twoSiteDmrg,
-		    wftOptions_.bounce);
+		                              wftOptions_.twoSiteDmrg,
+		                              wftOptions_.bounce);
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Window open, ready to transform vectors";
@@ -225,9 +223,9 @@ public:
 
 	// FIXME: change name to transformVector
 	void setInitialVector(VectorWithOffsetType& dest,
-	    const VectorWithOffsetType& src,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	                      const VectorWithOffsetType& src,
+	                      const LeftRightSuperType& lrs,
+	                      const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		bool allow = false;
 		switch (wftOptions_.dir) {
@@ -326,11 +324,11 @@ public:
 	}
 
 	void push(const BlockDiagonalMatrixType& transform,
-	    ProgramGlobals::DirectionEnum direction,
-	    const LeftRightSuperType& lrs,
-	    const VectorMatrixType& vts,
-	    const VectorVectorRealType& s,
-	    const VectorQnType& qns)
+	          ProgramGlobals::DirectionEnum direction,
+	          const LeftRightSuperType& lrs,
+	          const VectorMatrixType& vts,
+	          const VectorVectorRealType& s,
+	          const VectorQnType& qns)
 	{
 		if (!isEnabled_)
 			return;
@@ -388,7 +386,7 @@ public:
 	}
 
 	const BlockDiagonalMatrixType& multiPointGetTransform(SizeType ind,
-	    ProgramGlobals::DirectionEnum dir) const
+	                                                      ProgramGlobals::DirectionEnum dir) const
 	{
 		return waveStructCombined_.multiPointGetTransform(ind, dir);
 	}
@@ -396,7 +394,7 @@ public:
 private:
 
 	void writePartial(PsimagLite::IoSelector::Out& ioMain,
-	    PsimagLite::String prefix) const
+	                  PsimagLite::String prefix) const
 	{
 		assert(isEnabled_);
 		assert(save_);
@@ -438,9 +436,9 @@ private:
 	}
 
 	void createVector(VectorWithOffsetType& psiDest,
-	    const VectorWithOffsetType& psiSrc,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	                  const VectorWithOffsetType& psiSrc,
+	                  const LeftRightSuperType& lrs,
+	                  const OneSiteSpacesType& oneSiteSpaces) const
 	{
 
 		RealType norm1 = norm(psiSrc);
@@ -464,7 +462,7 @@ private:
 	}
 
 	SizeType computeCenter(const LeftRightSuperType& lrs,
-	    ProgramGlobals::DirectionEnum direction) const
+	                       ProgramGlobals::DirectionEnum direction) const
 	{
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			SizeType total = lrs.left().block().size();
@@ -494,9 +492,9 @@ private:
 		assert(numberOfSites > 0);
 		for (SizeType i = 1; i < numberOfSites - 1; i++) {
 			bool seen = (std::find(sitesSeen_.begin(),
-					 sitesSeen_.end(),
-					 i)
-			    != sitesSeen_.end());
+			                       sitesSeen_.end(),
+			                       i)
+			             != sitesSeen_.end());
 			if (!seen)
 				return false;
 		}

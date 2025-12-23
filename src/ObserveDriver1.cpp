@@ -1,7 +1,6 @@
 #include "ObserveDriver1.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 typedef Qn QnType;
 typedef VectorWithOffset<RealType, QnType> VectorWithOffset1Type;
@@ -10,13 +9,13 @@ typedef VectorWithOffsets<RealType, QnType> VectorWithOffset3Type;
 typedef VectorWithOffsets<ComplexType, QnType> VectorWithOffset4Type;
 
 typedef Dmrg::SuperGeometry<RealType,
-    InputNgType::Readable,
-    ProgramGlobals>
+                            InputNgType::Readable,
+                            ProgramGlobals>
     Geometry1Type;
 
 typedef Dmrg::SuperGeometry<ComplexType,
-    InputNgType::Readable,
-    ProgramGlobals>
+                            InputNgType::Readable,
+                            ProgramGlobals>
     Geometry2Type;
 
 typedef Basis<MySparseMatrixReal> Basis1Type;

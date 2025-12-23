@@ -90,7 +90,8 @@ class LadderX : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
-	enum {
+	enum
+	{
 		DIRECTION_X = LadderType::DIRECTION_X,
 		DIRECTION_Y = LadderType::DIRECTION_Y,
 		DIRECTION_XPY,

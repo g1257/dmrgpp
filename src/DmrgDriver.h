@@ -56,8 +56,8 @@ struct OperatorOptions {
 
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 typedef Dmrg::ParametersDmrgSolver<RealType,
-    InputNgType::Readable,
-    Dmrg::Qn>
+                                   InputNgType::Readable,
+                                   Dmrg::Qn>
     ParametersDmrgSolverType;
 
 void usageOperator();
@@ -120,8 +120,8 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 
 template <typename SolverType, typename VectorWithOffsetType>
 void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType&,
-    const ParametersDmrgSolverType&,
-    InputNgType::Readable&,
-    const OperatorOptions&);
+               const ParametersDmrgSolverType&,
+               InputNgType::Readable&,
+               const OperatorOptions&);
 
 #endif // DMRGDRIVER_H

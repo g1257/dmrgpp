@@ -84,11 +84,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <typeinfo>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ComplexOrRealType, typename QnType_>
-class VectorWithOffset
-{
+class VectorWithOffset {
 
 public:
 
@@ -113,8 +111,8 @@ public:
 
 	template <typename SomeBasisType>
 	VectorWithOffset(const VectorSizeType& compactedWeights,
-	    const VectorSizeType& sectors,
-	    const SomeBasisType& someBasis)
+	                 const VectorSizeType& sectors,
+	                 const SomeBasisType& someBasis)
 	    : progress_("VectorWithOffset")
 	    , size_(someBasis.size())
 	    , mAndq_(PairQnType(0, QnType::zero()))
@@ -140,8 +138,8 @@ public:
 
 	template <typename SomeBasisType>
 	VectorWithOffset(SizeType weight,
-	    SizeType sector,
-	    const SomeBasisType& someBasis)
+	                 SizeType sector,
+	                 const SomeBasisType& someBasis)
 	    : progress_("VectorWithOffset")
 	    , size_(someBasis.size())
 	    , data_(weight)
@@ -159,8 +157,8 @@ public:
 
 	template <typename SomeBasisType>
 	void set(VectorType& v,
-	    SizeType sector,
-	    const SomeBasisType& someBasis)
+	         SizeType sector,
+	         const SomeBasisType& someBasis)
 	{
 		size_ = someBasis.size();
 		assert(someBasis.partition() > 0);
@@ -222,8 +220,8 @@ public:
 
 	template <typename SomeInputType>
 	void read(SomeInputType& io,
-	    const PsimagLite::String& label,
-	    SizeType = 0)
+	          const PsimagLite::String& label,
+	          SizeType = 0)
 	{
 		io.read(size_, label + "/size_");
 		io.read(offset_, label + "/offset_");
@@ -247,8 +245,8 @@ public:
 
 	template <typename IoInputter>
 	void loadOneSector(IoInputter& io,
-	    const PsimagLite::String& label,
-	    SizeType counter = 0)
+	                   const PsimagLite::String& label,
+	                   SizeType counter = 0)
 	{
 		read(io, label, counter);
 	}
@@ -261,7 +259,7 @@ public:
 
 	template <typename SomeBasisType>
 	void populateFromQns(const VectorWithOffset& v,
-	    const SomeBasisType& someBasis)
+	                     const SomeBasisType& someBasis)
 	{
 		if (v.size() == 0)
 			return;
@@ -348,7 +346,7 @@ public:
 	static PsimagLite::String name() { return "vectorwithoffset"; }
 
 	friend ComplexOrRealType operator*(const VectorWithOffset& v1,
-	    const VectorWithOffset& v2)
+	                                   const VectorWithOffset& v2)
 	{
 		if (v1.size() == 0 || v2.size() == 0)
 			return 0.0;
@@ -386,7 +384,7 @@ private:
 
 	template <typename SomeBasisType>
 	SizeType findPartitionWithThisQn(const QnType& qn,
-	    const SomeBasisType& someBasis) const
+	                                 const SomeBasisType& someBasis) const
 	{
 		SizeType np = someBasis.partition() - 1;
 		for (SizeType i = 0; i < np; i++)
@@ -424,8 +422,8 @@ private:
 
 	template <typename SomeBasisType>
 	bool nonZeroPartition(const VectorType& v,
-	    const SomeBasisType& someBasis,
-	    SizeType i) const
+	                      const SomeBasisType& someBasis,
+	                      SizeType i) const
 	{
 		typename VectorType::value_type zero = 0;
 		for (SizeType j = someBasis.partition(i); j < someBasis.partition(i + 1); j++) {

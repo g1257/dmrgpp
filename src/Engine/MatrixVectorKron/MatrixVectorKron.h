@@ -85,11 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixVectorBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelType_>
-class MatrixVectorKron : public MatrixVectorBase<ModelType_>
-{
+class MatrixVectorKron : public MatrixVectorBase<ModelType_> {
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
@@ -112,8 +110,8 @@ public:
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
 
 	MatrixVectorKron(const ModelType& model,
-	    const HamiltonianConnectionType& hc,
-	    const typename ModelHelperType::Aux& aux)
+	                 const HamiltonianConnectionType& hc,
+	                 const typename ModelHelperType::Aux& aux)
 	    : params_(model.params())
 	    , initKron_(model, hc, aux)
 	    , kronMatrix_(initKron_, "Hamiltonian")

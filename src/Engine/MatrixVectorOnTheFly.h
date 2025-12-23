@@ -83,11 +83,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MatrixVectorBase.h"
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelType_>
-class MatrixVectorOnTheFly : public MatrixVectorBase<ModelType_>
-{
+class MatrixVectorOnTheFly : public MatrixVectorBase<ModelType_> {
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
@@ -105,8 +103,8 @@ public:
 	typedef typename ModelHelperType::Aux AuxType;
 
 	MatrixVectorOnTheFly(const ModelType& model,
-	    const HamiltonianConnectionType& hc,
-	    const AuxType& aux)
+	                     const HamiltonianConnectionType& hc,
+	                     const AuxType& aux)
 	    : model_(model)
 	    , hc_(hc)
 	    , aux_(aux)

@@ -89,26 +89,24 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetParamsType,
-    typename ModelType,
-    typename WaveFunctionTransfType,
-    typename LanczosSolverType,
-    typename VectorWithOffsetType>
+          typename ModelType,
+          typename WaveFunctionTransfType,
+          typename LanczosSolverType,
+          typename VectorWithOffsetType>
 class TimeVectorsChebyshev : public TimeVectorsBase<TargetParamsType,
-				 ModelType,
-				 WaveFunctionTransfType,
-				 LanczosSolverType,
-				 VectorWithOffsetType>
-{
+                                                    ModelType,
+                                                    WaveFunctionTransfType,
+                                                    LanczosSolverType,
+                                                    VectorWithOffsetType> {
 
 	typedef TimeVectorsBase<TargetParamsType,
-	    ModelType,
-	    WaveFunctionTransfType,
-	    LanczosSolverType,
-	    VectorWithOffsetType>
+	                        ModelType,
+	                        WaveFunctionTransfType,
+	                        LanczosSolverType,
+	                        VectorWithOffsetType>
 	    BaseType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
@@ -141,11 +139,11 @@ class TimeVectorsChebyshev : public TimeVectorsBase<TargetParamsType,
 public:
 
 	TimeVectorsChebyshev(const TargetParamsType& tstStruct,
-	    VectorVectorWithOffsetType& targetVectors,
-	    const ModelType& model,
-	    const WaveFunctionTransfType& wft,
-	    const LeftRightSuperType& lrs,
-	    InputValidatorType& ioIn)
+	                     VectorVectorWithOffsetType& targetVectors,
+	                     const ModelType& model,
+	                     const WaveFunctionTransfType& wft,
+	                     const LeftRightSuperType& lrs,
+	                     InputValidatorType& ioIn)
 	    : BaseType(model, lrs, wft, "chebyshev")
 	    , tstStruct_(tstStruct)
 	    , targetVectors_(targetVectors)
@@ -190,9 +188,9 @@ public:
 	}
 
 	virtual void calcTimeVectors(const VectorSizeType& indices,
-	    RealType Eg,
-	    const VectorWithOffsetType& phi,
-	    const typename BaseType::ExtraData& extra)
+	                             RealType Eg,
+	                             const VectorWithOffsetType& phi,
+	                             const typename BaseType::ExtraData& extra)
 	{
 		const VectorRealType& times = tstStruct_.times();
 
@@ -202,8 +200,8 @@ public:
 			assert(targetVectors_[noAdvance]);
 			if (targetVectors_[noAdvance]->size() > 0) {
 				BaseType::wftHelper().wftOneVector(phiNew,
-				    *targetVectors_[noAdvance],
-				    extra.block[0]);
+				                                   *targetVectors_[noAdvance],
+				                                   extra.block[0]);
 
 				*targetVectors_[noAdvance] = phiNew;
 			}
@@ -299,10 +297,10 @@ public:
 private:
 
 	void calcTargetVector(VectorWithOffsetType& v,
-	    const VectorWithOffsetType& phi,
-	    SizeType prev,
-	    SizeType prevMinus2,
-	    RealType Eg)
+	                      const VectorWithOffsetType& phi,
+	                      SizeType prev,
+	                      SizeType prevMinus2,
+	                      RealType Eg)
 
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
@@ -314,18 +312,18 @@ private:
 	}
 
 	void calcTargetVector(TargetVectorType& r,
-	    const VectorWithOffsetType& phi,
-	    SizeType prev,
-	    SizeType prevMinus2,
-	    SizeType i0,
-	    RealType Eg)
+	                      const VectorWithOffsetType& phi,
+	                      SizeType prev,
+	                      SizeType prevMinus2,
+	                      SizeType i0,
+	                      RealType Eg)
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		    ModelType::modelLinks(),
-		    this->time(),
-		    model_.superOpHelper());
+		                                                 ModelType::modelLinks(),
+		                                                 this->time(),
+		                                                 model_.superOpHelper());
 		MatrixLanczosType lanczosHelper(model_, hc, aux);
 
 		ProgramGlobals::VerboseEnum verbose = (model_.params().options.isSet("VerboseCheby"))
@@ -352,10 +350,10 @@ private:
 	}
 
 	void calcCorrectionVector(VectorWithOffsetType& v,
-	    const VectorWithOffsetType& phi,
-	    SizeType prev,
-	    SizeType prevMinus2,
-	    RealType Eg)
+	                          const VectorWithOffsetType& phi,
+	                          SizeType prev,
+	                          SizeType prevMinus2,
+	                          RealType Eg)
 
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
@@ -366,10 +364,10 @@ private:
 		}
 	}
 	void calcCorrectionVector(TargetVectorType& r,
-	    const VectorWithOffsetType& phi,
-	    SizeType prev,
-	    SizeType prevMinus2,
-	    SizeType i0)
+	                          const VectorWithOffsetType& phi,
+	                          SizeType prev,
+	                          SizeType prevMinus2,
+	                          SizeType i0)
 	{
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phiAdd(total);
@@ -459,10 +457,10 @@ private:
 	}
 
 	void correctVectors(VectorWithOffsetType& phi,
-	    const MatrixRealType& Vmatrix,
-	    const MatrixRealType& Tmatrix,
-	    const VectorType& weights,
-	    const VectorSizeType& permutation)
+	                    const MatrixRealType& Vmatrix,
+	                    const MatrixRealType& Tmatrix,
+	                    const VectorType& weights,
+	                    const VectorSizeType& permutation)
 
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ++ii) {
@@ -475,20 +473,20 @@ private:
 	}
 
 	void computeAuxForCorrection(VectorMatrixFieldType& V,
-	    VectorMatrixFieldType& T,
-	    VectorType& weights,
-	    VectorSizeType& permutation,
-	    const VectorWithOffsetType& phi,
-	    SizeType i0,
-	    RealType Eg,
-	    RealType currentTime) const
+	                             VectorMatrixFieldType& T,
+	                             VectorType& weights,
+	                             VectorSizeType& permutation,
+	                             const VectorWithOffsetType& phi,
+	                             SizeType i0,
+	                             RealType Eg,
+	                             RealType currentTime) const
 	{
 		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		    ModelType::modelLinks(),
-		    currentTime,
-		    model_.superOpHelper());
+		                                                 ModelType::modelLinks(),
+		                                                 currentTime,
+		                                                 model_.superOpHelper());
 		MatrixLanczosType lanczosHelper(model_, hc, aux);
 		ProgramGlobals::VerboseEnum verbose = (model_.params().options.isSet("VerboseCheby"))
 		    ? ProgramGlobals::VerboseEnum::YES
@@ -504,13 +502,13 @@ private:
 		VectorSizeType steps(phi.sectors());
 
 		ParallelTriDiagType helperTriDiag(phi,
-		    T,
-		    V,
-		    steps,
-		    lrs_,
-		    fakeTime,
-		    model_,
-		    ioIn_);
+		                                  T,
+		                                  V,
+		                                  steps,
+		                                  lrs_,
+		                                  fakeTime,
+		                                  model_,
+		                                  ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 
@@ -560,10 +558,10 @@ private:
 	}
 
 	void correctVector(VectorType& r,
-	    const MatrixRealType& Vmatrix,
-	    const MatrixRealType& Tmatrix,
-	    const VectorType& weights,
-	    const VectorSizeType& permutation) const
+	                   const MatrixRealType& Vmatrix,
+	                   const MatrixRealType& Tmatrix,
+	                   const VectorType& weights,
+	                   const VectorSizeType& permutation) const
 	{
 
 		const SizeType big = Vmatrix.rows();

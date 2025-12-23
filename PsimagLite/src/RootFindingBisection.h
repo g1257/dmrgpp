@@ -56,8 +56,7 @@ public:
 			if (sign(tmp) == sign(functionAtA)) {
 				a = c;
 				functionAtA = tmp;
-			}
-			else {
+			} else {
 				b = c;
 			}
 		}

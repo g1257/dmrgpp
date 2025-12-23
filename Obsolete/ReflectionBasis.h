@@ -87,12 +87,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ReflectionColor.h"
 #include "Sort.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename RealType, typename SparseMatrixType>
-class ReflectionBasis
-{
+class ReflectionBasis {
 
 	typedef ReflectionColor<RealType, SparseMatrixType> ReflectionColorOrDomType;
 	typedef PsimagLite::PackIndices PackIndicesType;
@@ -100,11 +98,17 @@ class ReflectionBasis
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
 
-	enum { AVAILABLE,
+	enum
+	{
+		AVAILABLE,
 		NOT_AVAILABLE,
-		COLOR };
-	enum { GREATER_THAN_ZERO,
-		LESS_THAN_ZERO };
+		COLOR
+	};
+	enum
+	{
+		GREATER_THAN_ZERO,
+		LESS_THAN_ZERO
+	};
 
 public:
 
@@ -156,8 +160,8 @@ public:
 	//! Invert triangular matrix R into Rinverse
 	//! Hack due to not having rectangular CRS implemented
 	void inverseTriangular(SparseMatrixType& R1Inverse,
-	    const SparseMatrixType& R1,
-	    const RealType& sector) const
+	                       const SparseMatrixType& R1,
+	                       const RealType& sector) const
 	{
 		SparseMatrixType R1t;
 		transposeConjugate(R1t, R1);
@@ -200,8 +204,8 @@ public:
 private:
 
 	void prepareAvailable(typename PsimagLite::Vector<SizeType>::Type& iavail,
-	    const typename PsimagLite::Vector<SizeType>::Type& ipcolor,
-	    const typename PsimagLite::Vector<SizeType>::Type& ipIsolated) const
+	                      const typename PsimagLite::Vector<SizeType>::Type& ipcolor,
+	                      const typename PsimagLite::Vector<SizeType>::Type& ipIsolated) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type tmp(reflection_.rank(), 1);
 		for (SizeType i = 0; i < ipcolor.size(); i++)
@@ -246,8 +250,8 @@ private:
 	}
 
 	void setDiagonal(SparseMatrixType& R1,
-	    const typename PsimagLite::Vector<ComplexOrRealType>::Type& dr,
-	    const RealType& sector) const
+	                 const typename PsimagLite::Vector<ComplexOrRealType>::Type& dr,
+	                 const RealType& sector) const
 	{
 		const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg = (sector > 0) ? ipPos_ : ipNeg_;
 
@@ -270,9 +274,9 @@ private:
 	}
 
 	void findPermuted(typename PsimagLite::Vector<SizeType>::Type& x,
-	    const typename PsimagLite::Vector<ComplexOrRealType>::Type& dd,
-	    const typename PsimagLite::Vector<SizeType>::Type& perm,
-	    SizeType lessOrGreater)
+	                  const typename PsimagLite::Vector<ComplexOrRealType>::Type& dd,
+	                  const typename PsimagLite::Vector<SizeType>::Type& perm,
+	                  SizeType lessOrGreater)
 	{
 		for (SizeType i = 0; i < perm.size(); i++) {
 			if (lessOrGreaterCondition(PsimagLite::real(dd[perm[i]]), lessOrGreater))
@@ -354,9 +358,9 @@ private:
 	}
 
 	void growOneRowAndOneColumn(SparseMatrixType& R1,
-	    const typename PsimagLite::Vector<ComplexOrRealType>::Type& r,
-	    const ComplexOrRealType& addedValue,
-	    const RealType& sector) const
+	                            const typename PsimagLite::Vector<ComplexOrRealType>::Type& r,
+	                            const ComplexOrRealType& addedValue,
+	                            const RealType& sector) const
 	{
 		SizeType n2 = (sector > 0) ? ipPos_.size() : ipNeg_.size();
 		SizeType n = R1.rank();
@@ -390,8 +394,8 @@ private:
 	   Let R1t = transpose(R1), solve   L * r = rhs
 	*/
 	void linearSolverTriangular(typename PsimagLite::Vector<ComplexOrRealType>::Type& r,
-	    const SparseMatrixType& R1t,
-	    const typename PsimagLite::Vector<ComplexOrRealType>::Type& rhs) const
+	                            const SparseMatrixType& R1t,
+	                            const typename PsimagLite::Vector<ComplexOrRealType>::Type& rhs) const
 	{
 
 		for (SizeType irow = 0; irow < R1t.rank(); irow++) {
@@ -456,10 +460,10 @@ private:
 	//	}
 
 	void setT1w(typename PsimagLite::Vector<ComplexOrRealType>::Type& T1w,
-	    const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg,
-	    const typename PsimagLite::Vector<ComplexOrRealType>::Type& w,
-	    const RealType& sector,
-	    const SparseMatrixType& reflectionT) const
+	            const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg,
+	            const typename PsimagLite::Vector<ComplexOrRealType>::Type& w,
+	            const RealType& sector,
+	            const SparseMatrixType& reflectionT) const
 	{
 		SizeType n = reflectionT.rank();
 		typename PsimagLite::Vector<int>::Type inverseP(n, -1);
@@ -495,8 +499,8 @@ private:
 	}
 
 	void findIsolated(typename PsimagLite::Vector<SizeType>::Type& ipIsolated,
-	    typename PsimagLite::Vector<SizeType>::Type& ipConnected,
-	    const SparseMatrixType& reflection_) const
+	                  typename PsimagLite::Vector<SizeType>::Type& ipConnected,
+	                  const SparseMatrixType& reflection_) const
 	{
 		for (SizeType i = 0; i < reflection_.rank(); i++) {
 			SizeType nz = 0;

@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Heisenberg Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> {
@@ -160,7 +159,7 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelHeisenberg";
 		io.createGroup(label);
@@ -184,7 +183,7 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersModelHeisenberg& parameters)
+	                                const ParametersModelHeisenberg& parameters)
 	{
 		if (!parameters.magneticFieldX.empty())
 			os << "MagneticFieldX=" << parameters.magneticFieldX << "\n";

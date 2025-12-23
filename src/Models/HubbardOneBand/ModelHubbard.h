@@ -90,15 +90,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <cassert>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelBaseType>
 class ExtendedHubbard1Orb;
 
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
 template <typename ModelBaseType>
-class ModelHubbard : public ModelBaseType
-{
+class ModelHubbard : public ModelBaseType {
 
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -135,16 +133,19 @@ public:
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 
-	enum { SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
-		SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN };
+	enum
+	{
+		SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
+		SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN
+	};
 
 	ModelHubbard(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry,
-	    PsimagLite::String extension)
+	             InputValidatorType& io,
+	             const SuperGeometryType& geometry,
+	             PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , modelParameters_(io)
 	    , spinSquared_(spinSquaredHelper_, NUMBER_OF_ORBITALS, DEGREES_OF_FREEDOM)
 	    , extension_(extension)
@@ -207,10 +208,10 @@ protected:
 			}
 
 			OperatorType myOp(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(1, 1 - sigma),
-			    asign,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(1, 1 - sigma),
+			                  asign,
+			                  su2related);
 
 			c.push(myOp, (sigma == 0) ? "up" : "down");
 			creationMatrix[sigma] = myOp;
@@ -227,17 +228,17 @@ protected:
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			splus.push(OperatorType(tmp2,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                        typename OperatorType::PairType(0, 0),
+			                        1.0,
+			                        su2Related));
 			SparseMatrixType tmp3;
 			transposeConjugate(tmp3, tmp2);
 			sminus.push(OperatorType(tmp3,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                         typename OperatorType::PairType(0, 0),
+			                         1.0,
+			                         su2Related));
 		}
 
 		{
@@ -248,10 +249,10 @@ protected:
 			SparseMatrixType tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			sz.push(OperatorType(tmp3,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                     typename OperatorType::PairType(0, 0),
+			                     1.0,
+			                     su2Related));
 		}
 
 		PsimagLite::Matrix<SparseElementType> dense1;
@@ -262,10 +263,10 @@ protected:
 			SparseMatrixType tmp3(multiplyTc(cup.getCRS(), cup.getCRS()));
 			typename OperatorType::Su2RelatedType su2Related;
 			nupop.push(OperatorType(tmp3,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                        typename OperatorType::PairType(0, 0),
+			                        1.0,
+			                        su2Related));
 			crsMatrixToFullMatrix(dense1, tmp3);
 		}
 
@@ -278,10 +279,10 @@ protected:
 			SparseMatrixType tmp3(multiplyTc(cdown.getCRS(), cdown.getCRS()));
 			typename OperatorType::Su2RelatedType su2Related;
 			ndownop.push(OperatorType(tmp3,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                          ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                          typename OperatorType::PairType(0, 0),
+			                          1.0,
+			                          su2Related));
 			crsMatrixToFullMatrix(dense2, tmp3);
 		}
 
@@ -291,10 +292,10 @@ protected:
 			SparseMatrixType tmp(dense1);
 			typename OperatorType::Su2RelatedType su2Related;
 			nop.push(OperatorType(tmp,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                      ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                      typename OperatorType::PairType(0, 0),
+			                      1.0,
+			                      su2Related));
 		}
 
 		{
@@ -307,10 +308,10 @@ protected:
 			SparseMatrixType tmp3(cup);
 			typename OperatorType::Su2RelatedType su2Related;
 			d.push(OperatorType(tmp3,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                    ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                    typename OperatorType::PairType(0, 0),
+			                    1.0,
+			                    su2Related));
 		}
 	}
 
@@ -366,13 +367,14 @@ protected:
 		rashbaSOC.push(cup, 'N', cdown, 'C');
 
 		// down-up
-		auto valueModifer = [](SparseElementType& value) { value = -PsimagLite::conj(value); };
+		auto valueModifer = [](SparseElementType& value)
+		{ value = -PsimagLite::conj(value); };
 
 		rashbaSOC.push(cdown,
-		    'N',
-		    cup,
-		    'C',
-		    valueModifer);
+		               'N',
+		               cup,
+		               'C',
+		               valueModifer);
 	}
 
 	/* PSIDOC Hubbard::write
@@ -393,7 +395,7 @@ protected:
 	PSIDOCCOPY $FirstFunctionBelow
 	 */
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1)) // (A)
 			io.createGroup(label1); // (B)
@@ -406,8 +408,8 @@ protected:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -468,7 +470,7 @@ protected:
 private:
 
 	void setBasis(HilbertBasisType& basis,
-	    const VectorSizeType& block) const
+	              const VectorSizeType& block) const
 	{
 		int sitesTimesDof = DEGREES_OF_FREEDOM * block.size();
 		HilbertState total = (1 << sitesTimesDof);
@@ -486,8 +488,8 @@ private:
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 	RealType sign(typename HilbertSpaceHubbardType::HilbertState const& ket,
-	    int i,
-	    int sigma) const
+	              int i,
+	              int sigma) const
 	{
 		int value = 0;
 		value += HilbertSpaceHubbardType::calcNofElectrons(ket, 0, i, 0);
@@ -511,8 +513,8 @@ private:
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
-	    int sigma,
-	    const HilbertBasisType& natBasis) const
+	                                      int sigma,
+	                                      const HilbertBasisType& natBasis) const
 	{
 		typename HilbertSpaceHubbardType::HilbertState bra, ket;
 		int n = natBasis.size();
@@ -536,8 +538,8 @@ private:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    int) const
+	                        const HilbertBasisType& basis,
+	                        int) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j

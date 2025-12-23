@@ -7,12 +7,10 @@
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType, typename VectorWithOffsetType>
-class OneSiteTruncation
-{
+class OneSiteTruncation {
 
 public:
 
@@ -26,9 +24,9 @@ public:
 	typedef typename PsimagLite::InputNg<InputCheck>::Readable ReadableType;
 
 	OneSiteTruncation(const LeftRightSuperType& lrs,
-	    ModelType& model,
-	    ReadableType& io,
-	    OutputFileOrNot& ioOut)
+	                  ModelType& model,
+	                  ReadableType& io,
+	                  OutputFileOrNot& ioOut)
 	    : lrs_(lrs)
 	    , model_(model)
 	    , m_(0)
@@ -49,8 +47,8 @@ public:
 	}
 
 	void update(SizeType oneSiteTruncSize,
-	    const VectorWithOffsetType& psi,
-	    ProgramGlobals::DirectionEnum dir)
+	            const VectorWithOffsetType& psi,
+	            ProgramGlobals::DirectionEnum dir)
 	{
 		if (oneSiteTruncSize == 0)
 			return;
@@ -66,9 +64,9 @@ public:
 private:
 
 	SizeType computeU(MatrixType& U,
-	    SizeType oneSiteTruncSize,
-	    const VectorWithOffsetType& psi,
-	    ProgramGlobals::DirectionEnum dir)
+	                  SizeType oneSiteTruncSize,
+	                  const VectorWithOffsetType& psi,
+	                  ProgramGlobals::DirectionEnum dir)
 	{
 		const SizeType sectors = psi.sectors();
 		const SizeType nsysOrEnv = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -91,8 +89,8 @@ private:
 					pack.unpack(x0, x1, lrs_.left().permutation(x));
 					for (SizeType x1prime = 0; x1prime < oneSiteTruncSize; ++x1prime) {
 						const SizeType xprime = pack.pack(x0,
-						    x1prime,
-						    lrs_.left().permutationInverse());
+						                                  x1prime,
+						                                  lrs_.left().permutationInverse());
 						const SizeType sWithOffsetprime = packSuper.pack(xprime, y, lrs_.super().permutationInverse());
 						if (sWithOffsetprime < offset)
 							continue; // respect all symmetries
@@ -107,8 +105,8 @@ private:
 					pack.unpack(y0, y1, lrs_.right().permutation(y));
 					for (SizeType y0prime = 0; y0prime < oneSiteTruncSize; ++y0prime) {
 						const SizeType yprime = pack.pack(y0prime,
-						    y1,
-						    lrs_.right().permutationInverse());
+						                                  y1,
+						                                  lrs_.right().permutationInverse());
 						const SizeType sWithOffsetprime = packSuper.pack(x, yprime, lrs_.super().permutationInverse());
 						if (sWithOffsetprime < offset)
 							continue; // respect all symmetries

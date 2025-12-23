@@ -5,12 +5,10 @@
 #include "MatrixVectorKron/GenIjPatch.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename WaveFunctionTransfBaseType>
-class WftAccelPatches
-{
+class WftAccelPatches {
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
@@ -31,33 +29,33 @@ class WftAccelPatches
 public:
 
 	WftAccelPatches(const DmrgWaveStructType& dmrgWaveStruct,
-	    const WftOptionsType& wftOptions)
+	                const WftOptionsType& wftOptions)
 	    : dmrgWaveStruct_(dmrgWaveStruct)
 	    , wftOptions_(wftOptions)
 	{
 	}
 
 	void operator()(VectorWithOffsetType& psiDest,
-	    SizeType iNew,
-	    const VectorWithOffsetType& psiSrc,
-	    SizeType iOld,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	                SizeType iNew,
+	                const VectorWithOffsetType& psiSrc,
+	                SizeType iOld,
+	                const LeftRightSuperType& lrs,
+	                const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		ProgramGlobals::DirectionEnum dir = oneSiteSpaces.direction();
 		char charLeft = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'C' : 'N';
 		char charRight = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'T' : 'N';
 
 		BlockDiagWfType psi(psiSrc,
-		    iOld,
-		    dmrgWaveStruct_.lrs());
+		                    iOld,
+		                    dmrgWaveStruct_.lrs());
 
 		psi.transform(charLeft,
-		    charRight,
-		    dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM),
-		    dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON),
-		    wftOptions_.gemmRnb,
-		    wftOptions_.threadsForGemmR);
+		              charRight,
+		              dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM),
+		              dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON),
+		              wftOptions_.gemmRnb,
+		              wftOptions_.threadsForGemmR);
 
 		psi.toVectorWithOffsets(psiDest, iNew, lrs, oneSiteSpaces);
 	}

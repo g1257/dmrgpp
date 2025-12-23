@@ -89,12 +89,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <cassert>
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
 template <typename ModelBaseType>
-class FermionSpinless : public ModelBaseType
-{
+class FermionSpinless : public ModelBaseType {
 
 	static const int FERMION_SIGN = -1;
 	static const int DEGREES_OF_FREEDOM = 1;
@@ -132,9 +130,9 @@ public:
 	typedef typename PsimagLite::Vector<std::pair<RealType, bool>>::Type VectorPairRealBoolType;
 
 	FermionSpinless(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry,
-	    PsimagLite::String extra)
+	                InputValidatorType& io,
+	                const SuperGeometryType& geometry,
+	                PsimagLite::String extra)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , offset_(DEGREES_OF_FREEDOM)
@@ -187,8 +185,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		static bool firstCall = true;
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
@@ -254,10 +252,10 @@ protected:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				    ProgramGlobals::FermionOrBosonEnum::FERMION,
-				    typename OperatorType::PairType(1, 1 - sigma),
-				    asign,
-				    su2related);
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+				                  typename OperatorType::PairType(1, 1 - sigma),
+				                  asign,
+				                  su2related);
 
 				this->createOpsLabel("c").push(myOp);
 			}
@@ -267,10 +265,10 @@ protected:
 			typename OperatorType::Su2RelatedType su2related;
 			su2related.offset = 1; // check FIXME
 			OperatorType myOp(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    angularFactor,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  typename OperatorType::PairType(0, 0),
+			                  angularFactor,
+			                  su2related);
 
 			this->createOpsLabel("n").push(myOp);
 		}
@@ -297,7 +295,7 @@ protected:
 	}
 
 	void setBasis(HilbertBasisType& basis,
-	    const VectorSizeType& block) const
+	              const VectorSizeType& block) const
 	{
 		int sitesTimesDof = DEGREES_OF_FREEDOM * block.size();
 		HilbertState total = (1 << sitesTimesDof);
@@ -310,8 +308,8 @@ protected:
 	// Calculate fermionic sign when applying operator
 	// c^\dagger_{i\sigma} to basis state ket
 	RealType sign(typename HilbertSpaceType::HilbertState const& ket,
-	    int i,
-	    int sigma) const
+	              int i,
+	              int sigma) const
 	{
 		int value = 0;
 		value += HilbertSpaceType::calcNofElectrons(ket, 0, i, 0);
@@ -324,8 +322,8 @@ protected:
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
-	    int sigma,
-	    const HilbertBasisType& natBasis) const
+	                                      int sigma,
+	                                      const HilbertBasisType& natBasis) const
 	{
 		typename HilbertSpaceType::HilbertState bra, ket;
 		int n = natBasis.size();
@@ -348,7 +346,7 @@ protected:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis) const
+	                        const HilbertBasisType& basis) const
 	{
 		const SizeType localSymms = ModelBaseType::targetQuantum().sizeOfOther();
 		if (localSymms == 0) {
@@ -393,7 +391,7 @@ protected:
 
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
-	    const VectorHilbertStateType& natBasis) const
+	                                      const VectorHilbertStateType& natBasis) const
 	{
 
 		SizeType n = natBasis.size();
@@ -432,10 +430,10 @@ protected:
 	}
 
 	static RealType calcMu(SizeType site,
-	    SizeType n,
-	    SizeType N1,
-	    RealType tau,
-	    RealType mu)
+	                       SizeType n,
+	                       SizeType N1,
+	                       RealType tau,
+	                       RealType mu)
 	{
 		//  (nm is the number of steps to increase the onsite
 		//   chemical potential at site i)

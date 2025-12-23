@@ -85,12 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GemmR.h"
 #include "Matrix.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename InitKronType>
-class KronConnections
-{
+class KronConnections {
 
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -125,8 +123,8 @@ public:
 
 		static const bool needsPrinting = false;
 		PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
-		    initKron_.gemmRnb(),
-		    initKron_.nthreads2());
+		                                           initKron_.gemmRnb(),
+		                                           initKron_.nthreads2());
 
 		SizeType nC = initKron_.connections();
 		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
@@ -153,15 +151,15 @@ public:
 
 				const char opt = performTranspose ? (isComplex ? 'c' : 't') : 'n';
 				kronMult(x_,
-				    offsetX,
-				    y_,
-				    offsetY,
-				    opt,
-				    opt,
-				    *Amat,
-				    *Bmat,
-				    initKron_.denseFlopDiscount(),
-				    gemmR);
+				         offsetX,
+				         y_,
+				         offsetY,
+				         opt,
+				         opt,
+				         *Amat,
+				         *Bmat,
+				         initKron_.denseFlopDiscount(),
+				         gemmR);
 			}
 		}
 	}

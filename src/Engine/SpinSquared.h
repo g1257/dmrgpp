@@ -81,26 +81,30 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SPIN_SQUARED_H
 #define SPIN_SQUARED_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename CallbackType>
-class SpinSquared
-{
+class SpinSquared {
 
 	typedef typename CallbackType::Word Word;
 	typedef typename CallbackType::FieldType FieldType;
 
 public:
 
-	enum { SPIN_UP = 0,
-		SPIN_DOWN = 1 };
+	enum
+	{
+		SPIN_UP = 0,
+		SPIN_DOWN = 1
+	};
 
-	enum { ORBITAL_A = 0,
-		ORBITAL_B = 1 };
+	enum
+	{
+		ORBITAL_A = 0,
+		ORBITAL_B = 1
+	};
 
 	SpinSquared(CallbackType& callback,
-	    int NUMBER_OF_ORBITALS1,
-	    int DEGREES_OF_FREEDOM1)
+	            int NUMBER_OF_ORBITALS1,
+	            int DEGREES_OF_FREEDOM1)
 	    : callback_(callback)
 	    , NUMBER_OF_ORBITALS(NUMBER_OF_ORBITALS1)
 	    , DEGREES_OF_FREEDOM(DEGREES_OF_FREEDOM1)
@@ -109,8 +113,8 @@ public:
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	    SizeType,
-	    PsimagLite::String msg = "") const
+	                   SizeType,
+	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "SpinSquared";
@@ -119,21 +123,21 @@ public:
 		const char* end = reinterpret_cast<const char*>(&NUMBER_OF_ORBITALS);
 		SizeType total = end - start;
 		mres.push(SomeMemResolvType::MEMORY_HEAPPTR,
-		    SomeMemResolvType::SIZEOF_HEAPREF,
-		    this,
-		    str + " ref to callback");
+		          SomeMemResolvType::SIZEOF_HEAPREF,
+		          this,
+		          str + " ref to callback");
 
 		mres.memResolv(&callback_, 0, str + " callback");
 
 		start = end;
 		end = reinterpret_cast<const char*>(&DEGREES_OF_FREEDOM);
 		total += mres.memResolv(&NUMBER_OF_ORBITALS,
-		    end - start,
-		    str + " NUMBER_OF_ORBITALS");
+		                        end - start,
+		                        str + " NUMBER_OF_ORBITALS");
 
 		total += mres.memResolv(&DEGREES_OF_FREEDOM,
-		    sizeof(*this) - total,
-		    str + " DEGREES_OF_FREEDOM");
+		                        sizeof(*this) - total,
+		                        str + " DEGREES_OF_FREEDOM");
 
 		return total;
 	}
@@ -231,7 +235,7 @@ public:
 	}
 
 	void write(PsimagLite::String,
-	    PsimagLite::IoNg::Out::Serializer&) const
+	           PsimagLite::IoNg::Out::Serializer&) const
 	{
 	}
 

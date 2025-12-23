@@ -79,12 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGET_PARAMS_GROUNDSTATE_H
 #include "TargetParamsBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType>
-class TargetParamsGroundState : public TargetParamsBase<ModelType>
-{
+class TargetParamsGroundState : public TargetParamsBase<ModelType> {
 
 	typedef TargetParamsBase<ModelType> BaseType;
 
@@ -110,7 +108,7 @@ public:
 	}
 
 	void write(PsimagLite::String,
-	    PsimagLite::IoSerializer&) const
+	           PsimagLite::IoSerializer&) const
 	{
 		// this function intentionally left blank
 	}

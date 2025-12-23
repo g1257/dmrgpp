@@ -82,8 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "MetaOpForConnection.hh"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename FieldType>
 struct Link {
@@ -93,12 +92,12 @@ struct Link {
 	typedef std::pair<MetaOpForConnection, MetaOpForConnection> PairMetaOForConnectoinType;
 
 	Link(PairMetaOForConnectoinType finalIndices1,
-	    ProgramGlobals::ConnectionEnum type1,
-	    const FieldType& value1,
-	    ProgramGlobals::FermionOrBosonEnum fOb,
-	    SizeType aM,
-	    RealType aF,
-	    SizeType cat)
+	     ProgramGlobals::ConnectionEnum type1,
+	     const FieldType& value1,
+	     ProgramGlobals::FermionOrBosonEnum fOb,
+	     SizeType aM,
+	     RealType aF,
+	     SizeType cat)
 	    : pairMetaOps(finalIndices1)
 	    , type(type1)
 	    , value(value1)

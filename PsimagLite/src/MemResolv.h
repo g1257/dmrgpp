@@ -28,9 +28,12 @@ class MemResolv {
 
 public:
 
-	enum MemoryKindEnum { MEMORY_DATA,
-		              MEMORY_HEAPPTR,
-		              MEMORY_TEXTPTR };
+	enum MemoryKindEnum
+	{
+		MEMORY_DATA,
+		MEMORY_HEAPPTR,
+		MEMORY_TEXTPTR
+	};
 
 	static const unsigned int SIZEOF_HEAPREF = sizeof(void*);
 	static const unsigned int SIZEOF_VPTR = sizeof(void*);

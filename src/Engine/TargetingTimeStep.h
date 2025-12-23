@@ -83,16 +83,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsSuzukiTrotter.h"
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingTimeStep : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingTimeStep : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
-	enum { BORDER_NEITHER,
+	enum
+	{
+		BORDER_NEITHER,
 		BORDER_LEFT,
-		BORDER_RIGHT };
+		BORDER_RIGHT
+	};
 
 public:
 
@@ -126,11 +127,11 @@ public:
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingTimeStep(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& ioIn,
-	    PsimagLite::String targeting)
+	                  const CheckpointType& checkPoint,
+	                  const WaveFunctionTransfType& wft,
+	                  const QnType&,
+	                  InputValidatorType& ioIn,
+	                  PsimagLite::String targeting)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_(ioIn, targeting, checkPoint.model())
 	    , wft_(wft)
@@ -194,10 +195,10 @@ public:
 	}
 
 	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType&,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
+	            const BlockType&,
+	            SizeType loopNumber)
 	{
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
@@ -234,8 +235,8 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix) const
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -249,9 +250,9 @@ public:
 private:
 
 	void evolveInternal(RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    SizeType loopNumber)
+	                    ProgramGlobals::DirectionEnum direction,
+	                    const BlockType& block1,
+	                    SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -280,11 +281,11 @@ private:
 		}
 
 		this->common().aoeNonConst().getPhi(&phiNew,
-		    Eg,
-		    direction,
-		    site,
-		    loopNumber,
-		    tstStruct_);
+		                                    Eg,
+		                                    direction,
+		                                    site,
+		                                    loopNumber,
+		                                    tstStruct_);
 
 		PairType startEnd(0, tstStruct_.times().size());
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
@@ -295,13 +296,13 @@ private:
 
 		static const bool isLastCall = true;
 		this->common().aoeNonConst().calcTimeVectors(indices,
-		    Eg,
-		    phiNew,
-		    direction,
-		    allOperatorsApplied,
-		    false, // don't wft or advance indices[0]
-		    block1,
-		    isLastCall);
+		                                             Eg,
+		                                             phiNew,
+		                                             direction,
+		                                             allOperatorsApplied,
+		                                             false, // don't wft or advance indices[0]
+		                                             block1,
+		                                             isLastCall);
 
 		this->common().cocoon(block1, direction, false);
 
@@ -340,18 +341,18 @@ private:
 	}
 
 	void printEnergies(const VectorWithOffsetType& phi,
-	    SizeType whatTarget,
-	    SizeType i0) const
+	                   SizeType whatTarget,
+	                   SizeType i0) const
 	{
 		const SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		    ModelType::modelLinks(),
-		    this->common().aoe().timeVectors().time(),
-		    BaseType::model().superOpHelper());
+		                                                 ModelType::modelLinks(),
+		                                                 this->common().aoe().timeVectors().time(),
+		                                                 BaseType::model().superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		    hc,
-		    aux);
+		                                                     hc,
+		                                                     aux);
 
 		const SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);

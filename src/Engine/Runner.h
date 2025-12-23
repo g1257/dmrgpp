@@ -89,15 +89,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 
-namespace Dmrg
-{
-class Runner
-{
+namespace Dmrg {
+class Runner {
 public:
 
 	Runner(const PsimagLite::String& exec,
-	    const PsimagLite::String& inputRoot,
-	    const PsimagLite::String& ext)
+	       const PsimagLite::String& inputRoot,
+	       const PsimagLite::String& ext)
 	    : exec_(exec)
 	    , inputRoot_(inputRoot)
 	    , ext_(ext)

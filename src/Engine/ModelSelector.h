@@ -84,12 +84,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/UlsOsu/UlsOsu.h"
 // end models DO NOT REMOVE MARK
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelBaseType>
-class ModelSelector
-{
+class ModelSelector {
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -146,8 +144,8 @@ public:
 	}
 
 	ModelBaseType& operator()(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	                          InputValidatorType& io,
+	                          const SuperGeometryType& geometry)
 	{
 		if (model_)
 			return *model_;
@@ -260,7 +258,7 @@ private:
 		SizeType l = str.length();
 		SizeType namel = name_.length();
 		PsimagLite::String tmp = (namel == l) ? ""
-						      : name_.substr(l, namel - l);
+		                                      : name_.substr(l, namel - l);
 		return tmp;
 	}
 

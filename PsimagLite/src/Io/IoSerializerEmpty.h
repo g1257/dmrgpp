@@ -14,8 +14,11 @@ class IoSerializerEmpty {
 
 public:
 
-	enum WriteMode { NO_OVERWRITE,
-		         ALLOW_OVERWRITE };
+	enum WriteMode
+	{
+		NO_OVERWRITE,
+		ALLOW_OVERWRITE
+	};
 
 	IoSerializerEmpty(String, unsigned int) { errorPrint("ctor"); }
 

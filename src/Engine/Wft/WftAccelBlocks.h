@@ -6,12 +6,10 @@
 #include <iomanip>
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename WaveFunctionTransfBaseType>
-class WftAccelBlocks
-{
+class WftAccelBlocks {
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
@@ -28,20 +26,19 @@ class WftAccelBlocks
 	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
 	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
 
-	class ParallelWftInBlocks
-	{
+	class ParallelWftInBlocks {
 
 	public:
 
 		ParallelWftInBlocks(VectorMatrixType& result,
-		    const VectorMatrixType& psi,
-		    const MatrixType& ws,
-		    const MatrixType& we,
-		    SizeType volumeOfNk,
-		    const ProgramGlobals::SysOrEnvEnum sysOrEnv,
-		    SizeType threads,
-		    SizeType gemmRnb,
-		    SizeType threadsForGemmR)
+		                    const VectorMatrixType& psi,
+		                    const MatrixType& ws,
+		                    const MatrixType& we,
+		                    SizeType volumeOfNk,
+		                    const ProgramGlobals::SysOrEnvEnum sysOrEnv,
+		                    SizeType threads,
+		                    SizeType gemmRnb,
+		                    SizeType threadsForGemmR)
 		    : result_(result)
 		    , psi_(psi)
 		    , ws_(ws)
@@ -187,8 +184,8 @@ class WftAccelBlocks
 			const int ldYtemp = nrow_Ytemp;
 			static const bool needsPrinting = false;
 			PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
-			    gemmRnb_,
-			    threadsForGemmR_);
+			                                           gemmRnb_,
+			                                           threadsForGemmR_);
 
 			if (use_method_1) {
 				// ------------------
@@ -388,8 +385,8 @@ class WftAccelBlocks
 			const int ldYtemp = nrow_Ytemp;
 			static const bool needsPrinting = false;
 			PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
-			    gemmRnb_,
-			    threadsForGemmR_);
+			                                           gemmRnb_,
+			                                           threadsForGemmR_);
 
 			if (use_method_1) {
 				// ---------------------------
@@ -471,7 +468,7 @@ class WftAccelBlocks
 		}
 
 		const MatrixType& getWeModif(const PsimagLite::Matrix<std::complex<RealType>>& m,
-		    SizeType threadNum)
+		                             SizeType threadNum)
 		{
 			storage_[threadNum].clear();
 			SizeType rows = m.rows();
@@ -498,18 +495,18 @@ class WftAccelBlocks
 public:
 
 	WftAccelBlocks(const DmrgWaveStructType& dmrgWaveStruct,
-	    const WftOptionsType& wftOptions)
+	               const WftOptionsType& wftOptions)
 	    : dmrgWaveStruct_(dmrgWaveStruct)
 	    , wftOptions_(wftOptions)
 	{
 	}
 
 	void environFromInfinite(VectorWithOffsetType& psiDest,
-	    SizeType i0,
-	    const VectorWithOffsetType& psiSrc,
-	    SizeType i0src,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	                         SizeType i0,
+	                         const VectorWithOffsetType& psiSrc,
+	                         SizeType i0src,
+	                         const LeftRightSuperType& lrs,
+	                         const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		if (lrs.left().block().size() < 2)
 			err("Bounce!?\n");
@@ -535,20 +532,20 @@ public:
 		VectorMatrixType result(volumeOfNk);
 
 		SizeType threads = std::min(volumeOfNk,
-		    PsimagLite::Concurrency::codeSectionParams.npthreads);
+		                            PsimagLite::Concurrency::codeSectionParams.npthreads);
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		ParallelizerType threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
-		    psi,
-		    ws,
-		    we,
-		    volumeOfNk,
-		    ProgramGlobals::SysOrEnvEnum::ENVIRON,
-		    threads,
-		    wftOptions_.gemmRnb,
-		    wftOptions_.threadsForGemmR);
+		                              psi,
+		                              ws,
+		                              we,
+		                              volumeOfNk,
+		                              ProgramGlobals::SysOrEnvEnum::ENVIRON,
+		                              threads,
+		                              wftOptions_.gemmRnb,
+		                              wftOptions_.threadsForGemmR);
 
 		threadedWft.loopCreate(helperWft);
 
@@ -556,11 +553,11 @@ public:
 	}
 
 	void systemFromInfinite(VectorWithOffsetType& psiDest,
-	    SizeType i0,
-	    const VectorWithOffsetType& psiSrc,
-	    SizeType i0src,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	                        SizeType i0,
+	                        const VectorWithOffsetType& psiSrc,
+	                        SizeType i0src,
+	                        const LeftRightSuperType& lrs,
+	                        const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		if (lrs.right().block().size() < 2)
 			err("Bounce!?\n");
@@ -591,14 +588,14 @@ public:
 		ParallelizerType threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
-		    psi,
-		    ws,
-		    we,
-		    volumeOfNk,
-		    ProgramGlobals::SysOrEnvEnum::SYSTEM,
-		    threads,
-		    wftOptions_.gemmRnb,
-		    wftOptions_.threadsForGemmR);
+		                              psi,
+		                              ws,
+		                              we,
+		                              volumeOfNk,
+		                              ProgramGlobals::SysOrEnvEnum::SYSTEM,
+		                              threads,
+		                              wftOptions_.gemmRnb,
+		                              wftOptions_.threadsForGemmR);
 
 		threadedWft.loopCreate(helperWft);
 
@@ -608,9 +605,9 @@ public:
 private:
 
 	void environPreparePsi(VectorMatrixType& psi,
-	    const VectorWithOffsetType& psiSrc,
-	    SizeType i0src,
-	    SizeType volumeOfNk) const
+	                       const VectorWithOffsetType& psiSrc,
+	                       SizeType i0src,
+	                       SizeType volumeOfNk) const
 	{
 		SizeType total = psiSrc.effectiveSize(i0src);
 		SizeType offset = psiSrc.offset(i0src);
@@ -629,10 +626,10 @@ private:
 	}
 
 	void environCopyOut(VectorWithOffsetType& psiDest,
-	    SizeType i0,
-	    const VectorMatrixType& result,
-	    const LeftRightSuperType& lrs,
-	    SizeType volumeOfNk) const
+	                    SizeType i0,
+	                    const VectorMatrixType& result,
+	                    const LeftRightSuperType& lrs,
+	                    SizeType volumeOfNk) const
 	{
 		SizeType nip = lrs.super().permutationInverse().size() / lrs.right().permutationInverse().size();
 		PackIndicesType pack1(nip);
@@ -652,9 +649,9 @@ private:
 	}
 
 	void systemPreparePsi(VectorMatrixType& psi,
-	    const VectorWithOffsetType& psiSrc,
-	    SizeType i0src,
-	    SizeType volumeOfNk) const
+	                      const VectorWithOffsetType& psiSrc,
+	                      SizeType i0src,
+	                      SizeType volumeOfNk) const
 	{
 		SizeType total = psiSrc.effectiveSize(i0src);
 		SizeType offset = psiSrc.offset(i0src);
@@ -673,10 +670,10 @@ private:
 	}
 
 	void systemCopyOut(VectorWithOffsetType& psiDest,
-	    SizeType i0,
-	    const VectorMatrixType& result,
-	    const LeftRightSuperType& lrs,
-	    SizeType volumeOfNk) const
+	                   SizeType i0,
+	                   const VectorMatrixType& result,
+	                   const LeftRightSuperType& lrs,
+	                   SizeType volumeOfNk) const
 	{
 		SizeType nip = lrs.left().permutationInverse().size() / volumeOfNk;
 		SizeType nalpha = lrs.left().permutationInverse().size();

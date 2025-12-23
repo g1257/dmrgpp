@@ -63,9 +63,8 @@ public:
 		const double& operator()(const double& x) const
 		{
 			auto it = std::find_if(
-			    data_.begin(), data_.end(), [&x](const std::pair<double, double>& pair) {
-				    return (pair.first == x);
-			    });
+			    data_.begin(), data_.end(), [&x](const std::pair<double, double>& pair)
+			    { return (pair.first == x); });
 			return it->second;
 		}
 
@@ -105,8 +104,7 @@ public:
 		{
 			if (separator == "space") {
 				return " ";
-			}
-			else if (separator == "comma") {
+			} else if (separator == "comma") {
 				return ",";
 			}
 

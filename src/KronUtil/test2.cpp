@@ -144,13 +144,13 @@ int main()
 
 							csr_submatrix(c,
 
-							    nrindex,
-							    ncindex,
-							    max_nnz_D,
-							    rindex,
-							    cindex,
+							              nrindex,
+							              ncindex,
+							              max_nnz_D,
+							              rindex,
+							              cindex,
 
-							    sd);
+							              sd);
 
 							/*
 							 * -----------------------

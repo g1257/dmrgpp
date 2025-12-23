@@ -96,15 +96,13 @@ private:
 			if (dotified.size() != 1)
 				err("Dotified failed " + context + "\n");
 			x = readable_.storageIndexByName(dotified[0]);
-		}
-		else if (l == 2) { // matrix.integer FiniteLoops
+		} else if (l == 2) { // matrix.integer FiniteLoops
 			split(dotified, prefix + lhs[1], ".");
 			if (dotified.size() != 1)
 				err("Dotified failed " + context + "\n");
 			x = assignStorageByName(dotified[0]);
 			storage_.push_back(StoreType(lhs[0], ""));
-		}
-		else if (l == 3) {
+		} else if (l == 3) {
 			// require vector.vector.integer FiniteLoops
 			split(dotified, prefix + lhs[2], ".");
 			if (dotified.size() != 1)

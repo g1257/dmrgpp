@@ -17,13 +17,11 @@ void Ainur::Action::operator()(A& attr, ContextType&, bool&) const
 		String v1 = boost::fusion::at_c<0>(attr);
 		String v2 = boost::fusion::at_c<1>(attr);
 		state_.assign(v1, v2);
-	}
-	else if (name_ == "statement2") {
+	} else if (name_ == "statement2") {
 		String v1 = boost::fusion::at_c<0>(attr);
 		String v2 = boost::fusion::at_c<1>(attr);
 		state_.declare(v1, v2);
-	}
-	else {
+	} else {
 		err("Ainur: bad action name " + name_ + "\n");
 	}
 }

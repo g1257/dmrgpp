@@ -3,12 +3,10 @@
 #include "Vector.h"
 #include <cstdlib>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType>
-class Pvector
-{
+class Pvector {
 
 public:
 

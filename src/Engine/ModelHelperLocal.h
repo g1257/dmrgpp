@@ -85,11 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename LeftRightSuperType_>
-class ModelHelperLocal
-{
+class ModelHelperLocal {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 
@@ -111,8 +109,7 @@ public:
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
 	typedef typename BasisType::QnType QnType;
 
-	class Aux
-	{
+	class Aux {
 
 	public:
 
@@ -224,10 +221,10 @@ public:
 	//! Does matrixBlock= (AB), A belongs to pSprime and B
 	// belongs to pEprime or viceversa (inter)
 	void fastOpProdInter(SparseMatrixType const& A,
-	    SparseMatrixType const& B,
-	    SparseMatrixType& matrixBlock,
-	    const LinkType& link,
-	    const Aux& aux) const
+	                     SparseMatrixType const& B,
+	                     SparseMatrixType& matrixBlock,
+	                     const LinkType& link,
+	                     const Aux& aux) const
 	{
 		RealType fermionSign = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 		    ? -1
@@ -286,11 +283,11 @@ public:
 	// viceversa (inter)
 	// Has been changed to accomodate for reflection symmetry
 	void fastOpProdInter(VectorSparseElementType& x,
-	    const VectorSparseElementType& y,
-	    const SparseMatrixType& A,
-	    const SparseMatrixType& B,
-	    const LinkType& link,
-	    const Aux& aux) const
+	                     const VectorSparseElementType& y,
+	                     const SparseMatrixType& A,
+	                     const SparseMatrixType& B,
+	                     const LinkType& link,
+	                     const Aux& aux) const
 	{
 		RealType fermionSign = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
 		    ? -1
@@ -354,8 +351,8 @@ public:
 	// This is a performance critical function
 	// Has been changed to accomodate for reflection symmetry
 	void hamiltonianLeftProduct(VectorSparseElementType& x,
-	    const VectorSparseElementType& y,
-	    const Aux& aux) const
+	                            const VectorSparseElementType& y,
+	                            const Aux& aux) const
 	{
 		int m = aux.m();
 		int offset = lrs_.super().partition(m);
@@ -389,8 +386,8 @@ public:
 	// Then, this function does x += H_m * y
 	// This is a performance critical function
 	void hamiltonianRightProduct(VectorSparseElementType& x,
-	    const VectorSparseElementType& y,
-	    const Aux& aux) const
+	                             const VectorSparseElementType& y,
+	                             const Aux& aux) const
 	{
 		int m = aux.m();
 		int offset = lrs_.super().partition(m);
@@ -424,8 +421,8 @@ public:
 	// returns the m-th block (in the ordering of basis1) of H
 	// Note: USed only for debugging
 	void calcHamiltonianPart(SparseMatrixType& matrixBlock,
-	    bool option,
-	    const Aux& aux) const
+	                         bool option,
+	                         const Aux& aux) const
 	{
 		int m = aux.m();
 		SizeType offset = lrs_.super().partition(m);

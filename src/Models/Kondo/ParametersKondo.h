@@ -3,17 +3,19 @@
 
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 
 	typedef ParametersModelBase<RealType, QnType> BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	enum class ExtEnum { NONE,
+	enum class ExtEnum
+	{
+		NONE,
 		EXTENDED,
-		EXTENDED2 };
+		EXTENDED2
+	};
 
 	template <typename IoInputType>
 	ParametersKondo(IoInputType& io, PsimagLite::String option)
@@ -51,7 +53,7 @@ struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersKondo";
 		io.createGroup(label);

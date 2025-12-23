@@ -2,27 +2,24 @@
 #define DIAGBLOCKDIAGMATRIX_H
 #include "EnforcePhase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename BlockDiagonalMatrixType>
-class DiagBlockDiagMatrix
-{
+class DiagBlockDiagMatrix {
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 	typedef typename BuildingBlockType::value_type ComplexOrRealType;
 	typedef typename BlockDiagonalMatrixType::VectorRealType VectorRealType;
 
-	class LoopForDiag
-	{
+	class LoopForDiag {
 
 		typedef PsimagLite::Concurrency ConcurrencyType;
 
 	public:
 
 		LoopForDiag(BlockDiagonalMatrixType& C1,
-		    VectorRealType& eigs1,
-		    char option1)
+		            VectorRealType& eigs1,
+		            char option1)
 		    : C(C1)
 		    , eigs(eigs1)
 		    , option(option1)
@@ -76,8 +73,8 @@ public:
 	//        is needed and LAPACK is not necessarily thread safe.
 	// This function is NOT called by useSvd
 	static void diagonalise(BlockDiagonalMatrixType& C,
-	    VectorRealType& eigs,
-	    char option)
+	                        VectorRealType& eigs,
+	                        char option)
 	{
 		typedef PsimagLite::NoPthreadsNg<LoopForDiag> ParallelizerType;
 		typedef PsimagLite::Concurrency ConcurrencyType;

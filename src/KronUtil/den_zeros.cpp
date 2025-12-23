@@ -2,8 +2,8 @@
 
 template <typename ComplexOrRealType>
 void den_zeros(const int,
-    const int,
-    PsimagLite::Matrix<ComplexOrRealType>& a_)
+               const int,
+               PsimagLite::Matrix<ComplexOrRealType>& a_)
 {
 	/*
 	 * ----------------------

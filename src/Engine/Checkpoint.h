@@ -90,12 +90,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "Stack.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType, typename WaveFunctionTransfType_>
-class Checkpoint
-{
+class Checkpoint {
 
 public:
 
@@ -122,24 +120,24 @@ public:
 	using VectorFiniteLoopType = typename PsimagLite::Vector<FiniteLoopType>::Type;
 
 	Checkpoint(const ParametersType& parameters,
-	    InputValidatorType& ioIn,
-	    const ModelType& model,
-	    SizeType nsectors,
-	    const BasisTraits& basisTraits)
+	           InputValidatorType& ioIn,
+	           const ModelType& model,
+	           SizeType nsectors,
+	           const BasisTraits& basisTraits)
 	    : parameters_(parameters)
 	    , model_(model)
 	    , basisTraits_(basisTraits)
 	    , isRestart_(parameters_.options.isSet("restart"))
 	    , systemStack_(parameters_.options.isSet("shrinkStacksOnDisk"),
-		  parameters_.filename,
-		  "Stacks",
-		  "system",
-		  basisTraits)
+	                   parameters_.filename,
+	                   "Stacks",
+	                   "system",
+	                   basisTraits)
 	    , envStack_(systemStack_.onDisk(),
-		  parameters_.filename,
-		  "Stacks",
-		  "environ",
-		  basisTraits)
+	                parameters_.filename,
+	                "Stacks",
+	                "environ",
+	                basisTraits)
 	    , progress_("Checkpoint")
 	    , energiesFromFile_(nsectors)
 	    , dummyBwo_("dummy", basisTraits)
@@ -217,8 +215,8 @@ public:
 	}
 
 	static void readEnergies(VectorVectorRealType& energies,
-	    PsimagLite::String lfEnergy,
-	    IoType::In& ioIn2)
+	                         PsimagLite::String lfEnergy,
+	                         IoType::In& ioIn2)
 	{
 		// Energies/Size <-- sectors
 		// Energies/0/Size <--- excited
@@ -239,17 +237,17 @@ public:
 			energies[sectorIndex].resize(nexcited);
 			for (SizeType e = 0; e < nexcited; ++e)
 				ioIn2.read(energies[sectorIndex][e],
-				    lfEnergy + "/" + ttos(sectorIndex) + "/" + ttos(e));
+				           lfEnergy + "/" + ttos(sectorIndex) + "/" + ttos(e));
 		}
 	}
 
 	static void writeEnergies(bool firstCall,
-	    PsimagLite::String label,
-	    const VectorVectorRealType& energies,
-	    IoType::Out& io)
+	                          PsimagLite::String label,
+	                          const VectorVectorRealType& energies,
+	                          IoType::Out& io)
 	{
 		PsimagLite::IoNgSerializer::WriteMode mode = (firstCall) ? PsimagLite::IoNgSerializer::NO_OVERWRITE
-									 : PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
+		                                                         : PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
 
 		// Energies/Size <-- sectors
 		// Energies/0/Size <--- excited
@@ -264,12 +262,12 @@ public:
 			if (firstCall)
 				io.createGroup(label + "/" + ttos(sectorIndex));
 			io.write(nexcited,
-			    label + "/" + ttos(sectorIndex) + "/Size",
-			    mode);
+			         label + "/" + ttos(sectorIndex) + "/Size",
+			         mode);
 			for (SizeType e = 0; e < nexcited; ++e)
 				io.write(energies[sectorIndex][e],
-				    label + "/" + ttos(sectorIndex) + "/" + ttos(e),
-				    mode);
+				         label + "/" + ttos(sectorIndex) + "/" + ttos(e),
+				         mode);
 		}
 	}
 
@@ -289,27 +287,27 @@ public:
 
 	// Not related to stacks
 	void write(const BasisWithOperatorsType& pS,
-	    const BasisWithOperatorsType& pE,
-	    typename IoType::Out& io) const
+	           const BasisWithOperatorsType& pE,
+	           typename IoType::Out& io) const
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Saving pS and pE...";
 		progress_.printline(msgg, std::cout);
 		pS.write(io,
-		    "CHKPOINTSYSTEM",
-		    IoType::Out::Serializer::NO_OVERWRITE,
-		    BasisWithOperatorsType::SaveEnum::ALL);
+		         "CHKPOINTSYSTEM",
+		         IoType::Out::Serializer::NO_OVERWRITE,
+		         BasisWithOperatorsType::SaveEnum::ALL);
 		pE.write(io,
-		    "CHKPOINTENVIRON",
-		    IoType::Out::Serializer::NO_OVERWRITE,
-		    BasisWithOperatorsType::SaveEnum::ALL);
+		         "CHKPOINTENVIRON",
+		         IoType::Out::Serializer::NO_OVERWRITE,
+		         BasisWithOperatorsType::SaveEnum::ALL);
 	}
 
 	// Not related to stacks
 	void read(BasisWithOperatorsType& pS,
-	    BasisWithOperatorsType& pE,
-	    const BasisTraits& basisTraits)
+	          BasisWithOperatorsType& pE,
+	          const BasisTraits& basisTraits)
 	{
 		typename PsimagLite::IoSelector::In ioTmp(parameters_.checkpoint.filename());
 
@@ -327,7 +325,7 @@ public:
 	}
 
 	void push(const BasisWithOperatorsType& pSorE,
-	    typename ProgramGlobals::SysOrEnvEnum what)
+	          typename ProgramGlobals::SysOrEnvEnum what)
 	{
 		if (what == ProgramGlobals::SysOrEnvEnum::ENVIRON)
 			envStack_.push(pSorE);
@@ -364,15 +362,15 @@ public:
 		SizeType sind = systemStack_.size() - ind - 1;
 		SizeType eind = envStack_.size() - ind - 1;
 		return std::pair<BasisWithOperatorsType, BasisWithOperatorsType>(systemStack_[sind],
-		    envStack_[eind]);
+		                                                                 envStack_[eind]);
 	}
 
 private:
 
 	// legacy reading (use as fallback only)
 	static void readEnergiesLegacy(VectorVectorRealType& energies,
-	    PsimagLite::String lfEnergy,
-	    IoType::In& ioIn2)
+	                               PsimagLite::String lfEnergy,
+	                               IoType::In& ioIn2)
 	{
 		// Energies/Size <-- numbers
 		// Energies/Energy <--- value
@@ -407,9 +405,9 @@ private:
 	Checkpoint& operator=(const Checkpoint&);
 
 	void checkFiniteLoops(VectorFiniteLoopType& vfl,
-	    SizeType totalSites,
-	    SizeType hilbertOneSite,
-	    InputValidatorType& ioIn) const
+	                      SizeType totalSites,
+	                      SizeType hilbertOneSite,
+	                      InputValidatorType& ioIn) const
 	{
 		if (parameters_.options.isSet("nofiniteloops"))
 			return;
@@ -438,10 +436,10 @@ private:
 	}
 
 	void checkFiniteLoops(const VectorFiniteLoopType& finiteLoop,
-	    SizeType totalSites,
-	    SizeType lastSite,
-	    int prevDeltaSign,
-	    bool checkPoint) const
+	                      SizeType totalSites,
+	                      SizeType lastSite,
+	                      int prevDeltaSign,
+	                      bool checkPoint) const
 	{
 		PsimagLite::String s = "checkFiniteLoops: I'm falling out of the lattice ";
 		PsimagLite::String loops = "";
@@ -494,10 +492,10 @@ private:
 	}
 
 	void checkAgainstPartialLoops(const VectorFiniteLoopType& finiteLoop,
-	    SizeType totalSites,
-	    SizeType lastSite,
-	    int prevDeltaSign,
-	    bool checkPoint) const
+	                              SizeType totalSites,
+	                              SizeType lastSite,
+	                              int prevDeltaSign,
+	                              bool checkPoint) const
 	{
 		int x = lastSite;
 		if (finiteLoop[0].stepLength() < 0 && !checkPoint)
@@ -525,7 +523,7 @@ private:
 	}
 
 	void checkMvalues(const VectorFiniteLoopType& finiteLoop,
-	    SizeType hilbertOneSite) const
+	                  SizeType hilbertOneSite) const
 	{
 		for (SizeType i = 0; i < finiteLoop.size(); ++i) {
 			if (finiteLoop[i].keptStates() >= hilbertOneSite)
@@ -550,13 +548,13 @@ private:
 	void loadStacksDiskToMemory()
 	{
 		DiskStackType systemDisk(parameters_.checkpoint.filename(),
-		    isRestart_,
-		    "system",
-		    basisTraits_);
+		                         isRestart_,
+		                         "system",
+		                         basisTraits_);
 		DiskStackType envDisk(parameters_.checkpoint.filename(),
-		    isRestart_,
-		    "environ",
-		    basisTraits_);
+		                      isRestart_,
+		                      "environ",
+		                      basisTraits_);
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -571,13 +569,13 @@ private:
 	{
 		const bool needsToRead = false;
 		DiskStackType systemDisk(parameters_.filename,
-		    needsToRead,
-		    "system",
-		    basisTraits_);
+		                         needsToRead,
+		                         "system",
+		                         basisTraits_);
 		DiskStackType envDisk(parameters_.filename,
-		    needsToRead,
-		    "environ",
-		    basisTraits_);
+		                      needsToRead,
+		                      "environ",
+		                      basisTraits_);
 		sayAboutToWrite();
 		DiskOrMemoryStackType::loadStack(systemDisk, systemStack_);
 		DiskOrMemoryStackType::loadStack(envDisk, envStack_);
@@ -588,7 +586,7 @@ private:
 	//! returns s1+s2 if s2 has no '/',
 	//! if s2 = s2a + '/' + s2b return s2a + '/' + s1 + s2b
 	PsimagLite::String appendWithDir(const PsimagLite::String& s1,
-	    const PsimagLite::String& s2) const
+	                                 const PsimagLite::String& s2) const
 	{
 		size_t x = s2.find("/");
 		if (x == PsimagLite::String::npos)

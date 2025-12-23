@@ -103,11 +103,11 @@ to the main dmrg driver are the following.
 	InputNgType::Readable io(ioW);
 	OmegaParamsType omegaParams(io);
 	ProcOmegasType procOmegas(io,
-	    precision,
-	    skipFourier,
-	    rootIname,
-	    rootOname,
-	    omegaParams);
+	                          precision,
+	                          skipFourier,
+	                          rootIname,
+	                          rootOname,
+	                          omegaParams);
 
 	procOmegas.run();
 

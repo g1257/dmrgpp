@@ -3,24 +3,25 @@
 #include "AnsiColors.h"
 #include "InputNg.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType>
-class Intent
-{
+class Intent {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename ModelType::ParametersType DmrgSolverParamsType;
 
-	enum class IntentEnum { NONE,
+	enum class IntentEnum
+	{
+		NONE,
 		UNKNOWN,
 		GS,
 		GIMP_MATSUBARA,
 		ARPES0,
 		ARPES1,
-		NEUTRONS_SZSZ };
+		NEUTRONS_SZSZ
+	};
 
 public:
 

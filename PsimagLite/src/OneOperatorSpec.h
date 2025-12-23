@@ -91,9 +91,8 @@ struct OneOperatorSpec {
 
 	static bool isNonNegativeInteger(const String& s)
 	{
-		return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) {
-			                     return !std::isdigit(c);
-		                     })
+		return !s.empty() && std::find_if(s.begin(), s.end(), [](char c)
+		                                  { return !std::isdigit(c); })
 		    == s.end();
 	}
 

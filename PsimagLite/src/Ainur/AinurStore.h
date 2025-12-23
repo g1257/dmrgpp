@@ -12,22 +12,31 @@ public:
 	typedef AinurLexical AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 
-	enum Type { UNKNOWN,
-		    SCALAR,
-		    VECTOR,
-		    MATRIX }; // HASH, FUNCTION
+	enum Type
+	{
+		UNKNOWN,
+		SCALAR,
+		VECTOR,
+		MATRIX
+	}; // HASH, FUNCTION
 
-	enum SubType { UNDEFINED,
-		       INTEGER,
-		       REAL,
-		       COMPLEX,
-		       STRING,
-		       CHAR,
-		       GROUP };
+	enum SubType
+	{
+		UNDEFINED,
+		INTEGER,
+		REAL,
+		COMPLEX,
+		STRING,
+		CHAR,
+		GROUP
+	};
 
-	enum Attribute { NONE,
-		         REQUIRED,
-		         CONST };
+	enum Attribute
+	{
+		NONE,
+		REQUIRED,
+		CONST
+	};
 
 	Store(String s, String a)
 	    : type_(UNKNOWN)
@@ -209,8 +218,7 @@ private:
 				value_.resize(rows * cols + 2);
 				value_[0] = ttos(rows);
 				value_[1] = ttos(cols);
-			}
-			else if (cols != thisCol) {
+			} else if (cols != thisCol) {
 				err("Malformed matrix, " + name + "\n");
 			}
 

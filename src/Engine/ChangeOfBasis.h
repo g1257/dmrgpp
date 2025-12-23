@@ -4,12 +4,10 @@
 #include "BlockOffDiagMatrix.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename OperatorStorageType, typename MatrixType>
-class ChangeOfBasis
-{
+class ChangeOfBasis {
 
 public:
 
@@ -38,8 +36,8 @@ public:
 	}
 
 	void operator()(OperatorStorageType& v,
-	    SizeType gemmRnb,
-	    SizeType threadsForGemmR) const
+	                SizeType gemmRnb,
+	                SizeType threadsForGemmR) const
 	{
 		if (!ProgramGlobals::oldChangeOfBasis) {
 			BlockOffDiagMatrixType vBlocked(v.getCRS(), transform_.offsetsRows());
@@ -53,9 +51,9 @@ public:
 	}
 
 	static void changeBasis(OperatorStorageType& v,
-	    const BlockDiagonalMatrixType& ftransform1,
-	    SizeType gemmRnb,
-	    SizeType threadsForGemmR)
+	                        const BlockDiagonalMatrixType& ftransform1,
+	                        SizeType gemmRnb,
+	                        SizeType threadsForGemmR)
 	{
 		if (!v.justCRS())
 			err("changeBasis: operatorstorage not justCRS\n");

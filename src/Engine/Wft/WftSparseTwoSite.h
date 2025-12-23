@@ -4,12 +4,10 @@
 #include "ProgramGlobals.h"
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename WaveFunctionTransfBaseType, typename MatrixOrIdentityType>
-class WftSparseTwoSite
-{
+class WftSparseTwoSite {
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
@@ -28,16 +26,16 @@ class WftSparseTwoSite
 public:
 
 	WftSparseTwoSite(VectorWithOffsetType& dest,
-	    SizeType i0,
-	    const VectorWithOffsetType& src,
-	    SizeType iOld,
-	    const DmrgWaveStructType& dmrgWaveStruct,
-	    const WftOptionsType& wftOptions,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces,
-	    const SparseMatrixType& wsT,
-	    const SparseMatrixType& we,
-	    const ProgramGlobals::SysOrEnvEnum sysOrEnv)
+	                 SizeType i0,
+	                 const VectorWithOffsetType& src,
+	                 SizeType iOld,
+	                 const DmrgWaveStructType& dmrgWaveStruct,
+	                 const WftOptionsType& wftOptions,
+	                 const LeftRightSuperType& lrs,
+	                 const OneSiteSpacesType& oneSiteSpaces,
+	                 const SparseMatrixType& wsT,
+	                 const SparseMatrixType& we,
+	                 const ProgramGlobals::SysOrEnvEnum sysOrEnv)
 	    : dest_(dest)
 	    , i0_(i0)
 	    , src_(src)
@@ -50,12 +48,12 @@ public:
 	    , hilbertMain_(oneSiteSpaces.hilbertMain())
 	    , hilbertAux_(oneSiteSpaces.hilbertAux())
 	    , pack1_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
-		      ? lrs.left().permutationInverse().size()
-		      : integerDivision(lrs.super().permutationInverse().size(),
-			    lrs.right().permutationInverse().size()))
+	                 ? lrs.left().permutationInverse().size()
+	                 : integerDivision(lrs.super().permutationInverse().size(),
+	                                   lrs.right().permutationInverse().size()))
 	    , pack2_((sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM)
-		      ? integerDivision(lrs.left().permutationInverse().size(), hilbertMain_)
-		      : hilbertMain_)
+	                 ? integerDivision(lrs.left().permutationInverse().size(), hilbertMain_)
+	                 : hilbertMain_)
 	    , sysOrEnv_(sysOrEnv)
 	{
 		assert(sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM || sysOrEnv == ProgramGlobals::SysOrEnvEnum::ENVIRON);
@@ -97,8 +95,8 @@ public:
 private:
 
 	ComplexOrRealType createAux2bFromInfinite(SizeType is,
-	    SizeType jpl,
-	    SizeType jen) const
+	                                          SizeType jpl,
+	                                          SizeType jen) const
 	{
 		SizeType offset = src_.offset(iOld_);
 		SizeType offsetPlusOne = dmrgWaveStruct_.lrs().super().partition(iOld_ + 1);
@@ -132,15 +130,15 @@ private:
 	}
 
 	ComplexOrRealType createAux1bFromInfinite(SizeType ip,
-	    SizeType kp,
-	    SizeType jp) const
+	                                          SizeType kp,
+	                                          SizeType jp) const
 	{
 		SizeType offset = src_.offset(iOld_);
 		const SparseMatrixType& ws = wsT_;
 		const SparseMatrixType& weT = we_;
 		SizeType ni = dmrgWaveStruct_.lrs().left().size();
 		SizeType nip = integerDivision(dmrgWaveStruct_.lrs().left().permutationInverse().size(),
-		    hilbertMain_);
+		                               hilbertMain_);
 		MatrixOrIdentityType wsRef2(wftOptions_.twoSiteDmrg && nip > hilbertAux_, ws);
 		SizeType start = weT.getRowPtr(jp);
 		SizeType end = weT.getRowPtr(jp + 1);

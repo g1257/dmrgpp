@@ -83,12 +83,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ClebschGordan.h"
 #include "ProgressIndicator.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename FieldType>
-class ClebschGordanCached
-{
+class ClebschGordanCached {
 	typedef ClebschGordan<FieldType> ClebschGordanType;
 	typedef typename ClebschGordanType::PairType PairType;
 

@@ -5,12 +5,10 @@
 #include "ProgressIndicator.h"
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename RealType>
-class TruncationControl
-{
+class TruncationControl {
 
 public:
 

@@ -83,11 +83,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <cassert>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelBaseType>
-class Immm : public ModelBaseType
-{
+class Immm : public ModelBaseType {
 
 	typedef unsigned int long WordType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
@@ -125,15 +123,21 @@ public:
 	static const int SPIN_DOWN = HilbertSpaceImmmType::SPIN_DOWN;
 	static const SizeType NUMBER_OF_SPINS = HilbertSpaceImmmType::NUMBER_OF_SPINS;
 
-	enum AtomEnum { ATOM_COPPER,
-		ATOM_OXYGEN };
+	enum AtomEnum
+	{
+		ATOM_COPPER,
+		ATOM_OXYGEN
+	};
 
-	enum { ORBITALS_COPPER = 1,
-		ORBITALS_OXYGEN = 2 };
+	enum
+	{
+		ORBITALS_COPPER = 1,
+		ORBITALS_OXYGEN = 2
+	};
 
 	Immm(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    SuperGeometryType const& geometry)
+	     InputValidatorType& io,
+	     SuperGeometryType const& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
@@ -224,10 +228,10 @@ protected:
 				typename OperatorType::Su2RelatedType su2Related;
 				typename OperatorType::PairType pairZero(0, 0);
 				sz.push(OperatorType(tmp,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    pairZero,
-				    1.0,
-				    su2Related));
+				                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                     pairZero,
+				                     1.0,
+				                     su2Related));
 			}
 
 			for (SizeType dof = 0; dof < total; ++dof)
@@ -246,10 +250,10 @@ protected:
 				SparseMatrixType tmp3 = creationMatrix[dof].getCRS() * tmp2;
 				typename OperatorType::Su2RelatedType su2Related;
 				o.push(OperatorType(tmp3,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2Related));
+				                    ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                    typename OperatorType::PairType(0, 0),
+				                    1.0,
+				                    su2Related));
 			}
 		}
 	}
@@ -263,8 +267,8 @@ private:
 
 	//! set creation matrices for sites in block
 	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
-	    VectorQnType& qns,
-	    const BlockType& block) const
+	                                 VectorQnType& qns,
+	                                 const BlockType& block) const
 	{
 		assert(block.size() == 1);
 		HilbertBasisType natBasis;
@@ -285,10 +289,10 @@ private:
 			typename OperatorType::Su2RelatedType su2related;
 
 			OperatorType myOp(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(0, 0),
+			                  1,
+			                  su2related);
 			creationMatrix.push_back(myOp);
 
 			nmatrix += multiplyTc(tmpMatrix, tmpMatrix);
@@ -297,15 +301,15 @@ private:
 		// add n_i
 		typename OperatorType::Su2RelatedType su2related2;
 		OperatorType nOp(SparseMatrixType(nmatrix),
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related2);
+		                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                 typename OperatorType::PairType(0, 0),
+		                 1,
+		                 su2related2);
 		creationMatrix.push_back(nOp);
 	}
 
 	void setBasis(HilbertBasisType& basis,
-	    const VectorSizeType& block) const
+	              const VectorSizeType& block) const
 	{
 		assert(block.size() == 1);
 		SizeType dof = NUMBER_OF_SPINS * orbitalsAtSite(0);
@@ -365,9 +369,9 @@ private:
 	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void findOperatorMatrices(SparseMatrixType& creationMatrix,
-	    SizeType,
-	    SizeType sigma,
-	    const HilbertBasisType& natBasis) const
+	                          SizeType,
+	                          SizeType sigma,
+	                          const HilbertBasisType& natBasis) const
 	{
 		HilbertState bra, ket;
 		SizeType n = natBasis.size();
@@ -394,8 +398,8 @@ private:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    SizeType site) const
+	                        const HilbertBasisType& basis,
+	                        SizeType site) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -426,8 +430,8 @@ private:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -498,8 +502,8 @@ private:
 	}
 
 	OperatorType cDaggerCi(const typename PsimagLite::Vector<SizeType>::Type& block,
-	    SizeType spin1,
-	    SizeType spin2) const
+	                       SizeType spin1,
+	                       SizeType spin2) const
 	{
 		assert(block.size() == 1);
 		SizeType site = block[0];
@@ -515,18 +519,18 @@ private:
 		assert(spin2 < 2);
 		for (SizeType orb = 0; orb < norb; orb++)
 			tmp += multiplyTc(creationMatrix[orb + spin1 * norb].getCRS(),
-			    creationMatrix[orb + spin2 * norb].getCRS());
+			                  creationMatrix[orb + spin2 * norb].getCRS());
 
 		typename OperatorType::Su2RelatedType su2Related;
 		return OperatorType(SparseMatrixType(tmp),
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1.0,
-		    su2Related);
+		                    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                    typename OperatorType::PairType(0, 0),
+		                    1.0,
+		                    su2Related);
 	}
 
 	OperatorType nUpOrDown(const typename PsimagLite::Vector<SizeType>::Type& block,
-	    SizeType spin) const
+	                       SizeType spin) const
 	{
 		return cDaggerCi(block, spin, spin);
 	}

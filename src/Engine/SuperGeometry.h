@@ -4,12 +4,10 @@
 #include "Geometry/GeometryDca.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType_, typename InputType_, typename ProgramGlobalsType>
-class SuperGeometry
-{
+class SuperGeometry {
 public:
 
 	typedef PsimagLite::Geometry<ComplexOrRealType_, InputType_, ProgramGlobalsType> GeometryType;
@@ -19,8 +17,7 @@ public:
 
 private:
 
-	class SuperPlaquette
-	{
+	class SuperPlaquette {
 
 	public:
 
@@ -38,20 +35,20 @@ private:
 		}
 
 		void addSuperConnections(VectorVectorSizeType& data,
-		    SizeType smax,
-		    SizeType emin,
-		    SizeType linSize) const
+		                         SizeType smax,
+		                         SizeType emin,
+		                         SizeType linSize) const
 		{
 			return (smax + 1 == emin) ? addSuperConnectionsFinite_(data, smax, emin, linSize)
-						  : addSuperConnectionsInfinite_(data, smax, emin, linSize);
+			                          : addSuperConnectionsInfinite_(data, smax, emin, linSize);
 		}
 
 		SizeType holloutRadius() const { return 4; }
 
 		ComplexOrRealType operator()(SizeType smax,
-		    SizeType emin,
-		    const VectorSizeType& hItems,
-		    const VectorSizeType& edofs) const
+		                             SizeType emin,
+		                             const VectorSizeType& hItems,
+		                             const VectorSizeType& edofs) const
 		{
 			return value_;
 		}
@@ -59,18 +56,18 @@ private:
 	private:
 
 		void addSuperConnectionsInfinite_(VectorVectorSizeType& data,
-		    SizeType smax,
-		    SizeType emin,
-		    SizeType linSize) const
+		                                  SizeType smax,
+		                                  SizeType emin,
+		                                  SizeType linSize) const
 		{
 			// FIXME: Add here site substitutions for when the lattice is not fully built
 			return;
 		}
 
 		void addSuperConnectionsFinite_(VectorVectorSizeType& data,
-		    SizeType smax,
-		    SizeType emin,
-		    SizeType linSize) const
+		                                SizeType smax,
+		                                SizeType emin,
+		                                SizeType linSize) const
 		{
 			// smax - 1, smax, emin, emin + 1
 			if (smax > 0 && emin + 1 < linSize)
@@ -128,11 +125,11 @@ public:
 	}
 
 	void split(SizeType sitesPerBlock,
-	    VectorSizeType& S,
-	    VectorVectorSizeType& X,
-	    VectorVectorSizeType& Y,
-	    VectorSizeType& E,
-	    bool allInSystem = false) const
+	           VectorSizeType& S,
+	           VectorVectorSizeType& X,
+	           VectorVectorSizeType& Y,
+	           VectorSizeType& E,
+	           bool allInSystem = false) const
 	{
 		geometry_.split(sitesPerBlock, S, X, Y, E, allInSystem);
 	}
@@ -159,10 +156,10 @@ public:
 	PsimagLite::String label(SizeType i) const { return geometry_.label(i); }
 
 	ComplexOrRealType operator()(SizeType smax,
-	    SizeType emin,
-	    const VectorSizeType& hItems,
-	    const VectorSizeType& edofs,
-	    SizeType term) const
+	                             SizeType emin,
+	                             const VectorSizeType& hItems,
+	                             const VectorSizeType& edofs,
+	                             SizeType term) const
 	{
 		const SizeType n = hItems.size();
 		assert(n == edofs.size());
@@ -187,7 +184,7 @@ public:
 	}
 
 	typename ProgramGlobals::ConnectionEnum connectionKind(SizeType smax,
-	    const VectorSizeType& hItems) const
+	                                                       const VectorSizeType& hItems) const
 	{
 		if (hItems.size() == 2)
 			return geometry_.connectionKind(smax, hItems[0], hItems[1]);
@@ -202,7 +199,7 @@ public:
 		}
 
 		return (flag == 3) ? ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON
-				   : ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM;
+		                   : ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM;
 	}
 
 	const GeometryDcaType& createDcaObject(SizeType orbitals) const
@@ -213,8 +210,8 @@ public:
 	}
 
 	void addSuperConnections(VectorVectorSizeType& data,
-	    SizeType smax,
-	    SizeType emin) const
+	                         SizeType smax,
+	                         SizeType emin) const
 	{
 		const SizeType n = superStrings_.size();
 		for (SizeType i = 0; i < n; ++i)

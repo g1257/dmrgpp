@@ -17,12 +17,10 @@
 #include "SuperGeometry.h"
 #include "VectorWithOffset.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType>
-class DmrgRunner
-{
+class DmrgRunner {
 
 public:
 
@@ -31,8 +29,8 @@ public:
 	typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
 	    ParametersDmrgSolverType;
 	typedef Dmrg::SuperGeometry<ComplexOrRealType,
-	    InputNgType::Readable,
-	    Dmrg::ProgramGlobals>
+	                            InputNgType::Readable,
+	                            Dmrg::ProgramGlobals>
 	    SuperGeometryType;
 	typedef Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn> VectorWithOffsetType;
 	typedef PsimagLite::PsiApp ApplicationType;
@@ -44,8 +42,8 @@ public:
 	}
 
 	void doOneRun(PsimagLite::String data,
-	    PsimagLite::String insitu,
-	    PsimagLite::String logfile) const
+	              PsimagLite::String insitu,
+	              PsimagLite::String logfile) const
 	{
 		typedef PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrixComplex;
 		typedef Dmrg::Basis<MySparseMatrixComplex> BasisType;
@@ -53,9 +51,9 @@ public:
 		typedef Dmrg::LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
 		typedef Dmrg::ModelHelperLocal<LeftRightSuperType> ModelHelperType;
 		typedef Dmrg::ModelBase<ModelHelperType,
-		    ParametersDmrgSolverType,
-		    InputNgType::Readable,
-		    SuperGeometryType>
+		                        ParametersDmrgSolverType,
+		                        InputNgType::Readable,
+		                        SuperGeometryType>
 		    ModelBaseType;
 
 		std::streambuf* globalCoutBuffer = 0;
@@ -118,7 +116,7 @@ private:
 
 	template <typename MatrixVectorType>
 	void doOneRun2(const ParametersDmrgSolverType& dmrgSolverParams,
-	    InputNgType::Readable& io) const
+	               InputNgType::Readable& io) const
 	{
 		SuperGeometryType geometry(io);
 		if (dmrgSolverParams.options.isSet("printgeometry"))
@@ -127,8 +125,8 @@ private:
 		typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
 		    ParametersForSolverType;
 		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-		    MatrixVectorType,
-		    typename MatrixVectorType::VectorType>
+		                                  MatrixVectorType,
+		                                  typename MatrixVectorType::VectorType>
 		    SolverType;
 		typedef typename SolverType::MatrixType::ModelType ModelBaseType;
 

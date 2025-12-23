@@ -86,7 +86,10 @@ class Star : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
-	enum { DIRECTION_S };
+	enum
+	{
+		DIRECTION_S
+	};
 
 	static const SizeType CENTER = 1;
 

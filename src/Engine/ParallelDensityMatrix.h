@@ -80,14 +80,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename BlockMatrixType,
-    typename BasisWithOperatorsType,
-    typename TargetVectorType>
-class ParallelDensityMatrix
-{
+          typename BasisWithOperatorsType,
+          typename TargetVectorType>
+class ParallelDensityMatrix {
 
 	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
 	typedef typename TargetVectorType::value_type DensityMatrixElementType;
@@ -99,13 +97,13 @@ public:
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
 
 	ParallelDensityMatrix(const TargetVectorType& target,
-	    const BasisWithOperatorsType& pBasis,
-	    const BasisWithOperatorsType& pBasisSummed,
-	    const BasisType& pSE,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType m,
-	    RealType weight,
-	    BuildingBlockType& matrixBlock)
+	                      const BasisWithOperatorsType& pBasis,
+	                      const BasisWithOperatorsType& pBasisSummed,
+	                      const BasisType& pSE,
+	                      ProgramGlobals::DirectionEnum direction,
+	                      SizeType m,
+	                      RealType weight,
+	                      BuildingBlockType& matrixBlock)
 	    : target_(target)
 	    , pBasis_(pBasis)
 	    , pBasisSummed_(pBasisSummed)
@@ -131,9 +129,9 @@ public:
 		SizeType ieff = taskNumber + start;
 		for (SizeType j = 0; j < length; ++j) {
 			matrixBlock_(taskNumber, j) += densityMatrixExpand(direction_,
-							   ieff,
-							   j + start,
-							   target_)
+			                                                   ieff,
+			                                                   j + start,
+			                                                   target_)
 			    * weight_;
 		}
 	}
@@ -141,23 +139,23 @@ public:
 private:
 
 	DensityMatrixElementType densityMatrixExpand(ProgramGlobals::DirectionEnum direction,
-	    SizeType alpha1,
-	    SizeType alpha2,
-	    const TargetVectorType& v)
+	                                             SizeType alpha1,
+	                                             SizeType alpha2,
+	                                             const TargetVectorType& v)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			return densityMatrixExpandSystem(alpha1,
-			    alpha2,
-			    v);
+			                                 alpha2,
+			                                 v);
 		else
 			return densityMatrixExpandEnviron(alpha1,
-			    alpha2,
-			    v);
+			                                  alpha2,
+			                                  v);
 	}
 
 	DensityMatrixElementType densityMatrixExpandEnviron(SizeType alpha1,
-	    SizeType alpha2,
-	    const TargetVectorType& v)
+	                                                    SizeType alpha2,
+	                                                    const TargetVectorType& v)
 	{
 		SizeType ns = pBasisSummed_.size();
 		SizeType total = pBasisSummed_.size();
@@ -184,8 +182,8 @@ private:
 	}
 
 	DensityMatrixElementType densityMatrixExpandSystem(SizeType alpha1,
-	    SizeType alpha2,
-	    const TargetVectorType& v)
+	                                                   SizeType alpha2,
+	                                                   const TargetVectorType& v)
 	{
 		SizeType ne = pBasisSummed_.size();
 		SizeType ns = pSE_.size() / ne;

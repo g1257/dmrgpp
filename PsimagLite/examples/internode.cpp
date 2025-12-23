@@ -21,7 +21,8 @@ int main(int argc, char* argv[])
 	// lambda
 	PsimagLite::InterNode<> internode(PsimagLite::MPI::COMM_WORLD);
 
-	internode.parallelFor(0, n, [](SizeType i, SizeType) { std::cout << i; });
+	internode.parallelFor(0, n, [](SizeType i, SizeType)
+	                      { std::cout << i; });
 	std::cout << "\n--------------------------\n";
 	size_t len = 1024;
 	char* name = new char[len + 1];

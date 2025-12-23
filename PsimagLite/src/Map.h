@@ -41,14 +41,20 @@ template <typename T>
 class IsMapLike {
 public:
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename Key, typename T, typename Compare>
 class IsMapLike<std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type>> {
 public:
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 template <typename MapType>

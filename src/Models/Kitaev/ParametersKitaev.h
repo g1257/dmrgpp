@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Kitaev Model Parameters
 // no connectors here, connectors are handled by the geometry
 template <typename RealType, typename QnType>
@@ -126,14 +125,14 @@ struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	                   SizeType,
+	                   PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersKitaev";
 		io.createGroup(label);
@@ -145,7 +144,7 @@ struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersKitaev& parameters)
+	                                const ParametersKitaev& parameters)
 	{
 		os << "MagneticFieldX=" << parameters.magneticFieldX << "\n";
 		os << "MagneticFieldY=" << parameters.magneticFieldY << "\n";

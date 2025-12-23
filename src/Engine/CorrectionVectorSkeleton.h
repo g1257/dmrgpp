@@ -91,22 +91,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TridiagRixsStatic.h"
 #include "VectorWithOffsets.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_,
-    typename VectorWithOffsetType_,
-    typename TargetingBaseType,
-    typename TargetParamsType>
-class CorrectionVectorSkeleton
-{
+          typename VectorWithOffsetType_,
+          typename TargetingBaseType,
+          typename TargetParamsType>
+class CorrectionVectorSkeleton {
 
 public:
 
 	typedef CorrectionVectorSkeleton<LanczosSolverType_,
-	    VectorWithOffsetType_,
-	    TargetingBaseType,
-	    TargetParamsType>
+	                                 VectorWithOffsetType_,
+	                                 TargetingBaseType,
+	                                 TargetParamsType>
 	    ThisType;
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef typename TargetingBaseType::MatrixVectorType MatrixVectorType;
@@ -134,7 +132,7 @@ public:
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
-	    TargetParamsType>
+	                                 TargetParamsType>
 	    CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
 	    ParallelTriDiagType;
@@ -146,8 +144,7 @@ public:
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 
-	class CalcR
-	{
+	class CalcR {
 
 	public:
 
@@ -185,10 +182,10 @@ public:
 	typedef KrylovHelper<typename CalcR::ActionType, TypeWrapper> KrylovHelperType;
 
 	CorrectionVectorSkeleton(InputValidatorType& ioIn,
-	    const TargetParamsType& tstStruct,
-	    const ModelType& model,
-	    const LeftRightSuperType& lrs,
-	    const RealType& energy)
+	                         const TargetParamsType& tstStruct,
+	                         const ModelType& model,
+	                         const LeftRightSuperType& lrs,
+	                         const RealType& energy)
 	    : ioIn_(ioIn)
 	    , tstStruct_(tstStruct)
 	    , model_(model)
@@ -200,8 +197,8 @@ public:
 	}
 
 	void calcDynVectors(const VectorWithOffsetType& tv0,
-	    VectorWithOffsetType& tv1,
-	    VectorWithOffsetType& tv2)
+	                    VectorWithOffsetType& tv1,
+	                    VectorWithOffsetType& tv2)
 	{
 		const bool needsTv2 = (!CalcR::ActionType::isValueComplex() || tstStruct_.algorithm() != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV);
 
@@ -250,9 +247,9 @@ public:
 	}
 
 	void calcDynVectors(const VectorWithOffsetType& tv0,
-	    const VectorWithOffsetType& tv1,
-	    VectorWithOffsetType& tv2,
-	    VectorWithOffsetType& tv3)
+	                    const VectorWithOffsetType& tv1,
+	                    VectorWithOffsetType& tv2,
+	                    VectorWithOffsetType& tv3)
 	{
 		VectorWithOffsetType tv4;
 		calcDynVectors(tv0, tv4, tv2);
@@ -265,9 +262,9 @@ public:
 private:
 
 	void computeXiAndXrIndirect(VectorType& xi,
-	    VectorType& xr,
-	    const VectorType& sv,
-	    SizeType p)
+	                            VectorType& xr,
+	                            const VectorType& sv,
+	                            SizeType p)
 	{
 		if (tstStruct_.omega().first != PsimagLite::FREQ_REAL)
 			throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
@@ -275,9 +272,9 @@ private:
 		const RealType fakeTime = 0;
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		    ModelType::modelLinks(),
-		    fakeTime,
-		    model_.superOpHelper());
+		                                                 ModelType::modelLinks(),
+		                                                 fakeTime,
+		                                                 model_.superOpHelper());
 		LanczosMatrixType h(model_, hc, aux);
 		RealType E0 = energy_;
 		CorrectionVectorFunctionType cvft(h, tstStruct_, E0);
@@ -292,13 +289,13 @@ private:
 	}
 
 	void computeXiAndXrKrylov(VectorType& xi,
-	    VectorType& xr,
-	    const VectorWithOffsetType& phi,
-	    SizeType i0,
-	    const MatrixComplexOrRealType& V,
-	    const MatrixComplexOrRealType& T,
-	    const VectorRealType& eigs,
-	    SizeType steps)
+	                          VectorType& xr,
+	                          const VectorWithOffsetType& phi,
+	                          SizeType i0,
+	                          const MatrixComplexOrRealType& V,
+	                          const MatrixComplexOrRealType& T,
+	                          const VectorRealType& eigs,
+	                          SizeType steps)
 	{
 		SizeType n2 = steps;
 		SizeType n = V.n_row();
@@ -338,22 +335,22 @@ private:
 	}
 
 	void triDiag(const VectorWithOffsetType& phi,
-	    VectorMatrixFieldType& T,
-	    VectorMatrixFieldType& V,
-	    VectorSizeType& steps)
+	             VectorMatrixFieldType& T,
+	             VectorMatrixFieldType& V,
+	             VectorSizeType& steps)
 	{
 		RealType fakeTime = 0;
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
 		ParallelTriDiagType helperTriDiag(phi,
-		    T,
-		    V,
-		    steps,
-		    lrs_,
-		    fakeTime,
-		    model_,
-		    ioIn_);
+		                                  T,
+		                                  V,
+		                                  steps,
+		                                  lrs_,
+		                                  fakeTime,
+		                                  model_,
+		                                  ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}

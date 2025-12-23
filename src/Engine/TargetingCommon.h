@@ -97,18 +97,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h"
 #include <cassert>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LambdaType>
-class LambdaForTests
-{
+class LambdaForTests {
 
 public:
 
 	void operator()(const PsimagLite::GetBraOrKet& bra,
-	    const PsimagLite::GetBraOrKet& ket,
-	    LambdaType* t) const
+	                const PsimagLite::GetBraOrKet& ket,
+	                LambdaType* t) const
 	{
 		if (!t)
 			return;
@@ -117,28 +115,29 @@ public:
 };
 
 template <>
-class LambdaForTests<int>
-{
+class LambdaForTests<int> {
 
 public:
 
 	void operator()(const PsimagLite::GetBraOrKet&,
-	    const PsimagLite::GetBraOrKet&,
-	    int*) const
+	                const PsimagLite::GetBraOrKet&,
+	                int*) const
 	{
 	}
 };
 
 template <typename TargetHelperType,
-    typename VectorWithOffsetType_,
-    typename LanczosSolverType_>
-class TargetingCommon
-{
+          typename VectorWithOffsetType_,
+          typename LanczosSolverType_>
+class TargetingCommon {
 
 public:
 
-	enum SetTvsEnum { NO_TVS = false,
-		READ_AND_SET_TVS = true };
+	enum SetTvsEnum
+	{
+		NO_TVS = false,
+		READ_AND_SET_TVS = true
+	};
 
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef LanczosSolverType_ LanczosSolverType;
@@ -161,8 +160,8 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef ApplyOperatorExpression<TargetHelperType,
-	    VectorWithOffsetType,
-	    LanczosSolverType>
+	                                VectorWithOffsetType,
+	                                LanczosSolverType>
 	    ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::VectorSizeType VectorSizeType;
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
@@ -187,13 +186,16 @@ public:
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 
-	enum class OpLabelCategory { DRESSED,
-		BARE };
+	enum class OpLabelCategory
+	{
+		DRESSED,
+		BARE
+	};
 
 	TargetingCommon(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    SizeType indexNoAdvance)
+	                const CheckpointType& checkPoint,
+	                const WaveFunctionTransfType& wft,
+	                SizeType indexNoAdvance)
 	    : cocoonType_(OpLabelCategory::DRESSED)
 	    , progress_("TargetingCommon")
 	    , checkPoint_(checkPoint)
@@ -211,7 +213,7 @@ public:
 				BraketType(checkPoint.model(), meas_[i]);
 
 			OpLabelCategory cocoonExpected = (isDressed) ? OpLabelCategory::DRESSED
-								     : OpLabelCategory::BARE;
+			                                             : OpLabelCategory::BARE;
 			if (i == 0) {
 				cocoonType_ = cocoonExpected;
 				continue;
@@ -231,8 +233,8 @@ public:
 	// START read/write
 
 	void write(PsimagLite::IoSelector::Out& io,
-	    const VectorSizeType& block,
-	    PsimagLite::String prefix) const
+	           const VectorSizeType& block,
+	           PsimagLite::String prefix) const
 	{
 		if (block.size() != 1)
 			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
@@ -247,26 +249,26 @@ public:
 	}
 
 	void writeNGSTs(PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix,
-	    const VectorSizeType& block,
-	    PsimagLite::String name,
-	    const PostProcType& cf) const
+	                PsimagLite::String prefix,
+	                const VectorSizeType& block,
+	                PsimagLite::String name,
+	                const PostProcType& cf) const
 	{
 		cf.write(io, prefix);
 		writeNGSTs(io, prefix, block, name);
 	}
 
 	void writeNGSTs(PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix,
-	    const VectorSizeType& block,
-	    PsimagLite::String name) const
+	                PsimagLite::String prefix,
+	                const VectorSizeType& block,
+	                PsimagLite::String name) const
 	{
 		SizeType site = block[0];
 		TimeSerializerType ts(currentTimeStep(),
-		    time(),
-		    site,
-		    aoe_,
-		    name);
+		                      time(),
+		                      site,
+		                      aoe_,
+		                      name);
 		ts.write(io, prefix);
 	}
 
@@ -279,8 +281,8 @@ public:
 	}
 
 	void readGSandNGSTs(IoInputType& io,
-	    PsimagLite::String prefix,
-	    PsimagLite::String name)
+	                    PsimagLite::String prefix,
+	                    PsimagLite::String name)
 	{
 		read(io, prefix);
 
@@ -360,9 +362,9 @@ public:
 
 	template <typename SomeLambdaType = int>
 	void cocoon(const BlockType& block,
-	    ProgramGlobals::DirectionEnum direction,
-	    bool doBorderIfBorder,
-	    SomeLambdaType* someLambda = nullptr) const
+	            ProgramGlobals::DirectionEnum direction,
+	            bool doBorderIfBorder,
+	            SomeLambdaType* someLambda = nullptr) const
 	{
 		if (aoe_.noStageIs(StageEnumType::DISABLED))
 			std::cout << "ALL OPERATORS HAVE BEEN APPLIED\n";
@@ -386,9 +388,9 @@ public:
 
 		LambdaForTests<SomeLambdaType> lambdaForTests;
 		MultiPointInSituType multiPointInSitu(aoe_.model(),
-		    checkPoint_,
-		    targetHelper_.wft(),
-		    direction);
+		                                      checkPoint_,
+		                                      targetHelper_.wft(),
+		                                      direction);
 
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
@@ -443,10 +445,10 @@ public:
 
 	// FIXME TODO REMOVE
 	ComplexOrRealType rixsCocoon(ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    SizeType index1,
-	    SizeType index2,
-	    bool needsShift) const
+	                             SizeType site,
+	                             SizeType index1,
+	                             SizeType index2,
+	                             bool needsShift) const
 	{
 		const ModelType& model = targetHelper_.model();
 		SizeType h = model.hilbertSize(site);
@@ -454,10 +456,10 @@ public:
 		SparseMatrixType idSparse;
 		idSparse.makeDiagonal(h, 1.0);
 		OperatorType id(idSparse,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(0, 0),
-		    1.0,
-		    su2Related1);
+		                ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                PairType(0, 0),
+		                1.0,
+		                su2Related1);
 		ComplexOrRealType value = 0.0;
 		SizeType n = meas_.size();
 		if (n == 0)
@@ -479,7 +481,7 @@ public:
 			const PsimagLite::String opLabel = meas_[i];
 
 			BraketType Braket(targetHelper_.model(),
-			    "<gs|" + opLabel + "[" + ttos(site) + "]|gs>");
+			                  "<gs|" + opLabel + "[" + ttos(site) + "]|gs>");
 			if (needsShift) {
 				const typename BraketType::AlgebraType& A = Braket.op(0);
 				value = test_(v1, v2, direction, site, A, border);
@@ -525,9 +527,9 @@ public:
 	}
 
 	void initialGuess(VectorWithOffsetType& v,
-	    const VectorWithOffsetType& psi,
-	    const OneSiteSpacesType& oneSiteSpaces,
-	    bool noguess) const
+	                  const VectorWithOffsetType& psi,
+	                  const OneSiteSpacesType& oneSiteSpaces,
+	                  bool noguess) const
 	{
 		const WaveFunctionTransfType& wft = targetHelper_.wft();
 
@@ -538,7 +540,7 @@ public:
 	}
 
 	void computeCorrection(ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1)
+	                       const BlockType& block1)
 	{
 		const VectorWithOffsetType& psi = aoe_.ensureOnlyOnePsi("computeCorrection");
 		ApplyOperatorExpressionType& aoeNonConst = const_cast<ApplyOperatorExpressionType&>(aoe_);
@@ -568,12 +570,12 @@ public:
 			VectorWithOffsetType phiTemp;
 			const OperatorType& cm = creationMatrix[j];
 			aoe_.applyOpLocal()(phiTemp,
-			    psi,
-			    cm,
-			    fs,
-			    splitSize,
-			    direction,
-			    ApplyOperatorType::BORDER_NO);
+			                    psi,
+			                    cm,
+			                    fs,
+			                    splitSize,
+			                    direction,
+			                    ApplyOperatorType::BORDER_NO);
 			if (j == 0)
 				v = phiTemp;
 			else
@@ -582,7 +584,7 @@ public:
 	}
 
 	int findFermionSignOfTheOperators(typename TargetParamsType::ConcatEnum concat,
-	    const VectorOperatorType& myoperator) const
+	                                  const VectorOperatorType& myoperator) const
 	{
 		bool wereSumming = (concat == TargetParamsType::ConcatEnum::SUM);
 		ProgramGlobals::FermionOrBosonEnum forB = ProgramGlobals::FermionOrBosonEnum::BOSON;
@@ -619,8 +621,8 @@ public:
 	}
 
 	void calcBracket(ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    const BraketType& braket) const
+	                 SizeType site,
+	                 const BraketType& braket) const
 	{
 		if (braket.points() != 1)
 			err("Brakets in situ must be one-points\n");
@@ -663,11 +665,11 @@ public:
 	// returns <src2|A|src1>
 	template <typename SomeAlgebraType>
 	ComplexOrRealType testRealWork(const VectorWithOffsetType& src1,
-	    const VectorWithOffsetType& src2,
-	    const ProgramGlobals::DirectionEnum systemOrEnviron,
-	    SizeType site,
-	    const SomeAlgebraType& A,
-	    BorderEnumType border) const
+	                               const VectorWithOffsetType& src2,
+	                               const ProgramGlobals::DirectionEnum systemOrEnviron,
+	                               SizeType site,
+	                               const SomeAlgebraType& A,
+	                               BorderEnumType border) const
 	{
 		const SizeType splitSize = targetHelper_.model().hilbertSize(site);
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
@@ -694,7 +696,7 @@ public:
 	}
 
 	void printNormsAndWeights(const RealType& gsWeight,
-	    const VectorRealType& weights) const
+	                          const VectorRealType& weights) const
 	{
 		if (aoe_.allStages(StageEnumType::DISABLED))
 			return;
@@ -758,9 +760,9 @@ private:
 	}
 
 	bool isThisNgstSameAsPrevious(PsimagLite::String nameThis,
-	    PsimagLite::String namePrev,
-	    SizeType tvsThis,
-	    SizeType tvsPrev) const
+	                              PsimagLite::String namePrev,
+	                              SizeType tvsThis,
+	                              SizeType tvsPrev) const
 	{
 		if (nameThis != "LEGACY" && namePrev != "LEGACY")
 			return (nameThis == namePrev);
@@ -781,7 +783,7 @@ private:
 	}
 
 	void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,
-	    const typename PsimagLite::Vector<SizeType>::Type& block) const
+	           const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		for (SizeType i = 0; i < block.size(); i++)
 			nk.push_back(targetHelper_.model().hilbertSize(block[i]));
@@ -789,20 +791,20 @@ private:
 
 	// prints <v1|A|v2>
 	void cocoon_(ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    const VectorWithOffsetType& v1,
-	    PsimagLite::String label1,
-	    const VectorWithOffsetType& v2,
-	    PsimagLite::String label2,
-	    BorderEnumType border,
-	    bool wantsPrinting) const
+	             SizeType site,
+	             const VectorWithOffsetType& v1,
+	             PsimagLite::String label1,
+	             const VectorWithOffsetType& v2,
+	             PsimagLite::String label2,
+	             BorderEnumType border,
+	             bool wantsPrinting) const
 	{
 		SizeType n = meas_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = braketTheBare(meas_[i],
-			    site,
-			    label1,
-			    label2);
+			                                           site,
+			                                           label1,
+			                                           label2);
 
 			BraketType Braket(targetHelper_.model(), opLabel);
 
@@ -816,9 +818,9 @@ private:
 	}
 
 	static PsimagLite::String braketTheBare(PsimagLite::String opLabel,
-	    SizeType,
-	    PsimagLite::String label1,
-	    PsimagLite::String label2)
+	                                        SizeType,
+	                                        PsimagLite::String label1,
+	                                        PsimagLite::String label2)
 	{
 		if (label1 == "PSI")
 			label1 = "gs";
@@ -844,7 +846,7 @@ private:
 		if (getBraOrKet.isPvector()) {
 			const SizeType pIndex = getBraOrKet.pIndex();
 			return (pIndex >= aoe_.tvs()) ? nullptr
-						      : &(aoe_.targetVectors(pIndex));
+			                              : &(aoe_.targetVectors(pIndex));
 		}
 
 		const SizeType sectorIndex = getBraOrKet.sectorIndex();
@@ -864,12 +866,12 @@ private:
 	// prints <src2|A|src1>
 	template <typename SomeAlgebraType>
 	void test(const VectorWithOffsetType& src1,
-	    const VectorWithOffsetType& src2,
-	    const ProgramGlobals::DirectionEnum systemOrEnviron,
-	    PsimagLite::String label,
-	    SizeType site,
-	    const SomeAlgebraType& A,
-	    BorderEnumType border) const
+	          const VectorWithOffsetType& src2,
+	          const ProgramGlobals::DirectionEnum systemOrEnviron,
+	          PsimagLite::String label,
+	          SizeType site,
+	          const SomeAlgebraType& A,
+	          BorderEnumType border) const
 	{
 		ComplexOrRealType sum = test_(src1, src2, systemOrEnviron, site, A, border);
 		std::cout << site << " " << sum << " " << time();
@@ -879,11 +881,11 @@ private:
 	// returns <src2|A|src1>; but if !withLegacyBugs returns <src1|A|src2>
 	template <typename SomeAlgebraType>
 	ComplexOrRealType test_(const VectorWithOffsetType& src1,
-	    const VectorWithOffsetType& src2,
-	    const ProgramGlobals::DirectionEnum systemOrEnviron,
-	    SizeType site,
-	    const SomeAlgebraType& A,
-	    BorderEnumType border) const
+	                        const VectorWithOffsetType& src2,
+	                        const ProgramGlobals::DirectionEnum systemOrEnviron,
+	                        SizeType site,
+	                        const SomeAlgebraType& A,
+	                        BorderEnumType border) const
 	{
 		if (targetHelper_.withLegacyBugs())
 			return testRealWork(src1, src2, systemOrEnviron, site, A, border);
@@ -905,12 +907,12 @@ private:
 }; // class TargetingCommon
 
 template <typename TargetHelperType,
-    typename VectorWithOffsetType,
-    typename LanczosSolverType>
+          typename VectorWithOffsetType,
+          typename LanczosSolverType>
 std::ostream& operator<<(std::ostream& os,
-    const TargetingCommon<TargetHelperType,
-	VectorWithOffsetType,
-	LanczosSolverType>& tst)
+                         const TargetingCommon<TargetHelperType,
+                                               VectorWithOffsetType,
+                                               LanczosSolverType>& tst)
 {
 	os << "DT=NothingToSeeHereYet\n";
 	return os;

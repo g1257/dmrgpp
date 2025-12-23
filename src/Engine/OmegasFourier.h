@@ -3,15 +3,12 @@
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType, typename Readable>
-class OmegasFourier
-{
+class OmegasFourier {
 
-	class OmegasGeometry
-	{
+	class OmegasGeometry {
 
 	public:
 
@@ -125,7 +122,7 @@ public:
 			const PsimagLite::String honey = "HoneyComb";
 			if (subname.find(honey) == 0) {
 				PsimagLite::String type = subname.substr(honey.length(),
-				    subname.size() - honey.length());
+				                                         subname.size() - honey.length());
 				return fourierHoneycomb(values1, values2, type);
 			}
 		}
@@ -200,8 +197,8 @@ private:
 	}
 
 	void fourierHoneycomb(const VectorRealType& values1,
-	    const VectorRealType& values2,
-	    PsimagLite::String type)
+	                      const VectorRealType& values2,
+	                      PsimagLite::String type)
 	{
 		err("unimplemented fourierLadderAverage\n");
 	}

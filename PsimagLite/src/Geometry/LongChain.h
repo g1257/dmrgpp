@@ -86,7 +86,10 @@ class LongChain : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
-	enum { DIRECTION_X };
+	enum
+	{
+		DIRECTION_X
+	};
 
 	LongChain()
 	    : linSize_(0)
@@ -106,16 +109,14 @@ public:
 			isPeriodic_ = (x > 0) ? true : false;
 			if (isPeriodic_)
 				std::cerr << "LongChain::ctor(): periodic\n";
-		}
-		catch (std::exception& e) {
+		} catch (std::exception& e) {
 		}
 
 		try {
 			int x = 0;
 			io.readline(x, "LongChainDistance=");
 			distance_ = x;
-		}
-		catch (std::exception& e) {
+		} catch (std::exception& e) {
 		}
 
 		if (linSize_ <= distance_)

@@ -83,12 +83,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "TargetParamsCommon.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType>
-class TargetParamsDynamic : public TargetParamsCommon<ModelType>
-{
+class TargetParamsDynamic : public TargetParamsCommon<ModelType> {
 public:
 
 	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
@@ -108,8 +106,8 @@ public:
 	}
 
 	virtual SizeType memResolv(PsimagLite::MemResolv&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	                           SizeType,
+	                           PsimagLite::String = "") const
 	{
 		return 0;
 	}

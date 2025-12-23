@@ -6,10 +6,10 @@ using RealType = double;
 using SizeType = unsigned int;
 
 RealType calcMu(SizeType site,
-    SizeType n,
-    SizeType N1,
-    RealType tau,
-    RealType mu)
+                SizeType n,
+                SizeType N1,
+                RealType tau,
+                RealType mu)
 {
 	//  (nm is the number of steps to increase the onsite
 	//   chemical potential at site i)

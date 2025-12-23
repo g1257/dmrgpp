@@ -84,12 +84,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename MatrixType>
-class ConjugateGradient
-{
+class ConjugateGradient {
 	typedef typename MatrixType::value_type FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
@@ -105,8 +103,8 @@ public:
 
 	//! A and b, the result x, and also the initial solution x0
 	void operator()(VectorType& x,
-	    const MatrixType& A,
-	    const VectorType& b) const
+	                const MatrixType& A,
+	                const VectorType& b) const
 	{
 		VectorType v = multiply(A, x);
 		VectorType p(b.size());

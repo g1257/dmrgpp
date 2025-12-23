@@ -80,12 +80,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MATRIX_OR_IDENTITY
 #define MATRIX_OR_IDENTITY
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename SparseMatrixType>
-class MatrixOrIdentity
-{
+class MatrixOrIdentity {
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 

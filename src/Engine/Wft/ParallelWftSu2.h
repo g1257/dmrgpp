@@ -81,14 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename VectorWithOffsetType,
-    typename DmrgWaveStructType,
-    typename LeftRightSuperType>
-class ParallelWftSu2
-{
+          typename DmrgWaveStructType,
+          typename LeftRightSuperType>
+class ParallelWftSu2 {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -106,12 +104,12 @@ public:
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
 	ParallelWftSu2(VectorWithOffsetType& psiDest,
-	    const VectorWithOffsetType& psiSrc,
-	    const LeftRightSuperType& lrs,
-	    SizeType i0,
-	    const VectorSizeType& nk,
-	    const DmrgWaveStructType& dmrgWaveStruct,
-	    ProgramGlobals::DirectionEnum dir)
+	               const VectorWithOffsetType& psiSrc,
+	               const LeftRightSuperType& lrs,
+	               SizeType i0,
+	               const VectorSizeType& nk,
+	               const DmrgWaveStructType& dmrgWaveStruct,
+	               ProgramGlobals::DirectionEnum dir)
 	    : psiDest_(psiDest)
 	    , psiSrc_(psiSrc)
 	    , lrs_(lrs)
@@ -186,12 +184,12 @@ public:
 			SizeType kp = 0;
 			SizeType jp = 0;
 			for (int kI = factorsInvSE_.getRowPtr(xx);
-			    kI < factorsInvSE_.getRowPtr(xx + 1);
-			    kI++) {
+			     kI < factorsInvSE_.getRowPtr(xx + 1);
+			     kI++) {
 				pack1_->unpack(alpha, jp, static_cast<SizeType>(factorsInvSE_.getCol(kI)));
 				for (int k2I = factorsInvS_.getRowPtr(alpha);
-				    k2I < factorsInvS_.getRowPtr(alpha + 1);
-				    k2I++) {
+				     k2I < factorsInvS_.getRowPtr(alpha + 1);
+				     k2I++) {
 					pack2_->unpack(ip, kp, static_cast<SizeType>(factorsInvS_.getCol(k2I)));
 					psiDest_.fastAccess(i0_, taskNumber) += factorsInvSE_.getValue(kI) * factorsInvS_.getValue(k2I) * createAux2b(psiSrc_, ip, kp, jp, wsT_, we_, nk_);
 				}
@@ -202,12 +200,12 @@ public:
 			SizeType kp = 0;
 			SizeType jp = 0;
 			for (int kI = factorsInvSE_.getRowPtr(xx);
-			    kI < factorsInvSE_.getRowPtr(xx + 1);
-			    kI++) {
+			     kI < factorsInvSE_.getRowPtr(xx + 1);
+			     kI++) {
 				pack1_->unpack(ip, beta, static_cast<SizeType>(factorsInvSE_.getCol(kI)));
 				for (int k2I = factorsInvE_.getRowPtr(beta);
-				    k2I < factorsInvE_.getRowPtr(beta + 1);
-				    k2I++) {
+				     k2I < factorsInvE_.getRowPtr(beta + 1);
+				     k2I++) {
 					pack2_->unpack(kp, jp, static_cast<SizeType>(factorsInvE_.getCol(k2I)));
 					psiDest_.fastAccess(i0_, taskNumber) += factorsInvSE_.getValue(kI) * factorsInvE_.getValue(k2I) * createAux1b(psiSrc_, ip, kp, jp, ws_, weT_, nk_);
 				}
@@ -226,12 +224,12 @@ private:
 
 	template <typename SomeVectorType>
 	SparseElementType createAux2b(const SomeVectorType& psiSrc,
-	    SizeType ip,
-	    SizeType kp,
-	    SizeType jp,
-	    const SparseMatrixType& wsT,
-	    const SparseMatrixType& we,
-	    const VectorSizeType& nk) const
+	                              SizeType ip,
+	                              SizeType kp,
+	                              SizeType jp,
+	                              const SparseMatrixType& wsT,
+	                              const SparseMatrixType& we,
+	                              const VectorSizeType& nk) const
 	{
 		SizeType nalpha = dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		assert(nalpha == wsT.cols());
@@ -271,12 +269,12 @@ private:
 
 	template <typename SomeVectorType>
 	SparseElementType createAux1b(const SomeVectorType& psiSrc,
-	    SizeType ip,
-	    SizeType kp,
-	    SizeType jp,
-	    const SparseMatrixType& ws,
-	    const SparseMatrixType& weT,
-	    const VectorSizeType& nk) const
+	                              SizeType ip,
+	                              SizeType kp,
+	                              SizeType jp,
+	                              const SparseMatrixType& ws,
+	                              const SparseMatrixType& weT,
+	                              const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = volumeOf(nk);
 		SizeType ni = dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols();

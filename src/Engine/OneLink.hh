@@ -3,12 +3,10 @@
 #include "ProgramGlobals.h"
 #include <functional>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType>
-class OneLink
-{
+class OneLink {
 
 public:
 
@@ -18,13 +16,13 @@ public:
 	using VectorSizeType = std::vector<SizeType>;
 
 	OneLink(VectorSizeType indices_,
-	    VectorSizeType orbs_,
-	    ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
-	    PsimagLite::String mods_,
-	    SizeType angularMomentum_,
-	    RealType angularFactor_,
-	    SizeType category_,
-	    LambdaType vModifier_)
+	        VectorSizeType orbs_,
+	        ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
+	        PsimagLite::String mods_,
+	        SizeType angularMomentum_,
+	        RealType angularFactor_,
+	        SizeType category_,
+	        LambdaType vModifier_)
 	    : indices(indices_)
 	    , orbs(orbs_)
 	    , fermionOrBoson(fermionOrBoson_)
@@ -37,13 +35,13 @@ public:
 	}
 
 	OneLink(VectorSizeType indices_,
-	    VectorSizeType orbs_,
-	    ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
-	    PsimagLite::String mods_,
-	    SizeType angularMomentum_,
-	    RealType angularFactor_,
-	    SizeType category_,
-	    OldLambdaType vModifier_)
+	        VectorSizeType orbs_,
+	        ProgramGlobals::FermionOrBosonEnum fermionOrBoson_,
+	        PsimagLite::String mods_,
+	        SizeType angularMomentum_,
+	        RealType angularFactor_,
+	        SizeType category_,
+	        OldLambdaType vModifier_)
 	    : indices(indices_)
 	    , orbs(orbs_)
 	    , fermionOrBoson(fermionOrBoson_)
@@ -52,7 +50,8 @@ public:
 	    , angularFactor(angularFactor_)
 	    , category(category_)
 	{
-		modifier = [vModifier_](ComplexOrRealType& value, RealType, SizeType) { vModifier_(value); };
+		modifier = [vModifier_](ComplexOrRealType& value, RealType, SizeType)
+		{ vModifier_(value); };
 	}
 
 	VectorSizeType indices;

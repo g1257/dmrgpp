@@ -111,8 +111,7 @@ private:
 		if (v1.size() == 0) {
 			wasEmpty = true;
 			v1.resize(v2.size());
-		}
-		else {
+		} else {
 			if (v1.size() != v2.size()) {
 				String s = "ContinuedFractionCollection::acc...(...)";
 				s += " vectors must be of same length\n";
@@ -124,8 +123,7 @@ private:
 			if (wasEmpty) {
 				v1[i].first = v2[i].first;
 				v1[i].second = v2[i].second;
-			}
-			else {
+			} else {
 				if (v1[i].first != v2[i].first)
 					throw RuntimeError(
 					    "CF: x coordinate different\n");

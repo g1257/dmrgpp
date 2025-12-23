@@ -4,14 +4,12 @@
 #include "OneLink.hh"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelLinksType,
-    typename LeftRightSuperType,
-    typename SuperOpHelperType>
-class ManyToTwoConnection
-{
+          typename LeftRightSuperType,
+          typename SuperOpHelperType>
+class ManyToTwoConnection {
 
 public:
 
@@ -23,10 +21,10 @@ public:
 	using PairMetaOpForConnection = std::pair<MetaOpForConnection, MetaOpForConnection>;
 
 	ManyToTwoConnection(const VectorSizeType& hItems,
-	    ProgramGlobals::ConnectionEnum type,
-	    const ModelTermLinkType& oneLink,
-	    const LeftRightSuperType& lrs,
-	    const SuperOpHelperType& superOpHelper)
+	                    ProgramGlobals::ConnectionEnum type,
+	                    const ModelTermLinkType& oneLink,
+	                    const LeftRightSuperType& lrs,
+	                    const SuperOpHelperType& superOpHelper)
 	    : oneLink_(oneLink)
 	    , lrs_(lrs)
 	{
@@ -41,8 +39,8 @@ public:
 			pairMetaOps_.second.modifier = oneLink.mods[1];
 		} else {
 			PairMetaOpForConnection finals = superOpHelper.finalIndices(hItems,
-			    type,
-			    lrs.right().block().size());
+			                                                            type,
+			                                                            lrs.right().block().size());
 			convertNonLocals(finals, type);
 			pairMetaOps_.first.modifier = 'N'; // fixme
 			pairMetaOps_.second.modifier = 'N'; // fixme
@@ -92,8 +90,8 @@ private:
 	}
 
 	SizeType locationFirst(SizeType hItems0,
-	    SizeType sigma,
-	    ProgramGlobals::ConnectionEnum type) const
+	                       SizeType sigma,
+	                       ProgramGlobals::ConnectionEnum type) const
 	{
 		const ProgramGlobals::SysOrEnvEnum sysOrEnv = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON;
 
@@ -107,8 +105,8 @@ private:
 	}
 
 	SizeType locationSecond(SizeType hItems1,
-	    SizeType sigma,
-	    ProgramGlobals::ConnectionEnum type) const
+	                        SizeType sigma,
+	                        ProgramGlobals::ConnectionEnum type) const
 	{
 		const ProgramGlobals::SysOrEnvEnum envOrSys = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
@@ -122,8 +120,8 @@ private:
 	}
 
 	SizeType finalIndex(ProgramGlobals::SysOrEnvEnum type,
-	    SizeType i,
-	    SizeType sigma) const
+	                    SizeType i,
+	                    SizeType sigma) const
 	{
 		assert(type == ProgramGlobals::SysOrEnvEnum::SYSTEM || type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
 
@@ -131,7 +129,7 @@ private:
 	}
 
 	void convertNonLocals(const PairMetaOpForConnection& pairMetas,
-	    ProgramGlobals::ConnectionEnum type)
+	                      ProgramGlobals::ConnectionEnum type)
 	{
 		pairMetaOps_.first = pairMetas.first;
 		if (pairMetas.first.site >= 0) {

@@ -3,15 +3,12 @@
 #include "CanonicalExpression.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename FieldType>
-class AlgebraicStringToNumber
-{
+class AlgebraicStringToNumber {
 
-	class LoopLengthSpec
-	{
+	class LoopLengthSpec {
 
 	public:
 

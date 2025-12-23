@@ -84,11 +84,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  Using WignerEckart Theorem to speed up SU(2) algorithm
  *
  */
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename LeftRightSuperType>
-class Su2Reduced
-{
+class Su2Reduced {
 	typedef typename LeftRightSuperType::OperatorsType OperatorsType;
 	typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type SparseElementType;
@@ -107,8 +105,8 @@ class Su2Reduced
 public:
 
 	Su2Reduced(int m,
-	    const LeftRightSuperType& lrs,
-	    bool = false)
+	           const LeftRightSuperType& lrs,
+	           bool = false)
 	    : m_(m)
 	    , lrs_(lrs)
 	    , cgObject_(Su2SymmetryGlobalsType::clebschGordanObject)
@@ -165,10 +163,10 @@ public:
 	}
 
 	SparseElementType reducedFactor(SizeType angularMomentum,
-	    SizeType category,
-	    bool flip,
-	    SizeType lf1,
-	    SizeType lf2) const
+	                                SizeType category,
+	                                bool flip,
+	                                SizeType lf1,
+	                                SizeType lf2) const
 	{
 		SizeType category2 = category;
 		if (flip)
@@ -195,7 +193,7 @@ public:
 private:
 
 	void createReducedHamiltonian(SparseMatrixType& hamReduced,
-	    const BasisWithOperatorsType& basis)
+	                              const BasisWithOperatorsType& basis)
 	{
 		SizeType xx = basis.numberOfOperators();
 		hamReduced.resize(xx, xx);
@@ -232,10 +230,10 @@ private:
 	}
 
 	void createReducedConj(SizeType k1,
-	    SparseMatrixType& opDest,
-	    const SparseMatrixType& opSrc,
-	    const BasisWithOperatorsType& basis,
-	    SizeType counter)
+	                       SparseMatrixType& opDest,
+	                       const SparseMatrixType& opSrc,
+	                       const BasisWithOperatorsType& basis,
+	                       SizeType counter)
 	{
 		SizeType n = opSrc.row();
 		opDest = transposeConjugate(opSrc);
@@ -258,11 +256,11 @@ private:
 	}
 
 	void createReducedOperator(SparseMatrixType& opDest,
-	    const typename PsimagLite::Vector<const OperatorType*>::Type& opSrc,
-	    const BasisWithOperatorsType& basis,
-	    const typename PsimagLite::Vector<SizeType>::Type& basisrInverse,
-	    SizeType n,
-	    SizeType)
+	                           const typename PsimagLite::Vector<const OperatorType*>::Type& opSrc,
+	                           const BasisWithOperatorsType& basis,
+	                           const typename PsimagLite::Vector<SizeType>::Type& basisrInverse,
+	                           SizeType n,
+	                           SizeType)
 	{
 		PsimagLite::Matrix<SparseElementType> opDest1(n, n);
 		for (SizeType i = 0; i < opSrc.size(); i++)
@@ -271,9 +269,9 @@ private:
 	}
 
 	void createReducedOperator(PsimagLite::Matrix<SparseElementType>& opDest1,
-	    const OperatorType& opSrc,
-	    const BasisWithOperatorsType& basis,
-	    const typename PsimagLite::Vector<SizeType>::Type& basisrInverse)
+	                           const OperatorType& opSrc,
+	                           const BasisWithOperatorsType& basis,
+	                           const typename PsimagLite::Vector<SizeType>::Type& basisrInverse)
 	{
 		PsimagLite::Matrix<SparseElementType> opSrcdense;
 		crsMatrixToFullMatrix(opSrcdense, opSrc.data);
@@ -290,10 +288,10 @@ private:
 	}
 
 	void buildAdditional(PsimagLite::Matrix<SparseElementType>& lfactor,
-	    SizeType k,
-	    SizeType mu1,
-	    SizeType mu2,
-	    typename PsimagLite::Vector<PairType>::Type& jsEffective)
+	                     SizeType k,
+	                     SizeType mu1,
+	                     SizeType mu2,
+	                     typename PsimagLite::Vector<PairType>::Type& jsEffective)
 	{
 		PairType kmu1(k, mu1);
 		PairType kmu2(k, mu2);
@@ -306,12 +304,12 @@ private:
 				for (SizeType i1prime = 0; i1prime < lrs_.left().jVals(); i1prime++) {
 					for (SizeType i2prime = 0; i2prime < lrs_.right().jVals(); i2prime++) {
 						SparseElementType sum = calcLfactor(lrs_.left().jVals(i1),
-						    lrs_.right().jVals(i2),
-						    lrs_.left().jVals(i1prime),
-						    lrs_.right().jVals(i2prime),
-						    jm,
-						    kmu1,
-						    kmu2);
+						                                    lrs_.right().jVals(i2),
+						                                    lrs_.left().jVals(i1prime),
+						                                    lrs_.right().jVals(i2prime),
+						                                    jm,
+						                                    kmu1,
+						                                    kmu2);
 						if (sum != static_cast<SparseElementType>(0)) {
 							counter++;
 							PairType jj(PairType(lrs_.left().jVals(i1), lrs_.right().jVals(i2)));
@@ -366,7 +364,7 @@ private:
 					if (electrons != le1 + rElectrons[lrs_.right().reducedIndex(i2)])
 						continue;
 					PairType jj(lrs_.left().jmValue(lrs_.left().reducedIndex(i1)).first,
-					    lrs_.right().jmValue(lrs_.right().reducedIndex(i2)).first);
+					            lrs_.right().jmValue(lrs_.right().reducedIndex(i2)).first);
 					if (jj != jsEffective[i])
 						continue;
 					reducedEffective_.push_back(PairType(i1, i2));
@@ -381,12 +379,12 @@ private:
 	}
 
 	SparseElementType calcLfactor(SizeType j1,
-	    SizeType j2,
-	    SizeType j1prime,
-	    SizeType j2prime,
-	    const PairType& jm,
-	    const PairType& kmu1,
-	    const PairType& kmu2) const
+	                              SizeType j2,
+	                              SizeType j1prime,
+	                              SizeType j2prime,
+	                              const PairType& jm,
+	                              const PairType& kmu1,
+	                              const PairType& kmu2) const
 	{
 		SparseElementType sum = 0;
 		SizeType k = kmu1.first;
@@ -476,7 +474,7 @@ private:
 		sort.sort(flavorsOldInverse_, perm);
 		typename PsimagLite::Vector<PairType>::Type r(reducedEffective_.size());
 		PsimagLite::Matrix<SizeType> reducedInverse(reducedInverse_.rows(),
-		    reducedInverse_.cols());
+		                                            reducedInverse_.cols());
 
 		for (SizeType i = 0; i < reducedEffective_.size(); i++) {
 			r[i] = reducedEffective_[perm[i]];

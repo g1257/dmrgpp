@@ -83,14 +83,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsRungeKutta.h"
 #include "TimeVectorsSuzukiTrotter.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetHelperType,
-    typename VectorWithOffsetType,
-    typename LanczosSolverType>
-class ApplyOperatorExpression
-{
+          typename VectorWithOffsetType,
+          typename LanczosSolverType>
+class ApplyOperatorExpression {
 
 public:
 
@@ -129,7 +127,7 @@ public:
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 
 	ApplyOperatorExpression(const TargetHelperType& targetHelper,
-	    SizeType indexNoAdvance)
+	                        SizeType indexNoAdvance)
 	    : progress_("ApplyOperatorExpression")
 	    , targetHelper_(targetHelper)
 	    , E0_(0.0)
@@ -137,9 +135,9 @@ public:
 	    , applyOpLocal_(targetHelper.lrs(), targetHelper.withLegacyBugs())
 	    , targetVectors_(0)
 	    , timeVectorsBase_(new TimeVectorsBaseType(targetHelper_.model(),
-		  targetHelper_.lrs(),
-		  targetHelper_.wft(),
-		  "base"))
+	                                               targetHelper_.lrs(),
+	                                               targetHelper_.wft(),
+	                                               "base"))
 	    , wftHelper_(targetHelper.model(), targetHelper.lrs(), targetHelper.wft())
 	    , multiSiteExprHelper_(targetHelper_.model().superGeometry().numberOfSites() - 2)
 	    , correlationsSkel_(multiSiteExprHelper_, targetHelper.model(), false)
@@ -197,11 +195,11 @@ public:
 	}
 
 	SizeType getPhi(VectorWithOffsetType* phiNew,
-	    RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    SizeType loopNumber,
-	    const TargetParamsType& tstStruct)
+	                RealType Eg,
+	                ProgramGlobals::DirectionEnum direction,
+	                SizeType site,
+	                SizeType loopNumber,
+	                const TargetParamsType& tstStruct)
 	{
 		SizeType count = 0;
 		const SizeType nsectors = psi_.size();
@@ -325,9 +323,9 @@ public:
 
 	template <typename SomeBasisType>
 	void setPsi(VectorVectorVectorType& inV,
-	    const VectorSizeType& sectors,
-	    const SomeBasisType& someBasis,
-	    SizeType nexcited)
+	            const VectorSizeType& sectors,
+	            const SomeBasisType& someBasis,
+	            SizeType nexcited)
 	{
 		const SizeType nsectors = sectors.size();
 
@@ -353,8 +351,8 @@ public:
 
 				assert(sectorIndex < sectors.size());
 				psi_[sectorIndex][excitedIndex]->set(inV[sectorIndex][excitedIndex],
-				    sectors[sectorIndex],
-				    someBasis);
+				                                     sectors[sectorIndex],
+				                                     someBasis);
 			}
 		}
 	}
@@ -484,7 +482,7 @@ public:
 	}
 
 	void initTimeVectors(const TargetParamsType& tstStruct,
-	    InputValidatorType& ioIn)
+	                     InputValidatorType& ioIn)
 	{
 		delete timeVectorsBase_;
 		timeVectorsBase_ = nullptr;
@@ -498,33 +496,33 @@ public:
 		switch (tstStruct.algorithm()) {
 		case TargetParamsType::AlgorithmEnum::KRYLOV:
 			timeVectorsBase_ = new TimeVectorsKrylovType(tstStruct,
-			    targetVectors_,
-			    model,
-			    wft,
-			    lrs,
-			    ioIn);
+			                                             targetVectors_,
+			                                             model,
+			                                             wft,
+			                                             lrs,
+			                                             ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::CHEBYSHEV:
 			timeVectorsBase_ = new TimeVectorsChebyshevType(tstStruct,
-			    targetVectors_,
-			    model,
-			    wft,
-			    lrs,
-			    ioIn);
+			                                                targetVectors_,
+			                                                model,
+			                                                wft,
+			                                                lrs,
+			                                                ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::RUNGE_KUTTA:
 			timeVectorsBase_ = new TimeVectorsRungeKuttaType(tstStruct,
-			    targetVectors_,
-			    model,
-			    wft,
-			    lrs);
+			                                                 targetVectors_,
+			                                                 model,
+			                                                 wft,
+			                                                 lrs);
 			break;
 		case TargetParamsType::AlgorithmEnum::SUZUKI_TROTTER:
 			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(tstStruct,
-			    targetVectors_,
-			    model,
-			    wft,
-			    lrs);
+			                                                    targetVectors_,
+			                                                    model,
+			                                                    wft,
+			                                                    lrs);
 			break;
 		default:
 			throw PsimagLite::RuntimeError(s.c_str());
@@ -538,7 +536,7 @@ public:
 	}
 
 	void loadEnergy(PsimagLite::IoSelector::In& io,
-	    PsimagLite::String label)
+	                PsimagLite::String label)
 	{
 		SizeType nsectors = 0;
 		io.read(nsectors, label + "/Size");
@@ -565,35 +563,35 @@ public:
 	}
 
 	void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
-	    RealType Eg,
-	    const VectorWithOffsetType& phi,
-	    ProgramGlobals::DirectionEnum direction,
-	    bool allOperatorsApplied,
-	    bool wftAndAdvanceIfNeeded,
-	    const PsimagLite::Vector<SizeType>::Type& block,
-	    bool isLastCall)
+	                     RealType Eg,
+	                     const VectorWithOffsetType& phi,
+	                     ProgramGlobals::DirectionEnum direction,
+	                     bool allOperatorsApplied,
+	                     bool wftAndAdvanceIfNeeded,
+	                     const PsimagLite::Vector<SizeType>::Type& block,
+	                     bool isLastCall)
 	{
 		typename TimeVectorsBaseType::ExtraData extra(direction,
-		    allOperatorsApplied,
-		    wftAndAdvanceIfNeeded,
-		    block,
-		    isLastCall);
+		                                              allOperatorsApplied,
+		                                              wftAndAdvanceIfNeeded,
+		                                              block,
+		                                              isLastCall);
 		if (timeVectorsBase_->isBase())
 			err("timeVectorsBase_ ptr not setup!?\n");
 
 		timeVectorsBase_->calcTimeVectors(indices,
-		    Eg,
-		    phi,
-		    extra);
+		                                  Eg,
+		                                  phi,
+		                                  extra);
 	}
 
 	void applyOneOperator(SizeType loopNumber,
-	    SizeType indexOfOperator,
-	    SizeType site,
-	    VectorWithOffsetType& phiNew,
-	    const VectorWithOffsetType& psiSrc,
-	    const ProgramGlobals::DirectionEnum systemOrEnviron,
-	    const TargetParamsType& tstStruct)
+	                      SizeType indexOfOperator,
+	                      SizeType site,
+	                      VectorWithOffsetType& phiNew,
+	                      const VectorWithOffsetType& psiSrc,
+	                      const ProgramGlobals::DirectionEnum systemOrEnviron,
+	                      const TargetParamsType& tstStruct)
 	{
 		if (tstStruct.startingLoops().size() > 0 && tstStruct.startingLoops()[indexOfOperator] > loopNumber)
 			return;
@@ -618,12 +616,12 @@ public:
 		targetHelper_.model().findOddElectronsOfOneSite(signs, site);
 		FermionSign fs(targetHelper_.lrs().left(), signs);
 		applyOpLocal_(phiNew,
-		    phiOld,
-		    tstStruct.aOperators()[indexOfOperator],
-		    fs,
-		    splitSize,
-		    systemOrEnviron,
-		    corner);
+		              phiOld,
+		              tstStruct.aOperators()[indexOfOperator],
+		              fs,
+		              splitSize,
+		              systemOrEnviron,
+		              corner);
 
 		RealType norma = norm(phiNew);
 		if (norma < 1e-6) {
@@ -646,8 +644,8 @@ public:
 	}
 
 	void wftOneVector(VectorWithOffsetType& phiNew,
-	    const VectorWithOffsetType& src,
-	    SizeType site) const
+	                  const VectorWithOffsetType& src,
+	                  SizeType site) const
 	{
 		wftHelper_.wftOneVector(phiNew, src, site);
 	}
@@ -674,7 +672,7 @@ private:
 
 	// legacy reading, use only as fallback
 	void loadEnergyLegacy(PsimagLite::IoSelector::In& io,
-	    PsimagLite::String label)
+	                      PsimagLite::String label)
 	{
 		SizeType total = 0;
 		io.read(total, label + "/Size");
@@ -718,12 +716,12 @@ private:
 	}
 
 	SizeType evolve(SizeType i,
-	    RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    SizeType loopNumber,
-	    SizeType lastI,
-	    const TargetParamsType& tstStruct)
+	                RealType Eg,
+	                ProgramGlobals::DirectionEnum direction,
+	                SizeType site,
+	                SizeType loopNumber,
+	                SizeType lastI,
+	                const TargetParamsType& tstStruct)
 	{
 		SizeType advanceEach = tstStruct.advanceEach();
 
@@ -791,11 +789,11 @@ private:
 	}
 
 	void computePhi(SizeType i,
-	    SizeType site,
-	    VectorWithOffsetType& phiNew,
-	    VectorWithOffsetType& phiOld,
-	    const ProgramGlobals::DirectionEnum systemOrEnviron,
-	    const TargetParamsType& tstStruct) const
+	                SizeType site,
+	                VectorWithOffsetType& phiNew,
+	                VectorWithOffsetType& phiOld,
+	                const ProgramGlobals::DirectionEnum systemOrEnviron,
+	                const TargetParamsType& tstStruct) const
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 
@@ -813,12 +811,12 @@ private:
 			const SizeType splitSize = targetHelper_.model().hilbertSize(site);
 			FermionSign fs(targetHelper_.lrs().left(), signs);
 			applyOpLocal_(phiNew,
-			    phiOld,
-			    tstStruct.aOperators()[i],
-			    fs,
-			    splitSize,
-			    systemOrEnviron,
-			    corner);
+			              phiOld,
+			              tstStruct.aOperators()[i],
+			              fs,
+			              splitSize,
+			              systemOrEnviron,
+			              corner);
 			RealType norma = norm(phiNew);
 
 			if (norma < 1e-6) {

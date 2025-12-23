@@ -5,12 +5,10 @@
 #include "ProgressIndicator.h"
 #include "TargetParamsBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetingBaseType>
-class NonLocalForTargetingExpression
-{
+class NonLocalForTargetingExpression {
 
 public:
 
@@ -63,9 +61,9 @@ public:
 	}
 
 	bool timeEvolve(PsimagLite::String name,
-	    const SiteSplitType& siteSplit,
-	    PsimagLite::String srcKet,
-	    SizeType site)
+	                const SiteSplitType& siteSplit,
+	                PsimagLite::String srcKet,
+	                SizeType site)
 	{
 		if (siteSplit.hasSiteString)
 			err("Global operators cannot have a site\n");
@@ -92,25 +90,25 @@ public:
 		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
 
 		auxPtr->pVectors().initTimeVectors(timeParams.timeSteps,
-		    timeParams.tau,
-		    timeParams.algo,
-		    timeParams.chebyTransform);
+		                                   timeParams.tau,
+		                                   timeParams.algo,
+		                                   timeParams.chebyTransform);
 
 		if (!oneTimeEvolution) {
 			oneTimeEvolution = new OneTimeEvolutionType(firstIndex,
-			    *srcVwo,
-			    srcKet,
-			    timeParams.disposition,
-			    timeParams.timeSteps,
-			    aux_.pVectors());
+			                                            *srcVwo,
+			                                            srcKet,
+			                                            timeParams.disposition,
+			                                            timeParams.timeSteps,
+			                                            aux_.pVectors());
 			aux_.timeEvolve().pushBack(oneTimeEvolution);
 		}
 
 		bool timeHasAdvanced = advanceInTimeOrNot(*oneTimeEvolution,
-		    timeParams.advanceEach,
-		    timeParams.depends,
-		    site,
-		    timeParams.tau);
+		                                          timeParams.advanceEach,
+		                                          timeParams.depends,
+		                                          site,
+		                                          timeParams.tau);
 
 		assert(oneTimeEvolution->indices().size() > 1);
 		const SizeType last = oneTimeEvolution->indices().size() - 1;
@@ -121,13 +119,13 @@ public:
 		    : srcVwo;
 
 		auxPtr->pVectors().aoeNonConst().calcTimeVectors(oneTimeEvolution->indices(),
-		    timeParams.Eg,
-		    *phi,
-		    aux_.direction(),
-		    allOperatorsApplied,
-		    false, // don't wft or advance indices[0]
-		    block1,
-		    isLastCall);
+		                                                 timeParams.Eg,
+		                                                 *phi,
+		                                                 aux_.direction(),
+		                                                 allOperatorsApplied,
+		                                                 false, // don't wft or advance indices[0]
+		                                                 block1,
+		                                                 isLastCall);
 
 		if (oneTimeEvolution->time() > 0) {
 			delete phi;
@@ -140,10 +138,10 @@ public:
 private:
 
 	bool advanceInTimeOrNot(OneTimeEvolutionType& oneTimeEvolution,
-	    SizeType advanceEach,
-	    const VectorSizeType& depends,
-	    SizeType site,
-	    RealType tau)
+	                        SizeType advanceEach,
+	                        const VectorSizeType& depends,
+	                        SizeType site,
+	                        RealType tau)
 	{
 		if (!passDepends(depends))
 			return false;
@@ -264,8 +262,8 @@ private:
 	}
 
 	static void getKeyAndValue(PsimagLite::String& key,
-	    PsimagLite::String& value,
-	    PsimagLite::String str)
+	                           PsimagLite::String& value,
+	                           PsimagLite::String str)
 	{
 		VectorStringType tokens;
 		PsimagLite::split(tokens, str, "=");

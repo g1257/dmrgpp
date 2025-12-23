@@ -88,12 +88,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include <algorithm>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelBaseType>
-class SpinOrbitalModel : public ModelBaseType
-{
+class SpinOrbitalModel : public ModelBaseType {
 
 public:
 
@@ -129,12 +127,12 @@ public:
 	typedef ParametersSpinOrbital<RealType, QnType> ParametersSpinOrbitalType;
 
 	SpinOrbitalModel(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry,
-	    PsimagLite::String option)
+	                 InputValidatorType& io,
+	                 const SuperGeometryType& geometry,
+	                 PsimagLite::String option)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , modelParams_(io)
 	    , superGeometry_(geometry)
 	    , hasLastTerm_(true)
@@ -174,8 +172,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -232,10 +230,10 @@ protected:
 			MatrixType tmpMatrix = findSplusMatrices(natBasis, orbital);
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmpMatrix),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel(sOrL + "plus").push(myOp);
 			this->makeTrackable(sOrL + "plus");
 
@@ -246,10 +244,10 @@ protected:
 			tmpMatrix = findSzMatrices(natBasis, orbital);
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType myOp2(SparseMatrixType(tmpMatrix),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related2);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1,
+			                   su2related2);
 			this->createOpsLabel(sOrL + "z").push(myOp2);
 			this->makeTrackable(sOrL + "z");
 		}
@@ -267,10 +265,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(lplusSquared),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("lplusSquared").push(myOp);
 			this->makeTrackable("lplusSquared");
 		}
@@ -278,10 +276,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(lpluslminus),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("lpluslminus").push(myOp);
 			this->makeTrackable("lpluslminus");
 		}
@@ -289,10 +287,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(lminuslplus),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("lminuslplus").push(myOp);
 			this->makeTrackable("lminuslplus");
 		}
@@ -300,10 +298,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(lplusLz),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("lplusLz").push(myOp);
 			this->makeTrackable("lplusLz");
 		}
@@ -311,10 +309,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(lzSquared),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("lzSquared").push(myOp);
 			this->makeTrackable("lzSquared");
 		}
@@ -330,10 +328,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(spluslplus),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("spluslplus").push(myOp);
 			this->makeTrackable("spluslplus");
 		}
@@ -341,10 +339,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(spluslminus),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("spluslminus").push(myOp);
 			this->makeTrackable("spluslminus");
 		}
@@ -352,10 +350,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(splusLz),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("splusLz").push(myOp);
 			this->makeTrackable("splusLz");
 		}
@@ -363,10 +361,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(lplusSz),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("lplusSz").push(myOp);
 			this->makeTrackable("lplusSz");
 		}
@@ -374,10 +372,10 @@ protected:
 		{
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(szlz),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("szlz").push(myOp);
 			this->makeTrackable("szlz");
 		}
@@ -389,10 +387,10 @@ protected:
 			MatrixType tmp = splus * lplusSquared;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("d0").push(myOp);
 			this->makeTrackable("d0");
 		}
@@ -401,10 +399,10 @@ protected:
 			MatrixType tmp = spluslminus * lminus;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("d1").push(myOp);
 			this->makeTrackable("d1");
 		}
@@ -413,10 +411,10 @@ protected:
 			MatrixType tmp = splus * lplusLz;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("d2").push(myOp);
 			this->makeTrackable("d2");
 		}
@@ -425,10 +423,10 @@ protected:
 			MatrixType tmp = splusLz * lminus;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("d3").push(myOp);
 			this->makeTrackable("d3");
 		}
@@ -437,10 +435,10 @@ protected:
 			MatrixType tmp = splus * lpluslminus;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("f0").push(myOp);
 			this->makeTrackable("f0");
 		}
@@ -449,10 +447,10 @@ protected:
 			MatrixType tmp = splus * lminuslplus;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("f1").push(myOp);
 			this->makeTrackable("f1");
 		}
@@ -461,10 +459,10 @@ protected:
 			MatrixType tmp = splus * lzSquared;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("g0").push(myOp);
 			this->makeTrackable("g0");
 		}
@@ -473,10 +471,10 @@ protected:
 			MatrixType tmp = sz * lplusSquared;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("g1").push(myOp);
 			this->makeTrackable("g1");
 		}
@@ -485,10 +483,10 @@ protected:
 			MatrixType tmp = sz * lplusLz;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("wprime").push(myOp);
 			this->makeTrackable("wprime");
 		}
@@ -497,10 +495,10 @@ protected:
 			MatrixType tmp = sz * lpluslminus;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("vprime").push(myOp);
 			this->makeTrackable("vprime");
 		}
@@ -509,10 +507,10 @@ protected:
 			MatrixType tmp = sz * lminuslplus;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("xprime").push(myOp);
 			this->makeTrackable("xprime");
 		}
@@ -521,10 +519,10 @@ protected:
 			MatrixType tmp = sz * lzSquared;
 			typename OperatorType::Su2RelatedType su2related;
 			OperatorType myOp(SparseMatrixType(tmp),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("z").push(myOp);
 			this->makeTrackable("z");
 		}
@@ -563,8 +561,10 @@ protected:
 	// more will be needed for J3L term
 	void fillModelLinks()
 	{
-		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *= 0.5; };
-		auto valueModiferTerm1 = [](ComplexOrRealType& value) { value *= 0.25; };
+		auto valueModiferTerm0 = [](ComplexOrRealType& value)
+		{ value *= 0.5; };
+		auto valueModiferTerm1 = [](ComplexOrRealType& value)
+		{ value *= 0.25; };
 
 		// this creates connections a and b
 		for (SizeType orbital = 0; orbital < 2; ++orbital) {
@@ -629,7 +629,8 @@ protected:
 		if (!hasLastTerm_)
 			return; // <--- EARLY EXIT HERE
 
-		auto valueModiferTerm2 = [](ComplexOrRealType& value) { value *= 0.125; };
+		auto valueModiferTerm2 = [](ComplexOrRealType& value)
+		{ value *= 0.125; };
 
 		ModelTermType& sdotSlDotLSquared = ModelBaseType::createTerm("sdotSlDotLSquared");
 		OpForLinkType d0("d0");
@@ -712,7 +713,7 @@ private:
 			const SizeType mPlusj0 = mPlusJ(ket, 0);
 			const SizeType mPlusj1 = mPlusJ(ket, 1);
 			SizeType bra = (orbital == 0) ? packM(mPlusj0 + 1, mPlusj1)
-						      : packM(mPlusj0, mPlusj1 + 1);
+			                              : packM(mPlusj0, mPlusj1 + 1);
 
 			RealType mPlusj = mPlusJ(ket, orbital);
 			RealType m = mPlusj - j;
@@ -721,8 +722,8 @@ private:
 
 			// bra = natBasis[jj];
 			typename HilbertBasisType::const_iterator it = std::find(natBasis.begin(),
-			    natBasis.end(),
-			    bra);
+			                                                         natBasis.end(),
+			                                                         bra);
 			assert(it != natBasis.end());
 			const SizeType jj = it - natBasis.begin();
 			cm(jj, ii) = sqrt(x);

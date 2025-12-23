@@ -158,8 +158,7 @@ struct ParametersForSolver {
 	{
 		if (ind >= 0) {
 			bunnie(t, prefix, ind, postfix, io);
-		}
-		else {
+		} else {
 			hare(t, prefix, postfix, io);
 		}
 	}
@@ -171,8 +170,7 @@ struct ParametersForSolver {
 		try {
 			io.readline(t, prefix + postfix + "=");
 			return;
-		}
-		catch (std::exception&) {
+		} catch (std::exception&) {
 		}
 	}
 
@@ -183,8 +181,7 @@ struct ParametersForSolver {
 		try {
 			io.readline(t, prefix + ttos(ind) + postfix + "=");
 			return;
-		}
-		catch (std::exception&) {
+		} catch (std::exception&) {
 		}
 
 		// if prefix + jnd + postfix exists with jnd < ind --> use the
@@ -195,8 +192,7 @@ struct ParametersForSolver {
 				io.readline(t,
 				            prefix + ttos(jnd) + postfix + "=");
 				return;
-			}
-			catch (std::exception&) {
+			} catch (std::exception&) {
 			}
 		}
 

@@ -3,14 +3,11 @@
 #include "GetBraOrKet.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename PvectorsType>
-class GroupOfOneTimeEvolutions
-{
-	class OneTimeEvolution
-	{
+class GroupOfOneTimeEvolutions {
+	class OneTimeEvolution {
 
 	public:
 
@@ -21,11 +18,11 @@ class GroupOfOneTimeEvolutions
 		typedef typename PvectorsType::RealType RealType;
 
 		OneTimeEvolution(SizeType firstIndex,
-		    const VectorWithOffsetType& src,
-		    PsimagLite::String srcKet,
-		    SizeType disposition,
-		    SizeType timeSteps,
-		    PvectorsType& pVectors)
+		                 const VectorWithOffsetType& src,
+		                 PsimagLite::String srcKet,
+		                 SizeType disposition,
+		                 SizeType timeSteps,
+		                 PvectorsType& pVectors)
 		    : indices_(timeSteps)
 		    , srcKet_(srcKet)
 		    , disposition_(disposition)
@@ -34,7 +31,8 @@ class GroupOfOneTimeEvolutions
 		{
 			indices_[0] = firstIndex;
 			for (SizeType i = 1; i < timeSteps; ++i) {
-				auto lambda = [this, i](SizeType ind) {
+				auto lambda = [this, i](SizeType ind)
+				{
 					indices_[i] = ind;
 					return "|P" + ttos(ind) + ">";
 				};

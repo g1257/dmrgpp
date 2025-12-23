@@ -28,8 +28,11 @@ public:
 	   already exists, and fail, otherwise
 	*/
 
-	enum WriteMode { NO_OVERWRITE,
-		         ALLOW_OVERWRITE };
+	enum WriteMode
+	{
+		NO_OVERWRITE,
+		ALLOW_OVERWRITE
+	};
 
 	IoNgSerializer(String filename, unsigned int mode)
 	    : hdf5file_(0)
@@ -42,8 +45,7 @@ public:
 
 		try {
 			hdf5file_ = new H5::H5File(filename, mode);
-		}
-		catch (H5::Exception& e) {
+		} catch (H5::Exception& e) {
 			delete hdf5file_;
 			hdf5file_ = 0;
 			throw e;
@@ -52,8 +54,7 @@ public:
 		if (mode == H5F_ACC_TRUNC) {
 			try {
 				createGroup("");
-			}
-			catch (H5::Exception& e) {
+			} catch (H5::Exception& e) {
 				filename_ = "";
 				delete hdf5file_;
 				hdf5file_ = 0;
@@ -64,8 +65,7 @@ public:
 		if (mode == H5F_ACC_RDONLY) {
 			try {
 				readCanary();
-			}
-			catch (H5::Exception& e) {
+			} catch (H5::Exception& e) {
 				filename_ = "";
 				delete hdf5file_;
 				hdf5file_ = 0;
@@ -131,8 +131,7 @@ public:
 		try {
 			H5::Group group = hdf5file_->openGroup(groupName.c_str());
 			group.close();
-		}
-		catch (...) {
+		} catch (...) {
 			return false;
 		}
 
@@ -340,8 +339,7 @@ public:
 			try {
 				what[i].write(name2 + "/" + typeToString(i),
 				              *this);
-			}
-			catch (...) {
+			} catch (...) {
 				what[i].overwrite(name2 + "/" + typeToString(i),
 				                  *this);
 			}
@@ -540,9 +538,12 @@ private:
 	// ut_dest is std::complex<floating> so that we can go from floating to
 	// complex<floating>
 
-	enum class ReadEnum { FLOATING,
-		              COMPLEX,
-		              OTHER };
+	enum class ReadEnum
+	{
+		FLOATING,
+		COMPLEX,
+		OTHER
+	};
 
 	template <typename SomeVectorType>
 	void readInternal(SomeVectorType& what, String name)
@@ -610,8 +611,7 @@ private:
 	{
 		try {
 			hdf5file_->unlink(name);
-		}
-		catch (...) {
+		} catch (...) {
 			std::cerr << "Cannot unlink " << name << "\n";
 		}
 
@@ -628,8 +628,7 @@ private:
 		try {
 			dataset = new H5::DataSet(
 			    hdf5file_->createDataSet(name, typeToH5<SomeType>(), *dataspace, dsCreatPlist));
-		}
-		catch (H5::Exception& e) {
+		} catch (H5::Exception& e) {
 			std::cerr << "H5 Exception createDataSet starts "
 			             "<-------------\n";
 			std::cerr << e.getDetailMsg() << "\n";
@@ -656,8 +655,7 @@ private:
 
 		try {
 			dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		}
-		catch (H5::Exception&) {
+		} catch (H5::Exception&) {
 			dataset = new H5::DataSet(hdf5file_->createDataSet(
 			    name, typeToH5<unsigned char>(), *dataspace, dsCreatPlist));
 		}
@@ -815,8 +813,7 @@ private:
 		char tmp;
 		try {
 			read(tmp, nameComplexOrReal);
-		}
-		catch (...) {
+		} catch (...) {
 			return ReadEnum::OTHER;
 		}
 

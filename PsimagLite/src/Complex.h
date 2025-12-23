@@ -43,19 +43,26 @@ template <typename T>
 class IsComplexNumber {
 public:
 
-	enum OpaqueEnum { True = false };
+	enum OpaqueEnum
+	{
+		True = false
+	};
 };
 
 template <typename T>
 class IsComplexNumber<std::complex<T>> {
 public:
 
-	enum OpaqueEnum { True = Loki::TypeTraits<T>::isArith };
+	enum OpaqueEnum
+	{
+		True = Loki::TypeTraits<T>::isArith
+	};
 };
 
 template <typename T>
 struct IsNumber {
-	enum {
+	enum
+	{
 		True = (IsComplexNumber<T>::True || Loki::TypeTraits<T>::isArith)
 	};
 };
@@ -127,15 +134,13 @@ inline std::complex<double> stringToComplex(const std::string& str)
 		if (str[str.find('+') + 1] == '-') {
 			imag = -imag;
 		}
-	}
-	else if (str.find('i') != std::string::npos) {
+	} else if (str.find('i') != std::string::npos) {
 		ss >> imag >> dummy;
 		real = 0;
 		if (str.back() != 'i') {
 			imag = 0;
 		}
-	}
-	else {
+	} else {
 		ss >> real;
 		imag = 0;
 	}

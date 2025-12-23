@@ -2,7 +2,7 @@
 
 template <typename ComplexOrRealType>
 void csr_to_den(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
-    PsimagLite::Matrix<ComplexOrRealType>& a_)
+                PsimagLite::Matrix<ComplexOrRealType>& a_)
 {
 	int ia = 0;
 	int ja = 0;
@@ -30,15 +30,15 @@ void csr_to_den(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 
 template <typename ComplexOrRealType>
 void csr_kron_mult_method(const int imethod,
-    const char transA,
-    const char transB,
+                          const char transA,
+                          const char transB,
 
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
+                          const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
+                          const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
 
-    const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
-    PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
+                          const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
+                          PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
 {
 	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int isTransA = (transA == 'T') || (transA == 't');
@@ -150,15 +150,15 @@ void csr_kron_mult_method(const int imethod,
 			// const char trans = (isTransB) ? 'T' : 'N';
 			const char trans = transB;
 			csr_matmul_pre(trans,
-			    b,
+			               b,
 
-			    nrow_Y,
-			    ncol_Y,
-			    yin,
+			               nrow_Y,
+			               ncol_Y,
+			               yin,
 
-			    nrow_BY,
-			    ncol_BY,
-			    byRef);
+			               nrow_BY,
+			               ncol_BY,
+			               byRef);
 		}
 
 		{
@@ -230,15 +230,15 @@ void csr_kron_mult_method(const int imethod,
 			 */
 			const char transa = isTransA ? 'N' : (isConjTransA ? 'Z' : 'T');
 			csr_matmul_post(transa,
-			    a,
+			                a,
 
-			    nrow_Y,
-			    ncol_Y,
-			    yin,
+			                nrow_Y,
+			                ncol_Y,
+			                yin,
 
-			    nrow_YAt,
-			    ncol_YAt,
-			    yatRef);
+			                nrow_YAt,
+			                ncol_YAt,
+			                yatRef);
 		}
 
 		{
@@ -252,15 +252,15 @@ void csr_kron_mult_method(const int imethod,
 			const char trans = transB;
 
 			csr_matmul_pre(trans,
-			    b,
+			               b,
 
-			    nrow_YAt,
-			    ncol_YAt,
-			    yatConstRef,
+			               nrow_YAt,
+			               ncol_YAt,
+			               yatConstRef,
 
-			    nrow_X,
-			    ncol_X,
-			    xout);
+			               nrow_X,
+			               ncol_X,
+			               xout);
 		}
 	} else if (imethod == 3) {
 		/*
@@ -313,14 +313,14 @@ void csr_kron_mult_method(const int imethod,
 
 template <typename ComplexOrRealType>
 void csr_kron_mult_method(const int imethod,
-    const char transA,
-    const char transB,
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
-    const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin_,
-    SizeType offsetY,
-    typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
-    SizeType offsetX)
+                          const char transA,
+                          const char transB,
+                          const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
+                          const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
+                          const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin_,
+                          SizeType offsetY,
+                          typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
+                          SizeType offsetX)
 
 {
 	const int isTransA = (transA == 'T') || (transA == 't');
@@ -345,24 +345,24 @@ void csr_kron_mult_method(const int imethod,
 	PsimagLite::MatrixNonOwned<const ComplexOrRealType> yin(nrow_Y, ncol_Y, yin_, offsetY);
 	PsimagLite::MatrixNonOwned<ComplexOrRealType> xout(nrow_X, ncol_X, xout_, offsetX);
 	csr_kron_mult_method(imethod,
-	    transA,
-	    transB,
-	    a,
-	    b,
-	    yin,
-	    xout);
+	                     transA,
+	                     transB,
+	                     a,
+	                     b,
+	                     yin,
+	                     xout);
 }
 
 template <typename ComplexOrRealType>
 void csr_kron_mult(const char transA,
-    const char transB,
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
-    const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin,
-    SizeType offsetY,
-    typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
-    SizeType offsetX,
-    const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
+                   const char transB,
+                   const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
+                   const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
+                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin,
+                   SizeType offsetY,
+                   typename PsimagLite::Vector<ComplexOrRealType>::Type& xout,
+                   SizeType offsetX,
+                   const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 {
 	/*
 	 *   -------------------------------------------------------------
@@ -428,12 +428,12 @@ void csr_kron_mult(const char transA,
 	estimate_kron_cost(nrow_1, ncol_1, nnz_A, nrow_2, ncol_2, nnz_B, &kron_nnz, &kron_flops, &imethod, denseFlopDiscount);
 
 	csr_kron_mult_method(imethod,
-	    transA,
-	    transB,
-	    a,
-	    b,
-	    yin,
-	    offsetY,
-	    xout,
-	    offsetX);
+	                     transA,
+	                     transB,
+	                     a,
+	                     b,
+	                     yin,
+	                     offsetY,
+	                     xout,
+	                     offsetX);
 }

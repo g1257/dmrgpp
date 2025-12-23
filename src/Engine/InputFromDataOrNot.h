@@ -4,12 +4,10 @@
 #include "Io/IoNg.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename InputCheckType>
-class InputFromDataOrNot
-{
+class InputFromDataOrNot {
 
 public:
 
@@ -17,8 +15,8 @@ public:
 	typedef PsimagLite::IoNg::In IoNgInType;
 
 	InputFromDataOrNot(PsimagLite::String filename,
-	    const InputCheckType& inputCheck,
-	    bool filenameIsCout)
+	                   const InputCheckType& inputCheck,
+	                   bool filenameIsCout)
 	    : ioWriteable_(0)
 	    , isData_(false)
 	{
@@ -29,7 +27,7 @@ public:
 			internal(filename);
 
 		ioWriteable_ = (isData_) ? new typename InputNgType::Writeable(inputCheck, data_)
-					 : new typename InputNgType::Writeable(filename, inputCheck);
+		                         : new typename InputNgType::Writeable(filename, inputCheck);
 		// data_ = "";
 	}
 

@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Heisenberg Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnType> {
@@ -107,14 +106,14 @@ struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnTyp
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	                   SizeType,
+	                   PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHeisenbergAncillaC";
 		io.createGroup(label);
@@ -125,7 +124,7 @@ struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnTyp
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersHeisenbergAncillaC& parameters)
+	                                const ParametersHeisenbergAncillaC& parameters)
 	{
 		os << "MagneticField=" << parameters.magneticField << "\n";
 		os << "HeisenbergTwiceS=" << parameters.twiceTheSpin << "\n";

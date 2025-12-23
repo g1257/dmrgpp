@@ -3,12 +3,10 @@
 #include "ProgressIndicator.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ActionType, typename TypeWrapperType>
-class KrylovHelper
-{
+class KrylovHelper {
 
 public:
 
@@ -28,12 +26,12 @@ public:
 
 	template <typename SomeActionType>
 	void calcR(VectorType& r,
-	    const SomeActionType& whatRorI,
-	    const MatrixComplexOrRealType& T,
-	    const MatrixComplexOrRealType& V,
-	    const VectorWithOffsetType& phi,
-	    SizeType n2,
-	    SizeType i0)
+	           const SomeActionType& whatRorI,
+	           const MatrixComplexOrRealType& T,
+	           const MatrixComplexOrRealType& V,
+	           const VectorWithOffsetType& phi,
+	           SizeType n2,
+	           SizeType i0)
 	{
 		const bool krylovAbridge = !params_.options.isSet("KrylovNoAbridge");
 		SizeType n3 = (krylovAbridge) ? 1 : n2;
@@ -66,9 +64,9 @@ public:
 	}
 
 	static ComplexOrRealType calcVTimesPhi(SizeType kprime,
-	    const MatrixComplexOrRealType& V,
-	    const VectorWithOffsetType& phi,
-	    SizeType i0)
+	                                       const MatrixComplexOrRealType& V,
+	                                       const VectorWithOffsetType& phi,
+	                                       SizeType i0)
 	{
 		ComplexOrRealType ret = 0;
 		SizeType total = phi.effectiveSize(i0);

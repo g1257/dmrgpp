@@ -84,12 +84,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsCommon.h"
 #include "TargetParamsTimeVectors.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType>
-class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType>
-{
+class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType> {
 
 public:
 
@@ -99,8 +97,8 @@ public:
 
 	template <typename IoInputter>
 	TargetParamsTimeStep(IoInputter& io,
-	    PsimagLite::String targeting,
-	    const ModelType& model)
+	                     PsimagLite::String targeting,
+	                     const ModelType& model)
 	    : TimeVectorParamsType(io, targeting, model)
 	    , maxTime_(0)
 	{

@@ -91,12 +91,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // includes the PsimagLite::norm functions
 #include "VectorWithOffsets.h" // includes the PsimagLite::norm functions
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ParametersType, typename TargetingType>
-class Diagonalization
-{
+class Diagonalization {
 
 public:
 
@@ -124,16 +122,16 @@ public:
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
 	typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,
-	    MatrixVectorType,
-	    TargetVectorType>
+	                                          MatrixVectorType,
+	                                          TargetVectorType>
 	    LanczosOrDavidsonBaseType;
 	typedef PsimagLite::DavidsonSolver<ParametersForSolverType,
-	    MatrixVectorType,
-	    TargetVectorType>
+	                                   MatrixVectorType,
+	                                   TargetVectorType>
 	    DavidsonSolverType;
 	typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-	    MatrixVectorType,
-	    TargetVectorType>
+	                                  MatrixVectorType,
+	                                  TargetVectorType>
 	    LanczosSolverType;
 	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
@@ -141,12 +139,12 @@ public:
 	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 
 	Diagonalization(const ParametersType& parameters,
-	    const ModelType& model,
-	    const bool& verbose,
-	    InputValidatorType& io,
-	    const typename QnType::VectorQnType& quantumSector,
-	    WaveFunctionTransfType& waveFunctionTransformation,
-	    const VectorVectorRealType& oldEnergy)
+	                const ModelType& model,
+	                const bool& verbose,
+	                InputValidatorType& io,
+	                const typename QnType::VectorQnType& quantumSector,
+	                WaveFunctionTransfType& waveFunctionTransformation,
+	                const VectorVectorRealType& oldEnergy)
 	    : parameters_(parameters)
 	    , model_(model)
 	    , verbose_(verbose)
@@ -160,10 +158,10 @@ public:
 
 	//! PTEX_LABEL{Diagonalization}
 	void operator()(TargetingType& target,
-	    VectorVectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& blockLeft,
-	    const BlockType& blockRight)
+	                VectorVectorRealType& energies,
+	                ProgramGlobals::DirectionEnum direction,
+	                const BlockType& blockLeft,
+	                const BlockType& blockRight)
 	{
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction == ProgramGlobals::DirectionEnum::INFINITE);
@@ -175,10 +173,10 @@ public:
 	}
 
 	void operator()(TargetingType& target,
-	    VectorVectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block,
-	    SizeType loopIndex)
+	                VectorVectorRealType& energies,
+	                ProgramGlobals::DirectionEnum direction,
+	                const BlockType& block,
+	                SizeType loopIndex)
 	{
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction != ProgramGlobals::DirectionEnum::INFINITE);
@@ -192,8 +190,8 @@ public:
 private:
 
 	SizeType targetedSymmetrySectors(VectorSizeType& mVector,
-	    VectorSizeType& compactedWeights,
-	    const LeftRightSuperType& lrs) const
+	                                 VectorSizeType& compactedWeights,
+	                                 const LeftRightSuperType& lrs) const
 	{
 		const SizeType total = lrs.super().partition() - 1;
 		SizeType sum = 0;
@@ -227,10 +225,10 @@ private:
 	}
 
 	void internalMain_(TargetingType& target,
-	    VectorVectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType loopIndex,
-	    const VectorSizeType& block)
+	                   VectorVectorRealType& energies,
+	                   ProgramGlobals::DirectionEnum direction,
+	                   SizeType loopIndex,
+	                   const VectorSizeType& block)
 
 	{
 		assert(block.size() == 1);
@@ -263,8 +261,8 @@ private:
 		VectorSizeType sectors;
 		VectorSizeType compactedWeights;
 		const SizeType weightsTotal = targetedSymmetrySectors(sectors,
-		    compactedWeights,
-		    lrs);
+		                                                      compactedWeights,
+		                                                      lrs);
 
 		if (weightsTotal == 0) {
 			PsimagLite::String msg("Diagonalization: ");
@@ -287,11 +285,11 @@ private:
 		VectorVectorType onlyForVwoS;
 		if (isVwoS) {
 			target.initialGuess(onlyForVwoS,
-			    oneSiteSpaces,
-			    noguess,
-			    compactedWeights,
-			    sectors,
-			    lrs.super());
+			                    oneSiteSpaces,
+			                    noguess,
+			                    compactedWeights,
+			                    sectors,
+			                    lrs.super());
 		}
 
 		for (SizeType j = 0; j < totalSectors; ++j) {
@@ -315,19 +313,19 @@ private:
 			progress_.printline(msgg, std::cout);
 
 			TargetVectorType* initialBySector = (isVwoS) ? &onlyForVwoS[j]
-								     : new TargetVectorType;
+			                                             : new TargetVectorType;
 
 			if (onlyWft) {
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
 					if (!isVwoS) {
 						target.initialGuess(*initialBySector,
-						    oneSiteSpaces,
-						    noguess,
-						    compactedWeights,
-						    sectors,
-						    j,
-						    excitedIndex,
-						    lrs.super());
+						                    oneSiteSpaces,
+						                    noguess,
+						                    compactedWeights,
+						                    sectors,
+						                    j,
+						                    excitedIndex,
+						                    lrs.super());
 					}
 
 					RealType norma = PsimagLite::norm(*initialBySector);
@@ -349,13 +347,13 @@ private:
 			} else {
 				if (!isVwoS) {
 					target.initialGuess(*initialBySector,
-					    oneSiteSpaces,
-					    noguess,
-					    compactedWeights,
-					    sectors,
-					    j,
-					    numberOfExcited, // sum all excited
-					    lrs.super());
+					                    oneSiteSpaces,
+					                    noguess,
+					                    compactedWeights,
+					                    sectors,
+					                    j,
+					                    numberOfExcited, // sum all excited
+					                    lrs.super());
 				}
 
 				RealType norma = PsimagLite::norm(*initialBySector);
@@ -368,12 +366,12 @@ private:
 
 				VectorRealType myEnergy;
 				diagonaliseOneBlock(myEnergy,
-				    vecSaved[j],
-				    i,
-				    lrs,
-				    target.time(),
-				    *initialBySector,
-				    loopIndex);
+				                    vecSaved[j],
+				                    i,
+				                    lrs,
+				                    target.time(),
+				                    *initialBySector,
+				                    loopIndex);
 
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
 					energySaved[j][excitedIndex] = myEnergy[excitedIndex];
@@ -413,9 +411,9 @@ private:
 	}
 
 	void calcGsEnergy(const VectorSizeType& sectors,
-	    const VectorVectorRealType& energySaved,
-	    const VectorVectorVectorType& vecSaved,
-	    const LeftRightSuperType& lrs)
+	                  const VectorVectorRealType& energySaved,
+	                  const VectorVectorVectorType& vecSaved,
+	                  const LeftRightSuperType& lrs)
 	{
 		SizeType totalSectors = sectors.size();
 
@@ -468,8 +466,8 @@ private:
 	}
 
 	void resizeSavedVectors(VectorVectorRealType& energySaved,
-	    VectorVectorVectorType& vecSaved,
-	    SizeType numberOfExcited)
+	                        VectorVectorVectorType& vecSaved,
+	                        SizeType numberOfExcited)
 	{
 		SizeType totalSectors = energySaved.size();
 		assert(vecSaved.size() == totalSectors);
@@ -485,7 +483,7 @@ private:
 	}
 
 	SizeType findLowestSectorIndex(const VectorVectorRealType& energySaved,
-	    const VectorVectorVectorType& vecSaved) const
+	                               const VectorVectorVectorType& vecSaved) const
 	{
 		constexpr SizeType excitedIndex = 0;
 
@@ -522,22 +520,22 @@ private:
 	}
 
 	/** Diagonalise the i-th block of the matrix, return its eigenvectors
-			in tmpVec and its eigenvalues in energyTmp
-		!PTEX_LABEL{diagonaliseOneBlock} */
+	                in tmpVec and its eigenvalues in energyTmp
+	        !PTEX_LABEL{diagonaliseOneBlock} */
 	void diagonaliseOneBlock(VectorRealType& energyTmp,
-	    VectorVectorType& tmpVec,
-	    SizeType partitionIndex,
-	    const LeftRightSuperType& lrs,
-	    RealType targetTime,
-	    const TargetVectorType& initialVector,
-	    SizeType loopIndex)
+	                         VectorVectorType& tmpVec,
+	                         SizeType partitionIndex,
+	                         const LeftRightSuperType& lrs,
+	                         RealType targetTime,
+	                         const TargetVectorType& initialVector,
+	                         SizeType loopIndex)
 	{
 		const OptionsType& options = parameters_.options;
 
 		HamiltonianConnectionType hc(lrs,
-		    ModelType::modelLinks(),
-		    targetTime,
-		    model_.superOpHelper());
+		                             ModelType::modelLinks(),
+		                             targetTime,
+		                             model_.superOpHelper());
 
 		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 		typename ModelHelperType::Aux aux(partitionIndex, lrs);
@@ -592,24 +590,24 @@ private:
 		msg << "I will now diagonalize a matrix of size=" << mSize;
 		progress_.printline(msgg, std::cout);
 		diagonaliseOneBlock(energyTmp,
-		    tmpVec,
-		    hc,
-		    initialVector,
-		    loopIndex,
-		    aux);
+		                    tmpVec,
+		                    hc,
+		                    initialVector,
+		                    loopIndex,
+		                    aux);
 	}
 
 	void diagonaliseOneBlock(VectorRealType& energyTmp,
-	    VectorVectorType& tmpVec,
-	    HamiltonianConnectionType& hc,
-	    const TargetVectorType& initialVector,
-	    SizeType loopIndex,
-	    const typename ModelHelperType::Aux& aux)
+	                         VectorVectorType& tmpVec,
+	                         HamiltonianConnectionType& hc,
+	                         const TargetVectorType& initialVector,
+	                         SizeType loopIndex,
+	                         const typename ModelHelperType::Aux& aux)
 	{
 		const SizeType nexcited = energyTmp.size();
 		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_,
-		    hc,
-		    aux);
+		                                                             hc,
+		                                                             aux);
 
 		if (parameters_.finiteLoop[loopIndex].wants("onlyslowwft")) {
 			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
@@ -703,9 +701,9 @@ private:
 	}
 
 	void computeAllLevelsBelow(VectorRealType& energyTmp,
-	    VectorVectorType& gsVector,
-	    LanczosOrDavidsonBaseType& object,
-	    const TargetVectorType& initialVector) const
+	                           VectorVectorType& gsVector,
+	                           LanczosOrDavidsonBaseType& object,
+	                           const TargetVectorType& initialVector) const
 	{
 		const SizeType nexcited = gsVector.size();
 		RealType norma = PsimagLite::norm(initialVector);
@@ -724,9 +722,9 @@ private:
 	}
 
 	void slowWft(VectorRealType& energyTmp,
-	    VectorVectorType& gsVector,
-	    const typename LanczosOrDavidsonBaseType::MatrixType& object,
-	    const TargetVectorType& initialVector) const
+	             VectorVectorType& gsVector,
+	             const typename LanczosOrDavidsonBaseType::MatrixType& object,
+	             const TargetVectorType& initialVector) const
 	{
 		const SizeType nexcited = gsVector.size();
 
@@ -745,10 +743,10 @@ private:
 	}
 
 	void doEntangler(TargetVectorType& v,
-	    const LeftRightSuperType& lrs,
-	    SizeType site,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType p)
+	                 const LeftRightSuperType& lrs,
+	                 SizeType site,
+	                 ProgramGlobals::DirectionEnum direction,
+	                 SizeType p)
 	{
 		const SizeType offset = lrs.super().partition(p);
 		const SizeType bs = lrs.super().partition(p + 1) - offset;
@@ -761,7 +759,7 @@ private:
 		bool breakLeft = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM || direction == ProgramGlobals::DirectionEnum::INFINITE);
 		bool breakRight = (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON || direction == ProgramGlobals::DirectionEnum::INFINITE);
 		bool firstCall = (direction == ProgramGlobals::DirectionEnum::INFINITE
-		    && leftLeftSize == h && lrs.right().size() == h * h);
+		                  && leftLeftSize == h && lrs.right().size() == h * h);
 
 		v.resize(bs);
 		for (SizeType i = 0; i < bs; ++i) {

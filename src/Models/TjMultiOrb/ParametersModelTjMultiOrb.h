@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_PARAMS_TJMULTIORB_H
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! ModelTjMultiOrb Parameters
 template <typename RealType, typename QnType>
 struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> {
@@ -111,14 +110,14 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	                   SizeType,
+	                   PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelTjMultiOrb";
 		io.createGroup(label);
@@ -130,7 +129,7 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersModelTjMultiOrb& parameters)
+	                                const ParametersModelTjMultiOrb& parameters)
 	{
 		os << "potentialV\n";
 		os << parameters.potentialV;

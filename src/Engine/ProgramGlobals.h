@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 struct ProgramGlobals {
 
@@ -98,32 +97,47 @@ struct ProgramGlobals {
 
 	static const SizeType MAX_LPS = 1000;
 
-	enum class DirectionEnum { INFINITE,
+	enum class DirectionEnum
+	{
+		INFINITE,
 		EXPAND_ENVIRON,
-		EXPAND_SYSTEM };
+		EXPAND_SYSTEM
+	};
 
-	enum class ConnectionEnum { SYSTEM_SYSTEM,
+	enum class ConnectionEnum
+	{
+		SYSTEM_SYSTEM,
 		SYSTEM_ENVIRON,
 		ENVIRON_SYSTEM,
-		ENVIRON_ENVIRON };
+		ENVIRON_ENVIRON
+	};
 
-	enum class SysOrEnvEnum { SYSTEM,
-		ENVIRON };
+	enum class SysOrEnvEnum
+	{
+		SYSTEM,
+		ENVIRON
+	};
 
-	enum class FermionOrBosonEnum { FERMION,
-		BOSON };
+	enum class FermionOrBosonEnum
+	{
+		FERMION,
+		BOSON
+	};
 
-	enum class VerboseEnum { NO,
-		YES };
+	enum class VerboseEnum
+	{
+		NO,
+		YES
+	};
 
 	static FermionOrBosonEnum multipy(const FermionOrBosonEnum& a,
-	    const FermionOrBosonEnum& b)
+	                                  const FermionOrBosonEnum& b)
 	{
 		if (a == FermionOrBosonEnum::BOSON)
 			return b;
 
 		return (b == FermionOrBosonEnum::BOSON) ? FermionOrBosonEnum::FERMION
-							: FermionOrBosonEnum::BOSON;
+		                                        : FermionOrBosonEnum::BOSON;
 	}
 
 	static void init(SizeType maxElectronsOneSpin_)
@@ -142,8 +156,8 @@ struct ProgramGlobals {
 	}
 
 	static int findBorderSiteFrom(SizeType site,
-	    DirectionEnum direction,
-	    SizeType n)
+	                              DirectionEnum direction,
+	                              SizeType n)
 	{
 		if (site == 1 && direction == DirectionEnum::EXPAND_ENVIRON)
 			return 0;
@@ -242,7 +256,8 @@ struct ProgramGlobals {
 
 	static PsimagLite::String toLower(PsimagLite::String data)
 	{
-		std::transform(data.begin(), data.end(), data.begin(), [](unsigned char c) { return std::tolower(c); });
+		std::transform(data.begin(), data.end(), data.begin(), [](unsigned char c)
+		               { return std::tolower(c); });
 		return data;
 	}
 

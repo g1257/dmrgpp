@@ -90,11 +90,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <cstdlib>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelBaseType>
-class HubbardAncillaExtended : public ModelBaseType
-{
+class HubbardAncillaExtended : public ModelBaseType {
 
 public:
 
@@ -137,11 +135,11 @@ public:
 	static SizeType const ORBITALS = 2;
 
 	HubbardAncillaExtended(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	                       InputValidatorType& io,
+	                       const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , modelParameters_(io)
 	    , helperHubbardAncilla_(geometry, modelParameters_)
 	{
@@ -153,8 +151,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType t) const
+	                                const BlockType& block,
+	                                RealType t) const
 	{
 		helperHubbardAncilla_.addDiagonalsInNaturalBasis(hmatrix, block, t);
 	}
@@ -213,10 +211,10 @@ protected:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				    ProgramGlobals::FermionOrBosonEnum::FERMION,
-				    typename OperatorType::PairType(1, m),
-				    asign,
-				    su2related);
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+				                  typename OperatorType::PairType(1, m),
+				                  asign,
+				                  su2related);
 				c.push(myOp);
 			}
 
@@ -256,8 +254,8 @@ protected:
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
 				OpForLinkType c("c", orb + spin * orbitals, orb);
 				typename ModelTermType::Su2Properties su2properties(1,
-				    (spin == 1) ? -1 : 1,
-				    spin);
+				                                                    (spin == 1) ? -1 : 1,
+				                                                    spin);
 				hop.push(c, 'N', c, 'C', su2properties);
 			}
 
@@ -266,8 +264,10 @@ protected:
 			ll.push(d, 'N', d, 'C');
 		}
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
-		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value) { if (isSu2) value = -value; };
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
+		{ value *= (isSu2) ? -0.5 : 0.5; };
+		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
+		{ if (isSu2) value = -value; };
 
 		for (SizeType orb = 0; orb < orbitals; ++orb) {
 			OpForLinkType splus("splus", orb, orb);
@@ -276,37 +276,38 @@ protected:
 			OpForLinkType pair("p", orb, orb);
 
 			spsm.push(splus,
-			    'N',
-			    splus,
-			    'C',
-			    valueModiferTerm0);
+			          'N',
+			          splus,
+			          'C',
+			          valueModiferTerm0);
 
 			if (!isSu2)
 				szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
 			else
 				spsm.push(splus,
-				    'N',
-				    splus,
-				    'C',
-				    valueModifierTermOther);
+				          'N',
+				          splus,
+				          'C',
+				          valueModifierTermOther);
 
 			ninj.push(n, 'N', n, 'N');
 
 			pp.push(pair,
-			    'N',
-			    pair,
-			    'C',
-			    [](ComplexOrRealType& value) { value *= (-1.0); });
+			        'N',
+			        pair,
+			        'C',
+			        [](ComplexOrRealType& value)
+			        { value *= (-1.0); });
 		}
 	}
 
 private:
 
 	void setSplus(OpsLabelType& splusop,
-	    OpsLabelType& sminus,
-	    SizeType,
-	    SizeType orbital,
-	    const VectorSparseMatrixType& vm) const
+	              OpsLabelType& sminus,
+	              SizeType,
+	              SizeType orbital,
+	              const VectorSparseMatrixType& vm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		SparseMatrixType m;
@@ -315,10 +316,10 @@ private:
 		multiply(splus, vm[0 + orbital], m);
 
 		OperatorType myOp(splus,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    -1,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0, 0),
+		                  -1,
+		                  su2related);
 		splusop.push(myOp);
 
 		myOp.dagger();
@@ -326,9 +327,9 @@ private:
 	}
 
 	void setSz(OpsLabelType& szop,
-	    SizeType,
-	    SizeType orbital,
-	    const VectorSparseMatrixType& vm) const
+	           SizeType,
+	           SizeType orbital,
+	           const VectorSparseMatrixType& vm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 
@@ -348,35 +349,35 @@ private:
 			szmatrix(i, i) = static_cast<RealType>(0.5) * (dn1(i, i) - dn2(i, i));
 
 		OperatorType sz(SparseMatrixType(szmatrix),
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		                ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                typename OperatorType::PairType(0, 0),
+		                1,
+		                su2related);
 
 		szop.push(sz);
 	}
 
 	void setPair(OpsLabelType& p,
-	    SizeType,
-	    SizeType orbital,
-	    const VectorSparseMatrixType& vm) const
+	             SizeType,
+	             SizeType orbital,
+	             const VectorSparseMatrixType& vm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		SparseMatrixType pair;
 		multiply(pair, vm[0 + orbital], vm[2 + orbital]);
 
 		OperatorType myOp(pair,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0, 0),
+		                  1,
+		                  su2related);
 		p.push(myOp);
 	}
 
 	void setN(OpsLabelType& nopop,
-	    SizeType,
-	    SizeType orbital,
-	    const VectorSparseMatrixType& vm) const
+	          SizeType,
+	          SizeType orbital,
+	          const VectorSparseMatrixType& vm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		SparseMatrixType cm1(vm[0 + orbital]);
@@ -395,10 +396,10 @@ private:
 		}
 
 		OperatorType nop(SparseMatrixType(nmatrix),
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                 typename OperatorType::PairType(0, 0),
+		                 1,
+		                 su2related);
 
 		nopop.push(nop);
 	}

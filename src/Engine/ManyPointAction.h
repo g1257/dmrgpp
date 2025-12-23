@@ -2,18 +2,16 @@
 #define MANYPOINTACTION_H
 #include "PredicateAwesome.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class ManyPointAction
-{
+class ManyPointAction {
 
 public:
 
 	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
 
 	ManyPointAction(bool hasNonTrivialAction,
-	    PsimagLite::String actionString)
+	                PsimagLite::String actionString)
 	    : nonTrivial_(hasNonTrivialAction)
 	    , actionString_(actionString)
 	{

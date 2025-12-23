@@ -3,12 +3,10 @@
 #include "FactorForTargetingExpression.hh"
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType>
-class KetForTargetingExpression
-{
+class KetForTargetingExpression {
 
 	using PairType = std::pair<SizeType, ComplexOrRealType>;
 	using SumStruct = std::vector<PairType>;
@@ -17,11 +15,14 @@ public:
 
 	using FactorForTargetingExpressionType = FactorForTargetingExpression<ComplexOrRealType>;
 
-	enum class Kind { U,
+	enum class Kind
+	{
+		U,
 		X,
 		P,
 		M,
-		S };
+		S
+	};
 
 	KetForTargetingExpression()
 	    : factor_(1.0)

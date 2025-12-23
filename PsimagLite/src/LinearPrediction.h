@@ -88,7 +88,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <complex>
 
 #ifdef USE_GSL
-extern "C" {
+extern "C"
+{
 #include <gsl/gsl_poly.h>
 }
 #endif

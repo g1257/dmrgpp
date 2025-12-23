@@ -3,12 +3,10 @@
 #include "Braket.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ObserverType>
-class StringOrderPost
-{
+class StringOrderPost {
 
 public:
 

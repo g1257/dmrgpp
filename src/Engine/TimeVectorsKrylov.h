@@ -87,36 +87,34 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetParamsType,
-    typename ModelType,
-    typename WaveFunctionTransfType,
-    typename LanczosSolverType,
-    typename VectorWithOffsetType_>
+          typename ModelType,
+          typename WaveFunctionTransfType,
+          typename LanczosSolverType,
+          typename VectorWithOffsetType_>
 class TimeVectorsKrylov : public TimeVectorsBase<
-			      TargetParamsType,
-			      ModelType,
-			      WaveFunctionTransfType,
-			      LanczosSolverType,
-			      VectorWithOffsetType_>
-{
+                              TargetParamsType,
+                              ModelType,
+                              WaveFunctionTransfType,
+                              LanczosSolverType,
+                              VectorWithOffsetType_> {
 
 public:
 
 	typedef VectorWithOffsetType_ VectorWithOffsetType;
 	typedef TimeVectorsBase<TargetParamsType,
-	    ModelType,
-	    WaveFunctionTransfType,
-	    LanczosSolverType,
-	    VectorWithOffsetType>
+	                        ModelType,
+	                        WaveFunctionTransfType,
+	                        LanczosSolverType,
+	                        VectorWithOffsetType>
 	    BaseType;
 	typedef TimeVectorsKrylov<TargetParamsType,
-	    ModelType,
-	    WaveFunctionTransfType,
-	    LanczosSolverType,
-	    VectorWithOffsetType>
+	                          ModelType,
+	                          WaveFunctionTransfType,
+	                          LanczosSolverType,
+	                          VectorWithOffsetType>
 	    ThisType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
@@ -150,11 +148,11 @@ public:
 	typedef KrylovHelper<Action, TypeWrapper> KrylovHelperType;
 
 	TimeVectorsKrylov(const TargetParamsType& tstStruct,
-	    VectorVectorWithOffsetType& targetVectors,
-	    const ModelType& model,
-	    const WaveFunctionTransfType& wft,
-	    const LeftRightSuperType& lrs,
-	    InputValidatorType& ioIn)
+	                  VectorVectorWithOffsetType& targetVectors,
+	                  const ModelType& model,
+	                  const WaveFunctionTransfType& wft,
+	                  const LeftRightSuperType& lrs,
+	                  InputValidatorType& ioIn)
 	    : BaseType(model, lrs, wft, "krylov")
 	    , tstStruct_(tstStruct)
 	    , targetVectors_(targetVectors)
@@ -168,9 +166,9 @@ public:
 	}
 
 	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
-	    RealType Eg,
-	    const VectorWithOffsetType& phi,
-	    const typename BaseType::ExtraData& extra)
+	                             RealType Eg,
+	                             const VectorWithOffsetType& phi,
+	                             const typename BaseType::ExtraData& extra)
 	{
 		const VectorRealType& times = tstStruct_.times();
 
@@ -186,8 +184,8 @@ public:
 				SizeType numberOfSites = lrs_.super().block().size();
 				if (extra.block[0] != 0 && extra.block[0] != numberOfSites - 1) {
 					BaseType::wftHelper().wftOneVector(phiNew,
-					    *targetVectors_[advance],
-					    extra.block[0]);
+					                                   *targetVectors_[advance],
+					                                   extra.block[0]);
 
 					*targetVectors_[indices[0]] = phiNew;
 				} else {
@@ -244,12 +242,12 @@ private:
 
 	//! Do not normalize states here, it leads to wrong results (!)
 	void calcTargetVectors(typename PsimagLite::Vector<SizeType>::Type indices,
-	    const VectorWithOffsetType& phi,
-	    const VectorMatrixFieldType& T,
-	    const VectorMatrixFieldType& V,
-	    RealType Eg,
-	    const VectorVectorRealType& eigs,
-	    typename PsimagLite::Vector<SizeType>::Type steps)
+	                       const VectorWithOffsetType& phi,
+	                       const VectorMatrixFieldType& T,
+	                       const VectorMatrixFieldType& V,
+	                       RealType Eg,
+	                       const VectorVectorRealType& eigs,
+	                       typename PsimagLite::Vector<SizeType>::Type steps)
 	{
 		const VectorRealType& times = tstStruct_.times();
 
@@ -263,21 +261,22 @@ private:
 	}
 
 	void calcTargetVector(VectorWithOffsetType& v,
-	    const VectorWithOffsetType& phi,
-	    const VectorMatrixFieldType& T,
-	    const VectorMatrixFieldType& V,
-	    RealType Eg,
-	    const VectorVectorRealType& eigs,
-	    typename PsimagLite::Vector<SizeType>::Type steps,
-	    SizeType timeIndex,
-	    const VectorRealType& times)
+	                      const VectorWithOffsetType& phi,
+	                      const VectorMatrixFieldType& T,
+	                      const VectorMatrixFieldType& V,
+	                      RealType Eg,
+	                      const VectorVectorRealType& eigs,
+	                      typename PsimagLite::Vector<SizeType>::Type steps,
+	                      SizeType timeIndex,
+	                      const VectorRealType& times)
 	{
 		v = phi;
 		for (SizeType ii = 0; ii < phi.sectors(); ++ii) {
 			const RealType time = times[timeIndex];
 			const RealType timeDirection = tstStruct_.timeDirection();
 			const VectorRealType& eigsii = eigs[ii];
-			auto action = [eigsii, Eg, time, timeDirection](SizeType k) {
+			auto action = [eigsii, Eg, time, timeDirection](SizeType k)
+			{
 				RealType tmp = (eigsii[k] - Eg) * time * timeDirection;
 				ComplexOrRealType c = 0.0;
 				PsimagLite::expComplexOrReal(c, -tmp);
@@ -293,12 +292,12 @@ private:
 
 	template <typename SomeLambdaType>
 	void calcTargetVector(VectorType& r,
-	    const VectorWithOffsetType& phi,
-	    const MatrixComplexOrRealType& T,
-	    const MatrixComplexOrRealType& V,
-	    const SomeLambdaType& action,
-	    SizeType steps,
-	    SizeType i0)
+	                      const VectorWithOffsetType& phi,
+	                      const MatrixComplexOrRealType& T,
+	                      const MatrixComplexOrRealType& V,
+	                      const SomeLambdaType& action,
+	                      SizeType steps,
+	                      SizeType i0)
 	{
 		SizeType n2 = steps;
 		SizeType n = V.rows();
@@ -321,9 +320,9 @@ private:
 	}
 
 	void triDiag(const VectorWithOffsetType& phi,
-	    VectorMatrixFieldType& T,
-	    VectorMatrixFieldType& V,
-	    typename PsimagLite::Vector<SizeType>::Type& steps)
+	             VectorMatrixFieldType& T,
+	             VectorMatrixFieldType& V,
+	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));

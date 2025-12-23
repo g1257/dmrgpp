@@ -7,12 +7,10 @@
 #include "TermForTargetingExpression.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetingBaseType>
-class AlgebraForTargetingExpression
-{
+class AlgebraForTargetingExpression {
 
 public:
 

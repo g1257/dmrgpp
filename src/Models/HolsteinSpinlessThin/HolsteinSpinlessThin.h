@@ -90,16 +90,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelBaseType>
-class HolsteinSpinlessThin : public ModelBaseType
-{
+class HolsteinSpinlessThin : public ModelBaseType {
 
 public:
 
-	enum class SiteType { SITE_BOSON,
-		SITE_FERMION };
+	enum class SiteType
+	{
+		SITE_BOSON,
+		SITE_FERMION
+	};
 
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
@@ -135,8 +136,7 @@ public:
 	typedef typename ModelBaseType::ModelLinksType ModelLinksType;
 	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
 
-	class AtomKind : public AtomKindBaseType
-	{
+	class AtomKind : public AtomKindBaseType {
 
 	public:
 
@@ -152,12 +152,12 @@ public:
 	static const int SPIN_UP = HilbertSpaceHubbardType::SPIN_UP;
 
 	HolsteinSpinlessThin(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry,
-	    PsimagLite::String additional)
+	                     InputValidatorType& io,
+	                     const SuperGeometryType& geometry,
+	                     PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
 	    , atomKind_(0)
@@ -175,8 +175,8 @@ public:
 	void print(std::ostream& os) const { operator<<(os, modelParameters_); }
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -254,10 +254,10 @@ protected:
 			}
 
 			OperatorType myOp(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(1, 1 - sigma),
-			    asign,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(1, 1 - sigma),
+			                  asign,
+			                  su2related);
 
 			c.push(myOp);
 
@@ -268,10 +268,10 @@ protected:
 		OpsLabelType& n = this->createOpsLabel("n", 1); // 1 == fermionic site
 		typename OperatorType::Su2RelatedType su2related;
 		OperatorType myOp(nmatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0, 0),
+		                  1,
+		                  su2related);
 
 		n.push(myOp);
 
@@ -293,10 +293,10 @@ protected:
 		su2related2.transpose.push_back(1);
 		su2related2.offset = 1;
 		OperatorType myOp2(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 2),
-		    -1,
-		    su2related2);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 2),
+		                   -1,
+		                   su2related2);
 		a.push(myOp2);
 
 		SparseMatrixType tmp2;
@@ -304,10 +304,10 @@ protected:
 		tmp2 += tmpMatrix;
 		typename OperatorType::Su2RelatedType su2Related3;
 		disp.push(OperatorType(tmp2,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1.0,
-		    su2Related3));
+		                       ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                       typename OperatorType::PairType(0, 0),
+		                       1.0,
+		                       su2Related3));
 	}
 
 	void fillModelLinks()
@@ -349,8 +349,8 @@ private:
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 	RealType sign(typename HilbertSpaceHubbardType::HilbertState const& ket,
-	    int i,
-	    int) const
+	              int i,
+	              int) const
 	{
 		int value = 0;
 		value += HilbertSpaceHubbardType::calcNofElectrons(ket, 0, i, 0);
@@ -361,7 +361,7 @@ private:
 	}
 
 	void findAllFermionicMatrices(VectorSparseMatrixType& cm,
-	    const HilbertBasisType& natBasis) const
+	                              const HilbertBasisType& natBasis) const
 	{
 		cm.resize(1);
 		cm[0] = findOperatorMatrices(SPIN_UP, natBasis);
@@ -369,7 +369,7 @@ private:
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(SizeType sigma,
-	    const HilbertBasisType& natBasis) const
+	                                      const HilbertBasisType& natBasis) const
 	{
 		typename HilbertSpaceHubbardType::HilbertState bra, ket;
 		int n = natBasis.size();
@@ -394,9 +394,9 @@ private:
 
 	// only fermions, bosons have no symmetry
 	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    SizeType offset,
-	    SiteType typeOfSite) const
+	                        const HilbertBasisType& basis,
+	                        SizeType offset,
+	                        SiteType typeOfSite) const
 	{
 		typedef std::pair<SizeType, SizeType> PairType;
 
@@ -421,8 +421,8 @@ private:
 	}
 
 	void addPotentialFV(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualIndexOfSite) const
+	                    const VectorSparseMatrixType& cm,
+	                    SizeType actualIndexOfSite) const
 	{
 		SparseMatrixType nup = n(cm[SPIN_UP]);
 		SizeType iUp = actualIndexOfSite;
@@ -431,8 +431,8 @@ private:
 	}
 
 	void addPotentialPhononV(SparseMatrixType& hmatrix,
-	    const SparseMatrixType& amatrix,
-	    SizeType actualIndexOfSite) const
+	                         const SparseMatrixType& amatrix,
+	                         SizeType actualIndexOfSite) const
 	{
 		if (modelParameters_.numberphonons == 0)
 			return;

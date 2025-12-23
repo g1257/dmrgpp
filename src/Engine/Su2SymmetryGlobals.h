@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "ClebschGordanCached.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename FieldType>
 struct Su2SymmetryGlobals {

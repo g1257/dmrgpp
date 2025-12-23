@@ -89,13 +89,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Utils.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
 template <typename Word>
-class HilbertSpaceHubbardHolsteinSpinless
-{
+class HilbertSpaceHubbardHolsteinSpinless {
 
 public:
 

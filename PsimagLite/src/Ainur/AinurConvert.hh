@@ -78,8 +78,7 @@ public:
 
 		try {
 			t = PsimagLite::atoi(label.c_str());
-		}
-		catch (std::exception& e) {
+		} catch (std::exception& e) {
 			std::cerr << "FATAL: AinurState: Label " + label + " must be an integer\n";
 			throw e.what();
 		}
@@ -93,8 +92,7 @@ public:
 
 		try {
 			t = PsimagLite::atof(label.c_str());
-		}
-		catch (...) {
+		} catch (...) {
 			err("FATAL: AinurState: Label " + label + " must be a real number\n");
 		}
 	}

@@ -5,12 +5,10 @@
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename SuperGeometryType>
-class HamiltonianAbstract
-{
+class HamiltonianAbstract {
 	using VectorSizeType = std::vector<SizeType>;
 	using VectorVectorSizeType = std::vector<VectorSizeType>;
 	using ComplexOrRealType = typename SuperGeometryType::ComplexOrRealType;
@@ -20,9 +18,9 @@ class HamiltonianAbstract
 public:
 
 	HamiltonianAbstract(const SuperGeometryType& superGeometry,
-	    SizeType smax,
-	    SizeType emin,
-	    const VectorSizeType& block)
+	                    SizeType smax,
+	                    SizeType emin,
+	                    const VectorSizeType& block)
 	    : superGeometry_(superGeometry)
 	    , smax_(smax)
 	    , emin_(emin)
@@ -50,9 +48,9 @@ public:
 	}
 
 	ComplexOrRealType connectionValue(const VectorSizeType& hItems,
-	    const OneLinkType& oneLink,
-	    SizeType termIndexForGeom,
-	    const RealType& targetTime)
+	                                  const OneLinkType& oneLink,
+	                                  SizeType termIndexForGeom,
+	                                  const RealType& targetTime)
 	{
 		ComplexOrRealType value = superGeometry_(smax_, emin_, hItems, oneLink.orbs, termIndexForGeom);
 		SizeType site = findSite(hItems);

@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! FeAs Model Parameters
 template <typename ComplexOrRealType, typename QnType>
@@ -96,12 +95,15 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
 
-	enum IntEnum { INT_PAPER33,
+	enum IntEnum
+	{
+		INT_PAPER33,
 		INT_V,
 		INT_CODE2,
 		INT_IMPURITY,
 		INT_KSPACE,
-		INT_ORBITAL0 };
+		INT_ORBITAL0
+	};
 
 	static PsimagLite::String modeString(IntEnum x)
 	{
@@ -308,7 +310,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelFeAs";
 		io.createGroup(label);
@@ -328,7 +330,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersModelFeAs& parameters)
+	                                const ParametersModelFeAs& parameters)
 	{
 		os << "Orbitals=" << parameters.orbitals << "\n";
 		os << "hubbardU\n";

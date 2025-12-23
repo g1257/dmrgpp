@@ -153,10 +153,13 @@ public:
 
 #endif
 
-	enum { SERIAL = 0,
-	       PTHREADS = 1,
-	       MPI = 2,
-	       PTHREADS_AND_MPI = 3 };
+	enum
+	{
+		SERIAL = 0,
+		PTHREADS = 1,
+		MPI = 2,
+		PTHREADS_AND_MPI = 3
+	};
 
 	static SizeType storageSize(SizeType npthreads)
 	{

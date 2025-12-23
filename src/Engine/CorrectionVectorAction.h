@@ -4,26 +4,27 @@
 #include "FreqEnum.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType,
-    typename TargetParamsType,
-    bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
-class CorrectionVectorActionBase
-{
+          typename TargetParamsType,
+          bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
+class CorrectionVectorActionBase {
 
 public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	enum ActionEnum { ACTION_IMAG,
-		ACTION_REAL };
+	enum ActionEnum
+	{
+		ACTION_IMAG,
+		ACTION_REAL
+	};
 
 	CorrectionVectorActionBase(const TargetParamsType& tstStruct,
-	    RealType E0,
-	    const VectorRealType& eigs)
+	                           RealType E0,
+	                           const VectorRealType& eigs)
 	    : tstStruct_(tstStruct)
 	    , E0_(E0)
 	    , eigs_(eigs)
@@ -59,15 +60,13 @@ protected:
 };
 
 template <typename ComplexOrRealType,
-    typename TargetParamsType,
-    bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
-class CorrectionVectorAction
-{
+          typename TargetParamsType,
+          bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
+class CorrectionVectorAction {
 };
 
 template <typename ComplexOrRealType, typename TargetParamsType>
-class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, false> : public CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType>
-{
+class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, false> : public CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType> {
 
 public:
 
@@ -75,8 +74,8 @@ public:
 	typedef typename BaseType::RealType RealType;
 
 	CorrectionVectorAction(const TargetParamsType& tstStruct,
-	    RealType E0,
-	    const typename BaseType::VectorRealType& eigs)
+	                       RealType E0,
+	                       const typename BaseType::VectorRealType& eigs)
 	    : BaseType(tstStruct, E0, eigs)
 	{
 	}
@@ -107,7 +106,7 @@ private:
 		} else {
 			RealType exponent = 1.0 / (2.0 * nFraction);
 			RealType denom = pow(part1 * part1 + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta(),
-			    exponent);
+			                     exponent);
 			RealType denom1 = sqrt(part1 * part1 + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta());
 			RealType cosreal = cos(acos(part1 / denom1) / nFraction);
 			RealType sinreal = sin(acos(part1 / denom1) / nFraction);
@@ -117,8 +116,7 @@ private:
 };
 
 template <typename ComplexOrRealType, typename TargetParamsType>
-class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, true> : public CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType>
-{
+class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, true> : public CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType> {
 
 public:
 
@@ -126,8 +124,8 @@ public:
 	typedef typename BaseType::RealType RealType;
 
 	CorrectionVectorAction(const TargetParamsType& tstStruct,
-	    RealType E0,
-	    const typename BaseType::VectorRealType& eigs)
+	                       RealType E0,
+	                       const typename BaseType::VectorRealType& eigs)
 	    : BaseType(tstStruct, E0, eigs)
 	{
 		if (firstCall_) {

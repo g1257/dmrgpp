@@ -107,9 +107,12 @@ public:
 	typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 
-	enum { WITH_INFO = 1,
-	       DEBUG = 2,
-	       ALLOWS_ZERO = 4 };
+	enum
+	{
+		WITH_INFO = 1,
+		DEBUG = 2,
+		ALLOWS_ZERO = 4
+	};
 
 	LanczosVectors(const MatrixType& mat, bool lotaMemory, SizeType steps, bool isReorthoEnabled)
 	    : progress_("LanczosVectors")

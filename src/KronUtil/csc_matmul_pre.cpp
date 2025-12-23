@@ -2,17 +2,17 @@
 
 template <typename ComplexOrRealType>
 void csc_matmul_pre(char trans_A,
-    const int nrow_A,
-    const int ncol_A,
-    const PsimagLite::Vector<int>::Type& acolptr,
-    const PsimagLite::Vector<int>::Type& arow,
-    const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
-    const int nrow_Y,
-    const int ncol_Y,
-    const PsimagLite::Matrix<ComplexOrRealType>& yin,
-    const int nrow_X,
-    const int ncol_X,
-    PsimagLite::Matrix<ComplexOrRealType>& xout)
+                    const int nrow_A,
+                    const int ncol_A,
+                    const PsimagLite::Vector<int>::Type& acolptr,
+                    const PsimagLite::Vector<int>::Type& arow,
+                    const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
+                    const int nrow_Y,
+                    const int ncol_Y,
+                    const PsimagLite::Matrix<ComplexOrRealType>& yin,
+                    const int nrow_X,
+                    const int ncol_X,
+                    PsimagLite::Matrix<ComplexOrRealType>& xout)
 {
 	/*
 	 * -------------------------------------------------------

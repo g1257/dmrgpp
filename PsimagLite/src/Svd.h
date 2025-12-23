@@ -97,11 +97,9 @@ private:
 	{
 		if (name_ == "gesdd") {
 			psimag::LAPACK::GESDD(jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, iwork, info);
-		}
-		else if (name_ == "gesvd") {
+		} else if (name_ == "gesvd") {
 			psimag::LAPACK::GESVD(jobz, jobz, m, n, a, lda, s, u, ldu, vt, ldvt, work, lwork, rwork, info);
-		}
-		else {
+		} else {
 			throw PsimagLite::RuntimeError("Unknown backend " + name_ + "\n");
 		}
 	}

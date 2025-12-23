@@ -82,11 +82,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelType_>
-class MatrixVectorBase
-{
+class MatrixVectorBase {
 
 public:
 
@@ -106,9 +104,9 @@ public:
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const;
 
 	static void fullDiag(VectorRealType& eigs,
-	    FullMatrixType& fm,
-	    const SparseMatrixType& matrixStored,
-	    int tmp)
+	                     FullMatrixType& fm,
+	                     const SparseMatrixType& matrixStored,
+	                     int tmp)
 	{
 		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
 

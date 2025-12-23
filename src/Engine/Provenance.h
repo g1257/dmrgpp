@@ -9,8 +9,7 @@
 #include <iostream>
 #include <sstream>
 
-class Provenance
-{
+class Provenance {
 
 public:
 

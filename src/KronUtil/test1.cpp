@@ -151,38 +151,38 @@ int main()
 
 									imethod = 1;
 									den_kron_mult_method(imethod,
-									    transA,
-									    transB,
-									    a_,
-									    b_,
-									    yRef.getVector(),
-									    0,
-									    x1Ref.getVector(),
-									    0,
-									    gemmR);
+									                     transA,
+									                     transB,
+									                     a_,
+									                     b_,
+									                     yRef.getVector(),
+									                     0,
+									                     x1Ref.getVector(),
+									                     0,
+									                     gemmR);
 
 									imethod = 2;
 									den_kron_mult_method(imethod,
-									    transA,
-									    transB,
-									    a_,
-									    b_,
-									    yRef.getVector(),
-									    0,
-									    x2Ref.getVector(),
-									    0,
-									    gemmR);
+									                     transA,
+									                     transB,
+									                     a_,
+									                     b_,
+									                     yRef.getVector(),
+									                     0,
+									                     x2Ref.getVector(),
+									                     0,
+									                     gemmR);
 									imethod = 3;
 									den_kron_mult_method(imethod,
-									    transA,
-									    transB,
-									    a_,
-									    b_,
-									    yRef.getVector(),
-									    0,
-									    x3Ref.getVector(),
-									    0,
-									    gemmR);
+									                     transA,
+									                     transB,
+									                     a_,
+									                     b_,
+									                     yRef.getVector(),
+									                     0,
+									                     x3Ref.getVector(),
+									                     0,
+									                     gemmR);
 
 									// ------------------
 									// form C = kron(A,B)
@@ -228,28 +228,28 @@ int main()
 											RealType diff31 = std::abs(x3_(ix, jx) - x1_(ix, jx));
 											RealType diff41 = std::abs(x4_(ix, jx) - x1_(ix, jx));
 											RealType diffmax = std::max(diff41,
-											    std::max(diff12, std::max(diff23, diff31)));
+											                            std::max(diff12, std::max(diff23, diff31)));
 											const RealType tol = 1.0 / (1000.0 * 1000.0 * 1000.0);
 
 											int isok = (diffmax <= tol);
 											if (!isok) {
 												nerrors += 1;
 												printf("den: transA=%c, itransA %d transB=%c, itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												    transA,
-												    itransA,
-												    transB,
-												    itransB,
-												    nrow_A,
-												    ncol_A,
-												    nrow_B,
-												    ncol_B);
+												       transA,
+												       itransA,
+												       transB,
+												       itransB,
+												       nrow_A,
+												       ncol_A,
+												       nrow_B,
+												       ncol_B);
 												printf("ix %d, jx %d, diff12 %f, diff23 %f, diff31 %f diff41 %f \n",
-												    ix,
-												    jx,
-												    diff12,
-												    diff23,
-												    diff31,
-												    diff41);
+												       ix,
+												       jx,
+												       diff12,
+												       diff23,
+												       diff31,
+												       diff41);
 											}
 										}
 									}
@@ -314,18 +314,18 @@ int main()
 											if (!isok) {
 												nerrors += 1;
 												printf("csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												    itransA,
-												    itransB,
-												    nrow_A,
-												    ncol_A,
-												    nrow_B,
-												    ncol_B);
+												       itransA,
+												       itransB,
+												       nrow_A,
+												       ncol_A,
+												       nrow_B,
+												       ncol_B);
 												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												    ix,
-												    jx,
-												    diff1,
-												    diff2,
-												    diff3);
+												       ix,
+												       jx,
+												       diff1,
+												       diff2,
+												       diff3);
 											}
 										}
 									}
@@ -340,25 +340,25 @@ int main()
 									den_zeros(nrow_X, ncol_X, sx1_);
 
 									den_kron_mult_method(imethod,
-									    transA,
-									    transB,
-									    a_,
-									    b_,
-									    yRef.getVector(),
-									    0,
-									    x1Ref.getVector(),
-									    0,
-									    gemmR);
+									                     transA,
+									                     transB,
+									                     a_,
+									                     b_,
+									                     yRef.getVector(),
+									                     0,
+									                     x1Ref.getVector(),
+									                     0,
+									                     gemmR);
 
 									csr_kron_mult(transA,
-									    transB,
-									    a,
-									    b,
-									    yRef.getVector(),
-									    0,
-									    sx1Ref.getVector(),
-									    0,
-									    denseFlopDiscount);
+									              transB,
+									              a,
+									              b,
+									              yRef.getVector(),
+									              0,
+									              sx1Ref.getVector(),
+									              0,
+									              denseFlopDiscount);
 
 									for (jx = 0; jx < ncol_X; jx++) {
 										for (ix = 0; ix < nrow_X; ix++) {
@@ -369,10 +369,10 @@ int main()
 											if (!isok) {
 												nerrors += 1;
 												printf("nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												    nrow_A,
-												    ncol_A,
-												    nrow_B,
-												    ncol_B);
+												       nrow_A,
+												       ncol_A,
+												       nrow_B,
+												       ncol_B);
 												printf("ix %d, jx %d, diff %f \n", ix, jx, diff);
 											}
 										}
@@ -411,18 +411,18 @@ int main()
 											if (!isok) {
 												nerrors += 1;
 												printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												    itransA,
-												    itransB,
-												    nrow_A,
-												    ncol_A,
-												    nrow_B,
-												    ncol_B);
+												       itransA,
+												       itransB,
+												       nrow_A,
+												       ncol_A,
+												       nrow_B,
+												       ncol_B);
 												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												    ix,
-												    jx,
-												    diff1,
-												    diff2,
-												    diff3);
+												       ix,
+												       jx,
+												       diff1,
+												       diff2,
+												       diff3);
 											}
 										}
 									}
@@ -465,15 +465,15 @@ int main()
 
 									imethod = 3;
 									den_csr_kron_mult_method(imethod,
-									    transA,
-									    transB,
-									    a_,
-									    b,
-									    yRef.getVector(),
-									    0,
-									    sx3Ref.getVector(),
-									    0,
-									    gemmR);
+									                         transA,
+									                         transB,
+									                         a_,
+									                         b,
+									                         yRef.getVector(),
+									                         0,
+									                         sx3Ref.getVector(),
+									                         0,
+									                         gemmR);
 
 									for (jx = 0; jx < ncol_X; jx++) {
 										for (ix = 0; ix < nrow_X; ix++) {
@@ -486,18 +486,18 @@ int main()
 											if (!isok) {
 												nerrors += 1;
 												printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												    itransA,
-												    itransB,
-												    nrow_A,
-												    ncol_A,
-												    nrow_B,
-												    ncol_B);
+												       itransA,
+												       itransB,
+												       nrow_A,
+												       ncol_A,
+												       nrow_B,
+												       ncol_B);
 												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												    ix,
-												    jx,
-												    diff1,
-												    diff2,
-												    diff3);
+												       ix,
+												       jx,
+												       diff1,
+												       diff2,
+												       diff3);
 											}
 										}
 									}
@@ -510,15 +510,15 @@ int main()
 									den_zeros(nrow_X, ncol_X, sx1_);
 
 									csr_den_kron_mult(transA,
-									    transB,
-									    a,
-									    b_,
-									    yRef.getVector(),
-									    0,
-									    sx1Ref.getVector(),
-									    0,
-									    denseFlopDiscount,
-									    gemmR);
+									                  transB,
+									                  a,
+									                  b_,
+									                  yRef.getVector(),
+									                  0,
+									                  sx1Ref.getVector(),
+									                  0,
+									                  denseFlopDiscount,
+									                  gemmR);
 
 									for (jx = 0; jx < ncol_X; jx++) {
 										for (ix = 0; ix < nrow_X; ix++) {
@@ -531,18 +531,18 @@ int main()
 											if (!isok) {
 												nerrors += 1;
 												printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												    itransA,
-												    itransB,
-												    nrow_A,
-												    ncol_A,
-												    nrow_B,
-												    ncol_B);
+												       itransA,
+												       itransB,
+												       nrow_A,
+												       ncol_A,
+												       nrow_B,
+												       ncol_B);
 												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												    ix,
-												    jx,
-												    diff1,
-												    diff2,
-												    diff3);
+												       ix,
+												       jx,
+												       diff1,
+												       diff2,
+												       diff3);
 											}
 										}
 									}
@@ -554,39 +554,39 @@ int main()
 									imethod = 1;
 									const SizeType izero = 0;
 									csr_den_kron_mult_method(imethod,
-									    transA,
-									    transB,
-									    a,
-									    b_,
-									    yRef.getVector(),
-									    izero,
-									    sx1Ref.getVector(),
-									    izero,
-									    gemmR);
+									                         transA,
+									                         transB,
+									                         a,
+									                         b_,
+									                         yRef.getVector(),
+									                         izero,
+									                         sx1Ref.getVector(),
+									                         izero,
+									                         gemmR);
 
 									imethod = 2;
 									csr_den_kron_mult_method(imethod,
-									    transA,
-									    transB,
-									    a,
-									    b_,
-									    yRef.getVector(),
-									    izero,
-									    sx2Ref.getVector(),
-									    izero,
-									    gemmR);
+									                         transA,
+									                         transB,
+									                         a,
+									                         b_,
+									                         yRef.getVector(),
+									                         izero,
+									                         sx2Ref.getVector(),
+									                         izero,
+									                         gemmR);
 
 									imethod = 3;
 									csr_den_kron_mult_method(imethod,
-									    transA,
-									    transB,
-									    a,
-									    b_,
-									    yRef.getVector(),
-									    izero,
-									    sx3Ref.getVector(),
-									    izero,
-									    gemmR);
+									                         transA,
+									                         transB,
+									                         a,
+									                         b_,
+									                         yRef.getVector(),
+									                         izero,
+									                         sx3Ref.getVector(),
+									                         izero,
+									                         gemmR);
 
 									for (jx = 0; jx < ncol_X; jx++) {
 										for (ix = 0; ix < nrow_X; ix++) {
@@ -599,18 +599,18 @@ int main()
 											if (!isok) {
 												nerrors += 1;
 												printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												    itransA,
-												    itransB,
-												    nrow_A,
-												    ncol_A,
-												    nrow_B,
-												    ncol_B);
+												       itransA,
+												       itransB,
+												       nrow_A,
+												       ncol_A,
+												       nrow_B,
+												       ncol_B);
 												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												    ix,
-												    jx,
-												    diff1,
-												    diff2,
-												    diff3);
+												       ix,
+												       jx,
+												       diff1,
+												       diff2,
+												       diff3);
 											}
 										}
 									}

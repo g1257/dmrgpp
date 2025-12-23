@@ -15,9 +15,12 @@ class SumDecomposition {
 
 public:
 
-	enum SelEnum { SEL_ALL,
-		       SEL_SIZE,
-		       SEL_INDEX };
+	enum SelEnum
+	{
+		SEL_ALL,
+		SEL_SIZE,
+		SEL_INDEX
+	};
 
 	SumDecomposition(SizeType total, SizeType sum, SelEnum sel = SEL_ALL, int selection = 0)
 	    : sum_(sum)

@@ -87,12 +87,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <stdexcept>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 	typedef TargetingBase<LanczosSolverType_, VectorWithOffsetType_> BaseType;
 	typedef typename BaseType::TargetingCommonType TargetingCommonType;
@@ -130,10 +128,10 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithO
 public:
 
 	TargetingExpression(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& io)
+	                    const CheckpointType& checkPoint,
+	                    const WaveFunctionTransfType& wft,
+	                    const QnType&,
+	                    InputValidatorType& io)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , progress_("TargetingExpression")
 	    , gsWeight_(0.3)
@@ -165,10 +163,10 @@ public:
 	}
 
 	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType&,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
+	            const BlockType&,
+	            SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -190,7 +188,8 @@ public:
 
 		const bool doBorderIfBorder = true;
 		auto testLambda = [this](const PsimagLite::GetBraOrKet& bra,
-				      const PsimagLite::GetBraOrKet& ket) {
+		                         const PsimagLite::GetBraOrKet& ket)
+		{
 			if (!hasTimeEvolution(bra) || !hasTimeEvolution(ket))
 				return;
 
@@ -240,14 +239,14 @@ public:
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
-	    PsimagLite::String prefix)
+	          PsimagLite::String prefix)
 	{
 		this->common().readGSandNGSTs(io, prefix, "Expression");
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "Expression");
@@ -357,9 +356,9 @@ private:
 	}
 
 	void finalize(const VectorVectorWithOffsetType& tempVectors,
-	    const VectorStringType& tempNames,
-	    SizeType pVectorIndex,
-	    const AlgebraType& tempExpr)
+	              const VectorStringType& tempNames,
+	              SizeType pVectorIndex,
+	              const AlgebraType& tempExpr)
 	{
 		const SizeType ntemps = tempNames.size();
 
@@ -386,7 +385,8 @@ private:
 			int x = pvectors_.findInAnyNames(tempNames[i]);
 			if (x >= 0)
 				continue;
-			auto lambda = [this, i, &tempToP, &tempNames](SizeType ind) {
+			auto lambda = [this, i, &tempToP, &tempNames](SizeType ind)
+			{
 				tempToP[i] = ind;
 				return this->expandExpression(tempNames[i], tempToP);
 			};
@@ -426,7 +426,7 @@ private:
 
 	// replace "R" + i ==> "P" + tempToP[i]
 	PsimagLite::String expandExpression(PsimagLite::String str,
-	    const VectorSizeType& tempToP) const
+	                                    const VectorSizeType& tempToP) const
 	{
 		SizeType i = 0;
 		const SizeType len = str.length();
@@ -472,10 +472,10 @@ private:
 			auto opaque = ket.fillSumStruct();
 
 			pvectors_.sumPvectors(opaque[0].first,
-			    opaque[0].second,
-			    opaque[1].first,
-			    opaque[1].second,
-			    ket.name());
+			                      opaque[0].second,
+			                      opaque[1].first,
+			                      opaque[1].second,
+			                      ket.name());
 
 			expr.setKet(i, "|P" + ttos(opaque[0].first) + ">");
 			expr.setFactor(i, 1.);

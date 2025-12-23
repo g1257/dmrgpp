@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! IsingMultiOrb Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnType> {
@@ -212,7 +211,7 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelIsingMultiOrb";
 		io.createGroup(label);
@@ -248,7 +247,7 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersModelIsingMultiOrb& parameters)
+	                                const ParametersModelIsingMultiOrb& parameters)
 	{
 		if (parameters.magneticFieldX.cols() > 0)
 			os << "MagneticFieldX=" << parameters.magneticFieldX << "\n";

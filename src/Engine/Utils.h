@@ -74,8 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "Vector.h"
 
-namespace std
-{
+namespace std {
 
 template <class T1, class T2>
 ostream& operator<<(std::ostream& os, const pair<T1, T2>& p)
@@ -86,20 +85,19 @@ ostream& operator<<(std::ostream& os, const pair<T1, T2>& p)
 } // namespace std
 
 // Utility functions that are still needed
-namespace utils
-{
+namespace utils {
 
 PsimagLite::String pathPrepend(PsimagLite::String, PsimagLite::String);
 
 template <template <typename, typename> class SomeVectorTemplate,
-    typename SomeAllocator1Type,
-    typename SomeAllocator2Type,
-    typename T>
+          typename SomeAllocator1Type,
+          typename SomeAllocator2Type,
+          typename T>
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<
-				  SomeVectorTemplate<T, SomeAllocator1Type>>::True,
-    void>::Type
+                                  SomeVectorTemplate<T, SomeAllocator1Type>>::True,
+                              void>::Type
 reorder(SomeVectorTemplate<T, SomeAllocator1Type>& v,
-    const SomeVectorTemplate<SizeType, SomeAllocator2Type>& permutation)
+        const SomeVectorTemplate<SizeType, SomeAllocator2Type>& permutation)
 {
 	SomeVectorTemplate<T, SomeAllocator1Type> tmpVector(v.size());
 	for (SizeType i = 0; i < v.size(); i++)
@@ -109,7 +107,7 @@ reorder(SomeVectorTemplate<T, SomeAllocator1Type>& v,
 
 template <typename SomeType>
 void reorder(PsimagLite::Matrix<SomeType>& v,
-    const PsimagLite::Vector<SizeType>::Type& permutation)
+             const PsimagLite::Vector<SizeType>::Type& permutation)
 {
 	PsimagLite::Matrix<SomeType> tmpVector(v.n_row(), v.n_col());
 	for (SizeType i = 0; i < v.n_row(); i++)
@@ -130,7 +128,7 @@ void blockUnion(Block& A, Block const& B, Block const& C)
 template <typename SomeVectorType>
 typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True, void>::Type
 truncateVector(SomeVectorType& v,
-    const PsimagLite::Vector<SizeType>::Type& removedIndices)
+               const PsimagLite::Vector<SizeType>::Type& removedIndices)
 {
 	SomeVectorType tmpVector;
 	for (SizeType i = 0; i < v.size(); i++) {
@@ -146,8 +144,8 @@ template <typename SomeVectorType>
 static
     typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True, void>::Type
     fillFermionicSigns(SomeVectorType& fermionicSigns,
-	const PsimagLite::Vector<bool>::Type& signs,
-	int f)
+                       const PsimagLite::Vector<bool>::Type& signs,
+                       int f)
 {
 	typedef typename SomeVectorType::value_type ValueType;
 	fermionicSigns.resize(signs.size());

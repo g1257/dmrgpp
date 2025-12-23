@@ -88,18 +88,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename LineChangerType>
-class Cloner
-{
+class Cloner {
 	static const SizeType LINE_LENGTH = 1024;
 
 public:
 
 	Cloner(const PsimagLite::String& infile,
-	    const PsimagLite::String& outRoot,
-	    const PsimagLite::String& ext)
+	       const PsimagLite::String& outRoot,
+	       const PsimagLite::String& ext)
 	    : infile_(infile)
 	    , outRoot_(outRoot)
 	    , ext_(ext)

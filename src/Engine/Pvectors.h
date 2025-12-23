@@ -6,12 +6,10 @@
 #include "Pvector.h"
 #include "TargetParamsTimeVectors.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetingBaseType>
-class Pvectors
-{
+class Pvectors {
 
 public:
 
@@ -30,8 +28,8 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	Pvectors(InputValidatorType& io,
-	    const ApplyOperatorExpressionType& aoe,
-	    const LeftRightSuperType& lrs)
+	         const ApplyOperatorExpressionType& aoe,
+	         const LeftRightSuperType& lrs)
 	    : io_(io)
 	    , aoe_(aoe)
 	    , lrs_(lrs)
@@ -140,10 +138,10 @@ public:
 	}
 
 	void sumPvectors(SizeType ind0,
-	    const ComplexOrRealType& val0,
-	    SizeType ind1,
-	    const ComplexOrRealType& val1,
-	    PsimagLite::String p0PlusP1)
+	                 const ComplexOrRealType& val0,
+	                 SizeType ind1,
+	                 const ComplexOrRealType& val1,
+	                 PsimagLite::String p0PlusP1)
 	{
 		assert(ind0 < ind1);
 		VectorWithOffsetType& v0 = aoeNonConst().targetVectorsNonConst(ind0);
@@ -189,9 +187,9 @@ public:
 	}
 
 	void initTimeVectors(SizeType timeSteps,
-	    RealType tau,
-	    PsimagLite::String algo,
-	    VectorRealType& chebyTransform)
+	                     RealType tau,
+	                     PsimagLite::String algo,
+	                     VectorRealType& chebyTransform)
 	{
 		tstStruct_.times().resize(timeSteps);
 		for (SizeType i = 0; i < timeSteps; ++i)

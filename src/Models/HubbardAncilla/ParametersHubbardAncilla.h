@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../FeAsModel/ParametersModelFeAs.h"
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Hubbard Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersHubbardAncilla : ParametersModelFeAs<RealType, QnType> {
@@ -97,14 +96,14 @@ struct ParametersHubbardAncilla : ParametersModelFeAs<RealType, QnType> {
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	                   SizeType,
+	                   PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardAncilla";
 		io.createGroup(label);

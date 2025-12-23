@@ -83,12 +83,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "NotMpi.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TwoPointCorrelationsType>
-class Parallel2PointCorrelations
-{
+class Parallel2PointCorrelations {
 
 public:
 
@@ -101,12 +99,12 @@ public:
 	typedef typename TwoPointCorrelationsType::BraketType BraketType;
 
 	Parallel2PointCorrelations(MatrixType& w,
-	    const TwoPointCorrelationsType& twopoint,
-	    const typename PsimagLite::Vector<PairType>::Type& pairs,
-	    const BraketType& braket,
-	    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	    const PsimagLite::GetBraOrKet& bra,
-	    const PsimagLite::GetBraOrKet& ket)
+	                           const TwoPointCorrelationsType& twopoint,
+	                           const typename PsimagLite::Vector<PairType>::Type& pairs,
+	                           const BraketType& braket,
+	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                           const PsimagLite::GetBraOrKet& bra,
+	                           const PsimagLite::GetBraOrKet& ket)
 	    : w_(w)
 	    , twopoint_(twopoint)
 	    , pairs_(pairs)
@@ -122,11 +120,11 @@ public:
 		SizeType i = pairs_[taskNumber].first;
 		SizeType j = pairs_[taskNumber].second;
 		w_(i, j) = twopoint_.calcCorrelation(i,
-		    j,
-		    braket_,
-		    fermionicSign_,
-		    bra_,
-		    ket_);
+		                                     j,
+		                                     braket_,
+		                                     fermionicSign_,
+		                                     bra_,
+		                                     ket_);
 	}
 
 	SizeType tasks() const { return pairs_.size(); }

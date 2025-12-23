@@ -92,21 +92,22 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
 template <typename Word>
-class HilbertSpaceImmm
-{
+class HilbertSpaceImmm {
 
 public:
 
 	typedef Word HilbertState;
 
 	static const SizeType NUMBER_OF_SPINS = 2;
-	enum { SPIN_UP = 0,
-		SPIN_DOWN = 1 };
+	enum
+	{
+		SPIN_UP = 0,
+		SPIN_DOWN = 1
+	};
 
 	HilbertSpaceImmm(SizeType maxOrbitals)
 	    : maxOrbitals_(maxOrbitals)
@@ -115,15 +116,15 @@ public:
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	    SizeType,
-	    PsimagLite::String msg = "") const
+	                   SizeType,
+	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "HilbertSpaceImmm";
 
 		mres.memResolv(&maxOrbitals_,
-		    sizeof(*this),
-		    str + " maxOrbitals");
+		               sizeof(*this),
+		               str + " maxOrbitals");
 
 		return sizeof(*this);
 	}
@@ -239,7 +240,7 @@ public:
 	}
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label2 = label + "/HilbertSpaceImmm";
 		io.createGroup(label2);

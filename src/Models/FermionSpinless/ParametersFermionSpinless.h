@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_PARAMS_FERMIONSPINLESS_H
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Hubbard Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> {
@@ -102,7 +101,7 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersFermionSpinless";
 		io.createGroup(label);
@@ -112,7 +111,7 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersFermionSpinless& parameters)
+	                                const ParametersFermionSpinless& parameters)
 	{
 		os << parameters.targetQuantum;
 		os << "potentialV\n";

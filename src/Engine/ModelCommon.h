@@ -93,12 +93,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include "Su2SymmetryGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ParametersType, typename SuperGeometryType, typename ModelHelperType>
-class ModelCommon
-{
+class ModelCommon {
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -126,7 +124,7 @@ public:
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 
 	ModelCommon(const ParametersType& params,
-	    const SuperGeometryType& superGeometry)
+	            const SuperGeometryType& superGeometry)
 	    : params_(params)
 	    , superGeometry_(superGeometry)
 	    , progress_("ModelCommon")
@@ -142,22 +140,22 @@ public:
 	const SuperGeometryType& superGeometry() const { return superGeometry_; }
 
 	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const VectorOperatorType& cm,
-	    const Block& block,
-	    RealType time) const
+	                                  const VectorOperatorType& cm,
+	                                  const Block& block,
+	                                  RealType time) const
 	{
 		if (block.size() != 1)
 			err("addConnectionsInNaturalBasis(): unimplemented\n");
 	}
 
 	/**
-		Returns H, the hamiltonian for basis1 and partition
-		$m$ consisting of the external product of basis2$\otimes$basis3
-		Note: Used only for debugging purposes
-		*/
+	        Returns H, the hamiltonian for basis1 and partition
+	        $m$ consisting of the external product of basis2$\otimes$basis3
+	        Note: Used only for debugging purposes
+	        */
 	void fullHamiltonian(SparseMatrixType& matrix,
-	    const HamiltonianConnectionType& hc,
-	    const typename ModelHelperType::Aux& aux) const
+	                     const HamiltonianConnectionType& hc,
+	                     const typename ModelHelperType::Aux& aux) const
 	{
 		SparseMatrixType matrixBlock;
 

@@ -6,12 +6,10 @@
 #include "OneOperatorSpec.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetingBaseType>
-class TermForTargetingExpression
-{
+class TermForTargetingExpression {
 
 public:
 
@@ -171,8 +169,8 @@ public:
 			ket_.multiply(tmp);
 			std::string ket_dest = ket_.name();
 			OperatorType* op = new OperatorType(aux_.pVectors().aoe().model().naturalOperator(opspec.label,
-			    0, // FIXME TODO SDHS Immm
-			    opspec.dof));
+			                                                                                  0, // FIXME TODO SDHS Immm
+			                                                                                  opspec.dof));
 			if (opspec.transpose)
 				op->transpose();
 
@@ -240,9 +238,9 @@ private:
 	}
 
 	void oneOperator(PsimagLite::String destKet,
-	    PsimagLite::String srcKet,
-	    const OperatorType& op,
-	    SizeType site)
+	                 PsimagLite::String srcKet,
+	                 const OperatorType& op,
+	                 SizeType site)
 	{
 		assert(siteCanBeApplied(site));
 		const VectorWithOffsetType& srcVwo = aux_.pVectors().getCurrentVectorConst(srcKet);
@@ -253,9 +251,9 @@ private:
 
 	// returns A|src1>
 	void applyInSitu(VectorWithOffsetType& dest,
-	    const VectorWithOffsetType& src1,
-	    SizeType site,
-	    const OperatorType& A)
+	                 const VectorWithOffsetType& src1,
+	                 SizeType site,
+	                 const OperatorType& A)
 	{
 		const SizeType splitSize = aux_.pVectors().aoe().model().hilbertSize(site);
 
@@ -267,14 +265,14 @@ private:
 		assert(n > 2);
 		bool b2 = (site == n - 1);
 		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
-						   : BorderEnumType::BORDER_NO;
+		                                   : BorderEnumType::BORDER_NO;
 		aux_.pVectors().aoe().applyOpLocal()(dest,
-		    src1,
-		    A,
-		    fs,
-		    splitSize,
-		    aux_.direction(),
-		    border);
+		                                     src1,
+		                                     A,
+		                                     fs,
+		                                     splitSize,
+		                                     aux_.direction(),
+		                                     border);
 	}
 
 	bool finalized_;

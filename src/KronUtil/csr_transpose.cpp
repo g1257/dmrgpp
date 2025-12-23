@@ -2,13 +2,13 @@
 
 template <typename ComplexOrRealType>
 void csr_transpose(const int nrow_A,
-    const int ncol_A,
-    const int arowptr[],
-    const int acol[],
-    const ComplexOrRealType aval[],
-    int atrowptr[],
-    int atcol[],
-    ComplexOrRealType atval[])
+                   const int ncol_A,
+                   const int arowptr[],
+                   const int acol[],
+                   const ComplexOrRealType aval[],
+                   int atrowptr[],
+                   int atcol[],
+                   ComplexOrRealType atval[])
 {
 	/*
 	 * --------------------------------------------------------

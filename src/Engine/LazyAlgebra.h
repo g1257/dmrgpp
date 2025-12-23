@@ -2,12 +2,10 @@
 #define LAZYALGEBRA_H
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename OperatorType>
-class LazyAlgebraFactor
-{
+class LazyAlgebraFactor {
 
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -72,7 +70,7 @@ public:
 	}
 
 	friend LazyAlgebraFactor operator*(const LazyAlgebraFactor& a,
-	    const LazyAlgebraFactor& b)
+	                                   const LazyAlgebraFactor& b)
 	{
 		LazyAlgebraFactor c = a;
 		c.overallFactor_ *= b.overallFactor_;
@@ -102,8 +100,7 @@ private:
 };
 
 template <typename OperatorType>
-class LazyAlgebra
-{
+class LazyAlgebra {
 
 public:
 

@@ -8,12 +8,10 @@
 #include "Pvectors.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetingBaseType>
-class AuxForTargetingExpression
-{
+class AuxForTargetingExpression {
 
 public:
 
@@ -32,10 +30,10 @@ public:
 	typedef GroupOfOneTimeEvolutions<PvectorsType> GroupOfOneTimeEvolutionsType;
 
 	AuxForTargetingExpression(PvectorsType& pVectors,
-	    GroupOfOneTimeEvolutionsType& timeEvolve,
-	    ProgramGlobals::DirectionEnum dir,
-	    RealType Eg,
-	    SizeType currentCoo)
+	                          GroupOfOneTimeEvolutionsType& timeEvolve,
+	                          ProgramGlobals::DirectionEnum dir,
+	                          RealType Eg,
+	                          SizeType currentCoo)
 	    : pVectors_(pVectors)
 	    , timeEvolve_(timeEvolve)
 	    , direction_(dir)

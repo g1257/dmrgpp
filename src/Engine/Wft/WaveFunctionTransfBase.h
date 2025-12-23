@@ -83,15 +83,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "WftOptions.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename DmrgWaveStructType_,
-    typename VectorWithOffsetType_,
-    typename OptionsType_,
-    typename OneSiteSpacesType_>
-class WaveFunctionTransfBase
-{
+          typename VectorWithOffsetType_,
+          typename OptionsType_,
+          typename OneSiteSpacesType_>
+class WaveFunctionTransfBase {
 
 public:
 
@@ -106,9 +104,9 @@ public:
 	using OneSiteSpacesType = OneSiteSpacesType_;
 
 	virtual void transformVector(VectorWithOffsetType& psiDest,
-	    const VectorWithOffsetType& psiSrc,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& nk) const
+	                             const VectorWithOffsetType& psiSrc,
+	                             const LeftRightSuperType& lrs,
+	                             const OneSiteSpacesType& nk) const
 	    = 0;
 
 	virtual ~WaveFunctionTransfBase() { }

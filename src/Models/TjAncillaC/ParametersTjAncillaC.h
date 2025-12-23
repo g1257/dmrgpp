@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_PARAMS_TJ_ANCILLAC_H
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! TjAncillaC Model Parameters
 // no connectors here, connectors are handled by the geometry
 template <typename RealType, typename QnType>
@@ -99,14 +98,14 @@ struct ParametersTjAncillaC : public ParametersModelBase<RealType, QnType> {
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	                   SizeType,
+	                   PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersTjAncillaC";
 		io.createGroup(label);
@@ -116,7 +115,7 @@ struct ParametersTjAncillaC : public ParametersModelBase<RealType, QnType> {
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersTjAncillaC& parameters)
+	                                const ParametersTjAncillaC& parameters)
 	{
 		os << "potentialV\n";
 		os << parameters.potentialV;

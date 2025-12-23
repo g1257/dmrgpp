@@ -10,7 +10,8 @@
 #include <stdexcept>
 
 #ifdef USE_GSL
-extern "C" {
+extern "C"
+{
 #include <gsl/gsl_multimin.h>
 }
 
@@ -54,8 +55,11 @@ class Minimizer {
 
 public:
 
-	enum { GSL_SUCCESS = ::GSL_SUCCESS,
-	       GSL_CONTINUE = ::GSL_CONTINUE };
+	enum
+	{
+		GSL_SUCCESS = ::GSL_SUCCESS,
+		GSL_CONTINUE = ::GSL_CONTINUE
+	};
 
 	Minimizer(FunctionType& function, SizeType maxIter, bool verbose = false)
 	    : function_(function)
@@ -267,8 +271,11 @@ class Minimizer {
 
 public:
 
-	enum { GSL_SUCCESS = 0,
-	       GSL_CONTINUE = 1 };
+	enum
+	{
+		GSL_SUCCESS = 0,
+		GSL_CONTINUE = 1
+	};
 
 	Minimizer(FunctionType&, SizeType, bool = false)
 	{

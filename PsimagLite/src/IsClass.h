@@ -20,7 +20,10 @@ class IsClass {
 
 public:
 
-	enum { value = sizeof(IsClass<T>::template test<T>(0)) == sizeof(One) };
+	enum
+	{
+		value = sizeof(IsClass<T>::template test<T>(0)) == sizeof(One)
+	};
 };
 
 } // namespace PsimagLite

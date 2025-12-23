@@ -8,12 +8,10 @@
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename HilbertBasisType, typename VectorOperatorType, bool>
-class FeAsJzSymmetry
-{
+class FeAsJzSymmetry {
 public:
 
 	typedef typename VectorOperatorType::value_type OperatorType;
@@ -26,25 +24,24 @@ public:
 
 	FeAsJzSymmetry(bool) { }
 	void init(HilbertBasisType&,
-	    VectorOperatorType&) { }
+	          VectorOperatorType&) { }
 
 	void setElectronsAndJz(SizeType& electrons,
-	    SizeType& electronsUp,
-	    SizeType ind) const { }
+	                       SizeType& electronsUp,
+	                       SizeType ind) const { }
 
 	bool isEnabled() const { return false; }
 
 	bool isSet() const { return false; }
 
 	void write(PsimagLite::String,
-	    PsimagLite::IoNg::Out::Serializer&) const
+	           PsimagLite::IoNg::Out::Serializer&) const
 	{
 	}
 };
 
 template <typename HilbertBasisType, typename VectorOperatorType>
-class FeAsJzSymmetry<HilbertBasisType, VectorOperatorType, true>
-{
+class FeAsJzSymmetry<HilbertBasisType, VectorOperatorType, true> {
 
 public:
 
@@ -71,7 +68,7 @@ public:
 	}
 
 	void init(const HilbertBasisType& natBasis,
-	    VectorOperatorType& creationMatrix)
+	          VectorOperatorType& creationMatrix)
 	{
 		assert(!isSet_);
 		// write operator Jz in first basis
@@ -105,8 +102,8 @@ public:
 	}
 
 	void setElectronsAndJz(SizeType& electrons,
-	    SizeType& electronsUp,
-	    SizeType ind) const
+	                       SizeType& electronsUp,
+	                       SizeType ind) const
 	{
 		if (!isEnabled_)
 			return;
@@ -122,7 +119,7 @@ public:
 	bool isSet() const { return isSet_; }
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/FeAsJzSymmetry";
 		io.createGroup(label);
@@ -350,8 +347,8 @@ private:
 	}
 
 	void Get_P_and_Blocks_and_electrons(const HilbertBasisType& natBasis,
-	    VectorRealType& blockOffsets,
-	    MatrixType& P)
+	                                    VectorRealType& blockOffsets,
+	                                    MatrixType& P)
 	{
 		// HilbertBasisType newBasis;
 		electrons_.resize(natBasis.size());
@@ -373,8 +370,8 @@ private:
 	}
 
 	void DiagonalizeBlocks_GetU(const MatrixType& Jz_opr,
-	    const VectorRealType& blockOffsets,
-	    VectorRealType& jzEigs)
+	                            const VectorRealType& blockOffsets,
+	                            VectorRealType& jzEigs)
 	{
 		SizeType nrow = Jz_opr.n_row();
 
@@ -413,10 +410,10 @@ private:
 		SizeType tmp_e;
 		// nup
 		SizeType nup = HilbertSpaceFeAsType::electronsWithGivenSpin(basis_i,
-		    SPIN_UP);
+		                                                            SPIN_UP);
 		// ndown
 		SizeType ndown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis_i,
-		    SPIN_DOWN);
+		                                                              SPIN_DOWN);
 		tmp_e = nup + ndown;
 		return tmp_e;
 	}
@@ -431,7 +428,7 @@ private:
 	}
 
 	void convertJzEigs(VectorSizeType& electronselectronsUp,
-	    const VectorRealType& jzEigs) const
+	                   const VectorRealType& jzEigs) const
 	{
 
 		electronselectronsUp.resize(jzEigs.size());

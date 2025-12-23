@@ -383,8 +383,7 @@ namespace BLAS {
 				throw PsimagLite::RuntimeError(
 				    "GEMM lda < max(1, m)\n");
 			}
-		}
-		else {
+		} else {
 			if (sx < std::max(1, sZ)) {
 				throw PsimagLite::RuntimeError(
 				    "GEMM lda < max(1, k)\n");

@@ -86,11 +86,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h" // in PsimagLite
 #include "Su2SymmetryGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename SparseMatrixType, typename SymmetryRelatedType>
-class JmSubspace
-{
+class JmSubspace {
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
@@ -105,11 +103,11 @@ public:
 	typedef std::pair<PairType, TwoPairsType> FlavorType;
 
 	JmSubspace(const PairType& jm,
-	    SizeType index,
-	    const PairType& jm1,
-	    const PairType& jm2,
-	    SizeType nelectrons,
-	    int heavy = 1)
+	           SizeType index,
+	           const PairType& jm1,
+	           const PairType& jm2,
+	           SizeType nelectrons,
+	           int heavy = 1)
 	    : jm_(jm)
 	    , nelectrons_(nelectrons)
 	    , heavy_(heavy)
@@ -119,9 +117,9 @@ public:
 	}
 
 	static void setToProduct(const SymmetryRelatedType* symm1,
-	    const SymmetryRelatedType* symm2,
-	    const PsimagLite::Vector<SizeType>::Type& ne1,
-	    const PsimagLite::Vector<SizeType>::Type& ne2)
+	                         const SymmetryRelatedType* symm2,
+	                         const PsimagLite::Vector<SizeType>::Type& ne1,
+	                         const PsimagLite::Vector<SizeType>::Type& ne2)
 	{
 		symm1_ = symm1;
 		symm2_ = symm2;
@@ -130,9 +128,9 @@ public:
 	}
 
 	void push(SizeType index,
-	    const PairType& jm1,
-	    const PairType& jm2,
-	    SizeType nelectrons)
+	          const PairType& jm1,
+	          const PairType& jm2,
+	          SizeType nelectrons)
 	{
 		if (nelectrons != nelectrons_)
 			err("JmSubspace::push(): nelectrons changed!!\n");
@@ -143,7 +141,7 @@ public:
 	bool operator==(const std::pair<PairType, SizeType>& nejm) const
 	{
 		std::pair<PairType, SizeType> nejmStored = std::pair<PairType, SizeType>(jm_,
-		    nelectrons_);
+		                                                                         nelectrons_);
 		return (nejm == nejmStored);
 	}
 
@@ -218,11 +216,11 @@ public:
 	}
 
 	static SizeType flavor(SizeType f1,
-	    SizeType f2,
-	    SizeType ne1,
-	    SizeType ne2,
-	    SizeType j1,
-	    SizeType j2)
+	                       SizeType f2,
+	                       SizeType ne1,
+	                       SizeType ne2,
+	                       SizeType j1,
+	                       SizeType j2)
 	{
 		SizeType x = f1 + f2 * symm1_->flavorsMax();
 		SizeType y = ne1 + ne2 * symm1_->electronsMax();

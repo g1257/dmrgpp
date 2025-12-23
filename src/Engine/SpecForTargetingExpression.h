@@ -9,12 +9,10 @@
 #include "Vector.h"
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetingBaseType>
-class SpecForTargetingExpression
-{
+class SpecForTargetingExpression {
 
 public:
 
@@ -25,8 +23,7 @@ public:
 	typedef typename AlgebraType::AuxiliaryType AuxiliaryType;
 	typedef std::pair<PsimagLite::String, AuxiliaryType> PairStringAuxType;
 
-	class AssignAndDestroy
-	{
+	class AssignAndDestroy {
 
 	public:
 

@@ -89,13 +89,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Profiling.h"
 #include "Sort.h"
 #include "TruncationControl.h"
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ParametersType,
-    typename TargetingType>
-class Truncation
-{
+          typename TargetingType>
+class Truncation {
 
 	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -129,10 +127,10 @@ class Truncation
 public:
 
 	Truncation(const LeftRightSuperType& lrs,
-	    WaveFunctionTransfType& waveFunctionTransformation,
-	    const ParametersType& parameters,
-	    const SuperGeometryType& geometry,
-	    OutputFileOrNot& ioOut)
+	           WaveFunctionTransfType& waveFunctionTransformation,
+	           const ParametersType& parameters,
+	           const SuperGeometryType& geometry,
+	           OutputFileOrNot& ioOut)
 	    : lrs_(lrs)
 	    , waveFunctionTransformation_(waveFunctionTransformation)
 	    , parameters_(parameters)
@@ -147,11 +145,11 @@ public:
 	}
 
 	void changeBasisFinite(BasisWithOperatorsType& pS,
-	    BasisWithOperatorsType& pE,
-	    const TargetingType& target,
-	    SizeType keptStates,
-	    const TruncationControlType& truncationControl,
-	    ProgramGlobals::DirectionEnum direction)
+	                       BasisWithOperatorsType& pE,
+	                       const TargetingType& target,
+	                       SizeType keptStates,
+	                       const TruncationControlType& truncationControl,
+	                       ProgramGlobals::DirectionEnum direction)
 	{
 		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
 		DensityMatrixBaseType* dmS = 0;
@@ -173,46 +171,46 @@ public:
 	const TransformType& transform(ProgramGlobals::DirectionEnum direction) const
 	{
 		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? leftCache_.transform
-										   : rightCache_.transform;
+		                                                                   : rightCache_.transform;
 	}
 
 	const RealType& error() const { return error_; }
 
 	void changeBasisInfinite(BasisWithOperatorsType& sBasis,
-	    BasisWithOperatorsType& eBasis,
-	    const TargetingType& target,
-	    SizeType keptStates,
-	    const TruncationControlType& truncationControl)
+	                         BasisWithOperatorsType& eBasis,
+	                         const TargetingType& target,
+	                         SizeType keptStates,
+	                         const TruncationControlType& truncationControl)
 	{
 		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
 
 		DensityMatrixBaseType* dmS = 0;
 		changeBasis(sBasis,
-		    target,
-		    keptStates,
-		    truncationControl,
-		    ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
-		    &dmS);
+		            target,
+		            keptStates,
+		            truncationControl,
+		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
+		            &dmS);
 		assert(dmS);
 		truncateBasis(sBasis,
-		    lrs_.right(),
-		    *dmS,
-		    ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		              lrs_.right(),
+		              *dmS,
+		              ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		delete dmS;
 		dmS = 0;
 
 		DensityMatrixBaseType* dmE = 0;
 		changeBasis(eBasis,
-		    target,
-		    keptStates,
-		    truncationControl,
-		    ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
-		    &dmE);
+		            target,
+		            keptStates,
+		            truncationControl,
+		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
+		            &dmE);
 		assert(dmE);
 		truncateBasis(eBasis,
-		    lrs_.left(),
-		    *dmE,
-		    ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		              lrs_.left(),
+		              *dmE,
+		              ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 		delete dmE;
 		dmE = 0;
 	}
@@ -220,28 +218,28 @@ public:
 private:
 
 	void changeBasis(BasisWithOperatorsType& rSprime,
-	    const TargetingType& target,
-	    SizeType keptStates,
-	    const TruncationControlType& truncationControl,
-	    ProgramGlobals::DirectionEnum direction,
-	    DensityMatrixBaseType** dm)
+	                 const TargetingType& target,
+	                 SizeType keptStates,
+	                 const TruncationControlType& truncationControl,
+	                 ProgramGlobals::DirectionEnum direction,
+	                 DensityMatrixBaseType** dm)
 	{
 		/* PSIDOC Truncation
-			Let us define the density matrices for system:
-			\begin{equation}
-			(\hat{\rho}_S)_{\alpha,\alpha'} = \sum_{\beta\in\mathcal{V}(E')}
-			\psi_{\alpha',\beta}^*\psi_{\alpha,\beta}
-			\label{eq:rhoSystem}
-			\end{equation}
-			in $\mathcal{V}(S')$,
-			and environment:
-			\begin{equation}
-			(\hat{\rho}_E )_{\beta,\beta'}= \sum_{\alpha\in \mathcal{V}(S')}
-			\psi_{\alpha,\beta'}^*\psi_{\alpha,\beta}
-			\label{eq:rhoEnviron}
-			\end{equation}
-			in $\mathcal{V}(E')$.
-			*/
+		        Let us define the density matrices for system:
+		        \begin{equation}
+		        (\hat{\rho}_S)_{\alpha,\alpha'} = \sum_{\beta\in\mathcal{V}(E')}
+		        \psi_{\alpha',\beta}^*\psi_{\alpha,\beta}
+		        \label{eq:rhoSystem}
+		        \end{equation}
+		        in $\mathcal{V}(S')$,
+		        and environment:
+		        \begin{equation}
+		        (\hat{\rho}_E )_{\beta,\beta'}= \sum_{\alpha\in \mathcal{V}(S')}
+		        \psi_{\alpha,\beta'}^*\psi_{\alpha,\beta}
+		        \label{eq:rhoEnviron}
+		        \end{equation}
+		        in $\mathcal{V}(E')$.
+		        */
 
 		const ProgramGlobals::DirectionEnum expandSys = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
 		const BasisWithOperatorsType& pBasis = (direction == expandSys) ? lrs_.left() : lrs_.right();
@@ -289,9 +287,9 @@ private:
 	}
 
 	void truncateBasis(BasisWithOperatorsType& rPrime,
-	    const BasisWithOperatorsType& oppoBasis,
-	    const DensityMatrixBaseType& dms,
-	    ProgramGlobals::DirectionEnum direction)
+	                   const BasisWithOperatorsType& oppoBasis,
+	                   const DensityMatrixBaseType& dms,
+	                   ProgramGlobals::DirectionEnum direction)
 	{
 		bool expandSys = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
@@ -312,32 +310,32 @@ private:
 		cache.transform.truncate(cache.removedIndices);
 
 		rPrime.truncateBasis(cache.transform,
-		    cache.eigs,
-		    cache.removedIndices,
-		    startEnd,
-		    parameters_.gemmRnb,
-		    PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo,
-		    parameters_.opOnSiteThreshold);
+		                     cache.eigs,
+		                     cache.removedIndices,
+		                     startEnd,
+		                     parameters_.gemmRnb,
+		                     PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo,
+		                     parameters_.opOnSiteThreshold);
 
 		LeftRightSuperType* lrs = 0;
 		if (expandSys)
 			lrs = new LeftRightSuperType(rPrime,
-			    const_cast<BasisWithOperatorsType&>(oppoBasis),
-			    const_cast<BasisType&>(lrs_.super()));
+			                             const_cast<BasisWithOperatorsType&>(oppoBasis),
+			                             const_cast<BasisType&>(lrs_.super()));
 		else
 			lrs = new LeftRightSuperType(const_cast<BasisWithOperatorsType&>(oppoBasis),
-			    rPrime,
-			    const_cast<BasisType&>(lrs_.super()));
+			                             rPrime,
+			                             const_cast<BasisType&>(lrs_.super()));
 
 		bool twoSiteDmrg = waveFunctionTransformation_.options().twoSiteDmrg;
 		bool wftInPatches = (waveFunctionTransformation_.options().accel == WaveFunctionTransfType::WftOptionsType::ACCEL_PATCHES);
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : *lrs;
 		waveFunctionTransformation_.push(cache.transform,
-		    direction,
-		    lrsForWft,
-		    dms.vts(),
-		    dms.s(),
-		    dms.qns());
+		                                 direction,
+		                                 lrsForWft,
+		                                 dms.vts(),
+		                                 dms.s(),
+		                                 dms.qns());
 
 		msg << "new size of basis=" << rPrime.size();
 		msg << " transform is " << cache.transform.rows() << " x " << cache.transform.cols();
@@ -376,8 +374,8 @@ private:
 	}
 
 	void updateKeptStates(SizeType& keptStates,
-	    const TruncationControlType& TruncationControl,
-	    const VectorRealType& eigs)
+	                      const TruncationControlType& TruncationControl,
+	                      const VectorRealType& eigs)
 	{
 		if (keptStates < keptStatesPrev_) {
 			std::cerr << "WARNING: Nominal kept states have decreased from " << keptStatesPrev_;
@@ -434,7 +432,7 @@ private:
 	}
 
 	RealType entropy(const VectorRealType& eigs,
-	    const RealType reyniIndex) const
+	                 const RealType reyniIndex) const
 	{
 		RealType ent = 0;
 		RealType val = 0;
@@ -464,22 +462,22 @@ private:
 	}
 
 	/* PSIDOC RemovalOfStates
-		Let $m_S$ (here given by \verb!keptStates_! be a fixed number that
-		corresponds to the number of states in $\mathcal{V}(S')$ that we want to keep.
-		Consider the first $m_S$ eigenvectors $w^S$,
-		 and let us call the Hilbert space spanned by them, $\mathcal{V}_R(S')$,
-		 the DMRG-reduced Hilbert space on
-		block $S'$. If $m_S\ge\#\mathcal{V}(S')$ then we keep all eigenvectors
-		and there is effectively no truncation.
-		We truncate the matrices $(H^{S' {\rm new\,\,basis}})$
-		(and other operators as necessary)
-		such that they now act on this truncated Hilbert space, $\mathcal{V}_R(S')$.
-		We proceed in the same manner for the environment.
-		!PTEX-END */
+	        Let $m_S$ (here given by \verb!keptStates_! be a fixed number that
+	        corresponds to the number of states in $\mathcal{V}(S')$ that we want to keep.
+	        Consider the first $m_S$ eigenvectors $w^S$,
+	         and let us call the Hilbert space spanned by them, $\mathcal{V}_R(S')$,
+	         the DMRG-reduced Hilbert space on
+	        block $S'$. If $m_S\ge\#\mathcal{V}(S')$ then we keep all eigenvectors
+	        and there is effectively no truncation.
+	        We truncate the matrices $(H^{S' {\rm new\,\,basis}})$
+	        (and other operators as necessary)
+	        such that they now act on this truncated Hilbert space, $\mathcal{V}_R(S')$.
+	        We proceed in the same manner for the environment.
+	        !PTEX-END */
 	//! eigenvalues are ordered in increasing order
 	SizeType computeKeptStates(SizeType& keptStates,
-	    const TruncationControlType& truncationControl,
-	    const VectorRealType& eigs) const
+	                           const TruncationControlType& truncationControl,
+	                           const VectorRealType& eigs) const
 	{
 		if (truncationControl.tolerance() < 0)
 			return keptStates;
@@ -516,7 +514,7 @@ private:
 	}
 
 	RealType sumUpTo(const VectorRealType& eigs,
-	    SizeType x) const
+	                 SizeType x) const
 	{
 		RealType discWeight = 0;
 		for (SizeType i = 0; i < x; ++i)
@@ -572,8 +570,8 @@ private:
 		ioOut_.write(eigs, label + "/" + ttos(index) + "/" + ttos(counter));
 
 		ioOut_.write(counter + 1,
-		    label + "/" + ttos(index) + "/Size",
-		    (counter == 0) ? IoOutType::Serializer::NO_OVERWRITE : IoOutType::Serializer::ALLOW_OVERWRITE);
+		             label + "/" + ttos(index) + "/Size",
+		             (counter == 0) ? IoOutType::Serializer::NO_OVERWRITE : IoOutType::Serializer::ALLOW_OVERWRITE);
 
 		++counterVector_[index];
 	}

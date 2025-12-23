@@ -86,12 +86,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include <algorithm>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename PairType_>
-class JmPairs
-{
+class JmPairs {
 
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
@@ -173,11 +171,11 @@ public:
 
 	template <typename IoOutputter>
 	void write(IoOutputter& io,
-	    PsimagLite::String prefix,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsOutputLike<IoOutputter>::True,
-		int>::Type
-	    = 0) const
+	           PsimagLite::String prefix,
+	           typename PsimagLite::EnableIf<
+	               PsimagLite::IsOutputLike<IoOutputter>::True,
+	               int>::Type
+	           = 0) const
 	{
 		io.write(jmPairs_, prefix + "su2JmPairs");
 		io.write(indices_, prefix + "su2JmIndices");
@@ -185,18 +183,18 @@ public:
 
 	template <typename IoInputter>
 	void read(IoInputter& io,
-	    PsimagLite::String prefix,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputter>::True,
-		int>::Type
-	    = 0)
+	          PsimagLite::String prefix,
+	          typename PsimagLite::EnableIf<
+	              PsimagLite::IsInputLike<IoInputter>::True,
+	              int>::Type
+	          = 0)
 	{
 		io.read(jmPairs_, prefix + "su2JmPairs");
 		io.read(indices_, prefix + "su2JmIndices");
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	    JmPairs<PairType> jmPairs)
+	                                JmPairs<PairType> jmPairs)
 	{
 		for (SizeType i = 0; i < jmPairs.size(); i++)
 			os << "jmPair[" << i << "]=" << jmPairs[i] << "\n";

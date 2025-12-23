@@ -82,16 +82,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsKrylov.h"
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingCVEvolution : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingCVEvolution : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
-	enum { BORDER_NEITHER,
+	enum
+	{
+		BORDER_NEITHER,
 		BORDER_LEFT,
-		BORDER_RIGHT };
+		BORDER_RIGHT
+	};
 
 public:
 
@@ -124,18 +125,18 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	    VectorWithOffsetType,
-	    BaseType,
-	    TargetParamsType>
+	                                 VectorWithOffsetType,
+	                                 BaseType,
+	                                 TargetParamsType>
 	    CorrectionVectorSkeletonType;
 	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 
 	TargetingCVEvolution(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& ioIn)
+	                     const CheckpointType& checkPoint,
+	                     const WaveFunctionTransfType& wft,
+	                     const QnType&,
+	                     InputValidatorType& ioIn)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_(ioIn, "TargetingCVEvolution", checkPoint.model())
 	    , wft_(wft)
@@ -190,10 +191,10 @@ public:
 	}
 
 	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType&,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
+	            const BlockType&,
+	            SizeType loopNumber)
 	{
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
@@ -229,8 +230,8 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix) const
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -244,9 +245,9 @@ public:
 private:
 
 	void evolveInternal(RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    SizeType loopNumber)
+	                    ProgramGlobals::DirectionEnum direction,
+	                    const BlockType& block1,
+	                    SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -254,11 +255,11 @@ private:
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
 		this->common().aoeNonConst().getPhi(&phiNew,
-		    Eg,
-		    direction,
-		    site,
-		    loopNumber,
-		    tstStruct_);
+		                                    Eg,
+		                                    direction,
+		                                    site,
+		                                    loopNumber,
+		                                    tstStruct_);
 
 		if (phiNew.size() == 0)
 			return;
@@ -270,21 +271,21 @@ private:
 		if (currentTimeStep == 0) {
 			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
 				skeleton_.calcDynVectors(phiNew,
-				    this->tvNonConst(1),
-				    bogusTv);
+				                         this->tvNonConst(1),
+				                         bogusTv);
 				skeleton_.calcDynVectors(this->tv(1),
-				    this->tvNonConst(2),
-				    bogusTv);
+				                         this->tvNonConst(2),
+				                         bogusTv);
 			} else {
 
 				skeleton_.calcDynVectors(phiNew,
-				    this->tvNonConst(1),
-				    this->tvNonConst(2));
+				                         this->tvNonConst(1),
+				                         this->tvNonConst(2));
 
 				skeleton_.calcDynVectors(this->tv(1),
-				    this->tv(2),
-				    this->tvNonConst(3),
-				    this->tvNonConst(4));
+				                         this->tv(2),
+				                         this->tvNonConst(3),
+				                         this->tvNonConst(4));
 			}
 		} else {
 			bool timeHasAdvanced = (counter_ != currentTimeStep && currentTimeStep < tstStruct_.nForFraction());
@@ -300,31 +301,31 @@ private:
 				const SizeType advanceIndex = (timeHasAdvanced) ? 2 : 1;
 				// wft tv1
 				this->common().aoe().wftOneVector(bogusTv,
-				    this->tv(advanceIndex),
-				    site);
+				                                  this->tv(advanceIndex),
+				                                  site);
 				this->tvNonConst(1) = bogusTv;
 				skeleton_.calcDynVectors(this->tv(1),
-				    this->tvNonConst(2),
-				    bogusTv);
+				                         this->tvNonConst(2),
+				                         bogusTv);
 			} else {
 
 				VectorWithOffsetType bogusTv2;
 				const SizeType advanceIndex = (timeHasAdvanced) ? 3 : 1;
 
 				this->common().aoe().wftOneVector(bogusTv,
-				    this->tv(advanceIndex),
-				    site);
+				                                  this->tv(advanceIndex),
+				                                  site);
 				const SizeType advanceIndexp1 = advanceIndex + 1;
 				this->common().aoe().wftOneVector(bogusTv2,
-				    this->tv(advanceIndexp1),
-				    site);
+				                                  this->tv(advanceIndexp1),
+				                                  site);
 				this->tvNonConst(1) = bogusTv;
 				this->tvNonConst(2) = bogusTv2;
 
 				skeleton_.calcDynVectors(this->tv(1),
-				    this->tv(2),
-				    this->tvNonConst(3),
-				    this->tvNonConst(4));
+				                         this->tv(2),
+				                         this->tvNonConst(3),
+				                         this->tvNonConst(4));
 			}
 		}
 

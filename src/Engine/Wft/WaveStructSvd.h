@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType_>
 struct WaveStructSvd {
@@ -106,7 +105,10 @@ struct WaveStructSvd {
 	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
 	typedef typename PsimagLite::IoNg::In IoInType;
 
-	enum class SaveEnum { ALL };
+	enum class SaveEnum
+	{
+		ALL
+	};
 
 	WaveStructSvd() { }
 
@@ -116,9 +118,9 @@ struct WaveStructSvd {
 	}
 
 	WaveStructSvd(const BlockDiagonalMatrixType& u,
-	    const VectorMatrixType& vts,
-	    const VectorVectorRealType& s,
-	    const VectorQnType& qns)
+	              const VectorMatrixType& vts,
+	              const VectorVectorRealType& s,
+	              const VectorQnType& qns)
 	    : u_(u)
 	    , vts_(vts)
 	    , // Not yet used, will be used by WftAccelSvd
@@ -150,9 +152,9 @@ struct WaveStructSvd {
 	}
 
 	void write(PsimagLite::IoNg::Out& io,
-	    PsimagLite::String prefix,
-	    PsimagLite::IoNgSerializer::WriteMode writeMode,
-	    SaveEnum) const
+	           PsimagLite::String prefix,
+	           PsimagLite::IoNgSerializer::WriteMode writeMode,
+	           SaveEnum) const
 	{
 		if (writeMode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			io.createGroup(prefix);

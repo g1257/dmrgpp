@@ -87,11 +87,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelType_, typename RngType_>
-class MettsStochastics
-{
+class MettsStochastics {
 
 public:
 
@@ -108,8 +106,8 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	MettsStochastics(const ModelType& model,
-	    int long seed,
-	    const VectorSizeType& pure)
+	                 int long seed,
+	                 const VectorSizeType& pure)
 	    : model_(model)
 	    , rng_(seed)
 	    , pure_(pure)
@@ -147,9 +145,9 @@ public:
 
 	// call only from INFINITE
 	void update(const QnType& qn,
-	    const typename PsimagLite::Vector<SizeType>::Type& block1,
-	    const typename PsimagLite::Vector<SizeType>::Type& block2,
-	    SizeType seed)
+	            const typename PsimagLite::Vector<SizeType>::Type& block1,
+	            const typename PsimagLite::Vector<SizeType>::Type& block2,
+	            SizeType seed)
 	{
 		if (addedSites_.size() == 0) {
 			pureStates_.resize(block2[block2.size() - 1] + block2.size() + 1);
@@ -172,7 +170,7 @@ public:
 	}
 
 	void setCollapseBasis(typename PsimagLite::Vector<RealType>::Type& collapseBasisWeights,
-	    SizeType site) const
+	                      SizeType site) const
 	{
 		SizeType nk = model_.hilbertSize(site);
 		for (SizeType alpha = 0; alpha < nk; alpha++) {

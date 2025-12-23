@@ -81,12 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define EXTENDED_HUBBARD_1ORB_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
 template <typename ModelBaseType>
-class ExtendedHubbard1Orb : public ModelBaseType
-{
+class ExtendedHubbard1Orb : public ModelBaseType {
 
 public:
 
@@ -119,12 +117,12 @@ public:
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 
 	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    SuperGeometryType const& geometry,
-	    PsimagLite::String extension)
+	                    InputValidatorType& io,
+	                    SuperGeometryType const& geometry,
+	                    PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , modelHubbard_(solverParams, io, geometry, extension)
@@ -143,12 +141,12 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                        const BlockType& block,
+	                                        RealType time) const
 	{
 		modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-		    block,
-		    time);
+		                                         block,
+		                                         time);
 	}
 
 	void fillLabeledOperators(VectorQnType& qns)
@@ -172,7 +170,7 @@ private:
 
 	//! Find n_i in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(int i,
-	    const VectorHilbertStateType& natBasis) const
+	                                      const VectorHilbertStateType& natBasis) const
 	{
 
 		SizeType n = natBasis.size();

@@ -31,8 +31,7 @@ public:
 		String str;
 		try {
 			io.readline(str, "GeometryKind=", false);
-		}
-		catch (std::exception&) {
+		} catch (std::exception&) {
 			io.readline(str, "gt0:GeometryKind=", false);
 		}
 

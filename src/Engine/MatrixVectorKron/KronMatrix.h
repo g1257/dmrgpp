@@ -88,12 +88,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename InitKronType>
-class KronMatrix
-{
+class KronMatrix {
 
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -144,7 +142,7 @@ public:
 
 		if (initKron_.loadBalance()) {
 			PsimagLite::Parallelizer<KronConnectionsType,
-			    PsimagLite::LoadBalancerWeights>
+			                         PsimagLite::LoadBalancerWeights>
 			    parallelConnections(codeSectionParams);
 			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());
 		} else {

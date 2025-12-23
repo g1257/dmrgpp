@@ -33,41 +33,41 @@ void usageOperator()
 
 template <typename MatrixVectorType, typename VectorWithOffsetType>
 void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry,
-    const ParametersDmrgSolverType& dmrgSolverParams,
-    InputNgType::Readable& io,
-    const OperatorOptions& opOptions)
+               const ParametersDmrgSolverType& dmrgSolverParams,
+               InputNgType::Readable& io,
+               const OperatorOptions& opOptions)
 {
 	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
 	    ParametersForSolverType;
 #ifndef MIN_COMPILE
 	if (dmrgSolverParams.options.isSet("ChebyshevSolver")) {
 		typedef PsimagLite::ChebyshevSolver<ParametersForSolverType,
-		    MatrixVectorType,
-		    typename MatrixVectorType::VectorType>
+		                                    MatrixVectorType,
+		                                    typename MatrixVectorType::VectorType>
 		    SolverType;
 		mainLoop4<SolverType, VectorWithOffsetType>(geometry,
-		    dmrgSolverParams,
-		    io,
-		    opOptions);
+		                                            dmrgSolverParams,
+		                                            io,
+		                                            opOptions);
 	} else {
 #else
 	{
 #endif
 		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-		    MatrixVectorType,
-		    typename MatrixVectorType::VectorType>
+		                                  MatrixVectorType,
+		                                  typename MatrixVectorType::VectorType>
 		    SolverType;
 		mainLoop4<SolverType, VectorWithOffsetType>(geometry,
-		    dmrgSolverParams,
-		    io,
-		    opOptions);
+		                                            dmrgSolverParams,
+		                                            io,
+		                                            opOptions);
 	}
 }
 
 template <typename MatrixVectorType>
 void mainLoop2(InputNgType::Readable& io,
-    const ParametersDmrgSolverType& dmrgSolverParams,
-    const OperatorOptions& opOptions)
+               const ParametersDmrgSolverType& dmrgSolverParams,
+               const OperatorOptions& opOptions)
 {
 
 	typedef typename MatrixVectorType::ModelType ModelBaseType;
@@ -84,25 +84,25 @@ void mainLoop2(InputNgType::Readable& io,
 	if (dmrgSolverParams.options.isSet("vectorwithoffsets")) {
 		typedef VectorWithOffsets<SparseElementType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
-		    dmrgSolverParams,
-		    io,
-		    opOptions);
+		                                                  dmrgSolverParams,
+		                                                  io,
+		                                                  opOptions);
 	} else {
 #else
 	{
 #endif
 		typedef VectorWithOffset<SparseElementType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
-		    dmrgSolverParams,
-		    io,
-		    opOptions);
+		                                                  dmrgSolverParams,
+		                                                  io,
+		                                                  opOptions);
 	}
 }
 
 template <typename ComplexOrRealType>
 void mainLoop1(InputNgType::Readable& io,
-    const ParametersDmrgSolverType& dmrgSolverParams,
-    const OperatorOptions& opOptions)
+               const ParametersDmrgSolverType& dmrgSolverParams,
+               const OperatorOptions& opOptions)
 {
 	typedef SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals> SuperGeometryType;
 	typedef PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrix;
@@ -111,9 +111,9 @@ void mainLoop1(InputNgType::Readable& io,
 	typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
 	typedef ModelHelperLocal<LeftRightSuperType> ModelHelperType;
 	typedef ModelBase<ModelHelperType,
-	    ParametersDmrgSolverType,
-	    InputNgType::Readable,
-	    SuperGeometryType>
+	                  ParametersDmrgSolverType,
+	                  InputNgType::Readable,
+	                  SuperGeometryType>
 	    ModelBaseType;
 
 #ifndef MIN_COMPILE
@@ -312,7 +312,7 @@ to the main dmrg driver are the following.
 		echoInput = true;
 
 		PsimagLite::RedirectOutput::setAppName(application.name(),
-		    Provenance::logo(application.name()));
+		                                       Provenance::logo(application.name()));
 
 		std::ios_base::openmode open_mode = (dmrgSolverParams.autoRestart) ? std::ofstream::app : std::ofstream::out;
 
@@ -344,9 +344,9 @@ to the main dmrg driver are the following.
 	}
 
 	PsimagLite::CodeSectionParams codeSection(dmrgSolverParams.nthreads,
-	    dmrgSolverParams.nthreads2,
-	    setAffinities,
-	    threadsStackSize);
+	                                          dmrgSolverParams.nthreads2,
+	                                          setAffinities,
+	                                          threadsStackSize);
 	ConcurrencyType::setOptions(codeSection);
 
 	registerSignals();

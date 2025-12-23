@@ -2,12 +2,10 @@
 #define SDHSREINTERPRET_H
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename BraketType>
-class SdhsReinterpret
-{
+class SdhsReinterpret {
 
 public:
 

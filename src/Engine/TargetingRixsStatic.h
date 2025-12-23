@@ -96,12 +96,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "VectorWithOffsets.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingRixsStatic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingRixsStatic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
@@ -144,17 +142,17 @@ public:
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	    VectorWithOffsetType,
-	    BaseType,
-	    TargetParamsType>
+	                                 VectorWithOffsetType,
+	                                 BaseType,
+	                                 TargetParamsType>
 	    CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 
 	TargetingRixsStatic(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& ioIn)
+	                    const CheckpointType& checkPoint,
+	                    const WaveFunctionTransfType& wft,
+	                    const QnType&,
+	                    InputValidatorType& ioIn)
 	    : BaseType(lrs, checkPoint, wft, 1)
 	    , tstStruct_(ioIn, "TargetingRixsStatic", checkPoint.model())
 	    , ioIn_(ioIn)
@@ -191,10 +189,10 @@ public:
 	}
 
 	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType& block2,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
+	            const BlockType& block2,
+	            SizeType loopNumber)
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -211,8 +209,8 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "RixsStatic");
@@ -243,9 +241,9 @@ private:
 	// tv[5] = real      cv for tv[3]
 
 	void evolve(RealType,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            SizeType site,
+	            SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -268,12 +266,12 @@ private:
 					VectorWithOffsetType tmpV1;
 					SizeType indexOfOperator = 0;
 					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					    indexOfOperator,
-					    site,
-					    tmpV1,
-					    psi00,
-					    direction,
-					    tstStruct_);
+					                                              indexOfOperator,
+					                                              site,
+					                                              tmpV1,
+					                                              psi00,
+					                                              direction,
+					                                              tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->tvNonConst(3) = tmpV1;
 						applied_ = true;
@@ -289,12 +287,12 @@ private:
 					VectorWithOffsetType tmpV1;
 					SizeType indexOfOperator = 0;
 					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					    indexOfOperator,
-					    site,
-					    tmpV1,
-					    psi00,
-					    direction,
-					    tstStruct_);
+					                                              indexOfOperator,
+					                                              site,
+					                                              tmpV1,
+					                                              psi00,
+					                                              direction,
+					                                              tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->tvNonConst(3) = tmpV1;
 						applied_ = false;
@@ -309,12 +307,12 @@ private:
 					VectorWithOffsetType tmpV2;
 					SizeType indexOfOperator = 1;
 					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					    indexOfOperator,
-					    site,
-					    tmpV2,
-					    psi00,
-					    direction,
-					    tstStruct_);
+					                                              indexOfOperator,
+					                                              site,
+					                                              tmpV2,
+					                                              psi00,
+					                                              direction,
+					                                              tstStruct_);
 					if (tmpV2.size() > 0) {
 						this->tvNonConst(3) += tmpV2;
 						applied_ = true;
@@ -330,12 +328,12 @@ private:
 					VectorWithOffsetType tmpV1;
 					SizeType indexOfOperator = 0;
 					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					    indexOfOperator,
-					    site,
-					    tmpV1,
-					    psi00,
-					    direction,
-					    tstStruct_);
+					                                              indexOfOperator,
+					                                              site,
+					                                              tmpV1,
+					                                              psi00,
+					                                              direction,
+					                                              tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->tvNonConst(3) = tmpV1;
 						applied_ = false;
@@ -350,12 +348,12 @@ private:
 					VectorWithOffsetType tmpV2;
 					SizeType indexOfOperator = 1;
 					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					    indexOfOperator,
-					    site,
-					    tmpV2,
-					    this->tv(3),
-					    direction,
-					    tstStruct_);
+					                                              indexOfOperator,
+					                                              site,
+					                                              tmpV2,
+					                                              this->tv(3),
+					                                              direction,
+					                                              tstStruct_);
 					if (tmpV2.size() > 0) {
 						this->tvNonConst(3) = tmpV2;
 						applied_ = true;
@@ -388,8 +386,8 @@ private:
 		}
 
 		skeleton_.calcDynVectors(this->tv(3),
-		    this->tvNonConst(4),
-		    this->tvNonConst(5));
+		                         this->tvNonConst(4),
+		                         this->tvNonConst(5));
 		//		this->tv(4) = this->common().aoe().targetVectors(1);
 		//		this->tv(5) = this->common().aoe().targetVectors(2);
 

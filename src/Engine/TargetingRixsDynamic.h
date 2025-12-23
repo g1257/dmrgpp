@@ -98,12 +98,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "VectorWithOffsets.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingRixsDynamic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingRixsDynamic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
@@ -147,19 +145,19 @@ public:
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	    VectorWithOffsetType,
-	    BaseType,
-	    TargetParamsType>
+	                                 VectorWithOffsetType,
+	                                 BaseType,
+	                                 TargetParamsType>
 	    CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename TargetParamsType::BaseType::AlgorithmEnum AlgorithmEnumType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingRixsDynamic(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& ioIn)
+	                     const CheckpointType& checkPoint,
+	                     const WaveFunctionTransfType& wft,
+	                     const QnType&,
+	                     InputValidatorType& ioIn)
 	    : BaseType(lrs, checkPoint, wft, 1)
 	    , tstStruct_(ioIn, "TargetingRixsDynamic", checkPoint.model())
 	    , tstStruct2_(nullptr)
@@ -252,10 +250,10 @@ public:
 	// tv[9] = Im of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[6]>
 	// + Re of (w*-H+i\eta)^{-1} A^\dagger_{site} |tv[7]>
 	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType& block2,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
+	            const BlockType& block2,
+	            SizeType loopNumber)
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -312,10 +310,10 @@ public:
 		SizeType site2 = numberOfSites;
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
-			site2 = 0;
+		        site2 = 0;
 		if (site == numberOfSites - 2 &&
-			direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-			site2 = numberOfSites - 1;
+		        direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		        site2 = numberOfSites - 1;
 		if (site2 == numberOfSites) return;
 		BlockType block(1, site2);
 		evolve(energies, direction, block, block2, loopNumber);
@@ -324,8 +322,8 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "RixsDynamic");
@@ -349,8 +347,8 @@ public:
 private:
 
 	void doMax1(SizeType site,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            SizeType loopNumber)
 	{
 		if (site == tstStruct_.sites(0)) {
 
@@ -374,11 +372,11 @@ private:
 			SizeType indexOfOperator = 0;
 
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV1, // phiNew
-			    this->tv(1), // src1 apply op on Im|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->tv(1), // src1 apply op on Im|alpha(C)>
+			           direction);
 
 			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax1"));
 			if (tmpV1.size() > 0)
@@ -390,11 +388,11 @@ private:
 			VectorWithOffsetType tmpV2;
 
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV2, // phi
-			    this->tv(2), // src1 apply op on Re|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV2, // phi
+			           this->tv(2), // src1 apply op on Re|alpha(C)>
+			           direction);
 
 			if (tmpV2.size() > 0)
 				addFactor(tmpV2, psi00, densCre);
@@ -411,30 +409,30 @@ private:
 	}
 
 	void doMax2Sum(SizeType site,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType loopNumber)
+	               ProgramGlobals::DirectionEnum direction,
+	               SizeType loopNumber)
 	{
 
 		if (site == tstStruct_.sites(0)) {
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 0;
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV1, // phiNew
-			    this->tv(1), // src1 apply op on Im|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->tv(1), // src1 apply op on Im|alpha(C)>
+			           direction);
 
 			if (tmpV1.size() > 0)
 				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV2, // phiNew
-			    this->tv(2), // src1 apply op on Re|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV2, // phiNew
+			           this->tv(2), // src1 apply op on Re|alpha(C)>
+			           direction);
 
 			if (tmpV2.size() > 0) {
 				this->tvNonConst(7) = tmpV2;
@@ -468,11 +466,11 @@ private:
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 1;
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV1, // phiNew
-			    this->tv(1), // src1 apply op on Im|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->tv(1), // src1 apply op on Im|alpha(C)>
+			           direction);
 
 			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax2"));
 
@@ -484,11 +482,11 @@ private:
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV2, // phiNew
-			    this->tv(2), // src1 apply op on Re|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV2, // phiNew
+			           this->tv(2), // src1 apply op on Re|alpha(C)>
+			           direction);
 
 			if (tmpV2.size() > 0)
 				addFactor(tmpV2, psi00, densCre);
@@ -505,30 +503,30 @@ private:
 	}
 
 	void doMax2Prod(SizeType site,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType loopNumber)
+	                ProgramGlobals::DirectionEnum direction,
+	                SizeType loopNumber)
 	{
 
 		if (site == tstStruct_.sites(0)) {
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 0;
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV1, // phiNew
-			    this->tv(1), // src1 apply op on Im|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->tv(1), // src1 apply op on Im|alpha(C)>
+			           direction);
 
 			if (tmpV1.size() > 0)
 				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV2, // phiNew
-			    this->tv(2), // src1 apply op on Re|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV2, // phiNew
+			           this->tv(2), // src1 apply op on Re|alpha(C)>
+			           direction);
 
 			if (tmpV2.size() > 0) {
 				this->tvNonConst(7) = tmpV2;
@@ -546,22 +544,22 @@ private:
 			VectorWithOffsetType tmpV1;
 			SizeType indexOfOperator = 1;
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV1, // phiNew
-			    this->tv(6), // src1 apply op on Im|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV1, // phiNew
+			           this->tv(6), // src1 apply op on Im|alpha(C)>
+			           direction);
 
 			if (tmpV1.size() > 0)
 				this->tvNonConst(6) = tmpV1;
 
 			VectorWithOffsetType tmpV2;
 			applyOneOp(loopNumber,
-			    indexOfOperator,
-			    site,
-			    tmpV2, // phiNew
-			    this->tv(7), // src1 apply op on Re|alpha(C)>
-			    direction);
+			           indexOfOperator,
+			           site,
+			           tmpV2, // phiNew
+			           this->tv(7), // src1 apply op on Re|alpha(C)>
+			           direction);
 
 			if (tmpV2.size() > 0) {
 				this->tvNonConst(7) = tmpV2;
@@ -603,8 +601,8 @@ private:
 	}
 
 	void addFactor(VectorWithOffsetType& phiNew,
-	    const VectorWithOffsetType& psiSrc2,
-	    ComplexOrRealType factor) const
+	               const VectorWithOffsetType& psiSrc2,
+	               ComplexOrRealType factor) const
 	{
 		// CHECK if psiSrc2 and phiNew have the same offset!
 		if (psiSrc2.offset(0) == phiNew.offset(0))
@@ -620,8 +618,8 @@ private:
 	}
 
 	void calcDynVectors(RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    const VectorSizeType& block1)
+	                    ProgramGlobals::DirectionEnum direction,
+	                    const VectorSizeType& block1)
 	{
 		if (!applied_ && appliedFirst_) {
 			return;
@@ -635,9 +633,9 @@ private:
 
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			skeleton_.calcDynVectors(this->tv(6),
-			    this->tv(7),
-			    this->tvNonConst(8),
-			    this->tvNonConst(9));
+			                         this->tv(7),
+			                         this->tvNonConst(8),
+			                         this->tvNonConst(9));
 			firstCall_ = false; // unused here but just in case
 			return;
 		}
@@ -664,51 +662,51 @@ private:
 	}
 
 	void calcVectors(const VectorSizeType& indices,
-	    RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    const VectorSizeType& block1,
-	    bool wftOrAdvance,
-	    bool isLastCall)
+	                 RealType Eg,
+	                 ProgramGlobals::DirectionEnum direction,
+	                 const VectorSizeType& block1,
+	                 bool wftOrAdvance,
+	                 bool isLastCall)
 	{
 		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		const VectorWithOffsetType& v0 = this->tv(indices[0]);
 
 		this->common().aoeNonConst().calcTimeVectors(indices,
-		    Eg,
-		    v0,
-		    direction,
-		    allOperatorsApplied,
-		    wftOrAdvance, // wft and advance indices[0]
-		    block1,
-		    isLastCall);
+		                                             Eg,
+		                                             v0,
+		                                             direction,
+		                                             allOperatorsApplied,
+		                                             wftOrAdvance, // wft and advance indices[0]
+		                                             block1,
+		                                             isLastCall);
 	}
 
 	void applyOneOp(SizeType loopNumber,
-	    SizeType indexOfOperator,
-	    SizeType site,
-	    VectorWithOffsetType& dest,
-	    const VectorWithOffsetType& src,
-	    ProgramGlobals::DirectionEnum direction)
+	                SizeType indexOfOperator,
+	                SizeType site,
+	                VectorWithOffsetType& dest,
+	                const VectorWithOffsetType& src,
+	                ProgramGlobals::DirectionEnum direction)
 	{
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 
 		if (algo != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV)
 			this->common().aoeNonConst().applyOneOperator(loopNumber,
-			    indexOfOperator,
-			    site,
-			    dest, // phiNew
-			    src, // src1
-			    direction,
-			    *tstStruct2_);
+			                                              indexOfOperator,
+			                                              site,
+			                                              dest, // phiNew
+			                                              src, // src1
+			                                              direction,
+			                                              *tstStruct2_);
 		else
 			this->common().aoeNonConst().applyOneOperator(loopNumber,
-			    indexOfOperator,
-			    site,
-			    dest, // phiNew
-			    src, // src1
-			    direction,
-			    tstStruct_);
+			                                              indexOfOperator,
+			                                              site,
+			                                              dest, // phiNew
+			                                              src, // src1
+			                                              direction,
+			                                              tstStruct_);
 	}
 
 	void setWeights()

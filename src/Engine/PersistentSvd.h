@@ -2,13 +2,11 @@
 #define PERSISTENTSVD_H
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // needef for WFT
 template <typename VectorMatrixType, typename VectorVectorRealType, typename VectorQnType>
-class PersistentSvd
-{
+class PersistentSvd {
 
 public:
 

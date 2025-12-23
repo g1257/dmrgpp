@@ -88,11 +88,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelBaseType>
-class Graphene : public ModelBaseType
-{
+class Graphene : public ModelBaseType {
 
 public:
 
@@ -129,8 +127,8 @@ public:
 	static const int SPIN_DOWN = HilbertSpaceFeAsType::SPIN_DOWN;
 
 	Graphene(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	         InputValidatorType& io,
+	         const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	{
@@ -166,8 +164,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -200,14 +198,14 @@ public:
 		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 			for (SizeType spin2 = 0; spin2 < 2; ++spin2) {
 				MatrixType tmp = multiplyTc(creationMatrix_[0 + spin1 * modelParameters_.orbitals].getCRS(),
-				    creationMatrix_[1 + spin2 * modelParameters_.orbitals].getCRS());
+				                            creationMatrix_[1 + spin2 * modelParameters_.orbitals].getCRS());
 				SparseMatrixType tmp2(tmp);
 				typename OperatorType::Su2RelatedType su2Related;
 				yop.push(OperatorType(tmp2,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2Related));
+				                      ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                      typename OperatorType::PairType(0, 0),
+				                      1.0,
+				                      su2Related));
 			}
 		}
 
@@ -223,26 +221,26 @@ public:
 			ntotalcrs += tmp2;
 			typename OperatorType::Su2RelatedType su2Related;
 			nop.push(OperatorType(tmp2,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                      ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                      typename OperatorType::PairType(0, 0),
+			                      1.0,
+			                      su2Related));
 			if (dof == 0 || dof == 2) // naup nadown
 				nn.push(OperatorType(tmp2,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2Related));
+				                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                     typename OperatorType::PairType(0, 0),
+				                     1.0,
+				                     su2Related));
 		}
 
 		this->makeTrackable("nn");
 
 		typename OperatorType::Su2RelatedType su2Related;
 		ntotal.push(OperatorType(ntotalcrs,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1.0,
-		    su2Related));
+		                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                         typename OperatorType::PairType(0, 0),
+		                         1.0,
+		                         su2Related));
 		this->makeTrackable("ntotal");
 
 		OpsLabelType& splus = this->createOpsLabel("splus");
@@ -251,29 +249,29 @@ public:
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow, nrow);
 			tmp += multiplyTc(creationMatrix_[dof].getCRS(),
-			    creationMatrix_[dof + modelParameters_.orbitals].getCRS());
+			                  creationMatrix_[dof + modelParameters_.orbitals].getCRS());
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			splus.push(OperatorType(tmp2,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                        typename OperatorType::PairType(0, 0),
+			                        1.0,
+			                        su2Related));
 			SparseMatrixType tmp3;
 			transposeConjugate(tmp3, tmp2);
 			sminus.push(OperatorType(tmp3,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                         typename OperatorType::PairType(0, 0),
+			                         1.0,
+			                         su2Related));
 
 			// s+ a
 			if (dof == 0)
 				splus2.push(OperatorType(tmp2,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2Related));
+				                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                         typename OperatorType::PairType(0, 0),
+				                         1.0,
+				                         su2Related));
 		}
 
 		this->makeTrackable("splus2");
@@ -285,16 +283,16 @@ public:
 
 			tmp += multiplyTc(creationMatrix_[dof].getCRS(), creationMatrix_[dof].getCRS());
 			tmp2 += multiplyTc(creationMatrix_[dof + modelParameters_.orbitals].getCRS(),
-			    creationMatrix_[dof + modelParameters_.orbitals].getCRS());
+			                   creationMatrix_[dof + modelParameters_.orbitals].getCRS());
 
 			tmp = 0.5 * (tmp - tmp2);
 			SparseMatrixType tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			sz.push(OperatorType(tmp3,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                     typename OperatorType::PairType(0, 0),
+			                     1.0,
+			                     su2Related));
 		}
 	}
 
@@ -353,7 +351,7 @@ public:
 	}
 
 	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
-	    const BlockType& block) const
+	                                 const BlockType& block) const
 	{
 		const HilbertBasisType& natBasis = basis_;
 		SparseMatrixType tmpMatrix;
@@ -381,10 +379,10 @@ public:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				    ProgramGlobals::FermionOrBosonEnum::FERMION,
-				    typename OperatorType::PairType(1, m),
-				    asign,
-				    su2related);
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+				                  typename OperatorType::PairType(1, m),
+				                  asign,
+				                  su2related);
 				creationMatrix.push_back(myOp);
 			}
 		}
@@ -432,9 +430,9 @@ private:
 	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void findOperatorMatrices(SparseMatrixType& creationMatrix,
-	    int i,
-	    int sigma,
-	    const HilbertBasisType& natBasis) const
+	                          int i,
+	                          int sigma,
+	                          const HilbertBasisType& natBasis) const
 	{
 		HilbertState bra, ket;
 		int n = natBasis.size();
@@ -464,8 +462,8 @@ private:
 	}
 
 	void setSymmetryRelatedInternal(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    int n) const
+	                                const HilbertBasisType& basis,
+	                                int n) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -485,10 +483,10 @@ private:
 
 			// nup
 			SizeType electronsUp = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			    SPIN_UP);
+			                                                                    SPIN_UP);
 			// ndown
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			    SPIN_DOWN);
+			                                                                      SPIN_DOWN);
 			SizeType electrons = electronsDown + electronsUp;
 
 			other[0] = electrons;

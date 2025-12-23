@@ -87,11 +87,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "SpinSquaredHelper.h"
 #include "VerySparseMatrix.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelBaseType>
-class ModelHubbardMultiBand : public ModelBaseType
-{
+class ModelHubbardMultiBand : public ModelBaseType {
 
 public:
 
@@ -128,14 +126,14 @@ public:
 	static const int SPIN_DOWN = HilbertSpaceFeAsType::SPIN_DOWN;
 
 	ModelHubbardMultiBand(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	                      InputValidatorType& io,
+	                      const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , spinSquared_(spinSquaredHelper_,
-		  modelParameters_.orbitals,
-		  2 * modelParameters_.orbitals)
+	                   modelParameters_.orbitals,
+	                   2 * modelParameters_.orbitals)
 	{
 		ProgramGlobals::init(modelParameters_.orbitals * superGeometry_.numberOfSites() + 1);
 		SizeType v1 = 2 * modelParameters_.orbitals * geometry.numberOfSites();
@@ -183,8 +181,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -200,9 +198,9 @@ public:
 			hmatrix += modelParameters_.hubbardU[site] * qx_;
 
 			addPotentialV(hmatrix,
-			    i,
-			    block[i],
-			    modelParameters_.potentialV);
+			              i,
+			              block[i],
+			              modelParameters_.potentialV);
 		}
 	}
 
@@ -223,21 +221,21 @@ protected:
 			{
 				MatrixType tmp(nrow, nrow);
 				tmp += multiplyTc(creationMatrix_[orbital].getCRS(),
-				    creationMatrix_[orbital + modelParameters_.orbitals].getCRS());
+				                  creationMatrix_[orbital + modelParameters_.orbitals].getCRS());
 				SparseMatrixType tmp2(tmp);
 				typename OperatorType::Su2RelatedType su2Related;
 				splus.push(OperatorType(tmp2,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2Related));
+				                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                        typename OperatorType::PairType(0, 0),
+				                        1.0,
+				                        su2Related));
 				SparseMatrixType tmp3;
 				transposeConjugate(tmp3, tmp2);
 				sminus.push(OperatorType(tmp3,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2Related));
+				                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                         typename OperatorType::PairType(0, 0),
+				                         1.0,
+				                         su2Related));
 			}
 
 			{ // S^z
@@ -245,31 +243,31 @@ protected:
 				MatrixType tmp2(nrow, nrow);
 
 				tmp += multiplyTc(creationMatrix_[orbital].getCRS(),
-				    creationMatrix_[orbital].getCRS());
+				                  creationMatrix_[orbital].getCRS());
 				tmp2 += multiplyTc(creationMatrix_[orbital + modelParameters_.orbitals].getCRS(),
-				    creationMatrix_[orbital + modelParameters_.orbitals].getCRS());
+				                   creationMatrix_[orbital + modelParameters_.orbitals].getCRS());
 
 				tmp = 0.5 * (tmp - tmp2);
 				SparseMatrixType tmp3(tmp);
 				typename OperatorType::Su2RelatedType su2Related;
 				sz.push(OperatorType(tmp3,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2Related));
+				                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                     typename OperatorType::PairType(0, 0),
+				                     1.0,
+				                     su2Related));
 			}
 
 			{ // delta = c^\dagger * c^dagger
 				SparseMatrixType atmp;
 				multiply(atmp,
-				    creationMatrix_[orbital + modelParameters_.orbitals].getCRS(),
-				    creationMatrix_[orbital].getCRS());
+				         creationMatrix_[orbital + modelParameters_.orbitals].getCRS(),
+				         creationMatrix_[orbital].getCRS());
 				typename OperatorType::Su2RelatedType su2Related;
 				d.push(OperatorType(atmp,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2Related));
+				                    ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                    typename OperatorType::PairType(0, 0),
+				                    1.0,
+				                    su2Related));
 			}
 		}
 
@@ -283,10 +281,10 @@ protected:
 				SparseMatrixType tmp2(tmp);
 				typename OperatorType::Su2RelatedType su2Related;
 				nop.push(OperatorType(tmp2,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2Related));
+				                      ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                      typename OperatorType::PairType(0, 0),
+				                      1.0,
+				                      su2Related));
 			}
 
 			{
@@ -321,7 +319,7 @@ protected:
 private:
 
 	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
-	    const BlockType& block) const
+	                                 const BlockType& block) const
 	{
 		HilbertBasisType natBasis = basis_;
 		SparseMatrixType tmpMatrix;
@@ -349,10 +347,10 @@ private:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				    ProgramGlobals::FermionOrBosonEnum::FERMION,
-				    typename OperatorType::PairType(1, m),
-				    asign,
-				    su2related);
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+				                  typename OperatorType::PairType(1, m),
+				                  asign,
+				                  su2related);
 				creationMatrix.push_back(myOp);
 			}
 		}
@@ -398,9 +396,9 @@ private:
 	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void findOperatorMatrices(SparseMatrixType& creationMatrix,
-	    int i,
-	    int sigma,
-	    const HilbertBasisType& natBasis) const
+	                          int i,
+	                          int sigma,
+	                          const HilbertBasisType& natBasis) const
 	{
 		int n = natBasis.size();
 		MatrixType cm(n, n);
@@ -431,8 +429,8 @@ private:
 	}
 
 	void setSymmetryRelatedInternal(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    int n) const
+	                                const HilbertBasisType& basis,
+	                                int n) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -455,10 +453,10 @@ private:
 
 			// nup
 			SizeType electronsUp = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			    SPIN_UP);
+			                                                                    SPIN_UP);
 			// ndown
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			    SPIN_DOWN);
+			                                                                      SPIN_DOWN);
 			SizeType electrons = electronsDown + electronsUp;
 
 			other[0] = electrons;
@@ -504,8 +502,8 @@ private:
 	}
 
 	void addHoppingOnSite(SparseMatrixType& hmatrix,
-	    SizeType i,
-	    SizeType actualSite) const
+	                      SizeType i,
+	                      SizeType actualSite) const
 	{
 		const RealType zero = 0.0;
 		SizeType orbitals = modelParameters_.orbitals;
@@ -551,9 +549,9 @@ private:
 	}
 
 	void addPotentialV(SparseMatrixType& hmatrix,
-	    SizeType i,
-	    SizeType actualIndexOfSite,
-	    const typename PsimagLite::Vector<RealType>::Type& V) const
+	                   SizeType i,
+	                   SizeType actualIndexOfSite,
+	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		SizeType v1 = 2 * modelParameters_.orbitals * superGeometry_.numberOfSites();
 		SizeType v2 = v1 * modelParameters_.orbitals;
@@ -583,10 +581,10 @@ private:
 	}
 
 	void addPotentialV(SparseMatrixType& hmatrix,
-	    SizeType i,
-	    SizeType actualIndexOfSite,
-	    SizeType orbital,
-	    const typename PsimagLite::Vector<RealType>::Type& V) const
+	                   SizeType i,
+	                   SizeType actualIndexOfSite,
+	                   SizeType orbital,
+	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		int dof = 2 * modelParameters_.orbitals;
 		const VectorOperatorType& cm = creationMatrix_;
@@ -602,20 +600,20 @@ private:
 	}
 
 	void addPotentialV(SparseMatrixType& hmatrix,
-	    SizeType i,
-	    SizeType actualIndexOfSite,
-	    SizeType orb,
-	    SizeType orb2,
-	    const typename PsimagLite::Vector<RealType>::Type& V) const
+	                   SizeType i,
+	                   SizeType actualIndexOfSite,
+	                   SizeType orb,
+	                   SizeType orb2,
+	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		int dof = 2 * modelParameters_.orbitals;
 		const VectorOperatorType& cm = creationMatrix_;
 		SizeType orbitalsSquared = modelParameters_.orbitals * modelParameters_.orbitals;
 
 		SparseMatrixType nup = nEx(cm[orb + SPIN_UP * modelParameters_.orbitals + i * dof].getCRS(),
-		    cm[orb2 + SPIN_UP * modelParameters_.orbitals + i * dof].getCRS());
+		                           cm[orb2 + SPIN_UP * modelParameters_.orbitals + i * dof].getCRS());
 		SparseMatrixType ndown = nEx(cm[orb + SPIN_DOWN * modelParameters_.orbitals + i * dof].getCRS(),
-		    cm[orb2 + SPIN_DOWN * modelParameters_.orbitals + i * dof].getCRS());
+		                             cm[orb2 + SPIN_DOWN * modelParameters_.orbitals + i * dof].getCRS());
 
 		SizeType linSize = superGeometry_.numberOfSites();
 
@@ -636,7 +634,7 @@ private:
 	}
 
 	SparseMatrixType nEx(const SparseMatrixType& c1,
-	    const SparseMatrixType& c2) const
+	                     const SparseMatrixType& c2) const
 	{
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType cdagger;

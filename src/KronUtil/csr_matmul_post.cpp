@@ -2,13 +2,13 @@
 
 template <typename ComplexOrRealType>
 void csr_matmul_post(char trans_A,
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
-    const int nrow_Y,
-    const int ncol_Y,
-    const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
-    const int nrow_X,
-    const int ncol_X,
-    PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
+                     const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
+                     const int nrow_Y,
+                     const int ncol_Y,
+                     const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
+                     const int nrow_X,
+                     const int ncol_X,
+                     PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
 {
 	/*
 	 * -------------------------------------------------------

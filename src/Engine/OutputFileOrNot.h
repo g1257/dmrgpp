@@ -3,17 +3,15 @@
 #include "Io/IoNg.h"
 #include "Io/IoSelector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class OutputFileOrNot
-{
+class OutputFileOrNot {
 
 public:
 
 	OutputFileOrNot(PsimagLite::String filename,
-	    PsimagLite::IoNg::OpenMode mode,
-	    bool disabled)
+	                PsimagLite::IoNg::OpenMode mode,
+	                bool disabled)
 	    : filename_(filename)
 	    , ptr_(nullptr)
 	{
@@ -48,9 +46,9 @@ public:
 
 	template <typename T>
 	void write(const T& t,
-	    PsimagLite::String str,
-	    PsimagLite::IoNg::Out::Serializer::WriteMode mode,
-	    typename std::enable_if<PsimagLite::IsVectorLike<T>::True, int>::type = 0)
+	           PsimagLite::String str,
+	           PsimagLite::IoNg::Out::Serializer::WriteMode mode,
+	           typename std::enable_if<PsimagLite::IsVectorLike<T>::True, int>::type = 0)
 	{
 		if (!ptr_)
 			return;
@@ -66,8 +64,8 @@ public:
 	}
 
 	void write(SizeType c,
-	    PsimagLite::String str,
-	    PsimagLite::IoNg::Out::Serializer::WriteMode mode)
+	           PsimagLite::String str,
+	           PsimagLite::IoNg::Out::Serializer::WriteMode mode)
 	{
 		if (!ptr_)
 			return;

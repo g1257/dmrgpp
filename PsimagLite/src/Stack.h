@@ -99,14 +99,20 @@ template <typename T>
 class IsStackLike {
 public:
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename T>
 class IsStackLike<std::stack<T, std::deque<T, typename Allocator<T>::Type>>> {
 public:
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 template <typename StackType>

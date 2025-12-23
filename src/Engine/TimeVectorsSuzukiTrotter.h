@@ -85,27 +85,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h"
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetParamsType,
-    typename ModelType,
-    typename WaveFunctionTransfType,
-    typename LanczosSolverType,
-    typename VectorWithOffsetType>
+          typename ModelType,
+          typename WaveFunctionTransfType,
+          typename LanczosSolverType,
+          typename VectorWithOffsetType>
 class TimeVectorsSuzukiTrotter : public TimeVectorsBase<
-				     TargetParamsType,
-				     ModelType,
-				     WaveFunctionTransfType,
-				     LanczosSolverType,
-				     VectorWithOffsetType>
-{
+                                     TargetParamsType,
+                                     ModelType,
+                                     WaveFunctionTransfType,
+                                     LanczosSolverType,
+                                     VectorWithOffsetType> {
 
 	typedef TimeVectorsBase<TargetParamsType,
-	    ModelType,
-	    WaveFunctionTransfType,
-	    LanczosSolverType,
-	    VectorWithOffsetType>
+	                        ModelType,
+	                        WaveFunctionTransfType,
+	                        LanczosSolverType,
+	                        VectorWithOffsetType>
 	    BaseType;
 	typedef typename BaseType::PairType PairType;
 	typedef typename TargetParamsType::RealType RealType;
@@ -132,10 +130,10 @@ class TimeVectorsSuzukiTrotter : public TimeVectorsBase<
 public:
 
 	TimeVectorsSuzukiTrotter(const TargetParamsType& tstStruct,
-	    VectorVectorWithOffsetType& targetVectors,
-	    const ModelType& model,
-	    const WaveFunctionTransfType& wft,
-	    const LeftRightSuperType& lrs)
+	                         VectorVectorWithOffsetType& targetVectors,
+	                         const ModelType& model,
+	                         const WaveFunctionTransfType& wft,
+	                         const LeftRightSuperType& lrs)
 	    : BaseType(model, lrs, wft, "suzukitrotter")
 	    , progress_("TimeVectorsSuzukiTrotter")
 	    , tstStruct_(tstStruct)
@@ -148,9 +146,9 @@ public:
 	}
 
 	virtual void calcTimeVectors(const VectorSizeType& indices,
-	    RealType Eg,
-	    const VectorWithOffsetType& phi,
-	    const typename BaseType::ExtraData& extraData)
+	                             RealType Eg,
+	                             const VectorWithOffsetType& phi,
+	                             const typename BaseType::ExtraData& extraData)
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -246,14 +244,14 @@ public:
 			VectorWithOffsetType src = *targetVectors_[ii];
 			// Only time differences here (i.e. extra.times[i] not extra.times[i]+currentTime_)
 			calcTargetVector(*targetVectors_[ii],
-			    Eg,
-			    src,
-			    extraData.dir,
-			    tstStruct_.times()[i],
-			    transformS,
-			    transformST,
-			    transformE,
-			    transformET);
+			                 Eg,
+			                 src,
+			                 extraData.dir,
+			                 tstStruct_.times()[i],
+			                 transformS,
+			                 transformST,
+			                 transformE,
+			                 transformET);
 			assert(targetVectors_[ii]->size() == targetVectors_[indices[0]]->size());
 		}
 	}
@@ -305,44 +303,44 @@ private:
 	}
 
 	void calcTargetVector(VectorWithOffsetType& target,
-	    RealType Eg,
-	    const VectorWithOffsetType& phi,
-	    const ProgramGlobals::DirectionEnum systemOrEnviron,
-	    const RealType& time,
-	    const SparseMatrixType& S,
-	    const SparseMatrixType& ST,
-	    const SparseMatrixType& E,
-	    const SparseMatrixType& ET)
+	                      RealType Eg,
+	                      const VectorWithOffsetType& phi,
+	                      const ProgramGlobals::DirectionEnum systemOrEnviron,
+	                      const RealType& time,
+	                      const SparseMatrixType& S,
+	                      const SparseMatrixType& ST,
+	                      const SparseMatrixType& E,
+	                      const SparseMatrixType& ET)
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
 			SizeType i0 = phi.sector(ii);
 			SizeType total = phi.effectiveSize(i0);
 			TargetVectorType result(total, 0.0);
 			calcTimeVectorsSuzukiTrotter(result,
-			    Eg,
-			    phi,
-			    systemOrEnviron,
-			    i0,
-			    time,
-			    S,
-			    ST,
-			    E,
-			    ET);
+			                             Eg,
+			                             phi,
+			                             systemOrEnviron,
+			                             i0,
+			                             time,
+			                             S,
+			                             ST,
+			                             E,
+			                             ET);
 			// NOTE: targetVectors_[0] = exp(iHt) |phi>
 			target.setDataInSector(result, i0);
 		}
 	}
 
 	void calcTimeVectorsSuzukiTrotter(TargetVectorType& result,
-	    RealType,
-	    const VectorWithOffsetType& phi,
-	    const ProgramGlobals::DirectionEnum systemOrEnviron,
-	    SizeType i0,
-	    const RealType& time,
-	    const SparseMatrixType& transformS,
-	    const SparseMatrixType& transformST,
-	    const SparseMatrixType& transformE,
-	    const SparseMatrixType& transformET) const
+	                                  RealType,
+	                                  const VectorWithOffsetType& phi,
+	                                  const ProgramGlobals::DirectionEnum systemOrEnviron,
+	                                  SizeType i0,
+	                                  const RealType& time,
+	                                  const SparseMatrixType& transformS,
+	                                  const SparseMatrixType& transformST,
+	                                  const SparseMatrixType& transformE,
+	                                  const SparseMatrixType& transformET) const
 	{
 		SizeType offset = phi.offset(i0);
 		TargetVectorType phi0(result.size());
@@ -365,46 +363,46 @@ private:
 			packSuper.unpack(xp, yp, lrs_.super().permutation(i + offset));
 			if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				timeVectorSystem(result,
-				    phi0,
-				    xp,
-				    yp,
-				    packSuper,
-				    block,
-				    m,
-				    i,
-				    offset,
-				    transformE,
-				    transformET,
-				    iperm);
+				                 phi0,
+				                 xp,
+				                 yp,
+				                 packSuper,
+				                 block,
+				                 m,
+				                 i,
+				                 offset,
+				                 transformE,
+				                 transformET,
+				                 iperm);
 			} else {
 				timeVectorEnviron(result,
-				    phi0,
-				    xp,
-				    yp,
-				    packSuper,
-				    block,
-				    m,
-				    i,
-				    offset,
-				    transformS,
-				    transformST,
-				    iperm);
+				                  phi0,
+				                  xp,
+				                  yp,
+				                  packSuper,
+				                  block,
+				                  m,
+				                  i,
+				                  offset,
+				                  transformS,
+				                  transformST,
+				                  iperm);
 			}
 		}
 	}
 
 	void timeVectorSystem(TargetVectorType& result,
-	    const TargetVectorType& phi0,
-	    SizeType xp,
-	    SizeType yp,
-	    const PackIndicesType& packSuper,
-	    const BlockType& block,
-	    const MatrixComplexOrRealType& m,
-	    SizeType i,
-	    SizeType offset,
-	    const SparseMatrixType& transform,
-	    const SparseMatrixType& transformT,
-	    const VectorSizeType& iperm) const
+	                      const TargetVectorType& phi0,
+	                      SizeType xp,
+	                      SizeType yp,
+	                      const PackIndicesType& packSuper,
+	                      const BlockType& block,
+	                      const MatrixComplexOrRealType& m,
+	                      SizeType i,
+	                      SizeType offset,
+	                      const SparseMatrixType& transform,
+	                      const SparseMatrixType& transformT,
+	                      const VectorSizeType& iperm) const
 	{
 		const LeftRightSuperType& oldLrs = lrs_;
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
@@ -431,22 +429,22 @@ private:
 			for (SizeType x2 = 0; x2 < hilbertSize; x2++) {
 				for (SizeType y1 = 0; y1 < hilbertSize; y1++) {
 					SizeType yfull2 = packRight.pack(y1,
-					    y2,
-					    oldLrs.right().permutationInverse());
+					                                 y2,
+					                                 oldLrs.right().permutationInverse());
 					for (SizeType k2 = transform1.getRowPtr(yfull2);
-					    k2 < transform1.getRowPtr(yfull2 + 1);
-					    k2++) {
+					     k2 < transform1.getRowPtr(yfull2 + 1);
+					     k2++) {
 						int y = transform1.getColOrExit(k2);
 						if (y < 0)
 							y = yfull2;
 						SizeType x = packLeft.pack(x1,
-						    x2,
-						    lrs_.left().permutationInverse());
+						                           x2,
+						                           lrs_.left().permutationInverse());
 						SizeType j = packSuper.pack(x,
-						    y,
-						    lrs_.super().permutationInverse());
+						                            y,
+						                            lrs_.super().permutationInverse());
 						ComplexOrRealType tmp = m(iperm[x2 + y1 * hilbertSize],
-						    iperm[x2p + y1p * hilbertSize]);
+						                          iperm[x2p + y1p * hilbertSize]);
 						if (PsimagLite::norm(tmp) < 1e-12)
 							continue;
 						if (j < offset || j >= offset + phi0.size())
@@ -459,17 +457,17 @@ private:
 	}
 
 	void timeVectorEnviron(TargetVectorType& result,
-	    const TargetVectorType& phi0,
-	    SizeType xp,
-	    SizeType yp,
-	    const PackIndicesType& packSuper,
-	    const BlockType& block,
-	    const MatrixComplexOrRealType& m,
-	    SizeType i,
-	    SizeType offset,
-	    const SparseMatrixType& transform,
-	    const SparseMatrixType& transformT,
-	    const VectorSizeType& iperm) const
+	                       const TargetVectorType& phi0,
+	                       SizeType xp,
+	                       SizeType yp,
+	                       const PackIndicesType& packSuper,
+	                       const BlockType& block,
+	                       const MatrixComplexOrRealType& m,
+	                       SizeType i,
+	                       SizeType offset,
+	                       const SparseMatrixType& transform,
+	                       const SparseMatrixType& transformT,
+	                       const VectorSizeType& iperm) const
 	{
 		const LeftRightSuperType& oldLrs = lrs_;
 		SizeType hilbertSize = model_.hilbertSize(block[0]);
@@ -498,23 +496,23 @@ private:
 			for (SizeType x2 = 0; x2 < hilbertSize; x2++) {
 				for (SizeType y1 = 0; y1 < hilbertSize; y1++) {
 					SizeType xfull2 = packLeft.pack(x1,
-					    x2,
-					    oldLrs.left().permutationInverse());
+					                                x2,
+					                                oldLrs.left().permutationInverse());
 					for (SizeType k2 = transform1.getRowPtr(xfull2);
-					    k2 < transform1.getRowPtr(xfull2 + 1);
-					    k2++) {
+					     k2 < transform1.getRowPtr(xfull2 + 1);
+					     k2++) {
 						int x = transform1.getColOrExit(k2);
 						if (x < 0)
 							x = xfull2;
 						SizeType y = packRight.pack(y1,
-						    y2,
-						    lrs_.right().permutationInverse());
+						                            y2,
+						                            lrs_.right().permutationInverse());
 						SizeType j = packSuper.pack(x,
-						    y,
-						    lrs_.super().permutationInverse());
+						                            y,
+						                            lrs_.super().permutationInverse());
 
 						ComplexOrRealType tmp = m(iperm[x2 + y1 * hilbertSize],
-						    iperm[x2p + y1p * hilbertSize]);
+						                          iperm[x2p + y1p * hilbertSize]);
 						if (PsimagLite::norm(tmp) < 1e-12)
 							continue;
 						if (j < offset || j >= offset + phi0.size())
@@ -528,15 +526,15 @@ private:
 	}
 
 	void suzukiTrotterPerm(VectorSizeType&,
-	    const VectorSizeType&) const
+	                       const VectorSizeType&) const
 	{
 		err("suzukiTrotter no longer supported (sorry!)\n");
 	}
 
 	void getMatrix(MatrixComplexOrRealType& m,
-	    const ProgramGlobals::DirectionEnum systemOrEnviron,
-	    const BlockType& block,
-	    const RealType& time) const
+	               const ProgramGlobals::DirectionEnum systemOrEnviron,
+	               const BlockType& block,
+	               const RealType& time) const
 	{
 		SparseMatrixType hmatrix;
 		RealType factorForDiagonals = (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 1.0 : 0.0;

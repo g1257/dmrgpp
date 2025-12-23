@@ -95,8 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 #include "SparseVector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // FIXME: MOVE ELSEWHERE:
 template <typename RealType>
@@ -113,17 +112,19 @@ bool isAlmostZero(const std::complex<RealType>& x, RealType eps = 1e-20)
 }
 
 template <typename RealType, typename SparseMatrixType>
-class ReflectionColor
-{
+class ReflectionColor {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
 
-	enum { AVAILABLE,
+	enum
+	{
+		AVAILABLE,
 		NOT_AVAILABLE,
-		COLOR };
+		COLOR
+	};
 
 public:
 
@@ -294,9 +295,9 @@ private:
 	}
 
 	void findConnected(typename PsimagLite::Vector<SizeType>::Type& jlist,
-	    SizeType ni,
-	    const SparseMatrixType& A,
-	    const RealType& eps) const
+	                   SizeType ni,
+	                   const SparseMatrixType& A,
+	                   const RealType& eps) const
 	{
 		bool hasDiagonal = false;
 		for (int k = A.getRowPtr(ni); k < A.getRowPtr(ni + 1); k++) {
@@ -330,8 +331,8 @@ private:
 	}
 
 	void findWithLabel(typename PsimagLite::Vector<SizeType>::Type& ilist,
-	    const typename PsimagLite::Vector<SizeType>::Type& ilabel,
-	    SizeType icolor) const
+	                   const typename PsimagLite::Vector<SizeType>::Type& ilabel,
+	                   SizeType icolor) const
 	{
 		for (SizeType i = 0; i < ilabel.size(); i++)
 			if (ilabel[i] == icolor)

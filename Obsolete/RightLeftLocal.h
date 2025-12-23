@@ -85,11 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *
  */
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename BasisType, typename BasisWithOperatorsType, typename SparseMatrixType>
-class RightLeftLocal
-{
+class RightLeftLocal {
 public:
 
 	typedef typename SparseMatrixType::value_type MatrixElementType;
@@ -118,16 +116,16 @@ public:
 	//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
 	//! Has been changed to accomodate for reflection symmetry
 	void fastOpProdInter(typename PsimagLite::Vector<MatrixElementType>::Type& x,
-	    typename PsimagLite::Vector<MatrixElementType> const ::Type& y,
-	    SparseMatrixType const& A,
-	    SparseMatrixType const& B,
-	    int type,
-	    MatrixElementType& hop,
-	    bool operatorsAreFermions = true,
-	    SizeType angularMomentum = 1,
-	    MatrixElementType angularSign = -1.0,
-	    SizeType category = 0,
-	    bool dummy2 = false) const
+	                     typename PsimagLite::Vector<MatrixElementType> const ::Type& y,
+	                     SparseMatrixType const& A,
+	                     SparseMatrixType const& B,
+	                     int type,
+	                     MatrixElementType& hop,
+	                     bool operatorsAreFermions = true,
+	                     SizeType angularMomentum = 1,
+	                     MatrixElementType angularSign = -1.0,
+	                     SizeType category = 0,
+	                     bool dummy2 = false) const
 	{
 		int const SystemEnviron = 1, EnvironSystem = 2;
 		int fermionSign = (operatorsAreFermions) ? -1 : 1;
@@ -152,23 +150,23 @@ public:
 		/*int ib = PsimagLite\:\:isInVector(addressesB_,&B);
 
 		if (ib<0) {
-			bm = new MatrixType(rightSize,rightSize);
-			prepareB(*bm,B);
-			bMatrix_.push_back(bm);
-			addressesB_.push_back(&B);
+		        bm = new MatrixType(rightSize,rightSize);
+		        prepareB(*bm,B);
+		        bMatrix_.push_back(bm);
+		        addressesB_.push_back(&B);
 		} else {
-			bm =  bMatrix_[ib];
+		        bm =  bMatrix_[ib];
 		}
 
 		int ia = PsimagLite\:\:isInVector(addressesA_,&A);*/
 		MatrixType* am = &aMatrix_;
 		/*if (ia<0) {
-			am = new MatrixType(leftSize,leftSize);
-			prepareA(*am,A,operatorsAreFermions);
-			aMatrix_.push_back(am);
-			addressesA_.push_back(&A);
+		        am = new MatrixType(leftSize,leftSize);
+		        prepareA(*am,A,operatorsAreFermions);
+		        aMatrix_.push_back(am);
+		        addressesA_.push_back(&A);
 		} else {
-			am =  aMatrix_[ia];
+		        am =  aMatrix_[ia];
 		}*/
 
 		//! multiply all here:
@@ -237,13 +235,13 @@ private:
 		int offset = basis1_.partition(m_);
 		int total = basis1_.partition(m_ + 1) - offset;
 		/*for (SizeType i=0;i<leftPerm_.size();i++) {
-			SizeType x = leftPerm_[i];
-			for (SizeType j=0;j<rightPerm_.size();j++) {
-				SizeType y = rightPerm_[j];
-				int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
-				if (ii<0 || ii>=total) continue;
-				m(i,j) = v[ii];
-			}
+		        SizeType x = leftPerm_[i];
+		        for (SizeType j=0;j<rightPerm_.size();j++) {
+		                SizeType y = rightPerm_[j];
+		                int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
+		                if (ii<0 || ii>=total) continue;
+		                m(i,j) = v[ii];
+		        }
 		}*/
 
 		// SizeType ns = basis2_.size();
@@ -259,15 +257,15 @@ private:
 		int offset = basis1_.partition(m_);
 		int total = basis1_.partition(m_ + 1) - offset;
 		/*for (SizeType i=0;i<leftPerm_.size();i++) {
-			SizeType x = leftPerm_[i];
-			for (SizeType j=0;j<rightPerm_.size();j++) {
-				SizeType y = rightPerm_[j];
-				int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
-				if (ii<0 || ii>=total) continue;
-				//MatrixElementType a =v[ii];
-				//a+=2.0;
-				 v[ii] += m(i,j);
-			}
+		        SizeType x = leftPerm_[i];
+		        for (SizeType j=0;j<rightPerm_.size();j++) {
+		                SizeType y = rightPerm_[j];
+		                int ii = basis1_.permutationInverse(x+y*basis2_.size())-offset;
+		                if (ii<0 || ii>=total) continue;
+		                //MatrixElementType a =v[ii];
+		                //a+=2.0;
+		                 v[ii] += m(i,j);
+		        }
 		}*/
 
 		SizeType ns = basis2_.size();

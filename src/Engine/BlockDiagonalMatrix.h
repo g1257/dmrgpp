@@ -89,24 +89,28 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename T>
 struct IsBasisType {
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 // A block matrix class
 // Blocks can be of any type and are templated with the type MatrixInBlockTemplate
 template <typename MatrixInBlockTemplate>
-class BlockDiagonalMatrix
-{
+class BlockDiagonalMatrix {
 
 public:
 
-	enum SaveEnum { SAVE_ALL,
-		SAVE_PARTIAL };
+	enum SaveEnum
+	{
+		SAVE_ALL,
+		SAVE_PARTIAL
+	};
 
 	typedef MatrixInBlockTemplate BuildingBlockType;
 	typedef typename BuildingBlockType::value_type ComplexOrRealType;
@@ -123,8 +127,8 @@ public:
 	}
 
 	BlockDiagonalMatrix(IoInType& io,
-	    PsimagLite::String label,
-	    bool readOnDemand)
+	                    PsimagLite::String label,
+	                    bool readOnDemand)
 	    : readOnDemand_(readOnDemand)
 	{
 		if (readOnDemand_)
@@ -138,10 +142,10 @@ public:
 
 	template <typename SomeBasisType>
 	BlockDiagonalMatrix(const SomeBasisType& basis,
-	    typename PsimagLite::EnableIf<
-		IsBasisType<SomeBasisType>::True,
-		int>::Type
-	    = 0)
+	                    typename PsimagLite::EnableIf<
+	                        IsBasisType<SomeBasisType>::True,
+	                        int>::Type
+	                    = 0)
 	    : isSquare_(true)
 	    , readOnDemand_(false)
 	    , offsetsRows_(basis.partition())
@@ -156,8 +160,8 @@ public:
 
 	template <typename IoOutputType>
 	void write(PsimagLite::String label1,
-	    IoOutputType& io,
-	    PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	           IoOutputType& io,
+	           PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		if (wM != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			io.createGroup(label1);
@@ -342,8 +346,8 @@ public:
 	}
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer,
-	    PsimagLite::IoSerializer::WriteMode wM = PsimagLite::IoSerializer::NO_OVERWRITE) const
+	           PsimagLite::IoSerializer& ioSerializer,
+	           PsimagLite::IoSerializer::WriteMode wM = PsimagLite::IoSerializer::NO_OVERWRITE) const
 	{
 		if (wM != PsimagLite::IoSerializer::ALLOW_OVERWRITE)
 			ioSerializer.createGroup(label);
@@ -395,7 +399,7 @@ public:
 private:
 
 	void computeRemap(VectorIntType& remap,
-	    const VectorSizeType& removedIndices2) const
+	                  const VectorSizeType& removedIndices2) const
 	{
 		VectorSizeType removedIndices = removedIndices2;
 		PsimagLite::Sort<VectorSizeType> sort;
@@ -416,8 +420,8 @@ private:
 
 	// rows aren't affected, columns may be truncated,
 	void truncate(SizeType ind, // <------ block to truncate
-	    const VectorIntType& remap,
-	    const VectorSizeType& offsetsOld)
+	              const VectorIntType& remap,
+	              const VectorSizeType& offsetsOld)
 	{
 		assert(ind < data_.size());
 		MatrixInBlockTemplate& m = data_[ind];
@@ -505,11 +509,13 @@ bool isUnitary(const BlockDiagonalMatrix<MatrixInBlockTemplate>& B)
 
 } // namespace Dmrg
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename T>
 struct IsMatrixLike<Dmrg::BlockDiagonalMatrix<T>> {
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 } // namespace PsimagLite
 /*@}*/

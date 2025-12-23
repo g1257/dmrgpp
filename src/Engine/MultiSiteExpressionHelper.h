@@ -3,12 +3,10 @@
 #include "DmrgSerializer.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType, typename VectorWithOffsetType_>
-class MultiSiteExpressionHelper
-{
+class MultiSiteExpressionHelper {
 
 public:
 
@@ -34,7 +32,7 @@ public:
 	}
 
 	void push(DmrgSerializerType const* ds,
-	    const VectorWithOffsetType& psi)
+	          const VectorWithOffsetType& psi)
 	{
 		SizeType coo = ds->centerOfOrthogonality();
 		assert(coo > 0);

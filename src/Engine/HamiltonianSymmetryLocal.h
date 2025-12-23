@@ -83,11 +83,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Sort.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename SparseMatrixType>
-class HamiltonianSymmetryLocal
-{
+class HamiltonianSymmetryLocal {
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
@@ -103,9 +101,9 @@ public:
 
 	template <typename SolverParametersType>
 	void calcRemovedIndices(VectorSizeType& removedIndices,
-	    const VectorSizeType& perm,
-	    SizeType kept,
-	    const SolverParametersType&) const
+	                        const VectorSizeType& perm,
+	                        SizeType kept,
+	                        const SolverParametersType&) const
 	{
 		const SizeType permSize = perm.size();
 		if (permSize <= kept)
@@ -125,18 +123,18 @@ public:
 
 	template <typename IoInputter>
 	void read(IoInputter&,
-	    PsimagLite::String,
-	    bool,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputter>::True,
-		int>::Type
-	    = 0)
+	          PsimagLite::String,
+	          bool,
+	          typename PsimagLite::EnableIf<
+	              PsimagLite::IsInputLike<IoInputter>::True,
+	              int>::Type
+	          = 0)
 	{
 	}
 
 	void write(PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String label,
-	    PsimagLite::IoNgSerializer::WriteMode mode) const
+	           PsimagLite::String label,
+	           PsimagLite::IoNgSerializer::WriteMode mode) const
 	{
 		io.write(0, label + "FACTORSSIZE", mode);
 	}

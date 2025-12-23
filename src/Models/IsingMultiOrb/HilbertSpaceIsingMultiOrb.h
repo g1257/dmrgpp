@@ -86,13 +86,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HILBERTSPACEISING_HEADER_H
 #define HILBERTSPACEISING_HEADER_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
 template <typename Word>
-class HilbertSpaceIsingMultiOrb
-{
+class HilbertSpaceIsingMultiOrb {
 
 	static SizeType orbitals_;
 
@@ -101,8 +99,11 @@ public:
 	typedef Word HilbertState;
 	typedef unsigned int long WordType;
 
-	enum { SPIN_UP = 0,
-		SPIN_DOWN = 1 };
+	enum
+	{
+		SPIN_UP = 0,
+		SPIN_DOWN = 1
+	};
 
 	static void setOrbitals(SizeType orbitals)
 	{

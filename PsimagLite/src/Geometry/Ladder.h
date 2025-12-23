@@ -88,8 +88,11 @@ class Ladder : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
-	enum { DIRECTION_X,
-	       DIRECTION_Y };
+	enum
+	{
+		DIRECTION_X,
+		DIRECTION_Y
+	};
 
 	Ladder() { }
 
@@ -109,8 +112,7 @@ public:
 			isPeriodicX_ = (x > 0) ? true : false;
 			std::cerr << "INFO: IsPeriodicX=" << isPeriodicX_
 			          << "\n";
-		}
-		catch (std::exception&) {
+		} catch (std::exception&) {
 		}
 
 		try {
@@ -122,8 +124,7 @@ public:
 				                   "IsPeriodicY set\n");
 			std::cerr << "INFO: IsPeriodicY=" << isPeriodicY_
 			          << "\n";
-		}
-		catch (std::exception& e) {
+		} catch (std::exception& e) {
 			if (leg_ > 2)
 				throw RuntimeError("LadderLeg>2 must have "
 				                   "IsPeriodicY= line\n");

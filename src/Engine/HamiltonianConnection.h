@@ -91,14 +91,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <cassert>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // Keep this class independent of x and y in x = H*y
 // For things that depend on x and y use ParallelHamiltonianConnection.h
 template <typename ModelLinksType, typename ModelHelperType_, typename ParamsForSolverType_>
-class HamiltonianConnection
-{
+class HamiltonianConnection {
 
 public:
 
@@ -127,9 +125,9 @@ public:
 	typedef OpsForLink<LeftRightSuperType> OpsForLinkType;
 
 	HamiltonianConnection(const LeftRightSuperType& lrs,
-	    const ModelLinksType& lpb,
-	    RealType targetTime,
-	    const SuperOpHelperBaseType& superOpHelper)
+	                      const ModelLinksType& lpb,
+	                      RealType targetTime,
+	                      const SuperOpHelperBaseType& superOpHelper)
 	    : modelHelper_(lrs)
 	    , modelLinks_(lpb)
 	    , targetTime_(targetTime)
@@ -141,9 +139,9 @@ public:
 	    , smax_(*std::max_element(systemBlock_.begin(), systemBlock_.end()))
 	    , emin_(*std::min_element(envBlock_.begin(), envBlock_.end()))
 	    , hamAbstract_(superOpHelper.superGeometry(),
-		  smax_,
-		  emin_,
-		  modelHelper_.leftRightSuper().super().block())
+	                   smax_,
+	                   emin_,
+	                   modelHelper_.leftRightSuper().super().block())
 	    , totalOnes_(hamAbstract_.items())
 	{
 		checkGeometryTerms();
@@ -212,10 +210,10 @@ public:
 				if (opsForLink.invalid())
 					continue;
 				modelHelper_.fastOpProdInter(opsForLink.A().getCRS(),
-				    opsForLink.B().getCRS(),
-				    mBlock,
-				    opsForLink.link(),
-				    aux);
+				                             opsForLink.B().getCRS(),
+				                             mBlock,
+				                             opsForLink.link(),
+				                             aux);
 
 				matrixBlock += mBlock;
 			}
@@ -279,26 +277,26 @@ private:
 				const OneLink<ComplexOrRealType>& oneLink = term(dofs);
 
 				ComplexOrRealType tmp = hamAbstract_.connectionValue(hItems,
-				    oneLink,
-				    termIndexForGeom,
-				    targetTime_);
+				                                                     oneLink,
+				                                                     termIndexForGeom,
+				                                                     targetTime_);
 
 				if (tmp == static_cast<RealType>(0.0))
 					continue;
 
 				ManyToTwoConnectionType manyToTwo(hItems,
-				    type,
-				    oneLink,
-				    modelHelper_.leftRightSuper(),
-				    superOpHelper_);
+				                                  type,
+				                                  oneLink,
+				                                  modelHelper_.leftRightSuper(),
+				                                  superOpHelper_);
 
 				LinkType link2(manyToTwo.pairMetaOps(),
-				    type,
-				    tmp,
-				    oneLink.fermionOrBoson,
-				    oneLink.angularMomentum,
-				    oneLink.angularFactor,
-				    oneLink.category);
+				               type,
+				               tmp,
+				               oneLink.fermionOrBoson,
+				               oneLink.angularMomentum,
+				               oneLink.angularFactor,
+				               oneLink.category);
 
 				++totalOne;
 				lps_.push_back(link2);
@@ -314,9 +312,9 @@ private:
 	}
 
 	SizeType addHermitianIfNeeded(LinkType& link2,
-	    ComplexOrRealType tmp,
-	    const ManyToTwoConnectionType& manyToTwo,
-	    ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
+	                              ComplexOrRealType tmp,
+	                              const ManyToTwoConnectionType& manyToTwo,
+	                              ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
 	{
 		if (manyToTwo.connectionIsHermitian(modelLinks_))
 			return 0;

@@ -2,16 +2,16 @@
 
 template <typename ComplexOrRealType>
 void den_kron_submatrix(const int nrow_A,
-    const int ncol_A,
-    const PsimagLite::Matrix<ComplexOrRealType>& a_,
-    const int nrow_B,
-    const int ncol_B,
-    const PsimagLite::Matrix<ComplexOrRealType>& b_,
-    const int nrindex,
-    const int ncindex,
-    const PsimagLite::Vector<int>::Type& rindex,
-    const PsimagLite::Vector<int>::Type& cindex,
-    PsimagLite::Matrix<ComplexOrRealType>& e_)
+                        const int ncol_A,
+                        const PsimagLite::Matrix<ComplexOrRealType>& a_,
+                        const int nrow_B,
+                        const int ncol_B,
+                        const PsimagLite::Matrix<ComplexOrRealType>& b_,
+                        const int nrindex,
+                        const int ncindex,
+                        const PsimagLite::Vector<int>::Type& rindex,
+                        const PsimagLite::Vector<int>::Type& cindex,
+                        PsimagLite::Matrix<ComplexOrRealType>& e_)
 {
 	/*
 	 * -------------------------------------------------

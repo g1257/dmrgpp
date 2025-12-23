@@ -196,8 +196,7 @@ public:
 		for (SizeType i = 0; i < parts.partition(); i++) {
 			if (firstLast.first >= parts.partition(i)) {
 				ret = i;
-			}
-			else {
+			} else {
 				break;
 			}
 		}
@@ -205,8 +204,7 @@ public:
 		for (SizeType i = 0; i < parts.partition(); i++) {
 			if (firstLast.second > parts.partition(i)) {
 				ret2 = i;
-			}
-			else {
+			} else {
 				break;
 			}
 		}
@@ -312,8 +310,7 @@ public:
 				}
 				sum = values[i];
 				prevIndex = indices_[i];
-			}
-			else {
+			} else {
 				sum += values[i];
 			}
 		}

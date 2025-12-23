@@ -80,12 +80,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define SUPER_HUBBARD_EXTENDED_H
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ExtendedHubbard1Orb by containment
 template <typename ModelBaseType>
-class SuperHubbardExtended : public ModelBaseType
-{
+class SuperHubbardExtended : public ModelBaseType {
 
 public:
 
@@ -119,8 +117,8 @@ public:
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 
 	SuperHubbardExtended(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	                     InputValidatorType& io,
+	                     const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , extendedHubbard_(solverParams, io, geometry, "")
@@ -139,8 +137,8 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                        const BlockType& block,
+	                                        RealType time) const
 	{
 		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
@@ -165,13 +163,14 @@ protected:
 
 		OpForLinkType splus("splus");
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
+		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
+		{ value *= (isSu2) ? -0.5 : 0.5; };
 
 		spsm.push(splus,
-		    'N',
-		    splus,
-		    'C',
-		    valueModiferTerm0);
+		          'N',
+		          splus,
+		          'C',
+		          valueModiferTerm0);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
@@ -179,12 +178,13 @@ protected:
 			OpForLinkType sz("sz");
 			szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
 		} else {
-			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value) { if (isSu2) value = -value; };
+			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
+			{ if (isSu2) value = -value; };
 			spsm.push(splus,
-			    'N',
-			    splus,
-			    'C',
-			    valueModifierTermOther);
+			          'N',
+			          splus,
+			          'C',
+			          valueModifierTermOther);
 		}
 	}
 
@@ -192,8 +192,8 @@ private:
 
 	//! Full hamiltonian from creation matrices cm
 	void addSiSj(SparseMatrixType&,
-	    const VectorOperatorType&,
-	    const BlockType& block) const
+	             const VectorOperatorType&,
+	             const BlockType& block) const
 	{
 		// Assume block.size()==1 and then problem solved!!
 		// there are no connection if there's only one site ;-)

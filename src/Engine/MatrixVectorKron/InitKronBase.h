@@ -82,12 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType>
-class InitKronBase
-{
+class InitKronBase {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
@@ -107,14 +105,17 @@ public:
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 
-	enum WhatBasisEnum { OLD,
-		NEW };
+	enum WhatBasisEnum
+	{
+		OLD,
+		NEW
+	};
 
 	InitKronBase(const LeftRightSuperType& lrs,
-	    SizeType m,
-	    const QnType& qn,
-	    RealType denseSparseThreshold,
-	    bool useLowerPart)
+	             SizeType m,
+	             const QnType& qn,
+	             RealType denseSparseThreshold,
+	             bool useLowerPart)
 	    : progress_("InitKronBase")
 	    , mOld_(m)
 	    , mNew_(m)
@@ -156,7 +157,7 @@ public:
 	}
 
 	const VectorSizeType& patch(WhatBasisEnum what,
-	    typename GenIjPatchType::LeftOrRightEnumType i) const
+	                            typename GenIjPatchType::LeftOrRightEnumType i) const
 	{
 		return (what == OLD) ? ijpatchesOld_(i) : ijpatchesNew_->operator()(i);
 	}
@@ -193,7 +194,7 @@ public:
 	}
 
 	void computeOffsets(VectorSizeType& offsetForPatches,
-	    WhatBasisEnum what)
+	                    WhatBasisEnum what)
 	{
 		assert(patch(what, GenIjPatchType::LEFT).size() == patch(what, GenIjPatchType::RIGHT).size());
 
@@ -228,9 +229,9 @@ public:
 
 	// In production mode this function should be empty
 	void checks(const MatrixDenseOrSparseType& Amat,
-	    const MatrixDenseOrSparseType& Bmat,
-	    SizeType ipatch,
-	    SizeType jpatch) const
+	            const MatrixDenseOrSparseType& Bmat,
+	            SizeType ipatch,
+	            SizeType jpatch) const
 	{
 #ifndef NDEBUG
 		SizeType lSizeI = lSizeFunction(NEW, ipatch);
@@ -247,27 +248,27 @@ public:
 protected:
 
 	void addOneConnection(const OperatorStorageType& A,
-	    const OperatorStorageType& B,
-	    const ComplexOrRealType& value,
-	    const ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
+	                      const OperatorStorageType& B,
+	                      const ComplexOrRealType& value,
+	                      const ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
 	{
 		OperatorStorageType Ahat;
 		calculateAhat(Ahat.getCRSNonConst(), A.getCRS(), value, fermionOrBoson);
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
-		    ijpatchesOld_,
-		    *ijpatchesNew_,
-		    GenIjPatchType::LEFT,
-		    denseSparseThreshold_,
-		    useLowerPart_);
+		                                                    ijpatchesOld_,
+		                                                    *ijpatchesNew_,
+		                                                    GenIjPatchType::LEFT,
+		                                                    denseSparseThreshold_,
+		                                                    useLowerPart_);
 
 		xc_.push_back(x1);
 
 		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,
-		    ijpatchesOld_,
-		    *ijpatchesNew_,
-		    GenIjPatchType::RIGHT,
-		    denseSparseThreshold_,
-		    useLowerPart_);
+		                                                    ijpatchesOld_,
+		                                                    *ijpatchesNew_,
+		                                                    GenIjPatchType::RIGHT,
+		                                                    denseSparseThreshold_,
+		                                                    useLowerPart_);
 		yc_.push_back(y1);
 	}
 
@@ -313,8 +314,8 @@ protected:
 	// copy xout(:) to vout(:)
 	// -------------------
 	void copyOut(VectorType& vout,
-	    const VectorType& xout,
-	    const VectorSizeType& vstart) const
+	             const VectorType& xout,
+	             const VectorSizeType& vstart) const
 	{
 		const VectorSizeType& permInverse = lrs(NEW).super().permutationInverse();
 		SizeType offset1 = offset(NEW);
@@ -377,7 +378,7 @@ private:
 	}
 
 	static SizeType sizeInternal(const GenIjPatchType& ijpatches,
-	    SizeType m)
+	                             SizeType m)
 	{
 		assert(ijpatches.lrs().super().partition(m + 1) >= ijpatches.lrs().super().partition(m));
 		return ijpatches.lrs().super().partition(m + 1) - ijpatches.lrs().super().partition(m);
@@ -392,9 +393,9 @@ private:
 
 	// Ahat(ia,ja) = (-1)^e_L(ia) A(ia,ja)*value
 	void calculateAhat(SparseMatrixType& Ahat,
-	    const SparseMatrixType& A,
-	    ComplexOrRealType val,
-	    ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
+	                   const SparseMatrixType& A,
+	                   ComplexOrRealType val,
+	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
 	{
 		Ahat = A;
 		SizeType rows = Ahat.rows();
@@ -410,14 +411,14 @@ private:
 	}
 
 	SizeType lSizeFunction(WhatBasisEnum what,
-	    SizeType ipatch) const
+	                       SizeType ipatch) const
 	{
 		SizeType igroup = patch(what, GenIjPatchType::LEFT)[ipatch];
 		return lrs(what).left().partition(igroup + 1) - lrs(what).left().partition(igroup);
 	}
 
 	SizeType rSizeFunction(WhatBasisEnum what,
-	    SizeType ipatch) const
+	                       SizeType ipatch) const
 	{
 		SizeType jgroup = patch(what, GenIjPatchType::RIGHT)[ipatch];
 		return lrs(what).right().partition(jgroup + 1) - lrs(what).right().partition(jgroup);

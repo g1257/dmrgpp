@@ -81,18 +81,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CORRECTION_V_FUNCTION_H
 #include "ConjugateGradient.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename MatrixType, typename InfoType>
-class CorrectionVectorFunction
-{
+class CorrectionVectorFunction {
 
 	typedef typename MatrixType::value_type FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
 
-	class InternalMatrix
-	{
+	class InternalMatrix {
 
 	public:
 

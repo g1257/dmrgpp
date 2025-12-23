@@ -62,8 +62,7 @@ public:
 
 			if (status == "closed") {
 				mainBuffer_ += str_[i];
-			}
-			else {
+			} else {
 				tempBuffer += str_[i];
 			}
 		}

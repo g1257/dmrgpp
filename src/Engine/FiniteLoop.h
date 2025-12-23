@@ -9,8 +9,7 @@
 #include <iostream>
 #include <map>
 
-namespace Dmrg
-{
+namespace Dmrg {
 /* PSIDOC FiniteLoop
 \subsection{Enabling finite loops}
 
@@ -32,7 +31,7 @@ lattice.
 \subsection{Example of a Finite loops line in the input file}
 
 \begin{verbatim}
-	FiniteLoops 4 7 200 0 -7 200 0 7 200 1 7 200 1
+        FiniteLoops 4 7 200 0 -7 200 0 7 200 1 7 200 1
 \end{verbatim}
 
 The number 4 implies 4 finite loops. The first fine loop is \verb!7 200 0!, meaning
@@ -80,8 +79,7 @@ There is some checking done to the finite loops input,
 but you might find that it's not comprehensive.
 */
 template <typename RealType>
-class FiniteLoop
-{
+class FiniteLoop {
 
 public:
 
@@ -89,9 +87,9 @@ public:
 	using TruncationControlType = TruncationControl<RealType>;
 
 	FiniteLoop(int sl,
-	    SizeType ks,
-	    PsimagLite::String str,
-	    const TruncationControlType& truncationControl)
+	           SizeType ks,
+	           PsimagLite::String str,
+	           const TruncationControlType& truncationControl)
 	    : stepLength_(sl)
 	    , keptStates_(ks)
 	    , bitField_(0)
@@ -114,8 +112,8 @@ public:
 	}
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer,
-	    PsimagLite::IoNgSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	           PsimagLite::IoSerializer& ioSerializer,
+	           PsimagLite::IoNgSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		PsimagLite::String root = label;
 
@@ -149,11 +147,11 @@ private:
 	void setMap()
 	{
 		const VectorStringType str = { "save",
-			"onlyfastwft",
-			"onlyslowwft",
-			"randomguess",
-			"multisitepush",
-			"onesitetruncation" };
+			                       "onlyfastwft",
+			                       "onlyslowwft",
+			                       "randomguess",
+			                       "multisitepush",
+			                       "onesitetruncation" };
 
 		SizeType bit = 1;
 		for (SizeType i = 0; i < str.size(); ++i) {
@@ -250,14 +248,14 @@ private:
 	}
 
 	static PsimagLite::String removeCharsAtStart(PsimagLite::String str,
-	    PsimagLite::String chars)
+	                                             PsimagLite::String chars)
 	{
 		size_t start = str.find_first_not_of(chars);
 		return (start == PsimagLite::String::npos) ? "" : str.substr(start);
 	}
 
 	static PsimagLite::String removeCharsAtEnd(PsimagLite::String str,
-	    PsimagLite::String chars)
+	                                           PsimagLite::String chars)
 	{
 		size_t end = str.find_last_not_of(chars);
 		return (end == PsimagLite::String::npos) ? "" : str.substr(0, end + 1);

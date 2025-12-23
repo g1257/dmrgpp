@@ -81,12 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "TypeToString.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetingType>
-class DensityMatrixLocal : public DensityMatrixBase<TargetingType>
-{
+class DensityMatrixLocal : public DensityMatrixBase<TargetingType> {
 
 	typedef DensityMatrixBase<TargetingType> BaseType;
 	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
@@ -105,16 +103,16 @@ public:
 	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 	typedef ParallelDensityMatrix<BlockDiagonalMatrixType,
-	    BasisWithOperatorsType,
-	    TargetVectorType>
+	                              BasisWithOperatorsType,
+	                              TargetVectorType>
 	    ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
 	    VectorVectorVectorWithOffsetType;
 
 	DensityMatrixLocal(const TargetingType& target,
-	    const LeftRightSuperType& lrs,
-	    const ParamsType& p)
+	                   const LeftRightSuperType& lrs,
+	                   const ParamsType& p)
 	    : progress_("DensityMatrixLocal")
 	    , data_((p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() : lrs.right())
 	    , direction_(p.direction)
@@ -153,13 +151,13 @@ public:
 					for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 
 						initPartition(matrixBlock,
-						    pBasis,
-						    m,
-						    *(psi[sectorIndex][excitedIndex]),
-						    pBasisSummed,
-						    lrs.super(),
-						    p.direction,
-						    w);
+						              pBasis,
+						              m,
+						              *(psi[sectorIndex][excitedIndex]),
+						              pBasisSummed,
+						              lrs.super(),
+						              p.direction,
+						              w);
 					}
 				}
 			}
@@ -171,13 +169,13 @@ public:
 					continue;
 				RealType w = target.weight(ix) / wnorm;
 				initPartition(matrixBlock,
-				    pBasis,
-				    m,
-				    target(ix),
-				    pBasisSummed,
-				    lrs.super(),
-				    p.direction,
-				    w);
+				              pBasis,
+				              m,
+				              target(ix),
+				              pBasisSummed,
+				              lrs.super(),
+				              p.direction,
+				              w);
 			}
 
 			// set this matrix block into data_
@@ -203,7 +201,7 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	    const DensityMatrixLocal& dm)
+	                                const DensityMatrixLocal& dm)
 	{
 		for (SizeType m = 0; m < dm.data_.blocks(); ++m) {
 			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
@@ -217,22 +215,22 @@ public:
 private:
 
 	void initPartition(BuildingBlockType& matrixBlock,
-	    BasisWithOperatorsType const& pBasis,
-	    SizeType m,
-	    const TargetVectorType& v,
-	    BasisWithOperatorsType const& pBasisSummed,
-	    BasisType const& pSE,
-	    ProgramGlobals::DirectionEnum direction,
-	    RealType weight)
+	                   BasisWithOperatorsType const& pBasis,
+	                   SizeType m,
+	                   const TargetVectorType& v,
+	                   BasisWithOperatorsType const& pBasisSummed,
+	                   BasisType const& pSE,
+	                   ProgramGlobals::DirectionEnum direction,
+	                   RealType weight)
 	{
 		ParallelDensityMatrixType helperDm(v,
-		    pBasis,
-		    pBasisSummed,
-		    pSE,
-		    direction,
-		    m,
-		    weight,
-		    matrixBlock);
+		                                   pBasis,
+		                                   pBasisSummed,
+		                                   pSE,
+		                                   direction,
+		                                   m,
+		                                   weight,
+		                                   matrixBlock);
 		ParallelizerType threadedDm(ConcurrencyType::codeSectionParams);
 		threadedDm.loopCreate(helperDm);
 	}

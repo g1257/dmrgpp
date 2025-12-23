@@ -84,16 +84,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Wft/WftHelper.h"
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetParamsType,
-    typename ModelType,
-    typename WaveFunctionTransfType,
-    typename LanczosSolverType,
-    typename VectorWithOffsetType>
-class TimeVectorsBase
-{
+          typename ModelType,
+          typename WaveFunctionTransfType,
+          typename LanczosSolverType,
+          typename VectorWithOffsetType>
+class TimeVectorsBase {
 
 public:
 
@@ -107,9 +105,9 @@ public:
 	typedef WftHelper<ModelType, VectorWithOffsetType, WaveFunctionTransfType> WftHelperType;
 
 	TimeVectorsBase(const ModelType& model,
-	    const LeftRightSuperType& lrs,
-	    const WaveFunctionTransfType& wft,
-	    PsimagLite::String name)
+	                const LeftRightSuperType& lrs,
+	                const WaveFunctionTransfType& wft,
+	                PsimagLite::String name)
 	    : wftHelper_(model, lrs, wft)
 	    , name_(name)
 	    , time_(0.0)
@@ -120,10 +118,10 @@ public:
 	struct ExtraData {
 
 		ExtraData(ProgramGlobals::DirectionEnum dir_,
-		    bool allOperatorsApplied_,
-		    bool wftAndAdvanceIfNeeded_,
-		    VectorSizeType block_,
-		    bool isLastCall_)
+		          bool allOperatorsApplied_,
+		          bool wftAndAdvanceIfNeeded_,
+		          VectorSizeType block_,
+		          bool isLastCall_)
 		    : dir(dir_)
 		    , allOperatorsApplied(allOperatorsApplied_)
 		    , wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_)
@@ -140,9 +138,9 @@ public:
 	};
 
 	virtual void calcTimeVectors(const VectorSizeType&,
-	    RealType,
-	    const VectorWithOffsetType&,
-	    const ExtraData&)
+	                             RealType,
+	                             const VectorWithOffsetType&,
+	                             const ExtraData&)
 	{
 		err("calcTimeVectors: unimplemented in this base class\n");
 	}

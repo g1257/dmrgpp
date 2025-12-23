@@ -84,12 +84,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h" // in PsimagLite
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType_, typename VectorWithOffsetType_>
-class ApplyOperatorLocal
-{
+class ApplyOperatorLocal {
 
 	typedef typename VectorWithOffsetType_::VectorType TargetVectorType;
 	typedef typename LeftRightSuperType_::BasisWithOperatorsType BasisWithOperatorsType;
@@ -98,8 +96,7 @@ class ApplyOperatorLocal
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename BasisWithOperatorsType::OperatorType OperatorType_;
 
-	class LegacyBug
-	{
+	class LegacyBug {
 
 	public:
 
@@ -137,12 +134,18 @@ class ApplyOperatorLocal
 
 public:
 
-	enum BorderEnum { BORDER_NO = false,
-		BORDER_YES = true };
+	enum BorderEnum
+	{
+		BORDER_NO = false,
+		BORDER_YES = true
+	};
 
-	enum class LatticePartEnum { MIDDLE,
+	enum class LatticePartEnum
+	{
+		MIDDLE,
 		LEFT_CORNER,
-		RIGHT_CORNER };
+		RIGHT_CORNER
+	};
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
@@ -159,12 +162,12 @@ public:
 	//! FIXME: we need to make a fast version for when we're just
 	//! figuring out where the (non-zero) partition is
 	void operator()(VectorWithOffsetType& dest,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& AA,
-	    const FermionSign& fermionSign,
-	    SizeType splitSize,
-	    ProgramGlobals::DirectionEnum systemOrEnviron,
-	    BorderEnum corner) const
+	                const VectorWithOffsetType& src,
+	                const OperatorType& AA,
+	                const FermionSign& fermionSign,
+	                SizeType splitSize,
+	                ProgramGlobals::DirectionEnum systemOrEnviron,
+	                BorderEnum corner) const
 	{
 		LegacyBug legacyBug(withLegacyBug_, AA);
 		const OperatorType& A = legacyBug();
@@ -183,10 +186,10 @@ public:
 	//! FIXME: we need to make a fast version for when we're just
 	//! figuring out where the (non-zero) partition is
 	void hookForZero(VectorWithOffsetType& dest,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& A,
-	    SizeType splitSize,
-	    ProgramGlobals::DirectionEnum systemOrEnviron) const
+	                 const VectorWithOffsetType& src,
+	                 const OperatorType& A,
+	                 SizeType splitSize,
+	                 ProgramGlobals::DirectionEnum systemOrEnviron) const
 	{
 		assert(systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 
@@ -202,10 +205,10 @@ public:
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void hookForZeroSystem(TargetVectorType& dest2,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& AA,
-	    SizeType splitSize,
-	    SizeType i0) const
+	                       const VectorWithOffsetType& src,
+	                       const OperatorType& AA,
+	                       SizeType splitSize,
+	                       SizeType i0) const
 	{
 		LegacyBug legacyBug(withLegacyBug_, AA);
 		const OperatorType& A = legacyBug();
@@ -249,11 +252,11 @@ private:
 	ApplyOperatorLocal& operator=(const ApplyOperatorLocal&);
 
 	void applyLocalOpSystem(VectorWithOffsetType& dest,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& A,
-	    const FermionSign& fermionSign,
-	    SizeType splitSize,
-	    LatticePartEnum whichPartOfTheLattice) const
+	                        const VectorWithOffsetType& src,
+	                        const OperatorType& A,
+	                        const FermionSign& fermionSign,
+	                        SizeType splitSize,
+	                        LatticePartEnum whichPartOfTheLattice) const
 	{
 		TargetVectorType dest2(lrs_.super().size(), 0.0);
 
@@ -276,11 +279,11 @@ private:
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void applyLocalOpSystem(TargetVectorType& dest2,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& A,
-	    const FermionSign& fermionSign,
-	    SizeType splitSize,
-	    SizeType i0) const
+	                        const VectorWithOffsetType& src,
+	                        const OperatorType& A,
+	                        const FermionSign& fermionSign,
+	                        SizeType splitSize,
+	                        SizeType i0) const
 	{
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
@@ -315,9 +318,9 @@ private:
 	}
 
 	void applyLocalOpEnviron(VectorWithOffsetType& dest,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& A,
-	    LatticePartEnum whichPartOfTheLattice) const
+	                         const VectorWithOffsetType& src,
+	                         const OperatorType& A,
+	                         LatticePartEnum whichPartOfTheLattice) const
 	{
 		TargetVectorType dest2(lrs_.super().size(), 0.0);
 
@@ -340,9 +343,9 @@ private:
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void applyLocalOpEnviron(TargetVectorType& dest2,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& A,
-	    SizeType i0) const
+	                         const VectorWithOffsetType& src,
+	                         const OperatorType& A,
+	                         SizeType i0) const
 	{
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
@@ -374,9 +377,9 @@ private:
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void applyLocalOpLeftCorner(TargetVectorType& dest2,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& A,
-	    SizeType i0) const
+	                            const VectorWithOffsetType& src,
+	                            const OperatorType& A,
+	                            SizeType i0) const
 	{
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
@@ -401,9 +404,9 @@ private:
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
 	void applyLocalOpRightCorner(TargetVectorType& dest2,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& A,
-	    SizeType i0) const
+	                             const VectorWithOffsetType& src,
+	                             const OperatorType& A,
+	                             SizeType i0) const
 	{
 		SizeType offset = src.offset(i0);
 		SizeType final = offset + src.effectiveSize(i0);
@@ -435,9 +438,9 @@ private:
 
 	// entry point for corner cases. These are all when expanding ths system
 	void applyLocalOpCorner(VectorWithOffsetType& dest,
-	    const VectorWithOffsetType& src,
-	    const OperatorType& A,
-	    const FermionSign& fermionSign) const
+	                        const VectorWithOffsetType& src,
+	                        const OperatorType& A,
+	                        const FermionSign& fermionSign) const
 	{
 		if (lrs_.right().size() == A.getCRS().rows()) { // right corner
 			SizeType splitSize = A.getCRS().rows(); // FIXME: check for SDHS

@@ -4,12 +4,10 @@
 #include "OperatorsCached.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType>
-class OpsForLink
-{
+class OpsForLink {
 
 public:
 
@@ -23,7 +21,7 @@ public:
 	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
 
 	OpsForLink(const OperatorsCachedType& operatorsCached,
-	    const VectorLinkType& lps)
+	           const VectorLinkType& lps)
 	    : lps_(lps)
 	    , operatorsCached_(operatorsCached)
 	    , link2_(nullptr)
@@ -43,9 +41,9 @@ public:
 		const ProgramGlobals::SysOrEnvEnum envOrSys = (link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
 		A_ = &operatorsCached_.getOpStorage(link2_->pairMetaOps.first,
-		    sysOrEnv);
+		                                    sysOrEnv);
 		B_ = &operatorsCached_.getOpStorage(link2_->pairMetaOps.second,
-		    envOrSys);
+		                                    envOrSys);
 
 		assert(A_);
 		assert(B_);

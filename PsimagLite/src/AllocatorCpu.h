@@ -140,12 +140,18 @@ struct RemoveConst<const T> {
 
 template <typename T>
 struct IsStringLike {
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename A>
 struct IsStringLike<std::basic_string<char, std::char_traits<char>, A>> {
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 typedef std::basic_string<char, std::char_traits<char>, Allocator<char>::Type>

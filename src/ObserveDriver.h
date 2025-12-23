@@ -29,8 +29,7 @@
 #include "VectorWithOffset.h"
 #include "VectorWithOffsets.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 typedef PsimagLite::IoSelector::In IoInputType;
 
@@ -50,9 +49,9 @@ typedef ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn> Paramete
 
 template <typename VectorWithOffsetType, typename ModelType>
 bool observeOneFullSweep(IoInputType& io,
-    const ModelType& model,
-    const PsimagLite::String& list,
-    SizeType orbitals);
+                         const ModelType& model,
+                         const PsimagLite::String& list,
+                         SizeType orbitals);
 }
 
 #endif // OBSERVEDRIVER_H

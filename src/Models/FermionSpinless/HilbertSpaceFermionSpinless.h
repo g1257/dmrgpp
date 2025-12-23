@@ -82,12 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_HILBERTSPACE_FERMIONSPINLESS_H
 #define DMRG_HILBERTSPACE_FERMIONSPINLESS_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename Word>
-class HilbertSpaceFermionSpinless
-{
+class HilbertSpaceFermionSpinless {
 public:
 
 	typedef Word HilbertState;

@@ -15,12 +15,10 @@
 #include "TargetingTimeStep.h"
 // end targets DO NOT REMOVE MARK
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetingBaseType>
-class TargetSelector
-{
+class TargetSelector {
 
 	typedef typename TargetingBaseType::MatrixVectorType MatrixVectorType;
 	typedef typename TargetingBaseType::CheckpointType CheckpointType;
@@ -56,10 +54,10 @@ class TargetSelector
 public:
 
 	TargetSelector(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const typename QnType::VectorQnType& quantumSector,
-	    InputValidatorType& ioIn)
+	               const CheckpointType& checkPoint,
+	               const WaveFunctionTransfType& wft,
+	               const typename QnType::VectorQnType& quantumSector,
+	               InputValidatorType& ioIn)
 	    : psi_(nullptr)
 	    , lrs_(lrs)
 	    , checkPoint_(checkPoint)
@@ -137,21 +135,21 @@ private:
 		PsimagLite::String targeting("GroundStateTargeting");
 
 		VectorStringType targets = { "GroundStateTargeting",
-			"TimeStepTargeting",
-			"AdaptiveDynamicTargeting",
-			"DynamicTargeting",
-			"CorrectionVectorTargeting",
-			"CorrectionTargeting",
-			"MettsTargeting",
-			"TargetingAncilla",
-			"TargetingCorrelations",
-			"TargetingInSitu",
-			"TargetingRixsStatic",
-			"TargetingRixsDynamic",
-			"TargetingChebyshev",
-			"TargetingExpression",
-			"TargetingMultiQ",
-			"TargetingCVEvolution" };
+			                     "TimeStepTargeting",
+			                     "AdaptiveDynamicTargeting",
+			                     "DynamicTargeting",
+			                     "CorrectionVectorTargeting",
+			                     "CorrectionTargeting",
+			                     "MettsTargeting",
+			                     "TargetingAncilla",
+			                     "TargetingCorrelations",
+			                     "TargetingInSitu",
+			                     "TargetingRixsStatic",
+			                     "TargetingRixsDynamic",
+			                     "TargetingChebyshev",
+			                     "TargetingExpression",
+			                     "TargetingMultiQ",
+			                     "TargetingCVEvolution" };
 
 		const SizeType totalTargets = targets.size();
 		SizeType count = 0;

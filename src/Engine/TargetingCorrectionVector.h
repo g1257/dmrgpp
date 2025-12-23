@@ -92,12 +92,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "VectorWithOffsets.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 	typedef LanczosSolverType_ LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
@@ -132,11 +130,11 @@ public:
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType,
-	    TargetParamsType>
+	                                 TargetParamsType>
 	    CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType,
-	    LanczosSolverType,
-	    VectorWithOffsetType>
+	                        LanczosSolverType,
+	                        VectorWithOffsetType>
 	    ParallelTriDiagType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
@@ -144,17 +142,17 @@ public:
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	    VectorWithOffsetType,
-	    BaseType,
-	    TargetParamsType>
+	                                 VectorWithOffsetType,
+	                                 BaseType,
+	                                 TargetParamsType>
 	    CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 
 	TargetingCorrectionVector(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& ioIn)
+	                          const CheckpointType& checkPoint,
+	                          const WaveFunctionTransfType& wft,
+	                          const QnType&,
+	                          InputValidatorType& ioIn)
 	    : BaseType(lrs, checkPoint, wft, 1)
 	    , tstStruct_(ioIn, "TargetingCorrectionVector", checkPoint.model())
 	    , ioIn_(ioIn)
@@ -192,10 +190,10 @@ public:
 	}
 
 	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType& block2,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
+	            const BlockType& block2,
+	            SizeType loopNumber)
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -225,8 +223,8 @@ public:
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "CorrectionVector");
@@ -241,17 +239,17 @@ public:
 private:
 
 	void evolve(RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            SizeType site,
+	            SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;
 		SizeType count = this->common().aoeNonConst().getPhi(&phiNew,
-		    Eg,
-		    direction,
-		    site,
-		    loopNumber,
-		    tstStruct_);
+		                                                     Eg,
+		                                                     direction,
+		                                                     site,
+		                                                     loopNumber,
+		                                                     tstStruct_);
 
 		if (direction != ProgramGlobals::DirectionEnum::INFINITE) {
 			correctionEnabled_ = true;
@@ -264,8 +262,8 @@ private:
 
 		this->tvNonConst(1) = phiNew;
 		skeleton_.calcDynVectors(this->tv(1),
-		    this->tvNonConst(2),
-		    this->tvNonConst(3));
+		                         this->tvNonConst(2),
+		                         this->tvNonConst(3));
 
 		setWeights();
 

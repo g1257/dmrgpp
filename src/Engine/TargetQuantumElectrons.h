@@ -81,12 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Hubbard Model Parameters
 template <typename RealType, typename QnType>
-class TargetQuantumElectrons
-{
+class TargetQuantumElectrons {
 
 public:
 
@@ -149,10 +147,10 @@ public:
 	}
 
 	void updateQuantumSector(VectorQnType& quantumSector,
-	    SizeType sites,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType step,
-	    const VectorQnType& adjustQuantumNumbers) const
+	                         SizeType sites,
+	                         ProgramGlobals::DirectionEnum direction,
+	                         SizeType step,
+	                         const VectorQnType& adjustQuantumNumbers) const
 	{
 		const SizeType maxSites = totalNumberOfSites_;
 
@@ -169,13 +167,13 @@ public:
 
 		for (SizeType i = 0; i < n; ++i)
 			quantumSector[i].scale(sites,
-			    totalNumberOfSites_,
-			    direction,
-			    isSu2_);
+			                       totalNumberOfSites_,
+			                       direction,
+			                       isSu2_);
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/TargetQuantumElectrons";
 		io.createGroup(label);
@@ -192,7 +190,7 @@ private:
 
 	template <typename IoInputType>
 	void readOneTarget(IoInputType& io,
-	    const PsimagLite::String label)
+	                   const PsimagLite::String label)
 	{
 		QnType qn(QnType::zero());
 		VectorSizeType qnOther;

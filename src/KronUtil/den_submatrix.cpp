@@ -2,13 +2,13 @@
 
 template <typename ComplexOrRealType>
 void den_submatrix(const int nrow_A,
-    const int ncol_A,
-    const PsimagLite::Matrix<ComplexOrRealType>& a_,
-    const int nrindex,
-    const int ncindex,
-    const PsimagLite::Vector<int>::Type& rindex,
-    const PsimagLite::Vector<int>::Type& cindex,
-    PsimagLite::Matrix<ComplexOrRealType>& c_)
+                   const int ncol_A,
+                   const PsimagLite::Matrix<ComplexOrRealType>& a_,
+                   const int nrindex,
+                   const int ncindex,
+                   const PsimagLite::Vector<int>::Type& rindex,
+                   const PsimagLite::Vector<int>::Type& cindex,
+                   PsimagLite::Matrix<ComplexOrRealType>& c_)
 {
 	/*
 	 * -------------------------------------

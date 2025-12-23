@@ -83,12 +83,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // for operator*
 #include "VectorWithOffsets.h" // for operator*
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename CorrelationsSkeletonType>
-class MultiPointCorrelations
-{
+class MultiPointCorrelations {
 
 	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
 	typedef typename ObserverHelperType::VectorType VectorType;
@@ -111,11 +109,11 @@ public:
 	template <typename VectorLikeType>
 	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<VectorLikeType>::True, void>::Type
 	operator()(VectorLikeType& result,
-	    const SparseMatrixType& O,
-	    SizeType rows,
-	    SizeType cols,
-	    PsimagLite::String bra,
-	    PsimagLite::String ket)
+	           const SparseMatrixType& O,
+	           SizeType rows,
+	           SizeType cols,
+	           PsimagLite::String bra,
+	           PsimagLite::String ket)
 	{
 		assert(rows == cols);
 		result.resize(rows);
@@ -138,11 +136,11 @@ private:
 
 	// from i to i+1
 	FieldType calcCorrelation_(SparseMatrixType& O2gt,
-	    SizeType i,
-	    const SparseMatrixType& O,
-	    const SparseMatrixType& identity,
-	    PsimagLite::String bra,
-	    PsimagLite::String ket)
+	                           SizeType i,
+	                           const SparseMatrixType& O,
+	                           const SparseMatrixType& identity,
+	                           PsimagLite::String bra,
+	                           PsimagLite::String ket)
 	{
 
 		if (i >= skeleton_.numberOfSites() - 1)

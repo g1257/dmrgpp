@@ -4,12 +4,10 @@
 #include "../FeAsModel/HilbertSpaceFeAs.h"
 #include "Matrix.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelBaseType, typename ModelParametersType>
-class HelperHubbardAncilla
-{
+class HelperHubbardAncilla {
 
 public:
 
@@ -38,7 +36,7 @@ public:
 	static const int FERMION_SIGN = -1;
 
 	HelperHubbardAncilla(const SuperGeometryType& geometry,
-	    const ModelParametersType& modelParams)
+	                     const ModelParametersType& modelParams)
 	    : superGeometry_(geometry)
 	    , modelParameters_(modelParams)
 	    , hot_(superGeometry_.orbitals(0, 0) > 1)
@@ -53,8 +51,8 @@ public:
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io,
-	    PsimagLite::String modelName) const
+	           PsimagLite::IoNg::Out::Serializer& io,
+	           PsimagLite::String modelName) const
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -68,8 +66,8 @@ public:
 	bool isHot() const { return hot_; }
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		SizeType n = block.size();
 		HilbertBasisType natBasis;
@@ -88,7 +86,7 @@ public:
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	static void setBasis(HilbertBasisType& basis,
-	    const VectorSizeType& block)
+	                     const VectorSizeType& block)
 	{
 		SizeType n = block.size();
 		HilbertState total = (1 << (2 * ORBITALS));
@@ -101,7 +99,7 @@ public:
 
 	//! set creation matrices for sites in block
 	static void setLambdaMatrices(OpsLabelType& d,
-	    const VectorSparseMatrixType& vm)
+	                              const VectorSparseMatrixType& vm)
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
@@ -114,16 +112,16 @@ public:
 			correctLambda(dlambda, spin1, vm);
 
 			OperatorType myOp(SparseMatrixType(dlambda),
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  typename OperatorType::PairType(0, 0),
+			                  1,
+			                  su2related);
 			d.push(myOp);
 		}
 	}
 
 	static void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis)
+	                               const HilbertBasisType& basis)
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -136,18 +134,18 @@ public:
 			PairType jmpair = PairType(0, 0);
 
 			SizeType naUp = HilbertSpaceFeAsType::calcNofElectrons(basis[i],
-			    ORBITALS * SPIN_UP);
+			                                                       ORBITALS * SPIN_UP);
 			SizeType naDown = HilbertSpaceFeAsType::calcNofElectrons(basis[i],
-			    ORBITALS * SPIN_DOWN);
+			                                                         ORBITALS * SPIN_DOWN);
 
 			SizeType flavor = 0;
 
 			// nup
 			other[1] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			    SPIN_UP);
+			                                                        SPIN_UP);
 			// ntotal
 			other[0] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-				       SPIN_DOWN)
+			                                                        SPIN_DOWN)
 			    + other[1];
 
 			// up ancilla
@@ -174,9 +172,9 @@ public:
 	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	static void findOperatorMatrices(MatrixType& creationMatrix,
-	    int i,
-	    int sigma,
-	    const HilbertBasisType& natBasis)
+	                                 int i,
+	                                 int sigma,
+	                                 const HilbertBasisType& natBasis)
 	{
 		HilbertState bra, ket;
 		SizeType n = natBasis.size();
@@ -206,8 +204,8 @@ public:
 	}
 
 	static void findAllMatrices(VectorSparseMatrixType& vm,
-	    SizeType i,
-	    const HilbertBasisType& natBasis)
+	                            SizeType i,
+	                            const HilbertBasisType& natBasis)
 	{
 		for (SizeType sigma = 0; sigma < 2 * ORBITALS; ++sigma) {
 			MatrixType m;
@@ -220,8 +218,8 @@ private:
 
 	//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
 	void addInteraction(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualSite) const
+	                    const VectorSparseMatrixType& cm,
+	                    SizeType actualSite) const
 	{
 		SparseMatrixType tmpMatrix;
 		SizeType nsites = superGeometry_.numberOfSites();
@@ -240,8 +238,8 @@ private:
 	}
 
 	void addPotentialV(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualIndexOfSite) const
+	                   const VectorSparseMatrixType& cm,
+	                   SizeType actualIndexOfSite) const
 	{
 		SizeType factor = (hot_) ? 2 : 1;
 		SizeType nsites = superGeometry_.numberOfSites();
@@ -262,8 +260,8 @@ private:
 	}
 
 	static void correctLambda(MatrixType& dlambda,
-	    SizeType spin1,
-	    const VectorSparseMatrixType& vm)
+	                          SizeType spin1,
+	                          const VectorSparseMatrixType& vm)
 	{
 		SizeType n = dlambda.rows();
 		MatrixType corrector(n, n);
@@ -275,8 +273,8 @@ private:
 	}
 
 	static void computeCorrector(MatrixType& corrector,
-	    SizeType spin1,
-	    const VectorSparseMatrixType& vm)
+	                             SizeType spin1,
+	                             const VectorSparseMatrixType& vm)
 	{
 		SizeType spin2 = 1 - spin1;
 		SparseMatrixType cm1(vm[0 + spin2 * ORBITALS]);

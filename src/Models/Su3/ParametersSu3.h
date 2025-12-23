@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename RealType, typename QnType>
 struct ParametersSu3 : public ParametersModelBase<RealType, QnType> {
@@ -102,7 +101,7 @@ struct ParametersSu3 : public ParametersModelBase<RealType, QnType> {
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersSu3";
 		io.createGroup(label);

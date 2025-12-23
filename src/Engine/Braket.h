@@ -7,12 +7,10 @@
 #include "PsimagLite.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType_>
-class Braket
-{
+class Braket {
 
 public:
 

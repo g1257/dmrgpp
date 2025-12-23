@@ -91,12 +91,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <fstream>
 #include <sys/types.h>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename CheckpointType, typename TargetingType>
-class Recovery
-{
+class Recovery {
 
 	typedef typename CheckpointType::ParametersType ParametersType;
 	typedef Recovery<ParametersType, int> RecoveryStaticType;
@@ -138,8 +136,7 @@ public:
 	typedef PsimagLite::Vector<VectorSizeType>::Type VectorBlockType;
 	typedef typename CheckpointType::RealType RealType;
 
-	class SpecOptions
-	{
+	class SpecOptions {
 
 	public:
 
@@ -179,10 +176,10 @@ public:
 	};
 
 	Recovery(const VectorBlockType& siteIndices,
-	    const CheckpointType& checkpoint,
-	    const WaveFunctionTransfType& wft,
-	    const BasisWithOperatorsType& pS,
-	    const BasisWithOperatorsType& pE)
+	         const CheckpointType& checkpoint,
+	         const WaveFunctionTransfType& wft,
+	         const BasisWithOperatorsType& pS,
+	         const BasisWithOperatorsType& pE)
 	    : progress_("Recovery")
 	    , predicateAwesome_(nullptr)
 	    , siteIndices_(siteIndices)
@@ -204,7 +201,7 @@ public:
 
 		VectorStringType parts;
 		RecoveryStaticType::makeThreeParts(parts,
-		    checkpoint_.parameters().checkpoint.filename());
+		                                   checkpoint_.parameters().checkpoint.filename());
 		if (parts.size() == 3)
 			counter_ = 1 + atoi(parts[1].c_str());
 	}
@@ -240,11 +237,11 @@ public:
 	}
 
 	void write(const TargetingType& psi,
-	    SizeType loopIndex,
-	    SizeType stepCurrent,
-	    int lastSign,
-	    OutputFileOrNot& ioOutCurrent,
-	    PsimagLite::String inputBlob) const
+	           SizeType loopIndex,
+	           SizeType stepCurrent,
+	           int lastSign,
+	           OutputFileOrNot& ioOutCurrent,
+	           PsimagLite::String inputBlob) const
 	{
 		PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());
 		prefix += ttos(counter_++);
@@ -322,8 +319,8 @@ private:
 	}
 
 	void writeRecovery(typename IoType::Out& ioOut,
-	    SizeType loopIndex,
-	    SizeType stepCurrent) const
+	                   SizeType loopIndex,
+	                   SizeType stepCurrent) const
 	{
 		ioOut.createGroup("Recovery");
 
@@ -370,7 +367,7 @@ private:
 	}
 
 	void writeEnergies(typename IoType::Out& ioOut,
-	    PsimagLite::String file) const
+	                   PsimagLite::String file) const
 	{
 		PsimagLite::String energyLabel = checkpoint_.parameters().checkpoint.labelForEnergy();
 		ioOut.flush();
@@ -396,15 +393,14 @@ private:
 }; // class Recovery
 
 template <typename ParametersType>
-class Recovery<ParametersType, int>
-{
+class Recovery<ParametersType, int> {
 
 public:
 
 	static PsimagLite::String recoveryFilePrefix() { return "Recovery"; }
 
 	static void checkOptions(PsimagLite::String recoverySave,
-	    const typename ParametersType::OptionsType& options)
+	                         const typename ParametersType::OptionsType& options)
 	{
 		if (recoverySave == "" || recoverySave == "no")
 			return;
@@ -435,7 +431,7 @@ public:
 	}
 
 	static void makeThreeParts(std::vector<PsimagLite::String>& parts,
-	    PsimagLite::String filename)
+	                           PsimagLite::String filename)
 	{
 		const PsimagLite::String prefix = recoveryFilePrefix();
 		const SizeType len = prefix.length();
@@ -467,7 +463,7 @@ private:
 	}
 
 	static void listFilesInDirectory(std::vector<PsimagLite::String>& files,
-	    PsimagLite::String path)
+	                                 PsimagLite::String path)
 	{
 		DIR* dir = 0;
 		dirent* ent = 0;

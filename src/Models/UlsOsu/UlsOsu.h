@@ -90,19 +90,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 #include "VerySparseMatrix.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
 template <typename ModelBaseType>
-class UlsOsu : public ModelBaseType
-{
+class UlsOsu : public ModelBaseType {
 
-	enum InternalDir { DIR_SX,
+	enum InternalDir
+	{
+		DIR_SX,
 		DIR_SY,
 		DIR_SZ,
 		DIR_LX,
 		DIR_LY,
-		DIR_LZ };
+		DIR_LZ
+	};
 
 public:
 
@@ -140,15 +141,21 @@ public:
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	static const int FERMION_SIGN = -1;
-	enum { STATE_EMPTY = 0,
+	enum
+	{
+		STATE_EMPTY = 0,
 		STATE_UP_A = 1,
-		STATE_DOWN_A = 4 };
-	enum { SPIN_UP,
-		SPIN_DOWN };
+		STATE_DOWN_A = 4
+	};
+	enum
+	{
+		SPIN_UP,
+		SPIN_DOWN
+	};
 
 	UlsOsu(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	       InputValidatorType& io,
+	       const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
@@ -190,8 +197,8 @@ public:
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findCreationMatrices(int,
-	    SizeType sigma,
-	    const VectorHilbertStateType&) const
+	                                      SizeType sigma,
+	                                      const VectorHilbertStateType&) const
 	{
 		assert(sigma < creationMatrix_.size());
 		return creationMatrix_[sigma].getCRS();
@@ -250,55 +257,55 @@ protected:
 			// Sx
 			tmpMatrix = findSdirMatrices(i, natBasis, DIR_SX, dummy);
 			OperatorType myOp1(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 			sx.push(myOp1);
 
 			// Sy
 			tmpMatrix = findSdirMatrices(i, natBasis, DIR_SY, dummy);
 			OperatorType myOp2(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 			sy.push(myOp2);
 
 			// Sz
 			tmpMatrix = findSdirMatrices(i, natBasis, DIR_SZ, dummy);
 			OperatorType myOp3(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 			sz.push(myOp3);
 
 			// Lx
 			tmpMatrix = findSdirMatrices(i, natBasis, DIR_LX, dummy);
 			OperatorType myOp4(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 			lx.push(myOp4);
 
 			// Ly
 			tmpMatrix = findSdirMatrices(i, natBasis, DIR_LY, dummy);
 			OperatorType myOp5(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 			ly.push(myOp5);
 
 			// Lz
 			tmpMatrix = findSdirMatrices(i, natBasis, DIR_LZ, dummy);
 			OperatorType myOp6(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 			lz.push(myOp6);
 		}
 	}
@@ -324,18 +331,18 @@ protected:
 private:
 
 	SparseMatrixType findSdirMatrices(SizeType,
-	    const HilbertBasisType&,
-	    InternalDir,
-	    RealType) const
+	                                  const HilbertBasisType&,
+	                                  InternalDir,
+	                                  RealType) const
 	{
 		err("Kitaev needs useComplex in SolverOptions in the input file\n");
 		throw PsimagLite::RuntimeError("FATAL\n");
 	}
 
 	SparseMatrixType findSdirMatrices(SizeType, // site,
-	    const HilbertBasisType& natBasis,
-	    InternalDir dir,
-	    std::complex<RealType>) const
+	                                  const HilbertBasisType& natBasis,
+	                                  InternalDir dir,
+	                                  std::complex<RealType>) const
 	{
 		SizeType total = natBasis.size();
 		double val = sqrt(2.0);
@@ -389,8 +396,8 @@ private:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -424,8 +431,8 @@ private:
 	}
 
 	void setNaturalBasis(HilbertBasisType& basis,
-	    const VectorSizeType& block,
-	    bool truncated) const
+	                     const VectorSizeType& block,
+	                     bool truncated) const
 	{
 		assert(block.size() == 1);
 		assert(modelParameters_.orbitals == 1);

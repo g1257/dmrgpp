@@ -8,12 +8,10 @@
 #include "OneSiteSpaces.hh"
 #include "Wft/WaveFunctionTransfFactory.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename VectorWithOffsetType, typename ModelType>
-class MultiPointInSitu
-{
+class MultiPointInSitu {
 
 public:
 
@@ -21,9 +19,9 @@ public:
 	typedef typename ModelType::ParametersType ParametersType;
 	typedef typename ParametersType::OptionsType OptionsType;
 	typedef WaveFunctionTransfFactory<LeftRightSuperType,
-	    VectorWithOffsetType,
-	    OptionsType,
-	    OneSiteSpaces<ModelType>>
+	                                  VectorWithOffsetType,
+	                                  OptionsType,
+	                                  OneSiteSpaces<ModelType>>
 	    WaveFunctionTransfType;
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 	typedef HelperForMultiPointInSitu<CheckpointType> HelperForMultiPointInSituType;
@@ -34,9 +32,9 @@ public:
 	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
 
 	MultiPointInSitu(const ModelType& model,
-	    const CheckpointType& checkpoint,
-	    const WaveFunctionTransfType& wft,
-	    ProgramGlobals::DirectionEnum dir)
+	                 const CheckpointType& checkpoint,
+	                 const WaveFunctionTransfType& wft,
+	                 ProgramGlobals::DirectionEnum dir)
 	    : model_(model)
 	    , bogusInput_(model.superGeometry().numberOfSites(), checkpoint, wft, dir)
 	    , observer_(bogusInput_, 0, 0, 0, model)

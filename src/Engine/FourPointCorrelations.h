@@ -85,11 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Braket.h"
 #include "CrsMatrix.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename CorrelationsSkeletonType>
-class FourPointCorrelations
-{
+class FourPointCorrelations {
 
 public:
 
@@ -116,10 +114,10 @@ public:
 	//! Four-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3<i4
 	FieldType operator()(SizeType i1,
-	    SizeType i2,
-	    SizeType i3,
-	    SizeType i4,
-	    const BraketType& braket) const
+	                     SizeType i2,
+	                     SizeType i3,
+	                     SizeType i4,
+	                     const BraketType& braket) const
 	{
 		if (i1 > i2 || i3 > i4 || i2 > i3)
 			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
@@ -141,9 +139,9 @@ public:
 	//! 3-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3
 	FieldType threePoint(SizeType i1,
-	    SizeType i2,
-	    SizeType i3,
-	    const BraketType& braket) const
+	                     SizeType i2,
+	                     SizeType i3,
+	                     const BraketType& braket) const
 	{
 		if (i1 > i2 || i2 > i3)
 			err("calcCorrelation: FourPoint needs ordered points\n");
@@ -172,14 +170,14 @@ public:
 		SparseMatrixType O2gt;
 		const bool finalTransform = true;
 		firstStage(O2gt,
-		    'N',
-		    braket.site(0),
-		    'N',
-		    braket.site(1),
-		    braket,
-		    0,
-		    1,
-		    finalTransform);
+		           'N',
+		           braket.site(0),
+		           'N',
+		           braket.site(1),
+		           braket,
+		           0,
+		           1,
+		           finalTransform);
 
 		assert(n > 3);
 		SizeType end = n - 2;
@@ -188,12 +186,12 @@ public:
 			SizeType i2 = braket.site(i - 1);
 			SparseMatrixType OsoFar;
 			middleStage(OsoFar,
-			    O2gt,
-			    i2,
-			    'N',
-			    braket.site(i),
-			    braket.op(i),
-			    braket.op(i - 1).fermionOrBoson());
+			            O2gt,
+			            i2,
+			            'N',
+			            braket.site(i),
+			            braket.op(i),
+			            braket.op(i - 1).fermionOrBoson());
 			O2gt = OsoFar;
 		}
 
@@ -203,26 +201,26 @@ public:
 		SizeType i4 = braket.site(n - 1);
 
 		return secondStage(O2gt,
-		    i2,
-		    'N',
-		    i3,
-		    'N',
-		    i4,
-		    braket,
-		    n - 2,
-		    n - 1);
+		                   i2,
+		                   'N',
+		                   i3,
+		                   'N',
+		                   i4,
+		                   braket,
+		                   n - 2,
+		                   n - 1);
 	}
 
 	//! requires i1<i2
 	void firstStage(SparseMatrixType& O2gt,
-	    char mod1,
-	    SizeType i1,
-	    char mod2,
-	    SizeType i2,
-	    const BraketType& braket,
-	    SizeType index0,
-	    SizeType index1,
-	    bool finalTransform) const
+	                char mod1,
+	                SizeType i1,
+	                char mod2,
+	                SizeType i2,
+	                const BraketType& braket,
+	                SizeType index0,
+	                SizeType index1,
+	                bool finalTransform) const
 	{
 
 		// Take care of modifiers
@@ -248,14 +246,14 @@ public:
 
 	//! requires i2<i3<i4
 	FieldType secondStage(const SparseMatrixType& O2gt,
-	    SizeType i2,
-	    char mod3,
-	    SizeType i3,
-	    char mod4,
-	    SizeType i4,
-	    const BraketType& braket,
-	    SizeType index0,
-	    SizeType index1) const
+	                      SizeType i2,
+	                      char mod3,
+	                      SizeType i3,
+	                      char mod4,
+	                      SizeType i4,
+	                      const BraketType& braket,
+	                      SizeType index0,
+	                      SizeType index1) const
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m, O4m;
@@ -276,10 +274,10 @@ public:
 		if (i4 == skeleton_.numberOfSites() - 1) {
 			if (i3 < i4 - 1) { // still not tested (2018-02-27)
 				const SizeType ptr = skeleton_.dmrgMultiply(O3g,
-				    Otmp,
-				    O3m,
-				    braket.op(index0).fermionOrBoson(),
-				    ns);
+				                                            Otmp,
+				                                            O3m,
+				                                            braket.op(index0).fermionOrBoson(),
+				                                            ns);
 
 				SparseMatrixType O3gt;
 				helper.transform(O3gt, O3g, ptr);
@@ -291,20 +289,20 @@ public:
 				growDirectly4p(Otmp, O3gt, i3 + 1, braket.op(index0).fermionOrBoson(), ns);
 
 				return skeleton_.bracketRightCorner(Otmp,
-				    O4m,
-				    braket.op(index1).fermionOrBoson(),
-				    i4 - 2, // <--- this is the pointer
-				    braket.bra(),
-				    braket.ket());
+				                                    O4m,
+				                                    braket.op(index1).fermionOrBoson(),
+				                                    i4 - 2, // <--- this is the pointer
+				                                    braket.bra(),
+				                                    braket.ket());
 			}
 
 			return skeleton_.bracketRightCorner(Otmp,
-			    O3m,
-			    O4m,
-			    braket.op(index1).fermionOrBoson(),
-			    i4 - 2, // <--- this is the pointer
-			    braket.bra(),
-			    braket.ket());
+			                                    O3m,
+			                                    O4m,
+			                                    braket.op(index1).fermionOrBoson(),
+			                                    i4 - 2, // <--- this is the pointer
+			                                    braket.bra(),
+			                                    braket.ket());
 		}
 
 		skeleton_.dmrgMultiply(O3g, Otmp, O3m, braket.op(index0).fermionOrBoson(), ns);
@@ -318,25 +316,25 @@ public:
 		growDirectly4p(Otmp, O3gt, i3 + 1, braket.op(index0).fermionOrBoson(), ns);
 
 		const SizeType ptr = skeleton_.dmrgMultiply(O4g,
-		    Otmp,
-		    O4m,
-		    braket.op(index1).fermionOrBoson(),
-		    ns);
+		                                            Otmp,
+		                                            O4m,
+		                                            braket.op(index1).fermionOrBoson(),
+		                                            ns);
 		return skeleton_.bracket(O4g,
-		    braket.op(index1).fermionOrBoson(),
-		    ptr,
-		    braket.bra(),
-		    braket.ket());
+		                         braket.op(index1).fermionOrBoson(),
+		                         ptr,
+		                         braket.bra(),
+		                         braket.ket());
 	}
 
 	//! requires i2<i3<i4
 	void middleStage(SparseMatrixType& dest,
-	    const SparseMatrixType& OsoFar,
-	    SizeType i2,
-	    char mod3,
-	    SizeType i3,
-	    const OperatorType& Op3,
-	    ProgramGlobals::FermionOrBosonEnum fermionS) const
+	                 const SparseMatrixType& OsoFar,
+	                 SizeType i2,
+	                 char mod3,
+	                 SizeType i3,
+	                 const OperatorType& Op3,
+	                 ProgramGlobals::FermionOrBosonEnum fermionS) const
 	{
 		// Take care of modifiers
 		if (i2 > i3)
@@ -364,11 +362,11 @@ private:
 
 	//! requires i2<i3
 	FieldType secondStage(const SparseMatrixType& O2gt,
-	    SizeType i2,
-	    char mod3,
-	    SizeType i3,
-	    const BraketType& braket,
-	    SizeType index) const
+	                      SizeType i2,
+	                      char mod3,
+	                      SizeType i3,
+	                      const BraketType& braket,
+	                      SizeType index) const
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m;
@@ -384,29 +382,29 @@ private:
 
 		if (i3 == skeleton_.numberOfSites() - 1) {
 			return skeleton_.bracketRightCorner(Otmp,
-			    O3m,
-			    braket.op(index).fermionOrBoson(),
-			    i3 - 2, // <---- this is the pointer
-			    braket.bra(),
-			    braket.ket());
+			                                    O3m,
+			                                    braket.op(index).fermionOrBoson(),
+			                                    i3 - 2, // <---- this is the pointer
+			                                    braket.bra(),
+			                                    braket.ket());
 		}
 
 		SparseMatrixType O3g;
 		skeleton_.dmrgMultiply(O3g, Otmp, O3m, braket.op(index).fermionOrBoson(), ns);
 
 		return skeleton_.bracket(O3g,
-		    braket.op(index).fermionOrBoson(),
-		    ns, // <---- this is the pointer
-		    braket.bra(),
-		    braket.ket());
+		                         braket.op(index).fermionOrBoson(),
+		                         ns, // <---- this is the pointer
+		                         braket.bra(),
+		                         braket.ket());
 	}
 
 	//! i can be zero here!!
 	void growDirectly4p(SparseMatrixType& Odest,
-	    const SparseMatrixType& Osrc,
-	    SizeType i,
-	    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	    SizeType ns) const
+	                    const SparseMatrixType& Osrc,
+	                    SizeType i,
+	                    ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                    SizeType ns) const
 	{
 		Odest = Osrc;
 
@@ -421,11 +419,11 @@ private:
 		for (SizeType s = nt; s < ns; ++s) {
 			SparseMatrixType Onew(helper.cols(s), helper.cols(s));
 			skeleton_.fluffUp(Onew,
-			    Odest,
-			    fermionicSign,
-			    CorrelationsSkeletonType::GrowDirection::RIGHT,
-			    (s < totalSites - 3),
-			    s);
+			                  Odest,
+			                  fermionicSign,
+			                  CorrelationsSkeletonType::GrowDirection::RIGHT,
+			                  (s < totalSites - 3),
+			                  s);
 			Odest = Onew;
 		}
 	}

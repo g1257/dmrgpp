@@ -14,8 +14,11 @@ public:
 	typedef typename FunctionType::RealType RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	enum IntegrationEnum { INTEG_QAG,
-		               INTEG_QAGP };
+	enum IntegrationEnum
+	{
+		INTEG_QAG,
+		INTEG_QAGP
+	};
 
 	Integrator(FunctionType& function, RealType epsabs = 1e-9, RealType epsrel = 1e-9, SizeType limit = 1000000)
 	    : epsabs_(epsabs)

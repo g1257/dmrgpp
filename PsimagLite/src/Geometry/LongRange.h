@@ -106,8 +106,7 @@ public:
 		try {
 			io.readline(entangler, "GeometryEntangler=");
 			hasEntangler = true;
-		}
-		catch (std::exception&) {
+		} catch (std::exception&) {
 		}
 
 		io.readline(dofs_, "DegreesOfFreedom=");
@@ -116,8 +115,7 @@ public:
 			const SizeType n = dofs_ * linSize;
 			matrix_.resize(n, n);
 			setEntangler(entangler);
-		}
-		else {
+		} else {
 			io.read(matrix_, "Connectors");
 		}
 
@@ -127,8 +125,7 @@ public:
 
 		if (goptions == "compact") {
 			reinterpretMatrix();
-		}
-		else {
+		} else {
 			if (dofs_ != matrix_.rows() / linSize) {
 				throw RuntimeError("Wrong Connectors matrix size\n");
 			}
@@ -138,8 +135,7 @@ public:
 
 		try {
 			io.readline(maxConnections_, "GeometryMaxConnections=");
-		}
-		catch (std::exception& e) {
+		} catch (std::exception& e) {
 			if (!hasEntangler) {
 				std::cerr
 				    << "Please add GeometryMaxConnections=0 or "
@@ -305,8 +301,7 @@ private:
 				SizeType orb1 = complexToInteger(values(i, counter++));
 				matrix_(orb0 + site0 * dofs_, orb1 + site1 * dofs_) = values(i, counter++);
 			}
-		}
-		else {
+		} else {
 			assert(values.cols() == 3);
 			for (SizeType i = 0; i < values.rows(); ++i) {
 				SizeType counter = 0;
@@ -337,8 +332,7 @@ private:
 	{
 		if (-9223372036854775808.0 <= d && d < 9223372036854775808.0) {
 			return d == static_cast<double>(static_cast<int64_t>(d));
-		}
-		else {
+		} else {
 			return false;
 		}
 	}

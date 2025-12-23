@@ -95,11 +95,9 @@ void pthread_mutex_lock(int myMutex)
 void pthread_mutex_unlock(int myMutex)
 {
 }
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename PthreadFunctionHolderType>
-class ThreadsWithMpi : public Concurrency<typename PthreadFunctionHolderType::RealType>
-{
+class ThreadsWithMpi : public Concurrency<typename PthreadFunctionHolderType::RealType> {
 public:
 
 	static void setThreads(SizeType dummy) { } // dummy

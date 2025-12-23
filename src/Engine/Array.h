@@ -5,12 +5,10 @@
 #include <cassert>
 #include <cstring>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename T>
-class Array
-{
+class Array {
 
 public:
 

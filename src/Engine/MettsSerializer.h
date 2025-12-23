@@ -81,12 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "TypeToString.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename VectorType>
-class MettsSerializer
-{
+class MettsSerializer {
 
 	typedef typename VectorType::value_type VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
@@ -98,8 +96,8 @@ public:
 	MettsSerializer() { }
 
 	MettsSerializer(RealType currentBeta,
-	    SizeType site,
-	    const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
+	                SizeType site,
+	                const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
 	    : currentBeta_(currentBeta)
 	    , site_(site)
 	    , targetVectors_(targetVectors)
@@ -157,10 +155,10 @@ public:
 
 	template <typename IoOutputter>
 	void write(IoOutputter& io,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsOutputLike<IoOutputter>::True,
-		int>::Type
-	    = 0) const
+	           typename PsimagLite::EnableIf<
+	               PsimagLite::IsOutputLike<IoOutputter>::True,
+	               int>::Type
+	           = 0) const
 	{
 		PsimagLite::String s = "BETA=" + ttos(currentBeta_);
 		io.printline(s);

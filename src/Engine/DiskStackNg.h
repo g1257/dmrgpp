@@ -80,11 +80,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <exception>
 
 // A disk stack, similar to std::stack but stores in disk not in memory
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename DataType>
-class DiskStack
-{
+class DiskStack {
 
 	typedef typename PsimagLite::IoNg::In IoInType;
 	typedef typename PsimagLite::IoNg::Out IoOutType;
@@ -92,9 +90,9 @@ class DiskStack
 public:
 
 	DiskStack(const PsimagLite::String filename,
-	    bool needsToRead,
-	    PsimagLite::String label,
-	    const BasisTraits& basisTraits)
+	          bool needsToRead,
+	          PsimagLite::String label,
+	          const BasisTraits& basisTraits)
 	    : ioOut_((needsToRead) ? 0 : new IoOutType(filename, PsimagLite::IoNg::ACC_RDW))
 	    , ioIn_((needsToRead) ? new IoInType(filename) : 0)
 	    , label_("DiskStack" + label)
@@ -140,21 +138,21 @@ public:
 
 		try {
 			d.write(*ioOut_,
-			    label_ + "/" + ttos(total_),
-			    IoOutType::Serializer::NO_OVERWRITE,
-			    DataType::SaveEnum::ALL);
+			        label_ + "/" + ttos(total_),
+			        IoOutType::Serializer::NO_OVERWRITE,
+			        DataType::SaveEnum::ALL);
 		} catch (...) {
 			d.write(*ioOut_,
-			    label_ + "/" + ttos(total_),
-			    IoOutType::Serializer::ALLOW_OVERWRITE,
-			    DataType::SaveEnum::ALL);
+			        label_ + "/" + ttos(total_),
+			        IoOutType::Serializer::ALLOW_OVERWRITE,
+			        DataType::SaveEnum::ALL);
 		}
 
 		++total_;
 
 		ioOut_->write(total_,
-		    label_ + "/Size",
-		    IoOutType::Serializer::ALLOW_OVERWRITE);
+		              label_ + "/Size",
+		              IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	void pop()
@@ -168,8 +166,8 @@ public:
 			return;
 
 		ioOut_->write(total_,
-		    label_ + "/Size",
-		    IoOutType::Serializer::ALLOW_OVERWRITE);
+		              label_ + "/Size",
+		              IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	void restore(SizeType total)
@@ -179,8 +177,8 @@ public:
 			return;
 
 		ioOut_->write(total_,
-		    label_ + "/Size",
-		    IoOutType::Serializer::ALLOW_OVERWRITE);
+		              label_ + "/Size",
+		              IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	const DataType& top() const
@@ -192,8 +190,8 @@ public:
 		delete dt_;
 		dt_ = 0;
 		dt_ = new DataType(*ioIn_,
-		    label_ + "/" + ttos(total_ - 1),
-		    basisTraits_);
+		                   label_ + "/" + ttos(total_ - 1),
+		                   basisTraits_);
 		return *dt_;
 	}
 

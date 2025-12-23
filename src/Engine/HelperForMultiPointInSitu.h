@@ -6,12 +6,10 @@
 #include "Matrix.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename CheckpointType>
-class HelperForMultiPointInSitu
-{
+class HelperForMultiPointInSitu {
 
 public:
 
@@ -30,15 +28,14 @@ public:
 	typedef typename DmrgSerializerType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
 
-	class BogusInput
-	{
+	class BogusInput {
 
 	public:
 
 		BogusInput(SizeType numberOfSites,
-		    const CheckpointType& checkPoint,
-		    const WaveFunctionTransfType& wft,
-		    ProgramGlobals::DirectionEnum dir)
+		           const CheckpointType& checkPoint,
+		           const WaveFunctionTransfType& wft,
+		           ProgramGlobals::DirectionEnum dir)
 		    : numberOfSites_(numberOfSites)
 		    , checkPoint_(checkPoint)
 		    , wft_(wft)
@@ -87,7 +84,7 @@ public:
 		}
 
 		const BlockDiagonalMatrixType& getTransform(SizeType ind,
-		    ProgramGlobals::DirectionEnum dir) const
+		                                            ProgramGlobals::DirectionEnum dir) const
 		{
 			return wft_.multiPointGetTransform(ind, dir);
 		}
@@ -115,11 +112,11 @@ public:
 	typedef BogusInput IoInputType;
 
 	HelperForMultiPointInSitu(BogusInput& io,
-	    SizeType start,
-	    SizeType nf,
-	    SizeType trail,
-	    bool withLegacyBugs,
-	    bool readOnDemand)
+	                          SizeType start,
+	                          SizeType nf,
+	                          SizeType trail,
+	                          bool withLegacyBugs,
+	                          bool readOnDemand)
 	    : io_(io)
 	    , ind_(1 + numberOfSites())
 	{
@@ -133,7 +130,7 @@ public:
 	SizeType numberOfSites() const { return io_.numberOfSites(); }
 
 	const VectorWithOffsetType& getVectorFromBracketId(const PsimagLite::GetBraOrKet& braOrKet,
-	    SizeType index) const
+	                                                   SizeType index) const
 	{
 		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::getVectorFromBracketId() " + PsimagLite::String("unimplemented\n"));
 	}
@@ -154,8 +151,8 @@ public:
 
 	// transform O2 by the transformation in location ind, and put the result in ret
 	void transform(SparseMatrixType& ret,
-	    const SparseMatrixType& O2,
-	    SizeType ind) const
+	               const SparseMatrixType& O2,
+	               SizeType ind) const
 	{
 		if (ind != ind_)
 			computeAndSaveTransform(ind);

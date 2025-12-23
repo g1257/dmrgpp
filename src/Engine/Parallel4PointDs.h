@@ -80,12 +80,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 #include "NotMpi.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType, typename FourPointCorrelationsType>
-class Parallel4PointDs
-{
+class Parallel4PointDs {
 
 	typedef std::pair<SizeType, SizeType> PairType;
 	typedef typename FourPointCorrelationsType::MatrixType MatrixType;
@@ -96,18 +94,21 @@ class Parallel4PointDs
 
 public:
 
-	enum FourPointModeEnum { MODE_NORMAL,
+	enum FourPointModeEnum
+	{
+		MODE_NORMAL,
 		MODE_THIN,
-		MODE_THINupdn };
+		MODE_THINupdn
+	};
 
 	typedef typename ModelType::RealType RealType;
 
 	Parallel4PointDs(MatrixType& fpd,
-	    const FourPointCorrelationsType& fourpoint,
-	    const ModelType& model,
-	    const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	    const typename PsimagLite::Vector<PairType>::Type& pairs,
-	    FourPointModeEnum mode)
+	                 const FourPointCorrelationsType& fourpoint,
+	                 const ModelType& model,
+	                 const typename PsimagLite::Vector<SizeType>::Type& gammas,
+	                 const typename PsimagLite::Vector<PairType>::Type& pairs,
+	                 FourPointModeEnum mode)
 	    : fpd_(fpd)
 	    , fourpoint_(fourpoint)
 	    , model_(model)
@@ -123,7 +124,7 @@ public:
 		SizeType j = pairs_[taskNumber].second;
 
 		fpd_(i, j) = (mode_ == MODE_NORMAL) ? fourPointDelta(2 * i, 2 * j, gammas_)
-						    : fourPointThin(i, j);
+		                                    : fourPointThin(i, j);
 		if (mode_ == MODE_NORMAL) {
 			fpd_(i, j) = fourPointDelta(2 * i, 2 * j, gammas_);
 		} else if (mode_ == MODE_THIN) {
@@ -140,8 +141,8 @@ public:
 private:
 
 	FieldType fourPointDelta(SizeType i,
-	    SizeType j,
-	    const typename PsimagLite::Vector<SizeType>::Type& gammas) const
+	                         SizeType j,
+	                         const typename PsimagLite::Vector<SizeType>::Type& gammas) const
 	{
 		SizeType hs = model_.hilbertSize(0);
 		SizeType nx = 0;

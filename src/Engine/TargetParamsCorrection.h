@@ -82,12 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsBase.h"
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType>
-class TargetParamsCorrection : public TargetParamsBase<ModelType>
-{
+class TargetParamsCorrection : public TargetParamsBase<ModelType> {
 
 	typedef TargetParamsBase<ModelType> BaseType;
 
@@ -103,8 +101,8 @@ public:
 	}
 
 	virtual SizeType memResolv(PsimagLite::MemResolv&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	                           SizeType,
+	                           PsimagLite::String = "") const
 	{
 		return 0;
 	}
@@ -127,7 +125,7 @@ public:
 	}
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/correctionA_", correctionA_);

@@ -37,36 +37,54 @@ namespace PsimagLite {
 
 template <typename T1, typename T2>
 struct TypesEqual {
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename T>
 struct TypesEqual<T, T> {
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 template <typename T>
 struct IsInputLike {
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename T>
 struct IsOutputLike {
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename T>
 class IsVectorLike {
 public:
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename T>
 class IsVectorLike<std::vector<T, typename Allocator<T>::Type>> {
 public:
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 } // namespace PsimagLite
@@ -109,11 +127,14 @@ vector<T2, A> operator*(const vector<vector<T1, A>, AA>& v1,
 
 struct ClosureOperations {
 
-	enum { OP_PLUS,
-	       OP_MINUS,
-	       OP_MULT,
-	       OP_DIVIDE,
-	       OP_CONJ };
+	enum
+	{
+		OP_PLUS,
+		OP_MINUS,
+		OP_MULT,
+		OP_DIVIDE,
+		OP_CONJ
+	};
 };
 
 template <typename T1, typename T2, int type>
@@ -134,13 +155,19 @@ public:
 template <typename T>
 struct IsClosureLike {
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename T1, typename T2, int type>
 struct IsClosureLike<ClosureOperator<T1, T2, type>> {
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 // vector * scalar
@@ -542,14 +569,20 @@ template <typename T>
 class IsPairLike {
 public:
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename T1, typename T2>
 class IsPairLike<std::pair<T1, T2>> {
 public:
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 inline String basenameOf(String s)

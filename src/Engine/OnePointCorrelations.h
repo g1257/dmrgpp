@@ -87,12 +87,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // for operator*
 #include "VectorWithOffsets.h" // for operator*
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ObserverHelperType, typename ModelType>
-class OnePointCorrelations
-{
+class OnePointCorrelations {
 
 	typedef typename ObserverHelperType::MatrixType MatrixType;
 	typedef typename ObserverHelperType::VectorType VectorType;
@@ -104,7 +102,7 @@ class OnePointCorrelations
 public:
 
 	OnePointCorrelations(const ObserverHelperType& helper,
-	    const ModelType& model)
+	                     const ModelType& model)
 	    : helper_(helper)
 	    , model_(model)
 	{
@@ -112,11 +110,11 @@ public:
 
 	template <typename ApplyOperatorType>
 	FieldType operator()(SizeType ptr,
-	    const typename ApplyOperatorType::OperatorType& A,
-	    SizeType site,
-	    typename ApplyOperatorType::BorderEnum corner,
-	    const PsimagLite::GetBraOrKet& bra,
-	    const PsimagLite::GetBraOrKet& ket) const
+	                     const typename ApplyOperatorType::OperatorType& A,
+	                     SizeType site,
+	                     typename ApplyOperatorType::BorderEnum corner,
+	                     const PsimagLite::GetBraOrKet& bra,
+	                     const PsimagLite::GetBraOrKet& ket) const
 	{
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
@@ -132,20 +130,20 @@ public:
 
 	template <typename ApplyOperatorType>
 	FieldType hookForZero(SizeType ptr,
-	    const typename ApplyOperatorType::OperatorType& A,
-	    SizeType splitSize,
-	    const PsimagLite::GetBraOrKet& bra,
-	    const PsimagLite::GetBraOrKet& ket) const
+	                      const typename ApplyOperatorType::OperatorType& A,
+	                      SizeType splitSize,
+	                      const PsimagLite::GetBraOrKet& bra,
+	                      const PsimagLite::GetBraOrKet& ket) const
 	{
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
 			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
 			return onePointInternalHookForZero<ApplyOperatorType>(A,
-			    splitSize,
-			    src1,
-			    src2,
-			    ptr);
+			                                                      splitSize,
+			                                                      src1,
+			                                                      src2,
+			                                                      ptr);
 		} catch (std::exception& e) {
 			std::cerr << "CAUGHT: " << e.what();
 			std::cerr << "WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -157,26 +155,26 @@ private:
 
 	template <typename ApplyOperatorType>
 	FieldType onePointInternal(const typename ApplyOperatorType::OperatorType& A,
-	    SizeType site,
-	    const VectorWithOffsetType& src1,
-	    const VectorWithOffsetType& src2,
-	    typename ApplyOperatorType::BorderEnum corner,
-	    SizeType ptr) const
+	                           SizeType site,
+	                           const VectorWithOffsetType& src1,
+	                           const VectorWithOffsetType& src2,
+	                           typename ApplyOperatorType::BorderEnum corner,
+	                           SizeType ptr) const
 	{
 		if (src1.sectors() == 0 || src2.sectors() == 0)
 			return 0.0;
 
 		SizeType splitSize = model_.hilbertSize(site);
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
-		    true);
+		                                true);
 		VectorWithOffsetType dest;
 		applyOpLocal1(dest,
-		    src1,
-		    A,
-		    helper_.fermionicSignLeft(ptr),
-		    splitSize,
-		    helper_.direction(ptr),
-		    corner);
+		              src1,
+		              A,
+		              helper_.fermionicSignLeft(ptr),
+		              splitSize,
+		              helper_.direction(ptr),
+		              corner);
 
 		FieldType sum = static_cast<FieldType>(0.0);
 		const VectorWithOffsetType& v1 = dest;
@@ -198,21 +196,21 @@ private:
 
 	template <typename ApplyOperatorType>
 	FieldType onePointInternalHookForZero(const typename ApplyOperatorType::OperatorType& A,
-	    SizeType splitSize,
-	    const VectorWithOffsetType& src1,
-	    const VectorWithOffsetType& src2,
-	    SizeType ptr) const
+	                                      SizeType splitSize,
+	                                      const VectorWithOffsetType& src1,
+	                                      const VectorWithOffsetType& src2,
+	                                      SizeType ptr) const
 	{
 
 		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
-		    true);
+		                                true);
 		VectorWithOffsetType dest;
 		applyOpLocal1.hookForZero(dest,
-		    src1,
-		    A,
-		    splitSize,
-		    // helper_.fermionicSignLeft(ptr),
-		    helper_.direction(ptr));
+		                          src1,
+		                          A,
+		                          splitSize,
+		                          // helper_.fermionicSignLeft(ptr),
+		                          helper_.direction(ptr));
 
 		FieldType sum = static_cast<FieldType>(0.0);
 		const VectorWithOffsetType& v1 = dest;

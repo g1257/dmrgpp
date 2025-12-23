@@ -3,14 +3,13 @@
 
 #include "ObserveDriver.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename VectorWithOffsetType,
-    typename ModelType>
+          typename ModelType>
 bool observeOneFullSweep(IoInputType& io,
-    const ModelType& model,
-    const PsimagLite::String& list,
-    SizeType orbitals)
+                         const ModelType& model,
+                         const PsimagLite::String& list,
+                         SizeType orbitals)
 {
 	typedef typename ModelType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -76,11 +75,11 @@ bool observeOneFullSweep(IoInputType& io,
 		trail = n - 2 - nf;
 
 	ObservableLibraryType observerLib(io,
-	    n,
-	    model,
-	    start,
-	    nf,
-	    trail);
+	                                  n,
+	                                  model,
+	                                  start,
+	                                  nf,
+	                                  trail);
 
 	ManyPointActionType* manyPointAction = new ManyPointActionType(false, "");
 	for (SizeType i = 0; i < vecOptions.size(); ++i) {
@@ -90,8 +89,8 @@ bool observeOneFullSweep(IoInputType& io,
 			continue;
 
 		SiteSplitType braceContent = PsimagLite::OneOperatorSpec::extractSiteIfAny(item,
-		    '{',
-		    '}');
+		                                                                           '{',
+		                                                                           '}');
 
 		PsimagLite::String actionString;
 		if (braceContent.hasSiteString) {

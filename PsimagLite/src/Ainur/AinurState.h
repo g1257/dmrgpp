@@ -27,7 +27,8 @@ public:
 		}
 	};
 
-	enum ErrorEnum {
+	enum ErrorEnum
+	{
 		ERR_PARSE_UNDECLARED,
 		ERR_PARSE_DECLARED,
 		ERR_PARSE_FAILED,
@@ -195,9 +196,8 @@ private:
 
 	int storageIndexByName(String key) const
 	{
-		auto it = std::find_if(ainurVariables_.begin(), ainurVariables_.end(), [&key](const AinurVariable& ainurVar) {
-			return (ainurVar.key == key);
-		});
+		auto it = std::find_if(ainurVariables_.begin(), ainurVariables_.end(), [&key](const AinurVariable& ainurVar)
+		                       { return (ainurVar.key == key); });
 
 		if (it == ainurVariables_.end())
 			return -1;
@@ -275,8 +275,7 @@ private:
 
 			if (isValidCharForMacroName(c)) {
 				macroName += c;
-			}
-			else {
+			} else {
 
 				int x = storageIndexByName(macroName);
 				if (x < 0)

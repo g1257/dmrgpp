@@ -2,16 +2,16 @@
 
 template <typename ComplexOrRealType>
 void den_matmul_post(const char trans_A,
-    const int nrow_A,
-    const int ncol_A,
-    const PsimagLite::Matrix<ComplexOrRealType>& a_,
-    const int nrow_Y,
-    const int ncol_Y,
-    const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
-    const int nrow_X,
-    const int ncol_X,
-    PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout,
-    PsimagLite::GemmR<ComplexOrRealType>& gemmR)
+                     const int nrow_A,
+                     const int ncol_A,
+                     const PsimagLite::Matrix<ComplexOrRealType>& a_,
+                     const int nrow_Y,
+                     const int ncol_Y,
+                     const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
+                     const int nrow_X,
+                     const int ncol_X,
+                     PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout,
+                     PsimagLite::GemmR<ComplexOrRealType>& gemmR)
 {
 	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	/*

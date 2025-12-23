@@ -82,12 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define EXTENDED_SUPER_HUBBARD_1ORB_H
 #include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Super Extended Hubbard for DMRG solver, uses ModelHubbard by containment
 template <typename ModelBaseType>
-class ExtendedSuperHubbard1Orb : public ModelBaseType
-{
+class ExtendedSuperHubbard1Orb : public ModelBaseType {
 
 public:
 
@@ -122,12 +120,12 @@ public:
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
 
 	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& superGeometry,
-	    PsimagLite::String extension)
+	                         InputValidatorType& io,
+	                         const SuperGeometryType& superGeometry,
+	                         PsimagLite::String extension)
 	    : ModelBaseType(solverParams,
-		  superGeometry,
-		  io)
+	                    superGeometry,
+	                    io)
 	    , modelParameters_(io)
 	    , superGeometry_(superGeometry)
 	    , extension_(extension)
@@ -147,8 +145,8 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                        const BlockType& block,
+	                                        RealType time) const
 	{
 		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
@@ -175,10 +173,10 @@ protected:
 		OpsLabelType& ph = this->createOpsLabel("ph");
 		typename OperatorType::Su2RelatedType su2related;
 		OperatorType phOp(tmp3crs,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0, 0),
+		                  1,
+		                  su2related);
 		ph.push(phOp);
 		// END define ph operator
 
@@ -229,17 +227,19 @@ protected:
 		    'N',
 		    splus,
 		    'C',
-		    [isSu2](SparseElementType& value, RealType, SizeType) { value *= (isSu2) ? -0.5 : 0.5; },
+		    [isSu2](SparseElementType& value, RealType, SizeType)
+		    { value *= (isSu2) ? -0.5 : 0.5; },
 		    typename ModelTermType::Su2Properties(2, -1, 2));
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		OpForLinkType sz("sz");
 
 		szsz.push(sz,
-		    'N',
-		    sz,
-		    'N',
-		    [isSu2](SparseElementType& value) { if (isSu2) value = -value; });
+		          'N',
+		          sz,
+		          'N',
+		          [isSu2](SparseElementType& value)
+		          { if (isSu2) value = -value; });
 
 		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
 		OpForLinkType pair("pair");
@@ -268,15 +268,16 @@ private:
 		iah.push(cdn1, 'N', cup, 'N');
 
 		// Because we only consider i<j we need to add the j,i connections
-		auto valueModifer = [](SparseElementType& value) { value *= -1; };
+		auto valueModifer = [](SparseElementType& value)
+		{ value *= -1; };
 		iah.push(cdown, 'N', cdn0, 'N', valueModifer);
 		iah.push(cup, 'N', cdn1, 'N', valueModifer);
 	}
 
 	// cdn_i == c^\dagger_{i \bar{sigma} n_{i sigma}
 	void setCdn(OpsLabelType& p,
-	    const VectorOperatorType& cm,
-	    SizeType sigma) const
+	            const VectorOperatorType& cm,
+	            SizeType sigma) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 
@@ -289,10 +290,10 @@ private:
 		multiply(cdn, cDaggerBarSigma.getCRS(), nSigmaOp);
 
 		OperatorType myOp(cdn,
-		    ProgramGlobals::FermionOrBosonEnum::FERMION,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+		                  typename OperatorType::PairType(0, 0),
+		                  1,
+		                  su2related);
 		p.push(myOp);
 	}
 
@@ -303,17 +304,17 @@ private:
 		multiply(pair, cm[0].getCRS(), cm[1].getCRS());
 
 		OperatorType myOp(pair,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0, 0),
+		                  1,
+		                  su2related);
 		p.push(myOp);
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 	RealType sign(typename HilbertSpaceHubbardType::HilbertState const& ket,
-	    int i,
-	    int sigma) const
+	              int i,
+	              int sigma) const
 	{
 		int value = 0;
 		value += HilbertSpaceHubbardType::calcNofElectrons(ket, 0, i, 0);

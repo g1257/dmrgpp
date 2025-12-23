@@ -3,15 +3,12 @@
 #include "TypeToString.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename OperatorType_>
-class LabeledOperators
-{
+class LabeledOperators {
 
-	class Label
-	{
+	class Label {
 
 	public:
 
@@ -97,8 +94,7 @@ class LabeledOperators
 	};
 
 	typedef typename PsimagLite::Vector<Label*>::Type VectorLabelType;
-	class IsValue
-	{
+	class IsValue {
 
 	public:
 
@@ -165,11 +161,11 @@ public:
 	}
 
 	Label& createLabel(PsimagLite::String name,
-	    SizeType kindOfSite)
+	                   SizeType kindOfSite)
 	{
 		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
-		    labels_.end(),
-		    IsValue(name));
+		                                                          labels_.end(),
+		                                                          IsValue(name));
 
 		if (x != labels_.end())
 			err("Repeated label " + name + "\n");
@@ -180,7 +176,7 @@ public:
 	}
 
 	const OperatorType& operator()(PsimagLite::String what,
-	    SizeType dof) const
+	                               SizeType dof) const
 	{
 		return findLabel(what)(dof);
 	}
@@ -188,8 +184,8 @@ public:
 	const LabelType& findLabel(PsimagLite::String what) const
 	{
 		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
-		    labels_.end(),
-		    IsValue(what));
+		                                                          labels_.end(),
+		                                                          IsValue(what));
 		if (x != labels_.end())
 			return *(labels_[x - labels_.begin()]);
 
@@ -209,8 +205,8 @@ public:
 	void introspect(PsimagLite::String what) const
 	{
 		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
-		    labels_.end(),
-		    what);
+		                                                          labels_.end(),
+		                                                          what);
 		if (x != labels_.end())
 			return labels_[x - labels_.begin()]->introspect();
 
@@ -245,10 +241,10 @@ private:
 		tmp.makeDiagonal(nrow, 1.0);
 		typename OperatorType::Su2RelatedType su2Related;
 		label.push(OperatorType(tmp,
-		    1.0,
-		    typename OperatorType::PairType(0, 0),
-		    1.0,
-		    su2Related));
+		                        1.0,
+		                        typename OperatorType::PairType(0, 0),
+		                        1.0,
+		                        su2Related));
 	}
 
 	LabeledOperators(const LabeledOperators&);

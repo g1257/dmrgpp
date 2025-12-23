@@ -4,12 +4,10 @@
 #include "Io/IoNg.h"
 #include "Stack.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename T>
-class MemoryStack : public PsimagLite::Stack<T>::Type
-{
+class MemoryStack : public PsimagLite::Stack<T>::Type {
 
 public:
 
@@ -17,8 +15,7 @@ public:
 };
 
 template <typename BasisWithOperatorsType>
-class DiskOrMemoryStack
-{
+class DiskOrMemoryStack {
 
 public:
 
@@ -26,10 +23,10 @@ public:
 	typedef DiskStack<BasisWithOperatorsType> DiskStackType;
 
 	DiskOrMemoryStack(bool onDisk,
-	    const PsimagLite::String filename,
-	    const PsimagLite::String post,
-	    PsimagLite::String label,
-	    const BasisTraits& basisTraits)
+	                  const PsimagLite::String filename,
+	                  const PsimagLite::String post,
+	                  PsimagLite::String label,
+	                  const BasisTraits& basisTraits)
 	    : basisTraits_(basisTraits)
 	    , diskW_(0)
 	    , diskR_(0)
@@ -155,7 +152,7 @@ public:
 private:
 
 	void writeWftStacksOnDisk(PsimagLite::String name,
-	    PsimagLite::IoNgSerializer& io) const
+	                          PsimagLite::IoNgSerializer& io) const
 	{
 		io.createGroup(name);
 		io.write(name + "/Size", this->size());

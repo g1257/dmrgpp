@@ -88,12 +88,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <algorithm>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelBaseType>
-class GaugeSpin : public ModelBaseType
-{
+class GaugeSpin : public ModelBaseType {
 
 public:
 
@@ -131,11 +129,11 @@ public:
 	static const SizeType TWICE_THE_SPIN = 2;
 
 	GaugeSpin(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	          InputValidatorType& io,
+	          const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , modelParameters_(io)
 	    , superOpHelperPlaquette_(nullptr)
 	{
@@ -152,8 +150,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -188,10 +186,10 @@ protected:
 		typename OperatorType::Su2RelatedType su2related;
 
 		OperatorType myOp(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 2),
-		    -1,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  PairType(2, 2),
+		                  -1,
+		                  su2related);
 		this->createOpsLabel("splus").push(myOp);
 		// this->makeTrackable("splus");
 
@@ -202,10 +200,10 @@ protected:
 		tmpMatrix = findSzMatrices(0, natBasis);
 		typename OperatorType::Su2RelatedType su2related2;
 		OperatorType myOp2(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 1),
-		    1.0 / sqrt(2.0),
-		    su2related2);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 1),
+		                   1.0 / sqrt(2.0),
+		                   su2related2);
 		this->createOpsLabel("sz").push(myOp2);
 		// this->makeTrackable("sz");
 
@@ -213,10 +211,10 @@ protected:
 		tmpMatrix = findSxMatrices(0, natBasis);
 		typename OperatorType::Su2RelatedType su2related3;
 		OperatorType myOp3(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 1),
-		    1.0 / sqrt(2.0),
-		    su2related3);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 1),
+		                   1.0 / sqrt(2.0),
+		                   su2related3);
 		this->createOpsLabel("sx").push(myOp3);
 		this->makeTrackable("sx");
 	}
@@ -235,8 +233,8 @@ protected:
 	}
 
 	void fillNewNonLocals(std::vector<OperatorType>& newNonLocals,
-	    const LeftRightSuperType& lrs,
-	    RealType) const // last argument is time
+	                      const LeftRightSuperType& lrs,
+	                      RealType) const // last argument is time
 	{
 		bool isSys = (lrs.super().block()[0] == 0);
 		if (isSys) {
@@ -274,7 +272,7 @@ private:
 
 	//! Find S^+_site in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	                                   const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -317,7 +315,7 @@ private:
 
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	                                const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -345,7 +343,7 @@ private:
 	}
 
 	SparseMatrixType findSxMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	                                const HilbertBasisType& natBasis) const
 	{
 		SparseMatrixType Splus_temp = findSplusMatrices(site, natBasis);
 		SparseMatrixType Sminus_temp, Sx;

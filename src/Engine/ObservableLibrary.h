@@ -86,12 +86,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "StringOrderPost.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ObserverType>
-class ObservableLibrary
-{
+class ObservableLibrary {
 
 public:
 
@@ -115,11 +113,11 @@ public:
 
 	template <typename IoInputter>
 	ObservableLibrary(IoInputter& io,
-	    SizeType numberOfSites,
-	    const ModelType& model,
-	    SizeType start,
-	    SizeType nf,
-	    SizeType trail)
+	                  SizeType numberOfSites,
+	                  const ModelType& model,
+	                  SizeType start,
+	                  SizeType nf,
+	                  SizeType trail)
 	    : numberOfSites_(numberOfSites)
 	    , hasTimeEvolution_(false)
 	    , model_(model)
@@ -132,9 +130,9 @@ public:
 	const ModelType& model() const { return model_; }
 
 	void interpret(const PsimagLite::String& list,
-	    SizeType rows,
-	    SizeType cols,
-	    const ManyPointActionType& manyPointAction)
+	               SizeType rows,
+	               SizeType cols,
+	               const ManyPointActionType& manyPointAction)
 	{
 		typename BraketType::VectorStringType vecStr;
 		PsimagLite::split(vecStr, list, ",");
@@ -165,8 +163,8 @@ public:
 				}
 
 				measureOnePoint(braket.bra(),
-				    braket.opName(0),
-				    braket.ket());
+				                braket.opName(0),
+				                braket.ket());
 				continue;
 			}
 
@@ -175,10 +173,10 @@ public:
 	}
 
 	void measure(const PsimagLite::String& label,
-	    SizeType rows,
-	    SizeType cols,
-	    const ManyPointActionType& manyPointAction,
-	    SizeType orbitals)
+	             SizeType rows,
+	             SizeType cols,
+	             const ManyPointActionType& manyPointAction,
+	             SizeType orbitals)
 	{
 		const RealType oneF = 1;
 		Su2RelatedType su2Related;
@@ -205,23 +203,23 @@ public:
 					PsimagLite::String str = "<gs|n?" + ttos(i) + ";n?" + ttos(j) + "|gs>";
 					BraketType braket(model_, str);
 					OperatorType n1Op(n1,
-					    ProgramGlobals::FermionOrBosonEnum::BOSON,
-					    PairSizeType(0, 0),
-					    oneF,
-					    su2Related);
+					                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+					                  PairSizeType(0, 0),
+					                  oneF,
+					                  su2Related);
 					OperatorType n2Op(n2,
-					    ProgramGlobals::FermionOrBosonEnum::BOSON,
-					    PairSizeType(0, 0),
-					    oneF,
-					    su2Related);
+					                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+					                  PairSizeType(0, 0),
+					                  oneF,
+					                  su2Related);
 
 					braket.forceOperators(n1Op, n2Op);
 					observe_.twoPoint(out,
-					    braket,
-					    ProgramGlobals::FermionOrBosonEnum::BOSON,
-					    "gs",
-					    "gs",
-					    manyPointAction);
+					                  braket,
+					                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+					                  "gs",
+					                  "gs",
+					                  manyPointAction);
 					std::cout << str << std::endl;
 					std::cout << out;
 				}
@@ -419,8 +417,8 @@ public:
 private:
 
 	void measureOnePoint(const PsimagLite::GetBraOrKet& bra,
-	    PsimagLite::String label,
-	    const PsimagLite::GetBraOrKet& ket)
+	                     PsimagLite::String label,
+	                     const PsimagLite::GetBraOrKet& ket)
 	{
 		printMatrix(bra, label, ket);
 
@@ -448,8 +446,8 @@ private:
 	}
 
 	void printMatrix(const PsimagLite::GetBraOrKet& bra,
-	    PsimagLite::String label,
-	    const PsimagLite::GetBraOrKet& ket) const
+	                 PsimagLite::String label,
+	                 const PsimagLite::GetBraOrKet& ket) const
 	{
 		bool printDone = false;
 
@@ -475,10 +473,10 @@ private:
 	}
 
 	void cornerLeftOrRight(SizeType site,
-	    SizeType ptr,
-	    const PsimagLite::GetBraOrKet& bra,
-	    PsimagLite::String label,
-	    const PsimagLite::GetBraOrKet& ket)
+	                       SizeType ptr,
+	                       const PsimagLite::GetBraOrKet& bra,
+	                       PsimagLite::String label,
+	                       const PsimagLite::GetBraOrKet& ket)
 	{
 		if (observe_.helper().site(ptr) != site)
 			return;
@@ -496,10 +494,10 @@ private:
 
 			const SizeType splitSize = model_.hilbertSize(1);
 			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr,
-			    opA,
-			    splitSize,
-			    bra,
-			    ket);
+			                                                                          opA,
+			                                                                          splitSize,
+			                                                                          bra,
+			                                                                          ket);
 			std::cout << "0 " << tmp1 << " " << observe_.helper().time(ptr) << "\n";
 			return;
 		}
@@ -521,18 +519,18 @@ private:
 
 		// do the corner case
 		FieldType tmp1 = observe_.template onePoint<ApplyOperatorType>(ptr,
-		    opAcorner,
-		    x,
-		    ApplyOperatorType::BORDER_YES,
-		    bra,
-		    ket);
+		                                                               opAcorner,
+		                                                               x,
+		                                                               ApplyOperatorType::BORDER_YES,
+		                                                               bra,
+		                                                               ket);
 		std::cout << x << " " << tmp1;
 		std::cout << " " << observe_.helper().time(ptr) << "\n";
 	}
 
 	MatrixType SliceOrbital(const MatrixType& m,
-	    const SizeType o1,
-	    const SizeType o2)
+	                        const SizeType o1,
+	                        const SizeType o2)
 	{
 		SizeType orbitals = 2;
 		SizeType nsite = numberOfSites_ / orbitals;
@@ -550,11 +548,11 @@ private:
 	}
 
 	void ppTwopoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
-	    typename PsimagLite::Vector<PsimagLite::String>::Type& names,
-	    SizeType rows,
-	    SizeType cols,
-	    PsimagLite::String bra,
-	    PsimagLite::String ket)
+	                typename PsimagLite::Vector<PsimagLite::String>::Type& names,
+	                SizeType rows,
+	                SizeType cols,
+	                PsimagLite::String bra,
+	                PsimagLite::String ket)
 	{
 		// Two-point Pair
 		MatrixType m1(rows, cols);
@@ -585,10 +583,10 @@ private:
 	}
 
 	void ppTwo(MatrixType& m,
-	    MatrixType& m2,
-	    SizeType flag,
-	    PsimagLite::String bra,
-	    PsimagLite::String ket)
+	           MatrixType& m2,
+	           SizeType flag,
+	           PsimagLite::String bra,
+	           PsimagLite::String ket)
 	{
 		const RealType oneF = 1;
 		Su2RelatedType su2Related;
@@ -607,24 +605,24 @@ private:
 			multiply(B, O1, O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A, B);
 			OperatorType opA(A,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			OperatorType opB(B,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
 			ManyPointActionType emptyAction(false, "");
 			observe_.twoPoint(m,
-			    braket,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    bra,
-			    ket,
-			    emptyAction);
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			// std::cout << m;
 			std::cout << "PairPair Correlations S^{l}_{on}" << std::endl;
 			SliceOrbital(m, 0, 0);
@@ -671,11 +669,11 @@ private:
 	}
 
 	void ppupupdndn(MatrixType& m,
-	    MatrixType& m2,
-	    SizeType orb1,
-	    SizeType orb2,
-	    SizeType orb3,
-	    SizeType orb4) const
+	                MatrixType& m2,
+	                SizeType orb1,
+	                SizeType orb2,
+	                SizeType orb3,
+	                SizeType orb4) const
 	{
 		PsimagLite::String string = "two";
 		if (string != "four" && string != "two") {
@@ -702,7 +700,7 @@ private:
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					SizeType spin1 = spin0;
 					pairs.push_back(PairSizeType(thini1 + thini2 * rows * orbitals + rows * orbitals * rows * orbitals * spin0,
-					    thinj1 + thinj2 * rows * orbitals + rows * orbitals * rows * orbitals * spin1));
+					                             thinj1 + thinj2 * rows * orbitals + rows * orbitals * rows * orbitals * spin1));
 				}
 			}
 		}
@@ -712,11 +710,11 @@ private:
 		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel4PointDsType helper4PointDs(m,
-		    observe_.fourpoint(),
-		    model_,
-		    gammas,
-		    pairs,
-		    Parallel4PointDsType::MODE_THINupdn);
+		                                    observe_.fourpoint(),
+		                                    model_,
+		                                    gammas,
+		                                    pairs,
+		                                    Parallel4PointDsType::MODE_THINupdn);
 
 		threaded4PointDs.loopCreate(helper4PointDs);
 
@@ -747,11 +745,11 @@ private:
 	}
 
 	void ddOrbitalsTwopoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
-	    typename PsimagLite::Vector<PsimagLite::String>::Type& names,
-	    SizeType rows,
-	    SizeType cols,
-	    PsimagLite::String bra,
-	    PsimagLite::String ket)
+	                        typename PsimagLite::Vector<PsimagLite::String>::Type& names,
+	                        SizeType rows,
+	                        SizeType cols,
+	                        PsimagLite::String bra,
+	                        PsimagLite::String ket)
 	{
 		// Two-point Pair
 		MatrixType* m1 = new MatrixType(rows, cols);
@@ -798,9 +796,9 @@ private:
 	}
 
 	void ddOrbitalsFourpoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
-	    typename PsimagLite::Vector<PsimagLite::String>::Type& names,
-	    SizeType rows,
-	    SizeType cols) const
+	                         typename PsimagLite::Vector<PsimagLite::String>::Type& names,
+	                         SizeType rows,
+	                         SizeType cols) const
 	{
 		// Singlet four-points
 		MatrixType* m1 = new MatrixType(rows, cols);
@@ -854,9 +852,9 @@ private:
 	}
 
 	void ddOrbitalsTwo(MatrixType& m,
-	    const SizeType flag,
-	    PsimagLite::String bra,
-	    PsimagLite::String ket)
+	                   const SizeType flag,
+	                   PsimagLite::String bra,
+	                   PsimagLite::String ket)
 	{
 		const RealType oneF = 1;
 		Su2RelatedType su2Related;
@@ -879,23 +877,23 @@ private:
 			multiply(B, O1, O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A, B);
 			OperatorType opA(A,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			OperatorType opB(B,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
 			observe_.twoPoint(m,
-			    braket,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    bra,
-			    ket,
-			    emptyAction);
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 
 			std::cout << m;
 		} else if (flag == 1) {
@@ -910,23 +908,23 @@ private:
 			multiply(B, O1, O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A, B);
 			OperatorType opA(A,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			OperatorType opB(B,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
 			observe_.twoPoint(m,
-			    braket,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    bra,
-			    ket,
-			    emptyAction);
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag == 2) {
 			SizeType spin0 = 0; // up
@@ -946,23 +944,23 @@ private:
 			operatorPlus(B, tmp1, mult1, tmp2, mult2); // B = 1.0*tmp1 + (-1.0)*tmp2 = Singlet
 			transposeConjugate(A, B); // A = transpose(B)
 			OperatorType opA(A,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			OperatorType opB(B,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
 			observe_.twoPoint(m,
-			    braket,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    bra,
-			    ket,
-			    emptyAction);
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag == 3) {
 			SizeType spin0 = 0; // up
@@ -982,23 +980,23 @@ private:
 			operatorPlus(B, tmp1, mult1, tmp2, mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet
 			transposeConjugate(A, B); // A = transpose(B)
 			OperatorType opA(A,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			OperatorType opB(B,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
 			observe_.twoPoint(m,
-			    braket,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    bra,
-			    ket,
-			    emptyAction);
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag == 4) {
 			SizeType orb0 = 0; // lower orbital
@@ -1012,23 +1010,23 @@ private:
 			multiply(B, O1, O2); // c_up,0 . c_up,1
 			transposeConjugate(A, B);
 			OperatorType opA(A,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			OperatorType opB(B,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
 			observe_.twoPoint(m,
-			    braket,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    bra,
-			    ket,
-			    emptyAction);
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag == 5) {
 			SizeType orb0 = 0; // lower orbital
@@ -1042,23 +1040,23 @@ private:
 			multiply(B, O1, O2); // c_dn,0 . c_dn,1
 			transposeConjugate(A, B);
 			OperatorType opA(A,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			OperatorType opB(B,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
 			observe_.twoPoint(m,
-			    braket,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    bra,
-			    ket,
-			    emptyAction);
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else if (flag == 6) {
 			SizeType spin0 = 0; // up
@@ -1079,23 +1077,23 @@ private:
 			operatorPlus(B, tmp1, mult1, tmp2, mult2);
 			transposeConjugate(A, B); // A = transpose(B)
 			OperatorType opA(A,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			OperatorType opB(B,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairSizeType(0, 0),
-			    oneF,
-			    su2Related);
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 PairSizeType(0, 0),
+			                 oneF,
+			                 su2Related);
 			BraketType braket(model_, "<gs|c'*c;c'*c|gs>");
 			braket.forceOperators(opA, opB);
 			observe_.twoPoint(m,
-			    braket,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    bra,
-			    ket,
-			    emptyAction);
+			                  braket,
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  bra,
+			                  ket,
+			                  emptyAction);
 			std::cout << m;
 		} else {
 			err("Unknown flag: " + ttos(flag));
@@ -1103,11 +1101,11 @@ private:
 	}
 
 	void ddOrbitalsFour(MatrixType& m,
-	    SizeType orb1,
-	    SizeType orb2,
-	    SizeType orb3,
-	    SizeType orb4,
-	    int sign) const
+	                    SizeType orb1,
+	                    SizeType orb2,
+	                    SizeType orb3,
+	                    SizeType orb4,
+	                    int sign) const
 	{
 		SizeType rows = m.n_row();
 		SizeType cols = m.n_row();
@@ -1121,12 +1119,12 @@ private:
 	}
 
 	FieldType ddOrbitalsFour2(SizeType i,
-	    SizeType j,
-	    SizeType orb1,
-	    SizeType orb2,
-	    SizeType orb3,
-	    SizeType orb4,
-	    int sign) const
+	                          SizeType j,
+	                          SizeType orb1,
+	                          SizeType orb2,
+	                          SizeType orb3,
+	                          SizeType orb4,
+	                          int sign) const
 	{
 		SizeType i1 = i;
 		SizeType i2 = i + 1;
@@ -1164,9 +1162,9 @@ private:
 	}
 
 	void ppFourpoint(typename PsimagLite::Vector<MatrixType*>::Type& result,
-	    typename PsimagLite::Vector<PsimagLite::String>::Type& names,
-	    SizeType rows,
-	    SizeType cols) const
+	                 typename PsimagLite::Vector<PsimagLite::String>::Type& names,
+	                 SizeType rows,
+	                 SizeType cols) const
 	{
 		/*	Alberto Nocera
 		 *
@@ -1274,7 +1272,7 @@ private:
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 						pairs.push_back(PairSizeType(thini1 + thini2 * rows * orbitals + rows * orbitals * rows * orbitals * spin0,
-						    thinj1 + thinj2 * rows * orbitals + rows * orbitals * rows * orbitals * spin1));
+						                             thinj1 + thinj2 * rows * orbitals + rows * orbitals * rows * orbitals * spin1));
 					}
 				}
 			}
@@ -1285,11 +1283,11 @@ private:
 		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel4PointDsType helper4PointDs(m,
-		    observe_.fourpoint(),
-		    model_,
-		    gammas,
-		    pairs,
-		    Parallel4PointDsType::MODE_THIN);
+		                                    observe_.fourpoint(),
+		                                    model_,
+		                                    gammas,
+		                                    pairs,
+		                                    Parallel4PointDsType::MODE_THIN);
 
 		threaded4PointDs.loopCreate(helper4PointDs);
 
@@ -1321,10 +1319,10 @@ private:
 	}
 
 	void manyPoint(MatrixType* storage,
-	    const BraketType& braket,
-	    SizeType rows,
-	    SizeType cols,
-	    const ManyPointActionType& someAction)
+	               const BraketType& braket,
+	               SizeType rows,
+	               SizeType cols,
+	               const ManyPointActionType& someAction)
 	{
 		static const bool DO_PRINT = true;
 
@@ -1364,9 +1362,9 @@ private:
 	}
 
 	void resizeStorage(VectorMatrixType& v,
-	    SizeType rows,
-	    SizeType cols,
-	    SizeType orbitals)
+	                   SizeType rows,
+	                   SizeType cols,
+	                   SizeType orbitals)
 	{
 		if (v.size() != 0)
 			return;

@@ -5,9 +5,9 @@
 
 template <typename SolverType, typename VectorWithOffsetType>
 void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType& geometry,
-    const ParametersDmrgSolverType& dmrgSolverParams,
-    InputNgType::Readable& io,
-    const OperatorOptions& opOptions)
+               const ParametersDmrgSolverType& dmrgSolverParams,
+               InputNgType::Readable& io,
+               const OperatorOptions& opOptions)
 {
 	typedef typename SolverType::MatrixType::ModelType ModelBaseType;
 

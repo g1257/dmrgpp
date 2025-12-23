@@ -22,12 +22,10 @@
  * etc.
  *
  */
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename SuperGeometryType, typename ParamsType>
-class SuperOpHelperPlaquette : public SuperOpHelperBase<SuperGeometryType, ParamsType>
-{
+class SuperOpHelperPlaquette : public SuperOpHelperBase<SuperGeometryType, ParamsType> {
 
 public:
 
@@ -44,8 +42,8 @@ public:
 	}
 
 	void setToProduct(SizeType smaxOrEmin,
-	    SizeType newSite,
-	    ProgramGlobals::DirectionEnum dir)
+	                  SizeType newSite,
+	                  ProgramGlobals::DirectionEnum dir)
 	{
 		smaxOrEmin_ = smaxOrEmin;
 		newSite_ = newSite;
@@ -61,8 +59,8 @@ public:
 	SizeType size() const { return 1; }
 
 	PairMetaOpForConnection finalIndices(const VectorSizeType& hItems,
-	    ProgramGlobals::ConnectionEnum type,
-	    SizeType rightBlockSize) const
+	                                     ProgramGlobals::ConnectionEnum type,
+	                                     SizeType rightBlockSize) const
 	{
 		assert(hItems.size() == 4);
 		constexpr int NON_LOCAL = -1;

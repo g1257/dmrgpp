@@ -10,12 +10,10 @@
 #include <numeric>
 #include <unordered_map>
 
-namespace std
-{
+namespace std {
 
 template <>
-class hash<Dmrg::Qn>
-{
+class hash<Dmrg::Qn> {
 
 public:
 

@@ -236,8 +236,7 @@ namespace MPI {
 					break;
 				MPI::send(v[taskNumber], 0, taskNumber);
 			}
-		}
-		else {
+		} else {
 			for (int r = 0; r < nprocs; r++) {
 				if (r == root)
 					continue;
@@ -272,8 +271,7 @@ namespace MPI {
 					break;
 				v[taskNumber].send(0, taskNumber, mpiComm);
 			}
-		}
-		else {
+		} else {
 			for (int r = 0; r < nprocs; r++) {
 				if (r == root)
 					continue;
@@ -305,8 +303,7 @@ namespace MPI {
 					break;
 				send(v[taskNumber], 0, taskNumber, mpiComm);
 			}
-		}
-		else {
+		} else {
 			for (int r = 0; r < nprocs; r++) {
 				if (r == root)
 					continue;

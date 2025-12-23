@@ -80,12 +80,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "NotMpi.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType, typename LanczosSolverType, typename VectorWithOffsetType>
-class ParallelTriDiag
-{
+class ParallelTriDiag {
 
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -104,13 +102,13 @@ public:
 	typedef typename PsimagLite::Vector<MatrixComplexOrRealType>::Type VectorMatrixFieldType;
 
 	ParallelTriDiag(const VectorWithOffsetType& phi,
-	    VectorMatrixFieldType& T,
-	    VectorMatrixFieldType& V,
-	    typename PsimagLite::Vector<SizeType>::Type& steps,
-	    const LeftRightSuperType& lrs,
-	    RealType currentTime,
-	    const ModelType& model,
-	    InputValidatorType& io)
+	                VectorMatrixFieldType& T,
+	                VectorMatrixFieldType& V,
+	                typename PsimagLite::Vector<SizeType>::Type& steps,
+	                const LeftRightSuperType& lrs,
+	                RealType currentTime,
+	                const ModelType& model,
+	                InputValidatorType& io)
 	    : phi_(phi)
 	    , T_(T)
 	    , V_(V)
@@ -133,16 +131,16 @@ public:
 private:
 
 	SizeType triDiag(const VectorWithOffsetType& phi,
-	    MatrixComplexOrRealType& T,
-	    MatrixComplexOrRealType& V,
-	    SizeType i0)
+	                 MatrixComplexOrRealType& T,
+	                 MatrixComplexOrRealType& V,
+	                 SizeType i0)
 	{
 		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		    ModelType::modelLinks(),
-		    currentTime_,
-		    model_.superOpHelper());
+		                                                 ModelType::modelLinks(),
+		                                                 currentTime_,
+		                                                 model_.superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc, aux);
 
 		typename LanczosSolverType::ParametersSolverType params(io_, "Tridiag");

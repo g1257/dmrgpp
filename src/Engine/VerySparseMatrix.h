@@ -84,12 +84,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "Sort.h" // in PsimagLite
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Yet another sparse matrix class
 template <class ComplexOrRealType>
-class VerySparseMatrix
-{
+class VerySparseMatrix {
 
 	typedef std::pair<SizeType, SizeType> PairType;
 	typedef PsimagLite::Vector<PairType>::Type VectorPairType;
@@ -204,9 +202,9 @@ public:
 	}
 
 	void set(SizeType counter,
-	    SizeType row,
-	    SizeType col,
-	    const ComplexOrRealType& value)
+	         SizeType row,
+	         SizeType col,
+	         const ComplexOrRealType& value)
 	{
 		assert(values_.size() == coordinates_.size());
 		assert(counter < coordinates_.size());
@@ -308,8 +306,8 @@ public:
 	}
 
 	void getRow(VectorSizeType& cols,
-	    SizeType row,
-	    SizeType startIndex = 0) const
+	            SizeType row,
+	            SizeType startIndex = 0) const
 	{
 		cols.clear();
 		for (SizeType i = startIndex; i < coordinates_.size(); i++) {
@@ -327,7 +325,7 @@ public:
 	}
 
 	void getColumn(VectorSizeType& rows,
-	    SizeType col) const
+	               SizeType col) const
 	{
 		rows.clear();
 		for (SizeType i = 0; i < coordinates_.size(); i++)
@@ -344,7 +342,7 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	    const VerySparseMatrix<ComplexOrRealType>& m)
+	                                const VerySparseMatrix<ComplexOrRealType>& m)
 	{
 		os << m.rows_ << " " << m.cols_;
 		if (m.rows_ == 0 || m.cols_ == 0)
@@ -358,7 +356,7 @@ public:
 	}
 
 	friend std::istream& operator>>(std::istream& is,
-	    VerySparseMatrix<ComplexOrRealType>& m)
+	                                VerySparseMatrix<ComplexOrRealType>& m)
 	{
 		is >> m.rows_;
 		is >> m.cols_;
@@ -588,7 +586,7 @@ bool isHermitian(const VerySparseMatrix<T>& m)
 
 template <typename T>
 void verySparseMatrixToDenseMatrix(PsimagLite::Matrix<T>& m,
-    const VerySparseMatrix<T>& vsm)
+                                   const VerySparseMatrix<T>& vsm)
 {
 	m.resize(vsm.rows(), vsm.cols());
 	m.setTo(0.0);
@@ -599,7 +597,7 @@ void verySparseMatrixToDenseMatrix(PsimagLite::Matrix<T>& m,
 
 template <typename T>
 void fullMatrixToVerySparseMatrix(VerySparseMatrix<T>& vsm,
-    const PsimagLite::Matrix<T>& m)
+                                  const PsimagLite::Matrix<T>& m)
 {
 	vsm.resize(m.rows(), m.cols());
 	for (SizeType i = 0; i < m.rows(); ++i) {
@@ -613,11 +611,13 @@ void fullMatrixToVerySparseMatrix(VerySparseMatrix<T>& vsm,
 }
 } // namespace Dmrg
 
-namespace PsimagLite
-{
+namespace PsimagLite {
 template <typename T>
 struct IsMatrixLike<Dmrg::VerySparseMatrix<T>> {
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 }
 /*@}*/

@@ -2,14 +2,14 @@
 
 template <typename ComplexOrRealType>
 void coord2csr(const int nrow_A,
-    const int ncol_A,
-    const int nnz,
-    const int ilist[],
-    const int jlist[],
-    const ComplexOrRealType alist[],
-    int arowptr[],
-    int acol[],
-    ComplexOrRealType aval[])
+               const int ncol_A,
+               const int nnz,
+               const int ilist[],
+               const int jlist[],
+               const ComplexOrRealType alist[],
+               int arowptr[],
+               int acol[],
+               ComplexOrRealType aval[])
 {
 	/*
 	 * --------------------------------------

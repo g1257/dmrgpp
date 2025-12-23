@@ -13,19 +13,19 @@ bool atLeastOneLoopWithBit0Set(const T& fl)
 	return false;
 }
 template <typename GeometryType,
-    typename ModelHelperType,
-    typename VectorWithOffsetType>
+          typename ModelHelperType,
+          typename VectorWithOffsetType>
 void mainLoop(GeometryType& geometry,
-    InputNgType::Readable& io,
-    const ParametersDmrgSolverType& params,
-    const PsimagLite::String& list)
+              InputNgType::Readable& io,
+              const ParametersDmrgSolverType& params,
+              const PsimagLite::String& list)
 {
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 
 	typedef ModelBase<ModelHelperType,
-	    ParametersDmrgSolverType,
-	    InputNgType::Readable,
-	    GeometryType>
+	                  ParametersDmrgSolverType,
+	                  InputNgType::Readable,
+	                  GeometryType>
 	    ModelBaseType;
 
 	SizeType orbitals = 1.0;
@@ -51,12 +51,12 @@ void mainLoop(GeometryType& geometry,
 }
 
 template <typename GeometryType,
-    template <typename> class ModelHelperTemplate,
-    typename MySparseMatrix>
+          template <typename> class ModelHelperTemplate,
+          typename MySparseMatrix>
 void mainLoop1(GeometryType& geometry,
-    InputNgType::Readable& io,
-    const ParametersDmrgSolverType& params,
-    const PsimagLite::String& list)
+               InputNgType::Readable& io,
+               const ParametersDmrgSolverType& params,
+               const PsimagLite::String& list)
 {
 	typedef Basis<MySparseMatrix> BasisType;
 	typedef BasisWithOperators<BasisType> BasisWithOperatorsType;
@@ -76,14 +76,14 @@ void mainLoop1(GeometryType& geometry,
 
 template <typename MySparseMatrix>
 void mainLoop0(InputNgType::Readable& io,
-    ParametersDmrgSolverType& dmrgSolverParams,
-    InputCheck& inputCheck,
-    const PsimagLite::String& list)
+               ParametersDmrgSolverType& dmrgSolverParams,
+               InputCheck& inputCheck,
+               const PsimagLite::String& list)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
 	typedef Dmrg::SuperGeometry<ComplexOrRealType,
-	    InputNgType::Readable,
-	    ProgramGlobals>
+	                            InputNgType::Readable,
+	                            ProgramGlobals>
 	    SuperGeometryType;
 
 	SuperGeometryType superGeometry(io);
@@ -219,9 +219,9 @@ int main(int argc, char** argv)
 	}
 
 	PsimagLite::CodeSectionParams codeSectionParams(dmrgSolverParams.nthreads,
-	    dmrgSolverParams.nthreads2,
-	    setAffinities,
-	    threadsStackSize);
+	                                                dmrgSolverParams.nthreads2,
+	                                                setAffinities,
+	                                                threadsStackSize);
 	ConcurrencyType::setOptions(codeSectionParams);
 
 	if (!atLeastOneLoopWithBit0Set(dmrgSolverParams.finiteLoop))

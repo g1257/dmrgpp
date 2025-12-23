@@ -85,12 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FreqEnum.h"
 #include "TargetParamsCommon.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType>
-class TargetParamsCorrectionVector : public TargetParamsCommon<ModelType>
-{
+class TargetParamsCorrectionVector : public TargetParamsCommon<ModelType> {
 
 public:
 
@@ -105,8 +103,8 @@ public:
 
 	template <typename IoInputter>
 	TargetParamsCorrectionVector(IoInputter& io,
-	    PsimagLite::String targeting,
-	    const ModelType& model)
+	                             PsimagLite::String targeting,
+	                             const ModelType& model)
 	    : BaseType(io, targeting, model)
 	    , cgSteps_(1000)
 	    , firstRitz_(0)
@@ -251,7 +249,7 @@ private:
 
 template <typename ModelType>
 inline std::ostream& operator<<(std::ostream& os,
-    const TargetParamsCorrectionVector<ModelType>& t)
+                                const TargetParamsCorrectionVector<ModelType>& t)
 {
 	os << "TargetParams.type=AdaptiveDynamic\n";
 	const TargetParamsCommon<ModelType>& tp = t;

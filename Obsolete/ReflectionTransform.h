@@ -87,12 +87,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ReflectionBasis.h"
 #include "Sort.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename RealType, typename SparseMatrixType>
-class ReflectionTransform
-{
+class ReflectionTransform {
 
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
@@ -122,8 +120,8 @@ public:
 	}
 
 	void transform(SparseMatrixType& dest1,
-	    SparseMatrixType& destm,
-	    const SparseMatrixType& H) const
+	               SparseMatrixType& destm,
+	               const SparseMatrixType& H) const
 	{
 		SparseMatrixType HQ1, HQm;
 		multiply(HQ1, H, Q1_);
@@ -208,8 +206,8 @@ public:
 
 	template <typename SomeVectorType>
 	void setInitState(const SomeVectorType& initVector,
-	    SomeVectorType& initVector1,
-	    SomeVectorType& initVector2) const
+	                  SomeVectorType& initVector1,
+	                  SomeVectorType& initVector2) const
 	{
 		SizeType minusSector = initVector.size() - plusSector_;
 		initVector1.resize(plusSector_);
@@ -285,8 +283,8 @@ private:
 	}
 
 	void computeTransform(SparseMatrixType& Q1,
-	    const ReflectionBasisType& reflectionBasis,
-	    const RealType& sector)
+	                      const ReflectionBasisType& reflectionBasis,
+	                      const RealType& sector)
 	{
 		const SparseMatrixType& R1 = reflectionBasis.R(sector);
 		SparseMatrixType R1Inverse;
@@ -304,8 +302,8 @@ private:
 	}
 
 	void computeFullQ(SparseMatrixType& Q,
-	    const SparseMatrixType& Q1,
-	    const SparseMatrixType& Qm) const
+	                  const SparseMatrixType& Q1,
+	                  const SparseMatrixType& Qm) const
 	{
 		SizeType n = Q1.rank();
 		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n, 0.0);
@@ -398,8 +396,8 @@ private:
 	}
 
 	void buildT1(SparseMatrixType& T1final,
-	    const ReflectionBasisType& reflectionBasis,
-	    const RealType& sector) const
+	             const ReflectionBasisType& reflectionBasis,
+	             const RealType& sector) const
 	{
 		const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
 		const SparseMatrixType& reflection = reflectionBasis.reflection();

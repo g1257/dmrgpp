@@ -18,7 +18,10 @@ class has_helloworld {
 
 public:
 
-	enum { value = sizeof(test<T>(0)) == sizeof(char) };
+	enum
+	{
+		value = sizeof(test<T>(0)) == sizeof(char)
+	};
 };
 
 class A {

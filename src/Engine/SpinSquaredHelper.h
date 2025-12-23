@@ -80,11 +80,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SPIN_SQ_HELPER_H
 #define SPIN_SQ_HELPER_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename FieldType_, typename Word_>
-class SpinSquaredHelper
-{
+class SpinSquaredHelper {
 
 public:
 
@@ -99,8 +97,8 @@ public:
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	    SizeType,
-	    PsimagLite::String msg = "") const
+	                   SizeType,
+	                   PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "SpinSquaredHelper";
@@ -110,8 +108,8 @@ public:
 		SizeType total = mres.memResolv(&data_, end - start, str + " data");
 
 		total += mres.memResolv(&ketSaved_,
-		    sizeof(*this) - total,
-		    str + " ketSaved");
+		                        sizeof(*this) - total,
+		                        str + " ketSaved");
 
 		return total;
 	}
@@ -138,7 +136,7 @@ public:
 	void clear() { data_ = 0; }
 
 	void write(PsimagLite::String,
-	    PsimagLite::IoNg::Out::Serializer&) const
+	           PsimagLite::IoNg::Out::Serializer&) const
 	{
 	}
 

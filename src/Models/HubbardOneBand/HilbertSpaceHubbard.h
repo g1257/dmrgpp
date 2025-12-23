@@ -87,13 +87,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HILBERTSPACEHUBBARD_HEADER_H
 #define HILBERTSPACEHUBBARD_HEADER_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on quaterny numbers (base 4)
 template <typename Word>
-class HilbertSpaceHubbard
-{
+class HilbertSpaceHubbard {
 public:
 
 	typedef Word HilbertState;

@@ -86,17 +86,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/types.h>
 #include <unistd.h>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename DmrgParametersType, typename GeometryType>
-class ToolBox
-{
+class ToolBox {
 
 	typedef std::pair<SizeType, PsimagLite::String> PairSizeStringType;
 
-	class GrepForLabel
-	{
+	class GrepForLabel {
 
 		typedef long int LongType;
 
@@ -116,9 +113,9 @@ class ToolBox
 		typedef InternalName ParametersType;
 
 		static void hook(std::ifstream& fin,
-		    PsimagLite::String,
-		    LongType len,
-		    const ParametersType& params)
+		                 PsimagLite::String,
+		                 LongType len,
+		                 const ParametersType& params)
 		{
 			LongType len2 = len;
 			LongType bufferLen = 1;
@@ -168,11 +165,14 @@ class ToolBox
 
 public:
 
-	enum ActionEnum { ACTION_UNKNOWN,
+	enum ActionEnum
+	{
+		ACTION_UNKNOWN,
 		ACTION_GREP,
 		ACTION_FILES,
 		ACTION_INPUT,
-		ACTION_ANALYSIS };
+		ACTION_ANALYSIS
+	};
 
 	typedef typename GrepForLabel::ParametersType ParametersForGrepType;
 
@@ -206,7 +206,7 @@ public:
 	}
 
 	static void printGrep(PsimagLite::String inputfile,
-	    ParametersForGrepType params)
+	                      ParametersForGrepType params)
 	{
 		SizeType lenInput = inputfile.size();
 		PsimagLite::String dotcout = ".cout";
@@ -224,8 +224,8 @@ public:
 	}
 
 	static void analize(const DmrgParametersType& solverParams,
-	    const GeometryType& geometry,
-	    PsimagLite::String extraOptions)
+	                    const GeometryType& geometry,
+	                    PsimagLite::String extraOptions)
 	{
 		PairSizeStringType g = findLargestGeometry(geometry);
 		SizeType m = neededKeptStates(g, geometry, solverParams);
@@ -261,8 +261,8 @@ private:
 	}
 
 	static SizeType neededKeptStates(PairSizeStringType g,
-	    const GeometryType& geometry,
-	    const DmrgParametersType& solverParams)
+	                                 const GeometryType& geometry,
+	                                 const DmrgParametersType& solverParams)
 	{
 		SizeType m = 0;
 		SizeType modelFactor = getModelFactor(solverParams.model);

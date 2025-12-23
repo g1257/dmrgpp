@@ -129,8 +129,7 @@ public:
 		String retString;
 		if (ret != 0) {
 			retString = "UNKNOWN";
-		}
-		else {
+		} else {
 			retString = name;
 		}
 
@@ -153,8 +152,7 @@ public:
 			serializer.write(root + "/RunId", runId_);
 			serializer.write(root + "/UnixTimeStart",
 			                 unixTime(false));
-		}
-		else {
+		} else {
 			serializer.write(root + "/UnixTimeEnd",
 			                 unixTime(false));
 		}

@@ -82,11 +82,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BlockDiagonalMatrix.h"
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename TargetingType>
-class DensityMatrixBase
-{
+class DensityMatrixBase {
 
 public:
 
@@ -102,10 +100,10 @@ public:
 	struct Params {
 
 		Params(bool u,
-		    ProgramGlobals::DirectionEnum d,
-		    bool de,
-		    bool enablePersistentSvd_,
-		    bool serialSvd_)
+		       ProgramGlobals::DirectionEnum d,
+		       bool de,
+		       bool enablePersistentSvd_,
+		       bool serialSvd_)
 		    : useSvd(u)
 		    , direction(d)
 		    , debug(de)

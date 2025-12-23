@@ -90,20 +90,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersModelHeisenberg.h"
 #include <algorithm>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelBaseType>
-class HeisenbergMix : public ModelBaseType
-{
+class HeisenbergMix : public ModelBaseType {
 
 	static const int NUMBER_OF_ORBITALS = 1;
 	static const int DEGREES_OF_FREEDOM = 2; // spin up and down
 
 public:
 
-	enum class SiteType { SITE_MIDDLE,
-		SITE_BORDER };
+	enum class SiteType
+	{
+		SITE_MIDDLE,
+		SITE_BORDER
+	};
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::BasisType BasisType;
@@ -138,8 +139,7 @@ public:
 	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
 	using ModelParametersType = ParametersModelHeisenberg<RealType, QnType>;
 
-	class AtomKind : public AtomKindBaseType
-	{
+	class AtomKind : public AtomKindBaseType {
 
 	public:
 
@@ -161,11 +161,11 @@ public:
 	};
 
 	HeisenbergMix(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	              InputValidatorType& io,
+	              const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , atomKind_(nullptr)
@@ -220,8 +220,8 @@ public:
 	 PSIDOCCOPY $FirstFunctionBelow::MagneticField
 	 */
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -299,10 +299,10 @@ protected:
 		PsimagLite::String border = (typeOfSite == SiteType::SITE_BORDER) ? "B" : "";
 
 		OperatorType myOp(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 2),
-		    -1,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  PairType(2, 2),
+		                  -1,
+		                  su2related);
 		this->createOpsLabel("splus" + border, indOfKindOfSite).push(myOp);
 		this->makeTrackable("splus" + border);
 
@@ -313,10 +313,10 @@ protected:
 		tmpMatrix = findSzMatrices(site, natBasis);
 		typename OperatorType::Su2RelatedType su2related2;
 		OperatorType myOp2(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 1),
-		    1.0 / sqrt(2.0),
-		    su2related2);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 1),
+		                   1.0 / sqrt(2.0),
+		                   su2related2);
 		this->createOpsLabel("sz" + border, indOfKindOfSite).push(myOp2);
 		this->makeTrackable("sz" + border);
 
@@ -324,18 +324,18 @@ protected:
 		tmpMatrix = findSxMatrices(site, natBasis);
 		typename OperatorType::Su2RelatedType su2related3;
 		OperatorType myOp3(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 1),
-		    1.0 / sqrt(2.0),
-		    su2related3);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 1),
+		                   1.0 / sqrt(2.0),
+		                   su2related3);
 		this->createOpsLabel("sx" + border, indOfKindOfSite).push(myOp3);
 
 		tmpMatrix = findMaximal(site, natBasis);
 		OperatorType myOp4(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 1),
-		    1.0 / sqrt(2.0),
-		    su2related3);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 1),
+		                   1.0 / sqrt(2.0),
+		                   su2related3);
 		this->createOpsLabel("maximal" + border, indOfKindOfSite).push(myOp4);
 
 		return natBasis.size();
@@ -350,7 +350,8 @@ protected:
 
 		OpForLinkType splus("splus");
 
-		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *= 0.5; };
+		auto valueModiferTerm0 = [](ComplexOrRealType& value)
+		{ value *= 0.5; };
 
 		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 
@@ -363,39 +364,39 @@ protected:
 
 		const bool wantsHermit = true;
 		ModelTermType& spsmB1 = ModelBaseType::createTerm("SplusSminusB1",
-		    wantsHermit,
-		    "SplusSminus");
+		                                                  wantsHermit,
+		                                                  "SplusSminus");
 		spsmB1.push(splusB, 'N', splus, 'C', valueModiferTerm0);
 
 		ModelTermType& spsmB2 = ModelBaseType::createTerm("SplusSminusB2",
-		    wantsHermit,
-		    "SplusSminus");
+		                                                  wantsHermit,
+		                                                  "SplusSminus");
 		spsmB2.push(splus, 'N', splusB, 'C', valueModiferTerm0);
 
 		OpForLinkType szB("szB");
 
 		ModelTermType& szszB1 = ModelBaseType::createTerm("szszB1",
-		    wantsHermit,
-		    "szsz");
+		                                                  wantsHermit,
+		                                                  "szsz");
 		szszB1.push(szB, 'N', sz, 'N');
 
 		ModelTermType& szszB2 = ModelBaseType::createTerm("szszB2",
-		    wantsHermit,
-		    "szsz");
+		                                                  wantsHermit,
+		                                                  "szsz");
 		szszB2.push(sz, 'N', szB, 'N');
 	}
 
 private:
 
 	void addMagneticField(SparseMatrixType& hmatrix,
-	    char c,
-	    SizeType site) const
+	                      char c,
+	                      SizeType site) const
 	{
 		assert(c == 'X' || c == 'Z');
 
 		const SizeType linSize = superGeometry_.numberOfSites();
 		const VectorRealType& v = (c == 'X') ? modelParameters_.magneticFieldX
-						     : modelParameters_.magneticFieldZ;
+		                                     : modelParameters_.magneticFieldZ;
 
 		if (v.size() != linSize)
 			return;
@@ -423,7 +424,7 @@ private:
 	{
 		const SizeType n = superGeometry_.numberOfSites();
 		return (site == 0 || site == n - 1) ? modelParameters_.twiceTheSpinBorder
-						    : modelParameters_.twiceTheSpin;
+		                                    : modelParameters_.twiceTheSpin;
 	}
 
 	void setBasis(HilbertBasisType& natBasis, SizeType site) const
@@ -437,7 +438,7 @@ private:
 
 	//! Find S^+_site in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	                                   const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -477,7 +478,7 @@ private:
 
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	                                const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -504,7 +505,7 @@ private:
 
 	//! Find Maximal_i in the natural basis natBasis
 	SparseMatrixType findMaximal(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	                             const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -530,7 +531,7 @@ private:
 	}
 
 	SparseMatrixType findSxMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	                                const HilbertBasisType& natBasis) const
 	{
 		SparseMatrixType Splus_temp = findSplusMatrices(site, natBasis);
 		SparseMatrixType Sminus_temp, Sx;
@@ -544,9 +545,9 @@ private:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    SizeType offset,
-	    SiteType) const
+	                        const HilbertBasisType& basis,
+	                        SizeType offset,
+	                        SiteType) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j

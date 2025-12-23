@@ -126,9 +126,12 @@ public:
 	typedef ChebyshevSerializer<TridiagonalMatrixType> PostProcType;
 	typedef PsimagLite::Random48<RealType> RngType;
 
-	enum { WITH_INFO = 1,
-	       DEBUG = 2,
-	       ALLOWS_ZERO = 4 };
+	enum
+	{
+		WITH_INFO = 1,
+		DEBUG = 2,
+		ALLOWS_ZERO = 4
+	};
 
 	ChebyshevSolver(MatrixType const& mat, SolverParametersType& params)
 	    : progress_("ChebyshevSolver")

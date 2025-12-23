@@ -2,12 +2,10 @@
 #define ENFORCEPHASE_H
 #include "Matrix.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType>
-class EnforcePhase
-{
+class EnforcePhase {
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 

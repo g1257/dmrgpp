@@ -3,12 +3,10 @@
 #include "Vector.h"
 #include <fstream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename T>
-class CompressedVector
-{
+class CompressedVector {
 
 public:
 

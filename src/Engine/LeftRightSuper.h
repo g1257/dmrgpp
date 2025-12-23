@@ -84,12 +84,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename BasisWithOperatorsType_, typename SuperBlockType>
-class LeftRightSuper
-{
+class LeftRightSuper {
 
 public:
 
@@ -107,12 +105,12 @@ public:
 
 	template <typename IoInputter>
 	LeftRightSuper(IoInputter& io,
-	    PsimagLite::String prefix,
-	    const BasisTraits& basisTraits,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputter>::True,
-		int>::Type
-	    = 0)
+	               PsimagLite::String prefix,
+	               const BasisTraits& basisTraits,
+	               typename PsimagLite::EnableIf<
+	                   PsimagLite::IsInputLike<IoInputter>::True,
+	                   int>::Type
+	               = 0)
 	    : progress_("LeftRightSuper")
 	    , left_(0)
 	    , right_(0)
@@ -138,9 +136,9 @@ public:
 	}
 
 	LeftRightSuper(const PsimagLite::String& slabel,
-	    const PsimagLite::String& elabel,
-	    const PsimagLite::String& selabel,
-	    const BasisTraits& basisTraits)
+	               const PsimagLite::String& elabel,
+	               const PsimagLite::String& selabel,
+	               const BasisTraits& basisTraits)
 	    : progress_("LeftRightSuper")
 	    , left_(0)
 	    , right_(0)
@@ -168,8 +166,8 @@ public:
 	}
 
 	LeftRightSuper(BasisWithOperatorsType& left,
-	    BasisWithOperatorsType& right,
-	    SuperBlockType& super)
+	               BasisWithOperatorsType& right,
+	               SuperBlockType& super)
 	    : progress_("LeftRightSuper")
 	    , left_(&left)
 	    , right_(&right)
@@ -202,32 +200,32 @@ public:
 
 	template <typename SomeModelType>
 	SizeType growLeftBlock(const SomeModelType& model,
-	    BasisWithOperatorsType& pS,
-	    BlockType const& X,
-	    RealType time)
+	                       BasisWithOperatorsType& pS,
+	                       BlockType const& X,
+	                       RealType time)
 	{
 		assert(left_);
 		return grow(*left_,
-		    model,
-		    pS,
-		    X,
-		    ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
-		    time);
+		            model,
+		            pS,
+		            X,
+		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
+		            time);
 	}
 
 	template <typename SomeModelType>
 	SizeType growRightBlock(const SomeModelType& model,
-	    BasisWithOperatorsType& pE,
-	    BlockType const& X,
-	    RealType time)
+	                        BasisWithOperatorsType& pE,
+	                        BlockType const& X,
+	                        RealType time)
 	{
 		assert(right_);
 		return grow(*right_,
-		    model,
-		    pE,
-		    X,
-		    ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
-		    time);
+		            model,
+		            pE,
+		            X,
+		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
+		            time);
 	}
 
 	void printSizes(const PsimagLite::String& label, std::ostream& os) const
@@ -261,9 +259,9 @@ public:
 	}
 
 	void write(PsimagLite::IoNg::Out& io,
-	    PsimagLite::String prefix,
-	    typename BasisWithOperatorsType::SaveEnum option,
-	    bool minimizeWrite) const
+	           PsimagLite::String prefix,
+	           typename BasisWithOperatorsType::SaveEnum option,
+	           bool minimizeWrite) const
 	{
 		prefix += "/LRS";
 		io.createGroup(prefix);
@@ -329,11 +327,11 @@ public:
 
 	template <typename IoInputType>
 	void read(IoInputType& io,
-	    PsimagLite::String prefix,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputType>::True,
-		int>::Type
-	    = 0)
+	          PsimagLite::String prefix,
+	          typename PsimagLite::EnableIf<
+	              PsimagLite::IsInputLike<IoInputType>::True,
+	              int>::Type
+	          = 0)
 	{
 		prefix += "/LRS";
 
@@ -353,31 +351,31 @@ private:
 
 	//! add block X to basis pS and put the result in left_:
 	/* PSIDOC LeftRightSuperGrow
-		Local operators are set for the basis in question with a call to
-		\cppClass{BasisWithOperators}'s member function \cppFunction{setOperators()}.
-		When adding sites to the system or environment the program does a
-		full outer product, i.e., it increases the size of all local operators.
-		This is performed by the call to \verb!setToProduct!
-		\verb!(pSprime,pS,Xbasis,dir,option)!
-		in the grow function, which actually calls \verb!pSprime.setToProduct!
-		\verb!(pS,xBasis,dir)!
-		This function also recalculates the Hamiltonian in the outer product
-		of (i) the previous system basis $pS$, and (ii) the basis $Xbasis$
-		corresponding to the site(s) that is (are) being added.
-		To do this, the Hamiltonian connection between the two parts
-		needs to be calculated and added, and this is done in the call to
-		\cppFunction{addHamiltonianConnection}.
-		Finally, the resulting dmrgBasis object for the outer product,
-		pSprime, is set to contain this full Hamiltonian with the call
-		to  \cppFunction{pSprime.setHamiltonian(matrix)}.
-		*/
+	        Local operators are set for the basis in question with a call to
+	        \cppClass{BasisWithOperators}'s member function \cppFunction{setOperators()}.
+	        When adding sites to the system or environment the program does a
+	        full outer product, i.e., it increases the size of all local operators.
+	        This is performed by the call to \verb!setToProduct!
+	        \verb!(pSprime,pS,Xbasis,dir,option)!
+	        in the grow function, which actually calls \verb!pSprime.setToProduct!
+	        \verb!(pS,xBasis,dir)!
+	        This function also recalculates the Hamiltonian in the outer product
+	        of (i) the previous system basis $pS$, and (ii) the basis $Xbasis$
+	        corresponding to the site(s) that is (are) being added.
+	        To do this, the Hamiltonian connection between the two parts
+	        needs to be calculated and added, and this is done in the call to
+	        \cppFunction{addHamiltonianConnection}.
+	        Finally, the resulting dmrgBasis object for the outer product,
+	        pSprime, is set to contain this full Hamiltonian with the call
+	        to  \cppFunction{pSprime.setHamiltonian(matrix)}.
+	        */
 	template <typename SomeModelType>
 	SizeType grow(BasisWithOperatorsType& leftOrRight,
-	    const SomeModelType& model,
-	    BasisWithOperatorsType& pS,
-	    const BlockType& X,
-	    ProgramGlobals::DirectionEnum dir,
-	    RealType time)
+	              const SomeModelType& model,
+	              BasisWithOperatorsType& pS,
+	              const BlockType& X,
+	              ProgramGlobals::DirectionEnum dir,
+	              RealType time)
 	{
 		BasisWithOperatorsType Xbasis("Xbasis", pS.traits());
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;

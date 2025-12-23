@@ -5,8 +5,7 @@
 #include "Su3RepresentationBase.h"
 
 template <typename ComplexOrRealType, bool>
-class Su3RepresentationP1 : public Su3RepresentationBase<ComplexOrRealType>
-{
+class Su3RepresentationP1 : public Su3RepresentationBase<ComplexOrRealType> {
 
 public:
 
@@ -71,8 +70,7 @@ public:
 
 template <typename ComplexOrRealType>
 class Su3RepresentationP1<ComplexOrRealType, true>
-    : public Su3RepresentationBase<ComplexOrRealType>
-{
+    : public Su3RepresentationBase<ComplexOrRealType> {
 
 public:
 

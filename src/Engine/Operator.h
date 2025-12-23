@@ -92,18 +92,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Su2Related.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // This is a structure, don't add member functions here!
 template <typename ComplexOrRealType>
-class Operator
-{
+class Operator {
 
 public:
 
-	enum { CAN_BE_ZERO = false,
-		MUST_BE_NONZERO = true };
+	enum
+	{
+		CAN_BE_ZERO = false,
+		MUST_BE_NONZERO = true
+	};
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef ComplexOrRealType value_type;
@@ -122,10 +123,10 @@ public:
 	}
 
 	Operator(const SparseMatrixType& data1,
-	    ProgramGlobals::FermionOrBosonEnum fermionSign1,
-	    const PairType& jm1,
-	    RealType angularFactor1,
-	    const Su2RelatedType& su2Related1)
+	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
+	         const PairType& jm1,
+	         RealType angularFactor1,
+	         const Su2RelatedType& su2Related1)
 	    : data_(data1)
 	    , fermionOrBoson_(fermionSign1)
 	    , jm_(jm1)
@@ -135,10 +136,10 @@ public:
 	}
 
 	Operator(const StorageType& data1,
-	    ProgramGlobals::FermionOrBosonEnum fermionSign1,
-	    const PairType& jm1,
-	    RealType angularFactor1,
-	    const Su2RelatedType& su2Related1)
+	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
+	         const PairType& jm1,
+	         RealType angularFactor1,
+	         const Su2RelatedType& su2Related1)
 	    : data_(data1)
 	    , fermionOrBoson_(fermionSign1)
 	    , jm_(jm1)
@@ -149,10 +150,10 @@ public:
 
 	template <typename IoInputType, typename SomeModelType>
 	Operator(IoInputType& io,
-	    SomeModelType& model,
-	    bool checkNonZero,
-	    PsimagLite::String prefix,
-	    int site = -1)
+	         SomeModelType& model,
+	         bool checkNonZero,
+	         PsimagLite::String prefix,
+	         int site = -1)
 	{
 		/*PSIDOC Operator
 		 \item[TSPOperator] [String] One of \{\verb!cooked!, \verb!raw!,
@@ -235,7 +236,7 @@ public:
 		int fs = 0;
 		io.readline(fs, prefix + "FERMIONSIGN=");
 		fermionOrBoson_ = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION
-					   : ProgramGlobals::FermionOrBosonEnum::BOSON;
+		                           : ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		jm_.first = jm_.second = 0;
 		angularFactor_ = 1;
@@ -265,8 +266,8 @@ public:
 	}
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer,
-	    PsimagLite::IoSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	           PsimagLite::IoSerializer& ioSerializer,
+	           PsimagLite::IoSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		if (mode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			ioSerializer.createGroup(label);
@@ -279,13 +280,13 @@ public:
 	}
 
 	void overwrite(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer) const
+	               PsimagLite::IoSerializer& ioSerializer) const
 	{
 		write(label, ioSerializer, PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
 	}
 
 	void read(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer)
+	          PsimagLite::IoSerializer& ioSerializer)
 	{
 		data_.read(label + "/data", ioSerializer);
 		ioSerializer.read(fermionOrBoson_, label + "/fermionOrBoson");
@@ -311,7 +312,7 @@ public:
 	Operator operator*(const Operator& other) const
 	{
 		const ProgramGlobals::FermionOrBosonEnum f = ProgramGlobals::multipy(fermionOrBoson_,
-		    other.fermionOrBoson_);
+		                                                                     other.fermionOrBoson_);
 		return Operator(data_ * other.data_, f, PairType(0, 0), 1.0, su2Related_);
 	}
 
@@ -332,10 +333,10 @@ public:
 		data_ = crs;
 
 		int fsOther = (other.fermionOrBoson_ == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1
-												     : 1;
+		                                                                                     : 1;
 		int fs = fSaved * fsOther;
 		fermionOrBoson_ = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION
-					   : ProgramGlobals::FermionOrBosonEnum::BOSON;
+		                           : ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		return *this;
 	}
@@ -351,31 +352,31 @@ public:
 	// operators END
 
 	void outerProduct(const Operator& A,
-	    SizeType nout,
-	    const VectorRealType& signs,
-	    bool order,
-	    const VectorSizeType& permutationFull)
+	                  SizeType nout,
+	                  const VectorRealType& signs,
+	                  bool order,
+	                  const VectorSizeType& permutationFull)
 	{
 		externalProduct2(data_,
-		    A.getStorage(),
-		    nout,
-		    signs,
-		    order,
-		    permutationFull);
+		                 A.getStorage(),
+		                 nout,
+		                 signs,
+		                 order,
+		                 permutationFull);
 	}
 
 	void outerProduct(const Operator& A,
-	    const Operator& B,
-	    const VectorRealType& signs,
-	    bool order,
-	    const VectorSizeType& permutationFull)
+	                  const Operator& B,
+	                  const VectorRealType& signs,
+	                  bool order,
+	                  const VectorSizeType& permutationFull)
 	{
 		externalProduct2(data_,
-		    A.getStorage(),
-		    B.getStorage(),
-		    signs,
-		    order,
-		    permutationFull);
+		                 A.getStorage(),
+		                 B.getStorage(),
+		                 signs,
+		                 order,
+		                 permutationFull);
 	}
 
 	SizeType metaDiff(const Operator& op2) const
@@ -416,9 +417,9 @@ public:
 	}
 
 	void set(ProgramGlobals::FermionOrBosonEnum fOrB,
-	    PairType jm1,
-	    RealType af,
-	    const Su2RelatedType& su2)
+	         PairType jm1,
+	         RealType af,
+	         const Su2RelatedType& su2)
 	{
 		fermionOrBoson_ = fOrB;
 		jm_ = jm1;
@@ -427,8 +428,8 @@ public:
 	}
 
 	void set(ProgramGlobals::FermionOrBosonEnum fOrB,
-	    PairType jm1,
-	    RealType af)
+	         PairType jm1,
+	         RealType af)
 	{
 		fermionOrBoson_ = fOrB;
 		jm_ = jm1;
@@ -504,11 +505,11 @@ private:
 };
 
 template <typename SparseMatrixType,
-    template <typename, typename> class SomeVectorTemplate,
-    typename SomeAllocator1Type,
-    typename SomeAllocator2Type>
+          template <typename, typename> class SomeVectorTemplate,
+          typename SomeAllocator1Type,
+          typename SomeAllocator2Type>
 void fillOperator(SomeVectorTemplate<SparseMatrixType*, SomeAllocator1Type>& data_,
-    SomeVectorTemplate<Operator<SparseMatrixType>, SomeAllocator2Type>& op)
+                  SomeVectorTemplate<Operator<SparseMatrixType>, SomeAllocator2Type>& op)
 {
 	for (SizeType i = 0; i < data_.size(); ++i)
 		data_[i] = &(op[i].data_);

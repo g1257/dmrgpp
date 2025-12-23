@@ -93,12 +93,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffsets.h"
 #include <cassert>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingDynamic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingDynamic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 public:
 
@@ -135,10 +133,10 @@ public:
 	typedef typename BaseType::VectorRealType VectorRealType;
 
 	TargetingDynamic(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& io)
+	                 const CheckpointType& checkPoint,
+	                 const WaveFunctionTransfType& wft,
+	                 const QnType&,
+	                 InputValidatorType& io)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_(io, "TargetingDynamic", checkPoint.model())
 	    , wft_(wft)
@@ -169,10 +167,10 @@ public:
 	}
 
 	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType& block2,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
+	            const BlockType& block2,
+	            SizeType loopNumber)
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -201,14 +199,14 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 
 		SizeType type = tstStruct_.type();
 		int fermionSign = this->common().findFermionSignOfTheOperators(tstStruct_.concatenation(),
-		    tstStruct_.aOperators());
+		                                                               tstStruct_.aOperators());
 		int s = (type & 1) ? -1 : 1;
 		int s2 = (type > 1) ? -1 : 1;
 		int s3 = (type & 1) ? -fermionSign : 1;
@@ -235,18 +233,18 @@ public:
 private:
 
 	void evolve(RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            SizeType site,
+	            SizeType loopNumber)
 	{
 
 		VectorWithOffsetType phiNew;
 		SizeType count = this->common().aoeNonConst().getPhi(&phiNew,
-		    Eg,
-		    direction,
-		    site,
-		    loopNumber,
-		    tstStruct_);
+		                                                     Eg,
+		                                                     direction,
+		                                                     site,
+		                                                     loopNumber,
+		                                                     tstStruct_);
 
 		if (count == 0)
 			return;
@@ -259,9 +257,9 @@ private:
 	}
 
 	void calcLanczosVectors(RealType&,
-	    typename PsimagLite::Vector<RealType>::Type&,
-	    const VectorWithOffsetType& phi,
-	    const ProgramGlobals::DirectionEnum)
+	                        typename PsimagLite::Vector<RealType>::Type&,
+	                        const VectorWithOffsetType& phi,
+	                        const ProgramGlobals::DirectionEnum)
 	{
 		for (SizeType i = 0; i < phi.sectors(); i++) {
 			VectorType sv;
@@ -285,15 +283,15 @@ private:
 	}
 
 	void getLanczosVectors(DenseMatrixType& V,
-	    const VectorType& sv,
-	    SizeType p)
+	                       const VectorType& sv,
+	                       SizeType p)
 	{
 		const RealType fakeTime = 0;
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		    ModelType::modelLinks(),
-		    fakeTime,
-		    BaseType::model().superOpHelper());
+		                                                 ModelType::modelLinks(),
+		                                                 fakeTime,
+		                                                 BaseType::model().superOpHelper());
 		typename LanczosSolverType::MatrixType h(BaseType::model(), hc, aux);
 		paramsForSolver_.lotaMemory = true;
 		LanczosSolverType lanczosSolver(h, paramsForSolver_);
@@ -304,7 +302,7 @@ private:
 	}
 
 	void setVectors(const DenseMatrixType& V,
-	    SizeType i0)
+	                SizeType i0)
 	{
 		for (SizeType i = 0; i < this->common().aoe().tvs(); i++) {
 			VectorType tmp(V.rows());

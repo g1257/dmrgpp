@@ -12,12 +12,10 @@
 // MatrixDenseOrSparse type
 // It also selects BlockDiagonalType for storage that we know is
 // block diagonal, like the DMRG transformation matrix
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType>
-class OperatorStorage
-{
+class OperatorStorage {
 
 public:
 
@@ -32,8 +30,11 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	enum class Type { CRS,
-		NOT_READY };
+	enum class Type
+	{
+		CRS,
+		NOT_READY
+	};
 
 	OperatorStorage(Type type = Type::CRS)
 	    : type_(type)
@@ -55,7 +56,7 @@ public:
 	}
 
 	void read(PsimagLite::String label,
-	    PsimagLite::IoNgSerializer& io)
+	          PsimagLite::IoNgSerializer& io)
 	{
 		if (justCRS())
 			return crs_.read(label, io);
@@ -64,8 +65,8 @@ public:
 	}
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoNgSerializer& io,
-	    PsimagLite::IoSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE)
+	           PsimagLite::IoNgSerializer& io,
+	           PsimagLite::IoSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE)
 	    const
 	{
 		if (justCRS())
@@ -75,7 +76,7 @@ public:
 	}
 
 	void overwrite(PsimagLite::String label,
-	    PsimagLite::IoNgSerializer& io) const
+	               PsimagLite::IoNgSerializer& io) const
 	{
 		if (justCRS())
 			return crs_.overwrite(label, io);
@@ -149,7 +150,7 @@ public:
 	}
 
 	void rotate(const PsimagLite::CrsMatrix<ComplexOrRealType>& left,
-	    const PsimagLite::CrsMatrix<ComplexOrRealType>& right)
+	            const PsimagLite::CrsMatrix<ComplexOrRealType>& right)
 	{
 		if (justCRS()) {
 			SparseMatrixType tmp;
@@ -213,7 +214,7 @@ public:
 	bool invalid() const { return (type_ == Type::NOT_READY); }
 
 	friend void transposeConjugate(OperatorStorage& dest,
-	    const OperatorStorage& src)
+	                               const OperatorStorage& src)
 	{
 		if (dest.justCRS() && src.justCRS())
 			return transposeConjugate(dest.crs_, src.getCRS());
@@ -222,7 +223,7 @@ public:
 	}
 
 	friend void fromCRS(OperatorStorage& dest,
-	    const PsimagLite::CrsMatrix<ComplexOrRealType>& src)
+	                    const PsimagLite::CrsMatrix<ComplexOrRealType>& src)
 	{
 		if (dest.justCRS()) {
 			dest.crs_ = src;
@@ -242,43 +243,43 @@ public:
 
 	// See CrsMatrix.h line 734
 	friend void externalProduct2(OperatorStorage& B,
-	    const OperatorStorage& A,
-	    SizeType nout,
-	    const VectorRealType& signs,
-	    bool order,
-	    const VectorSizeType& permutationFull)
+	                             const OperatorStorage& A,
+	                             SizeType nout,
+	                             const VectorRealType& signs,
+	                             bool order,
+	                             const VectorSizeType& permutationFull)
 	{
 		if (B.justCRS() && A.justCRS())
 			return externalProduct(B.crs_,
-			    A.getCRS(),
-			    nout,
-			    signs,
-			    order,
-			    permutationFull);
+			                       A.getCRS(),
+			                       nout,
+			                       signs,
+			                       order,
+			                       permutationFull);
 
 		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
 	}
 
 	friend void externalProduct2(OperatorStorage& C,
-	    const OperatorStorage& A,
-	    const OperatorStorage& B,
-	    const VectorRealType& signs,
-	    bool order,
-	    const VectorSizeType& permutationFull)
+	                             const OperatorStorage& A,
+	                             const OperatorStorage& B,
+	                             const VectorRealType& signs,
+	                             bool order,
+	                             const VectorSizeType& permutationFull)
 	{
 		if (A.justCRS() && B.justCRS() && C.justCRS())
 			return externalProduct(C.crs_,
-			    A.getCRS(),
-			    B.getCRS(),
-			    signs,
-			    order,
-			    permutationFull);
+			                       A.getCRS(),
+			                       B.getCRS(),
+			                       signs,
+			                       order,
+			                       permutationFull);
 
 		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
 	}
 
 	friend void fullMatrixToCrsMatrix(OperatorStorage& dest,
-	    const PsimagLite::Matrix<ComplexOrRealType>& src)
+	                                  const PsimagLite::Matrix<ComplexOrRealType>& src)
 	{
 		if (dest.justCRS())
 			return fullMatrixToCrsMatrix(dest.crs_, src);
@@ -295,7 +296,7 @@ private:
 template <typename ComplexOrRealType>
 OperatorStorage<ComplexOrRealType>
 operator*(const typename OperatorStorage<ComplexOrRealType>::RealType& value,
-    const OperatorStorage<ComplexOrRealType>& storage)
+          const OperatorStorage<ComplexOrRealType>& storage)
 {
 	if (storage.justCRS())
 		return storage.getCRS() * value;
@@ -306,7 +307,7 @@ operator*(const typename OperatorStorage<ComplexOrRealType>::RealType& value,
 template <typename ComplexOrRealType>
 OperatorStorage<ComplexOrRealType>
 operator*(const OperatorStorage<ComplexOrRealType>& a,
-    const OperatorStorage<ComplexOrRealType>& b)
+          const OperatorStorage<ComplexOrRealType>& b)
 {
 	if (a.justCRS() && b.justCRS())
 		return OperatorStorage<ComplexOrRealType>(a.getCRS() * b.getCRS());
@@ -316,7 +317,7 @@ operator*(const OperatorStorage<ComplexOrRealType>& a,
 
 template <typename ComplexOrRealType>
 void crsMatrixToFullMatrix(PsimagLite::Matrix<ComplexOrRealType>& dest,
-    const OperatorStorage<ComplexOrRealType>& src)
+                           const OperatorStorage<ComplexOrRealType>& src)
 {
 	if (src.justCRS())
 		return crsMatrixToFullMatrix(dest, src.getCRS());
@@ -326,7 +327,7 @@ void crsMatrixToFullMatrix(PsimagLite::Matrix<ComplexOrRealType>& dest,
 
 template <typename ComplexOrRealType>
 PsimagLite::Matrix<ComplexOrRealType> multiplyTc(const OperatorStorage<ComplexOrRealType>& src1,
-    const OperatorStorage<ComplexOrRealType>& src2)
+                                                 const OperatorStorage<ComplexOrRealType>& src2)
 {
 	if (src1.justCRS() && src2.justCRS())
 		return multiplyTc(src1.getCRS(), src2.getCRS());

@@ -89,13 +89,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HILBERTSPACEFEAS_HEADER_H
 #define HILBERTSPACEFEAS_HEADER_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
 template <typename Word>
-class HilbertSpaceFeAs
-{
+class HilbertSpaceFeAs {
 
 	static SizeType orbitals_;
 
@@ -103,8 +101,11 @@ public:
 
 	typedef Word HilbertState;
 
-	enum { SPIN_UP = 0,
-		SPIN_DOWN = 1 };
+	enum
+	{
+		SPIN_UP = 0,
+		SPIN_DOWN = 1
+	};
 
 	static void setOrbitals(SizeType orbitals)
 	{

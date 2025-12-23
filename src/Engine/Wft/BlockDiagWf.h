@@ -7,12 +7,10 @@
 #include <iomanip>
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename GenIjPatchType, typename VectorWithOffsetType, typename OneSiteSpacesType>
-class BlockDiagWf
-{
+class BlockDiagWf {
 
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef typename VectorType::value_type ComplexOrRealType;
@@ -29,18 +27,17 @@ class BlockDiagWf
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
 
-	class ParallelBlockCtor
-	{
+	class ParallelBlockCtor {
 
 	public:
 
 		ParallelBlockCtor(const VectorSizeType& patcheLeft,
-		    const VectorSizeType& patchesRight,
-		    const LeftRightSuperType& lrs,
-		    const VectorWithOffsetType& src,
-		    SizeType iSrc,
-		    VectorPairType& patches,
-		    VectorMatrixType& data)
+		                  const VectorSizeType& patchesRight,
+		                  const LeftRightSuperType& lrs,
+		                  const VectorWithOffsetType& src,
+		                  SizeType iSrc,
+		                  VectorPairType& patches,
+		                  VectorMatrixType& data)
 		    : patchesLeft_(patcheLeft)
 		    , patchesRight_(patchesRight)
 		    , lrs_(lrs)
@@ -71,8 +68,8 @@ class BlockDiagWf
 				for (SizeType c = 0; c < ctotal; ++c) {
 					SizeType col = c + offsetR;
 					SizeType ind = packSuper_.pack(row,
-					    col,
-					    lrs_.super().permutationInverse());
+					                               col,
+					                               lrs_.super().permutationInverse());
 					assert(ind >= offset_);
 					m(r, c) = src_.fastAccess(srcIndex_, ind - offset_);
 					// sum += PsimagLite::conj(m(r, c))*m(r, c);
@@ -93,22 +90,21 @@ class BlockDiagWf
 		VectorMatrixType& data_;
 	};
 
-	class ParallelBlockTransform
-	{
+	class ParallelBlockTransform {
 
 	public:
 
 		ParallelBlockTransform(const BlockDiagonalMatrixType& tLeft,
-		    const BlockDiagonalMatrixType& tRight,
-		    char charLeft,
-		    char charRight,
-		    SizeType threads,
-		    const VectorPairType& patches,
-		    VectorSizeType& offsetRows,
-		    VectorSizeType& offsetCols,
-		    VectorMatrixType& data,
-		    SizeType gemmRnb,
-		    SizeType threadsForGemmR)
+		                       const BlockDiagonalMatrixType& tRight,
+		                       char charLeft,
+		                       char charRight,
+		                       SizeType threads,
+		                       const VectorPairType& patches,
+		                       VectorSizeType& offsetRows,
+		                       VectorSizeType& offsetCols,
+		                       VectorMatrixType& data,
+		                       SizeType gemmRnb,
+		                       SizeType threadsForGemmR)
 		    : tLeft_(tLeft)
 		    , tRight_(tRight)
 		    , patchConvertLeft_(tLeft.blocks(), 0)
@@ -271,8 +267,8 @@ class BlockDiagWf
 			const ComplexOrRealType d_zero = 0.0;
 			static const bool needsPrinting = false;
 			PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
-			    gemmRnb_,
-			    threadsForGemmR_);
+			                                           gemmRnb_,
+			                                           threadsForGemmR_);
 
 			if (use_method_1) {
 				// ---------------------------
@@ -377,8 +373,8 @@ class BlockDiagWf
 	private:
 
 		static void patchConvert(VectorSizeType& v,
-		    bool isNeeded,
-		    const BlockDiagonalMatrixType& b)
+		                         bool isNeeded,
+		                         const BlockDiagonalMatrixType& b)
 		{
 			SizeType n = b.blocks();
 			assert(v.size() == n);
@@ -404,7 +400,7 @@ class BlockDiagWf
 		}
 
 		const MatrixType& getRightMatrixT(const PsimagLite::Matrix<std::complex<RealType>>& m,
-		    SizeType threadNum)
+		                                  SizeType threadNum)
 		{
 			storage_[threadNum].clear();
 			SizeType rows = m.rows();
@@ -440,8 +436,8 @@ class BlockDiagWf
 public:
 
 	BlockDiagWf(const VectorWithOffsetType& src,
-	    SizeType iSrc,
-	    const LeftRightSuperType& lrs)
+	            SizeType iSrc,
+	            const LeftRightSuperType& lrs)
 	    : lrs_(lrs)
 	    , rows_(lrs.left().size())
 	    , cols_(lrs.right().size())
@@ -475,11 +471,11 @@ public:
 	}
 
 	void transform(char charLeft,
-	    char charRight,
-	    const BlockDiagonalMatrixType& tLeft,
-	    const BlockDiagonalMatrixType& tRight,
-	    SizeType gemmRnb,
-	    SizeType threadsForGemmR)
+	               char charRight,
+	               const BlockDiagonalMatrixType& tLeft,
+	               const BlockDiagonalMatrixType& tRight,
+	               SizeType gemmRnb,
+	               SizeType threadsForGemmR)
 	{
 		SizeType npatches = data_.size();
 		SizeType threads = std::min(npatches, PsimagLite::Concurrency::codeSectionParams.npthreads);
@@ -488,16 +484,16 @@ public:
 		ParallelizerType threadedTransform(codeSectionParams);
 
 		ParallelBlockTransform helper(tLeft,
-		    tRight,
-		    charLeft,
-		    charRight,
-		    threads,
-		    patches_,
-		    offsetRows_,
-		    offsetCols_,
-		    data_,
-		    gemmRnb,
-		    threadsForGemmR);
+		                              tRight,
+		                              charLeft,
+		                              charRight,
+		                              threads,
+		                              patches_,
+		                              offsetRows_,
+		                              offsetCols_,
+		                              data_,
+		                              gemmRnb,
+		                              threadsForGemmR);
 
 		threadedTransform.loopCreate(helper);
 
@@ -507,9 +503,9 @@ public:
 	}
 
 	void toVectorWithOffsets(VectorWithOffsetType& dest,
-	    SizeType iNew,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	                         SizeType iNew,
+	                         const LeftRightSuperType& lrs,
+	                         const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		SizeType destIndex = dest.sector(iNew);
 		ProgramGlobals::DirectionEnum dir = oneSiteSpaces.direction();
@@ -532,9 +528,9 @@ public:
 private:
 
 	void toVectorExpandSys(VectorWithOffsetType& dest,
-	    SizeType destIndex,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	                       SizeType destIndex,
+	                       const LeftRightSuperType& lrs,
+	                       const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		SizeType hilbert = oneSiteSpaces.hilbertMain(); // CHECK
 
@@ -567,8 +563,8 @@ private:
 					SizeType lind = packLeft.pack(row, k, lrs.left().permutationInverse());
 
 					SizeType ind = packSuper.pack(lind,
-					    rind,
-					    lrs.super().permutationInverse());
+					                              rind,
+					                              lrs.super().permutationInverse());
 					const ComplexOrRealType& value = m(r, c);
 					// sum += PsimagLite::conj(value)*value;
 					// if (ind < offset || ind >= lrs.super().partition(destIndex + 1))
@@ -583,9 +579,9 @@ private:
 	}
 
 	void toVectorExpandEnviron(VectorWithOffsetType& dest,
-	    SizeType destIndex,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	                           SizeType destIndex,
+	                           const LeftRightSuperType& lrs,
+	                           const OneSiteSpacesType& oneSiteSpaces) const
 	{
 		SizeType hilbert = oneSiteSpaces.hilbertMain(); // CHECK!
 
@@ -618,8 +614,8 @@ private:
 					SizeType rind = packRight.pack(k, col, lrs.right().permutationInverse());
 
 					SizeType ind = packSuper.pack(lind,
-					    rind,
-					    lrs.super().permutationInverse());
+					                              rind,
+					                              lrs.super().permutationInverse());
 					const ComplexOrRealType& value = m(r, c);
 					// sum += PsimagLite::conj(value)*value;
 					// if (ind < offset || ind >= lrs.super().partition(destIndex + 1))

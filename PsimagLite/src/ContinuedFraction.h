@@ -86,8 +86,7 @@ public:
 		String f;
 		try {
 			io.readline(f, "#FreqEnum=");
-		}
-		catch (std::exception& e) {
+		} catch (std::exception& e) {
 			std::cerr
 			    << "ContinuedFraction: FreqEnum assumed REAL\n";
 			f = "Real";

@@ -86,12 +86,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <stdexcept>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingCorrection : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingCorrection : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 public:
 
@@ -121,10 +119,10 @@ public:
 	typedef typename BaseType::CheckpointType CheckpointType;
 
 	TargetingCorrection(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& io)
+	                    const CheckpointType& checkPoint,
+	                    const WaveFunctionTransfType& wft,
+	                    const QnType&,
+	                    InputValidatorType& io)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_(io, "TargetingCorrection")
 	    , gsWeight_(1 - tstStruct_.correctionA())
@@ -159,10 +157,10 @@ public:
 	}
 
 	void evolve(const VectorRealType&,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType&,
-	    SizeType)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
+	            const BlockType&,
+	            SizeType)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -174,14 +172,14 @@ public:
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io,
-	    PsimagLite::String prefix)
+	          PsimagLite::String prefix)
 	{
 		this->common().read(io, prefix);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix) const
 	{
 		this->common().write(io, block, prefix);
 	}

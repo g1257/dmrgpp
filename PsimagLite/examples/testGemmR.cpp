@@ -149,8 +149,7 @@ int main(int argc, char** argv)
 	if (all_passed) {
 		std::cout << "ALL PASSED "
 		          << "\n";
-	}
-	else {
+	} else {
 		std::cout << " nerr_double = " << nerr_double
 		          << " nerr_zcomplex = " << nerr_zcomplex << "\n";
 	}

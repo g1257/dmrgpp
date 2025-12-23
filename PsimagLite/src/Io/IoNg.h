@@ -106,7 +106,8 @@ directly by doubling the size of the array into a single dataset.
 /* PSIDOC_CODE_START IsRootUnDelegatedCode */
 template <typename T>
 struct IsRootUnDelegated {
-	enum {
+	enum
+	{
 		True = Loki::TypeTraits<T>::isArith || IsVectorLike<T>::True || IsStackLike<T>::True || IsPairLike<T>::True || std::is_enum<T>::value || IsEnumClass<T>::value || IsStringLike<T>::True
 	};
 };
@@ -125,10 +126,13 @@ public:
 	   and fail, otherwise H5F_ACC_RDWR - Open file for read/write, if it
 	   already exists, and fail, otherwise
 	*/
-	enum OpenMode { ACC_TRUNC,
-		        ACC_EXCL,
-		        ACC_RDONLY,
-		        ACC_RDW };
+	enum OpenMode
+	{
+		ACC_TRUNC,
+		ACC_EXCL,
+		ACC_RDONLY,
+		ACC_RDW
+	};
 
 	static void dontPrintDebug() { IoNgSerializer::dontPrintDebug(); }
 
@@ -300,12 +304,18 @@ public:
 
 template <>
 struct IsInputLike<IoNg::In> {
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 template <>
 struct IsOutputLike<IoNg::Out> {
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 } // namespace PsimagLite

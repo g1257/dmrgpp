@@ -3,12 +3,10 @@
 #include "../../Engine/ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelBaseType>
-class Aklt
-{
+class Aklt {
 
 public:
 
@@ -31,8 +29,8 @@ public:
 	}
 
 	void fillLabeledOperators(SizeType site,
-	    const SparseMatrixType& splus,
-	    const SparseMatrixType& sz)
+	                          const SparseMatrixType& splus,
+	                          const SparseMatrixType& sz)
 	{
 		if (!enabled_)
 			return;
@@ -79,7 +77,8 @@ public:
 		for (SizeType mu = 0; mu < 3; ++mu) { // mu = 0 is S+, mu = 1 is S-, mu=2 is Sz
 			for (SizeType mup = 0; mup < 3; ++mup) {
 				const RealType factor = findFactor(mu) * findFactor(mup) / 3.0;
-				auto valueModifier = [factor](ComplexOrRealType& value) { value *= factor; };
+				auto valueModifier = [factor](ComplexOrRealType& value)
+				{ value *= factor; };
 				SizeType index1 = indexFor(mu, mup);
 				SizeType index2 = indexFor(barOf(mu), barOf(mup));
 
@@ -135,10 +134,10 @@ private:
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		OperatorType myOp(matrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(0, 0),
-		    1.0,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  PairType(0, 0),
+		                  1.0,
+		                  su2related);
 		aklt.push(myOp);
 	}
 

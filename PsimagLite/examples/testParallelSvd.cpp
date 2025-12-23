@@ -44,7 +44,8 @@ int main(int argc, char** argv)
 
 	PsimagLite::Random48<RealType> rng(1234);
 
-	auto lambda = [&rng](SizeType, SizeType) {
+	auto lambda = [&rng](SizeType, SizeType)
+	{
 		SizeType lda = static_cast<SizeType>(rng() * 500) + 10;
 		SizeType cda = lda;
 		PsimagLite::Matrix<RealType> A(lda, cda);

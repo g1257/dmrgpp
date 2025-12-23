@@ -3,12 +3,12 @@
 
 template <typename ComplexOrRealType>
 void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
-    const int nrow_B,
-    const int ncol_B,
-    const int max_nnz,
-    const PsimagLite::Vector<int>::Type& rindex,
-    const PsimagLite::Vector<int>::Type& cindex,
-    PsimagLite::CrsMatrix<ComplexOrRealType>& b)
+                   const int nrow_B,
+                   const int ncol_B,
+                   const int max_nnz,
+                   const PsimagLite::Vector<int>::Type& rindex,
+                   const PsimagLite::Vector<int>::Type& cindex,
+                   PsimagLite::CrsMatrix<ComplexOrRealType>& b)
 {
 	/*
 	 * ---------------------------------------------------------------------------

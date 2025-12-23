@@ -94,12 +94,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ReflectionTransform.h"
 #include "Sort.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType, typename ConcurrencyType>
-class ReflectionOperator
-{
+class ReflectionOperator {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef typename LeftRightSuperType::SparseMatrixType
@@ -110,17 +108,20 @@ class ReflectionOperator
 	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
 	typedef ReflectionTransform<RealType, SparseMatrixType> ReflectionTransformType;
 
-	enum { AVAILABLE,
+	enum
+	{
+		AVAILABLE,
 		NOT_AVAILABLE,
-		COLOR };
+		COLOR
+	};
 
 public:
 
 	ReflectionOperator(LeftRightSuperType& lrs,
-	    ConcurrencyType& concurrency,
-	    SizeType n0,
-	    bool isEnabled,
-	    SizeType expandSys)
+	                   ConcurrencyType& concurrency,
+	                   SizeType n0,
+	                   bool isEnabled,
+	                   SizeType expandSys)
 	    : lrs_(lrs)
 	    , concurrency_(concurrency)
 	    , n0_(n0)
@@ -158,8 +159,8 @@ public:
 
 	template <typename SomeStructType>
 	void updateKeptStates(SizeType& keptStates,
-	    const SomeStructType& cacheLeft,
-	    const SomeStructType& cacheRight)
+	                      const SomeStructType& cacheLeft,
+	                      const SomeStructType& cacheRight)
 	{
 		const PsimagLite::Matrix<ComplexOrRealType>& transform1 = cacheLeft.transform;
 		const PsimagLite::Matrix<ComplexOrRealType>& transform2 = cacheRight.transform;
@@ -177,8 +178,8 @@ public:
 	}
 
 	void transform(SparseMatrixType& matrixA,
-	    SparseMatrixType& matrixB,
-	    const SparseMatrixType& matrix) const
+	               SparseMatrixType& matrixB,
+	               const SparseMatrixType& matrix) const
 	{
 		assert(isEnabled_);
 		reflectionTransform_.transform(matrixA, matrixB, matrix);
@@ -186,18 +187,18 @@ public:
 
 	template <typename SomeVectorType>
 	void setInitState(const SomeVectorType& initVector,
-	    SomeVectorType& initVector1,
-	    SomeVectorType& initVector2) const
+	                  SomeVectorType& initVector1,
+	                  SomeVectorType& initVector2) const
 	{
 		assert(isEnabled_);
 		return reflectionTransform_.setInitState(initVector, initVector1, initVector2);
 	}
 
 	RealType setGroundState(VectorType& gs,
-	    const RealType& gsEnergy1,
-	    const VectorType& gsVector1,
-	    const RealType& gsEnergy2,
-	    const VectorType& gsVector2) const
+	                        const RealType& gsEnergy1,
+	                        const VectorType& gsVector1,
+	                        const RealType& gsEnergy2,
+	                        const VectorType& gsVector2) const
 	{
 		assert(isEnabled_);
 		if (gsEnergy1 <= gsEnergy2) {
@@ -213,7 +214,7 @@ public:
 	bool isEnabled() const { return isEnabled_; }
 
 	void changeBasis(const PsimagLite::Matrix<ComplexOrRealType>& transform1,
-	    const PsimagLite::Matrix<ComplexOrRealType>& transform2)
+	                 const PsimagLite::Matrix<ComplexOrRealType>& transform2)
 	{
 		if (!isEnabled_)
 			return;
@@ -308,9 +309,9 @@ private:
 	//	}
 
 	void check(const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
-	    const SparseMatrixType& reflected,
-	    const PsimagLite::Matrix<ComplexOrRealType>& transform1,
-	    const PsimagLite::Matrix<ComplexOrRealType>& transform2)
+	           const SparseMatrixType& reflected,
+	           const PsimagLite::Matrix<ComplexOrRealType>& transform1,
+	           const PsimagLite::Matrix<ComplexOrRealType>& transform2)
 	{
 
 		SparseMatrixType newreflected;
@@ -348,8 +349,8 @@ private:
 	}
 
 	void getDifferences(typename PsimagLite::Vector<SizeType>::Type& diffs,
-	    const typename PsimagLite::Vector<SizeType>::Type& x1,
-	    const typename PsimagLite::Vector<SizeType>::Type& x2) const
+	                    const typename PsimagLite::Vector<SizeType>::Type& x1,
+	                    const typename PsimagLite::Vector<SizeType>::Type& x2) const
 	{
 		typename PsimagLite::Vector<SizeType>::const_iterator::Type it2 = x2.begin();
 		for (SizeType i = 0; i < x1.size(); i++) {
@@ -383,9 +384,9 @@ private:
 	}
 
 	void changeBasis(SparseMatrixType& newreflected,
-	    const SparseMatrixType& reflected,
-	    const PsimagLite::Matrix<ComplexOrRealType>& transform1,
-	    const PsimagLite::Matrix<ComplexOrRealType>& transform2)
+	                 const SparseMatrixType& reflected,
+	                 const PsimagLite::Matrix<ComplexOrRealType>& transform1,
+	                 const PsimagLite::Matrix<ComplexOrRealType>& transform2)
 	{
 		assert(reflected.rank() == transform1.n_row());
 		assert(reflected.rank() == transform2.n_row());
@@ -560,8 +561,8 @@ private:
 	}
 
 	void truncate(SparseMatrixType& reflectedFinal,
-	    const SparseMatrixType& reflected,
-	    SizeType keptstates)
+	              const SparseMatrixType& reflected,
+	              SizeType keptstates)
 	{
 		//		SizeType n = reflected.rank();
 		//		if (keptstates >= n) {

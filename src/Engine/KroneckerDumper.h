@@ -7,12 +7,10 @@
 #include "Vector.h"
 #include <fstream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType, typename SolverParamsType>
-class KroneckerDumper
-{
+class KroneckerDumper {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -30,10 +28,10 @@ public:
 
 	struct ParamsForKroneckerDumper {
 		ParamsForKroneckerDumper(bool enable = false,
-		    SizeType b = 0,
-		    SizeType e = 0,
-		    SizeType p = 6,
-		    SizeType nOfQns_ = 0)
+		                         SizeType b = 0,
+		                         SizeType e = 0,
+		                         SizeType p = 6,
+		                         SizeType nOfQns_ = 0)
 		    : enabled(enable)
 		    , begin(b)
 		    , end(e)
@@ -50,8 +48,8 @@ public:
 	}; // struct ParamsForKroneckerDumper
 
 	KroneckerDumper(const SolverParamsType& params,
-	    const LeftRightSuperType& lrs,
-	    ProgramGlobals::DirectionEnum dir)
+	                const LeftRightSuperType& lrs,
+	                ProgramGlobals::DirectionEnum dir)
 	    : enabled_(false)
 	    , pairCount_(0)
 	    , disable_(false)
@@ -64,9 +62,9 @@ public:
 		if (!enabled_)
 			return;
 		ParamsForKroneckerDumper p(enabled_,
-		    params.dumperBegin,
-		    params.dumperEnd,
-		    params.precision);
+		                           params.dumperBegin,
+		                           params.dumperEnd,
+		                           params.precision);
 
 		bool b = (p.end > 0 && counter_ >= p.end);
 		if (counter_ < p.begin || b) {
@@ -113,10 +111,10 @@ public:
 	}
 
 	void push(const SparseMatrixType& A,
-	    const SparseMatrixType& B,
-	    ComplexOrRealType val,
-	    ProgramGlobals::FermionOrBosonEnum bosonOrFermion,
-	    const VectorType& y)
+	          const SparseMatrixType& B,
+	          ComplexOrRealType val,
+	          ProgramGlobals::FermionOrBosonEnum bosonOrFermion,
+	          const VectorType& y)
 	{
 		if (!enabled_)
 			return;
@@ -146,8 +144,8 @@ public:
 	}
 
 	void push(bool option,
-	    const SparseMatrixType& hamiltonian,
-	    const VectorType& y)
+	          const SparseMatrixType& hamiltonian,
+	          const VectorType& y)
 	{
 		if (!enabled_)
 			return;
@@ -184,8 +182,8 @@ private:
 	}
 
 	void printOneBasis(PsimagLite::String name,
-	    const BasisType& basis,
-	    SizeType nOfQns)
+	                   const BasisType& basis,
+	                   SizeType nOfQns)
 	{
 		fout_ << "" + name + "Basis\n";
 		fout_ << "Sites\n";
@@ -210,9 +208,9 @@ private:
 
 	// Ahat(ia,ja) = (-1)^e_L(ia) A(ia,ja)*value
 	void calculateAhat(SparseMatrixType& Ahat,
-	    const SparseMatrixType& A,
-	    ComplexOrRealType val,
-	    ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
+	                   const SparseMatrixType& A,
+	                   ComplexOrRealType val,
+	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
 	{
 		Ahat = A;
 		SizeType rows = Ahat.rows();

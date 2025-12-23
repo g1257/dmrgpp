@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputNg.h"
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Hubbard Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
@@ -139,7 +138,7 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelHubbard";
 		io.createGroup(label);

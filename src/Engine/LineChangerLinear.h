@@ -86,18 +86,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ValueType>
-class LineChangerLinear
-{
+class LineChangerLinear {
 public:
 
 	LineChangerLinear(const PsimagLite::String& match,
-	    ValueType step,
-	    ValueType init,
-	    const PsimagLite::String& pre,
-	    const PsimagLite::String& post)
+	                  ValueType step,
+	                  ValueType init,
+	                  const PsimagLite::String& pre,
+	                  const PsimagLite::String& post)
 	    : match_(match)
 	    , step_(step)
 	    , init_(init)

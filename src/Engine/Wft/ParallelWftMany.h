@@ -79,14 +79,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename VectorWithOffsetType,
-    typename WaveFunctionTransfType,
-    typename LeftRightSuperType>
-class ParallelWftMany
-{
+          typename WaveFunctionTransfType,
+          typename LeftRightSuperType>
+class ParallelWftMany {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
@@ -98,9 +96,9 @@ public:
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
 	ParallelWftMany(VectorVectorWithOffsetType& targetVectors,
-	    SizeType nk,
-	    const WaveFunctionTransfType& wft,
-	    const LeftRightSuperType& lrs)
+	                SizeType nk,
+	                const WaveFunctionTransfType& wft,
+	                const LeftRightSuperType& lrs)
 	    : targetVectors_(targetVectors)
 	    , nk_(nk)
 	    , wft_(wft)
@@ -109,9 +107,9 @@ public:
 	}
 
 	void thread_function_(SizeType threadNum,
-	    SizeType blockSize,
-	    SizeType total,
-	    ConcurrencyType::MutexType*)
+	                      SizeType blockSize,
+	                      SizeType total,
+	                      ConcurrencyType::MutexType*)
 	{
 		SizeType nk = nk_;
 		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);

@@ -4,12 +4,10 @@
 #include "CrsMatrix.h"
 #include "GemmR.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename MatrixBlockType>
-class BlockOffDiagMatrix
-{
+class BlockOffDiagMatrix {
 
 	typedef typename MatrixBlockType::value_type ComplexOrRealType;
 	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
@@ -25,8 +23,8 @@ public:
 
 	template <typename SomeBasisType>
 	BlockOffDiagMatrix(const SomeBasisType& rowBasis,
-	    const SomeBasisType& colBasis,
-	    const typename SomeBasisType::QnType& qtarget)
+	                   const SomeBasisType& colBasis,
+	                   const typename SomeBasisType::QnType& qtarget)
 	{
 		typedef typename SomeBasisType::VectorQnType::value_type QnType;
 		SizeType rowPatches = rowBasis.partition();
@@ -57,7 +55,7 @@ public:
 	}
 
 	BlockOffDiagMatrix(const SparseMatrixType& sparse,
-	    const VectorSizeType& partitions)
+	                   const VectorSizeType& partitions)
 	    : offsetRows_(partitions)
 	    , rows_(0)
 	    , cols_(0)
@@ -180,9 +178,9 @@ public:
 
 	template <typename SomeBasisType>
 	void fromMatrixColumn(const MatrixBlockType& src,
-	    SizeType col,
-	    const SomeBasisType& super,
-	    SizeType partitionIndex)
+	                      SizeType col,
+	                      const SomeBasisType& super,
+	                      SizeType partitionIndex)
 	{
 		SizeType start = super.partition(partitionIndex);
 		SizeType end = super.partition(partitionIndex + 1) - start;
@@ -304,8 +302,8 @@ public:
 	}
 
 	void transform(const BlockDiagonalMatrixType& f,
-	    SizeType nb,
-	    SizeType nthreadsInner)
+	               SizeType nb,
+	               SizeType nthreadsInner)
 	{
 		if (offsetCols_.size() != 0)
 			err("BlockOffDiagMatrix::transform() only for square matrix\n");
@@ -335,34 +333,34 @@ public:
 				MatrixBlockType tmp(m.rows(), mRight.cols());
 				// tmp = data_[ii] * mRight;
 				gemmR('N',
-				    'N',
-				    m.rows(),
-				    mRight.cols(),
-				    m.cols(),
-				    1.0,
-				    &(m(0, 0)),
-				    m.rows(),
-				    &(mRight(0, 0)),
-				    mRight.rows(),
-				    0.0,
-				    &(tmp(0, 0)),
-				    tmp.rows());
+				      'N',
+				      m.rows(),
+				      mRight.cols(),
+				      m.cols(),
+				      1.0,
+				      &(m(0, 0)),
+				      m.rows(),
+				      &(mRight(0, 0)),
+				      mRight.rows(),
+				      0.0,
+				      &(tmp(0, 0)),
+				      tmp.rows());
 				// data_[ii] = transposeConjugate(mLeft) * tmp;
 				m.clear();
 				m.resize(mLeft.cols(), mRight.cols());
 				gemmR('C',
-				    'N',
-				    mLeft.cols(),
-				    tmp.cols(),
-				    tmp.rows(),
-				    1.0,
-				    &(mLeft(0, 0)),
-				    mLeft.rows(),
-				    &(tmp(0, 0)),
-				    tmp.rows(),
-				    0.0,
-				    &(m(0, 0)),
-				    m.rows());
+				      'N',
+				      mLeft.cols(),
+				      tmp.cols(),
+				      tmp.rows(),
+				      1.0,
+				      &(mLeft(0, 0)),
+				      mLeft.rows(),
+				      &(tmp(0, 0)),
+				      tmp.rows(),
+				      0.0,
+				      &(m(0, 0)),
+				      m.rows());
 			}
 
 			offsetRows_ = f.offsetsCols();
@@ -434,7 +432,7 @@ public:
 private:
 
 	static void fillIndexToPart(VectorSizeType& indexToPart,
-	    const VectorSizeType& partitions)
+	                            const VectorSizeType& partitions)
 	{
 		SizeType n = partitions.size();
 		assert(n > 0);

@@ -5,13 +5,11 @@
 #include "LazyAlgebra.h"
 #include "OneOperatorSpec.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType,
-    typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType>>
-class OperatorSpec
-{
+          typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType>>
+class OperatorSpec {
 
 public:
 
@@ -88,14 +86,14 @@ private:
 		tmp.makeDiagonal(rows, value);
 		typename OperatorType::Su2RelatedType su2Related;
 		return OperatorType(tmp,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1.0,
-		    su2Related);
+		                    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                    typename OperatorType::PairType(0, 0),
+		                    1.0,
+		                    su2Related);
 	}
 
 	OperatorType findOperator(const PsimagLite::String& name,
-	    SizeType site) const
+	                          SizeType site) const
 	{
 		if (name.length() < 2 || name[0] != ':') {
 			PsimagLite::String str("OperatorInterpreter: syntax error for ");
@@ -115,7 +113,7 @@ private:
 	}
 
 	void replaceString(PsimagLite::String& str,
-	    PsimagLite::String substr) const
+	                   PsimagLite::String substr) const
 	{
 		/* Locate the substring to replace. */
 		size_t index = str.find('$');

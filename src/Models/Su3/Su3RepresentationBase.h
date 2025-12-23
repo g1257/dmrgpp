@@ -4,8 +4,7 @@
 #include "PsimagLite.h"
 
 template <typename ComplexOrRealType>
-class Su3RepresentationBase
-{
+class Su3RepresentationBase {
 
 public:
 

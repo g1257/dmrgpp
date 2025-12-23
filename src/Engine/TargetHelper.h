@@ -79,12 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGET_HELPER_H
 #define TARGET_HELPER_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType_, typename WaveFunctionTransfType_>
-class TargetHelper
-{
+class TargetHelper {
 
 public:
 
@@ -96,8 +94,8 @@ public:
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 
 	TargetHelper(const LeftRightSuperType& lrs,
-	    const ModelType& model,
-	    const WaveFunctionTransfType& wft)
+	             const ModelType& model,
+	             const WaveFunctionTransfType& wft)
 	    : lrs_(lrs)
 	    , model_(model)
 	    , wft_(wft)

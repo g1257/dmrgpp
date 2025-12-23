@@ -84,11 +84,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelType_>
-class MatrixVectorStored : public MatrixVectorBase<ModelType_>
-{
+class MatrixVectorStored : public MatrixVectorBase<ModelType_> {
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
@@ -107,8 +105,8 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
 
 	MatrixVectorStored(const ModelType& model,
-	    const HamiltonianConnectionType& hc,
-	    const typename ModelHelperType::Aux& aux)
+	                   const HamiltonianConnectionType& hc,
+	                   const typename ModelHelperType::Aux& aux)
 	    : model_(model)
 	    , matrixStored_(2)
 	    , pointer_(0)
@@ -152,9 +150,9 @@ public:
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
 	{
 		BaseType::fullDiag(eigs,
-		    fm,
-		    matrixStored_[pointer_],
-		    model_.params().maxMatrixRankStored);
+		                   fm,
+		                   matrixStored_[pointer_],
+		                   model_.params().maxMatrixRankStored);
 	}
 
 private:

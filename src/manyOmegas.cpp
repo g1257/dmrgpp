@@ -90,7 +90,7 @@ to the main dmrg driver are the following.
 #else
 	    float
 #endif
-		RealType;
+	        RealType;
 	typedef Dmrg::OmegaParams<InputNgType, RealType> OmegaParamsType;
 	typedef Dmrg::ManyOmegas<RealType, OmegaParamsType> ManyOmegasType;
 

@@ -84,12 +84,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename VectorType>
-class TimeSerializer
-{
+class TimeSerializer {
 
 public:
 
@@ -100,10 +98,10 @@ public:
 
 	template <typename SomeAoeType>
 	TimeSerializer(SizeType currentTimeStep,
-	    RealType currentTime,
-	    SizeType site,
-	    const SomeAoeType& aoe,
-	    PsimagLite::String name)
+	               RealType currentTime,
+	               SizeType site,
+	               const SomeAoeType& aoe,
+	               PsimagLite::String name)
 	    : currentTimeStep_(currentTimeStep)
 	    , currentTime_(currentTime)
 	    , site_(site)
@@ -118,7 +116,7 @@ public:
 	}
 
 	TimeSerializer(typename PsimagLite::IoSelector::In& io,
-	    PsimagLite::String prefix)
+	               PsimagLite::String prefix)
 	    : owner_(true)
 	{
 		prefix += "/TimeSerializer/";

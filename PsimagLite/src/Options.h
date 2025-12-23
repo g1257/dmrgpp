@@ -99,9 +99,12 @@ public:
 
 	public:
 
-		enum { DISABLED,
-		       PERMISSIVE,
-		       STRICT };
+		enum
+		{
+			DISABLED,
+			PERMISSIVE,
+			STRICT
+		};
 
 		Writeable(VectorStringType& registeredOptions, SizeType mode)
 		    : registeredOptions_(registeredOptions)

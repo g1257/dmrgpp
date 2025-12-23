@@ -39,13 +39,13 @@ struct ToolOptions {
 
 template <typename ComplexOrRealType>
 void main1(InputNgType::Readable& io,
-    PsimagLite::PsiApp application,
-    const ParametersDmrgSolverType& dmrgSolverParams,
-    const ToolOptions& toolOptions)
+           PsimagLite::PsiApp application,
+           const ParametersDmrgSolverType& dmrgSolverParams,
+           const ToolOptions& toolOptions)
 {
 	typedef PsimagLite::Geometry<ComplexOrRealType,
-	    InputNgType::Readable,
-	    Dmrg::ProgramGlobals>
+	                             InputNgType::Readable,
+	                             Dmrg::ProgramGlobals>
 	    GeometryType;
 	GeometryType geometry(io);
 
@@ -53,7 +53,7 @@ void main1(InputNgType::Readable& io,
 	ConcurrencyType::codeSectionParams.npthreads = dmrgSolverParams.nthreads;
 	PsimagLite::String label = (toolOptions.action == "energies") ? "lowest" : toolOptions.extraOptions;
 	typename ToolBoxType::ParametersForGrepType params(label,
-	    toolOptions.shortoption);
+	                                                   toolOptions.shortoption);
 	typename ToolBoxType::ActionEnum act = ToolBoxType::actionCanonical(toolOptions.action);
 	if (act == ToolBoxType::ACTION_GREP) {
 		ToolBoxType::printGrep(toolOptions.filename, params);
@@ -159,8 +159,8 @@ int main(int argc, char** argv)
 	}
 
 	InputFromDataOrNot<InputCheck> inputFromDataOrNot(toolOptions.filename,
-	    inputCheck,
-	    filenameIsCout);
+	                                                  inputCheck,
+	                                                  filenameIsCout);
 	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
 
 	//! Read the parameters for this run

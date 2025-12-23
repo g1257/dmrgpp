@@ -169,8 +169,7 @@ public:
 		try {
 			io.readline(x, "DegreesOfFreedom=");
 			orbitals_ = x;
-		}
-		catch (std::exception&) {
+		} catch (std::exception&) {
 		}
 
 		if (orbitals_ == 0)
@@ -185,48 +184,38 @@ public:
 		if (s == "chain" || s == "longchain") {
 			geometryBase_ = new LongChain<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		}
-		else if (s == "chainEx") {
+		} else if (s == "chainEx") {
 			throw RuntimeError("GeometryTerm::ctor(): ChainEx: no "
 			                   "longer supported.\n");
-		}
-		else if (s == "ladder") {
+		} else if (s == "ladder") {
 			geometryBase_ = new Ladder<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		}
-		else if (s == "ladderx") {
+		} else if (s == "ladderx") {
 			geometryBase_ = new LadderX<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		}
-		else if (s == "ladderbath") {
+		} else if (s == "ladderbath") {
 			geometryBase_ = new LadderBath<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		}
-		else if (s == "ktwoniffour") {
+		} else if (s == "ktwoniffour") {
 			geometryBase_ = new KTwoNiFFour<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		}
-		else if (s == "star") {
+		} else if (s == "star") {
 			geometryBase_ = new Star<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		}
-		else if (s == "LongRange" || s == "General") {
+		} else if (s == "LongRange" || s == "General") {
 			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(
 			    aux.linSize, gOptions_, io);
 			idof = GeometryDirectionType::GENERAL;
-		}
-		else if (s == "Honeycomb") {
+		} else if (s == "Honeycomb") {
 			geometryBase_ = new Honeycomb<ComplexOrRealType, InputType>(
 			    aux.linSize, io);
-		}
-		else if (s.substr(0, 5) == "Super") {
+		} else if (s.substr(0, 5) == "Super") {
 			std::cout << __FILE__ << " SuperGeometry " << s
 			          << " detected\n";
 			std::cerr << __FILE__ << " SuperGeometry " << s
 			          << " detected\n";
 			gOptions_ = s;
-		}
-		else {
+		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}
 
@@ -244,8 +233,7 @@ public:
 			String vModifier;
 			io.readline(vModifier, "GeometryValueModifier=");
 			hasModifier = true;
-		}
-		catch (std::exception&) {
+		} catch (std::exception&) {
 		}
 
 		if (hasModifier) {

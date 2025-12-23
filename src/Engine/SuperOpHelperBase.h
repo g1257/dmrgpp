@@ -4,12 +4,10 @@
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename SuperGeometryType, typename ParametersType>
-class SuperOpHelperBase
-{
+class SuperOpHelperBase {
 
 public:
 
@@ -45,8 +43,8 @@ public:
 	}
 
 	virtual PairMetaOpForConnection finalIndices(const VectorSizeType&,
-	    ProgramGlobals::ConnectionEnum,
-	    SizeType) const
+	                                             ProgramGlobals::ConnectionEnum,
+	                                             SizeType) const
 	{
 		throw PsimagLite::RuntimeError("SuperOpHelperBase::finalIndices4sites\n");
 	}

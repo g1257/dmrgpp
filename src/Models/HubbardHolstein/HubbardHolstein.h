@@ -91,11 +91,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelBaseType>
-class HubbardHolstein : public ModelBaseType
-{
+class HubbardHolstein : public ModelBaseType {
 
 public:
 
@@ -137,13 +135,13 @@ public:
 	static SizeType const ORBITALS = 2;
 
 	HubbardHolstein(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry,
-	    PsimagLite::String additional,
-	    PsimagLite::String hdf5fileIfAny)
+	                InputValidatorType& io,
+	                const SuperGeometryType& geometry,
+	                PsimagLite::String additional,
+	                PsimagLite::String hdf5fileIfAny)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
 	    , isLrh_(additional == "LRH")
@@ -169,13 +167,13 @@ public:
 	void print(std::ostream& os) const { operator<<(os, modelParameters_); }
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
 		SizeType phonons = (oStruncActive_ || U_.rows() > 0) ? modelParameters_.oStruncPhonons
-								     : modelParameters_.numberphonons;
+		                                                     : modelParameters_.numberphonons;
 		if (phonons == 0)
 			err("addDiagonalsInNaturalBasis fatal error when OSTRUNC active\n");
 
@@ -225,7 +223,7 @@ protected:
 		OpsLabelType& cx = this->createOpsLabel("cx");
 		this->makeTrackable("c");
 		const SizeType phonons = (U_.rows() > 0) ? modelParameters_.oStruncPhonons
-							 : modelParameters_.numberphonons;
+		                                         : modelParameters_.numberphonons;
 		if (phonons > 0) {
 			this->makeTrackable("a");
 			if (isSsh_)
@@ -265,10 +263,10 @@ protected:
 			transposeConjugate(tmpMatrix2, tmpMatrix);
 
 			OperatorType myOp(tmpMatrix2,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(1, 1 - sigma),
-			    asign,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(1, 1 - sigma),
+			                  asign,
+			                  su2related);
 
 			c.push(myOp, (sigma == 0) ? "up" : "down");
 		}
@@ -279,10 +277,10 @@ protected:
 		transformByU(nmatrix);
 
 		OperatorType myOp(nmatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2relatedA);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0, 0),
+		                  1,
+		                  su2relatedA);
 
 		n.push(myOp);
 
@@ -297,17 +295,17 @@ protected:
 			typename OperatorType::Su2RelatedType su2Related;
 			SparseMatrixType spmatrix(t1);
 			splus.push(OperatorType(spmatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                        typename OperatorType::PairType(0, 0),
+			                        1.0,
+			                        su2Related));
 			SparseMatrixType smmatrix;
 			transposeConjugate(smmatrix, spmatrix);
 			sminus.push(OperatorType(smmatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                         typename OperatorType::PairType(0, 0),
+			                         1.0,
+			                         su2Related));
 		}
 		{
 			OpsLabelType& sz = this->createOpsLabel("sz");
@@ -319,10 +317,10 @@ protected:
 			SparseMatrixType szmatrix(t1);
 			typename OperatorType::Su2RelatedType su2Related;
 			sz.push(OperatorType(szmatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                     typename OperatorType::PairType(0, 0),
+			                     1.0,
+			                     su2Related));
 		}
 
 		{
@@ -342,17 +340,17 @@ protected:
 			SparseMatrixType tmp4(t1);
 			typename OperatorType::Su2RelatedType su2Related;
 			doubleOccM.push(OperatorType(tmp4,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                             ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                             typename OperatorType::PairType(0, 0),
+			                             1.0,
+			                             su2Related));
 
 			SparseMatrixType tmp5(t3);
 			doubleOcc.push(OperatorType(tmp5,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                            ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                            typename OperatorType::PairType(0, 0),
+			                            1.0,
+			                            su2Related));
 		}
 
 		if (phonons == 0)
@@ -375,10 +373,10 @@ protected:
 		transposeConjugate(tmpMatrix2, tmpMatrix);
 
 		OperatorType myOp2(tmpMatrix2,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 2),
-		    -1,
-		    su2related2);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 2),
+		                   -1,
+		                   su2related2);
 		a.push(myOp2);
 
 		{
@@ -389,10 +387,10 @@ protected:
 			tmp2 += tmp1;
 			typename OperatorType::Su2RelatedType su2Related2;
 			disp.push(OperatorType(tmp2,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related2));
+			                       ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                       typename OperatorType::PairType(0, 0),
+			                       1.0,
+			                       su2Related2));
 		}
 
 		if (!isSsh_ && !isLrh_)
@@ -422,10 +420,10 @@ protected:
 				transposeConjugate(tmpMatrix2, tmpMatrix);
 
 				OperatorType myOp3(tmpMatrix2,
-				    ProgramGlobals::FermionOrBosonEnum::FERMION,
-				    typename OperatorType::PairType(1, 1 - sigma),
-				    asign,
-				    su2related3);
+				                   ProgramGlobals::FermionOrBosonEnum::FERMION,
+				                   typename OperatorType::PairType(1, 1 - sigma),
+				                   asign,
+				                   su2related3);
 
 				cx.push(myOp3, (sigma == 0) ? "up" : "down");
 			}
@@ -458,7 +456,8 @@ protected:
 			OpForLinkType cx0("cx", 0);
 			OpForLinkType cx1("cx", 1);
 
-			auto modifier = [](ComplexOrRealType& value) { value *= (-1.0); };
+			auto modifier = [](ComplexOrRealType& value)
+			{ value *= (-1.0); };
 
 			hopSsh.push(cup, 'C', cx0, 'N');
 
@@ -518,15 +517,15 @@ protected:
 		} else {
 			ioOut.overwrite(U_, "OneSiteTruncationU");
 			ioOut.write(modelParameters_.oStruncPhonons,
-			    "OsTruncPhonons",
-			    PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
+			            "OsTruncPhonons",
+			            PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
 		}
 	}
 
 	// virtual override
 	SizeType setOperatorMatrices(VectorOperatorType& ops,
-	    VectorQnType& qm,
-	    const BlockType& block) const
+	                             VectorQnType& qm,
+	                             const BlockType& block) const
 	{
 		oStruncActive_ = false;
 
@@ -564,10 +563,10 @@ protected:
 			}
 
 			OperatorType myOp(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(1, 1 - sigma),
-			    asign,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(1, 1 - sigma),
+			                  asign,
+			                  su2related);
 
 			ops.push_back(myOp);
 		}
@@ -578,7 +577,7 @@ protected:
 			return oneSiteTruncSize;
 
 		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(natBasis,
-		    modelParameters_.oStruncPhonons);
+		                                                     modelParameters_.oStruncPhonons);
 
 		typename OperatorType::Su2RelatedType su2related2;
 		su2related2.source.push_back(ind * 2);
@@ -589,10 +588,10 @@ protected:
 		su2related2.transpose.push_back(1);
 		su2related2.offset = 1;
 		OperatorType myOp2(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 2),
-		    -1,
-		    su2related2);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 2),
+		                   -1,
+		                   su2related2);
 		ops.push_back(myOp2);
 
 		if (!isSsh_ && !isLrh_)
@@ -617,10 +616,10 @@ protected:
 			transformByU(tmpMatrix);
 
 			OperatorType myOp3(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(1, 1 - sigma),
-			    asign,
-			    su2related3);
+			                   ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                   typename OperatorType::PairType(1, 1 - sigma),
+			                   asign,
+			                   su2related3);
 
 			ops.push_back(myOp3);
 		}
@@ -633,8 +632,8 @@ private:
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	static void setBasis(HilbertBasisType& basis,
-	    const VectorSizeType& block,
-	    SizeType phonons)
+	                     const VectorSizeType& block,
+	                     SizeType phonons)
 	{
 		SizeType n = block.size();
 		HilbertState total = 4 * (phonons + 1);
@@ -653,15 +652,15 @@ private:
 		assert(counter == total);
 
 		SizeType sum = std::accumulate(basis.begin(),
-		    basis.end(),
-		    static_cast<SizeType>(0));
+		                               basis.end(),
+		                               static_cast<SizeType>(0));
 		if (sum != total * (total - 1) / 2)
 			err("Could not set up basis\n");
 	}
 
 	//! Find a^+ in the natural basis natBasis
 	SparseMatrixType findPhononadaggerMatrix(const HilbertBasisType& natBasis,
-	    SizeType phonons) const
+	                                         SizeType phonons) const
 	{
 		const SizeType total = natBasis.size();
 
@@ -707,7 +706,7 @@ private:
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
 	SparseMatrixType findOperatorMatrices(SizeType sigma,
-	    const HilbertBasisType& natBasis) const
+	                                      const HilbertBasisType& natBasis) const
 	{
 		const SizeType n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
@@ -740,8 +739,8 @@ private:
 	}
 
 	SparseMatrixType findSSHMatrices(SizeType sigma,
-	    const HilbertBasisType& natBasis,
-	    SizeType phonons) const
+	                                 const HilbertBasisType& natBasis,
+	                                 SizeType phonons) const
 	{
 		SparseMatrixType csigma_temp = findOperatorMatrices(sigma, natBasis);
 		SparseMatrixType a_temp = findPhononadaggerMatrix(natBasis, phonons);
@@ -752,8 +751,8 @@ private:
 	}
 
 	void findAllMatrices(VectorSparseMatrixType& vm,
-	    const HilbertBasisType& natBasis,
-	    SizeType phonons) const
+	                     const HilbertBasisType& natBasis,
+	                     SizeType phonons) const
 	{
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
 			SparseMatrixType m = findOperatorMatrices(sigma, natBasis);
@@ -769,7 +768,7 @@ private:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis) const
+	                        const HilbertBasisType& basis) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -795,8 +794,8 @@ private:
 	}
 
 	void addPotentialFV(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualIndexOfSite) const
+	                    const VectorSparseMatrixType& cm,
+	                    SizeType actualIndexOfSite) const
 	{
 		SparseMatrixType nup = n(cm[0]); // spin up
 		SparseMatrixType ndown = n(cm[1]); // spin down
@@ -811,9 +810,9 @@ private:
 	}
 
 	void addPotentialPhononV(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualIndexOfSite,
-	    SizeType phonons) const
+	                         const VectorSparseMatrixType& cm,
+	                         SizeType actualIndexOfSite,
+	                         SizeType phonons) const
 	{
 		if (phonons == 0)
 			return;
@@ -845,8 +844,8 @@ private:
 
 	//! Term is U \sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
 	void addInteractionFU(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualSite) const
+	                      const VectorSparseMatrixType& cm,
+	                      SizeType actualSite) const
 	{
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType m1 = cm[0]; // spin up
@@ -859,9 +858,9 @@ private:
 
 	//! Term is lambda\sum_{\alpha} (n_{i\alpha} -1) x_{i}
 	void addInteractionFPhonon(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualSite,
-	    SizeType phonons) const
+	                           const VectorSparseMatrixType& cm,
+	                           SizeType actualSite,
+	                           SizeType phonons) const
 	{
 		if (phonons == 0)
 			return;

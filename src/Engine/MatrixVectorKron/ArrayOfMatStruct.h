@@ -85,12 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "GenIjPatch.h"
 #include "Profiling.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType>
-class ArrayOfMatStruct
-{
+class ArrayOfMatStruct {
 
 public:
 
@@ -106,11 +104,11 @@ public:
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
 
 	ArrayOfMatStruct(const OperatorStorageType& sparse1,
-	    const GenIjPatchType& patchOld,
-	    const GenIjPatchType& patchNew,
-	    typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
-	    RealType threshold,
-	    bool useLowerPart)
+	                 const GenIjPatchType& patchOld,
+	                 const GenIjPatchType& patchNew,
+	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
+	                 RealType threshold,
+	                 bool useLowerPart)
 	    : data_(patchNew(leftOrRight).size(), patchOld(leftOrRight).size())
 	{
 		const SparseMatrixType& sparse = sparse1.getCRS();
@@ -310,9 +308,9 @@ public:
 					continue; // <--- ATTENTION: EARLY EXIT
 
 				data_(ipatch, jpatch) = new MatrixDenseOrSparseType(lnrows,
-				    lncols,
-				    isDense,
-				    nnz);
+				                                                    lncols,
+				                                                    isDense,
+				                                                    nnz);
 
 				MatrixDenseOrSparseType* pmat = data_(ipatch, jpatch);
 

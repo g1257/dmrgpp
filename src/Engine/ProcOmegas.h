@@ -17,12 +17,10 @@
  * (4) Gnuplot output not supported yet
  *
  */
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ComplexOrRealType, typename OmegaParamsType>
-class ProcOmegas
-{
+class ProcOmegas {
 
 public:
 
@@ -37,8 +35,7 @@ public:
 
 	static const SizeType MAX_LINE_SIZE = 409600;
 
-	class Qdata
-	{
+	class Qdata {
 
 	public:
 
@@ -84,11 +81,11 @@ public:
 	};
 
 	ProcOmegas(typename InputNgType::Readable& io,
-	    SizeType precision,
-	    bool skipFourier,
-	    PsimagLite::String rootIname,
-	    PsimagLite::String rootOname,
-	    const OmegaParamsType& omegaParams)
+	           SizeType precision,
+	           bool skipFourier,
+	           PsimagLite::String rootIname,
+	           PsimagLite::String rootOname,
+	           const OmegaParamsType& omegaParams)
 	    : rootIname_(rootIname)
 	    , rootOname_(rootOname)
 	    , omegaParams_(omegaParams)
@@ -157,11 +154,11 @@ public:
 private:
 
 	void procCommon(SizeType ind,
-	    RealType omega,
-	    VectorRealType& values1,
-	    VectorRealType& values2,
-	    VectorBoolType& defined,
-	    std::ofstream* fout)
+	                RealType omega,
+	                VectorRealType& values1,
+	                VectorRealType& values2,
+	                VectorBoolType& defined,
+	                std::ofstream* fout)
 	{
 		PsimagLite::String inFile("runFor");
 		inFile += rootIname_ + ttos(ind) + ".cout";
@@ -178,9 +175,9 @@ private:
 	}
 
 	void writeSpaceValues(std::ofstream& fout,
-	    RealType omega,
-	    const VectorRealType& v1,
-	    const VectorRealType& v2)
+	                      RealType omega,
+	                      const VectorRealType& v1,
+	                      const VectorRealType& v2)
 	{
 		const SizeType n = v1.size();
 		if (v2.size() != n)
@@ -190,7 +187,7 @@ private:
 
 		for (SizeType i = 0; i < n; ++i)
 			printToSpaceOut(fout,
-			    ttos(i) + " " + ttos(v1[i]) + " " + ttos(v2[i]) + "\n");
+			                ttos(i) + " " + ttos(v1[i]) + " " + ttos(v2[i]) + "\n");
 	}
 
 	static void printToSpaceOut(std::ofstream& fout, PsimagLite::String str)
@@ -199,9 +196,9 @@ private:
 	}
 
 	void correctionVectorRead(VectorRealType& v1,
-	    VectorRealType& v2,
-	    VectorBoolType& defined,
-	    PsimagLite::String inFile)
+	                          VectorRealType& v2,
+	                          VectorBoolType& defined,
+	                          PsimagLite::String inFile)
 	{
 		PsimagLite::String status("clear");
 		std::ifstream fin(inFile);
@@ -270,7 +267,7 @@ private:
 	}
 
 	void checkSites(const VectorBoolType& defined,
-	    PsimagLite::String inFile)
+	                PsimagLite::String inFile)
 	{
 		const SizeType n = defined.size();
 		for (SizeType i = 0; i < n; ++i)

@@ -98,8 +98,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <sys/types.h>
 #include <unistd.h>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 /* PSIDOC ParametersDmrgSolver
 \begin{itemize}
@@ -181,7 +180,7 @@ struct ParametersDmrgSolver {
 	FieldType denseSparseThreshold;
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer) const
 	{
 		PsimagLite::String root = label;
 
@@ -217,9 +216,9 @@ struct ParametersDmrgSolver {
 
 	//! Read Dmrg parameters from inp file
 	ParametersDmrgSolver(InputValidatorType& io,
-	    PsimagLite::String sOptions,
-	    bool earlyExit = false,
-	    bool isObserveCode = false)
+	                     PsimagLite::String sOptions,
+	                     bool earlyExit = false,
+	                     bool isObserveCode = false)
 	    : nthreads(1)
 	    , nthreads2(1)
 	    , sitesPerBlock(1)
@@ -255,8 +254,8 @@ struct ParametersDmrgSolver {
 		}
 
 		filename = filenameFromRootname(filename,
-		    options.isSet("addPidToOutputName"),
-		    ciRun);
+		                                options.isSet("addPidToOutputName"),
+		                                ciRun);
 
 		if (earlyExit)
 			return;
@@ -291,8 +290,8 @@ struct ParametersDmrgSolver {
 
 		if (tmpVector.size() > 0)
 			QnType::adjustQns(adjustQuantumNumbers,
-			    tmpVector,
-			    modeFromModel(model));
+			                  tmpVector,
+			                  modeFromModel(model));
 		try {
 			io.readline(nthreads, "Threads=");
 		} catch (std::exception&) {
@@ -475,8 +474,8 @@ struct ParametersDmrgSolver {
 	}
 
 	static bool getValueIfPresent(PsimagLite::String& str,
-	    PsimagLite::String label,
-	    InputValidatorType& io)
+	                              PsimagLite::String label,
+	                              InputValidatorType& io)
 	{
 		try {
 			io.readline(str, label);
@@ -487,8 +486,8 @@ struct ParametersDmrgSolver {
 	}
 
 	void readFiniteAndInfiniteLoops(PsimagLite::String& infLoops,
-	    bool& infLoopsIsAnInt,
-	    InputValidatorType& io)
+	                                bool& infLoopsIsAnInt,
+	                                InputValidatorType& io)
 	{
 		try {
 			io.readline(infLoops, "InfiniteLoopKeptStates=");
@@ -514,9 +513,9 @@ struct ParametersDmrgSolver {
 	}
 
 	void readFiniteLoops(InputValidatorType& io,
-	    VectorFiniteLoopType& vfl,
-	    const TruncationControlType& truncationC,
-	    int lastSite) const
+	                     VectorFiniteLoopType& vfl,
+	                     const TruncationControlType& truncationC,
+	                     int lastSite) const
 	{
 		if (io.version() < io.versionAinur()) {
 			VectorStringType tmpVec;
@@ -530,9 +529,9 @@ struct ParametersDmrgSolver {
 	}
 
 	void readFiniteLoops_(InputValidatorType& io,
-	    VectorFiniteLoopType& vfl,
-	    const VectorStringType& tmpVec,
-	    const TruncationControlType& truncationC) const
+	                      VectorFiniteLoopType& vfl,
+	                      const VectorStringType& tmpVec,
+	                      const TruncationControlType& truncationC) const
 	{
 		for (SizeType i = 0; i < tmpVec.size(); i += 3) {
 			typename PsimagLite::Vector<int>::Type xTmp(2);
@@ -548,10 +547,10 @@ struct ParametersDmrgSolver {
 	}
 
 	void readFiniteLoops_(InputValidatorType& io,
-	    VectorFiniteLoopType& vfl,
-	    const MatrixStringType& tmpMat,
-	    const TruncationControlType& truncationC,
-	    int lastSite) const
+	                      VectorFiniteLoopType& vfl,
+	                      const MatrixStringType& tmpMat,
+	                      const TruncationControlType& truncationC,
+	                      int lastSite) const
 	{
 		SizeType numberOfSites = 0;
 		io.readline(numberOfSites, "TotalNumberOfSites=");
@@ -568,7 +567,7 @@ struct ParametersDmrgSolver {
 
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
 			int length = (tmpMat(i, 0) == "@auto") ? autoNumber(i, numberOfSites, lastSite)
-							       : algebraicStringToNumber.procLength(tmpMat(i, 0));
+			                                       : algebraicStringToNumber.procLength(tmpMat(i, 0));
 			SizeType m = PsimagLite::atoi(tmpMat(i, 1));
 			FiniteLoopType fl(length, m, tmpMat(i, 2), truncationC);
 			vfl.push_back(fl);
@@ -600,7 +599,7 @@ struct ParametersDmrgSolver {
 			return lastSite;
 
 		return (ind == 0) ? autoNumberFirst(numberOfSites, lastSite)
-				  : autoNumberAfterFirst(ind, numberOfSites, lastSite);
+		                  : autoNumberAfterFirst(ind, numberOfSites, lastSite);
 	}
 
 	int autoNumberFirst(SizeType numberOfSites, SizeType lastSite) const
@@ -639,7 +638,7 @@ struct ParametersDmrgSolver {
 	}
 
 	static void readFiniteLoopsRepeat(InputValidatorType& io,
-	    VectorFiniteLoopType& vfl)
+	                                  VectorFiniteLoopType& vfl)
 	{
 		SizeType repeat = 0;
 
@@ -691,8 +690,8 @@ struct ParametersDmrgSolver {
 	}
 
 	static void checkRestart(PsimagLite::String filename1,
-	    PsimagLite::String filename2,
-	    const OptionsType& options)
+	                         PsimagLite::String filename2,
+	                         const OptionsType& options)
 	{
 		checkFilesNotEqual(filename1, filename2);
 		checkTwoSiteDmrg(filename2, options);
@@ -711,7 +710,7 @@ private:
 	}
 
 	static void checkFilesNotEqual(PsimagLite::String filename1,
-	    PsimagLite::String filename2)
+	                               PsimagLite::String filename2)
 	{
 		if (filename1 != filename2)
 			return;
@@ -721,7 +720,7 @@ private:
 	}
 
 	static void checkTwoSiteDmrg(PsimagLite::String filename2,
-	    const OptionsType& options)
+	                             const OptionsType& options)
 	{
 		PsimagLite::IoSelector::In io(filename2);
 		PsimagLite::String optionsOld;
@@ -758,8 +757,8 @@ private:
 	}
 
 	static PsimagLite::String filenameFromRootname(PsimagLite::String f,
-	    bool addPidToOutputName,
-	    bool ciRun)
+	                                               bool addPidToOutputName,
+	                                               bool ciRun)
 	{
 		size_t findIndex = f.find(".txt");
 		if (findIndex != PsimagLite::String::npos)

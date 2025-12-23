@@ -11,12 +11,10 @@
 typedef PsimagLite::Vector<IntegerType>::Type VectorIntegerType;
 typedef PsimagLite::Vector<int>::Type VectorIntType;
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename InitKronType>
-class BatchedGemmPluginSc
-{
+class BatchedGemmPluginSc {
 
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
@@ -98,13 +96,13 @@ public:
 		}
 
 		batchedGemm_ = new BatchedGemmType(nC,
-		    npatches,
-		    &(pLeft_[0]),
-		    &(pRight_[0]),
-		    aptr,
-		    &(ldAptr[0]),
-		    bptr,
-		    &(ldBptr[0]));
+		                                   npatches,
+		                                   &(pLeft_[0]),
+		                                   &(pRight_[0]),
+		                                   aptr,
+		                                   &(ldAptr[0]),
+		                                   bptr,
+		                                   &(ldBptr[0]));
 		delete[] aptr;
 		aptr = 0;
 		delete[] bptr;
@@ -134,9 +132,9 @@ public:
 private:
 
 	void getMatrixPointers(ComplexOrRealType** a,
-	    ComplexOrRealType** b,
-	    const MatrixDenseOrSparseType& Amat,
-	    const MatrixDenseOrSparseType& Bmat) const
+	                       ComplexOrRealType** b,
+	                       const MatrixDenseOrSparseType& Amat,
+	                       const MatrixDenseOrSparseType& Bmat) const
 	{
 		*a = *b = 0;
 		if (Amat.isZero() || Bmat.isZero())

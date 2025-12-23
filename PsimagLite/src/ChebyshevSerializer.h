@@ -51,9 +51,12 @@ namespace PsimagLite {
 template <typename RealType>
 struct KernelPolynomialParameters {
 
-	enum { JACKSON,
-	       LORENTZ,
-	       DIRICHLET };
+	enum
+	{
+		JACKSON,
+		LORENTZ,
+		DIRICHLET
+	};
 
 	KernelPolynomialParameters(SizeType type1, SizeType cutoff1, const RealType& lambda1)
 	    : type(type1)

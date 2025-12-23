@@ -2,15 +2,15 @@
 
 template <typename ComplexOrRealType>
 void estimate_kron_cost(const int nrow_A,
-    const int ncol_A,
-    const int nnz_A_in,
-    const int nrow_B,
-    const int ncol_B,
-    const int nnz_B_in,
-    ComplexOrRealType* p_kron_nnz,
-    ComplexOrRealType* p_kron_flops,
-    int* p_imethod,
-    const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
+                        const int ncol_A,
+                        const int nnz_A_in,
+                        const int nrow_B,
+                        const int ncol_B,
+                        const int nnz_B_in,
+                        ComplexOrRealType* p_kron_nnz,
+                        ComplexOrRealType* p_kron_flops,
+                        int* p_imethod,
+                        const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 {
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
@@ -86,10 +86,10 @@ void estimate_kron_cost(const int nrow_A,
 	RealType nnz_method3 = nnz_A * nnz_B;
 
 	RealType kron_flops = std::min(flops_method1,
-	    std::min(flops_method2, flops_method3));
+	                               std::min(flops_method2, flops_method3));
 
 	RealType kron_nnz = std::min(nnz_method1,
-	    std::min(nnz_method2, nnz_method3));
+	                             std::min(nnz_method2, nnz_method3));
 
 	const bool minimize_flops = true;
 	if (minimize_flops) {

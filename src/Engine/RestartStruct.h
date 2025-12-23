@@ -6,8 +6,7 @@
 #include "Vector.h"
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // no longer a struct
 struct RestartStruct {
@@ -87,7 +86,7 @@ struct RestartStruct {
 	int sourceTvForPsi() const { return sourceTvForPsi_; }
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer) const
 	{
 		PsimagLite::String root = label;
 		ioSerializer.createGroup(root);

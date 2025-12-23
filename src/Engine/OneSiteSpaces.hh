@@ -2,12 +2,10 @@
 #define ONESITESPACES_HH
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType>
-class OneSiteSpaces
-{
+class OneSiteSpaces {
 
 public:
 
@@ -15,7 +13,7 @@ public:
 	    : dir_(dir)
 	{
 		int siteAux = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM || dir == ProgramGlobals::DirectionEnum::INFINITE) ? site + 1
-																      : site - 1;
+		                                                                                                                      : site - 1;
 		assert(siteAux >= 0);
 		mainHilbert_ = model.hilbertSize(site);
 		auxHilbert_ = model.hilbertSize(siteAux);

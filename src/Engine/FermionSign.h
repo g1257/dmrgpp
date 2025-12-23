@@ -81,11 +81,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class FermionSign
-{
+class FermionSign {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -125,12 +123,12 @@ public:
 
 	template <typename IoInputter>
 	FermionSign(IoInputter& io,
-	    PsimagLite::String prefix,
-	    bool bogus,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputter>::True,
-		int>::Type
-	    = 0)
+	            PsimagLite::String prefix,
+	            bool bogus,
+	            typename PsimagLite::EnableIf<
+	                PsimagLite::IsInputLike<IoInputter>::True,
+	                int>::Type
+	            = 0)
 	{
 		if (bogus)
 			return;
@@ -145,11 +143,11 @@ public:
 
 	template <typename IoOutputter>
 	void write(IoOutputter& io,
-	    PsimagLite::String prefix,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsOutputLike<IoOutputter>::True,
-		int>::Type
-	    = 0) const
+	           PsimagLite::String prefix,
+	           typename PsimagLite::EnableIf<
+	               PsimagLite::IsOutputLike<IoOutputter>::True,
+	               int>::Type
+	           = 0) const
 	{
 		io.write(signs_, prefix);
 	}

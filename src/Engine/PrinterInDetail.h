@@ -2,12 +2,10 @@
 #define PRINTERINDETAIL_H
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType>
-class PrinterInDetail
-{
+class PrinterInDetail {
 
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::QnType QnType;
@@ -33,8 +31,8 @@ public:
 private:
 
 	void printOneSide(std::ostream& os,
-	    PsimagLite::String msg,
-	    const BasisWithOperatorsType& basis) const
+	                  PsimagLite::String msg,
+	                  const BasisWithOperatorsType& basis) const
 	{
 		SizeType sites = basis.block().size();
 		os << "Side=" << msg << "\n";
@@ -65,7 +63,7 @@ private:
 		os << "Operators at site " << site << " (" << siteC << ")\n";
 		for (SizeType sigma = 0; sigma < end; ++sigma) {
 			const OperatorType& myop = basis.localOperator(basis.localOperatorIndex(siteC,
-			    sigma));
+			                                                                        sigma));
 			os << sigma << " non-zeroes=";
 			os << myop.getStorage().nonZeros() << " rows=" << myop.getStorage().rows() << "\n";
 		}

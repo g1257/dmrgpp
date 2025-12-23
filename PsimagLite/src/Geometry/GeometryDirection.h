@@ -91,8 +91,11 @@ class GeometryDirection {
 
 public:
 
-	enum InternalDofEnum { GENERAL,
-		               SPECIFIC };
+	enum InternalDofEnum
+	{
+		GENERAL,
+		SPECIFIC
+	};
 
 	struct Auxiliary {
 
@@ -152,8 +155,7 @@ public:
 					    "rows=cols= "
 					    + ttos(aux.orbitals) + "\n");
 			}
-		}
-		else {
+		} else {
 			io.read(dataNumbers_, connectors);
 			if (dataNumbers_.size() != n) {
 				String s(__FILE__);
@@ -242,8 +244,7 @@ public:
 				os << gd.dataNumbers_[i] << " ";
 			}
 			os << "\n";
-		}
-		else {
+		} else {
 			os << "#GeometryMatrixSize=" << gd.dataMatrices_.size()
 			   << "\n";
 			for (SizeType i = 0; i < gd.dataMatrices_.size(); i++)

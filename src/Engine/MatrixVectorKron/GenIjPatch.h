@@ -84,12 +84,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <cassert>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType_>
-class GenIjPatch
-{
+class GenIjPatch {
 
 public:
 
@@ -98,8 +96,11 @@ public:
 	typedef typename BasisType::QnType QnType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	enum LeftOrRightEnumType { LEFT = 0,
-		RIGHT = 1 };
+	enum LeftOrRightEnumType
+	{
+		LEFT = 0,
+		RIGHT = 1
+	};
 
 	GenIjPatch(const LeftRightSuperType& lrs, const QnType& target)
 	    : lrs_(lrs)

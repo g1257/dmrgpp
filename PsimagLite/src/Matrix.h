@@ -650,14 +650,20 @@ template <typename T>
 class IsMatrixLike {
 public:
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename T>
 class IsMatrixLike<Matrix<T>> {
 public:
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 template <typename T>
@@ -728,13 +734,11 @@ void symbolicPrint(std::ostream& os, const Matrix<T>& A)
 						throw RuntimeError(s.c_str());
 					char chark = k + 65;
 					os << " " << chark << " ";
-				}
-				else {
+				} else {
 					char chark = k2 + 65;
 					os << "-" << chark << " ";
 				}
-			}
-			else {
+			} else {
 				char chark = k + 65;
 				os << " " << chark << " ";
 			}
@@ -787,8 +791,7 @@ std::istream& operator>>(std::istream& is, Matrix<T>& A)
 		for (SizeType j = 0; j < A.rows(); j++)
 			for (SizeType i = 0; i < A.cols(); i++)
 				is >> A(j, i);
-	}
-	else {
+	} else {
 		String str("ERROR istream& operator >> ");
 		str += "(std::istream&, Matrix<T>&): read past end stream";
 		throw RangeError(str);
@@ -970,8 +973,7 @@ Matrix<T> multiplyTransposeConjugate(const Matrix<T>& O1, const Matrix<T>& O2, c
 			for (SizeType t = 0; t < n; t++)
 				for (SizeType w = 0; w < n; w++)
 					ret(s, t) += PsimagLite::conj(O1(w, s)) * O2(w, t);
-	}
-	else {
+	} else {
 		for (SizeType s = 0; s < n; s++)
 			for (SizeType t = 0; t < n; t++)
 				for (SizeType w = 0; w < n; w++)

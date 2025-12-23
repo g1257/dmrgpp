@@ -81,14 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename VectorWithOffsetType,
-    typename DmrgWaveStructType,
-    typename OneSiteSpacesType>
-class ParallelWftOne
-{
+          typename DmrgWaveStructType,
+          typename OneSiteSpacesType>
+class ParallelWftOne {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
@@ -105,11 +103,11 @@ public:
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
 	ParallelWftOne(VectorWithOffsetType& psiDest,
-	    const VectorWithOffsetType& psiSrc,
-	    const LeftRightSuperType& lrs,
-	    SizeType i0,
-	    const OneSiteSpacesType& oneSiteSpaces,
-	    const DmrgWaveStructType& dmrgWaveStruct)
+	               const VectorWithOffsetType& psiSrc,
+	               const LeftRightSuperType& lrs,
+	               SizeType i0,
+	               const OneSiteSpacesType& oneSiteSpaces,
+	               const DmrgWaveStructType& dmrgWaveStruct)
 	    : psiDest_(psiDest)
 	    , psiSrc_(psiSrc)
 	    , lrs_(lrs)
@@ -180,11 +178,11 @@ private:
 
 	template <typename SomeVectorType>
 	SparseElementType createAux2b(const SomeVectorType& psiSrc,
-	    SizeType ip,
-	    SizeType kp,
-	    SizeType jp,
-	    const SparseMatrixType& wsT,
-	    const SparseMatrixType& we) const
+	                              SizeType ip,
+	                              SizeType kp,
+	                              SizeType jp,
+	                              const SparseMatrixType& wsT,
+	                              const SparseMatrixType& we) const
 	{
 		SizeType nalpha = dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		assert(nalpha == wsT.cols());
@@ -209,11 +207,11 @@ private:
 
 	template <typename SomeVectorType>
 	SparseElementType createAux1b(const SomeVectorType& psiSrc,
-	    SizeType ip,
-	    SizeType kp,
-	    SizeType jp,
-	    const SparseMatrixType& ws,
-	    const SparseMatrixType& weT) const
+	                              SizeType ip,
+	                              SizeType kp,
+	                              SizeType jp,
+	                              const SparseMatrixType& ws,
+	                              const SparseMatrixType& weT) const
 	{
 		SizeType volumeOfNk = oneSiteSpaces_.hilbertMain(); // CHECK!
 		SizeType ni = dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols();

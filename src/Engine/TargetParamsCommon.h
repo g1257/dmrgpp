@@ -85,12 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType>
-class TargetParamsCommon : public TargetParamsBase<ModelType>
-{
+class TargetParamsCommon : public TargetParamsBase<ModelType> {
 
 public:
 
@@ -110,8 +108,8 @@ public:
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	TargetParamsCommon(InputValidatorType& io,
-	    PsimagLite::String targeting,
-	    const ModelType& model)
+	                   PsimagLite::String targeting,
+	                   const ModelType& model)
 	    : BaseType(targeting)
 	    , sites_(0)
 	    , startingLoops_(0)
@@ -204,10 +202,10 @@ public:
 		for (SizeType i = 0; i < sites_.size(); ++i) {
 			PsimagLite::String prefix2 = (io.isAinur()) ? "TSPOp" + ttos(i) + ":" : "";
 			OperatorType myOp(io,
-			    model_,
-			    OperatorType::MUST_BE_NONZERO,
-			    prefix2,
-			    sites_[i]);
+			                  model_,
+			                  OperatorType::MUST_BE_NONZERO,
+			                  prefix2,
+			                  sites_[i]);
 			aOperators_.push_back(myOp);
 		}
 
@@ -238,8 +236,8 @@ public:
 	}
 
 	SizeType memResolv(PsimagLite::MemResolv&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	                   SizeType,
+	                   PsimagLite::String = "") const
 	{
 		return 0;
 	}
@@ -260,8 +258,8 @@ public:
 		if (start >= sites_.size())
 			return -1;
 		VectorSizeType::const_iterator it = std::find(sites_.begin() + start,
-		    sites_.end(),
-		    site);
+		                                              sites_.end(),
+		                                              site);
 		if (it == sites_.end())
 			return -1;
 		return it - sites_.begin();
@@ -325,7 +323,7 @@ public:
 	virtual SizeType levelIndex() const { return sectorLevel_.second; }
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 
@@ -341,7 +339,7 @@ public:
 	}
 
 	friend std::ostream& operator<<(std::ostream& os,
-	    const TargetParamsCommon& t)
+	                                const TargetParamsCommon& t)
 	{
 		os << "TargetParams.operators=" << t.aOperators_.size() << "\n";
 		for (SizeType i = 0; i < t.aOperators_.size(); i++) {
@@ -375,7 +373,7 @@ private:
 		if (aOperators_.size() != 1)
 			return false;
 		return (isTheIdentity(aOperators_[0].getStorage())
-		    && aOperators_[0].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::BOSON);
+		        && aOperators_[0].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	void checkSizesOfOperators() const

@@ -89,13 +89,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h" // in PsimagLite
 #include "Utils.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
 // (See corresponding section in paper)
 template <typename SparseMatrixType_>
-class Basis
-{
+class Basis {
 
 public:
 
@@ -123,8 +121,8 @@ public:
 	//! Loads this basis from memory or disk
 	template <typename IoInputter>
 	Basis(IoInputter& io,
-	    const PsimagLite::String& ss,
-	    const BasisTraits& traits)
+	      const PsimagLite::String& ss,
+	      const BasisTraits& traits)
 	    : dmrgTransformed_(false)
 	    , name_(ss)
 	{
@@ -150,32 +148,32 @@ public:
 	void set(BlockType const& B) { block_ = B; }
 
 	/* PSIDOC BasisSetToProduct
-		The quantum numbers of the original (untransformed) real-space basis
-		are set by the model class (to be described in Section~\ref{subsec:models}),
-		whereas the quantum numbers of outer products are handled
-		by the class \cppClass{Basis} and \cppClass{BasisImplementation},
-		function \cppFunction{setToProduct}. This can be done because if $|a\rangle$
-		has quantum number $q_a$ and $|b\rangle$ has quantum number
-		$q_b$, then $|a\rangle\otimes|b\rangle$ has quantum number
-		$q_a+q_b$.  \cppClass{Basis} knows how quantum
-		numbers change when we change the basis: they
-		do not change since the DMRG transformation
-		preserves quantum numbers; and  \cppClass{Basis} also
-		knows what happens to quantum numbers when we truncate the basis:
-		quantum numbers of discarded states are discarded.
-		In this way, symmetries are implemented efficiently,
-		with minimal dependencies and in a model-independent way.
-		*/
+	        The quantum numbers of the original (untransformed) real-space basis
+	        are set by the model class (to be described in Section~\ref{subsec:models}),
+	        whereas the quantum numbers of outer products are handled
+	        by the class \cppClass{Basis} and \cppClass{BasisImplementation},
+	        function \cppFunction{setToProduct}. This can be done because if $|a\rangle$
+	        has quantum number $q_a$ and $|b\rangle$ has quantum number
+	        $q_b$, then $|a\rangle\otimes|b\rangle$ has quantum number
+	        $q_a+q_b$.  \cppClass{Basis} knows how quantum
+	        numbers change when we change the basis: they
+	        do not change since the DMRG transformation
+	        preserves quantum numbers; and  \cppClass{Basis} also
+	        knows what happens to quantum numbers when we truncate the basis:
+	        quantum numbers of discarded states are discarded.
+	        In this way, symmetries are implemented efficiently,
+	        with minimal dependencies and in a model-independent way.
+	        */
 	void setToProduct(const ThisType& basis1,
-	    const ThisType& basis2,
-	    SizeType initialSizeOfHashTable = 10)
+	                  const ThisType& basis2,
+	                  SizeType initialSizeOfHashTable = 10)
 	{
 		if (useSu2Symmetry_)
 			err("SU(2) symmetry no longer supported\n");
 
 		PsimagLite::Profiling profiling("setToProduct",
-		    ttos(basis1.size()) + "x" + ttos(basis2.size()),
-		    std::cout);
+		                                ttos(basis1.size()) + "x" + ttos(basis2.size()),
+		                                std::cout);
 
 		block_.clear();
 		utils::blockUnion(block_, basis1.block_, basis2.block_);
@@ -295,42 +293,43 @@ public:
 
 		PsimagLite::CodeSectionParams codeParams = PsimagLite::Concurrency::codeSectionParams;
 		codeParams.npthreads = std::min(nps * npe,
-		    PsimagLite::Concurrency::codeSectionParams.npthreads);
+		                                PsimagLite::Concurrency::codeSectionParams.npthreads);
 		PsimagLite::Parallelizer2<> parallelizer2(codeParams);
 		parallelizer2.parallelFor(0,
-		    nps * npe,
-		    [nps,
-			basisLeftSize,
-			&offset_into_perm_array,
-			&leftSize_array,
-			&rightSize_array,
-			&basis1,
-			&basis2,
-			this](SizeType pspe, SizeType) {
-			    // ----------------------------
-			    // recall  pspe = ps + pe * nps;
-			    // ----------------------------
-			    const SizeType pe = pspe / nps;
-			    const SizeType ps = pspe - pe * nps;
-			    const SizeType offset_into_perm = offset_into_perm_array[pspe];
+		                          nps * npe,
+		                          [nps,
+		                           basisLeftSize,
+		                           &offset_into_perm_array,
+		                           &leftSize_array,
+		                           &rightSize_array,
+		                           &basis1,
+		                           &basis2,
+		                           this](SizeType pspe, SizeType)
+		                          {
+			                          // ----------------------------
+			                          // recall  pspe = ps + pe * nps;
+			                          // ----------------------------
+			                          const SizeType pe = pspe / nps;
+			                          const SizeType ps = pspe - pe * nps;
+			                          const SizeType offset_into_perm = offset_into_perm_array[pspe];
 
-			    const SizeType leftSize = leftSize_array[ps];
-			    const SizeType rightSize = rightSize_array[pe];
+			                          const SizeType leftSize = leftSize_array[ps];
+			                          const SizeType rightSize = rightSize_array[pe];
 
-			    for (SizeType iright = 0; iright < rightSize; ++iright) {
-				    for (SizeType ileft = 0; ileft < leftSize; ++ileft) {
+			                          for (SizeType iright = 0; iright < rightSize; ++iright) {
+				                          for (SizeType ileft = 0; ileft < leftSize; ++ileft) {
 
-					    const SizeType ileftOffset = basis1.offsets_[ps] + ileft;
-					    const SizeType irightOffset = basis2.offsets_[pe] + iright;
+					                          const SizeType ileftOffset = basis1.offsets_[ps] + ileft;
+					                          const SizeType irightOffset = basis2.offsets_[pe] + iright;
 
-					    const SizeType iglobalState = ileftOffset + irightOffset * basisLeftSize;
-					    const SizeType ipos = ileft + iright * leftSize + offset_into_perm;
+					                          const SizeType iglobalState = ileftOffset + irightOffset * basisLeftSize;
+					                          const SizeType ipos = ileft + iright * leftSize + offset_into_perm;
 
-					    this->permutationVector_[ipos] = iglobalState;
-					    this->permInverse_[iglobalState] = ipos;
-				    }
-			    }
-		    });
+					                          this->permutationVector_[ipos] = iglobalState;
+					                          this->permInverse_[iglobalState] = ipos;
+				                          }
+			                          }
+		                          });
 
 		checkPermutation(permInverse_);
 		checkPermutation(permutationVector_);
@@ -405,9 +404,9 @@ public:
 	//! transforms this basis by transform
 	template <typename SolverParametersType>
 	void changeBasis(VectorSizeType& removedIndices,
-	    const VectorSizeType& perm,
-	    SizeType kept,
-	    const SolverParametersType& solverParams)
+	                 const VectorSizeType& perm,
+	                 SizeType kept,
+	                 const SolverParametersType& solverParams)
 	{
 		removedIndices.clear();
 		if (useSu2Symmetry_)
@@ -424,7 +423,7 @@ public:
 	}
 
 	RealType truncateBasis(const typename PsimagLite::Vector<RealType>::Type& eigs,
-	    const VectorSizeType& removedIndices)
+	                       const VectorSizeType& removedIndices)
 	{
 		dmrgTransformed_ = true;
 
@@ -432,8 +431,8 @@ public:
 			return 0;
 
 		PsimagLite::Profiling profiling("truncateBasis",
-		    ttos(eigs.size()) + "-" + ttos(removedIndices.size()),
-		    std::cout);
+		                                ttos(eigs.size()) + "-" + ttos(removedIndices.size()),
+		                                std::cout);
 
 		// we don't truncate the permutation vectors
 		//	because they're needed for the WFT
@@ -449,8 +448,8 @@ public:
 			const SizeType offset = offsets_[i];
 			const SizeType thisSize = offsets_[i + 1] - offsets_[i];
 			const SizeType count = countRemovedStatesInRange(removedIndices,
-			    offset,
-			    thisSize);
+			                                                 offset,
+			                                                 thisSize);
 
 			if (count == thisSize)
 				continue;
@@ -522,9 +521,9 @@ public:
 
 	//! saves this basis to disk
 	void write(PsimagLite::IoNg::Out& io,
-	    const PsimagLite::String& ss,
-	    PsimagLite::IoNgSerializer::WriteMode mode,
-	    bool minimizeWrite) const
+	           const PsimagLite::String& ss,
+	           PsimagLite::IoNgSerializer::WriteMode mode,
+	           bool minimizeWrite) const
 	{
 		checkSigns();
 		PsimagLite::String label = ss + "/";
@@ -551,22 +550,22 @@ public:
 	//! saves this basis to disk
 	template <typename SomeIoType>
 	void write(SomeIoType& io,
-	    typename SomeIoType::Serializer::WriteMode mode,
-	    PsimagLite::String prefix,
-	    bool minimizeWrite,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsOutputLike<SomeIoType>::True,
-		int>::Type
-	    = 0) const
+	           typename SomeIoType::Serializer::WriteMode mode,
+	           PsimagLite::String prefix,
+	           bool minimizeWrite,
+	           typename PsimagLite::EnableIf<
+	               PsimagLite::IsOutputLike<SomeIoType>::True,
+	               int>::Type
+	           = 0) const
 	{
 		write(io, prefix + "/" + name_, mode, minimizeWrite);
 	}
 
 	// not optimized, used for OneSiteTruncation
 	static void notReallySortU(MatrixType& UnonConst,
-	    const MatrixType& Uconst,
-	    const VectorQnType& qns,
-	    SizeType start)
+	                           const MatrixType& Uconst,
+	                           const VectorQnType& qns,
+	                           SizeType start)
 	{
 		const SizeType ncols = Uconst.cols();
 		if (start >= ncols)
@@ -578,8 +577,8 @@ public:
 		for (SizeType col = start; col < ncols; ++col) {
 			QnType qForThisColumn = computeQforThisColumn(Uconst, qns, col);
 			typename VectorQnType::const_iterator it = std::find(qnsSeen.begin(),
-			    qnsSeen.end(),
-			    qForThisColumn);
+			                                                     qnsSeen.end(),
+			                                                     qForThisColumn);
 			if (it == qnsSeen.end()) {
 				// we haven't seen this qn yet
 				qnsSeen.push_back(qForThisColumn);
@@ -600,8 +599,8 @@ public:
 		SizeType counter1 = 0;
 		for (SizeType i = 0; i < qnsSize; ++i) {
 			typename VectorQnType::const_iterator it = std::find(qnsSeen.begin(),
-			    qnsSeen.end(),
-			    qns[i]);
+			                                                     qnsSeen.end(),
+			                                                     qns[i]);
 			if (it == qnsSeen.end())
 				continue;
 			const SizeType qIndex = it - qnsSeen.begin();
@@ -637,7 +636,7 @@ public:
 
 	//! The operator<< is a friend
 	friend std::ostream& operator<<(std::ostream& os,
-	    const Basis<SparseMatrixType>& x)
+	                                const Basis<SparseMatrixType>& x)
 	{
 		os << "dmrgTransformed=" << x.dmrgTransformed_ << "\n";
 		os << "name=" << x.name_ << "\n";
@@ -703,8 +702,8 @@ protected:
 private:
 
 	static QnType computeQforThisColumn(const MatrixType& U,
-	    const VectorQnType& qns,
-	    SizeType col)
+	                                    const VectorQnType& qns,
+	                                    SizeType col)
 	{
 		const SizeType nrows = U.rows();
 		assert(nrows == qns.size());
@@ -729,12 +728,12 @@ private:
 
 	template <typename IoInputter>
 	void loadInternal(IoInputter& io,
-	    PsimagLite::String prefix,
-	    bool minimizeRead,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputter>::True,
-		int>::Type
-	    = 0)
+	                  PsimagLite::String prefix,
+	                  bool minimizeRead,
+	                  typename PsimagLite::EnableIf<
+	                      PsimagLite::IsInputLike<IoInputter>::True,
+	                      int>::Type
+	                  = 0)
 	{
 		useSu2Symmetry_ = false;
 		prefix += "/";
@@ -782,8 +781,8 @@ private:
 	}
 
 	void offsetsFromSizes(std::unordered_map<QnType, SizeType>& offsets,
-	    std::unordered_map<QnType, SizeType>& sizes,
-	    const VectorBoolType& signsPerOffset)
+	                      std::unordered_map<QnType, SizeType>& sizes,
+	                      const VectorBoolType& signsPerOffset)
 	{
 		const SizeType total = qns_.size();
 		assert(total == sizes.size());
@@ -830,8 +829,8 @@ private:
 
 	// FIXME TODO: Can be made faster  because removedIndices is already sorted
 	SizeType countRemovedStatesInRange(const VectorSizeType& removedIndices,
-	    SizeType offset,
-	    SizeType thisSize) const
+	                                   SizeType offset,
+	                                   SizeType thisSize) const
 	{
 		SizeType count = 0;
 		const SizeType end = removedIndices.size();
@@ -847,7 +846,7 @@ private:
 	}
 
 	RealType calcError(const typename PsimagLite::Vector<RealType>::Type& eigs,
-	    const VectorSizeType& removedIndices) const
+	                   const VectorSizeType& removedIndices) const
 	{
 		RealType sum = static_cast<RealType>(0.0);
 		for (SizeType i = 0; i < eigs.size(); i++)
@@ -867,19 +866,18 @@ private:
 			name_ = "environ";
 	}
 
-	class MyLoop
-	{
+	class MyLoop {
 
 	public:
 
 		MyLoop(SizeType basis1OffsetsPs,
-		    SizeType basis2OffsetsPe,
-		    SizeType basisLeftSize,
-		    SizeType rightSize,
-		    SizeType offsetPlusExtraOffset,
-		    SizeType tasks,
-		    VectorSizeType& permutationVector,
-		    VectorSizeType& permInverse)
+		       SizeType basis2OffsetsPe,
+		       SizeType basisLeftSize,
+		       SizeType rightSize,
+		       SizeType offsetPlusExtraOffset,
+		       SizeType tasks,
+		       VectorSizeType& permutationVector,
+		       VectorSizeType& permInverse)
 		    : basis1OffsetsPs_(basis1OffsetsPs)
 		    , basis2OffsetsPe_(basis2OffsetsPe)
 		    , basisLeftSize_(basisLeftSize)
@@ -918,65 +916,65 @@ private:
 	}; // MyLoop
 
 	/* PSIDOC BasisQuantumNumbers
-		Symmetries will allow the solver to block the Hamiltonian matrix in blocks,
+	        Symmetries will allow the solver to block the Hamiltonian matrix in blocks,
 using less memory, speeding up
-		the computation and allowing the code to parallelize matrix blocks related by symmetry.
-		Let us assume that our particular model has $N_s$ symmetries labeled by $0\le \alpha < N_s$.
-		Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers
-		 $\tilde{q}_{k,\alpha}$. These quantum numbers can refer to practically anything,
-		 for example, to number of particles with a given spin or orbital or to the $z$
+	        the computation and allowing the code to parallelize matrix blocks related by symmetry.
+	        Let us assume that our particular model has $N_s$ symmetries labeled by $0\le \alpha < N_s$.
+	        Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers
+	         $\tilde{q}_{k,\alpha}$. These quantum numbers can refer to practically anything,
+	         for example, to number of particles with a given spin or orbital or to the $z$
 component of the spin.
-		We do not need to know the details to block the matrix. We know, however, that
+	        We do not need to know the details to block the matrix. We know, however, that
 these numbers are
-		finite, and let $Q$ be an integer such that $\tilde{q}_{k,\alpha}< Q$ $\forall k,\alpha$.
-		We can then combine all these quantum numbers into a single one,
-		like this: $q_k = \sum_\alpha \tilde{q}_{k,\alpha} Q^\alpha$,
-		and this mapping is bijective. In essence, we combined all ``good''
-		quantum numbers into a single one and from now on we
-		will consider that we have only one Hamiltonian symmetry called the
-		``effective'' symmetry, and only one corresponding number $q_k$, the
-		``effective'' quantum number. These numbers are stored in the  member
-		{\it quantumNumbers} of C++ class \cppClass{Basis}.
-		(Note that if one has 100 sites or less,\footnote{This is probably a
-		maximum for systems of correlated electrons such as the Hubbard model
-		or the t-J model.} then the number $Q$ defined above is probably of the
-		order of hundreds for usual symmetries, making this implementation very practical for
-		systems of correlated electrons.)
-		*/
+	        finite, and let $Q$ be an integer such that $\tilde{q}_{k,\alpha}< Q$ $\forall k,\alpha$.
+	        We can then combine all these quantum numbers into a single one,
+	        like this: $q_k = \sum_\alpha \tilde{q}_{k,\alpha} Q^\alpha$,
+	        and this mapping is bijective. In essence, we combined all ``good''
+	        quantum numbers into a single one and from now on we
+	        will consider that we have only one Hamiltonian symmetry called the
+	        ``effective'' symmetry, and only one corresponding number $q_k$, the
+	        ``effective'' quantum number. These numbers are stored in the  member
+	        {\it quantumNumbers} of C++ class \cppClass{Basis}.
+	        (Note that if one has 100 sites or less,\footnote{This is probably a
+	        maximum for systems of correlated electrons such as the Hubbard model
+	        or the t-J model.} then the number $Q$ defined above is probably of the
+	        order of hundreds for usual symmetries, making this implementation very practical for
+	        systems of correlated electrons.)
+	        */
 	VectorQnType qns_;
 	VectorBoolType signs_;
 	VectorBoolType signsOld_;
 
 	/* PSIDOC BasisPartition
-		What remains to be done is to find a partition of the basis which
-		labels where the quantum number changes. Let us say that the
-		quantum numbers of the reordered basis states are
-		\[
-		\{3,3,3,3,8,8,9,9,9,15,\cdots\}.
-		\]
-		Then we define a vector named ``partition'', such that partition[0]=0,
-		partition[1]=4, because the quantum number changes in the 4th position
-		(from 3 to 8), and then partition[2]=6, because the quantum number
-		changes again (from 8 to 9) in the 6th position, etc.
-		Now we know that our Hamiltonian matrix will be composed first of a
-		block of 4x4, then of a block of 2x2, etc.
-		*/
+	        What remains to be done is to find a partition of the basis which
+	        labels where the quantum number changes. Let us say that the
+	        quantum numbers of the reordered basis states are
+	        \[
+	        \{3,3,3,3,8,8,9,9,9,15,\cdots\}.
+	        \]
+	        Then we define a vector named ``partition'', such that partition[0]=0,
+	        partition[1]=4, because the quantum number changes in the 4th position
+	        (from 3 to 8), and then partition[2]=6, because the quantum number
+	        changes again (from 8 to 9) in the 6th position, etc.
+	        Now we know that our Hamiltonian matrix will be composed first of a
+	        block of 4x4, then of a block of 2x2, etc.
+	        */
 	VectorSizeType offsets_;
 
 	/* PSIDOC BasisPermutationVector
-		We then reorder our basis such that its elements are given in
-		increasing $q$ number. There will be a permutation vector associated
-		with this reordering, that will be stored in the member
-		\verb!permutationVector! of class \cppClass{Basis}.
-		For ease of coding we also store its inverse in \verb!permInverse!.
-		*/
+	        We then reorder our basis such that its elements are given in
+	        increasing $q$ number. There will be a permutation vector associated
+	        with this reordering, that will be stored in the member
+	        \verb!permutationVector! of class \cppClass{Basis}.
+	        For ease of coding we also store its inverse in \verb!permInverse!.
+	        */
 	VectorSizeType permutationVector_;
 	VectorSizeType permInverse_;
 	HamiltonianSymmetryLocalType symmLocal_;
 	/* PSIDOC BasisBlock
-		The variable block of a \cppClass{DmrgBasis} object indicates over
-		which sites the basis represented by this object is being built.
-		*/
+	        The variable block of a \cppClass{DmrgBasis} object indicates over
+	        which sites the basis represented by this object is being built.
+	        */
 	BlockType block_;
 	bool dmrgTransformed_;
 	PsimagLite::String name_;
@@ -989,7 +987,10 @@ bool Basis<SparseMatrixType>::useSu2Symmetry_ = false;
 
 template <typename SparseMatrixType_>
 struct IsBasisType<Basis<SparseMatrixType_>> {
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 } // namespace Dmrg

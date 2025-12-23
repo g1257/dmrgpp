@@ -82,12 +82,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType>
-class TargetParamsBase
-{
+class TargetParamsBase {
 public:
 
 	typedef typename ModelType::RealType RealType;
@@ -102,15 +100,21 @@ public:
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	enum class ConcatEnum { PRODUCT,
-		SUM };
+	enum class ConcatEnum
+	{
+		PRODUCT,
+		SUM
+	};
 
-	enum class AlgorithmEnum { KRYLOV,
+	enum class AlgorithmEnum
+	{
+		KRYLOV,
 		CONJUGATE_GRADIENT,
 		CHEBYSHEV,
 		KRYLOVTIME,
 		RUNGE_KUTTA,
-		SUZUKI_TROTTER };
+		SUZUKI_TROTTER
+	};
 
 	TargetParamsBase(PsimagLite::String targeting)
 	    : targeting_(targeting)

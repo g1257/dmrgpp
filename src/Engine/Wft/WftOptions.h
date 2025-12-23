@@ -2,8 +2,7 @@
 #define WFTOPTIONS_H
 #include "Complex.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename VectorWithOffsetType_, typename OptionsType>
 struct WftOptions {
@@ -11,18 +10,21 @@ struct WftOptions {
 	typedef typename VectorWithOffsetType_::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
-	enum AccelEnum { ACCEL_NONE,
+	enum AccelEnum
+	{
+		ACCEL_NONE,
 		ACCEL_PATCHES,
 		ACCEL_BLOCKS,
-		ACCEL_SVD };
+		ACCEL_SVD
+	};
 
 	WftOptions(ProgramGlobals::DirectionEnum dir1,
-	    const OptionsType& options,
-	    bool f,
-	    bool b,
-	    RealType d,
-	    SizeType gemmRnb_,
-	    SizeType threadsForGemmR_)
+	           const OptionsType& options,
+	           bool f,
+	           bool b,
+	           RealType d,
+	           SizeType gemmRnb_,
+	           SizeType threadsForGemmR_)
 	    : twoSiteDmrg(options.isSet("twositedmrg"))
 	    , kronLoadBalance(options.isSet("KronLoadBalance"))
 	    , firstCall(f)

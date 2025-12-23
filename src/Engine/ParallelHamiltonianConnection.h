@@ -4,12 +4,10 @@
 #include "OpsForLink.hh"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename HamiltonianConnectionType>
-class ParallelHamiltonianConnection
-{
+class ParallelHamiltonianConnection {
 
 	typedef typename HamiltonianConnectionType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -24,9 +22,9 @@ class ParallelHamiltonianConnection
 public:
 
 	ParallelHamiltonianConnection(VectorType& x,
-	    const VectorType& y,
-	    const HamiltonianConnectionType& hc,
-	    const AuxType& aux)
+	                              const VectorType& y,
+	                              const HamiltonianConnectionType& hc,
+	                              const AuxType& aux)
 	    : x_(x)
 	    , y_(y)
 	    , hc_(hc)
@@ -65,11 +63,11 @@ public:
 		opsForLink.setPointer(taskNumber);
 
 		hc_.modelHelper().fastOpProdInter(xtemp_[threadNum],
-		    y_,
-		    opsForLink.A().getCRS(),
-		    opsForLink.B().getCRS(),
-		    opsForLink.link(),
-		    aux_);
+		                                  y_,
+		                                  opsForLink.A().getCRS(),
+		                                  opsForLink.B().getCRS(),
+		                                  opsForLink.link(),
+		                                  aux_);
 
 		//		hc_.kroneckerDumper().push(A->getCRS(),
 		//		                           B->getCRS(),

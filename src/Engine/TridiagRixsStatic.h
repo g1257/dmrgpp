@@ -79,12 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TRIDIAGRIXSSTATIC_H
 #include "ApplyOperatorLocal.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType, typename LanczosSolverType, typename VectorWithOffsetType>
-class TridiagRixsStatic
-{
+class TridiagRixsStatic {
 
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -104,19 +102,18 @@ class TridiagRixsStatic
 	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2> ApplyOperatorLocalType;
 	typedef typename VectorWithOffsetType2::VectorSizeType VectorSizeType;
 
-	class MyMatrixVector : public LanczosSolverType::LanczosMatrixType
-	{
+	class MyMatrixVector : public LanczosSolverType::LanczosMatrixType {
 
 		typedef typename LanczosSolverType::LanczosMatrixType BasisType;
 
 	public:
 
 		MyMatrixVector(ModelType const* model,
-		    ModelHelperType const* modelHelper,
-		    const OperatorType& A,
-		    ProgramGlobals::DirectionEnum dir,
-		    typename ApplyOperatorLocalType::BorderEnum corner,
-		    const VectorSizeType& weights)
+		               ModelHelperType const* modelHelper,
+		               const OperatorType& A,
+		               ProgramGlobals::DirectionEnum dir,
+		               typename ApplyOperatorLocalType::BorderEnum corner,
+		               const VectorSizeType& weights)
 		    : BasisType(model, modelHelper)
 		    , applyOperatorLocal_(modelHelper->leftRightSuper())
 		    , A_(A)
@@ -157,8 +154,8 @@ class TridiagRixsStatic
 
 	typedef MyMatrixVector MyMatrixVectorType;
 	typedef PsimagLite::LanczosSolver<ParametersSolverType,
-	    MyMatrixVectorType,
-	    typename MyMatrixVectorType::VectorType>
+	                                  MyMatrixVectorType,
+	                                  typename MyMatrixVectorType::VectorType>
 	    MyLanczosSolverType;
 	typedef typename MyLanczosSolverType::TridiagonalMatrixType MyTridiagonalMatrixType;
 
@@ -169,10 +166,10 @@ public:
 	typedef typename PsimagLite::Vector<MatrixComplexOrRealType>::Type VectorMatrixFieldType;
 
 	TridiagRixsStatic(const LeftRightSuperType& lrs,
-	    const ModelType& model,
-	    InputValidatorType& io,
-	    SizeType site,
-	    ProgramGlobals::DirectionEnum direction)
+	                  const ModelType& model,
+	                  InputValidatorType& io,
+	                  SizeType site,
+	                  ProgramGlobals::DirectionEnum direction)
 	    : lrs_(lrs)
 	    , model_(model)
 	    , io_(io)
@@ -186,9 +183,9 @@ public:
 	}
 
 	void operator()(const VectorWithOffsetType& phi,
-	    VectorMatrixFieldType& T,
-	    VectorMatrixFieldType& V,
-	    VectorSizeType& steps)
+	                VectorMatrixFieldType& T,
+	                VectorMatrixFieldType& V,
+	                VectorSizeType& steps)
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ++ii) {
 			SizeType i = phi.sector(ii);
@@ -199,9 +196,9 @@ public:
 private:
 
 	SizeType triDiag(const VectorWithOffsetType& phi,
-	    MatrixComplexOrRealType& T,
-	    MatrixComplexOrRealType& V,
-	    SizeType i0)
+	                 MatrixComplexOrRealType& T,
+	                 MatrixComplexOrRealType& V,
+	                 SizeType i0)
 	{
 		VectorSizeType weights(lrs_.super().partition(), 0);
 		weights[i0] = phi.effectiveSize(i0);
@@ -210,11 +207,11 @@ private:
 		SizeType currentTime = 0;
 		typename ModelType::ModelHelperType modelHelper(p, lrs_, currentTime, threadNum);
 		typename MyLanczosSolverType::LanczosMatrixType lanczosHelper(&model_,
-		    &modelHelper,
-		    A_,
-		    direction_,
-		    corner_,
-		    weights);
+		                                                              &modelHelper,
+		                                                              A_,
+		                                                              direction_,
+		                                                              corner_,
+		                                                              weights);
 
 		ParametersSolverType params(io_, "Tridiag");
 		params.lotaMemory = true;

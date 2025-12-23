@@ -69,7 +69,8 @@ private:
 			          << "\n";
 		}
 
-		auto lambda = [transA, transB, m, n, k, alpha, &A, ldA, &B, ldB, beta, &C, ldC, nblocks_i, nb_i, nb_j, is_notransA, is_notransB](SizeType ij_block, SizeType) {
+		auto lambda = [transA, transB, m, n, k, alpha, &A, ldA, &B, ldB, beta, &C, ldC, nblocks_i, nb_i, nb_j, is_notransA, is_notransB](SizeType ij_block, SizeType)
+		{
 			const SizeType i_block = (ij_block % nblocks_i);
 			const SizeType j_block = (ij_block - i_block) / nblocks_i;
 			assert((i_block + j_block * nblocks_i) == ij_block);

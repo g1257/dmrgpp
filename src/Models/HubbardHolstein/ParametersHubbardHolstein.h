@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! FeAs Model Parameters
 template <typename ComplexOrRealType, typename QnType>
 struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType, QnType> {
@@ -144,14 +143,14 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	                   SizeType,
+	                   PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	           PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardHolstein";
 		io.createGroup(label);
@@ -165,7 +164,7 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 
 	//! Function that prints model parameters to stream os
 	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersHubbardHolstein& parameters)
+	                                const ParametersHubbardHolstein& parameters)
 	{
 		os << "NumberPhonons=" << parameters.numberphonons << "\n";
 

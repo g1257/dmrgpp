@@ -81,16 +81,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TimeVectorsChebyshev.h"
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingChebyshev : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingChebyshev : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
-	enum { BORDER_NEITHER,
+	enum
+	{
+		BORDER_NEITHER,
 		BORDER_LEFT,
-		BORDER_RIGHT };
+		BORDER_RIGHT
+	};
 
 public:
 
@@ -126,10 +127,10 @@ public:
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
 	TargetingChebyshev(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& ioIn)
+	                   const CheckpointType& checkPoint,
+	                   const WaveFunctionTransfType& wft,
+	                   const QnType&,
+	                   InputValidatorType& ioIn)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_(ioIn, "TargetingChebyshev", checkPoint.model())
 	    , wft_(wft)
@@ -203,10 +204,10 @@ public:
 	}
 
 	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType&,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType& block1,
+	            const BlockType&,
+	            SizeType loopNumber)
 	{
 		assert(energies.size() > 0);
 		RealType Eg = energies[0];
@@ -226,8 +227,8 @@ public:
 	}
 
 	void write(const VectorSizeType& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String prefix) const
 	{
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -243,9 +244,9 @@ public:
 private:
 
 	void evolveInternal(RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    SizeType loopNumber)
+	                    ProgramGlobals::DirectionEnum direction,
+	                    const BlockType& block1,
+	                    SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -265,13 +266,13 @@ private:
 
 		bool isLastCall = true;
 		this->common().aoeNonConst().calcTimeVectors(indices,
-		    Eg,
-		    phiNew,
-		    direction,
-		    allOperatorsApplied,
-		    false, // don't wft or advance indices[0]
-		    block1,
-		    isLastCall);
+		                                             Eg,
+		                                             phiNew,
+		                                             direction,
+		                                             allOperatorsApplied,
+		                                             false, // don't wft or advance indices[0]
+		                                             block1,
+		                                             isLastCall);
 
 		assert(phiNew.offset(0) == this->tv(1).offset(0));
 
@@ -292,10 +293,10 @@ private:
 	{
 		typedef OracleChebyshev<TargetingCommonType, TargetParamsType> OracleChebyshevType;
 		OracleChebyshevType oracle(BaseType::model(),
-		    BaseType::lrs(),
-		    this->common().aoe().currentTime(),
-		    tstStruct_,
-		    this->common().aoe().energy());
+		                           BaseType::lrs(),
+		                           this->common().aoe().currentTime(),
+		                           tstStruct_,
+		                           this->common().aoe().energy());
 
 		OperatorType A = BaseType::model().naturalOperator("c", 0, 0);
 		oracle(3, this->common(), systemOrEviron, site, A, ApplyOperatorType::BORDER_NO);
@@ -316,18 +317,18 @@ private:
 	}
 
 	void printChebyshev(const VectorWithOffsetType& phi,
-	    SizeType whatTarget,
-	    SizeType i0) const
+	                    SizeType whatTarget,
+	                    SizeType i0) const
 	{
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::HamiltonianConnectionType hc(p,
-		    BaseType::lrs(),
-		    BaseType::model().geometry(),
-		    BaseType::model().modelLinks(),
-		    this->common().aoe().currentTime(),
-		    0);
+		                                                 BaseType::lrs(),
+		                                                 BaseType::model().geometry(),
+		                                                 BaseType::model().modelLinks(),
+		                                                 this->common().aoe().currentTime(),
+		                                                 0);
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		    hc);
+		                                                     hc);
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);

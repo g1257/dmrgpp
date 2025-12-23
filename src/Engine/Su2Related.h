@@ -79,8 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputCheck.h"
 #include "InputNg.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // This is a structure, don't add member functions here!
 struct Su2Related {
 	Su2Related()
@@ -92,14 +91,14 @@ struct Su2Related {
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType& mres,
-	    SizeType,
-	    PsimagLite::String msg = "") const
+	                   SizeType,
+	                   PsimagLite::String msg = "") const
 	{
 		return 0;
 	}
 
 	void read(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer)
+	          PsimagLite::IoSerializer& ioSerializer)
 	{
 		ioSerializer.read(offset, label + "/offset");
 		ioSerializer.read(source, label + "/source");
@@ -107,7 +106,7 @@ struct Su2Related {
 	}
 
 	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer) const
+	           PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/offset", offset);

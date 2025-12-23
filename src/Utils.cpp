@@ -72,8 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 
 // Utility functions that are still needed
-namespace utils
-{
+namespace utils {
 
 PsimagLite::String pathPrepend(PsimagLite::String pre, PsimagLite::String pathname)
 {

@@ -91,11 +91,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelBaseType>
-class ModelFeBasedSc : public ModelBaseType
-{
+class ModelFeBasedSc : public ModelBaseType {
 
 public:
 
@@ -126,8 +124,8 @@ public:
 	typedef ParametersModelFeAs<ComplexOrRealType, QnType> ParamsModelFeAsType;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef FeAsJzSymmetry<HilbertBasisType,
-	    VectorOperatorType,
-	    PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
+	                       VectorOperatorType,
+	                       PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
 	    FeAsJzSymmetryType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::ModelTermType ModelTermType;
@@ -137,9 +135,9 @@ public:
 	static const int SPIN_DOWN = HilbertSpaceFeAsType::SPIN_DOWN;
 
 	ModelFeBasedSc(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& superGeometry,
-	    const PsimagLite::String& extension)
+	               InputValidatorType& io,
+	               const SuperGeometryType& superGeometry,
+	               const PsimagLite::String& extension)
 	    : ModelBaseType(solverParams, superGeometry, io)
 	    , reinterpretX_(6)
 	    , reinterpretY_(9)
@@ -147,8 +145,8 @@ public:
 	    , superGeometry_(superGeometry)
 	    , geometryDca_(superGeometry.createDcaObject(modelParameters_.orbitals))
 	    , spinSquared_(spinSquaredHelper_,
-		  modelParameters_.orbitals,
-		  2 * modelParameters_.orbitals)
+	                   modelParameters_.orbitals,
+	                   2 * modelParameters_.orbitals)
 	    , reinterpret_(!modelParameters_.jzSymmetry)
 	    , feAsJzSymmetry_(modelParameters_.jzSymmetry)
 	    , spinDependentHopping_(false)
@@ -280,8 +278,8 @@ public:
 		}
 
 		SizeType sum = std::accumulate(basis_.begin(),
-		    basis_.end(),
-		    static_cast<SizeType>(0));
+		                               basis_.end(),
+		                               static_cast<SizeType>(0));
 		SizeType n = basis_.size();
 		if (sum != n * (n - 1) / 2)
 			err("ModelFeBasedSc: basis set up wrong\n");
@@ -333,8 +331,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
@@ -348,14 +346,14 @@ public:
 			addAnisotropyD(hmatrix);
 			if (modelParameters_.potentialT.size() == 0 || time == 0) {
 				addPotentialV(hmatrix,
-				    i,
-				    block,
-				    modelParameters_.potentialV);
+				              i,
+				              block,
+				              modelParameters_.potentialV);
 			} else {
 				addPotentialV(hmatrix,
-				    i,
-				    block,
-				    modelParameters_.potentialT);
+				              i,
+				              block,
+				              modelParameters_.potentialT);
 			}
 		}
 	}
@@ -371,21 +369,21 @@ public:
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow, nrow);
 			tmp += multiplyTc(creationMatrix_[dof].getCRS(),
-			    creationMatrix_[dof + modelParameters_.orbitals].getCRS());
+			                  creationMatrix_[dof + modelParameters_.orbitals].getCRS());
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			splus.push(OperatorType(tmp2,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                        typename OperatorType::PairType(0, 0),
+			                        1.0,
+			                        su2Related));
 			SparseMatrixType tmp3;
 			transposeConjugate(tmp3, tmp2);
 			sminus.push(OperatorType(tmp3,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                         typename OperatorType::PairType(0, 0),
+			                         1.0,
+			                         su2Related));
 		}
 
 		OpsLabelType& sz = this->createOpsLabel("sz");
@@ -395,16 +393,16 @@ public:
 
 			tmp += multiplyTc(creationMatrix_[dof].getCRS(), creationMatrix_[dof].getCRS());
 			tmp2 += multiplyTc(creationMatrix_[dof + modelParameters_.orbitals].getCRS(),
-			    creationMatrix_[dof + modelParameters_.orbitals].getCRS());
+			                   creationMatrix_[dof + modelParameters_.orbitals].getCRS());
 
 			tmp = 0.5 * (tmp - tmp2);
 			SparseMatrixType tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			sz.push(OperatorType(tmp3,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                     typename OperatorType::PairType(0, 0),
+			                     1.0,
+			                     su2Related));
 		}
 
 		OpsLabelType& nop = this->createOpsLabel("n");
@@ -413,10 +411,10 @@ public:
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			nop.push(OperatorType(tmp2,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                      ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                      typename OperatorType::PairType(0, 0),
+			                      1.0,
+			                      su2Related));
 		}
 
 		if (spinDependentHopping_)
@@ -436,14 +434,14 @@ public:
 			SizeType orbital = dof % modelParameters_.orbitals;
 			SparseMatrixType atmp;
 			multiply(atmp,
-			    creationMatrix_[orbital + modelParameters_.orbitals].getCRS(),
-			    creationMatrix_[orbital].getCRS());
+			         creationMatrix_[orbital + modelParameters_.orbitals].getCRS(),
+			         creationMatrix_[orbital].getCRS());
 			typename OperatorType::Su2RelatedType su2Related;
 			d.push(OperatorType(atmp,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related));
+			                    ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                    typename OperatorType::PairType(0, 0),
+			                    1.0,
+			                    su2Related));
 		}
 
 		this->makeTrackable("C");
@@ -497,12 +495,12 @@ public:
 					OpForLinkType c2("C", orb2 + spin * orbitals, hop2); // (C)
 
 					hop.push(c1,
-					    'N',
-					    c2,
-					    'C',
-					    typename ModelTermType::Su2Properties(1,
-						(spin == 1) ? -1 : 1,
-						spin));
+					         'N',
+					         c2,
+					         'C',
+					         typename ModelTermType::Su2Properties(1,
+					                                               (spin == 1) ? -1 : 1,
+					                                               spin));
 				}
 			}
 		}
@@ -521,7 +519,7 @@ public:
 	}
 
 	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
-	    const BlockType& block) const
+	                                 const BlockType& block) const
 	{
 		const HilbertBasisType& natBasis = basis_;
 		SparseMatrixType tmpMatrix;
@@ -550,10 +548,10 @@ public:
 				}
 
 				OperatorType myOp(tmpMatrix,
-				    ProgramGlobals::FermionOrBosonEnum::FERMION,
-				    typename OperatorType::PairType(1, m),
-				    asign,
-				    su2related);
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+				                  typename OperatorType::PairType(1, m),
+				                  asign,
+				                  su2related);
 				creationMatrix.push_back(myOp);
 			}
 		}
@@ -601,9 +599,9 @@ private:
 	//! Find c^\dagger_i\gamma\sigma in the natural basis natBasis
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void findOperatorMatrices(SparseMatrixType& creationMatrix,
-	    int i,
-	    int sigma,
-	    const HilbertBasisType& natBasis) const
+	                          int i,
+	                          int sigma,
+	                          const HilbertBasisType& natBasis) const
 	{
 		HilbertState bra, ket;
 		int n = natBasis.size();
@@ -635,8 +633,8 @@ private:
 	}
 
 	void setSymmetryRelatedInternal(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    int n) const
+	                                const HilbertBasisType& basis,
+	                                int n) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -658,10 +656,10 @@ private:
 
 			// nup
 			SizeType electronsUp = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			    SPIN_UP);
+			                                                                    SPIN_UP);
 			// ndown
 			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			    SPIN_DOWN);
+			                                                                      SPIN_DOWN);
 			SizeType electrons = electronsDown + electronsUp;
 
 			if (modelParameters_.spinOrbit.rows() > 0 && !modelParameters_.jzSymmetry)
@@ -721,7 +719,7 @@ private:
 	//! Let |9> = |up a down b> and
 	//! Let |6> = |up b down a>  then
 	void reinterpret(MatrixType& cm,
-	    const HilbertBasisType& basis) const
+	                 const HilbertBasisType& basis) const
 	{
 		if (!reinterpret_ || modelParameters_.orbitals != 2)
 			return;
@@ -770,8 +768,8 @@ private:
 	}
 
 	void addInteraction(SparseMatrixType& hmatrix,
-	    SizeType i,
-	    const VectorSizeType& block) const
+	                    SizeType i,
+	                    const VectorSizeType& block) const
 	{
 		if (modelParameters_.feAsMode == ParamsModelFeAsType::INT_ORBITAL0) {
 			return addInteractionAncilla(hmatrix, i, block);
@@ -882,22 +880,22 @@ private:
 				SparseMatrixType tmpMatrix;
 
 				multiply(tmpMatrix,
-				    spinOperator(orb1, 0),
-				    spinOperator(orb2, 1));
+				         spinOperator(orb1, 0),
+				         spinOperator(orb2, 1));
 				val = findHubbardU(2, orb1, orb2) / val2;
 				// this is -2*J
 				hmatrix += val * tmpMatrix;
 
 				multiply(tmpMatrix,
-				    spinOperator(orb1, 1),
-				    spinOperator(orb2, 0));
+				         spinOperator(orb1, 1),
+				         spinOperator(orb2, 0));
 				val = findHubbardU(2, orb1, orb2) / val2;
 				// this is -2*J
 				hmatrix += val * tmpMatrix;
 
 				multiply(tmpMatrix,
-				    spinOperator(orb1, 2),
-				    spinOperator(orb2, 2));
+				         spinOperator(orb1, 2),
+				         spinOperator(orb2, 2));
 				val = findHubbardU(4, orb1, orb2) / val3;
 				// this is -2*J
 				hmatrix += val * tmpMatrix;
@@ -916,8 +914,8 @@ private:
 				if (orb1 == orb2)
 					continue;
 				multiply(tmpMatrix,
-				    nBar(orb1, orb2, SPIN_UP),
-				    nBar(orb1, orb2, SPIN_DOWN));
+				         nBar(orb1, orb2, SPIN_UP),
+				         nBar(orb1, orb2, SPIN_DOWN));
 				// -J
 				hmatrix += findHubbardU(3, orb1, orb2) * tmpMatrix;
 			}
@@ -942,16 +940,16 @@ private:
 					continue;
 
 				multiply(tmpMatrix1,
-				    cm[2 + spin1 * modelParameters_.orbitals + iOfSite * dofs].getCRS(),
-				    cm[0 + spin2 * modelParameters_.orbitals + iOfSite * dofs].getCRS());
+				         cm[2 + spin1 * modelParameters_.orbitals + iOfSite * dofs].getCRS(),
+				         cm[0 + spin2 * modelParameters_.orbitals + iOfSite * dofs].getCRS());
 
 				SparseMatrixType cmTranspose1;
 				transposeConjugate(cmTranspose1,
-				    cm[1 + spin2 * modelParameters_.orbitals + iOfSite * dofs].getCRS());
+				                   cm[1 + spin2 * modelParameters_.orbitals + iOfSite * dofs].getCRS());
 
 				SparseMatrixType cmTranspose2;
 				transposeConjugate(cmTranspose2,
-				    cm[1 + spin1 * modelParameters_.orbitals + iOfSite * dofs].getCRS());
+				                   cm[1 + spin1 * modelParameters_.orbitals + iOfSite * dofs].getCRS());
 
 				multiply(tmpMatrix2, cmTranspose1, cmTranspose2);
 
@@ -997,8 +995,8 @@ private:
 	}
 
 	void addMagneticField(SparseMatrixType& hmatrix,
-	    SizeType indexOfSite,
-	    const VectorSizeType& block) const
+	                      SizeType indexOfSite,
+	                      const VectorSizeType& block) const
 	{
 		if (modelParameters_.magneticField.rows() < 3)
 			return;
@@ -1007,9 +1005,9 @@ private:
 	}
 
 	void addMagneticField(SparseMatrixType& hmatrix,
-	    SizeType,
-	    const VectorSizeType& block,
-	    SizeType orbital) const
+	                      SizeType,
+	                      const VectorSizeType& block,
+	                      SizeType orbital) const
 	{
 		const VectorOperatorType& cm = creationMatrix_;
 		SizeType iOfSite = 0;
@@ -1038,9 +1036,9 @@ private:
 	}
 
 	void addPotentialV(SparseMatrixType& hmatrix,
-	    SizeType iOfSite,
-	    const VectorSizeType& block,
-	    const typename PsimagLite::Vector<RealType>::Type& V) const
+	                   SizeType iOfSite,
+	                   const VectorSizeType& block,
+	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		SizeType v1 = 2 * modelParameters_.orbitals * superGeometry_.numberOfSites();
 		SizeType v2 = v1 * modelParameters_.orbitals;
@@ -1069,10 +1067,10 @@ private:
 	}
 
 	void addPotentialV(SparseMatrixType& hmatrix,
-	    SizeType,
-	    const VectorSizeType& block,
-	    SizeType orbital,
-	    const typename PsimagLite::Vector<RealType>::Type& V) const
+	                   SizeType,
+	                   const VectorSizeType& block,
+	                   SizeType orbital,
+	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		const VectorOperatorType& cm = creationMatrix_;
 		int dof = 2 * modelParameters_.orbitals;
@@ -1090,11 +1088,11 @@ private:
 	}
 
 	void addPotentialV(SparseMatrixType& hmatrix,
-	    SizeType,
-	    const VectorSizeType& block,
-	    SizeType orb,
-	    SizeType orb2,
-	    const typename PsimagLite::Vector<RealType>::Type& V) const
+	                   SizeType,
+	                   const VectorSizeType& block,
+	                   SizeType orb,
+	                   SizeType orb2,
+	                   const typename PsimagLite::Vector<RealType>::Type& V) const
 	{
 		const VectorOperatorType& cm = creationMatrix_;
 		int dof = 2 * modelParameters_.orbitals;
@@ -1102,9 +1100,9 @@ private:
 		SizeType iOfSite = 0;
 		SizeType site = block[iOfSite];
 		SparseMatrixType nup = nEx(cm[orb + SPIN_UP * modelParameters_.orbitals + iOfSite * dof].getCRS(),
-		    cm[orb2 + SPIN_UP * modelParameters_.orbitals + iOfSite * dof].getCRS());
+		                           cm[orb2 + SPIN_UP * modelParameters_.orbitals + iOfSite * dof].getCRS());
 		SparseMatrixType ndown = nEx(cm[orb + SPIN_DOWN * modelParameters_.orbitals + iOfSite * dof].getCRS(),
-		    cm[orb2 + SPIN_DOWN * modelParameters_.orbitals + iOfSite * dof].getCRS());
+		                             cm[orb2 + SPIN_DOWN * modelParameters_.orbitals + iOfSite * dof].getCRS());
 
 		SizeType linSize = superGeometry_.numberOfSites();
 
@@ -1135,8 +1133,8 @@ private:
 	}
 
 	SparseMatrixType nBar(SizeType orb1,
-	    SizeType orb2,
-	    SizeType spin) const
+	                      SizeType orb2,
+	                      SizeType spin) const
 	{
 		const VectorOperatorType& cm = creationMatrix_;
 		SizeType dofs = 2 * modelParameters_.orbitals;
@@ -1160,7 +1158,7 @@ private:
 	}
 
 	SparseMatrixType spinOperator(SizeType orbital,
-	    SizeType component) const
+	                              SizeType component) const
 	{
 		switch (component) {
 		case 0: // S^+
@@ -1177,8 +1175,8 @@ private:
 	}
 
 	SparseMatrixType spinOperatorAux(SizeType orbital,
-	    SizeType spin1,
-	    SizeType spin2) const
+	                                 SizeType spin1,
+	                                 SizeType spin2) const
 	{
 		SizeType iOfSite = 0;
 		const VectorOperatorType& cm = creationMatrix_;
@@ -1186,8 +1184,8 @@ private:
 		SparseMatrixType result, temp;
 		transposeConjugate(temp, cm[orbital + spin2 * modelParameters_.orbitals + iOfSite * dofs].getCRS());
 		multiply(result, // =
-		    cm[orbital + spin1 * modelParameters_.orbitals + iOfSite * dofs].getCRS(), // times
-		    temp);
+		         cm[orbital + spin1 * modelParameters_.orbitals + iOfSite * dofs].getCRS(), // times
+		         temp);
 
 		return result;
 	}
@@ -1224,8 +1222,8 @@ private:
 
 	//! only for feAsMode == 4
 	void addInteractionKspace(SparseMatrixType& hmatrix,
-	    SizeType,
-	    const VectorSizeType& block) const
+	                          SizeType,
+	                          const VectorSizeType& block) const
 	{
 		SizeType iOfSite = 0;
 		assert(block.size() > iOfSite);
@@ -1273,8 +1271,8 @@ private:
 
 	//! only for feAsMode == 3
 	void addInteractionImpurity(SparseMatrixType& hmatrix,
-	    SizeType,
-	    const VectorSizeType& block) const
+	                            SizeType,
+	                            const VectorSizeType& block) const
 	{
 		SizeType iOfSite = 0;
 		assert(block.size() > iOfSite);
@@ -1367,8 +1365,8 @@ private:
 
 	//! Term is U[0]\sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
 	void addInteractionAncilla(SparseMatrixType& hmatrix,
-	    SizeType,
-	    const VectorSizeType& block) const
+	                           SizeType,
+	                           const VectorSizeType& block) const
 	{
 		SizeType iOfSite = 0;
 		assert(block.size() > iOfSite);

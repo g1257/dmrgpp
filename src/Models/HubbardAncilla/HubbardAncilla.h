@@ -90,11 +90,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <cstdlib>
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename ModelBaseType>
-class HubbardAncilla : public ModelBaseType
-{
+class HubbardAncilla : public ModelBaseType {
 
 public:
 
@@ -136,8 +134,8 @@ public:
 	static SizeType const ORBITALS = 2;
 
 	HubbardAncilla(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	               InputValidatorType& io,
+	               const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
@@ -151,8 +149,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType t) const
+	                                const BlockType& block,
+	                                RealType t) const
 	{
 		helperHubbardAncilla_.addDiagonalsInNaturalBasis(hmatrix, block, t);
 	}
@@ -222,10 +220,10 @@ protected:
 					naMatrix += tmpMatrix * tmpMatrix2;
 
 				OperatorType myOp(tmpMatrix2,
-				    ProgramGlobals::FermionOrBosonEnum::FERMION,
-				    typename OperatorType::PairType(1, m),
-				    asign,
-				    su2related);
+				                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+				                  typename OperatorType::PairType(1, m),
+				                  asign,
+				                  su2related);
 
 				c.push(myOp);
 			}
@@ -234,10 +232,10 @@ protected:
 
 			typename OperatorType::Su2RelatedType su2related2;
 			OperatorType naOp(naMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1,
-			    su2related2);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  typename OperatorType::PairType(0, 0),
+			                  1,
+			                  su2related2);
 
 			na.push(naOp);
 		}
@@ -255,10 +253,10 @@ protected:
 				OpForLinkType c("c", orb + spin * orbitals, orb);
 
 				hop.push(c,
-				    'N',
-				    c,
-				    'C',
-				    typename ModelTermType::Su2Properties(1, (spin == 1) ? -1 : 1, spin));
+				         'N',
+				         c,
+				         'C',
+				         typename ModelTermType::Su2Properties(1, (spin == 1) ? -1 : 1, spin));
 			}
 
 			OpForLinkType l("l", spin);

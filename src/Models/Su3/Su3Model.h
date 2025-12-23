@@ -88,12 +88,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Su3RepresentationP1.h"
 #include <algorithm>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelBaseType>
-class Su3Model : public ModelBaseType
-{
+class Su3Model : public ModelBaseType {
 
 public:
 
@@ -128,17 +126,17 @@ public:
 	typedef ParametersSu3<RealType, QnType> ParametersSu3Type;
 	typedef Su3RepresentationBase<ComplexOrRealType> Su3RepresentationBaseType;
 	typedef Su3RepresentationP1<ComplexOrRealType,
-	    PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
+	                            PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
 	    Su3RepresentationP1Type;
 
 	static const bool IS_REAL = !PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
 	Su3Model(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
+	         InputValidatorType& io,
+	         const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , superGeometry_(geometry)
 	    , modelParameters_(io)
 	    , su3Rep_(nullptr)
@@ -168,8 +166,8 @@ public:
 
 	// m*T3(i)*T3(i) + m*T8(i)*T8(i)
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -226,10 +224,10 @@ protected:
 			typename OperatorType::Su2RelatedType su2related;
 
 			OperatorType myOp(sparseMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("T" + ttos(a + 1)).push(myOp);
 			this->makeTrackable("T" + ttos(a + 1));
 		}
@@ -257,10 +255,10 @@ protected:
 			typename OperatorType::Su2RelatedType su2related;
 
 			OperatorType myOp(sparseMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			this->createOpsLabel("Tplus" + ttos(a + 1)).push(myOp);
 			this->makeTrackable("Tplus" + ttos(a + 1));
 			myOp.dagger();
@@ -278,10 +276,10 @@ protected:
 			typename OperatorType::Su2RelatedType su2related;
 
 			OperatorType myOp(sparseMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1,
+			                  su2related);
 			if (a == 4) {
 				this->createOpsLabel("T8").push(myOp);
 				this->makeTrackable("T8");
@@ -322,7 +320,8 @@ protected:
 	void fillModelLinksReal()
 	{
 		ModelTermType& jOnepm = ModelBaseType::createTerm("jOne_pm");
-		auto multiplyByZeroPointFive = [](ComplexOrRealType& value) { value *= 0.5; };
+		auto multiplyByZeroPointFive = [](ComplexOrRealType& value)
+		{ value *= 0.5; };
 
 		for (SizeType a = 0; a < 3; ++a) {
 			OpForLinkType aOpForLink("Tplus" + ttos(a + 1));
@@ -343,8 +342,8 @@ private:
 	// \sum_i T3(i) and \sum_i T8(i) are conserved separately
 	// We delegate to the representation the actual values and computation
 	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    int n) const
+	                        const HilbertBasisType& basis,
+	                        int n) const
 	{
 		typedef std::pair<SizeType, SizeType> PairType;
 

@@ -101,8 +101,11 @@ class InputNg {
 
 	class MyCompare {
 
-		enum { FIRST,
-		       SECOND };
+		enum
+		{
+			FIRST,
+			SECOND
+		};
 
 		typedef std::pair<String, SizeType> PairType;
 
@@ -156,7 +159,8 @@ public:
 
 	class Writeable {
 
-		enum {
+		enum
+		{
 			WHITESPACE,
 			ENDOFLINE,
 			EQUALSIGN,
@@ -165,7 +169,8 @@ public:
 			COMMENT
 		};
 
-		enum {
+		enum
+		{
 			IN_LABEL,
 			IN_VALUE_OR_LABEL,
 			IN_VALUE_TEXT,
@@ -295,8 +300,7 @@ public:
 				if (data_[i] == '\n') {
 					vlines.push_back(buffer);
 					buffer = "";
-				}
-				else {
+				} else {
 					buffer += data_[i];
 				}
 			}
@@ -412,8 +416,7 @@ public:
 							checkNumbers();
 							numericVector_.clear();
 							state_ = IN_LABEL;
-						}
-						else {
+						} else {
 							state_ = IN_VALUE_NUMERIC;
 						}
 					}

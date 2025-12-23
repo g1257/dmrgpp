@@ -6,16 +6,17 @@
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class Qn
-{
+class Qn {
 
 public:
 
-	enum ModalEnum { MODAL_SUM,
-		MODAL_MODULO };
+	enum ModalEnum
+	{
+		MODAL_SUM,
+		MODAL_MODULO
+	};
 
 	struct ModalStruct {
 
@@ -33,8 +34,8 @@ public:
 		}
 
 		void write(PsimagLite::String str,
-		    PsimagLite::IoNgSerializer& io,
-		    typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+		           PsimagLite::IoNgSerializer& io,
+		           typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 		{
 			if (wM != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 				io.createGroup(str);
@@ -112,8 +113,8 @@ public:
 	}
 
 	void write(PsimagLite::String str,
-	    PsimagLite::IoNgSerializer& io,
-	    typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	           PsimagLite::IoNgSerializer& io,
+	           typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		try {
 			io.read(modalStruct, "modalStruct");
@@ -148,7 +149,7 @@ public:
 #ifndef ENABLE_SU2
 		);
 #else
-		    && pairEqual(a.jmPair) && flavors == a.flavors);
+		        && pairEqual(a.jmPair) && flavors == a.flavors);
 #endif
 	}
 
@@ -158,9 +159,9 @@ public:
 	}
 
 	void scale(SizeType sites,
-	    SizeType totalSites,
-	    ProgramGlobals::DirectionEnum direction,
-	    bool isSu2)
+	           SizeType totalSites,
+	           ProgramGlobals::DirectionEnum direction,
+	           bool isSu2)
 	{
 		Qn original = *this;
 		SizeType mode = other.size();
@@ -213,8 +214,8 @@ public:
 
 	template <typename SomeIoInType>
 	static void readVector(VectorQnType& vqns,
-	    PsimagLite::String prefix,
-	    SomeIoInType& io)
+	                       PsimagLite::String prefix,
+	                       SomeIoInType& io)
 	{
 		SizeType aSize = 0;
 		io.read(aSize, prefix + "/Size");
@@ -225,8 +226,8 @@ public:
 	}
 
 	static void adjustQns(VectorQnType& outQns,
-	    const VectorSizeType& ints,
-	    SizeType mode)
+	                      const VectorSizeType& ints,
+	                      SizeType mode)
 	{
 		SizeType modePlusOne = mode + 1;
 		SizeType n = ints.size();
@@ -274,7 +275,7 @@ public:
 	}
 
 	static void su2ElectronsBridge(VectorSizeType& v,
-	    const VectorQnType& qns)
+	                               const VectorQnType& qns)
 	{
 		SizeType n = qns.size();
 		v.resize(n);

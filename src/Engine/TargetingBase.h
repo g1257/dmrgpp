@@ -90,12 +90,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Wft/WaveFunctionTransfFactory.h"
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingBase
-{
+class TargetingBase {
 
 public:
 
@@ -118,16 +116,16 @@ public:
 	typedef typename BasisType::QnType QnType;
 	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 	using WaveFunctionTransfType = WaveFunctionTransfFactory<LeftRightSuperType,
-	    VectorWithOffsetType,
-	    OptionsType,
-	    OneSiteSpacesType>;
+	                                                         VectorWithOffsetType,
+	                                                         OptionsType,
+	                                                         OneSiteSpacesType>;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;
 	typedef TargetHelper<ModelType, WaveFunctionTransfType> TargetHelperType;
 	typedef TargetingCommon<TargetHelperType,
-	    VectorWithOffsetType,
-	    LanczosSolverType>
+	                        VectorWithOffsetType,
+	                        LanczosSolverType>
 	    TargetingCommonType;
 	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
@@ -142,9 +140,9 @@ public:
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 
 	TargetingBase(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    SizeType indexNoAdvance)
+	              const CheckpointType& checkPoint,
+	              const WaveFunctionTransfType& wft,
+	              SizeType indexNoAdvance)
 	    : lrs_(lrs)
 	    , model_(checkPoint.model())
 	    , commonTargeting_(lrs, checkPoint, wft, indexNoAdvance)
@@ -182,19 +180,19 @@ public:
 	virtual RealType weight(SizeType i) const = 0;
 
 	virtual void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType& block2,
-	    SizeType loopNumber)
+	                    ProgramGlobals::DirectionEnum direction,
+	                    const BlockType& block1,
+	                    const BlockType& block2,
+	                    SizeType loopNumber)
 	    = 0;
 
 	virtual void read(typename TargetingCommonType::IoInputType&,
-	    PsimagLite::String)
+	                  PsimagLite::String)
 	    = 0;
 
 	virtual void write(const VectorSizeType&,
-	    PsimagLite::IoSelector::Out&,
-	    PsimagLite::String) const
+	                   PsimagLite::IoSelector::Out&,
+	                   PsimagLite::String) const
 	    = 0;
 
 	// virtuals with default implementation
@@ -202,13 +200,13 @@ public:
 	virtual bool includeGroundStage() const { return true; }
 
 	virtual void set(VectorVectorVectorType& inV,
-	    const VectorSizeType& sectors,
-	    const BasisType& someBasis)
+	                 const VectorSizeType& sectors,
+	                 const BasisType& someBasis)
 	{
 		commonTargeting_.aoeNonConst().setPsi(inV,
-		    sectors,
-		    someBasis,
-		    model_.params().numberOfExcited);
+		                                      sectors,
+		                                      someBasis,
+		                                      model_.params().numberOfExcited);
 	}
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
@@ -251,11 +249,11 @@ public:
 
 	// legacy thing for vectorwithoffsets
 	virtual void initialGuess(VectorVectorType& initialVector,
-	    const OneSiteSpacesType& oneSiteSpaces,
-	    bool noguess,
-	    const VectorSizeType& compactedWeights,
-	    const VectorSizeType& sectors,
-	    const BasisType& basis) const
+	                          const OneSiteSpacesType& oneSiteSpaces,
+	                          bool noguess,
+	                          const VectorSizeType& compactedWeights,
+	                          const VectorSizeType& sectors,
+	                          const BasisType& basis) const
 	{
 		if (VectorWithOffsetType::name() != "vectorwithoffsets")
 			err("FATAL: Wrong execution path\n");
@@ -270,13 +268,13 @@ public:
 	}
 
 	virtual void initialGuess(VectorType& initialVector,
-	    const OneSiteSpacesType& oneSiteSpaces,
-	    bool noguess,
-	    const VectorSizeType& compactedWeights,
-	    const VectorSizeType& sectors,
-	    SizeType sectorIndex,
-	    SizeType excited,
-	    const BasisType& basis) const
+	                          const OneSiteSpacesType& oneSiteSpaces,
+	                          bool noguess,
+	                          const VectorSizeType& compactedWeights,
+	                          const VectorSizeType& sectors,
+	                          SizeType sectorIndex,
+	                          SizeType excited,
+	                          const BasisType& basis) const
 	{
 		if (VectorWithOffsetType::name() == "vectorwithoffsets")
 			err("FATAL: Wrong execution path\n");
@@ -305,8 +303,8 @@ public:
 		for (SizeType e = start; e < end; ++e) {
 
 			VectorWithOffsetType vwo(compactedWeights[sectorIndex],
-			    sectors[sectorIndex],
-			    basis);
+			                         sectors[sectorIndex],
+			                         basis);
 
 			assert(e < psi[sectorIndex].size());
 			if (psi[sectorIndex][e] == nullptr) {
@@ -314,9 +312,9 @@ public:
 			}
 
 			commonTargeting_.initialGuess(vwo,
-			    *(psi[sectorIndex][e]),
-			    oneSiteSpaces,
-			    noguess);
+			                              *(psi[sectorIndex][e]),
+			                              oneSiteSpaces,
+			                              noguess);
 
 			VectorType tmpVector;
 			vwo.extract(tmpVector, vwo.sector(0));
@@ -354,7 +352,7 @@ public:
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
 	static PsimagLite::String buildPrefix(PsimagLite::IoSelector::Out& io,
-	    SizeType counter)
+	                                      SizeType counter)
 	{
 		PsimagLite::String prefix("TargetingCommon");
 		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
@@ -362,8 +360,8 @@ public:
 			io.createGroup(prefix);
 
 		io.write(counter + 1,
-		    prefix + "/Size",
-		    (counter == 0) ? SerializerType::NO_OVERWRITE : SerializerType::ALLOW_OVERWRITE);
+		         prefix + "/Size",
+		         (counter == 0) ? SerializerType::NO_OVERWRITE : SerializerType::ALLOW_OVERWRITE);
 
 		prefix += ("/" + ttos(counter));
 

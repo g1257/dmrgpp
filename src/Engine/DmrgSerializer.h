@@ -85,12 +85,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Io/IoSelector.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Move also checkpointing from DmrgSolver to here (FIXME)
 template <typename LeftRightSuperType, typename VectorWithOffsetType>
-class DmrgSerializer
-{
+class DmrgSerializer {
 
 public:
 
@@ -109,11 +107,11 @@ public:
 	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
 
 	DmrgSerializer(const FermionSignType& fS,
-	    const FermionSignType& fE,
-	    const LeftRightSuperType& lrs,
-	    const VectorVectorVectorWithOffsetType& wf,
-	    const BlockDiagonalMatrixType& transform,
-	    ProgramGlobals::DirectionEnum direction)
+	               const FermionSignType& fE,
+	               const LeftRightSuperType& lrs,
+	               const VectorVectorVectorWithOffsetType& wf,
+	               const BlockDiagonalMatrixType& transform,
+	               ProgramGlobals::DirectionEnum direction)
 	    : fS_(fS)
 	    , fE_(fE)
 	    , wavefunction_(wf)
@@ -127,14 +125,14 @@ public:
 	// used only by IoNg:
 	template <typename IoInputType>
 	DmrgSerializer(IoInputType& io,
-	    PsimagLite::String prefix,
-	    bool bogus,
-	    const BasisTraits& basisTraits,
-	    bool readOnDemand,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputType>::True,
-		int>::Type
-	    = 0)
+	               PsimagLite::String prefix,
+	               bool bogus,
+	               const BasisTraits& basisTraits,
+	               bool readOnDemand,
+	               typename PsimagLite::EnableIf<
+	                   PsimagLite::IsInputLike<IoInputType>::True,
+	                   int>::Type
+	               = 0)
 	    : fS_(io, prefix + "/fS", bogus)
 	    , fE_(io, prefix + "/fE", bogus)
 	    , lrs_(new LeftRightSuperType(io, prefix, basisTraits))
@@ -193,21 +191,21 @@ public:
 
 	template <typename SomeIoOutType>
 	void write(SomeIoOutType& io,
-	    PsimagLite::String prefix,
-	    typename BasisWithOperatorsType::SaveEnum option,
-	    SizeType numberOfSites,
-	    SizeType counter,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsOutputLike<SomeIoOutType>::True,
-		int>::Type
-	    = 0) const
+	           PsimagLite::String prefix,
+	           typename BasisWithOperatorsType::SaveEnum option,
+	           SizeType numberOfSites,
+	           SizeType counter,
+	           typename PsimagLite::EnableIf<
+	               PsimagLite::IsOutputLike<SomeIoOutType>::True,
+	               int>::Type
+	           = 0) const
 	{
 		if (counter == 0)
 			io.createGroup(prefix);
 
 		io.write(counter + 1,
-		    prefix + "/Size",
-		    (counter == 0) ? SomeIoOutType::Serializer::NO_OVERWRITE : SomeIoOutType::Serializer::ALLOW_OVERWRITE);
+		         prefix + "/Size",
+		         (counter == 0) ? SomeIoOutType::Serializer::NO_OVERWRITE : SomeIoOutType::Serializer::ALLOW_OVERWRITE);
 
 		prefix += ("/" + ttos(counter));
 
@@ -251,7 +249,7 @@ public:
 	}
 
 	const VectorWithOffsetType& psiConst(SizeType sectorIndex,
-	    SizeType levelIndex) const
+	                                     SizeType levelIndex) const
 	{
 		if (sectorIndex >= wavefunction_.size())
 			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = " + ttos(sectorIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
@@ -280,8 +278,8 @@ public:
 	}
 
 	static void transform(SparseMatrixType& ret,
-	    const SparseMatrixType& O,
-	    const BlockDiagonalMatrixType& transformExternal)
+	                      const SparseMatrixType& O,
+	                      const BlockDiagonalMatrixType& transformExternal)
 	{
 		BlockOffDiagMatrixType m(O, transformExternal.offsetsRows());
 		static const SizeType gemmRnb = 0; // disable GemmR

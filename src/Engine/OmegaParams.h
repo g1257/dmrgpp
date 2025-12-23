@@ -3,12 +3,10 @@
 #include "InputCheck.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename InputNgType, typename RealType_>
-class OmegaParams
-{
+class OmegaParams {
 
 public:
 

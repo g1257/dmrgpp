@@ -86,18 +86,27 @@ namespace PsimagLite {
 template <typename ComplexOrRealType, typename InputType>
 class KTwoNiFFour : public GeometryBase<ComplexOrRealType, InputType> {
 
-	enum SubtypeEnum { SUBTYPE_X,
-		           SUBTYPE_Y };
+	enum SubtypeEnum
+	{
+		SUBTYPE_X,
+		SUBTYPE_Y
+	};
 
-	enum { DIR_X,
-	       DIR_Y,
-	       DIR_XPY,
-	       DIR_XMY };
+	enum
+	{
+		DIR_X,
+		DIR_Y,
+		DIR_XPY,
+		DIR_XMY
+	};
 
 public:
 
-	enum TypeEnum { TYPE_O,
-		        TYPE_C };
+	enum TypeEnum
+	{
+		TYPE_O,
+		TYPE_C
+	};
 
 	typedef std::pair<TypeEnum, SubtypeEnum> PairType;
 	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;

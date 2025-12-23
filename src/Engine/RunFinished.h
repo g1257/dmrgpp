@@ -2,11 +2,9 @@
 #define RUNFINISHED_H
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class RunFinished
-{
+class RunFinished {
 
 public:
 

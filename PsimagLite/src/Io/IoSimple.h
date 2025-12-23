@@ -95,7 +95,8 @@ class IoSimple {
 
 	template <typename T>
 	struct PrintWithEqualSign {
-		enum {
+		enum
+		{
 			True = Loki::TypeTraits<T>::isArith || std::is_enum<T>::value || IsComplexNumber<T>::True
 		};
 	};
@@ -417,8 +418,7 @@ public:
 				try {
 					advance(s, 0, true);
 					i++;
-				}
-				catch (std::exception& e) {
+				} catch (std::exception& e) {
 					rewind();
 					return i;
 				}
@@ -452,12 +452,18 @@ public:
 
 template <>
 struct IsInputLike<IoSimple::In> {
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 template <>
 struct IsOutputLike<IoSimple::Out> {
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 } // namespace PsimagLite

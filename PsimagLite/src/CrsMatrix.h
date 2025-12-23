@@ -332,8 +332,7 @@ public:
 	{
 		if (((size_t)n) == (colind_.size() + 1)) {
 			colind_.push_back(v);
-		}
-		else {
+		} else {
 			colind_[n] = v;
 		};
 	}
@@ -344,8 +343,7 @@ public:
 	{
 		if (((size_t)n) == (values_.size() + 1)) {
 			values_.push_back(v);
-		}
-		else {
+		} else {
 			values_[n] = v;
 		};
 	}
@@ -402,8 +400,7 @@ public:
 			assert(static_cast<SizeType>(rowptr_[nrow_]) == values_.size());
 
 			return colind_.size();
-		}
-		else {
+		} else {
 			return 0;
 		};
 	}
@@ -757,7 +754,10 @@ template <typename T>
 class IsMatrixLike<CrsMatrix<T>> {
 public:
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 template <typename S>
@@ -802,8 +802,7 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 		// ------------------------------
 		crsMatrix.resize(rows, cols);
 		crsMatrix.reserve(nonZeros);
-	}
-	else {
+	} else {
 		crsMatrix.resize(rows, cols, nonZeros);
 	};
 
@@ -818,8 +817,7 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 			if (use_push) {
 				crsMatrix.pushValue(val);
 				crsMatrix.pushCol(j);
-			}
-			else {
+			} else {
 				crsMatrix.setValues(counter, val);
 				crsMatrix.setCol(counter, j);
 			};
@@ -1032,8 +1030,7 @@ void printFullMatrix(const CrsMatrix<T>& s, const String& name, SizeType how = 0
 			mathematicaPrint(std::cout, fullm);
 		if (how == 2)
 			symbolicPrint(std::cout, fullm);
-	}
-	catch (std::exception& e) {
+	} catch (std::exception& e) {
 	}
 
 	if (how == 0)
@@ -1072,8 +1069,7 @@ void multiply(CrsMatrix<S>& C, CrsMatrix<S3> const& A, CrsMatrix<S2> const& B)
 					temp[ptr[jbk]] = tmp;
 					index[ptr[jbk]] = jbk;
 					itemp++;
-				}
-				else {
+				} else {
 					temp[ptr[jbk]] += tmp;
 				}
 			}
@@ -1420,8 +1416,7 @@ void sum(CrsMatrix<T>& A, const std::vector<const CrsMatrix<T>*>& Bmats, const s
 
 				if (is_examined_already[jcol]) {
 					valueTmp[jcol] += (bij * b1);
-				}
-				else {
+				} else {
 					// ------------------------------------
 					// new column entry not examined before
 					// ------------------------------------
@@ -1499,8 +1494,7 @@ void fromBlockToFull(CrsMatrix<T>& Bfull, const CrsMatrix<T>& B, SizeType offset
 	if (use_push) {
 		Bfull.resize(nrows_Bfull, ncols_Bfull);
 		Bfull.reserve(nnz_Bfull);
-	}
-	else {
+	} else {
 		Bfull.resize(nrows_Bfull, ncols_Bfull, nnz_Bfull);
 	};
 
@@ -1517,8 +1511,7 @@ void fromBlockToFull(CrsMatrix<T>& Bfull, const CrsMatrix<T>& B, SizeType offset
 			if (use_push) {
 				Bfull.pushCol(j);
 				Bfull.pushValue(tmp);
-			}
-			else {
+			} else {
 				Bfull.setCol(counter, j);
 				Bfull.setValues(counter, tmp);
 			};

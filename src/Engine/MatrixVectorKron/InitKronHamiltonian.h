@@ -83,12 +83,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType_>
-class InitKronHamiltonian : public InitKronBase<typename ModelType_::LeftRightSuperType>
-{
+class InitKronHamiltonian : public InitKronBase<typename ModelType_::LeftRightSuperType> {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
@@ -112,14 +110,14 @@ public:
 	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
 
 	InitKronHamiltonian(const ModelType& model,
-	    const HamiltonianConnectionType& hc,
-	    const typename ModelHelperType::Aux& aux)
+	                    const HamiltonianConnectionType& hc,
+	                    const typename ModelHelperType::Aux& aux)
 	    : BaseType(hc.modelHelper().leftRightSuper(),
-		  aux.m(),
-		  hc.modelHelper().quantumNumber(aux.m()),
-		  model.params().denseSparseThreshold,
-		  !model.params().options.isSet("KronNoUseLowerPart")
-		      && !model.params().options.isSet("BatchedGemm"))
+	               aux.m(),
+	               hc.modelHelper().quantumNumber(aux.m()),
+	               model.params().denseSparseThreshold,
+	               !model.params().options.isSet("KronNoUseLowerPart")
+	                   && !model.params().options.isSet("BatchedGemm"))
 	    , model_(model)
 	    , hc_(hc)
 	    , vstart_(BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size() + 1)
@@ -163,7 +161,7 @@ public:
 	// copy vin(:) to yin(:)
 	// -------------------
 	void copyIn(const VectorType& vout,
-	    const VectorType& vin)
+	            const VectorType& vin)
 	{
 		VectorType& xout = xout_;
 		VectorType& yin = yin_;
@@ -231,7 +229,7 @@ public:
 	VectorType& xout() { return xout_; }
 
 	const SizeType& offsetForPatches(typename BaseType::WhatBasisEnum,
-	    SizeType ind) const
+	                                 SizeType ind) const
 	{
 		assert(ind < offsetForPatches_.size());
 		return offsetForPatches_[ind];

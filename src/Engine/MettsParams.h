@@ -82,13 +82,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "TargetParamsTimeVectors.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType>
-class MettsParams : public TargetParamsTimeVectors<ModelType>
-{
+class MettsParams : public TargetParamsTimeVectors<ModelType> {
 
 	typedef TargetParamsTimeVectors<ModelType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
@@ -102,8 +100,8 @@ public:
 
 	template <typename IoInputter>
 	MettsParams(IoInputter& io,
-	    PsimagLite::String targeting,
-	    const ModelType& model)
+	            PsimagLite::String targeting,
+	            const ModelType& model)
 	    : TimeVectorParamsType(io, targeting, model)
 	{
 		io.readline(beta, "BetaDividedByTwo=");

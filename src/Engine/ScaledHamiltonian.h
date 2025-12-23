@@ -4,16 +4,14 @@
 #include "ProgressIndicator.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // H' = c*H + d
 // c = oneovera = (2.0-epsilon)/Wstar
 // d = -oneovera*b = (2.0-epsilon)*(E0_+Wstar*0.5)/Wstar
 // FIXME: TODO: Constructor should only take c and d not tstruct and E0
 template <typename MatrixLanczosType, typename TargetParamsType>
-class ScaledHamiltonian
-{
+class ScaledHamiltonian {
 
 public:
 
@@ -24,9 +22,9 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	ScaledHamiltonian(const MatrixLanczosType& mat,
-	    const TargetParamsType& tstStruct,
-	    const RealType& E0,
-	    ProgramGlobals::VerboseEnum verbose)
+	                  const TargetParamsType& tstStruct,
+	                  const RealType& E0,
+	                  ProgramGlobals::VerboseEnum verbose)
 	    : matx_(mat)
 	    , tstStruct_(tstStruct)
 	    , E0_(E0)

@@ -83,16 +83,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // This is a class to compute ClebschGordan Coefficients
 // Don't use this class directly, use ClebschGordanCached instead, it'll improve performance
 // Parts taken from Ref.S = http://caps.gsfc.nasa.gov/simpson/software/cg_f90.txt
 //( David G. Simpson NASA, Goddard Space Flight Center, Greenbelt, Maryland  20771)
 
 template <typename FieldType>
-class ClebschGordan
-{
+class ClebschGordan {
 	typedef FieldType LongType;
 
 public:
@@ -120,8 +118,8 @@ public:
 
 	// receiving format is (2*j,j+m)
 	FieldType operator()(const PairType& jm,
-	    const PairType& jm1,
-	    const PairType& jm2) const
+	                     const PairType& jm1,
+	                     const PairType& jm2) const
 	{
 		FieldType j, m, j1, m1, j2, m2;
 		convert_(j, m, jm);
@@ -134,11 +132,11 @@ public:
 private:
 
 	bool passesHurdles(FieldType j,
-	    FieldType m,
-	    FieldType j1,
-	    FieldType m1,
-	    FieldType j2,
-	    FieldType m2) const
+	                   FieldType m,
+	                   FieldType j1,
+	                   FieldType m1,
+	                   FieldType j2,
+	                   FieldType m2) const
 	{
 		// From Ref.S
 		if (isfrac(j1 + j2 + j) || isfrac(j1 + m1) || isfrac(j2 + m2) || isfrac(j + m) || isfrac(-j1 + j - m2) || isfrac(-j2 + j + m1))
@@ -151,11 +149,11 @@ private:
 
 	// From Ref.S
 	bool isNonZero(FieldType j3,
-	    FieldType m3,
-	    FieldType j1,
-	    FieldType m1,
-	    FieldType j2,
-	    FieldType m2) const
+	               FieldType m3,
+	               FieldType j1,
+	               FieldType m1,
+	               FieldType j2,
+	               FieldType m2) const
 	{
 		if ((j3 < fabs(j1 - j2)) || (j3 > (j1 + j2)) || (fabs(m1) > j1) || (fabs(m2) > j2) || (fabs(m3) > j3))
 			return false;
@@ -183,11 +181,11 @@ private:
 	//
 	//\sum_k \frac{(-1)^k}{k!(j_1+j_2-j-k)!(j_1-m_1-k)!(j_2+m_2-k)!(j-j_2+m_1+k)!(j-j_1-m_2+k)!}.
 	FieldType cg(FieldType j,
-	    FieldType m,
-	    FieldType j1,
-	    FieldType m1,
-	    FieldType j2,
-	    FieldType m2) const
+	             FieldType m,
+	             FieldType j1,
+	             FieldType m1,
+	             FieldType j2,
+	             FieldType m2) const
 	{
 		if (!passesHurdles(j, m, j1, m1, j2, m2))
 			return 0;
@@ -200,11 +198,11 @@ private:
 
 	// From Ref. S
 	FieldType cg_f1(FieldType j3,
-	    FieldType m3,
-	    FieldType j1,
-	    FieldType m1,
-	    FieldType j2,
-	    FieldType m2) const
+	                FieldType m3,
+	                FieldType j1,
+	                FieldType m1,
+	                FieldType j2,
+	                FieldType m2) const
 	{
 		FieldType c = sqrt((j3 + j3 + 1) / fact_(nint(j1 + j2 + j3 + 1)));
 		c *= sqrt(fact_(nint(j1 + j2 - j3)) * fact_(nint(j2 + j3 - j1)) * fact_(nint(j3 + j1 - j2)));
@@ -214,11 +212,11 @@ private:
 
 	// From Ref. S
 	FieldType cg_f2(FieldType j3,
-	    FieldType,
-	    FieldType j1,
-	    FieldType m1,
-	    FieldType j2,
-	    FieldType m2) const
+	                FieldType,
+	                FieldType j1,
+	                FieldType m1,
+	                FieldType j2,
+	                FieldType m2) const
 	{
 		FieldType sumk = 0;
 		for (SizeType k = 0; k < factorial_.size(); k++) {

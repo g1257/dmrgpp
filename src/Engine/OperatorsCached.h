@@ -4,12 +4,10 @@
 #include "MetaOpForConnection.hh"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType>
-class OperatorsCached
-{
+class OperatorsCached {
 
 public:
 
@@ -54,17 +52,17 @@ public:
 	}
 
 	const OperatorStorageType& getOpStorage(const MetaOpForConnection& metaOp,
-	    const ProgramGlobals::SysOrEnvEnum type) const
+	                                        const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		return (metaOp.site >= 0) ? getOpStorageLocal(metaOp.index, metaOp.modifier, type)
-					  : getOpStorageNonLocal(metaOp, type);
+		                          : getOpStorageNonLocal(metaOp, type);
 	}
 
 private:
 
 	const OperatorStorageType& getOpStorageLocal(SizeType iifirst,
-	    char modifier,
-	    const ProgramGlobals::SysOrEnvEnum type) const
+	                                             char modifier,
+	                                             const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		const OperatorStorageType* m = 0;
 		if (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) {
@@ -121,7 +119,7 @@ private:
 	}
 
 	const OperatorStorageType& getOpStorageNonLocal(const MetaOpForConnection& metaOp,
-	    const ProgramGlobals::SysOrEnvEnum type) const
+	                                                const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		// Non local ops cannot have modifier different than 'N'
 		assert(metaOp.modifier == 'N');

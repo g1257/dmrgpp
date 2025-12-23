@@ -87,16 +87,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VectorWithOffset.h" // to include norm
 #include "VectorWithOffsets.h" // to include norm
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename IoInputType_,
-    typename MatrixType_,
-    typename VectorType_,
-    typename VectorWithOffsetType_,
-    typename LeftRightSuperType>
-class ObserverHelper
-{
+          typename MatrixType_,
+          typename VectorType_,
+          typename VectorWithOffsetType_,
+          typename LeftRightSuperType>
+class ObserverHelper {
 
 public:
 
@@ -120,15 +118,18 @@ public:
 	typedef PsimagLite::GetBraOrKet GetBraOrKetType;
 	typedef std::pair<LeftRightSuperType*, SizeType> PairLeftRightSuperSizeType;
 
-	enum class SaveEnum { YES,
-		NO };
+	enum class SaveEnum
+	{
+		YES,
+		NO
+	};
 
 	ObserverHelper(IoInputType& io,
-	    SizeType start,
-	    SizeType nf,
-	    SizeType trail,
-	    bool withLegacyBugs,
-	    bool readOnDemand)
+	               SizeType start,
+	               SizeType nf,
+	               SizeType trail,
+	               bool withLegacyBugs,
+	               bool readOnDemand)
 	    : io_(io)
 	    , withLegacyBugs_(withLegacyBugs)
 	    , readOnDemand_(readOnDemand)
@@ -183,8 +184,8 @@ public:
 	bool endOfData() const { return noMoreData_; }
 
 	void transform(SparseMatrixType& ret,
-	    const SparseMatrixType& O2,
-	    SizeType ind) const
+	               const SparseMatrixType& O2,
+	               SizeType ind) const
 	{
 		checkIndex(ind);
 
@@ -256,8 +257,8 @@ public:
 	}
 
 	const VectorWithOffsetType& psiConst(SizeType ind,
-	    SizeType sectorIndex,
-	    SizeType levelIndex) const
+	                                     SizeType sectorIndex,
+	                                     SizeType levelIndex) const
 	{
 		checkIndex(ind);
 
@@ -288,7 +289,7 @@ public:
 	SizeType size() const { return dSerializerV_.size(); }
 
 	const VectorWithOffsetType& getVectorFromBracketId(const PsimagLite::GetBraOrKet& braOrKet,
-	    SizeType index) const
+	                                                   SizeType index) const
 	{
 		if (braOrKet.isPvector()) {
 			const SizeType pIndex = braOrKet.pIndex();
@@ -299,7 +300,7 @@ public:
 	}
 
 	const VectorWithOffsetType& timeVector(SizeType braketId,
-	    SizeType ind) const
+	                                       SizeType ind) const
 	{
 		assert(ind < timeSerializerV_.size());
 		assert(timeSerializerV_[ind]);
@@ -314,7 +315,7 @@ public:
 private:
 
 	SizeType siteInternal(const LeftRightSuperType& lrs,
-	    ProgramGlobals::DirectionEnum direction) const
+	                      ProgramGlobals::DirectionEnum direction) const
 	{
 		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.right().block()[0] - 1 : lrs.right().block()[0];
 	}
@@ -334,10 +335,10 @@ private:
 		for (SizeType i = start; i < end; ++i) {
 
 			DmrgSerializerType* dSerializer = new DmrgSerializerType(io_,
-			    prefix + "/" + ttos(i),
-			    false,
-			    { true, true },
-			    readOnDemand_);
+			                                                         prefix + "/" + ttos(i),
+			                                                         false,
+			                                                         { true, true },
+			                                                         readOnDemand_);
 
 			SizeType tmp = dSerializer->leftRightSuper().sites();
 			if (tmp > 0 && numberOfSites_ == 0)

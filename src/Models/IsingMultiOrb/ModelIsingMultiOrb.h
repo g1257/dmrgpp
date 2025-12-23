@@ -88,12 +88,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersModelIsingMultiOrb.h"
 #include <algorithm>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelBaseType>
-class ModelIsingMultiOrb : public ModelBaseType
-{
+class ModelIsingMultiOrb : public ModelBaseType {
 
 	static const int DEGREES_OF_FREEDOM = 2; // spin up and down
 
@@ -135,12 +133,12 @@ public:
 	static const int SPIN_DOWN = HilbertSpaceIsingMultiOrbType::SPIN_DOWN;
 
 	ModelIsingMultiOrb(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry,
-	    PsimagLite::String additional)
+	                   InputValidatorType& io,
+	                   const SuperGeometryType& geometry,
+	                   PsimagLite::String additional)
 	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	                    geometry,
+	                    io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , tau_(0)
@@ -176,8 +174,8 @@ public:
 	 PSIDOCCOPY $FirstFunctionBelow::MagneticField
 	 */
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType& block,
+	                                RealType time) const
 	{
 		//			ModelBaseType::additionalOnSiteHamiltonianFromFile(hmatrix, block, ii, data);
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
@@ -236,17 +234,17 @@ protected:
 				su2related.offset = orbs;
 
 				splus.push(OperatorType(tmpMatrix,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2related));
+				                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                        typename OperatorType::PairType(0, 0),
+				                        1.0,
+				                        su2related));
 				SparseMatrixType tmp;
 				transposeConjugate(tmp, tmpMatrix);
 				sminus.push(OperatorType(tmp,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    typename OperatorType::PairType(0, 0),
-				    1.0,
-				    su2related));
+				                         ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                         typename OperatorType::PairType(0, 0),
+				                         1.0,
+				                         su2related));
 			}
 
 			OpsLabelType& sz = this->createOpsLabel("sz");
@@ -256,10 +254,10 @@ protected:
 				SparseMatrixType tmpMatrix = findSzMatrices(i, orb, natBasis);
 				typename OperatorType::Su2RelatedType su2related2;
 				sz.push(OperatorType(tmpMatrix,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    PairType(2, 1),
-				    1.0 / sqrt(2.0),
-				    su2related2));
+				                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                     PairType(2, 1),
+				                     1.0 / sqrt(2.0),
+				                     su2related2));
 			}
 
 			OpsLabelType& sx = this->createOpsLabel("sx");
@@ -269,18 +267,18 @@ protected:
 				SparseMatrixType tmpMatrix = findSxOrSyBarMatrices(i, orb, natBasis, "sx");
 				typename OperatorType::Su2RelatedType su2related3;
 				sx.push(OperatorType(tmpMatrix,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    PairType(2, 1),
-				    1.0 / sqrt(2.0),
-				    su2related3));
+				                     ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                     PairType(2, 1),
+				                     1.0 / sqrt(2.0),
+				                     su2related3));
 
 				// Set the operators S^ybar_i in the natural basis
 				tmpMatrix = findSxOrSyBarMatrices(i, orb, natBasis, "sybar");
 				sybar.push(OperatorType(tmpMatrix,
-				    ProgramGlobals::FermionOrBosonEnum::BOSON,
-				    PairType(0, 0),
-				    1,
-				    su2related3));
+				                        ProgramGlobals::FermionOrBosonEnum::BOSON,
+				                        PairType(0, 0),
+				                        1,
+				                        su2related3));
 			}
 		}
 	}
@@ -296,17 +294,17 @@ protected:
 private:
 
 	void addMagneticField(SparseMatrixType& hmatrix,
-	    char c,
-	    SizeType site,
-	    SizeType orb,
-	    RealType time) const
+	                      char c,
+	                      SizeType site,
+	                      SizeType orb,
+	                      RealType time) const
 	{
 		assert(c == 'X' || c == 'Z');
 
 		const SizeType linSize = superGeometry_.numberOfSites();
 		const SizeType orbs = modelParameters_.orbitals;
 		const PsimagLite::Matrix<RealType>& v = (c == 'X') ? modelParameters_.magneticFieldX
-								   : modelParameters_.magneticFieldZ;
+		                                                   : modelParameters_.magneticFieldZ;
 
 		if (v.cols() != linSize || v.rows() != orbs)
 			return;
@@ -331,11 +329,11 @@ private:
 	}
 
 	void addonsitelinksSzSz(SparseMatrixType& hmatrix,
-	    SizeType site,
-	    SizeType orb1,
-	    SizeType orb2,
-	    SizeType orb,
-	    RealType time) const
+	                        SizeType site,
+	                        SizeType orb1,
+	                        SizeType orb2,
+	                        SizeType orb,
+	                        RealType time) const
 	{
 		const SizeType linSize = superGeometry_.numberOfSites();
 		const SizeType orbs = modelParameters_.orbitals;
@@ -363,10 +361,10 @@ private:
 	}
 
 	void addMagneticFieldSchdedule(SparseMatrixType& hmatrix,
-	    char c,
-	    SizeType site,
-	    SizeType orb,
-	    RealType tmp) const
+	                               char c,
+	                               SizeType site,
+	                               SizeType orb,
+	                               RealType tmp) const
 	{
 		assert(c == 'X' || c == 'Z');
 
@@ -383,10 +381,10 @@ private:
 	}
 
 	void addonsitelinksSzSz(SparseMatrixType& hmatrix,
-	    SizeType site,
-	    SizeType orb1,
-	    SizeType orb2,
-	    SizeType orb) const
+	                        SizeType site,
+	                        SizeType orb1,
+	                        SizeType orb2,
+	                        SizeType orb) const
 	{
 		const SizeType linSize = superGeometry_.numberOfSites();
 		const SizeType orbs = modelParameters_.orbitals;
@@ -410,10 +408,10 @@ private:
 	}
 
 	void addonsitelinksSzSzSchedule(SparseMatrixType& hmatrix,
-	    SizeType site,
-	    SizeType orb1,
-	    SizeType orb2,
-	    RealType tmp) const
+	                                SizeType site,
+	                                SizeType orb1,
+	                                SizeType orb2,
+	                                RealType tmp) const
 	{
 		const OperatorType& sz1 = ModelBaseType::naturalOperator("sz", site, orb1);
 		const OperatorType& sz2 = ModelBaseType::naturalOperator("sz", site, orb2);
@@ -429,7 +427,8 @@ private:
 		const SizeType orbitals = modelParameters_.orbitals;
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
-		auto mylambda = [this](ComplexOrRealType& coupling, RealType time, SizeType) {
+		auto mylambda = [this](ComplexOrRealType& coupling, RealType time, SizeType)
+		{
 			coupling = timeDependentConnection(coupling, time, 2);
 		};
 
@@ -444,8 +443,8 @@ private:
 
 	//! Find S^+_i in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(SizeType,
-	    SizeType orb,
-	    const HilbertBasisType& natBasis) const
+	                                   SizeType orb,
+	                                   const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -464,8 +463,8 @@ private:
 
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrices(SizeType,
-	    SizeType orb,
-	    const HilbertBasisType& natBasis) const
+	                                SizeType orb,
+	                                const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -486,9 +485,9 @@ private:
 	}
 
 	SparseMatrixType findSxOrSyBarMatrices(SizeType site,
-	    SizeType orb,
-	    const HilbertBasisType& natBasis,
-	    PsimagLite::String what) const
+	                                       SizeType orb,
+	                                       const HilbertBasisType& natBasis,
+	                                       PsimagLite::String what) const
 	{
 		if (what != "sx" && what != "sybar")
 			err("findSxOrSyBarMatrices: don't know how to calculate " + what + "\n");
@@ -506,8 +505,8 @@ private:
 	}
 
 	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    int n) const
+	                        const HilbertBasisType& basis,
+	                        int n) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
