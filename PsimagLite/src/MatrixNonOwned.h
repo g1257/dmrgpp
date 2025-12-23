@@ -4,22 +4,22 @@
 
 namespace PsimagLite {
 
-template <typename T>
-struct VectorConstOrNot {
+template <typename T> struct VectorConstOrNot {
 	typedef typename Vector<T>::Type Type;
 };
 
-template <typename T>
-struct VectorConstOrNot<const T> {
+template <typename T> struct VectorConstOrNot<const T> {
 	typedef const typename Vector<T>::Type Type;
 };
 
-template <typename T>
-class MatrixNonOwned {
+template <typename T> class MatrixNonOwned {
 
 public:
 
-	MatrixNonOwned(SizeType nrow, SizeType ncol, typename VectorConstOrNot<T>::Type& data, SizeType offset)
+	MatrixNonOwned(SizeType nrow,
+	               SizeType ncol,
+	               typename VectorConstOrNot<T>::Type& data,
+	               SizeType offset)
 	    : nrow_(nrow)
 	    , ncol_(ncol)
 	    , data_(&data)
@@ -28,8 +28,7 @@ public:
 		check();
 	}
 
-	explicit MatrixNonOwned(
-	    const PsimagLite::Matrix<typename RemoveConst<T>::Type>& m)
+	explicit MatrixNonOwned(const PsimagLite::Matrix<typename RemoveConst<T>::Type>& m)
 	    : nrow_(m.n_row())
 	    , ncol_(m.n_col())
 	    , data_(&(m.data_))
@@ -38,8 +37,7 @@ public:
 		check();
 	}
 
-	explicit MatrixNonOwned(
-	    PsimagLite::Matrix<typename RemoveConst<T>::Type>& m)
+	explicit MatrixNonOwned(PsimagLite::Matrix<typename RemoveConst<T>::Type>& m)
 	    : nrow_(m.n_row())
 	    , ncol_(m.n_col())
 	    , data_(&(m.data_))

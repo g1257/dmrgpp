@@ -1,7 +1,6 @@
 #include "util.h"
 
-template <typename ComplexOrRealType>
-int den_nnz(const PsimagLite::Matrix<ComplexOrRealType>& a_)
+template <typename ComplexOrRealType> int den_nnz(const PsimagLite::Matrix<ComplexOrRealType>& a_)
 {
 	const int nrow_A = a_.n_row();
 	const int ncol_A = a_.n_col();

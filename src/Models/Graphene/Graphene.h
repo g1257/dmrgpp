@@ -89,8 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <numeric>
 
 namespace Dmrg {
-template <typename ModelBaseType>
-class Graphene : public ModelBaseType {
+template <typename ModelBaseType> class Graphene : public ModelBaseType {
 
 public:
 
@@ -197,8 +196,10 @@ public:
 		OpsLabelType& yop = this->createOpsLabel("yop");
 		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 			for (SizeType spin2 = 0; spin2 < 2; ++spin2) {
-				MatrixType tmp = multiplyTc(creationMatrix_[0 + spin1 * modelParameters_.orbitals].getCRS(),
-				                            creationMatrix_[1 + spin2 * modelParameters_.orbitals].getCRS());
+				MatrixType tmp = multiplyTc(
+				    creationMatrix_[0 + spin1 * modelParameters_.orbitals].getCRS(),
+				    creationMatrix_[1 + spin2 * modelParameters_.orbitals]
+				        .getCRS());
 				SparseMatrixType tmp2(tmp);
 				typename OperatorType::Su2RelatedType su2Related;
 				yop.push(OperatorType(tmp2,
@@ -216,7 +217,8 @@ public:
 		OpsLabelType& ntotal = this->createOpsLabel("ntotal");
 		SparseMatrixType ntotalcrs;
 		for (SizeType dof = 0; dof < 2 * modelParameters_.orbitals; ++dof) {
-			MatrixType tmp = multiplyTc(creationMatrix_[dof].getCRS(), creationMatrix_[dof].getCRS());
+			MatrixType tmp = multiplyTc(creationMatrix_[dof].getCRS(),
+			                            creationMatrix_[dof].getCRS());
 			SparseMatrixType tmp2(tmp);
 			ntotalcrs += tmp2;
 			typename OperatorType::Su2RelatedType su2Related;
@@ -248,8 +250,9 @@ public:
 		OpsLabelType& splus2 = this->createOpsLabel("splus2");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
 			MatrixType tmp(nrow, nrow);
-			tmp += multiplyTc(creationMatrix_[dof].getCRS(),
-			                  creationMatrix_[dof + modelParameters_.orbitals].getCRS());
+			tmp += multiplyTc(
+			    creationMatrix_[dof].getCRS(),
+			    creationMatrix_[dof + modelParameters_.orbitals].getCRS());
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			splus.push(OperatorType(tmp2,
@@ -281,9 +284,11 @@ public:
 			MatrixType tmp(nrow, nrow);
 			MatrixType tmp2(nrow, nrow);
 
-			tmp += multiplyTc(creationMatrix_[dof].getCRS(), creationMatrix_[dof].getCRS());
-			tmp2 += multiplyTc(creationMatrix_[dof + modelParameters_.orbitals].getCRS(),
-			                   creationMatrix_[dof + modelParameters_.orbitals].getCRS());
+			tmp += multiplyTc(creationMatrix_[dof].getCRS(),
+			                  creationMatrix_[dof].getCRS());
+			tmp2 += multiplyTc(
+			    creationMatrix_[dof + modelParameters_.orbitals].getCRS(),
+			    creationMatrix_[dof + modelParameters_.orbitals].getCRS());
 
 			tmp = 0.5 * (tmp - tmp2);
 			SparseMatrixType tmp3(tmp);
@@ -307,7 +312,8 @@ public:
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			OpForLinkType c1("C", 0 + spin * orbitals);
 			OpForLinkType c2("C", 0 + spin * orbitals);
-			typename ModelTermType::Su2Properties su2properties(1, (spin == 1) ? -1 : 1, spin);
+			typename ModelTermType::Su2Properties su2properties(
+			    1, (spin == 1) ? -1 : 1, spin);
 
 			hopA.push(c1, 'N', c2, 'C', su2properties);
 		}
@@ -317,7 +323,8 @@ public:
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			OpForLinkType c1("C", 1 + spin * orbitals);
 			OpForLinkType c2("C", 1 + spin * orbitals);
-			typename ModelTermType::Su2Properties su2properties(1, (spin == 1) ? -1 : 1, spin);
+			typename ModelTermType::Su2Properties su2properties(
+			    1, (spin == 1) ? -1 : 1, spin);
 			hopB.push(c1, 'N', c2, 'C', su2properties);
 		}
 
@@ -345,10 +352,7 @@ public:
 		}
 	}
 
-	void setQns(VectorQnType& qns) const
-	{
-		qns = qq_;
-	}
+	void setQns(VectorQnType& qns) const { qns = qq_; }
 
 	void setOperatorMatricesInternal(VectorOperatorType& creationMatrix,
 	                                 const BlockType& block) const
@@ -372,7 +376,8 @@ public:
 				typename OperatorType::Su2RelatedType su2related;
 				if (sigma < modelParameters_.orbitals) {
 					su2related.source.push_back(i * dofs + sigma);
-					su2related.source.push_back(i * dofs + sigma + modelParameters_.orbitals);
+					su2related.source.push_back(i * dofs + sigma
+					                            + modelParameters_.orbitals);
 					su2related.transpose.push_back(-1);
 					su2related.transpose.push_back(-1);
 					su2related.offset = modelParameters_.orbitals;
@@ -447,10 +452,13 @@ private:
 				HilbertSpaceFeAsType::create(bra, i, sigma);
 				int jj = PsimagLite::indexOrMinusOne(natBasis, bra);
 				if (jj < 0)
-					throw PsimagLite::RuntimeError("findOperatorMatrices: internal error\n");
+					throw PsimagLite::RuntimeError(
+					    "findOperatorMatrices: internal error\n");
 				if (ii == SizeType(jj)) {
-					std::cerr << "ii=" << i << " ket=" << ket << " bra=" << bra << " sigma=" << sigma << "\n";
-					throw PsimagLite::RuntimeError("Creation operator cannot be diagonal\n");
+					std::cerr << "ii=" << i << " ket=" << ket << " bra=" << bra
+					          << " sigma=" << sigma << "\n";
+					throw PsimagLite::RuntimeError(
+					    "Creation operator cannot be diagonal\n");
 				}
 				cm(ii, jj) = sign(ket, i, sigma);
 			}
@@ -461,9 +469,8 @@ private:
 		transposeConjugate(creationMatrix, temp);
 	}
 
-	void setSymmetryRelatedInternal(VectorQnType& qns,
-	                                const HilbertBasisType& basis,
-	                                int n) const
+	void
+	setSymmetryRelatedInternal(VectorQnType& qns, const HilbertBasisType& basis, int n) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -476,17 +483,19 @@ private:
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0, 0);
 
-			SizeType na = HilbertSpaceFeAsType::calcNofElectrons(basis[i], 0) + HilbertSpaceFeAsType::calcNofElectrons(basis[i], 0 + 2);
-			SizeType nb = HilbertSpaceFeAsType::calcNofElectrons(basis[i], 1) + HilbertSpaceFeAsType::calcNofElectrons(basis[i], 1 + 2);
+			SizeType na = HilbertSpaceFeAsType::calcNofElectrons(basis[i], 0)
+			    + HilbertSpaceFeAsType::calcNofElectrons(basis[i], 0 + 2);
+			SizeType nb = HilbertSpaceFeAsType::calcNofElectrons(basis[i], 1)
+			    + HilbertSpaceFeAsType::calcNofElectrons(basis[i], 1 + 2);
 
 			SizeType flavor = na + 3 * nb;
 
 			// nup
-			SizeType electronsUp = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                                    SPIN_UP);
+			SizeType electronsUp
+			    = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i], SPIN_UP);
 			// ndown
-			SizeType electronsDown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                                      SPIN_DOWN);
+			SizeType electronsDown
+			    = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i], SPIN_DOWN);
 			SizeType electrons = electronsDown + electronsUp;
 
 			other[0] = electrons;
@@ -524,18 +533,25 @@ private:
 		}
 
 		SparseMatrixType nmatrixAB = nmatrixA * nmatrixB;
-		hmatrix += static_cast<ComplexOrRealType>(0.25) * modelParameters_.pairHopping * nmatrixAB;
+		hmatrix += static_cast<ComplexOrRealType>(0.25) * modelParameters_.pairHopping
+		    * nmatrixAB;
 
-		const SparseMatrixType splusA = ModelBaseType::naturalOperator("splus", 0, 0).getCRS(); // splus_a
-		const SparseMatrixType splusB = ModelBaseType::naturalOperator("splus", 0, 1).getCRS(); // splus_b
-		const SparseMatrixType sminusA = ModelBaseType::naturalOperator("sminus", 0, 0).getCRS(); // sminus_a
-		const SparseMatrixType sminusB = ModelBaseType::naturalOperator("sminus", 0, 1).getCRS(); // sminus_b
+		const SparseMatrixType splusA
+		    = ModelBaseType::naturalOperator("splus", 0, 0).getCRS(); // splus_a
+		const SparseMatrixType splusB
+		    = ModelBaseType::naturalOperator("splus", 0, 1).getCRS(); // splus_b
+		const SparseMatrixType sminusA
+		    = ModelBaseType::naturalOperator("sminus", 0, 0).getCRS(); // sminus_a
+		const SparseMatrixType sminusB
+		    = ModelBaseType::naturalOperator("sminus", 0, 1).getCRS(); // sminus_b
 		SparseMatrixType tmp = splusA * sminusB;
 		tmp += splusB * sminusA;
 		hmatrix += static_cast<ComplexOrRealType>(0.5) * modelParameters_.pairHopping * tmp;
 
-		const SparseMatrixType szA = ModelBaseType::naturalOperator("sz", 0, 0).getCRS(); // sz_a
-		const SparseMatrixType szB = ModelBaseType::naturalOperator("sz", 0, 1).getCRS(); // sz_b
+		const SparseMatrixType szA
+		    = ModelBaseType::naturalOperator("sz", 0, 0).getCRS(); // sz_a
+		const SparseMatrixType szB
+		    = ModelBaseType::naturalOperator("sz", 0, 1).getCRS(); // sz_b
 		tmp = szA * szB;
 		hmatrix += modelParameters_.pairHopping * tmp;
 	}

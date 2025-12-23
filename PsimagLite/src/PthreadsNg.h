@@ -116,8 +116,7 @@ struct PthreadFunctionStruct {
 	    , nthreads(0)
 	    , total(0)
 	    , cpu(0)
-	{
-	}
+	{ }
 
 	PthreadFunctionHolderType* pfh;
 	const LoadBalancerType* loadBalancer;
@@ -130,9 +129,9 @@ struct PthreadFunctionStruct {
 template <typename PthreadFunctionHolderType, typename LoadBalancerType>
 void* thread_function_wrapper(void* dummyPtr)
 {
-	PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>* pfs = static_cast<PthreadFunctionStruct<PthreadFunctionHolderType,
-	                                                                                                            LoadBalancerType>*>(
-	    dummyPtr);
+	PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>* pfs
+	    = static_cast<PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>*>(
+	        dummyPtr);
 
 	PthreadFunctionHolderType* pfh = pfs->pfh;
 
@@ -157,8 +156,7 @@ void* thread_function_wrapper(void* dummyPtr)
 	return 0;
 }
 
-template <typename PthreadFunctionHolderType,
-          typename LoadBalancerType = LoadBalancerDefault>
+template <typename PthreadFunctionHolderType, typename LoadBalancerType = LoadBalancerDefault>
 class PthreadsNg {
 
 	static const int MAX_CPUS = 1024;
@@ -171,8 +169,7 @@ public:
 	    : nthreads_(codeSectionParams.npthreads)
 	    , setAffinities_(codeSectionParams.setAffinities)
 	    , stackSize_(codeSectionParams.stackSize)
-	{
-	}
+	{ }
 
 	bool affinities() const { return setAffinities_; }
 
@@ -191,8 +188,7 @@ public:
 	}
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
-	void loopCreate(PthreadFunctionHolderType& pfh,
-	                const VectorSizeType& weights)
+	void loopCreate(PthreadFunctionHolderType& pfh, const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, nthreads_);
 		loopCreate(pfh, *loadBalancer);
@@ -201,13 +197,11 @@ public:
 	}
 
 	// balancer (includes weights)
-	void loopCreate(PthreadFunctionHolderType& pfh,
-	                const LoadBalancerType& loadBalancer)
+	void loopCreate(PthreadFunctionHolderType& pfh, const LoadBalancerType& loadBalancer)
 	{
 		SizeType ntasks = pfh.tasks();
 		SizeType actualThreads = std::min(nthreads_, ntasks);
-		PthreadFunctionStruct<PthreadFunctionHolderType,
-		                      LoadBalancerType>* pfs;
+		PthreadFunctionStruct<PthreadFunctionHolderType, LoadBalancerType>* pfs;
 		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType,
 		                                LoadBalancerType>[actualThreads];
 		pthread_t* thread_id = new pthread_t[actualThreads];
@@ -237,22 +231,18 @@ public:
 			pfs[j].nthreads = actualThreads;
 
 			attr[j] = new pthread_attr_t;
-			int ret = (stackSize_ > 0)
-			    ? pthread_attr_setstacksize(attr[j], stackSize_)
-			    : 0;
+			int ret
+			    = (stackSize_ > 0) ? pthread_attr_setstacksize(attr[j], stackSize_) : 0;
 			if (ret != 0) {
 				std::cerr << __FILE__;
 				std::cerr << "\tpthread_attr_setstacksize() "
 				             "has returned non-zero "
 				          << ret << "\n";
-				std::cerr
-				    << "\tIt is possible (but no certain) that "
-				       "the following error";
+				std::cerr << "\tIt is possible (but no certain) that "
+				             "the following error";
 				std::cerr << "\thappened.\n";
-				std::cerr
-				    << "\tEINVAL The stack size is less than ";
-				std::cerr
-				    << "PTHREAD_STACK_MIN (16384) bytes.\n";
+				std::cerr << "\tEINVAL The stack size is less than ";
+				std::cerr << "PTHREAD_STACK_MIN (16384) bytes.\n";
 				std::cerr << "\tI will ignore this error and "
 				             "let you continue\n";
 			}
@@ -266,7 +256,10 @@ public:
 #endif
 
 			ret = pthread_create(
-			    &thread_id[j], attr[j], thread_function_wrapper<PthreadFunctionHolderType, LoadBalancerType>, &pfs[j]);
+			    &thread_id[j],
+			    attr[j],
+			    thread_function_wrapper<PthreadFunctionHolderType, LoadBalancerType>,
+			    &pfs[j]);
 			checkForError(ret);
 		}
 
@@ -310,9 +303,8 @@ private:
 		// pick a cpu from cpuset
 		int chosenCpu = getOneCpuFromSet(cpuset);
 		if (chosenCpu < 0) {
-			std::cerr
-			    << "setAffinity: no cpus left in set for thread "
-			    << threadNum << "\n";
+			std::cerr << "setAffinity: no cpus left in set for thread " << threadNum
+			          << "\n";
 			return;
 		}
 

@@ -85,9 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename TargetHelperType,
-          typename VectorWithOffsetType,
-          typename LanczosSolverType>
+template <typename TargetHelperType, typename VectorWithOffsetType, typename LanczosSolverType>
 class ApplyOperatorExpression {
 
 public:
@@ -102,11 +100,36 @@ public:
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef TimeVectorsBase<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsBaseType;
-	typedef TimeVectorsKrylov<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsKrylovType;
-	typedef TimeVectorsChebyshev<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsChebyshevType;
-	typedef TimeVectorsRungeKutta<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsRungeKuttaType;
-	typedef TimeVectorsSuzukiTrotter<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
+	typedef TimeVectorsBase<TargetParamsType,
+	                        ModelType,
+	                        WaveFunctionTransfType,
+	                        LanczosSolverType,
+	                        VectorWithOffsetType>
+	    TimeVectorsBaseType;
+	typedef TimeVectorsKrylov<TargetParamsType,
+	                          ModelType,
+	                          WaveFunctionTransfType,
+	                          LanczosSolverType,
+	                          VectorWithOffsetType>
+	    TimeVectorsKrylovType;
+	typedef TimeVectorsChebyshev<TargetParamsType,
+	                             ModelType,
+	                             WaveFunctionTransfType,
+	                             LanczosSolverType,
+	                             VectorWithOffsetType>
+	    TimeVectorsChebyshevType;
+	typedef TimeVectorsRungeKutta<TargetParamsType,
+	                              ModelType,
+	                              WaveFunctionTransfType,
+	                              LanczosSolverType,
+	                              VectorWithOffsetType>
+	    TimeVectorsRungeKuttaType;
+	typedef TimeVectorsSuzukiTrotter<TargetParamsType,
+	                                 ModelType,
+	                                 WaveFunctionTransfType,
+	                                 LanczosSolverType,
+	                                 VectorWithOffsetType>
+	    TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
@@ -119,15 +142,17 @@ public:
 	typedef MultiSiteExpressionHelper<LeftRightSuperType, VectorWithOffsetType>
 	    MultiSiteExpressionHelperType;
 	typedef typename MultiSiteExpressionHelperType::DmrgSerializerType DmrgSerializerType;
-	typedef CorrelationsSkeleton<MultiSiteExpressionHelperType, ModelType> CorrelationsSkeletonType;
+	typedef CorrelationsSkeleton<MultiSiteExpressionHelperType, ModelType>
+	    CorrelationsSkeletonType;
 	typedef typename TimeVectorsBaseType::WftHelperType WftHelperType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
+	typedef
+	    typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::
+	        Type VectorVectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 
-	ApplyOperatorExpression(const TargetHelperType& targetHelper,
-	                        SizeType indexNoAdvance)
+	ApplyOperatorExpression(const TargetHelperType& targetHelper, SizeType indexNoAdvance)
 	    : progress_("ApplyOperatorExpression")
 	    , targetHelper_(targetHelper)
 	    , E0_(0.0)
@@ -175,8 +200,10 @@ public:
 			if (flag)
 				return;
 
-			std::cerr << "AOE::initPsi(): WARNING sectors/nexcited changed during run\n";
-			std::cout << "AOE::initPsi(): WARNING sectors/nexcited changed during run\n";
+			std::cerr
+			    << "AOE::initPsi(): WARNING sectors/nexcited changed during run\n";
+			std::cout
+			    << "AOE::initPsi(): WARNING sectors/nexcited changed during run\n";
 			clearPsi();
 		}
 
@@ -205,7 +232,8 @@ public:
 		const SizeType nsectors = psi_.size();
 		const SizeType sectorIndex = tstStruct.sectorIndex();
 		if (sectorIndex >= nsectors)
-			err("getPhi: sectors=" + ttos(nsectors) + " <= " + ttos(sectorIndex) + "\n");
+			err("getPhi: sectors=" + ttos(nsectors) + " <= " + ttos(sectorIndex)
+			    + "\n");
 
 		const SizeType nlevels = psi_[sectorIndex].size();
 		const SizeType levelIndex = tstStruct.levelIndex();
@@ -231,7 +259,8 @@ public:
 		// in turn to the g.s.
 		for (SizeType i = 0; i < max; ++i) {
 
-			SizeType count2 = evolve(i, Eg, direction, site, loopNumber, max - 1, tstStruct);
+			SizeType count2
+			    = evolve(i, Eg, direction, site, loopNumber, max - 1, tstStruct);
 
 			if (count2 == 0)
 				continue;
@@ -334,14 +363,16 @@ public:
 		assert(nexcited > 0);
 
 		if (nsectors != inV.size())
-			err("FATAL: inV.size == " + ttos(inV.size()) + " but params.excited.size= "
-			    + ttos(nsectors) + "\n");
+			err("FATAL: inV.size == " + ttos(inV.size())
+			    + " but params.excited.size= " + ttos(nsectors) + "\n");
 
 		this->initPsi(nsectors, nexcited);
 
 		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
 			if (inV[sectorIndex].size() != nexcited)
-				err("Expected inV[" + ttos(sectorIndex) + "].size == " + ttos(nexcited) + " but found " + ttos(inV[sectorIndex].size()) + " instead\n");
+				err("Expected inV[" + ttos(sectorIndex)
+				    + "].size == " + ttos(nexcited) + " but found "
+				    + ttos(inV[sectorIndex].size()) + " instead\n");
 
 			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 
@@ -368,7 +399,8 @@ public:
 			io.createGroup(label);
 			io.write(nexcited, label + "/Size");
 			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex)
-				psi_[sectorIndex][excitedIndex]->write(io, label + "/" + ttos(excitedIndex));
+				psi_[sectorIndex][excitedIndex]->write(
+				    io, label + "/" + ttos(excitedIndex));
 		}
 	}
 
@@ -395,7 +427,8 @@ public:
 			psi_[sectorIndex].resize(nexcited);
 			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
 				psi_[sectorIndex][excitedIndex] = new VectorWithOffsetType;
-				psi_[sectorIndex][excitedIndex]->read(io, label + ttos(excitedIndex));
+				psi_[sectorIndex][excitedIndex]->read(io,
+				                                      label + ttos(excitedIndex));
 			}
 		}
 	}
@@ -481,8 +514,7 @@ public:
 		progress_.printline(msgg, std::cout);
 	}
 
-	void initTimeVectors(const TargetParamsType& tstStruct,
-	                     InputValidatorType& ioIn)
+	void initTimeVectors(const TargetParamsType& tstStruct, InputValidatorType& ioIn)
 	{
 		delete timeVectorsBase_;
 		timeVectorsBase_ = nullptr;
@@ -495,34 +527,20 @@ public:
 
 		switch (tstStruct.algorithm()) {
 		case TargetParamsType::AlgorithmEnum::KRYLOV:
-			timeVectorsBase_ = new TimeVectorsKrylovType(tstStruct,
-			                                             targetVectors_,
-			                                             model,
-			                                             wft,
-			                                             lrs,
-			                                             ioIn);
+			timeVectorsBase_ = new TimeVectorsKrylovType(
+			    tstStruct, targetVectors_, model, wft, lrs, ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::CHEBYSHEV:
-			timeVectorsBase_ = new TimeVectorsChebyshevType(tstStruct,
-			                                                targetVectors_,
-			                                                model,
-			                                                wft,
-			                                                lrs,
-			                                                ioIn);
+			timeVectorsBase_ = new TimeVectorsChebyshevType(
+			    tstStruct, targetVectors_, model, wft, lrs, ioIn);
 			break;
 		case TargetParamsType::AlgorithmEnum::RUNGE_KUTTA:
-			timeVectorsBase_ = new TimeVectorsRungeKuttaType(tstStruct,
-			                                                 targetVectors_,
-			                                                 model,
-			                                                 wft,
-			                                                 lrs);
+			timeVectorsBase_ = new TimeVectorsRungeKuttaType(
+			    tstStruct, targetVectors_, model, wft, lrs);
 			break;
 		case TargetParamsType::AlgorithmEnum::SUZUKI_TROTTER:
-			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(tstStruct,
-			                                                    targetVectors_,
-			                                                    model,
-			                                                    wft,
-			                                                    lrs);
+			timeVectorsBase_ = new TimeVectorsSuzukiTrotterType(
+			    tstStruct, targetVectors_, model, wft, lrs);
 			break;
 		default:
 			throw PsimagLite::RuntimeError(s.c_str());
@@ -535,8 +553,7 @@ public:
 		return *timeVectorsBase_;
 	}
 
-	void loadEnergy(PsimagLite::IoSelector::In& io,
-	                PsimagLite::String label)
+	void loadEnergy(PsimagLite::IoSelector::In& io, PsimagLite::String label)
 	{
 		SizeType nsectors = 0;
 		io.read(nsectors, label + "/Size");
@@ -571,18 +588,12 @@ public:
 	                     const PsimagLite::Vector<SizeType>::Type& block,
 	                     bool isLastCall)
 	{
-		typename TimeVectorsBaseType::ExtraData extra(direction,
-		                                              allOperatorsApplied,
-		                                              wftAndAdvanceIfNeeded,
-		                                              block,
-		                                              isLastCall);
+		typename TimeVectorsBaseType::ExtraData extra(
+		    direction, allOperatorsApplied, wftAndAdvanceIfNeeded, block, isLastCall);
 		if (timeVectorsBase_->isBase())
 			err("timeVectorsBase_ ptr not setup!?\n");
 
-		timeVectorsBase_->calcTimeVectors(indices,
-		                                  Eg,
-		                                  phi,
-		                                  extra);
+		timeVectorsBase_->calcTimeVectors(indices, Eg, phi, extra);
 	}
 
 	void applyOneOperator(SizeType loopNumber,
@@ -593,7 +604,8 @@ public:
 	                      const ProgramGlobals::DirectionEnum systemOrEnviron,
 	                      const TargetParamsType& tstStruct)
 	{
-		if (tstStruct.startingLoops().size() > 0 && tstStruct.startingLoops()[indexOfOperator] > loopNumber)
+		if (tstStruct.startingLoops().size() > 0
+		    && tstStruct.startingLoops()[indexOfOperator] > loopNumber)
 			return;
 
 		const bool hasBeenApplied = (phiNew.size() > 0);
@@ -603,7 +615,9 @@ public:
 		VectorWithOffsetType phiOld = psiSrc;
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 
-		BorderEnumType corner = (site == 0 || site == numberOfSites - 1) ? ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
+		BorderEnumType corner = (site == 0 || site == numberOfSites - 1)
+		    ? ApplyOperatorType::BORDER_YES
+		    : ApplyOperatorType::BORDER_NO;
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -653,26 +667,24 @@ public:
 	const VectorWithOffsetType& ensureOnlyOnePsi(PsimagLite::String func) const
 	{
 		if (psi_.size() != 1)
-			err("ensureOnlyOnePsi failed (more than one excited); called from" + func + "\n");
+			err("ensureOnlyOnePsi failed (more than one excited); called from" + func
+			    + "\n");
 
 		if (psi_[0].size() != 1)
-			err("ensureOnlyOnePsi failed (more than one sector); called from" + func + "\n");
+			err("ensureOnlyOnePsi failed (more than one sector); called from" + func
+			    + "\n");
 
 		return *(psi_[0][0]);
 	}
 
-	void timeHasAdvanced()
-	{
-		timeVectorsBase_->timeHasAdvanced();
-	}
+	void timeHasAdvanced() { timeVectorsBase_->timeHasAdvanced(); }
 
 	const ModelType& model() const { return targetHelper_.model(); }
 
 private:
 
 	// legacy reading, use only as fallback
-	void loadEnergyLegacy(PsimagLite::IoSelector::In& io,
-	                      PsimagLite::String label)
+	void loadEnergyLegacy(PsimagLite::IoSelector::In& io, PsimagLite::String label)
 	{
 		SizeType total = 0;
 		io.read(total, label + "/Size");
@@ -691,7 +703,8 @@ private:
 				s += ttos(tstStruct.sites(i));
 				s = s + " before having seen";
 				s = s + " site " + ttos(tstStruct.sites(j));
-				s = s + ". Please order your dynamic sites in order of appearance.\n";
+				s = s
+				    + ". Please order your dynamic sites in order of appearance.\n";
 				throw PsimagLite::RuntimeError(s);
 			}
 		}
@@ -730,7 +743,8 @@ private:
 			return 0;
 		}
 
-		if (tstStruct.startingLoops().size() > 0 && tstStruct.startingLoops()[i] > loopNumber)
+		if (tstStruct.startingLoops().size() > 0
+		    && tstStruct.startingLoops()[i] > loopNumber)
 			return 0;
 
 		if (site != tstStruct.sites(i) && stage_[i] == StageEnum::DISABLED)
@@ -763,11 +777,13 @@ private:
 				timeVectorsBase_->timeHasAdvanced();
 			}
 		} else {
-			if (i == lastI && stage_[i] == StageEnum::WFT_NOADVANCE && firstSeeLeftCorner_)
+			if (i == lastI && stage_[i] == StageEnum::WFT_NOADVANCE
+			    && firstSeeLeftCorner_)
 				++timesWithoutAdvancement_;
 		}
 
-		if (!firstSeeLeftCorner_ && i == lastI && stage_[i] == StageEnum::WFT_NOADVANCE && site == 1)
+		if (!firstSeeLeftCorner_ && i == lastI && stage_[i] == StageEnum::WFT_NOADVANCE
+		    && site == 1)
 			firstSeeLeftCorner_ = true;
 
 		const RealType time = timeVectorsBase_->time();
@@ -799,7 +815,10 @@ private:
 
 		if (stage_[i] == StageEnum::OPERATOR) {
 
-			BorderEnumType corner = (tstStruct.sites(i) == 0 || tstStruct.sites(i) == numberOfSites - 1) ? ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
+			BorderEnumType corner
+			    = (tstStruct.sites(i) == 0 || tstStruct.sites(i) == numberOfSites - 1)
+			    ? ApplyOperatorType::BORDER_YES
+			    : ApplyOperatorType::BORDER_NO;
 
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -825,11 +844,13 @@ private:
 				msg2 << "Norm of phi is zero\n";
 				progress_.printline(msgg2, std::cout);
 			}
-		} else if (stage_[i] == StageEnum::WFT_NOADVANCE || stage_[i] == StageEnum::WFT_ADVANCE) {
+		} else if (stage_[i] == StageEnum::WFT_NOADVANCE
+		           || stage_[i] == StageEnum::WFT_ADVANCE) {
 			const SizeType advanceEach = tstStruct.advanceEach();
 			SizeType advance = indexNoAdvance_;
 
-			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE && !timeVectorsBase_->isBase()) {
+			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE
+			    && !timeVectorsBase_->isBase()) {
 				SizeType timeSteps = tstStruct.times().size();
 				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
 			}

@@ -23,8 +23,7 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename RealType_, typename GeometryType_>
-class GeometryDca {
+template <typename RealType_, typename GeometryType_> class GeometryDca {
 
 public:
 

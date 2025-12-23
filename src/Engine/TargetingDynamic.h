@@ -205,8 +205,8 @@ public:
 		this->common().write(io, block, prefix);
 
 		SizeType type = tstStruct_.type();
-		int fermionSign = this->common().findFermionSignOfTheOperators(tstStruct_.concatenation(),
-		                                                               tstStruct_.aOperators());
+		int fermionSign = this->common().findFermionSignOfTheOperators(
+		    tstStruct_.concatenation(), tstStruct_.aOperators());
 		int s = (type & 1) ? -1 : 1;
 		int s2 = (type > 1) ? -1 : 1;
 		int s3 = (type & 1) ? -fermionSign : 1;
@@ -218,7 +218,8 @@ public:
 		params.Eg = this->common().aoe().energy();
 		params.weight = s2 * weightForContinuedFraction_ * s3;
 		params.isign = s;
-		if (tstStruct_.aOperators()[0].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::BOSON)
+		if (tstStruct_.aOperators()[0].fermionOrBoson()
+		    == ProgramGlobals::FermionOrBosonEnum::BOSON)
 			s2 *= s;
 
 		PostProcType cf(ab_, params);
@@ -239,12 +240,8 @@ private:
 	{
 
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().aoeNonConst().getPhi(&phiNew,
-		                                                     Eg,
-		                                                     direction,
-		                                                     site,
-		                                                     loopNumber,
-		                                                     tstStruct_);
+		SizeType count = this->common().aoeNonConst().getPhi(
+		    &phiNew, Eg, direction, site, loopNumber, tstStruct_);
 
 		if (count == 0)
 			return;
@@ -282,9 +279,7 @@ private:
 			weightForContinuedFraction_ = PsimagLite::real(phi * phi);
 	}
 
-	void getLanczosVectors(DenseMatrixType& V,
-	                       const VectorType& sv,
-	                       SizeType p)
+	void getLanczosVectors(DenseMatrixType& V, const VectorType& sv, SizeType p)
 	{
 		const RealType fakeTime = 0;
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
@@ -301,8 +296,7 @@ private:
 		lanczosSolver.lanczosVectorsSwap(V);
 	}
 
-	void setVectors(const DenseMatrixType& V,
-	                SizeType i0)
+	void setVectors(const DenseMatrixType& V, SizeType i0)
 	{
 		for (SizeType i = 0; i < this->common().aoe().tvs(); i++) {
 			VectorType tmp(V.rows());

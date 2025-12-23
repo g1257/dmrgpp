@@ -93,8 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ParametersType, typename TargetingType>
-class Diagonalization {
+template <typename ParametersType, typename TargetingType> class Diagonalization {
 
 public:
 
@@ -121,18 +120,15 @@ public:
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-	typedef PsimagLite::LanczosOrDavidsonBase<ParametersForSolverType,
-	                                          MatrixVectorType,
-	                                          TargetVectorType>
-	    LanczosOrDavidsonBaseType;
-	typedef PsimagLite::DavidsonSolver<ParametersForSolverType,
-	                                   MatrixVectorType,
-	                                   TargetVectorType>
-	    DavidsonSolverType;
-	typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-	                                  MatrixVectorType,
-	                                  TargetVectorType>
-	    LanczosSolverType;
+	typedef PsimagLite::
+	    LanczosOrDavidsonBase<ParametersForSolverType, MatrixVectorType, TargetVectorType>
+	        LanczosOrDavidsonBaseType;
+	typedef PsimagLite::
+	    DavidsonSolver<ParametersForSolverType, MatrixVectorType, TargetVectorType>
+	        DavidsonSolverType;
+	typedef PsimagLite::
+	    LanczosSolver<ParametersForSolverType, MatrixVectorType, TargetVectorType>
+	        LanczosSolverType;
 	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 	using FiniteLoopType = FiniteLoop<RealType>;
@@ -153,8 +149,7 @@ public:
 	    , quantumSector_(quantumSector)
 	    , wft_(waveFunctionTransformation)
 	    , oldEnergy_(oldEnergy)
-	{
-	}
+	{ }
 
 	//! PTEX_LABEL{Diagonalization}
 	void operator()(TargetingType& target,
@@ -203,12 +198,16 @@ private:
 					std::cerr << lrs.super().qnEx(i);
 
 				const QnType& qn = lrs.super().pseudoQn(i);
-				const bool b1 = (qn != quantumSector_[j] || std::find(mVector.begin(), mVector.end(), i) != mVector.end());
+				const bool b1 = (qn != quantumSector_[j]
+				                 || std::find(mVector.begin(), mVector.end(), i)
+				                     != mVector.end());
 
-				const SizeType bs = lrs.super().partition(i + 1) - lrs.super().partition(i);
+				const SizeType bs
+				    = lrs.super().partition(i + 1) - lrs.super().partition(i);
 
 				if (!parameters_.findSymmetrySector.empty()) {
-					if (!passSymmetryConstraints(qn, lrs.super().block().size(), bs))
+					if (!passSymmetryConstraints(
+					        qn, lrs.super().block().size(), bs))
 						continue;
 				} else {
 					if (b1)
@@ -260,9 +259,8 @@ private:
 
 		VectorSizeType sectors;
 		VectorSizeType compactedWeights;
-		const SizeType weightsTotal = targetedSymmetrySectors(sectors,
-		                                                      compactedWeights,
-		                                                      lrs);
+		const SizeType weightsTotal
+		    = targetedSymmetrySectors(sectors, compactedWeights, lrs);
 
 		if (weightsTotal == 0) {
 			PsimagLite::String msg("Diagonalization: ");
@@ -312,11 +310,12 @@ private:
 			msg << " and numberOfExcited=" << parameters_.numberOfExcited;
 			progress_.printline(msgg, std::cout);
 
-			TargetVectorType* initialBySector = (isVwoS) ? &onlyForVwoS[j]
-			                                             : new TargetVectorType;
+			TargetVectorType* initialBySector
+			    = (isVwoS) ? &onlyForVwoS[j] : new TargetVectorType;
 
 			if (onlyWft) {
-				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
+				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited;
+				     ++excitedIndex) {
 					if (!isVwoS) {
 						target.initialGuess(*initialBySector,
 						                    oneSiteSpaces,
@@ -340,8 +339,10 @@ private:
 					energySaved[j][excitedIndex] = oldEnergy_[j][excitedIndex];
 					PsimagLite::OstringStream msgg(std::cout.precision());
 					PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-					msg << "Early exit due to user requesting (fast) WFT only, ";
-					msg << "(non updated) energy= " << energySaved[j][excitedIndex];
+					msg << "Early exit due to user requesting (fast) WFT "
+					       "only, ";
+					msg << "(non updated) energy= "
+					    << energySaved[j][excitedIndex];
 					progress_.printline(msgg, std::cout);
 				}
 			} else {
@@ -361,7 +362,8 @@ private:
 				if (fabs(norma) >= 1e-12)
 					*initialBySector /= norma;
 
-				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex)
+				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited;
+				     ++excitedIndex)
 					vecSaved[j][excitedIndex].resize(initialBySector->size());
 
 				VectorRealType myEnergy;
@@ -373,7 +375,8 @@ private:
 				                    *initialBySector,
 				                    loopIndex);
 
-				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited; ++excitedIndex) {
+				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited;
+				     ++excitedIndex) {
 					energySaved[j][excitedIndex] = myEnergy[excitedIndex];
 					oldEnergy_[j][excitedIndex] = myEnergy[excitedIndex];
 				}
@@ -441,7 +444,8 @@ private:
 				progress_.printline(msgg4, std::cout);
 
 				const QnType& q = lrs.super().qnEx(sector);
-				const SizeType bs = lrs.super().partition(sector + 1) - lrs.super().partition(sector);
+				const SizeType bs = lrs.super().partition(sector + 1)
+				    - lrs.super().partition(sector);
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 				msg << "Found targetted symmetry sector in partition " << j;
@@ -450,7 +454,8 @@ private:
 
 				PsimagLite::OstringStream msgg2(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
-				msg2 << "Norm of vector is " << PsimagLite::norm(vecSaved[j][excitedIndex]);
+				msg2 << "Norm of vector is "
+				     << PsimagLite::norm(vecSaved[j][excitedIndex]);
 				msg2 << " and quantum numbers are ";
 				msg2 << q;
 				progress_.printline(msgg2, std::cout);
@@ -532,10 +537,8 @@ private:
 	{
 		const OptionsType& options = parameters_.options;
 
-		HamiltonianConnectionType hc(lrs,
-		                             ModelType::modelLinks(),
-		                             targetTime,
-		                             model_.superOpHelper());
+		HamiltonianConnectionType hc(
+		    lrs, ModelType::modelLinks(), targetTime, model_.superOpHelper());
 
 		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 		typename ModelHelperType::Aux aux(partitionIndex, lrs);
@@ -589,12 +592,7 @@ private:
 		const SizeType mSize = hc.modelHelper().size(partitionIndex);
 		msg << "I will now diagonalize a matrix of size=" << mSize;
 		progress_.printline(msgg, std::cout);
-		diagonaliseOneBlock(energyTmp,
-		                    tmpVec,
-		                    hc,
-		                    initialVector,
-		                    loopIndex,
-		                    aux);
+		diagonaliseOneBlock(energyTmp, tmpVec, hc, initialVector, loopIndex, aux);
 	}
 
 	void diagonaliseOneBlock(VectorRealType& energyTmp,
@@ -605,9 +603,7 @@ private:
 	                         const typename ModelHelperType::Aux& aux)
 	{
 		const SizeType nexcited = energyTmp.size();
-		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_,
-		                                                             hc,
-		                                                             aux);
+		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_, hc, aux);
 
 		if (parameters_.finiteLoop[loopIndex].wants("onlyslowwft")) {
 			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
@@ -686,7 +682,8 @@ private:
 				energyTmp[excited] = eigs[excited];
 				PsimagLite::OstringStream msgg2(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
-				msg2 << "Found eigenvalue[" << excited << "]= " << energyTmp[excited];
+				msg2 << "Found eigenvalue[" << excited
+				     << "]= " << energyTmp[excited];
 				progress_.printline(msgg2, std::cout);
 			}
 		}
@@ -756,8 +753,10 @@ private:
 		PsimagLite::PackIndices packLeft(leftLeftSize);
 		PsimagLite::PackIndices packRight(h);
 		RealType sum = 0;
-		bool breakLeft = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM || direction == ProgramGlobals::DirectionEnum::INFINITE);
-		bool breakRight = (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON || direction == ProgramGlobals::DirectionEnum::INFINITE);
+		bool breakLeft = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM
+		                  || direction == ProgramGlobals::DirectionEnum::INFINITE);
+		bool breakRight = (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON
+		                   || direction == ProgramGlobals::DirectionEnum::INFINITE);
 		bool firstCall = (direction == ProgramGlobals::DirectionEnum::INFINITE
 		                  && leftLeftSize == h && lrs.right().size() == h * h);
 
@@ -800,7 +799,8 @@ private:
 	}
 
 	// FIXME TODO: Write two versions: an unscaled one and an scaled one
-	bool passSymmetryConstraints(const QnType& qn, SizeType superSize, SizeType matrixSize) const
+	bool
+	passSymmetryConstraints(const QnType& qn, SizeType superSize, SizeType matrixSize) const
 	{
 		// const SizeType latticeSize = model_.superGeometry().numberOfSites();
 		PsimagLite::String predicate = parameters_.findSymmetrySector;

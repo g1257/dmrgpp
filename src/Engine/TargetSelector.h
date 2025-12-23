@@ -17,8 +17,7 @@
 
 namespace Dmrg {
 
-template <typename TargetingBaseType>
-class TargetSelector {
+template <typename TargetingBaseType> class TargetSelector {
 
 	typedef typename TargetingBaseType::MatrixVectorType MatrixVectorType;
 	typedef typename TargetingBaseType::CheckpointType CheckpointType;
@@ -35,7 +34,8 @@ class TargetSelector {
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename TargetingBaseType::LanczosSolverType LanczosSolverType;
 	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef TargetingGroundState<LanczosSolverType, VectorWithOffsetType> TargetingGroundStateType;
+	typedef TargetingGroundState<LanczosSolverType, VectorWithOffsetType>
+	    TargetingGroundStateType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	// start targets here:  DO NOT REMOVE MARK
 	typedef TargetingTimeStep<LanczosSolverType, VectorWithOffsetType> TargetingTimeStepType;
@@ -43,12 +43,17 @@ class TargetSelector {
 	typedef TargetingDynamic<LanczosSolverType, VectorWithOffsetType> TargetingDynamicType;
 	typedef TargetingCorrectionVector<LanczosSolverType, VectorWithOffsetType>
 	    TargetingCorrectionVectorType;
-	typedef TargetingCorrection<LanczosSolverType, VectorWithOffsetType> TargetingCorrectionType;
+	typedef TargetingCorrection<LanczosSolverType, VectorWithOffsetType>
+	    TargetingCorrectionType;
 	typedef TargetingMetts<LanczosSolverType, VectorWithOffsetType> TargetingMettsType;
-	typedef TargetingRixsStatic<LanczosSolverType, VectorWithOffsetType> TargetingRixsStaticType;
-	typedef TargetingRixsDynamic<LanczosSolverType, VectorWithOffsetType> TargetingRixsDynamicType;
-	typedef TargetingExpression<LanczosSolverType, VectorWithOffsetType> TargetingExpressionType;
-	typedef TargetingCVEvolution<LanczosSolverType, VectorWithOffsetType> TargetingCVEvolutionType;
+	typedef TargetingRixsStatic<LanczosSolverType, VectorWithOffsetType>
+	    TargetingRixsStaticType;
+	typedef TargetingRixsDynamic<LanczosSolverType, VectorWithOffsetType>
+	    TargetingRixsDynamicType;
+	typedef TargetingExpression<LanczosSolverType, VectorWithOffsetType>
+	    TargetingExpressionType;
+	typedef TargetingCVEvolution<LanczosSolverType, VectorWithOffsetType>
+	    TargetingCVEvolutionType;
 	// end targets DO NOT REMOVE MARK
 
 public:
@@ -64,8 +69,7 @@ public:
 	    , wft_(wft)
 	    , quantumSector_(quantumSector)
 	    , ioIn_(ioIn)
-	{
-	}
+	{ }
 
 	~TargetSelector()
 	{
@@ -89,7 +93,8 @@ public:
 	TargetingBaseType& operator()(PsimagLite::String targeting)
 	{
 		if (psi_)
-			err("TargetingBaseType::operator(): can only be called multiple times" + PsimagLite::String(" without argument\n"));
+			err("TargetingBaseType::operator(): can only be called multiple times"
+			    + PsimagLite::String(" without argument\n"));
 
 		check1(targeting);
 
@@ -99,11 +104,13 @@ public:
 			psi_ = new TargetingGroundStateType(lrs_, checkPoint_, wft_, qn, ioIn_);
 			// named targets start  DO NOT REMOVE MARK
 		} else if (targeting == "TimeStepTargeting" || targeting == "TargetingAncilla") {
-			psi_ = new TargetingTimeStepType(lrs_, checkPoint_, wft_, qn, ioIn_, targeting);
+			psi_ = new TargetingTimeStepType(
+			    lrs_, checkPoint_, wft_, qn, ioIn_, targeting);
 		} else if (targeting == "DynamicTargeting") {
 			psi_ = new TargetingDynamicType(lrs_, checkPoint_, wft_, qn, ioIn_);
 		} else if (targeting == "CorrectionVectorTargeting") {
-			psi_ = new TargetingCorrectionVectorType(lrs_, checkPoint_, wft_, qn, ioIn_);
+			psi_
+			    = new TargetingCorrectionVectorType(lrs_, checkPoint_, wft_, qn, ioIn_);
 		} else if (targeting == "TargetingChebyshev") {
 			psi_ = new TargetingChebyshevType(lrs_, checkPoint_, wft_, qn, ioIn_);
 		} else if (targeting == "CorrectionTargeting") {
@@ -155,7 +162,8 @@ private:
 		SizeType count = 0;
 		for (SizeType i = 0; i < totalTargets; ++i) {
 			if (options.isSet(targets[i])) {
-				if (targeting == "AdaptiveDynamicTargeting" && targets[i] == "DynamicTargeting")
+				if (targeting == "AdaptiveDynamicTargeting"
+				    && targets[i] == "DynamicTargeting")
 					continue;
 				targeting = targets[i];
 				count++;
@@ -174,9 +182,7 @@ private:
 		return targeting;
 	}
 
-	void check1(PsimagLite::String) const
-	{
-	}
+	void check1(PsimagLite::String) const { }
 
 	TargetingBaseType* psi_;
 	const LeftRightSuperType& lrs_;

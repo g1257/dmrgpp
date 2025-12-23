@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
-template <typename ModelBaseType>
-class TjAncillaG : public ModelBaseType {
+template <typename ModelBaseType> class TjAncillaG : public ModelBaseType {
 
 public:
 
@@ -294,11 +293,12 @@ protected:
 			SparseMatrixType c = tmp.getCRS();
 			SparseMatrixType tmp3(multiplyTc(c, c));
 			typename OperatorType::Su2RelatedType su2Related;
-			this->createOpsLabel("ndown").push(OperatorType(tmp3,
-			                                                ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                                                typename OperatorType::PairType(0, 0),
-			                                                1.0,
-			                                                su2Related));
+			this->createOpsLabel("ndown").push(
+			    OperatorType(tmp3,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 typename OperatorType::PairType(0, 0),
+			                 1.0,
+			                 su2Related));
 		}
 	}
 
@@ -309,25 +309,20 @@ protected:
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 		OpForLinkType splus0("splus");
 
-		auto modifierTerm0 = [isSu2](ComplexOrRealType& value)
-		{ value *= (isSu2) ? -0.5 : 0.5; };
-		spsm.push(splus0,
-		          'N',
-		          splus0,
-		          'C',
-		          modifierTerm0);
+		auto modifierTerm0
+		    = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
+		spsm.push(splus0, 'N', splus0, 'C', modifierTerm0);
 
 		auto modifierTerm1 = [isSu2](ComplexOrRealType& value)
-		{if (isSu2) value = -value; };
+		{
+			if (isSu2)
+				value = -value;
+		};
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		OpForLinkType sz0("sz");
 
-		szsz.push(sz0,
-		          'N',
-		          sz0,
-		          'C',
-		          modifierTerm1);
+		szsz.push(sz0, 'N', sz0, 'C', modifierTerm1);
 
 		ModelTermType& ancilla = ModelBaseType::createTerm("ancilla");
 		OpForLinkType d("d");
@@ -337,8 +332,7 @@ protected:
 private:
 
 	//! find all states in the natural basis for a block of n sites
-	void setBasis(HilbertBasisType& basis,
-	              const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis, const VectorSizeType& block) const
 	{
 		assert(block.size() == 1);
 		int sitesTimesDof = DEGREES_OF_FREEDOM;
@@ -350,8 +344,7 @@ private:
 			basis[a] = a;
 	}
 
-	SparseMatrixType findSplusMatrices(int i,
-	                                   const VectorHilbertStateType& natBasis) const
+	SparseMatrixType findSplusMatrices(int i, const VectorHilbertStateType& natBasis) const
 	{
 		assert(i == 0);
 		HilbertStateType bra, ket;
@@ -379,8 +372,7 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findSzMatrices(int i,
-	                                const VectorHilbertStateType& natBasis) const
+	SparseMatrixType findSzMatrices(int i, const VectorHilbertStateType& natBasis) const
 	{
 		assert(i == 0);
 		int n = natBasis.size();
@@ -409,8 +401,7 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findNiMatrices(int,
-	                                const VectorHilbertStateType& natBasis) const
+	SparseMatrixType findNiMatrices(int, const VectorHilbertStateType& natBasis) const
 	{
 		SizeType n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
@@ -430,9 +421,7 @@ private:
 		return creationMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int n) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, int n) const
 	{
 		assert(n == 1);
 
@@ -455,8 +444,7 @@ private:
 	// note: we use m+j instead of m
 	// This assures us that both j and m are SizeType
 	// Reinterprets 6 and 9
-	template <typename PairType>
-	PairType calcJmvalue(const HilbertStateType& ket) const
+	template <typename PairType> PairType calcJmvalue(const HilbertStateType& ket) const
 	{
 		return calcJmValueAux<PairType>(ket);
 	}
@@ -465,8 +453,7 @@ private:
 	// note: we use m+j instead of m
 	// This assures us that both j and m are SizeType
 	// does not work for 6 or 9
-	template <typename PairType>
-	PairType calcJmValueAux(const HilbertStateType& ket) const
+	template <typename PairType> PairType calcJmValueAux(const HilbertStateType& ket) const
 	{
 		SizeType site0 = 0;
 		SizeType site1 = 0;

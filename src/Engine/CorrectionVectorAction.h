@@ -62,11 +62,11 @@ protected:
 template <typename ComplexOrRealType,
           typename TargetParamsType,
           bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
-class CorrectionVectorAction {
-};
+class CorrectionVectorAction { };
 
 template <typename ComplexOrRealType, typename TargetParamsType>
-class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, false> : public CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType> {
+class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, false>
+    : public CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType> {
 
 public:
 
@@ -77,8 +77,7 @@ public:
 	                       RealType E0,
 	                       const typename BaseType::VectorRealType& eigs)
 	    : BaseType(tstStruct, E0, eigs)
-	{
-	}
+	{ }
 
 	ComplexOrRealType operator()(SizeType k) const
 	{
@@ -87,36 +86,42 @@ public:
 		    : BaseType::actionWhenMatsubara(k);
 	}
 
-	void setReal() const
-	{
-		BaseType::action_ = BaseType::ACTION_REAL;
-	}
+	void setReal() const { BaseType::action_ = BaseType::ACTION_REAL; }
 
 private:
 
 	ComplexOrRealType actionWhenFreqReal(SizeType k) const
 	{
 		RealType sign = (BaseType::tstStruct_.type() == 0) ? -1.0 : 1.0;
-		RealType part1 = (BaseType::eigs_[k] - BaseType::E0_) * sign + BaseType::tstStruct_.omega().second;
+		RealType part1 = (BaseType::eigs_[k] - BaseType::E0_) * sign
+		    + BaseType::tstStruct_.omega().second;
 		const SizeType nFraction = BaseType::tstStruct_.nForFraction();
 
 		if (nFraction == 1) {
-			RealType denom = part1 * part1 + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta();
-			return (BaseType::action_ == BaseType::ACTION_IMAG) ? BaseType::tstStruct_.eta() / denom : -part1 / denom;
+			RealType denom = part1 * part1
+			    + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta();
+			return (BaseType::action_ == BaseType::ACTION_IMAG)
+			    ? BaseType::tstStruct_.eta() / denom
+			    : -part1 / denom;
 		} else {
 			RealType exponent = 1.0 / (2.0 * nFraction);
-			RealType denom = pow(part1 * part1 + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta(),
-			                     exponent);
-			RealType denom1 = sqrt(part1 * part1 + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta());
+			RealType denom = pow(
+			    part1 * part1 + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta(),
+			    exponent);
+			RealType denom1
+			    = sqrt(part1 * part1
+			           + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta());
 			RealType cosreal = cos(acos(part1 / denom1) / nFraction);
 			RealType sinreal = sin(acos(part1 / denom1) / nFraction);
-			return (BaseType::action_ == BaseType::ACTION_IMAG) ? sinreal / denom : cosreal / denom;
+			return (BaseType::action_ == BaseType::ACTION_IMAG) ? sinreal / denom
+			                                                    : cosreal / denom;
 		}
 	}
 };
 
 template <typename ComplexOrRealType, typename TargetParamsType>
-class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, true> : public CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType> {
+class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, true>
+    : public CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType> {
 
 public:
 
@@ -146,10 +151,7 @@ public:
 		    : BaseType::actionWhenMatsubara(k);
 	}
 
-	void setReal() const
-	{
-		err("CorrectionVectorSkeleton::Action: Cannot set to real\n");
-	}
+	void setReal() const { err("CorrectionVectorSkeleton::Action: Cannot set to real\n"); }
 
 private:
 
@@ -157,11 +159,14 @@ private:
 	{
 		const SizeType nFraction = BaseType::tstStruct_.nForFraction();
 		RealType sign = (BaseType::tstStruct_.type() == 0) ? -1.0 : 1.0;
-		RealType part1 = (BaseType::eigs_[k] - BaseType::E0_) * sign + BaseType::tstStruct_.omega().second;
+		RealType part1 = (BaseType::eigs_[k] - BaseType::E0_) * sign
+		    + BaseType::tstStruct_.omega().second;
 		if (nFraction == 1) {
-			RealType denom = part1 * part1 + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta();
+			RealType denom = part1 * part1
+			    + BaseType::tstStruct_.eta() * BaseType::tstStruct_.eta();
 
-			return ComplexOrRealType(part1 / denom, -BaseType::tstStruct_.eta() / denom);
+			return ComplexOrRealType(part1 / denom,
+			                         -BaseType::tstStruct_.eta() / denom);
 		}
 
 		ComplexOrRealType cmplx(part1, -BaseType::tstStruct_.eta());

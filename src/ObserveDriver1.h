@@ -4,8 +4,7 @@
 #include "ObserveDriver.h"
 
 namespace Dmrg {
-template <typename VectorWithOffsetType,
-          typename ModelType>
+template <typename VectorWithOffsetType, typename ModelType>
 bool observeOneFullSweep(IoInputType& io,
                          const ModelType& model,
                          const PsimagLite::String& list,
@@ -15,7 +14,12 @@ bool observeOneFullSweep(IoInputType& io,
 	typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
 	typedef typename ModelType::MatrixType MatrixType;
 	typedef typename ModelType::VectorType VectorType;
-	typedef ObserverHelper<IoInputType, MatrixType, VectorType, VectorWithOffsetType, LeftRightSuperType> ObserverHelperType;
+	typedef ObserverHelper<IoInputType,
+	                       MatrixType,
+	                       VectorType,
+	                       VectorWithOffsetType,
+	                       LeftRightSuperType>
+	    ObserverHelperType;
 	typedef Observer<ObserverHelperType, ModelType> ObserverType;
 	typedef ObservableLibrary<ObserverType> ObservableLibraryType;
 	typedef typename ObservableLibraryType::ManyPointActionType ManyPointActionType;
@@ -74,12 +78,7 @@ bool observeOneFullSweep(IoInputType& io,
 	if (!hasTrail)
 		trail = n - 2 - nf;
 
-	ObservableLibraryType observerLib(io,
-	                                  n,
-	                                  model,
-	                                  start,
-	                                  nf,
-	                                  trail);
+	ObservableLibraryType observerLib(io, n, model, start, nf, trail);
 
 	ManyPointActionType* manyPointAction = new ManyPointActionType(false, "");
 	for (SizeType i = 0; i < vecOptions.size(); ++i) {
@@ -88,9 +87,8 @@ bool observeOneFullSweep(IoInputType& io,
 		if (item.find("%") == 0)
 			continue;
 
-		SiteSplitType braceContent = PsimagLite::OneOperatorSpec::extractSiteIfAny(item,
-		                                                                           '{',
-		                                                                           '}');
+		SiteSplitType braceContent
+		    = PsimagLite::OneOperatorSpec::extractSiteIfAny(item, '{', '}');
 
 		PsimagLite::String actionString;
 		if (braceContent.hasSiteString) {
@@ -103,7 +101,8 @@ bool observeOneFullSweep(IoInputType& io,
 
 			actionString = actionContent.substr(index + 7, actionContent.length() - 7);
 			delete manyPointAction;
-			manyPointAction = new ManyPointActionType(braceContent.hasSiteString, actionString);
+			manyPointAction
+			    = new ManyPointActionType(braceContent.hasSiteString, actionString);
 			if (braceContent.root != "")
 				err("Garbage trailing after brace close\n");
 			continue;

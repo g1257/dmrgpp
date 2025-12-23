@@ -82,9 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename BlockMatrixType,
-          typename BasisWithOperatorsType,
-          typename TargetVectorType>
+template <typename BlockMatrixType, typename BasisWithOperatorsType, typename TargetVectorType>
 class ParallelDensityMatrix {
 
 	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
@@ -113,13 +111,9 @@ public:
 	    , weight_(weight)
 	    , matrixBlock_(matrixBlock)
 	    , hasMpi_(PsimagLite::Concurrency::hasMpi())
-	{
-	}
+	{ }
 
-	SizeType tasks() const
-	{
-		return pBasis_.partition(m_ + 1) - pBasis_.partition(m_);
-	}
+	SizeType tasks() const { return pBasis_.partition(m_ + 1) - pBasis_.partition(m_); }
 
 	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
@@ -128,11 +122,8 @@ public:
 
 		SizeType ieff = taskNumber + start;
 		for (SizeType j = 0; j < length; ++j) {
-			matrixBlock_(taskNumber, j) += densityMatrixExpand(direction_,
-			                                                   ieff,
-			                                                   j + start,
-			                                                   target_)
-			    * weight_;
+			matrixBlock_(taskNumber, j)
+			    += densityMatrixExpand(direction_, ieff, j + start, target_) * weight_;
 		}
 	}
 
@@ -144,18 +135,13 @@ private:
 	                                             const TargetVectorType& v)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-			return densityMatrixExpandSystem(alpha1,
-			                                 alpha2,
-			                                 v);
+			return densityMatrixExpandSystem(alpha1, alpha2, v);
 		else
-			return densityMatrixExpandEnviron(alpha1,
-			                                  alpha2,
-			                                  v);
+			return densityMatrixExpandEnviron(alpha1, alpha2, v);
 	}
 
-	DensityMatrixElementType densityMatrixExpandEnviron(SizeType alpha1,
-	                                                    SizeType alpha2,
-	                                                    const TargetVectorType& v)
+	DensityMatrixElementType
+	densityMatrixExpandEnviron(SizeType alpha1, SizeType alpha2, const TargetVectorType& v)
 	{
 		SizeType ns = pBasisSummed_.size();
 		SizeType total = pBasisSummed_.size();
@@ -176,14 +162,14 @@ private:
 				continue;
 			SizeType start2 = v.offset(sector2);
 
-			sum += v.fastAccess(sector1, ii - start1) * PsimagLite::conj(v.fastAccess(sector2, jj - start2));
+			sum += v.fastAccess(sector1, ii - start1)
+			    * PsimagLite::conj(v.fastAccess(sector2, jj - start2));
 		}
 		return sum;
 	}
 
-	DensityMatrixElementType densityMatrixExpandSystem(SizeType alpha1,
-	                                                   SizeType alpha2,
-	                                                   const TargetVectorType& v)
+	DensityMatrixElementType
+	densityMatrixExpandSystem(SizeType alpha1, SizeType alpha2, const TargetVectorType& v)
 	{
 		SizeType ne = pBasisSummed_.size();
 		SizeType ns = pSE_.size() / ne;
@@ -205,7 +191,8 @@ private:
 				continue;
 			SizeType start2 = v.offset(sector2);
 
-			sum += v.fastAccess(sector1, ii - start1) * PsimagLite::conj(v.fastAccess(sector2, jj - start2));
+			sum += v.fastAccess(sector1, ii - start1)
+			    * PsimagLite::conj(v.fastAccess(sector2, jj - start2));
 		}
 
 		return sum;

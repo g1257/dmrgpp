@@ -42,8 +42,7 @@ struct OperatorOptions {
 	    , hasOperatorExpression(false)
 	    , transpose(false)
 	    , enabled(false)
-	{
-	}
+	{ }
 
 	SizeType site;
 	SizeType dof;
@@ -55,9 +54,7 @@ struct OperatorOptions {
 };
 
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-typedef Dmrg::ParametersDmrgSolver<RealType,
-                                   InputNgType::Readable,
-                                   Dmrg::Qn>
+typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
     ParametersDmrgSolverType;
 
 void usageOperator();

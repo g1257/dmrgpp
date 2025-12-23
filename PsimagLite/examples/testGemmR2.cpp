@@ -35,7 +35,8 @@ bool equalMatrices(PsimagLite::Matrix<RealType>& a,
 int main(int argc, char** argv)
 {
 	if (argc < 2)
-		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0]) + " total nthreadsOuter nthreadsInner\n");
+		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0])
+		                               + " total nthreadsOuter nthreadsInner\n");
 
 	const bool needsPrinting = false;
 	int const nb = 99;
@@ -62,10 +63,23 @@ int main(int argc, char** argv)
 
 		fillRandom(A, -10, 10, rng);
 		fillRandom(B, -10, 10, rng);
-		gemmR('N', 'N', ldc, cdc, cda, 1.0, &A(0, 0), lda, &B(0, 0), ldb, 0.0, &C(0, 0), ldc);
+		gemmR(
+		    'N', 'N', ldc, cdc, cda, 1.0, &A(0, 0), lda, &B(0, 0), ldb, 0.0, &C(0, 0), ldc);
 
 		PsimagLite::Matrix<RealType> C2(ldc, cdc);
-		psimag::BLAS::GEMM('N', 'N', ldc, cdc, cda, 1.0, &A(0, 0), lda, &B(0, 0), ldb, 0.0, &C2(0, 0), ldc);
+		psimag::BLAS::GEMM('N',
+		                   'N',
+		                   ldc,
+		                   cdc,
+		                   cda,
+		                   1.0,
+		                   &A(0, 0),
+		                   lda,
+		                   &B(0, 0),
+		                   ldb,
+		                   0.0,
+		                   &C2(0, 0),
+		                   ldc);
 		if (!equalMatrices(C, C2, 1e-6))
 			throw PsimagLite::RuntimeError("TEST FAILED\n");
 	};

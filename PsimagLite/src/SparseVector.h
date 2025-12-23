@@ -88,8 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <utility>
 
 namespace PsimagLite {
-template <typename FieldType>
-struct SparseVector {
+template <typename FieldType> struct SparseVector {
 public:
 
 	typedef FieldType value_type;
@@ -108,9 +107,7 @@ public:
 		}
 	}
 
-	void fromChunk(const typename Vector<FieldType>::Type& v,
-	               SizeType offset,
-	               SizeType total)
+	void fromChunk(const typename Vector<FieldType>::Type& v, SizeType offset, SizeType total)
 	{
 		resize(total);
 		for (SizeType i = 0; i < v.size(); i++) {
@@ -122,8 +119,7 @@ public:
 	SparseVector(SizeType n)
 	    : size_(n)
 	    , isSorted_(false)
-	{
-	}
+	{ }
 
 	void resize(SizeType x)
 	{
@@ -160,7 +156,10 @@ public:
 
 	FieldType value(SizeType x) const { return values_[x]; }
 
-	void toChunk(typename Vector<FieldType>::Type& dest, SizeType i0, SizeType total, bool test = false) const
+	void toChunk(typename Vector<FieldType>::Type& dest,
+	             SizeType i0,
+	             SizeType total,
+	             bool test = false) const
 	{
 		if (test) {
 			PairType firstLast = findFirstLast();
@@ -174,8 +173,7 @@ public:
 	}
 
 	template <typename SomeBasisType>
-	SizeType toChunk(typename Vector<FieldType>::Type& dest,
-	                 const SomeBasisType& parts) const
+	SizeType toChunk(typename Vector<FieldType>::Type& dest, const SomeBasisType& parts) const
 	{
 		SizeType part = findPartition(parts);
 		SizeType offset = parts.partition(part);
@@ -188,8 +186,7 @@ public:
 		return part;
 	}
 
-	template <typename SomeBasisType>
-	SizeType findPartition(const SomeBasisType& parts) const
+	template <typename SomeBasisType> SizeType findPartition(const SomeBasisType& parts) const
 	{
 		PairType firstLast = findFirstLast();
 		SizeType ret = 0;
@@ -209,14 +206,12 @@ public:
 			}
 		}
 		if (ret != ret2)
-			throw RuntimeError(
-			    "SparseVector::findPartition(...)"
-			    "vector extends more than one partition\n");
+			throw RuntimeError("SparseVector::findPartition(...)"
+			                   "vector extends more than one partition\n");
 		return ret;
 	}
 
-	template <typename T>
-	SparseVector<FieldType> operator*=(const T& val)
+	template <typename T> SparseVector<FieldType> operator*=(const T& val)
 	{
 		for (SizeType i = 0; i < values_.size(); i++)
 			values_[i] *= val;
@@ -330,16 +325,14 @@ public:
 	}
 
 	template <typename T, typename T2>
-	friend SparseVector<T2> operator*(const T& val,
-	                                  const SparseVector<T2>& sv);
+	friend SparseVector<T2> operator*(const T& val, const SparseVector<T2>& sv);
 
 private:
 
 	PairType findFirstLast() const
 	{
-		return PairType(
-		    *(std::min_element(indices_.begin(), indices_.end())),
-		    *(std::max_element(indices_.begin(), indices_.end())));
+		return PairType(*(std::min_element(indices_.begin(), indices_.end())),
+		                *(std::max_element(indices_.begin(), indices_.end())));
 	}
 
 	typename Vector<FieldType>::Type values_;
@@ -364,16 +357,14 @@ SparseVector<T2> operator*(const T& val, const SparseVector<T2>& sv)
 	return res;
 }
 
-template <typename T>
-T operator*(const SparseVector<T>& v1, const SparseVector<T>& v2)
+template <typename T> T operator*(const SparseVector<T>& v1, const SparseVector<T>& v2)
 {
 	return v1.scalarProduct(v2);
 }
 } // namespace PsimagLite
 
 namespace PsimagLite {
-template <typename FieldType>
-inline FieldType norm(const SparseVector<FieldType>& v)
+template <typename FieldType> inline FieldType norm(const SparseVector<FieldType>& v)
 {
 	FieldType sum = 0;
 	for (SizeType i = 0; i < v.indices(); i++)
@@ -381,8 +372,7 @@ inline FieldType norm(const SparseVector<FieldType>& v)
 	return sqrt(sum);
 }
 
-template <typename FieldType>
-inline FieldType norm(const SparseVector<std::complex<FieldType>>& v)
+template <typename FieldType> inline FieldType norm(const SparseVector<std::complex<FieldType>>& v)
 {
 	std::complex<FieldType> sum = 0;
 	for (SizeType i = 0; i < v.indices(); i++)

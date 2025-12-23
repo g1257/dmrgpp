@@ -93,8 +93,7 @@ public:
 
 	FermionSign(const VectorBoolType& signs)
 	    : signs_(signs)
-	{
-	}
+	{ }
 
 	template <typename SomeBasisType>
 	FermionSign(const SomeBasisType& basis, const VectorBoolType& signs)
@@ -122,13 +121,11 @@ public:
 	}
 
 	template <typename IoInputter>
-	FermionSign(IoInputter& io,
-	            PsimagLite::String prefix,
-	            bool bogus,
-	            typename PsimagLite::EnableIf<
-	                PsimagLite::IsInputLike<IoInputter>::True,
-	                int>::Type
-	            = 0)
+	FermionSign(
+	    IoInputter& io,
+	    PsimagLite::String prefix,
+	    bool bogus,
+	    typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		if (bogus)
 			return;
@@ -142,12 +139,11 @@ public:
 	}
 
 	template <typename IoOutputter>
-	void write(IoOutputter& io,
-	           PsimagLite::String prefix,
-	           typename PsimagLite::EnableIf<
-	               PsimagLite::IsOutputLike<IoOutputter>::True,
-	               int>::Type
-	           = 0) const
+	void
+	write(IoOutputter& io,
+	      PsimagLite::String prefix,
+	      typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type
+	      = 0) const
 	{
 		io.write(signs_, prefix);
 	}

@@ -95,8 +95,7 @@ namespace Dmrg {
   For S=1/2 and NUMBER_OF_ORBITALS=2 it is
   down A, down B; down A, up B; up A, down B; up A, up B;
   */
-template <typename ModelBaseType>
-class HeisenbergAncillaC : public ModelBaseType {
+template <typename ModelBaseType> class HeisenbergAncillaC : public ModelBaseType {
 
 	static const int NUMBER_OF_ORBITALS = 2;
 
@@ -135,9 +134,7 @@ public:
 	HeisenbergAncillaC(const SolverParamsType& solverParams,
 	                   InputValidatorType& io,
 	                   const SuperGeometryType& geometry)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , hot_(geometry.orbitals(0, 0) > 1)
 	{
@@ -186,7 +183,8 @@ public:
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
-		if (modelParameters_.magneticField.size() != ModelBaseType::superGeometry().numberOfSites())
+		if (modelParameters_.magneticField.size()
+		    != ModelBaseType::superGeometry().numberOfSites())
 			return;
 
 		SizeType n = block.size();
@@ -321,44 +319,31 @@ protected:
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 		OpForLinkType splus0("splus");
 
-		auto modifierTerm0 = [isSu2](SparseElementType& value)
-		{ value *= (isSu2) ? -0.5 : 0.5; };
-		spsm.push(splus0,
-		          'N',
-		          splus0,
-		          'C',
-		          modifierTerm0);
+		auto modifierTerm0
+		    = [isSu2](SparseElementType& value) { value *= (isSu2) ? -0.5 : 0.5; };
+		spsm.push(splus0, 'N', splus0, 'C', modifierTerm0);
 
 		if (hot_) {
 			OpForLinkType splus1("splus", 1, 1);
-			spsm.push(splus1,
-			          'N',
-			          splus1,
-			          'C',
-			          modifierTerm0);
+			spsm.push(splus1, 'N', splus1, 'C', modifierTerm0);
 		}
 
 		auto modifierTerm1 = [isSu2](SparseElementType& value)
-		{if (isSu2) value = -value; };
+		{
+			if (isSu2)
+				value = -value;
+		};
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		OpForLinkType sz0("sz");
 
-		szsz.push(sz0,
-		          'N',
-		          sz0,
-		          'C',
-		          modifierTerm1);
+		szsz.push(sz0, 'N', sz0, 'C', modifierTerm1);
 
 		if (hot_) {
 			OpForLinkType splus1("splus", 1, 1);
 			OpForLinkType sz1("sz", 1, 1);
 			if (isSu2)
-				szsz.push(splus1,
-				          'N',
-				          splus1,
-				          'C',
-				          modifierTerm1);
+				szsz.push(splus1, 'N', splus1, 'C', modifierTerm1);
 			else
 				szsz.push(sz1, 'N', sz1, 'C');
 		}
@@ -367,12 +352,11 @@ protected:
 		if (modelParameters_.twiceTheSpin == 1) {
 			OpForLinkType d("d", 0);
 			auto modifierTermD0 = [isSu2](SparseElementType& value)
-			{if (isSu2) value = -value; };
-			ancilla.push(d,
-			             'N',
-			             d,
-			             'C',
-			             modifierTermD0);
+			{
+				if (isSu2)
+					value = -value;
+			};
+			ancilla.push(d, 'N', d, 'C', modifierTermD0);
 			return;
 		}
 
@@ -380,7 +364,10 @@ protected:
 			err("Spin > 1 not supported by this model yet\n");
 
 		auto modifierTermDoff = [isSu2](SparseElementType& value)
-		{if (isSu2) value = -value; };
+		{
+			if (isSu2)
+				value = -value;
+		};
 		OpForLinkType N0("d", 0);
 		OpForLinkType N1("d", 1);
 		OpForLinkType N2("d", 2);
@@ -393,48 +380,23 @@ protected:
 		OpForLinkType W1("d", 9);
 		OpForLinkType T2("d", 10);
 
-		ancilla.push(N0,
-		             'N',
-		             M0,
-		             'C',
-		             modifierTermDoff);
+		ancilla.push(N0, 'N', M0, 'C', modifierTermDoff);
 
-		ancilla.push(N1,
-		             'N',
-		             M1,
-		             'C',
-		             modifierTermDoff);
+		ancilla.push(N1, 'N', M1, 'C', modifierTermDoff);
 
-		ancilla.push(N2,
-		             'N',
-		             M2,
-		             'C',
-		             modifierTermDoff);
+		ancilla.push(N2, 'N', M2, 'C', modifierTermDoff);
 
-		ancilla.push(T0,
-		             'N',
-		             W0,
-		             'C',
-		             modifierTermDoff);
+		ancilla.push(T0, 'N', W0, 'C', modifierTermDoff);
 
-		ancilla.push(T1,
-		             'N',
-		             W1,
-		             'C',
-		             modifierTermDoff);
+		ancilla.push(T1, 'N', W1, 'C', modifierTermDoff);
 
-		ancilla.push(T2,
-		             'N',
-		             T2,
-		             'C',
-		             modifierTermDoff);
+		ancilla.push(T2, 'N', T2, 'C', modifierTermDoff);
 	}
 
 private:
 
 	//! find all states in the natural basis for a block of n sites
-	void setBasis(HilbertBasisType& basis,
-	              const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis, const VectorSizeType& block) const
 	{
 		assert(block.size() == 1);
 		SizeType total = pow(modelParameters_.twiceTheSpin + 1, NUMBER_OF_ORBITALS);
@@ -445,9 +407,8 @@ private:
 	}
 
 	//! Find S^+_i a in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(int,
-	                                   SizeType orbital,
-	                                   const HilbertBasisType& natBasis) const
+	SparseMatrixType
+	findSplusMatrices(int, SizeType orbital, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -461,7 +422,8 @@ private:
 			SizeType bra1 = ket1 + 1;
 			if (bra1 >= total1)
 				continue;
-			PairSizeType bra = (orbital == 0) ? PairSizeType(bra1, ket2) : PairSizeType(ket2, bra1);
+			PairSizeType bra
+			    = (orbital == 0) ? PairSizeType(bra1, ket2) : PairSizeType(ket2, bra1);
 			SizeType jj = getFullIndex(bra);
 			RealType m = ket1 - j;
 
@@ -492,9 +454,8 @@ private:
 	}
 
 	//! Find Ntilde_i in the natural basis natBasis
-	MatrixType findNtildeDense(SizeType orbital,
-	                           SizeType which,
-	                           const HilbertBasisType& natBasis) const
+	MatrixType
+	findNtildeDense(SizeType orbital, SizeType which, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -514,9 +475,8 @@ private:
 	}
 
 	//! Find Mtilde_i in the natural basis natBasis
-	MatrixType findMtildeDense(SizeType orbital,
-	                           SizeType which,
-	                           const HilbertBasisType& natBasis) const
+	MatrixType
+	findMtildeDense(SizeType orbital, SizeType which, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -574,9 +534,8 @@ private:
 		return cm;
 	}
 
-	SparseMatrixType findSzMatrices(int,
-	                                SizeType orbital,
-	                                const HilbertBasisType& natBasis) const
+	SparseMatrixType
+	findSzMatrices(int, SizeType orbital, const HilbertBasisType& natBasis) const
 	{
 
 		MatrixType cm = findSzDense(orbital, natBasis);
@@ -678,12 +637,11 @@ private:
 		return operatorMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int n) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, int n) const
 	{
 		if (n != 1)
-			PsimagLite::RuntimeError("HeisenbergAncillaC::setSymmetryRelated n=1 only\n");
+			PsimagLite::RuntimeError(
+			    "HeisenbergAncillaC::setSymmetryRelated n=1 only\n");
 
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j

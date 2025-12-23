@@ -9,8 +9,7 @@
 
 namespace Dmrg {
 
-template <typename LeftRightSuperType, typename SolverParamsType>
-class KroneckerDumper {
+template <typename LeftRightSuperType, typename SolverParamsType> class KroneckerDumper {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -37,8 +36,7 @@ public:
 		    , end(e)
 		    , precision(p)
 		    , nOfQns(nOfQns_)
-		{
-		}
+		{ }
 
 		bool enabled;
 		SizeType begin;
@@ -61,10 +59,8 @@ public:
 		enabled_ = params.options.isSet("KroneckerDumper");
 		if (!enabled_)
 			return;
-		ParamsForKroneckerDumper p(enabled_,
-		                           params.dumperBegin,
-		                           params.dumperEnd,
-		                           params.precision);
+		ParamsForKroneckerDumper p(
+		    enabled_, params.dumperBegin, params.dumperEnd, params.precision);
 
 		bool b = (p.end > 0 && counter_ >= p.end);
 		if (counter_ < p.begin || b) {
@@ -85,7 +81,8 @@ public:
 		fout_.precision(p.precision);
 		fout_ << "KroneckerDumper for DMRG++ version " << DMRGPP_VERSION << "\n";
 		fout_ << "Instance=" << counter_ << "\n";
-		fout_ << "EncodingOfQuantumNumbers=" << (2 * ProgramGlobals::maxElectronsOneSpin) << "\n";
+		fout_ << "EncodingOfQuantumNumbers=" << (2 * ProgramGlobals::maxElectronsOneSpin)
+		      << "\n";
 
 		printOneBasis("Left", lrs.left(), p.nOfQns);
 		printOneBasis("Right", lrs.right(), p.nOfQns);
@@ -143,9 +140,7 @@ public:
 		ConcurrencyType::mutexUnlock(&mutex_);
 	}
 
-	void push(bool option,
-	          const SparseMatrixType& hamiltonian,
-	          const VectorType& y)
+	void push(bool option, const SparseMatrixType& hamiltonian, const VectorType& y)
 	{
 		if (!enabled_)
 			return;
@@ -181,9 +176,7 @@ private:
 		}
 	}
 
-	void printOneBasis(PsimagLite::String name,
-	                   const BasisType& basis,
-	                   SizeType nOfQns)
+	void printOneBasis(PsimagLite::String name, const BasisType& basis, SizeType nOfQns)
 	{
 		fout_ << "" + name + "Basis\n";
 		fout_ << "Sites\n";
@@ -216,7 +209,11 @@ private:
 		SizeType rows = Ahat.rows();
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows; ++i) {
-			RealType sign = (bosonOrFermion == ProgramGlobals::FermionOrBosonEnum::FERMION && signs_[i]) ? -1.0 : 1.0;
+			RealType sign
+			    = (bosonOrFermion == ProgramGlobals::FermionOrBosonEnum::FERMION
+			       && signs_[i])
+			    ? -1.0
+			    : 1.0;
 			for (int k = Ahat.getRowPtr(i); k < Ahat.getRowPtr(i + 1); ++k) {
 				ComplexOrRealType tmp = Ahat.getValue(k) * sign * val;
 				Ahat.setValues(counter++, tmp);
@@ -241,8 +238,7 @@ private:
 	ConcurrencyType::MutexType mutex_;
 }; // class KroneckerDumpter
 
-template <typename T1, typename T2>
-SizeType KroneckerDumper<T1, T2>::counter_ = 0;
+template <typename T1, typename T2> SizeType KroneckerDumper<T1, T2>::counter_ = 0;
 
 } // namespace Dmrg
 #endif // KRONECKERDUMPER_H

@@ -129,8 +129,7 @@ public:
 	static void mutexDestroy(MutexType* mutex)
 	{
 		if (pthread_mutex_destroy(mutex) != 0)
-			std::cerr
-			    << "WARNING: mutexDestroy returned non zero\n";
+			std::cerr << "WARNING: mutexDestroy returned non zero\n";
 	}
 
 	static void mutexLock(MutexType* mutex)
@@ -198,8 +197,7 @@ public:
 #ifdef USE_PTHREADS
 		mode |= 1;
 		if (!psimag::LAPACK::isThreadSafe())
-			std::cerr
-			    << "WARNING: You LAPACK might not be thread safe\n";
+			std::cerr << "WARNING: You LAPACK might not be thread safe\n";
 #else
 		if (nthreads != 1)
 			throw RuntimeError("nthreads>1 but no USE_PTHREADS "
@@ -221,15 +219,9 @@ public:
 		return (MPI::commRank(comm) == 0);
 	}
 
-	static SizeType nprocs(MPI::CommType comm = MPI::COMM_WORLD)
-	{
-		return MPI::commSize(comm);
-	}
+	static SizeType nprocs(MPI::CommType comm = MPI::COMM_WORLD) { return MPI::commSize(comm); }
 
-	static SizeType rank(MPI::CommType comm = MPI::COMM_WORLD)
-	{
-		return MPI::commRank(comm);
-	}
+	static SizeType rank(MPI::CommType comm = MPI::COMM_WORLD) { return MPI::commRank(comm); }
 
 	static bool hasMpi() { return (mode & MPI); }
 
@@ -242,7 +234,8 @@ public:
 		mpiDisabled_.disable(label);
 	}
 
-	static void mpiDisableIfNeeded(SizeType& mpiRank, SizeType& blockSize, String label, SizeType total)
+	static void
+	mpiDisableIfNeeded(SizeType& mpiRank, SizeType& blockSize, String label, SizeType total)
 	{
 		if (!hasMpi())
 			return;
@@ -280,12 +273,11 @@ public:
 		message1 += "and recompile\n";
 		throw PsimagLite::RuntimeError(message1.c_str());
 #else
-		std::cout << "Concurrency::npthreads="
-		          << codeSectionParams.npthreads << "\n";
-		std::cout << "Concurrency::npthreads2="
-		          << codeSectionParams.npthreadsLevelTwo << "\n";
-		std::cout << "Concurrency::setAffinitiesDefault="
-		          << codeSectionParams.setAffinities << "\n";
+		std::cout << "Concurrency::npthreads=" << codeSectionParams.npthreads << "\n";
+		std::cout << "Concurrency::npthreads2=" << codeSectionParams.npthreadsLevelTwo
+		          << "\n";
+		std::cout << "Concurrency::setAffinitiesDefault=" << codeSectionParams.setAffinities
+		          << "\n";
 #endif
 	}
 

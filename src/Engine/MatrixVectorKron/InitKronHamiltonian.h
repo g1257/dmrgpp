@@ -142,32 +142,24 @@ public:
 
 	bool isWft() const { return false; }
 
-	bool loadBalance() const
-	{
-		return model_.params().options.isSet("KronLoadBalance");
-	}
+	bool loadBalance() const { return model_.params().options.isSet("KronLoadBalance"); }
 
-	SizeType gemmRnb() const
-	{
-		return model_.params().gemmRnb;
-	}
+	SizeType gemmRnb() const { return model_.params().gemmRnb; }
 
-	SizeType nthreads2() const
-	{
-		return model_.params().nthreads2;
-	}
+	SizeType nthreads2() const { return model_.params().nthreads2; }
 
 	// -------------------
 	// copy vin(:) to yin(:)
 	// -------------------
-	void copyIn(const VectorType& vout,
-	            const VectorType& vin)
+	void copyIn(const VectorType& vout, const VectorType& vin)
 	{
 		VectorType& xout = xout_;
 		VectorType& yin = yin_;
 
-		const VectorSizeType& permInverse = BaseType::lrs(BaseType::NEW).super().permutationInverse();
-		const SparseMatrixType& leftH = BaseType::lrs(BaseType::NEW).left().hamiltonian().getCRS();
+		const VectorSizeType& permInverse
+		    = BaseType::lrs(BaseType::NEW).super().permutationInverse();
+		const SparseMatrixType& leftH
+		    = BaseType::lrs(BaseType::NEW).left().hamiltonian().getCRS();
 		SizeType nl = leftH.rows();
 
 		SizeType offset = BaseType::offset(BaseType::NEW);
@@ -177,8 +169,10 @@ public:
 
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 
-			SizeType igroup = BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
-			SizeType jgroup = BaseType::patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
+			SizeType igroup
+			    = BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT)[ipatch];
+			SizeType jgroup
+			    = BaseType::patch(BaseType::NEW, GenIjPatchType::RIGHT)[ipatch];
 
 			assert(left.partition(igroup + 1) >= left.partition(igroup));
 			SizeType sizeLeft = left.partition(igroup + 1) - left.partition(igroup);
@@ -198,14 +192,20 @@ public:
 					SizeType ij = i + j * nl;
 
 					assert(i < nl);
-					assert(j < BaseType::lrs(BaseType::NEW).right().hamiltonian().rows());
+					assert(j < BaseType::lrs(BaseType::NEW)
+					               .right()
+					               .hamiltonian()
+					               .rows());
 
 					assert(ij < permInverse.size());
 
 					SizeType r = permInverse[ij];
-					assert(!((r < offset) || (r >= (offset + BaseType::size(BaseType::NEW)))));
+					assert(
+					    !((r < offset)
+					      || (r >= (offset + BaseType::size(BaseType::NEW)))));
 
-					SizeType ip = vstart_[ipatch] + (iright + ileft * sizeRight);
+					SizeType ip
+					    = vstart_[ipatch] + (iright + ileft * sizeRight);
 					assert(ip < yin.size());
 
 					assert((r >= offset) && ((r - offset) < vin.size()));
@@ -219,39 +219,36 @@ public:
 	// -------------------
 	// copy xout(:) to vout(:)
 	// -------------------
-	void copyOut(VectorType& vout) const
-	{
-		BaseType::copyOut(vout, xout_, vstart_);
-	}
+	void copyOut(VectorType& vout) const { BaseType::copyOut(vout, xout_, vstart_); }
 
 	const VectorType& yin() const { return yin_; }
 
 	VectorType& xout() { return xout_; }
 
-	const SizeType& offsetForPatches(typename BaseType::WhatBasisEnum,
-	                                 SizeType ind) const
+	const SizeType& offsetForPatches(typename BaseType::WhatBasisEnum, SizeType ind) const
 	{
 		assert(ind < offsetForPatches_.size());
 		return offsetForPatches_[ind];
 	}
 
-	bool batchedGemm() const
-	{
-		return model_.params().options.isSet("BatchedGemm");
-	}
+	bool batchedGemm() const { return model_.params().options.isSet("BatchedGemm"); }
 
 private:
 
 	void addHlAndHr()
 	{
 		const RealType value = 1.0;
-		const OperatorStorageType& aL = hc_.modelHelper().leftRightSuper().left().hamiltonian();
-		const OperatorStorageType& aR = hc_.modelHelper().leftRightSuper().right().hamiltonian();
+		const OperatorStorageType& aL
+		    = hc_.modelHelper().leftRightSuper().left().hamiltonian();
+		const OperatorStorageType& aR
+		    = hc_.modelHelper().leftRightSuper().right().hamiltonian();
 		identityL_.makeDiagonal(aL.rows(), value);
 		identityR_.makeDiagonal(aR.rows(), value);
 
-		BaseType::addOneConnection(aL, identityR_, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
-		BaseType::addOneConnection(identityL_, aR, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
+		BaseType::addOneConnection(
+		    aL, identityR_, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
+		BaseType::addOneConnection(
+		    identityL_, aR, value, ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	void convertXcYcArrays()
@@ -269,7 +266,8 @@ private:
 			if (link2.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM) {
 				LinkType link3 = link2;
 				link3.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
-				if (link3.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+				if (link3.fermionOrBoson
+				    == ProgramGlobals::FermionOrBosonEnum::FERMION)
 					link3.value *= -1.0;
 
 				BaseType::addOneConnection(B, A, link3.value, link2.fermionOrBoson);

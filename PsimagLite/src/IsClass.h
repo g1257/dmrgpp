@@ -4,19 +4,16 @@
 
 namespace PsimagLite {
 
-template <typename T>
-class IsClass {
+template <typename T> class IsClass {
 
 	typedef char One;
 	typedef struct {
 		char a[2];
 	} Two;
 
-	template <typename C>
-	static One test(int C::*);
+	template <typename C> static One test(int C::*);
 
-	template <typename C>
-	static Two test(...);
+	template <typename C> static Two test(...);
 
 public:
 

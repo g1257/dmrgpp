@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename MatrixType>
-class ConjugateGradient {
+template <typename MatrixType> class ConjugateGradient {
 	typedef typename MatrixType::value_type FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
@@ -98,13 +97,10 @@ public:
 	    : progress_("ConjugateGradient")
 	    , max_(max)
 	    , eps_(eps)
-	{
-	}
+	{ }
 
 	//! A and b, the result x, and also the initial solution x0
-	void operator()(VectorType& x,
-	                const MatrixType& A,
-	                const VectorType& b) const
+	void operator()(VectorType& x, const MatrixType& A, const VectorType& b) const
 	{
 		VectorType v = multiply(A, x);
 		VectorType p(b.size());
@@ -146,7 +142,8 @@ public:
 
 		PsimagLite::OstringStream msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
-		msg2 << "WARNING: actual eps " << finalEps << " greater than requested eps= " << eps_;
+		msg2 << "WARNING: actual eps " << finalEps
+		     << " greater than requested eps= " << eps_;
 		progress_.printline(msgg2, std::cout);
 	}
 

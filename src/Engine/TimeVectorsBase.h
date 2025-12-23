@@ -112,8 +112,7 @@ public:
 	    , name_(name)
 	    , time_(0.0)
 	    , currentTimeStep_(0)
-	{
-	}
+	{ }
 
 	struct ExtraData {
 
@@ -127,8 +126,7 @@ public:
 		    , wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_)
 		    , block(block_)
 		    , isLastCall(isLastCall_)
-		{
-		}
+		{ }
 
 		ProgramGlobals::DirectionEnum dir;
 		bool allOperatorsApplied;

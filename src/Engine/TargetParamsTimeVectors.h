@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
-template <typename ModelType>
-class TargetParamsTimeVectors : public TargetParamsCommon<ModelType> {
+template <typename ModelType> class TargetParamsTimeVectors : public TargetParamsCommon<ModelType> {
 
 public:
 
@@ -130,49 +129,25 @@ public:
 
 		try {
 			io.readline(timeDirection_, "TSPTimeFactor=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
-	virtual VectorRealType& times()
-	{
-		return times_;
-	}
+	virtual VectorRealType& times() { return times_; }
 
-	virtual const VectorRealType& times() const
-	{
-		return times_;
-	}
+	virtual const VectorRealType& times() const { return times_; }
 
-	virtual SizeType advanceEach() const
-	{
-		return advanceEach_;
-	}
+	virtual SizeType advanceEach() const { return advanceEach_; }
 
-	virtual typename BaseType::AlgorithmEnum algorithm() const
-	{
-		return algorithm_;
-	}
+	virtual typename BaseType::AlgorithmEnum algorithm() const { return algorithm_; }
 
-	virtual RealType tau() const
-	{
-		return tau_;
-	}
+	virtual RealType tau() const { return tau_; }
 
-	virtual RealType timeDirection() const
-	{
-		return timeDirection_;
-	}
+	virtual RealType timeDirection() const { return timeDirection_; }
 
-	virtual const VectorRealType& chebyTransform() const
-	{
-		return chebyTransform_;
-	}
+	virtual const VectorRealType& chebyTransform() const { return chebyTransform_; }
 
 	template <typename IoInputter>
-	void setAlgorithm(VectorRealType* chebyTransform,
-	                  PsimagLite::String s,
-	                  IoInputter* io)
+	void setAlgorithm(VectorRealType* chebyTransform, PsimagLite::String s, IoInputter* io)
 	{
 		if (io && chebyTransform)
 			err("setAlgorithm: incorrect call (1)\n");
@@ -211,8 +186,7 @@ private:
 }; // class TargetParamsTimeVectors
 
 template <typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os, const TargetParamsTimeVectors<ModelType>& t)
+inline std::ostream& operator<<(std::ostream& os, const TargetParamsTimeVectors<ModelType>& t)
 {
 	os << "TargetParams.type=TimeVectors";
 	os << "TargetParams.tau=" << t.tau() << "\n";

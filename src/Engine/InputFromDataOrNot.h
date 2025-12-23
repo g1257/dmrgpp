@@ -6,8 +6,7 @@
 
 namespace Dmrg {
 
-template <typename InputCheckType>
-class InputFromDataOrNot {
+template <typename InputCheckType> class InputFromDataOrNot {
 
 public:
 
@@ -27,7 +26,8 @@ public:
 			internal(filename);
 
 		ioWriteable_ = (isData_) ? new typename InputNgType::Writeable(inputCheck, data_)
-		                         : new typename InputNgType::Writeable(filename, inputCheck);
+		                         : new
+		    typename InputNgType::Writeable(filename, inputCheck);
 		// data_ = "";
 	}
 

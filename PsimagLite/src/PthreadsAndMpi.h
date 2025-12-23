@@ -97,8 +97,7 @@ public:
 	    : BaseType(npthreads)
 	    , nthreads_(npthreads)
 	    , comm_(comm)
-	{
-	}
+	{ }
 
 	String name() const { return "pthreadsandmpi"; }
 

@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename LeftRightSuperType_>
-struct WaveStructSvd {
+template <typename LeftRightSuperType_> struct WaveStructSvd {
 
 	typedef LeftRightSuperType_ LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -127,8 +126,7 @@ struct WaveStructSvd {
 	    s_(s)
 	    , // Not yet used, will be used by WftAccelSvd
 	    qns_(qns)
-	{
-	}
+	{ }
 
 	const BlockDiagonalMatrixType& u() const { return u_; }
 
@@ -138,10 +136,7 @@ struct WaveStructSvd {
 
 	const VectorQnType& qns() const { return qns_; }
 
-	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix)
-	{
-		io.read(*this, prefix);
-	}
+	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix) { io.read(*this, prefix); }
 
 	void read(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io)
 	{

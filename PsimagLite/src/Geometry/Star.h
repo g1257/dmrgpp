@@ -97,17 +97,13 @@ public:
 
 	Star(SizeType linSize, InputType&)
 	    : linSize_(linSize)
-	{
-	}
+	{ }
 
 	virtual SizeType maxConnections() const { return linSize_ - 1; }
 
 	virtual SizeType dirs() const { return 1; }
 
-	SizeType handle(SizeType i, SizeType j) const
-	{
-		return (i < j) ? j - 1 : i - 1;
-	}
+	SizeType handle(SizeType i, SizeType j) const { return (i < j) ? j - 1 : i - 1; }
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
@@ -126,23 +122,14 @@ public:
 	// assumes i1 and i2 are connected
 	SizeType calcDir(SizeType, SizeType) const { return DIRECTION_S; }
 
-	bool fringe(SizeType i, SizeType, SizeType emin) const
-	{
-		return (i == emin);
-	}
+	bool fringe(SizeType i, SizeType, SizeType emin) const { return (i == emin); }
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType, SizeType, SizeType siteNew2) const
-	{
-		return siteNew2;
-	}
+	SizeType getSubstituteSite(SizeType, SizeType, SizeType siteNew2) const { return siteNew2; }
 
 	String label() const { return "star"; }
 
-	SizeType findReflection(SizeType) const
-	{
-		throw RuntimeError("findReflection\n");
-	}
+	SizeType findReflection(SizeType) const { throw RuntimeError("findReflection\n"); }
 
 	SizeType length(SizeType i) const
 	{

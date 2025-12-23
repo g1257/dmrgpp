@@ -104,17 +104,13 @@ public:
 	    : ladder_(linSize, io)
 	    , linSize_(linSize)
 	    , leg_(ladder_.leg())
-	{
-	}
+	{ }
 
 	virtual SizeType maxConnections() const { return leg_ + 1; }
 
 	virtual SizeType dirs() const { return 4; }
 
-	virtual SizeType length(SizeType) const
-	{
-		return this->unimplemented("length");
-	}
+	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
 
 	virtual SizeType translate(SizeType, SizeType, SizeType) const
 	{
@@ -154,7 +150,8 @@ public:
 		if (r1 == r2)
 			return this->neighbors(c1, c2, false, 0);
 
-		return (this->neighbors(r1, r2, isPeriodicY, leg_) && this->neighbors(c1, c2, isPeriodicY, lx));
+		return (this->neighbors(r1, r2, isPeriodicY, leg_)
+		        && this->neighbors(c1, c2, isPeriodicY, lx));
 	}
 
 	// assumes i1 and i2 are connected

@@ -9,8 +9,7 @@
 
 namespace PsimagLite {
 
-template <typename T>
-class GemmR {
+template <typename T> class GemmR {
 
 public:
 
@@ -18,13 +17,25 @@ public:
 	    : idebug_(idebug)
 	    , nb_(nb)
 	    , nthreads_(nthreads)
-	{
-	}
+	{ }
 
-	void operator()(char const transA, char const transB, int const m, int const n, int const k, T const& alpha, T const* const A, int const ldA, T const* const B, int const ldB, T const& beta, T* const C, int const ldC)
+	void operator()(char const transA,
+	                char const transB,
+	                int const m,
+	                int const n,
+	                int const k,
+	                T const& alpha,
+	                T const* const A,
+	                int const ldA,
+	                T const* const B,
+	                int const ldB,
+	                T const& beta,
+	                T* const C,
+	                int const ldC)
 	{
 		if (isSmall(m, n)) {
-			psimag::BLAS::GEMM(transA, transB, m, n, k, alpha, A, ldA, B, ldB, beta, C, ldC);
+			psimag::BLAS::GEMM(
+			    transA, transB, m, n, k, alpha, A, ldA, B, ldB, beta, C, ldC);
 			return;
 		}
 
@@ -33,7 +44,19 @@ public:
 
 private:
 
-	void bigMatrices(char const transA, char const transB, int const m, int const n, int const k, T const& alpha, T const* const A, int const ldA, T const* const B, int const ldB, T const& beta, T* const C, int const ldC)
+	void bigMatrices(char const transA,
+	                 char const transB,
+	                 int const m,
+	                 int const n,
+	                 int const k,
+	                 T const& alpha,
+	                 T const* const A,
+	                 int const ldA,
+	                 T const* const B,
+	                 int const ldB,
+	                 T const& beta,
+	                 T* const C,
+	                 int const ldC)
 	{
 		assert(!isSmall(m, n));
 
@@ -47,10 +70,8 @@ private:
 		//  -------------------------
 		const SizeType nblocks_i = (m + (nb_ - 1)) / nb_;
 		const SizeType nblocks_j = (n + (nb_ - 1)) / nb_;
-		int const nb_i = ((m % nblocks_i) == 0) ? (m / nblocks_i)
-		                                        : ((m / nblocks_i) + 1);
-		int const nb_j = ((n % nblocks_j) == 0) ? (n / nblocks_j)
-		                                        : ((n / nblocks_j) + 1);
+		int const nb_i = ((m % nblocks_i) == 0) ? (m / nblocks_i) : ((m / nblocks_i) + 1);
+		int const nb_j = ((n % nblocks_j) == 0) ? (n / nblocks_j) : ((n / nblocks_j) + 1);
 
 		bool const is_transA = (transA == 'T') || (transA == 't');
 		bool const is_conjA = (transA == 'C') || (transA == 'c');
@@ -62,14 +83,29 @@ private:
 
 		if (idebug_ >= 1) {
 			std::cout << " GEMMR: "
-			          << " m " << m << " n " << n << " k " << k
-			          << " nb " << nb_ << " nb_i " << nb_i
-			          << " nb_j " << nb_j << " nblocks_i "
-			          << nblocks_i << " nblocks_j " << nblocks_j
-			          << "\n";
+			          << " m " << m << " n " << n << " k " << k << " nb " << nb_
+			          << " nb_i " << nb_i << " nb_j " << nb_j << " nblocks_i "
+			          << nblocks_i << " nblocks_j " << nblocks_j << "\n";
 		}
 
-		auto lambda = [transA, transB, m, n, k, alpha, &A, ldA, &B, ldB, beta, &C, ldC, nblocks_i, nb_i, nb_j, is_notransA, is_notransB](SizeType ij_block, SizeType)
+		auto lambda = [transA,
+		               transB,
+		               m,
+		               n,
+		               k,
+		               alpha,
+		               &A,
+		               ldA,
+		               &B,
+		               ldB,
+		               beta,
+		               &C,
+		               ldC,
+		               nblocks_i,
+		               nb_i,
+		               nb_j,
+		               is_notransA,
+		               is_notransB](SizeType ij_block, SizeType)
 		{
 			const SizeType i_block = (ij_block % nblocks_i);
 			const SizeType j_block = (ij_block - i_block) / nblocks_i;
@@ -107,7 +143,8 @@ private:
 			T const* const pB = &(B[ib - 1 + (jb - 1) * ldB]);
 			T* const pC = &(C[ic - 1 + (jc - 1) * ldC]);
 
-			psimag::BLAS::GEMM(transA, transB, mm, nn, kk, alpha, pA, ldA, pB, ldB, beta, pC, ldC);
+			psimag::BLAS::GEMM(
+			    transA, transB, mm, nn, kk, alpha, pA, ldA, pB, ldB, beta, pC, ldC);
 		};
 
 		const SizeType tasks = nblocks_i * nblocks_j;

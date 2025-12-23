@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename ComplexOrRealType>
-class Pvector {
+template <typename ComplexOrRealType> class Pvector {
 
 public:
 
@@ -28,10 +27,7 @@ public:
 		vStr_.push_back(str);
 	}
 
-	bool isDone() const
-	{
-		return (lastName() == "DONE");
-	}
+	bool isDone() const { return (lastName() == "DONE"); }
 
 	void setAsDone() { vStr_.push_back("DONE"); }
 
@@ -136,10 +132,7 @@ private:
 		return atoi(buffer.c_str());
 	}
 
-	static bool isAdigit(unsigned char letter)
-	{
-		return (letter > 47 && letter < 58);
-	}
+	static bool isAdigit(unsigned char letter) { return (letter > 47 && letter < 58); }
 
 	VectorStringType vStr_;
 	RealType weight_;

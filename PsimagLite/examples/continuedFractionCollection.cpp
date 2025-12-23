@@ -31,8 +31,7 @@ using namespace PsimagLite;
 typedef double RealType;
 typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 typedef ContinuedFraction<TridiagonalMatrixType> ContinuedFractionType;
-typedef ContinuedFractionCollection<ContinuedFractionType>
-    ContinuedFractionCollectionType;
+typedef ContinuedFractionCollection<ContinuedFractionType> ContinuedFractionCollectionType;
 typedef ContinuedFractionType::PlotParamsType PlotParamsType;
 
 void usage(const char* progName)
@@ -41,8 +40,7 @@ void usage(const char* progName)
 	std::cerr << " -e omega2 -s omegaStep -d delta -B beta -m matsubaras\n";
 }
 
-void plotAll(const ContinuedFractionCollectionType& cfCollection,
-             const PlotParamsType& params)
+void plotAll(const ContinuedFractionCollectionType& cfCollection, const PlotParamsType& params)
 {
 	ContinuedFractionCollectionType::PlotDataType v;
 	cfCollection.plot(v, params);
@@ -53,8 +51,7 @@ void plotAll(const ContinuedFractionCollectionType& cfCollection,
 	}
 }
 
-void plotOneByOne(const ContinuedFractionCollectionType& cfCollection,
-                  const PlotParamsType& params)
+void plotOneByOne(const ContinuedFractionCollectionType& cfCollection, const PlotParamsType& params)
 {
 
 	std::cout.precision(12);

@@ -36,8 +36,7 @@ public:
 	MyLoop(SizeType nthreads, SizeType total)
 	    : sum_(ConcurrencyType::storageSize(nthreads))
 	    , v_(total, 0)
-	{
-	}
+	{ }
 
 	SizeType tasks() const { return v_.size(); }
 
@@ -107,8 +106,7 @@ int main(int argc, char* argv[])
 	SizeType sum = helper.sum();
 
 	if (ConcurrencyType::root()) {
-		std::cout << "Using " << threadObject.name()
-		          << " mode= " << ConcurrencyType::mode;
+		std::cout << "Using " << threadObject.name() << " mode= " << ConcurrencyType::mode;
 		std::cout << " with " << nthreads;
 		std::cout << " threads or mpi procs.\n";
 		std::cout << "sum=" << sum << "\n";

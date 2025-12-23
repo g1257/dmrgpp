@@ -130,8 +130,7 @@ struct ProgramGlobals {
 		YES
 	};
 
-	static FermionOrBosonEnum multipy(const FermionOrBosonEnum& a,
-	                                  const FermionOrBosonEnum& b)
+	static FermionOrBosonEnum multipy(const FermionOrBosonEnum& a, const FermionOrBosonEnum& b)
 	{
 		if (a == FermionOrBosonEnum::BOSON)
 			return b;
@@ -155,9 +154,7 @@ struct ProgramGlobals {
 		maxElectronsOneSpin = maxElectronsOneSpin_;
 	}
 
-	static int findBorderSiteFrom(SizeType site,
-	                              DirectionEnum direction,
-	                              SizeType n)
+	static int findBorderSiteFrom(SizeType site, DirectionEnum direction, SizeType n)
 	{
 		if (site == 1 && direction == DirectionEnum::EXPAND_ENVIRON)
 			return 0;
@@ -256,8 +253,10 @@ struct ProgramGlobals {
 
 	static PsimagLite::String toLower(PsimagLite::String data)
 	{
-		std::transform(data.begin(), data.end(), data.begin(), [](unsigned char c)
-		               { return std::tolower(c); });
+		std::transform(data.begin(),
+		               data.end(),
+		               data.begin(),
+		               [](unsigned char c) { return std::tolower(c); });
 		return data;
 	}
 

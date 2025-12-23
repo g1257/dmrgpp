@@ -85,14 +85,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename RealType>
-RealType minusOneOrMinusI(RealType)
-{
-	return -1;
-}
+template <typename RealType> RealType minusOneOrMinusI(RealType) { return -1; }
 
-template <typename RealType>
-std::complex<RealType> minusOneOrMinusI(std::complex<RealType>)
+template <typename RealType> std::complex<RealType> minusOneOrMinusI(std::complex<RealType>)
 {
 	return std::complex<RealType>(0.0, -1.0);
 }
@@ -102,12 +97,11 @@ template <typename TargetParamsType,
           typename WaveFunctionTransfType,
           typename LanczosSolverType,
           typename VectorWithOffsetType>
-class TimeVectorsRungeKutta : public TimeVectorsBase<
-                                  TargetParamsType,
-                                  ModelType,
-                                  WaveFunctionTransfType,
-                                  LanczosSolverType,
-                                  VectorWithOffsetType> {
+class TimeVectorsRungeKutta : public TimeVectorsBase<TargetParamsType,
+                                                     ModelType,
+                                                     WaveFunctionTransfType,
+                                                     LanczosSolverType,
+                                                     VectorWithOffsetType> {
 
 	typedef TimeVectorsBase<TargetParamsType,
 	                        ModelType,
@@ -143,8 +137,7 @@ public:
 	    , model_(model)
 	    , wft_(wft)
 	    , lrs_(lrs)
-	{
-	}
+	{ }
 
 	virtual void calcTimeVectors(const VectorSizeType& indices,
 	                             RealType Eg,
@@ -190,8 +183,7 @@ private:
 		    , aux_(p_, lrs)
 		    , hc_(lrs, ModelType::modelLinks(), currentTime, model.superOpHelper())
 		    , lanczosHelper_(model, hc_, aux_)
-		{
-		}
+		{ }
 
 		TargetVectorType operator()(const RealType&, const TargetVectorType& y) const
 		{
@@ -199,7 +191,8 @@ private:
 			lanczosHelper_.matrixVectorProduct(x, y);
 			for (SizeType i = 0; i < x.size(); i++)
 				x[i] -= E0_ * y[i];
-			ComplexOrRealType icomplex = minusOneOrMinusI(static_cast<ComplexOrRealType>(0));
+			ComplexOrRealType icomplex
+			    = minusOneOrMinusI(static_cast<ComplexOrRealType>(0));
 			ComplexOrRealType tmp2 = timeDirection_ * icomplex;
 			TargetVectorType x2;
 			x2 <= tmp2* x;
@@ -225,13 +218,8 @@ private:
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi0(total);
 		phi.extract(phi0, i0);
-		FunctionForRungeKutta f(Eg,
-		                        tstStruct_.timeDirection(),
-		                        lrs_,
-		                        this->time(),
-		                        model_,
-		                        phi,
-		                        i0);
+		FunctionForRungeKutta f(
+		    Eg, tstStruct_.timeDirection(), lrs_, this->time(), model_, phi, i0);
 
 		RealType epsForRK = tstStruct_.tau() / (times.size() - 1.0);
 		PsimagLite::RungeKutta<RealType, FunctionForRungeKutta, TargetVectorType>

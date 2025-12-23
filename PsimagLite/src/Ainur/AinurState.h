@@ -20,8 +20,7 @@ public:
 	typedef std::complex<DoubleOrFloatType> ComplexType;
 
 	struct myprint {
-		template <typename T>
-		void operator()(const T& t) const
+		template <typename T> void operator()(const T& t) const
 		{
 			std::cout << " --------> " << t << '\n';
 		}
@@ -122,13 +121,11 @@ public:
 		SizeType n = ainurVariables_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			const AinurVariable& ainurVar = ainurVariables_[i];
-			os << ainurVar.type << " " << ainurVar.key << " "
-			   << ainurVar.value << "\n";
+			os << ainurVar.type << " " << ainurVar.key << " " << ainurVar.value << "\n";
 		}
 	}
 
-	template <typename SomeType>
-	void readValue(SomeType& t, String label) const
+	template <typename SomeType> void readValue(SomeType& t, String label) const
 	{
 		int x = storageIndexByName(label);
 		if (x < 0)
@@ -147,8 +144,7 @@ public:
 		used_[x]++;
 	}
 
-	template <typename SomeMapType>
-	void setMap(SomeMapType& map) const
+	template <typename SomeMapType> void setMap(SomeMapType& map) const
 	{
 		const SizeType n = ainurVariables_.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -166,22 +162,31 @@ public:
 	{
 		switch (e) {
 		case ERR_PARSE_UNDECLARED:
-			return "FATAL parse error: Undeclared " + key + "\n" + "You provided a label in the " + "input file that was not recognized.\n" + "Please check the spelling. If you intended " + "to introduce a temporary label,\nyou must "
-			                                                                                                                                                                                  "declare "
+			return "FATAL parse error: Undeclared " + key + "\n"
+			    + "You provided a label in the "
+			    + "input file that was not recognized.\n"
+			    + "Please check the spelling. If you intended "
+			    + "to introduce a temporary label,\nyou must "
+			      "declare "
 			    + "it first; please see Ainur input format "
 			      "documentation.\n";
 		case ERR_PARSE_DECLARED:
-			return "FATAL parse error: Already declared " + key + "\n" + "You tried to re-declare a variable that was "
-			                                                             "already declared.\n"
-			    + "If you intended to just provide a value for " + key + " then please remove the declaration word.\n";
+			return "FATAL parse error: Already declared " + key + "\n"
+			    + "You tried to re-declare a variable that was "
+			      "already declared.\n"
+			    + "If you intended to just provide a value for " + key
+			    + " then please remove the declaration word.\n";
 		case ERR_PARSE_FAILED:
-			return "FATAL parse error: Parsing failed near " + key + "\n" + "This is probably a syntax error.\n";
+			return "FATAL parse error: Parsing failed near " + key + "\n"
+			    + "This is probably a syntax error.\n";
 		case ERR_READ_UNDECLARED:
-			return "FATAL read error: No such label " + key + "\n" + "The label " + key + " must appear in the input file\n";
+			return "FATAL read error: No such label " + key + "\n" + "The label " + key
+			    + " must appear in the input file\n";
 		case ERR_READ_NO_VALUE:
 			return "FATAL read error: No value provided for "
 			       "label "
-			    + key + "\n" + "The label " + key + " must appear in the input file with " + "a non-empty value\n";
+			    + key + "\n" + "The label " + key
+			    + " must appear in the input file with " + "a non-empty value\n";
 		default:
 			return "FATAL Ainur error: Unknown error\n";
 		}
@@ -196,7 +201,9 @@ private:
 
 	int storageIndexByName(String key) const
 	{
-		auto it = std::find_if(ainurVariables_.begin(), ainurVariables_.end(), [&key](const AinurVariable& ainurVar)
+		auto it = std::find_if(ainurVariables_.begin(),
+		                       ainurVariables_.end(),
+		                       [&key](const AinurVariable& ainurVar)
 		                       { return (ainurVar.key == key); });
 
 		if (it == ainurVariables_.end())
@@ -204,10 +211,7 @@ private:
 		return it - ainurVariables_.begin();
 	}
 
-	static bool isEmptyValue(String s)
-	{
-		return (s.length() == 0 || s == ZERO_CHAR_STRING_);
-	}
+	static bool isEmptyValue(String s) { return (s.length() == 0 || s == ZERO_CHAR_STRING_); }
 
 	void installNativeMacros()
 	{
@@ -235,7 +239,8 @@ private:
 		for (SizeType i = 0; i < n; ++i) {
 			if (!used_[i])
 				continue;
-			std::pair<bool, PsimagLite::String> macro = expandOneValue(ainurVariables_[i].value);
+			std::pair<bool, PsimagLite::String> macro
+			    = expandOneValue(ainurVariables_[i].value);
 
 			if (!macro.first)
 				continue;
@@ -253,8 +258,7 @@ private:
 	}
 
 	// \[a-zA-Z]+
-	std::pair<bool, PsimagLite::String>
-	expandOneValue(const String& value) const
+	std::pair<bool, PsimagLite::String> expandOneValue(const String& value) const
 	{
 		const SizeType n = value.length();
 		PsimagLite::String macroName;
@@ -290,8 +294,7 @@ private:
 			}
 		}
 
-		return std::pair<bool, PsimagLite::String>(hasAtLeastOneMacro,
-		                                           unquote(retString));
+		return std::pair<bool, PsimagLite::String>(hasAtLeastOneMacro, unquote(retString));
 	}
 
 	static bool isValidCharForMacroName(char c)

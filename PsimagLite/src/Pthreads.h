@@ -95,8 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <string.h>
 #endif
 
-template <typename PthreadFunctionHolderType>
-struct PthreadFunctionStruct {
+template <typename PthreadFunctionHolderType> struct PthreadFunctionStruct {
 	PthreadFunctionStruct()
 	    : pfh(0)
 	    , threadNum(0)
@@ -104,8 +103,7 @@ struct PthreadFunctionStruct {
 	    , total(0)
 	    , mutex(0)
 	    , cpu(0)
-	{
-	}
+	{ }
 
 	PthreadFunctionHolderType* pfh;
 	int threadNum;
@@ -115,10 +113,10 @@ struct PthreadFunctionStruct {
 	SizeType cpu;
 };
 
-template <typename PthreadFunctionHolderType>
-void* thread_function_wrapper(void* dummyPtr)
+template <typename PthreadFunctionHolderType> void* thread_function_wrapper(void* dummyPtr)
 {
-	PthreadFunctionStruct<PthreadFunctionHolderType>* pfs = (PthreadFunctionStruct<PthreadFunctionHolderType>*)dummyPtr;
+	PthreadFunctionStruct<PthreadFunctionHolderType>* pfs
+	    = (PthreadFunctionStruct<PthreadFunctionHolderType>*)dummyPtr;
 
 	PthreadFunctionHolderType* pfh = pfs->pfh;
 
@@ -137,8 +135,7 @@ void* thread_function_wrapper(void* dummyPtr)
 }
 
 namespace PsimagLite {
-template <typename PthreadFunctionHolderType>
-class Pthreads {
+template <typename PthreadFunctionHolderType> class Pthreads {
 
 public:
 
@@ -154,8 +151,7 @@ public:
 	void loopCreate(SizeType total, PthreadFunctionHolderType& pfh)
 	{
 		PthreadFunctionStruct<PthreadFunctionHolderType>* pfs;
-		pfs = new PthreadFunctionStruct<
-		    PthreadFunctionHolderType>[nthreads_];
+		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
 		pthread_t* thread_id = new pthread_t[nthreads_];
 		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
@@ -175,8 +171,10 @@ public:
 
 			setAffinity(attr[j], j, cores_);
 
-			ret = pthread_create(
-			    &thread_id[j], attr[j], thread_function_wrapper<PthreadFunctionHolderType>, &pfs[j]);
+			ret = pthread_create(&thread_id[j],
+			                     attr[j],
+			                     thread_function_wrapper<PthreadFunctionHolderType>,
+			                     &pfs[j]);
 			checkForError(ret);
 		}
 
@@ -194,8 +192,7 @@ public:
 #ifndef NDEBUG
 #ifdef __linux__
 		for (SizeType j = 0; j < nthreads_; j++) {
-			std::cout << "Pthreads: Pthread number " << j
-			          << " runs on core number ";
+			std::cout << "Pthreads: Pthread number " << j << " runs on core number ";
 			std::cout << pfs[j].cpu << "\n";
 		}
 #endif

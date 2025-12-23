@@ -87,8 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-template <typename ValueType>
-class LineChangerLinear {
+template <typename ValueType> class LineChangerLinear {
 public:
 
 	LineChangerLinear(const PsimagLite::String& match,
@@ -101,8 +100,7 @@ public:
 	    , init_(init)
 	    , pre_(pre)
 	    , post_(post)
-	{
-	}
+	{ }
 
 	const PsimagLite::String& string() const { return match_; }
 

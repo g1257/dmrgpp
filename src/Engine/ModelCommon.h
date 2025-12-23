@@ -123,8 +123,7 @@ public:
 	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 
-	ModelCommon(const ParametersType& params,
-	            const SuperGeometryType& superGeometry)
+	ModelCommon(const ParametersType& params, const SuperGeometryType& superGeometry)
 	    : params_(params)
 	    , superGeometry_(superGeometry)
 	    , progress_("ModelCommon")

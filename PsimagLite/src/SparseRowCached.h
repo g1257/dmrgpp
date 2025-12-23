@@ -87,8 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename CrsMatrixType>
-class SparseRowCached {
+template <typename CrsMatrixType> class SparseRowCached {
 
 public:
 
@@ -100,8 +99,7 @@ public:
 	    : cols_(cacheSize)
 	    , values_(cacheSize)
 	    , counter_(0)
-	{
-	}
+	{ }
 
 	void add(SizeType col, ValueType value)
 	{

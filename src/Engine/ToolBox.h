@@ -88,8 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename DmrgParametersType, typename GeometryType>
-class ToolBox {
+template <typename DmrgParametersType, typename GeometryType> class ToolBox {
 
 	typedef std::pair<SizeType, PsimagLite::String> PairSizeStringType;
 
@@ -101,8 +100,7 @@ class ToolBox {
 			InternalName(PsimagLite::String label_, bool cooked_)
 			    : cooked(cooked_)
 			    , label(label_)
-			{
-			}
+			{ }
 
 			bool cooked;
 			PsimagLite::String label;
@@ -200,13 +198,9 @@ public:
 		return ACTION_UNKNOWN;
 	}
 
-	static PsimagLite::String actions()
-	{
-		return "energies | grep | files | input |analysis";
-	}
+	static PsimagLite::String actions() { return "energies | grep | files | input |analysis"; }
 
-	static void printGrep(PsimagLite::String inputfile,
-	                      ParametersForGrepType params)
+	static void printGrep(PsimagLite::String inputfile, ParametersForGrepType params)
 	{
 		SizeType lenInput = inputfile.size();
 		PsimagLite::String dotcout = ".cout";
@@ -214,7 +208,8 @@ public:
 		SizeType loc = (lenInput < lenDotcout) ? 0 : lenInput - lenDotcout;
 		bool isCout = (inputfile.substr(loc, lenDotcout) == dotcout);
 
-		PsimagLite::String coutName = (isCout) ? inputfile : ProgramGlobals::coutName(inputfile);
+		PsimagLite::String coutName
+		    = (isCout) ? inputfile : ProgramGlobals::coutName(inputfile);
 		std::ifstream fin(coutName.c_str());
 		if (!fin || fin.bad()) {
 			err("Could not open file " + coutName + "\n");

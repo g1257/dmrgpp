@@ -179,8 +179,7 @@ struct ParametersDmrgSolver {
 	FieldType degeneracyMax;
 	FieldType denseSparseThreshold;
 
-	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
 		PsimagLite::String root = label;
 
@@ -204,7 +203,8 @@ struct ParametersDmrgSolver {
 		ioSerializer.write(root + "/insitu", insitu);
 		ioSerializer.write(root + "/recoverySave", recoverySave);
 		ioSerializer.write(root + "/printHamiltonianAverage", printHamiltonianAverage);
-		ioSerializer.write(root + "/saveDensityMatrixEigenvalues", saveDensityMatrixEigenvalues);
+		ioSerializer.write(root + "/saveDensityMatrixEigenvalues",
+		                   saveDensityMatrixEigenvalues);
 		checkpoint.write(label + "/checkpoint", ioSerializer);
 		ioSerializer.write(root + "/adjustQuantumNumbers", adjustQuantumNumbers);
 		ioSerializer.write(root + "/finiteLoop", finiteLoop);
@@ -253,9 +253,8 @@ struct ParametersDmrgSolver {
 			filename = io.filename();
 		}
 
-		filename = filenameFromRootname(filename,
-		                                options.isSet("addPidToOutputName"),
-		                                ciRun);
+		filename
+		    = filenameFromRootname(filename, options.isSet("addPidToOutputName"), ciRun);
 
 		if (earlyExit)
 			return;
@@ -273,8 +272,7 @@ struct ParametersDmrgSolver {
 		VectorSizeType tmpVector;
 		try {
 			io.read(tmpVector, "TargetQuantumNumbers");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (tmpVector.size() > 0) {
 			PsimagLite::String s = "*** FATAL: TargetQuantumNumbers ";
@@ -285,22 +283,17 @@ struct ParametersDmrgSolver {
 		tmpVector.clear();
 		try {
 			io.read(tmpVector, "AdjustQuantumNumbers");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (tmpVector.size() > 0)
-			QnType::adjustQns(adjustQuantumNumbers,
-			                  tmpVector,
-			                  modeFromModel(model));
+			QnType::adjustQns(adjustQuantumNumbers, tmpVector, modeFromModel(model));
 		try {
 			io.readline(nthreads, "Threads=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(nthreads2, "ThreadsLevelTwo=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (nthreads == 0 || nthreads2 == 0) {
 			PsimagLite::String s(__FILE__);
@@ -310,49 +303,40 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(gemmRnb, "GemmRnb=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		insitu = "";
 		try {
 			io.readline(insitu, "insitu=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(sitesPerBlock, "SitesPerBlock=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(maxMatrixRankStored, "MaxMatrixRankStored=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(numberOfExcited, "NumberOfExcited=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(degeneracyMax, "DegeneracyMax=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(recoverySave, "RecoverySave=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(dumperBegin, "KroneckerDumperBegin=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(dumperEnd, "KroneckerDumperEnd=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (options.isSet("KroneckerDumper")) {
 			if (options.isSet("MatrixVectorStored")) {
@@ -362,19 +346,18 @@ struct ParametersDmrgSolver {
 		} else {
 			if (dumperBegin > 0 || dumperEnd > 0) {
 				PsimagLite::String msg("FATAL: KroneckerDumperBegin|End needs ");
-				throw PsimagLite::RuntimeError(msg + "KroneckerDumper in SolverOptions\n");
+				throw PsimagLite::RuntimeError(
+				    msg + "KroneckerDumper in SolverOptions\n");
 			}
 		}
 
 		try {
 			io.readline(precision, "Precision=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(denseSparseThreshold, "DenseSparseThreshold=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (isObserveCode)
 			return;
@@ -384,18 +367,15 @@ struct ParametersDmrgSolver {
 
 		try {
 			io.readline(printHamiltonianAverage, "PrintHamiltonianAverage=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(saveDensityMatrixEigenvalues, "SaveDensityMatrixEigenvalues=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(opOnSiteThreshold, "OpOnSiteThreshold=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (options.isSet("findSymmetrySector"))
 			findSymmetrySector = "1==1";
@@ -403,11 +383,12 @@ struct ParametersDmrgSolver {
 		PsimagLite::String tmpString;
 		try {
 			io.readline(tmpString, "FindSymmetrySector=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (findSymmetrySector != "" && tmpString != "")
-			err(PsimagLite::String("Either findSymmetrySector in SolverOptions or ") + PsimagLite::String("FindSymmetrySector= line or neither of them, but not both\n"));
+			err(PsimagLite::String("Either findSymmetrySector in SolverOptions or ")
+			    + PsimagLite::String(
+			        "FindSymmetrySector= line or neither of them, but not both\n"));
 
 		if (tmpString != "")
 			findSymmetrySector = tmpString;
@@ -434,11 +415,13 @@ struct ParametersDmrgSolver {
 				checkpoint.setFilename(restartFrom);
 
 			if (checkpoint.filename() == "") {
-				PsimagLite::String tmp = "FATAL: RestartFilename NOT found in input ";
+				PsimagLite::String tmp
+				    = "FATAL: RestartFilename NOT found in input ";
 				err(tmp + "AND InfiniteLoopKeptStates is an int\n");
 			}
 
-			checkpoint.setFilename(filenameFromRootname(checkpoint.filename(), false, false));
+			checkpoint.setFilename(
+			    filenameFromRootname(checkpoint.filename(), false, false));
 			checkRestart(filename, checkpoint.filename(), options);
 			hasRestart = true;
 		} else {
@@ -448,7 +431,8 @@ struct ParametersDmrgSolver {
 			}
 
 			if (!infLoopsIsAnInt) {
-				PsimagLite::String tmp = "FATAL: InfiniteLoopKeptStates not an integer ";
+				PsimagLite::String tmp
+				    = "FATAL: InfiniteLoopKeptStates not an integer ";
 				err(tmp + "but no restart found in SolverOptions.\n");
 			}
 
@@ -473,9 +457,8 @@ struct ParametersDmrgSolver {
 		thisType->finiteLoop.swap(vfl);
 	}
 
-	static bool getValueIfPresent(PsimagLite::String& str,
-	                              PsimagLite::String label,
-	                              InputValidatorType& io)
+	static bool
+	getValueIfPresent(PsimagLite::String& str, PsimagLite::String label, InputValidatorType& io)
 	{
 		try {
 			io.readline(str, label);
@@ -566,8 +549,9 @@ struct ParametersDmrgSolver {
 		}
 
 		for (SizeType i = 0; i < tmpMat.rows(); ++i) {
-			int length = (tmpMat(i, 0) == "@auto") ? autoNumber(i, numberOfSites, lastSite)
-			                                       : algebraicStringToNumber.procLength(tmpMat(i, 0));
+			int length = (tmpMat(i, 0) == "@auto")
+			    ? autoNumber(i, numberOfSites, lastSite)
+			    : algebraicStringToNumber.procLength(tmpMat(i, 0));
 			SizeType m = PsimagLite::atoi(tmpMat(i, 1));
 			FiniteLoopType fl(length, m, tmpMat(i, 2), truncationC);
 			vfl.push_back(fl);
@@ -632,26 +616,24 @@ struct ParametersDmrgSolver {
 		SizeType x = (numberOfSites - 2);
 
 		if (lastSite != x && lastSite != 0)
-			err("autoNumberAfterFirst: Internal error, please report to DMRG++ mailing list\n");
+			err("autoNumberAfterFirst: Internal error, please report to DMRG++ mailing "
+			    "list\n");
 
 		return (lastSite == 0) ? x : -x;
 	}
 
-	static void readFiniteLoopsRepeat(InputValidatorType& io,
-	                                  VectorFiniteLoopType& vfl)
+	static void readFiniteLoopsRepeat(InputValidatorType& io, VectorFiniteLoopType& vfl)
 	{
 		SizeType repeat = 0;
 
 		try {
 			io.readline(repeat, "RepeatFiniteLoopsTimes=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		SizeType fromFl = 0;
 		try {
 			io.readline(fromFl, "RepeatFiniteLoopsFrom=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (vfl.size() == 0) {
 			std::cerr << "WARNING: No finite loops found\n";
@@ -660,8 +642,7 @@ struct ParametersDmrgSolver {
 		SizeType upToFl = vfl.size() - 1;
 		try {
 			io.readline(upToFl, "RepeatFiniteLoopsTo=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (upToFl >= vfl.size()) {
 			PsimagLite::String s(__FILE__);
@@ -709,8 +690,7 @@ private:
 		return 0;
 	}
 
-	static void checkFilesNotEqual(PsimagLite::String filename1,
-	                               PsimagLite::String filename2)
+	static void checkFilesNotEqual(PsimagLite::String filename1, PsimagLite::String filename2)
 	{
 		if (filename1 != filename2)
 			return;
@@ -719,8 +699,7 @@ private:
 		throw PsimagLite::RuntimeError(s.c_str());
 	}
 
-	static void checkTwoSiteDmrg(PsimagLite::String filename2,
-	                             const OptionsType& options)
+	static void checkTwoSiteDmrg(PsimagLite::String filename2, const OptionsType& options)
 	{
 		PsimagLite::IoSelector::In io(filename2);
 		PsimagLite::String optionsOld;
@@ -756,9 +735,8 @@ private:
 		throw PsimagLite::RuntimeError(s + "\n");
 	}
 
-	static PsimagLite::String filenameFromRootname(PsimagLite::String f,
-	                                               bool addPidToOutputName,
-	                                               bool ciRun)
+	static PsimagLite::String
+	filenameFromRootname(PsimagLite::String f, bool addPidToOutputName, bool ciRun)
 	{
 		size_t findIndex = f.find(".txt");
 		if (findIndex != PsimagLite::String::npos)

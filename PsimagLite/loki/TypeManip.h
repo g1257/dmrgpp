@@ -25,8 +25,7 @@ namespace Loki {
 // Defines 'value', an enum that evaluates to v
 ////////////////////////////////////////////////////////////////////////////////
 
-template <int v>
-struct Int2Type {
+template <int v> struct Int2Type {
 	enum
 	{
 		value = v
@@ -40,8 +39,7 @@ struct Int2Type {
 // Defines the type OriginalType which maps back to T
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T>
-struct Type2Type {
+template <typename T> struct Type2Type {
 	typedef T OriginalType;
 };
 
@@ -55,12 +53,10 @@ struct Type2Type {
 // Result evaluates to T if flag is true, and to U otherwise.
 ////////////////////////////////////////////////////////////////////////////////
 
-template <bool flag, typename T, typename U>
-struct Select {
+template <bool flag, typename T, typename U> struct Select {
 	typedef T Result;
 };
-template <typename T, typename U>
-struct Select<false, T, U> {
+template <typename T, typename U> struct Select<false, T, U> {
 	typedef U Result;
 };
 
@@ -73,16 +69,14 @@ struct Select<false, T, U> {
 // Result evaluates to true iff U == T (types equal)
 ////////////////////////////////////////////////////////////////////////////////
 
-template <typename T, typename U>
-struct IsSameType {
+template <typename T, typename U> struct IsSameType {
 	enum
 	{
 		value = false
 	};
 };
 
-template <typename T>
-struct IsSameType<T, T> {
+template <typename T> struct IsSameType<T, T> {
 	enum
 	{
 		value = true
@@ -94,8 +88,7 @@ struct IsSameType<T, T> {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace Private {
-	template <class T, class U>
-	struct ConversionHelper {
+	template <class T, class U> struct ConversionHelper {
 		typedef char Small;
 		struct Big {
 			char dummy[2];
@@ -122,8 +115,7 @@ namespace Private {
 // Caveat: might not work if T and U are in a private inheritance hierarchy.
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class T, class U>
-struct Conversion {
+template <class T, class U> struct Conversion {
 	typedef Private::ConversionHelper<T, U> H;
 #ifndef __MWERKS__
 	enum
@@ -146,8 +138,7 @@ struct Conversion {
 	};
 };
 
-template <class T>
-struct Conversion<T, T> {
+template <class T> struct Conversion<T, T> {
 	enum
 	{
 		exists = 1,
@@ -156,8 +147,7 @@ struct Conversion<T, T> {
 	};
 };
 
-template <class T>
-struct Conversion<void, T> {
+template <class T> struct Conversion<void, T> {
 	enum
 	{
 		exists = 0,
@@ -166,8 +156,7 @@ struct Conversion<void, T> {
 	};
 };
 
-template <class T>
-struct Conversion<T, void> {
+template <class T> struct Conversion<T, void> {
 	enum
 	{
 		exists = 0,
@@ -176,8 +165,7 @@ struct Conversion<T, void> {
 	};
 };
 
-template <>
-struct Conversion<void, void> {
+template <> struct Conversion<void, void> {
 public:
 
 	enum
@@ -197,11 +185,11 @@ public:
 // Caveat: might not work if T and U are in a private inheritance hierarchy.
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class T, class U>
-struct SuperSubclass {
+template <class T, class U> struct SuperSubclass {
 	enum
 	{
-		value = (::Loki::Conversion<const volatile U*, const volatile T*>::exists && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType)
+		value = (::Loki::Conversion<const volatile U*, const volatile T*>::exists
+		         && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType)
 	};
 
 	// Dummy enum to make sure that both classes are fully defined.
@@ -211,19 +199,19 @@ struct SuperSubclass {
 	};
 };
 
-template <>
-struct SuperSubclass<void, void> {
+template <> struct SuperSubclass<void, void> {
 	enum
 	{
 		value = false
 	};
 };
 
-template <class U>
-struct SuperSubclass<void, U> {
+template <class U> struct SuperSubclass<void, U> {
 	enum
 	{
-		value = (::Loki::Conversion<const volatile U*, const volatile void*>::exists && !::Loki::Conversion<const volatile void*, const volatile void*>::sameType)
+		value
+		= (::Loki::Conversion<const volatile U*, const volatile void*>::exists
+		   && !::Loki::Conversion<const volatile void*, const volatile void*>::sameType)
 	};
 
 	// Dummy enum to make sure that both classes are fully defined.
@@ -233,11 +221,11 @@ struct SuperSubclass<void, U> {
 	};
 };
 
-template <class T>
-struct SuperSubclass<T, void> {
+template <class T> struct SuperSubclass<T, void> {
 	enum
 	{
-		value = (::Loki::Conversion<const volatile void*, const volatile T*>::exists && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType)
+		value = (::Loki::Conversion<const volatile void*, const volatile T*>::exists
+		         && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType)
 	};
 
 	// Dummy enum to make sure that both classes are fully defined.
@@ -255,11 +243,12 @@ struct SuperSubclass<T, void> {
 // Caveat: might not work if T and U are in a private inheritance hierarchy.
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class T, class U>
-struct SuperSubclassStrict {
+template <class T, class U> struct SuperSubclassStrict {
 	enum
 	{
-		value = (::Loki::Conversion<const volatile U*, const volatile T*>::exists && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType && !::Loki::Conversion<const volatile T*, const volatile U*>::sameType)
+		value = (::Loki::Conversion<const volatile U*, const volatile T*>::exists
+		         && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType
+		         && !::Loki::Conversion<const volatile T*, const volatile U*>::sameType)
 	};
 
 	// Dummy enum to make sure that both classes are fully defined.
@@ -269,19 +258,20 @@ struct SuperSubclassStrict {
 	};
 };
 
-template <>
-struct SuperSubclassStrict<void, void> {
+template <> struct SuperSubclassStrict<void, void> {
 	enum
 	{
 		value = false
 	};
 };
 
-template <class U>
-struct SuperSubclassStrict<void, U> {
+template <class U> struct SuperSubclassStrict<void, U> {
 	enum
 	{
-		value = (::Loki::Conversion<const volatile U*, const volatile void*>::exists && !::Loki::Conversion<const volatile void*, const volatile void*>::sameType && !::Loki::Conversion<const volatile void*, const volatile U*>::sameType)
+		value
+		= (::Loki::Conversion<const volatile U*, const volatile void*>::exists
+		   && !::Loki::Conversion<const volatile void*, const volatile void*>::sameType
+		   && !::Loki::Conversion<const volatile void*, const volatile U*>::sameType)
 	};
 
 	// Dummy enum to make sure that both classes are fully defined.
@@ -291,11 +281,12 @@ struct SuperSubclassStrict<void, U> {
 	};
 };
 
-template <class T>
-struct SuperSubclassStrict<T, void> {
+template <class T> struct SuperSubclassStrict<T, void> {
 	enum
 	{
-		value = (::Loki::Conversion<const volatile void*, const volatile T*>::exists && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType)
+		value = (::Loki::Conversion<const volatile void*, const volatile T*>::exists
+		         && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType
+		         && !::Loki::Conversion<const volatile T*, const volatile void*>::sameType)
 	};
 
 	// Dummy enum to make sure that both classes are fully defined.
@@ -317,8 +308,7 @@ struct SuperSubclassStrict<T, void> {
 // Deprecated: Use SuperSubclass class template instead.
 ////////////////////////////////////////////////////////////////////////////////
 
-#define LOKI_SUPERSUBCLASS(T, U) \
-	::Loki::SuperSubclass<T, U>::value
+#define LOKI_SUPERSUBCLASS(T, U) ::Loki::SuperSubclass<T, U>::value
 
 ////////////////////////////////////////////////////////////////////////////////
 // macro SUPERSUBCLASS_STRICT
@@ -329,7 +319,6 @@ struct SuperSubclassStrict<T, void> {
 // Deprecated: Use SuperSubclassStrict class template instead.
 ////////////////////////////////////////////////////////////////////////////////
 
-#define LOKI_SUPERSUBCLASS_STRICT(T, U) \
-	::Loki::SuperSubclassStrict<T, U>::value
+#define LOKI_SUPERSUBCLASS_STRICT(T, U) ::Loki::SuperSubclassStrict<T, U>::value
 
 #endif // end file guardian

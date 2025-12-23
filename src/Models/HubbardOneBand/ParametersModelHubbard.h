@@ -111,7 +111,8 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		}
 
 		if (anisotropy.size() > 0 && anisotropy.size() != nsites) {
-			throw PsimagLite::RuntimeError("AnisotropyD size must be " + ttos(nsites) + " entries long, if provided.\n");
+			throw PsimagLite::RuntimeError("AnisotropyD size must be " + ttos(nsites)
+			                               + " entries long, if provided.\n");
 		}
 
 		try {
@@ -131,14 +132,14 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		}
 
 		if (magneticX.size() > 0 && magneticX.size() != nsites) {
-			throw PsimagLite::RuntimeError("MagneticFieldX size must be " + ttos(nsites) + " entries long, if provided.\n");
+			throw PsimagLite::RuntimeError("MagneticFieldX size must be " + ttos(nsites)
+			                               + " entries long, if provided.\n");
 		}
 
 		onSiteHaddLegacy = readOldT(io, nsites);
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelHubbard";
 		io.createGroup(label);
@@ -162,24 +163,24 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		RealType omega = 0;
 		try {
 			io.readline(omega, "omega=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		RealType phase = 0;
 		try {
 			io.readline(phase, "phase=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		// c means cosine below
-		const PsimagLite::String function = "*(c:+:*:%t:" + ttos(omega) + ":" + ttos(phase) + ")*";
+		const PsimagLite::String function
+		    = "*(c:+:*:%t:" + ttos(omega) + ":" + ttos(phase) + ")*";
 		const PsimagLite::String nup = function + "nup";
 		const PsimagLite::String ndown = function + "ndown";
 
 		VectorStringType potentialTv(nsites);
 		for (SizeType site = 0; site < nsites; ++site) {
 			const RealType val = potentialTlegacy[site];
-			const PsimagLite::String plusSignOrNot = ((val < 0) && (site > 0)) ? "+" : "";
+			const PsimagLite::String plusSignOrNot
+			    = ((val < 0) && (site > 0)) ? "+" : "";
 			PsimagLite::String expression = ttos(val) + nup + " + ";
 			expression += plusSignOrNot + ttos(val) + ndown;
 			potentialTv[site] = ProgramGlobals::killSpaces(expression);

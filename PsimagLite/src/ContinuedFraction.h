@@ -40,8 +40,7 @@ Please see full open source license included in file LICENSE.
 #include <typeinfo>
 
 namespace PsimagLite {
-template <typename TridiagonalMatrixType_>
-class ContinuedFraction {
+template <typename TridiagonalMatrixType_> class ContinuedFraction {
 public:
 
 	typedef TridiagonalMatrixType_ TridiagonalMatrixType;
@@ -51,13 +50,11 @@ public:
 	typedef typename TridiagonalMatrixType::value_type FieldType;
 	typedef Matrix<FieldType> MatrixType;
 	typedef Matrix<RealType> MatrixRealType;
-	typedef typename Vector<std::pair<RealType, ComplexType>>::Type
-	    PlotDataType;
+	typedef typename Vector<std::pair<RealType, ComplexType>>::Type PlotDataType;
 	typedef PlotParams<RealType> PlotParamsType;
 	typedef ParametersForSolver<RealType> ParametersType;
 
-	ContinuedFraction(const TridiagonalMatrixType& ab,
-	                  const ParametersType& params)
+	ContinuedFraction(const TridiagonalMatrixType& ab, const ParametersType& params)
 	    : progress_("ContinuedFraction")
 	    , freqEnum_(FREQ_REAL)
 	    , ab_(ab)
@@ -75,8 +72,7 @@ public:
 	    , Eg_(0)
 	    , weight_(0)
 	    , isign_(1)
-	{
-	}
+	{ }
 
 	ContinuedFraction(IoSimple::In& io)
 	    : progress_("ContinuedFraction")
@@ -87,8 +83,7 @@ public:
 		try {
 			io.readline(f, "#FreqEnum=");
 		} catch (std::exception& e) {
-			std::cerr
-			    << "ContinuedFraction: FreqEnum assumed REAL\n";
+			std::cerr << "ContinuedFraction: FreqEnum assumed REAL\n";
 			f = "Real";
 			io.rewind();
 		}
@@ -104,8 +99,7 @@ public:
 		diagonalize();
 	}
 
-	template <typename SomeIoOutputType>
-	void write(SomeIoOutputType&, String) const
+	template <typename SomeIoOutputType> void write(SomeIoOutputType&, String) const
 	{
 		String name(typeid(SomeIoOutputType).name());
 		std::cerr << "WARNING: cannot save ContinuedFraction";
@@ -169,21 +163,17 @@ public:
 		}
 	}
 
-	void plotMatsubara(PlotDataType& result,
-	                   const PlotParamsType& params) const
+	void plotMatsubara(PlotDataType& result, const PlotParamsType& params) const
 	{
 		SizeType counter = 0;
 		SizeType n = params.numberOfMatsubaras;
 		if (result.size() == 0)
 			result.resize(n);
-		for (SizeType omegaIndex = 0;
-		     omegaIndex < params.numberOfMatsubaras;
+		for (SizeType omegaIndex = 0; omegaIndex < params.numberOfMatsubaras;
 		     ++omegaIndex) {
-			ComplexType z(params.delta,
-			              matsubara(omegaIndex, params));
+			ComplexType z(params.delta, matsubara(omegaIndex, params));
 			ComplexType res = iOfOmega(z, Eg_, isign_);
-			std::pair<RealType, ComplexType> p(PsimagLite::imag(z),
-			                                   res);
+			std::pair<RealType, ComplexType> p(PsimagLite::imag(z), res);
 			result[counter++] = p;
 			if (counter >= result.size())
 				break;

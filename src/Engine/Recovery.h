@@ -93,8 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename CheckpointType, typename TargetingType>
-class Recovery {
+template <typename CheckpointType, typename TargetingType> class Recovery {
 
 	typedef typename CheckpointType::ParametersType ParametersType;
 	typedef Recovery<ParametersType, int> RecoveryStaticType;
@@ -105,8 +104,7 @@ class Recovery {
 		OptionSpec()
 		    : keepFiles(false)
 		    , maxFiles(10)
-		{
-		}
+		{ }
 
 		bool keepFiles;
 		SizeType maxFiles;
@@ -117,8 +115,7 @@ class Recovery {
 		OpaqueRestart()
 		    : loopIndex(0)
 		    , stepCurrent(0)
-		{
-		}
+		{ }
 
 		SizeType loopIndex;
 		SizeType stepCurrent;
@@ -143,8 +140,7 @@ public:
 		SpecOptions(bool& keepFiles, SizeType& maxFiles)
 		    : keepFiles_(keepFiles)
 		    , maxFiles_(maxFiles)
-		{
-		}
+		{ }
 
 		void operator()(PsimagLite::String str2)
 		{
@@ -221,14 +217,12 @@ public:
 		predicateAwesome_ = nullptr;
 	}
 
-	SizeType indexOfFirstFiniteLoop() const
-	{
-		return opaqueRestart_.loopIndex;
-	}
+	SizeType indexOfFirstFiniteLoop() const { return opaqueRestart_.loopIndex; }
 
 	SizeType stepCurrent(ProgramGlobals::DirectionEnum direction) const
 	{
-		return (checkpoint_.parameters().autoRestart) ? opaqueRestart_.stepCurrent : nonRecoveryStepCurrent(direction);
+		return (checkpoint_.parameters().autoRestart) ? opaqueRestart_.stepCurrent
+		                                              : nonRecoveryStepCurrent(direction);
 	}
 
 	bool byLoop(RealType loopIndex, RealType time, RealType loopLength) const
@@ -301,7 +295,8 @@ private:
 		PsimagLite::String str = checkpoint_.parameters().recoverySave;
 
 		SpecOptions lambda(optionSpec_.keepFiles, optionSpec_.maxFiles);
-		predicateAwesome_ = new PsimagLite::PredicateAwesome<SpecOptions>(str, ",", "&", &lambda);
+		predicateAwesome_
+		    = new PsimagLite::PredicateAwesome<SpecOptions>(str, ",", "&", &lambda);
 	}
 
 	static void dieWithError(PsimagLite::String str)
@@ -318,9 +313,8 @@ private:
 		dest.close();
 	}
 
-	void writeRecovery(typename IoType::Out& ioOut,
-	                   SizeType loopIndex,
-	                   SizeType stepCurrent) const
+	void
+	writeRecovery(typename IoType::Out& ioOut, SizeType loopIndex, SizeType stepCurrent) const
 	{
 		ioOut.createGroup("Recovery");
 
@@ -366,10 +360,10 @@ private:
 		return sc; // phew!!, that's all folks, now bugs, go away!!
 	}
 
-	void writeEnergies(typename IoType::Out& ioOut,
-	                   PsimagLite::String file) const
+	void writeEnergies(typename IoType::Out& ioOut, PsimagLite::String file) const
 	{
-		PsimagLite::String energyLabel = checkpoint_.parameters().checkpoint.labelForEnergy();
+		PsimagLite::String energyLabel
+		    = checkpoint_.parameters().checkpoint.labelForEnergy();
 		ioOut.flush();
 		typename IoType::In ioIn(file);
 
@@ -392,8 +386,7 @@ private:
 	mutable SizeType counter_;
 }; // class Recovery
 
-template <typename ParametersType>
-class Recovery<ParametersType, int> {
+template <typename ParametersType> class Recovery<ParametersType, int> {
 
 public:
 
@@ -457,10 +450,7 @@ public:
 
 private:
 
-	static bool isAdigit(char c)
-	{
-		return (c > 47 && c < 58);
-	}
+	static bool isAdigit(char c) { return (c > 47 && c < 58); }
 
 	static void listFilesInDirectory(std::vector<PsimagLite::String>& files,
 	                                 PsimagLite::String path)
@@ -513,8 +503,7 @@ private:
 			PsimagLite::IoNg::In ioIn(file);
 			ioIn.close();
 			return true;
-		} catch (...) {
-		}
+		} catch (...) { }
 
 		return false;
 	}

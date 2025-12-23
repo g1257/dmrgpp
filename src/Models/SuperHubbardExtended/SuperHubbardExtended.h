@@ -82,8 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ExtendedHubbard1Orb by containment
-template <typename ModelBaseType>
-class SuperHubbardExtended : public ModelBaseType {
+template <typename ModelBaseType> class SuperHubbardExtended : public ModelBaseType {
 
 public:
 
@@ -122,8 +121,7 @@ public:
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , extendedHubbard_(solverParams, io, geometry, "")
-	{
-	}
+	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -163,14 +161,10 @@ protected:
 
 		OpForLinkType splus("splus");
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
-		{ value *= (isSu2) ? -0.5 : 0.5; };
+		auto valueModiferTerm0
+		    = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
 
-		spsm.push(splus,
-		          'N',
-		          splus,
-		          'C',
-		          valueModiferTerm0);
+		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
@@ -179,21 +173,18 @@ protected:
 			szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
 		} else {
 			auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
-			{ if (isSu2) value = -value; };
-			spsm.push(splus,
-			          'N',
-			          splus,
-			          'C',
-			          valueModifierTermOther);
+			{
+				if (isSu2)
+					value = -value;
+			};
+			spsm.push(splus, 'N', splus, 'C', valueModifierTermOther);
 		}
 	}
 
 private:
 
 	//! Full hamiltonian from creation matrices cm
-	void addSiSj(SparseMatrixType&,
-	             const VectorOperatorType&,
-	             const BlockType& block) const
+	void addSiSj(SparseMatrixType&, const VectorOperatorType&, const BlockType& block) const
 	{
 		// Assume block.size()==1 and then problem solved!!
 		// there are no connection if there's only one site ;-)

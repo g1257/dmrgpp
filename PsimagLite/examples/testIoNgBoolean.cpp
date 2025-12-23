@@ -8,7 +8,11 @@ void createVector(std::vector<bool>& v)
 		v[i] = (drand48() < 0.5);
 }
 
-void saveAll(PsimagLite::String filename, const std::vector<bool>& v1, PsimagLite::String vname1, const std::vector<bool>& v2, PsimagLite::String vname2)
+void saveAll(PsimagLite::String filename,
+             const std::vector<bool>& v1,
+             PsimagLite::String vname1,
+             const std::vector<bool>& v2,
+             PsimagLite::String vname2)
 {
 	PsimagLite::IoNg::Out io(filename, PsimagLite::IoNg::ACC_TRUNC);
 	io.write(v1, vname1);

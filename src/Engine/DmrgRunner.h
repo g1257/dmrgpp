@@ -19,8 +19,7 @@
 
 namespace Dmrg {
 
-template <typename ComplexOrRealType>
-class DmrgRunner {
+template <typename ComplexOrRealType> class DmrgRunner {
 
 public:
 
@@ -28,9 +27,7 @@ public:
 	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 	typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
 	    ParametersDmrgSolverType;
-	typedef Dmrg::SuperGeometry<ComplexOrRealType,
-	                            InputNgType::Readable,
-	                            Dmrg::ProgramGlobals>
+	typedef Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>
 	    SuperGeometryType;
 	typedef Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn> VectorWithOffsetType;
 	typedef PsimagLite::PsiApp ApplicationType;
@@ -38,8 +35,7 @@ public:
 	DmrgRunner(RealType precision, const ApplicationType& application)
 	    : precision_(precision)
 	    , application_(application)
-	{
-	}
+	{ }
 
 	void doOneRun(PsimagLite::String data,
 	              PsimagLite::String insitu,
@@ -61,7 +57,8 @@ public:
 		if (logfile != "-") {
 			globalCoutBuffer = std::cout.rdbuf(); // save old buf
 			globalCoutStream.open(logfile.c_str(), std::ofstream::out);
-			if (!globalCoutStream || globalCoutStream.bad() || !globalCoutStream.good()) {
+			if (!globalCoutStream || globalCoutStream.bad()
+			    || !globalCoutStream.good()) {
 				PsimagLite::String str(application_.name());
 				str += ": Could not redirect std::cout to " + logfile + "\n";
 				err(str);

@@ -8,8 +8,7 @@
 
 // authored by K.A.A
 
-template <typename RealType, typename VectorType, typename MatrixType>
-class GammaCiCj {
+template <typename RealType, typename VectorType, typename MatrixType> class GammaCiCj {
 
 	typedef typename MatrixType::value_type ComplexOrRealType;
 
@@ -42,7 +41,8 @@ public:
 		tmp += y * T_;
 		for (SizeType i = 0; i < tmp.n_row(); i++)
 			for (SizeType j = 0; j < tmp.n_col(); j++)
-				tmp(i, j) += mV_(i, j) * y(i, j) + mW_(i, j) * cos(omega_ * t) * y(i, j);
+				tmp(i, j)
+				    += mV_(i, j) * y(i, j) + mW_(i, j) * cos(omega_ * t) * y(i, j);
 		return c * tmp;
 	}
 

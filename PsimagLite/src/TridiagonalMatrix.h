@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename FieldType>
-class TridiagonalMatrix {
+template <typename FieldType> class TridiagonalMatrix {
 
 	typedef typename Real<FieldType>::Type RealType;
 
@@ -96,15 +95,13 @@ public:
 
 	TridiagonalMatrix() { }
 
-	template <typename IoInputType>
-	TridiagonalMatrix(IoInputType& io)
+	template <typename IoInputType> TridiagonalMatrix(IoInputType& io)
 	{
 		io.read(a_, "#Avector");
 		io.read(b_, "#Bvector");
 	}
 
-	template <typename IoOutputType>
-	void write(IoOutputType& io) const
+	template <typename IoOutputType> void write(IoOutputType& io) const
 	{
 		io.write(a_, "#Avector");
 		io.write(b_, "#Bvector");
@@ -220,9 +217,11 @@ private:
 				}
 
 				if (m != l) {
-					RealType g = (groundD[l + 1] - groundD[l]) / (2.0 * groundE_[l]);
+					RealType g
+					    = (groundD[l + 1] - groundD[l]) / (2.0 * groundE_[l]);
 					RealType r = sqrt(g * g + 1.0);
-					g = groundD[m] - groundD[l] + groundE_[l] / (g + (g >= 0 ? fabs(r) : -fabs(r)));
+					g = groundD[m] - groundD[l]
+					    + groundE_[l] / (g + (g >= 0 ? fabs(r) : -fabs(r)));
 					RealType p = 0.0;
 					RealType c = 1.0;
 					int i = m - 1;

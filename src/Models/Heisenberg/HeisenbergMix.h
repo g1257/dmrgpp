@@ -92,8 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelBaseType>
-class HeisenbergMix : public ModelBaseType {
+template <typename ModelBaseType> class HeisenbergMix : public ModelBaseType {
 
 	static const int NUMBER_OF_ORBITALS = 1;
 	static const int DEGREES_OF_FREEDOM = 2; // spin up and down
@@ -145,8 +144,7 @@ public:
 
 		AtomKind(SizeType n)
 		    : n_(n)
-		{
-		}
+		{ }
 
 		virtual SizeType siteToAtomKind(SizeType site) const
 		{
@@ -163,9 +161,7 @@ public:
 	HeisenbergMix(const SolverParamsType& solverParams,
 	              InputValidatorType& io,
 	              const SuperGeometryType& geometry)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , atomKind_(nullptr)
@@ -174,9 +170,11 @@ public:
 		SizeType md = modelParameters_.anisotropyD.size();
 		SizeType me = modelParameters_.anisotropyE.size();
 
-		ModelParametersType::checkMagneticField(modelParameters_.magneticFieldX.size(), 'X', n);
+		ModelParametersType::checkMagneticField(
+		    modelParameters_.magneticFieldX.size(), 'X', n);
 
-		ModelParametersType::checkMagneticField(modelParameters_.magneticFieldZ.size(), 'Z', n);
+		ModelParametersType::checkMagneticField(
+		    modelParameters_.magneticFieldZ.size(), 'Z', n);
 
 		if (md > 0 && md != n) {
 			PsimagLite::String msg("HeisenbergMix: If provided, ");
@@ -234,7 +232,8 @@ public:
 			SizeType site = block[i];
 
 			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
-			const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
+			const OperatorType& splus
+			    = ModelBaseType::naturalOperator("splus", site, 0);
 
 			addMagneticField(hmatrix, 'X', site);
 			addMagneticField(hmatrix, 'Z', site);
@@ -350,8 +349,7 @@ protected:
 
 		OpForLinkType splus("splus");
 
-		auto valueModiferTerm0 = [](ComplexOrRealType& value)
-		{ value *= 0.5; };
+		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *= 0.5; };
 
 		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 
@@ -363,34 +361,26 @@ protected:
 		OpForLinkType splusB("splusB");
 
 		const bool wantsHermit = true;
-		ModelTermType& spsmB1 = ModelBaseType::createTerm("SplusSminusB1",
-		                                                  wantsHermit,
-		                                                  "SplusSminus");
+		ModelTermType& spsmB1
+		    = ModelBaseType::createTerm("SplusSminusB1", wantsHermit, "SplusSminus");
 		spsmB1.push(splusB, 'N', splus, 'C', valueModiferTerm0);
 
-		ModelTermType& spsmB2 = ModelBaseType::createTerm("SplusSminusB2",
-		                                                  wantsHermit,
-		                                                  "SplusSminus");
+		ModelTermType& spsmB2
+		    = ModelBaseType::createTerm("SplusSminusB2", wantsHermit, "SplusSminus");
 		spsmB2.push(splus, 'N', splusB, 'C', valueModiferTerm0);
 
 		OpForLinkType szB("szB");
 
-		ModelTermType& szszB1 = ModelBaseType::createTerm("szszB1",
-		                                                  wantsHermit,
-		                                                  "szsz");
+		ModelTermType& szszB1 = ModelBaseType::createTerm("szszB1", wantsHermit, "szsz");
 		szszB1.push(szB, 'N', sz, 'N');
 
-		ModelTermType& szszB2 = ModelBaseType::createTerm("szszB2",
-		                                                  wantsHermit,
-		                                                  "szsz");
+		ModelTermType& szszB2 = ModelBaseType::createTerm("szszB2", wantsHermit, "szsz");
 		szszB2.push(sz, 'N', szB, 'N');
 	}
 
 private:
 
-	void addMagneticField(SparseMatrixType& hmatrix,
-	                      char c,
-	                      SizeType site) const
+	void addMagneticField(SparseMatrixType& hmatrix, char c, SizeType site) const
 	{
 		assert(c == 'X' || c == 'Z');
 
@@ -437,8 +427,7 @@ private:
 	}
 
 	//! Find S^+_site in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(SizeType site,
-	                                   const HilbertBasisType& natBasis) const
+	SparseMatrixType findSplusMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -477,8 +466,7 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
+	SparseMatrixType findSzMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -504,8 +492,7 @@ private:
 	}
 
 	//! Find Maximal_i in the natural basis natBasis
-	SparseMatrixType findMaximal(SizeType site,
-	                             const HilbertBasisType& natBasis) const
+	SparseMatrixType findMaximal(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -530,8 +517,7 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findSxMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
+	SparseMatrixType findSxMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SparseMatrixType Splus_temp = findSplusMatrices(site, natBasis);
 		SparseMatrixType Sminus_temp, Sx;
@@ -558,7 +544,9 @@ private:
 		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 1);
 
 		if (isCanonical && !modelParameters_.magneticFieldX.empty())
-			err(PsimagLite::String(__FILE__) + ": MagneticFieldX CANNOT be canonical. Please " + "delete the TargetSzPlusConst= from the input file\n");
+			err(PsimagLite::String(__FILE__)
+			    + ": MagneticFieldX CANNOT be canonical. Please "
+			    + "delete the TargetSzPlusConst= from the input file\n");
 
 		VectorSizeType other;
 		if (isCanonical)

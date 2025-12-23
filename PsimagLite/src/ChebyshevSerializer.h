@@ -48,8 +48,7 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename RealType>
-struct KernelPolynomialParameters {
+template <typename RealType> struct KernelPolynomialParameters {
 
 	enum
 	{
@@ -62,16 +61,14 @@ struct KernelPolynomialParameters {
 	    : type(type1)
 	    , cutoff(cutoff1)
 	    , lambda(lambda1)
-	{
-	}
+	{ }
 
 	SizeType type;
 	SizeType cutoff;
 	RealType lambda;
 }; // struct KernelPolynomialParameters
 
-template <typename VectorType_>
-class ChebyshevSerializer {
+template <typename VectorType_> class ChebyshevSerializer {
 
 	typedef typename VectorType_::value_type VectorElementType;
 	typedef typename Real<VectorElementType>::Type RealType;
@@ -83,21 +80,18 @@ public:
 	typedef VectorType_ VectorType;
 	typedef typename VectorType::value_type FieldType;
 	typedef Matrix<FieldType> MatrixType;
-	typedef
-	    typename Vector<std::pair<RealType, RealType>>::Type PlotDataType;
+	typedef typename Vector<std::pair<RealType, RealType>>::Type PlotDataType;
 	typedef PlotParams<RealType> PlotParamsType;
 	typedef ParametersForSolver<RealType> ParametersType;
 	typedef KernelPolynomialParameters<RealType> KernelParametersType;
 	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
 	typedef typename TridiagonalMatrixType::VectorRealType VectorRealType;
 
-	ChebyshevSerializer(const TridiagonalMatrixType& ab,
-	                    const ParametersType& params)
+	ChebyshevSerializer(const TridiagonalMatrixType& ab, const ParametersType& params)
 	    : progress_("ChebyshevSerializer")
 	    , moments_(ab)
 	    , params_(params)
-	{
-	}
+	{ }
 
 	template <typename IoInputType>
 	ChebyshevSerializer(IoInputType& io)
@@ -113,8 +107,7 @@ public:
 		}
 	}
 
-	template <typename SomeIoOutputType>
-	void write(SomeIoOutputType&, String) const
+	template <typename SomeIoOutputType> void write(SomeIoOutputType&, String) const
 	{
 		String name(typeid(SomeIoOutputType).name());
 		std::cerr << "WARNING: cannot save ChebyshevSerializer";
@@ -132,7 +125,9 @@ public:
 
 	static const String& stringMarker() { return stringMarker_; }
 
-	void plot(PlotDataType& result, const PlotParamsType& params, const KernelParametersType& kernelParams) const
+	void plot(PlotDataType& result,
+	          const PlotParamsType& params,
+	          const KernelParametersType& kernelParams) const
 	{
 		SizeType cutoff = kernelParams.cutoff;
 		if (cutoff == 0 || moments_.size() < cutoff)
@@ -195,8 +190,7 @@ private:
 		}
 	}
 
-	void initKernel(VectorRealType& gn,
-	                const KernelParametersType& kernelParams) const
+	void initKernel(VectorRealType& gn, const KernelParametersType& kernelParams) const
 	{
 		switch (kernelParams.type) {
 		case KernelParametersType::JACKSON:
@@ -217,7 +211,8 @@ private:
 		SizeType nPlus1 = gn.size() + 1;
 		RealType cot1 = 1.0 / tan(M_PI / nPlus1);
 		for (SizeType i = 0; i < gn.size(); i++) {
-			gn[i] = (nPlus1 - i) * cos(M_PI * i / nPlus1) + sin(M_PI * i / nPlus1) * cot1;
+			gn[i]
+			    = (nPlus1 - i) * cos(M_PI * i / nPlus1) + sin(M_PI * i / nPlus1) * cot1;
 			gn[i] /= nPlus1;
 		}
 	}

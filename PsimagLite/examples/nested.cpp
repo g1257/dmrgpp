@@ -32,8 +32,7 @@ public:
 	    : ntasks_(ntasks)
 	    , x_(nthreads, 0)
 	    , offset_(outerTask * ntasks)
-	{
-	}
+	{ }
 
 	SizeType tasks() const { return ntasks_; }
 
@@ -64,13 +63,15 @@ class MyHelper {
 
 public:
 
-	MyHelper(SizeType ntasks, SizeType nthreadsOuter, SizeType ntasksInner, SizeType nthreadsInner)
+	MyHelper(SizeType ntasks,
+	         SizeType nthreadsOuter,
+	         SizeType ntasksInner,
+	         SizeType nthreadsInner)
 	    : ntasks_(ntasks)
 	    , x_(nthreadsOuter, 0)
 	    , ntasksInner_(ntasksInner)
 	    , nthreadsInner_(nthreadsInner)
-	{
-	}
+	{ }
 
 	SizeType tasks() const { return ntasks_; }
 

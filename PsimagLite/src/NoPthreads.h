@@ -84,15 +84,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 
 namespace PsimagLite {
-template <typename PthreadFunctionHolderType>
-class NoPthreads {
+template <typename PthreadFunctionHolderType> class NoPthreads {
 
 public:
 
 	NoPthreads(SizeType npthreads = 1, int = 0)
 	{
-		std::cerr
-		    << "NoPthreads is deprecated, please use NoPthreadsNg\n";
+		std::cerr << "NoPthreads is deprecated, please use NoPthreadsNg\n";
 		assert(npthreads == 1);
 	}
 

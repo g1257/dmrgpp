@@ -92,12 +92,11 @@ template <typename TargetParamsType,
           typename WaveFunctionTransfType,
           typename LanczosSolverType,
           typename VectorWithOffsetType>
-class TimeVectorsSuzukiTrotter : public TimeVectorsBase<
-                                     TargetParamsType,
-                                     ModelType,
-                                     WaveFunctionTransfType,
-                                     LanczosSolverType,
-                                     VectorWithOffsetType> {
+class TimeVectorsSuzukiTrotter : public TimeVectorsBase<TargetParamsType,
+                                                        ModelType,
+                                                        WaveFunctionTransfType,
+                                                        LanczosSolverType,
+                                                        VectorWithOffsetType> {
 
 	typedef TimeVectorsBase<TargetParamsType,
 	                        ModelType,
@@ -121,8 +120,7 @@ class TimeVectorsSuzukiTrotter : public TimeVectorsBase<
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef VectorComplexOrRealType TargetVectorType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type
-	    VectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 	typedef typename ModelType::HilbertBasisType HilbertBasisType;
 	typedef typename ModelType::HilbertBasisType::value_type HilbertStateType;
 	using OneSiteSpacesType = typename WaveFunctionTransfType::OneSiteSpacesType;
@@ -142,8 +140,7 @@ public:
 	    , wft_(wft)
 	    , lrs_(lrs)
 	    , twoSiteDmrg_(wft_.options().twoSiteDmrg)
-	{
-	}
+	{ }
 
 	virtual void calcTimeVectors(const VectorSizeType& indices,
 	                             RealType Eg,
@@ -185,10 +182,13 @@ public:
 		SizeType lastIndexLeft = lrs_.left().block().size();
 		assert(lastIndexLeft > 0);
 		lastIndexLeft--;
-		SizeType site = static_cast<SizeType>(lrs_.left().block()[lastIndexLeft] / sitesPerBlock);
+		SizeType site
+		    = static_cast<SizeType>(lrs_.left().block()[lastIndexLeft] / sitesPerBlock);
 		bool oddLink = (site & 1);
-		bool b1 = (oddLink && extraData.dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
-		bool b2 = (!oddLink && extraData.dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		bool b1
+		    = (oddLink && extraData.dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		bool b2
+		    = (!oddLink && extraData.dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 		if (b2 && lrs_.left().block().size() == sitesPerBlock)
 			b2 = false;
 
@@ -227,12 +227,14 @@ public:
 		transposeConjugate(transformET, transformE);
 
 		SizeType hilbertSize = model_.hilbertSize(extraData.block[0]);
-		if (extraData.dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM && lrs_.right().size() == hilbertSize) {
+		if (extraData.dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM
+		    && lrs_.right().size() == hilbertSize) {
 			transformE.makeDiagonal(hilbertSize, 1);
 			transformET.makeDiagonal(hilbertSize, 1);
 		}
 
-		if (extraData.dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON && lrs_.left().size() == hilbertSize) {
+		if (extraData.dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON
+		    && lrs_.left().size() == hilbertSize) {
 			transformS.makeDiagonal(hilbertSize, 1);
 			transformST.makeDiagonal(hilbertSize, 1);
 		}
@@ -242,7 +244,8 @@ public:
 			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
 			VectorWithOffsetType src = *targetVectors_[ii];
-			// Only time differences here (i.e. extra.times[i] not extra.times[i]+currentTime_)
+			// Only time differences here (i.e. extra.times[i] not
+			// extra.times[i]+currentTime_)
 			calcTargetVector(*targetVectors_[ii],
 			                 Eg,
 			                 src,
@@ -273,7 +276,8 @@ private:
 		assert(nsites > 0);
 		SizeType start = model_.params().sitesPerBlock - 1;
 		for (SizeType i = start; i < nsites - 1; i++) {
-			VectorSizeType::const_iterator it = find(linksSeen_.begin(), linksSeen_.end(), i);
+			VectorSizeType::const_iterator it
+			    = find(linksSeen_.begin(), linksSeen_.end(), i);
 			if (it == linksSeen_.end())
 				return false;
 		}
@@ -294,7 +298,8 @@ private:
 		// OK, now that we got the partition number right, let's wft:
 		VectorSizeType nk;
 		setNk(nk, block);
-		ProgramGlobals::DirectionEnum dir = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM; // FIXME!
+		ProgramGlobals::DirectionEnum dir
+		    = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM; // FIXME!
 		OneSiteSpacesType oneSiteSpaces(block[0], dir, model_);
 		wft_.setInitialVector(phiNew, *targetVectors_[i], lrs_, oneSiteSpaces);
 		phiNew.collapseSectors();
@@ -316,16 +321,8 @@ private:
 			SizeType i0 = phi.sector(ii);
 			SizeType total = phi.effectiveSize(i0);
 			TargetVectorType result(total, 0.0);
-			calcTimeVectorsSuzukiTrotter(result,
-			                             Eg,
-			                             phi,
-			                             systemOrEnviron,
-			                             i0,
-			                             time,
-			                             S,
-			                             ST,
-			                             E,
-			                             ET);
+			calcTimeVectorsSuzukiTrotter(
+			    result, Eg, phi, systemOrEnviron, i0, time, S, ST, E, ET);
 			// NOTE: targetVectors_[0] = exp(iHt) |phi>
 			target.setDataInSector(result, i0);
 		}
@@ -418,7 +415,8 @@ private:
 
 		MatrixOrIdentityType transformT1(!twoSiteDmrg_, transformT);
 		MatrixOrIdentityType transform1(!twoSiteDmrg_, transform);
-		for (SizeType k = transformT1.getRowPtr(yp); k < transformT1.getRowPtr(yp + 1); k++) {
+		for (SizeType k = transformT1.getRowPtr(yp); k < transformT1.getRowPtr(yp + 1);
+		     k++) {
 			SizeType x1 = 0, x2p = 0;
 			packLeft.unpack(x1, x2p, lrs_.left().permutation(xp));
 			int yfull = transformT1.getColOrExit(k);
@@ -428,28 +426,29 @@ private:
 			packRight.unpack(y1p, y2, oldLrs.right().permutation(yfull));
 			for (SizeType x2 = 0; x2 < hilbertSize; x2++) {
 				for (SizeType y1 = 0; y1 < hilbertSize; y1++) {
-					SizeType yfull2 = packRight.pack(y1,
-					                                 y2,
-					                                 oldLrs.right().permutationInverse());
+					SizeType yfull2 = packRight.pack(
+					    y1, y2, oldLrs.right().permutationInverse());
 					for (SizeType k2 = transform1.getRowPtr(yfull2);
 					     k2 < transform1.getRowPtr(yfull2 + 1);
 					     k2++) {
 						int y = transform1.getColOrExit(k2);
 						if (y < 0)
 							y = yfull2;
-						SizeType x = packLeft.pack(x1,
-						                           x2,
-						                           lrs_.left().permutationInverse());
-						SizeType j = packSuper.pack(x,
-						                            y,
-						                            lrs_.super().permutationInverse());
-						ComplexOrRealType tmp = m(iperm[x2 + y1 * hilbertSize],
-						                          iperm[x2p + y1p * hilbertSize]);
+						SizeType x = packLeft.pack(
+						    x1, x2, lrs_.left().permutationInverse());
+						SizeType j = packSuper.pack(
+						    x, y, lrs_.super().permutationInverse());
+						ComplexOrRealType tmp
+						    = m(iperm[x2 + y1 * hilbertSize],
+						        iperm[x2p + y1p * hilbertSize]);
 						if (PsimagLite::norm(tmp) < 1e-12)
 							continue;
 						if (j < offset || j >= offset + phi0.size())
-							throw PsimagLite::RuntimeError("j out of bounds\n");
-						result[j - offset] += tmp * phi0[i] * transformT1.getValue(k) * transform1.getValue(k2);
+							throw PsimagLite::RuntimeError(
+							    "j out of bounds\n");
+						result[j - offset] += tmp * phi0[i]
+						    * transformT1.getValue(k)
+						    * transform1.getValue(k2);
 					}
 				}
 			}
@@ -484,7 +483,8 @@ private:
 		MatrixOrIdentityType transformT1(!twoSiteDmrg_, transformT);
 		MatrixOrIdentityType transform1(!twoSiteDmrg_, transform);
 
-		for (SizeType k = transformT1.getRowPtr(xp); k < transformT1.getRowPtr(xp + 1); k++) {
+		for (SizeType k = transformT1.getRowPtr(xp); k < transformT1.getRowPtr(xp + 1);
+		     k++) {
 			int xfull = transformT1.getColOrExit(k);
 			if (xfull < 0)
 				xfull = xp;
@@ -495,38 +495,38 @@ private:
 			packRight.unpack(y1p, y2, lrs_.right().permutation(yp));
 			for (SizeType x2 = 0; x2 < hilbertSize; x2++) {
 				for (SizeType y1 = 0; y1 < hilbertSize; y1++) {
-					SizeType xfull2 = packLeft.pack(x1,
-					                                x2,
-					                                oldLrs.left().permutationInverse());
+					SizeType xfull2 = packLeft.pack(
+					    x1, x2, oldLrs.left().permutationInverse());
 					for (SizeType k2 = transform1.getRowPtr(xfull2);
 					     k2 < transform1.getRowPtr(xfull2 + 1);
 					     k2++) {
 						int x = transform1.getColOrExit(k2);
 						if (x < 0)
 							x = xfull2;
-						SizeType y = packRight.pack(y1,
-						                            y2,
-						                            lrs_.right().permutationInverse());
-						SizeType j = packSuper.pack(x,
-						                            y,
-						                            lrs_.super().permutationInverse());
+						SizeType y = packRight.pack(
+						    y1, y2, lrs_.right().permutationInverse());
+						SizeType j = packSuper.pack(
+						    x, y, lrs_.super().permutationInverse());
 
-						ComplexOrRealType tmp = m(iperm[x2 + y1 * hilbertSize],
-						                          iperm[x2p + y1p * hilbertSize]);
+						ComplexOrRealType tmp
+						    = m(iperm[x2 + y1 * hilbertSize],
+						        iperm[x2p + y1p * hilbertSize]);
 						if (PsimagLite::norm(tmp) < 1e-12)
 							continue;
 						if (j < offset || j >= offset + phi0.size())
-							throw PsimagLite::RuntimeError("j out of bounds (environ)\n");
+							throw PsimagLite::RuntimeError(
+							    "j out of bounds (environ)\n");
 
-						result[j - offset] += tmp * phi0[i] * transformT1.getValue(k) * transform1.getValue(k2);
+						result[j - offset] += tmp * phi0[i]
+						    * transformT1.getValue(k)
+						    * transform1.getValue(k2);
 					}
 				}
 			}
 		}
 	}
 
-	void suzukiTrotterPerm(VectorSizeType&,
-	                       const VectorSizeType&) const
+	void suzukiTrotterPerm(VectorSizeType&, const VectorSizeType&) const
 	{
 		err("suzukiTrotter no longer supported (sorry!)\n");
 	}
@@ -537,8 +537,10 @@ private:
 	               const RealType& time) const
 	{
 		SparseMatrixType hmatrix;
-		RealType factorForDiagonals = (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 1.0 : 0.0;
-		if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON && block[0] == 0)
+		RealType factorForDiagonals
+		    = (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 1.0 : 0.0;
+		if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON
+		    && block[0] == 0)
 			factorForDiagonals = 1.0;
 
 		if (fabs(factorForDiagonals) > 1e-6) {
@@ -577,7 +579,8 @@ private:
 			for (SizeType j = 0; j < blockRight.size(); ++j) {
 				SizeType jnd = blockRight[j];
 				assert(ind != jnd);
-				if (!model_.superGeometry().connected(smax, emin, VectorSizeType { ind, jnd }))
+				if (!model_.superGeometry().connected(
+				        smax, emin, VectorSizeType { ind, jnd }))
 					continue;
 				block.push_back(ind);
 				block.push_back(jnd);

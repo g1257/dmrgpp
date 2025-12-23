@@ -94,12 +94,11 @@ template <typename TargetParamsType,
           typename WaveFunctionTransfType,
           typename LanczosSolverType,
           typename VectorWithOffsetType_>
-class TimeVectorsKrylov : public TimeVectorsBase<
-                              TargetParamsType,
-                              ModelType,
-                              WaveFunctionTransfType,
-                              LanczosSolverType,
-                              VectorWithOffsetType_> {
+class TimeVectorsKrylov : public TimeVectorsBase<TargetParamsType,
+                                                 ModelType,
+                                                 WaveFunctionTransfType,
+                                                 LanczosSolverType,
+                                                 VectorWithOffsetType_> {
 
 public:
 
@@ -124,7 +123,8 @@ public:
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType> ParallelTriDiagType;
+	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
+	    ParallelTriDiagType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
 	typedef typename ParallelTriDiagType::TargetVectorType VectorType;
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
@@ -162,8 +162,7 @@ public:
 	    , ioIn_(ioIn)
 	    , timeHasAdvanced_(false)
 	    , krylovHelper_(model.params(), 0)
-	{
-	}
+	{ }
 
 	virtual void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
 	                             RealType Eg,
@@ -177,28 +176,30 @@ public:
 
 		// Only for RIXS Dynamics wft and (if needed) advance
 		if (extra.wftAndAdvanceIfNeeded) {
-			SizeType advance = (timeHasAdvanced_) ? indices[indices.size() - 1] : indices[0];
+			SizeType advance
+			    = (timeHasAdvanced_) ? indices[indices.size() - 1] : indices[0];
 			VectorWithOffsetType phiNew;
 			assert(targetVectors_[advance]);
 			if (targetVectors_[advance]->size() > 0) {
 				SizeType numberOfSites = lrs_.super().block().size();
 				if (extra.block[0] != 0 && extra.block[0] != numberOfSites - 1) {
-					BaseType::wftHelper().wftOneVector(phiNew,
-					                                   *targetVectors_[advance],
-					                                   extra.block[0]);
+					BaseType::wftHelper().wftOneVector(
+					    phiNew, *targetVectors_[advance], extra.block[0]);
 
 					*targetVectors_[indices[0]] = phiNew;
 				} else {
 					if (timeHasAdvanced_) {
 						assert(indices[0] != advance);
-						*targetVectors_[indices[0]] = *targetVectors_[advance];
+						*targetVectors_[indices[0]]
+						    = *targetVectors_[advance];
 					}
 				}
 			}
 		}
 
 		const SizeType n = indices.size();
-		if (this->currentTimeStep() == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
+		if (this->currentTimeStep() == 0 && tstStruct_.noOperator()
+		    && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
 				const SizeType ii = indices[i];
 				*targetVectors_[ii] = phi;
@@ -255,7 +256,8 @@ private:
 			const SizeType ii = indices[i];
 			assert(ii < targetVectors_.size());
 			*targetVectors_[ii] = phi;
-			// Only time differences here (i.e. extra.times[i] not extra.times[i]+currentTime_)
+			// Only time differences here (i.e. extra.times[i] not
+			// extra.times[i]+currentTime_)
 			calcTargetVector(*targetVectors_[ii], phi, T, V, Eg, eigs, steps, i, times);
 		}
 	}
@@ -314,9 +316,11 @@ private:
 		VectorType tmp(n2);
 		r.resize(n2);
 		krylovHelper_.calcR(r, action, T, V, phi, steps, i0);
-		psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
 		r.resize(n);
-		psimag::BLAS::GEMV('N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(r[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(r[0]), 1);
 	}
 
 	void triDiag(const VectorWithOffsetType& phi,
@@ -327,7 +331,8 @@ private:
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
-		ParallelTriDiagType helperTriDiag(phi, T, V, steps, lrs_, this->time(), model_, ioIn_);
+		ParallelTriDiagType helperTriDiag(
+		    phi, T, V, steps, lrs_, this->time(), model_, ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}

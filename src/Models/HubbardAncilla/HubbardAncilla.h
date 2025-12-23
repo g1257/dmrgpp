@@ -91,8 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 
 namespace Dmrg {
-template <typename ModelBaseType>
-class HubbardAncilla : public ModelBaseType {
+template <typename ModelBaseType> class HubbardAncilla : public ModelBaseType {
 
 public:
 
@@ -140,8 +139,7 @@ public:
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , helperHubbardAncilla_(superGeometry_, modelParameters_)
-	{
-	}
+	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -194,7 +192,8 @@ protected:
 				if (!hot && (sigma & 1))
 					continue;
 				MatrixType tmp;
-				HelperHubbardAncillaType::findOperatorMatrices(tmp, i, sigma, natBasis);
+				HelperHubbardAncillaType::findOperatorMatrices(
+				    tmp, i, sigma, natBasis);
 				SparseMatrixType tmpMatrix(tmp);
 				SizeType m = 0;
 				int asign = 1;
@@ -256,7 +255,8 @@ protected:
 				         'N',
 				         c,
 				         'C',
-				         typename ModelTermType::Su2Properties(1, (spin == 1) ? -1 : 1, spin));
+				         typename ModelTermType::Su2Properties(
+				             1, (spin == 1) ? -1 : 1, spin));
 			}
 
 			OpForLinkType l("l", spin);

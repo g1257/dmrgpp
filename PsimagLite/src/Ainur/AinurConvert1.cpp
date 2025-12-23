@@ -8,13 +8,13 @@
 
 namespace PsimagLite {
 
-boost::spirit::qi::rule<std::string::iterator, std::vector<std::string>(), boost::spirit::qi::space_type>
-ruleRows()
+boost::spirit::qi::
+    rule<std::string::iterator, std::vector<std::string>(), boost::spirit::qi::space_type>
+    ruleRows()
 {
-	boost::spirit::qi::rule<std::string::iterator,
-	                        std::vector<std::string>(),
-	                        boost::spirit::qi::space_type>
-	    myrule = "[" >> (+~boost::spirit::qi::char_(",[]")) % ',' >> "]";
+	boost::spirit::qi::
+	    rule<std::string::iterator, std::vector<std::string>(), boost::spirit::qi::space_type>
+	        myrule = "[" >> (+~boost::spirit::qi::char_(",[]")) % ',' >> "]";
 	return myrule;
 }
 
@@ -76,8 +76,7 @@ void AinurConvert::Action<T>::operator()(A& attr, ContextType&, bool&) const
 
 //---------
 
-template <typename T>
-void AinurConvert::convert(Matrix<T>& t, const AinurVariable& ainurVariable)
+template <typename T> void AinurConvert::convert(Matrix<T>& t, const AinurVariable& ainurVariable)
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
@@ -89,14 +88,16 @@ void AinurConvert::convert(Matrix<T>& t, const AinurVariable& ainurVariable)
 	IteratorType it = value.begin();
 	qi::rule<IteratorType, VectorStringType(), qi::space_type> ruRows = ruleRows();
 
-	qi::rule<IteratorType, VectorVectorVectorType(), qi::space_type> full = "[" >> -(ruRows % ",") >> "]";
+	qi::rule<IteratorType, VectorVectorVectorType(), qi::space_type> full
+	    = "[" >> -(ruRows % ",") >> "]";
 
 	ActionMatrix<T> actionMatrix("matrix", t, ainurMacros_);
 	bool r = qi::phrase_parse(it, value.end(), full[actionMatrix], qi::space);
 
 	// check if we have a match
 	if (!r) {
-		err("matrix parsing failed near " + stringContext(it, value.begin(), value.end()) + "\n");
+		err("matrix parsing failed near " + stringContext(it, value.begin(), value.end())
+		    + "\n");
 	}
 
 	if (it != value.end())
@@ -104,10 +105,12 @@ void AinurConvert::convert(Matrix<T>& t, const AinurVariable& ainurVariable)
 }
 
 template <typename T>
-void AinurConvert::convert(std::vector<T>& t,
-                           const AinurVariable& ainurVariable,
-                           typename EnableIf<Loki::TypeTraits<T>::isArith || IsComplexNumber<T>::True || TypesEqual<T, String>::True,
-                                             int>::Type)
+void AinurConvert::convert(
+    std::vector<T>& t,
+    const AinurVariable& ainurVariable,
+    typename EnableIf<Loki::TypeTraits<T>::isArith || IsComplexNumber<T>::True
+                          || TypesEqual<T, String>::True,
+                      int>::Type)
 {
 	namespace qi = boost::spirit::qi;
 	typedef std::string::iterator IteratorType;
@@ -123,41 +126,31 @@ void AinurConvert::convert(std::vector<T>& t,
 
 	// check if we have a match
 	if (!r)
-		err("vector parsing failed near " + stringContext(it, value.begin(), value.end()) + "\n");
+		err("vector parsing failed near " + stringContext(it, value.begin(), value.end())
+		    + "\n");
 
 	if (it != value.end()) {
 		std::cerr << "vector parsing: unmatched part exists near ";
-		std::cerr << stringContext(it, value.begin(), value.end())
-		          << "\n";
+		std::cerr << stringContext(it, value.begin(), value.end()) << "\n";
 	}
 }
 
 //---------
 
-template void AinurConvert::convert(Matrix<DoubleOrFloatType>&,
-                                    const AinurVariable&);
+template void AinurConvert::convert(Matrix<DoubleOrFloatType>&, const AinurVariable&);
 
-template void AinurConvert::convert(Matrix<std::complex<DoubleOrFloatType>>&,
-                                    const AinurVariable&);
+template void AinurConvert::convert(Matrix<std::complex<DoubleOrFloatType>>&, const AinurVariable&);
 
 template void AinurConvert::convert(Matrix<String>&, const AinurVariable&);
 
-template void AinurConvert::convert(std::vector<DoubleOrFloatType>&,
-                                    const AinurVariable&,
-                                    int);
+template void AinurConvert::convert(std::vector<DoubleOrFloatType>&, const AinurVariable&, int);
 
 template void
-AinurConvert::convert(std::vector<std::complex<DoubleOrFloatType>>&,
-                      const AinurVariable&,
-                      int);
+AinurConvert::convert(std::vector<std::complex<DoubleOrFloatType>>&, const AinurVariable&, int);
 
-template void AinurConvert::convert(std::vector<SizeType>&,
-                                    const AinurVariable&,
-                                    int);
+template void AinurConvert::convert(std::vector<SizeType>&, const AinurVariable&, int);
 
 template void AinurConvert::convert(std::vector<int>&, const AinurVariable&, int);
 
-template void AinurConvert::convert(std::vector<String>&,
-                                    const AinurVariable&,
-                                    int);
+template void AinurConvert::convert(std::vector<String>&, const AinurVariable&, int);
 } // namespace PsimagLite

@@ -88,8 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-template <typename ModelType_, typename RngType_>
-class MettsStochastics {
+template <typename ModelType_, typename RngType_> class MettsStochastics {
 
 public:
 
@@ -105,16 +104,13 @@ public:
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	MettsStochastics(const ModelType& model,
-	                 int long seed,
-	                 const VectorSizeType& pure)
+	MettsStochastics(const ModelType& model, int long seed, const VectorSizeType& pure)
 	    : model_(model)
 	    , rng_(seed)
 	    , pure_(pure)
 	    , progress_("MettsStochastics")
 	    , addedSites_(0)
-	{
-	}
+	{ }
 
 	const ModelType& model() const { return model_; }
 
@@ -139,7 +135,8 @@ public:
 		}
 
 		PsimagLite::String s(__FILE__);
-		s += PsimagLite::String(" ") + ttos(__LINE__) + " " + __FUNCTION__ + " Probabilities don't amount to 1\n";
+		s += PsimagLite::String(" ") + ttos(__LINE__) + " " + __FUNCTION__
+		    + " Probabilities don't amount to 1\n";
 		throw PsimagLite::RuntimeError(s.c_str());
 	}
 

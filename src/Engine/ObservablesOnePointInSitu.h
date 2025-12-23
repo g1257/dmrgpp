@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename VectorType>
-class ObservablesOnePointInSitu {
+template <typename VectorType> class ObservablesOnePointInSitu {
 
 public:
 
@@ -97,10 +96,7 @@ public:
 			inSitu_[i] = psi.inSitu(i);
 	}
 
-	const typename VectorType::value_type& operator()(SizeType i) const
-	{
-		return inSitu_[i];
-	}
+	const typename VectorType::value_type& operator()(SizeType i) const { return inSitu_[i]; }
 
 private:
 

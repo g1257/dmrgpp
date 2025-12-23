@@ -19,8 +19,7 @@
  */
 namespace Dmrg {
 
-template <typename ComplexOrRealType, typename OmegaParamsType>
-class ProcOmegas {
+template <typename ComplexOrRealType, typename OmegaParamsType> class ProcOmegas {
 
 public:
 
@@ -41,8 +40,7 @@ public:
 
 		Qdata(SizeType n)
 		    : data_(n, nullptr)
-		{
-		}
+		{ }
 
 		Qdata() { }
 
@@ -141,7 +139,8 @@ public:
 				assert(numberOfQs == 0);
 				numberOfQs = v.size();
 			} else if (numberOfQs != v.size()) {
-				err("INTERNAL ERROR: Omega set with non equal number of q points\n");
+				err("INTERNAL ERROR: Omega set with non equal number of q "
+				    "points\n");
 			}
 
 			for (SizeType m = 0; m < numberOfQs; ++m) {
@@ -190,10 +189,7 @@ private:
 			                ttos(i) + " " + ttos(v1[i]) + " " + ttos(v2[i]) + "\n");
 	}
 
-	static void printToSpaceOut(std::ofstream& fout, PsimagLite::String str)
-	{
-		fout << str;
-	}
+	static void printToSpaceOut(std::ofstream& fout, PsimagLite::String str) { fout << str; }
 
 	void correctionVectorRead(VectorRealType& v1,
 	                          VectorRealType& v2,
@@ -220,7 +216,8 @@ private:
 
 			bool skip = true;
 			for (SizeType i = 0; i < labels.size(); ++i) {
-				bool isGs = (s.find("gs") != PsimagLite::String::npos || s.find("X0") != PsimagLite::String::npos);
+				bool isGs = (s.find("gs") != PsimagLite::String::npos
+				             || s.find("X0") != PsimagLite::String::npos);
 
 				if (s.find(labels[i]) == PsimagLite::String::npos || !isGs)
 					continue;
@@ -235,7 +232,8 @@ private:
 			VectorStringType tokens;
 			PsimagLite::split(tokens, s, " ");
 			if (tokens.size() != 5)
-				err("correctionVectorRead: Not 5 tokens in line " + s + "\nFile= " + inFile + "\n");
+				err("correctionVectorRead: Not 5 tokens in line " + s
+				    + "\nFile= " + inFile + "\n");
 
 			SizeType site = PsimagLite::atoi(tokens[0]);
 			SizeType c = 0;
@@ -245,14 +243,16 @@ private:
 					continue;
 
 				if (site >= numberOfSites_)
-					err("correctionVectorRead: Site " + ttos(site) + " is too big\n");
+					err("correctionVectorRead: Site " + ttos(site)
+					    + " is too big\n");
 
 				if (c == 1)
 					v1[site] = PsimagLite::atof(tokens[1]);
 				else if (c == 2)
 					v2[site] = PsimagLite::atof(tokens[1]);
 				else
-					err("correctionVectorRead: counter c wrong in " + inFile + "\n");
+					err("correctionVectorRead: counter c wrong in " + inFile
+					    + "\n");
 
 				defined[site] = true;
 			}
@@ -266,13 +266,13 @@ private:
 		// print LOGFILEOUT "$0: correctionVectorRead maxsite= $maxSite\n";
 	}
 
-	void checkSites(const VectorBoolType& defined,
-	                PsimagLite::String inFile)
+	void checkSites(const VectorBoolType& defined, PsimagLite::String inFile)
 	{
 		const SizeType n = defined.size();
 		for (SizeType i = 0; i < n; ++i)
 			if (!defined[i])
-				err("Undefined value for site= " + ttos(i) + " file= " + inFile + "\n");
+				err("Undefined value for site= " + ttos(i) + " file= " + inFile
+				    + "\n");
 	}
 
 	PsimagLite::String inputfile_;

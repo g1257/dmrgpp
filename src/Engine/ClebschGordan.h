@@ -89,8 +89,7 @@ namespace Dmrg {
 // Parts taken from Ref.S = http://caps.gsfc.nasa.gov/simpson/software/cg_f90.txt
 //( David G. Simpson NASA, Goddard Space Flight Center, Greenbelt, Maryland  20771)
 
-template <typename FieldType>
-class ClebschGordan {
+template <typename FieldType> class ClebschGordan {
 	typedef FieldType LongType;
 
 public:
@@ -106,8 +105,7 @@ public:
 
 	void init(SizeType numberOfFactorials)
 	{
-		factorial_.resize(numberOfFactorials),
-		    createFactorials();
+		factorial_.resize(numberOfFactorials), createFactorials();
 
 		copies_++;
 		if (copies_ > 3) {
@@ -117,9 +115,7 @@ public:
 	}
 
 	// receiving format is (2*j,j+m)
-	FieldType operator()(const PairType& jm,
-	                     const PairType& jm1,
-	                     const PairType& jm2) const
+	FieldType operator()(const PairType& jm, const PairType& jm1, const PairType& jm2) const
 	{
 		FieldType j, m, j1, m1, j2, m2;
 		convert_(j, m, jm);
@@ -139,7 +135,8 @@ private:
 	                   FieldType m2) const
 	{
 		// From Ref.S
-		if (isfrac(j1 + j2 + j) || isfrac(j1 + m1) || isfrac(j2 + m2) || isfrac(j + m) || isfrac(-j1 + j - m2) || isfrac(-j2 + j + m1))
+		if (isfrac(j1 + j2 + j) || isfrac(j1 + m1) || isfrac(j2 + m2) || isfrac(j + m)
+		    || isfrac(-j1 + j - m2) || isfrac(-j2 + j + m1))
 			return false;
 
 		if (m != (m1 + m2))
@@ -155,7 +152,8 @@ private:
 	               FieldType j2,
 	               FieldType m2) const
 	{
-		if ((j3 < fabs(j1 - j2)) || (j3 > (j1 + j2)) || (fabs(m1) > j1) || (fabs(m2) > j2) || (fabs(m3) > j3))
+		if ((j3 < fabs(j1 - j2)) || (j3 > (j1 + j2)) || (fabs(m1) > j1) || (fabs(m2) > j2)
+		    || (fabs(m3) > j3))
 			return false;
 		return true;
 	}
@@ -175,17 +173,15 @@ private:
 		return false;
 	}
 
-	//\delta_{m,m_1+m_2} \sqrt{\frac{(2j+1)(j+j_1-j_2)!(j-j_1+j_2)!(j_1+j_2-j)! }{(j_1+j_2+j+1)!}} \ \times
+	//\delta_{m,m_1+m_2} \sqrt{\frac{(2j+1)(j+j_1-j_2)!(j-j_1+j_2)!(j_1+j_2-j)!
+	//}{(j_1+j_2+j+1)!}} \ \times
 	//
 	//\sqrt{(j+m)!(j-m)!(j_1-m_1)!(j_1+m_1)!(j_2-m_2)!(j_2+m_2)!}\ \times
 	//
-	//\sum_k \frac{(-1)^k}{k!(j_1+j_2-j-k)!(j_1-m_1-k)!(j_2+m_2-k)!(j-j_2+m_1+k)!(j-j_1-m_2+k)!}.
-	FieldType cg(FieldType j,
-	             FieldType m,
-	             FieldType j1,
-	             FieldType m1,
-	             FieldType j2,
-	             FieldType m2) const
+	//\sum_k
+	//\frac{(-1)^k}{k!(j_1+j_2-j-k)!(j_1-m_1-k)!(j_2+m_2-k)!(j-j_2+m_1+k)!(j-j_1-m_2+k)!}.
+	FieldType
+	cg(FieldType j, FieldType m, FieldType j1, FieldType m1, FieldType j2, FieldType m2) const
 	{
 		if (!passesHurdles(j, m, j1, m1, j2, m2))
 			return 0;
@@ -205,18 +201,16 @@ private:
 	                FieldType m2) const
 	{
 		FieldType c = sqrt((j3 + j3 + 1) / fact_(nint(j1 + j2 + j3 + 1)));
-		c *= sqrt(fact_(nint(j1 + j2 - j3)) * fact_(nint(j2 + j3 - j1)) * fact_(nint(j3 + j1 - j2)));
-		c *= sqrt(fact_(nint(j1 + m1)) * fact_(nint(j1 - m1)) * fact_(nint(j2 + m2)) * fact_(nint(j2 - m2)) * fact_(nint(j3 + m3)) * fact_(nint(j3 - m3)));
+		c *= sqrt(fact_(nint(j1 + j2 - j3)) * fact_(nint(j2 + j3 - j1))
+		          * fact_(nint(j3 + j1 - j2)));
+		c *= sqrt(fact_(nint(j1 + m1)) * fact_(nint(j1 - m1)) * fact_(nint(j2 + m2))
+		          * fact_(nint(j2 - m2)) * fact_(nint(j3 + m3)) * fact_(nint(j3 - m3)));
 		return c;
 	}
 
 	// From Ref. S
-	FieldType cg_f2(FieldType j3,
-	                FieldType,
-	                FieldType j1,
-	                FieldType m1,
-	                FieldType j2,
-	                FieldType m2) const
+	FieldType
+	cg_f2(FieldType j3, FieldType, FieldType j1, FieldType m1, FieldType j2, FieldType m2) const
 	{
 		FieldType sumk = 0;
 		for (SizeType k = 0; k < factorial_.size(); k++) {
@@ -230,7 +224,9 @@ private:
 				continue;
 			if (j2 + m2 - k < 0)
 				continue;
-			FieldType term = fact_(nint(j1 + j2 - j3 - k)) * fact_(nint(j3 - j1 - m2 + k)) * fact_(nint(j3 - j2 + m1 + k)) * fact_(nint(j1 - m1 - k)) * fact_(nint(j2 + m2 - k)) * fact_(k);
+			FieldType term = fact_(nint(j1 + j2 - j3 - k))
+			    * fact_(nint(j3 - j1 - m2 + k)) * fact_(nint(j3 - j2 + m1 + k))
+			    * fact_(nint(j1 - m1 - k)) * fact_(nint(j2 + m2 - k)) * fact_(k);
 			if (k % 2 == 1)
 				term = -term;
 			sumk += 1.0 / term;
@@ -251,10 +247,7 @@ private:
 			factorial_[i] = i * factorial_[i - 1];
 	}
 
-	LongType fact_(LongType x) const
-	{
-		return factorial_[(int)x];
-	}
+	LongType fact_(LongType x) const { return factorial_[(int)x]; }
 
 	int parityOf(const FieldType& f)
 	{
@@ -268,8 +261,7 @@ private:
 	typename PsimagLite::Vector<LongType>::Type factorial_;
 }; // ClebschGordan
 
-template <typename FieldType>
-SizeType ClebschGordan<FieldType>::copies_ = 0;
+template <typename FieldType> SizeType ClebschGordan<FieldType>::copies_ = 0;
 } // namespace Dmrg
 
 /*@}*/

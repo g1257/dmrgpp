@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename VectorType>
-class MettsSerializer {
+template <typename VectorType> class MettsSerializer {
 
 	typedef typename VectorType::value_type VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
@@ -101,8 +100,7 @@ public:
 	    : currentBeta_(currentBeta)
 	    , site_(site)
 	    , targetVectors_(targetVectors)
-	{
-	}
+	{ }
 
 	MettsSerializer(typename PsimagLite::IoSelector::In& io)
 	{
@@ -112,7 +110,8 @@ public:
 		io.read(x, s);
 
 		if (x < 0)
-			throw PsimagLite::RuntimeError("MettsSerializer:: time cannot be negative\n");
+			throw PsimagLite::RuntimeError(
+			    "MettsSerializer:: time cannot be negative\n");
 
 		currentBeta_ = x;
 
@@ -120,14 +119,16 @@ public:
 		int xi = 0;
 		io.read(xi, s);
 		if (xi < 0)
-			throw PsimagLite::RuntimeError("MettsSerializer:: site cannot be negative\n");
+			throw PsimagLite::RuntimeError(
+			    "MettsSerializer:: site cannot be negative\n");
 
 		site_ = xi;
 
 		s = "TNUMBEROFVECTORS";
 		io.read(xi, s);
 		if (xi <= 0)
-			throw PsimagLite::RuntimeError("MettsSerializer:: n. of vectors must be positive\n");
+			throw PsimagLite::RuntimeError(
+			    "MettsSerializer:: n. of vectors must be positive\n");
 
 		targetVectors_.resize(xi);
 		for (SizeType i = 0; i < targetVectors_.size(); i++) {
@@ -136,29 +137,19 @@ public:
 		}
 	}
 
-	SizeType size(SizeType i = 0) const
-	{
-		return targetVectors_[i].size();
-	}
+	SizeType size(SizeType i = 0) const { return targetVectors_[i].size(); }
 
 	RealType beta() const { return currentBeta_; }
 
-	SizeType site() const
-	{
-		return site_;
-	}
+	SizeType site() const { return site_; }
 
-	const VectorType& vector(SizeType i = 0) const
-	{
-		return targetVectors_[i];
-	}
+	const VectorType& vector(SizeType i = 0) const { return targetVectors_[i]; }
 
 	template <typename IoOutputter>
-	void write(IoOutputter& io,
-	           typename PsimagLite::EnableIf<
-	               PsimagLite::IsOutputLike<IoOutputter>::True,
-	               int>::Type
-	           = 0) const
+	void
+	write(IoOutputter& io,
+	      typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type
+	      = 0) const
 	{
 		PsimagLite::String s = "BETA=" + ttos(currentBeta_);
 		io.printline(s);
@@ -167,7 +158,8 @@ public:
 		s = "TNUMBEROFVECTORS=" + ttos(targetVectors_.size());
 		io.printline(s);
 		for (SizeType i = 0; i < targetVectors_.size(); i++) {
-			PsimagLite::String label = "targetVector" + ttos(i) + "_" + ttos(currentBeta_);
+			PsimagLite::String label
+			    = "targetVector" + ttos(i) + "_" + ttos(currentBeta_);
 			targetVectors_[i].write(io, label);
 		}
 	}

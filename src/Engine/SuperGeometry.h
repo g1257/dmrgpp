@@ -10,7 +10,8 @@ template <typename ComplexOrRealType_, typename InputType_, typename ProgramGlob
 class SuperGeometry {
 public:
 
-	typedef PsimagLite::Geometry<ComplexOrRealType_, InputType_, ProgramGlobalsType> GeometryType;
+	typedef PsimagLite::Geometry<ComplexOrRealType_, InputType_, ProgramGlobalsType>
+	    GeometryType;
 	typedef typename GeometryType::ComplexOrRealType ComplexOrRealType;
 	typedef typename GeometryType::VectorSizeType VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
@@ -31,7 +32,8 @@ private:
 		{
 			assert(hItems.size() == 4);
 
-			return (hItems[1] == hItems[0] + 1 && hItems[2] == hItems[1] + 1 && hItems[3] == hItems[2] + 1);
+			return (hItems[1] == hItems[0] + 1 && hItems[2] == hItems[1] + 1
+			        && hItems[3] == hItems[2] + 1);
 		}
 
 		void addSuperConnections(VectorVectorSizeType& data,
@@ -39,8 +41,9 @@ private:
 		                         SizeType emin,
 		                         SizeType linSize) const
 		{
-			return (smax + 1 == emin) ? addSuperConnectionsFinite_(data, smax, emin, linSize)
-			                          : addSuperConnectionsInfinite_(data, smax, emin, linSize);
+			return (smax + 1 == emin)
+			    ? addSuperConnectionsFinite_(data, smax, emin, linSize)
+			    : addSuperConnectionsInfinite_(data, smax, emin, linSize);
 		}
 
 		SizeType holloutRadius() const { return 4; }
@@ -60,7 +63,8 @@ private:
 		                                  SizeType emin,
 		                                  SizeType linSize) const
 		{
-			// FIXME: Add here site substitutions for when the lattice is not fully built
+			// FIXME: Add here site substitutions for when the lattice is not fully
+			// built
 			return;
 		}
 
@@ -164,7 +168,8 @@ public:
 		const SizeType n = hItems.size();
 		assert(n == edofs.size());
 		if (n == 2)
-			return geometry_(smax, emin, hItems[0], edofs[0], hItems[1], edofs[1], term);
+			return geometry_(
+			    smax, emin, hItems[0], edofs[0], hItems[1], edofs[1], term);
 
 		assert(superStrings_.size() == 1);
 		return superStrings_[0]->operator()(smax, emin, hItems, edofs);
@@ -209,13 +214,12 @@ public:
 		return *dcaPtr_;
 	}
 
-	void addSuperConnections(VectorVectorSizeType& data,
-	                         SizeType smax,
-	                         SizeType emin) const
+	void addSuperConnections(VectorVectorSizeType& data, SizeType smax, SizeType emin) const
 	{
 		const SizeType n = superStrings_.size();
 		for (SizeType i = 0; i < n; ++i)
-			superStrings_[i]->addSuperConnections(data, smax, emin, geometry_.numberOfSites());
+			superStrings_[i]->addSuperConnections(
+			    data, smax, emin, geometry_.numberOfSites());
 	}
 
 	friend std::ostream& operator<<(std::ostream& os, const SuperGeometry& supergeometry)

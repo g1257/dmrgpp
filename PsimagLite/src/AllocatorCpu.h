@@ -48,22 +48,16 @@ typedef uint32_t SizeType;
 
 namespace PsimagLite {
 
-template <typename T, bool B = std::is_enum<T>::value>
-struct IsEnumClass : std::false_type {
-};
+template <typename T, bool B = std::is_enum<T>::value> struct IsEnumClass : std::false_type { };
 
 template <typename T>
 struct IsEnumClass<T, true>
     : std::integral_constant<
           bool,
-          !std::is_convertible<
-              T,
-              typename std::underlying_type<T>::type>::value> {
-};
+          !std::is_convertible<T, typename std::underlying_type<T>::type>::value> { };
 
 #ifdef USE_CUSTOM_ALLOCATOR
-template <typename T, int templateParamFlags>
-class AllocatorCpu : public std::allocator<T> {
+template <typename T, int templateParamFlags> class AllocatorCpu : public std::allocator<T> {
 	typedef typename std::allocator<T> BaseType;
 
 	typedef MemoryCpu MemoryCpuType;
@@ -71,8 +65,7 @@ class AllocatorCpu : public std::allocator<T> {
 
 public:
 
-	template <typename U>
-	struct rebind {
+	template <typename U> struct rebind {
 		typedef AllocatorCpu<U, templateParamFlags> other;
 	}; // struct rebind
 
@@ -82,23 +75,20 @@ public:
 	template <typename OtherType>
 	AllocatorCpu(const OtherType& x)
 	    : std::allocator<T>(x)
-	{
-	}
+	{ }
 
-	typename BaseType::pointer allocate(typename BaseType::size_type n,
-	                                    void* = 0)
+	typename BaseType::pointer allocate(typename BaseType::size_type n, void* = 0)
 	{
 		if (n > this->max_size())
 			throw std::runtime_error("Bad allocation\n");
 
-		typename BaseType::pointer x = (typename BaseType::pointer)globalMemoryCpu.allocate(
-		    n * sizeof(T));
+		typename BaseType::pointer x
+		    = (typename BaseType::pointer)globalMemoryCpu.allocate(n * sizeof(T));
 
 		return static_cast<T*>(x);
 	}
 
-	void deallocate(typename BaseType::pointer p,
-	                typename BaseType::size_type n)
+	void deallocate(typename BaseType::pointer p, typename BaseType::size_type n)
 	{
 		globalMemoryCpu.deallocate(p);
 	}
@@ -106,8 +96,7 @@ public:
 }; // class AllocatorCpu
 #endif
 
-template <typename T>
-class Allocator {
+template <typename T> class Allocator {
 public:
 
 #ifdef USE_CUSTOM_ALLOCATOR
@@ -117,47 +106,38 @@ public:
 #endif
 }; // class Allocator
 
-template <bool b, typename T>
-class EnableIf {
-};
+template <bool b, typename T> class EnableIf { };
 
-template <typename T>
-class EnableIf<true, T> {
+template <typename T> class EnableIf<true, T> {
 public:
 
 	typedef T Type;
 };
 
-template <typename T>
-struct RemoveConst {
+template <typename T> struct RemoveConst {
 	typedef T Type;
 };
 
-template <typename T>
-struct RemoveConst<const T> {
+template <typename T> struct RemoveConst<const T> {
 	typedef T Type;
 };
 
-template <typename T>
-struct IsStringLike {
+template <typename T> struct IsStringLike {
 	enum
 	{
 		True = false
 	};
 };
 
-template <typename A>
-struct IsStringLike<std::basic_string<char, std::char_traits<char>, A>> {
+template <typename A> struct IsStringLike<std::basic_string<char, std::char_traits<char>, A>> {
 	enum
 	{
 		True = true
 	};
 };
 
-typedef std::basic_string<char, std::char_traits<char>, Allocator<char>::Type>
-    String;
-typedef std::basic_istringstream<char, std::char_traits<char>, Allocator<char>::Type>
-    IstringStream;
+typedef std::basic_string<char, std::char_traits<char>, Allocator<char>::Type> String;
+typedef std::basic_istringstream<char, std::char_traits<char>, Allocator<char>::Type> IstringStream;
 
 class OstringStream {
 public:
@@ -181,8 +161,7 @@ public:
 
 	explicit RuntimeError(const String& what_arg)
 	    : std::runtime_error(what_arg.c_str())
-	{
-	}
+	{ }
 };
 
 class RangeError : public std::range_error {
@@ -190,8 +169,7 @@ public:
 
 	explicit RangeError(const String& what_arg)
 	    : std::range_error(what_arg.c_str())
-	{
-	}
+	{ }
 };
 
 class LogicError : public std::logic_error {
@@ -199,8 +177,7 @@ public:
 
 	explicit LogicError(const String& what_arg)
 	    : std::logic_error(what_arg.c_str())
-	{
-	}
+	{ }
 };
 
 } // namespace PsimagLite

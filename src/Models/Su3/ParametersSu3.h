@@ -100,8 +100,7 @@ struct ParametersSu3 : public ParametersModelBase<RealType, QnType> {
 		io.readline(p, "Su3RepresentationP=");
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersSu3";
 		io.createGroup(label);

@@ -16,12 +16,10 @@ public:
 	typedef DoubleOrFloatType RealType;
 	typedef std::complex<RealType> ComplexType;
 
-	AinurReadable(const VectorStringType& names,
-	              const VectorStoreType& storage)
+	AinurReadable(const VectorStringType& names, const VectorStoreType& storage)
 	    : names_(names)
 	    , storage_(storage)
-	{
-	}
+	{ }
 
 	int storageIndexByName(String name) const
 	{
@@ -112,8 +110,7 @@ public:
 		const Store& store = storage_[x];
 
 		if (store.type() == Store::MATRIX) {
-			std::cerr << "readValue: " << s
-			          << " coerced into vector\n";
+			std::cerr << "readValue: " << s << " coerced into vector\n";
 			Matrix<typename VectorLikeType::value_type> m;
 			readValue(m, sOrig);
 			v = m.data();
@@ -147,8 +144,7 @@ public:
 				v.resize(times);
 			n = v.size();
 			for (SizeType i = 0; i < n; ++i)
-				getEntryFromString(v[i],
-				                   store.value(0, names_[x]));
+				getEntryFromString(v[i], store.value(0, names_[x]));
 			return;
 		}
 
@@ -197,9 +193,8 @@ public:
 
 		for (SizeType i = 0; i < rows; ++i)
 			for (SizeType j = 0; j < cols; ++j)
-				getEntryFromString(
-				    m(i, j),
-				    store.value(i + j * rows + 2, names_[x]));
+				getEntryFromString(m(i, j),
+				                   store.value(i + j * rows + 2, names_[x]));
 	}
 
 	// read matrices
@@ -212,15 +207,9 @@ public:
 
 private:
 
-	void getEntryFromString(SizeType& entry, String s) const
-	{
-		entry = atoi(s.c_str());
-	}
+	void getEntryFromString(SizeType& entry, String s) const { entry = atoi(s.c_str()); }
 
-	void getEntryFromString(RealType& entry, String s) const
-	{
-		entry = atof(s.c_str());
-	}
+	void getEntryFromString(RealType& entry, String s) const { entry = atof(s.c_str()); }
 
 	void getEntryFromString(ComplexType& entry, String s) const
 	{

@@ -82,8 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelType, typename FourPointCorrelationsType>
-class Parallel4PointDs {
+template <typename ModelType, typename FourPointCorrelationsType> class Parallel4PointDs {
 
 	typedef std::pair<SizeType, SizeType> PairType;
 	typedef typename FourPointCorrelationsType::MatrixType MatrixType;
@@ -115,8 +114,7 @@ public:
 	    , gammas_(gammas)
 	    , pairs_(pairs)
 	    , mode_(mode)
-	{
-	}
+	{ }
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
@@ -132,7 +130,8 @@ public:
 		} else if (mode_ == MODE_THINupdn) {
 			fpd_(i, j) = fourPointThinupdn(i, j);
 		} else {
-			throw PsimagLite::RuntimeError("Parallel4PointDs: No matching mode_ found \n");
+			throw PsimagLite::RuntimeError(
+			    "Parallel4PointDs: No matching mode_ found \n");
 		}
 	}
 
@@ -154,20 +153,25 @@ private:
 		nx /= 2;
 		SizeType site = 0;
 		// C_{gamma0,up}
-		PsimagLite::String str("<gs|c[" + ttos(site) + "]?" + ttos(gammas[0] + 0 * nx) + "';");
-		// const SparseMatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx).data;
+		PsimagLite::String str("<gs|c[" + ttos(site) + "]?" + ttos(gammas[0] + 0 * nx)
+		                       + "';");
+		// const SparseMatrixType& opC0 = model.naturalOperator("c",site,gammas[0] +
+		// 0*nx).data;
 
 		// C_{gamma1,down}
 		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[1] + 1 * nx) + "';";
-		// const SparseMatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx).data;
+		// const SparseMatrixType& opC1 = model.naturalOperator("c",site,gammas[1] +
+		// 1*nx).data;
 
 		// C_{gamma2,down}
 		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[2] + 1 * nx) + ";";
-		// const SparseMatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx).data;
+		// const SparseMatrixType& opC2 = model.naturalOperator("c",site,gammas[2] +
+		// 1*nx).data;
 
 		// C_{gamma3,up}
 		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[3] + 0 * nx) + "|gs>";
-		// const SparseMatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx).data;
+		// const SparseMatrixType& opC3 = model.naturalOperator("c",site,gammas[3] +
+		// 0*nx).data;
 
 		BraketType braket(model_, str);
 		return fourpoint_(i, i + 1, j, j + 1, braket);

@@ -126,8 +126,7 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 		try {
 			io.readline(oStruncPhonons, "OneSiteTruncationPhononsMax=");
 			io.readline(oStruncSite, "OneSiteTruncationSite=");
-		} catch (...) {
-		}
+		} catch (...) { }
 
 		if (oStruncPhonons > 0 && oStruncSite == 0)
 			err("OneSiteTruncationSite cannot be zero\n");
@@ -142,15 +141,12 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardHolstein";
 		io.createGroup(label);

@@ -6,8 +6,7 @@
 
 namespace Dmrg {
 
-template <typename OperatorStorageType, typename MatrixType>
-class ChangeOfBasis {
+template <typename OperatorStorageType, typename MatrixType> class ChangeOfBasis {
 
 public:
 
@@ -35,9 +34,7 @@ public:
 		transposeConjugate(oldTtranspose_, oldT_);
 	}
 
-	void operator()(OperatorStorageType& v,
-	                SizeType gemmRnb,
-	                SizeType threadsForGemmR) const
+	void operator()(OperatorStorageType& v, SizeType gemmRnb, SizeType threadsForGemmR) const
 	{
 		if (!ProgramGlobals::oldChangeOfBasis) {
 			BlockOffDiagMatrixType vBlocked(v.getCRS(), transform_.offsetsRows());

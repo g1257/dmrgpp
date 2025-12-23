@@ -93,8 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename CorrelationsSkeletonType>
-class TwoPointCorrelations {
+template <typename CorrelationsSkeletonType> class TwoPointCorrelations {
 
 public:
 
@@ -115,8 +114,7 @@ public:
 
 	TwoPointCorrelations(const CorrelationsSkeletonType& skeleton)
 	    : skeleton_(skeleton)
-	{
-	}
+	{ }
 
 	void operator()(PsimagLite::Matrix<FieldType>& w,
 	                const BraketType& braket,
@@ -142,13 +140,8 @@ public:
 		typedef PsimagLite::Parallelizer<Parallel2PointCorrelationsType> ParallelizerType;
 		ParallelizerType threaded2Points(PsimagLite::Concurrency::codeSectionParams);
 
-		Parallel2PointCorrelationsType helper2Points(w,
-		                                             *this,
-		                                             pairs,
-		                                             braket,
-		                                             fermionicSign,
-		                                             bra,
-		                                             ket);
+		Parallel2PointCorrelationsType helper2Points(
+		    w, *this, pairs, braket, fermionicSign, bra, ket);
 
 		threaded2Points.loopCreate(helper2Points);
 	}
@@ -173,12 +166,13 @@ public:
 		const SparseMatrixType& O1 = sdhs.op(0).getCRS();
 		const SparseMatrixType& O2 = sdhs.op(1).getCRS();
 
-		const RealType fsign = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1
-		                                                                                    : -1;
+		const RealType fsign
+		    = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		if (i == j) {
 			SizeType replacementSite = (i == 0) ? 1 : i - 1;
 			SizeType rowsForIdent = braket.model().hilbertSize(replacementSite);
-			c = calcDiagonalCorrelation(i, O1, O2, rowsForIdent, fermionicSign, bra, ket);
+			c = calcDiagonalCorrelation(
+			    i, O1, O2, rowsForIdent, fermionicSign, bra, ket);
 		} else if (i > j) {
 			c = fsign * calcCorrelation_(j, i, O2, O1, fermionicSign, bra, ket);
 		} else {
@@ -210,13 +204,8 @@ private:
 			                        bra,
 			                        ket);
 
-		return calcCorrelation_(i - 1,
-		                        i,
-		                        ident,
-		                        O2new,
-		                        ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                        bra,
-		                        ket);
+		return calcCorrelation_(
+		    i - 1, i, ident, O2new, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 	}
 
 	FieldType calcCorrelation_(SizeType i,
@@ -244,19 +233,15 @@ private:
 				SparseMatrixType O1g;
 				O1g.makeDiagonal(ni, 1.0);
 
-				return skeleton_.bracketRightCorner(O1g,
-				                                    O1m,
-				                                    O2m,
-				                                    fermionicSign,
-				                                    ptr,
-				                                    bra,
-				                                    ket);
+				return skeleton_.bracketRightCorner(
+				    O1g, O1m, O2m, fermionicSign, ptr, bra, ket);
 			}
 
 			SparseMatrixType O1g;
 			skeleton_.growDirectly(O1g, O1m, i, fermionicSign, j - 1, false);
 			// j - 2 below is the pointer
-			return skeleton_.bracketRightCorner(O1g, O2m, fermionicSign, j - 2, bra, ket);
+			return skeleton_.bracketRightCorner(
+			    O1g, O2m, fermionicSign, j - 2, bra, ket);
 		}
 
 		SparseMatrixType O1g, O2g;
@@ -265,11 +250,8 @@ private:
 		skeleton_.growDirectly(O1g, O1m, i, fermionicSign, ns, true);
 		const SizeType ptr = skeleton_.dmrgMultiply(O2g, O1g, O2m, fermionicSign, ns);
 
-		return skeleton_.bracket(O2g,
-		                         ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                         ptr,
-		                         bra,
-		                         ket);
+		return skeleton_.bracket(
+		    O2g, ProgramGlobals::FermionOrBosonEnum::BOSON, ptr, bra, ket);
 	}
 
 	static SparseMatrixType identity(SizeType n)

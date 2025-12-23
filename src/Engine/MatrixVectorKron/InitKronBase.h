@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename LeftRightSuperType>
-class InitKronBase {
+template <typename LeftRightSuperType> class InitKronBase {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
@@ -164,7 +163,8 @@ public:
 
 	SizeType offset(WhatBasisEnum what) const
 	{
-		return (what == OLD) ? ijpatchesOld_.lrs().super().partition(mOld_) : ijpatchesNew_->lrs().super().partition(mNew_);
+		return (what == OLD) ? ijpatchesOld_.lrs().super().partition(mOld_)
+		                     : ijpatchesNew_->lrs().super().partition(mNew_);
 	}
 
 	const ArrayOfMatStructType& xc(SizeType ic) const
@@ -185,18 +185,16 @@ public:
 
 	SizeType size(WhatBasisEnum what) const
 	{
-		return (what == OLD) ? sizeInternal(ijpatchesOld_, mOld_) : sizeInternal(*ijpatchesNew_, mNew_);
+		return (what == OLD) ? sizeInternal(ijpatchesOld_, mOld_)
+		                     : sizeInternal(*ijpatchesNew_, mNew_);
 	}
 
-	const VectorSizeType& weightsOfPatchesNew() const
-	{
-		return weightsOfPatches_;
-	}
+	const VectorSizeType& weightsOfPatchesNew() const { return weightsOfPatches_; }
 
-	void computeOffsets(VectorSizeType& offsetForPatches,
-	                    WhatBasisEnum what)
+	void computeOffsets(VectorSizeType& offsetForPatches, WhatBasisEnum what)
 	{
-		assert(patch(what, GenIjPatchType::LEFT).size() == patch(what, GenIjPatchType::RIGHT).size());
+		assert(patch(what, GenIjPatchType::LEFT).size()
+		       == patch(what, GenIjPatchType::RIGHT).size());
 
 		SizeType npatch = patch(what, GenIjPatchType::LEFT).size();
 		SizeType sum = 0;
@@ -223,7 +221,8 @@ public:
 
 	SizeType numberOfPatches(WhatBasisEnum what) const
 	{
-		assert(patch(what, GenIjPatchType::LEFT).size() == patch(what, GenIjPatchType::RIGHT).size());
+		assert(patch(what, GenIjPatchType::LEFT).size()
+		       == patch(what, GenIjPatchType::RIGHT).size());
 		return patch(what, GenIjPatchType::LEFT).size();
 	}
 
@@ -313,9 +312,7 @@ protected:
 	// -------------------
 	// copy xout(:) to vout(:)
 	// -------------------
-	void copyOut(VectorType& vout,
-	             const VectorType& xout,
-	             const VectorSizeType& vstart) const
+	void copyOut(VectorType& vout, const VectorType& xout, const VectorSizeType& vstart) const
 	{
 		const VectorSizeType& permInverse = lrs(NEW).super().permutationInverse();
 		SizeType offset1 = offset(NEW);
@@ -377,11 +374,12 @@ private:
 		}
 	}
 
-	static SizeType sizeInternal(const GenIjPatchType& ijpatches,
-	                             SizeType m)
+	static SizeType sizeInternal(const GenIjPatchType& ijpatches, SizeType m)
 	{
-		assert(ijpatches.lrs().super().partition(m + 1) >= ijpatches.lrs().super().partition(m));
-		return ijpatches.lrs().super().partition(m + 1) - ijpatches.lrs().super().partition(m);
+		assert(ijpatches.lrs().super().partition(m + 1)
+		       >= ijpatches.lrs().super().partition(m));
+		return ijpatches.lrs().super().partition(m + 1)
+		    - ijpatches.lrs().super().partition(m);
 	}
 
 	static void cacheSigns(VectorBoolType& signs, const VectorSizeType& electrons)
@@ -402,7 +400,11 @@ private:
 		assert(signsNew_.size() >= rows);
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows; ++i) {
-			RealType sign = (bosonOrFermion == ProgramGlobals::FermionOrBosonEnum::FERMION && signsNew_[i]) ? -1.0 : 1.0;
+			RealType sign
+			    = (bosonOrFermion == ProgramGlobals::FermionOrBosonEnum::FERMION
+			       && signsNew_[i])
+			    ? -1.0
+			    : 1.0;
 			for (int k = Ahat.getRowPtr(i); k < Ahat.getRowPtr(i + 1); ++k) {
 				ComplexOrRealType tmp = Ahat.getValue(k) * sign * val;
 				Ahat.setValues(counter++, tmp);
@@ -410,18 +412,17 @@ private:
 		}
 	}
 
-	SizeType lSizeFunction(WhatBasisEnum what,
-	                       SizeType ipatch) const
+	SizeType lSizeFunction(WhatBasisEnum what, SizeType ipatch) const
 	{
 		SizeType igroup = patch(what, GenIjPatchType::LEFT)[ipatch];
 		return lrs(what).left().partition(igroup + 1) - lrs(what).left().partition(igroup);
 	}
 
-	SizeType rSizeFunction(WhatBasisEnum what,
-	                       SizeType ipatch) const
+	SizeType rSizeFunction(WhatBasisEnum what, SizeType ipatch) const
 	{
 		SizeType jgroup = patch(what, GenIjPatchType::RIGHT)[ipatch];
-		return lrs(what).right().partition(jgroup + 1) - lrs(what).right().partition(jgroup);
+		return lrs(what).right().partition(jgroup + 1)
+		    - lrs(what).right().partition(jgroup);
 	}
 
 	InitKronBase(const InitKronBase&);

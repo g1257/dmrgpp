@@ -91,8 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
-template <typename ModelBaseType>
-class FermionSpinless : public ModelBaseType {
+template <typename ModelBaseType> class FermionSpinless : public ModelBaseType {
 
 	static const int FERMION_SIGN = -1;
 	static const int DEGREES_OF_FREEDOM = 1;
@@ -145,7 +144,8 @@ public:
 	    , vectorMu_(geometry.numberOfSites())
 	{
 		if (extra != "" && extra != "WithDelta")
-			err("FermionSpinLess can only be followed by WithDelta and not " + extra + "\n");
+			err("FermionSpinLess can only be followed by WithDelta and not " + extra
+			    + "\n");
 
 		const SizeType n = geometry.numberOfSites();
 
@@ -156,14 +156,12 @@ public:
 		try {
 			io.readline(tau_, "TSPTau=");
 			hasTau = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(mu_, "TSPMu=");
 			hasCalcMu_ = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		bool b1 = (hasTau && !hasCalcMu_);
 		bool b2 = (!hasTau && hasCalcMu_);
@@ -206,7 +204,8 @@ public:
 		if (hasCalcMu_) {
 			const SizeType nsites = ModelBaseType::superGeometry().numberOfSites();
 			const SizeType currentTimeStep = time / tau_;
-			const RealType effectiveMu = calcMu(site, currentTimeStep, nsites, tau_, mu_);
+			const RealType effectiveMu
+			    = calcMu(site, currentTimeStep, nsites, tau_, mu_);
 			hmatrix += effectiveMu * niup;
 			if (previousTimeStep_ != currentTimeStep || firstCall) {
 				printMuOfR(time);
@@ -294,8 +293,7 @@ protected:
 		}
 	}
 
-	void setBasis(HilbertBasisType& basis,
-	              const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis, const VectorSizeType& block) const
 	{
 		int sitesTimesDof = DEGREES_OF_FREEDOM * block.size();
 		HilbertState total = (1 << sitesTimesDof);
@@ -307,9 +305,7 @@ protected:
 
 	// Calculate fermionic sign when applying operator
 	// c^\dagger_{i\sigma} to basis state ket
-	RealType sign(typename HilbertSpaceType::HilbertState const& ket,
-	              int i,
-	              int sigma) const
+	RealType sign(typename HilbertSpaceType::HilbertState const& ket, int i, int sigma) const
 	{
 		int value = 0;
 		value += HilbertSpaceType::calcNofElectrons(ket, 0, i, 0);
@@ -321,9 +317,8 @@ protected:
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(int i,
-	                                      int sigma,
-	                                      const HilbertBasisType& natBasis) const
+	SparseMatrixType
+	findOperatorMatrices(int i, int sigma, const HilbertBasisType& natBasis) const
 	{
 		typename HilbertSpaceType::HilbertState bra, ket;
 		int n = natBasis.size();
@@ -345,8 +340,7 @@ protected:
 		return creationMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis) const
 	{
 		const SizeType localSymms = ModelBaseType::targetQuantum().sizeOfOther();
 		if (localSymms == 0) {
@@ -390,8 +384,7 @@ protected:
 	}
 
 	//! Find n_i in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(int i,
-	                                      const VectorHilbertStateType& natBasis) const
+	SparseMatrixType findOperatorMatrices(int i, const VectorHilbertStateType& natBasis) const
 	{
 
 		SizeType n = natBasis.size();
@@ -413,8 +406,7 @@ protected:
 	// note: we use m+j instead of m
 	// This assures us that both j and m are SizeType
 	// does not work for 6 or 9
-	template <typename PairType>
-	PairType calcJmValue(const HilbertState& ket) const
+	template <typename PairType> PairType calcJmValue(const HilbertState& ket) const
 	{
 		SizeType site0 = 0;
 		SizeType site1 = 0;
@@ -429,11 +421,7 @@ protected:
 		return jm;
 	}
 
-	static RealType calcMu(SizeType site,
-	                       SizeType n,
-	                       SizeType N1,
-	                       RealType tau,
-	                       RealType mu)
+	static RealType calcMu(SizeType site, SizeType n, SizeType N1, RealType tau, RealType mu)
 	{
 		//  (nm is the number of steps to increase the onsite
 		//   chemical potential at site i)
@@ -449,9 +437,8 @@ protected:
 
 				std::stringstream msg;
 				msg << "FermionSpinless::calcMu(): nm=0 "
-				    << "site=" << site << " n=" << n
-				    << " tau=" << tau << " mu=" << mu
-				    << " rm=" << rm << "\n";
+				    << "site=" << site << " n=" << n << " tau=" << tau
+				    << " mu=" << mu << " rm=" << rm << "\n";
 				std::cout << msg.str();
 			}
 		}

@@ -305,7 +305,8 @@ public:
 			if (vec.size() != 3)
 				return error1("JMVALUES", line);
 			return true;
-		} else if (label == "RAW_MATRIX" || label == "RS:RAW_MATRIX" || label == "SpinOrbit") {
+		} else if (label == "RAW_MATRIX" || label == "RS:RAW_MATRIX"
+		           || label == "SpinOrbit") {
 			if (!checkForMatrix(vec))
 				return error1(label, line);
 			return true;
@@ -325,8 +326,7 @@ public:
 		return false;
 	}
 
-	bool checkSimpleLabel(const PsimagLite::String& label,
-	                      SizeType line) const
+	bool checkSimpleLabel(const PsimagLite::String& label, SizeType line) const
 	{
 		for (SizeType i = 0; i < knownLabels_.size(); ++i)
 			if (knownLabels_[i] == label)
@@ -390,14 +390,16 @@ public:
 	                \item [KroneckerDumper] TBW
 	                \item [extendedPrint] TBW
 	                \item [truncationNoSvd] Do not use SVD for truncation;
-	                                                                   use density matrix instead
+	                                                                   use density matrix
+ instead
 	                \item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
 	                \item [setAffinities] TBW
 	                \item [wftNoAccel] Disable WFT acceleration (but not the WFT itself)
 	                \item [wftAccelPatches] Force WFT acceleration with patches, even
 	                in twositedmrg
 	                \item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
-	                                                        batched gemm and might need plugin sc
+	                                                        batched gemm and might need plugin
+ sc
 	                \item [KrylovNoAbridge] TBW
 	                \item [keepLegacyBugs] TBW
 	                \item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
@@ -414,13 +416,11 @@ public:
     code and not the main driver or other drivers.
 	        \item[ciRun] Mark the input for the ci or TestSuite; usually this is
 	                set by the ci.pl script automatically
-	                \item[notermalias] If the model being run has term aliasing, disable it; else it has
-	                no effect.
+	                \item[notermalias] If the model being run has term aliasing, disable it;
+ else it has no effect.
 	        \end{itemize}
 	        */
-	void check(const PsimagLite::String& label,
-	           const PsimagLite::String& val,
-	           SizeType)
+	void check(const PsimagLite::String& label, const PsimagLite::String& val, SizeType)
 	{
 		if (label != "SolverOptions")
 			return;
@@ -487,8 +487,8 @@ public:
 		registerOpts.push_back("ciRun");
 		registerOpts.push_back("notermalias");
 
-		PsimagLite::Options::Writeable optWriteable(registerOpts,
-		                                            PsimagLite::Options::Writeable::PERMISSIVE);
+		PsimagLite::Options::Writeable optWriteable(
+		    registerOpts, PsimagLite::Options::Writeable::PERMISSIVE);
 		optsReadable_ = new OptionsReadableType(optWriteable, val);
 
 		bool mvs = (val.find("MatrixVectorStored") != PsimagLite::String::npos);
@@ -523,9 +523,8 @@ private:
 	bool passesFileOptions(PsimagLite::String fileOption)
 	{
 		for (SizeType i = 0; i < allowedFileOptions_.size(); ++i)
-			if (std::find(allowedFileOptions_.begin(),
-			              allowedFileOptions_.end(),
-			              fileOption)
+			if (std::find(
+			        allowedFileOptions_.begin(), allowedFileOptions_.end(), fileOption)
 			    == allowedFileOptions_.end())
 				return false;
 		return true;

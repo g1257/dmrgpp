@@ -10,8 +10,7 @@ namespace PsimagLite {
 
 // level one parens only
 // TODO FIXME : Generalize to multiple levels
-template <typename ComplexOrRealType>
-class QuasiCanonical {
+template <typename ComplexOrRealType> class QuasiCanonical {
 
 public:
 
@@ -32,9 +31,8 @@ public:
 
 			if (str_[i] == '-' && i > 0) {
 				if (prev != '(' && prev != '+') {
-					throw RuntimeError(
-					    "The - sign must be preceded by "
-					    "nothing, parens, or +\n");
+					throw RuntimeError("The - sign must be preceded by "
+					                   "nothing, parens, or +\n");
 				}
 			}
 
@@ -42,17 +40,15 @@ public:
 
 			if (str_[i] == '(') {
 				if (status == "open")
-					throw RuntimeError(
-					    "Too many parens levels (one only "
-					    "supported for now)\n");
+					throw RuntimeError("Too many parens levels (one only "
+					                   "supported for now)\n");
 				status = "open";
 				continue;
 			}
 
 			if (str_[i] == ')') {
 				if (status == "closed")
-					throw RuntimeError(
-					    "Unbalanced parens, closed\n");
+					throw RuntimeError("Unbalanced parens, closed\n");
 				status = "closed";
 				mainBuffer_ += "@" + ttos(ats_.size()) + "@";
 				ats_.push_back(tempBuffer);
@@ -157,11 +153,9 @@ private:
 		VectorStringType ve;
 		split(ve, str, ":");
 
-		typedef PlusMinusMultiplyDivide<ComplexOrRealType>
-		    PrimitivesType;
+		typedef PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
 		PrimitivesType primitives;
-		ExpressionForAST<PrimitivesType> expresionForAST(ve,
-		                                                 primitives);
+		ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
 		return expresionForAST.exec();
 	}
 

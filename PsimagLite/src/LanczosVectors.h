@@ -89,8 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename MatrixType_, typename VectorType_>
-class LanczosVectors {
+template <typename MatrixType_, typename VectorType_> class LanczosVectors {
 
 	typedef typename VectorType_::value_type ComplexOrRealType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
@@ -114,7 +113,10 @@ public:
 		ALLOWS_ZERO = 4
 	};
 
-	LanczosVectors(const MatrixType& mat, bool lotaMemory, SizeType steps, bool isReorthoEnabled)
+	LanczosVectors(const MatrixType& mat,
+	               bool lotaMemory,
+	               SizeType steps,
+	               bool isReorthoEnabled)
 	    : progress_("LanczosVectors")
 	    , mat_(mat)
 	    , lotaMemory_(lotaMemory)
@@ -126,9 +128,8 @@ public:
 	    , overlap_(0)
 	{
 		if (!lotaMemory)
-			throw RuntimeError(
-			    "LanczosVectors: support for lotaMemory=false has "
-			    "been removed\n");
+			throw RuntimeError("LanczosVectors: support for lotaMemory=false has "
+			                   "been removed\n");
 
 		dealWithOverlapStorage(steps);
 	}
@@ -178,10 +179,7 @@ public:
 
 	DenseMatrixType* data() { return data_; }
 
-	VectorElementType data(SizeType i, SizeType j)
-	{
-		return data_->operator()(i, j);
-	}
+	VectorElementType data(SizeType i, SizeType j) { return data_->operator()(i, j); }
 
 	SizeType cols() const { return data_->cols(); }
 
@@ -202,7 +200,11 @@ public:
 		}
 	}
 
-	void oneStepDecomposition(VectorType& V0, VectorType& V1, VectorType& V2, TridiagonalMatrixType& ab, SizeType iter) const
+	void oneStepDecomposition(VectorType& V0,
+	                          VectorType& V1,
+	                          VectorType& V2,
+	                          TridiagonalMatrixType& ab,
+	                          SizeType iter) const
 	{
 		SizeType nn = V1.size();
 		for (SizeType h = 0; h < nn; h++)
@@ -211,13 +213,13 @@ public:
 
 		RealType atmp = 0.0;
 		for (SizeType h = 0; h < nn; h++)
-			atmp += PsimagLite::real(
-			    V2[h] * PsimagLite::conj(V1[h])); // <V1|V2>
+			atmp += PsimagLite::real(V2[h] * PsimagLite::conj(V1[h])); // <V1|V2>
 		ab.a(iter) = atmp;
 
 		RealType btmp = 0.0;
 		for (SizeType h = 0; h < nn; h++) {
-			V2[h] = V2[h] - ab.a(iter) * V1[h] - ab.b(iter) * V0[h]; // V2 = V2 - alpha*V1 - beta*V0;
+			V2[h] = V2[h] - ab.a(iter) * V1[h]
+			    - ab.b(iter) * V0[h]; // V2 = V2 - alpha*V1 - beta*V0;
 			btmp += PsimagLite::real(V2[h] * PsimagLite::conj(V2[h]));
 		}
 

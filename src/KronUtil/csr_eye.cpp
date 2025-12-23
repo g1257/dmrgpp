@@ -1,9 +1,7 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void csr_eye(const int nrow_B,
-             const int ncol_B,
-             PsimagLite::CrsMatrix<ComplexOrRealType>& b)
+void csr_eye(const int nrow_B, const int ncol_B, PsimagLite::CrsMatrix<ComplexOrRealType>& b)
 {
 	/*
 	 * ---------------------------------------------------------------------------

@@ -91,8 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <numeric>
 
 namespace Dmrg {
-template <typename ModelBaseType>
-class HolsteinThin : public ModelBaseType {
+template <typename ModelBaseType> class HolsteinThin : public ModelBaseType {
 
 public:
 
@@ -140,10 +139,7 @@ public:
 
 	public:
 
-		virtual SizeType siteToAtomKind(SizeType site) const
-		{
-			return (site & 1);
-		}
+		virtual SizeType siteToAtomKind(SizeType site) const { return (site & 1); }
 
 		virtual SizeType kindsOfAtoms() const { return 2; }
 	};
@@ -156,9 +152,7 @@ public:
 	             InputValidatorType& io,
 	             const SuperGeometryType& geometry,
 	             PsimagLite::String additional)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
 	    , atomKind_(0)
@@ -236,7 +230,8 @@ protected:
 
 		HilbertBasisType fermionicBasis;
 		setBasis(fermionicBasis, SiteType::SITE_FERMION);
-		setSymmetryRelated(qns, fermionicBasis, bosonicBasis.size(), SiteType::SITE_FERMION);
+		setSymmetryRelated(
+		    qns, fermionicBasis, bosonicBasis.size(), SiteType::SITE_FERMION);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		SparseMatrixType tmpMatrix;
@@ -286,7 +281,8 @@ protected:
 			OpsLabelType& sminus = this->createOpsLabel("sminus", 1);
 			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, fermionicBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, fermionicBasis);
-			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1 = multiplyTc(t1MatrixUp, t1MatrixDown);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1
+			    = multiplyTc(t1MatrixUp, t1MatrixDown);
 			typename OperatorType::Su2RelatedType su2Related;
 			SparseMatrixType spmatrix(t1);
 			splus.push(OperatorType(spmatrix,
@@ -306,8 +302,10 @@ protected:
 			OpsLabelType& sz = this->createOpsLabel("sz", 1);
 			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, fermionicBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, fermionicBasis);
-			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1 = multiplyTc(t1MatrixUp, t1MatrixUp);
-			PsimagLite::Matrix<typename SparseMatrixType::value_type> t2 = multiplyTc(t1MatrixDown, t1MatrixDown);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1
+			    = multiplyTc(t1MatrixUp, t1MatrixUp);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t2
+			    = multiplyTc(t1MatrixDown, t1MatrixDown);
 			t1 = 0.5 * (t1 - t2);
 			SparseMatrixType szmatrix(t1);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -328,14 +326,17 @@ protected:
 			for (SizeType ii = 0; ii < fermionicBasis.size(); ii++) {
 				id(ii, ii) = 1.0;
 			}
-			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1 = multiplyTc(t1MatrixUp, t1MatrixUp);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1
+			    = multiplyTc(t1MatrixUp, t1MatrixUp);
 			t1 = id + (-1.0) * t1;
-			PsimagLite::Matrix<typename SparseMatrixType::value_type> t2 = multiplyTc(t1MatrixDown, t1MatrixDown);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t2
+			    = multiplyTc(t1MatrixDown, t1MatrixDown);
 			t2 = id + (-1.0) * t2;
 			SparseMatrixType nMatrixUp(t1);
 			t1 = t1 + t2;
 			SparseMatrixType nMatrixDown(t2);
-			PsimagLite::Matrix<typename SparseMatrixType::value_type> t3 = multiplyTc(nMatrixDown, nMatrixUp);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t3
+			    = multiplyTc(nMatrixDown, nMatrixUp);
 			t1 = t1 + (-2.0) * t3;
 			SparseMatrixType tmp4(t1);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -406,12 +407,14 @@ protected:
 			hopb.push(a, 'C', a, 'N');
 
 			const bool wantsHerm = false;
-			ModelTermType& phononFermion = ModelBaseType::createTerm("PhononFermion", wantsHerm);
+			ModelTermType& phononFermion
+			    = ModelBaseType::createTerm("PhononFermion", wantsHerm);
 
 			OpForLinkType n("n");
 			phononFermion.push(a, 'N', n, 'N');
 
-			ModelTermType& fermionPhonon = ModelBaseType::createTerm("FermionPhonon", wantsHerm);
+			ModelTermType& fermionPhonon
+			    = ModelBaseType::createTerm("FermionPhonon", wantsHerm);
 
 			fermionPhonon.push(a, 'C', n, 'N');
 		}
@@ -423,7 +426,9 @@ private:
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void setBasis(HilbertBasisType& basis, SiteType kindOfSite) const
 	{
-		const HilbertState total = (kindOfSite == SiteType::SITE_BOSON) ? (modelParameters_.numberphonons + 1) : 4;
+		const HilbertState total = (kindOfSite == SiteType::SITE_BOSON)
+		    ? (modelParameters_.numberphonons + 1)
+		    : 4;
 
 		basis.resize(total);
 
@@ -432,9 +437,8 @@ private:
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
-	RealType sign(typename HilbertSpaceHubbardType::HilbertState const& ket,
-	              int i,
-	              int sigma) const
+	RealType
+	sign(typename HilbertSpaceHubbardType::HilbertState const& ket, int i, int sigma) const
 	{
 		int value = 0;
 		value += HilbertSpaceHubbardType::calcNofElectrons(ket, 0, i, 0);
@@ -508,9 +512,11 @@ private:
 
 			if (typeOfSite == SiteType::SITE_FERMION) {
 				// nup
-				SizeType electronsUp = HilbertSpaceHubbardType::getNofDigits(basis[i], 0);
+				SizeType electronsUp
+				    = HilbertSpaceHubbardType::getNofDigits(basis[i], 0);
 				// ndown
-				SizeType electronsDown = HilbertSpaceHubbardType::getNofDigits(basis[i], 1);
+				SizeType electronsDown
+				    = HilbertSpaceHubbardType::getNofDigits(basis[i], 1);
 
 				other[0] = electronsUp + electronsDown;
 

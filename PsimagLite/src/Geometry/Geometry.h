@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 template <typename ComplexOrRealType_, typename InputType_, typename ProgramGlobalsType>
-class Geometry
-    : public GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType_> {
+class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType_> {
 
 public:
 
@@ -95,8 +94,7 @@ public:
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 	typedef GeometryTerm<ComplexOrRealType, InputType> GeometryTermType;
 	typedef typename Vector<SizeType>::Type VectorSizeType;
-	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType>
-	    GeometryExType;
+	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType> GeometryExType;
 
 	/** @class hide_geometry1
 	        - TotalNumberOfSites=integer This is the total number of sites
@@ -112,8 +110,7 @@ public:
 		int x;
 		io.readline(x, "TotalNumberOfSites=");
 		if (x < 0)
-			throw RuntimeError(
-			    "TotalNumberOfSites<0 is an error\n");
+			throw RuntimeError("TotalNumberOfSites<0 is an error\n");
 		linSize_ = x;
 
 		io.readline(x, "NumberOfTerms=");
@@ -123,8 +120,7 @@ public:
 		terms_.resize(x, 0);
 
 		for (SizeType i = 0; i < terms_.size(); i++) {
-			typename GeometryTermType::Auxiliary aux(
-			    false, i, terms_.size(), linSize_);
+			typename GeometryTermType::Auxiliary aux(false, i, terms_.size(), linSize_);
 			terms_[i] = new GeometryTermType(io, aux);
 		}
 	}
@@ -160,18 +156,20 @@ public:
 	{
 		SizeType middle = smax + 1;
 		if (ind < middle && jnd >= middle)
-			return ProgramGlobalsType::ConnectionEnum::
-			    SYSTEM_ENVIRON;
+			return ProgramGlobalsType::ConnectionEnum::SYSTEM_ENVIRON;
 		if (jnd < middle && ind >= middle)
-			return ProgramGlobalsType::ConnectionEnum::
-			    ENVIRON_SYSTEM;
-		return (ind < middle)
-		    ? ProgramGlobalsType::ConnectionEnum::SYSTEM_SYSTEM
-		    : ProgramGlobalsType::ConnectionEnum::
-		          ENVIRON_ENVIRON;
+			return ProgramGlobalsType::ConnectionEnum::ENVIRON_SYSTEM;
+		return (ind < middle) ? ProgramGlobalsType::ConnectionEnum::SYSTEM_SYSTEM
+		                      : ProgramGlobalsType::ConnectionEnum::ENVIRON_ENVIRON;
 	}
 
-	ComplexOrRealType operator()(SizeType smax, SizeType emin, SizeType i1, SizeType edof1, SizeType i2, SizeType edof2, SizeType term) const
+	ComplexOrRealType operator()(SizeType smax,
+	                             SizeType emin,
+	                             SizeType i1,
+	                             SizeType edof1,
+	                             SizeType i2,
+	                             SizeType edof2,
+	                             SizeType term) const
 	{
 		assert(term < terms_.size());
 		return (smax + 1 == emin)
@@ -179,7 +177,8 @@ public:
 		    : terms_[term]->operator()(smax, emin, i1, edof1, i2, edof2);
 	}
 
-	ComplexOrRealType operator()(SizeType i1, SizeType edof1, SizeType i2, SizeType edof2, SizeType term) const
+	ComplexOrRealType
+	operator()(SizeType i1, SizeType edof1, SizeType i2, SizeType edof2, SizeType term) const
 	{
 		return terms_[term]->operator()(i1, edof1, i2, edof2);
 	}
@@ -209,13 +208,17 @@ public:
 		return terms_[term]->orbitals(site);
 	}
 
-	void split(SizeType sitesPerBlock, VectorSizeType& S, typename Vector<VectorSizeType>::Type& X, typename Vector<VectorSizeType>::Type& Y, VectorSizeType& E, bool allInSystem = false) const
+	void split(SizeType sitesPerBlock,
+	           VectorSizeType& S,
+	           typename Vector<VectorSizeType>::Type& X,
+	           typename Vector<VectorSizeType>::Type& Y,
+	           VectorSizeType& E,
+	           bool allInSystem = false) const
 	{
 		SizeType middle = linSize_ / 2;
 		if (linSize_ & 1) {
 			std::cerr << "EXPERIMENTAL: Geometry::split(...): ";
-			std::cerr << " Lattice is odd (it has " << linSize_
-			          << " sites).\n";
+			std::cerr << " Lattice is odd (it has " << linSize_ << " sites).\n";
 			middle++;
 		}
 
@@ -268,10 +271,7 @@ public:
 		}
 	}
 
-	SizeType maxConnections(SizeType termId) const
-	{
-		return terms_[termId]->maxConnections();
-	}
+	SizeType maxConnections(SizeType termId) const { return terms_[termId]->maxConnections(); }
 
 	SizeType maxConnections() const
 	{
@@ -287,10 +287,7 @@ public:
 		return terms_[termId]->findReflection(site);
 	}
 
-	SizeType length(SizeType i, SizeType termId) const
-	{
-		return terms_[termId]->length(i);
-	}
+	SizeType length(SizeType i, SizeType termId) const { return terms_[termId]->length(i); }
 
 	SizeType translate(SizeType site, SizeType dir, SizeType amount, SizeType termId) const
 	{
@@ -308,10 +305,7 @@ public:
 		return terms_[t]->handle(ind, jnd);
 	}
 
-	SizeType directions(SizeType term) const
-	{
-		return terms_[term]->directions();
-	}
+	SizeType directions(SizeType term) const { return terms_[term]->directions(); }
 
 	SizeType calcDir(SizeType term, SizeType i, SizeType j) const
 	{
@@ -329,9 +323,8 @@ public:
 
 	// friends
 	template <typename RealType2, typename InputType2, typename PgType>
-	friend std::ostream&
-	operator<<(std::ostream& os,
-	           const Geometry<RealType2, InputType2, PgType>& g);
+	friend std::ostream& operator<<(std::ostream& os,
+	                                const Geometry<RealType2, InputType2, PgType>& g);
 
 private:
 
@@ -340,9 +333,7 @@ private:
 }; // class Geometry
 
 template <typename ComplexOrRealType, typename InputType, typename PgType>
-std::ostream&
-operator<<(std::ostream& os,
-           const Geometry<ComplexOrRealType, InputType, PgType>& g)
+std::ostream& operator<<(std::ostream& os, const Geometry<ComplexOrRealType, InputType, PgType>& g)
 {
 	os << "#GeometrySize=" << g.linSize_ << "\n";
 	os << "#GeometryTerms=" << g.terms_.size() << "\n";

@@ -90,8 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelBaseType>
-class GaugeSpin : public ModelBaseType {
+template <typename ModelBaseType> class GaugeSpin : public ModelBaseType {
 
 public:
 
@@ -124,20 +123,18 @@ public:
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
 	typedef typename ModelBaseType::SuperOpHelperBaseType SuperOpHelperBaseType;
-	typedef SuperOpHelperPlaquette<SuperGeometryType, SolverParamsType> SuperOpHelperPlaquetteType;
+	typedef SuperOpHelperPlaquette<SuperGeometryType, SolverParamsType>
+	    SuperOpHelperPlaquetteType;
 
 	static const SizeType TWICE_THE_SPIN = 2;
 
 	GaugeSpin(const SolverParamsType& solverParams,
 	          InputValidatorType& io,
 	          const SuperGeometryType& geometry)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superOpHelperPlaquette_(nullptr)
-	{
-	}
+	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -264,15 +261,15 @@ protected:
 	SuperOpHelperBaseType* setSuperOpHelper()
 	{
 		if (!superOpHelperPlaquette_)
-			superOpHelperPlaquette_ = new SuperOpHelperPlaquetteType(ModelBaseType::superGeometry());
+			superOpHelperPlaquette_
+			    = new SuperOpHelperPlaquetteType(ModelBaseType::superGeometry());
 		return superOpHelperPlaquette_;
 	}
 
 private:
 
 	//! Find S^+_site in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(SizeType site,
-	                                   const HilbertBasisType& natBasis) const
+	SparseMatrixType findSplusMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -314,8 +311,7 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
+	SparseMatrixType findSzMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -342,8 +338,7 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findSxMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
+	SparseMatrixType findSxMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SparseMatrixType Splus_temp = findSplusMatrices(site, natBasis);
 		SparseMatrixType Sminus_temp, Sx;

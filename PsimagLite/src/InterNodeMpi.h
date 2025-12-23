@@ -11,8 +11,7 @@
 
 namespace PsimagLite {
 
-template <typename LoadBalancerType = LoadBalancerMpi>
-class InterNode {
+template <typename LoadBalancerType = LoadBalancerMpi> class InterNode {
 
 public:
 
@@ -22,8 +21,7 @@ public:
 	    : comm_(comm)
 	    , mpiSize_(MPI::commSize(comm_))
 	    , mpiRank_(MPI::commRank(comm_))
-	{
-	}
+	{ }
 
 	SizeType size() const { return mpiSize_; }
 
@@ -42,7 +40,10 @@ public:
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
 	template <typename SomeLambdaType>
-	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda, const VectorSizeType& weights)
+	void parallelFor(SizeType start,
+	                 SizeType end,
+	                 const SomeLambdaType& lambda,
+	                 const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights.size(), mpiSize_);
 		loadBalancer->setWeights(weights);
@@ -52,7 +53,10 @@ public:
 	}
 
 	template <typename SomeLambdaType>
-	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda, const LoadBalancerType& loadBalancer)
+	void parallelFor(SizeType start,
+	                 SizeType end,
+	                 const SomeLambdaType& lambda,
+	                 const LoadBalancerType& loadBalancer)
 	{
 		SizeType blockSize = loadBalancer.blockSize(mpiRank_);
 

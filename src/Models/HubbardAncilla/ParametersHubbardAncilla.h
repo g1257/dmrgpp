@@ -91,19 +91,15 @@ struct ParametersHubbardAncilla : ParametersModelFeAs<RealType, QnType> {
 	template <typename IoInputType>
 	ParametersHubbardAncilla(IoInputType& io)
 	    : BaseType(io)
-	{
-	}
+	{ }
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardAncilla";
 		io.createGroup(label);

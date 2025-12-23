@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 
 namespace Dmrg {
-template <typename ModelBaseType>
-class Immm : public ModelBaseType {
+template <typename ModelBaseType> class Immm : public ModelBaseType {
 
 	typedef unsigned int long WordType;
 	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
@@ -258,10 +257,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks()
-	{
-		err("Immm is broken\n");
-	}
+	void fillModelLinks() { err("Immm is broken\n"); }
 
 private:
 
@@ -308,8 +304,7 @@ private:
 		creationMatrix.push_back(nOp);
 	}
 
-	void setBasis(HilbertBasisType& basis,
-	              const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis, const VectorSizeType& block) const
 	{
 		assert(block.size() == 1);
 		SizeType dof = NUMBER_OF_SPINS * orbitalsAtSite(0);
@@ -336,7 +331,8 @@ private:
 		if (site > 0)
 			value += hilbertSpace_.electrons(ket);
 
-		// order for sign is: up a (sigma==0), down a (sigma==2), up b (sigma==1), down b(sigma==3)
+		// order for sign is: up a (sigma==0), down a (sigma==2), up b (sigma==1), down
+		// b(sigma==3)
 		unsigned int x = hilbertSpace_.get(ket, site);
 		switch (sigma) {
 		case 0:
@@ -397,9 +393,8 @@ private:
 		transposeConjugate(creationMatrix, temp);
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        SizeType site) const
+	void
+	setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, SizeType site) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -414,7 +409,8 @@ private:
 			// nup
 			other[1] = hilbertSpace_.electronsWithGivenSpin(basis[i], site, SPIN_UP);
 			// ndown
-			SizeType electronsDown = hilbertSpace_.electronsWithGivenSpin(basis[i], site, SPIN_DOWN);
+			SizeType electronsDown
+			    = hilbertSpace_.electronsWithGivenSpin(basis[i], site, SPIN_DOWN);
 			other[0] = electronsDown + other[1];
 			bool sign = other[0] & 1;
 			qns[i] = QnType(sign, other, jmpair, flavor);
@@ -422,8 +418,7 @@ private:
 	}
 
 	//! Not implemented, su(2) symmetry won't work
-	template <typename PairType>
-	PairType calcJmvalue(const HilbertState&) const
+	template <typename PairType> PairType calcJmvalue(const HilbertState&) const
 	{
 		PairType jm(0, 0);
 		return jm;
@@ -466,7 +461,8 @@ private:
 
 		const OperatorType& cup = ModelBaseType::naturalOperator("c", site, 0);
 		const OperatorType& cdown = ModelBaseType::naturalOperator("c", site, 1);
-		hmatrix += modelParameters_.hubbardU[site] * nbar(cup.getCRS()) * nbar(cdown.getCRS());
+		hmatrix
+		    += modelParameters_.hubbardU[site] * nbar(cup.getCRS()) * nbar(cdown.getCRS());
 	}
 
 	SparseMatrixType n(const SparseMatrixType& c) const
@@ -497,7 +493,8 @@ private:
 		crsMatrixToFullMatrix(fullm2, fullm);
 		typename PsimagLite::Vector<SparseElementType>::Type eigs(fullm2.n_row());
 		PsimagLite::diag(fullm2, eigs, 'V');
-		std::cout << str << " diagTest size=" << fullm.rank() << " eigs[0]=" << eigs[0] << "\n";
+		std::cout << str << " diagTest size=" << fullm.rank() << " eigs[0]=" << eigs[0]
+		          << "\n";
 		std::cout << fullm;
 	}
 
@@ -558,7 +555,8 @@ private:
 			return ((alpha & 10) == 0);
 
 		bool b1 = (alpha == 7 || alpha == 11 || alpha >= 13);
-		bool b2 = (alpha == 3 || alpha == 5 || alpha == 9 || alpha == 6 || alpha == 10 || alpha == 12);
+		bool b2 = (alpha == 3 || alpha == 5 || alpha == 9 || alpha == 6 || alpha == 10
+		           || alpha == 12);
 		switch (modelParameters_.minOxygenElectrons) {
 		case 1:
 			return (alpha > 0);

@@ -91,12 +91,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 
 namespace Dmrg {
-template <typename ModelBaseType>
-class ExtendedHubbard1Orb;
+template <typename ModelBaseType> class ExtendedHubbard1Orb;
 
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
-template <typename ModelBaseType>
-class ModelHubbard : public ModelBaseType {
+template <typename ModelBaseType> class ModelHubbard : public ModelBaseType {
 
 	typedef typename ModelBaseType::BlockType BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -143,9 +141,7 @@ public:
 	             InputValidatorType& io,
 	             const SuperGeometryType& geometry,
 	             PsimagLite::String extension)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , spinSquared_(spinSquaredHelper_, NUMBER_OF_ORBITALS, DEGREES_OF_FREEDOM)
 	    , extension_(extension)
@@ -168,10 +164,13 @@ public:
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		if (modelParameters_.magneticX.size() > 0 && ModelBaseType::targetQuantum().sizeOfOther() == 2) {
-			PsimagLite::String msg("ModelHubbard: Sz not conserved: You should remove ");
+		if (modelParameters_.magneticX.size() > 0
+		    && ModelBaseType::targetQuantum().sizeOfOther() == 2) {
+			PsimagLite::String msg(
+			    "ModelHubbard: Sz not conserved: You should remove ");
 			msg += "TargeteElectronsDown or TargetSzPlusConst from the input file.\n";
-			msg += "TargeteElectronsUp is then interpreted as total number of electrons\n";
+			msg += "TargeteElectronsUp is then interpreted as total number of "
+			       "electrons\n";
 			throw PsimagLite::RuntimeError(msg);
 		}
 	}
@@ -224,7 +223,8 @@ protected:
 			OpsLabelType& splus = this->createOpsLabel("splus");
 			OpsLabelType& sminus = this->createOpsLabel("sminus");
 
-			PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[iup].getCRS(), creationMatrix[idown].getCRS());
+			PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(
+			    creationMatrix[iup].getCRS(), creationMatrix[idown].getCRS());
 			SparseMatrixType tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			splus.push(OperatorType(tmp2,
@@ -243,8 +243,10 @@ protected:
 
 		{
 			OpsLabelType& sz = this->createOpsLabel("sz");
-			PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(creationMatrix[iup].getCRS(), creationMatrix[iup].getCRS());
-			PsimagLite::Matrix<SparseElementType> tmp2 = multiplyTc(creationMatrix[idown].getCRS(), creationMatrix[idown].getCRS());
+			PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(
+			    creationMatrix[iup].getCRS(), creationMatrix[iup].getCRS());
+			PsimagLite::Matrix<SparseElementType> tmp2 = multiplyTc(
+			    creationMatrix[idown].getCRS(), creationMatrix[idown].getCRS());
 			tmp = 0.5 * (tmp - tmp2);
 			SparseMatrixType tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -348,7 +350,8 @@ protected:
 		OpForLinkType cdown("c", 1); // (D)
 
 		if (extension_ == "Peierls") {
-			auto peierls = BuildPierls<SuperGeometryType, isComplex>::lambda(modelParameters_.potentialA);
+			auto peierls = BuildPierls<SuperGeometryType, isComplex>::lambda(
+			    modelParameters_.potentialA);
 			hop.push(cup, 'N', cup, 'C', peierls, su2_up); // (C)
 			hop.push(cdown, 'N', cdown, 'C', peierls, su2_do);
 		} else {
@@ -367,14 +370,10 @@ protected:
 		rashbaSOC.push(cup, 'N', cdown, 'C');
 
 		// down-up
-		auto valueModifer = [](SparseElementType& value)
-		{ value = -PsimagLite::conj(value); };
+		auto valueModifer
+		    = [](SparseElementType& value) { value = -PsimagLite::conj(value); };
 
-		rashbaSOC.push(cdown,
-		               'N',
-		               cup,
-		               'C',
-		               valueModifer);
+		rashbaSOC.push(cdown, 'N', cup, 'C', valueModifer);
 	}
 
 	/* PSIDOC Hubbard::write
@@ -394,8 +393,7 @@ protected:
 	and that's that. Here we write also some SU(2) auxiliary members in the last two lines.
 	PSIDOCCOPY $FirstFunctionBelow
 	 */
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1)) // (A)
 			io.createGroup(label1); // (B)
@@ -469,8 +467,7 @@ protected:
 
 private:
 
-	void setBasis(HilbertBasisType& basis,
-	              const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis, const VectorSizeType& block) const
 	{
 		int sitesTimesDof = DEGREES_OF_FREEDOM * block.size();
 		HilbertState total = (1 << sitesTimesDof);
@@ -487,9 +484,8 @@ private:
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
-	RealType sign(typename HilbertSpaceHubbardType::HilbertState const& ket,
-	              int i,
-	              int sigma) const
+	RealType
+	sign(typename HilbertSpaceHubbardType::HilbertState const& ket, int i, int sigma) const
 	{
 		int value = 0;
 		value += HilbertSpaceHubbardType::calcNofElectrons(ket, 0, i, 0);
@@ -512,9 +508,8 @@ private:
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(int i,
-	                                      int sigma,
-	                                      const HilbertBasisType& natBasis) const
+	SparseMatrixType
+	findOperatorMatrices(int i, int sigma, const HilbertBasisType& natBasis) const
 	{
 		typename HilbertSpaceHubbardType::HilbertState bra, ket;
 		int n = natBasis.size();
@@ -537,9 +532,7 @@ private:
 		return creationMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, int) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -549,16 +542,20 @@ private:
 
 		const bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 2);
 		if (isCanonical && extension_ == "RashbaSOC")
-			err(PsimagLite::String(__FILE__) + ": RashbaSOC sub-model must be canonical. Please " + "delete the TargetSzPlusConst= from the input file\n");
+			err(PsimagLite::String(__FILE__)
+			    + ": RashbaSOC sub-model must be canonical. Please "
+			    + "delete the TargetSzPlusConst= from the input file\n");
 
 		qns.resize(basis.size(), QnType::zero());
 		VectorSizeType other((isCanonical) ? 2 : 1, 0);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = calcJmValue<PairType>(basis[i]);
 			// nup
-			SizeType electronsUp = HilbertSpaceHubbardType::getNofDigits(basis[i], SPIN_UP);
+			SizeType electronsUp
+			    = HilbertSpaceHubbardType::getNofDigits(basis[i], SPIN_UP);
 			// ndown
-			SizeType electronsDown = HilbertSpaceHubbardType::getNofDigits(basis[i], SPIN_DOWN);
+			SizeType electronsDown
+			    = HilbertSpaceHubbardType::getNofDigits(basis[i], SPIN_DOWN);
 
 			other[0] = electronsUp + electronsDown;
 
@@ -574,8 +571,7 @@ private:
 	// note: we use m+j instead of m
 	// This assures us that both j and m are SizeType
 	// does not work for 6 or 9
-	template <typename PairType>
-	PairType calcJmValue(const HilbertState& ket) const
+	template <typename PairType> PairType calcJmValue(const HilbertState& ket) const
 	{
 		if (!MyBasis::useSu2Symmetry())
 			return PairType(0, 0);

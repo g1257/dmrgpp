@@ -84,14 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Matrix.h"
 
 namespace PsimagLite {
-template <typename RealType>
-class AlmostEqual {
+template <typename RealType> class AlmostEqual {
 public:
 
 	AlmostEqual(const RealType& eps)
 	    : eps_(eps)
-	{
-	}
+	{ }
 
 	//		template<typename SomeType>
 	//		bool operator()(

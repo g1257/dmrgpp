@@ -15,14 +15,16 @@ public:
 	typedef StoreType::AinurLexicalType AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 
-	AinurStatements(const VectorStringType& vecStr, const String& vecChar, const String& escapedChars, const VectorStringType& vecBrace)
+	AinurStatements(const VectorStringType& vecStr,
+	                const String& vecChar,
+	                const String& escapedChars,
+	                const VectorStringType& vecBrace)
 	    : vecStr_(vecStr)
 	    , vecChar_(vecChar)
 	    , escapedChars_(escapedChars)
 	    , vecBrace_(vecBrace)
 	    , readable_(names_, storage_)
-	{
-	}
+	{ }
 
 	VectorStringType push(const String& s2, String prefix)
 	{
@@ -54,7 +56,8 @@ public:
 			String right = leftAndRight[1];
 			SizeType last = right.length();
 			--last;
-			bool inBraces = (last < right.length() && right[0] == '{' && right[last] == '}');
+			bool inBraces
+			    = (last < right.length() && right[0] == '{' && right[last] == '}');
 
 			if (!inBraces)
 				err("Group must be in braces, " + leftAndRight[0] + "\n");
@@ -242,7 +245,8 @@ private:
 				if (storage_[i].subType() != storage_[ind].subType())
 					err("Subtype mismatch " + names_[i] + " in " + names_[ind]);
 
-				storage_[ind].value(jnd, names_[ind]) = storage_[i].value(jnd, names_[i]);
+				storage_[ind].value(jnd, names_[ind])
+				    = storage_[i].value(jnd, names_[i]);
 				break;
 			}
 
@@ -251,7 +255,8 @@ private:
 
 			assert(whatType == Store::VECTOR);
 			if (replType == Store::SCALAR) {
-				storage_[ind].value(jnd, names_[ind]) = storage_[i].value(0, names_[i]);
+				storage_[ind].value(jnd, names_[ind])
+				    = storage_[i].value(0, names_[i]);
 				break;
 			}
 

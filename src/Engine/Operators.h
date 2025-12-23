@@ -110,8 +110,7 @@ geometries or connections, because all local opeators are availabel at all
 times. Each SCE model class is responsible for determining whether a
 transformed operator can be used (or not because of the reason limitation above).
 */
-template <typename BasisType_>
-class Operators {
+template <typename BasisType_> class Operators {
 
 public:
 
@@ -178,10 +177,7 @@ public:
 				doTaskForSuper(taskNumber - nLocals);
 		}
 
-		SizeType tasks() const
-		{
-			return operators_.size() + superOps_.size();
-		}
+		SizeType tasks() const { return operators_.size() + superOps_.size(); }
 
 		SizeType finalize() const
 		{
@@ -201,7 +197,8 @@ public:
 				return;
 			}
 
-			changeOfBasis_(operators_[k].getStorageNonConst(), gemmRnb_, threadsForGemmR_);
+			changeOfBasis_(
+			    operators_[k].getStorageNonConst(), gemmRnb_, threadsForGemmR_);
 			++counter_[threadNum];
 		}
 
@@ -212,7 +209,8 @@ public:
 				return;
 			}
 
-			changeOfBasis_(superOps_[k].getStorageNonConst(), gemmRnb_, threadsForGemmR_);
+			changeOfBasis_(
+			    superOps_[k].getStorageNonConst(), gemmRnb_, threadsForGemmR_);
 		}
 
 		bool isLocalExcluded(SizeType k) const
@@ -225,7 +223,8 @@ public:
 				return true;
 
 			// excluded because not needed by Hamiltonian
-			// (opsPerSite_ == 0 means that model is SDHS and this feature is then not supported)
+			// (opsPerSite_ == 0 means that model is SDHS and this feature is then not
+			// supported)
 			if (opsPerSite_ == 0 || opOnSiteThreshold_ == 0)
 				return false;
 
@@ -235,7 +234,8 @@ public:
 
 		bool isSuperExcluded(SizeType) const
 		{
-			throw PsimagLite::RuntimeError("Operators.h: isSuperExcluded not written yet\n");
+			throw PsimagLite::RuntimeError(
+			    "Operators.h: isSuperExcluded not written yet\n");
 		}
 
 		VectorOperatorType& operators_;
@@ -281,13 +281,12 @@ public:
 	}
 
 	template <typename IoInputter>
-	void read(IoInputter& io,
-	          PsimagLite::String prefix,
-	          bool roi = true, // it is false only when called from constructor
-	          typename PsimagLite::EnableIf<
-	              PsimagLite::IsInputLike<IoInputter>::True,
-	              int>::Type
-	          = 0)
+	void
+	read(IoInputter& io,
+	     PsimagLite::String prefix,
+	     bool roi = true, // it is false only when called from constructor
+	     typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type
+	     = 0)
 	{
 		const SizeType last = prefix.length() - 1;
 		if (last >= prefix.length())
@@ -320,10 +319,7 @@ public:
 		err("Operators::setChangeAll(true) called to late\n");
 	}
 
-	void setLocal(const VectorOperatorType& ops)
-	{
-		operators_ = ops;
-	}
+	void setLocal(const VectorOperatorType& ops) { operators_ = ops; }
 
 	const OperatorType& getLocalByIndex(SizeType i) const
 	{
@@ -331,10 +327,7 @@ public:
 		return operators_[i];
 	}
 
-	SizeType sizeOfLocal() const
-	{
-		return operators_.size();
-	}
+	SizeType sizeOfLocal() const { return operators_.size(); }
 
 	void changeBasis(const BlockDiagonalMatrixType& ftransform,
 	                 const PairSizeSizeType& startEnd,
@@ -376,7 +369,8 @@ public:
 	                  const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
 		setToProductLocal(basis1, ops1, basis2, ops2, permutationInverse);
-		setToProductSuper(basis1, ops1, basis2, ops2, permutationInverse, someSuperOpHelper);
+		setToProductSuper(
+		    basis1, ops1, basis2, ops2, permutationInverse, someSuperOpHelper);
 	}
 
 	void outerProductHamiltonian(const StorageType& h2,
@@ -393,15 +387,9 @@ public:
 		hamiltonian_ += tmpMatrix;
 	}
 
-	void setHamiltonian(StorageType const& h)
-	{
-		hamiltonian_ = h;
-	}
+	void setHamiltonian(StorageType const& h) { hamiltonian_ = h; }
 
-	void setHamiltonian(const SparseMatrixType& h)
-	{
-		fromCRS(hamiltonian_, h);
-	}
+	void setHamiltonian(const SparseMatrixType& h) { fromCRS(hamiltonian_, h); }
 
 	const StorageType& hamiltonian() const { return hamiltonian_; }
 
@@ -415,12 +403,11 @@ public:
 	}
 
 	template <typename SomeIoOutType>
-	void overwrite(SomeIoOutType& io,
-	               const PsimagLite::String& s,
-	               typename PsimagLite::EnableIf<
-	                   PsimagLite::IsOutputLike<SomeIoOutType>::True,
-	                   int*>::Type
-	               = 0) const
+	void overwrite(
+	    SomeIoOutType& io,
+	    const PsimagLite::String& s,
+	    typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<SomeIoOutType>::True, int*>::Type
+	    = 0) const
 	{
 		io.overwrite(operators_, s + "/Operators");
 		//		 io.overwrite(superOps_, s + "/SuperOperators");
@@ -477,16 +464,18 @@ private:
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 		SizeType nlocalOps = ops2.sizeOfLocal() + ops3.sizeOfLocal();
 		operators_.resize(nlocalOps);
-		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
+		ProgramGlobals::FermionOrBosonEnum savedSign
+		    = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		for (SizeType i = 0; i < nlocalOps; ++i) {
 			if (i < ops2.sizeOfLocal()) {
 				const OperatorType& myOp = ops2.getLocalByIndex(i);
-				bool isFermion = (myOp.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
-				if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
-					utils::fillFermionicSigns(fermionicSigns,
-					                          basis2.signs(),
-					                          (isFermion) ? -1 : 1);
+				bool isFermion = (myOp.fermionOrBoson()
+				                  == ProgramGlobals::FermionOrBosonEnum::FERMION);
+				if (savedSign != myOp.fermionOrBoson()
+				    || fermionicSigns.size() == 0) {
+					utils::fillFermionicSigns(
+					    fermionicSigns, basis2.signs(), (isFermion) ? -1 : 1);
 					savedSign = myOp.fermionOrBoson();
 				}
 
@@ -498,14 +487,16 @@ private:
 				                     permutationInverse);
 
 			} else {
-				const OperatorType& myOp = ops3.getLocalByIndex(i - ops2.sizeOfLocal());
+				const OperatorType& myOp
+				    = ops3.getLocalByIndex(i - ops2.sizeOfLocal());
 
-				bool isFermion = (myOp.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
+				bool isFermion = (myOp.fermionOrBoson()
+				                  == ProgramGlobals::FermionOrBosonEnum::FERMION);
 
-				if (savedSign != myOp.fermionOrBoson() || fermionicSigns.size() == 0) {
-					utils::fillFermionicSigns(fermionicSigns,
-					                          basis2.signs(),
-					                          (isFermion) ? -1 : 1);
+				if (savedSign != myOp.fermionOrBoson()
+				    || fermionicSigns.size() == 0) {
+					utils::fillFermionicSigns(
+					    fermionicSigns, basis2.signs(), (isFermion) ? -1 : 1);
 					savedSign = myOp.fermionOrBoson();
 				}
 
@@ -532,24 +523,30 @@ private:
 		typename PsimagLite::Vector<RealType>::Type fermionicSigns;
 		SizeType nSuperOps = someSuperOpHelper.size();
 		superOps_.resize(nSuperOps);
-		ProgramGlobals::FermionOrBosonEnum savedSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
+		ProgramGlobals::FermionOrBosonEnum savedSign
+		    = ProgramGlobals::FermionOrBosonEnum::BOSON;
 		typedef typename SomeSuperOperatorHelperType::PairBoolSizeType PairBoolSizeType;
 		const bool option = (basis3.block().size() == 1);
 		for (SizeType i = 0; i < nSuperOps; ++i) {
 			const PairBoolSizeType op2Index = someSuperOpHelper.leftOperatorIndex(i);
 			const PairBoolSizeType op3Index = someSuperOpHelper.rightOperatorIndex(i);
-			const OperatorType& op1 = (!op2Index.first) ? ops2.getLocalByIndex(op2Index.second)
-			                                            : ops2.getSuperByIndex(op2Index.second);
-			const OperatorType& op3 = (!op3Index.first) ? ops3.getLocalByIndex(op3Index.second)
-			                                            : ops3.getSuperByIndex(op3Index.second);
-			bool isFermion = (op3.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
+			const OperatorType& op1 = (!op2Index.first)
+			    ? ops2.getLocalByIndex(op2Index.second)
+			    : ops2.getSuperByIndex(op2Index.second);
+			const OperatorType& op3 = (!op3Index.first)
+			    ? ops3.getLocalByIndex(op3Index.second)
+			    : ops3.getSuperByIndex(op3Index.second);
+			bool isFermion
+			    = (op3.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
 
 			if (savedSign != op3.fermionOrBoson() || fermionicSigns.size() == 0) {
-				utils::fillFermionicSigns(fermionicSigns, basis2.signs(), (isFermion) ? -1 : 1);
+				utils::fillFermionicSigns(
+				    fermionicSigns, basis2.signs(), (isFermion) ? -1 : 1);
 				savedSign = op3.fermionOrBoson();
 			}
 
-			superOps_[i].outerProduct(op1, op3, fermionicSigns, option, permutationInverse);
+			superOps_[i].outerProduct(
+			    op1, op3, fermionicSigns, option, permutationInverse);
 		}
 	}
 
@@ -585,11 +582,7 @@ private:
 	                          const VectorSizeType& permutationFull)
 	{
 		assert(!BasisType::useSu2Symmetry());
-		operators_[i].outerProduct(m,
-		                           x,
-		                           fermionicSigns,
-		                           option,
-		                           permutationFull);
+		operators_[i].outerProduct(m, x, fermionicSigns, option, permutationFull);
 		// don't forget to set fermion sign and j:
 		operators_[i].set(m.fermionOrBoson(), m.jm(), m.angularFactor());
 		// apply(operators_[i]);

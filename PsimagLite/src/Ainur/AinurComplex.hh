@@ -8,46 +8,26 @@ namespace PsimagLite {
 
 struct AinurComplex {
 
-	static void convert(long unsigned int& t, std::string str)
-	{
-		t = PsimagLite::atoi(str);
-	}
+	static void convert(long unsigned int& t, std::string str) { t = PsimagLite::atoi(str); }
 
-	static void convert(unsigned int& t, std::string str)
-	{
-		t = PsimagLite::atoi(str);
-	}
+	static void convert(unsigned int& t, std::string str) { t = PsimagLite::atoi(str); }
 
-	static void convert(long int& t, std::string str)
-	{
-		t = PsimagLite::atoi(str);
-	}
+	static void convert(long int& t, std::string str) { t = PsimagLite::atoi(str); }
 
-	static void convert(int& t, std::string str)
-	{
-		t = PsimagLite::atoi(str);
-	}
+	static void convert(int& t, std::string str) { t = PsimagLite::atoi(str); }
 
-	static void convert(double& t, std::string str)
-	{
-		t = PsimagLite::atof(str);
-	}
+	static void convert(double& t, std::string str) { t = PsimagLite::atof(str); }
 
-	static void convert(float& t, std::string str)
-	{
-		t = PsimagLite::atof(str);
-	}
+	static void convert(float& t, std::string str) { t = PsimagLite::atof(str); }
 
-	template <typename T>
-	static void convert(std::complex<T>& t, std::string str)
+	template <typename T> static void convert(std::complex<T>& t, std::string str)
 	{
 		t = toComplex<T>(str);
 	}
 
 	static void convert(String& t, std::string str) { t = str; }
 
-	template <typename T>
-	static void convert(T& t, std::string str)
+	template <typename T> static void convert(T& t, std::string str)
 	{
 		String msg("Unknown type ");
 		throw RuntimeError("convert(): " + msg + typeid(t).name() + " for " + str + "\n");
@@ -55,8 +35,7 @@ struct AinurComplex {
 
 private:
 
-	template <typename RealType>
-	static std::complex<RealType> toComplex(std::string str)
+	template <typename RealType> static std::complex<RealType> toComplex(std::string str)
 	{
 		typedef std::complex<RealType> ComplexType;
 

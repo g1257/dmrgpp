@@ -95,8 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 // This is a structure, don't add member functions here!
-template <typename ComplexOrRealType>
-class Operator {
+template <typename ComplexOrRealType> class Operator {
 
 public:
 
@@ -119,8 +118,7 @@ public:
 	Operator()
 	    : fermionOrBoson_(ProgramGlobals::FermionOrBosonEnum::BOSON)
 	    , angularFactor_(1)
-	{
-	}
+	{ }
 
 	Operator(const SparseMatrixType& data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
@@ -132,8 +130,7 @@ public:
 	    , jm_(jm1)
 	    , angularFactor_(angularFactor1)
 	    , su2Related_(su2Related1)
-	{
-	}
+	{ }
 
 	Operator(const StorageType& data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
@@ -145,8 +142,7 @@ public:
 	    , jm_(jm1)
 	    , angularFactor_(angularFactor1)
 	    , su2Related_(su2Related1)
-	{
-	}
+	{ }
 
 	template <typename IoInputType, typename SomeModelType>
 	Operator(IoInputType& io,
@@ -199,7 +195,8 @@ public:
 			VectorSizeType v;
 			io.read(v, prefix + "COOKED_EXTRA");
 			if (v.size() != 2)
-				throw PsimagLite::RuntimeError("COOKED_EXTRA must be followed 2 v0 v1\n");
+				throw PsimagLite::RuntimeError(
+				    "COOKED_EXTRA must be followed 2 v0 v1\n");
 			data_ = model.naturalOperator(s, v[0], v[1]).data_;
 		} else if (s == "raw") {
 			DenseMatrixType m;
@@ -207,7 +204,8 @@ public:
 			if (checkNonZero)
 				checkNotZeroMatrix(m);
 			fullMatrixToCrsMatrix(data_, m);
-			PsimagLite::String msg = "WARNING: RAW_MATRIX read, order of basis subject ";
+			PsimagLite::String msg
+			    = "WARNING: RAW_MATRIX read, order of basis subject ";
 			msg += "to change with DMRG++ version!\n";
 			std::cerr << msg;
 			std::cout << msg;
@@ -215,7 +213,8 @@ public:
 			io.readline(s, prefix + "OperatorExpression=");
 			typedef OperatorSpec<SomeModelType, Operator> OperatorSpecType;
 			OperatorSpecType opSpec(model);
-			PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
+			PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(
+			    opSpec);
 			Operator p;
 			const Operator opEmpty;
 			canonicalExpression(p, s, opEmpty, site);
@@ -255,19 +254,14 @@ public:
 		// FIXME: su2Related_ needs to be set properly for when SU(2) is running
 	}
 
-	void fromStorage(const PsimagLite::Matrix<ComplexOrRealType>& m)
-	{
-		data_.fromDense(m);
-	}
+	void fromStorage(const PsimagLite::Matrix<ComplexOrRealType>& m) { data_.fromDense(m); }
 
-	void fromStorage(const SparseMatrixType& m)
-	{
-		fromCRS(data_, m);
-	}
+	void fromStorage(const SparseMatrixType& m) { fromCRS(data_, m); }
 
 	void write(PsimagLite::String label,
 	           PsimagLite::IoSerializer& ioSerializer,
-	           PsimagLite::IoSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	           PsimagLite::IoSerializer::WriteMode mode
+	           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		if (mode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			ioSerializer.createGroup(label);
@@ -279,14 +273,12 @@ public:
 		// su2Related_.write(label + "/su2Related_", ioSerializer);
 	}
 
-	void overwrite(PsimagLite::String label,
-	               PsimagLite::IoSerializer& ioSerializer) const
+	void overwrite(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
 		write(label, ioSerializer, PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
 	}
 
-	void read(PsimagLite::String label,
-	          PsimagLite::IoSerializer& ioSerializer)
+	void read(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer)
 	{
 		data_.read(label + "/data", ioSerializer);
 		ioSerializer.read(fermionOrBoson_, label + "/fermionOrBoson");
@@ -311,8 +303,8 @@ public:
 	// operators START
 	Operator operator*(const Operator& other) const
 	{
-		const ProgramGlobals::FermionOrBosonEnum f = ProgramGlobals::multipy(fermionOrBoson_,
-		                                                                     other.fermionOrBoson_);
+		const ProgramGlobals::FermionOrBosonEnum f
+		    = ProgramGlobals::multipy(fermionOrBoson_, other.fermionOrBoson_);
 		return Operator(data_ * other.data_, f, PairType(0, 0), 1.0, su2Related_);
 	}
 
@@ -324,7 +316,8 @@ public:
 
 	Operator& operator*=(const Operator& other)
 	{
-		int fSaved = (fermionOrBoson_ == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
+		int fSaved
+		    = (fermionOrBoson_ == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 		fermionOrBoson_ = other.fermionOrBoson_;
 		if (metaDiff(other) > 0)
 			err("operator+= failed for Operator: metas not equal\n");
@@ -332,8 +325,9 @@ public:
 		StorageType crs = data_ * other.data_;
 		data_ = crs;
 
-		int fsOther = (other.fermionOrBoson_ == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1
-		                                                                                     : 1;
+		int fsOther = (other.fermionOrBoson_ == ProgramGlobals::FermionOrBosonEnum::FERMION)
+		    ? -1
+		    : 1;
 		int fs = fSaved * fsOther;
 		fermionOrBoson_ = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION
 		                           : ProgramGlobals::FermionOrBosonEnum::BOSON;
@@ -357,12 +351,7 @@ public:
 	                  bool order,
 	                  const VectorSizeType& permutationFull)
 	{
-		externalProduct2(data_,
-		                 A.getStorage(),
-		                 nout,
-		                 signs,
-		                 order,
-		                 permutationFull);
+		externalProduct2(data_, A.getStorage(), nout, signs, order, permutationFull);
 	}
 
 	void outerProduct(const Operator& A,
@@ -371,12 +360,8 @@ public:
 	                  bool order,
 	                  const VectorSizeType& permutationFull)
 	{
-		externalProduct2(data_,
-		                 A.getStorage(),
-		                 B.getStorage(),
-		                 signs,
-		                 order,
-		                 permutationFull);
+		externalProduct2(
+		    data_, A.getStorage(), B.getStorage(), signs, order, permutationFull);
 	}
 
 	SizeType metaDiff(const Operator& op2) const
@@ -401,20 +386,11 @@ public:
 		return code;
 	}
 
-	bool isEmpty() const
-	{
-		return (data_.rows() == 0);
-	}
+	bool isEmpty() const { return (data_.rows() == 0); }
 
-	void clear()
-	{
-		data_.clear();
-	}
+	void clear() { data_.clear(); }
 
-	void set(ProgramGlobals::FermionOrBosonEnum fOrB)
-	{
-		fermionOrBoson_ = fOrB;
-	}
+	void set(ProgramGlobals::FermionOrBosonEnum fOrB) { fermionOrBoson_ = fOrB; }
 
 	void set(ProgramGlobals::FermionOrBosonEnum fOrB,
 	         PairType jm1,
@@ -427,9 +403,7 @@ public:
 		su2Related_ = su2;
 	}
 
-	void set(ProgramGlobals::FermionOrBosonEnum fOrB,
-	         PairType jm1,
-	         RealType af)
+	void set(ProgramGlobals::FermionOrBosonEnum fOrB, PairType jm1, RealType af)
 	{
 		fermionOrBoson_ = fOrB;
 		jm_ = jm1;
@@ -444,10 +418,7 @@ public:
 	// FIXME TODO
 	StorageType& getStorageNonConst() { return data_; }
 
-	const ProgramGlobals::FermionOrBosonEnum& fermionOrBoson() const
-	{
-		return fermionOrBoson_;
-	}
+	const ProgramGlobals::FermionOrBosonEnum& fermionOrBoson() const { return fermionOrBoson_; }
 
 	const PairType& jm() const { return jm_; }
 
@@ -458,15 +429,9 @@ public:
 	// FIXME TODO
 	Su2RelatedType& su2RelatedNonConst() { return su2Related_; }
 
-	void conjugate()
-	{
-		data_.conjugate();
-	}
+	void conjugate() { data_.conjugate(); }
 
-	void transpose()
-	{
-		data_.transpose();
-	}
+	void transpose() { data_.transpose(); }
 
 	void dagger()
 	{
@@ -533,8 +498,7 @@ std::ostream& operator<<(std::ostream& os, const Operator<SparseMatrixType>& op)
 {
 	os << op.data_;
 	os << op.fermionSign << "\n";
-	os << "2\n"
-	   << op.jm_.first << " " << op.jm_.second << "\n";
+	os << "2\n" << op.jm_.first << " " << op.jm_.second << "\n";
 	os << op.angularFactor_ << "\n";
 	os << op.su2Related_;
 	return os;

@@ -5,8 +5,7 @@
 
 namespace PsimagLite {
 
-template <typename = int>
-class InterNode {
+template <typename = int> class InterNode {
 
 public:
 

@@ -90,8 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename InitKronType>
-class KronMatrix {
+template <typename InitKronType> class KronMatrix {
 
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -146,7 +145,8 @@ public:
 			    parallelConnections(codeSectionParams);
 			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());
 		} else {
-			PsimagLite::Parallelizer<KronConnectionsType> parallelConnections(codeSectionParams);
+			PsimagLite::Parallelizer<KronConnectionsType> parallelConnections(
+			    codeSectionParams);
 			parallelConnections.loopCreate(kc);
 		}
 

@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename LeftRightSuperType_, typename VectorWithOffsetType_>
-class ApplyOperatorLocal {
+template <typename LeftRightSuperType_, typename VectorWithOffsetType_> class ApplyOperatorLocal {
 
 	typedef typename VectorWithOffsetType_::VectorType TargetVectorType;
 	typedef typename LeftRightSuperType_::BasisWithOperatorsType BasisWithOperatorsType;
@@ -156,8 +155,7 @@ public:
 	ApplyOperatorLocal(const LeftRightSuperType& lrs, bool withLegacyBug)
 	    : lrs_(lrs)
 	    , withLegacyBug_(withLegacyBug)
-	{
-	}
+	{ }
 
 	//! FIXME: we need to make a fast version for when we're just
 	//! figuring out where the (non-zero) partition is
@@ -174,7 +172,8 @@ public:
 
 		if (corner == BORDER_NO) {
 			if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-				applyLocalOpSystem(dest, src, A, fermionSign, splitSize, LatticePartEnum::MIDDLE);
+				applyLocalOpSystem(
+				    dest, src, A, fermionSign, splitSize, LatticePartEnum::MIDDLE);
 			else
 				applyLocalOpEnviron(dest, src, A, LatticePartEnum::MIDDLE);
 			return;
@@ -304,7 +303,8 @@ private:
 			assert(x < lrs_.left().permutationVector().size());
 			pack2.unpack(x0, x1, lrs_.left().permutation(x));
 
-			const bool isFermion = (A.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
+			const bool isFermion
+			    = (A.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
 			const RealType sign = fermionSign(x0, (isFermion) ? -1 : 1);
 			const SizeType start = A.getCRS().getRowPtr(x1);
 			const SizeType end = A.getCRS().getRowPtr(x1 + 1);
@@ -362,13 +362,15 @@ private:
 			SizeType y0 = 0;
 			SizeType y1 = 0;
 			pack2.unpack(y0, y1, lrs_.right().permutation(y));
-			const bool isFermion = (A.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
+			const bool isFermion
+			    = (A.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
 			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
 			const SizeType start = A.getCRS().getRowPtr(y0);
 			const SizeType end = A.getCRS().getRowPtr(y0 + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType y0prime = A.getCRS().getCol(k);
-				SizeType yprime = lrs_.right().permutationInverse(y0prime + y1 * nx);
+				SizeType yprime
+				    = lrs_.right().permutationInverse(y0prime + y1 * nx);
 				SizeType j = lrs_.super().permutationInverse(x + yprime * ns);
 				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k) * sign;
 			}
@@ -424,7 +426,8 @@ private:
 			if (x >= lrs_.left().permutationVector().size())
 				err("applyLocalOpSystem S\n");
 
-			const bool isFermion = (A.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
+			const bool isFermion
+			    = (A.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
 			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
 			const SizeType start = A.getCRS().getRowPtr(y);
 			const SizeType end = A.getCRS().getRowPtr(y + 1);
@@ -444,7 +447,8 @@ private:
 	{
 		if (lrs_.right().size() == A.getCRS().rows()) { // right corner
 			SizeType splitSize = A.getCRS().rows(); // FIXME: check for SDHS
-			applyLocalOpSystem(dest, src, A, fermionSign, splitSize, LatticePartEnum::RIGHT_CORNER);
+			applyLocalOpSystem(
+			    dest, src, A, fermionSign, splitSize, LatticePartEnum::RIGHT_CORNER);
 			return;
 		}
 

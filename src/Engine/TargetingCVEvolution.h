@@ -129,7 +129,8 @@ public:
 	                                 BaseType,
 	                                 TargetParamsType>
 	    CorrectionVectorSkeletonType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef
+	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 
 	TargetingCVEvolution(const LeftRightSuperType& lrs,
@@ -219,10 +220,7 @@ public:
 		evolveInternal(Eg, direction, block, loopNumber);
 	}
 
-	bool end() const
-	{
-		return (almostDone_ >= 2);
-	}
+	bool end() const { return (almostDone_ >= 2); }
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
@@ -254,12 +252,8 @@ private:
 		VectorWithOffsetType phiNew;
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
-		this->common().aoeNonConst().getPhi(&phiNew,
-		                                    Eg,
-		                                    direction,
-		                                    site,
-		                                    loopNumber,
-		                                    tstStruct_);
+		this->common().aoeNonConst().getPhi(
+		    &phiNew, Eg, direction, site, loopNumber, tstStruct_);
 
 		if (phiNew.size() == 0)
 			return;
@@ -267,20 +261,16 @@ private:
 		this->tvNonConst(0) = phiNew;
 		VectorWithOffsetType bogusTv;
 
-		const SizeType currentTimeStep = this->common().aoe().timeVectors().currentTimeStep();
+		const SizeType currentTimeStep
+		    = this->common().aoe().timeVectors().currentTimeStep();
 		if (currentTimeStep == 0) {
 			if (PsimagLite::IsComplexNumber<ComplexOrRealType>::True) {
-				skeleton_.calcDynVectors(phiNew,
-				                         this->tvNonConst(1),
-				                         bogusTv);
-				skeleton_.calcDynVectors(this->tv(1),
-				                         this->tvNonConst(2),
-				                         bogusTv);
+				skeleton_.calcDynVectors(phiNew, this->tvNonConst(1), bogusTv);
+				skeleton_.calcDynVectors(this->tv(1), this->tvNonConst(2), bogusTv);
 			} else {
 
-				skeleton_.calcDynVectors(phiNew,
-				                         this->tvNonConst(1),
-				                         this->tvNonConst(2));
+				skeleton_.calcDynVectors(
+				    phiNew, this->tvNonConst(1), this->tvNonConst(2));
 
 				skeleton_.calcDynVectors(this->tv(1),
 				                         this->tv(2),
@@ -288,7 +278,8 @@ private:
 				                         this->tvNonConst(4));
 			}
 		} else {
-			bool timeHasAdvanced = (counter_ != currentTimeStep && currentTimeStep < tstStruct_.nForFraction());
+			bool timeHasAdvanced = (counter_ != currentTimeStep
+			                        && currentTimeStep < tstStruct_.nForFraction());
 
 			if (counter_ != currentTimeStep && !timeHasAdvanced) {
 				std::cout << __FILE__ << " is now DONE\n";
@@ -300,25 +291,20 @@ private:
 
 				const SizeType advanceIndex = (timeHasAdvanced) ? 2 : 1;
 				// wft tv1
-				this->common().aoe().wftOneVector(bogusTv,
-				                                  this->tv(advanceIndex),
-				                                  site);
+				this->common().aoe().wftOneVector(
+				    bogusTv, this->tv(advanceIndex), site);
 				this->tvNonConst(1) = bogusTv;
-				skeleton_.calcDynVectors(this->tv(1),
-				                         this->tvNonConst(2),
-				                         bogusTv);
+				skeleton_.calcDynVectors(this->tv(1), this->tvNonConst(2), bogusTv);
 			} else {
 
 				VectorWithOffsetType bogusTv2;
 				const SizeType advanceIndex = (timeHasAdvanced) ? 3 : 1;
 
-				this->common().aoe().wftOneVector(bogusTv,
-				                                  this->tv(advanceIndex),
-				                                  site);
+				this->common().aoe().wftOneVector(
+				    bogusTv, this->tv(advanceIndex), site);
 				const SizeType advanceIndexp1 = advanceIndex + 1;
-				this->common().aoe().wftOneVector(bogusTv2,
-				                                  this->tv(advanceIndexp1),
-				                                  site);
+				this->common().aoe().wftOneVector(
+				    bogusTv2, this->tv(advanceIndexp1), site);
 				this->tvNonConst(1) = bogusTv;
 				this->tvNonConst(2) = bogusTv2;
 
@@ -330,7 +316,8 @@ private:
 		}
 
 		counter_ = currentTimeStep;
-		auto* ptr = const_cast<TimeVectorsBaseType*>(&this->common().aoeNonConst().timeVectors());
+		auto* ptr
+		    = const_cast<TimeVectorsBaseType*>(&this->common().aoeNonConst().timeVectors());
 		ptr->setCurrentTime(counter_);
 
 		bool doBorderIfBorder = true;

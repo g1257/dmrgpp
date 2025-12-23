@@ -100,20 +100,16 @@ struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnTyp
 
 		try {
 			io.read(magneticField, "MagneticField");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHeisenbergAncillaC";
 		io.createGroup(label);

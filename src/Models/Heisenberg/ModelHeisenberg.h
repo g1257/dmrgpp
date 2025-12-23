@@ -92,8 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelBaseType>
-class ModelHeisenberg : public ModelBaseType {
+template <typename ModelBaseType> class ModelHeisenberg : public ModelBaseType {
 
 	static const int NUMBER_OF_ORBITALS = 1;
 	static const int DEGREES_OF_FREEDOM = 2; // spin up and down
@@ -135,9 +134,7 @@ public:
 	                InputValidatorType& io,
 	                const SuperGeometryType& geometry,
 	                PsimagLite::String additional)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , additional_(additional)
@@ -148,9 +145,11 @@ public:
 		SizeType md = modelParameters_.anisotropyD.size();
 		SizeType me = modelParameters_.anisotropyE.size();
 
-		ModelParametersType::checkMagneticField(modelParameters_.magneticFieldX.size(), 'X', n);
+		ModelParametersType::checkMagneticField(
+		    modelParameters_.magneticFieldX.size(), 'X', n);
 
-		ModelParametersType::checkMagneticField(modelParameters_.magneticFieldZ.size(), 'Z', n);
+		ModelParametersType::checkMagneticField(
+		    modelParameters_.magneticFieldZ.size(), 'Z', n);
 
 		if (md > 0 && md != n) {
 			PsimagLite::String msg("ModelHeisenberg: If provided, ");
@@ -198,7 +197,8 @@ public:
 			SizeType site = block[i];
 
 			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
-			const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
+			const OperatorType& splus
+			    = ModelBaseType::naturalOperator("splus", site, 0);
 
 			addMagneticField(hmatrix, 'X', site);
 			addMagneticField(hmatrix, 'Z', site);
@@ -329,8 +329,7 @@ protected:
 
 		OpForLinkType splus("splus");
 
-		auto valueModiferTerm0 = [](ComplexOrRealType& value)
-		{ value *= 0.5; };
+		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *= 0.5; };
 
 		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 
@@ -350,9 +349,7 @@ protected:
 
 private:
 
-	void addMagneticField(SparseMatrixType& hmatrix,
-	                      char c,
-	                      SizeType site) const
+	void addMagneticField(SparseMatrixType& hmatrix, char c, SizeType site) const
 	{
 		assert(c == 'X' || c == 'Z');
 
@@ -387,8 +384,7 @@ private:
 		OpForLinkType sx("sx");
 		sxsx.push(sx, 'N', sx, 'N');
 
-		auto sybarsybarModifier = [](ComplexOrRealType& value)
-		{ value *= -1.0; };
+		auto sybarsybarModifier = [](ComplexOrRealType& value) { value *= -1.0; };
 		ModelTermType& sybarsybar = ModelBaseType::createTerm("sybarsybar");
 		OpForLinkType sybar("sybar");
 		sybarsybar.push(sybar, 'N', sybar, 'N', sybarsybarModifier);
@@ -405,8 +401,7 @@ private:
 	}
 
 	//! Find S^+_site in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(SizeType site,
-	                                   const HilbertBasisType& natBasis) const
+	SparseMatrixType findSplusMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -448,8 +443,7 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(SizeType site,
-	                                const HilbertBasisType& natBasis) const
+	SparseMatrixType findSzMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -477,8 +471,7 @@ private:
 	}
 
 	//! Find Maximal_i in the natural basis natBasis
-	SparseMatrixType findMaximal(SizeType site,
-	                             const HilbertBasisType& natBasis) const
+	SparseMatrixType findMaximal(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -524,9 +517,7 @@ private:
 		return Sx;
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int n) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, int n) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -536,10 +527,14 @@ private:
 
 		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 1);
 		if (isCanonical && additional_ == "Anisotropic")
-			err(PsimagLite::String(__FILE__) + ": Anisotropic sub-model CANNOT be canonical. Please " + "delete the TargetSzPlusConst= from the input file\n");
+			err(PsimagLite::String(__FILE__)
+			    + ": Anisotropic sub-model CANNOT be canonical. Please "
+			    + "delete the TargetSzPlusConst= from the input file\n");
 
 		if (isCanonical && !modelParameters_.magneticFieldX.empty())
-			err(PsimagLite::String(__FILE__) + ": MagneticFieldX CANNOT be canonical. Please " + "delete the TargetSzPlusConst= from the input file\n");
+			err(PsimagLite::String(__FILE__)
+			    + ": MagneticFieldX CANNOT be canonical. Please "
+			    + "delete the TargetSzPlusConst= from the input file\n");
 
 		VectorSizeType other;
 		if (isCanonical)

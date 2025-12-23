@@ -22,8 +22,7 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename PrimitivesType>
-class ExpressionForAST {
+template <typename PrimitivesType> class ExpressionForAST {
 public:
 
 	typedef typename PrimitivesType::VectorValueType VectorValueType;
@@ -33,8 +32,7 @@ public:
 	typedef Node<VectorValueType> NodeType;
 	typedef typename Vector<TreeType*>::Type VectorTreeType;
 
-	ExpressionForAST(const VectorStringType& vecStr,
-	                 PrimitivesType& primitives)
+	ExpressionForAST(const VectorStringType& vecStr, PrimitivesType& primitives)
 	{
 		constexpr bool verbose = false; // FIXME
 		SizeType effectiveSize = vecStr.size();

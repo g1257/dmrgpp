@@ -10,8 +10,7 @@
 
 namespace Dmrg {
 
-template <typename TargetingBaseType>
-class AuxForTargetingExpression {
+template <typename TargetingBaseType> class AuxForTargetingExpression {
 
 public:
 
@@ -19,7 +18,9 @@ public:
 	typedef typename TargetingBaseType::ModelType ModelType;
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
+	typedef
+	    typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::
+	        Type VectorVectorVectorWithOffsetType;
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename TargetingBaseType::TargetParamsType TargetParamsType;
@@ -40,8 +41,7 @@ public:
 	    , Eg_(Eg)
 	    , currentCoo_(currentCoo)
 	    , pIndexOutput_(0)
-	{
-	}
+	{ }
 
 	PvectorsType& pVectors() const { return pVectors_; }
 
@@ -63,11 +63,13 @@ public:
 		if (getBraOrKet.isRvector()) {
 			const SizeType pIndex = getBraOrKet.pIndex();
 			if (pIndex >= tempVectors_.size())
-				err("getCurrentVectorNonConst: out of range for " + braOrKet + "\n");
+				err("getCurrentVectorNonConst: out of range for " + braOrKet
+				    + "\n");
 			return tempVectors_[pIndex];
 		}
 
-		throw PsimagLite::RuntimeError("getCurrentVectorNonConst: psi or tvs cannot be modified\n");
+		throw PsimagLite::RuntimeError(
+		    "getCurrentVectorNonConst: psi or tvs cannot be modified\n");
 	}
 
 	PsimagLite::String createTemporaryVector(PsimagLite::String str) const

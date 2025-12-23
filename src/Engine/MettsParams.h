@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 // Coordinates reading of TargetSTructure from input file
-template <typename ModelType>
-class MettsParams : public TargetParamsTimeVectors<ModelType> {
+template <typename ModelType> class MettsParams : public TargetParamsTimeVectors<ModelType> {
 
 	typedef TargetParamsTimeVectors<ModelType> BaseType;
 	typedef typename BaseType::VectorSizeType VectorSizeType;
@@ -99,9 +98,7 @@ public:
 	typedef typename OperatorType::StorageType SparseMatrixType;
 
 	template <typename IoInputter>
-	MettsParams(IoInputter& io,
-	            PsimagLite::String targeting,
-	            const ModelType& model)
+	MettsParams(IoInputter& io, PsimagLite::String targeting, const ModelType& model)
 	    : TimeVectorParamsType(io, targeting, model)
 	{
 		io.readline(beta, "BetaDividedByTwo=");
@@ -109,8 +106,7 @@ public:
 		io.readline(collapse, "MettsCollapse=");
 		try {
 			io.read(pure, "MettsPure");
-		} catch (std::exception& e) {
-		}
+		} catch (std::exception& e) { }
 
 		SizeType n = model.superGeometry().numberOfSites();
 		if (pure.size() > 0 && pure.size() != n) {

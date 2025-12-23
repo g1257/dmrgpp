@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 // A disk stack, similar to std::stack but stores in disk not in memory
 namespace Dmrg {
-template <typename DataType>
-class DiskStack {
+template <typename DataType> class DiskStack {
 
 	typedef typename PsimagLite::IoNg::In IoInType;
 	typedef typename PsimagLite::IoNg::Out IoOutType;
@@ -150,9 +149,7 @@ public:
 
 		++total_;
 
-		ioOut_->write(total_,
-		              label_ + "/Size",
-		              IoOutType::Serializer::ALLOW_OVERWRITE);
+		ioOut_->write(total_, label_ + "/Size", IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	void pop()
@@ -165,9 +162,7 @@ public:
 		if (!ioOut_)
 			return;
 
-		ioOut_->write(total_,
-		              label_ + "/Size",
-		              IoOutType::Serializer::ALLOW_OVERWRITE);
+		ioOut_->write(total_, label_ + "/Size", IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	void restore(SizeType total)
@@ -176,9 +171,7 @@ public:
 		if (!ioOut_)
 			return;
 
-		ioOut_->write(total_,
-		              label_ + "/Size",
-		              IoOutType::Serializer::ALLOW_OVERWRITE);
+		ioOut_->write(total_, label_ + "/Size", IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	const DataType& top() const
@@ -189,9 +182,7 @@ public:
 		assert(total_ > 0);
 		delete dt_;
 		dt_ = 0;
-		dt_ = new DataType(*ioIn_,
-		                   label_ + "/" + ttos(total_ - 1),
-		                   basisTraits_);
+		dt_ = new DataType(*ioIn_, label_ + "/" + ttos(total_ - 1), basisTraits_);
 		return *dt_;
 	}
 

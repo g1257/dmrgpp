@@ -23,8 +23,7 @@ public:
 		ModalStruct()
 		    : modalEnum(MODAL_SUM)
 		    , extra(0)
-		{
-		}
+		{ }
 
 		template <typename SomeInputType>
 		void read(PsimagLite::String str, SomeInputType& io)
@@ -35,7 +34,8 @@ public:
 
 		void write(PsimagLite::String str,
 		           PsimagLite::IoNgSerializer& io,
-		           typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+		           typename PsimagLite::IoNgSerializer::WriteMode wM
+		           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 		{
 			if (wM != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 				io.createGroup(str);
@@ -91,16 +91,14 @@ public:
 		flavors = q1.flavors; // ???
 	}
 
-	template <typename SomeInputType>
-	void read(PsimagLite::String str, SomeInputType& io)
+	template <typename SomeInputType> void read(PsimagLite::String str, SomeInputType& io)
 	{
 		io.read(oddElectrons, str + "/oddElectrons");
 		try {
 			VectorSizeType otherVector;
 			io.read(otherVector, str + "/other");
 			other.fromStdVector(otherVector);
-		} catch (...) {
-		}
+		} catch (...) { }
 
 		io.read(jmPair, str + "/jmPair");
 		io.read(flavors, str + "/flavors");
@@ -114,7 +112,8 @@ public:
 
 	void write(PsimagLite::String str,
 	           PsimagLite::IoNgSerializer& io,
-	           typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	           typename PsimagLite::IoNgSerializer::WriteMode wM
+	           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		try {
 			io.read(modalStruct, "modalStruct");
@@ -134,7 +133,8 @@ public:
 
 	void overwrite(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
 	{
-		const PsimagLite::IoNgSerializer::WriteMode mode = PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
+		const PsimagLite::IoNgSerializer::WriteMode mode
+		    = PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
 		io.write(str + "/oddElectrons", oddElectrons, mode);
 		VectorSizeType otherVector;
 		other.toStdVector(otherVector);
@@ -153,10 +153,7 @@ public:
 #endif
 	}
 
-	bool operator!=(const Qn& a) const
-	{
-		return !(*this == a);
-	}
+	bool operator!=(const Qn& a) const { return !(*this == a); }
 
 	void scale(SizeType sites,
 	           SizeType totalSites,
@@ -213,9 +210,7 @@ public:
 	}
 
 	template <typename SomeIoInType>
-	static void readVector(VectorQnType& vqns,
-	                       PsimagLite::String prefix,
-	                       SomeIoInType& io)
+	static void readVector(VectorQnType& vqns, PsimagLite::String prefix, SomeIoInType& io)
 	{
 		SizeType aSize = 0;
 		io.read(aSize, prefix + "/Size");
@@ -225,9 +220,7 @@ public:
 			vqns[i].read(prefix + "/" + ttos(i), io);
 	}
 
-	static void adjustQns(VectorQnType& outQns,
-	                      const VectorSizeType& ints,
-	                      SizeType mode)
+	static void adjustQns(VectorQnType& outQns, const VectorSizeType& ints, SizeType mode)
 	{
 		SizeType modePlusOne = mode + 1;
 		SizeType n = ints.size();
@@ -274,8 +267,7 @@ public:
 		return other[0];
 	}
 
-	static void su2ElectronsBridge(VectorSizeType& v,
-	                               const VectorQnType& qns)
+	static void su2ElectronsBridge(VectorSizeType& v, const VectorQnType& qns)
 	{
 		SizeType n = qns.size();
 		v.resize(n);

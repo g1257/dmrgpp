@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename ActionType, typename TypeWrapperType>
-class KrylovHelper {
+template <typename ActionType, typename TypeWrapperType> class KrylovHelper {
 
 public:
 
@@ -21,8 +20,7 @@ public:
 	    : params_(params)
 	    , firstRitz_(firstRitz)
 	    , progress_("KrylovHelper")
-	{
-	}
+	{ }
 
 	template <typename SomeActionType>
 	void calcR(VectorType& r,
@@ -46,7 +44,8 @@ public:
 		for (SizeType k = firstRitz_; k < n2; ++k) {
 			ComplexOrRealType sum = 0.0;
 			for (SizeType kprime = 0; kprime < n3; ++kprime) {
-				ComplexOrRealType tmp = PsimagLite::conj(T(kprime, k)) * calcVTimesPhiArray[kprime];
+				ComplexOrRealType tmp
+				    = PsimagLite::conj(T(kprime, k)) * calcVTimesPhiArray[kprime];
 				sum += tmp;
 				if (kprime > 0)
 					sum2 += tmp;

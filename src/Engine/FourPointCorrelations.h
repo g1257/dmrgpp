@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 
 namespace Dmrg {
-template <typename CorrelationsSkeletonType>
-class FourPointCorrelations {
+template <typename CorrelationsSkeletonType> class FourPointCorrelations {
 
 public:
 
@@ -108,8 +107,7 @@ public:
 
 	FourPointCorrelations(const CorrelationsSkeletonType& skeleton)
 	    : skeleton_(skeleton)
-	{
-	}
+	{ }
 
 	//! Four-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3<i4
@@ -120,13 +118,17 @@ public:
 	                     const BraketType& braket) const
 	{
 		if (i1 > i2 || i3 > i4 || i2 > i3)
-			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
+			throw PsimagLite::RuntimeError(
+			    "calcCorrelation: FourPoint needs ordered points\n");
 		if (i1 == i2 || i3 == i4)
-			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
+			throw PsimagLite::RuntimeError(
+			    "calcCorrelation: FourPoint needs distinct points\n");
 		if (i1 == i3 || i2 == i4)
-			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
+			throw PsimagLite::RuntimeError(
+			    "calcCorrelation: FourPoint needs distinct points\n");
 		if (i2 == i3 || i1 == i4)
-			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
+			throw PsimagLite::RuntimeError(
+			    "calcCorrelation: FourPoint needs distinct points\n");
 
 		SparseMatrixType O2gt;
 
@@ -138,10 +140,7 @@ public:
 
 	//! 3-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3
-	FieldType threePoint(SizeType i1,
-	                     SizeType i2,
-	                     SizeType i3,
-	                     const BraketType& braket) const
+	FieldType threePoint(SizeType i1, SizeType i2, SizeType i3, const BraketType& braket) const
 	{
 		if (i1 > i2 || i2 > i3)
 			err("calcCorrelation: FourPoint needs ordered points\n");
@@ -169,15 +168,8 @@ public:
 
 		SparseMatrixType O2gt;
 		const bool finalTransform = true;
-		firstStage(O2gt,
-		           'N',
-		           braket.site(0),
-		           'N',
-		           braket.site(1),
-		           braket,
-		           0,
-		           1,
-		           finalTransform);
+		firstStage(
+		    O2gt, 'N', braket.site(0), 'N', braket.site(1), braket, 0, 1, finalTransform);
 
 		assert(n > 3);
 		SizeType end = n - 2;
@@ -200,15 +192,7 @@ public:
 		SizeType i3 = braket.site(n - 2);
 		SizeType i4 = braket.site(n - 1);
 
-		return secondStage(O2gt,
-		                   i2,
-		                   'N',
-		                   i3,
-		                   'N',
-		                   i4,
-		                   braket,
-		                   n - 2,
-		                   n - 1);
+		return secondStage(O2gt, i2, 'N', i3, 'N', i4, braket, n - 2, n - 1);
 	}
 
 	//! requires i1<i2
@@ -236,7 +220,8 @@ public:
 			ns = 0;
 		skeleton_.growDirectly(O1g, O1m, i1, braket.op(index0).fermionOrBoson(), ns, true);
 
-		SizeType ptr = skeleton_.dmrgMultiply(O2g, O1g, O2m, braket.op(index1).fermionOrBoson(), ns);
+		SizeType ptr
+		    = skeleton_.dmrgMultiply(O2g, O1g, O2m, braket.op(index1).fermionOrBoson(), ns);
 
 		if (finalTransform)
 			skeleton_.helper().transform(O2gt, O2g, ptr);
@@ -273,11 +258,8 @@ public:
 		SparseMatrixType O3g, O4g;
 		if (i4 == skeleton_.numberOfSites() - 1) {
 			if (i3 < i4 - 1) { // still not tested (2018-02-27)
-				const SizeType ptr = skeleton_.dmrgMultiply(O3g,
-				                                            Otmp,
-				                                            O3m,
-				                                            braket.op(index0).fermionOrBoson(),
-				                                            ns);
+				const SizeType ptr = skeleton_.dmrgMultiply(
+				    O3g, Otmp, O3m, braket.op(index0).fermionOrBoson(), ns);
 
 				SparseMatrixType O3gt;
 				helper.transform(O3gt, O3g, ptr);
@@ -286,14 +268,16 @@ public:
 				if (ns < 0)
 					ns = 0;
 
-				growDirectly4p(Otmp, O3gt, i3 + 1, braket.op(index0).fermionOrBoson(), ns);
+				growDirectly4p(
+				    Otmp, O3gt, i3 + 1, braket.op(index0).fermionOrBoson(), ns);
 
-				return skeleton_.bracketRightCorner(Otmp,
-				                                    O4m,
-				                                    braket.op(index1).fermionOrBoson(),
-				                                    i4 - 2, // <--- this is the pointer
-				                                    braket.bra(),
-				                                    braket.ket());
+				return skeleton_.bracketRightCorner(
+				    Otmp,
+				    O4m,
+				    braket.op(index1).fermionOrBoson(),
+				    i4 - 2, // <--- this is the pointer
+				    braket.bra(),
+				    braket.ket());
 			}
 
 			return skeleton_.bracketRightCorner(Otmp,
@@ -315,16 +299,10 @@ public:
 			ns = 0;
 		growDirectly4p(Otmp, O3gt, i3 + 1, braket.op(index0).fermionOrBoson(), ns);
 
-		const SizeType ptr = skeleton_.dmrgMultiply(O4g,
-		                                            Otmp,
-		                                            O4m,
-		                                            braket.op(index1).fermionOrBoson(),
-		                                            ns);
-		return skeleton_.bracket(O4g,
-		                         braket.op(index1).fermionOrBoson(),
-		                         ptr,
-		                         braket.bra(),
-		                         braket.ket());
+		const SizeType ptr = skeleton_.dmrgMultiply(
+		    O4g, Otmp, O4m, braket.op(index1).fermionOrBoson(), ns);
+		return skeleton_.bracket(
+		    O4g, braket.op(index1).fermionOrBoson(), ptr, braket.bra(), braket.ket());
 	}
 
 	//! requires i2<i3<i4
@@ -338,9 +316,11 @@ public:
 	{
 		// Take care of modifiers
 		if (i2 > i3)
-			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs ordered points\n");
+			throw PsimagLite::RuntimeError(
+			    "calcCorrelation: FourPoint needs ordered points\n");
 		if (i2 == i3)
-			throw PsimagLite::RuntimeError("calcCorrelation: FourPoint needs distinct points\n");
+			throw PsimagLite::RuntimeError(
+			    "calcCorrelation: FourPoint needs distinct points\n");
 
 		SparseMatrixType O3m;
 		skeleton_.createWithModification(O3m, Op3.getCRS(), mod3);

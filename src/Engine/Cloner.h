@@ -89,8 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-template <typename LineChangerType>
-class Cloner {
+template <typename LineChangerType> class Cloner {
 	static const SizeType LINE_LENGTH = 1024;
 
 public:
@@ -101,13 +100,9 @@ public:
 	    : infile_(infile)
 	    , outRoot_(outRoot)
 	    , ext_(ext)
-	{
-	}
+	{ }
 
-	void push(const LineChangerType& lineChanger)
-	{
-		lineChanger_.push_back(lineChanger);
-	}
+	void push(const LineChangerType& lineChanger) { lineChanger_.push_back(lineChanger); }
 
 	void createInputFile(SizeType ind) const
 	{

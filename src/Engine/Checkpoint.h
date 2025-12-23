@@ -92,8 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelType, typename WaveFunctionTransfType_>
-class Checkpoint {
+template <typename ModelType, typename WaveFunctionTransfType_> class Checkpoint {
 
 public:
 
@@ -151,7 +150,8 @@ public:
 
 		SizeType site = 0; // FIXME for Immm model, find max of hilbert(site) over site
 		SizeType hilbertOneSite = model.hilbertSize(site);
-		if (parameters_.keptStatesInfinite > 0 && parameters_.keptStatesInfinite < hilbertOneSite) {
+		if (parameters_.keptStatesInfinite > 0
+		    && parameters_.keptStatesInfinite < hilbertOneSite) {
 			PsimagLite::String str("FATAL:  keptStatesInfinite= ");
 			str += ttos(parameters_.keptStatesInfinite) + " < ";
 			str += ttos(hilbertOneSite) + "\n";
@@ -160,7 +160,8 @@ public:
 
 		{
 			VectorFiniteLoopType vfl;
-			checkFiniteLoops(vfl, model.superGeometry().numberOfSites(), hilbertOneSite, ioIn);
+			checkFiniteLoops(
+			    vfl, model.superGeometry().numberOfSites(), hilbertOneSite, ioIn);
 			parameters.setFiniteLoops(vfl);
 		}
 
@@ -173,7 +174,8 @@ public:
 		{
 			IoType::In ioIn2(parameters_.checkpoint.filename());
 
-			readEnergies(energiesFromFile_, parameters_.checkpoint.labelForEnergy(), ioIn2);
+			readEnergies(
+			    energiesFromFile_, parameters_.checkpoint.labelForEnergy(), ioIn2);
 
 			ioIn2.read(v, "CHKPOINTSYSTEM/OperatorPerSite");
 			if (v.size() == 0)
@@ -184,7 +186,8 @@ public:
 			ioIn2.read(iscomplex, "IsComplex"); // previous run
 			ioIn2.close();
 
-			if (iscomplex && iscomplex != PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
+			if (iscomplex
+			    && iscomplex != PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
 				err("Previous run was complex and this one is not\n");
 		}
 
@@ -214,9 +217,8 @@ public:
 		loadStacksMemoryToDisk();
 	}
 
-	static void readEnergies(VectorVectorRealType& energies,
-	                         PsimagLite::String lfEnergy,
-	                         IoType::In& ioIn2)
+	static void
+	readEnergies(VectorVectorRealType& energies, PsimagLite::String lfEnergy, IoType::In& ioIn2)
 	{
 		// Energies/Size <-- sectors
 		// Energies/0/Size <--- excited
@@ -246,8 +248,9 @@ public:
 	                          const VectorVectorRealType& energies,
 	                          IoType::Out& io)
 	{
-		PsimagLite::IoNgSerializer::WriteMode mode = (firstCall) ? PsimagLite::IoNgSerializer::NO_OVERWRITE
-		                                                         : PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
+		PsimagLite::IoNgSerializer::WriteMode mode = (firstCall)
+		    ? PsimagLite::IoNgSerializer::NO_OVERWRITE
+		    : PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
 
 		// Energies/Size <-- sectors
 		// Energies/0/Size <--- excited
@@ -261,9 +264,7 @@ public:
 			const SizeType nexcited = energies[sectorIndex].size();
 			if (firstCall)
 				io.createGroup(label + "/" + ttos(sectorIndex));
-			io.write(nexcited,
-			         label + "/" + ttos(sectorIndex) + "/Size",
-			         mode);
+			io.write(nexcited, label + "/" + ttos(sectorIndex) + "/Size", mode);
 			for (SizeType e = 0; e < nexcited; ++e)
 				io.write(energies[sectorIndex][e],
 				         label + "/" + ttos(sectorIndex) + "/" + ttos(e),
@@ -305,9 +306,8 @@ public:
 	}
 
 	// Not related to stacks
-	void read(BasisWithOperatorsType& pS,
-	          BasisWithOperatorsType& pE,
-	          const BasisTraits& basisTraits)
+	void
+	read(BasisWithOperatorsType& pS, BasisWithOperatorsType& pE, const BasisTraits& basisTraits)
 	{
 		typename PsimagLite::IoSelector::In ioTmp(parameters_.checkpoint.filename());
 
@@ -324,8 +324,7 @@ public:
 		envStack_.push(pE);
 	}
 
-	void push(const BasisWithOperatorsType& pSorE,
-	          typename ProgramGlobals::SysOrEnvEnum what)
+	void push(const BasisWithOperatorsType& pSorE, typename ProgramGlobals::SysOrEnvEnum what)
 	{
 		if (what == ProgramGlobals::SysOrEnvEnum::ENVIRON)
 			envStack_.push(pSorE);
@@ -335,14 +334,17 @@ public:
 
 	BasisWithOperatorsType& shrink(typename ProgramGlobals::SysOrEnvEnum what)
 	{
-		return (what == ProgramGlobals::SysOrEnvEnum::ENVIRON) ? shrinkInternal(envStack_) : shrinkInternal(systemStack_);
+		return (what == ProgramGlobals::SysOrEnvEnum::ENVIRON)
+		    ? shrinkInternal(envStack_)
+		    : shrinkInternal(systemStack_);
 	}
 
 	bool isRestart() const { return isRestart_; }
 
 	SizeType stackSize(typename ProgramGlobals::SysOrEnvEnum what) const
 	{
-		return (what == ProgramGlobals::SysOrEnvEnum::ENVIRON) ? envStack_.size() : systemStack_.size();
+		return (what == ProgramGlobals::SysOrEnvEnum::ENVIRON) ? envStack_.size()
+		                                                       : systemStack_.size();
 	}
 
 	const DiskOrMemoryStackType& memoryStack(typename ProgramGlobals::SysOrEnvEnum option) const
@@ -414,7 +416,8 @@ private:
 
 		bool allInSystem = (parameters_.options.isSet("geometryallinsystem"));
 
-		int lastSite = (allInSystem) ? totalSites - 2 : totalSites / 2 - 1; // must be signed
+		int lastSite
+		    = (allInSystem) ? totalSites - 2 : totalSites / 2 - 1; // must be signed
 		int prevDeltaSign = 1;
 		bool checkPoint = false;
 
@@ -429,7 +432,8 @@ private:
 
 		if (!parameters_.autoRestart) {
 			checkFiniteLoops(vfl, totalSites, lastSite, prevDeltaSign, checkPoint);
-			checkAgainstPartialLoops(vfl, totalSites, lastSite, prevDeltaSign, checkPoint);
+			checkAgainstPartialLoops(
+			    vfl, totalSites, lastSite, prevDeltaSign, checkPoint);
 		}
 
 		checkMvalues(vfl, hilbertOneSite);
@@ -514,7 +518,8 @@ private:
 			if (b1 && delta * prevDeltaSign < 0) {
 				x += prevDeltaSign;
 				if (x != 1 && (static_cast<SizeType>(x) + 2) != totalSites && !last)
-					err("Loops need to go all the way to the left or to the right\n");
+					err("Loops need to go all the way to the left or to the "
+					    "right\n");
 			}
 
 			// update previous sign
@@ -522,8 +527,7 @@ private:
 		}
 	}
 
-	void checkMvalues(const VectorFiniteLoopType& finiteLoop,
-	                  SizeType hilbertOneSite) const
+	void checkMvalues(const VectorFiniteLoopType& finiteLoop, SizeType hilbertOneSite) const
 	{
 		for (SizeType i = 0; i < finiteLoop.size(); ++i) {
 			if (finiteLoop[i].keptStates() >= hilbertOneSite)
@@ -547,14 +551,10 @@ private:
 
 	void loadStacksDiskToMemory()
 	{
-		DiskStackType systemDisk(parameters_.checkpoint.filename(),
-		                         isRestart_,
-		                         "system",
-		                         basisTraits_);
-		DiskStackType envDisk(parameters_.checkpoint.filename(),
-		                      isRestart_,
-		                      "environ",
-		                      basisTraits_);
+		DiskStackType systemDisk(
+		    parameters_.checkpoint.filename(), isRestart_, "system", basisTraits_);
+		DiskStackType envDisk(
+		    parameters_.checkpoint.filename(), isRestart_, "environ", basisTraits_);
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -568,14 +568,8 @@ private:
 	void loadStacksMemoryToDisk()
 	{
 		const bool needsToRead = false;
-		DiskStackType systemDisk(parameters_.filename,
-		                         needsToRead,
-		                         "system",
-		                         basisTraits_);
-		DiskStackType envDisk(parameters_.filename,
-		                      needsToRead,
-		                      "environ",
-		                      basisTraits_);
+		DiskStackType systemDisk(parameters_.filename, needsToRead, "system", basisTraits_);
+		DiskStackType envDisk(parameters_.filename, needsToRead, "environ", basisTraits_);
 		sayAboutToWrite();
 		DiskOrMemoryStackType::loadStack(systemDisk, systemStack_);
 		DiskOrMemoryStackType::loadStack(envDisk, envStack_);

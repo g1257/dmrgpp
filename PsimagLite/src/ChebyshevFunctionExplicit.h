@@ -32,8 +32,7 @@ Please see full open source license included in file LICENSE.
 #include <cmath>
 
 namespace PsimagLite {
-template <typename RealType>
-class ChebyshevFunctionExplicit {
+template <typename RealType> class ChebyshevFunctionExplicit {
 
 public:
 

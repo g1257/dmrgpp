@@ -9,8 +9,7 @@
 
 namespace Dmrg {
 
-template <typename TargetingBaseType>
-class AlgebraForTargetingExpression {
+template <typename TargetingBaseType> class AlgebraForTargetingExpression {
 
 public:
 
@@ -38,8 +37,7 @@ public:
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false)
 	    , aux_(aux)
-	{
-	}
+	{ }
 
 	AlgebraForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
 	    : finalized_(false)

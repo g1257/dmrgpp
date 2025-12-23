@@ -110,10 +110,8 @@ public:
 			int x = 0;
 			io.readline(x, "IsPeriodicX=");
 			isPeriodicX_ = (x > 0) ? true : false;
-			std::cerr << "INFO: IsPeriodicX=" << isPeriodicX_
-			          << "\n";
-		} catch (std::exception&) {
-		}
+			std::cerr << "INFO: IsPeriodicX=" << isPeriodicX_ << "\n";
+		} catch (std::exception&) { }
 
 		try {
 			int x = 0;
@@ -122,8 +120,7 @@ public:
 			if (leg_ == 2)
 				throw RuntimeError("LadderLeg==2 cannot have "
 				                   "IsPeriodicY set\n");
-			std::cerr << "INFO: IsPeriodicY=" << isPeriodicY_
-			          << "\n";
+			std::cerr << "INFO: IsPeriodicY=" << isPeriodicY_ << "\n";
 		} catch (std::exception& e) {
 			if (leg_ > 2)
 				throw RuntimeError("LadderLeg>2 must have "
@@ -134,14 +131,10 @@ public:
 			isPeriodicY_ = false;
 
 		if (linSize % leg_ != 0)
-			throw RuntimeError(
-			    "Ladder: leg must divide number of sites\n");
+			throw RuntimeError("Ladder: leg must divide number of sites\n");
 	}
 
-	virtual SizeType maxConnections() const
-	{
-		return (isPeriodicX_) ? linSize_ : leg_ + 1;
-	}
+	virtual SizeType maxConnections() const { return (isPeriodicX_) ? linSize_ : leg_ + 1; }
 
 	virtual SizeType dirs() const { return 2; }
 
@@ -150,8 +143,7 @@ public:
 		if (dirId == DIRECTION_X)
 			return (isPeriodicX_) ? linSize_ : linSize_ - leg_;
 		else if (dirId == DIRECTION_Y)
-			return (isPeriodicY_) ? linSize_
-			                      : linSize_ - linSize_ / leg_;
+			return (isPeriodicY_) ? linSize_ : linSize_ - linSize_ / leg_;
 
 		throw RuntimeError("Unknown direction\n");
 	}
@@ -216,15 +208,11 @@ public:
 		case DIRECTION_X:
 			if (!isPeriodicX_)
 				return imin;
-			return (imin < leg_ && imax == imin + linSize_ - leg_)
-			    ? imax
-			    : imin;
+			return (imin < leg_ && imax == imin + linSize_ - leg_) ? imax : imin;
 		case DIRECTION_Y:
 			if (!isPeriodicY_)
 				return imin - y;
-			return (imin % leg_ == 0 && imax == imin + leg_ - 1)
-			    ? imax
-			    : imin;
+			return (imin % leg_ == 0 && imax == imin + leg_ - 1) ? imax : imin;
 		}
 
 		throw RuntimeError("handle: Unknown direction\n");

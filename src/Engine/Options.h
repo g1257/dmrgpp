@@ -8,8 +8,7 @@
 
 namespace Dmrg {
 
-template <typename InputValidatorType>
-class Options {
+template <typename InputValidatorType> class Options {
 
 public:
 
@@ -35,18 +34,15 @@ public:
 
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
-		const PsimagLite::String tmp = std::accumulate(vdata_.begin(),
-		                                               vdata_.end(),
-		                                               PsimagLite::String(","));
+		const PsimagLite::String tmp
+		    = std::accumulate(vdata_.begin(), vdata_.end(), PsimagLite::String(","));
 		ioSerializer.write(label, tmp);
 	}
 
 	bool isSet(PsimagLite::String what) const
 	{
 		what = ProgramGlobals::toLower(what);
-		VectorStringType::const_iterator it = std::find(vdata_.begin(),
-		                                                vdata_.end(),
-		                                                what);
+		VectorStringType::const_iterator it = std::find(vdata_.begin(), vdata_.end(), what);
 		return (it != vdata_.end());
 	}
 
@@ -57,8 +53,7 @@ private:
 		std::transform(vdata_.begin(),
 		               vdata_.end(),
 		               vdata_.begin(),
-		               [](PsimagLite::String s)
-		               { return ProgramGlobals::toLower(s); });
+		               [](PsimagLite::String s) { return ProgramGlobals::toLower(s); });
 	}
 
 	VectorStringType vdata_;

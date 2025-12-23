@@ -93,8 +93,7 @@ public:
 	    : linSize_(0)
 	    , dofs_(0)
 	    , maxConnections_(0)
-	{
-	}
+	{ }
 
 	LongRange(SizeType linSize, std::string goptions, InputType& io)
 	    : linSize_(linSize)
@@ -106,8 +105,7 @@ public:
 		try {
 			io.readline(entangler, "GeometryEntangler=");
 			hasEntangler = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		io.readline(dofs_, "DegreesOfFreedom=");
 
@@ -120,7 +118,9 @@ public:
 		}
 
 		if (goptions != "ConstantValues" and goptions != "compact" and goptions != "none") {
-			throw RuntimeError(std::string("GeometryOptions must be either ") + "ConstantValues or compact or none, not " + goptions + "\n");
+			throw RuntimeError(std::string("GeometryOptions must be either ")
+			                   + "ConstantValues or compact or none, not " + goptions
+			                   + "\n");
 		}
 
 		if (goptions == "compact") {
@@ -137,9 +137,8 @@ public:
 			io.readline(maxConnections_, "GeometryMaxConnections=");
 		} catch (std::exception& e) {
 			if (!hasEntangler) {
-				std::cerr
-				    << "Please add GeometryMaxConnections=0 or "
-				       "some other number\n";
+				std::cerr << "Please add GeometryMaxConnections=0 or "
+				             "some other number\n";
 				throw e;
 			}
 		}
@@ -149,28 +148,22 @@ public:
 	{
 		m = matrix_;
 		if (orbitals != dofs_)
-			throw RuntimeError(
-			    "General geometry connectors: wrong size\n");
+			throw RuntimeError("General geometry connectors: wrong size\n");
 	}
 
 	virtual SizeType maxConnections() const
 	{
-		return (maxConnections_ == 0) ? linSize_ * linSize_ * 0.25
-		                              : maxConnections_;
+		return (maxConnections_ == 0) ? linSize_ * linSize_ * 0.25 : maxConnections_;
 	}
 
 	virtual SizeType dirs() const { return 1; }
 
-	SizeType handle(SizeType i, SizeType j) const
-	{
-		return (i < j) ? i : j;
-	}
+	SizeType handle(SizeType i, SizeType j) const { return (i < j) ? i : j; }
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
 		assert(dirId == 0);
-		throw RuntimeError(
-		    "LongRange::getVectorSize(): unimplemented\n");
+		throw RuntimeError("LongRange::getVectorSize(): unimplemented\n");
 	}
 
 	bool connected(SizeType i1, SizeType i2) const { return true; }
@@ -191,10 +184,7 @@ public:
 
 	String label() const { return "LongRange"; }
 
-	SizeType findReflection(SizeType site) const
-	{
-		return linSize_ - site - 1;
-	}
+	SizeType findReflection(SizeType site) const { return linSize_ - site - 1; }
 
 	SizeType length(SizeType i) const
 	{
@@ -212,8 +202,7 @@ public:
 		return site;
 	}
 
-	template <class Archive>
-	void write(Archive&, const unsigned int)
+	template <class Archive> void write(Archive&, const unsigned int)
 	{
 		throw RuntimeError("LongRange::write(): unimplemented\n");
 	}
@@ -299,7 +288,8 @@ private:
 				SizeType orb0 = complexToInteger(values(i, counter++));
 				SizeType site1 = complexToInteger(values(i, counter++));
 				SizeType orb1 = complexToInteger(values(i, counter++));
-				matrix_(orb0 + site0 * dofs_, orb1 + site1 * dofs_) = values(i, counter++);
+				matrix_(orb0 + site0 * dofs_, orb1 + site1 * dofs_)
+				    = values(i, counter++);
 			}
 		} else {
 			assert(values.cols() == 3);
@@ -315,12 +305,15 @@ private:
 	static SizeType complexToInteger(const ComplexOrRealType& value)
 	{
 		if (std::imag(value) != 0) {
-			throw RuntimeError(std::string("Expected an integer in Connectors matrix ") + +" with compact option, not a complex number\n");
+			throw RuntimeError(std::string("Expected an integer in Connectors matrix ")
+			                   + +" with compact option, not a complex number\n");
 		}
 
 		RealType val = std::real(value);
 		if (!isInt64(val)) {
-			throw RuntimeError(std::string("Expected an integer in Connectors matrix ") + +" with compact option, not a floating point number\n");
+			throw RuntimeError(
+			    std::string("Expected an integer in Connectors matrix ")
+			    + +" with compact option, not a floating point number\n");
 		}
 
 		SizeType valInt = static_cast<SizeType>(val);

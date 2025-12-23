@@ -25,22 +25,19 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename ComplexOrRealType>
-class Real {
+template <typename ComplexOrRealType> class Real {
 public:
 
 	typedef ComplexOrRealType Type;
 };
 
-template <typename RealType>
-class Real<std::complex<RealType>> {
+template <typename RealType> class Real<std::complex<RealType>> {
 public:
 
 	typedef RealType Type;
 };
 
-template <typename T>
-class IsComplexNumber {
+template <typename T> class IsComplexNumber {
 public:
 
 	enum OpaqueEnum
@@ -49,8 +46,7 @@ public:
 	};
 };
 
-template <typename T>
-class IsComplexNumber<std::complex<T>> {
+template <typename T> class IsComplexNumber<std::complex<T>> {
 public:
 
 	enum OpaqueEnum
@@ -59,42 +55,36 @@ public:
 	};
 };
 
-template <typename T>
-struct IsNumber {
+template <typename T> struct IsNumber {
 	enum
 	{
 		True = (IsComplexNumber<T>::True || Loki::TypeTraits<T>::isArith)
 	};
 };
 
-template <typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type real(T t)
+template <typename T> typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type real(T t)
 {
 	return t;
 }
 
 template <typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type
-real(const std::complex<T>& t)
+typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type real(const std::complex<T>& t)
 {
 	return std::real(t);
 }
 
-template <typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type imag(T)
+template <typename T> typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type imag(T)
 {
 	return 0.0;
 }
 
 template <typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type
-imag(const std::complex<T>& t)
+typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type imag(const std::complex<T>& t)
 {
 	return std::imag(t);
 }
 
-template <typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat, T>::Type conj(T t)
+template <typename T> typename EnableIf<Loki::TypeTraits<T>::isFloat, T>::Type conj(T t)
 {
 	return t;
 }
@@ -106,15 +96,13 @@ conj(const std::complex<T>& t)
 	return std::conj(t);
 }
 
-template <typename T>
-typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type norm(T t)
+template <typename T> typename EnableIf<Loki::TypeTraits<T>::isArith, T>::Type norm(T t)
 {
 	return std::fabs(t);
 }
 
 template <typename T>
-typename EnableIf<Loki::TypeTraits<T>::isFloat, T>::Type
-norm(const std::complex<T>& t)
+typename EnableIf<Loki::TypeTraits<T>::isFloat, T>::Type norm(const std::complex<T>& t)
 {
 	return std::norm(t);
 }
@@ -151,8 +139,7 @@ inline std::complex<double> stringToComplex(const std::string& str)
 
 namespace std {
 template <typename T>
-typename PsimagLite::EnableIf<Loki::TypeTraits<T>::isFloat,
-                              std::complex<T>>::Type
+typename PsimagLite::EnableIf<Loki::TypeTraits<T>::isFloat, std::complex<T>>::Type
 operator*(int x, const std::complex<T>& y)
 {
 	return std::complex<T>(real(y) * x, imag(y) * x);

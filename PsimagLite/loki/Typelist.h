@@ -31,8 +31,7 @@ namespace Loki {
 //     Tail (second element, can be another typelist)
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class T, class U>
-struct Typelist {
+template <class T, class U> struct Typelist {
 	typedef T Head;
 	typedef U Tail;
 };
@@ -49,54 +48,51 @@ namespace TL {
 	// returns a typelist that is of T1, T2, ...
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <
-	    typename T1 = NullType,
-	    typename T2 = NullType,
-	    typename T3 = NullType,
-	    typename T4 = NullType,
-	    typename T5 = NullType,
-	    typename T6 = NullType,
-	    typename T7 = NullType,
-	    typename T8 = NullType,
-	    typename T9 = NullType,
-	    typename T10 = NullType,
-	    typename T11 = NullType,
-	    typename T12 = NullType,
-	    typename T13 = NullType,
-	    typename T14 = NullType,
-	    typename T15 = NullType,
-	    typename T16 = NullType,
-	    typename T17 = NullType,
-	    typename T18 = NullType>
+	template <typename T1 = NullType,
+	          typename T2 = NullType,
+	          typename T3 = NullType,
+	          typename T4 = NullType,
+	          typename T5 = NullType,
+	          typename T6 = NullType,
+	          typename T7 = NullType,
+	          typename T8 = NullType,
+	          typename T9 = NullType,
+	          typename T10 = NullType,
+	          typename T11 = NullType,
+	          typename T12 = NullType,
+	          typename T13 = NullType,
+	          typename T14 = NullType,
+	          typename T15 = NullType,
+	          typename T16 = NullType,
+	          typename T17 = NullType,
+	          typename T18 = NullType>
 	struct MakeTypelist {
 	private:
 
-		typedef typename MakeTypelist<
-		    T2,
-		    T3,
-		    T4,
-		    T5,
-		    T6,
-		    T7,
-		    T8,
-		    T9,
-		    T10,
-		    T11,
-		    T12,
-		    T13,
-		    T14,
-		    T15,
-		    T16,
-		    T17,
-		    T18>::Result TailResult;
+		typedef typename MakeTypelist<T2,
+		                              T3,
+		                              T4,
+		                              T5,
+		                              T6,
+		                              T7,
+		                              T8,
+		                              T9,
+		                              T10,
+		                              T11,
+		                              T12,
+		                              T13,
+		                              T14,
+		                              T15,
+		                              T16,
+		                              T17,
+		                              T18>::Result TailResult;
 
 	public:
 
 		typedef Typelist<T1, TailResult> Result;
 	};
 
-	template <>
-	struct MakeTypelist<> {
+	template <> struct MakeTypelist<> {
 		typedef NullType Result;
 	};
 
@@ -109,18 +105,15 @@ namespace TL {
 	//     the end terminator (which by convention is NullType)
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList>
-	struct Length;
-	template <>
-	struct Length<NullType> {
+	template <class TList> struct Length;
+	template <> struct Length<NullType> {
 		enum
 		{
 			value = 0
 		};
 	};
 
-	template <class T, class U>
-	struct Length<Typelist<T, U>> {
+	template <class T, class U> struct Length<Typelist<T, U>> {
 		enum
 		{
 			value = 1 + Length<U>::value
@@ -137,16 +130,13 @@ namespace TL {
 	// If you pass an out-of-bounds index, the result is a compile-time error
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList, unsigned int index>
-	struct TypeAt;
+	template <class TList, unsigned int index> struct TypeAt;
 
-	template <class Head, class Tail>
-	struct TypeAt<Typelist<Head, Tail>, 0> {
+	template <class Head, class Tail> struct TypeAt<Typelist<Head, Tail>, 0> {
 		typedef Head Result;
 	};
 
-	template <class Head, class Tail, unsigned int i>
-	struct TypeAt<Typelist<Head, Tail>, i> {
+	template <class Head, class Tail, unsigned int i> struct TypeAt<Typelist<Head, Tail>, i> {
 		typedef typename TypeAt<Tail, i - 1>::Result Result;
 	};
 
@@ -185,27 +175,23 @@ namespace TL {
 	// returns the position of T in TList, or NullType if T is not found in TList
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList, class T>
-	struct IndexOf;
+	template <class TList, class T> struct IndexOf;
 
-	template <class T>
-	struct IndexOf<NullType, T> {
+	template <class T> struct IndexOf<NullType, T> {
 		enum
 		{
 			value = -1
 		};
 	};
 
-	template <class T, class Tail>
-	struct IndexOf<Typelist<T, Tail>, T> {
+	template <class T, class Tail> struct IndexOf<Typelist<T, Tail>, T> {
 		enum
 		{
 			value = 0
 		};
 	};
 
-	template <class Head, class Tail, class T>
-	struct IndexOf<Typelist<Head, Tail>, T> {
+	template <class Head, class Tail, class T> struct IndexOf<Typelist<Head, Tail>, T> {
 	private:
 
 		enum
@@ -229,29 +215,22 @@ namespace TL {
 	// returns a typelist that is TList followed by T and NullType-terminated
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList, class T>
-	struct Append;
+	template <class TList, class T> struct Append;
 
-	template <>
-	struct Append<NullType, NullType> {
+	template <> struct Append<NullType, NullType> {
 		typedef NullType Result;
 	};
 
-	template <class T>
-	struct Append<NullType, T> {
+	template <class T> struct Append<NullType, T> {
 		typedef Typelist<T, NullType> Result;
 	};
 
-	template <class Head, class Tail>
-	struct Append<NullType, Typelist<Head, Tail>> {
+	template <class Head, class Tail> struct Append<NullType, Typelist<Head, Tail>> {
 		typedef Typelist<Head, Tail> Result;
 	};
 
-	template <class Head, class Tail, class T>
-	struct Append<Typelist<Head, Tail>, T> {
-		typedef Typelist<Head,
-		                 typename Append<Tail, T>::Result>
-		    Result;
+	template <class Head, class Tail, class T> struct Append<Typelist<Head, Tail>, T> {
+		typedef Typelist<Head, typename Append<Tail, T>::Result> Result;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -262,8 +241,7 @@ namespace TL {
 	// returns a typelist that is TList without the first occurence of T
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList, class T>
-	struct Erase;
+	template <class TList, class T> struct Erase;
 
 	template <class T> // Specialization 1
 	struct Erase<NullType, T> {
@@ -277,9 +255,7 @@ namespace TL {
 
 	template <class Head, class Tail, class T> // Specialization 3
 	struct Erase<Typelist<Head, Tail>, T> {
-		typedef Typelist<Head,
-		                 typename Erase<Tail, T>::Result>
-		    Result;
+		typedef Typelist<Head, typename Erase<Tail, T>::Result> Result;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -290,23 +266,17 @@ namespace TL {
 	// returns a typelist that is TList without any occurence of T
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList, class T>
-	struct EraseAll;
-	template <class T>
-	struct EraseAll<NullType, T> {
+	template <class TList, class T> struct EraseAll;
+	template <class T> struct EraseAll<NullType, T> {
 		typedef NullType Result;
 	};
-	template <class T, class Tail>
-	struct EraseAll<Typelist<T, Tail>, T> {
+	template <class T, class Tail> struct EraseAll<Typelist<T, Tail>, T> {
 		// Go all the way down the list removing the type
 		typedef typename EraseAll<Tail, T>::Result Result;
 	};
-	template <class Head, class Tail, class T>
-	struct EraseAll<Typelist<Head, Tail>, T> {
+	template <class Head, class Tail, class T> struct EraseAll<Typelist<Head, Tail>, T> {
 		// Go all the way down the list removing the type
-		typedef Typelist<Head,
-		                 typename EraseAll<Tail, T>::Result>
-		    Result;
+		typedef Typelist<Head, typename EraseAll<Tail, T>::Result> Result;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -316,16 +286,13 @@ namespace TL {
 	// NoDuplicates<TList, T>::Result
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList>
-	struct NoDuplicates;
+	template <class TList> struct NoDuplicates;
 
-	template <>
-	struct NoDuplicates<NullType> {
+	template <> struct NoDuplicates<NullType> {
 		typedef NullType Result;
 	};
 
-	template <class Head, class Tail>
-	struct NoDuplicates<Typelist<Head, Tail>> {
+	template <class Head, class Tail> struct NoDuplicates<Typelist<Head, Tail>> {
 	private:
 
 		typedef typename NoDuplicates<Tail>::Result L1;
@@ -344,24 +311,19 @@ namespace TL {
 	// returns a typelist in which the first occurence of T is replaced with U
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList, class T, class U>
-	struct Replace;
+	template <class TList, class T, class U> struct Replace;
 
-	template <class T, class U>
-	struct Replace<NullType, T, U> {
+	template <class T, class U> struct Replace<NullType, T, U> {
 		typedef NullType Result;
 	};
 
-	template <class T, class Tail, class U>
-	struct Replace<Typelist<T, Tail>, T, U> {
+	template <class T, class Tail, class U> struct Replace<Typelist<T, Tail>, T, U> {
 		typedef Typelist<U, Tail> Result;
 	};
 
 	template <class Head, class Tail, class T, class U>
 	struct Replace<Typelist<Head, Tail>, T, U> {
-		typedef Typelist<Head,
-		                 typename Replace<Tail, T, U>::Result>
-		    Result;
+		typedef Typelist<Head, typename Replace<Tail, T, U>::Result> Result;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -372,24 +334,19 @@ namespace TL {
 	// returns a typelist in which all occurences of T is replaced with U
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList, class T, class U>
-	struct ReplaceAll;
+	template <class TList, class T, class U> struct ReplaceAll;
 
-	template <class T, class U>
-	struct ReplaceAll<NullType, T, U> {
+	template <class T, class U> struct ReplaceAll<NullType, T, U> {
 		typedef NullType Result;
 	};
 
-	template <class T, class Tail, class U>
-	struct ReplaceAll<Typelist<T, Tail>, T, U> {
+	template <class T, class Tail, class U> struct ReplaceAll<Typelist<T, Tail>, T, U> {
 		typedef Typelist<U, typename ReplaceAll<Tail, T, U>::Result> Result;
 	};
 
 	template <class Head, class Tail, class T, class U>
 	struct ReplaceAll<Typelist<Head, Tail>, T, U> {
-		typedef Typelist<Head,
-		                 typename ReplaceAll<Tail, T, U>::Result>
-		    Result;
+		typedef Typelist<Head, typename ReplaceAll<Tail, T, U>::Result> Result;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -400,19 +357,14 @@ namespace TL {
 	// returns a typelist that is TList reversed
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList>
-	struct Reverse;
+	template <class TList> struct Reverse;
 
-	template <>
-	struct Reverse<NullType> {
+	template <> struct Reverse<NullType> {
 		typedef NullType Result;
 	};
 
-	template <class Head, class Tail>
-	struct Reverse<Typelist<Head, Tail>> {
-		typedef typename Append<
-		    typename Reverse<Tail>::Result,
-		    Head>::Result Result;
+	template <class Head, class Tail> struct Reverse<Typelist<Head, Tail>> {
+		typedef typename Append<typename Reverse<Tail>::Result, Head>::Result Result;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -423,26 +375,22 @@ namespace TL {
 	// returns the type in TList that's the most derived from T
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList, class T>
-	struct MostDerived;
+	template <class TList, class T> struct MostDerived;
 
-	template <class T>
-	struct MostDerived<NullType, T> {
+	template <class T> struct MostDerived<NullType, T> {
 		typedef T Result;
 	};
 
-	template <class Head, class Tail, class T>
-	struct MostDerived<Typelist<Head, Tail>, T> {
+	template <class Head, class Tail, class T> struct MostDerived<Typelist<Head, Tail>, T> {
 	private:
 
 		typedef typename MostDerived<Tail, T>::Result Candidate;
 
 	public:
 
-		typedef typename Select<
-		    SuperSubclass<Candidate, Head>::value,
-		    Head,
-		    Candidate>::Result Result;
+		typedef
+		    typename Select<SuperSubclass<Candidate, Head>::value, Head, Candidate>::Result
+		        Result;
 	};
 
 	////////////////////////////////////////////////////////////////////////////////
@@ -453,23 +401,17 @@ namespace TL {
 	// returns the reordered TList
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <class TList>
-	struct DerivedToFront;
+	template <class TList> struct DerivedToFront;
 
-	template <>
-	struct DerivedToFront<NullType> {
+	template <> struct DerivedToFront<NullType> {
 		typedef NullType Result;
 	};
 
-	template <class Head, class Tail>
-	struct DerivedToFront<Typelist<Head, Tail>> {
+	template <class Head, class Tail> struct DerivedToFront<Typelist<Head, Tail>> {
 	private:
 
-		typedef typename MostDerived<Tail, Head>::Result
-		    TheMostDerived;
-		typedef typename Replace<Tail,
-		                         TheMostDerived,
-		                         Head>::Result Temp;
+		typedef typename MostDerived<Tail, Head>::Result TheMostDerived;
+		typedef typename Replace<Tail, TheMostDerived, Head>::Result Temp;
 		typedef typename DerivedToFront<Temp>::Result L;
 
 	public:

@@ -4,9 +4,7 @@
 namespace Dmrg {
 
 // ApplyHamiltonian, with Nsl = Not so local
-template <typename ApplyOperatorLocalType,
-          typename ModelType,
-          typename LanczosSolverType>
+template <typename ApplyOperatorLocalType, typename ModelType, typename LanczosSolverType>
 class ApplyHamiltonian {
 
 public:
@@ -25,8 +23,7 @@ public:
 	                 const RealType& physicalTime)
 	    : model_(model)
 	    , physicalTime_(physicalTime)
-	{
-	}
+	{ }
 
 	//! FIXME: we need to make a fast version for when we're just
 	//! figuring out where the (non-zero) partition is
@@ -44,9 +41,7 @@ public:
 
 private:
 
-	void internal_(VectorType& r,
-	               const VectorWithOffsetType& phi,
-	               SizeType i0) const
+	void internal_(VectorType& r, const VectorWithOffsetType& phi, SizeType i0) const
 	{
 		SizeType p = applyOpLocal_.lrs().super().findPartitionNumber(phi.offset(i0));
 		HamiltonianConnectionType hc(p,

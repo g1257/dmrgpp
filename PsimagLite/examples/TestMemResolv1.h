@@ -7,13 +7,11 @@
 
 typedef PsimagLite::MemResolv MemResolv;
 
-template <typename T>
-class TestMemResolv1 {
+template <typename T> class TestMemResolv1 {
 
 	static const bool IS_CLASS = PsimagLite::IsClass<T>::value;
 	typedef std::vector<T> VectorType;
-	typedef PsimagLite::ResolveFinalOrNot<VectorType, IS_CLASS>
-	    ResolveFinalOrNotType;
+	typedef PsimagLite::ResolveFinalOrNot<VectorType, IS_CLASS> ResolveFinalOrNotType;
 	typedef TestMemResolv1<T> ThisType;
 
 public:
@@ -21,8 +19,7 @@ public:
 	TestMemResolv1(int size)
 	    : size_(size)
 	    , data_(size)
-	{
-	}
+	{ }
 
 	void setTo(T x)
 	{
@@ -44,8 +41,7 @@ public:
 	}
 
 	template <typename T2>
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const TestMemResolv1<T2>& mt);
+	friend std::ostream& operator<<(std::ostream& os, const TestMemResolv1<T2>& mt);
 
 private:
 
@@ -57,8 +53,7 @@ private:
 	VectorType data_;
 };
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const TestMemResolv1<T>& mt)
+template <typename T> std::ostream& operator<<(std::ostream& os, const TestMemResolv1<T>& mt)
 {
 	os << "TestMemResolv1 size= " << mt.size_ << "\n";
 	for (SizeType i = 0; i < mt.size_; ++i)

@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename CorrelationsSkeletonType>
-class MultiPointCorrelations {
+template <typename CorrelationsSkeletonType> class MultiPointCorrelations {
 
 	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
 	typedef typename ObserverHelperType::VectorType VectorType;
@@ -103,8 +102,7 @@ public:
 
 	MultiPointCorrelations(const CorrelationsSkeletonType& skeleton)
 	    : skeleton_(skeleton)
-	{
-	}
+	{ }
 
 	template <typename VectorLikeType>
 	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<VectorLikeType>::True, void>::Type
@@ -145,13 +143,15 @@ private:
 
 		if (i >= skeleton_.numberOfSites() - 1)
 			throw PsimagLite::RuntimeError("calcCorrelation: i must be < sites-1\n");
-		ProgramGlobals::FermionOrBosonEnum fermionicSign = ProgramGlobals::FermionOrBosonEnum::BOSON;
+		ProgramGlobals::FermionOrBosonEnum fermionicSign
+		    = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		SizeType ns = i;
 		SparseMatrixType O2g;
 		if (i == 0) {
 			skeleton_.growDirectly(O2gt, O, i, fermionicSign, ns, true);
-			const SizeType ptr = skeleton_.dmrgMultiply(O2g, O2gt, identity, fermionicSign, ns);
+			const SizeType ptr
+			    = skeleton_.dmrgMultiply(O2g, O2gt, identity, fermionicSign, ns);
 			FieldType ret = skeleton_.bracket(O2g, fermionicSign, ptr, bra, ket);
 			return ret;
 		}

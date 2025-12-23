@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelBaseType>
-class ModelSelector {
+template <typename ModelBaseType> class ModelSelector {
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
@@ -134,8 +133,7 @@ public:
 	ModelSelector(const PsimagLite::String& name)
 	    : name_(name)
 	    , model_(0)
-	{
-	}
+	{ }
 
 	~ModelSelector()
 	{
@@ -207,19 +205,25 @@ public:
 		} else if (name_ == "ModelHubbardMultiBand") {
 			model_ = new ModelHubbardMultiBandType(solverParams, io, geometry);
 		} else if (name_ == "HubbardHolstein") {
-			model_ = new HubbardHolsteinType(solverParams, io, geometry, "", hdf5fileIfAny);
+			model_ = new HubbardHolsteinType(
+			    solverParams, io, geometry, "", hdf5fileIfAny);
 		} else if (name_ == "HubbardHolsteinSSH") {
-			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH", hdf5fileIfAny);
+			model_ = new HubbardHolsteinType(
+			    solverParams, io, geometry, "SSH", hdf5fileIfAny);
 		} else if (name_ == "HubbardHolsteinLRH") {
-			model_ = new HubbardHolsteinType(solverParams, io, geometry, "LRH", hdf5fileIfAny);
+			model_ = new HubbardHolsteinType(
+			    solverParams, io, geometry, "LRH", hdf5fileIfAny);
 		} else if (name_ == "HolsteinThin") {
 			model_ = new HolsteinThinType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardHolsteinSpinless") {
-			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "", hdf5fileIfAny);
+			model_ = new HubbardHolsteinSpinlessType(
+			    solverParams, io, geometry, "", hdf5fileIfAny);
 		} else if (name_ == "HubbardHolsteinSpinlessSSH") {
-			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "SSH", hdf5fileIfAny);
+			model_ = new HubbardHolsteinSpinlessType(
+			    solverParams, io, geometry, "SSH", hdf5fileIfAny);
 		} else if (name_ == "HubbardHolsteinSpinlessLRH") {
-			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "LRH", hdf5fileIfAny);
+			model_ = new HubbardHolsteinSpinlessType(
+			    solverParams, io, geometry, "LRH", hdf5fileIfAny);
 		} else if (name_ == "HolsteinSpinlessThin") {
 			model_ = new HolsteinSpinlessThinType(solverParams, io, geometry, "");
 		} else if (name_.substr(0, 5) == "Kondo") {
@@ -257,8 +261,7 @@ private:
 	{
 		SizeType l = str.length();
 		SizeType namel = name_.length();
-		PsimagLite::String tmp = (namel == l) ? ""
-		                                      : name_.substr(l, namel - l);
+		PsimagLite::String tmp = (namel == l) ? "" : name_.substr(l, namel - l);
 		return tmp;
 	}
 

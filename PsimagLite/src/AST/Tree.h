@@ -21,16 +21,14 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename PrimitivesType>
-class Tree {
+template <typename PrimitivesType> class Tree {
 
 public:
 
 	typedef Tree<PrimitivesType> TreeType;
 	typedef typename PrimitivesType::ValueType ValueType;
 	typedef typename PrimitivesType::NodeType NodeType;
-	typedef
-	    typename PsimagLite::Vector<const TreeType*>::Type VectorTreeType;
+	typedef typename PsimagLite::Vector<const TreeType*>::Type VectorTreeType;
 	typedef typename NodeType::AnglesType AnglesType;
 	typedef typename PsimagLite::Vector<AnglesType>::Type VectorAnglesType;
 	typedef typename PsimagLite::Vector<ValueType>::Type VectorValueType;
@@ -39,8 +37,7 @@ public:
 	    : primitives_(primitives)
 	    , node_(node)
 	    , verbose_(verbose)
-	{
-	}
+	{ }
 
 	~Tree() { }
 
@@ -62,8 +59,7 @@ public:
 
 		ValueType tmp = node_.exec(values);
 		if (verbose_) {
-			std::cout << "tmp= " << tmp
-			          << " type= " << node_.code();
+			std::cout << "tmp= " << tmp << " type= " << node_.code();
 			for (SizeType i = 0; i < values.size(); i++)
 				std::cout << values[i] << " ";
 			std::cout << "\n";
@@ -102,10 +98,7 @@ public:
 		return descendants_[0]->isLinearTree();
 	}
 
-	void setDescendants(const TreeType& n0)
-	{
-		descendants_.push_back(&n0);
-	}
+	void setDescendants(const TreeType& n0) { descendants_.push_back(&n0); }
 
 	void setDescendants(const TreeType& n0, const TreeType& n1)
 	{

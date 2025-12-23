@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PsimagLite.h"
 
 namespace Dmrg {
-template <typename TargetingType>
-class DensityMatrixBase {
+template <typename TargetingType> class DensityMatrixBase {
 
 public:
 
@@ -109,8 +108,7 @@ public:
 		    , debug(de)
 		    , enablePersistentSvd(enablePersistentSvd_)
 		    , serialSvd(serialSvd_)
-		{
-		}
+		{ }
 
 		bool useSvd;
 		ProgramGlobals::DirectionEnum direction;
@@ -121,9 +119,7 @@ public:
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 
-	virtual ~DensityMatrixBase()
-	{
-	}
+	virtual ~DensityMatrixBase() { }
 
 	virtual const BlockDiagonalMatrixType& operator()() = 0;
 

@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
-template <typename ModelType>
-class TargetParamsDynamic : public TargetParamsCommon<ModelType> {
+template <typename ModelType> class TargetParamsDynamic : public TargetParamsCommon<ModelType> {
 public:
 
 	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
@@ -105,17 +104,12 @@ public:
 		io.readline(type_, "DynamicDmrgType=");
 	}
 
-	virtual SizeType memResolv(PsimagLite::MemResolv&,
-	                           SizeType,
-	                           PsimagLite::String = "") const
+	virtual SizeType memResolv(PsimagLite::MemResolv&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	virtual SizeType type() const
-	{
-		return type_;
-	}
+	virtual SizeType type() const { return type_; }
 
 private:
 
@@ -124,13 +118,10 @@ private:
 }; // class TargetParamsDynamic
 
 template <typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os, const TargetParamsDynamic<ModelType>& t)
+inline std::ostream& operator<<(std::ostream& os, const TargetParamsDynamic<ModelType>& t)
 {
 	os << "TargetParams.type=DynamicDmrg\n";
-	const typename TargetParamsDynamic<ModelType>::TargetParamsCommonType&
-	    tp
-	    = t;
+	const typename TargetParamsDynamic<ModelType>::TargetParamsCommonType& tp = t;
 	os << tp;
 	os << "DynamicDmrgType=" << t.type() << "\n";
 	return os;

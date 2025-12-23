@@ -122,21 +122,20 @@ void csc_kron_mult_method(const int imethod,
 			 */
 			const char trans = 'T';
 
-			csc_matmul_post(
-			    trans,
-			    nrow_A,
-			    ncol_A,
-			    acolptr,
-			    arow,
-			    aval,
+			csc_matmul_post(trans,
+			                nrow_A,
+			                ncol_A,
+			                acolptr,
+			                arow,
+			                aval,
 
-			    nrow_BY,
-			    ncol_BY,
-			    by_,
+			                nrow_BY,
+			                ncol_BY,
+			                by_,
 
-			    nrow_X,
-			    ncol_X,
-			    xout);
+			                nrow_X,
+			                ncol_X,
+			                xout);
 		}
 	} else if (imethod == 2) {
 		/*
@@ -309,24 +308,32 @@ void csc_kron_mult(const int nrow_A,
 		return;
 	};
 
-	estimate_kron_cost(nrow_A, ncol_A, nnz_A, nrow_B, ncol_B, nnz_B, &kron_nnz, &kron_flops, &imethod, denseFlopDiscount);
+	estimate_kron_cost(nrow_A,
+	                   ncol_A,
+	                   nnz_A,
+	                   nrow_B,
+	                   ncol_B,
+	                   nnz_B,
+	                   &kron_nnz,
+	                   &kron_flops,
+	                   &imethod,
+	                   denseFlopDiscount);
 
-	csc_kron_mult_method(
-	    imethod,
-	    nrow_A,
-	    ncol_A,
-	    acolptr,
-	    arow,
-	    aval,
+	csc_kron_mult_method(imethod,
+	                     nrow_A,
+	                     ncol_A,
+	                     acolptr,
+	                     arow,
+	                     aval,
 
-	    nrow_B,
-	    ncol_B,
-	    bcolptr,
-	    brow,
-	    bval,
+	                     nrow_B,
+	                     ncol_B,
+	                     bcolptr,
+	                     brow,
+	                     bval,
 
-	    yin,
-	    xout);
+	                     yin,
+	                     xout);
 }
 #undef BY
 #undef YAt

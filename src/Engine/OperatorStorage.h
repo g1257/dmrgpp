@@ -14,8 +14,7 @@
 // block diagonal, like the DMRG transformation matrix
 namespace Dmrg {
 
-template <typename ComplexOrRealType>
-class OperatorStorage {
+template <typename ComplexOrRealType> class OperatorStorage {
 
 public:
 
@@ -38,14 +37,12 @@ public:
 
 	OperatorStorage(Type type = Type::CRS)
 	    : type_(type)
-	{
-	}
+	{ }
 
 	explicit OperatorStorage(const SparseMatrixType& src)
 	    : type_(Type::CRS)
 	    , crs_(src)
-	{
-	}
+	{ }
 
 	void makeDiagonal(SizeType rows, ComplexOrRealType value = 1) // replace this by a ctor
 	{
@@ -55,8 +52,7 @@ public:
 		crs_.makeDiagonal(rows, value);
 	}
 
-	void read(PsimagLite::String label,
-	          PsimagLite::IoNgSerializer& io)
+	void read(PsimagLite::String label, PsimagLite::IoNgSerializer& io)
 	{
 		if (justCRS())
 			return crs_.read(label, io);
@@ -66,8 +62,8 @@ public:
 
 	void write(PsimagLite::String label,
 	           PsimagLite::IoNgSerializer& io,
-	           PsimagLite::IoSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE)
-	    const
+	           PsimagLite::IoSerializer::WriteMode mode
+	           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		if (justCRS())
 			return crs_.write(label, io, mode);
@@ -75,8 +71,7 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage::write\n");
 	}
 
-	void overwrite(PsimagLite::String label,
-	               PsimagLite::IoNgSerializer& io) const
+	void overwrite(PsimagLite::String label, PsimagLite::IoNgSerializer& io) const
 	{
 		if (justCRS())
 			return crs_.overwrite(label, io);
@@ -213,8 +208,7 @@ public:
 
 	bool invalid() const { return (type_ == Type::NOT_READY); }
 
-	friend void transposeConjugate(OperatorStorage& dest,
-	                               const OperatorStorage& src)
+	friend void transposeConjugate(OperatorStorage& dest, const OperatorStorage& src)
 	{
 		if (dest.justCRS() && src.justCRS())
 			return transposeConjugate(dest.crs_, src.getCRS());
@@ -250,12 +244,8 @@ public:
 	                             const VectorSizeType& permutationFull)
 	{
 		if (B.justCRS() && A.justCRS())
-			return externalProduct(B.crs_,
-			                       A.getCRS(),
-			                       nout,
-			                       signs,
-			                       order,
-			                       permutationFull);
+			return externalProduct(
+			    B.crs_, A.getCRS(), nout, signs, order, permutationFull);
 
 		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
 	}
@@ -268,12 +258,8 @@ public:
 	                             const VectorSizeType& permutationFull)
 	{
 		if (A.justCRS() && B.justCRS() && C.justCRS())
-			return externalProduct(C.crs_,
-			                       A.getCRS(),
-			                       B.getCRS(),
-			                       signs,
-			                       order,
-			                       permutationFull);
+			return externalProduct(
+			    C.crs_, A.getCRS(), B.getCRS(), signs, order, permutationFull);
 
 		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
 	}
@@ -305,9 +291,8 @@ operator*(const typename OperatorStorage<ComplexOrRealType>::RealType& value,
 }
 
 template <typename ComplexOrRealType>
-OperatorStorage<ComplexOrRealType>
-operator*(const OperatorStorage<ComplexOrRealType>& a,
-          const OperatorStorage<ComplexOrRealType>& b)
+OperatorStorage<ComplexOrRealType> operator*(const OperatorStorage<ComplexOrRealType>& a,
+                                             const OperatorStorage<ComplexOrRealType>& b)
 {
 	if (a.justCRS() && b.justCRS())
 		return OperatorStorage<ComplexOrRealType>(a.getCRS() * b.getCRS());

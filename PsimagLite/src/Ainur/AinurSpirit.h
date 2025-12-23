@@ -18,8 +18,7 @@ class Ainur {
 		Action(String name, AinurState& state)
 		    : name_(name)
 		    , state_(state)
-		{
-		}
+		{ }
 
 		template <typename A, typename ContextType>
 		void operator()(A& attr, ContextType& context, bool& hit) const;
@@ -35,8 +34,7 @@ class Ainur {
 		Action3(String name, AinurState& state)
 		    : name_(name)
 		    , state_(state)
-		{
-		}
+		{ }
 
 		template <typename A, typename ContextType>
 		void operator()(A& attr, ContextType& context, bool& hit) const;
@@ -48,8 +46,7 @@ class Ainur {
 	};
 
 	struct myprint {
-		template <typename T>
-		void operator()(const T& t) const
+		template <typename T> void operator()(const T& t) const
 		{
 			std::cout << " --------> " << t << '\n';
 		}
@@ -71,22 +68,14 @@ public:
 
 	void printAll(std::ostream& os) const { state_.printAll(os); }
 
-	template <typename SomeType>
-	void readValue(SomeType& t, String label) const
+	template <typename SomeType> void readValue(SomeType& t, String label) const
 	{
 		state_.readValue(t, dummy_ + label);
 	}
 
-	template <typename SomeMapType>
-	void setMap(SomeMapType& map) const
-	{
-		state_.setMap(map);
-	}
+	template <typename SomeMapType> void setMap(SomeMapType& map) const { state_.setMap(map); }
 
-	std::string resolve(const std::string& str) const
-	{
-		return state_.resolve(str);
-	}
+	std::string resolve(const std::string& str) const { return state_.resolve(str); }
 
 private:
 

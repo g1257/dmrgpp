@@ -7,8 +7,7 @@
 using namespace PsimagLite;
 typedef double RealType;
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const typename Vector<T>::Type& v)
+template <typename T> std::ostream& operator<<(std::ostream& os, const typename Vector<T>::Type& v)
 {
 	os << v.size() << "\n";
 	for (SizeType i = 0; i < v.size(); i++)
@@ -33,8 +32,7 @@ void fillRandomVector(Vector<RealType>::Type& x, RealType maxValue)
 		x[i] = drand48() * maxValue;
 }
 
-template <typename T>
-void testMultiply(const CrsMatrix<T>& m, RealType maxValue)
+template <typename T> void testMultiply(const CrsMatrix<T>& m, RealType maxValue)
 {
 	typename Vector<RealType>::Type x(m.rows(), 0.0), y(m.rows());
 	fillRandomVector(y, maxValue);

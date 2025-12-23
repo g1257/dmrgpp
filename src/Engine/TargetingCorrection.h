@@ -127,8 +127,7 @@ public:
 	    , tstStruct_(io, "TargetingCorrection")
 	    , gsWeight_(1 - tstStruct_.correctionA())
 	    , progress_("TargetingCorrection")
-	{
-	}
+	{ }
 
 	SizeType sites() const { return tstStruct_.sites(); }
 
@@ -171,8 +170,7 @@ public:
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
 		this->common().read(io, prefix);
 	}

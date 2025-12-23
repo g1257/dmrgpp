@@ -138,9 +138,12 @@ public:
 	    , numberOfSites_(0)
 	    , lrsStorage_(PairLeftRightSuperSizeType(nullptr, 0))
 	{
-		bool hasConcurrency = (PsimagLite::Concurrency::codeSectionParams.npthreads > 1 || PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo > 1);
+		bool hasConcurrency
+		    = (PsimagLite::Concurrency::codeSectionParams.npthreads > 1
+		       || PsimagLite::Concurrency::codeSectionParams.npthreadsLevelTwo > 1);
 		if (hasConcurrency && readOnDemand_)
-			err(std::string("ReadOnDemand does not support threading. ") + "Set Threads=1 in input, or use -S 1 in command line.\n");
+			err(std::string("ReadOnDemand does not support threading. ")
+			    + "Set Threads=1 in input, or use -S 1 in command line.\n");
 
 		typename BasisWithOperatorsType::VectorBoolType odds;
 		io_.read(odds, "OddElectronsOneSite");
@@ -183,9 +186,7 @@ public:
 
 	bool endOfData() const { return noMoreData_; }
 
-	void transform(SparseMatrixType& ret,
-	               const SparseMatrixType& O2,
-	               SizeType ind) const
+	void transform(SparseMatrixType& ret, const SparseMatrixType& O2, SizeType ind) const
 	{
 		checkIndex(ind);
 
@@ -240,7 +241,8 @@ public:
 			if (!lrsStorage_.first) {
 				const PsimagLite::String prefix = "Serializer/" + ttos(ind);
 
-				lrsStorage_.first = new LeftRightSuperType(io_, prefix, { true, true });
+				lrsStorage_.first
+				    = new LeftRightSuperType(io_, prefix, { true, true });
 				lrsStorage_.second = ind;
 			}
 
@@ -256,9 +258,8 @@ public:
 		return dSerializerV_[ind]->direction();
 	}
 
-	const VectorWithOffsetType& psiConst(SizeType ind,
-	                                     SizeType sectorIndex,
-	                                     SizeType levelIndex) const
+	const VectorWithOffsetType&
+	psiConst(SizeType ind, SizeType sectorIndex, SizeType levelIndex) const
 	{
 		checkIndex(ind);
 
@@ -299,25 +300,23 @@ public:
 		return psiConst(index, braOrKet.sectorIndex(), braOrKet.levelIndex());
 	}
 
-	const VectorWithOffsetType& timeVector(SizeType braketId,
-	                                       SizeType ind) const
+	const VectorWithOffsetType& timeVector(SizeType braketId, SizeType ind) const
 	{
 		assert(ind < timeSerializerV_.size());
 		assert(timeSerializerV_[ind]);
 		return timeSerializerV_[ind]->vector(braketId);
 	}
 
-	bool withLegacyBugs() const
-	{
-		return withLegacyBugs_;
-	}
+	bool withLegacyBugs() const { return withLegacyBugs_; }
 
 private:
 
 	SizeType siteInternal(const LeftRightSuperType& lrs,
 	                      ProgramGlobals::DirectionEnum direction) const
 	{
-		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.right().block()[0] - 1 : lrs.right().block()[0];
+		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		    ? lrs.right().block()[0] - 1
+		    : lrs.right().block()[0];
 	}
 
 	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
@@ -334,11 +333,8 @@ private:
 
 		for (SizeType i = start; i < end; ++i) {
 
-			DmrgSerializerType* dSerializer = new DmrgSerializerType(io_,
-			                                                         prefix + "/" + ttos(i),
-			                                                         false,
-			                                                         { true, true },
-			                                                         readOnDemand_);
+			DmrgSerializerType* dSerializer = new DmrgSerializerType(
+			    io_, prefix + "/" + ttos(i), false, { true, true }, readOnDemand_);
 
 			SizeType tmp = dSerializer->leftRightSuper().sites();
 			if (tmp > 0 && numberOfSites_ == 0)
@@ -360,10 +356,10 @@ private:
 					timeSerializerV_.push_back(ts);
 				else
 					delete ts;
-			} catch (...) {
-			}
+			} catch (...) { }
 
-			std::cerr << __FILE__ << " read " << i << " out of " << (end - start) << "\n";
+			std::cerr << __FILE__ << " read " << i << " out of " << (end - start)
+			          << "\n";
 			progress_.printMemoryUsage();
 		}
 
@@ -383,7 +379,8 @@ private:
 	void checkIndex(SizeType ind) const
 	{
 		if (ind >= dSerializerV_.size())
-			err("Index " + ttos(ind) + " greater or equal to " + ttos(dSerializerV_.size()));
+			err("Index " + ttos(ind) + " greater or equal to "
+			    + ttos(dSerializerV_.size()));
 
 		if (dSerializerV_[ind])
 			return;

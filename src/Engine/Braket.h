@@ -9,8 +9,7 @@
 
 namespace Dmrg {
 
-template <typename ModelType_>
-class Braket {
+template <typename ModelType_> class Braket {
 
 public:
 

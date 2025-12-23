@@ -333,10 +333,14 @@ void den_csr_kron_mult_method(const int imethod,
 
 							ComplexOrRealType cij = aij * bij;
 
-							int ix = (isTransB || isConjTransB) ? jb : ib;
-							int jx = (isTransA || isConjTransA) ? ja : ia;
-							int iy = (isTransB || isConjTransB) ? ib : jb;
-							int jy = (isTransA || isConjTransA) ? ia : ja;
+							int ix
+							    = (isTransB || isConjTransB) ? jb : ib;
+							int jx
+							    = (isTransA || isConjTransA) ? ja : ia;
+							int iy
+							    = (isTransB || isConjTransB) ? ib : jb;
+							int jy
+							    = (isTransA || isConjTransA) ? ia : ja;
 
 							xout(ix, jx) += (cij * yin(iy, jy));
 						};
@@ -377,10 +381,14 @@ void den_csr_kron_mult_method(const int imethod,
 
 							ComplexOrRealType cij = aij * bij;
 
-							int ix = (isTransB || isConjTransB) ? jb : ib;
-							int jx = (isTransA || isConjTransA) ? ja : ia;
-							int iy = (isTransB || isConjTransB) ? ib : jb;
-							int jy = (isTransA || isConjTransA) ? ia : ja;
+							int ix
+							    = (isTransB || isConjTransB) ? jb : ib;
+							int jx
+							    = (isTransA || isConjTransA) ? ja : ia;
+							int iy
+							    = (isTransB || isConjTransB) ? ib : jb;
+							int jy
+							    = (isTransA || isConjTransA) ? ia : ja;
 
 							xout(ix, jx) += (cij * yin(iy, jy));
 						};
@@ -489,7 +497,8 @@ void den_csr_kron_mult(const char transA,
 		const int nrow_X = (isTransB || isConjTransB) ? ncol_B : nrow_B;
 		const int ncol_X = (isTransA || isConjTransA) ? ncol_A : nrow_A;
 
-		PsimagLite::MatrixNonOwned<const ComplexOrRealType> yin(nrow_Y, ncol_Y, yin_, offsetY);
+		PsimagLite::MatrixNonOwned<const ComplexOrRealType> yin(
+		    nrow_Y, ncol_Y, yin_, offsetY);
 		PsimagLite::MatrixNonOwned<ComplexOrRealType> xout(nrow_X, ncol_X, xout_, offsetX);
 
 		const char trans1 = (isTransA || isConjTransA) ? 'N' : 'T';
@@ -545,18 +554,19 @@ void den_csr_kron_mult(const char transA,
 	const int nrow_2 = (isTransB || isConjTransB) ? ncol_B : nrow_B;
 	const int ncol_2 = (isTransB || isConjTransB) ? nrow_B : ncol_B;
 
-	estimate_kron_cost(nrow_1, ncol_1, nnz_A, nrow_2, ncol_2, nnz_B, &kron_nnz, &kron_flops, &imethod, denseFlopDiscount);
+	estimate_kron_cost(nrow_1,
+	                   ncol_1,
+	                   nnz_A,
+	                   nrow_2,
+	                   ncol_2,
+	                   nnz_B,
+	                   &kron_nnz,
+	                   &kron_flops,
+	                   &imethod,
+	                   denseFlopDiscount);
 
-	den_csr_kron_mult_method(imethod,
-	                         transA,
-	                         transB,
-	                         a_,
-	                         b,
-	                         yin_,
-	                         offsetY,
-	                         xout_,
-	                         offsetX,
-	                         gemmR);
+	den_csr_kron_mult_method(
+	    imethod, transA, transB, a_, b, yin_, offsetY, xout_, offsetX, gemmR);
 }
 
 #undef A

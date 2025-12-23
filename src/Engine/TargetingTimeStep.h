@@ -226,7 +226,8 @@ public:
 
 	bool end() const
 	{
-		return (tstStruct_.maxTime() != 0 && this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
+		return (tstStruct_.maxTime() != 0
+		        && this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
@@ -280,29 +281,28 @@ private:
 			this->common().cocoon(block1, direction, false);
 		}
 
-		this->common().aoeNonConst().getPhi(&phiNew,
-		                                    Eg,
-		                                    direction,
-		                                    site,
-		                                    loopNumber,
-		                                    tstStruct_);
+		this->common().aoeNonConst().getPhi(
+		    &phiNew, Eg, direction, site, loopNumber, tstStruct_);
 
 		PairType startEnd(0, tstStruct_.times().size());
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
+		bool allOperatorsApplied
+		    = (this->common().aoe().noStageIs(StageEnumType::DISABLED)
+		       && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		VectorSizeType indices(startEnd.second - startEnd.first);
 		for (SizeType i = 0; i < indices.size(); ++i)
 			indices[i] = i + startEnd.first;
 
 		static const bool isLastCall = true;
-		this->common().aoeNonConst().calcTimeVectors(indices,
-		                                             Eg,
-		                                             phiNew,
-		                                             direction,
-		                                             allOperatorsApplied,
-		                                             false, // don't wft or advance indices[0]
-		                                             block1,
-		                                             isLastCall);
+		this->common().aoeNonConst().calcTimeVectors(
+		    indices,
+		    Eg,
+		    phiNew,
+		    direction,
+		    allOperatorsApplied,
+		    false, // don't wft or advance indices[0]
+		    block1,
+		    isLastCall);
 
 		this->common().cocoon(block1, direction, false);
 
@@ -315,7 +315,8 @@ private:
 			printEnergies(); // in-situ
 
 		const OptionsType& options = this->model().params().options;
-		bool normalizeTimeVectors = (options.isSet("normalizeTimeVectors") || options.isSet("TargetingAncilla"));
+		bool normalizeTimeVectors
+		    = (options.isSet("normalizeTimeVectors") || options.isSet("TargetingAncilla"));
 
 		if (options.isSet("neverNormalizeVectors"))
 			normalizeTimeVectors = false;
@@ -340,19 +341,16 @@ private:
 		}
 	}
 
-	void printEnergies(const VectorWithOffsetType& phi,
-	                   SizeType whatTarget,
-	                   SizeType i0) const
+	void printEnergies(const VectorWithOffsetType& phi, SizeType whatTarget, SizeType i0) const
 	{
 		const SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
-		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 ModelType::modelLinks(),
-		                                                 this->common().aoe().timeVectors().time(),
-		                                                 BaseType::model().superOpHelper());
-		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		                                                     hc,
-		                                                     aux);
+		typename ModelType::HamiltonianConnectionType hc(
+		    BaseType::lrs(),
+		    ModelType::modelLinks(),
+		    this->common().aoe().timeVectors().time(),
+		    BaseType::model().superOpHelper());
+		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(), hc, aux);
 
 		const SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);

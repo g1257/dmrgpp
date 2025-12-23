@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename Word>
-class HilbertSpaceFermionSpinless {
+template <typename Word> class HilbertSpaceFermionSpinless {
 public:
 
 	typedef Word HilbertState;

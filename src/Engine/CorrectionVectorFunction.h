@@ -82,8 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ConjugateGradient.h"
 
 namespace Dmrg {
-template <typename MatrixType, typename InfoType>
-class CorrectionVectorFunction {
+template <typename MatrixType, typename InfoType> class CorrectionVectorFunction {
 
 	typedef typename MatrixType::value_type FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
@@ -119,7 +118,8 @@ class CorrectionVectorFunction {
 			// x <= x2 + f1*omegaMinusE0*xTmp + (omegaMinusE0*omegaMinusE0 + eta*eta)*y;
 			// equivalent
 			for (SizeType i = 0; i < x.size(); ++i)
-				x[i] = x2[i] + f1 * omegaMinusE0 * xTmp[i] + (omegaMinusE0 * omegaMinusE0 + eta * eta) * y[i];
+				x[i] = x2[i] + f1 * omegaMinusE0 * xTmp[i]
+				    + (omegaMinusE0 * omegaMinusE0 + eta * eta) * y[i];
 
 			x /= (-eta);
 		}
@@ -138,8 +138,7 @@ public:
 	CorrectionVectorFunction(const MatrixType& m, const InfoType& info, RealType E0)
 	    : im_(m, info, E0)
 	    , cg_(info.cgSteps(), info.cgEps())
-	{
-	}
+	{ }
 
 	void getXi(VectorType& result, const VectorType& sv) const
 	{

@@ -17,8 +17,7 @@ public:
 
 	Limit()
 	    : rlimit_(new struct rlimit)
-	{
-	}
+	{ }
 
 	~Limit()
 	{

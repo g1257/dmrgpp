@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename CrsMatrixType>
-class SparseRow {
+template <typename CrsMatrixType> class SparseRow {
 public:
 
 	typedef typename CrsMatrixType::value_type ValueType;

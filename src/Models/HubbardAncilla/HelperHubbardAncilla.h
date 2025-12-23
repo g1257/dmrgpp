@@ -6,8 +6,7 @@
 
 namespace Dmrg {
 
-template <typename ModelBaseType, typename ModelParametersType>
-class HelperHubbardAncilla {
+template <typename ModelBaseType, typename ModelParametersType> class HelperHubbardAncilla {
 
 public:
 
@@ -85,8 +84,7 @@ public:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	static void setBasis(HilbertBasisType& basis,
-	                     const VectorSizeType& block)
+	static void setBasis(HilbertBasisType& basis, const VectorSizeType& block)
 	{
 		SizeType n = block.size();
 		HilbertState total = (1 << (2 * ORBITALS));
@@ -98,8 +96,7 @@ public:
 	}
 
 	//! set creation matrices for sites in block
-	static void setLambdaMatrices(OpsLabelType& d,
-	                              const VectorSparseMatrixType& vm)
+	static void setLambdaMatrices(OpsLabelType& d, const VectorSparseMatrixType& vm)
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
@@ -120,8 +117,7 @@ public:
 		}
 	}
 
-	static void setSymmetryRelated(VectorQnType& qns,
-	                               const HilbertBasisType& basis)
+	static void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis)
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -133,19 +129,17 @@ public:
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = PairType(0, 0);
 
-			SizeType naUp = HilbertSpaceFeAsType::calcNofElectrons(basis[i],
-			                                                       ORBITALS * SPIN_UP);
-			SizeType naDown = HilbertSpaceFeAsType::calcNofElectrons(basis[i],
-			                                                         ORBITALS * SPIN_DOWN);
+			SizeType naUp
+			    = HilbertSpaceFeAsType::calcNofElectrons(basis[i], ORBITALS * SPIN_UP);
+			SizeType naDown = HilbertSpaceFeAsType::calcNofElectrons(
+			    basis[i], ORBITALS * SPIN_DOWN);
 
 			SizeType flavor = 0;
 
 			// nup
-			other[1] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                        SPIN_UP);
+			other[1] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i], SPIN_UP);
 			// ntotal
-			other[0] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i],
-			                                                        SPIN_DOWN)
+			other[0] = HilbertSpaceFeAsType::electronsWithGivenSpin(basis[i], SPIN_DOWN)
 			    + other[1];
 
 			// up ancilla
@@ -189,11 +183,13 @@ public:
 				HilbertSpaceFeAsType::create(bra, i, sigma);
 				int jj = PsimagLite::indexOrMinusOne(natBasis, bra);
 				if (jj < 0)
-					throw PsimagLite::RuntimeError("findOperatorMatrices: error\n");
+					throw PsimagLite::RuntimeError(
+					    "findOperatorMatrices: error\n");
 				if (ii == SizeType(jj)) {
 					std::cerr << "ii=" << i << " ket=" << ket << " bra=" << bra;
 					std::cerr << " sigma=" << sigma << "\n";
-					throw PsimagLite::RuntimeError("Creation op. cannot be diagonal\n");
+					throw PsimagLite::RuntimeError(
+					    "Creation op. cannot be diagonal\n");
 				}
 
 				cm(ii, jj) = sign(ket, i, sigma);
@@ -203,9 +199,8 @@ public:
 		transposeConjugate(creationMatrix, cm);
 	}
 
-	static void findAllMatrices(VectorSparseMatrixType& vm,
-	                            SizeType i,
-	                            const HilbertBasisType& natBasis)
+	static void
+	findAllMatrices(VectorSparseMatrixType& vm, SizeType i, const HilbertBasisType& natBasis)
 	{
 		for (SizeType sigma = 0; sigma < 2 * ORBITALS; ++sigma) {
 			MatrixType m;
@@ -233,7 +228,8 @@ private:
 
 			multiply(tmpMatrix, n(m1), n(m2));
 			assert(actualSite + nsites * alpha < modelParameters_.hubbardU.size());
-			hmatrix += modelParameters_.hubbardU[actualSite + nsites * alpha] * tmpMatrix;
+			hmatrix
+			    += modelParameters_.hubbardU[actualSite + nsites * alpha] * tmpMatrix;
 		}
 	}
 
@@ -259,9 +255,8 @@ private:
 		}
 	}
 
-	static void correctLambda(MatrixType& dlambda,
-	                          SizeType spin1,
-	                          const VectorSparseMatrixType& vm)
+	static void
+	correctLambda(MatrixType& dlambda, SizeType spin1, const VectorSparseMatrixType& vm)
 	{
 		SizeType n = dlambda.rows();
 		MatrixType corrector(n, n);
@@ -272,9 +267,8 @@ private:
 		dlambda = dlambda2 * corrector;
 	}
 
-	static void computeCorrector(MatrixType& corrector,
-	                             SizeType spin1,
-	                             const VectorSparseMatrixType& vm)
+	static void
+	computeCorrector(MatrixType& corrector, SizeType spin1, const VectorSparseMatrixType& vm)
 	{
 		SizeType spin2 = 1 - spin1;
 		SparseMatrixType cm1(vm[0 + spin2 * ORBITALS]);

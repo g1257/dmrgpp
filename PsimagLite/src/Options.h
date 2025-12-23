@@ -109,8 +109,7 @@ public:
 		Writeable(VectorStringType& registeredOptions, SizeType mode)
 		    : registeredOptions_(registeredOptions)
 		    , mode_(mode)
-		{
-		}
+		{ }
 
 		void set(Vector<String>::Type& optsThatAreSet, String opts)
 		{
@@ -151,9 +150,7 @@ public:
 
 		bool isSet(const String& thisOption) const
 		{
-			bool b = (find(optsThatAreSet_.begin(),
-			               optsThatAreSet_.end(),
-			               thisOption)
+			bool b = (find(optsThatAreSet_.begin(), optsThatAreSet_.end(), thisOption)
 			          == optsThatAreSet_.end());
 			return (!b);
 		}

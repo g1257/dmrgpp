@@ -6,8 +6,7 @@
 
 namespace Dmrg {
 
-template <typename SuperGeometryType, typename ParametersType>
-class SuperOpHelperBase {
+template <typename SuperGeometryType, typename ParametersType> class SuperOpHelperBase {
 
 public:
 
@@ -17,8 +16,7 @@ public:
 
 	SuperOpHelperBase(const SuperGeometryType& superGeometry)
 	    : superGeometry_(superGeometry)
-	{
-	}
+	{ }
 
 	virtual ~SuperOpHelperBase() { }
 
@@ -42,19 +40,15 @@ public:
 		return PairBoolSizeType(false, 0);
 	}
 
-	virtual PairMetaOpForConnection finalIndices(const VectorSizeType&,
-	                                             ProgramGlobals::ConnectionEnum,
-	                                             SizeType) const
+	virtual PairMetaOpForConnection
+	finalIndices(const VectorSizeType&, ProgramGlobals::ConnectionEnum, SizeType) const
 	{
 		throw PsimagLite::RuntimeError("SuperOpHelperBase::finalIndices4sites\n");
 	}
 
 	// non virtual below
 
-	const SuperGeometryType& superGeometry() const
-	{
-		return superGeometry_;
-	}
+	const SuperGeometryType& superGeometry() const { return superGeometry_; }
 
 	const ProgramGlobals::DirectionEnum& dir() const { return dir_; }
 

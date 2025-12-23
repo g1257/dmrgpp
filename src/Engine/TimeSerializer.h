@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename VectorType>
-class TimeSerializer {
+template <typename VectorType> class TimeSerializer {
 
 public:
 
@@ -115,8 +114,7 @@ public:
 			targetVectors_[i] = const_cast<VectorType*>(&aoe.targetVectors(i));
 	}
 
-	TimeSerializer(typename PsimagLite::IoSelector::In& io,
-	               PsimagLite::String prefix)
+	TimeSerializer(typename PsimagLite::IoSelector::In& io, PsimagLite::String prefix)
 	    : owner_(true)
 	{
 		prefix += "/TimeSerializer/";
@@ -188,10 +186,7 @@ public:
 		io.write(name_, prefix + "Name");
 	}
 
-	SizeType numberOfVectors() const
-	{
-		return targetVectors_.size();
-	}
+	SizeType numberOfVectors() const { return targetVectors_.size(); }
 
 	SizeType currentTimeStep() const { return currentTimeStep_; }
 

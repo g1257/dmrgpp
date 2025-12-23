@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename LeftRightSuperType_>
-class GenIjPatch {
+template <typename LeftRightSuperType_> class GenIjPatch {
 
 public:
 

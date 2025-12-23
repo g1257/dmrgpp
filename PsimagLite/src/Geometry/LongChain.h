@@ -95,8 +95,7 @@ public:
 	    : linSize_(0)
 	    , isPeriodic_(false)
 	    , distance_(1)
-	{
-	}
+	{ }
 
 	LongChain(SizeType linSize, InputType& io)
 	    : linSize_(linSize)
@@ -109,31 +108,23 @@ public:
 			isPeriodic_ = (x > 0) ? true : false;
 			if (isPeriodic_)
 				std::cerr << "LongChain::ctor(): periodic\n";
-		} catch (std::exception& e) {
-		}
+		} catch (std::exception& e) { }
 
 		try {
 			int x = 0;
 			io.readline(x, "LongChainDistance=");
 			distance_ = x;
-		} catch (std::exception& e) {
-		}
+		} catch (std::exception& e) { }
 
 		if (linSize_ <= distance_)
 			RuntimeError("LongChain::ctor()\n");
 	}
 
-	virtual SizeType maxConnections() const
-	{
-		return (isPeriodic_) ? linSize_ : 1;
-	}
+	virtual SizeType maxConnections() const { return (isPeriodic_) ? linSize_ : 1; }
 
 	virtual SizeType dirs() const { return 1; }
 
-	SizeType handle(SizeType i, SizeType j) const
-	{
-		return (i < j) ? i : j;
-	}
+	SizeType handle(SizeType i, SizeType j) const { return (i < j) ? i : j; }
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
@@ -180,10 +171,7 @@ public:
 
 	String label() const { return "longchain"; }
 
-	SizeType findReflection(SizeType site) const
-	{
-		return linSize_ - site - 1;
-	}
+	SizeType findReflection(SizeType site) const { return linSize_ - site - 1; }
 
 	SizeType length(SizeType i) const
 	{
@@ -201,8 +189,7 @@ public:
 		return site;
 	}
 
-	template <class Archive>
-	void write(Archive&, const unsigned int)
+	template <class Archive> void write(Archive&, const unsigned int)
 	{
 		throw RuntimeError("LongChain::write(): unimplemented\n");
 	}

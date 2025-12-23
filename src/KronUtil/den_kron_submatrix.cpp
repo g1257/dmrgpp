@@ -76,9 +76,11 @@ void den_kron_submatrix(const int nrow_A,
 			int jb = (jc % ncol_B);
 			int ja = (jc - jb) / ncol_B;
 
-			assert((0 <= ia) && (ia < nrow_A) && (0 <= ib) && (ib < nrow_B) && ((ib + ia * nrow_B) == ic));
+			assert((0 <= ia) && (ia < nrow_A) && (0 <= ib) && (ib < nrow_B)
+			       && ((ib + ia * nrow_B) == ic));
 
-			assert((0 <= ja) && (ja < ncol_A) && (0 <= jb) && (jb < ncol_B) && ((jb + ja * ncol_B) == jc));
+			assert((0 <= ja) && (ja < ncol_A) && (0 <= jb) && (jb < ncol_B)
+			       && ((jb + ja * ncol_B) == jc));
 
 			ComplexOrRealType cij = a_(ia, ja) * b_(ib, jb);
 

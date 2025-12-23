@@ -88,8 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ObserverType>
-class ObservableLibrary {
+template <typename ObserverType> class ObservableLibrary {
 
 public:
 
@@ -122,8 +121,7 @@ public:
 	    , hasTimeEvolution_(false)
 	    , model_(model)
 	    , observe_(io, start, nf, trail, model)
-	{
-	}
+	{ }
 
 	bool endOfData() const { return observe_.helper().endOfData(); }
 
@@ -146,25 +144,24 @@ public:
 				try {
 					braket.site(0); // will throw if site[0] == -1
 					hasValidSite = true;
-				} catch (std::exception&) {
-				}
+				} catch (std::exception&) { }
 
 				if (hasValidSite) {
-					throw PsimagLite::RuntimeError("One points cannot have an explicit site\n");
+					throw PsimagLite::RuntimeError(
+					    "One points cannot have an explicit site\n");
 				}
 
 				const PsimagLite::String opName = braket.opName(0);
 				if (opName.length() > 1 && opName[0] == '!') {
-					StringOrderPost<ObserverType> stringOrderPost(braket, observe_);
+					StringOrderPost<ObserverType> stringOrderPost(braket,
+					                                              observe_);
 					MatrixType m(rows, cols);
 					stringOrderPost.computeMatrix(m);
 					std::cout << m;
 					continue;
 				}
 
-				measureOnePoint(braket.bra(),
-				                braket.opName(0),
-				                braket.ket());
+				measureOnePoint(braket.bra(), braket.opName(0), braket.ket());
 				continue;
 			}
 
@@ -192,15 +189,18 @@ public:
 			for (SizeType i = 0; i < orbitals * 2; ++i) {
 				for (SizeType j = i; j < orbitals * 2; ++j) {
 					SparseMatrixType O2, O4, n1, n2;
-					SparseMatrixType O1 = model_.naturalOperator("c", site, i).getCRS(); // c_i
+					SparseMatrixType O1
+					    = model_.naturalOperator("c", site, i).getCRS(); // c_i
 					transposeConjugate(O2, O1); // O2 = transpose(O1)
-					SparseMatrixType O3 = model_.naturalOperator("c", site, j).getCRS(); // c_j
+					SparseMatrixType O3
+					    = model_.naturalOperator("c", site, j).getCRS(); // c_j
 					transposeConjugate(O4, O3); // O4 = transpose(O3)
 
 					multiply(n1, O2, O1); // c_i^{\dagger}.c_i
 					multiply(n2, O4, O3); // c_j^{\dagger}.c_j
 
-					PsimagLite::String str = "<gs|n?" + ttos(i) + ";n?" + ttos(j) + "|gs>";
+					PsimagLite::String str
+					    = "<gs|n?" + ttos(i) + ";n?" + ttos(j) + "|gs>";
 					BraketType braket(model_, str);
 					OperatorType n1Op(n1,
 					                  ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -231,9 +231,11 @@ public:
 			SizeType counter = 0;
 			for (SizeType i = 0; i < orbitals; ++i) {
 				for (SizeType j = i; j < orbitals; ++j) {
-					PsimagLite::String str = "<gs|sz?" + ttos(i) + ";sz?" + ttos(j) + "|gs>";
+					PsimagLite::String str
+					    = "<gs|sz?" + ttos(i) + ";sz?" + ttos(j) + "|gs>";
 					BraketType braket(model_, str);
-					manyPoint(&szsz_[counter], braket, rows, cols, manyPointAction);
+					manyPoint(
+					    &szsz_[counter], braket, rows, cols, manyPointAction);
 					MatrixType tSzThis = szsz_[counter];
 					RealType factor = (i != j) ? 2.0 : 1.0;
 					if (counter == 0)
@@ -242,7 +244,8 @@ public:
 						tSzTotal += factor * tSzThis;
 
 					if (PsimagLite::Concurrency::root()) {
-						std::cout << "OperatorSz orb" << i << "-" << j << ":\n";
+						std::cout << "OperatorSz orb" << i << "-" << j
+						          << ":\n";
 						std::cout << tSzThis;
 					}
 					counter++;
@@ -261,9 +264,14 @@ public:
 			SizeType counter = 0;
 			for (SizeType i = 0; i < orbitals; ++i) {
 				for (SizeType j = i; j < orbitals; ++j) {
-					PsimagLite::String str = "<gs|splus?" + ttos(i) + ";sminus?" + ttos(j) + "|gs>";
+					PsimagLite::String str = "<gs|splus?" + ttos(i) + ";sminus?"
+					    + ttos(j) + "|gs>";
 					BraketType braket(model_, str);
-					manyPoint(&sPlusSminus_[counter], braket, rows, cols, manyPointAction);
+					manyPoint(&sPlusSminus_[counter],
+					          braket,
+					          rows,
+					          cols,
+					          manyPointAction);
 					MatrixType tSpThis = sPlusSminus_[counter];
 					RealType factor = (i != j) ? 2.0 : 1.0;
 					if (counter == 0)
@@ -272,7 +280,8 @@ public:
 						tSpTotal += factor * tSpThis;
 
 					if (PsimagLite::Concurrency::root()) {
-						std::cout << "OperatorS+S- orb" << i << "-" << j << ":\n";
+						std::cout << "OperatorS+S- orb" << i << "-" << j
+						          << ":\n";
 						std::cout << tSpTotal;
 					}
 					counter++;
@@ -291,9 +300,14 @@ public:
 			SizeType counter = 0;
 			for (SizeType i = 0; i < orbitals; ++i) {
 				for (SizeType j = i; j < orbitals; ++j) {
-					PsimagLite::String str = "<gs|sminus?" + ttos(i) + ";splus?" + ttos(j) + "|gs>";
+					PsimagLite::String str = "<gs|sminus?" + ttos(i) + ";splus?"
+					    + ttos(j) + "|gs>";
 					BraketType braket(model_, str);
-					manyPoint(&sMinusSplus_[counter], braket, rows, cols, manyPointAction);
+					manyPoint(&sMinusSplus_[counter],
+					          braket,
+					          rows,
+					          cols,
+					          manyPointAction);
 					MatrixType tSmThis = sMinusSplus_[counter];
 					RealType factor = (i != j) ? 2.0 : 1.0;
 					if (counter == 0)
@@ -302,7 +316,8 @@ public:
 						tSmTotal += factor * tSmThis;
 
 					if (PsimagLite::Concurrency::root()) {
-						std::cout << "OperatorS-S+ orb" << i << "-" << j << ":\n";
+						std::cout << "OperatorS-S+ orb" << i << "-" << j
+						          << ":\n";
 						std::cout << tSmTotal;
 					}
 					counter++;
@@ -320,19 +335,26 @@ public:
 			for (SizeType x = 0; x < orbitals; ++x) {
 				for (SizeType y = x; y < orbitals; ++y) {
 					if (szsz_.size() == 0)
-						measure("szsz", rows, cols, manyPointAction, orbitals);
+						measure(
+						    "szsz", rows, cols, manyPointAction, orbitals);
 					if (sPlusSminus_.size() == 0)
-						measure("s+s-", rows, cols, manyPointAction, orbitals);
+						measure(
+						    "s+s-", rows, cols, manyPointAction, orbitals);
 					if (sMinusSplus_.size() == 0)
-						measure("s-s+", rows, cols, manyPointAction, orbitals);
+						measure(
+						    "s-s+", rows, cols, manyPointAction, orbitals);
 
-					MatrixType spinTotal(szsz_[counter].n_row(), szsz_[counter].n_col());
+					MatrixType spinTotal(szsz_[counter].n_row(),
+					                     szsz_[counter].n_col());
 
 					RealType factorSpSm = 0.5;
 					RealType factorSz = 1.0;
 					for (SizeType i = 0; i < spinTotal.n_row(); i++)
 						for (SizeType j = 0; j < spinTotal.n_col(); j++)
-							spinTotal(i, j) = factorSpSm * (sPlusSminus_[counter](i, j) + sMinusSplus_[counter](i, j)) + szsz_[counter](i, j) * factorSz;
+							spinTotal(i, j) = factorSpSm
+							        * (sPlusSminus_[counter](i, j)
+							           + sMinusSplus_[counter](i, j))
+							    + szsz_[counter](i, j) * factorSz;
 
 					RealType factor = (x != y) ? 2.0 : 1.0;
 					if (counter == 0)
@@ -341,7 +363,8 @@ public:
 						spinTotalTotal += factor * spinTotal;
 
 					if (PsimagLite::Concurrency::root()) {
-						std::cout << "SpinTotal orb" << x << "-" << y << ":\n";
+						std::cout << "SpinTotal orb" << x << "-" << y
+						          << ":\n";
 						std::cout << spinTotal;
 					}
 					counter++;
@@ -359,7 +382,8 @@ public:
 			manyPoint(0, braket, rows, cols, manyPointAction);
 
 		} else if (label == "pp") {
-			if (model_.params().model != "TjMultiOrb" && model_.params().model != "HubbardOneBandExtendedSuper") {
+			if (model_.params().model != "TjMultiOrb"
+			    && model_.params().model != "HubbardOneBandExtendedSuper") {
 				throw PsimagLite::RuntimeError("pp: not for this model\n");
 			}
 
@@ -429,14 +453,16 @@ private:
 			cornerLeftOrRight(1, i0, bra, label, ket);
 
 			PsimagLite::String str("<");
-			str += bra.toString() + "|" + label + "[" + ttos(site) + "]|" + ket.toString() + ">";
+			str += bra.toString() + "|" + label + "[" + ttos(site) + "]|"
+			    + ket.toString() + ">";
 			BraketType braket(model_, str);
 
 			const OperatorType& opA = braket.op(0);
 
 			if (!opA.isEmpty()) {
 
-				FieldType tmp1 = observe_.template onePoint<ApplyOperatorType>(i0, opA, site, ApplyOperatorType::BORDER_NO, bra, ket);
+				FieldType tmp1 = observe_.template onePoint<ApplyOperatorType>(
+				    i0, opA, site, ApplyOperatorType::BORDER_NO, bra, ket);
 				std::cout << site << " " << tmp1;
 				std::cout << " " << observe_.helper().time(i0) << "\n";
 			}
@@ -453,7 +479,8 @@ private:
 
 		for (SizeType site = 0; site < numberOfSites_; ++site) {
 			PsimagLite::String str("<");
-			str += bra.toString() + "|" + label + "[" + ttos(site) + "]|" + ket.toString() + ">";
+			str += bra.toString() + "|" + label + "[" + ttos(site) + "]|"
+			    + ket.toString() + ">";
 			BraketType braket(model_, str);
 
 			const OperatorType& opA = braket.op(0);
@@ -485,7 +512,8 @@ private:
 
 		if (site == 1 && !atCorner) {
 			PsimagLite::String str("<");
-			str += bra.toString() + "|" + label + "[" + ttos(0) + "]|" + ket.toString() + ">";
+			str += bra.toString() + "|" + label + "[" + ttos(0) + "]|" + ket.toString()
+			    + ">";
 			BraketType braket(model_, str);
 
 			const OperatorType& opA = braket.op(0);
@@ -493,11 +521,8 @@ private:
 				return;
 
 			const SizeType splitSize = model_.hilbertSize(1);
-			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(ptr,
-			                                                                          opA,
-			                                                                          splitSize,
-			                                                                          bra,
-			                                                                          ket);
+			FieldType tmp1 = observe_.template onePointHookForZero<ApplyOperatorType>(
+			    ptr, opA, splitSize, bra, ket);
 			std::cout << "0 " << tmp1 << " " << observe_.helper().time(ptr) << "\n";
 			return;
 		}
@@ -518,19 +543,13 @@ private:
 			return;
 
 		// do the corner case
-		FieldType tmp1 = observe_.template onePoint<ApplyOperatorType>(ptr,
-		                                                               opAcorner,
-		                                                               x,
-		                                                               ApplyOperatorType::BORDER_YES,
-		                                                               bra,
-		                                                               ket);
+		FieldType tmp1 = observe_.template onePoint<ApplyOperatorType>(
+		    ptr, opAcorner, x, ApplyOperatorType::BORDER_YES, bra, ket);
 		std::cout << x << " " << tmp1;
 		std::cout << " " << observe_.helper().time(ptr) << "\n";
 	}
 
-	MatrixType SliceOrbital(const MatrixType& m,
-	                        const SizeType o1,
-	                        const SizeType o2)
+	MatrixType SliceOrbital(const MatrixType& m, const SizeType o1, const SizeType o2)
 	{
 		SizeType orbitals = 2;
 		SizeType nsite = numberOfSites_ / orbitals;
@@ -637,8 +656,8 @@ private:
 			int sign = -1;
 			PsimagLite::String onsiteOrNot = "two";
 			// notice - orb3 and orb4 order had to be fliped to preserve
-			// i1 > i2 > i3 > i4 thin site ordering, this should add multiplication by (-1.0);
-			// std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
+			// i1 > i2 > i3 > i4 thin site ordering, this should add multiplication by
+			// (-1.0); std::cout << "PairPair Correlations S^{lu}_{on}" << std::endl;
 			ppFour(m, m2, orb1, orb2, orb4, orb3, onsiteOrNot, sign);
 
 		} else if (flag == 2) {
@@ -677,7 +696,8 @@ private:
 	{
 		PsimagLite::String string = "two";
 		if (string != "four" && string != "two") {
-			throw PsimagLite::RuntimeError("ppFour: only string = 'two' or 'four' is allowed \n");
+			throw PsimagLite::RuntimeError(
+			    "ppFour: only string = 'two' or 'four' is allowed \n");
 		}
 		SizeType rows = m.n_row();
 		SizeType cols = m.n_col();
@@ -693,14 +713,19 @@ private:
 		SizeType jmax = (string == "four") ? cols - 1 : cols;
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i * orbitals + orb1;
-			SizeType thini2 = (string == "four") ? (i + 1) * orbitals + orb2 : i * orbitals + orb2;
+			SizeType thini2
+			    = (string == "four") ? (i + 1) * orbitals + orb2 : i * orbitals + orb2;
 			for (SizeType j = i + offset; j < jmax; ++j) {
 				SizeType thinj1 = j * orbitals + orb3;
-				SizeType thinj2 = (string == "four") ? (j + 1) * orbitals + orb4 : j * orbitals + orb4;
+				SizeType thinj2 = (string == "four") ? (j + 1) * orbitals + orb4
+				                                     : j * orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					SizeType spin1 = spin0;
-					pairs.push_back(PairSizeType(thini1 + thini2 * rows * orbitals + rows * orbitals * rows * orbitals * spin0,
-					                             thinj1 + thinj2 * rows * orbitals + rows * orbitals * rows * orbitals * spin1));
+					pairs.push_back(PairSizeType(
+					    thini1 + thini2 * rows * orbitals
+					        + rows * orbitals * rows * orbitals * spin0,
+					    thinj1 + thinj2 * rows * orbitals
+					        + rows * orbitals * rows * orbitals * spin1));
 				}
 			}
 		}
@@ -722,19 +747,29 @@ private:
 		MatrixType mdown(rows, cols);
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i * orbitals + orb1;
-			SizeType thini2 = (string == "four") ? (i + 1) * orbitals + orb2 : i * orbitals + orb2;
+			SizeType thini2
+			    = (string == "four") ? (i + 1) * orbitals + orb2 : i * orbitals + orb2;
 			for (SizeType j = i + offset; j < jmax; ++j) {
 				SizeType thinj1 = j * orbitals + orb3;
-				SizeType thinj2 = (string == "four") ? (j + 1) * orbitals + orb4 : j * orbitals + orb4;
+				SizeType thinj2 = (string == "four") ? (j + 1) * orbitals + orb4
+				                                     : j * orbitals + orb4;
 
 				RealType vsign = -1.0;
 				SizeType spin0 = 0;
 				SizeType spin1 = 0;
-				mup(i, j) += vsign * m(thini1 + thini2 * rows * orbitals + spin0 * rows * orbitals * rows * orbitals, thinj1 + thinj2 * rows * orbitals + spin1 * rows * orbitals * rows * orbitals);
+				mup(i, j) += vsign
+				    * m(thini1 + thini2 * rows * orbitals
+				            + spin0 * rows * orbitals * rows * orbitals,
+				        thinj1 + thinj2 * rows * orbitals
+				            + spin1 * rows * orbitals * rows * orbitals);
 
 				spin0 = 1;
 				spin1 = 1;
-				mdown(i, j) += vsign * m(thini1 + thini2 * rows * orbitals + spin0 * rows * orbitals * rows * orbitals, thinj1 + thinj2 * rows * orbitals + spin1 * rows * orbitals * rows * orbitals);
+				mdown(i, j) += vsign
+				    * m(thini1 + thini2 * rows * orbitals
+				            + spin0 * rows * orbitals * rows * orbitals,
+				        thinj1 + thinj2 * rows * orbitals
+				            + spin1 * rows * orbitals * rows * orbitals);
 			}
 		}
 
@@ -869,9 +904,11 @@ private:
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
 			// c_dn,0
-			SparseMatrixType O1 = model_.naturalOperator("c", site, orb1 + spin1 * orbitals).getCRS();
+			SparseMatrixType O1
+			    = model_.naturalOperator("c", site, orb1 + spin1 * orbitals).getCRS();
 			// c_up,0
-			SparseMatrixType O2 = model_.naturalOperator("c", site, orb1 + spin0 * orbitals).getCRS();
+			SparseMatrixType O2
+			    = model_.naturalOperator("c", site, orb1 + spin0 * orbitals).getCRS();
 
 			SparseMatrixType A, B;
 			multiply(B, O1, O2); // c_dn,0 . c_up,0.
@@ -901,9 +938,11 @@ private:
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
 			// c_dn,0
-			SparseMatrixType O1 = model_.naturalOperator("c", site, orb1 + spin1 * orbitals).getCRS();
+			SparseMatrixType O1
+			    = model_.naturalOperator("c", site, orb1 + spin1 * orbitals).getCRS();
 			// c_up,0
-			SparseMatrixType O2 = model_.naturalOperator("c", site, orb1 + spin0 * orbitals).getCRS();
+			SparseMatrixType O2
+			    = model_.naturalOperator("c", site, orb1 + spin0 * orbitals).getCRS();
 			SparseMatrixType A, B;
 			multiply(B, O1, O2); // c_dn,0 . c_up,0.
 			transposeConjugate(A, B);
@@ -929,10 +968,18 @@ private:
 		} else if (flag == 2) {
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
-			SparseMatrixType O1 = model_.naturalOperator("c", site, 1 + spin1 * orbitals).getCRS(); // c_dn,1
-			SparseMatrixType O2 = model_.naturalOperator("c", site, 0 + spin0 * orbitals).getCRS(); // c_up,0
-			SparseMatrixType O3 = model_.naturalOperator("c", site, 1 + spin0 * orbitals).getCRS(); // c_up,1
-			SparseMatrixType O4 = model_.naturalOperator("c", site, 0 + spin1 * orbitals).getCRS(); // c_dn,0
+			SparseMatrixType O1
+			    = model_.naturalOperator("c", site, 1 + spin1 * orbitals)
+			          .getCRS(); // c_dn,1
+			SparseMatrixType O2
+			    = model_.naturalOperator("c", site, 0 + spin0 * orbitals)
+			          .getCRS(); // c_up,0
+			SparseMatrixType O3
+			    = model_.naturalOperator("c", site, 1 + spin0 * orbitals)
+			          .getCRS(); // c_up,1
+			SparseMatrixType O4
+			    = model_.naturalOperator("c", site, 0 + spin1 * orbitals)
+			          .getCRS(); // c_dn,0
 
 			SparseMatrixType A, B, tmp1, tmp2;
 			multiply(tmp1, O1, O2); // c_dn,1 . c_up,0
@@ -941,7 +988,8 @@ private:
 			FieldType mult1, mult2;
 			mult1 = 1.0;
 			mult2 = -1.0;
-			operatorPlus(B, tmp1, mult1, tmp2, mult2); // B = 1.0*tmp1 + (-1.0)*tmp2 = Singlet
+			operatorPlus(
+			    B, tmp1, mult1, tmp2, mult2); // B = 1.0*tmp1 + (-1.0)*tmp2 = Singlet
 			transposeConjugate(A, B); // A = transpose(B)
 			OperatorType opA(A,
 			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -965,10 +1013,18 @@ private:
 		} else if (flag == 3) {
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
-			SparseMatrixType O1 = model_.naturalOperator("c", site, 1 + spin1 * orbitals).getCRS(); // c_dn,1
-			SparseMatrixType O2 = model_.naturalOperator("c", site, 0 + spin0 * orbitals).getCRS(); // c_up,0
-			SparseMatrixType O3 = model_.naturalOperator("c", site, 1 + spin0 * orbitals).getCRS(); // c_up,1
-			SparseMatrixType O4 = model_.naturalOperator("c", site, 0 + spin1 * orbitals).getCRS(); // c_dn,0
+			SparseMatrixType O1
+			    = model_.naturalOperator("c", site, 1 + spin1 * orbitals)
+			          .getCRS(); // c_dn,1
+			SparseMatrixType O2
+			    = model_.naturalOperator("c", site, 0 + spin0 * orbitals)
+			          .getCRS(); // c_up,0
+			SparseMatrixType O3
+			    = model_.naturalOperator("c", site, 1 + spin0 * orbitals)
+			          .getCRS(); // c_up,1
+			SparseMatrixType O4
+			    = model_.naturalOperator("c", site, 0 + spin1 * orbitals)
+			          .getCRS(); // c_dn,0
 
 			SparseMatrixType A, B, tmp1, tmp2;
 			multiply(tmp1, O1, O2); // c_dn,1 . c_up,0
@@ -977,7 +1033,8 @@ private:
 			FieldType mult1, mult2;
 			mult1 = 1.0;
 			mult2 = 1.0;
-			operatorPlus(B, tmp1, mult1, tmp2, mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet
+			operatorPlus(
+			    B, tmp1, mult1, tmp2, mult2); // B = 1.0*tmp1 + (1.0)*tmp2 = Triplet
 			transposeConjugate(A, B); // A = transpose(B)
 			OperatorType opA(A,
 			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -1003,9 +1060,11 @@ private:
 			SizeType orb1 = 1; // upper orbital
 			SizeType spin0 = 0; // up
 			// c_up,0
-			SparseMatrixType O1 = model_.naturalOperator("c", site, orb0 + spin0 * orbitals).getCRS();
+			SparseMatrixType O1
+			    = model_.naturalOperator("c", site, orb0 + spin0 * orbitals).getCRS();
 			// c_up,1
-			SparseMatrixType O2 = model_.naturalOperator("c", site, orb1 + spin0 * orbitals).getCRS();
+			SparseMatrixType O2
+			    = model_.naturalOperator("c", site, orb1 + spin0 * orbitals).getCRS();
 			SparseMatrixType A, B;
 			multiply(B, O1, O2); // c_up,0 . c_up,1
 			transposeConjugate(A, B);
@@ -1033,9 +1092,11 @@ private:
 			SizeType orb1 = 1; // upper orbital
 			SizeType spin1 = 1; // dn
 			// c_dn,0
-			SparseMatrixType O1 = model_.naturalOperator("c", site, orb0 + spin1 * orbitals).getCRS();
+			SparseMatrixType O1
+			    = model_.naturalOperator("c", site, orb0 + spin1 * orbitals).getCRS();
 			// c_dn,1
-			SparseMatrixType O2 = model_.naturalOperator("c", site, orb1 + spin1 * orbitals).getCRS();
+			SparseMatrixType O2
+			    = model_.naturalOperator("c", site, orb1 + spin1 * orbitals).getCRS();
 			SparseMatrixType A, B;
 			multiply(B, O1, O2); // c_dn,0 . c_dn,1
 			transposeConjugate(A, B);
@@ -1061,10 +1122,18 @@ private:
 		} else if (flag == 6) {
 			SizeType spin0 = 0; // up
 			SizeType spin1 = 1; // down
-			SparseMatrixType O1 = model_.naturalOperator("c", site, 1 + spin1 * orbitals).getCRS(); // c_up,0
-			SparseMatrixType O2 = model_.naturalOperator("c", site, 0 + spin0 * orbitals).getCRS(); // c_up,1
-			SparseMatrixType O3 = model_.naturalOperator("c", site, 1 + spin0 * orbitals).getCRS(); // c_dn,0
-			SparseMatrixType O4 = model_.naturalOperator("c", site, 0 + spin1 * orbitals).getCRS(); // c_dn,1
+			SparseMatrixType O1
+			    = model_.naturalOperator("c", site, 1 + spin1 * orbitals)
+			          .getCRS(); // c_up,0
+			SparseMatrixType O2
+			    = model_.naturalOperator("c", site, 0 + spin0 * orbitals)
+			          .getCRS(); // c_up,1
+			SparseMatrixType O3
+			    = model_.naturalOperator("c", site, 1 + spin0 * orbitals)
+			          .getCRS(); // c_dn,0
+			SparseMatrixType O4
+			    = model_.naturalOperator("c", site, 0 + spin1 * orbitals)
+			          .getCRS(); // c_dn,1
 
 			SparseMatrixType A, B, tmp1, tmp2;
 			multiply(tmp1, O1, O2); // c_dn,1 . c_up,0
@@ -1139,17 +1208,20 @@ private:
 
 		for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 			// c(i1,orb1,spin0)
-			PsimagLite::String str("<gs|c[" + ttos(site) + "]?" + ttos(orb1 + spin0 * orbitals) + ";");
+			PsimagLite::String str("<gs|c[" + ttos(site) + "]?"
+			                       + ttos(orb1 + spin0 * orbitals) + ";");
 
 			// c(i2,orb2,1-spin0)
 			str += "c[" + ttos(site) + "]?" + ttos(orb2 + (1 - spin0) * orbitals) + ";";
 
 			for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 				// c(i2,orb2,spin1)
-				PsimagLite::String str2("c[" + ttos(site) + "]?" + ttos(orb3 + spin1 * orbitals) + "';");
+				PsimagLite::String str2("c[" + ttos(site) + "]?"
+				                        + ttos(orb3 + spin1 * orbitals) + "';");
 
 				// c(i3,orb1,1-spin1)
-				str2 += "c[" + ttos(site) + "]?" + ttos(orb4 + (1 - spin1) * orbitals) + "'|gs>";
+				str2 += "c[" + ttos(site) + "]?"
+				    + ttos(orb4 + (1 - spin1) * orbitals) + "'|gs>";
 
 				BraketType braket(model_, str + str2);
 				SizeType val = spin0 + spin1 + 1;
@@ -1247,10 +1319,18 @@ private:
 		//		result.push_back(m1);
 	}
 
-	void ppFour(MatrixType& m, MatrixType& m2, SizeType orb1, SizeType orb2, SizeType orb3, SizeType orb4, const PsimagLite::String& string, int sign) const
+	void ppFour(MatrixType& m,
+	            MatrixType& m2,
+	            SizeType orb1,
+	            SizeType orb2,
+	            SizeType orb3,
+	            SizeType orb4,
+	            const PsimagLite::String& string,
+	            int sign) const
 	{
 		if (string != "four" && string != "two") {
-			throw PsimagLite::RuntimeError("ppFour: only string = 'two' or 'four' is allowed \n");
+			throw PsimagLite::RuntimeError(
+			    "ppFour: only string = 'two' or 'four' is allowed \n");
 		}
 		SizeType rows = m.n_row();
 		SizeType cols = m.n_col();
@@ -1265,14 +1345,20 @@ private:
 		SizeType jmax = (string == "four") ? cols - 1 : cols;
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i * orbitals + orb1;
-			SizeType thini2 = (string == "four") ? (i + 1) * orbitals + orb2 : i * orbitals + orb2;
+			SizeType thini2
+			    = (string == "four") ? (i + 1) * orbitals + orb2 : i * orbitals + orb2;
 			for (SizeType j = i + offset; j < jmax; ++j) {
 				SizeType thinj1 = j * orbitals + orb3;
-				SizeType thinj2 = (string == "four") ? (j + 1) * orbitals + orb4 : j * orbitals + orb4;
+				SizeType thinj2 = (string == "four") ? (j + 1) * orbitals + orb4
+				                                     : j * orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
-						pairs.push_back(PairSizeType(thini1 + thini2 * rows * orbitals + rows * orbitals * rows * orbitals * spin0,
-						                             thinj1 + thinj2 * rows * orbitals + rows * orbitals * rows * orbitals * spin1));
+						pairs.push_back(PairSizeType(
+						    thini1 + thini2 * rows * orbitals
+						        + rows * orbitals * rows * orbitals * spin0,
+						    thinj1 + thinj2 * rows * orbitals
+						        + rows * orbitals * rows * orbitals
+						            * spin1));
 					}
 				}
 			}
@@ -1295,18 +1381,34 @@ private:
 		MatrixType mSinglet(rows, cols);
 		for (SizeType i = 0; i < rows; ++i) {
 			SizeType thini1 = i * orbitals + orb1;
-			SizeType thini2 = (string == "four") ? (i + 1) * orbitals + orb2 : i * orbitals + orb2;
+			SizeType thini2
+			    = (string == "four") ? (i + 1) * orbitals + orb2 : i * orbitals + orb2;
 			for (SizeType j = i + offset; j < jmax; ++j) {
 				SizeType thinj1 = j * orbitals + orb3;
-				SizeType thinj2 = (string == "four") ? (j + 1) * orbitals + orb4 : j * orbitals + orb4;
+				SizeType thinj2 = (string == "four") ? (j + 1) * orbitals + orb4
+				                                     : j * orbitals + orb4;
 				for (SizeType spin0 = 0; spin0 < 2; ++spin0) {
 					for (SizeType spin1 = 0; spin1 < 2; ++spin1) {
 
-						RealType TripletSign = (spin0 == spin1) ? -1.0 : -1.0;
-						mTriplet(i, j) += TripletSign * m(thini1 + thini2 * rows * orbitals + spin0 * rows * orbitals * rows * orbitals, thinj1 + thinj2 * rows * orbitals + spin1 * rows * orbitals * rows * orbitals);
+						RealType TripletSign
+						    = (spin0 == spin1) ? -1.0 : -1.0;
+						mTriplet(i, j) += TripletSign
+						    * m(thini1 + thini2 * rows * orbitals
+						            + spin0 * rows * orbitals * rows
+						                * orbitals,
+						        thinj1 + thinj2 * rows * orbitals
+						            + spin1 * rows * orbitals * rows
+						                * orbitals);
 
-						RealType SingletSign = (spin0 == spin1) ? -1.0 : 1.0;
-						mSinglet(i, j) += SingletSign * m(thini1 + thini2 * rows * orbitals + spin0 * rows * orbitals * rows * orbitals, thinj1 + thinj2 * rows * orbitals + spin1 * rows * orbitals * rows * orbitals);
+						RealType SingletSign
+						    = (spin0 == spin1) ? -1.0 : 1.0;
+						mSinglet(i, j) += SingletSign
+						    * m(thini1 + thini2 * rows * orbitals
+						            + spin0 * rows * orbitals * rows
+						                * orbitals,
+						        thinj1 + thinj2 * rows * orbitals
+						            + spin1 * rows * orbitals * rows
+						                * orbitals);
 					}
 				}
 			}
@@ -1361,10 +1463,7 @@ private:
 		observe_.anyPoint(braket, DO_PRINT);
 	}
 
-	void resizeStorage(VectorMatrixType& v,
-	                   SizeType rows,
-	                   SizeType cols,
-	                   SizeType orbitals)
+	void resizeStorage(VectorMatrixType& v, SizeType rows, SizeType cols, SizeType orbitals)
 	{
 		if (v.size() != 0)
 			return;

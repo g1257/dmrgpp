@@ -90,8 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 //! A class to operate on quaterny numbers (base 4)
-template <typename Word>
-class HilbertSpaceHubbard {
+template <typename Word> class HilbertSpaceHubbard {
 public:
 
 	typedef Word HilbertState;

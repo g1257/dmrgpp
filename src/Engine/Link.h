@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename FieldType>
-struct Link {
+template <typename FieldType> struct Link {
 
 	typedef std::pair<SizeType, SizeType> PairSizeType;
 	typedef typename PsimagLite::Real<FieldType>::Type RealType;
@@ -105,8 +104,7 @@ struct Link {
 	    , angularMomentum(aM)
 	    , angularFactor(aF)
 	    , category(cat)
-	{
-	}
+	{ }
 
 	PairMetaOForConnectoinType pairMetaOps;
 	ProgramGlobals::ConnectionEnum type;

@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename OperatorType_>
-class LabeledOperators {
+template <typename OperatorType_> class LabeledOperators {
 
 	class Label {
 
@@ -20,8 +19,7 @@ class LabeledOperators {
 		    : name_(name)
 		    , kindOfSite_(kindOfSite)
 		    , isTrackable_(false)
-		{
-		}
+		{ }
 
 		const OperatorType_& operator()(SizeType dof) const
 		{
@@ -33,10 +31,7 @@ class LabeledOperators {
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		bool operator==(const PsimagLite::String& name) const
-		{
-			return (name == name_);
-		}
+		bool operator==(const PsimagLite::String& name) const { return (name == name_); }
 
 		SizeType rows() const
 		{
@@ -75,10 +70,7 @@ class LabeledOperators {
 
 		bool isTrackable() const { return isTrackable_; }
 
-		void makeTrackable()
-		{
-			isTrackable_ = true;
-		}
+		void makeTrackable() { isTrackable_ = true; }
 
 	private:
 
@@ -100,13 +92,9 @@ class LabeledOperators {
 
 		IsValue(PsimagLite::String value)
 		    : value_(value)
-		{
-		}
+		{ }
 
-		bool operator()(Label const* label) const
-		{
-			return (*label == value_);
-		}
+		bool operator()(Label const* label) const { return (*label == value_); }
 
 	private:
 
@@ -124,8 +112,7 @@ public:
 
 	LabeledOperators(PsimagLite::String model = "")
 	    : model_(model)
-	{
-	}
+	{ }
 
 	~LabeledOperators()
 	{
@@ -160,12 +147,10 @@ public:
 		labels_.clear();
 	}
 
-	Label& createLabel(PsimagLite::String name,
-	                   SizeType kindOfSite)
+	Label& createLabel(PsimagLite::String name, SizeType kindOfSite)
 	{
-		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
-		                                                          labels_.end(),
-		                                                          IsValue(name));
+		typename VectorLabelType::const_iterator x
+		    = std::find_if(labels_.begin(), labels_.end(), IsValue(name));
 
 		if (x != labels_.end())
 			err("Repeated label " + name + "\n");
@@ -175,17 +160,15 @@ public:
 		return *label;
 	}
 
-	const OperatorType& operator()(PsimagLite::String what,
-	                               SizeType dof) const
+	const OperatorType& operator()(PsimagLite::String what, SizeType dof) const
 	{
 		return findLabel(what)(dof);
 	}
 
 	const LabelType& findLabel(PsimagLite::String what) const
 	{
-		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
-		                                                          labels_.end(),
-		                                                          IsValue(what));
+		typename VectorLabelType::const_iterator x
+		    = std::find_if(labels_.begin(), labels_.end(), IsValue(what));
 		if (x != labels_.end())
 			return *(labels_[x - labels_.begin()]);
 
@@ -197,16 +180,16 @@ public:
 	void introspect() const
 	{
 		SizeType n = labels_.size();
-		std::cout << "There are " << n << " labels available for the " << model_ << " model\n";
+		std::cout << "There are " << n << " labels available for the " << model_
+		          << " model\n";
 		for (SizeType i = 0; i < n; ++i)
 			labels_[i]->introspect();
 	}
 
 	void introspect(PsimagLite::String what) const
 	{
-		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
-		                                                          labels_.end(),
-		                                                          what);
+		typename VectorLabelType::const_iterator x
+		    = std::find_if(labels_.begin(), labels_.end(), what);
 		if (x != labels_.end())
 			return labels_[x - labels_.begin()]->introspect();
 
@@ -240,11 +223,8 @@ private:
 		typename OperatorType::StorageType tmp(nrow, nrow);
 		tmp.makeDiagonal(nrow, 1.0);
 		typename OperatorType::Su2RelatedType su2Related;
-		label.push(OperatorType(tmp,
-		                        1.0,
-		                        typename OperatorType::PairType(0, 0),
-		                        1.0,
-		                        su2Related));
+		label.push(
+		    OperatorType(tmp, 1.0, typename OperatorType::PairType(0, 0), 1.0, su2Related));
 	}
 
 	LabeledOperators(const LabeledOperators&);

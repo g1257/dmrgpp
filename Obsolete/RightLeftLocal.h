@@ -93,7 +93,12 @@ public:
 	typedef typename SparseMatrixType::value_type MatrixElementType;
 	typedef psimag::Matrix<MatrixElementType> MatrixType;
 
-	RightLeftLocal(int m, const BasisType& basis1, const BasisWithOperatorsType& basis2, const BasisWithOperatorsType& basis3, SizeType orbitals, bool useReflection = false)
+	RightLeftLocal(int m,
+	               const BasisType& basis1,
+	               const BasisWithOperatorsType& basis2,
+	               const BasisWithOperatorsType& basis3,
+	               SizeType orbitals,
+	               bool useReflection = false)
 	    : m_(m)
 	    , basis1_(basis1)
 	    , basis2_(basis2)
@@ -113,8 +118,8 @@ public:
 		// for (SizeType i=0;i<aMatrix_.size();i++) delete aMatrix_[i];
 	}
 
-	//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa (inter)
-	//! Has been changed to accomodate for reflection symmetry
+	//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa
+	//! (inter) Has been changed to accomodate for reflection symmetry
 	void fastOpProdInter(typename PsimagLite::Vector<MatrixElementType>::Type& x,
 	                     typename PsimagLite::Vector<MatrixElementType> const ::Type& y,
 	                     SparseMatrixType const& A,
@@ -171,8 +176,32 @@ public:
 
 		//! multiply all here:
 
-		psimag::BLAS::GEMM('N', 'C', rightSize, leftSize, rightSize, hop, &(bm->operator()(0, 0)), rightSize, &(yMatrix_(0, 0)), leftSize, 0.0, &(cMatrix_(0, 0)), rightSize);
-		psimag::BLAS::GEMM('N', 'C', leftSize, rightSize, leftSize, 1.0, &(am->operator()(0, 0)), leftSize, &(cMatrix_(0, 0)), rightSize, 0.0, &(tmpMatrix_(0, 0)), leftSize);
+		psimag::BLAS::GEMM('N',
+		                   'C',
+		                   rightSize,
+		                   leftSize,
+		                   rightSize,
+		                   hop,
+		                   &(bm->operator()(0, 0)),
+		                   rightSize,
+		                   &(yMatrix_(0, 0)),
+		                   leftSize,
+		                   0.0,
+		                   &(cMatrix_(0, 0)),
+		                   rightSize);
+		psimag::BLAS::GEMM('N',
+		                   'C',
+		                   leftSize,
+		                   rightSize,
+		                   leftSize,
+		                   1.0,
+		                   &(am->operator()(0, 0)),
+		                   leftSize,
+		                   &(cMatrix_(0, 0)),
+		                   rightSize,
+		                   0.0,
+		                   &(tmpMatrix_(0, 0)),
+		                   leftSize);
 
 		//! revert order
 		unpreparePhi(x, tmpMatrix_);
@@ -202,7 +231,8 @@ private:
 
 		for (SizeType alphaPrime = 0; alphaPrime < ns; alphaPrime++) {
 			for (SizeType betaPrime = 0; betaPrime < ne; betaPrime++) {
-				int tmp = basis1_.permutationInverse(alphaPrime + betaPrime * ns) - offset;
+				int tmp = basis1_.permutationInverse(alphaPrime + betaPrime * ns)
+				    - offset;
 				if (tmp >= total || tmp < 0)
 					continue;
 				int x = PsimagLite\:\: isInVector(leftPerm_, alphaPrime);
@@ -230,7 +260,8 @@ private:
 		bMatrix_.resize(rightSize, rightSize);
 	}
 
-	void preparePhi(MatrixType& m, typename PsimagLite::Vector<MatrixElementType> const ::Type& v) const
+	void preparePhi(MatrixType& m,
+	                typename PsimagLite::Vector<MatrixElementType> const ::Type& v) const
 	{
 		int offset = basis1_.partition(m_);
 		int total = basis1_.partition(m_ + 1) - offset;
@@ -252,7 +283,8 @@ private:
 		}
 	}
 
-	void unpreparePhi(typename PsimagLite::Vector<MatrixElementType>::Type& v, MatrixType& m) const
+	void unpreparePhi(typename PsimagLite::Vector<MatrixElementType>::Type& v,
+	                  MatrixType& m) const
 	{
 		int offset = basis1_.partition(m_);
 		int total = basis1_.partition(m_ + 1) - offset;
@@ -308,7 +340,8 @@ private:
 
 		for (int i = 0; i < total; i++) {
 			// row i of the ordered product basis
-			utils::getCoordinates(alpha_[i], beta_[i], basis1_.permutation(i + offset), ns);
+			utils::getCoordinates(
+			    alpha_[i], beta_[i], basis1_.permutation(i + offset), ns);
 		}
 	}
 

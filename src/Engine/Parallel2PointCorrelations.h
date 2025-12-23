@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename TwoPointCorrelationsType>
-class Parallel2PointCorrelations {
+template <typename TwoPointCorrelationsType> class Parallel2PointCorrelations {
 
 public:
 
@@ -112,19 +111,13 @@ public:
 	    , fermionicSign_(fermionicSign)
 	    , bra_(bra)
 	    , ket_(ket)
-	{
-	}
+	{ }
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
 		SizeType i = pairs_[taskNumber].first;
 		SizeType j = pairs_[taskNumber].second;
-		w_(i, j) = twopoint_.calcCorrelation(i,
-		                                     j,
-		                                     braket_,
-		                                     fermionicSign_,
-		                                     bra_,
-		                                     ket_);
+		w_(i, j) = twopoint_.calcCorrelation(i, j, braket_, fermionicSign_, bra_, ket_);
 	}
 
 	SizeType tasks() const { return pairs_.size(); }

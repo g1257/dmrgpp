@@ -110,7 +110,8 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithO
 	typedef SpecForTargetingExpression<BaseType> SpecForTargetingExpressionType;
 	typedef typename SpecForTargetingExpressionType::AlgebraType AlgebraType;
 	typedef typename SpecForTargetingExpressionType::AssignAndDestroy AssignAndDestroyType;
-	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType, AssignAndDestroyType>
+	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType,
+	                                        AssignAndDestroyType>
 	    CanonicalExpressionType;
 	typedef AuxForTargetingExpression<BaseType> AuxForTargetingExpressionType;
 	typedef typename TargetingCommonType::VectorRealType VectorRealType;
@@ -157,10 +158,7 @@ public:
 		return weights_[i];
 	}
 
-	RealType gsWeight() const
-	{
-		return gsWeightActual_;
-	}
+	RealType gsWeight() const { return gsWeightActual_; }
 
 	void evolve(const VectorRealType& energies,
 	            ProgramGlobals::DirectionEnum direction,
@@ -174,7 +172,8 @@ public:
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		assert(block1.size() == 1);
 		const SizeType site = block1[0];
-		const SizeType numberOfSites = this->common().aoe().model().superGeometry().numberOfSites();
+		const SizeType numberOfSites
+		    = this->common().aoe().model().superGeometry().numberOfSites();
 		const SizeType total = this->common().aoe().tvs();
 		assert(total <= pvectors_.targets());
 		if (site != 0 && site + 1 != numberOfSites)
@@ -187,8 +186,8 @@ public:
 		this->common().printNormsAndWeights(gsWeightActual_, weights_);
 
 		const bool doBorderIfBorder = true;
-		auto testLambda = [this](const PsimagLite::GetBraOrKet& bra,
-		                         const PsimagLite::GetBraOrKet& ket)
+		auto testLambda
+		    = [this](const PsimagLite::GetBraOrKet& bra, const PsimagLite::GetBraOrKet& ket)
 		{
 			if (!hasTimeEvolution(bra) || !hasTimeEvolution(ket))
 				return;
@@ -198,10 +197,12 @@ public:
 			const RealType globalTime = this->common().time();
 
 			if (braTime != ketTime)
-				err("BraTime= " + ttos(braTime) + " but ketTime= " + ttos(ketTime) + "\n");
+				err("BraTime= " + ttos(braTime) + " but ketTime= " + ttos(ketTime)
+				    + "\n");
 
 			if (braTime != globalTime)
-				err("Bra and kets have some time= " + ttos(braTime) + " but globalTime= " + ttos(globalTime) + "\n");
+				err("Bra and kets have some time= " + ttos(braTime)
+				    + " but globalTime= " + ttos(globalTime) + "\n");
 		};
 
 		if (loopNumber >= this->model().params().finiteLoop.size() - 1) {
@@ -238,8 +239,7 @@ public:
 		evolve(energies, direction, block, block, loopNumber);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
 		this->common().readGSandNGSTs(io, prefix, "Expression");
 	}

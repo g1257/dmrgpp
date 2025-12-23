@@ -9,9 +9,7 @@ class OutputFileOrNot {
 
 public:
 
-	OutputFileOrNot(PsimagLite::String filename,
-	                PsimagLite::IoNg::OpenMode mode,
-	                bool disabled)
+	OutputFileOrNot(PsimagLite::String filename, PsimagLite::IoNg::OpenMode mode, bool disabled)
 	    : filename_(filename)
 	    , ptr_(nullptr)
 	{
@@ -36,8 +34,7 @@ public:
 		return *ptr_;
 	}
 
-	template <typename T>
-	void write(const T& t, PsimagLite::String str)
+	template <typename T> void write(const T& t, PsimagLite::String str)
 	{
 		if (!ptr_)
 			return;
@@ -55,17 +52,15 @@ public:
 		ptr_->write(t, str, mode);
 	}
 
-	template <typename T>
-	void overwrite(const T& t, PsimagLite::String str)
+	template <typename T> void overwrite(const T& t, PsimagLite::String str)
 	{
 		if (!ptr_)
 			return;
 		ptr_->overwrite(t, str);
 	}
 
-	void write(SizeType c,
-	           PsimagLite::String str,
-	           PsimagLite::IoNg::Out::Serializer::WriteMode mode)
+	void
+	write(SizeType c, PsimagLite::String str, PsimagLite::IoNg::Out::Serializer::WriteMode mode)
 	{
 		if (!ptr_)
 			return;

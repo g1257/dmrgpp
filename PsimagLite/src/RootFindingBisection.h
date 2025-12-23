@@ -14,13 +14,16 @@
 #include "ProgressIndicator.h"
 
 namespace PsimagLite {
-template <typename FunctionType>
-class RootFindingBisection {
+template <typename FunctionType> class RootFindingBisection {
 	typedef typename FunctionType::RealType RealType;
 
 public:
 
-	RootFindingBisection(const FunctionType& function, RealType a = -100., RealType b = 100., SizeType maxIter = 100, RealType tolerance = 1.0e-3)
+	RootFindingBisection(const FunctionType& function,
+	                     RealType a = -100.,
+	                     RealType b = 100.,
+	                     SizeType maxIter = 100,
+	                     RealType tolerance = 1.0e-3)
 	    : function_(function)
 	    , maxIter_(maxIter)
 	    , tolerance_(tolerance)
@@ -29,8 +32,7 @@ public:
 	{
 		RealType f1 = function_(a_) * function_(b_);
 		if (f1 >= 0)
-			throw RuntimeError(
-			    "RootFindingBisection: condition not met\n");
+			throw RuntimeError("RootFindingBisection: condition not met\n");
 	}
 
 	RealType operator()() const

@@ -4,8 +4,7 @@
 
 namespace Dmrg {
 
-template <typename LeftRightSuperType>
-class PrinterInDetail {
+template <typename LeftRightSuperType> class PrinterInDetail {
 
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::QnType QnType;
@@ -17,8 +16,7 @@ public:
 	PrinterInDetail(const LeftRightSuperType& lrs, bool extended)
 	    : lrs_(lrs)
 	    , extended_(extended)
-	{
-	}
+	{ }
 
 	void print(std::ostream& os, PsimagLite::String msg) const
 	{
@@ -62,10 +60,11 @@ private:
 
 		os << "Operators at site " << site << " (" << siteC << ")\n";
 		for (SizeType sigma = 0; sigma < end; ++sigma) {
-			const OperatorType& myop = basis.localOperator(basis.localOperatorIndex(siteC,
-			                                                                        sigma));
+			const OperatorType& myop
+			    = basis.localOperator(basis.localOperatorIndex(siteC, sigma));
 			os << sigma << " non-zeroes=";
-			os << myop.getStorage().nonZeros() << " rows=" << myop.getStorage().rows() << "\n";
+			os << myop.getStorage().nonZeros() << " rows=" << myop.getStorage().rows()
+			   << "\n";
 		}
 	}
 

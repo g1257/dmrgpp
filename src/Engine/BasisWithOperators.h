@@ -89,7 +89,8 @@ namespace Dmrg {
 
          C++ class \cppClass{Basis} (and \cppClass{BasisImplementation}) implement only
          certain functionality associated with a Hilbert space basis, as mentioned in
-         the previous section. However, more capabilities related to a Hilbert space basis are needed.
+         the previous section. However, more capabilities related to a Hilbert space basis are
+   needed.
 
          C++ class \cppClass{BasisWithOperators} inherits from \cppClass{Basis}, and contains
          certain local operators for the basis in question, as well as the Hamiltonian matrix.
@@ -99,8 +100,9 @@ namespace Dmrg {
          For example, for the Hubbard model, we consider $c_{i\sigma}$ operators,
          that destroy an electron with spin $\sigma$ on site $i$.
          For the Heisenberg model, we consider operators $S^+_i$ and $S^z_i$ for each site $i$.
-         In each case these operators are calculated by the model class (see Section~\ref{subsec:models})
-         on the ``natural'' basis,  and added to the basis in question with a call to
+         In each case these operators are calculated by the model class (see
+   Section~\ref{subsec:models}) on the ``natural'' basis,  and added to the basis in question with a
+   call to
          \cppFunction{setOperators()}.
          These local operators are stored as sparse matrices to save memory,
          although the matrix type is templated and could be anything.
@@ -111,10 +113,10 @@ namespace Dmrg {
          Additionally, \cppClass{BasisWithOperators} has a number of member functions to
          handle operations that the DMRG method performs on
          local operators in a Hilbert space basis. These include functions to create
-         an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis, etc.
+         an outer product of two given Hilbert spaces, to transform a basis, to truncate a basis,
+   etc.
          */
-template <typename BasisType_>
-class BasisWithOperators : public BasisType_ {
+template <typename BasisType_> class BasisWithOperators : public BasisType_ {
 
 public:
 
@@ -142,8 +144,7 @@ public:
 	BasisWithOperators(const PsimagLite::String& s, const BasisTraits& basisTraits)
 	    : BasisType(s, basisTraits)
 	    , basisTraits_(basisTraits)
-	{
-	}
+	{ }
 
 	template <typename IoInputter>
 	BasisWithOperators(IoInputter& io,
@@ -158,12 +159,11 @@ public:
 	}
 
 	template <typename IoInputter>
-	void read(IoInputter& io,
-	          PsimagLite::String prefix,
-	          typename PsimagLite::EnableIf<
-	              PsimagLite::IsInputLike<IoInputter>::True,
-	              int>::Type
-	          = 0)
+	void
+	read(IoInputter& io,
+	     PsimagLite::String prefix,
+	     typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type
+	     = 0)
 	{
 		BasisType::read(io, prefix); // parent loads
 		operators_.read(io, prefix);
@@ -214,15 +214,9 @@ public:
 		return error;
 	}
 
-	void setHamiltonian(const SparseMatrixType& h)
-	{
-		operators_.setHamiltonian(h);
-	}
+	void setHamiltonian(const SparseMatrixType& h) { operators_.setHamiltonian(h); }
 
-	const OperatorStorageType& hamiltonian() const
-	{
-		return operators_.hamiltonian();
-	}
+	const OperatorStorageType& hamiltonian() const { return operators_.hamiltonian(); }
 
 	const OperatorStorageType& reducedHamiltonian() const
 	{
@@ -230,9 +224,7 @@ public:
 	}
 
 	template <typename SomeModelType>
-	SizeType setOneSite(const VectorSizeType& block,
-	                    const SomeModelType& model,
-	                    RealType time)
+	SizeType setOneSite(const VectorSizeType& block, const SomeModelType& model, RealType time)
 	{
 		typename BaseType::VectorQnType qm;
 
@@ -307,9 +299,8 @@ public:
 	           typename SomeOutputType::Serializer::WriteMode mode,
 	           PsimagLite::String prefix,
 	           SaveEnum option,
-	           typename PsimagLite::EnableIf<
-	               PsimagLite::IsOutputLike<SomeOutputType>::True,
-	               int*>::Type
+	           typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<SomeOutputType>::True,
+	                                         int*>::Type
 	           = 0) const
 	{
 		write(io, prefix + "/" + BasisType::name(), mode, option);
@@ -320,9 +311,8 @@ public:
 	           const PsimagLite::String& s,
 	           typename SomeOutputType::Serializer::WriteMode mode,
 	           SaveEnum option,
-	           typename PsimagLite::EnableIf<
-	               PsimagLite::IsOutputLike<SomeOutputType>::True,
-	               int*>::Type
+	           typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<SomeOutputType>::True,
+	                                         int*>::Type
 	           = 0) const
 	{
 		BasisType::write(io, s, mode, false); // parent saves
@@ -354,9 +344,8 @@ private:
 		                        someSuperOpHelper);
 
 		//! Calc. hamiltonian
-		operators_.outerProductHamiltonian(basis2.hamiltonian(),
-		                                   basis3.hamiltonian(),
-		                                   BaseType::permutationInverse());
+		operators_.outerProductHamiltonian(
+		    basis2.hamiltonian(), basis3.hamiltonian(), BaseType::permutationInverse());
 
 		SizeType offset1 = basis2.operatorsPerSite_.size();
 		operatorsPerSite_.resize(offset1 + basis3.operatorsPerSite_.size());
@@ -386,8 +375,7 @@ private:
 	VectorSizeType operatorsPerSite_;
 }; // class BasisWithOperators
 
-template <typename T>
-struct IsBasisType<BasisWithOperators<T>> {
+template <typename T> struct IsBasisType<BasisWithOperators<T>> {
 	enum
 	{
 		True = true

@@ -91,8 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <numeric>
 
 namespace Dmrg {
-template <typename ModelBaseType>
-class HolsteinSpinlessThin : public ModelBaseType {
+template <typename ModelBaseType> class HolsteinSpinlessThin : public ModelBaseType {
 
 public:
 
@@ -126,7 +125,8 @@ public:
 	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef ParametersHubbardHolsteinSpinless<RealType, QnType> ParametersHolsteinSpinlessThinType;
+	typedef ParametersHubbardHolsteinSpinless<RealType, QnType>
+	    ParametersHolsteinSpinlessThinType;
 	typedef std::pair<SizeType, SizeType> PairType;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
@@ -140,10 +140,7 @@ public:
 
 	public:
 
-		virtual SizeType siteToAtomKind(SizeType site) const
-		{
-			return (site & 1);
-		}
+		virtual SizeType siteToAtomKind(SizeType site) const { return (site & 1); }
 
 		virtual SizeType kindsOfAtoms() const { return 2; }
 	};
@@ -155,9 +152,7 @@ public:
 	                     InputValidatorType& io,
 	                     const SuperGeometryType& geometry,
 	                     PsimagLite::String additional)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
 	    , atomKind_(0)
@@ -234,7 +229,8 @@ protected:
 
 		HilbertBasisType fermionicBasis;
 		setBasis(fermionicBasis, SiteType::SITE_FERMION);
-		setSymmetryRelated(qns, fermionicBasis, bosonicBasis.size(), SiteType::SITE_FERMION);
+		setSymmetryRelated(
+		    qns, fermionicBasis, bosonicBasis.size(), SiteType::SITE_FERMION);
 
 		//! Set the operators c^\daggger_{i\gamma\sigma} in the natural basis
 		SparseMatrixType tmpMatrix;
@@ -325,7 +321,8 @@ protected:
 			hopb.push(a, 'C', a, 'N');
 
 			const bool wantsHerm = false;
-			ModelTermType& phononFermion = ModelBaseType::createTerm("PhononFermion", wantsHerm);
+			ModelTermType& phononFermion
+			    = ModelBaseType::createTerm("PhononFermion", wantsHerm);
 
 			OpForLinkType n("n");
 			OpForLinkType x("x");
@@ -339,7 +336,9 @@ private:
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
 	void setBasis(HilbertBasisType& basis, SiteType kindOfSite) const
 	{
-		const HilbertState total = (kindOfSite == SiteType::SITE_BOSON) ? (modelParameters_.numberphonons + 1) : 2;
+		const HilbertState total = (kindOfSite == SiteType::SITE_BOSON)
+		    ? (modelParameters_.numberphonons + 1)
+		    : 2;
 
 		basis.resize(total);
 
@@ -348,9 +347,7 @@ private:
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
-	RealType sign(typename HilbertSpaceHubbardType::HilbertState const& ket,
-	              int i,
-	              int) const
+	RealType sign(typename HilbertSpaceHubbardType::HilbertState const& ket, int i, int) const
 	{
 		int value = 0;
 		value += HilbertSpaceHubbardType::calcNofElectrons(ket, 0, i, 0);
@@ -410,7 +407,8 @@ private:
 
 			if (typeOfSite == SiteType::SITE_FERMION) {
 				// nup
-				SizeType electronsUp = HilbertSpaceHubbardType::getNofDigits(basis[i], 0);
+				SizeType electronsUp
+				    = HilbertSpaceHubbardType::getNofDigits(basis[i], 0);
 				other[0] = electronsUp;
 
 				sign = other[0] & 1;

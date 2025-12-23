@@ -6,16 +6,14 @@
 
 namespace Dmrg {
 
-template <typename T>
-class MemoryStack : public PsimagLite::Stack<T>::Type {
+template <typename T> class MemoryStack : public PsimagLite::Stack<T>::Type {
 
 public:
 
 	using PsimagLite::Stack<T>::Type::c;
 };
 
-template <typename BasisWithOperatorsType>
-class DiskOrMemoryStack {
+template <typename BasisWithOperatorsType> class DiskOrMemoryStack {
 
 public:
 
@@ -79,10 +77,7 @@ public:
 
 	bool onDisk() const { return (diskR_); }
 
-	SizeType size() const
-	{
-		return (diskR_) ? diskR_->size() : memory_.size();
-	}
+	SizeType size() const { return (diskR_) ? diskR_->size() : memory_.size(); }
 
 	const BasisWithOperatorsType& top() const
 	{
@@ -151,8 +146,7 @@ public:
 
 private:
 
-	void writeWftStacksOnDisk(PsimagLite::String name,
-	                          PsimagLite::IoNgSerializer& io) const
+	void writeWftStacksOnDisk(PsimagLite::String name, PsimagLite::IoNgSerializer& io) const
 	{
 		io.createGroup(name);
 		io.write(name + "/Size", this->size());

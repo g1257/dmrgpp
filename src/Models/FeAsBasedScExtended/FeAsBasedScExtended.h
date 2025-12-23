@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelBaseType>
-class FeAsBasedScExtended : public ModelBaseType {
+template <typename ModelBaseType> class FeAsBasedScExtended : public ModelBaseType {
 
 public:
 
@@ -128,8 +127,7 @@ public:
 	    , modelParameters_(io)
 	    , modelFeAs_(solverParams, io, geometry, "")
 	    , orbitals_(modelParameters_.orbitals)
-	{
-	}
+	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -191,14 +189,10 @@ protected:
 
 		OpForLinkType splus("naturalSplus");
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
-		{ value *= (isSu2) ? -0.5 : 0.5; };
+		auto valueModiferTerm0
+		    = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
 
-		spsm.push(splus,
-		          'N',
-		          splus,
-		          'C',
-		          valueModiferTerm0);
+		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 

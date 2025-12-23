@@ -82,8 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define SPIN_SQUARED_H
 
 namespace Dmrg {
-template <typename CallbackType>
-class SpinSquared {
+template <typename CallbackType> class SpinSquared {
 
 	typedef typename CallbackType::Word Word;
 	typedef typename CallbackType::FieldType FieldType;
@@ -102,19 +101,14 @@ public:
 		ORBITAL_B = 1
 	};
 
-	SpinSquared(CallbackType& callback,
-	            int NUMBER_OF_ORBITALS1,
-	            int DEGREES_OF_FREEDOM1)
+	SpinSquared(CallbackType& callback, int NUMBER_OF_ORBITALS1, int DEGREES_OF_FREEDOM1)
 	    : callback_(callback)
 	    , NUMBER_OF_ORBITALS(NUMBER_OF_ORBITALS1)
 	    , DEGREES_OF_FREEDOM(DEGREES_OF_FREEDOM1)
-	{
-	}
+	{ }
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "SpinSquared";
@@ -131,13 +125,11 @@ public:
 
 		start = end;
 		end = reinterpret_cast<const char*>(&DEGREES_OF_FREEDOM);
-		total += mres.memResolv(&NUMBER_OF_ORBITALS,
-		                        end - start,
-		                        str + " NUMBER_OF_ORBITALS");
+		total += mres.memResolv(
+		    &NUMBER_OF_ORBITALS, end - start, str + " NUMBER_OF_ORBITALS");
 
-		total += mres.memResolv(&DEGREES_OF_FREEDOM,
-		                        sizeof(*this) - total,
-		                        str + " DEGREES_OF_FREEDOM");
+		total += mres.memResolv(
+		    &DEGREES_OF_FREEDOM, sizeof(*this) - total, str + " DEGREES_OF_FREEDOM");
 
 		return total;
 	}
@@ -234,10 +226,7 @@ public:
 		return sum * 0.5;
 	}
 
-	void write(PsimagLite::String,
-	           PsimagLite::IoNg::Out::Serializer&) const
-	{
-	}
+	void write(PsimagLite::String, PsimagLite::IoNg::Out::Serializer&) const { }
 
 private:
 

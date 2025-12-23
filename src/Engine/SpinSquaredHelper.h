@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define SPIN_SQ_HELPER_H
 
 namespace Dmrg {
-template <typename FieldType_, typename Word_>
-class SpinSquaredHelper {
+template <typename FieldType_, typename Word_> class SpinSquaredHelper {
 
 public:
 
@@ -92,13 +91,10 @@ public:
 	SpinSquaredHelper()
 	    : data_(0)
 	    , ketSaved_(0)
-	{
-	}
+	{ }
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "SpinSquaredHelper";
@@ -107,9 +103,7 @@ public:
 		const char* end = reinterpret_cast<const char*>(&ketSaved_);
 		SizeType total = mres.memResolv(&data_, end - start, str + " data");
 
-		total += mres.memResolv(&ketSaved_,
-		                        sizeof(*this) - total,
-		                        str + " ketSaved");
+		total += mres.memResolv(&ketSaved_, sizeof(*this) - total, str + " ketSaved");
 
 		return total;
 	}
@@ -135,10 +129,7 @@ public:
 
 	void clear() { data_ = 0; }
 
-	void write(PsimagLite::String,
-	           PsimagLite::IoNg::Out::Serializer&) const
-	{
-	}
+	void write(PsimagLite::String, PsimagLite::IoNg::Out::Serializer&) const { }
 
 private:
 
@@ -170,7 +161,8 @@ private:
 			PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m <0\n");
 		SizeType ret = SizeType(tmp);
 		if (ret != tmp)
-			PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue: j+m not SizeType\n");
+			PsimagLite::RuntimeError(
+			    "SpinSquaredHelper::getMvalue: j+m not SizeType\n");
 		return ret;
 	}
 

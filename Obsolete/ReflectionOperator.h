@@ -96,12 +96,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename LeftRightSuperType, typename ConcurrencyType>
-class ReflectionOperator {
+template <typename LeftRightSuperType, typename ConcurrencyType> class ReflectionOperator {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename LeftRightSuperType::SparseMatrixType
-	    SparseMatrixType;
+	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
 	typedef typename LeftRightSuperType::RealType RealType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
@@ -259,7 +257,8 @@ public:
 
 private:
 
-	//	void transformPartialLeft(SparseMatrixType& tr,const SparseMatrixType& Q1,const SparseMatrix& Qm) const
+	//	void transformPartialLeft(SparseMatrixType& tr,const SparseMatrixType& Q1,const
+	// SparseMatrix& Qm) const
 	//	{
 
 	//		SizeType ns = lrs_.left().size();
@@ -283,7 +282,8 @@ private:
 
 	//	}
 
-	//	void transformPartial(SparseMatrixType& s1,const PsimagLite::Matrix<ComplexOrRealType>& fullm)
+	//	void transformPartial(SparseMatrixType& s1,const
+	// PsimagLite::Matrix<ComplexOrRealType>& fullm)
 	//	{
 	//		SparseMatrixType m1(fullm);
 	//		SparseMatrixType m1Conj;
@@ -293,7 +293,8 @@ private:
 	//		s1.checkValidity();
 	//	}
 
-	//	void transformPartial(SparseMatrixType& s1,const typename PsimagLite::Vector<RealType>::Type& eigs)
+	//	void transformPartial(SparseMatrixType& s1,const typename
+	// PsimagLite::Vector<RealType>::Type& eigs)
 	//	{
 	//		SizeType n = s1.rank();
 	//		s1.resize(n);
@@ -324,7 +325,8 @@ private:
 		typename PsimagLite::Vector<SizeType>::Type x;
 		for (SizeType ii = 0; ii < removedIndices.size(); ii++) {
 			SizeType i = removedIndices[ii];
-			for (int k = newreflected.getRowPtr(i); k < newreflected.getRowPtr(i + 1); k++) {
+			for (int k = newreflected.getRowPtr(i); k < newreflected.getRowPtr(i + 1);
+			     k++) {
 				ComplexOrRealType val = newreflected.getValue(k);
 				if (isAlmostZero(val, 1e-8))
 					continue;
@@ -354,7 +356,8 @@ private:
 	{
 		typename PsimagLite::Vector<SizeType>::const_iterator::Type it2 = x2.begin();
 		for (SizeType i = 0; i < x1.size(); i++) {
-			typename PsimagLite::Vector<SizeType>::const_iterator::Type it = find(it2, x2.end(), x1[i]);
+			typename PsimagLite::Vector<SizeType>::const_iterator::Type it
+			    = find(it2, x2.end(), x1[i]);
 			if (it == x2.end()) {
 				diffs.push_back(x1[i]);
 				continue;
@@ -396,8 +399,10 @@ private:
 		typename PsimagLite::Vector<int>::Type ptr(total, -1);
 		typename PsimagLite::Vector<SizeType>::Type index(total, 0);
 		typename PsimagLite::Vector<ComplexOrRealType>::Type temp(total, 0);
-		std::cerr << "transform1=" << transform1.n_row() << "x" << transform1.n_col() << "\n";
-		std::cerr << "transform2=" << transform2.n_row() << "x" << transform2.n_col() << "\n";
+		std::cerr << "transform1=" << transform1.n_row() << "x" << transform1.n_col()
+		          << "\n";
+		std::cerr << "transform2=" << transform2.n_row() << "x" << transform2.n_col()
+		          << "\n";
 
 		SizeType counter = 0;
 		for (SizeType x = 0; x < total; x++) {
@@ -406,13 +411,19 @@ private:
 			SizeType itemp = 0;
 			for (SizeType xprime = 0; xprime < transform1.n_row(); xprime++) {
 				ComplexOrRealType wl1 = transform1(xprime, x);
-				//				ComplexOrRealType wl1 =  transform(x,xprime);
-				for (int k = reflected.getRowPtr(xprime); k < reflected.getRowPtr(xprime + 1); k++) {
+				//				ComplexOrRealType wl1 =
+				// transform(x,xprime);
+				for (int k = reflected.getRowPtr(xprime);
+				     k < reflected.getRowPtr(xprime + 1);
+				     k++) {
 					SizeType xsecond = reflected.getCol(k);
 					ComplexOrRealType r = reflected.getValue(k);
-					for (SizeType xthird = 0; xthird < transform2.n_col(); xthird++) {
-						//						ComplexOrRealType val = wl1 * r * transform(xthird,xsecond);
-						ComplexOrRealType val = wl1 * r * transform2(xsecond, xthird);
+					for (SizeType xthird = 0; xthird < transform2.n_col();
+					     xthird++) {
+						//						ComplexOrRealType
+						// val = wl1 * r * transform(xthird,xsecond);
+						ComplexOrRealType val
+						    = wl1 * r * transform2(xsecond, xthird);
 						// if (isAlmostZero(val)) continue;
 						if (ptr[xthird] < 0) {
 							ptr[xthird] = itemp;
@@ -436,7 +447,8 @@ private:
 		newreflected.checkValidity();
 	}
 
-	void setSsector(SparseMatrixType& sSector, const typename PsimagLite::Vector<SizeType>::Type& sectors) const
+	void setSsector(SparseMatrixType& sSector,
+	                const typename PsimagLite::Vector<SizeType>::Type& sectors) const
 	{
 		assert(sectors.size() == 1);
 		SizeType m = sectors[0];
@@ -474,19 +486,27 @@ private:
 
 			SizeType itemp = 0;
 
-			for (int k = reflectedLeft_.getRowPtr(x0); k < reflectedLeft_.getRowPtr(x0 + 1); k++) {
+			for (int k = reflectedLeft_.getRowPtr(x0);
+			     k < reflectedLeft_.getRowPtr(x0 + 1);
+			     k++) {
 				ComplexOrRealType val1 = reflectedLeft_.getValue(k);
-				for (int k2 = reflectedRight_.getRowPtr(y1); k2 < reflectedRight_.getRowPtr(y1 + 1); k2++) {
-					ComplexOrRealType val2 = val1 * reflectedRight_.getValue(k2);
+				for (int k2 = reflectedRight_.getRowPtr(y1);
+				     k2 < reflectedRight_.getRowPtr(y1 + 1);
+				     k2++) {
+					ComplexOrRealType val2
+					    = val1 * reflectedRight_.getValue(k2);
 					if (isAlmostZero(val2))
 						continue;
 					SizeType x0prime = reflectedLeft_.getCol(k);
-					SizeType xprime = pack3.pack(x1, x0prime, lrs_.right().permutationInverse());
+					SizeType xprime = pack3.pack(
+					    x1, x0prime, lrs_.right().permutationInverse());
 
 					SizeType y1prime = reflectedRight_.getCol(k2);
-					SizeType yprime = pack2.pack(y1prime, y0, lrs_.left().permutationInverse());
+					SizeType yprime = pack2.pack(
+					    y1prime, y0, lrs_.left().permutationInverse());
 
-					SizeType iprime = pack1.pack(yprime, xprime, lrs_.super().permutationInverse());
+					SizeType iprime = pack1.pack(
+					    yprime, xprime, lrs_.super().permutationInverse());
 					assert(iprime >= offset && iprime < offset + total);
 					SizeType col = iprime - offset;
 					if (ptr[col] < 0) {
@@ -508,7 +528,8 @@ private:
 				counter++;
 			}
 			if (isAlmostZero(val, 1e-8)) {
-				std::cerr << "i=" << i << " x0=" << x0 << " x1=" << x1 << " y0=" << y0 << " y1=" << y1 << "\n";
+				std::cerr << "i=" << i << " x0=" << x0 << " x1=" << x1
+				          << " y0=" << y0 << " y1=" << y1 << "\n";
 			}
 		}
 		sSector.setRow(total, counter);
@@ -547,7 +568,9 @@ private:
 		return flag;
 	}
 
-	void printSparseMatrix(SparseMatrixType& s1, const PsimagLite::String& label, const RealType& eps) const
+	void printSparseMatrix(SparseMatrixType& s1,
+	                       const PsimagLite::String& label,
+	                       const RealType& eps) const
 	{
 		std::cout << label << "\n";
 		for (SizeType i = 0; i < s1.rank(); i++) {
@@ -555,7 +578,8 @@ private:
 				ComplexOrRealType val = s1.getValue(k);
 				if (isAlmostZero(val, eps))
 					continue;
-				std::cout << (i + 1) << " " << (1 + s1.getCol(k)) << " " << val << "\n";
+				std::cout << (i + 1) << " " << (1 + s1.getCol(k)) << " " << val
+				          << "\n";
 			}
 		}
 	}
@@ -573,17 +597,16 @@ private:
 		//		reflectedFinal.resize(keptstates);
 		//		SizeType counterl = 0;
 
-		//		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(keptstates,0.0);
-		//		for (SizeType i=0;i<keptstates;i++) {
+		//		typename PsimagLite::Vector<ComplexOrRealType>::Type
+		// sum(keptstates,0.0); 		for (SizeType i=0;i<keptstates;i++) {
 		//			reflectedFinal.setRow(i,counterl);
-		//			for (int k = reflected.getRowPtr(i); k < reflected.getRowPtr(i+1);k++) {
-		//				SizeType col = reflected.getCol(k);
-		//				if (col>=keptstates) continue;
-		//				ComplexOrRealType val = reflected.getValue(k);
-		//				reflectedFinal.pushCol(col);
-		//				reflectedFinal.pushValue(val);
-		//				counterl++;
-		//				sum[i] += PsimagLite::conj(val) * val;
+		//			for (int k = reflected.getRowPtr(i); k <
+		// reflected.getRowPtr(i+1);k++) { 				SizeType col =
+		// reflected.getCol(k); 				if (col>=keptstates)
+		// continue; 				ComplexOrRealType val =
+		// reflected.getValue(k); 				reflectedFinal.pushCol(col);
+		// reflectedFinal.pushValue(val); 				counterl++;
+		// sum[i] += PsimagLite::conj(val) * val;
 		//			}
 
 		//		}
@@ -594,7 +617,8 @@ private:
 		//		for (SizeType i=0;i<reflectedFinal.rank();i++) {
 		//			assert(!isAlmostZero(sum[i],1e-8));
 		//			ComplexOrRealType x = 1.0/sqrt(sum[i]);
-		//			for (int k = reflectedFinal.getRowPtr(i); k < reflectedFinal.getRowPtr(i+1);k++)
+		//			for (int k = reflectedFinal.getRowPtr(i); k <
+		// reflectedFinal.getRowPtr(i+1);k++)
 		//				reflectedFinal.setValues(k,reflectedFinal.getValue(k)*x);
 		//		}
 		//		reflectedFinal.checkValidity();
@@ -612,9 +636,12 @@ private:
 			reflectedLeft.setRow(x, counter);
 			SizeType x0 = 0, x1 = 0;
 			pack2.unpack(x0, x1, lrs_.left().permutation(x));
-			for (int k = reflectedLeft_.getRowPtr(x0); k < reflectedLeft_.getRowPtr(x0 + 1); k++) {
+			for (int k = reflectedLeft_.getRowPtr(x0);
+			     k < reflectedLeft_.getRowPtr(x0 + 1);
+			     k++) {
 				SizeType x0r = reflectedLeft_.getCol(k);
-				SizeType col = pack3.pack(x1, x0r, lrs_.right().permutationInverse());
+				SizeType col
+				    = pack3.pack(x1, x0r, lrs_.right().permutationInverse());
 				ComplexOrRealType val = reflectedLeft_.getValue(k);
 				// if (isAlmostZero(val)) continue;
 				reflectedLeft.pushCol(col);
@@ -632,11 +659,14 @@ private:
 			SizeType x0 = 0, x1 = 0;
 			reflectedRight.setRow(x, counter);
 			pack3.unpack(x0, x1, lrs_.right().permutation(x));
-			for (int k = reflectedRight_.getRowPtr(x1); k < reflectedRight_.getRowPtr(x1 + 1); k++) {
+			for (int k = reflectedRight_.getRowPtr(x1);
+			     k < reflectedRight_.getRowPtr(x1 + 1);
+			     k++) {
 				SizeType x1r = reflectedRight_.getCol(k);
 				ComplexOrRealType val = reflectedRight_.getValue(k);
 				// if (isAlmostZero(val)) continue;
-				SizeType col = pack2.pack(x1r, x0, lrs_.left().permutationInverse());
+				SizeType col
+				    = pack2.pack(x1r, x0, lrs_.left().permutationInverse());
 				reflectedRight.pushCol(col);
 				reflectedRight.pushValue(val);
 				counter++;

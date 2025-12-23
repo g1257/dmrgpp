@@ -43,13 +43,11 @@ Ainur::Ainur(String str)
 
 	if (verbose)
 		std::cerr << str << "\n\n";
-#define AINUR_COMMENTS \
-	('#' >> *(qi::char_ - qi::eol) >> qi::eol) | qi::eol | qi::space
+#define AINUR_COMMENTS ('#' >> *(qi::char_ - qi::eol) >> qi::eol) | qi::eol | qi::space
 	namespace qi = boost::spirit::qi;
 	namespace ascii = boost::spirit::ascii;
 	typedef boost::fusion::vector<std::string, std::string> AttribType;
-	typedef boost::fusion::vector<std::string, std::string, std::string>
-	    Attrib3Type;
+	typedef boost::fusion::vector<std::string, std::string, std::string> Attrib3Type;
 
 	typedef BOOST_TYPEOF(AINUR_COMMENTS) SkipperType;
 
@@ -67,7 +65,9 @@ Ainur::Ainur(String str)
 	zeroToNine = ascii::char_("0", "9");
 
 	typeQualifier %= +(aToZ | ascii::char_(".") | ascii::char_("!"));
-	keywords = *(ascii::char_("_")) >> +aToZ >> *(ascii::char_("a", "z") | ascii::char_("A", "Z") | ascii::char_("0", "9") | ascii::char_(":") | ascii::char_("_"));
+	keywords = *(ascii::char_("_")) >> +aToZ
+	    >> *(ascii::char_("a", "z") | ascii::char_("A", "Z") | ascii::char_("0", "9")
+	         | ascii::char_(":") | ascii::char_("_"));
 	statement1 %= keywords >> '=' >> value;
 	statement2 %= typeQualifier >> keywords;
 	statement3 %= typeQualifier >> keywords >> '=' >> value;
@@ -84,12 +84,12 @@ Ainur::Ainur(String str)
 	++first;
 	if (first != last && !allEmpty(first, last)) {
 
-		qi::parse(first, last, +('#' >> *(qi::char_ - qi::eol) >> qi::eol | qi::eol | qi::space));
+		qi::parse(
+		    first, last, +('#' >> *(qi::char_ - qi::eol) >> qi::eol | qi::eol | qi::space));
 
 		if (first + 1 != last && !allEmpty(first, last)) {
 			IteratorType e = (first + 20 < last) ? first + 20 : last;
-			err(AinurState::errLabel(AinurState::ERR_PARSE_FAILED,
-			                         String(first, e)));
+			err(AinurState::errLabel(AinurState::ERR_PARSE_FAILED, String(first, e)));
 		}
 	}
 

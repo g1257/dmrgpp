@@ -7,8 +7,7 @@
 
 namespace Dmrg {
 
-template <typename SuperGeometryType>
-class HamiltonianAbstract {
+template <typename SuperGeometryType> class HamiltonianAbstract {
 	using VectorSizeType = std::vector<SizeType>;
 	using VectorVectorSizeType = std::vector<VectorSizeType>;
 	using ComplexOrRealType = typename SuperGeometryType::ComplexOrRealType;
@@ -35,9 +34,11 @@ public:
 				if (!superGeometry.connected(smax, emin, v))
 					continue;
 
-				ProgramGlobals::ConnectionEnum type = superGeometry.connectionKind(smax, v);
+				ProgramGlobals::ConnectionEnum type
+				    = superGeometry.connectionKind(smax, v);
 
-				if (type == ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM || type == ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON)
+				if (type == ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM
+				    || type == ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON)
 					continue;
 
 				data_.push_back(v);
@@ -52,7 +53,8 @@ public:
 	                                  SizeType termIndexForGeom,
 	                                  const RealType& targetTime)
 	{
-		ComplexOrRealType value = superGeometry_(smax_, emin_, hItems, oneLink.orbs, termIndexForGeom);
+		ComplexOrRealType value
+		    = superGeometry_(smax_, emin_, hItems, oneLink.orbs, termIndexForGeom);
 		SizeType site = findSite(hItems);
 		oneLink.modifier(value, targetTime, site);
 		return value;
@@ -75,8 +77,10 @@ private:
 	SizeType findSite(const VectorSizeType& hItems) const
 	{
 		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
-		assert(type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON || type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
-		return (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? hItems[0] : hItems[1];
+		assert(type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON
+		       || type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
+		return (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? hItems[0]
+		                                                                : hItems[1];
 	}
 
 	const SuperGeometryType& superGeometry_;

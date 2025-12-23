@@ -90,25 +90,14 @@ public:
 
 	std::string import() const { return ""; }
 
-	bool check(const std::string& label,
-	           const VectorStringType& vec,
-	           unsigned int) const
+	bool check(const std::string& label, const VectorStringType& vec, unsigned int) const
 	{
 		return false;
 	}
 
-	void check(const std::string& label,
-	           const std::string& val,
-	           unsigned int)
-	{
-		return;
-	}
+	void check(const std::string& label, const std::string& val, unsigned int) { return; }
 
-	bool checkSimpleLabel(const std::string& label,
-	                      unsigned int line) const
-	{
-		return false;
-	}
+	bool checkSimpleLabel(const std::string& label, unsigned int line) const { return false; }
 
 }; // class InputCheckBase
 } // namespace PsimagLite

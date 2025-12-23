@@ -37,14 +37,12 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename ContinuedFractionType_>
-class ContinuedFractionCollection {
+template <typename ContinuedFractionType_> class ContinuedFractionCollection {
 public:
 
 	typedef ContinuedFractionType_ ContinuedFractionType;
 	typedef typename ContinuedFractionType::ComplexType ComplexType;
-	typedef typename ContinuedFractionType::TridiagonalMatrixType
-	    TridiagonalMatrixType;
+	typedef typename ContinuedFractionType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename TridiagonalMatrixType::value_type RealType;
 	typedef typename ContinuedFractionType::MatrixType MatrixType;
 	typedef typename ContinuedFractionType::PlotDataType PlotDataType;
@@ -53,8 +51,7 @@ public:
 	ContinuedFractionCollection(FreqEnum freqEnum)
 	    : freqEnum_(freqEnum)
 	    , progress_("ContinuedFractionCollection")
-	{
-	}
+	{ }
 
 	template <typename IoInputType>
 	ContinuedFractionCollection(IoInputType& io, SizeType level = 0)
@@ -75,8 +72,7 @@ public:
 		}
 	}
 
-	template <typename IoOutputType>
-	void write(IoOutputType& io) const
+	template <typename IoOutputType> void write(IoOutputType& io) const
 	{
 		io.write(data_.size(), "#CONTINUEDFRACTIONCOLLECTION");
 		for (SizeType i = 0; i < data_.size(); i++)
@@ -125,8 +121,7 @@ private:
 				v1[i].second = v2[i].second;
 			} else {
 				if (v1[i].first != v2[i].first)
-					throw RuntimeError(
-					    "CF: x coordinate different\n");
+					throw RuntimeError("CF: x coordinate different\n");
 				v1[i].second += v2[i].second;
 			}
 		}

@@ -11,8 +11,7 @@
 
 namespace Dmrg {
 
-template <typename TargetingBaseType>
-class SpecForTargetingExpression {
+template <typename TargetingBaseType> class SpecForTargetingExpression {
 
 public:
 
@@ -41,8 +40,7 @@ public:
 		AssignAndDestroy(const PairStringAuxType& pair)
 		    : t_(new AlgebraType(pair.first, pair.second))
 		    , isValid_(true)
-		{
-		}
+		{ }
 
 		~AssignAndDestroy()
 		{
@@ -124,10 +122,7 @@ public:
 		return PairStringAuxType(str, aux);
 	}
 
-	static bool isEmpty(const ResultType& term)
-	{
-		return term.isEmpty();
-	}
+	static bool isEmpty(const ResultType& term) { return term.isEmpty(); }
 };
 }
 #endif // SPECFORTARGETINGEXPRESSION_H

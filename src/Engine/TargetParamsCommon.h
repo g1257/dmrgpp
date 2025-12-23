@@ -87,8 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
-template <typename ModelType>
-class TargetParamsCommon : public TargetParamsBase<ModelType> {
+template <typename ModelType> class TargetParamsCommon : public TargetParamsBase<ModelType> {
 
 public:
 
@@ -190,22 +189,17 @@ public:
 			int tmp = 0;
 			io.readline(tmp, "TSPSkipTimeZero=");
 			skipTimeZero_ = (tmp > 0);
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(energyForExp_, "TSPEnergyForExp=");
 			isEnergyForExp_ = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		for (SizeType i = 0; i < sites_.size(); ++i) {
 			PsimagLite::String prefix2 = (io.isAinur()) ? "TSPOp" + ttos(i) + ":" : "";
-			OperatorType myOp(io,
-			                  model_,
-			                  OperatorType::MUST_BE_NONZERO,
-			                  prefix2,
-			                  sites_[i]);
+			OperatorType myOp(
+			    io, model_, OperatorType::MUST_BE_NONZERO, prefix2, sites_[i]);
 			aOperators_.push_back(myOp);
 		}
 
@@ -213,17 +207,16 @@ public:
 			VectorType tmpVector;
 			io.read(tmpVector, "TSPOperatorMultiplier");
 			multiplyOperators(tmpVector);
-			std::cout << "TSPOperatorMultiplier found with " << tmpVector.size() << " entries.\n";
-		} catch (std::exception&) {
-		}
+			std::cout << "TSPOperatorMultiplier found with " << tmpVector.size()
+			          << " entries.\n";
+		} catch (std::exception&) { }
 
 		bool hasApplyTo = false;
 		PsimagLite::String tmp;
 		try {
 			io.readline(tmp, "TSPApplyTo=");
 			hasApplyTo = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (hasApplyTo) {
 			PsimagLite::GetBraOrKet gbok(tmp);
@@ -235,17 +228,12 @@ public:
 		checkSizesOfOperators();
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	SizeType memResolv(PsimagLite::MemResolv&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	virtual SizeType sites() const
-	{
-		return sites_.size();
-	}
+	virtual SizeType sites() const { return sites_.size(); }
 
 	virtual SizeType sites(SizeType i) const
 	{
@@ -257,9 +245,8 @@ public:
 	{
 		if (start >= sites_.size())
 			return -1;
-		VectorSizeType::const_iterator it = std::find(sites_.begin() + start,
-		                                              sites_.end(),
-		                                              site);
+		VectorSizeType::const_iterator it
+		    = std::find(sites_.begin() + start, sites_.end(), site);
 		if (it == sites_.end())
 			return -1;
 		return it - sites_.begin();
@@ -273,57 +260,29 @@ public:
 		aOperators_[i] = op;
 	}
 
-	virtual const VectorSizeType& startingLoops() const
-	{
-		return startingLoops_;
-	}
+	virtual const VectorSizeType& startingLoops() const { return startingLoops_; }
 
-	virtual typename BaseType::ConcatEnum concatenation() const
-	{
-		return concatenation_;
-	}
+	virtual typename BaseType::ConcatEnum concatenation() const { return concatenation_; }
 
-	virtual const VectorOperatorType& aOperators() const
-	{
-		return aOperators_;
-	}
+	virtual const VectorOperatorType& aOperators() const { return aOperators_; }
 
-	virtual bool noOperator() const
-	{
-		return noOperator_;
-	}
+	virtual bool noOperator() const { return noOperator_; }
 
-	virtual void noOperator(bool x)
-	{
-		noOperator_ = x;
-	}
+	virtual void noOperator(bool x) { noOperator_ = x; }
 
-	virtual bool skipTimeZero() const
-	{
-		return skipTimeZero_;
-	}
+	virtual bool skipTimeZero() const { return skipTimeZero_; }
 
-	virtual bool isEnergyForExp() const
-	{
-		return isEnergyForExp_;
-	}
+	virtual bool isEnergyForExp() const { return isEnergyForExp_; }
 
-	virtual RealType energyForExp() const
-	{
-		return energyForExp_;
-	}
+	virtual RealType energyForExp() const { return energyForExp_; }
 
-	virtual RealType gsWeight() const
-	{
-		return gsWeight_;
-	}
+	virtual RealType gsWeight() const { return gsWeight_; }
 
 	virtual SizeType sectorIndex() const { return sectorLevel_.first; }
 
 	virtual SizeType levelIndex() const { return sectorLevel_.second; }
 
-	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 
@@ -338,8 +297,7 @@ public:
 		ioSerializer.write(label + "/aOperators_", aOperators_);
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const TargetParamsCommon& t)
+	friend std::ostream& operator<<(std::ostream& os, const TargetParamsCommon& t)
 	{
 		os << "TargetParams.operators=" << t.aOperators_.size() << "\n";
 		for (SizeType i = 0; i < t.aOperators_.size(); i++) {
@@ -373,7 +331,8 @@ private:
 		if (aOperators_.size() != 1)
 			return false;
 		return (isTheIdentity(aOperators_[0].getStorage())
-		        && aOperators_[0].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::BOSON);
+		        && aOperators_[0].fermionOrBoson()
+		            == ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	void checkSizesOfOperators() const

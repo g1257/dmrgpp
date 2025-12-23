@@ -24,8 +24,7 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename ValueType_>
-class PlusMinusMultiplyDivide {
+template <typename ValueType_> class PlusMinusMultiplyDivide {
 
 public:
 
@@ -108,7 +107,9 @@ public:
 
 private:
 
-	static void setInputRealOrComplex(NodeType* input, const String& code, const std::complex<double>& dummy)
+	static void setInputRealOrComplex(NodeType* input,
+	                                  const String& code,
+	                                  const std::complex<double>& dummy)
 	{
 		std::complex<double> val = stringToComplex(code);
 

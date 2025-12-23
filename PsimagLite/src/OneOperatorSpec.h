@@ -37,7 +37,9 @@ struct OneOperatorSpec {
 		label = label_.substr(0, i);
 		const String numericString = label_.substr(i + 1, label_.length());
 		if (!isAnInteger(numericString)) {
-			throw RuntimeError("FATAL: Syntax Error: The label " + label + " must be followed by an integer " + "and not " + numericString + "\n");
+			throw RuntimeError("FATAL: Syntax Error: The label " + label
+			                   + " must be followed by an integer " + "and not "
+			                   + numericString + "\n");
 		}
 
 		dof = atoi(numericString.c_str());
@@ -49,17 +51,15 @@ struct OneOperatorSpec {
 		    : hasSiteString(hasSiteString_)
 		    , root(root_)
 		    , siteString(siteString_)
-		{
-		}
+		{ }
 
 		bool hasSiteString;
 		String root;
 		String siteString;
 	};
 
-	static SiteSplit extractSiteIfAny(PsimagLite::String name,
-	                                  const char cBegin = '[',
-	                                  const char cEnd = ']')
+	static SiteSplit
+	extractSiteIfAny(PsimagLite::String name, const char cBegin = '[', const char cEnd = ']')
 	{
 		int firstIndex = -1;
 		int lastIndex = -1;
@@ -91,8 +91,8 @@ struct OneOperatorSpec {
 
 	static bool isNonNegativeInteger(const String& s)
 	{
-		return !s.empty() && std::find_if(s.begin(), s.end(), [](char c)
-		                                  { return !std::isdigit(c); })
+		return !s.empty()
+		    && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); })
 		    == s.end();
 	}
 

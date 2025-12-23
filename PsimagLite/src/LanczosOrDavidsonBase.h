@@ -98,7 +98,9 @@ public:
 
 	virtual void computeOneState(RealType&, VectorType&, const VectorType&, SizeType) = 0;
 
-	virtual void computeAllStatesBelow(VectorRealType&, VectorVectorType&, const VectorType&, SizeType) = 0;
+	virtual void
+	computeAllStatesBelow(VectorRealType&, VectorVectorType&, const VectorType&, SizeType)
+	    = 0;
 
 	static bool isReorthoEnabled(const SolverParametersType& params)
 	{

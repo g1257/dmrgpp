@@ -14,8 +14,7 @@ public:
 	LoadBalancerWeights(SizeType ntasks, SizeType nthreads)
 	    : LoadBalancerWeights(VectorSizeType(ntasks, 1),
 	                          nthreads) // ctor delegation
-	{
-	}
+	{ }
 
 	LoadBalancerWeights(const VectorSizeType& weights, SizeType nthreads)
 	    : taskNumber_(nthreads)
@@ -43,8 +42,7 @@ public:
 #ifdef DEBUG_PTHREADS_NG
 		for (SizeType i = 0; i < nthreads; ++i) {
 			SizeType n = taskNumber_[i].size();
-			std::cout << n << " Indices allocated to thread " << i
-			          << ": ";
+			std::cout << n << " Indices allocated to thread " << i << ": ";
 			for (SizeType j = 0; j < n; ++j)
 				std::cout << taskNumber_[i][j] << " ";
 			std::cout << "\n";
@@ -67,8 +65,7 @@ public:
 
 private:
 
-	SizeType
-	findThreadWithLightestWork(const VectorSizeType& workLoad) const
+	SizeType findThreadWithLightestWork(const VectorSizeType& workLoad) const
 	{
 		return std::min_element(workLoad.begin(), workLoad.end()) - workLoad.begin();
 	}

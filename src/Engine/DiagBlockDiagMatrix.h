@@ -4,8 +4,7 @@
 
 namespace Dmrg {
 
-template <typename BlockDiagonalMatrixType>
-class DiagBlockDiagMatrix {
+template <typename BlockDiagonalMatrixType> class DiagBlockDiagMatrix {
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 	typedef typename BuildingBlockType::value_type ComplexOrRealType;
@@ -17,9 +16,7 @@ class DiagBlockDiagMatrix {
 
 	public:
 
-		LoopForDiag(BlockDiagonalMatrixType& C1,
-		            VectorRealType& eigs1,
-		            char option1)
+		LoopForDiag(BlockDiagonalMatrixType& C1, VectorRealType& eigs1, char option1)
 		    : C(C1)
 		    , eigs(eigs1)
 		    , option(option1)
@@ -45,7 +42,8 @@ class DiagBlockDiagMatrix {
 			VectorRealType eigsTmp;
 			C.diagAndEnforcePhase(m, eigsTmp, option);
 			for (SizeType j = C.offsetsRows(m); j < C.offsetsRows(m + 1); ++j)
-				eigsForGather[m][j - C.offsetsRows(m)] = eigsTmp[j - C.offsetsRows(m)];
+				eigsForGather[m][j - C.offsetsRows(m)]
+				    = eigsTmp[j - C.offsetsRows(m)];
 		}
 
 		void gather()
@@ -72,9 +70,7 @@ public:
 	// Note: In reality, Parallelization is disabled here because a LAPACK call
 	//        is needed and LAPACK is not necessarily thread safe.
 	// This function is NOT called by useSvd
-	static void diagonalise(BlockDiagonalMatrixType& C,
-	                        VectorRealType& eigs,
-	                        char option)
+	static void diagonalise(BlockDiagonalMatrixType& C, VectorRealType& eigs, char option)
 	{
 		typedef PsimagLite::NoPthreadsNg<LoopForDiag> ParallelizerType;
 		typedef PsimagLite::Concurrency ConcurrencyType;

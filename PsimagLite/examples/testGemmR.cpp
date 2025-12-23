@@ -4,17 +4,11 @@
 
 typedef std::complex<double> zcomplex;
 
-template <typename T>
-T make_val(double const x, double const y) { return (x); }
+template <typename T> T make_val(double const x, double const y) { return (x); }
 
-template <>
-double make_val<double>(double const x, double const y)
-{
-	return (x);
-}
+template <> double make_val<double>(double const x, double const y) { return (x); }
 
-template <>
-zcomplex make_val<zcomplex>(double const x, double const y)
+template <> zcomplex make_val<zcomplex>(double const x, double const y)
 {
 	zcomplex z(x, y);
 	return (z);
@@ -43,12 +37,18 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 						char const transA = trans_table[itransA];
 						char const transB = trans_table[itransB];
 
-						bool const is_transA = (transA == 'T') || (transA == 't');
-						bool const is_transB = (transB == 'T') || (transB == 't');
-						bool const is_conjA = (transA == 'C') || (transA == 'c');
-						bool const is_conjB = (transB == 'C') || (transB == 'c');
-						bool const is_notransA = (!is_transA) && (!is_conjA);
-						bool const is_notransB = (!is_transB) && (!is_conjB);
+						bool const is_transA
+						    = (transA == 'T') || (transA == 't');
+						bool const is_transB
+						    = (transB == 'T') || (transB == 't');
+						bool const is_conjA
+						    = (transA == 'C') || (transA == 'c');
+						bool const is_conjB
+						    = (transB == 'C') || (transB == 'c');
+						bool const is_notransA
+						    = (!is_transA) && (!is_conjA);
+						bool const is_notransB
+						    = (!is_transB) && (!is_conjB);
 
 						int const mC = m;
 						int const nC = n;
@@ -68,8 +68,9 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 
 						for (int j = 0; j < nC; j++) {
 							for (int i = 0; i < mC; i++) {
-								T cij = make_val<T>(1.0 * (i + j) / (mC + nC),
-								                    1.0 * i * j / (mC * nC));
+								T cij = make_val<T>(
+								    1.0 * (i + j) / (mC + nC),
+								    1.0 * i * j / (mC * nC));
 								C(i, j) = cij;
 								C_gemmr(i, j) = cij;
 							}
@@ -77,28 +78,56 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 
 						for (int j = 0; j < nA; j++) {
 							for (int i = 0; i < mA; i++) {
-								T aij = make_val<T>(-1.0 * (i + j + 1), 1.0 * (j - i + 1));
+								T aij = make_val<T>(
+								    -1.0 * (i + j + 1),
+								    1.0 * (j - i + 1));
 								A(i, j) = aij;
 							}
 						}
 
 						for (int j = 0; j < nB; j++) {
 							for (int i = 0; i < mB; i++) {
-								T bij = make_val<T>(1.0 * (i + j + 1) / (mB * nB),
-								                    -1.0 * (j - i + 1) / (mB * nB));
+								T bij = make_val<T>(
+								    1.0 * (i + j + 1) / (mB * nB),
+								    -1.0 * (j - i + 1) / (mB * nB));
 								B(i, j) = bij;
 							}
 						}
 
-						gemmR(transA, transB, m, n, k, alpha, &(A(0, 0)), ldA, &(B(0, 0)), ldB, beta, &(C_gemmr(0, 0)), ldC);
+						gemmR(transA,
+						      transB,
+						      m,
+						      n,
+						      k,
+						      alpha,
+						      &(A(0, 0)),
+						      ldA,
+						      &(B(0, 0)),
+						      ldB,
+						      beta,
+						      &(C_gemmr(0, 0)),
+						      ldC);
 
-						psimag::BLAS::GEMM(transA, transB, m, n, k, alpha, &(A(0, 0)), ldA, &(B(0, 0)), ldB, beta, &(C(0, 0)), ldC);
+						psimag::BLAS::GEMM(transA,
+						                   transB,
+						                   m,
+						                   n,
+						                   k,
+						                   alpha,
+						                   &(A(0, 0)),
+						                   ldA,
+						                   &(B(0, 0)),
+						                   ldB,
+						                   beta,
+						                   &(C(0, 0)),
+						                   ldC);
 
 						double max_err = 0;
 						double c_norm = 0;
 						for (int j = 0; j < nC; j++) {
 							for (int i = 0; i < mC; i++) {
-								double const err = std::abs(C(i, j) - C_gemmr(i, j));
+								double const err = std::abs(
+								    C(i, j) - C_gemmr(i, j));
 								max_err = std::max(max_err, err);
 								c_norm += std::abs(C(i, j));
 							}
@@ -110,9 +139,11 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 							nerrors++;
 						}
 						if ((!isok) || (idebug >= 1)) {
-							std::cout << " transA " << transA << " transB " << transB << " m "
-							          << m << " n " << n << " k " << k << " max_err "
-							          << max_err << " c_norm " << c_norm << "\n";
+							std::cout << " transA " << transA
+							          << " transB " << transB << " m "
+							          << m << " n " << n << " k " << k
+							          << " max_err " << max_err
+							          << " c_norm " << c_norm << "\n";
 						}
 					}
 				}
@@ -131,7 +162,8 @@ int main(int argc, char** argv)
 	int nerr_zcomplex = 0;
 
 	if (argc < 2)
-		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0]) + " nthreads [nb] [debug]\n");
+		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0])
+		                               + " nthreads [nb] [debug]\n");
 
 	int nthreads = atoi(argv[1]);
 

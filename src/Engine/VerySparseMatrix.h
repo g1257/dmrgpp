@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 // Yet another sparse matrix class
-template <class ComplexOrRealType>
-class VerySparseMatrix {
+template <class ComplexOrRealType> class VerySparseMatrix {
 
 	typedef std::pair<SizeType, SizeType> PairType;
 	typedef PsimagLite::Vector<PairType>::Type VectorPairType;
@@ -102,8 +101,7 @@ public:
 	    : rows_(rows)
 	    , cols_(cols)
 	    , sorted_(true)
-	{
-	}
+	{ }
 
 	explicit VerySparseMatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& crs)
 	    : rows_(crs.rows())
@@ -201,10 +199,7 @@ public:
 		values_.push_back(value);
 	}
 
-	void set(SizeType counter,
-	         SizeType row,
-	         SizeType col,
-	         const ComplexOrRealType& value)
+	void set(SizeType counter, SizeType row, SizeType col, const ComplexOrRealType& value)
 	{
 		assert(values_.size() == coordinates_.size());
 		assert(counter < coordinates_.size());
@@ -212,15 +207,9 @@ public:
 		values_[counter] = value;
 	}
 
-	const ComplexOrRealType& operator()(SizeType i) const
-	{
-		return values_[i];
-	}
+	const ComplexOrRealType& operator()(SizeType i) const { return values_[i]; }
 
-	ComplexOrRealType& operator()(SizeType i)
-	{
-		return values_[i];
-	}
+	ComplexOrRealType& operator()(SizeType i) { return values_[i]; }
 
 	void transposeConjugate()
 	{
@@ -238,7 +227,8 @@ public:
 		if (sorted_ && other.sorted())
 			plusEqualOrd(other);
 		else
-			throw PsimagLite::RuntimeError("VerySparseMatrix::operator+=(): unsorted\n");
+			throw PsimagLite::RuntimeError(
+			    "VerySparseMatrix::operator+=(): unsorted\n");
 	}
 
 	void sort()
@@ -305,9 +295,7 @@ public:
 		return coordinates_[i].first;
 	}
 
-	void getRow(VectorSizeType& cols,
-	            SizeType row,
-	            SizeType startIndex = 0) const
+	void getRow(VectorSizeType& cols, SizeType row, SizeType startIndex = 0) const
 	{
 		cols.clear();
 		for (SizeType i = startIndex; i < coordinates_.size(); i++) {
@@ -324,8 +312,7 @@ public:
 		return coordinates_[i].second;
 	}
 
-	void getColumn(VectorSizeType& rows,
-	               SizeType col) const
+	void getColumn(VectorSizeType& rows, SizeType col) const
 	{
 		rows.clear();
 		for (SizeType i = 0; i < coordinates_.size(); i++)
@@ -355,8 +342,7 @@ public:
 		return os;
 	}
 
-	friend std::istream& operator>>(std::istream& is,
-	                                VerySparseMatrix<ComplexOrRealType>& m)
+	friend std::istream& operator>>(std::istream& is, VerySparseMatrix<ComplexOrRealType>& m)
 	{
 		is >> m.rows_;
 		is >> m.cols_;
@@ -382,8 +368,7 @@ public:
 		return is;
 	}
 
-	template <typename IoType>
-	void saveToDisk(IoType& outHandle)
+	template <typename IoType> void saveToDisk(IoType& outHandle)
 	{
 		PsimagLite::String s = "rows=" + ttos(rows_);
 		outHandle.printline(s);
@@ -394,8 +379,7 @@ public:
 		outHandle.printline(s);
 	}
 
-	template <typename IoType>
-	void loadFromDisk(IoType& inHandle, bool check = false)
+	template <typename IoType> void loadFromDisk(IoType& inHandle, bool check = false)
 	{
 		clear();
 		inHandle.readline(rows_, "rows=");
@@ -413,12 +397,14 @@ public:
 		SizeType flag = 0;
 		for (SizeType i = 0; i < coordinates_.size(); i++) {
 			if (coordinates_[i].first < 0 || coordinates_[i].first >= rows_) {
-				std::cerr << "coordinates[" << i << "].first=" << coordinates_[i].first << "\n";
+				std::cerr << "coordinates[" << i
+				          << "].first=" << coordinates_[i].first << "\n";
 				flag = 1;
 				break;
 			}
 			if (coordinates_[i].second < 0 || coordinates_[i].second >= cols_) {
-				std::cerr << "coordinates[" << i << "].second=" << coordinates_[i].second << "\n";
+				std::cerr << "coordinates[" << i
+				          << "].second=" << coordinates_[i].second << "\n";
 				flag = 2;
 				break;
 			}
@@ -570,8 +556,7 @@ private:
 	bool sorted_;
 }; // VerySparseMatrix
 
-template <typename T>
-bool isHermitian(const VerySparseMatrix<T>& m)
+template <typename T> bool isHermitian(const VerySparseMatrix<T>& m)
 {
 	T eps = 1e-6;
 	for (SizeType i = 0; i < m.nonZeros(); i++) {
@@ -585,8 +570,7 @@ bool isHermitian(const VerySparseMatrix<T>& m)
 }
 
 template <typename T>
-void verySparseMatrixToDenseMatrix(PsimagLite::Matrix<T>& m,
-                                   const VerySparseMatrix<T>& vsm)
+void verySparseMatrixToDenseMatrix(PsimagLite::Matrix<T>& m, const VerySparseMatrix<T>& vsm)
 {
 	m.resize(vsm.rows(), vsm.cols());
 	m.setTo(0.0);
@@ -596,8 +580,7 @@ void verySparseMatrixToDenseMatrix(PsimagLite::Matrix<T>& m,
 }
 
 template <typename T>
-void fullMatrixToVerySparseMatrix(VerySparseMatrix<T>& vsm,
-                                  const PsimagLite::Matrix<T>& m)
+void fullMatrixToVerySparseMatrix(VerySparseMatrix<T>& vsm, const PsimagLite::Matrix<T>& m)
 {
 	vsm.resize(m.rows(), m.cols());
 	for (SizeType i = 0; i < m.rows(); ++i) {
@@ -612,8 +595,7 @@ void fullMatrixToVerySparseMatrix(VerySparseMatrix<T>& vsm,
 } // namespace Dmrg
 
 namespace PsimagLite {
-template <typename T>
-struct IsMatrixLike<Dmrg::VerySparseMatrix<T>> {
+template <typename T> struct IsMatrixLike<Dmrg::VerySparseMatrix<T>> {
 	enum
 	{
 		True = true

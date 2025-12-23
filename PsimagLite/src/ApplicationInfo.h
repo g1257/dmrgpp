@@ -103,8 +103,7 @@ public:
 	    , pid_(getpid())
 	    , runId_(runIdInternal())
 	    , isFinalized_(false)
-	{
-	}
+	{ }
 
 	void finalize() { isFinalized_ = true; }
 
@@ -150,11 +149,9 @@ public:
 
 			serializer.write(root + "/Name", name_);
 			serializer.write(root + "/RunId", runId_);
-			serializer.write(root + "/UnixTimeStart",
-			                 unixTime(false));
+			serializer.write(root + "/UnixTimeStart", unixTime(false));
 		} else {
-			serializer.write(root + "/UnixTimeEnd",
-			                 unixTime(false));
+			serializer.write(root + "/UnixTimeEnd", unixTime(false));
 		}
 	}
 
@@ -166,8 +163,7 @@ public:
 		std::cout << "Set " << name << "=" << value << "\n";
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const ApplicationInfo& ai)
+	friend std::ostream& operator<<(std::ostream& os, const ApplicationInfo& ai)
 	{
 		if (ai.isFinalized_)
 			printFinalLegacy(os, ai);
@@ -188,12 +184,10 @@ private:
 		os << "SizeType=" << sizeof(SizeType) << "\n";
 	}
 
-	static void printFinalLegacy(std::ostream& os,
-	                             const ApplicationInfo& ai)
+	static void printFinalLegacy(std::ostream& os, const ApplicationInfo& ai)
 	{
 		OstringStream msg(std::cout.precision());
-		msg() << ai.name_ << "\nsizeof(SizeType)=" << sizeof(SizeType)
-		      << "\n";
+		msg() << ai.name_ << "\nsizeof(SizeType)=" << sizeof(SizeType) << "\n";
 #ifdef USE_FLOAT
 		msg() << ai.name_ << " using float\n";
 #else

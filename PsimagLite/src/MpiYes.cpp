@@ -83,17 +83,13 @@ namespace MPI {
 
 	CommType COMM_WORLD = MPI_COMM_WORLD;
 
-	template <>
-	const MPI_Datatype MpiData<unsigned int long>::Type = MPI_LONG;
+	template <> const MPI_Datatype MpiData<unsigned int long>::Type = MPI_LONG;
 
-	template <>
-	const MPI_Datatype MpiData<unsigned int>::Type = MPI_INTEGER;
+	template <> const MPI_Datatype MpiData<unsigned int>::Type = MPI_INTEGER;
 
-	template <>
-	const MPI_Datatype MpiData<double>::Type = MPI_DOUBLE;
+	template <> const MPI_Datatype MpiData<double>::Type = MPI_DOUBLE;
 
-	template <>
-	const MPI_Datatype MpiData<int>::Type = MPI_INTEGER;
+	template <> const MPI_Datatype MpiData<int>::Type = MPI_INTEGER;
 
 	void checkError(int errorCode, PsimagLite::String caller, CommType comm)
 	{

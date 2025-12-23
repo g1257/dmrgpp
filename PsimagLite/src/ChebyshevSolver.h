@@ -108,13 +108,11 @@ namespace PsimagLite {
 template <typename SolverParametersType, typename MatrixType_, typename VectorType>
 class ChebyshevSolver {
 
-	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType>
-	    NotBaseType;
+	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType> NotBaseType;
 	typedef typename SolverParametersType::RealType RealType;
 	typedef LanczosVectors<MatrixType_, VectorType> LanczosVectorsType;
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
-	typedef typename LanczosVectorsType::DenseMatrixRealType
-	    DenseMatrixRealType;
+	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
 	typedef typename LanczosVectorsType::VectorVectorType VectorVectorType;
 
 public:
@@ -139,22 +137,21 @@ public:
 	    , params_(params)
 	    , mode_(WITH_INFO)
 	    , rng_(343311)
-	    , lanczosVectors_(mat, params.lotaMemory, params.steps, NotBaseType::isReorthoEnabled(params))
+	    , lanczosVectors_(mat,
+	                      params.lotaMemory,
+	                      params.steps,
+	                      NotBaseType::isReorthoEnabled(params))
 	{
 		params.steps = 400;
 		setMode(params.options);
 		computeAandB();
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg << "Constructing... mat.rank=" << mat_.rows()
-		    << " steps=" << params.steps;
+		msg << "Constructing... mat.rank=" << mat_.rows() << " steps=" << params.steps;
 		progress_.printline(msgg, std::cout);
 	}
 
-	void computeGroundState(RealType&, VectorType&)
-	{
-		unimplemented("computeGroundState");
-	}
+	void computeGroundState(RealType&, VectorType&) { unimplemented("computeGroundState"); }
 
 	void computeGroundState(RealType& gsEnergy, VectorType& z, const VectorType& initialVector)
 	{
@@ -165,8 +162,7 @@ public:
 		unimplemented("computeGroundState");
 	}
 
-	void buildDenseMatrix(DenseMatrixType&,
-	                      const TridiagonalMatrixType&) const
+	void buildDenseMatrix(DenseMatrixType&, const TridiagonalMatrixType&) const
 	{
 		unimplemented("buildDenseMatrix");
 	}
@@ -179,8 +175,7 @@ public:
 
 	//! ab.a contains the even moments
 	//! ab.b contains the odd moments
-	void decomposition(const VectorType& initVector,
-	                   TridiagonalMatrixType& ab)
+	void decomposition(const VectorType& initVector, TridiagonalMatrixType& ab)
 	{
 		VectorType x(initVector.size(), 0.0);
 		VectorType y = initVector;
@@ -207,7 +202,11 @@ public:
 
 	//! atmp = < phi_n | phi_n>
 	//! btmp = < phi_n | phi_{n+1}>
-	void oneStepDec(VectorType& x, VectorType& y, RealType& atmp, RealType& btmp, SizeType jind) const
+	void oneStepDec(VectorType& x,
+	                VectorType& y,
+	                RealType& atmp,
+	                RealType& btmp,
+	                SizeType jind) const
 	{
 		bool isFirst = (jind == 0);
 		VectorType z(x.size(), 0.0);
@@ -274,15 +273,15 @@ private:
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg << "Found Energy=" << energyTmp << " after "
-		    << params_.steps;
+		msg << "Found Energy=" << energyTmp << " after " << params_.steps;
 		msg << " iterations, "
 		    << " orig. norm=" << norma;
 		progress_.printline(msgg, os);
 	}
 
 	//! only for debugging:
-	void computeGroundStateTest(RealType& gsEnergy, VectorType& z, const VectorType& initialVector)
+	void
+	computeGroundStateTest(RealType& gsEnergy, VectorType& z, const VectorType& initialVector)
 	{
 		unimplemented("computeGroundStateTest");
 	}
@@ -293,23 +292,18 @@ private:
 		InternalMatrix(const MatrixType& mat)
 		    : matx_(mat)
 		    , y_(matx_.rows())
-		{
-		}
+		{ }
 
 		SizeType rows() const { return matx_.rows(); }
 
-		void matrixVectorProduct(VectorType& x,
-		                         const VectorType& y) const
+		void matrixVectorProduct(VectorType& x, const VectorType& y) const
 		{
 			for (SizeType i = 0; i < y_.size(); i++)
 				y_[i] = -y[i];
 			matx_.matrixVectorProduct(x, y_);
 		}
 
-		VectorElementType operator()(SizeType i, SizeType j) const
-		{
-			return matx_(i, j);
-		}
+		VectorElementType operator()(SizeType i, SizeType j) const { return matx_(i, j); }
 
 	private:
 
@@ -327,8 +321,8 @@ private:
 		SolverParametersType params;
 		InternalMatrix mat2(mat_);
 		RealType eMax = 0;
-		LanczosSolver<SolverParametersType, InternalMatrix, VectorType>
-		    lanczosSolver2(mat2, params);
+		LanczosSolver<SolverParametersType, InternalMatrix, VectorType> lanczosSolver2(
+		    mat2, params);
 
 		VectorType z2(mat_.rows(), 0);
 		VectorType init(z2.size());
@@ -336,8 +330,8 @@ private:
 		lanczosSolver2.computeOneState(eMax, z2, init, 0);
 
 		VectorType z(mat_.rows(), 0);
-		LanczosSolver<SolverParametersType, MatrixType, VectorType>
-		    lanczosSolver(mat_, params);
+		LanczosSolver<SolverParametersType, MatrixType, VectorType> lanczosSolver(mat_,
+		                                                                          params);
 		RealType eMin = 0;
 		lanczosSolver.computeOneState(eMin, z, init, 0);
 
@@ -351,8 +345,7 @@ private:
 
 		PsimagLite::OstringStream msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
-		msg2 << "Spectrum bounds computed, eMax=" << eMax
-		     << " eMin=" << eMin;
+		msg2 << "Spectrum bounds computed, eMax=" << eMax << " eMin=" << eMin;
 		progress_.printline(msgg2, std::cout);
 	}
 

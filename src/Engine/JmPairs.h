@@ -88,8 +88,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename PairType_>
-class JmPairs {
+template <typename PairType_> class JmPairs {
 
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
@@ -143,10 +142,7 @@ public:
 		indices_.clear();
 	}
 
-	void reorder(const VectorSizeType& permutation)
-	{
-		utils::reorder(indices_, permutation);
-	}
+	void reorder(const VectorSizeType& permutation) { utils::reorder(indices_, permutation); }
 
 	void truncate(const VectorSizeType& removedIndices)
 	{
@@ -156,8 +152,7 @@ public:
 		removeUnusedPairs(unusedPairs);
 	}
 
-	template <typename Op>
-	void maxFirst(SizeType& maxvalue)
+	template <typename Op> void maxFirst(SizeType& maxvalue)
 	{
 		Op f;
 		for (SizeType i = 0; i < jmPairs_.size(); i++) {
@@ -170,31 +165,28 @@ public:
 	SizeType size() const { return indices_.size(); }
 
 	template <typename IoOutputter>
-	void write(IoOutputter& io,
-	           PsimagLite::String prefix,
-	           typename PsimagLite::EnableIf<
-	               PsimagLite::IsOutputLike<IoOutputter>::True,
-	               int>::Type
-	           = 0) const
+	void
+	write(IoOutputter& io,
+	      PsimagLite::String prefix,
+	      typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type
+	      = 0) const
 	{
 		io.write(jmPairs_, prefix + "su2JmPairs");
 		io.write(indices_, prefix + "su2JmIndices");
 	}
 
 	template <typename IoInputter>
-	void read(IoInputter& io,
-	          PsimagLite::String prefix,
-	          typename PsimagLite::EnableIf<
-	              PsimagLite::IsInputLike<IoInputter>::True,
-	              int>::Type
-	          = 0)
+	void
+	read(IoInputter& io,
+	     PsimagLite::String prefix,
+	     typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type
+	     = 0)
 	{
 		io.read(jmPairs_, prefix + "su2JmPairs");
 		io.read(indices_, prefix + "su2JmIndices");
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                JmPairs<PairType> jmPairs)
+	friend std::ostream& operator<<(std::ostream& os, JmPairs<PairType> jmPairs)
 	{
 		for (SizeType i = 0; i < jmPairs.size(); i++)
 			os << "jmPair[" << i << "]=" << jmPairs[i] << "\n";

@@ -45,11 +45,9 @@ int main(int argc, char** argv)
 	params.tolerance = -1;
 	params.options = "reortho";
 
-	typedef PsimagLite::LanczosSolver<
-	    SolverParametersType,
-	    PsimagLite::CrsMatrix<ComplexType>,
-	    VectorType>
-	    LanczosSolverType;
+	typedef PsimagLite::
+	    LanczosSolver<SolverParametersType, PsimagLite::CrsMatrix<ComplexType>, VectorType>
+	        LanczosSolverType;
 
 	LanczosSolverType lanczosSolver(msparse, params);
 

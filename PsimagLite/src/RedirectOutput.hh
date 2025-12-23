@@ -10,26 +10,20 @@ class RedirectOutput {
 
 public:
 
-	static void setAppName(const std::string& app_name)
-	{
-		setAppName(app_name, app_name);
-	}
+	static void setAppName(const std::string& app_name) { setAppName(app_name, app_name); }
 
-	static void setAppName(const std::string& app_name,
-	                       const std::string& app_name2)
+	static void setAppName(const std::string& app_name, const std::string& app_name2)
 	{
 		app_name_ = app_name;
 		app_name2_ = app_name2;
 	}
 
 	//  std::ofstream::app or std::ofstream::out
-	static void doIt(const std::string& label,
-	                 std::ios_base::openmode open_mode,
-	                 bool unbuffered)
+	static void
+	doIt(const std::string& label, std::ios_base::openmode open_mode, bool unbuffered)
 	{
 		cout_stream_.open(label.c_str(), open_mode);
-		if (!cout_stream_ || cout_stream_.bad()
-		    || !cout_stream_.good()) {
+		if (!cout_stream_ || cout_stream_.bad() || !cout_stream_.good()) {
 			PsimagLite::String str(app_name_);
 			str += ": Could not redirect std::cout to " + label + "\n";
 			err(str);

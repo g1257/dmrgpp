@@ -96,22 +96,16 @@ public:
 	typedef typename ModelType::RealType RealType;
 
 	template <typename IoInputter>
-	TargetParamsTimeStep(IoInputter& io,
-	                     PsimagLite::String targeting,
-	                     const ModelType& model)
+	TargetParamsTimeStep(IoInputter& io, PsimagLite::String targeting, const ModelType& model)
 	    : TimeVectorParamsType(io, targeting, model)
 	    , maxTime_(0)
 	{
 		try {
 			io.readline(maxTime_, "TSPMaxTime=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
-	virtual RealType maxTime() const
-	{
-		return maxTime_;
-	}
+	virtual RealType maxTime() const { return maxTime_; }
 
 private:
 
@@ -119,8 +113,7 @@ private:
 }; // class TargetParamsTimeStep
 
 template <typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os, const TargetParamsTimeStep<ModelType>& t)
+inline std::ostream& operator<<(std::ostream& os, const TargetParamsTimeStep<ModelType>& t)
 {
 	os << "TargetParams.type=TimeStep\n";
 

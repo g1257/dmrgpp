@@ -35,7 +35,8 @@ bool equalMatrices(PsimagLite::Matrix<RealType>& a,
 int main(int argc, char** argv)
 {
 	if (argc < 2)
-		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0]) + " total nthreadsOuter\n");
+		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0])
+		                               + " total nthreadsOuter\n");
 
 	int total = atoi(argv[1]);
 	int nthreadsOuter = atoi(argv[2]);

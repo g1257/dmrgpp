@@ -35,16 +35,13 @@ typedef Vector<ComplexOrRealType>::Type VectorType;
 typedef CrsMatrix<ComplexOrRealType> SparseMatrixType;
 typedef LanczosOrDavidsonBase<ParametersForSolverType, SparseMatrixType, VectorType>
     SparseSolverType;
-typedef LanczosSolver<ParametersForSolverType, SparseMatrixType, VectorType>
-    LanczosSolverType;
-typedef DavidsonSolver<ParametersForSolverType, SparseMatrixType, VectorType>
-    DavidsonSolverType;
+typedef LanczosSolver<ParametersForSolverType, SparseMatrixType, VectorType> LanczosSolverType;
+typedef DavidsonSolver<ParametersForSolverType, SparseMatrixType, VectorType> DavidsonSolverType;
 
 void usage(const char* progName)
 {
-	std::cerr
-	    << "Usage: " << progName
-	    << " -n rank [-x] [-d ] [-c max_columns] [-m max_value] [-r seed]\n";
+	std::cerr << "Usage: " << progName
+	          << " -n rank [-x] [-d ] [-c max_columns] [-m max_value] [-r seed]\n";
 	exit(1);
 }
 

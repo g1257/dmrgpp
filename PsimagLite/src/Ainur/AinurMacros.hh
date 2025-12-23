@@ -31,11 +31,11 @@ public:
 			std::vector<std::string> tokens;
 			split(tokens, csl, ",");
 			if (tokens.size() == 0) {
-				throw RuntimeError(
-				    "Parse error for " + args + ". Expected (filename, separator, "
-				                                "column_x, column_y),"
-				    + " where separator and columns are "
-				      "optional.\n");
+				throw RuntimeError("Parse error for " + args
+				                   + ". Expected (filename, separator, "
+				                     "column_x, column_y),"
+				                   + " where separator and columns are "
+				                     "optional.\n");
 			}
 
 			filename_ = deleteEnclosing(tokens[0], '\"');
@@ -54,7 +54,8 @@ public:
 			}
 
 			if (tokens.size() > 4) {
-				throw RuntimeError("Parse error for " + args + ": too many arguments\n");
+				throw RuntimeError("Parse error for " + args
+				                   + ": too many arguments\n");
 			}
 
 			readData();
@@ -62,21 +63,19 @@ public:
 
 		const double& operator()(const double& x) const
 		{
-			auto it = std::find_if(
-			    data_.begin(), data_.end(), [&x](const std::pair<double, double>& pair)
-			    { return (pair.first == x); });
+			auto it = std::find_if(data_.begin(),
+			                       data_.end(),
+			                       [&x](const std::pair<double, double>& pair)
+			                       { return (pair.first == x); });
 			return it->second;
 		}
 
-		static std::string deleteEnclosing(const std::string& content,
-		                                   char b)
+		static std::string deleteEnclosing(const std::string& content, char b)
 		{
 			return deleteEnclosing(content, b, b);
 		}
 
-		static std::string deleteEnclosing(const std::string& content,
-		                                   char b,
-		                                   char e)
+		static std::string deleteEnclosing(const std::string& content, char b, char e)
 		{
 			SizeType length = content.size();
 			if (length == 0)
@@ -99,8 +98,7 @@ public:
 
 	private:
 
-		static std::string
-		setSeparatorForSplit(const std::string& separator)
+		static std::string setSeparatorForSplit(const std::string& separator)
 		{
 			if (separator == "space") {
 				return " ";
@@ -108,7 +106,8 @@ public:
 				return ",";
 			}
 
-			throw RuntimeError("Wrong separator" + separator + ": only space and comma allowed.\n");
+			throw RuntimeError("Wrong separator" + separator
+			                   + ": only space and comma allowed.\n");
 		}
 
 		static bool emptyLine(const std::string& s)
@@ -135,7 +134,8 @@ public:
 				std::vector<std::string> tokens;
 				split(tokens, s);
 				if (columnX_ > tokens.size() || columnY_ > tokens.size()) {
-					throw RuntimeError("Line too small: " + std::string(s) + "\n");
+					throw RuntimeError("Line too small: " + std::string(s)
+					                   + "\n");
 				}
 
 				double vx = PsimagLite::atof(tokens[columnX_]);
@@ -156,8 +156,7 @@ public:
 	AinurMacros()
 	    : AINUR_FROM_FILE("AinurFromFile")
 	{
-		nativeMacros_.push_back(
-		    { "function", AINUR_FROM_FILE, "!" + AINUR_FROM_FILE });
+		nativeMacros_.push_back({ "function", AINUR_FROM_FILE, "!" + AINUR_FROM_FILE });
 	}
 
 	SizeType total() const { return nativeMacros_.size(); }
@@ -216,8 +215,7 @@ private:
 
 	// Expect ("function.txt") or
 	// ("function.txt")(3.0)
-	static std::pair<std::string, std::string>
-	getFunctionNameValue(const std::string& line)
+	static std::pair<std::string, std::string> getFunctionNameValue(const std::string& line)
 	{
 		SizeType length = line.size();
 		if (length < 4) {
@@ -241,8 +239,8 @@ private:
 			return std::pair<std::string, std::string>(line, "");
 		}
 
-		return std::pair<std::string, std::string>(
-		    line.substr(0, i + 1), line.substr(i + 2, length - i - 3));
+		return std::pair<std::string, std::string>(line.substr(0, i + 1),
+		                                           line.substr(i + 2, length - i - 3));
 	}
 
 	std::string addAinurFromFile(const std::string& content)

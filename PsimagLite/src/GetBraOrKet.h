@@ -71,8 +71,7 @@ private:
 		bool isP = (kind_ == Kind::P || kind_ == Kind::R);
 		if (isP == b)
 			return;
-		throw PsimagLite::RuntimeError(
-		    "Internal ERROR: checkIfPpvector\n");
+		throw PsimagLite::RuntimeError("Internal ERROR: checkIfPpvector\n");
 	}
 
 	void getKind(String str)

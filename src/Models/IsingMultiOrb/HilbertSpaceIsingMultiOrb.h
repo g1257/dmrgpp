@@ -89,8 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
-template <typename Word>
-class HilbertSpaceIsingMultiOrb {
+template <typename Word> class HilbertSpaceIsingMultiOrb {
 
 	static SizeType orbitals_;
 
@@ -105,10 +104,7 @@ public:
 		SPIN_DOWN = 1
 	};
 
-	static void setOrbitals(SizeType orbitals)
-	{
-		orbitals_ = orbitals;
-	}
+	static void setOrbitals(SizeType orbitals) { orbitals_ = orbitals; }
 
 	static bool isBitZeroAt(SizeType pos, SizeType ket)
 	{
@@ -130,8 +126,7 @@ private:
 
 }; // class HilbertSpaceIsingMultiOrb
 
-template <typename Word>
-SizeType HilbertSpaceIsingMultiOrb<Word>::orbitals_ = 1;
+template <typename Word> SizeType HilbertSpaceIsingMultiOrb<Word>::orbitals_ = 1;
 } // namespace Dmrg
 
 /*@}*/

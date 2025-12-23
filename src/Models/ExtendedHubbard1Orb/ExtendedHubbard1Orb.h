@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
-template <typename ModelBaseType>
-class ExtendedHubbard1Orb : public ModelBaseType {
+template <typename ModelBaseType> class ExtendedHubbard1Orb : public ModelBaseType {
 
 public:
 
@@ -120,14 +119,11 @@ public:
 	                    InputValidatorType& io,
 	                    SuperGeometryType const& geometry,
 	                    PsimagLite::String extension)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , modelHubbard_(solverParams, io, geometry, extension)
-	{
-	}
+	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -144,9 +140,7 @@ public:
 	                                        const BlockType& block,
 	                                        RealType time) const
 	{
-		modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-		                                         block,
-		                                         time);
+		modelHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
 
 	void fillLabeledOperators(VectorQnType& qns)
@@ -169,8 +163,7 @@ public:
 private:
 
 	//! Find n_i in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(int i,
-	                                      const VectorHilbertStateType& natBasis) const
+	SparseMatrixType findOperatorMatrices(int i, const VectorHilbertStateType& natBasis) const
 	{
 
 		SizeType n = natBasis.size();

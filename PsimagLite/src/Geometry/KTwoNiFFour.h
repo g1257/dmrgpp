@@ -128,10 +128,7 @@ public:
 
 	virtual SizeType dirs() const { return 4; }
 
-	virtual SizeType length(SizeType) const
-	{
-		return this->unimplemented("length");
-	}
+	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
 
 	virtual SizeType translate(SizeType, SizeType, SizeType) const
 	{
@@ -170,7 +167,8 @@ public:
 		SizeType newi1 = (type1.first == TYPE_O) ? i1 : i2;
 		SizeType newi2 = (type1.first == TYPE_O) ? i2 : i1;
 		assert(newi2 >= 3);
-		if (newi2 - 1 == newi1 || newi2 - 2 == newi1 || newi2 - 3 == newi1 || newi2 + 1 == newi1)
+		if (newi2 - 1 == newi1 || newi2 - 2 == newi1 || newi2 - 3 == newi1
+		    || newi2 + 1 == newi1)
 			return true;
 		return false;
 	}
@@ -322,8 +320,7 @@ public:
 		if (r == 0)
 			return PairType(TYPE_C, SUBTYPE_X);
 
-		return (r == 1) ? PairType(TYPE_O, SUBTYPE_X)
-		                : PairType(TYPE_O, SUBTYPE_Y);
+		return (r == 1) ? PairType(TYPE_O, SUBTYPE_X) : PairType(TYPE_O, SUBTYPE_Y);
 	}
 
 private:
@@ -339,10 +336,7 @@ private:
 		return (i == smax || i == emin);
 	}
 
-	SizeType subs0(SizeType smax, SizeType, SizeType) const
-	{
-		return smax + 3;
-	}
+	SizeType subs0(SizeType smax, SizeType, SizeType) const { return smax + 3; }
 
 	bool fringe1(SizeType i, SizeType smax, SizeType emin) const
 	{

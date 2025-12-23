@@ -98,26 +98,24 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 
 		try {
 			io.readline(reinterpretAndTruncate, "JHundInfinity=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (orbitals != 2 && reinterpretAndTruncate > 0)
-			throw PsimagLite::RuntimeError("JHundInfinity>0 only possible for orbitals==2\n");
+			throw PsimagLite::RuntimeError(
+			    "JHundInfinity>0 only possible for orbitals==2\n");
 
 		if (reinterpretAndTruncate > 3)
-			throw PsimagLite::RuntimeError("JHundInfinity must be less or equal to 3\n");
+			throw PsimagLite::RuntimeError(
+			    "JHundInfinity must be less or equal to 3\n");
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelTjMultiOrb";
 		io.createGroup(label);

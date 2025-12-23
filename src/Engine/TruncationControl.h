@@ -7,8 +7,7 @@
 
 namespace Dmrg {
 
-template <typename RealType>
-class TruncationControl {
+template <typename RealType> class TruncationControl {
 
 public:
 
@@ -18,8 +17,7 @@ public:
 	TruncationControl()
 	    : tolerance_(-1)
 	    , mMin_(0)
-	{
-	}
+	{ }
 
 	void read(InputNgReadableType& io, SizeType keptStatesInfinite, bool hasTwoSiteDmrg)
 	{
@@ -34,11 +32,12 @@ public:
 			if (tokens.size() > 1)
 				mMin_ = atoi(tokens[1].c_str());
 			if (!hasTwoSiteDmrg) {
-				std::cerr << "WARNING: TruncationTolerance used without twositedmrg\n";
-				std::cout << "WARNING: TruncationTolerance used without twositedmrg\n";
+				std::cerr
+				    << "WARNING: TruncationTolerance used without twositedmrg\n";
+				std::cout
+				    << "WARNING: TruncationTolerance used without twositedmrg\n";
 			}
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const

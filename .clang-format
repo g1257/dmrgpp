@@ -35,4 +35,5 @@ AllowAllParametersOfDeclarationOnNextLine: false
 AlignAfterOpenBracket: Align
   #AlignConsecutiveDeclarations: true
   #AlignConsecutiveAssignments: true
+ColumnLimit: 100
 ---

@@ -71,8 +71,7 @@ public:
 
 private:
 
-	template <typename T>
-	static bool compareOnOp(T lv, String op, T rv)
+	template <typename T> static bool compareOnOp(T lv, String op, T rv)
 	{
 		// {==, <, >, <=, >=, %%}
 		// If you add something here, add it also to PredicateSimple.cpp
@@ -94,10 +93,10 @@ private:
 	}
 
 	template <typename T>
-	static bool divisibleBy(
-	    SizeType lv,
-	    SizeType rv,
-	    typename std::enable_if<Loki::TypeTraits<T>::isArith, int*>::type = 0)
+	static bool divisibleBy(SizeType lv,
+	                        SizeType rv,
+	                        typename std::enable_if<Loki::TypeTraits<T>::isArith, int*>::type
+	                        = 0)
 	{
 		return ((lv % rv) == 0);
 	}
@@ -119,17 +118,15 @@ private:
 		String numericHs = replaceVariables(hs, names, vals);
 		VectorStringType tokens;
 		split(tokens, numericHs, separator_);
-		typedef PlusMinusMultiplyDivide<
-		    typename SomeVectorType::value_type>
-		    PrimitivesType;
+		typedef PlusMinusMultiplyDivide<typename SomeVectorType::value_type> PrimitivesType;
 		PrimitivesType primitives;
-		ExpressionForAST<PrimitivesType> expresionForAST(tokens,
-		                                                 primitives);
+		ExpressionForAST<PrimitivesType> expresionForAST(tokens, primitives);
 		return expresionForAST.exec();
 	}
 
 	template <typename SomeVectorType>
-	static String replaceVariables(String hs, const VectorStringType& names, const SomeVectorType& vals)
+	static String
+	replaceVariables(String hs, const VectorStringType& names, const SomeVectorType& vals)
 	{
 		const SizeType n = names.size();
 		assert(n == vals.size());
@@ -141,8 +138,7 @@ private:
 		return buffer;
 	}
 
-	template <typename T>
-	static String replaceVariable(String hs, String name, T val)
+	template <typename T> static String replaceVariable(String hs, String name, T val)
 	{
 		const String valString = ttos(val);
 		const SizeType nameLength = name.length();
@@ -152,8 +148,8 @@ private:
 			if (index == String::npos)
 				return hs;
 			String part1 = (index == 0) ? "" : hs.substr(0, index);
-			String part2 = hs.substr(index + nameLength,
-			                         hs.length() - nameLength - index);
+			String part2
+			    = hs.substr(index + nameLength, hs.length() - nameLength - index);
 			hs = part1 + valString + part2;
 		}
 

@@ -92,8 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 // A class to represent in a light way a Dmrg basis (used only to implement symmetries).
 // (See corresponding section in paper)
-template <typename SparseMatrixType_>
-class Basis {
+template <typename SparseMatrixType_> class Basis {
 
 public:
 
@@ -115,14 +114,11 @@ public:
 	Basis(const PsimagLite::String& s, const BasisTraits&)
 	    : dmrgTransformed_(false)
 	    , name_(s)
-	{
-	}
+	{ }
 
 	//! Loads this basis from memory or disk
 	template <typename IoInputter>
-	Basis(IoInputter& io,
-	      const PsimagLite::String& ss,
-	      const BasisTraits& traits)
+	Basis(IoInputter& io, const PsimagLite::String& ss, const BasisTraits& traits)
 	    : dmrgTransformed_(false)
 	    , name_(ss)
 	{
@@ -132,8 +128,7 @@ public:
 	}
 
 	//! Loads this basis from memory or disk
-	template <typename IoInputter>
-	void read(IoInputter& io, PsimagLite::String prefix)
+	template <typename IoInputter> void read(IoInputter& io, PsimagLite::String prefix)
 	{
 		name_ = "";
 		loadInternal(io, prefix, false);
@@ -171,9 +166,8 @@ public:
 		if (useSu2Symmetry_)
 			err("SU(2) symmetry no longer supported\n");
 
-		PsimagLite::Profiling profiling("setToProduct",
-		                                ttos(basis1.size()) + "x" + ttos(basis2.size()),
-		                                std::cout);
+		PsimagLite::Profiling profiling(
+		    "setToProduct", ttos(basis1.size()) + "x" + ttos(basis2.size()), std::cout);
 
 		block_.clear();
 		utils::blockUnion(block_, basis1.block_, basis2.block_);
@@ -237,7 +231,8 @@ public:
 
 				seenThisQns[tensorProd] = counter + 1;
 				qns_[counter] = tensorProd;
-				signsPerOffset[counter] = (basis1.signs_[basis1.offsets_[ps]] ^ basis2.signs_[basis2.offsets_[pe]]);
+				signsPerOffset[counter] = (basis1.signs_[basis1.offsets_[ps]]
+				                           ^ basis2.signs_[basis2.offsets_[pe]]);
 				++counter;
 			}
 		}
@@ -291,45 +286,51 @@ public:
 		// collapsed loop to fill permutation vector
 		// -----------------------------------------
 
-		PsimagLite::CodeSectionParams codeParams = PsimagLite::Concurrency::codeSectionParams;
-		codeParams.npthreads = std::min(nps * npe,
-		                                PsimagLite::Concurrency::codeSectionParams.npthreads);
+		PsimagLite::CodeSectionParams codeParams
+		    = PsimagLite::Concurrency::codeSectionParams;
+		codeParams.npthreads
+		    = std::min(nps * npe, PsimagLite::Concurrency::codeSectionParams.npthreads);
 		PsimagLite::Parallelizer2<> parallelizer2(codeParams);
-		parallelizer2.parallelFor(0,
-		                          nps * npe,
-		                          [nps,
-		                           basisLeftSize,
-		                           &offset_into_perm_array,
-		                           &leftSize_array,
-		                           &rightSize_array,
-		                           &basis1,
-		                           &basis2,
-		                           this](SizeType pspe, SizeType)
-		                          {
-			                          // ----------------------------
-			                          // recall  pspe = ps + pe * nps;
-			                          // ----------------------------
-			                          const SizeType pe = pspe / nps;
-			                          const SizeType ps = pspe - pe * nps;
-			                          const SizeType offset_into_perm = offset_into_perm_array[pspe];
+		parallelizer2.parallelFor(
+		    0,
+		    nps * npe,
+		    [nps,
+		     basisLeftSize,
+		     &offset_into_perm_array,
+		     &leftSize_array,
+		     &rightSize_array,
+		     &basis1,
+		     &basis2,
+		     this](SizeType pspe, SizeType)
+		    {
+			    // ----------------------------
+			    // recall  pspe = ps + pe * nps;
+			    // ----------------------------
+			    const SizeType pe = pspe / nps;
+			    const SizeType ps = pspe - pe * nps;
+			    const SizeType offset_into_perm = offset_into_perm_array[pspe];
 
-			                          const SizeType leftSize = leftSize_array[ps];
-			                          const SizeType rightSize = rightSize_array[pe];
+			    const SizeType leftSize = leftSize_array[ps];
+			    const SizeType rightSize = rightSize_array[pe];
 
-			                          for (SizeType iright = 0; iright < rightSize; ++iright) {
-				                          for (SizeType ileft = 0; ileft < leftSize; ++ileft) {
+			    for (SizeType iright = 0; iright < rightSize; ++iright) {
+				    for (SizeType ileft = 0; ileft < leftSize; ++ileft) {
 
-					                          const SizeType ileftOffset = basis1.offsets_[ps] + ileft;
-					                          const SizeType irightOffset = basis2.offsets_[pe] + iright;
+					    const SizeType ileftOffset
+					        = basis1.offsets_[ps] + ileft;
+					    const SizeType irightOffset
+					        = basis2.offsets_[pe] + iright;
 
-					                          const SizeType iglobalState = ileftOffset + irightOffset * basisLeftSize;
-					                          const SizeType ipos = ileft + iright * leftSize + offset_into_perm;
+					    const SizeType iglobalState
+					        = ileftOffset + irightOffset * basisLeftSize;
+					    const SizeType ipos
+					        = ileft + iright * leftSize + offset_into_perm;
 
-					                          this->permutationVector_[ipos] = iglobalState;
-					                          this->permInverse_[iglobalState] = ipos;
-				                          }
-			                          }
-		                          });
+					    this->permutationVector_[ipos] = iglobalState;
+					    this->permInverse_[iglobalState] = ipos;
+				    }
+			    }
+		    });
 
 		checkPermutation(permInverse_);
 		checkPermutation(permutationVector_);
@@ -362,10 +363,7 @@ public:
 	}
 
 	//! Return the permutation vector
-	const VectorSizeType& permutationVector() const
-	{
-		return permutationVector_;
-	}
+	const VectorSizeType& permutationVector() const { return permutationVector_; }
 
 	//! returns the inverse permutation of i
 	int permutationInverse(SizeType i) const
@@ -375,10 +373,7 @@ public:
 	}
 
 	//! returns the inverse permutation vector
-	const VectorSizeType& permutationInverse() const
-	{
-		return permInverse_;
-	}
+	const VectorSizeType& permutationInverse() const { return permInverse_; }
 
 	//! returns the block of sites over which this basis is built
 	const BlockType& block() const { return block_; }
@@ -431,7 +426,8 @@ public:
 			return 0;
 
 		PsimagLite::Profiling profiling("truncateBasis",
-		                                ttos(eigs.size()) + "-" + ttos(removedIndices.size()),
+		                                ttos(eigs.size()) + "-"
+		                                    + ttos(removedIndices.size()),
 		                                std::cout);
 
 		// we don't truncate the permutation vectors
@@ -447,9 +443,8 @@ public:
 		for (SizeType i = 0; i < n; ++i) {
 			const SizeType offset = offsets_[i];
 			const SizeType thisSize = offsets_[i + 1] - offsets_[i];
-			const SizeType count = countRemovedStatesInRange(removedIndices,
-			                                                 offset,
-			                                                 thisSize);
+			const SizeType count
+			    = countRemovedStatesInRange(removedIndices, offset, thisSize);
 
 			if (count == thisSize)
 				continue;
@@ -475,10 +470,7 @@ public:
 	}
 
 	//! returns the flavor of state i of this basis
-	SizeType getFlavor(SizeType i) const
-	{
-		return symmLocal_.getFlavor(i);
-	}
+	SizeType getFlavor(SizeType i) const { return symmLocal_.getFlavor(i); }
 
 	const VectorBoolType& oldSigns() const { return signsOld_; }
 
@@ -490,10 +482,7 @@ public:
 	}
 
 	//! Returns the (j,m) for state i of this basis
-	PairSizeType jmValue(SizeType i) const
-	{
-		return PairSizeType(0, 0);
-	}
+	PairSizeType jmValue(SizeType i) const { return PairSizeType(0, 0); }
 
 	//! Returns true if using SU(2) symmetry or false otherwise
 	static bool useSu2Symmetry() { return useSu2Symmetry_; }
@@ -504,20 +493,11 @@ public:
 	//! Returns true if this basis has been DMRG transformed, or false if it hasn't
 	bool dmrgTransformed() const { return dmrgTransformed_; }
 
-	PsimagLite::String pseudoQnToString(SizeType i) const
-	{
-		return "unimplemented";
-	}
+	PsimagLite::String pseudoQnToString(SizeType i) const { return "unimplemented"; }
 
-	QnType pseudoQn(SizeType i) const
-	{
-		return qnEx(i);
-	}
+	QnType pseudoQn(SizeType i) const { return qnEx(i); }
 
-	void su2ElectronsBridge(VectorSizeType& v) const
-	{
-		QnType::su2ElectronsBridge(v, qns_);
-	}
+	void su2ElectronsBridge(VectorSizeType& v) const { QnType::su2ElectronsBridge(v, qns_); }
 
 	//! saves this basis to disk
 	void write(PsimagLite::IoNg::Out& io,
@@ -549,14 +529,13 @@ public:
 
 	//! saves this basis to disk
 	template <typename SomeIoType>
-	void write(SomeIoType& io,
-	           typename SomeIoType::Serializer::WriteMode mode,
-	           PsimagLite::String prefix,
-	           bool minimizeWrite,
-	           typename PsimagLite::EnableIf<
-	               PsimagLite::IsOutputLike<SomeIoType>::True,
-	               int>::Type
-	           = 0) const
+	void
+	write(SomeIoType& io,
+	      typename SomeIoType::Serializer::WriteMode mode,
+	      PsimagLite::String prefix,
+	      bool minimizeWrite,
+	      typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<SomeIoType>::True, int>::Type
+	      = 0) const
 	{
 		write(io, prefix + "/" + name_, mode, minimizeWrite);
 	}
@@ -576,9 +555,8 @@ public:
 		VectorVectorSizeType m;
 		for (SizeType col = start; col < ncols; ++col) {
 			QnType qForThisColumn = computeQforThisColumn(Uconst, qns, col);
-			typename VectorQnType::const_iterator it = std::find(qnsSeen.begin(),
-			                                                     qnsSeen.end(),
-			                                                     qForThisColumn);
+			typename VectorQnType::const_iterator it
+			    = std::find(qnsSeen.begin(), qnsSeen.end(), qForThisColumn);
 			if (it == qnsSeen.end()) {
 				// we haven't seen this qn yet
 				qnsSeen.push_back(qForThisColumn);
@@ -598,9 +576,8 @@ public:
 		PsimagLite::Vector<int>::Type perm2(qindices, -1);
 		SizeType counter1 = 0;
 		for (SizeType i = 0; i < qnsSize; ++i) {
-			typename VectorQnType::const_iterator it = std::find(qnsSeen.begin(),
-			                                                     qnsSeen.end(),
-			                                                     qns[i]);
+			typename VectorQnType::const_iterator it
+			    = std::find(qnsSeen.begin(), qnsSeen.end(), qns[i]);
 			if (it == qnsSeen.end())
 				continue;
 			const SizeType qIndex = it - qnsSeen.begin();
@@ -635,8 +612,7 @@ public:
 	}
 
 	//! The operator<< is a friend
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const Basis<SparseMatrixType>& x)
+	friend std::ostream& operator<<(std::ostream& os, const Basis<SparseMatrixType>& x)
 	{
 		os << "dmrgTransformed=" << x.dmrgTransformed_ << "\n";
 		os << "name=" << x.name_ << "\n";
@@ -701,9 +677,8 @@ protected:
 
 private:
 
-	static QnType computeQforThisColumn(const MatrixType& U,
-	                                    const VectorQnType& qns,
-	                                    SizeType col)
+	static QnType
+	computeQforThisColumn(const MatrixType& U, const VectorQnType& qns, SizeType col)
 	{
 		const SizeType nrows = U.rows();
 		assert(nrows == qns.size());
@@ -727,13 +702,11 @@ private:
 	}
 
 	template <typename IoInputter>
-	void loadInternal(IoInputter& io,
-	                  PsimagLite::String prefix,
-	                  bool minimizeRead,
-	                  typename PsimagLite::EnableIf<
-	                      PsimagLite::IsInputLike<IoInputter>::True,
-	                      int>::Type
-	                  = 0)
+	void loadInternal(
+	    IoInputter& io,
+	    PsimagLite::String prefix,
+	    bool minimizeRead,
+	    typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		useSu2Symmetry_ = false;
 		prefix += "/";
@@ -886,12 +859,12 @@ private:
 		    , tasks_(tasks)
 		    , permutationVector_(permutationVector)
 		    , permInverse_(permInverse)
-		{
-		}
+		{ }
 
 		void doTask(SizeType ji, SizeType)
 		{
-			ldiv_t q = std::ldiv(static_cast<long int>(ji), static_cast<long int>(rightSize_));
+			ldiv_t q = std::ldiv(static_cast<long int>(ji),
+			                     static_cast<long int>(rightSize_));
 			const SizeType ileftOffset = basis1OffsetsPs_ + q.quot;
 			const SizeType irightOffset = basis2OffsetsPe_ + q.rem;
 			const SizeType iglobalState = ileftOffset + irightOffset * basisLeftSize_;
@@ -918,28 +891,27 @@ private:
 	/* PSIDOC BasisQuantumNumbers
 	        Symmetries will allow the solver to block the Hamiltonian matrix in blocks,
 using less memory, speeding up
-	        the computation and allowing the code to parallelize matrix blocks related by symmetry.
-	        Let us assume that our particular model has $N_s$ symmetries labeled by $0\le \alpha < N_s$.
-	        Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers
+	        the computation and allowing the code to parallelize matrix blocks related by
+symmetry. Let us assume that our particular model has $N_s$ symmetries labeled by $0\le \alpha <
+N_s$. Therefore, each element $k$  of the basis has $N_s$ associated ``good'' quantum numbers
 	         $\tilde{q}_{k,\alpha}$. These quantum numbers can refer to practically anything,
 	         for example, to number of particles with a given spin or orbital or to the $z$
 component of the spin.
 	        We do not need to know the details to block the matrix. We know, however, that
 these numbers are
-	        finite, and let $Q$ be an integer such that $\tilde{q}_{k,\alpha}< Q$ $\forall k,\alpha$.
-	        We can then combine all these quantum numbers into a single one,
-	        like this: $q_k = \sum_\alpha \tilde{q}_{k,\alpha} Q^\alpha$,
-	        and this mapping is bijective. In essence, we combined all ``good''
-	        quantum numbers into a single one and from now on we
-	        will consider that we have only one Hamiltonian symmetry called the
+	        finite, and let $Q$ be an integer such that $\tilde{q}_{k,\alpha}< Q$ $\forall
+k,\alpha$. We can then combine all these quantum numbers into a single one, like this: $q_k =
+\sum_\alpha \tilde{q}_{k,\alpha} Q^\alpha$, and this mapping is bijective. In essence, we combined
+all ``good'' quantum numbers into a single one and from now on we will consider that we have only
+one Hamiltonian symmetry called the
 	        ``effective'' symmetry, and only one corresponding number $q_k$, the
 	        ``effective'' quantum number. These numbers are stored in the  member
 	        {\it quantumNumbers} of C++ class \cppClass{Basis}.
 	        (Note that if one has 100 sites or less,\footnote{This is probably a
 	        maximum for systems of correlated electrons such as the Hubbard model
 	        or the t-J model.} then the number $Q$ defined above is probably of the
-	        order of hundreds for usual symmetries, making this implementation very practical for
-	        systems of correlated electrons.)
+	        order of hundreds for usual symmetries, making this implementation very practical
+for systems of correlated electrons.)
 	        */
 	VectorQnType qns_;
 	VectorBoolType signs_;
@@ -982,11 +954,9 @@ these numbers are
 
 }; // class Basis
 
-template <typename SparseMatrixType>
-bool Basis<SparseMatrixType>::useSu2Symmetry_ = false;
+template <typename SparseMatrixType> bool Basis<SparseMatrixType>::useSu2Symmetry_ = false;
 
-template <typename SparseMatrixType_>
-struct IsBasisType<Basis<SparseMatrixType_>> {
+template <typename SparseMatrixType_> struct IsBasisType<Basis<SparseMatrixType_>> {
 	enum
 	{
 		True = true

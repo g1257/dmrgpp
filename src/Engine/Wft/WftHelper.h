@@ -22,13 +22,10 @@ public:
 	    : model_(model)
 	    , lrs_(lrs)
 	    , wft_(wft)
-	{
-	}
+	{ }
 
-	void wftSome(VectorVectorWithOffsetType& tvs,
-	             SizeType site,
-	             SizeType begin,
-	             SizeType end) const
+	void
+	wftSome(VectorVectorWithOffsetType& tvs, SizeType site, SizeType begin, SizeType end) const
 	{
 		for (SizeType index = begin; index < end; ++index) {
 			assert(index < tvs.size());
@@ -48,12 +45,10 @@ public:
 		phiNew.populateFromQns(src, lrs_.super());
 
 		// OK, now that we got the partition number right, let's wft:
-		ProgramGlobals::DirectionEnum dir = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM; // FIXME!
+		ProgramGlobals::DirectionEnum dir
+		    = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM; // FIXME!
 		OneSiteSpacesType oneSiteSpaces(site, dir, model_);
-		wft_.setInitialVector(phiNew,
-		                      src,
-		                      lrs_,
-		                      oneSiteSpaces);
+		wft_.setInitialVector(phiNew, src, lrs_, oneSiteSpaces);
 	}
 
 private:

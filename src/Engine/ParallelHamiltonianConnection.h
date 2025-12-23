@@ -6,8 +6,7 @@
 
 namespace Dmrg {
 
-template <typename HamiltonianConnectionType>
-class ParallelHamiltonianConnection {
+template <typename HamiltonianConnectionType> class ParallelHamiltonianConnection {
 
 	typedef typename HamiltonianConnectionType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
@@ -41,17 +40,21 @@ public:
 
 		if (taskNumber == 0) {
 			hc_.modelHelper().hamiltonianLeftProduct(xtemp_[threadNum], y_, aux_);
-			//			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
-			//			        left().hamiltonian().getCRS();
-			//			hc_.kroneckerDumper().push(true, hamiltonian, y_);
+			//			const SparseMatrixType& hamiltonian =
+			// hc_.modelHelper().leftRightSuper().
+			// left().hamiltonian().getCRS();
+			// hc_.kroneckerDumper().push(true,
+			// hamiltonian, y_);
 			return;
 		}
 
 		if (taskNumber == 1) {
 			hc_.modelHelper().hamiltonianRightProduct(xtemp_[threadNum], y_, aux_);
-			//			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
-			//			        right().hamiltonian().getCRS();
-			//		hc_.kroneckerDumper().push(false, hamiltonian, y_);
+			//			const SparseMatrixType& hamiltonian =
+			// hc_.modelHelper().leftRightSuper().
+			// right().hamiltonian().getCRS();
+			// hc_.kroneckerDumper().push(false,
+			// hamiltonian, y_);
 			return;
 		}
 

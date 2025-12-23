@@ -3,9 +3,8 @@
 namespace PsimagLite {
 
 template <>
-void TridiagonalMatrix<double>::diag2(
-    TridiagonalMatrix<double>::VectorRealType& eigs,
-    SizeType nn) const
+void TridiagonalMatrix<double>::diag2(TridiagonalMatrix<double>::VectorRealType& eigs,
+                                      SizeType nn) const
 {
 	char jobz = 'N';
 	int n = nn;
@@ -19,7 +18,17 @@ void TridiagonalMatrix<double>::diag2(
 	TridiagonalMatrix<double>::VectorType e = b_;
 	eigs = a_;
 
-	psimag::LAPACK::dstedc_(&jobz, &n, &(eigs[0]), &(e[1]), &(z[0]), &lz, &(work[0]), &lwork, &(iwork[0]), &liwork, &info);
+	psimag::LAPACK::dstedc_(&jobz,
+	                        &n,
+	                        &(eigs[0]),
+	                        &(e[1]),
+	                        &(z[0]),
+	                        &lz,
+	                        &(work[0]),
+	                        &lwork,
+	                        &(iwork[0]),
+	                        &liwork,
+	                        &info);
 
 	if (info == 0)
 		return;
@@ -28,9 +37,8 @@ void TridiagonalMatrix<double>::diag2(
 }
 
 template <>
-void TridiagonalMatrix<float>::diag2(
-    TridiagonalMatrix<float>::VectorRealType& eigs,
-    SizeType nn) const
+void TridiagonalMatrix<float>::diag2(TridiagonalMatrix<float>::VectorRealType& eigs,
+                                     SizeType nn) const
 {
 	char jobz = 'N';
 	int n = nn;
@@ -44,7 +52,17 @@ void TridiagonalMatrix<float>::diag2(
 	TridiagonalMatrix<float>::VectorType e = b_;
 	eigs = a_;
 
-	psimag::LAPACK::sstedc_(&jobz, &n, &(eigs[0]), &(e[1]), &(z[0]), &lz, &(work[0]), &lwork, &(iwork[0]), &liwork, &info);
+	psimag::LAPACK::sstedc_(&jobz,
+	                        &n,
+	                        &(eigs[0]),
+	                        &(e[1]),
+	                        &(z[0]),
+	                        &lz,
+	                        &(work[0]),
+	                        &lwork,
+	                        &(iwork[0]),
+	                        &liwork,
+	                        &info);
 
 	if (info == 0)
 		return;

@@ -99,9 +99,7 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "ParametersImmm";
@@ -114,15 +112,13 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 		end = reinterpret_cast<const char*>(&minOxygenElectrons);
 		total += mres.memResolv(&potentialV, end - start, str + " potentialV");
 
-		total += mres.memResolv(&minOxygenElectrons,
-		                        sizeof(*this) - total,
-		                        str + " minOxygenElectrons");
+		total += mres.memResolv(
+		    &minOxygenElectrons, sizeof(*this) - total, str + " minOxygenElectrons");
 
 		return total;
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersImmm";
 		io.createGroup(label);
@@ -133,8 +129,7 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const ParametersImmm& parameters)
+	friend std::ostream& operator<<(std::ostream& os, const ParametersImmm& parameters)
 	{
 		os << "hubbardU\n";
 		os << parameters.hubbardU;

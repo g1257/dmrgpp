@@ -92,8 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
-template <typename Word>
-class HilbertSpaceHubbardHolstein {
+template <typename Word> class HilbertSpaceHubbardHolstein {
 
 public:
 
@@ -106,16 +105,10 @@ public:
 	};
 
 	// Get electronic state from combined electron and phonon ket a
-	static Word getF(Word a)
-	{
-		return (a & 3);
-	}
+	static Word getF(Word a) { return (a & 3); }
 
 	// Get phononic state from combined electron and phonon ket a
-	static Word getP(Word a)
-	{
-		return (a >> 2);
-	}
+	static Word getP(Word a) { return (a >> 2); }
 
 	// Create electron with internal dof "sigma" in binary number "a"
 	static void createF(Word& a, SizeType sigma)

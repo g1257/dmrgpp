@@ -100,7 +100,8 @@ to the main dmrg driver are the following.
 	ManyOmegasType manyOmegas(data, precision, omegaParams, application);
 
 	const PsimagLite::String obs = omegaParams.observable();
-	const PsimagLite::String insitu = "<gs|" + obs + "|P1>,<gs|" + obs + "|P2>,<gs|" + obs + "|P3>";
+	const PsimagLite::String insitu
+	    = "<gs|" + obs + "|P1>,<gs|" + obs + "|P2>,<gs|" + obs + "|P3>";
 
 	manyOmegas.run(dryrun, rootname, insitu);
 }

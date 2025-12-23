@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename ContainerType>
-class Permutations {
+template <typename ContainerType> class Permutations {
 	typedef typename ContainerType::value_type FieldType;
 
 public:
@@ -167,8 +166,7 @@ private:
 
 }; // Permutations
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const Permutations<T>& ig)
+template <typename T> std::ostream& operator<<(std::ostream& os, const Permutations<T>& ig)
 {
 	for (SizeType i = 0; i < ig.size(); i++)
 		os << ig[i] << " ";

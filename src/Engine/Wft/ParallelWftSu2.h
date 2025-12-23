@@ -83,15 +83,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename VectorWithOffsetType,
-          typename DmrgWaveStructType,
-          typename LeftRightSuperType>
+template <typename VectorWithOffsetType, typename DmrgWaveStructType, typename LeftRightSuperType>
 class ParallelWftSu2 {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
-	    VectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
@@ -126,14 +123,26 @@ public:
 		transposeConjugate(weT_, we_);
 
 		if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			assert(dmrgWaveStruct_.lrs().right().permutationInverse().size() == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).rows());
-			assert(lrs_.left().permutationInverse().size() / volumeOf(nk) == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
+			assert(
+			    dmrgWaveStruct_.lrs().right().permutationInverse().size()
+			    == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON)
+			           .rows());
+			assert(lrs_.left().permutationInverse().size() / volumeOf(nk)
+			       == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM)
+			              .cols());
 			pack1_ = new PackIndicesType(lrs.left().permutationInverse().size());
-			pack2_ = new PackIndicesType(lrs.left().permutationInverse().size() / volumeOf(nk));
+			pack2_ = new PackIndicesType(lrs.left().permutationInverse().size()
+			                             / volumeOf(nk));
 		} else {
-			assert(dmrgWaveStruct_.lrs().left().permutationInverse().size() == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
-			assert(lrs_.right().permutationInverse().size() / volumeOf(nk) == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).cols());
-			pack1_ = new PackIndicesType(lrs.super().permutationInverse().size() / lrs.right().permutationInverse().size());
+			assert(dmrgWaveStruct_.lrs().left().permutationInverse().size()
+			       == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM)
+			              .rows());
+			assert(
+			    lrs_.right().permutationInverse().size() / volumeOf(nk)
+			    == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON)
+			           .cols());
+			pack1_ = new PackIndicesType(lrs.super().permutationInverse().size()
+			                             / lrs.right().permutationInverse().size());
 			pack2_ = new PackIndicesType(volumeOf(nk));
 		}
 
@@ -176,7 +185,8 @@ public:
 		SizeType start = psiDest_.offset(i0_);
 		psiDest_.fastAccess(i0_, taskNumber) = 0.0;
 		SizeType xx = taskNumber + start;
-		assert(dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM || dir_ == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		assert(dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM
+		       || dir_ == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 
 		if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			SizeType ip = 0;
@@ -186,12 +196,19 @@ public:
 			for (int kI = factorsInvSE_.getRowPtr(xx);
 			     kI < factorsInvSE_.getRowPtr(xx + 1);
 			     kI++) {
-				pack1_->unpack(alpha, jp, static_cast<SizeType>(factorsInvSE_.getCol(kI)));
+				pack1_->unpack(
+				    alpha, jp, static_cast<SizeType>(factorsInvSE_.getCol(kI)));
 				for (int k2I = factorsInvS_.getRowPtr(alpha);
 				     k2I < factorsInvS_.getRowPtr(alpha + 1);
 				     k2I++) {
-					pack2_->unpack(ip, kp, static_cast<SizeType>(factorsInvS_.getCol(k2I)));
-					psiDest_.fastAccess(i0_, taskNumber) += factorsInvSE_.getValue(kI) * factorsInvS_.getValue(k2I) * createAux2b(psiSrc_, ip, kp, jp, wsT_, we_, nk_);
+					pack2_->unpack(
+					    ip,
+					    kp,
+					    static_cast<SizeType>(factorsInvS_.getCol(k2I)));
+					psiDest_.fastAccess(i0_, taskNumber)
+					    += factorsInvSE_.getValue(kI)
+					    * factorsInvS_.getValue(k2I)
+					    * createAux2b(psiSrc_, ip, kp, jp, wsT_, we_, nk_);
 				}
 			}
 		} else {
@@ -202,12 +219,19 @@ public:
 			for (int kI = factorsInvSE_.getRowPtr(xx);
 			     kI < factorsInvSE_.getRowPtr(xx + 1);
 			     kI++) {
-				pack1_->unpack(ip, beta, static_cast<SizeType>(factorsInvSE_.getCol(kI)));
+				pack1_->unpack(
+				    ip, beta, static_cast<SizeType>(factorsInvSE_.getCol(kI)));
 				for (int k2I = factorsInvE_.getRowPtr(beta);
 				     k2I < factorsInvE_.getRowPtr(beta + 1);
 				     k2I++) {
-					pack2_->unpack(kp, jp, static_cast<SizeType>(factorsInvE_.getCol(k2I)));
-					psiDest_.fastAccess(i0_, taskNumber) += factorsInvSE_.getValue(kI) * factorsInvE_.getValue(k2I) * createAux1b(psiSrc_, ip, kp, jp, ws_, weT_, nk_);
+					pack2_->unpack(
+					    kp,
+					    jp,
+					    static_cast<SizeType>(factorsInvE_.getCol(k2I)));
+					psiDest_.fastAccess(i0_, taskNumber)
+					    += factorsInvSE_.getValue(kI)
+					    * factorsInvE_.getValue(k2I)
+					    * createAux1b(psiSrc_, ip, kp, jp, ws_, weT_, nk_);
 				}
 			}
 		}
@@ -249,16 +273,22 @@ private:
 		assert(kpjp < dmrgWaveStruct_.lrs().right().permutationInverse().size());
 		SizeType kpjpx = dmrgWaveStruct_.lrs().right().permutationInverse(kpjp);
 
-		for (int k2I = factorsE.getRowPtr(kpjpx); k2I < factorsE.getRowPtr(kpjpx + 1); k2I++) {
+		for (int k2I = factorsE.getRowPtr(kpjpx); k2I < factorsE.getRowPtr(kpjpx + 1);
+		     k2I++) {
 			SizeType beta = factorsE.getCol(k2I);
 			for (int k = wsT.getRowPtr(ip); k < wsT.getRowPtr(ip + 1); k++) {
 				SizeType alpha = wsT.getCol(k);
-				for (int k2 = we.getRowPtr(beta); k2 < we.getRowPtr(beta + 1); k2++) {
+				for (int k2 = we.getRowPtr(beta); k2 < we.getRowPtr(beta + 1);
+				     k2++) {
 					SizeType j = we.getCol(k2);
 					SizeType r = alpha + j * nalpha;
-					for (int kI = factorsSE.getRowPtr(r); kI < factorsSE.getRowPtr(r + 1); kI++) {
+					for (int kI = factorsSE.getRowPtr(r);
+					     kI < factorsSE.getRowPtr(r + 1);
+					     kI++) {
 						SizeType x = factorsSE.getCol(kI);
-						sum += wsT.getValue(k) * we.getValue(k2) * psiSrc.slowAccess(x) * factorsSE.getValue(kI) * factorsE.getValue(k2I);
+						sum += wsT.getValue(k) * we.getValue(k2)
+						    * psiSrc.slowAccess(x) * factorsSE.getValue(kI)
+						    * factorsE.getValue(k2I);
 					}
 				}
 			}
@@ -277,8 +307,10 @@ private:
 	                              const VectorSizeType& nk) const
 	{
 		SizeType volumeOfNk = volumeOf(nk);
-		SizeType ni = dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols();
-		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size() / volumeOfNk;
+		SizeType ni
+		    = dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols();
+		SizeType nip
+		    = dmrgWaveStruct_.lrs().left().permutationInverse().size() / volumeOfNk;
 
 		const FactorsType* fptrS = dmrgWaveStruct_.lrs().left().getFactors();
 		assert(fptrS);
@@ -291,16 +323,21 @@ private:
 		SparseElementType sum = 0;
 
 		SizeType ipkp = ip + kp * nip;
-		for (int k2I = factorsS.getRowPtr(ipkp); k2I < factorsS.getRowPtr(ipkp + 1); k2I++) {
+		for (int k2I = factorsS.getRowPtr(ipkp); k2I < factorsS.getRowPtr(ipkp + 1);
+		     k2I++) {
 			SizeType alpha = factorsS.getCol(k2I);
 			for (int k = ws.getRowPtr(alpha); k < ws.getRowPtr(alpha + 1); k++) {
 				SizeType i = ws.getCol(k);
 				for (int k2 = weT.getRowPtr(jp); k2 < weT.getRowPtr(jp + 1); k2++) {
 					SizeType j = weT.getCol(k2);
 					SizeType r = i + j * ni;
-					for (int kI = factorsSE.getRowPtr(r); kI < factorsSE.getRowPtr(r + 1); kI++) {
+					for (int kI = factorsSE.getRowPtr(r);
+					     kI < factorsSE.getRowPtr(r + 1);
+					     kI++) {
 						SizeType x = factorsSE.getCol(kI);
-						sum += ws.getValue(k) * weT.getValue(k2) * psiSrc.slowAccess(x) * factorsSE.getValue(kI) * factorsS.getValue(k2I);
+						sum += ws.getValue(k) * weT.getValue(k2)
+						    * psiSrc.slowAccess(x) * factorsSE.getValue(kI)
+						    * factorsS.getValue(k2I);
 					}
 				}
 			}

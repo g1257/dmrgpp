@@ -8,8 +8,7 @@
 
 //! A class to interpolate using akima spline
 namespace PsimagLite {
-template <typename VectorType>
-class AkimaSpline {
+template <typename VectorType> class AkimaSpline {
 
 	typedef typename VectorType::value_type RealType;
 
@@ -24,8 +23,7 @@ public:
 	AkimaSpline(const VectorType& x, const VectorType& s)
 	{
 		if (x.size() != s.size())
-			throw RuntimeError(
-			    "Number of X and Y points must be the same\n");
+			throw RuntimeError("Number of X and Y points must be the same\n");
 		if (x.size() < 3)
 			throw RuntimeError("Number of X too small\n");
 		VectorType sprime;

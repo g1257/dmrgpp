@@ -49,5 +49,6 @@ int main(int argc, char** argv)
 		inNumbers[i] = i;
 
 	Dmrg::NotReallySort notReallySort;
-	notReallySort(outNumber, outQns, offset, inNumbers, qns, false, Dmrg::ProgramGlobals::VERBOSE_YES);
+	notReallySort(
+	    outNumber, outQns, offset, inNumbers, qns, false, Dmrg::ProgramGlobals::VERBOSE_YES);
 }

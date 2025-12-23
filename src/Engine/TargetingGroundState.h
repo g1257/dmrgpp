@@ -131,8 +131,7 @@ public:
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_("TargetingGroundState")
 	    , progress_("TargetingGroundState")
-	{
-	}
+	{ }
 
 	SizeType sites() const { return tstStruct_.sites(); }
 
@@ -164,10 +163,7 @@ public:
 		return 1.0 / sum;
 	}
 
-	SizeType size() const
-	{
-		return 0;
-	}
+	SizeType size() const { return 0; }
 
 	void evolve(const VectorRealType&,
 	            ProgramGlobals::DirectionEnum direction,
@@ -186,8 +182,7 @@ public:
 		this->common().write(io, block, prefix);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io,
-	          PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
 		this->common().readGSandNGSTs(io, prefix, "GroundState");
 	}

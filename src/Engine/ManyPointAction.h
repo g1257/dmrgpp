@@ -10,12 +10,10 @@ public:
 
 	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
 
-	ManyPointAction(bool hasNonTrivialAction,
-	                PsimagLite::String actionString)
+	ManyPointAction(bool hasNonTrivialAction, PsimagLite::String actionString)
 	    : nonTrivial_(hasNonTrivialAction)
 	    , actionString_(actionString)
-	{
-	}
+	{ }
 
 	bool operator()(SizeType s0, SizeType s1, SizeType s2, SizeType s3) const
 	{

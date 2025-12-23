@@ -63,8 +63,7 @@ public:
 			setMatrixValue(rhs, name);
 			break;
 		default:
-			std::cerr << "setRhs not implemented, rhs= " << rhs
-			          << "\n";
+			std::cerr << "setRhs not implemented, rhs= " << rhs << "\n";
 			break;
 		}
 	}
@@ -227,7 +226,8 @@ private:
 		}
 	}
 
-	void appendToVecStr(VectorStringType& dest, const VectorStringType& src, SizeType offset) const
+	void
+	appendToVecStr(VectorStringType& dest, const VectorStringType& src, SizeType offset) const
 	{
 		SizeType n = src.size();
 		assert(offset + n <= dest.size());

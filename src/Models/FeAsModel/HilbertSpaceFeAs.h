@@ -92,8 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
-template <typename Word>
-class HilbertSpaceFeAs {
+template <typename Word> class HilbertSpaceFeAs {
 
 	static SizeType orbitals_;
 
@@ -107,10 +106,7 @@ public:
 		SPIN_DOWN = 1
 	};
 
-	static void setOrbitals(SizeType orbitals)
-	{
-		orbitals_ = orbitals;
-	}
+	static void setOrbitals(SizeType orbitals) { orbitals_ = orbitals; }
 
 	// Get electronic state on site "j" in binary number "a"
 	static Word get(Word const& a, SizeType j)
@@ -236,8 +232,7 @@ public:
 
 }; // class HilbertSpaceFeAs
 
-template <typename Word>
-SizeType HilbertSpaceFeAs<Word>::orbitals_ = 2;
+template <typename Word> SizeType HilbertSpaceFeAs<Word>::orbitals_ = 2;
 } // namespace Dmrg
 
 /*@}*/

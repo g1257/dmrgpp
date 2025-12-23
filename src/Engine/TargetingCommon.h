@@ -99,8 +99,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename LambdaType>
-class LambdaForTests {
+template <typename LambdaType> class LambdaForTests {
 
 public:
 
@@ -114,21 +113,15 @@ public:
 	}
 };
 
-template <>
-class LambdaForTests<int> {
+template <> class LambdaForTests<int> {
 
 public:
 
-	void operator()(const PsimagLite::GetBraOrKet&,
-	                const PsimagLite::GetBraOrKet&,
-	                int*) const
-	{
-	}
+	void operator()(const PsimagLite::GetBraOrKet&, const PsimagLite::GetBraOrKet&, int*) const
+	{ }
 };
 
-template <typename TargetHelperType,
-          typename VectorWithOffsetType_,
-          typename LanczosSolverType_>
+template <typename TargetHelperType, typename VectorWithOffsetType_, typename LanczosSolverType_>
 class TargetingCommon {
 
 public:
@@ -159,9 +152,7 @@ public:
 	typedef typename BasisType::BlockType BlockType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef ApplyOperatorExpression<TargetHelperType,
-	                                VectorWithOffsetType,
-	                                LanczosSolverType>
+	typedef ApplyOperatorExpression<TargetHelperType, VectorWithOffsetType, LanczosSolverType>
 	    ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::VectorSizeType VectorSizeType;
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
@@ -212,15 +203,16 @@ public:
 			if (isDressed)
 				BraketType(checkPoint.model(), meas_[i]);
 
-			OpLabelCategory cocoonExpected = (isDressed) ? OpLabelCategory::DRESSED
-			                                             : OpLabelCategory::BARE;
+			OpLabelCategory cocoonExpected
+			    = (isDressed) ? OpLabelCategory::DRESSED : OpLabelCategory::BARE;
 			if (i == 0) {
 				cocoonType_ = cocoonExpected;
 				continue;
 			}
 
 			if (cocoonType_ != cocoonExpected)
-				err("FATAL: If one label is dressed (bare) then all must be dressed (bare)\n");
+				err("FATAL: If one label is dressed (bare) then all must be "
+				    "dressed (bare)\n");
 		}
 	}
 
@@ -237,7 +229,8 @@ public:
 	           PsimagLite::String prefix) const
 	{
 		if (block.size() != 1)
-			err(PsimagLite::String(__FILE__) + " write() only supports blocks.size=1\n");
+			err(PsimagLite::String(__FILE__)
+			    + " write() only supports blocks.size=1\n");
 
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -264,25 +257,20 @@ public:
 	                PsimagLite::String name) const
 	{
 		SizeType site = block[0];
-		TimeSerializerType ts(currentTimeStep(),
-		                      time(),
-		                      site,
-		                      aoe_,
-		                      name);
+		TimeSerializerType ts(currentTimeStep(), time(), site, aoe_, name);
 		ts.write(io, prefix);
 	}
 
 	void read(IoInputType& io, PsimagLite::String prefix)
 	{
-		const PsimagLite::String label = targetHelper_.model().params().checkpoint.labelForEnergy();
+		const PsimagLite::String label
+		    = targetHelper_.model().params().checkpoint.labelForEnergy();
 		prefix += "/";
 		aoe_.loadEnergy(io, label);
 		aoe_.readPsi(io, prefix);
 	}
 
-	void readGSandNGSTs(IoInputType& io,
-	                    PsimagLite::String prefix,
-	                    PsimagLite::String name)
+	void readGSandNGSTs(IoInputType& io, PsimagLite::String prefix, PsimagLite::String name)
 	{
 		read(io, prefix);
 
@@ -303,7 +291,8 @@ public:
 		const SizeType dstagesOrZero = (checkpoint.mapStages()) ? dstages : 0;
 
 		if (dstagesOrZero > 0 && dstagesOrZero != rstages)
-			err("TargetingCommon::readGSandNGSTs: stages cannot be set from previous\n");
+			err("TargetingCommon::readGSandNGSTs: stages cannot be set from "
+			    "previous\n");
 
 		for (SizeType i = 0; i < dstagesOrZero; ++i)
 			aoe_.setStage(i, stages[i]);
@@ -315,7 +304,8 @@ public:
 		if (tvForPsi >= 0) {
 			SizeType tvForPsiUnsigned = tvForPsi;
 			if (tvForPsiUnsigned >= rtvs)
-				err("TargetingCommon::readGSandNGSTs: sourceTvForPsi >= " + ttos(rtvs) + "\n");
+				err("TargetingCommon::readGSandNGSTs: sourceTvForPsi >= "
+				    + ttos(rtvs) + "\n");
 
 			std::cout << "FIXME TODO WARNING: Need better spec for TvForPsi\n";
 			std::cerr << "FIXME TODO WARNING: Need better spec for TvForPsi\n";
@@ -323,14 +313,16 @@ public:
 			aoe_.setOnlyOnePsi(ts->vector(tvForPsiUnsigned));
 		}
 
-		ApplyOperatorExpressionType& aoeNonConst = const_cast<ApplyOperatorExpressionType&>(aoe_);
+		ApplyOperatorExpressionType& aoeNonConst
+		    = const_cast<ApplyOperatorExpressionType&>(aoe_);
 		for (SizeType i = 0; i < dtvs; ++i) {
 			const int j = checkpoint.mappingTvs(i);
 			if (j < 0)
 				continue;
 			const SizeType jj = j;
 			if (jj >= rtvs) {
-				err("TargetingCommon::readGSandNGSTs: tvs mapping failed " + ttos(j) + " >= " + ttos(rtvs) + "\n");
+				err("TargetingCommon::readGSandNGSTs: tvs mapping failed " + ttos(j)
+				    + " >= " + ttos(rtvs) + "\n");
 			}
 
 			aoeNonConst.targetVectorsNonConst(i) = ts->vector(j);
@@ -353,10 +345,7 @@ public:
 
 	ApplyOperatorExpressionType& aoeNonConst() { return aoe_; }
 
-	RealType time() const
-	{
-		return aoe_.timeVectors().time();
-	}
+	RealType time() const { return aoe_.timeVectors().time(); }
 
 	// START Cocoons
 
@@ -381,16 +370,15 @@ public:
 		BorderEnumType border = ApplyOperatorType::BORDER_NO;
 		if (site == 0 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			border = ApplyOperatorType::BORDER_YES;
-		if (site == numberOfSites - 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		if (site == numberOfSites - 1
+		    && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			border = ApplyOperatorType::BORDER_YES;
 
 		const SizeType expectedSize = targetHelper_.model().hilbertSize(site);
 
 		LambdaForTests<SomeLambdaType> lambdaForTests;
-		MultiPointInSituType multiPointInSitu(aoe_.model(),
-		                                      checkPoint_,
-		                                      targetHelper_.wft(),
-		                                      direction);
+		MultiPointInSituType multiPointInSitu(
+		    aoe_.model(), checkPoint_, targetHelper_.wft(), direction);
 
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
@@ -434,7 +422,8 @@ public:
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
-		if (site == numberOfSites - 2 && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		if (site == numberOfSites - 2
+		    && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			site2 = numberOfSites - 1;
 		if (site2 == numberOfSites)
 			return;
@@ -471,7 +460,9 @@ public:
 			err("rixsCocoon: supports only bare operators\n");
 
 		SizeType numberOfSites = targetHelper_.model().superGeometry().numberOfSites();
-		BorderEnumType border = (site == 0 || site == numberOfSites - 1) ? ApplyOperatorType::BORDER_YES : ApplyOperatorType::BORDER_NO;
+		BorderEnumType border = (site == 0 || site == numberOfSites - 1)
+		    ? ApplyOperatorType::BORDER_YES
+		    : ApplyOperatorType::BORDER_NO;
 
 		const VectorWithOffsetType& v1 = aoe_.targetVectors(index1);
 		const VectorWithOffsetType& v2 = aoe_.targetVectors(index2);
@@ -539,11 +530,11 @@ public:
 			wft.setInitialVector(v, psi, targetHelper_.lrs(), oneSiteSpaces);
 	}
 
-	void computeCorrection(ProgramGlobals::DirectionEnum direction,
-	                       const BlockType& block1)
+	void computeCorrection(ProgramGlobals::DirectionEnum direction, const BlockType& block1)
 	{
 		const VectorWithOffsetType& psi = aoe_.ensureOnlyOnePsi("computeCorrection");
-		ApplyOperatorExpressionType& aoeNonConst = const_cast<ApplyOperatorExpressionType&>(aoe_);
+		ApplyOperatorExpressionType& aoeNonConst
+		    = const_cast<ApplyOperatorExpressionType&>(aoe_);
 		VectorWithOffsetType& v = aoeNonConst.targetVectorsNonConst(0);
 
 		// operators in the one-site basis:
@@ -552,7 +543,8 @@ public:
 		SizeType site2 = targetHelper_.lrs().left().block()[leftSize - 1];
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
 		VectorQnType q;
-		targetHelper_.model().setOperatorMatrices(creationMatrix, q, std::vector<SizeType>(1, site2));
+		targetHelper_.model().setOperatorMatrices(
+		    creationMatrix, q, std::vector<SizeType>(1, site2));
 
 		typename BasisWithOperatorsType::VectorBoolType signs(q.size());
 		for (SizeType i = 0; i < q.size(); ++i)
@@ -686,7 +678,8 @@ public:
 				if (i != j)
 					continue;
 				for (SizeType k = 0; k < dest.effectiveSize(i); k++)
-					sum += dest.fastAccess(i, k) * PsimagLite::conj(src2.fastAccess(j, k));
+					sum += dest.fastAccess(i, k)
+					    * PsimagLite::conj(src2.fastAccess(j, k));
 			}
 		}
 
@@ -695,8 +688,7 @@ public:
 		return sum;
 	}
 
-	void printNormsAndWeights(const RealType& gsWeight,
-	                          const VectorRealType& weights) const
+	void printNormsAndWeights(const RealType& gsWeight, const VectorRealType& weights) const
 	{
 		if (aoe_.allStages(StageEnumType::DISABLED))
 			return;
@@ -742,10 +734,7 @@ public:
 
 private:
 
-	SizeType currentTimeStep() const
-	{
-		return aoe_.timeVectors().currentTimeStep();
-	}
+	SizeType currentTimeStep() const { return aoe_.timeVectors().currentTimeStep(); }
 
 	void setCurrentTimeStep(SizeType ts)
 	{
@@ -770,10 +759,7 @@ private:
 		return (tvsThis == tvsPrev);
 	}
 
-	void setQuantumNumbers(const VectorWithOffsetType& v)
-	{
-		aoe_.setQuantumNumbers(v);
-	}
+	void setQuantumNumbers(const VectorWithOffsetType& v) { aoe_.setQuantumNumbers(v); }
 
 	void noCocoon(const PsimagLite::String& msg) const
 	{
@@ -801,10 +787,7 @@ private:
 	{
 		SizeType n = meas_.size();
 		for (SizeType i = 0; i < n; ++i) {
-			PsimagLite::String opLabel = braketTheBare(meas_[i],
-			                                           site,
-			                                           label1,
-			                                           label2);
+			PsimagLite::String opLabel = braketTheBare(meas_[i], site, label1, label2);
 
 			BraketType Braket(targetHelper_.model(), opLabel);
 
@@ -845,8 +828,7 @@ private:
 	{
 		if (getBraOrKet.isPvector()) {
 			const SizeType pIndex = getBraOrKet.pIndex();
-			return (pIndex >= aoe_.tvs()) ? nullptr
-			                              : &(aoe_.targetVectors(pIndex));
+			return (pIndex >= aoe_.tvs()) ? nullptr : &(aoe_.targetVectors(pIndex));
 		}
 
 		const SizeType sectorIndex = getBraOrKet.sectorIndex();
@@ -906,13 +888,10 @@ private:
 	mutable VectorType inSitu_;
 }; // class TargetingCommon
 
-template <typename TargetHelperType,
-          typename VectorWithOffsetType,
-          typename LanczosSolverType>
-std::ostream& operator<<(std::ostream& os,
-                         const TargetingCommon<TargetHelperType,
-                                               VectorWithOffsetType,
-                                               LanczosSolverType>& tst)
+template <typename TargetHelperType, typename VectorWithOffsetType, typename LanczosSolverType>
+std::ostream&
+operator<<(std::ostream& os,
+           const TargetingCommon<TargetHelperType, VectorWithOffsetType, LanczosSolverType>& tst)
 {
 	os << "DT=NothingToSeeHereYet\n";
 	return os;

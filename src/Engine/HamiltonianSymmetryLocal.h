@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h"
 
 namespace Dmrg {
-template <typename SparseMatrixType>
-class HamiltonianSymmetryLocal {
+template <typename SparseMatrixType> class HamiltonianSymmetryLocal {
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
@@ -122,15 +121,13 @@ public:
 	}
 
 	template <typename IoInputter>
-	void read(IoInputter&,
-	          PsimagLite::String,
-	          bool,
-	          typename PsimagLite::EnableIf<
-	              PsimagLite::IsInputLike<IoInputter>::True,
-	              int>::Type
-	          = 0)
-	{
-	}
+	void
+	read(IoInputter&,
+	     PsimagLite::String,
+	     bool,
+	     typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type
+	     = 0)
+	{ }
 
 	void write(PsimagLite::IoSelector::Out& io,
 	           PsimagLite::String label,

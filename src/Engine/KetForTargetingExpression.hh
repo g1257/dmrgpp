@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename ComplexOrRealType>
-class KetForTargetingExpression {
+template <typename ComplexOrRealType> class KetForTargetingExpression {
 
 	using PairType = std::pair<SizeType, ComplexOrRealType>;
 	using SumStruct = std::vector<PairType>;
@@ -27,8 +26,7 @@ public:
 	KetForTargetingExpression()
 	    : factor_(1.0)
 	    , kind_(Kind::U)
-	{
-	}
+	{ }
 
 	KetForTargetingExpression(const std::string& str)
 	    : factor_(1.0)
@@ -43,10 +41,7 @@ public:
 		setKind();
 	}
 
-	void setFactor(const ComplexOrRealType& val)
-	{
-		factor_.set(val);
-	}
+	void setFactor(const ComplexOrRealType& val) { factor_.set(val); }
 
 	void multiply(const std::string& op)
 	{
@@ -58,10 +53,7 @@ public:
 		kind_ = Kind::M;
 	}
 
-	void multiply(const ComplexOrRealType& val)
-	{
-		factor_.multiply(val);
-	}
+	void multiply(const ComplexOrRealType& val) { factor_.multiply(val); }
 
 	void sum(const KetForTargetingExpression& other)
 	{
@@ -116,29 +108,17 @@ public:
 		return str_;
 	}
 
-	int pIndex() const
-	{
-		return pIndex_;
-	}
+	int pIndex() const { return pIndex_; }
 
 	Kind kind() const { return kind_; }
 
 	const std::string op() const { return op_; }
 
-	bool isSummable() const
-	{
-		return (kind_ == Kind::P);
-	}
+	bool isSummable() const { return (kind_ == Kind::P); }
 
-	bool canSumBeFinished() const
-	{
-		return (kind_ == Kind::S && pVectors_to_sum_.size() > 1);
-	}
+	bool canSumBeFinished() const { return (kind_ == Kind::S && pVectors_to_sum_.size() > 1); }
 
-	ComplexOrRealType factor() const
-	{
-		return factor_.value();
-	}
+	ComplexOrRealType factor() const { return factor_.value(); }
 
 	SumStruct fillSumStruct() const
 	{

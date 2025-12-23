@@ -129,12 +129,9 @@ public:
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
-	typedef CorrectionVectorFunction<LanczosMatrixType,
-	                                 TargetParamsType>
+	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
 	    CorrectionVectorFunctionType;
-	typedef ParallelTriDiag<ModelType,
-	                        LanczosSolverType,
-	                        VectorWithOffsetType>
+	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
 	    ParallelTriDiagType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
 	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
@@ -215,7 +212,8 @@ public:
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
-		if (site == numberOfSites - 2 && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		if (site == numberOfSites - 2
+		    && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			site2 = numberOfSites - 1;
 		if (site2 == numberOfSites)
 			return;
@@ -244,12 +242,8 @@ private:
 	            SizeType loopNumber)
 	{
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().aoeNonConst().getPhi(&phiNew,
-		                                                     Eg,
-		                                                     direction,
-		                                                     site,
-		                                                     loopNumber,
-		                                                     tstStruct_);
+		SizeType count = this->common().aoeNonConst().getPhi(
+		    &phiNew, Eg, direction, site, loopNumber, tstStruct_);
 
 		if (direction != ProgramGlobals::DirectionEnum::INFINITE) {
 			correctionEnabled_ = true;
@@ -261,9 +255,7 @@ private:
 			return;
 
 		this->tvNonConst(1) = phiNew;
-		skeleton_.calcDynVectors(this->tv(1),
-		                         this->tvNonConst(2),
-		                         this->tvNonConst(3));
+		skeleton_.calcDynVectors(this->tv(1), this->tvNonConst(2), this->tvNonConst(3));
 
 		setWeights();
 

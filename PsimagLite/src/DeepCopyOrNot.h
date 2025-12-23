@@ -13,8 +13,7 @@ public:
 
 	DeepCopyOrNot(bool isDeep)
 	    : isDeep_(isDeep)
-	{
-	}
+	{ }
 
 	~DeepCopyOrNot()
 	{

@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename ModelType>
-class Intent {
+template <typename ModelType> class Intent {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
@@ -27,8 +26,7 @@ public:
 
 	Intent(const ModelType& model)
 	    : model_(model)
-	{
-	}
+	{ }
 
 	void check() const
 	{
@@ -87,8 +85,10 @@ private:
 		if (!hasInSolverOptions("restart"))
 			saySomethingAbout(PsimagLite::String("restart") + "in SolverOptions");
 
-		if (!hasInSolverOptions("CorrectionVectorTargeting") && !hasInSolverOptions("TargetingChebyshev"))
-			saySomethingAbout(PsimagLite::String("CorrectionVectorTargeting or ") + "TargetingChebyshev in SolverOptions");
+		if (!hasInSolverOptions("CorrectionVectorTargeting")
+		    && !hasInSolverOptions("TargetingChebyshev"))
+			saySomethingAbout(PsimagLite::String("CorrectionVectorTargeting or ")
+			                  + "TargetingChebyshev in SolverOptions");
 
 		if (!hasInSolverOptions("minimizeDisk"))
 			suggest("minimizeDisk in SolverOptions");
@@ -118,7 +118,8 @@ private:
 		const SizeType finiteLoops = model_.params().finiteLoop.size();
 
 		if (finiteLoops < tsploops.size() + 2)
-			saySomethingAbout("Expected finite loops equal or bigger than tsploops + 2");
+			saySomethingAbout(
+			    "Expected finite loops equal or bigger than tsploops + 2");
 	}
 
 	void examineSite(SizeType site) const
@@ -208,7 +209,8 @@ private:
 		if (x == y)
 			return;
 
-		saySomethingAbout("DynamicDmrgType should be " + ttos(x) + ", but " + ttos(y) + " found instead");
+		saySomethingAbout("DynamicDmrgType should be " + ttos(x) + ", but " + ttos(y)
+		                  + " found instead");
 	}
 
 	void operatorShouldBe(PsimagLite::String x) const
@@ -224,7 +226,8 @@ private:
 		if (x == y)
 			return;
 
-		saySomethingAbout("OperatorExpression should be " + x + ", but " + y + " found instead");
+		saySomethingAbout("OperatorExpression should be " + x + ", but " + y
+		                  + " found instead");
 	}
 
 	const ModelType& model_;

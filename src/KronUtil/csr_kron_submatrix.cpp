@@ -1,18 +1,17 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void csr_kron_submatrix(
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
+void csr_kron_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
+                        const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
 
-    const int nrindex,
-    const int ncindex,
-    const int max_nnz,
-    const PsimagLite::Vector<int>::Type& rindex,
-    const PsimagLite::Vector<int>::Type& cindex,
+                        const int nrindex,
+                        const int ncindex,
+                        const int max_nnz,
+                        const PsimagLite::Vector<int>::Type& rindex,
+                        const PsimagLite::Vector<int>::Type& cindex,
 
-    PsimagLite::CrsMatrix<ComplexOrRealType>& h)
+                        PsimagLite::CrsMatrix<ComplexOrRealType>& h)
 {
 	/*
 	 * -------------------------------------------------

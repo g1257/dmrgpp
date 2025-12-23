@@ -141,9 +141,10 @@ public:
 	    , progress_("WaveFunctionTransf")
 	    , filenameIn_(params.checkpoint.filename())
 	    , filenameOut_(params.filename)
-	    , waveStructCombined_(params.options.isSet("wftstacksondisk"),
-	                          params.filename,
-	                          { params.options.isSet("observe"), params.options.isSet("noSaveOperators") })
+	    , waveStructCombined_(
+	          params.options.isSet("wftstacksondisk"),
+	          params.filename,
+	          { params.options.isSet("observe"), params.options.isSet("noSaveOperators") })
 	    , wftImpl_(0)
 	    , rng_(3433117)
 	    , noLoad_(false)
@@ -161,7 +162,8 @@ public:
 				read();
 		} else {
 			if (params.options.isSet("noloadwft")) {
-				PsimagLite::String str("Error: noloadwft needs restart or checkpoint\n");
+				PsimagLite::String str(
+				    "Error: noloadwft needs restart or checkpoint\n");
 				throw PsimagLite::RuntimeError(str.c_str());
 			}
 		}
@@ -212,9 +214,8 @@ public:
 		if (!isEnabled_ || !allow)
 			return;
 
-		waveStructCombined_.beforeWft(wftOptions_.dir,
-		                              wftOptions_.twoSiteDmrg,
-		                              wftOptions_.bounce);
+		waveStructCombined_.beforeWft(
+		    wftOptions_.dir, wftOptions_.twoSiteDmrg, wftOptions_.bounce);
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Window open, ready to transform vectors";
@@ -251,7 +252,8 @@ public:
 			RealType x = norm(src);
 			bool b = (x < eps);
 			if (b) {
-				err(std::string("An important vector has norm=") + ttos(x) + " which is too small\n");
+				err(std::string("An important vector has norm=") + ttos(x)
+				    + " which is too small\n");
 			}
 
 			createVector(dest, src, lrs, oneSiteSpaces);
@@ -385,16 +387,15 @@ public:
 		waveStructCombined_.write(ioMain, label + "/WaveStructCombined");
 	}
 
-	const BlockDiagonalMatrixType& multiPointGetTransform(SizeType ind,
-	                                                      ProgramGlobals::DirectionEnum dir) const
+	const BlockDiagonalMatrixType&
+	multiPointGetTransform(SizeType ind, ProgramGlobals::DirectionEnum dir) const
 	{
 		return waveStructCombined_.multiPointGetTransform(ind, dir);
 	}
 
 private:
 
-	void writePartial(PsimagLite::IoSelector::Out& ioMain,
-	                  PsimagLite::String prefix) const
+	void writePartial(PsimagLite::IoSelector::Out& ioMain, PsimagLite::String prefix) const
 	{
 		assert(isEnabled_);
 		assert(save_);
@@ -407,7 +408,8 @@ private:
 	void read()
 	{
 		if (!isEnabled_)
-			throw PsimagLite::RuntimeError("WFT::read(...) called but wft is disabled\n");
+			throw PsimagLite::RuntimeError(
+			    "WFT::read(...) called but wft is disabled\n");
 
 		PsimagLite::IoSelector::In ioMain(filenameIn_);
 		PsimagLite::String label = "Wft";
@@ -422,10 +424,7 @@ private:
 		value = std::complex<RealType>(rng_() - 0.5, rng_() - 0.5);
 	}
 
-	void myRandomT(RealType& value) const
-	{
-		value = rng_() - 0.5;
-	}
+	void myRandomT(RealType& value) const { value = rng_() - 0.5; }
 
 	void afterWft(const LeftRightSuperType& lrs)
 	{
@@ -491,9 +490,7 @@ private:
 	{
 		assert(numberOfSites > 0);
 		for (SizeType i = 1; i < numberOfSites - 1; i++) {
-			bool seen = (std::find(sitesSeen_.begin(),
-			                       sitesSeen_.end(),
-			                       i)
+			bool seen = (std::find(sitesSeen_.begin(), sitesSeen_.end(), i)
 			             != sitesSeen_.end());
 			if (!seen)
 				return false;

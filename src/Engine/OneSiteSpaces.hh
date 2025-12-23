@@ -4,16 +4,17 @@
 
 namespace Dmrg {
 
-template <typename ModelType>
-class OneSiteSpaces {
+template <typename ModelType> class OneSiteSpaces {
 
 public:
 
 	OneSiteSpaces(SizeType site, ProgramGlobals::DirectionEnum dir, const ModelType& model)
 	    : dir_(dir)
 	{
-		int siteAux = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM || dir == ProgramGlobals::DirectionEnum::INFINITE) ? site + 1
-		                                                                                                                      : site - 1;
+		int siteAux = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM
+		               || dir == ProgramGlobals::DirectionEnum::INFINITE)
+		    ? site + 1
+		    : site - 1;
 		assert(siteAux >= 0);
 		mainHilbert_ = model.hilbertSize(site);
 		auxHilbert_ = model.hilbertSize(siteAux);

@@ -38,12 +38,9 @@ public:
 	    : BaseType(superGeometry)
 	    , smaxOrEmin_(0)
 	    , newSite_(0)
-	{
-	}
+	{ }
 
-	void setToProduct(SizeType smaxOrEmin,
-	                  SizeType newSite,
-	                  ProgramGlobals::DirectionEnum dir)
+	void setToProduct(SizeType smaxOrEmin, SizeType newSite, ProgramGlobals::DirectionEnum dir)
 	{
 		smaxOrEmin_ = smaxOrEmin;
 		newSite_ = newSite;
@@ -75,14 +72,18 @@ public:
 
 		if (smaxOrEmin_ + 2 == nsites) {
 			// (n - 4, n - 3, n - 2) x (n - 1)
-			MetaOpForConnection left { NON_LOCAL, encodeNonLocalSys(nsites - 4, 3), 'N' };
+			MetaOpForConnection left { NON_LOCAL,
+				                   encodeNonLocalSys(nsites - 4, 3),
+				                   'N' };
 			MetaOpForConnection right { static_cast<int>(hItems[3]), 0, 'N' };
 			return PairMetaOpForConnection(left, right);
 		}
 
 		if (smaxOrEmin_ & 1) {
 			// (s - 1, s) x (s + 1, s + 2)
-			MetaOpForConnection left { NON_LOCAL, encodeNonLocalSys(smaxOrEmin_ - 1, 2), 'N' };
+			MetaOpForConnection left { NON_LOCAL,
+				                   encodeNonLocalSys(smaxOrEmin_ - 1, 2),
+				                   'N' };
 			SizeType start = rightBlockSize + smaxOrEmin_ - 2;
 			MetaOpForConnection right { NON_LOCAL, encodeNonLocalEnv(start, 2), 'N' };
 			return PairMetaOpForConnection(left, right);

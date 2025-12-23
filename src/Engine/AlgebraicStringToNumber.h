@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename FieldType>
-class AlgebraicStringToNumber {
+template <typename FieldType> class AlgebraicStringToNumber {
 
 	class LoopLengthSpec {
 
@@ -63,8 +62,7 @@ public:
 	AlgebraicStringToNumber(PsimagLite::String msg, SizeType numberOfSites)
 	    : msg_(msg)
 	    , numberOfSites_(numberOfSites)
-	{
-	}
+	{ }
 
 	int procLength(PsimagLite::String val)
 	{

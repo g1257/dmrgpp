@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename FieldType>
-class ClebschGordanCached {
+template <typename FieldType> class ClebschGordanCached {
 	typedef ClebschGordan<FieldType> ClebschGordanType;
 	typedef typename ClebschGordanType::PairType PairType;
 
@@ -206,8 +205,7 @@ private:
 	ClebschGordanType cgObject_;
 }; // class ClebschGordanCached
 
-template <typename FieldType>
-SizeType ClebschGordanCached<FieldType>::copies_ = 0;
+template <typename FieldType> SizeType ClebschGordanCached<FieldType>::copies_ = 0;
 
 } // namespace Dmrg
 /*@}*/

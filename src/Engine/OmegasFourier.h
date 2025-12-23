@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename ComplexOrRealType, typename Readable>
-class OmegasFourier {
+template <typename ComplexOrRealType, typename Readable> class OmegasFourier {
 
 	class OmegasGeometry {
 
@@ -17,24 +16,16 @@ class OmegasFourier {
 		{
 			try {
 				io.readline(name_, "GeometryName=");
-			} catch (std::exception&) {
-			}
+			} catch (std::exception&) { }
 
 			try {
 				io.readline(subname_, "GeometrySubname=");
-			} catch (std::exception&) {
-			}
+			} catch (std::exception&) { }
 		}
 
-		PsimagLite::String name() const
-		{
-			return name_;
-		}
+		PsimagLite::String name() const { return name_; }
 
-		PsimagLite::String subname() const
-		{
-			return subname_;
-		}
+		PsimagLite::String subname() const { return subname_; }
 
 	private:
 
@@ -121,8 +112,8 @@ public:
 
 			const PsimagLite::String honey = "HoneyComb";
 			if (subname.find(honey) == 0) {
-				PsimagLite::String type = subname.substr(honey.length(),
-				                                         subname.size() - honey.length());
+				PsimagLite::String type = subname.substr(
+				    honey.length(), subname.size() - honey.length());
 				return fourierHoneycomb(values1, values2, type);
 			}
 		}
@@ -146,7 +137,9 @@ private:
 		if (!isPeriodicX_) {
 			bool b = (centralSite_ == nOverTwo);
 			if (!b && (centralSite_ != nOverTwo - 1)) {
-				err("Chain of " + ttos(numberOfSites_) + "sites, but central site is " + ttos(centralSite_) + ", makes no sense!?\n");
+				err("Chain of " + ttos(numberOfSites_)
+				    + "sites, but central site is " + ttos(centralSite_)
+				    + ", makes no sense!?\n");
 			}
 		}
 

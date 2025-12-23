@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename ComplexOrRealType>
-class OneLink {
+template <typename ComplexOrRealType> class OneLink {
 
 public:
 
@@ -31,8 +30,7 @@ public:
 	    , angularFactor(angularFactor_)
 	    , category(category_)
 	    , modifier(vModifier_)
-	{
-	}
+	{ }
 
 	OneLink(VectorSizeType indices_,
 	        VectorSizeType orbs_,

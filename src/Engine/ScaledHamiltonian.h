@@ -10,8 +10,7 @@ namespace Dmrg {
 // c = oneovera = (2.0-epsilon)/Wstar
 // d = -oneovera*b = (2.0-epsilon)*(E0_+Wstar*0.5)/Wstar
 // FIXME: TODO: Constructor should only take c and d not tstruct and E0
-template <typename MatrixLanczosType, typename TargetParamsType>
-class ScaledHamiltonian {
+template <typename MatrixLanczosType, typename TargetParamsType> class ScaledHamiltonian {
 
 public:
 

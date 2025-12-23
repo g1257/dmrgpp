@@ -5,11 +5,7 @@
 using RealType = double;
 using SizeType = unsigned int;
 
-RealType calcMu(SizeType site,
-                SizeType n,
-                SizeType N1,
-                RealType tau,
-                RealType mu)
+RealType calcMu(SizeType site, SizeType n, SizeType N1, RealType tau, RealType mu)
 {
 	//  (nm is the number of steps to increase the onsite
 	//   chemical potential at site i)
@@ -25,8 +21,7 @@ RealType calcMu(SizeType site,
 
 			std::stringstream msg;
 			msg << "FermionSpinless::calcMu(): nm=0 "
-			    << "site=" << site << " n=" << n
-			    << " tau=" << tau << " mu=" << mu
+			    << "site=" << site << " n=" << n << " tau=" << tau << " mu=" << mu
 			    << " rm=" << rm << "\n";
 			std::cout << msg.str();
 		}

@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename PthreadFunctionHolderType,
-          typename LoadBalancerType = LoadBalancerDefault>
+template <typename PthreadFunctionHolderType, typename LoadBalancerType = LoadBalancerDefault>
 class NoPthreadsNg {
 
 public:
@@ -94,8 +93,7 @@ public:
 	NoPthreadsNg(const CodeSectionParams& cs)
 	{
 		if (cs.npthreads != 1)
-			throw PsimagLite::RuntimeError(
-			    "NoPthreadsNg: ctor with threads != 1\n");
+			throw PsimagLite::RuntimeError("NoPthreadsNg: ctor with threads != 1\n");
 	}
 
 	bool affinities() const { return false; }
@@ -113,8 +111,7 @@ public:
 	}
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
-	void loopCreate(PthreadFunctionHolderType& pfh,
-	                const VectorSizeType& weights)
+	void loopCreate(PthreadFunctionHolderType& pfh, const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights, 1);
 		loopCreate(pfh, *loadBalancer);
@@ -123,12 +120,10 @@ public:
 	}
 
 	// balancer (includes weights)
-	void loopCreate(PthreadFunctionHolderType& pfh,
-	                const LoadBalancerType&)
+	void loopCreate(PthreadFunctionHolderType& pfh, const LoadBalancerType&)
 	{
 		SizeType ntasks = pfh.tasks();
-		for (SizeType taskNumber = 0; taskNumber < ntasks;
-		     ++taskNumber) {
+		for (SizeType taskNumber = 0; taskNumber < ntasks; ++taskNumber) {
 			pfh.doTask(taskNumber, 0);
 		}
 	}

@@ -103,9 +103,8 @@ template void csr_submatrix<RealType>(const PsimagLite::CrsMatrix<RealType>& a,
                                       const PsimagLite::Vector<int>::Type& cindex,
                                       PsimagLite::CrsMatrix<RealType>& b);
 
-template void csr_eye<RealType>(const int nrow_B,
-                                const int ncol_B,
-                                PsimagLite::CrsMatrix<RealType>& b);
+template void
+csr_eye<RealType>(const int nrow_B, const int ncol_B, PsimagLite::CrsMatrix<RealType>& b);
 
 template void csr_kron_submatrix<RealType>(const PsimagLite::CrsMatrix<RealType>& a,
                                            const PsimagLite::CrsMatrix<RealType>& b,
@@ -191,14 +190,11 @@ template void den_csr_kron_mult_method<RealType>(const int imethod,
                                                  SizeType offsetX,
                                                  PsimagLite::GemmR<RealType>&);
 
-template void den_zeros<RealType>(const int nrow_A,
-                                  const int ncol_A,
-                                  PsimagLite::Matrix<RealType>& a_);
+template void
+den_zeros<RealType>(const int nrow_A, const int ncol_A, PsimagLite::Matrix<RealType>& a_);
 
-template void den_transpose<RealType>(const int nrow_A,
-                                      const int ncol_A,
-                                      const RealType a_[],
-                                      RealType at_[]);
+template void
+den_transpose<RealType>(const int nrow_A, const int ncol_A, const RealType a_[], RealType at_[]);
 
 template void den_gen_matrix<RealType>(const int nrow_A,
                                        const int ncol_A,
@@ -266,16 +262,15 @@ template void den_kron_form<RealType>(const int nrow_A,
                                       const PsimagLite::Matrix<RealType>& b_,
                                       PsimagLite::Matrix<RealType>& c_);
 
-template void den_kron_form_general<RealType>(
-    const char transA,
-    const char transB,
-    const int nrow_A,
-    const int ncol_A,
-    const PsimagLite::Matrix<RealType>& a_,
-    const int nrow_B,
-    const int ncol_B,
-    const PsimagLite::Matrix<RealType>& b_,
-    PsimagLite::Matrix<RealType>& c_);
+template void den_kron_form_general<RealType>(const char transA,
+                                              const char transB,
+                                              const int nrow_A,
+                                              const int ncol_A,
+                                              const PsimagLite::Matrix<RealType>& a_,
+                                              const int nrow_B,
+                                              const int ncol_B,
+                                              const PsimagLite::Matrix<RealType>& b_,
+                                              PsimagLite::Matrix<RealType>& c_);
 
 template void den_submatrix<RealType>(const int nrow_A,
                                       const int ncol_A,
@@ -286,6 +281,5 @@ template void den_submatrix<RealType>(const int nrow_A,
                                       const PsimagLite::Vector<int>::Type& cindex,
                                       PsimagLite::Matrix<RealType>& c_);
 
-template void den_eye<RealType>(const int nrow_A,
-                                const int ncol_A,
-                                PsimagLite::Matrix<RealType>& c_);
+template void
+den_eye<RealType>(const int nrow_A, const int ncol_A, PsimagLite::Matrix<RealType>& c_);

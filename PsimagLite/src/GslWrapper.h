@@ -120,38 +120,64 @@ public:
 		return *fx;
 	}
 
-	gsl_integration_workspace*
-	gsl_integration_workspace_alloc(SizeType) const
+	gsl_integration_workspace* gsl_integration_workspace_alloc(SizeType) const
 	{
 		thereSnoGsl();
 		int* x = new int;
 		return x;
 	}
 
-	void gsl_integration_workspace_free(gsl_integration_workspace*) const
-	{
-		thereSnoGsl();
-	}
+	void gsl_integration_workspace_free(gsl_integration_workspace*) const { thereSnoGsl(); }
 
-	int gsl_integration_qag(const gsl_function*, double, double, double, double, size_t, int, gsl_integration_workspace*, double*, double*) const
-	{
-		thereSnoGsl();
-		return 0;
-	}
-
-	int gsl_integration_qagiu(gsl_function*, double, double, double, size_t, gsl_integration_workspace*, double*, double*) const
-	{
-		thereSnoGsl();
-		return 0;
-	}
-
-	int gsl_integration_qagp(const gsl_function*, double*, SizeType, double, double, SizeType, gsl_integration_workspace*, double*, double*) const
+	int gsl_integration_qag(const gsl_function*,
+	                        double,
+	                        double,
+	                        double,
+	                        double,
+	                        size_t,
+	                        int,
+	                        gsl_integration_workspace*,
+	                        double*,
+	                        double*) const
 	{
 		thereSnoGsl();
 		return 0;
 	}
 
-	int gsl_integration_qagi(gsl_function*, double, double, size_t, gsl_integration_workspace*, double*, double*) const
+	int gsl_integration_qagiu(gsl_function*,
+	                          double,
+	                          double,
+	                          double,
+	                          size_t,
+	                          gsl_integration_workspace*,
+	                          double*,
+	                          double*) const
+	{
+		thereSnoGsl();
+		return 0;
+	}
+
+	int gsl_integration_qagp(const gsl_function*,
+	                         double*,
+	                         SizeType,
+	                         double,
+	                         double,
+	                         SizeType,
+	                         gsl_integration_workspace*,
+	                         double*,
+	                         double*) const
+	{
+		thereSnoGsl();
+		return 0;
+	}
+
+	int gsl_integration_qagi(gsl_function*,
+	                         double,
+	                         double,
+	                         size_t,
+	                         gsl_integration_workspace*,
+	                         double*,
+	                         double*) const
 	{
 		thereSnoGsl();
 		return 0;
@@ -173,10 +199,7 @@ public:
 
 private:
 
-	void thereSnoGsl() const
-	{
-		throw RuntimeError("You need to compile with the GSL\n");
-	}
+	void thereSnoGsl() const { throw RuntimeError("You need to compile with the GSL\n"); }
 
 }; // class GslWrapper
 
@@ -191,18 +214,15 @@ public:
 
 	void printError(int status) const
 	{
-		std::cerr << "GslWrapper: error: " << gsl_strerror(status)
-		          << "\n";
+		std::cerr << "GslWrapper: error: " << gsl_strerror(status) << "\n";
 	}
 
-	gsl_error_handler_t*
-	gsl_set_error_handler(gsl_error_handler_t* new_handler) const
+	gsl_error_handler_t* gsl_set_error_handler(gsl_error_handler_t* new_handler) const
 	{
 		return ::gsl_set_error_handler(new_handler);
 	}
 
-	gsl_integration_workspace*
-	gsl_integration_workspace_alloc(SizeType n) const
+	gsl_integration_workspace* gsl_integration_workspace_alloc(SizeType n) const
 	{
 		return ::gsl_integration_workspace_alloc(n);
 	}
@@ -212,35 +232,66 @@ public:
 		return ::gsl_integration_workspace_free(w);
 	}
 
-	int gsl_integration_qagi(gsl_function* f, double epsabs, double epsrel, size_t limit, gsl_integration_workspace* workspace, double* result, double* abserr) const
+	int gsl_integration_qagi(gsl_function* f,
+	                         double epsabs,
+	                         double epsrel,
+	                         size_t limit,
+	                         gsl_integration_workspace* workspace,
+	                         double* result,
+	                         double* abserr) const
 	{
 		return ::gsl_integration_qagi(f, epsabs, epsrel, limit, workspace, result, abserr);
 	}
 
-	int gsl_integration_qagiu(gsl_function* f, double a, double epsabs, double epsrel, size_t limit, gsl_integration_workspace* workspace, double* result, double* abserr) const
+	int gsl_integration_qagiu(gsl_function* f,
+	                          double a,
+	                          double epsabs,
+	                          double epsrel,
+	                          size_t limit,
+	                          gsl_integration_workspace* workspace,
+	                          double* result,
+	                          double* abserr) const
 	{
-		return ::gsl_integration_qagiu(f, a, epsabs, epsrel, limit, workspace, result, abserr);
+		return ::gsl_integration_qagiu(
+		    f, a, epsabs, epsrel, limit, workspace, result, abserr);
 	}
 
-	int gsl_integration_qagp(const gsl_function* f, double* pts, SizeType npts, double epsabs, double epsrel, SizeType limit, gsl_integration_workspace* workspace, double* result, double* abserr) const
+	int gsl_integration_qagp(const gsl_function* f,
+	                         double* pts,
+	                         SizeType npts,
+	                         double epsabs,
+	                         double epsrel,
+	                         SizeType limit,
+	                         gsl_integration_workspace* workspace,
+	                         double* result,
+	                         double* abserr) const
 	{
-		return ::gsl_integration_qagp(f, pts, npts, epsabs, epsrel, limit, workspace, result, abserr);
+		return ::gsl_integration_qagp(
+		    f, pts, npts, epsabs, epsrel, limit, workspace, result, abserr);
 	}
 
-	int gsl_integration_qag(const gsl_function* f, double a, double b, double epsabs, double epsrel, size_t limit, int key, gsl_integration_workspace* workspace, double* result, double* abserr) const
+	int gsl_integration_qag(const gsl_function* f,
+	                        double a,
+	                        double b,
+	                        double epsabs,
+	                        double epsrel,
+	                        size_t limit,
+	                        int key,
+	                        gsl_integration_workspace* workspace,
+	                        double* result,
+	                        double* abserr) const
 	{
-		return ::gsl_integration_qag(f, a, b, epsabs, epsrel, limit, key, workspace, result, abserr);
+		return ::gsl_integration_qag(
+		    f, a, b, epsabs, epsrel, limit, key, workspace, result, abserr);
 	}
 
-	int gsl_sf_lngamma_complex_e(double zr, double zi, gsl_sf_result* lnr, gsl_sf_result* arg) const
+	int
+	gsl_sf_lngamma_complex_e(double zr, double zi, gsl_sf_result* lnr, gsl_sf_result* arg) const
 	{
 		return ::gsl_sf_lngamma_complex_e(zr, zi, lnr, arg);
 	}
 
-	int gsl_sf_Ci_e(double x, gsl_sf_result* result) const
-	{
-		return ::gsl_sf_Ci_e(x, result);
-	}
+	int gsl_sf_Ci_e(double x, gsl_sf_result* result) const { return ::gsl_sf_Ci_e(x, result); }
 
 }; // class GslWrapper
 

@@ -58,7 +58,8 @@ public:
 		MyRealType* bptr = &(b_[ind]->operator()(0, 0));
 		MyRealType* cptr = &(c_[ind]->operator()(0, 0));
 
-		psimag::BLAS::GEMM('N', 'N',
+		psimag::BLAS::GEMM('N',
+		                   'N',
 		                   mm, // rows of op(A)
 		                   nn, // columns of op(B)
 		                   kk, // columns of op(A)

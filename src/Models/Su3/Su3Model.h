@@ -90,8 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelBaseType>
-class Su3Model : public ModelBaseType {
+template <typename ModelBaseType> class Su3Model : public ModelBaseType {
 
 public:
 
@@ -134,9 +133,7 @@ public:
 	Su3Model(const SolverParamsType& solverParams,
 	         InputValidatorType& io,
 	         const SuperGeometryType& geometry)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , superGeometry_(geometry)
 	    , modelParameters_(io)
 	    , su3Rep_(nullptr)
@@ -144,7 +141,8 @@ public:
 		if (modelParameters_.p == 1) {
 			su3Rep_ = new Su3RepresentationP1Type();
 		} else {
-			err("Implementation for p = " + ttos(modelParameters_.p) + " has not been implemented\n");
+			err("Implementation for p = " + ttos(modelParameters_.p)
+			    + " has not been implemented\n");
 		}
 	}
 
@@ -320,8 +318,7 @@ protected:
 	void fillModelLinksReal()
 	{
 		ModelTermType& jOnepm = ModelBaseType::createTerm("jOne_pm");
-		auto multiplyByZeroPointFive = [](ComplexOrRealType& value)
-		{ value *= 0.5; };
+		auto multiplyByZeroPointFive = [](ComplexOrRealType& value) { value *= 0.5; };
 
 		for (SizeType a = 0; a < 3; ++a) {
 			OpForLinkType aOpForLink("Tplus" + ttos(a + 1));
@@ -341,9 +338,7 @@ private:
 
 	// \sum_i T3(i) and \sum_i T8(i) are conserved separately
 	// We delegate to the representation the actual values and computation
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int n) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, int n) const
 	{
 		typedef std::pair<SizeType, SizeType> PairType;
 

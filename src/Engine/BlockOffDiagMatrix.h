@@ -6,8 +6,7 @@
 
 namespace Dmrg {
 
-template <typename MatrixBlockType>
-class BlockOffDiagMatrix {
+template <typename MatrixBlockType> class BlockOffDiagMatrix {
 
 	typedef typename MatrixBlockType::value_type ComplexOrRealType;
 	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
@@ -54,8 +53,7 @@ public:
 		}
 	}
 
-	BlockOffDiagMatrix(const SparseMatrixType& sparse,
-	                   const VectorSizeType& partitions)
+	BlockOffDiagMatrix(const SparseMatrixType& sparse, const VectorSizeType& partitions)
 	    : offsetRows_(partitions)
 	    , rows_(0)
 	    , cols_(0)
@@ -106,7 +104,8 @@ public:
 				SizeType col = sparse.getCol(k);
 				SizeType jpatch = indexToPart[col];
 				MatrixBlockType& m = *(data_(ipatch, jpatch));
-				m(row - partitions[ipatch], col - partitions[jpatch]) = sparse.getValue(k);
+				m(row - partitions[ipatch], col - partitions[jpatch])
+				    = sparse.getValue(k);
 			}
 		}
 	}
@@ -199,7 +198,8 @@ public:
 					SizeType lindex = i + offsetRows_[ipatch];
 					for (SizeType j = 0; j < cols; ++j) {
 						SizeType rindex = j + offsetCols_[jpatch];
-						SizeType sindex = super.permutationInverse(lindex + rindex * rows_);
+						SizeType sindex = super.permutationInverse(
+						    lindex + rindex * rows_);
 						if (sindex < start || sindex >= end)
 							continue;
 						sindex -= start;
@@ -301,9 +301,7 @@ public:
 		sparse.checkValidity();
 	}
 
-	void transform(const BlockDiagonalMatrixType& f,
-	               SizeType nb,
-	               SizeType nthreadsInner)
+	void transform(const BlockDiagonalMatrixType& f, SizeType nb, SizeType nthreadsInner)
 	{
 		if (offsetCols_.size() != 0)
 			err("BlockOffDiagMatrix::transform() only for square matrix\n");
@@ -371,15 +369,9 @@ public:
 		}
 	}
 
-	SizeType rows() const
-	{
-		return rows_;
-	}
+	SizeType rows() const { return rows_; }
 
-	SizeType cols() const
-	{
-		return cols_;
-	}
+	SizeType cols() const { return cols_; }
 
 	const VectorSizeType& offsets(bool option) const
 	{
@@ -424,15 +416,11 @@ public:
 		return (*this) *= (1.0 / value);
 	}
 
-	friend RealType norm(const BlockOffDiagMatrix& m)
-	{
-		return sqrt(m.norm2());
-	}
+	friend RealType norm(const BlockOffDiagMatrix& m) { return sqrt(m.norm2()); }
 
 private:
 
-	static void fillIndexToPart(VectorSizeType& indexToPart,
-	                            const VectorSizeType& partitions)
+	static void fillIndexToPart(VectorSizeType& indexToPart, const VectorSizeType& partitions)
 	{
 		SizeType n = partitions.size();
 		assert(n > 0);
@@ -463,8 +451,7 @@ private:
 	static SizeType limitWarn_;
 };
 
-template <typename T1>
-SizeType BlockOffDiagMatrix<T1>::limitWarn_ = 0;
+template <typename T1> SizeType BlockOffDiagMatrix<T1>::limitWarn_ = 0;
 
 }
 #endif // BLOCKOFFDIAGMATRIX_H

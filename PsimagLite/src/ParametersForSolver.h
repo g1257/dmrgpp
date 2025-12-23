@@ -90,8 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename RealType_>
-struct ParametersForSolver {
+template <typename RealType_> struct ParametersForSolver {
 
 	typedef RealType_ RealType;
 
@@ -111,8 +110,7 @@ struct ParametersForSolver {
 	    , weight(0)
 	    , isign(0)
 	    , lotaMemory(false)
-	{
-	}
+	{ }
 
 	template <typename IoInputType>
 	ParametersForSolver(IoInputType& io, String prefix, int ind = -1)
@@ -170,8 +168,7 @@ struct ParametersForSolver {
 		try {
 			io.readline(t, prefix + postfix + "=");
 			return;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	template <typename T, typename IoInputType>
@@ -181,19 +178,16 @@ struct ParametersForSolver {
 		try {
 			io.readline(t, prefix + ttos(ind) + postfix + "=");
 			return;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		// if prefix + jnd + postfix exists with jnd < ind --> use the
 		// largest jnd and return
 		for (SizeType i = 0; i < ind; ++i) {
 			const SizeType jnd = ind - i - 1;
 			try {
-				io.readline(t,
-				            prefix + ttos(jnd) + postfix + "=");
+				io.readline(t, prefix + ttos(jnd) + postfix + "=");
 				return;
-			} catch (std::exception&) {
-			}
+			} catch (std::exception&) { }
 		}
 
 		hare(t, prefix, postfix, io);

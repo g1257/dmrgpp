@@ -82,8 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename T>
-class SampleCRSMatrix {
+template <typename T> class SampleCRSMatrix {
 
 public:
 
@@ -92,8 +91,7 @@ public:
 	SampleCRSMatrix(SizeType rank)
 	    : rank_(rank)
 	    , rowptr_(rank + 1)
-	{
-	}
+	{ }
 
 	SampleCRSMatrix(SizeType rank, SizeType seed, SizeType nonZeros, T maxValue)
 	    : rank_(rank)
@@ -117,8 +115,7 @@ public:
 		fillMatrix(rows, cols, vals);
 	}
 
-	template <typename SomeIoInputType>
-	SampleCRSMatrix(SomeIoInputType& io)
+	template <typename SomeIoInputType> SampleCRSMatrix(SomeIoInputType& io)
 	{
 		io >> rank_;
 		readVector(io, rowptr_);
@@ -142,8 +139,7 @@ public:
 
 	SizeType rank() const { return rank_; }
 
-	template <typename SomeIoOutputType>
-	void save(SomeIoOutputType& io) const
+	template <typename SomeIoOutputType> void save(SomeIoOutputType& io) const
 	{
 		io << rank_ << "\n";
 		saveVector(io, rowptr_);
@@ -227,8 +223,7 @@ private:
 
 }; // class SampleCRSMatrix
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const SampleCRSMatrix<T>& m)
+template <typename T> std::ostream& operator<<(std::ostream& os, const SampleCRSMatrix<T>& m)
 {
 	m.save(os);
 	return os;

@@ -96,8 +96,7 @@ extern "C"
 
 namespace PsimagLite {
 
-template <typename FieldType>
-class LinearPrediction {
+template <typename FieldType> class LinearPrediction {
 	typedef Matrix<FieldType> MatrixType;
 
 public:
@@ -108,9 +107,8 @@ public:
 	{
 		SizeType ysize = y.size();
 		if (ysize & 1)
-			throw RuntimeError(
-			    "LinearPrediction::ctor(...): data set must "
-			    "contain an even number of points\n");
+			throw RuntimeError("LinearPrediction::ctor(...): data set must "
+			                   "contain an even number of points\n");
 		SizeType n = ysize / 2;
 		MatrixType A(p, p);
 		typename Vector<FieldType>::Type B(p);
@@ -121,14 +119,12 @@ public:
 
 	const FieldType& operator()(SizeType i) const { return y_[i]; }
 
-	void linearPredictionfunction(const typename Vector<FieldType>::Type& y,
-	                              SizeType p)
+	void linearPredictionfunction(const typename Vector<FieldType>::Type& y, SizeType p)
 	{
 		SizeType ysize = y.size();
 		if (ysize & 1)
-			throw RuntimeError(
-			    "LinearPrediction::ctor(...): data set must "
-			    "contain an even number of points\n");
+			throw RuntimeError("LinearPrediction::ctor(...): data set must "
+			                   "contain an even number of points\n");
 		SizeType n = ysize / 2;
 		MatrixType A(p, p);
 		typename Vector<FieldType>::Type B(p);
@@ -215,8 +211,7 @@ private:
 	void computeD(MatrixType& A, typename Vector<FieldType>::Type& B)
 	{
 		SizeType p = B.size();
-		typename Vector<int>::Type ipiv(
-		    p); // use signed integers here!!
+		typename Vector<int>::Type ipiv(p); // use signed integers here!!
 		int info = 0;
 		psimag::LAPACK::GETRF(p, p, &(A(0, 0)), p, &(ipiv[0]), info);
 
@@ -225,8 +220,7 @@ private:
 		psimag::LAPACK::GETRI(p, &(A(0, 0)), p, &(ipiv[0]), &(work[0]), lwork, info);
 		lwork = static_cast<int>(work[0]);
 		if (lwork <= 0)
-			throw RuntimeError(
-			    "LinearPrediction:: internal error\n");
+			throw RuntimeError("LinearPrediction:: internal error\n");
 		work.resize(lwork);
 		// actual work:
 		psimag::LAPACK::GETRI(p, &(A(0, 0)), p, &(ipiv[0]), &(work[0]), lwork, info);

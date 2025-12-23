@@ -82,8 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename SparseMatrixType>
-class MatrixOrIdentity {
+template <typename SparseMatrixType> class MatrixOrIdentity {
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 
@@ -93,13 +92,9 @@ public:
 	    : enabled_(enabled)
 	    , m_(m)
 	    , one_(1.0)
-	{
-	}
+	{ }
 
-	SizeType getRowPtr(SizeType i) const
-	{
-		return (enabled_) ? m_.getRowPtr(i) : i;
-	}
+	SizeType getRowPtr(SizeType i) const { return (enabled_) ? m_.getRowPtr(i) : i; }
 
 	int getColOrExit(SizeType i) const
 	{

@@ -89,9 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-template <typename VectorWithOffsetType,
-          typename MettsStochasticsType,
-          typename TargetParamsType>
+template <typename VectorWithOffsetType, typename MettsStochasticsType, typename TargetParamsType>
 class MettsCollapse {
 
 	typedef typename VectorWithOffsetType::VectorType VectorType;
@@ -120,8 +118,7 @@ public:
 	    , progress_("MettsCollapse")
 	    , prevDirection_(ProgramGlobals::DirectionEnum::INFINITE)
 	    , collapseBasis_(0, 0)
-	{
-	}
+	{ }
 
 	bool operator()(VectorWithOffsetType& c,
 	                const VectorWithOffsetType& eToTheBetaH,
@@ -130,7 +127,8 @@ public:
 	{
 		assert(direction != ProgramGlobals::DirectionEnum::INFINITE);
 
-		if (targetParams_.collapse.find("every") != PsimagLite::String::npos || collapseBasis_.rows() == 0)
+		if (targetParams_.collapse.find("every") != PsimagLite::String::npos
+		    || collapseBasis_.rows() == 0)
 			setCollapseBasis(block);
 
 		internalAction(c, eToTheBetaH, block, direction, false);
@@ -314,13 +312,13 @@ private:
 			packLeft.unpack(alpha0, alpha1, lrs_.left().permutation(alpha));
 
 			for (SizeType alpha1Prime = 0; alpha1Prime < nk; alpha1Prime++) {
-				SizeType alphaPrime = packLeft.pack(alpha0,
-				                                    alpha1Prime,
-				                                    lrs_.left().permutationInverse());
-				SizeType iprime = packSuper.pack(alphaPrime,
-				                                 beta,
-				                                 lrs_.super().permutationInverse());
-				w.slowAccess(i + offset) += v.slowAccess(iprime) * collapseBasis_(alpha1Prime, indexFixed) * collapseBasis_(alpha1, indexFixed);
+				SizeType alphaPrime = packLeft.pack(
+				    alpha0, alpha1Prime, lrs_.left().permutationInverse());
+				SizeType iprime = packSuper.pack(
+				    alphaPrime, beta, lrs_.super().permutationInverse());
+				w.slowAccess(i + offset) += v.slowAccess(iprime)
+				    * collapseBasis_(alpha1Prime, indexFixed)
+				    * collapseBasis_(alpha1, indexFixed);
 			}
 		}
 	}
@@ -343,10 +341,11 @@ private:
 			packSuper.unpack(alpha, beta, lrs_.super().permutation(i + offset));
 
 			for (SizeType betaPrime = 0; betaPrime < nk; betaPrime++) {
-				SizeType iprime = packSuper.pack(alpha,
-				                                 betaPrime,
-				                                 lrs_.super().permutationInverse());
-				w.slowAccess(i + offset) += v.slowAccess(iprime) * collapseBasis_(betaPrime, indexFixed) * collapseBasis_(beta, indexFixed);
+				SizeType iprime = packSuper.pack(
+				    alpha, betaPrime, lrs_.super().permutationInverse());
+				w.slowAccess(i + offset) += v.slowAccess(iprime)
+				    * collapseBasis_(betaPrime, indexFixed)
+				    * collapseBasis_(beta, indexFixed);
 			}
 		}
 	}
@@ -384,13 +383,13 @@ private:
 			packRight.unpack(beta0, beta1, lrs_.right().permutation(beta));
 
 			for (SizeType beta0Prime = 0; beta0Prime < nk; beta0Prime++) {
-				SizeType betaPrime = packRight.pack(beta0Prime,
-				                                    beta1,
-				                                    lrs_.right().permutationInverse());
-				SizeType iprime = packSuper.pack(alpha,
-				                                 betaPrime,
-				                                 lrs_.super().permutationInverse());
-				w.slowAccess(i + offset) += v.slowAccess(iprime) * collapseBasis_(beta0Prime, indexFixed) * collapseBasis_(beta0, indexFixed);
+				SizeType betaPrime = packRight.pack(
+				    beta0Prime, beta1, lrs_.right().permutationInverse());
+				SizeType iprime = packSuper.pack(
+				    alpha, betaPrime, lrs_.super().permutationInverse());
+				w.slowAccess(i + offset) += v.slowAccess(iprime)
+				    * collapseBasis_(beta0Prime, indexFixed)
+				    * collapseBasis_(beta0, indexFixed);
 			}
 		}
 	}
@@ -413,10 +412,11 @@ private:
 			packSuper.unpack(alpha, beta, lrs_.super().permutation(i + offset));
 
 			for (SizeType alphaPrime = 0; alphaPrime < nk; alphaPrime++) {
-				SizeType iprime = packSuper.pack(alphaPrime,
-				                                 beta,
-				                                 lrs_.super().permutationInverse());
-				w.slowAccess(i + offset) += v.slowAccess(iprime) * collapseBasis_(alphaPrime, indexFixed) * collapseBasis_(alpha, indexFixed);
+				SizeType iprime = packSuper.pack(
+				    alphaPrime, beta, lrs_.super().permutationInverse());
+				w.slowAccess(i + offset) += v.slowAccess(iprime)
+				    * collapseBasis_(alphaPrime, indexFixed)
+				    * collapseBasis_(alpha, indexFixed);
 			}
 		}
 	}
@@ -458,7 +458,8 @@ private:
 
 		SizeType sitesPerBlock = mettsStochastics_.model().params().sitesPerBlock;
 		for (SizeType i = sitesPerBlock; i < site + 1; i++) {
-			bool seen = (std::find(sitesSeen_.begin(), sitesSeen_.end(), i) != sitesSeen_.end());
+			bool seen = (std::find(sitesSeen_.begin(), sitesSeen_.end(), i)
+			             != sitesSeen_.end());
 			if (!seen)
 				return false;
 		}
@@ -504,9 +505,7 @@ private:
 		m = m2;
 	}
 
-	void rotationNd(MatrixType& m,
-	                SizeType oneSiteHilbertSize,
-	                SizeType blockSize) const
+	void rotationNd(MatrixType& m, SizeType oneSiteHilbertSize, SizeType blockSize) const
 	{
 		if (blockSize == 1)
 			return rotationNd(m, oneSiteHilbertSize);
@@ -559,8 +558,10 @@ private:
 		typename PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk, block);
 		SizeType volumeOfNk = volumeOf(nk);
-		bool b1 = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM && lrs_.right().size() == volumeOfNk);
-		bool b2 = (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON && lrs_.left().size() == volumeOfNk);
+		bool b1 = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM
+		           && lrs_.right().size() == volumeOfNk);
+		bool b2 = (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON
+		           && lrs_.left().size() == volumeOfNk);
 		return (b1 || b2);
 	}
 

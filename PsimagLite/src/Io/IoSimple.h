@@ -93,11 +93,11 @@ namespace PsimagLite {
 //! IoSimple class handles Input/Output (IO) for the Dmrg++ program
 class IoSimple {
 
-	template <typename T>
-	struct PrintWithEqualSign {
+	template <typename T> struct PrintWithEqualSign {
 		enum
 		{
-			True = Loki::TypeTraits<T>::isArith || std::is_enum<T>::value || IsComplexNumber<T>::True
+			True = Loki::TypeTraits<T>::isArith || std::is_enum<T>::value
+			    || IsComplexNumber<T>::True
 		};
 	};
 
@@ -110,8 +110,7 @@ public:
 		Out()
 		    : rank_(0)
 		    , fout_(0)
-		{
-		}
+		{ }
 
 		Out(std::ostream& os)
 		    : rank_(0)
@@ -134,8 +133,7 @@ public:
 #endif
 			fout_->open(fn.c_str());
 			if (!(*fout_) || !fout_->good())
-				throw RuntimeError(
-				    "Out: error while opening file!\n");
+				throw RuntimeError("Out: error while opening file!\n");
 		}
 
 		~Out()
@@ -166,8 +164,7 @@ public:
 #endif
 			fout_->open(fn.c_str(), mode);
 			if (!(*fout_) || !fout_->good())
-				throw RuntimeError(
-				    "Out: error while opening file!\n");
+				throw RuntimeError("Out: error while opening file!\n");
 		}
 
 		void close()
@@ -200,13 +197,17 @@ public:
 		}
 
 		template <typename T>
-		void write(const T& x, const String& label, typename EnableIf<PrintWithEqualSign<T>::True, int>::Type = 0)
+		void write(const T& x,
+		           const String& label,
+		           typename EnableIf<PrintWithEqualSign<T>::True, int>::Type = 0)
 		{
 			(*fout_) << label << "=" << x << "\n";
 		}
 
 		template <class T>
-		void write(const T& something, const String& label, typename EnableIf<!PrintWithEqualSign<T>::True, int>::Type = 0)
+		void write(const T& something,
+		           const String& label,
+		           typename EnableIf<!PrintWithEqualSign<T>::True, int>::Type = 0)
 		{
 			if (rank_ != 0)
 				return;
@@ -233,8 +234,7 @@ public:
 			return x;
 		}
 
-		template <typename X>
-		friend Out& operator<<(Out& io, const X& t)
+		template <typename X> friend Out& operator<<(Out& io, const X& t)
 		{
 			if (io.rank_ != 0)
 				return io;
@@ -265,7 +265,8 @@ public:
 		    , fin_(fn.c_str())
 		{
 			if (!fin_ || !fin_.good() || fin_.bad()) {
-				String s = "IoSimple::ctor(...): Can't open file " + filename_ + "\n";
+				String s
+				    = "IoSimple::ctor(...): Can't open file " + filename_ + "\n";
 				throw RuntimeError(s.c_str());
 			}
 		}
@@ -279,7 +280,8 @@ public:
 			filename_ = fn;
 			fin_.open(fn.c_str());
 			if (!fin_ || !fin_.good() || fin_.bad()) {
-				String s = "IoSimpleIn::open(...) failed for file " + filename_ + "\n";
+				String s
+				    = "IoSimpleIn::open(...) failed for file " + filename_ + "\n";
 				throw RuntimeError(s.c_str());
 			}
 		}
@@ -301,8 +303,7 @@ public:
 					break;
 				if (temp.substr(0, s.size()) == s) {
 					foundOnce = true;
-					IstringStream temp2(
-					    temp.substr(s.size(), temp.size()));
+					IstringStream temp2(temp.substr(s.size(), temp.size()));
 					temp2 >> x;
 					if (level >= 0 && counter == LongSizeType(level)) {
 						found = true;
@@ -313,7 +314,8 @@ public:
 			}
 
 			if (!foundOnce || (!found && level != LAST_INSTANCE)) {
-				String emessage = "IoSimple::In::readline(): Not found " + s + " in file " + filename_;
+				String emessage = "IoSimple::In::readline(): Not found " + s
+				    + " in file " + filename_;
 				throw RuntimeError(emessage.c_str());
 			}
 
@@ -327,8 +329,7 @@ public:
 		}
 
 		template <typename X>
-		typename EnableIf<IsVectorLike<X>::True,
-		                  std::pair<String, SizeType>>::Type
+		typename EnableIf<IsVectorLike<X>::True, std::pair<String, SizeType>>::Type
 		read(X& x, String const& s, LongIntegerType level = 0, bool beQuiet = false)
 		{
 			std::pair<String, SizeType> sc = advance(s, level, beQuiet);
@@ -346,16 +347,17 @@ public:
 		}
 
 		template <typename X>
-		void
-		read(X& mat, String const& s, LongIntegerType level = 0, typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
+		void read(X& mat,
+		          String const& s,
+		          LongIntegerType level = 0,
+		          typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
 		{
 			advance(s, level);
 			fin_ >> mat;
 		}
 
 		template <typename X>
-		typename EnableIf<IsStackLike<X>::True,
-		                  std::pair<String, SizeType>>::Type
+		typename EnableIf<IsStackLike<X>::True, std::pair<String, SizeType>>::Type
 		read(X& x, String const& s, LongIntegerType level = 0, bool beQuiet = false)
 		{
 			std::pair<String, SizeType> sc = advance(s, level, beQuiet);
@@ -363,9 +365,8 @@ public:
 			return sc;
 		}
 
-		std::pair<String, SizeType> advance(String const& s,
-		                                    LongIntegerType level = 0,
-		                                    bool beQuiet = false)
+		std::pair<String, SizeType>
+		advance(String const& s, LongIntegerType level = 0, bool beQuiet = false)
 		{
 
 			String temp = "NOTFOUND";
@@ -393,16 +394,13 @@ public:
 				fin_.open(filename_.c_str());
 				if (counter > 1)
 					advance(s, counter - 2);
-				return std::pair<String, SizeType>(tempSaved,
-				                                   counter);
+				return std::pair<String, SizeType>(tempSaved, counter);
 			}
 
 			if (!found && tempSaved == "NOTFOUND") {
 				if (!beQuiet) {
-					std::cerr << "Not found " << s
-					          << " in file " << filename_;
-					std::cerr << " level=" << level
-					          << " counter=" << counter
+					std::cerr << "Not found " << s << " in file " << filename_;
+					std::cerr << " level=" << level << " counter=" << counter
 					          << "\n";
 				}
 				throw RuntimeError("IoSimple::In::read()\n");
@@ -424,24 +422,20 @@ public:
 				}
 			}
 
-			String ss = "IoSimple::count(...): too many " + s + " in file " + filename_ + "\n";
+			String ss = "IoSimple::count(...): too many " + s + " in file " + filename_
+			    + "\n";
 			throw RuntimeError(s.c_str());
 		}
 
 		void rewind()
 		{
 			fin_.clear(); // forget we hit the end of file
-			fin_.seekg(
-			    0, std::ios::beg); // move to the start of the file
+			fin_.seekg(0, std::ios::beg); // move to the start of the file
 		}
 
 		bool eof() const { return fin_.eof(); }
 
-		template <typename X>
-		friend void operator>>(In& io, X& t)
-		{
-			(io.fin_) >> t;
-		}
+		template <typename X> friend void operator>>(In& io, X& t) { (io.fin_) >> t; }
 
 	private:
 
@@ -450,16 +444,14 @@ public:
 	};
 }; // class IoSimple
 
-template <>
-struct IsInputLike<IoSimple::In> {
+template <> struct IsInputLike<IoSimple::In> {
 	enum
 	{
 		True = true
 	};
 };
 
-template <>
-struct IsOutputLike<IoSimple::Out> {
+template <> struct IsOutputLike<IoSimple::Out> {
 	enum
 	{
 		True = true
@@ -476,8 +468,7 @@ public:
 
 	IoSimpleIn(const char* fn)
 	    : PsimagLite::IoSimple::In(PsimagLite::String(fn))
-	{
-	}
+	{ }
 };
 } // namespace Spf
 /*@}*/

@@ -124,15 +124,12 @@ struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersKitaev";
 		io.createGroup(label);
@@ -143,8 +140,7 @@ struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const ParametersKitaev& parameters)
+	friend std::ostream& operator<<(std::ostream& os, const ParametersKitaev& parameters)
 	{
 		os << "MagneticFieldX=" << parameters.magneticFieldX << "\n";
 		os << "MagneticFieldY=" << parameters.magneticFieldY << "\n";

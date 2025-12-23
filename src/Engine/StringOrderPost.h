@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename ObserverType>
-class StringOrderPost {
+template <typename ObserverType> class StringOrderPost {
 
 public:
 
@@ -81,13 +80,14 @@ private:
 			return observe_.threePoint(braket, 0, 0, false);
 		}
 
-		// braket = op_[0]  * exp(i*pi*op_[1]) * exp(i*pi*op_[1]) * ... exp(i*pi*op_[1]) * op_[2]
-		// sites are i, i + 1, i + 2, ..., k - 1, k
+		// braket = op_[0]  * exp(i*pi*op_[1]) * exp(i*pi*op_[1]) * ... exp(i*pi*op_[1]) *
+		// op_[2] sites are i, i + 1, i + 2, ..., k - 1, k
 		PsimagLite::String op1copies = "";
 		for (SizeType j = i + 1; j < k; ++j)
 			op1copies += op1 + "[" + ttos(j) + "];";
 
-		PsimagLite::String str(left + ";" + op1copies + right); // op1copies carries a last ;
+		PsimagLite::String str(left + ";" + op1copies
+		                       + right); // op1copies carries a last ;
 		BraketType braket(braket_.model(), str);
 		std::cout << "stringorder rewritten to " << str << "\n";
 		return observe_.anyPoint(braket, false);
@@ -107,11 +107,13 @@ private:
 		}
 
 		if (!isValid) {
-			throw PsimagLite::RuntimeError("Expected only one operator instead of " + opsCenter + "\n");
+			throw PsimagLite::RuntimeError("Expected only one operator instead of "
+			                               + opsCenter + "\n");
 		}
 
 		if (!isDiagonal(nup.getCRS())) {
-			throw PsimagLite::RuntimeError("Expected a diagonal operator for " + opsCenter + "\n");
+			throw PsimagLite::RuntimeError("Expected a diagonal operator for "
+			                               + opsCenter + "\n");
 		}
 	}
 

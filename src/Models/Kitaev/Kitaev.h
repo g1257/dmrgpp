@@ -93,8 +93,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelBaseType, bool>
-class AddSy {
+template <typename ModelBaseType, bool> class AddSy {
 
 public:
 
@@ -106,8 +105,7 @@ public:
 	void operator()(SparseMatrixType) { }
 };
 
-template <typename ModelBaseType>
-class AddSy<ModelBaseType, true> {
+template <typename ModelBaseType> class AddSy<ModelBaseType, true> {
 
 public:
 
@@ -121,8 +119,7 @@ public:
 
 	AddSy(ModelBaseType* base)
 	    : base_(base)
-	{
-	}
+	{ }
 
 	void operator()(SparseMatrixType tmpMatrix)
 	{
@@ -143,8 +140,7 @@ private:
 	ModelBaseType* base_;
 };
 
-template <typename ModelBaseType>
-class Kitaev : public ModelBaseType {
+template <typename ModelBaseType> class Kitaev : public ModelBaseType {
 
 	static const int TWICE_THE_SPIN = 1;
 
@@ -192,15 +188,18 @@ public:
 	       InputValidatorType& io,
 	       const SuperGeometryType& geometry,
 	       PsimagLite::String additional)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , extended_(additional.length() > 7 && additional.substr(0, 8) == "Extended")
 	    , withGammas_(additional.length() > 9 && additional.substr(0, 10) == "WithGammas")
-	    , withGammasReal_(additional.length() > 13 && additional.substr(0, 14) == "WithGammasReal")
-	    , withCharge_((additional.length() > 9 && (additional.substr(8, 10) == "WithCharge" || additional.substr(10, 10) == "WithCharge" || additional.substr(0, 10) == "WithCharge"))
-	                  || (additional.length() > 13 && (additional.substr(14, 10) == "WithCharge")))
+	    , withGammasReal_(additional.length() > 13
+	                      && additional.substr(0, 14) == "WithGammasReal")
+	    , withCharge_(
+	          (additional.length() > 9
+	           && (additional.substr(8, 10) == "WithCharge"
+	               || additional.substr(10, 10) == "WithCharge"
+	               || additional.substr(0, 10) == "WithCharge"))
+	          || (additional.length() > 13 && (additional.substr(14, 10) == "WithCharge")))
 	{
 		if (withCharge_ and TWICE_THE_SPIN != 1)
 			err("Kitaev: Charged model only for s=1/2\n");
@@ -256,21 +255,24 @@ public:
 
 			if (hasX) {
 				// magnetic field x
-				const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, 0);
+				const OperatorType& sx
+				    = ModelBaseType::naturalOperator("sx", site, 0);
 				RealType tmp = modelParameters_.magneticFieldX[block[0]];
 				hmatrix += tmp * sx.getCRS();
 			}
 
 			if (hasY) {
 				// magnetic field y
-				const OperatorType& sy = ModelBaseType::naturalOperator("sy", site, 0);
+				const OperatorType& sy
+				    = ModelBaseType::naturalOperator("sy", site, 0);
 				RealType tmp = modelParameters_.magneticFieldY[block[0]];
 				hmatrix += tmp * sy.getCRS();
 			}
 
 			if (hasZ) {
 				// magnetic field z
-				const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
+				const OperatorType& sz
+				    = ModelBaseType::naturalOperator("sz", site, 0);
 				RealType tmp = modelParameters_.magneticFieldZ[block[0]];
 				hmatrix += tmp * sz.getCRS();
 			}
@@ -321,7 +323,8 @@ protected:
 			                   su2related);
 			sybar.push(myOp2); // Sybar = iSy
 
-			AddSy<ModelBaseType, PsimagLite::IsComplexNumber<ComplexOrRealType>::True> addSy(this);
+			AddSy<ModelBaseType, PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
+			    addSy(this);
 			addSy(tmpMatrix);
 
 			// Set the operators S^z_i in the natural basis
@@ -372,10 +375,18 @@ protected:
 			ModelTermType& hop = ModelBaseType::createTerm("hopping"); //(A)
 
 			OpForLinkType cup("c", 0); // (B)
-			hop.push(cup, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, 1, 0)); // (C)
+			hop.push(cup,
+			         'N',
+			         cup,
+			         'C',
+			         typename ModelTermType::Su2Properties(1, 1, 0)); // (C)
 
 			OpForLinkType cdown("c", 1); // (D)
-			hop.push(cdown, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, -1, 1));
+			hop.push(cdown,
+			         'N',
+			         cdown,
+			         'C',
+			         typename ModelTermType::Su2Properties(1, -1, 1));
 		}
 
 		VectorStringType labels = { "sx", "sybar", "sz" };
@@ -388,7 +399,8 @@ protected:
 				value *= x;
 			};
 
-			ModelBaseType::createTerm(labels[i] + labels[i], false).push(smu, 'N', smu, 'N', modif);
+			ModelBaseType::createTerm(labels[i] + labels[i], false)
+			    .push(smu, 'N', smu, 'N', modif);
 		}
 
 		OpForLinkType sx("sx");
@@ -424,10 +436,7 @@ protected:
 
 private:
 
-	void createTermSySz(const OpForLinkType&,
-	                    const OpForLinkType&,
-	                    bool,
-	                    RealType)
+	void createTermSySz(const OpForLinkType&, const OpForLinkType&, bool, RealType)
 	{
 		PsimagLite::String str = "needs useComplex in SolverOptions in the input\n";
 		err("FATAL: createTermSySz(): This Kitaev variant needs useComplex " + str);
@@ -438,12 +447,11 @@ private:
 	                    bool wantsHermit,
 	                    std::complex<RealType>)
 	{
-		auto modifMinusSqrtMinusOne = [](ComplexOrRealType& value)
-		{
-			value *= std::complex<RealType>(0, -1);
-		};
+		auto modifMinusSqrtMinusOne
+		    = [](ComplexOrRealType& value) { value *= std::complex<RealType>(0, -1); };
 
-		ModelBaseType::createTerm("sysz", false).push(sybar, 'N', sz, 'N', modifMinusSqrtMinusOne);
+		ModelBaseType::createTerm("sysz", false)
+		    .push(sybar, 'N', sz, 'N', modifMinusSqrtMinusOne);
 
 		bool noAlias = ModelBaseType::params().options.isSet("notermalias");
 		const PsimagLite::String aliasStr = (noAlias) ? "" : "sysz";
@@ -453,10 +461,7 @@ private:
 		szsy.push(sz, 'N', sybar, 'N', modifMinusSqrtMinusOne);
 	}
 
-	void createTermSxSy(const OpForLinkType&,
-	                    const OpForLinkType&,
-	                    bool,
-	                    RealType) const
+	void createTermSxSy(const OpForLinkType&, const OpForLinkType&, bool, RealType) const
 	{
 		PsimagLite::String str = "needs useComplex in SolverOptions in the input\n";
 		err("createTermSxSy(): This Kitaev variant " + str);
@@ -467,12 +472,11 @@ private:
 	                    bool wantsHermit,
 	                    std::complex<RealType>) const
 	{
-		auto modifMinusSqrtMinusOne = [](ComplexOrRealType& value)
-		{
-			value *= std::complex<RealType>(0, -1);
-		};
+		auto modifMinusSqrtMinusOne
+		    = [](ComplexOrRealType& value) { value *= std::complex<RealType>(0, -1); };
 
-		ModelBaseType::createTerm("sxsy", false).push(sx, 'N', sybar, 'N', modifMinusSqrtMinusOne);
+		ModelBaseType::createTerm("sxsy", false)
+		    .push(sx, 'N', sybar, 'N', modifMinusSqrtMinusOne);
 
 		bool noAlias = ModelBaseType::params().options.isSet("notermalias");
 		const PsimagLite::String aliasStr = (noAlias) ? "" : "sxsy";
@@ -488,11 +492,9 @@ private:
 	}
 
 	//! find all states in the natural basis for a block of n sites
-	void setBasis(HilbertBasisType& basis,
-	              const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis, const VectorSizeType& block) const
 	{
-		const SizeType total1 = (withCharge_) ? 3
-		                                      : TWICE_THE_SPIN + 1;
+		const SizeType total1 = (withCharge_) ? 3 : TWICE_THE_SPIN + 1;
 
 		SizeType total = utils::powUint(total1, block.size());
 
@@ -564,9 +566,7 @@ private:
 		return operatorMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int n) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, int n) const
 	{
 		assert(n == 1);
 
@@ -580,8 +580,7 @@ private:
 		setSymmetryRelatedWithCharge(qns, basis);
 	}
 
-	void setSymmetryRelatedWithCharge(VectorQnType& qns,
-	                                  const HilbertBasisType& basis) const
+	void setSymmetryRelatedWithCharge(VectorQnType& qns, const HilbertBasisType& basis) const
 	{
 		typedef std::pair<SizeType, SizeType> PairType;
 

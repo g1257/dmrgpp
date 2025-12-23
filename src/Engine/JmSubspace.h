@@ -87,8 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Su2SymmetryGlobals.h"
 
 namespace Dmrg {
-template <typename SparseMatrixType, typename SymmetryRelatedType>
-class JmSubspace {
+template <typename SparseMatrixType, typename SymmetryRelatedType> class JmSubspace {
 
 	typedef typename SparseMatrixType::value_type SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
@@ -127,10 +126,7 @@ public:
 		ne2_ = &ne2;
 	}
 
-	void push(SizeType index,
-	          const PairType& jm1,
-	          const PairType& jm2,
-	          SizeType nelectrons)
+	void push(SizeType index, const PairType& jm1, const PairType& jm2, SizeType nelectrons)
 	{
 		if (nelectrons != nelectrons_)
 			err("JmSubspace::push(): nelectrons changed!!\n");
@@ -140,8 +136,8 @@ public:
 
 	bool operator==(const std::pair<PairType, SizeType>& nejm) const
 	{
-		std::pair<PairType, SizeType> nejmStored = std::pair<PairType, SizeType>(jm_,
-		                                                                         nelectrons_);
+		std::pair<PairType, SizeType> nejmStored
+		    = std::pair<PairType, SizeType>(jm_, nelectrons_);
 		return (nejm == nejmStored);
 	}
 
@@ -171,20 +167,11 @@ public:
 		return flavors_.size();
 	}
 
-	PairType getJmValue() const
-	{
-		return jm_;
-	}
+	PairType getJmValue() const { return jm_; }
 
-	SizeType numberOfFlavors() const
-	{
-		return flavors_.size();
-	}
+	SizeType numberOfFlavors() const { return flavors_.size(); }
 
-	SizeType getFlavor(SizeType i) const
-	{
-		return flavors_[i];
-	}
+	SizeType getFlavor(SizeType i) const { return flavors_[i]; }
 
 	SizeType getNe() const { return nelectrons_; }
 
@@ -199,10 +186,7 @@ public:
 		values_.clear();
 	}
 
-	SizeType qn() const
-	{
-		return SymmetryRelatedType::neJmToIndex(nelectrons_, jm_);
-	}
+	SizeType qn() const { return SymmetryRelatedType::neJmToIndex(nelectrons_, jm_); }
 
 	SizeType findFreeRow(SizeType counter, SizeType total)
 	{
@@ -215,12 +199,8 @@ public:
 		throw PsimagLite::RuntimeError("findfreerow: no free rows\n");
 	}
 
-	static SizeType flavor(SizeType f1,
-	                       SizeType f2,
-	                       SizeType ne1,
-	                       SizeType ne2,
-	                       SizeType j1,
-	                       SizeType j2)
+	static SizeType
+	flavor(SizeType f1, SizeType f2, SizeType ne1, SizeType ne2, SizeType j1, SizeType j2)
 	{
 		SizeType x = f1 + f2 * symm1_->flavorsMax();
 		SizeType y = ne1 + ne2 * symm1_->electronsMax();
@@ -290,10 +270,12 @@ template <typename SparseMatrixType, typename SymmetryRelatedType>
 const SymmetryRelatedType* JmSubspace<SparseMatrixType, SymmetryRelatedType>::symm2_ = 0;
 
 template <typename SparseMatrixType, typename SymmetryRelatedType>
-const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType, SymmetryRelatedType>::ne1_ = 0;
+const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType, SymmetryRelatedType>::ne1_
+    = 0;
 
 template <typename SparseMatrixType, typename SymmetryRelatedType>
-const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType, SymmetryRelatedType>::ne2_ = 0;
+const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType, SymmetryRelatedType>::ne2_
+    = 0;
 
 } // namespace Dmrg
 

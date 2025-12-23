@@ -87,8 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename FieldType>
-struct Su2SymmetryGlobals {
+template <typename FieldType> struct Su2SymmetryGlobals {
 	typedef ClebschGordanCached<FieldType> ClebschGordanType;
 	static void init(bool hasSu2Symmetry)
 	{
@@ -99,8 +98,10 @@ struct Su2SymmetryGlobals {
 		clebschGordanObject.init(MaximumJValue, NumberOfFactorials);
 	}
 
-	static SizeType MaximumJValue; // this is the maximum allowed \tile{j}=2j value (j is half this value)
-	static SizeType NumberOfFactorials; // number of factorials for the Clebsch-Gordan coefficients
+	static SizeType
+	    MaximumJValue; // this is the maximum allowed \tile{j}=2j value (j is half this value)
+	static SizeType
+	    NumberOfFactorials; // number of factorials for the Clebsch-Gordan coefficients
 	static ClebschGordanType clebschGordanObject;
 }; // Su2SymmetryGlobals
 

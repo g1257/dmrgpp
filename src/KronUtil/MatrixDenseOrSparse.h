@@ -7,8 +7,7 @@
 
 namespace Dmrg {
 
-template <typename SparseMatrixType>
-class MatrixDenseOrSparse {
+template <typename SparseMatrixType> class MatrixDenseOrSparse {
 
 public:
 
@@ -18,9 +17,9 @@ public:
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
 	typedef PsimagLite::Vector<int>::Type VectorIntType;
 
-	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse,
-	                             const RealType& threshold)
-	    : isDense_(sparse.nonZeros() > static_cast<SizeType>(threshold * sparse.rows() * sparse.cols()))
+	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse, const RealType& threshold)
+	    : isDense_(sparse.nonZeros()
+	               > static_cast<SizeType>(threshold * sparse.rows() * sparse.cols()))
 	    , sparseMatrix_(sparse)
 	{
 		sparseMatrix_.checkValidity();
@@ -29,9 +28,7 @@ public:
 			crsMatrixToFullMatrix(denseMatrix_, sparse);
 	}
 
-	explicit MatrixDenseOrSparse(const SizeType nrows,
-	                             const SizeType ncols,
-	                             bool isDense_in)
+	explicit MatrixDenseOrSparse(const SizeType nrows, const SizeType ncols, bool isDense_in)
 	    : isDense_(isDense_in)
 	    , sparseMatrix_(nrows, ncols)
 	    , denseMatrix_(0, 0)
@@ -71,15 +68,9 @@ public:
 
 	bool isDense() const { return isDense_; }
 
-	SizeType rows() const
-	{
-		return sparseMatrix_.rows();
-	}
+	SizeType rows() const { return sparseMatrix_.rows(); }
 
-	SizeType cols() const
-	{
-		return sparseMatrix_.cols();
-	}
+	SizeType cols() const { return sparseMatrix_.cols(); }
 
 	const PsimagLite::Matrix<ComplexOrRealType>& dense() const
 	{
@@ -99,7 +90,8 @@ public:
 
 	bool isZero() const
 	{
-		return (isDense_) ? PsimagLite::isZero(denseMatrix_) : PsimagLite::isZero(sparseMatrix_);
+		return (isDense_) ? PsimagLite::isZero(denseMatrix_)
+		                  : PsimagLite::isZero(sparseMatrix_);
 	}
 
 	SparseMatrixType toSparse() const
@@ -139,17 +131,17 @@ private:
 }; // class MatrixDenseOrSparse
 
 template <typename SparseMatrixType>
-void kronMult(typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& xout,
-              SizeType offsetX,
-              const typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& yin,
-              SizeType offsetY,
-              char transA,
-              char transB,
-              const MatrixDenseOrSparse<SparseMatrixType>& A,
-              const MatrixDenseOrSparse<SparseMatrixType>& B,
-              const typename PsimagLite::Real<typename SparseMatrixType::value_type>::Type
-                  denseFlopDiscount,
-              PsimagLite::GemmR<typename SparseMatrixType::value_type>& gemmR)
+void kronMult(
+    typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& xout,
+    SizeType offsetX,
+    const typename PsimagLite::Vector<typename SparseMatrixType::value_type>::Type& yin,
+    SizeType offsetY,
+    char transA,
+    char transB,
+    const MatrixDenseOrSparse<SparseMatrixType>& A,
+    const MatrixDenseOrSparse<SparseMatrixType>& B,
+    const typename PsimagLite::Real<typename SparseMatrixType::value_type>::Type denseFlopDiscount,
+    PsimagLite::GemmR<typename SparseMatrixType::value_type>& gemmR)
 {
 	const bool isDenseA = A.isDense();
 	const bool isDenseB = B.isDense();

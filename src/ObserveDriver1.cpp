@@ -8,15 +8,9 @@ typedef VectorWithOffset<ComplexType, QnType> VectorWithOffset2Type;
 typedef VectorWithOffsets<RealType, QnType> VectorWithOffset3Type;
 typedef VectorWithOffsets<ComplexType, QnType> VectorWithOffset4Type;
 
-typedef Dmrg::SuperGeometry<RealType,
-                            InputNgType::Readable,
-                            ProgramGlobals>
-    Geometry1Type;
+typedef Dmrg::SuperGeometry<RealType, InputNgType::Readable, ProgramGlobals> Geometry1Type;
 
-typedef Dmrg::SuperGeometry<ComplexType,
-                            InputNgType::Readable,
-                            ProgramGlobals>
-    Geometry2Type;
+typedef Dmrg::SuperGeometry<ComplexType, InputNgType::Readable, ProgramGlobals> Geometry2Type;
 
 typedef Basis<MySparseMatrixReal> Basis1Type;
 typedef BasisWithOperators<Basis1Type> BasisWithOperators1Type;

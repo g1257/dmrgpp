@@ -5,8 +5,7 @@
 #include <cstdlib>
 #include <fstream>
 
-template <typename RealType_>
-class OracleData {
+template <typename RealType_> class OracleData {
 
 public:
 
@@ -34,8 +33,7 @@ public:
 			values_.push_back(value);
 		}
 
-		std::cerr << "#Found " << omegas_.size() << " omega values for kf=" << kf
-		          << "\n";
+		std::cerr << "#Found " << omegas_.size() << " omega values for kf=" << kf << "\n";
 		if (omegas_.size() == 0)
 			err("No data found in " + file + "\n");
 	}
@@ -55,8 +53,7 @@ private:
 	VectorRealType values_;
 };
 
-template <typename RealType>
-class FitData {
+template <typename RealType> class FitData {
 
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
@@ -92,8 +89,7 @@ public:
 		const RealType& omega = omegas_[i];
 		const RealType& delta = v[0];
 		const RealType& gamma = v[1];
-		return (j == 0) ? dfDelta(omega, delta, gamma)
-		                : dfGamma(omega, delta, gamma);
+		return (j == 0) ? dfDelta(omega, delta, gamma) : dfGamma(omega, delta, gamma);
 	}
 
 	SizeType size() const { return 2; }
@@ -139,10 +135,7 @@ private:
 		return num0 / den - num / square(den);
 	}
 
-	RealType dispersion(RealType kx, RealType ky) const
-	{
-		return -2 * cos(kx) - cos(ky);
-	}
+	RealType dispersion(RealType kx, RealType ky) const { return -2 * cos(kx) - cos(ky); }
 
 	RealType sum() const
 	{
@@ -163,8 +156,7 @@ private:
 	RealType anorm_;
 };
 
-template <typename OracleType, typename FitDataType>
-class Fitter {
+template <typename OracleType, typename FitDataType> class Fitter {
 
 	typedef typename OracleType::RealType RealType;
 	typedef typename OracleType::VectorRealType VectorRealType;
@@ -178,8 +170,7 @@ class Fitter {
 		MyFunctionTest(const OracleType& od, const FitDataType& fd)
 		    : od_(od)
 		    , fd_(fd)
-		{
-		}
+		{ }
 
 		RealType operator()(const VectorRealType& v) const
 		{
@@ -223,8 +214,7 @@ public:
 	    : od_(od)
 	    , fd_(fd)
 	    , results_(fd.size(), 0)
-	{
-	}
+	{ }
 
 	void fit(SizeType maxIter)
 	{

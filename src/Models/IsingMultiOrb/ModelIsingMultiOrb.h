@@ -90,8 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelBaseType>
-class ModelIsingMultiOrb : public ModelBaseType {
+template <typename ModelBaseType> class ModelIsingMultiOrb : public ModelBaseType {
 
 	static const int DEGREES_OF_FREEDOM = 2; // spin up and down
 
@@ -136,9 +135,7 @@ public:
 	                   InputValidatorType& io,
 	                   const SuperGeometryType& geometry,
 	                   PsimagLite::String additional)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , tau_(0)
@@ -152,12 +149,22 @@ public:
 
 		try {
 			io.readline(tau_, "TSPTau=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
-		ModelParametersType::checkMagneticField('X', modelParameters_.magneticFieldX.cols(), n, modelParameters_.magneticFieldX.rows(), orbs);
-		ModelParametersType::checkMagneticField('Z', modelParameters_.magneticFieldX.cols(), n, modelParameters_.magneticFieldX.rows(), orbs);
-		ModelParametersType::checkOnSiteLinksSzSz(modelParameters_.onsitelinksSzSz.cols(), n, modelParameters_.onsitelinksSzSz.rows(), orbs1);
+		ModelParametersType::checkMagneticField('X',
+		                                        modelParameters_.magneticFieldX.cols(),
+		                                        n,
+		                                        modelParameters_.magneticFieldX.rows(),
+		                                        orbs);
+		ModelParametersType::checkMagneticField('Z',
+		                                        modelParameters_.magneticFieldX.cols(),
+		                                        n,
+		                                        modelParameters_.magneticFieldX.rows(),
+		                                        orbs);
+		ModelParametersType::checkOnSiteLinksSzSz(modelParameters_.onsitelinksSzSz.cols(),
+		                                          n,
+		                                          modelParameters_.onsitelinksSzSz.rows(),
+		                                          orbs1);
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -177,7 +184,8 @@ public:
 	                                const BlockType& block,
 	                                RealType time) const
 	{
-		//			ModelBaseType::additionalOnSiteHamiltonianFromFile(hmatrix, block, ii, data);
+		//			ModelBaseType::additionalOnSiteHamiltonianFromFile(hmatrix,
+		// block, ii, data);
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
 		SizeType n = block.size();
@@ -264,7 +272,8 @@ protected:
 			OpsLabelType& sybar = this->createOpsLabel("sybar");
 			for (SizeType orb = 0; orb < orbs; orb++) {
 				// Set the operators S^x_i in the natural basis
-				SparseMatrixType tmpMatrix = findSxOrSyBarMatrices(i, orb, natBasis, "sx");
+				SparseMatrixType tmpMatrix
+				    = findSxOrSyBarMatrices(i, orb, natBasis, "sx");
 				typename OperatorType::Su2RelatedType su2related3;
 				sx.push(OperatorType(tmpMatrix,
 				                     ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -303,8 +312,9 @@ private:
 
 		const SizeType linSize = superGeometry_.numberOfSites();
 		const SizeType orbs = modelParameters_.orbitals;
-		const PsimagLite::Matrix<RealType>& v = (c == 'X') ? modelParameters_.magneticFieldX
-		                                                   : modelParameters_.magneticFieldZ;
+		const PsimagLite::Matrix<RealType>& v = (c == 'X')
+		    ? modelParameters_.magneticFieldX
+		    : modelParameters_.magneticFieldZ;
 
 		if (v.cols() != linSize || v.rows() != orbs)
 			return;
@@ -428,9 +438,7 @@ private:
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 
 		auto mylambda = [this](ComplexOrRealType& coupling, RealType time, SizeType)
-		{
-			coupling = timeDependentConnection(coupling, time, 2);
-		};
+		{ coupling = timeDependentConnection(coupling, time, 2); };
 
 		for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
 			OpForLinkType c1("sz", orb1, orb1);
@@ -442,9 +450,8 @@ private:
 	}
 
 	//! Find S^+_i in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(SizeType,
-	                                   SizeType orb,
-	                                   const HilbertBasisType& natBasis) const
+	SparseMatrixType
+	findSplusMatrices(SizeType, SizeType orb, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -462,9 +469,8 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(SizeType,
-	                                SizeType orb,
-	                                const HilbertBasisType& natBasis) const
+	SparseMatrixType
+	findSzMatrices(SizeType, SizeType orb, const HilbertBasisType& natBasis) const
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
@@ -504,9 +510,7 @@ private:
 		return Sx;
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis,
-	                        int n) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, int n) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -517,7 +521,9 @@ private:
 		bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 1);
 
 		if (isCanonical && modelParameters_.magneticFieldX.cols() > 0)
-			err(PsimagLite::String(__FILE__) + ": MagneticFieldX CANNOT be canonical. Please " + "delete the TargetSzPlusConst= from the input file\n");
+			err(PsimagLite::String(__FILE__)
+			    + ": MagneticFieldX CANNOT be canonical. Please "
+			    + "delete the TargetSzPlusConst= from the input file\n");
 
 		VectorSizeType other;
 		if (isCanonical)
@@ -552,7 +558,8 @@ private:
 		return sum;
 	}
 
-	ComplexOrRealType timeDependentConnection(ComplexOrRealType tmp, RealType time, SizeType index) const
+	ComplexOrRealType
+	timeDependentConnection(ComplexOrRealType tmp, RealType time, SizeType index) const
 	{
 		PsimagLite::Matrix<RealType> data;
 		interpolateSchedule(data);
@@ -598,10 +605,15 @@ private:
 				}
 				// Linear Interpolation for now
 				RealType den = top - bottom;
-				RealType mGamma = (timeSchedule(kj + 1, 1) - timeSchedule(kj, 1)) / den;
+				RealType mGamma
+				    = (timeSchedule(kj + 1, 1) - timeSchedule(kj, 1)) / den;
 				RealType mJ = (timeSchedule(kj + 1, 2) - timeSchedule(kj, 2)) / den;
-				RealType qGamma = (timeSchedule(kj, 1) * timeSchedule(kj + 1, 0) - timeSchedule(kj + 1, 1) * timeSchedule(kj, 0)) / den;
-				RealType qJ = (timeSchedule(kj, 2) * timeSchedule(kj + 1, 0) - timeSchedule(kj + 1, 2) * timeSchedule(kj, 0)) / den;
+				RealType qGamma = (timeSchedule(kj, 1) * timeSchedule(kj + 1, 0)
+				                   - timeSchedule(kj + 1, 1) * timeSchedule(kj, 0))
+				    / den;
+				RealType qJ = (timeSchedule(kj, 2) * timeSchedule(kj + 1, 0)
+				               - timeSchedule(kj + 1, 2) * timeSchedule(kj, 0))
+				    / den;
 				Gamma = mGamma * s + qGamma;
 				J = mJ * s + qJ;
 			}
@@ -649,10 +661,18 @@ private:
 				}
 				// Linear Interpolation for now
 				std::complex<RealType> den = top - bottom;
-				std::complex<RealType> mGamma = (timeSchedule(kj + 1, 1) - timeSchedule(kj, 1)) / den;
-				std::complex<RealType> mJ = (timeSchedule(kj + 1, 2) - timeSchedule(kj, 2)) / den;
-				std::complex<RealType> qGamma = (timeSchedule(kj, 1) * timeSchedule(kj + 1, 0) - timeSchedule(kj + 1, 1) * timeSchedule(kj, 0)) / den;
-				std::complex<RealType> qJ = (timeSchedule(kj, 2) * timeSchedule(kj + 1, 0) - timeSchedule(kj + 1, 2) * timeSchedule(kj, 0)) / den;
+				std::complex<RealType> mGamma
+				    = (timeSchedule(kj + 1, 1) - timeSchedule(kj, 1)) / den;
+				std::complex<RealType> mJ
+				    = (timeSchedule(kj + 1, 2) - timeSchedule(kj, 2)) / den;
+				std::complex<RealType> qGamma
+				    = (timeSchedule(kj, 1) * timeSchedule(kj + 1, 0)
+				       - timeSchedule(kj + 1, 1) * timeSchedule(kj, 0))
+				    / den;
+				std::complex<RealType> qJ
+				    = (timeSchedule(kj, 2) * timeSchedule(kj + 1, 0)
+				       - timeSchedule(kj + 1, 2) * timeSchedule(kj, 0))
+				    / den;
 				Gamma = mGamma * s + qGamma;
 				J = mJ * s + qJ;
 			}

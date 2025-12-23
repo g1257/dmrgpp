@@ -117,8 +117,7 @@ public:
 	    , currentTime_(currentTime)
 	    , model_(model)
 	    , io_(io)
-	{
-	}
+	{ }
 
 	SizeType tasks() const { return phi_.sectors(); }
 
@@ -137,10 +136,8 @@ private:
 	{
 		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
-		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 ModelType::modelLinks(),
-		                                                 currentTime_,
-		                                                 model_.superOpHelper());
+		typename ModelType::HamiltonianConnectionType hc(
+		    lrs_, ModelType::modelLinks(), currentTime_, model_.superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc, aux);
 
 		typename LanczosSolverType::ParametersSolverType params(io_, "Tridiag");

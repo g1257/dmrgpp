@@ -89,8 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename RealType, typename SparseMatrixType>
-class ReflectionTransform {
+template <typename RealType, typename SparseMatrixType> class ReflectionTransform {
 
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
@@ -101,8 +100,7 @@ public:
 
 	ReflectionTransform(bool idebug)
 	    : idebug_(idebug)
-	{
-	}
+	{ }
 
 	void update(const SparseMatrixType& sSector)
 	{
@@ -119,9 +117,8 @@ public:
 		printFullMatrix(Qm_, "Qm");
 	}
 
-	void transform(SparseMatrixType& dest1,
-	               SparseMatrixType& destm,
-	               const SparseMatrixType& H) const
+	void
+	transform(SparseMatrixType& dest1, SparseMatrixType& destm, const SparseMatrixType& H) const
 	{
 		SparseMatrixType HQ1, HQm;
 		multiply(HQ1, H, Q1_);
@@ -154,7 +151,8 @@ public:
 
 		if (idebug_) {
 			std::cerr << "norm1=" << norm1 << " normm=" << normm << "\n";
-			std::cerr << "plusSector=" << plusSector_ << " minusSector=" << minusSector << "\n";
+			std::cerr << "plusSector=" << plusSector_ << " minusSector=" << minusSector
+			          << "\n";
 			printFullMatrix(dest1, "dest1");
 			printFullMatrix(destm, "destm");
 		}
@@ -179,7 +177,9 @@ public:
 #endif
 	}
 
-	bool isThePartialIdentity(const SparseMatrixType& A, SizeType partialSize, const RealType& eps = 1e-6) const
+	bool isThePartialIdentity(const SparseMatrixType& A,
+	                          SizeType partialSize,
+	                          const RealType& eps = 1e-6) const
 	{
 		for (SizeType i = 0; i < partialSize; i++) {
 			for (int k = A.getRowPtr(i); k < A.getRowPtr(i + 1); k++) {
@@ -399,7 +399,8 @@ private:
 	             const ReflectionBasisType& reflectionBasis,
 	             const RealType& sector) const
 	{
-		const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
+		const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg
+		    = reflectionBasis.ipPosOrNeg(sector);
 		const SparseMatrixType& reflection = reflectionBasis.reflection();
 		SizeType n = reflection.rank();
 
@@ -408,7 +409,8 @@ private:
 		for (SizeType i = 0; i < n; i++) {
 			T1.setRow(i, counter);
 			bool hasDiagonal = false;
-			for (int k = reflection.getRowPtr(i); k < reflection.getRowPtr(i + 1); k++) {
+			for (int k = reflection.getRowPtr(i); k < reflection.getRowPtr(i + 1);
+			     k++) {
 				SizeType col = reflection.getCol(k);
 				ComplexOrRealType val = reflection.getValue(k);
 				if (col == i) {
@@ -463,7 +465,8 @@ private:
 		//			if (isAlmostZero(sum[i],1e-12)) continue;
 		//			sum[i] = 1.0/sqrt(sum[i]);
 
-		//			for (int k = T1final.getRowPtr(i);k<T1final.getRowPtr(i+1);k++)
+		//			for (int k =
+		// T1final.getRowPtr(i);k<T1final.getRowPtr(i+1);k++)
 		//				T1final.setValues(k,T1final.getValue(k) * sum[i]);
 
 		//		}

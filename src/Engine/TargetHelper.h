@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelType_, typename WaveFunctionTransfType_>
-class TargetHelper {
+template <typename ModelType_, typename WaveFunctionTransfType_> class TargetHelper {
 
 public:
 
@@ -99,8 +98,7 @@ public:
 	    : lrs_(lrs)
 	    , model_(model)
 	    , wft_(wft)
-	{
-	}
+	{ }
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
@@ -108,10 +106,7 @@ public:
 
 	const WaveFunctionTransfType& wft() const { return wft_; }
 
-	bool withLegacyBugs() const
-	{
-		return model_.params().options.isSet("keepLegacyBugs");
-	}
+	bool withLegacyBugs() const { return model_.params().options.isSet("keepLegacyBugs"); }
 
 private:
 

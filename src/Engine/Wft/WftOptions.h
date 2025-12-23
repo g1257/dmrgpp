@@ -4,8 +4,7 @@
 
 namespace Dmrg {
 
-template <typename VectorWithOffsetType_, typename OptionsType>
-struct WftOptions {
+template <typename VectorWithOffsetType_, typename OptionsType> struct WftOptions {
 
 	typedef typename VectorWithOffsetType_::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;

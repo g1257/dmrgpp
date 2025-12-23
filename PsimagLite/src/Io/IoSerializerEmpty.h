@@ -44,21 +44,23 @@ public:
 
 	/* write functions START */
 
-	template <typename T>
-	void write(String, const T&, WriteMode = NO_OVERWRITE)
+	template <typename T> void write(String, const T&, WriteMode = NO_OVERWRITE)
 	{
 		errorPrint("write");
 	}
 
 	// Note: THIS WILL EMPTY THE STACK OBJECT!
 	template <typename T>
-	void write(String, std::stack<T>&, WriteMode = NO_OVERWRITE, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith, int*>::Type = 0)
+	void write(String,
+	           std::stack<T>&,
+	           WriteMode = NO_OVERWRITE,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith, int*>::Type
+	           = 0)
 	{
 		errorPrint("write");
 	}
 
-	template <typename T>
-	void read(T&, String) { errorPrint("read"); }
+	template <typename T> void read(T&, String) { errorPrint("read"); }
 
 	static void unitTest(std::vector<bool>&) { errorPrint("unitTest"); }
 
@@ -72,8 +74,10 @@ private:
 
 	static void errorPrint(String fname)
 	{
-		throw RuntimeError(
-		    "FATAL: You called IoSerializer::" + fname + " but you compiled with USE_IO_SIMPLE." + " Please delete USE_IO_SIMPLE from Makefile and" + " enable HDF5 support.\n");
+		throw RuntimeError("FATAL: You called IoSerializer::" + fname
+		                   + " but you compiled with USE_IO_SIMPLE."
+		                   + " Please delete USE_IO_SIMPLE from Makefile and"
+		                   + " enable HDF5 support.\n");
 	}
 };
 } // namespace PsimagLite

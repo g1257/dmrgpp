@@ -108,17 +108,17 @@ public:
 	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
 	typedef typename LanczosVectorsType::VectorVectorType VectorVectorType;
 	typedef typename SolverParametersType::RealType RealType;
-	typedef typename LanczosVectorsType::DenseMatrixRealType
-	    DenseMatrixRealType;
+	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef SolverParametersType ParametersSolverType;
 	typedef MatrixType LanczosMatrixType;
-	typedef typename LanczosVectorsType::TridiagonalMatrixType
-	    TridiagonalMatrixType;
+	typedef typename LanczosVectorsType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename VectorType::value_type VectorElementType;
 	typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
 
-	LanczosCore(const MatrixType& mat, const SolverParametersType& params, bool isReorthoEnabled)
+	LanczosCore(const MatrixType& mat,
+	            const SolverParametersType& params,
+	            bool isReorthoEnabled)
 	    : progress_("LanczosCore")
 	    , mat_(mat)
 	    , params_(params)
@@ -127,8 +127,8 @@ public:
 	{
 		OstringStream msg(std::cout.precision());
 		msg() << "Constructing... mat.rank=" << mat_.rows();
-		msg() << " maximum steps=" << steps_
-		      << " maximum eps=" << params_.tolerance << " requested";
+		msg() << " maximum steps=" << steps_ << " maximum eps=" << params_.tolerance
+		      << " requested";
 		progress_.printline(msg, std::cout);
 	}
 
@@ -188,8 +188,8 @@ public:
 		mat_.matrixVectorProduct(V1, V0); // V1 = H|V0>
 		atmp = 0.0;
 		for (SizeType i = 0; i < matsize; ++i)
-			atmp += PsimagLite::real(
-			    V1[i] * PsimagLite::conj(V0[i])); // alpha = <V0|V1>
+			atmp
+			    += PsimagLite::real(V1[i] * PsimagLite::conj(V0[i])); // alpha = <V0|V1>
 		ab.a(0) = atmp;
 
 		RealType btmp = 0.0;
@@ -219,8 +219,8 @@ public:
 
 			lanczosVectors_.oneStepDecomposition(V0, V1, V2, ab, j);
 			ab.diag(tmpEigs, j + 1);
-			const SizeType eigsForError = std::min(excitedForStop,
-			                                       static_cast<SizeType>(tmpEigs.size()));
+			const SizeType eigsForError
+			    = std::min(excitedForStop, static_cast<SizeType>(tmpEigs.size()));
 
 			deltaMax = 0;
 			for (SizeType ii = 0; ii < eigsForError; ++ii) {

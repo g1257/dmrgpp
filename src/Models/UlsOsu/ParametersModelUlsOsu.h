@@ -104,32 +104,26 @@ struct ParametersModelUlsOsu : public ParametersModelBase<RealType, QnType> {
 		try {
 			io.read(magneticFieldX, "MagneticFieldX");
 			std::cerr << "Has MagneticFieldX \n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.read(magneticFieldY, "MagneticFieldY");
 			std::cerr << "Has MagneticFieldY \n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.read(magneticFieldZ, "MagneticFieldZ");
 			std::cerr << "Has MagneticFieldZ \n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	                   SizeType,
-	                   PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelUlsOsu";
 		io.createGroup(label);
@@ -140,8 +134,7 @@ struct ParametersModelUlsOsu : public ParametersModelBase<RealType, QnType> {
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const ParametersModelUlsOsu& parameters)
+	friend std::ostream& operator<<(std::ostream& os, const ParametersModelUlsOsu& parameters)
 	{
 		os << "MagneticFieldX=" << parameters.magneticFieldX << "\n";
 		os << "MagneticFieldY=" << parameters.magneticFieldY << "\n";

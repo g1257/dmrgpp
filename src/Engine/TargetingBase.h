@@ -92,8 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingBase {
+template <typename LanczosSolverType_, typename VectorWithOffsetType_> class TargetingBase {
 
 public:
 
@@ -123,11 +122,10 @@ public:
 	typedef VectorType TargetVectorType;
 	typedef TargetParamsBase<ModelType> TargetParamsType;
 	typedef TargetHelper<ModelType, WaveFunctionTransfType> TargetHelperType;
-	typedef TargetingCommon<TargetHelperType,
-	                        VectorWithOffsetType,
-	                        LanczosSolverType>
+	typedef TargetingCommon<TargetHelperType, VectorWithOffsetType, LanczosSolverType>
 	    TargetingCommonType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef
+	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
 	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
 	typedef typename ApplyOperatorExpressionType::DmrgSerializerType DmrgSerializerType;
@@ -166,10 +164,7 @@ public:
 
 	virtual ~TargetingBase() { }
 
-	virtual void postCtor()
-	{
-		commonTargeting_.postCtor(sites(), targets());
-	}
+	virtual void postCtor() { commonTargeting_.postCtor(sites(), targets()); }
 
 	virtual SizeType sites() const = 0;
 
@@ -186,27 +181,21 @@ public:
 	                    SizeType loopNumber)
 	    = 0;
 
-	virtual void read(typename TargetingCommonType::IoInputType&,
-	                  PsimagLite::String)
-	    = 0;
+	virtual void read(typename TargetingCommonType::IoInputType&, PsimagLite::String) = 0;
 
-	virtual void write(const VectorSizeType&,
-	                   PsimagLite::IoSelector::Out&,
-	                   PsimagLite::String) const
+	virtual void
+	write(const VectorSizeType&, PsimagLite::IoSelector::Out&, PsimagLite::String) const
 	    = 0;
 
 	// virtuals with default implementation
 
 	virtual bool includeGroundStage() const { return true; }
 
-	virtual void set(VectorVectorVectorType& inV,
-	                 const VectorSizeType& sectors,
-	                 const BasisType& someBasis)
+	virtual void
+	set(VectorVectorVectorType& inV, const VectorSizeType& sectors, const BasisType& someBasis)
 	{
-		commonTargeting_.aoeNonConst().setPsi(inV,
-		                                      sectors,
-		                                      someBasis,
-		                                      model_.params().numberOfExcited);
+		commonTargeting_.aoeNonConst().setPsi(
+		    inV, sectors, someBasis, model_.params().numberOfExcited);
 	}
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
@@ -225,10 +214,7 @@ public:
 		basisWithOps.setOneSite(X, model_, commonTargeting_.time());
 	}
 
-	virtual bool end() const
-	{
-		return false;
-	}
+	virtual bool end() const { return false; }
 
 	virtual SizeType size() const
 	{
@@ -237,10 +223,7 @@ public:
 		return commonTargeting_.aoe().tvs();
 	}
 
-	virtual RealType normSquared(SizeType i) const
-	{
-		return commonTargeting_.normSquared(i);
-	}
+	virtual RealType normSquared(SizeType i) const { return commonTargeting_.normSquared(i); }
 
 	virtual void initPsi(SizeType nsectors, SizeType nexcited)
 	{
@@ -258,7 +241,8 @@ public:
 		if (VectorWithOffsetType::name() != "vectorwithoffsets")
 			err("FATAL: Wrong execution path\n");
 
-		const VectorWithOffsetType& psi00 = commonTargeting_.aoe().ensureOnlyOnePsi("initialGuess");
+		const VectorWithOffsetType& psi00
+		    = commonTargeting_.aoe().ensureOnlyOnePsi("initialGuess");
 		VectorWithOffsetType vwo(compactedWeights, sectors, basis);
 		commonTargeting_.initialGuess(vwo, psi00, oneSiteSpaces, noguess);
 		const SizeType n = vwo.sectors();
@@ -288,7 +272,8 @@ public:
 		const SizeType numberOfExcited = psi[sectorIndex].size();
 
 		if (excited > numberOfExcited)
-			err("initialGuess, excited=" + ttos(excited) + " > " + ttos(numberOfExcited) + "\n");
+			err("initialGuess, excited=" + ttos(excited) + " > " + ttos(numberOfExcited)
+			    + "\n");
 
 		SizeType start = 0;
 		SizeType end = numberOfExcited;
@@ -302,19 +287,16 @@ public:
 		assert(sectorIndex < sectors.size());
 		for (SizeType e = start; e < end; ++e) {
 
-			VectorWithOffsetType vwo(compactedWeights[sectorIndex],
-			                         sectors[sectorIndex],
-			                         basis);
+			VectorWithOffsetType vwo(
+			    compactedWeights[sectorIndex], sectors[sectorIndex], basis);
 
 			assert(e < psi[sectorIndex].size());
 			if (psi[sectorIndex][e] == nullptr) {
 				noguess = true;
 			}
 
-			commonTargeting_.initialGuess(vwo,
-			                              *(psi[sectorIndex][e]),
-			                              oneSiteSpaces,
-			                              noguess);
+			commonTargeting_.initialGuess(
+			    vwo, *(psi[sectorIndex][e]), oneSiteSpaces, noguess);
 
 			VectorType tmpVector;
 			vwo.extract(tmpVector, vwo.sector(0));
@@ -339,10 +321,7 @@ public:
 		return commonTargeting_.aoe().targetVectors(i);
 	}
 
-	RealType time() const
-	{
-		return commonTargeting_.time();
-	}
+	RealType time() const { return commonTargeting_.time(); }
 
 	const typename VectorWithOffsetType::value_type& inSitu(SizeType i) const
 	{
@@ -351,8 +330,7 @@ public:
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
-	static PsimagLite::String buildPrefix(PsimagLite::IoSelector::Out& io,
-	                                      SizeType counter)
+	static PsimagLite::String buildPrefix(PsimagLite::IoSelector::Out& io, SizeType counter)
 	{
 		PsimagLite::String prefix("TargetingCommon");
 		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
@@ -361,7 +339,8 @@ public:
 
 		io.write(counter + 1,
 		         prefix + "/Size",
-		         (counter == 0) ? SerializerType::NO_OVERWRITE : SerializerType::ALLOW_OVERWRITE);
+		         (counter == 0) ? SerializerType::NO_OVERWRITE
+		                        : SerializerType::ALLOW_OVERWRITE);
 
 		prefix += ("/" + ttos(counter));
 
@@ -376,15 +355,9 @@ public:
 
 protected:
 
-	TargetingCommonType& common()
-	{
-		return commonTargeting_;
-	}
+	TargetingCommonType& common() { return commonTargeting_; }
 
-	const TargetingCommonType& common() const
-	{
-		return commonTargeting_;
-	}
+	const TargetingCommonType& common() const { return commonTargeting_; }
 
 	VectorWithOffsetType& tvNonConst(SizeType ind)
 	{
@@ -396,10 +369,7 @@ protected:
 		return commonTargeting_.aoe().targetVectors(ind);
 	}
 
-	const SizeType numberOfTvs() const
-	{
-		return commonTargeting_.aoe().tvs();
-	}
+	const SizeType numberOfTvs() const { return commonTargeting_.aoe().tvs(); }
 
 private:
 

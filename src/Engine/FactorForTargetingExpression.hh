@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename ComplexOrRealType>
-class FactorForTargetingExpression {
+template <typename ComplexOrRealType> class FactorForTargetingExpression {
 
 	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 	using VectorType = std::vector<ComplexOrRealType>;

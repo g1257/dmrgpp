@@ -30,8 +30,7 @@ int main(int argc, char* argv[])
 	m(0, 0) = m(3, 3) = -0.25;
 	m(1, 1) = m(2, 2) = 0.25;
 
-	std::cout << "matrix\n"
-	          << m << "\n";
+	std::cout << "matrix\n" << m << "\n";
 
 	PsimagLite::CrsMatrix<ComplexType> msparse(m);
 

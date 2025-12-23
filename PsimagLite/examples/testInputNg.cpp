@@ -174,8 +174,7 @@ int main(int argc, char* argv[])
 	std::string mystr("default");
 	try {
 		io.readline(mystr, "mystring=");
-	} catch (std::exception&) {
-	}
+	} catch (std::exception&) { }
 }
 /* PSIDOC_CODE_END */
 

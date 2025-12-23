@@ -8,8 +8,7 @@
 
 namespace Dmrg {
 
-template <typename LeftRightSuperType_>
-class WaveStructCombined {
+template <typename LeftRightSuperType_> class WaveStructCombined {
 
 public:
 
@@ -31,8 +30,7 @@ public:
 	    , wsStack_(onDisk, filename, "Wstacks", "system", basisTraits)
 	    , weStack_(onDisk, filename, "Wstacks", "environ", basisTraits)
 	    , needsPop_(false)
-	{
-	}
+	{ }
 
 	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix)
 	{
@@ -55,13 +53,12 @@ public:
 		weStack_.write(prefix + "/weStack", io.serializer());
 	}
 
-	void beforeWft(ProgramGlobals::DirectionEnum dir,
-	               bool twoSiteDmrg,
-	               bool bounce)
+	void beforeWft(ProgramGlobals::DirectionEnum dir, bool twoSiteDmrg, bool bounce)
 	{
-		WftStackType& stack = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_
-		                                                                             : weStack_;
-		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
+		WftStackType& stack
+		    = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_ : weStack_;
+		const PsimagLite::String label
+		    = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
 
 		needsPop_ = false;
 
@@ -84,9 +81,10 @@ public:
 
 	void afterWft(ProgramGlobals::DirectionEnum dir)
 	{
-		WftStackType& stack = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_
-		                                                                             : weStack_;
-		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
+		WftStackType& stack
+		    = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_ : weStack_;
+		const PsimagLite::String label
+		    = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
 
 		if (!needsPop_)
 			return;
@@ -130,10 +128,7 @@ public:
 		}
 	}
 
-	void setLrs(const LeftRightSuperType& lrs)
-	{
-		lrs_.dontCopyOperators(lrs);
-	}
+	void setLrs(const LeftRightSuperType& lrs) { lrs_.dontCopyOperators(lrs); }
 
 	const WaveStructSvdType& getWave(ProgramGlobals::SysOrEnvEnum sysOrEnv) const
 	{
@@ -143,10 +138,7 @@ public:
 		                                                          : weStack_.top();
 	}
 
-	const LeftRightSuperType& lrs() const
-	{
-		return lrs_;
-	}
+	const LeftRightSuperType& lrs() const { return lrs_; }
 
 	const BlockDiagonalMatrixType& getTransform(ProgramGlobals::SysOrEnvEnum dir) const
 	{
@@ -159,8 +151,8 @@ public:
 		                                                          : weStack_.size();
 	}
 
-	const BlockDiagonalMatrixType& multiPointGetTransform(SizeType ind,
-	                                                      ProgramGlobals::DirectionEnum dir) const
+	const BlockDiagonalMatrixType&
+	multiPointGetTransform(SizeType ind, ProgramGlobals::DirectionEnum dir) const
 	{
 		return (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? wsStack_[ind].u()
 		                                                             : weStack_[ind].u();

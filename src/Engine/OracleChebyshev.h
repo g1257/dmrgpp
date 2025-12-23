@@ -4,8 +4,7 @@
 
 namespace Dmrg {
 
-template <typename TargetingCommonType, typename TargetParamsType>
-class OracleChebyshev {
+template <typename TargetingCommonType, typename TargetParamsType> class OracleChebyshev {
 
 public:
 
@@ -33,8 +32,7 @@ public:
 	    , currentTime_(currentTime)
 	    , tstStruct_(tstStruct)
 	    , E0_(E0)
-	{
-	}
+	{ }
 
 	void operator()(SizeType n,
 	                const TargetingCommonType& common,
@@ -44,8 +42,8 @@ public:
 	                typename TargetingCommonType::BorderEnumType border)
 	{
 		VectorWithOffsetType p0;
-		typename TargetingCommonType::ApplyOperatorType applyOpLocal(lrs_,
-		                                                             common.withLegacyBugs());
+		typename TargetingCommonType::ApplyOperatorType applyOpLocal(
+		    lrs_, common.withLegacyBugs());
 		typename PsimagLite::Vector<bool>::Type signs;
 		model_.findOddElectronsOfOneSite(signs, site);
 		FermionSignType fs(lrs_.left(), signs);
@@ -62,13 +60,10 @@ public:
 			VectorWithOffsetType p2;
 			p2.fromFull(r, lrs_.super());
 			// <gs|c|p2>;
-			ComplexOrRealType result = common.testRealWork(p2,
-			                                               common.psi(),
-			                                               systemOrEnviron,
-			                                               site,
-			                                               A,
-			                                               border);
-			std::cout << "OracleChebyshev: <gs|H|p" << (i + 2) << ">= " << result << "\n";
+			ComplexOrRealType result = common.testRealWork(
+			    p2, common.psi(), systemOrEnviron, site, A, border);
+			std::cout << "OracleChebyshev: <gs|H|p" << (i + 2) << ">= " << result
+			          << "\n";
 			// prepare for next iteration
 			p0 = p1;
 			p1 = p2;
@@ -87,14 +82,9 @@ private:
 			i0 = p1.sector(ii);
 
 		SizeType p = lrs_.super().findPartitionNumber(p1.offset(i0));
-		typename ModelType::HamiltonianConnectionType hc(p,
-		                                                 lrs_,
-		                                                 model_.geometry(),
-		                                                 ModelType::modelLinks(),
-		                                                 currentTime_,
-		                                                 0);
-		MatrixLanczosType lanczosHelper(model_,
-		                                hc);
+		typename ModelType::HamiltonianConnectionType hc(
+		    p, lrs_, model_.geometry(), ModelType::modelLinks(), currentTime_, 0);
+		MatrixLanczosType lanczosHelper(model_, hc);
 
 		ScaledHamiltonianType lanczosHelper2(lanczosHelper, tstStruct_, E0_);
 

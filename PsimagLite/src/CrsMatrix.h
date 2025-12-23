@@ -125,8 +125,7 @@ namespace PsimagLite {
                 rowptr = [ 0  2  5  8 12 16 19 ]\\
         \end{tt}
         */
-template <class T>
-class CrsMatrix {
+template <class T> class CrsMatrix {
 
 public:
 
@@ -136,8 +135,7 @@ public:
 	CrsMatrix()
 	    : nrow_(0)
 	    , ncol_(0)
-	{
-	}
+	{ }
 
 	~CrsMatrix() { }
 
@@ -155,8 +153,7 @@ public:
 		resize(nrow, ncol, nonzero);
 	}
 
-	template <typename S>
-	CrsMatrix(const CrsMatrix<S>& a)
+	template <typename S> CrsMatrix(const CrsMatrix<S>& a)
 	{
 		colind_ = a.colind_;
 		rowptr_ = a.rowptr_;
@@ -165,8 +162,7 @@ public:
 		ncol_ = a.ncol_;
 	}
 
-	template <typename S>
-	CrsMatrix(const CrsMatrix<std::complex<S>>& a)
+	template <typename S> CrsMatrix(const CrsMatrix<std::complex<S>>& a)
 	{
 		colind_ = a.colind_;
 		rowptr_ = a.rowptr_;
@@ -229,10 +225,8 @@ public:
 
 	// start closure ctors
 
-	CrsMatrix(const std::ClosureOperator<
-	          CrsMatrix,
-	          CrsMatrix,
-	          std::ClosureOperations::OP_MULT>& c)
+	CrsMatrix(
+	    const std::ClosureOperator<CrsMatrix, CrsMatrix, std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix& x = *this;
 		const CrsMatrix& y = c.r1;
@@ -240,10 +234,7 @@ public:
 		multiply(x, y, z);
 	}
 
-	CrsMatrix(const std::ClosureOperator<
-	          T,
-	          CrsMatrix,
-	          std::ClosureOperations::OP_MULT>& c)
+	CrsMatrix(const std::ClosureOperator<T, CrsMatrix, std::ClosureOperations::OP_MULT>& c)
 	{
 		*this = c.r2;
 		this->values_ *= c.r1;
@@ -352,17 +343,16 @@ public:
 
 	bool operator==(const CrsMatrix<T>& op) const
 	{
-		return (nrow_ == op.nrow_ && ncol_ == op.ncol_ && rowptr_ == op.rowptr_ && colind_ == op.colind_ && values_ == op.values_);
+		return (nrow_ == op.nrow_ && ncol_ == op.ncol_ && rowptr_ == op.rowptr_
+		        && colind_ == op.colind_ && values_ == op.values_);
 	}
 
 	template <typename VerySparseMatrixType>
-	typename EnableIf<!std::IsClosureLike<VerySparseMatrixType>::True,
-	                  void>::Type
+	typename EnableIf<!std::IsClosureLike<VerySparseMatrixType>::True, void>::Type
 	operator=(const VerySparseMatrixType& m)
 	{
 		if (!m.sorted())
-			throw RuntimeError(
-			    "CrsMatrix: VerySparseMatrix must be sorted\n");
+			throw RuntimeError("CrsMatrix: VerySparseMatrix must be sorted\n");
 
 		clear();
 		SizeType nonZeros = m.nonZeros();
@@ -409,8 +399,7 @@ public:
 	 ** where x and y are vectors and A is a sparse matrix in
 	 ** row-compressed format */
 	template <typename VectorLikeType>
-	void matrixVectorProduct(VectorLikeType& x,
-	                         const VectorLikeType& y) const
+	void matrixVectorProduct(VectorLikeType& x, const VectorLikeType& y) const
 	{
 		assert(x.size() == y.size());
 		for (SizeType i = 0; i < y.size(); i++) {
@@ -425,16 +414,10 @@ public:
 	}
 
 #ifndef NO_DEPRECATED_ALLOWED
-	int nonZero() const
-	{
-		return colind_.size();
-	} // DEPRECATED, use nonZeros()
+	int nonZero() const { return colind_.size(); } // DEPRECATED, use nonZeros()
 #endif
 
-	SizeType rows() const
-	{
-		return nrow_;
-	}
+	SizeType rows() const { return nrow_; }
 
 	SizeType cols() const { return ncol_; }
 
@@ -534,10 +517,7 @@ public:
 	template <typename T1>
 	typename EnableIf<Loki::TypeTraits<T1>::isArith || IsComplexNumber<T1>::True,
 	                  CrsMatrix>::Type
-	operator=(const std::ClosureOperator<
-	          T1,
-	          CrsMatrix,
-	          std::ClosureOperations::OP_MULT>& c)
+	operator=(const std::ClosureOperator<T1, CrsMatrix, std::ClosureOperations::OP_MULT>& c)
 	{
 		*this = c.r2;
 		this->values_ *= c.r1;
@@ -547,10 +527,7 @@ public:
 	template <typename T1>
 	typename EnableIf<Loki::TypeTraits<T1>::isArith || IsComplexNumber<T1>::True,
 	                  CrsMatrix>::Type
-	operator+=(const std::ClosureOperator<
-	           T1,
-	           CrsMatrix,
-	           std::ClosureOperations::OP_MULT>& c)
+	operator+=(const std::ClosureOperator<T1, CrsMatrix, std::ClosureOperations::OP_MULT>& c)
 	{
 		CrsMatrix s;
 		add(s, c.r2, c.r1);
@@ -594,8 +571,9 @@ public:
 		MPI::recv(values_, root, tag + 4, mpiComm);
 	}
 
-	void
-	write(String label, IoSerializer& ioSerializer, IoSerializer::WriteMode mode = IoSerializer::NO_OVERWRITE) const
+	void write(String label,
+	           IoSerializer& ioSerializer,
+	           IoSerializer::WriteMode mode = IoSerializer::NO_OVERWRITE) const
 	{
 		if (nrow_ > 0)
 			checkValidity();
@@ -632,41 +610,32 @@ public:
 		checkValidity();
 	}
 
-	template <typename S>
-	friend bool isZero(const CrsMatrix<S>&, double);
+	template <typename S> friend bool isZero(const CrsMatrix<S>&, double);
+
+	template <typename S> friend typename Real<S>::Type norm2(const CrsMatrix<S>& m);
 
 	template <typename S>
-	friend typename Real<S>::Type norm2(const CrsMatrix<S>& m);
+	friend std::ostream& operator<<(std::ostream& os, const CrsMatrix<S>& m);
 
-	template <typename S>
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const CrsMatrix<S>& m);
+	template <class S> friend void difference(const CrsMatrix<S>& A, const CrsMatrix<S>& B);
 
-	template <class S>
-	friend void difference(const CrsMatrix<S>& A, const CrsMatrix<S>& B);
+	template <typename S> friend void MpiBroadcast(CrsMatrix<S>* v, int rank);
 
-	template <typename S>
-	friend void MpiBroadcast(CrsMatrix<S>* v, int rank);
+	template <typename S> friend void MpiSend(CrsMatrix<S>* v, int iproc, int i);
 
-	template <typename S>
-	friend void MpiSend(CrsMatrix<S>* v, int iproc, int i);
-
-	template <typename S>
-	friend void MpiRecv(CrsMatrix<S>* v, int iproc, int i);
+	template <typename S> friend void MpiRecv(CrsMatrix<S>* v, int iproc, int i);
 
 	template <typename CrsMatrixType>
-	friend std::istream& operator>>(std::istream& is,
-	                                CrsMatrix<CrsMatrixType>& m);
+	friend std::istream& operator>>(std::istream& is, CrsMatrix<CrsMatrixType>& m);
 
-	template <typename S>
-	friend void bcast(CrsMatrix<S>& m);
+	template <typename S> friend void bcast(CrsMatrix<S>& m);
 
 private:
 
 	template <typename T1>
-	typename std::enable_if<
-	    std::is_same<T1, typename Real<T>::Type>::value || std::is_same<T1, T>::value,
-	    void>::type
+	typename std::enable_if<std::is_same<T1, typename Real<T>::Type>::value
+	                            || std::is_same<T1, T>::value,
+	                        void>::type
 	add(CrsMatrix<T>& c, const CrsMatrix<T>& m, const T1& t1) const
 	{
 		assert(m.rows() == m.cols());
@@ -686,8 +655,7 @@ private:
 
 // Companion functions below:
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const CrsMatrix<T>& m)
+template <typename T> std::ostream& operator<<(std::ostream& os, const CrsMatrix<T>& m)
 {
 	SizeType n = m.rows();
 	if (n == 0) {
@@ -714,19 +682,16 @@ std::ostream& operator<<(std::ostream& os, const CrsMatrix<T>& m)
 	return os;
 }
 
-template <typename T>
-std::istream& operator>>(std::istream& is, CrsMatrix<T>& m)
+template <typename T> std::istream& operator>>(std::istream& is, CrsMatrix<T>& m)
 {
 	int n;
 	is >> n;
 	if (n < 0)
-		throw RuntimeError(
-		    "is>>CrsMatrix(...): Rows must be positive\n");
+		throw RuntimeError("is>>CrsMatrix(...): Rows must be positive\n");
 
 	int ncol = 0;
 	if (ncol < 0)
-		throw RuntimeError(
-		    "is>>CrsMatrix(...): Cols must be positive\n");
+		throw RuntimeError("is>>CrsMatrix(...): Cols must be positive\n");
 	is >> ncol;
 
 	if (n == 0 || ncol == 0)
@@ -750,8 +715,7 @@ std::istream& operator>>(std::istream& is, CrsMatrix<T>& m)
 	return is;
 }
 
-template <typename T>
-class IsMatrixLike<CrsMatrix<T>> {
+template <typename T> class IsMatrixLike<CrsMatrix<T>> {
 public:
 
 	enum
@@ -760,8 +724,7 @@ public:
 	};
 };
 
-template <typename S>
-void bcast(CrsMatrix<S>& m)
+template <typename S> void bcast(CrsMatrix<S>& m)
 {
 	MPI::bcast(m.rowptr_);
 	MPI::bcast(m.colind_);
@@ -771,23 +734,19 @@ void bcast(CrsMatrix<S>& m)
 }
 
 //! Transforms a Compressed-Row-Storage (CRS) into a full Matrix (Fast version)
-template <typename T>
-void crsMatrixToFullMatrix(Matrix<T>& m, const CrsMatrix<T>& crsMatrix)
+template <typename T> void crsMatrixToFullMatrix(Matrix<T>& m, const CrsMatrix<T>& crsMatrix)
 {
 	m.resize(crsMatrix.rows(), crsMatrix.cols(), 0);
 	for (SizeType i = 0; i < crsMatrix.rows(); i++) {
 		//  for (SizeType k=0;k<crsMatrix.cols();k++) m(i,k)=0;
-		for (int k = crsMatrix.getRowPtr(i);
-		     k < crsMatrix.getRowPtr(i + 1);
-		     k++)
+		for (int k = crsMatrix.getRowPtr(i); k < crsMatrix.getRowPtr(i + 1); k++)
 			m(i, crsMatrix.getCol(k)) = crsMatrix.getValue(k);
 	}
 }
 
 //! Transforms a full matrix into a Compressed-Row-Storage (CRS) Matrix
 // Use the constructor if possible
-template <typename T>
-void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
+template <typename T> void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 {
 	const T zval = 0.0;
 	SizeType rows = a.rows();
@@ -836,10 +795,15 @@ void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
           */
 
 template <typename T, typename VectorLikeType>
-typename EnableIf<
-    IsVectorLike<VectorLikeType>::True && Loki::TypeTraits<typename VectorLikeType::value_type>::isFloat,
-    void>::Type
-externalProduct(CrsMatrix<T>& B, const CrsMatrix<T>& A, SizeType nout, const VectorLikeType& signs, bool order, const PsimagLite::Vector<SizeType>::Type& permutationFull)
+typename EnableIf<IsVectorLike<VectorLikeType>::True
+                      && Loki::TypeTraits<typename VectorLikeType::value_type>::isFloat,
+                  void>::Type
+externalProduct(CrsMatrix<T>& B,
+                const CrsMatrix<T>& A,
+                SizeType nout,
+                const VectorLikeType& signs,
+                bool order,
+                const PsimagLite::Vector<SizeType>::Type& permutationFull)
 {
 	if (A.rows() > 0)
 		A.checkValidity();
@@ -863,8 +827,7 @@ externalProduct(CrsMatrix<T>& B, const CrsMatrix<T>& A, SizeType nout, const Vec
 	bool is_A_fastest = order;
 
 	if (nrow_A != ncol_A)
-		throw RuntimeError(
-		    "externalProduct: matrices must be square\n");
+		throw RuntimeError("externalProduct: matrices must be square\n");
 
 	// -----------------------
 	// setup row pointers in B
@@ -890,9 +853,8 @@ externalProduct(CrsMatrix<T>& B, const CrsMatrix<T>& A, SizeType nout, const Vec
 		SizeType nnz_row = A.getRowPtr(ia + 1) - A.getRowPtr(ia);
 
 		for (SizeType ie = 0; ie < nrow_eye; ie++) {
-			SizeType ib = (is_A_fastest)
-			    ? permutationFull[ia + ie * nrow_A]
-			    : permutationFull[ie + ia * nrow_eye];
+			SizeType ib = (is_A_fastest) ? permutationFull[ia + ie * nrow_A]
+			                             : permutationFull[ie + ia * nrow_eye];
 			nnz_B_row[ib] = nnz_row;
 		};
 	};
@@ -932,13 +894,11 @@ externalProduct(CrsMatrix<T>& B, const CrsMatrix<T>& A, SizeType nout, const Vec
 			for (SizeType ie = 0; ie < nrow_eye; ie++) {
 				SizeType je = ie;
 
-				SizeType ib = (is_A_fastest)
-				    ? ia + ie * nrow_A
-				    : ie + ia * nrow_eye;
+				SizeType ib
+				    = (is_A_fastest) ? ia + ie * nrow_A : ie + ia * nrow_eye;
 
-				SizeType jb = (is_A_fastest)
-				    ? ja + je * ncol_A
-				    : je + ja * ncol_eye;
+				SizeType jb
+				    = (is_A_fastest) ? ja + je * ncol_A : je + ja * ncol_eye;
 
 				// --------------------
 				// entry bij = B(ib,jb)
@@ -971,10 +931,15 @@ externalProduct(CrsMatrix<T>& B, const CrsMatrix<T>& A, SizeType nout, const Vec
           */
 
 template <typename T, typename VectorLikeType>
-typename EnableIf<
-    IsVectorLike<VectorLikeType>::True && Loki::TypeTraits<typename VectorLikeType::value_type>::isFloat,
-    void>::Type
-externalProduct(CrsMatrix<T>& C, const CrsMatrix<T>& A, const CrsMatrix<T>& B, const VectorLikeType& signs, bool order, const PsimagLite::Vector<SizeType>::Type& permutationFull)
+typename EnableIf<IsVectorLike<VectorLikeType>::True
+                      && Loki::TypeTraits<typename VectorLikeType::value_type>::isFloat,
+                  void>::Type
+externalProduct(CrsMatrix<T>& C,
+                const CrsMatrix<T>& A,
+                const CrsMatrix<T>& B,
+                const VectorLikeType& signs,
+                bool order,
+                const PsimagLite::Vector<SizeType>::Type& permutationFull)
 {
 	const SizeType nfull = permutationFull.size();
 
@@ -997,12 +962,9 @@ externalProduct(CrsMatrix<T>& C, const CrsMatrix<T>& A, const CrsMatrix<T>& B, c
 		C.setRow(i, counter);
 		const SizeType ind = perm[i];
 		ldiv_t q = std::ldiv(ind, noutOrNa);
-		for (int k1 = BorA.getRowPtr(q.rem);
-		     k1 < BorA.getRowPtr(q.rem + 1);
-		     ++k1) {
+		for (int k1 = BorA.getRowPtr(q.rem); k1 < BorA.getRowPtr(q.rem + 1); ++k1) {
 			const SizeType col1 = BorA.getCol(k1);
-			for (int k2 = AorB.getRowPtr(q.quot);
-			     k2 < AorB.getRowPtr(q.quot + 1);
+			for (int k2 = AorB.getRowPtr(q.quot); k2 < AorB.getRowPtr(q.quot + 1);
 			     ++k2) {
 				const SizeType col2 = AorB.getCol(k2);
 				SizeType j = permutationFull[col1 + col2 * noutOrNa];
@@ -1018,20 +980,21 @@ externalProduct(CrsMatrix<T>& C, const CrsMatrix<T>& A, const CrsMatrix<T>& B, c
 }
 
 template <typename T>
-void printFullMatrix(const CrsMatrix<T>& s, const String& name, SizeType how = 0, double eps = 1e-20)
+void printFullMatrix(const CrsMatrix<T>& s,
+                     const String& name,
+                     SizeType how = 0,
+                     double eps = 1e-20)
 {
 	Matrix<T> fullm(s.rows(), s.cols());
 	crsMatrixToFullMatrix(fullm, s);
 	std::cout << "--------->   " << name;
-	std::cout << " rank=" << s.rows() << "x" << s.cols()
-	          << " <----------\n";
+	std::cout << " rank=" << s.rows() << "x" << s.cols() << " <----------\n";
 	try {
 		if (how == 1)
 			mathematicaPrint(std::cout, fullm);
 		if (how == 2)
 			symbolicPrint(std::cout, fullm);
-	} catch (std::exception& e) {
-	}
+	} catch (std::exception& e) { }
 
 	if (how == 0)
 		fullm.print(std::cout, eps);
@@ -1088,7 +1051,9 @@ void multiply(CrsMatrix<S>& C, CrsMatrix<S3> const& A, CrsMatrix<S2> const& B)
 
 // vector2 = sparseMatrix * vector1
 template <class S>
-void multiply(typename Vector<S>::Type& v2, const CrsMatrix<S>& m, const typename Vector<S>::Type& v1)
+void multiply(typename Vector<S>::Type& v2,
+              const CrsMatrix<S>& m,
+              const typename Vector<S>::Type& v1)
 {
 	SizeType n = m.rows();
 	v2.resize(n);
@@ -1101,8 +1066,7 @@ void multiply(typename Vector<S>::Type& v2, const CrsMatrix<S>& m, const typenam
 }
 
 //! Sets B=transpose(conjugate(A))
-template <typename S, typename S2>
-void transposeConjugate(CrsMatrix<S>& B, const CrsMatrix<S2>& A)
+template <typename S, typename S2> void transposeConjugate(CrsMatrix<S>& B, const CrsMatrix<S2>& A)
 {
 	SizeType nrowA = A.rows();
 	SizeType ncolA = A.cols();
@@ -1324,7 +1288,9 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 
 //! Sets A=B0*b0+B1*b1 + ...
 template <typename T, typename T1>
-void sum(CrsMatrix<T>& A, const std::vector<const CrsMatrix<T>*>& Bmats, const std::vector<T1>& bvec)
+void sum(CrsMatrix<T>& A,
+         const std::vector<const CrsMatrix<T>*>& Bmats,
+         const std::vector<T1>& bvec)
 {
 	SizeType Bmats_size = Bmats.size();
 
@@ -1462,8 +1428,7 @@ void sum(CrsMatrix<T>& A, const std::vector<const CrsMatrix<T>*>& Bmats, const s
 	A.checkValidity();
 }
 
-template <typename T>
-bool isHermitian(const CrsMatrix<T>& A, bool verbose = false)
+template <typename T> bool isHermitian(const CrsMatrix<T>& A, bool verbose = false)
 {
 	if (A.rows() != A.cols())
 		return false;
@@ -1472,8 +1437,7 @@ bool isHermitian(const CrsMatrix<T>& A, bool verbose = false)
 	return isHermitian(dense, verbose);
 }
 
-template <typename T>
-bool isAntiHermitian(const CrsMatrix<T>& A)
+template <typename T> bool isAntiHermitian(const CrsMatrix<T>& A)
 {
 	if (A.rows() != A.cols())
 		return false;
@@ -1548,14 +1512,12 @@ bool isDiagonal(const CrsMatrix<T>& A, double eps = 1e-6, bool checkForIdentity 
 	return true;
 }
 
-template <class T>
-bool isTheIdentity(const CrsMatrix<T>& A, double eps = 1e-6)
+template <class T> bool isTheIdentity(const CrsMatrix<T>& A, double eps = 1e-6)
 {
 	return isDiagonal(A, eps, true);
 }
 
-template <typename T>
-typename Real<T>::Type norm2(const CrsMatrix<T>& m)
+template <typename T> typename Real<T>::Type norm2(const CrsMatrix<T>& m)
 {
 	T val = 0;
 	for (SizeType i = 0; i < m.values_.size(); i++)
@@ -1564,8 +1526,7 @@ typename Real<T>::Type norm2(const CrsMatrix<T>& m)
 	return PsimagLite::real(val);
 }
 
-template <typename T>
-Matrix<T> multiplyTc(const CrsMatrix<T>& a, const CrsMatrix<T>& b)
+template <typename T> Matrix<T> multiplyTc(const CrsMatrix<T>& a, const CrsMatrix<T>& b)
 {
 
 	CrsMatrix<T> bb, c;
@@ -1576,8 +1537,7 @@ Matrix<T> multiplyTc(const CrsMatrix<T>& a, const CrsMatrix<T>& b)
 	return cc;
 }
 
-template <typename T>
-bool isZero(const CrsMatrix<T>& A, double eps = 0)
+template <typename T> bool isZero(const CrsMatrix<T>& A, double eps = 0)
 {
 	SizeType n = A.values_.size();
 	for (SizeType i = 0; i < n; ++i) {

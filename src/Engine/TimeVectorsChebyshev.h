@@ -113,23 +113,19 @@ class TimeVectorsChebyshev : public TimeVectorsBase<TargetParamsType,
 	typedef typename BaseType::VectorRealType VectorRealType;
 	typedef typename ModelType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType
-	    BasisWithOperatorsType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
 	typedef typename PsimagLite::Matrix<ComplexOrRealType> MatrixRealType;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
 	    ParallelTriDiagType;
 	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename ParallelTriDiagType::MatrixComplexOrRealType
-	    MatrixComplexOrRealType;
+	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
 	typedef typename ParallelTriDiagType::TargetVectorType TargetVectorType;
-	typedef typename ParallelTriDiagType::VectorMatrixFieldType
-	    VectorMatrixFieldType;
+	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
 	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type
-	    VectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
 	typedef typename LanczosSolverType::MatrixType MatrixLanczosType;
 	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType> ScaledMatrixType;
@@ -160,15 +156,13 @@ public:
 	{
 		try {
 			ioIn_.readline(correctVectorsAwesomePred_, "ChebyshevCorrectVector=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 		try {
 			PsimagLite::String isFreqTargeted;
 			ioIn_.readline(isFreqTargeted, "CorrectionVectorTargeted=");
 			if (isFreqTargeted == "true" || isFreqTargeted == "True")
 				isFreqTargeted_ = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (isFreqTargeted_) {
 			PsimagLite::String warning("TargetingChebyshev: ");
@@ -177,7 +171,8 @@ public:
 			std::cerr << warning;
 			SizeType n = targetVectors_.size();
 			if (n != 4) {
-				PsimagLite::String msg = "TimeVectorsChebyshevFrequency:" + PsimagLite::String("number of targets must be 4\n");
+				PsimagLite::String msg = "TimeVectorsChebyshevFrequency:"
+				    + PsimagLite::String("number of targets must be 4\n");
 				std::cout << msg;
 				std::cerr << msg;
 				return;
@@ -199,9 +194,8 @@ public:
 			VectorWithOffsetType phiNew;
 			assert(targetVectors_[noAdvance]);
 			if (targetVectors_[noAdvance]->size() > 0) {
-				BaseType::wftHelper().wftOneVector(phiNew,
-				                                   *targetVectors_[noAdvance],
-				                                   extra.block[0]);
+				BaseType::wftHelper().wftOneVector(
+				    phiNew, *targetVectors_[noAdvance], extra.block[0]);
 
 				*targetVectors_[noAdvance] = phiNew;
 			}
@@ -211,7 +205,8 @@ public:
 		if (this->currentTimeStep() == 0) {
 			SizeType indexOf1 = indices[startOfWft];
 			assert(indexOf1 < targetVectors_.size());
-			VectorWithOffsetType* tv1 = const_cast<VectorWithOffsetType*>(targetVectors_[indexOf1]);
+			VectorWithOffsetType* tv1
+			    = const_cast<VectorWithOffsetType*>(targetVectors_[indexOf1]);
 			*tv1 = phi;
 			startOfWft = 2;
 		}
@@ -235,7 +230,8 @@ public:
 			BaseType::wftHelper().wftSome(targetVectors_, extra.block[0], m, n);
 
 		assert(n > 0);
-		if (this->currentTimeStep() == 0 && tstStruct_.noOperator() && tstStruct_.skipTimeZero()) {
+		if (this->currentTimeStep() == 0 && tstStruct_.noOperator()
+		    && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
 				SizeType ii = indices[i];
 				*targetVectors_[ii] = phi;
@@ -271,7 +267,8 @@ public:
 			if (isFreqTargeted_) {
 				SizeType post = indices[i + 1];
 				VectorWithOffsetType phiNew = phi;
-				calcCorrectionVector(phiNew, *targetVectors_[ii], prev, prevMinus2, Eg);
+				calcCorrectionVector(
+				    phiNew, *targetVectors_[ii], prev, prevMinus2, Eg);
 				*targetVectors_[post] += phiNew;
 			}
 		}
@@ -320,13 +317,12 @@ private:
 	{
 		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
-		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 ModelType::modelLinks(),
-		                                                 this->time(),
-		                                                 model_.superOpHelper());
+		typename ModelType::HamiltonianConnectionType hc(
+		    lrs_, ModelType::modelLinks(), this->time(), model_.superOpHelper());
 		MatrixLanczosType lanczosHelper(model_, hc, aux);
 
-		ProgramGlobals::VerboseEnum verbose = (model_.params().options.isSet("VerboseCheby"))
+		ProgramGlobals::VerboseEnum verbose
+		    = (model_.params().options.isSet("VerboseCheby"))
 		    ? ProgramGlobals::VerboseEnum::YES
 		    : ProgramGlobals::VerboseEnum::NO;
 
@@ -420,7 +416,9 @@ private:
 		// take the first vector and compute V and weights
 		const SizeType n = indices.size();
 		if (n != 3) {
-			PsimagLite::String msg = "TimeVectorsChebyshev:: correctVectors " + PsimagLite::String(" indices.size() = " + ttos(indices.size()) + " != 3 (ignoring)\n");
+			PsimagLite::String msg = "TimeVectorsChebyshev:: correctVectors "
+			    + PsimagLite::String(" indices.size() = " + ttos(indices.size())
+			                         + " != 3 (ignoring)\n");
 			std::cout << msg;
 			std::cerr << msg;
 			return;
@@ -431,7 +429,8 @@ private:
 		const VectorWithOffsetType& phi = *targetVectors_[indices[indexToUse]];
 
 		if (phi.sectors() == 0) {
-			PsimagLite::String msg = "TimeVectorsChebyshev:: correctVectors " + PsimagLite::String(" called too early maybe? (ignoring)\n");
+			PsimagLite::String msg = "TimeVectorsChebyshev:: correctVectors "
+			    + PsimagLite::String(" called too early maybe? (ignoring)\n");
 			std::cout << msg;
 			std::cerr << msg;
 			return;
@@ -445,7 +444,8 @@ private:
 		VectorType weights;
 
 		VectorSizeType permutation;
-		computeAuxForCorrection(V, T, weights, permutation, phi, phi.sector(0), Eg, this->time());
+		computeAuxForCorrection(
+		    V, T, weights, permutation, phi, phi.sector(0), Eg, this->time());
 		if (weights.size() == 0)
 			return;
 		assert(V.size() == 1);
@@ -453,7 +453,8 @@ private:
 		// correct all vectors based on the same V and weights
 		const SizeType nvectors = indices.size(); // = 3
 		for (SizeType i = 0; i < nvectors; ++i)
-			correctVectors(*targetVectors_[indices[i]], V[0], T[0], weights, permutation);
+			correctVectors(
+			    *targetVectors_[indices[i]], V[0], T[0], weights, permutation);
 	}
 
 	void correctVectors(VectorWithOffsetType& phi,
@@ -483,12 +484,11 @@ private:
 	{
 		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
-		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 ModelType::modelLinks(),
-		                                                 currentTime,
-		                                                 model_.superOpHelper());
+		typename ModelType::HamiltonianConnectionType hc(
+		    lrs_, ModelType::modelLinks(), currentTime, model_.superOpHelper());
 		MatrixLanczosType lanczosHelper(model_, hc, aux);
-		ProgramGlobals::VerboseEnum verbose = (model_.params().options.isSet("VerboseCheby"))
+		ProgramGlobals::VerboseEnum verbose
+		    = (model_.params().options.isSet("VerboseCheby"))
 		    ? ProgramGlobals::VerboseEnum::YES
 		    : ProgramGlobals::VerboseEnum::NO;
 		// defining Hprime matrix:
@@ -501,14 +501,7 @@ private:
 		//		VectorMatrixFieldType T(phi.sectors());
 		VectorSizeType steps(phi.sectors());
 
-		ParallelTriDiagType helperTriDiag(phi,
-		                                  T,
-		                                  V,
-		                                  steps,
-		                                  lrs_,
-		                                  fakeTime,
-		                                  model_,
-		                                  ioIn_);
+		ParallelTriDiagType helperTriDiag(phi, T, V, steps, lrs_, fakeTime, model_, ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 
@@ -551,7 +544,9 @@ private:
 			ComplexOrRealType sum = 0.0;
 			for (SizeType alphap = 0; alphap < small; ++alphap) {
 				for (SizeType j = 0; j < big; ++j)
-					sum += PsimagLite::conj(Vmatrix(j, alphap) * Tmatrix(alphap, ind)) * sv[j];
+					sum += PsimagLite::conj(Vmatrix(j, alphap)
+					                        * Tmatrix(alphap, ind))
+					    * sv[j];
 			}
 			weights[alpha] = sum;
 		}
@@ -575,13 +570,15 @@ private:
 			for (SizeType alpha = 0; alpha < nbad; ++alpha) {
 				SizeType ind = permutation[alpha];
 				for (SizeType alphap = 0; alphap < small; ++alphap) {
-					r[i] -= weights[alpha] * Vmatrix(i, alphap) * Tmatrix(alphap, ind);
+					r[i] -= weights[alpha] * Vmatrix(i, alphap)
+					    * Tmatrix(alphap, ind);
 				}
 			}
 			sum += r[i] * PsimagLite::conj(r[i]);
 		}
 
-		const RealType factor = sqrt(PsimagLite::real(sumOld)) / sqrt(PsimagLite::real(sum));
+		const RealType factor
+		    = sqrt(PsimagLite::real(sumOld)) / sqrt(PsimagLite::real(sum));
 		for (SizeType i = 0; i < big; ++i)
 			r[i] *= factor;
 	}

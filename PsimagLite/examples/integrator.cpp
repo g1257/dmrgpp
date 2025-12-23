@@ -1,13 +1,11 @@
 #include "Integrator.h"
 
-template <typename RealType_>
-class SquareFunction {
+template <typename RealType_> class SquareFunction {
 
 	struct Params {
 		Params(RealType_ p_)
 		    : p(p_)
-		{
-		}
+		{ }
 
 		RealType_ p;
 	};
@@ -18,8 +16,7 @@ public:
 
 	SquareFunction(RealType p)
 	    : p_(p)
-	{
-	}
+	{ }
 
 	static RealType function(RealType x, void* vp)
 	{

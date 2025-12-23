@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <vector>
 
 namespace Dmrg {
-template <typename ModelType_>
-class MatrixVectorStored : public MatrixVectorBase<ModelType_> {
+template <typename ModelType_> class MatrixVectorStored : public MatrixVectorBase<ModelType_> {
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
@@ -149,10 +148,8 @@ public:
 
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
 	{
-		BaseType::fullDiag(eigs,
-		                   fm,
-		                   matrixStored_[pointer_],
-		                   model_.params().maxMatrixRankStored);
+		BaseType::fullDiag(
+		    eigs, fm, matrixStored_[pointer_], model_.params().maxMatrixRankStored);
 	}
 
 private:

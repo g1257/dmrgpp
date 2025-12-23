@@ -28,8 +28,7 @@ struct ToolOptions {
 	ToolOptions()
 	    : extraOptions("lowest eigenvalue")
 	    , shortoption(false)
-	{
-	}
+	{ }
 
 	PsimagLite::String filename;
 	PsimagLite::String action;
@@ -43,17 +42,15 @@ void main1(InputNgType::Readable& io,
            const ParametersDmrgSolverType& dmrgSolverParams,
            const ToolOptions& toolOptions)
 {
-	typedef PsimagLite::Geometry<ComplexOrRealType,
-	                             InputNgType::Readable,
-	                             Dmrg::ProgramGlobals>
+	typedef PsimagLite::Geometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>
 	    GeometryType;
 	GeometryType geometry(io);
 
 	typedef Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType> ToolBoxType;
 	ConcurrencyType::codeSectionParams.npthreads = dmrgSolverParams.nthreads;
-	PsimagLite::String label = (toolOptions.action == "energies") ? "lowest" : toolOptions.extraOptions;
-	typename ToolBoxType::ParametersForGrepType params(label,
-	                                                   toolOptions.shortoption);
+	PsimagLite::String label
+	    = (toolOptions.action == "energies") ? "lowest" : toolOptions.extraOptions;
+	typename ToolBoxType::ParametersForGrepType params(label, toolOptions.shortoption);
 	typename ToolBoxType::ActionEnum act = ToolBoxType::actionCanonical(toolOptions.action);
 	if (act == ToolBoxType::ACTION_GREP) {
 		ToolBoxType::printGrep(toolOptions.filename, params);
@@ -148,7 +145,8 @@ int main(int argc, char** argv)
 	bool filenameIsCout = false;
 	PsimagLite::String dotCout = ".cout";
 	size_t pos = toolOptions.filename.find(dotCout);
-	if (pos != PsimagLite::String::npos && pos + dotCout.size() == toolOptions.filename.size()) {
+	if (pos != PsimagLite::String::npos
+	    && pos + dotCout.size() == toolOptions.filename.size()) {
 		filenameIsCout = true;
 	}
 
@@ -158,9 +156,8 @@ int main(int argc, char** argv)
 		inputCheck.checkFileOptions(toolOptions.extraOptions);
 	}
 
-	InputFromDataOrNot<InputCheck> inputFromDataOrNot(toolOptions.filename,
-	                                                  inputCheck,
-	                                                  filenameIsCout);
+	InputFromDataOrNot<InputCheck> inputFromDataOrNot(
+	    toolOptions.filename, inputCheck, filenameIsCout);
 	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
 
 	//! Read the parameters for this run

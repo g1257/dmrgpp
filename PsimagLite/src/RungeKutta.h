@@ -102,20 +102,24 @@ public:
 	    : f_(f)
 	    , h_(h)
 	    , verbose_(false)
-	{
-	}
+	{ }
 
-	void solveEx(typename Vector<VectorType>::Type& result, RealType t0, RealType t, const ArrayType& y0) const
+	void solveEx(typename Vector<VectorType>::Type& result,
+	             RealType t0,
+	             RealType t,
+	             const ArrayType& y0) const
 	{
 		SizeType N = static_cast<SizeType>(PsimagLite::real((t - t0) / h_));
 		solve(result, t0, N, y0);
 	}
 
-	void solve(typename Vector<VectorType>::Type& result, RealType t0, SizeType N, const ArrayType& y0) const
+	void solve(typename Vector<VectorType>::Type& result,
+	           RealType t0,
+	           SizeType N,
+	           const ArrayType& y0) const
 	{
 		ArrayType k1(y0), k2(y0), k3(y0), k4(y0);
-		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1,
-		         wtotInverse = 1.0 / 6.0;
+		RealType w1 = 1, w2 = 2, w3 = 2, w4 = 1, wtotInverse = 1.0 / 6.0;
 
 		RealType ti = t0;
 		ArrayType yi = y0;
@@ -143,28 +147,18 @@ public:
 
 private:
 
-	ComplexOrRealType findValueOf(const VectorType& yi, SizeType j) const
-	{
-		return yi[j];
-	}
+	ComplexOrRealType findValueOf(const VectorType& yi, SizeType j) const { return yi[j]; }
 
-	ComplexOrRealType findValueOf(const Matrix<ComplexOrRealType>& yi,
-	                              SizeType j) const
+	ComplexOrRealType findValueOf(const Matrix<ComplexOrRealType>& yi, SizeType j) const
 	{
 		return yi(j, j);
 	}
 
 	SizeType findSizeOf(const VectorType& yi) const { return yi.size(); }
 
-	SizeType findSizeOf(const Matrix<ComplexOrRealType>& yi) const
-	{
-		return yi.n_row();
-	}
+	SizeType findSizeOf(const Matrix<ComplexOrRealType>& yi) const { return yi.n_row(); }
 
-	void checkNorm(const Matrix<ComplexOrRealType>&,
-	               const Matrix<ComplexOrRealType>&) const
-	{
-	}
+	void checkNorm(const Matrix<ComplexOrRealType>&, const Matrix<ComplexOrRealType>&) const { }
 
 	void checkNorm(const VectorType& yi, const VectorType& y0) const
 	{

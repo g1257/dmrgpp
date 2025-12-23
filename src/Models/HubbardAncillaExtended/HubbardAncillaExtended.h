@@ -91,8 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 
 namespace Dmrg {
-template <typename ModelBaseType>
-class HubbardAncillaExtended : public ModelBaseType {
+template <typename ModelBaseType> class HubbardAncillaExtended : public ModelBaseType {
 
 public:
 
@@ -137,13 +136,10 @@ public:
 	HubbardAncillaExtended(const SolverParamsType& solverParams,
 	                       InputValidatorType& io,
 	                       const SuperGeometryType& geometry)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , helperHubbardAncilla_(geometry, modelParameters_)
-	{
-	}
+	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -192,7 +188,8 @@ protected:
 				if (!hot && (sigma & 1))
 					continue;
 				MatrixType tmp;
-				HelperHubbardAncillaType::findOperatorMatrices(tmp, i, sigma, natBasis);
+				HelperHubbardAncillaType::findOperatorMatrices(
+				    tmp, i, sigma, natBasis);
 				SparseMatrixType tmpMatrix(tmp);
 				SizeType m = 0;
 				int asign = 1;
@@ -253,9 +250,8 @@ protected:
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
 				OpForLinkType c("c", orb + spin * orbitals, orb);
-				typename ModelTermType::Su2Properties su2properties(1,
-				                                                    (spin == 1) ? -1 : 1,
-				                                                    spin);
+				typename ModelTermType::Su2Properties su2properties(
+				    1, (spin == 1) ? -1 : 1, spin);
 				hop.push(c, 'N', c, 'C', su2properties);
 			}
 
@@ -264,10 +260,13 @@ protected:
 			ll.push(d, 'N', d, 'C');
 		}
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
-		{ value *= (isSu2) ? -0.5 : 0.5; };
+		auto valueModiferTerm0
+		    = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
 		auto valueModifierTermOther = [isSu2](ComplexOrRealType& value)
-		{ if (isSu2) value = -value; };
+		{
+			if (isSu2)
+				value = -value;
+		};
 
 		for (SizeType orb = 0; orb < orbitals; ++orb) {
 			OpForLinkType splus("splus", orb, orb);
@@ -275,20 +274,16 @@ protected:
 			OpForLinkType n("n", orb, orb);
 			OpForLinkType pair("p", orb, orb);
 
-			spsm.push(splus,
-			          'N',
-			          splus,
-			          'C',
-			          valueModiferTerm0);
+			spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 
 			if (!isSu2)
-				szsz.push(sz, 'N', sz, 'N', typename ModelTermType::Su2Properties(2, 0.5));
-			else
-				spsm.push(splus,
+				szsz.push(sz,
 				          'N',
-				          splus,
-				          'C',
-				          valueModifierTermOther);
+				          sz,
+				          'N',
+				          typename ModelTermType::Su2Properties(2, 0.5));
+			else
+				spsm.push(splus, 'N', splus, 'C', valueModifierTermOther);
 
 			ninj.push(n, 'N', n, 'N');
 
@@ -296,8 +291,7 @@ protected:
 			        'N',
 			        pair,
 			        'C',
-			        [](ComplexOrRealType& value)
-			        { value *= (-1.0); });
+			        [](ComplexOrRealType& value) { value *= (-1.0); });
 		}
 	}
 
@@ -357,10 +351,8 @@ private:
 		szop.push(sz);
 	}
 
-	void setPair(OpsLabelType& p,
-	             SizeType,
-	             SizeType orbital,
-	             const VectorSparseMatrixType& vm) const
+	void
+	setPair(OpsLabelType& p, SizeType, SizeType orbital, const VectorSparseMatrixType& vm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 		SparseMatrixType pair;

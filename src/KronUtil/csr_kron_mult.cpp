@@ -173,17 +173,16 @@ void csr_kron_mult_method(const int imethod,
 			 * ---------------------------------
 			 */
 			const char trans = isTransA ? 'N' : (isConjTransA ? 'Z' : 'T');
-			csr_matmul_post(
-			    trans,
-			    a,
+			csr_matmul_post(trans,
+			                a,
 
-			    nrow_BY,
-			    ncol_BY,
-			    byConstRef,
+			                nrow_BY,
+			                ncol_BY,
+			                byConstRef,
 
-			    nrow_X,
-			    ncol_X,
-			    xout);
+			                nrow_X,
+			                ncol_X,
+			                xout);
 		}
 	} else if (imethod == 2) {
 		/*
@@ -344,13 +343,7 @@ void csr_kron_mult_method(const int imethod,
 	const int ncol_Y = ncol_1;
 	PsimagLite::MatrixNonOwned<const ComplexOrRealType> yin(nrow_Y, ncol_Y, yin_, offsetY);
 	PsimagLite::MatrixNonOwned<ComplexOrRealType> xout(nrow_X, ncol_X, xout_, offsetX);
-	csr_kron_mult_method(imethod,
-	                     transA,
-	                     transB,
-	                     a,
-	                     b,
-	                     yin,
-	                     xout);
+	csr_kron_mult_method(imethod, transA, transB, a, b, yin, xout);
 }
 
 template <typename ComplexOrRealType>
@@ -425,15 +418,16 @@ void csr_kron_mult(const char transA,
 	const int nrow_2 = (isTransB || isConjTransB) ? ncol_B : nrow_B;
 	const int ncol_2 = (isTransB || isConjTransB) ? nrow_B : ncol_B;
 
-	estimate_kron_cost(nrow_1, ncol_1, nnz_A, nrow_2, ncol_2, nnz_B, &kron_nnz, &kron_flops, &imethod, denseFlopDiscount);
+	estimate_kron_cost(nrow_1,
+	                   ncol_1,
+	                   nnz_A,
+	                   nrow_2,
+	                   ncol_2,
+	                   nnz_B,
+	                   &kron_nnz,
+	                   &kron_flops,
+	                   &imethod,
+	                   denseFlopDiscount);
 
-	csr_kron_mult_method(imethod,
-	                     transA,
-	                     transB,
-	                     a,
-	                     b,
-	                     yin,
-	                     offsetY,
-	                     xout,
-	                     offsetX);
+	csr_kron_mult_method(imethod, transA, transB, a, b, yin, offsetY, xout, offsetX);
 }

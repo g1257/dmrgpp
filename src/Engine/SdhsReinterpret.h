@@ -4,8 +4,7 @@
 
 namespace Dmrg {
 
-template <typename BraketType>
-class SdhsReinterpret {
+template <typename BraketType> class SdhsReinterpret {
 
 public:
 

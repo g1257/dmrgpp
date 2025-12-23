@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 
 namespace Dmrg {
-template <typename LeftRightSuperType_>
-class ModelHelperLocal {
+template <typename LeftRightSuperType_> class ModelHelperLocal {
 
 	typedef PsimagLite::PackIndices PackIndicesType;
 
@@ -167,7 +166,9 @@ public:
 			typename PsimagLite::Vector<int>::Type tmpBuffer(ne);
 			for (SizeType alphaPrime = 0; alphaPrime < ns; alphaPrime++) {
 				for (SizeType betaPrime = 0; betaPrime < ne; betaPrime++) {
-					tmpBuffer[betaPrime] = lrs.super().permutationInverse(alphaPrime + betaPrime * ns) - offset;
+					tmpBuffer[betaPrime] = lrs.super().permutationInverse(
+					                           alphaPrime + betaPrime * ns)
+					    - offset;
 					if (tmpBuffer[betaPrime] >= total)
 						tmpBuffer[betaPrime] = -1;
 				}
@@ -187,7 +188,8 @@ public:
 			fermionSigns_.resize(total);
 			for (int i = 0; i < total; i++) {
 				// row i of the ordered product basis
-				pack.unpack(alpha_[i], beta_[i], lrs.super().permutation(i + offset));
+				pack.unpack(
+				    alpha_[i], beta_[i], lrs.super().permutation(i + offset));
 				int fs = lrs.left().fermionicSign(alpha_[i], -1);
 				fermionSigns_[i] = (fs < 0) ? true : false;
 			}
@@ -202,8 +204,7 @@ public:
 
 	ModelHelperLocal(const LeftRightSuperType& lrs)
 	    : lrs_(lrs)
-	{
-	}
+	{ }
 
 	static bool isSu2() { return false; }
 
@@ -213,10 +214,7 @@ public:
 		return tmp; // reflection_.size(tmp);
 	}
 
-	const QnType& quantumNumber(SizeType mm) const
-	{
-		return lrs_.super().qnEx(mm);
-	}
+	const QnType& quantumNumber(SizeType mm) const { return lrs_.super().qnEx(mm); }
 
 	//! Does matrixBlock= (AB), A belongs to pSprime and B
 	// belongs to pEprime or viceversa (inter)
@@ -226,9 +224,8 @@ public:
 	                     const LinkType& link,
 	                     const Aux& aux) const
 	{
-		RealType fermionSign = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
-		    ? -1
-		    : 1;
+		RealType fermionSign
+		    = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 
 		//! work only on partition m
 		if (link.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM) {
@@ -252,9 +249,8 @@ public:
 			int alpha = aux.alpha(i);
 			int beta = aux.beta(i);
 
-			SparseElementType fsValue = (fermionSign < 0 && aux.fermionSigns(i))
-			    ? -link.value
-			    : link.value;
+			SparseElementType fsValue
+			    = (fermionSign < 0 && aux.fermionSigns(i)) ? -link.value : link.value;
 
 			for (int k = A.getRowPtr(alpha); k < A.getRowPtr(alpha + 1); k++) {
 				int alphaPrime = A.getCol(k);
@@ -265,9 +261,11 @@ public:
 						continue;
 					/* fermion signs note:
 					here the environ is applied first and has to "cross"
-					the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
+					the system, hence the sign factor
+					pSprime.fermionicSign(alpha,tmp)
 					*/
-					SparseElementType tmp = A.getValue(k) * B.getValue(kk) * fsValue;
+					SparseElementType tmp
+					    = A.getValue(k) * B.getValue(kk) * fsValue;
 					// if (tmp==static_cast<MatrixElementType>(0.0)) continue;
 					matrixBlock.pushCol(j);
 					matrixBlock.pushValue(tmp);
@@ -289,9 +287,8 @@ public:
 	                     const LinkType& link,
 	                     const Aux& aux) const
 	{
-		RealType fermionSign = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
-		    ? -1
-		    : 1;
+		RealType fermionSign
+		    = (link.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1 : 1;
 
 		if (link.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM) {
 			LinkType link2 = link;
@@ -320,14 +317,14 @@ public:
 			 * the system, hence the sign factor pSprime.fermionicSign(alpha,tmp)
 			 */
 
-			SparseElementType fsValue = (fermionSign < 0 && aux.fermionSigns(i))
-			    ? -link.value
-			    : link.value;
+			SparseElementType fsValue
+			    = (fermionSign < 0 && aux.fermionSigns(i)) ? -link.value : link.value;
 
 			for (int k = startk; k < endk; ++k) {
 				int alphaPrime = A.getCol(k);
 				SparseElementType tmp2 = A.getValue(k) * fsValue;
-				const typename PsimagLite::Vector<int>::Type& bufferTmp = aux.buffer(alphaPrime);
+				const typename PsimagLite::Vector<int>::Type& bufferTmp
+				    = aux.buffer(alphaPrime);
 
 				for (int kk = startkk; kk < endkk; ++kk) {
 					int betaPrime = B.getCol(kk);
@@ -420,9 +417,7 @@ public:
 	// basis2.hamiltonian_{beta,beta'} \delta_{alpha,alpha'}
 	// returns the m-th block (in the ordering of basis1) of H
 	// Note: USed only for debugging
-	void calcHamiltonianPart(SparseMatrixType& matrixBlock,
-	                         bool option,
-	                         const Aux& aux) const
+	void calcHamiltonianPart(SparseMatrixType& matrixBlock, bool option, const Aux& aux) const
 	{
 		int m = aux.m();
 		SizeType offset = lrs_.super().partition(m);
@@ -461,7 +456,8 @@ public:
 					alphaPrime = hamiltonian.getCol(k);
 				else
 					betaPrime = hamiltonian.getCol(k);
-				SizeType j = lrs_.super().permutationInverse(alphaPrime + betaPrime * ns);
+				SizeType j
+				    = lrs_.super().permutationInverse(alphaPrime + betaPrime * ns);
 				if (j < offset || j >= lrs_.super().partition(m + 1))
 					continue;
 				SparseElementType tmp = hamiltonian.getValue(k);
@@ -482,10 +478,7 @@ public:
 #endif
 	}
 
-	const LeftRightSuperType& leftRightSuper() const
-	{
-		return lrs_;
-	}
+	const LeftRightSuperType& leftRightSuper() const { return lrs_; }
 
 private:
 

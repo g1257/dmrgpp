@@ -8,8 +8,7 @@
 
 namespace Dmrg {
 
-template <typename TargetingBaseType>
-class TermForTargetingExpression {
+template <typename TargetingBaseType> class TermForTargetingExpression {
 
 public:
 
@@ -33,15 +32,15 @@ public:
 	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::BorderEnumType BorderEnumType;
-	typedef NonLocalForTargetingExpression<TargetingBaseType> NonLocalForTargetingExpressionType;
+	typedef NonLocalForTargetingExpression<TargetingBaseType>
+	    NonLocalForTargetingExpressionType;
 	using KetType = KetForTargetingExpression<ComplexOrRealType>;
 
 	TermForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false)
 	    , aux_(aux)
 	    , nonLocal_(aux)
-	{
-	}
+	{ }
 
 	TermForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
 	    : finalized_(false)
@@ -94,20 +93,11 @@ public:
 			finalized_ = false;
 	}
 
-	void multiply(const ComplexOrRealType& val)
-	{
-		ket_.multiply(val);
-	}
+	void multiply(const ComplexOrRealType& val) { ket_.multiply(val); }
 
-	void sum(const TermForTargetingExpression& other)
-	{
-		ket_.sum(other.ket());
-	}
+	void sum(const TermForTargetingExpression& other) { ket_.sum(other.ket()); }
 
-	void setFactor(const ComplexOrRealType& val)
-	{
-		ket_.setFactor(val);
-	}
+	void setFactor(const ComplexOrRealType& val) { ket_.setFactor(val); }
 
 	void finalize()
 	{
@@ -139,7 +129,8 @@ public:
 
 			SiteSplitType siteSplit = OneOperatorSpecType::extractSiteIfAny(tmp);
 			if (isGlobalOperator(tmp)) {
-				nonLocal_.timeEvolve(tmp, siteSplit, ket_.name(), aux_.currentCoO());
+				nonLocal_.timeEvolve(
+				    tmp, siteSplit, ket_.name(), aux_.currentCoO());
 				newVstr.push_back(tmp);
 				continue;
 			}
@@ -147,7 +138,8 @@ public:
 			if (!siteSplit.hasSiteString)
 				err("This op must have a site\n");
 
-			SizeType site = OneOperatorSpecType::strToNumberOrFail(siteSplit.siteString);
+			SizeType site
+			    = OneOperatorSpecType::strToNumberOrFail(siteSplit.siteString);
 			// can only apply at center of orthogonality (coo)
 			if (!siteCanBeApplied(site)) {
 				newVstr.push_back(tmp);
@@ -168,9 +160,10 @@ public:
 			std::string ket_src = ket_.name();
 			ket_.multiply(tmp);
 			std::string ket_dest = ket_.name();
-			OperatorType* op = new OperatorType(aux_.pVectors().aoe().model().naturalOperator(opspec.label,
-			                                                                                  0, // FIXME TODO SDHS Immm
-			                                                                                  opspec.dof));
+			OperatorType* op = new OperatorType(
+			    aux_.pVectors().aoe().model().naturalOperator(opspec.label,
+			                                                  0, // FIXME TODO SDHS Immm
+			                                                  opspec.dof));
 			if (opspec.transpose)
 				op->transpose();
 
@@ -189,17 +182,11 @@ public:
 		finalized_ = true;
 	}
 
-	void setKet(const std::string& ket)
-	{
-		ket_.set(ket);
-	}
+	void setKet(const std::string& ket) { ket_.set(ket); }
 
 	// Constant functions below
 
-	PsimagLite::String toString() const
-	{
-		return ket_.toString(ops_);
-	}
+	PsimagLite::String toString() const { return ket_.toString(ops_); }
 
 	bool isSummable() const
 	{
@@ -220,10 +207,7 @@ public:
 		return ket_.pIndex();
 	}
 
-	bool isPureKet() const
-	{
-		return (ops_.empty());
-	}
+	bool isPureKet() const { return (ops_.empty()); }
 
 private:
 
@@ -232,10 +216,7 @@ private:
 		return PvectorsType::PvectorType::isTimeEvolution(opName);
 	}
 
-	bool siteCanBeApplied(SizeType site) const
-	{
-		return (site == aux_.currentCoO());
-	}
+	bool siteCanBeApplied(SizeType site) const { return (site == aux_.currentCoO()); }
 
 	void oneOperator(PsimagLite::String destKet,
 	                 PsimagLite::String srcKet,
@@ -264,15 +245,10 @@ private:
 		SizeType n = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
 		assert(n > 2);
 		bool b2 = (site == n - 1);
-		BorderEnumType border = (b1 || b2) ? BorderEnumType::BORDER_YES
-		                                   : BorderEnumType::BORDER_NO;
-		aux_.pVectors().aoe().applyOpLocal()(dest,
-		                                     src1,
-		                                     A,
-		                                     fs,
-		                                     splitSize,
-		                                     aux_.direction(),
-		                                     border);
+		BorderEnumType border
+		    = (b1 || b2) ? BorderEnumType::BORDER_YES : BorderEnumType::BORDER_NO;
+		aux_.pVectors().aoe().applyOpLocal()(
+		    dest, src1, A, fs, splitSize, aux_.direction(), border);
 	}
 
 	bool finalized_;

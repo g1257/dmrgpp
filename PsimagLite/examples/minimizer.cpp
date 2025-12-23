@@ -2,12 +2,10 @@
 #include "Vector.h"
 // #include "Square.h"
 
-template <typename T>
-T square(const T& t1) { return t1 * t1; }
+template <typename T> T square(const T& t1) { return t1 * t1; }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os,
-                         const typename PsimagLite::Vector<T>::Type& v)
+std::ostream& operator<<(std::ostream& os, const typename PsimagLite::Vector<T>::Type& v)
 {
 	os << v.size() << "\n";
 	for (SizeType i = 0; i < v.size(); i++)
@@ -24,8 +22,7 @@ public:
 
 	typedef double FieldType;
 
-	template <typename SomeVectorType>
-	FieldType operator()(const SomeVectorType& v) const
+	template <typename SomeVectorType> FieldType operator()(const SomeVectorType& v) const
 	{
 		return square(v[0] - 2) + square(v[1] - 3);
 	}

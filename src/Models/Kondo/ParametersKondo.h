@@ -52,8 +52,7 @@ struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 		io.readline(pairingField, "PairingField=");
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersKondo";
 		io.createGroup(label);

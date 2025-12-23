@@ -20,6 +20,8 @@ TEST_CASE("AkimaSpline_from_std_vector", "[psimaglite]")
 	CHECK(akima_spline(3.5) == Approx(12.25));
 	CHECK(akima_spline(4.0) == Approx(16.0));
 	CHECK(akima_spline(5.0) == Approx(25.0));
-	CHECK_THROWS_MATCHES(akima_spline(25.0), RuntimeError, MessageMatches(Catch::Matchers::StartsWith("Akima: out of range")));
+	CHECK_THROWS_MATCHES(akima_spline(25.0),
+	                     RuntimeError,
+	                     MessageMatches(Catch::Matchers::StartsWith("Akima: out of range")));
 }
 }

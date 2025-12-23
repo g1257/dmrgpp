@@ -31,17 +31,13 @@ public:
 	MyHelper(SizeType ntasks, SizeType nthreads)
 	    : ntasks_(ntasks)
 	    , x_(nthreads, 0)
-	{
-	}
+	{ }
 
 	SizeType tasks() const { return ntasks_; }
 
 	int result() const { return x_[0]; }
 
-	void doTask(SizeType taskNumber, SizeType threadNum)
-	{
-		x_[threadNum] += taskNumber;
-	}
+	void doTask(SizeType taskNumber, SizeType threadNum) { x_[threadNum] += taskNumber; }
 
 	void sync()
 	{

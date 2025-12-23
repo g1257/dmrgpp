@@ -178,13 +178,16 @@ public:
 			return; // early exit here
 		}
 
-		tstStruct2_ = new TargetParams2Type(ioIn, "TargetingRixsDynamic", checkPoint.model());
+		tstStruct2_
+		    = new TargetParams2Type(ioIn, "TargetingRixsDynamic", checkPoint.model());
 
 		RealType tau = tstStruct2_->tau();
 		SizeType n = tstStruct2_->times().size();
-		if (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME) {
+		if (tstStruct_.algorithm()
+		    == TargetParamsType::BaseType::AlgorithmEnum::KRYLOVTIME) {
 			if (n != 5)
-				err("TargetingRixsDynamic with KrylovTime: number of TimeSteps must be 5\n");
+				err("TargetingRixsDynamic with KrylovTime: number of TimeSteps "
+				    "must be 5\n");
 		}
 
 		for (SizeType i = 0; i < n; ++i)
@@ -199,7 +202,12 @@ public:
 		tstStruct2_ = nullptr;
 	}
 
-	SizeType sites() const { return (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) ? tstStruct_.sites() : tstStruct2_->sites(); }
+	SizeType sites() const
+	{
+		return (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV)
+		    ? tstStruct_.sites()
+		    : tstStruct2_->sites();
+	}
 
 	SizeType targets() const
 	{
@@ -219,10 +227,7 @@ public:
 		return weight_[i];
 	}
 
-	RealType gsWeight() const
-	{
-		return gsWeightActual_;
-	}
+	RealType gsWeight() const { return gsWeightActual_; }
 
 	SizeType size() const
 	{
@@ -285,17 +290,20 @@ public:
 			this->common().aoeNonConst().wftSome(site, 6, this->common().aoe().tvs());
 		} else {
 			// just to set the stage and currenttime: CHEBY and KRYLOVTIME
-			this->common().aoeNonConst().getPhi(0, Eg, direction, site, loopNumber, *tstStruct2_);
+			this->common().aoeNonConst().getPhi(
+			    0, Eg, direction, site, loopNumber, *tstStruct2_);
 		}
 
 		if (!applied_) {
 			if (max == 1)
 				doMax1(site, direction, loopNumber);
 
-			if (max == 2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::SUM)
+			if (max == 2
+			    && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::SUM)
 				doMax2Sum(site, direction, loopNumber);
 
-			if (max == 2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::PRODUCT)
+			if (max == 2
+			    && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::PRODUCT)
 				doMax2Prod(site, direction, loopNumber);
 		}
 
@@ -346,25 +354,27 @@ public:
 
 private:
 
-	void doMax1(SizeType site,
-	            ProgramGlobals::DirectionEnum direction,
-	            SizeType loopNumber)
+	void doMax1(SizeType site, ProgramGlobals::DirectionEnum direction, SizeType loopNumber)
 	{
 		if (site == tstStruct_.sites(0)) {
 
-			ComplexOrRealType densCim = this->common().rixsCocoon(direction, site, 1, 0, false);
+			ComplexOrRealType densCim
+			    = this->common().rixsCocoon(direction, site, 1, 0, false);
 			std::cout << site << " " << densCim << " 0"; // 0 here is the currentTime
 			std::cout << " <P1|P0> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densCre = this->common().rixsCocoon(direction, site, 2, 0, false);
+			ComplexOrRealType densCre
+			    = this->common().rixsCocoon(direction, site, 2, 0, false);
 			std::cout << site << " " << densCre << " 0"; // 0 here is the currentTime
 			std::cout << " <P2|P0> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densjim = this->common().rixsCocoon(direction, site, 4, 3, false);
+			ComplexOrRealType densjim
+			    = this->common().rixsCocoon(direction, site, 4, 3, false);
 			std::cout << site << " " << densjim << " 0"; // 0 here is the currentTime
 			std::cout << " <P4|P3> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densjre = this->common().rixsCocoon(direction, site, 5, 3, false);
+			ComplexOrRealType densjre
+			    = this->common().rixsCocoon(direction, site, 5, 3, false);
 			std::cout << site << " " << densjre << " 0"; // 0 here is the currentTime
 			std::cout << " <P5|P3> 1\n"; // 1 here is the "superdensity"
 
@@ -378,7 +388,8 @@ private:
 			           this->tv(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
-			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax1"));
+			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(
+			    __FILE__ + PsimagLite::String("::doMax1"));
 			if (tmpV1.size() > 0)
 				addFactor(tmpV1, psi00, densCim);
 
@@ -408,9 +419,7 @@ private:
 		}
 	}
 
-	void doMax2Sum(SizeType site,
-	               ProgramGlobals::DirectionEnum direction,
-	               SizeType loopNumber)
+	void doMax2Sum(SizeType site, ProgramGlobals::DirectionEnum direction, SizeType loopNumber)
 	{
 
 		if (site == tstStruct_.sites(0)) {
@@ -447,19 +456,23 @@ private:
 
 		if (site == tstStruct_.sites(1)) {
 
-			ComplexOrRealType densCim = this->common().rixsCocoon(direction, site, 1, 0, false);
+			ComplexOrRealType densCim
+			    = this->common().rixsCocoon(direction, site, 1, 0, false);
 			std::cout << site << " " << densCim << " 0"; // 0 here is the currentTime
 			std::cout << " <P1|P0> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densCre = this->common().rixsCocoon(direction, site, 2, 0, false);
+			ComplexOrRealType densCre
+			    = this->common().rixsCocoon(direction, site, 2, 0, false);
 			std::cout << site << " " << densCre << " 0"; // 0 here is the currentTime
 			std::cout << " <P2|P0> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densjim = this->common().rixsCocoon(direction, site, 4, 3, false);
+			ComplexOrRealType densjim
+			    = this->common().rixsCocoon(direction, site, 4, 3, false);
 			std::cout << site << " " << densjim << " 0"; // 0 here is the currentTime
 			std::cout << " <P4|P3> 1\n"; // 1 here is the "superdensity"
 
-			ComplexOrRealType densjre = this->common().rixsCocoon(direction, site, 5, 3, false);
+			ComplexOrRealType densjre
+			    = this->common().rixsCocoon(direction, site, 5, 3, false);
 			std::cout << site << " " << densjre << " 0"; // 0 here is the currentTime
 			std::cout << " <P5|P3> 1\n"; // 1 here is the "superdensity"
 
@@ -472,7 +485,8 @@ private:
 			           this->tv(1), // src1 apply op on Im|alpha(C)>
 			           direction);
 
-			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::doMax2"));
+			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(
+			    __FILE__ + PsimagLite::String("::doMax2"));
 
 			if (tmpV1.size() > 0)
 				addFactor(tmpV1, psi00, densCim);
@@ -502,9 +516,7 @@ private:
 		}
 	}
 
-	void doMax2Prod(SizeType site,
-	                ProgramGlobals::DirectionEnum direction,
-	                SizeType loopNumber)
+	void doMax2Prod(SizeType site, ProgramGlobals::DirectionEnum direction, SizeType loopNumber)
 	{
 
 		if (site == tstStruct_.sites(0)) {
@@ -585,18 +597,24 @@ private:
 			eightOrEleven = 8;
 		}
 
-		const ComplexOrRealType rr = this->common().rixsCocoon(direction, site, nineOrTenOrFifteen, 5, true);
-		const ComplexOrRealType ri = this->common().rixsCocoon(direction, site, nineOrTenOrFifteen, 4, true);
-		const ComplexOrRealType ir = this->common().rixsCocoon(direction, site, eightOrEleven, 5, true);
-		const ComplexOrRealType ii = this->common().rixsCocoon(direction, site, eightOrEleven, 4, true);
+		const ComplexOrRealType rr
+		    = this->common().rixsCocoon(direction, site, nineOrTenOrFifteen, 5, true);
+		const ComplexOrRealType ri
+		    = this->common().rixsCocoon(direction, site, nineOrTenOrFifteen, 4, true);
+		const ComplexOrRealType ir
+		    = this->common().rixsCocoon(direction, site, eightOrEleven, 5, true);
+		const ComplexOrRealType ii
+		    = this->common().rixsCocoon(direction, site, eightOrEleven, 4, true);
 
 		RealType time = 0.0;
 		if (tstStruct_.algorithm() != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
 			time = this->common().aoe().timeVectors().time();
 		}
-		std::cout << site << " " << (ri - ir) << " " << time; // time here is the currentTime
+		std::cout << site << " " << (ri - ir) << " "
+		          << time; // time here is the currentTime
 		std::cout << " <gs|A|P2> 1\n"; // 1 here is the "superdensity"
-		std::cout << site << " " << (rr + ii) << " " << time; // time here is the currentTime
+		std::cout << site << " " << (rr + ii) << " "
+		          << time; // time here is the currentTime
 		std::cout << " <gs|A|P3> 1\n"; // 1 here is the "superdensity"
 	}
 
@@ -632,10 +650,8 @@ private:
 		const AlgorithmEnumType algo = tstStruct_.algorithm();
 
 		if (algo == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-			skeleton_.calcDynVectors(this->tv(6),
-			                         this->tv(7),
-			                         this->tvNonConst(8),
-			                         this->tvNonConst(9));
+			skeleton_.calcDynVectors(
+			    this->tv(6), this->tv(7), this->tvNonConst(8), this->tvNonConst(9));
 			firstCall_ = false; // unused here but just in case
 			return;
 		}
@@ -668,18 +684,21 @@ private:
 	                 bool wftOrAdvance,
 	                 bool isLastCall)
 	{
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
+		bool allOperatorsApplied
+		    = (this->common().aoe().noStageIs(StageEnumType::DISABLED)
+		       && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		const VectorWithOffsetType& v0 = this->tv(indices[0]);
 
-		this->common().aoeNonConst().calcTimeVectors(indices,
-		                                             Eg,
-		                                             v0,
-		                                             direction,
-		                                             allOperatorsApplied,
-		                                             wftOrAdvance, // wft and advance indices[0]
-		                                             block1,
-		                                             isLastCall);
+		this->common().aoeNonConst().calcTimeVectors(
+		    indices,
+		    Eg,
+		    v0,
+		    direction,
+		    allOperatorsApplied,
+		    wftOrAdvance, // wft and advance indices[0]
+		    block1,
+		    isLastCall);
 	}
 
 	void applyOneOp(SizeType loopNumber,
@@ -749,8 +768,7 @@ private:
 	static bool firstCall_;
 }; // class TargetingRixsDynamic
 
-template <typename T1, typename T2>
-bool TargetingRixsDynamic<T1, T2>::firstCall_ = true;
+template <typename T1, typename T2> bool TargetingRixsDynamic<T1, T2>::firstCall_ = true;
 
 } // namespace
 /*@}*/

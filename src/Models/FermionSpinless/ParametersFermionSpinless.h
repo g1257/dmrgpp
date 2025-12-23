@@ -100,8 +100,7 @@ struct ParametersFermionSpinless : public ParametersModelBase<RealType, QnType> 
 		io.read(potentialV, "potentialV");
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersFermionSpinless";
 		io.createGroup(label);

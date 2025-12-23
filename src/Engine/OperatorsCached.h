@@ -6,8 +6,7 @@
 
 namespace Dmrg {
 
-template <typename LeftRightSuperType>
-class OperatorsCached {
+template <typename LeftRightSuperType> class OperatorsCached {
 
 public:
 
@@ -46,10 +45,7 @@ public:
 		ConcurrencyType::mutexDestroy(&mutex_);
 	}
 
-	void clearThreadSelves() const
-	{
-		threadSelves_.clear();
-	}
+	void clearThreadSelves() const { threadSelves_.clear(); }
 
 	const OperatorStorageType& getOpStorage(const MetaOpForConnection& metaOp,
 	                                        const ProgramGlobals::SysOrEnvEnum type) const
@@ -86,7 +82,8 @@ private:
 			err("reducedOperator: FATAL: internal error\n");
 
 		if (garbage_.size() <= threadNum || seen_.size() <= threadNum)
-			err("reducedOperator: FATAL: " + ttos(threadNum) + " >= " + ttos(garbage_.size()) + "\n");
+			err("reducedOperator: FATAL: " + ttos(threadNum)
+			    + " >= " + ttos(garbage_.size()) + "\n");
 
 		int indexOfSeen = PsimagLite::indexOrMinusOne(seen_[threadNum], packed);
 		if (indexOfSeen >= 0) {
@@ -118,12 +115,15 @@ private:
 		return threadPreNum;
 	}
 
-	const OperatorStorageType& getOpStorageNonLocal(const MetaOpForConnection& metaOp,
-	                                                const ProgramGlobals::SysOrEnvEnum type) const
+	const OperatorStorageType&
+	getOpStorageNonLocal(const MetaOpForConnection& metaOp,
+	                     const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		// Non local ops cannot have modifier different than 'N'
 		assert(metaOp.modifier == 'N');
-		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? lrs_.left().getSuperByIndex(metaOp.index).getStorage() : lrs_.right().getSuperByIndex(metaOp.index).getStorage();
+		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+		    ? lrs_.left().getSuperByIndex(metaOp.index).getStorage()
+		    : lrs_.right().getSuperByIndex(metaOp.index).getStorage();
 	}
 
 	const LeftRightSuperType& lrs_;

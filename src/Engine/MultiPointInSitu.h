@@ -10,8 +10,7 @@
 
 namespace Dmrg {
 
-template <typename VectorWithOffsetType, typename ModelType>
-class MultiPointInSitu {
+template <typename VectorWithOffsetType, typename ModelType> class MultiPointInSitu {
 
 public:
 
@@ -46,7 +45,8 @@ public:
 	void operator()(const BraketType& braket, SizeType centerOfOrtho)
 	{
 		if (!model_.params().options.isSet("observe")) {
-			err(std::string("FATAL: You are trying to calculate ") + "multi-points in-situ\n");
+			err(std::string("FATAL: You are trying to calculate ")
+			    + "multi-points in-situ\n");
 		}
 
 		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::INFINITE)
@@ -87,7 +87,8 @@ public:
 
 private:
 
-	BraketType buildBraketWithSites(const BraketType& braket, SizeType site0, SizeType site1) const
+	BraketType
+	buildBraketWithSites(const BraketType& braket, SizeType site0, SizeType site1) const
 	{
 		if (braket.points() != 2)
 			err("MultiPointInSitu::buildBraketWithSites: expected two sites\n");

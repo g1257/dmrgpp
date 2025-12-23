@@ -11,8 +11,7 @@ SizeType integerDivision(SizeType a, SizeType b)
 	return a / b;
 }
 
-std::ostream& operator<<(std::ostream& os,
-                         const std::pair<SizeType, SizeType>& p)
+std::ostream& operator<<(std::ostream& os, const std::pair<SizeType, SizeType>& p)
 {
 	os << p.first << " " << p.second << " ";
 	return os;
@@ -57,10 +56,8 @@ void split(Vector<String>::Type& tokens, String str, String delimiters)
 
 String basename(const String& path)
 {
-	return String(
-	    std::find_if(path.rbegin(), path.rend(), MatchPathSeparator())
-	        .base(),
-	    path.end());
+	return String(std::find_if(path.rbegin(), path.rend(), MatchPathSeparator()).base(),
+	              path.end());
 }
 
 int atoi(String str)
@@ -99,7 +96,8 @@ bool isAfloat(String str)
 			continue;
 		}
 
-		if (str[i] == '-' || str[i] == '+' || str[i] == 'e' || str[i] == 'E' || str[i] == '.')
+		if (str[i] == '-' || str[i] == '+' || str[i] == 'e' || str[i] == 'E'
+		    || str[i] == '.')
 			continue;
 		return false;
 	}

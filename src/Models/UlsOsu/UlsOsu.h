@@ -92,8 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment
-template <typename ModelBaseType>
-class UlsOsu : public ModelBaseType {
+template <typename ModelBaseType> class UlsOsu : public ModelBaseType {
 
 	enum InternalDir
 	{
@@ -161,7 +160,9 @@ public:
 	    , superGeometry_(geometry)
 	    , offset_(6)
 	    , // Sx, Sy, Sz, Lx, Ly, Lz
-	    spinSquared_(spinSquaredHelper_, modelParameters_.orbitals, 2 * modelParameters_.orbitals)
+	    spinSquared_(spinSquaredHelper_,
+	                 modelParameters_.orbitals,
+	                 2 * modelParameters_.orbitals)
 	{
 		if (modelParameters_.orbitals != 1)
 			throw PsimagLite::RuntimeError("UlsOsu: must use Orbital=1 \n");
@@ -196,18 +197,14 @@ public:
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findCreationMatrices(int,
-	                                      SizeType sigma,
-	                                      const VectorHilbertStateType&) const
+	SparseMatrixType
+	findCreationMatrices(int, SizeType sigma, const VectorHilbertStateType&) const
 	{
 		assert(sigma < creationMatrix_.size());
 		return creationMatrix_[sigma].getCRS();
 	}
 
-	SizeType maxElectronsOneSpin() const
-	{
-		return 1 * superGeometry_.numberOfSites() + 1;
-	}
+	SizeType maxElectronsOneSpin() const { return 1 * superGeometry_.numberOfSites() + 1; }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -330,10 +327,8 @@ protected:
 
 private:
 
-	SparseMatrixType findSdirMatrices(SizeType,
-	                                  const HilbertBasisType&,
-	                                  InternalDir,
-	                                  RealType) const
+	SparseMatrixType
+	findSdirMatrices(SizeType, const HilbertBasisType&, InternalDir, RealType) const
 	{
 		err("Kitaev needs useComplex in SolverOptions in the input file\n");
 		throw PsimagLite::RuntimeError("FATAL\n");
@@ -430,9 +425,8 @@ private:
 		}
 	}
 
-	void setNaturalBasis(HilbertBasisType& basis,
-	                     const VectorSizeType& block,
-	                     bool truncated) const
+	void
+	setNaturalBasis(HilbertBasisType& basis, const VectorSizeType& block, bool truncated) const
 	{
 		assert(block.size() == 1);
 		assert(modelParameters_.orbitals == 1);

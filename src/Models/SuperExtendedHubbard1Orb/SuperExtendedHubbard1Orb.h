@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 //! Super Extended Hubbard for DMRG solver, uses ModelHubbard by containment
-template <typename ModelBaseType>
-class ExtendedSuperHubbard1Orb : public ModelBaseType {
+template <typename ModelBaseType> class ExtendedSuperHubbard1Orb : public ModelBaseType {
 
 public:
 
@@ -123,15 +122,12 @@ public:
 	                         InputValidatorType& io,
 	                         const SuperGeometryType& superGeometry,
 	                         PsimagLite::String extension)
-	    : ModelBaseType(solverParams,
-	                    superGeometry,
-	                    io)
+	    : ModelBaseType(solverParams, superGeometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(superGeometry)
 	    , extension_(extension)
 	    , extendedHubbard_(solverParams, io, superGeometry, extension)
-	{
-	}
+	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -211,10 +207,12 @@ protected:
 			OpForLinkType cdown("c", 1, 1);
 
 			// spin1 = 1 spin2 = 0
-			so.push(cdown, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, -1, 1));
+			so.push(
+			    cdown, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, -1, 1));
 
 			// spin1 = 0 spin2 = 1
-			so.push(cup, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, 1, 0));
+			so.push(
+			    cup, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, 1, 0));
 		}
 
 		const bool isSu2 = BasisType::useSu2Symmetry();
@@ -239,7 +237,10 @@ protected:
 		          sz,
 		          'N',
 		          [isSu2](SparseElementType& value)
-		          { if (isSu2) value = -value; });
+		          {
+			          if (isSu2)
+				          value = -value;
+		          });
 
 		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
 		OpForLinkType pair("pair");
@@ -268,16 +269,13 @@ private:
 		iah.push(cdn1, 'N', cup, 'N');
 
 		// Because we only consider i<j we need to add the j,i connections
-		auto valueModifer = [](SparseElementType& value)
-		{ value *= -1; };
+		auto valueModifer = [](SparseElementType& value) { value *= -1; };
 		iah.push(cdown, 'N', cdn0, 'N', valueModifer);
 		iah.push(cup, 'N', cdn1, 'N', valueModifer);
 	}
 
 	// cdn_i == c^\dagger_{i \bar{sigma} n_{i sigma}
-	void setCdn(OpsLabelType& p,
-	            const VectorOperatorType& cm,
-	            SizeType sigma) const
+	void setCdn(OpsLabelType& p, const VectorOperatorType& cm, SizeType sigma) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
 
@@ -312,9 +310,8 @@ private:
 	}
 
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
-	RealType sign(typename HilbertSpaceHubbardType::HilbertState const& ket,
-	              int i,
-	              int sigma) const
+	RealType
+	sign(typename HilbertSpaceHubbardType::HilbertState const& ket, int i, int sigma) const
 	{
 		int value = 0;
 		value += HilbertSpaceHubbardType::calcNofElectrons(ket, 0, i, 0);

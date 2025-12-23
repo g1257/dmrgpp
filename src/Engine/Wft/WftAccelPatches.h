@@ -7,8 +7,7 @@
 
 namespace Dmrg {
 
-template <typename WaveFunctionTransfBaseType>
-class WftAccelPatches {
+template <typename WaveFunctionTransfBaseType> class WftAccelPatches {
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
@@ -24,16 +23,15 @@ class WftAccelPatches {
 	typedef typename DmrgWaveStructType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType MatrixType;
 	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
-	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType> BlockDiagWfType;
+	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType>
+	    BlockDiagWfType;
 
 public:
 
-	WftAccelPatches(const DmrgWaveStructType& dmrgWaveStruct,
-	                const WftOptionsType& wftOptions)
+	WftAccelPatches(const DmrgWaveStructType& dmrgWaveStruct, const WftOptionsType& wftOptions)
 	    : dmrgWaveStruct_(dmrgWaveStruct)
 	    , wftOptions_(wftOptions)
-	{
-	}
+	{ }
 
 	void operator()(VectorWithOffsetType& psiDest,
 	                SizeType iNew,
@@ -46,9 +44,7 @@ public:
 		char charLeft = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'C' : 'N';
 		char charRight = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'T' : 'N';
 
-		BlockDiagWfType psi(psiSrc,
-		                    iOld,
-		                    dmrgWaveStruct_.lrs());
+		BlockDiagWfType psi(psiSrc, iOld, dmrgWaveStruct_.lrs());
 
 		psi.transform(charLeft,
 		              charRight,

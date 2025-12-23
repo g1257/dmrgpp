@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename ModelBaseType>
-class Kondo : public ModelBaseType {
+template <typename ModelBaseType> class Kondo : public ModelBaseType {
 
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::OperatorsType OperatorsType;
@@ -46,9 +45,11 @@ public:
 			std::cout << "Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
 			std::cerr << "Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
 			if (modelParams_.electronHx != 0 || modelParams_.kondoHx != 0)
-				err("Kondo: To use this symmetry electronHx and kondoHx must both be zero\n");
+				err("Kondo: To use this symmetry electronHx and kondoHx must both "
+				    "be zero\n");
 		} else if (nsym == 2) {
-			std::cout << "Kondo: Fermionic + Bosonic Sz, and TotalElectrons conserved\n";
+			std::cout
+			    << "Kondo: Fermionic + Bosonic Sz, and TotalElectrons conserved\n";
 			if (modelParams_.extended != ParametersKondoType::ExtEnum::NONE)
 				err("Kondo: Extended cannot be used with these symmetries\n");
 		}
@@ -69,8 +70,7 @@ public:
 	// For information purposes only. Write model parameters
 	// String contains the group
 	// Serializer object is second argument
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -191,11 +191,12 @@ protected:
 
 			PairSizeType zeroPair(0, 0);
 			typename OperatorType::Su2RelatedType su2Related;
-			this->createOpsLabel("sz").push(OperatorType(szMatrix,
-			                                             ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                                             zeroPair,
-			                                             1,
-			                                             su2Related));
+			this->createOpsLabel("sz").push(
+			    OperatorType(szMatrix,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 zeroPair,
+			                 1,
+			                 su2Related));
 		}
 	}
 
@@ -209,12 +210,13 @@ protected:
 
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			OpForLinkType c("c", spin);
-			typename ModelTermType::Su2Properties su2properties(1, (spin == 1) ? -1 : 1, spin);
+			typename ModelTermType::Su2Properties su2properties(
+			    1, (spin == 1) ? -1 : 1, spin);
 			hop.push(c, 'N', c, 'C', su2properties);
 		}
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value)
-		{ value *= (isSu2) ? -0.5 : 0.5; };
+		auto valueModiferTerm0
+		    = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
 
 		OpForLinkType splus("Splus");
 		OpForLinkType sz("Sz");
@@ -249,8 +251,7 @@ protected:
 
 private:
 
-	void setSymmetryRelatedInternal(VectorQnType& qns,
-	                                const VectorSizeType& basis) const
+	void setSymmetryRelatedInternal(VectorQnType& qns, const VectorSizeType& basis) const
 	{
 		qns.resize(basis.size(), QnType::zero());
 		SizeType nsym = this->targetQuantum().sizeOfOther();
@@ -331,8 +332,7 @@ private:
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findCmatrix(SizeType sigma,
-	                             const VectorSizeType& basis) const
+	SparseMatrixType findCmatrix(SizeType sigma, const VectorSizeType& basis) const
 	{
 		SizeType n = basis.size();
 		const ComplexOrRealType zero = 0.0;
@@ -466,9 +466,8 @@ private:
 		return creationMatrix;
 	}
 
-	SparseMatrixType kondoOnSite(SizeType,
-	                             const SparseMatrixType& niup,
-	                             const SparseMatrixType& nidown) const
+	SparseMatrixType
+	kondoOnSite(SizeType, const SparseMatrixType& niup, const SparseMatrixType& nidown) const
 	{
 		// cdu[d] is actually cu[d] not cu[d] dagger.
 		const SparseMatrixType& cdu = ops_[0].getCRS();

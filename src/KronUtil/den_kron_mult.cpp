@@ -403,18 +403,18 @@ void den_kron_mult(const char transA,
 	int nrow_2 = (isTransB || isConjTransB) ? ncol_B : nrow_B;
 	int ncol_2 = (isTransB || isConjTransB) ? nrow_B : ncol_B;
 
-	estimate_kron_cost(nrow_1, ncol_1, nnz_A, nrow_2, ncol_2, nnz_B, &kron_nnz, &kron_flops, &imethod, denseFlopDiscount);
+	estimate_kron_cost(nrow_1,
+	                   ncol_1,
+	                   nnz_A,
+	                   nrow_2,
+	                   ncol_2,
+	                   nnz_B,
+	                   &kron_nnz,
+	                   &kron_flops,
+	                   &imethod,
+	                   denseFlopDiscount);
 
-	den_kron_mult_method(imethod,
-	                     transA,
-	                     transB,
-	                     a_,
-	                     b_,
-	                     yin,
-	                     offsetY,
-	                     xout,
-	                     offsetX,
-	                     gemmR);
+	den_kron_mult_method(imethod, transA, transB, a_, b_, yin, offsetY, xout, offsetX, gemmR);
 }
 #undef BY
 #undef YAt

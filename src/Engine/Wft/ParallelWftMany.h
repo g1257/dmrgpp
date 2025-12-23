@@ -87,8 +87,7 @@ template <typename VectorWithOffsetType,
 class ParallelWftMany {
 
 	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
-	    VectorVectorWithOffsetType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 
 public:
 
@@ -103,8 +102,7 @@ public:
 	    , nk_(nk)
 	    , wft_(wft)
 	    , lrs_(lrs)
-	{
-	}
+	{ }
 
 	void thread_function_(SizeType threadNum,
 	                      SizeType blockSize,

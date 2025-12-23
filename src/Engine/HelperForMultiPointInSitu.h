@@ -8,8 +8,7 @@
 
 namespace Dmrg {
 
-template <typename CheckpointType>
-class HelperForMultiPointInSitu {
+template <typename CheckpointType> class HelperForMultiPointInSitu {
 
 public:
 
@@ -66,11 +65,13 @@ public:
 
 		const LeftRightSuperType& hookForMultiInSituLrs(SizeType ind)
 		{
-			std::pair<BasisWithOperatorsType, BasisWithOperatorsType> pair = checkPoint_.hookForMultiInSituLrs(ind);
+			std::pair<BasisWithOperatorsType, BasisWithOperatorsType> pair
+			    = checkPoint_.hookForMultiInSituLrs(ind);
 
 			BasisType super("superForMultiPointInSitu", pair.first.traits());
 			super.setToProduct(pair.first, pair.second);
-			LeftRightSuperType* lrsPtr = new LeftRightSuperType(pair.first, pair.second, super);
+			LeftRightSuperType* lrsPtr
+			    = new LeftRightSuperType(pair.first, pair.second, super);
 			garbage_.push_back(lrsPtr);
 			return *lrsPtr;
 		}
@@ -79,7 +80,8 @@ public:
 		{
 			if (fS_)
 				delete fS_;
-			fS_ = new FermionSignType(checkPoint_.hookForMultiInSituLrs(ind).first.signs());
+			fS_ = new FermionSignType(
+			    checkPoint_.hookForMultiInSituLrs(ind).first.signs());
 			return *fS_;
 		}
 
@@ -119,8 +121,7 @@ public:
 	                          bool readOnDemand)
 	    : io_(io)
 	    , ind_(1 + numberOfSites())
-	{
-	}
+	{ }
 
 	const LeftRightSuperType& leftRightSuper(SizeType ind) const
 	{
@@ -132,7 +133,9 @@ public:
 	const VectorWithOffsetType& getVectorFromBracketId(const PsimagLite::GetBraOrKet& braOrKet,
 	                                                   SizeType index) const
 	{
-		throw PsimagLite::RuntimeError("HelperForMultiPointInSitu::getVectorFromBracketId() " + PsimagLite::String("unimplemented\n"));
+		throw PsimagLite::RuntimeError(
+		    "HelperForMultiPointInSitu::getVectorFromBracketId() "
+		    + PsimagLite::String("unimplemented\n"));
 	}
 
 	SizeType cols(SizeType ind) const
@@ -150,19 +153,14 @@ public:
 	}
 
 	// transform O2 by the transformation in location ind, and put the result in ret
-	void transform(SparseMatrixType& ret,
-	               const SparseMatrixType& O2,
-	               SizeType ind) const
+	void transform(SparseMatrixType& ret, const SparseMatrixType& O2, SizeType ind) const
 	{
 		if (ind != ind_)
 			computeAndSaveTransform(ind);
 		DmrgSerializerType::transform(ret, O2, transform_);
 	}
 
-	ProgramGlobals::DirectionEnum direction(SizeType) const
-	{
-		return io_.direction();
-	}
+	ProgramGlobals::DirectionEnum direction(SizeType) const { return io_.direction(); }
 
 	short int signsOneSite(SizeType ind) const
 	{

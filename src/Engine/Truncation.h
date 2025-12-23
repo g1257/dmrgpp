@@ -91,9 +91,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TruncationControl.h"
 namespace Dmrg {
 
-template <typename ParametersType,
-          typename TargetingType>
-class Truncation {
+template <typename ParametersType, typename TargetingType> class Truncation {
 
 	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -170,8 +168,9 @@ public:
 
 	const TransformType& transform(ProgramGlobals::DirectionEnum direction) const
 	{
-		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? leftCache_.transform
-		                                                                   : rightCache_.transform;
+		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		    ? leftCache_.transform
+		    : rightCache_.transform;
 	}
 
 	const RealType& error() const { return error_; }
@@ -192,10 +191,8 @@ public:
 		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
 		            &dmS);
 		assert(dmS);
-		truncateBasis(sBasis,
-		              lrs_.right(),
-		              *dmS,
-		              ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
+		truncateBasis(
+		    sBasis, lrs_.right(), *dmS, ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		delete dmS;
 		dmS = 0;
 
@@ -207,10 +204,8 @@ public:
 		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
 		            &dmE);
 		assert(dmE);
-		truncateBasis(eBasis,
-		              lrs_.left(),
-		              *dmE,
-		              ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
+		truncateBasis(
+		    eBasis, lrs_.left(), *dmE, ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 		delete dmE;
 		dmE = 0;
 	}
@@ -241,8 +236,10 @@ private:
 		        in $\mathcal{V}(E')$.
 		        */
 
-		const ProgramGlobals::DirectionEnum expandSys = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
-		const BasisWithOperatorsType& pBasis = (direction == expandSys) ? lrs_.left() : lrs_.right();
+		const ProgramGlobals::DirectionEnum expandSys
+		    = ProgramGlobals::DirectionEnum::EXPAND_SYSTEM;
+		const BasisWithOperatorsType& pBasis
+		    = (direction == expandSys) ? lrs_.left() : lrs_.right();
 
 		bool debug = false;
 		bool useSvd = !parameters_.options.isSet("truncationNoSvd");
@@ -328,17 +325,15 @@ private:
 			                             const_cast<BasisType&>(lrs_.super()));
 
 		bool twoSiteDmrg = waveFunctionTransformation_.options().twoSiteDmrg;
-		bool wftInPatches = (waveFunctionTransformation_.options().accel == WaveFunctionTransfType::WftOptionsType::ACCEL_PATCHES);
+		bool wftInPatches = (waveFunctionTransformation_.options().accel
+		                     == WaveFunctionTransfType::WftOptionsType::ACCEL_PATCHES);
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : *lrs;
-		waveFunctionTransformation_.push(cache.transform,
-		                                 direction,
-		                                 lrsForWft,
-		                                 dms.vts(),
-		                                 dms.s(),
-		                                 dms.qns());
+		waveFunctionTransformation_.push(
+		    cache.transform, direction, lrsForWft, dms.vts(), dms.s(), dms.qns());
 
 		msg << "new size of basis=" << rPrime.size();
-		msg << " transform is " << cache.transform.rows() << " x " << cache.transform.cols();
+		msg << " transform is " << cache.transform.rows() << " x "
+		    << cache.transform.cols();
 		msg << " with " << cache.transform.blocks() << " symmetry blocks";
 		progress_.printline(msgg, std::cout);
 
@@ -378,7 +373,8 @@ private:
 	                      const VectorRealType& eigs)
 	{
 		if (keptStates < keptStatesPrev_) {
-			std::cerr << "WARNING: Nominal kept states have decreased from " << keptStatesPrev_;
+			std::cerr << "WARNING: Nominal kept states have decreased from "
+			          << keptStatesPrev_;
 			std::cerr << " to " << keptStates << "\n";
 		}
 
@@ -396,7 +392,8 @@ private:
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		if (newKeptStates != keptStates) {
 			// we report that the "m" value has been changed and...
-			msg << "Reducing kept states to " << newKeptStates << " from " << keptStates;
+			msg << "Reducing kept states to " << newKeptStates << " from "
+			    << keptStates;
 			// ... we change it:
 			keptStates = newKeptStates;
 		} else {
@@ -431,8 +428,7 @@ private:
 		progress_.printline(msgg, std::cout);
 	}
 
-	RealType entropy(const VectorRealType& eigs,
-	                 const RealType reyniIndex) const
+	RealType entropy(const VectorRealType& eigs, const RealType reyniIndex) const
 	{
 		RealType ent = 0;
 		RealType val = 0;
@@ -513,8 +509,7 @@ private:
 		return total;
 	}
 
-	RealType sumUpTo(const VectorRealType& eigs,
-	                 SizeType x) const
+	RealType sumUpTo(const VectorRealType& eigs, SizeType x) const
 	{
 		RealType discWeight = 0;
 		for (SizeType i = 0; i < x; ++i)
@@ -529,9 +524,11 @@ private:
 		for (SizeType i = 0; i < x; ++i) {
 			const RealType val = eigs[i];
 			if (val < 0)
-				std::cout << "checkAndSum: Density Matrix eigenvalue " << val << " (" << i << ") is less than zero\n";
+				std::cout << "checkAndSum: Density Matrix eigenvalue " << val
+				          << " (" << i << ") is less than zero\n";
 			if (val > 1)
-				std::cout << "checkAndSum: Density Matrix eigenvalue " << val << " (" << i << ") is greater than one\n";
+				std::cout << "checkAndSum: Density Matrix eigenvalue " << val
+				          << " (" << i << ") is greater than one\n";
 			sum += eigs[i];
 		}
 
@@ -571,7 +568,8 @@ private:
 
 		ioOut_.write(counter + 1,
 		             label + "/" + ttos(index) + "/Size",
-		             (counter == 0) ? IoOutType::Serializer::NO_OVERWRITE : IoOutType::Serializer::ALLOW_OVERWRITE);
+		             (counter == 0) ? IoOutType::Serializer::NO_OVERWRITE
+		                            : IoOutType::Serializer::ALLOW_OVERWRITE);
 
 		++counterVector_[index];
 	}
@@ -590,8 +588,7 @@ private:
 	static bool firstCall_;
 }; // class Truncation
 
-template <typename T1, typename T2>
-bool Truncation<T1, T2>::firstCall_ = true;
+template <typename T1, typename T2> bool Truncation<T1, T2>::firstCall_ = true;
 
 } // namespace
 /*@}*/

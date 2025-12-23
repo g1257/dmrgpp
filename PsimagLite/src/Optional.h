@@ -4,20 +4,17 @@
 #include <cassert>
 
 namespace PsimagLite {
-template <typename T>
-class Optional {
+template <typename T> class Optional {
 
 public:
 
 	Optional(T& t)
 	    : t_(&t)
-	{
-	}
+	{ }
 
 	Optional(int)
 	    : t_(0)
-	{
-	}
+	{ }
 
 	bool nonNull() const { return (t_); }
 

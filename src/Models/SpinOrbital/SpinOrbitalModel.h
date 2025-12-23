@@ -90,8 +90,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ModelBaseType>
-class SpinOrbitalModel : public ModelBaseType {
+template <typename ModelBaseType> class SpinOrbitalModel : public ModelBaseType {
 
 public:
 
@@ -130,9 +129,7 @@ public:
 	                 InputValidatorType& io,
 	                 const SuperGeometryType& geometry,
 	                 PsimagLite::String option)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParams_(io)
 	    , superGeometry_(geometry)
 	    , hasLastTerm_(true)
@@ -158,7 +155,8 @@ public:
 		if (option == "NoLastTerm")
 			hasLastTerm_ = false;
 		else if (option != "")
-			err(PsimagLite::String("SpinOrbitalModel or SpinOrbitalModelNoLastTerm ") + "but not " + option + "\n");
+			err(PsimagLite::String("SpinOrbitalModel or SpinOrbitalModelNoLastTerm ")
+			    + "but not " + option + "\n");
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -178,7 +176,8 @@ public:
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
 		assert(block.size() == 1);
-		//		SizeType site = block[0]; // lambda1 and lambda2 have no site depedence
+		//		SizeType site = block[0]; // lambda1 and lambda2 have no site
+		// depedence
 		MatrixType tmp = sDotL_;
 		tmp *= modelParams_.lambda1;
 
@@ -561,10 +560,8 @@ protected:
 	// more will be needed for J3L term
 	void fillModelLinks()
 	{
-		auto valueModiferTerm0 = [](ComplexOrRealType& value)
-		{ value *= 0.5; };
-		auto valueModiferTerm1 = [](ComplexOrRealType& value)
-		{ value *= 0.25; };
+		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *= 0.5; };
+		auto valueModiferTerm1 = [](ComplexOrRealType& value) { value *= 0.25; };
 
 		// this creates connections a and b
 		for (SizeType orbital = 0; orbital < 2; ++orbital) {
@@ -629,8 +626,7 @@ protected:
 		if (!hasLastTerm_)
 			return; // <--- EARLY EXIT HERE
 
-		auto valueModiferTerm2 = [](ComplexOrRealType& value)
-		{ value *= 0.125; };
+		auto valueModiferTerm2 = [](ComplexOrRealType& value) { value *= 0.125; };
 
 		ModelTermType& sdotSlDotLSquared = ModelBaseType::createTerm("sdotSlDotLSquared");
 		OpForLinkType d0("d0");
@@ -701,7 +697,8 @@ private:
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
-		const SizeType twiceTheSpin = (orbital == 0) ? modelParams_.twiceS : modelParams_.twiceL;
+		const SizeType twiceTheSpin
+		    = (orbital == 0) ? modelParams_.twiceS : modelParams_.twiceL;
 		RealType j = 0.5 * twiceTheSpin;
 
 		for (SizeType ii = 0; ii < total; ++ii) {
@@ -721,9 +718,8 @@ private:
 			assert(x >= 0);
 
 			// bra = natBasis[jj];
-			typename HilbertBasisType::const_iterator it = std::find(natBasis.begin(),
-			                                                         natBasis.end(),
-			                                                         bra);
+			typename HilbertBasisType::const_iterator it
+			    = std::find(natBasis.begin(), natBasis.end(), bra);
 			assert(it != natBasis.end());
 			const SizeType jj = it - natBasis.begin();
 			cm(jj, ii) = sqrt(x);
@@ -737,7 +733,8 @@ private:
 	{
 		SizeType total = natBasis.size();
 		MatrixType cm(total, total);
-		const SizeType twiceTheSpin = (orbital == 0) ? modelParams_.twiceS : modelParams_.twiceL;
+		const SizeType twiceTheSpin
+		    = (orbital == 0) ? modelParams_.twiceS : modelParams_.twiceL;
 		RealType j = 0.5 * twiceTheSpin;
 
 		for (SizeType ii = 0; ii < total; ++ii) {
@@ -754,7 +751,8 @@ private:
 	// ket = sz' + lz'*(2s + 1)
 	SizeType mPlusJ(SizeType ket, SizeType orbital) const
 	{
-		ldiv_t q = std::ldiv(static_cast<long int>(ket), static_cast<long int>(modelParams_.twiceS + 1));
+		ldiv_t q = std::ldiv(static_cast<long int>(ket),
+		                     static_cast<long int>(modelParams_.twiceS + 1));
 		assert(static_cast<SizeType>(q.rem) <= modelParams_.twiceS);
 		assert(static_cast<SizeType>(q.quot) <= modelParams_.twiceL);
 		return (orbital == 0) ? q.rem : q.quot;
@@ -781,11 +779,14 @@ private:
 		const SizeType nsymms = ModelBaseType::targetQuantum().sizeOfOther();
 
 		if (nsymms > 2)
-			err(PsimagLite::String(__FILE__) + ": must have 0, 1, or 2 symmetries " + "not " + ttos(nsymms) + " symmetries.\n");
+			err(PsimagLite::String(__FILE__) + ": must have 0, 1, or 2 symmetries "
+			    + "not " + ttos(nsymms) + " symmetries.\n");
 
 		if (nsymms == 2) {
 			if (modelParams_.lambda1 != 0 || modelParams_.lambda2 != 0)
-				err(PsimagLite::String(__FILE__) + ": SpinOrbit present; cannot conserve " + "S and L separately\n");
+				err(PsimagLite::String(__FILE__)
+				    + ": SpinOrbit present; cannot conserve "
+				    + "S and L separately\n");
 		}
 
 		VectorSizeType other;

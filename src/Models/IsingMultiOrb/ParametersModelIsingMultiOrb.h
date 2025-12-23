@@ -110,23 +110,25 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 
 		try {
 			io.read(magneticFieldX, "MagneticFieldX");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (magneticFieldX.rows() > 0 && magneticFieldX.rows() != orbitals)
-			throw PsimagLite::RuntimeError("MagneticFieldX: Expecting rows == orbitals\n");
+			throw PsimagLite::RuntimeError(
+			    "MagneticFieldX: Expecting rows == orbitals\n");
 		if (magneticFieldX.cols() > 0 && magneticFieldX.cols() != nsites)
-			throw PsimagLite::RuntimeError("MagneticFieldX: Expecting columns == sites\n");
+			throw PsimagLite::RuntimeError(
+			    "MagneticFieldX: Expecting columns == sites\n");
 
 		try {
 			io.read(magneticFieldZ, "MagneticFieldZ");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (magneticFieldZ.rows() > 0 && magneticFieldZ.rows() != orbitals)
-			throw PsimagLite::RuntimeError("MagneticFieldZ: Expecting rows == orbitals\n");
+			throw PsimagLite::RuntimeError(
+			    "MagneticFieldZ: Expecting rows == orbitals\n");
 		if (magneticFieldZ.cols() > 0 && magneticFieldZ.cols() != nsites)
-			throw PsimagLite::RuntimeError("MagneticFieldZ: Expecting columns == sites\n");
+			throw PsimagLite::RuntimeError(
+			    "MagneticFieldZ: Expecting columns == sites\n");
 
 		// throw if supplying MagneticField label
 		bool invalidLabel = false;
@@ -134,11 +136,12 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 			VectorRealType tmpVector;
 			io.read(tmpVector, "MagneticField=");
 			invalidLabel = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (invalidLabel) {
-			throw PsimagLite::RuntimeError("MagneticField label is no longer supported.\n" + PsimagLite::String("Please use MagneticField[XZ] instead\n"));
+			throw PsimagLite::RuntimeError(
+			    "MagneticField label is no longer supported.\n"
+			    + PsimagLite::String("Please use MagneticField[XZ] instead\n"));
 		}
 
 		// throw if supplying MagneticFieldDirection label
@@ -146,30 +149,31 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 			PsimagLite::String tmpStr;
 			io.readline(tmpStr, "MagneticFieldDirection=");
 			invalidLabel = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (invalidLabel) {
-			throw PsimagLite::RuntimeError("MagneticFieldDirection label is no longer supported.\n" + PsimagLite::String("Please use MagneticField[XZ] instead\n"));
+			throw PsimagLite::RuntimeError(
+			    "MagneticFieldDirection label is no longer supported.\n"
+			    + PsimagLite::String("Please use MagneticField[XZ] instead\n"));
 		}
 
 		try {
 			io.read(onsitelinksSzSz, "OnSiteLinksSzSz");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		const SizeType orbs1 = combinations(orbitals, 2);
 		if (onsitelinksSzSz.cols() > 0 && onsitelinksSzSz.cols() != nsites)
-			throw PsimagLite::RuntimeError("OnSiteLinksSzSz: Expecting cols == sites\n");
+			throw PsimagLite::RuntimeError(
+			    "OnSiteLinksSzSz: Expecting cols == sites\n");
 		if (onsitelinksSzSz.rows() > 0 && onsitelinksSzSz.rows() != orbs1)
-			throw PsimagLite::RuntimeError("OnSiteLinksSzSz: Expecting rows == combinations(orbitals,2)\n");
+			throw PsimagLite::RuntimeError(
+			    "OnSiteLinksSzSz: Expecting rows == combinations(orbitals,2)\n");
 
 		bool hasTimeSchedule = false;
 		try {
 			io.read(timeSchedule, "TimeSchedule");
 			hasTimeSchedule = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (hasTimeSchedule == true) { // Check Input to see if everything is correct
 
@@ -180,19 +184,18 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 			try {
 				io.readline(ta, "ta=");
 				hasta = true;
-			} catch (std::exception&) {
-			}
+			} catch (std::exception&) { }
 
 			RealType tau = 0.0;
 			bool hastau = false;
 			try {
 				io.readline(tau, "TSPTau=");
 				hastau = true;
-			} catch (std::exception&) {
-			}
+			} catch (std::exception&) { }
 
 			if (hastau && !hasta)
-				err("TimeSchedule: TSPTau is set, so you must have ta=something>0 in the input!\n");
+				err("TimeSchedule: TSPTau is set, so you must have ta=something>0 "
+				    "in the input!\n");
 			if (hasta && hastau)
 				if (ta < 0 || fabs(ta) < 1e-5)
 					err("TimeSchedule: ta is negative or too small!\n");
@@ -210,8 +213,7 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 		return combinations(n - 1, r - 1) + combinations(n - 1, r);
 	}
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelIsingMultiOrb";
 		io.createGroup(label);
@@ -222,7 +224,8 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 		onsitelinksSzSz.write(label + "/onsitelinksSzSz", io);
 	}
 
-	static void checkMagneticField(unsigned char c, SizeType s, SizeType n, SizeType ss, SizeType orbs)
+	static void
+	checkMagneticField(unsigned char c, SizeType s, SizeType n, SizeType ss, SizeType orbs)
 	{
 		if (s == 0 || s == n)
 			return;
@@ -230,7 +233,8 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 			return;
 
 		PsimagLite::String msg("ModelIsingMultiOrb: If provided, ");
-		msg += " MagneticField" + ttos(c) + " must be a matrix of (rows) " + ttos(orbs) + "orbitals times (cols) " + ttos(n) + " entries.\n";
+		msg += " MagneticField" + ttos(c) + " must be a matrix of (rows) " + ttos(orbs)
+		    + "orbitals times (cols) " + ttos(n) + " entries.\n";
 		err(msg);
 	}
 
@@ -241,7 +245,8 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 		if (ss == 0 || ss == orbs1)
 			return;
 		PsimagLite::String msg("ModelIsingMultiOrb: If provided, ");
-		msg += " OnsiteLinksSzSz must be a matrix of (rows) " + ttos(orbs1) + "terms times (cols) " + ttos(n) + " entries.\n";
+		msg += " OnsiteLinksSzSz must be a matrix of (rows) " + ttos(orbs1)
+		    + "terms times (cols) " + ttos(n) + " entries.\n";
 		err(msg);
 	}
 

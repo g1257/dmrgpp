@@ -12,8 +12,7 @@
 
 namespace std {
 
-template <>
-class hash<Dmrg::Qn> {
+template <> class hash<Dmrg::Qn> {
 
 public:
 
@@ -22,8 +21,7 @@ public:
 
 	hash(bool addOdd)
 	    : addOdd_(addOdd)
-	{
-	}
+	{ }
 
 	SizeType operator()(const Dmrg::Qn& qn) const
 	{

@@ -99,8 +99,7 @@ public:
 	    : exec_(exec)
 	    , inputRoot_(inputRoot)
 	    , ext_(ext)
-	{
-	}
+	{ }
 
 	void operator()(SizeType i) const
 	{

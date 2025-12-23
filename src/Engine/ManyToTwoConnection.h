@@ -6,9 +6,7 @@
 
 namespace Dmrg {
 
-template <typename ModelLinksType,
-          typename LeftRightSuperType,
-          typename SuperOpHelperType>
+template <typename ModelLinksType, typename LeftRightSuperType, typename SuperOpHelperType>
 class ManyToTwoConnection {
 
 public:
@@ -32,15 +30,16 @@ public:
 			pairMetaOps_.first.site = hItems[0];
 			pairMetaOps_.second.site = hItems[1];
 			assert(oneLink.indices.size() == 2);
-			pairMetaOps_.first.index = locationFirst(hItems[0], oneLink.indices[0], type);
-			pairMetaOps_.second.index = locationSecond(hItems[1], oneLink.indices[1], type);
+			pairMetaOps_.first.index
+			    = locationFirst(hItems[0], oneLink.indices[0], type);
+			pairMetaOps_.second.index
+			    = locationSecond(hItems[1], oneLink.indices[1], type);
 			assert(oneLink.mods.size() == 2);
 			pairMetaOps_.first.modifier = oneLink.mods[0];
 			pairMetaOps_.second.modifier = oneLink.mods[1];
 		} else {
-			PairMetaOpForConnection finals = superOpHelper.finalIndices(hItems,
-			                                                            type,
-			                                                            lrs.right().block().size());
+			PairMetaOpForConnection finals
+			    = superOpHelper.finalIndices(hItems, type, lrs.right().block().size());
 			convertNonLocals(finals, type);
 			pairMetaOps_.first.modifier = 'N'; // fixme
 			pairMetaOps_.second.modifier = 'N'; // fixme
@@ -53,7 +52,9 @@ public:
 	// it's OK only if value of connection is real
 	bool connectionIsHermitian(const ModelLinksType& modelLinks) const
 	{
-		return (oneLink_.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION) ? linkIsHermitianFermion(modelLinks) : linkIsHermitianBoson(modelLinks);
+		return (oneLink_.fermionOrBoson == ProgramGlobals::FermionOrBosonEnum::FERMION)
+		    ? linkIsHermitianFermion(modelLinks)
+		    : linkIsHermitianBoson(modelLinks);
 	}
 
 private:
@@ -89,43 +90,50 @@ private:
 		return (isHermit1 && isHermit2);
 	}
 
-	SizeType locationFirst(SizeType hItems0,
-	                       SizeType sigma,
-	                       ProgramGlobals::ConnectionEnum type) const
+	SizeType
+	locationFirst(SizeType hItems0, SizeType sigma, ProgramGlobals::ConnectionEnum type) const
 	{
-		const ProgramGlobals::SysOrEnvEnum sysOrEnv = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON;
+		const ProgramGlobals::SysOrEnvEnum sysOrEnv
+		    = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON)
+		    ? ProgramGlobals::SysOrEnvEnum::SYSTEM
+		    : ProgramGlobals::SysOrEnvEnum::ENVIRON;
 
 		SizeType i = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems0);
 
 		const SizeType offset = lrs_.left().block().size();
 
-		SizeType site1Corrected = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? i : i - offset;
+		SizeType site1Corrected
+		    = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? i : i - offset;
 
 		return finalIndex(sysOrEnv, site1Corrected, sigma);
 	}
 
-	SizeType locationSecond(SizeType hItems1,
-	                        SizeType sigma,
-	                        ProgramGlobals::ConnectionEnum type) const
+	SizeType
+	locationSecond(SizeType hItems1, SizeType sigma, ProgramGlobals::ConnectionEnum type) const
 	{
-		const ProgramGlobals::SysOrEnvEnum envOrSys = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
+		const ProgramGlobals::SysOrEnvEnum envOrSys
+		    = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON)
+		    ? ProgramGlobals::SysOrEnvEnum::ENVIRON
+		    : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
 		SizeType j = PsimagLite::indexOrMinusOne(lrs_.super().block(), hItems1);
 
 		const SizeType offset = lrs_.left().block().size();
 
-		SizeType site2Corrected = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? j - offset : j;
+		SizeType site2Corrected
+		    = (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? j - offset : j;
 
 		return finalIndex(envOrSys, site2Corrected, sigma);
 	}
 
-	SizeType finalIndex(ProgramGlobals::SysOrEnvEnum type,
-	                    SizeType i,
-	                    SizeType sigma) const
+	SizeType finalIndex(ProgramGlobals::SysOrEnvEnum type, SizeType i, SizeType sigma) const
 	{
-		assert(type == ProgramGlobals::SysOrEnvEnum::SYSTEM || type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
+		assert(type == ProgramGlobals::SysOrEnvEnum::SYSTEM
+		       || type == ProgramGlobals::SysOrEnvEnum::ENVIRON);
 
-		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? lrs_.left().localOperatorIndex(i, sigma) : lrs_.right().localOperatorIndex(i, sigma);
+		return (type == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+		    ? lrs_.left().localOperatorIndex(i, sigma)
+		    : lrs_.right().localOperatorIndex(i, sigma);
 	}
 
 	void convertNonLocals(const PairMetaOpForConnection& pairMetas,
@@ -134,13 +142,15 @@ private:
 		pairMetaOps_.first = pairMetas.first;
 		if (pairMetas.first.site >= 0) {
 			// Adjust index
-			pairMetaOps_.first.index = locationFirst(pairMetas.first.site, pairMetas.first.index, type);
+			pairMetaOps_.first.index
+			    = locationFirst(pairMetas.first.site, pairMetas.first.index, type);
 		}
 
 		pairMetaOps_.second = pairMetas.second;
 		if (pairMetas.second.site >= 0) {
 			// Adjust index
-			pairMetaOps_.second.index = locationSecond(pairMetas.second.site, pairMetas.second.index, type);
+			pairMetaOps_.second.index
+			    = locationSecond(pairMetas.second.site, pairMetas.second.index, type);
 		}
 	}
 

@@ -23,8 +23,7 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 
 namespace PsimagLite {
-template <typename T>
-class Random48 {
+template <typename T> class Random48 {
 
 public:
 

@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename InputNgType, typename RealType_>
-class OmegaParams {
+template <typename InputNgType, typename RealType_> class OmegaParams {
 
 public:
 
@@ -20,10 +19,7 @@ public:
 		configure(io);
 	}
 
-	OmegaParams(typename InputNgType::Readable& io)
-	{
-		configure(io);
-	}
+	OmegaParams(typename InputNgType::Readable& io) { configure(io); }
 
 	void configure(typename InputNgType::Readable& io)
 	{
@@ -34,10 +30,7 @@ public:
 		io.readline(obs_, "Observable=");
 	}
 
-	RealType omega(SizeType i) const
-	{
-		return i * step_ + begin_;
-	}
+	RealType omega(SizeType i) const { return i * step_ + begin_; }
 
 	PsimagLite::String observable() const { return obs_; }
 

@@ -45,10 +45,8 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
 		                                    MatrixVectorType,
 		                                    typename MatrixVectorType::VectorType>
 		    SolverType;
-		mainLoop4<SolverType, VectorWithOffsetType>(geometry,
-		                                            dmrgSolverParams,
-		                                            io,
-		                                            opOptions);
+		mainLoop4<SolverType, VectorWithOffsetType>(
+		    geometry, dmrgSolverParams, io, opOptions);
 	} else {
 #else
 	{
@@ -57,10 +55,8 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
 		                                  MatrixVectorType,
 		                                  typename MatrixVectorType::VectorType>
 		    SolverType;
-		mainLoop4<SolverType, VectorWithOffsetType>(geometry,
-		                                            dmrgSolverParams,
-		                                            io,
-		                                            opOptions);
+		mainLoop4<SolverType, VectorWithOffsetType>(
+		    geometry, dmrgSolverParams, io, opOptions);
 	}
 }
 
@@ -74,7 +70,8 @@ void mainLoop2(InputNgType::Readable& io,
 	typedef typename ModelBaseType::QnType QnType;
 	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
-	typedef SuperGeometry<SparseElementType, InputNgType::Readable, ProgramGlobals> SuperGeometryType;
+	typedef SuperGeometry<SparseElementType, InputNgType::Readable, ProgramGlobals>
+	    SuperGeometryType;
 
 	SuperGeometryType geometry(io);
 	if (dmrgSolverParams.options.isSet("printgeometry"))
@@ -83,19 +80,15 @@ void mainLoop2(InputNgType::Readable& io,
 
 	if (dmrgSolverParams.options.isSet("vectorwithoffsets")) {
 		typedef VectorWithOffsets<SparseElementType, QnType> VectorWithOffsetType;
-		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
-		                                                  dmrgSolverParams,
-		                                                  io,
-		                                                  opOptions);
+		mainLoop3<MatrixVectorType, VectorWithOffsetType>(
+		    geometry, dmrgSolverParams, io, opOptions);
 	} else {
 #else
 	{
 #endif
 		typedef VectorWithOffset<SparseElementType, QnType> VectorWithOffsetType;
-		mainLoop3<MatrixVectorType, VectorWithOffsetType>(geometry,
-		                                                  dmrgSolverParams,
-		                                                  io,
-		                                                  opOptions);
+		mainLoop3<MatrixVectorType, VectorWithOffsetType>(
+		    geometry, dmrgSolverParams, io, opOptions);
 	}
 }
 
@@ -104,7 +97,8 @@ void mainLoop1(InputNgType::Readable& io,
                const ParametersDmrgSolverType& dmrgSolverParams,
                const OperatorOptions& opOptions)
 {
-	typedef SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals> SuperGeometryType;
+	typedef SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>
+	    SuperGeometryType;
 	typedef PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrix;
 	typedef Basis<MySparseMatrix> BasisType;
 	typedef BasisWithOperators<BasisType> BasisWithOperatorsType;
@@ -314,7 +308,8 @@ to the main dmrg driver are the following.
 		PsimagLite::RedirectOutput::setAppName(application.name(),
 		                                       Provenance::logo(application.name()));
 
-		std::ios_base::openmode open_mode = (dmrgSolverParams.autoRestart) ? std::ofstream::app : std::ofstream::out;
+		std::ios_base::openmode open_mode
+		    = (dmrgSolverParams.autoRestart) ? std::ofstream::app : std::ofstream::out;
 
 		PsimagLite::RedirectOutput::doIt(options.label, open_mode, unbuffered);
 	}
@@ -340,18 +335,16 @@ to the main dmrg driver are the following.
 	SizeType threadsStackSize = 0;
 	try {
 		io.readline(threadsStackSize, "ThreadsStackSize=");
-	} catch (std::exception&) {
-	}
+	} catch (std::exception&) { }
 
-	PsimagLite::CodeSectionParams codeSection(dmrgSolverParams.nthreads,
-	                                          dmrgSolverParams.nthreads2,
-	                                          setAffinities,
-	                                          threadsStackSize);
+	PsimagLite::CodeSectionParams codeSection(
+	    dmrgSolverParams.nthreads, dmrgSolverParams.nthreads2, setAffinities, threadsStackSize);
 	ConcurrencyType::setOptions(codeSection);
 
 	registerSignals();
 
-	bool isComplex = (dmrgSolverParams.options.isSet("useComplex") || dmrgSolverParams.options.isSet("TimeStepTargeting"));
+	bool isComplex = (dmrgSolverParams.options.isSet("useComplex")
+	                  || dmrgSolverParams.options.isSet("TimeStepTargeting"));
 
 	if (isComplex)
 		mainLoop1<std::complex<RealType>>(io, dmrgSolverParams, options);

@@ -87,8 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename InitKronType>
-class KronConnections {
+template <typename InitKronType> class KronConnections {
 
 	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrRealType;
@@ -109,22 +108,17 @@ public:
 	    : initKron_(initKron)
 	    , x_(initKron.xout())
 	    , y_(initKron.yin())
-	{
-	}
+	{ }
 
-	SizeType tasks() const
-	{
-		return initKron_.numberOfPatches(InitKronType::NEW);
-	}
+	SizeType tasks() const { return initKron_.numberOfPatches(InitKronType::NEW); }
 
 	void doTask(SizeType outPatch, SizeType)
 	{
 		const bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
 		static const bool needsPrinting = false;
-		PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting,
-		                                           initKron_.gemmRnb(),
-		                                           initKron_.nthreads2());
+		PsimagLite::GemmR<ComplexOrRealType> gemmR(
+		    needsPrinting, initKron_.gemmRnb(), initKron_.nthreads2());
 
 		SizeType nC = initKron_.connections();
 		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
@@ -137,11 +131,16 @@ public:
 				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 				const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
-				const bool performTranspose = (initKron_.useLowerPart() && (outPatch < inPatch));
+				const bool performTranspose
+				    = (initKron_.useLowerPart() && (outPatch < inPatch));
 
-				const MatrixDenseOrSparseType* Amat = performTranspose ? xiStruct(inPatch, outPatch) : xiStruct(outPatch, inPatch);
+				const MatrixDenseOrSparseType* Amat = performTranspose
+				    ? xiStruct(inPatch, outPatch)
+				    : xiStruct(outPatch, inPatch);
 
-				const MatrixDenseOrSparseType* Bmat = performTranspose ? yiStruct(inPatch, outPatch) : yiStruct(outPatch, inPatch);
+				const MatrixDenseOrSparseType* Bmat = performTranspose
+				    ? yiStruct(inPatch, outPatch)
+				    : yiStruct(outPatch, inPatch);
 
 				if (!Amat || !Bmat)
 					continue;

@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename PvectorsType>
-class GroupOfOneTimeEvolutions {
+template <typename PvectorsType> class GroupOfOneTimeEvolutions {
 	class OneTimeEvolution {
 
 	public:
@@ -43,27 +42,15 @@ class GroupOfOneTimeEvolutions {
 
 		const VectorSizeType& indices() const { return indices_; }
 
-		SizeType timesWithoutAdvancement() const
-		{
-			return timesWithoutAdvancement_;
-		}
+		SizeType timesWithoutAdvancement() const { return timesWithoutAdvancement_; }
 
 		RealType time() const { return time_; }
 
-		void advanceTime(RealType tau)
-		{
-			time_ += tau;
-		}
+		void advanceTime(RealType tau) { time_ += tau; }
 
-		void resetTimesWithoutAdvancement()
-		{
-			timesWithoutAdvancement_ = 1;
-		}
+		void resetTimesWithoutAdvancement() { timesWithoutAdvancement_ = 1; }
 
-		void incrementTimesWithoutAdvancement()
-		{
-			++timesWithoutAdvancement_;
-		}
+		void incrementTimesWithoutAdvancement() { ++timesWithoutAdvancement_; }
 
 		bool hasKet(SizeType ket) const
 		{

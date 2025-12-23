@@ -33,25 +33,56 @@ int main()
 					for (ncol_B = 1; ncol_B <= 10; ncol_B += 3) {
 						for (nrow_B = 1; nrow_B <= 10; nrow_B += 3) {
 							for (itransA = 0; itransA <= 2; itransA++) {
-								for (itransB = 0; itransB <= 2; itransB++) {
-									char transA = (itransA == 1) ? 'T' : ((itransA == 2) ? 'C' : 'N');
-									char transB = (itransB == 1) ? 'T' : ((itransB == 2) ? 'C' : 'N');
+								for (itransB = 0; itransB <= 2;
+								     itransB++) {
+									char transA = (itransA == 1)
+									    ? 'T'
+									    : ((itransA == 2)
+									           ? 'C'
+									           : 'N');
+									char transB = (itransB == 1)
+									    ? 'T'
+									    : ((itransB == 2)
+									           ? 'C'
+									           : 'N');
 
 									int imethod = 0;
 
-									int isTransA = (transA == 'T');
-									int isTransB = (transB == 'T');
-									int isConjTransA = (transA == 'C');
-									int isConjTransB = (transB == 'C');
+									int isTransA
+									    = (transA == 'T');
+									int isTransB
+									    = (transB == 'T');
+									int isConjTransA
+									    = (transA == 'C');
+									int isConjTransB
+									    = (transB == 'C');
 
-									int nrow_1 = (isTransA || isConjTransA) ? ncol_A : nrow_A;
-									int ncol_1 = (isTransA || isConjTransA) ? nrow_A : ncol_A;
+									int nrow_1
+									    = (isTransA
+									       || isConjTransA)
+									    ? ncol_A
+									    : nrow_A;
+									int ncol_1
+									    = (isTransA
+									       || isConjTransA)
+									    ? nrow_A
+									    : ncol_A;
 
-									int nrow_2 = (isTransB || isConjTransB) ? ncol_B : nrow_B;
-									int ncol_2 = (isTransB || isConjTransB) ? nrow_B : ncol_B;
+									int nrow_2
+									    = (isTransB
+									       || isConjTransB)
+									    ? ncol_B
+									    : nrow_B;
+									int ncol_2
+									    = (isTransB
+									       || isConjTransB)
+									    ? nrow_B
+									    : ncol_B;
 
-									int nrow_C = nrow_1 * nrow_2;
-									int ncol_C = ncol_1 * ncol_2;
+									int nrow_C
+									    = nrow_1 * nrow_2;
+									int ncol_C
+									    = ncol_1 * ncol_2;
 
 									int nrow_X = nrow_2;
 									int ncol_X = nrow_1;
@@ -59,197 +90,400 @@ int main()
 									int nrow_Y = ncol_2;
 									int ncol_Y = ncol_1;
 
-									PsimagLite::Matrix<RealType> a_(nrow_A, ncol_A);
-									PsimagLite::Matrix<RealType> b_(nrow_B, ncol_B);
+									PsimagLite::Matrix<RealType>
+									    a_(nrow_A, ncol_A);
+									PsimagLite::Matrix<RealType>
+									    b_(nrow_B, ncol_B);
 
-									PsimagLite::Matrix<RealType> y_(nrow_Y, ncol_Y);
-									PsimagLite::MatrixNonOwned<const RealType> yRef(y_);
+									PsimagLite::Matrix<RealType>
+									    y_(nrow_Y, ncol_Y);
+									PsimagLite::MatrixNonOwned<
+									    const RealType>
+									    yRef(y_);
 
-									PsimagLite::Matrix<RealType> x1_(nrow_X, ncol_X);
-									PsimagLite::MatrixNonOwned<RealType> x1Ref(x1_);
-									PsimagLite::Matrix<RealType> x2_(nrow_X, ncol_X);
-									PsimagLite::MatrixNonOwned<RealType> x2Ref(x2_);
-									PsimagLite::Matrix<RealType> x3_(nrow_X, ncol_X);
-									PsimagLite::MatrixNonOwned<RealType> x3Ref(x3_);
-									PsimagLite::Matrix<RealType> x4_(nrow_X, ncol_X);
-									PsimagLite::MatrixNonOwned<RealType> x4Ref(x4_);
+									PsimagLite::Matrix<RealType>
+									    x1_(nrow_X, ncol_X);
+									PsimagLite::MatrixNonOwned<
+									    RealType>
+									    x1Ref(x1_);
+									PsimagLite::Matrix<RealType>
+									    x2_(nrow_X, ncol_X);
+									PsimagLite::MatrixNonOwned<
+									    RealType>
+									    x2Ref(x2_);
+									PsimagLite::Matrix<RealType>
+									    x3_(nrow_X, ncol_X);
+									PsimagLite::MatrixNonOwned<
+									    RealType>
+									    x3Ref(x3_);
+									PsimagLite::Matrix<RealType>
+									    x4_(nrow_X, ncol_X);
+									PsimagLite::MatrixNonOwned<
+									    RealType>
+									    x4Ref(x4_);
 
-									PsimagLite::Matrix<RealType> sx1_(nrow_X, ncol_X);
-									PsimagLite::MatrixNonOwned<RealType> sx1Ref(sx1_);
-									PsimagLite::Matrix<RealType> sx2_(nrow_X, ncol_X);
-									PsimagLite::MatrixNonOwned<RealType> sx2Ref(sx2_);
-									PsimagLite::Matrix<RealType> sx3_(nrow_X, ncol_X);
-									PsimagLite::MatrixNonOwned<RealType> sx3Ref(sx3_);
-									PsimagLite::Matrix<RealType> sx4_(nrow_X, ncol_X);
-									PsimagLite::MatrixNonOwned<RealType> sx4Ref(sx4_);
+									PsimagLite::Matrix<RealType>
+									    sx1_(nrow_X, ncol_X);
+									PsimagLite::MatrixNonOwned<
+									    RealType>
+									    sx1Ref(sx1_);
+									PsimagLite::Matrix<RealType>
+									    sx2_(nrow_X, ncol_X);
+									PsimagLite::MatrixNonOwned<
+									    RealType>
+									    sx2Ref(sx2_);
+									PsimagLite::Matrix<RealType>
+									    sx3_(nrow_X, ncol_X);
+									PsimagLite::MatrixNonOwned<
+									    RealType>
+									    sx3Ref(sx3_);
+									PsimagLite::Matrix<RealType>
+									    sx4_(nrow_X, ncol_X);
+									PsimagLite::MatrixNonOwned<
+									    RealType>
+									    sx4Ref(sx4_);
 
 									if (thresholdA == 0) {
-										if (nrow_A == ncol_A) {
+										if (nrow_A
+										    == ncol_A) {
 											/*
 											 * ------------------------------------
-											 * special case to test identity matrix
+											 * special
+											 * case to
+											 * test
+											 * identity
+											 * matrix
 											 * ------------------------------------
 											 */
-											if (idebug >= 1) {
-												printf("nrow_A=%d, identity \n", nrow_A);
+											if (idebug
+											    >= 1) {
+												printf(
+												    "nrow_A=%d, identity \n",
+												    nrow_A);
 											}
-											den_eye(nrow_A, ncol_A, a_);
-											assert(den_is_eye(a_));
+											den_eye(
+											    nrow_A,
+											    ncol_A,
+											    a_);
+											assert(
+											    den_is_eye(
+											        a_));
 
-											PsimagLite::CrsMatrix<RealType> a(a_);
-											assert(csr_is_eye(a));
+											PsimagLite::
+											    CrsMatrix<
+											        RealType>
+											        a(a_);
+											assert(
+											    csr_is_eye(
+											        a));
 										} else {
-											if (idebug >= 1) {
-												printf("nrow_A=%d,ncol_A=%d, zeros\n", nrow_A, ncol_A);
+											if (idebug
+											    >= 1) {
+												printf(
+												    "nrow_A=%d,ncol_A=%d, zeros\n",
+												    nrow_A,
+												    ncol_A);
 											}
 
-											den_zeros(nrow_A, ncol_A, a_);
-											assert(den_is_zeros(a_));
+											den_zeros(
+											    nrow_A,
+											    ncol_A,
+											    a_);
+											assert(
+											    den_is_zeros(
+											        a_));
 
-											PsimagLite::CrsMatrix<RealType> a(a_);
-											assert(csr_is_zeros(a));
+											PsimagLite::
+											    CrsMatrix<
+											        RealType>
+											        a(a_);
+											assert(
+											    csr_is_zeros(
+											        a));
 										}
 									} else {
-										den_gen_matrix(nrow_A, ncol_A, thresholdA, a_);
+										den_gen_matrix(
+										    nrow_A,
+										    ncol_A,
+										    thresholdA,
+										    a_);
 
-										PsimagLite::CrsMatrix<RealType> a(a_);
-										assert(den_is_eye(a_) == csr_is_eye(a));
-										assert(den_is_zeros(a_) == csr_is_zeros(a));
+										PsimagLite::
+										    CrsMatrix<
+										        RealType>
+										        a(a_);
+										assert(
+										    den_is_eye(a_)
+										    == csr_is_eye(
+										        a));
+										assert(
+										    den_is_zeros(a_)
+										    == csr_is_zeros(
+										        a));
 									}
 
-									if ((thresholdB == 0) && (nrow_B == ncol_B)) {
+									if ((thresholdB == 0)
+									    && (nrow_B == ncol_B)) {
 										/*
 										 * ------------------------------------
-										 * special case to test identity matrix
+										 * special case to
+										 * test identity
+										 * matrix
 										 * ------------------------------------
 										 */
 										if (idebug >= 1) {
-											printf("nrow_B=%d, identity \n", nrow_B);
+											printf(
+											    "nrow_"
+											    "B=%d, "
+											    "identi"
+											    "ty \n",
+											    nrow_B);
 										}
-										den_eye(nrow_B, ncol_B, b_);
-										assert(den_is_eye(b_));
+										den_eye(nrow_B,
+										        ncol_B,
+										        b_);
+										assert(
+										    den_is_eye(b_));
 
-										PsimagLite::CrsMatrix<RealType> b(b_);
-										assert(csr_is_eye(b));
+										PsimagLite::
+										    CrsMatrix<
+										        RealType>
+										        b(b_);
+										assert(
+										    csr_is_eye(b));
 									} else {
-										den_gen_matrix(nrow_B, ncol_B, thresholdB, b_);
+										den_gen_matrix(
+										    nrow_B,
+										    ncol_B,
+										    thresholdB,
+										    b_);
 
-										PsimagLite::CrsMatrix<RealType> b(b_);
-										assert(den_is_eye(b_) == csr_is_eye(b));
-										assert(den_is_zeros(b_) == csr_is_zeros(b));
+										PsimagLite::
+										    CrsMatrix<
+										        RealType>
+										        b(b_);
+										assert(
+										    den_is_eye(b_)
+										    == csr_is_eye(
+										        b));
+										assert(
+										    den_is_zeros(b_)
+										    == csr_is_zeros(
+										        b));
 									}
 
-									den_gen_matrix(nrow_Y, ncol_Y, 1.0, y_);
+									den_gen_matrix(nrow_Y,
+									               ncol_Y,
+									               1.0,
+									               y_);
 
-									den_zeros(nrow_X, ncol_X, x1_);
-									den_zeros(nrow_X, ncol_X, x2_);
-									den_zeros(nrow_X, ncol_X, x3_);
+									den_zeros(
+									    nrow_X, ncol_X, x1_);
+									den_zeros(
+									    nrow_X, ncol_X, x2_);
+									den_zeros(
+									    nrow_X, ncol_X, x3_);
 
-									den_zeros(nrow_X, ncol_X, sx1_);
-									den_zeros(nrow_X, ncol_X, sx2_);
-									den_zeros(nrow_X, ncol_X, sx3_);
+									den_zeros(
+									    nrow_X, ncol_X, sx1_);
+									den_zeros(
+									    nrow_X, ncol_X, sx2_);
+									den_zeros(
+									    nrow_X, ncol_X, sx3_);
 
 									imethod = 1;
-									den_kron_mult_method(imethod,
-									                     transA,
-									                     transB,
-									                     a_,
-									                     b_,
-									                     yRef.getVector(),
-									                     0,
-									                     x1Ref.getVector(),
-									                     0,
-									                     gemmR);
+									den_kron_mult_method(
+									    imethod,
+									    transA,
+									    transB,
+									    a_,
+									    b_,
+									    yRef.getVector(),
+									    0,
+									    x1Ref.getVector(),
+									    0,
+									    gemmR);
 
 									imethod = 2;
-									den_kron_mult_method(imethod,
-									                     transA,
-									                     transB,
-									                     a_,
-									                     b_,
-									                     yRef.getVector(),
-									                     0,
-									                     x2Ref.getVector(),
-									                     0,
-									                     gemmR);
+									den_kron_mult_method(
+									    imethod,
+									    transA,
+									    transB,
+									    a_,
+									    b_,
+									    yRef.getVector(),
+									    0,
+									    x2Ref.getVector(),
+									    0,
+									    gemmR);
 									imethod = 3;
-									den_kron_mult_method(imethod,
-									                     transA,
-									                     transB,
-									                     a_,
-									                     b_,
-									                     yRef.getVector(),
-									                     0,
-									                     x3Ref.getVector(),
-									                     0,
-									                     gemmR);
+									den_kron_mult_method(
+									    imethod,
+									    transA,
+									    transB,
+									    a_,
+									    b_,
+									    yRef.getVector(),
+									    0,
+									    x3Ref.getVector(),
+									    0,
+									    gemmR);
 
 									// ------------------
 									// form C = kron(A,B)
 									// ------------------
-									PsimagLite::Matrix<RealType> c_(nrow_C, ncol_C);
+									PsimagLite::Matrix<RealType>
+									    c_(nrow_C, ncol_C);
 
 									den_kron_form_general(
-									    transA, transB, nrow_A, ncol_A, a_, nrow_B, ncol_B, b_, c_);
+									    transA,
+									    transB,
+									    nrow_A,
+									    ncol_A,
+									    a_,
+									    nrow_B,
+									    ncol_B,
+									    b_,
+									    c_);
 
 									// -----------------------
 									// perform matrix-multiply
 									// -----------------------
 									{
-										const char trans1 = 'N';
-										const char trans2 = 'N';
-										const RealType alpha = 1.0;
-										const RealType beta = 0.0;
+										const char trans1
+										    = 'N';
+										const char trans2
+										    = 'N';
+										const RealType alpha
+										    = 1.0;
+										const RealType beta
+										    = 0.0;
 
 										// ------------------------------
-										// reshape X, Y as column vectors
+										// reshape X, Y as
+										// column vectors
 										// ------------------------------
-										const int mm = nrow_X * ncol_X;
+										const int mm
+										    = nrow_X
+										    * ncol_X;
 										const int nn = 1;
-										const int kk = ncol_C;
+										const int kk
+										    = ncol_C;
 
-										const int ld1 = nrow_C;
-										const int ld2 = nrow_Y * ncol_Y;
-										const int ld3 = nrow_X * ncol_X;
+										const int ld1
+										    = nrow_C;
+										const int ld2
+										    = nrow_Y
+										    * ncol_Y;
+										const int ld3
+										    = nrow_X
+										    * ncol_X;
 
-										const RealType* const pA = &(c_(0, 0));
-										const RealType* const pB = &(yRef.getVector()[0]);
-										RealType* pC = &(x4Ref.getVector()[0]);
-										psimag::BLAS::GEMM(trans1, trans2, mm, nn, kk, alpha, pA, ld1, pB, ld2, beta, pC, ld3);
+										const RealType* const
+										    pA
+										    = &(c_(0, 0));
+										const RealType* const
+										    pB
+										    = &(yRef.getVector()
+										            [0]);
+										RealType* pC = &(
+										    x4Ref
+										        .getVector()
+										            [0]);
+										psimag::BLAS::GEMM(
+										    trans1,
+										    trans2,
+										    mm,
+										    nn,
+										    kk,
+										    alpha,
+										    pA,
+										    ld1,
+										    pB,
+										    ld2,
+										    beta,
+										    pC,
+										    ld3);
 									}
 
 									int ix = 0;
 									int jx = 0;
 
-									for (jx = 0; jx < ncol_X; jx++) {
-										for (ix = 0; ix < nrow_X; ix++) {
-											RealType diff12 = std::abs(x1_(ix, jx) - x2_(ix, jx));
-											RealType diff23 = std::abs(x2_(ix, jx) - x3_(ix, jx));
-											RealType diff31 = std::abs(x3_(ix, jx) - x1_(ix, jx));
-											RealType diff41 = std::abs(x4_(ix, jx) - x1_(ix, jx));
-											RealType diffmax = std::max(diff41,
-											                            std::max(diff12, std::max(diff23, diff31)));
-											const RealType tol = 1.0 / (1000.0 * 1000.0 * 1000.0);
+									for (jx = 0; jx < ncol_X;
+									     jx++) {
+										for (ix = 0;
+										     ix < nrow_X;
+										     ix++) {
+											RealType
+											    diff12
+											    = std::abs(
+											        x1_(ix,
+											            jx)
+											        - x2_(
+											            ix,
+											            jx));
+											RealType
+											    diff23
+											    = std::abs(
+											        x2_(ix,
+											            jx)
+											        - x3_(
+											            ix,
+											            jx));
+											RealType
+											    diff31
+											    = std::abs(
+											        x3_(ix,
+											            jx)
+											        - x1_(
+											            ix,
+											            jx));
+											RealType
+											    diff41
+											    = std::abs(
+											        x4_(ix,
+											            jx)
+											        - x1_(
+											            ix,
+											            jx));
+											RealType diffmax = std::max(
+											    diff41,
+											    std::max(
+											        diff12,
+											        std::max(
+											            diff23,
+											            diff31)));
+											const RealType
+											    tol
+											    = 1.0
+											    / (1000.0
+											       * 1000.0
+											       * 1000.0);
 
-											int isok = (diffmax <= tol);
+											int isok
+											    = (diffmax
+											       <= tol);
 											if (!isok) {
-												nerrors += 1;
-												printf("den: transA=%c, itransA %d transB=%c, itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												       transA,
-												       itransA,
-												       transB,
-												       itransB,
-												       nrow_A,
-												       ncol_A,
-												       nrow_B,
-												       ncol_B);
-												printf("ix %d, jx %d, diff12 %f, diff23 %f, diff31 %f diff41 %f \n",
-												       ix,
-												       jx,
-												       diff12,
-												       diff23,
-												       diff31,
-												       diff41);
+												nerrors
+												    += 1;
+												printf(
+												    "den: transA=%c, itransA %d transB=%c, itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+												    transA,
+												    itransA,
+												    transB,
+												    itransB,
+												    nrow_A,
+												    ncol_A,
+												    nrow_B,
+												    ncol_B);
+												printf(
+												    "ix %d, jx %d, diff12 %f, diff23 %f, diff31 %f diff41 %f \n",
+												    ix,
+												    jx,
+												    diff12,
+												    diff23,
+												    diff31,
+												    diff41);
 											}
 										}
 									}
@@ -259,13 +493,21 @@ int main()
 									 * test sparse matrix
 									 * ------------------
 									 */
-									PsimagLite::CrsMatrix<RealType> a(a_);
-									assert(den_is_eye(a_) == csr_is_eye(a));
-									assert(den_is_zeros(a_) == csr_is_zeros(a));
+									PsimagLite::CrsMatrix<
+									    RealType>
+									    a(a_);
+									assert(den_is_eye(a_)
+									       == csr_is_eye(a));
+									assert(den_is_zeros(a_)
+									       == csr_is_zeros(a));
 
-									PsimagLite::CrsMatrix<RealType> b(b_);
-									assert(den_is_eye(b_) == csr_is_eye(b));
-									assert(den_is_zeros(b_) == csr_is_zeros(b));
+									PsimagLite::CrsMatrix<
+									    RealType>
+									    b(b_);
+									assert(den_is_eye(b_)
+									       == csr_is_eye(b));
+									assert(den_is_zeros(b_)
+									       == csr_is_zeros(b));
 
 									imethod = 1;
 									csr_kron_mult_method(
@@ -303,29 +545,69 @@ int main()
 									    yRef,
 									    sx3Ref);
 
-									for (jx = 0; jx < ncol_X; jx++) {
-										for (ix = 0; ix < nrow_X; ix++) {
-											RealType diff1 = std::abs(x1_(ix, jx) - sx1_(ix, jx));
-											RealType diff2 = std::abs(x2_(ix, jx) - sx2_(ix, jx));
-											RealType diff3 = std::abs(x3_(ix, jx) - sx3_(ix, jx));
-											RealType diffmax = std::max(diff1, std::max(diff2, diff3));
-											const RealType tol = 1.0 / (1000.0 * 1000.0 * 1000.0);
-											int isok = (diffmax <= tol);
+									for (jx = 0; jx < ncol_X;
+									     jx++) {
+										for (ix = 0;
+										     ix < nrow_X;
+										     ix++) {
+											RealType
+											    diff1
+											    = std::abs(
+											        x1_(ix,
+											            jx)
+											        - sx1_(
+											            ix,
+											            jx));
+											RealType
+											    diff2
+											    = std::abs(
+											        x2_(ix,
+											            jx)
+											        - sx2_(
+											            ix,
+											            jx));
+											RealType
+											    diff3
+											    = std::abs(
+											        x3_(ix,
+											            jx)
+											        - sx3_(
+											            ix,
+											            jx));
+											RealType
+											    diffmax
+											    = std::max(
+											        diff1,
+											        std::max(
+											            diff2,
+											            diff3));
+											const RealType
+											    tol
+											    = 1.0
+											    / (1000.0
+											       * 1000.0
+											       * 1000.0);
+											int isok
+											    = (diffmax
+											       <= tol);
 											if (!isok) {
-												nerrors += 1;
-												printf("csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												       itransA,
-												       itransB,
-												       nrow_A,
-												       ncol_A,
-												       nrow_B,
-												       ncol_B);
-												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												       ix,
-												       jx,
-												       diff1,
-												       diff2,
-												       diff3);
+												nerrors
+												    += 1;
+												printf(
+												    "csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+												    itransA,
+												    itransB,
+												    nrow_A,
+												    ncol_A,
+												    nrow_B,
+												    ncol_B);
+												printf(
+												    "ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
+												    ix,
+												    jx,
+												    diff1,
+												    diff2,
+												    diff3);
 											}
 										}
 									}
@@ -336,58 +618,88 @@ int main()
 									 * ---------------------
 									 */
 
-									den_zeros(nrow_X, ncol_X, x1_);
-									den_zeros(nrow_X, ncol_X, sx1_);
+									den_zeros(
+									    nrow_X, ncol_X, x1_);
+									den_zeros(
+									    nrow_X, ncol_X, sx1_);
 
-									den_kron_mult_method(imethod,
-									                     transA,
-									                     transB,
-									                     a_,
-									                     b_,
-									                     yRef.getVector(),
-									                     0,
-									                     x1Ref.getVector(),
-									                     0,
-									                     gemmR);
+									den_kron_mult_method(
+									    imethod,
+									    transA,
+									    transB,
+									    a_,
+									    b_,
+									    yRef.getVector(),
+									    0,
+									    x1Ref.getVector(),
+									    0,
+									    gemmR);
 
-									csr_kron_mult(transA,
-									              transB,
-									              a,
-									              b,
-									              yRef.getVector(),
-									              0,
-									              sx1Ref.getVector(),
-									              0,
-									              denseFlopDiscount);
+									csr_kron_mult(
+									    transA,
+									    transB,
+									    a,
+									    b,
+									    yRef.getVector(),
+									    0,
+									    sx1Ref.getVector(),
+									    0,
+									    denseFlopDiscount);
 
-									for (jx = 0; jx < ncol_X; jx++) {
-										for (ix = 0; ix < nrow_X; ix++) {
-											RealType diff = std::abs(x1_(ix, jx) - sx1_(ix, jx));
-											const RealType tol = 1.0 / (1000.0 * 1000.0 * 1000.0);
+									for (jx = 0; jx < ncol_X;
+									     jx++) {
+										for (ix = 0;
+										     ix < nrow_X;
+										     ix++) {
+											RealType
+											    diff
+											    = std::abs(
+											        x1_(ix,
+											            jx)
+											        - sx1_(
+											            ix,
+											            jx));
+											const RealType
+											    tol
+											    = 1.0
+											    / (1000.0
+											       * 1000.0
+											       * 1000.0);
 
-											int isok = (diff <= tol);
+											int isok
+											    = (diff
+											       <= tol);
 											if (!isok) {
-												nerrors += 1;
-												printf("nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												       nrow_A,
-												       ncol_A,
-												       nrow_B,
-												       ncol_B);
-												printf("ix %d, jx %d, diff %f \n", ix, jx, diff);
+												nerrors
+												    += 1;
+												printf(
+												    "nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+												    nrow_A,
+												    ncol_A,
+												    nrow_B,
+												    ncol_B);
+												printf(
+												    "ix %d, jx %d, diff %f \n",
+												    ix,
+												    jx,
+												    diff);
 											}
 										}
 									}
 
 									/*
 									 * -----------------------
-									 * test mixed matrix types dense and CSR
+									 * test mixed matrix types
+									 * dense and CSR
 									 * -----------------------
 									 */
 
-									den_zeros(nrow_X, ncol_X, sx1_);
+									den_zeros(
+									    nrow_X, ncol_X, sx1_);
 									den_csr_kron_mult(
 
-									    transA, transB,
+									    transA,
+									    transB,
 
 									    a_,
 
@@ -400,36 +712,69 @@ int main()
 									    denseFlopDiscount,
 									    gemmR);
 
-									for (jx = 0; jx < ncol_X; jx++) {
-										for (ix = 0; ix < nrow_X; ix++) {
-											RealType diff1 = std::abs(x1_(ix, jx) - sx1_(ix, jx));
-											RealType diff2 = 0;
-											RealType diff3 = 0;
-											RealType diffmax = std::max(diff1, std::max(diff2, diff3));
-											const RealType tol = 1.0 / (1000.0 * 1000.0 * 1000.0);
-											int isok = (diffmax <= tol);
+									for (jx = 0; jx < ncol_X;
+									     jx++) {
+										for (ix = 0;
+										     ix < nrow_X;
+										     ix++) {
+											RealType
+											    diff1
+											    = std::abs(
+											        x1_(ix,
+											            jx)
+											        - sx1_(
+											            ix,
+											            jx));
+											RealType
+											    diff2
+											    = 0;
+											RealType
+											    diff3
+											    = 0;
+											RealType
+											    diffmax
+											    = std::max(
+											        diff1,
+											        std::max(
+											            diff2,
+											            diff3));
+											const RealType
+											    tol
+											    = 1.0
+											    / (1000.0
+											       * 1000.0
+											       * 1000.0);
+											int isok
+											    = (diffmax
+											       <= tol);
 											if (!isok) {
-												nerrors += 1;
-												printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												       itransA,
-												       itransB,
-												       nrow_A,
-												       ncol_A,
-												       nrow_B,
-												       ncol_B);
-												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												       ix,
-												       jx,
-												       diff1,
-												       diff2,
-												       diff3);
+												nerrors
+												    += 1;
+												printf(
+												    "den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+												    itransA,
+												    itransB,
+												    nrow_A,
+												    ncol_A,
+												    nrow_B,
+												    ncol_B);
+												printf(
+												    "ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
+												    ix,
+												    jx,
+												    diff1,
+												    diff2,
+												    diff3);
 											}
 										}
 									}
 
-									den_zeros(nrow_X, ncol_X, sx1_);
-									den_zeros(nrow_X, ncol_X, sx2_);
-									den_zeros(nrow_X, ncol_X, sx3_);
+									den_zeros(
+									    nrow_X, ncol_X, sx1_);
+									den_zeros(
+									    nrow_X, ncol_X, sx2_);
+									den_zeros(
+									    nrow_X, ncol_X, sx3_);
 
 									imethod = 1;
 									den_csr_kron_mult_method(
@@ -464,153 +809,273 @@ int main()
 									    gemmR);
 
 									imethod = 3;
-									den_csr_kron_mult_method(imethod,
-									                         transA,
-									                         transB,
-									                         a_,
-									                         b,
-									                         yRef.getVector(),
-									                         0,
-									                         sx3Ref.getVector(),
-									                         0,
-									                         gemmR);
+									den_csr_kron_mult_method(
+									    imethod,
+									    transA,
+									    transB,
+									    a_,
+									    b,
+									    yRef.getVector(),
+									    0,
+									    sx3Ref.getVector(),
+									    0,
+									    gemmR);
 
-									for (jx = 0; jx < ncol_X; jx++) {
-										for (ix = 0; ix < nrow_X; ix++) {
-											RealType diff1 = std::abs(x1_(ix, jx) - sx1_(ix, jx));
-											RealType diff2 = std::abs(x2_(ix, jx) - sx2_(ix, jx));
-											RealType diff3 = std::abs(x3_(ix, jx) - sx3_(ix, jx));
-											RealType diffmax = std::max(diff1, std::max(diff2, diff3));
-											const RealType tol = 1.0 / (1000.0 * 1000.0 * 1000.0);
-											int isok = (diffmax <= tol);
+									for (jx = 0; jx < ncol_X;
+									     jx++) {
+										for (ix = 0;
+										     ix < nrow_X;
+										     ix++) {
+											RealType
+											    diff1
+											    = std::abs(
+											        x1_(ix,
+											            jx)
+											        - sx1_(
+											            ix,
+											            jx));
+											RealType
+											    diff2
+											    = std::abs(
+											        x2_(ix,
+											            jx)
+											        - sx2_(
+											            ix,
+											            jx));
+											RealType
+											    diff3
+											    = std::abs(
+											        x3_(ix,
+											            jx)
+											        - sx3_(
+											            ix,
+											            jx));
+											RealType
+											    diffmax
+											    = std::max(
+											        diff1,
+											        std::max(
+											            diff2,
+											            diff3));
+											const RealType
+											    tol
+											    = 1.0
+											    / (1000.0
+											       * 1000.0
+											       * 1000.0);
+											int isok
+											    = (diffmax
+											       <= tol);
 											if (!isok) {
-												nerrors += 1;
-												printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												       itransA,
-												       itransB,
-												       nrow_A,
-												       ncol_A,
-												       nrow_B,
-												       ncol_B);
-												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												       ix,
-												       jx,
-												       diff1,
-												       diff2,
-												       diff3);
+												nerrors
+												    += 1;
+												printf(
+												    "den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+												    itransA,
+												    itransB,
+												    nrow_A,
+												    ncol_A,
+												    nrow_B,
+												    ncol_B);
+												printf(
+												    "ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
+												    ix,
+												    jx,
+												    diff1,
+												    diff2,
+												    diff3);
 											}
 										}
 									}
 
 									/*
 									 * -----------------------
-									 * test mixed matrix types CSR and dense
+									 * test mixed matrix types
+									 * CSR and dense
 									 * -----------------------
 									 */
-									den_zeros(nrow_X, ncol_X, sx1_);
+									den_zeros(
+									    nrow_X, ncol_X, sx1_);
 
-									csr_den_kron_mult(transA,
-									                  transB,
-									                  a,
-									                  b_,
-									                  yRef.getVector(),
-									                  0,
-									                  sx1Ref.getVector(),
-									                  0,
-									                  denseFlopDiscount,
-									                  gemmR);
+									csr_den_kron_mult(
+									    transA,
+									    transB,
+									    a,
+									    b_,
+									    yRef.getVector(),
+									    0,
+									    sx1Ref.getVector(),
+									    0,
+									    denseFlopDiscount,
+									    gemmR);
 
-									for (jx = 0; jx < ncol_X; jx++) {
-										for (ix = 0; ix < nrow_X; ix++) {
-											RealType diff1 = std::abs(x1_(ix, jx) - sx1_(ix, jx));
-											RealType diff2 = 0;
-											RealType diff3 = 0;
-											RealType diffmax = std::max(diff1, std::max(diff2, diff3));
-											const RealType tol = 1.0 / (1000.0 * 1000.0 * 1000.0);
-											int isok = (diffmax <= tol);
+									for (jx = 0; jx < ncol_X;
+									     jx++) {
+										for (ix = 0;
+										     ix < nrow_X;
+										     ix++) {
+											RealType
+											    diff1
+											    = std::abs(
+											        x1_(ix,
+											            jx)
+											        - sx1_(
+											            ix,
+											            jx));
+											RealType
+											    diff2
+											    = 0;
+											RealType
+											    diff3
+											    = 0;
+											RealType
+											    diffmax
+											    = std::max(
+											        diff1,
+											        std::max(
+											            diff2,
+											            diff3));
+											const RealType
+											    tol
+											    = 1.0
+											    / (1000.0
+											       * 1000.0
+											       * 1000.0);
+											int isok
+											    = (diffmax
+											       <= tol);
 											if (!isok) {
-												nerrors += 1;
-												printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												       itransA,
-												       itransB,
-												       nrow_A,
-												       ncol_A,
-												       nrow_B,
-												       ncol_B);
-												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												       ix,
-												       jx,
-												       diff1,
-												       diff2,
-												       diff3);
+												nerrors
+												    += 1;
+												printf(
+												    "den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+												    itransA,
+												    itransB,
+												    nrow_A,
+												    ncol_A,
+												    nrow_B,
+												    ncol_B);
+												printf(
+												    "ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
+												    ix,
+												    jx,
+												    diff1,
+												    diff2,
+												    diff3);
 											}
 										}
 									}
 
-									den_zeros(nrow_X, ncol_X, sx1_);
-									den_zeros(nrow_X, ncol_X, sx2_);
-									den_zeros(nrow_X, ncol_X, sx3_);
+									den_zeros(
+									    nrow_X, ncol_X, sx1_);
+									den_zeros(
+									    nrow_X, ncol_X, sx2_);
+									den_zeros(
+									    nrow_X, ncol_X, sx3_);
 
 									imethod = 1;
 									const SizeType izero = 0;
-									csr_den_kron_mult_method(imethod,
-									                         transA,
-									                         transB,
-									                         a,
-									                         b_,
-									                         yRef.getVector(),
-									                         izero,
-									                         sx1Ref.getVector(),
-									                         izero,
-									                         gemmR);
+									csr_den_kron_mult_method(
+									    imethod,
+									    transA,
+									    transB,
+									    a,
+									    b_,
+									    yRef.getVector(),
+									    izero,
+									    sx1Ref.getVector(),
+									    izero,
+									    gemmR);
 
 									imethod = 2;
-									csr_den_kron_mult_method(imethod,
-									                         transA,
-									                         transB,
-									                         a,
-									                         b_,
-									                         yRef.getVector(),
-									                         izero,
-									                         sx2Ref.getVector(),
-									                         izero,
-									                         gemmR);
+									csr_den_kron_mult_method(
+									    imethod,
+									    transA,
+									    transB,
+									    a,
+									    b_,
+									    yRef.getVector(),
+									    izero,
+									    sx2Ref.getVector(),
+									    izero,
+									    gemmR);
 
 									imethod = 3;
-									csr_den_kron_mult_method(imethod,
-									                         transA,
-									                         transB,
-									                         a,
-									                         b_,
-									                         yRef.getVector(),
-									                         izero,
-									                         sx3Ref.getVector(),
-									                         izero,
-									                         gemmR);
+									csr_den_kron_mult_method(
+									    imethod,
+									    transA,
+									    transB,
+									    a,
+									    b_,
+									    yRef.getVector(),
+									    izero,
+									    sx3Ref.getVector(),
+									    izero,
+									    gemmR);
 
-									for (jx = 0; jx < ncol_X; jx++) {
-										for (ix = 0; ix < nrow_X; ix++) {
-											RealType diff1 = std::abs(x1_(ix, jx) - sx1_(ix, jx));
-											RealType diff2 = std::abs(x2_(ix, jx) - sx2_(ix, jx));
-											RealType diff3 = std::abs(x3_(ix, jx) - sx3_(ix, jx));
-											RealType diffmax = std::max(diff1, std::max(diff2, diff3));
-											const RealType tol = 1.0 / (1000.0 * 1000.0 * 1000.0);
-											int isok = (diffmax <= tol);
+									for (jx = 0; jx < ncol_X;
+									     jx++) {
+										for (ix = 0;
+										     ix < nrow_X;
+										     ix++) {
+											RealType
+											    diff1
+											    = std::abs(
+											        x1_(ix,
+											            jx)
+											        - sx1_(
+											            ix,
+											            jx));
+											RealType
+											    diff2
+											    = std::abs(
+											        x2_(ix,
+											            jx)
+											        - sx2_(
+											            ix,
+											            jx));
+											RealType
+											    diff3
+											    = std::abs(
+											        x3_(ix,
+											            jx)
+											        - sx3_(
+											            ix,
+											            jx));
+											RealType
+											    diffmax
+											    = std::max(
+											        diff1,
+											        std::max(
+											            diff2,
+											            diff3));
+											const RealType
+											    tol
+											    = 1.0
+											    / (1000.0
+											       * 1000.0
+											       * 1000.0);
+											int isok
+											    = (diffmax
+											       <= tol);
 											if (!isok) {
-												nerrors += 1;
-												printf("den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
-												       itransA,
-												       itransB,
-												       nrow_A,
-												       ncol_A,
-												       nrow_B,
-												       ncol_B);
-												printf("ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
-												       ix,
-												       jx,
-												       diff1,
-												       diff2,
-												       diff3);
+												nerrors
+												    += 1;
+												printf(
+												    "den_csr: itransA %d itransB %d nrow_A %d ncol_A %d nrow_B %d ncol_B %d \n",
+												    itransA,
+												    itransB,
+												    nrow_A,
+												    ncol_A,
+												    nrow_B,
+												    ncol_B);
+												printf(
+												    "ix %d, jx %d, diff1 %f, diff2 %f, diff3 %f \n",
+												    ix,
+												    jx,
+												    diff1,
+												    diff2,
+												    diff3);
 											}
 										}
 									}

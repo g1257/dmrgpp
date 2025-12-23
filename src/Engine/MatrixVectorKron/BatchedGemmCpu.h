@@ -10,8 +10,7 @@
 
 namespace Dmrg {
 
-template <typename InitKronType>
-class BatchedGemmCpu {
+template <typename InitKronType> class BatchedGemmCpu {
 
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
@@ -76,18 +75,23 @@ public:
 			const ArrayOfMatStructType& xiStruct = initKron_.xc(ioperator);
 			for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
 				for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-					const MatrixDenseOrSparseType* AsrcPtr = xiStruct(ipatch, jpatch);
+					const MatrixDenseOrSparseType* AsrcPtr
+					    = xiStruct(ipatch, jpatch);
 
 					if (!AsrcPtr)
 						continue;
 
 					const MatrixType& Asrc = AsrcPtr->dense();
-					SizeType igroup = initKron_.patch(InitKronType::NEW,
-					                                  GenIjPatchType::LEFT)[ipatch];
-					SizeType jgroup = initKron_.patch(InitKronType::NEW,
-					                                  GenIjPatchType::LEFT)[jpatch];
-					int ia = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
-					int ja = initKron_.lrs(InitKronType::NEW).left().partition(jgroup);
+					SizeType igroup = initKron_.patch(
+					    InitKronType::NEW, GenIjPatchType::LEFT)[ipatch];
+					SizeType jgroup = initKron_.patch(
+					    InitKronType::NEW, GenIjPatchType::LEFT)[jpatch];
+					int ia = initKron_.lrs(InitKronType::NEW)
+					             .left()
+					             .partition(igroup);
+					int ja = initKron_.lrs(InitKronType::NEW)
+					             .left()
+					             .partition(jgroup);
 
 					mylacpy(Asrc, Abatch_, ia, ja + ioperator * leftMaxState);
 				}
@@ -98,18 +102,23 @@ public:
 			const ArrayOfMatStructType& yiStruct = initKron_.yc(ioperator);
 			for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
 				for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-					const MatrixDenseOrSparseType* BsrcPtr = yiStruct(ipatch, jpatch);
+					const MatrixDenseOrSparseType* BsrcPtr
+					    = yiStruct(ipatch, jpatch);
 
 					if (!BsrcPtr)
 						continue;
 
 					const MatrixType& Bsrc = BsrcPtr->dense();
-					SizeType igroup = initKron_.patch(InitKronType::NEW,
-					                                  GenIjPatchType::RIGHT)[ipatch];
-					SizeType jgroup = initKron_.patch(InitKronType::NEW,
-					                                  GenIjPatchType::RIGHT)[jpatch];
-					int ib = initKron_.lrs(InitKronType::NEW).right().partition(igroup);
-					int jb = initKron_.lrs(InitKronType::NEW).right().partition(jgroup);
+					SizeType igroup = initKron_.patch(
+					    InitKronType::NEW, GenIjPatchType::RIGHT)[ipatch];
+					SizeType jgroup = initKron_.patch(
+					    InitKronType::NEW, GenIjPatchType::RIGHT)[jpatch];
+					int ib = initKron_.lrs(InitKronType::NEW)
+					             .right()
+					             .partition(igroup);
+					int jb = initKron_.lrs(InitKronType::NEW)
+					             .right()
+					             .partition(jgroup);
 
 					mylacpy(Bsrc, Bbatch_, ib, jb + ioperator * rightMaxState);
 				}
@@ -120,8 +129,8 @@ public:
 		rightPatchSize_.resize(npatches, 0);
 
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			SizeType igroup = initKron_.patch(InitKronType::NEW,
-			                                  GenIjPatchType::LEFT)[ipatch];
+			SizeType igroup
+			    = initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT)[ipatch];
 
 			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
 			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(igroup + 1);
@@ -130,8 +139,8 @@ public:
 		}
 
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			SizeType igroup = initKron_.patch(InitKronType::NEW,
-			                                  GenIjPatchType::RIGHT)[ipatch];
+			SizeType igroup
+			    = initKron_.patch(InitKronType::NEW, GenIjPatchType::RIGHT)[ipatch];
 			int R1 = initKron_.lrs(InitKronType::NEW).right().partition(igroup);
 			int R2 = initKron_.lrs(InitKronType::NEW).right().partition(igroup + 1);
 			rightPatchSize_[ipatch] = R2 - R1;
@@ -182,7 +191,8 @@ public:
 		for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
 			long j1 = initKron_.offsetForPatches(InitKronType::NEW, jpatch);
 			int nrowX = rightPatchSize_[jpatch];
-			assert(initKron_.offsetForPatches(InitKronType::NEW, jpatch + 1) - j1 == nrowX * leftPatchSize_[jpatch]);
+			assert(initKron_.offsetForPatches(InitKronType::NEW, jpatch + 1) - j1
+			       == nrowX * leftPatchSize_[jpatch]);
 
 			/*
 	 --------------------------------------
@@ -192,17 +202,18 @@ public:
 			assert(static_cast<SizeType>(j1) < vin.size());
 			int ldXJ = nrowX;
 
-			SizeType jgroup = initKron_.patch(InitKronType::NEW,
-			                                  GenIjPatchType::RIGHT)[jpatch];
+			SizeType jgroup
+			    = initKron_.patch(InitKronType::NEW, GenIjPatchType::RIGHT)[jpatch];
 			int R1 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup);
 			int R2 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup + 1);
 
-			SizeType igroup = initKron_.patch(InitKronType::NEW,
-			                                  GenIjPatchType::LEFT)[jpatch];
+			SizeType igroup
+			    = initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT)[jpatch];
 			int L1 = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
 			int L2 = initKron_.lrs(InitKronType::NEW).left().partition(igroup + 1);
 
-			assert(static_cast<SizeType>(j1 + R2 - R1 - 1 + (L2 - L1 - 1) * nrowX) < vin.size());
+			assert(static_cast<SizeType>(j1 + R2 - R1 - 1 + (L2 - L1 - 1) * nrowX)
+			       < vin.size());
 			/*
 	 -------------------------------
 	 independent DGEMM in same group
@@ -214,7 +225,8 @@ public:
 				/*
 		------------------------------------------------------------------------
 		BX(1:nrowBX, offsetBX + (L1:L2)) = Bbatch(1:nrowBX, offsetB + (R1:R2) ) *
-				                                                         XJ( 1:(R2-R1+1), 1:(L2-L1+1));
+				                                                         XJ(
+		1:(R2-R1+1), 1:(L2-L1+1));
 		------------------------------------------------------------------------
 		*/
 				psimag::BLAS::GEMM('N',
@@ -242,29 +254,34 @@ public:
 
 			long i1 = initKron_.offsetForPatches(InitKronType::NEW, ipatch);
 
-			SizeType jgroup = initKron_.patch(InitKronType::NEW,
-			                                  GenIjPatchType::RIGHT)[ipatch];
+			SizeType jgroup
+			    = initKron_.patch(InitKronType::NEW, GenIjPatchType::RIGHT)[ipatch];
 			SizeType R1 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup);
-			SizeType R2 = initKron_.lrs(InitKronType::NEW).right().partition(jgroup + 1);
+			SizeType R2
+			    = initKron_.lrs(InitKronType::NEW).right().partition(jgroup + 1);
 
-			SizeType igroup = initKron_.patch(InitKronType::NEW,
-			                                  GenIjPatchType::LEFT)[ipatch];
+			SizeType igroup
+			    = initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT)[ipatch];
 			SizeType L1 = initKron_.lrs(InitKronType::NEW).left().partition(igroup);
 			SizeType L2 = initKron_.lrs(InitKronType::NEW).left().partition(igroup + 1);
 
-			assert(R2 - R1 == rightPatchSize_[ipatch] && L2 - L1 == leftPatchSize_[ipatch]);
+			assert(R2 - R1 == rightPatchSize_[ipatch]
+			       && L2 - L1 == leftPatchSize_[ipatch]);
 
 			assert(static_cast<SizeType>(i1) < vout.size());
 			ComplexOrRealType* YI = &(vout[i1]);
 			int nrowYI = R2 - R1;
 			int ldYI = nrowYI;
 			int ncolYI = L2 - L1;
-			assert(static_cast<int>(initKron_.offsetForPatches(InitKronType::NEW, ipatch + 1) - i1) == nrowYI * ncolYI);
+			assert(static_cast<int>(
+			           initKron_.offsetForPatches(InitKronType::NEW, ipatch + 1) - i1)
+			       == nrowYI * ncolYI);
 
 			/*
 		--------------------------------------------------------------------
 		YI(1:(R2-R1+1),1:(L2-L1+1)) = BX( R1:R2,1:ncolBX) *
-			                                                         transpose( Abatch( L1:L2,1:ncolBX) );
+			                                                         transpose( Abatch(
+		L1:L2,1:ncolBX) );
 		--------------------------------------------------------------------
 	  */
 			psimag::BLAS::GEMM('N',
@@ -285,15 +302,9 @@ public:
 
 private:
 
-	static int iceil(int x, int n)
-	{
-		return (x + n - 1) / n;
-	}
+	static int iceil(int x, int n) { return (x + n - 1) / n; }
 
-	static void mylacpy(const MatrixType& a,
-	                    MatrixType& b,
-	                    SizeType xstart,
-	                    SizeType ystart)
+	static void mylacpy(const MatrixType& a, MatrixType& b, SizeType xstart, SizeType ystart)
 	{
 		int m = a.rows();
 		int n = a.cols();

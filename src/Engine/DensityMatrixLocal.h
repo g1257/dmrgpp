@@ -114,7 +114,8 @@ public:
 	                   const LeftRightSuperType& lrs,
 	                   const ParamsType& p)
 	    : progress_("DensityMatrixLocal")
-	    , data_((p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() : lrs.right())
+	    , data_((p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left()
+	                                                                          : lrs.right())
 	    , direction_(p.direction)
 	    , debug_(p.debug)
 	{
@@ -125,9 +126,13 @@ public:
 			progress_.printline(msgg, std::cout);
 		}
 
-		const BasisWithOperatorsType& pBasis = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left() : lrs.right();
+		const BasisWithOperatorsType& pBasis
+		    = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left()
+		                                                                    : lrs.right();
 
-		const BasisWithOperatorsType& pBasisSummed = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.right() : lrs.left();
+		const BasisWithOperatorsType& pBasisSummed
+		    = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.right()
+		                                                                    : lrs.left();
 
 		// loop over all partitions:
 		for (SizeType m = 0; m < pBasis.partition() - 1; m++) {
@@ -145,10 +150,12 @@ public:
 				const VectorVectorVectorWithOffsetType& psi = target.psiConst();
 				const SizeType nsectors = psi.size();
 
-				for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
+				for (SizeType sectorIndex = 0; sectorIndex < nsectors;
+				     ++sectorIndex) {
 					const SizeType nexcited = psi[sectorIndex].size();
 
-					for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+					for (SizeType excitedIndex = 0; excitedIndex < nexcited;
+					     ++excitedIndex) {
 
 						initPartition(matrixBlock,
 						              pBasis,
@@ -190,18 +197,14 @@ public:
 		}
 	}
 
-	virtual const BlockDiagonalMatrixType& operator()()
-	{
-		return data_;
-	}
+	virtual const BlockDiagonalMatrixType& operator()() { return data_; }
 
 	void diag(typename PsimagLite::Vector<RealType>::Type& eigs, char jobz)
 	{
 		DiagBlockDiagMatrix<BlockDiagonalMatrixType>::diagonalise(data_, eigs, jobz);
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const DensityMatrixLocal& dm)
+	friend std::ostream& operator<<(std::ostream& os, const DensityMatrixLocal& dm)
 	{
 		for (SizeType m = 0; m < dm.data_.blocks(); ++m) {
 			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
@@ -223,14 +226,8 @@ private:
 	                   ProgramGlobals::DirectionEnum direction,
 	                   RealType weight)
 	{
-		ParallelDensityMatrixType helperDm(v,
-		                                   pBasis,
-		                                   pBasisSummed,
-		                                   pSE,
-		                                   direction,
-		                                   m,
-		                                   weight,
-		                                   matrixBlock);
+		ParallelDensityMatrixType helperDm(
+		    v, pBasis, pBasisSummed, pSE, direction, m, weight, matrixBlock);
 		ParallelizerType threadedDm(ConcurrencyType::codeSectionParams);
 		threadedDm.loopCreate(helperDm);
 	}

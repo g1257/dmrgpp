@@ -131,8 +131,7 @@ public:
 	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
 	typedef typename LanczosSolverType::PostProcType PostProcType;
 	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
-	typedef CorrectionVectorFunction<LanczosMatrixType,
-	                                 TargetParamsType>
+	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
 	    CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
 	    ParallelTriDiagType;
@@ -152,8 +151,7 @@ public:
 
 		CalcR(const TargetParamsType& tstStruct, RealType E0, const VectorRealType& eigs)
 		    : action_(tstStruct, E0, eigs)
-		{
-		}
+		{ }
 
 		const ActionType& imag() const
 		{
@@ -193,14 +191,15 @@ public:
 	    , energy_(energy)
 	    , progress_("CorrectionVectorSkeleton")
 	    , krylovHelper_(model.params(), tstStruct.firstRitz())
-	{
-	}
+	{ }
 
 	void calcDynVectors(const VectorWithOffsetType& tv0,
 	                    VectorWithOffsetType& tv1,
 	                    VectorWithOffsetType& tv2)
 	{
-		const bool needsTv2 = (!CalcR::ActionType::isValueComplex() || tstStruct_.algorithm() != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV);
+		const bool needsTv2 = (!CalcR::ActionType::isValueComplex()
+		                       || tstStruct_.algorithm()
+		                           != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV);
 
 		const VectorWithOffsetType& phi = tv0;
 		tv1 = phi;
@@ -230,8 +229,10 @@ public:
 			SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(), 0), xr(sv.size(), 0);
 
-			if (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-				computeXiAndXrKrylov(xi, xr, phi, i0, V[i], T[i], eigs[i], steps[i]);
+			if (tstStruct_.algorithm()
+			    == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
+				computeXiAndXrKrylov(
+				    xi, xr, phi, i0, V[i], T[i], eigs[i], steps[i]);
 			} else {
 				computeXiAndXrIndirect(xi, xr, sv, p);
 			}
@@ -261,20 +262,16 @@ public:
 
 private:
 
-	void computeXiAndXrIndirect(VectorType& xi,
-	                            VectorType& xr,
-	                            const VectorType& sv,
-	                            SizeType p)
+	void
+	computeXiAndXrIndirect(VectorType& xi, VectorType& xr, const VectorType& sv, SizeType p)
 	{
 		if (tstStruct_.omega().first != PsimagLite::FREQ_REAL)
 			throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
 
 		const RealType fakeTime = 0;
 		typename ModelHelperType::Aux aux(p, lrs_);
-		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		                                                 ModelType::modelLinks(),
-		                                                 fakeTime,
-		                                                 model_.superOpHelper());
+		typename ModelType::HamiltonianConnectionType hc(
+		    lrs_, ModelType::modelLinks(), fakeTime, model_.superOpHelper());
 		LanczosMatrixType h(model_, hc, aux);
 		RealType E0 = energy_;
 		CorrectionVectorFunctionType cvft(h, tstStruct_, E0);
@@ -318,20 +315,24 @@ private:
 
 		krylovHelper_.calcR(r, what.imag(), T, V, phi, n2, i0);
 
-		psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
 
 		xi.resize(n);
-		psimag::BLAS::GEMV('N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(xi[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(xi[0]), 1);
 
 		if (CalcR::ActionType::isValueComplex())
 			return;
 
 		krylovHelper_.calcR(r, what.real(), T, V, phi, n2, i0);
 
-		psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
 
 		xr.resize(n);
-		psimag::BLAS::GEMV('N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(xr[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(xr[0]), 1);
 	}
 
 	void triDiag(const VectorWithOffsetType& phi,
@@ -343,14 +344,7 @@ private:
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
-		ParallelTriDiagType helperTriDiag(phi,
-		                                  T,
-		                                  V,
-		                                  steps,
-		                                  lrs_,
-		                                  fakeTime,
-		                                  model_,
-		                                  ioIn_);
+		ParallelTriDiagType helperTriDiag(phi, T, V, steps, lrs_, fakeTime, model_, ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}

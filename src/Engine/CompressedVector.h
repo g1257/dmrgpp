@@ -5,8 +5,7 @@
 
 namespace Dmrg {
 
-template <typename T>
-class CompressedVector {
+template <typename T> class CompressedVector {
 
 public:
 
@@ -62,10 +61,7 @@ public:
 
 private:
 
-	void build()
-	{
-		throw PsimagLite::RuntimeError("CompressedVector: build\n");
-	}
+	void build() { throw PsimagLite::RuntimeError("CompressedVector: build\n"); }
 
 	SizeType findPartition(SizeType ind) const
 	{

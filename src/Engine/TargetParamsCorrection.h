@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
-template <typename ModelType>
-class TargetParamsCorrection : public TargetParamsBase<ModelType> {
+template <typename ModelType> class TargetParamsCorrection : public TargetParamsBase<ModelType> {
 
 	typedef TargetParamsBase<ModelType> BaseType;
 
@@ -100,19 +99,14 @@ public:
 		io.readline(correctionA_, "CorrectionA=");
 	}
 
-	virtual SizeType memResolv(PsimagLite::MemResolv&,
-	                           SizeType,
-	                           PsimagLite::String = "") const
+	virtual SizeType memResolv(PsimagLite::MemResolv&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
 	virtual SizeType sites() const { return 0; }
 
-	virtual RealType correctionA() const
-	{
-		return correctionA_;
-	}
+	virtual RealType correctionA() const { return correctionA_; }
 
 	virtual SizeType sectorIndex() const
 	{
@@ -124,8 +118,7 @@ public:
 		throw PsimagLite::RuntimeError("levelIndex called for gs\n");
 	}
 
-	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/correctionA_", correctionA_);
@@ -137,8 +130,7 @@ private:
 }; // class TargetParamsCorrection
 
 template <typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os, const TargetParamsCorrection<ModelType>& t)
+inline std::ostream& operator<<(std::ostream& os, const TargetParamsCorrection<ModelType>& t)
 {
 	os << "TargetParams.type=correction\n";
 	os << "TargetCorrection.correctionA=" << t.correctionA() << "\n";

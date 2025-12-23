@@ -89,8 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ObserverHelperType_, typename ModelType>
-class CorrelationsSkeleton {
+template <typename ObserverHelperType_, typename ModelType> class CorrelationsSkeleton {
 
 public:
 
@@ -120,13 +119,9 @@ public:
 	    : helper_(helper)
 	    , model_(model)
 	    , normalizeResult_(normalizeResult)
-	{
-	}
+	{ }
 
-	SizeType numberOfSites() const
-	{
-		return helper_.numberOfSites();
-	}
+	SizeType numberOfSites() const { return helper_.numberOfSites(); }
 
 	//! i can be zero here!!
 	void growDirectly(SparseMatrixType& Odest,
@@ -156,10 +151,7 @@ public:
 		}
 	}
 
-	GrowDirection growthDirection(SizeType s,
-	                              int nt,
-	                              SizeType i,
-	                              SizeType ptr) const
+	GrowDirection growthDirection(SizeType s, int nt, SizeType i, SizeType ptr) const
 	{
 		const ProgramGlobals::DirectionEnum dir = helper_.direction(ptr);
 		GrowDirection growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -187,7 +179,8 @@ public:
 	             bool transform,
 	             SizeType ptr) const
 	{
-		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		const int fermionicSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		const ProgramGlobals::DirectionEnum dir = helper_.direction(ptr);
 
 		const BasisType& basis = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -208,11 +201,13 @@ public:
 			for (SizeType k = 0; k < ktotal; ++k) {
 				for (SizeType i = 0; i < orows; ++i) {
 					ret.setRow(i + k * orows, counter);
-					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
+					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1);
+					     ++kj) {
 						// Sperm[e0] = i + k*n
 						// Sperm[e1] = j + k*n
 
-						SizeType col = basis.permutationInverse(O.getCol(kj) + k * orows);
+						SizeType col = basis.permutationInverse(
+						    O.getCol(kj) + k * orows);
 
 						ret.setCol(counter, col);
 						ret.setValues(counter++, O.getValue(kj) * sign);
@@ -230,20 +225,26 @@ public:
 					ret.setRow(k + i * ktotal, counter);
 					RealType sign = 1;
 					if (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) {
-						sign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
+						sign
+						    = (fOrB
+						       == ProgramGlobals::FermionOrBosonEnum::BOSON)
 						    ? 1
-						    : fermionSignBasis(fermionicSign,
-						                       helper_.leftRightSuper(ptr).left())
+						    : fermionSignBasis(
+						          fermionicSign,
+						          helper_.leftRightSuper(ptr).left())
 						        * helper_.signsOneSite(k);
 					} else {
-						sign = helper_.fermionicSignLeft(ptr)(k, fermionicSign);
+						sign = helper_.fermionicSignLeft(ptr)(
+						    k, fermionicSign);
 					}
 
-					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
+					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1);
+					     ++kj) {
 						// Sperm[e0] = k + i*m
 						// Sperm[e1] = k + j*m
 
-						SizeType col = basis.permutationInverse(k + O.getCol(kj) * ktotal);
+						SizeType col = basis.permutationInverse(
+						    k + O.getCol(kj) * ktotal);
 
 						ret.setCol(counter, col);
 						ret.setValues(counter++, O.getValue(kj) * sign);
@@ -279,7 +280,8 @@ public:
 		return ptr;
 	}
 
-	static void createWithModification(SparseMatrixType& Om, const SparseMatrixType& O, char mod)
+	static void
+	createWithModification(SparseMatrixType& Om, const SparseMatrixType& O, char mod)
 	{
 		if (mod == 'n' || mod == 'N') {
 			Om = O;
@@ -370,7 +372,8 @@ private:
 	                        ProgramGlobals::FermionOrBosonEnum fOrB, // for O2
 	                        SizeType ns) const
 	{
-		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		const int fermionicSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		SizeType ni = O1.rows();
 
 		ptr = ns;
@@ -398,7 +401,9 @@ private:
 				SizeType e2 = O1.getCol(k);
 				for (int k2 = O2.getRowPtr(u); k2 < O2.getRowPtr(u + 1); k2++) {
 					SizeType u2 = O2.getCol(k2);
-					SizeType r2 = helper_.leftRightSuper(ptr).left().permutationInverse(e2 + u2 * ni);
+					SizeType r2
+					    = helper_.leftRightSuper(ptr).left().permutationInverse(
+					        e2 + u2 * ni);
 					value[r2] += O1.getValue(k) * O2.getValue(k2) * f;
 					col[r2] = 1;
 				}
@@ -427,8 +432,7 @@ private:
 	                         SizeType ns) const
 	{
 		int fs = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
-		RealType f = fermionSignBasis(fs,
-		                              helper_.leftRightSuper(ptr).left());
+		RealType f = fermionSignBasis(fs, helper_.leftRightSuper(ptr).left());
 		SizeType nj = O2.rows();
 
 		ptr = ns;
@@ -452,7 +456,8 @@ private:
 			SizeType e = 0;
 			SizeType u = 0;
 			pack.unpack(e, u, helper_.leftRightSuper(ptr).right().permutation(r));
-			const RealType sign = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON)
+			const RealType sign
+			    = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON)
 			    ? 1
 			    : f * helper_.signsOneSite(e);
 
@@ -461,7 +466,9 @@ private:
 
 				for (int k2 = O1.getRowPtr(u); k2 < O1.getRowPtr(u + 1); k2++) {
 					SizeType u2 = O1.getCol(k2);
-					SizeType r2 = helper_.leftRightSuper(ptr).right().permutationInverse(e2 + u2 * nj);
+					SizeType r2 = helper_.leftRightSuper(ptr)
+					                  .right()
+					                  .permutationInverse(e2 + u2 * nj);
 					assert(r2 < eprime);
 					col[r2] = 1;
 					value[r2] += O2.getValue(k) * O1.getValue(k2) * sign;
@@ -512,7 +519,8 @@ private:
 	                   ProgramGlobals::FermionOrBosonEnum fermionicSign,
 	                   SizeType ptr) const
 	{
-		if (vec1.size() != helper_.leftRightSuper(ptr).super().size() || vec1.size() != vec2.size())
+		if (vec1.size() != helper_.leftRightSuper(ptr).super().size()
+		    || vec1.size() != vec2.size())
 			err("CorrelationsSkeleton::bracket_(...): Error\n");
 
 		return (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -534,11 +542,16 @@ private:
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack.unpack(r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
+				pack.unpack(
+				    r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
 				for (int k = A.getRowPtr(r); k < A.getRowPtr(r + 1); k++) {
 					SizeType r2 = A.getCol(k);
-					SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(r2 + eta * A.cols());
-					sum += A.getValue(k) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2);
+					SizeType t2 = helper_.leftRightSuper(ptr)
+					                  .super()
+					                  .permutationInverse(r2 + eta * A.cols());
+					sum += A.getValue(k)
+					    * PsimagLite::conj(vec1.fastAccess(sector, t - offset))
+					    * vec2.slowAccess(t2);
 				}
 			}
 		}
@@ -552,10 +565,10 @@ private:
 	                          ProgramGlobals::FermionOrBosonEnum fOrB,
 	                          SizeType ptr) const
 	{
-		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		const int fermionicSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 
-		RealType sign = fermionSignBasis(fermionicSign,
-		                                 helper_.leftRightSuper(ptr).left());
+		RealType sign = fermionSignBasis(fermionicSign, helper_.leftRightSuper(ptr).left());
 
 		FieldType sum = 0;
 		PackIndicesType pack(helper_.leftRightSuper(ptr).left().size());
@@ -568,12 +581,17 @@ private:
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack.unpack(r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
+				pack.unpack(
+				    r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
 
 				for (int k = A.getRowPtr(eta); k < A.getRowPtr(eta + 1); k++) {
 					SizeType eta2 = A.getCol(k);
-					SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(r + eta2 * leftSize);
-					sum += A.getValue(k) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2) * sign;
+					SizeType t2 = helper_.leftRightSuper(ptr)
+					                  .super()
+					                  .permutationInverse(r + eta2 * leftSize);
+					sum += A.getValue(k)
+					    * PsimagLite::conj(vec1.fastAccess(sector, t - offset))
+					    * vec2.slowAccess(t2) * sign;
 				}
 			}
 		}
@@ -598,7 +616,8 @@ private:
 		// return helper_.leftRightSuper(ptr).super().electrons(t);
 		SizeType tmp = helper_.leftRightSuper(ptr).super().permutation(t);
 		ldiv_t mydiv = std::ldiv(tmp, helper_.leftRightSuper(ptr).left().size());
-		return helper_.leftRightSuper(ptr).right().signs()[mydiv.quot] ^ helper_.leftRightSuper(ptr).left().signs()[mydiv.rem];
+		return helper_.leftRightSuper(ptr).right().signs()[mydiv.quot]
+		    ^ helper_.leftRightSuper(ptr).left().signs()[mydiv.rem];
 	}
 
 	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
@@ -613,7 +632,8 @@ private:
 		SizeType ni = helper_.leftRightSuper(ptr).left().size();
 
 		// some sanity checks:
-		if (vec1.size() != vec2.size() || vec1.size() != helper_.leftRightSuper(ptr).super().size())
+		if (vec1.size() != vec2.size()
+		    || vec1.size() != helper_.leftRightSuper(ptr).super().size())
 			err("Observe::brRghtCrnrSystem_(...)\n");
 
 		if (ni != Acrs.rows())
@@ -628,12 +648,17 @@ private:
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack1.unpack(r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
+				pack1.unpack(
+				    r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
 
 				bool odd = superOddElectrons(t, ptr);
 				odd ^= helper_.leftRightSuper(ptr).right().signs()[eta];
-				const RealType sign = (odd && fermionSign == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1.0
-				                                                                                          : 1.0;
+				const RealType sign
+				    = (odd
+				       && fermionSign
+				           == ProgramGlobals::FermionOrBosonEnum::FERMION)
+				    ? -1.0
+				    : 1.0;
 
 				for (int k = Acrs.getRowPtr(r); k < Acrs.getRowPtr(r + 1); k++) {
 					SizeType rprime = Acrs.getCol(k);
@@ -642,8 +667,14 @@ private:
 					     k2++) {
 						SizeType eta2 = Bcrs.getCol(k2);
 
-						SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(rprime + eta2 * leftSize);
-						sum += Acrs.getValue(k) * Bcrs.getValue(k2) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2) * sign;
+						SizeType t2 = helper_.leftRightSuper(ptr)
+						                  .super()
+						                  .permutationInverse(
+						                      rprime + eta2 * leftSize);
+						sum += Acrs.getValue(k) * Bcrs.getValue(k2)
+						    * PsimagLite::conj(
+						           vec1.fastAccess(sector, t - offset))
+						    * vec2.slowAccess(t2) * sign;
 					}
 				}
 			}
@@ -659,15 +690,16 @@ private:
 	                            const VectorWithOffsetType& vec2,
 	                            SizeType ptr) const
 	{
-		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
-		int signRight = fermionSignBasis(fermionSign,
-		                                 helper_.leftRightSuper(ptr).right());
+		const int fermionSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		int signRight = fermionSignBasis(fermionSign, helper_.leftRightSuper(ptr).right());
 		FieldType sum = 0;
 		SizeType ni = Bcrs.rows();
 		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
 
 		// some sanity checks:
-		if (vec1.size() != vec2.size() || vec1.size() != helper_.leftRightSuper(ptr).super().size())
+		if (vec1.size() != vec2.size()
+		    || vec1.size() != helper_.leftRightSuper(ptr).super().size())
 			err("Observe::brLftCrnrEnviron_(...)\n");
 		if (helper_.leftRightSuper(ptr).right().size() / Bcrs.rows() != Acrs.rows())
 			err("Observe::brLftCrnrEnviron_(...)\n");
@@ -683,10 +715,13 @@ private:
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack1.unpack(eta, r, helper_.leftRightSuper(ptr).super().permutation(t));
+				pack1.unpack(
+				    eta, r, helper_.leftRightSuper(ptr).super().permutation(t));
 				SizeType r0, r1;
-				pack2.unpack(r0, r1, helper_.leftRightSuper(ptr).right().permutation(r));
-				const RealType sign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
+				pack2.unpack(
+				    r0, r1, helper_.leftRightSuper(ptr).right().permutation(r));
+				const RealType sign
+				    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
 				    ? 1
 				    : helper_.signsOneSite(r0) * signRight;
 
@@ -696,9 +731,19 @@ private:
 					     k2 < Bcrs.getRowPtr(eta + 1);
 					     k2++) {
 						SizeType eta2 = Bcrs.getCol(k2);
-						SizeType rprime = helper_.leftRightSuper(ptr).right().permutationInverse(r0 + r1prime * ni);
-						SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(eta2 + rprime * leftSize);
-						sum += PsimagLite::conj(Acrs.getValue(k)) * Bcrs.getValue(k2) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2) * sign;
+						SizeType rprime
+						    = helper_.leftRightSuper(ptr)
+						          .right()
+						          .permutationInverse(r0 + r1prime * ni);
+						SizeType t2 = helper_.leftRightSuper(ptr)
+						                  .super()
+						                  .permutationInverse(
+						                      eta2 + rprime * leftSize);
+						sum += PsimagLite::conj(Acrs.getValue(k))
+						    * Bcrs.getValue(k2)
+						    * PsimagLite::conj(
+						           vec1.fastAccess(sector, t - offset))
+						    * vec2.slowAccess(t2) * sign;
 					}
 				}
 			}
@@ -718,7 +763,8 @@ private:
 		if (helper_.direction(ptr) != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			return 0;
 
-		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		const int fermionSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 
 		SizeType penultimateSite = helper_.leftRightSuper(ptr).super().block().size();
 		assert(penultimateSite > 1);
@@ -753,25 +799,40 @@ private:
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack1.unpack(r,
-				             eta,
-				             helper_.leftRightSuper(ptr).super().permutation(t));
+				pack1.unpack(
+				    r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
 				SizeType r0, r1;
-				pack2.unpack(r0,
-				             r1,
-				             helper_.leftRightSuper(ptr).left().permutation(r));
+				pack2.unpack(
+				    r0, r1, helper_.leftRightSuper(ptr).left().permutation(r));
 				assert(r1 < oddElectrons.size());
 				RealType sign = (oddElectrons[r1]) ? fermionSign : 1;
 
-				for (int k1 = A1crs.getRowPtr(r0); k1 < A1crs.getRowPtr(r0 + 1); k1++) {
+				for (int k1 = A1crs.getRowPtr(r0); k1 < A1crs.getRowPtr(r0 + 1);
+				     k1++) {
 					SizeType r0prime = A1crs.getCol(k1);
-					for (int k2 = A2crs.getRowPtr(r1); k2 < A2crs.getRowPtr(r1 + 1); k2++) {
+					for (int k2 = A2crs.getRowPtr(r1);
+					     k2 < A2crs.getRowPtr(r1 + 1);
+					     k2++) {
 						SizeType r1prime = A2crs.getCol(k2);
-						for (int k3 = Bcrs.getRowPtr(eta); k3 < Bcrs.getRowPtr(eta + 1); k3++) {
+						for (int k3 = Bcrs.getRowPtr(eta);
+						     k3 < Bcrs.getRowPtr(eta + 1);
+						     k3++) {
 							SizeType eta2 = Bcrs.getCol(k3);
-							SizeType rprime = helper_.leftRightSuper(ptr).left().permutationInverse(r0prime + r1prime * ni);
-							SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(rprime + eta2 * leftSize);
-							sum += A1crs.getValue(k1) * A2crs.getValue(k2) * Bcrs.getValue(k3) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2) * sign;
+							SizeType rprime
+							    = helper_.leftRightSuper(ptr)
+							          .left()
+							          .permutationInverse(
+							              r0prime + r1prime * ni);
+							SizeType t2
+							    = helper_.leftRightSuper(ptr)
+							          .super()
+							          .permutationInverse(
+							              rprime + eta2 * leftSize);
+							sum += A1crs.getValue(k1)
+							    * A2crs.getValue(k2) * Bcrs.getValue(k3)
+							    * PsimagLite::conj(vec1.fastAccess(
+							        sector, t - offset))
+							    * vec2.slowAccess(t2) * sign;
 						}
 					}
 				}

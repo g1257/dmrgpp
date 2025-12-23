@@ -12,8 +12,7 @@ public:
 	    : enabled_(enabled)
 	    , checked_(false)
 	    , value_(false)
-	{
-	}
+	{ }
 
 	bool OK(PsimagLite::String filename)
 	{
@@ -26,7 +25,8 @@ public:
 
 	void printTermination(PsimagLite::String filename)
 	{
-		static const PsimagLite::String str = "File " + filename + " exists, " + "and you chose no clobber. Refusing to run\n";
+		static const PsimagLite::String str = "File " + filename + " exists, "
+		    + "and you chose no clobber. Refusing to run\n";
 		std::cerr << str;
 		std::cout << str;
 	}

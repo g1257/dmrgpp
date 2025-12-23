@@ -102,8 +102,7 @@ class TargetingMetts : public TargetingBase<LanczosSolverType_, VectorWithOffset
 		MettsPrev()
 		    : fixed(0)
 		    , permutationInverse(0)
-		{
-		}
+		{ }
 
 		SizeType fixed;
 		VectorSizeType permutationInverse;
@@ -142,22 +141,36 @@ public:
 	typedef typename PsimagLite::RandomForTests<RealType> RngType;
 	typedef MettsStochastics<ModelType, RngType> MettsStochasticsType;
 	typedef typename MettsStochasticsType::PairType PairType;
-	typedef MettsCollapse<VectorWithOffsetType,
-	                      MettsStochasticsType,
-	                      TargetParamsType>
+	typedef MettsCollapse<VectorWithOffsetType, MettsStochasticsType, TargetParamsType>
 	    MettsCollapseType;
 	typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
 	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef TimeVectorsKrylov<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsKrylovType;
-	typedef TimeVectorsRungeKutta<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsRungeKuttaType;
-	typedef TimeVectorsSuzukiTrotter<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
+	typedef TimeVectorsKrylov<TargetParamsType,
+	                          ModelType,
+	                          WaveFunctionTransfType,
+	                          LanczosSolverType,
+	                          VectorWithOffsetType>
+	    TimeVectorsKrylovType;
+	typedef TimeVectorsRungeKutta<TargetParamsType,
+	                              ModelType,
+	                              WaveFunctionTransfType,
+	                              LanczosSolverType,
+	                              VectorWithOffsetType>
+	    TimeVectorsRungeKuttaType;
+	typedef TimeVectorsSuzukiTrotter<TargetParamsType,
+	                                 ModelType,
+	                                 WaveFunctionTransfType,
+	                                 LanczosSolverType,
+	                                 VectorWithOffsetType>
+	    TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 	typedef typename BasisType::QnType QnType;
 	typedef typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type
 	    VectorBlockDiagonalMatrixType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef
+	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 	using OneSiteSpacesType = typename BaseType::OneSiteSpacesType;
 
@@ -207,15 +220,9 @@ public:
 
 	SizeType targets() const { return mettsStruct_.times().size() + 1; }
 
-	RealType weight(SizeType i) const
-	{
-		return weight_[i];
-	}
+	RealType weight(SizeType i) const { return weight_[i]; }
 
-	RealType gsWeight() const
-	{
-		return gsWeight_;
-	}
+	RealType gsWeight() const { return gsWeight_; }
 
 	bool includeGroundStage() const { return (fabs(gsWeight_) > 1e-6); }
 
@@ -272,7 +279,8 @@ public:
 			evolve(n1, n1, n1 - 1, Eg, direction, sites, loopNumber);
 
 		for (SizeType i = 0; i < this->common().aoe().tvs(); i++)
-			assert(this->tv(i).size() == 0 || this->tv(i).size() == lrs_.super().permutationVector().size());
+			assert(this->tv(i).size() == 0
+			       || this->tv(i).size() == lrs_.super().permutationVector().size());
 
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
@@ -298,10 +306,8 @@ public:
 			return;
 
 		// collapse
-		bool hasCollapsed = mettsCollapse_(this->tvNonConst(n1),
-		                                   this->tv(n1 - 1),
-		                                   sites,
-		                                   direction);
+		bool hasCollapsed
+		    = mettsCollapse_(this->tvNonConst(n1), this->tv(n1 - 1), sites, direction);
 		if (hasCollapsed) {
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -321,7 +327,8 @@ public:
 	{
 		this->common().write(io, block, prefix);
 
-		ApplyOperatorExpressionType& aoeNonConst = const_cast<ApplyOperatorExpressionType&>(this->common().aoe());
+		ApplyOperatorExpressionType& aoeNonConst
+		    = const_cast<ApplyOperatorExpressionType&>(this->common().aoe());
 		if (mettsStruct_.beta > this->common().aoe().timeVectors().time()) {
 			for (SizeType i = 0; i < this->common().aoe().tvs(); ++i)
 				aoeNonConst.destroyPvector(i);
@@ -370,22 +377,23 @@ private:
 		msg << norm(phi);
 		progress_.printline(msgg, std::cout);
 		if (norm(phi) < 1e-6)
-			setFromInfinite(this->tvNonConst(startEnd.first),
-			                lrs_);
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
+			setFromInfinite(this->tvNonConst(startEnd.first), lrs_);
+		bool allOperatorsApplied
+		    = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		VectorSizeType indices(startEnd.second - startEnd.first);
 		for (SizeType i = 0; i < indices.size(); ++i)
 			indices[i] = i + startEnd.first;
 
 		const bool isLastCall = true;
-		this->common().aoeNonConst().calcTimeVectors(indices,
-		                                             Eg,
-		                                             phi,
-		                                             systemOrEnviron,
-		                                             allOperatorsApplied,
-		                                             false, // don't wft or advance indices[0]
-		                                             block,
-		                                             isLastCall);
+		this->common().aoeNonConst().calcTimeVectors(
+		    indices,
+		    Eg,
+		    phi,
+		    systemOrEnviron,
+		    allOperatorsApplied,
+		    false, // don't wft or advance indices[0]
+		    block,
+		    isLastCall);
 		this->common().normalizeTimeVectors(startEnd.first + 1, startEnd.second);
 	}
 
@@ -396,8 +404,10 @@ private:
 
 		if (this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
 			if (!allSitesCollapsed()) {
-				if (sitesCollapsed_.size() > 2 * model_.superGeometry().numberOfSites())
-					throw PsimagLite::RuntimeError("advanceCounterAndComputeStage\n");
+				if (sitesCollapsed_.size()
+				    > 2 * model_.superGeometry().numberOfSites())
+					throw PsimagLite::RuntimeError(
+					    "advanceCounterAndComputeStage\n");
 				printAdvancement(timesWithoutAdvancement_);
 				return;
 			}
@@ -405,7 +415,8 @@ private:
 			sitesCollapsed_.clear();
 			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 			timesWithoutAdvancement_ = 0;
-			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(&(this->common().aoe().timeVectors()));
+			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(
+			    &(this->common().aoe().timeVectors()));
 			ptr->setCurrentTimeStep(0);
 			PsimagLite::OstringStream msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -426,22 +437,28 @@ private:
 			return;
 		}
 
-		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) && this->common().aoe().timeVectors().time() < mettsStruct_.beta) {
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)
+		    && this->common().aoe().timeVectors().time() < mettsStruct_.beta) {
 			this->common().setAllStagesTo(StageEnumType::WFT_ADVANCE);
-			const SizeType tmp = this->common().aoe().timeVectors().currentTimeStep() + 1;
-			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(&(this->common().aoe().timeVectors()));
+			const SizeType tmp
+			    = this->common().aoe().timeVectors().currentTimeStep() + 1;
+			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(
+			    &(this->common().aoe().timeVectors()));
 			ptr->setCurrentTimeStep(tmp);
 			timesWithoutAdvancement_ = 0;
 			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
-		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) && this->common().aoe().timeVectors().time() >= mettsStruct_.beta && block[0] != block.size()) {
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)
+		    && this->common().aoe().timeVectors().time() >= mettsStruct_.beta
+		    && block[0] != block.size()) {
 			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
-		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) && this->common().aoe().timeVectors().time() >= mettsStruct_.beta) {
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)
+		    && this->common().aoe().timeVectors().time() >= mettsStruct_.beta) {
 			this->common().setAllStagesTo(StageEnumType::COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.times().size();
@@ -470,7 +487,9 @@ private:
 			return;
 		assert(norm(this->tv(index)) > 1e-6);
 
-		if (this->common().aoe().allStages(StageEnumType::WFT_NOADVANCE) || this->common().aoe().allStages(StageEnumType::WFT_ADVANCE) || this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
+		if (this->common().aoe().allStages(StageEnumType::WFT_NOADVANCE)
+		    || this->common().aoe().allStages(StageEnumType::WFT_ADVANCE)
+		    || this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
 
 			SizeType advance = index;
 
@@ -504,8 +523,7 @@ private:
 		}
 	}
 
-	void updateStochastics(const VectorSizeType& block1,
-	                       const VectorSizeType& block2)
+	void updateStochastics(const VectorSizeType& block1, const VectorSizeType& block2)
 	{
 		const QnType& qn = model_.targetQuantum().qn(0);
 		mettsStochastics_.update(qn, block1, block2, mettsStruct_.rngSeed);
@@ -523,8 +541,7 @@ private:
 	}
 
 	// direction here is INFINITE
-	void getNewPures(const VectorSizeType& block1,
-	                 const VectorSizeType& block2)
+	void getNewPures(const VectorSizeType& block1, const VectorSizeType& block2)
 	{
 		VectorSizeType alphaFixed(block1.size());
 		for (SizeType i = 0; i < alphaFixed.size(); i++)
@@ -544,7 +561,8 @@ private:
 			msg << " site=" << block2[i] << " is " << betaFixed[i];
 		progress_.printline(msgg, std::cerr);
 
-		const BlockDiagonalMatrixType& transformSystem = getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM);
+		const BlockDiagonalMatrixType& transformSystem
+		    = getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM);
 
 		TargetVectorType newVector1(transformSystem.rows(), 0);
 
@@ -561,7 +579,8 @@ private:
 		           block1);
 		pureVectors_.first = newVector1;
 
-		const BlockDiagonalMatrixType& transformEnviron = getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON);
+		const BlockDiagonalMatrixType& transformEnviron
+		    = getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON);
 		TargetVectorType newVector2(transformEnviron.rows(), 0);
 
 		VectorSizeType nk2;
@@ -584,9 +603,7 @@ private:
 		environPrev_.permutationInverse = lrs_.right().permutationInverse();
 	}
 
-	void getFullVector(TargetVectorType& v,
-	                   SizeType m,
-	                   const LeftRightSuperType& lrs) const
+	void getFullVector(TargetVectorType& v, SizeType m, const LeftRightSuperType& lrs) const
 	{
 		int offset = lrs.super().partition(m);
 		int total = lrs.super().partition(m + 1) - offset;
@@ -626,13 +643,16 @@ private:
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk, block);
 		SizeType volumeOfNk = mettsCollapse_.volumeOf(nk);
-		SizeType newSize = (transform.cols() == 0) ? (ns * ns) : transform.cols() * volumeOfNk;
+		SizeType newSize
+		    = (transform.cols() == 0) ? (ns * ns) : transform.cols() * volumeOfNk;
 		newVector.resize(newSize);
 		for (SizeType alpha = 0; alpha < newVector.size(); alpha++)
 			newVector[alpha] = 0;
 
 		for (SizeType alpha = 0; alpha < ns; alpha++) {
-			SizeType gamma = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? basis.permutationInverse(alpha + alphaFixed * ns) : basis.permutationInverse(alphaFixed + alpha * volumeOfNk);
+			SizeType gamma = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+			    ? basis.permutationInverse(alpha + alphaFixed * ns)
+			    : basis.permutationInverse(alphaFixed + alpha * volumeOfNk);
 			newVector[gamma] = tmpVector[alpha];
 		}
 
@@ -659,7 +679,10 @@ private:
 		mettsCollapse_.setNk(nk, block);
 		SizeType ne = mettsCollapse_.volumeOf(nk);
 
-		const VectorSizeType& permutationInverse = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? systemPrev_.permutationInverse : environPrev_.permutationInverse;
+		const VectorSizeType& permutationInverse
+		    = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+		    ? systemPrev_.permutationInverse
+		    : environPrev_.permutationInverse;
 		SizeType nsPrev = permutationInverse.size() / ne;
 
 		newVector.resize(transform.cols());
@@ -667,12 +690,16 @@ private:
 		for (SizeType gamma = 0; gamma < newVector.size(); gamma++) {
 			newVector[gamma] = 0;
 			for (SizeType alpha = 0; alpha < nsPrev; alpha++) {
-				SizeType noPermIndex = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? alpha + systemPrev_.fixed * nsPrev : environPrev_.fixed + alpha * ne;
+				SizeType noPermIndex
+				    = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+				    ? alpha + systemPrev_.fixed * nsPrev
+				    : environPrev_.fixed + alpha * ne;
 
 				SizeType gammaPrime = permutationInverse[noPermIndex];
 
 				assert(gammaPrime < transform.rows());
-				newVector[gamma] += transform(gammaPrime, gamma) * oldVector[gammaPrime];
+				newVector[gamma]
+				    += transform(gammaPrime, gamma) * oldVector[gammaPrime];
 			}
 		}
 	}
@@ -710,8 +737,7 @@ private:
 		assert(PsimagLite::norm(oldVector) > 1e-6);
 	}
 
-	void setFromInfinite(VectorWithOffsetType& phi,
-	                     const LeftRightSuperType& lrs) const
+	void setFromInfinite(VectorWithOffsetType& phi, const LeftRightSuperType& lrs) const
 	{
 		phi.populateSectors(lrs.super());
 		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
@@ -758,9 +784,7 @@ private:
 	{
 		SizeType n = model_.superGeometry().numberOfSites();
 		for (SizeType i = 0; i < n; i++) {
-			bool seen = (std::find(sitesCollapsed_.begin(),
-			                       sitesCollapsed_.end(),
-			                       i)
+			bool seen = (std::find(sitesCollapsed_.begin(), sitesCollapsed_.end(), i)
 			             != sitesCollapsed_.end());
 			if (!seen)
 				return false;
@@ -782,19 +806,16 @@ private:
 		}
 	}
 
-	void printEnergies(const VectorWithOffsetType& phi,
-	                   SizeType whatTarget,
-	                   SizeType i0) const
+	void printEnergies(const VectorWithOffsetType& phi, SizeType whatTarget, SizeType i0) const
 	{
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, BaseType::lrs());
-		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 BaseType::ModelType::modelLinks(),
-		                                                 this->common().aoe().timeVectors().time(),
-		                                                 model_.superOpHelper());
-		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		                                                     hc,
-		                                                     aux);
+		typename ModelType::HamiltonianConnectionType hc(
+		    BaseType::lrs(),
+		    BaseType::ModelType::modelLinks(),
+		    this->common().aoe().timeVectors().time(),
+		    model_.superOpHelper());
+		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(), hc, aux);
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
@@ -873,8 +894,7 @@ private:
 	static SizeType timesWithoutAdvancement_;
 }; // class TargetingMetts
 
-template <typename T1, typename T2>
-SizeType TargetingMetts<T1, T2>::timesWithoutAdvancement_ = 0;
+template <typename T1, typename T2> SizeType TargetingMetts<T1, T2>::timesWithoutAdvancement_ = 0;
 
 } // namespace Dmrg
 

@@ -32,8 +32,7 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 
 namespace PsimagLite {
-template <typename RealType>
-class ChebyshevFunction {
+template <typename RealType> class ChebyshevFunction {
 
 public:
 

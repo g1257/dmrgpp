@@ -13,8 +13,7 @@ typedef PsimagLite::Vector<int>::Type VectorIntType;
 
 namespace Dmrg {
 
-template <typename InitKronType>
-class BatchedGemmPluginSc {
+template <typename InitKronType> class BatchedGemmPluginSc {
 
 	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
@@ -60,8 +59,10 @@ public:
 					const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 					const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
 
-					const MatrixDenseOrSparseType* Amat = xiStruct(outPatch, inPatch);
-					const MatrixDenseOrSparseType* Bmat = yiStruct(outPatch, inPatch);
+					const MatrixDenseOrSparseType* Amat
+					    = xiStruct(outPatch, inPatch);
+					const MatrixDenseOrSparseType* Bmat
+					    = yiStruct(outPatch, inPatch);
 
 					if (!Amat || !Bmat)
 						continue;
@@ -75,15 +76,23 @@ public:
 						++zeroes;
 					}
 
-					aptr[outPatch + inPatch * npatches + ic * npatches * npatches] = a;
-					bptr[outPatch + inPatch * npatches + ic * npatches * npatches] = b;
+					aptr[outPatch + inPatch * npatches
+					     + ic * npatches * npatches]
+					    = a;
+					bptr[outPatch + inPatch * npatches
+					     + ic * npatches * npatches]
+					    = b;
 
 					initKron_.checks(*Amat, *Bmat, outPatch, inPatch);
 					pLeft_[inPatch] = Amat->cols();
 					pRight_[inPatch] = Bmat->cols();
 
-					ldAptr[outPatch + inPatch * npatches + ic * npatches * npatches] = Amat->rows();
-					ldBptr[outPatch + inPatch * npatches + ic * npatches * npatches] = Bmat->rows();
+					ldAptr[outPatch + inPatch * npatches
+					       + ic * npatches * npatches]
+					    = Amat->rows();
+					ldBptr[outPatch + inPatch * npatches
+					       + ic * npatches * npatches]
+					    = Bmat->rows();
 				}
 			}
 		}

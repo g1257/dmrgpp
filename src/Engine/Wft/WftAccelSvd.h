@@ -6,8 +6,7 @@
 
 namespace Dmrg {
 
-template <typename WaveFunctionTransfBaseType>
-class WftAccelSvd {
+template <typename WaveFunctionTransfBaseType> class WftAccelSvd {
 
 	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
 	typedef typename DmrgWaveStructType::WaveStructSvdType WaveStructSvdType;
@@ -77,7 +76,10 @@ class WftAccelSvd {
 
 		const VectorMatrixType& vPrimeFinal() const { return vPrimeFinal_; }
 
-		const VectorQnType& qns() const { return (q_.size() > qTilde_.size()) ? qTilde_ : q_; }
+		const VectorQnType& qns() const
+		{
+			return (q_.size() > qTilde_.size()) ? qTilde_ : q_;
+		}
 
 	private:
 
@@ -119,15 +121,19 @@ class WftAccelSvd {
 		// U[patch] D V'[patch] *D[patch]
 		void doTask(SizeType patchBig, SizeType)
 		{
-			const VectorQnType& qSmall = (qnsFinal_.size() > qnsOfD_.size()) ? qnsOfD_ : qnsFinal_;
-			const VectorQnType& qBig = (qnsFinal_.size() > qnsOfD_.size()) ? qnsFinal_ : qnsOfD_;
+			const VectorQnType& qSmall
+			    = (qnsFinal_.size() > qnsOfD_.size()) ? qnsOfD_ : qnsFinal_;
+			const VectorQnType& qBig
+			    = (qnsFinal_.size() > qnsOfD_.size()) ? qnsFinal_ : qnsOfD_;
 			const QnType& q1 = qBig[patchBig];
 			int patchSmall = indexOrMinusOne(qSmall, q1);
 			if (patchSmall < 0)
 				return;
 
-			SizeType patch = (qnsFinal_.size() > qnsOfD_.size()) ? patchBig : patchSmall;
-			SizeType patchOfD = (qnsFinal_.size() > qnsOfD_.size()) ? patchSmall : patchBig;
+			SizeType patch
+			    = (qnsFinal_.size() > qnsOfD_.size()) ? patchBig : patchSmall;
+			SizeType patchOfD
+			    = (qnsFinal_.size() > qnsOfD_.size()) ? patchSmall : patchBig;
 
 			const MatrixType& u = uFinal_[patch];
 			const MatrixType& vprime = vPrimeFinal_[patch];
@@ -161,12 +167,10 @@ class WftAccelSvd {
 
 public:
 
-	WftAccelSvd(const DmrgWaveStructType& dmrgWaveStruct,
-	            const WftOptionsType& wftOptions)
+	WftAccelSvd(const DmrgWaveStructType& dmrgWaveStruct, const WftOptionsType& wftOptions)
 	    : dmrgWaveStruct_(dmrgWaveStruct)
 	    , wftOptions_(wftOptions)
-	{
-	}
+	{ }
 
 	void operator()(VectorWithOffsetType& psiDest,
 	                SizeType iNew,
@@ -175,13 +179,15 @@ public:
 	                const LeftRightSuperType& lrs,
 	                const OneSiteSpacesType& nk) const
 	{
-		//		typename ProgramGlobals::SysOrEnvEnum prevPart = (dir == ProgramGlobals::EXPAND_SYSTEM) ?
-		//		            ProgramGlobals::SYSTEM : ProgramGlobals::ENVIRON;
-		//		const WaveStructSvdType& wavePrev = dmrgWaveStruct_.getWave(prevPart);
+		//		typename ProgramGlobals::SysOrEnvEnum prevPart = (dir ==
+		// ProgramGlobals::EXPAND_SYSTEM) ? 		            ProgramGlobals::SYSTEM :
+		// ProgramGlobals::ENVIRON; 		const WaveStructSvdType& wavePrev =
+		// dmrgWaveStruct_.getWave(prevPart);
 
-		//		typename ProgramGlobals::SysOrEnvEnum oppoPart = (dir == ProgramGlobals::EXPAND_SYSTEM) ?
-		//		            ProgramGlobals::ENVIRON : ProgramGlobals::SYSTEM;
-		//		const WaveStructSvdType& waveOld = dmrgWaveStruct_.getWave(oppoPart);
+		//		typename ProgramGlobals::SysOrEnvEnum oppoPart = (dir ==
+		// ProgramGlobals::EXPAND_SYSTEM) ? 		            ProgramGlobals::ENVIRON
+		// : ProgramGlobals::SYSTEM; 		const WaveStructSvdType& waveOld =
+		// dmrgWaveStruct_.getWave(oppoPart);
 
 		//		internal(waveOld.u(),
 		//		         waveOld.vts(),
@@ -223,11 +229,8 @@ private:
 		threadOne.loopCreate(loopOne);
 
 		typedef PsimagLite::Parallelizer<LoopTwo> ParallelizerTwoType;
-		LoopTwo loopTwo(loopOne.uFinal(),
-		                loopOne.vPrimeFinal(),
-		                loopOne.qns(),
-		                sPrevious,
-		                qnsPrevious);
+		LoopTwo loopTwo(
+		    loopOne.uFinal(), loopOne.vPrimeFinal(), loopOne.qns(), sPrevious, qnsPrevious);
 		ParallelizerTwoType threadTwo(codeSectionParams);
 		threadTwo.loopCreate(loopTwo);
 	}
@@ -248,7 +251,8 @@ private:
 		svd('A', dest, s, vt);
 		SizeType rows = dest.rows();
 		SizeType cols = vt.cols();
-		RealType epsilon = *std::max_element(s.begin(), s.end()) * std::max(rows, cols) * std::numeric_limits<RealType>::epsilon();
+		RealType epsilon = *std::max_element(s.begin(), s.end()) * std::max(rows, cols)
+		    * std::numeric_limits<RealType>::epsilon();
 
 		SizeType n = biggerThanEpsilon(s, epsilon);
 

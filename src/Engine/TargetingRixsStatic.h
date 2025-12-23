@@ -170,15 +170,9 @@ public:
 
 	SizeType targets() const { return 6; }
 
-	RealType weight(SizeType i) const
-	{
-		return weight_[i];
-	}
+	RealType weight(SizeType i) const { return weight_[i]; }
 
-	RealType gsWeight() const
-	{
-		return gsWeight_;
-	}
+	RealType gsWeight() const { return gsWeight_; }
 
 	SizeType size() const
 	{
@@ -260,45 +254,53 @@ private:
 			err("You cannot apply more than 2 operators (only SUM is allowed)\n");
 
 		if (!applied_) {
-			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::evolve"));
+			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(
+			    __FILE__ + PsimagLite::String("::evolve"));
 			if (max == 1) {
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
 					SizeType indexOfOperator = 0;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					                                              indexOfOperator,
-					                                              site,
-					                                              tmpV1,
-					                                              psi00,
-					                                              direction,
-					                                              tstStruct_);
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
+					    indexOfOperator,
+					    site,
+					    tmpV1,
+					    psi00,
+					    direction,
+					    tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->tvNonConst(3) = tmpV1;
 						applied_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "Applied operator";
 						progress_.printline(msgg, std::cout);
 					}
 				}
 			}
-			if (max == 2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::SUM) {
+			if (max == 2
+			    && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::SUM) {
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
 					SizeType indexOfOperator = 0;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					                                              indexOfOperator,
-					                                              site,
-					                                              tmpV1,
-					                                              psi00,
-					                                              direction,
-					                                              tstStruct_);
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
+					    indexOfOperator,
+					    site,
+					    tmpV1,
+					    psi00,
+					    direction,
+					    tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->tvNonConst(3) = tmpV1;
 						applied_ = false;
 						appliedFirst_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "Applied first operator";
 						progress_.printline(msgg, std::cout);
 					}
@@ -306,40 +308,48 @@ private:
 				if (site == tstStruct_.sites(1)) {
 					VectorWithOffsetType tmpV2;
 					SizeType indexOfOperator = 1;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					                                              indexOfOperator,
-					                                              site,
-					                                              tmpV2,
-					                                              psi00,
-					                                              direction,
-					                                              tstStruct_);
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
+					    indexOfOperator,
+					    site,
+					    tmpV2,
+					    psi00,
+					    direction,
+					    tstStruct_);
 					if (tmpV2.size() > 0) {
 						this->tvNonConst(3) += tmpV2;
 						applied_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "Applied second operator";
 						progress_.printline(msgg, std::cout);
 					}
 				}
 			}
-			if (max == 2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::PRODUCT) {
+			if (max == 2
+			    && tstStruct_.concatenation()
+			        == TargetParamsType::ConcatEnum::PRODUCT) {
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
 					SizeType indexOfOperator = 0;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					                                              indexOfOperator,
-					                                              site,
-					                                              tmpV1,
-					                                              psi00,
-					                                              direction,
-					                                              tstStruct_);
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
+					    indexOfOperator,
+					    site,
+					    tmpV1,
+					    psi00,
+					    direction,
+					    tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->tvNonConst(3) = tmpV1;
 						applied_ = false;
 						appliedFirst_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "PROD: Applied First Operator";
 						progress_.printline(msgg, std::cout);
 					}
@@ -347,18 +357,21 @@ private:
 				if (site == tstStruct_.sites(1)) {
 					VectorWithOffsetType tmpV2;
 					SizeType indexOfOperator = 1;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
-					                                              indexOfOperator,
-					                                              site,
-					                                              tmpV2,
-					                                              this->tv(3),
-					                                              direction,
-					                                              tstStruct_);
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
+					    indexOfOperator,
+					    site,
+					    tmpV2,
+					    this->tv(3),
+					    direction,
+					    tstStruct_);
 					if (tmpV2.size() > 0) {
 						this->tvNonConst(3) = tmpV2;
 						applied_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "PROD: Applied Second Operator";
 						progress_.printline(msgg, std::cout);
 					}
@@ -385,9 +398,7 @@ private:
 			return;
 		}
 
-		skeleton_.calcDynVectors(this->tv(3),
-		                         this->tvNonConst(4),
-		                         this->tvNonConst(5));
+		skeleton_.calcDynVectors(this->tv(3), this->tvNonConst(4), this->tvNonConst(5));
 		//		this->tv(4) = this->common().aoe().targetVectors(1);
 		//		this->tv(5) = this->common().aoe().targetVectors(2);
 

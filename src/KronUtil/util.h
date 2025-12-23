@@ -91,9 +91,7 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
                    PsimagLite::CrsMatrix<ComplexOrRealType>& b);
 
 template <typename ComplexOrRealType>
-void csr_eye(const int nrow_B,
-             const int ncol_B,
-             PsimagLite::CrsMatrix<ComplexOrRealType>& b);
+void csr_eye(const int nrow_B, const int ncol_B, PsimagLite::CrsMatrix<ComplexOrRealType>& b);
 
 template <typename ComplexOrRealType>
 void csr_kron_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
@@ -105,8 +103,7 @@ void csr_kron_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
                         const PsimagLite::Vector<int>::Type& cindex,
                         PsimagLite::CrsMatrix<ComplexOrRealType>& h);
 
-int csc_nnz(const int ncol_A,
-            const PsimagLite::Vector<int>::Type& acolptr);
+int csc_nnz(const int ncol_A, const PsimagLite::Vector<int>::Type& acolptr);
 
 template <typename ComplexOrRealType>
 void csc_matmul_pre(const char trans_A,
@@ -189,15 +186,10 @@ void den_csr_kron_mult_method(const int imethod,
                               SizeType offsetX,
                               PsimagLite::GemmR<ComplexOrRealType>&);
 
-void den_copymat(const int nrow,
-                 const int ncol,
-                 const int asrc_[],
-                 int bdest_[]);
+void den_copymat(const int nrow, const int ncol, const int asrc_[], int bdest_[]);
 
 template <typename ComplexOrRealType>
-void den_zeros(const int nrow_A,
-               const int ncol_A,
-               PsimagLite::Matrix<ComplexOrRealType>& a_);
+void den_zeros(const int nrow_A, const int ncol_A, PsimagLite::Matrix<ComplexOrRealType>& a_);
 
 template <typename ComplexOrRealType>
 void den_transpose(const int nrow_A,
@@ -238,18 +230,17 @@ void den_matmul_post(const char trans_A,
                      PsimagLite::GemmR<ComplexOrRealType>&);
 
 template <typename ComplexOrRealType>
-void den_kron_submatrix(
-    const int nrow_A,
-    const int ncol_A,
-    const PsimagLite::Matrix<ComplexOrRealType>& a_,
-    const int nrow_B,
-    const int ncol_B,
-    const PsimagLite::Matrix<ComplexOrRealType>& b_,
-    const int nrindex,
-    const int ncindex,
-    const PsimagLite::Vector<int>::Type& rindex,
-    const PsimagLite::Vector<int>::Type& cindex,
-    PsimagLite::Matrix<ComplexOrRealType>& c_);
+void den_kron_submatrix(const int nrow_A,
+                        const int ncol_A,
+                        const PsimagLite::Matrix<ComplexOrRealType>& a_,
+                        const int nrow_B,
+                        const int ncol_B,
+                        const PsimagLite::Matrix<ComplexOrRealType>& b_,
+                        const int nrindex,
+                        const int ncindex,
+                        const PsimagLite::Vector<int>::Type& rindex,
+                        const PsimagLite::Vector<int>::Type& cindex,
+                        PsimagLite::Matrix<ComplexOrRealType>& c_);
 
 template <typename ComplexOrRealType>
 void den_kron_mult_method(const int imethod,
@@ -263,11 +254,9 @@ void den_kron_mult_method(const int imethod,
                           SizeType offsetX,
                           PsimagLite::GemmR<ComplexOrRealType>&);
 
-template <typename ComplexOrRealType>
-int den_nnz(const PsimagLite::Matrix<ComplexOrRealType>&);
+template <typename ComplexOrRealType> int den_nnz(const PsimagLite::Matrix<ComplexOrRealType>&);
 
-template <typename ComplexOrRealType>
-bool den_is_eye(const PsimagLite::Matrix<ComplexOrRealType>&);
+template <typename ComplexOrRealType> bool den_is_eye(const PsimagLite::Matrix<ComplexOrRealType>&);
 
 template <typename ComplexOrRealType>
 bool den_is_zeros(const PsimagLite::Matrix<ComplexOrRealType>&);
@@ -282,16 +271,15 @@ void den_kron_form(const int nrow_A,
                    PsimagLite::Matrix<ComplexOrRealType>& c_);
 
 template <typename ComplexOrRealType>
-void den_kron_form_general(
-    const char transA,
-    const char transB,
-    const int nrow_A,
-    const int ncol_A,
-    const PsimagLite::Matrix<ComplexOrRealType>& a_,
-    const int nrow_B,
-    const int ncol_B,
-    const PsimagLite::Matrix<ComplexOrRealType>& b_,
-    PsimagLite::Matrix<ComplexOrRealType>& c_);
+void den_kron_form_general(const char transA,
+                           const char transB,
+                           const int nrow_A,
+                           const int ncol_A,
+                           const PsimagLite::Matrix<ComplexOrRealType>& a_,
+                           const int nrow_B,
+                           const int ncol_B,
+                           const PsimagLite::Matrix<ComplexOrRealType>& b_,
+                           PsimagLite::Matrix<ComplexOrRealType>& c_);
 
 template <typename ComplexOrRealType>
 void den_submatrix(const int nrow_A,
@@ -304,9 +292,7 @@ void den_submatrix(const int nrow_A,
                    PsimagLite::Matrix<ComplexOrRealType>& c_);
 
 template <typename ComplexOrRealType>
-void den_eye(const int nrow_A,
-             const int ncol_A,
-             PsimagLite::Matrix<ComplexOrRealType>& c_);
+void den_eye(const int nrow_A, const int ncol_A, PsimagLite::Matrix<ComplexOrRealType>& c_);
 
 template <typename ComplexOrRealType>
 bool csr_is_zeros(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
@@ -317,8 +303,7 @@ bool csr_is_zeros(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
 	return isZero(a, 0.0);
 }
 
-template <typename ComplexOrRealType>
-int csr_nnz(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
+template <typename ComplexOrRealType> int csr_nnz(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
 {
 	return a.nonZeros();
 }

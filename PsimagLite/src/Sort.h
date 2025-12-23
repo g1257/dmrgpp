@@ -7,8 +7,7 @@
 #include <iostream>
 
 namespace PsimagLite {
-template <typename ContainerType>
-class Sort {
+template <typename ContainerType> class Sort {
 public:
 
 	typedef typename ContainerType::value_type FieldType;
@@ -19,8 +18,7 @@ public:
 
 		Compare(const typename Vector<PairType>::Type& x)
 		    : x_(x)
-		{
-		}
+		{ }
 
 		bool operator()(const PairType& x1, const PairType& x2)
 		{
@@ -33,7 +31,8 @@ public:
 	};
 
 	template <typename A>
-	void sort(ContainerType& x, typename std::vector<SizeType, A>& iperm, SizeType smallSize = 0)
+	void
+	sort(ContainerType& x, typename std::vector<SizeType, A>& iperm, SizeType smallSize = 0)
 	{
 		SizeType n = x.size();
 		if (n == 0)

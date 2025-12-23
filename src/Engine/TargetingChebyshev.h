@@ -122,7 +122,8 @@ public:
 	typedef typename OperatorType::StorageType SparseMatrixType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename BasisType::QnType QnType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef
+	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
 
@@ -148,14 +149,16 @@ public:
 		SizeType linSize = checkPoint.model().superGeometry().numberOfSites();
 		for (SizeType i = 0; i < nops; ++i)
 			if (tstStruct_.sites(i) == 0 || tstStruct_.sites(i) == linSize - 1)
-				err("TargetingChebyshev: FATAL: No application of operators at borders\n");
+				err("TargetingChebyshev: FATAL: No application of operators at "
+				    "borders\n");
 
 		RealType tau = tstStruct_.tau();
 		RealType sum = 0;
 		SizeType n = tstStruct_.times().size();
 
 		if (n < 3)
-			throw PsimagLite::RuntimeError("At least 3 Chebyshev vectors need to be targets\n");
+			throw PsimagLite::RuntimeError(
+			    "At least 3 Chebyshev vectors need to be targets\n");
 
 		RealType factor = (n + 4.0) / (n + 2.0);
 		factor *= (1.0 - gsWeight_);
@@ -218,7 +221,8 @@ public:
 
 	bool end() const
 	{
-		return (tstStruct_.maxTime() != 0 && this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
+		return (tstStruct_.maxTime() != 0
+		        && this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
 	}
 
 	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
@@ -251,7 +255,8 @@ private:
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
 		VectorWithOffsetType phiNew;
-		this->common().aoeNonConst().getPhi(&phiNew, Eg, direction, block1[0], loopNumber, tstStruct_);
+		this->common().aoeNonConst().getPhi(
+		    &phiNew, Eg, direction, block1[0], loopNumber, tstStruct_);
 
 		if (phiNew.size() == 0)
 			return;
@@ -260,24 +265,28 @@ private:
 		for (SizeType i = 0; i < tstStruct_.times().size(); ++i)
 			indices[i] = i;
 
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED) && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
+		bool allOperatorsApplied
+		    = (this->common().aoe().noStageIs(StageEnumType::DISABLED)
+		       && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
 		assert(0 < block1.size());
 
 		bool isLastCall = true;
-		this->common().aoeNonConst().calcTimeVectors(indices,
-		                                             Eg,
-		                                             phiNew,
-		                                             direction,
-		                                             allOperatorsApplied,
-		                                             false, // don't wft or advance indices[0]
-		                                             block1,
-		                                             isLastCall);
+		this->common().aoeNonConst().calcTimeVectors(
+		    indices,
+		    Eg,
+		    phiNew,
+		    direction,
+		    allOperatorsApplied,
+		    false, // don't wft or advance indices[0]
+		    block1,
+		    isLastCall);
 
 		assert(phiNew.offset(0) == this->tv(1).offset(0));
 
 		const OptionsType& options = this->model().params().options;
-		const bool normalizeTimeVectors = (options.isSet("normalizeVectors") && !options.isSet("neverNormalizeVectors"));
+		const bool normalizeTimeVectors = (options.isSet("normalizeVectors")
+		                                   && !options.isSet("neverNormalizeVectors"));
 
 		assert(phiNew.offset(0) == this->tv(1).offset(0));
 
@@ -316,9 +325,7 @@ private:
 		}
 	}
 
-	void printChebyshev(const VectorWithOffsetType& phi,
-	                    SizeType whatTarget,
-	                    SizeType i0) const
+	void printChebyshev(const VectorWithOffsetType& phi, SizeType whatTarget, SizeType i0) const
 	{
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 		typename ModelType::HamiltonianConnectionType hc(p,
@@ -327,8 +334,7 @@ private:
 		                                                 BaseType::model().modelLinks(),
 		                                                 this->common().aoe().currentTime(),
 		                                                 0);
-		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		                                                     hc);
+		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(), hc);
 
 		SizeType total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);

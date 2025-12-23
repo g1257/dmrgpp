@@ -94,20 +94,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 template <typename SolverParametersType, typename MatrixType, typename VectorType>
-class DavidsonSolver
-    : public LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType> {
+class DavidsonSolver : public LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType> {
 
 	typedef typename SolverParametersType::RealType RealType;
-	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType>
-	    BaseType;
+	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType> BaseType;
 	typedef typename VectorType::value_type ComplexOrRealType;
 	typedef typename BaseType::VectorRealType VectorRealType;
 	typedef typename BaseType::VectorVectorType VectorVectorType;
 
 public:
 
-	DavidsonSolver(MatrixType const& mat,
-	               const SolverParametersType& params)
+	DavidsonSolver(MatrixType const& mat, const SolverParametersType& params)
 	    : progress_("DavidsonSolver")
 	    , mat_(mat)
 	    , steps_(params.steps)
@@ -135,8 +132,7 @@ public:
 
 private:
 
-	void algorithm4_14(VectorType& t,
-	                   const typename Vector<VectorType>::Type& v)
+	void algorithm4_14(VectorType& t, const typename Vector<VectorType>::Type& v)
 	{
 		SizeType m = v.size();
 		if (m == 0)

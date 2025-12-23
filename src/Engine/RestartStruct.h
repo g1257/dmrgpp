@@ -18,8 +18,7 @@ struct RestartStruct {
 	    , labelForEnergy_("Energies")
 	    , mapStages_(true)
 	    , sourceTvForPsi_(-1)
-	{
-	}
+	{ }
 
 	/* PSIDOC MiscRestartOptions
 
@@ -37,13 +36,11 @@ struct RestartStruct {
 	 Sets the i-th target vector for this targeting to the previous run target
 	 vector number MappingTvs[i], if MappingTvs[i] is non-negative; skips it if negative.
 	 */
-	template <typename SomeInputType>
-	void read(SomeInputType& io)
+	template <typename SomeInputType> void read(SomeInputType& io)
 	{
 		try {
 			io.readline(labelForEnergy_, "RestartLabelForEnergy=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(sourceTvForPsi_, "RestartSourceTvForPsi=");
@@ -55,13 +52,11 @@ struct RestartStruct {
 			int x = 1;
 			io.readline(x, "RestartMapStages=");
 			mapStages_ = (x > 0);
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.read(mappingTvs_, "RestartMappingTvs");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	void setFilename(PsimagLite::String f) { filename_ = f; }
@@ -85,8 +80,7 @@ struct RestartStruct {
 
 	int sourceTvForPsi() const { return sourceTvForPsi_; }
 
-	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
 		PsimagLite::String root = label;
 		ioSerializer.createGroup(root);

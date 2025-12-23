@@ -9,8 +9,7 @@
 
 namespace Dmrg {
 
-template <typename ModelType, typename VectorWithOffsetType>
-class OneSiteTruncation {
+template <typename ModelType, typename VectorWithOffsetType> class OneSiteTruncation {
 
 public:
 
@@ -36,14 +35,12 @@ public:
 		try {
 			io.readline(m_, "OneSiteTruncationM=");
 			std::cout << "OneSiteTruncationM=" << m_ << "\n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(tolerance_, "OneSiteTruncationTolerance=");
 			std::cout << "OneSiteTruncationTolerance=" << tolerance_ << "\n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	void update(SizeType oneSiteTruncSize,
@@ -87,33 +84,39 @@ private:
 					SizeType x0 = 0;
 					SizeType x1 = 0;
 					pack.unpack(x0, x1, lrs_.left().permutation(x));
-					for (SizeType x1prime = 0; x1prime < oneSiteTruncSize; ++x1prime) {
-						const SizeType xprime = pack.pack(x0,
-						                                  x1prime,
-						                                  lrs_.left().permutationInverse());
-						const SizeType sWithOffsetprime = packSuper.pack(xprime, y, lrs_.super().permutationInverse());
+					for (SizeType x1prime = 0; x1prime < oneSiteTruncSize;
+					     ++x1prime) {
+						const SizeType xprime = pack.pack(
+						    x0, x1prime, lrs_.left().permutationInverse());
+						const SizeType sWithOffsetprime = packSuper.pack(
+						    xprime, y, lrs_.super().permutationInverse());
 						if (sWithOffsetprime < offset)
 							continue; // respect all symmetries
 						const SizeType sprime = sWithOffsetprime - offset;
 						if (sprime >= total)
 							continue; // respect all symmetries
-						U(x1, x1prime) += PsimagLite::conj(psi.fastAccess(sector, sprime)) * value;
+						U(x1, x1prime) += PsimagLite::conj(psi.fastAccess(
+						                      sector, sprime))
+						    * value;
 					}
 				} else {
 					SizeType y0 = 0;
 					SizeType y1 = 0;
 					pack.unpack(y0, y1, lrs_.right().permutation(y));
-					for (SizeType y0prime = 0; y0prime < oneSiteTruncSize; ++y0prime) {
-						const SizeType yprime = pack.pack(y0prime,
-						                                  y1,
-						                                  lrs_.right().permutationInverse());
-						const SizeType sWithOffsetprime = packSuper.pack(x, yprime, lrs_.super().permutationInverse());
+					for (SizeType y0prime = 0; y0prime < oneSiteTruncSize;
+					     ++y0prime) {
+						const SizeType yprime = pack.pack(
+						    y0prime, y1, lrs_.right().permutationInverse());
+						const SizeType sWithOffsetprime = packSuper.pack(
+						    x, yprime, lrs_.super().permutationInverse());
 						if (sWithOffsetprime < offset)
 							continue; // respect all symmetries
 						const SizeType sprime = sWithOffsetprime - offset;
 						if (sprime >= total)
 							continue; // respect all symmetries
-						U(y0, y0prime) += PsimagLite::conj(psi.fastAccess(sector, sprime)) * value;
+						U(y0, y0prime) += PsimagLite::conj(psi.fastAccess(
+						                      sector, sprime))
+						    * value;
 					}
 				}
 			}

@@ -156,7 +156,8 @@ public:
 		--last;
 		SizeType numberOfSites = hamAbstract_.superGeometry().numberOfSites();
 		assert(numberOfSites > 0);
-		bool superIsReallySuper = (lrs.super().block()[0] == 0 && lrs.super().block()[last] == numberOfSites - 1);
+		bool superIsReallySuper = (lrs.super().block()[0] == 0
+		                           && lrs.super().block()[last] == numberOfSites - 1);
 
 		if (!superIsReallySuper)
 			return; // <-- CONDITIONAL EARLY EXIT HERE
@@ -225,25 +226,13 @@ public:
 		matrix += matrix2;
 	}
 
-	OpsForLinkType opsForLink() const
-	{
-		return OpsForLinkType(operatorsCached_, lps_);
-	}
+	OpsForLinkType opsForLink() const { return OpsForLinkType(operatorsCached_, lps_); }
 
-	const ModelHelperType& modelHelper() const
-	{
-		return modelHelper_;
-	}
+	const ModelHelperType& modelHelper() const { return modelHelper_; }
 
-	SizeType tasks() const
-	{
-		return lps_.size();
-	}
+	SizeType tasks() const { return lps_.size(); }
 
-	void clearThreadSelves() const
-	{
-		operatorsCached_.clearThreadSelves();
-	}
+	void clearThreadSelves() const { operatorsCached_.clearThreadSelves(); }
 
 private:
 
@@ -259,7 +248,8 @@ private:
 
 		ProgramGlobals::ConnectionEnum type = superGeometry.connectionKind(smax_, hItems);
 
-		assert(type != ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM && type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
+		assert(type != ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM
+		       && type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
 
 		SizeType totalOne = 0;
 		const SizeType geometryTerms = modelLinks_.numberOfTerms();
@@ -269,17 +259,16 @@ private:
 				continue;
 
 			const typename ModelLinksType::TermType& term = modelLinks_.term(termIndex);
-			const SizeType termIndexForGeom = modelLinks_.termIndexForGeometry(termIndex);
+			const SizeType termIndexForGeom
+			    = modelLinks_.termIndexForGeometry(termIndex);
 
 			SizeType dofsTotal = term.size();
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
 
 				const OneLink<ComplexOrRealType>& oneLink = term(dofs);
 
-				ComplexOrRealType tmp = hamAbstract_.connectionValue(hItems,
-				                                                     oneLink,
-				                                                     termIndexForGeom,
-				                                                     targetTime_);
+				ComplexOrRealType tmp = hamAbstract_.connectionValue(
+				    hItems, oneLink, termIndexForGeom, targetTime_);
 
 				if (tmp == static_cast<RealType>(0.0))
 					continue;
@@ -303,7 +292,8 @@ private:
 
 				// Add H.C. parts if needed
 				if (hItems.size() == 2 && term.wantsHermitian()) {
-					totalOne += addHermitianIfNeeded(link2, tmp, manyToTwo, oneLink.fermionOrBoson);
+					totalOne += addHermitianIfNeeded(
+					    link2, tmp, manyToTwo, oneLink.fermionOrBoson);
 				}
 			}
 		}
@@ -325,7 +315,8 @@ private:
 			link2.value *= (-1.0);
 
 		link2.pairMetaOps.first.modifier = conjugateChar(link2.pairMetaOps.first.modifier);
-		link2.pairMetaOps.second.modifier = conjugateChar(link2.pairMetaOps.second.modifier);
+		link2.pairMetaOps.second.modifier
+		    = conjugateChar(link2.pairMetaOps.second.modifier);
 
 		lps_.push_back(link2);
 		return 1;
@@ -340,12 +331,14 @@ private:
 		// Check if replacements for geometry exist
 		SizeType inputTermsExpected = 0;
 		for (SizeType termIndex = 0; termIndex < fromModel; ++termIndex) {
-			const SizeType termIndexForGeom = modelLinks_.termIndexForGeometry(termIndex);
+			const SizeType termIndexForGeom
+			    = modelLinks_.termIndexForGeometry(termIndex);
 			if (termIndexForGeom > inputTermsExpected)
 				inputTermsExpected = termIndexForGeom;
 			if (termIndex != termIndexForGeom) {
 				PsimagLite::String msg("INFO: Replacement for geometry exist ");
-				msg += ttos(termIndex) + " is aliased to " + ttos(termIndexForGeom) + "\n";
+				msg += ttos(termIndex) + " is aliased to " + ttos(termIndexForGeom)
+				    + "\n";
 				if (doPrint) {
 					std::cerr << msg;
 					std::cout << msg;
@@ -356,11 +349,13 @@ private:
 		++inputTermsExpected;
 
 		if (fromModel < inputTermsExpected) {
-			err("FATAL:  INTERNAL: NumberOfTerms from model " + ttos(fromModel) + " is less than effective terms  " + ttos(inputTermsExpected) + "\n");
+			err("FATAL:  INTERNAL: NumberOfTerms from model " + ttos(fromModel)
+			    + " is less than effective terms  " + ttos(inputTermsExpected) + "\n");
 		}
 
 		if (fromInput > fromModel) {
-			err("FATAL: terms from input " + ttos(fromInput) + " > " + "terms from model = " + ttos(fromModel) + "\n");
+			err("FATAL: terms from input " + ttos(fromInput) + " > "
+			    + "terms from model = " + ttos(fromModel) + "\n");
 		}
 
 		if (fromInput < inputTermsExpected)

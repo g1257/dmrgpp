@@ -89,8 +89,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename ObserverHelperType, typename ModelType>
-class OnePointCorrelations {
+template <typename ObserverHelperType, typename ModelType> class OnePointCorrelations {
 
 	typedef typename ObserverHelperType::MatrixType MatrixType;
 	typedef typename ObserverHelperType::VectorType VectorType;
@@ -101,12 +100,10 @@ class OnePointCorrelations {
 
 public:
 
-	OnePointCorrelations(const ObserverHelperType& helper,
-	                     const ModelType& model)
+	OnePointCorrelations(const ObserverHelperType& helper, const ModelType& model)
 	    : helper_(helper)
 	    , model_(model)
-	{
-	}
+	{ }
 
 	template <typename ApplyOperatorType>
 	FieldType operator()(SizeType ptr,
@@ -120,7 +117,8 @@ public:
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
 			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
-			return onePointInternal<ApplyOperatorType>(A, site, src1, src2, corner, ptr);
+			return onePointInternal<ApplyOperatorType>(
+			    A, site, src1, src2, corner, ptr);
 		} catch (std::exception& e) {
 			std::cerr << "CAUGHT: " << e.what();
 			std::cerr << "WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -139,11 +137,8 @@ public:
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
 			const VectorWithOffsetType& src2 = helper_.getVectorFromBracketId(ket, ptr);
 
-			return onePointInternalHookForZero<ApplyOperatorType>(A,
-			                                                      splitSize,
-			                                                      src1,
-			                                                      src2,
-			                                                      ptr);
+			return onePointInternalHookForZero<ApplyOperatorType>(
+			    A, splitSize, src1, src2, ptr);
 		} catch (std::exception& e) {
 			std::cerr << "CAUGHT: " << e.what();
 			std::cerr << "WARNING: Observer::onePoint(...): Nothing here yet\n";
@@ -165,8 +160,7 @@ private:
 			return 0.0;
 
 		SizeType splitSize = model_.hilbertSize(site);
-		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
-		                                true);
+		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr), true);
 		VectorWithOffsetType dest;
 		applyOpLocal1(dest,
 		              src1,
@@ -187,7 +181,8 @@ private:
 					continue;
 				SizeType offset = v1.offset(i);
 				for (SizeType k = 0; k < v1.effectiveSize(i); k++)
-					sum += v1.slowAccess(k + offset) * PsimagLite::conj(v2.slowAccess(k + offset));
+					sum += v1.slowAccess(k + offset)
+					    * PsimagLite::conj(v2.slowAccess(k + offset));
 			}
 		}
 
@@ -202,8 +197,7 @@ private:
 	                                      SizeType ptr) const
 	{
 
-		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr),
-		                                true);
+		ApplyOperatorType applyOpLocal1(helper_.leftRightSuper(ptr), true);
 		VectorWithOffsetType dest;
 		applyOpLocal1.hookForZero(dest,
 		                          src1,
@@ -223,7 +217,8 @@ private:
 					continue;
 				SizeType offset = v1.offset(i);
 				for (SizeType k = 0; k < v1.effectiveSize(i); k++)
-					sum += v1.slowAccess(k + offset) * PsimagLite::conj(v2.slowAccess(k + offset));
+					sum += v1.slowAccess(k + offset)
+					    * PsimagLite::conj(v2.slowAccess(k + offset));
 			}
 		}
 

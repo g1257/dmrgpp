@@ -107,25 +107,17 @@ namespace MPI {
 
 	int barrier(CommType);
 
-	template <typename T>
-	void bcast(T&, int = 0, CommType = COMM_WORLD) { }
+	template <typename T> void bcast(T&, int = 0, CommType = COMM_WORLD) { }
 
-	template <typename T>
-	void recv(T&, int, int, CommType = COMM_WORLD) { }
+	template <typename T> void recv(T&, int, int, CommType = COMM_WORLD) { }
 
-	template <typename T>
-	void send(T&, int, int, CommType = COMM_WORLD) { }
+	template <typename T> void send(T&, int, int, CommType = COMM_WORLD) { }
 
-	template <typename T>
-	void pointByPointGather(T&, int = 0, CommType = COMM_WORLD)
-	{
-	}
+	template <typename T> void pointByPointGather(T&, int = 0, CommType = COMM_WORLD) { }
 
-	template <typename T>
-	void reduce(T&, int = 0, int = 0, int = 0) { }
+	template <typename T> void reduce(T&, int = 0, int = 0, int = 0) { }
 
-	template <typename T>
-	void allReduce(T&) { }
+	template <typename T> void allReduce(T&) { }
 
 } // namespace MPI
 

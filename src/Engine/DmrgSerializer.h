@@ -87,8 +87,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 // Move also checkpointing from DmrgSolver to here (FIXME)
-template <typename LeftRightSuperType, typename VectorWithOffsetType>
-class DmrgSerializer {
+template <typename LeftRightSuperType, typename VectorWithOffsetType> class DmrgSerializer {
 
 public:
 
@@ -104,7 +103,9 @@ public:
 	typedef typename BasisType::RealType RealType;
 	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
 	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
-	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
+	typedef
+	    typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::
+	        Type VectorVectorVectorWithOffsetType;
 
 	DmrgSerializer(const FermionSignType& fS,
 	               const FermionSignType& fE,
@@ -124,15 +125,14 @@ public:
 
 	// used only by IoNg:
 	template <typename IoInputType>
-	DmrgSerializer(IoInputType& io,
-	               PsimagLite::String prefix,
-	               bool bogus,
-	               const BasisTraits& basisTraits,
-	               bool readOnDemand,
-	               typename PsimagLite::EnableIf<
-	                   PsimagLite::IsInputLike<IoInputType>::True,
-	                   int>::Type
-	               = 0)
+	DmrgSerializer(
+	    IoInputType& io,
+	    PsimagLite::String prefix,
+	    bool bogus,
+	    const BasisTraits& basisTraits,
+	    bool readOnDemand,
+	    typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputType>::True, int>::Type
+	    = 0)
 	    : fS_(io, prefix + "/fS", bogus)
 	    , fE_(io, prefix + "/fE", bogus)
 	    , lrs_(new LeftRightSuperType(io, prefix, basisTraits))
@@ -152,7 +152,9 @@ public:
 				wavefunction_[i].resize(nexcited);
 				for (SizeType j = 0; j < nexcited; ++j) {
 					wavefunction_[i][j] = new VectorWithOffsetType;
-					wavefunction_[i][j]->read(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
+					wavefunction_[i][j]->read(io,
+					                          prefix + "/WaveFunction/"
+					                              + ttos(i) + "/" + ttos(j));
 				}
 			}
 		} catch (...) {
@@ -190,22 +192,22 @@ public:
 	}
 
 	template <typename SomeIoOutType>
-	void write(SomeIoOutType& io,
-	           PsimagLite::String prefix,
-	           typename BasisWithOperatorsType::SaveEnum option,
-	           SizeType numberOfSites,
-	           SizeType counter,
-	           typename PsimagLite::EnableIf<
-	               PsimagLite::IsOutputLike<SomeIoOutType>::True,
-	               int>::Type
-	           = 0) const
+	void write(
+	    SomeIoOutType& io,
+	    PsimagLite::String prefix,
+	    typename BasisWithOperatorsType::SaveEnum option,
+	    SizeType numberOfSites,
+	    SizeType counter,
+	    typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type
+	    = 0) const
 	{
 		if (counter == 0)
 			io.createGroup(prefix);
 
 		io.write(counter + 1,
 		         prefix + "/Size",
-		         (counter == 0) ? SomeIoOutType::Serializer::NO_OVERWRITE : SomeIoOutType::Serializer::ALLOW_OVERWRITE);
+		         (counter == 0) ? SomeIoOutType::Serializer::NO_OVERWRITE
+		                        : SomeIoOutType::Serializer::ALLOW_OVERWRITE);
 
 		prefix += ("/" + ttos(counter));
 
@@ -225,22 +227,17 @@ public:
 			io.createGroup(prefix + "/WaveFunction/" + ttos(i));
 			io.write(nexcited, prefix + "/WaveFunction/" + ttos(i) + "/Size");
 			for (SizeType j = 0; j < nexcited; ++j)
-				wavefunction_[i][j]->write(io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
+				wavefunction_[i][j]->write(
+				    io, prefix + "/WaveFunction/" + ttos(i) + "/" + ttos(j));
 		}
 
 		transform_.write(prefix + "/transform", io);
 		io.write(direction_, prefix + "/direction");
 	}
 
-	const FermionSignType& fermionicSignLeft() const
-	{
-		return fS_;
-	}
+	const FermionSignType& fermionicSignLeft() const { return fS_; }
 
-	const FermionSignType& fermionicSignRight() const
-	{
-		return fE_;
-	}
+	const FermionSignType& fermionicSignRight() const { return fE_; }
 
 	const LeftRightSuperType& leftRightSuper() const
 	{
@@ -248,27 +245,23 @@ public:
 		return *lrs_;
 	}
 
-	const VectorWithOffsetType& psiConst(SizeType sectorIndex,
-	                                     SizeType levelIndex) const
+	const VectorWithOffsetType& psiConst(SizeType sectorIndex, SizeType levelIndex) const
 	{
 		if (sectorIndex >= wavefunction_.size())
-			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = " + ttos(sectorIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
+			err(PsimagLite::String(__FILE__) + "::wavefunction(): sectorIndex = "
+			    + ttos(sectorIndex) + ">=" + ttos(wavefunction_.size()) + "\n");
 
 		if (levelIndex >= wavefunction_[sectorIndex].size())
-			err(PsimagLite::String(__FILE__) + "::wavefunction(): levelIndex = " + ttos(levelIndex) + ">=" + ttos(wavefunction_[sectorIndex].size()) + "\n");
+			err(PsimagLite::String(__FILE__)
+			    + "::wavefunction(): levelIndex = " + ttos(levelIndex)
+			    + ">=" + ttos(wavefunction_[sectorIndex].size()) + "\n");
 
 		return *(wavefunction_[sectorIndex][levelIndex]);
 	}
 
-	SizeType cols() const
-	{
-		return transform_.cols();
-	}
+	SizeType cols() const { return transform_.cols(); }
 
-	SizeType rows() const
-	{
-		return transform_.rows();
-	}
+	SizeType rows() const { return transform_.rows(); }
 
 	ProgramGlobals::DirectionEnum direction() const { return direction_; }
 
@@ -295,7 +288,8 @@ public:
 		SizeType max = lrs_->left().block().size();
 		assert(max > 0);
 		const SizeType site = lrs_->left().block()[max - 1];
-		return (direction_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? site : site + 1;
+		return (direction_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? site
+		                                                                    : site + 1;
 	}
 
 private:

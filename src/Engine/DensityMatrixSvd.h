@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename TargetingType>
-class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
+template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
 	typedef DensityMatrixBase<TargetingType> BaseType;
 	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
@@ -117,8 +116,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 			    : target(t)
 			    , sector(s)
 			    , jgroup(j)
-			{
-			}
+			{ }
 
 			SizeType target;
 			SizeType sector;
@@ -130,13 +128,11 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
 	public:
 
-		GroupsStruct(const LeftRightSuperType& lrs,
-		             ProgramGlobals::DirectionEnum direction)
+		GroupsStruct(const LeftRightSuperType& lrs, ProgramGlobals::DirectionEnum direction)
 		    : lrs_(lrs)
 		    , direction_(direction)
 		    , propsThisIgroup_(this->basis().partition())
-		{
-		}
+		{ }
 
 		~GroupsStruct()
 		{
@@ -155,24 +151,22 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 			m_[index] = nullptr;
 		}
 
-		void push(SizeType igroup,
-		          SizeType jgroup,
-		          SizeType target,
-		          SizeType sector)
+		void push(SizeType igroup, SizeType jgroup, SizeType target, SizeType sector)
 		{
 			// have I seen this group before?
-			typename VectorSizeType::iterator it = std::find(seenGroups_.begin(),
-			                                                 seenGroups_.end(),
-			                                                 igroup);
+			typename VectorSizeType::iterator it
+			    = std::find(seenGroups_.begin(), seenGroups_.end(), igroup);
 			if (it == seenGroups_.end()) { // No --> create group
 				seenGroups_.push_back(igroup);
 				// included repeted jgroups here
 				assert(igroup < propsThisIgroup_.size());
-				propsThisIgroup_[igroup].push_back(PropsOfGroup(target, sector, jgroup));
+				propsThisIgroup_[igroup].push_back(
+				    PropsOfGroup(target, sector, jgroup));
 
 			} else { //  Yes, add to group
 				assert(igroup < propsThisIgroup_.size());
-				propsThisIgroup_[igroup].push_back(PropsOfGroup(target, sector, jgroup));
+				propsThisIgroup_[igroup].push_back(
+				    PropsOfGroup(target, sector, jgroup));
 			}
 		}
 
@@ -189,7 +183,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 				for (SizeType j = 0; j < m; ++j) {
 					SizeType jgroup = propsThisIgroup_[igroup][j].jgroup;
 					SizeType joffset = this->basisPrime().partition(jgroup);
-					SizeType jsize = this->basisPrime().partition(jgroup + 1) - joffset;
+					SizeType jsize
+					    = this->basisPrime().partition(jgroup + 1) - joffset;
 					propsThisIgroup_[igroup][j].offset = cols;
 					cols += jsize;
 				}
@@ -228,7 +223,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 		{
 			SizeType m = propsThisIgroup_[igroup].size();
 			for (SizeType j = 0; j < m; ++j) {
-				if (propsThisIgroup_[igroup][j].target == target && propsThisIgroup_[igroup][j].sector == sector)
+				if (propsThisIgroup_[igroup][j].target == target
+				    && propsThisIgroup_[igroup][j].sector == sector)
 					return propsThisIgroup_[igroup][j].jgroup;
 			}
 
@@ -242,17 +238,16 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 		{
 			SizeType m = propsThisIgroup_[igroup].size();
 			for (SizeType j = 0; j < m; ++j) {
-				if (propsThisIgroup_[igroup][j].target == target && propsThisIgroup_[igroup][j].sector == sector && propsThisIgroup_[igroup][j].jgroup == jgroup)
+				if (propsThisIgroup_[igroup][j].target == target
+				    && propsThisIgroup_[igroup][j].sector == sector
+				    && propsThisIgroup_[igroup][j].jgroup == jgroup)
 					return propsThisIgroup_[igroup][j].offset;
 			}
 
 			throw PsimagLite::RuntimeError("GroupsStruct: additionalOffset\n");
 		}
 
-		SizeType size() const
-		{
-			return seenGroups_.size();
-		}
+		SizeType size() const { return seenGroups_.size(); }
 
 		bool expandSys() const
 		{
@@ -263,9 +258,8 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
 		SizeType groupIndex(SizeType igroup) const
 		{
-			typename VectorSizeType::const_iterator it = std::find(seenGroups_.begin(),
-			                                                       seenGroups_.end(),
-			                                                       igroup);
+			typename VectorSizeType::const_iterator it
+			    = std::find(seenGroups_.begin(), seenGroups_.end(), igroup);
 			assert(it != seenGroups_.end());
 			return it - seenGroups_.begin();
 		}
@@ -298,8 +292,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 		    , sector_(sector)
 		    , sqrtW_(sqrtW)
 		    , allTargets_(allTargets)
-		{
-		}
+		{ }
 
 		void doTask(SizeType ipatch, SizeType)
 		{
@@ -313,13 +306,13 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 			SizeType nl = lrs_.left().size();
 			SizeType rowOffset = allTargets_.basis().partition(groupBig);
 			SizeType rows = allTargets_.basis().partition(groupBig + 1) - rowOffset;
-			SizeType groupSmall = allTargets_.groupPrimeIndex(target_, sector_, groupBig);
+			SizeType groupSmall
+			    = allTargets_.groupPrimeIndex(target_, sector_, groupBig);
 			SizeType colOffset = allTargets_.basisPrime().partition(groupSmall);
-			SizeType cols = allTargets_.basisPrime().partition(groupSmall + 1) - colOffset;
-			SizeType additionalOffset = allTargets_.additionalOffset(groupBig,
-			                                                         target_,
-			                                                         sector_,
-			                                                         groupSmall);
+			SizeType cols
+			    = allTargets_.basisPrime().partition(groupSmall + 1) - colOffset;
+			SizeType additionalOffset
+			    = allTargets_.additionalOffset(groupBig, target_, sector_, groupSmall);
 
 			for (SizeType ind = 0; ind < rows; ++ind) {
 				for (SizeType jnd = 0; jnd < cols; ++jnd) {
@@ -338,15 +331,13 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 					if (r < offset || r >= offset + v_.effectiveSize(m))
 						continue;
 
-					matrix(ind, jnd + additionalOffset) += sqrtW_ * v_.slowAccess(r);
+					matrix(ind, jnd + additionalOffset)
+					    += sqrtW_ * v_.slowAccess(r);
 				}
 			}
 		}
 
-		SizeType tasks() const
-		{
-			return ijPatch_(GenIjPatchType::LEFT).size();
-		}
+		SizeType tasks() const { return ijPatch_(GenIjPatchType::LEFT).size(); }
 
 	private:
 
@@ -412,10 +403,7 @@ class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 				eigs_[i + offset] = eigsOnePatch[i] * eigsOnePatch[i];
 		}
 
-		SizeType tasks() const
-		{
-			return allTargets_.size();
-		}
+		SizeType tasks() const { return allTargets_.size(); }
 
 		// needed for WFT
 		const PersistentSvdType& additionalStorage() const { return persistentSvd_; }
@@ -441,8 +429,14 @@ public:
 	{
 		PsimagLite::Profiling profiling("DensityMatrixSvdCtor", std::cout);
 
-		typename GenIjPatchType::LeftOrRightEnumType dir1 = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? GenIjPatchType::LEFT : GenIjPatchType::RIGHT;
-		typename GenIjPatchType::LeftOrRightEnumType dir2 = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? GenIjPatchType::RIGHT : GenIjPatchType::LEFT;
+		typename GenIjPatchType::LeftOrRightEnumType dir1
+		    = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		    ? GenIjPatchType::LEFT
+		    : GenIjPatchType::RIGHT;
+		typename GenIjPatchType::LeftOrRightEnumType dir2
+		    = (p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		    ? GenIjPatchType::RIGHT
+		    : GenIjPatchType::LEFT;
 
 		typename PsimagLite::Vector<const VectorWithOffsetType*>::Type effectiveTargets;
 		SizeType x = 0;
@@ -454,10 +448,12 @@ public:
 			for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
 				const SizeType nexcited = psi[sectorIndex].size();
 
-				for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
+				for (SizeType excitedIndex = 0; excitedIndex < nexcited;
+				     ++excitedIndex) {
 					effectiveTargets.push_back(psi[sectorIndex][excitedIndex]);
 					assert(psi[sectorIndex][excitedIndex]);
-					pushOneTarget(*(psi[sectorIndex][excitedIndex]), x++, dir1, dir2);
+					pushOneTarget(
+					    *(psi[sectorIndex][excitedIndex]), x++, dir1, dir2);
 					++psiTargets;
 				}
 			}
@@ -479,8 +475,8 @@ public:
 		for (SizeType x = 0; x < effectiveTargets.size(); ++x) {
 
 			const VectorWithOffsetType& v = *effectiveTargets[x];
-			RealType weight = (x < psiTargets) ? target.gsWeight()
-			                                   : target.weight(x - psiTargets);
+			RealType weight
+			    = (x < psiTargets) ? target.gsWeight() : target.weight(x - psiTargets);
 
 			RealType mynorm = norm(v);
 			bool needsDeepCopy = (fabs(mynorm - 1) > 1e-4);
@@ -510,10 +506,7 @@ public:
 		profiling.end(msg.str());
 	}
 
-	virtual const BlockDiagonalMatrixType& operator()()
-	{
-		return data_;
-	}
+	virtual const BlockDiagonalMatrixType& operator()() { return data_; }
 
 	void diag(VectorRealType& eigs, char jobz)
 	{
@@ -530,10 +523,7 @@ public:
 
 		ParallelizerType threaded(csp);
 
-		ParallelSvd parallelSvd(data_,
-		                        allTargets_,
-		                        eigs,
-		                        persistentSvd_);
+		ParallelSvd parallelSvd(data_, allTargets_, eigs, persistentSvd_);
 
 		threaded.loopCreate(parallelSvd);
 
@@ -562,19 +552,12 @@ public:
 	}
 
 	// needed for WFT
-	const VectorVectorRealType& s() const
-	{
-		return persistentSvd_.s();
-	}
+	const VectorVectorRealType& s() const { return persistentSvd_.s(); }
 
 	// needed for WFT
-	const VectorQnType& qns() const
-	{
-		return persistentSvd_.qns();
-	}
+	const VectorQnType& qns() const { return persistentSvd_.qns(); }
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const DensityMatrixSvd& dm)
+	friend std::ostream& operator<<(std::ostream& os, const DensityMatrixSvd& dm)
 	{
 		for (SizeType m = 0; m < dm.data_.blocks(); ++m) {
 			SizeType ne = dm.pBasis_.electrons(dm.pBasis_.partition(m));
@@ -587,9 +570,7 @@ public:
 
 private:
 
-	void addThisTarget2(SizeType x,
-	                    const VectorWithOffsetType& v,
-	                    RealType sqrtW)
+	void addThisTarget2(SizeType x, const VectorWithOffsetType& v, RealType sqrtW)
 	{
 		const BasisType& super = lrs_.super();
 		for (SizeType sector = 0; sector < v.sectors(); ++sector) {
@@ -598,13 +579,8 @@ private:
 			GenIjPatchType genIjPatch(lrs_, qn);
 			typedef PsimagLite::Parallelizer<ParallelPsiSplit> ParallelizerType;
 			ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);
-			ParallelPsiSplit parallelPsiSplit(lrs_,
-			                                  genIjPatch,
-			                                  v,
-			                                  x,
-			                                  sector,
-			                                  sqrtW,
-			                                  allTargets_);
+			ParallelPsiSplit parallelPsiSplit(
+			    lrs_, genIjPatch, v, x, sector, sqrtW, allTargets_);
 			threaded.loopCreate(parallelPsiSplit);
 		}
 	}

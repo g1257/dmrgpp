@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename BasisWithOperatorsType_, typename SuperBlockType>
-class LeftRightSuper {
+template <typename BasisWithOperatorsType_, typename SuperBlockType> class LeftRightSuper {
 
 public:
 
@@ -104,13 +103,11 @@ public:
 	typedef typename BasisType::QnType QnType;
 
 	template <typename IoInputter>
-	LeftRightSuper(IoInputter& io,
-	               PsimagLite::String prefix,
-	               const BasisTraits& basisTraits,
-	               typename PsimagLite::EnableIf<
-	                   PsimagLite::IsInputLike<IoInputter>::True,
-	                   int>::Type
-	               = 0)
+	LeftRightSuper(
+	    IoInputter& io,
+	    PsimagLite::String prefix,
+	    const BasisTraits& basisTraits,
+	    typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	    : progress_("LeftRightSuper")
 	    , left_(0)
 	    , right_(0)
@@ -173,8 +170,7 @@ public:
 	    , right_(&right)
 	    , super_(&super)
 	    , refCounter_(1)
-	{
-	}
+	{ }
 
 	LeftRightSuper(const ThisType& rls)
 	    : progress_("LeftRightSuper")
@@ -205,12 +201,8 @@ public:
 	                       RealType time)
 	{
 		assert(left_);
-		return grow(*left_,
-		            model,
-		            pS,
-		            X,
-		            ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
-		            time);
+		return grow(
+		    *left_, model, pS, X, ProgramGlobals::DirectionEnum::EXPAND_SYSTEM, time);
 	}
 
 	template <typename SomeModelType>
@@ -220,12 +212,8 @@ public:
 	                        RealType time)
 	{
 		assert(right_);
-		return grow(*right_,
-		            model,
-		            pE,
-		            X,
-		            ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
-		            time);
+		return grow(
+		    *right_, model, pE, X, ProgramGlobals::DirectionEnum::EXPAND_ENVIRON, time);
 	}
 
 	void printSizes(const PsimagLite::String& label, std::ostream& os) const
@@ -326,12 +314,11 @@ public:
 	}
 
 	template <typename IoInputType>
-	void read(IoInputType& io,
-	          PsimagLite::String prefix,
-	          typename PsimagLite::EnableIf<
-	              PsimagLite::IsInputLike<IoInputType>::True,
-	              int>::Type
-	          = 0)
+	void
+	read(IoInputType& io,
+	     PsimagLite::String prefix,
+	     typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputType>::True, int>::Type
+	     = 0)
 	{
 		prefix += "/LRS";
 

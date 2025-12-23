@@ -95,8 +95,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
-template <typename Word>
-class HilbertSpaceImmm {
+template <typename Word> class HilbertSpaceImmm {
 
 public:
 
@@ -111,20 +110,15 @@ public:
 
 	HilbertSpaceImmm(SizeType maxOrbitals)
 	    : maxOrbitals_(maxOrbitals)
-	{
-	}
+	{ }
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	                   SizeType,
-	                   PsimagLite::String msg = "") const
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "HilbertSpaceImmm";
 
-		mres.memResolv(&maxOrbitals_,
-		               sizeof(*this),
-		               str + " maxOrbitals");
+		mres.memResolv(&maxOrbitals_, sizeof(*this), str + " maxOrbitals");
 
 		return sizeof(*this);
 	}
@@ -239,8 +233,7 @@ public:
 		return getNofDigits(m, sector);
 	}
 
-	void write(PsimagLite::String label,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label2 = label + "/HilbertSpaceImmm";
 		io.createGroup(label2);
@@ -249,10 +242,7 @@ public:
 
 private:
 
-	SizeType degreesOfFreedomUpTo(SizeType j) const
-	{
-		return dOf() * j;
-	}
+	SizeType degreesOfFreedomUpTo(SizeType j) const { return dOf() * j; }
 
 	// serializr start class HilbertSpaceImmm
 	// serializr normal maxOrbitals_

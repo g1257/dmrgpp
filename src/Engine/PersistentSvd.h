@@ -18,8 +18,7 @@ public:
 	    : vts_(n)
 	    , s_(n)
 	    , qns_(n, QnType::zero())
-	{
-	}
+	{ }
 
 	void clear()
 	{

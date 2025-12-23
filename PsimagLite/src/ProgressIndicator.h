@@ -125,13 +125,11 @@ public:
 		bufferActive_ = !bufferActive_;
 
 		String bufferActive = (bufferActive_) ? "active" : "inactive";
-		std::cerr << "ProgressIndicator: signal " << signal
-		          << " received.";
+		std::cerr << "ProgressIndicator: signal " << signal << " received.";
 		std::cerr << " buffer is now " << bufferActive << "\n";
 	}
 
-	template <typename SomeOutputType>
-	void printline(const String& s, SomeOutputType& os) const
+	template <typename SomeOutputType> void printline(const String& s, SomeOutputType& os) const
 	{
 		if (threadId_ != 0)
 			return;
@@ -187,15 +185,13 @@ public:
 		String vmPeak = musage_.findEntry("VmPeak:");
 		String vmSize = musage_.findEntry("VmSize:");
 		OstringStream msg(std::cout.precision());
-		msg() << "Current virtual memory is " << vmSize
-		      << " maximum was " << vmPeak;
+		msg() << "Current virtual memory is " << vmSize << " maximum was " << vmPeak;
 		printline(msg, std::cout);
 
 		if (!bufferActive_)
 			return;
 
-		buffer_() << "Current virtual memory is " << vmSize
-		          << " maximum was " << vmPeak;
+		buffer_() << "Current virtual memory is " << vmSize << " maximum was " << vmPeak;
 		printline(buffer_, std::cout);
 	}
 
@@ -203,8 +199,7 @@ public:
 
 private:
 
-	template <typename SomeOutputStreamType>
-	void prefix(SomeOutputStreamType& os) const
+	template <typename SomeOutputStreamType> void prefix(SomeOutputStreamType& os) const
 	{
 		const MemoryUsage::TimeHandle t = musage_.time();
 		const double seconds = t.millis();
@@ -214,10 +209,7 @@ private:
 		os.precision(prec);
 	}
 
-	OstringStream::OstringStreamType& prefixHelper(OstringStream& os) const
-	{
-		return os();
-	}
+	OstringStream::OstringStreamType& prefixHelper(OstringStream& os) const { return os(); }
 
 	template <typename SomeOutputStreamType>
 	SomeOutputStreamType& prefixHelper(SomeOutputStreamType& os) const

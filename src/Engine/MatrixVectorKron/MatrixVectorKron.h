@@ -86,8 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 
 namespace Dmrg {
-template <typename ModelType_>
-class MatrixVectorKron : public MatrixVectorBase<ModelType_> {
+template <typename ModelType_> class MatrixVectorKron : public MatrixVectorBase<ModelType_> {
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
@@ -137,14 +136,16 @@ public:
 	template <typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
-		const PsimagLite::MemoryUsage::TimeHandle time1 = PsimagLite::ProgressIndicator::time();
+		const PsimagLite::MemoryUsage::TimeHandle time1
+		    = PsimagLite::ProgressIndicator::time();
 
 		if (matrixStored_.rows() > 0)
 			matrixStored_.matrixVectorProduct(x, y);
 		else
 			kronMatrix_.matrixVectorProduct(x, y);
 
-		const PsimagLite::MemoryUsage::TimeHandle time2 = PsimagLite::ProgressIndicator::time();
+		const PsimagLite::MemoryUsage::TimeHandle time2
+		    = PsimagLite::ProgressIndicator::time();
 		const PsimagLite::MemoryUsage::TimeHandle deltaTime = time2 - time1;
 		time_ += deltaTime;
 	}

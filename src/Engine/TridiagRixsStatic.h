@@ -99,7 +99,8 @@ class TridiagRixsStatic {
 	typedef typename LanczosSolverType::ParametersSolverType ParametersSolverType;
 	typedef typename BasisWithOperatorsType::EffectiveQuantumNumberType EffectiveQnType;
 	typedef VectorWithOffset<ComplexOrRealType, EffectiveQnType> VectorWithOffsetType2;
-	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2> ApplyOperatorLocalType;
+	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2>
+	    ApplyOperatorLocalType;
 	typedef typename VectorWithOffsetType2::VectorSizeType VectorSizeType;
 
 	class MyMatrixVector : public LanczosSolverType::LanczosMatrixType {
@@ -123,8 +124,7 @@ class TridiagRixsStatic {
 		    , // FIXME CHECK
 		    x2_(weights, modelHelper->leftRightSuper().super())
 		    , y2_(weights, modelHelper->leftRightSuper().super())
-		{
-		}
+		{ }
 
 		template <typename SomeVectorType>
 		void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
@@ -179,7 +179,8 @@ public:
 		SizeType numberOfSites = model.geometry().numberOfSites();
 
 		int site2 = ProgramGlobals::findBorderSiteFrom(site, direction, numberOfSites);
-		corner_ = (site2 >= 0) ? ApplyOperatorLocalType::BORDER_YES : ApplyOperatorLocalType::BORDER_NO;
+		corner_ = (site2 >= 0) ? ApplyOperatorLocalType::BORDER_YES
+		                       : ApplyOperatorLocalType::BORDER_NO;
 	}
 
 	void operator()(const VectorWithOffsetType& phi,
@@ -206,12 +207,8 @@ private:
 		SizeType threadNum = 0;
 		SizeType currentTime = 0;
 		typename ModelType::ModelHelperType modelHelper(p, lrs_, currentTime, threadNum);
-		typename MyLanczosSolverType::LanczosMatrixType lanczosHelper(&model_,
-		                                                              &modelHelper,
-		                                                              A_,
-		                                                              direction_,
-		                                                              corner_,
-		                                                              weights);
+		typename MyLanczosSolverType::LanczosMatrixType lanczosHelper(
+		    &model_, &modelHelper, A_, direction_, corner_, weights);
 
 		ParametersSolverType params(io_, "Tridiag");
 		params.lotaMemory = true;

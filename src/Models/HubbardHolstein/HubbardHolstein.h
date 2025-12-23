@@ -92,8 +92,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <numeric>
 
 namespace Dmrg {
-template <typename ModelBaseType>
-class HubbardHolstein : public ModelBaseType {
+template <typename ModelBaseType> class HubbardHolstein : public ModelBaseType {
 
 public:
 
@@ -139,9 +138,7 @@ public:
 	                const SuperGeometryType& geometry,
 	                PsimagLite::String additional,
 	                PsimagLite::String hdf5fileIfAny)
-	    : ModelBaseType(solverParams,
-	                    geometry,
-	                    io)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
 	    , isLrh_(additional == "LRH")
@@ -172,8 +169,9 @@ public:
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
-		SizeType phonons = (oStruncActive_ || U_.rows() > 0) ? modelParameters_.oStruncPhonons
-		                                                     : modelParameters_.numberphonons;
+		SizeType phonons = (oStruncActive_ || U_.rows() > 0)
+		    ? modelParameters_.oStruncPhonons
+		    : modelParameters_.numberphonons;
 		if (phonons == 0)
 			err("addDiagonalsInNaturalBasis fatal error when OSTRUNC active\n");
 
@@ -291,7 +289,8 @@ protected:
 			OpsLabelType& sminus = this->createOpsLabel("sminus");
 			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, natBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, natBasis);
-			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1 = multiplyTc(t1MatrixUp, t1MatrixDown);
+			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1
+			    = multiplyTc(t1MatrixUp, t1MatrixDown);
 			typename OperatorType::Su2RelatedType su2Related;
 			SparseMatrixType spmatrix(t1);
 			splus.push(OperatorType(spmatrix,
@@ -311,8 +310,10 @@ protected:
 			OpsLabelType& sz = this->createOpsLabel("sz");
 			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, natBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, natBasis);
-			PsimagLite::Matrix<SparseElementType> t1 = multiplyTc(t1MatrixUp, t1MatrixUp);
-			PsimagLite::Matrix<SparseElementType> t2 = multiplyTc(t1MatrixDown, t1MatrixDown);
+			PsimagLite::Matrix<SparseElementType> t1
+			    = multiplyTc(t1MatrixUp, t1MatrixUp);
+			PsimagLite::Matrix<SparseElementType> t2
+			    = multiplyTc(t1MatrixDown, t1MatrixDown);
 			t1 = 0.5 * (t1 - t2);
 			SparseMatrixType szmatrix(t1);
 			typename OperatorType::Su2RelatedType su2Related;
@@ -328,12 +329,15 @@ protected:
 			OpsLabelType& doubleOccM = this->createOpsLabel("doubleM");
 			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, natBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, natBasis);
-			PsimagLite::Matrix<SparseElementType> t1 = multiplyTc(t1MatrixUp, t1MatrixUp);
-			PsimagLite::Matrix<SparseElementType> t2 = multiplyTc(t1MatrixDown, t1MatrixDown);
+			PsimagLite::Matrix<SparseElementType> t1
+			    = multiplyTc(t1MatrixUp, t1MatrixUp);
+			PsimagLite::Matrix<SparseElementType> t2
+			    = multiplyTc(t1MatrixDown, t1MatrixDown);
 			SparseMatrixType nMatrixUp(t1);
 			t1 = t1 + t2;
 			SparseMatrixType nMatrixDown(t2);
-			PsimagLite::Matrix<SparseElementType> t3 = multiplyTc(nMatrixDown, nMatrixUp);
+			PsimagLite::Matrix<SparseElementType> t3
+			    = multiplyTc(nMatrixDown, nMatrixUp);
 
 			t1 = t1 + (-2.0) * t3;
 
@@ -456,8 +460,7 @@ protected:
 			OpForLinkType cx0("cx", 0);
 			OpForLinkType cx1("cx", 1);
 
-			auto modifier = [](ComplexOrRealType& value)
-			{ value *= (-1.0); };
+			auto modifier = [](ComplexOrRealType& value) { value *= (-1.0); };
 
 			hopSsh.push(cup, 'C', cx0, 'N');
 
@@ -523,9 +526,8 @@ protected:
 	}
 
 	// virtual override
-	SizeType setOperatorMatrices(VectorOperatorType& ops,
-	                             VectorQnType& qm,
-	                             const BlockType& block) const
+	SizeType
+	setOperatorMatrices(VectorOperatorType& ops, VectorQnType& qm, const BlockType& block) const
 	{
 		oStruncActive_ = false;
 
@@ -576,8 +578,8 @@ protected:
 		if (modelParameters_.oStruncPhonons == 0)
 			return oneSiteTruncSize;
 
-		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(natBasis,
-		                                                     modelParameters_.oStruncPhonons);
+		SparseMatrixType tmpMatrix
+		    = findPhononadaggerMatrix(natBasis, modelParameters_.oStruncPhonons);
 
 		typename OperatorType::Su2RelatedType su2related2;
 		su2related2.source.push_back(ind * 2);
@@ -600,7 +602,8 @@ protected:
 		// Set the operators c_(i,sigma} * x_i in the natural basis
 
 		for (SizeType sigma = 0; sigma < 2; ++sigma) {
-			tmpMatrix = findSSHMatrices(sigma, natBasis, modelParameters_.oStruncPhonons);
+			tmpMatrix
+			    = findSSHMatrices(sigma, natBasis, modelParameters_.oStruncPhonons);
 			int asign = 1;
 			if (sigma > 0)
 				asign = 1;
@@ -631,9 +634,7 @@ private:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	static void setBasis(HilbertBasisType& basis,
-	                     const VectorSizeType& block,
-	                     SizeType phonons)
+	static void setBasis(HilbertBasisType& basis, const VectorSizeType& block, SizeType phonons)
 	{
 		SizeType n = block.size();
 		HilbertState total = 4 * (phonons + 1);
@@ -651,9 +652,8 @@ private:
 
 		assert(counter == total);
 
-		SizeType sum = std::accumulate(basis.begin(),
-		                               basis.end(),
-		                               static_cast<SizeType>(0));
+		SizeType sum
+		    = std::accumulate(basis.begin(), basis.end(), static_cast<SizeType>(0));
 		if (sum != total * (total - 1) / 2)
 			err("Could not set up basis\n");
 	}
@@ -699,7 +699,8 @@ private:
 	//! Calculate fermionic sign when applying operator c^\dagger_{i\sigma} to basis state ket
 	RealType sign(typename HilbertSpaceHubbardHolsteinType::HilbertState ket) const
 	{
-		const SizeType ndown = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(ket, HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN);
+		const SizeType ndown = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(
+		    ket, HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN);
 
 		return (ndown % 2 == 0) ? 1 : FERMION_SIGN;
 	}
@@ -719,7 +720,8 @@ private:
 			    ? HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_UP
 			    : HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN;
 
-			SizeType neSpin = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(ket, spin);
+			SizeType neSpin
+			    = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(ket, spin);
 			if (neSpin == 0) {
 				typename HilbertSpaceHubbardHolsteinType::HilbertState bra = ket;
 				HilbertSpaceHubbardHolsteinType::createF(bra, sigma);
@@ -738,9 +740,8 @@ private:
 		return creationMatrix;
 	}
 
-	SparseMatrixType findSSHMatrices(SizeType sigma,
-	                                 const HilbertBasisType& natBasis,
-	                                 SizeType phonons) const
+	SparseMatrixType
+	findSSHMatrices(SizeType sigma, const HilbertBasisType& natBasis, SizeType phonons) const
 	{
 		SparseMatrixType csigma_temp = findOperatorMatrices(sigma, natBasis);
 		SparseMatrixType a_temp = findPhononadaggerMatrix(natBasis, phonons);
@@ -767,8 +768,7 @@ private:
 		vm.push_back(m);
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	                        const HilbertBasisType& basis) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
@@ -781,9 +781,13 @@ private:
 			PairType jmpair = PairType(0, 0);
 
 			// nup
-			SizeType electronsUp = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(basis[i], HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_UP);
+			SizeType electronsUp
+			    = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(
+			        basis[i], HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_UP);
 			// ndown
-			SizeType electronsDown = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(basis[i], HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN);
+			SizeType electronsDown
+			    = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(
+			        basis[i], HilbertSpaceHubbardHolsteinType::SpinEnum::SPIN_DOWN);
 
 			SizeType electrons = electronsUp + electronsDown;
 			other[0] = electrons;
@@ -913,12 +917,12 @@ private:
 			io.read(U_, "OneSiteTruncationU");
 			std::cout << "OneSiteTruncationU = " << U_.rows() << " x " << U_.cols();
 			std::cout << " read from " << restartFilename << "\n";
-		} catch (...) {
-		}
+		} catch (...) { }
 
 		if (U_.rows() > 0) {
 			io.read(modelParameters_.oStruncPhonons, "OsTruncPhonons");
-			std::cout << "OsTruncPhonons set to " << modelParameters_.oStruncPhonons << "\n";
+			std::cout << "OsTruncPhonons set to " << modelParameters_.oStruncPhonons
+			          << "\n";
 		}
 	}
 

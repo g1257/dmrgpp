@@ -8,8 +8,7 @@
 
 namespace Dmrg {
 
-template <typename TargetingBaseType>
-class Pvectors {
+template <typename TargetingBaseType> class Pvectors {
 
 public:
 
@@ -57,7 +56,8 @@ public:
 
 	ApplyOperatorExpressionType& aoeNonConst()
 	{
-		ApplyOperatorExpressionType* aoePtr = const_cast<ApplyOperatorExpressionType*>(&aoe_);
+		ApplyOperatorExpressionType* aoePtr
+		    = const_cast<ApplyOperatorExpressionType*>(&aoe_);
 		return *aoePtr;
 	}
 
@@ -195,8 +195,10 @@ public:
 		for (SizeType i = 0; i < timeSteps; ++i)
 			tstStruct_.times()[i] = i * tau / (timeSteps - 1);
 
-		tstStruct_.template setAlgorithm<InputValidatorType>(&chebyTransform, algo, nullptr);
-		ApplyOperatorExpressionType* aoePtr = const_cast<ApplyOperatorExpressionType*>(&aoe_);
+		tstStruct_.template setAlgorithm<InputValidatorType>(
+		    &chebyTransform, algo, nullptr);
+		ApplyOperatorExpressionType* aoePtr
+		    = const_cast<ApplyOperatorExpressionType*>(&aoe_);
 		aoePtr->initTimeVectors(tstStruct_, io_);
 	}
 
@@ -247,8 +249,7 @@ private:
 			int tmp = 0;
 			io.readline(tmp, "Pvectors=");
 			hasObsolete = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (hasObsolete)
 			err("Delete the Pvectors= line from the input; it's no longer needed\n");

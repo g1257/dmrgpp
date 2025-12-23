@@ -10,8 +10,7 @@
 
 namespace Dmrg {
 
-template <typename HilbertBasisType, typename VectorOperatorType, bool>
-class FeAsJzSymmetry {
+template <typename HilbertBasisType, typename VectorOperatorType, bool> class FeAsJzSymmetry {
 public:
 
 	typedef typename VectorOperatorType::value_type OperatorType;
@@ -23,21 +22,15 @@ public:
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 	FeAsJzSymmetry(bool) { }
-	void init(HilbertBasisType&,
-	          VectorOperatorType&) { }
+	void init(HilbertBasisType&, VectorOperatorType&) { }
 
-	void setElectronsAndJz(SizeType& electrons,
-	                       SizeType& electronsUp,
-	                       SizeType ind) const { }
+	void setElectronsAndJz(SizeType& electrons, SizeType& electronsUp, SizeType ind) const { }
 
 	bool isEnabled() const { return false; }
 
 	bool isSet() const { return false; }
 
-	void write(PsimagLite::String,
-	           PsimagLite::IoNg::Out::Serializer&) const
-	{
-	}
+	void write(PsimagLite::String, PsimagLite::IoNg::Out::Serializer&) const { }
 };
 
 template <typename HilbertBasisType, typename VectorOperatorType>
@@ -67,8 +60,7 @@ public:
 		ProgramGlobals::oldChangeOfBasis = true;
 	}
 
-	void init(const HilbertBasisType& natBasis,
-	          VectorOperatorType& creationMatrix)
+	void init(const HilbertBasisType& natBasis, VectorOperatorType& creationMatrix)
 	{
 		assert(!isSet_);
 		// write operator Jz in first basis
@@ -101,9 +93,7 @@ public:
 		isSet_ = true;
 	}
 
-	void setElectronsAndJz(SizeType& electrons,
-	                       SizeType& electronsUp,
-	                       SizeType ind) const
+	void setElectronsAndJz(SizeType& electrons, SizeType& electronsUp, SizeType ind) const
 	{
 		if (!isEnabled_)
 			return;
@@ -118,8 +108,7 @@ public:
 
 	bool isSet() const { return isSet_; }
 
-	void write(PsimagLite::String label1,
-	           PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/FeAsJzSymmetry";
 		io.createGroup(label);
@@ -145,28 +134,38 @@ private:
 		// Works only for 3 orbital model
 		// xy=0,zx=1,yz=2
 		// nxy_up-nxy_dn
-		tmp += 0.5 * (multiplyTc(creationMatrix[0].getStorage(), creationMatrix[0].getStorage()));
-		tmp += -0.5 * (multiplyTc(creationMatrix[3].getStorage(), creationMatrix[3].getStorage()));
+		tmp += 0.5
+		    * (multiplyTc(creationMatrix[0].getStorage(), creationMatrix[0].getStorage()));
+		tmp += -0.5
+		    * (multiplyTc(creationMatrix[3].getStorage(), creationMatrix[3].getStorage()));
 
 		//        //nzx_up-nzx_dn
-		tmp += -0.5 * (multiplyTc(creationMatrix[4].getStorage(), creationMatrix[4].getStorage()));
-		tmp += 0.5 * (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[1].getStorage()));
+		tmp += -0.5
+		    * (multiplyTc(creationMatrix[4].getStorage(), creationMatrix[4].getStorage()));
+		tmp += 0.5
+		    * (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[1].getStorage()));
 
 		//        //nyz_up-nyz_dn
-		tmp += -0.5 * (multiplyTc(creationMatrix[5].getStorage(), creationMatrix[5].getStorage()));
-		tmp += 0.5 * (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[2].getStorage()));
+		tmp += -0.5
+		    * (multiplyTc(creationMatrix[5].getStorage(), creationMatrix[5].getStorage()));
+		tmp += 0.5
+		    * (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[2].getStorage()));
 
 		// i(czx_dn_dagg*cyz_dn) + hc (first with i, sec with -i,
 		ComplexOrRealType sqrtMinus1(0, 1);
 
-		tmp += +sqrtMinus1 * (multiplyTc(creationMatrix[4].getStorage(), creationMatrix[5].getStorage()));
+		tmp += +sqrtMinus1
+		    * (multiplyTc(creationMatrix[4].getStorage(), creationMatrix[5].getStorage()));
 
-		tmp += -sqrtMinus1 * (multiplyTc(creationMatrix[5].getStorage(), creationMatrix[4].getStorage()));
+		tmp += -sqrtMinus1
+		    * (multiplyTc(creationMatrix[5].getStorage(), creationMatrix[4].getStorage()));
 
 		// i(czx_up_dagg*cyz_up) + hc
-		tmp += +sqrtMinus1 * (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[2].getStorage()));
+		tmp += +sqrtMinus1
+		    * (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[2].getStorage()));
 
-		tmp += -sqrtMinus1 * (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[1].getStorage()));
+		tmp += -sqrtMinus1
+		    * (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[1].getStorage()));
 
 		return tmp;
 	}
@@ -179,19 +178,31 @@ private:
 		RealType _U, _J, _Up;
 		ComplexOrRealType sqrtMinus1(0, 1);
 
-		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[1].getStorage(),creationMatrix[2].getStorage()));
-		//    tmp +=  0.5*sqrtMinus1*(multiplyTc(creationMatrix[1].getStorage(),creationMatrix[3].getStorage()));
-		//    tmp +=  0.5*sqrtMinus1*(multiplyTc(creationMatrix[2].getStorage(),creationMatrix[1].getStorage()));
-		//    tmp +=  -0.5*(multiplyTc(creationMatrix[2].getStorage(),creationMatrix[3].getStorage()));
-		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[0].getStorage(),creationMatrix[4].getStorage()));
-		//    tmp += 0.5*(multiplyTc(creationMatrix[0].getStorage(),creationMatrix[5].getStorage()));
+		//    tmp +=
+		//    -0.5*sqrtMinus1*(multiplyTc(creationMatrix[1].getStorage(),creationMatrix[2].getStorage()));
+		//    tmp +=
+		//    0.5*sqrtMinus1*(multiplyTc(creationMatrix[1].getStorage(),creationMatrix[3].getStorage()));
+		//    tmp +=
+		//    0.5*sqrtMinus1*(multiplyTc(creationMatrix[2].getStorage(),creationMatrix[1].getStorage()));
+		//    tmp +=
+		//    -0.5*(multiplyTc(creationMatrix[2].getStorage(),creationMatrix[3].getStorage()));
+		//    tmp +=
+		//    -0.5*sqrtMinus1*(multiplyTc(creationMatrix[0].getStorage(),creationMatrix[4].getStorage()));
+		//    tmp +=
+		//    0.5*(multiplyTc(creationMatrix[0].getStorage(),creationMatrix[5].getStorage()));
 
-		//    tmp += 0.5*sqrtMinus1*(multiplyTc(creationMatrix[4].getStorage(),creationMatrix[0].getStorage()));
-		//    tmp += 0.5*sqrtMinus1*(multiplyTc(creationMatrix[4].getStorage(),creationMatrix[5].getStorage()));
-		//    tmp += 0.5*(multiplyTc(creationMatrix[5].getStorage(),creationMatrix[0].getStorage()));
-		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[5].getStorage(),creationMatrix[4].getStorage()));
-		//    tmp += -0.5*sqrtMinus1*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[1].getStorage()));
-		//    tmp += -0.5*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[2].getStorage()));
+		//    tmp +=
+		//    0.5*sqrtMinus1*(multiplyTc(creationMatrix[4].getStorage(),creationMatrix[0].getStorage()));
+		//    tmp +=
+		//    0.5*sqrtMinus1*(multiplyTc(creationMatrix[4].getStorage(),creationMatrix[5].getStorage()));
+		//    tmp +=
+		//    0.5*(multiplyTc(creationMatrix[5].getStorage(),creationMatrix[0].getStorage()));
+		//    tmp +=
+		//    -0.5*sqrtMinus1*(multiplyTc(creationMatrix[5].getStorage(),creationMatrix[4].getStorage()));
+		//    tmp +=
+		//    -0.5*sqrtMinus1*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[1].getStorage()));
+		//    tmp +=
+		//    -0.5*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[2].getStorage()));
 
 		// U=1.0, J=0.25 ,Up=U-2J
 		_U = 2.0;
@@ -201,40 +212,61 @@ private:
 		// U terms
 		if (true) {
 			// n_up_xy*n_dn_xy
-			tmp2 = ((multiplyTc(creationMatrix[0].getStorage(), creationMatrix[0].getStorage())) * (multiplyTc(creationMatrix[3].getStorage(), creationMatrix[3].getStorage())));
+			tmp2 = ((multiplyTc(creationMatrix[0].getStorage(),
+			                    creationMatrix[0].getStorage()))
+			        * (multiplyTc(creationMatrix[3].getStorage(),
+			                      creationMatrix[3].getStorage())));
 			tmp += _U * tmp2;
 			// n_up_xz*n_dn_xz
-			tmp2 = ((multiplyTc(creationMatrix[1].getStorage(), creationMatrix[1].getStorage())) * (multiplyTc(creationMatrix[4].getStorage(), creationMatrix[4].getStorage())));
+			tmp2 = ((multiplyTc(creationMatrix[1].getStorage(),
+			                    creationMatrix[1].getStorage()))
+			        * (multiplyTc(creationMatrix[4].getStorage(),
+			                      creationMatrix[4].getStorage())));
 			tmp += _U * tmp2;
 			// n_up_yz*n_dn_yz
-			tmp2 = ((multiplyTc(creationMatrix[2].getStorage(), creationMatrix[2].getStorage())) * (multiplyTc(creationMatrix[5].getStorage(), creationMatrix[5].getStorage())));
+			tmp2 = ((multiplyTc(creationMatrix[2].getStorage(),
+			                    creationMatrix[2].getStorage()))
+			        * (multiplyTc(creationMatrix[5].getStorage(),
+			                      creationMatrix[5].getStorage())));
 			tmp += _U * tmp2;
 		}
 
 		// Up-J/2 terms
 		if (true) {
 			// nxy*nxz
-			tmp2 = (multiplyTc(creationMatrix[0].getStorage(), creationMatrix[0].getStorage()));
-			tmp2 += (multiplyTc(creationMatrix[3].getStorage(), creationMatrix[3].getStorage()));
-			tmp3 = (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[1].getStorage()));
-			tmp3 += (multiplyTc(creationMatrix[4].getStorage(), creationMatrix[4].getStorage()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),
+			                   creationMatrix[0].getStorage()));
+			tmp2 += (multiplyTc(creationMatrix[3].getStorage(),
+			                    creationMatrix[3].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[1].getStorage(),
+			                   creationMatrix[1].getStorage()));
+			tmp3 += (multiplyTc(creationMatrix[4].getStorage(),
+			                    creationMatrix[4].getStorage()));
 			tmp4 = tmp2 * tmp3;
 
 			tmp += (_Up - _J * (0.5)) * tmp4;
 			// nxy*nyz
-			tmp2 = (multiplyTc(creationMatrix[0].getStorage(), creationMatrix[0].getStorage()));
-			tmp2 += (multiplyTc(creationMatrix[3].getStorage(), creationMatrix[3].getStorage()));
-			tmp3 = (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[2].getStorage()));
-			tmp3 += (multiplyTc(creationMatrix[5].getStorage(), creationMatrix[5].getStorage()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),
+			                   creationMatrix[0].getStorage()));
+			tmp2 += (multiplyTc(creationMatrix[3].getStorage(),
+			                    creationMatrix[3].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),
+			                   creationMatrix[2].getStorage()));
+			tmp3 += (multiplyTc(creationMatrix[5].getStorage(),
+			                    creationMatrix[5].getStorage()));
 			tmp4 = tmp2 * tmp3;
 
 			tmp += (_Up - _J * (0.5)) * tmp4;
 
 			// nxz*nyz
-			tmp2 = (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[1].getStorage()));
-			tmp2 += (multiplyTc(creationMatrix[4].getStorage(), creationMatrix[4].getStorage()));
-			tmp3 = (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[2].getStorage()));
-			tmp3 += (multiplyTc(creationMatrix[5].getStorage(), creationMatrix[5].getStorage()));
+			tmp2 = (multiplyTc(creationMatrix[1].getStorage(),
+			                   creationMatrix[1].getStorage()));
+			tmp2 += (multiplyTc(creationMatrix[4].getStorage(),
+			                    creationMatrix[4].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),
+			                   creationMatrix[2].getStorage()));
+			tmp3 += (multiplyTc(creationMatrix[5].getStorage(),
+			                    creationMatrix[5].getStorage()));
 			tmp4 = tmp2 * tmp3;
 
 			tmp += (_Up - _J * (0.5)) * tmp4;
@@ -243,28 +275,46 @@ private:
 		// SzSz Hunds term
 		if (true) {
 			// Sz_xy*Sz_xz
-			tmp2 = (multiplyTc(creationMatrix[0].getStorage(), creationMatrix[0].getStorage()));
-			tmp2 += (-1.0) * (multiplyTc(creationMatrix[3].getStorage(), creationMatrix[3].getStorage()));
-			tmp3 = (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[1].getStorage()));
-			tmp3 += (-1.0) * (multiplyTc(creationMatrix[4].getStorage(), creationMatrix[4].getStorage()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),
+			                   creationMatrix[0].getStorage()));
+			tmp2 += (-1.0)
+			    * (multiplyTc(creationMatrix[3].getStorage(),
+			                  creationMatrix[3].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[1].getStorage(),
+			                   creationMatrix[1].getStorage()));
+			tmp3 += (-1.0)
+			    * (multiplyTc(creationMatrix[4].getStorage(),
+			                  creationMatrix[4].getStorage()));
 			tmp4 = tmp2 * tmp3;
 
 			tmp += (0.25) * (-2 * _J) * tmp4;
 
 			// Sz_xy*Sz_yz
-			tmp2 = (multiplyTc(creationMatrix[0].getStorage(), creationMatrix[0].getStorage()));
-			tmp2 += (-1.0) * (multiplyTc(creationMatrix[3].getStorage(), creationMatrix[3].getStorage()));
-			tmp3 = (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[2].getStorage()));
-			tmp3 += (-1.0) * (multiplyTc(creationMatrix[5].getStorage(), creationMatrix[5].getStorage()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),
+			                   creationMatrix[0].getStorage()));
+			tmp2 += (-1.0)
+			    * (multiplyTc(creationMatrix[3].getStorage(),
+			                  creationMatrix[3].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),
+			                   creationMatrix[2].getStorage()));
+			tmp3 += (-1.0)
+			    * (multiplyTc(creationMatrix[5].getStorage(),
+			                  creationMatrix[5].getStorage()));
 			tmp4 = tmp2 * tmp3;
 
 			tmp += (0.25) * (-2 * _J) * tmp4;
 
 			// Sz_xz*Sz_yz
-			tmp2 = (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[1].getStorage()));
-			tmp2 += (-1.0) * (multiplyTc(creationMatrix[4].getStorage(), creationMatrix[4].getStorage()));
-			tmp3 = (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[2].getStorage()));
-			tmp3 += (-1.0) * (multiplyTc(creationMatrix[5].getStorage(), creationMatrix[5].getStorage()));
+			tmp2 = (multiplyTc(creationMatrix[1].getStorage(),
+			                   creationMatrix[1].getStorage()));
+			tmp2 += (-1.0)
+			    * (multiplyTc(creationMatrix[4].getStorage(),
+			                  creationMatrix[4].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),
+			                   creationMatrix[2].getStorage()));
+			tmp3 += (-1.0)
+			    * (multiplyTc(creationMatrix[5].getStorage(),
+			                  creationMatrix[5].getStorage()));
 			tmp4 = tmp2 * tmp3;
 
 			tmp += (0.25) * (-2 * _J) * tmp4;
@@ -275,35 +325,47 @@ private:
 		if (true) {
 
 			// Sp_xy*Sm_xz + Sp_xz*Sm_xy
-			tmp2 = multiplyTc(creationMatrix[0].getStorage(), creationMatrix[3].getStorage());
-			tmp3 = multiplyTc(creationMatrix[4].getStorage(), creationMatrix[1].getStorage());
+			tmp2 = multiplyTc(creationMatrix[0].getStorage(),
+			                  creationMatrix[3].getStorage());
+			tmp3 = multiplyTc(creationMatrix[4].getStorage(),
+			                  creationMatrix[1].getStorage());
 			tmp4 = tmp2 * tmp3;
 			tmp += (-_J) * tmp4;
 
-			tmp2 = multiplyTc(creationMatrix[1].getStorage(), creationMatrix[4].getStorage());
-			tmp3 = multiplyTc(creationMatrix[3].getStorage(), creationMatrix[0].getStorage());
+			tmp2 = multiplyTc(creationMatrix[1].getStorage(),
+			                  creationMatrix[4].getStorage());
+			tmp3 = multiplyTc(creationMatrix[3].getStorage(),
+			                  creationMatrix[0].getStorage());
 			tmp4 = tmp2 * tmp3;
 			tmp += (-_J) * tmp4;
 
 			// Sp_xy*Sm_yz + Sp_yz*Sm_xy
-			tmp2 = multiplyTc(creationMatrix[0].getStorage(), creationMatrix[3].getStorage());
-			tmp3 = multiplyTc(creationMatrix[5].getStorage(), creationMatrix[2].getStorage());
+			tmp2 = multiplyTc(creationMatrix[0].getStorage(),
+			                  creationMatrix[3].getStorage());
+			tmp3 = multiplyTc(creationMatrix[5].getStorage(),
+			                  creationMatrix[2].getStorage());
 			tmp4 = tmp2 * tmp3;
 			tmp += (-_J) * tmp4;
 
-			tmp2 = multiplyTc(creationMatrix[2].getStorage(), creationMatrix[5].getStorage());
-			tmp3 = multiplyTc(creationMatrix[3].getStorage(), creationMatrix[0].getStorage());
+			tmp2 = multiplyTc(creationMatrix[2].getStorage(),
+			                  creationMatrix[5].getStorage());
+			tmp3 = multiplyTc(creationMatrix[3].getStorage(),
+			                  creationMatrix[0].getStorage());
 			tmp4 = tmp2 * tmp3;
 			tmp += (-_J) * tmp4;
 
 			// Sp_yz*Sm_xz + Sp_xz*Sm_yz
-			tmp2 = multiplyTc(creationMatrix[2].getStorage(), creationMatrix[5].getStorage());
-			tmp3 = multiplyTc(creationMatrix[4].getStorage(), creationMatrix[1].getStorage());
+			tmp2 = multiplyTc(creationMatrix[2].getStorage(),
+			                  creationMatrix[5].getStorage());
+			tmp3 = multiplyTc(creationMatrix[4].getStorage(),
+			                  creationMatrix[1].getStorage());
 			tmp4 = tmp2 * tmp3;
 			tmp += (-_J) * tmp4;
 
-			tmp2 = multiplyTc(creationMatrix[1].getStorage(), creationMatrix[4].getStorage());
-			tmp3 = multiplyTc(creationMatrix[5].getStorage(), creationMatrix[2].getStorage());
+			tmp2 = multiplyTc(creationMatrix[1].getStorage(),
+			                  creationMatrix[4].getStorage());
+			tmp3 = multiplyTc(creationMatrix[5].getStorage(),
+			                  creationMatrix[2].getStorage());
 			tmp4 = tmp2 * tmp3;
 			tmp += (-_J) * tmp4;
 		}
@@ -313,8 +375,10 @@ private:
 		if (true) {
 			// P_xy_dagg P_xz + P_xz_dagg P_xy , gamma=xy,gamma_p=xz
 
-			tmp2 = (multiplyTc(creationMatrix[0].getStorage(), creationMatrix[4].getStorage()));
-			tmp3 = (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[3].getStorage()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),
+			                   creationMatrix[4].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[1].getStorage(),
+			                   creationMatrix[3].getStorage()));
 
 			tmp4 = tmp2 * transposeConjugate(tmp3);
 			tmp += (-1.0) * (_J)*tmp4;
@@ -323,8 +387,10 @@ private:
 			tmp += (-1.0) * (_J)*tmp4;
 
 			// gamma=xy,gamma_p=yz
-			tmp2 = (multiplyTc(creationMatrix[0].getStorage(), creationMatrix[5].getStorage()));
-			tmp3 = (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[3].getStorage()));
+			tmp2 = (multiplyTc(creationMatrix[0].getStorage(),
+			                   creationMatrix[5].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),
+			                   creationMatrix[3].getStorage()));
 
 			tmp4 = tmp2 * transposeConjugate(tmp3);
 			tmp += (-1.0) * (_J)*tmp4;
@@ -333,8 +399,10 @@ private:
 			tmp += (-1.0) * (_J)*tmp4;
 
 			// gamma=xz,gamma_p=yz
-			tmp2 = (multiplyTc(creationMatrix[1].getStorage(), creationMatrix[5].getStorage()));
-			tmp3 = (multiplyTc(creationMatrix[2].getStorage(), creationMatrix[4].getStorage()));
+			tmp2 = (multiplyTc(creationMatrix[1].getStorage(),
+			                   creationMatrix[5].getStorage()));
+			tmp3 = (multiplyTc(creationMatrix[2].getStorage(),
+			                   creationMatrix[4].getStorage()));
 
 			tmp4 = tmp2 * transposeConjugate(tmp3);
 			tmp += (-1.0) * (_J)*tmp4;
@@ -409,11 +477,9 @@ private:
 
 		SizeType tmp_e;
 		// nup
-		SizeType nup = HilbertSpaceFeAsType::electronsWithGivenSpin(basis_i,
-		                                                            SPIN_UP);
+		SizeType nup = HilbertSpaceFeAsType::electronsWithGivenSpin(basis_i, SPIN_UP);
 		// ndown
-		SizeType ndown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis_i,
-		                                                              SPIN_DOWN);
+		SizeType ndown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis_i, SPIN_DOWN);
 		tmp_e = nup + ndown;
 		return tmp_e;
 	}
@@ -427,15 +493,15 @@ private:
 		}
 	}
 
-	void convertJzEigs(VectorSizeType& electronselectronsUp,
-	                   const VectorRealType& jzEigs) const
+	void convertJzEigs(VectorSizeType& electronselectronsUp, const VectorRealType& jzEigs) const
 	{
 
 		electronselectronsUp.resize(jzEigs.size());
 		SizeType tmp_Sztype;
 		RealType tmp_doub;
 		for (SizeType i = 0; i < jzEigs.size(); i++) {
-			tmp_doub = (2 * jzEigs[i]); // + 5.0; //making all int value(by 2*) and positive(by +5.0)
+			tmp_doub = (2 * jzEigs[i]); // + 5.0; //making all int value(by 2*) and
+			                            // positive(by +5.0)
 
 			// Ne=1
 			if (i > 0 && i < 7) {
@@ -467,7 +533,8 @@ private:
 			}
 
 			tmp_doub = tmp_doub * 0.5;
-			tmp_Sztype = (SizeType)(tmp_doub + 0.5); // rounding off (like 0.999 to 1) before converting to SizeType
+			tmp_Sztype = (SizeType)(tmp_doub + 0.5); // rounding off (like 0.999 to 1)
+			                                         // before converting to SizeType
 
 			electronselectronsUp[i] = tmp_Sztype;
 		}

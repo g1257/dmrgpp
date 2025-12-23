@@ -118,10 +118,7 @@ public:
 
 	virtual SizeType dirs() const { return 3; }
 
-	virtual SizeType length(SizeType) const
-	{
-		return this->unimplemented("length");
-	}
+	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
 
 	virtual SizeType translate(SizeType, SizeType, SizeType) const
 	{
@@ -207,8 +204,8 @@ public:
 			SizeType siteNewCluster = siteNew - firstClusterSite;
 			SizeType smaxCluster = smax - firstClusterSite;
 			SizeType eminCluster = emin - firstClusterSite;
-			SizeType siteSubs = ladder_->getSubstituteSite(
-			    smaxCluster, eminCluster, siteNewCluster);
+			SizeType siteSubs
+			    = ladder_->getSubstituteSite(smaxCluster, eminCluster, siteNewCluster);
 			return siteSubs + firstClusterSite;
 		}
 

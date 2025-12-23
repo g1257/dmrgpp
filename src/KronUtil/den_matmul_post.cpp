@@ -68,7 +68,19 @@ void den_matmul_post(const char trans_A,
 			int ld2 = nrow_A;
 			int ld3 = nrow_X;
 
-			gemmR(trans1, trans2, mm, nn, kk, alpha, &(yin(0, 0)), ld1, &(a_(0, 0)), ld2, beta, &(xout(0, 0)), ld3);
+			gemmR(trans1,
+			      trans2,
+			      mm,
+			      nn,
+			      kk,
+			      alpha,
+			      &(yin(0, 0)),
+			      ld1,
+			      &(a_(0, 0)),
+			      ld2,
+			      beta,
+			      &(xout(0, 0)),
+			      ld3);
 
 		} else {
 
@@ -121,7 +133,19 @@ void den_matmul_post(const char trans_A,
 			int ld2 = nrow_A;
 			int ld3 = nrow_X;
 
-			gemmR(trans1, trans2, mm, nn, kk, alpha, &(yin(0, 0)), ld1, &(a_(0, 0)), ld2, beta, &(xout(0, 0)), ld3);
+			gemmR(trans1,
+			      trans2,
+			      mm,
+			      nn,
+			      kk,
+			      alpha,
+			      &(yin(0, 0)),
+			      ld1,
+			      &(a_(0, 0)),
+			      ld2,
+			      beta,
+			      &(xout(0, 0)),
+			      ld3);
 
 		} else {
 			int jx = 0;

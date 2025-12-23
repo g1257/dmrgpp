@@ -78,8 +78,7 @@ can go forward at most 7 sites, and backwards at most 7 sites.
 There is some checking done to the finite loops input,
 but you might find that it's not comprehensive.
 */
-template <typename RealType>
-class FiniteLoop {
+template <typename RealType> class FiniteLoop {
 
 public:
 
@@ -113,7 +112,8 @@ public:
 
 	void write(PsimagLite::String label,
 	           PsimagLite::IoSerializer& ioSerializer,
-	           PsimagLite::IoNgSerializer::WriteMode mode = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	           PsimagLite::IoNgSerializer::WriteMode mode
+	           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		PsimagLite::String root = label;
 
@@ -146,12 +146,9 @@ private:
 
 	void setMap()
 	{
-		const VectorStringType str = { "save",
-			                       "onlyfastwft",
-			                       "onlyslowwft",
-			                       "randomguess",
-			                       "multisitepush",
-			                       "onesitetruncation" };
+		const VectorStringType str
+		    = { "save",        "onlyfastwft",   "onlyslowwft",
+			"randomguess", "multisitepush", "onesitetruncation" };
 
 		SizeType bit = 1;
 		for (SizeType i = 0; i < str.size(); ++i) {
@@ -218,7 +215,8 @@ private:
 			if (flag) {
 				PsimagLite::OstringStream msgg(std::cout.precision());
 				PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-				msg << "Triplet 3rd: Only one bit of bit 1, bit 2, and bit 3 may be set";
+				msg << "Triplet 3rd: Only one bit of bit 1, bit 2, and bit 3 may "
+				       "be set";
 				msg << " VALUE= " << bitField_ << "\n";
 				err(msg.str());
 			} else {
@@ -228,7 +226,8 @@ private:
 
 		bool wantsOneSiteTrunc = (bitField_ & 32);
 		if (wantsOneSiteTrunc && !(bitField_ & 8))
-			err(PsimagLite::String("A finite loop that wants one site truncation must also want")
+			err(PsimagLite::String(
+			        "A finite loop that wants one site truncation must also want")
 			    + " random guess.\nIn other words, if bit 5 is set so must bit 3.\n");
 	}
 
@@ -254,8 +253,7 @@ private:
 		return (start == PsimagLite::String::npos) ? "" : str.substr(start);
 	}
 
-	static PsimagLite::String removeCharsAtEnd(PsimagLite::String str,
-	                                           PsimagLite::String chars)
+	static PsimagLite::String removeCharsAtEnd(PsimagLite::String str, PsimagLite::String chars)
 	{
 		size_t end = str.find_last_not_of(chars);
 		return (end == PsimagLite::String::npos) ? "" : str.substr(0, end + 1);
@@ -268,8 +266,7 @@ private:
 	TruncationControlType truncationControl_;
 };
 
-template <typename T>
-std::map<PsimagLite::String, SizeType> FiniteLoop<T>::mapNameBit_;
+template <typename T> std::map<PsimagLite::String, SizeType> FiniteLoop<T>::mapNameBit_;
 } // namespace Dmrg
 
 #endif // DMRG_FINITELOOP_H

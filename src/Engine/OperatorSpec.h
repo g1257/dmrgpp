@@ -7,8 +7,7 @@
 
 namespace Dmrg {
 
-template <typename ModelType,
-          typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType>>
+template <typename ModelType, typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType>>
 class OperatorSpec {
 
 public:
@@ -24,16 +23,18 @@ public:
 
 	OperatorSpec(const ModelType& model)
 	    : model_(model)
-	{
-	}
+	{ }
 
 	ResultType operator()(PsimagLite::String opLabel, int& site2) const
 	{
 		PsimagLite::String copyOfOpLabel = opLabel;
 		SiteSplitType site3Split = OneOperatorSpecType::extractSiteIfAny(opLabel);
 
-		if (site2 >= 0 && site3Split.hasSiteString && static_cast<SizeType>(site2) != OneOperatorSpecType::strToNumberOrFail(site3Split.siteString))
-			err(PsimagLite::String(__FILE__) + " FATAL , delete site from " + copyOfOpLabel + "\n");
+		if (site2 >= 0 && site3Split.hasSiteString
+		    && static_cast<SizeType>(site2)
+		        != OneOperatorSpecType::strToNumberOrFail(site3Split.siteString))
+			err(PsimagLite::String(__FILE__) + " FATAL , delete site from "
+			    + copyOfOpLabel + "\n");
 
 		opLabel = site3Split.root;
 
@@ -72,10 +73,7 @@ public:
 		return (op1.metaDiff(op2) == 0);
 	}
 
-	static bool isEmpty(const ResultType& op)
-	{
-		return op.isEmpty();
-	}
+	static bool isEmpty(const ResultType& op) { return op.isEmpty(); }
 
 private:
 
@@ -92,8 +90,7 @@ private:
 		                    su2Related);
 	}
 
-	OperatorType findOperator(const PsimagLite::String& name,
-	                          SizeType site) const
+	OperatorType findOperator(const PsimagLite::String& name, SizeType site) const
 	{
 		if (name.length() < 2 || name[0] != ':') {
 			PsimagLite::String str("OperatorInterpreter: syntax error for ");
@@ -112,8 +109,7 @@ private:
 		return OperatorType(io, model_, OperatorType::MUST_BE_NONZERO, prefix);
 	}
 
-	void replaceString(PsimagLite::String& str,
-	                   PsimagLite::String substr) const
+	void replaceString(PsimagLite::String& str, PsimagLite::String substr) const
 	{
 		/* Locate the substring to replace. */
 		size_t index = str.find('$');
