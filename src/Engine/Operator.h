@@ -147,6 +147,16 @@ public:
 	{
 	}
 
+	Operator(const SparseMatrixType& data1,
+	    ProgramGlobals::FermionOrBosonEnum fermionSign1)
+	    : data_(data1)
+	    , fermionOrBoson_(fermionSign1)
+	    , jm_(PairType(0, 0))
+	    , angularFactor_(1.0)
+	    , su2Related_(Su2RelatedType())
+	{
+	}
+
 	template <typename IoInputType, typename SomeModelType>
 	Operator(IoInputType& io,
 	    SomeModelType& model,

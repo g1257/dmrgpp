@@ -72,6 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../Models/IsingMultiOrb/ModelIsingMultiOrb.h"
 #include "../Models/Kitaev/Kitaev.h"
 #include "../Models/Kondo/Kondo.h"
+#include "../Models/LiouvillianHeisenberg/LiouvillianHeisenberg.hh"
 #include "../Models/SpinOrbital/SpinOrbitalModel.h"
 #include "../Models/Su3/Su3Model.h"
 #include "../Models/SuperExtendedHubbard1Orb/SuperExtendedHubbard1Orb.h"
@@ -129,6 +130,7 @@ class ModelSelector
 	typedef HeisenbergMix<ModelBaseType> HeisenbergMixType;
 	typedef SpinOrbitalModel<ModelBaseType> SpinOrbitalModelType;
 	typedef Su3Model<ModelBaseType> Su3ModelType;
+	typedef LiouvillianHeisenberg<ModelBaseType> LiouvillianHeisenbergType;
 	// end models  DO NOT REMOVE MARK
 
 public:
@@ -241,6 +243,8 @@ public:
 			model_ = new SpinOrbitalModelType(solverParams, io, geometry, tmp);
 		} else if (name_ == "Su3Model") {
 			model_ = new Su3ModelType(solverParams, io, geometry);
+		} else if (name_ == "LiouvillianHeisenberg") {
+			model_ = new LiouvillianHeisenbergType(solverParams, io, geometry);
 			// end models  DO NOT REMOVE MARK
 		} else {
 			PsimagLite::String s(__FILE__);
