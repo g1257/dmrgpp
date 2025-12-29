@@ -387,7 +387,7 @@ private:
 	{
 		typedef std::pair<SizeType, SizeType> PairType;
 
-		VectorSizeType other;
+		VectorSizeType other(1);
 		QnType::ifPresentOther0IsElectrons = false;
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
