@@ -126,11 +126,6 @@ Only headers files are used; boost runtime is not used.
 Create a directory somewhere and cd to it.
 
 <pre>
-git clone https://code.ornl.gov/gonzalo_3/PsimagLite
-cd PsimagLite/
-git checkout features
-git pull origin features 
-
 cd ../
 git clone https://code.ornl.gov/gonzalo_3/dmrgpp
 cd dmrgpp/
