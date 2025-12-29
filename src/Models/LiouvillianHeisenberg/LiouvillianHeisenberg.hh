@@ -123,7 +123,6 @@ public:
 	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
 	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
 	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef Aklt<ModelBaseType> AkltType;
 	using ModelParametersType = ParamsLiouvillianHeisenberg<RealType, QnType>;
 
 	LiouvillianHeisenberg(const SolverParamsType& solverParams,
@@ -138,6 +137,8 @@ public:
 		SizeType n = superGeometry_.numberOfSites();
 
 		ModelParametersType::checkMagneticField(modelParameters_.magneticFieldZ.size(), 'Z', n);
+
+		cacheJumpOperators();
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -171,41 +172,16 @@ public:
 		addMagneticFieldZ(hmatrix, modelParameters_.magneticFieldZ, site);
 
 		// physical ancilla jump connection
-		if (!mustApplyJumpOps(site)) {
+		const auto iter = jump_mapping_.find(site);
+		if (iter == jump_mapping_.end()) {
 			// ATTENTION: Early exit here
 			return;
 		}
 
-		assert(modelParameters_.bath_gamma.size() > site);
-		assert(modelParameters_.bath_f.size() > site);
-		ComplexOrRealType factor_a = modelParameters_.bath_gamma[site] * modelParameters_.bath_f[site];
-		ComplexOrRealType factor_b = modelParameters_.bath_gamma[site] - factor_a;
+		SizeType index = iter->second;
+		assert(index < jump_operators_.size());
 
-		const SparseMatrixType& sm_p = ModelBaseType::naturalOperator("sm_p", site, 0).getCRS();
-		const SparseMatrixType& sm_a = ModelBaseType::naturalOperator("sm_a", site, 0).getCRS();
-		const SparseMatrixType& sp_p = ModelBaseType::naturalOperator("sp_p", site, 0).getCRS();
-		const SparseMatrixType& sp_a = ModelBaseType::naturalOperator("sp_a", site, 0).getCRS();
-
-		SparseMatrixType p0_p = sm_p * sp_p;
-		SparseMatrixType p0_a = sm_a * sp_a;
-		SparseMatrixType p1_p = sp_p * sm_p;
-		SparseMatrixType p1_a = sp_a * sm_a;
-
-		SparseMatrixType sm_a_cross_sm_b;
-		SparseMatrixType sp_a_cross_sp_b;
-		externalProduct(sm_a_cross_sm_b, sm_a, sm_p, signs, true, perm);
-		externalProduct(sp_a_cross_sp_b, sp_a, sp_p, signs, true, perm);
-
-		SparseMatrixType buffer = factor_a * sm_a_cross_sm_b;
-
-		// PsimagLite::Matrix<ComplexOrRealType> tmp_dense;
-		// ComplexOrRealType minus_half = -0.5;
-		// PsimagLite::Matrix<ComplexOrRealType> p1;
-		// p1 <= p1_p.toDense() + p1_a.toDense();
-		// tmp_dense <= factor_a*(sm_a_cross_sm_b.toDense() + minus_half*p1);
-		// tmp_dense += factor_b*(sp_a_cross_sp_b.toDense() + minus_half*(p0_p.toDense() + p0_a.toDense()));
-		// SparseMatrixType tmpMatrix(tmp_dense);
-		// hmatrix += tmpMatrix;
+		hmatrix += jump_operators_[index];
 	}
 
 protected:
@@ -408,8 +384,84 @@ private:
 		return (site == 0 || site == superGeometry_.numberOfSites());
 	}
 
+	void cacheJumpOperators()
+	{
+		SizeType n = superGeometry_.numberOfSites();
+		if (modelParameters_.bath_gamma.size() != n) {
+			err("bath_gamma.size need to be equal to number of sites\n");
+		}
+
+		if (modelParameters_.bath_f.size() != n) {
+			err("bath_f.size need to be equal to number of sites\n");
+		}
+
+		for (SizeType site = 0; site < n; ++site) {
+			if (modelParameters_.bath_gamma[site] == 0)
+				continue;
+			cacheJumpOperator(site);
+		}
+	}
+
+	void cacheJumpOperator(SizeType site)
+	{
+		assert(modelParameters_.bath_gamma.size() > site);
+		assert(modelParameters_.bath_f.size() > site);
+		ComplexOrRealType factor_a = modelParameters_.bath_gamma[site] * modelParameters_.bath_f[site];
+		ComplexOrRealType factor_b = modelParameters_.bath_gamma[site] - factor_a;
+
+		const SparseMatrixType& sm_p = ModelBaseType::naturalOperator("sm_p", site, 0).getCRS();
+		const SparseMatrixType& sm_a = ModelBaseType::naturalOperator("sm_a", site, 0).getCRS();
+		const SparseMatrixType& sp_p = ModelBaseType::naturalOperator("sp_p", site, 0).getCRS();
+		const SparseMatrixType& sp_a = ModelBaseType::naturalOperator("sp_a", site, 0).getCRS();
+
+		SparseMatrixType p0_p = sm_p * sp_p;
+		SparseMatrixType p0_a = sm_a * sp_a;
+		SparseMatrixType p1_p = sp_p * sm_p;
+		SparseMatrixType p1_a = sp_a * sm_a;
+
+		SparseMatrixType sm_a_cross_sm_b;
+		SparseMatrixType sp_a_cross_sp_b;
+		SizeType hilbert = sm_p.rows();
+		assert(hilbert == 4); // because of the ancillas
+		SizeType physical_hilbert = sqrt(hilbert);
+		assert(physical_hilbert == 2); // spin 1/2
+		std::vector<RealType> signs(physical_hilbert, 1);
+		std::vector<SizeType> perm(hilbert);
+		for (SizeType i = 0; i < hilbert; ++i) {
+			perm[i] = i;
+		}
+
+		externalProduct(sm_a_cross_sm_b, sm_a, sm_p, signs, true, perm);
+		externalProduct(sp_a_cross_sp_b, sp_a, sp_p, signs, true, perm);
+
+		MatrixType sm_a_cross_sm_b_dense = sm_a_cross_sm_b.toDense();
+		MatrixType sp_a_cross_sp_b_dense = sp_a_cross_sp_b.toDense();
+		SparseMatrixType p0 = p0_p;
+		p0 += p0_a;
+		SparseMatrixType p1 = p1_p;
+		p1 += p1_a;
+		MatrixType p0_dense = p0.toDense();
+		MatrixType p1_dense = p1.toDense();
+
+		SizeType rank = p0_dense.rows();
+		assert(rank == p0_dense.cols());
+		assert(rank == 4);
+		MatrixType tmp_dense(rank, rank);
+		for (SizeType i = 0; i < rank; ++i) {
+			for (SizeType j = 0; j < rank; ++j) {
+				tmp_dense(i, j) = factor_a * (sm_a_cross_sm_b_dense(i, j) - 0.5 * p1_dense(i, j)) + factor_b * (sp_a_cross_sp_b_dense(i, j) - 0.5 * p0_dense(i, j));
+			}
+		}
+
+		SparseMatrixType tmpMatrix(tmp_dense);
+		jump_mapping_[site] = jump_operators_.size();
+		jump_operators_.push_back(tmpMatrix);
+	}
+
 	ModelParametersType modelParameters_;
 	const SuperGeometryType& superGeometry_;
+	std::vector<SparseMatrixType> jump_operators_;
+	std::map<SizeType, SizeType> jump_mapping_;
 }; // class LiouvillianHeisenberg
 
 } // namespace Dmrg
