@@ -100,34 +100,27 @@ Keys at https://g1257.github.com/keys.html
 
 ### Required Software
 
-\begin{enumerate}
+* GNU C++ or LLVM CLANG++ (C++17 is used)
 
-\item GNU C++ or LLVM CLANG++ (C++11 is used)
+* The BLAS and LAPACK library or equivalent
 
-\item (required) The BLAS and LAPACK library.
+* (required) HDF5
 
-\item (required) HDF5
-
-\item (required) PsimagLite. See below for details.
-
-\item (required) boost-devel (boost-spirit) for Ainur
+* (required) boost-devel (boost-spirit) for Ainur
 Only headers files are used; boost runtime is not used.
 
-\item (required) cmake and dependencies 
-(only needed to use the Makefile)
+* (required) cmake and dependencies
 
-\item (required for now; will not be required in future) perl
-(only needed to run the configure.pl script)
+* perl
 
-\item (optional) GSL (GNU Scientific library)
-\end{enumerate}
+* [optional] GSL (GNU Scientific library)
 
 ### Downloading DMRG++
 Create a directory somewhere and cd to it.
 
 <pre>
 cd ../
-git clone https://code.ornl.gov/gonzalo_3/dmrgpp
+git clone https://github.com/g1257/dmrgpp.git
 cd dmrgpp/
 git checkout features
 git pull origin features
@@ -143,7 +136,7 @@ cmake -B builddir [<options...>]
 `-B builddir` creates a build directory named `builddir` (you can choose a
 different name if you prefer).
 
-The `[<options...>]` part is where you specify other configuration options. 
+The `[<options...>]` part is where you specify other configuration options.
 
 #### Common CMake Options
 These options are generally useful for any CMake project:
@@ -152,7 +145,7 @@ These options are generally useful for any CMake project:
   compiler.
 
   Example: `-DCMAKE_CXX_COMPILER=clang++`
- 
+
 * `-DCMAKE_CXX_STANDARD=<standard>`: Sets the C++ standard. The default is `17`.
 
   Example: `-DCMAKE_CXX_STANDARD=20`
