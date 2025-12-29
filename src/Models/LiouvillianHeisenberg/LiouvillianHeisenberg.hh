@@ -84,8 +84,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/Utils.h"
 #include "../../Engine/VerySparseMatrix.h"
 #include "CrsMatrix.h"
+#include "ImaginaryUnitOrFail.hh"
 #include "ParamsLiouvillianHeisenberg.hh"
 #include <algorithm>
+#include <utility>
 
 namespace Dmrg
 {
@@ -249,13 +251,14 @@ protected:
 
 		// physical H
 		// FIXME: Multiply by -i
-		connectionsSpSm("spsm_p", "splus_p");
-		connectionSzSz("szsz_p", "sz_p");
+		ComplexOrRealType sqrt_minus_one = ImginaryUnitOrFail<ComplexOrRealType>::value();
+		connectionsSpSm("spsm_p", "splus_p", -sqrt_minus_one);
+		connectionSzSz("szsz_p", "sz_p", -sqrt_minus_one);
 
 		// ancilla H^T
 		// FIXME: Multiply by +i
-		connectionsSpSm("spsm_a", "splus_a");
-		connectionSzSz("szsz_a", "sz_a");
+		connectionsSpSm("spsm_a", "splus_a", sqrt_minus_one);
+		connectionSzSz("szsz_a", "sz_a", sqrt_minus_one);
 	}
 
 private:
@@ -275,20 +278,26 @@ private:
 		hmatrix += tmp * sz_a.getCRS();
 	}
 
-	void connectionsSpSm(const std::string& connection_name, const std::string& op_name)
+	void connectionsSpSm(const std::string& connection_name,
+	    const std::string& op_name,
+	    const ComplexOrRealType& factor)
 	{
 		ModelTermType& spsm = ModelBaseType::createTerm(connection_name);
 		OpForLinkType splus(op_name);
-		auto valueModiferTerm0 = [](ComplexOrRealType& value) { value *= 0.5; };
+
+		auto valueModiferTerm0 = [&factor = std::as_const(factor)](ComplexOrRealType& value) { value *= (0.5 * factor); };
 		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 	}
 
-	void connectionSzSz(const std::string& connection_name, const std::string& op_name)
+	void connectionSzSz(const std::string& connection_name,
+	    const std::string& op_name,
+	    const ComplexOrRealType& factor)
 	{
 		ModelTermType& szsz = ModelBaseType::createTerm(connection_name);
 
 		OpForLinkType sz(op_name);
-		szsz.push(sz, 'N', sz, 'N');
+		auto valueModiferTerm0 = [&factor = std::as_const(factor)](ComplexOrRealType& value) { value *= factor; };
+		szsz.push(sz, 'N', sz, 'N', valueModiferTerm0);
 	}
 
 	//! Find S^+_site in the natural basis natBasis
