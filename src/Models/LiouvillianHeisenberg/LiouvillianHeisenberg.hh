@@ -139,8 +139,6 @@ public:
 		SizeType n = superGeometry_.numberOfSites();
 
 		ModelParametersType::checkMagneticField(modelParameters_.magneticFieldZ.size(), 'Z', n);
-
-		cacheJumpOperators();
 	}
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
@@ -195,24 +193,29 @@ protected:
 		SizeType oneSitePhysical = modelParameters_.twiceTheSpin + 1;
 		// Contains ancilla
 		SizeType total = utils::powUint(oneSitePhysical * oneSitePhysical, block.size());
-		HilbertBasisType natBasis(total);
 		std::vector<SizeType> perm(total);
-		for (SizeType i = 0; i < total; ++i) {
-			natBasis[i] = i;
-			perm[i] = i;
-		}
 
-		setSymmetryRelated(qns, natBasis, block.size());
+		{
+			// Do not use natBasis outside this block
+			HilbertBasisType natBasis(total);
+			for (SizeType i = 0; i < total; ++i) {
+				natBasis[i] = i;
+				perm[i] = i;
+			}
+
+			setSymmetryRelated(qns, natBasis, block.size());
+		}
 
 		std::vector<RealType> signs(oneSitePhysical, 1);
 
 		for (SizeType i = 0; i < block.size(); i++) {
 			// Set the operators S^+_i in the natural basis
-			SparseMatrixType tmpMatrix1 = findSplusMatrices(i, natBasis);
+			SparseMatrixType tmpMatrix1 = findSplusMatrices(i); // 2 state space only
 			SparseMatrixType tmpMatrix;
 
 			// Physical S+ and S-
 			externalProduct(tmpMatrix, tmpMatrix1, oneSitePhysical, signs, false, perm);
+			tmpMatrix.checkValidity();
 			OperatorType myOp1(tmpMatrix, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			this->createOpsLabel("splus_p").push(myOp1);
 			this->makeTrackable("splus_p");
@@ -222,6 +225,7 @@ protected:
 
 			// Ancilla S+ and S-
 			externalProduct(tmpMatrix, tmpMatrix1, oneSitePhysical, signs, true, perm);
+			tmpMatrix.checkValidity();
 			OperatorType myOp2(tmpMatrix, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			this->createOpsLabel("splus_a").push(myOp2);
 			this->makeTrackable("splus_a");
@@ -230,18 +234,22 @@ protected:
 			this->createOpsLabel("sminus_a").push(myOp2);
 
 			// Physical Sz
-			tmpMatrix1 = findSzMatrices(i, natBasis);
+			tmpMatrix1 = findSzMatrices(i); // 2 state space only
 			externalProduct(tmpMatrix, tmpMatrix1, oneSitePhysical, signs, false, perm);
+			tmpMatrix.checkValidity();
 			OperatorType myOp3(tmpMatrix, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			this->createOpsLabel("sz_p").push(myOp3);
 			this->makeTrackable("sz_p");
 
 			// Ancilla Sz
 			externalProduct(tmpMatrix, tmpMatrix1, oneSitePhysical, signs, true, perm);
+			tmpMatrix.checkValidity();
 			OperatorType myOp4(tmpMatrix, ProgramGlobals::FermionOrBosonEnum::BOSON);
 			this->createOpsLabel("sz_a").push(myOp4);
 			this->makeTrackable("sz_a");
 		}
+
+		cacheJumpOperators();
 	}
 
 	void fillModelLinks()
@@ -250,13 +258,13 @@ protected:
 			err("SU(2) no longer supported\n");
 
 		// physical H
-		// FIXME: Multiply by -i
+		// Multiply by -i
 		ComplexOrRealType sqrt_minus_one = ImginaryUnitOrFail<ComplexOrRealType>::value();
 		connectionsSpSm("spsm_p", "splus_p", -sqrt_minus_one);
 		connectionSzSz("szsz_p", "sz_p", -sqrt_minus_one);
 
 		// ancilla H^T
-		// FIXME: Multiply by +i
+		// Multiply by +i
 		connectionsSpSm("spsm_a", "splus_a", sqrt_minus_one);
 		connectionSzSz("szsz_a", "sz_a", sqrt_minus_one);
 	}
@@ -300,11 +308,11 @@ private:
 		szsz.push(sz, 'N', sz, 'N', valueModiferTerm0);
 	}
 
-	//! Find S^+_site in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	//! Find S^+_site in the physical "small" basis only
+	SparseMatrixType findSplusMatrices(SizeType site) const
 	{
-		SizeType total = natBasis.size();
+		SizeType total = modelParameters_.twiceTheSpin + 1;
+		assert(total == 2);
 		MatrixType cm(total, total);
 		RealType j = 0.5 * modelParameters_.twiceTheSpin;
 		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
@@ -316,7 +324,7 @@ private:
 		mask <<= (site * bitsForOneSite);
 
 		for (SizeType ii = 0; ii < total; ii++) {
-			SizeType ket = natBasis[ii];
+			SizeType ket = ii;
 
 			SizeType ketsite = ket & mask;
 			ketsite >>= (site * bitsForOneSite);
@@ -343,11 +351,11 @@ private:
 		return operatorMatrix;
 	}
 
-	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	//! Find S^z_i in the physical small basis only
+	SparseMatrixType findSzMatrices(SizeType site) const
 	{
-		SizeType total = natBasis.size();
+		SizeType total = modelParameters_.twiceTheSpin + 1;
+		assert(total == 2);
 		MatrixType cm(total, total);
 		RealType j = 0.5 * modelParameters_.twiceTheSpin;
 		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
@@ -359,7 +367,7 @@ private:
 		mask <<= (site * bitsForOneSite);
 
 		for (SizeType ii = 0; ii < total; ii++) {
-			SizeType ket = natBasis[ii];
+			SizeType ket = ii;
 
 			SizeType ketsite = ket & mask;
 			ketsite >>= (site * bitsForOneSite);
@@ -388,11 +396,6 @@ private:
 		}
 	}
 
-	bool mustApplyJumpOps(SizeType site) const
-	{
-		return (site == 0 || site == superGeometry_.numberOfSites());
-	}
-
 	void cacheJumpOperators()
 	{
 		SizeType n = superGeometry_.numberOfSites();
@@ -418,18 +421,16 @@ private:
 		ComplexOrRealType factor_a = modelParameters_.bath_gamma[site] * modelParameters_.bath_f[site];
 		ComplexOrRealType factor_b = modelParameters_.bath_gamma[site] - factor_a;
 
-		const SparseMatrixType& sm_p = ModelBaseType::naturalOperator("sm_p", site, 0).getCRS();
-		const SparseMatrixType& sm_a = ModelBaseType::naturalOperator("sm_a", site, 0).getCRS();
-		const SparseMatrixType& sp_p = ModelBaseType::naturalOperator("sp_p", site, 0).getCRS();
-		const SparseMatrixType& sp_a = ModelBaseType::naturalOperator("sp_a", site, 0).getCRS();
+		SparseMatrixType sm_p = ModelBaseType::naturalOperator("sminus_p", site, 0).getCRS();
+		SparseMatrixType sm_a = ModelBaseType::naturalOperator("sminus_a", site, 0).getCRS();
+		SparseMatrixType sp_p = ModelBaseType::naturalOperator("splus_p", site, 0).getCRS();
+		SparseMatrixType sp_a = ModelBaseType::naturalOperator("splus_a", site, 0).getCRS();
 
 		SparseMatrixType p0_p = sm_p * sp_p;
 		SparseMatrixType p0_a = sm_a * sp_a;
 		SparseMatrixType p1_p = sp_p * sm_p;
 		SparseMatrixType p1_a = sp_a * sm_a;
 
-		SparseMatrixType sm_a_cross_sm_b;
-		SparseMatrixType sp_a_cross_sp_b;
 		SizeType hilbert = sm_p.rows();
 		assert(hilbert == 4); // because of the ancillas
 		SizeType physical_hilbert = sqrt(hilbert);
@@ -440,11 +441,17 @@ private:
 			perm[i] = i;
 		}
 
-		externalProduct(sm_a_cross_sm_b, sm_a, sm_p, signs, true, perm);
-		externalProduct(sp_a_cross_sp_b, sp_a, sp_p, signs, true, perm);
+		SparseMatrixType sp = findSplusMatrices(0);
+		SparseMatrixType sm;
+		transposeConjugate(sm, sp);
 
-		MatrixType sm_a_cross_sm_b_dense = sm_a_cross_sm_b.toDense();
-		MatrixType sp_a_cross_sp_b_dense = sp_a_cross_sp_b.toDense();
+		SparseMatrixType sm_cross_sm;
+		SparseMatrixType sp_cross_sp;
+		externalProduct(sm_cross_sm, sm, sm, signs, true, perm);
+		externalProduct(sp_cross_sp, sp, sp, signs, true, perm);
+
+		MatrixType sm_cross_sm_dense = sm_cross_sm.toDense();
+		MatrixType sp_cross_sp_dense = sp_cross_sp.toDense();
 		SparseMatrixType p0 = p0_p;
 		p0 += p0_a;
 		SparseMatrixType p1 = p1_p;
@@ -458,7 +465,7 @@ private:
 		MatrixType tmp_dense(rank, rank);
 		for (SizeType i = 0; i < rank; ++i) {
 			for (SizeType j = 0; j < rank; ++j) {
-				tmp_dense(i, j) = factor_a * (sm_a_cross_sm_b_dense(i, j) - 0.5 * p1_dense(i, j)) + factor_b * (sp_a_cross_sp_b_dense(i, j) - 0.5 * p0_dense(i, j));
+				tmp_dense(i, j) = factor_a * (sm_cross_sm_dense(i, j) - 0.5 * p1_dense(i, j)) + factor_b * (sp_cross_sp_dense(i, j) - 0.5 * p0_dense(i, j));
 			}
 		}
 
