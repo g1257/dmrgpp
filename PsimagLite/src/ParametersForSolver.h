@@ -95,7 +95,7 @@ template <typename RealType_> struct ParametersForSolver {
 	typedef RealType_ RealType;
 
 	static const SizeType MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
-	static const SizeType LanczosSteps = 200; // max number of external Lanczos steps
+	static const SizeType LanczosSteps    = 200; // max number of external Lanczos steps
 
 	ParametersForSolver()
 	    : steps(LanczosSteps)
@@ -198,12 +198,12 @@ template <typename RealType_> struct ParametersForSolver {
 	RealType tolerance;
 	SizeType stepsForEnergyConvergence;
 	SizeType eigsForStop;
-	String options;
+	String   options;
 	RealType oneOverA, b;
 	RealType Eg;
 	RealType weight;
-	int isign;
-	bool lotaMemory;
+	int      isign;
+	bool     lotaMemory;
 }; // class ParametersForSolver
 } // namespace PsimagLite
 

@@ -104,44 +104,44 @@ template <typename SolverType, typename VectorWithOffsetType_> class DmrgSolver 
 public:
 
 	typedef TargetingBase<SolverType, VectorWithOffsetType_> TargetingType;
-	typedef typename TargetingType::ModelType ModelType;
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef typename ModelType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename TargetingType::ModelType                ModelType;
+	typedef VectorWithOffsetType_                            VectorWithOffsetType;
+	typedef typename ModelType::OperatorsType                OperatorsType;
+	typedef typename OperatorsType::OperatorType             OperatorType;
 	typedef ObservablesOnePointInSitu<typename TargetingType::TargetVectorType>
-	    ObservablesOnePointInSituType;
+	                                                     ObservablesOnePointInSituType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelType::MyBasis MyBasis;
-	typedef typename MyBasis::RealType RealType;
-	typedef typename MyBasis::BlockType BlockType;
-	typedef typename ModelType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename TargetingType::TargetVectorType TargetVectorType;
-	typedef typename TargetVectorType::value_type ComplexOrRealType;
-	typedef typename TargetingType::TargetParamsType TargetParamsType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename ModelType::SolverParamsType ParametersType;
-	typedef Diagonalization<ParametersType, TargetingType> DiagonalizationType;
-	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef Truncation<ParametersType, TargetingType> TruncationType;
+	typedef typename OperatorsType::SparseMatrixType     SparseMatrixType;
+	typedef typename ModelType::MyBasis                  MyBasis;
+	typedef typename MyBasis::RealType                   RealType;
+	typedef typename MyBasis::BlockType                  BlockType;
+	typedef typename ModelType::BasisWithOperatorsType   MyBasisWithOperators;
+	typedef typename ModelType::ModelHelperType::LeftRightSuperType  LeftRightSuperType;
+	typedef typename TargetingType::TargetVectorType                 TargetVectorType;
+	typedef typename TargetVectorType::value_type                    ComplexOrRealType;
+	typedef typename TargetingType::TargetParamsType                 TargetParamsType;
+	typedef typename ModelType::InputValidatorType                   InputValidatorType;
+	typedef typename ModelType::SolverParamsType                     ParametersType;
+	typedef Diagonalization<ParametersType, TargetingType>           DiagonalizationType;
+	typedef typename TargetingType::WaveFunctionTransfType           WaveFunctionTransfType;
+	typedef Truncation<ParametersType, TargetingType>                TruncationType;
 	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
-	typedef typename ModelType::SuperGeometryType SuperGeometryType;
-	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
-	typedef Recovery<CheckpointType, TargetingType> RecoveryType;
-	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
-	typedef typename PsimagLite::Vector<BlockType>::Type VectorBlockType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename TargetingType::LanczosSolverType LanczosSolverType;
-	typedef PrinterInDetail<LeftRightSuperType> PrinterInDetailType;
-	typedef typename DiagonalizationType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename ModelType::SuperGeometryType                    SuperGeometryType;
+	typedef Checkpoint<ModelType, WaveFunctionTransfType>            CheckpointType;
+	typedef Recovery<CheckpointType, TargetingType>                  RecoveryType;
+	typedef typename DmrgSerializerType::FermionSignType             FermionSignType;
+	typedef typename PsimagLite::Vector<BlockType>::Type             VectorBlockType;
+	typedef typename PsimagLite::Vector<SizeType>::Type              VectorSizeType;
+	typedef typename TargetingType::LanczosSolverType                LanczosSolverType;
+	typedef PrinterInDetail<LeftRightSuperType>                      PrinterInDetailType;
+	typedef typename DiagonalizationType::BasisWithOperatorsType     BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BasisWithOperatorsType::QnType QnType;
-	typedef typename QnType::PairSizeType PairSizeType;
-	typedef typename DiagonalizationType::VectorRealType VectorRealType;
-	typedef typename DiagonalizationType::VectorVectorRealType VectorVectorRealType;
+	typedef typename BasisWithOperatorsType::QnType                  QnType;
+	typedef typename QnType::PairSizeType                            PairSizeType;
+	typedef typename DiagonalizationType::VectorRealType             VectorRealType;
+	typedef typename DiagonalizationType::VectorVectorRealType       VectorVectorRealType;
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	                                                           VectorVectorVectorWithOffsetType;
 	typedef OneSiteTruncation<ModelType, VectorWithOffsetType> OneSiteTruncationType;
 	using FiniteLoopType = FiniteLoop<RealType>;
 
@@ -173,10 +173,10 @@ public:
 	    , oneSiteTruncation_(lrs_, model, ioIn, ioOut_)
 	{
 		firstCall_ = true;
-		counter_ = 0;
+		counter_   = 0;
 
 		std::cout << appInfo_;
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Turning the engine on";
 		progress_.printline(msgg, std::cout);
@@ -197,7 +197,7 @@ public:
 
 	~DmrgSolver()
 	{
-		SizeType site = 0; // FIXME FOR IMMM
+		SizeType                                        site = 0; // FIXME FOR IMMM
 		typename BasisWithOperatorsType::VectorBoolType oddElectrons;
 		model_.findOddElectronsOfOneSite(oddElectrons, site);
 		ioOut_.write(oddElectrons, "OddElectronsOneSite");
@@ -206,7 +206,7 @@ public:
 		ioOut_.write(appInfo_, "ApplicationInfo");
 		ioOut_.close();
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Turning off the engine.";
 		progress_.printline(msgg, std::cout);
@@ -216,7 +216,7 @@ public:
 	{
 		ioOut_.write(geometry, "GEOMETRY");
 
-		BlockType S, E;
+		BlockType       S, E;
 		VectorBlockType X, Y;
 
 		const bool allInSystem = (parameters_.options.isSet("geometryallinsystem"));
@@ -308,13 +308,13 @@ obtain ordered
 	        */
 	void infiniteDmrgLoop(const VectorBlockType& X,
 	                      const VectorBlockType& Y,
-	                      BlockType const& E,
-	                      MyBasisWithOperators& pS,
-	                      MyBasisWithOperators& pE,
-	                      TargetingType& psi)
+	                      BlockType const&       E,
+	                      MyBasisWithOperators&  pS,
+	                      MyBasisWithOperators&  pE,
+	                      TargetingType&         psi)
 	{
-		bool twoSiteDmrg = parameters_.options.isSet("twositedmrg");
-		bool extendedPrint = parameters_.options.isSet("extendedPrint");
+		bool                twoSiteDmrg   = parameters_.options.isSet("twositedmrg");
+		bool                extendedPrint = parameters_.options.isSet("extendedPrint");
 		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
 
 		lrs_.left(pS);
@@ -328,7 +328,7 @@ obtain ordered
 		RealType time = 0; // no time advancement possible in the infiniteDmrgLoop
 		VectorVectorRealType energies;
 		for (SizeType step = 0; step < X.size(); step++) {
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "Infinite-loop: step=" << step << " ( of " << X.size() << "), ";
 			msg << " size of blk. added=" << X[step].size();
@@ -394,8 +394,8 @@ obtain ordered
   */
 	void finiteDmrgLoops(MyBasisWithOperators& pS,
 	                     MyBasisWithOperators& pE,
-	                     TargetingType& psi,
-	                     RecoveryType& recovery)
+	                     TargetingType&        psi,
+	                     RecoveryType&         recovery)
 	{
 		if (parameters_.options.isSet("nofiniteloops"))
 			return;
@@ -422,7 +422,7 @@ obtain ordered
 		for (SizeType i = indexOfFirstFiniteLoop; i < loopsTotal; ++i) {
 
 			lastSign = (parameters_.finiteLoop[i].stepLength() < 0) ? -1 : 1;
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "Finite loop number " << i;
 			msg << " with l=" << parameters_.finiteLoop[i].stepLength();
@@ -433,7 +433,7 @@ obtain ordered
 			if (i > 0) {
 				int signPrev = parameters_.finiteLoop[i - 1].stepLength();
 				int signThis = parameters_.finiteLoop[i].stepLength();
-				int sign = signPrev * signThis;
+				int sign     = signPrev * signThis;
 				if (sign > 0) {
 					if (parameters_.finiteLoop[i].stepLength() > 0)
 						stepCurrent_++;
@@ -480,8 +480,8 @@ obtain ordered
 		assert(numberOfSites > 2);
 		SizeType last = pS.block().size();
 		assert(last > 0);
-		SizeType lastSiteOfSystem = pS.block()[--last];
-		PsimagLite::String lOrR = "";
+		SizeType           lastSiteOfSystem = pS.block()[--last];
+		PsimagLite::String lOrR             = "";
 
 		if (what == ProgramGlobals::SysOrEnvEnum::SYSTEM && lastSiteOfSystem != 0)
 			lOrR = "right";
@@ -501,15 +501,15 @@ obtain ordered
 
 	void finiteStep(MyBasisWithOperators& pS,
 	                MyBasisWithOperators& pE,
-	                SizeType loopIndex,
-	                TargetingType& target)
+	                SizeType              loopIndex,
+	                TargetingType&        target)
 	{
-		const bool extendedPrint = parameters_.options.isSet("extendedPrint");
+		const bool          extendedPrint = parameters_.options.isSet("extendedPrint");
 		PrinterInDetailType printerInDetail(lrs_, extendedPrint);
-		int stepLength = parameters_.finiteLoop[loopIndex].stepLength();
-		SizeType keptStates = parameters_.finiteLoop[loopIndex].keptStates();
+		int                 stepLength = parameters_.finiteLoop[loopIndex].stepLength();
+		SizeType            keptStates = parameters_.finiteLoop[loopIndex].keptStates();
 
-		const SizeType ten = 10;
+		const SizeType ten                    = 10;
 		const SizeType initialSizeOfHashTable = std::max(ten, keptStates);
 
 		ProgramGlobals::DirectionEnum direction = (stepLength < 0)
@@ -518,7 +518,7 @@ obtain ordered
 
 		wft_.setStage(direction);
 
-		SizeType sitesPerBlock = parameters_.sitesPerBlock;
+		SizeType sitesPerBlock  = parameters_.sitesPerBlock;
 		int stepLengthCorrected = int((stepLength + 1 - sitesPerBlock) / sitesPerBlock);
 		if (stepLength < 0)
 			stepLengthCorrected = int((stepLength + sitesPerBlock - 1) / sitesPerBlock);
@@ -530,7 +530,7 @@ obtain ordered
 			if (static_cast<SizeType>(stepCurrent_) >= sitesIndices_.size())
 				err("stepCurrent_ too large!\n");
 
-			RealType time = target.time();
+			RealType time             = target.time();
 			SizeType oneSiteTruncSize = 0;
 
 			printerInDetail.print(std::cout, "finite");
@@ -598,13 +598,13 @@ obtain ordered
 			pS = lrs_.left();
 	}
 
-	void changeTruncateAndSerialize(MyBasisWithOperators& pS,
-	                                MyBasisWithOperators& pE,
-	                                const TargetingType& target,
+	void changeTruncateAndSerialize(MyBasisWithOperators&         pS,
+	                                MyBasisWithOperators&         pE,
+	                                const TargetingType&          target,
 	                                ProgramGlobals::DirectionEnum direction,
-	                                SizeType loopIndex)
+	                                SizeType                      loopIndex)
 	{
-		const bool twoSiteDmrg = parameters_.options.isSet("twositedmrg");
+		const bool      twoSiteDmrg = parameters_.options.isSet("twositedmrg");
 		FermionSignType fsS(pS.signs());
 		FermionSignType fsE(pE.signs());
 		assert(loopIndex < parameters_.finiteLoop.size());
@@ -627,11 +627,11 @@ obtain ordered
 		write(fsS, fsE, target, direction, loopIndex);
 	}
 
-	void write(const FermionSignType& fsS,
-	           const FermionSignType& fsE,
-	           const TargetingType& target,
+	void write(const FermionSignType&        fsS,
+	           const FermionSignType&        fsE,
+	           const TargetingType&          target,
 	           ProgramGlobals::DirectionEnum direction,
-	           SizeType loopIndex)
+	           SizeType                      loopIndex)
 	{
 		if (!saveData_)
 			return;
@@ -660,7 +660,7 @@ obtain ordered
 		typename BasisWithOperatorsType::SaveEnum saveOption2
 		    = (finiteLoop.wants("onlyslowwft")) ? BasisWithOperatorsType::SaveEnum::ALL
 		                                        : BasisWithOperatorsType::SaveEnum::PARTIAL;
-		SizeType numberOfSites = model_.superGeometry().numberOfSites();
+		SizeType           numberOfSites = model_.superGeometry().numberOfSites();
 		PsimagLite::String prefix("Serializer");
 		if (ioOut_.nonNull()) {
 			ds->write(ioOut_.handle(), prefix, saveOption2, numberOfSites, counter_);
@@ -723,27 +723,27 @@ obtain ordered
 		os << "FiniteLoops printing ends\n";
 	}
 
-	const ModelType& model_;
-	const ParametersType& parameters_;
-	InputValidatorType& ioIn_;
-	PsimagLite::ApplicationInfo appInfo_;
-	bool verbose_;
-	BasisTraits basisTraits_;
-	LeftRightSuperType lrs_;
-	OutputFileOrNot ioOut_;
+	const ModelType&              model_;
+	const ParametersType&         parameters_;
+	InputValidatorType&           ioIn_;
+	PsimagLite::ApplicationInfo   appInfo_;
+	bool                          verbose_;
+	BasisTraits                   basisTraits_;
+	LeftRightSuperType            lrs_;
+	OutputFileOrNot               ioOut_;
 	PsimagLite::ProgressIndicator progress_;
 	typename QnType::VectorQnType quantumSector_;
-	int stepCurrent_;
-	CheckpointType checkpoint_;
-	WaveFunctionTransfType wft_;
-	VectorBlockType sitesIndices_;
-	DiagonalizationType diagonalization_;
-	TruncationType truncate_;
+	int                           stepCurrent_;
+	CheckpointType                checkpoint_;
+	WaveFunctionTransfType        wft_;
+	VectorBlockType               sitesIndices_;
+	DiagonalizationType           diagonalization_;
+	TruncationType                truncate_;
 	ObservablesOnePointInSituType inSitu_;
-	bool saveData_;
-	OneSiteTruncationType oneSiteTruncation_;
-	static bool firstCall_;
-	static SizeType counter_;
+	bool                          saveData_;
+	OneSiteTruncationType         oneSiteTruncation_;
+	static bool                   firstCall_;
+	static SizeType               counter_;
 }; // class DmrgSolver
 
 template <typename T1, typename T2> bool DmrgSolver<T1, T2>::firstCall_ = true;

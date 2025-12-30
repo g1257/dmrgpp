@@ -6,7 +6,7 @@ extern "C" void dsyev_(char*, char*, int*, double*, int*, double*, double*, int*
 
 int main()
 {
-	int n = 100;
+	int                              n = 100;
 	PsimagLite::Vector<double>::Type m(n * n);
 	// fill "matrix"
 	for (SizeType i = 0; i < SizeType(n * n); i++)
@@ -17,12 +17,12 @@ int main()
 			m[i + j * n] = m[j + i * n];
 
 	PsimagLite::Vector<double>::Type eigs(n);
-	char jobz = 'V';
-	char uplo = 'U';
-	int lda = n;
+	char                             jobz = 'V';
+	char                             uplo = 'U';
+	int                              lda  = n;
 	PsimagLite::Vector<double>::Type work(3);
-	int info = 0;
-	int lwork = -1;
+	int                              info  = 0;
+	int                              lwork = -1;
 
 	// query:
 	dsyev_(&jobz, &uplo, &n, &(m[0]), &lda, &(eigs[0]), &(work[0]), &lwork, &info);

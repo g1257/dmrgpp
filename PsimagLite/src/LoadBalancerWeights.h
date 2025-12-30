@@ -22,14 +22,14 @@ public:
 		SizeType ntasks = weights.size();
 		if (ntasks < nthreads && ntasks > 0)
 			nthreads = ntasks;
-		VectorSizeType workLoad(nthreads, 0);
-		VectorSizeType weights2 = weights;
-		VectorSizeType iperm(ntasks, 0);
+		VectorSizeType       workLoad(nthreads, 0);
+		VectorSizeType       weights2 = weights;
+		VectorSizeType       iperm(ntasks, 0);
 		Sort<VectorSizeType> sort;
 		sort.sort(weights2, iperm);
 
 		for (SizeType iii = 0; iii < ntasks; ++iii) {
-			SizeType ii = ntasks - 1 - iii; // because sort is ascending
+			SizeType ii     = ntasks - 1 - iii; // because sort is ascending
 			SizeType thread = findThreadWithLightestWork(workLoad);
 			// assign work to thread
 			assert(thread < taskNumber_.size());

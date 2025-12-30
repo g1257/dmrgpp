@@ -5,7 +5,7 @@
 
 using namespace PsimagLite;
 
-typedef double RealType;
+typedef double             RealType;
 typedef Random48<RealType> RandomType;
 
 int main(int argc, char* argv[])

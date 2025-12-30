@@ -8,14 +8,14 @@ template <typename BraketType> class SdhsReinterpret {
 
 public:
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BraketType::ModelType ModelType;
-	typedef typename ModelType::OpaqueOp OpaqueOpType;
-	typedef typename BraketType::RealType RealType;
-	typedef typename BraketType::VectorAlgebraType VectorOperatorType;
-	typedef typename BraketType::AlgebraType OperatorType;
+	typedef PsimagLite::Vector<SizeType>::Type       VectorSizeType;
+	typedef typename BraketType::ModelType           ModelType;
+	typedef typename ModelType::OpaqueOp             OpaqueOpType;
+	typedef typename BraketType::RealType            RealType;
+	typedef typename BraketType::VectorAlgebraType   VectorOperatorType;
+	typedef typename BraketType::AlgebraType         OperatorType;
 	typedef typename BraketType::OneOperatorSpecType OneOperatorSpecType;
-	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
+	typedef typename OneOperatorSpecType::SiteSplit  SiteSplitType;
 
 	SdhsReinterpret(const BraketType& braket, const VectorSizeType& sites)
 	    : forbidden_(false)
@@ -60,7 +60,7 @@ public:
 
 private:
 
-	bool forbidden_;
+	bool               forbidden_;
 	VectorOperatorType ops_;
 };
 }

@@ -92,15 +92,15 @@ template <typename ModelType_, typename RngType_> class MettsStochastics {
 
 public:
 
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef ModelType_ ModelType;
-	typedef typename ModelType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::HilbertBasisType HilbertBasisType;
-	typedef RngType_ RngType;
-	typedef typename RngType::LongType LongType;
+	typedef std::pair<SizeType, SizeType>               PairType;
+	typedef ModelType_                                  ModelType;
+	typedef typename ModelType::QnType                  QnType;
+	typedef typename QnType::VectorQnType               VectorQnType;
+	typedef typename ModelType::RealType                RealType;
+	typedef typename ModelType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename ModelType::HilbertBasisType        HilbertBasisType;
+	typedef RngType_                                    RngType;
+	typedef typename RngType::LongType                  LongType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
@@ -124,7 +124,7 @@ public:
 
 	SizeType chooseRandomState(const VectorRealType& probs) const
 	{
-		RealType r = rng_();
+		RealType r  = rng_();
 		RealType s1 = 0;
 		RealType s2 = 0;
 		for (SizeType i = 0; i < probs.size(); ++i) {
@@ -141,10 +141,10 @@ public:
 	}
 
 	// call only from INFINITE
-	void update(const QnType& qn,
+	void update(const QnType&                                      qn,
 	            const typename PsimagLite::Vector<SizeType>::Type& block1,
 	            const typename PsimagLite::Vector<SizeType>::Type& block2,
-	            SizeType seed)
+	            SizeType                                           seed)
 	{
 		if (addedSites_.size() == 0) {
 			pureStates_.resize(block2[block2.size() - 1] + block2.size() + 1);
@@ -167,11 +167,11 @@ public:
 	}
 
 	void setCollapseBasis(typename PsimagLite::Vector<RealType>::Type& collapseBasisWeights,
-	                      SizeType site) const
+	                      SizeType                                     site) const
 	{
 		SizeType nk = model_.hilbertSize(site);
 		for (SizeType alpha = 0; alpha < nk; alpha++) {
-			RealType randomNumber = rng_();
+			RealType randomNumber       = rng_();
 			collapseBasisWeights[alpha] = randomNumber;
 		}
 		RealType norm1 = 1.0 / PsimagLite::norm(collapseBasisWeights);
@@ -186,13 +186,13 @@ private:
 			pureStates_[i] = SizeType(rng_() * model_.hilbertSize(i));
 	}
 
-	const ModelType& model_;
-	mutable RngType rng_;
-	const VectorSizeType& pure_;
-	PsimagLite::ProgressIndicator progress_;
+	const ModelType&                            model_;
+	mutable RngType                             rng_;
+	const VectorSizeType&                       pure_;
+	PsimagLite::ProgressIndicator               progress_;
 	typename PsimagLite::Vector<SizeType>::Type pureStates_;
 	typename PsimagLite::Vector<SizeType>::Type addedSites_;
-	VectorQnType qnVsSize_;
+	VectorQnType                                qnVsSize_;
 }; // class MettsStochastics
 } // namespace Dmrg
 /*@}*/

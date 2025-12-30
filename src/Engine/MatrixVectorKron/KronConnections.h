@@ -89,20 +89,20 @@ namespace Dmrg {
 
 template <typename InitKronType> class KronConnections {
 
-	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
-	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef typename InitKronType::SparseMatrixType                SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                  ComplexOrRealType;
+	typedef typename InitKronType::ArrayOfMatStructType            ArrayOfMatStructType;
+	typedef typename InitKronType::GenIjPatchType                  GenIjPatchType;
+	typedef PsimagLite::Concurrency                                ConcurrencyType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::Vector<SizeType>::Type                     VectorSizeType;
 
 public:
 
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>         MatrixType;
+	typedef typename MatrixDenseOrSparseType::VectorType  VectorType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
-	typedef typename InitKronType::RealType RealType;
+	typedef typename InitKronType::RealType               RealType;
 
 	KronConnections(InitKronType& initKron)
 	    : initKron_(initKron)
@@ -116,12 +116,12 @@ public:
 	{
 		const bool isComplex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
-		static const bool needsPrinting = false;
+		static const bool                    needsPrinting = false;
 		PsimagLite::GemmR<ComplexOrRealType> gemmR(
 		    needsPrinting, initKron_.gemmRnb(), initKron_.nthreads2());
 
-		SizeType nC = initKron_.connections();
-		SizeType total = initKron_.numberOfPatches(InitKronType::OLD);
+		SizeType nC      = initKron_.connections();
+		SizeType total   = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType offsetX = initKron_.offsetForPatches(InitKronType::NEW, outPatch);
 		assert(offsetX < x_.size());
 		for (SizeType inPatch = 0; inPatch < total; ++inPatch) {
@@ -174,8 +174,8 @@ private:
 	KronConnections& operator=(const KronConnections&);
 
 	const InitKronType& initKron_;
-	VectorType& x_;
-	const VectorType& y_;
+	VectorType&         x_;
+	const VectorType&   y_;
 }; // class KronConnections
 
 } // namespace PsimagLite

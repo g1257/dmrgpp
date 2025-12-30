@@ -16,7 +16,7 @@ void csr_eye(const int nrow_B, const int ncol_B, PsimagLite::CrsMatrix<ComplexOr
 	int ip = 0;
 	for (int irow = 0; irow < nrow_B; irow++) {
 		b.setRow(irow, ip);
-		const int jcol = irow;
+		const int  jcol     = irow;
 		const bool is_valid = (jcol < ncol_B);
 		if (is_valid) {
 			b.pushValue(1);

@@ -112,10 +112,10 @@ bool isAlmostZero(const std::complex<RealType>& x, RealType eps = 1e-20)
 
 template <typename RealType, typename SparseMatrixType> class ReflectionColor {
 
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef PsimagLite::PackIndices                              PackIndicesType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
+	typedef SparseVector<typename VectorType::value_type>        SparseVectorType;
 
 	enum
 	{
@@ -191,11 +191,11 @@ private:
 		}
 	}
 
-	void generateAmatrix(SparseMatrixType& A,
+	void generateAmatrix(SparseMatrixType&                                  A,
 	                     const typename PsimagLite::Vector<SizeType>::Type& ipConnected) const
 	{
 		A.resize(ipConnected.size());
-		SizeType counter = 0;
+		SizeType                               counter = 0;
 		typename PsimagLite::Vector<int>::Type ipConnectedInverse(reflection_.rank(), -1);
 		for (SizeType i = 0; i < ipConnected.size(); i++)
 			ipConnectedInverse[ipConnected[i]] = i;
@@ -206,7 +206,7 @@ private:
 			for (int k = reflection_.getRowPtr(ii); k < reflection_.getRowPtr(ii + 1);
 			     k++) {
 				ComplexOrRealType val = reflection_.getValue(k);
-				int col = ipConnectedInverse[reflection_.getCol(k)];
+				int               col = ipConnectedInverse[reflection_.getCol(k)];
 				if (col < 0)
 					continue;
 				A.pushCol(col);
@@ -221,14 +221,14 @@ private:
 	void findIsolated()
 	{
 		for (SizeType i = 0; i < reflection_.rank(); i++) {
-			SizeType nz = 0;
-			bool hasDiagonal = false;
+			SizeType nz          = 0;
+			bool     hasDiagonal = false;
 			for (int k = reflection_.getRowPtr(i); k < reflection_.getRowPtr(i + 1);
 			     k++) {
 				ComplexOrRealType val = reflection_.getValue(k);
-				SizeType col = reflection_.getCol(k);
+				SizeType          col = reflection_.getCol(k);
 				if (i == col) {
-					val = val + 1.0;
+					val         = val + 1.0;
 					hasDiagonal = true;
 				}
 				if (isAlmostZero(val, 1e-4))
@@ -248,9 +248,9 @@ private:
 	{
 		ilabel_.assign(A.rank(), AVAILABLE);
 
-		SizeType ncolor = firstColor - 1;
+		SizeType                                    ncolor = firstColor - 1;
 		typename PsimagLite::Vector<SizeType>::Type ilist;
-		RealType eps = 1e-3;
+		RealType                                    eps = 1e-3;
 
 		// while (any( ilabel == unlabeled))
 		for (SizeType ii = 0; ii < ilabel_.size(); ii++) {
@@ -297,14 +297,14 @@ private:
 	}
 
 	void findConnected(typename PsimagLite::Vector<SizeType>::Type& jlist,
-	                   SizeType ni,
-	                   const SparseMatrixType& A,
-	                   const RealType& eps) const
+	                   SizeType                                     ni,
+	                   const SparseMatrixType&                      A,
+	                   const RealType&                              eps) const
 	{
 		bool hasDiagonal = false;
 		for (int k = A.getRowPtr(ni); k < A.getRowPtr(ni + 1); k++) {
 			ComplexOrRealType val = A.getValue(k);
-			SizeType col = A.getCol(k);
+			SizeType          col = A.getCol(k);
 			if (ni == col) {
 				hasDiagonal = true;
 				val += 1.0;
@@ -318,7 +318,7 @@ private:
 	}
 
 	void gencolorCheck(const typename PsimagLite::Vector<SizeType>::Type& ilabel,
-	                   SizeType ncolor) const
+	                   SizeType                                           ncolor) const
 	{
 		// ------------
 		// RealType check
@@ -334,9 +334,9 @@ private:
 		}
 	}
 
-	void findWithLabel(typename PsimagLite::Vector<SizeType>::Type& ilist,
+	void findWithLabel(typename PsimagLite::Vector<SizeType>::Type&       ilist,
 	                   const typename PsimagLite::Vector<SizeType>::Type& ilabel,
-	                   SizeType icolor) const
+	                   SizeType                                           icolor) const
 	{
 		for (SizeType i = 0; i < ilabel.size(); i++)
 			if (ilabel[i] == icolor)
@@ -377,8 +377,8 @@ private:
 
 	//	}
 
-	const SparseMatrixType& reflection_;
-	bool idebug_;
+	const SparseMatrixType&                     reflection_;
+	bool                                        idebug_;
 	typename PsimagLite::Vector<SizeType>::Type ipIsolated_, ipConnected_;
 	typename PsimagLite::Vector<SizeType>::Type ilabel_;
 	//	typename PsimagLite::Vector<SizeType>::Type iperm_;

@@ -92,9 +92,9 @@ namespace PsimagLite {
 
 class ProgressIndicator {
 
-	static MemoryUsage musage_;
+	static MemoryUsage   musage_;
 	static OstringStream buffer_;
-	static bool bufferActive_;
+	static bool          bufferActive_;
 
 public:
 
@@ -106,13 +106,13 @@ public:
 			return;
 
 		caller_ = caller;
-		rank_ = Concurrency::rank();
+		rank_   = Concurrency::rank();
 	}
 
 	static void updateBuffer(int signal)
 	{
 		if (bufferActive_) {
-			pid_t p = getpid();
+			pid_t  p = getpid();
 			String outName("buffer");
 			outName += ttos(p);
 			outName += ".txt";
@@ -182,8 +182,8 @@ public:
 	void printMemoryUsage()
 	{
 		musage_.update();
-		String vmPeak = musage_.findEntry("VmPeak:");
-		String vmSize = musage_.findEntry("VmSize:");
+		String        vmPeak = musage_.findEntry("VmPeak:");
+		String        vmSize = musage_.findEntry("VmSize:");
 		OstringStream msg(std::cout.precision());
 		msg() << "Current virtual memory is " << vmSize << " maximum was " << vmPeak;
 		printline(msg, std::cout);
@@ -201,9 +201,9 @@ private:
 
 	template <typename SomeOutputStreamType> void prefix(SomeOutputStreamType& os) const
 	{
-		const MemoryUsage::TimeHandle t = musage_.time();
-		const double seconds = t.millis();
-		const SizeType prec = os.precision(3);
+		const MemoryUsage::TimeHandle t       = musage_.time();
+		const double                  seconds = t.millis();
+		const SizeType                prec    = os.precision(3);
 		prefixHelper(os) << caller_ << " "
 		                 << "[" << std::fixed << seconds << "]: ";
 		os.precision(prec);
@@ -217,7 +217,7 @@ private:
 		return os;
 	}
 
-	String caller_;
+	String   caller_;
 	SizeType threadId_;
 	SizeType rank_;
 }; // ProgressIndicator

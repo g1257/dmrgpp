@@ -18,7 +18,7 @@ void fillRandom(PsimagLite::Matrix<RealType>& m, RealType min, RealType max, Som
 
 bool equalMatrices(PsimagLite::Matrix<RealType>& a,
                    PsimagLite::Matrix<RealType>& b,
-                   RealType tolerance)
+                   RealType                      tolerance)
 {
 	const SizeType rows = a.rows();
 	const SizeType cols = b.cols();
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
 		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0])
 		                               + " total nthreadsOuter\n");
 
-	int total = atoi(argv[1]);
+	int total         = atoi(argv[1]);
 	int nthreadsOuter = atoi(argv[2]);
 
 	PsimagLite::Concurrency concurrency(&argc, &argv, nthreadsOuter);
@@ -47,8 +47,8 @@ int main(int argc, char** argv)
 
 	auto lambda = [&rng](SizeType, SizeType)
 	{
-		SizeType lda = static_cast<SizeType>(rng() * 500) + 10;
-		SizeType cda = lda;
+		SizeType                     lda = static_cast<SizeType>(rng() * 500) + 10;
+		SizeType                     cda = lda;
 		PsimagLite::Matrix<RealType> A(lda, cda);
 
 		fillRandom(A, -10, 10, rng);
@@ -56,13 +56,13 @@ int main(int argc, char** argv)
 		PsimagLite::Svd<RealType> svd;
 
 		PsimagLite::Vector<RealType>::Type s(lda);
-		PsimagLite::Matrix<RealType> vt;
+		PsimagLite::Matrix<RealType>       vt;
 
 		svd('A', A, s, vt);
 	};
 
 	PsimagLite::CodeSectionParams csp = PsimagLite::Concurrency::codeSectionParams;
-	csp.npthreads = nthreadsOuter;
+	csp.npthreads                     = nthreadsOuter;
 
 	PsimagLite::Parallelizer2<> parallelizer2(csp);
 	parallelizer2.parallelFor(0, total, lambda);

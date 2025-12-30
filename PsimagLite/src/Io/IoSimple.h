@@ -197,7 +197,7 @@ public:
 		}
 
 		template <typename T>
-		void write(const T& x,
+		void write(const T&      x,
 		           const String& label,
 		           typename EnableIf<PrintWithEqualSign<T>::True, int>::Type = 0)
 		{
@@ -205,7 +205,7 @@ public:
 		}
 
 		template <class T>
-		void write(const T& something,
+		void write(const T&      something,
 		           const String& label,
 		           typename EnableIf<!PrintWithEqualSign<T>::True, int>::Type = 0)
 		{
@@ -244,8 +244,8 @@ public:
 
 	private:
 
-		int rank_;
-		String filename_;
+		int            rank_;
+		String         filename_;
 		std::ofstream* fout_;
 	};
 
@@ -253,10 +253,10 @@ public:
 
 	public:
 
-		typedef int long LongIntegerType;
+		typedef int long             LongIntegerType;
 		static const LongIntegerType LAST_INSTANCE = -1;
 		static const LongIntegerType ONLY_INSTANCE = 0;
-		typedef unsigned int long LongSizeType;
+		typedef unsigned int long    LongSizeType;
 
 		In() { }
 
@@ -291,10 +291,10 @@ public:
 		template <typename X>
 		SizeType readline(X& x, const String& s, LongIntegerType level = 0)
 		{
-			String temp;
-			bool found = false;
-			bool foundOnce = false;
-			LongSizeType counter = 0;
+			String       temp;
+			bool         found     = false;
+			bool         foundOnce = false;
+			LongSizeType counter   = 0;
 			if (fin_.bad() || !fin_.good())
 				throw RuntimeError("Readline\n");
 			while (!fin_.eof()) {
@@ -333,7 +333,7 @@ public:
 		read(X& x, String const& s, LongIntegerType level = 0, bool beQuiet = false)
 		{
 			std::pair<String, SizeType> sc = advance(s, level, beQuiet);
-			int xsize;
+			int                         xsize;
 			fin_ >> xsize;
 			if (xsize == 0)
 				return sc;
@@ -347,9 +347,9 @@ public:
 		}
 
 		template <typename X>
-		void read(X& mat,
-		          String const& s,
-		          LongIntegerType level = 0,
+		void read(X&              mat,
+		          String const&   s,
+		          LongIntegerType level                               = 0,
 		          typename EnableIf<IsMatrixLike<X>::True, int>::Type = 0)
 		{
 			advance(s, level);
@@ -369,10 +369,10 @@ public:
 		advance(String const& s, LongIntegerType level = 0, bool beQuiet = false)
 		{
 
-			String temp = "NOTFOUND";
-			String tempSaved = "NOTFOUND";
-			LongSizeType counter = 0;
-			bool found = false;
+			String       temp      = "NOTFOUND";
+			String       tempSaved = "NOTFOUND";
+			LongSizeType counter   = 0;
+			bool         found     = false;
 
 			while (!fin_.eof()) {
 				fin_ >> temp;
@@ -439,7 +439,7 @@ public:
 
 	private:
 
-		String filename_;
+		String        filename_;
 		std::ifstream fin_;
 	};
 }; // class IoSimple

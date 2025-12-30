@@ -7,9 +7,9 @@ namespace Dmrg {
 template <typename LeftRightSuperType> class PrinterInDetail {
 
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::QnType QnType;
-	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename BasisWithOperatorsType::QnType             QnType;
+	typedef typename BasisWithOperatorsType::OperatorsType      OperatorsType;
+	typedef typename OperatorsType::OperatorType                OperatorType;
 
 public:
 
@@ -28,8 +28,8 @@ public:
 
 private:
 
-	void printOneSide(std::ostream& os,
-	                  PsimagLite::String msg,
+	void printOneSide(std::ostream&                 os,
+	                  PsimagLite::String            msg,
 	                  const BasisWithOperatorsType& basis) const
 	{
 		SizeType sites = basis.block().size();
@@ -50,8 +50,8 @@ private:
 		}
 
 		assert(sites > 0);
-		SizeType site = basis.block()[sites - 1];
-		SizeType end = basis.operatorsPerSite(0);
+		SizeType site  = basis.block()[sites - 1];
+		SizeType end   = basis.operatorsPerSite(0);
 		SizeType siteC = site;
 		if (msg == "right") {
 			assert(site >= basis.block()[0]);
@@ -69,7 +69,7 @@ private:
 	}
 
 	const LeftRightSuperType& lrs_;
-	bool extended_;
+	bool                      extended_;
 }; // class PrinterInDetail
 }
 #endif // PRINTERINDETAIL_H

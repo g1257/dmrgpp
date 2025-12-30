@@ -84,14 +84,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename CallbackType> class SpinSquared {
 
-	typedef typename CallbackType::Word Word;
+	typedef typename CallbackType::Word      Word;
 	typedef typename CallbackType::FieldType FieldType;
 
 public:
 
 	enum
 	{
-		SPIN_UP = 0,
+		SPIN_UP   = 0,
 		SPIN_DOWN = 1
 	};
 
@@ -114,8 +114,8 @@ public:
 		str += "SpinSquared";
 
 		const char* start = reinterpret_cast<const char*>(this);
-		const char* end = reinterpret_cast<const char*>(&NUMBER_OF_ORBITALS);
-		SizeType total = end - start;
+		const char* end   = reinterpret_cast<const char*>(&NUMBER_OF_ORBITALS);
+		SizeType    total = end - start;
 		mres.push(SomeMemResolvType::MEMORY_HEAPPTR,
 		          SomeMemResolvType::SIZEOF_HEAPREF,
 		          this,
@@ -124,7 +124,7 @@ public:
 		mres.memResolv(&callback_, 0, str + " callback");
 
 		start = end;
-		end = reinterpret_cast<const char*>(&DEGREES_OF_FREEDOM);
+		end   = reinterpret_cast<const char*>(&DEGREES_OF_FREEDOM);
 		total += mres.memResolv(
 		    &NUMBER_OF_ORBITALS, end - start, str + " NUMBER_OF_ORBITALS");
 
@@ -137,11 +137,11 @@ public:
 	void doOnePairOfSitesA(const Word& ket, SizeType i, SizeType j) const
 	{
 		FieldType value = 0.5;
-		Word bra = ket;
-		int ret = c(bra, j, ORBITAL_A, SPIN_UP);
-		ret = cDagger(bra, j, ORBITAL_A, SPIN_DOWN, ret);
-		ret = c(bra, i, ORBITAL_A, SPIN_DOWN, ret);
-		ret = cDagger(bra, i, ORBITAL_A, SPIN_UP, ret);
+		Word      bra   = ket;
+		int       ret   = c(bra, j, ORBITAL_A, SPIN_UP);
+		ret             = cDagger(bra, j, ORBITAL_A, SPIN_DOWN, ret);
+		ret             = c(bra, i, ORBITAL_A, SPIN_DOWN, ret);
+		ret             = cDagger(bra, i, ORBITAL_A, SPIN_UP, ret);
 		if (ret == 0)
 			callback_(ket, bra, value);
 		if (NUMBER_OF_ORBITALS == 1)
@@ -175,11 +175,11 @@ public:
 	void doOnePairOfSitesB(const Word& ket, SizeType i, SizeType j) const
 	{
 		FieldType value = 0.5;
-		Word bra = ket;
-		int ret = c(bra, j, ORBITAL_A, SPIN_DOWN);
-		ret = cDagger(bra, j, ORBITAL_A, SPIN_UP, ret);
-		ret = c(bra, i, ORBITAL_A, SPIN_UP, ret);
-		ret = cDagger(bra, i, ORBITAL_A, SPIN_DOWN, ret);
+		Word      bra   = ket;
+		int       ret   = c(bra, j, ORBITAL_A, SPIN_DOWN);
+		ret             = cDagger(bra, j, ORBITAL_A, SPIN_UP, ret);
+		ret             = c(bra, i, ORBITAL_A, SPIN_UP, ret);
+		ret             = cDagger(bra, i, ORBITAL_A, SPIN_DOWN, ret);
 		if (ret == 0)
 			callback_(ket, bra, value);
 		if (NUMBER_OF_ORBITALS == 1)
@@ -235,7 +235,7 @@ private:
 		if (ret < 0)
 			return ret;
 		SizeType shift_ = (DEGREES_OF_FREEDOM * i);
-		Word mask = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
+		Word     mask   = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
 		if ((ket & mask) == 0)
 			return -1;
 		ket ^= mask;
@@ -247,7 +247,7 @@ private:
 		if (ret < 0)
 			return ret;
 		SizeType shift_ = (DEGREES_OF_FREEDOM * i);
-		Word mask = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
+		Word     mask   = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
 		if ((ket & mask) > 0)
 			return -1;
 		ket |= mask;
@@ -257,7 +257,7 @@ private:
 	int n(const Word& ket, SizeType i, SizeType gamma, SizeType spin) const
 	{
 		SizeType shift_ = (DEGREES_OF_FREEDOM * i);
-		Word mask = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
+		Word     mask   = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
 		if ((ket & mask) > 0)
 			return 1;
 		return 0;

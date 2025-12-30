@@ -9,10 +9,10 @@ typedef PsimagLite::MemResolv MemResolv;
 
 template <typename T> class TestMemResolv1 {
 
-	static const bool IS_CLASS = PsimagLite::IsClass<T>::value;
+	static const bool      IS_CLASS = PsimagLite::IsClass<T>::value;
 	typedef std::vector<T> VectorType;
 	typedef PsimagLite::ResolveFinalOrNot<VectorType, IS_CLASS> ResolveFinalOrNotType;
-	typedef TestMemResolv1<T> ThisType;
+	typedef TestMemResolv1<T>                                   ThisType;
 
 public:
 
@@ -34,8 +34,8 @@ public:
 		PsimagLite::String str = msg;
 		msg += "TestMemResolv1 ";
 		const char* start = (const char*)&size_;
-		const char* end = (const char*)&data_;
-		SizeType total = vmptr.memResolv(&size_, end - start, str + "size");
+		const char* end   = (const char*)&data_;
+		SizeType    total = vmptr.memResolv(&size_, end - start, str + "size");
 		total += vmptr.memResolv(&data_, size_, str + "size");
 		return total;
 	}
@@ -49,7 +49,7 @@ private:
 
 	const TestMemResolv1& operator=(const TestMemResolv1& other);
 
-	int size_;
+	int        size_;
 	VectorType data_;
 };
 

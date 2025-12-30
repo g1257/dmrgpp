@@ -86,37 +86,37 @@ template <typename ModelBaseType> class SuperHubbardExtended : public ModelBaseT
 
 public:
 
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelBaseType::MyBasis BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
-	typedef typename ModelHelperType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
+	typedef typename ModelBaseType::VectorSizeType             VectorSizeType;
+	typedef ExtendedHubbard1Orb<ModelBaseType>                 ModelHubbardType;
+	typedef typename ModelBaseType::ModelHelperType            ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType          SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType         LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                   LinkType;
+	typedef typename ModelHelperType::OperatorsType            OperatorsType;
+	typedef typename OperatorsType::OperatorType               OperatorType;
+	typedef typename ModelHelperType::RealType                 RealType;
+	typedef typename ModelBaseType::QnType                     QnType;
+	typedef typename QnType::VectorQnType                      VectorQnType;
+	typedef typename ModelHelperType::SparseMatrixType         SparseMatrixType;
+	typedef typename SparseMatrixType::value_type              ComplexOrRealType;
+	typedef typename ModelBaseType::MyBasis                    BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType     MyBasisWithOperators;
+	typedef typename ModelHubbardType::HilbertBasisType        HilbertBasisType;
+	typedef typename ModelHelperType::BlockType                BlockType;
+	typedef typename ModelBaseType::SolverParamsType           SolverParamsType;
+	typedef typename ModelBaseType::VectorType                 VectorType;
 	typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
-	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeTypeType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename HilbertSpaceHubbardType::HilbertState     HilbertState;
+	typedef typename ModelBaseType::InputValidatorType         InputValidatorType;
+	typedef typename ModelBaseType::VectorOperatorType         VectorOperatorType;
+	typedef typename ModelBaseType::ModelTermType              ModelTermType;
+	typedef typename PsimagLite::Vector<HilbertState>::Type    VectorHilbertStateType;
+	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeTypeType;
+	typedef typename ModelBaseType::OpsLabelType               OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType              OpForLinkType;
 
-	SuperHubbardExtended(const SolverParamsType& solverParams,
-	                     InputValidatorType& io,
+	SuperHubbardExtended(const SolverParamsType&  solverParams,
+	                     InputValidatorType&      io,
 	                     const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
@@ -135,8 +135,8 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                        const BlockType& block,
-	                                        RealType time) const
+	                                        const BlockType&  block,
+	                                        RealType          time) const
 	{
 		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
@@ -192,7 +192,7 @@ private:
 	}
 
 	ParametersModelHubbard<RealType, QnType> modelParameters_;
-	ModelHubbardType extendedHubbard_;
+	ModelHubbardType                         extendedHubbard_;
 }; // class SuperHubbardExtended
 
 } // namespace Dmrg

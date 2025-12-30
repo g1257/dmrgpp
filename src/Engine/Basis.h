@@ -96,19 +96,19 @@ template <typename SparseMatrixType_> class Basis {
 
 public:
 
-	typedef typename SparseMatrixType_::value_type SparseElementType;
+	typedef typename SparseMatrixType_::value_type             SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType_;
-	typedef Basis<SparseMatrixType_> ThisType;
-	typedef HamiltonianSymmetryLocal<SparseMatrixType_> HamiltonianSymmetryLocalType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef VectorSizeType BlockType;
-	typedef SparseMatrixType_ SparseMatrixType;
-	typedef RealType_ RealType;
-	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
-	typedef Qn QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef Basis<SparseMatrixType_>                           ThisType;
+	typedef HamiltonianSymmetryLocal<SparseMatrixType_>        HamiltonianSymmetryLocalType;
+	typedef typename PsimagLite::Vector<SizeType>::Type        VectorSizeType;
+	typedef VectorSizeType                                     BlockType;
+	typedef SparseMatrixType_                                  SparseMatrixType;
+	typedef RealType_                                          RealType;
+	typedef PsimagLite::Vector<bool>::Type                     VectorBoolType;
+	typedef Qn                                                 QnType;
+	typedef typename QnType::VectorQnType                      VectorQnType;
+	typedef PsimagLite::Matrix<SparseElementType>              MatrixType;
+	typedef std::pair<SizeType, SizeType>                      PairSizeType;
 
 	//! Constructor, s=name of this basis
 	Basis(const PsimagLite::String& s, const BasisTraits&)
@@ -161,7 +161,7 @@ public:
 	        */
 	void setToProduct(const ThisType& basis1,
 	                  const ThisType& basis2,
-	                  SizeType initialSizeOfHashTable = 10)
+	                  SizeType        initialSizeOfHashTable = 10)
 	{
 		if (useSu2Symmetry_)
 			err("SU(2) symmetry no longer supported\n");
@@ -176,8 +176,8 @@ public:
 		SizeType ne = basis1.size();
 
 		unsigned long int check = ns * ne;
-		unsigned int shift = 8 * sizeof(SizeType) - 1;
-		unsigned long int max = 1;
+		unsigned int      shift = 8 * sizeof(SizeType) - 1;
+		unsigned long int max   = 1;
 		max <<= shift;
 		if (check >= max) {
 			PsimagLite::String msg("Basis::setToProduct: Basis too large. ");
@@ -194,10 +194,10 @@ public:
 			--nps;
 
 		// first pass for sizes in super
-		std::hash<QnType> myhash(true);
+		std::hash<QnType>                    myhash(true);
 		std::unordered_map<QnType, SizeType> qnSizes(initialSizeOfHashTable, myhash);
 		std::unordered_map<QnType, SizeType> seenThisQns(initialSizeOfHashTable, myhash);
-		VectorBoolType signsPerOffset(nps * npe);
+		VectorBoolType                       signsPerOffset(nps * npe);
 		//
 		// -------------------------------
 		// precompute left and right sizes
@@ -207,30 +207,30 @@ public:
 
 		for (SizeType ps = 0; ps < nps; ++ps) {
 			const SizeType leftSize = basis1.offsets_[ps + 1] - basis1.offsets_[ps];
-			leftSize_array[ps] = leftSize;
+			leftSize_array[ps]      = leftSize;
 		};
 		for (SizeType pe = 0; pe < npe; ++pe) {
 			const SizeType rightSize = basis2.offsets_[pe + 1] - basis2.offsets_[pe];
-			rightSize_array[pe] = rightSize;
+			rightSize_array[pe]      = rightSize;
 		};
 
-		SizeType counter = 0;
+		SizeType     counter = 0;
 		const QnType dummyQn(basis2.qns_[0], basis1.qns_[0]);
 		qns_.clear();
 		qns_.resize(nps * npe, dummyQn);
 		for (SizeType ps = 0; ps < nps; ++ps) {
 			for (SizeType pe = 0; pe < npe; ++pe) {
 
-				const SizeType leftSize = leftSize_array[ps];
+				const SizeType leftSize  = leftSize_array[ps];
 				const SizeType rightSize = rightSize_array[pe];
-				const QnType tensorProd(basis2.qns_[pe], basis1.qns_[ps]);
+				const QnType   tensorProd(basis2.qns_[pe], basis1.qns_[ps]);
 				qnSizes[tensorProd] += leftSize * rightSize;
 
 				if (seenThisQns[tensorProd])
 					continue;
 
 				seenThisQns[tensorProd] = counter + 1;
-				qns_[counter] = tensorProd;
+				qns_[counter]           = tensorProd;
 				signsPerOffset[counter] = (basis1.signs_[basis1.offsets_[ps]]
 				                           ^ basis2.signs_[basis2.offsets_[pe]]);
 				++counter;
@@ -249,7 +249,7 @@ public:
 		offsetsFromSizes(offsets, qnSizes, signsPerOffset);
 
 		// second pass for permutation in super
-		const SizeType basisLeftSize = basis1.size();
+		const SizeType basisLeftSize  = basis1.size();
 		const SizeType basisRightSize = basis2.size();
 		permInverse_.resize(basisLeftSize * basisRightSize);
 		permutationVector_.resize(permInverse_.size());
@@ -262,9 +262,9 @@ public:
 
 		for (SizeType pe = 0; pe < npe; ++pe) {
 			for (SizeType ps = 0; ps < nps; ++ps) {
-				const SizeType leftSize = leftSize_array[ps];
+				const SizeType leftSize  = leftSize_array[ps];
 				const SizeType rightSize = rightSize_array[pe];
-				const QnType thisQn(basis2.qns_[pe], basis1.qns_[ps]);
+				const QnType   thisQn(basis2.qns_[pe], basis1.qns_[ps]);
 
 				SizeType extraOffset = 0;
 
@@ -278,7 +278,7 @@ public:
 				const SizeType pspe = ps + pe * nps;
 
 				const SizeType offset_into_perm = offset + extraOffset;
-				offset_into_perm_array[pspe] = offset_into_perm;
+				offset_into_perm_array[pspe]    = offset_into_perm;
 			};
 		};
 
@@ -306,11 +306,11 @@ public:
 			    // ----------------------------
 			    // recall  pspe = ps + pe * nps;
 			    // ----------------------------
-			    const SizeType pe = pspe / nps;
-			    const SizeType ps = pspe - pe * nps;
+			    const SizeType pe               = pspe / nps;
+			    const SizeType ps               = pspe - pe * nps;
 			    const SizeType offset_into_perm = offset_into_perm_array[pspe];
 
-			    const SizeType leftSize = leftSize_array[ps];
+			    const SizeType leftSize  = leftSize_array[ps];
 			    const SizeType rightSize = rightSize_array[pe];
 
 			    for (SizeType iright = 0; iright < rightSize; ++iright) {
@@ -326,7 +326,7 @@ public:
 					    const SizeType ipos
 					        = ileft + iright * leftSize + offset_into_perm;
 
-					    this->permutationVector_[ipos] = iglobalState;
+					    this->permutationVector_[ipos]   = iglobalState;
 					    this->permInverse_[iglobalState] = ipos;
 				    }
 			    }
@@ -398,9 +398,9 @@ public:
 	//! removes the indices contained in removedIndices and
 	//! transforms this basis by transform
 	template <typename SolverParametersType>
-	void changeBasis(VectorSizeType& removedIndices,
-	                 const VectorSizeType& perm,
-	                 SizeType kept,
+	void changeBasis(VectorSizeType&             removedIndices,
+	                 const VectorSizeType&       perm,
+	                 SizeType                    kept,
 	                 const SolverParametersType& solverParams)
 	{
 		removedIndices.clear();
@@ -412,13 +412,13 @@ public:
 		if (removedIndices.size() == 0)
 			return;
 
-		VectorSizeType unusedPerm(removedIndices.size());
+		VectorSizeType                   unusedPerm(removedIndices.size());
 		PsimagLite::Sort<VectorSizeType> sort;
 		sort.sort(removedIndices, unusedPerm);
 	}
 
 	RealType truncateBasis(const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                       const VectorSizeType& removedIndices)
+	                       const VectorSizeType&                              removedIndices)
 	{
 		dmrgTransformed_ = true;
 
@@ -436,12 +436,12 @@ public:
 		assert(n < offsets_.size());
 		VectorSizeType newOffsets(n + 1);
 		assert(qns_.size() > 0);
-		const QnType dummyQn = qns_[0];
-		VectorQnType newQns(qns_.size(), dummyQn);
-		SizeType j = 0;
+		const QnType   dummyQn = qns_[0];
+		VectorQnType   newQns(qns_.size(), dummyQn);
+		SizeType       j = 0;
 		VectorBoolType newSigns(offsets_[n]);
 		for (SizeType i = 0; i < n; ++i) {
-			const SizeType offset = offsets_[i];
+			const SizeType offset   = offsets_[i];
 			const SizeType thisSize = offsets_[i + 1] - offsets_[i];
 			const SizeType count
 			    = countRemovedStatesInRange(removedIndices, offset, thisSize);
@@ -450,9 +450,9 @@ public:
 				continue;
 			assert(count <= thisSize);
 			const SizeType newSize = thisSize - count;
-			newOffsets[j + 1] = newOffsets[j] + newSize;
-			newQns[j] = qns_[i];
-			const bool oldSign = signs_[offsets_[i]];
+			newOffsets[j + 1]      = newOffsets[j] + newSize;
+			newQns[j]              = qns_[i];
+			const bool oldSign     = signs_[offsets_[i]];
 			assert(newOffsets[j] + newSize < newSigns.size() + 1);
 			for (SizeType k = 0; k < newSize; ++k)
 				newSigns[newOffsets[j] + k] = oldSign;
@@ -463,8 +463,8 @@ public:
 		newOffsets.resize(j + 1);
 		newQns.resize(j, dummyQn);
 		newSigns.resize(newOffsets[j]);
-		signs_ = newSigns;
-		qns_ = newQns;
+		signs_   = newSigns;
+		qns_     = newQns;
 		offsets_ = newOffsets;
 		return calcError(eigs, removedIndices);
 	}
@@ -500,10 +500,10 @@ public:
 	void su2ElectronsBridge(VectorSizeType& v) const { QnType::su2ElectronsBridge(v, qns_); }
 
 	//! saves this basis to disk
-	void write(PsimagLite::IoNg::Out& io,
-	           const PsimagLite::String& ss,
+	void write(PsimagLite::IoNg::Out&                io,
+	           const PsimagLite::String&             ss,
 	           PsimagLite::IoNgSerializer::WriteMode mode,
-	           bool minimizeWrite) const
+	           bool                                  minimizeWrite) const
 	{
 		checkSigns();
 		PsimagLite::String label = ss + "/";
@@ -530,10 +530,10 @@ public:
 	//! saves this basis to disk
 	template <typename SomeIoType>
 	void
-	write(SomeIoType& io,
+	write(SomeIoType&                                io,
 	      typename SomeIoType::Serializer::WriteMode mode,
-	      PsimagLite::String prefix,
-	      bool minimizeWrite,
+	      PsimagLite::String                         prefix,
+	      bool                                       minimizeWrite,
 	      typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<SomeIoType>::True, int>::Type
 	      = 0) const
 	{
@@ -541,18 +541,18 @@ public:
 	}
 
 	// not optimized, used for OneSiteTruncation
-	static void notReallySortU(MatrixType& UnonConst,
-	                           const MatrixType& Uconst,
+	static void notReallySortU(MatrixType&         UnonConst,
+	                           const MatrixType&   Uconst,
 	                           const VectorQnType& qns,
-	                           SizeType start)
+	                           SizeType            start)
 	{
 		const SizeType ncols = Uconst.cols();
 		if (start >= ncols)
 			err("notReallySortU: wrong start\n");
 
-		VectorQnType qnsSeen;
+		VectorQnType                                              qnsSeen;
 		typedef typename PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
-		VectorVectorSizeType m;
+		VectorVectorSizeType                                      m;
 		for (SizeType col = start; col < ncols; ++col) {
 			QnType qForThisColumn = computeQforThisColumn(Uconst, qns, col);
 			typename VectorQnType::const_iterator it
@@ -571,10 +571,10 @@ public:
 			m[qIndex].push_back(col);
 		}
 
-		const SizeType qindices = m.size();
-		const SizeType qnsSize = qns.size();
+		const SizeType                qindices = m.size();
+		const SizeType                qnsSize  = qns.size();
 		PsimagLite::Vector<int>::Type perm2(qindices, -1);
-		SizeType counter1 = 0;
+		SizeType                      counter1 = 0;
 		for (SizeType i = 0; i < qnsSize; ++i) {
 			typename VectorQnType::const_iterator it
 			    = std::find(qnsSeen.begin(), qnsSeen.end(), qns[i]);
@@ -592,10 +592,10 @@ public:
 			perm3[perm2[i]] = i;
 
 		assert(qindices <= qns.size());
-		SizeType counter = 0;
+		SizeType       counter = 0;
 		VectorSizeType perm(ncols - start);
 		for (SizeType i2 = 0; i2 < qindices; ++i2) {
-			SizeType i = perm3[i2];
+			SizeType       i     = perm3[i2];
 			const SizeType jsize = m[i].size();
 			for (SizeType j = 0; j < jsize; ++j) {
 				assert(counter + start < ncols);
@@ -650,11 +650,11 @@ protected:
 		permutationVector_.resize(n);
 		permInverse_.resize(n);
 		assert(0 < basisData2.size());
-		QnType qnPrev = basisData2[0];
-		SizeType sum = 0;
+		QnType   qnPrev = basisData2[0];
+		SizeType sum    = 0;
 		offsets_.push_back(0);
 		for (SizeType i = 0; i < n; ++i) {
-			const QnType& qn = basisData2[i];
+			const QnType& qn      = basisData2[i];
 			permutationVector_[i] = permInverse_[i] = i;
 			if (qn == qnPrev) {
 				++sum;
@@ -665,7 +665,7 @@ protected:
 			qns_.push_back(qnPrev);
 			offsets_.push_back(offsets_[counter] + sum);
 			qnPrev = qn;
-			sum = 1;
+			sum    = 1;
 		}
 
 		const SizeType counter = qns_.size();
@@ -690,7 +690,7 @@ private:
 				continue;
 			if (!nonZeroSeen) {
 				nonZeroSeen = true;
-				qnSaved = qns[row];
+				qnSaved     = qns[row];
 				continue;
 			}
 
@@ -703,9 +703,9 @@ private:
 
 	template <typename IoInputter>
 	void loadInternal(
-	    IoInputter& io,
+	    IoInputter&        io,
 	    PsimagLite::String prefix,
-	    bool minimizeRead,
+	    bool               minimizeRead,
 	    typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		useSu2Symmetry_ = false;
@@ -742,9 +742,9 @@ private:
 		--n;
 		assert(offsets_[n] == signs_.size());
 		for (SizeType p = 0; p < n; ++p) {
-			SizeType start = offsets_[p];
-			SizeType end = offsets_[p + 1];
-			bool expected = (qns_[p].other[0] & 1);
+			SizeType start    = offsets_[p];
+			SizeType end      = offsets_[p + 1];
+			bool     expected = (qns_[p].other[0] & 1);
 			for (SizeType i = start; i < end; ++i) {
 				if (signs_[i] != expected)
 					err("Unexpected sign\n");
@@ -755,7 +755,7 @@ private:
 
 	void offsetsFromSizes(std::unordered_map<QnType, SizeType>& offsets,
 	                      std::unordered_map<QnType, SizeType>& sizes,
-	                      const VectorBoolType& signsPerOffset)
+	                      const VectorBoolType&                 signsPerOffset)
 	{
 		const SizeType total = qns_.size();
 		assert(total == sizes.size());
@@ -766,12 +766,12 @@ private:
 
 		offsets_[0] = 0;
 		for (SizeType i = 0; i < total; ++i) {
-			const QnType& qn = qns_[i];
+			const QnType&  qn       = qns_[i];
 			const SizeType thisSize = sizes[qn];
-			offsets_[i + 1] = offsets_[i] + thisSize;
-			offsets[qn] = offsets_[i];
-			const SizeType offset = offsets_[i];
-			const bool value = signsPerOffset[i];
+			offsets_[i + 1]         = offsets_[i] + thisSize;
+			offsets[qn]             = offsets_[i];
+			const SizeType offset   = offsets_[i];
+			const bool     value    = signsPerOffset[i];
 			for (SizeType k = 0; k < thisSize; ++k)
 				signs_[offset + k] = value;
 		}
@@ -783,7 +783,7 @@ private:
 		return;
 #endif
 
-		const SizeType n = v.size();
+		const SizeType n        = v.size();
 		const SizeType expected = n * (n - 1);
 		SizeType value = std::accumulate(v.begin(), v.end(), static_cast<SizeType>(0));
 		if (value * 2 == expected)
@@ -795,19 +795,19 @@ private:
 	{
 		SizeType n = qns.size();
 		for (SizeType i = 0; i < n; ++i) {
-			qns[i].flavors = 0;
+			qns[i].flavors      = 0;
 			qns[i].jmPair.first = qns[i].jmPair.second = 0;
 		}
 	}
 
 	// FIXME TODO: Can be made faster  because removedIndices is already sorted
 	SizeType countRemovedStatesInRange(const VectorSizeType& removedIndices,
-	                                   SizeType offset,
-	                                   SizeType thisSize) const
+	                                   SizeType              offset,
+	                                   SizeType              thisSize) const
 	{
-		SizeType count = 0;
-		const SizeType end = removedIndices.size();
-		const SizeType last = offset + thisSize;
+		SizeType       count = 0;
+		const SizeType end   = removedIndices.size();
+		const SizeType last  = offset + thisSize;
 		for (SizeType i = 0; i < end; ++i) {
 			const SizeType ind = removedIndices[i];
 			if (ind < offset || ind >= last)
@@ -819,7 +819,7 @@ private:
 	}
 
 	RealType calcError(const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                   const VectorSizeType& removedIndices) const
+	                   const VectorSizeType&                              removedIndices) const
 	{
 		RealType sum = static_cast<RealType>(0.0);
 		for (SizeType i = 0; i < eigs.size(); i++)
@@ -843,12 +843,12 @@ private:
 
 	public:
 
-		MyLoop(SizeType basis1OffsetsPs,
-		       SizeType basis2OffsetsPe,
-		       SizeType basisLeftSize,
-		       SizeType rightSize,
-		       SizeType offsetPlusExtraOffset,
-		       SizeType tasks,
+		MyLoop(SizeType        basis1OffsetsPs,
+		       SizeType        basis2OffsetsPe,
+		       SizeType        basisLeftSize,
+		       SizeType        rightSize,
+		       SizeType        offsetPlusExtraOffset,
+		       SizeType        tasks,
 		       VectorSizeType& permutationVector,
 		       VectorSizeType& permInverse)
 		    : basis1OffsetsPs_(basis1OffsetsPs)
@@ -863,26 +863,26 @@ private:
 
 		void doTask(SizeType ji, SizeType)
 		{
-			ldiv_t q = std::ldiv(static_cast<long int>(ji),
-			                     static_cast<long int>(rightSize_));
-			const SizeType ileftOffset = basis1OffsetsPs_ + q.quot;
+			ldiv_t         q            = std::ldiv(static_cast<long int>(ji),
+                                             static_cast<long int>(rightSize_));
+			const SizeType ileftOffset  = basis1OffsetsPs_ + q.quot;
 			const SizeType irightOffset = basis2OffsetsPe_ + q.rem;
 			const SizeType iglobalState = ileftOffset + irightOffset * basisLeftSize_;
-			const SizeType ipos = offsetPlusExtraOffset_ + ji;
-			permutationVector_[ipos] = iglobalState;
-			permInverse_[iglobalState] = ipos;
+			const SizeType ipos         = offsetPlusExtraOffset_ + ji;
+			permutationVector_[ipos]    = iglobalState;
+			permInverse_[iglobalState]  = ipos;
 		}
 
 		SizeType tasks() const { return tasks_; }
 
 	private:
 
-		const SizeType basis1OffsetsPs_;
-		const SizeType basis2OffsetsPe_;
-		const SizeType basisLeftSize_;
-		const SizeType rightSize_;
-		const SizeType offsetPlusExtraOffset_;
-		const SizeType tasks_;
+		const SizeType  basis1OffsetsPs_;
+		const SizeType  basis2OffsetsPe_;
+		const SizeType  basisLeftSize_;
+		const SizeType  rightSize_;
+		const SizeType  offsetPlusExtraOffset_;
+		const SizeType  tasks_;
 		VectorSizeType& permutationVector_;
 		VectorSizeType& permInverse_;
 
@@ -913,7 +913,7 @@ one Hamiltonian symmetry called the
 	        order of hundreds for usual symmetries, making this implementation very practical
 for systems of correlated electrons.)
 	        */
-	VectorQnType qns_;
+	VectorQnType   qns_;
 	VectorBoolType signs_;
 	VectorBoolType signsOld_;
 
@@ -940,17 +940,17 @@ for systems of correlated electrons.)
 	        \verb!permutationVector! of class \cppClass{Basis}.
 	        For ease of coding we also store its inverse in \verb!permInverse!.
 	        */
-	VectorSizeType permutationVector_;
-	VectorSizeType permInverse_;
+	VectorSizeType               permutationVector_;
+	VectorSizeType               permInverse_;
 	HamiltonianSymmetryLocalType symmLocal_;
 	/* PSIDOC BasisBlock
 	        The variable block of a \cppClass{DmrgBasis} object indicates over
 	        which sites the basis represented by this object is being built.
 	        */
-	BlockType block_;
-	bool dmrgTransformed_;
+	BlockType          block_;
+	bool               dmrgTransformed_;
 	PsimagLite::String name_;
-	static bool useSu2Symmetry_;
+	static bool        useSu2Symmetry_;
 
 }; // class Basis
 

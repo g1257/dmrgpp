@@ -21,35 +21,35 @@ public:
 
 	String name() const { return name_; }
 
-	void operator()(char jobz,
-	                Matrix<ComplexOrRealType>& a,
+	void operator()(char                             jobz,
+	                Matrix<ComplexOrRealType>&       a,
 	                typename Vector<RealType>::Type& s,
-	                Matrix<ComplexOrRealType>& vt)
+	                Matrix<ComplexOrRealType>&       vt)
 	{
 		if (jobz != 'A' && jobz != 'S') {
 			String msg("svd: jobz must be either A or S");
 			String jobzString = " ";
-			jobzString[0] = jobz;
+			jobzString[0]     = jobz;
 			throw RuntimeError(msg + ", not " + jobzString + "\n");
 		}
 
-		int m = a.rows();
-		int n = a.cols();
+		int m   = a.rows();
+		int n   = a.cols();
 		int lda = m;
 		int min = (m < n) ? m : n;
 
 		s.resize(min);
-		int ldu = m;
-		int ucol = (jobz == 'A') ? m : min;
+		int                       ldu  = m;
+		int                       ucol = (jobz == 'A') ? m : min;
 		Matrix<ComplexOrRealType> u(ldu, ucol);
-		int ldvt = (jobz == 'A') ? n : min;
+		int                       ldvt = (jobz == 'A') ? n : min;
 		vt.resize(ldvt, n);
 		int lrwork = 2.0 * min * std::max(5 * min + 7, 2 * std::max(m, n) + 2 * min + 1);
 		typename Vector<typename Real<ComplexOrRealType>::Type>::Type rwork(lrwork, 0.0);
 
 		typename Vector<ComplexOrRealType>::Type work(100, 0);
-		int info = 0;
-		Vector<int>::Type iwork(8 * min, 0);
+		int                                      info = 0;
+		Vector<int>::Type                        iwork(8 * min, 0);
 
 		// query optimal work
 		int lwork = -1;
@@ -76,7 +76,7 @@ public:
 		}
 
 		RealType lworkReal = PsimagLite::real(work[0]);
-		lwork = static_cast<int>(lworkReal) + (m + n) * 256;
+		lwork              = static_cast<int>(lworkReal) + (m + n) * 256;
 		work.resize(lwork + 10);
 
 		// real work:
@@ -109,21 +109,21 @@ public:
 
 private:
 
-	void mycall(char* jobz,
-	            int* m,
-	            int* n,
+	void mycall(char*              jobz,
+	            int*               m,
+	            int*               n,
 	            ComplexOrRealType* a, // T*,
-	            int* lda,
-	            RealType* s,
+	            int*               lda,
+	            RealType*          s,
 	            ComplexOrRealType* u, // T*,
-	            int* ldu,
+	            int*               ldu,
 	            ComplexOrRealType* vt, // T*,
-	            int* ldvt,
+	            int*               ldvt,
 	            ComplexOrRealType* work, // T*,
-	            int* lwork,
-	            RealType* rwork, // nothing
-	            int* iwork,
-	            int* info)
+	            int*               lwork,
+	            RealType*          rwork, // nothing
+	            int*               iwork,
+	            int*               info)
 	{
 		if (name_ == "gesdd") {
 			psimag::LAPACK::GESDD(jobz,

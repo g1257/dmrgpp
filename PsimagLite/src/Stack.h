@@ -113,7 +113,7 @@ public:
 };
 
 template <typename StackType>
-typename EnableIf<IsStackLike<StackType>::True, std::ostream>::Type& operator<<(std::ostream& os,
+typename EnableIf<IsStackLike<StackType>::True, std::ostream>::Type& operator<<(std::ostream&    os,
                                                                                 const StackType& st)
 {
 	StackType st2 = st;
@@ -128,10 +128,10 @@ typename EnableIf<IsStackLike<StackType>::True, std::ostream>::Type& operator<<(
 
 template <typename StackType>
 typename EnableIf<IsStackLike<StackType>::True, std::istream>::Type& operator>>(std::istream& is,
-                                                                                StackType& x)
+                                                                                StackType&    x)
 {
 	typedef typename StackType::value_type ValueType;
-	typename Vector<ValueType>::Type tmpVec;
+	typename Vector<ValueType>::Type       tmpVec;
 	is >> tmpVec;
 	for (int i = tmpVec.size() - 1; i >= 0; i--) {
 		x.push(tmpVec[i]);

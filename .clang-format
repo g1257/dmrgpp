@@ -33,7 +33,7 @@ BinPackParameters: false
 ExperimentalAutoDetectBinPacking: false
 AllowAllParametersOfDeclarationOnNextLine: false
 AlignAfterOpenBracket: Align
-  #AlignConsecutiveDeclarations: true
-  #AlignConsecutiveAssignments: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: true
 ColumnLimit: 100
 ---

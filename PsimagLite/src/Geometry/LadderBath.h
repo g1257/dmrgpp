@@ -86,7 +86,7 @@ namespace PsimagLite {
 template <typename ComplexOrRealType, typename InputType>
 class LadderBath : public GeometryBase<ComplexOrRealType, InputType> {
 
-	typedef std::pair<int, int> PairType;
+	typedef std::pair<int, int>                  PairType;
 	typedef Ladder<ComplexOrRealType, InputType> LadderType;
 
 public:
@@ -201,9 +201,9 @@ public:
 		// in the cluster
 		if (c1.first < 0) {
 			SizeType firstClusterSite = (clusterSize_ / 2) * bathSitesPerSite_;
-			SizeType siteNewCluster = siteNew - firstClusterSite;
-			SizeType smaxCluster = smax - firstClusterSite;
-			SizeType eminCluster = emin - firstClusterSite;
+			SizeType siteNewCluster   = siteNew - firstClusterSite;
+			SizeType smaxCluster      = smax - firstClusterSite;
+			SizeType eminCluster      = emin - firstClusterSite;
 			SizeType siteSubs
 			    = ladder_->getSubstituteSite(smaxCluster, eminCluster, siteNewCluster);
 			return siteSubs + firstClusterSite;
@@ -230,13 +230,13 @@ private:
 	// of this bath site as a pair (c,b)
 	PairType getClusterSite(SizeType i) const
 	{
-		SizeType firstClusterSite = (clusterSize_ / 2) * bathSitesPerSite_;
+		SizeType firstClusterSite  = (clusterSize_ / 2) * bathSitesPerSite_;
 		SizeType lastP1ClusterSite = firstClusterSite + clusterSize_;
 		if (i >= firstClusterSite && i < lastP1ClusterSite)
 			return PairType(-1, -1);
 
 		SizeType middle = linSize_ / 2;
-		SizeType cs = clusterSize_ / 2;
+		SizeType cs     = clusterSize_ / 2;
 		// now i is in the bath:
 		if (i < middle) { // i is in the system
 			return PairType(i % cs + firstClusterSite, i / cs);
@@ -286,9 +286,9 @@ private:
 		i2 -= firstClusterSite;
 	}
 
-	SizeType linSize_;
-	SizeType bathSitesPerSite_;
-	SizeType clusterSize_;
+	SizeType    linSize_;
+	SizeType    bathSitesPerSite_;
+	SizeType    clusterSize_;
 	LadderType* ladder_;
 }; // class LadderBath
 } // namespace PsimagLite

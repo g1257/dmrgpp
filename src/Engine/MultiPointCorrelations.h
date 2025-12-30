@@ -88,13 +88,13 @@ namespace Dmrg {
 template <typename CorrelationsSkeletonType> class MultiPointCorrelations {
 
 	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
-	typedef typename ObserverHelperType::VectorType VectorType;
-	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename VectorType::value_type FieldType;
-	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef MultiPointCorrelations<CorrelationsSkeletonType> ThisType;
-	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
+	typedef typename ObserverHelperType::VectorType               VectorType;
+	typedef typename ObserverHelperType::VectorWithOffsetType     VectorWithOffsetType;
+	typedef typename ObserverHelperType::BasisWithOperatorsType   BasisWithOperatorsType;
+	typedef typename VectorType::value_type                       FieldType;
+	typedef typename BasisWithOperatorsType::RealType             RealType;
+	typedef MultiPointCorrelations<CorrelationsSkeletonType>      ThisType;
+	typedef typename CorrelationsSkeletonType::SparseMatrixType   SparseMatrixType;
 
 public:
 
@@ -106,12 +106,12 @@ public:
 
 	template <typename VectorLikeType>
 	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<VectorLikeType>::True, void>::Type
-	operator()(VectorLikeType& result,
+	operator()(VectorLikeType&         result,
 	           const SparseMatrixType& O,
-	           SizeType rows,
-	           SizeType cols,
-	           PsimagLite::String bra,
-	           PsimagLite::String ket)
+	           SizeType                rows,
+	           SizeType                cols,
+	           PsimagLite::String      bra,
+	           PsimagLite::String      ket)
 	{
 		assert(rows == cols);
 		result.resize(rows);
@@ -133,12 +133,12 @@ public:
 private:
 
 	// from i to i+1
-	FieldType calcCorrelation_(SparseMatrixType& O2gt,
-	                           SizeType i,
+	FieldType calcCorrelation_(SparseMatrixType&       O2gt,
+	                           SizeType                i,
 	                           const SparseMatrixType& O,
 	                           const SparseMatrixType& identity,
-	                           PsimagLite::String bra,
-	                           PsimagLite::String ket)
+	                           PsimagLite::String      bra,
+	                           PsimagLite::String      ket)
 	{
 
 		if (i >= skeleton_.numberOfSites() - 1)
@@ -146,7 +146,7 @@ private:
 		ProgramGlobals::FermionOrBosonEnum fermionicSign
 		    = ProgramGlobals::FermionOrBosonEnum::BOSON;
 
-		SizeType ns = i;
+		SizeType         ns = i;
 		SparseMatrixType O2g;
 		if (i == 0) {
 			skeleton_.growDirectly(O2gt, O, i, fermionicSign, ns, true);

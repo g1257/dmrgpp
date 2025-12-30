@@ -257,7 +257,7 @@ private:
 		return -1;
 	}
 
-	static SizeType copies_;
+	static SizeType                             copies_;
 	typename PsimagLite::Vector<LongType>::Type factorial_;
 }; // ClebschGordan
 

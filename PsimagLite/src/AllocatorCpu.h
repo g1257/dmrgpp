@@ -60,7 +60,7 @@ struct IsEnumClass<T, true>
 template <typename T, int templateParamFlags> class AllocatorCpu : public std::allocator<T> {
 	typedef typename std::allocator<T> BaseType;
 
-	typedef MemoryCpu MemoryCpuType;
+	typedef MemoryCpu     MemoryCpuType;
 	typedef unsigned char ByteType;
 
 public:
@@ -136,7 +136,7 @@ template <typename A> struct IsStringLike<std::basic_string<char, std::char_trai
 	};
 };
 
-typedef std::basic_string<char, std::char_traits<char>, Allocator<char>::Type> String;
+typedef std::basic_string<char, std::char_traits<char>, Allocator<char>::Type>        String;
 typedef std::basic_istringstream<char, std::char_traits<char>, Allocator<char>::Type> IstringStream;
 
 class OstringStream {

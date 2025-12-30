@@ -11,9 +11,9 @@ class SuperGeometry {
 public:
 
 	typedef PsimagLite::Geometry<ComplexOrRealType_, InputType_, ProgramGlobalsType>
-	    GeometryType;
-	typedef typename GeometryType::ComplexOrRealType ComplexOrRealType;
-	typedef typename GeometryType::VectorSizeType VectorSizeType;
+	                                                          GeometryType;
+	typedef typename GeometryType::ComplexOrRealType          ComplexOrRealType;
+	typedef typename GeometryType::VectorSizeType             VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
 
 private:
@@ -37,9 +37,9 @@ private:
 		}
 
 		void addSuperConnections(VectorVectorSizeType& data,
-		                         SizeType smax,
-		                         SizeType emin,
-		                         SizeType linSize) const
+		                         SizeType              smax,
+		                         SizeType              emin,
+		                         SizeType              linSize) const
 		{
 			return (smax + 1 == emin)
 			    ? addSuperConnectionsFinite_(data, smax, emin, linSize)
@@ -48,8 +48,8 @@ private:
 
 		SizeType holloutRadius() const { return 4; }
 
-		ComplexOrRealType operator()(SizeType smax,
-		                             SizeType emin,
+		ComplexOrRealType operator()(SizeType              smax,
+		                             SizeType              emin,
 		                             const VectorSizeType& hItems,
 		                             const VectorSizeType& edofs) const
 		{
@@ -59,9 +59,9 @@ private:
 	private:
 
 		void addSuperConnectionsInfinite_(VectorVectorSizeType& data,
-		                                  SizeType smax,
-		                                  SizeType emin,
-		                                  SizeType linSize) const
+		                                  SizeType              smax,
+		                                  SizeType              emin,
+		                                  SizeType              linSize) const
 		{
 			// FIXME: Add here site substitutions for when the lattice is not fully
 			// built
@@ -69,9 +69,9 @@ private:
 		}
 
 		void addSuperConnectionsFinite_(VectorVectorSizeType& data,
-		                                SizeType smax,
-		                                SizeType emin,
-		                                SizeType linSize) const
+		                                SizeType              smax,
+		                                SizeType              emin,
+		                                SizeType              linSize) const
 		{
 			// smax - 1, smax, emin, emin + 1
 			if (smax > 0 && emin + 1 < linSize)
@@ -91,8 +91,8 @@ private:
 
 public:
 
-	typedef typename GeometryType::RealType RealType;
-	typedef PsimagLite::GeometryDca<RealType, GeometryType> GeometryDcaType;
+	typedef typename GeometryType::RealType                    RealType;
+	typedef PsimagLite::GeometryDca<RealType, GeometryType>    GeometryDcaType;
 	typedef typename PsimagLite::Vector<SuperPlaquette*>::Type VectorSuperPlaquetteType;
 
 	SuperGeometry(InputType_& io)
@@ -120,7 +120,7 @@ public:
 	~SuperGeometry()
 	{
 		delete dcaPtr_;
-		dcaPtr_ = nullptr;
+		dcaPtr_          = nullptr;
 		const SizeType n = superStrings_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			delete superStrings_[i];
@@ -128,12 +128,12 @@ public:
 		}
 	}
 
-	void split(SizeType sitesPerBlock,
-	           VectorSizeType& S,
+	void split(SizeType              sitesPerBlock,
+	           VectorSizeType&       S,
 	           VectorVectorSizeType& X,
 	           VectorVectorSizeType& Y,
-	           VectorSizeType& E,
-	           bool allInSystem = false) const
+	           VectorSizeType&       E,
+	           bool                  allInSystem = false) const
 	{
 		geometry_.split(sitesPerBlock, S, X, Y, E, allInSystem);
 	}
@@ -159,11 +159,11 @@ public:
 
 	PsimagLite::String label(SizeType i) const { return geometry_.label(i); }
 
-	ComplexOrRealType operator()(SizeType smax,
-	                             SizeType emin,
+	ComplexOrRealType operator()(SizeType              smax,
+	                             SizeType              emin,
 	                             const VectorSizeType& hItems,
 	                             const VectorSizeType& edofs,
-	                             SizeType term) const
+	                             SizeType              term) const
 	{
 		const SizeType n = hItems.size();
 		assert(n == edofs.size());
@@ -188,14 +188,14 @@ public:
 		return false;
 	}
 
-	typename ProgramGlobals::ConnectionEnum connectionKind(SizeType smax,
+	typename ProgramGlobals::ConnectionEnum connectionKind(SizeType              smax,
 	                                                       const VectorSizeType& hItems) const
 	{
 		if (hItems.size() == 2)
 			return geometry_.connectionKind(smax, hItems[0], hItems[1]);
 
-		const SizeType n = hItems.size();
-		SizeType flag = 0;
+		const SizeType n    = hItems.size();
+		SizeType       flag = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			if (hItems[i] <= smax)
 				flag |= 1;
@@ -230,9 +230,9 @@ public:
 
 private:
 
-	const GeometryType geometry_;
+	const GeometryType       geometry_;
 	mutable GeometryDcaType* dcaPtr_;
-	SizeType hollowOutRadius_;
+	SizeType                 hollowOutRadius_;
 	VectorSuperPlaquetteType superStrings_;
 };
 

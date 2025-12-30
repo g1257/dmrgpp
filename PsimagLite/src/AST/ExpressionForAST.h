@@ -26,22 +26,22 @@ template <typename PrimitivesType> class ExpressionForAST {
 public:
 
 	typedef typename PrimitivesType::VectorValueType VectorValueType;
-	typedef typename VectorValueType::value_type ValueType;
-	typedef Tree<PrimitivesType> TreeType;
-	typedef Vector<String>::Type VectorStringType;
-	typedef Node<VectorValueType> NodeType;
-	typedef typename Vector<TreeType*>::Type VectorTreeType;
+	typedef typename VectorValueType::value_type     ValueType;
+	typedef Tree<PrimitivesType>                     TreeType;
+	typedef Vector<String>::Type                     VectorStringType;
+	typedef Node<VectorValueType>                    NodeType;
+	typedef typename Vector<TreeType*>::Type         VectorTreeType;
 
 	ExpressionForAST(const VectorStringType& vecStr, PrimitivesType& primitives)
 	{
-		constexpr bool verbose = false; // FIXME
-		SizeType effectiveSize = vecStr.size();
+		constexpr bool                     verbose       = false; // FIXME
+		SizeType                           effectiveSize = vecStr.size();
 		PsimagLite::Vector<SizeType>::Type va;
 
 		SizeType sumOfA = 1;
 		for (SizeType i = 0; i < effectiveSize; i++) {
 			PsimagLite::String cStr = vecStr[i];
-			const NodeType& node = primitives.findNodeFromCode(cStr);
+			const NodeType&    node = primitives.findNodeFromCode(cStr);
 
 			SizeType a = node.arity();
 			sumOfA += (a - 1);

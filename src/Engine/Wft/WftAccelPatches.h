@@ -9,20 +9,20 @@ namespace Dmrg {
 
 template <typename WaveFunctionTransfBaseType> class WftAccelPatches {
 
-	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
-	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
+	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType   DmrgWaveStructType;
+	typedef typename WaveFunctionTransfBaseType::WftOptionsType       WftOptionsType;
 	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename WaveFunctionTransfBaseType::VectorSizeType VectorSizeType;
+	typedef typename WaveFunctionTransfBaseType::VectorSizeType       VectorSizeType;
 	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename VectorType::value_type ComplexOrRealType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename DmrgWaveStructType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename VectorWithOffsetType::VectorType            VectorType;
+	typedef typename VectorType::value_type                      ComplexOrRealType;
+	typedef typename DmrgWaveStructType::BasisWithOperatorsType  BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType    SparseMatrixType;
 	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
 	typedef typename DmrgWaveStructType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BlockDiagonalMatrixType::BuildingBlockType MatrixType;
-	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
+	typedef typename BlockDiagonalMatrixType::BuildingBlockType  MatrixType;
+	typedef GenIjPatch<LeftRightSuperType>                       GenIjPatchType;
 	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType>
 	    BlockDiagWfType;
 
@@ -33,15 +33,15 @@ public:
 	    , wftOptions_(wftOptions)
 	{ }
 
-	void operator()(VectorWithOffsetType& psiDest,
-	                SizeType iNew,
+	void operator()(VectorWithOffsetType&       psiDest,
+	                SizeType                    iNew,
 	                const VectorWithOffsetType& psiSrc,
-	                SizeType iOld,
-	                const LeftRightSuperType& lrs,
-	                const OneSiteSpacesType& oneSiteSpaces) const
+	                SizeType                    iOld,
+	                const LeftRightSuperType&   lrs,
+	                const OneSiteSpacesType&    oneSiteSpaces) const
 	{
 		ProgramGlobals::DirectionEnum dir = oneSiteSpaces.direction();
-		char charLeft = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'C' : 'N';
+		char charLeft  = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'C' : 'N';
 		char charRight = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'T' : 'N';
 
 		BlockDiagWfType psi(psiSrc, iOld, dmrgWaveStruct_.lrs());
@@ -59,7 +59,7 @@ public:
 private:
 
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	const WftOptionsType& wftOptions_;
+	const WftOptionsType&     wftOptions_;
 };
 }
 #endif // WFTACCELPATCHES_H

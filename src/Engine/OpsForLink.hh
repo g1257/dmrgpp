@@ -11,13 +11,13 @@ template <typename LeftRightSuperType> class OpsForLink {
 public:
 
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
-	typedef typename LeftRightSuperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef Link<ComplexOrRealType> LinkType;
-	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
-	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
+	typedef typename LeftRightSuperType::OperatorsType    OperatorsType;
+	typedef typename OperatorsType::OperatorType          OperatorType;
+	typedef typename OperatorType::StorageType            OperatorStorageType;
+	typedef typename SparseMatrixType::value_type         ComplexOrRealType;
+	typedef Link<ComplexOrRealType>                       LinkType;
+	typedef typename PsimagLite::Vector<LinkType>::Type   VectorLinkType;
+	typedef OperatorsCached<LeftRightSuperType>           OperatorsCachedType;
 
 	OpsForLink(const OperatorsCachedType& operatorsCached, const VectorLinkType& lps)
 	    : lps_(lps)
@@ -82,9 +82,9 @@ public:
 
 private:
 
-	VectorLinkType lps_;
-	OperatorsCachedType operatorsCached_;
-	LinkType* link2_;
+	VectorLinkType             lps_;
+	OperatorsCachedType        operatorsCached_;
+	LinkType*                  link2_;
 	OperatorStorageType const* A_;
 	OperatorStorageType const* B_;
 };

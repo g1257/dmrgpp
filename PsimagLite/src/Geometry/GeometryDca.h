@@ -28,7 +28,7 @@ template <typename RealType_, typename GeometryType_> class GeometryDca {
 public:
 
 	typedef GeometryType_ GeometryType;
-	typedef RealType_ RealType;
+	typedef RealType_     RealType;
 
 	GeometryDca(const GeometryType& g, SizeType orbitals)
 	    : enabled_(false)
@@ -70,7 +70,7 @@ private:
 		throw RuntimeError(str);
 	}
 
-	bool enabled_;
+	bool   enabled_;
 	String message_;
 }; // class GeometryDca
 

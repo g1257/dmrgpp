@@ -88,44 +88,44 @@ namespace Dmrg {
 
 template <typename ModelBaseType> class ModelSelector {
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
+	typedef typename ModelBaseType::ModelHelperType    ModelHelperType;
+	typedef typename ModelBaseType::SolverParamsType   SolverParamsType;
+	typedef typename ModelBaseType::SuperGeometryType  SuperGeometryType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 
 	// start models here:  DO NOT REMOVE MARK
-	typedef ModelHeisenberg<ModelBaseType> ModelHeisenbergType;
-	typedef ModelIsingMultiOrb<ModelBaseType> ModelIsingMultiOrbType;
-	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
-	typedef HeisenbergAncillaC<ModelBaseType> HeisenbergAncillaCType;
-	typedef ExtendedHubbard1Orb<ModelBaseType> ModelHubbardExtType;
+	typedef ModelHeisenberg<ModelBaseType>          ModelHeisenbergType;
+	typedef ModelIsingMultiOrb<ModelBaseType>       ModelIsingMultiOrbType;
+	typedef ModelHubbard<ModelBaseType>             ModelHubbardType;
+	typedef HeisenbergAncillaC<ModelBaseType>       HeisenbergAncillaCType;
+	typedef ExtendedHubbard1Orb<ModelBaseType>      ModelHubbardExtType;
 	typedef ExtendedSuperHubbard1Orb<ModelBaseType> ModelHubbardExtSuperType;
-	typedef ModelFeBasedSc<ModelBaseType> FeBasedScType;
-	typedef FeAsBasedScExtended<ModelBaseType> FeBasedScExtType;
-	typedef Immm<ModelBaseType> ImmmType;
-	typedef TjMultiOrb<ModelBaseType> TjMultiOrbType;
-	typedef TjAnisotropic<ModelBaseType> TjAnisotropicType;
-	typedef UlsOsu<ModelBaseType> UlsOsuType;
-	typedef TjAncillaC2<ModelBaseType> TjAncillaC2Type;
-	typedef TjAncillaC<ModelBaseType> TjAncillaCType;
-	typedef TjAncillaG<ModelBaseType> TjAncillaGType;
-	typedef SuperHubbardExtended<ModelBaseType> SuperHubbardExtendedType;
-	typedef HubbardAncilla<ModelBaseType> HubbardAncillaType;
-	typedef HubbardAncillaExtended<ModelBaseType> HubbardAncillaExtendedType;
-	typedef FermionSpinless<ModelBaseType> FermionSpinlessType;
-	typedef Kitaev<ModelBaseType> KitaevType;
-	typedef ModelHubbardMultiBand<ModelBaseType> ModelHubbardMultiBandType;
-	typedef HubbardHolstein<ModelBaseType> HubbardHolsteinType;
-	typedef HubbardHolsteinSpinless<ModelBaseType> HubbardHolsteinSpinlessType;
-	typedef Kondo<ModelBaseType> KondoType;
-	typedef Graphene<ModelBaseType> GrapheneType;
-	typedef HolsteinThin<ModelBaseType> HolsteinThinType;
-	typedef HolsteinSpinlessThin<ModelBaseType> HolsteinSpinlessThinType;
-	typedef GaugeSpin<ModelBaseType> GaugeSpinType;
-	typedef HeisenbergMix<ModelBaseType> HeisenbergMixType;
-	typedef SpinOrbitalModel<ModelBaseType> SpinOrbitalModelType;
-	typedef Su3Model<ModelBaseType> Su3ModelType;
+	typedef ModelFeBasedSc<ModelBaseType>           FeBasedScType;
+	typedef FeAsBasedScExtended<ModelBaseType>      FeBasedScExtType;
+	typedef Immm<ModelBaseType>                     ImmmType;
+	typedef TjMultiOrb<ModelBaseType>               TjMultiOrbType;
+	typedef TjAnisotropic<ModelBaseType>            TjAnisotropicType;
+	typedef UlsOsu<ModelBaseType>                   UlsOsuType;
+	typedef TjAncillaC2<ModelBaseType>              TjAncillaC2Type;
+	typedef TjAncillaC<ModelBaseType>               TjAncillaCType;
+	typedef TjAncillaG<ModelBaseType>               TjAncillaGType;
+	typedef SuperHubbardExtended<ModelBaseType>     SuperHubbardExtendedType;
+	typedef HubbardAncilla<ModelBaseType>           HubbardAncillaType;
+	typedef HubbardAncillaExtended<ModelBaseType>   HubbardAncillaExtendedType;
+	typedef FermionSpinless<ModelBaseType>          FermionSpinlessType;
+	typedef Kitaev<ModelBaseType>                   KitaevType;
+	typedef ModelHubbardMultiBand<ModelBaseType>    ModelHubbardMultiBandType;
+	typedef HubbardHolstein<ModelBaseType>          HubbardHolsteinType;
+	typedef HubbardHolsteinSpinless<ModelBaseType>  HubbardHolsteinSpinlessType;
+	typedef Kondo<ModelBaseType>                    KondoType;
+	typedef Graphene<ModelBaseType>                 GrapheneType;
+	typedef HolsteinThin<ModelBaseType>             HolsteinThinType;
+	typedef HolsteinSpinlessThin<ModelBaseType>     HolsteinSpinlessThinType;
+	typedef GaugeSpin<ModelBaseType>                GaugeSpinType;
+	typedef HeisenbergMix<ModelBaseType>            HeisenbergMixType;
+	typedef SpinOrbitalModel<ModelBaseType>         SpinOrbitalModelType;
+	typedef Su3Model<ModelBaseType>                 Su3ModelType;
 	// end models  DO NOT REMOVE MARK
 
 public:
@@ -141,8 +141,8 @@ public:
 			delete model_;
 	}
 
-	ModelBaseType& operator()(const SolverParamsType& solverParams,
-	                          InputValidatorType& io,
+	ModelBaseType& operator()(const SolverParamsType&  solverParams,
+	                          InputValidatorType&      io,
 	                          const SuperGeometryType& geometry)
 	{
 		if (model_)
@@ -170,7 +170,7 @@ public:
 			model_ = new ModelHubbardExtSuperType(solverParams, io, geometry, tmp);
 		} else if (name_.substr(0, 11) == "FeAsBasedSc" && name_ != "FeAsBasedScExtended") {
 			PsimagLite::String tmp = getExtension("FeAsBasedSc");
-			model_ = new FeBasedScType(solverParams, io, geometry, tmp);
+			model_                 = new FeBasedScType(solverParams, io, geometry, tmp);
 		} else if (name_.substr(0, 19) == "FeAsBasedScExtended") {
 			model_ = new FeBasedScExtType(solverParams, io, geometry);
 		} else if (name_ == "Immm") {
@@ -201,7 +201,7 @@ public:
 			model_ = new FermionSpinlessType(solverParams, io, geometry, "WithDelta");
 		} else if (name_.substr(0, 6) == "Kitaev") {
 			PsimagLite::String tmp = getExtension("Kitaev");
-			model_ = new KitaevType(solverParams, io, geometry, tmp);
+			model_                 = new KitaevType(solverParams, io, geometry, tmp);
 		} else if (name_ == "ModelHubbardMultiBand") {
 			model_ = new ModelHubbardMultiBandType(solverParams, io, geometry);
 		} else if (name_ == "HubbardHolstein") {
@@ -228,7 +228,7 @@ public:
 			model_ = new HolsteinSpinlessThinType(solverParams, io, geometry, "");
 		} else if (name_.substr(0, 5) == "Kondo") {
 			PsimagLite::String tmp = getExtension("Kondo");
-			model_ = new KondoType(solverParams, io, geometry, tmp);
+			model_                 = new KondoType(solverParams, io, geometry, tmp);
 		} else if (name_.substr(0, 14) == "HubbardOneBand") {
 			PsimagLite::String tmp = getExtension("HubbardOneBand");
 			model_ = new ModelHubbardType(solverParams, io, geometry, tmp);
@@ -259,9 +259,9 @@ private:
 
 	std::string getExtension(const std::string& str) const
 	{
-		SizeType l = str.length();
-		SizeType namel = name_.length();
-		PsimagLite::String tmp = (namel == l) ? "" : name_.substr(l, namel - l);
+		SizeType           l     = str.length();
+		SizeType           namel = name_.length();
+		PsimagLite::String tmp   = (namel == l) ? "" : name_.substr(l, namel - l);
 		return tmp;
 	}
 
@@ -281,7 +281,7 @@ private:
 	}
 
 	PsimagLite::String name_;
-	ModelBaseType* model_;
+	ModelBaseType*     model_;
 
 }; // ModelSelector
 

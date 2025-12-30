@@ -16,7 +16,7 @@ struct OneOperatorSpec {
 		if (lastIndex > 0)
 			lastIndex--;
 		if (label[lastIndex] == '\'') {
-			label = label.substr(0, lastIndex);
+			label     = label.substr(0, lastIndex);
 			transpose = true;
 		}
 
@@ -34,7 +34,7 @@ struct OneOperatorSpec {
 		if (i + 1 == label.length())
 			err("WRONG op. spec. " + label_ + ", nothing after ?\n");
 
-		label = label_.substr(0, i);
+		label                      = label_.substr(0, i);
 		const String numericString = label_.substr(i + 1, label_.length());
 		if (!isAnInteger(numericString)) {
 			throw RuntimeError("FATAL: Syntax Error: The label " + label
@@ -53,7 +53,7 @@ struct OneOperatorSpec {
 		    , siteString(siteString_)
 		{ }
 
-		bool hasSiteString;
+		bool   hasSiteString;
 		String root;
 		String siteString;
 	};
@@ -62,7 +62,7 @@ struct OneOperatorSpec {
 	extractSiteIfAny(PsimagLite::String name, const char cBegin = '[', const char cEnd = ']')
 	{
 		int firstIndex = -1;
-		int lastIndex = -1;
+		int lastIndex  = -1;
 		for (SizeType i = 0; i < name.length(); ++i) {
 			if (name[i] == cBegin) {
 				firstIndex = i;
@@ -104,8 +104,8 @@ struct OneOperatorSpec {
 	}
 
 	SizeType dof;
-	String label;
-	bool transpose;
+	String   label;
+	bool     transpose;
 }; // struct OneOperatorSpec
 
 } // namespace PsimagLite

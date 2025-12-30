@@ -42,8 +42,8 @@ public:
 	}
 
 	template <typename T>
-	void write(const T& t,
-	           PsimagLite::String str,
+	void write(const T&                                     t,
+	           PsimagLite::String                           str,
 	           PsimagLite::IoNg::Out::Serializer::WriteMode mode,
 	           typename std::enable_if<PsimagLite::IsVectorLike<T>::True, int>::type = 0)
 	{
@@ -94,7 +94,7 @@ private:
 
 	OutputFileOrNot& operator=(const OutputFileOrNot&) = delete;
 
-	PsimagLite::String filename_;
+	PsimagLite::String           filename_;
 	PsimagLite::IoSelector::Out* ptr_;
 };
 }

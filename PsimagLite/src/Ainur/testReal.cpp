@@ -28,7 +28,7 @@ int main(int argc, char** argv)
 
 	PsimagLite::String str;
 	for (int i = 1; i < argc; ++i) {
-		std::ifstream fin(argv[i]);
+		std::ifstream      fin(argv[i]);
 		PsimagLite::String str2;
 
 		fin.seekg(0, std::ios::end);

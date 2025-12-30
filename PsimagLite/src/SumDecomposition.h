@@ -66,10 +66,10 @@ private:
 		}
 	}
 
-	SizeType sum_;
-	SelEnum sel_;
-	int selection_;
-	int size_;
+	SizeType                     sum_;
+	SelEnum                      sel_;
+	int                          selection_;
+	int                          size_;
 	Vector<VectorSizeType>::Type data_;
 };
 

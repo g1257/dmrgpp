@@ -40,8 +40,8 @@ public:
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
 	template <typename SomeLambdaType>
-	void parallelFor(SizeType start,
-	                 SizeType end,
+	void parallelFor(SizeType              start,
+	                 SizeType              end,
 	                 const SomeLambdaType& lambda,
 	                 const VectorSizeType& weights)
 	{
@@ -53,9 +53,9 @@ public:
 	}
 
 	template <typename SomeLambdaType>
-	void parallelFor(SizeType start,
-	                 SizeType end,
-	                 const SomeLambdaType& lambda,
+	void parallelFor(SizeType                start,
+	                 SizeType                end,
+	                 const SomeLambdaType&   lambda,
 	                 const LoadBalancerType& loadBalancer)
 	{
 		SizeType blockSize = loadBalancer.blockSize(mpiRank_);
@@ -73,8 +73,8 @@ public:
 private:
 
 	MPI::CommType comm_;
-	SizeType mpiSize_;
-	SizeType mpiRank_;
+	SizeType      mpiSize_;
+	SizeType      mpiRank_;
 };
 } // namespace PsimagLite
 #endif // INTER_NODE_MPI_H

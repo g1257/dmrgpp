@@ -76,11 +76,11 @@ namespace utils {
 
 PsimagLite::String pathPrepend(PsimagLite::String pre, PsimagLite::String pathname)
 {
-	bool addDotDot = false;
+	bool               addDotDot = false;
 	PsimagLite::String path1("");
 	if (pathname.length() > 2 && pathname[0] == '.' && pathname[1] == '.') {
 		addDotDot = true;
-		path1 = pathname.substr(2, pathname.length());
+		path1     = pathname.substr(2, pathname.length());
 	}
 
 	if (pathname.length() > 1 && pathname[0] == '/')

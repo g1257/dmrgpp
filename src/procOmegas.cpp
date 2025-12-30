@@ -21,13 +21,13 @@ int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("procOmegas", &argc, &argv, 1);
 
-	int opt = 0;
-	bool versionOnly = false;
+	int                opt         = 0;
+	bool               versionOnly = false;
 	PsimagLite::String inputfile;
-	PsimagLite::String rootIname = "input";
-	PsimagLite::String rootOname = "out";
-	SizeType precision = 12;
-	bool skipFourier = false;
+	PsimagLite::String rootIname   = "input";
+	PsimagLite::String rootOname   = "out";
+	SizeType           precision   = 12;
+	bool               skipFourier = false;
 
 	/* PSIDOC DmrgDriverProcOmegas
 There is a single input file that is passed as the
@@ -94,14 +94,14 @@ to the main dmrg driver are the following.
 	if (versionOnly)
 		return 0;
 
-	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-	typedef Dmrg::OmegaParams<InputNgType, double> OmegaParamsType;
+	typedef PsimagLite::InputNg<Dmrg::InputCheck>     InputNgType;
+	typedef Dmrg::OmegaParams<InputNgType, double>    OmegaParamsType;
 	typedef Dmrg::ProcOmegas<double, OmegaParamsType> ProcOmegasType;
 
-	Dmrg::InputCheck inputCheck;
+	Dmrg::InputCheck       inputCheck;
 	InputNgType::Writeable ioW(inputfile, inputCheck);
-	InputNgType::Readable io(ioW);
-	OmegaParamsType omegaParams(io);
+	InputNgType::Readable  io(ioW);
+	OmegaParamsType        omegaParams(io);
 	ProcOmegasType procOmegas(io, precision, skipFourier, rootIname, rootOname, omegaParams);
 
 	procOmegas.run();

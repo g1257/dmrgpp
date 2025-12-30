@@ -89,11 +89,11 @@ class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type, Inpu
 
 public:
 
-	typedef ComplexOrRealType_ ComplexOrRealType;
-	typedef InputType_ InputType;
-	typedef typename Real<ComplexOrRealType>::Type RealType;
-	typedef GeometryTerm<ComplexOrRealType, InputType> GeometryTermType;
-	typedef typename Vector<SizeType>::Type VectorSizeType;
+	typedef ComplexOrRealType_                                             ComplexOrRealType;
+	typedef InputType_                                                     InputType;
+	typedef typename Real<ComplexOrRealType>::Type                         RealType;
+	typedef GeometryTerm<ComplexOrRealType, InputType>                     GeometryTermType;
+	typedef typename Vector<SizeType>::Type                                VectorSizeType;
 	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType> GeometryExType;
 
 	/** @class hide_geometry1
@@ -208,12 +208,12 @@ public:
 		return terms_[term]->orbitals(site);
 	}
 
-	void split(SizeType sitesPerBlock,
-	           VectorSizeType& S,
+	void split(SizeType                               sitesPerBlock,
+	           VectorSizeType&                        S,
 	           typename Vector<VectorSizeType>::Type& X,
 	           typename Vector<VectorSizeType>::Type& Y,
-	           VectorSizeType& E,
-	           bool allInSystem = false) const
+	           VectorSizeType&                        E,
+	           bool                                   allInSystem = false) const
 	{
 		SizeType middle = linSize_ / 2;
 		if (linSize_ & 1) {
@@ -253,8 +253,8 @@ public:
 			typename Vector<SizeType>::Type tmpV2(sitesPerBlock);
 			for (SizeType j = 0; j < sitesPerBlock; j++) {
 				SizeType jj = sitesPerBlock - 1 - j;
-				tmpV[j] = (linSize_ - 1 - i - jj) + (middle - sitesPerBlock);
-				tmpV2[j] = jj + i;
+				tmpV[j]     = (linSize_ - 1 - i - jj) + (middle - sitesPerBlock);
+				tmpV2[j]    = jj + i;
 				assert(tmpV[j] < linSize_);
 			}
 
@@ -323,12 +323,12 @@ public:
 
 	// friends
 	template <typename RealType2, typename InputType2, typename PgType>
-	friend std::ostream& operator<<(std::ostream& os,
+	friend std::ostream& operator<<(std::ostream&                                  os,
 	                                const Geometry<RealType2, InputType2, PgType>& g);
 
 private:
 
-	SizeType linSize_;
+	SizeType                                 linSize_;
 	typename Vector<GeometryTermType*>::Type terms_;
 }; // class Geometry
 

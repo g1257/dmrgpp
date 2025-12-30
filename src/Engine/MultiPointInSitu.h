@@ -15,23 +15,23 @@ template <typename VectorWithOffsetType, typename ModelType> class MultiPointInS
 public:
 
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::ParametersType ParametersType;
-	typedef typename ParametersType::OptionsType OptionsType;
+	typedef typename ModelType::ParametersType     ParametersType;
+	typedef typename ParametersType::OptionsType   OptionsType;
 	typedef WaveFunctionTransfFactory<LeftRightSuperType,
 	                                  VectorWithOffsetType,
 	                                  OptionsType,
 	                                  OneSiteSpaces<ModelType>>
-	    WaveFunctionTransfType;
-	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
-	typedef HelperForMultiPointInSitu<CheckpointType> HelperForMultiPointInSituType;
+	                                                           WaveFunctionTransfType;
+	typedef Checkpoint<ModelType, WaveFunctionTransfType>      CheckpointType;
+	typedef HelperForMultiPointInSitu<CheckpointType>          HelperForMultiPointInSituType;
 	typedef typename HelperForMultiPointInSituType::BogusInput BogusInputType;
 	typedef typename HelperForMultiPointInSituType::MatrixType MatrixType;
 	typedef Observer<HelperForMultiPointInSituType, ModelType> ObserverType;
-	typedef Braket<ModelType> BraketType;
-	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
+	typedef Braket<ModelType>                                  BraketType;
+	typedef PsimagLite::Vector<bool>::Type                     VectorBoolType;
 
-	MultiPointInSitu(const ModelType& model,
-	                 const CheckpointType& checkpoint,
+	MultiPointInSitu(const ModelType&              model,
+	                 const CheckpointType&         checkpoint,
 	                 const WaveFunctionTransfType& wft,
 	                 ProgramGlobals::DirectionEnum dir)
 	    : model_(model)
@@ -61,16 +61,16 @@ public:
 		if (braket.points() != 2)
 			err("MultiPointInSitu: only two point for now\n");
 
-		constexpr bool needsPrinting = true;
+		constexpr bool  needsPrinting = true;
 		ManyPointAction action(false, "");
-		const SizeType n = model_.superGeometry().numberOfSites();
-		MatrixType storage(n, n);
+		const SizeType  n = model_.superGeometry().numberOfSites();
+		MatrixType      storage(n, n);
 
 		SizeType start = 0;
-		SizeType end = 0;
+		SizeType end   = 0;
 		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			start = 0;
-			end = centerOfOrtho;
+			end   = centerOfOrtho;
 		} else {
 			start = centerOfOrtho + 1;
 			;
@@ -111,9 +111,9 @@ private:
 		return true;
 	}
 
-	const ModelType& model_;
-	BogusInputType bogusInput_;
-	ObserverType observer_;
+	const ModelType&      model_;
+	BogusInputType        bogusInput_;
+	ObserverType          observer_;
 	static VectorBoolType seen_;
 };
 

@@ -25,8 +25,8 @@ template <typename VectorValueType, typename AnglesType_ = int> class Node {
 
 public:
 
-	typedef AnglesType_ AnglesType;
-	typedef typename VectorValueType::value_type ValueType;
+	typedef AnglesType_                                   AnglesType;
+	typedef typename VectorValueType::value_type          ValueType;
 	typedef typename PsimagLite::Vector<AnglesType>::Type VectorAnglesType;
 
 	virtual ~Node() { }
@@ -216,9 +216,9 @@ public:
 
 private:
 
-	char char_;
+	char               char_;
 	PsimagLite::String strOneChar_;
-	mutable ValueType input_;
+	mutable ValueType  input_;
 
 }; // class Input
 

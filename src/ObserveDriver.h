@@ -42,16 +42,16 @@ typedef float RealType;
 typedef std::complex<RealType> ComplexType;
 
 typedef PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
-typedef PsimagLite::CrsMatrix<RealType> MySparseMatrixReal;
+typedef PsimagLite::CrsMatrix<RealType>    MySparseMatrixReal;
 
-typedef PsimagLite::InputNg<InputCheck> InputNgType;
+typedef PsimagLite::InputNg<InputCheck>                                 InputNgType;
 typedef ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn> ParametersDmrgSolverType;
 
 template <typename VectorWithOffsetType, typename ModelType>
-bool observeOneFullSweep(IoInputType& io,
-                         const ModelType& model,
+bool observeOneFullSweep(IoInputType&              io,
+                         const ModelType&          model,
                          const PsimagLite::String& list,
-                         SizeType orbitals);
+                         SizeType                  orbitals);
 }
 
 #endif // OBSERVEDRIVER_H

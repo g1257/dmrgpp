@@ -24,7 +24,7 @@ Please see full open source license included in file LICENSE.
 
 class MyHelper {
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef PsimagLite::Concurrency            ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
@@ -35,7 +35,7 @@ public:
 	{
 		srand48(1234);
 		for (SizeType i = 0; i < ntasks; ++i) {
-			double x = 10 * drand48();
+			double x   = 10 * drand48();
 			weight_[i] = 1 + static_cast<SizeType>(x);
 			std::cout << weight_[i] << " ";
 		}
@@ -77,13 +77,13 @@ int main(int argc, char* argv[])
 	}
 
 	SizeType nthreads = atoi(argv[1]);
-	SizeType ntasks = atoi(argv[2]);
+	SizeType ntasks   = atoi(argv[2]);
 
 	ConcurrencyType concurrency(&argc, &argv, nthreads);
 
 	typedef MyHelper HelperType;
 	typedef PsimagLite::Parallelizer<HelperType, PsimagLite::LoadBalancerWeights>
-	    ParallelizerType;
+	                 ParallelizerType;
 	ParallelizerType threadObject(ConcurrencyType::codeSectionParams);
 
 	HelperType helper(ntasks, nthreads);

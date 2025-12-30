@@ -1,17 +1,17 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void den_matmul_pre(const char trans_A,
-                    const int nrow_A,
-                    const int ncol_A,
-                    const PsimagLite::Matrix<ComplexOrRealType>& a_,
-                    const int nrow_Y,
-                    const int ncol_Y,
+void den_matmul_pre(const char                                                 trans_A,
+                    const int                                                  nrow_A,
+                    const int                                                  ncol_A,
+                    const PsimagLite::Matrix<ComplexOrRealType>&               a_,
+                    const int                                                  nrow_Y,
+                    const int                                                  ncol_Y,
                     const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
-                    const int nrow_X,
-                    const int ncol_X,
-                    PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout,
-                    PsimagLite::GemmR<ComplexOrRealType>& gemmR)
+                    const int                                                  nrow_X,
+                    const int                                                  ncol_X,
+                    PsimagLite::MatrixNonOwned<ComplexOrRealType>&             xout,
+                    PsimagLite::GemmR<ComplexOrRealType>&                      gemmR)
 {
 	/*
 	 * -------------------------------------------------------
@@ -30,10 +30,10 @@ void den_matmul_pre(const char trans_A,
 	 *  requires  nrow_X == nrow_A, ncol_A == nrow_Y, ncol_X == ncol_Y
 	 * -------------------------------------------------------
 	 */
-	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
-	bool use_blas = true;
-	int isTranspose = (trans_A == 'T') || (trans_A == 't');
-	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
+	const bool is_complex      = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+	bool       use_blas        = true;
+	int        isTranspose     = (trans_A == 'T') || (trans_A == 't');
+	int        isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
 
 	if (isTranspose || isConjTranspose) {
 		/*
@@ -55,15 +55,15 @@ void den_matmul_pre(const char trans_A,
 			// char trans1 = 'T';
 			char trans1 = trans_A;
 			char trans2 = 'N';
-			int mm = nrow_X;
-			int nn = ncol_X;
-			int kk = nrow_Y;
+			int  mm     = nrow_X;
+			int  nn     = ncol_X;
+			int  kk     = nrow_Y;
 
 			ComplexOrRealType alpha = 1.0;
-			ComplexOrRealType beta = 1.0;
-			int ld1 = nrow_A;
-			int ld2 = nrow_Y;
-			int ld3 = nrow_X;
+			ComplexOrRealType beta  = 1.0;
+			int               ld1   = nrow_A;
+			int               ld2   = nrow_Y;
+			int               ld3   = nrow_X;
 
 			gemmR(trans1,
 			      trans2,
@@ -89,10 +89,10 @@ void den_matmul_pre(const char trans_A,
 					int jy = jx;
 
 					ComplexOrRealType dsum = 0;
-					int ia = 0;
+					int               ia   = 0;
 					for (ia = 0; ia < nrow_A; ia++) {
-						int iy = ia;
-						ComplexOrRealType aij = a_(ia, ja);
+						int               iy   = ia;
+						ComplexOrRealType aij  = a_(ia, ja);
 						ComplexOrRealType atji = aij;
 						if (is_complex && isConjTranspose) {
 							atji = PsimagLite::conj(atji);
@@ -122,15 +122,15 @@ void den_matmul_pre(const char trans_A,
 			 */
 			char trans1 = 'N';
 			char trans2 = 'N';
-			int mm = nrow_X;
-			int nn = ncol_X;
-			int kk = nrow_Y;
+			int  mm     = nrow_X;
+			int  nn     = ncol_X;
+			int  kk     = nrow_Y;
 
 			ComplexOrRealType alpha = 1;
-			ComplexOrRealType beta = 1;
-			int ld1 = nrow_A;
-			int ld2 = nrow_Y;
-			int ld3 = nrow_X;
+			ComplexOrRealType beta  = 1;
+			int               ld1   = nrow_A;
+			int               ld2   = nrow_Y;
+			int               ld3   = nrow_X;
 
 			gemmR(trans1,
 			      trans2,
@@ -159,9 +159,9 @@ void den_matmul_pre(const char trans_A,
 					int jy = jx;
 
 					ComplexOrRealType dsum = 0;
-					int ja = 0;
+					int               ja   = 0;
 					for (ja = 0; ja < ncol_A; ja++) {
-						int iy = ja;
+						int               iy  = ja;
 						ComplexOrRealType aij = a_(ia, ja);
 						dsum += (aij * yin(iy, jy));
 					};

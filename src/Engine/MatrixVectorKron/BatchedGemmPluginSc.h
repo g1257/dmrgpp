@@ -9,22 +9,22 @@
 #include <complex>
 
 typedef PsimagLite::Vector<IntegerType>::Type VectorIntegerType;
-typedef PsimagLite::Vector<int>::Type VectorIntType;
+typedef PsimagLite::Vector<int>::Type         VectorIntType;
 
 namespace Dmrg {
 
 template <typename InitKronType> class BatchedGemmPluginSc {
 
-	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
+	typedef typename InitKronType::ArrayOfMatStructType            ArrayOfMatStructType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
-	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
-	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType*>::Type VectorMatrixType;
-	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
-	typedef typename GenIjPatchType::BasisType BasisType;
-	typedef BatchedGemm<ComplexOrRealType> BatchedGemmType;
+	typedef typename MatrixDenseOrSparseType::VectorType           VectorType;
+	typedef typename InitKronType::SparseMatrixType                SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                  ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                  MatrixType;
+	typedef typename PsimagLite::Vector<MatrixType*>::Type         VectorMatrixType;
+	typedef typename InitKronType::GenIjPatchType                  GenIjPatchType;
+	typedef typename GenIjPatchType::BasisType                     BasisType;
+	typedef BatchedGemm<ComplexOrRealType>                         BatchedGemmType;
 
 	static const typename InitKronType::WhatBasisEnum DUMMY = InitKronType::OLD;
 
@@ -37,13 +37,13 @@ public:
 	{
 		if (!enabled())
 			return;
-		SizeType npatches = initKron_.numberOfPatches(DUMMY);
-		SizeType nC = initKron_.connections();
-		const SizeType total = npatches * npatches * nC;
-		ComplexOrRealType** aptr = new ComplexOrRealType*[total];
-		ComplexOrRealType** bptr = new ComplexOrRealType*[total];
-		VectorIntType ldAptr(npatches * npatches * nC);
-		VectorIntType ldBptr(npatches * npatches * nC);
+		SizeType            npatches = initKron_.numberOfPatches(DUMMY);
+		SizeType            nC       = initKron_.connections();
+		const SizeType      total    = npatches * npatches * nC;
+		ComplexOrRealType** aptr     = new ComplexOrRealType*[total];
+		ComplexOrRealType** bptr     = new ComplexOrRealType*[total];
+		VectorIntType       ldAptr(npatches * npatches * nC);
+		VectorIntType       ldBptr(npatches * npatches * nC);
 
 		memset(aptr, 0, total * sizeof(ComplexOrRealType*));
 		memset(bptr, 0, total * sizeof(ComplexOrRealType*));
@@ -84,7 +84,7 @@ public:
 					    = b;
 
 					initKron_.checks(*Amat, *Bmat, outPatch, inPatch);
-					pLeft_[inPatch] = Amat->cols();
+					pLeft_[inPatch]  = Amat->cols();
 					pRight_[inPatch] = Bmat->cols();
 
 					ldAptr[outPatch + inPatch * npatches
@@ -133,15 +133,15 @@ public:
 	void matrixVector(VectorType& vout, const VectorType& vin) const
 	{
 		assert(enabled());
-		ComplexOrRealType* vinptr = const_cast<ComplexOrRealType*>(&(vin[0]));
+		ComplexOrRealType* vinptr  = const_cast<ComplexOrRealType*>(&(vin[0]));
 		ComplexOrRealType* voutptr = const_cast<ComplexOrRealType*>(&(vout[0]));
 		batchedGemm_->apply_Htarget(vinptr, voutptr);
 	}
 
 private:
 
-	void getMatrixPointers(ComplexOrRealType** a,
-	                       ComplexOrRealType** b,
+	void getMatrixPointers(ComplexOrRealType**            a,
+	                       ComplexOrRealType**            b,
 	                       const MatrixDenseOrSparseType& Amat,
 	                       const MatrixDenseOrSparseType& Bmat) const
 	{
@@ -169,12 +169,12 @@ private:
 
 	BatchedGemmPluginSc& operator=(const BatchedGemmPluginSc&) = delete;
 
-	PsimagLite::ProgressIndicator progress_;
-	const InitKronType& initKron_;
-	VectorIntType pLeft_;
-	VectorIntType pRight_;
+	PsimagLite::ProgressIndicator   progress_;
+	const InitKronType&             initKron_;
+	VectorIntType                   pLeft_;
+	VectorIntType                   pRight_;
 	BatchedGemm<ComplexOrRealType>* batchedGemm_;
-	mutable VectorMatrixType garbage_;
+	mutable VectorMatrixType        garbage_;
 };
 }
 #endif // BATCHED_GEMM_PLUGIN_SC_H

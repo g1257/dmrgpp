@@ -82,12 +82,12 @@ template <typename RealType> class FiniteLoop {
 
 public:
 
-	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorStringType      = PsimagLite::Vector<PsimagLite::String>::Type;
 	using TruncationControlType = TruncationControl<RealType>;
 
-	FiniteLoop(int sl,
-	           SizeType ks,
-	           PsimagLite::String str,
+	FiniteLoop(int                          sl,
+	           SizeType                     ks,
+	           PsimagLite::String           str,
 	           const TruncationControlType& truncationControl)
 	    : stepLength_(sl)
 	    , keptStates_(ks)
@@ -102,7 +102,7 @@ public:
 		VectorStringType tokens;
 		PsimagLite::split(tokens, str, ":");
 		bool hasBitField = false;
-		bool hasAtField = false;
+		bool hasAtField  = false;
 		for (SizeType i = 0; i < tokens.size(); ++i)
 			procToken(hasBitField, hasAtField, tokens[i]);
 
@@ -110,8 +110,8 @@ public:
 		checkBitField();
 	}
 
-	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer,
+	void write(PsimagLite::String                    label,
+	           PsimagLite::IoSerializer&             ioSerializer,
 	           PsimagLite::IoNgSerializer::WriteMode mode
 	           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
@@ -165,7 +165,7 @@ private:
 			dieIfTrue(hasBitField, "Bit field already set for this finite loop\n");
 			dieIfTrue(hasAtField, "Bit field already set for this finite loop\n");
 			hasBitField = true;
-			bitField_ = PsimagLite::atoi(str);
+			bitField_   = PsimagLite::atoi(str);
 			return;
 		}
 
@@ -207,7 +207,7 @@ private:
 	{
 		// Only 1 bit of bit 1, bit 2, and bit 3 may be set
 		SizeType saveOption = bitField_;
-		bool flag = false;
+		bool     flag       = false;
 		for (SizeType i = 0; i < 3; ++i) {
 			saveOption >>= 1; // ATTENTION: Discards bit 0 when i === 0
 			if (!(saveOption & 1))
@@ -260,9 +260,9 @@ private:
 	}
 
 	static std::map<PsimagLite::String, SizeType> mapNameBit_;
-	const int stepLength_; // how much to go right (+) or left (-)
-	const SizeType keptStates_; // kept states
-	SizeType bitField_;
+	const int             stepLength_; // how much to go right (+) or left (-)
+	const SizeType        keptStates_; // kept states
+	SizeType              bitField_;
 	TruncationControlType truncationControl_;
 };
 

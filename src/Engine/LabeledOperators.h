@@ -11,9 +11,9 @@ template <typename OperatorType_> class LabeledOperators {
 
 	public:
 
-		typedef typename PsimagLite::Vector<OperatorType_>::Type VectorOperatorType;
+		typedef typename PsimagLite::Vector<OperatorType_>::Type      VectorOperatorType;
 		typedef typename PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-		typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
+		typedef std::pair<PsimagLite::String, SizeType>               PairStringSizeType;
 
 		Label(PsimagLite::String name, SizeType kindOfSite)
 		    : name_(name)
@@ -79,10 +79,10 @@ template <typename OperatorType_> class LabeledOperators {
 		Label& operator=(const Label&);
 
 		PsimagLite::String name_;
-		SizeType kindOfSite_;
-		bool isTrackable_;
+		SizeType           kindOfSite_;
+		bool               isTrackable_;
 		VectorOperatorType ops_;
-		VectorStringType descriptions_;
+		VectorStringType   descriptions_;
 	};
 
 	typedef typename PsimagLite::Vector<Label*>::Type VectorLabelType;
@@ -103,12 +103,12 @@ template <typename OperatorType_> class LabeledOperators {
 
 public:
 
-	typedef OperatorType_ OperatorType;
-	typedef Label LabelType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef OperatorType_                                   OperatorType;
+	typedef Label                                           LabelType;
+	typedef PsimagLite::Vector<SizeType>::Type              VectorSizeType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename OperatorType::value_type ComplexOrRealType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef typename OperatorType::value_type               ComplexOrRealType;
+	typedef std::pair<SizeType, SizeType>                   PairSizeType;
 
 	LabeledOperators(PsimagLite::String model = "")
 	    : model_(model)
@@ -211,8 +211,8 @@ public:
 
 	void makeTrackable(PsimagLite::String name)
 	{
-		const LabelType& label = findLabel(name);
-		LabelType& labelNonConst = const_cast<LabelType&>(label);
+		const LabelType& label         = findLabel(name);
+		LabelType&       labelNonConst = const_cast<LabelType&>(label);
 		labelNonConst.makeTrackable();
 	}
 
@@ -232,7 +232,7 @@ private:
 	LabeledOperators& operator=(const LabeledOperators&);
 
 	PsimagLite::String model_;
-	VectorLabelType labels_;
+	VectorLabelType    labels_;
 };
 }
 #endif // LABELEDOPERATORS_H

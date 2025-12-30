@@ -27,7 +27,7 @@ public:
 		    , columnX_(0)
 		    , columnY_(1)
 		{
-			std::string csl = deleteEnclosing(args, '(', ')');
+			std::string              csl = deleteEnclosing(args, '(', ')');
 			std::vector<std::string> tokens;
 			split(tokens, csl, ",");
 			if (tokens.size() == 0) {
@@ -80,7 +80,7 @@ public:
 			SizeType length = content.size();
 			if (length == 0)
 				return content;
-			SizeType last = length - 1;
+			SizeType last  = length - 1;
 			SizeType total = length;
 			SizeType start = 0;
 
@@ -138,18 +138,18 @@ public:
 					                   + "\n");
 				}
 
-				double vx = PsimagLite::atof(tokens[columnX_]);
-				double vy = PsimagLite::atof(tokens[columnY_]);
+				double                    vx = PsimagLite::atof(tokens[columnX_]);
+				double                    vy = PsimagLite::atof(tokens[columnY_]);
 				std::pair<double, double> pair(vx, vy);
 				data_.emplace_back(pair);
 			}
 		}
 
-		std::string filename_;
-		std::string separator_;
-		std::string separatorForSplit_;
-		SizeType columnX_;
-		SizeType columnY_;
+		std::string                            filename_;
+		std::string                            separator_;
+		std::string                            separatorForSplit_;
+		SizeType                               columnX_;
+		SizeType                               columnY_;
 		std::vector<std::pair<double, double>> data_;
 	};
 
@@ -171,9 +171,9 @@ public:
 	{
 		if (line.substr(1, AINUR_FROM_FILE.size()) == AINUR_FROM_FILE) {
 			SizeType start = AINUR_FROM_FILE.size() + 1;
-			SizeType len = line.size();
+			SizeType len   = line.size();
 			assert(len > start);
-			SizeType rest = len - start;
+			SizeType    rest    = len - start;
 			std::string content = line.substr(start, rest);
 			return addAinurFromFile(content);
 		}
@@ -206,8 +206,8 @@ public:
 		SizeType index = functionNameToIndex_.at(functionName);
 		assert(index < ainurFunctions_.size());
 		std::string argument = AinurFunction::deleteEnclosing(nameValue.second, '(', ')');
-		double x = PsimagLite::atof(argument);
-		double y = ainurFunctions_[index](x);
+		double      x        = PsimagLite::atof(argument);
+		double      y        = ainurFunctions_[index](x);
 		return std::to_string(y);
 	}
 
@@ -255,10 +255,10 @@ private:
 		return content;
 	}
 
-	const std::string AINUR_FROM_FILE;
-	std::vector<NativeMacro> nativeMacros_;
+	const std::string               AINUR_FROM_FILE;
+	std::vector<NativeMacro>        nativeMacros_;
 	std::map<std::string, SizeType> functionNameToIndex_;
-	std::vector<AinurFunction> ainurFunctions_;
+	std::vector<AinurFunction>      ainurFunctions_;
 };
 
 } // namespace PsimagLite

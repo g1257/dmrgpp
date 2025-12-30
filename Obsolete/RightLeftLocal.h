@@ -91,14 +91,14 @@ class RightLeftLocal {
 public:
 
 	typedef typename SparseMatrixType::value_type MatrixElementType;
-	typedef psimag::Matrix<MatrixElementType> MatrixType;
+	typedef psimag::Matrix<MatrixElementType>     MatrixType;
 
-	RightLeftLocal(int m,
-	               const BasisType& basis1,
+	RightLeftLocal(int                           m,
+	               const BasisType&              basis1,
 	               const BasisWithOperatorsType& basis2,
 	               const BasisWithOperatorsType& basis3,
-	               SizeType orbitals,
-	               bool useReflection = false)
+	               SizeType                      orbitals,
+	               bool                          useReflection = false)
 	    : m_(m)
 	    , basis1_(basis1)
 	    , basis2_(basis2)
@@ -120,27 +120,27 @@ public:
 
 	//! Does x+= (AB)y, where A belongs to pSprime and B  belongs to pEprime or viceversa
 	//! (inter) Has been changed to accomodate for reflection symmetry
-	void fastOpProdInter(typename PsimagLite::Vector<MatrixElementType>::Type& x,
+	void fastOpProdInter(typename PsimagLite::Vector<MatrixElementType>::Type&        x,
 	                     typename PsimagLite::Vector<MatrixElementType> const ::Type& y,
-	                     SparseMatrixType const& A,
-	                     SparseMatrixType const& B,
-	                     int type,
-	                     MatrixElementType& hop,
-	                     bool operatorsAreFermions = true,
-	                     SizeType angularMomentum = 1,
-	                     MatrixElementType angularSign = -1.0,
-	                     SizeType category = 0,
-	                     bool dummy2 = false) const
+	                     SparseMatrixType const&                                      A,
+	                     SparseMatrixType const&                                      B,
+	                     int                                                          type,
+	                     MatrixElementType&                                           hop,
+	                     bool              operatorsAreFermions = true,
+	                     SizeType          angularMomentum      = 1,
+	                     MatrixElementType angularSign          = -1.0,
+	                     SizeType          category             = 0,
+	                     bool              dummy2               = false) const
 	{
 		int const SystemEnviron = 1, EnvironSystem = 2;
-		int fermionSign = (operatorsAreFermions) ? -1 : 1;
+		int       fermionSign = (operatorsAreFermions) ? -1 : 1;
 
 		if (type == EnvironSystem) {
 			MatrixElementType hop2 = hop * fermionSign;
 			fastOpProdInter(x, y, B, A, SystemEnviron, hop2, operatorsAreFermions);
 			return;
 		}
-		SizeType leftSize = leftPerm_.size();
+		SizeType leftSize  = leftPerm_.size();
 		SizeType rightSize = rightPerm_.size();
 		// static const typename PsimagLite::Vector<MatrixElementType>*::Type yAddress = 0;
 
@@ -209,25 +209,25 @@ public:
 
 private:
 
-	int m_;
-	const BasisType& basis1_;
-	const BasisWithOperatorsType& basis2_;
-	const BasisWithOperatorsType& basis3_;
+	int                                         m_;
+	const BasisType&                            basis1_;
+	const BasisWithOperatorsType&               basis2_;
+	const BasisWithOperatorsType&               basis3_;
 	typename PsimagLite::Vector<SizeType>::Type alpha_, beta_;
 	typename PsimagLite::Vector<SizeType>::Type leftPermInv_, rightPermInv_;
 	typename PsimagLite::Vector<SizeType>::Type leftPerm_, rightPerm_;
-	mutable MatrixType bMatrix_;
-	mutable MatrixType aMatrix_;
-	mutable MatrixType cMatrix_, tmpMatrix_, yMatrix_;
+	mutable MatrixType                          bMatrix_;
+	mutable MatrixType                          aMatrix_;
+	mutable MatrixType                          cMatrix_, tmpMatrix_, yMatrix_;
 	// mutable typename PsimagLite::Vector<const::Type SparseMatrixType*> addressesA_;
 	// mutable typename PsimagLite::Vector<const::Type SparseMatrixType*> addressesB_;
 
 	void init()
 	{
-		SizeType ns = basis2_.size();
-		SizeType ne = basis3_.size();
-		int offset = basis1_.partition(m_);
-		int total = basis1_.partition(m_ + 1) - offset;
+		SizeType ns     = basis2_.size();
+		SizeType ne     = basis3_.size();
+		int      offset = basis1_.partition(m_);
+		int      total  = basis1_.partition(m_ + 1) - offset;
 
 		for (SizeType alphaPrime = 0; alphaPrime < ns; alphaPrime++) {
 			for (SizeType betaPrime = 0; betaPrime < ne; betaPrime++) {
@@ -250,7 +250,7 @@ private:
 		for (SizeType i = 0; i < leftPerm_.size(); i++)
 			leftPermInv_[leftPerm_[i]] = i;
 
-		SizeType leftSize = leftPerm_.size();
+		SizeType leftSize  = leftPerm_.size();
 		SizeType rightSize = rightPerm_.size();
 
 		yMatrix_.resize(leftSize, rightSize);
@@ -260,11 +260,11 @@ private:
 		bMatrix_.resize(rightSize, rightSize);
 	}
 
-	void preparePhi(MatrixType& m,
+	void preparePhi(MatrixType&                                                  m,
 	                typename PsimagLite::Vector<MatrixElementType> const ::Type& v) const
 	{
 		int offset = basis1_.partition(m_);
-		int total = basis1_.partition(m_ + 1) - offset;
+		int total  = basis1_.partition(m_ + 1) - offset;
 		/*for (SizeType i=0;i<leftPerm_.size();i++) {
 		        SizeType x = leftPerm_[i];
 		        for (SizeType j=0;j<rightPerm_.size();j++) {
@@ -284,10 +284,10 @@ private:
 	}
 
 	void unpreparePhi(typename PsimagLite::Vector<MatrixElementType>::Type& v,
-	                  MatrixType& m) const
+	                  MatrixType&                                           m) const
 	{
 		int offset = basis1_.partition(m_);
-		int total = basis1_.partition(m_ + 1) - offset;
+		int total  = basis1_.partition(m_ + 1) - offset;
 		/*for (SizeType i=0;i<leftPerm_.size();i++) {
 		        SizeType x = leftPerm_[i];
 		        for (SizeType j=0;j<rightPerm_.size();j++) {
@@ -314,7 +314,7 @@ private:
 			SizeType x = rightPerm_[i];
 			for (SizeType j = 0; j < rightPerm_.size(); j++) {
 				SizeType y = rightPerm_[j];
-				m(i, j) = B(x, y);
+				m(i, j)    = B(x, y);
 			}
 		}
 	}
@@ -323,20 +323,20 @@ private:
 	{
 		int fermionSign = (operatorsAreFermions) ? -1 : 1;
 		for (SizeType i = 0; i < leftPerm_.size(); i++) {
-			SizeType x = leftPerm_[i];
+			SizeType          x   = leftPerm_[i];
 			MatrixElementType tmp = basis2_.fermionicSign(x, fermionSign);
 			for (SizeType j = 0; j < leftPerm_.size(); j++) {
 				SizeType y = leftPerm_[j];
-				m(i, j) = A(x, y) * tmp;
+				m(i, j)    = A(x, y) * tmp;
 			}
 		}
 	}
 
 	void createAlphaAndBeta()
 	{
-		SizeType ns = basis2_.size();
-		int offset = basis1_.partition(m_);
-		int total = basis1_.partition(m_ + 1) - offset;
+		SizeType ns     = basis2_.size();
+		int      offset = basis1_.partition(m_);
+		int      total  = basis1_.partition(m_ + 1) - offset;
 
 		for (int i = 0; i < total; i++) {
 			// row i of the ordered product basis

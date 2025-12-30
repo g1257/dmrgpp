@@ -108,28 +108,28 @@ class TimeVectorsRungeKutta : public TimeVectorsBase<TargetParamsType,
 	                        WaveFunctionTransfType,
 	                        LanczosSolverType,
 	                        VectorWithOffsetType>
-	    BaseType;
-	typedef typename BaseType::PairType PairType;
-	typedef typename TargetParamsType::RealType RealType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef VectorComplexOrRealType TargetVectorType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	                                                                 BaseType;
+	typedef typename BaseType::PairType                              PairType;
+	typedef typename TargetParamsType::RealType                      RealType;
+	typedef typename ModelType::ModelHelperType                      ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                    MatrixComplexOrRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type     VectorComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
+	typedef VectorComplexOrRealType                                  TargetVectorType;
+	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 
 public:
 
-	TimeVectorsRungeKutta(const TargetParamsType& tstStruct,
-	                      VectorVectorWithOffsetType& targetVectors,
-	                      const ModelType& model,
+	TimeVectorsRungeKutta(const TargetParamsType&       tstStruct,
+	                      VectorVectorWithOffsetType&   targetVectors,
+	                      const ModelType&              model,
 	                      const WaveFunctionTransfType& wft,
-	                      const LeftRightSuperType& lrs)
+	                      const LeftRightSuperType&     lrs)
 	    : BaseType(model, lrs, wft, "rungekutta")
 	    , progress_("TimeVectorsRungeKutta")
 	    , tstStruct_(tstStruct)
@@ -139,12 +139,12 @@ public:
 	    , lrs_(lrs)
 	{ }
 
-	virtual void calcTimeVectors(const VectorSizeType& indices,
-	                             RealType Eg,
+	virtual void calcTimeVectors(const VectorSizeType&       indices,
+	                             RealType                    Eg,
 	                             const VectorWithOffsetType& phi,
 	                             const typename BaseType::ExtraData&)
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "using RungeKutta";
 
@@ -170,13 +170,13 @@ private:
 
 	public:
 
-		FunctionForRungeKutta(const RealType& E0,
-		                      const RealType& timeDirection,
-		                      const LeftRightSuperType& lrs,
-		                      RealType currentTime,
-		                      const ModelType& model,
+		FunctionForRungeKutta(const RealType&             E0,
+		                      const RealType&             timeDirection,
+		                      const LeftRightSuperType&   lrs,
+		                      RealType                    currentTime,
+		                      const ModelType&            model,
 		                      const VectorWithOffsetType& phi,
-		                      SizeType i0)
+		                      SizeType                    i0)
 		    : E0_(E0)
 		    , timeDirection_(timeDirection)
 		    , p_(lrs.super().findPartitionNumber(phi.offset(i0)))
@@ -194,29 +194,29 @@ private:
 			ComplexOrRealType icomplex
 			    = minusOneOrMinusI(static_cast<ComplexOrRealType>(0));
 			ComplexOrRealType tmp2 = timeDirection_ * icomplex;
-			TargetVectorType x2;
-			x2 <= tmp2* x;
+			TargetVectorType  x2;
+			x2 <= tmp2*       x;
 			return x2;
 		}
 
 	private:
 
-		RealType E0_;
-		RealType timeDirection_;
-		SizeType p_;
-		typename ModelHelperType::Aux aux_;
+		RealType                                      E0_;
+		RealType                                      timeDirection_;
+		SizeType                                      p_;
+		typename ModelHelperType::Aux                 aux_;
 		typename ModelType::HamiltonianConnectionType hc_;
-		typename LanczosSolverType::MatrixType lanczosHelper_;
+		typename LanczosSolverType::MatrixType        lanczosHelper_;
 	}; // FunctionForRungeKutta
 
-	void calcTimeVectors(const VectorSizeType& indices,
-	                     RealType Eg,
+	void calcTimeVectors(const VectorSizeType&       indices,
+	                     RealType                    Eg,
 	                     const VectorWithOffsetType& phi,
-	                     SizeType i0)
+	                     SizeType                    i0)
 	{
 		const VectorRealType& times = tstStruct_.times();
-		SizeType total = phi.effectiveSize(i0);
-		TargetVectorType phi0(total);
+		SizeType              total = phi.effectiveSize(i0);
+		TargetVectorType      phi0(total);
 		phi.extract(phi0, i0);
 		FunctionForRungeKutta f(
 		    Eg, tstStruct_.timeDirection(), lrs_, this->time(), model_, phi, i0);
@@ -238,11 +238,11 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
-	const TargetParamsType& tstStruct_;
-	VectorVectorWithOffsetType& targetVectors_;
-	const ModelType& model_;
+	const TargetParamsType&       tstStruct_;
+	VectorVectorWithOffsetType&   targetVectors_;
+	const ModelType&              model_;
 	const WaveFunctionTransfType& wft_;
-	const LeftRightSuperType& lrs_;
+	const LeftRightSuperType&     lrs_;
 }; // class TimeVectorsRungeKutta
 } // namespace Dmrg
 /*@}*/

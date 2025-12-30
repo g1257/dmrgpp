@@ -43,9 +43,9 @@ template <typename T> void fillRandom(T& v, typename EnableIf<IsVectorLike<T>::T
 	if (n == 0)
 		throw std::runtime_error("fillRandom must be called with size > 0\n");
 
-	Random48<typename T::value_type> myrng(time(0));
-	typename PsimagLite::Real<typename T::value_type>::Type sum = 0;
-	const typename T::value_type zeroPointFive = 0.5;
+	Random48<typename T::value_type>                        myrng(time(0));
+	typename PsimagLite::Real<typename T::value_type>::Type sum           = 0;
+	const typename T::value_type                            zeroPointFive = 0.5;
 	for (SizeType i = 0; i < n; ++i) {
 		v[i] = myrng() - zeroPointFive;
 		sum += PsimagLite::real(v[i] * PsimagLite::conj(v[i]));
@@ -73,8 +73,8 @@ public:
 	{
 		chekSizeType();
 
-		SizeType n = *argc;
-		char** temp = *argv;
+		SizeType n    = *argc;
+		char**   temp = *argv;
 		for (SizeType i = 0; i < n; ++i)
 			cmdLine_ += String(temp[i]) + " ";
 	}
@@ -110,7 +110,7 @@ public:
 
 	static String slurp(String filename)
 	{
-		std::ifstream fin(filename.c_str());
+		std::ifstream     fin(filename.c_str());
 		std::stringstream sstr;
 		sstr << fin.rdbuf();
 		return sstr.str();
@@ -130,9 +130,9 @@ private:
 	static const int libSizeOfSizeType_;
 
 	Concurrency concurrency_;
-	String appName_;
-	String cmdLine_;
-	String microArch_;
+	String      appName_;
+	String      cmdLine_;
+	String      microArch_;
 };
 
 } // namespace PsimagLite

@@ -99,28 +99,28 @@ template <typename ParametersType, typename SuperGeometryType, typename ModelHel
 class ModelCommon {
 
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelHelperType::LinkType LinkType;
+	typedef typename SparseMatrixType::value_type      ComplexOrRealType;
+	typedef typename ModelHelperType::LinkType         LinkType;
 
 public:
 
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename ModelHelperType::BlockType Block;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelHelperType::BasisType MyBasis;
-	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef LabeledOperators<OperatorType> LabeledOperatorsType;
-	typedef ModelLinks<LabeledOperatorsType, SuperGeometryType> ModelLinksType;
+	typedef PsimagLite::InputNg<InputCheck>::Readable            InputValidatorType;
+	typedef typename ModelHelperType::OperatorsType              OperatorsType;
+	typedef typename OperatorsType::OperatorType                 OperatorType;
+	typedef typename ModelHelperType::BlockType                  Block;
+	typedef typename ModelHelperType::RealType                   RealType;
+	typedef typename ModelHelperType::BasisType                  MyBasis;
+	typedef typename ModelHelperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef LabeledOperators<OperatorType>                       LabeledOperatorsType;
+	typedef ModelLinks<LabeledOperatorsType, SuperGeometryType>  ModelLinksType;
 	typedef HamiltonianConnection<ModelLinksType, ModelHelperType, ParametersType>
-	    HamiltonianConnectionType;
-	typedef typename HamiltonianConnectionType::VectorLinkType VectorLinkType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename PsimagLite::Vector<VectorLinkType>::Type VectorVectorLinkType;
-	typedef typename HamiltonianConnectionType::VectorSizeType VectorSizeType;
+	                                                                 HamiltonianConnectionType;
+	typedef typename HamiltonianConnectionType::VectorLinkType       VectorLinkType;
+	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type          VectorOperatorType;
+	typedef typename PsimagLite::Vector<VectorLinkType>::Type        VectorVectorLinkType;
+	typedef typename HamiltonianConnectionType::VectorSizeType       VectorSizeType;
 	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
 
 	ModelCommon(const ParametersType& params, const SuperGeometryType& superGeometry)
@@ -138,10 +138,10 @@ public:
 
 	const SuperGeometryType& superGeometry() const { return superGeometry_; }
 
-	void addConnectionsInNaturalBasis(SparseMatrixType& hmatrix,
+	void addConnectionsInNaturalBasis(SparseMatrixType&         hmatrix,
 	                                  const VectorOperatorType& cm,
-	                                  const Block& block,
-	                                  RealType time) const
+	                                  const Block&              block,
+	                                  RealType                  time) const
 	{
 		if (block.size() != 1)
 			err("addConnectionsInNaturalBasis(): unimplemented\n");
@@ -152,8 +152,8 @@ public:
 	        $m$ consisting of the external product of basis2$\otimes$basis3
 	        Note: Used only for debugging purposes
 	        */
-	void fullHamiltonian(SparseMatrixType& matrix,
-	                     const HamiltonianConnectionType& hc,
+	void fullHamiltonian(SparseMatrixType&                    matrix,
+	                     const HamiltonianConnectionType&     hc,
 	                     const typename ModelHelperType::Aux& aux) const
 	{
 		SparseMatrixType matrixBlock;
@@ -176,8 +176,8 @@ public:
 
 private:
 
-	const ParametersType& params_;
-	const SuperGeometryType& superGeometry_;
+	const ParametersType&         params_;
+	const SuperGeometryType&      superGeometry_;
 	PsimagLite::ProgressIndicator progress_;
 }; // class ModelCommon
 } // namespace Dmrg

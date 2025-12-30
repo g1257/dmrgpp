@@ -29,17 +29,17 @@ template <typename ValueType_> class PlusMinusMultiplyDivide {
 public:
 
 	typedef typename PsimagLite::Vector<ValueType_>::Type VectorValueType;
-	typedef Node<VectorValueType> NodeType;
-	typedef typename PsimagLite::Vector<NodeType*>::Type VectorNodeType;
-	typedef Plus<VectorValueType> PlusType;
-	typedef Minus<VectorValueType> MinusType;
-	typedef Times<VectorValueType> TimesType;
-	typedef DividedBy<VectorValueType> DividedByType;
-	typedef Modulus<VectorValueType> ModulusType;
-	typedef Input<VectorValueType> InputType;
-	typedef ValueType_ ValueType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef Node<VectorValueType>                         NodeType;
+	typedef typename PsimagLite::Vector<NodeType*>::Type  VectorNodeType;
+	typedef Plus<VectorValueType>                         PlusType;
+	typedef Minus<VectorValueType>                        MinusType;
+	typedef Times<VectorValueType>                        TimesType;
+	typedef DividedBy<VectorValueType>                    DividedByType;
+	typedef Modulus<VectorValueType>                      ModulusType;
+	typedef Input<VectorValueType>                        InputType;
+	typedef ValueType_                                    ValueType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type  VectorStringType;
+	typedef PsimagLite::Vector<SizeType>::Type            VectorSizeType;
 
 	PlusMinusMultiplyDivide()
 	    : inputsSoFar_(0)
@@ -107,8 +107,8 @@ public:
 
 private:
 
-	static void setInputRealOrComplex(NodeType* input,
-	                                  const String& code,
+	static void setInputRealOrComplex(NodeType*                   input,
+	                                  const String&               code,
 	                                  const std::complex<double>& dummy)
 	{
 		std::complex<double> val = stringToComplex(code);
@@ -126,7 +126,7 @@ private:
 	}
 
 	VectorNodeType nodes_;
-	SizeType inputsSoFar_;
+	SizeType       inputsSoFar_;
 }; // class PlusMinusMultiplyDivide
 
 } // namespace PsimagLite

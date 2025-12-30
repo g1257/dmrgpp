@@ -5,9 +5,9 @@ void csr_kron_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 
                         const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
 
-                        const int nrindex,
-                        const int ncindex,
-                        const int max_nnz,
+                        const int                            nrindex,
+                        const int                            ncindex,
+                        const int                            max_nnz,
                         const PsimagLite::Vector<int>::Type& rindex,
                         const PsimagLite::Vector<int>::Type& cindex,
 
@@ -63,7 +63,7 @@ void csr_kron_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 	 * ------------------------------
 	 */
 	int* cmap = new int[ncol_C];
-	int jc = 0;
+	int  jc   = 0;
 	for (jc = 0; jc < ncol_C; jc++) {
 		cmap[jc] = -1;
 	};
@@ -78,7 +78,7 @@ void csr_kron_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 
 	const bool use_push = true;
 
-	int ih = 0;
+	int ih    = 0;
 	int ifree = 0;
 
 	// ----------------------------------------------------
@@ -98,16 +98,16 @@ void csr_kron_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 		int ib = iblist[ih];
 
 		int istarta = a.getRowPtr(ia);
-		int ienda = a.getRowPtr(ia + 1);
+		int ienda   = a.getRowPtr(ia + 1);
 
 		int istartb = b.getRowPtr(ib);
-		int iendb = b.getRowPtr(ib + 1);
+		int iendb   = b.getRowPtr(ib + 1);
 
 		int ka = 0;
 		int kb = 0;
 		for (ka = istarta; ka < ienda; ka++) {
 
-			int ja = a.getCol(ka);
+			int               ja  = a.getCol(ka);
 			ComplexOrRealType aij = a.getValue(ka);
 
 			for (kb = istartb; kb < iendb; kb++) {
@@ -115,7 +115,7 @@ void csr_kron_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 
 				int jc = jb + ja * ncol_B;
 
-				int jh = cmap[jc];
+				int jh      = cmap[jc];
 				int isvalid = (0 <= jh) && (jh < ncol_H);
 				if (isvalid) {
 					ComplexOrRealType bij = b.getValue(kb);

@@ -200,10 +200,10 @@ public:
 
 	SizeType handle(SizeType i1, SizeType i2) const
 	{
-		const SizeType dir = calcDir(i1, i2);
+		const SizeType dir  = calcDir(i1, i2);
 		const SizeType imin = (i1 < i2) ? i1 : i2;
 		const SizeType imax = (i1 < i2) ? i2 : i1;
-		const SizeType y = imin / leg_;
+		const SizeType y    = imin / leg_;
 		switch (dir) {
 		case DIRECTION_X:
 			if (!isPeriodicX_)
@@ -249,8 +249,8 @@ public:
 	SizeType translate(SizeType site, SizeType dir, SizeType amount) const
 	{
 		assert(dir < 2);
-		SizeType x = SizeType(site / leg_);
-		SizeType y = site % leg_;
+		SizeType x  = SizeType(site / leg_);
+		SizeType y  = site % leg_;
 		SizeType lx = SizeType(linSize_ / leg_);
 		if (dir == DIRECTION_X)
 			x = translateInternal(x, lx, amount);
@@ -263,9 +263,9 @@ public:
 
 	SizeType findReflection(SizeType site) const
 	{
-		SizeType x = SizeType(site / leg_);
-		SizeType y = site % leg_;
-		SizeType lx = SizeType(linSize_ / leg_);
+		SizeType x   = SizeType(site / leg_);
+		SizeType y   = site % leg_;
+		SizeType lx  = SizeType(linSize_ / leg_);
 		SizeType ind = y + (lx - x - 1) * leg_;
 		assert(ind < linSize_);
 		return ind;
@@ -287,8 +287,8 @@ private:
 
 	SizeType linSize_;
 	SizeType leg_;
-	bool isPeriodicX_;
-	bool isPeriodicY_;
+	bool     isPeriodicX_;
+	bool     isPeriodicY_;
 }; // class Ladder
 } // namespace PsimagLite
 

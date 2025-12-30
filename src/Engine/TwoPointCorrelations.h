@@ -98,30 +98,30 @@ template <typename CorrelationsSkeletonType> class TwoPointCorrelations {
 public:
 
 	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
-	typedef typename ObserverHelperType::VectorType VectorType;
-	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename VectorType::value_type FieldType;
-	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef TwoPointCorrelations<CorrelationsSkeletonType> ThisType;
-	typedef typename CorrelationsSkeletonType::BraketType BraketType;
-	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
-	typedef typename ObserverHelperType::MatrixType MatrixType;
-	typedef Parallel2PointCorrelations<ThisType> Parallel2PointCorrelationsType;
+	typedef typename ObserverHelperType::VectorType               VectorType;
+	typedef typename ObserverHelperType::VectorWithOffsetType     VectorWithOffsetType;
+	typedef typename ObserverHelperType::BasisWithOperatorsType   BasisWithOperatorsType;
+	typedef typename VectorType::value_type                       FieldType;
+	typedef typename BasisWithOperatorsType::RealType             RealType;
+	typedef TwoPointCorrelations<CorrelationsSkeletonType>        ThisType;
+	typedef typename CorrelationsSkeletonType::BraketType         BraketType;
+	typedef typename CorrelationsSkeletonType::SparseMatrixType   SparseMatrixType;
+	typedef typename ObserverHelperType::MatrixType               MatrixType;
+	typedef Parallel2PointCorrelations<ThisType>              Parallel2PointCorrelationsType;
 	typedef typename Parallel2PointCorrelationsType::PairType PairType;
-	typedef SdhsReinterpret<BraketType> SdhsReinterpretType;
-	typedef ManyPointAction ManyPointActionType;
+	typedef SdhsReinterpret<BraketType>                       SdhsReinterpretType;
+	typedef ManyPointAction                                   ManyPointActionType;
 
 	TwoPointCorrelations(const CorrelationsSkeletonType& skeleton)
 	    : skeleton_(skeleton)
 	{ }
 
-	void operator()(PsimagLite::Matrix<FieldType>& w,
-	                const BraketType& braket,
+	void operator()(PsimagLite::Matrix<FieldType>&     w,
+	                const BraketType&                  braket,
 	                ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                const PsimagLite::GetBraOrKet& bra,
-	                const PsimagLite::GetBraOrKet& ket,
-	                const ManyPointActionType& action) const
+	                const PsimagLite::GetBraOrKet&     bra,
+	                const PsimagLite::GetBraOrKet&     ket,
+	                const ManyPointActionType&         action) const
 	{
 		SizeType rows = w.n_row();
 		SizeType cols = w.n_col();
@@ -150,14 +150,14 @@ public:
 	// where |psi> is the g.s.
 	// Note1: O1 is applied to site i and O2 is applied to site j
 	// Note2: O1 and O2 operators must commute or anti-commute (set fermionicSign accordingly)
-	FieldType calcCorrelation(SizeType i,
-	                          SizeType j,
-	                          const BraketType& braket,
+	FieldType calcCorrelation(SizeType                           i,
+	                          SizeType                           j,
+	                          const BraketType&                  braket,
 	                          ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                          const PsimagLite::GetBraOrKet& bra,
-	                          const PsimagLite::GetBraOrKet& ket) const
+	                          const PsimagLite::GetBraOrKet&     bra,
+	                          const PsimagLite::GetBraOrKet&     ket) const
 	{
-		FieldType c = 0;
+		FieldType           c = 0;
 		SdhsReinterpretType sdhs(braket, { i, j });
 
 		if (sdhs.forbidden())
@@ -170,9 +170,9 @@ public:
 		    = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		if (i == j) {
 			SizeType replacementSite = (i == 0) ? 1 : i - 1;
-			SizeType rowsForIdent = braket.model().hilbertSize(replacementSite);
-			c = calcDiagonalCorrelation(
-			    i, O1, O2, rowsForIdent, fermionicSign, bra, ket);
+			SizeType rowsForIdent    = braket.model().hilbertSize(replacementSite);
+			c                        = calcDiagonalCorrelation(
+                            i, O1, O2, rowsForIdent, fermionicSign, bra, ket);
 		} else if (i > j) {
 			c = fsign * calcCorrelation_(j, i, O2, O1, fermionicSign, bra, ket);
 		} else {
@@ -184,10 +184,10 @@ public:
 
 private:
 
-	FieldType calcDiagonalCorrelation(SizeType i,
+	FieldType calcDiagonalCorrelation(SizeType                i,
 	                                  const SparseMatrixType& O1,
 	                                  const SparseMatrixType& O2,
-	                                  SizeType rowsForIdent,
+	                                  SizeType                rowsForIdent,
 	                                  ProgramGlobals::FermionOrBosonEnum,
 	                                  const PsimagLite::GetBraOrKet& bra,
 	                                  const PsimagLite::GetBraOrKet& ket) const
@@ -208,20 +208,20 @@ private:
 		    i - 1, i, ident, O2new, ProgramGlobals::FermionOrBosonEnum::BOSON, bra, ket);
 	}
 
-	FieldType calcCorrelation_(SizeType i,
-	                           SizeType j,
-	                           const SparseMatrixType& O1,
-	                           const SparseMatrixType& O2,
+	FieldType calcCorrelation_(SizeType                           i,
+	                           SizeType                           j,
+	                           const SparseMatrixType&            O1,
+	                           const SparseMatrixType&            O2,
 	                           ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                           const PsimagLite::GetBraOrKet& bra,
-	                           const PsimagLite::GetBraOrKet& ket) const
+	                           const PsimagLite::GetBraOrKet&     bra,
+	                           const PsimagLite::GetBraOrKet&     ket) const
 	{
 
 		if (i >= j)
 			err("Observer::calcCorrelation_(...): i must be smaller than j\n");
 
 		const ObserverHelperType& helper = skeleton_.helper();
-		SparseMatrixType O1m, O2m;
+		SparseMatrixType          O1m, O2m;
 		skeleton_.createWithModification(O1m, O1, 'n');
 		skeleton_.createWithModification(O2m, O2, 'n');
 
@@ -245,7 +245,7 @@ private:
 		}
 
 		SparseMatrixType O1g, O2g;
-		SizeType ns = j - 1;
+		SizeType         ns = j - 1;
 
 		skeleton_.growDirectly(O1g, O1m, i, fermionicSign, ns, true);
 		const SizeType ptr = skeleton_.dmrgMultiply(O2g, O1g, O2m, fermionicSign, ns);

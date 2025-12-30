@@ -100,40 +100,40 @@ class TargetingDynamic : public TargetingBase<LanczosSolverType_, VectorWithOffs
 
 public:
 
-	typedef LanczosSolverType_ LanczosSolverType;
+	typedef LanczosSolverType_                                      LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType MatrixVectorType;
-	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::OperatorsType OperatorsType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef TargetParamsDynamic<ModelType> TargetParamsType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef VectorType TargetVectorType;
-	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
-	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
-	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BasisType::QnType QnType;
-	typedef typename TargetingCommonType::StageEnumType StageEnumType;
-	typedef typename BaseType::VectorRealType VectorRealType;
+	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
+	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
+	typedef typename BaseType::CheckpointType                       CheckpointType;
+	typedef typename MatrixVectorType::ModelType                    ModelType;
+	typedef typename ModelType::RealType                            RealType;
+	typedef typename ModelType::OperatorsType                       OperatorsType;
+	typedef typename ModelType::ModelHelperType                     ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                   ComplexOrRealType;
+	typedef TargetParamsDynamic<ModelType>                          TargetParamsType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
+	typedef typename VectorWithOffsetType::VectorType               VectorType;
+	typedef VectorType                                              TargetVectorType;
+	typedef typename TargetingCommonType::TimeSerializerType        TimeSerializerType;
+	typedef PsimagLite::Matrix<typename VectorType::value_type>     DenseMatrixType;
+	typedef PsimagLite::Matrix<RealType>                            DenseMatrixRealType;
+	typedef typename LanczosSolverType::PostProcType                PostProcType;
+	typedef typename LanczosSolverType::TridiagonalMatrixType       TridiagonalMatrixType;
+	typedef typename ModelType::InputValidatorType                  InputValidatorType;
+	typedef typename PsimagLite::Vector<SizeType>::Type             VectorSizeType;
+	typedef typename BasisType::QnType                              QnType;
+	typedef typename TargetingCommonType::StageEnumType             StageEnumType;
+	typedef typename BaseType::VectorRealType                       VectorRealType;
 
-	TargetingDynamic(const LeftRightSuperType& lrs,
-	                 const CheckpointType& checkPoint,
+	TargetingDynamic(const LeftRightSuperType&     lrs,
+	                 const CheckpointType&         checkPoint,
 	                 const WaveFunctionTransfType& wft,
 	                 const QnType&,
 	                 InputValidatorType& io)
@@ -166,11 +166,11 @@ public:
 		return gsWeight_;
 	}
 
-	void evolve(const VectorRealType& energies,
+	void evolve(const VectorRealType&         energies,
 	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
-	            const BlockType& block2,
-	            SizeType loopNumber)
+	            const BlockType&              block1,
+	            const BlockType&              block2,
+	            SizeType                      loopNumber)
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -180,13 +180,13 @@ public:
 		}
 
 		assert(energies.size() > 0);
-		RealType Eg = energies[0];
+		RealType Eg   = energies[0];
 		SizeType site = block1[0];
 		evolve(Eg, direction, site, loopNumber);
 
 		// corner case
 		SizeType numberOfSites = this->lrs().super().block().size();
-		SizeType site2 = numberOfSites;
+		SizeType site2         = numberOfSites;
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
@@ -198,16 +198,16 @@ public:
 		evolve(Eg, direction, site2, loopNumber);
 	}
 
-	void write(const VectorSizeType& block,
+	void write(const VectorSizeType&        block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	           PsimagLite::String           prefix) const
 	{
 		this->common().write(io, block, prefix);
 
-		SizeType type = tstStruct_.type();
-		int fermionSign = this->common().findFermionSignOfTheOperators(
-		    tstStruct_.concatenation(), tstStruct_.aOperators());
-		int s = (type & 1) ? -1 : 1;
+		SizeType type        = tstStruct_.type();
+		int      fermionSign = this->common().findFermionSignOfTheOperators(
+                    tstStruct_.concatenation(), tstStruct_.aOperators());
+		int s  = (type & 1) ? -1 : 1;
 		int s2 = (type > 1) ? -1 : 1;
 		int s3 = (type & 1) ? -fermionSign : 1;
 
@@ -215,9 +215,9 @@ public:
 			return;
 
 		typename PostProcType::ParametersType params = paramsForSolver_;
-		params.Eg = this->common().aoe().energy();
+		params.Eg                                    = this->common().aoe().energy();
 		params.weight = s2 * weightForContinuedFraction_ * s3;
-		params.isign = s;
+		params.isign  = s;
 		if (tstStruct_.aOperators()[0].fermionOrBoson()
 		    == ProgramGlobals::FermionOrBosonEnum::BOSON)
 			s2 *= s;
@@ -233,22 +233,22 @@ public:
 
 private:
 
-	void evolve(RealType Eg,
+	void evolve(RealType                      Eg,
 	            ProgramGlobals::DirectionEnum direction,
-	            SizeType site,
-	            SizeType loopNumber)
+	            SizeType                      site,
+	            SizeType                      loopNumber)
 	{
 
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().aoeNonConst().getPhi(
-		    &phiNew, Eg, direction, site, loopNumber, tstStruct_);
+		SizeType             count = this->common().aoeNonConst().getPhi(
+                    &phiNew, Eg, direction, site, loopNumber, tstStruct_);
 
 		if (count == 0)
 			return;
 
 		calcLanczosVectors(gsWeight_, weight_, phiNew, direction);
 
-		bool doBorderIfBorder = false;
+		bool           doBorderIfBorder = false;
 		VectorSizeType block(1, site);
 		this->common().cocoon(block, direction, doBorderIfBorder);
 	}
@@ -260,10 +260,10 @@ private:
 	{
 		for (SizeType i = 0; i < phi.sectors(); i++) {
 			VectorType sv;
-			SizeType i0 = phi.sector(i);
+			SizeType   i0 = phi.sector(i);
 			phi.extract(sv, i0);
 			DenseMatrixType V;
-			SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
+			SizeType        p = this->lrs().super().findPartitionNumber(phi.offset(i0));
 			getLanczosVectors(V, sv, p);
 			if (i == 0) {
 				assert(V.cols() > 0);
@@ -281,13 +281,13 @@ private:
 
 	void getLanczosVectors(DenseMatrixType& V, const VectorType& sv, SizeType p)
 	{
-		const RealType fakeTime = 0;
-		typename ModelHelperType::Aux aux(p, BaseType::lrs());
+		const RealType                                fakeTime = 0;
+		typename ModelHelperType::Aux                 aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
 		                                                 ModelType::modelLinks(),
 		                                                 fakeTime,
 		                                                 BaseType::model().superOpHelper());
-		typename LanczosSolverType::MatrixType h(BaseType::model(), hc, aux);
+		typename LanczosSolverType::MatrixType        h(BaseType::model(), hc, aux);
 		paramsForSolver_.lotaMemory = true;
 		LanczosSolverType lanczosSolver(h, paramsForSolver_);
 
@@ -329,14 +329,14 @@ private:
 		return sum;
 	}
 
-	TargetParamsType tstStruct_;
-	const WaveFunctionTransfType& wft_;
-	PsimagLite::ProgressIndicator progress_;
-	RealType gsWeight_;
+	TargetParamsType                                 tstStruct_;
+	const WaveFunctionTransfType&                    wft_;
+	PsimagLite::ProgressIndicator                    progress_;
+	RealType                                         gsWeight_;
 	typename LanczosSolverType::ParametersSolverType paramsForSolver_;
-	typename PsimagLite::Vector<RealType>::Type weight_;
-	TridiagonalMatrixType ab_;
-	RealType weightForContinuedFraction_;
+	typename PsimagLite::Vector<RealType>::Type      weight_;
+	TridiagonalMatrixType                            ab_;
+	RealType                                         weightForContinuedFraction_;
 }; // class TargetingDynamic
 } // namespace
 /*@}*/

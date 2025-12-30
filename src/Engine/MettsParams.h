@@ -88,12 +88,12 @@ namespace Dmrg {
 template <typename ModelType> class MettsParams : public TargetParamsTimeVectors<ModelType> {
 
 	typedef TargetParamsTimeVectors<ModelType> BaseType;
-	typedef typename BaseType::VectorSizeType VectorSizeType;
+	typedef typename BaseType::VectorSizeType  VectorSizeType;
 
 public:
 
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::OperatorType OperatorType;
+	typedef typename ModelType::RealType       RealType;
+	typedef typename ModelType::OperatorType   OperatorType;
 	typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 
@@ -118,10 +118,10 @@ public:
 		this->noOperator(false);
 	}
 
-	int long rngSeed;
-	RealType beta;
+	int long           rngSeed;
+	RealType           beta;
 	PsimagLite::String collapse;
-	VectorSizeType pure;
+	VectorSizeType     pure;
 }; // class MettsParams
 
 template <typename ModelType>

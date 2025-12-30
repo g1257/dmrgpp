@@ -99,41 +99,41 @@ template <typename ModelBaseType> class ModelHeisenberg : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::BasisType BasisType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename ModelBaseType::VectorQnType VectorQnType;
-	typedef typename ModelBaseType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef unsigned int long WordType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelBaseType::VectorRealType VectorRealType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef typename PsimagLite::Vector<SizeType>::Type HilbertBasisType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
+	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
+	typedef typename ModelHelperType::BasisType             BasisType;
+	typedef typename ModelBaseType::SuperGeometryType       SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                LinkType;
+	typedef typename ModelHelperType::OperatorsType         OperatorsType;
+	typedef typename ModelHelperType::RealType              RealType;
+	typedef typename ModelBaseType::VectorType              VectorType;
+	typedef typename ModelBaseType::QnType                  QnType;
+	typedef typename ModelBaseType::VectorQnType            VectorQnType;
+	typedef typename ModelBaseType::BlockType               BlockType;
+	typedef typename ModelBaseType::SolverParamsType        SolverParamsType;
+	typedef typename ModelHelperType::SparseMatrixType      SparseMatrixType;
+	typedef typename SparseMatrixType::value_type           ComplexOrRealType;
+	typedef unsigned int long                               WordType;
+	typedef typename ModelBaseType::InputValidatorType      InputValidatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>           MatrixType;
+	typedef typename PsimagLite::Vector<SizeType>::Type     VectorSizeType;
+	typedef typename ModelBaseType::VectorRealType          VectorRealType;
+	typedef typename ModelBaseType::ModelTermType           ModelTermType;
+	typedef typename PsimagLite::Vector<SizeType>::Type     HilbertBasisType;
+	typedef typename OperatorsType::OperatorType            OperatorType;
+	typedef typename OperatorType::PairType                 PairType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelBaseType::MyBasis MyBasis;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef Aklt<ModelBaseType> AkltType;
+	typedef typename ModelBaseType::MyBasis                 MyBasis;
+	typedef typename ModelBaseType::BasisWithOperatorsType  MyBasisWithOperators;
+	typedef typename ModelBaseType::OpsLabelType            OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType           OpForLinkType;
+	typedef Aklt<ModelBaseType>                             AkltType;
 	using ModelParametersType = ParametersModelHeisenberg<RealType, QnType>;
 
-	ModelHeisenberg(const SolverParamsType& solverParams,
-	                InputValidatorType& io,
+	ModelHeisenberg(const SolverParamsType&  solverParams,
+	                InputValidatorType&      io,
 	                const SuperGeometryType& geometry,
-	                PsimagLite::String additional)
+	                PsimagLite::String       additional)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
@@ -141,7 +141,7 @@ public:
 	    , spinSquared_(spinSquaredHelper_, NUMBER_OF_ORBITALS, DEGREES_OF_FREEDOM)
 	    , aklt_(*this, additional)
 	{
-		SizeType n = superGeometry_.numberOfSites();
+		SizeType n  = superGeometry_.numberOfSites();
 		SizeType md = modelParameters_.anisotropyD.size();
 		SizeType me = modelParameters_.anisotropyE.size();
 
@@ -183,13 +183,13 @@ public:
 	 PSIDOCCOPY $FirstFunctionBelow::MagneticField
 	 */
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const BlockType& block,
-	                                RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
 		SizeType linSize = superGeometry_.numberOfSites();
-		SizeType n = block.size();
+		SizeType n       = block.size();
 
 		for (SizeType i = 0; i < n; ++i) {
 
@@ -208,7 +208,7 @@ public:
 			// anisotropyD
 			if (modelParameters_.anisotropyD.size() == linSize) {
 				SparseMatrixType Szsquare;
-				RealType tmp = modelParameters_.anisotropyD[site];
+				RealType         tmp = modelParameters_.anisotropyD[site];
 				multiply(Szsquare, sz.getCRS(), sz.getCRS());
 				hmatrix += tmp * Szsquare;
 			}
@@ -233,9 +233,9 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
+		SizeType  site = 0;
 		BlockType block(1, site);
-		SizeType total = utils::powUint(modelParameters_.twiceTheSpin + 1, block.size());
+		SizeType  total = utils::powUint(modelParameters_.twiceTheSpin + 1, block.size());
 		HilbertBasisType natBasis(total);
 		for (SizeType i = 0; i < total; ++i)
 			natBasis[i] = i;
@@ -270,22 +270,22 @@ protected:
 			// Set the operators S^z_i in the natural basis
 			tmpMatrix = findSzMatrices(i, natBasis);
 			typename OperatorType::Su2RelatedType su2related2;
-			OperatorType myOp2(tmpMatrix,
-			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                   PairType(2, 1),
-			                   1.0 / sqrt(2.0),
-			                   su2related2);
+			OperatorType                          myOp2(tmpMatrix,
+                                           ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                           PairType(2, 1),
+                                           1.0 / sqrt(2.0),
+                                           su2related2);
 			this->createOpsLabel("sz").push(myOp2);
 			this->makeTrackable("sz");
 
 			// Set the operators S^x_i in the natural basis
 			tmpMatrix = findSxOrSyBarMatrices(i, natBasis, "sx");
 			typename OperatorType::Su2RelatedType su2related3;
-			OperatorType myOp3(tmpMatrix,
-			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
-			                   PairType(2, 1),
-			                   1.0 / sqrt(2.0),
-			                   su2related3);
+			OperatorType                          myOp3(tmpMatrix,
+                                           ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                           PairType(2, 1),
+                                           1.0 / sqrt(2.0),
+                                           su2related3);
 			this->createOpsLabel("sx").push(myOp3);
 
 			if (additional_ == "Anisotropic" || additional_ == "2")
@@ -353,15 +353,15 @@ private:
 	{
 		assert(c == 'X' || c == 'Z');
 
-		const SizeType linSize = superGeometry_.numberOfSites();
-		const VectorRealType& v = (c == 'X') ? modelParameters_.magneticFieldX
-		                                     : modelParameters_.magneticFieldZ;
+		const SizeType        linSize = superGeometry_.numberOfSites();
+		const VectorRealType& v       = (c == 'X') ? modelParameters_.magneticFieldX
+		                                           : modelParameters_.magneticFieldZ;
 
 		if (v.size() != linSize)
 			return;
 
 		assert(site < v.size());
-		RealType tmp = v[site];
+		RealType            tmp    = v[site];
 		const OperatorType& sminus = ModelBaseType::naturalOperator("sminus", site, 0);
 
 		const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
@@ -373,7 +373,7 @@ private:
 
 		assert(c == 'X');
 		const OperatorType& splus = ModelBaseType::naturalOperator("splus", site, 0);
-		constexpr RealType zeroPointFive = 0.5;
+		constexpr RealType  zeroPointFive = 0.5;
 		hmatrix += zeroPointFive * tmp * splus.getCRS();
 		hmatrix += zeroPointFive * tmp * sminus.getCRS();
 	}
@@ -381,12 +381,12 @@ private:
 	void fillModelLinks2()
 	{
 		ModelTermType& sxsx = ModelBaseType::createTerm("sxsx");
-		OpForLinkType sx("sx");
+		OpForLinkType  sx("sx");
 		sxsx.push(sx, 'N', sx, 'N');
 
-		auto sybarsybarModifier = [](ComplexOrRealType& value) { value *= -1.0; };
-		ModelTermType& sybarsybar = ModelBaseType::createTerm("sybarsybar");
-		OpForLinkType sybar("sybar");
+		auto           sybarsybarModifier = [](ComplexOrRealType& value) { value *= -1.0; };
+		ModelTermType& sybarsybar         = ModelBaseType::createTerm("sybarsybar");
+		OpForLinkType  sybar("sybar");
 		sybarsybar.push(sybar, 'N', sybar, 'N', sybarsybarModifier);
 
 		connectionSzSz();
@@ -403,12 +403,12 @@ private:
 	//! Find S^+_site in the natural basis natBasis
 	SparseMatrixType findSplusMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
-		SizeType total = natBasis.size();
+		SizeType   total = natBasis.size();
 		MatrixType cm(total, total);
-		RealType j = 0.5 * modelParameters_.twiceTheSpin;
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-		SizeType bits = 1 + ProgramGlobals::logBase2(modelParameters_.twiceTheSpin);
-		SizeType mask = 1;
+		RealType   j              = 0.5 * modelParameters_.twiceTheSpin;
+		SizeType   bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
+		SizeType   bits = 1 + ProgramGlobals::logBase2(modelParameters_.twiceTheSpin);
+		SizeType   mask = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);
 		mask--;
@@ -445,12 +445,12 @@ private:
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
-		SizeType total = natBasis.size();
+		SizeType   total = natBasis.size();
 		MatrixType cm(total, total);
-		RealType j = 0.5 * modelParameters_.twiceTheSpin;
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-		SizeType bits = ProgramGlobals::logBase2(modelParameters_.twiceTheSpin) + 1;
-		SizeType mask = 1;
+		RealType   j              = 0.5 * modelParameters_.twiceTheSpin;
+		SizeType   bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
+		SizeType   bits = ProgramGlobals::logBase2(modelParameters_.twiceTheSpin) + 1;
+		SizeType   mask = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);
 		mask--;
@@ -462,7 +462,7 @@ private:
 			SizeType ketsite = ket & mask;
 			ketsite >>= (site * bitsForOneSite);
 			assert(ketsite == ket);
-			RealType m = ketsite - j;
+			RealType m   = ketsite - j;
 			cm(ket, ket) = m;
 		}
 
@@ -473,11 +473,11 @@ private:
 	//! Find Maximal_i in the natural basis natBasis
 	SparseMatrixType findMaximal(SizeType site, const HilbertBasisType& natBasis) const
 	{
-		SizeType total = natBasis.size();
+		SizeType   total = natBasis.size();
 		MatrixType cm(total, total);
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
-		SizeType bits = ProgramGlobals::logBase2(modelParameters_.twiceTheSpin) + 1;
-		SizeType mask = 1;
+		SizeType   bitsForOneSite = utils::bitSizeOfInteger(modelParameters_.twiceTheSpin);
+		SizeType   bits = ProgramGlobals::logBase2(modelParameters_.twiceTheSpin) + 1;
+		SizeType   mask = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);
 		mask--;
@@ -498,14 +498,14 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findSxOrSyBarMatrices(SizeType site,
+	SparseMatrixType findSxOrSyBarMatrices(SizeType                site,
 	                                       const HilbertBasisType& natBasis,
-	                                       PsimagLite::String what) const
+	                                       PsimagLite::String      what) const
 	{
 		if (what != "sx" && what != "sybar")
 			err("findSxOrSyBarMatrices: don't know how to calculate " + what + "\n");
 
-		const RealType sign = (what == "sx") ? 1.0 : -1.0;
+		const RealType   sign       = (what == "sx") ? 1.0 : -1.0;
 		SparseMatrixType Splus_temp = findSplusMatrices(site, natBasis);
 		SparseMatrixType Sminus_temp, Sx;
 		transposeConjugate(Sminus_temp, Splus_temp);
@@ -546,7 +546,7 @@ private:
 			if (isCanonical)
 				other[0] = getSzPlusConst(basis[i], n);
 			SizeType flavor = 1;
-			qns[i] = QnType(false, other, jmpair, flavor);
+			qns[i]          = QnType(false, other, jmpair, flavor);
 		}
 	}
 
@@ -569,12 +569,12 @@ private:
 		return sum;
 	}
 
-	ModelParametersType modelParameters_;
-	const SuperGeometryType& superGeometry_;
-	SpinSquaredHelper<RealType, WordType> spinSquaredHelper_;
-	PsimagLite::String additional_;
+	ModelParametersType                                modelParameters_;
+	const SuperGeometryType&                           superGeometry_;
+	SpinSquaredHelper<RealType, WordType>              spinSquaredHelper_;
+	PsimagLite::String                                 additional_;
 	SpinSquared<SpinSquaredHelper<RealType, WordType>> spinSquared_;
-	AkltType aklt_;
+	AkltType                                           aklt_;
 }; // class ModelHeisenberg
 
 } // namespace Dmrg

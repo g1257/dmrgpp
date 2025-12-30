@@ -70,22 +70,22 @@ template <typename RealType> struct KernelPolynomialParameters {
 
 template <typename VectorType_> class ChebyshevSerializer {
 
-	typedef typename VectorType_::value_type VectorElementType;
+	typedef typename VectorType_::value_type       VectorElementType;
 	typedef typename Real<VectorElementType>::Type RealType;
 
 	static const String stringMarker_;
 
 public:
 
-	typedef VectorType_ VectorType;
-	typedef typename VectorType::value_type FieldType;
-	typedef Matrix<FieldType> MatrixType;
+	typedef VectorType_                                          VectorType;
+	typedef typename VectorType::value_type                      FieldType;
+	typedef Matrix<FieldType>                                    MatrixType;
 	typedef typename Vector<std::pair<RealType, RealType>>::Type PlotDataType;
-	typedef PlotParams<RealType> PlotParamsType;
-	typedef ParametersForSolver<RealType> ParametersType;
-	typedef KernelPolynomialParameters<RealType> KernelParametersType;
-	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
-	typedef typename TridiagonalMatrixType::VectorRealType VectorRealType;
+	typedef PlotParams<RealType>                                 PlotParamsType;
+	typedef ParametersForSolver<RealType>                        ParametersType;
+	typedef KernelPolynomialParameters<RealType>                 KernelParametersType;
+	typedef TridiagonalMatrix<RealType>                          TridiagonalMatrixType;
+	typedef typename TridiagonalMatrixType::VectorRealType       VectorRealType;
 
 	ChebyshevSerializer(const TridiagonalMatrixType& ab, const ParametersType& params)
 	    : progress_("ChebyshevSerializer")
@@ -125,8 +125,8 @@ public:
 
 	static const String& stringMarker() { return stringMarker_; }
 
-	void plot(PlotDataType& result,
-	          const PlotParamsType& params,
+	void plot(PlotDataType&               result,
+	          const PlotParamsType&       params,
 	          const KernelParametersType& kernelParams) const
 	{
 		SizeType cutoff = kernelParams.cutoff;
@@ -139,7 +139,7 @@ public:
 		computeGnMuN(gnmun, gn);
 
 		SizeType counter = 0;
-		SizeType n = SizeType((params.omega2 - params.omega1) / params.deltaOmega);
+		SizeType n       = SizeType((params.omega2 - params.omega1) / params.deltaOmega);
 		if (result.size() == 0)
 			result.resize(n);
 		RealType offset = params_.Eg;
@@ -184,9 +184,9 @@ private:
 	void computeGnMuN(VectorRealType& gnmn, VectorRealType& gn) const
 	{
 		for (SizeType i = 0; i < gnmn.size(); ++i) {
-			const SizeType j = (i & 1) ? (i - 1) / 2 : i / 2;
+			const SizeType  j   = (i & 1) ? (i - 1) / 2 : i / 2;
 			const RealType& tmp = (i & 1) ? moments_.b(j) : moments_.a(j);
-			gnmn[i] = tmp * gn[i];
+			gnmn[i]             = tmp * gn[i];
 		}
 	}
 
@@ -209,7 +209,7 @@ private:
 	void initKernelJackson(VectorRealType& gn) const
 	{
 		SizeType nPlus1 = gn.size() + 1;
-		RealType cot1 = 1.0 / tan(M_PI / nPlus1);
+		RealType cot1   = 1.0 / tan(M_PI / nPlus1);
 		for (SizeType i = 0; i < gn.size(); i++) {
 			gn[i]
 			    = (nPlus1 - i) * cos(M_PI * i / nPlus1) + sin(M_PI * i / nPlus1) * cot1;
@@ -219,16 +219,16 @@ private:
 
 	void initKernelLorentz(VectorRealType& gn, const RealType& lambda) const
 	{
-		RealType nreal = gn.size();
+		RealType nreal      = gn.size();
 		RealType sinhlambda = sinh(lambda);
 		for (SizeType i = 0; i < gn.size(); i++) {
 			gn[i] = sinh(lambda * (1 - i / nreal)) / sinhlambda;
 		}
 	}
 
-	ProgressIndicator progress_;
-	TridiagonalMatrixType moments_;
-	ParametersType params_;
+	ProgressIndicator           progress_;
+	TridiagonalMatrixType       moments_;
+	ParametersType              params_;
 	ChebyshevFunction<RealType> chebyshev_;
 }; // class ChebyshevSerializer
 

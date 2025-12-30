@@ -109,8 +109,8 @@ public:
 		if (ysize & 1)
 			throw RuntimeError("LinearPrediction::ctor(...): data set must "
 			                   "contain an even number of points\n");
-		SizeType n = ysize / 2;
-		MatrixType A(p, p);
+		SizeType                         n = ysize / 2;
+		MatrixType                       A(p, p);
 		typename Vector<FieldType>::Type B(p);
 		computeA(A, n);
 		computeB(B, n);
@@ -125,8 +125,8 @@ public:
 		if (ysize & 1)
 			throw RuntimeError("LinearPrediction::ctor(...): data set must "
 			                   "contain an even number of points\n");
-		SizeType n = ysize / 2;
-		MatrixType A(p, p);
+		SizeType                         n = ysize / 2;
+		MatrixType                       A(p, p);
 		typename Vector<FieldType>::Type B(p);
 		computeA(A, n);
 		computeB(B, n);
@@ -148,12 +148,12 @@ public:
 	void predict2(SizeType p)
 	{
 		// Fix roots
-		typedef std::complex<double> Complex;
-		SizeType twicep = 2 * p;
-		SizeType pp1 = p + 1;
+		typedef std::complex<double>     Complex;
+		SizeType                         twicep = 2 * p;
+		SizeType                         pp1    = p + 1;
 		typename Vector<FieldType>::Type nd(p), aa(pp1), zz(twicep);
-		std::vector<Complex> roots(p);
-		std::vector<Complex> ab(pp1);
+		std::vector<Complex>             roots(p);
+		std::vector<Complex>             ab(pp1);
 
 		aa[p] = 1;
 		for (SizeType j = 0; j < p; j++) {
@@ -210,13 +210,13 @@ private:
 	//! call to BLAS::GEMV
 	void computeD(MatrixType& A, typename Vector<FieldType>::Type& B)
 	{
-		SizeType p = B.size();
+		SizeType                   p = B.size();
 		typename Vector<int>::Type ipiv(p); // use signed integers here!!
-		int info = 0;
+		int                        info = 0;
 		psimag::LAPACK::GETRF(p, p, &(A(0, 0)), p, &(ipiv[0]), info);
 
 		typename Vector<FieldType>::Type work(2);
-		int lwork = -1; // query mode
+		int                              lwork = -1; // query mode
 		psimag::LAPACK::GETRI(p, &(A(0, 0)), p, &(ipiv[0]), &(work[0]), lwork, info);
 		lwork = static_cast<int>(work[0]);
 		if (lwork <= 0)
@@ -252,7 +252,7 @@ private:
 	}
 
 	typename Vector<FieldType>::Type y_;
-	SizeType p_;
+	SizeType                         p_;
 	typename Vector<FieldType>::Type d_;
 }; // class LinearPrediction
 } // namespace PsimagLite

@@ -88,7 +88,7 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	// no connectors here, connectors are handled by the geometry
@@ -119,7 +119,7 @@ struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnTyp
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
+	friend std::ostream& operator<<(std::ostream&                       os,
 	                                const ParametersHeisenbergAncillaC& parameters)
 	{
 		os << "MagneticField=" << parameters.magneticField << "\n";
@@ -127,7 +127,7 @@ struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnTyp
 		return os;
 	}
 
-	SizeType twiceTheSpin;
+	SizeType       twiceTheSpin;
 	VectorRealType magneticField;
 };
 } // namespace Dmrg

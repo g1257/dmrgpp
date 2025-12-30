@@ -12,20 +12,20 @@ template <typename LeftRightSuperType_> class WaveStructCombined {
 
 public:
 
-	typedef LeftRightSuperType_ LeftRightSuperType;
-	typedef WaveStructSvd<LeftRightSuperType> WaveStructSvdType;
-	typedef typename WaveStructSvdType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef LeftRightSuperType_                                 LeftRightSuperType;
+	typedef WaveStructSvd<LeftRightSuperType>                   WaveStructSvdType;
+	typedef typename WaveStructSvdType::BasisWithOperatorsType  BasisWithOperatorsType;
 	typedef typename WaveStructSvdType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename WaveStructSvdType::VectorVectorRealType VectorVectorRealType;
-	typedef typename WaveStructSvdType::VectorMatrixType VectorMatrixType;
-	typedef typename WaveStructSvdType::VectorQnType VectorQnType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::BlockType VectorSizeType;
-	typedef DiskOrMemoryStack<WaveStructSvdType> WftStackType;
+	typedef typename WaveStructSvdType::VectorVectorRealType    VectorVectorRealType;
+	typedef typename WaveStructSvdType::VectorMatrixType        VectorMatrixType;
+	typedef typename WaveStructSvdType::VectorQnType            VectorQnType;
+	typedef typename BasisWithOperatorsType::BasisType          BasisType;
+	typedef typename BasisType::BlockType                       VectorSizeType;
+	typedef DiskOrMemoryStack<WaveStructSvdType>                WftStackType;
 
-	WaveStructCombined(bool onDisk,
+	WaveStructCombined(bool                     onDisk,
 	                   const PsimagLite::String filename,
-	                   const BasisTraits& basisTraits)
+	                   const BasisTraits&       basisTraits)
 	    : lrs_("pSE", "pSprime", "pEprime", basisTraits)
 	    , wsStack_(onDisk, filename, "Wstacks", "system", basisTraits)
 	    , weStack_(onDisk, filename, "Wstacks", "environ", basisTraits)
@@ -98,11 +98,11 @@ public:
 	}
 
 	void push(const BlockDiagonalMatrixType& transform,
-	          ProgramGlobals::DirectionEnum direction,
-	          const VectorMatrixType& vts,
-	          const VectorVectorRealType& s,
-	          const VectorQnType& qns,
-	          ProgramGlobals::DirectionEnum dir)
+	          ProgramGlobals::DirectionEnum  direction,
+	          const VectorMatrixType&        vts,
+	          const VectorVectorRealType&    s,
+	          const VectorQnType&            qns,
+	          ProgramGlobals::DirectionEnum  dir)
 	{
 		WaveStructSvdType wave(transform, vts, s, qns);
 
@@ -167,9 +167,9 @@ private:
 	}
 
 	LeftRightSuperType lrs_;
-	WftStackType wsStack_;
-	WftStackType weStack_;
-	bool needsPop_;
+	WftStackType       wsStack_;
+	WftStackType       weStack_;
+	bool               needsPop_;
 };
 }
 #endif // WAVESTRUCTCOMBINED_H

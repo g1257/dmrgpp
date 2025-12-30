@@ -92,15 +92,15 @@ namespace Dmrg {
 template <typename VectorWithOffsetType, typename MettsStochasticsType, typename TargetParamsType>
 class MettsCollapse {
 
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename MettsStochasticsType::PairType PairType;
-	typedef typename MettsStochasticsType::LeftRightSuperType LeftRightSuperType;
+	typedef typename VectorWithOffsetType::VectorType           VectorType;
+	typedef typename MettsStochasticsType::PairType             PairType;
+	typedef typename MettsStochasticsType::LeftRightSuperType   LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename MettsStochasticsType::RealType RealType;
-	typedef typename MettsStochasticsType::RngType RngType;
-	typedef typename MettsStochasticsType::ModelType ModelType;
-	typedef PsimagLite::Matrix<RealType> MatrixType;
+	typedef typename BasisWithOperatorsType::BasisType          BasisType;
+	typedef typename MettsStochasticsType::RealType             RealType;
+	typedef typename MettsStochasticsType::RngType              RngType;
+	typedef typename MettsStochasticsType::ModelType            ModelType;
+	typedef PsimagLite::Matrix<RealType>                        MatrixType;
 
 	static const bool COLLAPSE_INTO_RANDOM_BASIS = false;
 
@@ -109,8 +109,8 @@ public:
 	typedef PsimagLite::PackIndices PackIndicesType;
 
 	MettsCollapse(const MettsStochasticsType& mettsStochastics,
-	              const LeftRightSuperType& lrs,
-	              const TargetParamsType& targetParams)
+	              const LeftRightSuperType&   lrs,
+	              const TargetParamsType&     targetParams)
 	    : mettsStochastics_(mettsStochastics)
 	    , lrs_(lrs)
 	    , rng_(targetParams.rngSeed)
@@ -120,10 +120,10 @@ public:
 	    , collapseBasis_(0, 0)
 	{ }
 
-	bool operator()(VectorWithOffsetType& c,
-	                const VectorWithOffsetType& eToTheBetaH,
+	bool operator()(VectorWithOffsetType&                        c,
+	                const VectorWithOffsetType&                  eToTheBetaH,
 	                typename PsimagLite::Vector<SizeType>::Type& block,
-	                ProgramGlobals::DirectionEnum direction)
+	                ProgramGlobals::DirectionEnum                direction)
 	{
 		assert(direction != ProgramGlobals::DirectionEnum::INFINITE);
 
@@ -157,7 +157,7 @@ public:
 		return true;
 	}
 
-	void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,
+	void setNk(typename PsimagLite::Vector<SizeType>::Type&       nk,
 	           const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		for (SizeType i = 0; i < block.size(); i++)
@@ -186,11 +186,11 @@ public:
 
 private:
 
-	void internalAction(VectorWithOffsetType& dest2,
-	                    const VectorWithOffsetType& src2,
+	void internalAction(VectorWithOffsetType&                              dest2,
+	                    const VectorWithOffsetType&                        src2,
 	                    const typename PsimagLite::Vector<SizeType>::Type& block,
-	                    ProgramGlobals::DirectionEnum direction,
-	                    bool border) const
+	                    ProgramGlobals::DirectionEnum                      direction,
+	                    bool                                               border) const
 	{
 		if (dest2.size() == 0) {
 			dest2 = src2;
@@ -232,12 +232,12 @@ private:
 		assert(dest2.size() == src2.size());
 	}
 
-	void collapseVector(VectorWithOffsetType& dest2, // <<---- CPS
-	                    const VectorWithOffsetType& src, // <--- MPS
+	void collapseVector(VectorWithOffsetType&         dest2, // <<---- CPS
+	                    const VectorWithOffsetType&   src, // <--- MPS
 	                    ProgramGlobals::DirectionEnum direction,
-	                    SizeType indexFixed, // <--- m1
+	                    SizeType                      indexFixed, // <--- m1
 	                    SizeType nk, // <-- size of the Hilbert sp. of one site
-	                    bool border) const
+	                    bool     border) const
 	{
 		VectorWithOffsetType dest = dest2;
 		dest.populateSectors(lrs_.super());
@@ -251,13 +251,13 @@ private:
 		std::cerr << " Norm of the collapsed=" << norm(dest2) << "\n";
 	}
 
-	void collapseVector(VectorWithOffsetType& w, // <<---- CPS
-	                    const VectorWithOffsetType& v, // <--- MPS
+	void collapseVector(VectorWithOffsetType&         w, // <<---- CPS
+	                    const VectorWithOffsetType&   v, // <--- MPS
 	                    ProgramGlobals::DirectionEnum direction,
-	                    SizeType m, // <-- non-zero sector
-	                    SizeType indexFixed, // <--- m1
+	                    SizeType                      m, // <-- non-zero sector
+	                    SizeType                      indexFixed, // <--- m1
 	                    SizeType nk, // <-- size of the Hilbert sp. of one site
-	                    bool border) const
+	                    bool     border) const
 	{
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			collapseVectorLeft(w, v, m, indexFixed, nk, border);
@@ -279,12 +279,12 @@ private:
 		std::cout << __FILE__ << " " << __LINE__ << " count=" << fraction << "%\n";
 	}
 
-	void collapseVectorLeft(VectorWithOffsetType& w, // <<---- CPS
+	void collapseVectorLeft(VectorWithOffsetType&       w, // <<---- CPS
 	                        const VectorWithOffsetType& v, // <--- MPS
-	                        SizeType m, // <-- non-zero sector
-	                        SizeType indexFixed, // <--- m1
+	                        SizeType                    m, // <-- non-zero sector
+	                        SizeType                    indexFixed, // <--- m1
 	                        SizeType nk, // <-- size of the Hilbert sp. of one site
-	                        bool border) const
+	                        bool     border) const
 	{
 		if (border)
 			collapseLeftBorder(w, v, m, indexFixed, nk);
@@ -292,16 +292,16 @@ private:
 			collapseVectorLeft(w, v, m, indexFixed, nk);
 	}
 
-	void collapseVectorLeft(VectorWithOffsetType& w, // <<---- CPS
+	void collapseVectorLeft(VectorWithOffsetType&       w, // <<---- CPS
 	                        const VectorWithOffsetType& v, // <--- MPS
-	                        SizeType m, // <-- non-zero sector
-	                        SizeType indexFixed, // <--- m1
+	                        SizeType                    m, // <-- non-zero sector
+	                        SizeType                    indexFixed, // <--- m1
 	                        SizeType nk) const // <-- size of the Hilbert sp. of one site
 	{
 		SizeType offset = lrs_.super().partition(m);
-		int total = lrs_.super().partition(m + 1) - offset;
+		int      total  = lrs_.super().partition(m + 1) - offset;
 
-		SizeType ns = lrs_.left().size();
+		SizeType        ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
 		PackIndicesType packLeft(ns / nk);
 		for (SizeType i = 0; i < SizeType(total); i++) {
@@ -323,17 +323,17 @@ private:
 		}
 	}
 
-	void collapseLeftBorder(VectorWithOffsetType& w, // <<---- CPS
+	void collapseLeftBorder(VectorWithOffsetType&       w, // <<---- CPS
 	                        const VectorWithOffsetType& v, // <--- MPS
-	                        SizeType m, // <-- non-zero sector
-	                        SizeType indexFixed, // <--- m1
+	                        SizeType                    m, // <-- non-zero sector
+	                        SizeType                    indexFixed, // <--- m1
 	                        SizeType nk) const // <-- size of the Hilbert sp. of one site
 	{
 		assert(lrs_.right().size() == nk);
 		SizeType offset = lrs_.super().partition(m);
-		int total = lrs_.super().partition(m + 1) - offset;
+		int      total  = lrs_.super().partition(m + 1) - offset;
 
-		SizeType ns = lrs_.left().size();
+		SizeType        ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
 
 		for (SizeType i = 0; i < SizeType(total); i++) {
@@ -350,12 +350,12 @@ private:
 		}
 	}
 
-	void collapseVectorRight(VectorWithOffsetType& w, // <<---- CPS
+	void collapseVectorRight(VectorWithOffsetType&       w, // <<---- CPS
 	                         const VectorWithOffsetType& v, // <--- MPS
-	                         SizeType m, // <-- non-zero sector
-	                         SizeType indexFixed, // <--- m1
+	                         SizeType                    m, // <-- non-zero sector
+	                         SizeType                    indexFixed, // <--- m1
 	                         SizeType nk, // <-- size of the Hilbert sp. of one site
-	                         bool border) const
+	                         bool     border) const
 	{
 		if (border)
 			collapseRightBorder(w, v, m, indexFixed, nk);
@@ -363,16 +363,16 @@ private:
 			collapseVectorRight(w, v, m, indexFixed, nk);
 	}
 
-	void collapseVectorRight(VectorWithOffsetType& w, // <<---- CPS
+	void collapseVectorRight(VectorWithOffsetType&       w, // <<---- CPS
 	                         const VectorWithOffsetType& v, // <--- MPS
-	                         SizeType m, // <-- non-zero sector
-	                         SizeType indexFixed, // <--- m1
+	                         SizeType                    m, // <-- non-zero sector
+	                         SizeType                    indexFixed, // <--- m1
 	                         SizeType nk) const // <-- size of the Hilbert sp. of one site
 	{
 		SizeType offset = lrs_.super().partition(m);
-		int total = lrs_.super().partition(m + 1) - offset;
+		int      total  = lrs_.super().partition(m + 1) - offset;
 
-		SizeType ns = lrs_.left().size();
+		SizeType        ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
 		PackIndicesType packRight(nk);
 		for (SizeType i = 0; i < SizeType(total); i++) {
@@ -394,17 +394,17 @@ private:
 		}
 	}
 
-	void collapseRightBorder(VectorWithOffsetType& w, // <<---- CPS
+	void collapseRightBorder(VectorWithOffsetType&       w, // <<---- CPS
 	                         const VectorWithOffsetType& v, // <--- MPS
-	                         SizeType m, // <-- non-zero sector
-	                         SizeType indexFixed, // <--- m1
+	                         SizeType                    m, // <-- non-zero sector
+	                         SizeType                    indexFixed, // <--- m1
 	                         SizeType nk) const // <-- size of the Hilbert sp. of one site
 	{
 		assert(lrs_.left().size() == nk);
 		SizeType offset = lrs_.super().partition(m);
-		int total = lrs_.super().partition(m + 1) - offset;
+		int      total  = lrs_.super().partition(m + 1) - offset;
 
-		SizeType ns = lrs_.left().size();
+		SizeType        ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
 
 		for (SizeType i = 0; i < SizeType(total); i++) {
@@ -423,10 +423,10 @@ private:
 
 	// p[m] = norm2 of the collapsed_m
 	void probability(typename PsimagLite::Vector<RealType>::Type& p,
-	                 const VectorWithOffsetType& src,
-	                 ProgramGlobals::DirectionEnum direction,
-	                 SizeType volumeOfNk,
-	                 bool border) const
+	                 const VectorWithOffsetType&                  src,
+	                 ProgramGlobals::DirectionEnum                direction,
+	                 SizeType                                     volumeOfNk,
+	                 bool                                         border) const
 	{
 		RealType tmp = norm(src);
 		if (fabs(tmp - 1.0) > 1e-3)
@@ -500,7 +500,7 @@ private:
 			throw PsimagLite::RuntimeError("particleCollapse: only for 4 states\n");
 
 		MatrixType m2(m.rows(), m.cols());
-		RealType theta = M_PI * rng_();
+		RealType   theta = M_PI * rng_();
 		rotation2d(m2, 1, 2, theta);
 		m = m2;
 	}
@@ -529,9 +529,9 @@ private:
 	{
 		for (SizeType i = 0; i < hilbertSize; i++) {
 			MatrixType aux1(m.rows(), m.n_col());
-			RealType theta = M_PI * rng_();
-			SizeType i1 = i;
-			SizeType i2 = i + 1;
+			RealType   theta = M_PI * rng_();
+			SizeType   i1    = i;
+			SizeType   i2    = i + 1;
 			if (i == hilbertSize - 1)
 				i2 = 0;
 			rotation2d(aux1, i1, i2, theta);
@@ -548,31 +548,31 @@ private:
 		for (SizeType i = 0; i < m.rows(); i++)
 			m(i, i) = 1.0;
 		m(x, x) = m(y, y) = cos(theta);
-		m(x, y) = sin(theta);
-		m(y, x) = -sin(theta);
+		m(x, y)           = sin(theta);
+		m(y, x)           = -sin(theta);
 	}
 
-	bool atBorder(ProgramGlobals::DirectionEnum direction,
+	bool atBorder(ProgramGlobals::DirectionEnum                      direction,
 	              const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		typename PsimagLite::Vector<SizeType>::Type nk;
 		setNk(nk, block);
 		SizeType volumeOfNk = volumeOf(nk);
-		bool b1 = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM
-		           && lrs_.right().size() == volumeOfNk);
-		bool b2 = (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON
-		           && lrs_.left().size() == volumeOfNk);
+		bool     b1         = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM
+                           && lrs_.right().size() == volumeOfNk);
+		bool     b2         = (direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON
+                           && lrs_.left().size() == volumeOfNk);
 		return (b1 || b2);
 	}
 
-	void setBlockToBorder(typename PsimagLite::Vector<SizeType>::Type& block2,
+	void setBlockToBorder(typename PsimagLite::Vector<SizeType>::Type&       block2,
 	                      const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		block2 = block;
 		assert(block.size() > 0);
-		SizeType site = block[block.size() - 1];
-		bool leftCorner = (site + 2 == lrs_.super().block().size()) ? false : true;
-		int offset = (leftCorner) ? -block.size() : block.size();
+		SizeType site       = block[block.size() - 1];
+		bool     leftCorner = (site + 2 == lrs_.super().block().size()) ? false : true;
+		int      offset     = (leftCorner) ? -block.size() : block.size();
 		for (SizeType i = 0; i < block2.size(); i++) {
 			block2[i] = block[i] + offset;
 		}
@@ -588,13 +588,13 @@ private:
 		throw PsimagLite::RuntimeError("checkBasis\n");
 	}
 
-	const MettsStochasticsType& mettsStochastics_;
-	const LeftRightSuperType& lrs_;
-	mutable RngType rng_;
-	const TargetParamsType& targetParams_;
-	PsimagLite::ProgressIndicator progress_;
-	ProgramGlobals::DirectionEnum prevDirection_;
-	MatrixType collapseBasis_;
+	const MettsStochasticsType&                 mettsStochastics_;
+	const LeftRightSuperType&                   lrs_;
+	mutable RngType                             rng_;
+	const TargetParamsType&                     targetParams_;
+	PsimagLite::ProgressIndicator               progress_;
+	ProgramGlobals::DirectionEnum               prevDirection_;
+	MatrixType                                  collapseBasis_;
 	typename PsimagLite::Vector<SizeType>::Type sitesSeen_;
 }; // class MettsCollapse
 } // namespace Dmrg

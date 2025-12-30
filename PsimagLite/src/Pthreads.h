@@ -106,11 +106,11 @@ template <typename PthreadFunctionHolderType> struct PthreadFunctionStruct {
 	{ }
 
 	PthreadFunctionHolderType* pfh;
-	int threadNum;
-	SizeType blockSize;
-	SizeType total;
-	pthread_mutex_t* mutex;
-	SizeType cpu;
+	int                        threadNum;
+	SizeType                   blockSize;
+	SizeType                   total;
+	pthread_mutex_t*           mutex;
+	SizeType                   cpu;
 };
 
 template <typename PthreadFunctionHolderType> void* thread_function_wrapper(void* dummyPtr)
@@ -145,7 +145,7 @@ public:
 	{
 		std::cerr << "Pthreads is deprecated, please use PthreadsNg\n";
 		int cores = sysconf(_SC_NPROCESSORS_ONLN);
-		cores_ = (cores > 0) ? cores : 1;
+		cores_    = (cores > 0) ? cores : 1;
 	}
 
 	void loopCreate(SizeType total, PthreadFunctionHolderType& pfh)
@@ -153,13 +153,13 @@ public:
 		PthreadFunctionStruct<PthreadFunctionHolderType>* pfs;
 		pfs = new PthreadFunctionStruct<PthreadFunctionHolderType>[nthreads_];
 		pthread_mutex_init(&(mutex_), NULL);
-		pthread_t* thread_id = new pthread_t[nthreads_];
-		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
+		pthread_t*       thread_id = new pthread_t[nthreads_];
+		pthread_attr_t** attr      = new pthread_attr_t*[nthreads_];
 
 		for (SizeType j = 0; j < nthreads_; j++) {
 			pfs[j].threadNum = j;
-			pfs[j].pfh = &pfh;
-			pfs[j].total = total;
+			pfs[j].pfh       = &pfh;
+			pfs[j].total     = total;
 			pfs[j].blockSize = total / nthreads_;
 			if (total % nthreads_ != 0)
 				pfs[j].blockSize++;
@@ -216,11 +216,11 @@ private:
 #ifdef PTHREAD_ASSIGN_AFFINITIES
 #ifndef __APPLE__
 		cpu_set_t* cpuset = new cpu_set_t;
-		int cpu = threadNum % cores;
+		int        cpu    = threadNum % cores;
 		CPU_ZERO(cpuset);
 		CPU_SET(cpu, cpuset);
 		std::size_t cpusetsize = sizeof(cpu_set_t);
-		int ret = pthread_attr_setaffinity_np(attr, cpusetsize, cpuset);
+		int         ret        = pthread_attr_setaffinity_np(attr, cpusetsize, cpuset);
 		checkForError(ret);
 		// clean up
 		delete cpuset;
@@ -238,8 +238,8 @@ private:
 #endif
 	}
 
-	SizeType nthreads_;
-	SizeType cores_;
+	SizeType        nthreads_;
+	SizeType        cores_;
 	pthread_mutex_t mutex_;
 }; // Pthreads class
 

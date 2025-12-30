@@ -110,9 +110,9 @@ private:
 
 	PsimagLite::String filename_;
 	PsimagLite::String labelForEnergy_;
-	bool mapStages_;
-	int sourceTvForPsi_;
-	VectorIntType mappingTvs_;
+	bool               mapStages_;
+	int                sourceTvForPsi_;
+	VectorIntType      mappingTvs_;
 };
 
 } // namespace Dmrg

@@ -89,7 +89,7 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
@@ -182,7 +182,7 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
+	friend std::ostream& operator<<(std::ostream&                    os,
 	                                const ParametersModelHeisenberg& parameters)
 	{
 		if (!parameters.magneticFieldX.empty())
@@ -196,8 +196,8 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 		return os;
 	}
 
-	SizeType twiceTheSpin;
-	SizeType twiceTheSpinBorder;
+	SizeType       twiceTheSpin;
+	SizeType       twiceTheSpinBorder;
 	VectorRealType magneticFieldX;
 	VectorRealType magneticFieldZ;
 	VectorRealType anisotropyD;

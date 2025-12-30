@@ -123,7 +123,7 @@ namespace Dmrg {
 void registerSignals()
 {
 #ifdef USE_SIGNALS
-	int signum = SIGUSR1;
+	int       signum  = SIGUSR1;
 	sigset_t* maskset = new sigset_t;
 
 	int ret = sigemptyset(maskset);
@@ -134,8 +134,8 @@ void registerSignals()
 
 	struct sigaction act;
 	act.sa_handler = PsimagLite::ProgressIndicator::updateBuffer;
-	act.sa_flags = 0;
-	act.sa_mask = *maskset;
+	act.sa_flags   = 0;
+	act.sa_mask    = *maskset;
 
 	ret = sigaction(signum, &act, 0);
 	delete maskset;

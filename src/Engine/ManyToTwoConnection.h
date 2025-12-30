@@ -11,23 +11,23 @@ class ManyToTwoConnection {
 
 public:
 
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef std::pair<SizeType, SizeType>      PairSizeType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 	using ComplexOrRealType = typename ModelLinksType::ComplexOrRealType;
 	using ModelTermLinkType = OneLink<ComplexOrRealType>;
 	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
 	using PairMetaOpForConnection = std::pair<MetaOpForConnection, MetaOpForConnection>;
 
-	ManyToTwoConnection(const VectorSizeType& hItems,
+	ManyToTwoConnection(const VectorSizeType&          hItems,
 	                    ProgramGlobals::ConnectionEnum type,
-	                    const ModelTermLinkType& oneLink,
-	                    const LeftRightSuperType& lrs,
-	                    const SuperOpHelperType& superOpHelper)
+	                    const ModelTermLinkType&       oneLink,
+	                    const LeftRightSuperType&      lrs,
+	                    const SuperOpHelperType&       superOpHelper)
 	    : oneLink_(oneLink)
 	    , lrs_(lrs)
 	{
 		if (hItems.size() == 2) {
-			pairMetaOps_.first.site = hItems[0];
+			pairMetaOps_.first.site  = hItems[0];
 			pairMetaOps_.second.site = hItems[1];
 			assert(oneLink.indices.size() == 2);
 			pairMetaOps_.first.index
@@ -35,13 +35,13 @@ public:
 			pairMetaOps_.second.index
 			    = locationSecond(hItems[1], oneLink.indices[1], type);
 			assert(oneLink.mods.size() == 2);
-			pairMetaOps_.first.modifier = oneLink.mods[0];
+			pairMetaOps_.first.modifier  = oneLink.mods[0];
 			pairMetaOps_.second.modifier = oneLink.mods[1];
 		} else {
 			PairMetaOpForConnection finals
 			    = superOpHelper.finalIndices(hItems, type, lrs.right().block().size());
 			convertNonLocals(finals, type);
-			pairMetaOps_.first.modifier = 'N'; // fixme
+			pairMetaOps_.first.modifier  = 'N'; // fixme
 			pairMetaOps_.second.modifier = 'N'; // fixme
 		}
 	}
@@ -69,10 +69,10 @@ private:
 
 		bool isHermit1 = (h1 == ModelLinksType::HERMIT_PLUS);
 		bool isHermit2 = (h2 == ModelLinksType::HERMIT_PLUS);
-		bool isAnti1 = (h1 == ModelLinksType::HERMIT_MINUS);
-		bool isAnti2 = (h2 == ModelLinksType::HERMIT_MINUS);
-		bool b1 = (isHermit1 && isAnti2);
-		bool b2 = (isAnti1 && isHermit2);
+		bool isAnti1   = (h1 == ModelLinksType::HERMIT_MINUS);
+		bool isAnti2   = (h2 == ModelLinksType::HERMIT_MINUS);
+		bool b1        = (isHermit1 && isAnti2);
+		bool b2        = (isAnti1 && isHermit2);
 		return (b1 || b2);
 	}
 
@@ -154,9 +154,9 @@ private:
 		}
 	}
 
-	const ModelTermLinkType& oneLink_;
+	const ModelTermLinkType&  oneLink_;
 	const LeftRightSuperType& lrs_;
-	PairMetaOpForConnection pairMetaOps_;
+	PairMetaOpForConnection   pairMetaOps_;
 };
 }
 #endif // MANYTOTWOCONNECTION_H

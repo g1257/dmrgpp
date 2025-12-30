@@ -89,11 +89,11 @@ namespace Dmrg {
 
 template <typename FieldType> struct Su2SymmetryGlobals {
 	typedef ClebschGordanCached<FieldType> ClebschGordanType;
-	static void init(bool hasSu2Symmetry)
+	static void                            init(bool hasSu2Symmetry)
 	{
 		if (!hasSu2Symmetry)
 			return;
-		MaximumJValue = 20;
+		MaximumJValue      = 20;
 		NumberOfFactorials = 100;
 		clebschGordanObject.init(MaximumJValue, NumberOfFactorials);
 	}

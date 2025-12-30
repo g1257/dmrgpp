@@ -25,7 +25,7 @@ class Ainur {
 
 	private:
 
-		String name_;
+		String      name_;
 		AinurState& state_;
 	};
 
@@ -41,7 +41,7 @@ class Ainur {
 
 	private:
 
-		String name_;
+		String      name_;
 		AinurState& state_;
 	};
 
@@ -54,8 +54,8 @@ class Ainur {
 
 public:
 
-	typedef std::string::iterator IteratorType;
-	typedef Vector<char>::Type VectorCharType;
+	typedef std::string::iterator        IteratorType;
+	typedef Vector<char>::Type           VectorCharType;
 	typedef AinurState::VectorStringType VectorStringType;
 
 	Ainur(String str);
@@ -92,7 +92,7 @@ private:
 		return true;
 	}
 
-	String dummy_;
+	String     dummy_;
 	AinurState state_;
 }; // class AinurSpirit
 

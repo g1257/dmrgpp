@@ -97,8 +97,8 @@ public:
 		// x = ind - y*n;
 		// x= ind % n;
 		ldiv_t q = std::ldiv(ind, n_);
-		y = q.quot;
-		x = q.rem;
+		y        = q.quot;
+		x        = q.rem;
 	}
 
 	SizeType

@@ -88,12 +88,12 @@ namespace Dmrg {
 
 template <typename LeftRightSuperType_, typename VectorWithOffsetType_> class ApplyOperatorLocal {
 
-	typedef typename VectorWithOffsetType_::VectorType TargetVectorType;
+	typedef typename VectorWithOffsetType_::VectorType           TargetVectorType;
 	typedef typename LeftRightSuperType_::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef typename BasisWithOperatorsType::ComplexOrRealType ComplexOrRealType;
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType_;
+	typedef typename BasisWithOperatorsType::RealType            RealType;
+	typedef typename BasisWithOperatorsType::ComplexOrRealType   ComplexOrRealType;
+	typedef PsimagLite::PackIndices                              PackIndicesType;
+	typedef typename BasisWithOperatorsType::OperatorType        OperatorType_;
 
 	class LegacyBug {
 
@@ -127,7 +127,7 @@ template <typename LeftRightSuperType_, typename VectorWithOffsetType_> class Ap
 
 	private:
 
-		bool withLegacyBug_;
+		bool           withLegacyBug_;
 		OperatorType_* Aptr_;
 	}; // class LegacyBug
 
@@ -135,7 +135,7 @@ public:
 
 	enum BorderEnum
 	{
-		BORDER_NO = false,
+		BORDER_NO  = false,
 		BORDER_YES = true
 	};
 
@@ -146,11 +146,11 @@ public:
 		RIGHT_CORNER
 	};
 
-	typedef LeftRightSuperType_ LeftRightSuperType;
+	typedef LeftRightSuperType_                        LeftRightSuperType;
 	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef OperatorType_ OperatorType;
-	typedef FermionSign FermionSignType;
+	typedef VectorWithOffsetType_                      VectorWithOffsetType;
+	typedef OperatorType_                              OperatorType;
+	typedef FermionSign                                FermionSignType;
 
 	ApplyOperatorLocal(const LeftRightSuperType& lrs, bool withLegacyBug)
 	    : lrs_(lrs)
@@ -159,15 +159,15 @@ public:
 
 	//! FIXME: we need to make a fast version for when we're just
 	//! figuring out where the (non-zero) partition is
-	void operator()(VectorWithOffsetType& dest,
-	                const VectorWithOffsetType& src,
-	                const OperatorType& AA,
-	                const FermionSign& fermionSign,
-	                SizeType splitSize,
+	void operator()(VectorWithOffsetType&         dest,
+	                const VectorWithOffsetType&   src,
+	                const OperatorType&           AA,
+	                const FermionSign&            fermionSign,
+	                SizeType                      splitSize,
 	                ProgramGlobals::DirectionEnum systemOrEnviron,
-	                BorderEnum corner) const
+	                BorderEnum                    corner) const
 	{
-		LegacyBug legacyBug(withLegacyBug_, AA);
+		LegacyBug           legacyBug(withLegacyBug_, AA);
 		const OperatorType& A = legacyBug();
 
 		if (corner == BORDER_NO) {
@@ -184,10 +184,10 @@ public:
 
 	//! FIXME: we need to make a fast version for when we're just
 	//! figuring out where the (non-zero) partition is
-	void hookForZero(VectorWithOffsetType& dest,
-	                 const VectorWithOffsetType& src,
-	                 const OperatorType& A,
-	                 SizeType splitSize,
+	void hookForZero(VectorWithOffsetType&         dest,
+	                 const VectorWithOffsetType&   src,
+	                 const OperatorType&           A,
+	                 SizeType                      splitSize,
 	                 ProgramGlobals::DirectionEnum systemOrEnviron) const
 	{
 		assert(systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
@@ -203,19 +203,19 @@ public:
 	}
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
-	void hookForZeroSystem(TargetVectorType& dest2,
+	void hookForZeroSystem(TargetVectorType&           dest2,
 	                       const VectorWithOffsetType& src,
-	                       const OperatorType& AA,
-	                       SizeType splitSize,
-	                       SizeType i0) const
+	                       const OperatorType&         AA,
+	                       SizeType                    splitSize,
+	                       SizeType                    i0) const
 	{
-		LegacyBug legacyBug(withLegacyBug_, AA);
+		LegacyBug           legacyBug(withLegacyBug_, AA);
 		const OperatorType& A = legacyBug();
 
 		SizeType offset = src.offset(i0);
-		SizeType final = offset + src.effectiveSize(i0);
-		SizeType ns = lrs_.left().permutationVector().size();
-		SizeType nx = ns / splitSize;
+		SizeType final  = offset + src.effectiveSize(i0);
+		SizeType ns     = lrs_.left().permutationVector().size();
+		SizeType nx     = ns / splitSize;
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
 
@@ -232,11 +232,11 @@ public:
 			pack2.unpack(x0, x1, lrs_.left().permutation(x));
 
 			SizeType start = A.getCRS().getRowPtr(x0);
-			SizeType end = A.getCRS().getRowPtr(x0 + 1);
+			SizeType end   = A.getCRS().getRowPtr(x0 + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType x0prime = A.getCRS().getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0prime + x1 * nx);
-				SizeType j = lrs_.super().permutationInverse(xprime + y * ns);
+				SizeType j      = lrs_.super().permutationInverse(xprime + y * ns);
 				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k);
 			}
 		}
@@ -250,12 +250,12 @@ private:
 
 	ApplyOperatorLocal& operator=(const ApplyOperatorLocal&);
 
-	void applyLocalOpSystem(VectorWithOffsetType& dest,
+	void applyLocalOpSystem(VectorWithOffsetType&       dest,
 	                        const VectorWithOffsetType& src,
-	                        const OperatorType& A,
-	                        const FermionSign& fermionSign,
-	                        SizeType splitSize,
-	                        LatticePartEnum whichPartOfTheLattice) const
+	                        const OperatorType&         A,
+	                        const FermionSign&          fermionSign,
+	                        SizeType                    splitSize,
+	                        LatticePartEnum             whichPartOfTheLattice) const
 	{
 		TargetVectorType dest2(lrs_.super().size(), 0.0);
 
@@ -277,17 +277,17 @@ private:
 	}
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
-	void applyLocalOpSystem(TargetVectorType& dest2,
+	void applyLocalOpSystem(TargetVectorType&           dest2,
 	                        const VectorWithOffsetType& src,
-	                        const OperatorType& A,
-	                        const FermionSign& fermionSign,
-	                        SizeType splitSize,
-	                        SizeType i0) const
+	                        const OperatorType&         A,
+	                        const FermionSign&          fermionSign,
+	                        SizeType                    splitSize,
+	                        SizeType                    i0) const
 	{
 		SizeType offset = src.offset(i0);
-		SizeType final = offset + src.effectiveSize(i0);
-		SizeType ns = lrs_.left().permutationVector().size();
-		SizeType nx = ns / splitSize;
+		SizeType final  = offset + src.effectiveSize(i0);
+		SizeType ns     = lrs_.left().permutationVector().size();
+		SizeType nx     = ns / splitSize;
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
 
@@ -305,22 +305,22 @@ private:
 
 			const bool isFermion
 			    = (A.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
-			const RealType sign = fermionSign(x0, (isFermion) ? -1 : 1);
+			const RealType sign  = fermionSign(x0, (isFermion) ? -1 : 1);
 			const SizeType start = A.getCRS().getRowPtr(x1);
-			const SizeType end = A.getCRS().getRowPtr(x1 + 1);
+			const SizeType end   = A.getCRS().getRowPtr(x1 + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType x1prime = A.getCRS().getCol(k);
 				SizeType xprime = lrs_.left().permutationInverse(x0 + x1prime * nx);
-				SizeType j = lrs_.super().permutationInverse(xprime + y * ns);
+				SizeType j      = lrs_.super().permutationInverse(xprime + y * ns);
 				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k) * sign;
 			}
 		}
 	}
 
-	void applyLocalOpEnviron(VectorWithOffsetType& dest,
+	void applyLocalOpEnviron(VectorWithOffsetType&       dest,
 	                         const VectorWithOffsetType& src,
-	                         const OperatorType& A,
-	                         LatticePartEnum whichPartOfTheLattice) const
+	                         const OperatorType&         A,
+	                         LatticePartEnum             whichPartOfTheLattice) const
 	{
 		TargetVectorType dest2(lrs_.super().size(), 0.0);
 
@@ -342,16 +342,16 @@ private:
 	}
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
-	void applyLocalOpEnviron(TargetVectorType& dest2,
+	void applyLocalOpEnviron(TargetVectorType&           dest2,
 	                         const VectorWithOffsetType& src,
-	                         const OperatorType& A,
-	                         SizeType i0) const
+	                         const OperatorType&         A,
+	                         SizeType                    i0) const
 	{
 		SizeType offset = src.offset(i0);
-		SizeType final = offset + src.effectiveSize(i0);
+		SizeType final  = offset + src.effectiveSize(i0);
 
-		SizeType ns = lrs_.left().size();
-		SizeType nx = A.getCRS().rows();
+		SizeType        ns = lrs_.left().size();
+		SizeType        nx = A.getCRS().rows();
 		PackIndicesType pack1(ns);
 		PackIndicesType pack2(nx);
 
@@ -364,9 +364,9 @@ private:
 			pack2.unpack(y0, y1, lrs_.right().permutation(y));
 			const bool isFermion
 			    = (A.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
-			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
+			const RealType sign  = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
 			const SizeType start = A.getCRS().getRowPtr(y0);
-			const SizeType end = A.getCRS().getRowPtr(y0 + 1);
+			const SizeType end   = A.getCRS().getRowPtr(y0 + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType y0prime = A.getCRS().getCol(k);
 				SizeType yprime
@@ -378,15 +378,15 @@ private:
 	}
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
-	void applyLocalOpLeftCorner(TargetVectorType& dest2,
+	void applyLocalOpLeftCorner(TargetVectorType&           dest2,
 	                            const VectorWithOffsetType& src,
-	                            const OperatorType& A,
-	                            SizeType i0) const
+	                            const OperatorType&         A,
+	                            SizeType                    i0) const
 	{
 		SizeType offset = src.offset(i0);
-		SizeType final = offset + src.effectiveSize(i0);
+		SizeType final  = offset + src.effectiveSize(i0);
 
-		SizeType ns = lrs_.left().size();
+		SizeType        ns = lrs_.left().size();
 		PackIndicesType pack(ns);
 
 		for (SizeType i = offset; i < final; ++i) {
@@ -395,24 +395,24 @@ private:
 			pack.unpack(x, y, lrs_.super().permutation(i));
 
 			const SizeType start = A.getCRS().getRowPtr(x);
-			const SizeType end = A.getCRS().getRowPtr(x + 1);
+			const SizeType end   = A.getCRS().getRowPtr(x + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType xprime = A.getCRS().getCol(k);
-				SizeType j = lrs_.super().permutationInverse(xprime + y * ns);
+				SizeType j      = lrs_.super().permutationInverse(xprime + y * ns);
 				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k);
 			}
 		}
 	}
 
 	// dest2 = transpose(A) * src; corrected if !withLegacyBug
-	void applyLocalOpRightCorner(TargetVectorType& dest2,
+	void applyLocalOpRightCorner(TargetVectorType&           dest2,
 	                             const VectorWithOffsetType& src,
-	                             const OperatorType& A,
-	                             SizeType i0) const
+	                             const OperatorType&         A,
+	                             SizeType                    i0) const
 	{
 		SizeType offset = src.offset(i0);
-		SizeType final = offset + src.effectiveSize(i0);
-		SizeType ns = lrs_.left().permutationVector().size();
+		SizeType final  = offset + src.effectiveSize(i0);
+		SizeType ns     = lrs_.left().permutationVector().size();
 		if (src.size() != lrs_.super().permutationVector().size())
 			err("applyLocalOpSystem SE\n");
 
@@ -428,22 +428,22 @@ private:
 
 			const bool isFermion
 			    = (A.fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::FERMION);
-			const RealType sign = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
+			const RealType sign  = lrs_.left().fermionicSign(x, (isFermion) ? -1 : 1);
 			const SizeType start = A.getCRS().getRowPtr(y);
-			const SizeType end = A.getCRS().getRowPtr(y + 1);
+			const SizeType end   = A.getCRS().getRowPtr(y + 1);
 			for (SizeType k = start; k < end; ++k) {
 				SizeType yprime = A.getCRS().getCol(k);
-				SizeType j = lrs_.super().permutationInverse(x + yprime * ns);
+				SizeType j      = lrs_.super().permutationInverse(x + yprime * ns);
 				dest2[j] += src.slowAccess(i) * A.getCRS().getValue(k) * sign;
 			}
 		}
 	}
 
 	// entry point for corner cases. These are all when expanding ths system
-	void applyLocalOpCorner(VectorWithOffsetType& dest,
+	void applyLocalOpCorner(VectorWithOffsetType&       dest,
 	                        const VectorWithOffsetType& src,
-	                        const OperatorType& A,
-	                        const FermionSign& fermionSign) const
+	                        const OperatorType&         A,
+	                        const FermionSign&          fermionSign) const
 	{
 		if (lrs_.right().size() == A.getCRS().rows()) { // right corner
 			SizeType splitSize = A.getCRS().rows(); // FIXME: check for SDHS
@@ -456,7 +456,7 @@ private:
 	}
 
 	const LeftRightSuperType& lrs_;
-	bool withLegacyBug_;
+	bool                      withLegacyBug_;
 }; // class ApplyOperatorLocal
 } // namespace Dmrg
 

@@ -122,9 +122,9 @@ public:
 	static void createP(Word& a)
 	{
 		const SizeType nphonons = getP(a);
-		const Word stateP = 1 + nphonons;
-		const Word maskP = (stateP << 2);
-		const Word maskF = getF(a);
+		const Word     stateP   = 1 + nphonons;
+		const Word     maskP    = (stateP << 2);
+		const Word     maskF    = getF(a);
 		assert(maskF < 4);
 		a = (maskP | maskF);
 	}

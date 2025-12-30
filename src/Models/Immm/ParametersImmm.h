@@ -105,11 +105,11 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 		str += "ParametersImmm";
 
 		const char* start = reinterpret_cast<const char*>(this);
-		const char* end = reinterpret_cast<const char*>(&potentialV);
-		SizeType total = mres.memResolv(&hubbardU, end - start, str + " hubbardU");
+		const char* end   = reinterpret_cast<const char*>(&potentialV);
+		SizeType    total = mres.memResolv(&hubbardU, end - start, str + " hubbardU");
 
 		start = end;
-		end = reinterpret_cast<const char*>(&minOxygenElectrons);
+		end   = reinterpret_cast<const char*>(&minOxygenElectrons);
 		total += mres.memResolv(&potentialV, end - start, str + " potentialV");
 
 		total += mres.memResolv(
@@ -141,7 +141,7 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	typename PsimagLite::Vector<RealType>::Type potentialV;
-	SizeType minOxygenElectrons;
+	SizeType                                    minOxygenElectrons;
 };
 } // namespace Dmrg
 

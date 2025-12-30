@@ -86,17 +86,17 @@ namespace Dmrg {
 
 template <typename FieldType> struct Link {
 
-	typedef std::pair<SizeType, SizeType> PairSizeType;
-	typedef typename PsimagLite::Real<FieldType>::Type RealType;
+	typedef std::pair<SizeType, SizeType>                       PairSizeType;
+	typedef typename PsimagLite::Real<FieldType>::Type          RealType;
 	typedef std::pair<MetaOpForConnection, MetaOpForConnection> PairMetaOForConnectoinType;
 
-	Link(PairMetaOForConnectoinType finalIndices1,
-	     ProgramGlobals::ConnectionEnum type1,
-	     const FieldType& value1,
+	Link(PairMetaOForConnectoinType         finalIndices1,
+	     ProgramGlobals::ConnectionEnum     type1,
+	     const FieldType&                   value1,
 	     ProgramGlobals::FermionOrBosonEnum fOb,
-	     SizeType aM,
-	     RealType aF,
-	     SizeType cat)
+	     SizeType                           aM,
+	     RealType                           aF,
+	     SizeType                           cat)
 	    : pairMetaOps(finalIndices1)
 	    , type(type1)
 	    , value(value1)
@@ -106,13 +106,13 @@ template <typename FieldType> struct Link {
 	    , category(cat)
 	{ }
 
-	PairMetaOForConnectoinType pairMetaOps;
-	ProgramGlobals::ConnectionEnum type;
-	FieldType value;
+	PairMetaOForConnectoinType         pairMetaOps;
+	ProgramGlobals::ConnectionEnum     type;
+	FieldType                          value;
 	ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
-	SizeType angularMomentum;
-	RealType angularFactor;
-	SizeType category;
+	SizeType                           angularMomentum;
+	RealType                           angularFactor;
+	SizeType                           category;
 }; // struct Link
 } // namespace Dmrg
 

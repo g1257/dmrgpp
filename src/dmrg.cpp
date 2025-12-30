@@ -33,9 +33,9 @@ void usageOperator()
 
 template <typename MatrixVectorType, typename VectorWithOffsetType>
 void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry,
-               const ParametersDmrgSolverType& dmrgSolverParams,
-               InputNgType::Readable& io,
-               const OperatorOptions& opOptions)
+               const ParametersDmrgSolverType&                          dmrgSolverParams,
+               InputNgType::Readable&                                   io,
+               const OperatorOptions&                                   opOptions)
 {
 	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
 	    ParametersForSolverType;
@@ -61,14 +61,14 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
 }
 
 template <typename MatrixVectorType>
-void mainLoop2(InputNgType::Readable& io,
+void mainLoop2(InputNgType::Readable&          io,
                const ParametersDmrgSolverType& dmrgSolverParams,
-               const OperatorOptions& opOptions)
+               const OperatorOptions&          opOptions)
 {
 
-	typedef typename MatrixVectorType::ModelType ModelBaseType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename MatrixVectorType::ModelType        ModelBaseType;
+	typedef typename ModelBaseType::QnType              QnType;
+	typedef typename ModelBaseType::ModelHelperType     ModelHelperType;
 	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef SuperGeometry<SparseElementType, InputNgType::Readable, ProgramGlobals>
 	    SuperGeometryType;
@@ -93,17 +93,17 @@ void mainLoop2(InputNgType::Readable& io,
 }
 
 template <typename ComplexOrRealType>
-void mainLoop1(InputNgType::Readable& io,
+void mainLoop1(InputNgType::Readable&          io,
                const ParametersDmrgSolverType& dmrgSolverParams,
-               const OperatorOptions& opOptions)
+               const OperatorOptions&          opOptions)
 {
 	typedef SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>
-	    SuperGeometryType;
-	typedef PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrix;
-	typedef Basis<MySparseMatrix> BasisType;
-	typedef BasisWithOperators<BasisType> BasisWithOperatorsType;
+	                                                          SuperGeometryType;
+	typedef PsimagLite::CrsMatrix<ComplexOrRealType>          MySparseMatrix;
+	typedef Basis<MySparseMatrix>                             BasisType;
+	typedef BasisWithOperators<BasisType>                     BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
-	typedef ModelHelperLocal<LeftRightSuperType> ModelHelperType;
+	typedef ModelHelperLocal<LeftRightSuperType>              ModelHelperType;
 	typedef ModelBase<ModelHelperType,
 	                  ParametersDmrgSolverType,
 	                  InputNgType::Readable,
@@ -124,19 +124,19 @@ void mainLoop1(InputNgType::Readable& io,
 int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("DMRG++", &argc, &argv, 1);
-	InputCheck inputCheck;
+	InputCheck         inputCheck;
 	PsimagLite::String filename = "";
-	int opt = 0;
-	OperatorOptions options;
+	int                opt      = 0;
+	OperatorOptions    options;
 	PsimagLite::String strUsage(application.name());
 	if (PsimagLite::basename(argv[0]) == "operator")
 		options.enabled = true;
 	strUsage += " -f filename [-k] [-p precision] [-o solverOptions] [-V] [whatToMeasure]";
 	PsimagLite::String sOptions("");
-	int precision = 0;
-	bool unbuffered = false;
-	SizeType threadsInCmd = 0;
-	bool versionOnly = false;
+	int                precision    = 0;
+	bool               unbuffered   = false;
+	SizeType           threadsInCmd = 0;
+	bool               versionOnly  = false;
 	/* PSIDOC DmrgDriver
 There is a single input file that is passed as the
 argument to \verb!-f!, like so
@@ -227,7 +227,7 @@ to the main dmrg driver are the following.
 			break;
 		case 'e':
 			options.hasOperatorExpression = true;
-			options.opexpr = optarg;
+			options.opexpr                = optarg;
 			break;
 		case 'o':
 			sOptions += optarg;
@@ -244,7 +244,7 @@ to the main dmrg driver are the following.
 			unbuffered = true;
 			break;
 		case 'V':
-			versionOnly = true;
+			versionOnly   = true;
 			options.label = "-";
 			break;
 		default:
@@ -279,7 +279,7 @@ to the main dmrg driver are the following.
 	}
 
 	InputNgType::Writeable ioWriteable(filename, inputCheck);
-	InputNgType::Readable io(ioWriteable);
+	InputNgType::Readable  io(ioWriteable);
 
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false);
 

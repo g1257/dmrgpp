@@ -109,9 +109,9 @@ typename EnableIf<Loki::TypeTraits<T>::isFloat, T>::Type norm(const std::complex
 
 inline std::complex<double> stringToComplex(const std::string& str)
 {
-	double real = 0;
-	double imag = 0;
-	char dummy = 0;
+	double            real  = 0;
+	double            imag  = 0;
+	char              dummy = 0;
 	std::stringstream ss(str);
 
 	if (str.find('+') != std::string::npos || str.find('-') != std::string::npos) {

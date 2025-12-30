@@ -11,7 +11,7 @@ template <typename SuperGeometryType, typename ParametersType> class SuperOpHelp
 public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef std::pair<bool, SizeType> PairBoolSizeType;
+	typedef std::pair<bool, SizeType>          PairBoolSizeType;
 	using PairMetaOpForConnection = std::pair<MetaOpForConnection, MetaOpForConnection>;
 
 	SuperOpHelperBase(const SuperGeometryType& superGeometry)
@@ -54,7 +54,7 @@ public:
 
 private:
 
-	const SuperGeometryType& superGeometry_;
+	const SuperGeometryType&      superGeometry_;
 	ProgramGlobals::DirectionEnum dir_;
 };
 }

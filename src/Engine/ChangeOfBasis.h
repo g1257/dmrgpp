@@ -10,8 +10,8 @@ template <typename OperatorStorageType, typename MatrixType> class ChangeOfBasis
 
 public:
 
-	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
-	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
+	typedef BlockDiagonalMatrix<MatrixType>          BlockDiagonalMatrixType;
+	typedef BlockOffDiagMatrix<MatrixType>           BlockOffDiagMatrixType;
 	typedef typename OperatorStorageType::value_type ComplexOrRealType;
 	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
 
@@ -47,10 +47,10 @@ public:
 		v.rotate(oldTtranspose_, oldT_);
 	}
 
-	static void changeBasis(OperatorStorageType& v,
+	static void changeBasis(OperatorStorageType&           v,
 	                        const BlockDiagonalMatrixType& ftransform1,
-	                        SizeType gemmRnb,
-	                        SizeType threadsForGemmR)
+	                        SizeType                       gemmRnb,
+	                        SizeType                       threadsForGemmR)
 	{
 		if (!v.justCRS())
 			err("changeBasis: operatorstorage not justCRS\n");
@@ -80,8 +80,8 @@ public:
 private:
 
 	BlockDiagonalMatrixType transform_;
-	SparseMatrixType oldT_;
-	SparseMatrixType oldTtranspose_;
+	SparseMatrixType        oldT_;
+	SparseMatrixType        oldTtranspose_;
 }; // class ChangeOfBasis
 } // namespace Dmrg
 #endif // DMRG_CHANGEOFBASIS_H

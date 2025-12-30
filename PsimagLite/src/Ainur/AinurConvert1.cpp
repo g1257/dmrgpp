@@ -55,8 +55,8 @@ void AinurConvert::Action<T>::operator()(A& attr, ContextType&, bool&) const
 	}
 
 	if (n == 2 && attr[1].length() > 4 && attr[1].substr(0, 4) == "...x") {
-		const SizeType m = t_.size();
-		const SizeType l = attr[1].length();
+		const SizeType m  = t_.size();
+		const SizeType l  = attr[1].length();
 		const SizeType mm = PsimagLite::atoi(attr[1].substr(4, l - 4));
 		if (m != 0)
 			std::cout << "Resizing vector to " << mm << "\n";
@@ -79,20 +79,20 @@ void AinurConvert::Action<T>::operator()(A& attr, ContextType&, bool&) const
 template <typename T> void AinurConvert::convert(Matrix<T>& t, const AinurVariable& ainurVariable)
 {
 	namespace qi = boost::spirit::qi;
-	typedef std::string::iterator IteratorType;
-	typedef std::vector<std::string> VectorStringType;
+	typedef std::string::iterator         IteratorType;
+	typedef std::vector<std::string>      VectorStringType;
 	typedef std::vector<VectorStringType> VectorVectorVectorType;
 
 	String value = ainurVariable.value;
 
-	IteratorType it = value.begin();
+	IteratorType                                               it     = value.begin();
 	qi::rule<IteratorType, VectorStringType(), qi::space_type> ruRows = ruleRows();
 
 	qi::rule<IteratorType, VectorVectorVectorType(), qi::space_type> full
 	    = "[" >> -(ruRows % ",") >> "]";
 
 	ActionMatrix<T> actionMatrix("matrix", t, ainurMacros_);
-	bool r = qi::phrase_parse(it, value.end(), full[actionMatrix], qi::space);
+	bool            r = qi::phrase_parse(it, value.end(), full[actionMatrix], qi::space);
 
 	// check if we have a match
 	if (!r) {
@@ -106,18 +106,18 @@ template <typename T> void AinurConvert::convert(Matrix<T>& t, const AinurVariab
 
 template <typename T>
 void AinurConvert::convert(
-    std::vector<T>& t,
+    std::vector<T>&      t,
     const AinurVariable& ainurVariable,
     typename EnableIf<Loki::TypeTraits<T>::isArith || IsComplexNumber<T>::True
                           || TypesEqual<T, String>::True,
                       int>::Type)
 {
 	namespace qi = boost::spirit::qi;
-	typedef std::string::iterator IteratorType;
+	typedef std::string::iterator    IteratorType;
 	typedef std::vector<std::string> VectorStringType;
 
-	String value = ainurVariable.value;
-	IteratorType it = value.begin();
+	String                                                     value  = ainurVariable.value;
+	IteratorType                                               it     = value.begin();
 	qi::rule<IteratorType, VectorStringType(), qi::space_type> ruRows = ruleRows();
 
 	Action<T> actionRows("rows", t, ainurMacros_);

@@ -187,9 +187,9 @@ private:
 		if (ii1 == ii2)
 			return falseDir;
 
-		bool normal = (ii1 < ii2);
-		SizeType i1 = (normal) ? ii1 : ii2;
-		SizeType i2 = (normal) ? ii2 : ii1;
+		bool     normal = (ii1 < ii2);
+		SizeType i1     = (normal) ? ii1 : ii2;
+		SizeType i2     = (normal) ? ii2 : ii1;
 
 		SizeType x1 = 0;
 		SizeType y1 = 0;
@@ -214,8 +214,8 @@ private:
 	void getCoordinates(SizeType& x, SizeType& y, SizeType i) const
 	{
 		div_t q = std::div(static_cast<int>(i), static_cast<int>(ly_));
-		x = q.quot;
-		y = q.rem;
+		x       = q.quot;
+		y       = q.rem;
 	}
 
 	// assumes i1 < i2
@@ -329,8 +329,8 @@ private:
 
 	SizeType linSize_;
 	SizeType ly_;
-	bool periodicY_;
-	bool periodicX_;
+	bool     periodicY_;
+	bool     periodicX_;
 };
 } // namespace PsimagLite
 

@@ -98,13 +98,13 @@ namespace Dmrg {
 
 template <typename LeftRightSuperType, typename ConcurrencyType> class ReflectionOperator {
 
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
-	typedef typename LeftRightSuperType::RealType RealType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef PsimagLite::PackIndices                              PackIndicesType;
+	typedef typename LeftRightSuperType::SparseMatrixType        SparseMatrixType;
+	typedef typename LeftRightSuperType::RealType                RealType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
-	typedef ReflectionTransform<RealType, SparseMatrixType> ReflectionTransformType;
+	typedef SparseVector<typename VectorType::value_type>        SparseVectorType;
+	typedef ReflectionTransform<RealType, SparseMatrixType>      ReflectionTransformType;
 
 	enum
 	{
@@ -116,10 +116,10 @@ template <typename LeftRightSuperType, typename ConcurrencyType> class Reflectio
 public:
 
 	ReflectionOperator(LeftRightSuperType& lrs,
-	                   ConcurrencyType& concurrency,
-	                   SizeType n0,
-	                   bool isEnabled,
-	                   SizeType expandSys)
+	                   ConcurrencyType&    concurrency,
+	                   SizeType            n0,
+	                   bool                isEnabled,
+	                   SizeType            expandSys)
 	    : lrs_(lrs)
 	    , concurrency_(concurrency)
 	    , n0_(n0)
@@ -156,7 +156,7 @@ public:
 	}
 
 	template <typename SomeStructType>
-	void updateKeptStates(SizeType& keptStates,
+	void updateKeptStates(SizeType&             keptStates,
 	                      const SomeStructType& cacheLeft,
 	                      const SomeStructType& cacheRight)
 	{
@@ -175,8 +175,8 @@ public:
 		check(cacheRight.removedIndices, reflectedRight_, transform2, transform1);
 	}
 
-	void transform(SparseMatrixType& matrixA,
-	               SparseMatrixType& matrixB,
+	void transform(SparseMatrixType&       matrixA,
+	               SparseMatrixType&       matrixB,
 	               const SparseMatrixType& matrix) const
 	{
 		assert(isEnabled_);
@@ -185,17 +185,17 @@ public:
 
 	template <typename SomeVectorType>
 	void setInitState(const SomeVectorType& initVector,
-	                  SomeVectorType& initVector1,
-	                  SomeVectorType& initVector2) const
+	                  SomeVectorType&       initVector1,
+	                  SomeVectorType&       initVector2) const
 	{
 		assert(isEnabled_);
 		return reflectionTransform_.setInitState(initVector, initVector1, initVector2);
 	}
 
-	RealType setGroundState(VectorType& gs,
-	                        const RealType& gsEnergy1,
+	RealType setGroundState(VectorType&       gs,
+	                        const RealType&   gsEnergy1,
 	                        const VectorType& gsVector1,
-	                        const RealType& gsEnergy2,
+	                        const RealType&   gsEnergy2,
 	                        const VectorType& gsVector2) const
 	{
 		assert(isEnabled_);
@@ -310,9 +310,9 @@ private:
 	//	}
 
 	void check(const typename PsimagLite::Vector<SizeType>::Type& removedIndices,
-	           const SparseMatrixType& reflected,
-	           const PsimagLite::Matrix<ComplexOrRealType>& transform1,
-	           const PsimagLite::Matrix<ComplexOrRealType>& transform2)
+	           const SparseMatrixType&                            reflected,
+	           const PsimagLite::Matrix<ComplexOrRealType>&       transform1,
+	           const PsimagLite::Matrix<ComplexOrRealType>&       transform2)
 	{
 
 		SparseMatrixType newreflected;
@@ -335,7 +335,7 @@ private:
 			}
 		}
 		Sort<typename PsimagLite::Vector<SizeType>::Type> sort;
-		typename PsimagLite::Vector<SizeType>::Type iperm(x.size());
+		typename PsimagLite::Vector<SizeType>::Type       iperm(x.size());
 		sort.sort(x, iperm);
 
 		typename PsimagLite::Vector<SizeType>::Type diffs;
@@ -350,7 +350,7 @@ private:
 			std::cerr << "removed[" << i << "]=" << removedIndices[i] << "\n";
 	}
 
-	void getDifferences(typename PsimagLite::Vector<SizeType>::Type& diffs,
+	void getDifferences(typename PsimagLite::Vector<SizeType>::Type&       diffs,
 	                    const typename PsimagLite::Vector<SizeType>::Type& x1,
 	                    const typename PsimagLite::Vector<SizeType>::Type& x2) const
 	{
@@ -368,7 +368,7 @@ private:
 
 	void normalize(SparseMatrixType& A) const
 	{
-		SizeType n = A.rank();
+		SizeType                                             n = A.rank();
 		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n, 0.0);
 		for (SizeType i = 0; i < n; i++) {
 			for (int k = A.getRowPtr(i); k < A.getRowPtr(i + 1); k++) {
@@ -386,8 +386,8 @@ private:
 		}
 	}
 
-	void changeBasis(SparseMatrixType& newreflected,
-	                 const SparseMatrixType& reflected,
+	void changeBasis(SparseMatrixType&                            newreflected,
+	                 const SparseMatrixType&                      reflected,
 	                 const PsimagLite::Matrix<ComplexOrRealType>& transform1,
 	                 const PsimagLite::Matrix<ComplexOrRealType>& transform2)
 	{
@@ -396,8 +396,8 @@ private:
 
 		SizeType total = transform1.n_col();
 		newreflected.resize(total);
-		typename PsimagLite::Vector<int>::Type ptr(total, -1);
-		typename PsimagLite::Vector<SizeType>::Type index(total, 0);
+		typename PsimagLite::Vector<int>::Type               ptr(total, -1);
+		typename PsimagLite::Vector<SizeType>::Type          index(total, 0);
 		typename PsimagLite::Vector<ComplexOrRealType>::Type temp(total, 0);
 		std::cerr << "transform1=" << transform1.n_row() << "x" << transform1.n_col()
 		          << "\n";
@@ -416,8 +416,8 @@ private:
 				for (int k = reflected.getRowPtr(xprime);
 				     k < reflected.getRowPtr(xprime + 1);
 				     k++) {
-					SizeType xsecond = reflected.getCol(k);
-					ComplexOrRealType r = reflected.getValue(k);
+					SizeType          xsecond = reflected.getCol(k);
+					ComplexOrRealType r       = reflected.getValue(k);
 					for (SizeType xthird = 0; xthird < transform2.n_col();
 					     xthird++) {
 						//						ComplexOrRealType
@@ -426,8 +426,8 @@ private:
 						    = wl1 * r * transform2(xsecond, xthird);
 						// if (isAlmostZero(val)) continue;
 						if (ptr[xthird] < 0) {
-							ptr[xthird] = itemp;
-							temp[ptr[xthird]] = val;
+							ptr[xthird]        = itemp;
+							temp[ptr[xthird]]  = val;
 							index[ptr[xthird]] = xthird;
 							itemp++;
 						} else {
@@ -447,13 +447,13 @@ private:
 		newreflected.checkValidity();
 	}
 
-	void setSsector(SparseMatrixType& sSector,
+	void setSsector(SparseMatrixType&                                  sSector,
 	                const typename PsimagLite::Vector<SizeType>::Type& sectors) const
 	{
 		assert(sectors.size() == 1);
-		SizeType m = sectors[0];
+		SizeType m      = sectors[0];
 		SizeType offset = lrs_.super().partition(m);
-		SizeType total = lrs_.super().partition(m + 1) - offset;
+		SizeType total  = lrs_.super().partition(m + 1) - offset;
 		setSsector(sSector, total, offset);
 	}
 
@@ -462,15 +462,15 @@ private:
 		if (total == 0)
 			total = lrs_.super().size();
 		sSector.resize(total);
-		SizeType counter = 0;
-		SizeType ns = lrs_.left().size();
+		SizeType        counter = 0;
+		SizeType        ns      = lrs_.left().size();
 		PackIndicesType pack2(ns / n0_);
 		PackIndicesType pack3(n0_);
 		PackIndicesType pack1(ns);
 		assert(reflectedLeft_.rank() == ns / n0_);
 		assert(reflectedRight_.rank() == ns / n0_);
-		typename PsimagLite::Vector<int>::Type ptr(total, -1);
-		typename PsimagLite::Vector<SizeType>::Type index(total, 0);
+		typename PsimagLite::Vector<int>::Type               ptr(total, -1);
+		typename PsimagLite::Vector<SizeType>::Type          index(total, 0);
 		typename PsimagLite::Vector<ComplexOrRealType>::Type temp(total, 0);
 
 		for (SizeType i = 0; i < total; i++) {
@@ -498,20 +498,20 @@ private:
 					if (isAlmostZero(val2))
 						continue;
 					SizeType x0prime = reflectedLeft_.getCol(k);
-					SizeType xprime = pack3.pack(
-					    x1, x0prime, lrs_.right().permutationInverse());
+					SizeType xprime  = pack3.pack(
+                                            x1, x0prime, lrs_.right().permutationInverse());
 
 					SizeType y1prime = reflectedRight_.getCol(k2);
-					SizeType yprime = pack2.pack(
-					    y1prime, y0, lrs_.left().permutationInverse());
+					SizeType yprime  = pack2.pack(
+                                            y1prime, y0, lrs_.left().permutationInverse());
 
 					SizeType iprime = pack1.pack(
 					    yprime, xprime, lrs_.super().permutationInverse());
 					assert(iprime >= offset && iprime < offset + total);
 					SizeType col = iprime - offset;
 					if (ptr[col] < 0) {
-						ptr[col] = itemp;
-						temp[ptr[col]] = val2;
+						ptr[col]        = itemp;
+						temp[ptr[col]]  = val2;
 						index[ptr[col]] = col;
 						itemp++;
 					} else {
@@ -551,8 +551,8 @@ private:
 
 	bool hasZeroRows(const SparseMatrixType& sSector, bool verbose) const
 	{
-		bool flag = false;
-		SizeType n = sSector.rank();
+		bool     flag = false;
+		SizeType n    = sSector.rank();
 		for (SizeType i = 0; i < n; i++) {
 			ComplexOrRealType sum = 0.0;
 			for (int k = sSector.getRowPtr(i); k < sSector.getRowPtr(i + 1); k++) {
@@ -568,9 +568,9 @@ private:
 		return flag;
 	}
 
-	void printSparseMatrix(SparseMatrixType& s1,
+	void printSparseMatrix(SparseMatrixType&         s1,
 	                       const PsimagLite::String& label,
-	                       const RealType& eps) const
+	                       const RealType&           eps) const
 	{
 		std::cout << label << "\n";
 		for (SizeType i = 0; i < s1.rank(); i++) {
@@ -584,9 +584,9 @@ private:
 		}
 	}
 
-	void truncate(SparseMatrixType& reflectedFinal,
+	void truncate(SparseMatrixType&       reflectedFinal,
 	              const SparseMatrixType& reflected,
-	              SizeType keptstates)
+	              SizeType                keptstates)
 	{
 		//		SizeType n = reflected.rank();
 		//		if (keptstates >= n) {
@@ -626,9 +626,9 @@ private:
 
 	void updateReflected()
 	{
-		SizeType ns = lrs_.left().size();
-		PackIndicesType pack2(ns / n0_);
-		PackIndicesType pack3(n0_);
+		SizeType         ns = lrs_.left().size();
+		PackIndicesType  pack2(ns / n0_);
+		PackIndicesType  pack3(n0_);
 		SparseMatrixType reflectedLeft(ns, ns);
 
 		SizeType counter = 0;
@@ -662,7 +662,7 @@ private:
 			for (int k = reflectedRight_.getRowPtr(x1);
 			     k < reflectedRight_.getRowPtr(x1 + 1);
 			     k++) {
-				SizeType x1r = reflectedRight_.getCol(k);
+				SizeType          x1r = reflectedRight_.getCol(k);
 				ComplexOrRealType val = reflectedRight_.getValue(k);
 				// if (isAlmostZero(val)) continue;
 				SizeType col
@@ -677,14 +677,14 @@ private:
 		reflectedRight_ = reflectedRight;
 	}
 
-	LeftRightSuperType& lrs_;
-	ConcurrencyType& concurrency_;
-	SizeType n0_; // hilbert size of one site
+	LeftRightSuperType&           lrs_;
+	ConcurrencyType&              concurrency_;
+	SizeType                      n0_; // hilbert size of one site
 	PsimagLite::ProgressIndicator progress_;
-	bool isEnabled_;
-	SizeType expandSys_;
-	SparseMatrixType reflectedLeft_, reflectedRight_;
-	ReflectionTransformType reflectionTransform_;
+	bool                          isEnabled_;
+	SizeType                      expandSys_;
+	SparseMatrixType              reflectedLeft_, reflectedRight_;
+	ReflectionTransformType       reflectionTransform_;
 }; // class ReflectionOperator
 
 } // namespace Dmrg

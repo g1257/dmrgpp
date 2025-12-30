@@ -48,15 +48,15 @@ namespace TL {
 	// returns a typelist that is of T1, T2, ...
 	////////////////////////////////////////////////////////////////////////////////
 
-	template <typename T1 = NullType,
-	          typename T2 = NullType,
-	          typename T3 = NullType,
-	          typename T4 = NullType,
-	          typename T5 = NullType,
-	          typename T6 = NullType,
-	          typename T7 = NullType,
-	          typename T8 = NullType,
-	          typename T9 = NullType,
+	template <typename T1  = NullType,
+	          typename T2  = NullType,
+	          typename T3  = NullType,
+	          typename T4  = NullType,
+	          typename T5  = NullType,
+	          typename T6  = NullType,
+	          typename T7  = NullType,
+	          typename T8  = NullType,
+	          typename T9  = NullType,
 	          typename T10 = NullType,
 	          typename T11 = NullType,
 	          typename T12 = NullType,
@@ -296,7 +296,7 @@ namespace TL {
 	private:
 
 		typedef typename NoDuplicates<Tail>::Result L1;
-		typedef typename Erase<L1, Head>::Result L2;
+		typedef typename Erase<L1, Head>::Result    L2;
 
 	public:
 
@@ -410,9 +410,9 @@ namespace TL {
 	template <class Head, class Tail> struct DerivedToFront<Typelist<Head, Tail>> {
 	private:
 
-		typedef typename MostDerived<Tail, Head>::Result TheMostDerived;
+		typedef typename MostDerived<Tail, Head>::Result             TheMostDerived;
 		typedef typename Replace<Tail, TheMostDerived, Head>::Result Temp;
-		typedef typename DerivedToFront<Temp>::Result L;
+		typedef typename DerivedToFront<Temp>::Result                L;
 
 	public:
 

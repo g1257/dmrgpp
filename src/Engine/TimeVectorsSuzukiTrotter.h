@@ -103,35 +103,35 @@ class TimeVectorsSuzukiTrotter : public TimeVectorsBase<TargetParamsType,
 	                        WaveFunctionTransfType,
 	                        LanczosSolverType,
 	                        VectorWithOffsetType>
-	    BaseType;
-	typedef typename BaseType::PairType PairType;
-	typedef typename TargetParamsType::RealType RealType;
-	typedef typename TargetParamsType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef MatrixOrIdentity<SparseMatrixType> MatrixOrIdentityType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef VectorComplexOrRealType TargetVectorType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	                                                                 BaseType;
+	typedef typename BaseType::PairType                              PairType;
+	typedef typename TargetParamsType::RealType                      RealType;
+	typedef typename TargetParamsType::SparseMatrixType              SparseMatrixType;
+	typedef typename ModelType::ModelHelperType                      ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
+	typedef PsimagLite::PackIndices                                  PackIndicesType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType               BasisType;
+	typedef typename BasisType::BlockType                            BlockType;
+	typedef MatrixOrIdentity<SparseMatrixType>                       MatrixOrIdentityType;
+	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                    MatrixComplexOrRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type     VectorComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
+	typedef VectorComplexOrRealType                                  TargetVectorType;
+	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
-	typedef typename ModelType::HilbertBasisType HilbertBasisType;
-	typedef typename ModelType::HilbertBasisType::value_type HilbertStateType;
+	typedef typename ModelType::HilbertBasisType                     HilbertBasisType;
+	typedef typename ModelType::HilbertBasisType::value_type         HilbertStateType;
 	using OneSiteSpacesType = typename WaveFunctionTransfType::OneSiteSpacesType;
 
 public:
 
-	TimeVectorsSuzukiTrotter(const TargetParamsType& tstStruct,
-	                         VectorVectorWithOffsetType& targetVectors,
-	                         const ModelType& model,
+	TimeVectorsSuzukiTrotter(const TargetParamsType&       tstStruct,
+	                         VectorVectorWithOffsetType&   targetVectors,
+	                         const ModelType&              model,
 	                         const WaveFunctionTransfType& wft,
-	                         const LeftRightSuperType& lrs)
+	                         const LeftRightSuperType&     lrs)
 	    : BaseType(model, lrs, wft, "suzukitrotter")
 	    , progress_("TimeVectorsSuzukiTrotter")
 	    , tstStruct_(tstStruct)
@@ -142,12 +142,12 @@ public:
 	    , twoSiteDmrg_(wft_.options().twoSiteDmrg)
 	{ }
 
-	virtual void calcTimeVectors(const VectorSizeType& indices,
-	                             RealType Eg,
-	                             const VectorWithOffsetType& phi,
+	virtual void calcTimeVectors(const VectorSizeType&               indices,
+	                             RealType                            Eg,
+	                             const VectorWithOffsetType&         phi,
 	                             const typename BaseType::ExtraData& extraData)
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "EXPERIMENTAL: using SuzukiTrotter";
 
@@ -169,7 +169,7 @@ public:
 			assert(ii < targetVectors_.size());
 			if (targetVectors_[ii]->size() == 0 || !extraData.allOperatorsApplied) {
 				*targetVectors_[ii] = phi;
-				returnFlag = true;
+				returnFlag          = true;
 			}
 		}
 
@@ -197,8 +197,8 @@ public:
 		if (b1 || b2)
 			return;
 
-		bool areAllLinksSeen = allLinksSeen();
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		bool                                          areAllLinksSeen = allLinksSeen();
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << "LINKS SEEN ";
 		for (SizeType i = 0; i < linksSeen_.size(); i++)
@@ -209,7 +209,7 @@ public:
 			for (SizeType i = 0; i < extraData.block.size(); ++i)
 				linksSeen_.push_back(lastIndexLeft + i);
 		} else {
-			PsimagLite::OstringStream msgg3(std::cout.precision());
+			PsimagLite::OstringStream                     msgg3(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg3 = msgg3();
 			msg3 << "ALL LINKS SEEN";
 			progress_.printline(msgg3, std::cout);
@@ -262,7 +262,7 @@ public:
 	void timeHasAdvanced()
 	{
 		linksSeen_.clear();
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "ALL LINKS CLEARED";
 		progress_.printline(msgg, std::cout);
@@ -307,19 +307,19 @@ private:
 		*targetVectors_[i] = phiNew;
 	}
 
-	void calcTargetVector(VectorWithOffsetType& target,
-	                      RealType Eg,
-	                      const VectorWithOffsetType& phi,
+	void calcTargetVector(VectorWithOffsetType&               target,
+	                      RealType                            Eg,
+	                      const VectorWithOffsetType&         phi,
 	                      const ProgramGlobals::DirectionEnum systemOrEnviron,
-	                      const RealType& time,
-	                      const SparseMatrixType& S,
-	                      const SparseMatrixType& ST,
-	                      const SparseMatrixType& E,
-	                      const SparseMatrixType& ET)
+	                      const RealType&                     time,
+	                      const SparseMatrixType&             S,
+	                      const SparseMatrixType&             ST,
+	                      const SparseMatrixType&             E,
+	                      const SparseMatrixType&             ET)
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
-			SizeType i0 = phi.sector(ii);
-			SizeType total = phi.effectiveSize(i0);
+			SizeType         i0    = phi.sector(ii);
+			SizeType         total = phi.effectiveSize(i0);
 			TargetVectorType result(total, 0.0);
 			calcTimeVectorsSuzukiTrotter(
 			    result, Eg, phi, systemOrEnviron, i0, time, S, ST, E, ET);
@@ -330,21 +330,21 @@ private:
 
 	void calcTimeVectorsSuzukiTrotter(TargetVectorType& result,
 	                                  RealType,
-	                                  const VectorWithOffsetType& phi,
+	                                  const VectorWithOffsetType&         phi,
 	                                  const ProgramGlobals::DirectionEnum systemOrEnviron,
-	                                  SizeType i0,
-	                                  const RealType& time,
-	                                  const SparseMatrixType& transformS,
-	                                  const SparseMatrixType& transformST,
-	                                  const SparseMatrixType& transformE,
-	                                  const SparseMatrixType& transformET) const
+	                                  SizeType                            i0,
+	                                  const RealType&                     time,
+	                                  const SparseMatrixType&             transformS,
+	                                  const SparseMatrixType&             transformST,
+	                                  const SparseMatrixType&             transformE,
+	                                  const SparseMatrixType&             transformET) const
 	{
-		SizeType offset = phi.offset(i0);
+		SizeType         offset = phi.offset(i0);
 		TargetVectorType phi0(result.size());
 		phi.extract(phi0, i0);
 
 		// NOTE: result =  exp(iHt) |phi0>
-		SizeType ns = lrs_.left().size();
+		SizeType        ns = lrs_.left().size();
 		PackIndicesType packSuper(ns);
 
 		VectorSizeType block;
@@ -388,25 +388,25 @@ private:
 		}
 	}
 
-	void timeVectorSystem(TargetVectorType& result,
-	                      const TargetVectorType& phi0,
-	                      SizeType xp,
-	                      SizeType yp,
-	                      const PackIndicesType& packSuper,
-	                      const BlockType& block,
+	void timeVectorSystem(TargetVectorType&              result,
+	                      const TargetVectorType&        phi0,
+	                      SizeType                       xp,
+	                      SizeType                       yp,
+	                      const PackIndicesType&         packSuper,
+	                      const BlockType&               block,
 	                      const MatrixComplexOrRealType& m,
-	                      SizeType i,
-	                      SizeType offset,
-	                      const SparseMatrixType& transform,
-	                      const SparseMatrixType& transformT,
-	                      const VectorSizeType& iperm) const
+	                      SizeType                       i,
+	                      SizeType                       offset,
+	                      const SparseMatrixType&        transform,
+	                      const SparseMatrixType&        transformT,
+	                      const VectorSizeType&          iperm) const
 	{
-		const LeftRightSuperType& oldLrs = lrs_;
-		SizeType hilbertSize = model_.hilbertSize(block[0]);
-		SizeType ns = lrs_.left().size();
-		SizeType nx = ns / hilbertSize;
-		PackIndicesType packLeft(nx);
-		PackIndicesType packRight(hilbertSize);
+		const LeftRightSuperType& oldLrs      = lrs_;
+		SizeType                  hilbertSize = model_.hilbertSize(block[0]);
+		SizeType                  ns          = lrs_.left().size();
+		SizeType                  nx          = ns / hilbertSize;
+		PackIndicesType           packLeft(nx);
+		PackIndicesType           packRight(hilbertSize);
 
 		if (!twoSiteDmrg_) {
 			assert(transform.cols() == lrs_.right().size());
@@ -455,25 +455,25 @@ private:
 		}
 	}
 
-	void timeVectorEnviron(TargetVectorType& result,
-	                       const TargetVectorType& phi0,
-	                       SizeType xp,
-	                       SizeType yp,
-	                       const PackIndicesType& packSuper,
-	                       const BlockType& block,
+	void timeVectorEnviron(TargetVectorType&              result,
+	                       const TargetVectorType&        phi0,
+	                       SizeType                       xp,
+	                       SizeType                       yp,
+	                       const PackIndicesType&         packSuper,
+	                       const BlockType&               block,
 	                       const MatrixComplexOrRealType& m,
-	                       SizeType i,
-	                       SizeType offset,
-	                       const SparseMatrixType& transform,
-	                       const SparseMatrixType& transformT,
-	                       const VectorSizeType& iperm) const
+	                       SizeType                       i,
+	                       SizeType                       offset,
+	                       const SparseMatrixType&        transform,
+	                       const SparseMatrixType&        transformT,
+	                       const VectorSizeType&          iperm) const
 	{
-		const LeftRightSuperType& oldLrs = lrs_;
-		SizeType hilbertSize = model_.hilbertSize(block[0]);
-		SizeType ns = oldLrs.left().permutationInverse().size();
-		SizeType nx = ns / hilbertSize;
-		PackIndicesType packLeft(nx);
-		PackIndicesType packRight(hilbertSize);
+		const LeftRightSuperType& oldLrs      = lrs_;
+		SizeType                  hilbertSize = model_.hilbertSize(block[0]);
+		SizeType                  ns          = oldLrs.left().permutationInverse().size();
+		SizeType                  nx          = ns / hilbertSize;
+		PackIndicesType           packLeft(nx);
+		PackIndicesType           packRight(hilbertSize);
 
 		if (!twoSiteDmrg_) {
 			assert(transform.cols() == lrs_.left().size());
@@ -531,20 +531,20 @@ private:
 		err("suzukiTrotter no longer supported (sorry!)\n");
 	}
 
-	void getMatrix(MatrixComplexOrRealType& m,
+	void getMatrix(MatrixComplexOrRealType&            m,
 	               const ProgramGlobals::DirectionEnum systemOrEnviron,
-	               const BlockType& block,
-	               const RealType& time) const
+	               const BlockType&                    block,
+	               const RealType&                     time) const
 	{
 		SparseMatrixType hmatrix;
-		RealType factorForDiagonals
+		RealType         factorForDiagonals
 		    = (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 1.0 : 0.0;
 		if (systemOrEnviron == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON
 		    && block[0] == 0)
 			factorForDiagonals = 1.0;
 
 		if (fabs(factorForDiagonals) > 1e-6) {
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "LINKS factors=" << factorForDiagonals;
 			msg << " added for diagonals on sites ";
@@ -569,10 +569,10 @@ private:
 
 	void calcBlock(VectorSizeType& block) const
 	{
-		const VectorSizeType& blockLeft = lrs_.left().block();
+		const VectorSizeType& blockLeft  = lrs_.left().block();
 		const VectorSizeType& blockRight = lrs_.right().block();
-		SizeType smax = blockLeft[blockLeft.size() - 1];
-		SizeType emin = blockRight[0];
+		SizeType              smax       = blockLeft[blockLeft.size() - 1];
+		SizeType              emin       = blockRight[0];
 
 		for (SizeType i = 0; i < blockLeft.size(); ++i) {
 			SizeType ind = blockLeft[i];
@@ -587,18 +587,18 @@ private:
 			}
 		}
 		PsimagLite::Sort<VectorSizeType> sort;
-		VectorSizeType iperm(block.size());
+		VectorSizeType                   iperm(block.size());
 		sort.sort(block, iperm);
 	}
 
 	PsimagLite::ProgressIndicator progress_;
-	const TargetParamsType& tstStruct_;
-	VectorVectorWithOffsetType& targetVectors_;
-	const ModelType& model_;
+	const TargetParamsType&       tstStruct_;
+	VectorVectorWithOffsetType&   targetVectors_;
+	const ModelType&              model_;
 	const WaveFunctionTransfType& wft_;
-	const LeftRightSuperType& lrs_;
-	bool twoSiteDmrg_;
-	VectorSizeType linksSeen_;
+	const LeftRightSuperType&     lrs_;
+	bool                          twoSiteDmrg_;
+	VectorSizeType                linksSeen_;
 }; // class TimeVectorsSuzukiTrotter
 } // namespace Dmrg
 /*@}*/

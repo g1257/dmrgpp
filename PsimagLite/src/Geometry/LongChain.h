@@ -139,7 +139,7 @@ public:
 			return false;
 		SizeType imin = (i1 < i2) ? i1 : i2;
 		SizeType imax = (i1 > i2) ? i1 : i2;
-		bool b = (imax - imin == distance_);
+		bool     b    = (imax - imin == distance_);
 		if (!isPeriodic_)
 			return b;
 		bool b2 = (imax - imin == linSize_ - distance_);
@@ -197,7 +197,7 @@ public:
 private:
 
 	SizeType linSize_;
-	bool isPeriodic_;
+	bool     isPeriodic_;
 	SizeType distance_;
 }; // class LongChain
 } // namespace PsimagLite

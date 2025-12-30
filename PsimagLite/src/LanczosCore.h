@@ -104,21 +104,21 @@ class LanczosCore {
 
 public:
 
-	typedef VectorType_ VectorType;
-	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
-	typedef typename LanczosVectorsType::VectorVectorType VectorVectorType;
-	typedef typename SolverParametersType::RealType RealType;
-	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef SolverParametersType ParametersSolverType;
-	typedef MatrixType LanczosMatrixType;
+	typedef VectorType_                                        VectorType;
+	typedef typename LanczosVectorsType::DenseMatrixType       DenseMatrixType;
+	typedef typename LanczosVectorsType::VectorVectorType      VectorVectorType;
+	typedef typename SolverParametersType::RealType            RealType;
+	typedef typename LanczosVectorsType::DenseMatrixRealType   DenseMatrixRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
+	typedef SolverParametersType                               ParametersSolverType;
+	typedef MatrixType                                         LanczosMatrixType;
 	typedef typename LanczosVectorsType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef typename VectorType::value_type VectorElementType;
-	typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
+	typedef typename VectorType::value_type                    VectorElementType;
+	typedef ContinuedFraction<TridiagonalMatrixType>           PostProcType;
 
-	LanczosCore(const MatrixType& mat,
+	LanczosCore(const MatrixType&           mat,
 	            const SolverParametersType& params,
-	            bool isReorthoEnabled)
+	            bool                        isReorthoEnabled)
 	    : progress_("LanczosCore")
 	    , mat_(mat)
 	    , params_(params)
@@ -144,12 +144,12 @@ public:
 	 *            |               .     .  a[j-2]  b[j-2] |
 	 *            |               .     .  b[j-2]  a[j-1] |
 	 */
-	void decomposition(const VectorType& initVector,
+	void decomposition(const VectorType&      initVector,
 	                   TridiagonalMatrixType& ab,
-	                   SizeType excitedForStop)
+	                   SizeType               excitedForStop)
 	{
 		SizeType& max_nstep = steps_;
-		SizeType matsize = mat_.rows();
+		SizeType  matsize   = mat_.rows();
 
 		if (initVector.size() != matsize) {
 			String msg("decomposition: vector size ");
@@ -174,8 +174,8 @@ public:
 			max_nstep = matsize;
 		ab.resize(max_nstep, 0);
 
-		bool exitFlag = false;
-		SizeType j = 0;
+		bool     exitFlag = false;
+		SizeType j        = 0;
 		lanczosVectors_.saveInitialVector(V0);
 		lanczosVectors_.prepareMemory(matsize, max_nstep);
 
@@ -198,7 +198,7 @@ public:
 			btmp += PsimagLite::real(V1[i] * PsimagLite::conj(V1[i]));
 		}
 
-		btmp = sqrt(btmp);
+		btmp    = sqrt(btmp);
 		ab.b(1) = btmp; // beta = sqrt(V1*V1)
 
 		if (btmp > 0) {
@@ -212,7 +212,7 @@ public:
 
 		VectorRealType tmpEigs(ab.size(), 0);
 		VectorRealType eold(ab.size(), 0);
-		RealType deltaMax = 0;
+		RealType       deltaMax = 0;
 
 		// ---- Starting the loop -------
 		for (j = 1; j < max_nstep; ++j) {
@@ -225,7 +225,7 @@ public:
 			deltaMax = 0;
 			for (SizeType ii = 0; ii < eigsForError; ++ii) {
 				const RealType delta = fabs(tmpEigs[ii] - eold[ii]);
-				eold[ii] = tmpEigs[ii];
+				eold[ii]             = tmpEigs[ii];
 				if (delta > deltaMax)
 					deltaMax = delta;
 			}
@@ -294,11 +294,11 @@ public:
 
 private:
 
-	ProgressIndicator progress_;
-	const MatrixType& mat_;
+	ProgressIndicator           progress_;
+	const MatrixType&           mat_;
 	const SolverParametersType& params_;
-	SizeType steps_;
-	LanczosVectorsType lanczosVectors_;
+	SizeType                    steps_;
+	LanczosVectorsType          lanczosVectors_;
 }; // class LanczosCore
 
 } // namespace PsimagLite

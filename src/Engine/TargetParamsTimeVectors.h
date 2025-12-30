@@ -88,14 +88,14 @@ template <typename ModelType> class TargetParamsTimeVectors : public TargetParam
 
 public:
 
-	typedef TargetParamsCommon<ModelType> BaseType;
-	typedef typename ModelType::RealType RealType;
+	typedef TargetParamsCommon<ModelType>     BaseType;
+	typedef typename ModelType::RealType      RealType;
 	typedef typename BaseType::VectorRealType VectorRealType;
 
 	template <typename IoInputter>
-	TargetParamsTimeVectors(IoInputter& io,
+	TargetParamsTimeVectors(IoInputter&        io,
 	                        PsimagLite::String targeting,
-	                        const ModelType& model)
+	                        const ModelType&   model)
 	    : BaseType(io, targeting, model)
 	    , advanceEach_(0)
 	    , algorithm_(BaseType::AlgorithmEnum::KRYLOV)
@@ -177,12 +177,12 @@ public:
 
 private:
 
-	VectorRealType times_;
-	SizeType advanceEach_;
+	VectorRealType                   times_;
+	SizeType                         advanceEach_;
 	typename BaseType::AlgorithmEnum algorithm_;
-	RealType tau_;
-	RealType timeDirection_;
-	VectorRealType chebyTransform_;
+	RealType                         tau_;
+	RealType                         timeDirection_;
+	VectorRealType                   chebyTransform_;
 }; // class TargetParamsTimeVectors
 
 template <typename ModelType>

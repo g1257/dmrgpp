@@ -109,9 +109,9 @@ struct Su2Related {
 		ioSerializer.write(label + "/transpose", transpose);
 	}
 
-	SizeType offset;
+	SizeType                           offset;
 	PsimagLite::Vector<SizeType>::Type source;
-	PsimagLite::Vector<int>::Type transpose;
+	PsimagLite::Vector<int>::Type      transpose;
 };
 
 std::istream& operator>>(std::istream&, Su2Related&);

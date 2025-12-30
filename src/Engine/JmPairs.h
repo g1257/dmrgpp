@@ -94,8 +94,8 @@ template <typename PairType_> class JmPairs {
 
 public:
 
-	typedef PairType_ PairType;
-	typedef PairType value_type;
+	typedef PairType_                                   PairType;
+	typedef PairType                                    value_type;
 	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
 
 	//! indices_[alpha] = jm
@@ -166,7 +166,7 @@ public:
 
 	template <typename IoOutputter>
 	void
-	write(IoOutputter& io,
+	write(IoOutputter&       io,
 	      PsimagLite::String prefix,
 	      typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type
 	      = 0) const
@@ -177,7 +177,7 @@ public:
 
 	template <typename IoInputter>
 	void
-	read(IoInputter& io,
+	read(IoInputter&        io,
 	     PsimagLite::String prefix,
 	     typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type
 	     = 0)
@@ -204,7 +204,7 @@ private:
 
 	void removeUnusedPairs(const VectorSizeType& unusedPairs)
 	{
-		SizeType counter = 0;
+		SizeType       counter = 0;
 		VectorSizeType neworder(jmPairs_.size());
 		VectorPairType tmpVector(jmPairs_.size() - unusedPairs.size());
 
@@ -212,7 +212,7 @@ private:
 			if (PsimagLite::indexOrMinusOne(unusedPairs, i) >= 0)
 				continue;
 			tmpVector[counter] = jmPairs_[i];
-			neworder[i] = counter;
+			neworder[i]        = counter;
 			counter++;
 		}
 

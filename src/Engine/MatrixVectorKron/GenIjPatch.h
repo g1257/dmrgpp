@@ -90,14 +90,14 @@ template <typename LeftRightSuperType_> class GenIjPatch {
 
 public:
 
-	typedef LeftRightSuperType_ LeftRightSuperType;
+	typedef LeftRightSuperType_                    LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisType BasisType;
-	typedef typename BasisType::QnType QnType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename BasisType::QnType             QnType;
+	typedef PsimagLite::Vector<SizeType>::Type     VectorSizeType;
 
 	enum LeftOrRightEnumType
 	{
-		LEFT = 0,
+		LEFT  = 0,
 		RIGHT = 1
 	};
 
@@ -129,9 +129,9 @@ public:
 private:
 
 	const LeftRightSuperType& lrs_;
-	const QnType& qn_;
-	VectorSizeType patchesLeft_;
-	VectorSizeType patchesRight_;
+	const QnType&             qn_;
+	VectorSizeType            patchesLeft_;
+	VectorSizeType            patchesRight_;
 
 }; // class GenIjPatch
 } // namespace PsimagLite

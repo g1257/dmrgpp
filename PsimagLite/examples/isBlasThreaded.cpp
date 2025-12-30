@@ -5,7 +5,7 @@
 #define USE_PTHREADS_OR_NOT_NG
 #include "Parallelizer.h"
 
-typedef double MyRealType;
+typedef double                         MyRealType;
 typedef PsimagLite::Matrix<MyRealType> MatrixType;
 
 class MyBlasWrapper {
@@ -22,9 +22,9 @@ public:
 	{
 		for (SizeType i = 0; i < total; ++i) {
 			SizeType factor = (i & 1) ? 2 : 1;
-			a_[i] = new MatrixType(m * factor, k * factor);
-			b_[i] = new MatrixType(k * factor, n * factor);
-			c_[i] = new MatrixType(m * factor, n * factor);
+			a_[i]           = new MatrixType(m * factor, k * factor);
+			b_[i]           = new MatrixType(k * factor, n * factor);
+			c_[i]           = new MatrixType(m * factor, n * factor);
 			fillMatrix(*(a_[i]));
 			fillMatrix(*(b_[i]));
 		}
@@ -51,9 +51,9 @@ public:
 		SizeType kk = a_[ind]->cols();
 		assert(kk == b_[ind]->rows());
 		assert(c_[ind]->rows() == mm && c_[ind]->cols() == nn);
-		SizeType lda = a_[ind]->rows();
-		SizeType ldb = b_[ind]->rows();
-		SizeType ldc = c_[ind]->rows();
+		SizeType    lda  = a_[ind]->rows();
+		SizeType    ldb  = b_[ind]->rows();
+		SizeType    ldc  = c_[ind]->rows();
 		MyRealType* aptr = &(a_[ind]->operator()(0, 0));
 		MyRealType* bptr = &(b_[ind]->operator()(0, 0));
 		MyRealType* cptr = &(c_[ind]->operator()(0, 0));
@@ -85,9 +85,9 @@ private:
 				m(i, j) = myrandom48_();
 	}
 
-	VectorMatrixType a_;
-	VectorMatrixType b_;
-	VectorMatrixType c_;
+	VectorMatrixType                 a_;
+	VectorMatrixType                 b_;
+	VectorMatrixType                 c_;
 	PsimagLite::Random48<MyRealType> myrandom48_;
 };
 
@@ -98,15 +98,15 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	SizeType m = atoi(argv[1]);
-	SizeType k = atoi(argv[2]);
-	SizeType n = atoi(argv[3]);
-	SizeType total = atoi(argv[4]);
+	SizeType m       = atoi(argv[1]);
+	SizeType k       = atoi(argv[2]);
+	SizeType n       = atoi(argv[3]);
+	SizeType total   = atoi(argv[4]);
 	SizeType threads = atoi(argv[5]);
 
-	PsimagLite::CodeSectionParams codeSections(threads);
+	PsimagLite::CodeSectionParams           codeSections(threads);
 	PsimagLite::Parallelizer<MyBlasWrapper> parallel(codeSections);
-	MyBlasWrapper myblasWrapper(m, n, k, total);
+	MyBlasWrapper                           myblasWrapper(m, n, k, total);
 
 	parallel.loopCreate(myblasWrapper);
 }

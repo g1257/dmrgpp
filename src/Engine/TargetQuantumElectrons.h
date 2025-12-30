@@ -88,8 +88,8 @@ template <typename RealType, typename QnType> class TargetQuantumElectrons {
 public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename QnType::PairSizeType PairSizeType;
-	typedef typename QnType::VectorQnType VectorQnType;
+	typedef typename QnType::PairSizeType      PairSizeType;
+	typedef typename QnType::VectorQnType      VectorQnType;
 
 	template <typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io)
@@ -104,8 +104,8 @@ public:
 
 		isSu2_ = (tmp > 0);
 
-		bool hasNqns = false;
-		SizeType nqns = 0;
+		bool     hasNqns = false;
+		SizeType nqns    = 0;
 		try {
 			io.readline(nqns, "NumberOfTargetQns=");
 			hasNqns = true;
@@ -143,11 +143,11 @@ public:
 		return vqn_[ind];
 	}
 
-	void updateQuantumSector(VectorQnType& quantumSector,
-	                         SizeType sites,
+	void updateQuantumSector(VectorQnType&                 quantumSector,
+	                         SizeType                      sites,
 	                         ProgramGlobals::DirectionEnum direction,
-	                         SizeType step,
-	                         const VectorQnType& adjustQuantumNumbers) const
+	                         SizeType                      step,
+	                         const VectorQnType&           adjustQuantumNumbers) const
 	{
 		const SizeType maxSites = totalNumberOfSites_;
 
@@ -185,12 +185,12 @@ private:
 	template <typename IoInputType>
 	void readOneTarget(IoInputType& io, const PsimagLite::String label)
 	{
-		QnType qn(QnType::zero());
+		QnType         qn(QnType::zero());
 		VectorSizeType qnOther;
-		const bool allowUpDown = true;
+		const bool     allowUpDown = true;
 
 		PsimagLite::String msg("TargetQuantumElectrons: ");
-		bool hasTwiceJ = false;
+		bool               hasTwiceJ = false;
 		try {
 			io.readline(qn.jmPair.first, "TargetSpinTimesTwo" + label + "=");
 			hasTwiceJ = true;
@@ -198,14 +198,14 @@ private:
 
 		SizeType ready = 0;
 		if (allowUpDown) {
-			SizeType electronsUp = 0;
+			SizeType electronsUp   = 0;
 			SizeType electronsDown = 0;
 			try {
 				electronsUp
 				    = readNumberOrExpression(io, "TargetElectronsUp" + label + "=");
 				electronsDown = readNumberOrExpression(
 				    io, "TargetElectronsDown" + label + "=");
-				SizeType tmp = electronsUp + electronsDown;
+				SizeType tmp    = electronsUp + electronsDown;
 				qn.oddElectrons = (tmp & 1);
 				qnOther.push_back(tmp);
 				qnOther.push_back(electronsUp);
@@ -287,7 +287,7 @@ private:
 		PsimagLite::String val;
 		io.readline(val, fullLabel);
 
-		const PsimagLite::String msg = "Target number for " + fullLabel;
+		const PsimagLite::String    msg = "Target number for " + fullLabel;
 		AlgebraicStringToNumberType algebraicStringToNumber(msg, totalNumberOfSites_);
 
 		SizeType p = algebraicStringToNumber.procLength(val);
@@ -296,8 +296,8 @@ private:
 		return p;
 	}
 
-	SizeType totalNumberOfSites_;
-	bool isSu2_;
+	SizeType     totalNumberOfSites_;
+	bool         isSu2_;
 	VectorQnType vqn_;
 };
 } // namespace Dmrg

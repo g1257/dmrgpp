@@ -23,7 +23,7 @@ Please see full open source license included in file LICENSE.
 
 class MyHelper {
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef PsimagLite::Concurrency            ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
@@ -47,7 +47,7 @@ public:
 
 private:
 
-	SizeType ntasks_;
+	SizeType       ntasks_;
 	VectorSizeType x_;
 }; // class MyHelper
 
@@ -61,15 +61,15 @@ int main(int argc, char* argv[])
 	}
 
 	SizeType nthreads = atoi(argv[1]);
-	SizeType ntasks = atoi(argv[2]);
+	SizeType ntasks   = atoi(argv[2]);
 
 	ConcurrencyType concurrency(&argc, &argv, nthreads);
 
-	typedef MyHelper HelperType;
+	typedef MyHelper                             HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
 
 	PsimagLite::CodeSectionParams csp(nthreads, 1, true, 0);
-	ParallelizerType threadObject(csp);
+	ParallelizerType              threadObject(csp);
 
 	HelperType helper(ntasks, nthreads);
 

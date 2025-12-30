@@ -9,12 +9,12 @@ class AinurReadable {
 
 public:
 
-	typedef Store StoreType;
-	typedef Vector<StoreType>::Type VectorStoreType;
-	typedef StoreType::AinurLexicalType AinurLexicalType;
+	typedef Store                              StoreType;
+	typedef Vector<StoreType>::Type            VectorStoreType;
+	typedef StoreType::AinurLexicalType        AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
-	typedef DoubleOrFloatType RealType;
-	typedef std::complex<RealType> ComplexType;
+	typedef DoubleOrFloatType                  RealType;
+	typedef std::complex<RealType>             ComplexType;
 
 	AinurReadable(const VectorStringType& names, const VectorStoreType& storage)
 	    : names_(names)
@@ -60,7 +60,7 @@ public:
 
 	void readValue(int& t, String s) const
 	{
-		s = prefix_ + s;
+		s     = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -73,7 +73,7 @@ public:
 
 	void readValue(RealType& t, String s) const
 	{
-		s = prefix_ + s;
+		s     = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -86,7 +86,7 @@ public:
 
 	void readValue(String& t, String s) const
 	{
-		s = prefix_ + s;
+		s     = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -103,7 +103,7 @@ public:
 	readValue(VectorLikeType& v, String sOrig) const
 	{
 		String s = prefix_ + sOrig;
-		int x = storageIndexByName(s);
+		int    x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
 
@@ -129,7 +129,7 @@ public:
 
 		String tmp = (n == 2) ? store.value(1, names_[x]) : "";
 		AinurLexicalType::removeTrailingBlanks(tmp);
-		size_t start = tmp.find("...");
+		size_t   start = tmp.find("...");
 		SizeType times = (start != String::npos && tmp.length() > 3)
 		    ? atoi(tmp.substr(start + 3, tmp.length() - 3).c_str())
 		    : 0;
@@ -162,7 +162,7 @@ public:
 	typename EnableIf<Loki::TypeTraits<FloatingType>::isArith, void>::Type
 	readValue(Matrix<FloatingType>& m, String s) const
 	{
-		s = prefix_ + s;
+		s     = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -217,8 +217,8 @@ private:
 	}
 
 	const VectorStringType& names_;
-	const VectorStoreType& storage_;
-	String prefix_;
+	const VectorStoreType&  storage_;
+	String                  prefix_;
 }; // class AinurReadable
 
 } // namespace PsimagLite

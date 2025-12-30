@@ -168,7 +168,7 @@ struct ProgramGlobals {
 	static PsimagLite::String rootName(PsimagLite::String filename)
 	{
 		PsimagLite::String rootname = filename;
-		size_t index = rootname.find(".", 0);
+		size_t             index    = rootname.find(".", 0);
 		if (index != PsimagLite::String::npos) {
 			rootname.erase(index, filename.length());
 		}
@@ -179,7 +179,7 @@ struct ProgramGlobals {
 	static PsimagLite::String coutName(PsimagLite::String filename)
 	{
 		PsimagLite::String rootname = PsimagLite::basename(filename);
-		size_t index = rootname.find(".", 0);
+		size_t             index    = rootname.find(".", 0);
 		if (index != PsimagLite::String::npos) {
 			rootname.erase(index, filename.length());
 		}
@@ -244,7 +244,7 @@ struct ProgramGlobals {
 	static PsimagLite::String killSpaces(PsimagLite::String str)
 	{
 		PsimagLite::String buffer;
-		const SizeType n = str.length();
+		const SizeType     n = str.length();
 		for (SizeType i = 0; i < n; ++i)
 			if (str[i] != ' ')
 				buffer += str[i];

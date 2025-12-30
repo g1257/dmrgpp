@@ -84,9 +84,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename MatrixType, typename InfoType> class CorrectionVectorFunction {
 
-	typedef typename MatrixType::value_type FieldType;
+	typedef typename MatrixType::value_type              FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
-	typedef typename PsimagLite::Real<FieldType>::Type RealType;
+	typedef typename PsimagLite::Real<FieldType>::Type   RealType;
 
 	class InternalMatrix {
 
@@ -106,8 +106,8 @@ template <typename MatrixType, typename InfoType> class CorrectionVectorFunction
 
 		void matrixVectorProduct(VectorType& x, const VectorType& y) const
 		{
-			RealType eta = info_.eta();
-			RealType omegaMinusE0 = info_.omega().second + E0_;
+			RealType   eta          = info_.eta();
+			RealType   omegaMinusE0 = info_.omega().second + E0_;
 			VectorType xTmp(x.size(), 0);
 			m_.matrixVectorProduct(xTmp, y); // xTmp = Hy
 			VectorType x2(x.size(), 0);
@@ -127,8 +127,8 @@ template <typename MatrixType, typename InfoType> class CorrectionVectorFunction
 	private:
 
 		const MatrixType& m_;
-		const InfoType& info_;
-		RealType E0_;
+		const InfoType&   info_;
+		RealType          E0_;
 	};
 
 	typedef ConjugateGradient<InternalMatrix> ConjugateGradientType;
@@ -150,7 +150,7 @@ public:
 
 private:
 
-	InternalMatrix im_;
+	InternalMatrix        im_;
 	ConjugateGradientType cg_;
 }; // class CorrectionVectorFunction
 } // namespace Dmrg

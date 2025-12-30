@@ -136,7 +136,7 @@ public:
 	private:
 
 		Vector<String>::Type registeredOptions_;
-		SizeType mode_;
+		SizeType             mode_;
 	}; // class Writeable
 
 	class Readable {

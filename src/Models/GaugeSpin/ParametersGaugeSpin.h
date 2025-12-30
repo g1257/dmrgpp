@@ -89,7 +89,7 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersGaugeSpin : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
@@ -121,7 +121,7 @@ struct ParametersGaugeSpin : public ParametersModelBase<RealType, QnType> {
 		return os;
 	}
 
-	SizeType twiceTheSpin;
+	SizeType       twiceTheSpin;
 	VectorRealType magneticFieldV;
 };
 } // namespace Dmrg

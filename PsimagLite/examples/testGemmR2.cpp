@@ -18,7 +18,7 @@ void fillRandom(PsimagLite::Matrix<RealType>& m, RealType min, RealType max, Som
 
 bool equalMatrices(PsimagLite::Matrix<RealType>& a,
                    PsimagLite::Matrix<RealType>& b,
-                   RealType tolerance)
+                   RealType                      tolerance)
 {
 	const SizeType rows = a.rows();
 	const SizeType cols = b.cols();
@@ -39,10 +39,10 @@ int main(int argc, char** argv)
 		                               + " total nthreadsOuter nthreadsInner\n");
 
 	const bool needsPrinting = false;
-	int const nb = 99;
-	int total = atoi(argv[1]);
-	int nthreadsOuter = atoi(argv[2]);
-	int nthreadsInner = atoi(argv[3]);
+	int const  nb            = 99;
+	int        total         = atoi(argv[1]);
+	int        nthreadsOuter = atoi(argv[2]);
+	int        nthreadsInner = atoi(argv[3]);
 
 	PsimagLite::Concurrency concurrency(&argc, &argv, nthreadsInner);
 
@@ -50,13 +50,13 @@ int main(int argc, char** argv)
 
 	auto lambda = [&rng, nthreadsInner](SizeType, SizeType)
 	{
-		PsimagLite::GemmR<RealType> gemmR(needsPrinting, nb, nthreadsInner);
-		SizeType lda = static_cast<SizeType>(rng() * 500) + 10;
-		SizeType cda = lda;
-		SizeType ldb = lda;
-		SizeType cdb = lda;
-		SizeType ldc = lda;
-		SizeType cdc = lda;
+		PsimagLite::GemmR<RealType>  gemmR(needsPrinting, nb, nthreadsInner);
+		SizeType                     lda = static_cast<SizeType>(rng() * 500) + 10;
+		SizeType                     cda = lda;
+		SizeType                     ldb = lda;
+		SizeType                     cdb = lda;
+		SizeType                     ldc = lda;
+		SizeType                     cdc = lda;
 		PsimagLite::Matrix<RealType> A(lda, cda);
 		PsimagLite::Matrix<RealType> B(ldb, cdb);
 		PsimagLite::Matrix<RealType> C(ldc, cdc);
@@ -85,7 +85,7 @@ int main(int argc, char** argv)
 	};
 
 	PsimagLite::CodeSectionParams csp = PsimagLite::Concurrency::codeSectionParams;
-	csp.npthreads = nthreadsOuter;
+	csp.npthreads                     = nthreadsOuter;
 
 	PsimagLite::Parallelizer2<> parallelizer2(csp);
 	parallelizer2.parallelFor(0, total, lambda);

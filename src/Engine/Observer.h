@@ -99,32 +99,32 @@ template <typename ObserverHelperType, typename ModelType_> class Observer {
 
 public:
 
-	typedef ModelType_ ModelType;
-	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename ObserverHelperType::IoInputType IoInputType;
-	typedef typename VectorWithOffsetType::value_type FieldType;
-	typedef PsimagLite::SparseVector<FieldType> VectorType;
-	typedef typename ModelType_::RealType RealType;
-	typedef PsimagLite::Matrix<FieldType> MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
-	typedef typename ModelType_::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef ModelType_                                               ModelType;
+	typedef typename ObserverHelperType::VectorWithOffsetType        VectorWithOffsetType;
+	typedef typename ObserverHelperType::IoInputType                 IoInputType;
+	typedef typename VectorWithOffsetType::value_type                FieldType;
+	typedef PsimagLite::SparseVector<FieldType>                      VectorType;
+	typedef typename ModelType_::RealType                            RealType;
+	typedef PsimagLite::Matrix<FieldType>                            MatrixType;
+	typedef typename PsimagLite::Vector<MatrixType>::Type            VectorMatrixType;
+	typedef typename ModelType_::BasisWithOperatorsType              BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
 	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType_::ParametersType ParametersType;
-	typedef CorrelationsSkeleton<ObserverHelperType, ModelType_> CorrelationsSkeletonType;
-	typedef OnePointCorrelations<ObserverHelperType, ModelType_> OnePointCorrelationsType;
-	typedef TwoPointCorrelations<CorrelationsSkeletonType> TwoPointCorrelationsType;
-	typedef FourPointCorrelations<CorrelationsSkeletonType> FourPointCorrelationsType;
-	typedef MultiPointCorrelations<CorrelationsSkeletonType> MultiPointCorrelationsType;
-	typedef typename CorrelationsSkeletonType::BraketType BraketType;
-	typedef Parallel4PointDs<ModelType, FourPointCorrelationsType> Parallel4PointDsType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef ManyPointAction ManyPointActionType;
+	typedef typename ModelType_::ParametersType                      ParametersType;
+	typedef CorrelationsSkeleton<ObserverHelperType, ModelType_>     CorrelationsSkeletonType;
+	typedef OnePointCorrelations<ObserverHelperType, ModelType_>     OnePointCorrelationsType;
+	typedef TwoPointCorrelations<CorrelationsSkeletonType>           TwoPointCorrelationsType;
+	typedef FourPointCorrelations<CorrelationsSkeletonType>          FourPointCorrelationsType;
+	typedef MultiPointCorrelations<CorrelationsSkeletonType>         MultiPointCorrelationsType;
+	typedef typename CorrelationsSkeletonType::BraketType            BraketType;
+	typedef Parallel4PointDs<ModelType, FourPointCorrelationsType>   Parallel4PointDsType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type             VectorStringType;
+	typedef ManyPointAction                                          ManyPointActionType;
 
-	Observer(IoInputType& io,
-	         SizeType start,
-	         SizeType nf,
-	         SizeType trail,
+	Observer(IoInputType&      io,
+	         SizeType          start,
+	         SizeType          nf,
+	         SizeType          trail,
 	         const ModelType_& model)
 	    : helper_(io,
 	              start,
@@ -151,9 +151,9 @@ public:
 		return (!es && helper_.site(ptr) == 1);
 	}
 
-	void twoPoint(MatrixType& storage,
-	              const BraketType& braket,
-	              bool needsPrinting,
+	void twoPoint(MatrixType&                storage,
+	              const BraketType&          braket,
+	              bool                       needsPrinting,
 	              const ManyPointActionType& action) const
 	{
 		assert(braket.points() == 2);
@@ -227,12 +227,12 @@ public:
 		}
 	}
 
-	void twoPoint(MatrixType& m,
-	              const BraketType braket,
+	void twoPoint(MatrixType&                        m,
+	              const BraketType                   braket,
 	              ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	              PsimagLite::String bra,
-	              PsimagLite::String ket,
-	              const ManyPointActionType& action) const
+	              PsimagLite::String                 bra,
+	              PsimagLite::String                 ket,
+	              const ManyPointActionType&         action) const
 	{
 		twopoint_(m, braket, fermionicSign, bra, ket, action);
 	}
@@ -308,9 +308,9 @@ public:
 
 	const FourPointCorrelationsType& fourpoint() const { return fourpoint_; }
 
-	void fourPoint(const BraketType& braket,
-	               SizeType rows,
-	               SizeType cols,
+	void fourPoint(const BraketType&      braket,
+	               SizeType               rows,
+	               SizeType               cols,
 	               const ManyPointAction& myaction)
 	{
 		assert(braket.points() == 4);
@@ -345,11 +345,11 @@ public:
 		if (flag == 15) {
 			std::cout << "Fixed all sites\n";
 			BraketType braketOrdered = braket;
-			int sign = orderBraketIfNeeded(braketOrdered);
-			SizeType site0 = braketOrdered.site(0);
-			SizeType site1 = braketOrdered.site(1);
+			int        sign          = orderBraketIfNeeded(braketOrdered);
+			SizeType   site0         = braketOrdered.site(0);
+			SizeType   site1         = braketOrdered.site(1);
 			typename FourPointCorrelationsType::SparseMatrixType O2gt;
-			const bool finalTransform = true;
+			const bool                                           finalTransform = true;
 			fourpoint_.firstStage(
 			    O2gt, 'N', site0, 'N', site1, braketOrdered, 0, 1, finalTransform);
 			typename MatrixType::value_type tmp
@@ -376,7 +376,7 @@ public:
 			std::cout << "Fixed site0= " << site0 << "\n";
 			std::cout << "Fixed site1= " << site1 << "\n";
 			typename FourPointCorrelationsType::SparseMatrixType O2gt;
-			const bool finalTransform = true;
+			const bool                                           finalTransform = true;
 			fourpoint_.firstStage(
 			    O2gt, 'N', site0, 'N', site1, braket, 0, 1, finalTransform);
 
@@ -475,9 +475,9 @@ public:
 		return tmp;
 	}
 
-	void fourPointDeltas(MatrixType& fpd,
+	void fourPointDeltas(MatrixType&                                        fpd,
 	                     const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	                     const ModelType& model)
+	                     const ModelType&                                   model)
 	{
 		if (gammas.size() != 4) {
 			std::cerr << "Observer: fourPointDeltas(...):  wrong number of gammas ";
@@ -517,23 +517,23 @@ public:
 	}
 
 	template <typename ApplyOperatorType>
-	FieldType onePoint(SizeType ptr,
+	FieldType onePoint(SizeType                                        ptr,
 	                   const typename ApplyOperatorType::OperatorType& A,
-	                   SizeType site,
-	                   typename ApplyOperatorType::BorderEnum corner,
-	                   const PsimagLite::GetBraOrKet& bra,
-	                   const PsimagLite::GetBraOrKet& ket) const
+	                   SizeType                                        site,
+	                   typename ApplyOperatorType::BorderEnum          corner,
+	                   const PsimagLite::GetBraOrKet&                  bra,
+	                   const PsimagLite::GetBraOrKet&                  ket) const
 	{
 		return onepoint_.template operator()<ApplyOperatorType>(
 		    ptr, A, site, corner, bra, ket);
 	}
 
 	template <typename ApplyOperatorType>
-	FieldType onePointHookForZero(SizeType ptr,
+	FieldType onePointHookForZero(SizeType                                        ptr,
 	                              const typename ApplyOperatorType::OperatorType& A,
-	                              SizeType splitSize,
-	                              const PsimagLite::GetBraOrKet& bra,
-	                              const PsimagLite::GetBraOrKet& ket) const
+	                              SizeType                                        splitSize,
+	                              const PsimagLite::GetBraOrKet&                  bra,
+	                              const PsimagLite::GetBraOrKet&                  ket) const
 	{
 		return onepoint_.template hookForZero<ApplyOperatorType>(
 		    ptr, A, splitSize, bra, ket);
@@ -541,12 +541,12 @@ public:
 
 	template <typename VectorLikeType>
 	typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<VectorLikeType>::True, void>::Type
-	multiCorrelations(VectorLikeType& result,
+	multiCorrelations(VectorLikeType&         result,
 	                  const SparseMatrixType& O,
-	                  SizeType rows,
-	                  SizeType cols,
-	                  PsimagLite::String bra,
-	                  PsimagLite::String ket)
+	                  SizeType                rows,
+	                  SizeType                cols,
+	                  PsimagLite::String      bra,
+	                  PsimagLite::String      ket)
 	{
 		MultiPointCorrelationsType multi(skeleton_);
 		multi(result, O, rows, cols, bra, ket);
@@ -566,8 +566,8 @@ private:
 		}
 
 		PsimagLite::Sort<std::vector<SizeType>> sort;
-		std::vector<SizeType> sitesSorted = sites;
-		std::vector<SizeType> iperm(sites.size());
+		std::vector<SizeType>                   sitesSorted = sites;
+		std::vector<SizeType>                   iperm(sites.size());
 		sort.sort(sitesSorted, iperm);
 
 		if (sites == sitesSorted)
@@ -608,9 +608,9 @@ private:
 	// https://stackoverflow.com/questions/20702782/efficiently-determine-the-parity-of-a-permutation
 	static SizeType swapCountSmall(const std::vector<SizeType>& perm)
 	{
-		SizeType n = perm.size();
-		SizeType swaps = 0;
-		unsigned long int seen = 0;
+		SizeType          n     = perm.size();
+		SizeType          swaps = 0;
+		unsigned long int seen  = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			unsigned long int mask = (1L << i);
 			if ((seen & mask) != 0)
@@ -625,10 +625,10 @@ private:
 		return swaps;
 	}
 
-	const ObserverHelperType helper_;
-	const OnePointCorrelationsType onepoint_;
-	const CorrelationsSkeletonType skeleton_;
-	const TwoPointCorrelationsType twopoint_;
+	const ObserverHelperType        helper_;
+	const OnePointCorrelationsType  onepoint_;
+	const CorrelationsSkeletonType  skeleton_;
+	const TwoPointCorrelationsType  twopoint_;
 	const FourPointCorrelationsType fourpoint_;
 }; // class Observer
 } // namespace Dmrg

@@ -1,18 +1,18 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void csc_matmul_pre(char trans_A,
-                    const int nrow_A,
-                    const int ncol_A,
-                    const PsimagLite::Vector<int>::Type& acolptr,
-                    const PsimagLite::Vector<int>::Type& arow,
+void csc_matmul_pre(char                                                        trans_A,
+                    const int                                                   nrow_A,
+                    const int                                                   ncol_A,
+                    const PsimagLite::Vector<int>::Type&                        acolptr,
+                    const PsimagLite::Vector<int>::Type&                        arow,
                     const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
-                    const int nrow_Y,
-                    const int ncol_Y,
-                    const PsimagLite::Matrix<ComplexOrRealType>& yin,
-                    const int nrow_X,
-                    const int ncol_X,
-                    PsimagLite::Matrix<ComplexOrRealType>& xout)
+                    const int                                                   nrow_Y,
+                    const int                                                   ncol_Y,
+                    const PsimagLite::Matrix<ComplexOrRealType>&                yin,
+                    const int                                                   nrow_X,
+                    const int                                                   ncol_X,
+                    PsimagLite::Matrix<ComplexOrRealType>&                      xout)
 {
 	/*
 	 * -------------------------------------------------------
@@ -32,9 +32,9 @@ void csc_matmul_pre(char trans_A,
 	 * -------------------------------------------------------
 	 */
 
-	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
-	int isTranspose = (trans_A == 'T') || (trans_A == 't');
-	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
+	const bool is_complex      = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+	int        isTranspose     = (trans_A == 'T') || (trans_A == 't');
+	int        isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
 
 	if (isTranspose || isConjTranspose) {
 		/*
@@ -50,13 +50,13 @@ void csc_matmul_pre(char trans_A,
 		int ja = 0;
 		for (ja = 0; ja < ncol_A; ja++) {
 			int istart = acolptr[ja];
-			int iend = acolptr[ja + 1] - 1;
-			int k = 0;
+			int iend   = acolptr[ja + 1] - 1;
+			int k      = 0;
 			for (k = istart; k <= iend; k++) {
 				int ia = arow[k];
 				assert((0 <= ia) && (ia < nrow_A));
 
-				ComplexOrRealType aij = aval[k];
+				ComplexOrRealType aij  = aval[k];
 				ComplexOrRealType atji = aij;
 				if (is_complex && isConjTranspose) {
 					atji = PsimagLite::conj(atji);
@@ -82,8 +82,8 @@ void csc_matmul_pre(char trans_A,
 		int ja = 0;
 		for (ja = 0; ja < ncol_A; ja++) {
 			int istart = acolptr[ja];
-			int iend = acolptr[ja + 1] - 1;
-			int k = 0;
+			int iend   = acolptr[ja + 1] - 1;
+			int k      = 0;
 			for (k = istart; k <= iend; k++) {
 				ComplexOrRealType aij = aval[k];
 

@@ -10,8 +10,8 @@ template <typename SuperGeometryType, bool> class BuildPierls {
 public:
 
 	using ComplexOrRealType = typename SuperGeometryType::ComplexOrRealType;
-	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
-	using VectorRealType = std::vector<RealType>;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType    = std::vector<RealType>;
 
 	static auto lambda(const VectorRealType& A)
 	{
@@ -24,8 +24,8 @@ template <typename SuperGeometryType> class BuildPierls<SuperGeometryType, true>
 public:
 
 	using ComplexOrRealType = typename SuperGeometryType::ComplexOrRealType;
-	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
-	using VectorRealType = std::vector<RealType>;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType    = std::vector<RealType>;
 
 	static auto lambda(const VectorRealType& A)
 	{

@@ -6,7 +6,7 @@
 
 int main(int argc, char** argv)
 {
-	constexpr unsigned int nthreads = 1;
+	constexpr unsigned int  nthreads = 1;
 	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);
 
 	if (argc != 2) {
@@ -14,15 +14,15 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	typedef double RealType;
-	typedef std::complex<RealType> ComplexType;
+	typedef double                                  RealType;
+	typedef std::complex<RealType>                  ComplexType;
 	typedef PsimagLite::ParametersForSolver<double> SolverParametersType;
-	typedef PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef PsimagLite::Vector<ComplexType>::Type VectorType;
+	typedef PsimagLite::Vector<RealType>::Type      VectorRealType;
+	typedef PsimagLite::Vector<ComplexType>::Type   VectorType;
 
 	PsimagLite::Matrix<ComplexType> m;
-	std::ifstream fin(argv[1]);
-	PsimagLite::String file(argv[1]);
+	std::ifstream                   fin(argv[1]);
+	PsimagLite::String              file(argv[1]);
 	if (!fin || fin.bad() || !fin.good())
 		throw PsimagLite::RuntimeError("Could not open file " + file + "\n");
 
@@ -42,8 +42,8 @@ int main(int argc, char** argv)
 
 	SolverParametersType params;
 	params.lotaMemory = true;
-	params.tolerance = -1;
-	params.options = "reortho";
+	params.tolerance  = -1;
+	params.options    = "reortho";
 
 	typedef PsimagLite::
 	    LanczosSolver<SolverParametersType, PsimagLite::CrsMatrix<ComplexType>, VectorType>

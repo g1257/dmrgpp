@@ -9,8 +9,8 @@ template <typename FunctionType> class Integrator {
 
 public:
 
-	typedef GslWrapper GslWrapperType;
-	typedef typename FunctionType::RealType RealType;
+	typedef GslWrapper                                  GslWrapperType;
+	typedef typename FunctionType::RealType             RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	enum IntegrationEnum
@@ -20,9 +20,9 @@ public:
 	};
 
 	Integrator(FunctionType& function,
-	           RealType epsabs = 1e-9,
-	           RealType epsrel = 1e-9,
-	           SizeType limit = 1000000)
+	           RealType      epsabs = 1e-9,
+	           RealType      epsrel = 1e-9,
+	           SizeType      limit  = 1000000)
 	    : epsabs_(epsabs)
 	    , epsrel_(epsrel)
 	    , limit_(limit)
@@ -107,14 +107,14 @@ private:
 		return result_;
 	}
 
-	GslWrapperType gslWrapper_;
-	RealType epsabs_;
-	RealType epsrel_;
-	SizeType limit_;
-	RealType result_;
-	RealType abserr_;
+	GslWrapperType                             gslWrapper_;
+	RealType                                   epsabs_;
+	RealType                                   epsrel_;
+	SizeType                                   limit_;
+	RealType                                   result_;
+	RealType                                   abserr_;
 	GslWrapperType::gsl_integration_workspace* workspace_;
-	GslWrapperType::gsl_function f_;
+	GslWrapperType::gsl_function               f_;
 };
 } // namespace PsimagLite
 #endif // PSI_INTEGRATOR_H

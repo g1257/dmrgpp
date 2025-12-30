@@ -158,8 +158,8 @@ public:
 		colind_ = a.colind_;
 		rowptr_ = a.rowptr_;
 		values_ = a.values_;
-		nrow_ = a.nrow_;
-		ncol_ = a.ncol_;
+		nrow_   = a.nrow_;
+		ncol_   = a.ncol_;
 	}
 
 	template <typename S> CrsMatrix(const CrsMatrix<std::complex<S>>& a)
@@ -167,14 +167,14 @@ public:
 		colind_ = a.colind_;
 		rowptr_ = a.rowptr_;
 		values_ = a.values_;
-		nrow_ = a.nrow_;
-		ncol_ = a.ncol_;
+		nrow_   = a.nrow_;
+		ncol_   = a.ncol_;
 	}
 
 	explicit CrsMatrix(const Matrix<T>& a)
 	{
-		int counter = 0;
-		double eps = 0;
+		int    counter = 0;
+		double eps     = 0;
 
 		resize(a.rows(), a.cols());
 
@@ -192,17 +192,17 @@ public:
 		setRow(a.rows(), counter);
 	}
 
-	CrsMatrix(SizeType rank, // square matrix ONLY for now
-	          const Vector<SizeType>::Type& rows2,
-	          const Vector<SizeType>::Type& cols,
+	CrsMatrix(SizeType                        rank, // square matrix ONLY for now
+	          const Vector<SizeType>::Type&   rows2,
+	          const Vector<SizeType>::Type&   cols,
 	          const typename Vector<T>::Type& vals)
 	    : rowptr_(rank + 1)
 	    , nrow_(rank)
 	    , ncol_(rank)
 	{
 		Sort<Vector<SizeType>::Type> s;
-		Vector<SizeType>::Type iperm(rows2.size());
-		Vector<SizeType>::Type rows = rows2;
+		Vector<SizeType>::Type       iperm(rows2.size());
+		Vector<SizeType>::Type       rows = rows2;
 		s.sort(rows, iperm);
 		SizeType counter = 0;
 		SizeType prevRow = rows[0] + 1;
@@ -211,7 +211,7 @@ public:
 			if (prevRow != row) {
 				// add new row
 				rowptr_[row] = counter++;
-				prevRow = row;
+				prevRow      = row;
 			}
 
 			colind_.push_back(cols[iperm[i]]);
@@ -228,7 +228,7 @@ public:
 	CrsMatrix(
 	    const std::ClosureOperator<CrsMatrix, CrsMatrix, std::ClosureOperations::OP_MULT>& c)
 	{
-		CrsMatrix& x = *this;
+		CrsMatrix&       x = *this;
 		const CrsMatrix& y = c.r1;
 		const CrsMatrix& z = c.r2;
 		multiply(x, y, z);
@@ -249,19 +249,19 @@ public:
 		str += "CrsMatrix";
 
 		const char* start = reinterpret_cast<const char*>(this);
-		const char* end = reinterpret_cast<const char*>(&colind_);
-		SizeType total = mres.memResolv(&rowptr_, end - start, str + " rowptr");
+		const char* end   = reinterpret_cast<const char*>(&colind_);
+		SizeType    total = mres.memResolv(&rowptr_, end - start, str + " rowptr");
 
 		start = end;
-		end = reinterpret_cast<const char*>(&values_);
+		end   = reinterpret_cast<const char*>(&values_);
 		total += mres.memResolv(&colind_, end - start, str + " colind");
 
 		start = end;
-		end = reinterpret_cast<const char*>(&nrow_);
+		end   = reinterpret_cast<const char*>(&nrow_);
 		total += mres.memResolv(&values_, end - start, str + " values");
 
 		start = end;
-		end = reinterpret_cast<const char*>(&ncol_);
+		end   = reinterpret_cast<const char*>(&ncol_);
 		total += mres.memResolv(&nrow_, end - start, str + " nrow");
 
 		total += mres.memResolv(&ncol_, sizeof(*this) - total, str + " ncol");
@@ -375,7 +375,7 @@ public:
 
 	void operator+=(const CrsMatrix& m)
 	{
-		CrsMatrix c;
+		CrsMatrix                           c;
 		static const typename Real<T>::Type f1 = 1.0;
 		add(c, m, f1);
 		*this = c;
@@ -427,11 +427,11 @@ public:
 		this->colind_.swap(other.colind_);
 		this->values_.swap(other.values_);
 		SizeType nrow = this->nrow_;
-		this->nrow_ = other.nrow_;
-		other.nrow_ = nrow;
+		this->nrow_   = other.nrow_;
+		other.nrow_   = nrow;
 		SizeType ncol = this->ncol_;
-		this->ncol_ = other.ncol_;
-		other.ncol_ = ncol;
+		this->ncol_   = other.ncol_;
+		other.ncol_   = ncol;
 	}
 
 	void pushCol(SizeType i) { colind_.push_back(i); }
@@ -571,8 +571,8 @@ public:
 		MPI::recv(values_, root, tag + 4, mpiComm);
 	}
 
-	void write(String label,
-	           IoSerializer& ioSerializer,
+	void write(String                  label,
+	           IoSerializer&           ioSerializer,
 	           IoSerializer::WriteMode mode = IoSerializer::NO_OVERWRITE) const
 	{
 		if (nrow_ > 0)
@@ -648,9 +648,9 @@ private:
 
 	typename Vector<int>::Type rowptr_;
 	typename Vector<int>::Type colind_;
-	typename Vector<T>::Type values_;
-	SizeType nrow_;
-	SizeType ncol_;
+	typename Vector<T>::Type   values_;
+	SizeType                   nrow_;
+	SizeType                   ncol_;
 }; // class CrsMatrix
 
 // Companion functions below:
@@ -748,9 +748,9 @@ template <typename T> void crsMatrixToFullMatrix(Matrix<T>& m, const CrsMatrix<T
 // Use the constructor if possible
 template <typename T> void fullMatrixToCrsMatrix(CrsMatrix<T>& crsMatrix, const Matrix<T>& a)
 {
-	const T zval = 0.0;
-	SizeType rows = a.rows();
-	SizeType cols = a.cols();
+	const T  zval     = 0.0;
+	SizeType rows     = a.rows();
+	SizeType cols     = a.cols();
 	SizeType nonZeros = rows * cols;
 
 	const bool use_push = true;
@@ -798,11 +798,11 @@ template <typename T, typename VectorLikeType>
 typename EnableIf<IsVectorLike<VectorLikeType>::True
                       && Loki::TypeTraits<typename VectorLikeType::value_type>::isFloat,
                   void>::Type
-externalProduct(CrsMatrix<T>& B,
-                const CrsMatrix<T>& A,
-                SizeType nout,
-                const VectorLikeType& signs,
-                bool order,
+externalProduct(CrsMatrix<T>&                             B,
+                const CrsMatrix<T>&                       A,
+                SizeType                                  nout,
+                const VectorLikeType&                     signs,
+                bool                                      order,
                 const PsimagLite::Vector<SizeType>::Type& permutationFull)
 {
 	if (A.rows() > 0)
@@ -811,16 +811,16 @@ externalProduct(CrsMatrix<T>& B,
 	//  B = kron(eye, A)   if (is_A_fastest)
 	//  B = kron(A, eye)   otherwise
 	// -------------------------------------
-	SizeType nrow_A = A.rows();
-	SizeType ncol_A = A.cols();
-	SizeType n = nout;
+	SizeType nrow_A   = A.rows();
+	SizeType ncol_A   = A.cols();
+	SizeType n        = nout;
 	SizeType nrow_eye = n;
 	SizeType ncol_eye = n;
-	SizeType nnz_A = A.nonZeros();
+	SizeType nnz_A    = A.nonZeros();
 
 	SizeType nrow_B = n * nrow_A;
 	SizeType ncol_B = n * ncol_A;
-	SizeType nnz_B = n * nnz_A;
+	SizeType nnz_B  = n * nnz_A;
 
 	B.resize(nrow_B, ncol_B, nnz_B);
 
@@ -853,8 +853,8 @@ externalProduct(CrsMatrix<T>& B,
 		SizeType nnz_row = A.getRowPtr(ia + 1) - A.getRowPtr(ia);
 
 		for (SizeType ie = 0; ie < nrow_eye; ie++) {
-			SizeType ib = (is_A_fastest) ? permutationFull[ia + ie * nrow_A]
-			                             : permutationFull[ie + ia * nrow_eye];
+			SizeType ib   = (is_A_fastest) ? permutationFull[ia + ie * nrow_A]
+			                               : permutationFull[ie + ia * nrow_eye];
 			nnz_B_row[ib] = nnz_row;
 		};
 	};
@@ -888,8 +888,8 @@ externalProduct(CrsMatrix<T>& B,
 			// --------------------
 			// entry aij = A(ia,ja)
 			// --------------------
-			SizeType ja = A.getCol(k);
-			T aij = A.getValue(k);
+			SizeType ja  = A.getCol(k);
+			T        aij = A.getValue(k);
 
 			for (SizeType ie = 0; ie < nrow_eye; ie++) {
 				SizeType je = ie;
@@ -904,7 +904,7 @@ externalProduct(CrsMatrix<T>& B,
 				// entry bij = B(ib,jb)
 				// --------------------
 				int alpha = ie;
-				T bij = (is_A_fastest) ? aij : aij * signs[alpha];
+				T   bij   = (is_A_fastest) ? aij : aij * signs[alpha];
 
 				SizeType ip = B_rowptr[permutationFull[ib]];
 
@@ -934,11 +934,11 @@ template <typename T, typename VectorLikeType>
 typename EnableIf<IsVectorLike<VectorLikeType>::True
                       && Loki::TypeTraits<typename VectorLikeType::value_type>::isFloat,
                   void>::Type
-externalProduct(CrsMatrix<T>& C,
-                const CrsMatrix<T>& A,
-                const CrsMatrix<T>& B,
-                const VectorLikeType& signs,
-                bool order,
+externalProduct(CrsMatrix<T>&                             C,
+                const CrsMatrix<T>&                       A,
+                const CrsMatrix<T>&                       B,
+                const VectorLikeType&                     signs,
+                bool                                      order,
                 const PsimagLite::Vector<SizeType>::Type& permutationFull)
 {
 	const SizeType nfull = permutationFull.size();
@@ -947,11 +947,11 @@ externalProduct(CrsMatrix<T>& C,
 	for (SizeType i = 0; i < nfull; ++i)
 		perm[permutationFull[i]] = i;
 
-	const SizeType nout = B.rows();
-	const SizeType na = A.rows();
-	const SizeType noutOrNa = (!order) ? nout : na;
-	const CrsMatrix<T>& AorB = (!order) ? A : B;
-	const CrsMatrix<T>& BorA = (!order) ? B : A;
+	const SizeType      nout     = B.rows();
+	const SizeType      na       = A.rows();
+	const SizeType      noutOrNa = (!order) ? nout : na;
+	const CrsMatrix<T>& AorB     = (!order) ? A : B;
+	const CrsMatrix<T>& BorA     = (!order) ? B : A;
 	assert(A.rows() == A.cols());
 	assert(B.rows() == B.cols());
 	assert(nout * na == nfull);
@@ -961,13 +961,13 @@ externalProduct(CrsMatrix<T>& C,
 	for (SizeType i = 0; i < nfull; ++i) {
 		C.setRow(i, counter);
 		const SizeType ind = perm[i];
-		ldiv_t q = std::ldiv(ind, noutOrNa);
+		ldiv_t         q   = std::ldiv(ind, noutOrNa);
 		for (int k1 = BorA.getRowPtr(q.rem); k1 < BorA.getRowPtr(q.rem + 1); ++k1) {
 			const SizeType col1 = BorA.getCol(k1);
 			for (int k2 = AorB.getRowPtr(q.quot); k2 < AorB.getRowPtr(q.quot + 1);
 			     ++k2) {
 				const SizeType col2 = AorB.getCol(k2);
-				SizeType j = permutationFull[col1 + col2 * noutOrNa];
+				SizeType       j    = permutationFull[col1 + col2 * noutOrNa];
 				C.pushCol(j);
 				C.pushValue(BorA.getValue(k1) * AorB.getValue(k2) * signs[q.rem]);
 				++counter;
@@ -981,9 +981,9 @@ externalProduct(CrsMatrix<T>& C,
 
 template <typename T>
 void printFullMatrix(const CrsMatrix<T>& s,
-                     const String& name,
-                     SizeType how = 0,
-                     double eps = 1e-20)
+                     const String&       name,
+                     SizeType            how = 0,
+                     double              eps = 1e-20)
 {
 	Matrix<T> fullm(s.rows(), s.cols());
 	crsMatrixToFullMatrix(fullm, s);
@@ -1005,11 +1005,11 @@ void printFullMatrix(const CrsMatrix<T>& s,
 template <typename S, typename S3, typename S2>
 void multiply(CrsMatrix<S>& C, CrsMatrix<S3> const& A, CrsMatrix<S2> const& B)
 {
-	int j, s, mlast, itemp, jbk;
-	SizeType n = A.rows();
+	int                        j, s, mlast, itemp, jbk;
+	SizeType                   n = A.rows();
 	typename Vector<int>::Type ptr(B.cols(), -1), index(B.cols(), 0);
-	typename Vector<S>::Type temp(B.cols(), 0);
-	S tmp;
+	typename Vector<S>::Type   temp(B.cols(), 0);
+	S                          tmp;
 
 	C.resize(n, B.cols());
 
@@ -1023,13 +1023,13 @@ void multiply(CrsMatrix<S>& C, CrsMatrix<S3> const& A, CrsMatrix<S2> const& B)
 		itemp = 0;
 		for (j = A.getRowPtr(i); j < A.getRowPtr(i + 1); j++) {
 			SizeType istart = B.getRowPtr(A.getCol(j));
-			SizeType iend = B.getRowPtr(A.getCol(j) + 1);
+			SizeType iend   = B.getRowPtr(A.getCol(j) + 1);
 			for (SizeType k = istart; k < iend; k++) {
 				jbk = B.getCol(k);
 				tmp = A.getValue(j) * B.getValue(k);
 				if (ptr[jbk] < 0) {
-					ptr[jbk] = itemp;
-					temp[ptr[jbk]] = tmp;
+					ptr[jbk]        = itemp;
+					temp[ptr[jbk]]  = tmp;
 					index[ptr[jbk]] = jbk;
 					itemp++;
 				} else {
@@ -1051,8 +1051,8 @@ void multiply(CrsMatrix<S>& C, CrsMatrix<S3> const& A, CrsMatrix<S2> const& B)
 
 // vector2 = sparseMatrix * vector1
 template <class S>
-void multiply(typename Vector<S>::Type& v2,
-              const CrsMatrix<S>& m,
+void multiply(typename Vector<S>::Type&       v2,
+              const CrsMatrix<S>&             m,
               const typename Vector<S>::Type& v1)
 {
 	SizeType n = m.rows();
@@ -1117,8 +1117,8 @@ template <typename S, typename S2> void transposeConjugate(CrsMatrix<S>& B, cons
 	for (SizeType ia = 0; ia < nrowA; ia++) {
 		for (int k = A.getRowPtr(ia); k < A.getRowPtr(ia + 1); k++) {
 
-			SizeType ja = A.getCol(k);
-			S2 aij = A.getValue(k);
+			SizeType ja  = A.getCol(k);
+			S2       aij = A.getValue(k);
 
 			// ---------------------------------
 			// B(ib=ja,jb=ia) = conj( A(ia,ja) )
@@ -1179,7 +1179,7 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 	// ------------------------------------------
 	// temporary vectors to accelerate processing
 	// ------------------------------------------
-	std::vector<T> valueTmp(ncol_A, zero);
+	std::vector<T>    valueTmp(ncol_A, zero);
 	std::vector<bool> is_examined_already(ncol_A, false);
 
 	SizeType counter = 0;
@@ -1190,10 +1190,10 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 		const bool is_valid_C_row = (irow < nrow_C);
 
 		const int kstart_B = (is_valid_B_row) ? B.getRowPtr(irow) : 0;
-		const int kend_B = (is_valid_B_row) ? B.getRowPtr(irow + 1) : 0;
+		const int kend_B   = (is_valid_B_row) ? B.getRowPtr(irow + 1) : 0;
 
 		const int kstart_C = (is_valid_C_row) ? C.getRowPtr(irow) : 0;
-		const int kend_C = (is_valid_C_row) ? C.getRowPtr(irow + 1) : 0;
+		const int kend_C   = (is_valid_C_row) ? C.getRowPtr(irow + 1) : 0;
 
 		// --------------------------------
 		// check whether there is work to do
@@ -1206,7 +1206,7 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 		// add contributions from matrix B and matrix C
 		// -------------------------------
 		for (int k = kstart_B; k < kend_B; k++) {
-			const T bij = B.getValue(k);
+			const T        bij  = B.getValue(k);
 			const SizeType jcol = B.getCol(k);
 
 			assert(jcol < ncol_A);
@@ -1215,7 +1215,7 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 		};
 
 		for (int k = kstart_C; k < kend_C; k++) {
-			const T cij = C.getValue(k);
+			const T        cij  = C.getValue(k);
 			const SizeType jcol = C.getCol(k);
 
 			assert(jcol < ncol_A);
@@ -1232,7 +1232,7 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 			if (!is_examined_already[jcol]) {
 				is_examined_already[jcol] = true;
 
-				const T aij = valueTmp[jcol];
+				const T    aij     = valueTmp[jcol];
 				const bool is_zero = (aij == zero);
 				if (!is_zero) {
 					A.pushCol(jcol);
@@ -1247,7 +1247,7 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 			if (!is_examined_already[jcol]) {
 				is_examined_already[jcol] = true;
 
-				const T aij = valueTmp[jcol];
+				const T    aij     = valueTmp[jcol];
 				const bool is_zero = (aij == zero);
 				if (!is_zero) {
 					A.pushCol(jcol);
@@ -1262,14 +1262,14 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 		// --------------------------------------------------
 
 		for (int k = kstart_B; k < kend_B; k++) {
-			const SizeType jcol = B.getCol(k);
-			valueTmp[jcol] = zero;
+			const SizeType jcol       = B.getCol(k);
+			valueTmp[jcol]            = zero;
 			is_examined_already[jcol] = false;
 		};
 
 		for (int k = kstart_C; k < kend_C; k++) {
-			const SizeType jcol = C.getCol(k);
-			valueTmp[jcol] = zero;
+			const SizeType jcol       = C.getCol(k);
+			valueTmp[jcol]            = zero;
 			is_examined_already[jcol] = false;
 		};
 
@@ -1288,9 +1288,9 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 
 //! Sets A=B0*b0+B1*b1 + ...
 template <typename T, typename T1>
-void sum(CrsMatrix<T>& A,
+void sum(CrsMatrix<T>&                           A,
          const std::vector<const CrsMatrix<T>*>& Bmats,
-         const std::vector<T1>& bvec)
+         const std::vector<T1>&                  bvec)
 {
 	SizeType Bmats_size = Bmats.size();
 
@@ -1298,17 +1298,17 @@ void sum(CrsMatrix<T>& A,
 	// nrow_A = MAX( nrow_B(:) )
 	// ncol_A = MAX( ncol_B(:) )
 	// ------------------------------
-	SizeType nrow_A = 0;
-	SizeType ncol_A = 0;
+	SizeType nrow_A  = 0;
+	SizeType ncol_A  = 0;
 	SizeType nnz_sum = 0;
 	SizeType nnz_max = 0;
 
 	for (SizeType imat = 0; imat < Bmats_size; ++imat) {
 		assert(imat < Bmats.size());
 		const CrsMatrix<T>& thisMat = *(Bmats[imat]);
-		SizeType nrow_B = thisMat.rows();
-		SizeType ncol_B = thisMat.cols();
-		SizeType nnz_B = thisMat.nonZeros();
+		SizeType            nrow_B  = thisMat.rows();
+		SizeType            ncol_B  = thisMat.cols();
+		SizeType            nnz_B   = thisMat.nonZeros();
 
 		nrow_A = (nrow_B > nrow_A) ? nrow_B : nrow_A;
 		ncol_A = (ncol_B > ncol_A) ? ncol_B : ncol_A;
@@ -1342,7 +1342,7 @@ void sum(CrsMatrix<T>& A,
 	// ------------------------------------------
 	// temporary vectors to accelerate processing
 	// ------------------------------------------
-	std::vector<T> valueTmp(ncol_A);
+	std::vector<T>    valueTmp(ncol_A);
 	std::vector<bool> is_examined_already(ncol_A, false);
 
 	std::vector<SizeType> column_index;
@@ -1356,9 +1356,9 @@ void sum(CrsMatrix<T>& A,
 
 		for (SizeType imat = 0; imat < Bmats_size; ++imat) {
 			assert(imat < Bmats.size());
-			const CrsMatrix<T>& thisMat = *(Bmats[imat]);
-			const SizeType nrow_B = thisMat.rows();
-			const bool is_valid_B_row = (irow < nrow_B);
+			const CrsMatrix<T>& thisMat        = *(Bmats[imat]);
+			const SizeType      nrow_B         = thisMat.rows();
+			const bool          is_valid_B_row = (irow < nrow_B);
 
 			const SizeType kstart_B = (is_valid_B_row) ? thisMat.getRowPtr(irow) : 0;
 			const SizeType kend_B = (is_valid_B_row) ? thisMat.getRowPtr(irow + 1) : 0;
@@ -1375,7 +1375,7 @@ void sum(CrsMatrix<T>& A,
 			// -------------------------------
 			const T1 b1 = bvec[imat];
 			for (SizeType k = kstart_B; k < kend_B; ++k) {
-				const T bij = thisMat.getValue(k);
+				const T        bij  = thisMat.getValue(k);
 				const SizeType jcol = thisMat.getCol(k);
 
 				assert(jcol < ncol_A);
@@ -1449,10 +1449,10 @@ template <typename T> bool isAntiHermitian(const CrsMatrix<T>& A)
 template <typename T>
 void fromBlockToFull(CrsMatrix<T>& Bfull, const CrsMatrix<T>& B, SizeType offset)
 {
-	const bool use_push = true;
-	int nrows_Bfull = Bfull.rows();
-	int ncols_Bfull = Bfull.cols();
-	int nnz_Bfull = B.nonZeros();
+	const bool use_push    = true;
+	int        nrows_Bfull = Bfull.rows();
+	int        ncols_Bfull = Bfull.cols();
+	int        nnz_Bfull   = B.nonZeros();
 	Bfull.clear();
 
 	if (use_push) {
@@ -1470,8 +1470,8 @@ void fromBlockToFull(CrsMatrix<T>& Bfull, const CrsMatrix<T>& B, SizeType offset
 		SizeType i = ii + offset;
 		Bfull.setRow(i, counter);
 		for (int jj = B.getRowPtr(ii); jj < B.getRowPtr(ii + 1); ++jj) {
-			SizeType j = B.getCol(jj) + offset;
-			T tmp = B.getValue(jj);
+			SizeType j   = B.getCol(jj) + offset;
+			T        tmp = B.getValue(jj);
 			if (use_push) {
 				Bfull.pushCol(j);
 				Bfull.pushValue(tmp);
@@ -1495,8 +1495,8 @@ bool isDiagonal(const CrsMatrix<T>& A, double eps = 1e-6, bool checkForIdentity 
 {
 	if (A.rows() != A.cols())
 		return false;
-	SizeType n = A.rows();
-	const T f1 = (-1.0);
+	SizeType n  = A.rows();
+	const T  f1 = (-1.0);
 	for (SizeType i = 0; i < n; i++) {
 		for (int k = A.getRowPtr(i); k < A.getRowPtr(i + 1); k++) {
 			SizeType col = A.getCol(k);

@@ -88,8 +88,8 @@ bool isAnInteger(String str)
 
 bool isAfloat(String str)
 {
-	const SizeType n = str.length();
-	bool hasDigit = false;
+	const SizeType n        = str.length();
+	bool           hasDigit = false;
 	for (SizeType i = 0; i < n; ++i) {
 		if (isdigit(str[i])) {
 			hasDigit = true;

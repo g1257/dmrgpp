@@ -96,7 +96,7 @@ namespace PsimagLite {
 class GslWrapper {
 public:
 
-	typedef int DummyType;
+	typedef int       DummyType;
 	typedef DummyType gsl_integration_workspace;
 	typedef double (*GslWrapperFunctionType)(double, void*);
 	typedef struct {
@@ -108,7 +108,7 @@ public:
 
 	struct gsl_function {
 		GslWrapperFunctionType function;
-		void* params;
+		void*                  params;
 	};
 
 	gsl_error_handler_t gsl_set_error_handler(gsl_error_handler_t) const
@@ -209,8 +209,8 @@ class GslWrapper {
 public:
 
 	typedef ::gsl_integration_workspace gsl_integration_workspace;
-	typedef ::gsl_function gsl_function;
-	typedef ::gsl_sf_result gsl_sf_result;
+	typedef ::gsl_function              gsl_function;
+	typedef ::gsl_sf_result             gsl_sf_result;
 
 	void printError(int status) const
 	{
@@ -232,54 +232,54 @@ public:
 		return ::gsl_integration_workspace_free(w);
 	}
 
-	int gsl_integration_qagi(gsl_function* f,
-	                         double epsabs,
-	                         double epsrel,
-	                         size_t limit,
+	int gsl_integration_qagi(gsl_function*              f,
+	                         double                     epsabs,
+	                         double                     epsrel,
+	                         size_t                     limit,
 	                         gsl_integration_workspace* workspace,
-	                         double* result,
-	                         double* abserr) const
+	                         double*                    result,
+	                         double*                    abserr) const
 	{
 		return ::gsl_integration_qagi(f, epsabs, epsrel, limit, workspace, result, abserr);
 	}
 
-	int gsl_integration_qagiu(gsl_function* f,
-	                          double a,
-	                          double epsabs,
-	                          double epsrel,
-	                          size_t limit,
+	int gsl_integration_qagiu(gsl_function*              f,
+	                          double                     a,
+	                          double                     epsabs,
+	                          double                     epsrel,
+	                          size_t                     limit,
 	                          gsl_integration_workspace* workspace,
-	                          double* result,
-	                          double* abserr) const
+	                          double*                    result,
+	                          double*                    abserr) const
 	{
 		return ::gsl_integration_qagiu(
 		    f, a, epsabs, epsrel, limit, workspace, result, abserr);
 	}
 
-	int gsl_integration_qagp(const gsl_function* f,
-	                         double* pts,
-	                         SizeType npts,
-	                         double epsabs,
-	                         double epsrel,
-	                         SizeType limit,
+	int gsl_integration_qagp(const gsl_function*        f,
+	                         double*                    pts,
+	                         SizeType                   npts,
+	                         double                     epsabs,
+	                         double                     epsrel,
+	                         SizeType                   limit,
 	                         gsl_integration_workspace* workspace,
-	                         double* result,
-	                         double* abserr) const
+	                         double*                    result,
+	                         double*                    abserr) const
 	{
 		return ::gsl_integration_qagp(
 		    f, pts, npts, epsabs, epsrel, limit, workspace, result, abserr);
 	}
 
-	int gsl_integration_qag(const gsl_function* f,
-	                        double a,
-	                        double b,
-	                        double epsabs,
-	                        double epsrel,
-	                        size_t limit,
-	                        int key,
+	int gsl_integration_qag(const gsl_function*        f,
+	                        double                     a,
+	                        double                     b,
+	                        double                     epsabs,
+	                        double                     epsrel,
+	                        size_t                     limit,
+	                        int                        key,
 	                        gsl_integration_workspace* workspace,
-	                        double* result,
-	                        double* abserr) const
+	                        double*                    result,
+	                        double*                    abserr) const
 	{
 		return ::gsl_integration_qag(
 		    f, a, b, epsabs, epsrel, limit, key, workspace, result, abserr);

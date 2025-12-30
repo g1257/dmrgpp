@@ -86,7 +86,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template <typename FieldType> class ClebschGordanCached {
-	typedef ClebschGordan<FieldType> ClebschGordanType;
+	typedef ClebschGordan<FieldType>             ClebschGordanType;
 	typedef typename ClebschGordanType::PairType PairType;
 
 public:
@@ -105,8 +105,8 @@ public:
 
 	void init(SizeType jmax, SizeType nfactorials)
 	{
-		jmax_ = jmax;
-		max2_ = ((jmax_ - 1) * (jmax_ + 2)) / 2 + 1;
+		jmax_  = jmax;
+		max2_  = ((jmax_ - 1) * (jmax_ + 2)) / 2 + 1;
 		max22_ = max2_ * max2_;
 		data_.resize(max22_ * jmax_ * 2, UNDEFINED_VALUE);
 		cgObject_.init(nfactorials);
@@ -125,7 +125,7 @@ public:
 
 		SizeType index1 = calcSubIndex(jm1);
 		SizeType index2 = calcSubIndex(jm2);
-		SizeType jmin = 0;
+		SizeType jmin   = 0;
 		if (jm1.first > jm2.first)
 			jmin = jm1.first - jm2.first;
 		else
@@ -197,12 +197,12 @@ private:
 		return jm1.second + jm2.second - x;
 	}
 
-	static SizeType copies_;
-	int UNDEFINED_VALUE;
-	SizeType jmax_;
-	SizeType max2_, max22_;
+	static SizeType                              copies_;
+	int                                          UNDEFINED_VALUE;
+	SizeType                                     jmax_;
+	SizeType                                     max2_, max22_;
 	typename PsimagLite::Vector<FieldType>::Type data_;
-	ClebschGordanType cgObject_;
+	ClebschGordanType                            cgObject_;
 }; // class ClebschGordanCached
 
 template <typename FieldType> SizeType ClebschGordanCached<FieldType>::copies_ = 0;

@@ -30,8 +30,8 @@ class SuperOpHelperPlaquette : public SuperOpHelperBase<SuperGeometryType, Param
 public:
 
 	typedef SuperOpHelperBase<SuperGeometryType, ParamsType> BaseType;
-	typedef typename BaseType::VectorSizeType VectorSizeType;
-	typedef typename BaseType::PairBoolSizeType PairBoolSizeType;
+	typedef typename BaseType::VectorSizeType                VectorSizeType;
+	typedef typename BaseType::PairBoolSizeType              PairBoolSizeType;
 	using PairMetaOpForConnection = typename BaseType::PairMetaOpForConnection;
 
 	SuperOpHelperPlaquette(const SuperGeometryType& superGeometry)
@@ -43,7 +43,7 @@ public:
 	void setToProduct(SizeType smaxOrEmin, SizeType newSite, ProgramGlobals::DirectionEnum dir)
 	{
 		smaxOrEmin_ = smaxOrEmin;
-		newSite_ = newSite;
+		newSite_    = newSite;
 		BaseType::setToProduct(smaxOrEmin, newSite, dir);
 		isTriangle_ = (newSite & 1);
 		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -55,9 +55,9 @@ public:
 	// testing devel FIXME TODO
 	SizeType size() const { return 1; }
 
-	PairMetaOpForConnection finalIndices(const VectorSizeType& hItems,
+	PairMetaOpForConnection finalIndices(const VectorSizeType&          hItems,
 	                                     ProgramGlobals::ConnectionEnum type,
-	                                     SizeType rightBlockSize) const
+	                                     SizeType                       rightBlockSize) const
 	{
 		assert(hItems.size() == 4);
 		constexpr int NON_LOCAL = -1;
@@ -84,7 +84,7 @@ public:
 			MetaOpForConnection left { NON_LOCAL,
 				                   encodeNonLocalSys(smaxOrEmin_ - 1, 2),
 				                   'N' };
-			SizeType start = rightBlockSize + smaxOrEmin_ - 2;
+			SizeType            start = rightBlockSize + smaxOrEmin_ - 2;
 			MetaOpForConnection right { NON_LOCAL, encodeNonLocalEnv(start, 2), 'N' };
 			return PairMetaOpForConnection(left, right);
 		}
@@ -160,7 +160,7 @@ private:
 
 	SizeType smaxOrEmin_;
 	SizeType newSite_;
-	bool isTriangle_;
+	bool     isTriangle_;
 };
 }
 #endif // SuperOpHelperPlaquette_H

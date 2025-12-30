@@ -15,7 +15,7 @@ typedef float RealType;
 #endif
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
 typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
-    ParametersDmrgSolverType;
+                                ParametersDmrgSolverType;
 typedef PsimagLite::Concurrency ConcurrencyType;
 
 void usage(const PsimagLite::String& name)
@@ -33,17 +33,17 @@ struct ToolOptions {
 	PsimagLite::String filename;
 	PsimagLite::String action;
 	PsimagLite::String extraOptions;
-	bool shortoption;
+	bool               shortoption;
 };
 
 template <typename ComplexOrRealType>
-void main1(InputNgType::Readable& io,
-           PsimagLite::PsiApp application,
+void main1(InputNgType::Readable&          io,
+           PsimagLite::PsiApp              application,
            const ParametersDmrgSolverType& dmrgSolverParams,
-           const ToolOptions& toolOptions)
+           const ToolOptions&              toolOptions)
 {
 	typedef PsimagLite::Geometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>
-	    GeometryType;
+	             GeometryType;
 	GeometryType geometry(io);
 
 	typedef Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType> ToolBoxType;
@@ -86,10 +86,10 @@ int main(int argc, char** argv)
 {
 	using namespace Dmrg;
 	PsimagLite::PsiApp application("toolboxdmrg", &argc, &argv, 1);
-	ToolOptions toolOptions;
-	int opt = 0;
-	int precision = 0;
-	bool versionOnly = false;
+	ToolOptions        toolOptions;
+	int                opt         = 0;
+	int                precision   = 0;
+	bool               versionOnly = false;
 	PsimagLite::String sOptions;
 	while ((opt = getopt(argc, argv, "f:p:a:E:o:sV")) != -1) {
 		switch (opt) {
@@ -142,9 +142,9 @@ int main(int argc, char** argv)
 
 	InputCheck inputCheck;
 
-	bool filenameIsCout = false;
-	PsimagLite::String dotCout = ".cout";
-	size_t pos = toolOptions.filename.find(dotCout);
+	bool               filenameIsCout = false;
+	PsimagLite::String dotCout        = ".cout";
+	size_t             pos            = toolOptions.filename.find(dotCout);
 	if (pos != PsimagLite::String::npos
 	    && pos + dotCout.size() == toolOptions.filename.size()) {
 		filenameIsCout = true;
@@ -161,7 +161,7 @@ int main(int argc, char** argv)
 	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
 
 	//! Read the parameters for this run
-	bool earlyExit = true;
+	bool                     earlyExit = true;
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, earlyExit);
 
 	if (precision > 0)

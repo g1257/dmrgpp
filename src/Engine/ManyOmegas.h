@@ -16,13 +16,13 @@ template <typename ComplexOrRealType, typename OmegaParamsType> class ManyOmegas
 public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef DmrgRunner<ComplexOrRealType> DmrgRunnerType;
-	typedef typename DmrgRunnerType::InputNgType InputNgType;
-	typedef PsimagLite::PsiApp ApplicationType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
+	typedef DmrgRunner<ComplexOrRealType>                      DmrgRunnerType;
+	typedef typename DmrgRunnerType::InputNgType               InputNgType;
+	typedef PsimagLite::PsiApp                                 ApplicationType;
 
-	ManyOmegas(PsimagLite::String data,
-	           RealType precision,
+	ManyOmegas(PsimagLite::String     data,
+	           RealType               precision,
 	           const OmegaParamsType& omegaParams,
 	           const ApplicationType& app)
 	    : data_(data)
@@ -40,7 +40,7 @@ public:
 		    omegaParams_.total(),
 		    [this, root, dryRun, insitu](SizeType i, SizeType)
 		    {
-			    const RealType omega = omegaParams_.omega(i);
+			    const RealType     omega = omegaParams_.omega(i);
 			    PsimagLite::String data2 = addOmega(omega);
 			    PsimagLite::String outputfile
 			        = "\nOutputFile=\"" + root + ttos(i) + "\";\n";
@@ -69,8 +69,8 @@ public:
 		return data_ + str;
 	}
 
-	PsimagLite::String data_;
-	DmrgRunnerType runner_;
+	PsimagLite::String     data_;
+	DmrgRunnerType         runner_;
 	const OmegaParamsType& omegaParams_;
 };
 }

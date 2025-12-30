@@ -91,8 +91,8 @@ template <typename ValueType> class LineChangerLinear {
 public:
 
 	LineChangerLinear(const PsimagLite::String& match,
-	                  ValueType step,
-	                  ValueType init,
+	                  ValueType                 step,
+	                  ValueType                 init,
 	                  const PsimagLite::String& pre,
 	                  const PsimagLite::String& post)
 	    : match_(match)
@@ -107,14 +107,14 @@ public:
 	bool act(SizeType i, PsimagLite::String& line) const
 	{
 		ValueType val = i * step_ + init_;
-		line = match_ + pre_ + ttos(val) + post_;
+		line          = match_ + pre_ + ttos(val) + post_;
 		return true;
 	}
 
 private:
 
 	PsimagLite::String match_;
-	ValueType step_, init_;
+	ValueType          step_, init_;
 	PsimagLite::String pre_, post_;
 }; // class LineChangerLinear
 

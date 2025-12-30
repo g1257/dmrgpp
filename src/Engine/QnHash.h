@@ -16,7 +16,7 @@ template <> class hash<Dmrg::Qn> {
 
 public:
 
-	typedef Dmrg::Qn::VectorQnType VectorQnType;
+	typedef Dmrg::Qn::VectorQnType   VectorQnType;
 	typedef Dmrg::Qn::VectorSizeType VectorSizeType;
 
 	hash(bool addOdd)
@@ -26,9 +26,9 @@ public:
 	SizeType operator()(const Dmrg::Qn& qn) const
 	{
 		const SizeType offset = 8; // 8 bits
-		const SizeType n = qn.other.size(); // small number
-		SizeType key = (addOdd_ && qn.oddElectrons) ? 1 : 0;
-		SizeType bits = (addOdd_) ? 1 : 0;
+		const SizeType n      = qn.other.size(); // small number
+		SizeType       key    = (addOdd_ && qn.oddElectrons) ? 1 : 0;
+		SizeType       bits   = (addOdd_) ? 1 : 0;
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType val = qn.other[i];

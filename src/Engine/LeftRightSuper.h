@@ -90,21 +90,21 @@ template <typename BasisWithOperatorsType_, typename SuperBlockType> class LeftR
 
 public:
 
-	typedef typename SuperBlockType::RealType RealType;
-	typedef BasisWithOperatorsType_ BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
+	typedef typename SuperBlockType::RealType                       RealType;
+	typedef BasisWithOperatorsType_                                 BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
+	typedef typename BasisWithOperatorsType::OperatorsType          OperatorsType;
+	typedef typename OperatorsType::OperatorType                    OperatorType;
+	typedef typename OperatorType::StorageType                      OperatorStorageType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef PsimagLite::ProgressIndicator                           ProgressIndicatorType;
 	typedef LeftRightSuper<BasisWithOperatorsType_, SuperBlockType> ThisType;
-	typedef typename BasisType::QnType QnType;
+	typedef typename BasisType::QnType                              QnType;
 
 	template <typename IoInputter>
 	LeftRightSuper(
-	    IoInputter& io,
+	    IoInputter&        io,
 	    PsimagLite::String prefix,
 	    const BasisTraits& basisTraits,
 	    typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
@@ -125,24 +125,24 @@ public:
 		PsimagLite::String nameRight;
 		io.read(nameRight, prefix + "/NameEnviron");
 
-		BasisTraits basisTraits2 = basisTraits;
+		BasisTraits basisTraits2   = basisTraits;
 		basisTraits2.isObserveCode = true;
 		super_ = new SuperBlockType(io, prefix + "/" + nameSuper, basisTraits);
-		left_ = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, basisTraits2);
+		left_  = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, basisTraits2);
 		right_ = new BasisWithOperatorsType(io, prefix + "/" + nameRight, basisTraits2);
 	}
 
 	LeftRightSuper(const PsimagLite::String& slabel,
 	               const PsimagLite::String& elabel,
 	               const PsimagLite::String& selabel,
-	               const BasisTraits& basisTraits)
+	               const BasisTraits&        basisTraits)
 	    : progress_("LeftRightSuper")
 	    , left_(0)
 	    , right_(0)
 	    , super_(0)
 	    , refCounter_(0)
 	{
-		left_ = new BasisWithOperatorsType(slabel, basisTraits);
+		left_  = new BasisWithOperatorsType(slabel, basisTraits);
 		right_ = new BasisWithOperatorsType(elabel, basisTraits);
 		super_ = new SuperBlockType(selabel, basisTraits);
 	}
@@ -164,7 +164,7 @@ public:
 
 	LeftRightSuper(BasisWithOperatorsType& left,
 	               BasisWithOperatorsType& right,
-	               SuperBlockType& super)
+	               SuperBlockType&         super)
 	    : progress_("LeftRightSuper")
 	    , left_(&left)
 	    , right_(&right)
@@ -176,7 +176,7 @@ public:
 	    : progress_("LeftRightSuper")
 	    , refCounter_(1)
 	{
-		left_ = rls.left_;
+		left_  = rls.left_;
 		right_ = rls.right_;
 		super_ = rls.super_;
 	}
@@ -195,10 +195,10 @@ public:
 	}
 
 	template <typename SomeModelType>
-	SizeType growLeftBlock(const SomeModelType& model,
+	SizeType growLeftBlock(const SomeModelType&    model,
 	                       BasisWithOperatorsType& pS,
-	                       BlockType const& X,
-	                       RealType time)
+	                       BlockType const&        X,
+	                       RealType                time)
 	{
 		assert(left_);
 		return grow(
@@ -206,10 +206,10 @@ public:
 	}
 
 	template <typename SomeModelType>
-	SizeType growRightBlock(const SomeModelType& model,
+	SizeType growRightBlock(const SomeModelType&    model,
 	                        BasisWithOperatorsType& pE,
-	                        BlockType const& X,
-	                        RealType time)
+	                        BlockType const&        X,
+	                        RealType                time)
 	{
 		assert(right_);
 		return grow(
@@ -221,7 +221,7 @@ public:
 		assert(left_);
 		assert(right_);
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << label << ": left-block basis=" << left_->size();
 		msg << ", right-block basis=" << right_->size();
@@ -246,10 +246,10 @@ public:
 		super_->setToProduct(*left_, *right_, initialSizeOfHashTable);
 	}
 
-	void write(PsimagLite::IoNg::Out& io,
-	           PsimagLite::String prefix,
+	void write(PsimagLite::IoNg::Out&                    io,
+	           PsimagLite::String                        prefix,
 	           typename BasisWithOperatorsType::SaveEnum option,
-	           bool minimizeWrite) const
+	           bool                                      minimizeWrite) const
 	{
 		prefix += "/LRS";
 		io.createGroup(prefix);
@@ -315,7 +315,7 @@ public:
 
 	template <typename IoInputType>
 	void
-	read(IoInputType& io,
+	read(IoInputType&       io,
 	     PsimagLite::String prefix,
 	     typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputType>::True, int>::Type
 	     = 0)
@@ -357,12 +357,12 @@ private:
 	        to  \cppFunction{pSprime.setHamiltonian(matrix)}.
 	        */
 	template <typename SomeModelType>
-	SizeType grow(BasisWithOperatorsType& leftOrRight,
-	              const SomeModelType& model,
-	              BasisWithOperatorsType& pS,
-	              const BlockType& X,
+	SizeType grow(BasisWithOperatorsType&       leftOrRight,
+	              const SomeModelType&          model,
+	              BasisWithOperatorsType&       pS,
+	              const BlockType&              X,
 	              ProgramGlobals::DirectionEnum dir,
-	              RealType time)
+	              RealType                      time)
 	{
 		BasisWithOperatorsType Xbasis("Xbasis", pS.traits());
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
@@ -377,7 +377,7 @@ private:
 		SparseMatrixType matrix = leftOrRight.hamiltonian().getCRS();
 
 		LeftRightSuper2Type* lrs;
-		BasisType* leftOrRightL = &leftOrRight;
+		BasisType*           leftOrRightL = &leftOrRight;
 		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			lrs = new LeftRightSuper2Type(pS, Xbasis, *leftOrRightL);
 		} else {
@@ -398,11 +398,11 @@ private:
 
 	LeftRightSuper& operator=(const LeftRightSuper&);
 
-	ProgressIndicatorType progress_;
+	ProgressIndicatorType   progress_;
 	BasisWithOperatorsType* left_;
 	BasisWithOperatorsType* right_;
-	SuperBlockType* super_;
-	SizeType refCounter_;
+	SuperBlockType*         super_;
+	SizeType                refCounter_;
 }; // class LeftRightSuper
 
 } // namespace Dmrg

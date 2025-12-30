@@ -28,11 +28,11 @@ Please see full open source license included in file LICENSE.
 #include <string>
 
 using namespace PsimagLite;
-typedef double RealType;
-typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
-typedef ContinuedFraction<TridiagonalMatrixType> ContinuedFractionType;
+typedef double                                             RealType;
+typedef TridiagonalMatrix<RealType>                        TridiagonalMatrixType;
+typedef ContinuedFraction<TridiagonalMatrixType>           ContinuedFractionType;
 typedef ContinuedFractionCollection<ContinuedFractionType> ContinuedFractionCollectionType;
-typedef ContinuedFractionType::PlotParamsType PlotParamsType;
+typedef ContinuedFractionType::PlotParamsType              PlotParamsType;
 
 void usage(const char* progName)
 {
@@ -67,15 +67,15 @@ void plotOneByOne(const ContinuedFractionCollectionType& cfCollection, const Plo
 
 int main(int argc, char* argv[])
 {
-	int opt = 0;
-	String file = "";
-	RealType wbegin = 0;
-	RealType wend = 0;
-	RealType wstep = 0;
-	RealType delta = 0;
-	RealType beta = 0.0;
+	int      opt        = 0;
+	String   file       = "";
+	RealType wbegin     = 0;
+	RealType wend       = 0;
+	RealType wstep      = 0;
+	RealType delta      = 0;
+	RealType beta       = 0.0;
 	SizeType matsubaras = 0;
-	bool oneByOne = false;
+	bool     oneByOne   = false;
 	while ((opt = getopt(argc, argv, "f:b:e:s:d:m:B:1")) != -1) {
 		switch (opt) {
 		case 'f':
@@ -115,9 +115,9 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	IoSimple::In io(file);
+	IoSimple::In                    io(file);
 	ContinuedFractionCollectionType cfCollection(io);
-	PlotParamsType params(wbegin, wend, wstep, delta, beta, matsubaras);
+	PlotParamsType                  params(wbegin, wend, wstep, delta, beta, matsubaras);
 	if (!oneByOne)
 		plotAll(cfCollection, params);
 	else

@@ -121,7 +121,7 @@ private:
 	}
 
 	SizeType size_;
-	T* data_;
+	T*       data_;
 };
 }
 #endif // ARRAY_H

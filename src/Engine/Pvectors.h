@@ -12,23 +12,23 @@ template <typename TargetingBaseType> class Pvectors {
 
 public:
 
-	typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
-	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
+	typedef PsimagLite::InputNg<InputCheck>::Readable               InputValidatorType;
+	typedef typename TargetingBaseType::VectorWithOffsetType        VectorWithOffsetType;
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef typename TargetingBaseType::ModelType ModelType;
-	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef TargetParamsTimeVectors<ModelType> TargetParamsTimeVectorsType;
-	typedef Pvector<typename VectorWithOffsetType::value_type> PvectorType;
-	typedef typename PsimagLite::Vector<PvectorType*>::Type VectorPvectorType;
-	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename TargetingBaseType::ModelType                   ModelType;
+	typedef typename ModelType::LeftRightSuperType                  LeftRightSuperType;
+	typedef typename VectorWithOffsetType::value_type               ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type      RealType;
+	typedef TargetParamsTimeVectors<ModelType>                      TargetParamsTimeVectorsType;
+	typedef Pvector<typename VectorWithOffsetType::value_type>      PvectorType;
+	typedef typename PsimagLite::Vector<PvectorType*>::Type         VectorPvectorType;
+	typedef PsimagLite::Vector<bool>::Type                          VectorBoolType;
+	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
+	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
 
-	Pvectors(InputValidatorType& io,
+	Pvectors(InputValidatorType&                io,
 	         const ApplyOperatorExpressionType& aoe,
-	         const LeftRightSuperType& lrs)
+	         const LeftRightSuperType&          lrs)
 	    : io_(io)
 	    , aoe_(aoe)
 	    , lrs_(lrs)
@@ -89,13 +89,13 @@ public:
 	template <typename SomeLambdaType>
 	void createNew(const VectorWithOffsetType& src, SomeLambdaType& lambda)
 	{
-		const SizeType ind = aoeNonConst().createPvector(src);
+		const SizeType           ind   = aoeNonConst().createPvector(src);
 		const PsimagLite::String ename = lambda(ind);
-		PvectorType* pnew = new PvectorType(ename);
+		PvectorType*             pnew  = new PvectorType(ename);
 		pnew->setAsDone();
 		pVectors_.push_back(pnew);
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "P[" << ind << "]=" << ename << " created";
 		progress_.printline(msgg, std::cout);
@@ -137,15 +137,15 @@ public:
 		throw PsimagLite::RuntimeError("findPforThisExpression: P not found\n");
 	}
 
-	void sumPvectors(SizeType ind0,
+	void sumPvectors(SizeType                 ind0,
 	                 const ComplexOrRealType& val0,
-	                 SizeType ind1,
+	                 SizeType                 ind1,
 	                 const ComplexOrRealType& val1,
-	                 PsimagLite::String p0PlusP1)
+	                 PsimagLite::String       p0PlusP1)
 	{
 		assert(ind0 < ind1);
 		VectorWithOffsetType& v0 = aoeNonConst().targetVectorsNonConst(ind0);
-		VectorWithOffsetType v1 = aoe_.targetVectors(ind1);
+		VectorWithOffsetType  v1 = aoe_.targetVectors(ind1);
 		v0 *= val0;
 		v1 *= val1;
 
@@ -167,7 +167,7 @@ public:
 			if (used[i])
 				continue;
 			aoeNonConst().destroyPvector(i);
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "P[" << i << "] destroyed";
 			progress_.printline(msgg, std::cout);
@@ -179,17 +179,17 @@ public:
 		// aoe().trimVectors();
 		const SizeType tvsFinal = aoe_.tvs();
 		if (tvs != tvsFinal) {
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "Number of target vectors is " << tvsFinal << " now";
 			progress_.printline(msgg, std::cout);
 		}
 	}
 
-	void initTimeVectors(SizeType timeSteps,
-	                     RealType tau,
+	void initTimeVectors(SizeType           timeSteps,
+	                     RealType           tau,
 	                     PsimagLite::String algo,
-	                     VectorRealType& chebyTransform)
+	                     VectorRealType&    chebyTransform)
 	{
 		tstStruct_.times().resize(timeSteps);
 		for (SizeType i = 0; i < timeSteps; ++i)
@@ -231,7 +231,7 @@ private:
 
 		pVectors_.resize(total);
 		PsimagLite::String tmp;
-		RealType sum = 0.0;
+		RealType           sum = 0.0;
 		for (SizeType i = 0; i < total; ++i) {
 			io.readline(tmp, "P" + ttos(i) + "=");
 			PvectorType::checkSyntaxOfValue(tmp);
@@ -257,7 +257,7 @@ private:
 
 	static SizeType getPvectorsTotal(InputValidatorType& io)
 	{
-		VectorSizeType seen;
+		VectorSizeType                                          seen;
 		const typename InputValidatorType::MapStringStringType& map = io.map();
 
 		for (auto it = map.begin(); it != map.end(); ++it) {
@@ -267,9 +267,9 @@ private:
 			seen.push_back(index);
 		}
 
-		const SizeType total = seen.size();
+		const SizeType                   total = seen.size();
 		PsimagLite::Sort<VectorSizeType> sort;
-		VectorSizeType iperm(total);
+		VectorSizeType                   iperm(total);
 		sort.sort(seen, iperm);
 
 		for (SizeType i = 0; i < total; ++i) {
@@ -308,7 +308,7 @@ private:
 				continue;
 
 			PsimagLite::String buffer;
-			SizeType j = i + 2;
+			SizeType           j = i + 2;
 			for (; j < len; ++j) {
 				if (str[j] >= 48 && str[j] <= 57) {
 					buffer += str[j];
@@ -324,17 +324,17 @@ private:
 			if (buffer == "")
 				continue;
 			const SizeType ind = PsimagLite::atoi(buffer);
-			used[ind] = true;
+			used[ind]          = true;
 		}
 	}
 
-	InputValidatorType& io_;
+	InputValidatorType&                io_;
 	const ApplyOperatorExpressionType& aoe_;
-	const LeftRightSuperType& lrs_;
-	PsimagLite::ProgressIndicator progress_;
-	SizeType origPvectors_;
-	VectorPvectorType pVectors_;
-	TargetParamsTimeVectorsType tstStruct_;
+	const LeftRightSuperType&          lrs_;
+	PsimagLite::ProgressIndicator      progress_;
+	SizeType                           origPvectors_;
+	VectorPvectorType                  pVectors_;
+	TargetParamsTimeVectorsType        tstStruct_;
 };
 
 }

@@ -43,16 +43,16 @@ namespace PsimagLite {
 template <typename TridiagonalMatrixType_> class ContinuedFraction {
 public:
 
-	typedef TridiagonalMatrixType_ TridiagonalMatrixType;
-	typedef typename TridiagonalMatrixType::value_type MatrixElementType;
-	typedef typename Real<MatrixElementType>::Type RealType;
-	typedef typename std::complex<RealType> ComplexType;
-	typedef typename TridiagonalMatrixType::value_type FieldType;
-	typedef Matrix<FieldType> MatrixType;
-	typedef Matrix<RealType> MatrixRealType;
+	typedef TridiagonalMatrixType_                                  TridiagonalMatrixType;
+	typedef typename TridiagonalMatrixType::value_type              MatrixElementType;
+	typedef typename Real<MatrixElementType>::Type                  RealType;
+	typedef typename std::complex<RealType>                         ComplexType;
+	typedef typename TridiagonalMatrixType::value_type              FieldType;
+	typedef Matrix<FieldType>                                       MatrixType;
+	typedef Matrix<RealType>                                        MatrixRealType;
 	typedef typename Vector<std::pair<RealType, ComplexType>>::Type PlotDataType;
-	typedef PlotParams<RealType> PlotParamsType;
-	typedef ParametersForSolver<RealType> ParametersType;
+	typedef PlotParams<RealType>                                    PlotParamsType;
+	typedef ParametersForSolver<RealType>                           ParametersType;
 
 	ContinuedFraction(const TridiagonalMatrixType& ab, const ParametersType& params)
 	    : progress_("ContinuedFraction")
@@ -126,10 +126,10 @@ public:
 
 	void set(const TridiagonalMatrixType& ab, const RealType& Eg, RealType weight, int isign)
 	{
-		ab_ = ab;
-		Eg_ = Eg;
+		ab_     = ab;
+		Eg_     = Eg;
 		weight_ = weight;
-		isign_ = isign;
+		isign_  = isign;
 
 		diagonalize();
 	}
@@ -149,13 +149,13 @@ public:
 	void plotReal(PlotDataType& result, const PlotParamsType& params) const
 	{
 		SizeType counter = 0;
-		SizeType n = SizeType((params.omega2 - params.omega1) / params.deltaOmega);
+		SizeType n       = SizeType((params.omega2 - params.omega1) / params.deltaOmega);
 		if (result.size() == 0)
 			result.resize(n);
 		for (RealType omega = params.omega1; omega < params.omega2;
 		     omega += params.deltaOmega) {
-			ComplexType z(omega, params.delta);
-			ComplexType res = iOfOmega(z, Eg_, isign_);
+			ComplexType                      z(omega, params.delta);
+			ComplexType                      res = iOfOmega(z, Eg_, isign_);
 			std::pair<RealType, ComplexType> p(omega, res);
 			result[counter++] = p;
 			if (counter >= result.size())
@@ -166,7 +166,7 @@ public:
 	void plotMatsubara(PlotDataType& result, const PlotParamsType& params) const
 	{
 		SizeType counter = 0;
-		SizeType n = params.numberOfMatsubaras;
+		SizeType n       = params.numberOfMatsubaras;
 		if (result.size() == 0)
 			result.resize(n);
 		for (SizeType omegaIndex = 0; omegaIndex < params.numberOfMatsubaras;
@@ -225,12 +225,12 @@ private:
 		return (2.0 * ind + 1.0) * M_PI / params.beta;
 	}
 
-	ProgressIndicator progress_;
-	FreqEnum freqEnum_;
-	TridiagonalMatrixType ab_;
-	RealType Eg_;
-	std::complex<RealType> weight_;
-	int isign_;
+	ProgressIndicator               progress_;
+	FreqEnum                        freqEnum_;
+	TridiagonalMatrixType           ab_;
+	RealType                        Eg_;
+	std::complex<RealType>          weight_;
+	int                             isign_;
 	typename Vector<RealType>::Type eigs_;
 	typename Vector<RealType>::Type intensity_;
 }; // class ContinuedFraction

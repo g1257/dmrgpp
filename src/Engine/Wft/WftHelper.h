@@ -11,13 +11,13 @@ class WftHelper {
 public:
 
 	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename ModelType::ModelHelperType                      ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
+	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
 	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 
-	WftHelper(const ModelType& model,
-	          const LeftRightSuperType& lrs,
+	WftHelper(const ModelType&              model,
+	          const LeftRightSuperType&     lrs,
 	          const WaveFunctionTransfType& wft)
 	    : model_(model)
 	    , lrs_(lrs)
@@ -38,9 +38,9 @@ public:
 		}
 	}
 
-	void wftOneVector(VectorWithOffsetType& phiNew,
+	void wftOneVector(VectorWithOffsetType&       phiNew,
 	                  const VectorWithOffsetType& src,
-	                  SizeType site) const
+	                  SizeType                    site) const
 	{
 		phiNew.populateFromQns(src, lrs_.super());
 
@@ -53,8 +53,8 @@ public:
 
 private:
 
-	const ModelType& model_;
-	const LeftRightSuperType& lrs_;
+	const ModelType&              model_;
+	const LeftRightSuperType&     lrs_;
 	const WaveFunctionTransfType& wft_;
 };
 }

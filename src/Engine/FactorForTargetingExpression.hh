@@ -7,8 +7,8 @@ namespace Dmrg {
 
 template <typename ComplexOrRealType> class FactorForTargetingExpression {
 
-	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
-	using VectorType = std::vector<ComplexOrRealType>;
+	using RealType      = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorType    = std::vector<ComplexOrRealType>;
 	using VecStringType = std::vector<std::string>;
 
 public:
@@ -88,8 +88,8 @@ public:
 			err("Cannot call swap without 2 factors\n");
 
 		ComplexOrRealType f = factors_[0];
-		factors_[0] = factors_[1];
-		factors_[1] = f;
+		factors_[0]         = factors_[1];
+		factors_[1]         = f;
 		setStr();
 	}
 
@@ -139,7 +139,7 @@ private:
 			strFactors_[ind] = "";
 	}
 
-	VectorType factors_;
+	VectorType    factors_;
 	VecStringType strFactors_;
 };
 }

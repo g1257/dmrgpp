@@ -14,7 +14,7 @@ int main(int argc, char* argv[])
 	PsimagLite::Options::Writeable optWriteable(registerOpts,
 	                                            PsimagLite::Options::Writeable::STRICT);
 
-	PsimagLite::String myoptions(argv[1]);
+	PsimagLite::String            myoptions(argv[1]);
 	PsimagLite::Options::Readable optsReadable(optWriteable, myoptions);
 	std::cout << "fast=" << optsReadable.isSet("fast") << "\n";
 }

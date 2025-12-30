@@ -18,16 +18,16 @@ template <typename ComplexOrRealType> class OperatorStorage {
 
 public:
 
-	typedef ComplexOrRealType value_type;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
-	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
-	typedef BlockDiagonalMatrixType BlockDiagonalType;
-	typedef BlockOffDiagMatrixType BlockOffDiagType;
+	typedef ComplexOrRealType                                  value_type;
+	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
+	typedef BlockDiagonalMatrix<MatrixType>                    BlockDiagonalMatrixType;
+	typedef BlockOffDiagMatrix<MatrixType>                     BlockOffDiagMatrixType;
+	typedef BlockDiagonalMatrixType                            BlockDiagonalType;
+	typedef BlockOffDiagMatrixType                             BlockOffDiagType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::CrsMatrix<ComplexOrRealType>           SparseMatrixType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
+	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
 
 	enum class Type
 	{
@@ -60,8 +60,8 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage::read\n");
 	}
 
-	void write(PsimagLite::String label,
-	           PsimagLite::IoNgSerializer& io,
+	void write(PsimagLite::String                  label,
+	           PsimagLite::IoNgSerializer&         io,
 	           PsimagLite::IoSerializer::WriteMode mode
 	           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
@@ -216,7 +216,7 @@ public:
 		err("OperatorStorage: transposeConjugate\n");
 	}
 
-	friend void fromCRS(OperatorStorage& dest,
+	friend void fromCRS(OperatorStorage&                                dest,
 	                    const PsimagLite::CrsMatrix<ComplexOrRealType>& src)
 	{
 		if (dest.justCRS()) {
@@ -236,12 +236,12 @@ public:
 	}
 
 	// See CrsMatrix.h line 734
-	friend void externalProduct2(OperatorStorage& B,
+	friend void externalProduct2(OperatorStorage&       B,
 	                             const OperatorStorage& A,
-	                             SizeType nout,
-	                             const VectorRealType& signs,
-	                             bool order,
-	                             const VectorSizeType& permutationFull)
+	                             SizeType               nout,
+	                             const VectorRealType&  signs,
+	                             bool                   order,
+	                             const VectorSizeType&  permutationFull)
 	{
 		if (B.justCRS() && A.justCRS())
 			return externalProduct(
@@ -250,12 +250,12 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
 	}
 
-	friend void externalProduct2(OperatorStorage& C,
+	friend void externalProduct2(OperatorStorage&       C,
 	                             const OperatorStorage& A,
 	                             const OperatorStorage& B,
-	                             const VectorRealType& signs,
-	                             bool order,
-	                             const VectorSizeType& permutationFull)
+	                             const VectorRealType&  signs,
+	                             bool                   order,
+	                             const VectorSizeType&  permutationFull)
 	{
 		if (A.justCRS() && B.justCRS() && C.justCRS())
 			return externalProduct(
@@ -264,7 +264,7 @@ public:
 		throw PsimagLite::RuntimeError("OperatorStorage: externalProduct\n");
 	}
 
-	friend void fullMatrixToCrsMatrix(OperatorStorage& dest,
+	friend void fullMatrixToCrsMatrix(OperatorStorage&                             dest,
 	                                  const PsimagLite::Matrix<ComplexOrRealType>& src)
 	{
 		if (dest.justCRS())
@@ -275,14 +275,14 @@ public:
 
 private:
 
-	Type type_;
+	Type             type_;
 	SparseMatrixType crs_;
 };
 
 template <typename ComplexOrRealType>
 OperatorStorage<ComplexOrRealType>
 operator*(const typename OperatorStorage<ComplexOrRealType>::RealType& value,
-          const OperatorStorage<ComplexOrRealType>& storage)
+          const OperatorStorage<ComplexOrRealType>&                    storage)
 {
 	if (storage.justCRS())
 		return storage.getCRS() * value;
@@ -301,7 +301,7 @@ OperatorStorage<ComplexOrRealType> operator*(const OperatorStorage<ComplexOrReal
 }
 
 template <typename ComplexOrRealType>
-void crsMatrixToFullMatrix(PsimagLite::Matrix<ComplexOrRealType>& dest,
+void crsMatrixToFullMatrix(PsimagLite::Matrix<ComplexOrRealType>&    dest,
                            const OperatorStorage<ComplexOrRealType>& src)
 {
 	if (src.justCRS())

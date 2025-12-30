@@ -94,44 +94,44 @@ template <typename ModelBaseType> class Su3Model : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::BasisType BasisType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename ModelBaseType::VectorQnType VectorQnType;
-	typedef typename ModelBaseType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef unsigned int long WordType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelBaseType::VectorRealType VectorRealType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef typename PsimagLite::Vector<SizeType>::Type HilbertBasisType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
+	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
+	typedef typename ModelHelperType::BasisType             BasisType;
+	typedef typename ModelBaseType::SuperGeometryType       SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                LinkType;
+	typedef typename ModelHelperType::OperatorsType         OperatorsType;
+	typedef typename ModelHelperType::RealType              RealType;
+	typedef typename ModelBaseType::VectorType              VectorType;
+	typedef typename ModelBaseType::QnType                  QnType;
+	typedef typename ModelBaseType::VectorQnType            VectorQnType;
+	typedef typename ModelBaseType::BlockType               BlockType;
+	typedef typename ModelBaseType::SolverParamsType        SolverParamsType;
+	typedef typename ModelHelperType::SparseMatrixType      SparseMatrixType;
+	typedef typename SparseMatrixType::value_type           ComplexOrRealType;
+	typedef unsigned int long                               WordType;
+	typedef typename ModelBaseType::InputValidatorType      InputValidatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>           MatrixType;
+	typedef typename PsimagLite::Vector<SizeType>::Type     VectorSizeType;
+	typedef typename ModelBaseType::VectorRealType          VectorRealType;
+	typedef typename ModelBaseType::ModelTermType           ModelTermType;
+	typedef typename PsimagLite::Vector<SizeType>::Type     HilbertBasisType;
+	typedef typename OperatorsType::OperatorType            OperatorType;
+	typedef typename OperatorType::PairType                 PairType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelBaseType::MyBasis MyBasis;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef ParametersSu3<RealType, QnType> ParametersSu3Type;
-	typedef Su3RepresentationBase<ComplexOrRealType> Su3RepresentationBaseType;
+	typedef typename ModelBaseType::MyBasis                 MyBasis;
+	typedef typename ModelBaseType::BasisWithOperatorsType  MyBasisWithOperators;
+	typedef typename ModelBaseType::OpsLabelType            OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType           OpForLinkType;
+	typedef ParametersSu3<RealType, QnType>                 ParametersSu3Type;
+	typedef Su3RepresentationBase<ComplexOrRealType>        Su3RepresentationBaseType;
 	typedef Su3RepresentationP1<ComplexOrRealType,
 	                            PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
 	    Su3RepresentationP1Type;
 
 	static const bool IS_REAL = !PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
-	Su3Model(const SolverParamsType& solverParams,
-	         InputValidatorType& io,
+	Su3Model(const SolverParamsType&  solverParams,
+	         InputValidatorType&      io,
 	         const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , superGeometry_(geometry)
@@ -164,8 +164,8 @@ public:
 
 	// m*T3(i)*T3(i) + m*T8(i)*T8(i)
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const BlockType& block,
-	                                RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -202,9 +202,9 @@ protected:
 
 	void fillLabeledOperatorsComplex(VectorQnType& qns)
 	{
-		SizeType site = 0;
-		BlockType block(1, site);
-		SizeType total = su3Rep_->size();
+		SizeType         site = 0;
+		BlockType        block(1, site);
+		SizeType         total = su3Rep_->size();
 		HilbertBasisType natBasis(total);
 		for (SizeType i = 0; i < total; ++i)
 			natBasis[i] = i;
@@ -233,9 +233,9 @@ protected:
 
 	void fillLabeledOperatorsReal(VectorQnType& qns)
 	{
-		SizeType site = 0;
-		BlockType block(1, site);
-		SizeType total = su3Rep_->size();
+		SizeType         site = 0;
+		BlockType        block(1, site);
+		SizeType         total = su3Rep_->size();
 		HilbertBasisType natBasis(total);
 		for (SizeType i = 0; i < total; ++i)
 			natBasis[i] = i;
@@ -317,7 +317,7 @@ protected:
 
 	void fillModelLinksReal()
 	{
-		ModelTermType& jOnepm = ModelBaseType::createTerm("jOne_pm");
+		ModelTermType& jOnepm        = ModelBaseType::createTerm("jOne_pm");
 		auto multiplyByZeroPointFive = [](ComplexOrRealType& value) { value *= 0.5; };
 
 		for (SizeType a = 0; a < 3; ++a) {
@@ -326,11 +326,11 @@ protected:
 		}
 
 		ModelTermType& jOne33 = ModelBaseType::createTerm("jOne_33");
-		OpForLinkType aOpForLink3("T3");
+		OpForLinkType  aOpForLink3("T3");
 		jOne33.push(aOpForLink3, 'N', aOpForLink3, 'C');
 
 		ModelTermType& jOne88 = ModelBaseType::createTerm("jOne_88");
-		OpForLinkType aOpForLink8("T8");
+		OpForLinkType  aOpForLink8("T8");
 		jOne88.push(aOpForLink8, 'N', aOpForLink8, 'C');
 	}
 
@@ -347,15 +347,15 @@ private:
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0, 0);
-			other[0] = su3Rep_->t3OfState(i);
-			other[1] = su3Rep_->t8OfState(i);
+			other[0]        = su3Rep_->t3OfState(i);
+			other[1]        = su3Rep_->t8OfState(i);
 			SizeType flavor = 1;
-			qns[i] = QnType(false, other, jmpair, flavor);
+			qns[i]          = QnType(false, other, jmpair, flavor);
 		}
 	}
 
-	const SuperGeometryType& superGeometry_;
-	ParametersSu3Type modelParameters_;
+	const SuperGeometryType&   superGeometry_;
+	ParametersSu3Type          modelParameters_;
 	Su3RepresentationBaseType* su3Rep_;
 }; // class Su3Model
 

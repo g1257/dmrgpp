@@ -95,36 +95,36 @@ class TargetingGroundState : public TargetingBase<LanczosSolverType_, VectorWith
 
 public:
 
-	typedef LanczosSolverType_ LanczosSolverType;
+	typedef LanczosSolverType_                                      LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType MatrixVectorType;
-	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef VectorType TargetVectorType;
-	typedef TargetParamsGroundState<ModelType> TargetParamsType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BasisType::QnType QnType;
-	typedef typename BaseType::VectorRealType VectorRealType;
+	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
+	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
+	typedef typename BaseType::CheckpointType                       CheckpointType;
+	typedef typename MatrixVectorType::ModelType                    ModelType;
+	typedef typename ModelType::RealType                            RealType;
+	typedef typename ModelType::ModelHelperType                     ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
+	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef typename SparseMatrixType::value_type                   ComplexOrRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type    VectorType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
+	typedef VectorType                                              TargetVectorType;
+	typedef TargetParamsGroundState<ModelType>                      TargetParamsType;
+	typedef typename ModelType::InputValidatorType                  InputValidatorType;
+	typedef typename PsimagLite::Vector<SizeType>::Type             VectorSizeType;
+	typedef typename BasisType::QnType                              QnType;
+	typedef typename BaseType::VectorRealType                       VectorRealType;
 	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
 	    VectorVectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 
-	TargetingGroundState(const LeftRightSuperType& lrs,
-	                     const CheckpointType& checkPoint,
+	TargetingGroundState(const LeftRightSuperType&     lrs,
+	                     const CheckpointType&         checkPoint,
 	                     const WaveFunctionTransfType& wft,
 	                     const QnType&,
 	                     InputValidatorType&)
@@ -145,12 +145,12 @@ public:
 	RealType gsWeight() const
 	{
 		const VectorVectorVectorWithOffsetType& v = this->common().aoe().psiConst();
-		const SizeType n = v.size();
+		const SizeType                          n = v.size();
 
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			const VectorVectorWithOffsetType& vv = v[i];
-			const SizeType m = vv.size();
+			const SizeType                    m  = vv.size();
 			for (SizeType j = 0; j < m; ++j) {
 				const VectorWithOffsetType* vvv = vv[j];
 				if (!vvv)
@@ -167,7 +167,7 @@ public:
 
 	void evolve(const VectorRealType&,
 	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
+	            const BlockType&              block1,
 	            const BlockType&,
 	            SizeType)
 	{
@@ -176,8 +176,8 @@ public:
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out&                       io,
+	           PsimagLite::String                                 prefix) const
 	{
 		this->common().write(io, block, prefix);
 	}
@@ -189,7 +189,7 @@ public:
 
 private:
 
-	TargetParamsType tstStruct_;
+	TargetParamsType              tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
 
 }; // class TargetingGroundState

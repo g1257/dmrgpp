@@ -14,12 +14,12 @@ int main(int argc, char** argv)
 {
 	PsimagLite::PsiApp application("manyOmegas", &argc, &argv, 1);
 
-	int opt = 0;
-	bool versionOnly = false;
+	int                opt         = 0;
+	bool               versionOnly = false;
 	PsimagLite::String inputfile;
 	PsimagLite::String rootname;
-	SizeType precision = 12;
-	bool dryrun = false;
+	SizeType           precision = 12;
+	bool               dryrun    = false;
 
 	/* PSIDOC DmrgDriverManyOmegas
 There is a single input file that is passed as the
@@ -90,14 +90,14 @@ to the main dmrg driver are the following.
 #else
 	    float
 #endif
-	        RealType;
-	typedef Dmrg::OmegaParams<InputNgType, RealType> OmegaParamsType;
+	                                                    RealType;
+	typedef Dmrg::OmegaParams<InputNgType, RealType>    OmegaParamsType;
 	typedef Dmrg::ManyOmegas<RealType, OmegaParamsType> ManyOmegasType;
 
 	PsimagLite::String data;
 	ManyOmegasType::InputNgType::Writeable::readFile(data, inputfile);
 	OmegaParamsType omegaParams(data);
-	ManyOmegasType manyOmegas(data, precision, omegaParams, application);
+	ManyOmegasType  manyOmegas(data, precision, omegaParams, application);
 
 	const PsimagLite::String obs = omegaParams.observable();
 	const PsimagLite::String insitu

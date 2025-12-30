@@ -35,13 +35,13 @@ struct PthreadFunctionStruct2 {
 	    , cpu(0)
 	{ }
 
-	const SomeLambdaType* pfh;
+	const SomeLambdaType*   pfh;
 	const LoadBalancerType* loadBalancer;
-	int threadNum;
-	SizeType nthreads;
-	SizeType start;
-	SizeType end;
-	SizeType cpu;
+	int                     threadNum;
+	SizeType                nthreads;
+	SizeType                start;
+	SizeType                end;
+	SizeType                cpu;
 };
 
 template <typename SomeLambdaType, typename SomeLoadBalancer>
@@ -103,8 +103,8 @@ public:
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
 	template <typename SomeLambdaType>
-	void parallelFor(SizeType start,
-	                 SizeType end,
+	void parallelFor(SizeType              start,
+	                 SizeType              end,
 	                 const SomeLambdaType& lambda,
 	                 const VectorSizeType& weights)
 	{
@@ -116,23 +116,23 @@ public:
 	}
 
 	template <typename SomeLambdaType>
-	void parallelFor(SizeType start,
-	                 SizeType end,
-	                 const SomeLambdaType& lambda,
+	void parallelFor(SizeType                start,
+	                 SizeType                end,
+	                 const SomeLambdaType&   lambda,
 	                 const LoadBalancerType& loadBalancer)
 	{
 		PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>* pfs
 		    = new PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>[nthreads_];
-		pthread_t* thread_id = new pthread_t[nthreads_];
-		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
+		pthread_t*       thread_id = new pthread_t[nthreads_];
+		pthread_attr_t** attr      = new pthread_attr_t*[nthreads_];
 
 		for (SizeType j = 0; j < nthreads_; ++j) {
-			pfs[j].pfh = &lambda;
+			pfs[j].pfh          = &lambda;
 			pfs[j].loadBalancer = &loadBalancer;
-			pfs[j].threadNum = j;
-			pfs[j].start = start;
-			pfs[j].end = end;
-			pfs[j].nthreads = nthreads_;
+			pfs[j].threadNum    = j;
+			pfs[j].start        = start;
+			pfs[j].end          = end;
+			pfs[j].nthreads     = nthreads_;
 
 			attr[j] = new pthread_attr_t;
 			int ret
@@ -186,7 +186,7 @@ private:
 	}
 
 	SizeType nthreads_;
-	size_t stackSize_;
+	size_t   stackSize_;
 };
 } // namespace PsimagLite
 #endif // PARALLELIZER2PTHREAD_H

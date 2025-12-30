@@ -8,36 +8,36 @@ namespace Dmrg {
 
 template <typename WaveFunctionTransfBaseType> class WftAccelSvd {
 
-	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
-	typedef typename DmrgWaveStructType::WaveStructSvdType WaveStructSvdType;
-	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
+	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType   DmrgWaveStructType;
+	typedef typename DmrgWaveStructType::WaveStructSvdType            WaveStructSvdType;
+	typedef typename WaveFunctionTransfBaseType::WftOptionsType       WftOptionsType;
 	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename WaveFunctionTransfBaseType::VectorSizeType VectorSizeType;
+	typedef typename WaveFunctionTransfBaseType::VectorSizeType       VectorSizeType;
 	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename VectorType::value_type ComplexOrRealType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
-	typedef typename BasisWithOperatorsType::QnType QnType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename DmrgWaveStructType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename VectorWithOffsetType::VectorType            VectorType;
+	typedef typename VectorType::value_type                      ComplexOrRealType;
+	typedef typename DmrgWaveStructType::BasisWithOperatorsType  BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::VectorQnType        VectorQnType;
+	typedef typename BasisWithOperatorsType::QnType              QnType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType    SparseMatrixType;
 	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
 	typedef typename DmrgWaveStructType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BlockDiagonalMatrixType::BuildingBlockType MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
-	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename BlockDiagonalMatrixType::BuildingBlockType  MatrixType;
+	typedef typename PsimagLite::Vector<MatrixType>::Type        VectorMatrixType;
+	typedef typename PsimagLite::Vector<VectorType>::Type        VectorVectorType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type          VectorRealType;
 
 	class LoopOne {
 
 	public:
 
-		LoopOne(const MatrixType& u,
-		        const MatrixType& vPrime,
+		LoopOne(const MatrixType&   u,
+		        const MatrixType&   vPrime,
 		        const VectorQnType& q,
-		        const MatrixType& uTildePrime,
-		        const MatrixType& vTildePrimePrime,
+		        const MatrixType&   uTildePrime,
+		        const MatrixType&   vTildePrimePrime,
 		        const VectorQnType& qTilde)
 		    : u_(u)
 		    , vPrime_(vPrime)
@@ -59,16 +59,16 @@ template <typename WaveFunctionTransfBaseType> class WftAccelSvd {
 		void doTask(SizeType patchBig, SizeType)
 		{
 			const VectorQnType& qSmall = (q_.size() > qTilde_.size()) ? qTilde_ : q_;
-			const VectorQnType& qBig = (q_.size() > qTilde_.size()) ? q_ : qTilde_;
-			const QnType& q1 = qBig[patchBig];
-			int patchSmall = indexOrMinusOne(qSmall, q1);
+			const VectorQnType& qBig   = (q_.size() > qTilde_.size()) ? q_ : qTilde_;
+			const QnType&       q1     = qBig[patchBig];
+			int                 patchSmall = indexOrMinusOne(qSmall, q1);
 			if (patchSmall < 0)
 				return;
 
-			SizeType patch = (q_.size() > qTilde_.size()) ? patchBig : patchSmall;
+			SizeType patch      = (q_.size() > qTilde_.size()) ? patchBig : patchSmall;
 			SizeType patchTilde = (q_.size() > qTilde_.size()) ? patchSmall : patchBig;
 
-			uFinal_[patchSmall] = uTildePrime_[patchTilde] * u_[patch];
+			uFinal_[patchSmall]      = uTildePrime_[patchTilde] * u_[patch];
 			vPrimeFinal_[patchSmall] = vPrime_[patchTilde] * vTildePrimePrime_[patch];
 		}
 
@@ -85,23 +85,23 @@ template <typename WaveFunctionTransfBaseType> class WftAccelSvd {
 
 		const VectorMatrixType& u_;
 		const VectorMatrixType& vPrime_;
-		const VectorQnType& q_;
+		const VectorQnType&     q_;
 		const VectorMatrixType& uTildePrime_;
 		const VectorMatrixType& vTildePrimePrime_;
-		const VectorQnType& qTilde_;
-		SizeType npatches_;
-		VectorMatrixType uFinal_;
-		VectorMatrixType vPrimeFinal_;
+		const VectorQnType&     qTilde_;
+		SizeType                npatches_;
+		VectorMatrixType        uFinal_;
+		VectorMatrixType        vPrimeFinal_;
 	}; // class LoopOne
 
 	class LoopTwo {
 
 	public:
 
-		LoopTwo(const MatrixType& ufinal,
-		        const MatrixType& vPrimeFinal,
+		LoopTwo(const MatrixType&   ufinal,
+		        const MatrixType&   vPrimeFinal,
 		        const VectorQnType& qnsFinal,
-		        const VectorType& d,
+		        const VectorType&   d,
 		        const VectorQnType& qnsOfD)
 		    : uFinal_(ufinal)
 		    , vPrimeFinal_(vPrimeFinal)
@@ -125,8 +125,8 @@ template <typename WaveFunctionTransfBaseType> class WftAccelSvd {
 			    = (qnsFinal_.size() > qnsOfD_.size()) ? qnsOfD_ : qnsFinal_;
 			const VectorQnType& qBig
 			    = (qnsFinal_.size() > qnsOfD_.size()) ? qnsFinal_ : qnsOfD_;
-			const QnType& q1 = qBig[patchBig];
-			int patchSmall = indexOrMinusOne(qSmall, q1);
+			const QnType& q1         = qBig[patchBig];
+			int           patchSmall = indexOrMinusOne(qSmall, q1);
 			if (patchSmall < 0)
 				return;
 
@@ -135,11 +135,11 @@ template <typename WaveFunctionTransfBaseType> class WftAccelSvd {
 			SizeType patchOfD
 			    = (qnsFinal_.size() > qnsOfD_.size()) ? patchSmall : patchBig;
 
-			const MatrixType& u = uFinal_[patch];
+			const MatrixType& u      = uFinal_[patch];
 			const MatrixType& vprime = vPrimeFinal_[patch];
-			const VectorType& d = d_[patchOfD];
-			SizeType itotal = u.rows();
-			SizeType ktotal = u.cols();
+			const VectorType& d      = d_[patchOfD];
+			SizeType          itotal = u.rows();
+			SizeType          ktotal = u.cols();
 			assert(ktotal = d.size());
 			SizeType jtotal = vprime.cols();
 			assert(vprime.rows() == ktotal);
@@ -158,11 +158,11 @@ template <typename WaveFunctionTransfBaseType> class WftAccelSvd {
 
 		const VectorMatrixType& uFinal_;
 		const VectorMatrixType& vPrimeFinal_;
-		const VectorQnType& qnsFinal_;
+		const VectorQnType&     qnsFinal_;
 		const VectorVectorType& d_;
-		const VectorQnType& qnsOfD_;
-		SizeType patches_;
-		VectorMatrixType result_;
+		const VectorQnType&     qnsOfD_;
+		SizeType                patches_;
+		VectorMatrixType        result_;
 	}; // class LoopTwo
 
 public:
@@ -172,12 +172,12 @@ public:
 	    , wftOptions_(wftOptions)
 	{ }
 
-	void operator()(VectorWithOffsetType& psiDest,
-	                SizeType iNew,
+	void operator()(VectorWithOffsetType&       psiDest,
+	                SizeType                    iNew,
 	                const VectorWithOffsetType& psiSrc,
-	                SizeType iOld,
-	                const LeftRightSuperType& lrs,
-	                const OneSiteSpacesType& nk) const
+	                SizeType                    iOld,
+	                const LeftRightSuperType&   lrs,
+	                const OneSiteSpacesType&    nk) const
 	{
 		//		typename ProgramGlobals::SysOrEnvEnum prevPart = (dir ==
 		// ProgramGlobals::EXPAND_SYSTEM) ? 		            ProgramGlobals::SYSTEM :
@@ -202,10 +202,10 @@ private:
 
 	void internal(const VectorMatrixType& uVeryOld,
 	              const VectorMatrixType& vPrimeVeryOld,
-	              const VectorQnType& qnsVeryOld,
+	              const VectorQnType&     qnsVeryOld,
 	              const VectorMatrixType& uPrevious,
 	              const VectorMatrixType& vPrimePrevious,
-	              const VectorQnType& qnsPrevious,
+	              const VectorQnType&     qnsPrevious,
 	              const VectorVectorType& sPrevious)
 	{
 
@@ -215,22 +215,22 @@ private:
 
 		VectorMatrixType vPrimePreviousPinv;
 		pinv(vPrimePreviousPinv, vPrimePrevious);
-		LoopOne loopOne(uVeryOld,
-		                vPrimeVeryOld,
-		                qnsVeryOld,
-		                uPreviousPinv,
-		                vPrimePreviousPinv,
-		                qnsPrevious);
+		LoopOne                                   loopOne(uVeryOld,
+                                vPrimeVeryOld,
+                                qnsVeryOld,
+                                uPreviousPinv,
+                                vPrimePreviousPinv,
+                                qnsPrevious);
 		typedef PsimagLite::Parallelizer<LoopOne> ParallelizerOneType;
 		SizeType threads = std::min(std::max(qnsVeryOld.size(), qnsPrevious.size()),
 		                            PsimagLite::Concurrency::codeSectionParams.npthreads);
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
-		ParallelizerOneType threadOne(codeSectionParams);
+		ParallelizerOneType           threadOne(codeSectionParams);
 		threadOne.loopCreate(loopOne);
 
 		typedef PsimagLite::Parallelizer<LoopTwo> ParallelizerTwoType;
-		LoopTwo loopTwo(
-		    loopOne.uFinal(), loopOne.vPrimeFinal(), loopOne.qns(), sPrevious, qnsPrevious);
+		LoopTwo                                   loopTwo(
+                    loopOne.uFinal(), loopOne.vPrimeFinal(), loopOne.qns(), sPrevious, qnsPrevious);
 		ParallelizerTwoType threadTwo(codeSectionParams);
 		threadTwo.loopCreate(loopTwo);
 	}
@@ -247,10 +247,10 @@ private:
 	{
 		dest = src;
 		VectorRealType s;
-		MatrixType vt;
+		MatrixType     vt;
 		svd('A', dest, s, vt);
-		SizeType rows = dest.rows();
-		SizeType cols = vt.cols();
+		SizeType rows    = dest.rows();
+		SizeType cols    = vt.cols();
 		RealType epsilon = *std::max_element(s.begin(), s.end()) * std::max(rows, cols)
 		    * std::numeric_limits<RealType>::epsilon();
 
@@ -267,7 +267,7 @@ private:
 
 		dest.resize(cols, rows);
 		ComplexOrRealType alpha = 1;
-		ComplexOrRealType beta = 0;
+		ComplexOrRealType beta  = 0;
 		psimag::BLAS::GEMM('N',
 		                   'N',
 		                   cols,
@@ -293,7 +293,7 @@ private:
 	}
 
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	const WftOptionsType& wftOptions_;
+	const WftOptionsType&     wftOptions_;
 }; // class WftAccelSvd
 }
 #endif // WFT_ACCEL_SVD_H

@@ -28,8 +28,8 @@ class AinurConvert {
 
 	private:
 
-		String name_;
-		std::vector<T>& t_;
+		String             name_;
+		std::vector<T>&    t_;
 		const AinurMacros& ainurMacros_;
 	}; // struct Action
 
@@ -46,8 +46,8 @@ class AinurConvert {
 
 	private:
 
-		String name_;
-		Matrix<T>& t_;
+		String             name_;
+		Matrix<T>&         t_;
 		const AinurMacros& ainurMacros_;
 	}; // struct ActionMatrix
 
@@ -58,7 +58,7 @@ public:
 	{ }
 
 	template <typename T>
-	void convert(std::vector<T>& t,
+	void convert(std::vector<T>&      t,
 	             const AinurVariable& ainurVariable,
 	             typename EnableIf<Loki::TypeTraits<T>::isArith || IsComplexNumber<T>::True
 	                                   || TypesEqual<T, String>::True,
@@ -68,7 +68,7 @@ public:
 	template <typename T> void convert(Matrix<T>& t, const AinurVariable& ainurVariable);
 
 	template <typename T>
-	void convert(T& t,
+	void convert(T&                   t,
 	             const AinurVariable& ainurVariable,
 	             typename EnableIf<Loki::TypeTraits<T>::isIntegral, int>::Type = 0)
 	{
@@ -83,7 +83,7 @@ public:
 	}
 
 	template <typename T>
-	void convert(T& t,
+	void convert(T&                   t,
 	             const AinurVariable& ainurVariable,
 	             typename EnableIf<Loki::TypeTraits<T>::isFloat, int>::Type = 0)
 	{
@@ -98,8 +98,8 @@ public:
 
 	void convert(String& t, const AinurVariable& ainurVariable)
 	{
-		String label = ainurMacros_.valueFromFunction(ainurVariable.value);
-		SizeType l = label.size();
+		String   label = ainurMacros_.valueFromFunction(ainurVariable.value);
+		SizeType l     = label.size();
 		if (l > 1 && label[0] == '"' && label[l - 1] == '"') {
 			t = (l == 2) ? "" : label.substr(1, l - 2);
 			return;
@@ -113,16 +113,16 @@ private:
 	static String stringContext(std::string::iterator it,
 	                            std::string::iterator start,
 	                            std::string::iterator end,
-	                            SizeType before = 5,
-	                            SizeType after = 10)
+	                            SizeType              before = 5,
+	                            SizeType              after  = 10)
 	{
-		std::string::iterator alpha = it;
-		SizeType counter = 0;
+		std::string::iterator alpha   = it;
+		SizeType              counter = 0;
 		while (alpha != start && counter++ < before)
 			--alpha;
 
 		std::string::iterator omega = it;
-		counter = 0;
+		counter                     = 0;
 		while (omega != end && counter++ < after)
 			++omega;
 

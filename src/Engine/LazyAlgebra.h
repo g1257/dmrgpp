@@ -7,8 +7,8 @@ namespace Dmrg {
 template <typename OperatorType> class LazyAlgebraFactor {
 
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename OperatorType::value_type ComplexOrRealType;
+	typedef PsimagLite::Vector<SizeType>::Type              VectorSizeType;
+	typedef typename OperatorType::value_type               ComplexOrRealType;
 
 public:
 
@@ -70,8 +70,8 @@ public:
 	{
 		LazyAlgebraFactor c = a;
 		c.overallFactor_ *= b.overallFactor_;
-		const SizeType n = b.indices_.size();
-		SizeType offset = c.ops_.size();
+		const SizeType n      = b.indices_.size();
+		SizeType       offset = c.ops_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType ind = b.indices_[i];
 			if (ind == 0) {
@@ -91,8 +91,8 @@ public:
 private:
 
 	VectorOperatorType ops_;
-	VectorSizeType indices_;
-	ComplexOrRealType overallFactor_;
+	VectorSizeType     indices_;
+	ComplexOrRealType  overallFactor_;
 };
 
 template <typename OperatorType> class LazyAlgebra {
@@ -102,7 +102,7 @@ public:
 	typedef LazyAlgebraFactor<OperatorType> LazyAlgebraFactorType;
 	typedef
 	    typename PsimagLite::Vector<LazyAlgebraFactorType>::Type VectorLazyAlgebraFactorType;
-	typedef typename OperatorType::value_type ComplexOrRealType;
+	typedef typename OperatorType::value_type                    ComplexOrRealType;
 
 	LazyAlgebra()
 	    : factors_(1, OperatorType())

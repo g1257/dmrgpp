@@ -90,8 +90,8 @@ template <typename FieldType> class TridiagonalMatrix {
 public:
 
 	typedef typename Vector<FieldType>::Type VectorType;
-	typedef typename Vector<RealType>::Type VectorRealType;
-	typedef FieldType value_type;
+	typedef typename Vector<RealType>::Type  VectorRealType;
+	typedef FieldType                        value_type;
 
 	TridiagonalMatrix() { }
 
@@ -152,7 +152,7 @@ public:
 			n = a_.size();
 		m.resize(n, n, 0);
 		for (SizeType i = 0; i < n - 1; ++i) {
-			m(i, i) = a_[i];
+			m(i, i)     = a_[i];
 			m(i, i + 1) = b_[i + 1];
 			m(i + 1, i) = PsimagLite::conj(b_[i + 1]);
 		}
@@ -191,14 +191,14 @@ private:
 
 		assert(a_.size() >= nn && b_.size() >= nn);
 		for (SizeType i = 0; i < nn; ++i) {
-			groundD[i] = a_[i];
+			groundD[i]  = a_[i];
 			groundE_[i] = b_[i];
 		}
 
-		RealType s = 0;
+		RealType s          = 0;
 		long int intCounter = 0;
-		int m = 0;
-		int l = 0;
+		int      m          = 0;
+		int      l          = 0;
 		for (; l < n; l++) {
 			do {
 				intCounter++;
@@ -220,14 +220,14 @@ private:
 					RealType g
 					    = (groundD[l + 1] - groundD[l]) / (2.0 * groundE_[l]);
 					RealType r = sqrt(g * g + 1.0);
-					g = groundD[m] - groundD[l]
+					g          = groundD[m] - groundD[l]
 					    + groundE_[l] / (g + (g >= 0 ? fabs(r) : -fabs(r)));
 					RealType p = 0.0;
 					RealType c = 1.0;
-					int i = m - 1;
+					int      i = m - 1;
 					for (s = 1.0; i >= l; i--) {
-						RealType f = s * groundE_[i];
-						RealType h = c * groundE_[i];
+						RealType f      = s * groundE_[i];
+						RealType h      = c * groundE_[i];
 						groundE_[i + 1] = (r = sqrt(f * f + g * g));
 						if (r == 0.0) {
 							groundD[i + 1] -= p;
@@ -235,12 +235,12 @@ private:
 							break;
 						}
 
-						s = f / r;
-						c = g / r;
-						g = groundD[i + 1] - p;
-						r = (groundD[i] - g) * s + 2.0 * c * h;
+						s              = f / r;
+						c              = g / r;
+						g              = groundD[i + 1] - p;
+						r              = (groundD[i] - g) * s + 2.0 * c * h;
 						groundD[i + 1] = g + (p = s * r);
-						g = c * r - h;
+						g              = c * r - h;
 					}
 
 					if (r == 0.0 && i >= l)
@@ -266,8 +266,8 @@ private:
 		}
 	}
 
-	VectorRealType a_;
-	VectorRealType b_;
+	VectorRealType         a_;
+	VectorRealType         b_;
 	mutable VectorRealType groundE_;
 }; // class TridiagonalMatrix
 } // namespace PsimagLite

@@ -94,22 +94,22 @@ template <typename ModelType_> class MatrixVectorKron : public MatrixVectorBase<
 
 public:
 
-	typedef ModelType_ ModelType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelType::ParametersType ParametersType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef InitKronHamiltonian<ModelType> InitKronType;
-	typedef KronMatrix<InitKronType> KronMatrixType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef ModelType_                                           ModelType;
+	typedef typename ModelType::ModelHelperType                  ModelHelperType;
+	typedef typename ModelType::ParametersType                   ParametersType;
+	typedef typename ModelHelperType::RealType                   RealType;
+	typedef InitKronHamiltonian<ModelType>                       InitKronType;
+	typedef KronMatrix<InitKronType>                             KronMatrixType;
+	typedef typename ModelHelperType::SparseMatrixType           SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type          VectorRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
-	typedef typename SparseMatrixType::value_type value_type;
-	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                FullMatrixType;
+	typedef typename SparseMatrixType::value_type                value_type;
+	typedef typename ModelType::HamiltonianConnectionType        HamiltonianConnectionType;
 
-	MatrixVectorKron(const ModelType& model,
-	                 const HamiltonianConnectionType& hc,
+	MatrixVectorKron(const ModelType&                     model,
+	                 const HamiltonianConnectionType&     hc,
 	                 const typename ModelHelperType::Aux& aux)
 	    : params_(model.params())
 	    , initKron_(model, hc, aux)
@@ -185,10 +185,10 @@ private:
 		std::cout << matrixStored_;
 	}
 
-	const ParametersType& params_;
-	InitKronType initKron_;
-	KronMatrixType kronMatrix_;
-	SparseMatrixType matrixStored_;
+	const ParametersType&                       params_;
+	InitKronType                                initKron_;
+	KronMatrixType                              kronMatrix_;
+	SparseMatrixType                            matrixStored_;
 	mutable PsimagLite::MemoryUsage::TimeHandle time_;
 }; // class MatrixVectorKron
 } // namespace Dmrg

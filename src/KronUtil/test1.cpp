@@ -10,20 +10,20 @@ typedef float RealType;
 int main()
 {
 	const RealType denseFlopDiscount = 0.2;
-	const int idebug = 0;
-	int nerrors = 0;
-	RealType thresholdA = 0;
-	RealType thresholdB = 0;
-	int nrow_A = 0;
-	int ncol_A = 0;
-	int nrow_B = 0;
-	int ncol_B = 0;
-	int itransA = 0;
-	int itransB = 0;
+	const int      idebug            = 0;
+	int            nerrors           = 0;
+	RealType       thresholdA        = 0;
+	RealType       thresholdB        = 0;
+	int            nrow_A            = 0;
+	int            ncol_A            = 0;
+	int            nrow_B            = 0;
+	int            ncol_B            = 0;
+	int            itransA           = 0;
+	int            itransB           = 0;
 
-	static const bool needsPrinting = false;
-	const SizeType gemmRnb = 100;
-	const SizeType threadsForGemmR = 1;
+	static const bool           needsPrinting   = false;
+	const SizeType              gemmRnb         = 100;
+	const SizeType              threadsForGemmR = 1;
 	PsimagLite::GemmR<RealType> gemmR(needsPrinting, gemmRnb, threadsForGemmR);
 
 	for (thresholdB = 0; thresholdB <= 1.1; thresholdB += 0.1) {
@@ -973,7 +973,7 @@ int main()
 									den_zeros(
 									    nrow_X, ncol_X, sx3_);
 
-									imethod = 1;
+									imethod              = 1;
 									const SizeType izero = 0;
 									csr_den_kron_mult_method(
 									    imethod,

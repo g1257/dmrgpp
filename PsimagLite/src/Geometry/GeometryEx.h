@@ -48,11 +48,11 @@ public:
 		String str = msg;
 		str += "GeometryEx";
 		const char* start = (const char*)&meshLength_;
-		const char* end = (const char*)&enabled_;
-		SizeType total = mres.memResolv(&meshLength_, end - start, str + " meshLength");
+		const char* end   = (const char*)&enabled_;
+		SizeType    total = mres.memResolv(&meshLength_, end - start, str + " meshLength");
 
 		start = end;
-		end = (const char*)&meshStep_;
+		end   = (const char*)&meshStep_;
 		total += mres.memResolv(&enabled_, end - start, str + " enabled");
 
 		assert(x > total);
@@ -99,9 +99,9 @@ public:
 	void getMeshVector(VectorRealType& kvector, SizeType k) const
 	{
 		assert(enabled_);
-		int k1 = k;
-		int m = meshLength_;
-		div_t q = std::div(k1, m);
+		int   k1   = k;
+		int   m    = meshLength_;
+		div_t q    = std::div(k1, m);
 		kvector[0] = -M_PI + q.quot * meshStep_;
 		kvector[1] = -M_PI + q.rem * meshStep_;
 	}
@@ -115,7 +115,7 @@ public:
 private:
 
 	SizeType meshLength_;
-	bool enabled_;
+	bool     enabled_;
 	RealType meshStep_;
 };
 

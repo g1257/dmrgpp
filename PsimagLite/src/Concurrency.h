@@ -95,12 +95,12 @@ class Concurrency {
 
 public:
 
-	static SizeType mode;
+	static SizeType          mode;
 	static CodeSectionParams codeSectionParams;
 
 #ifndef USE_PTHREADS
 
-	typedef int MutexType;
+	typedef int      MutexType;
 	typedef SizeType PthreadtType;
 
 	static void mutexLock(MutexType*) { }
@@ -118,7 +118,7 @@ public:
 #include <pthread.h>
 
 	typedef pthread_mutex_t MutexType;
-	typedef pthread_t PthreadtType;
+	typedef pthread_t       PthreadtType;
 
 	static void mutexInit(MutexType* mutex)
 	{
@@ -154,9 +154,9 @@ public:
 
 	enum
 	{
-		SERIAL = 0,
-		PTHREADS = 1,
-		MPI = 2,
+		SERIAL           = 0,
+		PTHREADS         = 1,
+		MPI              = 2,
 		PTHREADS_AND_MPI = 3
 	};
 
@@ -191,9 +191,9 @@ public:
 	Concurrency(int* argc, char*** argv, size_t nthreads)
 	{
 		FloatingPoint::enableExcept();
-		codeSectionParams.npthreads = nthreads;
+		codeSectionParams.npthreads         = nthreads;
 		codeSectionParams.npthreadsLevelTwo = 1;
-		mode = 0;
+		mode                                = 0;
 #ifdef USE_PTHREADS
 		mode |= 1;
 		if (!psimag::LAPACK::isThreadSafe())
@@ -241,7 +241,7 @@ public:
 			return;
 		if (!mpiDisabled_(label))
 			return;
-		mpiRank = 0;
+		mpiRank   = 0;
 		blockSize = total;
 		if (!hasPthreads())
 			return;

@@ -88,40 +88,40 @@ template <typename ModelBaseType> class ExtendedSuperHubbard1Orb : public ModelB
 
 public:
 
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-	typedef ExtendedHubbard1Orb<ModelBaseType> ExtendedHubbard1OrbType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef typename ModelBaseType::MyBasis BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ExtendedHubbard1OrbType::HilbertBasisType HilbertBasisType;
-	typedef typename ModelHelperType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
+	typedef typename ModelBaseType::VectorSizeType                    VectorSizeType;
+	typedef ExtendedHubbard1Orb<ModelBaseType>                        ExtendedHubbard1OrbType;
+	typedef typename ModelBaseType::ModelHelperType                   ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType                 SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType                LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                          LinkType;
+	typedef typename ModelHelperType::OperatorsType                   OperatorsType;
+	typedef typename OperatorsType::OperatorType                      OperatorType;
+	typedef typename ModelHelperType::RealType                        RealType;
+	typedef typename ModelBaseType::QnType                            QnType;
+	typedef typename QnType::VectorQnType                             VectorQnType;
+	typedef typename ModelHelperType::SparseMatrixType                SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                     SparseElementType;
+	typedef typename ModelBaseType::MyBasis                           BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType            MyBasisWithOperators;
+	typedef typename ExtendedHubbard1OrbType::HilbertBasisType        HilbertBasisType;
+	typedef typename ModelHelperType::BlockType                       BlockType;
+	typedef typename ModelBaseType::SolverParamsType                  SolverParamsType;
+	typedef typename ModelBaseType::VectorType                        VectorType;
+	typedef PsimagLite::Matrix<SparseElementType>                     MatrixType;
 	typedef typename ExtendedHubbard1OrbType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
-	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
-	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename HilbertSpaceHubbardType::HilbertState            HilbertState;
+	typedef typename ModelBaseType::InputValidatorType                InputValidatorType;
+	typedef typename ModelBaseType::VectorOperatorType                VectorOperatorType;
+	typedef typename PsimagLite::Vector<HilbertState>::Type           VectorHilbertStateType;
+	typedef typename PsimagLite::Vector<SparseMatrixType>::Type       VectorSparseMatrixType;
+	typedef typename ModelBaseType::OpsLabelType                      OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType                     OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType                     ModelTermType;
 
-	ExtendedSuperHubbard1Orb(const SolverParamsType& solverParams,
-	                         InputValidatorType& io,
+	ExtendedSuperHubbard1Orb(const SolverParamsType&  solverParams,
+	                         InputValidatorType&      io,
 	                         const SuperGeometryType& superGeometry,
-	                         PsimagLite::String extension)
+	                         PsimagLite::String       extension)
 	    : ModelBaseType(solverParams, superGeometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(superGeometry)
@@ -141,8 +141,8 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                        const BlockType& block,
-	                                        RealType time) const
+	                                        const BlockType&  block,
+	                                        RealType          time) const
 	{
 		extendedHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
@@ -152,7 +152,7 @@ protected:
 	void fillLabeledOperators(VectorQnType& qns)
 	{
 		const SizeType site = 0;
-		BlockType block(1, site);
+		BlockType      block(1, site);
 		extendedHubbard_.fillLabeledOperators(qns);
 		VectorOperatorType cm(3);
 		for (SizeType dof = 0; dof < 2; ++dof)
@@ -161,18 +161,18 @@ protected:
 		cm[2] = this->naturalOperator("n", site, 0);
 
 		// BEGIN define ph operator
-		MatrixType tmp1 = multiplyTc(cm[1].getCRS(), cm[1].getCRS());
-		MatrixType tmp2 = multiplyTc(cm[0].getCRS(), cm[0].getCRS());
-		MatrixType tmp3 = tmp1 * tmp2;
+		MatrixType       tmp1 = multiplyTc(cm[1].getCRS(), cm[1].getCRS());
+		MatrixType       tmp2 = multiplyTc(cm[0].getCRS(), cm[0].getCRS());
+		MatrixType       tmp3 = tmp1 * tmp2;
 		SparseMatrixType tmp3crs;
 		fullMatrixToCrsMatrix(tmp3crs, tmp3);
-		OpsLabelType& ph = this->createOpsLabel("ph");
+		OpsLabelType&                         ph = this->createOpsLabel("ph");
 		typename OperatorType::Su2RelatedType su2related;
-		OperatorType phOp(tmp3crs,
-		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                  typename OperatorType::PairType(0, 0),
-		                  1,
-		                  su2related);
+		OperatorType                          phOp(tmp3crs,
+                                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                  typename OperatorType::PairType(0, 0),
+                                  1,
+                                  su2related);
 		ph.push(phOp);
 		// END define ph operator
 
@@ -218,7 +218,7 @@ protected:
 		const bool isSu2 = BasisType::useSu2Symmetry();
 
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
-		OpForLinkType splus("splus");
+		OpForLinkType  splus("splus");
 
 		spsm.push(
 		    splus,
@@ -230,7 +230,7 @@ protected:
 		    typename ModelTermType::Su2Properties(2, -1, 2));
 
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
-		OpForLinkType sz("sz");
+		OpForLinkType  sz("sz");
 
 		szsz.push(sz,
 		          'N',
@@ -243,7 +243,7 @@ protected:
 		          });
 
 		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
-		OpForLinkType pair("pair");
+		OpForLinkType  pair("pair");
 
 		pp.push(pair, 'N', pair, 'C', typename ModelTermType::Su2Properties(2, 1, 2));
 
@@ -279,9 +279,9 @@ private:
 	{
 		typename OperatorType::Su2RelatedType su2related;
 
-		std::string nSigmaStr = (sigma == 0) ? "nup" : "ndown";
-		SparseMatrixType nSigmaOp = this->naturalOperator(nSigmaStr, 0, 0).getCRS();
-		OperatorType cDaggerBarSigma = cm[1 - sigma];
+		std::string      nSigmaStr       = (sigma == 0) ? "nup" : "ndown";
+		SparseMatrixType nSigmaOp        = this->naturalOperator(nSigmaStr, 0, 0).getCRS();
+		OperatorType     cDaggerBarSigma = cm[1 - sigma];
 		cDaggerBarSigma.dagger();
 
 		SparseMatrixType cdn;
@@ -298,7 +298,7 @@ private:
 	void setPairi(OpsLabelType& p, const VectorOperatorType& cm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
-		SparseMatrixType pair;
+		SparseMatrixType                      pair;
 		multiply(pair, cm[0].getCRS(), cm[1].getCRS());
 
 		OperatorType myOp(pair,
@@ -334,9 +334,9 @@ private:
 	}
 
 	ParametersModelHubbard<RealType, QnType> modelParameters_;
-	const SuperGeometryType& superGeometry_;
-	PsimagLite::String extension_;
-	ExtendedHubbard1OrbType extendedHubbard_;
+	const SuperGeometryType&                 superGeometry_;
+	PsimagLite::String                       extension_;
+	ExtendedHubbard1OrbType                  extendedHubbard_;
 }; // class ExtendedSuperHubbard1Orb
 
 } // namespace Dmrg

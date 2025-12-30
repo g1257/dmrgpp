@@ -12,10 +12,10 @@ template <typename T> bool atLeastOneLoopWithBit0Set(const T& fl)
 	return false;
 }
 template <typename GeometryType, typename ModelHelperType, typename VectorWithOffsetType>
-void mainLoop(GeometryType& geometry,
-              InputNgType::Readable& io,
+void mainLoop(GeometryType&                   geometry,
+              InputNgType::Readable&          io,
               const ParametersDmrgSolverType& params,
-              const PsimagLite::String& list)
+              const PsimagLite::String&       list)
 {
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 
@@ -31,10 +31,10 @@ void mainLoop(GeometryType& geometry,
 	} catch (std::exception&) { }
 
 	ModelSelector<ModelBaseType> modelSelector(params.model);
-	const ModelBaseType& model = modelSelector(params, io, geometry);
+	const ModelBaseType&         model = modelSelector(params, io, geometry);
 
 	const PsimagLite::String& datafile = params.filename;
-	IoInputType dataIo(datafile);
+	IoInputType               dataIo(datafile);
 
 	bool iscomplex = false;
 	dataIo.read(iscomplex, "IsComplex");
@@ -50,17 +50,17 @@ void mainLoop(GeometryType& geometry,
 template <typename GeometryType,
           template <typename> class ModelHelperTemplate,
           typename MySparseMatrix>
-void mainLoop1(GeometryType& geometry,
-               InputNgType::Readable& io,
+void mainLoop1(GeometryType&                   geometry,
+               InputNgType::Readable&          io,
                const ParametersDmrgSolverType& params,
-               const PsimagLite::String& list)
+               const PsimagLite::String&       list)
 {
-	typedef Basis<MySparseMatrix> BasisType;
-	typedef BasisWithOperators<BasisType> BasisWithOperatorsType;
+	typedef Basis<MySparseMatrix>                             BasisType;
+	typedef BasisWithOperators<BasisType>                     BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
-	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef Qn QnType;
+	typedef ModelHelperTemplate<LeftRightSuperType>           ModelHelperType;
+	typedef typename MySparseMatrix::value_type               ComplexOrRealType;
+	typedef Qn                                                QnType;
 
 	if (params.options.isSet("vectorwithoffsets")) {
 		typedef VectorWithOffsets<ComplexOrRealType, QnType> VectorWithOffsetType;
@@ -74,9 +74,9 @@ void mainLoop1(GeometryType& geometry,
 }
 
 template <typename MySparseMatrix>
-void mainLoop0(InputNgType::Readable& io,
+void mainLoop0(InputNgType::Readable&    io,
                ParametersDmrgSolverType& dmrgSolverParams,
-               InputCheck& inputCheck,
+               InputCheck&               inputCheck,
                const PsimagLite::String& list)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
@@ -84,7 +84,7 @@ void mainLoop0(InputNgType::Readable& io,
 	    SuperGeometryType;
 
 	SuperGeometryType superGeometry(io);
-	int tmp = 0;
+	int               tmp = 0;
 	try {
 		io.readline(tmp, "UseSu2Symmetry=");
 	} catch (std::exception&) { }
@@ -133,10 +133,10 @@ int main(int argc, char** argv)
 	PsimagLite::PsiApp application("observe", &argc, &argv, 1);
 	PsimagLite::String filename;
 	PsimagLite::String filesOption;
-	int opt = 0;
-	int precision = 0;
-	SizeType threadsInCmd = 0;
-	bool versionOnly = false;
+	int                opt          = 0;
+	int                precision    = 0;
+	SizeType           threadsInCmd = 0;
+	bool               versionOnly  = false;
 	PsimagLite::String sOptions(",observe");
 
 	while ((opt = getopt(argc, argv, "f:p:o:F:S:V")) != -1) {
@@ -193,9 +193,9 @@ int main(int argc, char** argv)
 	application.printCmdLine(std::cout);
 
 	// Setup the Geometry
-	InputCheck inputCheck;
+	InputCheck                     inputCheck;
 	InputFromDataOrNot<InputCheck> inputFromDataOrNot(filename, inputCheck, false);
-	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
+	InputNgType::Readable          io(inputFromDataOrNot.ioWriteable());
 
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false, true);
 

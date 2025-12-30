@@ -84,23 +84,23 @@ namespace Dmrg {
 template <typename ModelType, typename LanczosSolverType, typename VectorWithOffsetType>
 class TridiagRixsStatic {
 
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef PsimagLite::Matrix<SparseElementType> MatrixType;
-	typedef typename LanczosSolverType::ParametersSolverType ParametersSolverType;
+	typedef typename ModelType::ModelHelperType                         ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType                LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType         BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorsType              OperatorsType;
+	typedef typename OperatorsType::OperatorType                        OperatorType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType           SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                       ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type          RealType;
+	typedef typename ModelType::InputValidatorType                      InputValidatorType;
+	typedef PsimagLite::Concurrency                                     ConcurrencyType;
+	typedef typename SparseMatrixType::value_type                       SparseElementType;
+	typedef PsimagLite::Matrix<SparseElementType>                       MatrixType;
+	typedef typename LanczosSolverType::ParametersSolverType            ParametersSolverType;
 	typedef typename BasisWithOperatorsType::EffectiveQuantumNumberType EffectiveQnType;
-	typedef VectorWithOffset<ComplexOrRealType, EffectiveQnType> VectorWithOffsetType2;
+	typedef VectorWithOffset<ComplexOrRealType, EffectiveQnType>        VectorWithOffsetType2;
 	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2>
-	    ApplyOperatorLocalType;
+	                                                       ApplyOperatorLocalType;
 	typedef typename VectorWithOffsetType2::VectorSizeType VectorSizeType;
 
 	class MyMatrixVector : public LanczosSolverType::LanczosMatrixType {
@@ -109,12 +109,12 @@ class TridiagRixsStatic {
 
 	public:
 
-		MyMatrixVector(ModelType const* model,
-		               ModelHelperType const* modelHelper,
-		               const OperatorType& A,
-		               ProgramGlobals::DirectionEnum dir,
+		MyMatrixVector(ModelType const*                            model,
+		               ModelHelperType const*                      modelHelper,
+		               const OperatorType&                         A,
+		               ProgramGlobals::DirectionEnum               dir,
 		               typename ApplyOperatorLocalType::BorderEnum corner,
-		               const VectorSizeType& weights)
+		               const VectorSizeType&                       weights)
 		    : BasisType(model, modelHelper)
 		    , applyOperatorLocal_(modelHelper->leftRightSuper())
 		    , A_(A)
@@ -143,32 +143,32 @@ class TridiagRixsStatic {
 
 	private:
 
-		ApplyOperatorLocalType applyOperatorLocal_;
-		const OperatorType& A_;
-		ProgramGlobals::DirectionEnum dir_;
+		ApplyOperatorLocalType                      applyOperatorLocal_;
+		const OperatorType&                         A_;
+		ProgramGlobals::DirectionEnum               dir_;
 		typename ApplyOperatorLocalType::BorderEnum corner_;
-		FermionSign fs_;
-		mutable VectorWithOffsetType2 x2_;
-		mutable VectorWithOffsetType2 y2_;
+		FermionSign                                 fs_;
+		mutable VectorWithOffsetType2               x2_;
+		mutable VectorWithOffsetType2               y2_;
 	}; // class MyMatrixVector
 
 	typedef MyMatrixVector MyMatrixVectorType;
 	typedef PsimagLite::LanczosSolver<ParametersSolverType,
 	                                  MyMatrixVectorType,
 	                                  typename MyMatrixVectorType::VectorType>
-	    MyLanczosSolverType;
+	                                                            MyLanczosSolverType;
 	typedef typename MyLanczosSolverType::TridiagonalMatrixType MyTridiagonalMatrixType;
 
 public:
 
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type TargetVectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type       TargetVectorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                      MatrixComplexOrRealType;
 	typedef typename PsimagLite::Vector<MatrixComplexOrRealType>::Type VectorMatrixFieldType;
 
-	TridiagRixsStatic(const LeftRightSuperType& lrs,
-	                  const ModelType& model,
-	                  InputValidatorType& io,
-	                  SizeType site,
+	TridiagRixsStatic(const LeftRightSuperType&     lrs,
+	                  const ModelType&              model,
+	                  InputValidatorType&           io,
+	                  SizeType                      site,
 	                  ProgramGlobals::DirectionEnum direction)
 	    : lrs_(lrs)
 	    , model_(model)
@@ -179,32 +179,32 @@ public:
 		SizeType numberOfSites = model.geometry().numberOfSites();
 
 		int site2 = ProgramGlobals::findBorderSiteFrom(site, direction, numberOfSites);
-		corner_ = (site2 >= 0) ? ApplyOperatorLocalType::BORDER_YES
-		                       : ApplyOperatorLocalType::BORDER_NO;
+		corner_   = (site2 >= 0) ? ApplyOperatorLocalType::BORDER_YES
+		                         : ApplyOperatorLocalType::BORDER_NO;
 	}
 
 	void operator()(const VectorWithOffsetType& phi,
-	                VectorMatrixFieldType& T,
-	                VectorMatrixFieldType& V,
-	                VectorSizeType& steps)
+	                VectorMatrixFieldType&      T,
+	                VectorMatrixFieldType&      V,
+	                VectorSizeType&             steps)
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ++ii) {
 			SizeType i = phi.sector(ii);
-			steps[ii] = triDiag(phi, T[ii], V[ii], i);
+			steps[ii]  = triDiag(phi, T[ii], V[ii], i);
 		}
 	}
 
 private:
 
 	SizeType triDiag(const VectorWithOffsetType& phi,
-	                 MatrixComplexOrRealType& T,
-	                 MatrixComplexOrRealType& V,
-	                 SizeType i0)
+	                 MatrixComplexOrRealType&    T,
+	                 MatrixComplexOrRealType&    V,
+	                 SizeType                    i0)
 	{
 		VectorSizeType weights(lrs_.super().partition(), 0);
-		weights[i0] = phi.effectiveSize(i0);
-		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
-		SizeType threadNum = 0;
+		weights[i0]          = phi.effectiveSize(i0);
+		SizeType p           = lrs_.super().findPartitionNumber(phi.offset(i0));
+		SizeType threadNum   = 0;
 		SizeType currentTime = 0;
 		typename ModelType::ModelHelperType modelHelper(p, lrs_, currentTime, threadNum);
 		typename MyLanczosSolverType::LanczosMatrixType lanczosHelper(
@@ -212,25 +212,25 @@ private:
 
 		ParametersSolverType params(io_, "Tridiag");
 		params.lotaMemory = true;
-		params.threadId = threadNum;
+		params.threadId   = threadNum;
 
 		MyLanczosSolverType lanczosSolver(lanczosHelper, params, &V);
 
 		MyTridiagonalMatrixType ab;
-		SizeType total = phi.effectiveSize(i0);
-		TargetVectorType phi2(total);
+		SizeType                total = phi.effectiveSize(i0);
+		TargetVectorType        phi2(total);
 		phi.extract(phi2, i0);
 		lanczosSolver.decomposition(phi2, ab);
 		lanczosSolver.buildDenseMatrix(T, ab);
 		return lanczosSolver.steps();
 	}
 
-	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
-	InputValidatorType& io_;
-	OperatorType A_;
+	const LeftRightSuperType&                   lrs_;
+	const ModelType&                            model_;
+	InputValidatorType&                         io_;
+	OperatorType                                A_;
 	typename ApplyOperatorLocalType::BorderEnum corner_;
-	ProgramGlobals::DirectionEnum direction_;
+	ProgramGlobals::DirectionEnum               direction_;
 }; // class TridiagRixsStatic
 } // namespace Dmrg
 #endif // TRIDIAGRIXSSTATIC_H

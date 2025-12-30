@@ -11,25 +11,25 @@ namespace Dmrg {
 
 template <typename LeftRightSuperType, typename SolverParamsType> class KroneckerDumper {
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef PsimagLite::Concurrency                              ConcurrencyType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType  BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType           BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType    SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BasisType::QnType QnType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
+	typedef typename PsimagLite::Vector<bool>::Type              VectorBoolType;
+	typedef typename PsimagLite::Vector<SizeType>::Type          VectorSizeType;
+	typedef typename BasisType::QnType                           QnType;
+	typedef std::pair<SizeType, SizeType>                        PairSizeType;
 
 public:
 
 	struct ParamsForKroneckerDumper {
-		ParamsForKroneckerDumper(bool enable = false,
-		                         SizeType b = 0,
-		                         SizeType e = 0,
-		                         SizeType p = 6,
+		ParamsForKroneckerDumper(bool     enable  = false,
+		                         SizeType b       = 0,
+		                         SizeType e       = 0,
+		                         SizeType p       = 6,
 		                         SizeType nOfQns_ = 0)
 		    : enabled(enable)
 		    , begin(b)
@@ -38,15 +38,15 @@ public:
 		    , nOfQns(nOfQns_)
 		{ }
 
-		bool enabled;
+		bool     enabled;
 		SizeType begin;
 		SizeType end;
 		SizeType precision;
 		SizeType nOfQns;
 	}; // struct ParamsForKroneckerDumper
 
-	KroneckerDumper(const SolverParamsType& params,
-	                const LeftRightSuperType& lrs,
+	KroneckerDumper(const SolverParamsType&       params,
+	                const LeftRightSuperType&     lrs,
 	                ProgramGlobals::DirectionEnum dir)
 	    : enabled_(false)
 	    , pairCount_(0)
@@ -107,11 +107,11 @@ public:
 		ConcurrencyType::mutexDestroy(&mutex_);
 	}
 
-	void push(const SparseMatrixType& A,
-	          const SparseMatrixType& B,
-	          ComplexOrRealType val,
+	void push(const SparseMatrixType&            A,
+	          const SparseMatrixType&            B,
+	          ComplexOrRealType                  val,
 	          ProgramGlobals::FermionOrBosonEnum bosonOrFermion,
-	          const VectorType& y)
+	          const VectorType&                  y)
 	{
 		if (!enabled_)
 			return;
@@ -200,13 +200,13 @@ private:
 	}
 
 	// Ahat(ia,ja) = (-1)^e_L(ia) A(ia,ja)*value
-	void calculateAhat(SparseMatrixType& Ahat,
-	                   const SparseMatrixType& A,
-	                   ComplexOrRealType val,
+	void calculateAhat(SparseMatrixType&                  Ahat,
+	                   const SparseMatrixType&            A,
+	                   ComplexOrRealType                  val,
 	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
 	{
-		Ahat = A;
-		SizeType rows = Ahat.rows();
+		Ahat             = A;
+		SizeType rows    = Ahat.rows();
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows; ++i) {
 			RealType sign
@@ -228,13 +228,13 @@ private:
 		return (PsimagLite::norm(ydiff) > 1e-8);
 	}
 
-	static SizeType counter_;
-	bool enabled_;
-	SizeType pairCount_;
-	bool disable_;
-	VectorType y_;
-	std::ofstream fout_;
-	VectorBoolType signs_;
+	static SizeType            counter_;
+	bool                       enabled_;
+	SizeType                   pairCount_;
+	bool                       disable_;
+	VectorType                 y_;
+	std::ofstream              fout_;
+	VectorBoolType             signs_;
 	ConcurrencyType::MutexType mutex_;
 }; // class KroneckerDumpter
 

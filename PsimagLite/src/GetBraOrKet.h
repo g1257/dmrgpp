@@ -32,7 +32,7 @@ public:
 			braOrKet_ = braOrKet.substr(1, l - 2);
 		if (braOrKet_[0] == '<' && braOrKet_[last] == '|' && l > 2) {
 			braOrKet_ = braOrKet.substr(1, l - 2);
-			isKet_ = false;
+			isKet_    = false;
 		}
 
 		getKind(braOrKet_);
@@ -80,7 +80,7 @@ private:
 			err("GetBraOrKet:: " + str + "too short\n");
 
 		if (str[0] == 'P') {
-			kind_ = Kind::P;
+			kind_       = Kind::P;
 			pair_.first = getNumberFrom(str, 1); // modifies str
 		} else if (str == "gs") {
 			kind_ = Kind::E;
@@ -89,10 +89,10 @@ private:
 			kind_ = Kind::P;
 			return;
 		} else if (str[0] == 'Q') {
-			kind_ = Kind::E;
+			kind_       = Kind::E;
 			pair_.first = getNumberFrom(str, 1); // modifies str
 		} else if (str[0] == 'R') {
-			kind_ = Kind::R;
+			kind_       = Kind::R;
 			pair_.first = getNumberFrom(str, 1); // modifies str
 			return;
 		}
@@ -109,7 +109,7 @@ private:
 
 	static SizeType getNumberFrom(String& str, SizeType start)
 	{
-		String number("");
+		String   number("");
 		SizeType i = start;
 		for (; i < str.length(); ++i) {
 			unsigned char x = str[i];
@@ -128,9 +128,9 @@ private:
 		return atoi(number.c_str());
 	}
 
-	bool isKet_;
-	String braOrKet_;
-	Kind kind_;
+	bool         isKet_;
+	String       braOrKet_;
+	Kind         kind_;
 	PairSizeType pair_;
 };
 } // namespace PsimagLite

@@ -13,19 +13,19 @@ template <typename ModelType, typename VectorWithOffsetType> class OneSiteTrunca
 
 public:
 
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename ModelType::MatrixType MatrixType;
-	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::VectorRealType VectorRealType;
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef PsimagLite::PackIndices                             PackIndicesType;
+	typedef typename ModelType::MatrixType                      MatrixType;
+	typedef typename ModelType::LeftRightSuperType              LeftRightSuperType;
+	typedef typename ModelType::VectorRealType                  VectorRealType;
+	typedef typename VectorWithOffsetType::value_type           ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type  RealType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename PsimagLite::InputNg<InputCheck>::Readable ReadableType;
+	typedef typename PsimagLite::InputNg<InputCheck>::Readable  ReadableType;
 
 	OneSiteTruncation(const LeftRightSuperType& lrs,
-	                  ModelType& model,
-	                  ReadableType& io,
-	                  OutputFileOrNot& ioOut)
+	                  ModelType&                model,
+	                  ReadableType&             io,
+	                  OutputFileOrNot&          ioOut)
 	    : lrs_(lrs)
 	    , model_(model)
 	    , m_(0)
@@ -43,8 +43,8 @@ public:
 		} catch (std::exception&) { }
 	}
 
-	void update(SizeType oneSiteTruncSize,
-	            const VectorWithOffsetType& psi,
+	void update(SizeType                      oneSiteTruncSize,
+	            const VectorWithOffsetType&   psi,
 	            ProgramGlobals::DirectionEnum dir)
 	{
 		if (oneSiteTruncSize == 0)
@@ -52,7 +52,7 @@ public:
 
 		// compute U ...
 		MatrixType U(oneSiteTruncSize, oneSiteTruncSize);
-		SizeType start = computeU(U, oneSiteTruncSize, psi, dir);
+		SizeType   start = computeU(U, oneSiteTruncSize, psi, dir);
 
 		// ... and send it to model
 		model_.oneSiteTruncationUpdate(ioOut_, U, start);
@@ -60,20 +60,20 @@ public:
 
 private:
 
-	SizeType computeU(MatrixType& U,
-	                  SizeType oneSiteTruncSize,
-	                  const VectorWithOffsetType& psi,
+	SizeType computeU(MatrixType&                   U,
+	                  SizeType                      oneSiteTruncSize,
+	                  const VectorWithOffsetType&   psi,
 	                  ProgramGlobals::DirectionEnum dir)
 	{
-		const SizeType sectors = psi.sectors();
-		const SizeType nsysOrEnv = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
-		    ? lrs_.left().size() / oneSiteTruncSize
-		    : oneSiteTruncSize;
+		const SizeType  sectors   = psi.sectors();
+		const SizeType  nsysOrEnv = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		     ? lrs_.left().size() / oneSiteTruncSize
+		     : oneSiteTruncSize;
 		PackIndicesType pack(nsysOrEnv);
 		PackIndicesType packSuper(lrs_.left().size());
 		for (SizeType i = 0; i < sectors; ++i) {
 			const SizeType sector = psi.sector(i);
-			const SizeType total = psi.effectiveSize(sector);
+			const SizeType total  = psi.effectiveSize(sector);
 			const SizeType offset = psi.offset(sector);
 			for (SizeType s = 0; s < total; ++s) {
 				SizeType x = 0;
@@ -152,10 +152,10 @@ private:
 	}
 
 	const LeftRightSuperType& lrs_;
-	ModelType& model_;
-	SizeType m_;
-	RealType tolerance_;
-	OutputFileOrNot& ioOut_;
+	ModelType&                model_;
+	SizeType                  m_;
+	RealType                  tolerance_;
+	OutputFileOrNot&          ioOut_;
 };
 }
 #endif // ONESITETRUNCATION_H

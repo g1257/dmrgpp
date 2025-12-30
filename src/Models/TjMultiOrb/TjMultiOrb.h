@@ -90,38 +90,38 @@ template <typename ModelBaseType> class TjMultiOrb : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::VectorRealType VectorRealType;
-	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelBaseType::HilbertBasisType HilbertBasisFeAsType;
-	typedef typename HilbertBasisFeAsType::value_type HilbertStateFeAs;
-	typedef HilbertSpaceFeAs<HilbertStateFeAs> HilbertSpaceFeAsType;
-	typedef typename ModelBaseType::MyBasis BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelHubbardType::HilbertState HilbertStateType;
-	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
-	typedef typename ModelHelperType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename ModelBaseType::VectorRealType              VectorRealType;
+	typedef ModelHubbard<ModelBaseType>                         ModelHubbardType;
+	typedef typename ModelBaseType::ModelHelperType             ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType           SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType          LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                    LinkType;
+	typedef typename ModelHelperType::OperatorsType             OperatorsType;
+	typedef typename OperatorsType::OperatorType                OperatorType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type     VectorOperatorType;
+	typedef typename ModelHelperType::RealType                  RealType;
+	typedef typename ModelBaseType::QnType                      QnType;
+	typedef typename QnType::VectorQnType                       VectorQnType;
+	typedef typename ModelHelperType::SparseMatrixType          SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename ModelBaseType::HilbertBasisType            HilbertBasisFeAsType;
+	typedef typename HilbertBasisFeAsType::value_type           HilbertStateFeAs;
+	typedef HilbertSpaceFeAs<HilbertStateFeAs>                  HilbertSpaceFeAsType;
+	typedef typename ModelBaseType::MyBasis                     BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType      MyBasisWithOperators;
+	typedef typename ModelHubbardType::HilbertState             HilbertStateType;
+	typedef typename ModelHubbardType::HilbertBasisType         HilbertBasisType;
+	typedef typename ModelHelperType::BlockType                 BlockType;
+	typedef typename ModelBaseType::SolverParamsType            SolverParamsType;
+	typedef typename ModelBaseType::VectorType                  VectorType;
+	typedef typename ModelBaseType::InputValidatorType          InputValidatorType;
+	typedef typename OperatorType::PairType                     PairType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>               MatrixType;
 	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename PsimagLite::Vector<SizeType>::Type         VectorSizeType;
+	typedef typename ModelBaseType::OpsLabelType                OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType               OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType               ModelTermType;
 
 	static const int FERMION_SIGN = -1;
 
@@ -133,8 +133,8 @@ public:
 
 	enum
 	{
-		STATE_EMPTY = 0,
-		STATE_UP_A = 1,
+		STATE_EMPTY  = 0,
+		STATE_UP_A   = 1,
 		STATE_DOWN_A = 4
 	};
 
@@ -144,8 +144,8 @@ public:
 		SPIN_DOWN
 	};
 
-	TjMultiOrb(const SolverParamsType& solverParams,
-	           InputValidatorType& io,
+	TjMultiOrb(const SolverParamsType&  solverParams,
+	           InputValidatorType&      io,
 	           const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
@@ -229,18 +229,18 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
-		VectorSizeType block(1, site);
+		SizeType               site = 0;
+		VectorSizeType         block(1, site);
 		VectorHilbertStateType natBasis;
-		SparseMatrixType tmpMatrix;
+		SparseMatrixType       tmpMatrix;
 		setNaturalBasis(natBasis, block, false);
 		setSymmetryRelated(qns, natBasis, block.size());
 
-		SizeType dof = 2 * modelParameters_.orbitals;
-		OpsLabelType& c = this->createOpsLabel("c");
-		OpsLabelType& splus = this->createOpsLabel("splus");
-		OpsLabelType& sz = this->createOpsLabel("sz");
-		OpsLabelType& nop = this->createOpsLabel("n");
+		SizeType      dof    = 2 * modelParameters_.orbitals;
+		OpsLabelType& c      = this->createOpsLabel("c");
+		OpsLabelType& splus  = this->createOpsLabel("splus");
+		OpsLabelType& sz     = this->createOpsLabel("sz");
+		OpsLabelType& nop    = this->createOpsLabel("n");
 		OpsLabelType& sminus = this->createOpsLabel("sminus");
 
 		this->makeTrackable("c");
@@ -250,7 +250,7 @@ protected:
 
 		// Set the operators c^\daggger_{i\sigma} in the natural basis
 
-		SizeType n = natBasis.size();
+		SizeType   n = natBasis.size();
 		MatrixType rotation(n, n);
 		MatrixType rotationR(n, n);
 		computeRotation(rotation, rotationR, natBasis);
@@ -316,12 +316,12 @@ protected:
 					tmpMatrix = findSzMatrices(
 					    i, orb, natBasis, &rotation, &rotationR);
 					typename OperatorType::Su2RelatedType su2related2;
-					OperatorType myOp2(
-					    tmpMatrix,
-					    ProgramGlobals::FermionOrBosonEnum::BOSON,
-					    PairType(2, 1),
-					    1.0 / sqrt(2.0),
-					    su2related2);
+					OperatorType                          myOp2(
+                                            tmpMatrix,
+                                            ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                            PairType(2, 1),
+                                            1.0 / sqrt(2.0),
+                                            su2related2);
 					sz.push(myOp2);
 				}
 			}
@@ -330,7 +330,7 @@ protected:
 				for (SizeType orb = 0; orb < modelParameters_.orbitals; orb++) {
 					tmpMatrix = findNiMatrices(
 					    0, orb, natBasis, &rotation, &rotationR);
-					RealType angularFactor = 1;
+					RealType                              angularFactor = 1;
 					typename OperatorType::Su2RelatedType su2related3;
 					su2related3.offset = 1; // check FIXME
 					OperatorType myOp3(
@@ -346,7 +346,7 @@ protected:
 
 		OpsLabelType& nupop = this->createOpsLabel("nup");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
-			SizeType x = dof + SPIN_UP * modelParameters_.orbitals;
+			SizeType     x   = dof + SPIN_UP * modelParameters_.orbitals;
 			OperatorType cup = this->naturalOperator("c", site, x);
 			cup.dagger();
 			SparseMatrixType nup(multiplyTc(cup.getCRS(), cup.getCRS()));
@@ -362,7 +362,7 @@ protected:
 
 		OpsLabelType& ndownpop = this->createOpsLabel("ndown");
 		for (SizeType dof = 0; dof < modelParameters_.orbitals; ++dof) {
-			SizeType x = dof + SPIN_DOWN * modelParameters_.orbitals;
+			SizeType     x     = dof + SPIN_DOWN * modelParameters_.orbitals;
 			OperatorType cdown = this->naturalOperator("c", site, x);
 			cdown.dagger();
 			SparseMatrixType ndown(multiplyTc(cdown.getCRS(), cdown.getCRS()));
@@ -385,11 +385,11 @@ protected:
 		//! and similarly for spin down.
 
 		const SizeType orbitals = modelParameters_.orbitals;
-		ModelTermType& hop = ModelBaseType::createTerm("hopping");
-		bool isSu2 = BasisType::useSu2Symmetry();
-		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
-		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
-		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
+		ModelTermType& hop      = ModelBaseType::createTerm("hopping");
+		bool           isSu2    = BasisType::useSu2Symmetry();
+		ModelTermType& spsm     = ModelBaseType::createTerm("SplusSminus");
+		ModelTermType& szsz     = ModelBaseType::createTerm("szsz");
+		ModelTermType& ninj     = ModelBaseType::createTerm("ninj");
 
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {
@@ -432,24 +432,24 @@ protected:
 private:
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findCreationMatrices(int i,
-	                                      int sigma,
+	SparseMatrixType findCreationMatrices(int                           i,
+	                                      int                           sigma,
 	                                      const VectorHilbertStateType& natBasis,
-	                                      const MatrixType* rot,
-	                                      const MatrixType* rotT) const
+	                                      const MatrixType*             rot,
+	                                      const MatrixType*             rotT) const
 	{
 		assert(i == 0);
 		HilbertStateType bra, ket;
-		int n = natBasis.size();
-		MatrixType cm(n, n);
-		SizeType orbitals = modelParameters_.orbitals;
+		int              n = natBasis.size();
+		MatrixType       cm(n, n);
+		SizeType         orbitals = modelParameters_.orbitals;
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
-			bra = ket = natBasis[ii];
+			bra = ket             = natBasis[ii];
 			HilbertStateType mask = (1 << (sigma + i * 2 * orbitals));
 			if (ket & mask)
 				continue;
-			bra = (ket ^ mask);
+			bra    = (ket ^ mask);
 			int jj = PsimagLite::indexOrMinusOne(natBasis, bra);
 			if (jj < 0)
 				continue;
@@ -463,22 +463,22 @@ private:
 	}
 
 	//! Find n_i in the natural basis natBasis
-	SparseMatrixType findNiMatrices(int i,
-	                                SizeType orb,
+	SparseMatrixType findNiMatrices(int                           i,
+	                                SizeType                      orb,
 	                                const VectorHilbertStateType& natBasis,
-	                                const MatrixType* rot,
-	                                const MatrixType* rotT) const
+	                                const MatrixType*             rot,
+	                                const MatrixType*             rotT) const
 	{
 		assert(i == 0);
 		SizeType orbitals = modelParameters_.orbitals;
-		SizeType n = natBasis.size();
+		SizeType n        = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 		SizeType dofs = 2 * modelParameters_.orbitals;
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
 			HilbertStateType ket = natBasis[ii];
-			cm(ii, ii) = 0.0;
-			SizeType orbitals = modelParameters_.orbitals;
+			cm(ii, ii)           = 0.0;
+			SizeType orbitals    = modelParameters_.orbitals;
 			for (SizeType sigma = 0; sigma < dofs; sigma += orbitals) {
 				HilbertStateType mask = (1 << (orb + sigma));
 				if (ket & mask)
@@ -498,14 +498,14 @@ private:
 	{
 		assert(sigma < 2 * modelParameters_.orbitals);
 		VectorHilbertStateType natBasis;
-		BlockType block(1, 0);
+		BlockType              block(1, 0);
 		setNaturalBasis(natBasis, block, false);
-		SizeType n = natBasis.size();
+		SizeType   n = natBasis.size();
 		MatrixType cm(n, n);
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
-			HilbertStateType ket = natBasis[ii];
-			cm(ii, ii) = 0.0;
+			HilbertStateType ket  = natBasis[ii];
+			cm(ii, ii)            = 0.0;
 			HilbertStateType mask = (1 << sigma);
 			if (ket & mask)
 				cm(ii, ii) += 1.0;
@@ -521,22 +521,22 @@ private:
 	}
 
 	//! Find S^+_i in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(int i,
-	                                   SizeType orb,
+	SparseMatrixType findSplusMatrices(int                           i,
+	                                   SizeType                      orb,
 	                                   const VectorHilbertStateType& natBasis,
-	                                   const MatrixType* rot,
-	                                   const MatrixType* rotT) const
+	                                   const MatrixType*             rot,
+	                                   const MatrixType*             rotT) const
 	{
 		assert(i == 0);
 		HilbertStateType bra, ket;
-		int n = natBasis.size();
-		MatrixType cm(n, n);
-		SizeType orbitals = modelParameters_.orbitals;
+		int              n = natBasis.size();
+		MatrixType       cm(n, n);
+		SizeType         orbitals = modelParameters_.orbitals;
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
-			ket = natBasis[ii];
-			SizeType l = orb + orbitals;
-			bra = ket;
+			ket                     = natBasis[ii];
+			SizeType l              = orb + orbitals;
+			bra                     = ket;
 			HilbertStateType masklp = (1 << l);
 			HilbertStateType masklm = (1 << (l - orbitals));
 			if ((ket & masklp) > 0 && (ket & masklm) == 0) {
@@ -556,25 +556,25 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(int i,
-	                                SizeType orb,
+	SparseMatrixType findSzMatrices(int                           i,
+	                                SizeType                      orb,
 	                                const VectorHilbertStateType& natBasis,
-	                                const MatrixType* rot,
-	                                const MatrixType* rotT) const
+	                                const MatrixType*             rot,
+	                                const MatrixType*             rotT) const
 	{
 		assert(i == 0);
-		int n = natBasis.size();
+		int        n = natBasis.size();
 		MatrixType cm(n, n);
-		SizeType orbitals = modelParameters_.orbitals;
+		SizeType   orbitals = modelParameters_.orbitals;
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
-			HilbertStateType ket = natBasis[ii];
-			int counter = 0;
-			SizeType l1 = orb;
-			HilbertStateType masklp = (1 << l1);
+			HilbertStateType ket     = natBasis[ii];
+			int              counter = 0;
+			SizeType         l1      = orb;
+			HilbertStateType masklp  = (1 << l1);
 			if (ket & masklp)
 				counter++;
-			SizeType l2 = orb + orbitals;
+			SizeType         l2      = orb + orbitals;
 			HilbertStateType masklp1 = (1 << l2);
 			if (ket & masklp1)
 				counter--;
@@ -591,13 +591,13 @@ private:
 
 	void correctLambda(MatrixType& cm2, const VectorHilbertStateType& natBasis) const
 	{
-		SizeType n = natBasis.size();
+		SizeType                                                  n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> dens(n, n);
 		SizeType dofs = 2 * modelParameters_.orbitals;
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
 			HilbertStateType ket = natBasis[ii];
-			dens(ii, ii) = 0.0;
+			dens(ii, ii)         = 0.0;
 			for (SizeType sigma = 0; sigma < dofs; sigma++) {
 				HilbertStateType mask = (1 << sigma);
 				if (ket & mask)
@@ -605,7 +605,7 @@ private:
 			}
 		}
 
-		MatrixType corrector(n, n);
+		MatrixType        corrector(n, n);
 		ComplexOrRealType f1 = (-1.0);
 		ComplexOrRealType f2 = 0.5;
 		for (SizeType i = 0; i < n; ++i)
@@ -614,9 +614,9 @@ private:
 		cm2 = cm2 * corrector;
 	}
 
-	void truncateMatrix(MatrixType& cm,
-	                    const MatrixType* rot,
-	                    const MatrixType* rotT,
+	void truncateMatrix(MatrixType&                   cm,
+	                    const MatrixType*             rot,
+	                    const MatrixType*             rotT,
 	                    const VectorHilbertStateType& natBasis) const
 	{
 		if (modelParameters_.orbitals != 2 || modelParameters_.reinterpretAndTruncate == 0)
@@ -638,7 +638,7 @@ private:
 		n -= target.size();
 
 		MatrixType cm2(n, n);
-		SizeType ii = 0;
+		SizeType   ii = 0;
 		for (SizeType i = 0; i < cm.rows(); ++i) {
 			VectorSizeType::const_iterator it
 			    = std::find(target.begin(), target.end(), i);
@@ -668,22 +668,22 @@ private:
 		if (orbitals == 1)
 			return 1;
 
-		int value = 0;
-		SizeType dofs = 2 * modelParameters_.orbitals;
+		int      value = 0;
+		SizeType dofs  = 2 * modelParameters_.orbitals;
 		for (SizeType alpha = 0; alpha < dofs; alpha++)
 			value += HilbertSpaceFeAsType::calcNofElectrons(ket, 0, i, alpha);
 
 		if (i > 0)
 			value += HilbertSpaceFeAsType::electrons(ket);
 
-		unsigned int x = HilbertSpaceFeAsType::get(ket, i);
-		int spin = sigma / modelParameters_.orbitals;
-		SizeType orb = sigma % modelParameters_.orbitals;
+		unsigned int x    = HilbertSpaceFeAsType::get(ket, i);
+		int          spin = sigma / modelParameters_.orbitals;
+		SizeType     orb  = sigma % modelParameters_.orbitals;
 
 		for (SizeType j = 0; j < orb; j++) {
 			for (SizeType k = 0; k < 2; k++) {
-				SizeType ind = j + k * modelParameters_.orbitals;
-				int mask = (1 << ind);
+				SizeType ind  = j + k * modelParameters_.orbitals;
+				int      mask = (1 << ind);
 				if (x & mask)
 					value++;
 			}
@@ -727,7 +727,7 @@ private:
 		transposeConjugate(uT, u);
 	}
 
-	void findIndicesToRemove(VectorSizeType& indices,
+	void findIndicesToRemove(VectorSizeType&               indices,
 	                         const VectorHilbertStateType& natBasis) const
 	{
 		VectorHilbertStateType target(1, REINTERPRET_6);
@@ -748,14 +748,14 @@ private:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const BlockType& block,
-	                                RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
-		SizeType n = block.size();
+		SizeType n        = block.size();
 		SizeType orbitals = modelParameters_.orbitals;
-		SizeType linSize = superGeometry_.numberOfSites();
+		SizeType linSize  = superGeometry_.numberOfSites();
 		for (SizeType i = 0; i < n; i++) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
 				// potentialV
@@ -793,8 +793,8 @@ private:
 
 	void weedOutBasis(VectorHilbertStateType& basis, bool truncated) const
 	{
-		SizeType orbitals = modelParameters_.orbitals;
-		HilbertBasisType basisTmp;
+		SizeType               orbitals = modelParameters_.orbitals;
+		HilbertBasisType       basisTmp;
 		VectorHilbertStateType electrons(orbitals, 0);
 		if (orbitals != 2)
 			truncated = false;
@@ -844,8 +844,8 @@ private:
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType, SizeType> PairType;
-		SizeType orbitals = modelParameters_.orbitals;
-		VectorSizeType other(2, 0);
+		SizeType                              orbitals = modelParameters_.orbitals;
+		VectorSizeType                        other(2, 0);
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0, 0);
@@ -854,7 +854,7 @@ private:
 				jmpair = calcJmvalue<PairType>(basis[i]);
 
 			// nup
-			SizeType electronsUp = 0;
+			SizeType electronsUp   = 0;
 			SizeType electronsDown = 0;
 			for (SizeType dof = 0; dof < orbitals; ++dof) {
 				HilbertStateType mask = (1 << dof);
@@ -866,10 +866,10 @@ private:
 			}
 
 			SizeType electrons = electronsDown + electronsUp;
-			other[0] = electrons;
-			other[1] = electronsUp;
-			bool sign = electrons & 1;
-			qns[i] = QnType(sign, other, jmpair, electrons);
+			other[0]           = electrons;
+			other[1]           = electronsUp;
+			bool sign          = electrons & 1;
+			qns[i]             = QnType(sign, other, jmpair, electrons);
 		}
 	}
 
@@ -901,14 +901,14 @@ private:
 		return jm;
 	}
 
-	ParametersModelTjMultiOrb<RealType, QnType> modelParameters_;
-	const SuperGeometryType& superGeometry_;
-	SizeType offset_;
-	SpinSquaredHelper<RealType, HilbertStateType> spinSquaredHelper_;
+	ParametersModelTjMultiOrb<RealType, QnType>                modelParameters_;
+	const SuperGeometryType&                                   superGeometry_;
+	SizeType                                                   offset_;
+	SpinSquaredHelper<RealType, HilbertStateType>              spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType, HilbertStateType>> spinSquared_;
-	HilbertBasisType basis_;
-	VectorQnType qq_;
-	VectorOperatorType creationMatrix_;
+	HilbertBasisType                                           basis_;
+	VectorQnType                                               qq_;
+	VectorOperatorType                                         creationMatrix_;
 }; // class TjMultiOrb
 
 } // namespace Dmrg

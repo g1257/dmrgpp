@@ -147,8 +147,8 @@ public:
 		ioSerializer.read(data_, label + "/data_");
 	}
 
-	void write(String label,
-	           IoSerializer& ioSerializer,
+	void write(String                  label,
+	           IoSerializer&           ioSerializer,
 	           IoSerializer::WriteMode wM = IoSerializer::NO_OVERWRITE) const
 	{
 		bool flag = false;
@@ -195,11 +195,11 @@ public:
 		String str = msg;
 		str += "Matrix";
 		const char* start = (const char*)&nrow_;
-		const char* end = (const char*)&ncol_;
-		SizeType total = mres.memResolv(&nrow_, end - start, str + " nrow_");
+		const char* end   = (const char*)&ncol_;
+		SizeType    total = mres.memResolv(&nrow_, end - start, str + " nrow_");
 
 		start = end;
-		end = (const char*)&data_;
+		end   = (const char*)&data_;
 		total += mres.memResolv(&ncol_, end - start, str + " ncol_");
 
 		total += mres.memResolv(&data_, sizeof(*this) - total, str + " data_");
@@ -224,8 +224,8 @@ public:
 
 	SizeType nonZeros() const
 	{
-		const T zval = 0.0;
-		SizeType n = nrow_ * ncol_;
+		const T  zval = 0.0;
+		SizeType n    = nrow_ * ncol_;
 		assert(data_.size() >= n);
 		SizeType count = 0;
 		for (SizeType i = 0; i < n; ++i)
@@ -327,10 +327,10 @@ public:
 		m.data_.swap(data_);
 		SizeType row = m.nrow_;
 		SizeType col = m.ncol_;
-		m.nrow_ = nrow_;
-		m.ncol_ = ncol_;
-		nrow_ = row;
-		ncol_ = col;
+		m.nrow_      = nrow_;
+		m.ncol_      = ncol_;
+		nrow_        = row;
+		ncol_        = col;
 	}
 
 	void setTo(const T& val)
@@ -509,9 +509,9 @@ public:
 	Matrix&
 	operator=(const std::ClosureOperator<Matrix<T>, Matrix, std::ClosureOperations::OP_MULT>& c)
 	{
-		const Matrix<T>& a = c.r1;
-		const Matrix<T>& b = c.r2;
-		const T f1 = 1.0;
+		const Matrix<T>& a  = c.r1;
+		const Matrix<T>& b  = c.r2;
+		const T          f1 = 1.0;
 		matrixMatrix(a, b, f1);
 
 		return *this;
@@ -550,18 +550,18 @@ private:
 		*this = m; // copy is needed in case a or b are *this matrix
 	}
 
-	SizeType nrow_;
-	SizeType ncol_;
+	SizeType                 nrow_;
+	SizeType                 ncol_;
 	typename Vector<T>::Type data_;
 }; // class Matrix
 
 // start in Matrix.cpp
-void geev(char jobvl,
-          char jobvr,
-          Matrix<std::complex<double>>& a,
+void geev(char                                jobvl,
+          char                                jobvr,
+          Matrix<std::complex<double>>&       a,
           Vector<std::complex<double>>::Type& w,
-          Matrix<std::complex<double>>& vl,
-          Matrix<std::complex<double>>& vr);
+          Matrix<std::complex<double>>&       vl,
+          Matrix<std::complex<double>>&       vr);
 
 void diag(Matrix<double>& m, Vector<double>::Type& eigs, char option);
 
@@ -577,11 +577,11 @@ typename std::enable_if<IsComplexNumber<T>::True, void>::type inverse(Matrix<T>&
 #ifdef NO_LAPACK
 	throw RuntimeError("inverse: NO LAPACK!\n");
 #else
-	int n = m.rows();
-	int info = 0;
+	int               n    = m.rows();
+	int               info = 0;
 	Vector<int>::Type ipiv(n, 0);
 	psimag::LAPACK::GETRF(n, n, &(m(0, 0)), n, &(ipiv[0]), info);
-	int lwork = -1;
+	int                      lwork = -1;
 	typename Vector<T>::Type work(2);
 	psimag::LAPACK::GETRI(n, &(m(0, 0)), n, &(ipiv[0]), &(work[0]), lwork, info);
 	lwork = static_cast<int>(PsimagLite::real(work[0]));
@@ -599,11 +599,11 @@ typename std::enable_if<Loki::TypeTraits<T>::isArith, void>::type inverse(Matrix
 #ifdef NO_LAPACK
 	throw RuntimeError("inverse: NO LAPACK!\n");
 #else
-	int n = m.rows();
-	int info = 0;
+	int               n    = m.rows();
+	int               info = 0;
 	Vector<int>::Type ipiv(n, 0);
 	psimag::LAPACK::GETRF(n, n, &(m(0, 0)), n, &(ipiv[0]), info);
-	int lwork = -1;
+	int                      lwork = -1;
 	typename Vector<T>::Type work(2);
 	psimag::LAPACK::GETRI(n, &(m(0, 0)), n, &(ipiv[0]), &(work[0]), lwork, info);
 	lwork = static_cast<int>(work[0]);
@@ -669,8 +669,8 @@ template <typename T> void symbolicPrint(std::ostream& os, const Matrix<T>& A)
 	SizeType i, j;
 	os << A.rows() << " " << A.cols() << "\n";
 	typename Vector<T>::Type values;
-	String s = "symbolicPrint: Not enough characters\n";
-	SizeType maxCharacters = 25;
+	String                   s             = "symbolicPrint: Not enough characters\n";
+	SizeType                 maxCharacters = 25;
 	for (i = 0; i < A.rows(); i++) {
 		for (j = 0; j < A.cols(); j++) {
 
@@ -766,8 +766,8 @@ template <typename T> std::istream& operator>>(std::istream& is, Matrix<T>& A)
 
 template <typename T> bool isHermitian(Matrix<T> const& A, bool verbose = false)
 {
-	SizeType n = A.rows();
-	double eps = 1e-6;
+	SizeType n   = A.rows();
+	double   eps = 1e-6;
 	if (n != A.cols())
 		throw RuntimeError("isHermitian called on a non-square matrix.\n");
 	for (SizeType i = 0; i < n; i++)
@@ -786,8 +786,8 @@ template <typename T> bool isHermitian(Matrix<T> const& A, bool verbose = false)
 
 template <typename T> bool isAntiHermitian(const Matrix<T>& A, bool verbose = false)
 {
-	SizeType n = A.rows();
-	double eps = 1e-6;
+	SizeType n   = A.rows();
+	double   eps = 1e-6;
 	if (n != A.cols())
 		throw RuntimeError("isHermitian called on a non-square matrix.\n");
 	for (SizeType i = 0; i < n; ++i) {
@@ -909,11 +909,11 @@ operator-(const Matrix<T>& a, const Matrix<T>& b)
 
 template <typename T, typename A>
 void operator<=(
-    std::vector<T, A>& v,
+    std::vector<T, A>&                                                                         v,
     const std::ClosureOperator<Matrix<T>, std::vector<T, A>, std::ClosureOperations::OP_MULT>& c)
 {
 	const std::vector<T, A>& b = c.r2;
-	const Matrix<T>& a = c.r1;
+	const Matrix<T>&         a = c.r1;
 	assert(a.cols() == b.size());
 	v.resize(a.rows());
 	for (SizeType i = 0; i < a.rows(); i++) {
@@ -926,11 +926,11 @@ void operator<=(
 
 template <typename T, typename A>
 void operator<=(
-    std::vector<T, A>& v,
+    std::vector<T, A>&                                                                         v,
     const std::ClosureOperator<std::vector<T, A>, Matrix<T>, std::ClosureOperations::OP_MULT>& c)
 {
 	const std::vector<T, A>& b = c.r1;
-	const Matrix<T>& a = c.r2;
+	const Matrix<T>&         a = c.r2;
 	assert(a.rows() == b.size());
 	v.resize(a.cols());
 	for (SizeType i = 0; i < a.cols(); i++) {
@@ -944,7 +944,7 @@ void operator<=(
 template <typename T>
 Matrix<T> multiplyTransposeConjugate(const Matrix<T>& O1, const Matrix<T>& O2, char modifier = 'C')
 {
-	SizeType n = O1.rows();
+	SizeType  n = O1.rows();
 	Matrix<T> ret(n, n);
 	if (modifier == 'C') {
 		for (SizeType s = 0; s < n; s++)
@@ -987,7 +987,7 @@ template <typename T> Matrix<T> transposeConjugate(const Matrix<T>& A)
 
 template <typename T> void exp(Matrix<T>& m)
 {
-	SizeType n = m.rows();
+	SizeType                                      n = m.rows();
 	typename Vector<typename Real<T>::Type>::Type eigs(n);
 	diag(m, eigs, 'V');
 	Matrix<T> expm(n, n);
@@ -996,7 +996,7 @@ template <typename T> void exp(Matrix<T>& m)
 			T sum = 0;
 			for (SizeType k = 0; k < n; k++) {
 				typename Real<T>::Type alpha = eigs[k];
-				T tmp = 0.0;
+				T                      tmp   = 0.0;
 				expComplexOrReal(tmp, alpha);
 				sum += PsimagLite::conj(m(i, k)) * m(j, k) * tmp;
 			}
@@ -1086,10 +1086,10 @@ namespace MPI {
 	                  void>::Type
 	allReduce(SomeMatrixType& v, MPI_Op op = MPI_SUM, CommType mpiComm = MPI_COMM_WORLD)
 	{
-		SomeMatrixType recvbuf = v;
-		MPI_Datatype datatype = MpiData<typename SomeMatrixType::value_type>::Type;
-		SizeType total = v.rows() * v.cols();
-		int errorCode
+		SomeMatrixType recvbuf  = v;
+		MPI_Datatype   datatype = MpiData<typename SomeMatrixType::value_type>::Type;
+		SizeType       total    = v.rows() * v.cols();
+		int            errorCode
 		    = MPI_Allreduce(&(v(0, 0)), &(recvbuf(0, 0)), total, datatype, op, mpiComm);
 		checkError(errorCode, "MPI_Allreduce", mpiComm);
 		v = recvbuf;
@@ -1102,10 +1102,10 @@ namespace MPI {
 	allReduce(SomeMatrixType& v, MPI_Op op = MPI_SUM, CommType mpiComm = MPI_COMM_WORLD)
 	{
 		SomeMatrixType recvbuf = v;
-		MPI_Datatype datatype
+		MPI_Datatype   datatype
 		    = MpiData<typename SomeMatrixType::value_type::value_type>::Type;
 		SizeType total = v.rows() * v.cols();
-		int errorCode
+		int      errorCode
 		    = MPI_Allreduce(&(v(0, 0)), &(recvbuf(0, 0)), 2 * total, datatype, op, mpiComm);
 		checkError(errorCode, "MPI_Allreduce", mpiComm);
 		v = recvbuf;

@@ -80,9 +80,9 @@ public:
 
 		void encode_(unsigned char const* bytesToEncode, unsigned int inLen)
 		{
-			buffer_ = "";
-			int i = 0;
-			int j = 0;
+			buffer_         = "";
+			int           i = 0;
+			int           j = 0;
 			unsigned char charArray3[3];
 			unsigned char charArray4[4];
 
@@ -130,11 +130,11 @@ public:
 
 		Decode(const String& encodedString)
 		{
-			buffer_ = "";
-			int inLen = encodedString.size();
-			int i = 0;
-			int j = 0;
-			int in_ = 0;
+			buffer_             = "";
+			int           inLen = encodedString.size();
+			int           i     = 0;
+			int           j     = 0;
+			int           in_   = 0;
 			unsigned char charArray4[4], charArray3[3];
 
 			while (inLen-- && (encodedString[in_] != '=')

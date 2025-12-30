@@ -95,46 +95,46 @@ template <typename ModelBaseType> class HubbardAncillaExtended : public ModelBas
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
-	typedef typename HilbertBasisType::value_type HilbertState;
-	typedef typename ModelHelperType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::MyBasis BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef ParametersHubbardAncillaExtended<RealType, QnType> ParametersHubbardAncillaType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
+	typedef typename ModelBaseType::ModelHelperType             ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType           SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType          LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                    LinkType;
+	typedef typename ModelHelperType::OperatorsType             OperatorsType;
+	typedef typename OperatorsType::OperatorType                OperatorType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type     VectorOperatorType;
+	typedef typename ModelHelperType::RealType                  RealType;
+	typedef typename ModelBaseType::QnType                      QnType;
+	typedef typename QnType::VectorQnType                       VectorQnType;
+	typedef typename ModelBaseType::HilbertBasisType            HilbertBasisType;
+	typedef typename HilbertBasisType::value_type               HilbertState;
+	typedef typename ModelHelperType::BlockType                 BlockType;
+	typedef typename ModelBaseType::SolverParamsType            SolverParamsType;
+	typedef typename ModelHelperType::SparseMatrixType          SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename ModelBaseType::InputValidatorType          InputValidatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>               MatrixType;
+	typedef typename ModelBaseType::VectorSizeType              VectorSizeType;
+	typedef typename ModelBaseType::VectorType                  VectorType;
+	typedef typename ModelBaseType::MyBasis                     BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType      MyBasisWithOperators;
+	typedef ParametersHubbardAncillaExtended<RealType, QnType>  ParametersHubbardAncillaType;
+	typedef std::pair<SizeType, SizeType>                       PairType;
+	typedef typename PsimagLite::Vector<PairType>::Type         VectorPairType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename ModelBaseType::OpsLabelType                OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType               OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType               ModelTermType;
 	typedef HelperHubbardAncilla<ModelBaseType, ParametersHubbardAncillaType>
-	    HelperHubbardAncillaType;
+	                                                                HelperHubbardAncillaType;
 	typedef typename HelperHubbardAncillaType::HilbertSpaceFeAsType HilbertSpaceFeAsType;
 
-	static const int FERMION_SIGN = -1;
-	static const int SPIN_UP = HilbertSpaceFeAsType::SPIN_UP;
-	static const int SPIN_DOWN = HilbertSpaceFeAsType::SPIN_DOWN;
-	static SizeType const ORBITALS = 2;
+	static const int      FERMION_SIGN = -1;
+	static const int      SPIN_UP      = HilbertSpaceFeAsType::SPIN_UP;
+	static const int      SPIN_DOWN    = HilbertSpaceFeAsType::SPIN_DOWN;
+	static SizeType const ORBITALS     = 2;
 
-	HubbardAncillaExtended(const SolverParamsType& solverParams,
-	                       InputValidatorType& io,
+	HubbardAncillaExtended(const SolverParamsType&  solverParams,
+	                       InputValidatorType&      io,
 	                       const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
@@ -147,8 +147,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const BlockType& block,
-	                                RealType t) const
+	                                const BlockType&  block,
+	                                RealType          t) const
 	{
 		helperHubbardAncilla_.addDiagonalsInNaturalBasis(hmatrix, block, t);
 	}
@@ -157,21 +157,21 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
-		BlockType block(1, site);
+		SizeType         site = 0;
+		BlockType        block(1, site);
 		HilbertBasisType natBasis;
 		HelperHubbardAncillaType::setBasis(natBasis, block);
 		helperHubbardAncilla_.setSymmetryRelated(qns, natBasis);
 
 		//! Set the operators c^\dagger_{i\gamma\sigma} in the natural basis
-		SizeType dofs = 2 * ORBITALS;
-		OpsLabelType& c = this->createOpsLabel("c");
-		OpsLabelType& d = this->createOpsLabel("d");
-		OpsLabelType& splus = this->createOpsLabel("splus");
+		SizeType      dofs   = 2 * ORBITALS;
+		OpsLabelType& c      = this->createOpsLabel("c");
+		OpsLabelType& d      = this->createOpsLabel("d");
+		OpsLabelType& splus  = this->createOpsLabel("splus");
 		OpsLabelType& sminus = this->createOpsLabel("sminus");
-		OpsLabelType& sz = this->createOpsLabel("sz");
-		OpsLabelType& p = this->createOpsLabel("p");
-		OpsLabelType& nop = this->createOpsLabel("n");
+		OpsLabelType& sz     = this->createOpsLabel("sz");
+		OpsLabelType& p      = this->createOpsLabel("p");
+		OpsLabelType& nop    = this->createOpsLabel("n");
 
 		this->makeTrackable("c");
 		this->makeTrackable("d");
@@ -191,10 +191,10 @@ protected:
 				HelperHubbardAncillaType::findOperatorMatrices(
 				    tmp, i, sigma, natBasis);
 				SparseMatrixType tmpMatrix(tmp);
-				SizeType m = 0;
-				int asign = 1;
+				SizeType         m     = 0;
+				int              asign = 1;
 				if (sigma > ORBITALS - 1) {
-					m = 1;
+					m     = 1;
 					asign = -1;
 				}
 
@@ -239,13 +239,13 @@ protected:
 	void fillModelLinks()
 	{
 		const SizeType orbitals = (helperHubbardAncilla_.isHot()) ? 2 : 1;
-		const bool isSu2 = BasisType::useSu2Symmetry();
-		ModelTermType& hop = ModelBaseType::createTerm("hopping"); // diagonal in orbital
+		const bool     isSu2    = BasisType::useSu2Symmetry();
+		ModelTermType& hop  = ModelBaseType::createTerm("hopping"); // diagonal in orbital
 		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
 		ModelTermType& szsz = ModelBaseType::createTerm("szsz");
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
-		ModelTermType& ll = ModelBaseType::createTerm("LambdaLambda");
-		ModelTermType& pp = ModelBaseType::createTerm("PairPair");
+		ModelTermType& ll   = ModelBaseType::createTerm("LambdaLambda");
+		ModelTermType& pp   = ModelBaseType::createTerm("PairPair");
 
 		for (SizeType spin = 0; spin < 2; ++spin) {
 			for (SizeType orb = 0; orb < orbitals; ++orb) {
@@ -300,11 +300,11 @@ private:
 	void setSplus(OpsLabelType& splusop,
 	              OpsLabelType& sminus,
 	              SizeType,
-	              SizeType orbital,
+	              SizeType                      orbital,
 	              const VectorSparseMatrixType& vm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
-		SparseMatrixType m;
+		SparseMatrixType                      m;
 		transposeConjugate(m, vm[2 + orbital]);
 		SparseMatrixType splus;
 		multiply(splus, vm[0 + orbital], m);
@@ -322,7 +322,7 @@ private:
 
 	void setSz(OpsLabelType& szop,
 	           SizeType,
-	           SizeType orbital,
+	           SizeType                      orbital,
 	           const VectorSparseMatrixType& vm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
@@ -331,12 +331,12 @@ private:
 		SparseMatrixType cm2(vm[2 + orbital]);
 		SparseMatrixType n1 = HelperHubbardAncillaType::n(cm1);
 		SparseMatrixType n2 = HelperHubbardAncillaType::n(cm2);
-		MatrixType dn1;
-		MatrixType dn2;
+		MatrixType       dn1;
+		MatrixType       dn2;
 		crsMatrixToFullMatrix(dn1, n1);
 		crsMatrixToFullMatrix(dn2, n2);
 
-		SizeType n = dn1.rows();
+		SizeType   n = dn1.rows();
 		MatrixType szmatrix(n, n);
 
 		for (SizeType i = 0; i < n; ++i)
@@ -355,7 +355,7 @@ private:
 	setPair(OpsLabelType& p, SizeType, SizeType orbital, const VectorSparseMatrixType& vm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
-		SparseMatrixType pair;
+		SparseMatrixType                      pair;
 		multiply(pair, vm[0 + orbital], vm[2 + orbital]);
 
 		OperatorType myOp(pair,
@@ -368,19 +368,19 @@ private:
 
 	void setN(OpsLabelType& nopop,
 	          SizeType,
-	          SizeType orbital,
+	          SizeType                      orbital,
 	          const VectorSparseMatrixType& vm) const
 	{
 		typename OperatorType::Su2RelatedType su2related;
-		SparseMatrixType cm1(vm[0 + orbital]);
-		SparseMatrixType cm2(vm[2 + orbital]);
-		SparseMatrixType n1 = HelperHubbardAncillaType::n(cm1);
-		SparseMatrixType n2 = HelperHubbardAncillaType::n(cm2);
-		MatrixType dn1;
-		MatrixType dn2;
+		SparseMatrixType                      cm1(vm[0 + orbital]);
+		SparseMatrixType                      cm2(vm[2 + orbital]);
+		SparseMatrixType                      n1 = HelperHubbardAncillaType::n(cm1);
+		SparseMatrixType                      n2 = HelperHubbardAncillaType::n(cm2);
+		MatrixType                            dn1;
+		MatrixType                            dn2;
 		crsMatrixToFullMatrix(dn1, n1);
 		crsMatrixToFullMatrix(dn2, n2);
-		SizeType n = dn1.rows();
+		SizeType   n = dn1.rows();
 		MatrixType nmatrix(n, n);
 
 		for (SizeType i = 0; i < n; ++i) {
@@ -397,7 +397,7 @@ private:
 	}
 
 	ParametersHubbardAncillaType modelParameters_;
-	HelperHubbardAncillaType helperHubbardAncilla_;
+	HelperHubbardAncillaType     helperHubbardAncilla_;
 }; // class HubbardAncilla
 } // namespace Dmrg
 /*@}*/

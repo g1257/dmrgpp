@@ -98,25 +98,25 @@ class ObserverHelper {
 
 public:
 
-	typedef IoInputType_ IoInputType;
-	typedef MatrixType_ MatrixType;
-	typedef VectorType_ VectorType;
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef SizeType IndexType;
-	typedef typename VectorType::value_type FieldType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
+	typedef IoInputType_                                             IoInputType;
+	typedef MatrixType_                                              MatrixType;
+	typedef VectorType_                                              VectorType;
+	typedef VectorWithOffsetType_                                    VectorWithOffsetType;
+	typedef SizeType                                                 IndexType;
+	typedef typename VectorType::value_type                          FieldType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::RealType                RealType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
+	typedef TimeSerializer<VectorWithOffsetType>                     TimeSerializerType;
+	typedef typename BasisWithOperatorsType::BasisType               BasisType;
+	typedef typename BasisWithOperatorsType::OperatorType            OperatorType;
 	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
-	typedef typename DmrgSerializerType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
-	typedef PsimagLite::GetBraOrKet GetBraOrKetType;
-	typedef std::pair<LeftRightSuperType*, SizeType> PairLeftRightSuperSizeType;
+	typedef typename DmrgSerializerType::BlockDiagonalMatrixType     BlockDiagonalMatrixType;
+	typedef typename DmrgSerializerType::FermionSignType             FermionSignType;
+	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
+	typedef PsimagLite::Vector<short int>::Type                      VectorShortIntType;
+	typedef PsimagLite::GetBraOrKet                                  GetBraOrKetType;
+	typedef std::pair<LeftRightSuperType*, SizeType>                 PairLeftRightSuperSizeType;
 
 	enum class SaveEnum
 	{
@@ -125,11 +125,11 @@ public:
 	};
 
 	ObserverHelper(IoInputType& io,
-	               SizeType start,
-	               SizeType nf,
-	               SizeType trail,
-	               bool withLegacyBugs,
-	               bool readOnDemand)
+	               SizeType     start,
+	               SizeType     nf,
+	               SizeType     trail,
+	               bool         withLegacyBugs,
+	               bool         readOnDemand)
 	    : io_(io)
 	    , withLegacyBugs_(withLegacyBugs)
 	    , readOnDemand_(readOnDemand)
@@ -194,7 +194,7 @@ public:
 			return dSerializerV_[ind]->transform(ret, O2);
 
 		const PsimagLite::String prefix = "Serializer/" + ttos(ind);
-		BlockDiagonalMatrixType transformStorage(io_, prefix + "/transform", false);
+		BlockDiagonalMatrixType  transformStorage(io_, prefix + "/transform", false);
 		DmrgSerializerType::transform(ret, O2, transformStorage);
 	}
 
@@ -311,7 +311,7 @@ public:
 
 private:
 
-	SizeType siteInternal(const LeftRightSuperType& lrs,
+	SizeType siteInternal(const LeftRightSuperType&     lrs,
 	                      ProgramGlobals::DirectionEnum direction) const
 	{
 		return (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -322,7 +322,7 @@ private:
 	bool init(SizeType start, SizeType end, SaveEnum saveOrNot)
 	{
 		PsimagLite::String prefix = "Serializer";
-		SizeType total = 0;
+		SizeType           total  = 0;
 		io_.read(total, prefix + "/Size");
 		if (start >= end || start >= total)
 			return false;
@@ -349,7 +349,7 @@ private:
 				delete dSerializer;
 
 			try {
-				PsimagLite::String prefix("/TargetingCommon/" + ttos(i));
+				PsimagLite::String  prefix("/TargetingCommon/" + ttos(i));
 				TimeSerializerType* ts = new TimeSerializerType(io_, prefix);
 				std::cerr << "Read TimeSerializer\n";
 				if (saveOrNot == SaveEnum::YES)
@@ -388,16 +388,16 @@ private:
 		err("dSerializerV_ at index " + ttos(ind) + " point to 0x0\n");
 	}
 
-	IoInputType& io_;
+	IoInputType&                                           io_;
 	typename PsimagLite::Vector<DmrgSerializerType*>::Type dSerializerV_;
 	typename PsimagLite::Vector<TimeSerializerType*>::Type timeSerializerV_;
-	const bool withLegacyBugs_;
-	const bool readOnDemand_;
-	PsimagLite::ProgressIndicator progress_;
-	bool noMoreData_;
-	VectorShortIntType signsOneSite_;
-	SizeType numberOfSites_;
-	mutable PairLeftRightSuperSizeType lrsStorage_;
+	const bool                                             withLegacyBugs_;
+	const bool                                             readOnDemand_;
+	PsimagLite::ProgressIndicator                          progress_;
+	bool                                                   noMoreData_;
+	VectorShortIntType                                     signsOneSite_;
+	SizeType                                               numberOfSites_;
+	mutable PairLeftRightSuperSizeType                     lrsStorage_;
 }; // ObserverHelper
 } // namespace Dmrg
 

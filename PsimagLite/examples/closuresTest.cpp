@@ -4,7 +4,7 @@
 
 void testVector()
 {
-	int n = 4;
+	int                 n = 4;
 	std::vector<double> v1(n, 1.0);
 	std::vector<double> v2(n, 1.1);
 	std::vector<double> v3;
@@ -32,10 +32,10 @@ void testVector()
 
 void testMatrix()
 {
-	SizeType n = 4;
+	SizeType                   n = 4;
 	PsimagLite::Matrix<double> m1(n, n);
 	for (SizeType i = 0; i < n; ++i) {
-		m1(i, i) = i;
+		m1(i, i)        = i;
 		SizeType iPlus1 = i + 1;
 		if (iPlus1 >= n)
 			iPlus1 = 0;
@@ -75,7 +75,7 @@ void testMatrix()
 	// matrix * vector
 	std::vector<double> v1(n, 3.0);
 	std::vector<double> v2;
-	v2 <= m3* v1;
+	v2 <= m3*           v1;
 	std::cout << v2;
 	v2 <= v1* m3;
 	std::cout << v2;
@@ -92,7 +92,7 @@ void createRandomCrs(PsimagLite::CrsMatrix<T>& crs, SizeType seed, SizeType nonZ
 		// and a column
 		SizeType col = SizeType(drand48() * m.cols());
 		// and a value
-		T val = drand48() * maxValue;
+		T val       = drand48() * maxValue;
 		m(row, col) = val;
 	}
 
@@ -119,11 +119,11 @@ bool checkCrs(const PsimagLite::CrsMatrix<T>& m, const PsimagLite::Matrix<T>& fm
 
 void testCrsMatrix()
 {
-	SizeType n = 10;
-	unsigned int long seed = 343981;
-	double ratio = 0.5;
-	SizeType nonZeros = SizeType(ratio * n * n);
-	double maxValue = 10.0;
+	SizeType                      n        = 10;
+	unsigned int long             seed     = 343981;
+	double                        ratio    = 0.5;
+	SizeType                      nonZeros = SizeType(ratio * n * n);
+	double                        maxValue = 10.0;
 	PsimagLite::CrsMatrix<double> m1(n, n);
 	createRandomCrs(m1, seed, nonZeros, maxValue);
 	PsimagLite::Matrix<double> fm1;
@@ -145,15 +145,15 @@ void testCrsMatrix()
 	std::cout << "-------------\n";
 
 	std::cout << "---ctor(crs*crs)----TEST 2/4\n";
-	PsimagLite::CrsMatrix<double> m3 = m1 * m2;
-	PsimagLite::Matrix<double> fm3 = fm1 * fm2;
+	PsimagLite::CrsMatrix<double> m3  = m1 * m2;
+	PsimagLite::Matrix<double>    fm3 = fm1 * fm2;
 	std::cout << "CHECK PASSES=" << checkCrs(m3, fm3) << "\n";
 	//	std::cout<<m3;
 	//	std::cout<<"-------------\n";
 
 	std::cout << "---ctor(scalar*crs)----TEST 3/4\n";
 	PsimagLite::CrsMatrix<double> m4 = 1.3 * m2;
-	PsimagLite::Matrix<double> fm4;
+	PsimagLite::Matrix<double>    fm4;
 	fm4 = 1.3 * fm2;
 	std::cout << "CHECK PASSES=" << checkCrs(m4, fm4) << "\n";
 	//	std::cout<<m4;

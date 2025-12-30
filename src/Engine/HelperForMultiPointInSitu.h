@@ -12,27 +12,27 @@ template <typename CheckpointType> class HelperForMultiPointInSitu {
 
 public:
 
-	typedef typename CheckpointType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename WaveFunctionTransfType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef FermionSign FermionSignType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename VectorType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename PsimagLite::Vector<LeftRightSuperType*>::Type VectorLeftRightSuperType;
+	typedef typename CheckpointType::WaveFunctionTransfType          WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType    VectorWithOffsetType;
+	typedef typename WaveFunctionTransfType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
+	typedef FermionSign                                              FermionSignType;
+	typedef typename VectorWithOffsetType::VectorType                VectorType;
+	typedef typename VectorType::value_type                          ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                    MatrixType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
+	typedef typename BasisWithOperatorsType::BasisType               BasisType;
+	typedef typename PsimagLite::Vector<LeftRightSuperType*>::Type   VectorLeftRightSuperType;
 	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
-	typedef typename DmrgSerializerType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef PsimagLite::Vector<short int>::Type VectorShortIntType;
+	typedef typename DmrgSerializerType::BlockDiagonalMatrixType     BlockDiagonalMatrixType;
+	typedef PsimagLite::Vector<short int>::Type                      VectorShortIntType;
 
 	class BogusInput {
 
 	public:
 
-		BogusInput(SizeType numberOfSites,
-		           const CheckpointType& checkPoint,
+		BogusInput(SizeType                      numberOfSites,
+		           const CheckpointType&         checkPoint,
 		           const WaveFunctionTransfType& wft,
 		           ProgramGlobals::DirectionEnum dir)
 		    : numberOfSites_(numberOfSites)
@@ -53,7 +53,7 @@ public:
 		~BogusInput()
 		{
 			delete fS_;
-			fS_ = nullptr;
+			fS_              = nullptr;
 			const SizeType n = garbage_.size();
 			for (SizeType i = 0; i < n; ++i) {
 				delete garbage_[i];
@@ -85,7 +85,7 @@ public:
 			return *fS_;
 		}
 
-		const BlockDiagonalMatrixType& getTransform(SizeType ind,
+		const BlockDiagonalMatrixType& getTransform(SizeType                      ind,
 		                                            ProgramGlobals::DirectionEnum dir) const
 		{
 			return wft_.multiPointGetTransform(ind, dir);
@@ -102,23 +102,23 @@ public:
 
 	private:
 
-		SizeType numberOfSites_;
-		const CheckpointType& checkPoint_;
+		SizeType                      numberOfSites_;
+		const CheckpointType&         checkPoint_;
 		const WaveFunctionTransfType& wft_;
 		ProgramGlobals::DirectionEnum dir_;
-		VectorShortIntType signsOneSite_;
-		FermionSignType* fS_;
-		VectorLeftRightSuperType garbage_;
+		VectorShortIntType            signsOneSite_;
+		FermionSignType*              fS_;
+		VectorLeftRightSuperType      garbage_;
 	};
 
 	typedef BogusInput IoInputType;
 
 	HelperForMultiPointInSitu(BogusInput& io,
-	                          SizeType start,
-	                          SizeType nf,
-	                          SizeType trail,
-	                          bool withLegacyBugs,
-	                          bool readOnDemand)
+	                          SizeType    start,
+	                          SizeType    nf,
+	                          SizeType    trail,
+	                          bool        withLegacyBugs,
+	                          bool        readOnDemand)
 	    : io_(io)
 	    , ind_(1 + numberOfSites())
 	{ }
@@ -178,13 +178,13 @@ private:
 	void computeAndSaveTransform(SizeType ind) const
 	{
 		const ProgramGlobals::DirectionEnum dir = direction(ind);
-		transform_ = io_.getTransform(ind, dir);
-		ind_ = ind;
+		transform_                              = io_.getTransform(ind, dir);
+		ind_                                    = ind;
 	}
 
-	BogusInput& io_;
+	BogusInput&                     io_;
 	mutable BlockDiagonalMatrixType transform_;
-	mutable SizeType ind_;
+	mutable SizeType                ind_;
 };
 }
 #endif // HELPERFORMULTIPOINTINSITU_H

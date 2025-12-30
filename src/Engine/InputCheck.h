@@ -88,7 +88,7 @@ namespace Dmrg {
 
 class InputCheck {
 
-	typedef PsimagLite::Options::Readable OptionsReadableType;
+	typedef PsimagLite::Options::Readable                OptionsReadableType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 public:
@@ -297,9 +297,9 @@ public:
 		return str;
 	}
 
-	bool check(const PsimagLite::String& label,
+	bool check(const PsimagLite::String&                           label,
 	           const PsimagLite::Vector<PsimagLite::String>::Type& vec,
-	           SizeType line) const
+	           SizeType                                            line) const
 	{
 		if (label == "JMVALUES" || label == "RS:JMVALUES") {
 			if (vec.size() != 3)
@@ -491,8 +491,8 @@ public:
 		    registerOpts, PsimagLite::Options::Writeable::PERMISSIVE);
 		optsReadable_ = new OptionsReadableType(optWriteable, val);
 
-		bool mvs = (val.find("MatrixVectorStored") != PsimagLite::String::npos);
-		bool mvo = (val.find("MatrixVectorOnTheFly") != PsimagLite::String::npos);
+		bool mvs    = (val.find("MatrixVectorStored") != PsimagLite::String::npos);
+		bool mvo    = (val.find("MatrixVectorOnTheFly") != PsimagLite::String::npos);
 		bool notMvk = (mvs || mvo);
 		if (val.find("BatchedGemm") != PsimagLite::String::npos) {
 			if (notMvk)
@@ -544,7 +544,7 @@ private:
 			return false;
 		SizeType row = atoi(vec[0].c_str());
 		SizeType col = atoi(vec[1].c_str());
-		SizeType n = row * col;
+		SizeType n   = row * col;
 		return (vec.size() == n + 2);
 	}
 
@@ -556,8 +556,8 @@ private:
 	}
 
 	OptionsReadableType* optsReadable_;
-	VectorStringType allowedFileOptions_;
-	VectorStringType knownLabels_;
+	VectorStringType     allowedFileOptions_;
+	VectorStringType     knownLabels_;
 }; // class InputCheck
 } // namespace Dmrg
 

@@ -10,18 +10,18 @@ template <typename PvectorsType> class GroupOfOneTimeEvolutions {
 
 	public:
 
-		typedef OneTimeEvolution ThisType;
+		typedef OneTimeEvolution                             ThisType;
 		typedef typename PsimagLite::Vector<ThisType*>::Type VectorOneTimeEvolutionType;
-		typedef typename PvectorsType::VectorWithOffsetType VectorWithOffsetType;
-		typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-		typedef typename PvectorsType::RealType RealType;
+		typedef typename PvectorsType::VectorWithOffsetType  VectorWithOffsetType;
+		typedef PsimagLite::Vector<SizeType>::Type           VectorSizeType;
+		typedef typename PvectorsType::RealType              RealType;
 
-		OneTimeEvolution(SizeType firstIndex,
+		OneTimeEvolution(SizeType                    firstIndex,
 		                 const VectorWithOffsetType& src,
-		                 PsimagLite::String srcKet,
-		                 SizeType disposition,
-		                 SizeType timeSteps,
-		                 PvectorsType& pVectors)
+		                 PsimagLite::String          srcKet,
+		                 SizeType                    disposition,
+		                 SizeType                    timeSteps,
+		                 PvectorsType&               pVectors)
 		    : indices_(timeSteps)
 		    , srcKet_(srcKet)
 		    , disposition_(disposition)
@@ -75,18 +75,18 @@ template <typename PvectorsType> class GroupOfOneTimeEvolutions {
 			return (getBraOrKet.isPvector()) ? getBraOrKet.pIndex() : -1;
 		}
 
-		VectorSizeType indices_;
+		VectorSizeType     indices_;
 		PsimagLite::String srcKet_;
-		SizeType disposition_;
-		SizeType timesWithoutAdvancement_;
-		RealType time_;
+		SizeType           disposition_;
+		SizeType           timesWithoutAdvancement_;
+		RealType           time_;
 	};
 
 public:
 
-	typedef OneTimeEvolution OneTimeEvolutionType;
+	typedef OneTimeEvolution                                     OneTimeEvolutionType;
 	typedef typename PsimagLite::Vector<OneTimeEvolution*>::Type VectorOneTimeEvolutionType;
-	typedef typename PvectorsType::RealType RealType;
+	typedef typename PvectorsType::RealType                      RealType;
 
 	GroupOfOneTimeEvolutions() { }
 

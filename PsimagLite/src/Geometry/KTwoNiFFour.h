@@ -108,7 +108,7 @@ public:
 		TYPE_C
 	};
 
-	typedef std::pair<TypeEnum, SubtypeEnum> PairType;
+	typedef std::pair<TypeEnum, SubtypeEnum>           PairType;
 	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
 
 	KTwoNiFFour() { }
@@ -199,7 +199,7 @@ public:
 		}
 		//! o-c or c-o
 		SizeType newi1 = (type1.first == TYPE_O) ? i1 : i2;
-		type1 = findTypeOfSite(newi1);
+		type1          = findTypeOfSite(newi1);
 		return (type1.second == SUBTYPE_X) ? DIR_X : DIR_Y;
 	}
 
@@ -257,8 +257,8 @@ public:
 	SizeType matrixRank(SizeType, SizeType) const
 	{
 		SizeType sites = linSize_;
-		SizeType no = 0;
-		SizeType nc = 0;
+		SizeType no    = 0;
+		SizeType nc    = 0;
 		for (SizeType i = 0; i < sites; i++) {
 			SizeType type1 = findTypeOfSite(i).first;
 			if (type1 == TYPE_C)
@@ -278,7 +278,7 @@ public:
 		if (type1 == TYPE_C || orb == 0)
 			return i;
 		SizeType sites = linSize_;
-		SizeType tmp = (i + 1) / 4;
+		SizeType tmp   = (i + 1) / 4;
 		assert(sites + i >= tmp);
 		return sites + i - tmp;
 	}
@@ -290,7 +290,7 @@ public:
 		SizeType newi2 = std::max(i1, i2);
 		PairType type1 = findTypeOfSite(newi1);
 		PairType type2 = findTypeOfSite(newi2);
-		int sign1 = 1;
+		int      sign1 = 1;
 		if (type1.first != type2.first) {
 
 			int diff = newi2 - newi1;
@@ -316,7 +316,7 @@ public:
 	static PairType findTypeOfSite(SizeType site)
 	{
 		SizeType sitePlusOne = site + 1;
-		SizeType r = sitePlusOne % 4;
+		SizeType r           = sitePlusOne % 4;
 		if (r == 0)
 			return PairType(TYPE_C, SUBTYPE_X);
 
@@ -380,7 +380,7 @@ private:
 	}
 
 	SizeType linSize_;
-	int signChange_;
+	int      signChange_;
 }; // class KTwoNiFFour
 } // namespace PsimagLite
 

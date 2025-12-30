@@ -91,8 +91,8 @@ struct ParametersHubbardHolsteinSpinless : public ParametersModelBase<ComplexOrR
 	// connections are handled by the geometry
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
 	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType>>::Type VectorType;
 
 	template <typename IoInputType>
@@ -164,7 +164,7 @@ struct ParametersHubbardHolsteinSpinless : public ParametersModelBase<ComplexOrR
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
+	friend std::ostream& operator<<(std::ostream&                            os,
 	                                const ParametersHubbardHolsteinSpinless& parameters)
 	{
 		os << "NumberPhonons=" << parameters.numberphonons << "\n";
@@ -177,9 +177,9 @@ struct ParametersHubbardHolsteinSpinless : public ParametersModelBase<ComplexOrR
 		return os;
 	}
 
-	SizeType numberphonons;
-	SizeType oStruncPhonons;
-	SizeType oStruncSite;
+	SizeType       numberphonons;
+	SizeType       oStruncPhonons;
+	SizeType       oStruncSite;
 	VectorRealType lambdaFP;
 	// Onsite potential values
 	VectorRealType potentialFV;

@@ -20,14 +20,14 @@ namespace PsimagLite {
 template <typename FunctionType>
 typename FunctionType::FieldType myFunction(const gsl_vector* v, void* params)
 {
-	FunctionType* ft = (FunctionType*)params;
+	FunctionType*                                           ft = (FunctionType*)params;
 	typename Vector<typename FunctionType::FieldType>::Type stdv(v->data, v->data + v->size);
 	return ft->operator()(stdv);
 }
 
 template <typename FunctionType> void myDfunction(const gsl_vector* v, void* params, gsl_vector* df)
 {
-	FunctionType* ft = (FunctionType*)params;
+	FunctionType*                                           ft = (FunctionType*)params;
 	typename Vector<typename FunctionType::FieldType>::Type src(v->data, v->data + v->size);
 	typename Vector<typename FunctionType::FieldType>::Type dest(df->data, df->data + df->size);
 	ft->df(dest, src);
@@ -44,15 +44,15 @@ void myFdFunction(const gsl_vector* v, void* params, double* f, gsl_vector* df)
 
 template <typename RealType, typename FunctionType> class Minimizer {
 
-	typedef typename FunctionType::FieldType FieldType;
-	typedef typename Vector<FieldType>::Type VectorType;
+	typedef typename FunctionType::FieldType  FieldType;
+	typedef typename Vector<FieldType>::Type  VectorType;
 	typedef Minimizer<RealType, FunctionType> ThisType;
 
 public:
 
 	enum
 	{
-		GSL_SUCCESS = ::GSL_SUCCESS,
+		GSL_SUCCESS  = ::GSL_SUCCESS,
 		GSL_CONTINUE = ::GSL_CONTINUE
 	};
 
@@ -87,12 +87,12 @@ public:
 			gsl_vector_set(xs, i, delta);
 
 		gsl_multimin_function func;
-		func.f = myFunction<FunctionType>;
-		func.n = function_.size();
+		func.f      = myFunction<FunctionType>;
+		func.n      = function_.size();
 		func.params = &function_;
 		gsl_multimin_fminimizer_set(gslS_, &func, x, xs);
 
-		SizeType iter = 0;
+		SizeType iter      = 0;
 		RealType prevValue = 0;
 
 		for (; iter < maxIter_; iter++) {
@@ -106,13 +106,13 @@ public:
 			}
 
 			RealType size = gsl_multimin_fminimizer_size(gslS_);
-			status_ = gsl_multimin_test_size(size, tolerance);
+			status_       = gsl_multimin_test_size(size, tolerance);
 
 			if (verbose_) {
 				typename Vector<typename FunctionType::FieldType>::Type v(
 				    gslS_->x->data, gslS_->x->data + func.n);
 				RealType thisValue = function_(v);
-				RealType diff = fabs(thisValue - prevValue);
+				RealType diff      = fabs(thisValue - prevValue);
 				std::cerr << "simplex: " << iter << " " << thisValue
 				          << " diff= " << diff;
 				std::cerr << " status= " << status_ << " size=" << size << "\n";
@@ -130,10 +130,10 @@ public:
 	}
 
 	int conjugateGradient(VectorType& minVector,
-	                      RealType delta = 1e-3,
-	                      RealType delta2 = 1e-3,
-	                      RealType tolerance = 1e-3,
-	                      SizeType saveEvery = 0)
+	                      RealType    delta     = 1e-3,
+	                      RealType    delta2    = 1e-3,
+	                      RealType    tolerance = 1e-3,
+	                      SizeType    saveEvery = 0)
 	{
 		gsl_vector* x;
 		/* Starting point,  */
@@ -142,16 +142,16 @@ public:
 			gsl_vector_set(x, i, minVector[i]);
 
 		gsl_multimin_function_fdf func;
-		func.f = myFunction<FunctionType>;
-		func.df = myDfunction<FunctionType>;
-		func.fdf = myFdFunction<FunctionType>;
-		func.n = function_.size();
+		func.f      = myFunction<FunctionType>;
+		func.df     = myDfunction<FunctionType>;
+		func.fdf    = myFdFunction<FunctionType>;
+		func.n      = function_.size();
 		func.params = &function_;
 
 		gsl_multimin_fdfminimizer_set(gslDs_, &func, x, delta, delta2);
 
 		RealType prevValue = 0;
-		SizeType iter = 0;
+		SizeType iter      = 0;
 		for (; iter < maxIter_; iter++) {
 			status_ = gsl_multimin_fdfminimizer_iterate(gslDs_);
 
@@ -170,7 +170,7 @@ public:
 				typename Vector<typename FunctionType::FieldType>::Type v(
 				    gslDs_->x->data, gslDs_->x->data + func.n);
 				RealType thisValue = function_(v);
-				RealType diff = fabs(thisValue - prevValue);
+				RealType diff      = fabs(thisValue - prevValue);
 				std::cerr << "conjugateGradient: " << iter << " " << thisValue;
 				std::cerr << " diff= " << diff;
 				std::cerr << " gradientNorm= " << gradientNorm(gslDs_->x);
@@ -237,14 +237,14 @@ private:
 		return sqrt(sum);
 	}
 
-	FunctionType& function_;
-	SizeType maxIter_;
-	bool verbose_;
-	int status_;
-	const gsl_multimin_fminimizer_type* gslT_;
-	gsl_multimin_fminimizer* gslS_;
+	FunctionType&                         function_;
+	SizeType                              maxIter_;
+	bool                                  verbose_;
+	int                                   status_;
+	const gsl_multimin_fminimizer_type*   gslT_;
+	gsl_multimin_fminimizer*              gslS_;
 	const gsl_multimin_fdfminimizer_type* gslDt_;
-	gsl_multimin_fdfminimizer* gslDs_;
+	gsl_multimin_fdfminimizer*            gslDs_;
 
 }; // class Minimizer
 } // namespace PsimagLite
@@ -262,7 +262,7 @@ public:
 
 	enum
 	{
-		GSL_SUCCESS = 0,
+		GSL_SUCCESS  = 0,
 		GSL_CONTINUE = 1
 	};
 

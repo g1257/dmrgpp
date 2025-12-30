@@ -10,34 +10,34 @@ namespace Dmrg {
 
 template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 
-	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
-	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
+	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType   DmrgWaveStructType;
+	typedef typename WaveFunctionTransfBaseType::WftOptionsType       WftOptionsType;
 	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename WaveFunctionTransfBaseType::VectorSizeType VectorSizeType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename VectorType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
-	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
+	typedef typename WaveFunctionTransfBaseType::VectorSizeType       VectorSizeType;
+	typedef typename DmrgWaveStructType::LeftRightSuperType           LeftRightSuperType;
+	typedef typename VectorWithOffsetType::VectorType                 VectorType;
+	typedef typename VectorType::value_type                           ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type        RealType;
+	typedef typename DmrgWaveStructType::BasisWithOperatorsType       BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType         SparseMatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                     MatrixType;
+	typedef typename PsimagLite::Vector<MatrixType>::Type             VectorMatrixType;
+	typedef typename WaveFunctionTransfBaseType::PackIndicesType      PackIndicesType;
 	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
 
 	class ParallelWftInBlocks {
 
 	public:
 
-		ParallelWftInBlocks(VectorMatrixType& result,
-		                    const VectorMatrixType& psi,
-		                    const MatrixType& ws,
-		                    const MatrixType& we,
-		                    SizeType volumeOfNk,
+		ParallelWftInBlocks(VectorMatrixType&                  result,
+		                    const VectorMatrixType&            psi,
+		                    const MatrixType&                  ws,
+		                    const MatrixType&                  we,
+		                    SizeType                           volumeOfNk,
 		                    const ProgramGlobals::SysOrEnvEnum sysOrEnv,
-		                    SizeType threads,
-		                    SizeType gemmRnb,
-		                    SizeType threadsForGemmR)
+		                    SizeType                           threads,
+		                    SizeType                           gemmRnb,
+		                    SizeType                           threadsForGemmR)
 		    : result_(result)
 		    , psi_(psi)
 		    , ws_(ws)
@@ -65,10 +65,10 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 		void doTaskEnviron(SizeType kp, SizeType threadNum)
 		{
 #if (0)
-			SizeType ipsize = ws_.rows();
+			SizeType ipsize  = ws_.rows();
 			SizeType i2psize = ws_.cols();
 			SizeType jp2size = we_.rows();
-			SizeType jpsize = we_.cols();
+			SizeType jpsize  = we_.cols();
 #endif
 
 			const int nrow_W_S = ws_.rows();
@@ -113,25 +113,25 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 			//      2 * nrow_W_S * ncol_W_S * ncol_Ytemp flops
 			// ---------------------------
 
-			const ComplexOrRealType* Yold = &((psi_[kp])(0, 0));
-			const int ldYold = nrow_Yold;
+			const ComplexOrRealType* Yold   = &((psi_[kp])(0, 0));
+			const int                ldYold = nrow_Yold;
 
-			const ComplexOrRealType* W_E = &(weModif(0, 0));
-			const int ldW_E = nrow_W_E;
+			const ComplexOrRealType* W_E   = &(weModif(0, 0));
+			const int                ldW_E = nrow_W_E;
 
-			const ComplexOrRealType* W_S = &(ws_(0, 0));
-			const int ldW_S = nrow_W_S;
+			const ComplexOrRealType* W_S   = &(ws_(0, 0));
+			const int                ldW_S = nrow_W_S;
 
-			ComplexOrRealType* Ynew = &((result_[kp])(0, 0));
-			const int ldYnew = nrow_Ynew;
+			ComplexOrRealType* Ynew   = &((result_[kp])(0, 0));
+			const int          ldYnew = nrow_Ynew;
 
 			// ----------------------
 			// Method 1
 			// (1) Ytemp = W_S * Yold
 			// (2) Ynew = Ytemp * W_E
 			// ----------------------
-			nrow_Ytemp = nrow_W_S;
-			ncol_Ytemp = ncol_Yold;
+			nrow_Ytemp                    = nrow_W_S;
+			ncol_Ytemp                    = ncol_Yold;
 			const RealType flops_method_1 = 2.0 * nrow_W_S * ncol_W_S * ncol_Yold
 			    + 2.0 * nrow_Ytemp * ncol_Ytemp * ncol_W_E;
 
@@ -140,8 +140,8 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 			// (1) Ytemp = Yold * W_E
 			// (2) Ynew = W_S * Ytemp
 			// ------------------------
-			nrow_Ytemp = nrow_Yold;
-			ncol_Ytemp = ncol_W_E;
+			nrow_Ytemp                    = nrow_Yold;
+			ncol_Ytemp                    = ncol_W_E;
 			const RealType flops_method_2 = 2.0 * nrow_Yold * ncol_Yold * ncol_W_E
 			    + 2.0 * nrow_W_S * ncol_W_S * ncol_Ytemp;
 
@@ -159,7 +159,7 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 			}
 #endif
 
-			const ComplexOrRealType d_one = 1.0;
+			const ComplexOrRealType d_one  = 1.0;
 			const ComplexOrRealType d_zero = 0.0;
 
 			// ---------------------------
@@ -180,9 +180,9 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 
 			MatrixType tmp(nrow_Ytemp, ncol_Ytemp);
 			tmp.setTo(0.0);
-			ComplexOrRealType* Ytemp = &(tmp(0, 0));
-			const int ldYtemp = nrow_Ytemp;
-			static const bool needsPrinting = false;
+			ComplexOrRealType*                   Ytemp         = &(tmp(0, 0));
+			const int                            ldYtemp       = nrow_Ytemp;
+			static const bool                    needsPrinting = false;
 			PsimagLite::GemmR<ComplexOrRealType> gemmR(
 			    needsPrinting, gemmRnb_, threadsForGemmR_);
 
@@ -202,7 +202,7 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 					const int kk = nrow_Yold;
 
 					const ComplexOrRealType alpha = d_one;
-					const ComplexOrRealType beta = d_zero;
+					const ComplexOrRealType beta  = d_zero;
 
 					assert(ncol_W_S == nrow_Yold);
 					assert(nrow_Ytemp == nrow_W_S);
@@ -232,7 +232,7 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 					const int kk = ncol_Ytemp;
 
 					const ComplexOrRealType alpha = d_one;
-					const ComplexOrRealType beta = d_zero;
+					const ComplexOrRealType beta  = d_zero;
 
 					assert(nrow_Ynew == nrow_Ytemp);
 					assert(ncol_Ynew == ncol_W_E);
@@ -265,7 +265,7 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 				//  ------------------
 				{
 					const ComplexOrRealType alpha = d_one;
-					const ComplexOrRealType beta = d_zero;
+					const ComplexOrRealType beta  = d_zero;
 
 					const int mm = nrow_Ytemp;
 					const int nn = ncol_Ytemp;
@@ -295,7 +295,7 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 				// ------------------
 				{
 					const ComplexOrRealType alpha = d_one;
-					const ComplexOrRealType beta = d_zero;
+					const ComplexOrRealType beta  = d_zero;
 
 					const int mm = nrow_Ynew;
 					const int nn = ncol_Ynew;
@@ -325,8 +325,8 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 		void doTaskSystem(SizeType kp)
 		{
 #if (0)
-			SizeType ipSize = ws_.rows();
-			SizeType isSize = ws_.cols();
+			SizeType ipSize  = ws_.rows();
+			SizeType isSize  = ws_.cols();
 			SizeType jenSize = we_.rows();
 			SizeType jprSize = we_.cols();
 #endif
@@ -356,19 +356,19 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 			result_[kp].resize(nrow_Ynew, ncol_Ynew);
 			result_[kp].setTo(0.0);
 
-			const ComplexOrRealType* Yold = &((psi_[kp])(0, 0));
-			const int ldYold = nrow_Yold;
+			const ComplexOrRealType* Yold   = &((psi_[kp])(0, 0));
+			const int                ldYold = nrow_Yold;
 
-			const ComplexOrRealType* W_E = &(we_(0, 0));
-			const int ldW_E = nrow_W_E;
+			const ComplexOrRealType* W_E   = &(we_(0, 0));
+			const int                ldW_E = nrow_W_E;
 
-			ComplexOrRealType* Ynew = &((result_[kp])(0, 0));
-			const int ldYnew = nrow_Ynew;
+			ComplexOrRealType* Ynew   = &((result_[kp])(0, 0));
+			const int          ldYnew = nrow_Ynew;
 
-			const ComplexOrRealType* W_S = &(ws_(0, 0));
-			const int ldW_S = nrow_W_S;
+			const ComplexOrRealType* W_S   = &(ws_(0, 0));
+			const int                ldW_S = nrow_W_S;
 
-			const ComplexOrRealType d_one = 1.0;
+			const ComplexOrRealType d_one  = 1.0;
 			const ComplexOrRealType d_zero = 0.0;
 
 			// ---------------------------------------------------
@@ -394,8 +394,8 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 			// (1) Ytemp = conj( transpose(W_S)) * Yold
 			// (2) Ynew = Ytemp * transpose(W_E)
 			// ---------------------------------------
-			nrow_Ytemp = ncol_W_S;
-			ncol_Ytemp = ncol_Yold;
+			nrow_Ytemp                    = ncol_W_S;
+			ncol_Ytemp                    = ncol_Yold;
 			const RealType flops_method_1 = 2.0 * nrow_W_S * ncol_W_S * ncol_Yold
 			    + 2.0 * nrow_Ytemp * ncol_Ytemp * nrow_W_E;
 
@@ -404,8 +404,8 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 			// (1) Ytemp = Yold * transpose(W_E)
 			// (2) Ynew = conj(transpose(W_S)) * Ytemp
 			// -----------------------
-			nrow_Ytemp = nrow_Yold;
-			ncol_Ytemp = nrow_W_E;
+			nrow_Ytemp                    = nrow_Yold;
+			ncol_Ytemp                    = nrow_W_E;
 			const RealType flops_method_2 = 2.0 * nrow_Yold * ncol_Yold * nrow_W_E
 			    + 2.0 * nrow_W_S * ncol_W_S * ncol_Ytemp;
 
@@ -430,9 +430,9 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 			MatrixType tmp(nrow_Ytemp, ncol_Ytemp);
 			tmp.setTo(0.0);
 
-			ComplexOrRealType* Ytemp = &(tmp(0, 0));
-			const int ldYtemp = nrow_Ytemp;
-			static const bool needsPrinting = false;
+			ComplexOrRealType*                   Ytemp         = &(tmp(0, 0));
+			const int                            ldYtemp       = nrow_Ytemp;
+			static const bool                    needsPrinting = false;
 			PsimagLite::GemmR<ComplexOrRealType> gemmR(
 			    needsPrinting, gemmRnb_, threadsForGemmR_);
 
@@ -448,7 +448,7 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 				// -----------------------------------------
 				{
 					const ComplexOrRealType alpha = d_one;
-					const ComplexOrRealType beta = d_zero;
+					const ComplexOrRealType beta  = d_zero;
 
 					const int mm = nrow_Ytemp;
 					const int nn = ncol_Ytemp;
@@ -474,7 +474,7 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 				// ----------------------------------
 				{
 					const ComplexOrRealType alpha = d_one;
-					const ComplexOrRealType beta = d_zero;
+					const ComplexOrRealType beta  = d_zero;
 
 					const int mm = nrow_Ynew;
 					const int nn = ncol_Ynew;
@@ -508,7 +508,7 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 
 				{
 					const ComplexOrRealType alpha = d_one;
-					const ComplexOrRealType beta = d_zero;
+					const ComplexOrRealType beta  = d_zero;
 
 					const int mm = nrow_Ytemp;
 					const int nn = ncol_Ytemp;
@@ -535,7 +535,7 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 
 				{
 					const ComplexOrRealType alpha = d_one;
-					const ComplexOrRealType beta = d_zero;
+					const ComplexOrRealType beta  = d_zero;
 
 					const int mm = nrow_Ynew;
 					const int nn = ncol_Ynew;
@@ -577,15 +577,15 @@ template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 			return storage_[threadNum];
 		}
 
-		VectorMatrixType& result_;
-		const VectorMatrixType& psi_;
-		const MatrixType& ws_;
-		const MatrixType& we_;
-		SizeType volumeOfNk_;
+		VectorMatrixType&                  result_;
+		const VectorMatrixType&            psi_;
+		const MatrixType&                  ws_;
+		const MatrixType&                  we_;
+		SizeType                           volumeOfNk_;
 		const ProgramGlobals::SysOrEnvEnum sysOrEnv_;
-		VectorMatrixType storage_;
-		SizeType gemmRnb_;
-		SizeType threadsForGemmR_;
+		VectorMatrixType                   storage_;
+		SizeType                           gemmRnb_;
+		SizeType                           threadsForGemmR_;
 	};
 
 public:
@@ -595,17 +595,17 @@ public:
 	    , wftOptions_(wftOptions)
 	{ }
 
-	void environFromInfinite(VectorWithOffsetType& psiDest,
-	                         SizeType i0,
+	void environFromInfinite(VectorWithOffsetType&       psiDest,
+	                         SizeType                    i0,
 	                         const VectorWithOffsetType& psiSrc,
-	                         SizeType i0src,
-	                         const LeftRightSuperType& lrs,
-	                         const OneSiteSpacesType& oneSiteSpaces) const
+	                         SizeType                    i0src,
+	                         const LeftRightSuperType&   lrs,
+	                         const OneSiteSpacesType&    oneSiteSpaces) const
 	{
 		if (lrs.left().block().size() < 2)
 			err("Bounce!?\n");
 
-		SizeType volumeOfNk = oneSiteSpaces.hilbertMain(); // CHECK!
+		SizeType   volumeOfNk = oneSiteSpaces.hilbertMain(); // CHECK!
 		MatrixType ws;
 		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toDense(ws);
 
@@ -628,7 +628,7 @@ public:
 		SizeType threads
 		    = std::min(volumeOfNk, PsimagLite::Concurrency::codeSectionParams.npthreads);
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
-		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		PsimagLite::CodeSectionParams                         codeSectionParams(threads);
 		ParallelizerType threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
@@ -646,24 +646,24 @@ public:
 		environCopyOut(psiDest, i0, result, lrs, volumeOfNk);
 	}
 
-	void systemFromInfinite(VectorWithOffsetType& psiDest,
-	                        SizeType i0,
+	void systemFromInfinite(VectorWithOffsetType&       psiDest,
+	                        SizeType                    i0,
 	                        const VectorWithOffsetType& psiSrc,
-	                        SizeType i0src,
-	                        const LeftRightSuperType& lrs,
-	                        const OneSiteSpacesType& oneSiteSpaces) const
+	                        SizeType                    i0src,
+	                        const LeftRightSuperType&   lrs,
+	                        const OneSiteSpacesType&    oneSiteSpaces) const
 	{
 		if (lrs.right().block().size() < 2)
 			err("Bounce!?\n");
 
-		SizeType volumeOfNk = oneSiteSpaces.hilbertMain(); // CHECK!
+		SizeType   volumeOfNk = oneSiteSpaces.hilbertMain(); // CHECK!
 		MatrixType ws;
 		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toDense(ws);
 
 		MatrixType we;
 		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).toDense(we);
 
-		SizeType ipSize = ws.rows();
+		SizeType ipSize  = ws.rows();
 		SizeType jprSize = we.cols();
 
 		VectorMatrixType psi(volumeOfNk);
@@ -679,7 +679,7 @@ public:
 		SizeType threads
 		    = std::min(volumeOfNk, PsimagLite::Concurrency::codeSectionParams.npthreads);
 		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
-		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		PsimagLite::CodeSectionParams                         codeSectionParams(threads);
 		ParallelizerType threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
@@ -699,43 +699,43 @@ public:
 
 private:
 
-	void environPreparePsi(VectorMatrixType& psi,
+	void environPreparePsi(VectorMatrixType&           psi,
 	                       const VectorWithOffsetType& psiSrc,
-	                       SizeType i0src,
-	                       SizeType volumeOfNk) const
+	                       SizeType                    i0src,
+	                       SizeType                    volumeOfNk) const
 	{
-		SizeType total = psiSrc.effectiveSize(i0src);
-		SizeType offset = psiSrc.offset(i0src);
+		SizeType        total  = psiSrc.effectiveSize(i0src);
+		SizeType        offset = psiSrc.offset(i0src);
 		PackIndicesType packSuper(dmrgWaveStruct_.lrs().left().size());
 		PackIndicesType packLeft(dmrgWaveStruct_.lrs().left().size() / volumeOfNk);
 
 		for (SizeType x = 0; x < total; ++x) {
 			SizeType alpha = 0;
-			SizeType jp2 = 0;
+			SizeType jp2   = 0;
 			packSuper.unpack(
 			    alpha, jp2, dmrgWaveStruct_.lrs().super().permutation(x + offset));
 			SizeType ip2 = 0;
-			SizeType kp = 0;
+			SizeType kp  = 0;
 			packLeft.unpack(ip2, kp, dmrgWaveStruct_.lrs().left().permutation(alpha));
 			psi[kp](ip2, jp2) += psiSrc.fastAccess(i0src, x);
 		}
 	}
 
-	void environCopyOut(VectorWithOffsetType& psiDest,
-	                    SizeType i0,
-	                    const VectorMatrixType& result,
+	void environCopyOut(VectorWithOffsetType&     psiDest,
+	                    SizeType                  i0,
+	                    const VectorMatrixType&   result,
 	                    const LeftRightSuperType& lrs,
-	                    SizeType volumeOfNk) const
+	                    SizeType                  volumeOfNk) const
 	{
 		SizeType nip = lrs.super().permutationInverse().size()
 		    / lrs.right().permutationInverse().size();
 		PackIndicesType pack1(nip);
 		PackIndicesType pack2(volumeOfNk);
-		SizeType total = psiDest.effectiveSize(i0);
-		SizeType start = psiDest.offset(i0);
+		SizeType        total = psiDest.effectiveSize(i0);
+		SizeType        start = psiDest.offset(i0);
 
 		for (SizeType x = 0; x < total; ++x) {
-			SizeType ip = 0;
+			SizeType ip   = 0;
 			SizeType beta = 0;
 			pack1.unpack(ip, beta, lrs.super().permutation(x + start));
 			SizeType kp = 0;
@@ -745,13 +745,13 @@ private:
 		}
 	}
 
-	void systemPreparePsi(VectorMatrixType& psi,
+	void systemPreparePsi(VectorMatrixType&           psi,
 	                      const VectorWithOffsetType& psiSrc,
-	                      SizeType i0src,
-	                      SizeType volumeOfNk) const
+	                      SizeType                    i0src,
+	                      SizeType                    volumeOfNk) const
 	{
-		SizeType total = psiSrc.effectiveSize(i0src);
-		SizeType offset = psiSrc.offset(i0src);
+		SizeType        total  = psiSrc.effectiveSize(i0src);
+		SizeType        offset = psiSrc.offset(i0src);
 		PackIndicesType packSuper(dmrgWaveStruct_.lrs().left().size());
 		PackIndicesType packRight(volumeOfNk);
 
@@ -767,24 +767,24 @@ private:
 		}
 	}
 
-	void systemCopyOut(VectorWithOffsetType& psiDest,
-	                   SizeType i0,
-	                   const VectorMatrixType& result,
+	void systemCopyOut(VectorWithOffsetType&     psiDest,
+	                   SizeType                  i0,
+	                   const VectorMatrixType&   result,
 	                   const LeftRightSuperType& lrs,
-	                   SizeType volumeOfNk) const
+	                   SizeType                  volumeOfNk) const
 	{
-		SizeType nip = lrs.left().permutationInverse().size() / volumeOfNk;
-		SizeType nalpha = lrs.left().permutationInverse().size();
+		SizeType        nip    = lrs.left().permutationInverse().size() / volumeOfNk;
+		SizeType        nalpha = lrs.left().permutationInverse().size();
 		PackIndicesType pack1(nalpha);
 		PackIndicesType pack2(nip);
-		SizeType total = psiDest.effectiveSize(i0);
-		SizeType start = psiDest.offset(i0);
+		SizeType        total = psiDest.effectiveSize(i0);
+		SizeType        start = psiDest.offset(i0);
 
 		for (SizeType x = 0; x < total; ++x) {
 			SizeType isn = 0;
 			SizeType jen = 0;
 			pack1.unpack(isn, jen, lrs.super().permutation(x + start));
-			SizeType is = 0;
+			SizeType is  = 0;
 			SizeType jpl = 0;
 			pack2.unpack(is, jpl, lrs.left().permutation(isn));
 			psiDest.fastAccess(i0, x) += result[jpl](is, jen);
@@ -792,7 +792,7 @@ private:
 	}
 
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	const WftOptionsType& wftOptions_;
+	const WftOptionsType&     wftOptions_;
 };
 }
 #endif // WFTACCELBLOCKS_H

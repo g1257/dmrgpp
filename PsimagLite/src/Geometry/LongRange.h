@@ -85,7 +85,7 @@ template <typename ComplexOrRealType, typename InputType>
 class LongRange : public GeometryBase<ComplexOrRealType, InputType> {
 
 	using MatrixType = Matrix<ComplexOrRealType>;
-	using RealType = typename Real<ComplexOrRealType>::Type;
+	using RealType   = typename Real<ComplexOrRealType>::Type;
 
 public:
 
@@ -99,8 +99,8 @@ public:
 	    : linSize_(linSize)
 	    , maxConnections_(0)
 	{
-		bool hasEntangler = false;
-		typename Real<ComplexOrRealType>::Type entangler = 0;
+		bool                                   hasEntangler = false;
+		typename Real<ComplexOrRealType>::Type entangler    = 0;
 
 		try {
 			io.readline(entangler, "GeometryEntangler=");
@@ -284,19 +284,19 @@ private:
 			assert(values.cols() == 5);
 			for (SizeType i = 0; i < values.rows(); ++i) {
 				SizeType counter = 0;
-				SizeType site0 = complexToInteger(values(i, counter++));
-				SizeType orb0 = complexToInteger(values(i, counter++));
-				SizeType site1 = complexToInteger(values(i, counter++));
-				SizeType orb1 = complexToInteger(values(i, counter++));
+				SizeType site0   = complexToInteger(values(i, counter++));
+				SizeType orb0    = complexToInteger(values(i, counter++));
+				SizeType site1   = complexToInteger(values(i, counter++));
+				SizeType orb1    = complexToInteger(values(i, counter++));
 				matrix_(orb0 + site0 * dofs_, orb1 + site1 * dofs_)
 				    = values(i, counter++);
 			}
 		} else {
 			assert(values.cols() == 3);
 			for (SizeType i = 0; i < values.rows(); ++i) {
-				SizeType counter = 0;
-				SizeType site0 = complexToInteger(values(i, counter++));
-				SizeType site1 = complexToInteger(values(i, counter++));
+				SizeType counter      = 0;
+				SizeType site0        = complexToInteger(values(i, counter++));
+				SizeType site1        = complexToInteger(values(i, counter++));
 				matrix_(site0, site1) = values(i, counter++);
 			}
 		}
@@ -330,9 +330,9 @@ private:
 		}
 	}
 
-	SizeType linSize_;
-	SizeType dofs_;
-	SizeType maxConnections_;
+	SizeType   linSize_;
+	SizeType   dofs_;
+	SizeType   maxConnections_;
 	MatrixType matrix_;
 }; // class LongRange
 } // namespace PsimagLite

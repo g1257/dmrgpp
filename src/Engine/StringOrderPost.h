@@ -11,23 +11,23 @@ public:
 
 	typedef typename ObserverType::ModelType ModelType;
 	using OperatorType = typename ModelType::OperatorType;
-	typedef Braket<ModelType> BraketType;
-	typedef typename BraketType::VectorStringType VectorStringType;
-	typedef typename BraketType::AlgebraType AlgebraType;
-	typedef typename BraketType::OperatorSpecType OperatorSpecType;
-	typedef typename BraketType::VectorAlgebraType VectorAlgebraType;
-	typedef typename BraketType::VectorIntType VectorIntType;
-	typedef typename BraketType::MatrixType MatrixType;
-	typedef typename BraketType::SparseMatrixType SparseMatrixType;
+	typedef Braket<ModelType>                                   BraketType;
+	typedef typename BraketType::VectorStringType               VectorStringType;
+	typedef typename BraketType::AlgebraType                    AlgebraType;
+	typedef typename BraketType::OperatorSpecType               OperatorSpecType;
+	typedef typename BraketType::VectorAlgebraType              VectorAlgebraType;
+	typedef typename BraketType::VectorIntType                  VectorIntType;
+	typedef typename BraketType::MatrixType                     MatrixType;
+	typedef typename BraketType::SparseMatrixType               SparseMatrixType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename BraketType::ComplexOrRealType ComplexOrRealType;
+	typedef typename BraketType::ComplexOrRealType              ComplexOrRealType;
 
 	StringOrderPost(const BraketType& braket, const ObserverType& observe)
 	    : braket_(braket)
 	    , observe_(observe)
 	{
 		static const PsimagLite::String stringop = "!stringorder=";
-		const PsimagLite::String special = braket.opName(0);
+		const PsimagLite::String        special  = braket.opName(0);
 
 		const SizeType l = stringop.length();
 		if (special.substr(0, l) == stringop) {
@@ -65,10 +65,10 @@ private:
 		if (n == 0)
 			err("StringOrderPost::computeOneElement\n");
 
-		const PsimagLite::String bra = braket_.bra().toString();
-		const PsimagLite::String ket = braket_.ket().toString();
-		const PsimagLite::String op1 = "exp_i_pi_" + ops_[1];
-		const PsimagLite::String left = "<" + bra + "|" + ops_[0] + "[" + ttos(i) + "]";
+		const PsimagLite::String bra   = braket_.bra().toString();
+		const PsimagLite::String ket   = braket_.ket().toString();
+		const PsimagLite::String op1   = "exp_i_pi_" + ops_[1];
+		const PsimagLite::String left  = "<" + bra + "|" + ops_[0] + "[" + ttos(i) + "]";
 		const PsimagLite::String right = ops_[2] + "[" + ttos(k) + "]|" + ket + ">";
 		if (n == 1) {
 			if (k != i + 2)
@@ -76,7 +76,7 @@ private:
 			// braket = op_[0]  * exp(i*pi*op_[1]) * op_[2]
 			// sites are i, i + 1, k
 			PsimagLite::String str(left + ";" + op1 + "[" + ttos(i + 1) + "];" + right);
-			BraketType braket(braket_.model(), str);
+			BraketType         braket(braket_.model(), str);
 			return observe_.threePoint(braket, 0, 0, false);
 		}
 
@@ -88,7 +88,7 @@ private:
 
 		PsimagLite::String str(left + ";" + op1copies
 		                       + right); // op1copies carries a last ;
-		BraketType braket(braket_.model(), str);
+		BraketType         braket(braket_.model(), str);
 		std::cout << "stringorder rewritten to " << str << "\n";
 		return observe_.anyPoint(braket, false);
 	}
@@ -96,12 +96,12 @@ private:
 	void checkCenterOp(const std::string& opsCenter) const
 	{
 		OperatorSpecType opSpec(braket_.model());
-		OperatorType nup;
-		bool isValid = false;
+		OperatorType     nup;
+		bool             isValid = false;
 		try {
 			int site = -1;
-			nup = opSpec(opsCenter, site);
-			isValid = true;
+			nup      = opSpec(opsCenter, site);
+			isValid  = true;
 		} catch (std::exception& e) {
 			std::cerr << e.what() << "\n";
 		}
@@ -117,8 +117,8 @@ private:
 		}
 	}
 
-	const BraketType& braket_;
-	VectorStringType ops_;
+	const BraketType&   braket_;
+	VectorStringType    ops_;
 	const ObserverType& observe_;
 };
 }

@@ -12,17 +12,17 @@ namespace Dmrg {
 
 template <typename InitKronType> class BatchedGemmCpu {
 
-	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
-	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
-	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
-	typedef typename MatrixDenseOrSparseType::VectorType VectorType;
-	typedef typename VectorType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef long int IntegerType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef PsimagLite::Vector<char>::Type VectorCharType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType*>::Type VectorStarType;
+	typedef typename InitKronType::ArrayOfMatStructType                 ArrayOfMatStructType;
+	typedef typename InitKronType::GenIjPatchType                       GenIjPatchType;
+	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType      MatrixDenseOrSparseType;
+	typedef typename MatrixDenseOrSparseType::VectorType                VectorType;
+	typedef typename VectorType::value_type                             ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                       MatrixType;
+	typedef long int                                                    IntegerType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type          RealType;
+	typedef PsimagLite::Vector<SizeType>::Type                          VectorSizeType;
+	typedef PsimagLite::Vector<char>::Type                              VectorCharType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType*>::Type       VectorStarType;
 	typedef typename PsimagLite::Vector<const ComplexOrRealType*>::Type VectorConstStarType;
 
 	static const int ialign_ = 32;
@@ -38,16 +38,16 @@ public:
 			return;
 
 		{
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "Constructing...";
 			progress_.printline(msgg, std::cout);
 		}
 
-		SizeType npatches = initKron_.numberOfPatches(InitKronType::OLD);
+		SizeType npatches  = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType noperator = initKron_.connections();
 
-		SizeType leftMaxState = initKron_.lrs(InitKronType::NEW).left().size();
+		SizeType leftMaxState  = initKron_.lrs(InitKronType::NEW).left().size();
 		SizeType rightMaxState = initKron_.lrs(InitKronType::NEW).right().size();
 
 		int nrowAbatch = leftMaxState;
@@ -81,9 +81,9 @@ public:
 					if (!AsrcPtr)
 						continue;
 
-					const MatrixType& Asrc = AsrcPtr->dense();
-					SizeType igroup = initKron_.patch(
-					    InitKronType::NEW, GenIjPatchType::LEFT)[ipatch];
+					const MatrixType& Asrc   = AsrcPtr->dense();
+					SizeType          igroup = initKron_.patch(
+                                            InitKronType::NEW, GenIjPatchType::LEFT)[ipatch];
 					SizeType jgroup = initKron_.patch(
 					    InitKronType::NEW, GenIjPatchType::LEFT)[jpatch];
 					int ia = initKron_.lrs(InitKronType::NEW)
@@ -108,9 +108,9 @@ public:
 					if (!BsrcPtr)
 						continue;
 
-					const MatrixType& Bsrc = BsrcPtr->dense();
-					SizeType igroup = initKron_.patch(
-					    InitKronType::NEW, GenIjPatchType::RIGHT)[ipatch];
+					const MatrixType& Bsrc   = BsrcPtr->dense();
+					SizeType          igroup = initKron_.patch(
+                                            InitKronType::NEW, GenIjPatchType::RIGHT)[ipatch];
 					SizeType jgroup = initKron_.patch(
 					    InitKronType::NEW, GenIjPatchType::RIGHT)[jpatch];
 					int ib = initKron_.lrs(InitKronType::NEW)
@@ -146,17 +146,17 @@ public:
 			rightPatchSize_[ipatch] = R2 - R1;
 		}
 
-		int leftMaxStates = initKron_.lrs(InitKronType::NEW).left().size();
+		int leftMaxStates  = initKron_.lrs(InitKronType::NEW).left().size();
 		int rightMaxStates = initKron_.lrs(InitKronType::NEW).right().size();
-		int nrowA = leftMaxStates;
-		int ncolA = nrowA;
-		int nrowB = rightMaxStates;
-		int nrowBX = nrowB;
-		int ldBX = ialign_ * iceil(nrowBX, ialign_);
+		int nrowA          = leftMaxStates;
+		int ncolA          = nrowA;
+		int nrowB          = rightMaxStates;
+		int nrowBX         = nrowB;
+		int ldBX           = ialign_ * iceil(nrowBX, ialign_);
 		BX_.resize(ldBX, ncolA * noperator);
 
 		{
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "Construction done.";
 			progress_.printline(msgg, std::cout);
@@ -175,22 +175,22 @@ public:
  compute  Y = H * X
  ------------------
 */
-		int leftMaxStates = initKron_.lrs(InitKronType::NEW).left().size();
-		int rightMaxStates = initKron_.lrs(InitKronType::NEW).right().size();
-		SizeType npatches = initKron_.numberOfPatches(InitKronType::OLD);
-		SizeType noperator = initKron_.connections();
-		int nrowA = leftMaxStates;
-		int ncolA = nrowA;
-		int nrowB = rightMaxStates;
-		int ncolB = nrowB;
-		int nrowBX = nrowB;
-		int ncolBX = ncolA * noperator;
-		int ldBX = ialign_ * iceil(nrowBX, ialign_);
+		int      leftMaxStates  = initKron_.lrs(InitKronType::NEW).left().size();
+		int      rightMaxStates = initKron_.lrs(InitKronType::NEW).right().size();
+		SizeType npatches       = initKron_.numberOfPatches(InitKronType::OLD);
+		SizeType noperator      = initKron_.connections();
+		int      nrowA          = leftMaxStates;
+		int      ncolA          = nrowA;
+		int      nrowB          = rightMaxStates;
+		int      ncolB          = nrowB;
+		int      nrowBX         = nrowB;
+		int      ncolBX         = ncolA * noperator;
+		int      ldBX           = ialign_ * iceil(nrowBX, ialign_);
 		BX_.setTo(0.0);
 
 		for (SizeType jpatch = 0; jpatch < npatches; ++jpatch) {
-			long j1 = initKron_.offsetForPatches(InitKronType::NEW, jpatch);
-			int nrowX = rightPatchSize_[jpatch];
+			long j1    = initKron_.offsetForPatches(InitKronType::NEW, jpatch);
+			int  nrowX = rightPatchSize_[jpatch];
 			assert(initKron_.offsetForPatches(InitKronType::NEW, jpatch + 1) - j1
 			       == nrowX * leftPatchSize_[jpatch]);
 
@@ -220,7 +220,7 @@ public:
 	 -------------------------------
 	 */
 			for (SizeType k = 0; k < noperator; ++k) {
-				int offsetB = k * ncolB;
+				int offsetB  = k * ncolB;
 				int offsetBX = k * ncolA;
 				/*
 		------------------------------------------------------------------------
@@ -269,10 +269,10 @@ public:
 			       && L2 - L1 == leftPatchSize_[ipatch]);
 
 			assert(static_cast<SizeType>(i1) < vout.size());
-			ComplexOrRealType* YI = &(vout[i1]);
-			int nrowYI = R2 - R1;
-			int ldYI = nrowYI;
-			int ncolYI = L2 - L1;
+			ComplexOrRealType* YI     = &(vout[i1]);
+			int                nrowYI = R2 - R1;
+			int                ldYI   = nrowYI;
+			int                ncolYI = L2 - L1;
 			assert(static_cast<int>(
 			           initKron_.offsetForPatches(InitKronType::NEW, ipatch + 1) - i1)
 			       == nrowYI * ncolYI);
@@ -313,13 +313,13 @@ private:
 				b(i + xstart, j + ystart) = a(i, j);
 	}
 
-	const InitKronType& initKron_;
+	const InitKronType&           initKron_;
 	PsimagLite::ProgressIndicator progress_;
-	MatrixType Abatch_;
-	MatrixType Bbatch_;
-	mutable MatrixType BX_;
-	VectorSizeType leftPatchSize_;
-	VectorSizeType rightPatchSize_;
+	MatrixType                    Abatch_;
+	MatrixType                    Bbatch_;
+	mutable MatrixType            BX_;
+	VectorSizeType                leftPatchSize_;
+	VectorSizeType                rightPatchSize_;
 };
 }
 #endif // BATCHED_GEMM_CPU_H

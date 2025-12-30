@@ -85,7 +85,7 @@ namespace Dmrg {
 
 template <typename VectorType> class MettsSerializer {
 
-	typedef typename VectorType::value_type VectorElementType;
+	typedef typename VectorType::value_type                    VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
 public:
@@ -94,8 +94,8 @@ public:
 	// to build an array of these
 	MettsSerializer() { }
 
-	MettsSerializer(RealType currentBeta,
-	                SizeType site,
+	MettsSerializer(RealType                                             currentBeta,
+	                SizeType                                             site,
 	                const typename PsimagLite::Vector<VectorType>::Type& targetVectors)
 	    : currentBeta_(currentBeta)
 	    , site_(site)
@@ -104,7 +104,7 @@ public:
 
 	MettsSerializer(typename PsimagLite::IoSelector::In& io)
 	{
-		RealType x = 0;
+		RealType           x = 0;
 		PsimagLite::String s = "BETA";
 
 		io.read(x, s);
@@ -115,7 +115,7 @@ public:
 
 		currentBeta_ = x;
 
-		s = "TargetCentralSite";
+		s      = "TargetCentralSite";
 		int xi = 0;
 		io.read(xi, s);
 		if (xi < 0)
@@ -166,8 +166,8 @@ public:
 
 private:
 
-	RealType currentBeta_;
-	SizeType site_;
+	RealType                                      currentBeta_;
+	SizeType                                      site_;
 	typename PsimagLite::Vector<VectorType>::Type targetVectors_;
 }; // class MettsSerializer
 } // namespace Dmrg

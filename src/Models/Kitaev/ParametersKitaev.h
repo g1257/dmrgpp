@@ -89,7 +89,7 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersKitaev : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	template <typename IoInputType>

@@ -84,12 +84,12 @@ namespace Dmrg {
 
 template <typename ModelType, typename FourPointCorrelationsType> class Parallel4PointDs {
 
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename FourPointCorrelationsType::MatrixType MatrixType;
-	typedef typename FourPointCorrelationsType::BraketType BraketType;
-	typedef typename MatrixType::value_type FieldType;
+	typedef std::pair<SizeType, SizeType>                        PairType;
+	typedef typename FourPointCorrelationsType::MatrixType       MatrixType;
+	typedef typename FourPointCorrelationsType::BraketType       BraketType;
+	typedef typename MatrixType::value_type                      FieldType;
 	typedef typename FourPointCorrelationsType::SparseMatrixType SparseMatrixType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef PsimagLite::Concurrency                              ConcurrencyType;
 
 public:
 
@@ -102,12 +102,12 @@ public:
 
 	typedef typename ModelType::RealType RealType;
 
-	Parallel4PointDs(MatrixType& fpd,
-	                 const FourPointCorrelationsType& fourpoint,
-	                 const ModelType& model,
+	Parallel4PointDs(MatrixType&                                        fpd,
+	                 const FourPointCorrelationsType&                   fourpoint,
+	                 const ModelType&                                   model,
 	                 const typename PsimagLite::Vector<SizeType>::Type& gammas,
 	                 const typename PsimagLite::Vector<PairType>::Type& pairs,
-	                 FourPointModeEnum mode)
+	                 FourPointModeEnum                                  mode)
 	    : fpd_(fpd)
 	    , fourpoint_(fourpoint)
 	    , model_(model)
@@ -139,8 +139,8 @@ public:
 
 private:
 
-	FieldType fourPointDelta(SizeType i,
-	                         SizeType j,
+	FieldType fourPointDelta(SizeType                                           i,
+	                         SizeType                                           j,
 	                         const typename PsimagLite::Vector<SizeType>::Type& gammas) const
 	{
 		SizeType hs = model_.hilbertSize(0);
@@ -180,14 +180,14 @@ private:
 	FieldType fourPointThin(SizeType i, SizeType j) const
 	{
 		SizeType number1 = fpd_.n_row() / 2;
-		SizeType spin0 = i / number1;
-		SizeType tmp = i % number1;
+		SizeType spin0   = i / number1;
+		SizeType tmp     = i % number1;
 		SizeType number2 = sqrt(number1);
-		SizeType thini2 = tmp / number2;
-		SizeType thini1 = tmp % number2;
+		SizeType thini2  = tmp / number2;
+		SizeType thini1  = tmp % number2;
 
-		SizeType spin1 = j / number1;
-		tmp = j % number1;
+		SizeType spin1  = j / number1;
+		tmp             = j % number1;
 		SizeType thinj2 = tmp / number2;
 		SizeType thinj1 = tmp % number2;
 		// int sign = gammas[0] - 1;
@@ -216,21 +216,21 @@ private:
 		//		return signTerm*fourval;
 
 		BraketType braket(model_, str);
-		FieldType fourval = fourpoint_(thini1, thini2, thinj1, thinj2, braket);
+		FieldType  fourval = fourpoint_(thini1, thini2, thinj1, thinj2, braket);
 		return fourval;
 	}
 
 	FieldType fourPointThinupdn(SizeType i, SizeType j) const
 	{
 		SizeType number1 = fpd_.n_row() / 2;
-		SizeType spin0 = i / number1;
-		SizeType tmp = i % number1;
+		SizeType spin0   = i / number1;
+		SizeType tmp     = i % number1;
 		SizeType number2 = sqrt(number1);
-		SizeType thini2 = tmp / number2;
-		SizeType thini1 = tmp % number2;
+		SizeType thini2  = tmp / number2;
+		SizeType thini1  = tmp % number2;
 
-		SizeType spin1 = j / number1;
-		tmp = j % number1;
+		SizeType spin1  = j / number1;
+		tmp             = j % number1;
 		SizeType thinj2 = tmp / number2;
 		SizeType thinj1 = tmp % number2;
 		// int sign = gammas[0] - 1;
@@ -250,16 +250,16 @@ private:
 		str += "c?" + ttos(spin1) + "[" + ttos(site) + "]|gs>";
 
 		BraketType braket(model_, str);
-		FieldType fourval = fourpoint_(thini1, thini2, thinj1, thinj2, braket);
+		FieldType  fourval = fourpoint_(thini1, thini2, thinj1, thinj2, braket);
 		return fourval;
 	}
 
-	MatrixType& fpd_;
-	const FourPointCorrelationsType& fourpoint_;
-	const ModelType& model_;
+	MatrixType&                                        fpd_;
+	const FourPointCorrelationsType&                   fourpoint_;
+	const ModelType&                                   model_;
 	const typename PsimagLite::Vector<SizeType>::Type& gammas_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
-	const FourPointModeEnum mode_;
+	const FourPointModeEnum                            mode_;
 }; // class Parallel4PointDs
 } // namespace Dmrg
 

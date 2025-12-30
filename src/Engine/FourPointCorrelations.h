@@ -91,19 +91,19 @@ template <typename CorrelationsSkeletonType> class FourPointCorrelations {
 public:
 
 	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
-	typedef typename ObserverHelperType::VectorType VectorType;
-	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef SizeType IndexType;
-	typedef typename VectorType::value_type FieldType;
-	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef typename CorrelationsSkeletonType::SparseMatrixType SparseMatrixType;
-	typedef typename CorrelationsSkeletonType::OperatorType OperatorType;
-	typedef typename ObserverHelperType::MatrixType MatrixType;
-	typedef PsimagLite::Vector<char>::Type VectorCharType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename CorrelationsSkeletonType::BraketType BraketType;
+	typedef typename ObserverHelperType::VectorType               VectorType;
+	typedef typename ObserverHelperType::VectorWithOffsetType     VectorWithOffsetType;
+	typedef typename ObserverHelperType::BasisWithOperatorsType   BasisWithOperatorsType;
+	typedef SizeType                                              IndexType;
+	typedef typename VectorType::value_type                       FieldType;
+	typedef typename BasisWithOperatorsType::RealType             RealType;
+	typedef typename CorrelationsSkeletonType::SparseMatrixType   SparseMatrixType;
+	typedef typename CorrelationsSkeletonType::OperatorType       OperatorType;
+	typedef typename ObserverHelperType::MatrixType               MatrixType;
+	typedef PsimagLite::Vector<char>::Type                        VectorCharType;
+	typedef PsimagLite::Vector<SizeType>::Type                    VectorSizeType;
+	typedef typename PsimagLite::Vector<SparseMatrixType>::Type   VectorSparseMatrixType;
+	typedef typename CorrelationsSkeletonType::BraketType         BraketType;
 
 	FourPointCorrelations(const CorrelationsSkeletonType& skeleton)
 	    : skeleton_(skeleton)
@@ -111,10 +111,10 @@ public:
 
 	//! Four-point: these are expensive and uncached!!!
 	//! requires i1<i2<i3<i4
-	FieldType operator()(SizeType i1,
-	                     SizeType i2,
-	                     SizeType i3,
-	                     SizeType i4,
+	FieldType operator()(SizeType          i1,
+	                     SizeType          i2,
+	                     SizeType          i3,
+	                     SizeType          i4,
 	                     const BraketType& braket) const
 	{
 		if (i1 > i2 || i3 > i4 || i2 > i3)
@@ -149,8 +149,8 @@ public:
 
 		SparseMatrixType O2gt;
 
-		const SizeType nsites = skeleton_.numberOfSites();
-		const bool finalTransform = (i3 + 1 != nsites || i2 + 1 != i3);
+		const SizeType nsites         = skeleton_.numberOfSites();
+		const bool     finalTransform = (i3 + 1 != nsites || i2 + 1 != i3);
 		firstStage(O2gt, 'N', i1, 'N', i2, braket, 0, 1, finalTransform);
 
 		return secondStage(O2gt, i2, 'N', i3, braket, 2);
@@ -167,7 +167,7 @@ public:
 		checkIndicesForStrictOrdering(braket);
 
 		SparseMatrixType O2gt;
-		const bool finalTransform = true;
+		const bool       finalTransform = true;
 		firstStage(
 		    O2gt, 'N', braket.site(0), 'N', braket.site(1), braket, 0, 1, finalTransform);
 
@@ -175,7 +175,7 @@ public:
 		SizeType end = n - 2;
 		// do the middle
 		for (SizeType i = 2; i < end; ++i) {
-			SizeType i2 = braket.site(i - 1);
+			SizeType         i2 = braket.site(i - 1);
 			SparseMatrixType OsoFar;
 			middleStage(OsoFar,
 			            O2gt,
@@ -197,14 +197,14 @@ public:
 
 	//! requires i1<i2
 	void firstStage(SparseMatrixType& O2gt,
-	                char mod1,
-	                SizeType i1,
-	                char mod2,
-	                SizeType i2,
+	                char              mod1,
+	                SizeType          i1,
+	                char              mod2,
+	                SizeType          i2,
 	                const BraketType& braket,
-	                SizeType index0,
-	                SizeType index1,
-	                bool finalTransform) const
+	                SizeType          index0,
+	                SizeType          index1,
+	                bool              finalTransform) const
 	{
 
 		// Take care of modifiers
@@ -231,14 +231,14 @@ public:
 
 	//! requires i2<i3<i4
 	FieldType secondStage(const SparseMatrixType& O2gt,
-	                      SizeType i2,
-	                      char mod3,
-	                      SizeType i3,
-	                      char mod4,
-	                      SizeType i4,
-	                      const BraketType& braket,
-	                      SizeType index0,
-	                      SizeType index1) const
+	                      SizeType                i2,
+	                      char                    mod3,
+	                      SizeType                i3,
+	                      char                    mod4,
+	                      SizeType                i4,
+	                      const BraketType&       braket,
+	                      SizeType                index0,
+	                      SizeType                index1) const
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m, O4m;
@@ -246,7 +246,7 @@ public:
 		skeleton_.createWithModification(O4m, braket.op(index1).getCRS(), mod4);
 
 		const ObserverHelperType& helper = skeleton_.helper();
-		int ns = i3 - 1;
+		int                       ns     = i3 - 1;
 		if (ns < 0)
 			ns = 0;
 		SparseMatrixType Otmp;
@@ -306,12 +306,12 @@ public:
 	}
 
 	//! requires i2<i3<i4
-	void middleStage(SparseMatrixType& dest,
-	                 const SparseMatrixType& OsoFar,
-	                 SizeType i2,
-	                 char mod3,
-	                 SizeType i3,
-	                 const OperatorType& Op3,
+	void middleStage(SparseMatrixType&                  dest,
+	                 const SparseMatrixType&            OsoFar,
+	                 SizeType                           i2,
+	                 char                               mod3,
+	                 SizeType                           i3,
+	                 const OperatorType&                Op3,
 	                 ProgramGlobals::FermionOrBosonEnum fermionS) const
 	{
 		// Take care of modifiers
@@ -342,11 +342,11 @@ private:
 
 	//! requires i2<i3
 	FieldType secondStage(const SparseMatrixType& O2gt,
-	                      SizeType i2,
-	                      char mod3,
-	                      SizeType i3,
-	                      const BraketType& braket,
-	                      SizeType index) const
+	                      SizeType                i2,
+	                      char                    mod3,
+	                      SizeType                i3,
+	                      const BraketType&       braket,
+	                      SizeType                index) const
 	{
 		// Take care of modifiers
 		SparseMatrixType O3m;
@@ -380,11 +380,11 @@ private:
 	}
 
 	//! i can be zero here!!
-	void growDirectly4p(SparseMatrixType& Odest,
-	                    const SparseMatrixType& Osrc,
-	                    SizeType i,
+	void growDirectly4p(SparseMatrixType&                  Odest,
+	                    const SparseMatrixType&            Osrc,
+	                    SizeType                           i,
 	                    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	                    SizeType ns) const
+	                    SizeType                           ns) const
 	{
 		Odest = Osrc;
 
@@ -393,8 +393,8 @@ private:
 		if (nt < 0)
 			nt = 0;
 
-		const ObserverHelperType& helper = skeleton_.helper();
-		const SizeType totalSites = skeleton_.numberOfSites();
+		const ObserverHelperType& helper     = skeleton_.helper();
+		const SizeType            totalSites = skeleton_.numberOfSites();
 
 		for (SizeType s = nt; s < ns; ++s) {
 			SparseMatrixType Onew(helper.cols(s), helper.cols(s));
@@ -413,7 +413,7 @@ private:
 		if (braket.points() < 2)
 			return;
 
-		bool flag = true;
+		bool     flag = true;
 		SizeType prev = braket.site(0);
 		for (SizeType i = 1; i < braket.points(); ++i) {
 			if (braket.site(i) <= prev) {

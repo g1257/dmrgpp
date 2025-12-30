@@ -96,34 +96,34 @@ class TargetingCVEvolution : public TargetingBase<LanczosSolverType_, VectorWith
 
 public:
 
-	typedef LanczosSolverType_ LanczosSolverType;
+	typedef LanczosSolverType_                                      LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename BaseType::OptionsType OptionsType;
-	typedef typename BaseType::MatrixVectorType MatrixVectorType;
-	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::OperatorsType OperatorsType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
-	typedef typename VectorWithOffsetType::VectorType TargetVectorType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef TargetParamsCorrectionVector<ModelType> TargetParamsType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BasisType::QnType QnType;
-	typedef typename TargetingCommonType::StageEnumType StageEnumType;
+	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
+	typedef std::pair<SizeType, SizeType>                           PairType;
+	typedef typename BaseType::OptionsType                          OptionsType;
+	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
+	typedef typename BaseType::CheckpointType                       CheckpointType;
+	typedef typename MatrixVectorType::ModelType                    ModelType;
+	typedef typename ModelType::RealType                            RealType;
+	typedef typename ModelType::OperatorsType                       OperatorsType;
+	typedef typename ModelType::ModelHelperType                     ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
+	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
+	typedef typename VectorWithOffsetType::value_type               ComplexOrRealType;
+	typedef typename VectorWithOffsetType::VectorType               TargetVectorType;
+	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
+	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef TargetParamsCorrectionVector<ModelType>                 TargetParamsType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef typename TargetingCommonType::TimeSerializerType        TimeSerializerType;
+	typedef typename OperatorType::StorageType                      SparseMatrixType;
+	typedef typename ModelType::InputValidatorType                  InputValidatorType;
+	typedef typename BasisType::QnType                              QnType;
+	typedef typename TargetingCommonType::StageEnumType             StageEnumType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
 	                                 VectorWithOffsetType,
 	                                 BaseType,
@@ -133,8 +133,8 @@ public:
 	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 
-	TargetingCVEvolution(const LeftRightSuperType& lrs,
-	                     const CheckpointType& checkPoint,
+	TargetingCVEvolution(const LeftRightSuperType&     lrs,
+	                     const CheckpointType&         checkPoint,
 	                     const WaveFunctionTransfType& wft,
 	                     const QnType&,
 	                     InputValidatorType& ioIn)
@@ -157,7 +157,7 @@ public:
 		if (gsWeight_ < 0 || gsWeight_ >= 1)
 			err("gsWeight_ must be in [0, 1)\n");
 
-		SizeType n = weight_.size();
+		SizeType n      = weight_.size();
 		RealType factor = (1.0 - gsWeight_) / n;
 		for (SizeType i = 0; i < n; ++i)
 			weight_[i] = factor;
@@ -191,9 +191,9 @@ public:
 		return b;
 	}
 
-	void evolve(const VectorRealType& energies,
+	void evolve(const VectorRealType&         energies,
 	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
+	            const BlockType&              block1,
 	            const BlockType&,
 	            SizeType loopNumber)
 	{
@@ -215,7 +215,7 @@ public:
 				return;
 		}
 
-		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
+		SizeType  x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1, x);
 		evolveInternal(Eg, direction, block, loopNumber);
 	}
@@ -227,11 +227,11 @@ public:
 		this->common().readGSandNGSTs(io, prefix, "CVEvolution");
 	}
 
-	void write(const VectorSizeType& block,
+	void write(const VectorSizeType&        block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	           PsimagLite::String           prefix) const
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Saving state...";
 		progress_.printline(msgg, std::cout);
@@ -242,10 +242,10 @@ public:
 
 private:
 
-	void evolveInternal(RealType Eg,
+	void evolveInternal(RealType                      Eg,
 	                    ProgramGlobals::DirectionEnum direction,
-	                    const BlockType& block1,
-	                    SizeType loopNumber)
+	                    const BlockType&              block1,
+	                    SizeType                      loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -298,7 +298,7 @@ private:
 			} else {
 
 				VectorWithOffsetType bogusTv2;
-				const SizeType advanceIndex = (timeHasAdvanced) ? 3 : 1;
+				const SizeType       advanceIndex = (timeHasAdvanced) ? 3 : 1;
 
 				this->common().aoe().wftOneVector(
 				    bogusTv, this->tv(advanceIndex), site);
@@ -326,14 +326,14 @@ private:
 		this->common().printNormsAndWeights(gsWeight_, weight_);
 	}
 
-	TargetParamsType tstStruct_;
+	TargetParamsType              tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
-	SizeType counter_;
-	SizeType almostDone_;
-	CorrectionVectorSkeletonType skeleton_;
-	VectorRealType weight_;
-	RealType gsWeight_;
+	SizeType                      counter_;
+	SizeType                      almostDone_;
+	CorrectionVectorSkeletonType  skeleton_;
+	VectorRealType                weight_;
+	RealType                      gsWeight_;
 }; // class TargetingCVEvolution
 } // namespace Dmrg
 

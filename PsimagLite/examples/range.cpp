@@ -53,7 +53,7 @@ public:
 	{
 		if (ConcurrencyType::hasPthreads()) {
 			SizeType tmp = PsimagLite::sum(sum_);
-			sum_[0] = tmp;
+			sum_[0]      = tmp;
 		}
 
 		if (ConcurrencyType::hasMpi()) {
@@ -89,11 +89,11 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	SizeType total = atoi(argv[1]);
+	SizeType total    = atoi(argv[1]);
 	SizeType nthreads = atoi(argv[2]);
 	ConcurrencyType(&argc, &argv, nthreads);
 
-	typedef MyLoop HelperType;
+	typedef MyLoop                               HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
 	ParallelizerType threadObject(ConcurrencyType::codeSectionParams);
 

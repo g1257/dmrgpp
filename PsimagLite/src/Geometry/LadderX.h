@@ -137,12 +137,12 @@ public:
 		if (ladder_.connected(i1, i2))
 			return true;
 
-		SizeType lx = linSize_ / leg_;
-		bool isPeriodicY = ladder_.isPeriodicY();
-		SizeType c1 = i1 / leg_;
-		SizeType c2 = i2 / leg_;
-		SizeType r1 = i1 % leg_;
-		SizeType r2 = i2 % leg_;
+		SizeType lx          = linSize_ / leg_;
+		bool     isPeriodicY = ladder_.isPeriodicY();
+		SizeType c1          = i1 / leg_;
+		SizeType c2          = i2 / leg_;
+		SizeType r1          = i1 % leg_;
+		SizeType r2          = i2 % leg_;
 
 		if (c1 == c2)
 			return this->neighbors(r1, r2, isPeriodicY, leg_);
@@ -181,7 +181,7 @@ public:
 	// assumes i1 and i2 are connected
 	SizeType handle(SizeType i1, SizeType i2) const
 	{
-		SizeType dir = calcDir(i1, i2);
+		SizeType dir  = calcDir(i1, i2);
 		SizeType imin = (i1 < i2) ? i1 : i2;
 		switch (dir) {
 		case DIRECTION_X:
@@ -212,8 +212,8 @@ public:
 private:
 
 	LadderType ladder_; // owner
-	SizeType linSize_;
-	SizeType leg_;
+	SizeType   linSize_;
+	SizeType   leg_;
 }; // class LadderBath
 } // namespace PsimagLite
 

@@ -12,18 +12,18 @@ template <typename LabeledOperatorsType, typename SuperGeometryType_> class Mode
 
 public:
 
-	typedef std::pair<SizeType, SizeType> PairSizeType;
-	typedef std::pair<char, char> PairCharType;
-	typedef std::pair<PsimagLite::String, PsimagLite::String> PairStringType;
-	typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
+	typedef std::pair<SizeType, SizeType>                         PairSizeType;
+	typedef std::pair<char, char>                                 PairCharType;
+	typedef std::pair<PsimagLite::String, PsimagLite::String>     PairStringType;
+	typedef std::pair<PsimagLite::String, SizeType>               PairStringSizeType;
 	typedef typename LabeledOperatorsType::OperatorType::RealType RealType_;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename LabeledOperatorsType::LabelType LabelType;
-	typedef typename LabeledOperatorsType::ComplexOrRealType ComplexOrRealType;
-	typedef typename LabeledOperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::RealType RealType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef PsimagLite::Vector<SizeType>::Type                    VectorSizeType;
+	typedef typename LabeledOperatorsType::LabelType              LabelType;
+	typedef typename LabeledOperatorsType::ComplexOrRealType      ComplexOrRealType;
+	typedef typename LabeledOperatorsType::OperatorType           OperatorType;
+	typedef typename OperatorType::RealType                       RealType;
+	typedef typename OperatorType::StorageType                    OperatorStorageType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type       VectorOperatorType;
 	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
 	    VectorPairStringSizeType;
 	using OneLinkType = OneLink<ComplexOrRealType>;
@@ -52,12 +52,12 @@ public:
 			    , category(c)
 			{ }
 
-			SizeType angularMomentum;
+			SizeType  angularMomentum;
 			RealType_ angularFactor;
-			SizeType category;
+			SizeType  category;
 		};
 
-		using LambdaType = typename OneLinkType::LambdaType;
+		using LambdaType    = typename OneLinkType::LambdaType;
 		using OldLambdaType = typename OneLinkType::OldLambdaType;
 
 		// pair of sites should actually be pair of kinds of sites
@@ -96,10 +96,10 @@ public:
 		// give only su2properties
 		template <typename OpaqueOp>
 		void push(const OpaqueOp& op1,
-		          char mod1,
+		          char            mod1,
 		          const OpaqueOp& op2,
-		          char mod2,
-		          Su2Properties su2properties)
+		          char            mod2,
+		          Su2Properties   su2properties)
 		{
 			push(
 			    op1,
@@ -113,10 +113,10 @@ public:
 		// give only lambda (new)
 		template <typename OpaqueOp>
 		void push(const OpaqueOp& op1,
-		          char mod1,
+		          char            mod1,
 		          const OpaqueOp& op2,
-		          char mod2,
-		          LambdaType modifier)
+		          char            mod2,
+		          LambdaType      modifier)
 		{
 			push(op1, mod1, op2, mod2, modifier, Su2Properties());
 		}
@@ -124,10 +124,10 @@ public:
 		// give only lambda (old)
 		template <typename OpaqueOp>
 		void push(const OpaqueOp& op1,
-		          char mod1,
+		          char            mod1,
 		          const OpaqueOp& op2,
-		          char mod2,
-		          OldLambdaType modifier)
+		          char            mod2,
+		          OldLambdaType   modifier)
 		{
 			LambdaType newModif
 			    = [modifier](ComplexOrRealType& value, RealType, SizeType)
@@ -151,11 +151,11 @@ public:
 		// give all
 		template <typename OpaqueOp>
 		void push(const OpaqueOp& op1,
-		          char mod1,
+		          char            mod1,
 		          const OpaqueOp& op2,
-		          char mod2,
-		          LambdaType vModifier,
-		          Su2Properties su2properties)
+		          char            mod2,
+		          LambdaType      vModifier,
+		          Su2Properties   su2properties)
 		{
 			if (links_.size() > 0) {
 				if (!areSitesCompatible2(
@@ -192,15 +192,15 @@ public:
 		template <typename OpaqueOp>
 		void push4(
 		    const OpaqueOp& op1,
-		    char mod1,
+		    char            mod1,
 		    const OpaqueOp& op2,
-		    char mod2,
+		    char            mod2,
 		    const OpaqueOp& op3,
-		    char mod3,
+		    char            mod3,
 		    const OpaqueOp& op4,
-		    char mod4,
-		    OldLambdaType vModifier = [](ComplexOrRealType&) { },
-		    Su2Properties su2properties = Su2Properties())
+		    char            mod4,
+		    OldLambdaType   vModifier     = [](ComplexOrRealType&) { },
+		    Su2Properties   su2properties = Su2Properties())
 		{
 			if (links_.size() > 0) {
 				if (!areSitesCompatible2(VectorSizeType { op1.kindOfSite,
@@ -264,10 +264,10 @@ public:
 			os << "Term Name=" << name_ << " Dofs=" << links_.size() << "\n";
 			const SizeType n = links_.size();
 			for (SizeType i = 0; i < n; ++i) {
-				const OneLinkType& onelink = links_[i];
+				const OneLinkType&    onelink = links_[i];
 				const VectorSizeType& indices = onelink.indices;
-				const SizeType m = indices.size();
-				PsimagLite::String fermOrBos
+				const SizeType        m       = indices.size();
+				PsimagLite::String    fermOrBos
 				    = (onelink.fermionOrBoson
 				       == ProgramGlobals::FermionOrBosonEnum::FERMION)
 				    ? "[Fermionic]"
@@ -284,9 +284,9 @@ public:
 					    = labeledOps[lPair.first].name();
 					const PsimagLite::String dof
 					    = (lPair.second == 0) ? "" : "?" + ttos(lPair.second);
-					const char modChar = onelink.mods[j];
+					const char               modChar = onelink.mods[j];
 					const PsimagLite::String mod = (modChar == 'N') ? "" : "'";
-					const SizeType orbital = onelink.orbs[j];
+					const SizeType           orbital = onelink.orbs[j];
 					const PsimagLite::String orbitalStr
 					    = (orbital == 0) ? "" : "!" + ttos(orbital);
 					const SizeType kind = labeledOps[lPair.first].kindOfSite();
@@ -307,11 +307,11 @@ public:
 			return offsets_[name] + dof;
 		}
 
-		static PairSizeType findOperatorIndex(SizeType index,
+		static PairSizeType findOperatorIndex(SizeType                    index,
 		                                      const LabeledOperatorsType& labeledOps)
 		{
 			const SizeType n = labeledOps.size();
-			SizeType k = 0;
+			SizeType       k = 0;
 			for (SizeType i = 0; i < n; ++i) {
 				if (!labeledOps[i].isTrackable())
 					continue;
@@ -331,9 +331,9 @@ public:
 		Term& operator=(const Term&);
 
 		PsimagLite::String name_; // name of term, not name of operator
-		const bool wantsHermitian_;
-		VectorOneLinkType links_;
-		VectorSizeType vectorKind_;
+		const bool         wantsHermitian_;
+		VectorOneLinkType  links_;
+		VectorSizeType     vectorKind_;
 	};
 
 	class IsValue {
@@ -358,11 +358,11 @@ public:
 		HERMIT_MINUS
 	};
 
-	typedef SuperGeometryType_ SuperGeometryType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef SuperGeometryType_                               SuperGeometryType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type     VectorStringType;
 	typedef typename PsimagLite::Vector<HermitianEnum>::Type VectorHermitianEnum;
-	typedef typename PsimagLite::Vector<Term*>::Type VectorTermType;
-	typedef Term TermType;
+	typedef typename PsimagLite::Vector<Term*>::Type         VectorTermType;
+	typedef Term                                             TermType;
 
 	ModelLinks()
 	    : maxDofs_(0)
@@ -393,8 +393,8 @@ public:
 		}
 
 		VectorOperatorType cm; // only for hermit
-		SizeType n = labeledOps.size();
-		VectorSizeType dofsByKind(n);
+		SizeType           n = labeledOps.size();
+		VectorSizeType     dofsByKind(n);
 		hilbert_.resize(atomKind_->kindsOfAtoms());
 		for (SizeType i = 0; i < n; ++i) {
 			const LabelType& ll = labeledOps[i];
@@ -424,7 +424,7 @@ public:
 
 	void postCtor2()
 	{
-		const SizeType fromModel = terms_.size();
+		const SizeType   fromModel = terms_.size();
 		VectorStringType input;
 		for (SizeType termIndex = 0; termIndex < fromModel; ++termIndex) {
 			const SizeType termIndexForGeom = termIndexForGeometry(termIndex);
@@ -435,8 +435,8 @@ public:
 
 		VectorSizeType termGeomReplacement(fromModel);
 		for (SizeType termIndex = 0; termIndex < fromModel; ++termIndex) {
-			const SizeType termIndexForGeom = termIndexForGeometry(termIndex);
-			PsimagLite::String name = terms_[termIndexForGeom]->name();
+			const SizeType     termIndexForGeom = termIndexForGeometry(termIndex);
+			PsimagLite::String name             = terms_[termIndexForGeom]->name();
 			typename VectorStringType::const_iterator x
 			    = std::find(input.begin(), input.end(), name);
 			if (x == input.end())
@@ -502,9 +502,9 @@ public:
 		return *(terms_[term]);
 	}
 
-	static void setOperatorMatrices(VectorOperatorType& cm,
+	static void setOperatorMatrices(VectorOperatorType&         cm,
 	                                const LabeledOperatorsType& labeledOps,
-	                                SizeType kindOfSite)
+	                                SizeType                    kindOfSite)
 	{
 		cm.clear();
 		SizeType n = labeledOps.size();
@@ -529,7 +529,7 @@ public:
 		return hilbert_[kindOfSite];
 	}
 
-	bool areSitesCompatibleForThisTerm(SizeType termIndex,
+	bool areSitesCompatibleForThisTerm(SizeType              termIndex,
 	                                   const VectorSizeType& actualSites) const
 	{
 		assert(atomKind_);
@@ -568,13 +568,13 @@ private:
 		return (isAntiHermitian(m)) ? HERMIT_MINUS : HERMIT_NEITHER;
 	}
 
-	VectorTermType terms_;
-	VectorHermitianEnum hermit_;
-	SizeType maxDofs_;
-	VectorSizeType termGeomReplacement_;
-	const static AtomKindBase* atomKind_;
+	VectorTermType                                terms_;
+	VectorHermitianEnum                           hermit_;
+	SizeType                                      maxDofs_;
+	VectorSizeType                                termGeomReplacement_;
+	const static AtomKindBase*                    atomKind_;
 	static std::map<PsimagLite::String, SizeType> offsets_;
-	VectorSizeType hilbert_;
+	VectorSizeType                                hilbert_;
 };
 
 template <typename T1, typename T2>

@@ -10,17 +10,17 @@ class ApplyHamiltonian {
 public:
 
 	typedef typename ApplyOperatorLocalType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename ApplyOperatorLocalType::OperatorType OperatorType;
-	typedef typename ApplyOperatorLocalType::FermionSignType FermionSignType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
-	typedef typename ApplyOperatorLocalType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::RealType RealType;
+	typedef typename ApplyOperatorLocalType::OperatorType         OperatorType;
+	typedef typename ApplyOperatorLocalType::FermionSignType      FermionSignType;
+	typedef typename VectorWithOffsetType::VectorType             VectorType;
+	typedef typename ModelType::HamiltonianConnectionType         HamiltonianConnectionType;
+	typedef typename ApplyOperatorLocalType::LeftRightSuperType   LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType   BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::RealType             RealType;
 
 	ApplyHamiltonian(const LeftRightSuperType& lrs,
-	                 const ModelType& model,
-	                 const RealType& physicalTime)
+	                 const ModelType&          model,
+	                 const RealType&           physicalTime)
 	    : model_(model)
 	    , physicalTime_(physicalTime)
 	{ }
@@ -29,10 +29,10 @@ public:
 	//! figuring out where the (non-zero) partition is
 	void operator()(VectorWithOffsetType& dest, const VectorWithOffsetType& phi) const
 	{
-		dest = phi;
+		dest             = phi;
 		SizeType sectors = phi.sectors();
 		for (SizeType ii = 0; ii < sectors; ++ii) {
-			SizeType i = phi.sector(ii);
+			SizeType   i = phi.sector(ii);
 			VectorType r;
 			internal_(r, phi, i);
 			dest.setDataInSector(r, i);
@@ -50,9 +50,9 @@ private:
 		                             model_.modelLinks(),
 		                             physicalTime_,
 		                             0);
-		MatrixForApplicationType lanczosHelper(model_, hc);
+		MatrixForApplicationType  lanczosHelper(model_, hc);
 
-		SizeType total = phi.effectiveSize(i0);
+		SizeType   total = phi.effectiveSize(i0);
 		VectorType phi2(total);
 		phi.extract(phi2, i0);
 		r.resize(total);
@@ -64,8 +64,8 @@ private:
 	ApplyHamiltonian& operator=(const ApplyHamiltonian&);
 
 	ApplyOperatorLocalType applyOpLocal_;
-	const ModelType& model_;
-	const RealType& physicalTime_;
+	const ModelType&       model_;
+	const RealType&        physicalTime_;
 };
 }
 #endif // DMRG_APPLYHAMILTONIAN_H

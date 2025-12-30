@@ -10,11 +10,11 @@ template <typename ActionType, typename TypeWrapperType> class KrylovHelper {
 public:
 
 	typedef typename TypeWrapperType::MatrixComplexOrRealType MatrixComplexOrRealType;
-	typedef typename TypeWrapperType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename ActionType::VectorRealType VectorRealType;
-	typedef typename TypeWrapperType::SolverParamsType SolverParamsType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
+	typedef typename TypeWrapperType::VectorWithOffsetType    VectorWithOffsetType;
+	typedef typename ActionType::VectorRealType               VectorRealType;
+	typedef typename TypeWrapperType::SolverParamsType        SolverParamsType;
+	typedef typename VectorWithOffsetType::VectorType         VectorType;
+	typedef typename VectorWithOffsetType::value_type         ComplexOrRealType;
 
 	KrylovHelper(const SolverParamsType& params, SizeType firstRitz)
 	    : params_(params)
@@ -23,16 +23,16 @@ public:
 	{ }
 
 	template <typename SomeActionType>
-	void calcR(VectorType& r,
-	           const SomeActionType& whatRorI,
+	void calcR(VectorType&                    r,
+	           const SomeActionType&          whatRorI,
 	           const MatrixComplexOrRealType& T,
 	           const MatrixComplexOrRealType& V,
-	           const VectorWithOffsetType& phi,
-	           SizeType n2,
-	           SizeType i0)
+	           const VectorWithOffsetType&    phi,
+	           SizeType                       n2,
+	           SizeType                       i0)
 	{
 		const bool krylovAbridge = !params_.options.isSet("KrylovNoAbridge");
-		SizeType n3 = (krylovAbridge) ? 1 : n2;
+		SizeType   n3            = (krylovAbridge) ? 1 : n2;
 		// ---------------------------------------------------
 		// precompute values of calcVTimesPhi(kprime,v,phi,i0)
 		// ---------------------------------------------------
@@ -54,7 +54,7 @@ public:
 			r[k] = sum * whatRorI(k);
 		}
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Abridgment=" << sum2;
 		if (krylovAbridge)
@@ -62,13 +62,13 @@ public:
 		progress_.printline(msgg, std::cout);
 	}
 
-	static ComplexOrRealType calcVTimesPhi(SizeType kprime,
+	static ComplexOrRealType calcVTimesPhi(SizeType                       kprime,
 	                                       const MatrixComplexOrRealType& V,
-	                                       const VectorWithOffsetType& phi,
-	                                       SizeType i0)
+	                                       const VectorWithOffsetType&    phi,
+	                                       SizeType                       i0)
 	{
-		ComplexOrRealType ret = 0;
-		SizeType total = phi.effectiveSize(i0);
+		ComplexOrRealType ret   = 0;
+		SizeType          total = phi.effectiveSize(i0);
 
 		for (SizeType j = 0; j < total; ++j)
 			ret += PsimagLite::conj(V(j, kprime)) * phi.fastAccess(i0, j);
@@ -77,8 +77,8 @@ public:
 
 private:
 
-	const SolverParamsType& params_;
-	SizeType firstRitz_;
+	const SolverParamsType&       params_;
+	SizeType                      firstRitz_;
 	PsimagLite::ProgressIndicator progress_;
 };
 }

@@ -1,13 +1,13 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void den_kron_form(const int nrow_A,
-                   const int ncol_A,
+void den_kron_form(const int                                    nrow_A,
+                   const int                                    ncol_A,
                    const PsimagLite::Matrix<ComplexOrRealType>& a_,
-                   const int nrow_B,
-                   const int ncol_B,
+                   const int                                    nrow_B,
+                   const int                                    ncol_B,
                    const PsimagLite::Matrix<ComplexOrRealType>& b_,
-                   PsimagLite::Matrix<ComplexOrRealType>& c_)
+                   PsimagLite::Matrix<ComplexOrRealType>&       c_)
 {
 	/*
 	 * ---------------------------------------

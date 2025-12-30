@@ -88,10 +88,10 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 
-	using BaseType = ParametersModelBase<RealType, QnType>;
-	using IoInputType = PsimagLite::InputNg<InputCheck>::Readable;
+	using BaseType         = ParametersModelBase<RealType, QnType>;
+	using IoInputType      = PsimagLite::InputNg<InputCheck>::Readable;
 	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
-	using VectorRealType = std::vector<RealType>;
+	using VectorRealType   = std::vector<RealType>;
 
 	ParametersModelHubbard(IoInputType& io)
 	    : BaseType(io, false)
@@ -173,12 +173,12 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		// c means cosine below
 		const PsimagLite::String function
 		    = "*(c:+:*:%t:" + ttos(omega) + ":" + ttos(phase) + ")*";
-		const PsimagLite::String nup = function + "nup";
+		const PsimagLite::String nup   = function + "nup";
 		const PsimagLite::String ndown = function + "ndown";
 
 		VectorStringType potentialTv(nsites);
 		for (SizeType site = 0; site < nsites; ++site) {
-			const RealType val = potentialTlegacy[site];
+			const RealType           val = potentialTlegacy[site];
 			const PsimagLite::String plusSignOrNot
 			    = ((val < 0) && (site > 0)) ? "+" : "";
 			PsimagLite::String expression = ttos(val) + nup + " + ";

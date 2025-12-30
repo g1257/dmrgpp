@@ -1,15 +1,15 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void estimate_kron_cost(const int nrow_A,
-                        const int ncol_A,
-                        const int nnz_A_in,
-                        const int nrow_B,
-                        const int ncol_B,
-                        const int nnz_B_in,
-                        ComplexOrRealType* p_kron_nnz,
-                        ComplexOrRealType* p_kron_flops,
-                        int* p_imethod,
+void estimate_kron_cost(const int                                                nrow_A,
+                        const int                                                ncol_A,
+                        const int                                                nnz_A_in,
+                        const int                                                nrow_B,
+                        const int                                                ncol_B,
+                        const int                                                nnz_B_in,
+                        ComplexOrRealType*                                       p_kron_nnz,
+                        ComplexOrRealType*                                       p_kron_flops,
+                        int*                                                     p_imethod,
                         const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 {
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
@@ -20,10 +20,10 @@ void estimate_kron_cost(const int nrow_A,
 	assert(p_kron_flops != 0);
 	assert(p_imethod != 0);
 
-	RealType nnz_A = static_cast<RealType>(nnz_A_in);
-	RealType nnz_B = static_cast<RealType>(nnz_B_in);
-	bool is_dense_A = (nnz_A_in == nrow_A * ncol_A);
-	bool is_dense_B = (nnz_B_in == nrow_B * ncol_B);
+	RealType nnz_A      = static_cast<RealType>(nnz_A_in);
+	RealType nnz_B      = static_cast<RealType>(nnz_B_in);
+	bool     is_dense_A = (nnz_A_in == nrow_A * ncol_A);
+	bool     is_dense_B = (nnz_B_in == nrow_B * ncol_B);
 
 	/*
 	 * ------------------------------------
@@ -44,14 +44,14 @@ void estimate_kron_cost(const int nrow_A,
   % X(ib,ia) = BY(ib,ja)*At(ja,ia)
   % ------------------------
   */
-	discount = (is_dense_B) ? denseFlopDiscount : 1;
+	discount          = (is_dense_B) ? denseFlopDiscount : 1;
 	RealType flops_BY = discount * 2.0 * nnz_B * ncol_A;
 
-	discount = (is_dense_A) ? denseFlopDiscount : 1;
+	discount            = (is_dense_A) ? denseFlopDiscount : 1;
 	RealType flops_BYAt = discount * 2.0 * nnz_A * nrow_B;
 
 	RealType flops_method1 = flops_BY + flops_BYAt;
-	RealType nnz_method1 = nrow_B * ncol_A;
+	RealType nnz_method1   = nrow_B * ncol_A;
 
 	/*
   % ------------------------
@@ -64,14 +64,14 @@ void estimate_kron_cost(const int nrow_A,
   % X(ib,ia) = B(ib,jb)*YAt(jb,ia)
   % ------------------------
   */
-	discount = (is_dense_A) ? denseFlopDiscount : 1;
+	discount           = (is_dense_A) ? denseFlopDiscount : 1;
 	RealType flops_YAt = discount * 2.0 * nnz_A * ncol_B;
 
-	discount = (is_dense_B) ? denseFlopDiscount : 1;
+	discount   = (is_dense_B) ? denseFlopDiscount : 1;
 	flops_BYAt = discount * 2.0 * nnz_B * nrow_A;
 
 	RealType flops_method2 = flops_YAt + flops_BYAt;
-	RealType nnz_method2 = ncol_B * nrow_A;
+	RealType nnz_method2   = ncol_B * nrow_A;
 
 	/*
   % ------------------
@@ -83,7 +83,7 @@ void estimate_kron_cost(const int nrow_A,
   % ------------------
   */
 	RealType flops_method3 = 2.0 * nnz_A * nnz_B;
-	RealType nnz_method3 = nnz_A * nnz_B;
+	RealType nnz_method3   = nnz_A * nnz_B;
 
 	RealType kron_flops = std::min(flops_method1, std::min(flops_method2, flops_method3));
 
@@ -119,9 +119,9 @@ void estimate_kron_cost(const int nrow_A,
 		};
 	}
 
-	*p_kron_nnz = kron_nnz;
+	*p_kron_nnz   = kron_nnz;
 	*p_kron_flops = kron_flops;
-	*p_imethod = imethod;
+	*p_imethod    = imethod;
 }
 
 #undef MIN

@@ -93,20 +93,20 @@ class WaveFunctionTransfBase {
 
 public:
 
-	typedef DmrgWaveStructType_ DmrgWaveStructType;
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
+	typedef DmrgWaveStructType_                                 DmrgWaveStructType;
+	typedef VectorWithOffsetType_                               VectorWithOffsetType;
+	typedef PsimagLite::PackIndices                             PackIndicesType;
+	typedef typename DmrgWaveStructType::LeftRightSuperType     LeftRightSuperType;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef WftOptions<VectorWithOffsetType_, OptionsType_> WftOptionsType;
+	typedef typename BasisWithOperatorsType::BasisType          BasisType;
+	typedef PsimagLite::Vector<SizeType>::Type                  VectorSizeType;
+	typedef WftOptions<VectorWithOffsetType_, OptionsType_>     WftOptionsType;
 	using OneSiteSpacesType = OneSiteSpacesType_;
 
-	virtual void transformVector(VectorWithOffsetType& psiDest,
+	virtual void transformVector(VectorWithOffsetType&       psiDest,
 	                             const VectorWithOffsetType& psiSrc,
-	                             const LeftRightSuperType& lrs,
-	                             const OneSiteSpacesType& nk) const
+	                             const LeftRightSuperType&   lrs,
+	                             const OneSiteSpacesType&    nk) const
 	    = 0;
 
 	virtual ~WaveFunctionTransfBase() { }

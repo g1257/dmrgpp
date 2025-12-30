@@ -126,7 +126,7 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
+	friend std::ostream& operator<<(std::ostream&                    os,
 	                                const ParametersModelTjMultiOrb& parameters)
 	{
 		os << "potentialV\n";
@@ -138,8 +138,8 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 
 	// Do not include here connection parameters
 	typename PsimagLite::Vector<RealType>::Type potentialV;
-	SizeType orbitals;
-	SizeType reinterpretAndTruncate;
+	SizeType                                    orbitals;
+	SizeType                                    reinterpretAndTruncate;
 };
 } // namespace Dmrg
 

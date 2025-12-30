@@ -91,24 +91,24 @@ template <typename ModelType> class TargetParamsCommon : public TargetParamsBase
 
 public:
 
-	typedef typename ModelType::RealType RealType;
-	typedef TargetParamsBase<ModelType> BaseType;
-	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename ModelType::RealType                         RealType;
+	typedef TargetParamsBase<ModelType>                          BaseType;
+	typedef typename ModelType::OperatorType                     OperatorType;
+	typedef typename OperatorType::PairType                      PairType;
+	typedef typename OperatorType::StorageType                   SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                MatrixType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef PsimagLite::Vector<SizeType>::Type                   VectorSizeType;
+	typedef typename PsimagLite::Vector<MatrixType>::Type        VectorMatrixType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type      VectorOperatorType;
+	typedef typename ModelType::InputValidatorType               InputValidatorType;
+	typedef std::pair<SizeType, SizeType>                        PairSizeType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type         VectorStringType;
 
 	TargetParamsCommon(InputValidatorType& io,
-	                   PsimagLite::String targeting,
-	                   const ModelType& model)
+	                   PsimagLite::String  targeting,
+	                   const ModelType&    model)
 	    : BaseType(targeting)
 	    , sites_(0)
 	    , startingLoops_(0)
@@ -198,8 +198,8 @@ public:
 
 		for (SizeType i = 0; i < sites_.size(); ++i) {
 			PsimagLite::String prefix2 = (io.isAinur()) ? "TSPOp" + ttos(i) + ":" : "";
-			OperatorType myOp(
-			    io, model_, OperatorType::MUST_BE_NONZERO, prefix2, sites_[i]);
+			OperatorType       myOp(
+                            io, model_, OperatorType::MUST_BE_NONZERO, prefix2, sites_[i]);
 			aOperators_.push_back(myOp);
 		}
 
@@ -211,7 +211,7 @@ public:
 			          << " entries.\n";
 		} catch (std::exception&) { }
 
-		bool hasApplyTo = false;
+		bool               hasApplyTo = false;
 		PsimagLite::String tmp;
 		try {
 			io.readline(tmp, "TSPApplyTo=");
@@ -345,7 +345,7 @@ private:
 		}
 
 		for (SizeType i = 0; i < aOperators_.size(); i++) {
-			SizeType n = aOperators_[i].getStorage().rows();
+			SizeType n       = aOperators_[i].getStorage().rows();
 			SizeType hilbert = model_.hilbertSize(sites_[i]);
 			if (n != hilbert) {
 				PsimagLite::String str(__FILE__);
@@ -398,7 +398,7 @@ private:
 	void errorBorderOperators(SizeType site) const
 	{
 		SizeType linSize = model_.superGeometry().numberOfSites();
-		SizeType site2 = (site == 0) ? 1 : linSize - 2;
+		SizeType site2   = (site == 0) ? 1 : linSize - 2;
 
 		PsimagLite::String str("ERROR: Operators at border site: Please ");
 		str += "add the identity operator at site " + ttos(site2) + "\n";
@@ -409,7 +409,7 @@ private:
 	{
 		typedef AlgebraicStringToNumber<RealType> AlgebraicStringToNumberType;
 		const SizeType numberOfSites = model_.superGeometry().numberOfSites();
-		const SizeType n = strs.size();
+		const SizeType n             = strs.size();
 		nums.resize(n);
 
 		AlgebraicStringToNumberType algebraicStringToNumber("TSPSites", numberOfSites);
@@ -424,18 +424,18 @@ private:
 		std::cout << "];\n";
 	}
 
-	VectorSizeType sites_;
-	VectorSizeType startingLoops_;
+	VectorSizeType                sites_;
+	VectorSizeType                startingLoops_;
 	typename BaseType::ConcatEnum concatenation_;
-	bool noOperator_;
-	bool skipTimeZero_;
-	bool isEnergyForExp_;
-	RealType gsWeight_;
-	RealType energyForExp_;
-	VectorOperatorType aOperators_;
-	InputValidatorType& io_;
-	const ModelType& model_;
-	PairSizeType sectorLevel_;
+	bool                          noOperator_;
+	bool                          skipTimeZero_;
+	bool                          isEnergyForExp_;
+	RealType                      gsWeight_;
+	RealType                      energyForExp_;
+	VectorOperatorType            aOperators_;
+	InputValidatorType&           io_;
+	const ModelType&              model_;
+	PairSizeType                  sectorLevel_;
 }; // class TargetParamsCommon
 } // namespace Dmrg
 

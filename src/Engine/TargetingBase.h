@@ -96,51 +96,51 @@ template <typename LanczosSolverType_, typename VectorWithOffsetType_> class Tar
 
 public:
 
-	typedef LanczosSolverType_ LanczosSolverType;
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef typename LanczosSolverType::MatrixType MatrixVectorType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::ParametersType ParametersType;
-	typedef typename ParametersType::OptionsType OptionsType;
-	typedef PsimagLite::ParametersForSolver<RealType> ParametersForSolverType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef LanczosSolverType_                                  LanczosSolverType;
+	typedef VectorWithOffsetType_                               VectorWithOffsetType;
+	typedef typename LanczosSolverType::MatrixType              MatrixVectorType;
+	typedef typename MatrixVectorType::ModelType                ModelType;
+	typedef typename ModelType::RealType                        RealType;
+	typedef typename ModelType::ParametersType                  ParametersType;
+	typedef typename ParametersType::OptionsType                OptionsType;
+	typedef PsimagLite::ParametersForSolver<RealType>           ParametersForSolverType;
+	typedef typename ModelType::ModelHelperType                 ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename BasisType::QnType QnType;
-	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
+	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
+	typedef typename BasisWithOperatorsType::OperatorType       OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType          BasisType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename BasisType::BlockType                       BlockType;
+	typedef typename BasisType::QnType                          QnType;
+	using OneSiteSpacesType      = OneSiteSpaces<ModelType>;
 	using WaveFunctionTransfType = WaveFunctionTransfFactory<LeftRightSuperType,
 	                                                         VectorWithOffsetType,
 	                                                         OptionsType,
 	                                                         OneSiteSpacesType>;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef VectorType TargetVectorType;
-	typedef TargetParamsBase<ModelType> TargetParamsType;
+	typedef typename VectorWithOffsetType::VectorType       VectorType;
+	typedef VectorType                                      TargetVectorType;
+	typedef TargetParamsBase<ModelType>                     TargetParamsType;
 	typedef TargetHelper<ModelType, WaveFunctionTransfType> TargetHelperType;
 	typedef TargetingCommon<TargetHelperType, VectorWithOffsetType, LanczosSolverType>
 	    TargetingCommonType;
 	typedef
 	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type       VectorOperatorType;
+	typedef typename ApplyOperatorExpressionType::StageEnumType   StageEnumType;
 	typedef typename ApplyOperatorExpressionType::DmrgSerializerType DmrgSerializerType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
-	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
+	typedef typename PsimagLite::Vector<SizeType>::Type              VectorSizeType;
+	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
+	typedef typename PsimagLite::Vector<TargetVectorType>::Type      VectorVectorType;
+	typedef typename PsimagLite::Vector<VectorVectorType>::Type      VectorVectorVectorType;
 	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	                                                      VectorVectorVectorWithOffsetType;
 	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
 
-	TargetingBase(const LeftRightSuperType& lrs,
-	              const CheckpointType& checkPoint,
+	TargetingBase(const LeftRightSuperType&     lrs,
+	              const CheckpointType&         checkPoint,
 	              const WaveFunctionTransfType& wft,
-	              SizeType indexNoAdvance)
+	              SizeType                      indexNoAdvance)
 	    : lrs_(lrs)
 	    , model_(checkPoint.model())
 	    , commonTargeting_(lrs, checkPoint, wft, indexNoAdvance)
@@ -174,11 +174,11 @@ public:
 
 	virtual RealType weight(SizeType i) const = 0;
 
-	virtual void evolve(const VectorRealType& energies,
+	virtual void evolve(const VectorRealType&         energies,
 	                    ProgramGlobals::DirectionEnum direction,
-	                    const BlockType& block1,
-	                    const BlockType& block2,
-	                    SizeType loopNumber)
+	                    const BlockType&              block1,
+	                    const BlockType&              block2,
+	                    SizeType                      loopNumber)
 	    = 0;
 
 	virtual void read(typename TargetingCommonType::IoInputType&, PsimagLite::String) = 0;
@@ -231,12 +231,12 @@ public:
 	}
 
 	// legacy thing for vectorwithoffsets
-	virtual void initialGuess(VectorVectorType& initialVector,
+	virtual void initialGuess(VectorVectorType&        initialVector,
 	                          const OneSiteSpacesType& oneSiteSpaces,
-	                          bool noguess,
-	                          const VectorSizeType& compactedWeights,
-	                          const VectorSizeType& sectors,
-	                          const BasisType& basis) const
+	                          bool                     noguess,
+	                          const VectorSizeType&    compactedWeights,
+	                          const VectorSizeType&    sectors,
+	                          const BasisType&         basis) const
 	{
 		if (VectorWithOffsetType::name() != "vectorwithoffsets")
 			err("FATAL: Wrong execution path\n");
@@ -251,20 +251,20 @@ public:
 			vwo.extract(initialVector[i], vwo.sector(i));
 	}
 
-	virtual void initialGuess(VectorType& initialVector,
+	virtual void initialGuess(VectorType&              initialVector,
 	                          const OneSiteSpacesType& oneSiteSpaces,
-	                          bool noguess,
-	                          const VectorSizeType& compactedWeights,
-	                          const VectorSizeType& sectors,
-	                          SizeType sectorIndex,
-	                          SizeType excited,
-	                          const BasisType& basis) const
+	                          bool                     noguess,
+	                          const VectorSizeType&    compactedWeights,
+	                          const VectorSizeType&    sectors,
+	                          SizeType                 sectorIndex,
+	                          SizeType                 excited,
+	                          const BasisType&         basis) const
 	{
 		if (VectorWithOffsetType::name() == "vectorwithoffsets")
 			err("FATAL: Wrong execution path\n");
 
 		const VectorVectorVectorWithOffsetType& psi = commonTargeting_.aoe().psiConst();
-		const SizeType nsectors = psi.size();
+		const SizeType                          nsectors = psi.size();
 
 		if (nsectors != compactedWeights.size())
 			err("initialGuess compactedWeights\n");
@@ -276,10 +276,10 @@ public:
 			    + "\n");
 
 		SizeType start = 0;
-		SizeType end = numberOfExcited;
+		SizeType end   = numberOfExcited;
 		if (excited < numberOfExcited) {
 			start = excited;
-			end = excited + 1;
+			end   = excited + 1;
 		}
 
 		assert(sectorIndex < psi.size());
@@ -332,7 +332,7 @@ public:
 
 	static PsimagLite::String buildPrefix(PsimagLite::IoSelector::Out& io, SizeType counter)
 	{
-		PsimagLite::String prefix("TargetingCommon");
+		PsimagLite::String                              prefix("TargetingCommon");
 		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
 		if (counter == 0)
 			io.createGroup(prefix);
@@ -374,8 +374,8 @@ protected:
 private:
 
 	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
-	TargetingCommonType commonTargeting_;
+	const ModelType&          model_;
+	TargetingCommonType       commonTargeting_;
 }; // class TargetingBase
 
 } // namespace Dmrg

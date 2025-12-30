@@ -29,7 +29,7 @@ public:
 	{
 		rlimit_->rlim_cur = s;
 		rlimit_->rlim_max = (h > s) ? h : s;
-		int ret = setrlimit(RLIMIT_AS, rlimit_);
+		int ret           = setrlimit(RLIMIT_AS, rlimit_);
 		checkRet(ret, "setrlimit");
 	}
 

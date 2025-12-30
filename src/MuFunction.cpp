@@ -41,9 +41,9 @@ RealType calcMu(SizeType site, SizeType n, SizeType N1, RealType tau, RealType m
 
 int main(int argc, char* argv[])
 {
-	RealType tau = 0.001;
-	RealType mu = 0;
-	SizeType nsites = 12;
+	RealType tau            = 0.001;
+	RealType mu             = 0;
+	SizeType nsites         = 12;
 	SizeType totalTimeSteps = 2000;
 
 	for (SizeType currentTimeStep = 0; currentTimeStep < totalTimeSteps; ++currentTimeStep) {

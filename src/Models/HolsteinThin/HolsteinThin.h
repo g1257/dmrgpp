@@ -101,39 +101,39 @@ public:
 		SITE_FERMION
 	};
 
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
-	typedef typename HilbertBasisType::value_type HilbertState;
-	typedef unsigned int long WordType;
-	typedef HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
-	typedef typename ModelHelperType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::MyBasis BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef ParametersHubbardHolstein<RealType, QnType> ParametersHolsteinThinType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
+	typedef typename ModelBaseType::VectorSizeType              VectorSizeType;
+	typedef typename ModelBaseType::ModelHelperType             ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType           SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType          LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                    LinkType;
+	typedef typename ModelHelperType::OperatorsType             OperatorsType;
+	typedef typename OperatorsType::OperatorType                OperatorType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type     VectorOperatorType;
+	typedef typename ModelHelperType::RealType                  RealType;
+	typedef typename ModelBaseType::QnType                      QnType;
+	typedef typename QnType::VectorQnType                       VectorQnType;
+	typedef typename ModelHelperType::SparseMatrixType          SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename ModelBaseType::HilbertBasisType            HilbertBasisType;
+	typedef typename HilbertBasisType::value_type               HilbertState;
+	typedef unsigned int long                                   WordType;
+	typedef HilbertSpaceHubbard<WordType>                       HilbertSpaceHubbardType;
+	typedef typename ModelHelperType::BlockType                 BlockType;
+	typedef typename ModelBaseType::SolverParamsType            SolverParamsType;
+	typedef typename ModelBaseType::VectorType                  VectorType;
+	typedef typename ModelBaseType::MyBasis                     BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType      MyBasisWithOperators;
+	typedef typename ModelBaseType::InputValidatorType          InputValidatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>               MatrixType;
+	typedef ParametersHubbardHolstein<RealType, QnType>         ParametersHolsteinThinType;
+	typedef std::pair<SizeType, SizeType>                       PairType;
+	typedef typename PsimagLite::Vector<PairType>::Type         VectorPairType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef typename ModelBaseType::ModelLinksType ModelLinksType;
-	typedef typename ModelLinksType::AtomKindBase AtomKindBaseType;
+	typedef typename ModelBaseType::OpsLabelType                OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType               OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType               ModelTermType;
+	typedef typename ModelBaseType::ModelLinksType              ModelLinksType;
+	typedef typename ModelLinksType::AtomKindBase               AtomKindBaseType;
 
 	class AtomKind : public AtomKindBaseType {
 
@@ -145,13 +145,13 @@ public:
 	};
 
 	static const int FERMION_SIGN = -1;
-	static const int SPIN_UP = HilbertSpaceHubbardType::SPIN_UP;
-	static const int SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN;
+	static const int SPIN_UP      = HilbertSpaceHubbardType::SPIN_UP;
+	static const int SPIN_DOWN    = HilbertSpaceHubbardType::SPIN_DOWN;
 
-	HolsteinThin(const SolverParamsType& solverParams,
-	             InputValidatorType& io,
+	HolsteinThin(const SolverParamsType&  solverParams,
+	             InputValidatorType&      io,
 	             const SuperGeometryType& geometry,
-	             PsimagLite::String additional)
+	             PsimagLite::String       additional)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
@@ -170,14 +170,14 @@ public:
 	void print(std::ostream& os) const { operator<<(os, modelParameters_); }
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const BlockType& block,
-	                                RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
 		assert(block.size() == 1);
 		const SizeType actualSite = block[0];
-		SiteType kindOfSite = determineKindOfSiteFromSite(actualSite);
+		SiteType       kindOfSite = determineKindOfSiteFromSite(actualSite);
 
 		if (kindOfSite == SiteType::SITE_FERMION) {
 			HilbertBasisType fermionicBasis;
@@ -266,25 +266,25 @@ protected:
 
 		OpsLabelType& n = this->createOpsLabel("n", 1); // 1 == fermionic site
 		typename OperatorType::Su2RelatedType su2related;
-		OperatorType myOp(nmatrix,
-		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                  typename OperatorType::PairType(0, 0),
-		                  1,
-		                  su2related);
+		OperatorType                          myOp(nmatrix,
+                                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                  typename OperatorType::PairType(0, 0),
+                                  1,
+                                  su2related);
 
 		n.push(myOp);
 
-		SizeType iup = 0;
+		SizeType iup   = 0;
 		SizeType idown = 1;
 		{
-			OpsLabelType& splus = this->createOpsLabel("splus", 1);
-			OpsLabelType& sminus = this->createOpsLabel("sminus", 1);
-			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, fermionicBasis);
+			OpsLabelType&    splus        = this->createOpsLabel("splus", 1);
+			OpsLabelType&    sminus       = this->createOpsLabel("sminus", 1);
+			SparseMatrixType t1MatrixUp   = findOperatorMatrices(iup, fermionicBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, fermionicBasis);
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1
 			    = multiplyTc(t1MatrixUp, t1MatrixDown);
 			typename OperatorType::Su2RelatedType su2Related;
-			SparseMatrixType spmatrix(t1);
+			SparseMatrixType                      spmatrix(t1);
 			splus.push(OperatorType(spmatrix,
 			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
 			                        typename OperatorType::PairType(0, 0),
@@ -299,15 +299,15 @@ protected:
 			                         su2Related));
 		}
 		{
-			OpsLabelType& sz = this->createOpsLabel("sz", 1);
-			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, fermionicBasis);
+			OpsLabelType&    sz           = this->createOpsLabel("sz", 1);
+			SparseMatrixType t1MatrixUp   = findOperatorMatrices(iup, fermionicBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, fermionicBasis);
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> t1
 			    = multiplyTc(t1MatrixUp, t1MatrixUp);
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> t2
 			    = multiplyTc(t1MatrixDown, t1MatrixDown);
 			t1 = 0.5 * (t1 - t2);
-			SparseMatrixType szmatrix(t1);
+			SparseMatrixType                      szmatrix(t1);
 			typename OperatorType::Su2RelatedType su2Related;
 			sz.push(OperatorType(szmatrix,
 			                     ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -317,11 +317,11 @@ protected:
 		}
 
 		{
-			OpsLabelType& doubleOcc = this->createOpsLabel("double", 1);
-			OpsLabelType& doubleOccM = this->createOpsLabel("doubleM", 1);
-			SparseMatrixType t1MatrixUp = findOperatorMatrices(iup, fermionicBasis);
+			OpsLabelType&    doubleOcc    = this->createOpsLabel("double", 1);
+			OpsLabelType&    doubleOccM   = this->createOpsLabel("doubleM", 1);
+			SparseMatrixType t1MatrixUp   = findOperatorMatrices(iup, fermionicBasis);
 			SparseMatrixType t1MatrixDown = findOperatorMatrices(idown, fermionicBasis);
-			SizeType nn = fermionicBasis.size();
+			SizeType         nn           = fermionicBasis.size();
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> id(nn, nn);
 			for (SizeType ii = 0; ii < fermionicBasis.size(); ii++) {
 				id(ii, ii) = 1.0;
@@ -334,11 +334,11 @@ protected:
 			t2 = id + (-1.0) * t2;
 			SparseMatrixType nMatrixUp(t1);
 			t1 = t1 + t2;
-			SparseMatrixType nMatrixDown(t2);
+			SparseMatrixType                                          nMatrixDown(t2);
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> t3
 			    = multiplyTc(nMatrixDown, nMatrixUp);
 			t1 = t1 + (-2.0) * t3;
-			SparseMatrixType tmp4(t1);
+			SparseMatrixType                      tmp4(t1);
 			typename OperatorType::Su2RelatedType su2Related;
 			doubleOccM.push(OperatorType(tmp4,
 			                             ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -376,7 +376,7 @@ protected:
 		                   su2related2);
 		a.push(myOp2);
 
-		OpsLabelType& disp = this->createOpsLabel("disp", 0);
+		OpsLabelType&    disp = this->createOpsLabel("disp", 0);
 		SparseMatrixType tmp2;
 		transposeConjugate(tmp2, tmpMatrix);
 		tmp2 += tmpMatrix;
@@ -392,12 +392,12 @@ protected:
 	{
 		ModelTermType& hopf = ModelBaseType::createTerm("HoppingFermionic");
 
-		OpForLinkType cup("c", 0);
+		OpForLinkType                         cup("c", 0);
 		typename ModelTermType::Su2Properties su2properties(1, 1, 0);
 		hopf.push(cup, 'C', cup, 'N', su2properties);
 
 		typename ModelTermType::Su2Properties su2properties2(1, -1, 1);
-		OpForLinkType cdown("c", 1);
+		OpForLinkType                         cdown("c", 1);
 		hopf.push(cdown, 'C', cdown, 'N', su2properties2);
 
 		if (modelParameters_.numberphonons > 0) {
@@ -406,7 +406,7 @@ protected:
 			OpForLinkType a("a");
 			hopb.push(a, 'C', a, 'N');
 
-			const bool wantsHerm = false;
+			const bool     wantsHerm = false;
 			ModelTermType& phononFermion
 			    = ModelBaseType::createTerm("PhononFermion", wantsHerm);
 
@@ -469,11 +469,11 @@ private:
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(SizeType sigma,
+	SparseMatrixType findOperatorMatrices(SizeType                sigma,
 	                                      const HilbertBasisType& natBasis) const
 	{
-		typename HilbertSpaceHubbardType::HilbertState bra, ket;
-		int n = natBasis.size();
+		typename HilbertSpaceHubbardType::HilbertState            bra, ket;
+		int                                                       n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
@@ -494,16 +494,16 @@ private:
 	}
 
 	// only fermions, bosons have no symmetry
-	void setSymmetryRelated(VectorQnType& qns,
+	void setSymmetryRelated(VectorQnType&           qns,
 	                        const HilbertBasisType& basis,
-	                        SizeType offset,
-	                        SiteType typeOfSite) const
+	                        SizeType                offset,
+	                        SiteType                typeOfSite) const
 	{
 		typedef std::pair<SizeType, SizeType> PairType;
 
 		qns.resize(basis.size() + offset, QnType::zero());
 		static const bool isCanonical = true;
-		VectorSizeType other((isCanonical) ? 2 : 1, 0);
+		VectorSizeType    other((isCanonical) ? 2 : 1, 0);
 		for (SizeType i = 0; i < basis.size(); ++i) {
 
 			PairType jmpair(0, 0);
@@ -530,9 +530,9 @@ private:
 	}
 
 	//! Term is U \sum_{\alpha}n_{i\alpha UP} n_{i\alpha DOWN}
-	void addInteractionFU(SparseMatrixType& hmatrix,
+	void addInteractionFU(SparseMatrixType&             hmatrix,
 	                      const VectorSparseMatrixType& cm,
-	                      SizeType actualSite) const
+	                      SizeType                      actualSite) const
 	{
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType m1 = cm[SPIN_UP];
@@ -543,15 +543,15 @@ private:
 		hmatrix += modelParameters_.hubbardFU[actualSite] * tmpMatrix;
 	}
 
-	void addPotentialFV(SparseMatrixType& hmatrix,
+	void addPotentialFV(SparseMatrixType&             hmatrix,
 	                    const VectorSparseMatrixType& cm,
-	                    SizeType actualIndexOfSite) const
+	                    SizeType                      actualIndexOfSite) const
 	{
-		SparseMatrixType nup = n(cm[SPIN_UP]);
+		SparseMatrixType nup   = n(cm[SPIN_UP]);
 		SparseMatrixType ndown = n(cm[SPIN_DOWN]);
 
 		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
-		SizeType iUp = actualIndexOfSite;
+		SizeType iUp     = actualIndexOfSite;
 		assert(iUp < modelParameters_.potentialFV.size());
 		hmatrix += modelParameters_.potentialFV[iUp] * nup;
 		SizeType iDown = actualIndexOfSite + linSize;
@@ -559,14 +559,14 @@ private:
 		hmatrix += modelParameters_.potentialFV[iDown] * ndown;
 	}
 
-	void addPotentialPhononV(SparseMatrixType& hmatrix,
+	void addPotentialPhononV(SparseMatrixType&       hmatrix,
 	                         const SparseMatrixType& amatrix,
-	                         SizeType actualIndexOfSite) const
+	                         SizeType                actualIndexOfSite) const
 	{
 		if (modelParameters_.numberphonons == 0)
 			return;
 		SparseMatrixType nphon = n(amatrix);
-		SizeType iUp = actualIndexOfSite;
+		SizeType         iUp   = actualIndexOfSite;
 		assert(iUp < modelParameters_.potentialPV.size());
 		hmatrix += modelParameters_.potentialPV[iUp] * nphon;
 	}
@@ -584,16 +584,16 @@ private:
 	//! Find a^+_site in the natural basis natBasis
 	SparseMatrixType findPhononadaggerMatrix(const HilbertBasisType& natBasis) const
 	{
-		SizeType total = natBasis.size();
+		SizeType   total = natBasis.size();
 		MatrixType cm(total, total);
 		for (SizeType ii = 0; ii < total; ++ii) {
-			const WordType ket = natBasis[ii];
+			const WordType ket   = natBasis[ii];
 			const SizeType nphon = ket;
 			if (nphon >= modelParameters_.numberphonons)
 				continue; //  too many phonons, cannot create
 			const WordType bra = ket + 1;
-			const RealType x = bra;
-			cm(ii, bra) = sqrt(x);
+			const RealType x   = bra;
+			cm(ii, bra)        = sqrt(x);
 		}
 
 		// print cm matrix
@@ -609,8 +609,8 @@ private:
 	}
 
 	ParametersHolsteinThinType modelParameters_;
-	bool isSsh_;
-	const AtomKind* atomKind_;
+	bool                       isSsh_;
+	const AtomKind*            atomKind_;
 }; // class HolsteinThin
 } // namespace Dmrg
 /*@}*/

@@ -91,34 +91,34 @@ template <typename LeftRightSuperType> class ArrayOfMatStruct {
 
 public:
 
-	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename LeftRightSuperType::SparseMatrixType        SparseMatrixType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType  BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::OperatorStorageType OperatorStorageType;
-	typedef MatrixDenseOrSparse<SparseMatrixType> MatrixDenseOrSparseType;
-	typedef typename MatrixDenseOrSparseType::RealType RealType;
-	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
-	typedef typename GenIjPatchType::VectorSizeType VectorSizeType;
-	typedef typename GenIjPatchType::BasisType BasisType;
-	typedef typename MatrixDenseOrSparseType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef MatrixDenseOrSparse<SparseMatrixType>                MatrixDenseOrSparseType;
+	typedef typename MatrixDenseOrSparseType::RealType           RealType;
+	typedef GenIjPatch<LeftRightSuperType>                       GenIjPatchType;
+	typedef typename GenIjPatchType::VectorSizeType              VectorSizeType;
+	typedef typename GenIjPatchType::BasisType                   BasisType;
+	typedef typename MatrixDenseOrSparseType::value_type         ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                MatrixType;
 
-	ArrayOfMatStruct(const OperatorStorageType& sparse1,
-	                 const GenIjPatchType& patchOld,
-	                 const GenIjPatchType& patchNew,
+	ArrayOfMatStruct(const OperatorStorageType&                   sparse1,
+	                 const GenIjPatchType&                        patchOld,
+	                 const GenIjPatchType&                        patchNew,
 	                 typename GenIjPatchType::LeftOrRightEnumType leftOrRight,
-	                 RealType threshold,
-	                 bool useLowerPart)
+	                 RealType                                     threshold,
+	                 bool                                         useLowerPart)
 	    : data_(patchNew(leftOrRight).size(), patchOld(leftOrRight).size())
 	{
-		const SparseMatrixType& sparse = sparse1.getCRS();
-		const BasisType& basisOld = (leftOrRight == GenIjPatchType::LEFT)
-		    ? patchOld.lrs().left()
-		    : patchOld.lrs().right();
-		const BasisType& basisNew = (leftOrRight == GenIjPatchType::LEFT)
-		    ? patchNew.lrs().left()
-		    : patchNew.lrs().right();
-		const SizeType npatchOld = patchOld(leftOrRight).size();
-		const SizeType npatchNew = patchNew(leftOrRight).size();
+		const SparseMatrixType& sparse    = sparse1.getCRS();
+		const BasisType&        basisOld  = (leftOrRight == GenIjPatchType::LEFT)
+		            ? patchOld.lrs().left()
+		            : patchOld.lrs().right();
+		const BasisType&        basisNew  = (leftOrRight == GenIjPatchType::LEFT)
+		            ? patchNew.lrs().left()
+		            : patchNew.lrs().right();
+		const SizeType          npatchOld = patchOld(leftOrRight).size();
+		const SizeType          npatchNew = patchNew(leftOrRight).size();
 
 		const SizeType ipatchSize = npatchNew;
 		const SizeType jpatchSize = npatchOld;
@@ -157,8 +157,8 @@ public:
 
 		for (SizeType ipatch = 0; ipatch < ipatchSize; ++ipatch) {
 			const SizeType igroup = patchNew(leftOrRight)[ipatch];
-			const SizeType i1 = basisNew.partition(igroup);
-			const SizeType i2 = basisNew.partition(igroup + 1);
+			const SizeType i1     = basisNew.partition(igroup);
+			const SizeType i2     = basisNew.partition(igroup + 1);
 			assert((0 <= i1) && (i1 <= i2) && (i2 <= sparse.rows()));
 
 			offset_ipatch[ipatch] = i1;
@@ -171,8 +171,8 @@ public:
 
 		for (SizeType jpatch = 0; jpatch < jpatchSize; ++jpatch) {
 			const SizeType jgroup = patchOld(leftOrRight)[jpatch];
-			const SizeType j1 = basisOld.partition(jgroup);
-			const SizeType j2 = basisOld.partition(jgroup + 1);
+			const SizeType j1     = basisOld.partition(jgroup);
+			const SizeType j2     = basisOld.partition(jgroup + 1);
 
 			assert((0 <= j1) && (j1 <= j2) && (j2 <= ncols));
 
@@ -227,7 +227,7 @@ public:
 		};
 
 		std::vector<SizeType> total_nz(jpatchSize, 0);
-		std::vector<bool> is_dense1D(jpatchSize, false);
+		std::vector<bool>     is_dense1D(jpatchSize, false);
 
 		for (SizeType ipatch = 0; ipatch < ipatchSize; ipatch++) {
 
@@ -257,10 +257,10 @@ public:
 
 			for (SizeType irow = i1; irow < i2; irow++) {
 				const SizeType istart = sparse.getRowPtr(irow);
-				const SizeType iend = sparse.getRowPtr(irow + 1);
+				const SizeType iend   = sparse.getRowPtr(irow + 1);
 
 				for (SizeType k = istart; k < iend; k++) {
-					const SizeType jcol = sparse.getCol(k);
+					const SizeType jcol   = sparse.getCol(k);
 					const SizeType jpatch = index_to_jpatch[jcol];
 
 					bool is_valid_jpatch
@@ -304,7 +304,7 @@ public:
 				const SizeType lncols = jpatch_Size[jpatch];
 
 				const SizeType indx = jpatch;
-				const SizeType nnz = total_nz[indx];
+				const SizeType nnz  = total_nz[indx];
 
 				const bool isDense = (nnz >= threshold * lnrows * lncols);
 				assert(nnz <= lnrows * lncols);
@@ -359,7 +359,7 @@ public:
 
 					SizeType ip = 0;
 					for (SizeType irow = 0; irow < lnrows; irow++) {
-						SizeType icount = (rowPtr1D[indx])[irow];
+						SizeType icount        = (rowPtr1D[indx])[irow];
 						(rowPtr1D[indx])[irow] = ip;
 
 						sparse_mat.setRow(irow, ip);
@@ -377,10 +377,10 @@ public:
 
 			for (SizeType irow = i1; irow < i2; irow++) {
 				const SizeType istart = sparse.getRowPtr(irow);
-				const SizeType iend = sparse.getRowPtr(irow + 1);
+				const SizeType iend   = sparse.getRowPtr(irow + 1);
 
 				for (SizeType k = istart; k < iend; k++) {
-					const SizeType jcol = sparse.getCol(k);
+					const SizeType jcol   = sparse.getCol(k);
 					const SizeType jpatch = index_to_jpatch[jcol];
 
 					const bool is_valid_jpatch
@@ -396,10 +396,10 @@ public:
 
 					const SizeType indx = jpatch;
 
-					const SizeType i1 = offset_ipatch[ipatch];
+					const SizeType i1         = offset_ipatch[ipatch];
 					const SizeType local_irow = (irow - i1);
 
-					const SizeType j1 = offset_jpatch[jpatch];
+					const SizeType j1         = offset_jpatch[jpatch];
 					const SizeType local_jcol = (jcol - j1);
 
 					const ComplexOrRealType aij = sparse.getValue(k);

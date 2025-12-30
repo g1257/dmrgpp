@@ -9,15 +9,15 @@ class AinurStatements {
 
 public:
 
-	typedef AinurReadable::RealType RealType;
-	typedef AinurReadable::VectorStoreType VectorStoreType;
-	typedef AinurReadable::StoreType StoreType;
-	typedef StoreType::AinurLexicalType AinurLexicalType;
+	typedef AinurReadable::RealType            RealType;
+	typedef AinurReadable::VectorStoreType     VectorStoreType;
+	typedef AinurReadable::StoreType           StoreType;
+	typedef StoreType::AinurLexicalType        AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 
 	AinurStatements(const VectorStringType& vecStr,
-	                const String& vecChar,
-	                const String& escapedChars,
+	                const String&           vecChar,
+	                const String&           escapedChars,
 	                const VectorStringType& vecBrace)
 	    : vecStr_(vecStr)
 	    , vecChar_(vecChar)
@@ -29,7 +29,7 @@ public:
 	VectorStringType push(const String& s2, String prefix)
 	{
 		VectorStringType emptyStringVector;
-		String s = s2;
+		String           s = s2;
 		AinurLexicalType::removeTrailingBlanks(s);
 		AinurLexicalType::removeTrailingBlanks(prefix);
 		if (s == "")
@@ -53,8 +53,8 @@ public:
 		unescape(identifier);
 		StoreType& store = storage_[storageIndex];
 		if (store.type() == StoreType::SCALAR && store.subType() == StoreType::GROUP) {
-			String right = leftAndRight[1];
-			SizeType last = right.length();
+			String   right = leftAndRight[1];
+			SizeType last  = right.length();
 			--last;
 			bool inBraces
 			    = (last < right.length() && right[0] == '{' && right[last] == '}');
@@ -145,7 +145,7 @@ private:
 	void unescape(String& s) const
 	{
 		SizeType l = s.length();
-		String newStr("");
+		String   newStr("");
 		for (SizeType i = 0; i < l; ++i) {
 			if (s[i] == '@') {
 				newStr += getReplacement(i, s, l);
@@ -166,8 +166,8 @@ private:
 		oneChar[0] = s[i];
 		if (i + 3 >= l)
 			return oneChar;
-		char c = s[++i];
-		String number;
+		char     c = s[++i];
+		String   number;
 		SizeType j = i + 1;
 		for (; j < l; ++j) {
 			if (s[j] == '@')
@@ -180,7 +180,7 @@ private:
 		if (s[j] != '@')
 			err("Error while replacing string, no final @ found\n");
 
-		i = j + 1;
+		i          = j + 1;
 		SizeType n = atoi(number.c_str());
 		return getReplacement(c, n);
 	}
@@ -265,12 +265,12 @@ private:
 	}
 
 	const VectorStringType& vecStr_;
-	const String& vecChar_;
-	const String& escapedChars_;
+	const String&           vecChar_;
+	const String&           escapedChars_;
 	const VectorStringType& vecBrace_;
-	VectorStringType names_;
-	VectorStoreType storage_;
-	AinurReadable readable_;
+	VectorStringType        names_;
+	VectorStoreType         storage_;
+	AinurReadable           readable_;
 }; // class AinurStatements
 } // namespace PsimagLite
 #endif // AINURSTATEMENT_H

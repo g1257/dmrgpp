@@ -90,16 +90,16 @@ class ApplyOperatorExpression {
 
 public:
 
-	typedef typename TargetHelperType::RealType RealType;
-	typedef typename TargetHelperType::ModelType ModelType;
-	typedef typename ModelType::ParametersType ParametersType;
-	typedef typename ParametersType::OptionsType OptionsType;
-	typedef TargetParamsBase<ModelType> TargetParamsType;
-	typedef typename TargetHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename TargetHelperType::RealType                 RealType;
+	typedef typename TargetHelperType::ModelType                ModelType;
+	typedef typename ModelType::ParametersType                  ParametersType;
+	typedef typename ParametersType::OptionsType                OptionsType;
+	typedef TargetParamsBase<ModelType>                         TargetParamsType;
+	typedef typename TargetHelperType::LeftRightSuperType       LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename TargetHelperType::WaveFunctionTransfType   WaveFunctionTransfType;
 	typedef TimeVectorsBase<TargetParamsType,
 	                        ModelType,
 	                        WaveFunctionTransfType,
@@ -129,26 +129,26 @@ public:
 	                                 WaveFunctionTransfType,
 	                                 LanczosSolverType,
 	                                 VectorWithOffsetType>
-	    TimeVectorsSuzukiTrotterType;
+	                                               TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<SizeType>::Type              VectorSizeType;
+	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
 	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType> ApplyOperatorType;
-	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
-	typedef typename TimeVectorsBaseType::PairType PairType;
-	typedef StageEnum StageEnumType;
-	typedef typename PsimagLite::Vector<StageEnum>::Type VectorStageEnumType;
+	typedef typename ApplyOperatorType::BorderEnum                       BorderEnumType;
+	typedef typename TimeVectorsBaseType::PairType                       PairType;
+	typedef StageEnum                                                    StageEnumType;
+	typedef typename PsimagLite::Vector<StageEnum>::Type                 VectorStageEnumType;
 	typedef MultiSiteExpressionHelper<LeftRightSuperType, VectorWithOffsetType>
 	    MultiSiteExpressionHelperType;
 	typedef typename MultiSiteExpressionHelperType::DmrgSerializerType DmrgSerializerType;
 	typedef CorrelationsSkeleton<MultiSiteExpressionHelperType, ModelType>
-	    CorrelationsSkeletonType;
+	                                                    CorrelationsSkeletonType;
 	typedef typename TimeVectorsBaseType::WftHelperType WftHelperType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
+	typedef typename VectorWithOffsetType::VectorType   VectorType;
 	typedef
 	    typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::
-	        Type VectorVectorVectorWithOffsetType;
+	        Type                                          VectorVectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 
@@ -168,7 +168,7 @@ public:
 	    , correlationsSkel_(multiSiteExprHelper_, targetHelper.model(), false)
 	{
 		timesWithoutAdvancement_ = 0;
-		firstSeeLeftCorner_ = false;
+		firstSeeLeftCorner_      = false;
 	}
 
 	~ApplyOperatorExpression()
@@ -221,21 +221,21 @@ public:
 		stage_.resize((tstSites == 0) ? 1 : tstSites, StageEnum::DISABLED);
 	}
 
-	SizeType getPhi(VectorWithOffsetType* phiNew,
-	                RealType Eg,
+	SizeType getPhi(VectorWithOffsetType*         phiNew,
+	                RealType                      Eg,
 	                ProgramGlobals::DirectionEnum direction,
-	                SizeType site,
-	                SizeType loopNumber,
-	                const TargetParamsType& tstStruct)
+	                SizeType                      site,
+	                SizeType                      loopNumber,
+	                const TargetParamsType&       tstStruct)
 	{
-		SizeType count = 0;
-		const SizeType nsectors = psi_.size();
+		SizeType       count       = 0;
+		const SizeType nsectors    = psi_.size();
 		const SizeType sectorIndex = tstStruct.sectorIndex();
 		if (sectorIndex >= nsectors)
 			err("getPhi: sectors=" + ttos(nsectors) + " <= " + ttos(sectorIndex)
 			    + "\n");
 
-		const SizeType nlevels = psi_[sectorIndex].size();
+		const SizeType nlevels    = psi_[sectorIndex].size();
 		const SizeType levelIndex = tstStruct.levelIndex();
 		if (levelIndex >= nlevels)
 			err("getPhi: levels=" + ttos(nlevels) + " <= " + ttos(levelIndex) + "\n");
@@ -291,7 +291,7 @@ public:
 			E0_ = Eg;
 
 		if (noStageIs(StageEnum::DISABLED)) {
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "EnergyForExp was ";
 			if (tstStruct.isEnergyForExp()) {
@@ -352,9 +352,9 @@ public:
 
 	template <typename SomeBasisType>
 	void setPsi(VectorVectorVectorType& inV,
-	            const VectorSizeType& sectors,
-	            const SomeBasisType& someBasis,
-	            SizeType nexcited)
+	            const VectorSizeType&   sectors,
+	            const SomeBasisType&    someBasis,
+	            SizeType                nexcited)
 	{
 		const SizeType nsectors = sectors.size();
 
@@ -394,8 +394,8 @@ public:
 		io.createGroup(prefix + "/PSI");
 		io.write(nsectors, prefix + "/PSI/Size");
 		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-			const SizeType nexcited = psi_[sectorIndex].size();
-			PsimagLite::String label = prefix + "/PSI/" + ttos(sectorIndex);
+			const SizeType     nexcited = psi_[sectorIndex].size();
+			PsimagLite::String label    = prefix + "/PSI/" + ttos(sectorIndex);
 			io.createGroup(label);
 			io.write(nexcited, label + "/Size");
 			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex)
@@ -421,8 +421,8 @@ public:
 		psi_.resize(nsectors);
 
 		for (SizeType sectorIndex = 0; sectorIndex < nsectors; ++sectorIndex) {
-			PsimagLite::String label = prefix + "/PSI/" + ttos(sectorIndex) + "/";
-			SizeType nexcited = 0;
+			PsimagLite::String label    = prefix + "/PSI/" + ttos(sectorIndex) + "/";
+			SizeType           nexcited = 0;
 			io.read(nexcited, label + "Size");
 			psi_[sectorIndex].resize(nexcited);
 			for (SizeType excitedIndex = 0; excitedIndex < nexcited; ++excitedIndex) {
@@ -451,7 +451,7 @@ public:
 
 	SizeType createPvector(const VectorWithOffsetType& vv)
 	{
-		const SizeType n = targetVectors_.size();
+		const SizeType        n = targetVectors_.size();
 		VectorWithOffsetType* v = new VectorWithOffsetType();
 		targetVectors_.push_back(v);
 		*targetVectors_[n] = vv;
@@ -469,7 +469,7 @@ public:
 	void trimVectors()
 	{
 		const SizeType n = targetVectors_.size();
-		SizeType x = 0;
+		SizeType       x = 0;
 		for (SizeType ii = 0; ii < n; ++ii) {
 			const SizeType i = n - ii - 1;
 			if (targetVectors_[i]->size() == 0) {
@@ -508,7 +508,7 @@ public:
 			targetVectors_.resize(x);
 		}
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Number of target vectors is now " << targetVectors_.size();
 		progress_.printline(msgg, std::cout);
@@ -517,10 +517,10 @@ public:
 	void initTimeVectors(const TargetParamsType& tstStruct, InputValidatorType& ioIn)
 	{
 		delete timeVectorsBase_;
-		timeVectorsBase_ = nullptr;
-		const LeftRightSuperType& lrs = targetHelper_.lrs();
-		const ModelType& model = targetHelper_.model();
-		const WaveFunctionTransfType& wft = targetHelper_.wft();
+		timeVectorsBase_                    = nullptr;
+		const LeftRightSuperType&     lrs   = targetHelper_.lrs();
+		const ModelType&              model = targetHelper_.model();
+		const WaveFunctionTransfType& wft   = targetHelper_.wft();
 
 		PsimagLite::String s(__FILE__);
 		s += " Unknown algorithm\n";
@@ -580,13 +580,13 @@ public:
 	}
 
 	void calcTimeVectors(const PsimagLite::Vector<SizeType>::Type& indices,
-	                     RealType Eg,
-	                     const VectorWithOffsetType& phi,
-	                     ProgramGlobals::DirectionEnum direction,
-	                     bool allOperatorsApplied,
-	                     bool wftAndAdvanceIfNeeded,
+	                     RealType                                  Eg,
+	                     const VectorWithOffsetType&               phi,
+	                     ProgramGlobals::DirectionEnum             direction,
+	                     bool                                      allOperatorsApplied,
+	                     bool                                      wftAndAdvanceIfNeeded,
 	                     const PsimagLite::Vector<SizeType>::Type& block,
-	                     bool isLastCall)
+	                     bool                                      isLastCall)
 	{
 		typename TimeVectorsBaseType::ExtraData extra(
 		    direction, allOperatorsApplied, wftAndAdvanceIfNeeded, block, isLastCall);
@@ -596,13 +596,13 @@ public:
 		timeVectorsBase_->calcTimeVectors(indices, Eg, phi, extra);
 	}
 
-	void applyOneOperator(SizeType loopNumber,
-	                      SizeType indexOfOperator,
-	                      SizeType site,
-	                      VectorWithOffsetType& phiNew,
-	                      const VectorWithOffsetType& psiSrc,
+	void applyOneOperator(SizeType                            loopNumber,
+	                      SizeType                            indexOfOperator,
+	                      SizeType                            site,
+	                      VectorWithOffsetType&               phiNew,
+	                      const VectorWithOffsetType&         psiSrc,
 	                      const ProgramGlobals::DirectionEnum systemOrEnviron,
-	                      const TargetParamsType& tstStruct)
+	                      const TargetParamsType&             tstStruct)
 	{
 		if (tstStruct.startingLoops().size() > 0
 		    && tstStruct.startingLoops()[indexOfOperator] > loopNumber)
@@ -612,14 +612,14 @@ public:
 		if (hasBeenApplied)
 			return;
 
-		VectorWithOffsetType phiOld = psiSrc;
-		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
+		VectorWithOffsetType phiOld        = psiSrc;
+		SizeType             numberOfSites = targetHelper_.lrs().super().block().size();
 
 		BorderEnumType corner = (site == 0 || site == numberOfSites - 1)
 		    ? ApplyOperatorType::BORDER_YES
 		    : ApplyOperatorType::BORDER_NO;
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "I'm applying a local operator now";
 		progress_.printline(msgg, std::cout);
@@ -639,7 +639,7 @@ public:
 
 		RealType norma = norm(phiNew);
 		if (norma < 1e-6) {
-			PsimagLite::OstringStream msgg2(std::cout.precision());
+			PsimagLite::OstringStream                     msgg2(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 			msg2 << "Norm of phi is zero\n";
 			progress_.printline(msgg2, std::cout);
@@ -657,9 +657,9 @@ public:
 		wftHelper_.wftSome(targetVectors_, site, begin, end);
 	}
 
-	void wftOneVector(VectorWithOffsetType& phiNew,
+	void wftOneVector(VectorWithOffsetType&       phiNew,
 	                  const VectorWithOffsetType& src,
-	                  SizeType site) const
+	                  SizeType                    site) const
 	{
 		wftHelper_.wftOneVector(phiNew, src, site);
 	}
@@ -728,13 +728,13 @@ private:
 		return "undefined";
 	}
 
-	SizeType evolve(SizeType i,
-	                RealType Eg,
+	SizeType evolve(SizeType                      i,
+	                RealType                      Eg,
 	                ProgramGlobals::DirectionEnum direction,
-	                SizeType site,
-	                SizeType loopNumber,
-	                SizeType lastI,
-	                const TargetParamsType& tstStruct)
+	                SizeType                      site,
+	                SizeType                      loopNumber,
+	                SizeType                      lastI,
+	                const TargetParamsType&       tstStruct)
 	{
 		SizeType advanceEach = tstStruct.advanceEach();
 
@@ -762,12 +762,12 @@ private:
 		if (stage_[i] == StageEnum::OPERATOR)
 			checkOrder(i, tstStruct);
 
-		const OptionsType& options = targetHelper_.model().params().options;
-		const bool advanceOnlyAtBorder = !options.isSet("advanceUnrestricted");
+		const OptionsType& options             = targetHelper_.model().params().options;
+		const bool         advanceOnlyAtBorder = !options.isSet("advanceUnrestricted");
 
-		SizeType sites = targetHelper_.model().superGeometry().numberOfSites();
-		bool weAreAtBorder = (site < 1 || site >= sites - 1);
-		bool dontAdvance = (advanceOnlyAtBorder & !weAreAtBorder);
+		SizeType sites         = targetHelper_.model().superGeometry().numberOfSites();
+		bool     weAreAtBorder = (site < 1 || site >= sites - 1);
+		bool     dontAdvance   = (advanceOnlyAtBorder & !weAreAtBorder);
 
 		if (advanceEach > 0 && timesWithoutAdvancement_ >= advanceEach && !dontAdvance) {
 			stage_[i] = StageEnum::WFT_ADVANCE;
@@ -786,15 +786,15 @@ private:
 		    && site == 1)
 			firstSeeLeftCorner_ = true;
 
-		const RealType time = timeVectorsBase_->time();
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		const RealType                                time = timeVectorsBase_->time();
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << "Steps without advance: " << timesWithoutAdvancement_;
 		msg2 << " site=" << site << " currenTime=" << time;
 		if (timesWithoutAdvancement_ > 0)
 			progress_.printline(msgg2, std::cout);
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Evolving, stage=" << stageToString(i);
 		msg << " site=" << site << " loopNumber=" << loopNumber;
@@ -804,12 +804,12 @@ private:
 		return 1;
 	}
 
-	void computePhi(SizeType i,
-	                SizeType site,
-	                VectorWithOffsetType& phiNew,
-	                VectorWithOffsetType& phiOld,
+	void computePhi(SizeType                            i,
+	                SizeType                            site,
+	                VectorWithOffsetType&               phiNew,
+	                VectorWithOffsetType&               phiOld,
 	                const ProgramGlobals::DirectionEnum systemOrEnviron,
-	                const TargetParamsType& tstStruct) const
+	                const TargetParamsType&             tstStruct) const
 	{
 		SizeType numberOfSites = targetHelper_.lrs().super().block().size();
 
@@ -820,7 +820,7 @@ private:
 			    ? ApplyOperatorType::BORDER_YES
 			    : ApplyOperatorType::BORDER_NO;
 
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "I'm applying a local operator now";
 			progress_.printline(msgg, std::cout);
@@ -828,7 +828,7 @@ private:
 			targetHelper_.model().findOddElectronsOfOneSite(signs, site);
 
 			const SizeType splitSize = targetHelper_.model().hilbertSize(site);
-			FermionSign fs(targetHelper_.lrs().left(), signs);
+			FermionSign    fs(targetHelper_.lrs().left(), signs);
 			applyOpLocal_(phiNew,
 			              phiOld,
 			              tstStruct.aOperators()[i],
@@ -847,12 +847,12 @@ private:
 		} else if (stage_[i] == StageEnum::WFT_NOADVANCE
 		           || stage_[i] == StageEnum::WFT_ADVANCE) {
 			const SizeType advanceEach = tstStruct.advanceEach();
-			SizeType advance = indexNoAdvance_;
+			SizeType       advance     = indexNoAdvance_;
 
 			if (advanceEach > 0 && stage_[i] == StageEnum::WFT_ADVANCE
 			    && !timeVectorsBase_->isBase()) {
 				SizeType timeSteps = tstStruct.times().size();
-				advance = (timeSteps > 0) ? timeSteps - 1 : 0;
+				advance            = (timeSteps > 0) ? timeSteps - 1 : 0;
 			}
 
 			if (targetVectors_.size() <= advance) {
@@ -901,20 +901,20 @@ private:
 
 	ApplyOperatorExpression& operator=(const ApplyOperatorExpression&) = delete;
 
-	PsimagLite::ProgressIndicator progress_;
-	const TargetHelperType& targetHelper_;
-	VectorStageEnumType stage_;
-	RealType E0_;
-	SizeType indexNoAdvance_;
-	ApplyOperatorType applyOpLocal_;
-	VectorVectorVectorWithOffsetType psi_;
-	VectorVectorWithOffsetType targetVectors_;
-	TimeVectorsBaseType* timeVectorsBase_;
-	WftHelperType wftHelper_;
+	PsimagLite::ProgressIndicator         progress_;
+	const TargetHelperType&               targetHelper_;
+	VectorStageEnumType                   stage_;
+	RealType                              E0_;
+	SizeType                              indexNoAdvance_;
+	ApplyOperatorType                     applyOpLocal_;
+	VectorVectorVectorWithOffsetType      psi_;
+	VectorVectorWithOffsetType            targetVectors_;
+	TimeVectorsBaseType*                  timeVectorsBase_;
+	WftHelperType                         wftHelper_;
 	mutable MultiSiteExpressionHelperType multiSiteExprHelper_;
-	CorrelationsSkeletonType correlationsSkel_;
-	static SizeType timesWithoutAdvancement_;
-	static bool firstSeeLeftCorner_;
+	CorrelationsSkeletonType              correlationsSkel_;
+	static SizeType                       timesWithoutAdvancement_;
+	static bool                           firstSeeLeftCorner_;
 };
 
 template <typename T1, typename T2, typename T3>

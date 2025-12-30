@@ -1,10 +1,10 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void den_transpose(const int nrow_A,
-                   const int ncol_A,
+void den_transpose(const int               nrow_A,
+                   const int               ncol_A,
                    const ComplexOrRealType a_[],
-                   ComplexOrRealType at_[])
+                   ComplexOrRealType       at_[])
 {
 	/*
 	 * ---------------------------

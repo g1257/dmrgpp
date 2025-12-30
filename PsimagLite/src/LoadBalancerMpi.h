@@ -15,7 +15,7 @@ public:
 	    : blockSize_(ntasks / nthreads)
 	{
 		if (ntasks < nthreads && ntasks > 0) {
-			nthreads = ntasks;
+			nthreads   = ntasks;
 			blockSize_ = 1;
 		}
 

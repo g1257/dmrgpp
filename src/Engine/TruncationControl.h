@@ -11,7 +11,7 @@ template <typename RealType> class TruncationControl {
 
 public:
 
-	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorStringType    = PsimagLite::Vector<PsimagLite::String>::Type;
 	using InputNgReadableType = PsimagLite::InputNg<InputCheck>::Readable;
 
 	TruncationControl()
@@ -25,7 +25,7 @@ public:
 
 		try {
 			PsimagLite::String s;
-			VectorStringType tokens;
+			VectorStringType   tokens;
 			io.readline(s, "TruncationTolerance=");
 			PsimagLite::split(tokens, s, ",");
 			tolerance_ = PsimagLite::atof(tokens[0].c_str());
@@ -51,7 +51,7 @@ public:
 	{
 		if (tolerance_ < 0)
 			return;
-		PsimagLite::OstringStream msgg(os.precision());
+		PsimagLite::OstringStream                     msgg(os.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "has tolerance= " << tolerance_;
 		msg << " minimum m= " << mMin_;

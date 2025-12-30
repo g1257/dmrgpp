@@ -110,13 +110,13 @@ public:
 		SAVE_PARTIAL
 	};
 
-	typedef MatrixInBlockTemplate BuildingBlockType;
-	typedef typename BuildingBlockType::value_type ComplexOrRealType;
+	typedef MatrixInBlockTemplate                              BuildingBlockType;
+	typedef typename BuildingBlockType::value_type             ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef PsimagLite::Vector<int>::Type VectorIntType;
-	typedef PsimagLite::IoSelector::In IoInType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
+	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
+	typedef PsimagLite::Vector<int>::Type                      VectorIntType;
+	typedef PsimagLite::IoSelector::In                         IoInType;
 
 	BlockDiagonalMatrix()
 	    : isSquare_(true)
@@ -152,8 +152,8 @@ public:
 	}
 
 	template <typename IoOutputType>
-	void write(PsimagLite::String label1,
-	           IoOutputType& io,
+	void write(PsimagLite::String                    label1,
+	           IoOutputType&                         io,
 	           PsimagLite::IoNgSerializer::WriteMode wM
 	           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
@@ -224,7 +224,7 @@ public:
 			return;
 
 		mustBeSquare("truncate");
-		SizeType n = data_.size();
+		SizeType      n = data_.size();
 		VectorIntType remap(cols(), -1);
 		computeRemap(remap, removedIndices2);
 		VectorSizeType offsetsOld = offsetsCols_;
@@ -270,7 +270,7 @@ public:
 		SizeType c = cols();
 		fm.resize(r, c);
 		SizeType counter = 0;
-		SizeType k = 0;
+		SizeType k       = 0;
 		for (SizeType i = 0; i < r; ++i) {
 			fm.setRow(i, counter);
 			if (k + 1 < offsetsRows_.size() && offsetsRows_[k + 1] <= i)
@@ -342,8 +342,8 @@ public:
 		ioSerializer.read(data_, label + "/data");
 	}
 
-	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer,
+	void write(PsimagLite::String                  label,
+	           PsimagLite::IoSerializer&           ioSerializer,
 	           PsimagLite::IoSerializer::WriteMode wM
 	           = PsimagLite::IoSerializer::NO_OVERWRITE) const
 	{
@@ -369,7 +369,7 @@ public:
 
 	friend std::istream& operator>>(std::istream& is, BlockDiagonalMatrix& m)
 	{
-		int x = -1;
+		int                x = -1;
 		PsimagLite::String temp;
 		is >> temp;
 		if (temp == "NAME=")
@@ -398,12 +398,12 @@ private:
 
 	void computeRemap(VectorIntType& remap, const VectorSizeType& removedIndices2) const
 	{
-		VectorSizeType removedIndices = removedIndices2;
+		VectorSizeType                   removedIndices = removedIndices2;
 		PsimagLite::Sort<VectorSizeType> sort;
-		VectorSizeType iperm(removedIndices.size(), 0);
+		VectorSizeType                   iperm(removedIndices.size(), 0);
 		sort.sort(removedIndices, iperm);
-		SizeType c = cols();
-		SizeType k = 0;
+		SizeType                 c = cols();
+		SizeType                 k = 0;
 		VectorSizeType::iterator b = removedIndices.begin();
 		for (SizeType j = 0; j < c; ++j) {
 			if (std::find(b, removedIndices.end(), j) != removedIndices.end()) {
@@ -416,8 +416,8 @@ private:
 	}
 
 	// rows aren't affected, columns may be truncated,
-	void truncate(SizeType ind, // <------ block to truncate
-	              const VectorIntType& remap,
+	void truncate(SizeType              ind, // <------ block to truncate
+	              const VectorIntType&  remap,
 	              const VectorSizeType& offsetsOld)
 	{
 		assert(ind < data_.size());
@@ -426,8 +426,8 @@ private:
 		SizeType offsetOld = offsetsOld[ind];
 		assert(ind < offsetsCols_.size());
 		SizeType offsetNew = offsetsCols_[ind];
-		SizeType c = m.cols();
-		SizeType counter = 0;
+		SizeType c         = m.cols();
+		SizeType counter   = 0;
 		for (SizeType j = 0; j < c; ++j) {
 			assert(j + offsetOld < remap.size());
 			if (remap[j + offsetOld] >= 0)
@@ -447,7 +447,7 @@ private:
 
 		assert(counter < c);
 
-		SizeType r = m.rows();
+		SizeType r       = m.rows();
 		SizeType newCols = c - counter;
 		assert(newCols < c);
 		MatrixInBlockTemplate m2(r, newCols);
@@ -481,10 +481,10 @@ private:
 		err("BlockDiagonalMatrix::" + msg + " must be square\n");
 	}
 
-	bool isSquare_;
-	bool readOnDemand_;
-	VectorSizeType offsetsRows_;
-	VectorSizeType offsetsCols_;
+	bool                                                     isSquare_;
+	bool                                                     readOnDemand_;
+	VectorSizeType                                           offsetsRows_;
+	VectorSizeType                                           offsetsCols_;
 	typename PsimagLite::Vector<MatrixInBlockTemplate>::Type data_;
 }; // class BlockDiagonalMatrix
 
@@ -493,7 +493,7 @@ private:
 template <class MatrixInBlockTemplate>
 bool isUnitary(const BlockDiagonalMatrix<MatrixInBlockTemplate>& B)
 {
-	bool flag = true;
+	bool                  flag = true;
 	MatrixInBlockTemplate matrixTmp;
 
 	for (SizeType m = 0; m < B.blocks(); m++) {

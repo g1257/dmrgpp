@@ -30,12 +30,12 @@ using namespace PsimagLite;
 typedef double RealType;
 typedef double ComplexOrRealType;
 
-typedef ParametersForSolver<RealType> ParametersForSolverType;
+typedef ParametersForSolver<RealType>   ParametersForSolverType;
 typedef Vector<ComplexOrRealType>::Type VectorType;
-typedef CrsMatrix<ComplexOrRealType> SparseMatrixType;
+typedef CrsMatrix<ComplexOrRealType>    SparseMatrixType;
 typedef LanczosOrDavidsonBase<ParametersForSolverType, SparseMatrixType, VectorType>
-    SparseSolverType;
-typedef LanczosSolver<ParametersForSolverType, SparseMatrixType, VectorType> LanczosSolverType;
+                                                                              SparseSolverType;
+typedef LanczosSolver<ParametersForSolverType, SparseMatrixType, VectorType>  LanczosSolverType;
 typedef DavidsonSolver<ParametersForSolverType, SparseMatrixType, VectorType> DavidsonSolverType;
 
 void usage(const char* progName)
@@ -47,16 +47,16 @@ void usage(const char* progName)
 
 int main(int argc, char* argv[])
 {
-	constexpr unsigned int nthreads = 1;
+	constexpr unsigned int  nthreads = 1;
 	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);
 
-	int opt = 0;
-	bool useDavidson = false;
-	SizeType n = 0;
-	RealType maxValue = 0;
-	SizeType maxCol = 0;
-	SizeType seed = 0;
-	bool lotaMemory = true;
+	int      opt         = 0;
+	bool     useDavidson = false;
+	SizeType n           = 0;
+	RealType maxValue    = 0;
+	SizeType maxCol      = 0;
+	SizeType seed        = 0;
+	bool     lotaMemory  = true;
 
 	while ((opt = getopt(argc, argv, "n:c:m:r:dx")) != -1) {
 		switch (opt) {
@@ -96,9 +96,9 @@ int main(int argc, char* argv[])
 
 	// create a random matrix:
 	Random48<RealType> random(seed);
-	SparseMatrixType sparse(n, n);
+	SparseMatrixType   sparse(n, n);
 	Vector<bool>::Type seenThisColumn(n);
-	SizeType counter = 0;
+	SizeType           counter = 0;
 	for (SizeType i = 0; i < n; i++) {
 		sparse.setRow(i, counter);
 		// random vector:
@@ -109,7 +109,7 @@ int main(int argc, char* argv[])
 			SizeType col = SizeType(random() * n);
 			if (seenThisColumn[col])
 				continue;
-			seenThisColumn[col] = true;
+			seenThisColumn[col]   = true;
 			ComplexOrRealType val = random() * maxValue;
 
 			sparse.pushValue(val);
@@ -129,9 +129,9 @@ int main(int argc, char* argv[])
 	// sparse solver setup
 	ParametersForSolverType params;
 	params.lotaMemory = lotaMemory;
-	LanczosSolverType lanczosSolver(sparse, params);
+	LanczosSolverType  lanczosSolver(sparse, params);
 	DavidsonSolverType davisonSolver(sparse, params);
-	SparseSolverType* solver = 0;
+	SparseSolverType*  solver = 0;
 
 	// select solver
 	if (useDavidson)
@@ -140,7 +140,7 @@ int main(int argc, char* argv[])
 		solver = &lanczosSolver;
 
 	// diagonalize matrix
-	RealType gsEnergy = 0;
+	RealType   gsEnergy = 0;
 	VectorType gsVector(n);
 
 	VectorType initial(n);

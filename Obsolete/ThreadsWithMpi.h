@@ -104,7 +104,7 @@ public:
 	{
 		PsimagLite::Range<SomeConcurrencyType> range(0, total, concurrency);
 
-		SizeType np = concurrency.nprocs();
+		SizeType np        = concurrency.nprocs();
 		SizeType blockSize = total / np;
 		if (total % np != 0)
 			blockSize++;

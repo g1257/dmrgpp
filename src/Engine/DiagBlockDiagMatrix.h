@@ -7,8 +7,8 @@ namespace Dmrg {
 template <typename BlockDiagonalMatrixType> class DiagBlockDiagMatrix {
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
-	typedef typename BuildingBlockType::value_type ComplexOrRealType;
-	typedef typename BlockDiagonalMatrixType::VectorRealType VectorRealType;
+	typedef typename BuildingBlockType::value_type              ComplexOrRealType;
+	typedef typename BlockDiagonalMatrixType::VectorRealType    VectorRealType;
 
 	class LoopForDiag {
 
@@ -38,7 +38,7 @@ template <typename BlockDiagonalMatrixType> class DiagBlockDiagMatrix {
 		void doTask(SizeType taskNumber, SizeType)
 		{
 			assert(C.rows() == C.cols());
-			SizeType m = taskNumber;
+			SizeType       m = taskNumber;
 			VectorRealType eigsTmp;
 			C.diagAndEnforcePhase(m, eigsTmp, option);
 			for (SizeType j = C.offsetsRows(m); j < C.offsetsRows(m + 1); ++j)
@@ -57,11 +57,11 @@ template <typename BlockDiagonalMatrixType> class DiagBlockDiagMatrix {
 
 	private:
 
-		BlockDiagonalMatrixType& C;
-		VectorRealType& eigs;
-		char option;
+		BlockDiagonalMatrixType&                          C;
+		VectorRealType&                                   eigs;
+		char                                              option;
 		typename PsimagLite::Vector<VectorRealType>::Type eigsForGather;
-		typename PsimagLite::Vector<SizeType>::Type weights;
+		typename PsimagLite::Vector<SizeType>::Type       weights;
 	};
 
 public:
@@ -73,7 +73,7 @@ public:
 	static void diagonalise(BlockDiagonalMatrixType& C, VectorRealType& eigs, char option)
 	{
 		typedef PsimagLite::NoPthreadsNg<LoopForDiag> ParallelizerType;
-		typedef PsimagLite::Concurrency ConcurrencyType;
+		typedef PsimagLite::Concurrency               ConcurrencyType;
 		SizeType savedNpthreads = ConcurrencyType::codeSectionParams.npthreads;
 		ConcurrencyType::codeSectionParams.npthreads = 1;
 		ParallelizerType threadObject(ConcurrencyType::codeSectionParams);

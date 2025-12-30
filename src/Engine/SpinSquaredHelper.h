@@ -86,7 +86,7 @@ template <typename FieldType_, typename Word_> class SpinSquaredHelper {
 public:
 
 	typedef FieldType_ FieldType;
-	typedef Word_ Word;
+	typedef Word_      Word;
 
 	SpinSquaredHelper()
 	    : data_(0)
@@ -100,8 +100,8 @@ public:
 		str += "SpinSquaredHelper";
 
 		const char* start = reinterpret_cast<const char*>(this);
-		const char* end = reinterpret_cast<const char*>(&ketSaved_);
-		SizeType total = mres.memResolv(&data_, end - start, str + " data");
+		const char* end   = reinterpret_cast<const char*>(&ketSaved_);
+		SizeType    total = mres.memResolv(&data_, end - start, str + " data");
 
 		total += mres.memResolv(&ketSaved_, sizeof(*this) - total, str + " ketSaved");
 
@@ -122,7 +122,7 @@ public:
 	//! receives m, returns (2*j,m+j)
 	std::pair<SizeType, SizeType> getJmPair(const FieldType& m) const
 	{
-		SizeType j = getJvalue();
+		SizeType j      = getJvalue();
 		SizeType mtilde = getMvalue(m, j);
 		return std::pair<SizeType, SizeType>(j, mtilde);
 	}
@@ -135,8 +135,8 @@ private:
 
 	int perfectSquareOrCrash(const FieldType& t) const
 	{
-		FieldType r = sqrt(t);
-		int ri = int(r);
+		FieldType r  = sqrt(t);
+		int       ri = int(r);
 		if (ri != r)
 			PsimagLite::RuntimeError("SpinSquaredHelper:: sqrt(1+4d) not an integer\n");
 

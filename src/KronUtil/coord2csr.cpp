@@ -1,15 +1,15 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void coord2csr(const int nrow_A,
-               const int ncol_A,
-               const int nnz,
-               const int ilist[],
-               const int jlist[],
+void coord2csr(const int               nrow_A,
+               const int               ncol_A,
+               const int               nnz,
+               const int               ilist[],
+               const int               jlist[],
                const ComplexOrRealType alist[],
-               int arowptr[],
-               int acol[],
-               ComplexOrRealType aval[])
+               int                     arowptr[],
+               int                     acol[],
+               ComplexOrRealType       aval[])
 {
 	/*
 	 * --------------------------------------
@@ -93,8 +93,8 @@ void coord2csr(const int nrow_A,
 		int k = 0;
 
 		for (k = 0; k < nnz; k++) {
-			int ia = ilist[k];
-			int ja = jlist[k];
+			int               ia  = ilist[k];
+			int               ja  = jlist[k];
 			ComplexOrRealType aij = alist[k];
 
 			int ipos = arowptr[ia] + nnz_row[ia];

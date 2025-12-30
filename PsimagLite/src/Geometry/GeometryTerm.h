@@ -100,12 +100,12 @@ namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType> class GeometryTerm {
 
-	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
+	typedef GeometryBase<ComplexOrRealType, InputType>             GeometryBaseType;
 	typedef GeometryDirection<ComplexOrRealType, GeometryBaseType> GeometryDirectionType;
 
 public:
 
-	typedef typename Real<ComplexOrRealType>::Type RealType;
+	typedef typename Real<ComplexOrRealType>::Type          RealType;
 	typedef typename GeometryDirectionType::InternalDofEnum InternalDofEnum;
 
 	struct Auxiliary {
@@ -126,7 +126,7 @@ public:
 			ioSerializer.write(label + "/linSize", linSize);
 		}
 
-		bool debug;
+		bool     debug;
 		SizeType termId;
 		SizeType numberOfTerms;
 		SizeType linSize;
@@ -303,12 +303,12 @@ public:
 	                                    SizeType edof2) const
 	{
 		assert(geometryBase_);
-		bool bothFringe = (geometryBase_->fringe(i1, smax, emin)
-		                   && geometryBase_->fringe(i2, smax, emin));
-		SizeType siteNew1 = i1;
-		SizeType siteNew2 = i2;
-		SizeType edofNew1 = edof1;
-		SizeType edofNew2 = edof2;
+		bool     bothFringe = (geometryBase_->fringe(i1, smax, emin)
+                                   && geometryBase_->fringe(i2, smax, emin));
+		SizeType siteNew1   = i1;
+		SizeType siteNew2   = i2;
+		SizeType edofNew1   = edof1;
+		SizeType edofNew2   = edof2;
 		if (bothFringe) {
 			if (i2 < i1) {
 				siteNew1 = i2;
@@ -434,7 +434,7 @@ private:
 		if (!geometryBase_)
 			return;
 
-		SizeType linSize = aux_.linSize;
+		SizeType linSize    = aux_.linSize;
 		SizeType matrixRank = geometryBase_->matrixRank(linSize, orbitals_);
 		cachedValues_.resize(matrixRank, matrixRank);
 
@@ -473,12 +473,12 @@ private:
 
 	GeometryTerm& operator=(const GeometryTerm&);
 
-	Auxiliary aux_;
-	SizeType orbitals_;
-	GeometryBaseType* geometryBase_;
-	String gOptions_;
+	Auxiliary                                    aux_;
+	SizeType                                     orbitals_;
+	GeometryBaseType*                            geometryBase_;
+	String                                       gOptions_;
 	typename Vector<GeometryDirectionType>::Type directions_;
-	Matrix<ComplexOrRealType> cachedValues_;
+	Matrix<ComplexOrRealType>                    cachedValues_;
 }; // class GeometryTerm
 } // namespace PsimagLite
 

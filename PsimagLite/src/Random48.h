@@ -28,7 +28,7 @@ template <typename T> class Random48 {
 public:
 
 	typedef long int LongType;
-	typedef T value_type; // legacy name
+	typedef T        value_type; // legacy name
 
 	Random48(LongType seed, SizeType rank = 0, SizeType nprocs = 1)
 	{

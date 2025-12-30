@@ -91,11 +91,11 @@ namespace Dmrg {
 
 template <typename RealType, typename SparseMatrixType> class ReflectionBasis {
 
-	typedef ReflectionColor<RealType, SparseMatrixType> ReflectionColorOrDomType;
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef ReflectionColor<RealType, SparseMatrixType>          ReflectionColorOrDomType;
+	typedef PsimagLite::PackIndices                              PackIndicesType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
+	typedef SparseVector<typename VectorType::value_type>        SparseVectorType;
 
 	enum
 	{
@@ -155,15 +155,15 @@ public:
 
 	//! Invert triangular matrix R into Rinverse
 	//! Hack due to not having rectangular CRS implemented
-	void inverseTriangular(SparseMatrixType& R1Inverse,
+	void inverseTriangular(SparseMatrixType&       R1Inverse,
 	                       const SparseMatrixType& R1,
-	                       const RealType& sector) const
+	                       const RealType&         sector) const
 	{
 		SparseMatrixType R1t;
 		transposeConjugate(R1t, R1);
 		typename PsimagLite::Vector<ComplexOrRealType>::Type r(R1t.rank());
-		SparseMatrixType tmpMatrix(r.size(), r.size());
-		SizeType counter = 0;
+		SparseMatrixType                                     tmpMatrix(r.size(), r.size());
+		SizeType                                             counter = 0;
 		for (SizeType i = 0; i < R1t.rank(); i++) {
 			tmpMatrix.setRow(i, counter);
 			typename PsimagLite::Vector<ComplexOrRealType>::Type rhs(R1t.rank(), 0);
@@ -199,7 +199,7 @@ public:
 
 private:
 
-	void prepareAvailable(typename PsimagLite::Vector<SizeType>::Type& iavail,
+	void prepareAvailable(typename PsimagLite::Vector<SizeType>::Type&       iavail,
 	                      const typename PsimagLite::Vector<SizeType>::Type& ipcolor,
 	                      const typename PsimagLite::Vector<SizeType>::Type& ipIsolated) const
 	{
@@ -232,7 +232,7 @@ private:
 	}
 
 	void setDiagonal(typename PsimagLite::Vector<ComplexOrRealType>::Type& dd,
-	                 const SparseMatrixType& m) const
+	                 const SparseMatrixType&                               m) const
 	{
 		for (SizeType i = 0; i < m.rank(); i++) {
 			ComplexOrRealType val = 0;
@@ -246,9 +246,9 @@ private:
 		}
 	}
 
-	void setDiagonal(SparseMatrixType& R1,
+	void setDiagonal(SparseMatrixType&                                           R1,
 	                 const typename PsimagLite::Vector<ComplexOrRealType>::Type& dr,
-	                 const RealType& sector) const
+	                 const RealType&                                             sector) const
 	{
 		const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg
 		    = (sector > 0) ? ipPos_ : ipNeg_;
@@ -258,8 +258,8 @@ private:
 		for (SizeType i = 0; i < R1.rank(); i++) {
 			R1.setRow(i, counter);
 
-			ComplexOrRealType val = 1.0 + sector * dr[ipPosOrNeg[i]];
-			RealType val2 = sqrt(2.0 * PsimagLite::norm(val));
+			ComplexOrRealType val  = 1.0 + sector * dr[ipPosOrNeg[i]];
+			RealType          val2 = sqrt(2.0 * PsimagLite::norm(val));
 			if (isAlmostZero(val2, 1e-10))
 				continue;
 
@@ -271,10 +271,10 @@ private:
 		R1.checkValidity();
 	}
 
-	void findPermuted(typename PsimagLite::Vector<SizeType>::Type& x,
+	void findPermuted(typename PsimagLite::Vector<SizeType>::Type&                x,
 	                  const typename PsimagLite::Vector<ComplexOrRealType>::Type& dd,
-	                  const typename PsimagLite::Vector<SizeType>::Type& perm,
-	                  SizeType lessOrGreater)
+	                  const typename PsimagLite::Vector<SizeType>::Type&          perm,
+	                  SizeType                                                    lessOrGreater)
 	{
 		for (SizeType i = 0; i < perm.size(); i++) {
 			if (lessOrGreaterCondition(PsimagLite::real(dd[perm[i]]), lessOrGreater))
@@ -291,7 +291,7 @@ private:
 		}
 	}
 
-	void permute(typename PsimagLite::Vector<SizeType>::Type& iavail,
+	void permute(typename PsimagLite::Vector<SizeType>::Type&       iavail,
 	             const typename PsimagLite::Vector<SizeType>::Type& ip) const
 	{
 		for (SizeType i = 0; i < iavail.size(); i++)
@@ -325,10 +325,10 @@ private:
 		progress_.printline(msg, std::cout);
 	}
 
-	bool doneOneSector(SizeType i,
-	                   SizeType j,
-	                   SparseMatrixType& R1,
-	                   const RealType& sector,
+	bool doneOneSector(SizeType                i,
+	                   SizeType                j,
+	                   SparseMatrixType&       R1,
+	                   const RealType&         sector,
 	                   const SparseMatrixType& reflectionT)
 	{
 		bool done = (ipPos_.size() + ipNeg_.size() >= reflection_.rank());
@@ -345,7 +345,7 @@ private:
 		typename PsimagLite::Vector<ComplexOrRealType>::Type T1w(ipPosOrNeg.size(), 0);
 		setT1w(T1w, ipPosOrNeg, w, sector, reflectionT);
 		typename PsimagLite::Vector<ComplexOrRealType>::Type r(R1.rank());
-		SparseMatrixType R1t;
+		SparseMatrixType                                     R1t;
 		transposeConjugate(R1t, R1);
 		linearSolverTriangular(r, R1t, T1w);
 		ComplexOrRealType rkk2 = w * w - r * r; // note: operator* will conjugate if needed
@@ -362,15 +362,15 @@ private:
 		return false;
 	}
 
-	void growOneRowAndOneColumn(SparseMatrixType& R1,
+	void growOneRowAndOneColumn(SparseMatrixType&                                           R1,
 	                            const typename PsimagLite::Vector<ComplexOrRealType>::Type& r,
 	                            const ComplexOrRealType& addedValue,
-	                            const RealType& sector) const
+	                            const RealType&          sector) const
 	{
-		SizeType n2 = (sector > 0) ? ipPos_.size() : ipNeg_.size();
-		SizeType n = R1.rank();
+		SizeType         n2 = (sector > 0) ? ipPos_.size() : ipNeg_.size();
+		SizeType         n  = R1.rank();
 		SparseMatrixType R1new(n + 1, n + 1);
-		SizeType counter = 0;
+		SizeType         counter = 0;
 		for (SizeType i = 0; i < n; i++) {
 			R1new.setRow(i, counter);
 			for (int k = R1.getRowPtr(i); k < R1.getRowPtr(i + 1); k++) {
@@ -399,8 +399,8 @@ private:
 	   Let R1t = transpose(R1), solve   L * r = rhs
 	*/
 	void linearSolverTriangular(
-	    typename PsimagLite::Vector<ComplexOrRealType>::Type& r,
-	    const SparseMatrixType& R1t,
+	    typename PsimagLite::Vector<ComplexOrRealType>::Type&       r,
+	    const SparseMatrixType&                                     R1t,
 	    const typename PsimagLite::Vector<ComplexOrRealType>::Type& rhs) const
 	{
 
@@ -408,7 +408,7 @@ private:
 			ComplexOrRealType dsum = 0.0;
 			ComplexOrRealType diag = 0.0;
 			for (int k = R1t.getRowPtr(irow); k < R1t.getRowPtr(irow + 1); k++) {
-				SizeType j = R1t.getCol(k);
+				SizeType          j   = R1t.getCol(k);
 				ComplexOrRealType lij = R1t.getValue(k);
 				if (j == irow) { // treat diagonal different
 					diag = lij; // save diagonal in diag
@@ -467,13 +467,13 @@ private:
 	//		}
 	//	}
 
-	void setT1w(typename PsimagLite::Vector<ComplexOrRealType>::Type& T1w,
-	            const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg,
+	void setT1w(typename PsimagLite::Vector<ComplexOrRealType>::Type&       T1w,
+	            const typename PsimagLite::Vector<SizeType>::Type&          ipPosOrNeg,
 	            const typename PsimagLite::Vector<ComplexOrRealType>::Type& w,
-	            const RealType& sector,
-	            const SparseMatrixType& reflectionT) const
+	            const RealType&                                             sector,
+	            const SparseMatrixType&                                     reflectionT) const
 	{
-		SizeType n = reflectionT.rank();
+		SizeType                               n = reflectionT.rank();
 		typename PsimagLite::Vector<int>::Type inverseP(n, -1);
 		for (SizeType ii = 0; ii < ipPosOrNeg.size(); ii++) {
 			if (isAlmostZero(w[ii], 1e-14))
@@ -482,9 +482,9 @@ private:
 		}
 
 		for (SizeType col = 0; col < T1w.size(); col++) {
-			ComplexOrRealType sum = 0.0;
-			SizeType start = reflectionT.getRowPtr(col);
-			SizeType end = reflectionT.getRowPtr(col + 1);
+			ComplexOrRealType sum   = 0.0;
+			SizeType          start = reflectionT.getRowPtr(col);
+			SizeType          end   = reflectionT.getRowPtr(col + 1);
 			for (SizeType k = start; k < end; k++) {
 				int x = inverseP[reflectionT.getCol(k)];
 				if (x < 0)
@@ -496,13 +496,13 @@ private:
 	}
 
 	void setColumn(typename PsimagLite::Vector<ComplexOrRealType>::Type& w,
-	               const RealType& sector,
-	               SizeType j,
-	               const SparseMatrixType& reflectionT) const
+	               const RealType&                                       sector,
+	               SizeType                                              j,
+	               const SparseMatrixType&                               reflectionT) const
 	{
 		for (int k = reflectionT.getRowPtr(j); k < reflectionT.getRowPtr(j + 1); k++) {
 			SizeType col = reflectionT.getCol(k);
-			w[col] = reflection_.getValue(k);
+			w[col]       = reflection_.getValue(k);
 			if (col == j)
 				w[col] += sector;
 			w[col] *= sector;
@@ -511,17 +511,17 @@ private:
 
 	void findIsolated(typename PsimagLite::Vector<SizeType>::Type& ipIsolated,
 	                  typename PsimagLite::Vector<SizeType>::Type& ipConnected,
-	                  const SparseMatrixType& reflection_) const
+	                  const SparseMatrixType&                      reflection_) const
 	{
 		for (SizeType i = 0; i < reflection_.rank(); i++) {
-			SizeType nz = 0;
-			bool hasDiagonal = false;
+			SizeType nz          = 0;
+			bool     hasDiagonal = false;
 			for (int k = reflection_.getRowPtr(i); k < reflection_.getRowPtr(i + 1);
 			     k++) {
 				ComplexOrRealType val = reflection_.getValue(k);
-				SizeType col = reflection_.getCol(k);
+				SizeType          col = reflection_.getCol(k);
 				if (i == col) {
-					val = val + 1.0;
+					val         = val + 1.0;
 					hasDiagonal = true;
 				}
 				if (isAlmostZero(val, 1e-4))
@@ -537,11 +537,11 @@ private:
 		}
 	}
 
-	PsimagLite::ProgressIndicator progress_;
-	const SparseMatrixType& reflection_;
-	bool idebug_;
+	PsimagLite::ProgressIndicator               progress_;
+	const SparseMatrixType&                     reflection_;
+	bool                                        idebug_;
 	typename PsimagLite::Vector<SizeType>::Type ipPos_, ipNeg_;
-	SparseMatrixType R1_, Rm_;
+	SparseMatrixType                            R1_, Rm_;
 
 }; // class ReflectionBasis
 

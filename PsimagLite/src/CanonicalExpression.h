@@ -9,7 +9,7 @@ template <typename ItemSpecType> class AssignAndDestroy {
 
 public:
 
-	typedef typename ItemSpecType::ResultType T;
+	typedef typename ItemSpecType::ResultType        T;
 	typedef typename ItemSpecType::ComplexOrRealType ComplexOrRealType;
 
 	AssignAndDestroy(const T& t)
@@ -43,12 +43,12 @@ private:
 template <typename ItemSpecType, typename AssignAndDestroyType = AssignAndDestroy<ItemSpecType>>
 class CanonicalExpression {
 
-	typedef typename ItemSpecType::ResultType ResultType;
+	typedef typename ItemSpecType::ResultType        ResultType;
 	typedef typename ItemSpecType::ComplexOrRealType ComplexOrRealType;
-	typedef typename ItemSpecType::AuxiliaryType AuxiliaryType;
-	typedef typename Real<ComplexOrRealType>::Type RealType;
-	typedef Vector<String>::Type VectorStringType;
-	typedef QuasiCanonical<ComplexOrRealType> QuasiCanonicalType;
+	typedef typename ItemSpecType::AuxiliaryType     AuxiliaryType;
+	typedef typename Real<ComplexOrRealType>::Type   RealType;
+	typedef Vector<String>::Type                     VectorStringType;
+	typedef QuasiCanonical<ComplexOrRealType>        QuasiCanonicalType;
 
 public:
 
@@ -56,10 +56,10 @@ public:
 	    : itemSpec_(itemSpec)
 	{ }
 
-	bool operator()(ResultType& result,
-	                String expr,
+	bool operator()(ResultType&       result,
+	                String            expr,
 	                const ResultType& resultEmpty,
-	                AuxiliaryType& aux) const
+	                AuxiliaryType&    aux) const
 	{
 		// canonical expressions only for now
 		// expr --> exprCanonical
@@ -70,7 +70,7 @@ public:
 
 		for (SizeType i = 0; i < numberOfTerms; ++i) {
 			AssignAndDestroyType assignAndDestroy(resultEmpty); // t_ = resultEmpty
-			bool isNotEmpty
+			bool                 isNotEmpty
 			    = procCanonicalTerm(assignAndDestroy, quasiCanonical, i, aux);
 			if (!isNotEmpty)
 				continue;
@@ -119,13 +119,13 @@ public:
 private:
 
 	bool procCanonicalTerm(AssignAndDestroyType& assignAndDestroy,
-	                       QuasiCanonicalType& quasiCanonical,
-	                       SizeType ind,
-	                       AuxiliaryType& aux) const
+	                       QuasiCanonicalType&   quasiCanonical,
+	                       SizeType              ind,
+	                       AuxiliaryType&        aux) const
 	{
-		String termCanonical = quasiCanonical.term(ind);
-		ComplexOrRealType factor = 1.0;
-		VectorStringType vecStr;
+		String            termCanonical = quasiCanonical.term(ind);
+		ComplexOrRealType factor        = 1.0;
+		VectorStringType  vecStr;
 		split(vecStr, termCanonical, "*");
 
 		for (SizeType i = 0; i < vecStr.size(); ++i) {
@@ -141,10 +141,10 @@ private:
 	}
 
 	void procCanonicalFactor(AssignAndDestroyType& prev,
-	                         ComplexOrRealType& factor,
-	                         String termStr,
-	                         QuasiCanonicalType& quasiCanonical,
-	                         AuxiliaryType& aux) const
+	                         ComplexOrRealType&    factor,
+	                         String                termStr,
+	                         QuasiCanonicalType&   quasiCanonical,
+	                         AuxiliaryType&        aux) const
 	{
 		bool isCaScalar = QuasiCanonicalType::isRealScalar(termStr);
 		if (isCaScalar) {

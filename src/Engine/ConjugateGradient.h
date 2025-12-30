@@ -87,9 +87,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template <typename MatrixType> class ConjugateGradient {
-	typedef typename MatrixType::value_type FieldType;
+	typedef typename MatrixType::value_type              FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
-	typedef typename PsimagLite::Real<FieldType>::Type RealType;
+	typedef typename PsimagLite::Real<FieldType>::Type   RealType;
 
 public:
 
@@ -108,14 +108,14 @@ public:
 		VectorType rnext;
 		for (SizeType i = 0; i < rprev.size(); i++) {
 			rprev[i] = b[i] - v[i];
-			p[i] = rprev[i];
+			p[i]     = rprev[i];
 		}
 
 		SizeType k = 0;
 		while (k < max_) {
-			VectorType tmp = multiply(A, p);
-			FieldType scalarrprev = scalarProduct(rprev, rprev);
-			FieldType val = scalarrprev / scalarProduct(p, tmp);
+			VectorType    tmp         = multiply(A, p);
+			FieldType     scalarrprev = scalarProduct(rprev, rprev);
+			FieldType     val         = scalarrprev / scalarProduct(p, tmp);
 			v <= x + val* p;
 			x = v;
 			v <= rprev - val* tmp;
@@ -124,12 +124,12 @@ public:
 				break;
 			val = scalarProduct(rnext, rnext) / scalarrprev;
 			v <= rnext - val* p;
-			p = v;
+			p     = v;
 			rprev = rnext;
 			k++;
 		}
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Finished after " << k << " steps out of " << max_;
 		msg << " requested eps= " << eps_;
@@ -140,7 +140,7 @@ public:
 		if (finalEps <= eps_)
 			return;
 
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << "WARNING: actual eps " << finalEps
 		     << " greater than requested eps= " << eps_;
@@ -165,8 +165,8 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
-	SizeType max_;
-	RealType eps_;
+	SizeType                      max_;
+	RealType                      eps_;
 }; // class ConjugateGradient
 
 } // namespace Dmrg

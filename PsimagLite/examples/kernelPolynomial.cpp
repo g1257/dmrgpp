@@ -34,20 +34,20 @@ void usage(const char* progName)
 
 int main(int argc, char* argv[])
 {
-	int opt = 0;
-	PsimagLite::String file = "";
-	typedef double RealType;
+	int                                        opt  = 0;
+	PsimagLite::String                         file = "";
+	typedef double                             RealType;
 	typedef PsimagLite::Vector<RealType>::Type VectorType;
 
-	RealType wbegin = 0;
-	RealType wend = 0;
-	RealType wstep = 0;
-	typedef PsimagLite::ChebyshevSerializer<VectorType> ChebyshevSerializerType;
+	RealType                                              wbegin = 0;
+	RealType                                              wend   = 0;
+	RealType                                              wstep  = 0;
+	typedef PsimagLite::ChebyshevSerializer<VectorType>   ChebyshevSerializerType;
 	typedef ChebyshevSerializerType::KernelParametersType KernelParametersType;
-	SizeType type = KernelParametersType::JACKSON;
-	RealType lambda = 0.0;
-	bool makeZero = false;
-	SizeType cutoff = 0;
+	SizeType                                              type = KernelParametersType::JACKSON;
+	RealType                                              lambda   = 0.0;
+	bool                                                  makeZero = false;
+	SizeType                                              cutoff   = 0;
 	while ((opt = getopt(argc, argv, "f:b:e:s:c:l:zd")) != -1) {
 		switch (opt) {
 		case 'f':
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
 			cutoff = atoi(optarg);
 			break;
 		case 'l':
-			type = KernelParametersType::LORENTZ;
+			type   = KernelParametersType::LORENTZ;
 			lambda = atof(optarg);
 			break;
 		case 'd':
@@ -96,8 +96,8 @@ int main(int argc, char* argv[])
 	ChebyshevSerializerType chebyshevSerializer(io);
 
 	ChebyshevSerializerType::PlotParamsType params(wbegin, wend, wstep, 0.0, 0.0, 0);
-	ChebyshevSerializerType::PlotDataType v;
-	KernelParametersType kernelParams(type, cutoff, lambda);
+	ChebyshevSerializerType::PlotDataType   v;
+	KernelParametersType                    kernelParams(type, cutoff, lambda);
 	chebyshevSerializer.plot(v, params, kernelParams);
 	for (SizeType x = 0; x < v.size(); x++) {
 		RealType tmp = v[x].second;

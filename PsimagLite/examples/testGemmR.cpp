@@ -17,13 +17,13 @@ template <> zcomplex make_val<zcomplex>(double const x, double const y)
 template <typename T>
 int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, bool needsPrinting)
 {
-	int const idebug = (needsPrinting) ? 1 : 0;
-	int nerrors = 0;
+	int const idebug  = (needsPrinting) ? 1 : 0;
+	int       nerrors = 0;
 
 	char const trans_table[3] = { 'N', 'T', 'C' };
 
 	T const alpha = make_val<T>(1.1, 2.1);
-	T const beta = make_val<T>(3.1, 4.1);
+	T const beta  = make_val<T>(3.1, 4.1);
 
 	PsimagLite::GemmR<T> gemmR(
 	    needsPrinting, nb, PsimagLite::Concurrency::codeSectionParams.npthreads);
@@ -71,7 +71,7 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 								T cij = make_val<T>(
 								    1.0 * (i + j) / (mC + nC),
 								    1.0 * i * j / (mC * nC));
-								C(i, j) = cij;
+								C(i, j)       = cij;
 								C_gemmr(i, j) = cij;
 							}
 						}
@@ -123,7 +123,7 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 						                   ldC);
 
 						double max_err = 0;
-						double c_norm = 0;
+						double c_norm  = 0;
 						for (int j = 0; j < nC; j++) {
 							for (int i = 0; i < mC; i++) {
 								double const err = std::abs(
@@ -133,8 +133,8 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 							}
 						}
 
-						double const tol = 0.0000001;
-						bool const isok = (max_err < tol);
+						double const tol  = 0.0000001;
+						bool const   isok = (max_err < tol);
 						if (!isok) {
 							nerrors++;
 						}
@@ -156,10 +156,10 @@ int test_GEMMR(int const Mmax, int const Nmax, int const Kmax, int const nb, boo
 
 int main(int argc, char** argv)
 {
-	int const Nmax = 300;
-	int const Mmax = 301;
-	int const Kmax = 302;
-	int nerr_zcomplex = 0;
+	int const Nmax          = 300;
+	int const Mmax          = 301;
+	int const Kmax          = 302;
+	int       nerr_zcomplex = 0;
 
 	if (argc < 2)
 		throw PsimagLite::RuntimeError("USAGE: " + PsimagLite::String(argv[0])
@@ -167,7 +167,7 @@ int main(int argc, char** argv)
 
 	int nthreads = atoi(argv[1]);
 
-	int const nb = (argc >= 3) ? atoi(argv[2]) : 99;
+	int const  nb            = (argc >= 3) ? atoi(argv[2]) : 99;
 	const bool needsPrinting = (argc == 4) ? atoi(argv[3]) > 0 : false;
 
 	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);

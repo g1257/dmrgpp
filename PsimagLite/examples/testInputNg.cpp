@@ -96,7 +96,7 @@ int main(int argc, char* argv[])
 
 	typedef PsimagLite::InputNg<MyInputCheck> InputNgType;
 
-	std::string filename(argv[1]);
+	std::string  filename(argv[1]);
 	MyInputCheck myInputCheck;
 
 	/* PSIDOC_RESUME
@@ -108,7 +108,7 @@ int main(int argc, char* argv[])
 	*/
 
 	InputNgType::Writeable ioWriteable(filename, myInputCheck);
-	InputNgType::Readable io(ioWriteable);
+	InputNgType::Readable  io(ioWriteable);
 
 	/* PSIDOC_RESUME
 	\end{lstlisting}

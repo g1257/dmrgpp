@@ -86,26 +86,26 @@ namespace Dmrg {
 template <typename VectorWithOffsetType, typename DmrgWaveStructType, typename LeftRightSuperType>
 class ParallelWftSu2 {
 
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef PsimagLite::PackIndices                                 PackIndicesType;
+	typedef PsimagLite::Concurrency                                 ConcurrencyType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef typename BasisWithOperatorsType::FactorsType FactorsType;
+	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
+	typedef typename DmrgWaveStructType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                   SparseElementType;
+	typedef typename BasisWithOperatorsType::FactorsType            FactorsType;
 
 public:
 
-	typedef typename VectorWithOffsetType::value_type VectorElementType;
+	typedef typename VectorWithOffsetType::value_type          VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
-	ParallelWftSu2(VectorWithOffsetType& psiDest,
-	               const VectorWithOffsetType& psiSrc,
-	               const LeftRightSuperType& lrs,
-	               SizeType i0,
-	               const VectorSizeType& nk,
-	               const DmrgWaveStructType& dmrgWaveStruct,
+	ParallelWftSu2(VectorWithOffsetType&         psiDest,
+	               const VectorWithOffsetType&   psiSrc,
+	               const LeftRightSuperType&     lrs,
+	               SizeType                      i0,
+	               const VectorSizeType&         nk,
+	               const DmrgWaveStructType&     dmrgWaveStruct,
 	               ProgramGlobals::DirectionEnum dir)
 	    : psiDest_(psiDest)
 	    , psiSrc_(psiSrc)
@@ -182,17 +182,17 @@ public:
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
-		SizeType start = psiDest_.offset(i0_);
+		SizeType start                       = psiDest_.offset(i0_);
 		psiDest_.fastAccess(i0_, taskNumber) = 0.0;
-		SizeType xx = taskNumber + start;
+		SizeType xx                          = taskNumber + start;
 		assert(dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM
 		       || dir_ == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON);
 
 		if (dir_ == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			SizeType ip = 0;
+			SizeType ip    = 0;
 			SizeType alpha = 0;
-			SizeType kp = 0;
-			SizeType jp = 0;
+			SizeType kp    = 0;
+			SizeType jp    = 0;
 			for (int kI = factorsInvSE_.getRowPtr(xx);
 			     kI < factorsInvSE_.getRowPtr(xx + 1);
 			     kI++) {
@@ -212,10 +212,10 @@ public:
 				}
 			}
 		} else {
-			SizeType ip = 0;
+			SizeType ip   = 0;
 			SizeType beta = 0;
-			SizeType kp = 0;
-			SizeType jp = 0;
+			SizeType kp   = 0;
+			SizeType jp   = 0;
 			for (int kI = factorsInvSE_.getRowPtr(xx);
 			     kI < factorsInvSE_.getRowPtr(xx + 1);
 			     kI++) {
@@ -247,13 +247,13 @@ private:
 	ParallelWftSu2& operator=(const ParallelWftSu2<T1, T2, T3>&);
 
 	template <typename SomeVectorType>
-	SparseElementType createAux2b(const SomeVectorType& psiSrc,
-	                              SizeType ip,
-	                              SizeType kp,
-	                              SizeType jp,
+	SparseElementType createAux2b(const SomeVectorType&   psiSrc,
+	                              SizeType                ip,
+	                              SizeType                kp,
+	                              SizeType                jp,
 	                              const SparseMatrixType& wsT,
 	                              const SparseMatrixType& we,
-	                              const VectorSizeType& nk) const
+	                              const VectorSizeType&   nk) const
 	{
 		SizeType nalpha = dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		assert(nalpha == wsT.cols());
@@ -266,8 +266,8 @@ private:
 		assert(fptrSE);
 		const FactorsType& factorsSE = *fptrSE;
 
-		SizeType volumeOfNk = this->volumeOf(nk);
-		SparseElementType sum = 0;
+		SizeType          volumeOfNk = this->volumeOf(nk);
+		SparseElementType sum        = 0;
 
 		SizeType kpjp = kp + jp * volumeOfNk;
 		assert(kpjp < dmrgWaveStruct_.lrs().right().permutationInverse().size());
@@ -298,13 +298,13 @@ private:
 	}
 
 	template <typename SomeVectorType>
-	SparseElementType createAux1b(const SomeVectorType& psiSrc,
-	                              SizeType ip,
-	                              SizeType kp,
-	                              SizeType jp,
+	SparseElementType createAux1b(const SomeVectorType&   psiSrc,
+	                              SizeType                ip,
+	                              SizeType                kp,
+	                              SizeType                jp,
 	                              const SparseMatrixType& ws,
 	                              const SparseMatrixType& weT,
-	                              const VectorSizeType& nk) const
+	                              const VectorSizeType&   nk) const
 	{
 		SizeType volumeOfNk = volumeOf(nk);
 		SizeType ni
@@ -346,22 +346,22 @@ private:
 		return sum;
 	}
 
-	VectorWithOffsetType& psiDest_;
-	const VectorWithOffsetType& psiSrc_;
-	const LeftRightSuperType& lrs_;
-	SizeType i0_;
-	const VectorSizeType& nk_;
-	const DmrgWaveStructType& dmrgWaveStruct_;
+	VectorWithOffsetType&         psiDest_;
+	const VectorWithOffsetType&   psiSrc_;
+	const LeftRightSuperType&     lrs_;
+	SizeType                      i0_;
+	const VectorSizeType&         nk_;
+	const DmrgWaveStructType&     dmrgWaveStruct_;
 	ProgramGlobals::DirectionEnum dir_;
-	SparseMatrixType ws_;
-	SparseMatrixType we_;
-	PackIndicesType* pack1_;
-	PackIndicesType* pack2_;
-	SparseMatrixType wsT_;
-	SparseMatrixType weT_;
-	FactorsType factorsInvSE_;
-	FactorsType factorsInvS_;
-	FactorsType factorsInvE_;
+	SparseMatrixType              ws_;
+	SparseMatrixType              we_;
+	PackIndicesType*              pack1_;
+	PackIndicesType*              pack2_;
+	SparseMatrixType              wsT_;
+	SparseMatrixType              weT_;
+	FactorsType                   factorsInvSE_;
+	FactorsType                   factorsInvS_;
+	FactorsType                   factorsInvE_;
 }; // class ParallelWftSu2
 } // namespace Dmrg
 

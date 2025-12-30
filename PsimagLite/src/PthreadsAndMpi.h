@@ -107,8 +107,8 @@ public:
 
 private:
 
-	SizeType nthreads_;
-	MPI::CommType comm_;
+	SizeType        nthreads_;
+	MPI::CommType   comm_;
 	pthread_mutex_t mutex_;
 
 }; // PthreadsAndMpi class

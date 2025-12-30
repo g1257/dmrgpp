@@ -105,7 +105,7 @@ public:
 
 	void operator()(const PsimagLite::GetBraOrKet& bra,
 	                const PsimagLite::GetBraOrKet& ket,
-	                LambdaType* t) const
+	                LambdaType*                    t) const
 	{
 		if (!t)
 			return;
@@ -128,53 +128,53 @@ public:
 
 	enum SetTvsEnum
 	{
-		NO_TVS = false,
+		NO_TVS           = false,
 		READ_AND_SET_TVS = true
 	};
 
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef LanczosSolverType_ LanczosSolverType;
-	typedef PsimagLite::IoSelector IoType;
-	typedef typename IoType::In IoInputType;
-	typedef typename TargetHelperType::RealType RealType;
-	typedef typename TargetHelperType::ModelType ModelType;
-	typedef typename TargetHelperType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
+	typedef VectorWithOffsetType_                               VectorWithOffsetType;
+	typedef LanczosSolverType_                                  LanczosSolverType;
+	typedef PsimagLite::IoSelector                              IoType;
+	typedef typename IoType::In                                 IoInputType;
+	typedef typename TargetHelperType::RealType                 RealType;
+	typedef typename TargetHelperType::ModelType                ModelType;
+	typedef typename TargetHelperType::ModelHelperType          ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
+	typedef typename LanczosSolverType::PostProcType            PostProcType;
+	typedef typename VectorWithOffsetType::VectorType           VectorType;
 	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename BasisWithOperatorsType::OperatorType       OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType          BasisType;
+	typedef typename BasisWithOperatorsType::VectorQnType       VectorQnType;
+	typedef typename BasisType::BlockType                       BlockType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type        VectorStringType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type     VectorOperatorType;
 	typedef ApplyOperatorExpression<TargetHelperType, VectorWithOffsetType, LanczosSolverType>
-	    ApplyOperatorExpressionType;
-	typedef typename ApplyOperatorExpressionType::VectorSizeType VectorSizeType;
+	                                                                ApplyOperatorExpressionType;
+	typedef typename ApplyOperatorExpressionType::VectorSizeType    VectorSizeType;
 	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
-	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
-	typedef typename TargetHelperType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename ApplyOperatorExpressionType::TargetParamsType TargetParamsType;
+	typedef typename ApplyOperatorType::BorderEnum                  BorderEnumType;
+	typedef typename TargetHelperType::WaveFunctionTransfType       WaveFunctionTransfType;
+	typedef typename ApplyOperatorExpressionType::TargetParamsType  TargetParamsType;
 	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType
-	    VectorVectorWithOffsetType;
+	                                                             VectorVectorWithOffsetType;
 	typedef typename ApplyOperatorExpressionType::VectorRealType VectorRealType;
-	typedef typename ApplyOperatorExpressionType::PairType PairType;
+	typedef typename ApplyOperatorExpressionType::PairType       PairType;
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef Braket<ModelType> BraketType;
-	typedef FermionSign FermionSignType;
-	typedef typename ApplyOperatorExpressionType::StageEnumType StageEnumType;
-	typedef TimeSerializer<VectorWithOffsetType> TimeSerializerType;
-	typedef RestartStruct RestartStructType;
+	typedef typename ModelType::InputValidatorType                    InputValidatorType;
+	typedef Braket<ModelType>                                         BraketType;
+	typedef FermionSign                                               FermionSignType;
+	typedef typename ApplyOperatorExpressionType::StageEnumType       StageEnumType;
+	typedef TimeSerializer<VectorWithOffsetType>                      TimeSerializerType;
+	typedef RestartStruct                                             RestartStructType;
 	typedef typename ApplyOperatorExpressionType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
-	typedef SdhsReinterpret<BraketType> SdhsReinterpretType;
+	                                                           VectorVectorVectorWithOffsetType;
+	typedef SdhsReinterpret<BraketType>                        SdhsReinterpretType;
 	typedef MultiPointInSitu<VectorWithOffsetType_, ModelType> MultiPointInSituType;
-	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
+	typedef Checkpoint<ModelType, WaveFunctionTransfType>      CheckpointType;
 	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
 
 	enum class OpLabelCategory
@@ -183,10 +183,10 @@ public:
 		BARE
 	};
 
-	TargetingCommon(const LeftRightSuperType& lrs,
-	                const CheckpointType& checkPoint,
+	TargetingCommon(const LeftRightSuperType&     lrs,
+	                const CheckpointType&         checkPoint,
 	                const WaveFunctionTransfType& wft,
-	                SizeType indexNoAdvance)
+	                SizeType                      indexNoAdvance)
 	    : cocoonType_(OpLabelCategory::DRESSED)
 	    , progress_("TargetingCommon")
 	    , checkPoint_(checkPoint)
@@ -225,14 +225,14 @@ public:
 	// START read/write
 
 	void write(PsimagLite::IoSelector::Out& io,
-	           const VectorSizeType& block,
-	           PsimagLite::String prefix) const
+	           const VectorSizeType&        block,
+	           PsimagLite::String           prefix) const
 	{
 		if (block.size() != 1)
 			err(PsimagLite::String(__FILE__)
 			    + " write() only supports blocks.size=1\n");
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Saving state...";
 		progress_.printline(msgg, std::cout);
@@ -242,21 +242,21 @@ public:
 	}
 
 	void writeNGSTs(PsimagLite::IoSelector::Out& io,
-	                PsimagLite::String prefix,
-	                const VectorSizeType& block,
-	                PsimagLite::String name,
-	                const PostProcType& cf) const
+	                PsimagLite::String           prefix,
+	                const VectorSizeType&        block,
+	                PsimagLite::String           name,
+	                const PostProcType&          cf) const
 	{
 		cf.write(io, prefix);
 		writeNGSTs(io, prefix, block, name);
 	}
 
 	void writeNGSTs(PsimagLite::IoSelector::Out& io,
-	                PsimagLite::String prefix,
-	                const VectorSizeType& block,
-	                PsimagLite::String name) const
+	                PsimagLite::String           prefix,
+	                const VectorSizeType&        block,
+	                PsimagLite::String           name) const
 	{
-		SizeType site = block[0];
+		SizeType           site = block[0];
 		TimeSerializerType ts(currentTimeStep(), time(), site, aoe_, name);
 		ts.write(io, prefix);
 	}
@@ -328,7 +328,7 @@ public:
 			aoeNonConst.targetVectorsNonConst(i) = ts->vector(j);
 		}
 
-		bool sameNgst = isThisNgstSameAsPrevious(name, ts->name(), dtvs, rtvs);
+		bool     sameNgst  = isThisNgstSameAsPrevious(name, ts->name(), dtvs, rtvs);
 		SizeType cTimeStep = (sameNgst) ? ts->currentTimeStep() : 0;
 		setCurrentTimeStep(cTimeStep);
 
@@ -350,10 +350,10 @@ public:
 	// START Cocoons
 
 	template <typename SomeLambdaType = int>
-	void cocoon(const BlockType& block,
+	void cocoon(const BlockType&              block,
 	            ProgramGlobals::DirectionEnum direction,
-	            bool doBorderIfBorder,
-	            SomeLambdaType* someLambda = nullptr) const
+	            bool                          doBorderIfBorder,
+	            SomeLambdaType*               someLambda = nullptr) const
 	{
 		if (aoe_.noStageIs(StageEnumType::DISABLED))
 			std::cout << "ALL OPERATORS HAVE BEEN APPLIED\n";
@@ -365,9 +365,9 @@ public:
 
 		SizeType n = meas_.size();
 		assert(block.size() > 0);
-		SizeType site = block[0];
+		SizeType site          = block[0];
 		SizeType numberOfSites = targetHelper_.model().superGeometry().numberOfSites();
-		BorderEnumType border = ApplyOperatorType::BORDER_NO;
+		BorderEnumType border  = ApplyOperatorType::BORDER_NO;
 		if (site == 0 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			border = ApplyOperatorType::BORDER_YES;
 		if (site == numberOfSites - 1
@@ -377,8 +377,8 @@ public:
 		const SizeType expectedSize = targetHelper_.model().hilbertSize(site);
 
 		LambdaForTests<SomeLambdaType> lambdaForTests;
-		MultiPointInSituType multiPointInSitu(
-		    aoe_.model(), checkPoint_, targetHelper_.wft(), direction);
+		MultiPointInSituType           multiPointInSitu(
+                    aoe_.model(), checkPoint_, targetHelper_.wft(), direction);
 
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
@@ -434,23 +434,23 @@ public:
 
 	// FIXME TODO REMOVE
 	ComplexOrRealType rixsCocoon(ProgramGlobals::DirectionEnum direction,
-	                             SizeType site,
-	                             SizeType index1,
-	                             SizeType index2,
-	                             bool needsShift) const
+	                             SizeType                      site,
+	                             SizeType                      index1,
+	                             SizeType                      index2,
+	                             bool                          needsShift) const
 	{
-		const ModelType& model = targetHelper_.model();
-		SizeType h = model.hilbertSize(site);
+		const ModelType&                      model = targetHelper_.model();
+		SizeType                              h     = model.hilbertSize(site);
 		typename OperatorType::Su2RelatedType su2Related1;
-		SparseMatrixType idSparse;
+		SparseMatrixType                      idSparse;
 		idSparse.makeDiagonal(h, 1.0);
-		OperatorType id(idSparse,
-		                ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                PairType(0, 0),
-		                1.0,
-		                su2Related1);
+		OperatorType      id(idSparse,
+                                ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                PairType(0, 0),
+                                1.0,
+                                su2Related1);
 		ComplexOrRealType value = 0.0;
-		SizeType n = meas_.size();
+		SizeType          n     = meas_.size();
 		if (n == 0)
 			return value;
 		if (n > 1)
@@ -460,9 +460,9 @@ public:
 			err("rixsCocoon: supports only bare operators\n");
 
 		SizeType numberOfSites = targetHelper_.model().superGeometry().numberOfSites();
-		BorderEnumType border = (site == 0 || site == numberOfSites - 1)
-		    ? ApplyOperatorType::BORDER_YES
-		    : ApplyOperatorType::BORDER_NO;
+		BorderEnumType border  = (site == 0 || site == numberOfSites - 1)
+		     ? ApplyOperatorType::BORDER_YES
+		     : ApplyOperatorType::BORDER_NO;
 
 		const VectorWithOffsetType& v1 = aoe_.targetVectors(index1);
 		const VectorWithOffsetType& v2 = aoe_.targetVectors(index2);
@@ -517,10 +517,10 @@ public:
 		}
 	}
 
-	void initialGuess(VectorWithOffsetType& v,
+	void initialGuess(VectorWithOffsetType&       v,
 	                  const VectorWithOffsetType& psi,
-	                  const OneSiteSpacesType& oneSiteSpaces,
-	                  bool noguess) const
+	                  const OneSiteSpacesType&    oneSiteSpaces,
+	                  bool                        noguess) const
 	{
 		const WaveFunctionTransfType& wft = targetHelper_.wft();
 
@@ -532,7 +532,7 @@ public:
 
 	void computeCorrection(ProgramGlobals::DirectionEnum direction, const BlockType& block1)
 	{
-		const VectorWithOffsetType& psi = aoe_.ensureOnlyOnePsi("computeCorrection");
+		const VectorWithOffsetType&  psi = aoe_.ensureOnlyOnePsi("computeCorrection");
 		ApplyOperatorExpressionType& aoeNonConst
 		    = const_cast<ApplyOperatorExpressionType&>(aoe_);
 		VectorWithOffsetType& v = aoeNonConst.targetVectorsNonConst(0);
@@ -542,7 +542,7 @@ public:
 		assert(leftSize > 0);
 		SizeType site2 = targetHelper_.lrs().left().block()[leftSize - 1];
 		typename PsimagLite::Vector<OperatorType>::Type creationMatrix;
-		VectorQnType q;
+		VectorQnType                                    q;
 		targetHelper_.model().setOperatorMatrices(
 		    creationMatrix, q, std::vector<SizeType>(1, site2));
 
@@ -560,7 +560,7 @@ public:
 		FermionSign fs(targetHelper_.lrs().left(), signs);
 		for (SizeType j = 0; j < creationMatrix.size(); j++) {
 			VectorWithOffsetType phiTemp;
-			const OperatorType& cm = creationMatrix[j];
+			const OperatorType&  cm = creationMatrix[j];
 			aoe_.applyOpLocal()(phiTemp,
 			                    psi,
 			                    cm,
@@ -576,7 +576,7 @@ public:
 	}
 
 	int findFermionSignOfTheOperators(typename TargetParamsType::ConcatEnum concat,
-	                                  const VectorOperatorType& myoperator) const
+	                                  const VectorOperatorType&             myoperator) const
 	{
 		bool wereSumming = (concat == TargetParamsType::ConcatEnum::SUM);
 		ProgramGlobals::FermionOrBosonEnum forB = ProgramGlobals::FermionOrBosonEnum::BOSON;
@@ -613,8 +613,8 @@ public:
 	}
 
 	void calcBracket(ProgramGlobals::DirectionEnum direction,
-	                 SizeType site,
-	                 const BraketType& braket) const
+	                 SizeType                      site,
+	                 const BraketType&             braket) const
 	{
 		if (braket.points() != 1)
 			err("Brakets in situ must be one-points\n");
@@ -656,17 +656,17 @@ public:
 
 	// returns <src2|A|src1>
 	template <typename SomeAlgebraType>
-	ComplexOrRealType testRealWork(const VectorWithOffsetType& src1,
-	                               const VectorWithOffsetType& src2,
+	ComplexOrRealType testRealWork(const VectorWithOffsetType&         src1,
+	                               const VectorWithOffsetType&         src2,
 	                               const ProgramGlobals::DirectionEnum systemOrEnviron,
-	                               SizeType site,
-	                               const SomeAlgebraType& A,
-	                               BorderEnumType border) const
+	                               SizeType                            site,
+	                               const SomeAlgebraType&              A,
+	                               BorderEnumType                      border) const
 	{
 		const SizeType splitSize = targetHelper_.model().hilbertSize(site);
 		typename PsimagLite::Vector<bool>::Type oddElectrons;
 		targetHelper_.model().findOddElectronsOfOneSite(oddElectrons, site);
-		FermionSign fs(targetHelper_.lrs().left(), oddElectrons);
+		FermionSign          fs(targetHelper_.lrs().left(), oddElectrons);
 		VectorWithOffsetType dest;
 		aoe_.applyOpLocal()(dest, src1, A, fs, splitSize, systemOrEnviron, border);
 
@@ -693,14 +693,14 @@ public:
 		if (aoe_.allStages(StageEnumType::DISABLED))
 			return;
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "gsWeight=" << gsWeight << " weights= ";
 		for (SizeType i = 0; i < weights.size(); ++i)
 			msg << weights[i] << " ";
 		progress_.printline(msgg, std::cout);
 
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << "gsNorms=";
 
@@ -725,7 +725,7 @@ public:
 		if (currentTimeStep() == 0)
 			return;
 
-		PsimagLite::OstringStream msgg3(std::cout.precision());
+		PsimagLite::OstringStream                     msgg3(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg3 = msgg3();
 		msg3 << "CurrentTime=" << time();
 		msg3 << " CurrentTimeStep=" << currentTimeStep();
@@ -750,8 +750,8 @@ private:
 
 	bool isThisNgstSameAsPrevious(PsimagLite::String nameThis,
 	                              PsimagLite::String namePrev,
-	                              SizeType tvsThis,
-	                              SizeType tvsPrev) const
+	                              SizeType           tvsThis,
+	                              SizeType           tvsPrev) const
 	{
 		if (nameThis != "LEGACY" && namePrev != "LEGACY")
 			return (nameThis == namePrev);
@@ -768,7 +768,7 @@ private:
 		std::cout << "-------------&*&*&* In-situ measurements end\n";
 	}
 
-	void setNk(typename PsimagLite::Vector<SizeType>::Type& nk,
+	void setNk(typename PsimagLite::Vector<SizeType>::Type&       nk,
 	           const typename PsimagLite::Vector<SizeType>::Type& block) const
 	{
 		for (SizeType i = 0; i < block.size(); i++)
@@ -777,13 +777,13 @@ private:
 
 	// prints <v1|A|v2>
 	void cocoon_(ProgramGlobals::DirectionEnum direction,
-	             SizeType site,
-	             const VectorWithOffsetType& v1,
-	             PsimagLite::String label1,
-	             const VectorWithOffsetType& v2,
-	             PsimagLite::String label2,
-	             BorderEnumType border,
-	             bool wantsPrinting) const
+	             SizeType                      site,
+	             const VectorWithOffsetType&   v1,
+	             PsimagLite::String            label1,
+	             const VectorWithOffsetType&   v2,
+	             PsimagLite::String            label2,
+	             BorderEnumType                border,
+	             bool                          wantsPrinting) const
 	{
 		SizeType n = meas_.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -847,13 +847,13 @@ private:
 
 	// prints <src2|A|src1>
 	template <typename SomeAlgebraType>
-	void test(const VectorWithOffsetType& src1,
-	          const VectorWithOffsetType& src2,
+	void test(const VectorWithOffsetType&         src1,
+	          const VectorWithOffsetType&         src2,
 	          const ProgramGlobals::DirectionEnum systemOrEnviron,
-	          PsimagLite::String label,
-	          SizeType site,
-	          const SomeAlgebraType& A,
-	          BorderEnumType border) const
+	          PsimagLite::String                  label,
+	          SizeType                            site,
+	          const SomeAlgebraType&              A,
+	          BorderEnumType                      border) const
 	{
 		ComplexOrRealType sum = test_(src1, src2, systemOrEnviron, site, A, border);
 		std::cout << site << " " << sum << " " << time();
@@ -862,12 +862,12 @@ private:
 
 	// returns <src2|A|src1>; but if !withLegacyBugs returns <src1|A|src2>
 	template <typename SomeAlgebraType>
-	ComplexOrRealType test_(const VectorWithOffsetType& src1,
-	                        const VectorWithOffsetType& src2,
+	ComplexOrRealType test_(const VectorWithOffsetType&         src1,
+	                        const VectorWithOffsetType&         src2,
 	                        const ProgramGlobals::DirectionEnum systemOrEnviron,
-	                        SizeType site,
-	                        const SomeAlgebraType& A,
-	                        BorderEnumType border) const
+	                        SizeType                            site,
+	                        const SomeAlgebraType&              A,
+	                        BorderEnumType                      border) const
 	{
 		if (targetHelper_.withLegacyBugs())
 			return testRealWork(src1, src2, systemOrEnviron, site, A, border);
@@ -879,18 +879,18 @@ private:
 
 	TargetingCommon& operator=(const TargetingCommon&) = delete;
 
-	OpLabelCategory cocoonType_;
-	VectorStringType meas_;
+	OpLabelCategory               cocoonType_;
+	VectorStringType              meas_;
 	PsimagLite::ProgressIndicator progress_;
-	const CheckpointType& checkPoint_;
-	TargetHelperType targetHelper_;
-	ApplyOperatorExpressionType aoe_;
-	mutable VectorType inSitu_;
+	const CheckpointType&         checkPoint_;
+	TargetHelperType              targetHelper_;
+	ApplyOperatorExpressionType   aoe_;
+	mutable VectorType            inSitu_;
 }; // class TargetingCommon
 
 template <typename TargetHelperType, typename VectorWithOffsetType, typename LanczosSolverType>
 std::ostream&
-operator<<(std::ostream& os,
+operator<<(std::ostream&                                                                     os,
            const TargetingCommon<TargetHelperType, VectorWithOffsetType, LanczosSolverType>& tst)
 {
 	os << "DT=NothingToSeeHereYet\n";

@@ -44,18 +44,18 @@ private:
 		if (str == "-i")
 			return ComplexType(0., -1.);
 
-		String buffer;
-		bool flag = false;
-		const SizeType n = str.length();
-		RealType real1 = 0;
+		String         buffer;
+		bool           flag  = false;
+		const SizeType n     = str.length();
+		RealType       real1 = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			bool isSqrtMinus1 = (str[i] == 'i');
 			if (isSqrtMinus1 && flag)
 				throw RuntimeError("Error parsing number " + str + "\n");
 
 			if (isSqrtMinus1) {
-				flag = true;
-				real1 = (buffer == "") ? 0 : atof(buffer.c_str());
+				flag   = true;
+				real1  = (buffer == "") ? 0 : atof(buffer.c_str());
 				buffer = "";
 				continue;
 			}

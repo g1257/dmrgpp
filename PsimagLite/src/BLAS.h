@@ -1240,79 +1240,79 @@ namespace BLAS {
 
 	// ============================================================================
 	inline double DOT(IntegerForBlasType n,
-	                  double* dx,
+	                  double*            dx,
 	                  IntegerForBlasType incx,
-	                  double* dy,
+	                  double*            dy,
 	                  IntegerForBlasType incy)
 	{
 		return ddot_(&n, dx, &incx, dy, &incy);
 	}
 
 	// ============================================================================
-	inline void GEMM(char c1,
-	                 char c2,
+	inline void GEMM(char               c1,
+	                 char               c2,
 	                 IntegerForBlasType sX,
 	                 IntegerForBlasType sY,
 	                 IntegerForBlasType sZ,
-	                 const float& a,
-	                 const float* x,
+	                 const float&       a,
+	                 const float*       x,
 	                 IntegerForBlasType sx,
-	                 const float* y,
+	                 const float*       y,
 	                 IntegerForBlasType sy,
-	                 const float& b,
-	                 float* z,
+	                 const float&       b,
+	                 float*             z,
 	                 IntegerForBlasType sz)
 	{
 		sgemm_(&c1, &c2, &sX, &sY, &sZ, &a, x, &sx, y, &sy, &b, z, &sz);
 	}
 
-	inline void GEMM(char c1,
-	                 char c2,
+	inline void GEMM(char               c1,
+	                 char               c2,
 	                 IntegerForBlasType sX,
 	                 IntegerForBlasType sY,
 	                 IntegerForBlasType sZ,
-	                 const double& a,
-	                 const double* x,
+	                 const double&      a,
+	                 const double*      x,
 	                 IntegerForBlasType sx,
-	                 const double* y,
+	                 const double*      y,
 	                 IntegerForBlasType sy,
-	                 const double& b,
-	                 double* z,
+	                 const double&      b,
+	                 double*            z,
 	                 IntegerForBlasType sz)
 	{
 		dgemm_(&c1, &c2, &sX, &sY, &sZ, &a, x, &sx, y, &sy, &b, z, &sz);
 	}
 
-	inline void GEMM(char c1,
-	                 char c2,
-	                 IntegerForBlasType sX,
-	                 IntegerForBlasType sY,
-	                 IntegerForBlasType sZ,
+	inline void GEMM(char                       c1,
+	                 char                       c2,
+	                 IntegerForBlasType         sX,
+	                 IntegerForBlasType         sY,
+	                 IntegerForBlasType         sZ,
 	                 const std::complex<float>& a,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType sx,
+	                 IntegerForBlasType         sx,
 	                 const std::complex<float>* y,
-	                 IntegerForBlasType sy,
+	                 IntegerForBlasType         sy,
 	                 const std::complex<float>& b,
-	                 std::complex<float>* z,
-	                 IntegerForBlasType sz)
+	                 std::complex<float>*       z,
+	                 IntegerForBlasType         sz)
 	{
 		cgemm_(&c1, &c2, &sX, &sY, &sZ, &a, x, &sx, y, &sy, &b, z, &sz);
 	}
 
-	inline void GEMM(char c1,
-	                 char c2,
-	                 IntegerForBlasType sX,
-	                 IntegerForBlasType sY,
-	                 IntegerForBlasType sZ,
+	inline void GEMM(char                        c1,
+	                 char                        c2,
+	                 IntegerForBlasType          sX,
+	                 IntegerForBlasType          sY,
+	                 IntegerForBlasType          sZ,
 	                 const std::complex<double>& a,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType sx,
+	                 IntegerForBlasType          sx,
 	                 const std::complex<double>* y,
-	                 IntegerForBlasType sy,
+	                 IntegerForBlasType          sy,
 	                 const std::complex<double>& b,
-	                 std::complex<double>* z,
-	                 IntegerForBlasType sz)
+	                 std::complex<double>*       z,
+	                 IntegerForBlasType          sz)
 	{
 		/* When  TRANSA = 'N' or 'n' then
 		        LDA must be at least  max( 1, m ), otherwise  LDA must be at
@@ -1332,1195 +1332,1195 @@ namespace BLAS {
 	}
 
 	// ***************************************************************************
-	inline void SYMM(char c1,
-	                 char c2,
+	inline void SYMM(char               c1,
+	                 char               c2,
 	                 IntegerForBlasType sX,
 	                 IntegerForBlasType sY,
-	                 const float& a,
-	                 const float* x,
+	                 const float&       a,
+	                 const float*       x,
 	                 IntegerForBlasType sx,
-	                 const float* y,
+	                 const float*       y,
 	                 IntegerForBlasType sy,
-	                 const float& b,
-	                 float* z,
+	                 const float&       b,
+	                 float*             z,
 	                 IntegerForBlasType sz)
 	{
 		ssymm_(&c1, &c2, &sX, &sY, &a, x, &sx, y, &sy, &b, z, &sz);
 	}
 
-	inline void SYMM(char c1,
-	                 char c2,
+	inline void SYMM(char               c1,
+	                 char               c2,
 	                 IntegerForBlasType sX,
 	                 IntegerForBlasType sY,
-	                 const double& a,
-	                 const double* x,
+	                 const double&      a,
+	                 const double*      x,
 	                 IntegerForBlasType sx,
-	                 const double* y,
+	                 const double*      y,
 	                 IntegerForBlasType sy,
-	                 const double& b,
-	                 double* z,
+	                 const double&      b,
+	                 double*            z,
 	                 IntegerForBlasType sz)
 	{
 		dsymm_(&c1, &c2, &sX, &sY, &a, x, &sx, y, &sy, &b, z, &sz);
 	}
-	inline void SYMM(char c1,
-	                 char c2,
-	                 IntegerForBlasType sX,
-	                 IntegerForBlasType sY,
+	inline void SYMM(char                       c1,
+	                 char                       c2,
+	                 IntegerForBlasType         sX,
+	                 IntegerForBlasType         sY,
 	                 const std::complex<float>& a,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType sx,
+	                 IntegerForBlasType         sx,
 	                 const std::complex<float>* y,
-	                 IntegerForBlasType sy,
+	                 IntegerForBlasType         sy,
 	                 const std::complex<float>& b,
-	                 std::complex<float>* z,
-	                 IntegerForBlasType sz)
+	                 std::complex<float>*       z,
+	                 IntegerForBlasType         sz)
 	{
 		csymm_(&c1, &c2, &sX, &sY, &a, x, &sx, y, &sy, &b, z, &sz);
 	}
-	inline void SYMM(char c1,
-	                 char c2,
-	                 IntegerForBlasType sX,
-	                 IntegerForBlasType sY,
+	inline void SYMM(char                        c1,
+	                 char                        c2,
+	                 IntegerForBlasType          sX,
+	                 IntegerForBlasType          sY,
 	                 const std::complex<double>& a,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType sx,
+	                 IntegerForBlasType          sx,
 	                 const std::complex<double>* y,
-	                 IntegerForBlasType sy,
+	                 IntegerForBlasType          sy,
 	                 const std::complex<double>& b,
-	                 std::complex<double>* z,
-	                 IntegerForBlasType sz)
+	                 std::complex<double>*       z,
+	                 IntegerForBlasType          sz)
 	{
 		zsymm_(&c1, &c2, &sX, &sY, &a, x, &sx, y, &sy, &b, z, &sz);
 	}
 	// ---------------------------------------------------------------------------
-	inline void HEMM(char c1,
-	                 char c2,
-	                 IntegerForBlasType sX,
-	                 IntegerForBlasType sY,
+	inline void HEMM(char                       c1,
+	                 char                       c2,
+	                 IntegerForBlasType         sX,
+	                 IntegerForBlasType         sY,
 	                 const std::complex<float>& a,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType sx,
+	                 IntegerForBlasType         sx,
 	                 const std::complex<float>* y,
 	                 IntegerForBlasType,
 	                 const std::complex<float>& b,
-	                 std::complex<float>* z,
-	                 IntegerForBlasType sz)
+	                 std::complex<float>*       z,
+	                 IntegerForBlasType         sz)
 	{
 		chemm_(&c1, &c2, &sX, &sY, &a, x, &sx, y, &sx, &b, z, &sz);
 	}
-	inline void HEMM(char c1,
-	                 char c2,
-	                 IntegerForBlasType sX,
-	                 IntegerForBlasType sY,
+	inline void HEMM(char                        c1,
+	                 char                        c2,
+	                 IntegerForBlasType          sX,
+	                 IntegerForBlasType          sY,
 	                 const std::complex<double>& a,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType sx,
+	                 IntegerForBlasType          sx,
 	                 const std::complex<double>* y,
 	                 IntegerForBlasType,
 	                 const std::complex<double>& b,
-	                 std::complex<double>* z,
-	                 IntegerForBlasType sz)
+	                 std::complex<double>*       z,
+	                 IntegerForBlasType          sz)
 	{
 		zhemm_(&c1, &c2, &sX, &sY, &a, x, &sx, y, &sx, &b, z, &sz);
 	}
 	// **************************************************************************
-	inline void SYRK(char UPLO,
-	                 char TRANS,
+	inline void SYRK(char               UPLO,
+	                 char               TRANS,
 	                 IntegerForBlasType N,
 	                 IntegerForBlasType K,
-	                 const float& ALPHA,
-	                 const float* A,
+	                 const float&       ALPHA,
+	                 const float*       A,
 	                 IntegerForBlasType LDA,
-	                 const float& BETA,
-	                 float* C,
+	                 const float&       BETA,
+	                 float*             C,
 	                 IntegerForBlasType LDC)
 	{
 		ssyrk_(&UPLO, &TRANS, &N, &K, &ALPHA, A, &LDA, &BETA, C, &LDC);
 	}
-	inline void SYRK(char UPLO,
-	                 char TRANS,
+	inline void SYRK(char               UPLO,
+	                 char               TRANS,
 	                 IntegerForBlasType N,
 	                 IntegerForBlasType K,
-	                 const double& ALPHA,
-	                 const double* A,
+	                 const double&      ALPHA,
+	                 const double*      A,
 	                 IntegerForBlasType LDA,
-	                 const double& BETA,
-	                 double* C,
+	                 const double&      BETA,
+	                 double*            C,
 	                 IntegerForBlasType LDC)
 	{
 		dsyrk_(&UPLO, &TRANS, &N, &K, &ALPHA, A, &LDA, &BETA, C, &LDC);
 	}
-	inline void SYRK(char UPLO,
-	                 char TRANS,
-	                 IntegerForBlasType N,
-	                 IntegerForBlasType K,
+	inline void SYRK(char                       UPLO,
+	                 char                       TRANS,
+	                 IntegerForBlasType         N,
+	                 IntegerForBlasType         K,
 	                 const std::complex<float>& ALPHA,
 	                 const std::complex<float>* A,
-	                 IntegerForBlasType LDA,
+	                 IntegerForBlasType         LDA,
 	                 const std::complex<float>& BETA,
-	                 std::complex<float>* C,
-	                 IntegerForBlasType LDC)
+	                 std::complex<float>*       C,
+	                 IntegerForBlasType         LDC)
 	{
 		csyrk_(&UPLO, &TRANS, &N, &K, &ALPHA, A, &LDA, &BETA, C, &LDC);
 	}
-	inline void SYRK(char UPLO,
-	                 char TRANS,
-	                 IntegerForBlasType N,
-	                 IntegerForBlasType K,
+	inline void SYRK(char                        UPLO,
+	                 char                        TRANS,
+	                 IntegerForBlasType          N,
+	                 IntegerForBlasType          K,
 	                 const std::complex<double>& ALPHA,
 	                 const std::complex<double>* A,
-	                 IntegerForBlasType LDA,
+	                 IntegerForBlasType          LDA,
 	                 const std::complex<double>& BETA,
-	                 std::complex<double>* C,
-	                 IntegerForBlasType LDC)
+	                 std::complex<double>*       C,
+	                 IntegerForBlasType          LDC)
 	{
 		zsyrk_(&UPLO, &TRANS, &N, &K, &ALPHA, A, &LDA, &BETA, C, &LDC);
 	}
 
 	// ***************************************************************************
-	inline void HERK(char UPLO,
-	                 char TRANS,
-	                 IntegerForBlasType N,
-	                 IntegerForBlasType K,
+	inline void HERK(char                       UPLO,
+	                 char                       TRANS,
+	                 IntegerForBlasType         N,
+	                 IntegerForBlasType         K,
 	                 const std::complex<float>& ALPHA,
 	                 const std::complex<float>* A,
-	                 IntegerForBlasType LDA,
+	                 IntegerForBlasType         LDA,
 	                 const std::complex<float>& BETA,
-	                 std::complex<float>* C,
-	                 IntegerForBlasType LDC)
+	                 std::complex<float>*       C,
+	                 IntegerForBlasType         LDC)
 	{
 		cherk_(&UPLO, &TRANS, &N, &K, &ALPHA, A, &LDA, &BETA, C, &LDC);
 	}
-	inline void HERK(char UPLO,
-	                 char TRANS,
-	                 IntegerForBlasType N,
-	                 IntegerForBlasType K,
+	inline void HERK(char                        UPLO,
+	                 char                        TRANS,
+	                 IntegerForBlasType          N,
+	                 IntegerForBlasType          K,
 	                 const std::complex<double>& ALPHA,
 	                 const std::complex<double>* A,
-	                 IntegerForBlasType LDA,
+	                 IntegerForBlasType          LDA,
 	                 const std::complex<double>& BETA,
-	                 std::complex<double>* C,
-	                 IntegerForBlasType LDC)
+	                 std::complex<double>*       C,
+	                 IntegerForBlasType          LDC)
 	{
 		zherk_(&UPLO, &TRANS, &N, &K, &ALPHA, A, &LDA, &BETA, C, &LDC);
 	}
 	// ***************************************************************************
-	inline void SYR2K(char uplo,
-	                  char trans,
+	inline void SYR2K(char               uplo,
+	                  char               trans,
 	                  IntegerForBlasType n,
 	                  IntegerForBlasType k,
-	                  const float& alpha,
-	                  const float* A,
+	                  const float&       alpha,
+	                  const float*       A,
 	                  IntegerForBlasType lda,
-	                  const float* B,
+	                  const float*       B,
 	                  IntegerForBlasType ldb,
-	                  const float& beta,
-	                  float* C,
+	                  const float&       beta,
+	                  float*             C,
 	                  IntegerForBlasType ldc)
 	{
 		ssyr2k_(&uplo, &trans, &n, &k, &alpha, A, &lda, B, &ldb, &beta, C, &ldc);
 	}
-	inline void SYR2K(char uplo,
-	                  char trans,
+	inline void SYR2K(char               uplo,
+	                  char               trans,
 	                  IntegerForBlasType n,
 	                  IntegerForBlasType k,
-	                  const double& alpha,
-	                  const double* A,
+	                  const double&      alpha,
+	                  const double*      A,
 	                  IntegerForBlasType lda,
-	                  const double* B,
+	                  const double*      B,
 	                  IntegerForBlasType ldb,
-	                  const double& beta,
-	                  double* C,
+	                  const double&      beta,
+	                  double*            C,
 	                  IntegerForBlasType ldc)
 	{
 		dsyr2k_(&uplo, &trans, &n, &k, &alpha, A, &lda, B, &ldb, &beta, C, &ldc);
 	}
-	inline void SYR2k(char uplo,
-	                  char trans,
-	                  IntegerForBlasType n,
-	                  IntegerForBlasType k,
+	inline void SYR2k(char                       uplo,
+	                  char                       trans,
+	                  IntegerForBlasType         n,
+	                  IntegerForBlasType         k,
 	                  const std::complex<float>& alpha,
 	                  const std::complex<float>* A,
-	                  IntegerForBlasType lda,
+	                  IntegerForBlasType         lda,
 	                  const std::complex<float>* B,
-	                  IntegerForBlasType ldb,
+	                  IntegerForBlasType         ldb,
 	                  const std::complex<float>& beta,
-	                  std::complex<float>* C,
-	                  IntegerForBlasType ldc)
+	                  std::complex<float>*       C,
+	                  IntegerForBlasType         ldc)
 	{
 		csyr2k_(&uplo, &trans, &n, &k, &alpha, A, &lda, B, &ldb, &beta, C, &ldc);
 	}
-	inline void SYR2k(char uplo,
-	                  char trans,
-	                  IntegerForBlasType n,
-	                  IntegerForBlasType k,
+	inline void SYR2k(char                        uplo,
+	                  char                        trans,
+	                  IntegerForBlasType          n,
+	                  IntegerForBlasType          k,
 	                  const std::complex<double>& alpha,
 	                  const std::complex<double>* A,
-	                  IntegerForBlasType lda,
+	                  IntegerForBlasType          lda,
 	                  const std::complex<double>* B,
-	                  IntegerForBlasType ldb,
+	                  IntegerForBlasType          ldb,
 	                  const std::complex<double>& beta,
-	                  std::complex<double>* C,
-	                  IntegerForBlasType ldc)
+	                  std::complex<double>*       C,
+	                  IntegerForBlasType          ldc)
 	{
 		zsyr2k_(&uplo, &trans, &n, &k, &alpha, A, &lda, B, &ldb, &beta, C, &ldc);
 	}
 	// ***************************************************************************
-	inline void HER2k(char uplo,
-	                  char trans,
-	                  IntegerForBlasType n,
-	                  IntegerForBlasType k,
+	inline void HER2k(char                       uplo,
+	                  char                       trans,
+	                  IntegerForBlasType         n,
+	                  IntegerForBlasType         k,
 	                  const std::complex<float>& alpha,
 	                  const std::complex<float>* A,
-	                  IntegerForBlasType lda,
+	                  IntegerForBlasType         lda,
 	                  const std::complex<float>* B,
-	                  IntegerForBlasType ldb,
+	                  IntegerForBlasType         ldb,
 	                  const std::complex<float>& beta,
-	                  std::complex<float>* C,
-	                  IntegerForBlasType ldc)
+	                  std::complex<float>*       C,
+	                  IntegerForBlasType         ldc)
 	{
 		cher2k_(&uplo, &trans, &n, &k, &alpha, A, &lda, B, &ldb, &beta, C, &ldc);
 	}
-	inline void HER2k(char uplo,
-	                  char trans,
-	                  IntegerForBlasType n,
-	                  IntegerForBlasType k,
+	inline void HER2k(char                        uplo,
+	                  char                        trans,
+	                  IntegerForBlasType          n,
+	                  IntegerForBlasType          k,
 	                  const std::complex<double>& alpha,
 	                  const std::complex<double>* A,
-	                  IntegerForBlasType lda,
+	                  IntegerForBlasType          lda,
 	                  const std::complex<double>* B,
-	                  IntegerForBlasType ldb,
+	                  IntegerForBlasType          ldb,
 	                  const std::complex<double>& beta,
-	                  std::complex<double>* C,
-	                  IntegerForBlasType ldc)
+	                  std::complex<double>*       C,
+	                  IntegerForBlasType          ldc)
 	{
 		zher2k_(&uplo, &trans, &n, &k, &alpha, A, &lda, B, &ldb, &beta, C, &ldc);
 	}
 	// ********************************************************************************
-	inline void TRMM(char side,
-	                 char uplo,
-	                 char transa,
-	                 char diag,
+	inline void TRMM(char               side,
+	                 char               uplo,
+	                 char               transa,
+	                 char               diag,
 	                 IntegerForBlasType m,
 	                 IntegerForBlasType n,
-	                 const float& alpha,
-	                 const float* A,
+	                 const float&       alpha,
+	                 const float*       A,
 	                 IntegerForBlasType lda,
-	                 float* B,
+	                 float*             B,
 	                 IntegerForBlasType ldb)
 	{
 		strmm_(&side, &uplo, &transa, &diag, &m, &n, &alpha, A, &lda, B, &ldb);
 	}
-	inline void TRMM(char side,
-	                 char uplo,
-	                 char transa,
-	                 char diag,
+	inline void TRMM(char               side,
+	                 char               uplo,
+	                 char               transa,
+	                 char               diag,
 	                 IntegerForBlasType m,
 	                 IntegerForBlasType n,
-	                 const double& alpha,
-	                 const double* A,
+	                 const double&      alpha,
+	                 const double*      A,
 	                 IntegerForBlasType lda,
-	                 double* B,
+	                 double*            B,
 	                 IntegerForBlasType ldb)
 	{
 		dtrmm_(&side, &uplo, &transa, &diag, &m, &n, &alpha, A, &lda, B, &ldb);
 	}
-	inline void TRMM(char side,
-	                 char uplo,
-	                 char transa,
-	                 char diag,
-	                 IntegerForBlasType m,
-	                 IntegerForBlasType n,
+	inline void TRMM(char                       side,
+	                 char                       uplo,
+	                 char                       transa,
+	                 char                       diag,
+	                 IntegerForBlasType         m,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* A,
-	                 IntegerForBlasType lda,
-	                 std::complex<float>* B,
-	                 IntegerForBlasType ldb)
+	                 IntegerForBlasType         lda,
+	                 std::complex<float>*       B,
+	                 IntegerForBlasType         ldb)
 	{
 		ctrmm_(&side, &uplo, &transa, &diag, &m, &n, &alpha, A, &lda, B, &ldb);
 	}
-	inline void TRMM(char side,
-	                 char uplo,
-	                 char transa,
-	                 char diag,
-	                 IntegerForBlasType m,
-	                 IntegerForBlasType n,
+	inline void TRMM(char                        side,
+	                 char                        uplo,
+	                 char                        transa,
+	                 char                        diag,
+	                 IntegerForBlasType          m,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* A,
-	                 IntegerForBlasType lda,
-	                 std::complex<double>* B,
-	                 IntegerForBlasType ldb)
+	                 IntegerForBlasType          lda,
+	                 std::complex<double>*       B,
+	                 IntegerForBlasType          ldb)
 	{
 		ztrmm_(&side, &uplo, &transa, &diag, &m, &n, &alpha, A, &lda, B, &ldb);
 	}
 	// ********************************************************************************
-	inline void TRSM(char side,
-	                 char uplo,
-	                 char transa,
-	                 char diag,
+	inline void TRSM(char               side,
+	                 char               uplo,
+	                 char               transa,
+	                 char               diag,
 	                 IntegerForBlasType m,
 	                 IntegerForBlasType n,
-	                 const float& alpha,
-	                 const float* A,
+	                 const float&       alpha,
+	                 const float*       A,
 	                 IntegerForBlasType lda,
-	                 float* B,
+	                 float*             B,
 	                 IntegerForBlasType ldb)
 	{
 		strsm_(&side, &uplo, &transa, &diag, &m, &n, &alpha, A, &lda, B, &ldb);
 	}
-	inline void TRSM(char side,
-	                 char uplo,
-	                 char transa,
-	                 char diag,
+	inline void TRSM(char               side,
+	                 char               uplo,
+	                 char               transa,
+	                 char               diag,
 	                 IntegerForBlasType m,
 	                 IntegerForBlasType n,
-	                 const double& alpha,
-	                 const double* A,
+	                 const double&      alpha,
+	                 const double*      A,
 	                 IntegerForBlasType lda,
-	                 double* B,
+	                 double*            B,
 	                 IntegerForBlasType ldb)
 	{
 		dtrsm_(&side, &uplo, &transa, &diag, &m, &n, &alpha, A, &lda, B, &ldb);
 	}
-	inline void TRSM(char side,
-	                 char uplo,
-	                 char transa,
-	                 char diag,
-	                 IntegerForBlasType m,
-	                 IntegerForBlasType n,
+	inline void TRSM(char                       side,
+	                 char                       uplo,
+	                 char                       transa,
+	                 char                       diag,
+	                 IntegerForBlasType         m,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* A,
-	                 IntegerForBlasType lda,
-	                 std::complex<float>* B,
-	                 IntegerForBlasType ldb)
+	                 IntegerForBlasType         lda,
+	                 std::complex<float>*       B,
+	                 IntegerForBlasType         ldb)
 	{
 		ctrsm_(&side, &uplo, &transa, &diag, &m, &n, &alpha, A, &lda, B, &ldb);
 	}
-	inline void TRSM(char side,
-	                 char uplo,
-	                 char transa,
-	                 char diag,
-	                 IntegerForBlasType m,
-	                 IntegerForBlasType n,
+	inline void TRSM(char                        side,
+	                 char                        uplo,
+	                 char                        transa,
+	                 char                        diag,
+	                 IntegerForBlasType          m,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* A,
-	                 IntegerForBlasType lda,
-	                 std::complex<double>* B,
-	                 IntegerForBlasType ldb)
+	                 IntegerForBlasType          lda,
+	                 std::complex<double>*       B,
+	                 IntegerForBlasType          ldb)
 	{
 		ztrsm_(&side, &uplo, &transa, &diag, &m, &n, &alpha, A, &lda, B, &ldb);
 	}
 	// ***************************************************************************
 
-	inline void GEMV(char c,
+	inline void GEMV(char               c,
 	                 IntegerForBlasType M,
 	                 IntegerForBlasType N,
-	                 const float& alpha,
-	                 const float* A,
+	                 const float&       alpha,
+	                 const float*       A,
 	                 IntegerForBlasType ldA,
-	                 const float* x,
+	                 const float*       x,
 	                 IntegerForBlasType incX,
-	                 const float& beta,
-	                 float* y,
+	                 const float&       beta,
+	                 float*             y,
 	                 IntegerForBlasType incY)
 	{
 		sgemv_(&c, &M, &N, &alpha, A, &ldA, x, &incX, &beta, y, &incY);
 	}
 	// ----------------------------------------------------------------------------
-	inline void GEMV(char c,
+	inline void GEMV(char               c,
 	                 IntegerForBlasType M,
 	                 IntegerForBlasType N,
-	                 const double& alpha,
-	                 const double* A,
+	                 const double&      alpha,
+	                 const double*      A,
 	                 IntegerForBlasType ldA,
-	                 const double* x,
+	                 const double*      x,
 	                 IntegerForBlasType incX,
-	                 const double& beta,
-	                 double* y,
+	                 const double&      beta,
+	                 double*            y,
 	                 IntegerForBlasType incY)
 	{
 		dgemv_(&c, &M, &N, &alpha, A, &ldA, x, &incX, &beta, y, &incY);
 	}
 	// ---------------------------------------------------------------------------
-	inline void GEMV(char c,
-	                 IntegerForBlasType M,
-	                 IntegerForBlasType N,
+	inline void GEMV(char                       c,
+	                 IntegerForBlasType         M,
+	                 IntegerForBlasType         N,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* A,
-	                 IntegerForBlasType ldA,
+	                 IntegerForBlasType         ldA,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType incX,
+	                 IntegerForBlasType         incX,
 	                 const std::complex<float>& beta,
-	                 std::complex<float>* y,
-	                 IntegerForBlasType incY)
+	                 std::complex<float>*       y,
+	                 IntegerForBlasType         incY)
 	{
 		cgemv_(&c, &M, &N, &alpha, A, &ldA, x, &incX, &beta, y, &incY);
 	}
 	// ---------------------------------------------------------------------------
-	inline void GEMV(char c,
-	                 IntegerForBlasType M,
-	                 IntegerForBlasType N,
+	inline void GEMV(char                        c,
+	                 IntegerForBlasType          M,
+	                 IntegerForBlasType          N,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* A,
-	                 IntegerForBlasType ldA,
+	                 IntegerForBlasType          ldA,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType incX,
+	                 IntegerForBlasType          incX,
 	                 const std::complex<double>& beta,
-	                 std::complex<double>* y,
-	                 IntegerForBlasType incY)
+	                 std::complex<double>*       y,
+	                 IntegerForBlasType          incY)
 	{
 		zgemv_(&c, &M, &N, &alpha, A, &ldA, x, &incX, &beta, y, &incY);
 	}
 	// ----------------------------------------------------------------------------
-	inline void GBMV(char trans,
+	inline void GBMV(char               trans,
 	                 IntegerForBlasType m,
 	                 IntegerForBlasType n,
 	                 IntegerForBlasType kl,
 	                 IntegerForBlasType ku,
-	                 const float& alpha,
-	                 const float* A,
+	                 const float&       alpha,
+	                 const float*       A,
 	                 IntegerForBlasType lda,
-	                 const float* x,
+	                 const float*       x,
 	                 IntegerForBlasType incx,
-	                 const float& beta,
-	                 float* y,
+	                 const float&       beta,
+	                 float*             y,
 	                 IntegerForBlasType incy)
 	{
 		sgbmv_(&trans, &m, &n, &kl, &ku, &alpha, A, &lda, x, &incx, &beta, y, &incy);
 	}
-	inline void GBMV(char trans,
+	inline void GBMV(char               trans,
 	                 IntegerForBlasType m,
 	                 IntegerForBlasType n,
 	                 IntegerForBlasType kl,
 	                 IntegerForBlasType ku,
-	                 const double& alpha,
-	                 const double* A,
+	                 const double&      alpha,
+	                 const double*      A,
 	                 IntegerForBlasType lda,
-	                 const double* x,
+	                 const double*      x,
 	                 IntegerForBlasType incx,
-	                 const double& beta,
-	                 double* y,
+	                 const double&      beta,
+	                 double*            y,
 	                 IntegerForBlasType incy)
 	{
 		dgbmv_(&trans, &m, &n, &kl, &ku, &alpha, A, &lda, x, &incx, &beta, y, &incy);
 	}
-	inline void GBMV(char trans,
-	                 IntegerForBlasType m,
-	                 IntegerForBlasType n,
-	                 IntegerForBlasType kl,
-	                 IntegerForBlasType ku,
+	inline void GBMV(char                       trans,
+	                 IntegerForBlasType         m,
+	                 IntegerForBlasType         n,
+	                 IntegerForBlasType         kl,
+	                 IntegerForBlasType         ku,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* A,
-	                 IntegerForBlasType lda,
+	                 IntegerForBlasType         lda,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType         incx,
 	                 const std::complex<float>& beta,
-	                 std::complex<float>* y,
-	                 IntegerForBlasType incy)
+	                 std::complex<float>*       y,
+	                 IntegerForBlasType         incy)
 	{
 		cgbmv_(&trans, &m, &n, &kl, &ku, &alpha, A, &lda, x, &incx, &beta, y, &incy);
 	}
-	inline void GBMV(char trans,
-	                 IntegerForBlasType m,
-	                 IntegerForBlasType n,
-	                 IntegerForBlasType kl,
-	                 IntegerForBlasType ku,
+	inline void GBMV(char                        trans,
+	                 IntegerForBlasType          m,
+	                 IntegerForBlasType          n,
+	                 IntegerForBlasType          kl,
+	                 IntegerForBlasType          ku,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* A,
-	                 IntegerForBlasType lda,
+	                 IntegerForBlasType          lda,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType          incx,
 	                 const std::complex<double>& beta,
-	                 std::complex<double>* y,
-	                 IntegerForBlasType incy)
+	                 std::complex<double>*       y,
+	                 IntegerForBlasType          incy)
 	{
 		zgbmv_(&trans, &m, &n, &kl, &ku, &alpha, A, &lda, x, &incx, &beta, y, &incy);
 	}
 	// ****************************************************************************
-	inline void HEMV(char uplo,
-	                 IntegerForBlasType n,
+	inline void HEMV(char                       uplo,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* a,
-	                 IntegerForBlasType lda,
+	                 IntegerForBlasType         lda,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType         incx,
 	                 const std::complex<float>& beta,
-	                 std::complex<float>* y,
-	                 IntegerForBlasType incy)
+	                 std::complex<float>*       y,
+	                 IntegerForBlasType         incy)
 	{
 		chemv_(&uplo, &n, &alpha, a, &lda, x, &incx, &beta, y, &incy);
 	}
-	inline void HEMV(char uplo,
-	                 IntegerForBlasType n,
+	inline void HEMV(char                        uplo,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* a,
-	                 IntegerForBlasType lda,
+	                 IntegerForBlasType          lda,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType          incx,
 	                 const std::complex<double>& beta,
-	                 std::complex<double>* y,
-	                 IntegerForBlasType incy)
+	                 std::complex<double>*       y,
+	                 IntegerForBlasType          incy)
 	{
 		zhemv_(&uplo, &n, &alpha, a, &lda, x, &incx, &beta, y, &incy);
 	}
 	// **************************************************************************
-	inline void HBMV(char uplo,
-	                 IntegerForBlasType n,
-	                 IntegerForBlasType k,
+	inline void HBMV(char                       uplo,
+	                 IntegerForBlasType         n,
+	                 IntegerForBlasType         k,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* a,
-	                 IntegerForBlasType lda,
+	                 IntegerForBlasType         lda,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType         incx,
 	                 const std::complex<float>& beta,
-	                 std::complex<float>* y,
-	                 IntegerForBlasType incy)
+	                 std::complex<float>*       y,
+	                 IntegerForBlasType         incy)
 	{
 		chbmv_(&uplo, &n, &k, &alpha, a, &lda, x, &incx, &beta, y, &incy);
 	}
-	inline void HBMV(char uplo,
-	                 IntegerForBlasType n,
-	                 IntegerForBlasType k,
+	inline void HBMV(char                        uplo,
+	                 IntegerForBlasType          n,
+	                 IntegerForBlasType          k,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* a,
-	                 IntegerForBlasType lda,
+	                 IntegerForBlasType          lda,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType          incx,
 	                 const std::complex<double>& beta,
-	                 std::complex<double>* y,
-	                 IntegerForBlasType incy)
+	                 std::complex<double>*       y,
+	                 IntegerForBlasType          incy)
 	{
 		zhbmv_(&uplo, &n, &k, &alpha, a, &lda, x, &incx, &beta, y, &incy);
 	}
 	// ***************************************************************************
-	inline void HPMV(char uplo,
-	                 IntegerForBlasType n,
+	inline void HPMV(char                       uplo,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* ap,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType         incx,
 	                 const std::complex<float>& beta,
-	                 std::complex<float>* y,
-	                 IntegerForBlasType incy)
+	                 std::complex<float>*       y,
+	                 IntegerForBlasType         incy)
 	{
 		chpmv_(&uplo, &n, &alpha, ap, x, &incx, &beta, y, &incy);
 	}
-	inline void HPMV(char uplo,
-	                 IntegerForBlasType n,
+	inline void HPMV(char                        uplo,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* ap,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType          incx,
 	                 const std::complex<double>& beta,
-	                 std::complex<double>* y,
-	                 IntegerForBlasType incy)
+	                 std::complex<double>*       y,
+	                 IntegerForBlasType          incy)
 	{
 		zhpmv_(&uplo, &n, &alpha, ap, x, &incx, &beta, y, &incy);
 	}
 	// ***************************************************************************
-	inline void SYMV(char uplo,
+	inline void SYMV(char               uplo,
 	                 IntegerForBlasType n,
-	                 const float& alpha,
-	                 const float* a,
+	                 const float&       alpha,
+	                 const float*       a,
 	                 IntegerForBlasType lda,
-	                 const float* x,
+	                 const float*       x,
 	                 IntegerForBlasType incx,
-	                 const float& beta,
-	                 float* y,
+	                 const float&       beta,
+	                 float*             y,
 	                 IntegerForBlasType incy)
 	{
 		ssymv_(&uplo, &n, &alpha, a, &lda, x, &incx, &beta, y, &incy);
 	}
-	inline void SYMV(char uplo,
+	inline void SYMV(char               uplo,
 	                 IntegerForBlasType n,
-	                 const double& alpha,
-	                 const double* a,
+	                 const double&      alpha,
+	                 const double*      a,
 	                 IntegerForBlasType lda,
-	                 const double* x,
+	                 const double*      x,
 	                 IntegerForBlasType incx,
-	                 const double& beta,
-	                 double* y,
+	                 const double&      beta,
+	                 double*            y,
 	                 IntegerForBlasType incy)
 	{
 		dsymv_(&uplo, &n, &alpha, a, &lda, x, &incx, &beta, y, &incy);
 	}
 	// ****************************************************************************
-	inline void SBMV(char uplo,
+	inline void SBMV(char               uplo,
 	                 IntegerForBlasType n,
 	                 IntegerForBlasType k,
-	                 const float& alpha,
-	                 const float* a,
+	                 const float&       alpha,
+	                 const float*       a,
 	                 IntegerForBlasType lda,
-	                 const float* x,
+	                 const float*       x,
 	                 IntegerForBlasType incx,
-	                 const float& beta,
-	                 float* y,
+	                 const float&       beta,
+	                 float*             y,
 	                 IntegerForBlasType incy)
 	{
 		ssbmv_(&uplo, &n, &k, &alpha, a, &lda, x, &incx, &beta, y, &incy);
 	}
-	inline void SBMV(char uplo,
+	inline void SBMV(char               uplo,
 	                 IntegerForBlasType n,
 	                 IntegerForBlasType k,
-	                 const double& alpha,
-	                 const double* a,
+	                 const double&      alpha,
+	                 const double*      a,
 	                 IntegerForBlasType lda,
-	                 const double* x,
+	                 const double*      x,
 	                 IntegerForBlasType incx,
-	                 const double& beta,
-	                 double* y,
+	                 const double&      beta,
+	                 double*            y,
 	                 IntegerForBlasType incy)
 	{
 		dsbmv_(&uplo, &n, &k, &alpha, a, &lda, x, &incx, &beta, y, &incy);
 	}
 	// ****************************************************************************
-	inline void SPMV(char uplo,
+	inline void SPMV(char               uplo,
 	                 IntegerForBlasType n,
-	                 const float& alpha,
-	                 const float* ap,
-	                 const float* x,
+	                 const float&       alpha,
+	                 const float*       ap,
+	                 const float*       x,
 	                 IntegerForBlasType incx,
-	                 const float& beta,
-	                 float* y,
+	                 const float&       beta,
+	                 float*             y,
 	                 IntegerForBlasType incy)
 	{
 		sspmv_(&uplo, &n, &alpha, ap, x, &incx, &beta, y, &incy);
 	}
-	inline void SPMV(char uplo,
+	inline void SPMV(char               uplo,
 	                 IntegerForBlasType n,
-	                 const double& alpha,
-	                 const double* ap,
-	                 const double* x,
+	                 const double&      alpha,
+	                 const double*      ap,
+	                 const double*      x,
 	                 IntegerForBlasType incx,
-	                 const double& beta,
-	                 double* y,
+	                 const double&      beta,
+	                 double*            y,
 	                 IntegerForBlasType incy)
 	{
 		dspmv_(&uplo, &n, &alpha, ap, x, &incx, &beta, y, &incy);
 	}
 	// ****************************************************************************
-	inline void TRMV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TRMV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
-	                 const float* a,
+	                 const float*       a,
 	                 IntegerForBlasType lda,
-	                 float* x,
+	                 float*             x,
 	                 IntegerForBlasType incx)
 	{
 		strmv_(&uplo, &trans, &diag, &n, a, &lda, x, &incx);
 	}
-	inline void TRMV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TRMV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
-	                 const double* a,
+	                 const double*      a,
 	                 IntegerForBlasType lda,
-	                 double* x,
+	                 double*            x,
 	                 IntegerForBlasType incx)
 	{
 		dtrmv_(&uplo, &trans, &diag, &n, a, &lda, x, &incx);
 	}
-	inline void TRMV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
+	inline void TRMV(char                       uplo,
+	                 char                       trans,
+	                 char                       diag,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>* a,
-	                 IntegerForBlasType lda,
-	                 std::complex<float>* x,
-	                 IntegerForBlasType incx)
+	                 IntegerForBlasType         lda,
+	                 std::complex<float>*       x,
+	                 IntegerForBlasType         incx)
 	{
 		ctrmv_(&uplo, &trans, &diag, &n, a, &lda, x, &incx);
 	}
-	inline void TRMV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
+	inline void TRMV(char                        uplo,
+	                 char                        trans,
+	                 char                        diag,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>* a,
-	                 IntegerForBlasType lda,
-	                 std::complex<double>* x,
-	                 IntegerForBlasType incx)
+	                 IntegerForBlasType          lda,
+	                 std::complex<double>*       x,
+	                 IntegerForBlasType          incx)
 	{
 		ztrmv_(&uplo, &trans, &diag, &n, a, &lda, x, &incx);
 	}
 	// ****************************************************************************
-	inline void TBMV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TBMV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
 	                 IntegerForBlasType k,
-	                 const float* a,
+	                 const float*       a,
 	                 IntegerForBlasType lda,
-	                 float* x,
+	                 float*             x,
 	                 IntegerForBlasType incx)
 	{
 		stbmv_(&uplo, &trans, &diag, &n, &k, a, &lda, x, &incx);
 	}
-	inline void TBMV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TBMV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
 	                 IntegerForBlasType k,
-	                 const double* a,
+	                 const double*      a,
 	                 IntegerForBlasType lda,
-	                 double* x,
+	                 double*            x,
 	                 IntegerForBlasType incx)
 	{
 		dtbmv_(&uplo, &trans, &diag, &n, &k, a, &lda, x, &incx);
 	}
-	inline void TBMV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
-	                 IntegerForBlasType k,
+	inline void TBMV(char                       uplo,
+	                 char                       trans,
+	                 char                       diag,
+	                 IntegerForBlasType         n,
+	                 IntegerForBlasType         k,
 	                 const std::complex<float>* a,
-	                 IntegerForBlasType lda,
-	                 std::complex<float>* x,
-	                 IntegerForBlasType incx)
+	                 IntegerForBlasType         lda,
+	                 std::complex<float>*       x,
+	                 IntegerForBlasType         incx)
 	{
 		ctbmv_(&uplo, &trans, &diag, &n, &k, a, &lda, x, &incx);
 	}
-	inline void TBMV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
-	                 IntegerForBlasType k,
+	inline void TBMV(char                        uplo,
+	                 char                        trans,
+	                 char                        diag,
+	                 IntegerForBlasType          n,
+	                 IntegerForBlasType          k,
 	                 const std::complex<double>* a,
-	                 IntegerForBlasType lda,
-	                 std::complex<double>* x,
-	                 IntegerForBlasType incx)
+	                 IntegerForBlasType          lda,
+	                 std::complex<double>*       x,
+	                 IntegerForBlasType          incx)
 	{
 		ztbmv_(&uplo, &trans, &diag, &n, &k, a, &lda, x, &incx);
 	}
 	// ****************************************************************************
-	inline void TPMV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TPMV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
-	                 const float* ap,
-	                 float* x,
+	                 const float*       ap,
+	                 float*             x,
 	                 IntegerForBlasType incx)
 	{
 		stpmv_(&uplo, &trans, &diag, &n, ap, x, &incx);
 	}
-	inline void TPMV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TPMV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
-	                 const double* ap,
-	                 double* x,
+	                 const double*      ap,
+	                 double*            x,
 	                 IntegerForBlasType incx)
 	{
 		dtpmv_(&uplo, &trans, &diag, &n, ap, x, &incx);
 	}
-	inline void TPMV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
+	inline void TPMV(char                       uplo,
+	                 char                       trans,
+	                 char                       diag,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>* ap,
-	                 std::complex<float>* x,
-	                 IntegerForBlasType incx)
+	                 std::complex<float>*       x,
+	                 IntegerForBlasType         incx)
 	{
 		ctpmv_(&uplo, &trans, &diag, &n, ap, x, &incx);
 	}
-	inline void TPMV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
+	inline void TPMV(char                        uplo,
+	                 char                        trans,
+	                 char                        diag,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>* ap,
-	                 std::complex<double>* x,
-	                 IntegerForBlasType incx)
+	                 std::complex<double>*       x,
+	                 IntegerForBlasType          incx)
 	{
 		ztpmv_(&uplo, &trans, &diag, &n, ap, x, &incx);
 	}
 	// ****************************************************************************
-	inline void TRSV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TRSV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
-	                 const float* a,
+	                 const float*       a,
 	                 IntegerForBlasType lda,
-	                 float* x,
+	                 float*             x,
 	                 IntegerForBlasType incx)
 	{
 		strsv_(&uplo, &trans, &diag, &n, a, &lda, x, &incx);
 	}
-	inline void TRSV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TRSV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
-	                 const double* a,
+	                 const double*      a,
 	                 IntegerForBlasType lda,
-	                 double* x,
+	                 double*            x,
 	                 IntegerForBlasType incx)
 	{
 		dtrsv_(&uplo, &trans, &diag, &n, a, &lda, x, &incx);
 	}
-	inline void TRSV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
+	inline void TRSV(char                       uplo,
+	                 char                       trans,
+	                 char                       diag,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>* a,
-	                 IntegerForBlasType lda,
-	                 std::complex<float>* x,
-	                 IntegerForBlasType incx)
+	                 IntegerForBlasType         lda,
+	                 std::complex<float>*       x,
+	                 IntegerForBlasType         incx)
 	{
 		ctrsv_(&uplo, &trans, &diag, &n, a, &lda, x, &incx);
 	}
-	inline void TRSV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
+	inline void TRSV(char                        uplo,
+	                 char                        trans,
+	                 char                        diag,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>* a,
-	                 IntegerForBlasType lda,
-	                 std::complex<double>* x,
-	                 IntegerForBlasType incx)
+	                 IntegerForBlasType          lda,
+	                 std::complex<double>*       x,
+	                 IntegerForBlasType          incx)
 	{
 		ztrsv_(&uplo, &trans, &diag, &n, a, &lda, x, &incx);
 	}
 	// ****************************************************************************
-	inline void TBSV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TBSV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
 	                 IntegerForBlasType k,
-	                 const float* a,
+	                 const float*       a,
 	                 IntegerForBlasType lda,
-	                 float* x,
+	                 float*             x,
 	                 IntegerForBlasType incx)
 	{
 		stbsv_(&uplo, &trans, &diag, &n, &k, a, &lda, x, &incx);
 	}
-	inline void TBSV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TBSV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
 	                 IntegerForBlasType k,
-	                 const double* a,
+	                 const double*      a,
 	                 IntegerForBlasType lda,
-	                 double* x,
+	                 double*            x,
 	                 IntegerForBlasType incx)
 	{
 		dtbsv_(&uplo, &trans, &diag, &n, &k, a, &lda, x, &incx);
 	}
-	inline void TBSV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
-	                 IntegerForBlasType k,
+	inline void TBSV(char                       uplo,
+	                 char                       trans,
+	                 char                       diag,
+	                 IntegerForBlasType         n,
+	                 IntegerForBlasType         k,
 	                 const std::complex<float>* a,
-	                 IntegerForBlasType lda,
-	                 std::complex<float>* x,
-	                 IntegerForBlasType incx)
+	                 IntegerForBlasType         lda,
+	                 std::complex<float>*       x,
+	                 IntegerForBlasType         incx)
 	{
 		ctbsv_(&uplo, &trans, &diag, &n, &k, a, &lda, x, &incx);
 	}
-	inline void TBSV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
-	                 IntegerForBlasType k,
+	inline void TBSV(char                        uplo,
+	                 char                        trans,
+	                 char                        diag,
+	                 IntegerForBlasType          n,
+	                 IntegerForBlasType          k,
 	                 const std::complex<double>* a,
-	                 IntegerForBlasType lda,
-	                 std::complex<double>* x,
-	                 IntegerForBlasType incx)
+	                 IntegerForBlasType          lda,
+	                 std::complex<double>*       x,
+	                 IntegerForBlasType          incx)
 	{
 		ztbsv_(&uplo, &trans, &diag, &n, &k, a, &lda, x, &incx);
 	}
 	// ****************************************************************************
-	inline void TPSV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TPSV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
-	                 const float* ap,
-	                 float* x,
+	                 const float*       ap,
+	                 float*             x,
 	                 IntegerForBlasType incx)
 	{
 		stpsv_(&uplo, &trans, &diag, &n, ap, x, &incx);
 	}
-	inline void TPSV(char uplo,
-	                 char trans,
-	                 char diag,
+	inline void TPSV(char               uplo,
+	                 char               trans,
+	                 char               diag,
 	                 IntegerForBlasType n,
-	                 const double* ap,
-	                 double* x,
+	                 const double*      ap,
+	                 double*            x,
 	                 IntegerForBlasType incx)
 	{
 		dtpsv_(&uplo, &trans, &diag, &n, ap, x, &incx);
 	}
-	inline void TPSV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
+	inline void TPSV(char                       uplo,
+	                 char                       trans,
+	                 char                       diag,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>* ap,
-	                 std::complex<float>* x,
-	                 IntegerForBlasType incx)
+	                 std::complex<float>*       x,
+	                 IntegerForBlasType         incx)
 	{
 		ctpsv_(&uplo, &trans, &diag, &n, ap, x, &incx);
 	}
-	inline void TPSV(char uplo,
-	                 char trans,
-	                 char diag,
-	                 IntegerForBlasType n,
+	inline void TPSV(char                        uplo,
+	                 char                        trans,
+	                 char                        diag,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>* ap,
-	                 std::complex<double>* x,
-	                 IntegerForBlasType incx)
+	                 std::complex<double>*       x,
+	                 IntegerForBlasType          incx)
 	{
 		ztpsv_(&uplo, &trans, &diag, &n, ap, x, &incx);
 	}
 	// ****************************************************************************
 	inline void GER(IntegerForBlasType m,
 	                IntegerForBlasType n,
-	                const float& alpha,
-	                const float* x,
+	                const float&       alpha,
+	                const float*       x,
 	                IntegerForBlasType incx,
-	                const float* y,
+	                const float*       y,
 	                IntegerForBlasType incy,
-	                float* a,
+	                float*             a,
 	                IntegerForBlasType lda)
 	{
 		sger_(&m, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
 	inline void GER(IntegerForBlasType m,
 	                IntegerForBlasType n,
-	                const double& alpha,
-	                const double* x,
+	                const double&      alpha,
+	                const double*      x,
 	                IntegerForBlasType incx,
-	                const double* y,
+	                const double*      y,
 	                IntegerForBlasType incy,
-	                double* a,
+	                double*            a,
 	                IntegerForBlasType lda)
 	{
 		dger_(&m, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
 	// ****************************************************************************
-	inline void GERU(IntegerForBlasType m,
-	                 IntegerForBlasType n,
+	inline void GERU(IntegerForBlasType         m,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType         incx,
 	                 const std::complex<float>* y,
-	                 IntegerForBlasType incy,
-	                 std::complex<float>* a,
-	                 IntegerForBlasType lda)
+	                 IntegerForBlasType         incy,
+	                 std::complex<float>*       a,
+	                 IntegerForBlasType         lda)
 	{
 		cgeru_(&m, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
-	inline void GERU(IntegerForBlasType m,
-	                 IntegerForBlasType n,
+	inline void GERU(IntegerForBlasType          m,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType          incx,
 	                 const std::complex<double>* y,
-	                 IntegerForBlasType incy,
-	                 std::complex<double>* a,
-	                 IntegerForBlasType lda)
+	                 IntegerForBlasType          incy,
+	                 std::complex<double>*       a,
+	                 IntegerForBlasType          lda)
 	{
 		zgeru_(&m, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
 	// ****************************************************************************
-	inline void GERC(IntegerForBlasType m,
-	                 IntegerForBlasType n,
+	inline void GERC(IntegerForBlasType         m,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType         incx,
 	                 const std::complex<float>* y,
-	                 IntegerForBlasType incy,
-	                 std::complex<float>* a,
-	                 IntegerForBlasType lda)
+	                 IntegerForBlasType         incy,
+	                 std::complex<float>*       a,
+	                 IntegerForBlasType         lda)
 	{
 		cgerc_(&m, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
-	inline void GERC(IntegerForBlasType m,
-	                 IntegerForBlasType n,
+	inline void GERC(IntegerForBlasType          m,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType          incx,
 	                 const std::complex<double>* y,
-	                 IntegerForBlasType incy,
-	                 std::complex<double>* a,
-	                 IntegerForBlasType lda)
+	                 IntegerForBlasType          incy,
+	                 std::complex<double>*       a,
+	                 IntegerForBlasType          lda)
 	{
 		zgerc_(&m, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
 	// *****************************************************************************
-	inline void HER(char uplo,
-	                IntegerForBlasType n,
+	inline void HER(char                       uplo,
+	                IntegerForBlasType         n,
 	                const std::complex<float>& alpha,
 	                const std::complex<float>* x,
-	                IntegerForBlasType incx,
-	                std::complex<float>* a,
-	                IntegerForBlasType lda)
+	                IntegerForBlasType         incx,
+	                std::complex<float>*       a,
+	                IntegerForBlasType         lda)
 	{
 		cher_(&uplo, &n, &alpha, x, &incx, a, &lda);
 	}
-	inline void HER(char uplo,
-	                IntegerForBlasType n,
+	inline void HER(char                        uplo,
+	                IntegerForBlasType          n,
 	                const std::complex<double>& alpha,
 	                const std::complex<double>* x,
-	                IntegerForBlasType incx,
-	                std::complex<double>* a,
-	                IntegerForBlasType lda)
+	                IntegerForBlasType          incx,
+	                std::complex<double>*       a,
+	                IntegerForBlasType          lda)
 	{
 		zher_(&uplo, &n, &alpha, x, &incx, a, &lda);
 	}
 	// *****************************************************************************
-	inline void HPR(char uplo,
-	                IntegerForBlasType n,
+	inline void HPR(char                       uplo,
+	                IntegerForBlasType         n,
 	                const std::complex<float>& alpha,
 	                const std::complex<float>* x,
-	                IntegerForBlasType incx,
-	                std::complex<float>* ap)
+	                IntegerForBlasType         incx,
+	                std::complex<float>*       ap)
 	{
 		chpr_(&uplo, &n, &alpha, x, &incx, ap);
 	}
-	inline void HPR(char uplo,
-	                IntegerForBlasType n,
+	inline void HPR(char                        uplo,
+	                IntegerForBlasType          n,
 	                const std::complex<double>& alpha,
 	                const std::complex<double>* x,
-	                IntegerForBlasType incx,
-	                std::complex<float>* ap)
+	                IntegerForBlasType          incx,
+	                std::complex<float>*        ap)
 	{
 		zhpr_(&uplo, &n, &alpha, x, &incx, ap);
 	}
 	// *****************************************************************************
-	inline void HER2(char uplo,
-	                 IntegerForBlasType n,
+	inline void HER2(char                       uplo,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType         incx,
 	                 const std::complex<float>* y,
-	                 IntegerForBlasType incy,
-	                 std::complex<float>* a,
-	                 IntegerForBlasType lda)
+	                 IntegerForBlasType         incy,
+	                 std::complex<float>*       a,
+	                 IntegerForBlasType         lda)
 	{
 		cher2_(&uplo, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
-	inline void HER2(char uplo,
-	                 IntegerForBlasType n,
+	inline void HER2(char                        uplo,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType          incx,
 	                 const std::complex<double>* y,
-	                 IntegerForBlasType incy,
-	                 std::complex<double>* a,
-	                 IntegerForBlasType lda)
+	                 IntegerForBlasType          incy,
+	                 std::complex<double>*       a,
+	                 IntegerForBlasType          lda)
 	{
 		zher2_(&uplo, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
 	// *****************************************************************************
-	inline void HPR2(char uplo,
-	                 IntegerForBlasType n,
+	inline void HPR2(char                       uplo,
+	                 IntegerForBlasType         n,
 	                 const std::complex<float>& alpha,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType         incx,
 	                 const std::complex<float>* y,
-	                 IntegerForBlasType incy,
-	                 std::complex<float>* ap)
+	                 IntegerForBlasType         incy,
+	                 std::complex<float>*       ap)
 	{
 		chpr2_(&uplo, &n, &alpha, x, &incx, y, &incy, ap);
 	}
-	inline void HPR2(char uplo,
-	                 IntegerForBlasType n,
+	inline void HPR2(char                        uplo,
+	                 IntegerForBlasType          n,
 	                 const std::complex<double>& alpha,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType incx,
+	                 IntegerForBlasType          incx,
 	                 const std::complex<double>* y,
-	                 IntegerForBlasType incy,
-	                 std::complex<double>* ap)
+	                 IntegerForBlasType          incy,
+	                 std::complex<double>*       ap)
 	{
 		zhpr2_(&uplo, &n, &alpha, x, &incx, y, &incy, ap);
 	}
 	// *****************************************************************************
-	inline void SYR(char uplo,
+	inline void SYR(char               uplo,
 	                IntegerForBlasType n,
-	                const float& alpha,
-	                const float* x,
+	                const float&       alpha,
+	                const float*       x,
 	                IntegerForBlasType incx,
-	                float* a,
+	                float*             a,
 	                IntegerForBlasType lda)
 	{
 		ssyr_(&uplo, &n, &alpha, x, &incx, a, &lda);
 	}
-	inline void SYR(char uplo,
+	inline void SYR(char               uplo,
 	                IntegerForBlasType n,
-	                const double& alpha,
-	                const double* x,
+	                const double&      alpha,
+	                const double*      x,
 	                IntegerForBlasType incx,
-	                double* a,
+	                double*            a,
 	                IntegerForBlasType lda)
 	{
 		dsyr_(&uplo, &n, &alpha, x, &incx, a, &lda);
 	}
 	// ****************************************************************************
-	inline void SPR(char uplo,
+	inline void SPR(char               uplo,
 	                IntegerForBlasType n,
-	                const float& alpha,
-	                const float* x,
+	                const float&       alpha,
+	                const float*       x,
 	                IntegerForBlasType incx,
-	                float* ap)
+	                float*             ap)
 	{
 		sspr_(&uplo, &n, &alpha, x, &incx, ap);
 	}
-	inline void SPR(char uplo,
+	inline void SPR(char               uplo,
 	                IntegerForBlasType n,
-	                const double& alpha,
-	                const double* x,
+	                const double&      alpha,
+	                const double*      x,
 	                IntegerForBlasType incx,
-	                double* ap)
+	                double*            ap)
 	{
 		dspr_(&uplo, &n, &alpha, x, &incx, ap);
 	}
 	// ****************************************************************************
-	inline void SYR2(char uplo,
+	inline void SYR2(char               uplo,
 	                 IntegerForBlasType n,
-	                 const float& alpha,
-	                 const float* x,
+	                 const float&       alpha,
+	                 const float*       x,
 
 	                 IntegerForBlasType incx,
-	                 const float* y,
+	                 const float*       y,
 	                 IntegerForBlasType incy,
-	                 float* a,
+	                 float*             a,
 	                 IntegerForBlasType lda)
 	{
 		ssyr2_(&uplo, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
-	inline void SYR2(char uplo,
+	inline void SYR2(char               uplo,
 	                 IntegerForBlasType n,
-	                 const double& alpha,
-	                 const double* x,
+	                 const double&      alpha,
+	                 const double*      x,
 
 	                 IntegerForBlasType incx,
-	                 const double* y,
+	                 const double*      y,
 	                 IntegerForBlasType incy,
-	                 double* a,
+	                 double*            a,
 	                 IntegerForBlasType lda)
 	{
 		dsyr2_(&uplo, &n, &alpha, x, &incx, y, &incy, a, &lda);
 	}
 	// ****************************************************************************
-	inline void SPR2(char uplo,
+	inline void SPR2(char               uplo,
 	                 IntegerForBlasType n,
-	                 const float& alpha,
-	                 const float* x,
+	                 const float&       alpha,
+	                 const float*       x,
 
 	                 IntegerForBlasType incx,
-	                 const float* y,
+	                 const float*       y,
 	                 IntegerForBlasType incy,
-	                 float* ap)
+	                 float*             ap)
 	{
 		sspr2_(&uplo, &n, &alpha, x, &incx, y, &incy, ap);
 	}
-	inline void SPR2(char uplo,
+	inline void SPR2(char               uplo,
 	                 IntegerForBlasType n,
-	                 const double& alpha,
-	                 const double* x,
+	                 const double&      alpha,
+	                 const double*      x,
 
 	                 IntegerForBlasType incx,
-	                 const double* y,
+	                 const double*      y,
 	                 IntegerForBlasType incy,
-	                 double* ap)
+	                 double*            ap)
 	{
 		dspr2_(&uplo, &n, &alpha, x, &incx, y, &incy, ap);
 	}
@@ -2528,79 +2528,79 @@ namespace BLAS {
 	// ****************************************************************************
 
 	inline void AXPY(IntegerForBlasType size,
-	                 const float& a,
-	                 const float* x,
+	                 const float&       a,
+	                 const float*       x,
 	                 IntegerForBlasType sx,
-	                 float* y,
+	                 float*             y,
 	                 IntegerForBlasType sy)
 	{
 		saxpy_(&size, &a, x, &sx, y, &sy);
 	}
 
 	inline void AXPY(IntegerForBlasType size,
-	                 const double& a,
-	                 const double* x,
+	                 const double&      a,
+	                 const double*      x,
 	                 IntegerForBlasType sx,
-	                 double* y,
+	                 double*            y,
 	                 IntegerForBlasType sy)
 	{
 		daxpy_(&size, &a, x, &sx, y, &sy);
 	}
 
-	inline void AXPY(IntegerForBlasType size,
+	inline void AXPY(IntegerForBlasType         size,
 	                 const std::complex<float>& a,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType sx,
+	                 IntegerForBlasType         sx,
 
 	                 std::complex<float>* y,
-	                 IntegerForBlasType sy)
+	                 IntegerForBlasType   sy)
 	{
 		caxpy_(&size, &a, x, &sx, y, &sy);
 	}
 
-	inline void AXPY(IntegerForBlasType size,
+	inline void AXPY(IntegerForBlasType          size,
 	                 const std::complex<double>& a,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType sx,
+	                 IntegerForBlasType          sx,
 
 	                 std::complex<double>* y,
-	                 IntegerForBlasType sy)
+	                 IntegerForBlasType    sy)
 	{
 		zaxpy_(&size, &a, x, &sx, y, &sy);
 	}
 	// ----------------------------------------------------------------------------
 	inline void COPY(IntegerForBlasType size,
-	                 const float* x,
+	                 const float*       x,
 	                 IntegerForBlasType sx,
-	                 float* y,
+	                 float*             y,
 	                 IntegerForBlasType sy)
 	{
 		scopy_(&size, x, &sx, y, &sy);
 	}
 
 	inline void COPY(IntegerForBlasType size,
-	                 const double* x,
+	                 const double*      x,
 	                 IntegerForBlasType sx,
-	                 double* y,
+	                 double*            y,
 	                 IntegerForBlasType sy)
 	{
 		dcopy_(&size, x, &sx, y, &sy);
 	}
 
-	inline void COPY(IntegerForBlasType size,
+	inline void COPY(IntegerForBlasType         size,
 	                 const std::complex<float>* x,
-	                 IntegerForBlasType sx,
-	                 std::complex<float>* y,
-	                 IntegerForBlasType sy)
+	                 IntegerForBlasType         sx,
+	                 std::complex<float>*       y,
+	                 IntegerForBlasType         sy)
 	{
 		ccopy_(&size, x, &sx, y, &sy);
 	}
 
-	inline void COPY(IntegerForBlasType size,
+	inline void COPY(IntegerForBlasType          size,
 	                 const std::complex<double>* x,
-	                 IntegerForBlasType sx,
-	                 std::complex<double>* y,
-	                 IntegerForBlasType sy)
+	                 IntegerForBlasType          sx,
+	                 std::complex<double>*       y,
+	                 IntegerForBlasType          sy)
 	{
 		zcopy_(&size, x, &sx, y, &sy);
 	}
@@ -2615,18 +2615,18 @@ namespace BLAS {
 		dscal_(&size, &a, y, &sy);
 	}
 
-	inline void SCAL(IntegerForBlasType size,
+	inline void SCAL(IntegerForBlasType         size,
 	                 const std::complex<float>& a,
-	                 std::complex<float>* y,
-	                 IntegerForBlasType sy)
+	                 std::complex<float>*       y,
+	                 IntegerForBlasType         sy)
 	{
 		cscal_(&size, &a, y, &sy);
 	}
 
-	inline void SCAL(IntegerForBlasType size,
+	inline void SCAL(IntegerForBlasType          size,
 	                 const std::complex<double>& a,
-	                 std::complex<double>* y,
-	                 IntegerForBlasType sy)
+	                 std::complex<double>*       y,
+	                 IntegerForBlasType          sy)
 	{
 		zscal_(&size, &a, y, &sy);
 	}

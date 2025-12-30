@@ -106,44 +106,44 @@ template <typename ModelBaseType> class UlsOsu : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::VectorRealType VectorRealType;
-	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelBaseType::HilbertBasisType HilbertBasisFeAsType;
-	typedef typename HilbertBasisFeAsType::value_type HilbertStateFeAs;
-	typedef HilbertSpaceFeAs<HilbertStateFeAs> HilbertSpaceFeAsType;
-	typedef typename ModelBaseType::MyBasis BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelHubbardType::HilbertState HilbertStateType;
-	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
-	typedef typename ModelHelperType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename ModelBaseType::VectorRealType              VectorRealType;
+	typedef ModelHubbard<ModelBaseType>                         ModelHubbardType;
+	typedef typename ModelBaseType::ModelHelperType             ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType           SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType          LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                    LinkType;
+	typedef typename ModelHelperType::OperatorsType             OperatorsType;
+	typedef typename OperatorsType::OperatorType                OperatorType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type     VectorOperatorType;
+	typedef typename ModelHelperType::RealType                  RealType;
+	typedef typename ModelBaseType::QnType                      QnType;
+	typedef typename QnType::VectorQnType                       VectorQnType;
+	typedef typename ModelHelperType::SparseMatrixType          SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename ModelBaseType::HilbertBasisType            HilbertBasisFeAsType;
+	typedef typename HilbertBasisFeAsType::value_type           HilbertStateFeAs;
+	typedef HilbertSpaceFeAs<HilbertStateFeAs>                  HilbertSpaceFeAsType;
+	typedef typename ModelBaseType::MyBasis                     BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType      MyBasisWithOperators;
+	typedef typename ModelHubbardType::HilbertState             HilbertStateType;
+	typedef typename ModelHubbardType::HilbertBasisType         HilbertBasisType;
+	typedef typename ModelHelperType::BlockType                 BlockType;
+	typedef typename ModelBaseType::SolverParamsType            SolverParamsType;
+	typedef typename ModelBaseType::VectorType                  VectorType;
+	typedef typename ModelBaseType::InputValidatorType          InputValidatorType;
+	typedef typename OperatorType::PairType                     PairType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>               MatrixType;
 	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename PsimagLite::Vector<SizeType>::Type         VectorSizeType;
+	typedef typename ModelBaseType::OpsLabelType                OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType               OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType               ModelTermType;
 
 	static const int FERMION_SIGN = -1;
 	enum
 	{
-		STATE_EMPTY = 0,
-		STATE_UP_A = 1,
+		STATE_EMPTY  = 0,
+		STATE_UP_A   = 1,
 		STATE_DOWN_A = 4
 	};
 	enum
@@ -152,8 +152,8 @@ public:
 		SPIN_DOWN
 	};
 
-	UlsOsu(const SolverParamsType& solverParams,
-	       InputValidatorType& io,
+	UlsOsu(const SolverParamsType&  solverParams,
+	       InputValidatorType&      io,
 	       const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
@@ -167,11 +167,11 @@ public:
 		if (modelParameters_.orbitals != 1)
 			throw PsimagLite::RuntimeError("UlsOsu: must use Orbital=1 \n");
 
-		SizeType n = superGeometry_.numberOfSites();
+		SizeType n  = superGeometry_.numberOfSites();
 		SizeType mx = modelParameters_.magneticFieldX.size();
 		SizeType my = modelParameters_.magneticFieldY.size();
 		SizeType mz = modelParameters_.magneticFieldZ.size();
-		SizeType m = mz;
+		SizeType m  = mz;
 
 		if (mx != my || my != mz || mz != mx) {
 			PsimagLite::String msg("tJKitaev: If provided, ");
@@ -226,10 +226,10 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
-		VectorSizeType block(1, site);
-		VectorHilbertStateType natBasis;
-		SparseMatrixType tmpMatrix;
+		SizeType                        site = 0;
+		VectorSizeType                  block(1, site);
+		VectorHilbertStateType          natBasis;
+		SparseMatrixType                tmpMatrix;
 		typename MatrixType::value_type dummy = 0.0;
 		setNaturalBasis(natBasis, block, false);
 		OpsLabelType& sx = this->createOpsLabel("sx");
@@ -336,11 +336,11 @@ private:
 
 	SparseMatrixType findSdirMatrices(SizeType, // site,
 	                                  const HilbertBasisType& natBasis,
-	                                  InternalDir dir,
+	                                  InternalDir             dir,
 	                                  std::complex<RealType>) const
 	{
-		SizeType total = natBasis.size();
-		double val = sqrt(2.0);
+		SizeType   total = natBasis.size();
+		double     val   = sqrt(2.0);
 		MatrixType Ax(3, 3), Ay(3, 3), Az(3, 3), Iden(3, 3);
 		Ax.setTo(0.0);
 		Ay.setTo(0.0);
@@ -391,12 +391,12 @@ private:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const BlockType& block,
-	                                RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
-		SizeType n = block.size();
+		SizeType n       = block.size();
 		SizeType linSize = superGeometry_.numberOfSites();
 		if (modelParameters_.magneticFieldX.size() != linSize)
 			return; // <<---- PLEASE NOTE EARLY EXIT HERE
@@ -409,18 +409,18 @@ private:
 			SizeType site = block[i];
 
 			// magnetic field x
-			const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, 0);
-			RealType tmp = modelParameters_.magneticFieldX[block[0]];
+			const OperatorType& sx  = ModelBaseType::naturalOperator("sx", site, 0);
+			RealType            tmp = modelParameters_.magneticFieldX[block[0]];
 			hmatrix += tmp * sx.getCRS();
 
 			// magnetic field y
 			const OperatorType& sy = ModelBaseType::naturalOperator("sy", site, 0);
-			tmp = modelParameters_.magneticFieldY[block[0]];
+			tmp                    = modelParameters_.magneticFieldY[block[0]];
 			hmatrix += tmp * sy.getCRS();
 
 			// magnetic field z
 			const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
-			tmp = modelParameters_.magneticFieldZ[block[0]];
+			tmp                    = modelParameters_.magneticFieldZ[block[0]];
 			hmatrix += tmp * sz.getCRS();
 		}
 	}
@@ -449,14 +449,14 @@ private:
 		}
 	}
 
-	ParametersModelUlsOsu<RealType, QnType> modelParameters_;
-	const SuperGeometryType& superGeometry_;
-	SizeType offset_;
-	SpinSquaredHelper<RealType, HilbertStateType> spinSquaredHelper_;
+	ParametersModelUlsOsu<RealType, QnType>                    modelParameters_;
+	const SuperGeometryType&                                   superGeometry_;
+	SizeType                                                   offset_;
+	SpinSquaredHelper<RealType, HilbertStateType>              spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType, HilbertStateType>> spinSquared_;
-	HilbertBasisType basis_;
-	VectorQnType qq_;
-	VectorOperatorType creationMatrix_;
+	HilbertBasisType                                           basis_;
+	VectorQnType                                               qq_;
+	VectorOperatorType                                         creationMatrix_;
 }; // class UlsOsu
 
 } // namespace Dmrg

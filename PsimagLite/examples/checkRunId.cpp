@@ -12,7 +12,7 @@ void usage(const char* progName)
 bool checkRunId(PsimagLite::String id, PsimagLite::String progName)
 {
 	PsimagLite::String str(id);
-	int l = str.length();
+	int                l = str.length();
 	if (l < 3) {
 		std::cerr << progName << ": too short runId=" << id << "\n";
 		return false;
@@ -26,8 +26,8 @@ bool checkRunId(PsimagLite::String id, PsimagLite::String progName)
 	for (int i = 0; i < l - 2; ++i)
 		number += str[i];
 
-	unsigned long int x = atol(number.c_str());
-	int bits = PsimagLite::BitManip::countKernighan(x);
+	unsigned long int x    = atol(number.c_str());
+	int               bits = PsimagLite::BitManip::countKernighan(x);
 	std::cout << number << " " << check << " " << bits << "\n";
 	// std::cout<<bits<<"\n";
 	return (bits == atoi(check.c_str()));
@@ -38,8 +38,8 @@ int main(int argc, char** argv)
 	constexpr unsigned int nthreads = 1;
 	PsimagLite::Concurrency(&argc, &argv, nthreads);
 
-	int opt = 0;
-	int g = 0;
+	int                opt = 0;
+	int                g   = 0;
 	PsimagLite::String id;
 	while ((opt = getopt(argc, argv, "g:i:")) != -1) {
 		switch (opt) {
@@ -67,7 +67,7 @@ int main(int argc, char** argv)
 
 	for (int i = 0; i < g; ++i) {
 		PsimagLite::ApplicationInfo appInfo("test");
-		bool b = checkRunId(appInfo.runId(), argv[0]);
+		bool                        b = checkRunId(appInfo.runId(), argv[0]);
 		if (!b) {
 			std::cerr << "Found invalid number\n";
 			return 4;

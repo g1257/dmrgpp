@@ -93,7 +93,7 @@ struct ParametersGraphene : public ParametersModelBase<ComplexOrRealType, QnType
 	// connections are handled by the geometry
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
 
 	template <typename IoInputType>
 	ParametersGraphene(IoInputType& io)

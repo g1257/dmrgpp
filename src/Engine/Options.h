@@ -12,8 +12,8 @@ template <typename InputValidatorType> class Options {
 
 public:
 
-	typedef typename PsimagLite::String::value_type CharType;
-	typedef typename PsimagLite::String::const_iterator StringConstIterator;
+	typedef typename PsimagLite::String::value_type      CharType;
+	typedef typename PsimagLite::String::const_iterator  StringConstIterator;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	Options(PsimagLite::String label, InputValidatorType& io)
@@ -41,7 +41,7 @@ public:
 
 	bool isSet(PsimagLite::String what) const
 	{
-		what = ProgramGlobals::toLower(what);
+		what                                = ProgramGlobals::toLower(what);
 		VectorStringType::const_iterator it = std::find(vdata_.begin(), vdata_.end(), what);
 		return (it != vdata_.end());
 	}

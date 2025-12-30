@@ -91,8 +91,8 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 	// connections are handled by the geometry
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
 	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType>>::Type VectorType;
 
 	template <typename IoInputType>
@@ -159,7 +159,7 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
+	friend std::ostream& operator<<(std::ostream&                    os,
 	                                const ParametersHubbardHolstein& parameters)
 	{
 		os << "NumberPhonons=" << parameters.numberphonons << "\n";
@@ -176,9 +176,9 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 		return os;
 	}
 
-	SizeType numberphonons;
-	SizeType oStruncPhonons;
-	SizeType oStruncSite;
+	SizeType       numberphonons;
+	SizeType       oStruncPhonons;
+	SizeType       oStruncSite;
 	VectorRealType hubbardFU;
 	VectorRealType lambdaFP;
 	// Onsite potential values

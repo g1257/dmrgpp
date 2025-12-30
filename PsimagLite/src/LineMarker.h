@@ -42,7 +42,7 @@ public:
 	template <typename IoInputType>
 	LineMarker(IoInputType& io, const String& name, SizeType level = 0)
 	{
-		name_ = name + "=0";
+		name_      = name + "=0";
 		SizeType x = 0; // bogus
 		io.readline(x, name_, level);
 	}

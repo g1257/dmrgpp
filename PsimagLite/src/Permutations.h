@@ -97,7 +97,7 @@ public:
 		for (SizeType i = 0; i < data_.size(); i++)
 			data_[i] = orig[i];
 		Sort<typename Vector<SizeType>::Type> mysort;
-		typename Vector<SizeType>::Type iperm(data_.size());
+		typename Vector<SizeType>::Type       iperm(data_.size());
 		mysort.sort(data_, iperm);
 	}
 
@@ -144,8 +144,8 @@ private:
 
 	int largestk() const
 	{
-		int saved = -1;
-		SizeType tot = data_.size() - 1;
+		int      saved = -1;
+		SizeType tot   = data_.size() - 1;
 		for (SizeType i = 0; i < tot; i++) {
 			if (data_[i] < data_[i + 1])
 				saved = i;

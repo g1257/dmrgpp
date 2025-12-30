@@ -22,8 +22,8 @@ struct CodeSectionParams {
 
 	SizeType npthreads;
 	SizeType npthreadsLevelTwo;
-	bool setAffinities;
-	size_t stackSize;
+	bool     setAffinities;
+	size_t   stackSize;
 };
 } // namespace PsimagLite
 #endif // CODESECTION_PARAMS_H

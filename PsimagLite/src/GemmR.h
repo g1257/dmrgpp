@@ -19,19 +19,19 @@ public:
 	    , nthreads_(nthreads)
 	{ }
 
-	void operator()(char const transA,
-	                char const transB,
-	                int const m,
-	                int const n,
-	                int const k,
-	                T const& alpha,
+	void operator()(char const     transA,
+	                char const     transB,
+	                int const      m,
+	                int const      n,
+	                int const      k,
+	                T const&       alpha,
 	                T const* const A,
-	                int const ldA,
+	                int const      ldA,
 	                T const* const B,
-	                int const ldB,
-	                T const& beta,
-	                T* const C,
-	                int const ldC)
+	                int const      ldB,
+	                T const&       beta,
+	                T* const       C,
+	                int const      ldC)
 	{
 		if (isSmall(m, n)) {
 			psimag::BLAS::GEMM(
@@ -44,19 +44,19 @@ public:
 
 private:
 
-	void bigMatrices(char const transA,
-	                 char const transB,
-	                 int const m,
-	                 int const n,
-	                 int const k,
-	                 T const& alpha,
+	void bigMatrices(char const     transA,
+	                 char const     transB,
+	                 int const      m,
+	                 int const      n,
+	                 int const      k,
+	                 T const&       alpha,
 	                 T const* const A,
-	                 int const ldA,
+	                 int const      ldA,
 	                 T const* const B,
-	                 int const ldB,
-	                 T const& beta,
-	                 T* const C,
-	                 int const ldC)
+	                 int const      ldB,
+	                 T const&       beta,
+	                 T* const       C,
+	                 int const      ldC)
 	{
 		assert(!isSmall(m, n));
 
@@ -73,12 +73,12 @@ private:
 		int const nb_i = ((m % nblocks_i) == 0) ? (m / nblocks_i) : ((m / nblocks_i) + 1);
 		int const nb_j = ((n % nblocks_j) == 0) ? (n / nblocks_j) : ((n / nblocks_j) + 1);
 
-		bool const is_transA = (transA == 'T') || (transA == 't');
-		bool const is_conjA = (transA == 'C') || (transA == 'c');
+		bool const is_transA   = (transA == 'T') || (transA == 't');
+		bool const is_conjA    = (transA == 'C') || (transA == 'c');
 		bool const is_notransA = (!is_transA) && (!is_conjA);
 
-		bool const is_transB = (transB == 'T') || (transB == 't');
-		bool const is_conjB = (transB == 'C') || (transB == 'c');
+		bool const is_transB   = (transB == 'T') || (transB == 't');
+		bool const is_conjB    = (transB == 'C') || (transB == 'c');
 		bool const is_notransB = (!is_transB) && (!is_conjB);
 
 		if (idebug_ >= 1) {
@@ -112,9 +112,9 @@ private:
 			assert((i_block + j_block * nblocks_i) == ij_block);
 
 			int const ic_start = 1 + (i_block)*nb_i;
-			int const ic_end = std::min(m, ic_start + nb_i - 1);
+			int const ic_end   = std::min(m, ic_start + nb_i - 1);
 			int const jc_start = 1 + (j_block)*nb_j;
-			int const jc_end = std::min(n, jc_start + nb_j - 1);
+			int const jc_end   = std::min(n, jc_start + nb_j - 1);
 
 			// --------------------------------------------
 			// compute   C(ic_start:ic_end, jc_start:jc_end) =
@@ -141,15 +141,15 @@ private:
 
 			T const* const pA = &(A[ia - 1 + (ja - 1) * ldA]);
 			T const* const pB = &(B[ib - 1 + (jb - 1) * ldB]);
-			T* const pC = &(C[ic - 1 + (jc - 1) * ldC]);
+			T* const       pC = &(C[ic - 1 + (jc - 1) * ldC]);
 
 			psimag::BLAS::GEMM(
 			    transA, transB, mm, nn, kk, alpha, pA, ldA, pB, ldB, beta, pC, ldC);
 		};
 
-		const SizeType tasks = nblocks_i * nblocks_j;
-		CodeSectionParams csp = Concurrency::codeSectionParams;
-		csp.npthreads = std::min(tasks, nthreads_);
+		const SizeType    tasks = nblocks_i * nblocks_j;
+		CodeSectionParams csp   = Concurrency::codeSectionParams;
+		csp.npthreads           = std::min(tasks, nthreads_);
 		Parallelizer2<> parallelizer2(csp);
 		parallelizer2.parallelFor(0, tasks, lambda);
 	}
@@ -161,7 +161,7 @@ private:
 		return ((m <= nb_) && (n <= nb_));
 	}
 
-	bool idebug_;
+	bool     idebug_;
 	SizeType nb_;
 	SizeType nthreads_;
 }; // class GemmR

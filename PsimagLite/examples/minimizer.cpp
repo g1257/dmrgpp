@@ -31,15 +31,15 @@ public:
 
 int main(int argc, char* argv[])
 {
-	SizeType n = 2;
+	SizeType                        n = 2;
 	typename Vector<RealType>::Type x(n);
 
 	// inital guess:
 	for (SizeType i = 0; i < n; i++)
 		x[i] = drand48();
 
-	SizeType maxIter = 100;
-	MyFunctionTest f;
+	SizeType                            maxIter = 100;
+	MyFunctionTest                      f;
 	Minimizer<RealType, MyFunctionTest> min(f, maxIter);
 
 	int iter = min.simplex(x, 1e-3, 1e-5);

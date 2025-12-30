@@ -17,7 +17,7 @@ class PredicateAnd {
 
 public:
 
-	typedef Vector<PredicateSimple>::Type VectorPredicateSimpleType;
+	typedef Vector<PredicateSimple>::Type     VectorPredicateSimpleType;
 	typedef PredicateSimple::VectorStringType VectorStringType;
 
 	PredicateAnd(String pred, PsimagLite::String sep = "&")
@@ -32,9 +32,9 @@ public:
 
 	template <typename T> bool isTrue(String name, T val)
 	{
-		VectorStringType names { name };
+		VectorStringType         names { name };
 		typename Vector<T>::Type values { val };
-		SizeType n = vPredicateSimple_.size();
+		SizeType                 n = vPredicateSimple_.size();
 		for (SizeType i = 0; i < n; ++i)
 			if (!vPredicateSimple_[i].isTrue(names, values))
 				return false;
@@ -43,9 +43,9 @@ public:
 
 	template <typename T> bool isTrue(String name1, T val1, String name2, T val2)
 	{
-		VectorStringType names { name1, name2 };
+		VectorStringType         names { name1, name2 };
 		typename Vector<T>::Type values { val1, val2 };
-		SizeType n = vPredicateSimple_.size();
+		SizeType                 n = vPredicateSimple_.size();
 		for (SizeType i = 0; i < n; ++i)
 			if (!vPredicateSimple_[i].isTrue(names, values))
 				return false;
@@ -55,9 +55,9 @@ public:
 	template <typename T>
 	bool isTrue(String name1, T val1, String name2, T val2, String name3, T val3)
 	{
-		VectorStringType names { name1, name2, name3 };
+		VectorStringType         names { name1, name2, name3 };
 		typename Vector<T>::Type values { val1, val2, val3 };
-		SizeType n = vPredicateSimple_.size();
+		SizeType                 n = vPredicateSimple_.size();
 		for (SizeType i = 0; i < n; ++i)
 			if (!vPredicateSimple_[i].isTrue(names, values))
 				return false;
@@ -66,17 +66,17 @@ public:
 
 	template <typename T>
 	bool isTrue(String name1,
-	            T val1,
+	            T      val1,
 	            String name2,
-	            T val2,
+	            T      val2,
 	            String name3,
-	            T val3,
+	            T      val3,
 	            String name4,
-	            T val4)
+	            T      val4)
 	{
-		VectorStringType names { name1, name2, name3, name4 };
+		VectorStringType         names { name1, name2, name3, name4 };
 		typename Vector<T>::Type values { val1, val2, val3, val4 };
-		SizeType n = vPredicateSimple_.size();
+		SizeType                 n = vPredicateSimple_.size();
 		for (SizeType i = 0; i < n; ++i)
 			if (!vPredicateSimple_[i].isTrue(names, values))
 				return false;
@@ -85,7 +85,7 @@ public:
 
 private:
 
-	String pred_;
+	String                    pred_;
 	VectorPredicateSimpleType vPredicateSimple_;
 };
 } // namespace PsimagLite

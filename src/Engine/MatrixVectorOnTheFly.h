@@ -90,20 +90,20 @@ template <typename ModelType_> class MatrixVectorOnTheFly : public MatrixVectorB
 
 public:
 
-	typedef ModelType_ ModelType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type value_type;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
+	typedef ModelType_                                    ModelType;
+	typedef typename ModelType::ModelHelperType           ModelHelperType;
+	typedef typename ModelHelperType::RealType            RealType;
+	typedef typename ModelHelperType::SparseMatrixType    SparseMatrixType;
+	typedef typename SparseMatrixType::value_type         value_type;
+	typedef typename SparseMatrixType::value_type         ComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type   VectorRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>         FullMatrixType;
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
-	typedef typename ModelHelperType::Aux AuxType;
+	typedef typename ModelHelperType::Aux                 AuxType;
 
-	MatrixVectorOnTheFly(const ModelType& model,
+	MatrixVectorOnTheFly(const ModelType&                 model,
 	                     const HamiltonianConnectionType& hc,
-	                     const AuxType& aux)
+	                     const AuxType&                   aux)
 	    : model_(model)
 	    , hc_(hc)
 	    , aux_(aux)
@@ -140,10 +140,10 @@ public:
 
 private:
 
-	const ModelType& model_;
+	const ModelType&                 model_;
 	const HamiltonianConnectionType& hc_;
-	const AuxType& aux_;
-	SparseMatrixType matrixStored_;
+	const AuxType&                   aux_;
+	SparseMatrixType                 matrixStored_;
 }; // class MatrixVectorOnTheFly
 } // namespace Dmrg
 

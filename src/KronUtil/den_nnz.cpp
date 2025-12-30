@@ -16,7 +16,7 @@ template <typename ComplexOrRealType> int den_nnz(const PsimagLite::Matrix<Compl
 	};
 
 	const ComplexOrRealType dzero = 0;
-	int nnz_A = 0;
+	int                     nnz_A = 0;
 
 	int ja = 0;
 
@@ -29,7 +29,7 @@ template <typename ComplexOrRealType> int den_nnz(const PsimagLite::Matrix<Compl
 		int ia = 0;
 		for (ia = 0; ia < nrow_A; ia++) {
 			int is_zero = (a_(ia, ja) == dzero);
-			nnz_A = (is_zero) ? nnz_A : (nnz_A + 1);
+			nnz_A       = (is_zero) ? nnz_A : (nnz_A + 1);
 		};
 	};
 

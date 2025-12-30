@@ -107,39 +107,39 @@ class TimeVectorsChebyshev : public TimeVectorsBase<TargetParamsType,
 	                        WaveFunctionTransfType,
 	                        LanczosSolverType,
 	                        VectorWithOffsetType>
-	    BaseType;
-	typedef typename BaseType::PairType PairType;
-	typedef typename TargetParamsType::RealType RealType;
-	typedef typename BaseType::VectorRealType VectorRealType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	                                                            BaseType;
+	typedef typename BaseType::PairType                         PairType;
+	typedef typename TargetParamsType::RealType                 RealType;
+	typedef typename BaseType::VectorRealType                   VectorRealType;
+	typedef typename ModelType::ModelHelperType                 ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Matrix<ComplexOrRealType> MatrixRealType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename PsimagLite::Matrix<ComplexOrRealType>      MatrixRealType;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
-	    ParallelTriDiagType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
-	typedef typename ParallelTriDiagType::TargetVectorType TargetVectorType;
-	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
+	                                                                 ParallelTriDiagType;
+	typedef typename VectorWithOffsetType::VectorType                VectorType;
+	typedef typename ParallelTriDiagType::MatrixComplexOrRealType    MatrixComplexOrRealType;
+	typedef typename ParallelTriDiagType::TargetVectorType           TargetVectorType;
+	typedef typename ParallelTriDiagType::VectorMatrixFieldType      VectorMatrixFieldType;
+	typedef typename LanczosSolverType::TridiagonalMatrixType        TridiagonalMatrixType;
+	typedef typename ModelType::InputValidatorType                   InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
-	typedef typename LanczosSolverType::MatrixType MatrixLanczosType;
-	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType> ScaledMatrixType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type        VectorVectorRealType;
+	typedef typename LanczosSolverType::MatrixType                   MatrixLanczosType;
+	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType>   ScaledMatrixType;
+	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
+	typedef PsimagLite::PredicateAwesome<>                           PredicateAwesomeType;
 
 public:
 
-	TimeVectorsChebyshev(const TargetParamsType& tstStruct,
-	                     VectorVectorWithOffsetType& targetVectors,
-	                     const ModelType& model,
+	TimeVectorsChebyshev(const TargetParamsType&       tstStruct,
+	                     VectorVectorWithOffsetType&   targetVectors,
+	                     const ModelType&              model,
 	                     const WaveFunctionTransfType& wft,
-	                     const LeftRightSuperType& lrs,
-	                     InputValidatorType& ioIn)
+	                     const LeftRightSuperType&     lrs,
+	                     InputValidatorType&           ioIn)
 	    : BaseType(model, lrs, wft, "chebyshev")
 	    , tstStruct_(tstStruct)
 	    , targetVectors_(targetVectors)
@@ -182,15 +182,15 @@ public:
 		}
 	}
 
-	virtual void calcTimeVectors(const VectorSizeType& indices,
-	                             RealType Eg,
-	                             const VectorWithOffsetType& phi,
+	virtual void calcTimeVectors(const VectorSizeType&               indices,
+	                             RealType                            Eg,
+	                             const VectorWithOffsetType&         phi,
 	                             const typename BaseType::ExtraData& extra)
 	{
 		const VectorRealType& times = tstStruct_.times();
 
 		if (extra.wftAndAdvanceIfNeeded) {
-			const SizeType noAdvance = indices[0];
+			const SizeType       noAdvance = indices[0];
 			VectorWithOffsetType phiNew;
 			assert(targetVectors_[noAdvance]);
 			if (targetVectors_[noAdvance]->size() > 0) {
@@ -207,7 +207,7 @@ public:
 			assert(indexOf1 < targetVectors_.size());
 			VectorWithOffsetType* tv1
 			    = const_cast<VectorWithOffsetType*>(targetVectors_[indexOf1]);
-			*tv1 = phi;
+			*tv1       = phi;
 			startOfWft = 2;
 		}
 
@@ -233,7 +233,7 @@ public:
 		if (this->currentTimeStep() == 0 && tstStruct_.noOperator()
 		    && tstStruct_.skipTimeZero()) {
 			for (SizeType i = 0; i < n; ++i) {
-				SizeType ii = indices[i];
+				SizeType ii         = indices[i];
 				*targetVectors_[ii] = phi;
 			}
 
@@ -250,8 +250,8 @@ public:
 
 		if (timeHasAdvanced_) {
 			for (SizeType i = 0; i < m - 1; ++i) {
-				SizeType ii = indices[i];
-				SizeType jj = indices[i + 1];
+				SizeType ii         = indices[i];
+				SizeType jj         = indices[i + 1];
 				*targetVectors_[ii] = *targetVectors_[jj];
 			}
 		}
@@ -261,11 +261,11 @@ public:
 			assert(ii < targetVectors_.size());
 			assert(ii != 1);
 			*targetVectors_[ii] = phi;
-			SizeType prev = indices[i - 1];
+			SizeType prev       = indices[i - 1];
 			SizeType prevMinus2 = indices[i - 2];
 			calcTargetVector(*targetVectors_[ii], phi, prev, prevMinus2, Eg);
 			if (isFreqTargeted_) {
-				SizeType post = indices[i + 1];
+				SizeType             post   = indices[i + 1];
 				VectorWithOffsetType phiNew = phi;
 				calcCorrectionVector(
 				    phiNew, *targetVectors_[ii], prev, prevMinus2, Eg);
@@ -274,9 +274,9 @@ public:
 		}
 
 		assert(extra.block.size() > 0);
-		const SizeType site = extra.block[0];
-		const SizeType nsites = model_.superGeometry().numberOfSites();
-		const SizeType center = nsites / 2;
+		const SizeType       site   = extra.block[0];
+		const SizeType       nsites = model_.superGeometry().numberOfSites();
+		const SizeType       center = nsites / 2;
 		PredicateAwesomeType pred(correctVectorsAwesomePred_);
 		const bool flagcorrection = pred.isTrue("%s", site, "%c", center, "%n", nsites);
 		if (flagcorrection)
@@ -293,29 +293,29 @@ public:
 
 private:
 
-	void calcTargetVector(VectorWithOffsetType& v,
+	void calcTargetVector(VectorWithOffsetType&       v,
 	                      const VectorWithOffsetType& phi,
-	                      SizeType prev,
-	                      SizeType prevMinus2,
-	                      RealType Eg)
+	                      SizeType                    prev,
+	                      SizeType                    prevMinus2,
+	                      RealType                    Eg)
 
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
-			SizeType i0 = phi.sector(ii);
+			SizeType         i0 = phi.sector(ii);
 			TargetVectorType r;
 			calcTargetVector(r, phi, prev, prevMinus2, i0, Eg);
 			v.setDataInSector(r, i0);
 		}
 	}
 
-	void calcTargetVector(TargetVectorType& r,
+	void calcTargetVector(TargetVectorType&           r,
 	                      const VectorWithOffsetType& phi,
-	                      SizeType prev,
-	                      SizeType prevMinus2,
-	                      SizeType i0,
-	                      RealType Eg)
+	                      SizeType                    prev,
+	                      SizeType                    prevMinus2,
+	                      SizeType                    i0,
+	                      RealType                    Eg)
 	{
-		SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
+		SizeType                      p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(
 		    lrs_, ModelType::modelLinks(), this->time(), model_.superOpHelper());
@@ -329,14 +329,14 @@ private:
 		// defining Hprime matrix:
 		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct_, Eg, verbose);
 
-		SizeType total = phi.effectiveSize(i0);
+		SizeType         total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		r.resize(total);
 		if (this->currentTimeStep() == 0) {
 			phi.extract(phi2, i0);
 			lanczosHelper2.matrixVectorProduct(r, phi2); // applying Hprime
 		} else {
-			TargetVectorType x2(total);
+			TargetVectorType     x2(total);
 			VectorWithOffsetType x = 2.0 * (*targetVectors_[prev]);
 			x.extract(x2, i0);
 			targetVectors_[prevMinus2]->extract(phi2, i0);
@@ -345,27 +345,27 @@ private:
 		}
 	}
 
-	void calcCorrectionVector(VectorWithOffsetType& v,
+	void calcCorrectionVector(VectorWithOffsetType&       v,
 	                          const VectorWithOffsetType& phi,
-	                          SizeType prev,
-	                          SizeType prevMinus2,
-	                          RealType Eg)
+	                          SizeType                    prev,
+	                          SizeType                    prevMinus2,
+	                          RealType                    Eg)
 
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
-			SizeType i0 = phi.sector(ii);
+			SizeType         i0 = phi.sector(ii);
 			TargetVectorType r;
 			calcCorrectionVector(r, phi, prev, prevMinus2, i0);
 			v.setDataInSector(r, i0);
 		}
 	}
-	void calcCorrectionVector(TargetVectorType& r,
+	void calcCorrectionVector(TargetVectorType&           r,
 	                          const VectorWithOffsetType& phi,
-	                          SizeType prev,
-	                          SizeType prevMinus2,
-	                          SizeType i0)
+	                          SizeType                    prev,
+	                          SizeType                    prevMinus2,
+	                          SizeType                    i0)
 	{
-		SizeType total = phi.effectiveSize(i0);
+		SizeType         total = phi.effectiveSize(i0);
 		TargetVectorType phiAdd(total);
 		r.resize(total);
 
@@ -373,30 +373,30 @@ private:
 
 		if (this->currentTimeStep() == 0) {
 
-			RealType factor = computeChebyAndDamping(2, omega_);
+			RealType factor   = computeChebyAndDamping(2, omega_);
 			RealType omegaden = sqrt(1.0 - omega_ * omega_);
 
-			RealType f = 2.0 * c * factor / omegaden;
+			RealType             f        = 2.0 * c * factor / omegaden;
 			VectorWithOffsetType phi_temp = f * (phi);
 			phi_temp.extract(phiAdd, i0);
 			r += phiAdd;
 
-			factor = computeChebyAndDamping(1, omega_);
-			f = 2.0 * c * factor / omegaden;
+			factor   = computeChebyAndDamping(1, omega_);
+			f        = 2.0 * c * factor / omegaden;
 			phi_temp = f * (*targetVectors_[prev]);
 			phi_temp.extract(phiAdd, i0);
 			r += phiAdd;
 
-			factor = computeChebyAndDamping(0, omega_);
-			f = c * factor / omegaden;
+			factor   = computeChebyAndDamping(0, omega_);
+			f        = c * factor / omegaden;
 			phi_temp = f * (*targetVectors_[prevMinus2]);
 			phi_temp.extract(phiAdd, i0);
 			r += phiAdd;
 		} else {
-			double time = 2 + this->currentTimeStep();
-			RealType factor = computeChebyAndDamping(time, omega_);
-			RealType omegaden = sqrt(1.0 - omega_ * omega_);
-			RealType f = 2.0 * c * factor / omegaden;
+			double               time     = 2 + this->currentTimeStep();
+			RealType             factor   = computeChebyAndDamping(time, omega_);
+			RealType             omegaden = sqrt(1.0 - omega_ * omega_);
+			RealType             f        = 2.0 * c * factor / omegaden;
 			VectorWithOffsetType phi_temp = f * (phi);
 			phi_temp.extract(phiAdd, i0);
 			r += phiAdd;
@@ -405,8 +405,8 @@ private:
 
 	RealType computeChebyAndDamping(SizeType index, RealType omega)
 	{
-		RealType ChebyPoly = cos(index * acos(omega));
-		RealType Ntotal = 1.0 * model_.params().finiteLoop.size() - 2.0;
+		RealType ChebyPoly     = cos(index * acos(omega));
+		RealType Ntotal        = 1.0 * model_.params().finiteLoop.size() - 2.0;
 		RealType DampingFactor = sinh(lambda_ * (1.0 - index / Ntotal)) / sinh(lambda_);
 		return ChebyPoly * DampingFactor;
 	}
@@ -441,7 +441,7 @@ private:
 
 		VectorMatrixFieldType V(phi.sectors());
 		VectorMatrixFieldType T(phi.sectors());
-		VectorType weights;
+		VectorType            weights;
 
 		VectorSizeType permutation;
 		computeAuxForCorrection(
@@ -460,12 +460,12 @@ private:
 	void correctVectors(VectorWithOffsetType& phi,
 	                    const MatrixRealType& Vmatrix,
 	                    const MatrixRealType& Tmatrix,
-	                    const VectorType& weights,
+	                    const VectorType&     weights,
 	                    const VectorSizeType& permutation)
 
 	{
 		for (SizeType ii = 0; ii < phi.sectors(); ++ii) {
-			SizeType i0 = phi.sector(ii);
+			SizeType         i0 = phi.sector(ii);
 			TargetVectorType r;
 			phi.extract(r, i0);
 			correctVector(r, Vmatrix, Tmatrix, weights, permutation);
@@ -473,20 +473,20 @@ private:
 		}
 	}
 
-	void computeAuxForCorrection(VectorMatrixFieldType& V,
-	                             VectorMatrixFieldType& T,
-	                             VectorType& weights,
-	                             VectorSizeType& permutation,
+	void computeAuxForCorrection(VectorMatrixFieldType&      V,
+	                             VectorMatrixFieldType&      T,
+	                             VectorType&                 weights,
+	                             VectorSizeType&             permutation,
 	                             const VectorWithOffsetType& phi,
-	                             SizeType i0,
-	                             RealType Eg,
-	                             RealType currentTime) const
+	                             SizeType                    i0,
+	                             RealType                    Eg,
+	                             RealType                    currentTime) const
 	{
-		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
+		const SizeType                p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(
 		    lrs_, ModelType::modelLinks(), currentTime, model_.superOpHelper());
-		MatrixLanczosType lanczosHelper(model_, hc, aux);
+		MatrixLanczosType           lanczosHelper(model_, hc, aux);
 		ProgramGlobals::VerboseEnum verbose
 		    = (model_.params().options.isSet("VerboseCheby"))
 		    ? ProgramGlobals::VerboseEnum::YES
@@ -494,7 +494,7 @@ private:
 		// defining Hprime matrix:
 		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct_, Eg, verbose);
 
-		const RealType fakeTime = 0;
+		const RealType                                        fakeTime = 0;
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
@@ -519,8 +519,8 @@ private:
 		const MatrixRealType& Vmatrix = V[0];
 		const MatrixRealType& Tmatrix = T[0]; // contains rotation matrix after diag
 
-		const SizeType small = Vmatrix.cols();
-		const SizeType big = Vmatrix.rows();
+		const SizeType                   small = Vmatrix.cols();
+		const SizeType                   big   = Vmatrix.rows();
 		PsimagLite::Sort<VectorRealType> sort;
 		permutation.resize(small);
 		sort.sort(veigs, permutation);
@@ -540,7 +540,7 @@ private:
 		phi.extract(sv, i0);
 
 		for (SizeType alpha = 0; alpha < nbad; ++alpha) {
-			SizeType ind = permutation[alpha];
+			SizeType          ind = permutation[alpha];
 			ComplexOrRealType sum = 0.0;
 			for (SizeType alphap = 0; alphap < small; ++alphap) {
 				for (SizeType j = 0; j < big; ++j)
@@ -552,17 +552,17 @@ private:
 		}
 	}
 
-	void correctVector(VectorType& r,
+	void correctVector(VectorType&           r,
 	                   const MatrixRealType& Vmatrix,
 	                   const MatrixRealType& Tmatrix,
-	                   const VectorType& weights,
+	                   const VectorType&     weights,
 	                   const VectorSizeType& permutation) const
 	{
 
-		const SizeType big = Vmatrix.rows();
-		const SizeType small = Vmatrix.cols();
-		const SizeType nbad = weights.size();
-		ComplexOrRealType sum = 0;
+		const SizeType    big    = Vmatrix.rows();
+		const SizeType    small  = Vmatrix.cols();
+		const SizeType    nbad   = weights.size();
+		ComplexOrRealType sum    = 0;
 		ComplexOrRealType sumOld = 0;
 
 		for (SizeType i = 0; i < big; ++i) {
@@ -583,17 +583,17 @@ private:
 			r[i] *= factor;
 	}
 
-	const TargetParamsType& tstStruct_;
-	VectorVectorWithOffsetType& targetVectors_;
-	const ModelType& model_;
+	const TargetParamsType&       tstStruct_;
+	VectorVectorWithOffsetType&   targetVectors_;
+	const ModelType&              model_;
 	const WaveFunctionTransfType& wft_;
-	const LeftRightSuperType& lrs_;
-	InputValidatorType& ioIn_;
-	bool timeHasAdvanced_;
-	PsimagLite::String correctVectorsAwesomePred_;
-	bool isFreqTargeted_;
-	RealType omega_;
-	RealType lambda_;
+	const LeftRightSuperType&     lrs_;
+	InputValidatorType&           ioIn_;
+	bool                          timeHasAdvanced_;
+	PsimagLite::String            correctVectorsAwesomePred_;
+	bool                          isFreqTargeted_;
+	RealType                      omega_;
+	RealType                      lambda_;
 }; // class TimeVectorsChebyshev
 } // namespace Dmrg
 /*@}*/

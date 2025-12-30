@@ -37,7 +37,7 @@ public:
 
 private:
 
-	bool nonTrivial_;
+	bool               nonTrivial_;
 	PsimagLite::String actionString_;
 };
 

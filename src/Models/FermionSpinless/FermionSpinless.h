@@ -93,45 +93,45 @@ namespace Dmrg {
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
 template <typename ModelBaseType> class FermionSpinless : public ModelBaseType {
 
-	static const int FERMION_SIGN = -1;
+	static const int FERMION_SIGN       = -1;
 	static const int DEGREES_OF_FREEDOM = 1;
 	static const int NUMBER_OF_ORBITALS = 1;
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef unsigned int long WordType;
-	typedef HilbertSpaceFermionSpinless<WordType> HilbertSpaceType;
-	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename HilbertSpaceType::HilbertState HilbertState;
-	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef typename ModelBaseType::MyBasis BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename ModelBaseType::ModelHelperType                      ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType                    SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType                   LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                             LinkType;
+	typedef typename ModelHelperType::OperatorsType                      OperatorsType;
+	typedef typename OperatorsType::OperatorType                         OperatorType;
+	typedef typename ModelHelperType::RealType                           RealType;
+	typedef typename ModelBaseType::QnType                               QnType;
+	typedef typename QnType::VectorQnType                                VectorQnType;
+	typedef typename ModelBaseType::SparseMatrixType                     SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                        ComplexOrRealType;
+	typedef unsigned int long                                            WordType;
+	typedef HilbertSpaceFermionSpinless<WordType>                        HilbertSpaceType;
+	typedef typename ModelBaseType::VectorOperatorType                   VectorOperatorType;
+	typedef typename ModelBaseType::VectorSizeType                       VectorSizeType;
+	typedef typename ModelBaseType::OpsLabelType                         OpsLabelType;
+	typedef typename ModelBaseType::BlockType                            BlockType;
+	typedef typename ModelBaseType::SolverParamsType                     SolverParamsType;
+	typedef typename ModelBaseType::VectorType                           VectorType;
+	typedef typename HilbertSpaceType::HilbertState                      HilbertState;
+	typedef typename PsimagLite::Vector<HilbertState>::Type              VectorHilbertStateType;
+	typedef typename ModelBaseType::InputValidatorType                   InputValidatorType;
+	typedef typename ModelBaseType::MyBasis                              BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType               MyBasisWithOperators;
+	typedef typename PsimagLite::Vector<HilbertState>::Type              HilbertBasisType;
+	typedef typename ModelBaseType::OpForLinkType                        OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType                        ModelTermType;
 	typedef typename PsimagLite::Vector<std::pair<RealType, bool>>::Type VectorPairRealBoolType;
 
-	FermionSpinless(const SolverParamsType& solverParams,
-	                InputValidatorType& io,
+	FermionSpinless(const SolverParamsType&  solverParams,
+	                InputValidatorType&      io,
 	                const SuperGeometryType& geometry,
-	                PsimagLite::String extra)
+	                PsimagLite::String       extra)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , offset_(DEGREES_OF_FREEDOM)
@@ -183,8 +183,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const BlockType& block,
-	                                RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		static bool firstCall = true;
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
@@ -193,9 +193,9 @@ public:
 		if (n != 1)
 			err("addDiagonalsInNaturalBasis: block.size() != 1\n");
 
-		const SizeType site = block[0];
-		const OperatorType& niupop = ModelBaseType::naturalOperator("n", site, 0);
-		const SparseMatrixType& niup = niupop.getCRS();
+		const SizeType          site   = block[0];
+		const OperatorType&     niupop = ModelBaseType::naturalOperator("n", site, 0);
+		const SparseMatrixType& niup   = niupop.getCRS();
 
 		// V_iup term
 		RealType tmp = modelParameters_.potentialV[site];
@@ -210,14 +210,14 @@ public:
 			if (previousTimeStep_ != currentTimeStep || firstCall) {
 				printMuOfR(time);
 				previousTimeStep_ = currentTimeStep;
-				firstCall = false;
+				firstCall         = false;
 				for (SizeType i = 0; i < vectorMu_.size(); ++i)
 					vectorMu_[site].second = false;
 
-				vectorMu_[site].first = effectiveMu;
+				vectorMu_[site].first  = effectiveMu;
 				vectorMu_[site].second = true;
 			} else {
-				vectorMu_[site].first = effectiveMu;
+				vectorMu_[site].first  = effectiveMu;
 				vectorMu_[site].second = true;
 			}
 		}
@@ -227,8 +227,8 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
-		BlockType block(1, site);
+		SizeType         site = 0;
+		BlockType        block(1, site);
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 		setBasis(natBasis, block);
@@ -260,7 +260,7 @@ protected:
 			}
 
 			tmpMatrix = findOperatorMatrices(i, natBasis);
-			RealType angularFactor = 1;
+			RealType                              angularFactor = 1;
 			typename OperatorType::Su2RelatedType su2related;
 			su2related.offset = 1; // check FIXME
 			OperatorType myOp(tmpMatrix,
@@ -278,7 +278,7 @@ protected:
 
 	void fillModelLinks()
 	{
-		ModelTermType& hop = ModelBaseType::createTerm("hopping");
+		ModelTermType& hop  = ModelBaseType::createTerm("hopping");
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
 
 		OpForLinkType cup("c");
@@ -295,8 +295,8 @@ protected:
 
 	void setBasis(HilbertBasisType& basis, const VectorSizeType& block) const
 	{
-		int sitesTimesDof = DEGREES_OF_FREEDOM * block.size();
-		HilbertState total = (1 << sitesTimesDof);
+		int          sitesTimesDof = DEGREES_OF_FREEDOM * block.size();
+		HilbertState total         = (1 << sitesTimesDof);
 
 		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a)
@@ -320,8 +320,8 @@ protected:
 	SparseMatrixType
 	findOperatorMatrices(int i, int sigma, const HilbertBasisType& natBasis) const
 	{
-		typename HilbertSpaceType::HilbertState bra, ket;
-		int n = natBasis.size();
+		typename HilbertSpaceType::HilbertState                   bra, ket;
+		int                                                       n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
@@ -372,9 +372,9 @@ protected:
 		if (isCanonical)
 			other.resize(1);
 		for (SizeType i = 0; i < basis.size(); ++i) {
-			PairType jmpair = calcJmValue<PairType>(basis[i]);
+			PairType jmpair    = calcJmValue<PairType>(basis[i]);
 			SizeType electrons = HilbertSpaceType::getNofDigits(basis[i], 0);
-			SizeType flavor = electrons;
+			SizeType flavor    = electrons;
 
 			bool sign = electrons & 1;
 			if (other.size() == 1)
@@ -387,12 +387,12 @@ protected:
 	SparseMatrixType findOperatorMatrices(int i, const VectorHilbertStateType& natBasis) const
 	{
 
-		SizeType n = natBasis.size();
+		SizeType                                                  n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
 			HilbertState ket = natBasis[ii];
-			cm(ii, ii) = 0.0;
+			cm(ii, ii)       = 0.0;
 			for (int sigma = 0; sigma < DEGREES_OF_FREEDOM; sigma++)
 				if (HilbertSpaceType::isNonZero(ket, i, sigma))
 					cm(ii, ii) += 1.0;
@@ -468,16 +468,16 @@ protected:
 
 		std::cout << "];\n";
 	}
-	ParametersFermionSpinless<RealType, QnType> modelParameters_;
-	SizeType offset_;
-	SpinSquaredHelper<RealType, WordType> spinSquaredHelper_;
+	ParametersFermionSpinless<RealType, QnType>        modelParameters_;
+	SizeType                                           offset_;
+	SpinSquaredHelper<RealType, WordType>              spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType, WordType>> spinSquared_;
-	const bool hasDelta_;
-	bool hasCalcMu_;
-	RealType tau_;
-	RealType mu_;
-	mutable SizeType previousTimeStep_;
-	mutable VectorPairRealBoolType vectorMu_;
+	const bool                                         hasDelta_;
+	bool                                               hasCalcMu_;
+	RealType                                           tau_;
+	RealType                                           mu_;
+	mutable SizeType                                   previousTimeStep_;
+	mutable VectorPairRealBoolType                     vectorMu_;
 
 }; // class FermionSpinless
 

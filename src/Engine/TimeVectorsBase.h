@@ -95,19 +95,19 @@ class TimeVectorsBase {
 
 public:
 
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename TargetParamsType::RealType RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef std::pair<SizeType, SizeType> PairType;
+	typedef typename ModelType::ModelHelperType                     ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
+	typedef typename TargetParamsType::RealType                     RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
+	typedef std::pair<SizeType, SizeType>                           PairType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
 	typedef WftHelper<ModelType, VectorWithOffsetType, WaveFunctionTransfType> WftHelperType;
 
-	TimeVectorsBase(const ModelType& model,
-	                const LeftRightSuperType& lrs,
+	TimeVectorsBase(const ModelType&              model,
+	                const LeftRightSuperType&     lrs,
 	                const WaveFunctionTransfType& wft,
-	                PsimagLite::String name)
+	                PsimagLite::String            name)
 	    : wftHelper_(model, lrs, wft)
 	    , name_(name)
 	    , time_(0.0)
@@ -117,10 +117,10 @@ public:
 	struct ExtraData {
 
 		ExtraData(ProgramGlobals::DirectionEnum dir_,
-		          bool allOperatorsApplied_,
-		          bool wftAndAdvanceIfNeeded_,
-		          VectorSizeType block_,
-		          bool isLastCall_)
+		          bool                          allOperatorsApplied_,
+		          bool                          wftAndAdvanceIfNeeded_,
+		          VectorSizeType                block_,
+		          bool                          isLastCall_)
 		    : dir(dir_)
 		    , allOperatorsApplied(allOperatorsApplied_)
 		    , wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_)
@@ -128,11 +128,11 @@ public:
 		    , isLastCall(isLastCall_)
 		{ }
 
-		ProgramGlobals::DirectionEnum dir;
-		bool allOperatorsApplied;
-		bool wftAndAdvanceIfNeeded;
+		ProgramGlobals::DirectionEnum      dir;
+		bool                               allOperatorsApplied;
+		bool                               wftAndAdvanceIfNeeded;
 		PsimagLite::Vector<SizeType>::Type block;
-		bool isLastCall;
+		bool                               isLastCall;
 	};
 
 	virtual void calcTimeVectors(const VectorSizeType&,
@@ -167,10 +167,10 @@ protected:
 
 private:
 
-	WftHelperType wftHelper_;
+	WftHelperType      wftHelper_;
 	PsimagLite::String name_;
-	RealType time_;
-	SizeType currentTimeStep_;
+	RealType           time_;
+	SizeType           currentTimeStep_;
 }; // class TimeVectorsBase
 } // namespace Dmrg
 /*@}*/

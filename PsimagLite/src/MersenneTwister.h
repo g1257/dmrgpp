@@ -21,11 +21,11 @@ public:
 
 private:
 
-	static const unsigned N_ = 624;
+	static const unsigned N_                 = 624;
 	static const unsigned keepLast32BitMask_ = 4294967295; // 2^32 - 1
-	unsigned index_;
-	unsigned state_[N_];
-	void generate();
+	unsigned              index_;
+	unsigned              state_[N_];
+	void                  generate();
 };
 
 } // namespace PsimagLite

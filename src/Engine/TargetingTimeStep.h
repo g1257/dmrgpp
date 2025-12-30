@@ -97,41 +97,41 @@ class TargetingTimeStep : public TargetingBase<LanczosSolverType_, VectorWithOff
 
 public:
 
-	typedef LanczosSolverType_ LanczosSolverType;
+	typedef LanczosSolverType_                                      LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename BaseType::OptionsType OptionsType;
-	typedef typename BaseType::MatrixVectorType MatrixVectorType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::OperatorsType OperatorsType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
-	typedef typename VectorWithOffsetType::VectorType TargetVectorType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef TargetParamsTimeStep<ModelType> TargetParamsType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename BasisType::QnType QnType;
-	typedef typename TargetingCommonType::StageEnumType StageEnumType;
+	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
+	typedef typename BaseType::CheckpointType                       CheckpointType;
+	typedef std::pair<SizeType, SizeType>                           PairType;
+	typedef typename BaseType::OptionsType                          OptionsType;
+	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
+	typedef typename MatrixVectorType::ModelType                    ModelType;
+	typedef typename ModelType::RealType                            RealType;
+	typedef typename ModelType::OperatorsType                       OperatorsType;
+	typedef typename ModelType::ModelHelperType                     ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
+	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
+	typedef typename VectorWithOffsetType::value_type               ComplexOrRealType;
+	typedef typename VectorWithOffsetType::VectorType               TargetVectorType;
+	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
+	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef TargetParamsTimeStep<ModelType>                         TargetParamsType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef typename TargetingCommonType::TimeSerializerType        TimeSerializerType;
+	typedef typename OperatorType::StorageType                      SparseMatrixType;
+	typedef typename ModelType::InputValidatorType                  InputValidatorType;
+	typedef typename BasisType::QnType                              QnType;
+	typedef typename TargetingCommonType::StageEnumType             StageEnumType;
 
-	TargetingTimeStep(const LeftRightSuperType& lrs,
-	                  const CheckpointType& checkPoint,
+	TargetingTimeStep(const LeftRightSuperType&     lrs,
+	                  const CheckpointType&         checkPoint,
 	                  const WaveFunctionTransfType& wft,
 	                  const QnType&,
 	                  InputValidatorType& ioIn,
-	                  PsimagLite::String targeting)
+	                  PsimagLite::String  targeting)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_(ioIn, targeting, checkPoint.model())
 	    , wft_(wft)
@@ -147,13 +147,13 @@ public:
 
 		RealType tau = tstStruct_.tau();
 		RealType sum = 0;
-		SizeType n = tstStruct_.times().size();
+		SizeType n   = tstStruct_.times().size();
 
 		RealType factor = (n + 4.0) / (n + 2.0);
 		factor *= (1.0 - gsWeight_);
 		for (SizeType i = 0; i < n; i++) {
 			tstStruct_.times()[i] = i * tau / (n - 1);
-			weight_[i] = factor / (n + 4);
+			weight_[i]            = factor / (n + 4);
 			sum += weight_[i];
 		}
 		sum -= weight_[0];
@@ -194,9 +194,9 @@ public:
 		return b;
 	}
 
-	void evolve(const VectorRealType& energies,
+	void evolve(const VectorRealType&         energies,
 	            ProgramGlobals::DirectionEnum direction,
-	            const BlockType& block1,
+	            const BlockType&              block1,
 	            const BlockType&,
 	            SizeType loopNumber)
 	{
@@ -219,7 +219,7 @@ public:
 				return;
 		}
 
-		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
+		SizeType  x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1, x);
 		evolveInternal(Eg, direction, block, loopNumber);
 	}
@@ -235,11 +235,11 @@ public:
 		this->common().readGSandNGSTs(io, prefix, "TimeStep");
 	}
 
-	void write(const VectorSizeType& block,
+	void write(const VectorSizeType&        block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String prefix) const
+	           PsimagLite::String           prefix) const
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Saving state...";
 		progress_.printline(msgg, std::cout);
@@ -250,10 +250,10 @@ public:
 
 private:
 
-	void evolveInternal(RealType Eg,
+	void evolveInternal(RealType                      Eg,
 	                    ProgramGlobals::DirectionEnum direction,
-	                    const BlockType& block1,
-	                    SizeType loopNumber)
+	                    const BlockType&              block1,
+	                    SizeType                      loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -261,8 +261,8 @@ private:
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
 
-		SizeType numberOfSites = this->lrs().super().block().size();
-		bool doBorderIfBorder = (site < 1 || site >= numberOfSites - 1);
+		SizeType numberOfSites    = this->lrs().super().block().size();
+		bool     doBorderIfBorder = (site < 1 || site >= numberOfSites - 1);
 
 		if (doBorderIfBorder) {
 			if (loopNumber >= this->model().params().finiteLoop.size() - 1) {
@@ -285,7 +285,7 @@ private:
 		    &phiNew, Eg, direction, site, loopNumber, tstStruct_);
 
 		PairType startEnd(0, tstStruct_.times().size());
-		bool allOperatorsApplied
+		bool     allOperatorsApplied
 		    = (this->common().aoe().noStageIs(StageEnumType::DISABLED)
 		       && this->common().aoe().noStageIs(StageEnumType::OPERATOR));
 
@@ -307,7 +307,7 @@ private:
 		this->common().cocoon(block1, direction, false);
 
 		PsimagLite::String predicate = this->model().params().printHamiltonianAverage;
-		const SizeType center = this->model().superGeometry().numberOfSites() / 2;
+		const SizeType     center    = this->model().superGeometry().numberOfSites() / 2;
 		PsimagLite::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		assert(block1.size() > 0);
@@ -315,7 +315,7 @@ private:
 			printEnergies(); // in-situ
 
 		const OptionsType& options = this->model().params().options;
-		bool normalizeTimeVectors
+		bool               normalizeTimeVectors
 		    = (options.isSet("normalizeTimeVectors") || options.isSet("TargetingAncilla"));
 
 		if (options.isSet("neverNormalizeVectors"))
@@ -344,7 +344,7 @@ private:
 	void printEnergies(const VectorWithOffsetType& phi, SizeType whatTarget, SizeType i0) const
 	{
 		const SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-		typename ModelHelperType::Aux aux(p, BaseType::lrs());
+		typename ModelHelperType::Aux                 aux(p, BaseType::lrs());
 		typename ModelType::HamiltonianConnectionType hc(
 		    BaseType::lrs(),
 		    ModelType::modelLinks(),
@@ -352,30 +352,30 @@ private:
 		    BaseType::model().superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(), hc, aux);
 
-		const SizeType total = phi.effectiveSize(i0);
+		const SizeType   total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		phi.extract(phi2, i0);
 		TargetVectorType x(total);
 		lanczosHelper.matrixVectorProduct(x, phi2);
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Hamiltonian average at time=" << this->common().aoe().timeVectors().time();
 		msg << " for target=" << whatTarget;
 		ComplexOrRealType numerator = phi2 * x;
-		ComplexOrRealType den = phi2 * phi2;
-		ComplexOrRealType division = (PsimagLite::norm(den) < 1e-10) ? 0 : numerator / den;
+		ComplexOrRealType den       = phi2 * phi2;
+		ComplexOrRealType division  = (PsimagLite::norm(den) < 1e-10) ? 0 : numerator / den;
 		msg << " sector=" << i0 << " <phi(t)|H|phi(t)>=" << numerator;
 		msg << " <phi(t)|phi(t)>=" << den << " " << division;
 		progress_.printline(msgg, std::cout);
 		tvEnergy_[whatTarget] = PsimagLite::real(division);
 	}
 
-	TargetParamsType tstStruct_;
+	TargetParamsType              tstStruct_;
 	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
-	VectorRealType weight_;
-	mutable VectorRealType tvEnergy_;
-	RealType gsWeight_;
+	VectorRealType                weight_;
+	mutable VectorRealType        tvEnergy_;
+	RealType                      gsWeight_;
 }; // class TargetingTimeStep
 } // namespace Dmrg
 

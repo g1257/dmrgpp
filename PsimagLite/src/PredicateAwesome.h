@@ -59,13 +59,13 @@ template <typename SpecType = PredicateDefaultSpec> class PredicateAwesome {
 
 public:
 
-	typedef Vector<PredicateAnd>::Type VectorPredicateAndType;
+	typedef Vector<PredicateAnd>::Type     VectorPredicateAndType;
 	typedef PredicateAnd::VectorStringType VectorStringType;
 
-	PredicateAwesome(String pred,
-	                 String orSeparator = ",",
-	                 String andSeparator = "&",
-	                 SpecType* spec = nullptr)
+	PredicateAwesome(String    pred,
+	                 String    orSeparator  = ",",
+	                 String    andSeparator = "&",
+	                 SpecType* spec         = nullptr)
 	    : pred_(pred)
 	{
 		if (pred_ == "")
@@ -124,13 +124,13 @@ public:
 
 	template <typename T1, typename T2>
 	bool isTrue(String name1,
-	            T1 val1,
+	            T1     val1,
 	            String name2,
-	            T2 val2,
+	            T2     val2,
 	            String name3,
-	            T1 val3,
+	            T1     val3,
 	            String name4,
-	            T2 val4)
+	            T2     val4)
 	{
 		if (pred_ == "")
 			return false;
@@ -144,7 +144,7 @@ public:
 
 private:
 
-	String pred_;
+	String                 pred_;
 	VectorPredicateAndType predicateAnd_;
 };
 } // namespace PsimagLite

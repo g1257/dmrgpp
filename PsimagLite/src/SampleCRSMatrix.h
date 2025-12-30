@@ -99,7 +99,7 @@ public:
 	{
 		srand48(seed);
 		typename Vector<SizeType>::Type rows, cols;
-		typename Vector<T>::Type vals;
+		typename Vector<T>::Type        vals;
 		for (SizeType i = 0; i < nonZeros; i++) {
 			// pick a row
 			SizeType row = SizeType(drand48() * rank);
@@ -129,7 +129,7 @@ public:
 
 	void pushValue(const T& value) { values_.push_back(value); }
 
-	void matrixVectorProduct(typename Vector<T>::Type& x,
+	void matrixVectorProduct(typename Vector<T>::Type&       x,
 	                         const typename Vector<T>::Type& y) const
 	{
 		for (SizeType i = 0; i < y.size(); i++)
@@ -194,10 +194,10 @@ private:
 
 	void fillMatrix(typename Vector<SizeType>::Type& rows,
 	                typename Vector<SizeType>::Type& cols,
-	                typename Vector<T>::Type& vals)
+	                typename Vector<T>::Type&        vals)
 	{
 		Sort<typename Vector<SizeType>::Type> s;
-		typename Vector<SizeType>::Type iperm(rows.size());
+		typename Vector<SizeType>::Type       iperm(rows.size());
 		s.sort(rows, iperm);
 		SizeType counter = 0;
 		SizeType prevRow = rows[0] + 1;
@@ -206,7 +206,7 @@ private:
 			if (prevRow != row) {
 				// add new row
 				rowptr_[row] = counter++;
-				prevRow = row;
+				prevRow      = row;
 			}
 			colind_.push_back(cols[iperm[i]]);
 			values_.push_back(vals[iperm[i]]);
@@ -216,10 +216,10 @@ private:
 			rowptr_[i] = counter;
 	}
 
-	SizeType rank_;
+	SizeType                        rank_;
 	typename Vector<SizeType>::Type rowptr_;
 	typename Vector<SizeType>::Type colind_;
-	typename Vector<T>::Type values_;
+	typename Vector<T>::Type        values_;
 
 }; // class SampleCRSMatrix
 

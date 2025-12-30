@@ -85,7 +85,7 @@ namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename GeometryBaseType> class GeometryDirection {
 
-	typedef Matrix<ComplexOrRealType> MatrixType;
+	typedef Matrix<ComplexOrRealType>              MatrixType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 
 public:
@@ -113,15 +113,15 @@ public:
 			ioSerializer.write(label + "/edof", idof);
 		}
 
-		bool constantValues;
-		SizeType dirId;
+		bool            constantValues;
+		SizeType        dirId;
 		InternalDofEnum idof;
-		SizeType orbitals;
+		SizeType        orbitals;
 	}; // struct Auxiliary
 
 	template <typename IoInputter>
-	GeometryDirection(IoInputter& io,
-	                  const Auxiliary& aux,
+	GeometryDirection(IoInputter&             io,
+	                  const Auxiliary&        aux,
 	                  const GeometryBaseType* geometryFactory)
 	    : aux_(aux)
 	    , geometryBase_(geometryFactory)
@@ -135,7 +135,7 @@ public:
 
 		assert(aux.idof == SPECIFIC);
 
-		String connectors = "Connectors";
+		String connectors  = "Connectors";
 		String savedPrefix = io.prefix();
 		io.prefix() += "dir" + ttos(aux.dirId) + ":";
 
@@ -144,7 +144,7 @@ public:
 				n = 1;
 			for (SizeType i = 0; i < n; i++) {
 				MatrixType m;
-				String extraString = (n > 1 && io.version() > 2) ? ttos(i) : "";
+				String     extraString = (n > 1 && io.version() > 2) ? ttos(i) : "";
 				io.read(m, connectors + extraString);
 				dataMatrices_.push_back(m);
 				if (aux.orbitals != m.rows() || aux.orbitals != m.cols())
@@ -254,11 +254,11 @@ private:
 		return (aux_.constantValues) ? 1 : geometryBase_->getVectorSize(aux_.dirId);
 	}
 
-	Auxiliary aux_;
-	const GeometryBaseType* geometryBase_;
+	Auxiliary                                aux_;
+	const GeometryBaseType*                  geometryBase_;
 	typename Vector<ComplexOrRealType>::Type dataNumbers_;
-	typename Vector<MatrixType>::Type dataMatrices_;
-	MatrixType rawHoppings_;
+	typename Vector<MatrixType>::Type        dataMatrices_;
+	MatrixType                               rawHoppings_;
 }; // class GeometryDirection
 } // namespace PsimagLite
 

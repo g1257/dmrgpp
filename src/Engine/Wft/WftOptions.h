@@ -6,7 +6,7 @@ namespace Dmrg {
 
 template <typename VectorWithOffsetType_, typename OptionsType> struct WftOptions {
 
-	typedef typename VectorWithOffsetType_::value_type ComplexOrRealType;
+	typedef typename VectorWithOffsetType_::value_type         ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
 	enum AccelEnum
@@ -18,12 +18,12 @@ template <typename VectorWithOffsetType_, typename OptionsType> struct WftOption
 	};
 
 	WftOptions(ProgramGlobals::DirectionEnum dir1,
-	           const OptionsType& options,
-	           bool f,
-	           bool b,
-	           RealType d,
-	           SizeType gemmRnb_,
-	           SizeType threadsForGemmR_)
+	           const OptionsType&            options,
+	           bool                          f,
+	           bool                          b,
+	           RealType                      d,
+	           SizeType                      gemmRnb_,
+	           SizeType                      threadsForGemmR_)
 	    : twoSiteDmrg(options.isSet("twositedmrg"))
 	    , kronLoadBalance(options.isSet("KronLoadBalance"))
 	    , firstCall(f)
@@ -82,15 +82,15 @@ template <typename VectorWithOffsetType_, typename OptionsType> struct WftOption
 		io.write(threadsForGemmR, label + "/threadsForGemmR");
 	}
 
-	bool twoSiteDmrg;
-	bool kronLoadBalance;
-	bool firstCall;
-	bool bounce;
+	bool                          twoSiteDmrg;
+	bool                          kronLoadBalance;
+	bool                          firstCall;
+	bool                          bounce;
 	ProgramGlobals::DirectionEnum dir;
-	AccelEnum accel;
-	RealType denseSparseThreshold;
-	SizeType gemmRnb;
-	SizeType threadsForGemmR;
+	AccelEnum                     accel;
+	RealType                      denseSparseThreshold;
+	SizeType                      gemmRnb;
+	SizeType                      threadsForGemmR;
 
 private:
 

@@ -10,17 +10,17 @@ template <typename LeftRightSuperType> class OperatorsCached {
 
 public:
 
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename LeftRightSuperType::BasisType BasisType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef std::pair<SizeType, SizeType>                           PairType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef typename LeftRightSuperType::BasisType                  BasisType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef typename BasisWithOperatorsType::OperatorsType          OperatorsType;
+	typedef typename OperatorsType::OperatorType                    OperatorType;
+	typedef typename OperatorType::StorageType                      OperatorStorageType;
+	typedef PsimagLite::Concurrency                                 ConcurrencyType;
 	typedef typename PsimagLite::Vector<OperatorStorageType*>::Type VectorOperatorStorageType;
 	typedef typename PsimagLite::Vector<VectorOperatorStorageType>::Type
-	    VectorVectorOperatorStorageType;
+	                  VectorVectorOperatorStorageType;
 	typedef BlockType VectorSizeType;
 
 	OperatorsCached(const LeftRightSuperType& lrs)
@@ -47,7 +47,7 @@ public:
 
 	void clearThreadSelves() const { threadSelves_.clear(); }
 
-	const OperatorStorageType& getOpStorage(const MetaOpForConnection& metaOp,
+	const OperatorStorageType& getOpStorage(const MetaOpForConnection&         metaOp,
 	                                        const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		return (metaOp.site >= 0) ? getOpStorageLocal(metaOp.index, metaOp.modifier, type)
@@ -56,8 +56,8 @@ public:
 
 private:
 
-	const OperatorStorageType& getOpStorageLocal(SizeType iifirst,
-	                                             char modifier,
+	const OperatorStorageType& getOpStorageLocal(SizeType                           iifirst,
+	                                             char                               modifier,
 	                                             const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		const OperatorStorageType* m = 0;
@@ -74,9 +74,9 @@ private:
 
 		assert(modifier == 'C');
 		SizeType typeIndex = (type == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? 0 : 1;
-		SizeType packed = typeIndex + iifirst * 2;
+		SizeType packed    = typeIndex + iifirst * 2;
 		const ConcurrencyType::PthreadtType threadSelf = ConcurrencyType::threadSelf();
-		const SizeType threadNum = threadNumberFromSelf(threadSelf);
+		const SizeType                      threadNum  = threadNumberFromSelf(threadSelf);
 
 		if (garbage_.size() != seen_.size())
 			err("reducedOperator: FATAL: internal error\n");
@@ -116,7 +116,7 @@ private:
 	}
 
 	const OperatorStorageType&
-	getOpStorageNonLocal(const MetaOpForConnection& metaOp,
+	getOpStorageNonLocal(const MetaOpForConnection&         metaOp,
 	                     const ProgramGlobals::SysOrEnvEnum type) const
 	{
 		// Non local ops cannot have modifier different than 'N'
@@ -126,10 +126,10 @@ private:
 		    : lrs_.right().getSuperByIndex(metaOp.index).getStorage();
 	}
 
-	const LeftRightSuperType& lrs_;
-	mutable VectorVectorOperatorStorageType garbage_;
-	mutable typename PsimagLite::Vector<BlockType>::Type seen_;
-	mutable ConcurrencyType::MutexType mutex_;
+	const LeftRightSuperType&                                       lrs_;
+	mutable VectorVectorOperatorStorageType                         garbage_;
+	mutable typename PsimagLite::Vector<BlockType>::Type            seen_;
+	mutable ConcurrencyType::MutexType                              mutex_;
 	mutable PsimagLite::Vector<ConcurrencyType::PthreadtType>::Type threadSelves_;
 };
 }

@@ -8,14 +8,14 @@ typedef double RealType;
 typedef float RealType;
 #endif
 
-template void csr_kron_mult<RealType>(const char transA,
-                                      const char transB,
-                                      const PsimagLite::CrsMatrix<RealType>& a,
-                                      const PsimagLite::CrsMatrix<RealType>& b,
+template void csr_kron_mult<RealType>(const char                                transA,
+                                      const char                                transB,
+                                      const PsimagLite::CrsMatrix<RealType>&    a,
+                                      const PsimagLite::CrsMatrix<RealType>&    b,
                                       const PsimagLite::Vector<RealType>::Type& yin,
-                                      SizeType offsetY,
-                                      PsimagLite::Vector<RealType>::Type& xout,
-                                      SizeType offsetX,
+                                      SizeType                                  offsetY,
+                                      PsimagLite::Vector<RealType>::Type&       xout,
+                                      SizeType                                  offsetX,
                                       const RealType);
 
 template void
@@ -24,58 +24,58 @@ csr_kron_mult<std::complex<RealType>>(const char transA,
                                       const PsimagLite::CrsMatrix<std::complex<RealType>>&,
                                       const PsimagLite::CrsMatrix<std::complex<RealType>>&,
                                       const PsimagLite::Vector<std::complex<RealType>>::Type& yin,
-                                      SizeType offsetY,
+                                      SizeType                                          offsetY,
                                       PsimagLite::Vector<std::complex<RealType>>::Type& xout,
-                                      SizeType offsetX,
+                                      SizeType                                          offsetX,
                                       const RealType);
 
 //-----------------------------------------------------------------------------------
 
-template void den_csr_kron_mult<RealType>(const char transA,
-                                          const char transB,
+template void den_csr_kron_mult<RealType>(const char                          transA,
+                                          const char                          transB,
                                           const PsimagLite::Matrix<RealType>& a_,
                                           const PsimagLite::CrsMatrix<RealType>&,
                                           const PsimagLite::Vector<RealType>::Type& yin,
-                                          SizeType offsetY,
-                                          PsimagLite::Vector<RealType>::Type& xout,
-                                          SizeType offsetX,
+                                          SizeType                                  offsetY,
+                                          PsimagLite::Vector<RealType>::Type&       xout,
+                                          SizeType                                  offsetX,
                                           const RealType,
                                           PsimagLite::GemmR<RealType>&);
 
 template void den_csr_kron_mult<std::complex<RealType>>(
-    const char transA,
-    const char transB,
+    const char                                        transA,
+    const char                                        transB,
     const PsimagLite::Matrix<std::complex<RealType>>& a_,
     const PsimagLite::CrsMatrix<std::complex<RealType>>&,
     const PsimagLite::Vector<std::complex<RealType>>::Type& yin,
-    SizeType offsetY,
-    PsimagLite::Vector<std::complex<RealType>>::Type& xout,
-    SizeType offsetX,
+    SizeType                                                offsetY,
+    PsimagLite::Vector<std::complex<RealType>>::Type&       xout,
+    SizeType                                                offsetX,
     const RealType,
     PsimagLite::GemmR<std::complex<RealType>>&);
 
 //-----------------------------------------------------------------------------------
 
-template void den_kron_mult<RealType>(const char transA,
-                                      const char transB,
-                                      const PsimagLite::Matrix<RealType>& a_,
-                                      const PsimagLite::Matrix<RealType>& b_,
+template void den_kron_mult<RealType>(const char                                transA,
+                                      const char                                transB,
+                                      const PsimagLite::Matrix<RealType>&       a_,
+                                      const PsimagLite::Matrix<RealType>&       b_,
                                       const PsimagLite::Vector<RealType>::Type& yin,
-                                      SizeType offsetY,
-                                      PsimagLite::Vector<RealType>::Type& xout,
-                                      SizeType offsetX,
+                                      SizeType                                  offsetY,
+                                      PsimagLite::Vector<RealType>::Type&       xout,
+                                      SizeType                                  offsetX,
                                       const RealType,
                                       PsimagLite::GemmR<RealType>&);
 
 template void
-den_kron_mult<std::complex<RealType>>(const char transA,
-                                      const char transB,
+den_kron_mult<std::complex<RealType>>(const char                                        transA,
+                                      const char                                        transB,
                                       const PsimagLite::Matrix<std::complex<RealType>>& a_,
                                       const PsimagLite::Matrix<std::complex<RealType>>& b_,
                                       const PsimagLite::Vector<std::complex<RealType>>::Type& yin,
-                                      SizeType offsetY,
+                                      SizeType                                          offsetY,
                                       PsimagLite::Vector<std::complex<RealType>>::Type& xout,
-                                      SizeType offsetX,
+                                      SizeType                                          offsetX,
                                       const RealType,
                                       PsimagLite::GemmR<std::complex<RealType>>&);
 
@@ -84,11 +84,11 @@ den_kron_mult<std::complex<RealType>>(const char transA,
 template void csr_den_kron_mult<RealType>(const char transA,
                                           const char transB,
                                           const PsimagLite::CrsMatrix<RealType>&,
-                                          const PsimagLite::Matrix<RealType>& b_,
+                                          const PsimagLite::Matrix<RealType>&       b_,
                                           const PsimagLite::Vector<RealType>::Type& yin,
-                                          SizeType offsetY,
-                                          PsimagLite::Vector<RealType>::Type& xout,
-                                          SizeType offsetX,
+                                          SizeType                                  offsetY,
+                                          PsimagLite::Vector<RealType>::Type&       xout,
+                                          SizeType                                  offsetX,
                                           const RealType,
                                           PsimagLite::GemmR<RealType>&);
 
@@ -96,10 +96,10 @@ template void csr_den_kron_mult<std::complex<RealType>>(
     const char transA,
     const char transB,
     const PsimagLite::CrsMatrix<std::complex<RealType>>&,
-    const PsimagLite::Matrix<std::complex<RealType>>& b_,
+    const PsimagLite::Matrix<std::complex<RealType>>&       b_,
     const PsimagLite::Vector<std::complex<RealType>>::Type& yin,
-    SizeType offsetY,
-    PsimagLite::Vector<std::complex<RealType>>::Type& xout,
-    SizeType offsetX,
+    SizeType                                                offsetY,
+    PsimagLite::Vector<std::complex<RealType>>::Type&       xout,
+    SizeType                                                offsetX,
     const RealType,
     PsimagLite::GemmR<std::complex<RealType>>&);

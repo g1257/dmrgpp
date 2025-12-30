@@ -78,8 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-SizeType ProgramGlobals::maxElectronsOneSpin = 0;
-bool ProgramGlobals::oldChangeOfBasis = false;
+SizeType                 ProgramGlobals::maxElectronsOneSpin = 0;
+bool                     ProgramGlobals::oldChangeOfBasis    = false;
 const PsimagLite::String ProgramGlobals::license
     = "Copyright (c) 2009-2016-2018, UT-Battelle, LLC\n"
       "All rights reserved\n"
@@ -99,7 +99,7 @@ const PsimagLite::String ProgramGlobals::license
       "---------------------------------------------------------\n"
       "\n";
 
-PsimagLite::String ProgramGlobals::SYSTEM_STACK_STRING = "SystemStack";
+PsimagLite::String ProgramGlobals::SYSTEM_STACK_STRING  = "SystemStack";
 PsimagLite::String ProgramGlobals::ENVIRON_STACK_STRING = "EnvironStack";
 
 } // namespace Dmrg

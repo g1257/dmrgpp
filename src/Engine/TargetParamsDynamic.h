@@ -89,13 +89,13 @@ template <typename ModelType> class TargetParamsDynamic : public TargetParamsCom
 public:
 
 	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-	typedef typename ModelType::RealType RealType;
+	typedef typename ModelType::RealType  RealType;
 
-	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
+	typedef typename ModelType::OperatorType      OperatorType;
+	typedef typename OperatorType::PairType       PairType;
+	typedef typename OperatorType::StorageType    SparseMatrixType;
 	typedef typename SparseMatrixType::value_type ComplexOrReal;
-	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrReal>     MatrixType;
 
 	template <typename IoInputter>
 	TargetParamsDynamic(IoInputter& io, PsimagLite::String targeting, const ModelType& model)

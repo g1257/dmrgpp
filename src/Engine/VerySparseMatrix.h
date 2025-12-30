@@ -88,9 +88,9 @@ namespace Dmrg {
 // Yet another sparse matrix class
 template <class ComplexOrRealType> class VerySparseMatrix {
 
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef PsimagLite::Vector<PairType>::Type VectorPairType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef std::pair<SizeType, SizeType>                        PairType;
+	typedef PsimagLite::Vector<PairType>::Type                   VectorPairType;
+	typedef typename PsimagLite::Vector<SizeType>::Type          VectorSizeType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorComplexOrRealType;
 
 public:
@@ -115,7 +115,7 @@ public:
 			for (int k = crs.getRowPtr(i); k < crs.getRowPtr(i + 1); ++k) {
 				// (i,crs.getCol(k)) --> coordinate
 				coordinates_[counter] = PairType(i, crs.getCol(k));
-				values_[counter++] = crs.getValue(k);
+				values_[counter++]    = crs.getValue(k);
 			}
 		}
 
@@ -125,12 +125,12 @@ public:
 	void makeDiagonal(SizeType n, ComplexOrRealType value)
 	{
 		rows_ = cols_ = n;
-		sorted_ = true;
+		sorted_       = true;
 		coordinates_.resize(n);
 		values_.resize(n);
 		for (SizeType i = 0; i < n; ++i) {
 			coordinates_[i] = PairType(i, i);
-			values_[i] = value;
+			values_[i]      = value;
 		}
 	}
 
@@ -146,8 +146,8 @@ public:
 		coordinates_.resize(nonzeros);
 		values_.resize(nonzeros);
 		sorted_ = false;
-		rows_ = rows;
-		cols_ = cols;
+		rows_   = rows;
+		cols_   = cols;
 	}
 
 	ComplexOrRealType& operator()(SizeType row, SizeType col)
@@ -157,7 +157,7 @@ public:
 		if (x < 0) {
 			coordinates_.push_back(coordinate);
 			values_.push_back(0);
-			x = values_.size() - 1;
+			x       = values_.size() - 1;
 			sorted_ = false;
 		}
 
@@ -180,8 +180,8 @@ public:
 	void operator=(const PsimagLite::CrsMatrix<ComplexOrRealType>& crs)
 	{
 		clear();
-		rows_ = crs.rows();
-		cols_ = crs.cols();
+		rows_   = crs.rows();
+		cols_   = crs.cols();
 		sorted_ = true;
 		for (SizeType i = 0; i < rows_; i++)
 			for (int k = crs.getRowPtr(i); k < crs.getRowPtr(i + 1); k++)
@@ -204,7 +204,7 @@ public:
 		assert(values_.size() == coordinates_.size());
 		assert(counter < coordinates_.size());
 		coordinates_[counter] = PairType(row, col);
-		values_[counter] = value;
+		values_[counter]      = value;
 	}
 
 	const ComplexOrRealType& operator()(SizeType i) const { return values_[i]; }
@@ -240,7 +240,7 @@ public:
 		if (n == 0)
 			return;
 
-		VectorSizeType perm(n, 0);
+		VectorSizeType                   perm(n, 0);
 		PsimagLite::Sort<VectorPairType> sort;
 		sort.sort(coordinates_, perm);
 
@@ -249,17 +249,17 @@ public:
 			values[i] = values_[perm[i]];
 
 		// uniqueness
-		PairType prevCoord = coordinates_[0];
+		PairType                       prevCoord = coordinates_[0];
 		PsimagLite::Vector<bool>::Type mark(n, false);
-		SizeType ind = 0;
-		ComplexOrRealType val = values[ind];
-		SizeType newsize = 0;
+		SizeType                       ind     = 0;
+		ComplexOrRealType              val     = values[ind];
+		SizeType                       newsize = 0;
 		for (SizeType i = 1; i < n; ++i) {
 			if (prevCoord != coordinates_[i]) {
-				prevCoord = coordinates_[i];
+				prevCoord   = coordinates_[i];
 				values[ind] = val;
-				val = values[i];
-				ind = i;
+				val         = values[i];
+				ind         = i;
 				++newsize;
 				continue;
 			}
@@ -277,7 +277,7 @@ public:
 		for (SizeType i = 0; i < n; ++i) {
 			if (mark[i])
 				continue;
-			coords[j] = coordinates_[i];
+			coords[j]    = coordinates_[i];
 			values_[j++] = values[i];
 		}
 
@@ -328,7 +328,7 @@ public:
 		return values_[i];
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
+	friend std::ostream& operator<<(std::ostream&                              os,
 	                                const VerySparseMatrix<ComplexOrRealType>& m)
 	{
 		os << m.rows_ << " " << m.cols_;
@@ -349,7 +349,7 @@ public:
 		if (m.rows_ == 0 || m.cols_ == 0)
 			return is;
 		PsimagLite::String temp;
-		PairType coordinate;
+		PairType           coordinate;
 
 		while (true) {
 			is >> temp;
@@ -431,7 +431,7 @@ private:
 			return;
 
 		// pre-alloc memory:
-		VectorPairType newcoord(coordinates_.size() + other.coordinates_.size());
+		VectorPairType          newcoord(coordinates_.size() + other.coordinates_.size());
 		VectorComplexOrRealType newvals(coordinates_.size() + other.coordinates_.size());
 
 		// ----------------------------
@@ -460,32 +460,32 @@ private:
 		// note use "maxrc" as sentinel end marker to simplify coding
 		// ------------------------------------------------------
 		const unsigned int bigval = 1024 * 1024 * 1024;
-		const PairType maxrc(bigval, bigval);
+		const PairType     maxrc(bigval, bigval);
 
-		SizeType jp = 0;
-		SizeType ip = 0;
+		SizeType jp      = 0;
+		SizeType ip      = 0;
 		SizeType counter = 0;
 
 		PairType irc = (coordinates_.size() > 0) ? coordinates_[ip] : maxrc;
 		PairType jrc = (other.coordinates_.size() > 0) ? other.coordinates_[jp] : maxrc;
 		if (irc < jrc) {
 			newcoord[0] = irc;
-			newvals[0] = values_[0];
-			ip = 1;
+			newvals[0]  = values_[0];
+			ip          = 1;
 		} else {
 			newcoord[0] = jrc;
-			newvals[0] = other.values_[0];
-			jp = 1;
+			newvals[0]  = other.values_[0];
+			jp          = 1;
 		};
 
 		bool has_work_ip = (ip < coordinates_.size());
 		bool has_work_jp = (jp < other.coordinates_.size());
-		bool has_work = has_work_ip || has_work_jp;
+		bool has_work    = has_work_ip || has_work_jp;
 		while (has_work) {
 
 			has_work_ip = (ip < coordinates_.size());
 			has_work_jp = (jp < other.coordinates_.size());
-			has_work = has_work_ip || has_work_jp;
+			has_work    = has_work_ip || has_work_jp;
 			if (!has_work) {
 				break;
 			};
@@ -493,13 +493,13 @@ private:
 			// ------------------------------------------------------
 			// unified treatment of  coordinate_ or other.coordinate_
 			// ------------------------------------------------------
-			PairType irc = (has_work_ip) ? coordinates_[ip] : maxrc;
+			PairType          irc     = (has_work_ip) ? coordinates_[ip] : maxrc;
 			ComplexOrRealType val_irc = (has_work_ip) ? values_[ip] : 0;
 
-			PairType jrc = (has_work_jp) ? other.coordinates_[jp] : maxrc;
+			PairType          jrc     = (has_work_jp) ? other.coordinates_[jp] : maxrc;
 			ComplexOrRealType val_jrc = (has_work_jp) ? other.values_[jp] : 0;
 
-			PairType ijrc = (irc < jrc) ? irc : jrc;
+			PairType          ijrc     = (irc < jrc) ? irc : jrc;
 			ComplexOrRealType val_ijrc = (irc < jrc) ? val_irc : val_jrc;
 
 			if (irc < jrc) {
@@ -525,7 +525,7 @@ private:
 				// advance to next new entry
 				// -------------------------
 				counter++;
-				newvals[counter] = val_ijrc;
+				newvals[counter]  = val_ijrc;
 				newcoord[counter] = ijrc;
 			};
 		};
@@ -539,7 +539,7 @@ private:
 
 		for (SizeType i = 0; i < nonzeros; i++) {
 			coordinates_[i] = newcoord[i];
-			values_[i] = newvals[i];
+			values_[i]      = newvals[i];
 		}
 	}
 
@@ -549,11 +549,11 @@ private:
 		return false;
 	}
 
-	SizeType rows_;
-	SizeType cols_;
+	SizeType                rows_;
+	SizeType                cols_;
 	VectorComplexOrRealType values_;
-	VectorPairType coordinates_;
-	bool sorted_;
+	VectorPairType          coordinates_;
+	bool                    sorted_;
 }; // VerySparseMatrix
 
 template <typename T> bool isHermitian(const VerySparseMatrix<T>& m)

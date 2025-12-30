@@ -96,51 +96,51 @@ template <typename ModelBaseType> class ExtendedHubbard1Orb;
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
 template <typename ModelBaseType> class ModelHubbard : public ModelBaseType {
 
-	typedef typename ModelBaseType::BlockType BlockType;
+	typedef typename ModelBaseType::BlockType        BlockType;
 	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
+	typedef typename ModelBaseType::VectorType       VectorType;
 
-	static const int FERMION_SIGN = -1;
+	static const int FERMION_SIGN       = -1;
 	static const int DEGREES_OF_FREEDOM = 2;
 	static const int NUMBER_OF_ORBITALS = 1;
 
 public:
 
-	typedef ModelHubbard<ModelBaseType> ThisType;
-	typedef unsigned int long WordType;
-	typedef HilbertSpaceHubbard<WordType> HilbertSpaceHubbardType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::SparseElementType SparseElementType;
-	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef typename ModelBaseType::MyBasis MyBasis;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
+	typedef ModelHubbard<ModelBaseType>                     ThisType;
+	typedef unsigned int long                               WordType;
+	typedef HilbertSpaceHubbard<WordType>                   HilbertSpaceHubbardType;
+	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType       SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                LinkType;
+	typedef typename ModelHelperType::OperatorsType         OperatorsType;
+	typedef typename OperatorsType::OperatorType            OperatorType;
+	typedef typename ModelHelperType::RealType              RealType;
+	typedef typename ModelBaseType::SparseMatrixType        SparseMatrixType;
+	typedef typename ModelHelperType::SparseElementType     SparseElementType;
+	typedef typename ModelBaseType::VectorOperatorType      VectorOperatorType;
+	typedef typename ModelBaseType::VectorSizeType          VectorSizeType;
+	typedef typename ModelBaseType::QnType                  QnType;
+	typedef typename QnType::VectorQnType                   VectorQnType;
+	typedef typename HilbertSpaceHubbardType::HilbertState  HilbertState;
+	typedef typename ModelBaseType::InputValidatorType      InputValidatorType;
+	typedef typename ModelBaseType::MyBasis                 MyBasis;
+	typedef typename ModelBaseType::BasisWithOperatorsType  MyBasisWithOperators;
 	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelBaseType::ModelTermType           ModelTermType;
+	typedef typename ModelBaseType::OpForLinkType           OpForLinkType;
+	typedef typename ModelBaseType::OpsLabelType            OpsLabelType;
 
 	enum
 	{
-		SPIN_UP = HilbertSpaceHubbardType::SPIN_UP,
+		SPIN_UP   = HilbertSpaceHubbardType::SPIN_UP,
 		SPIN_DOWN = HilbertSpaceHubbardType::SPIN_DOWN
 	};
 
-	ModelHubbard(const SolverParamsType& solverParams,
-	             InputValidatorType& io,
+	ModelHubbard(const SolverParamsType&  solverParams,
+	             InputValidatorType&      io,
 	             const SuperGeometryType& geometry,
-	             PsimagLite::String extension)
+	             PsimagLite::String       extension)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , spinSquared_(spinSquaredHelper_, NUMBER_OF_ORBITALS, DEGREES_OF_FREEDOM)
@@ -148,8 +148,8 @@ public:
 	{
 		ModelBaseType::onSiteHLegacyFix(modelParameters_.onSiteHaddLegacy);
 
-		SizeType usize = modelParameters_.hubbardU.size();
-		SizeType vsize = modelParameters_.potentialV.size();
+		SizeType usize      = modelParameters_.hubbardU.size();
+		SizeType vsize      = modelParameters_.potentialV.size();
 		SizeType totalSites = geometry.numberOfSites();
 
 		if (usize != totalSites) {
@@ -179,8 +179,8 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
-		BlockType block(1, site);
+		SizeType         site = 0;
+		BlockType        block(1, site);
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 		setBasis(natBasis, block);
@@ -216,16 +216,16 @@ protected:
 			creationMatrix[sigma] = myOp;
 		}
 
-		SizeType iup = SPIN_UP;
+		SizeType iup   = SPIN_UP;
 		SizeType idown = SPIN_DOWN;
 
 		{
-			OpsLabelType& splus = this->createOpsLabel("splus");
+			OpsLabelType& splus  = this->createOpsLabel("splus");
 			OpsLabelType& sminus = this->createOpsLabel("sminus");
 
 			PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(
 			    creationMatrix[iup].getCRS(), creationMatrix[idown].getCRS());
-			SparseMatrixType tmp2(tmp);
+			SparseMatrixType                      tmp2(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			splus.push(OperatorType(tmp2,
 			                        ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -242,13 +242,13 @@ protected:
 		}
 
 		{
-			OpsLabelType& sz = this->createOpsLabel("sz");
+			OpsLabelType&                         sz  = this->createOpsLabel("sz");
 			PsimagLite::Matrix<SparseElementType> tmp = multiplyTc(
 			    creationMatrix[iup].getCRS(), creationMatrix[iup].getCRS());
 			PsimagLite::Matrix<SparseElementType> tmp2 = multiplyTc(
 			    creationMatrix[idown].getCRS(), creationMatrix[idown].getCRS());
 			tmp = 0.5 * (tmp - tmp2);
-			SparseMatrixType tmp3(tmp);
+			SparseMatrixType                      tmp3(tmp);
 			typename OperatorType::Su2RelatedType su2Related;
 			sz.push(OperatorType(tmp3,
 			                     ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -260,7 +260,7 @@ protected:
 		PsimagLite::Matrix<SparseElementType> dense1;
 		{
 			OpsLabelType& nupop = this->createOpsLabel("nup");
-			OperatorType cup = creationMatrix[SPIN_UP];
+			OperatorType  cup   = creationMatrix[SPIN_UP];
 			cup.dagger();
 			SparseMatrixType tmp3(multiplyTc(cup.getCRS(), cup.getCRS()));
 			typename OperatorType::Su2RelatedType su2Related;
@@ -291,7 +291,7 @@ protected:
 		{
 			OpsLabelType& nop = this->createOpsLabel("n");
 			dense1 += dense2;
-			SparseMatrixType tmp(dense1);
+			SparseMatrixType                      tmp(dense1);
 			typename OperatorType::Su2RelatedType su2Related;
 			nop.push(OperatorType(tmp,
 			                      ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -301,13 +301,13 @@ protected:
 		}
 
 		{
-			OpsLabelType& d = this->createOpsLabel("d");
+			OpsLabelType&                         d = this->createOpsLabel("d");
 			PsimagLite::Matrix<SparseElementType> cup;
 			crsMatrixToFullMatrix(cup, creationMatrix[SPIN_UP].getCRS());
 			PsimagLite::Matrix<SparseElementType> cdown;
 			crsMatrixToFullMatrix(cdown, creationMatrix[SPIN_DOWN].getCRS());
 			cup = (cup * cdown);
-			SparseMatrixType tmp3(cup);
+			SparseMatrixType                      tmp3(cup);
 			typename OperatorType::Su2RelatedType su2Related;
 			d.push(OperatorType(tmp3,
 			                    ProgramGlobals::FermionOrBosonEnum::BOSON,
@@ -341,7 +341,7 @@ protected:
 	void fillModelLinks()
 	{
 		constexpr bool isComplex = PsimagLite::IsComplexNumber<SparseElementType>::True;
-		ModelTermType& hop = ModelBaseType::createTerm("hopping"); //(A)
+		ModelTermType& hop       = ModelBaseType::createTerm("hopping"); //(A)
 
 		auto su2_up = typename ModelTermType::Su2Properties(1, 1, 0);
 		auto su2_do = typename ModelTermType::Su2Properties(1, -1, 1);
@@ -406,14 +406,14 @@ protected:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	                                const BlockType& block,
-	                                RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
-		SizeType n = block.size();
+		SizeType         n = block.size();
 		SparseMatrixType tmpMatrix, niup, nidown, Szsquare, Szi, Splusi, Sminusi;
-		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
+		SizeType         linSize = ModelBaseType::superGeometry().numberOfSites();
 
 		for (SizeType i = 0; i < n; ++i) {
 			const SizeType site = block[i];
@@ -469,8 +469,8 @@ private:
 
 	void setBasis(HilbertBasisType& basis, const VectorSizeType& block) const
 	{
-		int sitesTimesDof = DEGREES_OF_FREEDOM * block.size();
-		HilbertState total = (1 << sitesTimesDof);
+		int          sitesTimesDof = DEGREES_OF_FREEDOM * block.size();
+		HilbertState total         = (1 << sitesTimesDof);
 
 		basis.resize(total);
 		for (HilbertState a = 0; a < total; ++a)
@@ -511,8 +511,8 @@ private:
 	SparseMatrixType
 	findOperatorMatrices(int i, int sigma, const HilbertBasisType& natBasis) const
 	{
-		typename HilbertSpaceHubbardType::HilbertState bra, ket;
-		int n = natBasis.size();
+		typename HilbertSpaceHubbardType::HilbertState            bra, ket;
+		int                                                       n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
@@ -563,7 +563,7 @@ private:
 				other[1] = electronsUp;
 
 			bool sign = other[0] & 1;
-			qns[i] = QnType(sign, other, jmpair, other[0]);
+			qns[i]    = QnType(sign, other, jmpair, other[0]);
 		}
 	}
 
@@ -588,10 +588,10 @@ private:
 		return jm;
 	}
 
-	ParametersModelHubbard<RealType, QnType> modelParameters_;
-	SpinSquaredHelper<RealType, WordType> spinSquaredHelper_;
+	ParametersModelHubbard<RealType, QnType>           modelParameters_;
+	SpinSquaredHelper<RealType, WordType>              spinSquaredHelper_;
 	SpinSquared<SpinSquaredHelper<RealType, WordType>> spinSquared_;
-	PsimagLite::String extension_;
+	PsimagLite::String                                 extension_;
 }; // class ModelHubbard
 
 } // namespace Dmrg

@@ -86,33 +86,33 @@ namespace Dmrg {
 template <typename TargetingType>
 class DensityMatrixLocal : public DensityMatrixBase<TargetingType> {
 
-	typedef DensityMatrixBase<TargetingType> BaseType;
-	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
-	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename TargetingType::VectorWithOffsetType TargetVectorType;
-	typedef typename TargetingType::TargetVectorType::value_type DensityMatrixElementType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
+	typedef DensityMatrixBase<TargetingType>                          BaseType;
+	typedef typename TargetingType::LeftRightSuperType                LeftRightSuperType;
+	typedef typename TargetingType::BasisWithOperatorsType            BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType                BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType         SparseMatrixType;
+	typedef typename TargetingType::VectorWithOffsetType              TargetVectorType;
+	typedef typename TargetingType::TargetVectorType::value_type      DensityMatrixElementType;
+	typedef PsimagLite::Concurrency                                   ConcurrencyType;
+	typedef PsimagLite::ProgressIndicator                             ProgressIndicatorType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-	typedef typename DensityMatrixBase<TargetingType>::Params ParamsType;
+	typedef typename DensityMatrixBase<TargetingType>::Params         ParamsType;
 
 public:
 
-	typedef typename BaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
+	typedef typename BaseType::BlockDiagonalMatrixType          BlockDiagonalMatrixType;
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 	typedef ParallelDensityMatrix<BlockDiagonalMatrixType,
 	                              BasisWithOperatorsType,
 	                              TargetVectorType>
-	    ParallelDensityMatrixType;
+	                                                            ParallelDensityMatrixType;
 	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
 	    VectorVectorVectorWithOffsetType;
 
-	DensityMatrixLocal(const TargetingType& target,
+	DensityMatrixLocal(const TargetingType&      target,
 	                   const LeftRightSuperType& lrs,
-	                   const ParamsType& p)
+	                   const ParamsType&         p)
 	    : progress_("DensityMatrixLocal")
 	    , data_((p.direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? lrs.left()
 	                                                                          : lrs.right())
@@ -120,7 +120,7 @@ public:
 	    , debug_(p.debug)
 	{
 		{
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "Init partition for all targets";
 			progress_.printline(msgg, std::cout);
@@ -148,7 +148,7 @@ public:
 			// if we are to target the ground state do it now:
 			if (target.includeGroundStage()) {
 				const VectorVectorVectorWithOffsetType& psi = target.psiConst();
-				const SizeType nsectors = psi.size();
+				const SizeType                          nsectors = psi.size();
 
 				for (SizeType sectorIndex = 0; sectorIndex < nsectors;
 				     ++sectorIndex) {
@@ -190,7 +190,7 @@ public:
 		}
 
 		{
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "Done with init partition";
 			progress_.printline(msgg, std::cout);
@@ -217,14 +217,14 @@ public:
 
 private:
 
-	void initPartition(BuildingBlockType& matrixBlock,
+	void initPartition(BuildingBlockType&            matrixBlock,
 	                   BasisWithOperatorsType const& pBasis,
-	                   SizeType m,
-	                   const TargetVectorType& v,
+	                   SizeType                      m,
+	                   const TargetVectorType&       v,
 	                   BasisWithOperatorsType const& pBasisSummed,
-	                   BasisType const& pSE,
+	                   BasisType const&              pSE,
 	                   ProgramGlobals::DirectionEnum direction,
-	                   RealType weight)
+	                   RealType                      weight)
 	{
 		ParallelDensityMatrixType helperDm(
 		    v, pBasis, pBasisSummed, pSE, direction, m, weight, matrixBlock);
@@ -232,10 +232,10 @@ private:
 		threadedDm.loopCreate(helperDm);
 	}
 
-	ProgressIndicatorType progress_;
-	BlockDiagonalMatrixType data_;
+	ProgressIndicatorType         progress_;
+	BlockDiagonalMatrixType       data_;
 	ProgramGlobals::DirectionEnum direction_;
-	bool debug_;
+	bool                          debug_;
 }; // class DensityMatrixLocal
 
 } // namespace Dmrg

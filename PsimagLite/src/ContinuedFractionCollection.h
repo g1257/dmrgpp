@@ -40,13 +40,13 @@ namespace PsimagLite {
 template <typename ContinuedFractionType_> class ContinuedFractionCollection {
 public:
 
-	typedef ContinuedFractionType_ ContinuedFractionType;
-	typedef typename ContinuedFractionType::ComplexType ComplexType;
+	typedef ContinuedFractionType_                                ContinuedFractionType;
+	typedef typename ContinuedFractionType::ComplexType           ComplexType;
 	typedef typename ContinuedFractionType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef typename TridiagonalMatrixType::value_type RealType;
-	typedef typename ContinuedFractionType::MatrixType MatrixType;
-	typedef typename ContinuedFractionType::PlotDataType PlotDataType;
-	typedef typename ContinuedFractionType::PlotParamsType PlotParamsType;
+	typedef typename TridiagonalMatrixType::value_type            RealType;
+	typedef typename ContinuedFractionType::MatrixType            MatrixType;
+	typedef typename ContinuedFractionType::PlotDataType          PlotDataType;
+	typedef typename ContinuedFractionType::PlotParamsType        PlotParamsType;
 
 	ContinuedFractionCollection(FreqEnum freqEnum)
 	    : freqEnum_(freqEnum)
@@ -117,7 +117,7 @@ private:
 		for (SizeType i = 0; i < v1.size(); i++) {
 
 			if (wasEmpty) {
-				v1[i].first = v2[i].first;
+				v1[i].first  = v2[i].first;
 				v1[i].second = v2[i].second;
 			} else {
 				if (v1[i].first != v2[i].first)
@@ -127,8 +127,8 @@ private:
 		}
 	}
 
-	FreqEnum freqEnum_;
-	ProgressIndicator progress_;
+	FreqEnum                                     freqEnum_;
+	ProgressIndicator                            progress_;
 	typename Vector<ContinuedFractionType>::Type data_;
 }; // class ContinuedFractionCollection
 } // namespace PsimagLite

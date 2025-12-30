@@ -18,13 +18,13 @@ template <typename BasisWithOperatorsType> class DiskOrMemoryStack {
 public:
 
 	typedef MemoryStack<BasisWithOperatorsType> MemoryStackType;
-	typedef DiskStack<BasisWithOperatorsType> DiskStackType;
+	typedef DiskStack<BasisWithOperatorsType>   DiskStackType;
 
-	DiskOrMemoryStack(bool onDisk,
+	DiskOrMemoryStack(bool                     onDisk,
 	                  const PsimagLite::String filename,
 	                  const PsimagLite::String post,
-	                  PsimagLite::String label,
-	                  const BasisTraits& basisTraits)
+	                  PsimagLite::String       label,
+	                  const BasisTraits&       basisTraits)
 	    : basisTraits_(basisTraits)
 	    , diskW_(0)
 	    , diskR_(0)
@@ -32,8 +32,8 @@ public:
 		if (!onDisk)
 			return;
 
-		size_t lastindex = filename.find_last_of(".");
-		PsimagLite::String file = filename.substr(0, lastindex) + post + ".hd5";
+		size_t             lastindex = filename.find_last_of(".");
+		PsimagLite::String file      = filename.substr(0, lastindex) + post + ".hd5";
 
 		if (createFile_) {
 			PsimagLite::IoNg::Out out(file, PsimagLite::IoNg::ACC_TRUNC);
@@ -87,7 +87,7 @@ public:
 	void toDisk(DiskStackType& disk) const
 	{
 		if (diskR_) {
-			SizeType total = diskR_->size();
+			SizeType       total        = diskR_->size();
 			DiskStackType& diskNonConst = const_cast<DiskStackType&>(*diskR_);
 			loadStack(disk, diskNonConst);
 			assert(diskW_);
@@ -174,10 +174,10 @@ private:
 
 	DiskOrMemoryStack& operator=(const DiskOrMemoryStack&);
 
-	const BasisTraits& basisTraits_;
+	const BasisTraits&      basisTraits_;
 	mutable MemoryStackType memory_;
-	DiskStackType* diskW_;
-	DiskStackType* diskR_;
+	DiskStackType*          diskW_;
+	DiskStackType*          diskR_;
 };
 
 template <typename BasisWithOperatorsType>

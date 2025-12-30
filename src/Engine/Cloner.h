@@ -106,10 +106,10 @@ public:
 
 	void createInputFile(SizeType ind) const
 	{
-		std::ifstream fin(infile_.c_str());
+		std::ifstream      fin(infile_.c_str());
 		PsimagLite::String outfile = outRoot_ + ttos(ind) + ext_;
-		std::ofstream fout(outfile.c_str());
-		char line[LINE_LENGTH];
+		std::ofstream      fout(outfile.c_str());
+		char               line[LINE_LENGTH];
 		while (!fin.eof()) {
 			fin.getline(line, LINE_LENGTH);
 			PsimagLite::String s(line);
@@ -133,7 +133,7 @@ private:
 		return true;
 	}
 
-	PsimagLite::String infile_, outRoot_, ext_;
+	PsimagLite::String                                 infile_, outRoot_, ext_;
 	typename PsimagLite::Vector<LineChangerType>::Type lineChanger_;
 }; // class Cloner
 

@@ -13,9 +13,9 @@ public:
 
 	OmegaParams(PsimagLite::String data)
 	{
-		Dmrg::InputCheck inputCheck;
+		Dmrg::InputCheck                inputCheck;
 		typename InputNgType::Writeable ioWriteable(inputCheck, data);
-		typename InputNgType::Readable io(ioWriteable);
+		typename InputNgType::Readable  io(ioWriteable);
 		configure(io);
 	}
 
@@ -40,10 +40,10 @@ public:
 
 private:
 
-	RealType begin_;
-	RealType step_;
-	SizeType offset_;
-	SizeType total_;
+	RealType           begin_;
+	RealType           step_;
+	SizeType           offset_;
+	SizeType           total_;
 	PsimagLite::String obs_;
 };
 

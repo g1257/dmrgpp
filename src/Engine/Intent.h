@@ -7,9 +7,9 @@ namespace Dmrg {
 
 template <typename ModelType> class Intent {
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::Vector<SizeType>::Type     VectorSizeType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename ModelType::ParametersType DmrgSolverParamsType;
+	typedef typename ModelType::ParametersType     DmrgSolverParamsType;
 
 	enum class IntentEnum
 	{
@@ -124,8 +124,8 @@ private:
 
 	void examineSite(SizeType site) const
 	{
-		const SizeType l = model_.superGeometry().numberOfSites();
-		const SizeType leg = (l & 1) ? 0 : getLeg();
+		const SizeType l        = model_.superGeometry().numberOfSites();
+		const SizeType leg      = (l & 1) ? 0 : getLeg();
 		const SizeType lOverTwo = l / 2;
 
 		if (leg == 1) {
@@ -172,7 +172,7 @@ private:
 
 	SizeType getLeg() const
 	{
-		SizeType terms = model_.superGeometry().terms();
+		SizeType           terms = model_.superGeometry().terms();
 		PsimagLite::String name("");
 		for (SizeType t = 0; t < terms; ++t) {
 			if (t > 0 && name != model_.superGeometry().label(t))

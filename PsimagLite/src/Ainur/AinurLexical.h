@@ -29,10 +29,10 @@ private:
 	String getContext(String::const_iterator c,
 	                  String::const_iterator b,
 	                  String::const_iterator e,
-	                  SizeType n = 10) const
+	                  SizeType               n = 10) const
 	{
 		String::const_iterator begin = (c - n > b) ? c - n : b;
-		String::const_iterator end = (c + n > e) ? e : c + n;
+		String::const_iterator end   = (c + n > e) ? e : c + n;
 
 		return String(begin, end);
 	}

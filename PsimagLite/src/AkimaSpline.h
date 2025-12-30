@@ -30,18 +30,18 @@ public:
 		calculateSprime(sprime, x, s);
 		for (SizeType i = 0; i < x.size() - 1; i++) {
 			AkimaStruct ak;
-			ak.x0 = x[i];
-			ak.x1 = x[i + 1];
-			ak.a0 = s[i];
-			ak.a1 = sprime[i];
-			RealType u = x[i + 1] - x[i];
+			ak.x0       = x[i];
+			ak.x1       = x[i + 1];
+			ak.a0       = s[i];
+			ak.a1       = sprime[i];
+			RealType u  = x[i + 1] - x[i];
 			RealType ds = (s[i + 1] - s[i]);
-			ak.a2 = (3 * ds - (2 * sprime[i] + sprime[i + 1]) * u) / (u * u);
-			ak.a3 = ((sprime[i] + sprime[i + 1]) * u - 2 * ds) / (u * u * u);
+			ak.a2       = (3 * ds - (2 * sprime[i] + sprime[i + 1]) * u) / (u * u);
+			ak.a3       = ((sprime[i] + sprime[i + 1]) * u - 2 * ds) / (u * u * u);
 			akimaStruct_.push_back(ak);
 		}
 		SizeType k = akimaStruct_.size() - 1;
-		interval_ = IntervalType(akimaStruct_[0].x0, akimaStruct_[k].x1);
+		interval_  = IntervalType(akimaStruct_[0].x0, akimaStruct_[k].x1);
 	}
 
 	RealType operator()(const RealType& x) const
@@ -57,7 +57,7 @@ private:
 	RealType functionFor(const RealType& x, SizeType i) const
 	{
 		const AkimaStruct& ak = akimaStruct_[i];
-		RealType u = x - ak.x0;
+		RealType           u  = x - ak.x0;
 		return ak.a0 + ak.a1 * u + ak.a2 * u * u + ak.a3 * u * u * u;
 	}
 
@@ -96,8 +96,8 @@ private:
 		d.resize(k + 3);
 		for (SizeType i = 2; i <= k; i++)
 			d[i] = (s[i - 1] - s[i - 2]) / (x[i - 1] - x[i - 2]);
-		d[1] = 2 * d[2] - d[3];
-		d[0] = 2 * d[1] - d[2];
+		d[1]     = 2 * d[2] - d[3];
+		d[0]     = 2 * d[1] - d[2];
 		d[k + 1] = 2 * d[k] - d[k - 1];
 		d[k + 2] = 2 * d[k + 1] - d[k];
 	}
@@ -110,7 +110,7 @@ private:
 	}
 
 	typename Vector<AkimaStruct>::Type akimaStruct_;
-	IntervalType interval_;
+	IntervalType                       interval_;
 };
 }
 #endif // AKIMA_H_

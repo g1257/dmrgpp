@@ -18,7 +18,7 @@ public:
 	{
 
 		const SizeType len = t.length();
-		String buffer;
+		String         buffer;
 		for (SizeType i = 0; i < len; ++i) {
 			if (t[i] == 'i') {
 				if (isImag_)
@@ -40,7 +40,7 @@ public:
 
 private:
 
-	bool isImag_;
+	bool     isImag_;
 	RealType value_;
 };
 

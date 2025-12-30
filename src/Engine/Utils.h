@@ -94,7 +94,7 @@ template <template <typename, typename> class SomeVectorTemplate,
           typename T>
 typename PsimagLite::
     EnableIf<PsimagLite::IsVectorLike<SomeVectorTemplate<T, SomeAllocator1Type>>::True, void>::Type
-    reorder(SomeVectorTemplate<T, SomeAllocator1Type>& v,
+    reorder(SomeVectorTemplate<T, SomeAllocator1Type>&              v,
             const SomeVectorTemplate<SizeType, SomeAllocator2Type>& permutation)
 {
 	SomeVectorTemplate<T, SomeAllocator1Type> tmpVector(v.size());
@@ -137,9 +137,9 @@ truncateVector(SomeVectorType& v, const PsimagLite::Vector<SizeType>::Type& remo
 
 template <typename SomeVectorType>
 static typename PsimagLite::EnableIf<PsimagLite::IsVectorLike<SomeVectorType>::True, void>::Type
-fillFermionicSigns(SomeVectorType& fermionicSigns,
+fillFermionicSigns(SomeVectorType&                       fermionicSigns,
                    const PsimagLite::Vector<bool>::Type& signs,
-                   int f)
+                   int                                   f)
 {
 	typedef typename SomeVectorType::value_type ValueType;
 	fermionicSigns.resize(signs.size());

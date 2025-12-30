@@ -28,8 +28,8 @@ Please see full open source license included in file LICENSE.
 #include <string>
 
 using ComplexOrRealType = double;
-using VectorType = std::vector<ComplexOrRealType>;
-using AkimaSplineType = PsimagLite::AkimaSpline<VectorType>;
+using VectorType        = std::vector<ComplexOrRealType>;
+using AkimaSplineType   = PsimagLite::AkimaSpline<VectorType>;
 
 void readTwoColumnData(const std::string& file, VectorType& v0, VectorType& v1)
 {
@@ -41,8 +41,8 @@ void readTwoColumnData(const std::string& file, VectorType& v0, VectorType& v1)
 		fin >> s;
 		if (s[0] == '#')
 			continue;
-		ComplexOrRealType x = std::atof(s.c_str());
-		SizeType size = v0.size();
+		ComplexOrRealType x    = std::atof(s.c_str());
+		SizeType          size = v0.size();
 		if (size > 1 && x < v0[size - 1])
 			break;
 		v0.push_back(x);
@@ -67,11 +67,11 @@ int main(int argc, char* argv[])
 	VectorType x, s;
 	readTwoColumnData(argv[1], x, s);
 
-	AkimaSplineType akimaSpline(x, s);
+	AkimaSplineType   akimaSpline(x, s);
 	ComplexOrRealType xstart = std::atof(argv[2]);
-	ComplexOrRealType xend = std::atof(argv[3]);
-	SizeType total = std::atoi(argv[4]);
-	ComplexOrRealType xstep = (xend - xstart) / total;
+	ComplexOrRealType xend   = std::atof(argv[3]);
+	SizeType          total  = std::atoi(argv[4]);
+	ComplexOrRealType xstep  = (xend - xstart) / total;
 
 	for (ComplexOrRealType x = xstart; x < xend; x += xstep) {
 		std::cout << x << " " << akimaSpline(x) << "\n";

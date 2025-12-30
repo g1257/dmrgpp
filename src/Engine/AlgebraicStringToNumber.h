@@ -70,10 +70,10 @@ public:
 
 		val = loopLengthSpec.convertVal(val);
 
-		FieldType numberOfSites = numberOfSites_;
+		FieldType                                       numberOfSites = numberOfSites_;
 		PsimagLite::CanonicalExpression<LoopLengthSpec> canonicalExpression(loopLengthSpec);
-		typename LoopLengthSpec::ResultType opEmpty(1);
-		typename LoopLengthSpec::ResultType p(1);
+		typename LoopLengthSpec::ResultType             opEmpty(1);
+		typename LoopLengthSpec::ResultType             p(1);
 		canonicalExpression(p, val, opEmpty, numberOfSites);
 		if (p != static_cast<int>(p))
 			err(msg_ + ": string value " + val + " yields non integer\n");
@@ -83,7 +83,7 @@ public:
 private:
 
 	PsimagLite::String msg_;
-	SizeType numberOfSites_;
+	SizeType           numberOfSites_;
 };
 }
 #endif // ALGEBRAICSTRINGTONUMBER_H

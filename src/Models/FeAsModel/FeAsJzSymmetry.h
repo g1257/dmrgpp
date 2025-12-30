@@ -13,13 +13,13 @@ namespace Dmrg {
 template <typename HilbertBasisType, typename VectorOperatorType, bool> class FeAsJzSymmetry {
 public:
 
-	typedef typename VectorOperatorType::value_type OperatorType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef typename OperatorStorageType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename VectorOperatorType::value_type            OperatorType;
+	typedef typename OperatorType::StorageType                 OperatorStorageType;
+	typedef typename OperatorStorageType::value_type           ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
+	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
 
 	FeAsJzSymmetry(bool) { }
 	void init(HilbertBasisType&, VectorOperatorType&) { }
@@ -38,17 +38,17 @@ class FeAsJzSymmetry<HilbertBasisType, VectorOperatorType, true> {
 
 public:
 
-	typedef typename VectorOperatorType::value_type OperatorType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef typename OperatorStorageType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename VectorOperatorType::value_type            OperatorType;
+	typedef typename OperatorType::StorageType                 OperatorStorageType;
+	typedef typename OperatorStorageType::value_type           ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename HilbertBasisType::value_type WordType;
-	typedef HilbertSpaceFeAs<WordType> HilbertSpaceFeAsType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
+	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
+	typedef typename HilbertBasisType::value_type              WordType;
+	typedef HilbertSpaceFeAs<WordType>                         HilbertSpaceFeAsType;
 
-	static const int SPIN_UP = HilbertSpaceFeAsType::SPIN_UP;
+	static const int SPIN_UP   = HilbertSpaceFeAsType::SPIN_UP;
 	static const int SPIN_DOWN = HilbertSpaceFeAsType::SPIN_DOWN;
 
 	FeAsJzSymmetry(bool isEnabled)
@@ -129,7 +129,7 @@ private:
 
 	MatrixType Jz_opr_original_basis(VectorOperatorType& creationMatrix)
 	{
-		SizeType nrow = creationMatrix[0].getStorage().rows();
+		SizeType   nrow = creationMatrix[0].getStorage().rows();
 		MatrixType tmp(nrow, nrow);
 		// Works only for 3 orbital model
 		// xy=0,zx=1,yz=2
@@ -172,10 +172,10 @@ private:
 
 	MatrixType Calculate_onsite_Hamiltonian(VectorOperatorType& creationMatrix)
 	{
-		SizeType nrow = creationMatrix[0].getStorage().row();
-		MatrixType tmp(nrow, nrow);
-		MatrixType tmp2(nrow, nrow), tmp3(nrow, nrow), tmp4(nrow, nrow);
-		RealType _U, _J, _Up;
+		SizeType          nrow = creationMatrix[0].getStorage().row();
+		MatrixType        tmp(nrow, nrow);
+		MatrixType        tmp2(nrow, nrow), tmp3(nrow, nrow), tmp4(nrow, nrow);
+		RealType          _U, _J, _Up;
 		ComplexOrRealType sqrtMinus1(0, 1);
 
 		//    tmp +=
@@ -205,8 +205,8 @@ private:
 		//    -0.5*(multiplyTc(creationMatrix[3].getStorage(),creationMatrix[2].getStorage()));
 
 		// U=1.0, J=0.25 ,Up=U-2J
-		_U = 2.0;
-		_J = 0.5;
+		_U  = 2.0;
+		_J  = 0.5;
 		_Up = _U - 2 * _J;
 
 		// U terms
@@ -415,8 +415,8 @@ private:
 	}
 
 	void Get_P_and_Blocks_and_electrons(const HilbertBasisType& natBasis,
-	                                    VectorRealType& blockOffsets,
-	                                    MatrixType& P)
+	                                    VectorRealType&         blockOffsets,
+	                                    MatrixType&             P)
 	{
 		// HilbertBasisType newBasis;
 		electrons_.resize(natBasis.size());
@@ -427,9 +427,9 @@ private:
 			for (SizeType i = 0; i < natBasis.size(); i++) {
 				if (no_of_electrons(natBasis[i]) == ne) {
 					// newBasis.pushback(natBasis[i]);
-					P(j, i) = 1;
+					P(j, i)       = 1;
 					electrons_[j] = ne;
-					j = j + 1;
+					j             = j + 1;
 				}
 			}
 
@@ -437,9 +437,9 @@ private:
 		}
 	}
 
-	void DiagonalizeBlocks_GetU(const MatrixType& Jz_opr,
+	void DiagonalizeBlocks_GetU(const MatrixType&     Jz_opr,
 	                            const VectorRealType& blockOffsets,
-	                            VectorRealType& jzEigs)
+	                            VectorRealType&       jzEigs)
 	{
 		SizeType nrow = Jz_opr.n_row();
 
@@ -447,7 +447,7 @@ private:
 		utranspose_.resize(nrow, nrow);
 
 		VectorRealType Jz_block_eigs;
-		SizeType r_ = 0;
+		SizeType       r_ = 0;
 		for (SizeType i = 0; i < 7; i++) {
 			SizeType nrow_b = blockOffsets[i] - r_;
 
@@ -463,7 +463,7 @@ private:
 			for (SizeType ir = 0; ir < nrow_b; ir++) {
 				jzEigs[r_ + ir] = Jz_block_eigs[ir];
 				for (SizeType ic = 0; ic < nrow_b; ic++) {
-					u_(r_ + ir, r_ + ic) = Jz_block(ir, ic);
+					u_(r_ + ir, r_ + ic)          = Jz_block(ir, ic);
 					utranspose_(r_ + ic, r_ + ir) = Jz_block(ir, ic);
 				}
 			}
@@ -480,14 +480,14 @@ private:
 		SizeType nup = HilbertSpaceFeAsType::electronsWithGivenSpin(basis_i, SPIN_UP);
 		// ndown
 		SizeType ndown = HilbertSpaceFeAsType::electronsWithGivenSpin(basis_i, SPIN_DOWN);
-		tmp_e = nup + ndown;
+		tmp_e          = nup + ndown;
 		return tmp_e;
 	}
 
 	void Rotate_all(const MatrixType& R, VectorOperatorType& creationMatrix)
 	{
 		for (SizeType i = 0; i < creationMatrix.size(); ++i) {
-			MatrixType tmp = creationMatrix[i].getStorage().toDense() * R;
+			MatrixType tmp  = creationMatrix[i].getStorage().toDense() * R;
 			MatrixType tmp2 = multiplyTransposeConjugate(R, tmp);
 			creationMatrix[i].fromStorage(tmp2);
 		}
@@ -532,7 +532,7 @@ private:
 				tmp_doub += 18;
 			}
 
-			tmp_doub = tmp_doub * 0.5;
+			tmp_doub   = tmp_doub * 0.5;
 			tmp_Sztype = (SizeType)(tmp_doub + 0.5); // rounding off (like 0.999 to 1)
 			                                         // before converting to SizeType
 
@@ -540,11 +540,11 @@ private:
 		}
 	}
 
-	bool isEnabled_;
-	bool isSet_;
-	MatrixType u_;
-	MatrixType utranspose_;
-	MatrixType Hamil_onsite_;
+	bool           isEnabled_;
+	bool           isSet_;
+	MatrixType     u_;
+	MatrixType     utranspose_;
+	MatrixType     Hamil_onsite_;
 	VectorSizeType jzModifiedEigs_;
 	VectorSizeType electrons_;
 }; // class FeAsJzSymmetry

@@ -11,7 +11,7 @@ template <typename ContainerType> class Sort {
 public:
 
 	typedef typename ContainerType::value_type FieldType;
-	typedef std::pair<FieldType, SizeType> PairType;
+	typedef std::pair<FieldType, SizeType>     PairType;
 	class Compare {
 
 	public:
@@ -41,16 +41,16 @@ public:
 		if (smallSize != 0)
 			n = smallSize;
 		assert(n == iperm.size());
-		const ContainerType& xread = x;
-		PairType onep(xread[0], 0);
+		const ContainerType&            xread = x;
+		PairType                        onep(xread[0], 0);
 		typename Vector<PairType>::Type p(n, onep);
 		for (SizeType i = 0; i < n; i++) {
-			p[i].first = xread[i];
+			p[i].first  = xread[i];
 			p[i].second = i;
 		}
 		std::sort(p.begin(), p.end(), Compare(p));
 		for (SizeType i = 0; i < n; i++) {
-			x[i] = p[i].first;
+			x[i]     = p[i].first;
 			iperm[i] = p[i].second;
 		}
 	}

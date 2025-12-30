@@ -9,24 +9,24 @@ template <typename ModelBaseType> class Aklt {
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelBaseType::ModelHelperType    ModelHelperType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef std::pair<SizeType, char> PairSizeCharType;
+	typedef typename ModelHelperType::OperatorsType    OperatorsType;
+	typedef typename OperatorsType::OperatorType       OperatorType;
+	typedef typename OperatorType::PairType            PairType;
+	typedef typename ModelBaseType::OpsLabelType       OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType      OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType      ModelTermType;
+	typedef typename ModelHelperType::RealType         RealType;
+	typedef typename SparseMatrixType::value_type      ComplexOrRealType;
+	typedef std::pair<SizeType, char>                  PairSizeCharType;
 
 	Aklt(ModelBaseType& modelBase, PsimagLite::String additional)
 	    : modelBase_(modelBase)
 	    , enabled_(additional == "Aklt")
 	{ }
 
-	void fillLabeledOperators(SizeType site,
+	void fillLabeledOperators(SizeType                site,
 	                          const SparseMatrixType& splus,
 	                          const SparseMatrixType& sz)
 	{
@@ -75,7 +75,7 @@ public:
 		for (SizeType mu = 0; mu < 3; ++mu) { // mu = 0 is S+, mu = 1 is S-, mu=2 is Sz
 			for (SizeType mup = 0; mup < 3; ++mup) {
 				const RealType factor = findFactor(mu) * findFactor(mup) / 3.0;
-				auto valueModifier
+				auto           valueModifier
 				    = [factor](ComplexOrRealType& value) { value *= factor; };
 				SizeType index1 = indexFor(mu, mup);
 				SizeType index2 = indexFor(barOf(mu), barOf(mup));
@@ -128,16 +128,16 @@ private:
 	void pushOneOperator(OpsLabelType& aklt, const SparseMatrixType& matrix)
 	{
 		typename OperatorType::Su2RelatedType su2related;
-		OperatorType myOp(matrix,
-		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
-		                  PairType(0, 0),
-		                  1.0,
-		                  su2related);
+		OperatorType                          myOp(matrix,
+                                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                  PairType(0, 0),
+                                  1.0,
+                                  su2related);
 		aklt.push(myOp);
 	}
 
 	ModelBaseType& modelBase_;
-	bool enabled_;
+	bool           enabled_;
 };
 }
 #endif // AKLT_H

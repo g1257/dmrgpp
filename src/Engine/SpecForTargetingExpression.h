@@ -17,10 +17,10 @@ public:
 
 	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef AlgebraForTargetingExpression<TargetingBaseType> AlgebraType;
-	typedef AlgebraType ResultType;
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
-	typedef typename AlgebraType::AuxiliaryType AuxiliaryType;
-	typedef std::pair<PsimagLite::String, AuxiliaryType> PairStringAuxType;
+	typedef AlgebraType                                      ResultType;
+	typedef typename VectorWithOffsetType::value_type        ComplexOrRealType;
+	typedef typename AlgebraType::AuxiliaryType              AuxiliaryType;
+	typedef std::pair<PsimagLite::String, AuxiliaryType>     PairStringAuxType;
 
 	class AssignAndDestroy {
 
@@ -114,7 +114,7 @@ public:
 		}
 
 		AlgebraType* t_;
-		bool isValid_;
+		bool         isValid_;
 	};
 
 	PairStringAuxType operator()(PsimagLite::String str, AuxiliaryType& aux) const

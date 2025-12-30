@@ -96,10 +96,10 @@ namespace PsimagLite {
 template <typename SolverParametersType, typename MatrixType, typename VectorType>
 class DavidsonSolver : public LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType> {
 
-	typedef typename SolverParametersType::RealType RealType;
+	typedef typename SolverParametersType::RealType                             RealType;
 	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType> BaseType;
-	typedef typename VectorType::value_type ComplexOrRealType;
-	typedef typename BaseType::VectorRealType VectorRealType;
+	typedef typename VectorType::value_type     ComplexOrRealType;
+	typedef typename BaseType::VectorRealType   VectorRealType;
 	typedef typename BaseType::VectorVectorType VectorVectorType;
 
 public:
@@ -138,17 +138,17 @@ private:
 		if (m == 0)
 			return;
 		// select a value for k less than 1
-		RealType k = 0.25;
+		RealType k     = 0.25;
 		RealType tauin = PsimagLite::real(t * t);
 		for (SizeType i = 0; i < m; i++) {
 			ComplexOrRealType tmp = scalarProduct(v[i], t);
-			t = t - tmp * t;
+			t                     = t - tmp * t;
 		}
 		if (PsimagLite::real(t * t) / tauin > k)
 			return;
 		for (SizeType i = 0; i < m; i++) {
 			ComplexOrRealType tmp = scalarProduct(v[i], t);
-			t = t - tmp * v[i];
+			t                     = t - tmp * v[i];
 		}
 	}
 
@@ -168,8 +168,8 @@ private:
 
 	ProgressIndicator progress_;
 	const MatrixType& mat_;
-	SizeType steps_;
-	RealType eps_;
+	SizeType          steps_;
+	RealType          eps_;
 }; // class DavidsonSolver
 } // namespace PsimagLite
 

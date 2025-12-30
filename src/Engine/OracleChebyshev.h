@@ -8,25 +8,25 @@ template <typename TargetingCommonType, typename TargetParamsType> class OracleC
 
 public:
 
-	typedef typename TargetingCommonType::ModelType ModelType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename TargetParamsType::RealType RealType;
-	typedef typename TargetingCommonType::LanczosSolverType LanczosSolverType;
-	typedef typename TargetingCommonType::ComplexOrRealType ComplexOrRealType;
-	typedef typename TargetingCommonType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename LanczosSolverType::MatrixType MatrixLanczosType;
+	typedef typename TargetingCommonType::ModelType                ModelType;
+	typedef typename ModelType::ModelHelperType                    ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType           LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType    BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorType          OperatorType;
+	typedef typename TargetParamsType::RealType                    RealType;
+	typedef typename TargetingCommonType::LanczosSolverType        LanczosSolverType;
+	typedef typename TargetingCommonType::ComplexOrRealType        ComplexOrRealType;
+	typedef typename TargetingCommonType::VectorWithOffsetType     VectorWithOffsetType;
+	typedef typename LanczosSolverType::MatrixType                 MatrixLanczosType;
 	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType> ScaledHamiltonianType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename TargetingCommonType::FermionSignType FermionSignType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type   VectorType;
+	typedef typename TargetingCommonType::FermionSignType          FermionSignType;
 
-	OracleChebyshev(const ModelType& model,
+	OracleChebyshev(const ModelType&          model,
 	                const LeftRightSuperType& lrs,
-	                const RealType& currentTime,
-	                const TargetParamsType& tstStruct,
-	                RealType E0)
+	                const RealType&           currentTime,
+	                const TargetParamsType&   tstStruct,
+	                RealType                  E0)
 	    : model_(model)
 	    , lrs_(lrs)
 	    , currentTime_(currentTime)
@@ -34,25 +34,25 @@ public:
 	    , E0_(E0)
 	{ }
 
-	void operator()(SizeType n,
-	                const TargetingCommonType& common,
-	                SizeType systemOrEnviron,
-	                SizeType site,
-	                OperatorType& A,
+	void operator()(SizeType                                     n,
+	                const TargetingCommonType&                   common,
+	                SizeType                                     systemOrEnviron,
+	                SizeType                                     site,
+	                OperatorType&                                A,
 	                typename TargetingCommonType::BorderEnumType border)
 	{
-		VectorWithOffsetType p0;
+		VectorWithOffsetType                            p0;
 		typename TargetingCommonType::ApplyOperatorType applyOpLocal(
 		    lrs_, common.withLegacyBugs());
 		typename PsimagLite::Vector<bool>::Type signs;
 		model_.findOddElectronsOfOneSite(signs, site);
 		FermionSignType fs(lrs_.left(), signs);
-		OperatorType Aprime = A;
+		OperatorType    Aprime = A;
 		Aprime.dagger();
 		applyOpLocal(p0, common.psi(), Aprime, fs, systemOrEnviron, border);
 
 		VectorWithOffsetType p1;
-		VectorType r;
+		VectorType           r;
 		chebyIteration(r, p0, p0, true);
 		p1.fromFull(r, lrs_.super());
 		for (SizeType i = 0; i < n; ++i) {
@@ -72,10 +72,10 @@ public:
 
 private:
 
-	void chebyIteration(VectorType& r,
+	void chebyIteration(VectorType&                 r,
 	                    const VectorWithOffsetType& p1,
 	                    const VectorWithOffsetType& p0,
-	                    bool firstOne) const
+	                    bool                        firstOne) const
 	{
 		SizeType i0 = 0;
 		for (SizeType ii = 0; ii < p1.sectors(); ++ii)
@@ -90,9 +90,9 @@ private:
 
 		SizeType total = p1.effectiveSize(i0);
 		r.resize(total);
-		VectorType x2(total);
-		const RealType factor = (firstOne) ? 1.0 : 2.0;
-		VectorWithOffsetType x = factor * p1;
+		VectorType           x2(total);
+		const RealType       factor = (firstOne) ? 1.0 : 2.0;
+		VectorWithOffsetType x      = factor * p1;
 		x.extract(x2, i0);
 		lanczosHelper2.matrixVectorProduct(r, x2); // applying Hprime
 		if (firstOne)
@@ -103,11 +103,11 @@ private:
 		r += (-1.0) * phi2;
 	}
 
-	const ModelType& model_;
+	const ModelType&          model_;
 	const LeftRightSuperType& lrs_;
-	const RealType& currentTime_;
-	const TargetParamsType& tstStruct_;
-	const RealType& E0_;
+	const RealType&           currentTime_;
+	const TargetParamsType&   tstStruct_;
+	const RealType&           E0_;
 };
 }
 #endif // ORACLECHEBYSHEV_H

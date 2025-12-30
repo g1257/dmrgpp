@@ -86,10 +86,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename SparseMatrixType> class HamiltonianSymmetryLocal {
 
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type              SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
-	typedef PsimagLite::CrsMatrix<RealType> FactorsType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::CrsMatrix<RealType>                    FactorsType;
+	typedef typename PsimagLite::Vector<SizeType>::Type        VectorSizeType;
 
 public:
 
@@ -99,9 +99,9 @@ public:
 	}
 
 	template <typename SolverParametersType>
-	void calcRemovedIndices(VectorSizeType& removedIndices,
+	void calcRemovedIndices(VectorSizeType&       removedIndices,
 	                        const VectorSizeType& perm,
-	                        SizeType kept,
+	                        SizeType              kept,
 	                        const SolverParametersType&) const
 	{
 		const SizeType permSize = perm.size();
@@ -129,8 +129,8 @@ public:
 	     = 0)
 	{ }
 
-	void write(PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String label,
+	void write(PsimagLite::IoSelector::Out&          io,
+	           PsimagLite::String                    label,
 	           PsimagLite::IoNgSerializer::WriteMode mode) const
 	{
 		io.write(0, label + "FACTORSSIZE", mode);

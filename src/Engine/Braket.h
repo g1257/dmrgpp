@@ -13,22 +13,22 @@ template <typename ModelType_> class Braket {
 
 public:
 
-	typedef ModelType_ ModelType;
-	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename PsimagLite::Vector<int>::Type VectorIntType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename OperatorType::Su2RelatedType Su2RelatedType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef ModelType_                                         ModelType;
+	typedef typename ModelType::OperatorType                   OperatorType;
+	typedef typename PsimagLite::Vector<int>::Type             VectorIntType;
+	typedef typename OperatorType::PairType                    PairType;
+	typedef typename OperatorType::Su2RelatedType              Su2RelatedType;
+	typedef typename OperatorType::StorageType                 SparseMatrixType;
+	typedef typename SparseMatrixType::value_type              ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef OperatorSpec<ModelType, OperatorType> OperatorSpecType;
-	typedef typename OperatorSpecType::ResultType AlgebraType;
-	typedef typename OperatorSpecType::OneOperatorSpecType OneOperatorSpecType;
-	typedef typename PsimagLite::Vector<AlgebraType>::Type VectorAlgebraType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef PsimagLite::GetBraOrKet GetBraOrKetType;
-	typedef PsimagLite::Vector<GetBraOrKetType>::Type VectorGetBraOrKetType;
+	typedef OperatorSpec<ModelType, OperatorType>              OperatorSpecType;
+	typedef typename OperatorSpecType::ResultType              AlgebraType;
+	typedef typename OperatorSpecType::OneOperatorSpecType     OneOperatorSpecType;
+	typedef typename PsimagLite::Vector<AlgebraType>::Type     VectorAlgebraType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type       VectorStringType;
+	typedef PsimagLite::GetBraOrKet                            GetBraOrKetType;
+	typedef PsimagLite::Vector<GetBraOrKetType>::Type          VectorGetBraOrKetType;
 
 	Braket(const ModelType& model, const PsimagLite::String& braket)
 	    : model_(model)
@@ -66,9 +66,9 @@ public:
 
 		sites_.resize(opExprName_.size(), -1);
 
-		OperatorSpecType opSpec(model);
+		OperatorSpecType                                  opSpec(model);
 		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
-		const AlgebraType opEmpty;
+		const AlgebraType                                 opEmpty;
 		for (SizeType i = 0; i < opExprName_.size(); ++i) {
 			AlgebraType tmp;
 			canonicalExpression(tmp, opExprName_[i], opEmpty, sites_[i]);
@@ -137,13 +137,13 @@ public:
 		if (n == 1)
 			return;
 
-		std::string str = "<" + braket_[0].toString() + "|";
+		std::string       str = "<" + braket_[0].toString() + "|";
 		VectorAlgebraType opNew(n);
-		VectorIntType sitesNew(n);
-		VectorStringType opExprNameNew(n);
+		VectorIntType     sitesNew(n);
+		VectorStringType  opExprNameNew(n);
 		for (SizeType i = 0; i < n; ++i) {
-			opNew[i] = op_[permutation[i]];
-			sitesNew[i] = sites_[permutation[i]];
+			opNew[i]         = op_[permutation[i]];
+			sitesNew[i]      = sites_[permutation[i]];
 			opExprNameNew[i] = opExprName_[permutation[i]];
 			str += opName(i);
 			if (i + 1 < n)
@@ -154,20 +154,20 @@ public:
 
 		// actual changes
 		savedString_ = str;
-		op_ = opNew;
-		sites_ = sitesNew;
-		opExprName_ = opExprNameNew;
+		op_          = opNew;
+		sites_       = sitesNew;
+		opExprName_  = opExprNameNew;
 		// braket_ does not change because bra and ket don't change
 	}
 
 private:
 
-	const ModelType& model_;
+	const ModelType&      model_;
 	VectorGetBraOrKetType braket_; // convert to pair?
-	PsimagLite::String savedString_;
-	VectorStringType opExprName_;
-	VectorAlgebraType op_;
-	VectorIntType sites_;
+	PsimagLite::String    savedString_;
+	VectorStringType      opExprName_;
+	VectorAlgebraType     op_;
+	VectorIntType         sites_;
 }; // class Braket
 }
 

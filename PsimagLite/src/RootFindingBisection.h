@@ -20,10 +20,10 @@ template <typename FunctionType> class RootFindingBisection {
 public:
 
 	RootFindingBisection(const FunctionType& function,
-	                     RealType a = -100.,
-	                     RealType b = 100.,
-	                     SizeType maxIter = 100,
-	                     RealType tolerance = 1.0e-3)
+	                     RealType            a         = -100.,
+	                     RealType            b         = 100.,
+	                     SizeType            maxIter   = 100,
+	                     RealType            tolerance = 1.0e-3)
 	    : function_(function)
 	    , maxIter_(maxIter)
 	    , tolerance_(tolerance)
@@ -44,19 +44,19 @@ public:
 		// OUTPUT: value which differs from a root of f(x)=0 by less
 		// than TOL
 
-		RealType a = a_;
-		RealType b = b_;
-		SizeType n = 0;
+		RealType a           = a_;
+		RealType b           = b_;
+		SizeType n           = 0;
 		RealType functionAtA = function_(a);
 		while (n < maxIter_) {
-			RealType c = (a + b) / 2; // new midpoint
+			RealType c   = (a + b) / 2; // new midpoint
 			RealType tmp = function_(c);
 			if (fabs(tmp) < tolerance_) { // solution found
 				return c;
 			}
 			n++;
 			if (sign(tmp) == sign(functionAtA)) {
-				a = c;
+				a           = c;
 				functionAtA = tmp;
 			} else {
 				b = c;
@@ -74,9 +74,9 @@ private:
 	int sign(const RealType& x) const { return (x >= 0) ? 1 : -1; }
 
 	const FunctionType& function_;
-	SizeType maxIter_;
-	RealType tolerance_;
-	RealType a_, b_;
+	SizeType            maxIter_;
+	RealType            tolerance_;
+	RealType            a_, b_;
 }; // RootFindingBisection
 } // namespace PsimagLite
 

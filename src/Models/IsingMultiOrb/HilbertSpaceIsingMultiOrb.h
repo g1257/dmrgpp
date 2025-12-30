@@ -95,12 +95,12 @@ template <typename Word> class HilbertSpaceIsingMultiOrb {
 
 public:
 
-	typedef Word HilbertState;
+	typedef Word              HilbertState;
 	typedef unsigned int long WordType;
 
 	enum
 	{
-		SPIN_UP = 0,
+		SPIN_UP   = 0,
 		SPIN_DOWN = 1
 	};
 
@@ -109,7 +109,7 @@ public:
 	static bool isBitZeroAt(SizeType pos, SizeType ket)
 	{
 		SizeType mask = 1ul;
-		bool flag = true;
+		bool     flag = true;
 		for (SizeType i = 1; i < pos; i++)
 			mask <<= 1;
 

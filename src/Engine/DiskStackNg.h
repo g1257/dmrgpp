@@ -83,15 +83,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename DataType> class DiskStack {
 
-	typedef typename PsimagLite::IoNg::In IoInType;
+	typedef typename PsimagLite::IoNg::In  IoInType;
 	typedef typename PsimagLite::IoNg::Out IoOutType;
 
 public:
 
 	DiskStack(const PsimagLite::String filename,
-	          bool needsToRead,
-	          PsimagLite::String label,
-	          const BasisTraits& basisTraits)
+	          bool                     needsToRead,
+	          PsimagLite::String       label,
+	          const BasisTraits&       basisTraits)
 	    : ioOut_((needsToRead) ? 0 : new IoOutType(filename, PsimagLite::IoNg::ACC_RDW))
 	    , ioIn_((needsToRead) ? new IoInType(filename) : 0)
 	    , label_("DiskStack" + label)
@@ -107,7 +107,7 @@ public:
 		}
 
 		ioIn_->read(total_, label_ + "/Size");
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Read from file " + filename + " succeeded";
 		progress_.printline(msgg, std::cout);
@@ -194,13 +194,13 @@ private:
 
 	DiskStack& operator=(const DiskStack&);
 
-	IoOutType* ioOut_;
-	IoInType* ioIn_;
-	PsimagLite::String label_;
-	const BasisTraits& basisTraits_;
-	int total_;
+	IoOutType*                    ioOut_;
+	IoInType*                     ioIn_;
+	PsimagLite::String            label_;
+	const BasisTraits&            basisTraits_;
+	int                           total_;
 	PsimagLite::ProgressIndicator progress_;
-	mutable DataType* dt_;
+	mutable DataType*             dt_;
 }; // class DiskStack
 
 } // namespace Dmrg

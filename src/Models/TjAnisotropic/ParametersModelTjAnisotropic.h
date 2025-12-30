@@ -86,7 +86,7 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersModelTjAnisotropic : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	template <typename IoInputType>
@@ -156,7 +156,7 @@ struct ParametersModelTjAnisotropic : public ParametersModelBase<RealType, QnTyp
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
+	friend std::ostream& operator<<(std::ostream&                       os,
 	                                const ParametersModelTjAnisotropic& parameters)
 	{
 		os << "potentialV\n";

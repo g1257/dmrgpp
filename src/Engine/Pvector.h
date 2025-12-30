@@ -10,7 +10,7 @@ template <typename ComplexOrRealType> class Pvector {
 public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type       VectorStringType;
 
 	// |P0>=(c?0[0]'*c?0[1]' +  c?1[0]'*c?1[1] - c?0[1]'*c?0[0] - c?1[1]'*c?1[0])|gs>*weight
 	// The weight is optional
@@ -97,8 +97,8 @@ public:
 		if (!isTimeEvolution(rhs))
 			return;
 
-		const SizeType n = rhs.length();
-		SizeType countStars = 0;
+		const SizeType n          = rhs.length();
+		SizeType       countStars = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			if (rhs[i] == '*')
 				++countStars;
@@ -119,7 +119,7 @@ private:
 			err("Pvector " + str + " string too short\n");
 		PsimagLite::String buffer("");
 		for (SizeType i = 0; i < l; ++i) {
-			const SizeType j = l - i - 1;
+			const SizeType      j      = l - i - 1;
 			const unsigned char letter = str[j];
 			if (letter == '*')
 				break;
@@ -135,7 +135,7 @@ private:
 	static bool isAdigit(unsigned char letter) { return (letter > 47 && letter < 58); }
 
 	VectorStringType vStr_;
-	RealType weight_;
+	RealType         weight_;
 };
 }
 #endif // PVECTOR_H

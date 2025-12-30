@@ -93,7 +93,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	// connections are handled by the geometry
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
 
 	enum IntEnum
 	{
@@ -169,7 +169,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 		try {
 			PsimagLite::String tmp;
 			io.readline(tmp, "Decay=");
-			feAsMode = convertToEnum(tmp);
+			feAsMode         = convertToEnum(tmp);
 			decayInInputFile = true;
 		} catch (std::exception&) { }
 
@@ -364,17 +364,17 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 		return os;
 	}
 
-	SizeType orbitals;
+	SizeType                                    orbitals;
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 	typename PsimagLite::Vector<RealType>::Type potentialT;
-	IntEnum feAsMode;
-	RealType coulombV;
-	RealType anisotropyD;
-	PsimagLite::Matrix<RealType> magneticField;
-	PsimagLite::Matrix<ComplexOrRealType> spinOrbit;
-	SizeType jzSymmetry;
-	SizeType orbDependence;
+	IntEnum                                     feAsMode;
+	RealType                                    coulombV;
+	RealType                                    anisotropyD;
+	PsimagLite::Matrix<RealType>                magneticField;
+	PsimagLite::Matrix<ComplexOrRealType>       spinOrbit;
+	SizeType                                    jzSymmetry;
+	SizeType                                    orbDependence;
 };
 } // namespace Dmrg
 

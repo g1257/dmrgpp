@@ -17,13 +17,13 @@ void diag(Matrix<double>& m, Vector<double>::Type& eigs, char option)
 #ifdef NO_LAPACK
 	throw RuntimeError("diag: dsyev_: NO LAPACK!\n");
 #else
-	char jobz = option;
-	char uplo = 'U';
-	int n = m.rows();
-	int lda = m.cols();
+	char                 jobz = option;
+	char                 uplo = 'U';
+	int                  n    = m.rows();
+	int                  lda  = m.cols();
 	Vector<double>::Type work(3);
-	int info;
-	int lwork = -1;
+	int                  info;
+	int                  lwork = -1;
 
 	if (lda <= 0)
 		throw RuntimeError("lda<=0\n");
@@ -38,7 +38,7 @@ void diag(Matrix<double>& m, Vector<double>::Type& eigs, char option)
 	}
 
 	const int NB = 256;
-	lwork = std::max(1 + static_cast<int>(work[0]), (NB + 2) * n);
+	lwork        = std::max(1 + static_cast<int>(work[0]), (NB + 2) * n);
 	work.resize(lwork);
 	// real work:
 	dsyev_(&jobz, &uplo, &n, &(m(0, 0)), &lda, &(eigs[0]), &(work[0]), &lwork, &info);
@@ -54,14 +54,14 @@ void diag(Matrix<std::complex<double>>& m, Vector<double>::Type& eigs, char opti
 #ifdef NO_LAPACK
 	throw RuntimeError("diag: zheev: NO LAPACK!\n");
 #else
-	char jobz = option;
-	char uplo = 'U';
-	int n = m.rows();
-	int lda = m.cols();
+	char                               jobz = option;
+	char                               uplo = 'U';
+	int                                n    = m.rows();
+	int                                lda  = m.cols();
 	Vector<std::complex<double>>::Type work(3);
-	Vector<double>::Type rwork(3 * n);
-	int info;
-	int lwork = -1;
+	Vector<double>::Type               rwork(3 * n);
+	int                                info;
+	int                                lwork = -1;
 
 	eigs.resize(n);
 
@@ -74,7 +74,7 @@ void diag(Matrix<std::complex<double>>& m, Vector<double>::Type& eigs, char opti
 	}
 
 	const int NB = 256;
-	lwork = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2) * n);
+	lwork        = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2) * n);
 	work.resize(lwork);
 	// real work:
 	zheev_(
@@ -91,13 +91,13 @@ void diag(Matrix<float>& m, Vector<float>::Type& eigs, char option)
 #ifdef NO_LAPACK
 	throw RuntimeError("diag: dsyev_: NO LAPACK!\n");
 #else
-	char jobz = option;
-	char uplo = 'U';
-	int n = m.rows();
-	int lda = m.cols();
+	char                jobz = option;
+	char                uplo = 'U';
+	int                 n    = m.rows();
+	int                 lda  = m.cols();
 	Vector<float>::Type work(3);
-	int info;
-	int lwork = -1;
+	int                 info;
+	int                 lwork = -1;
 
 	if (lda <= 0)
 		throw RuntimeError("lda<=0\n");
@@ -112,7 +112,7 @@ void diag(Matrix<float>& m, Vector<float>::Type& eigs, char option)
 	}
 
 	const int NB = 256;
-	lwork = std::max(1 + static_cast<int>(work[0]), (NB + 2) * n);
+	lwork        = std::max(1 + static_cast<int>(work[0]), (NB + 2) * n);
 	work.resize(lwork);
 
 	// real work:
@@ -129,13 +129,13 @@ void diag(Matrix<std::complex<float>>& m, Vector<float>::Type& eigs, char option
 #ifdef NO_LAPACK
 	throw RuntimeError("diag: cheev: NO LAPACK!\n");
 #else
-	char jobz = option;
-	char uplo = 'U';
-	int n = m.rows();
-	int lda = m.cols();
+	char                              jobz = option;
+	char                              uplo = 'U';
+	int                               n    = m.rows();
+	int                               lda  = m.cols();
 	Vector<std::complex<float>>::Type work(3);
-	Vector<float>::Type rwork(3 * n);
-	int info, lwork = -1;
+	Vector<float>::Type               rwork(3 * n);
+	int                               info, lwork = -1;
 
 	eigs.resize(n);
 
@@ -148,7 +148,7 @@ void diag(Matrix<std::complex<float>>& m, Vector<float>::Type& eigs, char option
 	}
 
 	const int NB = 256;
-	lwork = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2) * n);
+	lwork        = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2) * n);
 	work.resize(lwork);
 
 	// real work:
@@ -161,24 +161,24 @@ void diag(Matrix<std::complex<float>>& m, Vector<float>::Type& eigs, char option
 #endif
 }
 
-void geev(char jobvl,
-          char jobvr,
-          Matrix<std::complex<double>>& a,
+void geev(char                                jobvl,
+          char                                jobvr,
+          Matrix<std::complex<double>>&       a,
           Vector<std::complex<double>>::Type& w,
-          Matrix<std::complex<double>>& vl,
-          Matrix<std::complex<double>>& vr)
+          Matrix<std::complex<double>>&       vl,
+          Matrix<std::complex<double>>&       vr)
 {
 #ifdef NO_LAPACK
 	throw RuntimeError("diag: geev: NO LAPACK!\n");
 #else
-	int n = a.rows();
-	int lda = a.cols();
-	int ldvl = vl.rows();
-	int ldvr = vr.rows();
-	int info = 0;
+	int                                n    = a.rows();
+	int                                lda  = a.cols();
+	int                                ldvl = vl.rows();
+	int                                ldvr = vr.rows();
+	int                                info = 0;
 	Vector<std::complex<double>>::Type work(10, 0);
-	Vector<double>::Type rwork(2 * n + 1, 0);
-	int lwork = -1;
+	Vector<double>::Type               rwork(2 * n + 1, 0);
+	int                                lwork = -1;
 	zgeev_(&jobvl,
 	       &jobvr,
 	       &n,
@@ -195,7 +195,7 @@ void geev(char jobvl,
 	       &info);
 
 	const int NB = 256;
-	lwork = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2) * n);
+	lwork        = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2) * n);
 	work.resize(lwork);
 
 	zgeev_(&jobvl,

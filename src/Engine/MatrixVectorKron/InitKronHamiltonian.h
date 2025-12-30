@@ -92,25 +92,25 @@ class InitKronHamiltonian : public InitKronBase<typename ModelType_::LeftRightSu
 
 public:
 
-	typedef ModelType_ ModelType;
-	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
-	typedef typename LeftRightSuperType::BasisType BasisType;
-	typedef InitKronBase<LeftRightSuperType> BaseType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename HamiltonianConnectionType::LinkType LinkType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename BaseType::ArrayOfMatStructType ArrayOfMatStructType;
-	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
+	typedef ModelType_                                               ModelType;
+	typedef typename ModelType::HamiltonianConnectionType            HamiltonianConnectionType;
+	typedef typename ModelType::ModelHelperType                      ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
+	typedef typename ModelHelperType::OperatorStorageType            OperatorStorageType;
+	typedef typename LeftRightSuperType::BasisType                   BasisType;
+	typedef InitKronBase<LeftRightSuperType>                         BaseType;
+	typedef typename ModelHelperType::SparseMatrixType               SparseMatrixType;
+	typedef typename HamiltonianConnectionType::LinkType             LinkType;
+	typedef typename ModelHelperType::RealType                       RealType;
+	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
+	typedef typename BaseType::ArrayOfMatStructType                  ArrayOfMatStructType;
+	typedef typename ArrayOfMatStructType::GenIjPatchType            GenIjPatchType;
 	typedef typename PsimagLite::Vector<ArrayOfMatStructType*>::Type VectorArrayOfMatStructType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type     VectorType;
+	typedef typename ArrayOfMatStructType::VectorSizeType            VectorSizeType;
 
-	InitKronHamiltonian(const ModelType& model,
-	                    const HamiltonianConnectionType& hc,
+	InitKronHamiltonian(const ModelType&                     model,
+	                    const HamiltonianConnectionType&     hc,
 	                    const typename ModelHelperType::Aux& aux)
 	    : BaseType(hc.modelHelper().leftRightSuper(),
 	               aux.m(),
@@ -154,7 +154,7 @@ public:
 	void copyIn(const VectorType& vout, const VectorType& vin)
 	{
 		VectorType& xout = xout_;
-		VectorType& yin = yin_;
+		VectorType& yin  = yin_;
 
 		const VectorSizeType& permInverse
 		    = BaseType::lrs(BaseType::NEW).super().permutationInverse();
@@ -162,8 +162,8 @@ public:
 		    = BaseType::lrs(BaseType::NEW).left().hamiltonian().getCRS();
 		SizeType nl = leftH.rows();
 
-		SizeType offset = BaseType::offset(BaseType::NEW);
-		SizeType npatches = BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size();
+		SizeType offset       = BaseType::offset(BaseType::NEW);
+		SizeType npatches     = BaseType::patch(BaseType::NEW, GenIjPatchType::LEFT).size();
 		const BasisType& left = BaseType::lrs(BaseType::NEW).left();
 		const BasisType& right = BaseType::lrs(BaseType::NEW).right();
 
@@ -180,7 +180,7 @@ public:
 			assert(right.partition(jgroup + 1) >= right.partition(jgroup));
 			SizeType sizeRight = right.partition(jgroup + 1) - right.partition(jgroup);
 
-			SizeType left_offset = left.partition(igroup);
+			SizeType left_offset  = left.partition(igroup);
 			SizeType right_offset = right.partition(jgroup);
 
 			for (SizeType ileft = 0; ileft < sizeLeft; ++ileft) {
@@ -209,7 +209,7 @@ public:
 					assert(ip < yin.size());
 
 					assert((r >= offset) && ((r - offset) < vin.size()));
-					yin[ip] = vin[r - offset];
+					yin[ip]  = vin[r - offset];
 					xout[ip] = vout[r - offset];
 				}
 			}
@@ -237,7 +237,7 @@ private:
 
 	void addHlAndHr()
 	{
-		const RealType value = 1.0;
+		const RealType             value = 1.0;
 		const OperatorStorageType& aL
 		    = hc_.modelHelper().leftRightSuper().left().hamiltonian();
 		const OperatorStorageType& aR
@@ -259,13 +259,13 @@ private:
 		for (SizeType ix = 0; ix < total; ++ix) {
 
 			opsForLink.setPointer(ix);
-			const OperatorStorageType& A = opsForLink.A();
-			const OperatorStorageType& B = opsForLink.B();
-			const LinkType& link2 = opsForLink.link();
+			const OperatorStorageType& A     = opsForLink.A();
+			const OperatorStorageType& B     = opsForLink.B();
+			const LinkType&            link2 = opsForLink.link();
 
 			if (link2.type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM) {
 				LinkType link3 = link2;
-				link3.type = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
+				link3.type     = ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON;
 				if (link3.fermionOrBoson
 				    == ProgramGlobals::FermionOrBosonEnum::FERMION)
 					link3.value *= -1.0;
@@ -282,14 +282,14 @@ private:
 
 	InitKronHamiltonian& operator=(const InitKronHamiltonian&);
 
-	const ModelType& model_;
+	const ModelType&                 model_;
 	const HamiltonianConnectionType& hc_;
-	OperatorStorageType identityL_;
-	OperatorStorageType identityR_;
-	VectorSizeType vstart_;
-	VectorType yin_;
-	VectorType xout_;
-	VectorSizeType offsetForPatches_;
+	OperatorStorageType              identityL_;
+	OperatorStorageType              identityR_;
+	VectorSizeType                   vstart_;
+	VectorType                       yin_;
+	VectorType                       xout_;
+	VectorSizeType                   offsetForPatches_;
 };
 } // namespace Dmrg
 

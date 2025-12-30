@@ -101,30 +101,30 @@ public:
 
 	enum
 	{
-		CAN_BE_ZERO = false,
+		CAN_BE_ZERO     = false,
 		MUST_BE_NONZERO = true
 	};
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef ComplexOrRealType value_type;
-	typedef PsimagLite::CrsMatrix<value_type> SparseMatrixType;
+	typedef PsimagLite::Vector<SizeType>::Type          VectorSizeType;
+	typedef ComplexOrRealType                           value_type;
+	typedef PsimagLite::CrsMatrix<value_type>           SparseMatrixType;
 	typedef typename PsimagLite::Real<value_type>::Type RealType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef Su2Related Su2RelatedType;
-	typedef PsimagLite::Matrix<value_type> DenseMatrixType;
+	typedef std::pair<SizeType, SizeType>               PairType;
+	typedef Su2Related                                  Su2RelatedType;
+	typedef PsimagLite::Matrix<value_type>              DenseMatrixType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef OperatorStorage<ComplexOrRealType> StorageType;
+	typedef OperatorStorage<ComplexOrRealType>          StorageType;
 
 	Operator()
 	    : fermionOrBoson_(ProgramGlobals::FermionOrBosonEnum::BOSON)
 	    , angularFactor_(1)
 	{ }
 
-	Operator(const SparseMatrixType& data1,
+	Operator(const SparseMatrixType&            data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
-	         const PairType& jm1,
-	         RealType angularFactor1,
-	         const Su2RelatedType& su2Related1)
+	         const PairType&                    jm1,
+	         RealType                           angularFactor1,
+	         const Su2RelatedType&              su2Related1)
 	    : data_(data1)
 	    , fermionOrBoson_(fermionSign1)
 	    , jm_(jm1)
@@ -132,11 +132,11 @@ public:
 	    , su2Related_(su2Related1)
 	{ }
 
-	Operator(const StorageType& data1,
+	Operator(const StorageType&                 data1,
 	         ProgramGlobals::FermionOrBosonEnum fermionSign1,
-	         const PairType& jm1,
-	         RealType angularFactor1,
-	         const Su2RelatedType& su2Related1)
+	         const PairType&                    jm1,
+	         RealType                           angularFactor1,
+	         const Su2RelatedType&              su2Related1)
 	    : data_(data1)
 	    , fermionOrBoson_(fermionSign1)
 	    , jm_(jm1)
@@ -145,11 +145,11 @@ public:
 	{ }
 
 	template <typename IoInputType, typename SomeModelType>
-	Operator(IoInputType& io,
-	         SomeModelType& model,
-	         bool checkNonZero,
+	Operator(IoInputType&       io,
+	         SomeModelType&     model,
+	         bool               checkNonZero,
 	         PsimagLite::String prefix,
-	         int site = -1)
+	         int                site = -1)
 	{
 		/*PSIDOC Operator
 		 \item[TSPOperator] [String] One of \{\verb!cooked!, \verb!raw!,
@@ -211,17 +211,17 @@ public:
 			std::cout << msg;
 		} else if (s == "expression") {
 			io.readline(s, prefix + "OperatorExpression=");
-			typedef OperatorSpec<SomeModelType, Operator> OperatorSpecType;
-			OperatorSpecType opSpec(model);
+			typedef OperatorSpec<SomeModelType, Operator>     OperatorSpecType;
+			OperatorSpecType                                  opSpec(model);
 			PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(
 			    opSpec);
-			Operator p;
+			Operator       p;
 			const Operator opEmpty;
 			canonicalExpression(p, s, opEmpty, site);
-			data_ = p.data_;
+			data_           = p.data_;
 			fermionOrBoson_ = p.fermionOrBoson_;
-			jm_ = p.jm_;
-			angularFactor_ = p.angularFactor_;
+			jm_             = p.jm_;
+			angularFactor_  = p.angularFactor_;
 			// TODO FIXME: deprecate cooked
 			return;
 		} else {
@@ -238,7 +238,7 @@ public:
 		                           : ProgramGlobals::FermionOrBosonEnum::BOSON;
 
 		jm_.first = jm_.second = 0;
-		angularFactor_ = 1;
+		angularFactor_         = 1;
 		if (!SomeModelType::MyBasis::useSu2Symmetry())
 			return;
 
@@ -246,7 +246,7 @@ public:
 		io.read(v, prefix + "JMVALUES");
 		if (v.size() != 2)
 			err("FATAL: JMVALUES is not a vector of 2 values\n");
-		jm_.first = v[0];
+		jm_.first  = v[0];
 		jm_.second = v[1];
 
 		io.readline(angularFactor_, prefix + "angularFactor_=");
@@ -258,8 +258,8 @@ public:
 
 	void fromStorage(const SparseMatrixType& m) { fromCRS(data_, m); }
 
-	void write(PsimagLite::String label,
-	           PsimagLite::IoSerializer& ioSerializer,
+	void write(PsimagLite::String                  label,
+	           PsimagLite::IoSerializer&           ioSerializer,
 	           PsimagLite::IoSerializer::WriteMode mode
 	           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
@@ -323,12 +323,12 @@ public:
 			err("operator+= failed for Operator: metas not equal\n");
 
 		StorageType crs = data_ * other.data_;
-		data_ = crs;
+		data_           = crs;
 
 		int fsOther = (other.fermionOrBoson_ == ProgramGlobals::FermionOrBosonEnum::FERMION)
 		    ? -1
 		    : 1;
-		int fs = fSaved * fsOther;
+		int fs      = fSaved * fsOther;
 		fermionOrBoson_ = (fs < 0) ? ProgramGlobals::FermionOrBosonEnum::FERMION
 		                           : ProgramGlobals::FermionOrBosonEnum::BOSON;
 
@@ -345,19 +345,19 @@ public:
 
 	// operators END
 
-	void outerProduct(const Operator& A,
-	                  SizeType nout,
+	void outerProduct(const Operator&       A,
+	                  SizeType              nout,
 	                  const VectorRealType& signs,
-	                  bool order,
+	                  bool                  order,
 	                  const VectorSizeType& permutationFull)
 	{
 		externalProduct2(data_, A.getStorage(), nout, signs, order, permutationFull);
 	}
 
-	void outerProduct(const Operator& A,
-	                  const Operator& B,
+	void outerProduct(const Operator&       A,
+	                  const Operator&       B,
 	                  const VectorRealType& signs,
-	                  bool order,
+	                  bool                  order,
 	                  const VectorSizeType& permutationFull)
 	{
 		externalProduct2(
@@ -368,7 +368,7 @@ public:
 	{
 		const Operator& op1 = *this;
 
-		SizeType code = 0;
+		SizeType                       code = 0;
 		PsimagLite::Vector<bool>::Type b(4, false);
 
 		b[0] = (op1.fermionOrBoson_ != op2.fermionOrBoson_);
@@ -393,21 +393,21 @@ public:
 	void set(ProgramGlobals::FermionOrBosonEnum fOrB) { fermionOrBoson_ = fOrB; }
 
 	void set(ProgramGlobals::FermionOrBosonEnum fOrB,
-	         PairType jm1,
-	         RealType af,
-	         const Su2RelatedType& su2)
+	         PairType                           jm1,
+	         RealType                           af,
+	         const Su2RelatedType&              su2)
 	{
 		fermionOrBoson_ = fOrB;
-		jm_ = jm1;
-		angularFactor_ = af;
-		su2Related_ = su2;
+		jm_             = jm1;
+		angularFactor_  = af;
+		su2Related_     = su2;
 	}
 
 	void set(ProgramGlobals::FermionOrBosonEnum fOrB, PairType jm1, RealType af)
 	{
 		fermionOrBoson_ = fOrB;
-		jm_ = jm1;
-		angularFactor_ = af;
+		jm_             = jm1;
+		angularFactor_  = af;
 	}
 
 	// short cut
@@ -449,7 +449,7 @@ private:
 	void checkNotZeroMatrix(const DenseMatrixType& m) const
 	{
 		RealType norma = norm2(m);
-		RealType eps = 1e-6;
+		RealType eps   = 1e-6;
 		if (norma > eps)
 			return;
 
@@ -464,16 +464,16 @@ private:
 	// does this operator commute or anticommute with others of the
 	// same class on different sites
 	ProgramGlobals::FermionOrBosonEnum fermionOrBoson_;
-	PairType jm_; // angular momentum of this operator
-	RealType angularFactor_;
-	Su2RelatedType su2Related_;
+	PairType                           jm_; // angular momentum of this operator
+	RealType                           angularFactor_;
+	Su2RelatedType                     su2Related_;
 };
 
 template <typename SparseMatrixType,
           template <typename, typename> class SomeVectorTemplate,
           typename SomeAllocator1Type,
           typename SomeAllocator2Type>
-void fillOperator(SomeVectorTemplate<SparseMatrixType*, SomeAllocator1Type>& data_,
+void fillOperator(SomeVectorTemplate<SparseMatrixType*, SomeAllocator1Type>&          data_,
                   SomeVectorTemplate<Operator<SparseMatrixType>, SomeAllocator2Type>& op)
 {
 	for (SizeType i = 0; i < data_.size(); ++i)

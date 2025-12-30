@@ -3,7 +3,7 @@
 namespace PsimagLite {
 std::complex<double> LnGammaFunction(const std::complex<double>& z)
 {
-	GslWrapper gslWrapper;
+	GslWrapper                gslWrapper;
 	GslWrapper::gsl_sf_result lnr;
 	GslWrapper::gsl_sf_result arg;
 	gslWrapper.gsl_sf_lngamma_complex_e(PsimagLite::real(z), PsimagLite::imag(z), &lnr, &arg);
@@ -12,7 +12,7 @@ std::complex<double> LnGammaFunction(const std::complex<double>& z)
 
 double Ci(const double& x)
 {
-	GslWrapper gslWrapper;
+	GslWrapper                gslWrapper;
 	GslWrapper::gsl_sf_result result;
 	gslWrapper.gsl_sf_Ci_e(x, &result);
 	return result.val;

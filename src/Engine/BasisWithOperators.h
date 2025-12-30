@@ -120,20 +120,20 @@ template <typename BasisType_> class BasisWithOperators : public BasisType_ {
 
 public:
 
-	typedef BasisType_ BaseType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename BaseType::RealType RealType;
-	typedef Operators<BasisType_> OperatorsType;
-	typedef typename OperatorsType::PairSizeSizeType PairSizeSizeType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorsType::BasisType BasisType;
-	typedef typename BasisType::BlockType VectorSizeType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef BasisWithOperators<BasisType_> ThisType;
-	typedef typename OperatorStorageType::value_type ComplexOrRealType;
+	typedef BasisType_                                        BaseType;
+	typedef std::pair<SizeType, SizeType>                     PairType;
+	typedef typename BaseType::RealType                       RealType;
+	typedef Operators<BasisType_>                             OperatorsType;
+	typedef typename OperatorsType::PairSizeSizeType          PairSizeSizeType;
+	typedef typename OperatorsType::OperatorType              OperatorType;
+	typedef typename OperatorsType::BasisType                 BasisType;
+	typedef typename BasisType::BlockType                     VectorSizeType;
+	typedef typename OperatorType::StorageType                OperatorStorageType;
+	typedef BasisWithOperators<BasisType_>                    ThisType;
+	typedef typename OperatorStorageType::value_type          ComplexOrRealType;
 	typedef typename PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>             MatrixType;
+	typedef BlockDiagonalMatrix<MatrixType>                   BlockDiagonalMatrixType;
 
 	enum class SaveEnum
 	{
@@ -147,9 +147,9 @@ public:
 	{ }
 
 	template <typename IoInputter>
-	BasisWithOperators(IoInputter& io,
+	BasisWithOperators(IoInputter&               io,
 	                   const PsimagLite::String& ss,
-	                   const BasisTraits& basisTraits)
+	                   const BasisTraits&        basisTraits)
 	    : BasisType(io, ss, { false, false })
 	    , basisTraits_(basisTraits)
 	    , operators_(io, ss + "/", basisTraits_.isObserveCode)
@@ -160,7 +160,7 @@ public:
 
 	template <typename IoInputter>
 	void
-	read(IoInputter& io,
+	read(IoInputter&        io,
 	     PsimagLite::String prefix,
 	     typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type
 	     = 0)
@@ -172,18 +172,18 @@ public:
 
 	void dontCopyOperators(const BasisWithOperators& b)
 	{
-		BaseType& base = *this;
-		const BaseType& b1 = static_cast<BaseType>(b);
-		base = b1;
-		operatorsPerSite_ = b.operatorsPerSite_;
+		BaseType&       base = *this;
+		const BaseType& b1   = static_cast<BaseType>(b);
+		base                 = b1;
+		operatorsPerSite_    = b.operatorsPerSite_;
 		operators_.clear();
 	}
 
 	// set this basis to the outer product of
 	// basis2 and basis3 or basis3 and basis2  depending on dir
 	template <typename SomeSuperOperatorHelperType>
-	void setToProduct(const ThisType& basis2,
-	                  const ThisType& basis3,
+	void setToProduct(const ThisType&                    basis2,
+	                  const ThisType&                    basis3,
 	                  const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
 		if (someSuperOpHelper.dir() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -194,13 +194,13 @@ public:
 
 	//! transform this basis by transform
 	//! note: basis change must conserve total number of electrons and all quantum numbers
-	RealType truncateBasis(const BlockDiagonalMatrixType& ftransform,
+	RealType truncateBasis(const BlockDiagonalMatrixType&                     ftransform,
 	                       const typename PsimagLite::Vector<RealType>::Type& eigs,
-	                       const VectorSizeType& removedIndices,
-	                       const PairSizeSizeType& startEnd,
-	                       SizeType gemmRnb,
-	                       SizeType threadsForGemmR,
-	                       SizeType opOnSiteThreshold)
+	                       const VectorSizeType&                              removedIndices,
+	                       const PairSizeSizeType&                            startEnd,
+	                       SizeType                                           gemmRnb,
+	                       SizeType                                           threadsForGemmR,
+	                       SizeType                                           opOnSiteThreshold)
 	{
 		RealType error = BasisType::truncateBasis(eigs, removedIndices);
 
@@ -230,7 +230,7 @@ public:
 
 		BaseType::set(block);
 		typename PsimagLite::Vector<OperatorType>::Type ops;
-		SparseMatrixType h;
+		SparseMatrixType                                h;
 
 		SizeType oneSiteTruncActive = model.setOperatorMatrices(ops, qm, block);
 
@@ -295,10 +295,10 @@ public:
 	const BasisTraits& traits() const { return basisTraits_; }
 
 	template <typename SomeOutputType>
-	void write(SomeOutputType& io,
+	void write(SomeOutputType&                                io,
 	           typename SomeOutputType::Serializer::WriteMode mode,
-	           PsimagLite::String prefix,
-	           SaveEnum option,
+	           PsimagLite::String                             prefix,
+	           SaveEnum                                       option,
 	           typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<SomeOutputType>::True,
 	                                         int*>::Type
 	           = 0) const
@@ -307,10 +307,10 @@ public:
 	}
 
 	template <typename SomeOutputType>
-	void write(SomeOutputType& io,
-	           const PsimagLite::String& s,
+	void write(SomeOutputType&                                io,
+	           const PsimagLite::String&                      s,
 	           typename SomeOutputType::Serializer::WriteMode mode,
-	           SaveEnum option,
+	           SaveEnum                                       option,
 	           typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<SomeOutputType>::True,
 	                                         int*>::Type
 	           = 0) const
@@ -328,8 +328,8 @@ private:
 	//! set this basis to the outer product of   basis2 and basis3
 	//! PTEX_LABEL{setToProductOps}
 	template <typename SomeSuperOperatorHelperType>
-	void setToProductInternal(const ThisType& basis2,
-	                          const ThisType& basis3,
+	void setToProductInternal(const ThisType&                    basis2,
+	                          const ThisType&                    basis3,
 	                          const SomeSuperOperatorHelperType& someSuperOpHelper)
 	{
 		// reorder the basis
@@ -359,8 +359,8 @@ private:
 
 	SizeType opsPerSiteOrMinusOne() const
 	{
-		const SizeType n = BasisType::block().size();
-		SizeType result = operatorsPerSite(0);
+		const SizeType n      = BasisType::block().size();
+		SizeType       result = operatorsPerSite(0);
 		for (SizeType i = 1; i < n; ++i)
 			if (result != operatorsPerSite(i))
 				return 0;
@@ -370,8 +370,8 @@ private:
 
 	// BasisWithOperators(const BasisWithOperators&);
 
-	BasisTraits basisTraits_;
-	OperatorsType operators_;
+	BasisTraits    basisTraits_;
+	OperatorsType  operators_;
 	VectorSizeType operatorsPerSite_;
 }; // class BasisWithOperators
 

@@ -93,31 +93,31 @@ namespace Dmrg {
 
 template <typename ParametersType, typename TargetingType> class Truncation {
 
-	typedef typename TargetingType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::BlockType VectorSizeType;
-	typedef typename BasisWithOperatorsType::PairSizeSizeType PairSizeSizeType;
-	typedef typename LeftRightSuperType::ProgressIndicatorType ProgressIndicatorType;
-	typedef typename TargetingType::SparseMatrixType SparseMatrixType;
-	typedef typename TargetingType::RealType RealType;
-	typedef typename TargetingType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef DensityMatrixLocal<TargetingType> DensityMatrixLocalType;
-	typedef DensityMatrixSvd<TargetingType> DensityMatrixSvdType;
-	typedef DensityMatrixBase<TargetingType> DensityMatrixBaseType;
+	typedef typename TargetingType::LeftRightSuperType              LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef typename BasisType::BlockType                           VectorSizeType;
+	typedef typename BasisWithOperatorsType::PairSizeSizeType       PairSizeSizeType;
+	typedef typename LeftRightSuperType::ProgressIndicatorType      ProgressIndicatorType;
+	typedef typename TargetingType::SparseMatrixType                SparseMatrixType;
+	typedef typename TargetingType::RealType                        RealType;
+	typedef typename TargetingType::WaveFunctionTransfType          WaveFunctionTransfType;
+	typedef DensityMatrixLocal<TargetingType>                       DensityMatrixLocalType;
+	typedef DensityMatrixSvd<TargetingType>                         DensityMatrixSvdType;
+	typedef DensityMatrixBase<TargetingType>                        DensityMatrixBaseType;
 	typedef typename DensityMatrixBaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename TargetingType::ModelType ModelType;
-	typedef typename ModelType::SuperGeometryType SuperGeometryType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename DensityMatrixBaseType::Params ParamsDensityMatrixType;
-	typedef BlockDiagonalMatrixType TransformType;
-	typedef PsimagLite::IoNg::Out IoOutType;
+	typedef typename TargetingType::ModelType                       ModelType;
+	typedef typename ModelType::SuperGeometryType                   SuperGeometryType;
+	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
+	typedef typename DensityMatrixBaseType::Params                  ParamsDensityMatrixType;
+	typedef BlockDiagonalMatrixType                                 TransformType;
+	typedef PsimagLite::IoNg::Out                                   IoOutType;
 	using TruncationControlType = TruncationControl<RealType>;
 
 	struct TruncationCache {
 
-		BlockDiagonalMatrixType transform;
-		VectorRealType eigs;
+		BlockDiagonalMatrixType                     transform;
+		VectorRealType                              eigs;
 		typename PsimagLite::Vector<SizeType>::Type removedIndices;
 
 	}; // TruncationCache
@@ -125,10 +125,10 @@ template <typename ParametersType, typename TargetingType> class Truncation {
 public:
 
 	Truncation(const LeftRightSuperType& lrs,
-	           WaveFunctionTransfType& waveFunctionTransformation,
-	           const ParametersType& parameters,
-	           const SuperGeometryType& geometry,
-	           OutputFileOrNot& ioOut)
+	           WaveFunctionTransfType&   waveFunctionTransformation,
+	           const ParametersType&     parameters,
+	           const SuperGeometryType&  geometry,
+	           OutputFileOrNot&          ioOut)
 	    : lrs_(lrs)
 	    , waveFunctionTransformation_(waveFunctionTransformation)
 	    , parameters_(parameters)
@@ -142,14 +142,14 @@ public:
 		parameters_.truncationControl.print(std::cout, progress_);
 	}
 
-	void changeBasisFinite(BasisWithOperatorsType& pS,
-	                       BasisWithOperatorsType& pE,
-	                       const TargetingType& target,
-	                       SizeType keptStates,
-	                       const TruncationControlType& truncationControl,
+	void changeBasisFinite(BasisWithOperatorsType&       pS,
+	                       BasisWithOperatorsType&       pE,
+	                       const TargetingType&          target,
+	                       SizeType                      keptStates,
+	                       const TruncationControlType&  truncationControl,
 	                       ProgramGlobals::DirectionEnum direction)
 	{
-		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
+		PsimagLite::Profiling  profiling("TruncationChangeBasis", std::cout);
 		DensityMatrixBaseType* dmS = 0;
 
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
@@ -175,10 +175,10 @@ public:
 
 	const RealType& error() const { return error_; }
 
-	void changeBasisInfinite(BasisWithOperatorsType& sBasis,
-	                         BasisWithOperatorsType& eBasis,
-	                         const TargetingType& target,
-	                         SizeType keptStates,
+	void changeBasisInfinite(BasisWithOperatorsType&      sBasis,
+	                         BasisWithOperatorsType&      eBasis,
+	                         const TargetingType&         target,
+	                         SizeType                     keptStates,
 	                         const TruncationControlType& truncationControl)
 	{
 		PsimagLite::Profiling profiling("TruncationChangeBasis", std::cout);
@@ -212,12 +212,12 @@ public:
 
 private:
 
-	void changeBasis(BasisWithOperatorsType& rSprime,
-	                 const TargetingType& target,
-	                 SizeType keptStates,
-	                 const TruncationControlType& truncationControl,
+	void changeBasis(BasisWithOperatorsType&       rSprime,
+	                 const TargetingType&          target,
+	                 SizeType                      keptStates,
+	                 const TruncationControlType&  truncationControl,
 	                 ProgramGlobals::DirectionEnum direction,
-	                 DensityMatrixBaseType** dm)
+	                 DensityMatrixBaseType**       dm)
 	{
 		/* PSIDOC Truncation
 		        Let us define the density matrices for system:
@@ -241,12 +241,12 @@ private:
 		const BasisWithOperatorsType& pBasis
 		    = (direction == expandSys) ? lrs_.left() : lrs_.right();
 
-		bool debug = false;
-		bool useSvd = !parameters_.options.isSet("truncationNoSvd");
+		bool debug               = false;
+		bool useSvd              = !parameters_.options.isSet("truncationNoSvd");
 		bool enablePersistentSvd = parameters_.options.isSet("EnablePersistentSvd");
-		bool serialSvd = parameters_.options.isSet("SerialSvd");
+		bool serialSvd           = parameters_.options.isSet("SerialSvd");
 		ParamsDensityMatrixType p(useSvd, direction, debug, enablePersistentSvd, serialSvd);
-		TruncationCache& cache = (direction == expandSys) ? leftCache_ : rightCache_;
+		TruncationCache&        cache = (direction == expandSys) ? leftCache_ : rightCache_;
 
 		if (BasisType::useSu2Symmetry()) {
 			err("SU(2) no longer supported\n");
@@ -263,7 +263,7 @@ private:
 		dmS->diag(cache.eigs, 'V');
 
 		typename PsimagLite::Vector<SizeType>::Type perm(cache.eigs.size());
-		PsimagLite::Sort<VectorRealType> sort;
+		PsimagLite::Sort<VectorRealType>            sort;
 		sort.sort(cache.eigs, perm);
 
 		printSumAndCheckEigs(cache.eigs);
@@ -272,7 +272,7 @@ private:
 
 		cache.transform = dmS->operator()();
 		if (parameters_.options.isSet("nodmrgtransform")) {
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "SolverOptions=nodmrgtransform, setting transform to identity";
 			progress_.printline(msgg, std::cout);
@@ -283,15 +283,15 @@ private:
 		rSprime.changeBasis(cache.removedIndices, perm, keptStates, parameters_);
 	}
 
-	void truncateBasis(BasisWithOperatorsType& rPrime,
+	void truncateBasis(BasisWithOperatorsType&       rPrime,
 	                   const BasisWithOperatorsType& oppoBasis,
-	                   const DensityMatrixBaseType& dms,
+	                   const DensityMatrixBaseType&  dms,
 	                   ProgramGlobals::DirectionEnum direction)
 	{
 		bool expandSys = (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM);
 		const BasisWithOperatorsType& basis = (expandSys) ? lrs_.left() : lrs_.right();
-		size_t mostRecent = superGeometry_.hollowOutRadius(maxOpsPerSiteLeft());
-		size_t numOfOp = basis.numberOfLocalOperators();
+		size_t           mostRecent = superGeometry_.hollowOutRadius(maxOpsPerSiteLeft());
+		size_t           numOfOp    = basis.numberOfLocalOperators();
 		PairSizeSizeType startEnd(0, numOfOp);
 		if (startEnd.second > mostRecent) {
 			if (expandSys)
@@ -300,7 +300,7 @@ private:
 				startEnd.second = mostRecent;
 		}
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		TruncationCache& cache = (expandSys) ? leftCache_ : rightCache_;
 
@@ -324,7 +324,7 @@ private:
 			                             rPrime,
 			                             const_cast<BasisType&>(lrs_.super()));
 
-		bool twoSiteDmrg = waveFunctionTransformation_.options().twoSiteDmrg;
+		bool twoSiteDmrg  = waveFunctionTransformation_.options().twoSiteDmrg;
 		bool wftInPatches = (waveFunctionTransformation_.options().accel
 		                     == WaveFunctionTransfType::WftOptionsType::ACCEL_PATCHES);
 		const LeftRightSuperType& lrsForWft = (twoSiteDmrg || wftInPatches) ? lrs_ : *lrs;
@@ -344,8 +344,8 @@ private:
 	// there is no right
 	SizeType maxOpsPerSiteLeft() const
 	{
-		const SizeType n = lrs_.left().block().size();
-		SizeType max = lrs_.left().operatorsPerSite(0);
+		const SizeType n   = lrs_.left().block().size();
+		SizeType       max = lrs_.left().operatorsPerSite(0);
 		for (SizeType i = 1; i < n; ++i) {
 			if (max < lrs_.left().operatorsPerSite(i))
 				max = lrs_.left().operatorsPerSite(i);
@@ -356,7 +356,7 @@ private:
 
 	void printSumAndCheckEigs(const VectorRealType& eigs) const
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 
 		RealType sum = checkAndSum(eigs);
@@ -368,9 +368,9 @@ private:
 			err("printSumAndCheckEigs: DM eigs don't amount to one\n");
 	}
 
-	void updateKeptStates(SizeType& keptStates,
+	void updateKeptStates(SizeType&                    keptStates,
 	                      const TruncationControlType& TruncationControl,
-	                      const VectorRealType& eigs)
+	                      const VectorRealType&        eigs)
 	{
 		if (keptStates < keptStatesPrev_) {
 			std::cerr << "WARNING: Nominal kept states have decreased from "
@@ -387,7 +387,7 @@ private:
 		SizeType statesToRemove = 0;
 		if (eigs.size() >= newKeptStates)
 			statesToRemove = eigs.size() - newKeptStates;
-		RealType discWeight = sumUpTo(eigs, statesToRemove);
+		RealType                  discWeight = sumUpTo(eigs, statesToRemove);
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		if (newKeptStates != keptStates) {
@@ -406,7 +406,7 @@ private:
 		error_ = discWeight;
 
 		// we report the discarded weight
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << "Discarded weight (Truncation error): " << discWeight;
 		progress_.printline(msgg2, std::cout);
@@ -417,9 +417,9 @@ private:
 
 	void calcAndPrintEntropies(const VectorRealType& eigs)
 	{
-		RealType rntentropy = entropy(eigs, 1.0);
-		const RealType reyniIndex = 2.0;
-		RealType r2p0entropy = entropy(eigs, reyniIndex);
+		RealType                  rntentropy  = entropy(eigs, 1.0);
+		const RealType            reyniIndex  = 2.0;
+		RealType                  r2p0entropy = entropy(eigs, reyniIndex);
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		// von-neumann entaglement entropy; and 2nd order Reyni entropy
@@ -471,9 +471,9 @@ private:
 	        We proceed in the same manner for the environment.
 	        !PTEX-END */
 	//! eigenvalues are ordered in increasing order
-	SizeType computeKeptStates(SizeType& keptStates,
+	SizeType computeKeptStates(SizeType&                    keptStates,
 	                           const TruncationControlType& truncationControl,
-	                           const VectorRealType& eigs) const
+	                           const VectorRealType&        eigs) const
 	{
 		if (truncationControl.tolerance() < 0)
 			return keptStates;
@@ -483,7 +483,7 @@ private:
 		int maxToRemove = eigs.size() - truncationControl.mMin();
 		if (maxToRemove < 0)
 			maxToRemove = 0;
-		SizeType total = truncationControl.mMin();
+		SizeType total      = truncationControl.mMin();
 		RealType discWeight = sumUpTo(eigs, start);
 		// maybe we should use int instead of SizeType here!!!
 
@@ -519,7 +519,7 @@ private:
 
 	RealType checkAndSum(const VectorRealType& eigs) const
 	{
-		SizeType x = eigs.size();
+		SizeType x   = eigs.size();
 		RealType sum = 0;
 		for (SizeType i = 0; i < x; ++i) {
 			const RealType val = eigs[i];
@@ -542,7 +542,7 @@ private:
 		SizeType index = lrs_.left().block()[last - 1];
 
 		PsimagLite::String predicate = parameters_.saveDensityMatrixEigenvalues;
-		const SizeType center = superGeometry_.numberOfSites() / 2;
+		const SizeType     center    = superGeometry_.numberOfSites() / 2;
 		PsimagLite::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 
@@ -575,17 +575,17 @@ private:
 	}
 
 	const LeftRightSuperType& lrs_;
-	WaveFunctionTransfType& waveFunctionTransformation_;
-	const ParametersType& parameters_;
-	const SuperGeometryType& superGeometry_;
-	OutputFileOrNot& ioOut_;
-	ProgressIndicatorType progress_;
-	RealType error_;
-	TruncationCache leftCache_;
-	TruncationCache rightCache_;
-	VectorSizeType counterVector_;
-	SizeType keptStatesPrev_;
-	static bool firstCall_;
+	WaveFunctionTransfType&   waveFunctionTransformation_;
+	const ParametersType&     parameters_;
+	const SuperGeometryType&  superGeometry_;
+	OutputFileOrNot&          ioOut_;
+	ProgressIndicatorType     progress_;
+	RealType                  error_;
+	TruncationCache           leftCache_;
+	TruncationCache           rightCache_;
+	VectorSizeType            counterVector_;
+	SizeType                  keptStatesPrev_;
+	static bool               firstCall_;
 }; // class Truncation
 
 template <typename T1, typename T2> bool Truncation<T1, T2>::firstCall_ = true;

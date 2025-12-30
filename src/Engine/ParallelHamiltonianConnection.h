@@ -9,21 +9,21 @@ namespace Dmrg {
 template <typename HamiltonianConnectionType> class ParallelHamiltonianConnection {
 
 	typedef typename HamiltonianConnectionType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename HamiltonianConnectionType::VectorType VectorType;
-	typedef typename HamiltonianConnectionType::LinkType LinkType;
-	typedef typename ModelHelperType::Aux AuxType;
+	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
+	typedef typename ModelHelperType::OperatorStorageType       OperatorStorageType;
+	typedef typename ModelHelperType::SparseMatrixType          SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef PsimagLite::Concurrency                             ConcurrencyType;
+	typedef typename HamiltonianConnectionType::VectorType      VectorType;
+	typedef typename HamiltonianConnectionType::LinkType        LinkType;
+	typedef typename ModelHelperType::Aux                       AuxType;
 
 public:
 
-	ParallelHamiltonianConnection(VectorType& x,
-	                              const VectorType& y,
+	ParallelHamiltonianConnection(VectorType&                      x,
+	                              const VectorType&                y,
 	                              const HamiltonianConnectionType& hc,
-	                              const AuxType& aux)
+	                              const AuxType&                   aux)
 	    : x_(x)
 	    , y_(y)
 	    , hc_(hc)
@@ -108,10 +108,10 @@ public:
 
 private:
 
-	VectorType& x_;
-	const VectorType& y_;
-	const HamiltonianConnectionType& hc_;
-	const AuxType& aux_;
+	VectorType&                                   x_;
+	const VectorType&                             y_;
+	const HamiltonianConnectionType&              hc_;
+	const AuxType&                                aux_;
 	typename PsimagLite::Vector<VectorType>::Type xtemp_;
 };
 }

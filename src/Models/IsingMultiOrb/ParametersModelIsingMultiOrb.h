@@ -88,9 +88,9 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename PsimagLite::Matrix<RealType> MatrixRealType;
+	typedef typename PsimagLite::Matrix<RealType>       MatrixRealType;
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
 	ParametersModelIsingMultiOrb(IoInputType& io)
@@ -186,8 +186,8 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 				hasta = true;
 			} catch (std::exception&) { }
 
-			RealType tau = 0.0;
-			bool hastau = false;
+			RealType tau    = 0.0;
+			bool     hastau = false;
 			try {
 				io.readline(tau, "TSPTau=");
 				hastau = true;
@@ -251,7 +251,7 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
+	friend std::ostream& operator<<(std::ostream&                       os,
 	                                const ParametersModelIsingMultiOrb& parameters)
 	{
 		if (parameters.magneticFieldX.cols() > 0)
@@ -265,13 +265,13 @@ struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnTyp
 		return os;
 	}
 
-	SizeType orbitals;
+	SizeType       orbitals;
 	MatrixRealType magneticFieldX;
 	MatrixRealType magneticFieldZ;
 	MatrixRealType onsitelinksSzSz;
 	MatrixRealType timeSchedule;
-	bool hasTimeSchedule_;
-	RealType ta;
+	bool           hasTimeSchedule_;
+	RealType       ta;
 };
 } // namespace Dmrg
 

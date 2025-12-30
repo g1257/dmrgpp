@@ -14,19 +14,19 @@ template <typename ComplexOrRealType> class QuasiCanonical {
 
 public:
 
-	typedef Vector<String>::Type VectorStringType;
-	typedef Vector<bool>::Type VectorBoolType;
+	typedef Vector<String>::Type                     VectorStringType;
+	typedef Vector<bool>::Type                       VectorBoolType;
 	typedef typename Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename Real<ComplexOrRealType>::Type RealType;
-	typedef std::complex<RealType> ComplexType;
+	typedef typename Real<ComplexOrRealType>::Type   RealType;
+	typedef std::complex<RealType>                   ComplexType;
 
 	QuasiCanonical(String str)
 	    : str_(str)
 	{
 		const SizeType len = str_.length();
-		String tempBuffer;
-		String status = "closed";
-		char prev = '\0';
+		String         tempBuffer;
+		String         status = "closed";
+		char           prev   = '\0';
 		for (SizeType i = 0; i < len; ++i) {
 
 			if (str_[i] == '-' && i > 0) {
@@ -91,8 +91,8 @@ public:
 		if (str[0] != '@' || str[len - 1] != '@')
 			return -1;
 
-		String snumber = str.substr(1, len - 2);
-		SizeType number = atoi(snumber);
+		String   snumber = str.substr(1, len - 2);
+		SizeType number  = atoi(snumber);
 		if (number >= ats_.size())
 			return -1;
 		return number;
@@ -134,7 +134,7 @@ public:
 			err("CanonicalExpression: term must not be empty\n");
 
 		for (SizeType i = 0; i < n; ++i) {
-			char c = termStr[i];
+			char c       = termStr[i];
 			bool isDigit = (c >= '0' && c <= '9');
 			if (c == '.' || c == '-' || c == '+' || isDigit)
 				continue;
@@ -154,16 +154,16 @@ private:
 		split(ve, str, ":");
 
 		typedef PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
-		PrimitivesType primitives;
-		ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
+		PrimitivesType                                     primitives;
+		ExpressionForAST<PrimitivesType>                   expresionForAST(ve, primitives);
 		return expresionForAST.exec();
 	}
 
-	String str_;
-	String mainBuffer_;
+	String           str_;
+	String           mainBuffer_;
 	VectorStringType ats_;
 	VectorStringType terms_;
-	VectorType cachedValues_;
+	VectorType       cachedValues_;
 };
 } // namespace PsimagLite
 #endif // QUASICANONICAL_H

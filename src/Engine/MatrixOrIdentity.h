@@ -112,9 +112,9 @@ public:
 
 private:
 
-	bool enabled_;
+	bool                    enabled_;
 	const SparseMatrixType& m_;
-	SparseElementType one_;
+	SparseElementType       one_;
 }; // class MatrixOrIdentity
 
 } // namespace Dmrg

@@ -91,7 +91,7 @@ namespace PsimagLite {
 template <typename FieldType> struct SparseVector {
 public:
 
-	typedef FieldType value_type;
+	typedef FieldType                     value_type;
 	typedef std::pair<SizeType, SizeType> PairType;
 
 	SparseVector(const typename Vector<FieldType>::Type& v)
@@ -157,9 +157,9 @@ public:
 	FieldType value(SizeType x) const { return values_[x]; }
 
 	void toChunk(typename Vector<FieldType>::Type& dest,
-	             SizeType i0,
-	             SizeType total,
-	             bool test = false) const
+	             SizeType                          i0,
+	             SizeType                          total,
+	             bool                              test = false) const
 	{
 		if (test) {
 			PairType firstLast = findFirstLast();
@@ -175,9 +175,9 @@ public:
 	template <typename SomeBasisType>
 	SizeType toChunk(typename Vector<FieldType>::Type& dest, const SomeBasisType& parts) const
 	{
-		SizeType part = findPartition(parts);
+		SizeType part   = findPartition(parts);
 		SizeType offset = parts.partition(part);
-		SizeType total = parts.partition(part + 1) - offset;
+		SizeType total  = parts.partition(part + 1) - offset;
 		dest.resize(total);
 		for (SizeType i = 0; i < total; i++)
 			dest[i] = 0;
@@ -189,7 +189,7 @@ public:
 	template <typename SomeBasisType> SizeType findPartition(const SomeBasisType& parts) const
 	{
 		PairType firstLast = findFirstLast();
-		SizeType ret = 0;
+		SizeType ret       = 0;
 		for (SizeType i = 0; i < parts.partition(); i++) {
 			if (firstLast.first >= parts.partition(i)) {
 				ret = i;
@@ -248,7 +248,7 @@ public:
 		assert(indices_.size() == 1 || isSorted_);
 		assert(v.indices_.size() == 1 || v.isSorted_);
 		FieldType sum = 0;
-		SizeType i = 0, j = 0, index = 0;
+		SizeType  i = 0, j = 0, index = 0;
 
 		for (; i < indices_.size(); i++) {
 			index = indices_[i];
@@ -286,14 +286,14 @@ public:
 			return;
 
 		Sort<typename Vector<SizeType>::Type> sort;
-		typename Vector<SizeType>::Type iperm(indices_.size());
+		typename Vector<SizeType>::Type       iperm(indices_.size());
 		sort.sort(indices_, iperm);
 		typename Vector<FieldType>::Type values(iperm.size());
 		for (SizeType i = 0; i < values_.size(); i++)
 			values[i] = values_[iperm[i]];
 		values_.clear();
-		FieldType sum = values[0];
-		SizeType prevIndex = indices_[0];
+		FieldType                       sum       = values[0];
+		SizeType                        prevIndex = indices_[0];
 		typename Vector<SizeType>::Type indices;
 
 		for (SizeType i = 1; i < indices_.size(); i++) {
@@ -303,7 +303,7 @@ public:
 					values_.push_back(sum);
 					indices.push_back(prevIndex);
 				}
-				sum = values[i];
+				sum       = values[i];
 				prevIndex = indices_[i];
 			} else {
 				sum += values[i];
@@ -313,7 +313,7 @@ public:
 			values_.push_back(sum);
 			indices.push_back(prevIndex);
 		}
-		indices_ = indices;
+		indices_  = indices;
 		isSorted_ = true;
 	}
 
@@ -336,9 +336,9 @@ private:
 	}
 
 	typename Vector<FieldType>::Type values_;
-	typename Vector<SizeType>::Type indices_;
-	SizeType size_;
-	bool isSorted_;
+	typename Vector<SizeType>::Type  indices_;
+	SizeType                         size_;
+	bool                             isSorted_;
 }; // class SparseVector
 
 template <typename FieldType>

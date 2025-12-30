@@ -92,27 +92,27 @@ template <typename LeftRightSuperType, typename VectorWithOffsetType> class Dmrg
 public:
 
 	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> ThisType;
-	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::VectorQnType VectorQnType;
-	typedef typename BasisType::VectorSizeType VectorSizeType;
-	typedef FermionSign FermionSignType;
-	typedef typename BasisType::RealType RealType;
-	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
-	typedef BlockOffDiagMatrix<MatrixType> BlockOffDiagMatrixType;
+	typedef typename LeftRightSuperType::SparseMatrixType            SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                    MatrixType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType               BasisType;
+	typedef typename BasisType::VectorQnType                         VectorQnType;
+	typedef typename BasisType::VectorSizeType                       VectorSizeType;
+	typedef FermionSign                                              FermionSignType;
+	typedef typename BasisType::RealType                             RealType;
+	typedef BlockDiagonalMatrix<MatrixType>                          BlockDiagonalMatrixType;
+	typedef BlockOffDiagMatrix<MatrixType>                           BlockOffDiagMatrixType;
 	typedef
 	    typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::
 	        Type VectorVectorVectorWithOffsetType;
 
-	DmrgSerializer(const FermionSignType& fS,
-	               const FermionSignType& fE,
-	               const LeftRightSuperType& lrs,
+	DmrgSerializer(const FermionSignType&                  fS,
+	               const FermionSignType&                  fE,
+	               const LeftRightSuperType&               lrs,
 	               const VectorVectorVectorWithOffsetType& wf,
-	               const BlockDiagonalMatrixType& transform,
-	               ProgramGlobals::DirectionEnum direction)
+	               const BlockDiagonalMatrixType&          transform,
+	               ProgramGlobals::DirectionEnum           direction)
 	    : fS_(fS)
 	    , fE_(fE)
 	    , wavefunction_(wf)
@@ -126,11 +126,11 @@ public:
 	// used only by IoNg:
 	template <typename IoInputType>
 	DmrgSerializer(
-	    IoInputType& io,
+	    IoInputType&       io,
 	    PsimagLite::String prefix,
-	    bool bogus,
+	    bool               bogus,
 	    const BasisTraits& basisTraits,
-	    bool readOnDemand,
+	    bool               readOnDemand,
 	    typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputType>::True, int>::Type
 	    = 0)
 	    : fS_(io, prefix + "/fS", bogus)
@@ -193,11 +193,11 @@ public:
 
 	template <typename SomeIoOutType>
 	void write(
-	    SomeIoOutType& io,
-	    PsimagLite::String prefix,
+	    SomeIoOutType&                            io,
+	    PsimagLite::String                        prefix,
 	    typename BasisWithOperatorsType::SaveEnum option,
-	    SizeType numberOfSites,
-	    SizeType counter,
+	    SizeType                                  numberOfSites,
+	    SizeType                                  counter,
 	    typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<SomeIoOutType>::True, int>::Type
 	    = 0) const
 	{
@@ -270,13 +270,13 @@ public:
 		transform(ret, O, transform_);
 	}
 
-	static void transform(SparseMatrixType& ret,
-	                      const SparseMatrixType& O,
+	static void transform(SparseMatrixType&              ret,
+	                      const SparseMatrixType&        O,
 	                      const BlockDiagonalMatrixType& transformExternal)
 	{
 		BlockOffDiagMatrixType m(O, transformExternal.offsetsRows());
-		static const SizeType gemmRnb = 0; // disable GemmR
-		static const SizeType threadsForGemmR = 1; // disable GemmR parallel
+		static const SizeType  gemmRnb         = 0; // disable GemmR
+		static const SizeType  threadsForGemmR = 1; // disable GemmR parallel
 		m.transform(transformExternal, gemmRnb, threadsForGemmR);
 		m.toSparse(ret);
 	}
@@ -309,13 +309,13 @@ private:
 
 	ThisType& operator=(const ThisType& ds);
 
-	FermionSignType fS_;
-	FermionSignType fE_;
-	LeftRightSuperType* lrs_;
+	FermionSignType                  fS_;
+	FermionSignType                  fE_;
+	LeftRightSuperType*              lrs_;
 	VectorVectorVectorWithOffsetType wavefunction_;
-	bool ownWf_;
-	BlockDiagonalMatrixType transform_;
-	ProgramGlobals::DirectionEnum direction_;
+	bool                             ownWf_;
+	BlockDiagonalMatrixType          transform_;
+	ProgramGlobals::DirectionEnum    direction_;
 }; // class DmrgSerializer
 } // namespace Dmrg
 

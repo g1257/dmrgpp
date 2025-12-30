@@ -38,7 +38,7 @@ template <typename T> class RandomForTests {
 public:
 
 	typedef long int LongType;
-	typedef T value_type; // legacy name
+	typedef T        value_type; // legacy name
 
 	RandomForTests(int seed)
 	    : next_(seed)

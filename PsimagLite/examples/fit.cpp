@@ -9,7 +9,7 @@ template <typename RealType_> class OracleData {
 
 public:
 
-	typedef RealType_ RealType;
+	typedef RealType_                                   RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	OracleData(PsimagLite::String file, RealType kf)
@@ -49,8 +49,8 @@ public:
 private:
 
 	PsimagLite::String file_;
-	VectorRealType omegas_;
-	VectorRealType values_;
+	VectorRealType     omegas_;
+	VectorRealType     values_;
 };
 
 template <typename RealType> class FitData {
@@ -105,32 +105,32 @@ private:
 
 	RealType finternal(RealType omega, RealType delta, RealType gamma) const
 	{
-		RealType gaom = gamma * omega;
-		RealType num = (omega + ekf_) * gaom * 2.0 * anorm_ / M_PI;
+		RealType gaom   = gamma * omega;
+		RealType num    = (omega + ekf_) * gaom * 2.0 * anorm_ / M_PI;
 		RealType omega2 = omega * omega;
-		RealType phi2 = ekf_ * ekf_ + gamma * gamma + delta * delta;
-		RealType den = square(omega2 - phi2) + 4 * gaom * gaom;
+		RealType phi2   = ekf_ * ekf_ + gamma * gamma + delta * delta;
+		RealType den    = square(omega2 - phi2) + 4 * gaom * gaom;
 		return num / den;
 	}
 
 	RealType dfDelta(RealType omega, RealType delta, RealType gamma) const
 	{
-		RealType gaom = gamma * omega;
-		RealType num = (omega + ekf_) * gaom * 2.0 * anorm_ / M_PI;
+		RealType gaom   = gamma * omega;
+		RealType num    = (omega + ekf_) * gaom * 2.0 * anorm_ / M_PI;
 		RealType omega2 = omega * omega;
-		RealType phi2 = ekf_ * ekf_ + gamma * gamma + delta * delta;
-		RealType den = square(omega2 - phi2) + 4 * gaom * gaom;
-		RealType numd = 4.0 * delta * (phi2 - omega2);
+		RealType phi2   = ekf_ * ekf_ + gamma * gamma + delta * delta;
+		RealType den    = square(omega2 - phi2) + 4 * gaom * gaom;
+		RealType numd   = 4.0 * delta * (phi2 - omega2);
 		return -num * numd / square(den);
 	}
 
 	RealType dfGamma(RealType omega, RealType delta, RealType gamma) const
 	{
-		RealType gaom = gamma * omega;
-		RealType num0 = (omega + ekf_) * omega * 2.0 * anorm_ / M_PI;
+		RealType gaom   = gamma * omega;
+		RealType num0   = (omega + ekf_) * omega * 2.0 * anorm_ / M_PI;
 		RealType omega2 = omega * omega;
-		RealType phi2 = ekf_ * ekf_ + gamma * gamma + delta * delta;
-		RealType den = square(omega2 - phi2) + 4.0 * gaom * gaom;
+		RealType phi2   = ekf_ * ekf_ + gamma * gamma + delta * delta;
+		RealType den    = square(omega2 - phi2) + 4.0 * gaom * gaom;
 		RealType num = -num0 * gamma * (4 * (phi2 - omega2) * gamma + 8 * gamma * omega2);
 		return num0 / den - num / square(den);
 	}
@@ -139,7 +139,7 @@ private:
 
 	RealType sum() const
 	{
-		SizeType n = omegas_.size();
+		SizeType n   = omegas_.size();
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i)
 			sum += finternal(omegas_[i], initDelta_, initGamma_);
@@ -149,16 +149,16 @@ private:
 	static RealType square(RealType x) { return x * x; }
 
 	VectorRealType omegas_;
-	RealType mu_;
-	RealType ekf_;
+	RealType       mu_;
+	RealType       ekf_;
 	const RealType initDelta_;
 	const RealType initGamma_;
-	RealType anorm_;
+	RealType       anorm_;
 };
 
 template <typename OracleType, typename FitDataType> class Fitter {
 
-	typedef typename OracleType::RealType RealType;
+	typedef typename OracleType::RealType       RealType;
 	typedef typename OracleType::VectorRealType VectorRealType;
 
 	class MyFunctionTest {
@@ -175,7 +175,7 @@ template <typename OracleType, typename FitDataType> class Fitter {
 		RealType operator()(const VectorRealType& v) const
 		{
 			RealType sum = 0.0;
-			SizeType n = od_.omegas().size();
+			SizeType n   = od_.omegas().size();
 			for (SizeType i = 0; i < n; ++i) {
 				RealType x = fabs(od_(i) - fd_(i, v));
 				sum += x * x;
@@ -189,7 +189,7 @@ template <typename OracleType, typename FitDataType> class Fitter {
 			assert(result.size() == size());
 			for (SizeType j = 0; j < size(); ++j) {
 				RealType sum = 0.0;
-				SizeType n = od_.omegas().size();
+				SizeType n   = od_.omegas().size();
 				for (SizeType i = 0; i < n; ++i) {
 					// FIXME CHECK SIGN OF DERIVATIVE HERE
 					RealType x = (fd_(i, v) - od_(i)) * fd_.df(i, v, j);
@@ -204,7 +204,7 @@ template <typename OracleType, typename FitDataType> class Fitter {
 
 	private:
 
-		const OracleType& od_;
+		const OracleType&  od_;
 		const FitDataType& fd_;
 	};
 
@@ -220,7 +220,7 @@ public:
 	{
 		FitDataType::init(results_);
 
-		MyFunctionTest f(od_, fd_);
+		MyFunctionTest                                  f(od_, fd_);
 		PsimagLite::Minimizer<RealType, MyFunctionTest> min(f, maxIter);
 
 		int iter = min.simplex(results_, 1e-5, 1e-7);
@@ -236,7 +236,7 @@ public:
 	{
 		FitDataType::init(results_);
 
-		MyFunctionTest f(od_, fd_);
+		MyFunctionTest                                  f(od_, fd_);
 		PsimagLite::Minimizer<RealType, MyFunctionTest> min(f, maxIter);
 
 		int iter = min.conjugateGradient(results_, 1e-3, 1e-3, 1e-3);
@@ -262,9 +262,9 @@ private:
 			os << od_.omegas()[i] << " " << od_(i) << " " << fd_(i, results_) << "\n";
 	}
 
-	const OracleType& od_;
+	const OracleType&  od_;
 	const FitDataType& fd_;
-	VectorRealType results_;
+	VectorRealType     results_;
 };
 
 int main(int argc, char** argv)
@@ -274,9 +274,9 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	double mu = atof(argv[2]);
-	double kf = atof(argv[3]);
-	int ky = atoi(argv[4]);
+	double             mu = atof(argv[2]);
+	double             kf = atof(argv[3]);
+	int                ky = atoi(argv[4]);
 	OracleData<double> od(argv[1], kf);
 
 	FitData<double> fit(od.omegas(), mu, kf, ky);

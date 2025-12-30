@@ -88,7 +88,7 @@ namespace PsimagLite {
 template <typename ComplexOrRealType, typename InputType> class GeometryBase {
 
 	typedef std::pair<SizeType, SizeType> PairType;
-	typedef Matrix<ComplexOrRealType> MatrixType;
+	typedef Matrix<ComplexOrRealType>     MatrixType;
 
 public:
 
@@ -153,7 +153,7 @@ protected:
 	{
 		SizeType imin = (i1 < i2) ? i1 : i2;
 		SizeType imax = (i1 > i2) ? i1 : i2;
-		bool b = (imax - imin == 1);
+		bool     b    = (imax - imin == 1);
 		if (!periodic)
 			return b;
 		bool b2 = (imax - imin == period);

@@ -40,7 +40,7 @@ private:
 
 	DeepCopyOrNot& operator=(const DeepCopyOrNot&);
 
-	bool isDeep_;
+	bool                 isDeep_;
 	VectorUnderlyingType garbage_;
 };
 } // namespace PsimagLite

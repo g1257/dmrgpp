@@ -16,10 +16,10 @@ template <typename T> class MatrixNonOwned {
 
 public:
 
-	MatrixNonOwned(SizeType nrow,
-	               SizeType ncol,
+	MatrixNonOwned(SizeType                            nrow,
+	               SizeType                            ncol,
 	               typename VectorConstOrNot<T>::Type& data,
-	               SizeType offset)
+	               SizeType                            offset)
 	    : nrow_(nrow)
 	    , ncol_(ncol)
 	    , data_(&data)
@@ -86,10 +86,10 @@ private:
 
 	MatrixNonOwned& operator=(const MatrixNonOwned&);
 
-	SizeType nrow_;
-	SizeType ncol_;
+	SizeType                            nrow_;
+	SizeType                            ncol_;
 	typename VectorConstOrNot<T>::Type* data_;
-	SizeType offset_;
+	SizeType                            offset_;
 };
 } // namespace PsimagLite
 

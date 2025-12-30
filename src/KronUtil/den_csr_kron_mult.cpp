@@ -1,16 +1,16 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void den_csr_kron_mult_method(const int imethod,
-                              const char transA,
-                              const char transB,
-                              const PsimagLite::Matrix<ComplexOrRealType>& a_,
-                              const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
+void den_csr_kron_mult_method(const int                                                   imethod,
+                              const char                                                  transA,
+                              const char                                                  transB,
+                              const PsimagLite::Matrix<ComplexOrRealType>&                a_,
+                              const PsimagLite::CrsMatrix<ComplexOrRealType>&             b,
                               const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin_,
-                              SizeType offsetY,
-                              typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
-                              SizeType offsetX,
-                              PsimagLite::GemmR<ComplexOrRealType>& gemmR)
+                              SizeType                                                    offsetY,
+                              typename PsimagLite::Vector<ComplexOrRealType>::Type&       xout_,
+                              SizeType                                                    offsetX,
+                              PsimagLite::GemmR<ComplexOrRealType>&                       gemmR)
 {
 	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
@@ -36,7 +36,7 @@ void den_csr_kron_mult_method(const int imethod,
 	const int ncol_Y = ncol_1;
 
 	PsimagLite::MatrixNonOwned<const ComplexOrRealType> yin(nrow_Y, ncol_Y, yin_, offsetY);
-	PsimagLite::MatrixNonOwned<ComplexOrRealType> xout(nrow_X, ncol_X, xout_, offsetX);
+	PsimagLite::MatrixNonOwned<ComplexOrRealType>       xout(nrow_X, ncol_X, xout_, offsetX);
 
 	assert((imethod == 1) || (imethod == 2) || (imethod == 3));
 
@@ -96,10 +96,10 @@ void den_csr_kron_mult_method(const int imethod,
 		 *  --------------------------------------------
 		 */
 
-		int nrow_BY = nrow_X;
-		int ncol_BY = ncol_Y;
-		PsimagLite::Matrix<ComplexOrRealType> by_(nrow_BY, ncol_BY);
-		PsimagLite::MatrixNonOwned<ComplexOrRealType> byRef(by_);
+		int                                                 nrow_BY = nrow_X;
+		int                                                 ncol_BY = ncol_Y;
+		PsimagLite::Matrix<ComplexOrRealType>               by_(nrow_BY, ncol_BY);
+		PsimagLite::MatrixNonOwned<ComplexOrRealType>       byRef(by_);
 		PsimagLite::MatrixNonOwned<const ComplexOrRealType> byConstRef(by_);
 
 		/*
@@ -199,11 +199,11 @@ void den_csr_kron_mult_method(const int imethod,
 		 * ---------------------
 		 */
 
-		int nrow_YAt = nrow_Y;
-		int ncol_YAt = ncol_X;
-		PsimagLite::Matrix<ComplexOrRealType> yat_(nrow_YAt, ncol_YAt);
+		int                                                 nrow_YAt = nrow_Y;
+		int                                                 ncol_YAt = ncol_X;
+		PsimagLite::Matrix<ComplexOrRealType>               yat_(nrow_YAt, ncol_YAt);
 		PsimagLite::MatrixNonOwned<const ComplexOrRealType> yatConstRef(yat_);
-		PsimagLite::MatrixNonOwned<ComplexOrRealType> yatRef(yat_);
+		PsimagLite::MatrixNonOwned<ComplexOrRealType>       yatRef(yat_);
 
 		/*
 		 * ----------------
@@ -321,11 +321,11 @@ void den_csr_kron_mult_method(const int imethod,
 					int ib = 0;
 					for (ib = 0; ib < nrow_B; ib++) {
 						int istartb = b.getRowPtr(ib);
-						int iendb = b.getRowPtr(ib + 1);
+						int iendb   = b.getRowPtr(ib + 1);
 
 						int kb = 0;
 						for (kb = istartb; kb < iendb; kb++) {
-							int jb = b.getCol(kb);
+							int               jb  = b.getCol(kb);
 							ComplexOrRealType bij = b.getValue(kb);
 							if (is_complex && isConjTransB) {
 								bij = PsimagLite::conj(bij);
@@ -358,11 +358,11 @@ void den_csr_kron_mult_method(const int imethod,
 			int ib = 0;
 			for (ib = 0; ib < nrow_B; ib++) {
 				int istartb = b.getRowPtr(ib);
-				int iendb = b.getRowPtr(ib + 1);
+				int iendb   = b.getRowPtr(ib + 1);
 
 				int kb = 0;
 				for (kb = istartb; kb < iendb; kb++) {
-					int jb = b.getCol(kb);
+					int               jb  = b.getCol(kb);
 					ComplexOrRealType bij = b.getValue(kb);
 					if (is_complex && isConjTransB) {
 						bij = PsimagLite::conj(bij);
@@ -400,20 +400,20 @@ void den_csr_kron_mult_method(const int imethod,
 }
 
 template <typename ComplexOrRealType>
-void den_csr_kron_mult(const char transA,
-                       const char transB,
-                       const PsimagLite::Matrix<ComplexOrRealType>& a_,
-                       const PsimagLite::CrsMatrix<ComplexOrRealType>& b,
+void den_csr_kron_mult(const char                                                  transA,
+                       const char                                                  transB,
+                       const PsimagLite::Matrix<ComplexOrRealType>&                a_,
+                       const PsimagLite::CrsMatrix<ComplexOrRealType>&             b,
                        const typename PsimagLite::Vector<ComplexOrRealType>::Type& yin_,
-                       SizeType offsetY,
-                       typename PsimagLite::Vector<ComplexOrRealType>::Type& xout_,
-                       SizeType offsetX,
+                       SizeType                                                    offsetY,
+                       typename PsimagLite::Vector<ComplexOrRealType>::Type&       xout_,
+                       SizeType                                                    offsetX,
                        const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount,
-                       PsimagLite::GemmR<ComplexOrRealType>& gemmR)
+                       PsimagLite::GemmR<ComplexOrRealType>&                    gemmR)
 
 {
 	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
-	const int idebug = 0;
+	const int  idebug     = 0;
 	/*
 	 *   -------------------------------------------------------------
 	 *   A in dense matrix format
@@ -450,8 +450,8 @@ void den_csr_kron_mult(const char transA,
 	const int nrow_B = b.rows();
 	const int ncol_B = b.cols();
 
-	int nnz_A = den_nnz(a_);
-	int nnz_B = csr_nnz(b);
+	int nnz_A   = den_nnz(a_);
+	int nnz_B   = csr_nnz(b);
 	int no_work = (den_is_zeros(a_) || csr_is_zeros(b));
 	if (no_work) {
 		if (idebug >= 1) {
@@ -544,9 +544,9 @@ void den_csr_kron_mult(const char transA,
 		return;
 	};
 
-	ComplexOrRealType kron_nnz = 0;
+	ComplexOrRealType kron_nnz   = 0;
 	ComplexOrRealType kron_flops = 0;
-	int imethod = 1;
+	int               imethod    = 1;
 
 	const int nrow_1 = (isTransA || isConjTransA) ? ncol_A : nrow_A;
 	const int ncol_1 = (isTransA || isConjTransA) ? nrow_A : ncol_A;

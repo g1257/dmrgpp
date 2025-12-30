@@ -99,10 +99,10 @@ namespace Private {
 	typedef LOKI_TYPELIST_3(float, double, long double) StdFloats;
 #else
 	typedef Loki::Seq<unsigned char, unsigned short int, unsigned int, unsigned long int>::Type
-	    StdUnsignedInts;
+	                                                               StdUnsignedInts;
 	typedef Loki::Seq<signed char, short int, int, long int>::Type StdSignedInts;
-	typedef Loki::Seq<bool, char, wchar_t>::Type StdOtherInts;
-	typedef Loki::Seq<float, double, long double>::Type StdFloats;
+	typedef Loki::Seq<bool, char, wchar_t>::Type                   StdOtherInts;
+	typedef Loki::Seq<float, double, long double>::Type            StdFloats;
 
 #endif
 	template <typename U> struct AddPointer {
@@ -5056,11 +5056,11 @@ private:
 
 public:
 
-	typedef typename UnConst<T>::Result NonConstType;
-	typedef typename UnVolatile<T>::Result NonVolatileType;
+	typedef typename UnConst<T>::Result                              NonConstType;
+	typedef typename UnVolatile<T>::Result                           NonVolatileType;
 	typedef typename UnVolatile<typename UnConst<T>::Result>::Result UnqualifiedType;
-	typedef typename PointerTraits<UnqualifiedType>::PointeeType PointeeType;
-	typedef typename ReferenceTraits<T>::ReferredType ReferredType;
+	typedef typename PointerTraits<UnqualifiedType>::PointeeType     PointeeType;
+	typedef typename ReferenceTraits<T>::ReferredType                ReferredType;
 
 	enum
 	{

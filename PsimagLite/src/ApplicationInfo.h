@@ -122,9 +122,9 @@ public:
 
 	String hostname() const
 	{
-		int len = 1024;
-		char* name = new char[len];
-		int ret = gethostname(name, len);
+		int    len  = 1024;
+		char*  name = new char[len];
+		int    ret  = gethostname(name, len);
 		String retString;
 		if (ret != 0) {
 			retString = "UNKNOWN";
@@ -200,11 +200,11 @@ private:
 
 	RunIdType runIdInternal() const
 	{
-		unsigned int p = getpid();
-		time_t tt = unixTime(true);
-		MersenneTwister mt(tt + p);
-		unsigned int x = tt ^ mt.random();
-		OstringStream msgg(std::cout.precision());
+		unsigned int                      p  = getpid();
+		time_t                            tt = unixTime(true);
+		MersenneTwister                   mt(tt + p);
+		unsigned int                      x = tt ^ mt.random();
+		OstringStream                     msgg(std::cout.precision());
 		OstringStream::OstringStreamType& msg = msgg();
 		msg << x;
 		x = p ^ mt.random();
@@ -212,7 +212,7 @@ private:
 		unsigned long int y = atol(msg.str().c_str());
 		y ^= mt.random();
 		x = BitManip::countKernighan(y);
-		OstringStream msgg2(std::cout.precision());
+		OstringStream                     msgg2(std::cout.precision());
 		OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << y;
 		if (x < 10)
@@ -223,9 +223,9 @@ private:
 
 	long unsigned int convertToLuint(PsimagLite::String str) const
 	{
-		long unsigned int sum = 0;
+		long unsigned int sum  = 0;
 		long unsigned int prod = 1;
-		int l = str.length();
+		int               l    = str.length();
 		assert(l < 20);
 
 		for (int i = 0; i < l; ++i) {
@@ -238,9 +238,9 @@ private:
 	}
 
 	PsimagLite::String name_;
-	unsigned int pid_;
-	const RunIdType runId_;
-	bool isFinalized_;
+	unsigned int       pid_;
+	const RunIdType    runId_;
+	bool               isFinalized_;
 }; // class ApplicationInfo
 
 std::ostream& operator<<(std::ostream& os, const ApplicationInfo& ai);

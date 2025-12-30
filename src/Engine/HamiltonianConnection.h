@@ -100,33 +100,33 @@ class HamiltonianConnection {
 
 public:
 
-	typedef ModelHelperType_ ModelHelperType;
-	typedef ParamsForSolverType_ ParamsForSolverType;
-	typedef typename ModelLinksType::SuperGeometryType SuperGeometryType;
-	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef VerySparseMatrix<ComplexOrRealType> VerySparseMatrixType;
-	typedef typename ModelHelperType::LinkType LinkType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
-	typedef typename PsimagLite::Concurrency ConcurrencyType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
-	typedef typename ModelHelperType::Aux AuxType;
-	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
+	typedef ModelHelperType_                                          ModelHelperType;
+	typedef ParamsForSolverType_                                      ParamsForSolverType;
+	typedef typename ModelLinksType::SuperGeometryType                SuperGeometryType;
+	typedef HamiltonianAbstract<SuperGeometryType>                    HamiltonianAbstractType;
+	typedef typename ModelHelperType::RealType                        RealType;
+	typedef typename ModelHelperType::SparseMatrixType                SparseMatrixType;
+	typedef typename ModelHelperType::OperatorStorageType             OperatorStorageType;
+	typedef typename SparseMatrixType::value_type                     ComplexOrRealType;
+	typedef VerySparseMatrix<ComplexOrRealType>                       VerySparseMatrixType;
+	typedef typename ModelHelperType::LinkType                        LinkType;
+	typedef std::pair<SizeType, SizeType>                             PairType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type      VectorType;
+	typedef typename PsimagLite::Vector<VectorType>::Type             VectorVectorType;
+	typedef typename PsimagLite::Concurrency                          ConcurrencyType;
+	typedef PsimagLite::Vector<SizeType>::Type                        VectorSizeType;
+	typedef typename ModelHelperType::LeftRightSuperType              LeftRightSuperType;
+	typedef typename PsimagLite::Vector<LinkType>::Type               VectorLinkType;
+	typedef typename ModelHelperType::Aux                             AuxType;
+	typedef OperatorsCached<LeftRightSuperType>                       OperatorsCachedType;
 	typedef SuperOpHelperBase<SuperGeometryType, ParamsForSolverType> SuperOpHelperBaseType;
 	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>
-	    ManyToTwoConnectionType;
+	                                       ManyToTwoConnectionType;
 	typedef OpsForLink<LeftRightSuperType> OpsForLinkType;
 
-	HamiltonianConnection(const LeftRightSuperType& lrs,
-	                      const ModelLinksType& lpb,
-	                      RealType targetTime,
+	HamiltonianConnection(const LeftRightSuperType&    lrs,
+	                      const ModelLinksType&        lpb,
+	                      RealType                     targetTime,
 	                      const SuperOpHelperBaseType& superOpHelper)
 	    : modelHelper_(lrs)
 	    , modelLinks_(lpb)
@@ -162,12 +162,12 @@ public:
 		if (!superIsReallySuper)
 			return; // <-- CONDITIONAL EARLY EXIT HERE
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "LinkProductStructSize=" << lps_.size();
 		progress_.printline(msgg, std::cout);
 
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		// add left and right contributions
 		msg2 << "PthreadsTheoreticalLimitForThisPart=" << (lps_.size() + 2);
@@ -197,12 +197,12 @@ public:
 
 	void matrixBond(VerySparseMatrixType& matrix, const AuxType& aux) const
 	{
-		SizeType matrixRank = matrix.rows();
+		SizeType             matrixRank = matrix.rows();
 		VerySparseMatrixType matrix2(matrixRank, matrixRank);
-		SizeType nitems = totalOnes_.size();
+		SizeType             nitems = totalOnes_.size();
 
 		OpsForLinkType opsForLink(operatorsCached_, lps_);
-		SizeType x = 0;
+		SizeType       x = 0;
 		for (SizeType xx = 0; xx < nitems; ++xx) {
 			SparseMatrixType matrixBlock(matrixRank, matrixRank);
 			for (SizeType i = 0; i < totalOnes_[xx]; ++i) {
@@ -251,7 +251,7 @@ private:
 		assert(type != ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM
 		       && type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
 
-		SizeType totalOne = 0;
+		SizeType       totalOne      = 0;
 		const SizeType geometryTerms = modelLinks_.numberOfTerms();
 		for (SizeType termIndex = 0; termIndex < geometryTerms; ++termIndex) {
 
@@ -259,7 +259,7 @@ private:
 				continue;
 
 			const typename ModelLinksType::TermType& term = modelLinks_.term(termIndex);
-			const SizeType termIndexForGeom
+			const SizeType                           termIndexForGeom
 			    = modelLinks_.termIndexForGeometry(termIndex);
 
 			SizeType dofsTotal = term.size();
@@ -301,9 +301,9 @@ private:
 		return totalOne;
 	}
 
-	SizeType addHermitianIfNeeded(LinkType& link2,
-	                              ComplexOrRealType tmp,
-	                              const ManyToTwoConnectionType& manyToTwo,
+	SizeType addHermitianIfNeeded(LinkType&                          link2,
+	                              ComplexOrRealType                  tmp,
+	                              const ManyToTwoConnectionType&     manyToTwo,
 	                              ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
 	{
 		if (manyToTwo.connectionIsHermitian(modelLinks_))
@@ -326,7 +326,7 @@ private:
 	{
 		const SizeType fromInput = hamAbstract_.superGeometry().terms();
 		const SizeType fromModel = modelLinks_.numberOfTerms();
-		bool doPrint = (smax_ == 0);
+		bool           doPrint   = (smax_ == 0);
 
 		// Check if replacements for geometry exist
 		SizeType inputTermsExpected = 0;
@@ -373,19 +373,19 @@ private:
 		return (c == 'N') ? 'C' : 'N';
 	}
 
-	const ModelHelperType modelHelper_;
-	const ModelLinksType& modelLinks_;
-	RealType targetTime_;
-	const SuperOpHelperBaseType& superOpHelper_;
-	OperatorsCachedType operatorsCached_;
+	const ModelHelperType         modelHelper_;
+	const ModelLinksType&         modelLinks_;
+	RealType                      targetTime_;
+	const SuperOpHelperBaseType&  superOpHelper_;
+	OperatorsCachedType           operatorsCached_;
 	PsimagLite::ProgressIndicator progress_;
-	VectorLinkType lps_;
-	const VectorSizeType& systemBlock_;
-	const VectorSizeType& envBlock_;
-	const SizeType smax_;
-	const SizeType emin_;
-	HamiltonianAbstractType hamAbstract_;
-	VectorSizeType totalOnes_;
+	VectorLinkType                lps_;
+	const VectorSizeType&         systemBlock_;
+	const VectorSizeType&         envBlock_;
+	const SizeType                smax_;
+	const SizeType                emin_;
+	HamiltonianAbstractType       hamAbstract_;
+	VectorSizeType                totalOnes_;
 }; // class HamiltonianConnection
 } // namespace Dmrg
 

@@ -129,9 +129,9 @@ template <typename InputCheckType> class InputNg {
 
 		PairType mysplit(const String& x) const
 		{
-			SizeType mode = FIRST;
-			String xfirst = "";
-			String xsecond = "";
+			SizeType mode    = FIRST;
+			String   xfirst  = "";
+			String   xsecond = "";
 			for (SizeType i = 0; i < x.length(); i++) {
 				if (x[i] == '@') {
 					mode = SECOND;
@@ -150,7 +150,7 @@ template <typename InputCheckType> class InputNg {
 
 	typedef MyCompare MyCompareType;
 
-	typedef typename Map<String, String, MyCompareType>::Type MapStrStrType;
+	typedef typename Map<String, String, MyCompareType>::Type               MapStrStrType;
 	typedef typename Map<String, Vector<String>::Type, MyCompareType>::Type MapStrVecType;
 
 public:
@@ -208,8 +208,8 @@ public:
 			internal(file);
 		}
 
-		void set(MapStrStrType& mapStrStr,
-		         MapStrVecType& mapStrVec,
+		void set(MapStrStrType&        mapStrStr,
+		         MapStrVecType&        mapStrVec,
 		         Vector<String>::Type& labelsForRemoval) const
 		{
 			if (ainurMode_)
@@ -283,7 +283,7 @@ public:
 		{
 			VectorStringType vlines;
 			splitIntoLines(vlines);
-			data_ = "";
+			data_            = "";
 			const SizeType n = vlines.size();
 			for (SizeType i = 0; i < n; ++i) {
 				const String& thisline = vlines[i];
@@ -293,7 +293,7 @@ public:
 
 		void splitIntoLines(VectorStringType& vlines) const
 		{
-			String buffer("");
+			String         buffer("");
 			const SizeType n = data_.length();
 			for (SizeType i = 0; i < n; ++i) {
 				if (data_[i] == '\n') {
@@ -319,9 +319,9 @@ public:
 			if (line[0] != '!')
 				return line + "\n";
 
-			const SizeType n = line.length();
-			SizeType ind = 1;
-			String a;
+			const SizeType n   = line.length();
+			SizeType       ind = 1;
+			String         a;
 			for (; ind < n; ++ind) {
 				if (line[ind] == '$')
 					break;
@@ -450,7 +450,7 @@ public:
 					std::cout << "Read text value=" << buffer << "\n";
 				adjLabel = adjLabelForDuplicates(lastLabel_, mapStrStr_);
 				mapStrStr_[adjLabel] = buffer;
-				state_ = IN_LABEL;
+				state_               = IN_LABEL;
 				inputCheck_.check(adjLabel, buffer, line_);
 				break;
 			case IN_VALUE_NUMERIC:
@@ -508,7 +508,7 @@ public:
 				throw RuntimeError(s.c_str());
 			}
 
-			String adjLabel = adjLabelForDuplicates(lastLabel_, mapStrVec_);
+			String adjLabel      = adjLabelForDuplicates(lastLabel_, mapStrVec_);
 			mapStrVec_[adjLabel] = numericVector_;
 		}
 
@@ -516,7 +516,7 @@ public:
 		String adjLabelForDuplicates(const String& label, SomeMapType& mymap)
 		{
 			String rootLabel = findRootLabel(label);
-			int x = findLastOccurrence(rootLabel, mymap);
+			int    x         = findLastOccurrence(rootLabel, mymap);
 			if (x < 0)
 				return label;
 			labelsForRemoval_.push_back(rootLabel);
@@ -557,18 +557,18 @@ public:
 #endif
 		}
 
-		String data_;
-		SizeType line_;
-		SizeType state_;
-		Vector<String>::Type numericVector_;
-		String lastLabel_;
-		String file_;
-		InputCheckType inputCheck_;
-		bool verbose_;
-		bool ainurMode_;
-		typename Map<String, String, MyCompareType>::Type mapStrStr_;
+		String                                                          data_;
+		SizeType                                                        line_;
+		SizeType                                                        state_;
+		Vector<String>::Type                                            numericVector_;
+		String                                                          lastLabel_;
+		String                                                          file_;
+		InputCheckType                                                  inputCheck_;
+		bool                                                            verbose_;
+		bool                                                            ainurMode_;
+		typename Map<String, String, MyCompareType>::Type               mapStrStr_;
 		typename Map<String, Vector<String>::Type, MyCompareType>::Type mapStrVec_;
-		Vector<String>::Type labelsForRemoval_;
+		Vector<String>::Type                                            labelsForRemoval_;
 	}; // class Writeable
 
 	class Readable {
@@ -576,7 +576,7 @@ public:
 	public:
 
 		typedef typename Map<String, String, MyCompareType>::Type MapStringStringType;
-		typedef typename MapStringStringType::iterator MapStringIteratorType;
+		typedef typename MapStringStringType::iterator            MapStringIteratorType;
 		typedef typename Map<String, Vector<String>::Type, MyCompareType>::Type::iterator
 		    MapStringVectorIteratorType;
 
@@ -627,14 +627,14 @@ public:
 
 		String prefix() const { return (ainur_) ? ainur_->prefix() : ""; }
 
-		void readline(String& val,
+		void readline(String&       val,
 		              const String& label,
-		              bool clean = true,
-		              bool forceRemoval = false)
+		              bool          clean        = true,
+		              bool          forceRemoval = false)
 		{
 			if (ainur_) {
-				String label2 = label;
-				SizeType last = label2.length();
+				String   label2 = label;
+				SizeType last   = label2.length();
 				if (last > 0) {
 					--last;
 					if (label2[last] == '=')
@@ -644,8 +644,8 @@ public:
 				return ainur_->readValue(val, label2);
 			}
 
-			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			String                label2 = label2label(label);
+			MapStringIteratorType it     = findFirstValueForLabel(label2, mapStrStr_);
 			if (it == mapStrStr_.end())
 				throwWithMessage(label, label2);
 
@@ -660,8 +660,8 @@ public:
 		readline(FloatingType& val, const String& label)
 		{
 			if (ainur_) {
-				String label2 = label;
-				SizeType last = label2.length();
+				String   label2 = label;
+				SizeType last   = label2.length();
 				if (last > 0) {
 					--last;
 					if (label2[last] == '=')
@@ -671,8 +671,8 @@ public:
 				return ainur_->readValue(val, label2);
 			}
 
-			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			String                label2 = label2label(label);
+			MapStringIteratorType it     = findFirstValueForLabel(label2, mapStrStr_);
 			if (it == mapStrStr_.end())
 				throwWithMessage(label, label2);
 
@@ -684,8 +684,8 @@ public:
 		void readline(long int& val, const String& label)
 		{
 			if (ainur_) {
-				String label2 = label;
-				SizeType last = label2.length();
+				String   label2 = label;
+				SizeType last   = label2.length();
 				if (last > 0) {
 					--last;
 					if (label2[last] == '=')
@@ -695,8 +695,8 @@ public:
 				return ainur_->readValue(val, label2);
 			}
 
-			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			String                label2 = label2label(label);
+			MapStringIteratorType it     = findFirstValueForLabel(label2, mapStrStr_);
 			if (it == mapStrStr_.end())
 				throwWithMessage(label, label2);
 
@@ -708,8 +708,8 @@ public:
 		void readline(SizeType& val, const String& label)
 		{
 			if (ainur_) {
-				String label2 = label;
-				SizeType last = label2.length();
+				String   label2 = label;
+				SizeType last   = label2.length();
 				if (last > 0) {
 					--last;
 					if (label2[last] == '=')
@@ -719,8 +719,8 @@ public:
 				return ainur_->readValue(val, label2);
 			}
 
-			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			String                label2 = label2label(label);
+			MapStringIteratorType it     = findFirstValueForLabel(label2, mapStrStr_);
 			if (it == mapStrStr_.end())
 				throwWithMessage(label, label2);
 
@@ -732,8 +732,8 @@ public:
 		void readline(int& val, const String& label)
 		{
 			if (ainur_) {
-				String label2 = label;
-				SizeType last = label2.length();
+				String   label2 = label;
+				SizeType last   = label2.length();
 				if (last > 0) {
 					--last;
 					if (label2[last] == '=')
@@ -743,8 +743,8 @@ public:
 				return ainur_->readValue(val, label2);
 			}
 
-			String label2 = label2label(label);
-			MapStringIteratorType it = findFirstValueForLabel(label2, mapStrStr_);
+			String                label2 = label2label(label);
+			MapStringIteratorType it     = findFirstValueForLabel(label2, mapStrStr_);
 			if (it == mapStrStr_.end())
 				throwWithMessage(label, label2);
 
@@ -776,7 +776,7 @@ public:
 			if (ainur_)
 				return ainur_->readValue(val, label);
 
-			String label2 = label2label(label);
+			String                                      label2 = label2label(label);
 			typedef typename VectorLikeType::value_type NumericType;
 			MapStringVectorIteratorType it = findFirstValueForLabel(label2, mapStrVec_);
 			if (it == mapStrVec_.end())
@@ -881,8 +881,8 @@ public:
 			typedef typename Map<String, String, MyCompareType>::Type::iterator
 			    MyIteratorType;
 			for (MyIteratorType it = mapStrStr_.begin(); it != mapStrStr_.end(); ++it) {
-				String mystr = it->first;
-				long unsigned int it0 = mystr.find(label2);
+				String            mystr = it->first;
+				long unsigned int it0   = mystr.find(label2);
 				if (it0 == String::npos)
 					continue;
 				String::iterator it1 = find(mystr.begin(), mystr.end(), '[');
@@ -917,10 +917,10 @@ public:
 	private:
 
 		template <typename SomeMapType>
-		void cleanLabelsIfNeeded(const String& label,
-		                         SomeMapType& mymap,
+		void cleanLabelsIfNeeded(const String&                   label,
+		                         SomeMapType&                    mymap,
 		                         typename SomeMapType::iterator& it,
-		                         bool forceRemoval = false)
+		                         bool                            forceRemoval = false)
 		{
 			Vector<String>::Type::iterator it2
 			    = find(labelsForRemoval_.begin(), labelsForRemoval_.end(), label);
@@ -946,7 +946,7 @@ public:
 
 		template <typename SomeMapType>
 		typename SomeMapType::iterator findFirstValueForLabel(const String& label,
-		                                                      SomeMapType& mymap)
+		                                                      SomeMapType&  mymap)
 		{
 			for (typename SomeMapType::iterator it = mymap.begin(); it != mymap.end();
 			     ++it) {
@@ -968,7 +968,7 @@ public:
 				return stringToReal(s.c_str());
 			}
 
-			String buffer("");
+			String   buffer("");
 			SizeType start = 0;
 			for (SizeType i = 1; i < s.length(); ++i) {
 				start = i;
@@ -1011,7 +1011,7 @@ public:
 		double stringToReal(const String& s) const
 		{
 			for (SizeType i = 0; i < s.length(); ++i) {
-				char c = s[i];
+				char c  = s[i];
 				bool b1 = (c < 48 || c > 57);
 				bool b2
 				    = (c != '.' && c != '-' && c != '+' && c != 'e' && c != 'E');
@@ -1041,8 +1041,8 @@ public:
 		static String extensionOf(String s)
 		{
 			const SizeType l = s.length();
-			String buffer;
-			bool flag = false;
+			String         buffer;
+			bool           flag = false;
 			for (SizeType i = 0; i < l; ++i) {
 				const SizeType j = l - i - 1;
 				if (s[j] == '.') {
@@ -1056,11 +1056,11 @@ public:
 			if (!flag)
 				return "";
 
-			String buffer2 = buffer;
-			const SizeType l2 = buffer.length();
+			String         buffer2 = buffer;
+			const SizeType l2      = buffer.length();
 			for (SizeType i = 0; i < l2; ++i) {
 				const SizeType j = l2 - i - 1;
-				buffer2[j] = buffer[i];
+				buffer2[j]       = buffer[i];
 			}
 
 			return buffer2;
@@ -1076,14 +1076,14 @@ public:
 		typename Map<String, Vector<String>::Type, MyCompareType>::Type mapStrVec_;
 		// serializr normal labelsForRemoval_
 		Vector<String>::Type labelsForRemoval_;
-		Ainur* ainur_;
-		String dummy_;
+		Ainur*               ainur_;
+		String               dummy_;
 	}; // class Readable
 
 	static String findRootLabel(const String& label)
 	{
-		String buffer = "";
-		SizeType len = label.length();
+		String   buffer = "";
+		SizeType len    = label.length();
 		for (SizeType i = 0; i < len; i++) {
 			if (label.at(i) == '@')
 				break;

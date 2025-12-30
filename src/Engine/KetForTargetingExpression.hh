@@ -7,7 +7,7 @@ namespace Dmrg {
 
 template <typename ComplexOrRealType> class KetForTargetingExpression {
 
-	using PairType = std::pair<SizeType, ComplexOrRealType>;
+	using PairType  = std::pair<SizeType, ComplexOrRealType>;
 	using SumStruct = std::vector<PairType>;
 
 public:
@@ -49,7 +49,7 @@ public:
 			err("KetForTargetingExpression: multiply one op at a time\n");
 		}
 
-		op_ = op;
+		op_   = op;
 		kind_ = Kind::M;
 	}
 
@@ -154,18 +154,18 @@ private:
 		--last;
 		if (str_.substr(0, 2) == "|P" && str_[last] == '>') {
 			pIndex_ = PsimagLite::atoi(str_.substr(2, last - 2));
-			kind_ = Kind::P;
+			kind_   = Kind::P;
 		} else {
 			kind_ = Kind::U;
 		}
 	}
 
-	std::string str_;
+	std::string                      str_;
 	FactorForTargetingExpressionType factor_;
-	Kind kind_;
-	int pIndex_ = -1;
-	std::string op_;
-	std::vector<SizeType> pVectors_to_sum_;
+	Kind                             kind_;
+	int                              pIndex_ = -1;
+	std::string                      op_;
+	std::vector<SizeType>            pVectors_to_sum_;
 };
 }
 #endif // KETFORTARGETINGEXPRESSION_HH

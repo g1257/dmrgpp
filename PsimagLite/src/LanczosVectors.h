@@ -91,32 +91,32 @@ namespace PsimagLite {
 
 template <typename MatrixType_, typename VectorType_> class LanczosVectors {
 
-	typedef typename VectorType_::value_type ComplexOrRealType;
-	typedef typename Real<ComplexOrRealType>::Type RealType;
+	typedef typename VectorType_::value_type         ComplexOrRealType;
+	typedef typename Real<ComplexOrRealType>::Type   RealType;
 	typedef LanczosVectors<MatrixType_, VectorType_> ThisType;
 
 public:
 
-	typedef MatrixType_ MatrixType;
-	typedef VectorType_ VectorType;
-	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
-	typedef typename VectorType::value_type VectorElementType;
-	typedef Matrix<VectorElementType> DenseMatrixType;
-	typedef Matrix<RealType> DenseMatrixRealType;
-	typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
+	typedef MatrixType_                                   MatrixType;
+	typedef VectorType_                                   VectorType;
+	typedef TridiagonalMatrix<RealType>                   TridiagonalMatrixType;
+	typedef typename VectorType::value_type               VectorElementType;
+	typedef Matrix<VectorElementType>                     DenseMatrixType;
+	typedef Matrix<RealType>                              DenseMatrixRealType;
+	typedef ContinuedFraction<TridiagonalMatrixType>      PostProcType;
 	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
 
 	enum
 	{
-		WITH_INFO = 1,
-		DEBUG = 2,
+		WITH_INFO   = 1,
+		DEBUG       = 2,
 		ALLOWS_ZERO = 4
 	};
 
 	LanczosVectors(const MatrixType& mat,
-	               bool lotaMemory,
-	               SizeType steps,
-	               bool isReorthoEnabled)
+	               bool              lotaMemory,
+	               SizeType          steps,
+	               bool              isReorthoEnabled)
 	    : progress_("LanczosVectors")
 	    , mat_(mat)
 	    , lotaMemory_(lotaMemory)
@@ -192,7 +192,7 @@ public:
 	void excitedVector(VectorType& z, const DenseMatrixType& ritz, SizeType excited) const
 	{
 		SizeType small = data_->cols();
-		SizeType big = data_->rows();
+		SizeType big   = data_->rows();
 		for (SizeType j = 0; j < small; j++) {
 			ComplexOrRealType ctmp = ritz(j, excited);
 			for (SizeType i = 0; i < big; i++)
@@ -200,11 +200,11 @@ public:
 		}
 	}
 
-	void oneStepDecomposition(VectorType& V0,
-	                          VectorType& V1,
-	                          VectorType& V2,
+	void oneStepDecomposition(VectorType&            V0,
+	                          VectorType&            V1,
+	                          VectorType&            V2,
 	                          TridiagonalMatrixType& ab,
-	                          SizeType iter) const
+	                          SizeType               iter) const
 	{
 		SizeType nn = V1.size();
 		for (SizeType h = 0; h < nn; h++)
@@ -282,7 +282,7 @@ private:
 			return;
 		}
 
-		data_ = new DenseMatrixType(rows, cols);
+		data_        = new DenseMatrixType(rows, cols);
 		needsDelete_ = true;
 		OstringStream msg(std::cout.precision());
 		msg() << "lotaMemory_=true";
@@ -300,7 +300,7 @@ private:
 		return;
 
 		SizeType maxNstep = std::min(steps, mat_.rows());
-		overlap_ = new VectorType(maxNstep, 0);
+		overlap_          = new VectorType(maxNstep, 0);
 	}
 
 	//! copy ctor and assigment operator are invalid
@@ -311,13 +311,13 @@ private:
 
 	ProgressIndicator progress_;
 	const MatrixType& mat_;
-	bool lotaMemory_;
-	bool isReorthoEnabled_;
+	bool              lotaMemory_;
+	bool              isReorthoEnabled_;
 	VectorElementType dummy_;
-	bool needsDelete_;
-	VectorType ysaved_;
-	DenseMatrixType* data_;
-	VectorType* overlap_;
+	bool              needsDelete_;
+	VectorType        ysaved_;
+	DenseMatrixType*  data_;
+	VectorType*       overlap_;
 }; // class LanczosVectors
 
 } // namespace PsimagLite

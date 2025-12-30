@@ -95,8 +95,8 @@ namespace Dmrg {
 
 template <typename CheckpointType, typename TargetingType> class Recovery {
 
-	typedef typename CheckpointType::ParametersType ParametersType;
-	typedef Recovery<ParametersType, int> RecoveryStaticType;
+	typedef typename CheckpointType::ParametersType    ParametersType;
+	typedef Recovery<ParametersType, int>              RecoveryStaticType;
 	typedef typename CheckpointType::ComplexOrRealType ComplexOrRealType;
 
 	struct OptionSpec {
@@ -106,7 +106,7 @@ template <typename CheckpointType, typename TargetingType> class Recovery {
 		    , maxFiles(10)
 		{ }
 
-		bool keepFiles;
+		bool     keepFiles;
 		SizeType maxFiles;
 	};
 
@@ -123,15 +123,15 @@ template <typename CheckpointType, typename TargetingType> class Recovery {
 
 public:
 
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type    VectorStringType;
 	typedef typename CheckpointType::BasisWithOperatorsType BasisWithOperatorsType;
 	typedef typename CheckpointType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename CheckpointType::IoType IoType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename CheckpointType::DiskOrMemoryStackType DiskOrMemoryStackType;
-	typedef typename CheckpointType::DiskStackType DiskStackType;
-	typedef PsimagLite::Vector<VectorSizeType>::Type VectorBlockType;
-	typedef typename CheckpointType::RealType RealType;
+	typedef typename CheckpointType::IoType                 IoType;
+	typedef typename PsimagLite::Vector<SizeType>::Type     VectorSizeType;
+	typedef typename CheckpointType::DiskOrMemoryStackType  DiskOrMemoryStackType;
+	typedef typename CheckpointType::DiskStackType          DiskStackType;
+	typedef PsimagLite::Vector<VectorSizeType>::Type        VectorBlockType;
+	typedef typename CheckpointType::RealType               RealType;
 
 	class SpecOptions {
 
@@ -159,7 +159,7 @@ public:
 
 			if (str[0] == 'M' && str[1] == '=') {
 				PsimagLite::String each = str.substr(2, str.length() - 2);
-				maxFiles_ = atoi(each.c_str());
+				maxFiles_               = atoi(each.c_str());
 				std::cerr << "Recovery Max files= " << maxFiles_ << "\n";
 				return;
 			}
@@ -167,12 +167,12 @@ public:
 
 	private:
 
-		bool& keepFiles_;
+		bool&     keepFiles_;
 		SizeType& maxFiles_;
 	};
 
-	Recovery(const VectorBlockType& siteIndices,
-	         const CheckpointType& checkpoint,
+	Recovery(const VectorBlockType&        siteIndices,
+	         const CheckpointType&         checkpoint,
 	         const WaveFunctionTransfType& wft,
 	         const BasisWithOperatorsType& pS,
 	         const BasisWithOperatorsType& pE)
@@ -231,11 +231,11 @@ public:
 	}
 
 	void write(const TargetingType& psi,
-	           SizeType loopIndex,
-	           SizeType stepCurrent,
-	           int lastSign,
-	           OutputFileOrNot& ioOutCurrent,
-	           PsimagLite::String inputBlob) const
+	           SizeType             loopIndex,
+	           SizeType             stepCurrent,
+	           int                  lastSign,
+	           OutputFileOrNot&     ioOutCurrent,
+	           PsimagLite::String   inputBlob) const
 	{
 		PsimagLite::String prefix(RecoveryStaticType::recoveryFilePrefix());
 		prefix += ttos(counter_++);
@@ -338,7 +338,7 @@ private:
 	int nonRecoveryStepCurrent(ProgramGlobals::DirectionEnum direction) const
 	{
 		// all right, now we can get the actual site to add:
-		SizeType sitesPerBlock = checkpoint_.parameters().sitesPerBlock;
+		SizeType       sitesPerBlock = checkpoint_.parameters().sitesPerBlock;
 		VectorSizeType siteToAdd(sitesPerBlock);
 		// left-most site of pE
 		for (SizeType j = 0; j < sitesPerBlock; ++j)
@@ -374,16 +374,16 @@ private:
 		ioIn.close();
 	}
 
-	PsimagLite::ProgressIndicator progress_;
+	PsimagLite::ProgressIndicator              progress_;
 	PsimagLite::PredicateAwesome<SpecOptions>* predicateAwesome_;
-	OptionSpec optionSpec_;
-	OpaqueRestart opaqueRestart_;
-	const VectorBlockType& siteIndices_;
-	const CheckpointType& checkpoint_;
-	const WaveFunctionTransfType& wft_;
-	const BasisWithOperatorsType& pS_;
-	const BasisWithOperatorsType& pE_;
-	mutable SizeType counter_;
+	OptionSpec                                 optionSpec_;
+	OpaqueRestart                              opaqueRestart_;
+	const VectorBlockType&                     siteIndices_;
+	const CheckpointType&                      checkpoint_;
+	const WaveFunctionTransfType&              wft_;
+	const BasisWithOperatorsType&              pS_;
+	const BasisWithOperatorsType&              pE_;
+	mutable SizeType                           counter_;
 }; // class Recovery
 
 template <typename ParametersType> class Recovery<ParametersType, int> {
@@ -392,7 +392,7 @@ public:
 
 	static PsimagLite::String recoveryFilePrefix() { return "Recovery"; }
 
-	static void checkOptions(PsimagLite::String recoverySave,
+	static void checkOptions(PsimagLite::String                          recoverySave,
 	                         const typename ParametersType::OptionsType& options)
 	{
 		if (recoverySave == "" || recoverySave == "no")
@@ -424,10 +424,10 @@ public:
 	}
 
 	static void makeThreeParts(std::vector<PsimagLite::String>& parts,
-	                           PsimagLite::String filename)
+	                           PsimagLite::String               filename)
 	{
 		const PsimagLite::String prefix = recoveryFilePrefix();
-		const SizeType len = prefix.length();
+		const SizeType           len    = prefix.length();
 		if (filename.substr(0, len) != prefix)
 			return;
 		parts.push_back(prefix);
@@ -453,9 +453,9 @@ private:
 	static bool isAdigit(char c) { return (c > 47 && c < 58); }
 
 	static void listFilesInDirectory(std::vector<PsimagLite::String>& files,
-	                                 PsimagLite::String path)
+	                                 PsimagLite::String               path)
 	{
-		DIR* dir = 0;
+		DIR*    dir = 0;
 		dirent* ent = 0;
 		if ((dir = opendir(path.c_str())) != 0) {
 			while ((ent = readdir(dir)) != 0) {
@@ -472,7 +472,7 @@ private:
 
 	static PsimagLite::String getRecoveryFile(PsimagLite::String filename)
 	{
-		const PsimagLite::String prefix = recoveryFilePrefix();
+		const PsimagLite::String        prefix = recoveryFilePrefix();
 		std::vector<PsimagLite::String> files;
 		listFilesInDirectory(files, ".");
 
@@ -480,7 +480,7 @@ private:
 			return "";
 
 		PsimagLite::String saved("");
-		SizeType max = 0;
+		SizeType           max = 0;
 
 		for (SizeType i = 0; i < files.size(); ++i) {
 			std::vector<PsimagLite::String> parts;
@@ -489,7 +489,7 @@ private:
 				continue;
 			SizeType counter = atoi(parts[1].c_str());
 			if (counter >= max && isValidFile(files[i])) {
-				max = counter;
+				max   = counter;
 				saved = files[i];
 			}
 		}

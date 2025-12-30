@@ -104,7 +104,7 @@ public:
 	static const SizeType NUMBER_OF_SPINS = 2;
 	enum
 	{
-		SPIN_UP = 0,
+		SPIN_UP   = 0,
 		SPIN_DOWN = 1
 	};
 
@@ -128,9 +128,9 @@ public:
 	// Get electronic state on site "j" in binary number "a"
 	Word get(Word const& a, SizeType j) const
 	{
-		SizeType k = degreesOfFreedomUpTo(j);
+		SizeType k    = degreesOfFreedomUpTo(j);
 		SizeType ones = (1 << (dOf())) - 1;
-		Word mask = (ones << k);
+		Word     mask = (ones << k);
 
 		mask &= a;
 		mask >>= k;
@@ -140,8 +140,8 @@ public:
 	// Create electron with internal dof  "sigma" on site "j" in binary number "a"
 	void create(Word& a, SizeType j, SizeType sigma) const
 	{
-		SizeType k = degreesOfFreedomUpTo(j);
-		Word mask = (1 << (k + sigma));
+		SizeType k    = degreesOfFreedomUpTo(j);
+		Word     mask = (1 << (k + sigma));
 		a |= mask;
 	}
 
@@ -159,14 +159,14 @@ public:
 	//! returns the number of electrons of internal dof "value" in binary number "data"
 	int getNofDigits(const Word& data, SizeType value) const
 	{
-		int ret = 0;
-		Word data2 = data;
-		SizeType i = 0;
-		SizeType dof = 0;
+		int      ret   = 0;
+		Word     data2 = data;
+		SizeType i     = 0;
+		SizeType dof   = 0;
 
 		do {
 			SizeType k = degreesOfFreedomUpTo(i);
-			dof = dOf();
+			dof        = dOf();
 			if ((data & (1 << (k + value))))
 				ret++;
 			i++;
@@ -179,10 +179,10 @@ public:
 	int electronsWithGivenSpin(Word const& data, SizeType, SizeType spin) const
 	{
 
-		SizeType norb = dOf() / NUMBER_OF_SPINS;
+		SizeType norb   = dOf() / NUMBER_OF_SPINS;
 		SizeType beginX = spin * norb;
-		SizeType endX = beginX + norb;
-		SizeType sum = 0;
+		SizeType endX   = beginX + norb;
+		SizeType sum    = 0;
 
 		for (SizeType x = beginX; x < endX; x++)
 			sum += getNofDigits(data, x);
@@ -210,7 +210,7 @@ public:
 			return 0;
 		Word m = 0;
 		for (SizeType site = ii; site < j; site++) {
-			SizeType k = degreesOfFreedomUpTo(site);
+			SizeType k   = degreesOfFreedomUpTo(site);
 			SizeType dof = dOf();
 			for (SizeType sigma = 0; sigma < dof; sigma++)
 				m |= (1 << (k + sigma));
@@ -224,7 +224,7 @@ public:
 	{
 		Word m = 0;
 
-		SizeType k = degreesOfFreedomUpTo(i);
+		SizeType k   = degreesOfFreedomUpTo(i);
 		SizeType dof = dOf();
 		for (SizeType sigma = 0; sigma < dof; sigma++)
 			m |= (1 << (k + sigma));

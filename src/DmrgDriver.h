@@ -44,13 +44,13 @@ struct OperatorOptions {
 	    , enabled(false)
 	{ }
 
-	SizeType site;
-	SizeType dof;
+	SizeType           site;
+	SizeType           dof;
 	PsimagLite::String label;
 	PsimagLite::String opexpr;
-	bool hasOperatorExpression;
-	bool transpose;
-	bool enabled;
+	bool               hasOperatorExpression;
+	bool               transpose;
+	bool               enabled;
 };
 
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
@@ -62,9 +62,9 @@ void usageOperator();
 template <typename ModelBaseType>
 void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOptions)
 {
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
+	typedef typename ModelHelperType::OperatorsType         OperatorsType;
+	typedef typename OperatorsType::OperatorType            OperatorType;
 	typedef Dmrg::OperatorSpec<ModelBaseType, OperatorType> OperatorSpecType;
 
 	if (obsOptions.hasOperatorExpression && obsOptions.label != "") {
@@ -84,12 +84,12 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 		return;
 	}
 
-	OperatorType opC;
+	OperatorType       opC;
 	const OperatorType opEmpty;
 
 	if (obsOptions.hasOperatorExpression) {
-		OperatorSpecType opSpec(model);
-		int site = -1;
+		OperatorSpecType                                  opSpec(model);
+		int                                               site = -1;
 		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
 
 		canonicalExpression(opC, obsOptions.opexpr, opEmpty, site);

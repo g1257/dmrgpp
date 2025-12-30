@@ -9,7 +9,7 @@ class Store {
 
 public:
 
-	typedef AinurLexical AinurLexicalType;
+	typedef AinurLexical                       AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 
 	enum Type
@@ -203,7 +203,7 @@ private:
 		SizeType offset = 2;
 		for (SizeType row = 0; row < rows; ++row) {
 			VectorStringType v;
-			String s = tmp[row];
+			String           s = tmp[row];
 			AinurLexicalType::removeTrailingBlanks(s);
 			SizeType last = s.length();
 			if (last > 0 && s[--last] == ',')
@@ -235,9 +235,9 @@ private:
 			dest[offset + i] = src[i];
 	}
 
-	Type type_;
-	SubType subType_;
-	Attribute attr_;
+	Type             type_;
+	SubType          subType_;
+	Attribute        attr_;
 	VectorStringType value_;
 	mutable SizeType used_;
 };

@@ -141,7 +141,7 @@ public:
 
 	public:
 
-		typedef IoNgSerializer Serializer;
+		typedef IoNgSerializer      Serializer;
 		typedef std::vector<String> VectorStringType;
 
 		Out(const String& filename, OpenMode mode)
@@ -175,8 +175,8 @@ public:
 		}
 
 		template <typename T>
-		void write(std::stack<T>& what,
-		           String name2,
+		void write(std::stack<T>&            what,
+		           String                    name2,
 		           IoNgSerializer::WriteMode mode = IoNgSerializer::NO_OVERWRITE,
 		           typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
@@ -184,8 +184,8 @@ public:
 		}
 
 		template <typename T>
-		void write(const T& what,
-		           String name2,
+		void write(const T&                  what,
+		           String                    name2,
 		           IoNgSerializer::WriteMode mode = IoNgSerializer::NO_OVERWRITE,
 		           typename EnableIf<IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
@@ -194,15 +194,15 @@ public:
 
 		template <typename T>
 		void write(const T& what,
-		           String name2,
+		           String   name2,
 		           typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
 			what.write(name2, ioNgSerializer_);
 		}
 
 		template <typename T>
-		void write(const T& what,
-		           String name2,
+		void write(const T&                  what,
+		           String                    name2,
 		           IoNgSerializer::WriteMode mode,
 		           typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
@@ -211,7 +211,7 @@ public:
 
 		template <typename T>
 		void overwrite(const T& what,
-		               String name2,
+		               String   name2,
 		               typename EnableIf<IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
 			ioNgSerializer_.overwrite(name2, what);
@@ -219,7 +219,7 @@ public:
 
 		template <typename T>
 		void overwrite(const T& what,
-		               String name2,
+		               String   name2,
 		               typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
 			what.overwrite(name2, ioNgSerializer_);
@@ -256,7 +256,7 @@ public:
 
 	public:
 
-		typedef int long LongIntegerType;
+		typedef int long          LongIntegerType;
 		typedef unsigned int long LongSizeType;
 
 		In(String filename)
@@ -281,7 +281,7 @@ public:
 		}
 
 		template <typename T>
-		void read(T& what,
+		void read(T&     what,
 		          String name,
 		          typename EnableIf<IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{
@@ -289,7 +289,7 @@ public:
 		}
 
 		template <typename T>
-		void read(T& what,
+		void read(T&     what,
 		          String name,
 		          typename EnableIf<!IsRootUnDelegated<T>::True, int*>::Type = 0)
 		{

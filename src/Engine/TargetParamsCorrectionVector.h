@@ -92,19 +92,19 @@ class TargetParamsCorrectionVector : public TargetParamsCommon<ModelType> {
 
 public:
 
-	typedef TargetParamsCommon<ModelType> BaseType;
-	typedef typename ModelType::RealType RealType;
+	typedef TargetParamsCommon<ModelType>             BaseType;
+	typedef typename ModelType::RealType              RealType;
 	typedef typename BaseType::BaseType::PairFreqType PairFreqType;
-	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrReal;
-	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
+	typedef typename ModelType::OperatorType          OperatorType;
+	typedef typename OperatorType::PairType           PairType;
+	typedef typename OperatorType::StorageType        SparseMatrixType;
+	typedef typename SparseMatrixType::value_type     ComplexOrReal;
+	typedef PsimagLite::Matrix<ComplexOrReal>         MatrixType;
 
 	template <typename IoInputter>
-	TargetParamsCorrectionVector(IoInputter& io,
+	TargetParamsCorrectionVector(IoInputter&        io,
 	                             PsimagLite::String targeting,
-	                             const ModelType& model)
+	                             const ModelType&   model)
 	    : BaseType(io, targeting, model)
 	    , cgSteps_(1000)
 	    , firstRitz_(0)
@@ -204,16 +204,16 @@ public:
 
 private:
 
-	SizeType type_;
+	SizeType                         type_;
 	typename BaseType::AlgorithmEnum algorithm_;
-	SizeType cgSteps_;
-	SizeType firstRitz_;
-	SizeType nForFraction_;
-	SizeType advanceEach_;
-	RealType correctionA_;
-	PairFreqType omega_;
-	RealType eta_;
-	RealType cgEps_;
+	SizeType                         cgSteps_;
+	SizeType                         firstRitz_;
+	SizeType                         nForFraction_;
+	SizeType                         advanceEach_;
+	RealType                         correctionA_;
+	PairFreqType                     omega_;
+	RealType                         eta_;
+	RealType                         cgEps_;
 }; // class TargetParamsCorrectionVector
 
 template <typename ModelType>

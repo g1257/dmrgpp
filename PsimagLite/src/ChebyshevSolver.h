@@ -109,25 +109,25 @@ template <typename SolverParametersType, typename MatrixType_, typename VectorTy
 class ChebyshevSolver {
 
 	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType> NotBaseType;
-	typedef typename SolverParametersType::RealType RealType;
-	typedef LanczosVectors<MatrixType_, VectorType> LanczosVectorsType;
-	typedef typename LanczosVectorsType::DenseMatrixType DenseMatrixType;
+	typedef typename SolverParametersType::RealType                              RealType;
+	typedef LanczosVectors<MatrixType_, VectorType>          LanczosVectorsType;
+	typedef typename LanczosVectorsType::DenseMatrixType     DenseMatrixType;
 	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
-	typedef typename LanczosVectorsType::VectorVectorType VectorVectorType;
+	typedef typename LanczosVectorsType::VectorVectorType    VectorVectorType;
 
 public:
 
-	typedef SolverParametersType ParametersSolverType;
-	typedef MatrixType_ MatrixType;
-	typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
-	typedef typename VectorType::value_type VectorElementType;
+	typedef SolverParametersType                       ParametersSolverType;
+	typedef MatrixType_                                MatrixType;
+	typedef TridiagonalMatrix<RealType>                TridiagonalMatrixType;
+	typedef typename VectorType::value_type            VectorElementType;
 	typedef ChebyshevSerializer<TridiagonalMatrixType> PostProcType;
-	typedef PsimagLite::Random48<RealType> RngType;
+	typedef PsimagLite::Random48<RealType>             RngType;
 
 	enum
 	{
-		WITH_INFO = 1,
-		DEBUG = 2,
+		WITH_INFO   = 1,
+		DEBUG       = 2,
 		ALLOWS_ZERO = 4
 	};
 
@@ -145,7 +145,7 @@ public:
 		params.steps = 400;
 		setMode(params.options);
 		computeAandB();
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Constructing... mat.rank=" << mat_.rows() << " steps=" << params.steps;
 		progress_.printline(msgg, std::cout);
@@ -204,11 +204,11 @@ public:
 	//! btmp = < phi_n | phi_{n+1}>
 	void oneStepDec(VectorType& x,
 	                VectorType& y,
-	                RealType& atmp,
-	                RealType& btmp,
-	                SizeType jind) const
+	                RealType&   atmp,
+	                RealType&   btmp,
+	                SizeType    jind) const
 	{
-		bool isFirst = (jind == 0);
+		bool       isFirst = (jind == 0);
 		VectorType z(x.size(), 0.0);
 		mat_.matrixVectorProduct(z, y); // z+= Hy
 		// scale matrix:
@@ -223,8 +223,8 @@ public:
 
 		for (SizeType i = 0; i < mat_.rows(); i++) {
 			VectorElementType tmp = val * z[i] - x[i];
-			x[i] = y[i];
-			y[i] = tmp;
+			x[i]                  = y[i];
+			y[i]                  = tmp;
 		}
 
 		btmp = 0.0;
@@ -271,7 +271,7 @@ private:
 			// throw RuntimeError("Norm\n");
 		}
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Found Energy=" << energyTmp << " after " << params_.steps;
 		msg << " iterations, "
@@ -307,20 +307,20 @@ private:
 
 	private:
 
-		const MatrixType& matx_;
+		const MatrixType&  matx_;
 		mutable VectorType y_;
 	}; // class InternalMatrix
 
 	void computeAandB()
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Asking LanczosSolver to compute spectrum bounds...";
 		progress_.printline(msgg, std::cout);
 
-		SolverParametersType params;
-		InternalMatrix mat2(mat_);
-		RealType eMax = 0;
+		SolverParametersType                                            params;
+		InternalMatrix                                                  mat2(mat_);
+		RealType                                                        eMax = 0;
 		LanczosSolver<SolverParametersType, InternalMatrix, VectorType> lanczosSolver2(
 		    mat2, params);
 
@@ -329,10 +329,10 @@ private:
 		PsimagLite::fillRandom(init);
 		lanczosSolver2.computeOneState(eMax, z2, init, 0);
 
-		VectorType z(mat_.rows(), 0);
+		VectorType                                                  z(mat_.rows(), 0);
 		LanczosSolver<SolverParametersType, MatrixType, VectorType> lanczosSolver(mat_,
 		                                                                          params);
-		RealType eMin = 0;
+		RealType                                                    eMin = 0;
 		lanczosSolver.computeOneState(eMin, z, init, 0);
 
 		eMax = -eMax;
@@ -341,20 +341,20 @@ private:
 		assert(eMax - eMin > 1e-2);
 
 		params_.oneOverA = 2.0 / (eMax - eMin);
-		params_.b = (eMax + eMin) / 2;
+		params_.b        = (eMax + eMin) / 2;
 
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << "Spectrum bounds computed, eMax=" << eMax << " eMin=" << eMin;
 		progress_.printline(msgg2, std::cout);
 	}
 
-	ProgressIndicator progress_;
-	MatrixType const& mat_;
+	ProgressIndicator     progress_;
+	MatrixType const&     mat_;
 	SolverParametersType& params_;
-	SizeType mode_;
-	RngType rng_;
-	LanczosVectorsType lanczosVectors_;
+	SizeType              mode_;
+	RngType               rng_;
+	LanczosVectorsType    lanczosVectors_;
 	//! Scaling factors for the Chebyshev expansion
 }; // class ChebyshevSolver
 } // namespace PsimagLite

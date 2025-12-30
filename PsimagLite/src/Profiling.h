@@ -73,9 +73,9 @@ private:
 	}
 
 	ProgressIndicator progressIndicator_;
-	MemoryUsage memoryUsage_;
-	bool isDead_;
-	std::ostream& os_;
+	MemoryUsage       memoryUsage_;
+	bool              isDead_;
+	std::ostream&     os_;
 }; // Profiling
 } // namespace PsimagLite
 

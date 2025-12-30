@@ -39,14 +39,14 @@ Ainur::Ainur(String str)
     : dummy_("")
 {
 	AinurLexical discard(str);
-	bool verbose = AinurState::verbose();
+	bool         verbose = AinurState::verbose();
 
 	if (verbose)
 		std::cerr << str << "\n\n";
 #define AINUR_COMMENTS ('#' >> *(qi::char_ - qi::eol) >> qi::eol) | qi::eol | qi::space
-	namespace qi = boost::spirit::qi;
+	namespace qi    = boost::spirit::qi;
 	namespace ascii = boost::spirit::ascii;
-	typedef boost::fusion::vector<std::string, std::string> AttribType;
+	typedef boost::fusion::vector<std::string, std::string>              AttribType;
 	typedef boost::fusion::vector<std::string, std::string, std::string> Attrib3Type;
 
 	typedef BOOST_TYPEOF(AINUR_COMMENTS) SkipperType;
@@ -56,12 +56,12 @@ Ainur::Ainur(String str)
 	qi::rule<IteratorType, std::string(), qi::unused_type> keywords;
 	qi::rule<IteratorType, std::string(), qi::unused_type> value;
 	qi::rule<IteratorType, std::string(), qi::unused_type> typeQualifier;
-	qi::rule<IteratorType, AttribType, SkipperType> statement1;
-	qi::rule<IteratorType, AttribType, SkipperType> statement2;
-	qi::rule<IteratorType, Attrib3Type, SkipperType> statement3;
-	qi::rule<IteratorType, SkipperType> statement;
+	qi::rule<IteratorType, AttribType, SkipperType>        statement1;
+	qi::rule<IteratorType, AttribType, SkipperType>        statement2;
+	qi::rule<IteratorType, Attrib3Type, SkipperType>       statement3;
+	qi::rule<IteratorType, SkipperType>                    statement;
 	value %= qi::lexeme[+(qi::char_ - qi::char_(";"))];
-	aToZ = ascii::char_("a", "z") | ascii::char_("A", "Z");
+	aToZ       = ascii::char_("a", "z") | ascii::char_("A", "Z");
 	zeroToNine = ascii::char_("0", "9");
 
 	typeQualifier %= +(aToZ | ascii::char_(".") | ascii::char_("!"));
@@ -72,13 +72,13 @@ Ainur::Ainur(String str)
 	statement2 %= typeQualifier >> keywords;
 	statement3 %= typeQualifier >> keywords >> '=' >> value;
 
-	Action action1("statement1", state_);
-	Action action2("statement2", state_);
+	Action  action1("statement1", state_);
+	Action  action2("statement2", state_);
 	Action3 action3("statement3", state_);
 	statement %= statement3[action3] | statement2[action2] | statement1[action1];
 
 	IteratorType first = str.begin();
-	IteratorType last = str.end();
+	IteratorType last  = str.end();
 	qi::phrase_parse(first, last, statement % ";", AINUR_COMMENTS);
 
 	++first;

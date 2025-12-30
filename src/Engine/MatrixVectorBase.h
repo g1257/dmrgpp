@@ -87,14 +87,14 @@ template <typename ModelType_> class MatrixVectorBase {
 
 public:
 
-	typedef ModelType_ ModelType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef ModelType_                                           ModelType;
+	typedef typename ModelType::ModelHelperType                  ModelHelperType;
+	typedef typename ModelHelperType::RealType                   RealType;
+	typedef typename ModelHelperType::SparseMatrixType           SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type          VectorRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                FullMatrixType;
 
 	SizeType reflectionSector() const { return 0; }
 
@@ -102,10 +102,10 @@ public:
 
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const;
 
-	static void fullDiag(VectorRealType& eigs,
-	                     FullMatrixType& fm,
+	static void fullDiag(VectorRealType&         eigs,
+	                     FullMatrixType&         fm,
 	                     const SparseMatrixType& matrixStored,
-	                     int tmp)
+	                     int                     tmp)
 	{
 		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
 
