@@ -165,3 +165,4 @@ add_test(NAME observe6700 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input20
                                   "<gs|sz;sz|gs>,<gs|splus;sminus|gs>")
 add_test(NAME observe6700_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
                                     ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput20.cout)
+set_tests_properties(observe6700_1 PROPERTIES DEPENDS observe6700)
