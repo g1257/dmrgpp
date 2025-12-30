@@ -662,8 +662,9 @@ private:
 
 		switch (parameters_.matrix_solver_enum) {
 		case MatrixSolverEnum::DENSE:
+			energyTmp.resize(tmpVec.size());
 			dense_diag(lanczosHelper, energyTmp, tmpVec);
-			break;
+			return; // EARLY EXIT HERE
 		case MatrixSolverEnum::LANCZOS:
 			lanczosOrDavidson = new LanczosSolverType(lanczosHelper, params);
 			break;
