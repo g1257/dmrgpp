@@ -6,17 +6,14 @@
 #include <cctype>
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename InputValidatorType>
-class Options
-{
+template <typename InputValidatorType> class Options {
 
 public:
 
-	typedef typename PsimagLite::String::value_type CharType;
-	typedef typename PsimagLite::String::const_iterator StringConstIterator;
+	typedef typename PsimagLite::String::value_type      CharType;
+	typedef typename PsimagLite::String::const_iterator  StringConstIterator;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 	Options(PsimagLite::String label, InputValidatorType& io)
@@ -37,18 +34,15 @@ public:
 
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
-		const PsimagLite::String tmp = std::accumulate(vdata_.begin(),
-		    vdata_.end(),
-		    PsimagLite::String(","));
+		const PsimagLite::String tmp
+		    = std::accumulate(vdata_.begin(), vdata_.end(), PsimagLite::String(","));
 		ioSerializer.write(label, tmp);
 	}
 
 	bool isSet(PsimagLite::String what) const
 	{
-		what = ProgramGlobals::toLower(what);
-		VectorStringType::const_iterator it = std::find(vdata_.begin(),
-		    vdata_.end(),
-		    what);
+		what                                = ProgramGlobals::toLower(what);
+		VectorStringType::const_iterator it = std::find(vdata_.begin(), vdata_.end(), what);
 		return (it != vdata_.end());
 	}
 
@@ -57,9 +51,9 @@ private:
 	void lowerAll()
 	{
 		std::transform(vdata_.begin(),
-		    vdata_.end(),
-		    vdata_.begin(),
-		    [](PsimagLite::String s) { return ProgramGlobals::toLower(s); });
+		               vdata_.end(),
+		               vdata_.begin(),
+		               [](PsimagLite::String s) { return ProgramGlobals::toLower(s); });
 	}
 
 	VectorStringType vdata_;

@@ -9,8 +9,7 @@
 #include <iostream>
 #include <sstream>
 
-class Provenance
-{
+class Provenance {
 
 public:
 
@@ -26,7 +25,7 @@ public:
 
 	static PsimagLite::String logo(PsimagLite::String appName)
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << appName << "\x1b[38;5;120";
 		msg << " [features " << DMRGPP_VERSION << "] " << PsimagLite::AnsiColor::reset;

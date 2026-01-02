@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	const SizeType n = atoi(argv[1]);
+	const SizeType n       = atoi(argv[1]);
 	const SizeType threads = atoi(argv[2]);
 
 	PsimagLite::Vector<double>::Type v(n);

@@ -3,28 +3,23 @@
 #include "TypeToString.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename OperatorType_>
-class LabeledOperators
-{
+template <typename OperatorType_> class LabeledOperators {
 
-	class Label
-	{
+	class Label {
 
 	public:
 
-		typedef typename PsimagLite::Vector<OperatorType_>::Type VectorOperatorType;
+		typedef typename PsimagLite::Vector<OperatorType_>::Type      VectorOperatorType;
 		typedef typename PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-		typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
+		typedef std::pair<PsimagLite::String, SizeType>               PairStringSizeType;
 
 		Label(PsimagLite::String name, SizeType kindOfSite)
 		    : name_(name)
 		    , kindOfSite_(kindOfSite)
 		    , isTrackable_(false)
-		{
-		}
+		{ }
 
 		const OperatorType_& operator()(SizeType dof) const
 		{
@@ -36,10 +31,7 @@ class LabeledOperators
 			throw PsimagLite::RuntimeError(msg);
 		}
 
-		bool operator==(const PsimagLite::String& name) const
-		{
-			return (name == name_);
-		}
+		bool operator==(const PsimagLite::String& name) const { return (name == name_); }
 
 		SizeType rows() const
 		{
@@ -78,10 +70,7 @@ class LabeledOperators
 
 		bool isTrackable() const { return isTrackable_; }
 
-		void makeTrackable()
-		{
-			isTrackable_ = true;
-		}
+		void makeTrackable() { isTrackable_ = true; }
 
 	private:
 
@@ -90,27 +79,22 @@ class LabeledOperators
 		Label& operator=(const Label&);
 
 		PsimagLite::String name_;
-		SizeType kindOfSite_;
-		bool isTrackable_;
+		SizeType           kindOfSite_;
+		bool               isTrackable_;
 		VectorOperatorType ops_;
-		VectorStringType descriptions_;
+		VectorStringType   descriptions_;
 	};
 
 	typedef typename PsimagLite::Vector<Label*>::Type VectorLabelType;
-	class IsValue
-	{
+	class IsValue {
 
 	public:
 
 		IsValue(PsimagLite::String value)
 		    : value_(value)
-		{
-		}
+		{ }
 
-		bool operator()(Label const* label) const
-		{
-			return (*label == value_);
-		}
+		bool operator()(Label const* label) const { return (*label == value_); }
 
 	private:
 
@@ -119,17 +103,16 @@ class LabeledOperators
 
 public:
 
-	typedef OperatorType_ OperatorType;
-	typedef Label LabelType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef OperatorType_                                   OperatorType;
+	typedef Label                                           LabelType;
+	typedef PsimagLite::Vector<SizeType>::Type              VectorSizeType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename OperatorType::value_type ComplexOrRealType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef typename OperatorType::value_type               ComplexOrRealType;
+	typedef std::pair<SizeType, SizeType>                   PairSizeType;
 
 	LabeledOperators(PsimagLite::String model = "")
 	    : model_(model)
-	{
-	}
+	{ }
 
 	~LabeledOperators()
 	{
@@ -164,12 +147,10 @@ public:
 		labels_.clear();
 	}
 
-	Label& createLabel(PsimagLite::String name,
-	    SizeType kindOfSite)
+	Label& createLabel(PsimagLite::String name, SizeType kindOfSite)
 	{
-		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
-		    labels_.end(),
-		    IsValue(name));
+		typename VectorLabelType::const_iterator x
+		    = std::find_if(labels_.begin(), labels_.end(), IsValue(name));
 
 		if (x != labels_.end())
 			err("Repeated label " + name + "\n");
@@ -179,17 +160,15 @@ public:
 		return *label;
 	}
 
-	const OperatorType& operator()(PsimagLite::String what,
-	    SizeType dof) const
+	const OperatorType& operator()(PsimagLite::String what, SizeType dof) const
 	{
 		return findLabel(what)(dof);
 	}
 
 	const LabelType& findLabel(PsimagLite::String what) const
 	{
-		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
-		    labels_.end(),
-		    IsValue(what));
+		typename VectorLabelType::const_iterator x
+		    = std::find_if(labels_.begin(), labels_.end(), IsValue(what));
 		if (x != labels_.end())
 			return *(labels_[x - labels_.begin()]);
 
@@ -201,16 +180,16 @@ public:
 	void introspect() const
 	{
 		SizeType n = labels_.size();
-		std::cout << "There are " << n << " labels available for the " << model_ << " model\n";
+		std::cout << "There are " << n << " labels available for the " << model_
+		          << " model\n";
 		for (SizeType i = 0; i < n; ++i)
 			labels_[i]->introspect();
 	}
 
 	void introspect(PsimagLite::String what) const
 	{
-		typename VectorLabelType::const_iterator x = std::find_if(labels_.begin(),
-		    labels_.end(),
-		    what);
+		typename VectorLabelType::const_iterator x
+		    = std::find_if(labels_.begin(), labels_.end(), what);
 		if (x != labels_.end())
 			return labels_[x - labels_.begin()]->introspect();
 
@@ -232,8 +211,8 @@ public:
 
 	void makeTrackable(PsimagLite::String name)
 	{
-		const LabelType& label = findLabel(name);
-		LabelType& labelNonConst = const_cast<LabelType&>(label);
+		const LabelType& label         = findLabel(name);
+		LabelType&       labelNonConst = const_cast<LabelType&>(label);
 		labelNonConst.makeTrackable();
 	}
 
@@ -244,11 +223,8 @@ private:
 		typename OperatorType::StorageType tmp(nrow, nrow);
 		tmp.makeDiagonal(nrow, 1.0);
 		typename OperatorType::Su2RelatedType su2Related;
-		label.push(OperatorType(tmp,
-		    1.0,
-		    typename OperatorType::PairType(0, 0),
-		    1.0,
-		    su2Related));
+		label.push(
+		    OperatorType(tmp, 1.0, typename OperatorType::PairType(0, 0), 1.0, su2Related));
 	}
 
 	LabeledOperators(const LabeledOperators&);
@@ -256,7 +232,7 @@ private:
 	LabeledOperators& operator=(const LabeledOperators&);
 
 	PsimagLite::String model_;
-	VectorLabelType labels_;
+	VectorLabelType    labels_;
 };
 }
 #endif // LABELEDOPERATORS_H

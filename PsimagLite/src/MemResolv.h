@@ -12,8 +12,8 @@
 namespace PsimagLite {
 
 struct MemoryPointer {
-	unsigned int type;
-	unsigned int length;
+	unsigned int      type;
+	unsigned int      length;
 	long unsigned int ptr;
 }; // struct MemoryPointers
 
@@ -21,21 +21,24 @@ bool operator==(const MemoryPointer& a, const MemoryPointer& b);
 
 class MemResolv {
 
-	typedef std::vector<MemoryPointer> VectorMemoryPointerType;
+	typedef std::vector<MemoryPointer>             VectorMemoryPointerType;
 	typedef std::pair<long unsigned int, long int> PairType;
-	typedef std::vector<PairType> VectorPairType;
+	typedef std::vector<PairType>                  VectorPairType;
 	typedef double (*RefFunctionType)(double);
 
 public:
 
-	enum MemoryKindEnum { MEMORY_DATA,
-		              MEMORY_HEAPPTR,
-		              MEMORY_TEXTPTR };
+	enum MemoryKindEnum
+	{
+		MEMORY_DATA,
+		MEMORY_HEAPPTR,
+		MEMORY_TEXTPTR
+	};
 
-	static const unsigned int SIZEOF_HEAPREF = sizeof(void*);
-	static const unsigned int SIZEOF_VPTR = sizeof(void*);
-	static const unsigned int SIZEOF_HEAPPTR = sizeof(void*);
-	static const long unsigned int LABEL_LENGTH = 128;
+	static const unsigned int      SIZEOF_HEAPREF = sizeof(void*);
+	static const unsigned int      SIZEOF_VPTR    = sizeof(void*);
+	static const unsigned int      SIZEOF_HEAPPTR = sizeof(void*);
+	static const long unsigned int LABEL_LENGTH   = 128;
 
 	template <typename T>
 	MemResolv(T* ptr)
@@ -43,8 +46,7 @@ public:
 	    , refTextPtr_(0)
 	    , zeroes_(0)
 	    , lenOfZeroes_(0)
-	{
-	}
+	{ }
 
 	MemResolv(String filename, String label)
 	    : intoOffset_(0)
@@ -65,10 +67,8 @@ public:
 			throw RuntimeError(mresolvName + " cannot open " + filename + "\n");
 
 		long unsigned int lenOfLabel = 0;
-		fin.read(reinterpret_cast<char*>(&lenOfLabel),
-		         sizeof(lenOfLabel));
-		fin.read(reinterpret_cast<char*>(&lenOfLabel),
-		         sizeof(lenOfLabel));
+		fin.read(reinterpret_cast<char*>(&lenOfLabel), sizeof(lenOfLabel));
+		fin.read(reinterpret_cast<char*>(&lenOfLabel), sizeof(lenOfLabel));
 		if (lenOfLabel != LABEL_LENGTH)
 			throw RuntimeError(mresolvName + " label length error\n");
 		if (lenOfLabel != label.length())
@@ -80,25 +80,22 @@ public:
 		if (!stringEqual(label2, label))
 			throw RuntimeError(mresolvName + " mismatched label");
 
-		long unsigned int oldStart = 0;
-		char* ptrOldStart = reinterpret_cast<char*>(&oldStart);
+		long unsigned int oldStart    = 0;
+		char*             ptrOldStart = reinterpret_cast<char*>(&oldStart);
 		fin.read(ptrOldStart, sizeof(oldStart));
 
 		std::cout << "Recovered reference heap pointer ";
 		std::cout << reinterpret_cast<void*>(oldStart) << "\n";
 
-		fin.read(reinterpret_cast<char*>(&refTextPtr_),
-		         sizeof(refTextPtr_));
-		std::cout << "Recovered reference text pointer " << refTextPtr_
-		          << "\n";
+		fin.read(reinterpret_cast<char*>(&refTextPtr_), sizeof(refTextPtr_));
+		std::cout << "Recovered reference text pointer " << refTextPtr_ << "\n";
 
-		fin.read(reinterpret_cast<char*>(&intoOffset_),
-		         sizeof(intoOffset_));
+		fin.read(reinterpret_cast<char*>(&intoOffset_), sizeof(intoOffset_));
 
 		loadChunkInfo(fin);
 
-		long unsigned int len = 0;
-		char* ptrLen = reinterpret_cast<char*>(&len);
+		long unsigned int len    = 0;
+		char*             ptrLen = reinterpret_cast<char*>(&len);
 		fin.read(ptrLen, sizeof(len));
 		std::cout << "MemResolv read from file len= " << len << "\n";
 		unsigned char* sourcePtr = new unsigned char[len];
@@ -109,7 +106,7 @@ public:
 
 		// ADJUST POINTER VALUES
 		long int newStart = pointerToLui(reinterpret_cast<void*>(sourcePtr));
-		long int offset = newStart - oldStart;
+		long int offset   = newStart - oldStart;
 
 		adjustPointers(sourcePtr, offset);
 	}
@@ -146,18 +143,17 @@ public:
 
 		long unsigned int lenOfLabel = label.length();
 		assert(lenOfLabel == LABEL_LENGTH);
-		fout.write(reinterpret_cast<char*>(&lenOfLabel),
-		           sizeof(lenOfLabel));
-		fout.write(reinterpret_cast<char*>(&lenOfLabel),
-		           sizeof(lenOfLabel));
+		fout.write(reinterpret_cast<char*>(&lenOfLabel), sizeof(lenOfLabel));
+		fout.write(reinterpret_cast<char*>(&lenOfLabel), sizeof(lenOfLabel));
 		fout.write(label.data(), lenOfLabel);
 
-		SizeType total = 0;
-		SizeType maxHoleSize = 0;
+		SizeType       total       = 0;
+		SizeType       maxHoleSize = 0;
 		VectorPairType offsetsForHoles;
 		findSizes(total, maxHoleSize, offsetsForHoles);
 
-		long unsigned int refPtrValue = pointerToLui(reinterpret_cast<void*>(vmptr_[0].ptr));
+		long unsigned int refPtrValue
+		    = pointerToLui(reinterpret_cast<void*>(vmptr_[0].ptr));
 		adjustPointer(reinterpret_cast<unsigned char*>(&refPtrValue),
 		              sizeof(refPtrValue),
 		              0,
@@ -165,10 +161,8 @@ public:
 		char* ptrRefPtr = reinterpret_cast<char*>(&refPtrValue);
 		fout.write(ptrRefPtr, sizeof(refPtrValue));
 
-		fout.write(reinterpret_cast<const char*>(&refTextPtr_),
-		           sizeof(refTextPtr_));
-		std::cout << "Written reference text pointer " << refTextPtr_
-		          << "\n";
+		fout.write(reinterpret_cast<const char*>(&refTextPtr_), sizeof(refTextPtr_));
+		std::cout << "Written reference text pointer " << refTextPtr_ << "\n";
 
 		const char* ptrIntoPtr = reinterpret_cast<const char*>(&intoOffset_);
 		fout.write(ptrIntoPtr, sizeof(intoOffset_));
@@ -177,13 +171,12 @@ public:
 
 		saveChunkInfo(fout, offsetsForHoles);
 
-		long unsigned int len = total;
-		char* ptrLen = reinterpret_cast<char*>(&len);
+		long unsigned int len    = total;
+		char*             ptrLen = reinterpret_cast<char*>(&len);
 		fout.write(ptrLen, sizeof(len));
 
 		SizeType total2 = saveChunkData(fout, offsetsForHoles);
-		std::cout << "Saved " << total2 << " bytes to " << filename
-		          << "\n";
+		std::cout << "Saved " << total2 << " bytes to " << filename << "\n";
 		fout.close();
 	}
 
@@ -193,10 +186,10 @@ public:
 	void push(MemoryKindEnum type, unsigned int length, T* ptr, String msg = "")
 	{
 		MemoryPointer mptr;
-		mptr.type = type;
-		mptr.length = length;
+		mptr.type        = type;
+		mptr.length      = length;
 		const void* vptr = reinterpret_cast<const void*>(ptr);
-		mptr.ptr = pointerToLui(vptr);
+		mptr.ptr         = pointerToLui(vptr);
 		if (find(vmptr_.begin(), vmptr_.end(), mptr) != vmptr_.end())
 			return;
 
@@ -205,19 +198,17 @@ public:
 
 		if (msg == "")
 			return;
-		std::cout << "Address start " << vptr << " length "
-		          << mptr.length;
+		std::cout << "Address start " << vptr << " length " << mptr.length;
 		std::cout << " type=" << type << " " << msg << "\n";
 	}
 
 	unsigned char* dup()
 	{
-		SizeType total = 0;
-		SizeType maxHoleSize = 0;
+		SizeType       total       = 0;
+		SizeType       maxHoleSize = 0;
 		VectorPairType offsetsForHoles;
 		findSizes(total, maxHoleSize, offsetsForHoles);
-		std::cout << "total = " << total
-		          << " maxHoleSize= " << maxHoleSize << "\n";
+		std::cout << "total = " << total << " maxHoleSize= " << maxHoleSize << "\n";
 		unsigned char* ptr = new unsigned char[total];
 		garbage_.push_back(ptr);
 		garbageSize_.push_back(total);
@@ -235,8 +226,8 @@ public:
 	{
 		SizeType tmp = sizeof(NoClassType);
 		assert(x >= tmp);
-		SizeType r = x - tmp;
-		char* cPtr = (char*)c;
+		SizeType r    = x - tmp;
+		char*    cPtr = (char*)c;
 		updateZeroes(r + 1, 0);
 		cPtr += tmp;
 		memcpy(cPtr, zeroes_, r);
@@ -246,29 +237,25 @@ public:
 	}
 
 	template <typename SomeComplexNumber>
-	typename EnableIf<IsComplexNumber<SomeComplexNumber>::True,
-	                  SizeType>::Type
-	memResolv(const SomeComplexNumber*,
-	          SizeType = sizeof(SomeComplexNumber),
-	          String = "")
+	typename EnableIf<IsComplexNumber<SomeComplexNumber>::True, SizeType>::Type
+	memResolv(const SomeComplexNumber*, SizeType = sizeof(SomeComplexNumber), String = "")
 	{
-		throw RuntimeError(
-		    "memResolv for std::complex not implemented\n");
+		throw RuntimeError("memResolv for std::complex not implemented\n");
 	}
 
 	template <typename T1, typename T2, typename T3>
 	SizeType memResolv(const std::basic_string<T1, T2, T3>* c,
-	                   SizeType x = sizeof(std::basic_string<T1, T2, T3>),
-	                   String msg = "")
+	                   SizeType x   = sizeof(std::basic_string<T1, T2, T3>),
+	                   String   msg = "")
 	{
 		assert(x == sizeof(std::basic_string<T1, T2, T3>));
 		SizeType total = x;
 		push(MemResolv::MEMORY_HEAPPTR, x, c, msg + " string ptr");
 
-		const long unsigned int* c2 = (const long unsigned int*)c;
-		const char* c3 = (const char*)*c2;
-		SizeType len = sizeof(unsigned int);
-		char* ptr = const_cast<char*>(c3);
+		const long unsigned int* c2  = (const long unsigned int*)c;
+		const char*              c3  = (const char*)*c2;
+		SizeType                 len = sizeof(unsigned int);
+		char*                    ptr = const_cast<char*>(c3);
 		ptr -= len;
 		updateZeroes(len + 1, 0);
 		memcpy(reinterpret_cast<char*>(ptr), zeroes_, len);
@@ -286,11 +273,11 @@ public:
 	typename EnableIf<IsPairLike<SomePairType>::True, SizeType>::Type
 	memResolv(const SomePairType* c, SizeType x = sizeof(SomePairType), String msg = "")
 	{
-		typedef typename SomePairType::first_type FirstType;
+		typedef typename SomePairType::first_type  FirstType;
 		typedef typename SomePairType::second_type SecondType;
 
-		const FirstType* f = (const FirstType*)c;
-		SizeType total = memResolv(f, sizeof(FirstType), msg + "->first");
+		const FirstType* f     = (const FirstType*)c;
+		SizeType         total = memResolv(f, sizeof(FirstType), msg + "->first");
 
 		const char* s = (const char*)c;
 		s += sizeof(FirstType*);
@@ -304,8 +291,8 @@ public:
 			return total;
 
 		updateZeroes(r + 1, 0);
-		const char* s3 = reinterpret_cast<const char*>(c);
-		char* ptr = const_cast<char*>(s3);
+		const char* s3  = reinterpret_cast<const char*>(c);
+		char*       ptr = const_cast<char*>(s3);
 		ptr += sizeof(SomePairType);
 		memcpy(reinterpret_cast<char*>(ptr), zeroes_, r);
 
@@ -313,9 +300,9 @@ public:
 	}
 
 	template <typename SomeVectorType>
-	typename EnableIf<
-	    IsVectorLike<SomeVectorType>::True && !IsClass<typename SomeVectorType::value_type>::value,
-	    SizeType>::Type
+	typename EnableIf<IsVectorLike<SomeVectorType>::True
+	                      && !IsClass<typename SomeVectorType::value_type>::value,
+	                  SizeType>::Type
 	memResolv(const SomeVectorType* v, SizeType = 0, String msg = "")
 	{
 		typedef typename SomeVectorType::value_type SomeElementType;
@@ -325,8 +312,8 @@ public:
 		assert(tmp = 3 * sizeof(void*)); // begin end reserve
 		checkForVectorReserve(v);
 
-		SizeType total = tmp;
-		const SomeVectorType& vv = *v;
+		SizeType              total = tmp;
+		const SomeVectorType& vv    = *v;
 
 		tmp = sizeof(SomeElementType) * vv.size();
 		if (tmp == 0)
@@ -339,9 +326,9 @@ public:
 	}
 
 	template <typename SomeVectorType>
-	typename EnableIf<
-	    IsVectorLike<SomeVectorType>::True && IsClass<typename SomeVectorType::value_type>::value,
-	    SizeType>::Type
+	typename EnableIf<IsVectorLike<SomeVectorType>::True
+	                      && IsClass<typename SomeVectorType::value_type>::value,
+	                  SizeType>::Type
 	memResolv(const SomeVectorType* v, SizeType = 0, String msg = "")
 	{
 		SizeType tmp = sizeof(SomeVectorType);
@@ -349,8 +336,8 @@ public:
 		push(MemResolv::MEMORY_HEAPPTR, tmp, v, msg + " vector<class>");
 		checkForVectorReserve(v);
 
-		SizeType total = tmp;
-		const SomeVectorType& vv = *v;
+		SizeType              total = tmp;
+		const SomeVectorType& vv    = *v;
 
 		if (vv.size() == 0)
 			return total;
@@ -362,9 +349,9 @@ public:
 	}
 
 	template <typename SomeVectorType>
-	typename EnableIf<
-	    IsVectorLike<SomeVectorType>::True && !IsClass<typename SomeVectorType::value_type>::value,
-	    SizeType>::Type
+	typename EnableIf<IsVectorLike<SomeVectorType>::True
+	                      && !IsClass<typename SomeVectorType::value_type>::value,
+	                  SizeType>::Type
 	memResolvPtr(const SomeVectorType* v, SizeType = 0, String msg = "")
 	{
 		typedef typename SomeVectorType::value_type SomeElementType;
@@ -374,8 +361,8 @@ public:
 		assert(tmp = 3 * sizeof(void*)); // begin end reserve
 		checkForVectorReserve(v);
 
-		SizeType total = tmp;
-		const SomeVectorType& vv = *v;
+		SizeType              total = tmp;
+		const SomeVectorType& vv    = *v;
 
 		tmp = sizeof(SomeElementType) * vv.size();
 		if (tmp == 0)
@@ -395,23 +382,25 @@ public:
 	}
 
 	template <typename SomeClassType>
-	typename EnableIf<!IsVectorLike<SomeClassType>::True && !IsPairLike<SomeClassType>::True && !IsMapLike<SomeClassType>::True && !IsComplexNumber<SomeClassType>::True && IsClass<SomeClassType>::value,
+	typename EnableIf<!IsVectorLike<SomeClassType>::True && !IsPairLike<SomeClassType>::True
+	                      && !IsMapLike<SomeClassType>::True
+	                      && !IsComplexNumber<SomeClassType>::True
+	                      && IsClass<SomeClassType>::value,
 	                  SizeType>::Type
 	memResolv(const SomeClassType* c, SizeType x = 0, String msg = "")
 	{
 		return c->memResolv(*this, x, msg);
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const MemResolv& mresolv);
+	friend std::ostream& operator<<(std::ostream& os, const MemResolv& mresolv);
 
 private:
 
 	template <typename SomeVectorType>
 	void checkForVectorReserve(const SomeVectorType* vPtr) const
 	{
-		const long unsigned int* v = (const long unsigned int*)vPtr;
-		const long unsigned int* end = (const long unsigned int*)(v + 1);
+		const long unsigned int* v       = (const long unsigned int*)vPtr;
+		const long unsigned int* end     = (const long unsigned int*)(v + 1);
 		const long unsigned int* reserve = (const long unsigned int*)(v + 2);
 		if (*end != *reserve)
 			std::cerr << "WARNING: std::vector has reserve\n";
@@ -460,7 +449,7 @@ private:
 		if (vmptr_.size() == 0)
 			return;
 
-		std::vector<SizeType> iperm(rankVector_.size());
+		std::vector<SizeType>       iperm(rankVector_.size());
 		Sort<std::vector<SizeType>> sort;
 		sort.sort(rankVector_, iperm);
 		unsigned int long oldStart = pointerToLui(reinterpret_cast<void*>(vmptr_[0].ptr));
@@ -468,7 +457,7 @@ private:
 		std::cout << "Chunks in order\n";
 		for (SizeType i = 0; i < iperm.size(); ++i) {
 			SizeType j = iperm[i];
-			vmptr[i] = vmptr_[j];
+			vmptr[i]   = vmptr_[j];
 			std::cout << "Entry " << vmptr[i].type << " 0x";
 			std::hex(std::cout);
 			std::cout << vmptr[i].ptr << " ";
@@ -476,57 +465,51 @@ private:
 			std::cout << " " << vmptr[i].length << "\n";
 		}
 
-		vmptr_ = vmptr;
+		vmptr_                     = vmptr;
 		unsigned int long newStart = pointerToLui(reinterpret_cast<void*>(vmptr_[0].ptr));
-		intoOffset_ = (newStart > oldStart) ? newStart - oldStart
-		                                    : oldStart - newStart;
+		intoOffset_ = (newStart > oldStart) ? newStart - oldStart : oldStart - newStart;
 
-		SizeType total = 0;
-		SizeType maxHoleSize = 0;
+		SizeType       total       = 0;
+		SizeType       maxHoleSize = 0;
 		VectorPairType offsetsForHoles;
 		findSizes(total, maxHoleSize, offsetsForHoles);
 
 		int long correctedIntoOffset = intoOffset_;
-		int long correctedOldStart = oldStart;
-		adjustPointer(
-		    reinterpret_cast<unsigned char*>(&correctedOldStart),
-		    sizeof(correctedOldStart),
-		    0,
-		    &offsetsForHoles);
+		int long correctedOldStart   = oldStart;
+		adjustPointer(reinterpret_cast<unsigned char*>(&correctedOldStart),
+		              sizeof(correctedOldStart),
+		              0,
+		              &offsetsForHoles);
 		correctedIntoOffset -= oldStart;
 		correctedIntoOffset += correctedOldStart;
 
 		intoOffset_ = correctedIntoOffset;
 	}
 
-	void saveChunkInfo(std::ofstream& fout,
-	                   const VectorPairType& offsetsForHoles) const
+	void saveChunkInfo(std::ofstream& fout, const VectorPairType& offsetsForHoles) const
 	{
 		long unsigned int len = vmptr_.size();
 		fout.write(reinterpret_cast<char*>(&len), sizeof(len));
 		for (SizeType i = 0; i < vmptr_.size(); ++i) {
 			MemoryPointer mptr = vmptr_[i];
-			adjustPointer(
-			    reinterpret_cast<unsigned char*>(&(mptr.ptr)),
-			    sizeof(mptr.ptr),
-			    0,
-			    &offsetsForHoles);
+			adjustPointer(reinterpret_cast<unsigned char*>(&(mptr.ptr)),
+			              sizeof(mptr.ptr),
+			              0,
+			              &offsetsForHoles);
 
-			fout.write(reinterpret_cast<char*>(&mptr),
-			           sizeof(MemoryPointer));
+			fout.write(reinterpret_cast<char*>(&mptr), sizeof(MemoryPointer));
 		}
 	}
 
-	SizeType saveChunkData(std::ofstream& fout,
-	                       const VectorPairType& offsetsForHoles) const
+	SizeType saveChunkData(std::ofstream& fout, const VectorPairType& offsetsForHoles) const
 	{
 		SizeType total = 0;
 
 		for (SizeType i = 0; i < vmptr_.size(); ++i) {
 			if (i > 0) {
 				long unsigned int end = vmptr_[i - 1].ptr + vmptr_[i - 1].length;
-				SizeType srcHoleSize = vmptr_[i].ptr - end;
-				SizeType destHoleSize = srcHoleSize % 8;
+				SizeType          srcHoleSize  = vmptr_[i].ptr - end;
+				SizeType          destHoleSize = srcHoleSize % 8;
 
 				if (lenOfZeroes_ <= destHoleSize)
 					throw RuntimeError("lenZeroes\n");
@@ -537,17 +520,14 @@ private:
 				total += destHoleSize;
 			}
 
-			SizeType len = vmptr_[i].length;
-			char* mptr = reinterpret_cast<char*>(vmptr_[i].ptr);
-			char* allocated = 0;
+			SizeType len       = vmptr_[i].length;
+			char*    mptr      = reinterpret_cast<char*>(vmptr_[i].ptr);
+			char*    allocated = 0;
 
 			if (vmptr_[i].type == MEMORY_HEAPPTR) {
 				allocated = new char[len];
-				memcpy(allocated,
-				       reinterpret_cast<char*>(vmptr_[i].ptr),
-				       len);
-				adjustPointer(reinterpret_cast<unsigned char*>(
-				                  allocated),
+				memcpy(allocated, reinterpret_cast<char*>(vmptr_[i].ptr), len);
+				adjustPointer(reinterpret_cast<unsigned char*>(allocated),
 				              len,
 				              0,
 				              &offsetsForHoles);
@@ -569,38 +549,38 @@ private:
 		vmptr_.resize(len);
 		for (SizeType i = 0; i < vmptr_.size(); ++i) {
 			MemoryPointer* mptr = &(vmptr_[i]);
-			fin.read(reinterpret_cast<char*>(mptr),
-			         sizeof(MemoryPointer));
+			fin.read(reinterpret_cast<char*>(mptr), sizeof(MemoryPointer));
 			rankVector_.push_back(mptr->ptr);
 		}
 	}
 
-	void findSizes(SizeType& total, SizeType& maxHoleSize, VectorPairType& offsetsForHoles) const
+	void
+	findSizes(SizeType& total, SizeType& maxHoleSize, VectorPairType& offsetsForHoles) const
 	{
 		maxHoleSize = 1;
-		total = 0;
+		total       = 0;
 		if (vmptr_.size() == 0)
 			return;
 		long unsigned int start = vmptr_[0].ptr;
-		long unsigned int end = start + vmptr_[0].length;
-		total = vmptr_[0].length;
+		long unsigned int end   = start + vmptr_[0].length;
+		total                   = vmptr_[0].length;
 		for (SizeType i = 1; i < vmptr_.size(); ++i) {
 			long unsigned int start2 = vmptr_[i].ptr;
-			long unsigned int end2 = start2 + vmptr_[i].length;
+			long unsigned int end2   = start2 + vmptr_[i].length;
 			if (start2 < end)
 				throw RuntimeError("findTotal end\n");
 
 			total += vmptr_[i].length;
-			long int srcHoleSize = start2 - end;
+			long int srcHoleSize  = start2 - end;
 			long int destHoleSize = srcHoleSize % 8;
-			long int offset = destHoleSize - srcHoleSize;
+			long int offset       = destHoleSize - srcHoleSize;
 			PairType offsetForHole(start2, offset);
 			offsetsForHoles.push_back(offsetForHole);
 			total += destHoleSize;
 			if (static_cast<long unsigned int>(destHoleSize) > maxHoleSize)
 				maxHoleSize = destHoleSize;
 
-			end = end2;
+			end   = end2;
 			start = start2;
 		}
 	}
@@ -612,11 +592,11 @@ private:
 
 		long unsigned int newStart = pointerToLui(reinterpret_cast<void*>(ptr));
 		long unsigned int oldStart = vmptr_[0].ptr;
-		long int offset = newStart - oldStart;
+		long int          offset   = newStart - oldStart;
 
 		long unsigned int start = vmptr_[0].ptr;
-		SizeType len = vmptr_[0].length;
-		long unsigned int end = start + len;
+		SizeType          len   = vmptr_[0].length;
+		long unsigned int end   = start + len;
 
 		SizeType total2 = copyData(&ptr, 0, offset, offsetsForHoles);
 
@@ -624,11 +604,11 @@ private:
 			if (total2 >= total)
 				throw RuntimeError("deepCopy total2\n");
 			long unsigned int start2 = vmptr_[i].ptr;
-			SizeType len = vmptr_[i].length;
-			long unsigned int end2 = start2 + len;
+			SizeType          len    = vmptr_[i].length;
+			long unsigned int end2   = start2 + len;
 			if (start2 < end)
 				throw RuntimeError("deepCopy\n");
-			SizeType srcHoleSize = start2 - end;
+			SizeType srcHoleSize  = start2 - end;
 			SizeType destHoleSize = srcHoleSize % 8;
 
 			if (lenOfZeroes_ <= destHoleSize)
@@ -643,7 +623,7 @@ private:
 			total2 += copyData(&ptr, i, offset, offsetsForHoles);
 
 			start = start2;
-			end = end2;
+			end   = end2;
 		}
 
 		if (total2 < total) {
@@ -652,11 +632,14 @@ private:
 		}
 	}
 
-	SizeType copyData(unsigned char** ptr, SizeType i, long int offset, const VectorPairType& offsetsForHoles)
+	SizeType copyData(unsigned char**       ptr,
+	                  SizeType              i,
+	                  long int              offset,
+	                  const VectorPairType& offsetsForHoles)
 	{
-		const void* src = reinterpret_cast<const void*>(vmptr_[i].ptr);
-		void* src2 = const_cast<void*>(src);
-		SizeType len = vmptr_[i].length;
+		const void* src  = reinterpret_cast<const void*>(vmptr_[i].ptr);
+		void*       src2 = const_cast<void*>(src);
+		SizeType    len  = vmptr_[i].length;
 
 		memcpy(*ptr, src2, len);
 		if (vmptr_[i].type == MEMORY_HEAPPTR)
@@ -691,7 +674,10 @@ private:
 		}*/
 	}
 
-	void adjustPointer(unsigned char* ptr, SizeType n, long int offset, const VectorPairType* offsetsForHoles) const
+	void adjustPointer(unsigned char*        ptr,
+	                   SizeType              n,
+	                   long int              offset,
+	                   const VectorPairType* offsetsForHoles) const
 	{
 		if (n < 8 || n % 8 != 0)
 			throw RuntimeError("adjustPointer");
@@ -699,12 +685,13 @@ private:
 		SizeType counter = 0;
 
 		do {
-			void* p = reinterpret_cast<void*>(ptr);
+			void*              p        = reinterpret_cast<void*>(ptr);
 			long unsigned int* ptrToLui = reinterpret_cast<long unsigned int*>(ptr);
-			long unsigned int value = *ptrToLui;
+			long unsigned int  value    = *ptrToLui;
 
 			if (value != 0) {
-				long int correctForHoles = correctionForHoles(value, offsetsForHoles);
+				long int correctForHoles
+				    = correctionForHoles(value, offsetsForHoles);
 				long int allOffsetCorrections = correctForHoles + offset;
 				value += allOffsetCorrections;
 				long unsigned int* valuePtr = &value;
@@ -716,14 +703,13 @@ private:
 		} while (counter < n);
 	}
 
-	long int
-	correctionForHoles(long unsigned int value,
-	                   const VectorPairType* offsetsForHolesPtr) const
+	long int correctionForHoles(long unsigned int     value,
+	                            const VectorPairType* offsetsForHolesPtr) const
 	{
 		if (offsetsForHolesPtr == 0)
 			return 0;
 		const VectorPairType& offsetsForHoles = *offsetsForHolesPtr;
-		long int c = 0;
+		long int              c               = 0;
 		for (SizeType i = 0; i < offsetsForHoles.size(); ++i) {
 			SizeType start = offsetsForHoles[i].first;
 			if (value < start)
@@ -739,24 +725,21 @@ private:
 		return reinterpret_cast<long unsigned int>(ptr);
 	}
 
-	long unsigned int intoOffset_;
-	long int refTextPtr_;
-	mutable char* zeroes_;
-	mutable SizeType lenOfZeroes_;
-	VectorMemoryPointerType vmptr_;
-	std::vector<SizeType> rankVector_;
+	long unsigned int           intoOffset_;
+	long int                    refTextPtr_;
+	mutable char*               zeroes_;
+	mutable SizeType            lenOfZeroes_;
+	VectorMemoryPointerType     vmptr_;
+	std::vector<SizeType>       rankVector_;
 	std::vector<unsigned char*> garbage_;
-	std::vector<SizeType> garbageSize_;
+	std::vector<SizeType>       garbageSize_;
 }; // class MemResolv
 
 std::ostream& operator<<(std::ostream& os, const MemResolv& mresolv);
 
-template <typename T, bool IsClassTrait>
-class ResolveFinalOrNot {
-};
+template <typename T, bool IsClassTrait> class ResolveFinalOrNot { };
 
-template <typename T>
-class ResolveFinalOrNot<T, false> {
+template <typename T> class ResolveFinalOrNot<T, false> {
 
 public:
 
@@ -768,8 +751,7 @@ public:
 	}
 };
 
-template <typename T>
-class ResolveFinalOrNot<T, true> {
+template <typename T> class ResolveFinalOrNot<T, true> {
 
 public:
 

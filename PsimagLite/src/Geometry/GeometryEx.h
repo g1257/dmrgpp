@@ -7,8 +7,7 @@
 
 namespace PsimagLite {
 
-template <typename RealType, typename InputType>
-class GeometryEx {
+template <typename RealType, typename InputType> class GeometryEx {
 
 public:
 
@@ -18,21 +17,17 @@ public:
 	    : meshLength_(0)
 	    , enabled_(false)
 	    , meshStep_(0)
-	{
-	}
+	{ }
 
 	GeometryEx(InputType& io, SizeType meshPoints)
 	    : meshLength_(static_cast<SizeType>(sqrt(meshPoints)))
 	    , enabled_(false)
-	    , meshStep_((meshLength_ > 0)
-	                    ? static_cast<RealType>(2 * M_PI / meshLength_)
-	                    : 0)
+	    , meshStep_((meshLength_ > 0) ? static_cast<RealType>(2 * M_PI / meshLength_) : 0)
 	{
 		String str;
 		try {
 			io.readline(str, "GeometryKind=", false);
-		}
-		catch (std::exception&) {
+		} catch (std::exception&) {
 			io.readline(str, "gt0:GeometryKind=", false);
 		}
 
@@ -40,8 +35,7 @@ public:
 			enabled_ = true;
 	}
 
-	template <class Archive>
-	void write(Archive& ar, const unsigned int)
+	template <class Archive> void write(Archive& ar, const unsigned int)
 	{
 		ar & meshLength_;
 		ar & enabled_;
@@ -54,11 +48,11 @@ public:
 		String str = msg;
 		str += "GeometryEx";
 		const char* start = (const char*)&meshLength_;
-		const char* end = (const char*)&enabled_;
-		SizeType total = mres.memResolv(&meshLength_, end - start, str + " meshLength");
+		const char* end   = (const char*)&enabled_;
+		SizeType    total = mres.memResolv(&meshLength_, end - start, str + " meshLength");
 
 		start = end;
-		end = (const char*)&meshStep_;
+		end   = (const char*)&meshStep_;
 		total += mres.memResolv(&enabled_, end - start, str + " enabled");
 
 		assert(x > total);
@@ -105,9 +99,9 @@ public:
 	void getMeshVector(VectorRealType& kvector, SizeType k) const
 	{
 		assert(enabled_);
-		int k1 = k;
-		int m = meshLength_;
-		div_t q = std::div(k1, m);
+		int   k1   = k;
+		int   m    = meshLength_;
+		div_t q    = std::div(k1, m);
 		kvector[0] = -M_PI + q.quot * meshStep_;
 		kvector[1] = -M_PI + q.rem * meshStep_;
 	}
@@ -121,7 +115,7 @@ public:
 private:
 
 	SizeType meshLength_;
-	bool enabled_;
+	bool     enabled_;
 	RealType meshStep_;
 };
 
@@ -133,8 +127,7 @@ private:
 
 namespace PsimagLite {
 
-template <typename RealType, typename InputType>
-class GeometryEx {
+template <typename RealType, typename InputType> class GeometryEx {
 
 public:
 
@@ -144,8 +137,7 @@ public:
 	{
 		SizeType ly = 2;
 		SizeType lx = 2;
-		std::cerr
-		    << "WARNING: GeometryEx(): lattice of 2x2 hard wired\n";
+		std::cerr << "WARNING: GeometryEx(): lattice of 2x2 hard wired\n";
 		msGeometryInit2D(lx, 0, 0, ly, meshPoints);
 	}
 
@@ -166,10 +158,7 @@ public:
 	//! Number of symmetry operations for this K Geometry.
 	SizeType nGroupK() const { return msGeometryNgroupK(); }
 
-	SizeType ickequ(SizeType j, SizeType op) const
-	{
-		return msGeometryIckequ(j, op);
-	}
+	SizeType ickequ(SizeType j, SizeType op) const { return msGeometryIckequ(j, op); }
 
 	void getMeshVector(VectorRealType& kvector, SizeType k) const
 	{

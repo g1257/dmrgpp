@@ -27,8 +27,8 @@ Please see full open source license included in file LICENSE.
 #include <string>
 
 using namespace PsimagLite;
-typedef double RealType;
-typedef TridiagonalMatrix<RealType> TridiagonalMatrixType;
+typedef double                                   RealType;
+typedef TridiagonalMatrix<RealType>              TridiagonalMatrixType;
 typedef ContinuedFraction<TridiagonalMatrixType> ContinuedFractionType;
 
 void usage(const char* progName)
@@ -40,12 +40,12 @@ void usage(const char* progName)
 
 int main(int argc, char* argv[])
 {
-	int opt = 0;
-	String file = "";
+	int      opt    = 0;
+	String   file   = "";
 	RealType wbegin = 0;
-	RealType wend = 0;
-	RealType wstep = 0;
-	RealType delta = 0;
+	RealType wend   = 0;
+	RealType wstep  = 0;
+	RealType delta  = 0;
 
 	while ((opt = getopt(argc, argv, "f:b:e:s:d:")) != -1) {
 		switch (opt) {
@@ -75,10 +75,10 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	IoSimple::In io(file);
-	ContinuedFractionType cf(io);
+	IoSimple::In                                           io(file);
+	ContinuedFractionType                                  cf(io);
 	typedef typename ContinuedFractionType::PlotParamsType PlotParamsType;
-	typename ContinuedFractionType::PlotDataType v;
+	typename ContinuedFractionType::PlotDataType           v;
 	PlotParamsType plotParams(wbegin, wend, wstep, delta, 0, 0);
 	cf.plot(v, plotParams);
 	for (SizeType x = 0; x < v.size(); x++) {

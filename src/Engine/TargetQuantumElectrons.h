@@ -81,18 +81,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Hubbard Model Parameters
-template <typename RealType, typename QnType>
-class TargetQuantumElectrons
-{
+template <typename RealType, typename QnType> class TargetQuantumElectrons {
 
 public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename QnType::PairSizeType PairSizeType;
-	typedef typename QnType::VectorQnType VectorQnType;
+	typedef typename QnType::PairSizeType      PairSizeType;
+	typedef typename QnType::VectorQnType      VectorQnType;
 
 	template <typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io)
@@ -103,18 +100,16 @@ public:
 		int tmp = 0;
 		try {
 			io.readline(tmp, "UseSu2Symmetry=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		isSu2_ = (tmp > 0);
 
-		bool hasNqns = false;
-		SizeType nqns = 0;
+		bool     hasNqns = false;
+		SizeType nqns    = 0;
 		try {
 			io.readline(nqns, "NumberOfTargetQns=");
 			hasNqns = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (!hasNqns) {
 			readOneTarget(io, "");
@@ -148,15 +143,16 @@ public:
 		return vqn_[ind];
 	}
 
-	void updateQuantumSector(VectorQnType& quantumSector,
-	    SizeType sites,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType step,
-	    const VectorQnType& adjustQuantumNumbers) const
+	void updateQuantumSector(VectorQnType&                 quantumSector,
+	                         SizeType                      sites,
+	                         ProgramGlobals::DirectionEnum direction,
+	                         SizeType                      step,
+	                         const VectorQnType&           adjustQuantumNumbers) const
 	{
 		const SizeType maxSites = totalNumberOfSites_;
 
-		if (direction == ProgramGlobals::DirectionEnum::INFINITE && sites < maxSites && adjustQuantumNumbers.size() > step) {
+		if (direction == ProgramGlobals::DirectionEnum::INFINITE && sites < maxSites
+		    && adjustQuantumNumbers.size() > step) {
 			if (quantumSector.size() != 1)
 				err("adjustQuantumNumbers only with single target\n");
 			quantumSector[0] = adjustQuantumNumbers[step];
@@ -168,14 +164,10 @@ public:
 		const SizeType n = quantumSector.size();
 
 		for (SizeType i = 0; i < n; ++i)
-			quantumSector[i].scale(sites,
-			    totalNumberOfSites_,
-			    direction,
-			    isSu2_);
+			quantumSector[i].scale(sites, totalNumberOfSites_, direction, isSu2_);
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/TargetQuantumElectrons";
 		io.createGroup(label);
@@ -191,50 +183,49 @@ private:
 	TargetQuantumElectrons& operator=(const TargetQuantumElectrons&);
 
 	template <typename IoInputType>
-	void readOneTarget(IoInputType& io,
-	    const PsimagLite::String label)
+	void readOneTarget(IoInputType& io, const PsimagLite::String label)
 	{
-		QnType qn(QnType::zero());
+		QnType         qn(QnType::zero());
 		VectorSizeType qnOther;
-		const bool allowUpDown = true;
+		const bool     allowUpDown = true;
 
 		PsimagLite::String msg("TargetQuantumElectrons: ");
-		bool hasTwiceJ = false;
+		bool               hasTwiceJ = false;
 		try {
 			io.readline(qn.jmPair.first, "TargetSpinTimesTwo" + label + "=");
 			hasTwiceJ = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		SizeType ready = 0;
 		if (allowUpDown) {
-			SizeType electronsUp = 0;
+			SizeType electronsUp   = 0;
 			SizeType electronsDown = 0;
 			try {
-				electronsUp = readNumberOrExpression(io, "TargetElectronsUp" + label + "=");
-				electronsDown = readNumberOrExpression(io, "TargetElectronsDown" + label + "=");
-				SizeType tmp = electronsUp + electronsDown;
+				electronsUp
+				    = readNumberOrExpression(io, "TargetElectronsUp" + label + "=");
+				electronsDown = readNumberOrExpression(
+				    io, "TargetElectronsDown" + label + "=");
+				SizeType tmp    = electronsUp + electronsDown;
 				qn.oddElectrons = (tmp & 1);
 				qnOther.push_back(tmp);
 				qnOther.push_back(electronsUp);
 				ready = 2;
-			} catch (std::exception&) {
-			}
+			} catch (std::exception&) { }
 		}
 
 		try {
-			SizeType tmp = readNumberOrExpression(io, "TargetElectronsTotal" + label + "=");
+			SizeType tmp
+			    = readNumberOrExpression(io, "TargetElectronsTotal" + label + "=");
 			qn.oddElectrons = (tmp & 1);
 			qnOther.push_back(tmp);
 			ready++;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
-			SizeType szPlusConst = readNumberOrExpression(io, "TargetSzPlusConst" + label + "=");
+			SizeType szPlusConst
+			    = readNumberOrExpression(io, "TargetSzPlusConst" + label + "=");
 			qnOther.push_back(szPlusConst);
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (ready == 3) {
 			msg += "Provide either up/down or total/sz but not both.\n";
@@ -245,25 +236,25 @@ private:
 			std::string parity;
 			io.readline(parity, "TargetFermionicParity=");
 			if (ready != 0) {
-				err("TargetFermionicParity cannot be used if you provide TargetElectrons*\n");
+				err("TargetFermionicParity cannot be used if you provide "
+				    "TargetElectrons*\n");
 			}
 
 			if (parity != "even" && parity != "odd") {
-				err("TargetFermionicParity must be either even or odd, not " + parity + "\n");
+				err("TargetFermionicParity must be either even or odd, not "
+				    + parity + "\n");
 			}
 
 			qn.oddElectrons = (parity == "odd");
 			std::cout << "Using TargetFermionicParity=" << qn.oddElectrons << "\n";
 			std::cerr << "Using TargetFermionicParity=" << qn.oddElectrons << "\n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		bool flag = false;
 		try {
 			readNumberOrExpression(io, "TargetExtra" + label + "=");
 			flag = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (flag)
 			err("Instead of TargetExtra" + label + "= please use a vector\n");
@@ -273,8 +264,7 @@ private:
 			io.read(extra, "TargetExtra" + label);
 			for (SizeType i = 0; i < extra.size(); ++i)
 				qnOther.push_back(extra[i]);
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		qn.other.fromStdVector(qnOther);
 
@@ -297,7 +287,7 @@ private:
 		PsimagLite::String val;
 		io.readline(val, fullLabel);
 
-		const PsimagLite::String msg = "Target number for " + fullLabel;
+		const PsimagLite::String    msg = "Target number for " + fullLabel;
 		AlgebraicStringToNumberType algebraicStringToNumber(msg, totalNumberOfSites_);
 
 		SizeType p = algebraicStringToNumber.procLength(val);
@@ -306,8 +296,8 @@ private:
 		return p;
 	}
 
-	SizeType totalNumberOfSites_;
-	bool isSu2_;
+	SizeType     totalNumberOfSites_;
+	bool         isSu2_;
 	VectorQnType vqn_;
 };
 } // namespace Dmrg

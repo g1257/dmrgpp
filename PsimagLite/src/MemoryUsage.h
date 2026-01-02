@@ -95,20 +95,20 @@ public:
 
 		TimeHandle()
 		{
-			startTime_.tv_sec = 0;
+			startTime_.tv_sec  = 0;
 			startTime_.tv_usec = 0;
 			gettimeofday(&startTime_, 0);
 		}
 
 		TimeHandle(time_t s, suseconds_t u)
 		{
-			startTime_.tv_sec = s;
+			startTime_.tv_sec  = s;
 			startTime_.tv_usec = u;
 		}
 
 		TimeHandle operator-(const TimeHandle& other) const
 		{
-			time_t s = startTime_.tv_sec - other.startTime_.tv_sec;
+			time_t      s = startTime_.tv_sec - other.startTime_.tv_sec;
 			suseconds_t u = startTime_.tv_usec - other.startTime_.tv_usec;
 			return TimeHandle(s, u);
 		}
@@ -167,12 +167,12 @@ public:
 			return "NOT_FOUND";
 
 		x += label.length();
-		long unsigned int y = data_.find("\n", x);
-		SizeType len = y - x;
+		long unsigned int y   = data_.find("\n", x);
+		SizeType          len = y - x;
 		if (y == String::npos)
 			len = data_.length() - x;
-		String s2 = data_.substr(x, len);
-		x = 0;
+		String s2        = data_.substr(x, len);
+		x                = 0;
 		const SizeType n = s2.length();
 		for (SizeType i = 0; i < n; ++i) {
 			++x;
@@ -196,8 +196,8 @@ public:
 
 private:
 
-	String data_;
-	String myself_;
+	String     data_;
+	String     myself_;
 	TimeHandle startTime_;
 }; // class MemoryUsage
 

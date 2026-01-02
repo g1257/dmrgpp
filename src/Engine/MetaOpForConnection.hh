@@ -2,13 +2,12 @@
 #define METAOPFORCONNECTION_HH
 #include "AllocatorCpu.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 struct MetaOpForConnection {
-	int site; // -1 means non-local
+	int      site; // -1 means non-local
 	SizeType index;
-	char modifier;
+	char     modifier;
 };
 
 }

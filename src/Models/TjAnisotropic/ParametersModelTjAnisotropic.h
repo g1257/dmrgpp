@@ -81,13 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_PARAMS_TJAnisotropic_H
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! ModelTjAnisotropic Parameters
 template <typename RealType, typename QnType>
 struct ParametersModelTjAnisotropic : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	template <typename IoInputType>
@@ -107,49 +106,43 @@ struct ParametersModelTjAnisotropic : public ParametersModelBase<RealType, QnTyp
 		try {
 			io.read(potentialV, "potentialV");
 			std::cerr << "Has potentialV \n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.read(magneticFieldX, "MagneticFieldX");
 			std::cerr << "Has MagneticFieldX \n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.read(magneticFieldY, "MagneticFieldY");
 			std::cerr << "Has MagneticFieldY \n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.read(magneticFieldZ, "MagneticFieldZ");
 			std::cerr << "Has MagneticFieldZ \n";
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(reinterpretAndTruncate, "JHundInfinity=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (orbitals != 2 && reinterpretAndTruncate > 0)
-			throw PsimagLite::RuntimeError("JHundInfinity>0 only possible for orbitals==2\n");
+			throw PsimagLite::RuntimeError(
+			    "JHundInfinity>0 only possible for orbitals==2\n");
 
 		if (reinterpretAndTruncate > 3)
-			throw PsimagLite::RuntimeError("JHundInfinity must be less or equal to 3\n");
+			throw PsimagLite::RuntimeError(
+			    "JHundInfinity must be less or equal to 3\n");
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelTjAnisotropic";
 		io.createGroup(label);
@@ -163,8 +156,8 @@ struct ParametersModelTjAnisotropic : public ParametersModelBase<RealType, QnTyp
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersModelTjAnisotropic& parameters)
+	friend std::ostream& operator<<(std::ostream&                       os,
+	                                const ParametersModelTjAnisotropic& parameters)
 	{
 		os << "potentialV\n";
 		os << parameters.potentialV;

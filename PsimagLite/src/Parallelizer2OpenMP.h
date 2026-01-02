@@ -6,8 +6,7 @@
 
 namespace PsimagLite {
 
-template <typename = int>
-class Parallelizer2 {
+template <typename = int> class Parallelizer2 {
 
 public:
 

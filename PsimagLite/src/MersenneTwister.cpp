@@ -22,11 +22,11 @@ MersenneTwister::MersenneTwister(unsigned s, int rank, int)
 
 void MersenneTwister::seed(unsigned s)
 {
-	index_ = 0;
+	index_    = 0;
 	state_[0] = s;
 	for (unsigned i = 1; i < N_; ++i) {
 		unsigned tmp = state_[i - 1] ^ (state_[i - 1] >> 30);
-		state_[i] = keepLast32BitMask_ & (1812433253 * (tmp + i));
+		state_[i]    = keepLast32BitMask_ & (1812433253 * (tmp + i));
 	}
 }
 
@@ -34,7 +34,7 @@ void MersenneTwister::generate()
 {
 	for (unsigned i = 0; i < N_; ++i) {
 		unsigned y = (state_[i] & 0x80000000) + (state_[(i + 1) % N_] & 0x7fffffff);
-		state_[i] = state_[(i + 397) % N_] ^ (y >> 1);
+		state_[i]  = state_[(i + 397) % N_] ^ (y >> 1);
 		if (y % 2 != 0)
 			state_[i] ^= 2567483615;
 	}

@@ -5,12 +5,9 @@
 #include <cassert>
 #include <cstring>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename T>
-class Array
-{
+template <typename T> class Array {
 
 public:
 
@@ -19,8 +16,7 @@ public:
 	Array()
 	    : size_(0)
 	    , data_(0)
-	{
-	}
+	{ }
 
 	Array(SizeType n)
 	    : size_(0)
@@ -125,7 +121,7 @@ private:
 	}
 
 	SizeType size_;
-	T* data_;
+	T*       data_;
 };
 }
 #endif // ARRAY_H

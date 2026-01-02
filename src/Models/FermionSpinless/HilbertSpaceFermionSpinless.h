@@ -82,12 +82,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_HILBERTSPACE_FERMIONSPINLESS_H
 #define DMRG_HILBERTSPACE_FERMIONSPINLESS_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename Word>
-class HilbertSpaceFermionSpinless
-{
+template <typename Word> class HilbertSpaceFermionSpinless {
 public:
 
 	typedef Word HilbertState;
@@ -169,9 +166,9 @@ public:
 	static int getNofDigits(Word const& data, int value)
 	{
 		assert(value == 0);
-		int ret = 0;
+		int  ret   = 0;
 		Word data2 = data;
-		int i = 0;
+		int  i     = 0;
 		do {
 			if ((data & (1 << (i + value))))
 				ret++;
@@ -189,7 +186,7 @@ public:
 		int ii = i + 1;
 		if (ii >= j)
 			return 0;
-		Word m = 0;
+		Word     m   = 0;
 		SizeType end = j;
 		for (SizeType k = ii; k < end; k++)
 			m |= (1 << k);

@@ -53,9 +53,7 @@ public:
 
 		Encode(const String& str)
 		{
-			encode_(reinterpret_cast<const unsigned char*>(
-			            str.c_str()),
-			        str.length());
+			encode_(reinterpret_cast<const unsigned char*>(str.c_str()), str.length());
 		}
 
 		Encode(unsigned char const* bytesToEncode, unsigned int inLen)
@@ -65,14 +63,12 @@ public:
 
 		const String& operator()() const { return buffer_; }
 
-		void write(String label,
-		           PsimagLite::IoSerializer& ioSerializer) const
+		void write(String label, PsimagLite::IoSerializer& ioSerializer) const
 		{
 			ioSerializer.write(label, buffer_);
 		}
 
-		friend std::ostream& operator<<(std::ostream& os,
-		                                const Encode& encode)
+		friend std::ostream& operator<<(std::ostream& os, const Encode& encode)
 		{
 			os << "#InputStartsHere\n";
 			os << encode.buffer_;
@@ -82,12 +78,11 @@ public:
 
 	private:
 
-		void encode_(unsigned char const* bytesToEncode,
-		             unsigned int inLen)
+		void encode_(unsigned char const* bytesToEncode, unsigned int inLen)
 		{
-			buffer_ = "";
-			int i = 0;
-			int j = 0;
+			buffer_         = "";
+			int           i = 0;
+			int           j = 0;
 			unsigned char charArray3[3];
 			unsigned char charArray4[4];
 
@@ -95,8 +90,10 @@ public:
 				charArray3[i++] = *(bytesToEncode++);
 				if (i == 3) {
 					charArray4[0] = (charArray3[0] & 0xfc) >> 2;
-					charArray4[1] = ((charArray3[0] & 0x03) << 4) + ((charArray3[1] & 0xf0) >> 4);
-					charArray4[2] = ((charArray3[1] & 0x0f) << 2) + ((charArray3[2] & 0xc0) >> 6);
+					charArray4[1] = ((charArray3[0] & 0x03) << 4)
+					    + ((charArray3[1] & 0xf0) >> 4);
+					charArray4[2] = ((charArray3[1] & 0x0f) << 2)
+					    + ((charArray3[2] & 0xc0) >> 6);
 					charArray4[3] = charArray3[2] & 0x3f;
 
 					for (i = 0; (i < 4); i++)
@@ -110,8 +107,10 @@ public:
 					charArray3[j] = '\0';
 
 				charArray4[0] = (charArray3[0] & 0xfc) >> 2;
-				charArray4[1] = ((charArray3[0] & 0x03) << 4) + ((charArray3[1] & 0xf0) >> 4);
-				charArray4[2] = ((charArray3[1] & 0x0f) << 2) + ((charArray3[2] & 0xc0) >> 6);
+				charArray4[1]
+				    = ((charArray3[0] & 0x03) << 4) + ((charArray3[1] & 0xf0) >> 4);
+				charArray4[2]
+				    = ((charArray3[1] & 0x0f) << 2) + ((charArray3[2] & 0xc0) >> 6);
 				charArray4[3] = charArray3[2] & 0x3f;
 
 				for (j = 0; (j < i + 1); j++)
@@ -131,24 +130,27 @@ public:
 
 		Decode(const String& encodedString)
 		{
-			buffer_ = "";
-			int inLen = encodedString.size();
-			int i = 0;
-			int j = 0;
-			int in_ = 0;
+			buffer_             = "";
+			int           inLen = encodedString.size();
+			int           i     = 0;
+			int           j     = 0;
+			int           in_   = 0;
 			unsigned char charArray4[4], charArray3[3];
 
-			while (inLen-- && (encodedString[in_] != '=') && isBase64(encodedString[in_])) {
+			while (inLen-- && (encodedString[in_] != '=')
+			       && isBase64(encodedString[in_])) {
 				charArray4[i++] = encodedString[in_];
 				in_++;
 				if (i == 4) {
 					for (i = 0; i < 4; i++)
-						charArray4[i] = base64Chars_.find(
-						    charArray4[i]);
+						charArray4[i] = base64Chars_.find(charArray4[i]);
 
-					charArray3[0] = (charArray4[0] << 2) + ((charArray4[1] & 0x30) >> 4);
-					charArray3[1] = ((charArray4[1] & 0xf) << 4) + ((charArray4[2] & 0x3c) >> 2);
-					charArray3[2] = ((charArray4[2] & 0x3) << 6) + charArray4[3];
+					charArray3[0]
+					    = (charArray4[0] << 2) + ((charArray4[1] & 0x30) >> 4);
+					charArray3[1] = ((charArray4[1] & 0xf) << 4)
+					    + ((charArray4[2] & 0x3c) >> 2);
+					charArray3[2]
+					    = ((charArray4[2] & 0x3) << 6) + charArray4[3];
 
 					for (i = 0; (i < 3); i++)
 						buffer_ += charArray3[i];
@@ -163,8 +165,10 @@ public:
 				for (j = 0; j < 4; j++)
 					charArray4[j] = base64Chars_.find(charArray4[j]);
 
-				charArray3[0] = (charArray4[0] << 2) + ((charArray4[1] & 0x30) >> 4);
-				charArray3[1] = ((charArray4[1] & 0xf) << 4) + ((charArray4[2] & 0x3c) >> 2);
+				charArray3[0]
+				    = (charArray4[0] << 2) + ((charArray4[1] & 0x30) >> 4);
+				charArray3[1]
+				    = ((charArray4[1] & 0xf) << 4) + ((charArray4[2] & 0x3c) >> 2);
 				charArray3[2] = ((charArray4[2] & 0x3) << 6) + charArray4[3];
 
 				for (j = 0; (j < i - 1); j++)

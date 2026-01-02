@@ -90,13 +90,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename RealType_>
-struct ParametersForSolver {
+template <typename RealType_> struct ParametersForSolver {
 
 	typedef RealType_ RealType;
 
 	static const SizeType MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
-	static const SizeType LanczosSteps = 200; // max number of external Lanczos steps
+	static const SizeType LanczosSteps    = 200; // max number of external Lanczos steps
 
 	ParametersForSolver()
 	    : steps(LanczosSteps)
@@ -111,8 +110,7 @@ struct ParametersForSolver {
 	    , weight(0)
 	    , isign(0)
 	    , lotaMemory(false)
-	{
-	}
+	{ }
 
 	template <typename IoInputType>
 	ParametersForSolver(IoInputType& io, String prefix, int ind = -1)
@@ -158,8 +156,7 @@ struct ParametersForSolver {
 	{
 		if (ind >= 0) {
 			bunnie(t, prefix, ind, postfix, io);
-		}
-		else {
+		} else {
 			hare(t, prefix, postfix, io);
 		}
 	}
@@ -171,9 +168,7 @@ struct ParametersForSolver {
 		try {
 			io.readline(t, prefix + postfix + "=");
 			return;
-		}
-		catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	template <typename T, typename IoInputType>
@@ -183,21 +178,16 @@ struct ParametersForSolver {
 		try {
 			io.readline(t, prefix + ttos(ind) + postfix + "=");
 			return;
-		}
-		catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		// if prefix + jnd + postfix exists with jnd < ind --> use the
 		// largest jnd and return
 		for (SizeType i = 0; i < ind; ++i) {
 			const SizeType jnd = ind - i - 1;
 			try {
-				io.readline(t,
-				            prefix + ttos(jnd) + postfix + "=");
+				io.readline(t, prefix + ttos(jnd) + postfix + "=");
 				return;
-			}
-			catch (std::exception&) {
-			}
+			} catch (std::exception&) { }
 		}
 
 		hare(t, prefix, postfix, io);
@@ -208,12 +198,12 @@ struct ParametersForSolver {
 	RealType tolerance;
 	SizeType stepsForEnergyConvergence;
 	SizeType eigsForStop;
-	String options;
+	String   options;
 	RealType oneOverA, b;
 	RealType Eg;
 	RealType weight;
-	int isign;
-	bool lotaMemory;
+	int      isign;
+	bool     lotaMemory;
 }; // class ParametersForSolver
 } // namespace PsimagLite
 

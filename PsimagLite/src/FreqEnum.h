@@ -3,8 +3,11 @@
 
 namespace PsimagLite {
 
-enum FreqEnum { FREQ_REAL,
-	        FREQ_MATSUBARA };
+enum FreqEnum
+{
+	FREQ_REAL,
+	FREQ_MATSUBARA
+};
 
 }
 

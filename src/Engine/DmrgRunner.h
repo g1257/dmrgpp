@@ -17,53 +17,48 @@
 #include "SuperGeometry.h"
 #include "VectorWithOffset.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ComplexOrRealType>
-class DmrgRunner
-{
+template <typename ComplexOrRealType> class DmrgRunner {
 
 public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
+	typedef PsimagLite::InputNg<Dmrg::InputCheck>              InputNgType;
 	typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
 	    ParametersDmrgSolverType;
-	typedef Dmrg::SuperGeometry<ComplexOrRealType,
-	    InputNgType::Readable,
-	    Dmrg::ProgramGlobals>
-	    SuperGeometryType;
+	typedef Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>
+	                                                            SuperGeometryType;
 	typedef Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn> VectorWithOffsetType;
-	typedef PsimagLite::PsiApp ApplicationType;
+	typedef PsimagLite::PsiApp                                  ApplicationType;
 
 	DmrgRunner(RealType precision, const ApplicationType& application)
 	    : precision_(precision)
 	    , application_(application)
-	{
-	}
+	{ }
 
 	void doOneRun(PsimagLite::String data,
-	    PsimagLite::String insitu,
-	    PsimagLite::String logfile) const
+	              PsimagLite::String insitu,
+	              PsimagLite::String logfile) const
 	{
 		typedef PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrixComplex;
-		typedef Dmrg::Basis<MySparseMatrixComplex> BasisType;
-		typedef Dmrg::BasisWithOperators<BasisType> BasisWithOperatorsType;
+		typedef Dmrg::Basis<MySparseMatrixComplex>       BasisType;
+		typedef Dmrg::BasisWithOperators<BasisType>      BasisWithOperatorsType;
 		typedef Dmrg::LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
-		typedef Dmrg::ModelHelperLocal<LeftRightSuperType> ModelHelperType;
+		typedef Dmrg::ModelHelperLocal<LeftRightSuperType>              ModelHelperType;
 		typedef Dmrg::ModelBase<ModelHelperType,
-		    ParametersDmrgSolverType,
-		    InputNgType::Readable,
-		    SuperGeometryType>
+		                        ParametersDmrgSolverType,
+		                        InputNgType::Readable,
+		                        SuperGeometryType>
 		    ModelBaseType;
 
 		std::streambuf* globalCoutBuffer = 0;
-		std::ofstream globalCoutStream;
+		std::ofstream   globalCoutStream;
 		if (logfile != "-") {
 			globalCoutBuffer = std::cout.rdbuf(); // save old buf
 			globalCoutStream.open(logfile.c_str(), std::ofstream::out);
-			if (!globalCoutStream || globalCoutStream.bad() || !globalCoutStream.good()) {
+			if (!globalCoutStream || globalCoutStream.bad()
+			    || !globalCoutStream.good()) {
 				PsimagLite::String str(application_.name());
 				str += ": Could not redirect std::cout to " + logfile + "\n";
 				err(str);
@@ -74,9 +69,9 @@ public:
 			printOutputChange(logfile, data);
 		}
 
-		Dmrg::InputCheck inputCheck;
+		Dmrg::InputCheck       inputCheck;
 		InputNgType::Writeable ioWriteable(inputCheck, data);
-		InputNgType::Readable io(ioWriteable);
+		InputNgType::Readable  io(ioWriteable);
 
 		ParametersDmrgSolverType dmrgSolverParams(io, "", false);
 		if (dmrgSolverParams.options.isSet("hd5DontPrint"))
@@ -118,7 +113,7 @@ private:
 
 	template <typename MatrixVectorType>
 	void doOneRun2(const ParametersDmrgSolverType& dmrgSolverParams,
-	    InputNgType::Readable& io) const
+	               InputNgType::Readable&          io) const
 	{
 		SuperGeometryType geometry(io);
 		if (dmrgSolverParams.options.isSet("printgeometry"))
@@ -127,9 +122,9 @@ private:
 		typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
 		    ParametersForSolverType;
 		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-		    MatrixVectorType,
-		    typename MatrixVectorType::VectorType>
-		    SolverType;
+		                                  MatrixVectorType,
+		                                  typename MatrixVectorType::VectorType>
+		                                                   SolverType;
 		typedef typename SolverType::MatrixType::ModelType ModelBaseType;
 
 		//! Setup the Model
@@ -138,7 +133,7 @@ private:
 
 		//! Setup the dmrg solver: (vectorwithoffset.h only):
 		typedef Dmrg::DmrgSolver<SolverType, VectorWithOffsetType> DmrgSolverType;
-		DmrgSolverType dmrgSolver(model, io);
+		DmrgSolverType                                             dmrgSolver(model, io);
 
 		//! Calculate observables:
 		dmrgSolver.main(geometry);
@@ -153,7 +148,7 @@ private:
 		os << base64() << "\n";
 	}
 
-	RealType precision_;
+	RealType               precision_;
 	const ApplicationType& application_;
 };
 }

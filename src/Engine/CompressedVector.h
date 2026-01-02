@@ -3,12 +3,9 @@
 #include "Vector.h"
 #include <fstream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename T>
-class CompressedVector
-{
+template <typename T> class CompressedVector {
 
 public:
 
@@ -48,7 +45,7 @@ public:
 		partition_.resize(2);
 		partition_[0] = 0;
 		partition_[1] = n;
-		size_ = n;
+		size_         = n;
 		data_.clear();
 		data_.resize(1, 0);
 	}
@@ -64,10 +61,7 @@ public:
 
 private:
 
-	void build()
-	{
-		throw PsimagLite::RuntimeError("CompressedVector: build\n");
-	}
+	void build() { throw PsimagLite::RuntimeError("CompressedVector: build\n"); }
 
 	SizeType findPartition(SizeType ind) const
 	{
@@ -79,8 +73,8 @@ private:
 		throw PsimagLite::RuntimeError("CompressedVector: findPartition\n");
 	}
 
-	SizeType size_;
-	PsimagLite::Vector<SizeType>::Type partition_;
+	SizeType                             size_;
+	PsimagLite::Vector<SizeType>::Type   partition_;
 	typename PsimagLite::Vector<T>::Type data_;
 }; // class CompressedVector
 

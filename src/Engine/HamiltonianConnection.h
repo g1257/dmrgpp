@@ -91,45 +91,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <cassert>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // Keep this class independent of x and y in x = H*y
 // For things that depend on x and y use ParallelHamiltonianConnection.h
 template <typename ModelLinksType, typename ModelHelperType_, typename ParamsForSolverType_>
-class HamiltonianConnection
-{
+class HamiltonianConnection {
 
 public:
 
-	typedef ModelHelperType_ ModelHelperType;
-	typedef ParamsForSolverType_ ParamsForSolverType;
-	typedef typename ModelLinksType::SuperGeometryType SuperGeometryType;
-	typedef HamiltonianAbstract<SuperGeometryType> HamiltonianAbstractType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef VerySparseMatrix<ComplexOrRealType> VerySparseMatrixType;
-	typedef typename ModelHelperType::LinkType LinkType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
-	typedef typename PsimagLite::Concurrency ConcurrencyType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
-	typedef typename ModelHelperType::Aux AuxType;
-	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
+	typedef ModelHelperType_                                          ModelHelperType;
+	typedef ParamsForSolverType_                                      ParamsForSolverType;
+	typedef typename ModelLinksType::SuperGeometryType                SuperGeometryType;
+	typedef HamiltonianAbstract<SuperGeometryType>                    HamiltonianAbstractType;
+	typedef typename ModelHelperType::RealType                        RealType;
+	typedef typename ModelHelperType::SparseMatrixType                SparseMatrixType;
+	typedef typename ModelHelperType::OperatorStorageType             OperatorStorageType;
+	typedef typename SparseMatrixType::value_type                     ComplexOrRealType;
+	typedef VerySparseMatrix<ComplexOrRealType>                       VerySparseMatrixType;
+	typedef typename ModelHelperType::LinkType                        LinkType;
+	typedef std::pair<SizeType, SizeType>                             PairType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type      VectorType;
+	typedef typename PsimagLite::Vector<VectorType>::Type             VectorVectorType;
+	typedef typename PsimagLite::Concurrency                          ConcurrencyType;
+	typedef PsimagLite::Vector<SizeType>::Type                        VectorSizeType;
+	typedef typename ModelHelperType::LeftRightSuperType              LeftRightSuperType;
+	typedef typename PsimagLite::Vector<LinkType>::Type               VectorLinkType;
+	typedef typename ModelHelperType::Aux                             AuxType;
+	typedef OperatorsCached<LeftRightSuperType>                       OperatorsCachedType;
 	typedef SuperOpHelperBase<SuperGeometryType, ParamsForSolverType> SuperOpHelperBaseType;
 	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>
-	    ManyToTwoConnectionType;
+	                                       ManyToTwoConnectionType;
 	typedef OpsForLink<LeftRightSuperType> OpsForLinkType;
 
-	HamiltonianConnection(const LeftRightSuperType& lrs,
-	    const ModelLinksType& lpb,
-	    RealType targetTime,
-	    const SuperOpHelperBaseType& superOpHelper)
+	HamiltonianConnection(const LeftRightSuperType&    lrs,
+	                      const ModelLinksType&        lpb,
+	                      RealType                     targetTime,
+	                      const SuperOpHelperBaseType& superOpHelper)
 	    : modelHelper_(lrs)
 	    , modelLinks_(lpb)
 	    , targetTime_(targetTime)
@@ -141,9 +139,9 @@ public:
 	    , smax_(*std::max_element(systemBlock_.begin(), systemBlock_.end()))
 	    , emin_(*std::min_element(envBlock_.begin(), envBlock_.end()))
 	    , hamAbstract_(superOpHelper.superGeometry(),
-		  smax_,
-		  emin_,
-		  modelHelper_.leftRightSuper().super().block())
+	                   smax_,
+	                   emin_,
+	                   modelHelper_.leftRightSuper().super().block())
 	    , totalOnes_(hamAbstract_.items())
 	{
 		checkGeometryTerms();
@@ -158,17 +156,18 @@ public:
 		--last;
 		SizeType numberOfSites = hamAbstract_.superGeometry().numberOfSites();
 		assert(numberOfSites > 0);
-		bool superIsReallySuper = (lrs.super().block()[0] == 0 && lrs.super().block()[last] == numberOfSites - 1);
+		bool superIsReallySuper = (lrs.super().block()[0] == 0
+		                           && lrs.super().block()[last] == numberOfSites - 1);
 
 		if (!superIsReallySuper)
 			return; // <-- CONDITIONAL EARLY EXIT HERE
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "LinkProductStructSize=" << lps_.size();
 		progress_.printline(msgg, std::cout);
 
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		// add left and right contributions
 		msg2 << "PthreadsTheoreticalLimitForThisPart=" << (lps_.size() + 2);
@@ -198,12 +197,12 @@ public:
 
 	void matrixBond(VerySparseMatrixType& matrix, const AuxType& aux) const
 	{
-		SizeType matrixRank = matrix.rows();
+		SizeType             matrixRank = matrix.rows();
 		VerySparseMatrixType matrix2(matrixRank, matrixRank);
-		SizeType nitems = totalOnes_.size();
+		SizeType             nitems = totalOnes_.size();
 
 		OpsForLinkType opsForLink(operatorsCached_, lps_);
-		SizeType x = 0;
+		SizeType       x = 0;
 		for (SizeType xx = 0; xx < nitems; ++xx) {
 			SparseMatrixType matrixBlock(matrixRank, matrixRank);
 			for (SizeType i = 0; i < totalOnes_[xx]; ++i) {
@@ -212,10 +211,10 @@ public:
 				if (opsForLink.invalid())
 					continue;
 				modelHelper_.fastOpProdInter(opsForLink.A().getCRS(),
-				    opsForLink.B().getCRS(),
-				    mBlock,
-				    opsForLink.link(),
-				    aux);
+				                             opsForLink.B().getCRS(),
+				                             mBlock,
+				                             opsForLink.link(),
+				                             aux);
 
 				matrixBlock += mBlock;
 			}
@@ -227,25 +226,13 @@ public:
 		matrix += matrix2;
 	}
 
-	OpsForLinkType opsForLink() const
-	{
-		return OpsForLinkType(operatorsCached_, lps_);
-	}
+	OpsForLinkType opsForLink() const { return OpsForLinkType(operatorsCached_, lps_); }
 
-	const ModelHelperType& modelHelper() const
-	{
-		return modelHelper_;
-	}
+	const ModelHelperType& modelHelper() const { return modelHelper_; }
 
-	SizeType tasks() const
-	{
-		return lps_.size();
-	}
+	SizeType tasks() const { return lps_.size(); }
 
-	void clearThreadSelves() const
-	{
-		operatorsCached_.clearThreadSelves();
-	}
+	void clearThreadSelves() const { operatorsCached_.clearThreadSelves(); }
 
 private:
 
@@ -261,9 +248,10 @@ private:
 
 		ProgramGlobals::ConnectionEnum type = superGeometry.connectionKind(smax_, hItems);
 
-		assert(type != ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM && type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
+		assert(type != ProgramGlobals::ConnectionEnum::SYSTEM_SYSTEM
+		       && type != ProgramGlobals::ConnectionEnum::ENVIRON_ENVIRON);
 
-		SizeType totalOne = 0;
+		SizeType       totalOne      = 0;
 		const SizeType geometryTerms = modelLinks_.numberOfTerms();
 		for (SizeType termIndex = 0; termIndex < geometryTerms; ++termIndex) {
 
@@ -271,41 +259,41 @@ private:
 				continue;
 
 			const typename ModelLinksType::TermType& term = modelLinks_.term(termIndex);
-			const SizeType termIndexForGeom = modelLinks_.termIndexForGeometry(termIndex);
+			const SizeType                           termIndexForGeom
+			    = modelLinks_.termIndexForGeometry(termIndex);
 
 			SizeType dofsTotal = term.size();
 			for (SizeType dofs = 0; dofs < dofsTotal; ++dofs) {
 
 				const OneLink<ComplexOrRealType>& oneLink = term(dofs);
 
-				ComplexOrRealType tmp = hamAbstract_.connectionValue(hItems,
-				    oneLink,
-				    termIndexForGeom,
-				    targetTime_);
+				ComplexOrRealType tmp = hamAbstract_.connectionValue(
+				    hItems, oneLink, termIndexForGeom, targetTime_);
 
 				if (tmp == static_cast<RealType>(0.0))
 					continue;
 
 				ManyToTwoConnectionType manyToTwo(hItems,
-				    type,
-				    oneLink,
-				    modelHelper_.leftRightSuper(),
-				    superOpHelper_);
+				                                  type,
+				                                  oneLink,
+				                                  modelHelper_.leftRightSuper(),
+				                                  superOpHelper_);
 
 				LinkType link2(manyToTwo.pairMetaOps(),
-				    type,
-				    tmp,
-				    oneLink.fermionOrBoson,
-				    oneLink.angularMomentum,
-				    oneLink.angularFactor,
-				    oneLink.category);
+				               type,
+				               tmp,
+				               oneLink.fermionOrBoson,
+				               oneLink.angularMomentum,
+				               oneLink.angularFactor,
+				               oneLink.category);
 
 				++totalOne;
 				lps_.push_back(link2);
 
 				// Add H.C. parts if needed
 				if (hItems.size() == 2 && term.wantsHermitian()) {
-					totalOne += addHermitianIfNeeded(link2, tmp, manyToTwo, oneLink.fermionOrBoson);
+					totalOne += addHermitianIfNeeded(
+					    link2, tmp, manyToTwo, oneLink.fermionOrBoson);
 				}
 			}
 		}
@@ -313,10 +301,10 @@ private:
 		return totalOne;
 	}
 
-	SizeType addHermitianIfNeeded(LinkType& link2,
-	    ComplexOrRealType tmp,
-	    const ManyToTwoConnectionType& manyToTwo,
-	    ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
+	SizeType addHermitianIfNeeded(LinkType&                          link2,
+	                              ComplexOrRealType                  tmp,
+	                              const ManyToTwoConnectionType&     manyToTwo,
+	                              ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
 	{
 		if (manyToTwo.connectionIsHermitian(modelLinks_))
 			return 0;
@@ -327,7 +315,8 @@ private:
 			link2.value *= (-1.0);
 
 		link2.pairMetaOps.first.modifier = conjugateChar(link2.pairMetaOps.first.modifier);
-		link2.pairMetaOps.second.modifier = conjugateChar(link2.pairMetaOps.second.modifier);
+		link2.pairMetaOps.second.modifier
+		    = conjugateChar(link2.pairMetaOps.second.modifier);
 
 		lps_.push_back(link2);
 		return 1;
@@ -337,17 +326,19 @@ private:
 	{
 		const SizeType fromInput = hamAbstract_.superGeometry().terms();
 		const SizeType fromModel = modelLinks_.numberOfTerms();
-		bool doPrint = (smax_ == 0);
+		bool           doPrint   = (smax_ == 0);
 
 		// Check if replacements for geometry exist
 		SizeType inputTermsExpected = 0;
 		for (SizeType termIndex = 0; termIndex < fromModel; ++termIndex) {
-			const SizeType termIndexForGeom = modelLinks_.termIndexForGeometry(termIndex);
+			const SizeType termIndexForGeom
+			    = modelLinks_.termIndexForGeometry(termIndex);
 			if (termIndexForGeom > inputTermsExpected)
 				inputTermsExpected = termIndexForGeom;
 			if (termIndex != termIndexForGeom) {
 				PsimagLite::String msg("INFO: Replacement for geometry exist ");
-				msg += ttos(termIndex) + " is aliased to " + ttos(termIndexForGeom) + "\n";
+				msg += ttos(termIndex) + " is aliased to " + ttos(termIndexForGeom)
+				    + "\n";
 				if (doPrint) {
 					std::cerr << msg;
 					std::cout << msg;
@@ -358,11 +349,13 @@ private:
 		++inputTermsExpected;
 
 		if (fromModel < inputTermsExpected) {
-			err("FATAL:  INTERNAL: NumberOfTerms from model " + ttos(fromModel) + " is less than effective terms  " + ttos(inputTermsExpected) + "\n");
+			err("FATAL:  INTERNAL: NumberOfTerms from model " + ttos(fromModel)
+			    + " is less than effective terms  " + ttos(inputTermsExpected) + "\n");
 		}
 
 		if (fromInput > fromModel) {
-			err("FATAL: terms from input " + ttos(fromInput) + " > " + "terms from model = " + ttos(fromModel) + "\n");
+			err("FATAL: terms from input " + ttos(fromInput) + " > "
+			    + "terms from model = " + ttos(fromModel) + "\n");
 		}
 
 		if (fromInput < inputTermsExpected)
@@ -380,19 +373,19 @@ private:
 		return (c == 'N') ? 'C' : 'N';
 	}
 
-	const ModelHelperType modelHelper_;
-	const ModelLinksType& modelLinks_;
-	RealType targetTime_;
-	const SuperOpHelperBaseType& superOpHelper_;
-	OperatorsCachedType operatorsCached_;
+	const ModelHelperType         modelHelper_;
+	const ModelLinksType&         modelLinks_;
+	RealType                      targetTime_;
+	const SuperOpHelperBaseType&  superOpHelper_;
+	OperatorsCachedType           operatorsCached_;
 	PsimagLite::ProgressIndicator progress_;
-	VectorLinkType lps_;
-	const VectorSizeType& systemBlock_;
-	const VectorSizeType& envBlock_;
-	const SizeType smax_;
-	const SizeType emin_;
-	HamiltonianAbstractType hamAbstract_;
-	VectorSizeType totalOnes_;
+	VectorLinkType                lps_;
+	const VectorSizeType&         systemBlock_;
+	const VectorSizeType&         envBlock_;
+	const SizeType                smax_;
+	const SizeType                emin_;
+	HamiltonianAbstractType       hamAbstract_;
+	VectorSizeType                totalOnes_;
 }; // class HamiltonianConnection
 } // namespace Dmrg
 

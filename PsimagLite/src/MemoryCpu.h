@@ -51,7 +51,7 @@ public:
 
 	void* allocate(size_t x)
 	{
-		void* p = malloc(x);
+		void*              p = malloc(x);
 		std::ostringstream msg;
 		msg << "// Allocated starting at " << p << " " << x << " bytes";
 		std::cout << msg.str() << "\n";

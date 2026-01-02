@@ -1,9 +1,6 @@
 #include "util.h"
 
-void den_copymat(const int nrow,
-    const int ncol,
-    const int asrc_[],
-    int bdest_[])
+void den_copymat(const int nrow, const int ncol, const int asrc_[], int bdest_[])
 {
 	/*
 	 * -----------------------------

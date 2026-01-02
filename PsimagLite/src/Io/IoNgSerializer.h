@@ -28,8 +28,11 @@ public:
 	   already exists, and fail, otherwise
 	*/
 
-	enum WriteMode { NO_OVERWRITE,
-		         ALLOW_OVERWRITE };
+	enum WriteMode
+	{
+		NO_OVERWRITE,
+		ALLOW_OVERWRITE
+	};
 
 	IoNgSerializer(String filename, unsigned int mode)
 	    : hdf5file_(0)
@@ -42,8 +45,7 @@ public:
 
 		try {
 			hdf5file_ = new H5::H5File(filename, mode);
-		}
-		catch (H5::Exception& e) {
+		} catch (H5::Exception& e) {
 			delete hdf5file_;
 			hdf5file_ = 0;
 			throw e;
@@ -52,8 +54,7 @@ public:
 		if (mode == H5F_ACC_TRUNC) {
 			try {
 				createGroup("");
-			}
-			catch (H5::Exception& e) {
+			} catch (H5::Exception& e) {
 				filename_ = "";
 				delete hdf5file_;
 				hdf5file_ = 0;
@@ -64,8 +65,7 @@ public:
 		if (mode == H5F_ACC_RDONLY) {
 			try {
 				readCanary();
-			}
-			catch (H5::Exception& e) {
+			} catch (H5::Exception& e) {
 				filename_ = "";
 				delete hdf5file_;
 				hdf5file_ = 0;
@@ -89,8 +89,7 @@ public:
 	void open(String filename, unsigned int mode)
 	{
 		if (hdf5file_)
-			throw RuntimeError(
-			    "IoNgSerializer::open(): object already open\n");
+			throw RuntimeError("IoNgSerializer::open(): object already open\n");
 
 		filename_ = filename;
 		hdf5file_ = new H5::H5File(filename, mode);
@@ -119,10 +118,7 @@ public:
 
 	const String& filename() const { return filename_; }
 
-	void createGroup(String group)
-	{
-		hdf5file_->createGroup("Def/" + group);
-	}
+	void createGroup(String group) { hdf5file_->createGroup("Def/" + group); }
 
 	bool doesGroupExist(String groupName)
 	{
@@ -131,8 +127,7 @@ public:
 		try {
 			H5::Group group = hdf5file_->openGroup(groupName.c_str());
 			group.close();
-		}
-		catch (...) {
+		} catch (...) {
 			return false;
 		}
 
@@ -142,11 +137,16 @@ public:
 	/* write functions START */
 
 	template <typename T>
-	bool write(String name2, const T& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<Loki::TypeTraits<T>::isArith || std::is_enum<T>::value, int*>::Type = 0)
+	bool
+	write(String    name2,
+	      const T&  what,
+	      WriteMode allowOverwrite = NO_OVERWRITE,
+	      typename EnableIf<Loki::TypeTraits<T>::isArith || std::is_enum<T>::value, int*>::Type
+	      = 0)
 	{
-		String name = "Def/" + name2;
-		const void* ptr = static_cast<const T*>(&what);
-		hsize_t dims[1];
+		String      name = "Def/" + name2;
+		const void* ptr  = static_cast<const T*>(&what);
+		hsize_t     dims[1];
 		dims[0] = 1;
 
 		if (allowOverwrite)
@@ -159,9 +159,9 @@ public:
 	void write(String name2, String what, WriteMode allowOverwrite = NO_OVERWRITE)
 	{
 		overwriteNotSupported(allowOverwrite);
-		String name = "Def/" + name2;
+		String  name = "Def/" + name2;
 		hsize_t dims[1];
-		dims[0] = what.length();
+		dims[0]   = what.length();
 		void* ptr = static_cast<void*>(&what[0]);
 		internalWrite<char>(name, ptr, dims, 1);
 	}
@@ -171,7 +171,7 @@ public:
 		String name = "Def/" + name2;
 
 		unsigned char tmp[1];
-		tmp[0] = (b) ? 1 : 0;
+		tmp[0]          = (b) ? 1 : 0;
 		const void* ptr = static_cast<const void*>(tmp);
 
 		hsize_t dims[1];
@@ -184,7 +184,12 @@ public:
 	}
 
 	template <typename T1, typename T2>
-	void write(String name2, const std::pair<T1, T2>& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith, int*>::Type = 0)
+	void write(String                   name2,
+	           const std::pair<T1, T2>& what,
+	           WriteMode                allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
+	                             int*>::Type
+	           = 0)
 	{
 		if (allowOverwrite != ALLOW_OVERWRITE)
 			createGroup(name2);
@@ -193,7 +198,13 @@ public:
 	}
 
 	template <typename T1, typename T2>
-	void write(String name2, const std::pair<T1, T2>& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<Loki::TypeTraits<T1>::isArith && !Loki::TypeTraits<T2>::isArith, int*>::Type = 0)
+	void
+	write(String                   name2,
+	      const std::pair<T1, T2>& what,
+	      WriteMode                allowOverwrite = NO_OVERWRITE,
+	      typename EnableIf<Loki::TypeTraits<T1>::isArith && !Loki::TypeTraits<T2>::isArith,
+	                        int*>::Type
+	      = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
 		createGroup(name2);
@@ -203,7 +214,11 @@ public:
 
 	// Note: THIS WILL EMPTY THE STACK OBJECT!
 	template <typename T>
-	void write(String name, std::stack<T>& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith, int*>::Type = 0)
+	void write(String         name,
+	           std::stack<T>& what,
+	           WriteMode      allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith, int*>::Type
+	           = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
 		createGroup(name);
@@ -216,19 +231,22 @@ public:
 		}
 	}
 
-	void write(String name, const std::vector<bool>& what, WriteMode allowOverwrite = NO_OVERWRITE)
+	void
+	write(String name, const std::vector<bool>& what, WriteMode allowOverwrite = NO_OVERWRITE)
 	{
 		VectorOfBoolInternalType converted = convertFromBoolean(what);
 		write(name, converted, allowOverwrite);
 	}
 
 	template <typename T>
-	void
-	write(String name2, const std::vector<T>& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<Loki::TypeTraits<T>::isArith, int*>::Type = 0)
+	void write(String                name2,
+	           const std::vector<T>& what,
+	           WriteMode             allowOverwrite                        = NO_OVERWRITE,
+	           typename EnableIf<Loki::TypeTraits<T>::isArith, int*>::Type = 0)
 	{
 		if (what.size() == 0)
 			return;
-		String name = "Def/" + name2;
+		String  name = "Def/" + name2;
 		hsize_t dims[1];
 		dims[0] = what.size();
 		assert(0 < what.size());
@@ -243,16 +261,18 @@ public:
 	}
 
 	template <typename T>
-	void
-	write(String name2, const std::vector<std::complex<T>>& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<Loki::TypeTraits<T>::isArith, int*>::Type = 0)
+	void write(String                              name2,
+	           const std::vector<std::complex<T>>& what,
+	           WriteMode                           allowOverwrite          = NO_OVERWRITE,
+	           typename EnableIf<Loki::TypeTraits<T>::isArith, int*>::Type = 0)
 	{
 		if (what.size() == 0)
 			return;
 
 		assert(0 < what.size());
-		const void* ptr = static_cast<const void*>(&what[0]);
-		String name = "Def/" + name2;
-		hsize_t dims[1];
+		const void* ptr  = static_cast<const void*>(&what[0]);
+		String      name = "Def/" + name2;
+		hsize_t     dims[1];
 		dims[0] = 2 * what.size();
 
 		writeComplexOrReal(name2, 'C');
@@ -263,13 +283,11 @@ public:
 	}
 
 	template <typename T>
-	void write(
-	    String name2,
-	    const std::vector<std::vector<T>>& what,
-	    WriteMode allowOverwrite = NO_OVERWRITE,
-	    typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith,
-	                      int*>::Type
-	    = 0)
+	void write(String                             name2,
+	           const std::vector<std::vector<T>>& what,
+	           WriteMode                          allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<Loki::TypeTraits<typename Real<T>::Type>::isArith, int*>::Type
+	           = 0)
 	{
 		SizeType n = what.size();
 		if (allowOverwrite != ALLOW_OVERWRITE)
@@ -280,7 +298,12 @@ public:
 	}
 
 	template <typename T1, typename T2>
-	void write(String name2, const std::vector<std::pair<T1, T2>>& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith, int*>::Type = 0)
+	void write(String                                name2,
+	           const std::vector<std::pair<T1, T2>>& what,
+	           WriteMode                             allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
+	                             int*>::Type
+	           = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
@@ -291,7 +314,12 @@ public:
 	}
 
 	template <typename T>
-	void write(String name2, const std::vector<T>& what, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith && !IsPairLike<T>::True && !IsEnumClass<T>::value, int*>::Type = 0)
+	void write(String                name2,
+	           const std::vector<T>& what,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	                                 && !IsPairLike<T>::True && !IsEnumClass<T>::value,
+	                             int*>::Type
+	           = 0)
 	{
 		SizeType n = what.size();
 		createGroup(name2);
@@ -301,7 +329,13 @@ public:
 	}
 
 	template <typename T>
-	void write(String name2, const std::vector<T>& what, WriteMode allowOverwrite, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith && !IsPairLike<T>::True && !IsEnumClass<T>::value, int*>::Type = 0)
+	void write(String                name2,
+	           const std::vector<T>& what,
+	           WriteMode             allowOverwrite,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	                                 && !IsPairLike<T>::True && !IsEnumClass<T>::value,
+	                             int*>::Type
+	           = 0)
 	{
 		SizeType n = what.size();
 		if (allowOverwrite != ALLOW_OVERWRITE)
@@ -312,7 +346,10 @@ public:
 	}
 
 	template <typename T>
-	void write(String name2, const std::vector<T>& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<IsEnumClass<T>::value, int*>::Type = 0)
+	void write(String                name2,
+	           const std::vector<T>& what,
+	           WriteMode             allowOverwrite                 = NO_OVERWRITE,
+	           typename EnableIf<IsEnumClass<T>::value, int*>::Type = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
@@ -323,9 +360,14 @@ public:
 	}
 
 	template <typename T>
-	void overwrite(String name2, const std::vector<T>& what, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith && !IsPairLike<T>::True, int*>::Type = 0)
+	void overwrite(String                name2,
+	               const std::vector<T>& what,
+	               typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	                                     && !IsPairLike<T>::True,
+	                                 int*>::Type
+	               = 0)
 	{
-		SizeType n = what.size();
+		SizeType n    = what.size();
 		SizeType oldN = 0;
 		read(oldN, name2 + "/Size");
 		SizeType min = std::min(oldN, n);
@@ -338,18 +380,21 @@ public:
 
 		for (SizeType i = min; i < n; ++i) {
 			try {
-				what[i].write(name2 + "/" + typeToString(i),
-				              *this);
-			}
-			catch (...) {
-				what[i].overwrite(name2 + "/" + typeToString(i),
-				                  *this);
+				what[i].write(name2 + "/" + typeToString(i), *this);
+			} catch (...) {
+				what[i].overwrite(name2 + "/" + typeToString(i), *this);
 			}
 		}
 	}
 
 	template <typename T>
-	void write(String name2, const std::vector<T>& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith && IsPairLike<T>::True, int*>::Type = 0)
+	void write(String                name2,
+	           const std::vector<T>& what,
+	           WriteMode             allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	                                 && IsPairLike<T>::True,
+	                             int*>::Type
+	           = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
@@ -360,7 +405,11 @@ public:
 	}
 
 	template <typename T>
-	void write(String name2, const std::vector<T*>& what, WriteMode allowOverwrite = NO_OVERWRITE, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith, int*>::Type = 0)
+	void write(String                 name2,
+	           const std::vector<T*>& what,
+	           WriteMode              allowOverwrite = NO_OVERWRITE,
+	           typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith, int*>::Type
+	           = 0)
 	{
 		overwriteNotSupported(allowOverwrite);
 		SizeType n = what.size();
@@ -375,9 +424,14 @@ public:
 	// read functions START
 
 	template <typename SomeType>
-	void read(SomeType& value, String name, typename EnableIf<Loki::TypeTraits<SomeType>::isArith && !std::is_enum<SomeType>::value, int*>::Type = 0)
+	void read(
+	    SomeType& value,
+	    String    name,
+	    typename EnableIf<Loki::TypeTraits<SomeType>::isArith && !std::is_enum<SomeType>::value,
+	                      int*>::Type
+	    = 0)
 	{
-		void* ptr = static_cast<void*>(&value);
+		void*        ptr     = static_cast<void*>(&value);
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
 		dataset->read(ptr, typeToH5<SomeType>());
 		delete dataset;
@@ -388,8 +442,8 @@ public:
 	void read(bool& value, String name)
 	{
 		unsigned char tmp[1];
-		tmp[0] = 0;
-		void* ptr = static_cast<void*>(tmp);
+		tmp[0]               = 0;
+		void*        ptr     = static_cast<void*>(tmp);
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
 		dataset->read(ptr, typeToH5<unsigned char>());
 		delete dataset;
@@ -397,14 +451,22 @@ public:
 	}
 
 	template <typename T1, typename T2>
-	void read(std::pair<T1, T2>& what, String name, typename EnableIf<Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith, int*>::Type = 0)
+	void read(std::pair<T1, T2>& what,
+	          String             name,
+	          typename EnableIf<Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
+	                            int*>::Type
+	          = 0)
 	{
 		read(what.first, name + "/0");
 		read(what.second, name + "/1");
 	}
 
 	template <typename T1, typename T2>
-	void read(std::pair<T1, T2>& what, String name, typename EnableIf<Loki::TypeTraits<T1>::isArith && !Loki::TypeTraits<T2>::isArith, int*>::Type = 0)
+	void read(std::pair<T1, T2>& what,
+	          String             name,
+	          typename EnableIf<Loki::TypeTraits<T1>::isArith && !Loki::TypeTraits<T2>::isArith,
+	                            int*>::Type
+	          = 0)
 	{
 		read(what.first, name + "/0");
 		what.second.read(name + "/1", *this);
@@ -418,7 +480,11 @@ public:
 	}
 
 	template <typename SomeType>
-	void read(SomeType& value, String name, typename EnableIf<std::is_enum<SomeType>::value || IsEnumClass<SomeType>::value, int*>::Type = 0)
+	void read(SomeType& value,
+	          String    name,
+	          typename EnableIf<std::is_enum<SomeType>::value || IsEnumClass<SomeType>::value,
+	                            int*>::Type
+	          = 0)
 	{
 		SizeType x = 0;
 		read(x, name);
@@ -426,21 +492,27 @@ public:
 	}
 
 	template <typename T>
-	void
-	read(std::vector<T>& what, String name, typename EnableIf<Loki::TypeTraits<T>::isArith, int*>::Type = 0)
+	void read(std::vector<T>& what,
+	          String          name,
+	          typename EnableIf<Loki::TypeTraits<T>::isArith, int*>::Type = 0)
 	{
 		readInternal(what, name);
 	}
 
 	template <typename T>
-	void
-	read(std::vector<std::complex<T>>& what, String name, typename EnableIf<Loki::TypeTraits<T>::isArith, int*>::Type = 0)
+	void read(std::vector<std::complex<T>>& what,
+	          String                        name,
+	          typename EnableIf<Loki::TypeTraits<T>::isArith, int*>::Type = 0)
 	{
 		readInternal(what, name);
 	}
 
 	template <typename T1, typename T2>
-	void read(std::vector<std::pair<T1, T2>>& what, String name, typename EnableIf<Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith, int*>::Type = 0)
+	void read(std::vector<std::pair<T1, T2>>& what,
+	          String                          name,
+	          typename EnableIf<Loki::TypeTraits<T1>::isArith && Loki::TypeTraits<T2>::isArith,
+	                            int*>::Type
+	          = 0)
 	{
 		SizeType size = 0;
 		read(size, name + "/Size");
@@ -450,7 +522,12 @@ public:
 	}
 
 	template <typename T>
-	void read(std::vector<T>& what, String name, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith && !IsPairLike<T>::True && !IsEnumClass<T>::value, int*>::Type = 0)
+	void read(std::vector<T>& what,
+	          String          name,
+	          typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	                                && !IsPairLike<T>::True && !IsEnumClass<T>::value,
+	                            int*>::Type
+	          = 0)
 	{
 		SizeType size = 0;
 		read(size, name + "/Size");
@@ -460,7 +537,12 @@ public:
 	}
 
 	template <typename T>
-	void read(std::vector<T>& what, String name, typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith && IsPairLike<T>::True, int*>::Type = 0)
+	void read(std::vector<T>& what,
+	          String          name,
+	          typename EnableIf<!Loki::TypeTraits<typename Real<T>::Type>::isArith
+	                                && IsPairLike<T>::True,
+	                            int*>::Type
+	          = 0)
 	{
 		SizeType size = 0;
 		read(size, name + "/Size");
@@ -470,7 +552,9 @@ public:
 	}
 
 	template <typename T>
-	void read(std::vector<T>& what, String name, typename EnableIf<IsEnumClass<T>::value, int*>::Type = 0)
+	void read(std::vector<T>& what,
+	          String          name,
+	          typename EnableIf<IsEnumClass<T>::value, int*>::Type = 0)
 	{
 		SizeType size = 0;
 		read(size, name + "/Size");
@@ -479,8 +563,7 @@ public:
 			read(what[i], name + "/" + ttos(i));
 	}
 
-	template <typename T>
-	void read(std::vector<std::vector<T>>& what, String name)
+	template <typename T> void read(std::vector<std::vector<T>>& what, String name)
 	{
 		SizeType size = 0;
 		read(size, name + "/Size");
@@ -489,8 +572,7 @@ public:
 			read(what[i], name + "/" + ttos(i));
 	}
 
-	template <typename T>
-	void read(std::stack<T>& what, String name)
+	template <typename T> void read(std::stack<T>& what, String name)
 	{
 		SizeType x = 0;
 		read(x, name + "/Size");
@@ -510,8 +592,7 @@ public:
 			std::cout << x[i] << " ";
 		std::cout << "\nOutput: ";
 		for (SizeType i = 0; i < y.size(); ++i)
-			std::cout << static_cast<unsigned short int>(y[i])
-			          << " ";
+			std::cout << static_cast<unsigned short int>(y[i]) << " ";
 		std::cout << "\n\nconvertToBoolean\n";
 		x.clear();
 		convertToBoolean(x, y);
@@ -540,19 +621,20 @@ private:
 	// ut_dest is std::complex<floating> so that we can go from floating to
 	// complex<floating>
 
-	enum class ReadEnum { FLOATING,
-		              COMPLEX,
-		              OTHER };
-
-	template <typename SomeVectorType>
-	void readInternal(SomeVectorType& what, String name)
+	enum class ReadEnum
 	{
-		typedef typename Real<typename SomeVectorType::value_type>::Type
-		    UnderlyingType;
+		FLOATING,
+		COMPLEX,
+		OTHER
+	};
+
+	template <typename SomeVectorType> void readInternal(SomeVectorType& what, String name)
+	{
+		typedef typename Real<typename SomeVectorType::value_type>::Type UnderlyingType;
 
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
 		const H5::DataSpace& dspace = dataset->getSpace();
-		const int ndims = dspace.getSimpleExtentNdims();
+		const int            ndims  = dspace.getSimpleExtentNdims();
 		if (ndims != 1)
 			throw RuntimeError("IoNgSerializer: problem reading "
 			                   "vector ndims != 1\n");
@@ -565,13 +647,13 @@ private:
 			throw RuntimeError("IoNgSerializer: problem reading "
 			                   "vector dims[0] == 0\n");
 
-		const ReadEnum readEnumOnDisk = getReadEnumOnDisk(name);
-		static const ReadEnum readEnumDest = getReadEnumDestination<
-		    typename SomeVectorType::value_type>();
+		const ReadEnum        readEnumOnDisk = getReadEnumOnDisk(name);
+		static const ReadEnum readEnumDest
+		    = getReadEnumDestination<typename SomeVectorType::value_type>();
 
 		if (readEnumOnDisk == readEnumDest) {
-			SizeType complexSize = (readEnumDest == ReadEnum::COMPLEX) ? getHalfSize(n)
-			                                                           : n;
+			SizeType complexSize
+			    = (readEnumDest == ReadEnum::COMPLEX) ? getHalfSize(n) : n;
 			what.resize(complexSize, 0);
 			void* ptr = static_cast<void*>(&(what[0]));
 			dataset->read(ptr, typeToH5<UnderlyingType>());
@@ -583,8 +665,7 @@ private:
 		// only other case is from real --> complex
 		if (readEnumOnDisk == ReadEnum::FLOATING && readEnumDest == ReadEnum::COMPLEX) {
 			// this type is complex; but what's on disk is real
-			typename Vector<UnderlyingType>::Type temporary(
-			    dims[0]);
+			typename Vector<UnderlyingType>::Type temporary(dims[0]);
 			void* ptr2 = static_cast<void*>(&(temporary[0]));
 			dataset->read(ptr2, typeToH5<UnderlyingType>());
 			what.resize(dims[0]);
@@ -610,8 +691,7 @@ private:
 	{
 		try {
 			hdf5file_->unlink(name);
-		}
-		catch (...) {
+		} catch (...) {
 			std::cerr << "Cannot unlink " << name << "\n";
 		}
 
@@ -622,14 +702,12 @@ private:
 	bool internalWrite(String name, const void* ptr, hsize_t dims[], SizeType ndims)
 	{
 		H5::DataSpace* dataspace = new H5::DataSpace(ndims, dims); // create new dspace
-		H5::DSetCreatPropList
-		    dsCreatPlist; // What properties here? FIXME
-		H5::DataSet* dataset = nullptr;
+		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+		H5::DataSet*          dataset = nullptr;
 		try {
-			dataset = new H5::DataSet(
-			    hdf5file_->createDataSet(name, typeToH5<SomeType>(), *dataspace, dsCreatPlist));
-		}
-		catch (H5::Exception& e) {
+			dataset = new H5::DataSet(hdf5file_->createDataSet(
+			    name, typeToH5<SomeType>(), *dataspace, dsCreatPlist));
+		} catch (H5::Exception& e) {
 			std::cerr << "H5 Exception createDataSet starts "
 			             "<-------------\n";
 			std::cerr << e.getDetailMsg() << "\n";
@@ -647,17 +725,15 @@ private:
 	void writeCanary()
 	{
 		hsize_t dims[1];
-		dims[0] = 1;
-		static const String name = "/Def/Canary";
-		H5::DataSpace* dataspace = new H5::DataSpace(1, dims); // create new dspace
-		H5::DSetCreatPropList
-		    dsCreatPlist; // What properties here? FIXME
-		H5::DataSet* dataset = 0;
+		dims[0]                         = 1;
+		static const String   name      = "/Def/Canary";
+		H5::DataSpace*        dataspace = new H5::DataSpace(1, dims); // create new dspace
+		H5::DSetCreatPropList dsCreatPlist; // What properties here? FIXME
+		H5::DataSet*          dataset = 0;
 
 		try {
 			dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		}
-		catch (H5::Exception&) {
+		} catch (H5::Exception&) {
 			dataset = new H5::DataSet(hdf5file_->createDataSet(
 			    name, typeToH5<unsigned char>(), *dataspace, dsCreatPlist));
 		}
@@ -672,9 +748,9 @@ private:
 	{
 		static const String name = "/Def/Canary";
 
-		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet(name));
-		const H5::DataSpace& dspace = dataset->getSpace();
-		const int ndims = dspace.getSimpleExtentNdims();
+		H5::DataSet*         dataset = new H5::DataSet(hdf5file_->openDataSet(name));
+		const H5::DataSpace& dspace  = dataset->getSpace();
+		const int            ndims   = dspace.getSimpleExtentNdims();
 		if (ndims != 1)
 			throw RuntimeError("IoNgSerializer: problem reading "
 			                   "vector<arith> (ndims)\n");
@@ -686,8 +762,8 @@ private:
 			throw RuntimeError("IoNgSerializer: problem reading "
 			                   "vector<arith> (dims)\n");
 
-		unsigned char c = 0;
-		void* ptr = static_cast<void*>(&c);
+		unsigned char c   = 0;
+		void*         ptr = static_cast<void*>(&c);
 		dataset->read(ptr, typeToH5<unsigned char>());
 		delete[] dims;
 		delete dataset;
@@ -696,11 +772,10 @@ private:
 			throw RuntimeError("File " + filename_ + " is not valid (dead canary)\n");
 	}
 
-	static VectorOfBoolInternalType
-	convertFromBoolean(const std::vector<bool>& src)
+	static VectorOfBoolInternalType convertFromBoolean(const std::vector<bool>& src)
 	{
 		typedef VectorOfBoolInternalType::value_type ValueType;
-		SizeType total = src.size();
+		SizeType                                     total = src.size();
 
 		if (total == 0)
 			return VectorOfBoolInternalType(booleanEncodedSize_, 0);
@@ -712,9 +787,9 @@ private:
 		encodeBooleanSize(c, total);
 		SizeType blockSize = sizeof(ValueType);
 
-		ValueType mask = 1;
-		SizeType j = booleanEncodedStart_;
-		SizeType bytes = 0;
+		ValueType mask  = 1;
+		SizeType  j     = booleanEncodedStart_;
+		SizeType  bytes = 0;
 		for (SizeType i = 0; i < total; ++i) {
 			assert(j < c.size());
 			assert(mask > 0);
@@ -733,12 +808,11 @@ private:
 		return c;
 	}
 
-	static void convertToBoolean(std::vector<bool>& dest,
-	                             const VectorOfBoolInternalType& x)
+	static void convertToBoolean(std::vector<bool>& dest, const VectorOfBoolInternalType& x)
 	{
 		typedef VectorOfBoolInternalType::value_type ValueType;
 		SizeType numberOfBits = sizeof(ValueType) * 8 * x.size();
-		SizeType blockSize = sizeof(ValueType);
+		SizeType blockSize    = sizeof(ValueType);
 
 		SizeType encodedSize = decodeBooleanSize(x);
 		assert(encodedSize <= numberOfBits);
@@ -747,9 +821,9 @@ private:
 
 		dest.resize(numberOfBits);
 
-		ValueType mask = 1;
-		SizeType j = booleanEncodedStart_;
-		SizeType bytes = 0;
+		ValueType mask  = 1;
+		SizeType  j     = booleanEncodedStart_;
+		SizeType  bytes = 0;
 		for (SizeType i = 0; i < numberOfBits; ++i) {
 			assert(j < x.size());
 			assert(mask > 0);
@@ -765,8 +839,7 @@ private:
 		}
 	}
 
-	static void encodeBooleanSize(VectorOfBoolInternalType& x,
-	                              SizeType total)
+	static void encodeBooleanSize(VectorOfBoolInternalType& x, SizeType total)
 	{
 		static short int byteSize = 256;
 		assert(x.size() >= booleanEncodedSize_);
@@ -784,7 +857,7 @@ private:
 	{
 		static short int byteSize = 256;
 		assert(x.size() >= booleanEncodedSize_);
-		SizeType tmp = 0;
+		SizeType tmp   = 0;
 		SizeType level = 1;
 		for (SizeType i = 0; i < booleanEncodedSize_; ++i) {
 			tmp += x[i] * level;
@@ -797,8 +870,7 @@ private:
 	static hsize_t getHalfSize(hsize_t x)
 	{
 		if (x & 1)
-			throw RuntimeError(
-			    "FATAL: Complex vector with uneven fp size\n");
+			throw RuntimeError("FATAL: Complex vector with uneven fp size\n");
 
 		return x / 2;
 	}
@@ -812,30 +884,27 @@ private:
 	ReadEnum getReadEnumOnDisk(String name2)
 	{
 		const String nameComplexOrReal = name2 + "ComplexOrReal";
-		char tmp;
+		char         tmp;
 		try {
 			read(tmp, nameComplexOrReal);
-		}
-		catch (...) {
+		} catch (...) {
 			return ReadEnum::OTHER;
 		}
 
 		return (tmp == 'C') ? ReadEnum::COMPLEX : ReadEnum::FLOATING;
 	}
 
-	template <typename T>
-	ReadEnum getReadEnumDestination()
+	template <typename T> ReadEnum getReadEnumDestination()
 	{
 		if (IsComplexNumber<T>::True)
 			return ReadEnum::COMPLEX;
-		return (Loki::TypeTraits<T>::isFloat) ? ReadEnum::FLOATING
-		                                      : ReadEnum::OTHER;
+		return (Loki::TypeTraits<T>::isFloat) ? ReadEnum::FLOATING : ReadEnum::OTHER;
 	}
 
-	H5::H5File* hdf5file_;
-	String filename_;
-	unsigned int mode_;
-	static const SizeType booleanEncodedSize_ = 4;
+	H5::H5File*           hdf5file_;
+	String                filename_;
+	unsigned int          mode_;
+	static const SizeType booleanEncodedSize_  = 4;
 	static const SizeType booleanEncodedStart_ = 4;
 };
 } // namespace PsimagLite

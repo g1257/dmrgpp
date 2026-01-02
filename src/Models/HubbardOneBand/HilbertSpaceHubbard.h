@@ -87,17 +87,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HILBERTSPACEHUBBARD_HEADER_H
 #define HILBERTSPACEHUBBARD_HEADER_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on quaterny numbers (base 4)
-template <typename Word>
-class HilbertSpaceHubbard
-{
+template <typename Word> class HilbertSpaceHubbard {
 public:
 
-	typedef Word HilbertState;
-	static int const SPIN_UP = 0;
+	typedef Word     HilbertState;
+	static int const SPIN_UP   = 0;
 	static int const SPIN_DOWN = 1;
 
 	//! For state "a" set electron on site "j" to value "value"
@@ -186,7 +183,7 @@ public:
 	// Is there an electron with internal dof  "sigma" on site "i" in binary number "ket"?
 	static bool isNonZero(Word const& ket, int i, int sigma)
 	{
-		int tmp = get(ket, i);
+		int          tmp  = get(ket, i);
 		HilbertState mask = (1 << sigma);
 		return (tmp & mask);
 	}
@@ -194,9 +191,9 @@ public:
 	//! returns the number of electrons of internal dof "value" in binary number "data"
 	static int getNofDigits(Word const& data, int value)
 	{
-		int ret = 0;
+		int  ret   = 0;
 		Word data2 = data;
-		int i = 0;
+		int  i     = 0;
 		do {
 			if ((data & (1 << (2 * i + value))))
 				ret++;
@@ -214,7 +211,7 @@ public:
 		int ii = i + 1;
 		if (ii >= j)
 			return 0;
-		Word m = 0;
+		Word     m   = 0;
 		SizeType end = 2 * j;
 		for (SizeType k = 2 * ii; k < end; k++)
 			m |= (1 << k);

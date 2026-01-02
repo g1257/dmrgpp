@@ -4,21 +4,18 @@
 #include "Io/IoNg.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename InputCheckType>
-class InputFromDataOrNot
-{
+template <typename InputCheckType> class InputFromDataOrNot {
 
 public:
 
 	typedef PsimagLite::InputNg<InputCheckType> InputNgType;
-	typedef PsimagLite::IoNg::In IoNgInType;
+	typedef PsimagLite::IoNg::In                IoNgInType;
 
-	InputFromDataOrNot(PsimagLite::String filename,
-	    const InputCheckType& inputCheck,
-	    bool filenameIsCout)
+	InputFromDataOrNot(PsimagLite::String    filename,
+	                   const InputCheckType& inputCheck,
+	                   bool                  filenameIsCout)
 	    : ioWriteable_(0)
 	    , isData_(false)
 	{
@@ -29,7 +26,8 @@ public:
 			internal(filename);
 
 		ioWriteable_ = (isData_) ? new typename InputNgType::Writeable(inputCheck, data_)
-					 : new typename InputNgType::Writeable(filename, inputCheck);
+		                         : new
+		    typename InputNgType::Writeable(filename, inputCheck);
 		// data_ = "";
 	}
 
@@ -52,7 +50,7 @@ private:
 	{
 		IoNgInType* io = 0;
 		try {
-			io = new IoNgInType(filename);
+			io      = new IoNgInType(filename);
 			isData_ = true;
 		} catch (...) {
 			return;
@@ -75,10 +73,10 @@ private:
 			err(s + " Cannot open file " + filename + "\n");
 		}
 
-		static const PsimagLite::String search = "PsiApp::echoBase64: ";
-		static const SizeType lsearch = search.length();
-		PsimagLite::String str;
-		bool found = false;
+		static const PsimagLite::String search  = "PsiApp::echoBase64: ";
+		static const SizeType           lsearch = search.length();
+		PsimagLite::String              str;
+		bool                            found = false;
 		while (std::getline(fin, str)) {
 			if (str.substr(0, lsearch) != search)
 				continue;
@@ -92,13 +90,13 @@ private:
 			err("Could not find " + search + " in " + filename + "\n");
 
 		PsimagLite::PsiBase64::Decode base64decode(str);
-		data_ = base64decode();
+		data_   = base64decode();
 		isData_ = true;
 	}
 
 	typename InputNgType::Writeable* ioWriteable_;
-	bool isData_;
-	PsimagLite::String data_;
+	bool                             isData_;
+	PsimagLite::String               data_;
 };
 }
 #endif // INPUTFROMDATAORNOT_H

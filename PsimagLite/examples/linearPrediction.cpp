@@ -25,7 +25,7 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 #include <string>
 
-typedef double FieldType;
+typedef double                                  FieldType;
 typedef PsimagLite::LinearPrediction<FieldType> LinearPredictionType;
 
 void usage(const char* progName)
@@ -35,11 +35,11 @@ void usage(const char* progName)
 
 int main(int argc, char* argv[])
 {
-	int opt = 0;
-	PsimagLite::String file = "";
+	int                opt   = 0;
+	PsimagLite::String file  = "";
 	PsimagLite::String label = "";
-	SizeType p = 0;
-	SizeType q = 2;
+	SizeType           p     = 0;
+	SizeType           q     = 2;
 	while ((opt = getopt(argc, argv, "f:p:l:q:")) != -1) {
 		switch (opt) {
 		case 'f':
@@ -65,7 +65,7 @@ int main(int argc, char* argv[])
 		return 1;
 	}
 
-	PsimagLite::IoSimple::In io(file);
+	PsimagLite::IoSimple::In            io(file);
 	PsimagLite::Vector<FieldType>::Type y;
 	io.read(y, label);
 	SizeType n = y.size();

@@ -83,8 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! FeAs Model Parameters
 template <typename ComplexOrRealType, typename QnType>
 struct ParametersHubbardHolsteinSpinless : public ParametersModelBase<ComplexOrRealType, QnType> {
@@ -92,8 +91,8 @@ struct ParametersHubbardHolsteinSpinless : public ParametersModelBase<ComplexOrR
 	// connections are handled by the geometry
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
 	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType>>::Type VectorType;
 
 	template <typename IoInputType>
@@ -132,8 +131,7 @@ struct ParametersHubbardHolsteinSpinless : public ParametersModelBase<ComplexOrR
 		try {
 			io.readline(oStruncPhonons, "OneSiteTruncationPhononsMax=");
 			io.readline(oStruncSite, "OneSiteTruncationSite=");
-		} catch (...) {
-		}
+		} catch (...) { }
 
 		if (oStruncPhonons > 0 && oStruncSite == 0)
 			err("OneSiteTruncationSite cannot be zero\n");
@@ -148,15 +146,12 @@ struct ParametersHubbardHolsteinSpinless : public ParametersModelBase<ComplexOrR
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardHolsteinSpinless";
 		io.createGroup(label);
@@ -169,8 +164,8 @@ struct ParametersHubbardHolsteinSpinless : public ParametersModelBase<ComplexOrR
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersHubbardHolsteinSpinless& parameters)
+	friend std::ostream& operator<<(std::ostream&                            os,
+	                                const ParametersHubbardHolsteinSpinless& parameters)
 	{
 		os << "NumberPhonons=" << parameters.numberphonons << "\n";
 		os << "lambdaFP\n";
@@ -182,9 +177,9 @@ struct ParametersHubbardHolsteinSpinless : public ParametersModelBase<ComplexOrR
 		return os;
 	}
 
-	SizeType numberphonons;
-	SizeType oStruncPhonons;
-	SizeType oStruncSite;
+	SizeType       numberphonons;
+	SizeType       oStruncPhonons;
+	SizeType       oStruncSite;
 	VectorRealType lambdaFP;
 	// Onsite potential values
 	VectorRealType potentialFV;

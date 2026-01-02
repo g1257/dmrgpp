@@ -87,53 +87,49 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "PackIndices.h"
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ObserverHelperType_, typename ModelType>
-class CorrelationsSkeleton
-{
+template <typename ObserverHelperType_, typename ModelType> class CorrelationsSkeleton {
 
 public:
 
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef Braket<ModelType> BraketType;
-	typedef ObserverHelperType_ ObserverHelperType;
-	typedef typename ObserverHelperType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
+	typedef PsimagLite::PackIndices                             PackIndicesType;
+	typedef Braket<ModelType>                                   BraketType;
+	typedef ObserverHelperType_                                 ObserverHelperType;
+	typedef typename ObserverHelperType::VectorWithOffsetType   VectorWithOffsetType;
+	typedef typename VectorWithOffsetType::VectorType           VectorType;
 	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename ObserverHelperType::FermionSignType FermionSignType;
-	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::VectorSizeType VectorSizeType;
-	typedef typename VectorType::value_type FieldType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef PsimagLite::CrsMatrix<FieldType> SparseMatrixType;
+	typedef typename ObserverHelperType::FermionSignType        FermionSignType;
+	typedef typename BasisWithOperatorsType::RealType           RealType;
+	typedef typename BasisWithOperatorsType::BasisType          BasisType;
+	typedef typename BasisType::VectorSizeType                  VectorSizeType;
+	typedef typename VectorType::value_type                     FieldType;
+	typedef typename BasisWithOperatorsType::OperatorType       OperatorType;
+	typedef PsimagLite::CrsMatrix<FieldType>                    SparseMatrixType;
 
-	enum class GrowDirection { RIGHT,
-		LEFT };
+	enum class GrowDirection
+	{
+		RIGHT,
+		LEFT
+	};
 
 	CorrelationsSkeleton(const ObserverHelperType& helper,
-	    const ModelType& model,
-	    bool normalizeResult)
+	                     const ModelType&          model,
+	                     bool                      normalizeResult)
 	    : helper_(helper)
 	    , model_(model)
 	    , normalizeResult_(normalizeResult)
-	{
-	}
+	{ }
 
-	SizeType numberOfSites() const
-	{
-		return helper_.numberOfSites();
-	}
+	SizeType numberOfSites() const { return helper_.numberOfSites(); }
 
 	//! i can be zero here!!
-	void growDirectly(SparseMatrixType& Odest,
-	    const SparseMatrixType& Osrc,
-	    SizeType i,
-	    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	    SizeType ns,
-	    bool transform) const
+	void growDirectly(SparseMatrixType&                  Odest,
+	                  const SparseMatrixType&            Osrc,
+	                  SizeType                           i,
+	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                  SizeType                           ns,
+	                  bool                               transform) const
 	{
 		Odest = Osrc;
 		// from 0 --> i
@@ -143,7 +139,7 @@ public:
 
 		for (SizeType s = nt; s < ns; ++s) {
 			const GrowDirection growOption = growthDirection(s, nt, i, s);
-			SparseMatrixType Onew(helper_.cols(s), helper_.cols(s));
+			SparseMatrixType    Onew(helper_.cols(s), helper_.cols(s));
 
 			fluffUp(Onew, Odest, fermionicSign, growOption, false, s);
 			if (!transform && s == ns - 1) {
@@ -155,10 +151,7 @@ public:
 		}
 	}
 
-	GrowDirection growthDirection(SizeType s,
-	    int nt,
-	    SizeType i,
-	    SizeType ptr) const
+	GrowDirection growthDirection(SizeType s, int nt, SizeType i, SizeType ptr) const
 	{
 		const ProgramGlobals::DirectionEnum dir = helper_.direction(ptr);
 		GrowDirection growOption = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -179,23 +172,24 @@ public:
 	}
 
 	// Perfomance critical:
-	void fluffUp(SparseMatrixType& ret2,
-	    const SparseMatrixType& O,
-	    ProgramGlobals::FermionOrBosonEnum fOrB,
-	    const GrowDirection growOption,
-	    bool transform,
-	    SizeType ptr) const
+	void fluffUp(SparseMatrixType&                  ret2,
+	             const SparseMatrixType&            O,
+	             ProgramGlobals::FermionOrBosonEnum fOrB,
+	             const GrowDirection                growOption,
+	             bool                               transform,
+	             SizeType                           ptr) const
 	{
-		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		const int fermionicSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		const ProgramGlobals::DirectionEnum dir = helper_.direction(ptr);
 
 		const BasisType& basis = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 		    ? helper_.leftRightSuper(ptr).left()
 		    : helper_.leftRightSuper(ptr).right();
 
-		SizeType n = basis.size();
-		SizeType orows = O.rows();
-		SizeType ktotal = n / orows;
+		SizeType         n      = basis.size();
+		SizeType         orows  = O.rows();
+		SizeType         ktotal = n / orows;
 		SparseMatrixType ret(n, n, ktotal * O.nonZeros());
 
 		if (growOption == GrowDirection::RIGHT) {
@@ -207,11 +201,13 @@ public:
 			for (SizeType k = 0; k < ktotal; ++k) {
 				for (SizeType i = 0; i < orows; ++i) {
 					ret.setRow(i + k * orows, counter);
-					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
+					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1);
+					     ++kj) {
 						// Sperm[e0] = i + k*n
 						// Sperm[e1] = j + k*n
 
-						SizeType col = basis.permutationInverse(O.getCol(kj) + k * orows);
+						SizeType col = basis.permutationInverse(
+						    O.getCol(kj) + k * orows);
 
 						ret.setCol(counter, col);
 						ret.setValues(counter++, O.getValue(kj) * sign);
@@ -229,20 +225,26 @@ public:
 					ret.setRow(k + i * ktotal, counter);
 					RealType sign = 1;
 					if (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) {
-						sign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
+						sign
+						    = (fOrB
+						       == ProgramGlobals::FermionOrBosonEnum::BOSON)
 						    ? 1
-						    : fermionSignBasis(fermionicSign,
-							  helper_.leftRightSuper(ptr).left())
-							* helper_.signsOneSite(k);
+						    : fermionSignBasis(
+						          fermionicSign,
+						          helper_.leftRightSuper(ptr).left())
+						        * helper_.signsOneSite(k);
 					} else {
-						sign = helper_.fermionicSignLeft(ptr)(k, fermionicSign);
+						sign = helper_.fermionicSignLeft(ptr)(
+						    k, fermionicSign);
 					}
 
-					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1); ++kj) {
+					for (int kj = O.getRowPtr(i); kj < O.getRowPtr(i + 1);
+					     ++kj) {
 						// Sperm[e0] = k + i*m
 						// Sperm[e1] = k + j*m
 
-						SizeType col = basis.permutationInverse(k + O.getCol(kj) * ktotal);
+						SizeType col = basis.permutationInverse(
+						    k + O.getCol(kj) * ktotal);
 
 						ret.setCol(counter, col);
 						ret.setValues(counter++, O.getValue(kj) * sign);
@@ -263,11 +265,11 @@ public:
 		ret2 = ret;
 	}
 
-	SizeType dmrgMultiply(SparseMatrixType& result,
-	    const SparseMatrixType& O1,
-	    const SparseMatrixType& O2,
-	    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	    SizeType ns) const
+	SizeType dmrgMultiply(SparseMatrixType&                  result,
+	                      const SparseMatrixType&            O1,
+	                      const SparseMatrixType&            O2,
+	                      ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                      SizeType                           ns) const
 	{
 		SizeType ptr = (ns == 0) ? ns : ns - 1;
 		if (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -278,7 +280,8 @@ public:
 		return ptr;
 	}
 
-	static void createWithModification(SparseMatrixType& Om, const SparseMatrixType& O, char mod)
+	static void
+	createWithModification(SparseMatrixType& Om, const SparseMatrixType& O, char mod)
 	{
 		if (mod == 'n' || mod == 'N') {
 			Om = O;
@@ -288,11 +291,11 @@ public:
 		transposeConjugate(Om, O);
 	}
 
-	FieldType bracket(const SparseMatrixType& A,
-	    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	    SizeType ptr,
-	    const PsimagLite::GetBraOrKet& bra,
-	    const PsimagLite::GetBraOrKet& ket) const
+	FieldType bracket(const SparseMatrixType&            A,
+	                  ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                  SizeType                           ptr,
+	                  const PsimagLite::GetBraOrKet&     bra,
+	                  const PsimagLite::GetBraOrKet&     ket) const
 	{
 		// try {
 		const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
@@ -300,19 +303,19 @@ public:
 
 		return bracket_(A, src1, src2, fermionicSign, ptr);
 		/*} catch (std::exception& e) {
-			std::cerr<<"CAUGHT: "<<e.what();
-			std::cerr<<"WARNING: CorrelationsSkeleton::bracket(...):";
-			std::cerr<<" No data seen yet\n";
-			return 0;
+		        std::cerr<<"CAUGHT: "<<e.what();
+		        std::cerr<<"WARNING: CorrelationsSkeleton::bracket(...):";
+		        std::cerr<<" No data seen yet\n";
+		        return 0;
 		}*/
 	}
 
-	FieldType bracketRightCorner(const SparseMatrixType& A,
-	    const SparseMatrixType& B,
-	    ProgramGlobals::FermionOrBosonEnum fermionSign,
-	    SizeType ptr,
-	    const PsimagLite::GetBraOrKet& bra,
-	    const PsimagLite::GetBraOrKet& ket) const
+	FieldType bracketRightCorner(const SparseMatrixType&            A,
+	                             const SparseMatrixType&            B,
+	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
+	                             SizeType                           ptr,
+	                             const PsimagLite::GetBraOrKet&     bra,
+	                             const PsimagLite::GetBraOrKet&     ket) const
 	{
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
@@ -326,13 +329,13 @@ public:
 		}
 	}
 
-	FieldType bracketRightCorner(const SparseMatrixType& A,
-	    const SparseMatrixType& B,
-	    const SparseMatrixType& C,
-	    ProgramGlobals::FermionOrBosonEnum fermionSign,
-	    SizeType ptr,
-	    const PsimagLite::GetBraOrKet& bra,
-	    const PsimagLite::GetBraOrKet& ket) const
+	FieldType bracketRightCorner(const SparseMatrixType&            A,
+	                             const SparseMatrixType&            B,
+	                             const SparseMatrixType&            C,
+	                             ProgramGlobals::FermionOrBosonEnum fermionSign,
+	                             SizeType                           ptr,
+	                             const PsimagLite::GetBraOrKet&     bra,
+	                             const PsimagLite::GetBraOrKet&     ket) const
 	{
 		try {
 			const VectorWithOffsetType& src1 = helper_.getVectorFromBracketId(bra, ptr);
@@ -353,7 +356,7 @@ private:
 	int fermionSignBasis(int fermionicSign, const BasisType& basis) const
 	{
 		const typename BasisWithOperatorsType::VectorBoolType& v = basis.signs();
-		SizeType n = v.size();
+		SizeType                                               n = v.size();
 		if (n == 0)
 			return 1;
 		bool nx0 = v[0];
@@ -362,17 +365,18 @@ private:
 		return (nx0) ? fermionicSign : 1;
 	}
 
-	void dmrgMultiplySystem(SparseMatrixType& result,
-	    SizeType& ptr,
-	    const SparseMatrixType& O1,
-	    const SparseMatrixType& O2,
-	    ProgramGlobals::FermionOrBosonEnum fOrB, // for O2
-	    SizeType ns) const
+	void dmrgMultiplySystem(SparseMatrixType&                  result,
+	                        SizeType&                          ptr,
+	                        const SparseMatrixType&            O1,
+	                        const SparseMatrixType&            O2,
+	                        ProgramGlobals::FermionOrBosonEnum fOrB, // for O2
+	                        SizeType                           ns) const
 	{
-		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		const int fermionicSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 		SizeType ni = O1.rows();
 
-		ptr = ns;
+		ptr             = ns;
 		SizeType sprime = helper_.leftRightSuper(ptr).left().size(); // ni*nj;
 		result.resize(sprime, sprime);
 
@@ -382,7 +386,7 @@ private:
 			err("problem in dmrgMultiply\n");
 		}
 
-		PsimagLite::Vector<SizeType>::Type col(sprime, 0);
+		PsimagLite::Vector<SizeType>::Type           col(sprime, 0);
 		typename PsimagLite::Vector<FieldType>::Type value(sprime, 0);
 
 		PackIndicesType pack(ni);
@@ -397,7 +401,9 @@ private:
 				SizeType e2 = O1.getCol(k);
 				for (int k2 = O2.getRowPtr(u); k2 < O2.getRowPtr(u + 1); k2++) {
 					SizeType u2 = O2.getCol(k2);
-					SizeType r2 = helper_.leftRightSuper(ptr).left().permutationInverse(e2 + u2 * ni);
+					SizeType r2
+					    = helper_.leftRightSuper(ptr).left().permutationInverse(
+					        e2 + u2 * ni);
 					value[r2] += O1.getValue(k) * O2.getValue(k2) * f;
 					col[r2] = 1;
 				}
@@ -410,7 +416,7 @@ private:
 				result.pushValue(value[i]);
 				counter++;
 				value[i] = 0.0;
-				col[i] = 0;
+				col[i]   = 0;
 			}
 		}
 
@@ -418,19 +424,18 @@ private:
 		result.checkValidity();
 	}
 
-	void dmrgMultiplyEnviron(SparseMatrixType& result,
-	    SizeType& ptr,
-	    const SparseMatrixType& O1,
-	    const SparseMatrixType& O2,
-	    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	    SizeType ns) const
+	void dmrgMultiplyEnviron(SparseMatrixType&                  result,
+	                         SizeType&                          ptr,
+	                         const SparseMatrixType&            O1,
+	                         const SparseMatrixType&            O2,
+	                         ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                         SizeType                           ns) const
 	{
-		int fs = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
-		RealType f = fermionSignBasis(fs,
-		    helper_.leftRightSuper(ptr).left());
+		int      fs = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		RealType f  = fermionSignBasis(fs, helper_.leftRightSuper(ptr).left());
 		SizeType nj = O2.rows();
 
-		ptr = ns;
+		ptr             = ns;
 		SizeType eprime = helper_.leftRightSuper(ptr).right().size(); // ni*nj;
 		result.resize(eprime, eprime);
 
@@ -440,7 +445,7 @@ private:
 			throw PsimagLite::RuntimeError("problem in dmrgMultiply\n");
 		}
 
-		PsimagLite::Vector<SizeType>::Type col(eprime, 0);
+		PsimagLite::Vector<SizeType>::Type           col(eprime, 0);
 		typename PsimagLite::Vector<FieldType>::Type value(eprime, 0);
 
 		PackIndicesType pack(nj);
@@ -451,7 +456,8 @@ private:
 			SizeType e = 0;
 			SizeType u = 0;
 			pack.unpack(e, u, helper_.leftRightSuper(ptr).right().permutation(r));
-			const RealType sign = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON)
+			const RealType sign
+			    = (fermionicSign == ProgramGlobals::FermionOrBosonEnum::BOSON)
 			    ? 1
 			    : f * helper_.signsOneSite(e);
 
@@ -460,7 +466,9 @@ private:
 
 				for (int k2 = O1.getRowPtr(u); k2 < O1.getRowPtr(u + 1); k2++) {
 					SizeType u2 = O1.getCol(k2);
-					SizeType r2 = helper_.leftRightSuper(ptr).right().permutationInverse(e2 + u2 * nj);
+					SizeType r2 = helper_.leftRightSuper(ptr)
+					                  .right()
+					                  .permutationInverse(e2 + u2 * nj);
 					assert(r2 < eprime);
 					col[r2] = 1;
 					value[r2] += O2.getValue(k) * O1.getValue(k2) * sign;
@@ -474,7 +482,7 @@ private:
 				result.pushValue(value[i]);
 				counter++;
 				value[i] = 0.0;
-				col[i] = 0;
+				col[i]   = 0;
 			}
 		}
 
@@ -484,16 +492,16 @@ private:
 
 	static void reorderRowsCrs(SparseMatrixType& matrix, const BasisType& basis)
 	{
-		SizeType nrows = matrix.rows();
-		SizeType ncols = matrix.cols();
+		SizeType         nrows = matrix.rows();
+		SizeType         ncols = matrix.cols();
 		SparseMatrixType matrix2(nrows, ncols, matrix.nonZeros());
 
 		SizeType counter = 0;
 		for (SizeType row = 0; row < nrows; ++row) {
 			matrix2.setRow(row, counter);
-			SizeType r = basis.permutation(row);
+			SizeType r     = basis.permutation(row);
 			SizeType start = matrix.getRowPtr(r);
-			SizeType end = matrix.getRowPtr(r + 1);
+			SizeType end   = matrix.getRowPtr(r + 1);
 			for (SizeType k = start; k < end; ++k) {
 				matrix2.setCol(counter, matrix.getCol(k));
 				matrix2.setValues(counter++, matrix.getValue(k));
@@ -505,13 +513,14 @@ private:
 		matrix = matrix2;
 	}
 
-	FieldType bracket_(const SparseMatrixType& A,
-	    const VectorWithOffsetType& vec1,
-	    const VectorWithOffsetType& vec2,
-	    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	    SizeType ptr) const
+	FieldType bracket_(const SparseMatrixType&            A,
+	                   const VectorWithOffsetType&        vec1,
+	                   const VectorWithOffsetType&        vec2,
+	                   ProgramGlobals::FermionOrBosonEnum fermionicSign,
+	                   SizeType                           ptr) const
 	{
-		if (vec1.size() != helper_.leftRightSuper(ptr).super().size() || vec1.size() != vec2.size())
+		if (vec1.size() != helper_.leftRightSuper(ptr).super().size()
+		    || vec1.size() != vec2.size())
 			err("CorrelationsSkeleton::bracket_(...): Error\n");
 
 		return (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -519,25 +528,30 @@ private:
 		    : bracketEnviron_(A, vec1, vec2, fermionicSign, ptr);
 	}
 
-	FieldType bracketSystem_(const SparseMatrixType& A,
-	    const VectorWithOffsetType& vec1,
-	    const VectorWithOffsetType& vec2,
-	    SizeType ptr) const
+	FieldType bracketSystem_(const SparseMatrixType&     A,
+	                         const VectorWithOffsetType& vec1,
+	                         const VectorWithOffsetType& vec2,
+	                         SizeType                    ptr) const
 	{
-		FieldType sum = 0;
+		FieldType       sum = 0;
 		PackIndicesType pack(helper_.leftRightSuper(ptr).left().size());
 		for (SizeType x = 0; x < vec1.sectors(); x++) {
 			SizeType sector = vec1.sector(x);
 			SizeType offset = vec1.offset(sector);
-			SizeType total = offset + vec1.effectiveSize(sector);
+			SizeType total  = offset + vec1.effectiveSize(sector);
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack.unpack(r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
+				pack.unpack(
+				    r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
 				for (int k = A.getRowPtr(r); k < A.getRowPtr(r + 1); k++) {
 					SizeType r2 = A.getCol(k);
-					SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(r2 + eta * A.cols());
-					sum += A.getValue(k) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2);
+					SizeType t2 = helper_.leftRightSuper(ptr)
+					                  .super()
+					                  .permutationInverse(r2 + eta * A.cols());
+					sum += A.getValue(k)
+					    * PsimagLite::conj(vec1.fastAccess(sector, t - offset))
+					    * vec2.slowAccess(t2);
 				}
 			}
 		}
@@ -545,34 +559,39 @@ private:
 		return resultDivided(sum, vec1);
 	}
 
-	FieldType bracketEnviron_(const SparseMatrixType& A,
-	    const VectorWithOffsetType& vec1,
-	    const VectorWithOffsetType& vec2,
-	    ProgramGlobals::FermionOrBosonEnum fOrB,
-	    SizeType ptr) const
+	FieldType bracketEnviron_(const SparseMatrixType&            A,
+	                          const VectorWithOffsetType&        vec1,
+	                          const VectorWithOffsetType&        vec2,
+	                          ProgramGlobals::FermionOrBosonEnum fOrB,
+	                          SizeType                           ptr) const
 	{
-		const int fermionicSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		const int fermionicSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 
-		RealType sign = fermionSignBasis(fermionicSign,
-		    helper_.leftRightSuper(ptr).left());
+		RealType sign = fermionSignBasis(fermionicSign, helper_.leftRightSuper(ptr).left());
 
-		FieldType sum = 0;
+		FieldType       sum = 0;
 		PackIndicesType pack(helper_.leftRightSuper(ptr).left().size());
-		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
+		SizeType        leftSize = helper_.leftRightSuper(ptr).left().size();
 
 		for (SizeType x = 0; x < vec1.sectors(); x++) {
 			SizeType sector = vec1.sector(x);
 			SizeType offset = vec1.offset(sector);
-			SizeType total = offset + vec1.effectiveSize(sector);
+			SizeType total  = offset + vec1.effectiveSize(sector);
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack.unpack(r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
+				pack.unpack(
+				    r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
 
 				for (int k = A.getRowPtr(eta); k < A.getRowPtr(eta + 1); k++) {
 					SizeType eta2 = A.getCol(k);
-					SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(r + eta2 * leftSize);
-					sum += A.getValue(k) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2) * sign;
+					SizeType t2   = helper_.leftRightSuper(ptr)
+					                  .super()
+					                  .permutationInverse(r + eta2 * leftSize);
+					sum += A.getValue(k)
+					    * PsimagLite::conj(vec1.fastAccess(sector, t - offset))
+					    * vec2.slowAccess(t2) * sign;
 				}
 			}
 		}
@@ -580,12 +599,12 @@ private:
 		return resultDivided(sum, vec1);
 	}
 
-	FieldType bracketRightCorner_(const SparseMatrixType& A,
-	    const SparseMatrixType& B,
-	    ProgramGlobals::FermionOrBosonEnum fermionSign,
-	    const VectorWithOffsetType& vec1,
-	    const VectorWithOffsetType& vec2,
-	    SizeType ptr) const
+	FieldType bracketRightCorner_(const SparseMatrixType&            A,
+	                              const SparseMatrixType&            B,
+	                              ProgramGlobals::FermionOrBosonEnum fermionSign,
+	                              const VectorWithOffsetType&        vec1,
+	                              const VectorWithOffsetType&        vec2,
+	                              SizeType                           ptr) const
 	{
 		return (helper_.direction(ptr) == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 		    ? brRghtCrnrSystem_(A, B, fermionSign, vec1, vec2, ptr)
@@ -595,24 +614,26 @@ private:
 	bool superOddElectrons(SizeType t, SizeType ptr) const
 	{
 		// return helper_.leftRightSuper(ptr).super().electrons(t);
-		SizeType tmp = helper_.leftRightSuper(ptr).super().permutation(t);
-		ldiv_t mydiv = std::ldiv(tmp, helper_.leftRightSuper(ptr).left().size());
-		return helper_.leftRightSuper(ptr).right().signs()[mydiv.quot] ^ helper_.leftRightSuper(ptr).left().signs()[mydiv.rem];
+		SizeType tmp   = helper_.leftRightSuper(ptr).super().permutation(t);
+		ldiv_t   mydiv = std::ldiv(tmp, helper_.leftRightSuper(ptr).left().size());
+		return helper_.leftRightSuper(ptr).right().signs()[mydiv.quot]
+		    ^ helper_.leftRightSuper(ptr).left().signs()[mydiv.rem];
 	}
 
-	FieldType brRghtCrnrSystem_(const SparseMatrixType& Acrs,
-	    const SparseMatrixType& Bcrs,
-	    ProgramGlobals::FermionOrBosonEnum fermionSign,
-	    const VectorWithOffsetType& vec1,
-	    const VectorWithOffsetType& vec2,
-	    SizeType ptr) const
+	FieldType brRghtCrnrSystem_(const SparseMatrixType&            Acrs,
+	                            const SparseMatrixType&            Bcrs,
+	                            ProgramGlobals::FermionOrBosonEnum fermionSign,
+	                            const VectorWithOffsetType&        vec1,
+	                            const VectorWithOffsetType&        vec2,
+	                            SizeType                           ptr) const
 	{
-		FieldType sum = 0;
-		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
-		SizeType ni = helper_.leftRightSuper(ptr).left().size();
+		FieldType sum      = 0;
+		SizeType  leftSize = helper_.leftRightSuper(ptr).left().size();
+		SizeType  ni       = helper_.leftRightSuper(ptr).left().size();
 
 		// some sanity checks:
-		if (vec1.size() != vec2.size() || vec1.size() != helper_.leftRightSuper(ptr).super().size())
+		if (vec1.size() != vec2.size()
+		    || vec1.size() != helper_.leftRightSuper(ptr).super().size())
 			err("Observe::brRghtCrnrSystem_(...)\n");
 
 		if (ni != Acrs.rows())
@@ -623,26 +644,37 @@ private:
 		for (SizeType x = 0; x < vec1.sectors(); x++) {
 			SizeType sector = vec1.sector(x);
 			SizeType offset = vec1.offset(sector);
-			SizeType total = offset + vec1.effectiveSize(sector);
+			SizeType total  = offset + vec1.effectiveSize(sector);
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack1.unpack(r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
+				pack1.unpack(
+				    r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
 
 				bool odd = superOddElectrons(t, ptr);
 				odd ^= helper_.leftRightSuper(ptr).right().signs()[eta];
-				const RealType sign = (odd && fermionSign == ProgramGlobals::FermionOrBosonEnum::FERMION) ? -1.0
-															  : 1.0;
+				const RealType sign
+				    = (odd
+				       && fermionSign
+				           == ProgramGlobals::FermionOrBosonEnum::FERMION)
+				    ? -1.0
+				    : 1.0;
 
 				for (int k = Acrs.getRowPtr(r); k < Acrs.getRowPtr(r + 1); k++) {
 					SizeType rprime = Acrs.getCol(k);
 					for (int k2 = Bcrs.getRowPtr(eta);
-					    k2 < Bcrs.getRowPtr(eta + 1);
-					    k2++) {
+					     k2 < Bcrs.getRowPtr(eta + 1);
+					     k2++) {
 						SizeType eta2 = Bcrs.getCol(k2);
 
-						SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(rprime + eta2 * leftSize);
-						sum += Acrs.getValue(k) * Bcrs.getValue(k2) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2) * sign;
+						SizeType t2 = helper_.leftRightSuper(ptr)
+						                  .super()
+						                  .permutationInverse(
+						                      rprime + eta2 * leftSize);
+						sum += Acrs.getValue(k) * Bcrs.getValue(k2)
+						    * PsimagLite::conj(
+						           vec1.fastAccess(sector, t - offset))
+						    * vec2.slowAccess(t2) * sign;
 					}
 				}
 			}
@@ -651,22 +683,23 @@ private:
 		return resultDivided(sum, vec1);
 	}
 
-	FieldType brLftCrnrEnviron_(const SparseMatrixType& Acrs,
-	    const SparseMatrixType& Bcrs,
-	    ProgramGlobals::FermionOrBosonEnum fOrB,
-	    const VectorWithOffsetType& vec1,
-	    const VectorWithOffsetType& vec2,
-	    SizeType ptr) const
+	FieldType brLftCrnrEnviron_(const SparseMatrixType&            Acrs,
+	                            const SparseMatrixType&            Bcrs,
+	                            ProgramGlobals::FermionOrBosonEnum fOrB,
+	                            const VectorWithOffsetType&        vec1,
+	                            const VectorWithOffsetType&        vec2,
+	                            SizeType                           ptr) const
 	{
-		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
-		int signRight = fermionSignBasis(fermionSign,
-		    helper_.leftRightSuper(ptr).right());
+		const int fermionSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		int signRight = fermionSignBasis(fermionSign, helper_.leftRightSuper(ptr).right());
 		FieldType sum = 0;
-		SizeType ni = Bcrs.rows();
-		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
+		SizeType  ni  = Bcrs.rows();
+		SizeType  leftSize = helper_.leftRightSuper(ptr).left().size();
 
 		// some sanity checks:
-		if (vec1.size() != vec2.size() || vec1.size() != helper_.leftRightSuper(ptr).super().size())
+		if (vec1.size() != vec2.size()
+		    || vec1.size() != helper_.leftRightSuper(ptr).super().size())
 			err("Observe::brLftCrnrEnviron_(...)\n");
 		if (helper_.leftRightSuper(ptr).right().size() / Bcrs.rows() != Acrs.rows())
 			err("Observe::brLftCrnrEnviron_(...)\n");
@@ -678,26 +711,39 @@ private:
 		for (SizeType x = 0; x < vec1.sectors(); x++) {
 			SizeType sector = vec1.sector(x);
 			SizeType offset = vec1.offset(sector);
-			SizeType total = offset + vec1.effectiveSize(sector);
+			SizeType total  = offset + vec1.effectiveSize(sector);
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack1.unpack(eta, r, helper_.leftRightSuper(ptr).super().permutation(t));
+				pack1.unpack(
+				    eta, r, helper_.leftRightSuper(ptr).super().permutation(t));
 				SizeType r0, r1;
-				pack2.unpack(r0, r1, helper_.leftRightSuper(ptr).right().permutation(r));
-				const RealType sign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
+				pack2.unpack(
+				    r0, r1, helper_.leftRightSuper(ptr).right().permutation(r));
+				const RealType sign
+				    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON)
 				    ? 1
 				    : helper_.signsOneSite(r0) * signRight;
 
 				for (int k = Acrs.getRowPtr(r1); k < Acrs.getRowPtr(r1 + 1); k++) {
 					SizeType r1prime = Acrs.getCol(k);
 					for (int k2 = Bcrs.getRowPtr(eta);
-					    k2 < Bcrs.getRowPtr(eta + 1);
-					    k2++) {
+					     k2 < Bcrs.getRowPtr(eta + 1);
+					     k2++) {
 						SizeType eta2 = Bcrs.getCol(k2);
-						SizeType rprime = helper_.leftRightSuper(ptr).right().permutationInverse(r0 + r1prime * ni);
-						SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(eta2 + rprime * leftSize);
-						sum += PsimagLite::conj(Acrs.getValue(k)) * Bcrs.getValue(k2) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2) * sign;
+						SizeType rprime
+						    = helper_.leftRightSuper(ptr)
+						          .right()
+						          .permutationInverse(r0 + r1prime * ni);
+						SizeType t2 = helper_.leftRightSuper(ptr)
+						                  .super()
+						                  .permutationInverse(
+						                      eta2 + rprime * leftSize);
+						sum += PsimagLite::conj(Acrs.getValue(k))
+						    * Bcrs.getValue(k2)
+						    * PsimagLite::conj(
+						           vec1.fastAccess(sector, t - offset))
+						    * vec2.slowAccess(t2) * sign;
 					}
 				}
 			}
@@ -706,18 +752,19 @@ private:
 		return resultDivided(sum, vec1);
 	}
 
-	FieldType bracketRightCorner_(const SparseMatrixType& A1,
-	    const SparseMatrixType& A2,
-	    const SparseMatrixType& B,
-	    ProgramGlobals::FermionOrBosonEnum fOrB,
-	    const VectorWithOffsetType& vec1,
-	    const VectorWithOffsetType& vec2,
-	    SizeType ptr) const
+	FieldType bracketRightCorner_(const SparseMatrixType&            A1,
+	                              const SparseMatrixType&            A2,
+	                              const SparseMatrixType&            B,
+	                              ProgramGlobals::FermionOrBosonEnum fOrB,
+	                              const VectorWithOffsetType&        vec1,
+	                              const VectorWithOffsetType&        vec2,
+	                              SizeType                           ptr) const
 	{
 		if (helper_.direction(ptr) != ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			return 0;
 
-		const int fermionSign = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
+		const int fermionSign
+		    = (fOrB == ProgramGlobals::FermionOrBosonEnum::BOSON) ? 1 : -1;
 
 		SizeType penultimateSite = helper_.leftRightSuper(ptr).super().block().size();
 		assert(penultimateSite > 1);
@@ -728,9 +775,9 @@ private:
 		SparseMatrixType A1crs(A1);
 		SparseMatrixType A2crs(A2);
 		SparseMatrixType Bcrs(B);
-		FieldType sum = 0;
-		SizeType ni = helper_.leftRightSuper(ptr).left().size() / A2crs.rows();
-		SizeType leftSize = helper_.leftRightSuper(ptr).left().size();
+		FieldType        sum = 0;
+		SizeType         ni  = helper_.leftRightSuper(ptr).left().size() / A2crs.rows();
+		SizeType         leftSize = helper_.leftRightSuper(ptr).left().size();
 
 		// some sanity checks:
 		assert(vec1.size() == vec2.size());
@@ -748,29 +795,44 @@ private:
 		for (SizeType x = 0; x < vec1.sectors(); x++) {
 			SizeType sector = vec1.sector(x);
 			SizeType offset = vec1.offset(sector);
-			SizeType total = offset + vec1.effectiveSize(sector);
+			SizeType total  = offset + vec1.effectiveSize(sector);
 			for (SizeType t = offset; t < total; t++) {
 				SizeType eta, r;
 
-				pack1.unpack(r,
-				    eta,
-				    helper_.leftRightSuper(ptr).super().permutation(t));
+				pack1.unpack(
+				    r, eta, helper_.leftRightSuper(ptr).super().permutation(t));
 				SizeType r0, r1;
-				pack2.unpack(r0,
-				    r1,
-				    helper_.leftRightSuper(ptr).left().permutation(r));
+				pack2.unpack(
+				    r0, r1, helper_.leftRightSuper(ptr).left().permutation(r));
 				assert(r1 < oddElectrons.size());
 				RealType sign = (oddElectrons[r1]) ? fermionSign : 1;
 
-				for (int k1 = A1crs.getRowPtr(r0); k1 < A1crs.getRowPtr(r0 + 1); k1++) {
+				for (int k1 = A1crs.getRowPtr(r0); k1 < A1crs.getRowPtr(r0 + 1);
+				     k1++) {
 					SizeType r0prime = A1crs.getCol(k1);
-					for (int k2 = A2crs.getRowPtr(r1); k2 < A2crs.getRowPtr(r1 + 1); k2++) {
+					for (int k2 = A2crs.getRowPtr(r1);
+					     k2 < A2crs.getRowPtr(r1 + 1);
+					     k2++) {
 						SizeType r1prime = A2crs.getCol(k2);
-						for (int k3 = Bcrs.getRowPtr(eta); k3 < Bcrs.getRowPtr(eta + 1); k3++) {
+						for (int k3 = Bcrs.getRowPtr(eta);
+						     k3 < Bcrs.getRowPtr(eta + 1);
+						     k3++) {
 							SizeType eta2 = Bcrs.getCol(k3);
-							SizeType rprime = helper_.leftRightSuper(ptr).left().permutationInverse(r0prime + r1prime * ni);
-							SizeType t2 = helper_.leftRightSuper(ptr).super().permutationInverse(rprime + eta2 * leftSize);
-							sum += A1crs.getValue(k1) * A2crs.getValue(k2) * Bcrs.getValue(k3) * PsimagLite::conj(vec1.fastAccess(sector, t - offset)) * vec2.slowAccess(t2) * sign;
+							SizeType rprime
+							    = helper_.leftRightSuper(ptr)
+							          .left()
+							          .permutationInverse(
+							              r0prime + r1prime * ni);
+							SizeType t2
+							    = helper_.leftRightSuper(ptr)
+							          .super()
+							          .permutationInverse(
+							              rprime + eta2 * leftSize);
+							sum += A1crs.getValue(k1)
+							    * A2crs.getValue(k2) * Bcrs.getValue(k3)
+							    * PsimagLite::conj(vec1.fastAccess(
+							        sector, t - offset))
+							    * vec2.slowAccess(t2) * sign;
 						}
 					}
 				}
@@ -785,15 +847,15 @@ private:
 		if (!normalizeResult_)
 			return sum;
 
-		FieldType tmp = vec * vec;
-		RealType norma2 = PsimagLite::real(tmp);
+		FieldType tmp    = vec * vec;
+		RealType  norma2 = PsimagLite::real(tmp);
 		assert(fabs(norma2) > 1e-10 && fabs(PsimagLite::imag(tmp)) < 1e-6);
 		return sum / norma2;
 	}
 
 	const ObserverHelperType& helper_;
-	const ModelType& model_;
-	bool normalizeResult_;
+	const ModelType&          model_;
+	bool                      normalizeResult_;
 }; // class CorrelationsSkeleton
 } // namespace Dmrg
 

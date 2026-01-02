@@ -86,20 +86,29 @@ namespace PsimagLite {
 template <typename ComplexOrRealType, typename InputType>
 class KTwoNiFFour : public GeometryBase<ComplexOrRealType, InputType> {
 
-	enum SubtypeEnum { SUBTYPE_X,
-		           SUBTYPE_Y };
+	enum SubtypeEnum
+	{
+		SUBTYPE_X,
+		SUBTYPE_Y
+	};
 
-	enum { DIR_X,
-	       DIR_Y,
-	       DIR_XPY,
-	       DIR_XMY };
+	enum
+	{
+		DIR_X,
+		DIR_Y,
+		DIR_XPY,
+		DIR_XMY
+	};
 
 public:
 
-	enum TypeEnum { TYPE_O,
-		        TYPE_C };
+	enum TypeEnum
+	{
+		TYPE_O,
+		TYPE_C
+	};
 
-	typedef std::pair<TypeEnum, SubtypeEnum> PairType;
+	typedef std::pair<TypeEnum, SubtypeEnum>           PairType;
 	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
 
 	KTwoNiFFour() { }
@@ -119,10 +128,7 @@ public:
 
 	virtual SizeType dirs() const { return 4; }
 
-	virtual SizeType length(SizeType) const
-	{
-		return this->unimplemented("length");
-	}
+	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
 
 	virtual SizeType translate(SizeType, SizeType, SizeType) const
 	{
@@ -161,7 +167,8 @@ public:
 		SizeType newi1 = (type1.first == TYPE_O) ? i1 : i2;
 		SizeType newi2 = (type1.first == TYPE_O) ? i2 : i1;
 		assert(newi2 >= 3);
-		if (newi2 - 1 == newi1 || newi2 - 2 == newi1 || newi2 - 3 == newi1 || newi2 + 1 == newi1)
+		if (newi2 - 1 == newi1 || newi2 - 2 == newi1 || newi2 - 3 == newi1
+		    || newi2 + 1 == newi1)
 			return true;
 		return false;
 	}
@@ -192,7 +199,7 @@ public:
 		}
 		//! o-c or c-o
 		SizeType newi1 = (type1.first == TYPE_O) ? i1 : i2;
-		type1 = findTypeOfSite(newi1);
+		type1          = findTypeOfSite(newi1);
 		return (type1.second == SUBTYPE_X) ? DIR_X : DIR_Y;
 	}
 
@@ -250,8 +257,8 @@ public:
 	SizeType matrixRank(SizeType, SizeType) const
 	{
 		SizeType sites = linSize_;
-		SizeType no = 0;
-		SizeType nc = 0;
+		SizeType no    = 0;
+		SizeType nc    = 0;
 		for (SizeType i = 0; i < sites; i++) {
 			SizeType type1 = findTypeOfSite(i).first;
 			if (type1 == TYPE_C)
@@ -271,7 +278,7 @@ public:
 		if (type1 == TYPE_C || orb == 0)
 			return i;
 		SizeType sites = linSize_;
-		SizeType tmp = (i + 1) / 4;
+		SizeType tmp   = (i + 1) / 4;
 		assert(sites + i >= tmp);
 		return sites + i - tmp;
 	}
@@ -283,7 +290,7 @@ public:
 		SizeType newi2 = std::max(i1, i2);
 		PairType type1 = findTypeOfSite(newi1);
 		PairType type2 = findTypeOfSite(newi2);
-		int sign1 = 1;
+		int      sign1 = 1;
 		if (type1.first != type2.first) {
 
 			int diff = newi2 - newi1;
@@ -309,12 +316,11 @@ public:
 	static PairType findTypeOfSite(SizeType site)
 	{
 		SizeType sitePlusOne = site + 1;
-		SizeType r = sitePlusOne % 4;
+		SizeType r           = sitePlusOne % 4;
 		if (r == 0)
 			return PairType(TYPE_C, SUBTYPE_X);
 
-		return (r == 1) ? PairType(TYPE_O, SUBTYPE_X)
-		                : PairType(TYPE_O, SUBTYPE_Y);
+		return (r == 1) ? PairType(TYPE_O, SUBTYPE_X) : PairType(TYPE_O, SUBTYPE_Y);
 	}
 
 private:
@@ -330,10 +336,7 @@ private:
 		return (i == smax || i == emin);
 	}
 
-	SizeType subs0(SizeType smax, SizeType, SizeType) const
-	{
-		return smax + 3;
-	}
+	SizeType subs0(SizeType smax, SizeType, SizeType) const { return smax + 3; }
 
 	bool fringe1(SizeType i, SizeType smax, SizeType emin) const
 	{
@@ -377,7 +380,7 @@ private:
 	}
 
 	SizeType linSize_;
-	int signChange_;
+	int      signChange_;
 }; // class KTwoNiFFour
 } // namespace PsimagLite
 

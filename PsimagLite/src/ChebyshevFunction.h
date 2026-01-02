@@ -32,8 +32,7 @@ Please see full open source license included in file LICENSE.
 #include <iostream>
 
 namespace PsimagLite {
-template <typename RealType>
-class ChebyshevFunction {
+template <typename RealType> class ChebyshevFunction {
 
 public:
 
@@ -50,7 +49,7 @@ public:
 			return (2 * this->operator()(p, x) * this->operator()(p + 1, x) - x);
 		}
 
-		int pp = m / 2;
+		int      pp  = m / 2;
 		RealType tmp = this->operator()(pp, x);
 		return (2 * tmp * tmp - 1);
 	}

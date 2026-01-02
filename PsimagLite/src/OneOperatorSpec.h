@@ -16,7 +16,7 @@ struct OneOperatorSpec {
 		if (lastIndex > 0)
 			lastIndex--;
 		if (label[lastIndex] == '\'') {
-			label = label.substr(0, lastIndex);
+			label     = label.substr(0, lastIndex);
 			transpose = true;
 		}
 
@@ -34,10 +34,12 @@ struct OneOperatorSpec {
 		if (i + 1 == label.length())
 			err("WRONG op. spec. " + label_ + ", nothing after ?\n");
 
-		label = label_.substr(0, i);
+		label                      = label_.substr(0, i);
 		const String numericString = label_.substr(i + 1, label_.length());
 		if (!isAnInteger(numericString)) {
-			throw RuntimeError("FATAL: Syntax Error: The label " + label + " must be followed by an integer " + "and not " + numericString + "\n");
+			throw RuntimeError("FATAL: Syntax Error: The label " + label
+			                   + " must be followed by an integer " + "and not "
+			                   + numericString + "\n");
 		}
 
 		dof = atoi(numericString.c_str());
@@ -49,20 +51,18 @@ struct OneOperatorSpec {
 		    : hasSiteString(hasSiteString_)
 		    , root(root_)
 		    , siteString(siteString_)
-		{
-		}
+		{ }
 
-		bool hasSiteString;
+		bool   hasSiteString;
 		String root;
 		String siteString;
 	};
 
-	static SiteSplit extractSiteIfAny(PsimagLite::String name,
-	                                  const char cBegin = '[',
-	                                  const char cEnd = ']')
+	static SiteSplit
+	extractSiteIfAny(PsimagLite::String name, const char cBegin = '[', const char cEnd = ']')
 	{
 		int firstIndex = -1;
-		int lastIndex = -1;
+		int lastIndex  = -1;
 		for (SizeType i = 0; i < name.length(); ++i) {
 			if (name[i] == cBegin) {
 				firstIndex = i;
@@ -91,9 +91,8 @@ struct OneOperatorSpec {
 
 	static bool isNonNegativeInteger(const String& s)
 	{
-		return !s.empty() && std::find_if(s.begin(), s.end(), [](char c) {
-			                     return !std::isdigit(c);
-		                     })
+		return !s.empty()
+		    && std::find_if(s.begin(), s.end(), [](char c) { return !std::isdigit(c); })
 		    == s.end();
 	}
 
@@ -105,8 +104,8 @@ struct OneOperatorSpec {
 	}
 
 	SizeType dof;
-	String label;
-	bool transpose;
+	String   label;
+	bool     transpose;
 }; // struct OneOperatorSpec
 
 } // namespace PsimagLite

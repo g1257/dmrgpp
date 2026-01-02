@@ -83,32 +83,30 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "WftOptions.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename DmrgWaveStructType_,
-    typename VectorWithOffsetType_,
-    typename OptionsType_,
-    typename OneSiteSpacesType_>
-class WaveFunctionTransfBase
-{
+          typename VectorWithOffsetType_,
+          typename OptionsType_,
+          typename OneSiteSpacesType_>
+class WaveFunctionTransfBase {
 
 public:
 
-	typedef DmrgWaveStructType_ DmrgWaveStructType;
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
+	typedef DmrgWaveStructType_                                 DmrgWaveStructType;
+	typedef VectorWithOffsetType_                               VectorWithOffsetType;
+	typedef PsimagLite::PackIndices                             PackIndicesType;
+	typedef typename DmrgWaveStructType::LeftRightSuperType     LeftRightSuperType;
 	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef WftOptions<VectorWithOffsetType_, OptionsType_> WftOptionsType;
+	typedef typename BasisWithOperatorsType::BasisType          BasisType;
+	typedef PsimagLite::Vector<SizeType>::Type                  VectorSizeType;
+	typedef WftOptions<VectorWithOffsetType_, OptionsType_>     WftOptionsType;
 	using OneSiteSpacesType = OneSiteSpacesType_;
 
-	virtual void transformVector(VectorWithOffsetType& psiDest,
-	    const VectorWithOffsetType& psiSrc,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& nk) const
+	virtual void transformVector(VectorWithOffsetType&       psiDest,
+	                             const VectorWithOffsetType& psiSrc,
+	                             const LeftRightSuperType&   lrs,
+	                             const OneSiteSpacesType&    nk) const
 	    = 0;
 
 	virtual ~WaveFunctionTransfBase() { }

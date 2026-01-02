@@ -2,16 +2,13 @@
 #define LAZYALGEBRA_H
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename OperatorType>
-class LazyAlgebraFactor
-{
+template <typename OperatorType> class LazyAlgebraFactor {
 
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename OperatorType::value_type ComplexOrRealType;
+	typedef PsimagLite::Vector<SizeType>::Type              VectorSizeType;
+	typedef typename OperatorType::value_type               ComplexOrRealType;
 
 public:
 
@@ -19,15 +16,13 @@ public:
 	    : ops_(1, OperatorType())
 	    , indices_(1, 1)
 	    , overallFactor_(1.0)
-	{
-	}
+	{ }
 
 	LazyAlgebraFactor(const OperatorType& op)
 	    : ops_(1, op)
 	    , indices_(1, 1)
 	    , overallFactor_(1.0)
-	{
-	}
+	{ }
 
 	const LazyAlgebraFactor& operator*=(const ComplexOrRealType& f)
 	{
@@ -71,13 +66,12 @@ public:
 		return true;
 	}
 
-	friend LazyAlgebraFactor operator*(const LazyAlgebraFactor& a,
-	    const LazyAlgebraFactor& b)
+	friend LazyAlgebraFactor operator*(const LazyAlgebraFactor& a, const LazyAlgebraFactor& b)
 	{
 		LazyAlgebraFactor c = a;
 		c.overallFactor_ *= b.overallFactor_;
-		const SizeType n = b.indices_.size();
-		SizeType offset = c.ops_.size();
+		const SizeType n      = b.indices_.size();
+		SizeType       offset = c.ops_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType ind = b.indices_[i];
 			if (ind == 0) {
@@ -97,29 +91,26 @@ public:
 private:
 
 	VectorOperatorType ops_;
-	VectorSizeType indices_;
-	ComplexOrRealType overallFactor_;
+	VectorSizeType     indices_;
+	ComplexOrRealType  overallFactor_;
 };
 
-template <typename OperatorType>
-class LazyAlgebra
-{
+template <typename OperatorType> class LazyAlgebra {
 
 public:
 
 	typedef LazyAlgebraFactor<OperatorType> LazyAlgebraFactorType;
-	typedef typename PsimagLite::Vector<LazyAlgebraFactorType>::Type VectorLazyAlgebraFactorType;
-	typedef typename OperatorType::value_type ComplexOrRealType;
+	typedef
+	    typename PsimagLite::Vector<LazyAlgebraFactorType>::Type VectorLazyAlgebraFactorType;
+	typedef typename OperatorType::value_type                    ComplexOrRealType;
 
 	LazyAlgebra()
 	    : factors_(1, OperatorType())
-	{
-	}
+	{ }
 
 	LazyAlgebra(const OperatorType& op)
 	    : factors_(1, op)
-	{
-	}
+	{ }
 
 	const LazyAlgebra& operator+=(const LazyAlgebra& f)
 	{

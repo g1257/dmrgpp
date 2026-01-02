@@ -3,12 +3,12 @@
 
 template <typename ComplexOrRealType>
 void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
-    const int nrow_B,
-    const int ncol_B,
-    const int max_nnz,
-    const PsimagLite::Vector<int>::Type& rindex,
-    const PsimagLite::Vector<int>::Type& cindex,
-    PsimagLite::CrsMatrix<ComplexOrRealType>& b)
+                   const int                                       nrow_B,
+                   const int                                       ncol_B,
+                   const int                                       max_nnz,
+                   const PsimagLite::Vector<int>::Type&            rindex,
+                   const PsimagLite::Vector<int>::Type&            cindex,
+                   PsimagLite::CrsMatrix<ComplexOrRealType>&       b)
 {
 	/*
 	 * ---------------------------------------------------------------------------
@@ -30,7 +30,7 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 	const int ncol_A = a.cols();
 
 	int* cmap = new int[ncol_A];
-	int* nnz = new int[nrow_B];
+	int* nnz  = new int[nrow_B];
 
 	int ja = 0;
 	int ib = 0;
@@ -58,9 +58,9 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 	};
 
 	for (ib = 0; ib < nrow_B; ib++) {
-		int ia = rindex[ib];
+		int ia     = rindex[ib];
 		int istart = a.getRowPtr(ia);
-		int iend = a.getRowPtr(ia + 1);
+		int iend   = a.getRowPtr(ia + 1);
 
 		assert((0 <= ia) && (static_cast<SizeType>(ia) < a.rows()));
 
@@ -69,7 +69,7 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 			int ja = a.getCol(k);
 			assert((0 <= ja) && (ja < ncol_A));
 
-			int jb = cmap[ja];
+			int jb      = cmap[ja];
 			int isok_jb = (0 <= jb) && (jb < ncol_B);
 			if (isok_jb) {
 				nnz[ib] += 1;
@@ -123,15 +123,15 @@ void csr_submatrix(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
 	 * --------------------------------------
 	 */
 	for (ib = 0; ib < nrow_B; ib++) {
-		int ia = rindex[ib];
+		int ia     = rindex[ib];
 		int istart = a.getRowPtr(ia);
-		int iend = a.getRowPtr(ia + 1);
-		int k = 0;
+		int iend   = a.getRowPtr(ia + 1);
+		int k      = 0;
 		for (k = istart; k < iend; k++) {
-			int ja = a.getCol(k);
+			int               ja  = a.getCol(k);
 			ComplexOrRealType aij = a.getValue(k);
 
-			jb = cmap[ja];
+			jb          = cmap[ja];
 			int isvalid = (0 <= jb) && (jb < ncol_B);
 			if (isvalid) {
 				if (use_push) {

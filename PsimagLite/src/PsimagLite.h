@@ -37,17 +37,15 @@ struct MatchPathSeparator {
 	bool operator()(char ch) const { return (ch == '/'); }
 };
 
-template <typename T>
-void fillRandom(T& v, typename EnableIf<IsVectorLike<T>::True, int>::Type = 0)
+template <typename T> void fillRandom(T& v, typename EnableIf<IsVectorLike<T>::True, int>::Type = 0)
 {
 	SizeType n = v.size();
 	if (n == 0)
-		throw std::runtime_error(
-		    "fillRandom must be called with size > 0\n");
+		throw std::runtime_error("fillRandom must be called with size > 0\n");
 
-	Random48<typename T::value_type> myrng(time(0));
-	typename PsimagLite::Real<typename T::value_type>::Type sum = 0;
-	const typename T::value_type zeroPointFive = 0.5;
+	Random48<typename T::value_type>                        myrng(time(0));
+	typename PsimagLite::Real<typename T::value_type>::Type sum           = 0;
+	const typename T::value_type                            zeroPointFive = 0.5;
 	for (SizeType i = 0; i < n; ++i) {
 		v[i] = myrng() - zeroPointFive;
 		sum += PsimagLite::real(v[i] * PsimagLite::conj(v[i]));
@@ -75,14 +73,13 @@ public:
 	{
 		chekSizeType();
 
-		SizeType n = *argc;
-		char** temp = *argv;
+		SizeType n    = *argc;
+		char**   temp = *argv;
 		for (SizeType i = 0; i < n; ++i)
 			cmdLine_ += String(temp[i]) + " ";
 	}
 
-	void checkMicroArch(std::ostream& os,
-	                    PsimagLite::String compiledArch) const
+	void checkMicroArch(std::ostream& os, PsimagLite::String compiledArch) const
 	{
 		os << "Compiled MicroArchitecture is " << compiledArch << "\n";
 		os << "Running on MicroArchitecture " << microArch_ << "\n";
@@ -94,10 +91,7 @@ public:
 
 	const String& name() const { return appName_; }
 
-	void printCmdLine(std::ostream& os) const
-	{
-		os << "PsiApp: CmdLine: " << cmdLine_ << "\n";
-	}
+	void printCmdLine(std::ostream& os) const { os << "PsiApp: CmdLine: " << cmdLine_ << "\n"; }
 
 	static void base64encode(std::ostream& os, String data, bool flag)
 	{
@@ -110,14 +104,13 @@ public:
 
 	static void echoBase64(std::ostream& os, String filename)
 	{
-		os << "PsiApp::echoBase64: Echo of " << filename
-		   << " in base64\n";
+		os << "PsiApp::echoBase64: Echo of " << filename << " in base64\n";
 		base64encode(os, slurp(filename), false);
 	}
 
 	static String slurp(String filename)
 	{
-		std::ifstream fin(filename.c_str());
+		std::ifstream     fin(filename.c_str());
 		std::stringstream sstr;
 		sstr << fin.rdbuf();
 		return sstr.str();
@@ -137,9 +130,9 @@ private:
 	static const int libSizeOfSizeType_;
 
 	Concurrency concurrency_;
-	String appName_;
-	String cmdLine_;
-	String microArch_;
+	String      appName_;
+	String      cmdLine_;
+	String      microArch_;
 };
 
 } // namespace PsimagLite

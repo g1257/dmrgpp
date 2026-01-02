@@ -5,15 +5,15 @@
 
 template <typename SolverType, typename VectorWithOffsetType>
 void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType& geometry,
-    const ParametersDmrgSolverType& dmrgSolverParams,
-    InputNgType::Readable& io,
-    const OperatorOptions& opOptions)
+               const ParametersDmrgSolverType&                                dmrgSolverParams,
+               InputNgType::Readable&                                         io,
+               const OperatorOptions&                                         opOptions)
 {
 	typedef typename SolverType::MatrixType::ModelType ModelBaseType;
 
 	//! Setup the Model
 	Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
-	ModelBaseType& model = modelSelector(dmrgSolverParams, io, geometry);
+	ModelBaseType&                     model = modelSelector(dmrgSolverParams, io, geometry);
 
 	if (opOptions.enabled) {
 		operatorDriver(model, opOptions);
@@ -22,7 +22,7 @@ void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType& ge
 
 	//! Setup the dmrg solver:
 	typedef Dmrg::DmrgSolver<SolverType, VectorWithOffsetType> DmrgSolverType;
-	DmrgSolverType dmrgSolver(model, io);
+	DmrgSolverType                                             dmrgSolver(model, io);
 
 	//! Calculate observables:
 	dmrgSolver.main(geometry);

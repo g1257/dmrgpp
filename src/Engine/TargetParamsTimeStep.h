@@ -84,36 +84,28 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetParamsCommon.h"
 #include "TargetParamsTimeVectors.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType>
-class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType>
-{
+class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType> {
 
 public:
 
 	typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
-	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-	typedef typename ModelType::RealType RealType;
+	typedef TargetParamsCommon<ModelType>      TargetParamsCommonType;
+	typedef typename ModelType::RealType       RealType;
 
 	template <typename IoInputter>
-	TargetParamsTimeStep(IoInputter& io,
-	    PsimagLite::String targeting,
-	    const ModelType& model)
+	TargetParamsTimeStep(IoInputter& io, PsimagLite::String targeting, const ModelType& model)
 	    : TimeVectorParamsType(io, targeting, model)
 	    , maxTime_(0)
 	{
 		try {
 			io.readline(maxTime_, "TSPMaxTime=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
-	virtual RealType maxTime() const
-	{
-		return maxTime_;
-	}
+	virtual RealType maxTime() const { return maxTime_; }
 
 private:
 
@@ -121,8 +113,7 @@ private:
 }; // class TargetParamsTimeStep
 
 template <typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os, const TargetParamsTimeStep<ModelType>& t)
+inline std::ostream& operator<<(std::ostream& os, const TargetParamsTimeStep<ModelType>& t)
 {
 	os << "TargetParams.type=TimeStep\n";
 

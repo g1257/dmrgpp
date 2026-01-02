@@ -81,59 +81,55 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SPIN_SQUARED_H
 #define SPIN_SQUARED_H
 
-namespace Dmrg
-{
-template <typename CallbackType>
-class SpinSquared
-{
+namespace Dmrg {
+template <typename CallbackType> class SpinSquared {
 
-	typedef typename CallbackType::Word Word;
+	typedef typename CallbackType::Word      Word;
 	typedef typename CallbackType::FieldType FieldType;
 
 public:
 
-	enum { SPIN_UP = 0,
-		SPIN_DOWN = 1 };
+	enum
+	{
+		SPIN_UP   = 0,
+		SPIN_DOWN = 1
+	};
 
-	enum { ORBITAL_A = 0,
-		ORBITAL_B = 1 };
+	enum
+	{
+		ORBITAL_A = 0,
+		ORBITAL_B = 1
+	};
 
-	SpinSquared(CallbackType& callback,
-	    int NUMBER_OF_ORBITALS1,
-	    int DEGREES_OF_FREEDOM1)
+	SpinSquared(CallbackType& callback, int NUMBER_OF_ORBITALS1, int DEGREES_OF_FREEDOM1)
 	    : callback_(callback)
 	    , NUMBER_OF_ORBITALS(NUMBER_OF_ORBITALS1)
 	    , DEGREES_OF_FREEDOM(DEGREES_OF_FREEDOM1)
-	{
-	}
+	{ }
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	    SizeType,
-	    PsimagLite::String msg = "") const
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "SpinSquared";
 
 		const char* start = reinterpret_cast<const char*>(this);
-		const char* end = reinterpret_cast<const char*>(&NUMBER_OF_ORBITALS);
-		SizeType total = end - start;
+		const char* end   = reinterpret_cast<const char*>(&NUMBER_OF_ORBITALS);
+		SizeType    total = end - start;
 		mres.push(SomeMemResolvType::MEMORY_HEAPPTR,
-		    SomeMemResolvType::SIZEOF_HEAPREF,
-		    this,
-		    str + " ref to callback");
+		          SomeMemResolvType::SIZEOF_HEAPREF,
+		          this,
+		          str + " ref to callback");
 
 		mres.memResolv(&callback_, 0, str + " callback");
 
 		start = end;
-		end = reinterpret_cast<const char*>(&DEGREES_OF_FREEDOM);
-		total += mres.memResolv(&NUMBER_OF_ORBITALS,
-		    end - start,
-		    str + " NUMBER_OF_ORBITALS");
+		end   = reinterpret_cast<const char*>(&DEGREES_OF_FREEDOM);
+		total += mres.memResolv(
+		    &NUMBER_OF_ORBITALS, end - start, str + " NUMBER_OF_ORBITALS");
 
-		total += mres.memResolv(&DEGREES_OF_FREEDOM,
-		    sizeof(*this) - total,
-		    str + " DEGREES_OF_FREEDOM");
+		total += mres.memResolv(
+		    &DEGREES_OF_FREEDOM, sizeof(*this) - total, str + " DEGREES_OF_FREEDOM");
 
 		return total;
 	}
@@ -141,11 +137,11 @@ public:
 	void doOnePairOfSitesA(const Word& ket, SizeType i, SizeType j) const
 	{
 		FieldType value = 0.5;
-		Word bra = ket;
-		int ret = c(bra, j, ORBITAL_A, SPIN_UP);
-		ret = cDagger(bra, j, ORBITAL_A, SPIN_DOWN, ret);
-		ret = c(bra, i, ORBITAL_A, SPIN_DOWN, ret);
-		ret = cDagger(bra, i, ORBITAL_A, SPIN_UP, ret);
+		Word      bra   = ket;
+		int       ret   = c(bra, j, ORBITAL_A, SPIN_UP);
+		ret             = cDagger(bra, j, ORBITAL_A, SPIN_DOWN, ret);
+		ret             = c(bra, i, ORBITAL_A, SPIN_DOWN, ret);
+		ret             = cDagger(bra, i, ORBITAL_A, SPIN_UP, ret);
 		if (ret == 0)
 			callback_(ket, bra, value);
 		if (NUMBER_OF_ORBITALS == 1)
@@ -179,11 +175,11 @@ public:
 	void doOnePairOfSitesB(const Word& ket, SizeType i, SizeType j) const
 	{
 		FieldType value = 0.5;
-		Word bra = ket;
-		int ret = c(bra, j, ORBITAL_A, SPIN_DOWN);
-		ret = cDagger(bra, j, ORBITAL_A, SPIN_UP, ret);
-		ret = c(bra, i, ORBITAL_A, SPIN_UP, ret);
-		ret = cDagger(bra, i, ORBITAL_A, SPIN_DOWN, ret);
+		Word      bra   = ket;
+		int       ret   = c(bra, j, ORBITAL_A, SPIN_DOWN);
+		ret             = cDagger(bra, j, ORBITAL_A, SPIN_UP, ret);
+		ret             = c(bra, i, ORBITAL_A, SPIN_UP, ret);
+		ret             = cDagger(bra, i, ORBITAL_A, SPIN_DOWN, ret);
 		if (ret == 0)
 			callback_(ket, bra, value);
 		if (NUMBER_OF_ORBITALS == 1)
@@ -230,10 +226,7 @@ public:
 		return sum * 0.5;
 	}
 
-	void write(PsimagLite::String,
-	    PsimagLite::IoNg::Out::Serializer&) const
-	{
-	}
+	void write(PsimagLite::String, PsimagLite::IoNg::Out::Serializer&) const { }
 
 private:
 
@@ -242,7 +235,7 @@ private:
 		if (ret < 0)
 			return ret;
 		SizeType shift_ = (DEGREES_OF_FREEDOM * i);
-		Word mask = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
+		Word     mask   = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
 		if ((ket & mask) == 0)
 			return -1;
 		ket ^= mask;
@@ -254,7 +247,7 @@ private:
 		if (ret < 0)
 			return ret;
 		SizeType shift_ = (DEGREES_OF_FREEDOM * i);
-		Word mask = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
+		Word     mask   = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
 		if ((ket & mask) > 0)
 			return -1;
 		ket |= mask;
@@ -264,7 +257,7 @@ private:
 	int n(const Word& ket, SizeType i, SizeType gamma, SizeType spin) const
 	{
 		SizeType shift_ = (DEGREES_OF_FREEDOM * i);
-		Word mask = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
+		Word     mask   = 1 << (shift_ + gamma + spin * NUMBER_OF_ORBITALS);
 		if ((ket & mask) > 0)
 			return 1;
 		return 0;

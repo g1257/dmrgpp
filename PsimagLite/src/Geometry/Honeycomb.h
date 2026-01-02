@@ -89,11 +89,17 @@ class Honeycomb : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
-	enum Dir { DIR_X = 0,
-		   DIR_Y = 1,
-		   DIR_Z = 2 };
-	enum GeLe { GREATER_OR_EQUAL,
-		    LESS_OR_EQUAL };
+	enum Dir
+	{
+		DIR_X = 0,
+		DIR_Y = 1,
+		DIR_Z = 2
+	};
+	enum GeLe
+	{
+		GREATER_OR_EQUAL,
+		LESS_OR_EQUAL
+	};
 
 	Honeycomb(SizeType linSize, InputType& io)
 	    : linSize_(linSize)
@@ -108,9 +114,7 @@ public:
 		try {
 			io.readline(x, "IsPeriodicX=");
 			periodicX_ = (x > 0);
-		}
-		catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	virtual SizeType maxConnections() const
@@ -121,10 +125,7 @@ public:
 
 	virtual SizeType dirs() const { return 3; }
 
-	virtual SizeType length(SizeType) const
-	{
-		return this->unimplemented("length");
-	}
+	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
 
 	virtual SizeType translate(SizeType, SizeType, SizeType) const
 	{
@@ -133,14 +134,10 @@ public:
 
 	SizeType getVectorSize(SizeType dirId) const
 	{
-		throw RuntimeError(
-		    "Honeycomb::getVectorSize() unimplemented\n");
+		throw RuntimeError("Honeycomb::getVectorSize() unimplemented\n");
 	}
 
-	bool connected(SizeType i1, SizeType i2) const
-	{
-		return connectedInternal(i1, i2).first;
-	}
+	bool connected(SizeType i1, SizeType i2) const { return connectedInternal(i1, i2).first; }
 
 	// assumes i1 and i2 are connected
 	SizeType calcDir(SizeType i1, SizeType i2) const
@@ -170,8 +167,7 @@ public:
 	// siteNew2 is fringe in the environment
 	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
 	{
-		throw RuntimeError(
-		    "Honeycomb::getSubstituteSite() unimplemented\n");
+		throw RuntimeError("Honeycomb::getSubstituteSite() unimplemented\n");
 	}
 
 	String label() const { return "Honeycomb"; }
@@ -181,8 +177,7 @@ public:
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}
 
-	template <class Archive>
-	void write(Archive&, const unsigned int) { }
+	template <class Archive> void write(Archive&, const unsigned int) { }
 
 private:
 
@@ -192,9 +187,9 @@ private:
 		if (ii1 == ii2)
 			return falseDir;
 
-		bool normal = (ii1 < ii2);
-		SizeType i1 = (normal) ? ii1 : ii2;
-		SizeType i2 = (normal) ? ii2 : ii1;
+		bool     normal = (ii1 < ii2);
+		SizeType i1     = (normal) ? ii1 : ii2;
+		SizeType i2     = (normal) ? ii2 : ii1;
 
 		SizeType x1 = 0;
 		SizeType y1 = 0;
@@ -219,8 +214,8 @@ private:
 	void getCoordinates(SizeType& x, SizeType& y, SizeType i) const
 	{
 		div_t q = std::div(static_cast<int>(i), static_cast<int>(ly_));
-		x = q.quot;
-		y = q.rem;
+		x       = q.quot;
+		y       = q.rem;
 	}
 
 	// assumes i1 < i2
@@ -334,8 +329,8 @@ private:
 
 	SizeType linSize_;
 	SizeType ly_;
-	bool periodicY_;
-	bool periodicX_;
+	bool     periodicY_;
+	bool     periodicX_;
 };
 } // namespace PsimagLite
 

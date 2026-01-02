@@ -37,22 +37,17 @@ public:
 
 	LineMarker(const String& name)
 	    : name_(name + "=0")
-	{
-	}
+	{ }
 
 	template <typename IoInputType>
 	LineMarker(IoInputType& io, const String& name, SizeType level = 0)
 	{
-		name_ = name + "=0";
+		name_      = name + "=0";
 		SizeType x = 0; // bogus
 		io.readline(x, name_, level);
 	}
 
-	template <typename IoOutputType>
-	void save(IoOutputType& io) const
-	{
-		io.printline(name_);
-	}
+	template <typename IoOutputType> void save(IoOutputType& io) const { io.printline(name_); }
 
 private:
 

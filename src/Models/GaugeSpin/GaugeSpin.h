@@ -88,58 +88,53 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <algorithm>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ModelBaseType>
-class GaugeSpin : public ModelBaseType
-{
+template <typename ModelBaseType> class GaugeSpin : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::BasisType BasisType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename ModelBaseType::VectorQnType VectorQnType;
-	typedef typename ModelBaseType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef unsigned int long WordType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelBaseType::VectorRealType VectorRealType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef typename PsimagLite::Vector<SizeType>::Type HilbertBasisType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
+	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
+	typedef typename ModelHelperType::BasisType             BasisType;
+	typedef typename ModelBaseType::SuperGeometryType       SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                LinkType;
+	typedef typename ModelHelperType::OperatorsType         OperatorsType;
+	typedef typename ModelHelperType::RealType              RealType;
+	typedef typename ModelBaseType::VectorType              VectorType;
+	typedef typename ModelBaseType::QnType                  QnType;
+	typedef typename ModelBaseType::VectorQnType            VectorQnType;
+	typedef typename ModelBaseType::BlockType               BlockType;
+	typedef typename ModelBaseType::SolverParamsType        SolverParamsType;
+	typedef typename ModelHelperType::SparseMatrixType      SparseMatrixType;
+	typedef typename SparseMatrixType::value_type           ComplexOrRealType;
+	typedef unsigned int long                               WordType;
+	typedef typename ModelBaseType::InputValidatorType      InputValidatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>           MatrixType;
+	typedef typename PsimagLite::Vector<SizeType>::Type     VectorSizeType;
+	typedef typename ModelBaseType::VectorRealType          VectorRealType;
+	typedef typename ModelBaseType::ModelTermType           ModelTermType;
+	typedef typename PsimagLite::Vector<SizeType>::Type     HilbertBasisType;
+	typedef typename OperatorsType::OperatorType            OperatorType;
+	typedef typename OperatorType::PairType                 PairType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelBaseType::MyBasis MyBasis;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::SuperOpHelperBaseType SuperOpHelperBaseType;
-	typedef SuperOpHelperPlaquette<SuperGeometryType, SolverParamsType> SuperOpHelperPlaquetteType;
+	typedef typename ModelBaseType::MyBasis                 MyBasis;
+	typedef typename ModelBaseType::BasisWithOperatorsType  MyBasisWithOperators;
+	typedef typename ModelBaseType::OpsLabelType            OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType           OpForLinkType;
+	typedef typename ModelBaseType::SuperOpHelperBaseType   SuperOpHelperBaseType;
+	typedef SuperOpHelperPlaquette<SuperGeometryType, SolverParamsType>
+	    SuperOpHelperPlaquetteType;
 
 	static const SizeType TWICE_THE_SPIN = 2;
 
-	GaugeSpin(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry)
-	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	GaugeSpin(const SolverParamsType&  solverParams,
+	          InputValidatorType&      io,
+	          const SuperGeometryType& geometry)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superOpHelperPlaquette_(nullptr)
-	{
-	}
+	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -152,8 +147,8 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -175,7 +170,7 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		const SizeType total = TWICE_THE_SPIN + 1;
+		const SizeType   total = TWICE_THE_SPIN + 1;
 		HilbertBasisType natBasis(total);
 		for (SizeType i = 0; i < total; ++i)
 			natBasis[i] = i;
@@ -188,10 +183,10 @@ protected:
 		typename OperatorType::Su2RelatedType su2related;
 
 		OperatorType myOp(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 2),
-		    -1,
-		    su2related);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  PairType(2, 2),
+		                  -1,
+		                  su2related);
 		this->createOpsLabel("splus").push(myOp);
 		// this->makeTrackable("splus");
 
@@ -201,22 +196,22 @@ protected:
 		// Set the operators S^z_i in the natural basis
 		tmpMatrix = findSzMatrices(0, natBasis);
 		typename OperatorType::Su2RelatedType su2related2;
-		OperatorType myOp2(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 1),
-		    1.0 / sqrt(2.0),
-		    su2related2);
+		OperatorType                          myOp2(tmpMatrix,
+                                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                   PairType(2, 1),
+                                   1.0 / sqrt(2.0),
+                                   su2related2);
 		this->createOpsLabel("sz").push(myOp2);
 		// this->makeTrackable("sz");
 
 		// Set the operators S^x_i in the natural basis
 		tmpMatrix = findSxMatrices(0, natBasis);
 		typename OperatorType::Su2RelatedType su2related3;
-		OperatorType myOp3(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 1),
-		    1.0 / sqrt(2.0),
-		    su2related3);
+		OperatorType                          myOp3(tmpMatrix,
+                                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                   PairType(2, 1),
+                                   1.0 / sqrt(2.0),
+                                   su2related3);
 		this->createOpsLabel("sx").push(myOp3);
 		this->makeTrackable("sx");
 	}
@@ -235,8 +230,8 @@ protected:
 	}
 
 	void fillNewNonLocals(std::vector<OperatorType>& newNonLocals,
-	    const LeftRightSuperType& lrs,
-	    RealType) const // last argument is time
+	                      const LeftRightSuperType&  lrs,
+	                      RealType) const // last argument is time
 	{
 		bool isSys = (lrs.super().block()[0] == 0);
 		if (isSys) {
@@ -253,7 +248,7 @@ protected:
 				newNonLocals.push_back(op1 * op2);
 			} else {
 				// (0,1) x (2) (or (2,3)x(4) etc.)
-				SizeType lastNonLocal = last / 2 - 1;
+				SizeType            lastNonLocal = last / 2 - 1;
 				const OperatorType& op1 = lrs.left().getSuperByIndex(lastNonLocal);
 				const OperatorType& op2 = lrs.right().localOperator(0);
 				newNonLocals.push_back(op1 * op2);
@@ -266,22 +261,22 @@ protected:
 	SuperOpHelperBaseType* setSuperOpHelper()
 	{
 		if (!superOpHelperPlaquette_)
-			superOpHelperPlaquette_ = new SuperOpHelperPlaquetteType(ModelBaseType::superGeometry());
+			superOpHelperPlaquette_
+			    = new SuperOpHelperPlaquetteType(ModelBaseType::superGeometry());
 		return superOpHelperPlaquette_;
 	}
 
 private:
 
 	//! Find S^+_site in the natural basis natBasis
-	SparseMatrixType findSplusMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	SparseMatrixType findSplusMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
-		SizeType total = natBasis.size();
+		SizeType   total = natBasis.size();
 		MatrixType cm(total, total);
-		RealType j = 0.5 * TWICE_THE_SPIN;
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(TWICE_THE_SPIN);
-		SizeType bits = 1 + ProgramGlobals::logBase2(TWICE_THE_SPIN);
-		SizeType mask = 1;
+		RealType   j              = 0.5 * TWICE_THE_SPIN;
+		SizeType   bitsForOneSite = utils::bitSizeOfInteger(TWICE_THE_SPIN);
+		SizeType   bits           = 1 + ProgramGlobals::logBase2(TWICE_THE_SPIN);
+		SizeType   mask           = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);
 		mask--;
@@ -316,15 +311,14 @@ private:
 	}
 
 	//! Find S^z_i in the natural basis natBasis
-	SparseMatrixType findSzMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	SparseMatrixType findSzMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
-		SizeType total = natBasis.size();
+		SizeType   total = natBasis.size();
 		MatrixType cm(total, total);
-		RealType j = 0.5 * TWICE_THE_SPIN;
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(TWICE_THE_SPIN);
-		SizeType bits = ProgramGlobals::logBase2(TWICE_THE_SPIN) + 1;
-		SizeType mask = 1;
+		RealType   j              = 0.5 * TWICE_THE_SPIN;
+		SizeType   bitsForOneSite = utils::bitSizeOfInteger(TWICE_THE_SPIN);
+		SizeType   bits           = ProgramGlobals::logBase2(TWICE_THE_SPIN) + 1;
+		SizeType   mask           = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);
 		mask--;
@@ -336,7 +330,7 @@ private:
 			SizeType ketsite = ket & mask;
 			ketsite >>= (site * bitsForOneSite);
 			assert(ketsite == ket);
-			RealType m = ketsite - j;
+			RealType m   = ketsite - j;
 			cm(ket, ket) = m;
 		}
 
@@ -344,8 +338,7 @@ private:
 		return operatorMatrix;
 	}
 
-	SparseMatrixType findSxMatrices(SizeType site,
-	    const HilbertBasisType& natBasis) const
+	SparseMatrixType findSxMatrices(SizeType site, const HilbertBasisType& natBasis) const
 	{
 		SparseMatrixType Splus_temp = findSplusMatrices(site, natBasis);
 		SparseMatrixType Sminus_temp, Sx;
@@ -372,7 +365,7 @@ private:
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair(0, 0);
 			SizeType flavor = 1;
-			qns[i] = QnType(false, other, jmpair, flavor);
+			qns[i]          = QnType(false, other, jmpair, flavor);
 		}
 	}
 
@@ -381,7 +374,7 @@ private:
 	GaugeSpin& operator=(const GaugeSpin&) = delete;
 
 	ParametersGaugeSpin<RealType, QnType> modelParameters_;
-	SuperOpHelperPlaquetteType* superOpHelperPlaquette_;
+	SuperOpHelperPlaquetteType*           superOpHelperPlaquette_;
 }; // class GaugeSpin
 
 } // namespace Dmrg

@@ -103,8 +103,7 @@ public:
 	    , pid_(getpid())
 	    , runId_(runIdInternal())
 	    , isFinalized_(false)
-	{
-	}
+	{ }
 
 	void finalize() { isFinalized_ = true; }
 
@@ -123,14 +122,13 @@ public:
 
 	String hostname() const
 	{
-		int len = 1024;
-		char* name = new char[len];
-		int ret = gethostname(name, len);
+		int    len  = 1024;
+		char*  name = new char[len];
+		int    ret  = gethostname(name, len);
 		String retString;
 		if (ret != 0) {
 			retString = "UNKNOWN";
-		}
-		else {
+		} else {
 			retString = name;
 		}
 
@@ -151,12 +149,9 @@ public:
 
 			serializer.write(root + "/Name", name_);
 			serializer.write(root + "/RunId", runId_);
-			serializer.write(root + "/UnixTimeStart",
-			                 unixTime(false));
-		}
-		else {
-			serializer.write(root + "/UnixTimeEnd",
-			                 unixTime(false));
+			serializer.write(root + "/UnixTimeStart", unixTime(false));
+		} else {
+			serializer.write(root + "/UnixTimeEnd", unixTime(false));
 		}
 	}
 
@@ -168,8 +163,7 @@ public:
 		std::cout << "Set " << name << "=" << value << "\n";
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const ApplicationInfo& ai)
+	friend std::ostream& operator<<(std::ostream& os, const ApplicationInfo& ai)
 	{
 		if (ai.isFinalized_)
 			printFinalLegacy(os, ai);
@@ -190,12 +184,10 @@ private:
 		os << "SizeType=" << sizeof(SizeType) << "\n";
 	}
 
-	static void printFinalLegacy(std::ostream& os,
-	                             const ApplicationInfo& ai)
+	static void printFinalLegacy(std::ostream& os, const ApplicationInfo& ai)
 	{
 		OstringStream msg(std::cout.precision());
-		msg() << ai.name_ << "\nsizeof(SizeType)=" << sizeof(SizeType)
-		      << "\n";
+		msg() << ai.name_ << "\nsizeof(SizeType)=" << sizeof(SizeType) << "\n";
 #ifdef USE_FLOAT
 		msg() << ai.name_ << " using float\n";
 #else
@@ -208,11 +200,11 @@ private:
 
 	RunIdType runIdInternal() const
 	{
-		unsigned int p = getpid();
-		time_t tt = unixTime(true);
-		MersenneTwister mt(tt + p);
-		unsigned int x = tt ^ mt.random();
-		OstringStream msgg(std::cout.precision());
+		unsigned int                      p  = getpid();
+		time_t                            tt = unixTime(true);
+		MersenneTwister                   mt(tt + p);
+		unsigned int                      x = tt ^ mt.random();
+		OstringStream                     msgg(std::cout.precision());
 		OstringStream::OstringStreamType& msg = msgg();
 		msg << x;
 		x = p ^ mt.random();
@@ -220,7 +212,7 @@ private:
 		unsigned long int y = atol(msg.str().c_str());
 		y ^= mt.random();
 		x = BitManip::countKernighan(y);
-		OstringStream msgg2(std::cout.precision());
+		OstringStream                     msgg2(std::cout.precision());
 		OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << y;
 		if (x < 10)
@@ -231,9 +223,9 @@ private:
 
 	long unsigned int convertToLuint(PsimagLite::String str) const
 	{
-		long unsigned int sum = 0;
+		long unsigned int sum  = 0;
 		long unsigned int prod = 1;
-		int l = str.length();
+		int               l    = str.length();
 		assert(l < 20);
 
 		for (int i = 0; i < l; ++i) {
@@ -246,9 +238,9 @@ private:
 	}
 
 	PsimagLite::String name_;
-	unsigned int pid_;
-	const RunIdType runId_;
-	bool isFinalized_;
+	unsigned int       pid_;
+	const RunIdType    runId_;
+	bool               isFinalized_;
 }; // class ApplicationInfo
 
 std::ostream& operator<<(std::ostream& os, const ApplicationInfo& ai);

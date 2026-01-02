@@ -84,65 +84,61 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Wft/WftHelper.h"
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename TargetParamsType,
-    typename ModelType,
-    typename WaveFunctionTransfType,
-    typename LanczosSolverType,
-    typename VectorWithOffsetType>
-class TimeVectorsBase
-{
+          typename ModelType,
+          typename WaveFunctionTransfType,
+          typename LanczosSolverType,
+          typename VectorWithOffsetType>
+class TimeVectorsBase {
 
 public:
 
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename TargetParamsType::RealType RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef std::pair<SizeType, SizeType> PairType;
+	typedef typename ModelType::ModelHelperType                     ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
+	typedef typename TargetParamsType::RealType                     RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
+	typedef std::pair<SizeType, SizeType>                           PairType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
 	typedef WftHelper<ModelType, VectorWithOffsetType, WaveFunctionTransfType> WftHelperType;
 
-	TimeVectorsBase(const ModelType& model,
-	    const LeftRightSuperType& lrs,
-	    const WaveFunctionTransfType& wft,
-	    PsimagLite::String name)
+	TimeVectorsBase(const ModelType&              model,
+	                const LeftRightSuperType&     lrs,
+	                const WaveFunctionTransfType& wft,
+	                PsimagLite::String            name)
 	    : wftHelper_(model, lrs, wft)
 	    , name_(name)
 	    , time_(0.0)
 	    , currentTimeStep_(0)
-	{
-	}
+	{ }
 
 	struct ExtraData {
 
 		ExtraData(ProgramGlobals::DirectionEnum dir_,
-		    bool allOperatorsApplied_,
-		    bool wftAndAdvanceIfNeeded_,
-		    VectorSizeType block_,
-		    bool isLastCall_)
+		          bool                          allOperatorsApplied_,
+		          bool                          wftAndAdvanceIfNeeded_,
+		          VectorSizeType                block_,
+		          bool                          isLastCall_)
 		    : dir(dir_)
 		    , allOperatorsApplied(allOperatorsApplied_)
 		    , wftAndAdvanceIfNeeded(wftAndAdvanceIfNeeded_)
 		    , block(block_)
 		    , isLastCall(isLastCall_)
-		{
-		}
+		{ }
 
-		ProgramGlobals::DirectionEnum dir;
-		bool allOperatorsApplied;
-		bool wftAndAdvanceIfNeeded;
+		ProgramGlobals::DirectionEnum      dir;
+		bool                               allOperatorsApplied;
+		bool                               wftAndAdvanceIfNeeded;
 		PsimagLite::Vector<SizeType>::Type block;
-		bool isLastCall;
+		bool                               isLastCall;
 	};
 
 	virtual void calcTimeVectors(const VectorSizeType&,
-	    RealType,
-	    const VectorWithOffsetType&,
-	    const ExtraData&)
+	                             RealType,
+	                             const VectorWithOffsetType&,
+	                             const ExtraData&)
 	{
 		err("calcTimeVectors: unimplemented in this base class\n");
 	}
@@ -171,10 +167,10 @@ protected:
 
 private:
 
-	WftHelperType wftHelper_;
+	WftHelperType      wftHelper_;
 	PsimagLite::String name_;
-	RealType time_;
-	SizeType currentTimeStep_;
+	RealType           time_;
+	SizeType           currentTimeStep_;
 }; // class TimeVectorsBase
 } // namespace Dmrg
 /*@}*/

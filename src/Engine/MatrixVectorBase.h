@@ -82,22 +82,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include <vector>
 
-namespace Dmrg
-{
-template <typename ModelType_>
-class MatrixVectorBase
-{
+namespace Dmrg {
+template <typename ModelType_> class MatrixVectorBase {
 
 public:
 
-	typedef ModelType_ ModelType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef ModelType_                                           ModelType;
+	typedef typename ModelType::ModelHelperType                  ModelHelperType;
+	typedef typename ModelHelperType::RealType                   RealType;
+	typedef typename ModelHelperType::SparseMatrixType           SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type          VectorRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                FullMatrixType;
 
 	SizeType reflectionSector() const { return 0; }
 
@@ -105,10 +102,10 @@ public:
 
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const;
 
-	static void fullDiag(VectorRealType& eigs,
-	    FullMatrixType& fm,
-	    const SparseMatrixType& matrixStored,
-	    int tmp)
+	static void fullDiag(VectorRealType&         eigs,
+	                     FullMatrixType&         fm,
+	                     const SparseMatrixType& matrixStored,
+	                     int                     tmp)
 	{
 		SizeType maxMatrixRankStored = (tmp < 0) ? 0 : tmp;
 
@@ -116,7 +113,8 @@ public:
 			PsimagLite::String str("MatrixVectorBase:fullDiag: no stored matrix\n");
 			str += "\trow= " + ttos(eigs.size()) + " max row= ";
 			str += ttos(maxMatrixRankStored) + "\n";
-			str += "Please add or increase MaxMatrixRankStored=" + ttos(2 + matrixStored.rows());
+			str += "Please add or increase MaxMatrixRankStored="
+			    + ttos(2 + matrixStored.rows());
 			str += " in your input file\n";
 			err(str);
 		}
@@ -125,7 +123,8 @@ public:
 			PsimagLite::String str("MatrixVectorBase:fullDiag: internal error!\n");
 			str += "\trow= " + ttos(matrixStored.rows()) + " max row= ";
 			str += ttos(maxMatrixRankStored) + "\n";
-			str += "Please add or increase MaxMatrixRankStored= to at least " + ttos(2 + eigs.size()) + " in your input file\n";
+			str += "Please add or increase MaxMatrixRankStored= to at least "
+			    + ttos(2 + eigs.size()) + " in your input file\n";
 			err(str);
 		}
 

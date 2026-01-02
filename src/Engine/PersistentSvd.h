@@ -2,26 +2,23 @@
 #define PERSISTENTSVD_H
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // needef for WFT
 template <typename VectorMatrixType, typename VectorVectorRealType, typename VectorQnType>
-class PersistentSvd
-{
+class PersistentSvd {
 
 public:
 
-	typedef typename VectorMatrixType::value_type MatrixType;
+	typedef typename VectorMatrixType::value_type     MatrixType;
 	typedef typename VectorVectorRealType::value_type VectorRealType;
-	typedef typename VectorQnType::value_type QnType;
+	typedef typename VectorQnType::value_type         QnType;
 
 	PersistentSvd(SizeType n)
 	    : vts_(n)
 	    , s_(n)
 	    , qns_(n, QnType::zero())
-	{
-	}
+	{ }
 
 	void clear()
 	{
@@ -56,9 +53,9 @@ public:
 
 private:
 
-	VectorMatrixType vts_; // needed for WFT
+	VectorMatrixType                                  vts_; // needed for WFT
 	typename PsimagLite::Vector<VectorRealType>::Type s_; // needed for WFT
-	VectorQnType qns_; // needed for WFT
+	VectorQnType                                      qns_; // needed for WFT
 };
 
 }

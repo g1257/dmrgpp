@@ -33,18 +33,16 @@ Please see full open source license included in file LICENSE.
 #include <string>
 
 namespace PsimagLite {
-template <typename T>
-class RandomForTests {
+template <typename T> class RandomForTests {
 
 public:
 
 	typedef long int LongType;
-	typedef T value_type; // legacy name
+	typedef T        value_type; // legacy name
 
 	RandomForTests(int seed)
 	    : next_(seed)
-	{
-	}
+	{ }
 
 	T operator()()
 	{

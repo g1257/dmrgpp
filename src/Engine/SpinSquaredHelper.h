@@ -80,38 +80,30 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef SPIN_SQ_HELPER_H
 #define SPIN_SQ_HELPER_H
 
-namespace Dmrg
-{
-template <typename FieldType_, typename Word_>
-class SpinSquaredHelper
-{
+namespace Dmrg {
+template <typename FieldType_, typename Word_> class SpinSquaredHelper {
 
 public:
 
 	typedef FieldType_ FieldType;
-	typedef Word_ Word;
+	typedef Word_      Word;
 
 	SpinSquaredHelper()
 	    : data_(0)
 	    , ketSaved_(0)
-	{
-	}
+	{ }
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	    SizeType,
-	    PsimagLite::String msg = "") const
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "SpinSquaredHelper";
 
 		const char* start = reinterpret_cast<const char*>(this);
-		const char* end = reinterpret_cast<const char*>(&ketSaved_);
-		SizeType total = mres.memResolv(&data_, end - start, str + " data");
+		const char* end   = reinterpret_cast<const char*>(&ketSaved_);
+		SizeType    total = mres.memResolv(&data_, end - start, str + " data");
 
-		total += mres.memResolv(&ketSaved_,
-		    sizeof(*this) - total,
-		    str + " ketSaved");
+		total += mres.memResolv(&ketSaved_, sizeof(*this) - total, str + " ketSaved");
 
 		return total;
 	}
@@ -130,24 +122,21 @@ public:
 	//! receives m, returns (2*j,m+j)
 	std::pair<SizeType, SizeType> getJmPair(const FieldType& m) const
 	{
-		SizeType j = getJvalue();
+		SizeType j      = getJvalue();
 		SizeType mtilde = getMvalue(m, j);
 		return std::pair<SizeType, SizeType>(j, mtilde);
 	}
 
 	void clear() { data_ = 0; }
 
-	void write(PsimagLite::String,
-	    PsimagLite::IoNg::Out::Serializer&) const
-	{
-	}
+	void write(PsimagLite::String, PsimagLite::IoNg::Out::Serializer&) const { }
 
 private:
 
 	int perfectSquareOrCrash(const FieldType& t) const
 	{
-		FieldType r = sqrt(t);
-		int ri = int(r);
+		FieldType r  = sqrt(t);
+		int       ri = int(r);
 		if (ri != r)
 			PsimagLite::RuntimeError("SpinSquaredHelper:: sqrt(1+4d) not an integer\n");
 
@@ -172,7 +161,8 @@ private:
 			PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue(): j+m <0\n");
 		SizeType ret = SizeType(tmp);
 		if (ret != tmp)
-			PsimagLite::RuntimeError("SpinSquaredHelper::getMvalue: j+m not SizeType\n");
+			PsimagLite::RuntimeError(
+			    "SpinSquaredHelper::getMvalue: j+m not SizeType\n");
 		return ret;
 	}
 

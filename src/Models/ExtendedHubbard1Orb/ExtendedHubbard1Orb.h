@@ -81,55 +81,49 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define EXTENDED_HUBBARD_1ORB_H
 #include "../Models/HubbardOneBand/ModelHubbard.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ModelHubbard by containment
-template <typename ModelBaseType>
-class ExtendedHubbard1Orb : public ModelBaseType
-{
+template <typename ModelBaseType> class ExtendedHubbard1Orb : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-	typedef ModelHubbard<ModelBaseType> ModelHubbardType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelBaseType::MyBasis MyBasis;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelHubbardType::HilbertBasisType HilbertBasisType;
-	typedef typename ModelHelperType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
+	typedef typename ModelBaseType::VectorSizeType             VectorSizeType;
+	typedef ModelHubbard<ModelBaseType>                        ModelHubbardType;
+	typedef typename ModelBaseType::ModelHelperType            ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType          SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType         LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                   LinkType;
+	typedef typename ModelHelperType::OperatorsType            OperatorsType;
+	typedef typename OperatorsType::OperatorType               OperatorType;
+	typedef typename ModelHelperType::RealType                 RealType;
+	typedef typename ModelBaseType::QnType                     QnType;
+	typedef typename QnType::VectorQnType                      VectorQnType;
+	typedef typename ModelHelperType::SparseMatrixType         SparseMatrixType;
+	typedef typename SparseMatrixType::value_type              ComplexOrRealType;
+	typedef typename ModelBaseType::MyBasis                    MyBasis;
+	typedef typename ModelBaseType::BasisWithOperatorsType     MyBasisWithOperators;
+	typedef typename ModelHubbardType::HilbertBasisType        HilbertBasisType;
+	typedef typename ModelHelperType::BlockType                BlockType;
+	typedef typename ModelBaseType::SolverParamsType           SolverParamsType;
+	typedef typename ModelBaseType::VectorType                 VectorType;
 	typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
-	typedef typename HilbertSpaceHubbardType::HilbertState HilbertState;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename PsimagLite::Vector<HilbertState>::Type VectorHilbertStateType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
+	typedef typename HilbertSpaceHubbardType::HilbertState     HilbertState;
+	typedef typename ModelBaseType::InputValidatorType         InputValidatorType;
+	typedef typename ModelBaseType::VectorOperatorType         VectorOperatorType;
+	typedef typename PsimagLite::Vector<HilbertState>::Type    VectorHilbertStateType;
+	typedef typename ModelBaseType::OpsLabelType               OpsLabelType;
+	typedef typename ModelBaseType::ModelTermType              ModelTermType;
+	typedef typename ModelBaseType::OpForLinkType              OpForLinkType;
 
-	ExtendedHubbard1Orb(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    SuperGeometryType const& geometry,
-	    PsimagLite::String extension)
-	    : ModelBaseType(solverParams,
-		  geometry,
-		  io)
+	ExtendedHubbard1Orb(const SolverParamsType&  solverParams,
+	                    InputValidatorType&      io,
+	                    SuperGeometryType const& geometry,
+	                    PsimagLite::String       extension)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
 	    , modelHubbard_(solverParams, io, geometry, extension)
-	{
-	}
+	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
@@ -143,12 +137,10 @@ public:
 	}
 
 	virtual void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                        const BlockType&  block,
+	                                        RealType          time) const
 	{
-		modelHubbard_.addDiagonalsInNaturalBasis(hmatrix,
-		    block,
-		    time);
+		modelHubbard_.addDiagonalsInNaturalBasis(hmatrix, block, time);
 	}
 
 	void fillLabeledOperators(VectorQnType& qns)
@@ -163,7 +155,7 @@ public:
 		modelHubbard_.fillModelLinks();
 
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
-		OpForLinkType n("n");
+		OpForLinkType  n("n");
 
 		ninj.push(n, 'N', n, 'N');
 	}
@@ -171,16 +163,15 @@ public:
 private:
 
 	//! Find n_i in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(int i,
-	    const VectorHilbertStateType& natBasis) const
+	SparseMatrixType findOperatorMatrices(int i, const VectorHilbertStateType& natBasis) const
 	{
 
-		SizeType n = natBasis.size();
+		SizeType                                                  n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
 		for (SizeType ii = 0; ii < natBasis.size(); ii++) {
 			HilbertState ket = natBasis[ii];
-			cm(ii, ii) = 0.0;
+			cm(ii, ii)       = 0.0;
 			for (SizeType sigma = 0; sigma < 2; sigma++)
 				if (HilbertSpaceHubbardType::isNonZero(ket, i, sigma))
 					cm(ii, ii) += 1.0;
@@ -191,8 +182,8 @@ private:
 	}
 
 	ParametersModelHubbard<RealType, QnType> modelParameters_;
-	const SuperGeometryType& superGeometry_;
-	ModelHubbardType modelHubbard_;
+	const SuperGeometryType&                 superGeometry_;
+	ModelHubbardType                         modelHubbard_;
 }; // class ExtendedHubbard1Orb
 
 } // namespace Dmrg

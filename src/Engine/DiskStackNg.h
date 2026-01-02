@@ -80,21 +80,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <exception>
 
 // A disk stack, similar to std::stack but stores in disk not in memory
-namespace Dmrg
-{
-template <typename DataType>
-class DiskStack
-{
+namespace Dmrg {
+template <typename DataType> class DiskStack {
 
-	typedef typename PsimagLite::IoNg::In IoInType;
+	typedef typename PsimagLite::IoNg::In  IoInType;
 	typedef typename PsimagLite::IoNg::Out IoOutType;
 
 public:
 
 	DiskStack(const PsimagLite::String filename,
-	    bool needsToRead,
-	    PsimagLite::String label,
-	    const BasisTraits& basisTraits)
+	          bool                     needsToRead,
+	          PsimagLite::String       label,
+	          const BasisTraits&       basisTraits)
 	    : ioOut_((needsToRead) ? 0 : new IoOutType(filename, PsimagLite::IoNg::ACC_RDW))
 	    , ioIn_((needsToRead) ? new IoInType(filename) : 0)
 	    , label_("DiskStack" + label)
@@ -110,7 +107,7 @@ public:
 		}
 
 		ioIn_->read(total_, label_ + "/Size");
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Read from file " + filename + " succeeded";
 		progress_.printline(msgg, std::cout);
@@ -140,21 +137,19 @@ public:
 
 		try {
 			d.write(*ioOut_,
-			    label_ + "/" + ttos(total_),
-			    IoOutType::Serializer::NO_OVERWRITE,
-			    DataType::SaveEnum::ALL);
+			        label_ + "/" + ttos(total_),
+			        IoOutType::Serializer::NO_OVERWRITE,
+			        DataType::SaveEnum::ALL);
 		} catch (...) {
 			d.write(*ioOut_,
-			    label_ + "/" + ttos(total_),
-			    IoOutType::Serializer::ALLOW_OVERWRITE,
-			    DataType::SaveEnum::ALL);
+			        label_ + "/" + ttos(total_),
+			        IoOutType::Serializer::ALLOW_OVERWRITE,
+			        DataType::SaveEnum::ALL);
 		}
 
 		++total_;
 
-		ioOut_->write(total_,
-		    label_ + "/Size",
-		    IoOutType::Serializer::ALLOW_OVERWRITE);
+		ioOut_->write(total_, label_ + "/Size", IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	void pop()
@@ -167,9 +162,7 @@ public:
 		if (!ioOut_)
 			return;
 
-		ioOut_->write(total_,
-		    label_ + "/Size",
-		    IoOutType::Serializer::ALLOW_OVERWRITE);
+		ioOut_->write(total_, label_ + "/Size", IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	void restore(SizeType total)
@@ -178,9 +171,7 @@ public:
 		if (!ioOut_)
 			return;
 
-		ioOut_->write(total_,
-		    label_ + "/Size",
-		    IoOutType::Serializer::ALLOW_OVERWRITE);
+		ioOut_->write(total_, label_ + "/Size", IoOutType::Serializer::ALLOW_OVERWRITE);
 	}
 
 	const DataType& top() const
@@ -191,9 +182,7 @@ public:
 		assert(total_ > 0);
 		delete dt_;
 		dt_ = 0;
-		dt_ = new DataType(*ioIn_,
-		    label_ + "/" + ttos(total_ - 1),
-		    basisTraits_);
+		dt_ = new DataType(*ioIn_, label_ + "/" + ttos(total_ - 1), basisTraits_);
 		return *dt_;
 	}
 
@@ -205,13 +194,13 @@ private:
 
 	DiskStack& operator=(const DiskStack&);
 
-	IoOutType* ioOut_;
-	IoInType* ioIn_;
-	PsimagLite::String label_;
-	const BasisTraits& basisTraits_;
-	int total_;
+	IoOutType*                    ioOut_;
+	IoInType*                     ioIn_;
+	PsimagLite::String            label_;
+	const BasisTraits&            basisTraits_;
+	int                           total_;
 	PsimagLite::ProgressIndicator progress_;
-	mutable DataType* dt_;
+	mutable DataType*             dt_;
 }; // class DiskStack
 
 } // namespace Dmrg

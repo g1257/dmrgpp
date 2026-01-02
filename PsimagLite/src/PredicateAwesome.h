@@ -55,15 +55,17 @@ namespace PsimagLite {
  etc. Can we do this with varargs templates?? FIXME TODO
  */
 
-template <typename SpecType = PredicateDefaultSpec>
-class PredicateAwesome {
+template <typename SpecType = PredicateDefaultSpec> class PredicateAwesome {
 
 public:
 
-	typedef Vector<PredicateAnd>::Type VectorPredicateAndType;
+	typedef Vector<PredicateAnd>::Type     VectorPredicateAndType;
 	typedef PredicateAnd::VectorStringType VectorStringType;
 
-	PredicateAwesome(String pred, String orSeparator = ",", String andSeparator = "&", SpecType* spec = nullptr)
+	PredicateAwesome(String    pred,
+	                 String    orSeparator  = ",",
+	                 String    andSeparator = "&",
+	                 SpecType* spec         = nullptr)
 	    : pred_(pred)
 	{
 		if (pred_ == "")
@@ -74,21 +76,18 @@ public:
 		for (SizeType i = 0; i < n; ++i) {
 			if (tokens[i].length() > 0 && tokens[i][0] == '@') {
 				if (!spec)
-					throw RuntimeError(
-					    String("PredicateAwesome:: with "
-					           "default spec")
-					    + " cannot handle special options\n");
+					throw RuntimeError(String("PredicateAwesome:: with "
+					                          "default spec")
+					                   + " cannot handle special options\n");
 				spec->operator()(tokens[i]);
 				continue;
 			}
 
-			predicateAnd_.push_back(
-			    PredicateAnd(tokens[i], andSeparator));
+			predicateAnd_.push_back(PredicateAnd(tokens[i], andSeparator));
 		}
 	}
 
-	template <typename T>
-	bool isTrue(String name, T val)
+	template <typename T> bool isTrue(String name, T val)
 	{
 		if (pred_ == "")
 			return false;
@@ -124,20 +123,28 @@ public:
 	}
 
 	template <typename T1, typename T2>
-	bool isTrue(String name1, T1 val1, String name2, T2 val2, String name3, T1 val3, String name4, T2 val4)
+	bool isTrue(String name1,
+	            T1     val1,
+	            String name2,
+	            T2     val2,
+	            String name3,
+	            T1     val3,
+	            String name4,
+	            T2     val4)
 	{
 		if (pred_ == "")
 			return false;
 		SizeType n = predicateAnd_.size();
 		for (SizeType i = 0; i < n; ++i)
-			if (predicateAnd_[i].isTrue(name1, val1, name2, val2, name3, val3, name4, val4))
+			if (predicateAnd_[i].isTrue(
+			        name1, val1, name2, val2, name3, val3, name4, val4))
 				return true;
 		return false;
 	}
 
 private:
 
-	String pred_;
+	String                 pred_;
 	VectorPredicateAndType predicateAnd_;
 };
 } // namespace PsimagLite

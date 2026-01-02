@@ -1,13 +1,11 @@
 #include "Integrator.h"
 
-template <typename RealType_>
-class SquareFunction {
+template <typename RealType_> class SquareFunction {
 
 	struct Params {
 		Params(RealType_ p_)
 		    : p(p_)
-		{
-		}
+		{ }
 
 		RealType_ p;
 	};
@@ -18,8 +16,7 @@ public:
 
 	SquareFunction(RealType p)
 	    : p_(p)
-	{
-	}
+	{ }
 
 	static RealType function(RealType x, void* vp)
 	{
@@ -41,13 +38,13 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	double x0 = atof(argv[1]);
-	SizeType total = atoi(argv[2]);
-	double xstep = atof(argv[3]);
-	typedef SquareFunction<double> SquareFunctionType;
-	SquareFunctionType squareFunction(3.0);
+	double                                     x0    = atof(argv[1]);
+	SizeType                                   total = atoi(argv[2]);
+	double                                     xstep = atof(argv[3]);
+	typedef SquareFunction<double>             SquareFunctionType;
+	SquareFunctionType                         squareFunction(3.0);
 	PsimagLite::Integrator<SquareFunctionType> integrator(squareFunction);
-	PsimagLite::Vector<double>::Type pts(2, 0);
+	PsimagLite::Vector<double>::Type           pts(2, 0);
 	for (SizeType i = 0; i < total; ++i) {
 		pts[1] = x0 + i * xstep;
 		std::cout << pts[1] << " " << integrator(pts) << "\n";

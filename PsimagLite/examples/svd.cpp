@@ -18,7 +18,7 @@ int main()
 	MatrixType m(a);
 
 	PsimagLite::Vector<double>::Type s;
-	MatrixType vt;
+	MatrixType                       vt;
 
 	PsimagLite::Svd<double> svd;
 	svd('A', a, s, vt);

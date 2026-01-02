@@ -6,5 +6,5 @@ using namespace PsimagLite;
 int main(int argc, char** argv)
 {
 	SizeType nthreads = 1;
-	PsiApp application("DMRG++", &argc, &argv, nthreads);
+	PsiApp   application("DMRG++", &argc, &argv, nthreads);
 }

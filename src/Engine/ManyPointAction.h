@@ -2,22 +2,18 @@
 #define MANYPOINTACTION_H
 #include "PredicateAwesome.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class ManyPointAction
-{
+class ManyPointAction {
 
 public:
 
 	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
 
-	ManyPointAction(bool hasNonTrivialAction,
-	    PsimagLite::String actionString)
+	ManyPointAction(bool hasNonTrivialAction, PsimagLite::String actionString)
 	    : nonTrivial_(hasNonTrivialAction)
 	    , actionString_(actionString)
-	{
-	}
+	{ }
 
 	bool operator()(SizeType s0, SizeType s1, SizeType s2, SizeType s3) const
 	{
@@ -41,7 +37,7 @@ public:
 
 private:
 
-	bool nonTrivial_;
+	bool               nonTrivial_;
 	PsimagLite::String actionString_;
 };
 

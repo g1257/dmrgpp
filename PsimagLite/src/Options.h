@@ -99,15 +99,17 @@ public:
 
 	public:
 
-		enum { DISABLED,
-		       PERMISSIVE,
-		       STRICT };
+		enum
+		{
+			DISABLED,
+			PERMISSIVE,
+			STRICT
+		};
 
 		Writeable(VectorStringType& registeredOptions, SizeType mode)
 		    : registeredOptions_(registeredOptions)
 		    , mode_(mode)
-		{
-		}
+		{ }
 
 		void set(Vector<String>::Type& optsThatAreSet, String opts)
 		{
@@ -134,7 +136,7 @@ public:
 	private:
 
 		Vector<String>::Type registeredOptions_;
-		SizeType mode_;
+		SizeType             mode_;
 	}; // class Writeable
 
 	class Readable {
@@ -148,9 +150,7 @@ public:
 
 		bool isSet(const String& thisOption) const
 		{
-			bool b = (find(optsThatAreSet_.begin(),
-			               optsThatAreSet_.end(),
-			               thisOption)
+			bool b = (find(optsThatAreSet_.begin(), optsThatAreSet_.end(), thisOption)
 			          == optsThatAreSet_.end());
 			return (!b);
 		}

@@ -83,30 +83,31 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename LeftRightSuperType_>
-struct WaveStructSvd {
+template <typename LeftRightSuperType_> struct WaveStructSvd {
 
-	typedef LeftRightSuperType_ LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef LeftRightSuperType_                                      LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::QnType QnType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
-	typedef typename PsimagLite::Matrix<SparseElementType> MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
-	typedef typename BasisWithOperatorsType::VectorQnType VectorQnType;
-	typedef typename PsimagLite::IoNg::In IoInType;
+	typedef typename BasisWithOperatorsType::OperatorType            OperatorType;
+	typedef typename OperatorType::StorageType                       SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                    SparseElementType;
+	typedef typename BasisWithOperatorsType::BasisType               BasisType;
+	typedef typename BasisType::QnType                               QnType;
+	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
+	typedef typename BasisWithOperatorsType::RealType                RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type        VectorVectorRealType;
+	typedef typename PsimagLite::Matrix<SparseElementType>           MatrixType;
+	typedef typename PsimagLite::Vector<MatrixType>::Type            VectorMatrixType;
+	typedef typename BasisWithOperatorsType::VectorQnType            VectorQnType;
+	typedef typename PsimagLite::IoNg::In                            IoInType;
 
-	enum class SaveEnum { ALL };
+	enum class SaveEnum
+	{
+		ALL
+	};
 
 	WaveStructSvd() { }
 
@@ -116,17 +117,16 @@ struct WaveStructSvd {
 	}
 
 	WaveStructSvd(const BlockDiagonalMatrixType& u,
-	    const VectorMatrixType& vts,
-	    const VectorVectorRealType& s,
-	    const VectorQnType& qns)
+	              const VectorMatrixType&        vts,
+	              const VectorVectorRealType&    s,
+	              const VectorQnType&            qns)
 	    : u_(u)
 	    , vts_(vts)
 	    , // Not yet used, will be used by WftAccelSvd
 	    s_(s)
 	    , // Not yet used, will be used by WftAccelSvd
 	    qns_(qns)
-	{
-	}
+	{ }
 
 	const BlockDiagonalMatrixType& u() const { return u_; }
 
@@ -136,10 +136,7 @@ struct WaveStructSvd {
 
 	const VectorQnType& qns() const { return qns_; }
 
-	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix)
-	{
-		io.read(*this, prefix);
-	}
+	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix) { io.read(*this, prefix); }
 
 	void read(PsimagLite::String prefix, PsimagLite::IoNgSerializer& io)
 	{
@@ -149,10 +146,10 @@ struct WaveStructSvd {
 		QnType::readVector(qns_, prefix + "/qns", io);
 	}
 
-	void write(PsimagLite::IoNg::Out& io,
-	    PsimagLite::String prefix,
-	    PsimagLite::IoNgSerializer::WriteMode writeMode,
-	    SaveEnum) const
+	void write(PsimagLite::IoNg::Out&                io,
+	           PsimagLite::String                    prefix,
+	           PsimagLite::IoNgSerializer::WriteMode writeMode,
+	           SaveEnum) const
 	{
 		if (writeMode != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 			io.createGroup(prefix);
@@ -174,9 +171,9 @@ struct WaveStructSvd {
 private:
 
 	BlockDiagonalMatrixType u_;
-	VectorMatrixType vts_;
-	VectorVectorRealType s_;
-	VectorQnType qns_;
+	VectorMatrixType        vts_;
+	VectorVectorRealType    s_;
+	VectorQnType            qns_;
 }; // struct WaveStructSvd
 
 } // namespace Dmrg

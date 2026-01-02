@@ -22,12 +22,12 @@ bool csr_is_eye(const PsimagLite::CrsMatrix<ComplexOrRealType>& a)
 
 	for (int ia = 0; ia < nrow_A; ia++) {
 		int istart = a.getRowPtr(ia);
-		int iend = a.getRowPtr(ia + 1);
+		int iend   = a.getRowPtr(ia + 1);
 
 		bool has_diagonal = false;
 		;
 		for (int k = istart; k < iend; k++) {
-			int ja = a.getCol(k);
+			int               ja  = a.getCol(k);
 			ComplexOrRealType aij = a.getValue(k);
 			ComplexOrRealType eij = (ia == ja) ? 1 : 0;
 			if (ia == ja) {

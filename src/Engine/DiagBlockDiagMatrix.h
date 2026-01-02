@@ -2,27 +2,21 @@
 #define DIAGBLOCKDIAGMATRIX_H
 #include "EnforcePhase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename BlockDiagonalMatrixType>
-class DiagBlockDiagMatrix
-{
+template <typename BlockDiagonalMatrixType> class DiagBlockDiagMatrix {
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
-	typedef typename BuildingBlockType::value_type ComplexOrRealType;
-	typedef typename BlockDiagonalMatrixType::VectorRealType VectorRealType;
+	typedef typename BuildingBlockType::value_type              ComplexOrRealType;
+	typedef typename BlockDiagonalMatrixType::VectorRealType    VectorRealType;
 
-	class LoopForDiag
-	{
+	class LoopForDiag {
 
 		typedef PsimagLite::Concurrency ConcurrencyType;
 
 	public:
 
-		LoopForDiag(BlockDiagonalMatrixType& C1,
-		    VectorRealType& eigs1,
-		    char option1)
+		LoopForDiag(BlockDiagonalMatrixType& C1, VectorRealType& eigs1, char option1)
 		    : C(C1)
 		    , eigs(eigs1)
 		    , option(option1)
@@ -44,11 +38,12 @@ class DiagBlockDiagMatrix
 		void doTask(SizeType taskNumber, SizeType)
 		{
 			assert(C.rows() == C.cols());
-			SizeType m = taskNumber;
+			SizeType       m = taskNumber;
 			VectorRealType eigsTmp;
 			C.diagAndEnforcePhase(m, eigsTmp, option);
 			for (SizeType j = C.offsetsRows(m); j < C.offsetsRows(m + 1); ++j)
-				eigsForGather[m][j - C.offsetsRows(m)] = eigsTmp[j - C.offsetsRows(m)];
+				eigsForGather[m][j - C.offsetsRows(m)]
+				    = eigsTmp[j - C.offsetsRows(m)];
 		}
 
 		void gather()
@@ -62,11 +57,11 @@ class DiagBlockDiagMatrix
 
 	private:
 
-		BlockDiagonalMatrixType& C;
-		VectorRealType& eigs;
-		char option;
+		BlockDiagonalMatrixType&                          C;
+		VectorRealType&                                   eigs;
+		char                                              option;
 		typename PsimagLite::Vector<VectorRealType>::Type eigsForGather;
-		typename PsimagLite::Vector<SizeType>::Type weights;
+		typename PsimagLite::Vector<SizeType>::Type       weights;
 	};
 
 public:
@@ -75,12 +70,10 @@ public:
 	// Note: In reality, Parallelization is disabled here because a LAPACK call
 	//        is needed and LAPACK is not necessarily thread safe.
 	// This function is NOT called by useSvd
-	static void diagonalise(BlockDiagonalMatrixType& C,
-	    VectorRealType& eigs,
-	    char option)
+	static void diagonalise(BlockDiagonalMatrixType& C, VectorRealType& eigs, char option)
 	{
 		typedef PsimagLite::NoPthreadsNg<LoopForDiag> ParallelizerType;
-		typedef PsimagLite::Concurrency ConcurrencyType;
+		typedef PsimagLite::Concurrency               ConcurrencyType;
 		SizeType savedNpthreads = ConcurrencyType::codeSectionParams.npthreads;
 		ConcurrencyType::codeSectionParams.npthreads = 1;
 		ParallelizerType threadObject(ConcurrencyType::codeSectionParams);

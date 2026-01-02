@@ -79,12 +79,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGET_PARAMS_GROUNDSTATE_H
 #include "TargetParamsBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
-template <typename ModelType>
-class TargetParamsGroundState : public TargetParamsBase<ModelType>
-{
+template <typename ModelType> class TargetParamsGroundState : public TargetParamsBase<ModelType> {
 
 	typedef TargetParamsBase<ModelType> BaseType;
 
@@ -94,8 +91,7 @@ public:
 
 	TargetParamsGroundState(PsimagLite::String targeting)
 	    : BaseType(targeting)
-	{
-	}
+	{ }
 
 	virtual SizeType sites() const { return 0; }
 
@@ -109,16 +105,14 @@ public:
 		throw PsimagLite::RuntimeError("levelIndex called for gs\n");
 	}
 
-	void write(PsimagLite::String,
-	    PsimagLite::IoSerializer&) const
+	void write(PsimagLite::String, PsimagLite::IoSerializer&) const
 	{
 		// this function intentionally left blank
 	}
 }; // class TargetParamsGroundState
 
 template <typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os, const TargetParamsGroundState<ModelType>&)
+inline std::ostream& operator<<(std::ostream& os, const TargetParamsGroundState<ModelType>&)
 {
 	os << "TargetParams.type=GroundState\n";
 	return os;

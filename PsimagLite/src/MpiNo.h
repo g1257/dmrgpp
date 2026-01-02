@@ -88,8 +88,8 @@ namespace PsimagLite {
 namespace MPI {
 
 	typedef int CommType;
-	extern int COMM_WORLD;
-	extern int SUM;
+	extern int  COMM_WORLD;
+	extern int  SUM;
 
 	void init(int*, char***);
 
@@ -107,25 +107,17 @@ namespace MPI {
 
 	int barrier(CommType);
 
-	template <typename T>
-	void bcast(T&, int = 0, CommType = COMM_WORLD) { }
+	template <typename T> void bcast(T&, int = 0, CommType = COMM_WORLD) { }
 
-	template <typename T>
-	void recv(T&, int, int, CommType = COMM_WORLD) { }
+	template <typename T> void recv(T&, int, int, CommType = COMM_WORLD) { }
 
-	template <typename T>
-	void send(T&, int, int, CommType = COMM_WORLD) { }
+	template <typename T> void send(T&, int, int, CommType = COMM_WORLD) { }
 
-	template <typename T>
-	void pointByPointGather(T&, int = 0, CommType = COMM_WORLD)
-	{
-	}
+	template <typename T> void pointByPointGather(T&, int = 0, CommType = COMM_WORLD) { }
 
-	template <typename T>
-	void reduce(T&, int = 0, int = 0, int = 0) { }
+	template <typename T> void reduce(T&, int = 0, int = 0, int = 0) { }
 
-	template <typename T>
-	void allReduce(T&) { }
+	template <typename T> void allReduce(T&) { }
 
 } // namespace MPI
 

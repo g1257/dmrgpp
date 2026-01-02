@@ -81,22 +81,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class FermionSign
-{
+class FermionSign {
 
-	typedef PsimagLite::PackIndices PackIndicesType;
+	typedef PsimagLite::PackIndices            PackIndicesType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
+	typedef PsimagLite::Vector<bool>::Type     VectorBoolType;
 
 public:
 
 	FermionSign(const VectorBoolType& signs)
 	    : signs_(signs)
-	{
-	}
+	{ }
 
 	template <typename SomeBasisType>
 	FermionSign(const SomeBasisType& basis, const VectorBoolType& signs)
@@ -106,7 +103,7 @@ public:
 
 		SizeType n = basis.oldSigns().size();
 		assert(basis.oldSigns().size() % signs.size() == 0);
-		SizeType nx = basis.oldSigns().size() / signs.size();
+		SizeType        nx = basis.oldSigns().size() / signs.size();
 		PackIndicesType pack(nx);
 		signs_.resize(nx);
 		if (nx <= 1)
@@ -124,13 +121,11 @@ public:
 	}
 
 	template <typename IoInputter>
-	FermionSign(IoInputter& io,
+	FermionSign(
+	    IoInputter&        io,
 	    PsimagLite::String prefix,
-	    bool bogus,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputter>::True,
-		int>::Type
-	    = 0)
+	    bool               bogus,
+	    typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	{
 		if (bogus)
 			return;
@@ -144,12 +139,11 @@ public:
 	}
 
 	template <typename IoOutputter>
-	void write(IoOutputter& io,
-	    PsimagLite::String prefix,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsOutputLike<IoOutputter>::True,
-		int>::Type
-	    = 0) const
+	void
+	write(IoOutputter&       io,
+	      PsimagLite::String prefix,
+	      typename PsimagLite::EnableIf<PsimagLite::IsOutputLike<IoOutputter>::True, int>::Type
+	      = 0) const
 	{
 		io.write(signs_, prefix);
 	}

@@ -82,8 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename FieldType>
-FieldType fermi(const FieldType& x)
+template <typename FieldType> FieldType fermi(const FieldType& x)
 {
 	if (x > 50)
 		return 0;
@@ -95,16 +94,14 @@ FieldType fermi(const FieldType& x)
 }
 
 // Derivative (prime) of Fermi's function
-template <typename FieldType>
-FieldType fermiPrime(const FieldType& x)
+template <typename FieldType> FieldType fermiPrime(const FieldType& x)
 {
 	FieldType res;
 	res = -fermi(x) * fermi(-x);
 	return res;
 }
 
-template <typename FieldType>
-FieldType logfermi(const FieldType& x)
+template <typename FieldType> FieldType logfermi(const FieldType& x)
 {
 	FieldType res;
 	if (x > 20)

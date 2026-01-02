@@ -6,24 +6,24 @@
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class Qn
-{
+class Qn {
 
 public:
 
-	enum ModalEnum { MODAL_SUM,
-		MODAL_MODULO };
+	enum ModalEnum
+	{
+		MODAL_SUM,
+		MODAL_MODULO
+	};
 
 	struct ModalStruct {
 
 		ModalStruct()
 		    : modalEnum(MODAL_SUM)
 		    , extra(0)
-		{
-		}
+		{ }
 
 		template <typename SomeInputType>
 		void read(PsimagLite::String str, SomeInputType& io)
@@ -32,9 +32,10 @@ public:
 			io.read(extra, str + "/extra");
 		}
 
-		void write(PsimagLite::String str,
-		    PsimagLite::IoNgSerializer& io,
-		    typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+		void write(PsimagLite::String                             str,
+		           PsimagLite::IoNgSerializer&                    io,
+		           typename PsimagLite::IoNgSerializer::WriteMode wM
+		           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 		{
 			if (wM != PsimagLite::IoNgSerializer::ALLOW_OVERWRITE)
 				io.createGroup(str);
@@ -42,13 +43,13 @@ public:
 			io.write(str + "/extra", extra, wM);
 		}
 
-		ModalEnum modalEnum;
+		ModalEnum          modalEnum;
 		short unsigned int extra;
 	};
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
-	typedef PsimagLite::Vector<Qn>::Type VectorQnType;
+	typedef PsimagLite::Vector<SizeType>::Type    VectorSizeType;
+	typedef std::pair<SizeType, SizeType>         PairSizeType;
+	typedef PsimagLite::Vector<Qn>::Type          VectorQnType;
 	typedef PsimagLite::Vector<ModalStruct>::Type VectorModalStructType;
 
 	Qn(bool odd, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor)
@@ -74,7 +75,7 @@ public:
 	Qn(const Qn& q1, const Qn& q2)
 	{
 		oddElectrons = (q1.oddElectrons ^ q2.oddElectrons);
-		SizeType n = q1.other.size();
+		SizeType n   = q1.other.size();
 		assert(q2.other.size() == n);
 		assert(modalStruct.size() == n);
 
@@ -85,21 +86,19 @@ public:
 				other[i] %= modalStruct[i].extra;
 		}
 
-		jmPair.first = q1.jmPair.first + q2.jmPair.first;
+		jmPair.first  = q1.jmPair.first + q2.jmPair.first;
 		jmPair.second = q1.jmPair.second + q2.jmPair.second;
-		flavors = q1.flavors; // ???
+		flavors       = q1.flavors; // ???
 	}
 
-	template <typename SomeInputType>
-	void read(PsimagLite::String str, SomeInputType& io)
+	template <typename SomeInputType> void read(PsimagLite::String str, SomeInputType& io)
 	{
 		io.read(oddElectrons, str + "/oddElectrons");
 		try {
 			VectorSizeType otherVector;
 			io.read(otherVector, str + "/other");
 			other.fromStdVector(otherVector);
-		} catch (...) {
-		}
+		} catch (...) { }
 
 		io.read(jmPair, str + "/jmPair");
 		io.read(flavors, str + "/flavors");
@@ -111,9 +110,10 @@ public:
 			err("Qn::read\n");
 	}
 
-	void write(PsimagLite::String str,
-	    PsimagLite::IoNgSerializer& io,
-	    typename PsimagLite::IoNgSerializer::WriteMode wM = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
+	void write(PsimagLite::String                             str,
+	           PsimagLite::IoNgSerializer&                    io,
+	           typename PsimagLite::IoNgSerializer::WriteMode wM
+	           = PsimagLite::IoNgSerializer::NO_OVERWRITE) const
 	{
 		try {
 			io.read(modalStruct, "modalStruct");
@@ -133,7 +133,8 @@ public:
 
 	void overwrite(PsimagLite::String str, PsimagLite::IoNgSerializer& io) const
 	{
-		const PsimagLite::IoNgSerializer::WriteMode mode = PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
+		const PsimagLite::IoNgSerializer::WriteMode mode
+		    = PsimagLite::IoNgSerializer::ALLOW_OVERWRITE;
 		io.write(str + "/oddElectrons", oddElectrons, mode);
 		VectorSizeType otherVector;
 		other.toStdVector(otherVector);
@@ -148,22 +149,19 @@ public:
 #ifndef ENABLE_SU2
 		);
 #else
-		    && pairEqual(a.jmPair) && flavors == a.flavors);
+		        && pairEqual(a.jmPair) && flavors == a.flavors);
 #endif
 	}
 
-	bool operator!=(const Qn& a) const
-	{
-		return !(*this == a);
-	}
+	bool operator!=(const Qn& a) const { return !(*this == a); }
 
-	void scale(SizeType sites,
-	    SizeType totalSites,
-	    ProgramGlobals::DirectionEnum direction,
-	    bool isSu2)
+	void scale(SizeType                      sites,
+	           SizeType                      totalSites,
+	           ProgramGlobals::DirectionEnum direction,
+	           bool                          isSu2)
 	{
-		Qn original = *this;
-		SizeType mode = other.size();
+		Qn       original = *this;
+		SizeType mode     = other.size();
 		if (isSu2 && mode != 2)
 			err("Qn::scale() expects mode==1 for SU(2)\n");
 
@@ -171,10 +169,10 @@ public:
 			double ts = totalSites;
 			for (SizeType x = 0; x < mode; ++x) {
 				double flp = original.other[x] * sites;
-				other[x] = static_cast<SizeType>(round(flp / ts));
+				other[x]   = static_cast<SizeType>(round(flp / ts));
 			}
 
-			double flp = original.jmPair.first * sites;
+			double flp   = original.jmPair.first * sites;
 			jmPair.first = static_cast<SizeType>(round(flp / ts));
 		}
 
@@ -186,9 +184,9 @@ public:
 
 		assert(ifPresentOther0IsElectrons && other.size() > 0);
 
-		SizeType tmp = jmPair.first;
+		SizeType           tmp = jmPair.first;
 		PsimagLite::String str("SymmetryElectronsSz: FATAL: Impossible parameters ");
-		bool flag = false;
+		bool               flag = false;
 		if (original.oddElectrons) {
 			if (!(tmp & 1)) {
 				flag = true;
@@ -212,9 +210,7 @@ public:
 	}
 
 	template <typename SomeIoInType>
-	static void readVector(VectorQnType& vqns,
-	    PsimagLite::String prefix,
-	    SomeIoInType& io)
+	static void readVector(VectorQnType& vqns, PsimagLite::String prefix, SomeIoInType& io)
 	{
 		SizeType aSize = 0;
 		io.read(aSize, prefix + "/Size");
@@ -224,12 +220,10 @@ public:
 			vqns[i].read(prefix + "/" + ttos(i), io);
 	}
 
-	static void adjustQns(VectorQnType& outQns,
-	    const VectorSizeType& ints,
-	    SizeType mode)
+	static void adjustQns(VectorQnType& outQns, const VectorSizeType& ints, SizeType mode)
 	{
 		SizeType modePlusOne = mode + 1;
-		SizeType n = ints.size();
+		SizeType n           = ints.size();
 		if (n == 0)
 			err("adjustQns failed with n == 0\n");
 
@@ -242,7 +236,7 @@ public:
 			assert(1 + i * modePlusOne < ints.size());
 			SizeType tmp = ints[1 + i * modePlusOne];
 			assert(outQns[i].other.size() > 0);
-			outQns[i].other[0] = tmp;
+			outQns[i].other[0]     = tmp;
 			outQns[i].oddElectrons = (tmp & 1);
 			for (SizeType j = 1; j < modePlusOne; ++j) {
 				SizeType k = (j == 1) ? 0 : j;
@@ -255,7 +249,7 @@ public:
 
 	bool isDefinedOther() const
 	{
-		SizeType n = other.size();
+		SizeType n     = other.size();
 		SizeType value = 1;
 		SizeType total = sizeof(value) * 8 - 1;
 		value <<= total;
@@ -273,8 +267,7 @@ public:
 		return other[0];
 	}
 
-	static void su2ElectronsBridge(VectorSizeType& v,
-	    const VectorQnType& qns)
+	static void su2ElectronsBridge(VectorSizeType& v, const VectorQnType& qns)
 	{
 		SizeType n = qns.size();
 		v.resize(n);
@@ -301,11 +294,11 @@ public:
 	}
 
 	static VectorModalStructType modalStruct;
-	static bool ifPresentOther0IsElectrons;
-	bool oddElectrons;
-	Array<SizeType> other;
-	PairSizeType jmPair;
-	SizeType flavors;
+	static bool                  ifPresentOther0IsElectrons;
+	bool                         oddElectrons;
+	Array<SizeType>              other;
+	PairSizeType                 jmPair;
+	SizeType                     flavors;
 
 private:
 

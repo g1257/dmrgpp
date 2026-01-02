@@ -8,11 +8,10 @@
 #include <sstream>
 
 namespace PsimagLite {
-template <class T>
-String typeToString(T t)
+template <class T> String typeToString(T t)
 {
 	std::stringstream ss;
-	String str;
+	String            str;
 	ss.precision(10);
 	ss << t;
 	ss >> str;
@@ -20,10 +19,6 @@ String typeToString(T t)
 }
 } // namespace PsimagLite
 
-template <class T>
-PsimagLite::String ttos(T t)
-{
-	return PsimagLite::typeToString(t);
-}
+template <class T> PsimagLite::String ttos(T t) { return PsimagLite::typeToString(t); }
 
 #endif // TYPE_TO_STRING_H

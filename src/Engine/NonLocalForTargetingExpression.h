@@ -5,34 +5,31 @@
 #include "ProgressIndicator.h"
 #include "TargetParamsBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename TargetingBaseType>
-class NonLocalForTargetingExpression
-{
+template <typename TargetingBaseType> class NonLocalForTargetingExpression {
 
 public:
 
-	typedef AuxForTargetingExpression<TargetingBaseType> AuxiliaryType;
-	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename TargetingBaseType::ModelType ModelType;
-	typedef typename TargetingBaseType::LanczosSolverType LanczosSolverType;
-	typedef typename TargetingBaseType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename TargetingBaseType::TargetParamsType TargetParamsType;
-	typedef typename TargetParamsType::RealType RealType;
+	typedef AuxForTargetingExpression<TargetingBaseType>            AuxiliaryType;
+	typedef typename TargetingBaseType::VectorWithOffsetType        VectorWithOffsetType;
+	typedef typename TargetingBaseType::ModelType                   ModelType;
+	typedef typename TargetingBaseType::LanczosSolverType           LanczosSolverType;
+	typedef typename TargetingBaseType::WaveFunctionTransfType      WaveFunctionTransfType;
+	typedef typename TargetingBaseType::TargetParamsType            TargetParamsType;
+	typedef typename TargetParamsType::RealType                     RealType;
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename AuxiliaryType::InputValidatorType InputValidatorType;
+	typedef typename AuxiliaryType::InputValidatorType              InputValidatorType;
 	typedef typename AuxiliaryType::GroupOfOneTimeEvolutionsType GroupOfOneTimeEvolutionsType;
 	typedef typename GroupOfOneTimeEvolutionsType::OneTimeEvolutionType OneTimeEvolutionType;
-	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
-	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
-	typedef typename ModelType::VectorSizeType VectorSizeType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef std::pair<PsimagLite::String, SizeType> PairStringSizeType;
-	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
+	typedef PsimagLite::OneOperatorSpec                                 OneOperatorSpecType;
+	typedef typename OneOperatorSpecType::SiteSplit                     SiteSplitType;
+	typedef typename ModelType::VectorSizeType                          VectorSizeType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type                VectorStringType;
+	typedef typename PsimagLite::Vector<RealType>::Type                 VectorRealType;
+	typedef std::pair<PsimagLite::String, SizeType>                     PairStringSizeType;
+	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType   TimeVectorsBaseType;
 
 	struct TimeParams {
 
@@ -43,29 +40,27 @@ public:
 		    , algo("Krylov")
 		    , disposition(0)
 		    , Eg(Eg1)
-		{
-		}
+		{ }
 
-		SizeType timeSteps;
-		RealType tau = 0.1;
-		SizeType advanceEach;
+		SizeType           timeSteps;
+		RealType           tau = 0.1;
+		SizeType           advanceEach;
 		PsimagLite::String algo;
-		VectorRealType chebyTransform;
-		SizeType disposition;
-		VectorSizeType depends;
-		RealType Eg;
+		VectorRealType     chebyTransform;
+		SizeType           disposition;
+		VectorSizeType     depends;
+		RealType           Eg;
 	};
 
 	NonLocalForTargetingExpression(const AuxiliaryType& aux)
 	    : aux_(aux)
 	    , progress_("NonLocalForTargetingExpression")
-	{
-	}
+	{ }
 
-	bool timeEvolve(PsimagLite::String name,
-	    const SiteSplitType& siteSplit,
-	    PsimagLite::String srcKet,
-	    SizeType site)
+	bool timeEvolve(PsimagLite::String   name,
+	                const SiteSplitType& siteSplit,
+	                PsimagLite::String   srcKet,
+	                SizeType             site)
 	{
 		if (siteSplit.hasSiteString)
 			err("Global operators cannot have a site\n");
@@ -74,7 +69,8 @@ public:
 		if (firstIndex >= aux_.pVectors().origPvectors())
 			err("Cannot set an NGST to a temporary vector\n");
 
-		OneTimeEvolutionType* oneTimeEvolution = aux_.timeEvolve().findThisEvolution(firstIndex);
+		OneTimeEvolutionType* oneTimeEvolution
+		    = aux_.timeEvolve().findThisEvolution(firstIndex);
 
 		const VectorWithOffsetType* srcVwo = &aux_.pVectors().getCurrentVectorConst(srcKet);
 		if (srcVwo->size() == 0 && !oneTimeEvolution)
@@ -82,45 +78,47 @@ public:
 
 		static const bool allOperatorsApplied = true;
 
-		VectorSizeType block1(1, site);
+		VectorSizeType    block1(1, site);
 		static const bool isLastCall = true;
 
-		const SizeType nsites = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
+		const SizeType nsites
+		    = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
 		TimeParams timeParams(nsites, aux_.Eg());
 		extractParamsFromName(timeParams, name);
 
 		AuxiliaryType* auxPtr = const_cast<AuxiliaryType*>(&aux_);
 
 		auxPtr->pVectors().initTimeVectors(timeParams.timeSteps,
-		    timeParams.tau,
-		    timeParams.algo,
-		    timeParams.chebyTransform);
+		                                   timeParams.tau,
+		                                   timeParams.algo,
+		                                   timeParams.chebyTransform);
 
 		if (!oneTimeEvolution) {
 			oneTimeEvolution = new OneTimeEvolutionType(firstIndex,
-			    *srcVwo,
-			    srcKet,
-			    timeParams.disposition,
-			    timeParams.timeSteps,
-			    aux_.pVectors());
+			                                            *srcVwo,
+			                                            srcKet,
+			                                            timeParams.disposition,
+			                                            timeParams.timeSteps,
+			                                            aux_.pVectors());
 			aux_.timeEvolve().pushBack(oneTimeEvolution);
 		}
 
 		bool timeHasAdvanced = advanceInTimeOrNot(*oneTimeEvolution,
-		    timeParams.advanceEach,
-		    timeParams.depends,
-		    site,
-		    timeParams.tau);
+		                                          timeParams.advanceEach,
+		                                          timeParams.depends,
+		                                          site,
+		                                          timeParams.tau);
 
 		assert(oneTimeEvolution->indices().size() > 1);
-		const SizeType last = oneTimeEvolution->indices().size() - 1;
-		const SizeType advanceOrNot = (timeHasAdvanced) ? last : 0;
-		const SizeType firstOrLast = oneTimeEvolution->indices()[advanceOrNot];
-		const VectorWithOffsetType* phi = (oneTimeEvolution->time() > 0)
-		    ? new VectorWithOffsetType(aux_.pVectors().aoe().targetVectors(firstOrLast))
-		    : srcVwo;
+		const SizeType              last         = oneTimeEvolution->indices().size() - 1;
+		const SizeType              advanceOrNot = (timeHasAdvanced) ? last : 0;
+		const SizeType              firstOrLast = oneTimeEvolution->indices()[advanceOrNot];
+		const VectorWithOffsetType* phi         = (oneTimeEvolution->time() > 0)
+		            ? new VectorWithOffsetType(aux_.pVectors().aoe().targetVectors(firstOrLast))
+		            : srcVwo;
 
-		auxPtr->pVectors().aoeNonConst().calcTimeVectors(oneTimeEvolution->indices(),
+		auxPtr->pVectors().aoeNonConst().calcTimeVectors(
+		    oneTimeEvolution->indices(),
 		    timeParams.Eg,
 		    *phi,
 		    aux_.direction(),
@@ -140,24 +138,25 @@ public:
 private:
 
 	bool advanceInTimeOrNot(OneTimeEvolutionType& oneTimeEvolution,
-	    SizeType advanceEach,
-	    const VectorSizeType& depends,
-	    SizeType site,
-	    RealType tau)
+	                        SizeType              advanceEach,
+	                        const VectorSizeType& depends,
+	                        SizeType              site,
+	                        RealType              tau)
 	{
 		if (!passDepends(depends))
 			return false;
 
 		static const bool advanceOnlyAtBorder = true;
-		const SizeType sites = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
-		const bool weAreAtBorder = (site == 0 || site == sites - 1);
-		const bool dontAdvance = (advanceOnlyAtBorder && !weAreAtBorder);
-		bool timeHasAdvanced = false;
+		const SizeType    sites
+		    = aux_.pVectors().aoe().model().superGeometry().numberOfSites();
+		const bool weAreAtBorder   = (site == 0 || site == sites - 1);
+		const bool dontAdvance     = (advanceOnlyAtBorder && !weAreAtBorder);
+		bool       timeHasAdvanced = false;
 		if (advanceEach > 0 && oneTimeEvolution.timesWithoutAdvancement() >= advanceEach
 		    && !dontAdvance) {
 			oneTimeEvolution.resetTimesWithoutAdvancement();
 			oneTimeEvolution.advanceTime(tau);
-			timeHasAdvanced = true;
+			timeHasAdvanced           = true;
 			const int sourceToDestroy = oneTimeEvolution.sourceToDestroy();
 			if (sourceToDestroy >= 0)
 				aux_.pVectors().aoeNonConst().destroyPvector(sourceToDestroy);
@@ -166,10 +165,11 @@ private:
 		}
 
 		// make sure aoe.timeVectors.time_ is in sync with oneTimeEvolution's time
-		TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(&aux_.pVectors().aoe().timeVectors());
+		TimeVectorsBaseType* ptr
+		    = const_cast<TimeVectorsBaseType*>(&aux_.pVectors().aoe().timeVectors());
 		ptr->setCurrentTime(oneTimeEvolution.time());
 
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << "Steps without advance: " << oneTimeEvolution.timesWithoutAdvancement();
 		msg2 << " site=" << site << " currenTime=" << oneTimeEvolution.time();
@@ -191,15 +191,16 @@ private:
 	{
 		// TimeEvolve{tau=0.1,steps=5,advanceEach=14,disposition=FIXME,algorithm=FIXME,depends=P1}
 		const PsimagLite::String tev = "TimeEvolve";
-		PsimagLite::String te = name.substr(0, tev.length());
+		PsimagLite::String       te  = name.substr(0, tev.length());
 		if (te != tev)
 			err(ttos(__FILE__) + " Only " + tev + " implemented, not " + te + "\n");
 
 		name = name.substr(tev.length(), name.length() - tev.length());
 		PsimagLite::String buffer;
-		const SizeType m = name.length();
+		const SizeType     m = name.length();
 		for (SizeType i = 0; i < m; ++i) {
-			if (name[i] == ' ' || name[i] == '{' || name[i] == '}' || name[i] == '(' || name[i] == ')')
+			if (name[i] == ' ' || name[i] == '{' || name[i] == '}' || name[i] == '('
+			    || name[i] == ')')
 				continue;
 			buffer += name[i];
 		}
@@ -221,7 +222,8 @@ private:
 			} else if (key == "steps") {
 				timeParams.timeSteps = PsimagLite::atoi(value);
 			} else if (key == "algorithm") {
-				timeParams.algo = getChebyIfNeeded(timeParams.chebyTransform, value);
+				timeParams.algo
+				    = getChebyIfNeeded(timeParams.chebyTransform, value);
 			} else if (key == "EnergyForExp" or key == "energyforexp") {
 				timeParams.Eg = PsimagLite::atof(value);
 			} else if (key == "depends") {
@@ -263,20 +265,19 @@ private:
 		}
 	}
 
-	static void getKeyAndValue(PsimagLite::String& key,
-	    PsimagLite::String& value,
-	    PsimagLite::String str)
+	static void
+	getKeyAndValue(PsimagLite::String& key, PsimagLite::String& value, PsimagLite::String str)
 	{
 		VectorStringType tokens;
 		PsimagLite::split(tokens, str, "=");
 		if (tokens.size() != 2)
 			err("Expected key=value, not " + str + "\n");
 
-		key = tokens[0];
+		key   = tokens[0];
 		value = tokens[1];
 	}
 
-	const AuxiliaryType& aux_;
+	const AuxiliaryType&          aux_;
 	PsimagLite::ProgressIndicator progress_;
 };
 }

@@ -80,37 +80,35 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "NotMpi.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename ModelType, typename LanczosSolverType, typename VectorWithOffsetType>
-class ParallelTriDiag
-{
+class ParallelTriDiag {
 
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename ModelType::ModelHelperType                 ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type  RealType;
+	typedef typename LanczosSolverType::TridiagonalMatrixType   TridiagonalMatrixType;
+	typedef typename ModelType::InputValidatorType              InputValidatorType;
+	typedef PsimagLite::Concurrency                             ConcurrencyType;
 
 public:
 
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type TargetVectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixComplexOrRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type       TargetVectorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                      MatrixComplexOrRealType;
 	typedef typename PsimagLite::Vector<MatrixComplexOrRealType>::Type VectorMatrixFieldType;
 
-	ParallelTriDiag(const VectorWithOffsetType& phi,
-	    VectorMatrixFieldType& T,
-	    VectorMatrixFieldType& V,
-	    typename PsimagLite::Vector<SizeType>::Type& steps,
-	    const LeftRightSuperType& lrs,
-	    RealType currentTime,
-	    const ModelType& model,
-	    InputValidatorType& io)
+	ParallelTriDiag(const VectorWithOffsetType&                  phi,
+	                VectorMatrixFieldType&                       T,
+	                VectorMatrixFieldType&                       V,
+	                typename PsimagLite::Vector<SizeType>::Type& steps,
+	                const LeftRightSuperType&                    lrs,
+	                RealType                                     currentTime,
+	                const ModelType&                             model,
+	                InputValidatorType&                          io)
 	    : phi_(phi)
 	    , T_(T)
 	    , V_(V)
@@ -119,8 +117,7 @@ public:
 	    , currentTime_(currentTime)
 	    , model_(model)
 	    , io_(io)
-	{
-	}
+	{ }
 
 	SizeType tasks() const { return phi_.sectors(); }
 
@@ -133,16 +130,14 @@ public:
 private:
 
 	SizeType triDiag(const VectorWithOffsetType& phi,
-	    MatrixComplexOrRealType& T,
-	    MatrixComplexOrRealType& V,
-	    SizeType i0)
+	                 MatrixComplexOrRealType&    T,
+	                 MatrixComplexOrRealType&    V,
+	                 SizeType                    i0)
 	{
-		const SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
+		const SizeType                p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
-		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		    ModelType::modelLinks(),
-		    currentTime_,
-		    model_.superOpHelper());
+		typename ModelType::HamiltonianConnectionType hc(
+		    lrs_, ModelType::modelLinks(), currentTime_, model_.superOpHelper());
 		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc, aux);
 
 		typename LanczosSolverType::ParametersSolverType params(io_, "Tridiag");
@@ -151,8 +146,8 @@ private:
 		LanczosSolverType lanczosSolver(lanczosHelper, params);
 
 		TridiagonalMatrixType ab;
-		SizeType total = phi.effectiveSize(i0);
-		TargetVectorType phi2(total);
+		SizeType              total = phi.effectiveSize(i0);
+		TargetVectorType      phi2(total);
 		phi.extract(phi2, i0);
 		lanczosSolver.decomposition(phi2, ab);
 		ab.buildDenseMatrix(T);
@@ -162,14 +157,14 @@ private:
 		return lanczosSolver.steps();
 	}
 
-	const VectorWithOffsetType& phi_;
-	VectorMatrixFieldType& T_;
-	VectorMatrixFieldType& V_;
+	const VectorWithOffsetType&                  phi_;
+	VectorMatrixFieldType&                       T_;
+	VectorMatrixFieldType&                       V_;
 	typename PsimagLite::Vector<SizeType>::Type& steps_;
-	const LeftRightSuperType& lrs_;
-	RealType currentTime_;
-	const ModelType& model_;
-	InputValidatorType& io_;
+	const LeftRightSuperType&                    lrs_;
+	RealType                                     currentTime_;
+	const ModelType&                             model_;
+	InputValidatorType&                          io_;
 }; // class ParallelTriDiag
 } // namespace Dmrg
 

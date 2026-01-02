@@ -43,7 +43,7 @@ int main()
 	                             "\nGesellschaft mit beschränkter Haftung";
 
 	PsimagLite::PsiBase64::Encode base64encode(s);
-	PsimagLite::String encoded = base64encode();
+	PsimagLite::String            encoded = base64encode();
 	std::cout << "encoded: " << encoded << "\n";
 	std::cout << "decoded: " << PsimagLite::PsiBase64::Decode(encoded)() << "\n";
 }

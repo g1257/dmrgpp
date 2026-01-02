@@ -90,7 +90,8 @@ class LadderX : public GeometryBase<ComplexOrRealType, InputType> {
 
 public:
 
-	enum {
+	enum
+	{
 		DIRECTION_X = LadderType::DIRECTION_X,
 		DIRECTION_Y = LadderType::DIRECTION_Y,
 		DIRECTION_XPY,
@@ -103,17 +104,13 @@ public:
 	    : ladder_(linSize, io)
 	    , linSize_(linSize)
 	    , leg_(ladder_.leg())
-	{
-	}
+	{ }
 
 	virtual SizeType maxConnections() const { return leg_ + 1; }
 
 	virtual SizeType dirs() const { return 4; }
 
-	virtual SizeType length(SizeType) const
-	{
-		return this->unimplemented("length");
-	}
+	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
 
 	virtual SizeType translate(SizeType, SizeType, SizeType) const
 	{
@@ -140,12 +137,12 @@ public:
 		if (ladder_.connected(i1, i2))
 			return true;
 
-		SizeType lx = linSize_ / leg_;
-		bool isPeriodicY = ladder_.isPeriodicY();
-		SizeType c1 = i1 / leg_;
-		SizeType c2 = i2 / leg_;
-		SizeType r1 = i1 % leg_;
-		SizeType r2 = i2 % leg_;
+		SizeType lx          = linSize_ / leg_;
+		bool     isPeriodicY = ladder_.isPeriodicY();
+		SizeType c1          = i1 / leg_;
+		SizeType c2          = i2 / leg_;
+		SizeType r1          = i1 % leg_;
+		SizeType r2          = i2 % leg_;
 
 		if (c1 == c2)
 			return this->neighbors(r1, r2, isPeriodicY, leg_);
@@ -153,7 +150,8 @@ public:
 		if (r1 == r2)
 			return this->neighbors(c1, c2, false, 0);
 
-		return (this->neighbors(r1, r2, isPeriodicY, leg_) && this->neighbors(c1, c2, isPeriodicY, lx));
+		return (this->neighbors(r1, r2, isPeriodicY, leg_)
+		        && this->neighbors(c1, c2, isPeriodicY, lx));
 	}
 
 	// assumes i1 and i2 are connected
@@ -183,7 +181,7 @@ public:
 	// assumes i1 and i2 are connected
 	SizeType handle(SizeType i1, SizeType i2) const
 	{
-		SizeType dir = calcDir(i1, i2);
+		SizeType dir  = calcDir(i1, i2);
 		SizeType imin = (i1 < i2) ? i1 : i2;
 		switch (dir) {
 		case DIRECTION_X:
@@ -214,8 +212,8 @@ public:
 private:
 
 	LadderType ladder_; // owner
-	SizeType linSize_;
-	SizeType leg_;
+	SizeType   linSize_;
+	SizeType   leg_;
 }; // class LadderBath
 } // namespace PsimagLite
 

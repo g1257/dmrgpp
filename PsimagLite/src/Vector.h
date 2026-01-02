@@ -35,54 +35,64 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename T1, typename T2>
-struct TypesEqual {
-	enum { True = false };
+template <typename T1, typename T2> struct TypesEqual {
+	enum
+	{
+		True = false
+	};
 };
 
-template <typename T>
-struct TypesEqual<T, T> {
-	enum { True = true };
+template <typename T> struct TypesEqual<T, T> {
+	enum
+	{
+		True = true
+	};
 };
 
-template <typename T>
-struct IsInputLike {
-	enum { True = false };
+template <typename T> struct IsInputLike {
+	enum
+	{
+		True = false
+	};
 };
 
-template <typename T>
-struct IsOutputLike {
-	enum { True = false };
+template <typename T> struct IsOutputLike {
+	enum
+	{
+		True = false
+	};
 };
 
-template <typename T>
-class IsVectorLike {
+template <typename T> class IsVectorLike {
 public:
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
-template <typename T>
-class IsVectorLike<std::vector<T, typename Allocator<T>::Type>> {
+template <typename T> class IsVectorLike<std::vector<T, typename Allocator<T>::Type>> {
 public:
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 } // namespace PsimagLite
 
 namespace std {
 
-template <typename T1, typename T2>
-istream& operator>>(istream& is, pair<T1, T2>& v)
+template <typename T1, typename T2> istream& operator>>(istream& is, pair<T1, T2>& v)
 {
 	is >> v.first;
 	is >> v.second;
 	return is;
 }
 
-template <typename X, typename A>
-X operator*(const vector<X, A>& v, const vector<X, A>& w)
+template <typename X, typename A> X operator*(const vector<X, A>& v, const vector<X, A>& w)
 {
 	if (v.size() != w.size())
 		throw std::runtime_error("operator*\n");
@@ -94,8 +104,7 @@ X operator*(const vector<X, A>& v, const vector<X, A>& w)
 }
 
 template <typename T1, typename T2, typename A, typename AA>
-vector<T2, A> operator*(const vector<vector<T1, A>, AA>& v1,
-                        const vector<T2, A>& v2)
+vector<T2, A> operator*(const vector<vector<T1, A>, AA>& v1, const vector<T2, A>& v2)
 {
 	vector<T2, A> v3(v2.size());
 	for (SizeType i = 0; i < v3.size(); i++) {
@@ -109,54 +118,57 @@ vector<T2, A> operator*(const vector<vector<T1, A>, AA>& v1,
 
 struct ClosureOperations {
 
-	enum { OP_PLUS,
-	       OP_MINUS,
-	       OP_MULT,
-	       OP_DIVIDE,
-	       OP_CONJ };
+	enum
+	{
+		OP_PLUS,
+		OP_MINUS,
+		OP_MULT,
+		OP_DIVIDE,
+		OP_CONJ
+	};
 };
 
-template <typename T1, typename T2, int type>
-class ClosureOperator {
+template <typename T1, typename T2, int type> class ClosureOperator {
 
 public:
 
 	ClosureOperator(const T1& v1, const T2& v2)
 	    : r1(v1)
 	    , r2(v2)
-	{
-	}
+	{ }
 
 	const T1& r1;
 	const T2& r2;
 };
 
-template <typename T>
-struct IsClosureLike {
+template <typename T> struct IsClosureLike {
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
-template <typename T1, typename T2, int type>
-struct IsClosureLike<ClosureOperator<T1, T2, type>> {
+template <typename T1, typename T2, int type> struct IsClosureLike<ClosureOperator<T1, T2, type>> {
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 // vector * scalar
 template <typename T1, typename T2, typename A>
-ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>
-operator*(const T1& v1, const vector<T2, A>& v2)
+ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT> operator*(const T1&            v1,
+                                                                         const vector<T2, A>& v2)
 {
-	return ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>(
-	    v1, v2);
+	return ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>(v1, v2);
 }
 
 // vector * scalar
 template <typename T1, typename T2>
-typename PsimagLite::EnableIf<
-    IsClosureLike<T1>::True || IsClosureLike<T2>::True,
-    ClosureOperator<T1, T2, ClosureOperations::OP_MULT>>::Type
+typename PsimagLite::EnableIf<IsClosureLike<T1>::True || IsClosureLike<T2>::True,
+                              ClosureOperator<T1, T2, ClosureOperations::OP_MULT>>::Type
 operator*(const T1& v1, const T2& v2)
 {
 	return ClosureOperator<T1, T2, ClosureOperations::OP_MULT>(v1, v2);
@@ -164,9 +176,8 @@ operator*(const T1& v1, const T2& v2)
 
 template <typename T1, typename T2, typename A>
 typename PsimagLite::EnableIf<PsimagLite::IsNumber<T1>::True, void>::Type
-operator<=(
-    vector<T2, A>& v,
-    const ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>& c)
+operator<=(vector<T2, A>&                                                        v,
+           const ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>& c)
 {
 	v = c.r2;
 	for (SizeType i = 0; i < v.size(); i++)
@@ -177,21 +188,20 @@ template <typename T1, typename T2, typename A>
 typename PsimagLite::EnableIf<PsimagLite::IsNumber<T1>::True && PsimagLite::IsNumber<T2>::True,
                               void>::Type
 operator<=(
-    vector<T2, A>& v,
-    const ClosureOperator<
-        T1,
-        ClosureOperator<T2, std::vector<T2, A>, ClosureOperations::OP_MULT>,
-        ClosureOperations::OP_MULT>& c)
+    vector<T2, A>&                                     v,
+    const ClosureOperator<T1,
+                          ClosureOperator<T2, std::vector<T2, A>, ClosureOperations::OP_MULT>,
+                          ClosureOperations::OP_MULT>& c)
 {
-	v = c.r2.r2;
+	v      = c.r2.r2;
 	T2 tmp = c.r1 * c.r2.r1;
 	for (SizeType i = 0; i < v.size(); i++)
 		v[i] *= tmp;
 }
 
 template <typename T1, typename T2, typename A>
-ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>
-operator*(const vector<T2, A>& v2, const T1& v1)
+ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT> operator*(const vector<T2, A>& v2,
+                                                                         const T1&            v1)
 {
 	return v1 * v2;
 }
@@ -205,16 +215,15 @@ operator+(const vector<T1, A1>& v1, const vector<T2, A2>& v2)
 }
 
 template <typename T1, typename T2>
-typename PsimagLite::EnableIf<
-    IsClosureLike<T1>::True || IsClosureLike<T2>::True,
-    ClosureOperator<T1, T2, ClosureOperations::OP_PLUS>>::Type
+typename PsimagLite::EnableIf<IsClosureLike<T1>::True || IsClosureLike<T2>::True,
+                              ClosureOperator<T1, T2, ClosureOperations::OP_PLUS>>::Type
 operator+(const T1& v1, const T2& v2)
 {
 	return ClosureOperator<T1, T2, ClosureOperations::OP_PLUS>(v1, v2);
 }
 
 template <typename T1, typename T2, typename A>
-void operator<=(vector<T1, A>& v,
+void operator<=(vector<T1, A>&                                                                   v,
                 const ClosureOperator<vector<T1, A>, vector<T2, A>, ClosureOperations::OP_PLUS>& c)
 {
 	v.resize(c.r1.size());
@@ -224,11 +233,10 @@ void operator<=(vector<T1, A>& v,
 
 template <typename T1, typename T2, typename A>
 void operator<=(
-    vector<T2, A>& v,
-    const ClosureOperator<
-        vector<T2, A>,
-        ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
-        ClosureOperations::OP_PLUS>& c)
+    vector<T2, A>&                                     v,
+    const ClosureOperator<vector<T2, A>,
+                          ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
+                          ClosureOperations::OP_PLUS>& c)
 {
 	v.resize(c.r1.size());
 	for (SizeType i = 0; i < v.size(); i++)
@@ -237,11 +245,10 @@ void operator<=(
 
 template <typename T1, typename T2, typename A1, typename A2>
 void operator<=(
-    vector<T1, A1>& v,
-    const ClosureOperator<
-        ClosureOperator<T1, vector<T2, A2>, ClosureOperations::OP_MULT>,
-        vector<T1, A1>,
-        ClosureOperations::OP_PLUS>& c)
+    vector<T1, A1>&                                    v,
+    const ClosureOperator<ClosureOperator<T1, vector<T2, A2>, ClosureOperations::OP_MULT>,
+                          vector<T1, A1>,
+                          ClosureOperations::OP_PLUS>& c)
 {
 	v.resize(c.r2.size());
 	for (SizeType i = 0; i < v.size(); i++)
@@ -250,7 +257,7 @@ void operator<=(
 
 template <typename T1, typename T2, typename A>
 void operator<=(
-    vector<T2, A>& v,
+    vector<T2, A>&                                     v,
     const ClosureOperator<T1,
                           ClosureOperator<vector<T2, A>, vector<T2, A>, ClosureOperations::OP_PLUS>,
                           ClosureOperations::OP_MULT>& c)
@@ -265,20 +272,19 @@ void operator<=(
     vector<T2, A>& v,
     const ClosureOperator<
         ClosureOperator<
-            ClosureOperator<
-                ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
-                ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
-                ClosureOperations::OP_PLUS>,
+            ClosureOperator<ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
+                            ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
+                            ClosureOperations::OP_PLUS>,
             ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
             ClosureOperations::OP_PLUS>,
         ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
         ClosureOperations::OP_PLUS>& c)
 {
 	v.resize(c.r2.r2.size());
-	T1 m1 = c.r2.r1;
-	T1 m2 = c.r1.r2.r1;
-	T1 m3 = c.r1.r1.r2.r1;
-	T1 m4 = c.r1.r1.r1.r1;
+	T1                   m1 = c.r2.r1;
+	T1                   m2 = c.r1.r2.r1;
+	T1                   m3 = c.r1.r1.r2.r1;
+	T1                   m4 = c.r1.r1.r1.r1;
 	const vector<T2, A>& k1 = c.r2.r2;
 	const vector<T2, A>& k2 = c.r1.r2.r2;
 	const vector<T2, A>& k3 = c.r1.r1.r2.r2;
@@ -296,16 +302,15 @@ operator-(const vector<T1, A1>& v1, const vector<T2, A2>& v2)
 }
 
 template <typename T1, typename T2>
-typename PsimagLite::EnableIf<
-    IsClosureLike<T1>::True || IsClosureLike<T2>::True,
-    ClosureOperator<T1, T2, ClosureOperations::OP_MINUS>>::Type
+typename PsimagLite::EnableIf<IsClosureLike<T1>::True || IsClosureLike<T2>::True,
+                              ClosureOperator<T1, T2, ClosureOperations::OP_MINUS>>::Type
 operator-(const T1& v1, const T2& v2)
 {
 	return ClosureOperator<T1, T2, ClosureOperations::OP_MINUS>(v1, v2);
 }
 
 template <typename T, typename A>
-void operator<=(vector<T, A>& v,
+void operator<=(vector<T, A>&                                                                   v,
                 const ClosureOperator<vector<T, A>, vector<T, A>, ClosureOperations::OP_MINUS>& c)
 {
 	v.resize(c.r1.size());
@@ -315,11 +320,10 @@ void operator<=(vector<T, A>& v,
 
 template <typename T1, typename T2, typename A1, typename A2>
 void operator<=(
-    vector<T1, A1>& v,
-    const ClosureOperator<
-        vector<T1, A1>,
-        ClosureOperator<T1, vector<T2, A2>, ClosureOperations::OP_MULT>,
-        ClosureOperations::OP_MINUS>& c)
+    vector<T1, A1>&                                     v,
+    const ClosureOperator<vector<T1, A1>,
+                          ClosureOperator<T1, vector<T2, A2>, ClosureOperations::OP_MULT>,
+                          ClosureOperations::OP_MINUS>& c)
 {
 	v.resize(c.r1.size());
 	for (SizeType i = 0; i < v.size(); i++)
@@ -327,11 +331,11 @@ void operator<=(
 }
 
 template <typename T1, typename T2, typename A>
-void operator<=(
-    vector<T2, A>& v,
-    const ClosureOperator<T1,
-                          ClosureOperator<vector<T2, A>, vector<T2, A>, ClosureOperations::OP_MINUS>,
-                          ClosureOperations::OP_MULT>& c)
+void operator<=(vector<T2, A>& v,
+                const ClosureOperator<
+                    T1,
+                    ClosureOperator<vector<T2, A>, vector<T2, A>, ClosureOperations::OP_MINUS>,
+                    ClosureOperations::OP_MULT>& c)
 {
 	v.resize(c.r2.r2.size());
 	for (SizeType i = 0; i < v.size(); i++)
@@ -339,18 +343,16 @@ void operator<=(
 }
 
 template <typename T1, typename T2, typename A>
-void operator<=(
-    vector<T2, A>& v,
-    const ClosureOperator<
-        ClosureOperator<
-            std::vector<T2, A>,
-            ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
-            ClosureOperations::OP_MINUS>,
-        ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
-        ClosureOperations::OP_PLUS>& c)
+void operator<=(vector<T2, A>& v,
+                const ClosureOperator<
+                    ClosureOperator<std::vector<T2, A>,
+                                    ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
+                                    ClosureOperations::OP_MINUS>,
+                    ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>,
+                    ClosureOperations::OP_PLUS>& c)
 {
-	T1 m2 = c.r1.r2.r1;
-	T1 m3 = c.r2.r1;
+	T1                   m2 = c.r1.r2.r1;
+	T1                   m3 = c.r2.r1;
 	const vector<T2, A>& k1 = c.r1.r1;
 	const vector<T2, A>& k2 = c.r1.r2.r2;
 	const vector<T2, A>& k3 = c.r2.r2;
@@ -362,8 +364,7 @@ void operator<=(
 
 // operator+=
 template <typename FieldType, typename A>
-vector<FieldType, A> operator+=(vector<FieldType, A>& v,
-                                const vector<FieldType, A>& w)
+vector<FieldType, A> operator+=(vector<FieldType, A>& v, const vector<FieldType, A>& w)
 {
 	for (SizeType i = 0; i < w.size(); i++)
 		v[i] += w[i];
@@ -371,9 +372,8 @@ vector<FieldType, A> operator+=(vector<FieldType, A>& v,
 }
 
 template <typename T1, typename T2, typename A>
-vector<T2, A> operator+=(
-    vector<T2, A>& v,
-    const ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>& w)
+vector<T2, A> operator+=(vector<T2, A>&                                                        v,
+                         const ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>& w)
 {
 	for (SizeType i = 0; i < v.size(); i++)
 		v[i] += w.r1 * w.r2[i];
@@ -382,8 +382,7 @@ vector<T2, A> operator+=(
 
 // operator-=
 template <typename FieldType, typename A>
-vector<FieldType, A> operator-=(vector<FieldType, A>& v,
-                                const vector<FieldType, A>& w)
+vector<FieldType, A> operator-=(vector<FieldType, A>& v, const vector<FieldType, A>& w)
 {
 	for (SizeType i = 0; i < w.size(); i++)
 		v[i] -= w[i];
@@ -391,9 +390,8 @@ vector<FieldType, A> operator-=(vector<FieldType, A>& v,
 }
 
 template <typename T1, typename T2, typename A>
-vector<T2, A> operator-=(
-    vector<T2, A>& v,
-    const ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>& w)
+vector<T2, A> operator-=(vector<T2, A>&                                                        v,
+                         const ClosureOperator<T1, vector<T2, A>, ClosureOperations::OP_MULT>& w)
 {
 	for (SizeType i = 0; i < v.size(); i++)
 		v[i] -= w.r1 * w.r2[i];
@@ -419,22 +417,19 @@ vector<T1, A> operator/=(vector<T1, A>& v, const T2& t2)
 
 // end of closure
 
-template <typename T, typename A>
-T scalarProduct(const vector<T, A>& v1, const vector<T, A>& v2)
+template <typename T, typename A> T scalarProduct(const vector<T, A>& v1, const vector<T, A>& v2)
 {
-	T result = 0.0;
-	const SizeType n = v1.size();
+	T              result = 0.0;
+	const SizeType n      = v1.size();
 	if (n != v2.size())
-		throw PsimagLite::RuntimeError(
-		    "scalarProduct of vectors of different size\n");
+		throw PsimagLite::RuntimeError("scalarProduct of vectors of different size\n");
 	for (SizeType i = 0; i < n; i++)
 		result += PsimagLite::conj(v1[i]) * v2[i];
 	return result;
 }
 
 #ifndef USE_XACC
-template <class X, typename A>
-ostream& operator<<(ostream& s, const vector<X, A>& v)
+template <class X, typename A> ostream& operator<<(ostream& s, const vector<X, A>& v)
 {
 	s << v.size() << "\n";
 	for (SizeType i = 0; i < v.size(); i++)
@@ -452,8 +447,7 @@ ostream& operator<<(ostream& s, const vector<pair<X, Y>, A>& v)
 }
 #endif
 
-template <typename FieldType, typename A>
-istream& operator>>(istream& is, vector<FieldType, A>& v)
+template <typename FieldType, typename A> istream& operator>>(istream& is, vector<FieldType, A>& v)
 {
 	int xsize = 0;
 	is >> xsize;
@@ -469,15 +463,13 @@ istream& operator>>(istream& is, vector<FieldType, A>& v)
 
 namespace PsimagLite {
 
-template <typename T>
-class Vector {
+template <typename T> class Vector {
 public:
 
 	typedef std::vector<T, typename Allocator<T>::Type> Type;
 }; // class Vector
 
-template <>
-class Vector<bool> {
+template <> class Vector<bool> {
 public:
 
 	typedef std::vector<bool, Allocator<bool>::Type> Type;
@@ -491,11 +483,7 @@ void vectorPrint(const std::vector<T, A>& v, char const* name, std::ostream& s)
 		s << name << "[" << i << "]=" << v[i] << std::endl;
 }
 
-template <class X, typename A>
-X norm(const std::vector<X, A>& v)
-{
-	return sqrt(v * v);
-}
+template <class X, typename A> X norm(const std::vector<X, A>& v) { return sqrt(v * v); }
 
 template <typename X, typename A>
 typename EnableIf<Loki::TypeTraits<X>::isFloat, X>::Type
@@ -509,9 +497,9 @@ norm(const std::vector<std::complex<X>, A>& v)
 
 template <typename X, typename RandomType>
 void randomizeVector(typename Vector<typename RandomType::value_type>::Type& v,
-                     const X& a,
-                     const X& b,
-                     const RandomType& r)
+                     const X&                                                a,
+                     const X&                                                b,
+                     const RandomType&                                       r)
 {
 	for (SizeType i = 0; i < v.size(); i++)
 		v[i] = a + b * r.random();
@@ -527,8 +515,7 @@ int indexOrMinusOne(const std::vector<X, A>& natBasis, Y const& v)
 }
 
 template <typename SomeVectorType>
-typename EnableIf<IsVectorLike<SomeVectorType>::True,
-                  typename SomeVectorType::value_type>::Type
+typename EnableIf<IsVectorLike<SomeVectorType>::True, typename SomeVectorType::value_type>::Type
 sum(SomeVectorType& v)
 {
 	typename SomeVectorType::value_type tmp = 0;
@@ -538,26 +525,30 @@ sum(SomeVectorType& v)
 	return tmp;
 }
 
-template <typename T>
-class IsPairLike {
+template <typename T> class IsPairLike {
 public:
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
-template <typename T1, typename T2>
-class IsPairLike<std::pair<T1, T2>> {
+template <typename T1, typename T2> class IsPairLike<std::pair<T1, T2>> {
 public:
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 inline String basenameOf(String s)
 {
-	int j = 0;
+	int      j = 0;
 	SizeType l = s.length();
 	for (SizeType i = 0; i < l; ++i) {
-		j = l - i - 1;
+		j                 = l - i - 1;
 		const char letter = s[j];
 		if (letter == '.')
 			break;

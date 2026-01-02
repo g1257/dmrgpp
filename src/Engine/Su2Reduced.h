@@ -84,31 +84,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  *  Using WignerEckart Theorem to speed up SU(2) algorithm
  *
  */
-namespace Dmrg
-{
-template <typename LeftRightSuperType>
-class Su2Reduced
-{
-	typedef typename LeftRightSuperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType
-	    BasisWithOperatorsType;
-	typedef typename LeftRightSuperType::BasisType BasisType;
-	typedef typename BasisType::BlockType VectorSizeType;
-	typedef typename BasisType::RealType RealType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
-	typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
+namespace Dmrg {
+template <typename LeftRightSuperType> class Su2Reduced {
+	typedef typename LeftRightSuperType::OperatorsType          OperatorsType;
+	typedef typename OperatorsType::SparseMatrixType            SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               SparseElementType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef typename LeftRightSuperType::BasisType              BasisType;
+	typedef typename BasisType::BlockType                       VectorSizeType;
+	typedef typename BasisType::RealType                        RealType;
+	typedef std::pair<SizeType, SizeType>                       PairType;
+	typedef typename OperatorsType::OperatorType                OperatorType;
+	typedef Su2SymmetryGlobals<RealType>                        Su2SymmetryGlobalsType;
+	typedef typename Su2SymmetryGlobalsType::ClebschGordanType  ClebschGordanType;
 
 	static const SizeType System = 0, Environ = 1;
 
 public:
 
-	Su2Reduced(int m,
-	    const LeftRightSuperType& lrs,
-	    bool = false)
+	Su2Reduced(int m, const LeftRightSuperType& lrs, bool = false)
 	    : m_(m)
 	    , lrs_(lrs)
 	    , cgObject_(Su2SymmetryGlobalsType::clebschGordanObject)
@@ -119,7 +113,7 @@ public:
 		SizeType counter = 0;
 		for (SizeType i = 0; i < lrs.left().numberOfOperators(); i++) {
 			SizeType j = lrs.left().getReducedOperatorByIndex(i).jm.first;
-			int x = PsimagLite::indexOrMinusOne(jvalues, j);
+			int      x = PsimagLite::indexOrMinusOne(jvalues, j);
 			if (x < 0)
 				jvalues.push_back(j);
 			counter += (j + 1);
@@ -130,7 +124,8 @@ public:
 		counter = 0;
 		for (SizeType i = 0; i < jvalues.size(); i++) {
 			for (SizeType m = 0; m <= jvalues[i]; m++) {
-				buildAdditional(lfactor_[counter], jvalues[i], m, jvalues[i] - m, jsEffective);
+				buildAdditional(
+				    lfactor_[counter], jvalues[i], m, jvalues[i] - m, jsEffective);
 				counter++;
 			}
 		}
@@ -144,31 +139,22 @@ public:
 		createReducedHamiltonian(hamiltonian3_, lrs_.right());
 	}
 
-	const PairType& reducedEffective(SizeType i) const
-	{
-		return reducedEffective_[i];
-	}
+	const PairType& reducedEffective(SizeType i) const { return reducedEffective_[i]; }
 
-	SizeType reducedEffectiveSize() const
-	{
-		return reducedEffective_.size();
-	}
+	SizeType reducedEffectiveSize() const { return reducedEffective_.size(); }
 
 	SizeType flavorMapping(SizeType i1prime, SizeType i2prime) const
 	{
 		return flavorsOldInverse_[reducedInverse_(i1prime, i2prime)];
 	}
 
-	SizeType flavorMapping(SizeType i) const
-	{
-		return flavorsOldInverse_[i];
-	}
+	SizeType flavorMapping(SizeType i) const { return flavorsOldInverse_[i]; }
 
 	SparseElementType reducedFactor(SizeType angularMomentum,
-	    SizeType category,
-	    bool flip,
-	    SizeType lf1,
-	    SizeType lf2) const
+	                                SizeType category,
+	                                bool     flip,
+	                                SizeType lf1,
+	                                SizeType lf2) const
 	{
 		SizeType category2 = category;
 		if (flip)
@@ -182,40 +168,35 @@ public:
 		return lfactorHamiltonian_(j1, j2);
 	}
 
-	const SparseMatrixType& hamiltonianLeft() const
-	{
-		return hamiltonian2_;
-	}
+	const SparseMatrixType& hamiltonianLeft() const { return hamiltonian2_; }
 
-	const SparseMatrixType& hamiltonianRight() const
-	{
-		return hamiltonian3_;
-	}
+	const SparseMatrixType& hamiltonianRight() const { return hamiltonian3_; }
 
 private:
 
-	void createReducedHamiltonian(SparseMatrixType& hamReduced,
-	    const BasisWithOperatorsType& basis)
+	void createReducedHamiltonian(SparseMatrixType&             hamReduced,
+	                              const BasisWithOperatorsType& basis)
 	{
 		SizeType xx = basis.numberOfOperators();
 		hamReduced.resize(xx, xx);
 		typename PsimagLite::Vector<SizeType>::Type basisrinverse(basis.size());
 		for (SizeType i = 0; i < basis.size(); i++) {
-			SizeType f = basis.getFlavor(i);
-			SizeType j = basis.jmValue(i).first;
+			SizeType f       = basis.getFlavor(i);
+			SizeType j       = basis.jmValue(i).first;
 			basisrinverse[i] = findJf(basis, j, f);
 		}
 
-		SizeType angularMomentum = 0;
+		SizeType                                               angularMomentum = 0;
 		typename PsimagLite::Vector<const OperatorType*>::Type opSrc(angularMomentum + 1);
 
 		OperatorType myOp;
-		myOp.data = basis.hamiltonian();
-		myOp.fermionSign = 1;
-		myOp.jm = typename OperatorType::PairType(0, 0);
+		myOp.data          = basis.hamiltonian();
+		myOp.fermionSign   = 1;
+		myOp.jm            = typename OperatorType::PairType(0, 0);
 		myOp.angularFactor = 1.0;
-		opSrc[0] = &myOp;
-		createReducedOperator(hamReduced, opSrc, basis, basisrinverse, basis.reducedSize(), 0);
+		opSrc[0]           = &myOp;
+		createReducedOperator(
+		    hamReduced, opSrc, basis, basisrinverse, basis.reducedSize(), 0);
 	}
 
 	SizeType findJf(const BasisWithOperatorsType& basis, SizeType j, SizeType f)
@@ -231,24 +212,25 @@ private:
 		return 0; // bogus
 	}
 
-	void createReducedConj(SizeType k1,
-	    SparseMatrixType& opDest,
-	    const SparseMatrixType& opSrc,
-	    const BasisWithOperatorsType& basis,
-	    SizeType counter)
+	void createReducedConj(SizeType                      k1,
+	                       SparseMatrixType&             opDest,
+	                       const SparseMatrixType&       opSrc,
+	                       const BasisWithOperatorsType& basis,
+	                       SizeType                      counter)
 	{
 		SizeType n = opSrc.row();
-		opDest = transposeConjugate(opSrc);
+		opDest     = transposeConjugate(opSrc);
 		for (SizeType i = 0; i < n; i++) {
 			PairType jm = basis.jmValue(basis.reducedIndex(i));
 			for (int k = opDest.getRowPtr(i); k < opDest.getRowPtr(i + 1); k++) {
-				SizeType j = opDest.getCol(k);
+				SizeType j       = opDest.getCol(k);
 				PairType jmPrime = basis.jmValue(basis.reducedIndex(j));
 
-				SparseElementType factor = SparseElementType(jm.first + 1) / SparseElementType(jmPrime.first + 1);
+				SparseElementType factor = SparseElementType(jm.first + 1)
+				    / SparseElementType(jmPrime.first + 1);
 				factor = sqrt(factor);
-				int x = k1 + jm.first - jmPrime.first;
-				x = int(x / 2);
+				int x  = k1 + jm.first - jmPrime.first;
+				x      = int(x / 2);
 				if (x % 2 != 0)
 					factor = -1.0 * factor;
 				SparseElementType val = opDest.getValue(k) * factor;
@@ -257,12 +239,13 @@ private:
 		}
 	}
 
-	void createReducedOperator(SparseMatrixType& opDest,
-	    const typename PsimagLite::Vector<const OperatorType*>::Type& opSrc,
-	    const BasisWithOperatorsType& basis,
-	    const typename PsimagLite::Vector<SizeType>::Type& basisrInverse,
-	    SizeType n,
-	    SizeType)
+	void
+	createReducedOperator(SparseMatrixType&                                             opDest,
+	                      const typename PsimagLite::Vector<const OperatorType*>::Type& opSrc,
+	                      const BasisWithOperatorsType&                                 basis,
+	                      const typename PsimagLite::Vector<SizeType>::Type& basisrInverse,
+	                      SizeType                                           n,
+	                      SizeType)
 	{
 		PsimagLite::Matrix<SparseElementType> opDest1(n, n);
 		for (SizeType i = 0; i < opSrc.size(); i++)
@@ -270,58 +253,71 @@ private:
 		fullMatrixToCrsMatrix(opDest, opDest1);
 	}
 
-	void createReducedOperator(PsimagLite::Matrix<SparseElementType>& opDest1,
-	    const OperatorType& opSrc,
-	    const BasisWithOperatorsType& basis,
-	    const typename PsimagLite::Vector<SizeType>::Type& basisrInverse)
+	void createReducedOperator(PsimagLite::Matrix<SparseElementType>&             opDest1,
+	                           const OperatorType&                                opSrc,
+	                           const BasisWithOperatorsType&                      basis,
+	                           const typename PsimagLite::Vector<SizeType>::Type& basisrInverse)
 	{
 		PsimagLite::Matrix<SparseElementType> opSrcdense;
 		crsMatrixToFullMatrix(opSrcdense, opSrc.data);
 		for (SizeType i = 0; i < opSrc.data.rows(); i++) {
 			PairType jm = basis.jmValue(i);
-			for (int l = opSrc.data.getRowPtr(i); l < opSrc.data.getRowPtr(i + 1); l++) {
-				SizeType iprime = opSrc.data.getCol(l);
+			for (int l = opSrc.data.getRowPtr(i); l < opSrc.data.getRowPtr(i + 1);
+			     l++) {
+				SizeType iprime  = opSrc.data.getCol(l);
 				PairType jmPrime = basis.jmValue(iprime);
 
 				RealType divisor = opSrc.angularFactor * (jmPrime.first + 1);
-				opDest1(basisrInverse[i], basisrInverse[iprime]) += opSrcdense(i, iprime) * cgObject_(jmPrime, jm, opSrc.jm) / divisor;
+				opDest1(basisrInverse[i], basisrInverse[iprime])
+				    += opSrcdense(i, iprime) * cgObject_(jmPrime, jm, opSrc.jm)
+				    / divisor;
 			}
 		}
 	}
 
-	void buildAdditional(PsimagLite::Matrix<SparseElementType>& lfactor,
-	    SizeType k,
-	    SizeType mu1,
-	    SizeType mu2,
-	    typename PsimagLite::Vector<PairType>::Type& jsEffective)
+	void buildAdditional(PsimagLite::Matrix<SparseElementType>&       lfactor,
+	                     SizeType                                     k,
+	                     SizeType                                     mu1,
+	                     SizeType                                     mu2,
+	                     typename PsimagLite::Vector<PairType>::Type& jsEffective)
 	{
 		PairType kmu1(k, mu1);
 		PairType kmu2(k, mu2);
 		SizeType counter = 0;
-		int offset = lrs_.super().partition(m_);
-		PairType jm = lrs_.super().jmValue(offset);
-		lfactor.resize(lrs_.left().jMax() * lrs_.right().jMax(), lrs_.left().jMax() * lrs_.right().jMax());
+		int      offset  = lrs_.super().partition(m_);
+		PairType jm      = lrs_.super().jmValue(offset);
+		lfactor.resize(lrs_.left().jMax() * lrs_.right().jMax(),
+		               lrs_.left().jMax() * lrs_.right().jMax());
 		for (SizeType i1 = 0; i1 < lrs_.left().jVals(); i1++) {
 			for (SizeType i2 = 0; i2 < lrs_.right().jVals(); i2++) {
-				for (SizeType i1prime = 0; i1prime < lrs_.left().jVals(); i1prime++) {
-					for (SizeType i2prime = 0; i2prime < lrs_.right().jVals(); i2prime++) {
-						SparseElementType sum = calcLfactor(lrs_.left().jVals(i1),
-						    lrs_.right().jVals(i2),
-						    lrs_.left().jVals(i1prime),
-						    lrs_.right().jVals(i2prime),
-						    jm,
-						    kmu1,
-						    kmu2);
+				for (SizeType i1prime = 0; i1prime < lrs_.left().jVals();
+				     i1prime++) {
+					for (SizeType i2prime = 0; i2prime < lrs_.right().jVals();
+					     i2prime++) {
+						SparseElementType sum
+						    = calcLfactor(lrs_.left().jVals(i1),
+						                  lrs_.right().jVals(i2),
+						                  lrs_.left().jVals(i1prime),
+						                  lrs_.right().jVals(i2prime),
+						                  jm,
+						                  kmu1,
+						                  kmu2);
 						if (sum != static_cast<SparseElementType>(0)) {
 							counter++;
-							PairType jj(PairType(lrs_.left().jVals(i1), lrs_.right().jVals(i2)));
-							int x3 = PsimagLite::indexOrMinusOne(jsEffective, jj);
+							PairType jj(
+							    PairType(lrs_.left().jVals(i1),
+							             lrs_.right().jVals(i2)));
+							int x3 = PsimagLite::indexOrMinusOne(
+							    jsEffective, jj);
 							if (x3 < 0)
 								jsEffective.push_back(jj);
 						}
 
-						SizeType row = lrs_.left().jVals(i1) + lrs_.right().jVals(i2) * lrs_.left().jMax();
-						SizeType col = lrs_.left().jVals(i1prime) + lrs_.right().jVals(i2prime) * lrs_.left().jMax();
+						SizeType row = lrs_.left().jVals(i1)
+						    + lrs_.right().jVals(i2) * lrs_.left().jMax();
+						SizeType col = lrs_.left().jVals(i1prime)
+						    + lrs_.right().jVals(i2prime)
+						        * lrs_.left().jMax();
 						lfactor(row, col) = sum;
 					}
 				}
@@ -331,13 +327,20 @@ private:
 
 	void calcHamFactor(PsimagLite::Matrix<SparseElementType>& lfactor)
 	{
-		int offset = lrs_.super().partition(m_);
-		PairType jm = lrs_.super().jmValue(offset);
+		int      offset = lrs_.super().partition(m_);
+		PairType jm     = lrs_.super().jmValue(offset);
 		lfactor.resize(lrs_.left().jMax(), lrs_.right().jMax());
 		PairType kmu(0, 0);
 		for (SizeType i1 = 0; i1 < lrs_.left().jVals(); i1++) {
 			for (SizeType i2 = 0; i2 < lrs_.right().jVals(); i2++) {
-				lfactor(lrs_.left().jVals(i1), lrs_.right().jVals(i2)) = calcLfactor(lrs_.left().jVals(i1), lrs_.right().jVals(i2), lrs_.left().jVals(i1), lrs_.right().jVals(i2), jm, kmu, kmu);
+				lfactor(lrs_.left().jVals(i1), lrs_.right().jVals(i2))
+				    = calcLfactor(lrs_.left().jVals(i1),
+				                  lrs_.right().jVals(i2),
+				                  lrs_.left().jVals(i1),
+				                  lrs_.right().jVals(i2),
+				                  jm,
+				                  kmu,
+				                  kmu);
 			}
 		}
 	}
@@ -345,7 +348,7 @@ private:
 	void calcEffectiveStates(typename PsimagLite::Vector<PairType>::Type jsEffective)
 	{
 		SizeType offset = lrs_.super().partition(m_);
-		PairType jm = lrs_.super().jmValue(offset);
+		PairType jm     = lrs_.super().jmValue(offset);
 		reducedEffective_.clear();
 		reducedInverse_.resize(lrs_.left().reducedSize(), lrs_.right().reducedSize());
 		VectorSizeType sElectrons;
@@ -363,10 +366,14 @@ private:
 				SizeType le1 = lElectrons[lrs_.left().reducedIndex(i1)];
 				for (SizeType i2 = 0; i2 < lrs_.right().reducedSize(); i2++) {
 					assert(lrs_.right().reducedIndex(i2) < rElectrons.size());
-					if (electrons != le1 + rElectrons[lrs_.right().reducedIndex(i2)])
+					if (electrons
+					    != le1 + rElectrons[lrs_.right().reducedIndex(i2)])
 						continue;
-					PairType jj(lrs_.left().jmValue(lrs_.left().reducedIndex(i1)).first,
-					    lrs_.right().jmValue(lrs_.right().reducedIndex(i2)).first);
+					PairType jj(
+					    lrs_.left().jmValue(lrs_.left().reducedIndex(i1)).first,
+					    lrs_.right()
+					        .jmValue(lrs_.right().reducedIndex(i2))
+					        .first);
 					if (jj != jsEffective[i])
 						continue;
 					reducedEffective_.push_back(PairType(i1, i2));
@@ -380,22 +387,22 @@ private:
 		reorderMap();
 	}
 
-	SparseElementType calcLfactor(SizeType j1,
-	    SizeType j2,
-	    SizeType j1prime,
-	    SizeType j2prime,
-	    const PairType& jm,
-	    const PairType& kmu1,
-	    const PairType& kmu2) const
+	SparseElementType calcLfactor(SizeType        j1,
+	                              SizeType        j2,
+	                              SizeType        j1prime,
+	                              SizeType        j2prime,
+	                              const PairType& jm,
+	                              const PairType& kmu1,
+	                              const PairType& kmu2) const
 	{
 		SparseElementType sum = 0;
-		SizeType k = kmu1.first;
-		SizeType mu1 = kmu1.second;
-		SizeType mu2 = kmu2.second;
+		SizeType          k   = kmu1.first;
+		SizeType          mu1 = kmu1.second;
+		SizeType          mu2 = kmu2.second;
 
 		for (SizeType m1 = 0; m1 <= j1; m1++) {
 			PairType jm1(j1, m1);
-			int x = j1 + j2 - jm.first;
+			int      x = j1 + j2 - jm.first;
 			if (x % 2 != 0)
 				continue;
 			if (int(int(x / 2) - m1 + jm.second) < 0)
@@ -433,7 +440,8 @@ private:
 			if (x != 0)
 				continue;
 
-			sum += cgObject_(jm1prime, jm1, kmu1) * cgObject_(jm2prime, jm2, kmu2) * cgObject_(jm, jm1, jm2) * cgObject_(jm, jm1prime, jm2prime);
+			sum += cgObject_(jm1prime, jm1, kmu1) * cgObject_(jm2prime, jm2, kmu2)
+			    * cgObject_(jm, jm1, jm2) * cgObject_(jm, jm1prime, jm2prime);
 		}
 		return sum;
 	}
@@ -454,15 +462,15 @@ private:
 			SizeType f1 = lrs_.left().getFlavor(i1);
 			assert(i1 < lElectrons.size());
 			SizeType ne1 = lElectrons[i1];
-			SizeType j1 = lrs_.left().jmValue(i1).first;
+			SizeType j1  = lrs_.left().jmValue(i1).first;
 
 			SizeType i2 = lrs_.right().reducedIndex(reducedEffective_[i].second);
 			SizeType f2 = lrs_.right().getFlavor(i2);
 			assert(i2 < rElectrons.size());
 			SizeType ne2 = rElectrons[i2];
-			SizeType j2 = lrs_.right().jmValue(i2).first;
+			SizeType j2  = lrs_.right().jmValue(i2).first;
 
-			SizeType f = lrs_.super().flavor2Index(f1, f2, ne1, ne2, j1, j2);
+			SizeType f            = lrs_.super().flavor2Index(f1, f2, ne1, ne2, j1, j2);
 			flavorsOldInverse_[i] = flavorsOldInverse[f];
 		}
 	}
@@ -475,26 +483,26 @@ private:
 		PsimagLite::Sort<typename PsimagLite::Vector<SizeType>::Type> sort;
 		sort.sort(flavorsOldInverse_, perm);
 		typename PsimagLite::Vector<PairType>::Type r(reducedEffective_.size());
-		PsimagLite::Matrix<SizeType> reducedInverse(reducedInverse_.rows(),
-		    reducedInverse_.cols());
+		PsimagLite::Matrix<SizeType>                reducedInverse(reducedInverse_.rows(),
+                                                            reducedInverse_.cols());
 
 		for (SizeType i = 0; i < reducedEffective_.size(); i++) {
-			r[i] = reducedEffective_[perm[i]];
+			r[i]                                    = reducedEffective_[perm[i]];
 			reducedInverse(r[i].first, r[i].second) = i;
 		}
 		reducedEffective_ = r;
-		reducedInverse_ = reducedInverse;
+		reducedInverse_   = reducedInverse;
 	}
 
-	SizeType m_;
-	const LeftRightSuperType& lrs_;
+	SizeType                                                                 m_;
+	const LeftRightSuperType&                                                lrs_;
 	typename PsimagLite::Vector<PsimagLite::Matrix<SparseElementType>>::Type lfactor_;
-	PsimagLite::Matrix<SparseElementType> lfactorHamiltonian_;
-	SparseMatrixType hamiltonian2_, hamiltonian3_;
+	PsimagLite::Matrix<SparseElementType>       lfactorHamiltonian_;
+	SparseMatrixType                            hamiltonian2_, hamiltonian3_;
 	typename PsimagLite::Vector<PairType>::Type reducedEffective_;
-	PsimagLite::Matrix<SizeType> reducedInverse_;
+	PsimagLite::Matrix<SizeType>                reducedInverse_;
 	typename PsimagLite::Vector<SizeType>::Type flavorsOldInverse_;
-	ClebschGordanType& cgObject_;
+	ClebschGordanType&                          cgObject_;
 }; // class
 } // namespace Dmrg
 /*@}*/

@@ -4,29 +4,26 @@
 #include "OpsForLink.hh"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename HamiltonianConnectionType>
-class ParallelHamiltonianConnection
-{
+template <typename HamiltonianConnectionType> class ParallelHamiltonianConnection {
 
 	typedef typename HamiltonianConnectionType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelHelperType::OperatorStorageType OperatorStorageType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename HamiltonianConnectionType::VectorType VectorType;
-	typedef typename HamiltonianConnectionType::LinkType LinkType;
-	typedef typename ModelHelperType::Aux AuxType;
+	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
+	typedef typename ModelHelperType::OperatorStorageType       OperatorStorageType;
+	typedef typename ModelHelperType::SparseMatrixType          SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef PsimagLite::Concurrency                             ConcurrencyType;
+	typedef typename HamiltonianConnectionType::VectorType      VectorType;
+	typedef typename HamiltonianConnectionType::LinkType        LinkType;
+	typedef typename ModelHelperType::Aux                       AuxType;
 
 public:
 
-	ParallelHamiltonianConnection(VectorType& x,
-	    const VectorType& y,
-	    const HamiltonianConnectionType& hc,
-	    const AuxType& aux)
+	ParallelHamiltonianConnection(VectorType&                      x,
+	                              const VectorType&                y,
+	                              const HamiltonianConnectionType& hc,
+	                              const AuxType&                   aux)
 	    : x_(x)
 	    , y_(y)
 	    , hc_(hc)
@@ -43,17 +40,21 @@ public:
 
 		if (taskNumber == 0) {
 			hc_.modelHelper().hamiltonianLeftProduct(xtemp_[threadNum], y_, aux_);
-			//			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
-			//			        left().hamiltonian().getCRS();
-			//			hc_.kroneckerDumper().push(true, hamiltonian, y_);
+			//			const SparseMatrixType& hamiltonian =
+			// hc_.modelHelper().leftRightSuper().
+			// left().hamiltonian().getCRS();
+			// hc_.kroneckerDumper().push(true,
+			// hamiltonian, y_);
 			return;
 		}
 
 		if (taskNumber == 1) {
 			hc_.modelHelper().hamiltonianRightProduct(xtemp_[threadNum], y_, aux_);
-			//			const SparseMatrixType& hamiltonian = hc_.modelHelper().leftRightSuper().
-			//			        right().hamiltonian().getCRS();
-			//		hc_.kroneckerDumper().push(false, hamiltonian, y_);
+			//			const SparseMatrixType& hamiltonian =
+			// hc_.modelHelper().leftRightSuper().
+			// right().hamiltonian().getCRS();
+			// hc_.kroneckerDumper().push(false,
+			// hamiltonian, y_);
 			return;
 		}
 
@@ -65,11 +66,11 @@ public:
 		opsForLink.setPointer(taskNumber);
 
 		hc_.modelHelper().fastOpProdInter(xtemp_[threadNum],
-		    y_,
-		    opsForLink.A().getCRS(),
-		    opsForLink.B().getCRS(),
-		    opsForLink.link(),
-		    aux_);
+		                                  y_,
+		                                  opsForLink.A().getCRS(),
+		                                  opsForLink.B().getCRS(),
+		                                  opsForLink.link(),
+		                                  aux_);
 
 		//		hc_.kroneckerDumper().push(A->getCRS(),
 		//		                           B->getCRS(),
@@ -107,10 +108,10 @@ public:
 
 private:
 
-	VectorType& x_;
-	const VectorType& y_;
-	const HamiltonianConnectionType& hc_;
-	const AuxType& aux_;
+	VectorType&                                   x_;
+	const VectorType&                             y_;
+	const HamiltonianConnectionType&              hc_;
+	const AuxType&                                aux_;
 	typename PsimagLite::Vector<VectorType>::Type xtemp_;
 };
 }

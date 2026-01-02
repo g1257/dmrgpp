@@ -92,9 +92,9 @@ namespace PsimagLite {
 
 class ProgressIndicator {
 
-	static MemoryUsage musage_;
+	static MemoryUsage   musage_;
 	static OstringStream buffer_;
-	static bool bufferActive_;
+	static bool          bufferActive_;
 
 public:
 
@@ -106,13 +106,13 @@ public:
 			return;
 
 		caller_ = caller;
-		rank_ = Concurrency::rank();
+		rank_   = Concurrency::rank();
 	}
 
 	static void updateBuffer(int signal)
 	{
 		if (bufferActive_) {
-			pid_t p = getpid();
+			pid_t  p = getpid();
 			String outName("buffer");
 			outName += ttos(p);
 			outName += ".txt";
@@ -125,13 +125,11 @@ public:
 		bufferActive_ = !bufferActive_;
 
 		String bufferActive = (bufferActive_) ? "active" : "inactive";
-		std::cerr << "ProgressIndicator: signal " << signal
-		          << " received.";
+		std::cerr << "ProgressIndicator: signal " << signal << " received.";
 		std::cerr << " buffer is now " << bufferActive << "\n";
 	}
 
-	template <typename SomeOutputType>
-	void printline(const String& s, SomeOutputType& os) const
+	template <typename SomeOutputType> void printline(const String& s, SomeOutputType& os) const
 	{
 		if (threadId_ != 0)
 			return;
@@ -184,18 +182,16 @@ public:
 	void printMemoryUsage()
 	{
 		musage_.update();
-		String vmPeak = musage_.findEntry("VmPeak:");
-		String vmSize = musage_.findEntry("VmSize:");
+		String        vmPeak = musage_.findEntry("VmPeak:");
+		String        vmSize = musage_.findEntry("VmSize:");
 		OstringStream msg(std::cout.precision());
-		msg() << "Current virtual memory is " << vmSize
-		      << " maximum was " << vmPeak;
+		msg() << "Current virtual memory is " << vmSize << " maximum was " << vmPeak;
 		printline(msg, std::cout);
 
 		if (!bufferActive_)
 			return;
 
-		buffer_() << "Current virtual memory is " << vmSize
-		          << " maximum was " << vmPeak;
+		buffer_() << "Current virtual memory is " << vmSize << " maximum was " << vmPeak;
 		printline(buffer_, std::cout);
 	}
 
@@ -203,21 +199,17 @@ public:
 
 private:
 
-	template <typename SomeOutputStreamType>
-	void prefix(SomeOutputStreamType& os) const
+	template <typename SomeOutputStreamType> void prefix(SomeOutputStreamType& os) const
 	{
-		const MemoryUsage::TimeHandle t = musage_.time();
-		const double seconds = t.millis();
-		const SizeType prec = os.precision(3);
+		const MemoryUsage::TimeHandle t       = musage_.time();
+		const double                  seconds = t.millis();
+		const SizeType                prec    = os.precision(3);
 		prefixHelper(os) << caller_ << " "
 		                 << "[" << std::fixed << seconds << "]: ";
 		os.precision(prec);
 	}
 
-	OstringStream::OstringStreamType& prefixHelper(OstringStream& os) const
-	{
-		return os();
-	}
+	OstringStream::OstringStreamType& prefixHelper(OstringStream& os) const { return os(); }
 
 	template <typename SomeOutputStreamType>
 	SomeOutputStreamType& prefixHelper(SomeOutputStreamType& os) const
@@ -225,7 +217,7 @@ private:
 		return os;
 	}
 
-	String caller_;
+	String   caller_;
 	SizeType threadId_;
 	SizeType rank_;
 }; // ProgressIndicator

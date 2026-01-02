@@ -89,13 +89,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HILBERTSPACEFEAS_HEADER_H
 #define HILBERTSPACEFEAS_HEADER_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
-template <typename Word>
-class HilbertSpaceFeAs
-{
+template <typename Word> class HilbertSpaceFeAs {
 
 	static SizeType orbitals_;
 
@@ -103,21 +100,21 @@ public:
 
 	typedef Word HilbertState;
 
-	enum { SPIN_UP = 0,
-		SPIN_DOWN = 1 };
-
-	static void setOrbitals(SizeType orbitals)
+	enum
 	{
-		orbitals_ = orbitals;
-	}
+		SPIN_UP   = 0,
+		SPIN_DOWN = 1
+	};
+
+	static void setOrbitals(SizeType orbitals) { orbitals_ = orbitals; }
 
 	// Get electronic state on site "j" in binary number "a"
 	static Word get(Word const& a, SizeType j)
 	{
 		SizeType dofs = 2 * orbitals_;
-		SizeType k = dofs * j;
+		SizeType k    = dofs * j;
 		SizeType ones = (1 << (dofs)) - 1;
-		Word mask = (ones << k);
+		Word     mask = (ones << k);
 
 		mask &= a;
 		mask >>= k;
@@ -128,8 +125,8 @@ public:
 	static void create(Word& a, SizeType j, SizeType sigma)
 	{
 		SizeType dofs = 2 * orbitals_;
-		SizeType k = dofs * j;
-		Word mask = (1 << (k + sigma));
+		SizeType k    = dofs * j;
+		Word     mask = (1 << (k + sigma));
 		a |= mask;
 	}
 
@@ -137,8 +134,8 @@ public:
 	static void destroy(Word& a, SizeType j, SizeType sigma)
 	{
 		SizeType dofs = 2 * orbitals_;
-		SizeType k = dofs * j;
-		Word mask = (1 << (k + sigma));
+		SizeType k    = dofs * j;
+		Word     mask = (1 << (k + sigma));
 		a &= (~mask);
 	}
 
@@ -156,10 +153,10 @@ public:
 	//! returns the number of electrons of internal dof "value" in binary number "data"
 	static int getNofDigits(Word const& data, SizeType value)
 	{
-		SizeType dofs = 2 * orbitals_;
-		int ret = 0;
-		Word data2 = data;
-		SizeType i = 0;
+		SizeType dofs  = 2 * orbitals_;
+		int      ret   = 0;
+		Word     data2 = data;
+		SizeType i     = 0;
 		do {
 			if ((data & (1 << (dofs * i + value))))
 				ret++;
@@ -172,13 +169,13 @@ public:
 	//! Number of electrons with spin spin (sums over bands and sites)
 	static int electronsWithGivenSpin(Word const& data, SizeType spin)
 	{
-		SizeType sum = 0;
-		Word data2 = data;
+		SizeType sum   = 0;
+		Word     data2 = data;
 		SizeType digit = 0;
 		while (data2 > 0) {
-			SizeType sigma = digit % (2 * orbitals_);
-			SizeType spin2 = static_cast<SizeType>(sigma / orbitals_);
-			Word thisbit = (data2 & 1);
+			SizeType sigma   = digit % (2 * orbitals_);
+			SizeType spin2   = static_cast<SizeType>(sigma / orbitals_);
+			Word     thisbit = (data2 & 1);
 			data2 >>= 1;
 			digit++;
 			if (spin == spin2)
@@ -191,7 +188,7 @@ public:
 	//! Number of electrons in binary number "data" (sum over all bands)
 	static SizeType electrons(const Word& data)
 	{
-		SizeType sum = 0;
+		SizeType sum  = 0;
 		SizeType dofs = 2 * orbitals_;
 		for (SizeType sector = 0; sector < dofs; sector++)
 			sum += calcNofElectrons(data, sector);
@@ -204,7 +201,7 @@ public:
 	static int calcNofElectrons(Word const& ket, SizeType i, SizeType j, SizeType sector)
 	{
 		SizeType dofs = 2 * orbitals_;
-		SizeType ii = i + 1;
+		SizeType ii   = i + 1;
 		if (ii >= j)
 			return 0;
 		Word m = 0;
@@ -217,10 +214,10 @@ public:
 	//! Number of electrons with dof sector in binary number "ket"
 	static int calcNofElectrons(Word const& ket, SizeType sector)
 	{
-		SizeType dofs = 2 * orbitals_;
-		Word ket2 = ket;
+		SizeType dofs  = 2 * orbitals_;
+		Word     ket2  = ket;
 		SizeType digit = 0;
-		int sum = 0;
+		int      sum   = 0;
 		while (ket2 > 0) {
 			SizeType sector2 = digit % dofs;
 			SizeType thisbit = (ket2 & 1);
@@ -235,8 +232,7 @@ public:
 
 }; // class HilbertSpaceFeAs
 
-template <typename Word>
-SizeType HilbertSpaceFeAs<Word>::orbitals_ = 2;
+template <typename Word> SizeType HilbertSpaceFeAs<Word>::orbitals_ = 2;
 } // namespace Dmrg
 
 /*@}*/

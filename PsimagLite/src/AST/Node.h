@@ -21,13 +21,12 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename VectorValueType, typename AnglesType_ = int>
-class Node {
+template <typename VectorValueType, typename AnglesType_ = int> class Node {
 
 public:
 
-	typedef AnglesType_ AnglesType;
-	typedef typename VectorValueType::value_type ValueType;
+	typedef AnglesType_                                   AnglesType;
+	typedef typename VectorValueType::value_type          ValueType;
 	typedef typename PsimagLite::Vector<AnglesType>::Type VectorAnglesType;
 
 	virtual ~Node() { }
@@ -40,17 +39,12 @@ public:
 
 	virtual ValueType exec(const VectorValueType&) const = 0;
 
-	virtual ValueType exec(const VectorValueType&,
-	                       const VectorAnglesType*,
-	                       SizeType&) const
+	virtual ValueType exec(const VectorValueType&, const VectorAnglesType*, SizeType&) const
 	{
 		throw PsimagLite::RuntimeError("node::exec() long form\n");
 	}
 
-	virtual void set(const ValueType&) const
-	{
-		throw PsimagLite::RuntimeError("node::set\n");
-	}
+	virtual void set(const ValueType&) const { throw PsimagLite::RuntimeError("node::set\n"); }
 
 	virtual void setAngle(PsimagLite::String) const { }
 
@@ -65,8 +59,7 @@ public:
 
 }; // class Node
 
-template <typename VectorValueType>
-class Plus : public Node<VectorValueType> {
+template <typename VectorValueType> class Plus : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -86,8 +79,7 @@ public:
 
 }; // class Plus
 
-template <typename VectorValueType>
-class Minus : public Node<VectorValueType> {
+template <typename VectorValueType> class Minus : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -107,8 +99,7 @@ public:
 
 }; // class Minus
 
-template <typename VectorValueType>
-class Times : public Node<VectorValueType> {
+template <typename VectorValueType> class Times : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -128,8 +119,7 @@ public:
 
 }; // class Times
 
-template <typename VectorValueType>
-class DividedBy : public Node<VectorValueType> {
+template <typename VectorValueType> class DividedBy : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -152,8 +142,7 @@ public:
 
 }; // class DividedBy
 
-template <typename VectorValueType>
-class IfGtZero : public Node<VectorValueType> {
+template <typename VectorValueType> class IfGtZero : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -174,8 +163,7 @@ public:
 
 }; // class IfGtZero
 
-template <typename VectorValueType>
-class Int : public Node<VectorValueType> {
+template <typename VectorValueType> class Int : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -197,8 +185,7 @@ public:
 
 }; // class Int
 
-template <typename VectorValueType>
-class Input : public Node<VectorValueType> {
+template <typename VectorValueType> class Input : public Node<VectorValueType> {
 
 	typedef typename VectorValueType::value_type ValueType;
 
@@ -229,9 +216,9 @@ public:
 
 private:
 
-	char char_;
+	char               char_;
 	PsimagLite::String strOneChar_;
-	mutable ValueType input_;
+	mutable ValueType  input_;
 
 }; // class Input
 

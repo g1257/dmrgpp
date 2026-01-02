@@ -82,8 +82,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename T>
-class SampleCRSMatrix {
+template <typename T> class SampleCRSMatrix {
 
 public:
 
@@ -92,8 +91,7 @@ public:
 	SampleCRSMatrix(SizeType rank)
 	    : rank_(rank)
 	    , rowptr_(rank + 1)
-	{
-	}
+	{ }
 
 	SampleCRSMatrix(SizeType rank, SizeType seed, SizeType nonZeros, T maxValue)
 	    : rank_(rank)
@@ -101,7 +99,7 @@ public:
 	{
 		srand48(seed);
 		typename Vector<SizeType>::Type rows, cols;
-		typename Vector<T>::Type vals;
+		typename Vector<T>::Type        vals;
 		for (SizeType i = 0; i < nonZeros; i++) {
 			// pick a row
 			SizeType row = SizeType(drand48() * rank);
@@ -117,8 +115,7 @@ public:
 		fillMatrix(rows, cols, vals);
 	}
 
-	template <typename SomeIoInputType>
-	SampleCRSMatrix(SomeIoInputType& io)
+	template <typename SomeIoInputType> SampleCRSMatrix(SomeIoInputType& io)
 	{
 		io >> rank_;
 		readVector(io, rowptr_);
@@ -132,7 +129,7 @@ public:
 
 	void pushValue(const T& value) { values_.push_back(value); }
 
-	void matrixVectorProduct(typename Vector<T>::Type& x,
+	void matrixVectorProduct(typename Vector<T>::Type&       x,
 	                         const typename Vector<T>::Type& y) const
 	{
 		for (SizeType i = 0; i < y.size(); i++)
@@ -142,8 +139,7 @@ public:
 
 	SizeType rank() const { return rank_; }
 
-	template <typename SomeIoOutputType>
-	void save(SomeIoOutputType& io) const
+	template <typename SomeIoOutputType> void save(SomeIoOutputType& io) const
 	{
 		io << rank_ << "\n";
 		saveVector(io, rowptr_);
@@ -198,10 +194,10 @@ private:
 
 	void fillMatrix(typename Vector<SizeType>::Type& rows,
 	                typename Vector<SizeType>::Type& cols,
-	                typename Vector<T>::Type& vals)
+	                typename Vector<T>::Type&        vals)
 	{
 		Sort<typename Vector<SizeType>::Type> s;
-		typename Vector<SizeType>::Type iperm(rows.size());
+		typename Vector<SizeType>::Type       iperm(rows.size());
 		s.sort(rows, iperm);
 		SizeType counter = 0;
 		SizeType prevRow = rows[0] + 1;
@@ -210,7 +206,7 @@ private:
 			if (prevRow != row) {
 				// add new row
 				rowptr_[row] = counter++;
-				prevRow = row;
+				prevRow      = row;
 			}
 			colind_.push_back(cols[iperm[i]]);
 			values_.push_back(vals[iperm[i]]);
@@ -220,15 +216,14 @@ private:
 			rowptr_[i] = counter;
 	}
 
-	SizeType rank_;
+	SizeType                        rank_;
 	typename Vector<SizeType>::Type rowptr_;
 	typename Vector<SizeType>::Type colind_;
-	typename Vector<T>::Type values_;
+	typename Vector<T>::Type        values_;
 
 }; // class SampleCRSMatrix
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const SampleCRSMatrix<T>& m)
+template <typename T> std::ostream& operator<<(std::ostream& os, const SampleCRSMatrix<T>& m)
 {
 	m.save(os);
 	return os;

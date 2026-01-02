@@ -1,14 +1,16 @@
 #ifndef STAGEENUM_H
 #define STAGEENUM_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-enum class StageEnum { DISABLED,
+enum class StageEnum
+{
+	DISABLED,
 	OPERATOR,
 	WFT_NOADVANCE,
 	WFT_ADVANCE,
-	COLLAPSE };
+	COLLAPSE
+};
 
 }
 #endif // STAGEENUM_H

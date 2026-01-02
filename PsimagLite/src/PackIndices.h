@@ -88,8 +88,7 @@ public:
 
 	PackIndices(SizeType n)
 	    : n_(n)
-	{
-	}
+	{ }
 
 	//! given ind and n, get x and y such that ind = x + y*n
 	void unpack(SizeType& x, SizeType& y, SizeType ind) const
@@ -98,11 +97,12 @@ public:
 		// x = ind - y*n;
 		// x= ind % n;
 		ldiv_t q = std::ldiv(ind, n_);
-		y = q.quot;
-		x = q.rem;
+		y        = q.quot;
+		x        = q.rem;
 	}
 
-	SizeType pack(SizeType x0, SizeType x1, const Vector<SizeType>::Type& permutationInverse) const
+	SizeType
+	pack(SizeType x0, SizeType x1, const Vector<SizeType>::Type& permutationInverse) const
 	{
 		assert(x0 + n_ * x1 < permutationInverse.size());
 		return permutationInverse[x0 + n_ * x1];

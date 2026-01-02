@@ -82,23 +82,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGET_PARAMS_TIME_VECTORS_H
 #include "TargetParamsCommon.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
-template <typename ModelType>
-class TargetParamsTimeVectors : public TargetParamsCommon<ModelType>
-{
+template <typename ModelType> class TargetParamsTimeVectors : public TargetParamsCommon<ModelType> {
 
 public:
 
-	typedef TargetParamsCommon<ModelType> BaseType;
-	typedef typename ModelType::RealType RealType;
+	typedef TargetParamsCommon<ModelType>     BaseType;
+	typedef typename ModelType::RealType      RealType;
 	typedef typename BaseType::VectorRealType VectorRealType;
 
 	template <typename IoInputter>
-	TargetParamsTimeVectors(IoInputter& io,
-	    PsimagLite::String targeting,
-	    const ModelType& model)
+	TargetParamsTimeVectors(IoInputter&        io,
+	                        PsimagLite::String targeting,
+	                        const ModelType&   model)
 	    : BaseType(io, targeting, model)
 	    , advanceEach_(0)
 	    , algorithm_(BaseType::AlgorithmEnum::KRYLOV)
@@ -132,49 +129,25 @@ public:
 
 		try {
 			io.readline(timeDirection_, "TSPTimeFactor=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
-	virtual VectorRealType& times()
-	{
-		return times_;
-	}
+	virtual VectorRealType& times() { return times_; }
 
-	virtual const VectorRealType& times() const
-	{
-		return times_;
-	}
+	virtual const VectorRealType& times() const { return times_; }
 
-	virtual SizeType advanceEach() const
-	{
-		return advanceEach_;
-	}
+	virtual SizeType advanceEach() const { return advanceEach_; }
 
-	virtual typename BaseType::AlgorithmEnum algorithm() const
-	{
-		return algorithm_;
-	}
+	virtual typename BaseType::AlgorithmEnum algorithm() const { return algorithm_; }
 
-	virtual RealType tau() const
-	{
-		return tau_;
-	}
+	virtual RealType tau() const { return tau_; }
 
-	virtual RealType timeDirection() const
-	{
-		return timeDirection_;
-	}
+	virtual RealType timeDirection() const { return timeDirection_; }
 
-	virtual const VectorRealType& chebyTransform() const
-	{
-		return chebyTransform_;
-	}
+	virtual const VectorRealType& chebyTransform() const { return chebyTransform_; }
 
 	template <typename IoInputter>
-	void setAlgorithm(VectorRealType* chebyTransform,
-	    PsimagLite::String s,
-	    IoInputter* io)
+	void setAlgorithm(VectorRealType* chebyTransform, PsimagLite::String s, IoInputter* io)
 	{
 		if (io && chebyTransform)
 			err("setAlgorithm: incorrect call (1)\n");
@@ -204,17 +177,16 @@ public:
 
 private:
 
-	VectorRealType times_;
-	SizeType advanceEach_;
+	VectorRealType                   times_;
+	SizeType                         advanceEach_;
 	typename BaseType::AlgorithmEnum algorithm_;
-	RealType tau_;
-	RealType timeDirection_;
-	VectorRealType chebyTransform_;
+	RealType                         tau_;
+	RealType                         timeDirection_;
+	VectorRealType                   chebyTransform_;
 }; // class TargetParamsTimeVectors
 
 template <typename ModelType>
-inline std::ostream&
-operator<<(std::ostream& os, const TargetParamsTimeVectors<ModelType>& t)
+inline std::ostream& operator<<(std::ostream& os, const TargetParamsTimeVectors<ModelType>& t)
 {
 	os << "TargetParams.type=TimeVectors";
 	os << "TargetParams.tau=" << t.tau() << "\n";

@@ -87,21 +87,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename CrsMatrixType>
-class SparseRowCached {
+template <typename CrsMatrixType> class SparseRowCached {
 
 public:
 
 	typedef typename CrsMatrixType::value_type ValueType;
-	typedef typename Vector<SizeType>::Type ColumnsType;
-	typedef typename Vector<ValueType>::Type VectorType;
+	typedef typename Vector<SizeType>::Type    ColumnsType;
+	typedef typename Vector<ValueType>::Type   VectorType;
 
 	SparseRowCached(SizeType cacheSize)
 	    : cols_(cacheSize)
 	    , values_(cacheSize)
 	    , counter_(0)
-	{
-	}
+	{ }
 
 	void add(SizeType col, ValueType value)
 	{
@@ -114,7 +112,7 @@ public:
 			values_.resize(cacheSize);
 		}
 
-		cols_[counter_] = col;
+		cols_[counter_]   = col;
 		values_[counter_] = value;
 		counter_++;
 	}
@@ -140,11 +138,11 @@ public:
 			return 0;
 
 		Sort<ColumnsType> s;
-		ColumnsType iperm(counter_);
+		ColumnsType       iperm(counter_);
 		s.sort(cols_, iperm, counter_);
-		SizeType prevCol = cols_[0];
-		SizeType counter = 0;
-		ValueType value = 0;
+		SizeType  prevCol = cols_[0];
+		SizeType  counter = 0;
+		ValueType value   = 0;
 		for (SizeType i = 0; i < counter_; i++) {
 			if (cols_[i] == prevCol) {
 				value += values_[iperm[i]];
@@ -153,7 +151,7 @@ public:
 			matrix.pushCol(prevCol);
 			matrix.pushValue(value);
 			counter++;
-			value = values_[iperm[i]];
+			value   = values_[iperm[i]];
 			prevCol = cols_[i];
 		}
 		matrix.pushCol(prevCol);
@@ -165,9 +163,9 @@ public:
 
 private:
 
-	ColumnsType cols_;
+	ColumnsType                      cols_;
 	typename Vector<ValueType>::Type values_;
-	SizeType counter_;
+	SizeType                         counter_;
 
 }; // class SparseRowCached
 

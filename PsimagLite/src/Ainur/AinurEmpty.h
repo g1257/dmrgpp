@@ -26,8 +26,7 @@ public:
 
 	void printAll(std::ostream& os) const { errorMessage(); }
 
-	template <typename SomeType>
-	void readValue(SomeType& t, String label) const
+	template <typename SomeType> void readValue(SomeType& t, String label) const
 	{
 		errorMessage();
 	}
@@ -38,11 +37,7 @@ public:
 		return "";
 	}
 
-	template <typename SomeMapType>
-	void setMap(SomeMapType&) const
-	{
-		errorMessage();
-	}
+	template <typename SomeMapType> void setMap(SomeMapType&) const { errorMessage(); }
 
 private:
 

@@ -97,8 +97,7 @@ public:
 	    : BaseType(npthreads)
 	    , nthreads_(npthreads)
 	    , comm_(comm)
-	{
-	}
+	{ }
 
 	String name() const { return "pthreadsandmpi"; }
 
@@ -108,8 +107,8 @@ public:
 
 private:
 
-	SizeType nthreads_;
-	MPI::CommType comm_;
+	SizeType        nthreads_;
+	MPI::CommType   comm_;
 	pthread_mutex_t mutex_;
 
 }; // PthreadsAndMpi class

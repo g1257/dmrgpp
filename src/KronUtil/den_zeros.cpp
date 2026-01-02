@@ -1,9 +1,7 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void den_zeros(const int,
-    const int,
-    PsimagLite::Matrix<ComplexOrRealType>& a_)
+void den_zeros(const int, const int, PsimagLite::Matrix<ComplexOrRealType>& a_)
 {
 	/*
 	 * ----------------------

@@ -24,8 +24,8 @@ public:
 	    : pred_(pred)
 	    , separator_(separator)
 	{
-		SizeType length = 0;
-		size_t location = String::npos;
+		SizeType length   = 0;
+		size_t   location = String::npos;
 
 		SizeType n = pred.length();
 		if (n < 3)
@@ -38,14 +38,14 @@ public:
 			String maybeOp = pred.substr(i, 2);
 			if (operatorLength(maybeOp) == 2) {
 				location = i;
-				length = 2;
+				length   = 2;
 				break;
 			}
 
 			maybeOp = pred.substr(i, 1);
 			if (operatorLength(maybeOp) == 1) {
 				location = i;
-				length = 1;
+				length   = 1;
 				break;
 			}
 		}
@@ -54,7 +54,7 @@ public:
 			err("Could not find operator in predicate " + pred + "\n");
 
 		lhs_ = pred.substr(0, location);
-		op_ = pred.substr(location, length);
+		op_  = pred.substr(location, length);
 		rhs_ = pred.substr(location + length, n - location - length);
 		if (lhs_ == "" || rhs_ == "")
 			err("Left or right expression is empty\n");
@@ -64,15 +64,14 @@ public:
 	bool isTrue(const VectorStringType& names, const SomeVectorType& vals)
 	{
 		typedef typename SomeVectorType::value_type SomeValueType;
-		SomeValueType lv = getValue(lhs_, names, vals);
-		SomeValueType rv = getValue(rhs_, names, vals);
+		SomeValueType                               lv = getValue(lhs_, names, vals);
+		SomeValueType                               rv = getValue(rhs_, names, vals);
 		return compareOnOp(lv, op_, rv);
 	}
 
 private:
 
-	template <typename T>
-	static bool compareOnOp(T lv, String op, T rv)
+	template <typename T> static bool compareOnOp(T lv, String op, T rv)
 	{
 		// {==, <, >, <=, >=, %%}
 		// If you add something here, add it also to PredicateSimple.cpp
@@ -94,10 +93,10 @@ private:
 	}
 
 	template <typename T>
-	static bool divisibleBy(
-	    SizeType lv,
-	    SizeType rv,
-	    typename std::enable_if<Loki::TypeTraits<T>::isArith, int*>::type = 0)
+	static bool divisibleBy(SizeType lv,
+	                        SizeType rv,
+	                        typename std::enable_if<Loki::TypeTraits<T>::isArith, int*>::type
+	                        = 0)
 	{
 		return ((lv % rv) == 0);
 	}
@@ -116,20 +115,18 @@ private:
 	typename SomeVectorType::value_type
 	getValue(String hs, const VectorStringType& names, const SomeVectorType& vals)
 	{
-		String numericHs = replaceVariables(hs, names, vals);
+		String           numericHs = replaceVariables(hs, names, vals);
 		VectorStringType tokens;
 		split(tokens, numericHs, separator_);
-		typedef PlusMinusMultiplyDivide<
-		    typename SomeVectorType::value_type>
-		    PrimitivesType;
-		PrimitivesType primitives;
-		ExpressionForAST<PrimitivesType> expresionForAST(tokens,
-		                                                 primitives);
+		typedef PlusMinusMultiplyDivide<typename SomeVectorType::value_type> PrimitivesType;
+		PrimitivesType                                                       primitives;
+		ExpressionForAST<PrimitivesType> expresionForAST(tokens, primitives);
 		return expresionForAST.exec();
 	}
 
 	template <typename SomeVectorType>
-	static String replaceVariables(String hs, const VectorStringType& names, const SomeVectorType& vals)
+	static String
+	replaceVariables(String hs, const VectorStringType& names, const SomeVectorType& vals)
 	{
 		const SizeType n = names.size();
 		assert(n == vals.size());
@@ -141,10 +138,9 @@ private:
 		return buffer;
 	}
 
-	template <typename T>
-	static String replaceVariable(String hs, String name, T val)
+	template <typename T> static String replaceVariable(String hs, String name, T val)
 	{
-		const String valString = ttos(val);
+		const String   valString  = ttos(val);
 		const SizeType nameLength = name.length();
 
 		while (true) {
@@ -152,8 +148,8 @@ private:
 			if (index == String::npos)
 				return hs;
 			String part1 = (index == 0) ? "" : hs.substr(0, index);
-			String part2 = hs.substr(index + nameLength,
-			                         hs.length() - nameLength - index);
+			String part2
+			    = hs.substr(index + nameLength, hs.length() - nameLength - index);
 			hs = part1 + valString + part2;
 		}
 
@@ -161,11 +157,11 @@ private:
 	}
 
 	static VectorStringType ops_;
-	String pred_;
-	String separator_;
-	String lhs_;
-	String op_;
-	String rhs_;
+	String                  pred_;
+	String                  separator_;
+	String                  lhs_;
+	String                  op_;
+	String                  rhs_;
 };
 } // namespace PsimagLite
 #endif // PREDICATE_SIMPLE_H

@@ -8,12 +8,12 @@
 int main(int argc, char* argv[])
 {
 	PsimagLite::Concurrency concurrency(&argc, &argv, /*nthreads=*/1);
-	using ComplexType = std::complex<double>;
+	using ComplexType          = std::complex<double>;
 	using SolverParametersType = PsimagLite::ParametersForSolver<double>;
-	using VectorType = std::vector<ComplexType>;
+	using VectorType           = std::vector<ComplexType>;
 
 	/* We fill a dense matrix */
-	int n = 8;
+	int                             n = 8;
 	PsimagLite::Matrix<ComplexType> m(n, n);
 	// fill m
 	for (int i = 0; i < n; ++i)
@@ -37,10 +37,9 @@ int main(int argc, char* argv[])
 	params.lotaMemory = true;
 
 	/* We create the solver object */
-	PsimagLite::LanczosSolver<SolverParametersType,
-	                          PsimagLite::CrsMatrix<ComplexType>,
-	                          VectorType>
-	    lanczosSolver(msparse, params);
+	PsimagLite::
+	    LanczosSolver<SolverParametersType, PsimagLite::CrsMatrix<ComplexType>, VectorType>
+	        lanczosSolver(msparse, params);
 
 	// This double will contain the lowest eigenvalue
 	double e = 0;

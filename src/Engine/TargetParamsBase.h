@@ -82,40 +82,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ModelType>
-class TargetParamsBase
-{
+template <typename ModelType> class TargetParamsBase {
 public:
 
-	typedef typename ModelType::RealType RealType;
-	typedef std::pair<PsimagLite::FreqEnum, RealType> PairFreqType;
-	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename OperatorType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
+	typedef typename ModelType::RealType                    RealType;
+	typedef std::pair<PsimagLite::FreqEnum, RealType>       PairFreqType;
+	typedef typename ModelType::OperatorType                OperatorType;
+	typedef typename OperatorType::PairType                 PairType;
+	typedef typename OperatorType::SparseMatrixType         SparseMatrixType;
+	typedef typename SparseMatrixType::value_type           ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>           MatrixType;
+	typedef PsimagLite::Vector<SizeType>::Type              VectorSizeType;
+	typedef typename PsimagLite::Vector<MatrixType>::Type   VectorMatrixType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type     VectorRealType;
 
-	enum class ConcatEnum { PRODUCT,
-		SUM };
+	enum class ConcatEnum
+	{
+		PRODUCT,
+		SUM
+	};
 
-	enum class AlgorithmEnum { KRYLOV,
+	enum class AlgorithmEnum
+	{
+		KRYLOV,
 		CONJUGATE_GRADIENT,
 		CHEBYSHEV,
 		KRYLOVTIME,
 		RUNGE_KUTTA,
-		SUZUKI_TROTTER };
+		SUZUKI_TROTTER
+	};
 
 	TargetParamsBase(PsimagLite::String targeting)
 	    : targeting_(targeting)
-	{
-	}
+	{ }
 
 	virtual ~TargetParamsBase() { }
 
@@ -159,30 +161,15 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
-	virtual RealType correctionA() const
-	{
-		return 0;
-	}
+	virtual RealType correctionA() const { return 0; }
 
-	virtual SizeType type() const
-	{
-		return unimplementedInt("type");
-	}
+	virtual SizeType type() const { return unimplementedInt("type"); }
 
-	virtual void type(SizeType)
-	{
-		unimplemented("type(SizeType)");
-	}
+	virtual void type(SizeType) { unimplemented("type(SizeType)"); }
 
-	virtual SizeType advanceEach() const
-	{
-		return 0;
-	}
+	virtual SizeType advanceEach() const { return 0; }
 
-	virtual SizeType cgSteps() const
-	{
-		return unimplementedInt("cgSteps");
-	}
+	virtual SizeType cgSteps() const { return unimplementedInt("cgSteps"); }
 
 	virtual PairFreqType omega() const
 	{
@@ -190,35 +177,17 @@ public:
 		throw PsimagLite::RuntimeError(s);
 	}
 
-	virtual void omega(PsimagLite::FreqEnum, RealType)
-	{
-		unimplemented("omega(RealType)");
-	}
+	virtual void omega(PsimagLite::FreqEnum, RealType) { unimplemented("omega(RealType)"); }
 
-	virtual RealType eta() const
-	{
-		return unimplemented("eta");
-	}
+	virtual RealType eta() const { return unimplemented("eta"); }
 
-	virtual RealType cgEps() const
-	{
-		return unimplemented("cgEps");
-	}
+	virtual RealType cgEps() const { return unimplemented("cgEps"); }
 
-	virtual AlgorithmEnum algorithm() const
-	{
-		throw PsimagLite::RuntimeError("algorithm");
-	}
+	virtual AlgorithmEnum algorithm() const { throw PsimagLite::RuntimeError("algorithm"); }
 
-	virtual RealType tau() const
-	{
-		return unimplemented("tau");
-	}
+	virtual RealType tau() const { return unimplemented("tau"); }
 
-	virtual RealType maxTime() const
-	{
-		return unimplemented("maxTime");
-	}
+	virtual RealType maxTime() const { return unimplemented("maxTime"); }
 
 	virtual VectorRealType& times()
 	{
@@ -230,15 +199,9 @@ public:
 		throw PsimagLite::RuntimeError("times() unimplemented\n");
 	}
 
-	virtual bool noOperator() const
-	{
-		return static_cast<bool>(unimplemented("noOperator"));
-	}
+	virtual bool noOperator() const { return static_cast<bool>(unimplemented("noOperator")); }
 
-	virtual void noOperator(bool)
-	{
-		unimplemented("noOperator");
-	}
+	virtual void noOperator(bool) { unimplemented("noOperator"); }
 
 	virtual bool skipTimeZero() const
 	{
@@ -250,20 +213,11 @@ public:
 		return static_cast<bool>(unimplemented("isEnergyForExp"));
 	}
 
-	virtual RealType energyForExp() const
-	{
-		return unimplemented("energyForExp");
-	}
+	virtual RealType energyForExp() const { return unimplemented("energyForExp"); }
 
-	virtual RealType gsWeight() const
-	{
-		return unimplemented("gsWeight");
-	}
+	virtual RealType gsWeight() const { return unimplemented("gsWeight"); }
 
-	virtual RealType timeDirection() const
-	{
-		return unimplemented("timeDirection");
-	}
+	virtual RealType timeDirection() const { return unimplemented("timeDirection"); }
 
 	virtual PsimagLite::String targeting() const { return targeting_; }
 

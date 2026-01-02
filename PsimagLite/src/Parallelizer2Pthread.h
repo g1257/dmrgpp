@@ -23,8 +23,7 @@
 #include <string.h>
 #endif
 
-template <typename SomeLambdaType,
-          typename LoadBalancerType = PsimagLite::LoadBalancerDefault>
+template <typename SomeLambdaType, typename LoadBalancerType = PsimagLite::LoadBalancerDefault>
 struct PthreadFunctionStruct2 {
 	PthreadFunctionStruct2()
 	    : pfh(0)
@@ -34,24 +33,22 @@ struct PthreadFunctionStruct2 {
 	    , start(0)
 	    , end(0)
 	    , cpu(0)
-	{
-	}
+	{ }
 
-	const SomeLambdaType* pfh;
+	const SomeLambdaType*   pfh;
 	const LoadBalancerType* loadBalancer;
-	int threadNum;
-	SizeType nthreads;
-	SizeType start;
-	SizeType end;
-	SizeType cpu;
+	int                     threadNum;
+	SizeType                nthreads;
+	SizeType                start;
+	SizeType                end;
+	SizeType                cpu;
 };
 
 template <typename SomeLambdaType, typename SomeLoadBalancer>
 void* thread_function_wrapper2(void* dummyPtr)
 {
-	PthreadFunctionStruct2<SomeLambdaType, SomeLoadBalancer>* pfs = static_cast<
-	    PthreadFunctionStruct2<SomeLambdaType, SomeLoadBalancer>*>(
-	    dummyPtr);
+	PthreadFunctionStruct2<SomeLambdaType, SomeLoadBalancer>* pfs
+	    = static_cast<PthreadFunctionStruct2<SomeLambdaType, SomeLoadBalancer>*>(dummyPtr);
 
 	const SomeLambdaType* pfh = pfs->pfh;
 
@@ -78,8 +75,7 @@ void* thread_function_wrapper2(void* dummyPtr)
 
 namespace PsimagLite {
 
-template <typename LoadBalancerType = LoadBalancerDefault>
-class Parallelizer2 {
+template <typename LoadBalancerType = LoadBalancerDefault> class Parallelizer2 {
 
 public:
 
@@ -88,8 +84,7 @@ public:
 	Parallelizer2(const CodeSectionParams& codeParams)
 	    : nthreads_(codeParams.npthreads)
 	    , stackSize_(codeParams.stackSize)
-	{
-	}
+	{ }
 
 	SizeType numberOfThreads() const { return nthreads_; }
 
@@ -108,7 +103,10 @@ public:
 
 	// weights, no balancer ==> create balancer with weights ==> delegate
 	template <typename SomeLambdaType>
-	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda, const VectorSizeType& weights)
+	void parallelFor(SizeType              start,
+	                 SizeType              end,
+	                 const SomeLambdaType& lambda,
+	                 const VectorSizeType& weights)
 	{
 		LoadBalancerType* loadBalancer = new LoadBalancerType(weights.size(), nthreads_);
 		loadBalancer->setWeights(weights);
@@ -118,38 +116,37 @@ public:
 	}
 
 	template <typename SomeLambdaType>
-	void parallelFor(SizeType start, SizeType end, const SomeLambdaType& lambda, const LoadBalancerType& loadBalancer)
+	void parallelFor(SizeType                start,
+	                 SizeType                end,
+	                 const SomeLambdaType&   lambda,
+	                 const LoadBalancerType& loadBalancer)
 	{
-		PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>* pfs = new PthreadFunctionStruct2<SomeLambdaType,
-		                                                                                           LoadBalancerType>[nthreads_];
-		pthread_t* thread_id = new pthread_t[nthreads_];
-		pthread_attr_t** attr = new pthread_attr_t*[nthreads_];
+		PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>* pfs
+		    = new PthreadFunctionStruct2<SomeLambdaType, LoadBalancerType>[nthreads_];
+		pthread_t*       thread_id = new pthread_t[nthreads_];
+		pthread_attr_t** attr      = new pthread_attr_t*[nthreads_];
 
 		for (SizeType j = 0; j < nthreads_; ++j) {
-			pfs[j].pfh = &lambda;
+			pfs[j].pfh          = &lambda;
 			pfs[j].loadBalancer = &loadBalancer;
-			pfs[j].threadNum = j;
-			pfs[j].start = start;
-			pfs[j].end = end;
-			pfs[j].nthreads = nthreads_;
+			pfs[j].threadNum    = j;
+			pfs[j].start        = start;
+			pfs[j].end          = end;
+			pfs[j].nthreads     = nthreads_;
 
 			attr[j] = new pthread_attr_t;
-			int ret = (stackSize_ > 0)
-			    ? pthread_attr_setstacksize(attr[j], stackSize_)
-			    : 0;
+			int ret
+			    = (stackSize_ > 0) ? pthread_attr_setstacksize(attr[j], stackSize_) : 0;
 			if (ret != 0) {
 				std::cerr << __FILE__;
 				std::cerr << "\tpthread_attr_setstacksize() "
 				             "has returned non-zero "
 				          << ret << "\n";
-				std::cerr
-				    << "\tIt is possible (but no certain) that "
-				       "the following error";
+				std::cerr << "\tIt is possible (but no certain) that "
+				             "the following error";
 				std::cerr << "\thappened.\n";
-				std::cerr
-				    << "\tEINVAL The stack size is less than ";
-				std::cerr
-				    << "PTHREAD_STACK_MIN (16384) bytes.\n";
+				std::cerr << "\tEINVAL The stack size is less than ";
+				std::cerr << "PTHREAD_STACK_MIN (16384) bytes.\n";
 				std::cerr << "\tI will ignore this error and "
 				             "let you continue\n";
 			}
@@ -158,7 +155,10 @@ public:
 			checkForError(ret);
 
 			ret = pthread_create(
-			    &thread_id[j], attr[j], thread_function_wrapper2<SomeLambdaType, LoadBalancerType>, &pfs[j]);
+			    &thread_id[j],
+			    attr[j],
+			    thread_function_wrapper2<SomeLambdaType, LoadBalancerType>,
+			    &pfs[j]);
 			checkForError(ret);
 		}
 
@@ -186,7 +186,7 @@ private:
 	}
 
 	SizeType nthreads_;
-	size_t stackSize_;
+	size_t   stackSize_;
 };
 } // namespace PsimagLite
 #endif // PARALLELIZER2PTHREAD_H

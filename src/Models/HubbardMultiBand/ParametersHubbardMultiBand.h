@@ -83,17 +83,16 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! FeAs Model Parameters
 template <typename ComplexOrRealType, typename QnType>
 struct ParametersHubbardMultiBand : public ParametersModelBase<ComplexOrRealType, QnType> {
 	// no connections here please!!
 	// connections are handled by the geometry
 
-	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
 	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType>>::Type VectorType;
 
 	template <typename IoInputType>
@@ -106,8 +105,7 @@ struct ParametersHubbardMultiBand : public ParametersModelBase<ComplexOrRealType
 		SizeType h = 1;
 		try {
 			io.readline(h, "NumberOfHoppingOrbitalMatrices=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		SizeType sites = 0;
 		io.readline(sites, "TotalNumberOfSites=");
@@ -122,15 +120,12 @@ struct ParametersHubbardMultiBand : public ParametersModelBase<ComplexOrRealType
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHubbardMultiBand";
 		io.createGroup(label);
@@ -142,8 +137,8 @@ struct ParametersHubbardMultiBand : public ParametersModelBase<ComplexOrRealType
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersHubbardMultiBand& parameters)
+	friend std::ostream& operator<<(std::ostream&                     os,
+	                                const ParametersHubbardMultiBand& parameters)
 	{
 		os << "Orbitals=" << parameters.orbitals << "\n";
 		os << "hubbardU\n";
@@ -154,11 +149,11 @@ struct ParametersHubbardMultiBand : public ParametersModelBase<ComplexOrRealType
 		return os;
 	}
 
-	SizeType orbitals;
+	SizeType       orbitals;
 	VectorRealType hubbardU;
 	// Onsite potential values, one for each site
 	VectorRealType potentialV;
-	VectorType hopOnSite;
+	VectorType     hopOnSite;
 };
 } // namespace Dmrg
 

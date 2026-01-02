@@ -84,13 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename CrsMatrixType>
-class SparseRow {
+template <typename CrsMatrixType> class SparseRow {
 public:
 
 	typedef typename CrsMatrixType::value_type ValueType;
-	typedef typename Vector<SizeType>::Type ColumnsType;
-	typedef typename Vector<ValueType>::Type VectorType;
+	typedef typename Vector<SizeType>::Type    ColumnsType;
+	typedef typename Vector<ValueType>::Type   VectorType;
 
 	void add(SizeType col, ValueType value)
 	{
@@ -118,11 +117,11 @@ public:
 			return 0;
 
 		Sort<ColumnsType> s;
-		ColumnsType iperm(cols_.size());
+		ColumnsType       iperm(cols_.size());
 		s.sort(cols_, iperm);
-		SizeType prevCol = cols_[0];
-		SizeType counter = 0;
-		ValueType value = 0;
+		SizeType  prevCol = cols_[0];
+		SizeType  counter = 0;
+		ValueType value   = 0;
 		for (SizeType i = 0; i < cols_.size(); i++) {
 			assert(cols_[i] < matrix.cols());
 			if (cols_[i] == prevCol) {
@@ -132,7 +131,7 @@ public:
 			matrix.pushCol(prevCol);
 			matrix.pushValue(value);
 			counter++;
-			value = values_[iperm[i]];
+			value   = values_[iperm[i]];
 			prevCol = cols_[i];
 		}
 		matrix.pushCol(prevCol);
@@ -156,7 +155,7 @@ public:
 private:
 
 	ColumnsType cols_;
-	VectorType values_;
+	VectorType  values_;
 
 }; // class SparseRow
 

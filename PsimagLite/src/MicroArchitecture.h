@@ -15,8 +15,7 @@ public:
 		vendorId_ = readLabel("/proc/cpuinfo", "vendor_id");
 		if (vendorId_.find("Intel") != String::npos) {
 			vendorId_ = "Intel";
-		}
-		else {
+		} else {
 			if (vendorId_.find("AMD") != String::npos)
 				vendorId_ = "AMD";
 			else
@@ -35,7 +34,7 @@ private:
 			return "";
 
 		String line;
-		bool flag = false;
+		bool   flag = false;
 		for (; std::getline(fin, line);) {
 			if (line.find(label) != String::npos) {
 				flag = true;
@@ -53,12 +52,12 @@ private:
 	static String extractOther(String vendorId)
 	{
 		std::string literal = ":";
-		size_t it = vendorId.find(literal);
+		size_t      it      = vendorId.find(literal);
 		if (it == String::npos)
 			return "";
 
 		SizeType index = it + 1;
-		SizeType ind = index;
+		SizeType ind   = index;
 		SizeType total = vendorId.length();
 		for (; ind < total; ++ind)
 			if (vendorId[ind] != ' ' && vendorId[ind] != '\t')

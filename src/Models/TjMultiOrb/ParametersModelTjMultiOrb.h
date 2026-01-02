@@ -81,8 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_PARAMS_TJMULTIORB_H
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! ModelTjMultiOrb Parameters
 template <typename RealType, typename QnType>
 struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> {
@@ -99,26 +98,24 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 
 		try {
 			io.readline(reinterpretAndTruncate, "JHundInfinity=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (orbitals != 2 && reinterpretAndTruncate > 0)
-			throw PsimagLite::RuntimeError("JHundInfinity>0 only possible for orbitals==2\n");
+			throw PsimagLite::RuntimeError(
+			    "JHundInfinity>0 only possible for orbitals==2\n");
 
 		if (reinterpretAndTruncate > 3)
-			throw PsimagLite::RuntimeError("JHundInfinity must be less or equal to 3\n");
+			throw PsimagLite::RuntimeError(
+			    "JHundInfinity must be less or equal to 3\n");
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelTjMultiOrb";
 		io.createGroup(label);
@@ -129,8 +126,8 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersModelTjMultiOrb& parameters)
+	friend std::ostream& operator<<(std::ostream&                    os,
+	                                const ParametersModelTjMultiOrb& parameters)
 	{
 		os << "potentialV\n";
 		os << parameters.potentialV;
@@ -141,8 +138,8 @@ struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> 
 
 	// Do not include here connection parameters
 	typename PsimagLite::Vector<RealType>::Type potentialV;
-	SizeType orbitals;
-	SizeType reinterpretAndTruncate;
+	SizeType                                    orbitals;
+	SizeType                                    reinterpretAndTruncate;
 };
 } // namespace Dmrg
 

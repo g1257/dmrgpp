@@ -3,31 +3,30 @@
 #include "FactorForTargetingExpression.hh"
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ComplexOrRealType>
-class KetForTargetingExpression
-{
+template <typename ComplexOrRealType> class KetForTargetingExpression {
 
-	using PairType = std::pair<SizeType, ComplexOrRealType>;
+	using PairType  = std::pair<SizeType, ComplexOrRealType>;
 	using SumStruct = std::vector<PairType>;
 
 public:
 
 	using FactorForTargetingExpressionType = FactorForTargetingExpression<ComplexOrRealType>;
 
-	enum class Kind { U,
+	enum class Kind
+	{
+		U,
 		X,
 		P,
 		M,
-		S };
+		S
+	};
 
 	KetForTargetingExpression()
 	    : factor_(1.0)
 	    , kind_(Kind::U)
-	{
-	}
+	{ }
 
 	KetForTargetingExpression(const std::string& str)
 	    : factor_(1.0)
@@ -42,10 +41,7 @@ public:
 		setKind();
 	}
 
-	void setFactor(const ComplexOrRealType& val)
-	{
-		factor_.set(val);
-	}
+	void setFactor(const ComplexOrRealType& val) { factor_.set(val); }
 
 	void multiply(const std::string& op)
 	{
@@ -53,14 +49,11 @@ public:
 			err("KetForTargetingExpression: multiply one op at a time\n");
 		}
 
-		op_ = op;
+		op_   = op;
 		kind_ = Kind::M;
 	}
 
-	void multiply(const ComplexOrRealType& val)
-	{
-		factor_.multiply(val);
-	}
+	void multiply(const ComplexOrRealType& val) { factor_.multiply(val); }
 
 	void sum(const KetForTargetingExpression& other)
 	{
@@ -115,29 +108,17 @@ public:
 		return str_;
 	}
 
-	int pIndex() const
-	{
-		return pIndex_;
-	}
+	int pIndex() const { return pIndex_; }
 
 	Kind kind() const { return kind_; }
 
 	const std::string op() const { return op_; }
 
-	bool isSummable() const
-	{
-		return (kind_ == Kind::P);
-	}
+	bool isSummable() const { return (kind_ == Kind::P); }
 
-	bool canSumBeFinished() const
-	{
-		return (kind_ == Kind::S && pVectors_to_sum_.size() > 1);
-	}
+	bool canSumBeFinished() const { return (kind_ == Kind::S && pVectors_to_sum_.size() > 1); }
 
-	ComplexOrRealType factor() const
-	{
-		return factor_.value();
-	}
+	ComplexOrRealType factor() const { return factor_.value(); }
 
 	SumStruct fillSumStruct() const
 	{
@@ -173,18 +154,18 @@ private:
 		--last;
 		if (str_.substr(0, 2) == "|P" && str_[last] == '>') {
 			pIndex_ = PsimagLite::atoi(str_.substr(2, last - 2));
-			kind_ = Kind::P;
+			kind_   = Kind::P;
 		} else {
 			kind_ = Kind::U;
 		}
 	}
 
-	std::string str_;
+	std::string                      str_;
 	FactorForTargetingExpressionType factor_;
-	Kind kind_;
-	int pIndex_ = -1;
-	std::string op_;
-	std::vector<SizeType> pVectors_to_sum_;
+	Kind                             kind_;
+	int                              pIndex_ = -1;
+	std::string                      op_;
+	std::vector<SizeType>            pVectors_to_sum_;
 };
 }
 #endif // KETFORTARGETINGEXPRESSION_HH

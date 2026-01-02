@@ -91,63 +91,59 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TridiagRixsStatic.h"
 #include "VectorWithOffsets.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_,
-    typename VectorWithOffsetType_,
-    typename TargetingBaseType,
-    typename TargetParamsType>
-class CorrectionVectorSkeleton
-{
+          typename VectorWithOffsetType_,
+          typename TargetingBaseType,
+          typename TargetParamsType>
+class CorrectionVectorSkeleton {
 
 public:
 
 	typedef CorrectionVectorSkeleton<LanczosSolverType_,
-	    VectorWithOffsetType_,
-	    TargetingBaseType,
-	    TargetParamsType>
-	    ThisType;
-	typedef LanczosSolverType_ LanczosSolverType;
-	typedef typename TargetingBaseType::MatrixVectorType MatrixVectorType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename ModelType::OperatorsType OperatorsType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename TargetingBaseType::WaveFunctionTransfType WaveFunctionTransfType;
+	                                 VectorWithOffsetType_,
+	                                 TargetingBaseType,
+	                                 TargetParamsType>
+	                                                              ThisType;
+	typedef LanczosSolverType_                                    LanczosSolverType;
+	typedef typename TargetingBaseType::MatrixVectorType          MatrixVectorType;
+	typedef typename MatrixVectorType::ModelType                  ModelType;
+	typedef typename ModelType::RealType                          RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type           VectorRealType;
+	typedef typename ModelType::OperatorsType                     OperatorsType;
+	typedef typename ModelType::ModelHelperType                   ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType          LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType   BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorType         OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType            BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType     SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                 ComplexOrRealType;
+	typedef typename BasisType::BlockType                         BlockType;
+	typedef typename TargetingBaseType::WaveFunctionTransfType    WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef VectorType TargetVectorType;
-	typedef typename TargetingBaseType::TargetingCommonType TargetingCommonType;
-	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
-	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
-	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
-	typedef CorrectionVectorFunction<LanczosMatrixType,
-	    TargetParamsType>
+	typedef typename VectorWithOffsetType::VectorType             VectorType;
+	typedef VectorType                                            TargetVectorType;
+	typedef typename TargetingBaseType::TargetingCommonType       TargetingCommonType;
+	typedef typename TargetingCommonType::TimeSerializerType      TimeSerializerType;
+	typedef typename LanczosSolverType::TridiagonalMatrixType     TridiagonalMatrixType;
+	typedef PsimagLite::Matrix<typename VectorType::value_type>   DenseMatrixType;
+	typedef PsimagLite::Matrix<RealType>                          DenseMatrixRealType;
+	typedef typename LanczosSolverType::PostProcType              PostProcType;
+	typedef typename LanczosSolverType::MatrixType                LanczosMatrixType;
+	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
 	    CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
 	    ParallelTriDiagType;
 	typedef TridiagRixsStatic<ModelType, LanczosSolverType, VectorWithOffsetType>
-	    TridiagRixsStaticType;
+	                                                              TridiagRixsStaticType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
-	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename ParallelTriDiagType::VectorMatrixFieldType   VectorMatrixFieldType;
+	typedef PsimagLite::Vector<SizeType>::Type                    VectorSizeType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type     VectorVectorRealType;
+	typedef typename ModelType::InputValidatorType                InputValidatorType;
 
-	class CalcR
-	{
+	class CalcR {
 
 	public:
 
@@ -155,8 +151,7 @@ public:
 
 		CalcR(const TargetParamsType& tstStruct, RealType E0, const VectorRealType& eigs)
 		    : action_(tstStruct, E0, eigs)
-		{
-		}
+		{ }
 
 		const ActionType& imag() const
 		{
@@ -178,17 +173,17 @@ public:
 	struct TypeWrapper {
 
 		typedef typename ThisType::MatrixComplexOrRealType MatrixComplexOrRealType;
-		typedef typename ThisType::VectorWithOffsetType VectorWithOffsetType;
-		typedef typename ModelType::SolverParamsType SolverParamsType;
+		typedef typename ThisType::VectorWithOffsetType    VectorWithOffsetType;
+		typedef typename ModelType::SolverParamsType       SolverParamsType;
 	};
 
 	typedef KrylovHelper<typename CalcR::ActionType, TypeWrapper> KrylovHelperType;
 
-	CorrectionVectorSkeleton(InputValidatorType& ioIn,
-	    const TargetParamsType& tstStruct,
-	    const ModelType& model,
-	    const LeftRightSuperType& lrs,
-	    const RealType& energy)
+	CorrectionVectorSkeleton(InputValidatorType&       ioIn,
+	                         const TargetParamsType&   tstStruct,
+	                         const ModelType&          model,
+	                         const LeftRightSuperType& lrs,
+	                         const RealType&           energy)
 	    : ioIn_(ioIn)
 	    , tstStruct_(tstStruct)
 	    , model_(model)
@@ -196,17 +191,18 @@ public:
 	    , energy_(energy)
 	    , progress_("CorrectionVectorSkeleton")
 	    , krylovHelper_(model.params(), tstStruct.firstRitz())
-	{
-	}
+	{ }
 
 	void calcDynVectors(const VectorWithOffsetType& tv0,
-	    VectorWithOffsetType& tv1,
-	    VectorWithOffsetType& tv2)
+	                    VectorWithOffsetType&       tv1,
+	                    VectorWithOffsetType&       tv2)
 	{
-		const bool needsTv2 = (!CalcR::ActionType::isValueComplex() || tstStruct_.algorithm() != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV);
+		const bool needsTv2 = (!CalcR::ActionType::isValueComplex()
+		                       || tstStruct_.algorithm()
+		                           != TargetParamsType::BaseType::AlgorithmEnum::KRYLOV);
 
 		const VectorWithOffsetType& phi = tv0;
-		tv1 = phi;
+		tv1                             = phi;
 		if (needsTv2)
 			tv2 = phi;
 
@@ -224,17 +220,19 @@ public:
 
 		for (SizeType i = 0; i < phi.sectors(); i++) {
 			VectorType sv;
-			SizeType i0 = phi.sector(i);
+			SizeType   i0 = phi.sector(i);
 			tv0.extract(sv, i0);
 			// g.s. is included separately
 			// set Aq
 			// tv0.setDataInSector(sv,i0);
 			// set xi
-			SizeType p = lrs_.super().findPartitionNumber(phi.offset(i0));
+			SizeType   p = lrs_.super().findPartitionNumber(phi.offset(i0));
 			VectorType xi(sv.size(), 0), xr(sv.size(), 0);
 
-			if (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
-				computeXiAndXrKrylov(xi, xr, phi, i0, V[i], T[i], eigs[i], steps[i]);
+			if (tstStruct_.algorithm()
+			    == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV) {
+				computeXiAndXrKrylov(
+				    xi, xr, phi, i0, V[i], T[i], eigs[i], steps[i]);
 			} else {
 				computeXiAndXrIndirect(xi, xr, sv, p);
 			}
@@ -250,9 +248,9 @@ public:
 	}
 
 	void calcDynVectors(const VectorWithOffsetType& tv0,
-	    const VectorWithOffsetType& tv1,
-	    VectorWithOffsetType& tv2,
-	    VectorWithOffsetType& tv3)
+	                    const VectorWithOffsetType& tv1,
+	                    VectorWithOffsetType&       tv2,
+	                    VectorWithOffsetType&       tv3)
 	{
 		VectorWithOffsetType tv4;
 		calcDynVectors(tv0, tv4, tv2);
@@ -264,22 +262,18 @@ public:
 
 private:
 
-	void computeXiAndXrIndirect(VectorType& xi,
-	    VectorType& xr,
-	    const VectorType& sv,
-	    SizeType p)
+	void
+	computeXiAndXrIndirect(VectorType& xi, VectorType& xr, const VectorType& sv, SizeType p)
 	{
 		if (tstStruct_.omega().first != PsimagLite::FREQ_REAL)
 			throw PsimagLite::RuntimeError("Matsubara only with KRYLOV\n");
 
-		const RealType fakeTime = 0;
-		typename ModelHelperType::Aux aux(p, lrs_);
-		typename ModelType::HamiltonianConnectionType hc(lrs_,
-		    ModelType::modelLinks(),
-		    fakeTime,
-		    model_.superOpHelper());
-		LanczosMatrixType h(model_, hc, aux);
-		RealType E0 = energy_;
+		const RealType                                fakeTime = 0;
+		typename ModelHelperType::Aux                 aux(p, lrs_);
+		typename ModelType::HamiltonianConnectionType hc(
+		    lrs_, ModelType::modelLinks(), fakeTime, model_.superOpHelper());
+		LanczosMatrixType            h(model_, hc, aux);
+		RealType                     E0 = energy_;
 		CorrectionVectorFunctionType cvft(h, tstStruct_, E0);
 
 		cvft.getXi(xi, sv);
@@ -291,17 +285,17 @@ private:
 		xr /= tstStruct_.eta();
 	}
 
-	void computeXiAndXrKrylov(VectorType& xi,
-	    VectorType& xr,
-	    const VectorWithOffsetType& phi,
-	    SizeType i0,
-	    const MatrixComplexOrRealType& V,
-	    const MatrixComplexOrRealType& T,
-	    const VectorRealType& eigs,
-	    SizeType steps)
+	void computeXiAndXrKrylov(VectorType&                    xi,
+	                          VectorType&                    xr,
+	                          const VectorWithOffsetType&    phi,
+	                          SizeType                       i0,
+	                          const MatrixComplexOrRealType& V,
+	                          const MatrixComplexOrRealType& T,
+	                          const VectorRealType&          eigs,
+	                          SizeType                       steps)
 	{
 		SizeType n2 = steps;
-		SizeType n = V.n_row();
+		SizeType n  = V.n_row();
 		if (T.n_col() != T.n_row())
 			throw PsimagLite::RuntimeError("T is not square\n");
 		if (V.n_col() != T.n_col())
@@ -312,48 +306,45 @@ private:
 		if (b1)
 			printRitz(eigs, i0);
 
-		ComplexOrRealType zone = 1.0;
+		ComplexOrRealType zone  = 1.0;
 		ComplexOrRealType zzero = 0.0;
 
 		TargetVectorType tmp(n2);
-		VectorType r(n2);
-		CalcR what(tstStruct_, energy_, eigs);
+		VectorType       r(n2);
+		CalcR            what(tstStruct_, energy_, eigs);
 
 		krylovHelper_.calcR(r, what.imag(), T, V, phi, n2, i0);
 
-		psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
 
 		xi.resize(n);
-		psimag::BLAS::GEMV('N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(xi[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(xi[0]), 1);
 
 		if (CalcR::ActionType::isValueComplex())
 			return;
 
 		krylovHelper_.calcR(r, what.real(), T, V, phi, n2, i0);
 
-		psimag::BLAS::GEMV('N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n2, n2, zone, &(T(0, 0)), n2, &(r[0]), 1, zzero, &(tmp[0]), 1);
 
 		xr.resize(n);
-		psimag::BLAS::GEMV('N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(xr[0]), 1);
+		psimag::BLAS::GEMV(
+		    'N', n, n2, zone, &(V(0, 0)), n, &(tmp[0]), 1, zzero, &(xr[0]), 1);
 	}
 
 	void triDiag(const VectorWithOffsetType& phi,
-	    VectorMatrixFieldType& T,
-	    VectorMatrixFieldType& V,
-	    VectorSizeType& steps)
+	             VectorMatrixFieldType&      T,
+	             VectorMatrixFieldType&      V,
+	             VectorSizeType&             steps)
 	{
-		RealType fakeTime = 0;
+		RealType                                              fakeTime = 0;
 		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
-		ParallelTriDiagType helperTriDiag(phi,
-		    T,
-		    V,
-		    steps,
-		    lrs_,
-		    fakeTime,
-		    model_,
-		    ioIn_);
+		ParallelTriDiagType helperTriDiag(phi, T, V, steps, lrs_, fakeTime, model_, ioIn_);
 
 		threadedTriDiag.loopCreate(helperTriDiag);
 	}
@@ -377,14 +368,14 @@ private:
 		std::cout << "\n";
 	}
 
-	InputValidatorType& ioIn_;
-	const TargetParamsType& tstStruct_;
-	const ModelType& model_;
-	const LeftRightSuperType& lrs_;
-	const RealType& energy_;
+	InputValidatorType&           ioIn_;
+	const TargetParamsType&       tstStruct_;
+	const ModelType&              model_;
+	const LeftRightSuperType&     lrs_;
+	const RealType&               energy_;
 	PsimagLite::ProgressIndicator progress_;
-	RealType weightForContinuedFraction_;
-	KrylovHelperType krylovHelper_;
+	RealType                      weightForContinuedFraction_;
+	KrylovHelperType              krylovHelper_;
 }; // class CorrectionVectorSkeleton
 
 } // namespace

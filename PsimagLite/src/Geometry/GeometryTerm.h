@@ -98,16 +98,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename ComplexOrRealType, typename InputType>
-class GeometryTerm {
+template <typename ComplexOrRealType, typename InputType> class GeometryTerm {
 
-	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
-	typedef GeometryDirection<ComplexOrRealType, GeometryBaseType>
-	    GeometryDirectionType;
+	typedef GeometryBase<ComplexOrRealType, InputType>             GeometryBaseType;
+	typedef GeometryDirection<ComplexOrRealType, GeometryBaseType> GeometryDirectionType;
 
 public:
 
-	typedef typename Real<ComplexOrRealType>::Type RealType;
+	typedef typename Real<ComplexOrRealType>::Type          RealType;
 	typedef typename GeometryDirectionType::InternalDofEnum InternalDofEnum;
 
 	struct Auxiliary {
@@ -117,21 +115,18 @@ public:
 		    , termId(t)
 		    , numberOfTerms(n)
 		    , linSize(l)
-		{
-		}
+		{ }
 
-		void write(PsimagLite::String label,
-		           IoSerializer& ioSerializer) const
+		void write(PsimagLite::String label, IoSerializer& ioSerializer) const
 		{
 			ioSerializer.createGroup(label);
 			ioSerializer.write(label + "/debug", debug);
 			ioSerializer.write(label + "/termId", termId);
-			ioSerializer.write(label + "/numberOfTerms",
-			                   numberOfTerms);
+			ioSerializer.write(label + "/numberOfTerms", numberOfTerms);
 			ioSerializer.write(label + "/linSize", linSize);
 		}
 
-		bool debug;
+		bool     debug;
 		SizeType termId;
 		SizeType numberOfTerms;
 		SizeType linSize;
@@ -140,8 +135,7 @@ public:
 	GeometryTerm()
 	    : orbitals_(0)
 	    , geometryBase_(0)
-	{
-	}
+	{ }
 
 	/** @class hide_geometry2
 	 - DegreesOfFreedom=integer Degrees of freedom on which the connectors
@@ -158,9 +152,7 @@ public:
 	    , gOptions_("none")
 	{
 		String savedPrefix = io.prefix();
-		io.prefix() += (aux.numberOfTerms > 1)
-		    ? "gt" + ttos(aux.termId) + ":"
-		    : "";
+		io.prefix() += (aux.numberOfTerms > 1) ? "gt" + ttos(aux.termId) + ":" : "";
 
 		InternalDofEnum idof = GeometryDirectionType::SPECIFIC;
 
@@ -169,9 +161,7 @@ public:
 		try {
 			io.readline(x, "DegreesOfFreedom=");
 			orbitals_ = x;
-		}
-		catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (orbitals_ == 0)
 			throw RuntimeError("DegreesOfFreedom=0 not allowed\n");
@@ -183,50 +173,35 @@ public:
 		bool constantValues = (gOptions_.find("ConstantValues") != String::npos);
 
 		if (s == "chain" || s == "longchain") {
-			geometryBase_ = new LongChain<ComplexOrRealType, InputType>(
-			    aux.linSize, io);
-		}
-		else if (s == "chainEx") {
+			geometryBase_
+			    = new LongChain<ComplexOrRealType, InputType>(aux.linSize, io);
+		} else if (s == "chainEx") {
 			throw RuntimeError("GeometryTerm::ctor(): ChainEx: no "
 			                   "longer supported.\n");
-		}
-		else if (s == "ladder") {
-			geometryBase_ = new Ladder<ComplexOrRealType, InputType>(
-			    aux.linSize, io);
-		}
-		else if (s == "ladderx") {
-			geometryBase_ = new LadderX<ComplexOrRealType, InputType>(
-			    aux.linSize, io);
-		}
-		else if (s == "ladderbath") {
-			geometryBase_ = new LadderBath<ComplexOrRealType, InputType>(
-			    aux.linSize, io);
-		}
-		else if (s == "ktwoniffour") {
-			geometryBase_ = new KTwoNiFFour<ComplexOrRealType, InputType>(
-			    aux.linSize, io);
-		}
-		else if (s == "star") {
-			geometryBase_ = new Star<ComplexOrRealType, InputType>(
-			    aux.linSize, io);
-		}
-		else if (s == "LongRange" || s == "General") {
+		} else if (s == "ladder") {
+			geometryBase_ = new Ladder<ComplexOrRealType, InputType>(aux.linSize, io);
+		} else if (s == "ladderx") {
+			geometryBase_ = new LadderX<ComplexOrRealType, InputType>(aux.linSize, io);
+		} else if (s == "ladderbath") {
+			geometryBase_
+			    = new LadderBath<ComplexOrRealType, InputType>(aux.linSize, io);
+		} else if (s == "ktwoniffour") {
+			geometryBase_
+			    = new KTwoNiFFour<ComplexOrRealType, InputType>(aux.linSize, io);
+		} else if (s == "star") {
+			geometryBase_ = new Star<ComplexOrRealType, InputType>(aux.linSize, io);
+		} else if (s == "LongRange" || s == "General") {
 			geometryBase_ = new LongRange<ComplexOrRealType, InputType>(
 			    aux.linSize, gOptions_, io);
 			idof = GeometryDirectionType::GENERAL;
-		}
-		else if (s == "Honeycomb") {
-			geometryBase_ = new Honeycomb<ComplexOrRealType, InputType>(
-			    aux.linSize, io);
-		}
-		else if (s.substr(0, 5) == "Super") {
-			std::cout << __FILE__ << " SuperGeometry " << s
-			          << " detected\n";
-			std::cerr << __FILE__ << " SuperGeometry " << s
-			          << " detected\n";
+		} else if (s == "Honeycomb") {
+			geometryBase_
+			    = new Honeycomb<ComplexOrRealType, InputType>(aux.linSize, io);
+		} else if (s.substr(0, 5) == "Super") {
+			std::cout << __FILE__ << " SuperGeometry " << s << " detected\n";
+			std::cerr << __FILE__ << " SuperGeometry " << s << " detected\n";
 			gOptions_ = s;
-		}
-		else {
+		} else {
 			throw RuntimeError("Unknown geometry " + s + "\n");
 		}
 
@@ -235,8 +210,7 @@ public:
 			typename GeometryDirectionType::Auxiliary aux(
 			    constantValues, i, idof, orbitals_);
 
-			directions_.push_back(
-			    GeometryDirectionType(io, aux, geometryBase_));
+			directions_.push_back(GeometryDirectionType(io, aux, geometryBase_));
 		}
 
 		bool hasModifier = false;
@@ -244,13 +218,10 @@ public:
 			String vModifier;
 			io.readline(vModifier, "GeometryValueModifier=");
 			hasModifier = true;
-		}
-		catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (hasModifier) {
-			throw RuntimeError(
-			    "GeometryValueModifier is no longer allowed\n");
+			throw RuntimeError("GeometryValueModifier is no longer allowed\n");
 		}
 
 		cacheValues();
@@ -305,8 +276,7 @@ public:
 		return str;
 	}
 
-	template <class Archive>
-	void write(Archive&, const unsigned int) { }
+	template <class Archive> void write(Archive&, const unsigned int) { }
 
 	template <typename SomeMemResolvType>
 	SizeType memResolv(SomeMemResolvType&, SizeType, String) const
@@ -314,7 +284,8 @@ public:
 		return 0;
 	}
 
-	const ComplexOrRealType& operator()(SizeType i1, SizeType edof1, SizeType i2, SizeType edof2) const
+	const ComplexOrRealType&
+	operator()(SizeType i1, SizeType edof1, SizeType i2, SizeType edof2) const
 	{
 		assert(geometryBase_);
 		int k1 = geometryBase_->index(i1, edof1, orbitals_);
@@ -324,14 +295,20 @@ public:
 	}
 
 	// assumes 1<smax+1 < emin
-	const ComplexOrRealType& operator()(SizeType smax, SizeType emin, SizeType i1, SizeType edof1, SizeType i2, SizeType edof2) const
+	const ComplexOrRealType& operator()(SizeType smax,
+	                                    SizeType emin,
+	                                    SizeType i1,
+	                                    SizeType edof1,
+	                                    SizeType i2,
+	                                    SizeType edof2) const
 	{
 		assert(geometryBase_);
-		bool bothFringe = (geometryBase_->fringe(i1, smax, emin) && geometryBase_->fringe(i2, smax, emin));
-		SizeType siteNew1 = i1;
-		SizeType siteNew2 = i2;
-		SizeType edofNew1 = edof1;
-		SizeType edofNew2 = edof2;
+		bool     bothFringe = (geometryBase_->fringe(i1, smax, emin)
+                                   && geometryBase_->fringe(i2, smax, emin));
+		SizeType siteNew1   = i1;
+		SizeType siteNew2   = i2;
+		SizeType edofNew1   = edof1;
+		SizeType edofNew2   = edof2;
 		if (bothFringe) {
 			if (i2 < i1) {
 				siteNew1 = i2;
@@ -352,7 +329,8 @@ public:
 			return false;
 
 		assert(geometryBase_);
-		bool bothFringe = (geometryBase_->fringe(i1, smax, emin) && geometryBase_->fringe(i2, smax, emin));
+		bool bothFringe = (geometryBase_->fringe(i1, smax, emin)
+		                   && geometryBase_->fringe(i2, smax, emin));
 
 		if (!bothFringe)
 			return geometryBase_->connected(i1, i2);
@@ -362,8 +340,7 @@ public:
 
 	bool connected(SizeType i1, SizeType i2) const
 	{
-		return (geometryBase_) ? geometryBase_->connected(i1, i2)
-		                       : false;
+		return (geometryBase_) ? geometryBase_->connected(i1, i2) : false;
 	}
 
 	String label() const
@@ -405,14 +382,12 @@ public:
 			for (SizeType dof1 = 0; dof1 < dofsi; dof1++) {
 				for (SizeType j = 0; j < linSize; j++) {
 					SizeType dofsj = orbitals(j);
-					for (SizeType dof2 = 0; dof2 < dofsj;
-					     dof2++) {
+					for (SizeType dof2 = 0; dof2 < dofsj; dof2++) {
 						if (!connected(i, j)) {
 							os << 0 << " ";
 							continue;
 						}
-						os << operator()(i, dof1, j, dof2)
-						   << " ";
+						os << operator()(i, dof1, j, dof2) << " ";
 					}
 				}
 
@@ -427,10 +402,7 @@ public:
 		return geometryBase_->handle(ind, jnd);
 	}
 
-	SizeType directions() const
-	{
-		return (geometryBase_) ? geometryBase_->dirs() : 0;
-	}
+	SizeType directions() const { return (geometryBase_) ? geometryBase_->dirs() : 0; }
 
 	SizeType calcDir(SizeType i, SizeType j) const
 	{
@@ -440,8 +412,7 @@ public:
 
 	String options() const { return gOptions_; }
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const GeometryTerm& gt)
+	friend std::ostream& operator<<(std::ostream& os, const GeometryTerm& gt)
 	{
 		os << "#GeometryDirections=" << gt.directions_.size() << "\n";
 		for (SizeType i = 0; i < gt.directions_.size(); i++)
@@ -463,7 +434,7 @@ private:
 		if (!geometryBase_)
 			return;
 
-		SizeType linSize = aux_.linSize;
+		SizeType linSize    = aux_.linSize;
 		SizeType matrixRank = geometryBase_->matrixRank(linSize, orbitals_);
 		cachedValues_.resize(matrixRank, matrixRank);
 
@@ -471,20 +442,16 @@ private:
 			for (SizeType i2 = 0; i2 < linSize; ++i2) {
 				if (!geometryBase_->connected(i1, i2))
 					continue;
-				for (SizeType edof1 = 0; edof1 < orbitals_;
-				     edof1++) {
-					int k1 = geometryBase_->index(
-					    i1, edof1, orbitals_);
+				for (SizeType edof1 = 0; edof1 < orbitals_; edof1++) {
+					int k1 = geometryBase_->index(i1, edof1, orbitals_);
 					if (k1 < 0)
 						continue;
-					for (SizeType edof2 = 0;
-					     edof2 < orbitals_;
-					     edof2++) {
-						int k2 = geometryBase_->index(
-						    i2, edof2, orbitals_);
+					for (SizeType edof2 = 0; edof2 < orbitals_; edof2++) {
+						int k2 = geometryBase_->index(i2, edof2, orbitals_);
 						if (k2 < 0)
 							continue;
-						cachedValues_(k1, k2) = calcValue(i1, edof1, i2, edof2);
+						cachedValues_(k1, k2)
+						    = calcValue(i1, edof1, i2, edof2);
 					}
 				}
 			}
@@ -506,12 +473,12 @@ private:
 
 	GeometryTerm& operator=(const GeometryTerm&);
 
-	Auxiliary aux_;
-	SizeType orbitals_;
-	GeometryBaseType* geometryBase_;
-	String gOptions_;
+	Auxiliary                                    aux_;
+	SizeType                                     orbitals_;
+	GeometryBaseType*                            geometryBase_;
+	String                                       gOptions_;
 	typename Vector<GeometryDirectionType>::Type directions_;
-	Matrix<ComplexOrRealType> cachedValues_;
+	Matrix<ComplexOrRealType>                    cachedValues_;
 }; // class GeometryTerm
 } // namespace PsimagLite
 

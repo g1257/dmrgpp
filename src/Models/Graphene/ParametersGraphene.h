@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! FeAs Model Parameters
 template <typename ComplexOrRealType, typename QnType>
@@ -94,7 +93,7 @@ struct ParametersGraphene : public ParametersModelBase<ComplexOrRealType, QnType
 	// connections are handled by the geometry
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
 
 	template <typename IoInputType>
 	ParametersGraphene(IoInputType& io)
@@ -106,15 +105,12 @@ struct ParametersGraphene : public ParametersModelBase<ComplexOrRealType, QnType
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersGraphene";
 		io.createGroup(label);

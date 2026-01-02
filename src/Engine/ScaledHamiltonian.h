@@ -4,29 +4,26 @@
 #include "ProgressIndicator.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // H' = c*H + d
 // c = oneovera = (2.0-epsilon)/Wstar
 // d = -oneovera*b = (2.0-epsilon)*(E0_+Wstar*0.5)/Wstar
 // FIXME: TODO: Constructor should only take c and d not tstruct and E0
-template <typename MatrixLanczosType, typename TargetParamsType>
-class ScaledHamiltonian
-{
+template <typename MatrixLanczosType, typename TargetParamsType> class ScaledHamiltonian {
 
 public:
 
-	typedef typename TargetParamsType::RealType RealType;
-	typedef typename MatrixLanczosType::ComplexOrRealType ComplexOrRealType;
+	typedef typename TargetParamsType::RealType                  RealType;
+	typedef typename MatrixLanczosType::ComplexOrRealType        ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                MatrixType;
+	typedef typename PsimagLite::Vector<RealType>::Type          VectorRealType;
 
-	ScaledHamiltonian(const MatrixLanczosType& mat,
-	    const TargetParamsType& tstStruct,
-	    const RealType& E0,
-	    ProgramGlobals::VerboseEnum verbose)
+	ScaledHamiltonian(const MatrixLanczosType&    mat,
+	                  const TargetParamsType&     tstStruct,
+	                  const RealType&             E0,
+	                  ProgramGlobals::VerboseEnum verbose)
 	    : matx_(mat)
 	    , tstStruct_(tstStruct)
 	    , E0_(E0)
@@ -36,9 +33,9 @@ public:
 		c_ = tstStruct_.chebyTransform()[0];
 		d_ = tstStruct_.chebyTransform()[1];
 
-		SizeType n = matx_.rows();
-		PsimagLite::ProgressIndicator progress("InternalMatrix");
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		SizeType                                      n = matx_.rows();
+		PsimagLite::ProgressIndicator                 progress("InternalMatrix");
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "H'=" << c_ << "*H " << d_ << "      (rank=" << n << ")";
 		progress.printline(msgg, std::cout);
@@ -46,10 +43,10 @@ public:
 		if (verbose == ProgramGlobals::VerboseEnum::NO)
 			return;
 
-		MatrixType dense;
+		MatrixType     dense;
 		VectorRealType eigs(n);
 		matx_.fullDiag(eigs, dense);
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << "eigs[0]=" << eigs[0] << " eigs[" << (n - 1) << "]=" << eigs[n - 1];
 		progress.printline(msgg2, std::cout);
@@ -75,10 +72,10 @@ public:
 private:
 
 	const MatrixLanczosType& matx_;
-	const TargetParamsType& tstStruct_;
-	const RealType& E0_;
-	RealType c_;
-	RealType d_;
+	const TargetParamsType&  tstStruct_;
+	const RealType&          E0_;
+	RealType                 c_;
+	RealType                 d_;
 }; // class ScaledHamiltonian
 }
 

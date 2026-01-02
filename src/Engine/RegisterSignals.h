@@ -85,13 +85,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <signal.h>
 #endif
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 /* PSIDOC RegisterSignals
    PLEASE NOTE: This is an experimental (CITATION NEEDED FIXME) feature. To use it
-		you must add \verb!-DUSE_SIGNALS! to
-		\verb!CPPFLAGS! in the Makefile.
+                you must add \verb!-DUSE_SIGNALS! to
+                \verb!CPPFLAGS! in the Makefile.
 
    \subsection{SIGUSR1}
 
@@ -114,7 +113,7 @@ namespace Dmrg
    The temporary file is named bufferN.txt where N is the PID of the DMRG++ process.
 
    HINT: qsig might be used to send a signal if the DMRG++ process is running in
-	 PBS or torque.
+         PBS or torque.
 
    CAVEATS: Leaving the buffer on for long periods of time might cause high memory
    consumption. The temporary buffer file is overwritten if the buffer is used more
@@ -124,7 +123,7 @@ namespace Dmrg
 void registerSignals()
 {
 #ifdef USE_SIGNALS
-	int signum = SIGUSR1;
+	int       signum  = SIGUSR1;
 	sigset_t* maskset = new sigset_t;
 
 	int ret = sigemptyset(maskset);
@@ -135,8 +134,8 @@ void registerSignals()
 
 	struct sigaction act;
 	act.sa_handler = PsimagLite::ProgressIndicator::updateBuffer;
-	act.sa_flags = 0;
-	act.sa_mask = *maskset;
+	act.sa_flags   = 0;
+	act.sa_mask    = *maskset;
 
 	ret = sigaction(signum, &act, 0);
 	delete maskset;

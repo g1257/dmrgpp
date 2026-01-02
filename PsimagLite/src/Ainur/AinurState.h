@@ -15,19 +15,19 @@ class AinurState {
 
 public:
 
-	typedef Vector<SizeType>::Type VectorSizeType;
-	typedef Vector<String>::Type VectorStringType;
+	typedef Vector<SizeType>::Type          VectorSizeType;
+	typedef Vector<String>::Type            VectorStringType;
 	typedef std::complex<DoubleOrFloatType> ComplexType;
 
 	struct myprint {
-		template <typename T>
-		void operator()(const T& t) const
+		template <typename T> void operator()(const T& t) const
 		{
 			std::cout << " --------> " << t << '\n';
 		}
 	};
 
-	enum ErrorEnum {
+	enum ErrorEnum
+	{
 		ERR_PARSE_UNDECLARED,
 		ERR_PARSE_DECLARED,
 		ERR_PARSE_FAILED,
@@ -65,7 +65,7 @@ public:
 		if (x >= 0)
 			err(errLabel(ERR_PARSE_DECLARED, key));
 
-		SizeType u = 1;
+		SizeType u    = 1;
 		SizeType last = d.length();
 		assert(last > 0);
 		if (last > 1 && d[last - 1] == '!') {
@@ -92,8 +92,8 @@ public:
 
 	void printUnused(std::ostream& os) const
 	{
-		SizeType n = used_.size();
-		bool flag = false;
+		SizeType n    = used_.size();
+		bool     flag = false;
 		for (SizeType i = 0; i < n; ++i) {
 			if (used_[i] > 0)
 				continue;
@@ -121,13 +121,11 @@ public:
 		SizeType n = ainurVariables_.size();
 		for (SizeType i = 0; i < n; ++i) {
 			const AinurVariable& ainurVar = ainurVariables_[i];
-			os << ainurVar.type << " " << ainurVar.key << " "
-			   << ainurVar.value << "\n";
+			os << ainurVar.type << " " << ainurVar.key << " " << ainurVar.value << "\n";
 		}
 	}
 
-	template <typename SomeType>
-	void readValue(SomeType& t, String label) const
+	template <typename SomeType> void readValue(SomeType& t, String label) const
 	{
 		int x = storageIndexByName(label);
 		if (x < 0)
@@ -146,8 +144,7 @@ public:
 		used_[x]++;
 	}
 
-	template <typename SomeMapType>
-	void setMap(SomeMapType& map) const
+	template <typename SomeMapType> void setMap(SomeMapType& map) const
 	{
 		const SizeType n = ainurVariables_.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -155,7 +152,7 @@ public:
 				continue;
 
 			const AinurVariable& ainurVar = ainurVariables_[i];
-			map[ainurVar.key] = ainurVar.value;
+			map[ainurVar.key]             = ainurVar.value;
 		}
 	}
 
@@ -165,22 +162,31 @@ public:
 	{
 		switch (e) {
 		case ERR_PARSE_UNDECLARED:
-			return "FATAL parse error: Undeclared " + key + "\n" + "You provided a label in the " + "input file that was not recognized.\n" + "Please check the spelling. If you intended " + "to introduce a temporary label,\nyou must "
-			                                                                                                                                                                                  "declare "
+			return "FATAL parse error: Undeclared " + key + "\n"
+			    + "You provided a label in the "
+			    + "input file that was not recognized.\n"
+			    + "Please check the spelling. If you intended "
+			    + "to introduce a temporary label,\nyou must "
+			      "declare "
 			    + "it first; please see Ainur input format "
 			      "documentation.\n";
 		case ERR_PARSE_DECLARED:
-			return "FATAL parse error: Already declared " + key + "\n" + "You tried to re-declare a variable that was "
-			                                                             "already declared.\n"
-			    + "If you intended to just provide a value for " + key + " then please remove the declaration word.\n";
+			return "FATAL parse error: Already declared " + key + "\n"
+			    + "You tried to re-declare a variable that was "
+			      "already declared.\n"
+			    + "If you intended to just provide a value for " + key
+			    + " then please remove the declaration word.\n";
 		case ERR_PARSE_FAILED:
-			return "FATAL parse error: Parsing failed near " + key + "\n" + "This is probably a syntax error.\n";
+			return "FATAL parse error: Parsing failed near " + key + "\n"
+			    + "This is probably a syntax error.\n";
 		case ERR_READ_UNDECLARED:
-			return "FATAL read error: No such label " + key + "\n" + "The label " + key + " must appear in the input file\n";
+			return "FATAL read error: No such label " + key + "\n" + "The label " + key
+			    + " must appear in the input file\n";
 		case ERR_READ_NO_VALUE:
 			return "FATAL read error: No value provided for "
 			       "label "
-			    + key + "\n" + "The label " + key + " must appear in the input file with " + "a non-empty value\n";
+			    + key + "\n" + "The label " + key
+			    + " must appear in the input file with " + "a non-empty value\n";
 		default:
 			return "FATAL Ainur error: Unknown error\n";
 		}
@@ -195,19 +201,17 @@ private:
 
 	int storageIndexByName(String key) const
 	{
-		auto it = std::find_if(ainurVariables_.begin(), ainurVariables_.end(), [&key](const AinurVariable& ainurVar) {
-			return (ainurVar.key == key);
-		});
+		auto it = std::find_if(ainurVariables_.begin(),
+		                       ainurVariables_.end(),
+		                       [&key](const AinurVariable& ainurVar)
+		                       { return (ainurVar.key == key); });
 
 		if (it == ainurVariables_.end())
 			return -1;
 		return it - ainurVariables_.begin();
 	}
 
-	static bool isEmptyValue(String s)
-	{
-		return (s.length() == 0 || s == ZERO_CHAR_STRING_);
-	}
+	static bool isEmptyValue(String s) { return (s.length() == 0 || s == ZERO_CHAR_STRING_); }
 
 	void installNativeMacros()
 	{
@@ -219,8 +223,8 @@ private:
 
 	void expandMacrosRecursively()
 	{
-		static const SizeType avoidInfMax = 100;
-		SizeType avoidInfCounter = 0;
+		static const SizeType avoidInfMax     = 100;
+		SizeType              avoidInfCounter = 0;
 		while (expandMacros()) {
 			if (avoidInfCounter++ > avoidInfMax) {
 				err("Recursion limit of " + ttos(avoidInfMax) + " exceeded.\n");
@@ -230,12 +234,13 @@ private:
 
 	bool expandMacros()
 	{
-		const SizeType n = ainurVariables_.size();
-		bool atLeastOneValueHasMacro = false;
+		const SizeType n                       = ainurVariables_.size();
+		bool           atLeastOneValueHasMacro = false;
 		for (SizeType i = 0; i < n; ++i) {
 			if (!used_[i])
 				continue;
-			std::pair<bool, PsimagLite::String> macro = expandOneValue(ainurVariables_[i].value);
+			std::pair<bool, PsimagLite::String> macro
+			    = expandOneValue(ainurVariables_[i].value);
 
 			if (!macro.first)
 				continue;
@@ -244,23 +249,22 @@ private:
 				macro.second = ainurMacros_.procNativeMacro(macro.second);
 			}
 
-			ainurVariables_[i].value = macro.second;
+			ainurVariables_[i].value  = macro.second;
 			ainurVariables_[i].opaque = "MACRO";
-			atLeastOneValueHasMacro = true;
+			atLeastOneValueHasMacro   = true;
 		}
 
 		return atLeastOneValueHasMacro;
 	}
 
 	// \[a-zA-Z]+
-	std::pair<bool, PsimagLite::String>
-	expandOneValue(const String& value) const
+	std::pair<bool, PsimagLite::String> expandOneValue(const String& value) const
 	{
-		const SizeType n = value.length();
+		const SizeType     n = value.length();
 		PsimagLite::String macroName;
 		PsimagLite::String retString;
-		bool hasAtLeastOneMacro = false;
-		SizeType status = 0; // 0 = outsite a macro, 1 = inside a macro
+		bool               hasAtLeastOneMacro = false;
+		SizeType           status = 0; // 0 = outsite a macro, 1 = inside a macro
 		for (SizeType i = 0; i < n; ++i) {
 			const char c = value[i];
 			if (c == '\\') {
@@ -275,8 +279,7 @@ private:
 
 			if (isValidCharForMacroName(c)) {
 				macroName += c;
-			}
-			else {
+			} else {
 
 				int x = storageIndexByName(macroName);
 				if (x < 0)
@@ -285,14 +288,13 @@ private:
 				assert(static_cast<SizeType>(x) < ainurVariables_.size());
 				retString += unquote(ainurVariables_[x].value) + c;
 
-				macroName = "";
+				macroName          = "";
 				hasAtLeastOneMacro = true;
-				status = 0;
+				status             = 0;
 			}
 		}
 
-		return std::pair<bool, PsimagLite::String>(hasAtLeastOneMacro,
-		                                           unquote(retString));
+		return std::pair<bool, PsimagLite::String>(hasAtLeastOneMacro, unquote(retString));
 	}
 
 	static bool isValidCharForMacroName(char c)
@@ -317,10 +319,10 @@ private:
 		return str;
 	}
 
-	static String ZERO_CHAR_STRING_;
-	AinurMacros ainurMacros_;
+	static String              ZERO_CHAR_STRING_;
+	AinurMacros                ainurMacros_;
 	std::vector<AinurVariable> ainurVariables_;
-	mutable VectorSizeType used_;
+	mutable VectorSizeType     used_;
 };
 
 } // namespace PsimagLite

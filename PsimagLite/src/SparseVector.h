@@ -88,11 +88,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <utility>
 
 namespace PsimagLite {
-template <typename FieldType>
-struct SparseVector {
+template <typename FieldType> struct SparseVector {
 public:
 
-	typedef FieldType value_type;
+	typedef FieldType                     value_type;
 	typedef std::pair<SizeType, SizeType> PairType;
 
 	SparseVector(const typename Vector<FieldType>::Type& v)
@@ -108,9 +107,7 @@ public:
 		}
 	}
 
-	void fromChunk(const typename Vector<FieldType>::Type& v,
-	               SizeType offset,
-	               SizeType total)
+	void fromChunk(const typename Vector<FieldType>::Type& v, SizeType offset, SizeType total)
 	{
 		resize(total);
 		for (SizeType i = 0; i < v.size(); i++) {
@@ -122,8 +119,7 @@ public:
 	SparseVector(SizeType n)
 	    : size_(n)
 	    , isSorted_(false)
-	{
-	}
+	{ }
 
 	void resize(SizeType x)
 	{
@@ -160,7 +156,10 @@ public:
 
 	FieldType value(SizeType x) const { return values_[x]; }
 
-	void toChunk(typename Vector<FieldType>::Type& dest, SizeType i0, SizeType total, bool test = false) const
+	void toChunk(typename Vector<FieldType>::Type& dest,
+	             SizeType                          i0,
+	             SizeType                          total,
+	             bool                              test = false) const
 	{
 		if (test) {
 			PairType firstLast = findFirstLast();
@@ -174,12 +173,11 @@ public:
 	}
 
 	template <typename SomeBasisType>
-	SizeType toChunk(typename Vector<FieldType>::Type& dest,
-	                 const SomeBasisType& parts) const
+	SizeType toChunk(typename Vector<FieldType>::Type& dest, const SomeBasisType& parts) const
 	{
-		SizeType part = findPartition(parts);
+		SizeType part   = findPartition(parts);
 		SizeType offset = parts.partition(part);
-		SizeType total = parts.partition(part + 1) - offset;
+		SizeType total  = parts.partition(part + 1) - offset;
 		dest.resize(total);
 		for (SizeType i = 0; i < total; i++)
 			dest[i] = 0;
@@ -188,16 +186,14 @@ public:
 		return part;
 	}
 
-	template <typename SomeBasisType>
-	SizeType findPartition(const SomeBasisType& parts) const
+	template <typename SomeBasisType> SizeType findPartition(const SomeBasisType& parts) const
 	{
 		PairType firstLast = findFirstLast();
-		SizeType ret = 0;
+		SizeType ret       = 0;
 		for (SizeType i = 0; i < parts.partition(); i++) {
 			if (firstLast.first >= parts.partition(i)) {
 				ret = i;
-			}
-			else {
+			} else {
 				break;
 			}
 		}
@@ -205,20 +201,17 @@ public:
 		for (SizeType i = 0; i < parts.partition(); i++) {
 			if (firstLast.second > parts.partition(i)) {
 				ret2 = i;
-			}
-			else {
+			} else {
 				break;
 			}
 		}
 		if (ret != ret2)
-			throw RuntimeError(
-			    "SparseVector::findPartition(...)"
-			    "vector extends more than one partition\n");
+			throw RuntimeError("SparseVector::findPartition(...)"
+			                   "vector extends more than one partition\n");
 		return ret;
 	}
 
-	template <typename T>
-	SparseVector<FieldType> operator*=(const T& val)
+	template <typename T> SparseVector<FieldType> operator*=(const T& val)
 	{
 		for (SizeType i = 0; i < values_.size(); i++)
 			values_[i] *= val;
@@ -255,7 +248,7 @@ public:
 		assert(indices_.size() == 1 || isSorted_);
 		assert(v.indices_.size() == 1 || v.isSorted_);
 		FieldType sum = 0;
-		SizeType i = 0, j = 0, index = 0;
+		SizeType  i = 0, j = 0, index = 0;
 
 		for (; i < indices_.size(); i++) {
 			index = indices_[i];
@@ -293,14 +286,14 @@ public:
 			return;
 
 		Sort<typename Vector<SizeType>::Type> sort;
-		typename Vector<SizeType>::Type iperm(indices_.size());
+		typename Vector<SizeType>::Type       iperm(indices_.size());
 		sort.sort(indices_, iperm);
 		typename Vector<FieldType>::Type values(iperm.size());
 		for (SizeType i = 0; i < values_.size(); i++)
 			values[i] = values_[iperm[i]];
 		values_.clear();
-		FieldType sum = values[0];
-		SizeType prevIndex = indices_[0];
+		FieldType                       sum       = values[0];
+		SizeType                        prevIndex = indices_[0];
 		typename Vector<SizeType>::Type indices;
 
 		for (SizeType i = 1; i < indices_.size(); i++) {
@@ -310,10 +303,9 @@ public:
 					values_.push_back(sum);
 					indices.push_back(prevIndex);
 				}
-				sum = values[i];
+				sum       = values[i];
 				prevIndex = indices_[i];
-			}
-			else {
+			} else {
 				sum += values[i];
 			}
 		}
@@ -321,7 +313,7 @@ public:
 			values_.push_back(sum);
 			indices.push_back(prevIndex);
 		}
-		indices_ = indices;
+		indices_  = indices;
 		isSorted_ = true;
 	}
 
@@ -333,22 +325,20 @@ public:
 	}
 
 	template <typename T, typename T2>
-	friend SparseVector<T2> operator*(const T& val,
-	                                  const SparseVector<T2>& sv);
+	friend SparseVector<T2> operator*(const T& val, const SparseVector<T2>& sv);
 
 private:
 
 	PairType findFirstLast() const
 	{
-		return PairType(
-		    *(std::min_element(indices_.begin(), indices_.end())),
-		    *(std::max_element(indices_.begin(), indices_.end())));
+		return PairType(*(std::min_element(indices_.begin(), indices_.end())),
+		                *(std::max_element(indices_.begin(), indices_.end())));
 	}
 
 	typename Vector<FieldType>::Type values_;
-	typename Vector<SizeType>::Type indices_;
-	SizeType size_;
-	bool isSorted_;
+	typename Vector<SizeType>::Type  indices_;
+	SizeType                         size_;
+	bool                             isSorted_;
 }; // class SparseVector
 
 template <typename FieldType>
@@ -367,16 +357,14 @@ SparseVector<T2> operator*(const T& val, const SparseVector<T2>& sv)
 	return res;
 }
 
-template <typename T>
-T operator*(const SparseVector<T>& v1, const SparseVector<T>& v2)
+template <typename T> T operator*(const SparseVector<T>& v1, const SparseVector<T>& v2)
 {
 	return v1.scalarProduct(v2);
 }
 } // namespace PsimagLite
 
 namespace PsimagLite {
-template <typename FieldType>
-inline FieldType norm(const SparseVector<FieldType>& v)
+template <typename FieldType> inline FieldType norm(const SparseVector<FieldType>& v)
 {
 	FieldType sum = 0;
 	for (SizeType i = 0; i < v.indices(); i++)
@@ -384,8 +372,7 @@ inline FieldType norm(const SparseVector<FieldType>& v)
 	return sqrt(sum);
 }
 
-template <typename FieldType>
-inline FieldType norm(const SparseVector<std::complex<FieldType>>& v)
+template <typename FieldType> inline FieldType norm(const SparseVector<std::complex<FieldType>>& v)
 {
 	std::complex<FieldType> sum = 0;
 	for (SizeType i = 0; i < v.indices(); i++)

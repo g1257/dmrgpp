@@ -29,26 +29,29 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
-template <typename Key, typename T, typename Compare = std::less<Key>>
-class Map {
+template <typename Key, typename T, typename Compare = std::less<Key>> class Map {
 public:
 
-	typedef std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type>
-	    Type;
+	typedef std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type> Type;
 }; // class Map
 
-template <typename T>
-class IsMapLike {
+template <typename T> class IsMapLike {
 public:
 
-	enum { True = false };
+	enum
+	{
+		True = false
+	};
 };
 
 template <typename Key, typename T, typename Compare>
 class IsMapLike<std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type>> {
 public:
 
-	enum { True = true };
+	enum
+	{
+		True = true
+	};
 };
 
 template <typename MapType>

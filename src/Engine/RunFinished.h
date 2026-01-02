@@ -2,11 +2,9 @@
 #define RUNFINISHED_H
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class RunFinished
-{
+class RunFinished {
 
 public:
 
@@ -14,8 +12,7 @@ public:
 	    : enabled_(enabled)
 	    , checked_(false)
 	    , value_(false)
-	{
-	}
+	{ }
 
 	bool OK(PsimagLite::String filename)
 	{
@@ -28,7 +25,8 @@ public:
 
 	void printTermination(PsimagLite::String filename)
 	{
-		static const PsimagLite::String str = "File " + filename + " exists, " + "and you chose no clobber. Refusing to run\n";
+		static const PsimagLite::String str = "File " + filename + " exists, "
+		    + "and you chose no clobber. Refusing to run\n";
 		std::cerr << str;
 		std::cout << str;
 	}
@@ -38,16 +36,16 @@ private:
 	void checkRun(PsimagLite::String filename)
 	{
 		checked_ = true;
-		value_ = false;
+		value_   = false;
 		std::ifstream fin(filename.c_str(), std::ios::ate);
 		if (!fin || fin.bad() || !fin.good()) {
 			value_ = false;
 			return;
 		}
 
-		char schar1[1024];
+		char           schar1[1024];
 		std::streampos size = fin.tellg();
-		int i = 1;
+		int            i    = 1;
 		while (i <= size) {
 			fin.seekg(-i, std::ios::end);
 			fin.getline(schar1, 1023);

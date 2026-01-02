@@ -6,7 +6,7 @@ namespace PsimagLite {
 namespace MPI {
 
 	int COMM_WORLD = 0;
-	int SUM = 0;
+	int SUM        = 0;
 
 	void init(int*, char***) { }
 

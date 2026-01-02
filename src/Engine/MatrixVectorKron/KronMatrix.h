@@ -88,24 +88,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename InitKronType>
-class KronMatrix
-{
+template <typename InitKronType> class KronMatrix {
 
-	typedef typename InitKronType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef KronConnections<InitKronType> KronConnectionsType;
-	typedef typename KronConnectionsType::MatrixType MatrixType;
-	typedef typename KronConnectionsType::VectorType VectorType;
-	typedef typename InitKronType::ArrayOfMatStructType ArrayOfMatStructType;
-	typedef typename InitKronType::GenIjPatchType GenIjPatchType;
+	typedef typename InitKronType::SparseMatrixType                SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                  ComplexOrRealType;
+	typedef KronConnections<InitKronType>                          KronConnectionsType;
+	typedef typename KronConnectionsType::MatrixType               MatrixType;
+	typedef typename KronConnectionsType::VectorType               VectorType;
+	typedef typename InitKronType::ArrayOfMatStructType            ArrayOfMatStructType;
+	typedef typename InitKronType::GenIjPatchType                  GenIjPatchType;
 	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename GenIjPatchType::BasisType BasisType;
-	typedef BATCHED_GEMM<InitKronType> BatchedGemmType;
+	typedef typename PsimagLite::Vector<SizeType>::Type            VectorSizeType;
+	typedef typename GenIjPatchType::BasisType                     BasisType;
+	typedef BATCHED_GEMM<InitKronType>                             BatchedGemmType;
 
 public:
 
@@ -114,7 +111,7 @@ public:
 	    , progress_("KronMatrix")
 	    , batchedGemm_(initKron)
 	{
-		PsimagLite::String str((initKron.loadBalance()) ? "true" : "false");
+		PsimagLite::String        str((initKron.loadBalance()) ? "true" : "false");
 		PsimagLite::OstringStream msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "KronMatrix: " << name << " sizes=" << initKron.size(InitKronType::NEW);
@@ -129,7 +126,7 @@ public:
 
 		if (batchedGemm_.enabled()) {
 			VectorType& xout = initKron_.xout();
-			VectorType xoutTmp(xout.size(), 0.0);
+			VectorType  xoutTmp(xout.size(), 0.0);
 			batchedGemm_.matrixVector(xoutTmp, initKron_.yin());
 			for (SizeType i = 0; i < xoutTmp.size(); ++i)
 				xout[i] += xoutTmp[i];
@@ -139,16 +136,17 @@ public:
 		}
 
 		KronConnectionsType kc(initKron_);
-		SizeType threads = PsimagLite::Concurrency::codeSectionParams.npthreads;
+		SizeType            threads = PsimagLite::Concurrency::codeSectionParams.npthreads;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 
 		if (initKron_.loadBalance()) {
 			PsimagLite::Parallelizer<KronConnectionsType,
-			    PsimagLite::LoadBalancerWeights>
+			                         PsimagLite::LoadBalancerWeights>
 			    parallelConnections(codeSectionParams);
 			parallelConnections.loopCreate(kc, initKron_.weightsOfPatchesNew());
 		} else {
-			PsimagLite::Parallelizer<KronConnectionsType> parallelConnections(codeSectionParams);
+			PsimagLite::Parallelizer<KronConnectionsType> parallelConnections(
+			    codeSectionParams);
 			parallelConnections.loopCreate(kc);
 		}
 
@@ -163,9 +161,9 @@ private:
 
 	const KronMatrix& operator=(const KronMatrix&);
 
-	InitKronType& initKron_;
+	InitKronType&                 initKron_;
 	PsimagLite::ProgressIndicator progress_;
-	BatchedGemmType batchedGemm_;
+	BatchedGemmType               batchedGemm_;
 }; // class KronMatrix
 
 } // namespace PsimagLite

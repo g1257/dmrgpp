@@ -9,19 +9,17 @@ class AinurReadable {
 
 public:
 
-	typedef Store StoreType;
-	typedef Vector<StoreType>::Type VectorStoreType;
-	typedef StoreType::AinurLexicalType AinurLexicalType;
+	typedef Store                              StoreType;
+	typedef Vector<StoreType>::Type            VectorStoreType;
+	typedef StoreType::AinurLexicalType        AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
-	typedef DoubleOrFloatType RealType;
-	typedef std::complex<RealType> ComplexType;
+	typedef DoubleOrFloatType                  RealType;
+	typedef std::complex<RealType>             ComplexType;
 
-	AinurReadable(const VectorStringType& names,
-	              const VectorStoreType& storage)
+	AinurReadable(const VectorStringType& names, const VectorStoreType& storage)
 	    : names_(names)
 	    , storage_(storage)
-	{
-	}
+	{ }
 
 	int storageIndexByName(String name) const
 	{
@@ -62,7 +60,7 @@ public:
 
 	void readValue(int& t, String s) const
 	{
-		s = prefix_ + s;
+		s     = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -75,7 +73,7 @@ public:
 
 	void readValue(RealType& t, String s) const
 	{
-		s = prefix_ + s;
+		s     = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -88,7 +86,7 @@ public:
 
 	void readValue(String& t, String s) const
 	{
-		s = prefix_ + s;
+		s     = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -105,15 +103,14 @@ public:
 	readValue(VectorLikeType& v, String sOrig) const
 	{
 		String s = prefix_ + sOrig;
-		int x = storageIndexByName(s);
+		int    x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
 
 		const Store& store = storage_[x];
 
 		if (store.type() == Store::MATRIX) {
-			std::cerr << "readValue: " << s
-			          << " coerced into vector\n";
+			std::cerr << "readValue: " << s << " coerced into vector\n";
 			Matrix<typename VectorLikeType::value_type> m;
 			readValue(m, sOrig);
 			v = m.data();
@@ -132,7 +129,7 @@ public:
 
 		String tmp = (n == 2) ? store.value(1, names_[x]) : "";
 		AinurLexicalType::removeTrailingBlanks(tmp);
-		size_t start = tmp.find("...");
+		size_t   start = tmp.find("...");
 		SizeType times = (start != String::npos && tmp.length() > 3)
 		    ? atoi(tmp.substr(start + 3, tmp.length() - 3).c_str())
 		    : 0;
@@ -147,8 +144,7 @@ public:
 				v.resize(times);
 			n = v.size();
 			for (SizeType i = 0; i < n; ++i)
-				getEntryFromString(v[i],
-				                   store.value(0, names_[x]));
+				getEntryFromString(v[i], store.value(0, names_[x]));
 			return;
 		}
 
@@ -166,7 +162,7 @@ public:
 	typename EnableIf<Loki::TypeTraits<FloatingType>::isArith, void>::Type
 	readValue(Matrix<FloatingType>& m, String s) const
 	{
-		s = prefix_ + s;
+		s     = prefix_ + s;
 		int x = storageIndexByName(s);
 		if (x < 0)
 			err("Not found " + s + "\n");
@@ -197,9 +193,8 @@ public:
 
 		for (SizeType i = 0; i < rows; ++i)
 			for (SizeType j = 0; j < cols; ++j)
-				getEntryFromString(
-				    m(i, j),
-				    store.value(i + j * rows + 2, names_[x]));
+				getEntryFromString(m(i, j),
+				                   store.value(i + j * rows + 2, names_[x]));
 	}
 
 	// read matrices
@@ -212,15 +207,9 @@ public:
 
 private:
 
-	void getEntryFromString(SizeType& entry, String s) const
-	{
-		entry = atoi(s.c_str());
-	}
+	void getEntryFromString(SizeType& entry, String s) const { entry = atoi(s.c_str()); }
 
-	void getEntryFromString(RealType& entry, String s) const
-	{
-		entry = atof(s.c_str());
-	}
+	void getEntryFromString(RealType& entry, String s) const { entry = atof(s.c_str()); }
 
 	void getEntryFromString(ComplexType& entry, String s) const
 	{
@@ -228,8 +217,8 @@ private:
 	}
 
 	const VectorStringType& names_;
-	const VectorStoreType& storage_;
-	String prefix_;
+	const VectorStoreType&  storage_;
+	String                  prefix_;
 }; // class AinurReadable
 
 } // namespace PsimagLite

@@ -82,39 +82,39 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename LeftRightSuperType>
-class InitKronBase
-{
+template <typename LeftRightSuperType> class InitKronBase {
 
 	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
 
 public:
 
-	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
-	typedef typename LeftRightSuperType::RealType RealType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorStorageType OperatorStorageType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef ArrayOfMatStruct<LeftRightSuperType> ArrayOfMatStructType;
-	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
-	typedef typename LeftRightSuperType::BasisType BasisType;
-	typedef typename BasisType::QnType QnType;
-	typedef typename ArrayOfMatStructType::GenIjPatchType GenIjPatchType;
+	typedef typename LeftRightSuperType::SparseMatrixType            SparseMatrixType;
+	typedef typename LeftRightSuperType::RealType                    RealType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorStorageType     OperatorStorageType;
+	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
+	typedef ArrayOfMatStruct<LeftRightSuperType>                     ArrayOfMatStructType;
+	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType   MatrixDenseOrSparseType;
+	typedef typename LeftRightSuperType::BasisType                   BasisType;
+	typedef typename BasisType::QnType                               QnType;
+	typedef typename ArrayOfMatStructType::GenIjPatchType            GenIjPatchType;
 	typedef typename PsimagLite::Vector<ArrayOfMatStructType*>::Type VectorArrayOfMatStructType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename ArrayOfMatStructType::VectorSizeType VectorSizeType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type     VectorType;
+	typedef typename ArrayOfMatStructType::VectorSizeType            VectorSizeType;
 
-	enum WhatBasisEnum { OLD,
-		NEW };
+	enum WhatBasisEnum
+	{
+		OLD,
+		NEW
+	};
 
 	InitKronBase(const LeftRightSuperType& lrs,
-	    SizeType m,
-	    const QnType& qn,
-	    RealType denseSparseThreshold,
-	    bool useLowerPart)
+	             SizeType                  m,
+	             const QnType&             qn,
+	             RealType                  denseSparseThreshold,
+	             bool                      useLowerPart)
 	    : progress_("InitKronBase")
 	    , mOld_(m)
 	    , mNew_(m)
@@ -124,7 +124,7 @@ public:
 	    , ijpatchesNew_(&ijpatchesOld_)
 	    , wftMode_(false)
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "::ctor (for H), ";
 		msg << "denseSparseThreshold= " << denseSparseThreshold;
@@ -155,15 +155,16 @@ public:
 		return (what == OLD) ? ijpatchesOld_.lrs() : ijpatchesNew_->lrs();
 	}
 
-	const VectorSizeType& patch(WhatBasisEnum what,
-	    typename GenIjPatchType::LeftOrRightEnumType i) const
+	const VectorSizeType& patch(WhatBasisEnum                                what,
+	                            typename GenIjPatchType::LeftOrRightEnumType i) const
 	{
 		return (what == OLD) ? ijpatchesOld_(i) : ijpatchesNew_->operator()(i);
 	}
 
 	SizeType offset(WhatBasisEnum what) const
 	{
-		return (what == OLD) ? ijpatchesOld_.lrs().super().partition(mOld_) : ijpatchesNew_->lrs().super().partition(mNew_);
+		return (what == OLD) ? ijpatchesOld_.lrs().super().partition(mOld_)
+		                     : ijpatchesNew_->lrs().super().partition(mNew_);
 	}
 
 	const ArrayOfMatStructType& xc(SizeType ic) const
@@ -184,23 +185,21 @@ public:
 
 	SizeType size(WhatBasisEnum what) const
 	{
-		return (what == OLD) ? sizeInternal(ijpatchesOld_, mOld_) : sizeInternal(*ijpatchesNew_, mNew_);
+		return (what == OLD) ? sizeInternal(ijpatchesOld_, mOld_)
+		                     : sizeInternal(*ijpatchesNew_, mNew_);
 	}
 
-	const VectorSizeType& weightsOfPatchesNew() const
-	{
-		return weightsOfPatches_;
-	}
+	const VectorSizeType& weightsOfPatchesNew() const { return weightsOfPatches_; }
 
-	void computeOffsets(VectorSizeType& offsetForPatches,
-	    WhatBasisEnum what)
+	void computeOffsets(VectorSizeType& offsetForPatches, WhatBasisEnum what)
 	{
-		assert(patch(what, GenIjPatchType::LEFT).size() == patch(what, GenIjPatchType::RIGHT).size());
+		assert(patch(what, GenIjPatchType::LEFT).size()
+		       == patch(what, GenIjPatchType::RIGHT).size());
 
-		SizeType npatch = patch(what, GenIjPatchType::LEFT).size();
-		SizeType sum = 0;
-		const BasisType& left = lrs(what).left();
-		const BasisType& right = lrs(what).right();
+		SizeType         npatch = patch(what, GenIjPatchType::LEFT).size();
+		SizeType         sum    = 0;
+		const BasisType& left   = lrs(what).left();
+		const BasisType& right  = lrs(what).right();
 
 		assert(offsetForPatches.size() == npatch + 1);
 		for (SizeType ipatch = 0; ipatch < npatch; ipatch++) {
@@ -222,15 +221,16 @@ public:
 
 	SizeType numberOfPatches(WhatBasisEnum what) const
 	{
-		assert(patch(what, GenIjPatchType::LEFT).size() == patch(what, GenIjPatchType::RIGHT).size());
+		assert(patch(what, GenIjPatchType::LEFT).size()
+		       == patch(what, GenIjPatchType::RIGHT).size());
 		return patch(what, GenIjPatchType::LEFT).size();
 	}
 
 	// In production mode this function should be empty
 	void checks(const MatrixDenseOrSparseType& Amat,
-	    const MatrixDenseOrSparseType& Bmat,
-	    SizeType ipatch,
-	    SizeType jpatch) const
+	            const MatrixDenseOrSparseType& Bmat,
+	            SizeType                       ipatch,
+	            SizeType                       jpatch) const
 	{
 #ifndef NDEBUG
 		SizeType lSizeI = lSizeFunction(NEW, ipatch);
@@ -246,28 +246,28 @@ public:
 
 protected:
 
-	void addOneConnection(const OperatorStorageType& A,
-	    const OperatorStorageType& B,
-	    const ComplexOrRealType& value,
-	    const ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
+	void addOneConnection(const OperatorStorageType&               A,
+	                      const OperatorStorageType&               B,
+	                      const ComplexOrRealType&                 value,
+	                      const ProgramGlobals::FermionOrBosonEnum fermionOrBoson)
 	{
 		OperatorStorageType Ahat;
 		calculateAhat(Ahat.getCRSNonConst(), A.getCRS(), value, fermionOrBoson);
 		ArrayOfMatStructType* x1 = new ArrayOfMatStructType(Ahat,
-		    ijpatchesOld_,
-		    *ijpatchesNew_,
-		    GenIjPatchType::LEFT,
-		    denseSparseThreshold_,
-		    useLowerPart_);
+		                                                    ijpatchesOld_,
+		                                                    *ijpatchesNew_,
+		                                                    GenIjPatchType::LEFT,
+		                                                    denseSparseThreshold_,
+		                                                    useLowerPart_);
 
 		xc_.push_back(x1);
 
 		ArrayOfMatStructType* y1 = new ArrayOfMatStructType(B,
-		    ijpatchesOld_,
-		    *ijpatchesNew_,
-		    GenIjPatchType::RIGHT,
-		    denseSparseThreshold_,
-		    useLowerPart_);
+		                                                    ijpatchesOld_,
+		                                                    *ijpatchesNew_,
+		                                                    GenIjPatchType::RIGHT,
+		                                                    denseSparseThreshold_,
+		                                                    useLowerPart_);
 		yc_.push_back(y1);
 	}
 
@@ -278,9 +278,9 @@ protected:
 	{
 		SizeType npatches = patch(what, GenIjPatchType::LEFT).size();
 		assert(npatches > 0);
-		SizeType ip = 0;
-		VectorSizeType weights(npatches, 0);
-		const BasisType& left = lrs(what).left();
+		SizeType         ip = 0;
+		VectorSizeType   weights(npatches, 0);
+		const BasisType& left  = lrs(what).left();
 		const BasisType& right = lrs(what).right();
 
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
@@ -312,16 +312,14 @@ protected:
 	// -------------------
 	// copy xout(:) to vout(:)
 	// -------------------
-	void copyOut(VectorType& vout,
-	    const VectorType& xout,
-	    const VectorSizeType& vstart) const
+	void copyOut(VectorType& vout, const VectorType& xout, const VectorSizeType& vstart) const
 	{
 		const VectorSizeType& permInverse = lrs(NEW).super().permutationInverse();
-		SizeType offset1 = offset(NEW);
-		SizeType nl = lrs(NEW).left().hamiltonian().rows();
-		SizeType npatches = patch(NEW, GenIjPatchType::LEFT).size();
-		const BasisType& left = lrs(NEW).left();
-		const BasisType& right = lrs(NEW).right();
+		SizeType              offset1     = offset(NEW);
+		SizeType              nl          = lrs(NEW).left().hamiltonian().rows();
+		SizeType              npatches    = patch(NEW, GenIjPatchType::LEFT).size();
+		const BasisType&      left        = lrs(NEW).left();
+		const BasisType&      right       = lrs(NEW).right();
 
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
 
@@ -334,7 +332,7 @@ protected:
 			assert(right.partition(jgroup + 1) >= right.partition(jgroup));
 			SizeType sizeRight = right.partition(jgroup + 1) - right.partition(jgroup);
 
-			SizeType left_offset = left.partition(igroup);
+			SizeType left_offset  = left.partition(igroup);
 			SizeType right_offset = right.partition(jgroup);
 
 			for (SizeType ileft = 0; ileft < sizeLeft; ++ileft) {
@@ -367,20 +365,21 @@ private:
 	{
 		long unsigned int max = *(std::max_element(weights.begin(), weights.end()));
 		max >>= 31;
-		SizeType bits = 1 + PsimagLite::log2Integer(max);
+		SizeType bits     = 1 + PsimagLite::log2Integer(max);
 		SizeType npatches = weights.size();
 		weightsOfPatches_.resize(npatches);
 		for (SizeType ipatch = 0; ipatch < npatches; ++ipatch) {
-			long unsigned int tmp = (weights[ipatch] >> bits);
+			long unsigned int tmp     = (weights[ipatch] >> bits);
 			weightsOfPatches_[ipatch] = (max == 0) ? weights[ipatch] : tmp;
 		}
 	}
 
-	static SizeType sizeInternal(const GenIjPatchType& ijpatches,
-	    SizeType m)
+	static SizeType sizeInternal(const GenIjPatchType& ijpatches, SizeType m)
 	{
-		assert(ijpatches.lrs().super().partition(m + 1) >= ijpatches.lrs().super().partition(m));
-		return ijpatches.lrs().super().partition(m + 1) - ijpatches.lrs().super().partition(m);
+		assert(ijpatches.lrs().super().partition(m + 1)
+		       >= ijpatches.lrs().super().partition(m));
+		return ijpatches.lrs().super().partition(m + 1)
+		    - ijpatches.lrs().super().partition(m);
 	}
 
 	static void cacheSigns(VectorBoolType& signs, const VectorSizeType& electrons)
@@ -391,17 +390,21 @@ private:
 	}
 
 	// Ahat(ia,ja) = (-1)^e_L(ia) A(ia,ja)*value
-	void calculateAhat(SparseMatrixType& Ahat,
-	    const SparseMatrixType& A,
-	    ComplexOrRealType val,
-	    ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
+	void calculateAhat(SparseMatrixType&                  Ahat,
+	                   const SparseMatrixType&            A,
+	                   ComplexOrRealType                  val,
+	                   ProgramGlobals::FermionOrBosonEnum bosonOrFermion) const
 	{
-		Ahat = A;
+		Ahat          = A;
 		SizeType rows = Ahat.rows();
 		assert(signsNew_.size() >= rows);
 		SizeType counter = 0;
 		for (SizeType i = 0; i < rows; ++i) {
-			RealType sign = (bosonOrFermion == ProgramGlobals::FermionOrBosonEnum::FERMION && signsNew_[i]) ? -1.0 : 1.0;
+			RealType sign
+			    = (bosonOrFermion == ProgramGlobals::FermionOrBosonEnum::FERMION
+			       && signsNew_[i])
+			    ? -1.0
+			    : 1.0;
 			for (int k = Ahat.getRowPtr(i); k < Ahat.getRowPtr(i + 1); ++k) {
 				ComplexOrRealType tmp = Ahat.getValue(k) * sign * val;
 				Ahat.setValues(counter++, tmp);
@@ -409,18 +412,17 @@ private:
 		}
 	}
 
-	SizeType lSizeFunction(WhatBasisEnum what,
-	    SizeType ipatch) const
+	SizeType lSizeFunction(WhatBasisEnum what, SizeType ipatch) const
 	{
 		SizeType igroup = patch(what, GenIjPatchType::LEFT)[ipatch];
 		return lrs(what).left().partition(igroup + 1) - lrs(what).left().partition(igroup);
 	}
 
-	SizeType rSizeFunction(WhatBasisEnum what,
-	    SizeType ipatch) const
+	SizeType rSizeFunction(WhatBasisEnum what, SizeType ipatch) const
 	{
 		SizeType jgroup = patch(what, GenIjPatchType::RIGHT)[ipatch];
-		return lrs(what).right().partition(jgroup + 1) - lrs(what).right().partition(jgroup);
+		return lrs(what).right().partition(jgroup + 1)
+		    - lrs(what).right().partition(jgroup);
 	}
 
 	InitKronBase(const InitKronBase&);
@@ -428,17 +430,17 @@ private:
 	InitKronBase& operator=(const InitKronBase&);
 
 	PsimagLite::ProgressIndicator progress_;
-	SizeType mOld_;
-	SizeType mNew_;
-	const RealType denseSparseThreshold_;
-	const bool useLowerPart_;
-	GenIjPatchType ijpatchesOld_;
-	GenIjPatchType* ijpatchesNew_;
-	VectorSizeType weightsOfPatches_;
-	VectorArrayOfMatStructType xc_;
-	VectorArrayOfMatStructType yc_;
-	VectorBoolType signsNew_;
-	bool wftMode_;
+	SizeType                      mOld_;
+	SizeType                      mNew_;
+	const RealType                denseSparseThreshold_;
+	const bool                    useLowerPart_;
+	GenIjPatchType                ijpatchesOld_;
+	GenIjPatchType*               ijpatchesNew_;
+	VectorSizeType                weightsOfPatches_;
+	VectorArrayOfMatStructType    xc_;
+	VectorArrayOfMatStructType    yc_;
+	VectorBoolType                signsNew_;
+	bool                          wftMode_;
 };
 } // namespace Dmrg
 

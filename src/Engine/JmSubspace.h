@@ -86,30 +86,27 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Sort.h" // in PsimagLite
 #include "Su2SymmetryGlobals.h"
 
-namespace Dmrg
-{
-template <typename SparseMatrixType, typename SymmetryRelatedType>
-class JmSubspace
-{
+namespace Dmrg {
+template <typename SparseMatrixType, typename SymmetryRelatedType> class JmSubspace {
 
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	typedef typename SparseMatrixType::value_type              SparseElementType;
 	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef std::pair<PairType, PairType> TwoPairsType;
-	typedef Su2SymmetryGlobals<RealType> Su2SymmetryGlobalsType;
+	typedef std::pair<SizeType, SizeType>                      PairType;
+	typedef std::pair<PairType, PairType>                      TwoPairsType;
+	typedef Su2SymmetryGlobals<RealType>                       Su2SymmetryGlobalsType;
 	typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
-	typedef PsimagLite::PackIndices PackIndicesType;
+	typedef PsimagLite::PackIndices                            PackIndicesType;
 
 public:
 
 	typedef std::pair<PairType, TwoPairsType> FlavorType;
 
 	JmSubspace(const PairType& jm,
-	    SizeType index,
-	    const PairType& jm1,
-	    const PairType& jm2,
-	    SizeType nelectrons,
-	    int heavy = 1)
+	           SizeType        index,
+	           const PairType& jm1,
+	           const PairType& jm2,
+	           SizeType        nelectrons,
+	           int             heavy = 1)
 	    : jm_(jm)
 	    , nelectrons_(nelectrons)
 	    , heavy_(heavy)
@@ -118,21 +115,18 @@ public:
 		push(index, jm1, jm2, nelectrons);
 	}
 
-	static void setToProduct(const SymmetryRelatedType* symm1,
-	    const SymmetryRelatedType* symm2,
-	    const PsimagLite::Vector<SizeType>::Type& ne1,
-	    const PsimagLite::Vector<SizeType>::Type& ne2)
+	static void setToProduct(const SymmetryRelatedType*                symm1,
+	                         const SymmetryRelatedType*                symm2,
+	                         const PsimagLite::Vector<SizeType>::Type& ne1,
+	                         const PsimagLite::Vector<SizeType>::Type& ne2)
 	{
 		symm1_ = symm1;
 		symm2_ = symm2;
-		ne1_ = &ne1;
-		ne2_ = &ne2;
+		ne1_   = &ne1;
+		ne2_   = &ne2;
 	}
 
-	void push(SizeType index,
-	    const PairType& jm1,
-	    const PairType& jm2,
-	    SizeType nelectrons)
+	void push(SizeType index, const PairType& jm1, const PairType& jm2, SizeType nelectrons)
 	{
 		if (nelectrons != nelectrons_)
 			err("JmSubspace::push(): nelectrons changed!!\n");
@@ -142,8 +136,8 @@ public:
 
 	bool operator==(const std::pair<PairType, SizeType>& nejm) const
 	{
-		std::pair<PairType, SizeType> nejmStored = std::pair<PairType, SizeType>(jm_,
-		    nelectrons_);
+		std::pair<PairType, SizeType> nejmStored
+		    = std::pair<PairType, SizeType>(jm_, nelectrons_);
 		return (nejm == nejmStored);
 	}
 
@@ -153,7 +147,7 @@ public:
 	SizeType createFactors(SparseMatrixType& factors, SizeType offset)
 	{
 		flavors_.clear();
-		PsimagLite::Vector<SizeType>::Type perm(indices_.size());
+		PsimagLite::Vector<SizeType>::Type                   perm(indices_.size());
 		PsimagLite::Sort<PsimagLite::Vector<SizeType>::Type> sort;
 		sort.sort(flavorIndices_, perm);
 		SizeType flavorSaved = flavorIndices_[0];
@@ -173,20 +167,11 @@ public:
 		return flavors_.size();
 	}
 
-	PairType getJmValue() const
-	{
-		return jm_;
-	}
+	PairType getJmValue() const { return jm_; }
 
-	SizeType numberOfFlavors() const
-	{
-		return flavors_.size();
-	}
+	SizeType numberOfFlavors() const { return flavors_.size(); }
 
-	SizeType getFlavor(SizeType i) const
-	{
-		return flavors_[i];
-	}
+	SizeType getFlavor(SizeType i) const { return flavors_[i]; }
 
 	SizeType getNe() const { return nelectrons_; }
 
@@ -201,10 +186,7 @@ public:
 		values_.clear();
 	}
 
-	SizeType qn() const
-	{
-		return SymmetryRelatedType::neJmToIndex(nelectrons_, jm_);
-	}
+	SizeType qn() const { return SymmetryRelatedType::neJmToIndex(nelectrons_, jm_); }
 
 	SizeType findFreeRow(SizeType counter, SizeType total)
 	{
@@ -217,18 +199,14 @@ public:
 		throw PsimagLite::RuntimeError("findfreerow: no free rows\n");
 	}
 
-	static SizeType flavor(SizeType f1,
-	    SizeType f2,
-	    SizeType ne1,
-	    SizeType ne2,
-	    SizeType j1,
-	    SizeType j2)
+	static SizeType
+	flavor(SizeType f1, SizeType f2, SizeType ne1, SizeType ne2, SizeType j1, SizeType j2)
 	{
-		SizeType x = f1 + f2 * symm1_->flavorsMax();
-		SizeType y = ne1 + ne2 * symm1_->electronsMax();
-		SizeType z = j1 + j2 * symm1_->jMax();
+		SizeType x    = f1 + f2 * symm1_->flavorsMax();
+		SizeType y    = ne1 + ne2 * symm1_->electronsMax();
+		SizeType z    = j1 + j2 * symm1_->jMax();
 		SizeType xmax = symm1_->flavorsMax() * symm2_->flavorsMax();
-		SizeType ret = x + y * xmax;
+		SizeType ret  = x + y * xmax;
 		SizeType ymax = symm1_->electronsMax() * symm2_->electronsMax();
 		return ret + z * xmax * ymax;
 	}
@@ -237,17 +215,17 @@ private:
 
 	void setFlavorsIndex(SizeType i, const PairType& jm1, const PairType& jm2)
 	{
-		SizeType alpha = 0, beta = 0;
+		SizeType        alpha = 0, beta = 0;
 		PackIndicesType pack(symm1_->size());
 		pack.unpack(alpha, beta, i);
 
-		SizeType ne1 = (*ne1_)[alpha];
-		SizeType ne2 = (*ne2_)[beta];
-		SizeType flavor1 = symm1_->getFlavor(alpha);
-		SizeType flavor2 = symm2_->getFlavor(beta);
-		PairType flavorPair = PairType(flavor1, flavor2);
-		PairType nePair = PairType(ne1, ne2);
-		PairType j1j2 = PairType(jm1.first, jm2.first);
+		SizeType   ne1         = (*ne1_)[alpha];
+		SizeType   ne2         = (*ne2_)[beta];
+		SizeType   flavor1     = symm1_->getFlavor(alpha);
+		SizeType   flavor2     = symm2_->getFlavor(beta);
+		PairType   flavorPair  = PairType(flavor1, flavor2);
+		PairType   nePair      = PairType(ne1, ne2);
+		PairType   j1j2        = PairType(jm1.first, jm2.first);
 		FlavorType flavorPair2 = FlavorType(flavorPair, TwoPairsType(nePair, j1j2));
 		flavorIndices_.push_back(calculateFlavor(flavorPair2));
 
@@ -260,28 +238,28 @@ private:
 	static SizeType calculateFlavor(const FlavorType& g)
 	{
 		// order is : f1, f2, ne1, ne2, j1, j2
-		SizeType f1 = (g.first).first;
-		SizeType f2 = (g.first).second;
-		TwoPairsType tp = g.second;
-		SizeType ne1 = (tp.first).first;
-		SizeType ne2 = (tp.first).second;
-		SizeType j1 = (tp.second).first;
-		SizeType j2 = (tp.second).second;
+		SizeType     f1  = (g.first).first;
+		SizeType     f2  = (g.first).second;
+		TwoPairsType tp  = g.second;
+		SizeType     ne1 = (tp.first).first;
+		SizeType     ne2 = (tp.first).second;
+		SizeType     j1  = (tp.second).first;
+		SizeType     j2  = (tp.second).second;
 		return flavor(f1, f2, ne1, ne2, j1, j2);
 	}
 
-	PairType jm_;
-	SizeType nelectrons_;
-	int heavy_;
-	ClebschGordanType* cgObject_;
-	PsimagLite::Vector<SizeType>::Type indices_;
+	PairType                                    jm_;
+	SizeType                                    nelectrons_;
+	int                                         heavy_;
+	ClebschGordanType*                          cgObject_;
+	PsimagLite::Vector<SizeType>::Type          indices_;
 	typename PsimagLite::Vector<RealType>::Type cg_, values_;
 	typename PsimagLite::Vector<SizeType>::Type flavors_, flavorIndices_;
 
 	static const PsimagLite::Vector<SizeType>::Type* ne1_;
 	static const PsimagLite::Vector<SizeType>::Type* ne2_;
-	static const SymmetryRelatedType* symm1_;
-	static const SymmetryRelatedType* symm2_;
+	static const SymmetryRelatedType*                symm1_;
+	static const SymmetryRelatedType*                symm2_;
 	static SizeType flavorsMaxPerSite__, numberOfSites__, electronsMaxPerSite__, jMaxPerSite__;
 }; // class JmSubspace
 
@@ -292,10 +270,12 @@ template <typename SparseMatrixType, typename SymmetryRelatedType>
 const SymmetryRelatedType* JmSubspace<SparseMatrixType, SymmetryRelatedType>::symm2_ = 0;
 
 template <typename SparseMatrixType, typename SymmetryRelatedType>
-const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType, SymmetryRelatedType>::ne1_ = 0;
+const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType, SymmetryRelatedType>::ne1_
+    = 0;
 
 template <typename SparseMatrixType, typename SymmetryRelatedType>
-const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType, SymmetryRelatedType>::ne2_ = 0;
+const PsimagLite::Vector<SizeType>::Type* JmSubspace<SparseMatrixType, SymmetryRelatedType>::ne2_
+    = 0;
 
 } // namespace Dmrg
 

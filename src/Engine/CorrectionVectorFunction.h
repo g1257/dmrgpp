@@ -81,18 +81,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CORRECTION_V_FUNCTION_H
 #include "ConjugateGradient.h"
 
-namespace Dmrg
-{
-template <typename MatrixType, typename InfoType>
-class CorrectionVectorFunction
-{
+namespace Dmrg {
+template <typename MatrixType, typename InfoType> class CorrectionVectorFunction {
 
-	typedef typename MatrixType::value_type FieldType;
+	typedef typename MatrixType::value_type              FieldType;
 	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
-	typedef typename PsimagLite::Real<FieldType>::Type RealType;
+	typedef typename PsimagLite::Real<FieldType>::Type   RealType;
 
-	class InternalMatrix
-	{
+	class InternalMatrix {
 
 	public:
 
@@ -110,8 +106,8 @@ class CorrectionVectorFunction
 
 		void matrixVectorProduct(VectorType& x, const VectorType& y) const
 		{
-			RealType eta = info_.eta();
-			RealType omegaMinusE0 = info_.omega().second + E0_;
+			RealType   eta          = info_.eta();
+			RealType   omegaMinusE0 = info_.omega().second + E0_;
 			VectorType xTmp(x.size(), 0);
 			m_.matrixVectorProduct(xTmp, y); // xTmp = Hy
 			VectorType x2(x.size(), 0);
@@ -122,7 +118,8 @@ class CorrectionVectorFunction
 			// x <= x2 + f1*omegaMinusE0*xTmp + (omegaMinusE0*omegaMinusE0 + eta*eta)*y;
 			// equivalent
 			for (SizeType i = 0; i < x.size(); ++i)
-				x[i] = x2[i] + f1 * omegaMinusE0 * xTmp[i] + (omegaMinusE0 * omegaMinusE0 + eta * eta) * y[i];
+				x[i] = x2[i] + f1 * omegaMinusE0 * xTmp[i]
+				    + (omegaMinusE0 * omegaMinusE0 + eta * eta) * y[i];
 
 			x /= (-eta);
 		}
@@ -130,8 +127,8 @@ class CorrectionVectorFunction
 	private:
 
 		const MatrixType& m_;
-		const InfoType& info_;
-		RealType E0_;
+		const InfoType&   info_;
+		RealType          E0_;
 	};
 
 	typedef ConjugateGradient<InternalMatrix> ConjugateGradientType;
@@ -141,8 +138,7 @@ public:
 	CorrectionVectorFunction(const MatrixType& m, const InfoType& info, RealType E0)
 	    : im_(m, info, E0)
 	    , cg_(info.cgSteps(), info.cgEps())
-	{
-	}
+	{ }
 
 	void getXi(VectorType& result, const VectorType& sv) const
 	{
@@ -154,7 +150,7 @@ public:
 
 private:
 
-	InternalMatrix im_;
+	InternalMatrix        im_;
 	ConjugateGradientType cg_;
 }; // class CorrectionVectorFunction
 } // namespace Dmrg

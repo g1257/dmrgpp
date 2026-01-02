@@ -85,8 +85,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <algorithm>
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 struct ProgramGlobals {
 
@@ -98,32 +97,46 @@ struct ProgramGlobals {
 
 	static const SizeType MAX_LPS = 1000;
 
-	enum class DirectionEnum { INFINITE,
+	enum class DirectionEnum
+	{
+		INFINITE,
 		EXPAND_ENVIRON,
-		EXPAND_SYSTEM };
+		EXPAND_SYSTEM
+	};
 
-	enum class ConnectionEnum { SYSTEM_SYSTEM,
+	enum class ConnectionEnum
+	{
+		SYSTEM_SYSTEM,
 		SYSTEM_ENVIRON,
 		ENVIRON_SYSTEM,
-		ENVIRON_ENVIRON };
+		ENVIRON_ENVIRON
+	};
 
-	enum class SysOrEnvEnum { SYSTEM,
-		ENVIRON };
+	enum class SysOrEnvEnum
+	{
+		SYSTEM,
+		ENVIRON
+	};
 
-	enum class FermionOrBosonEnum { FERMION,
-		BOSON };
+	enum class FermionOrBosonEnum
+	{
+		FERMION,
+		BOSON
+	};
 
-	enum class VerboseEnum { NO,
-		YES };
+	enum class VerboseEnum
+	{
+		NO,
+		YES
+	};
 
-	static FermionOrBosonEnum multipy(const FermionOrBosonEnum& a,
-	    const FermionOrBosonEnum& b)
+	static FermionOrBosonEnum multipy(const FermionOrBosonEnum& a, const FermionOrBosonEnum& b)
 	{
 		if (a == FermionOrBosonEnum::BOSON)
 			return b;
 
 		return (b == FermionOrBosonEnum::BOSON) ? FermionOrBosonEnum::FERMION
-							: FermionOrBosonEnum::BOSON;
+		                                        : FermionOrBosonEnum::BOSON;
 	}
 
 	static void init(SizeType maxElectronsOneSpin_)
@@ -141,9 +154,7 @@ struct ProgramGlobals {
 		maxElectronsOneSpin = maxElectronsOneSpin_;
 	}
 
-	static int findBorderSiteFrom(SizeType site,
-	    DirectionEnum direction,
-	    SizeType n)
+	static int findBorderSiteFrom(SizeType site, DirectionEnum direction, SizeType n)
 	{
 		if (site == 1 && direction == DirectionEnum::EXPAND_ENVIRON)
 			return 0;
@@ -157,7 +168,7 @@ struct ProgramGlobals {
 	static PsimagLite::String rootName(PsimagLite::String filename)
 	{
 		PsimagLite::String rootname = filename;
-		size_t index = rootname.find(".", 0);
+		size_t             index    = rootname.find(".", 0);
 		if (index != PsimagLite::String::npos) {
 			rootname.erase(index, filename.length());
 		}
@@ -168,7 +179,7 @@ struct ProgramGlobals {
 	static PsimagLite::String coutName(PsimagLite::String filename)
 	{
 		PsimagLite::String rootname = PsimagLite::basename(filename);
-		size_t index = rootname.find(".", 0);
+		size_t             index    = rootname.find(".", 0);
 		if (index != PsimagLite::String::npos) {
 			rootname.erase(index, filename.length());
 		}
@@ -233,7 +244,7 @@ struct ProgramGlobals {
 	static PsimagLite::String killSpaces(PsimagLite::String str)
 	{
 		PsimagLite::String buffer;
-		const SizeType n = str.length();
+		const SizeType     n = str.length();
 		for (SizeType i = 0; i < n; ++i)
 			if (str[i] != ' ')
 				buffer += str[i];
@@ -242,7 +253,10 @@ struct ProgramGlobals {
 
 	static PsimagLite::String toLower(PsimagLite::String data)
 	{
-		std::transform(data.begin(), data.end(), data.begin(), [](unsigned char c) { return std::tolower(c); });
+		std::transform(data.begin(),
+		               data.end(),
+		               data.begin(),
+		               [](unsigned char c) { return std::tolower(c); });
 		return data;
 	}
 

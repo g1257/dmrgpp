@@ -9,24 +9,20 @@
 #include "Vector.h"
 #include <numeric>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename TargetingBaseType>
-class SpecForTargetingExpression
-{
+template <typename TargetingBaseType> class SpecForTargetingExpression {
 
 public:
 
 	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
 	typedef AlgebraForTargetingExpression<TargetingBaseType> AlgebraType;
-	typedef AlgebraType ResultType;
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
-	typedef typename AlgebraType::AuxiliaryType AuxiliaryType;
-	typedef std::pair<PsimagLite::String, AuxiliaryType> PairStringAuxType;
+	typedef AlgebraType                                      ResultType;
+	typedef typename VectorWithOffsetType::value_type        ComplexOrRealType;
+	typedef typename AlgebraType::AuxiliaryType              AuxiliaryType;
+	typedef std::pair<PsimagLite::String, AuxiliaryType>     PairStringAuxType;
 
-	class AssignAndDestroy
-	{
+	class AssignAndDestroy {
 
 	public:
 
@@ -44,8 +40,7 @@ public:
 		AssignAndDestroy(const PairStringAuxType& pair)
 		    : t_(new AlgebraType(pair.first, pair.second))
 		    , isValid_(true)
-		{
-		}
+		{ }
 
 		~AssignAndDestroy()
 		{
@@ -119,7 +114,7 @@ public:
 		}
 
 		AlgebraType* t_;
-		bool isValid_;
+		bool         isValid_;
 	};
 
 	PairStringAuxType operator()(PsimagLite::String str, AuxiliaryType& aux) const
@@ -127,10 +122,7 @@ public:
 		return PairStringAuxType(str, aux);
 	}
 
-	static bool isEmpty(const ResultType& term)
-	{
-		return term.isEmpty();
-	}
+	static bool isEmpty(const ResultType& term) { return term.isEmpty(); }
 };
 }
 #endif // SPECFORTARGETINGEXPRESSION_H

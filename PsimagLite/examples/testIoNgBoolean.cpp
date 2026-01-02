@@ -8,7 +8,11 @@ void createVector(std::vector<bool>& v)
 		v[i] = (drand48() < 0.5);
 }
 
-void saveAll(PsimagLite::String filename, const std::vector<bool>& v1, PsimagLite::String vname1, const std::vector<bool>& v2, PsimagLite::String vname2)
+void saveAll(PsimagLite::String       filename,
+             const std::vector<bool>& v1,
+             PsimagLite::String       vname1,
+             const std::vector<bool>& v2,
+             PsimagLite::String       vname2)
 {
 	PsimagLite::IoNg::Out io(filename, PsimagLite::IoNg::ACC_TRUNC);
 	io.write(v1, vname1);
@@ -39,18 +43,18 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	SizeType n = atoi(argv[1]);
+	SizeType          n = atoi(argv[1]);
 	std::vector<bool> v1(n, false);
 	createVector(v1);
 	std::vector<bool> v2(n, false);
 	createVector(v2);
 	PsimagLite::String filename = "file.hd5";
-	PsimagLite::String vname1 = "myv1";
-	PsimagLite::String vname2 = "myv2";
+	PsimagLite::String vname1   = "myv1";
+	PsimagLite::String vname2   = "myv2";
 	saveAll(filename, v1, vname1, v2, vname2);
 
-	std::vector<bool> w1;
-	std::vector<bool> w2;
+	std::vector<bool>    w1;
+	std::vector<bool>    w2;
 	PsimagLite::IoNg::In io(filename);
 	io.read(w1, vname1);
 	io.read(w2, vname2);

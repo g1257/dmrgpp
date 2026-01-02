@@ -7,8 +7,7 @@
 using namespace PsimagLite;
 typedef double RealType;
 
-template <typename T>
-std::ostream& operator<<(std::ostream& os, const typename Vector<T>::Type& v)
+template <typename T> std::ostream& operator<<(std::ostream& os, const typename Vector<T>::Type& v)
 {
 	os << v.size() << "\n";
 	for (SizeType i = 0; i < v.size(); i++)
@@ -33,8 +32,7 @@ void fillRandomVector(Vector<RealType>::Type& x, RealType maxValue)
 		x[i] = drand48() * maxValue;
 }
 
-template <typename T>
-void testMultiply(const CrsMatrix<T>& m, RealType maxValue)
+template <typename T> void testMultiply(const CrsMatrix<T>& m, RealType maxValue)
 {
 	typename Vector<RealType>::Type x(m.rows(), 0.0), y(m.rows());
 	fillRandomVector(y, maxValue);
@@ -71,30 +69,28 @@ int main(int argc, char* argv[])
 	PsimagLite::Concurrency(&argc, &argv, nthreads);
 
 	if (argc == 3) {
-		SizeType rank = std::atoi(argv[1]);
-		unsigned int long seed = 343981;
-		RealType ratio = std::atof(argv[2]);
-		SizeType nonZeros = SizeType(ratio * rank * rank);
-		RealType maxValue = 10.0;
-		CrsMatrix<RealType> m = createRandomCrs(rank, seed, nonZeros, maxValue);
+		SizeType            rank     = std::atoi(argv[1]);
+		unsigned int long   seed     = 343981;
+		RealType            ratio    = std::atof(argv[2]);
+		SizeType            nonZeros = SizeType(ratio * rank * rank);
+		RealType            maxValue = 10.0;
+		CrsMatrix<RealType> m        = createRandomCrs(rank, seed, nonZeros, maxValue);
 		std::cout << m;
 
 		testMultiply(m, maxValue);
-	}
-	else if (argc == 2) {
-		std::ifstream fin(argv[1]);
+	} else if (argc == 2) {
+		std::ifstream    fin(argv[1]);
 		Matrix<RealType> mdense(fin);
 		fin.close();
 		std::cout << mdense;
 
 		CrsMatrix<RealType> m(mdense);
-		RealType maxValue = 10.0;
+		RealType            maxValue = 10.0;
 		testMultiply(m, maxValue);
 		std::cout << m;
 		std::cout << "----------\n";
 		std::cout << m.toDense();
-	}
-	else {
+	} else {
 		throw RuntimeError("Wrong number of arguments\n");
 	}
 }

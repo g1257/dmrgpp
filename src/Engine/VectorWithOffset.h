@@ -84,22 +84,19 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Vector.h"
 #include <typeinfo>
 
-namespace Dmrg
-{
-template <typename ComplexOrRealType, typename QnType_>
-class VectorWithOffset
-{
+namespace Dmrg {
+template <typename ComplexOrRealType, typename QnType_> class VectorWithOffset {
 
 public:
 
-	typedef QnType_ QnType;
-	typedef VectorWithOffset<ComplexOrRealType, QnType> ThisType;
-	typedef ComplexOrRealType value_type;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef QnType_                                              QnType;
+	typedef VectorWithOffset<ComplexOrRealType, QnType>          ThisType;
+	typedef ComplexOrRealType                                    value_type;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef std::pair<SizeType, QnType> PairQnType;
-	typedef typename QnType::PairSizeType PairSizeType;
+	typedef PsimagLite::Vector<SizeType>::Type                   VectorSizeType;
+	typedef std::pair<SizeType, QnType>                          PairQnType;
+	typedef typename QnType::PairSizeType                        PairSizeType;
 
 	static const ComplexOrRealType zero_;
 
@@ -108,13 +105,12 @@ public:
 	    , size_(0)
 	    , offset_(0)
 	    , mAndq_(PairQnType(0, QnType::zero()))
-	{
-	}
+	{ }
 
 	template <typename SomeBasisType>
 	VectorWithOffset(const VectorSizeType& compactedWeights,
-	    const VectorSizeType& sectors,
-	    const SomeBasisType& someBasis)
+	                 const VectorSizeType& sectors,
+	                 const SomeBasisType&  someBasis)
 	    : progress_("VectorWithOffset")
 	    , size_(someBasis.size())
 	    , mAndq_(PairQnType(0, QnType::zero()))
@@ -134,21 +130,18 @@ public:
 
 		data_.resize(compactedWeights[0]);
 		const SizeType sector = sectors[0];
-		offset_ = someBasis.partition(sector);
-		mAndq_ = PairQnType(sector, someBasis.pseudoQn(sector));
+		offset_               = someBasis.partition(sector);
+		mAndq_                = PairQnType(sector, someBasis.pseudoQn(sector));
 	}
 
 	template <typename SomeBasisType>
-	VectorWithOffset(SizeType weight,
-	    SizeType sector,
-	    const SomeBasisType& someBasis)
+	VectorWithOffset(SizeType weight, SizeType sector, const SomeBasisType& someBasis)
 	    : progress_("VectorWithOffset")
 	    , size_(someBasis.size())
 	    , data_(weight)
 	    , offset_(someBasis.partition(sector))
 	    , mAndq_(PairQnType(sector, someBasis.pseudoQn(sector)))
-	{
-	}
+	{ }
 
 	void clear()
 	{
@@ -158,17 +151,15 @@ public:
 	}
 
 	template <typename SomeBasisType>
-	void set(VectorType& v,
-	    SizeType sector,
-	    const SomeBasisType& someBasis)
+	void set(VectorType& v, SizeType sector, const SomeBasisType& someBasis)
 	{
 		size_ = someBasis.size();
 		assert(someBasis.partition() > 0);
 
 		data_.swap(v);
-		offset_ = someBasis.partition(sector);
+		offset_          = someBasis.partition(sector);
 		const QnType& qn = someBasis.pseudoQn(sector);
-		mAndq_ = PairQnType(sector, qn);
+		mAndq_           = PairQnType(sector, qn);
 	}
 
 	template <typename SomeBasisType>
@@ -176,11 +167,11 @@ public:
 	{
 		size_ = someBasis.size();
 		try {
-			SizeType m = findPartition(v, someBasis);
-			offset_ = someBasis.partition(m);
+			SizeType m       = findPartition(v, someBasis);
+			offset_          = someBasis.partition(m);
 			const QnType& qn = someBasis.pseudoQn(m);
-			mAndq_ = PairQnType(m, qn);
-			SizeType total = someBasis.partition(m + 1) - offset_;
+			mAndq_           = PairQnType(m, qn);
+			SizeType total   = someBasis.partition(m + 1) - offset_;
 			data_.resize(total);
 			for (SizeType i = 0; i < total; i++)
 				data_[i] = v[i + offset_];
@@ -207,13 +198,9 @@ public:
 		assert(mAndq_.second.isDefinedOther());
 	}
 
-	void extract(VectorType& v, SizeType = 0) const
-	{
-		v = data_;
-	}
+	void extract(VectorType& v, SizeType = 0) const { v = data_; }
 
-	template <typename SparseVectorType>
-	void toSparse(SparseVectorType& sv) const
+	template <typename SparseVectorType> void toSparse(SparseVectorType& sv) const
 	{
 		sv.resize(size_);
 		for (SizeType i = 0; i < data_.size(); i++)
@@ -221,9 +208,7 @@ public:
 	}
 
 	template <typename SomeInputType>
-	void read(SomeInputType& io,
-	    const PsimagLite::String& label,
-	    SizeType = 0)
+	void read(SomeInputType& io, const PsimagLite::String& label, SizeType = 0)
 	{
 		io.read(size_, label + "/size_");
 		io.read(offset_, label + "/offset_");
@@ -246,22 +231,18 @@ public:
 	}
 
 	template <typename IoInputter>
-	void loadOneSector(IoInputter& io,
-	    const PsimagLite::String& label,
-	    SizeType counter = 0)
+	void loadOneSector(IoInputter& io, const PsimagLite::String& label, SizeType counter = 0)
 	{
 		read(io, label, counter);
 	}
 
-	template <typename SomeBasisType>
-	void populateSectors(const SomeBasisType&)
+	template <typename SomeBasisType> void populateSectors(const SomeBasisType&)
 	{
 		throw PsimagLite::RuntimeError("VectorWithOffset cannot populateSectors\n");
 	}
 
 	template <typename SomeBasisType>
-	void populateFromQns(const VectorWithOffset& v,
-	    const SomeBasisType& someBasis)
+	void populateFromQns(const VectorWithOffset& v, const SomeBasisType& someBasis)
 	{
 		if (v.size() == 0)
 			return;
@@ -269,15 +250,15 @@ public:
 		size_ = someBasis.size();
 
 		const QnType& q = v.qn(0);
-		SizeType m = findPartitionWithThisQn(q, someBasis);
-		offset_ = someBasis.partition(m);
+		SizeType      m = findPartitionWithThisQn(q, someBasis);
+		offset_         = someBasis.partition(m);
 		assert(q == someBasis.pseudoQn(m));
-		mAndq_ = PairQnType(m, q);
-		SizeType total = someBasis.partition(m + 1) - offset_;
+		mAndq_           = PairQnType(m, q);
+		SizeType   total = someBasis.partition(m + 1) - offset_;
 		VectorType tmpV(total, 0);
 		data_ = tmpV;
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "populateFromQns succeeded";
 		progress_.printline(msgg, std::cout);
@@ -300,10 +281,10 @@ public:
 	ThisType operator+=(const ThisType& v)
 	{
 		if (size_ == 0 && offset_ == 0 && mAndq_.first == 0) {
-			data_ = v.data_;
-			size_ = v.size_;
+			data_   = v.data_;
+			size_   = v.size_;
 			offset_ = v.offset_;
-			mAndq_ = v.mAndq_;
+			mAndq_  = v.mAndq_;
 			return *this;
 		}
 
@@ -347,8 +328,7 @@ public:
 
 	static PsimagLite::String name() { return "vectorwithoffset"; }
 
-	friend ComplexOrRealType operator*(const VectorWithOffset& v1,
-	    const VectorWithOffset& v2)
+	friend ComplexOrRealType operator*(const VectorWithOffset& v1, const VectorWithOffset& v2)
 	{
 		if (v1.size() == 0 || v2.size() == 0)
 			return 0.0;
@@ -364,10 +344,7 @@ public:
 		return w;
 	}
 
-	friend RealType norm(const VectorWithOffset& v)
-	{
-		return PsimagLite::norm(v.data_);
-	}
+	friend RealType norm(const VectorWithOffset& v) { return PsimagLite::norm(v.data_); }
 
 	friend void normalize(VectorWithOffset& v)
 	{
@@ -385,8 +362,7 @@ public:
 private:
 
 	template <typename SomeBasisType>
-	SizeType findPartitionWithThisQn(const QnType& qn,
-	    const SomeBasisType& someBasis) const
+	SizeType findPartitionWithThisQn(const QnType& qn, const SomeBasisType& someBasis) const
 	{
 		SizeType np = someBasis.partition() - 1;
 		for (SizeType i = 0; i < np; i++)
@@ -399,8 +375,8 @@ private:
 	template <typename SomeBasisType>
 	SizeType findPartition(const VectorType& v, const SomeBasisType& someBasis) const
 	{
-		bool found = false;
-		SizeType p = 0;
+		bool     found = false;
+		SizeType p     = 0;
 		for (SizeType i = 0; i < someBasis.partition() - 1; i++) {
 			if (nonZeroPartition(v, someBasis, i)) {
 				if (found) {
@@ -410,7 +386,7 @@ private:
 				}
 
 				found = true;
-				p = i;
+				p     = i;
 			}
 		}
 		if (!found) {
@@ -423,9 +399,7 @@ private:
 	}
 
 	template <typename SomeBasisType>
-	bool nonZeroPartition(const VectorType& v,
-	    const SomeBasisType& someBasis,
-	    SizeType i) const
+	bool nonZeroPartition(const VectorType& v, const SomeBasisType& someBasis, SizeType i) const
 	{
 		typename VectorType::value_type zero = 0;
 		for (SizeType j = someBasis.partition(i); j < someBasis.partition(i + 1); j++) {
@@ -436,10 +410,10 @@ private:
 	}
 
 	PsimagLite::ProgressIndicator progress_;
-	SizeType size_;
-	VectorType data_;
-	SizeType offset_;
-	PairQnType mAndq_; // partition
+	SizeType                      size_;
+	VectorType                    data_;
+	SizeType                      offset_;
+	PairQnType                    mAndq_; // partition
 }; // class VectorWithOffset
 
 template <typename ComplexOrRealType, typename EffectiveQnType>

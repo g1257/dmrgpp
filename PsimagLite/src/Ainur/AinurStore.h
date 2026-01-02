@@ -9,25 +9,34 @@ class Store {
 
 public:
 
-	typedef AinurLexical AinurLexicalType;
+	typedef AinurLexical                       AinurLexicalType;
 	typedef AinurLexicalType::VectorStringType VectorStringType;
 
-	enum Type { UNKNOWN,
-		    SCALAR,
-		    VECTOR,
-		    MATRIX }; // HASH, FUNCTION
+	enum Type
+	{
+		UNKNOWN,
+		SCALAR,
+		VECTOR,
+		MATRIX
+	}; // HASH, FUNCTION
 
-	enum SubType { UNDEFINED,
-		       INTEGER,
-		       REAL,
-		       COMPLEX,
-		       STRING,
-		       CHAR,
-		       GROUP };
+	enum SubType
+	{
+		UNDEFINED,
+		INTEGER,
+		REAL,
+		COMPLEX,
+		STRING,
+		CHAR,
+		GROUP
+	};
 
-	enum Attribute { NONE,
-		         REQUIRED,
-		         CONST };
+	enum Attribute
+	{
+		NONE,
+		REQUIRED,
+		CONST
+	};
 
 	Store(String s, String a)
 	    : type_(UNKNOWN)
@@ -54,8 +63,7 @@ public:
 			setMatrixValue(rhs, name);
 			break;
 		default:
-			std::cerr << "setRhs not implemented, rhs= " << rhs
-			          << "\n";
+			std::cerr << "setRhs not implemented, rhs= " << rhs << "\n";
 			break;
 		}
 	}
@@ -195,7 +203,7 @@ private:
 		SizeType offset = 2;
 		for (SizeType row = 0; row < rows; ++row) {
 			VectorStringType v;
-			String s = tmp[row];
+			String           s = tmp[row];
 			AinurLexicalType::removeTrailingBlanks(s);
 			SizeType last = s.length();
 			if (last > 0 && s[--last] == ',')
@@ -209,8 +217,7 @@ private:
 				value_.resize(rows * cols + 2);
 				value_[0] = ttos(rows);
 				value_[1] = ttos(cols);
-			}
-			else if (cols != thisCol) {
+			} else if (cols != thisCol) {
 				err("Malformed matrix, " + name + "\n");
 			}
 
@@ -219,7 +226,8 @@ private:
 		}
 	}
 
-	void appendToVecStr(VectorStringType& dest, const VectorStringType& src, SizeType offset) const
+	void
+	appendToVecStr(VectorStringType& dest, const VectorStringType& src, SizeType offset) const
 	{
 		SizeType n = src.size();
 		assert(offset + n <= dest.size());
@@ -227,9 +235,9 @@ private:
 			dest[offset + i] = src[i];
 	}
 
-	Type type_;
-	SubType subType_;
-	Attribute attr_;
+	Type             type_;
+	SubType          subType_;
+	Attribute        attr_;
 	VectorStringType value_;
 	mutable SizeType used_;
 };

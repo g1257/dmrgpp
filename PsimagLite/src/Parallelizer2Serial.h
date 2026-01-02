@@ -5,16 +5,14 @@
 
 namespace PsimagLite {
 
-template <typename = int>
-class Parallelizer2 {
+template <typename = int> class Parallelizer2 {
 
 public:
 
 	Parallelizer2(const CodeSectionParams& codeParams)
 	{
 		if (codeParams.npthreads != 1)
-			throw RuntimeError(
-			    "Please compile with -DUSE_PTHREADS\n");
+			throw RuntimeError("Please compile with -DUSE_PTHREADS\n");
 	}
 
 	template <typename SomeLambdaType>

@@ -83,16 +83,18 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace PsimagLite {
 
-template <typename ComplexOrRealType, typename GeometryBaseType>
-class GeometryDirection {
+template <typename ComplexOrRealType, typename GeometryBaseType> class GeometryDirection {
 
-	typedef Matrix<ComplexOrRealType> MatrixType;
+	typedef Matrix<ComplexOrRealType>              MatrixType;
 	typedef typename Real<ComplexOrRealType>::Type RealType;
 
 public:
 
-	enum InternalDofEnum { GENERAL,
-		               SPECIFIC };
+	enum InternalDofEnum
+	{
+		GENERAL,
+		SPECIFIC
+	};
 
 	struct Auxiliary {
 
@@ -101,27 +103,26 @@ public:
 		    , dirId(d)
 		    , idof(idof_)
 		    , orbitals(orbitals_)
-		{
-		}
+		{ }
 
-		void write(PsimagLite::String label,
-		           IoSerializer& ioSerializer) const
+		void write(PsimagLite::String label, IoSerializer& ioSerializer) const
 		{
 			ioSerializer.createGroup(label);
-			ioSerializer.write(label + "/constantValues",
-			                   constantValues);
+			ioSerializer.write(label + "/constantValues", constantValues);
 			ioSerializer.write(label + "/dirId", dirId);
 			ioSerializer.write(label + "/edof", idof);
 		}
 
-		bool constantValues;
-		SizeType dirId;
+		bool            constantValues;
+		SizeType        dirId;
 		InternalDofEnum idof;
-		SizeType orbitals;
+		SizeType        orbitals;
 	}; // struct Auxiliary
 
 	template <typename IoInputter>
-	GeometryDirection(IoInputter& io, const Auxiliary& aux, const GeometryBaseType* geometryFactory)
+	GeometryDirection(IoInputter&             io,
+	                  const Auxiliary&        aux,
+	                  const GeometryBaseType* geometryFactory)
 	    : aux_(aux)
 	    , geometryBase_(geometryFactory)
 	{
@@ -134,7 +135,7 @@ public:
 
 		assert(aux.idof == SPECIFIC);
 
-		String connectors = "Connectors";
+		String connectors  = "Connectors";
 		String savedPrefix = io.prefix();
 		io.prefix() += "dir" + ttos(aux.dirId) + ":";
 
@@ -143,17 +144,15 @@ public:
 				n = 1;
 			for (SizeType i = 0; i < n; i++) {
 				MatrixType m;
-				String extraString = (n > 1 && io.version() > 2) ? ttos(i) : "";
+				String     extraString = (n > 1 && io.version() > 2) ? ttos(i) : "";
 				io.read(m, connectors + extraString);
 				dataMatrices_.push_back(m);
 				if (aux.orbitals != m.rows() || aux.orbitals != m.cols())
-					throw RuntimeError(
-					    "Connectors must be matrices of "
-					    "rows=cols= "
-					    + ttos(aux.orbitals) + "\n");
+					throw RuntimeError("Connectors must be matrices of "
+					                   "rows=cols= "
+					                   + ttos(aux.orbitals) + "\n");
 			}
-		}
-		else {
+		} else {
 			io.read(dataNumbers_, connectors);
 			if (dataNumbers_.size() != n) {
 				String s(__FILE__);
@@ -209,8 +208,8 @@ public:
 
 		assert(b || (dataMatrices_[h].rows() > edof2 && dataMatrices_[h].cols() > edof1));
 
-		ComplexOrRealType tmp = (b) ? dataMatrices_[h](edof1, edof2)
-		                            : dataMatrices_[h](edof2, edof1);
+		ComplexOrRealType tmp
+		    = (b) ? dataMatrices_[h](edof1, edof2) : dataMatrices_[h](edof2, edof1);
 		int signChange = geometryBase_->signChange(i, j);
 		return tmp * static_cast<RealType>(signChange);
 	}
@@ -226,8 +225,7 @@ public:
 		return os;
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
-	                                const GeometryDirection& gd)
+	friend std::ostream& operator<<(std::ostream& os, const GeometryDirection& gd)
 	{
 		os << "#GeometryDirectionAuxiliary\n";
 		os << gd.aux_;
@@ -235,17 +233,14 @@ public:
 		bool isMatrix = (gd.aux_.orbitals > 1 || gd.aux_.idof == SPECIFIC);
 
 		if (!isMatrix) {
-			os << "#GeometryNumbersSize=" << gd.dataNumbers_.size()
-			   << "\n";
+			os << "#GeometryNumbersSize=" << gd.dataNumbers_.size() << "\n";
 			os << "#GeometryNumbers=";
 			for (SizeType i = 0; i < gd.dataNumbers_.size(); i++) {
 				os << gd.dataNumbers_[i] << " ";
 			}
 			os << "\n";
-		}
-		else {
-			os << "#GeometryMatrixSize=" << gd.dataMatrices_.size()
-			   << "\n";
+		} else {
+			os << "#GeometryMatrixSize=" << gd.dataMatrices_.size() << "\n";
 			for (SizeType i = 0; i < gd.dataMatrices_.size(); i++)
 				os << gd.dataMatrices_[i];
 		}
@@ -256,16 +251,14 @@ private:
 
 	SizeType getVectorSize()
 	{
-		return (aux_.constantValues)
-		    ? 1
-		    : geometryBase_->getVectorSize(aux_.dirId);
+		return (aux_.constantValues) ? 1 : geometryBase_->getVectorSize(aux_.dirId);
 	}
 
-	Auxiliary aux_;
-	const GeometryBaseType* geometryBase_;
+	Auxiliary                                aux_;
+	const GeometryBaseType*                  geometryBase_;
 	typename Vector<ComplexOrRealType>::Type dataNumbers_;
-	typename Vector<MatrixType>::Type dataMatrices_;
-	MatrixType rawHoppings_;
+	typename Vector<MatrixType>::Type        dataMatrices_;
+	MatrixType                               rawHoppings_;
 }; // class GeometryDirection
 } // namespace PsimagLite
 

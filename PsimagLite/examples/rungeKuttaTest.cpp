@@ -8,8 +8,7 @@
 
 // authored by K.A.A
 
-template <typename RealType, typename VectorType, typename MatrixType>
-class GammaCiCj {
+template <typename RealType, typename VectorType, typename MatrixType> class GammaCiCj {
 
 	typedef typename MatrixType::value_type ComplexOrRealType;
 
@@ -36,13 +35,14 @@ public:
 	MatrixType operator()(const RealType& t, const MatrixType& y) const
 	{
 		ComplexOrRealType c(0., -1.);
-		MatrixType tmp = (-1.0) * (T_ * y);
+		MatrixType        tmp = (-1.0) * (T_ * y);
 		// MatrixType yTranspose;
 		// transposeConjugate(yTranspose,y);
 		tmp += y * T_;
 		for (SizeType i = 0; i < tmp.n_row(); i++)
 			for (SizeType j = 0; j < tmp.n_col(); j++)
-				tmp(i, j) += mV_(i, j) * y(i, j) + mW_(i, j) * cos(omega_ * t) * y(i, j);
+				tmp(i, j)
+				    += mV_(i, j) * y(i, j) + mW_(i, j) * cos(omega_ * t) * y(i, j);
 		return c * tmp;
 	}
 
@@ -51,9 +51,9 @@ private:
 	const MatrixType& T_;
 	const VectorType& V_;
 	const VectorType& W_;
-	MatrixType mV_;
-	MatrixType mW_;
-	RealType omega_;
+	MatrixType        mV_;
+	MatrixType        mW_;
+	RealType          omega_;
 }; // class GammaCiCj
 
 #ifndef USE_FLOAT
@@ -64,9 +64,9 @@ typedef float RealType
 typedef std::complex<RealType> ComplexOrRealType;
 // typedef RealType ComplexOrRealType;
 typedef PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+typedef PsimagLite::Matrix<ComplexOrRealType>       MatrixType;
 typedef GammaCiCj<RealType, VectorType, MatrixType> GammaCiCjType;
-typedef PsimagLite::IoSimple::In IoInType;
+typedef PsimagLite::IoSimple::In                    IoInType;
 
 void usage(const char* progName)
 {
@@ -76,12 +76,12 @@ void usage(const char* progName)
 
 int main(int argc, char* argv[])
 {
-	int opt;
-	PsimagLite::String file = "";
-	RealType wbegin = 0.;
-	RealType wend = 10.;
-	RealType wstep = 0.01;
-	PsimagLite::String file2 = "";
+	int                opt;
+	PsimagLite::String file   = "";
+	RealType           wbegin = 0.;
+	RealType           wend   = 10.;
+	RealType           wstep  = 0.01;
+	PsimagLite::String file2  = "";
 
 	while ((opt = getopt(argc, argv, "f:i:b:e:s:")) != -1) {
 		switch (opt) {
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 	SizeType N;
 	io.readline(N, "TotalNumberOfSites=");
 
-	RealType hopping = 1.0;
+	RealType   hopping = 1.0;
 	MatrixType T(N, N);
 	for (SizeType i = 0; i < N - 1; i++)
 		T(i, i + 1) = T(i + 1, i) = hopping;
@@ -133,11 +133,11 @@ int main(int argc, char* argv[])
 	RealType omega;
 	io.readline(omega, "omega=");
 
-	GammaCiCjType f(T, V, W, omega);
+	GammaCiCjType                                               f(T, V, W, omega);
 	PsimagLite::RungeKutta<RealType, GammaCiCjType, MatrixType> rk(f, wstep);
 
 	MatrixType y0;
-	IoInType io2(file2);
+	IoInType   io2(file2);
 	io2.read(y0, "MatrixCiCj");
 	for (SizeType i = 0; i < y0.n_row(); i++) {
 		for (SizeType j = 0; j < y0.n_col(); j++) {

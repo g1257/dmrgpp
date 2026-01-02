@@ -98,8 +98,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #endif // USE_PTHREADS
 
 namespace PsimagLite {
-template <typename InstanceType,
-          typename LoadBalancerType = LoadBalancerDefault>
+template <typename InstanceType, typename LoadBalancerType = LoadBalancerDefault>
 class Parallelizer
 
 #ifdef USE_PTHREADS
@@ -116,13 +115,11 @@ public:
 
 	Parallelizer(const CodeSectionParams& cs)
 	    : BaseType(cs)
-	{
-	}
+	{ }
 
 	Parallelizer(String codeSectionParams)
 	    : BaseType(codeSectionParamss_[codeSectionParams])
-	{
-	}
+	{ }
 
 	static bool exists(String name)
 	{

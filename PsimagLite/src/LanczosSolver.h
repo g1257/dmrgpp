@@ -8,39 +8,36 @@
 namespace PsimagLite {
 
 template <typename SolverParametersType, typename MatrixType_, typename VectorType_>
-class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType,
-                                                   MatrixType_,
-                                                   VectorType_> {
+class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType_> {
 
 public:
 
-	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType_>
-	    BaseType;
-	typedef LanczosCore<SolverParametersType, MatrixType_, VectorType_>
-	    LanczosCoreType;
-	typedef typename LanczosCoreType::TridiagonalMatrixType
-	    TridiagonalMatrixType;
-	typedef typename LanczosCoreType::RealType RealType;
-	typedef typename LanczosCoreType::VectorType VectorType;
-	typedef typename Vector<VectorType>::Type VectorVectorType;
-	typedef typename LanczosCoreType::VectorRealType VectorRealType;
-	typedef MatrixType_ MatrixType;
-	typedef ContinuedFraction<TridiagonalMatrixType> PostProcType;
-	typedef SolverParametersType ParametersSolverType;
+	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType_> BaseType;
+	typedef LanczosCore<SolverParametersType, MatrixType_, VectorType_> LanczosCoreType;
+	typedef typename LanczosCoreType::TridiagonalMatrixType             TridiagonalMatrixType;
+	typedef typename LanczosCoreType::RealType                          RealType;
+	typedef typename LanczosCoreType::VectorType                        VectorType;
+	typedef typename Vector<VectorType>::Type                           VectorVectorType;
+	typedef typename LanczosCoreType::VectorRealType                    VectorRealType;
+	typedef MatrixType_                                                 MatrixType;
+	typedef ContinuedFraction<TridiagonalMatrixType>                    PostProcType;
+	typedef SolverParametersType                                        ParametersSolverType;
 
 	LanczosSolver(const MatrixType& mat, const SolverParametersType& params)
 	    : ls_(mat, params, BaseType::isReorthoEnabled(params))
-	{
-	}
+	{ }
 
-	void computeOneState(RealType& energy, VectorType& z, const VectorType& initialVector, SizeType excited)
+	void computeOneState(RealType&         energy,
+	                     VectorType&       z,
+	                     const VectorType& initialVector,
+	                     SizeType          excited)
 	{
 		Profiling profiling("LanczosSolver", std::cout);
 
 		TridiagonalMatrixType ab;
 		ls_.decomposition(initialVector, ab, excited);
 
-		VectorRealType eigs(ab.size());
+		VectorRealType                            eigs(ab.size());
 		typename LanczosCoreType::DenseMatrixType ritz;
 		ab.buildDenseMatrix(ritz);
 		diag(ritz, eigs, 'V');
@@ -53,23 +50,25 @@ public:
 			throw RuntimeError(str + " norm is zero\n");
 
 		const RealType norma = norm(initialVector);
-		const SizeType iter = ls_.steps();
+		const SizeType iter  = ls_.steps();
 
 		if (norma < 1e-5 || norma > 100)
 			std::cerr << "norma=" << norma << "\n";
 
 		OstringStream msg(std::cout.precision());
-		String what = "lowest";
+		String        what = "lowest";
 		if (excited > 0)
 			what = ttos(excited) + " excited";
-		msg() << "Found " << what << " eigenvalue= " << energy
-		      << " after " << iter;
+		msg() << "Found " << what << " eigenvalue= " << energy << " after " << iter;
 		msg() << " iterations, "
 		      << " orig. norm=" << norma << " excited=" << excited;
 		profiling.end(msg().str());
 	}
 
-	void computeAllStatesBelow(VectorRealType& eigs, VectorVectorType& z, const VectorType& initialVector, SizeType excited)
+	void computeAllStatesBelow(VectorRealType&   eigs,
+	                           VectorVectorType& z,
+	                           const VectorType& initialVector,
+	                           SizeType          excited)
 	{
 		TridiagonalMatrixType ab;
 		ls_.decomposition(initialVector, ab, excited);
@@ -88,8 +87,7 @@ public:
 			ls_.excitedVector(z[i], ritz, i);
 	}
 
-	void decomposition(const VectorType& initVector,
-	                   TridiagonalMatrixType& ab)
+	void decomposition(const VectorType& initVector, TridiagonalMatrixType& ab)
 	{
 		return ls_.decomposition(initVector, ab, ls_.params().eigsForStop);
 	}

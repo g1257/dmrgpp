@@ -92,69 +92,64 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "VectorWithOffsets.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
-	typedef LanczosSolverType_ LanczosSolverType;
+	typedef LanczosSolverType_                                      LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
 
 public:
 
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType MatrixVectorType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename BaseType::OptionsType OptionsType;
-	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename ModelType::OperatorsType OperatorsType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef TargetParamsCorrectionVector<ModelType> TargetParamsType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
+	typedef typename BaseType::TargetingCommonType                TargetingCommonType;
+	typedef typename BaseType::MatrixVectorType                   MatrixVectorType;
+	typedef typename MatrixVectorType::ModelType                  ModelType;
+	typedef typename ModelType::RealType                          RealType;
+	typedef typename BaseType::OptionsType                        OptionsType;
+	typedef typename BaseType::CheckpointType                     CheckpointType;
+	typedef typename PsimagLite::Vector<RealType>::Type           VectorRealType;
+	typedef typename ModelType::OperatorsType                     OperatorsType;
+	typedef typename ModelType::ModelHelperType                   ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType          LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType   BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorType         OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType            BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType     SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                 ComplexOrRealType;
+	typedef TargetParamsCorrectionVector<ModelType>               TargetParamsType;
+	typedef typename BasisType::BlockType                         BlockType;
+	typedef typename BaseType::WaveFunctionTransfType             WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef VectorType TargetVectorType;
-	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
-	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
-	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
-	typedef CorrectionVectorFunction<LanczosMatrixType,
-	    TargetParamsType>
+	typedef typename VectorWithOffsetType::VectorType             VectorType;
+	typedef VectorType                                            TargetVectorType;
+	typedef typename TargetingCommonType::TimeSerializerType      TimeSerializerType;
+	typedef typename LanczosSolverType::TridiagonalMatrixType     TridiagonalMatrixType;
+	typedef PsimagLite::Matrix<typename VectorType::value_type>   DenseMatrixType;
+	typedef PsimagLite::Matrix<RealType>                          DenseMatrixRealType;
+	typedef typename LanczosSolverType::PostProcType              PostProcType;
+	typedef typename LanczosSolverType::MatrixType                LanczosMatrixType;
+	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
 	    CorrectionVectorFunctionType;
-	typedef ParallelTriDiag<ModelType,
-	    LanczosSolverType,
-	    VectorWithOffsetType>
-	    ParallelTriDiagType;
+	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
+	                                                              ParallelTriDiagType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
-	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename ParallelTriDiagType::VectorMatrixFieldType   VectorMatrixFieldType;
+	typedef typename PsimagLite::Vector<SizeType>::Type           VectorSizeType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type     VectorVectorRealType;
+	typedef typename ModelType::InputValidatorType                InputValidatorType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	    VectorWithOffsetType,
-	    BaseType,
-	    TargetParamsType>
-	    CorrectionVectorSkeletonType;
+	                                 VectorWithOffsetType,
+	                                 BaseType,
+	                                 TargetParamsType>
+	                                   CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 
-	TargetingCorrectionVector(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& ioIn)
+	TargetingCorrectionVector(const LeftRightSuperType&     lrs,
+	                          const CheckpointType&         checkPoint,
+	                          const WaveFunctionTransfType& wft,
+	                          const QnType&,
+	                          InputValidatorType& ioIn)
 	    : BaseType(lrs, checkPoint, wft, 1)
 	    , tstStruct_(ioIn, "TargetingCorrectionVector", checkPoint.model())
 	    , ioIn_(ioIn)
@@ -191,11 +186,11 @@ public:
 		return BaseType::size();
 	}
 
-	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType& block2,
-	    SizeType loopNumber)
+	void evolve(const VectorRealType&         energies,
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType&              block1,
+	            const BlockType&              block2,
+	            SizeType                      loopNumber)
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -205,7 +200,7 @@ public:
 		}
 
 		assert(energies.size() > 0);
-		RealType Eg = energies[0];
+		RealType Eg   = energies[0];
 		SizeType site = block1[0];
 		evolve(Eg, direction, site, loopNumber);
 
@@ -213,11 +208,12 @@ public:
 
 		// corner case
 		SizeType numberOfSites = this->lrs().super().block().size();
-		SizeType site2 = numberOfSites;
+		SizeType site2         = numberOfSites;
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
 			site2 = 0;
-		if (site == numberOfSites - 2 && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
+		if (site == numberOfSites - 2
+		    && direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
 			site2 = numberOfSites - 1;
 		if (site2 == numberOfSites)
 			return;
@@ -225,8 +221,8 @@ public:
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out&                       io,
+	           PsimagLite::String                                 prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "CorrectionVector");
@@ -240,18 +236,14 @@ public:
 
 private:
 
-	void evolve(RealType Eg,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    SizeType loopNumber)
+	void evolve(RealType                      Eg,
+	            ProgramGlobals::DirectionEnum direction,
+	            SizeType                      site,
+	            SizeType                      loopNumber)
 	{
 		VectorWithOffsetType phiNew;
-		SizeType count = this->common().aoeNonConst().getPhi(&phiNew,
-		    Eg,
-		    direction,
-		    site,
-		    loopNumber,
-		    tstStruct_);
+		SizeType             count = this->common().aoeNonConst().getPhi(
+                    &phiNew, Eg, direction, site, loopNumber, tstStruct_);
 
 		if (direction != ProgramGlobals::DirectionEnum::INFINITE) {
 			correctionEnabled_ = true;
@@ -263,14 +255,12 @@ private:
 			return;
 
 		this->tvNonConst(1) = phiNew;
-		skeleton_.calcDynVectors(this->tv(1),
-		    this->tvNonConst(2),
-		    this->tvNonConst(3));
+		skeleton_.calcDynVectors(this->tv(1), this->tvNonConst(2), this->tvNonConst(3));
 
 		setWeights();
 
 		VectorSizeType block(1, site);
-		bool doBorderIfBorder = false;
+		bool           doBorderIfBorder = false;
 		this->common().cocoon(block, direction, doBorderIfBorder);
 	}
 
@@ -320,13 +310,13 @@ private:
 		gsWeight_ = 1.0 - weight_[0];
 	}
 
-	TargetParamsType tstStruct_;
-	InputValidatorType& ioIn_;
-	PsimagLite::ProgressIndicator progress_;
-	RealType gsWeight_;
-	bool correctionEnabled_;
+	TargetParamsType                            tstStruct_;
+	InputValidatorType&                         ioIn_;
+	PsimagLite::ProgressIndicator               progress_;
+	RealType                                    gsWeight_;
+	bool                                        correctionEnabled_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
-	CorrectionVectorSkeletonType skeleton_;
+	CorrectionVectorSkeletonType                skeleton_;
 }; // class TargetingCorrectionVector
 } // namespace
 /*@}*/

@@ -88,53 +88,50 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <stdexcept>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingGroundState : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingGroundState : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 public:
 
-	typedef LanczosSolverType_ LanczosSolverType;
+	typedef LanczosSolverType_                                      LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType MatrixVectorType;
-	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef VectorType TargetVectorType;
-	typedef TargetParamsGroundState<ModelType> TargetParamsType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BasisType::QnType QnType;
-	typedef typename BaseType::VectorRealType VectorRealType;
+	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
+	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
+	typedef typename BaseType::CheckpointType                       CheckpointType;
+	typedef typename MatrixVectorType::ModelType                    ModelType;
+	typedef typename ModelType::RealType                            RealType;
+	typedef typename ModelType::ModelHelperType                     ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
+	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef typename SparseMatrixType::value_type                   ComplexOrRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type    VectorType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
+	typedef VectorType                                              TargetVectorType;
+	typedef TargetParamsGroundState<ModelType>                      TargetParamsType;
+	typedef typename ModelType::InputValidatorType                  InputValidatorType;
+	typedef typename PsimagLite::Vector<SizeType>::Type             VectorSizeType;
+	typedef typename BasisType::QnType                              QnType;
+	typedef typename BaseType::VectorRealType                       VectorRealType;
 	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
 	    VectorVectorVectorWithOffsetType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
 
-	TargetingGroundState(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType&)
+	TargetingGroundState(const LeftRightSuperType&     lrs,
+	                     const CheckpointType&         checkPoint,
+	                     const WaveFunctionTransfType& wft,
+	                     const QnType&,
+	                     InputValidatorType&)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_("TargetingGroundState")
 	    , progress_("TargetingGroundState")
-	{
-	}
+	{ }
 
 	SizeType sites() const { return tstStruct_.sites(); }
 
@@ -148,12 +145,12 @@ public:
 	RealType gsWeight() const
 	{
 		const VectorVectorVectorWithOffsetType& v = this->common().aoe().psiConst();
-		const SizeType n = v.size();
+		const SizeType                          n = v.size();
 
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			const VectorVectorWithOffsetType& vv = v[i];
-			const SizeType m = vv.size();
+			const SizeType                    m  = vv.size();
 			for (SizeType j = 0; j < m; ++j) {
 				const VectorWithOffsetType* vvv = vv[j];
 				if (!vvv)
@@ -166,37 +163,33 @@ public:
 		return 1.0 / sum;
 	}
 
-	SizeType size() const
-	{
-		return 0;
-	}
+	SizeType size() const { return 0; }
 
 	void evolve(const VectorRealType&,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType&,
-	    SizeType)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType&              block1,
+	            const BlockType&,
+	            SizeType)
 	{
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out&                       io,
+	           PsimagLite::String                                 prefix) const
 	{
 		this->common().write(io, block, prefix);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io,
-	    PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
 		this->common().readGSandNGSTs(io, prefix, "GroundState");
 	}
 
 private:
 
-	TargetParamsType tstStruct_;
+	TargetParamsType              tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
 
 }; // class TargetingGroundState

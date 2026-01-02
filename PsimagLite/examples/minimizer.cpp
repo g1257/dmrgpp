@@ -2,12 +2,10 @@
 #include "Vector.h"
 // #include "Square.h"
 
-template <typename T>
-T square(const T& t1) { return t1 * t1; }
+template <typename T> T square(const T& t1) { return t1 * t1; }
 
 template <typename T>
-std::ostream& operator<<(std::ostream& os,
-                         const typename PsimagLite::Vector<T>::Type& v)
+std::ostream& operator<<(std::ostream& os, const typename PsimagLite::Vector<T>::Type& v)
 {
 	os << v.size() << "\n";
 	for (SizeType i = 0; i < v.size(); i++)
@@ -24,8 +22,7 @@ public:
 
 	typedef double FieldType;
 
-	template <typename SomeVectorType>
-	FieldType operator()(const SomeVectorType& v) const
+	template <typename SomeVectorType> FieldType operator()(const SomeVectorType& v) const
 	{
 		return square(v[0] - 2) + square(v[1] - 3);
 	}
@@ -34,15 +31,15 @@ public:
 
 int main(int argc, char* argv[])
 {
-	SizeType n = 2;
+	SizeType                        n = 2;
 	typename Vector<RealType>::Type x(n);
 
 	// inital guess:
 	for (SizeType i = 0; i < n; i++)
 		x[i] = drand48();
 
-	SizeType maxIter = 100;
-	MyFunctionTest f;
+	SizeType                            maxIter = 100;
+	MyFunctionTest                      f;
 	Minimizer<RealType, MyFunctionTest> min(f, maxIter);
 
 	int iter = min.simplex(x, 1e-3, 1e-5);

@@ -23,7 +23,7 @@ Please see full open source license included in file LICENSE.
 
 class InnerHelper {
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef PsimagLite::Concurrency            ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
@@ -32,8 +32,7 @@ public:
 	    : ntasks_(ntasks)
 	    , x_(nthreads, 0)
 	    , offset_(outerTask * ntasks)
-	{
-	}
+	{ }
 
 	SizeType tasks() const { return ntasks_; }
 
@@ -52,25 +51,27 @@ public:
 
 private:
 
-	SizeType ntasks_;
+	SizeType       ntasks_;
 	VectorSizeType x_;
-	SizeType offset_;
+	SizeType       offset_;
 }; // class InnerHelper
 
 class MyHelper {
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef PsimagLite::Concurrency            ConcurrencyType;
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
 public:
 
-	MyHelper(SizeType ntasks, SizeType nthreadsOuter, SizeType ntasksInner, SizeType nthreadsInner)
+	MyHelper(SizeType ntasks,
+	         SizeType nthreadsOuter,
+	         SizeType ntasksInner,
+	         SizeType nthreadsInner)
 	    : ntasks_(ntasks)
 	    , x_(nthreadsOuter, 0)
 	    , ntasksInner_(ntasksInner)
 	    , nthreadsInner_(nthreadsInner)
-	{
-	}
+	{ }
 
 	SizeType tasks() const { return ntasks_; }
 
@@ -79,8 +80,8 @@ public:
 	void doTask(SizeType taskNumber, SizeType threadNum)
 	{
 		typedef PsimagLite::Parallelizer<InnerHelper> ParallelizerType;
-		PsimagLite::CodeSectionParams cs(nthreadsInner_);
-		ParallelizerType threadObject(cs);
+		PsimagLite::CodeSectionParams                 cs(nthreadsInner_);
+		ParallelizerType                              threadObject(cs);
 		InnerHelper helper(ntasksInner_, nthreadsInner_, taskNumber);
 		threadObject.loopCreate(helper);
 		helper.sync();
@@ -95,10 +96,10 @@ public:
 
 private:
 
-	SizeType ntasks_;
+	SizeType       ntasks_;
 	VectorSizeType x_;
-	SizeType ntasksInner_;
-	SizeType nthreadsInner_;
+	SizeType       ntasksInner_;
+	SizeType       nthreadsInner_;
 }; // class MyHelper
 
 int main(int argc, char* argv[])
@@ -112,16 +113,16 @@ int main(int argc, char* argv[])
 	}
 
 	SizeType nthreadsOuter = atoi(argv[1]);
-	SizeType ntasks = atoi(argv[2]);
+	SizeType ntasks        = atoi(argv[2]);
 	SizeType nthreadsInner = atoi(argv[3]);
-	SizeType ntasksInner = atoi(argv[4]);
+	SizeType ntasksInner   = atoi(argv[4]);
 
 	ConcurrencyType concurrency(&argc, &argv, 1);
 
-	typedef MyHelper HelperType;
+	typedef MyHelper                             HelperType;
 	typedef PsimagLite::Parallelizer<HelperType> ParallelizerType;
-	PsimagLite::CodeSectionParams cs(nthreadsOuter);
-	ParallelizerType threadObject(cs);
+	PsimagLite::CodeSectionParams                cs(nthreadsOuter);
+	ParallelizerType                             threadObject(cs);
 
 	HelperType helper(ntasks, nthreadsOuter, ntasksInner, nthreadsInner);
 
