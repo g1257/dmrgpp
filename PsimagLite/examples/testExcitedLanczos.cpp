@@ -5,11 +5,11 @@
 
 int main(int argc, char* argv[])
 {
-	typedef double RealType;
-	typedef std::complex<double> ComplexType;
+	typedef double                                  RealType;
+	typedef std::complex<double>                    ComplexType;
 	typedef PsimagLite::ParametersForSolver<double> SolverParametersType;
-	typedef PsimagLite::Vector<ComplexType>::Type VectorComplexType;
-	typedef PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef PsimagLite::Vector<ComplexType>::Type   VectorComplexType;
+	typedef PsimagLite::Vector<RealType>::Type      VectorRealType;
 
 	constexpr unsigned int nthreads = 1;
 	// Needs to create a object for the RAII to work
@@ -23,7 +23,7 @@ int main(int argc, char* argv[])
 	SizeType excited = atoi(argv[1]);
 
 	/* We fill a dense matrix */
-	int n = 8;
+	int                             n = 8;
 	PsimagLite::Matrix<ComplexType> m(n, n);
 	// fill m
 	for (int i = 0; i < n; ++i)
@@ -36,19 +36,19 @@ int main(int argc, char* argv[])
 
 	SolverParametersType params;
 	params.lotaMemory = true;
-	params.tolerance = -1;
-	params.options = "reortho";
+	params.tolerance  = -1;
+	params.options    = "reortho";
 	PsimagLite::LanczosSolver<SolverParametersType,
 	                          PsimagLite::CrsMatrix<ComplexType>,
 	                          VectorComplexType>
 	    lanczosSolver(msparse, params);
 
 	PsimagLite::Random48<double> myrng(time(0));
-	VectorComplexType initialV(n, 0.0);
+	VectorComplexType            initialV(n, 0.0);
 	for (SizeType i = 0; i < n; ++i)
 		initialV[i] = myrng() - 0.5;
 
-	double e1 = 0;
+	double            e1 = 0;
 	VectorComplexType z1(n, 0.0);
 	lanczosSolver.computeOneState(e1, z1, initialV, excited);
 	std::cout << "energy1=" << e1 << "\n";

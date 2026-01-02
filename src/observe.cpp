@@ -3,8 +3,7 @@
 
 using namespace Dmrg;
 
-template <typename T>
-bool atLeastOneLoopWithBit0Set(const T& fl)
+template <typename T> bool atLeastOneLoopWithBit0Set(const T& fl)
 {
 	const SizeType n = fl.size();
 	for (SizeType i = 0; i < n; ++i)
@@ -13,33 +12,30 @@ bool atLeastOneLoopWithBit0Set(const T& fl)
 
 	return false;
 }
-template <typename GeometryType,
-    typename ModelHelperType,
-    typename VectorWithOffsetType>
-void mainLoop(GeometryType& geometry,
-    InputNgType::Readable& io,
-    const ParametersDmrgSolverType& params,
-    const std::string& list)
+template <typename GeometryType, typename ModelHelperType, typename VectorWithOffsetType>
+void mainLoop(GeometryType&                   geometry,
+              InputNgType::Readable&          io,
+              const ParametersDmrgSolverType& params,
+              const std::string&              list)
 {
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 
 	typedef ModelBase<ModelHelperType,
-	    ParametersDmrgSolverType,
-	    InputNgType::Readable,
-	    GeometryType>
+	                  ParametersDmrgSolverType,
+	                  InputNgType::Readable,
+	                  GeometryType>
 	    ModelBaseType;
 
 	SizeType orbitals = 1.0;
 	try {
 		io.readline(orbitals, "Orbitals=");
-	} catch (std::exception&) {
-	}
+	} catch (std::exception&) { }
 
 	ModelSelector<ModelBaseType> modelSelector(params.model);
-	const ModelBaseType& model = modelSelector(params, io, geometry);
+	const ModelBaseType&         model = modelSelector(params, io, geometry);
 
 	const std::string& datafile = params.filename;
-	IoInputType dataIo(datafile);
+	IoInputType        dataIo(datafile);
 
 	bool iscomplex = false;
 	dataIo.read(iscomplex, "IsComplex");
@@ -47,59 +43,60 @@ void mainLoop(GeometryType& geometry,
 	if (iscomplex != PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
 		err("Previous run was complex and this one is not (or viceversa)\n");
 
-	while (!observeOneFullSweep<VectorWithOffsetType, ModelBaseType>(dataIo, model, list, orbitals))
+	while (!observeOneFullSweep<VectorWithOffsetType, ModelBaseType>(
+	    dataIo, model, list, orbitals))
 		;
 }
 
 template <typename GeometryType,
-    template <typename> class ModelHelperTemplate,
-    typename MySparseMatrix>
-void mainLoop1(GeometryType& geometry,
-    InputNgType::Readable& io,
-    const ParametersDmrgSolverType& params,
-    const std::string& list)
+          template <typename> class ModelHelperTemplate,
+          typename MySparseMatrix>
+void mainLoop1(GeometryType&                   geometry,
+               InputNgType::Readable&          io,
+               const ParametersDmrgSolverType& params,
+               const std::string&              list)
 {
-	typedef Basis<MySparseMatrix> BasisType;
-	typedef BasisWithOperators<BasisType> BasisWithOperatorsType;
+	typedef Basis<MySparseMatrix>                             BasisType;
+	typedef BasisWithOperators<BasisType>                     BasisWithOperatorsType;
 	typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType> ModelHelperType;
-	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef Qn QnType;
+	typedef ModelHelperTemplate<LeftRightSuperType>           ModelHelperType;
+	typedef typename MySparseMatrix::value_type               ComplexOrRealType;
+	typedef Qn                                                QnType;
 
 	if (params.options.isSet("vectorwithoffsets")) {
 		typedef VectorWithOffsets<ComplexOrRealType, QnType> VectorWithOffsetType;
-		mainLoop<GeometryType, ModelHelperType, VectorWithOffsetType>(geometry, io, params, list);
+		mainLoop<GeometryType, ModelHelperType, VectorWithOffsetType>(
+		    geometry, io, params, list);
 	} else {
 		typedef VectorWithOffset<ComplexOrRealType, QnType> VectorWithOffsetType;
-		mainLoop<GeometryType, ModelHelperType, VectorWithOffsetType>(geometry, io, params, list);
+		mainLoop<GeometryType, ModelHelperType, VectorWithOffsetType>(
+		    geometry, io, params, list);
 	}
 }
 
 template <typename MySparseMatrix>
-void mainLoop0(InputNgType::Readable& io,
-    ParametersDmrgSolverType& dmrgSolverParams,
-    InputCheck& inputCheck,
-    const std::string& list)
+void mainLoop0(InputNgType::Readable&    io,
+               ParametersDmrgSolverType& dmrgSolverParams,
+               InputCheck&               inputCheck,
+               const std::string&        list)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef Dmrg::SuperGeometry<ComplexOrRealType,
-	    InputNgType::Readable,
-	    ProgramGlobals>
+	typedef Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>
 	    SuperGeometryType;
 
 	SuperGeometryType superGeometry(io);
-	int tmp = 0;
+	int               tmp = 0;
 	try {
 		io.readline(tmp, "UseSu2Symmetry=");
-	} catch (std::exception&) {
-	}
+	} catch (std::exception&) { }
 
 	bool su2 = (tmp > 0);
 
 	if (su2) {
 		err("SU(2) no longer supported\n");
 	} else {
-		mainLoop1<SuperGeometryType, ModelHelperLocal, MySparseMatrix>(superGeometry, io, dmrgSolverParams, list);
+		mainLoop1<SuperGeometryType, ModelHelperLocal, MySparseMatrix>(
+		    superGeometry, io, dmrgSolverParams, list);
 	}
 }
 
@@ -137,15 +134,15 @@ int main(int argc, char** argv)
 {
 	using namespace Dmrg;
 	PsimagLite::PsiApp application("observe", &argc, &argv, 1);
-	std::string filename;
-	std::string filesOption;
-	std::string output_filename;
-	std::string sOptions(",observe");
-	int opt = 0;
-	int precision = 0;
-	SizeType threadsInCmd = 0;
-	bool versionOnly = false;
-	bool unbuffered = false;
+	std::string        filename;
+	std::string        filesOption;
+	std::string        output_filename;
+	std::string        sOptions(",observe");
+	int                opt          = 0;
+	int                precision    = 0;
+	SizeType           threadsInCmd = 0;
+	bool               versionOnly  = false;
+	bool               unbuffered   = false;
 
 	while ((opt = getopt(argc, argv, "f:l:o:p:F:S:UV")) != -1) {
 		switch (opt) {
@@ -205,7 +202,7 @@ int main(int argc, char** argv)
 		}
 
 		PsimagLite::RedirectOutput::setAppName(application.name(),
-		    Provenance::logo(application.name()));
+		                                       Provenance::logo(application.name()));
 
 		std::ios_base::openmode open_mode = std::ofstream::out;
 
@@ -229,9 +226,9 @@ int main(int argc, char** argv)
 	application.printCmdLine(std::cout);
 
 	// Setup the Geometry
-	InputCheck inputCheck;
+	InputCheck                     inputCheck;
 	InputFromDataOrNot<InputCheck> inputFromDataOrNot(filename, inputCheck, false);
-	InputNgType::Readable io(inputFromDataOrNot.ioWriteable());
+	InputNgType::Readable          io(inputFromDataOrNot.ioWriteable());
 
 	ParametersDmrgSolverType dmrgSolverParams(io, sOptions, false, true);
 
@@ -248,19 +245,17 @@ int main(int argc, char** argv)
 	SizeType threadsStackSize = 0;
 	try {
 		io.readline(threadsStackSize, "ThreadsStackSize=");
-	} catch (std::exception&) {
-	}
+	} catch (std::exception&) { }
 
-	PsimagLite::CodeSectionParams codeSectionParams(dmrgSolverParams.nthreads,
-	    dmrgSolverParams.nthreads2,
-	    setAffinities,
-	    threadsStackSize);
+	PsimagLite::CodeSectionParams codeSectionParams(
+	    dmrgSolverParams.nthreads, dmrgSolverParams.nthreads2, setAffinities, threadsStackSize);
 	ConcurrencyType::setOptions(codeSectionParams);
 
 	if (!atLeastOneLoopWithBit0Set(dmrgSolverParams.finiteLoop))
 		err("FATAL: At least one loop must have bit 0 set for observe to work\n");
 
-	bool isComplex = (dmrgSolverParams.options.isSet("useComplex") || dmrgSolverParams.options.isSet("TimeStepTargeting"));
+	bool isComplex = (dmrgSolverParams.options.isSet("useComplex")
+	                  || dmrgSolverParams.options.isSet("TimeStepTargeting"));
 
 	if (isComplex) {
 		mainLoop0<MySparseMatrixComplex>(io, dmrgSolverParams, inputCheck, list);
