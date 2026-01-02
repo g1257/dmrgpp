@@ -4,8 +4,9 @@ use strict;
 use warnings;
 use utf8;
 
-my ($file) = @ARGV;
-defined($file) or die "USAGE: $0 filename\n";
+my ($file, $tolerance) = @ARGV;
+defined($file) or die "USAGE: $0 filename [tolerance]\n";
+defined($tolerance) or $tolerance = 1e-4;
 
 my ($labels, $matrices) = loadLabelsAndData($file);
 
@@ -15,7 +16,7 @@ my $gold_file = getGoldfilename($file);
 #print STDERR "$0: Gold file is $gold_file\n";
 my ($glabels, $gmatrices) = loadLabelsAndData($gold_file);
 compareLabels($glabels, $labels);
-compareData($gmatrices, $matrices, $glabels);
+compareData($gmatrices, $matrices, $glabels, $tolerance);
 
 sub getGoldfilename
 {
@@ -31,7 +32,7 @@ sub getGoldfilename
 
 sub compareData
 {
-	my ($gold, $steel, $labels) = @_;
+	my ($gold, $steel, $labels, $tolerance) = @_;
 
 	my $n = scalar(@$gold);
 	my $nsteel = scalar(@$steel);
@@ -40,19 +41,19 @@ sub compareData
 	}
 
 	for (my $i = 0; $i < $n; ++$i) {
-		next if (matrixEqual($gold->[$i], $steel->[$i]));
+		next if (matrixEqual($gold->[$i], $steel->[$i], $tolerance));
 		die "$0: Matrices differ for label ".$labels->[$i]."\n";
 	}
 }
 
 sub matrixEqual
 {
-	my ($ma, $mb) = @_;
+	my ($ma, $mb, $tolerance) = @_;
 	my $na = scalar(@$ma);
 	my $nb = scalar(@$mb);
 	return 0 if ($na != $nb);
 	for (my $i = 0; $i < $na; ++$i) {
-		next if (vectorEqual($ma->[$i], $mb->[$i]));
+		next if (vectorEqual($ma->[$i], $mb->[$i], $tolerance));
 		return 0;
 	}
 
@@ -61,12 +62,12 @@ sub matrixEqual
 
 sub vectorEqual
 {
-	my ($va, $vb) = @_;
+	my ($va, $vb, $tolerance) = @_;
 	my $na = scalar(@$va);
 	my $nb = scalar(@$vb);
 	return 0 unless ($na == $nb);
 	for (my $i = 0; $i < $na; ++$i) {
-		next if (abs($va->[$i] - $vb->[$i]) < 1e-4);
+		next if (abs($va->[$i] - $vb->[$i]) < $tolerance);
 		return 0;
 	}
 
