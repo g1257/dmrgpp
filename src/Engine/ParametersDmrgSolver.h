@@ -678,6 +678,18 @@ struct ParametersDmrgSolver {
 		checkTwoSiteDmrg(filename2, options);
 	}
 
+	PsimagLite::String restartFilename() const
+	{
+		// check first for observe
+		bool isObserve = this->options.isSet("observe");
+		if (isObserve)
+			return this->filename;
+
+		// then for restart
+		bool isRestart = this->options.isSet("restart");
+		return (isRestart) ? this->checkpoint.filename() : "";
+	}
+
 private:
 
 	static SizeType modeFromModel(PsimagLite::String model)
