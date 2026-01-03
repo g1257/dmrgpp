@@ -58,7 +58,6 @@ volume="183",
 pages="2226-2232",
 year="2012"}
 
-
 \@article{re:alvarez0311,
 author="G. Alvarez and  L. G. G. V. Dias da Silva and
 E. Ponce and  E. Dagotto",
@@ -78,8 +77,10 @@ journal="Phys. Rev. B",
 volume="87",
 pages="245130",
 year="2013"}
+</pre>
 
 And also:
+<pre>
 \@article{re:alvarez08,
  re:webDmrgPlusPlus,
  Author = {G. Alvarez},
@@ -100,28 +101,25 @@ Keys at https://g1257.github.com/keys.html
 
 ### Required Software
 
-\begin{enumerate}
+1. GNU C++ or LLVM CLANG++ (C++11 is used)
 
-\item GNU C++ or LLVM CLANG++ (C++11 is used)
+2. (required) The BLAS and LAPACK library.
 
-\item (required) The BLAS and LAPACK library.
+3. (required) HDF5
 
-\item (required) HDF5
+4. (required) PsimagLite. See below for details.
 
-\item (required) PsimagLite. See below for details.
-
-\item (required) boost-devel (boost-spirit) for Ainur
+5. (required) boost-devel (boost-spirit) for Ainur
 Only headers files are used; boost runtime is not used.
 
-\item (optional) GSL (GNU Scientific library)
+6. (optional) GSL (GNU Scientific library)
 
-\item (optional) make or gmake
+7. (optional) make or gmake
 (only needed to use the Makefile)
 
-\item (optional) perl
+8. (optional) perl
 (only needed to run the configure.pl script)
 
-\end{enumerate}
 
 ### Downloading DMRG++
 Create a directory somewhere and cd to it.
