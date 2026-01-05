@@ -13,7 +13,7 @@ public:
 
 	static T value()
 	{
-		err("This features can only be run when usecomplex is in SolverOptions\n");
+		err("This feature can only be run when usecomplex is in SolverOptions\n");
 		return 0.;
 	}
 };

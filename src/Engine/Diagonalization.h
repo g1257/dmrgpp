@@ -698,6 +698,7 @@ private:
 		progress_.printline(msgg1, std::cout);
 
 		delete lanczosOrDavidson;
+		lanczosOrDavidson = nullptr;
 	}
 
 	void dense_diag(const typename LanczosOrDavidsonBaseType::MatrixType& lanczosHelper,
