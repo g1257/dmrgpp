@@ -104,14 +104,14 @@ Keys at https://g1257.github.com/keys.html
 
 * The BLAS and LAPACK library or equivalent
 
-* (required) HDF5
+* [required] HDF5
 
-* (required) boost-devel (boost-spirit) for Ainur
+* [required] boost-devel (boost-spirit) for Ainur
 Only headers files are used; boost runtime is not used.
 
-* (required) cmake and dependencies
+* [required] cmake and dependencies
 
-* perl
+* [required] perl
 
 * [optional] GSL (GNU Scientific library)
 
