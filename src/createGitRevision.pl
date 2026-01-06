@@ -18,6 +18,7 @@ print FOUT "// Created by $0\n";
 print FOUT "#ifndef GIT_REVISION_H\n";
 print FOUT "#define PSIMAGLITE_GIT_REV \"$hashPsimagLite\"\n";
 print FOUT "#define DMRGPP_GIT_REV \"$hashDmrgpp\"\n";
+print FOUT "#define DMFT_GIT_REV \"$hashDmrgpp\"\n";
 print FOUT "#define MICRO_ARCH \"$microArch\"\n";
 print FOUT "#endif\n";
 close(FOUT);

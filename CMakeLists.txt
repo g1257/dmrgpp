@@ -18,4 +18,6 @@ include(Catch)
 
 add_subdirectory(PsimagLite)
 add_subdirectory(src)
+
+add_subdirectory(cincuenta)
 # add_subdirectory(doc)
