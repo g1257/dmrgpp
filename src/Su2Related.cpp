@@ -75,8 +75,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #include "Su2Related.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 std::istream& operator>>(std::istream& is, Su2Related& x)
 {

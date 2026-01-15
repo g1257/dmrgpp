@@ -1,3 +1,17 @@
+# Indentation
+
+## Short write-up:
+
+cd dmrgpp/src
+perl ../../PsimagLite/scripts/format.pl .
+
+which uses clang-format;
+see PsimagLite/.clang_format for the rules.
+
+---------------
+
+## Long write-up
+
 DMRG++ is indented using "hard" tabs and Kernighan and Ritchie indentation. 
 This is the indentation style used by the Linux Kernel. 
 Note that the tab character is octal 011, decimal 9, hex. 09, or '\t' (horizontal tab). 

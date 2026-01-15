@@ -96,65 +96,63 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TargetingBase.h"
 #include "VectorWithOffsets.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingRixsStatic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingRixsStatic : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
-	typedef LanczosSolverType_ LanczosSolverType;
+	typedef LanczosSolverType_                                      LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
 
 public:
 
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType MatrixVectorType;
-	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename ModelType::OperatorsType OperatorsType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef TargetParamsCorrectionVector<ModelType> TargetParamsType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
+	typedef typename BaseType::TargetingCommonType                TargetingCommonType;
+	typedef typename BaseType::MatrixVectorType                   MatrixVectorType;
+	typedef typename BaseType::CheckpointType                     CheckpointType;
+	typedef typename MatrixVectorType::ModelType                  ModelType;
+	typedef typename ModelType::RealType                          RealType;
+	typedef typename PsimagLite::Vector<RealType>::Type           VectorRealType;
+	typedef typename ModelType::OperatorsType                     OperatorsType;
+	typedef typename ModelType::ModelHelperType                   ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType          LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType   BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::OperatorType         OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType            BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType     SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                 ComplexOrRealType;
+	typedef TargetParamsCorrectionVector<ModelType>               TargetParamsType;
+	typedef typename BasisType::BlockType                         BlockType;
+	typedef typename BaseType::WaveFunctionTransfType             WaveFunctionTransfType;
 	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef VectorType TargetVectorType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
-	typedef PsimagLite::Matrix<RealType> DenseMatrixRealType;
-	typedef typename LanczosSolverType::PostProcType PostProcType;
-	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef typename LanczosSolverType::MatrixType LanczosMatrixType;
+	typedef typename VectorWithOffsetType::VectorType             VectorType;
+	typedef VectorType                                            TargetVectorType;
+	typedef typename LanczosSolverType::TridiagonalMatrixType     TridiagonalMatrixType;
+	typedef PsimagLite::Matrix<typename VectorType::value_type>   DenseMatrixType;
+	typedef PsimagLite::Matrix<RealType>                          DenseMatrixRealType;
+	typedef typename LanczosSolverType::PostProcType              PostProcType;
+	typedef typename TargetingCommonType::TimeSerializerType      TimeSerializerType;
+	typedef typename LanczosSolverType::MatrixType                LanczosMatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
 	    CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
-	    ParallelTriDiagType;
+	                                                              ParallelTriDiagType;
 	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
-	typedef typename ParallelTriDiagType::VectorMatrixFieldType VectorMatrixFieldType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename ParallelTriDiagType::VectorMatrixFieldType   VectorMatrixFieldType;
+	typedef typename PsimagLite::Vector<SizeType>::Type           VectorSizeType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type     VectorVectorRealType;
+	typedef typename ModelType::InputValidatorType                InputValidatorType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	    VectorWithOffsetType,
-	    BaseType,
-	    TargetParamsType>
-	    CorrectionVectorSkeletonType;
+	                                 VectorWithOffsetType,
+	                                 BaseType,
+	                                 TargetParamsType>
+	                                   CorrectionVectorSkeletonType;
 	typedef typename BasisType::QnType QnType;
 
-	TargetingRixsStatic(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& ioIn)
+	TargetingRixsStatic(const LeftRightSuperType&     lrs,
+	                    const CheckpointType&         checkPoint,
+	                    const WaveFunctionTransfType& wft,
+	                    const QnType&,
+	                    InputValidatorType& ioIn)
 	    : BaseType(lrs, checkPoint, wft, 1)
 	    , tstStruct_(ioIn, "TargetingRixsStatic", checkPoint.model())
 	    , ioIn_(ioIn)
@@ -172,15 +170,9 @@ public:
 
 	SizeType targets() const { return 6; }
 
-	RealType weight(SizeType i) const
-	{
-		return weight_[i];
-	}
+	RealType weight(SizeType i) const { return weight_[i]; }
 
-	RealType gsWeight() const
-	{
-		return gsWeight_;
-	}
+	RealType gsWeight() const { return gsWeight_; }
 
 	SizeType size() const
 	{
@@ -190,11 +182,11 @@ public:
 		return (applied_) ? 6 : 3;
 	}
 
-	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType& block2,
-	    SizeType loopNumber)
+	void evolve(const VectorRealType&         energies,
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType&              block1,
+	            const BlockType&              block2,
+	            SizeType                      loopNumber)
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -204,15 +196,15 @@ public:
 		}
 
 		assert(energies.size() > 0);
-		RealType Eg = energies[0];
+		RealType Eg   = energies[0];
 		SizeType site = block1[0];
 		evolve(Eg, direction, site, loopNumber);
 		this->common().printNormsAndWeights(gsWeight_, weight_);
 	}
 
-	void write(const VectorSizeType& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	void write(const VectorSizeType&        block,
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String           prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "RixsStatic");
@@ -243,9 +235,9 @@ private:
 	// tv[5] = real      cv for tv[3]
 
 	void evolve(RealType,
-	    ProgramGlobals::DirectionEnum direction,
-	    SizeType site,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            SizeType                      site,
+	            SizeType                      loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -262,12 +254,14 @@ private:
 			err("You cannot apply more than 2 operators (only SUM is allowed)\n");
 
 		if (!applied_) {
-			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(__FILE__ + PsimagLite::String("::evolve"));
+			const VectorWithOffsetType& psi00 = this->common().aoe().ensureOnlyOnePsi(
+			    __FILE__ + PsimagLite::String("::evolve"));
 			if (max == 1) {
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
-					SizeType indexOfOperator = 0;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
+					SizeType             indexOfOperator = 0;
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
 					    indexOfOperator,
 					    site,
 					    tmpV1,
@@ -276,19 +270,23 @@ private:
 					    tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->tvNonConst(3) = tmpV1;
-						applied_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						applied_            = true;
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "Applied operator";
 						progress_.printline(msgg, std::cout);
 					}
 				}
 			}
-			if (max == 2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::SUM) {
+			if (max == 2
+			    && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::SUM) {
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
-					SizeType indexOfOperator = 0;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
+					SizeType             indexOfOperator = 0;
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
 					    indexOfOperator,
 					    site,
 					    tmpV1,
@@ -297,18 +295,21 @@ private:
 					    tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->tvNonConst(3) = tmpV1;
-						applied_ = false;
-						appliedFirst_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						applied_            = false;
+						appliedFirst_       = true;
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "Applied first operator";
 						progress_.printline(msgg, std::cout);
 					}
 				}
 				if (site == tstStruct_.sites(1)) {
 					VectorWithOffsetType tmpV2;
-					SizeType indexOfOperator = 1;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
+					SizeType             indexOfOperator = 1;
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
 					    indexOfOperator,
 					    site,
 					    tmpV2,
@@ -318,18 +319,23 @@ private:
 					if (tmpV2.size() > 0) {
 						this->tvNonConst(3) += tmpV2;
 						applied_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "Applied second operator";
 						progress_.printline(msgg, std::cout);
 					}
 				}
 			}
-			if (max == 2 && tstStruct_.concatenation() == TargetParamsType::ConcatEnum::PRODUCT) {
+			if (max == 2
+			    && tstStruct_.concatenation()
+			        == TargetParamsType::ConcatEnum::PRODUCT) {
 				if (site == tstStruct_.sites(0)) {
 					VectorWithOffsetType tmpV1;
-					SizeType indexOfOperator = 0;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
+					SizeType             indexOfOperator = 0;
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
 					    indexOfOperator,
 					    site,
 					    tmpV1,
@@ -338,18 +344,21 @@ private:
 					    tstStruct_);
 					if (tmpV1.size() > 0) {
 						this->tvNonConst(3) = tmpV1;
-						applied_ = false;
-						appliedFirst_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						applied_            = false;
+						appliedFirst_       = true;
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "PROD: Applied First Operator";
 						progress_.printline(msgg, std::cout);
 					}
 				}
 				if (site == tstStruct_.sites(1)) {
 					VectorWithOffsetType tmpV2;
-					SizeType indexOfOperator = 1;
-					this->common().aoeNonConst().applyOneOperator(loopNumber,
+					SizeType             indexOfOperator = 1;
+					this->common().aoeNonConst().applyOneOperator(
+					    loopNumber,
 					    indexOfOperator,
 					    site,
 					    tmpV2,
@@ -358,9 +367,11 @@ private:
 					    tstStruct_);
 					if (tmpV2.size() > 0) {
 						this->tvNonConst(3) = tmpV2;
-						applied_ = true;
-						PsimagLite::OstringStream msgg(std::cout.precision());
-						PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+						applied_            = true;
+						PsimagLite::OstringStream msgg(
+						    std::cout.precision());
+						PsimagLite::OstringStream::OstringStreamType& msg
+						    = msgg();
 						msg << "PROD: Applied Second Operator";
 						progress_.printline(msgg, std::cout);
 					}
@@ -370,7 +381,7 @@ private:
 
 		doCorrectionVector();
 
-		bool doBorderIfBorder = true;
+		bool           doBorderIfBorder = true;
 		VectorSizeType block(1, site);
 		this->common().cocoon(block, direction, doBorderIfBorder);
 	}
@@ -387,9 +398,7 @@ private:
 			return;
 		}
 
-		skeleton_.calcDynVectors(this->tv(3),
-		    this->tvNonConst(4),
-		    this->tvNonConst(5));
+		skeleton_.calcDynVectors(this->tv(3), this->tvNonConst(4), this->tvNonConst(5));
 		//		this->tv(4) = this->common().aoe().targetVectors(1);
 		//		this->tv(5) = this->common().aoe().targetVectors(2);
 
@@ -411,14 +420,14 @@ private:
 			weight_[r] = (1.0 - gsWeight_) / sum;
 	}
 
-	TargetParamsType tstStruct_;
-	InputValidatorType& ioIn_;
-	PsimagLite::ProgressIndicator progress_;
-	RealType gsWeight_;
+	TargetParamsType                            tstStruct_;
+	InputValidatorType&                         ioIn_;
+	PsimagLite::ProgressIndicator               progress_;
+	RealType                                    gsWeight_;
 	typename PsimagLite::Vector<RealType>::Type weight_;
-	CorrectionVectorSkeletonType skeleton_;
-	bool applied_;
-	bool appliedFirst_;
+	CorrectionVectorSkeletonType                skeleton_;
+	bool                                        applied_;
+	bool                                        appliedFirst_;
 }; // class TargetingRixsStatic
 } // namespace
 /*@}*/

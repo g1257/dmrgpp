@@ -85,33 +85,30 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
-template <typename ModelType>
-class TargetParamsCommon : public TargetParamsBase<ModelType>
-{
+template <typename ModelType> class TargetParamsCommon : public TargetParamsBase<ModelType> {
 
 public:
 
-	typedef typename ModelType::RealType RealType;
-	typedef TargetParamsBase<ModelType> BaseType;
-	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename ModelType::RealType                         RealType;
+	typedef TargetParamsBase<ModelType>                          BaseType;
+	typedef typename ModelType::OperatorType                     OperatorType;
+	typedef typename OperatorType::PairType                      PairType;
+	typedef typename OperatorType::StorageType                   SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                MatrixType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type VectorMatrixType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef PsimagLite::Vector<SizeType>::Type                   VectorSizeType;
+	typedef typename PsimagLite::Vector<MatrixType>::Type        VectorMatrixType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type      VectorOperatorType;
+	typedef typename ModelType::InputValidatorType               InputValidatorType;
+	typedef std::pair<SizeType, SizeType>                        PairSizeType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type         VectorStringType;
 
 	TargetParamsCommon(InputValidatorType& io,
-	    PsimagLite::String targeting,
-	    const ModelType& model)
+	                   PsimagLite::String  targeting,
+	                   const ModelType&    model)
 	    : BaseType(targeting)
 	    , sites_(0)
 	    , startingLoops_(0)
@@ -192,22 +189,17 @@ public:
 			int tmp = 0;
 			io.readline(tmp, "TSPSkipTimeZero=");
 			skipTimeZero_ = (tmp > 0);
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(energyForExp_, "TSPEnergyForExp=");
 			isEnergyForExp_ = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		for (SizeType i = 0; i < sites_.size(); ++i) {
 			PsimagLite::String prefix2 = (io.isAinur()) ? "TSPOp" + ttos(i) + ":" : "";
-			OperatorType myOp(io,
-			    model_,
-			    OperatorType::MUST_BE_NONZERO,
-			    prefix2,
-			    sites_[i]);
+			OperatorType       myOp(
+                            io, model_, OperatorType::MUST_BE_NONZERO, prefix2, sites_[i]);
 			aOperators_.push_back(myOp);
 		}
 
@@ -215,17 +207,16 @@ public:
 			VectorType tmpVector;
 			io.read(tmpVector, "TSPOperatorMultiplier");
 			multiplyOperators(tmpVector);
-			std::cout << "TSPOperatorMultiplier found with " << tmpVector.size() << " entries.\n";
-		} catch (std::exception&) {
-		}
+			std::cout << "TSPOperatorMultiplier found with " << tmpVector.size()
+			          << " entries.\n";
+		} catch (std::exception&) { }
 
-		bool hasApplyTo = false;
+		bool               hasApplyTo = false;
 		PsimagLite::String tmp;
 		try {
 			io.readline(tmp, "TSPApplyTo=");
 			hasApplyTo = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (hasApplyTo) {
 			PsimagLite::GetBraOrKet gbok(tmp);
@@ -237,17 +228,12 @@ public:
 		checkSizesOfOperators();
 	}
 
-	SizeType memResolv(PsimagLite::MemResolv&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	SizeType memResolv(PsimagLite::MemResolv&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	virtual SizeType sites() const
-	{
-		return sites_.size();
-	}
+	virtual SizeType sites() const { return sites_.size(); }
 
 	virtual SizeType sites(SizeType i) const
 	{
@@ -259,9 +245,8 @@ public:
 	{
 		if (start >= sites_.size())
 			return -1;
-		VectorSizeType::const_iterator it = std::find(sites_.begin() + start,
-		    sites_.end(),
-		    site);
+		VectorSizeType::const_iterator it
+		    = std::find(sites_.begin() + start, sites_.end(), site);
 		if (it == sites_.end())
 			return -1;
 		return it - sites_.begin();
@@ -275,57 +260,29 @@ public:
 		aOperators_[i] = op;
 	}
 
-	virtual const VectorSizeType& startingLoops() const
-	{
-		return startingLoops_;
-	}
+	virtual const VectorSizeType& startingLoops() const { return startingLoops_; }
 
-	virtual typename BaseType::ConcatEnum concatenation() const
-	{
-		return concatenation_;
-	}
+	virtual typename BaseType::ConcatEnum concatenation() const { return concatenation_; }
 
-	virtual const VectorOperatorType& aOperators() const
-	{
-		return aOperators_;
-	}
+	virtual const VectorOperatorType& aOperators() const { return aOperators_; }
 
-	virtual bool noOperator() const
-	{
-		return noOperator_;
-	}
+	virtual bool noOperator() const { return noOperator_; }
 
-	virtual void noOperator(bool x)
-	{
-		noOperator_ = x;
-	}
+	virtual void noOperator(bool x) { noOperator_ = x; }
 
-	virtual bool skipTimeZero() const
-	{
-		return skipTimeZero_;
-	}
+	virtual bool skipTimeZero() const { return skipTimeZero_; }
 
-	virtual bool isEnergyForExp() const
-	{
-		return isEnergyForExp_;
-	}
+	virtual bool isEnergyForExp() const { return isEnergyForExp_; }
 
-	virtual RealType energyForExp() const
-	{
-		return energyForExp_;
-	}
+	virtual RealType energyForExp() const { return energyForExp_; }
 
-	virtual RealType gsWeight() const
-	{
-		return gsWeight_;
-	}
+	virtual RealType gsWeight() const { return gsWeight_; }
 
 	virtual SizeType sectorIndex() const { return sectorLevel_.first; }
 
 	virtual SizeType levelIndex() const { return sectorLevel_.second; }
 
-	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 
@@ -340,8 +297,7 @@ public:
 		ioSerializer.write(label + "/aOperators_", aOperators_);
 	}
 
-	friend std::ostream& operator<<(std::ostream& os,
-	    const TargetParamsCommon& t)
+	friend std::ostream& operator<<(std::ostream& os, const TargetParamsCommon& t)
 	{
 		os << "TargetParams.operators=" << t.aOperators_.size() << "\n";
 		for (SizeType i = 0; i < t.aOperators_.size(); i++) {
@@ -375,7 +331,8 @@ private:
 		if (aOperators_.size() != 1)
 			return false;
 		return (isTheIdentity(aOperators_[0].getStorage())
-		    && aOperators_[0].fermionOrBoson() == ProgramGlobals::FermionOrBosonEnum::BOSON);
+		        && aOperators_[0].fermionOrBoson()
+		            == ProgramGlobals::FermionOrBosonEnum::BOSON);
 	}
 
 	void checkSizesOfOperators() const
@@ -388,7 +345,7 @@ private:
 		}
 
 		for (SizeType i = 0; i < aOperators_.size(); i++) {
-			SizeType n = aOperators_[i].getStorage().rows();
+			SizeType n       = aOperators_[i].getStorage().rows();
 			SizeType hilbert = model_.hilbertSize(sites_[i]);
 			if (n != hilbert) {
 				PsimagLite::String str(__FILE__);
@@ -441,7 +398,7 @@ private:
 	void errorBorderOperators(SizeType site) const
 	{
 		SizeType linSize = model_.superGeometry().numberOfSites();
-		SizeType site2 = (site == 0) ? 1 : linSize - 2;
+		SizeType site2   = (site == 0) ? 1 : linSize - 2;
 
 		PsimagLite::String str("ERROR: Operators at border site: Please ");
 		str += "add the identity operator at site " + ttos(site2) + "\n";
@@ -452,7 +409,7 @@ private:
 	{
 		typedef AlgebraicStringToNumber<RealType> AlgebraicStringToNumberType;
 		const SizeType numberOfSites = model_.superGeometry().numberOfSites();
-		const SizeType n = strs.size();
+		const SizeType n             = strs.size();
 		nums.resize(n);
 
 		AlgebraicStringToNumberType algebraicStringToNumber("TSPSites", numberOfSites);
@@ -467,18 +424,18 @@ private:
 		std::cout << "];\n";
 	}
 
-	VectorSizeType sites_;
-	VectorSizeType startingLoops_;
+	VectorSizeType                sites_;
+	VectorSizeType                startingLoops_;
 	typename BaseType::ConcatEnum concatenation_;
-	bool noOperator_;
-	bool skipTimeZero_;
-	bool isEnergyForExp_;
-	RealType gsWeight_;
-	RealType energyForExp_;
-	VectorOperatorType aOperators_;
-	InputValidatorType& io_;
-	const ModelType& model_;
-	PairSizeType sectorLevel_;
+	bool                          noOperator_;
+	bool                          skipTimeZero_;
+	bool                          isEnergyForExp_;
+	RealType                      gsWeight_;
+	RealType                      energyForExp_;
+	VectorOperatorType            aOperators_;
+	InputValidatorType&           io_;
+	const ModelType&              model_;
+	PairSizeType                  sectorLevel_;
 }; // class TargetParamsCommon
 } // namespace Dmrg
 

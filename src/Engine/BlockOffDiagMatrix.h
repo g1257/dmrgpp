@@ -3,31 +3,27 @@
 #include "BlockDiagonalMatrix.h"
 #include "CrsMatrix.h"
 #include "GemmR.h"
-#include "LAPACK.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename MatrixBlockType>
-class BlockOffDiagMatrix
-{
+template <typename MatrixBlockType> class BlockOffDiagMatrix {
 
-	typedef typename MatrixBlockType::value_type ComplexOrRealType;
-	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
-	typedef BlockDiagonalMatrix<MatrixBlockType> BlockDiagonalMatrixType;
+	typedef typename MatrixBlockType::value_type               ComplexOrRealType;
+	typedef PsimagLite::CrsMatrix<ComplexOrRealType>           SparseMatrixType;
+	typedef BlockDiagonalMatrix<MatrixBlockType>               BlockDiagonalMatrixType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
+	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
+	typedef std::pair<SizeType, SizeType>                      PairType;
+	typedef PsimagLite::Vector<VectorSizeType>::Type           VectorVectorSizeType;
 
 public:
 
 	typedef MatrixBlockType value_type;
 
 	template <typename SomeBasisType>
-	BlockOffDiagMatrix(const SomeBasisType& rowBasis,
-	    const SomeBasisType& colBasis,
-	    const typename SomeBasisType::QnType& qtarget)
+	BlockOffDiagMatrix(const SomeBasisType&                  rowBasis,
+	                   const SomeBasisType&                  colBasis,
+	                   const typename SomeBasisType::QnType& qtarget)
 	{
 		typedef typename SomeBasisType::VectorQnType::value_type QnType;
 		SizeType rowPatches = rowBasis.partition();
@@ -45,20 +41,19 @@ public:
 
 		for (SizeType i = 0; i < rowPatches - 1; ++i) {
 			SizeType rows = offsetRows_[i + 1] - offsetRows_[i];
-			QnType qrow = rowBasis.qnEx(i);
+			QnType   qrow = rowBasis.qnEx(i);
 			for (SizeType j = 0; j < colPatches - 1; ++j) {
 				QnType qcol = colBasis.qnEx(j);
 				QnType q(qrow, qcol);
 				if (q != qtarget)
 					continue;
 				SizeType cols = offsetCols_[j + 1] - offsetCols_[j];
-				data_(i, j) = new MatrixBlockType(rows, cols);
+				data_(i, j)   = new MatrixBlockType(rows, cols);
 			}
 		}
 	}
 
-	BlockOffDiagMatrix(const SparseMatrixType& sparse,
-	    const VectorSizeType& partitions)
+	BlockOffDiagMatrix(const SparseMatrixType& sparse, const VectorSizeType& partitions)
 	    : offsetRows_(partitions)
 	    , rows_(0)
 	    , cols_(0)
@@ -82,10 +77,10 @@ public:
 
 		for (SizeType row = 0; row < rows_; ++row) {
 			SizeType kStart = sparse.getRowPtr(row);
-			SizeType kEnd = sparse.getRowPtr(row + 1);
+			SizeType kEnd   = sparse.getRowPtr(row + 1);
 			SizeType ipatch = indexToPart[row];
 			for (SizeType k = kStart; k < kEnd; ++k) {
-				SizeType col = sparse.getCol(k);
+				SizeType col    = sparse.getCol(k);
 				SizeType jpatch = indexToPart[col];
 				icount(ipatch, jpatch)++;
 			}
@@ -103,13 +98,14 @@ public:
 
 		for (SizeType row = 0; row < rows_; ++row) {
 			SizeType kStart = sparse.getRowPtr(row);
-			SizeType kEnd = sparse.getRowPtr(row + 1);
+			SizeType kEnd   = sparse.getRowPtr(row + 1);
 			SizeType ipatch = indexToPart[row];
 			for (SizeType k = kStart; k < kEnd; ++k) {
-				SizeType col = sparse.getCol(k);
-				SizeType jpatch = indexToPart[col];
-				MatrixBlockType& m = *(data_(ipatch, jpatch));
-				m(row - partitions[ipatch], col - partitions[jpatch]) = sparse.getValue(k);
+				SizeType         col    = sparse.getCol(k);
+				SizeType         jpatch = indexToPart[col];
+				MatrixBlockType& m      = *(data_(ipatch, jpatch));
+				m(row - partitions[ipatch], col - partitions[jpatch])
+				    = sparse.getValue(k);
 			}
 		}
 	}
@@ -131,8 +127,8 @@ public:
 	ComplexOrRealType operator*(const BlockOffDiagMatrix& other) const
 	{
 		ComplexOrRealType sum = 0;
-		SizeType nr = data_.rows();
-		SizeType nc = data_.cols();
+		SizeType          nr  = data_.rows();
+		SizeType          nc  = data_.cols();
 		if (nr != other.data_.rows() || nc != other.data_.cols())
 			operatorFailed("*");
 		for (SizeType ipatch = 0; ipatch < nr; ++ipatch) {
@@ -154,8 +150,8 @@ public:
 
 	void randomize()
 	{
-		SizeType nr = data_.rows();
-		SizeType nc = data_.cols();
+		SizeType nr  = data_.rows();
+		SizeType nc  = data_.cols();
 		RealType sum = 0;
 		for (SizeType ipatch = 0; ipatch < nr; ++ipatch) {
 			for (SizeType jpatch = 0; jpatch < nc; ++jpatch) {
@@ -181,28 +177,29 @@ public:
 
 	template <typename SomeBasisType>
 	void fromMatrixColumn(const MatrixBlockType& src,
-	    SizeType col,
-	    const SomeBasisType& super,
-	    SizeType partitionIndex)
+	                      SizeType               col,
+	                      const SomeBasisType&   super,
+	                      SizeType               partitionIndex)
 	{
 		SizeType start = super.partition(partitionIndex);
-		SizeType end = super.partition(partitionIndex + 1) - start;
-		SizeType nr = data_.rows();
-		SizeType nc = data_.cols();
+		SizeType end   = super.partition(partitionIndex + 1) - start;
+		SizeType nr    = data_.rows();
+		SizeType nc    = data_.cols();
 
 		for (SizeType ipatch = 0; ipatch < nr; ++ipatch) {
 			for (SizeType jpatch = 0; jpatch < nc; ++jpatch) {
 				MatrixBlockType* mptr = data_(ipatch, jpatch);
 				if (mptr == 0)
 					continue;
-				MatrixBlockType& m = *mptr;
-				SizeType rows = m.rows();
-				SizeType cols = m.cols();
+				MatrixBlockType& m    = *mptr;
+				SizeType         rows = m.rows();
+				SizeType         cols = m.cols();
 				for (SizeType i = 0; i < rows; ++i) {
 					SizeType lindex = i + offsetRows_[ipatch];
 					for (SizeType j = 0; j < cols; ++j) {
 						SizeType rindex = j + offsetCols_[jpatch];
-						SizeType sindex = super.permutationInverse(lindex + rindex * rows_);
+						SizeType sindex = super.permutationInverse(
+						    lindex + rindex * rows_);
 						if (sindex < start || sindex >= end)
 							continue;
 						sindex -= start;
@@ -246,7 +243,7 @@ public:
 		}
 
 		VectorSizeType nonzeroInThisRow(rows_, 0);
-		SizeType count = 0;
+		SizeType       count = 0;
 		for (SizeType ipatch = 0; ipatch < n; ++ipatch) {
 			for (SizeType jpatch = 0; jpatch < n; ++jpatch) {
 				const MatrixBlockType* mptr = data_(ipatch, jpatch);
@@ -287,9 +284,9 @@ public:
 					continue;
 				const MatrixBlockType& m = *mptr;
 				for (SizeType r = 0; r < m.rows(); ++r) {
-					SizeType const row = r + offsetRows_[ipatch];
+					SizeType const row      = r + offsetRows_[ipatch];
 					SizeType const ip_start = sparse.getRowPtr(row);
-					SizeType ip = ip_start + nonzeroInThisRow[row];
+					SizeType       ip       = ip_start + nonzeroInThisRow[row];
 					for (SizeType c = 0; c < m.cols(); ++c) {
 						SizeType const col = c + offsetRows_[jpatch];
 						sparse.setValues(ip, m(r, c));
@@ -304,14 +301,12 @@ public:
 		sparse.checkValidity();
 	}
 
-	void transform(const BlockDiagonalMatrixType& f,
-	    SizeType nb,
-	    SizeType nthreadsInner)
+	void transform(const BlockDiagonalMatrixType& f, SizeType nb, SizeType nthreadsInner)
 	{
 		if (offsetCols_.size() != 0)
 			err("BlockOffDiagMatrix::transform() only for square matrix\n");
 
-		static const bool needsPrinting = false;
+		static const bool                    needsPrinting = false;
 		PsimagLite::GemmR<ComplexOrRealType> gemmR(needsPrinting, nb, nthreadsInner);
 
 		assert(offsetRows_.size() > 0);
@@ -321,9 +316,9 @@ public:
 				MatrixBlockType* mptr = data_(ipatch, jpatch);
 				if (mptr == 0)
 					continue;
-				MatrixBlockType& m = *mptr;
+				MatrixBlockType&       m      = *mptr;
 				const MatrixBlockType& mRight = f(jpatch);
-				const MatrixBlockType& mLeft = f(ipatch);
+				const MatrixBlockType& mLeft  = f(ipatch);
 
 				if (mLeft.rows() == 0 || mRight.rows() == 0) {
 					m.clear();
@@ -336,53 +331,47 @@ public:
 				MatrixBlockType tmp(m.rows(), mRight.cols());
 				// tmp = data_[ii] * mRight;
 				gemmR('N',
-				    'N',
-				    m.rows(),
-				    mRight.cols(),
-				    m.cols(),
-				    1.0,
-				    &(m(0, 0)),
-				    m.rows(),
-				    &(mRight(0, 0)),
-				    mRight.rows(),
-				    0.0,
-				    &(tmp(0, 0)),
-				    tmp.rows());
+				      'N',
+				      m.rows(),
+				      mRight.cols(),
+				      m.cols(),
+				      1.0,
+				      &(m(0, 0)),
+				      m.rows(),
+				      &(mRight(0, 0)),
+				      mRight.rows(),
+				      0.0,
+				      &(tmp(0, 0)),
+				      tmp.rows());
 				// data_[ii] = transposeConjugate(mLeft) * tmp;
 				m.clear();
 				m.resize(mLeft.cols(), mRight.cols());
 				gemmR('C',
-				    'N',
-				    mLeft.cols(),
-				    tmp.cols(),
-				    tmp.rows(),
-				    1.0,
-				    &(mLeft(0, 0)),
-				    mLeft.rows(),
-				    &(tmp(0, 0)),
-				    tmp.rows(),
-				    0.0,
-				    &(m(0, 0)),
-				    m.rows());
+				      'N',
+				      mLeft.cols(),
+				      tmp.cols(),
+				      tmp.rows(),
+				      1.0,
+				      &(mLeft(0, 0)),
+				      mLeft.rows(),
+				      &(tmp(0, 0)),
+				      tmp.rows(),
+				      0.0,
+				      &(m(0, 0)),
+				      m.rows());
 			}
 
 			offsetRows_ = f.offsetsCols();
-			n = offsetRows_.size();
+			n           = offsetRows_.size();
 			assert(n > 0);
 			--n;
 			cols_ = rows_ = offsetRows_[n];
 		}
 	}
 
-	SizeType rows() const
-	{
-		return rows_;
-	}
+	SizeType rows() const { return rows_; }
 
-	SizeType cols() const
-	{
-		return cols_;
-	}
+	SizeType cols() const { return cols_; }
 
 	const VectorSizeType& offsets(bool option) const
 	{
@@ -391,8 +380,8 @@ public:
 
 	const RealType norm2() const
 	{
-		SizeType n = data_.rows();
-		SizeType m = data_.cols();
+		SizeType n   = data_.rows();
+		SizeType m   = data_.cols();
 		RealType sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
 			for (SizeType j = 0; j < m; ++j) {
@@ -427,15 +416,11 @@ public:
 		return (*this) *= (1.0 / value);
 	}
 
-	friend RealType norm(const BlockOffDiagMatrix& m)
-	{
-		return sqrt(m.norm2());
-	}
+	friend RealType norm(const BlockOffDiagMatrix& m) { return sqrt(m.norm2()); }
 
 private:
 
-	static void fillIndexToPart(VectorSizeType& indexToPart,
-	    const VectorSizeType& partitions)
+	static void fillIndexToPart(VectorSizeType& indexToPart, const VectorSizeType& partitions)
 	{
 		SizeType n = partitions.size();
 		assert(n > 0);
@@ -458,16 +443,15 @@ private:
 
 	BlockOffDiagMatrix& operator=(const BlockOffDiagMatrix&);
 
-	VectorSizeType offsetRows_;
-	VectorSizeType offsetCols_;
-	SizeType rows_;
-	SizeType cols_;
+	VectorSizeType                                offsetRows_;
+	VectorSizeType                                offsetCols_;
+	SizeType                                      rows_;
+	SizeType                                      cols_;
 	typename PsimagLite::Matrix<MatrixBlockType*> data_;
-	static SizeType limitWarn_;
+	static SizeType                               limitWarn_;
 };
 
-template <typename T1>
-SizeType BlockOffDiagMatrix<T1>::limitWarn_ = 0;
+template <typename T1> SizeType BlockOffDiagMatrix<T1>::limitWarn_ = 0;
 
 }
 #endif // BLOCKOFFDIAGMATRIX_H

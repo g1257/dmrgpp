@@ -1,0 +1,111 @@
+\documentclass{article}
+\usepackage{amsmath}
+
+\begin{document}
+\title{The SVD in DMRG}
+\author{G.A.}
+\maketitle
+
+
+Sites of the lattice are labeled from 0 to N-1, independent of geometry. 
+DMRG has two phases of computation for the ground state: ``infinite loop'' followed by ``finite loop''.
+During the ``infinite loop,'' DMRG grows the lattice from 2 sites on the left and 2 sites on the right, until
+N/2 sites are on the left and N/2 sites are on the right, for a total of N sites, which are predetermined. DMRG++ also supports growing the lattice with only one site on the environment at all times, so that growth happens as 2+1, 3+1, ..., (N-1) + 1.
+During the ``finite loop'', DMRG sweeps the lattice back and forth, from the place where 
+the ``infinite loop'' left off, and then to the rightmost corner and then back to the leftmost, and so on.
+
+At every DMRG step there is a special site of the lattice called the
+\emph{center of orthogonality} (coo), and the lattice is divided in system and environment.
+All sites of the lattice smaller than the coo belong to the system, and all sites greater than the coo belong to the environ.
+The coo itself belongs to the system if the system is growing, and to the environ if the system is shrinking. The full lattice is always composed of system plus environ, and is referred to as the ``superblock.''
+The superblock size changes during the ``infinite loop'' phase, but stays constant during the ``finite loop'' phase.
+
+On each site of the lattice lives a finite-dimensional Hilbert space of dimension (say) D. We assume that all sites of the lattice have the same Hilbert space on them,
+even though DMRG supports site-dependent Hilbert spaces (SDHS).
+The inner product on a basis of states $\{e_i\}$ is $\langle e_i | e_j\rangle = \delta_{ij}$.
+For a system of $N$ sites this D dimensional Hilbert space is extended by a
+\emph{tensor product} of Hilbert spaces to the full lattice, so that the total dimension
+would be $D^N$,
+except that, of course, DMRG introduces truncation.
+
+In DMRG, the original computational basis suffers tensor products, change of basis, and then
+truncation. At every DMRG step there are (at least) three bases: the basis for the system, the
+basis for the environ, and the basis for the superblock. In addition, basis states $e_i$ are 
+assigned an effective quantum number $q_i$, which represents all local symmetries
+of the Hamiltonian that are being considered. We choose $q_i \in $ the non-negative integers. For example, if $a$ is a basis state of the 
+superblock with quantum number \texttt{qsup(a)}, $b$ is a basis state of the system
+with quantum number \texttt{qsys(b)}, and $c$ is a basis state of the environ 
+with quantum number \texttt{qenv(c)}, and
+such that $a = b \otimes c$, then
+\begin{equation}
+	qsup(a) = qsys(b) + qenv(c)
+\end{equation}
+In words: the computational bases have always well defined effective quantum numbers.
+
+If we consider the ground state vector at a given coo to be $\psi$, we can label its coefficients as $\psi_{i,j}$ so that $i$ refers to the system basis, and $j$ to the environ basis.
+DMRG++ works in single quantum target and multi quantum target modes, but this writing
+discusses only single quantum target mode.
+In this mode, there is a quantum target $qt \ge 0$ in the non-negative integers that is predetermined and set in the input. 
+In this mode, then $\psi_{i,j} = 0$ if $q_i + q_j \neq qt$ by construction.
+Moreover there may be many $(q_i, q_j)$ pairs that satisfy $q_i + q_j = qt$, and these pairs
+are referred to as symmetry groups.
+For reasons that will become clear in the following, multiple $qt$ will need to be ``targeted,'' so we must assume that there is a loop over known $qt$ values as well.
+
+When the system is growing, an SVD of the ground state vector is performed in such a way
+that the vector is reshaped as a matrix, with indices $i$ in the system and $j$ in the environ.
+We assume that the indices have been ordered and partitioned by quantum number and
+the operation must be done by quantum group $g\equiv (g_s, g_e)$ with $g_s + g_e = qt$ as follows.
+\begin{equation}
+	\psi'_g(i, j) = \sum_k U_g(i, k) S_g(k) V_g(k, j),
+	\label{eq:svd}
+\end{equation}
+where this equation includes only $i$ such that $q_i = g_a$ and $q_j = g_b$, and the use of $\psi'$ instead of $\psi$ is explained next.
+
+Before discussing the previous steps in detail, there is an additional complication: For non-ground state targets (NGSTs) like time-evolution, spectral function calculation, temperature, and others, more than one vector needs to be subjected to SVD.
+This is because these vectors need to enter into DMRG measurements, and only vectors
+included in the SVD can be considered accurate for measurements.
+The above equation then uses $\psi'$ instead of $\psi$ where 
+\begin{equation}
+	\psi'_g(i, \sum_p j_p  \prod_{p' < p} s_{p'}) = \psi^p(i, j_p),
+	\label{eq:reshape}
+\end{equation}
+for all $0\le j_p < s_p$, and I have labeled the needed vectors as $\psi^p$, where
+(say) $\psi^0\equiv \psi$ is the ground state (if needed).
+
+The first step in the SVD is then building Eq.~(\ref{eq:reshape}) with all needed vectors.
+Even in the single quantum target case, the vectors $\psi^p$ may be in other quantum sectors:
+For example, consider a spinless fermion model and consider that the vector
+$\psi^1 = c_{42} \psi$ needs inclusion in the SVD. $\psi^1$ belongs to a different quantum
+sector than $\psi$ if the quantum symmetry is charge.
+This explains why more than one $qt$ target may be needed.
+DMRG++ parallelizes this task over symmetry groups in 
+\texttt{dmrgpp/src/Engine/DensiyMatrixSvd.h} class \texttt{ParallelPsiSplit}.
+The size of the patches or symmetry groups is usually variable, with a few large-sized patches taken most of the time.
+
+After the building step, the next step is the actual SVD or rather SVDs done by
+Eq.~(\ref{eq:svd}) also in parallel. 
+Each SVD uses LAPACK gesdd or gesvd
+at \texttt{PsimagLite/src/Svd.h}.
+Here again this task is done in parallel by patches or symmetry groups, with the 
+caveat that a few large patches may take most of the resources.
+This is in
+\texttt{dmrgpp/src/Engine/DensiyMatrixSvd.h} class \texttt{ParallelSvd}.
+
+The last step of the SVD is the collection of the results from it.
+The values $S_g(k)^2$ are sorted \emph{globally} for all indices $k$ and all symmetry groups $g$.
+If we assume that the lowest $C$ values are discarded, it then gives rise to the
+elision of indices likely across groups, and some groups may disappear alltogether.
+DMRG++ needs to rotate-and-truncate all ``tracked operators'' $O$ in the system into the new basis:
+\begin{equation}
+	\tilde{O}_g = U_g^\dagger O_g U_g,
+	\label{eq:rotation}
+\end{equation}
+where $U$ is the block diagonal matrix $U_g$ for every block $g$, except that
+after the removal of discarded columns it is almost block diagonal only.
+Equation (\ref{eq:rotation}) respects symmetry groups,
+but is not a canonical transformation due to truncation:
+Only the long contraction leads to unity, so that $U U_g^\dagger = I_g$ but 
+$U^dagger U  =\neq I_g$ under truncation, that is, if $C>0$.
+DMRG++ does this transformation by (optionally) parallelizing over symmetry groups $g$.
+\end{document}
+

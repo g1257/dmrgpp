@@ -92,38 +92,33 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
-template <typename Word>
-class HilbertSpaceImmm
-{
+template <typename Word> class HilbertSpaceImmm {
 
 public:
 
 	typedef Word HilbertState;
 
 	static const SizeType NUMBER_OF_SPINS = 2;
-	enum { SPIN_UP = 0,
-		SPIN_DOWN = 1 };
+	enum
+	{
+		SPIN_UP   = 0,
+		SPIN_DOWN = 1
+	};
 
 	HilbertSpaceImmm(SizeType maxOrbitals)
 	    : maxOrbitals_(maxOrbitals)
-	{
-	}
+	{ }
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	    SizeType,
-	    PsimagLite::String msg = "") const
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "HilbertSpaceImmm";
 
-		mres.memResolv(&maxOrbitals_,
-		    sizeof(*this),
-		    str + " maxOrbitals");
+		mres.memResolv(&maxOrbitals_, sizeof(*this), str + " maxOrbitals");
 
 		return sizeof(*this);
 	}
@@ -133,9 +128,9 @@ public:
 	// Get electronic state on site "j" in binary number "a"
 	Word get(Word const& a, SizeType j) const
 	{
-		SizeType k = degreesOfFreedomUpTo(j);
+		SizeType k    = degreesOfFreedomUpTo(j);
 		SizeType ones = (1 << (dOf())) - 1;
-		Word mask = (ones << k);
+		Word     mask = (ones << k);
 
 		mask &= a;
 		mask >>= k;
@@ -145,8 +140,8 @@ public:
 	// Create electron with internal dof  "sigma" on site "j" in binary number "a"
 	void create(Word& a, SizeType j, SizeType sigma) const
 	{
-		SizeType k = degreesOfFreedomUpTo(j);
-		Word mask = (1 << (k + sigma));
+		SizeType k    = degreesOfFreedomUpTo(j);
+		Word     mask = (1 << (k + sigma));
 		a |= mask;
 	}
 
@@ -164,14 +159,14 @@ public:
 	//! returns the number of electrons of internal dof "value" in binary number "data"
 	int getNofDigits(const Word& data, SizeType value) const
 	{
-		int ret = 0;
-		Word data2 = data;
-		SizeType i = 0;
-		SizeType dof = 0;
+		int      ret   = 0;
+		Word     data2 = data;
+		SizeType i     = 0;
+		SizeType dof   = 0;
 
 		do {
 			SizeType k = degreesOfFreedomUpTo(i);
-			dof = dOf();
+			dof        = dOf();
 			if ((data & (1 << (k + value))))
 				ret++;
 			i++;
@@ -184,10 +179,10 @@ public:
 	int electronsWithGivenSpin(Word const& data, SizeType, SizeType spin) const
 	{
 
-		SizeType norb = dOf() / NUMBER_OF_SPINS;
+		SizeType norb   = dOf() / NUMBER_OF_SPINS;
 		SizeType beginX = spin * norb;
-		SizeType endX = beginX + norb;
-		SizeType sum = 0;
+		SizeType endX   = beginX + norb;
+		SizeType sum    = 0;
 
 		for (SizeType x = beginX; x < endX; x++)
 			sum += getNofDigits(data, x);
@@ -215,7 +210,7 @@ public:
 			return 0;
 		Word m = 0;
 		for (SizeType site = ii; site < j; site++) {
-			SizeType k = degreesOfFreedomUpTo(site);
+			SizeType k   = degreesOfFreedomUpTo(site);
 			SizeType dof = dOf();
 			for (SizeType sigma = 0; sigma < dof; sigma++)
 				m |= (1 << (k + sigma));
@@ -229,7 +224,7 @@ public:
 	{
 		Word m = 0;
 
-		SizeType k = degreesOfFreedomUpTo(i);
+		SizeType k   = degreesOfFreedomUpTo(i);
 		SizeType dof = dOf();
 		for (SizeType sigma = 0; sigma < dof; sigma++)
 			m |= (1 << (k + sigma));
@@ -238,8 +233,7 @@ public:
 		return getNofDigits(m, sector);
 	}
 
-	void write(PsimagLite::String label,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label2 = label + "/HilbertSpaceImmm";
 		io.createGroup(label2);
@@ -248,10 +242,7 @@ public:
 
 private:
 
-	SizeType degreesOfFreedomUpTo(SizeType j) const
-	{
-		return dOf() * j;
-	}
+	SizeType degreesOfFreedomUpTo(SizeType j) const { return dOf() * j; }
 
 	// serializr start class HilbertSpaceImmm
 	// serializr normal maxOrbitals_

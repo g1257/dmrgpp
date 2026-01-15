@@ -3,40 +3,37 @@
 #include "ParametersKondo.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ModelBaseType>
-class Kondo : public ModelBaseType
-{
+template <typename ModelBaseType> class Kondo : public ModelBaseType {
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename ModelBaseType::ModelHelperType    ModelHelperType;
+	typedef typename ModelHelperType::OperatorsType    OperatorsType;
+	typedef typename OperatorsType::OperatorType       OperatorType;
 	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename ModelBaseType::VectorQnType VectorQnType;
-	typedef typename ModelBaseType::BlockType VectorSizeType;
-	typedef typename ModelBaseType::RealType RealType;
-	typedef typename ModelBaseType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename ModelHelperType::BasisType BasisType;
-	typedef ParametersKondo<RealType, QnType> ParametersKondoType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
+	typedef typename ModelBaseType::VectorQnType       VectorQnType;
+	typedef typename ModelBaseType::BlockType          VectorSizeType;
+	typedef typename ModelBaseType::RealType           RealType;
+	typedef typename ModelBaseType::SparseMatrixType   SparseMatrixType;
+	typedef typename SparseMatrixType::value_type      ComplexOrRealType;
+	typedef typename ModelBaseType::QnType             QnType;
+	typedef typename ModelHelperType::BasisType        BasisType;
+	typedef ParametersKondo<RealType, QnType>          ParametersKondoType;
+	typedef typename ModelBaseType::SuperGeometryType  SuperGeometryType;
+	typedef typename ModelBaseType::SolverParamsType   SolverParamsType;
 	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>      MatrixType;
+	typedef typename ModelBaseType::OpsLabelType       OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType      OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType      ModelTermType;
+	typedef std::pair<SizeType, SizeType>              PairSizeType;
 
 public:
 
-	Kondo(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry,
-	    PsimagLite::String option)
+	Kondo(const SolverParamsType&  solverParams,
+	      InputValidatorType&      io,
+	      const SuperGeometryType& geometry,
+	      PsimagLite::String       option)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , solverParams_(solverParams)
 	    , modelParams_(io, option)
@@ -48,15 +45,17 @@ public:
 			std::cout << "Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
 			std::cerr << "Kondo: Only Fermionic Sz + Bosonic Sz conserved\n";
 			if (modelParams_.electronHx != 0 || modelParams_.kondoHx != 0)
-				err("Kondo: To use this symmetry electronHx and kondoHx must both be zero\n");
+				err("Kondo: To use this symmetry electronHx and kondoHx must both "
+				    "be zero\n");
 		} else if (nsym == 2) {
-			std::cout << "Kondo: Fermionic + Bosonic Sz, and TotalElectrons conserved\n";
+			std::cout
+			    << "Kondo: Fermionic + Bosonic Sz, and TotalElectrons conserved\n";
 			if (modelParams_.extended != ParametersKondoType::ExtEnum::NONE)
 				err("Kondo: Extended cannot be used with these symmetries\n");
 		}
 
 		SizeType sitesTimesDof = 2 + modelParams_.twiceTheSpin;
-		SizeType total = (1 << sitesTimesDof);
+		SizeType total         = (1 << sitesTimesDof);
 		basis_.resize(total);
 		for (SizeType a = 0; a < total; ++a)
 			basis_[a] = a;
@@ -71,8 +70,7 @@ public:
 	// For information purposes only. Write model parameters
 	// String contains the group
 	// Serializer object is second argument
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -89,22 +87,22 @@ public:
 	// operators in setOperatorMatrices
 	// The RealType contain the physical time in case your onsite terms
 	// depend on it
-	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const VectorSizeType& block,
-	    RealType time) const
+	void addDiagonalsInNaturalBasis(SparseMatrixType&     hmatrix,
+	                                const VectorSizeType& block,
+	                                RealType              time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
 		SizeType n = block.size();
 		assert(n == 1);
-		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
+		SizeType         linSize = ModelBaseType::superGeometry().numberOfSites();
 		SparseMatrixType tmpMatrix;
 		SparseMatrixType niup;
 		SparseMatrixType nidown;
 
 		for (SizeType i = 0; i < n; ++i) {
-			SizeType ind = block[i];
-			const OperatorType& cup = ModelBaseType::naturalOperator("c", ind, 0);
+			SizeType            ind   = block[i];
+			const OperatorType& cup   = ModelBaseType::naturalOperator("c", ind, 0);
 			const OperatorType& cdown = ModelBaseType::naturalOperator("c", ind, 1);
 			assert(ops_.size() > 1 + i * 4);
 
@@ -191,31 +189,34 @@ protected:
 			szMatrix += mupT * mup;
 			szMatrix *= 0.5;
 
-			PairSizeType zeroPair(0, 0);
+			PairSizeType                          zeroPair(0, 0);
 			typename OperatorType::Su2RelatedType su2Related;
-			this->createOpsLabel("sz").push(OperatorType(szMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    zeroPair,
-			    1,
-			    su2Related));
+			this->createOpsLabel("sz").push(
+			    OperatorType(szMatrix,
+			                 ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                 zeroPair,
+			                 1,
+			                 su2Related));
 		}
 	}
 
 	void fillModelLinks()
 	{
-		const bool isSu2 = BasisType::useSu2Symmetry();
-		ModelTermType& hop = ModelBaseType::createTerm("hopping");
-		ModelTermType& spsm = ModelBaseType::createTerm("SplusSminus");
-		ModelTermType& szsz = ModelBaseType::createTerm("SzSz");
-		ModelTermType& ninj = ModelBaseType::createTerm("ninj");
+		const bool     isSu2 = BasisType::useSu2Symmetry();
+		ModelTermType& hop   = ModelBaseType::createTerm("hopping");
+		ModelTermType& spsm  = ModelBaseType::createTerm("SplusSminus");
+		ModelTermType& szsz  = ModelBaseType::createTerm("SzSz");
+		ModelTermType& ninj  = ModelBaseType::createTerm("ninj");
 
 		for (SizeType spin = 0; spin < 2; ++spin) {
-			OpForLinkType c("c", spin);
-			typename ModelTermType::Su2Properties su2properties(1, (spin == 1) ? -1 : 1, spin);
+			OpForLinkType                         c("c", spin);
+			typename ModelTermType::Su2Properties su2properties(
+			    1, (spin == 1) ? -1 : 1, spin);
 			hop.push(c, 'N', c, 'C', su2properties);
 		}
 
-		auto valueModiferTerm0 = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
+		auto valueModiferTerm0
+		    = [isSu2](ComplexOrRealType& value) { value *= (isSu2) ? -0.5 : 0.5; };
 
 		OpForLinkType splus("Splus");
 		OpForLinkType sz("Sz");
@@ -250,11 +251,10 @@ protected:
 
 private:
 
-	void setSymmetryRelatedInternal(VectorQnType& qns,
-	    const VectorSizeType& basis) const
+	void setSymmetryRelatedInternal(VectorQnType& qns, const VectorSizeType& basis) const
 	{
 		qns.resize(basis.size(), QnType::zero());
-		SizeType nsym = this->targetQuantum().sizeOfOther();
+		SizeType       nsym = this->targetQuantum().sizeOfOther();
 		VectorSizeType other(nsym);
 
 		if (nsym == 1)
@@ -285,7 +285,7 @@ private:
 			}
 
 			bool sign = electrons & 1;
-			qns[i] = QnType(sign, other, jmpair, 0);
+			qns[i]    = QnType(sign, other, jmpair, 0);
 		}
 	}
 
@@ -297,48 +297,47 @@ private:
 			SparseMatrixType tmpMatrix = findCmatrix(sigma, basis_);
 
 			OperatorType myOp(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(0, 0),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(0, 0),
+			                  1,
+			                  su2related);
 
 			ops_.push_back(myOp);
 		}
 
 		// now the S+ and Sz for local spins
 		SparseMatrixType m = findSplusMatrix(basis_);
-		OperatorType sp(m,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		OperatorType     sp(m,
+                                ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                typename OperatorType::PairType(0, 0),
+                                1,
+                                su2related);
 		ops_.push_back(sp);
 
 		m = findSzMatrix(basis_);
 		OperatorType sz(m,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		                ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                typename OperatorType::PairType(0, 0),
+		                1,
+		                su2related);
 		ops_.push_back(sz);
 
 		m = findNmatrix(basis_);
 		OperatorType nm(m,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2related);
+		                ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                typename OperatorType::PairType(0, 0),
+		                1,
+		                su2related);
 		ops_.push_back(nm);
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findCmatrix(SizeType sigma,
-	    const VectorSizeType& basis) const
+	SparseMatrixType findCmatrix(SizeType sigma, const VectorSizeType& basis) const
 	{
-		SizeType n = basis.size();
+		SizeType                n    = basis.size();
 		const ComplexOrRealType zero = 0.0;
-		MatrixType cm(n, n, zero);
-		SizeType mask = (1 << sigma);
+		MatrixType              cm(n, n, zero);
+		SizeType                mask = (1 << sigma);
 
 		for (SizeType i = 0; i < n; ++i) {
 			SizeType ket = basis[i];
@@ -366,13 +365,13 @@ private:
 	//! Find S^+ in the natural basis natBasis
 	SparseMatrixType findSplusMatrix(const VectorSizeType& basis) const
 	{
-		SizeType site = 0;
-		SizeType total = basis.size();
+		SizeType   site  = 0;
+		SizeType   total = basis.size();
 		MatrixType cm(total, total, 0);
-		RealType j = 0.5 * modelParams_.twiceTheSpin;
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParams_.twiceTheSpin);
-		SizeType bits = 1 + ProgramGlobals::logBase2(modelParams_.twiceTheSpin);
-		SizeType mask = 1;
+		RealType   j              = 0.5 * modelParams_.twiceTheSpin;
+		SizeType   bitsForOneSite = utils::bitSizeOfInteger(modelParams_.twiceTheSpin);
+		SizeType   bits           = 1 + ProgramGlobals::logBase2(modelParams_.twiceTheSpin);
+		SizeType   mask           = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);
 		mask--;
@@ -417,13 +416,13 @@ private:
 	//! Find S^z_i in the natural basis natBasis
 	SparseMatrixType findSzMatrix(const VectorSizeType& basis) const
 	{
-		SizeType site = 0;
-		SizeType total = basis.size();
+		SizeType   site  = 0;
+		SizeType   total = basis.size();
 		MatrixType cm(total, total, 0);
-		RealType j = 0.5 * modelParams_.twiceTheSpin;
-		SizeType bitsForOneSite = utils::bitSizeOfInteger(modelParams_.twiceTheSpin);
-		SizeType bits = ProgramGlobals::logBase2(modelParams_.twiceTheSpin) + 1;
-		SizeType mask = 1;
+		RealType   j              = 0.5 * modelParams_.twiceTheSpin;
+		SizeType   bitsForOneSite = utils::bitSizeOfInteger(modelParams_.twiceTheSpin);
+		SizeType   bits           = ProgramGlobals::logBase2(modelParams_.twiceTheSpin) + 1;
+		SizeType   mask           = 1;
 		mask <<= bits; // mask = 2^bits
 		assert(mask > 0);
 		mask--;
@@ -450,9 +449,9 @@ private:
 	SparseMatrixType findNmatrix(const VectorSizeType& basis) const
 	{
 		const ComplexOrRealType zero = 0.0;
-		SizeType n = basis.size();
-		MatrixType cm(n, n, zero);
-		VectorSizeType mask(2, 0);
+		SizeType                n    = basis.size();
+		MatrixType              cm(n, n, zero);
+		VectorSizeType          mask(2, 0);
 		mask[0] = 1;
 		mask[1] = 2;
 		for (SizeType i = 0; i < n; ++i) {
@@ -467,22 +466,21 @@ private:
 		return creationMatrix;
 	}
 
-	SparseMatrixType kondoOnSite(SizeType,
-	    const SparseMatrixType& niup,
-	    const SparseMatrixType& nidown) const
+	SparseMatrixType
+	kondoOnSite(SizeType, const SparseMatrixType& niup, const SparseMatrixType& nidown) const
 	{
 		// cdu[d] is actually cu[d] not cu[d] dagger.
 		const SparseMatrixType& cdu = ops_[0].getCRS();
 		const SparseMatrixType& cdd = ops_[1].getCRS();
-		const SparseMatrixType& Sp = ops_[2].getCRS();
-		const SparseMatrixType& Sz = ops_[3].getCRS();
+		const SparseMatrixType& Sp  = ops_[2].getCRS();
+		const SparseMatrixType& Sz  = ops_[3].getCRS();
 
 		SparseMatrixType Sm;
 		transposeConjugate(Sm, Sp);
 
-		SparseMatrixType sz = niup;
-		const RealType minusOne = -1.0;
-		const RealType zeroPointFive = 0.5;
+		SparseMatrixType sz            = niup;
+		const RealType   minusOne      = -1.0;
+		const RealType   zeroPointFive = 0.5;
 		sz += minusOne * nidown;
 		sz *= zeroPointFive;
 
@@ -511,10 +509,10 @@ private:
 	}
 
 	const SolverParamsType& solverParams_;
-	ParametersKondoType modelParams_;
-	VectorSizeType basis_;
-	VectorQnType qn_;
-	VectorOperatorType ops_;
+	ParametersKondoType     modelParams_;
+	VectorSizeType          basis_;
+	VectorQnType            qn_;
+	VectorOperatorType      ops_;
 };
 }
 

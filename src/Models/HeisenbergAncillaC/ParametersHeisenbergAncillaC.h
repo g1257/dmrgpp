@@ -83,13 +83,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Heisenberg Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	// no connectors here, connectors are handled by the geometry
@@ -101,20 +100,16 @@ struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnTyp
 
 		try {
 			io.read(magneticField, "MagneticField");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&,
-	    SizeType,
-	    PsimagLite::String = "") const
+	SizeType memResolv(SomeMemResolvType&, SizeType, PsimagLite::String = "") const
 	{
 		return 0;
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersHeisenbergAncillaC";
 		io.createGroup(label);
@@ -124,15 +119,15 @@ struct ParametersHeisenbergAncillaC : public ParametersModelBase<RealType, QnTyp
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersHeisenbergAncillaC& parameters)
+	friend std::ostream& operator<<(std::ostream&                       os,
+	                                const ParametersHeisenbergAncillaC& parameters)
 	{
 		os << "MagneticField=" << parameters.magneticField << "\n";
 		os << "HeisenbergTwiceS=" << parameters.twiceTheSpin << "\n";
 		return os;
 	}
 
-	SizeType twiceTheSpin;
+	SizeType       twiceTheSpin;
 	VectorRealType magneticField;
 };
 } // namespace Dmrg

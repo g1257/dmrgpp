@@ -84,8 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! FeAs Model Parameters
 template <typename ComplexOrRealType, typename QnType>
@@ -94,14 +93,17 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	// connections are handled by the geometry
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef ParametersModelBase<ComplexOrRealType, QnType> BaseType;
+	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
 
-	enum IntEnum { INT_PAPER33,
+	enum IntEnum
+	{
+		INT_PAPER33,
 		INT_V,
 		INT_CODE2,
 		INT_IMPURITY,
 		INT_KSPACE,
-		INT_ORBITAL0 };
+		INT_ORBITAL0
+	};
 
 	static PsimagLite::String modeString(IntEnum x)
 	{
@@ -167,10 +169,9 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 		try {
 			PsimagLite::String tmp;
 			io.readline(tmp, "Decay=");
-			feAsMode = convertToEnum(tmp);
+			feAsMode         = convertToEnum(tmp);
 			decayInInputFile = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (decayInInputFile) {
 			PsimagLite::String str("Please use FeAsMode= instead of Decay=");
@@ -201,8 +202,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 
 		try {
 			io.readline(orbDependence, "OrbDependence=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (feAsMode == INT_PAPER33 || feAsMode == INT_IMPURITY) {
 			if (!orbDependence) {
@@ -232,7 +232,8 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 			if (!orbDependence) {
 				std::cout << "U[0]=" << hubbardU[0] << " U\n";
 				std::cout << "U[1]=" << hubbardU[1] << " U'-J/2\n";
-				std::cout << "U[2]=" << hubbardU[2] << " -2J for S+S- + S-S+ term\n";
+				std::cout << "U[2]=" << hubbardU[2]
+				          << " -2J for S+S- + S-S+ term\n";
 				std::cout << "U[3]=" << hubbardU[3] << " -J\n";
 				std::cout << "U[4]=" << hubbardU[4] << " -2J for SzSz term\n";
 			} else {
@@ -268,30 +269,28 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 		}
 		try {
 			io.read(magneticField, "magneticField");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.read(potentialT, "potentialT");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (magneticField.rows() != 0 && magneticField.rows() != 3)
-			throw PsimagLite::RuntimeError("MagneticField: if present must have 3 rows\n");
+			throw PsimagLite::RuntimeError(
+			    "MagneticField: if present must have 3 rows\n");
 		if (magneticField.rows() != 0 && magneticField.cols() != potentialV.size())
-			throw PsimagLite::RuntimeError("MagneticField: Expecting columns == sites\n");
+			throw PsimagLite::RuntimeError(
+			    "MagneticField: Expecting columns == sites\n");
 
 		try {
 			io.readline(jzSymmetry, "JzSymmetry=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		bool hasSpinOrbitMatrix = false;
 		try {
 			io.read(spinOrbit, "SpinOrbit");
 			hasSpinOrbitMatrix = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (!hasSpinOrbitMatrix && jzSymmetry > 0)
 			err("jzSymmetry > 0 needs SpinOrbit matrix in input file\n");
@@ -303,12 +302,10 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 
 		try {
 			io.readline(anisotropyD, "AnisotropyD=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelFeAs";
 		io.createGroup(label);
@@ -327,8 +324,7 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersModelFeAs& parameters)
+	friend std::ostream& operator<<(std::ostream& os, const ParametersModelFeAs& parameters)
 	{
 		os << "Orbitals=" << parameters.orbitals << "\n";
 		os << "hubbardU\n";
@@ -353,7 +349,8 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 			os << parameters.orbDependence;
 		}
 		os << "FeAsMode=";
-		os << ParametersModelFeAs<RealType, QnType>::modeString(parameters.feAsMode) << "\n";
+		os << ParametersModelFeAs<RealType, QnType>::modeString(parameters.feAsMode)
+		   << "\n";
 		if (parameters.feAsMode == ParametersModelFeAs<RealType, QnType>::INT_V)
 			os << "CoulombV=" << parameters.coulombV << "\n";
 
@@ -367,17 +364,17 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 		return os;
 	}
 
-	SizeType orbitals;
+	SizeType                                    orbitals;
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	typename PsimagLite::Vector<RealType>::Type potentialV;
 	typename PsimagLite::Vector<RealType>::Type potentialT;
-	IntEnum feAsMode;
-	RealType coulombV;
-	RealType anisotropyD;
-	PsimagLite::Matrix<RealType> magneticField;
-	PsimagLite::Matrix<ComplexOrRealType> spinOrbit;
-	SizeType jzSymmetry;
-	SizeType orbDependence;
+	IntEnum                                     feAsMode;
+	RealType                                    coulombV;
+	RealType                                    anisotropyD;
+	PsimagLite::Matrix<RealType>                magneticField;
+	PsimagLite::Matrix<ComplexOrRealType>       spinOrbit;
+	SizeType                                    jzSymmetry;
+	SizeType                                    orbDependence;
 };
 } // namespace Dmrg
 

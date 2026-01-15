@@ -5,23 +5,19 @@
 #include "ProgressIndicator.h"
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename RealType>
-class TruncationControl
-{
+template <typename RealType> class TruncationControl {
 
 public:
 
-	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorStringType    = PsimagLite::Vector<PsimagLite::String>::Type;
 	using InputNgReadableType = PsimagLite::InputNg<InputCheck>::Readable;
 
 	TruncationControl()
 	    : tolerance_(-1)
 	    , mMin_(0)
-	{
-	}
+	{ }
 
 	void read(InputNgReadableType& io, SizeType keptStatesInfinite, bool hasTwoSiteDmrg)
 	{
@@ -29,18 +25,19 @@ public:
 
 		try {
 			PsimagLite::String s;
-			VectorStringType tokens;
+			VectorStringType   tokens;
 			io.readline(s, "TruncationTolerance=");
 			PsimagLite::split(tokens, s, ",");
 			tolerance_ = PsimagLite::atof(tokens[0].c_str());
 			if (tokens.size() > 1)
 				mMin_ = atoi(tokens[1].c_str());
 			if (!hasTwoSiteDmrg) {
-				std::cerr << "WARNING: TruncationTolerance used without twositedmrg\n";
-				std::cout << "WARNING: TruncationTolerance used without twositedmrg\n";
+				std::cerr
+				    << "WARNING: TruncationTolerance used without twositedmrg\n";
+				std::cout
+				    << "WARNING: TruncationTolerance used without twositedmrg\n";
 			}
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
@@ -54,7 +51,7 @@ public:
 	{
 		if (tolerance_ < 0)
 			return;
-		PsimagLite::OstringStream msgg(os.precision());
+		PsimagLite::OstringStream                     msgg(os.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "has tolerance= " << tolerance_;
 		msg << " minimum m= " << mMin_;

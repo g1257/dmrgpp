@@ -87,24 +87,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ReflectionBasis.h"
 #include "Sort.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename RealType, typename SparseMatrixType>
-class ReflectionTransform
-{
+template <typename RealType, typename SparseMatrixType> class ReflectionTransform {
 
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef SparseVector<typename VectorType::value_type> SparseVectorType;
-	typedef ReflectionBasis<RealType, SparseMatrixType> ReflectionBasisType;
+	typedef SparseVector<typename VectorType::value_type>        SparseVectorType;
+	typedef ReflectionBasis<RealType, SparseMatrixType>          ReflectionBasisType;
 
 public:
 
 	ReflectionTransform(bool idebug)
 	    : idebug_(idebug)
-	{
-	}
+	{ }
 
 	void update(const SparseMatrixType& sSector)
 	{
@@ -121,9 +117,8 @@ public:
 		printFullMatrix(Qm_, "Qm");
 	}
 
-	void transform(SparseMatrixType& dest1,
-	    SparseMatrixType& destm,
-	    const SparseMatrixType& H) const
+	void
+	transform(SparseMatrixType& dest1, SparseMatrixType& destm, const SparseMatrixType& H) const
 	{
 		SparseMatrixType HQ1, HQm;
 		multiply(HQ1, H, Q1_);
@@ -156,7 +151,8 @@ public:
 
 		if (idebug_) {
 			std::cerr << "norm1=" << norm1 << " normm=" << normm << "\n";
-			std::cerr << "plusSector=" << plusSector_ << " minusSector=" << minusSector << "\n";
+			std::cerr << "plusSector=" << plusSector_ << " minusSector=" << minusSector
+			          << "\n";
 			printFullMatrix(dest1, "dest1");
 			printFullMatrix(destm, "destm");
 		}
@@ -181,7 +177,9 @@ public:
 #endif
 	}
 
-	bool isThePartialIdentity(const SparseMatrixType& A, SizeType partialSize, const RealType& eps = 1e-6) const
+	bool isThePartialIdentity(const SparseMatrixType& A,
+	                          SizeType                partialSize,
+	                          const RealType&         eps = 1e-6) const
 	{
 		for (SizeType i = 0; i < partialSize; i++) {
 			for (int k = A.getRowPtr(i); k < A.getRowPtr(i + 1); k++) {
@@ -208,8 +206,8 @@ public:
 
 	template <typename SomeVectorType>
 	void setInitState(const SomeVectorType& initVector,
-	    SomeVectorType& initVector1,
-	    SomeVectorType& initVector2) const
+	                  SomeVectorType&       initVector1,
+	                  SomeVectorType&       initVector2) const
 	{
 		SizeType minusSector = initVector.size() - plusSector_;
 		initVector1.resize(plusSector_);
@@ -243,11 +241,11 @@ private:
 	void reshape(SparseMatrixType& A, SizeType n2) const
 	{
 		SparseMatrixType B(n2, n2);
-		SizeType counter = 0;
+		SizeType         counter = 0;
 		for (SizeType i = 0; i < n2; i++) {
 			B.setRow(i, counter);
 			for (int k = A.getRowPtr(i); k < A.getRowPtr(i + 1); k++) {
-				SizeType col = A.getCol(k);
+				SizeType          col = A.getCol(k);
 				ComplexOrRealType val = A.getValue(k);
 				if (col >= n2) {
 					assert(isAlmostZero(val, 1e-5));
@@ -284,12 +282,12 @@ private:
 		assert(b);
 	}
 
-	void computeTransform(SparseMatrixType& Q1,
-	    const ReflectionBasisType& reflectionBasis,
-	    const RealType& sector)
+	void computeTransform(SparseMatrixType&          Q1,
+	                      const ReflectionBasisType& reflectionBasis,
+	                      const RealType&            sector)
 	{
 		const SparseMatrixType& R1 = reflectionBasis.R(sector);
-		SparseMatrixType R1Inverse;
+		SparseMatrixType        R1Inverse;
 		reflectionBasis.inverseTriangular(R1Inverse, R1, sector);
 
 		SparseMatrixType T1;
@@ -303,13 +301,13 @@ private:
 		printFullMatrix(T1, "T1");
 	}
 
-	void computeFullQ(SparseMatrixType& Q,
-	    const SparseMatrixType& Q1,
-	    const SparseMatrixType& Qm) const
+	void computeFullQ(SparseMatrixType&       Q,
+	                  const SparseMatrixType& Q1,
+	                  const SparseMatrixType& Qm) const
 	{
-		SizeType n = Q1.rank();
+		SizeType                                             n = Q1.rank();
 		typename PsimagLite::Vector<ComplexOrRealType>::Type sum(n, 0.0);
-		SizeType counter = 0;
+		SizeType                                             counter = 0;
 		Q.resize(n);
 		SizeType minusSector = n - plusSector_;
 		for (SizeType i = 0; i < n; i++) {
@@ -397,21 +395,23 @@ private:
 		Qm_.setRow(Qm_.rank(), counter);
 	}
 
-	void buildT1(SparseMatrixType& T1final,
-	    const ReflectionBasisType& reflectionBasis,
-	    const RealType& sector) const
+	void buildT1(SparseMatrixType&          T1final,
+	             const ReflectionBasisType& reflectionBasis,
+	             const RealType&            sector) const
 	{
-		const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg = reflectionBasis.ipPosOrNeg(sector);
+		const typename PsimagLite::Vector<SizeType>::Type& ipPosOrNeg
+		    = reflectionBasis.ipPosOrNeg(sector);
 		const SparseMatrixType& reflection = reflectionBasis.reflection();
-		SizeType n = reflection.rank();
+		SizeType                n          = reflection.rank();
 
 		SparseMatrixType T1(n, n);
-		SizeType counter = 0;
+		SizeType         counter = 0;
 		for (SizeType i = 0; i < n; i++) {
 			T1.setRow(i, counter);
 			bool hasDiagonal = false;
-			for (int k = reflection.getRowPtr(i); k < reflection.getRowPtr(i + 1); k++) {
-				SizeType col = reflection.getCol(k);
+			for (int k = reflection.getRowPtr(i); k < reflection.getRowPtr(i + 1);
+			     k++) {
+				SizeType          col = reflection.getCol(k);
 				ComplexOrRealType val = reflection.getValue(k);
 				if (col == i) {
 					val += sector;
@@ -465,14 +465,15 @@ private:
 		//			if (isAlmostZero(sum[i],1e-12)) continue;
 		//			sum[i] = 1.0/sqrt(sum[i]);
 
-		//			for (int k = T1final.getRowPtr(i);k<T1final.getRowPtr(i+1);k++)
+		//			for (int k =
+		// T1final.getRowPtr(i);k<T1final.getRowPtr(i+1);k++)
 		//				T1final.setValues(k,T1final.getValue(k) * sum[i]);
 
 		//		}
 	}
 
-	bool idebug_;
-	SizeType plusSector_;
+	bool             idebug_;
+	SizeType         plusSector_;
 	SparseMatrixType Q1_, Qm_;
 
 }; // class ReflectionTransform

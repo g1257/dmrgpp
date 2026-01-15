@@ -87,36 +87,30 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
-template <typename ModelType_, typename RngType_>
-class MettsStochastics
-{
+namespace Dmrg {
+template <typename ModelType_, typename RngType_> class MettsStochastics {
 
 public:
 
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef ModelType_ ModelType;
-	typedef typename ModelType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::HilbertBasisType HilbertBasisType;
-	typedef RngType_ RngType;
-	typedef typename RngType::LongType LongType;
+	typedef std::pair<SizeType, SizeType>               PairType;
+	typedef ModelType_                                  ModelType;
+	typedef typename ModelType::QnType                  QnType;
+	typedef typename QnType::VectorQnType               VectorQnType;
+	typedef typename ModelType::RealType                RealType;
+	typedef typename ModelType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename ModelType::HilbertBasisType        HilbertBasisType;
+	typedef RngType_                                    RngType;
+	typedef typename RngType::LongType                  LongType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-	MettsStochastics(const ModelType& model,
-	    int long seed,
-	    const VectorSizeType& pure)
+	MettsStochastics(const ModelType& model, int long seed, const VectorSizeType& pure)
 	    : model_(model)
 	    , rng_(seed)
 	    , pure_(pure)
 	    , progress_("MettsStochastics")
 	    , addedSites_(0)
-	{
-	}
+	{ }
 
 	const ModelType& model() const { return model_; }
 
@@ -130,7 +124,7 @@ public:
 
 	SizeType chooseRandomState(const VectorRealType& probs) const
 	{
-		RealType r = rng_();
+		RealType r  = rng_();
 		RealType s1 = 0;
 		RealType s2 = 0;
 		for (SizeType i = 0; i < probs.size(); ++i) {
@@ -141,15 +135,16 @@ public:
 		}
 
 		PsimagLite::String s(__FILE__);
-		s += PsimagLite::String(" ") + ttos(__LINE__) + " " + __FUNCTION__ + " Probabilities don't amount to 1\n";
+		s += PsimagLite::String(" ") + ttos(__LINE__) + " " + __FUNCTION__
+		    + " Probabilities don't amount to 1\n";
 		throw PsimagLite::RuntimeError(s.c_str());
 	}
 
 	// call only from INFINITE
-	void update(const QnType& qn,
-	    const typename PsimagLite::Vector<SizeType>::Type& block1,
-	    const typename PsimagLite::Vector<SizeType>::Type& block2,
-	    SizeType seed)
+	void update(const QnType&                                      qn,
+	            const typename PsimagLite::Vector<SizeType>::Type& block1,
+	            const typename PsimagLite::Vector<SizeType>::Type& block2,
+	            SizeType                                           seed)
 	{
 		if (addedSites_.size() == 0) {
 			pureStates_.resize(block2[block2.size() - 1] + block2.size() + 1);
@@ -172,11 +167,11 @@ public:
 	}
 
 	void setCollapseBasis(typename PsimagLite::Vector<RealType>::Type& collapseBasisWeights,
-	    SizeType site) const
+	                      SizeType                                     site) const
 	{
 		SizeType nk = model_.hilbertSize(site);
 		for (SizeType alpha = 0; alpha < nk; alpha++) {
-			RealType randomNumber = rng_();
+			RealType randomNumber       = rng_();
 			collapseBasisWeights[alpha] = randomNumber;
 		}
 		RealType norm1 = 1.0 / PsimagLite::norm(collapseBasisWeights);
@@ -191,13 +186,13 @@ private:
 			pureStates_[i] = SizeType(rng_() * model_.hilbertSize(i));
 	}
 
-	const ModelType& model_;
-	mutable RngType rng_;
-	const VectorSizeType& pure_;
-	PsimagLite::ProgressIndicator progress_;
+	const ModelType&                            model_;
+	mutable RngType                             rng_;
+	const VectorSizeType&                       pure_;
+	PsimagLite::ProgressIndicator               progress_;
 	typename PsimagLite::Vector<SizeType>::Type pureStates_;
 	typename PsimagLite::Vector<SizeType>::Type addedSites_;
-	VectorQnType qnVsSize_;
+	VectorQnType                                qnVsSize_;
 }; // class MettsStochastics
 } // namespace Dmrg
 /*@}*/

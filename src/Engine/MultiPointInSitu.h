@@ -8,35 +8,32 @@
 #include "OneSiteSpaces.hh"
 #include "Wft/WaveFunctionTransfFactory.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename VectorWithOffsetType, typename ModelType>
-class MultiPointInSitu
-{
+template <typename VectorWithOffsetType, typename ModelType> class MultiPointInSitu {
 
 public:
 
 	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::ParametersType ParametersType;
-	typedef typename ParametersType::OptionsType OptionsType;
+	typedef typename ModelType::ParametersType     ParametersType;
+	typedef typename ParametersType::OptionsType   OptionsType;
 	typedef WaveFunctionTransfFactory<LeftRightSuperType,
-	    VectorWithOffsetType,
-	    OptionsType,
-	    OneSiteSpaces<ModelType>>
-	    WaveFunctionTransfType;
-	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
-	typedef HelperForMultiPointInSitu<CheckpointType> HelperForMultiPointInSituType;
+	                                  VectorWithOffsetType,
+	                                  OptionsType,
+	                                  OneSiteSpaces<ModelType>>
+	                                                           WaveFunctionTransfType;
+	typedef Checkpoint<ModelType, WaveFunctionTransfType>      CheckpointType;
+	typedef HelperForMultiPointInSitu<CheckpointType>          HelperForMultiPointInSituType;
 	typedef typename HelperForMultiPointInSituType::BogusInput BogusInputType;
 	typedef typename HelperForMultiPointInSituType::MatrixType MatrixType;
 	typedef Observer<HelperForMultiPointInSituType, ModelType> ObserverType;
-	typedef Braket<ModelType> BraketType;
-	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
+	typedef Braket<ModelType>                                  BraketType;
+	typedef PsimagLite::Vector<bool>::Type                     VectorBoolType;
 
-	MultiPointInSitu(const ModelType& model,
-	    const CheckpointType& checkpoint,
-	    const WaveFunctionTransfType& wft,
-	    ProgramGlobals::DirectionEnum dir)
+	MultiPointInSitu(const ModelType&              model,
+	                 const CheckpointType&         checkpoint,
+	                 const WaveFunctionTransfType& wft,
+	                 ProgramGlobals::DirectionEnum dir)
 	    : model_(model)
 	    , bogusInput_(model.superGeometry().numberOfSites(), checkpoint, wft, dir)
 	    , observer_(bogusInput_, 0, 0, 0, model)
@@ -47,6 +44,11 @@ public:
 
 	void operator()(const BraketType& braket, SizeType centerOfOrtho)
 	{
+		if (!model_.params().options.isSet("observe")) {
+			err(std::string("FATAL: You are trying to calculate ")
+			    + "multi-points in-situ\n");
+		}
+
 		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
 
@@ -59,16 +61,16 @@ public:
 		if (braket.points() != 2)
 			err("MultiPointInSitu: only two point for now\n");
 
-		constexpr bool needsPrinting = true;
+		constexpr bool  needsPrinting = true;
 		ManyPointAction action(false, "");
-		const SizeType n = model_.superGeometry().numberOfSites();
-		MatrixType storage(n, n);
+		const SizeType  n = model_.superGeometry().numberOfSites();
+		MatrixType      storage(n, n);
 
 		SizeType start = 0;
-		SizeType end = 0;
+		SizeType end   = 0;
 		if (bogusInput_.direction() == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			start = 0;
-			end = centerOfOrtho;
+			end   = centerOfOrtho;
 		} else {
 			start = centerOfOrtho + 1;
 			;
@@ -85,7 +87,8 @@ public:
 
 private:
 
-	BraketType buildBraketWithSites(const BraketType& braket, SizeType site0, SizeType site1) const
+	BraketType
+	buildBraketWithSites(const BraketType& braket, SizeType site0, SizeType site1) const
 	{
 		if (braket.points() != 2)
 			err("MultiPointInSitu::buildBraketWithSites: expected two sites\n");
@@ -108,9 +111,9 @@ private:
 		return true;
 	}
 
-	const ModelType& model_;
-	BogusInputType bogusInput_;
-	ObserverType observer_;
+	const ModelType&      model_;
+	BogusInputType        bogusInput_;
+	ObserverType          observer_;
 	static VectorBoolType seen_;
 };
 

@@ -84,13 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Heisenberg Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
@@ -129,11 +128,12 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 			VectorRealType tmpVector;
 			io.read(tmpVector, "MagneticField=");
 			invalidLabel = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (invalidLabel) {
-			throw PsimagLite::RuntimeError("MagneticField label is no longer supported.\n" + PsimagLite::String("Please use MagneticField[XZ] instead\n"));
+			throw PsimagLite::RuntimeError(
+			    "MagneticField label is no longer supported.\n"
+			    + PsimagLite::String("Please use MagneticField[XZ] instead\n"));
 		}
 
 		// throw if supplying MagneticFieldDirection label
@@ -141,26 +141,24 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 			PsimagLite::String tmpStr;
 			io.readline(tmpStr, "MagneticFieldDirection=");
 			invalidLabel = true;
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (invalidLabel) {
-			throw PsimagLite::RuntimeError("MagneticFieldDirection label is no longer supported.\n" + PsimagLite::String("Please use MagneticField[XZ] instead\n"));
+			throw PsimagLite::RuntimeError(
+			    "MagneticFieldDirection label is no longer supported.\n"
+			    + PsimagLite::String("Please use MagneticField[XZ] instead\n"));
 		}
 
 		try {
 			io.read(anisotropyD, "AnisotropyD");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.read(anisotropyE, "AnisotropyE");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelHeisenberg";
 		io.createGroup(label);
@@ -178,13 +176,14 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 			return;
 
 		PsimagLite::String msg("ModelHeisenberg: If provided, ");
-		msg += " MagneticField" + ttos(c) + " must be a vector of " + ttos(n) + " entries.\n";
+		msg += " MagneticField" + ttos(c) + " must be a vector of " + ttos(n)
+		    + " entries.\n";
 		err(msg);
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersModelHeisenberg& parameters)
+	friend std::ostream& operator<<(std::ostream&                    os,
+	                                const ParametersModelHeisenberg& parameters)
 	{
 		if (!parameters.magneticFieldX.empty())
 			os << "MagneticFieldX=" << parameters.magneticFieldX << "\n";
@@ -197,8 +196,8 @@ struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> 
 		return os;
 	}
 
-	SizeType twiceTheSpin;
-	SizeType twiceTheSpinBorder;
+	SizeType       twiceTheSpin;
+	SizeType       twiceTheSpinBorder;
 	VectorRealType magneticFieldX;
 	VectorRealType magneticFieldZ;
 	VectorRealType anisotropyD;

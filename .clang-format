@@ -1,36 +1,39 @@
 ---
-# We'll use defaults from the LLVM style, but with 4 columns indentation.
+# clang-format file for DMRG++ and PsimagLite 
 BasedOnStyle: WebKit
 Language: Cpp
-UseTab: ForContinuationAndIndentation
+UseTab: ForIndentation
 TabWidth: 8
 IndentWidth: 8
-BreakBeforeBraces: Linux
+BreakBeforeBraces: Custom
 IndentAccessModifiers: false
 AccessModifierOffset: -8
 EmptyLineAfterAccessModifier: Always
 BraceWrapping:
   AfterCaseLabel:  true
-  AfterClass:      true
-  AfterControlStatement: true
+  AfterClass:      false
+  AfterControlStatement: false
   AfterEnum:       true
   AfterExternBlock: true
   AfterFunction:   true
-  AfterNamespace:  true
+  AfterNamespace:  false
   AfterObjCDeclaration: true
-  AfterStruct:     true
+  AfterStruct:     false
   AfterUnion:      true
-  AfterExternBlock: false
-  BeforeCatch:     true
-  BeforeElse:      true
+  BeforeCatch:     false
+  BeforeElse:      false
   BeforeLambdaBody: true
   IndentBraces:    false
-  SplitEmptyFunction: true
-  SplitEmptyRecord: true
-  SplitEmptyNamespace: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
 
 BinPackArguments: false
 BinPackParameters: false
 ExperimentalAutoDetectBinPacking: false
 AllowAllParametersOfDeclarationOnNextLine: false
+AlignAfterOpenBracket: Align
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: true
+ColumnLimit: 100
 ---

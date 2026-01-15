@@ -3,17 +3,13 @@
 #include "Io/IoNg.h"
 #include "Io/IoSelector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class OutputFileOrNot
-{
+class OutputFileOrNot {
 
 public:
 
-	OutputFileOrNot(PsimagLite::String filename,
-	    PsimagLite::IoNg::OpenMode mode,
-	    bool disabled)
+	OutputFileOrNot(PsimagLite::String filename, PsimagLite::IoNg::OpenMode mode, bool disabled)
 	    : filename_(filename)
 	    , ptr_(nullptr)
 	{
@@ -38,8 +34,7 @@ public:
 		return *ptr_;
 	}
 
-	template <typename T>
-	void write(const T& t, PsimagLite::String str)
+	template <typename T> void write(const T& t, PsimagLite::String str)
 	{
 		if (!ptr_)
 			return;
@@ -47,27 +42,25 @@ public:
 	}
 
 	template <typename T>
-	void write(const T& t,
-	    PsimagLite::String str,
-	    PsimagLite::IoNg::Out::Serializer::WriteMode mode,
-	    typename std::enable_if<PsimagLite::IsVectorLike<T>::True, int>::type = 0)
+	void write(const T&                                     t,
+	           PsimagLite::String                           str,
+	           PsimagLite::IoNg::Out::Serializer::WriteMode mode,
+	           typename std::enable_if<PsimagLite::IsVectorLike<T>::True, int>::type = 0)
 	{
 		if (!ptr_)
 			return;
 		ptr_->write(t, str, mode);
 	}
 
-	template <typename T>
-	void overwrite(const T& t, PsimagLite::String str)
+	template <typename T> void overwrite(const T& t, PsimagLite::String str)
 	{
 		if (!ptr_)
 			return;
 		ptr_->overwrite(t, str);
 	}
 
-	void write(SizeType c,
-	    PsimagLite::String str,
-	    PsimagLite::IoNg::Out::Serializer::WriteMode mode)
+	void
+	write(SizeType c, PsimagLite::String str, PsimagLite::IoNg::Out::Serializer::WriteMode mode)
 	{
 		if (!ptr_)
 			return;
@@ -101,7 +94,7 @@ private:
 
 	OutputFileOrNot& operator=(const OutputFileOrNot&) = delete;
 
-	PsimagLite::String filename_;
+	PsimagLite::String           filename_;
 	PsimagLite::IoSelector::Out* ptr_;
 };
 }

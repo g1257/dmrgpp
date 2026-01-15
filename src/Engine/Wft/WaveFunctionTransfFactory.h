@@ -88,64 +88,63 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "WaveFunctionTransfLocal.h"
 #include "WaveStructCombined.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename LeftRightSuperType_,
-    typename VectorWithOffsetType_,
-    typename OptionsType_,
-    typename OneSiteSpacesType_>
-class WaveFunctionTransfFactory
-{
+          typename VectorWithOffsetType_,
+          typename OptionsType_,
+          typename OneSiteSpacesType_>
+class WaveFunctionTransfFactory {
 
 	typedef PsimagLite::IoSelector IoType;
 
 public:
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef LeftRightSuperType_ LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type             VectorStringType;
+	typedef LeftRightSuperType_                                      LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
 	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
-	typedef typename BasisWithOperatorsType::RealType RealType;
-	typedef WaveStructCombined<LeftRightSuperType> WaveStructCombinedType;
-	typedef typename WaveStructCombinedType::VectorVectorRealType VectorVectorRealType;
-	typedef typename WaveStructCombinedType::VectorMatrixType VectorMatrixType;
-	typedef typename WaveStructCombinedType::VectorQnType VectorQnType;
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
+	typedef typename BasisWithOperatorsType::BasisType               BasisType;
+	typedef typename SparseMatrixType::value_type                    SparseElementType;
+	typedef typename PsimagLite::Vector<SparseElementType>::Type     VectorType;
+	typedef typename BasisWithOperatorsType::RealType                RealType;
+	typedef WaveStructCombined<LeftRightSuperType>                   WaveStructCombinedType;
+	typedef typename WaveStructCombinedType::VectorVectorRealType    VectorVectorRealType;
+	typedef typename WaveStructCombinedType::VectorMatrixType        VectorMatrixType;
+	typedef typename WaveStructCombinedType::VectorQnType            VectorQnType;
+	typedef VectorWithOffsetType_                                    VectorWithOffsetType;
 	using OneSiteSpacesType = OneSiteSpacesType_;
 	typedef WaveFunctionTransfBase<WaveStructCombinedType,
-	    VectorWithOffsetType,
-	    OptionsType_,
-	    OneSiteSpacesType_>
+	                               VectorWithOffsetType,
+	                               OptionsType_,
+	                               OneSiteSpacesType_>
 	    WaveFunctionTransfBaseType;
 	typedef WaveFunctionTransfLocal<WaveStructCombinedType,
-	    VectorWithOffsetType,
-	    OptionsType_,
-	    OneSiteSpacesType_>
-	    WaveFunctionTransfLocalType;
+	                                VectorWithOffsetType,
+	                                OptionsType_,
+	                                OneSiteSpacesType_>
+	                                                            WaveFunctionTransfLocalType;
 	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
-	typedef typename WaveStructCombinedType::WaveStructSvdType WaveStructSvdType;
+	typedef typename WaveStructCombinedType::WaveStructSvdType  WaveStructSvdType;
 
 	template <typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)
 	    : isEnabled_(!(params.options.isSet("nowft")))
 	    , wftOptions_(ProgramGlobals::DirectionEnum::INFINITE,
-		  params.options,
-		  true,
-		  true,
-		  params.denseSparseThreshold,
-		  params.gemmRnb,
-		  params.nthreads2)
+	                  params.options,
+	                  true,
+	                  true,
+	                  params.denseSparseThreshold,
+	                  params.gemmRnb,
+	                  params.nthreads2)
 	    , progress_("WaveFunctionTransf")
 	    , filenameIn_(params.checkpoint.filename())
 	    , filenameOut_(params.filename)
-	    , waveStructCombined_(params.options.isSet("wftstacksondisk"),
-		  params.filename,
-		  { params.options.isSet("observe"), params.options.isSet("noSaveOperators") })
+	    , waveStructCombined_(
+	          params.options.isSet("wftstacksondisk"),
+	          params.filename,
+	          { params.options.isSet("observe"), params.options.isSet("noSaveOperators") })
 	    , wftImpl_(0)
 	    , rng_(3433117)
 	    , noLoad_(false)
@@ -163,7 +162,8 @@ public:
 				read();
 		} else {
 			if (params.options.isSet("noloadwft")) {
-				PsimagLite::String str("Error: noloadwft needs restart or checkpoint\n");
+				PsimagLite::String str(
+				    "Error: noloadwft needs restart or checkpoint\n");
 				throw PsimagLite::RuntimeError(str.c_str());
 			}
 		}
@@ -188,7 +188,7 @@ public:
 	{
 		if (stage == wftOptions_.dir)
 			return;
-		wftOptions_.dir = stage;
+		wftOptions_.dir    = stage;
 		wftOptions_.bounce = true;
 	}
 
@@ -214,20 +214,19 @@ public:
 		if (!isEnabled_ || !allow)
 			return;
 
-		waveStructCombined_.beforeWft(wftOptions_.dir,
-		    wftOptions_.twoSiteDmrg,
-		    wftOptions_.bounce);
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		waveStructCombined_.beforeWft(
+		    wftOptions_.dir, wftOptions_.twoSiteDmrg, wftOptions_.bounce);
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Window open, ready to transform vectors";
 		progress_.printline(msgg, std::cout);
 	}
 
 	// FIXME: change name to transformVector
-	void setInitialVector(VectorWithOffsetType& dest,
-	    const VectorWithOffsetType& src,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	void setInitialVector(VectorWithOffsetType&       dest,
+	                      const VectorWithOffsetType& src,
+	                      const LeftRightSuperType&   lrs,
+	                      const OneSiteSpacesType&    oneSiteSpaces) const
 	{
 		bool allow = false;
 		switch (wftOptions_.dir) {
@@ -249,15 +248,16 @@ public:
 			allow = false;
 
 		if (isEnabled_ && allow) {
-#ifndef NDEBUG
 			RealType eps = 1e-12;
-			RealType x = norm(src);
-			bool b = (x < eps);
-			if (b)
-				std::cerr << "norm=" << x << "\n";
-			assert(!b);
-#endif
+			RealType x   = norm(src);
+			bool     b   = (x < eps);
+			if (b) {
+				err(std::string("An important vector has norm=") + ttos(x)
+				    + " which is too small\n");
+			}
+
 			createVector(dest, src, lrs, oneSiteSpaces);
+
 		} else {
 			createRandomVector(dest);
 		}
@@ -287,7 +287,7 @@ public:
 		if (!isEnabled_ || !allow)
 			return;
 		afterWft(lrs);
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Window closed, no more transformations, please";
 		progress_.printline(msgg, std::cout);
@@ -302,7 +302,7 @@ public:
 
 		if (!isEnabled_)
 			return; // don't make noise unless enabled
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Yes, I'm awake, but there's nothing heavy to do now";
 		progress_.printline(msgg, std::cout);
@@ -310,9 +310,9 @@ public:
 
 	void createRandomVector(VectorWithOffsetType& y, SizeType i0) const
 	{
-		SizeType total = y.effectiveSize(i0);
+		SizeType                                  total = y.effectiveSize(i0);
 		typename VectorWithOffsetType::value_type tmp;
-		RealType atmp = 0;
+		RealType                                  atmp = 0;
 		for (SizeType i = 0; i < total; i++) {
 			myRandomT(tmp);
 			y.fastAccess(i0, i) = tmp;
@@ -326,18 +326,18 @@ public:
 	}
 
 	void push(const BlockDiagonalMatrixType& transform,
-	    ProgramGlobals::DirectionEnum direction,
-	    const LeftRightSuperType& lrs,
-	    const VectorMatrixType& vts,
-	    const VectorVectorRealType& s,
-	    const VectorQnType& qns)
+	          ProgramGlobals::DirectionEnum  direction,
+	          const LeftRightSuperType&      lrs,
+	          const VectorMatrixType&        vts,
+	          const VectorVectorRealType&    s,
+	          const VectorQnType&            qns)
 	{
 		if (!isEnabled_)
 			return;
 
 		waveStructCombined_.push(transform, direction, vts, s, qns, wftOptions_.dir);
 		waveStructCombined_.setLrs(lrs);
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "OK, pushing option=" << ProgramGlobals::toString(direction);
 		msg << " and stage=" << ProgramGlobals::toString(wftOptions_.dir);
@@ -387,16 +387,15 @@ public:
 		waveStructCombined_.write(ioMain, label + "/WaveStructCombined");
 	}
 
-	const BlockDiagonalMatrixType& multiPointGetTransform(SizeType ind,
-	    ProgramGlobals::DirectionEnum dir) const
+	const BlockDiagonalMatrixType&
+	multiPointGetTransform(SizeType ind, ProgramGlobals::DirectionEnum dir) const
 	{
 		return waveStructCombined_.multiPointGetTransform(ind, dir);
 	}
 
 private:
 
-	void writePartial(PsimagLite::IoSelector::Out& ioMain,
-	    PsimagLite::String prefix) const
+	void writePartial(PsimagLite::IoSelector::Out& ioMain, PsimagLite::String prefix) const
 	{
 		assert(isEnabled_);
 		assert(save_);
@@ -409,10 +408,11 @@ private:
 	void read()
 	{
 		if (!isEnabled_)
-			throw PsimagLite::RuntimeError("WFT::read(...) called but wft is disabled\n");
+			throw PsimagLite::RuntimeError(
+			    "WFT::read(...) called but wft is disabled\n");
 
 		PsimagLite::IoSelector::In ioMain(filenameIn_);
-		PsimagLite::String label = "Wft";
+		PsimagLite::String         label = "Wft";
 		ioMain.read(isEnabled_, label + "/isEnabled");
 		wftOptions_.read(ioMain, label + "/WftOptions");
 		waveStructCombined_.read(ioMain, label + "/WaveStructCombined");
@@ -424,23 +424,20 @@ private:
 		value = std::complex<RealType>(rng_() - 0.5, rng_() - 0.5);
 	}
 
-	void myRandomT(RealType& value) const
-	{
-		value = rng_() - 0.5;
-	}
+	void myRandomT(RealType& value) const { value = rng_() - 0.5; }
 
 	void afterWft(const LeftRightSuperType& lrs)
 	{
 		waveStructCombined_.setLrs(lrs);
 		waveStructCombined_.afterWft(wftOptions_.dir);
 		wftOptions_.firstCall = false;
-		wftOptions_.bounce = false;
+		wftOptions_.bounce    = false;
 	}
 
-	void createVector(VectorWithOffsetType& psiDest,
-	    const VectorWithOffsetType& psiSrc,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	void createVector(VectorWithOffsetType&       psiDest,
+	                  const VectorWithOffsetType& psiSrc,
+	                  const LeftRightSuperType&   lrs,
+	                  const OneSiteSpacesType&    oneSiteSpaces) const
 	{
 
 		RealType norm1 = norm(psiSrc);
@@ -449,8 +446,8 @@ private:
 
 		wftImpl_->transformVector(psiDest, psiSrc, lrs, oneSiteSpaces);
 
-		RealType norm2 = norm(psiDest);
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		RealType                                      norm2 = norm(psiDest);
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Transformation completed ";
 		if (fabs(norm1 - norm2) > 1e-5) {
@@ -463,8 +460,8 @@ private:
 		progress_.printline(msgg, std::cout);
 	}
 
-	SizeType computeCenter(const LeftRightSuperType& lrs,
-	    ProgramGlobals::DirectionEnum direction) const
+	SizeType computeCenter(const LeftRightSuperType&     lrs,
+	                       ProgramGlobals::DirectionEnum direction) const
 	{
 		if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			SizeType total = lrs.left().block().size();
@@ -482,7 +479,7 @@ private:
 		SizeType numberOfSites = lrs.super().block().size();
 		if (checkSites(numberOfSites)) {
 			noLoad_ = false;
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << " now available";
 			progress_.printline(msgg, std::cout);
@@ -493,10 +490,8 @@ private:
 	{
 		assert(numberOfSites > 0);
 		for (SizeType i = 1; i < numberOfSites - 1; i++) {
-			bool seen = (std::find(sitesSeen_.begin(),
-					 sitesSeen_.end(),
-					 i)
-			    != sitesSeen_.end());
+			bool seen = (std::find(sitesSeen_.begin(), sitesSeen_.end(), i)
+			             != sitesSeen_.end());
 			if (!seen)
 				return false;
 		}
@@ -504,17 +499,17 @@ private:
 		return true;
 	}
 
-	bool isEnabled_;
-	WftOptionsType wftOptions_;
-	PsimagLite::ProgressIndicator progress_;
-	PsimagLite::String filenameIn_;
-	PsimagLite::String filenameOut_;
-	WaveStructCombinedType waveStructCombined_;
-	WaveFunctionTransfBaseType* wftImpl_;
+	bool                           isEnabled_;
+	WftOptionsType                 wftOptions_;
+	PsimagLite::ProgressIndicator  progress_;
+	PsimagLite::String             filenameIn_;
+	PsimagLite::String             filenameOut_;
+	WaveStructCombinedType         waveStructCombined_;
+	WaveFunctionTransfBaseType*    wftImpl_;
 	PsimagLite::Random48<RealType> rng_;
-	bool noLoad_;
-	const bool save_;
-	VectorSizeType sitesSeen_;
+	bool                           noLoad_;
+	const bool                     save_;
+	VectorSizeType                 sitesSeen_;
 }; // class WaveFunctionTransformation
 } // namespace Dmrg
 

@@ -82,50 +82,44 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "BlockDiagonalMatrix.h"
 #include "PsimagLite.h"
 
-namespace Dmrg
-{
-template <typename TargetingType>
-class DensityMatrixBase
-{
+namespace Dmrg {
+template <typename TargetingType> class DensityMatrixBase {
 
 public:
 
-	typedef typename TargetingType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename TargetingType::TargetVectorType::value_type DensityMatrixElementType;
+	typedef typename TargetingType::BasisWithOperatorsType            BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType                BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType         SparseMatrixType;
+	typedef typename TargetingType::TargetVectorType::value_type      DensityMatrixElementType;
 	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef PsimagLite::Matrix<DensityMatrixElementType> MatrixType;
-	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
+	typedef typename PsimagLite::Vector<RealType>::Type               VectorRealType;
+	typedef PsimagLite::Matrix<DensityMatrixElementType>              MatrixType;
+	typedef BlockDiagonalMatrix<MatrixType>                           BlockDiagonalMatrixType;
 
 	struct Params {
 
-		Params(bool u,
-		    ProgramGlobals::DirectionEnum d,
-		    bool de,
-		    bool enablePersistentSvd_,
-		    bool serialSvd_)
+		Params(bool                          u,
+		       ProgramGlobals::DirectionEnum d,
+		       bool                          de,
+		       bool                          enablePersistentSvd_,
+		       bool                          serialSvd_)
 		    : useSvd(u)
 		    , direction(d)
 		    , debug(de)
 		    , enablePersistentSvd(enablePersistentSvd_)
 		    , serialSvd(serialSvd_)
-		{
-		}
+		{ }
 
-		bool useSvd;
+		bool                          useSvd;
 		ProgramGlobals::DirectionEnum direction;
-		bool debug;
-		bool enablePersistentSvd;
-		bool serialSvd;
+		bool                          debug;
+		bool                          enablePersistentSvd;
+		bool                          serialSvd;
 	};
 
 	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
 
-	virtual ~DensityMatrixBase()
-	{
-	}
+	virtual ~DensityMatrixBase() { }
 
 	virtual const BlockDiagonalMatrixType& operator()() = 0;
 
@@ -148,9 +142,9 @@ public:
 
 private:
 
-	typename PsimagLite::Vector<MatrixType>::Type vtsEmpty_;
+	typename PsimagLite::Vector<MatrixType>::Type     vtsEmpty_;
 	typename PsimagLite::Vector<VectorRealType>::Type sEmpty_;
-	typename BasisWithOperatorsType::VectorQnType qnsEmpty_;
+	typename BasisWithOperatorsType::VectorQnType     qnsEmpty_;
 
 }; // class DensityMatrixBase
 } // namespace Dmrg

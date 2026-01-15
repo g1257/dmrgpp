@@ -84,13 +84,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <stdexcept>
 #include <vector>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-class InputCheck
-{
+class InputCheck {
 
-	typedef PsimagLite::Options::Readable OptionsReadableType;
+	typedef PsimagLite::Options::Readable                OptionsReadableType;
 	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 public:
@@ -294,19 +292,21 @@ public:
 		str += "matrix.real OnSiteLinksSzSz;\n";
 		str += "string TargetFermionicParity;\n";
 		str += "matrix TimeSchedule;\n";
+		str += "string DefineOperators;\n";
 
 		return str;
 	}
 
-	bool check(const PsimagLite::String& label,
-	    const PsimagLite::Vector<PsimagLite::String>::Type& vec,
-	    SizeType line) const
+	bool check(const PsimagLite::String&                           label,
+	           const PsimagLite::Vector<PsimagLite::String>::Type& vec,
+	           SizeType                                            line) const
 	{
 		if (label == "JMVALUES" || label == "RS:JMVALUES") {
 			if (vec.size() != 3)
 				return error1("JMVALUES", line);
 			return true;
-		} else if (label == "RAW_MATRIX" || label == "RS:RAW_MATRIX" || label == "SpinOrbit") {
+		} else if (label == "RAW_MATRIX" || label == "RS:RAW_MATRIX"
+		           || label == "SpinOrbit") {
 			if (!checkForMatrix(vec))
 				return error1(label, line);
 			return true;
@@ -326,8 +326,7 @@ public:
 		return false;
 	}
 
-	bool checkSimpleLabel(const PsimagLite::String& label,
-	    SizeType line) const
+	bool checkSimpleLabel(const PsimagLite::String& label, SizeType line) const
 	{
 		for (SizeType i = 0; i < knownLabels_.size(); ++i)
 			if (knownLabels_[i] == label)
@@ -340,88 +339,88 @@ public:
 
 	/* PSIDOC dmrgSolverOptions
 	   \verb!SolverOptions=! in the input file must contain
-		  a comma-separated list of strings. At least one of the following strings must
-		  be provided:
-		\begin{itemize}
-			\item[none]  Use this when no options are given, because the list of
-		   strings must be non-null.
-				Note that ``none'' does not disable other options.
+	          a comma-separated list of strings. At least one of the following strings must
+	          be provided:
+	        \begin{itemize}
+	                \item[none]  Use this when no options are given, because the list of
+	           strings must be non-null.
+	                        Note that ``none'' does not disable other options.
 
-			 \item[useSu2Symmetry] Use the SU(2) symmetry for the model, and
-			interpret quantum
-				 numbers in the line ``QNS'' appropriately.
+	                 \item[useSu2Symmetry] Use the SU(2) symmetry for the model, and
+	                interpret quantum
+	                         numbers in the line ``QNS'' appropriately.
 
-			 \item[nofiniteloops]  Don't do finite loops, even if provided under
-			``FiniteLoops'' below.
-			\item[restart] Restart from a previously saved run. See FIXME
-			\item[debugmatrix] Print Hamiltonian matrix for targeted sector of
-			superblock
-			\item[exactdiag] Do exact diagonalization with LAPACK instead of Lanczos
-			\item[nodmrgtransform] Do not DMRG transform bases
-			\item[useDavidson] Use Davidson instead of Lanczos
-			\item[verbose] Enable verbose output
-			\item[nowft] Disable the Wave Function Transformation (WFT)
-			\item[useComplex] TBW
-			\item[inflate] TBW
-			\item[twositedmrg] Use 2-site DMRG. Default is 1-site DMRG
-			\item[noloadwft] TBW
-			\item[ChebyshevSolver] Use ChebyshevSolver instead of Lanczos
-			\item[MatrixVectorStored] Store superblock sector of Hamiltonian matrix
-			in memory instead of constructing it on the fly.
-			\item[MatrixVectorKron] TBW
-			\item[TimeStepTargeting] TDMRG algorithm
-			\item[DynamicTargeting] TBW
-			\item[AdaptiveDynamicTargeting] TBW
-			\item[CorrectionVectorTargeting] TBW
-			\item[CorrectionTargeting] TBW
-			\item[TargetingAncilla] TBW
-			\item[MettsTargeting] TBW
-			\item[TargetingInSitu] TBW
-			\item[geometryallinsystem] During infinite algorithm make environment
-			contain always exactly one site
-			\item[vectorwithoffsets] TBW
-			\item[allPvectors] TBW
-			\item[printgeometry] TBW
-			\item[recoveryEnableRead] Enables recovery if previous run crashed
-			\item[neverNormalizeVectors] TBW
-			\item [advanceUnrestricted] Don't restrict advance time to borders
-			\item [findSymmetrySector] Find symmetry sector with lowest energy, and
-			ignore value set in TargetElectronsUp or TargetSzPlusConst.
-			See the line FindSymmetrySector= for more flexibility.
-			\item [KroneckerDumper] TBW
-			\item [extendedPrint] TBW
-			\item [truncationNoSvd] Do not use SVD for truncation;
-									   use density matrix instead
-			\item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
-			\item [setAffinities] TBW
-			\item [wftNoAccel] Disable WFT acceleration (but not the WFT itself)
-			\item [wftAccelPatches] Force WFT acceleration with patches, even
-			in twositedmrg
-			\item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
-								batched gemm and might need plugin sc
-			\item [KrylovNoAbridge] TBW
-			\item [keepLegacyBugs] TBW
-			\item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
+	                 \item[nofiniteloops]  Don't do finite loops, even if provided under
+	                ``FiniteLoops'' below.
+	                \item[restart] Restart from a previously saved run. See FIXME
+	                \item[debugmatrix] Print Hamiltonian matrix for targeted sector of
+	                superblock
+	                \item[exactdiag] Do exact diagonalization with LAPACK instead of Lanczos
+	                \item[nodmrgtransform] Do not DMRG transform bases
+	                \item[useDavidson] Use Davidson instead of Lanczos
+	                \item[verbose] Enable verbose output
+	                \item[nowft] Disable the Wave Function Transformation (WFT)
+	                \item[useComplex] TBW
+	                \item[inflate] TBW
+	                \item[twositedmrg] Use 2-site DMRG. Default is 1-site DMRG
+	                \item[noloadwft] TBW
+	                \item[ChebyshevSolver] Use ChebyshevSolver instead of Lanczos
+	                \item[MatrixVectorStored] Store superblock sector of Hamiltonian matrix
+	                in memory instead of constructing it on the fly.
+	                \item[MatrixVectorKron] TBW
+	                \item[TimeStepTargeting] TDMRG algorithm
+	                \item[DynamicTargeting] TBW
+	                \item[AdaptiveDynamicTargeting] TBW
+	                \item[CorrectionVectorTargeting] TBW
+	                \item[CorrectionTargeting] TBW
+	                \item[TargetingAncilla] TBW
+	                \item[MettsTargeting] TBW
+	                \item[TargetingInSitu] TBW
+	                \item[geometryallinsystem] During infinite algorithm make environment
+	                contain always exactly one site
+	                \item[vectorwithoffsets] TBW
+	                \item[allPvectors] TBW
+	                \item[printgeometry] TBW
+	                \item[recoveryEnableRead] Enables recovery if previous run crashed
+	                \item[neverNormalizeVectors] TBW
+	                \item [advanceUnrestricted] Don't restrict advance time to borders
+	                \item [findSymmetrySector] Find symmetry sector with lowest energy, and
+	                ignore value set in TargetElectronsUp or TargetSzPlusConst.
+	                See the line FindSymmetrySector= for more flexibility.
+	                \item [KroneckerDumper] TBW
+	                \item [extendedPrint] TBW
+	                \item [truncationNoSvd] Do not use SVD for truncation;
+	                                                                   use density matrix
+ instead
+	                \item [KronNoLoadBalance] Disable load balancing for MatrixVectorKron
+	                \item [setAffinities] TBW
+	                \item [wftNoAccel] Disable WFT acceleration (but not the WFT itself)
+	                \item [wftAccelPatches] Force WFT acceleration with patches, even
+	                in twositedmrg
+	                \item [BatchedGemm] Only meaningful with MatrixVectorKron. Enables
+	                                                        batched gemm and might need plugin
+ sc
+	                \item [KrylovNoAbridge] TBW
+	                \item [keepLegacyBugs] TBW
+	                \item [KronNoUseLowerPart] Don't Use lower part of Kron matrix but
  recompute it instead.
-			\item [shrinkStacksOnDisk] Store shrink stacks on disk instead of in memory
-			\item [OperatorsChangeAll] Do not hollow out operators but keep track of
-			them for all sites. This is will use more RAM, but might be needed
-			to target expressions.
-			\item [calcAndPrintEntropies] Calculate entropies and print to cout file
-			\item [blasNotThreadSafe] TBW
-			\item [observeReadOnDemand]  When this option is set, the observe code will
+	                \item [shrinkStacksOnDisk] Store shrink stacks on disk instead of in memory
+	                \item [OperatorsChangeAll] Do not hollow out operators but keep track of
+	                them for all sites. This is will use more RAM, but might be needed
+	                to target expressions.
+	                \item [calcAndPrintEntropies] Calculate entropies and print to cout file
+	                \item [blasNotThreadSafe] TBW
+	                \item [observeReadOnDemand]  When this option is set, the observe code will
 	read the wavefunction and transform from the file only as needed.
     This option only has effect when running the observe
     code and not the main driver or other drivers.
-		\item[ciRun] Mark the input for the ci or TestSuite; usually this is
-			set by the ci.pl script automatically
-			\item[notermalias] If the model being run has term aliasing, disable it; else it has
-			no effect.
-		\end{itemize}
-		*/
-	void check(const PsimagLite::String& label,
-	    const PsimagLite::String& val,
-	    SizeType)
+	        \item[ciRun] Mark the input for the ci or TestSuite; usually this is
+	                set by the ci.pl script automatically
+	                \item[notermalias] If the model being run has term aliasing, disable it;
+ else it has no effect.
+	        \end{itemize}
+	        */
+	void check(const PsimagLite::String& label, const PsimagLite::String& val, SizeType)
 	{
 		if (label != "SolverOptions")
 			return;
@@ -488,12 +487,12 @@ public:
 		registerOpts.push_back("ciRun");
 		registerOpts.push_back("notermalias");
 
-		PsimagLite::Options::Writeable optWriteable(registerOpts,
-		    PsimagLite::Options::Writeable::PERMISSIVE);
+		PsimagLite::Options::Writeable optWriteable(
+		    registerOpts, PsimagLite::Options::Writeable::PERMISSIVE);
 		optsReadable_ = new OptionsReadableType(optWriteable, val);
 
-		bool mvs = (val.find("MatrixVectorStored") != PsimagLite::String::npos);
-		bool mvo = (val.find("MatrixVectorOnTheFly") != PsimagLite::String::npos);
+		bool mvs    = (val.find("MatrixVectorStored") != PsimagLite::String::npos);
+		bool mvo    = (val.find("MatrixVectorOnTheFly") != PsimagLite::String::npos);
 		bool notMvk = (mvs || mvo);
 		if (val.find("BatchedGemm") != PsimagLite::String::npos) {
 			if (notMvk)
@@ -524,9 +523,8 @@ private:
 	bool passesFileOptions(PsimagLite::String fileOption)
 	{
 		for (SizeType i = 0; i < allowedFileOptions_.size(); ++i)
-			if (std::find(allowedFileOptions_.begin(),
-				allowedFileOptions_.end(),
-				fileOption)
+			if (std::find(
+			        allowedFileOptions_.begin(), allowedFileOptions_.end(), fileOption)
 			    == allowedFileOptions_.end())
 				return false;
 		return true;
@@ -546,7 +544,7 @@ private:
 			return false;
 		SizeType row = atoi(vec[0].c_str());
 		SizeType col = atoi(vec[1].c_str());
-		SizeType n = row * col;
+		SizeType n   = row * col;
 		return (vec.size() == n + 2);
 	}
 
@@ -558,8 +556,8 @@ private:
 	}
 
 	OptionsReadableType* optsReadable_;
-	VectorStringType allowedFileOptions_;
-	VectorStringType knownLabels_;
+	VectorStringType     allowedFileOptions_;
+	VectorStringType     knownLabels_;
 }; // class InputCheck
 } // namespace Dmrg
 

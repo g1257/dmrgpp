@@ -84,35 +84,30 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "ProgressIndicator.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename BasisWithOperatorsType_, typename SuperBlockType>
-class LeftRightSuper
-{
+template <typename BasisWithOperatorsType_, typename SuperBlockType> class LeftRightSuper {
 
 public:
 
-	typedef typename SuperBlockType::RealType RealType;
-	typedef BasisWithOperatorsType_ BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef PsimagLite::ProgressIndicator ProgressIndicatorType;
+	typedef typename SuperBlockType::RealType                       RealType;
+	typedef BasisWithOperatorsType_                                 BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
+	typedef typename BasisWithOperatorsType::OperatorsType          OperatorsType;
+	typedef typename OperatorsType::OperatorType                    OperatorType;
+	typedef typename OperatorType::StorageType                      OperatorStorageType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef PsimagLite::ProgressIndicator                           ProgressIndicatorType;
 	typedef LeftRightSuper<BasisWithOperatorsType_, SuperBlockType> ThisType;
-	typedef typename BasisType::QnType QnType;
+	typedef typename BasisType::QnType                              QnType;
 
 	template <typename IoInputter>
-	LeftRightSuper(IoInputter& io,
+	LeftRightSuper(
+	    IoInputter&        io,
 	    PsimagLite::String prefix,
 	    const BasisTraits& basisTraits,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputter>::True,
-		int>::Type
-	    = 0)
+	    typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputter>::True, int>::Type = 0)
 	    : progress_("LeftRightSuper")
 	    , left_(0)
 	    , right_(0)
@@ -130,24 +125,24 @@ public:
 		PsimagLite::String nameRight;
 		io.read(nameRight, prefix + "/NameEnviron");
 
-		BasisTraits basisTraits2 = basisTraits;
+		BasisTraits basisTraits2   = basisTraits;
 		basisTraits2.isObserveCode = true;
 		super_ = new SuperBlockType(io, prefix + "/" + nameSuper, basisTraits);
-		left_ = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, basisTraits2);
+		left_  = new BasisWithOperatorsType(io, prefix + "/" + nameLeft, basisTraits2);
 		right_ = new BasisWithOperatorsType(io, prefix + "/" + nameRight, basisTraits2);
 	}
 
 	LeftRightSuper(const PsimagLite::String& slabel,
-	    const PsimagLite::String& elabel,
-	    const PsimagLite::String& selabel,
-	    const BasisTraits& basisTraits)
+	               const PsimagLite::String& elabel,
+	               const PsimagLite::String& selabel,
+	               const BasisTraits&        basisTraits)
 	    : progress_("LeftRightSuper")
 	    , left_(0)
 	    , right_(0)
 	    , super_(0)
 	    , refCounter_(0)
 	{
-		left_ = new BasisWithOperatorsType(slabel, basisTraits);
+		left_  = new BasisWithOperatorsType(slabel, basisTraits);
 		right_ = new BasisWithOperatorsType(elabel, basisTraits);
 		super_ = new SuperBlockType(selabel, basisTraits);
 	}
@@ -168,21 +163,20 @@ public:
 	}
 
 	LeftRightSuper(BasisWithOperatorsType& left,
-	    BasisWithOperatorsType& right,
-	    SuperBlockType& super)
+	               BasisWithOperatorsType& right,
+	               SuperBlockType&         super)
 	    : progress_("LeftRightSuper")
 	    , left_(&left)
 	    , right_(&right)
 	    , super_(&super)
 	    , refCounter_(1)
-	{
-	}
+	{ }
 
 	LeftRightSuper(const ThisType& rls)
 	    : progress_("LeftRightSuper")
 	    , refCounter_(1)
 	{
-		left_ = rls.left_;
+		left_  = rls.left_;
 		right_ = rls.right_;
 		super_ = rls.super_;
 	}
@@ -201,33 +195,25 @@ public:
 	}
 
 	template <typename SomeModelType>
-	SizeType growLeftBlock(const SomeModelType& model,
-	    BasisWithOperatorsType& pS,
-	    BlockType const& X,
-	    RealType time)
+	SizeType growLeftBlock(const SomeModelType&    model,
+	                       BasisWithOperatorsType& pS,
+	                       BlockType const&        X,
+	                       RealType                time)
 	{
 		assert(left_);
-		return grow(*left_,
-		    model,
-		    pS,
-		    X,
-		    ProgramGlobals::DirectionEnum::EXPAND_SYSTEM,
-		    time);
+		return grow(
+		    *left_, model, pS, X, ProgramGlobals::DirectionEnum::EXPAND_SYSTEM, time);
 	}
 
 	template <typename SomeModelType>
-	SizeType growRightBlock(const SomeModelType& model,
-	    BasisWithOperatorsType& pE,
-	    BlockType const& X,
-	    RealType time)
+	SizeType growRightBlock(const SomeModelType&    model,
+	                        BasisWithOperatorsType& pE,
+	                        BlockType const&        X,
+	                        RealType                time)
 	{
 		assert(right_);
-		return grow(*right_,
-		    model,
-		    pE,
-		    X,
-		    ProgramGlobals::DirectionEnum::EXPAND_ENVIRON,
-		    time);
+		return grow(
+		    *right_, model, pE, X, ProgramGlobals::DirectionEnum::EXPAND_ENVIRON, time);
 	}
 
 	void printSizes(const PsimagLite::String& label, std::ostream& os) const
@@ -235,7 +221,7 @@ public:
 		assert(left_);
 		assert(right_);
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << label << ": left-block basis=" << left_->size();
 		msg << ", right-block basis=" << right_->size();
@@ -260,10 +246,10 @@ public:
 		super_->setToProduct(*left_, *right_, initialSizeOfHashTable);
 	}
 
-	void write(PsimagLite::IoNg::Out& io,
-	    PsimagLite::String prefix,
-	    typename BasisWithOperatorsType::SaveEnum option,
-	    bool minimizeWrite) const
+	void write(PsimagLite::IoNg::Out&                    io,
+	           PsimagLite::String                        prefix,
+	           typename BasisWithOperatorsType::SaveEnum option,
+	           bool                                      minimizeWrite) const
 	{
 		prefix += "/LRS";
 		io.createGroup(prefix);
@@ -328,12 +314,11 @@ public:
 	}
 
 	template <typename IoInputType>
-	void read(IoInputType& io,
-	    PsimagLite::String prefix,
-	    typename PsimagLite::EnableIf<
-		PsimagLite::IsInputLike<IoInputType>::True,
-		int>::Type
-	    = 0)
+	void
+	read(IoInputType&       io,
+	     PsimagLite::String prefix,
+	     typename PsimagLite::EnableIf<PsimagLite::IsInputLike<IoInputType>::True, int>::Type
+	     = 0)
 	{
 		prefix += "/LRS";
 
@@ -353,31 +338,31 @@ private:
 
 	//! add block X to basis pS and put the result in left_:
 	/* PSIDOC LeftRightSuperGrow
-		Local operators are set for the basis in question with a call to
-		\cppClass{BasisWithOperators}'s member function \cppFunction{setOperators()}.
-		When adding sites to the system or environment the program does a
-		full outer product, i.e., it increases the size of all local operators.
-		This is performed by the call to \verb!setToProduct!
-		\verb!(pSprime,pS,Xbasis,dir,option)!
-		in the grow function, which actually calls \verb!pSprime.setToProduct!
-		\verb!(pS,xBasis,dir)!
-		This function also recalculates the Hamiltonian in the outer product
-		of (i) the previous system basis $pS$, and (ii) the basis $Xbasis$
-		corresponding to the site(s) that is (are) being added.
-		To do this, the Hamiltonian connection between the two parts
-		needs to be calculated and added, and this is done in the call to
-		\cppFunction{addHamiltonianConnection}.
-		Finally, the resulting dmrgBasis object for the outer product,
-		pSprime, is set to contain this full Hamiltonian with the call
-		to  \cppFunction{pSprime.setHamiltonian(matrix)}.
-		*/
+	        Local operators are set for the basis in question with a call to
+	        \cppClass{BasisWithOperators}'s member function \cppFunction{setOperators()}.
+	        When adding sites to the system or environment the program does a
+	        full outer product, i.e., it increases the size of all local operators.
+	        This is performed by the call to \verb!setToProduct!
+	        \verb!(pSprime,pS,Xbasis,dir,option)!
+	        in the grow function, which actually calls \verb!pSprime.setToProduct!
+	        \verb!(pS,xBasis,dir)!
+	        This function also recalculates the Hamiltonian in the outer product
+	        of (i) the previous system basis $pS$, and (ii) the basis $Xbasis$
+	        corresponding to the site(s) that is (are) being added.
+	        To do this, the Hamiltonian connection between the two parts
+	        needs to be calculated and added, and this is done in the call to
+	        \cppFunction{addHamiltonianConnection}.
+	        Finally, the resulting dmrgBasis object for the outer product,
+	        pSprime, is set to contain this full Hamiltonian with the call
+	        to  \cppFunction{pSprime.setHamiltonian(matrix)}.
+	        */
 	template <typename SomeModelType>
-	SizeType grow(BasisWithOperatorsType& leftOrRight,
-	    const SomeModelType& model,
-	    BasisWithOperatorsType& pS,
-	    const BlockType& X,
-	    ProgramGlobals::DirectionEnum dir,
-	    RealType time)
+	SizeType grow(BasisWithOperatorsType&       leftOrRight,
+	              const SomeModelType&          model,
+	              BasisWithOperatorsType&       pS,
+	              const BlockType&              X,
+	              ProgramGlobals::DirectionEnum dir,
+	              RealType                      time)
 	{
 		BasisWithOperatorsType Xbasis("Xbasis", pS.traits());
 		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
@@ -392,7 +377,7 @@ private:
 		SparseMatrixType matrix = leftOrRight.hamiltonian().getCRS();
 
 		LeftRightSuper2Type* lrs;
-		BasisType* leftOrRightL = &leftOrRight;
+		BasisType*           leftOrRightL = &leftOrRight;
 		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 			lrs = new LeftRightSuper2Type(pS, Xbasis, *leftOrRightL);
 		} else {
@@ -413,11 +398,11 @@ private:
 
 	LeftRightSuper& operator=(const LeftRightSuper&);
 
-	ProgressIndicatorType progress_;
+	ProgressIndicatorType   progress_;
 	BasisWithOperatorsType* left_;
 	BasisWithOperatorsType* right_;
-	SuperBlockType* super_;
-	SizeType refCounter_;
+	SuperBlockType*         super_;
+	SizeType                refCounter_;
 }; // class LeftRightSuper
 
 } // namespace Dmrg

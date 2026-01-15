@@ -5,8 +5,7 @@
 #include "Su3RepresentationBase.h"
 
 template <typename ComplexOrRealType, bool>
-class Su3RepresentationP1 : public Su3RepresentationBase<ComplexOrRealType>
-{
+class Su3RepresentationP1 : public Su3RepresentationBase<ComplexOrRealType> {
 
 public:
 
@@ -45,7 +44,7 @@ public:
 		assert(n == 4);
 		static const ComplexOrRealType oneOverSqrt3 = 1.0 / sqrt(3.0);
 		m(0, 0) = m(1, 1) = 0.5 * oneOverSqrt3;
-		m(2, 2) = -oneOverSqrt3;
+		m(2, 2)           = -oneOverSqrt3;
 	}
 
 	// diagonal 1 -1 0  ==> 2 0 1
@@ -71,13 +70,12 @@ public:
 
 template <typename ComplexOrRealType>
 class Su3RepresentationP1<ComplexOrRealType, true>
-    : public Su3RepresentationBase<ComplexOrRealType>
-{
+    : public Su3RepresentationBase<ComplexOrRealType> {
 
 public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
 
 	void getMatrix(MatrixType& m, SizeType n) const
 	{
@@ -125,7 +123,7 @@ public:
 		assert(n == 7);
 		static const RealType oneOverSqrt3 = 1.0 / sqrt(3.0);
 		m(0, 0) = m(1, 1) = 0.5 * oneOverSqrt3;
-		m(2, 2) = -oneOverSqrt3;
+		m(2, 2)           = -oneOverSqrt3;
 	}
 
 	// diagonal 1 -1 0  ==> 2 0 1

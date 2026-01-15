@@ -91,59 +91,54 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cstdlib>
 #include <numeric>
 
-namespace Dmrg
-{
-template <typename ModelBaseType>
-class HubbardHolsteinSpinless : public ModelBaseType
-{
+namespace Dmrg {
+template <typename ModelBaseType> class HubbardHolsteinSpinless : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::VectorSizeType VectorSizeType;
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename ModelBaseType::VectorSizeType          VectorSizeType;
+	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
+	typedef typename ModelBaseType::SuperGeometryType       SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                LinkType;
+	typedef typename ModelHelperType::OperatorsType         OperatorsType;
+	typedef typename OperatorsType::OperatorType            OperatorType;
 	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelHelperType::SparseElementType SparseElementType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelBaseType::HilbertBasisType HilbertBasisType;
-	typedef typename HilbertBasisType::value_type HilbertState;
-	typedef unsigned int long WordType;
-	typedef HilbertSpaceHubbardHolsteinSpinless<WordType> HilbertSpaceHubbardHolsteinWordType;
-	typedef HilbertSpaceHubbardHolsteinSpinless<HilbertState> HilbertSpaceHubbardHolsteinType;
-	typedef typename ModelHelperType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::MyBasis BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	typedef typename ModelHelperType::RealType              RealType;
+	typedef typename ModelBaseType::QnType                  QnType;
+	typedef typename QnType::VectorQnType                   VectorQnType;
+	typedef typename ModelHelperType::SparseElementType     SparseElementType;
+	typedef typename ModelHelperType::SparseMatrixType      SparseMatrixType;
+	typedef typename SparseMatrixType::value_type           ComplexOrRealType;
+	typedef typename ModelBaseType::HilbertBasisType        HilbertBasisType;
+	typedef typename HilbertBasisType::value_type           HilbertState;
+	typedef unsigned int long                               WordType;
+	typedef HilbertSpaceHubbardHolsteinSpinless<WordType>   HilbertSpaceHubbardHolsteinWordType;
+	typedef HilbertSpaceHubbardHolsteinSpinless<HilbertState>   HilbertSpaceHubbardHolsteinType;
+	typedef typename ModelHelperType::BlockType                 BlockType;
+	typedef typename ModelBaseType::SolverParamsType            SolverParamsType;
+	typedef typename ModelBaseType::VectorType                  VectorType;
+	typedef typename ModelBaseType::MyBasis                     BasisType;
+	typedef typename ModelBaseType::BasisWithOperatorsType      MyBasisWithOperators;
+	typedef typename ModelBaseType::InputValidatorType          InputValidatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>               MatrixType;
 	typedef ParametersHubbardHolsteinSpinless<RealType, QnType> ParametersHubbardHolsteinType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
+	typedef std::pair<SizeType, SizeType>                       PairType;
+	typedef typename PsimagLite::Vector<PairType>::Type         VectorPairType;
 	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	typedef typename ModelBaseType::OpsLabelType                OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType               OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType               ModelTermType;
 
-	static const int FERMION_SIGN = -1;
-	static SizeType const ORBITALS = 2;
+	static const int      FERMION_SIGN = -1;
+	static SizeType const ORBITALS     = 2;
 
-	HubbardHolsteinSpinless(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry,
-	    PsimagLite::String additional,
-	    PsimagLite::String hdf5fileIfAny)
-	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+	HubbardHolsteinSpinless(const SolverParamsType&  solverParams,
+	                        InputValidatorType&      io,
+	                        const SuperGeometryType& geometry,
+	                        PsimagLite::String       additional,
+	                        PsimagLite::String       hdf5fileIfAny)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
 	    , isLrh_(additional == "LRH")
@@ -169,17 +164,18 @@ public:
 	void print(std::ostream& os) const { operator<<(os, modelParameters_); }
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
-		SizeType phonons = (oStruncActive_ || U_.rows() > 0) ? modelParameters_.oStruncPhonons
-								     : modelParameters_.numberphonons;
+		SizeType phonons = (oStruncActive_ || U_.rows() > 0)
+		    ? modelParameters_.oStruncPhonons
+		    : modelParameters_.numberphonons;
 		if (phonons == 0)
 			err("addDiagonalsInNaturalBasis fatal error when OSTRUNC active\n");
 
-		SizeType n = block.size();
+		SizeType         n = block.size();
 		HilbertBasisType natBasis;
 		setBasis(natBasis, block, phonons);
 
@@ -217,15 +213,15 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
+		SizeType  site = 0;
 		BlockType block(1, site);
 
-		OpsLabelType& c = this->createOpsLabel("c");
-		OpsLabelType& a = this->createOpsLabel("a");
+		OpsLabelType& c  = this->createOpsLabel("c");
+		OpsLabelType& a  = this->createOpsLabel("a");
 		OpsLabelType& cx = this->createOpsLabel("cx");
 		this->makeTrackable("c");
 		const SizeType phonons = (U_.rows() > 0) ? modelParameters_.oStruncPhonons
-							 : modelParameters_.numberphonons;
+		                                         : modelParameters_.numberphonons;
 		if (phonons > 0) {
 			this->makeTrackable("a");
 			if (isSsh_)
@@ -241,7 +237,7 @@ protected:
 		SparseMatrixType tmpMatrix;
 		for (SizeType sigma = 0; sigma < 1; ++sigma) {
 			tmpMatrix = findOperatorMatrices(sigma, natBasis);
-			nmatrix = n(tmpMatrix);
+			nmatrix   = n(tmpMatrix);
 			typename OperatorType::Su2RelatedType su2related;
 			if (sigma == 0) {
 				su2related.source.push_back(site);
@@ -254,24 +250,24 @@ protected:
 			SparseMatrixType tmpMatrix2;
 			transposeConjugate(tmpMatrix2, tmpMatrix);
 			OperatorType myOp(tmpMatrix2,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(1, 1 - sigma),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(1, 1 - sigma),
+			                  1,
+			                  su2related);
 
 			c.push(myOp, "up");
 		}
 
-		OpsLabelType& n = this->createOpsLabel("n");
+		OpsLabelType&                         n = this->createOpsLabel("n");
 		typename OperatorType::Su2RelatedType su2relatedA;
 
 		transformByU(nmatrix);
 
 		OperatorType myOp(nmatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1,
-		    su2relatedA);
+		                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                  typename OperatorType::PairType(0, 0),
+		                  1,
+		                  su2relatedA);
 
 		n.push(myOp);
 
@@ -295,24 +291,24 @@ protected:
 		transposeConjugate(tmpMatrix2, tmpMatrix);
 
 		OperatorType myOp2(tmpMatrix2,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 2),
-		    -1,
-		    su2related2);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 2),
+		                   -1,
+		                   su2related2);
 		a.push(myOp2);
 
 		{
-			OpsLabelType& disp = this->createOpsLabel("disp");
+			OpsLabelType&    disp = this->createOpsLabel("disp");
 			SparseMatrixType tmp1 = findPhononadaggerMatrix(natBasis, phonons);
 			SparseMatrixType tmp2;
 			transposeConjugate(tmp2, tmp1);
 			tmp2 += tmp1;
 			typename OperatorType::Su2RelatedType su2Related2;
 			disp.push(OperatorType(tmp2,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    typename OperatorType::PairType(0, 0),
-			    1.0,
-			    su2Related2));
+			                       ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                       typename OperatorType::PairType(0, 0),
+			                       1.0,
+			                       su2Related2));
 		}
 
 		if (!isSsh_ && !isLrh_)
@@ -339,10 +335,10 @@ protected:
 				transposeConjugate(tmpMatrix2, tmpMatrix);
 
 				OperatorType myOp3(tmpMatrix2,
-				    ProgramGlobals::FermionOrBosonEnum::FERMION,
-				    typename OperatorType::PairType(1, 1 - sigma),
-				    1,
-				    su2related3);
+				                   ProgramGlobals::FermionOrBosonEnum::FERMION,
+				                   typename OperatorType::PairType(1, 1 - sigma),
+				                   1,
+				                   su2related3);
 
 				cx.push(myOp3, "up");
 			}
@@ -394,7 +390,7 @@ protected:
 	void announce(PsimagLite::String str) const
 	{
 		const PsimagLite::String msg("finite loop");
-		const SizeType l = msg.length();
+		const SizeType           l = msg.length();
 
 		if (str.substr(0, l) != msg)
 			return;
@@ -427,15 +423,14 @@ protected:
 		} else {
 			ioOut.overwrite(U_, "OneSiteTruncationU");
 			ioOut.write(modelParameters_.oStruncPhonons,
-			    "OsTruncPhonons",
-			    PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
+			            "OsTruncPhonons",
+			            PsimagLite::IoNgSerializer::ALLOW_OVERWRITE);
 		}
 	}
 
 	// virtual override
-	SizeType setOperatorMatrices(VectorOperatorType& ops,
-	    VectorQnType& qm,
-	    const BlockType& block) const
+	SizeType
+	setOperatorMatrices(VectorOperatorType& ops, VectorQnType& qm, const BlockType& block) const
 	{
 		oStruncActive_ = false;
 
@@ -470,10 +465,10 @@ protected:
 			}
 
 			OperatorType myOp(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(1, 1 - sigma),
-			    1,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                  typename OperatorType::PairType(1, 1 - sigma),
+			                  1,
+			                  su2related);
 
 			ops.push_back(myOp);
 		}
@@ -483,8 +478,8 @@ protected:
 		if (modelParameters_.oStruncPhonons == 0)
 			return oneSiteTruncSize;
 
-		SparseMatrixType tmpMatrix = findPhononadaggerMatrix(natBasis,
-		    modelParameters_.oStruncPhonons);
+		SparseMatrixType tmpMatrix
+		    = findPhononadaggerMatrix(natBasis, modelParameters_.oStruncPhonons);
 
 		typename OperatorType::Su2RelatedType su2related2;
 		su2related2.source.push_back(ind * 2);
@@ -495,10 +490,10 @@ protected:
 		su2related2.transpose.push_back(1);
 		su2related2.offset = 1;
 		OperatorType myOp2(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(2, 2),
-		    -1,
-		    su2related2);
+		                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                   PairType(2, 2),
+		                   -1,
+		                   su2related2);
 		ops.push_back(myOp2);
 
 		if (!isSsh_ && !isLrh_)
@@ -507,7 +502,8 @@ protected:
 		// Set the operators c_(i,sigma} * x_i in the natural basis
 
 		for (SizeType sigma = 0; sigma < 1; ++sigma) {
-			tmpMatrix = findSSHMatrices(sigma, natBasis, modelParameters_.oStruncPhonons);
+			tmpMatrix
+			    = findSSHMatrices(sigma, natBasis, modelParameters_.oStruncPhonons);
 			typename OperatorType::Su2RelatedType su2related3;
 			if (sigma == 0) {
 				su2related3.source.push_back(ind);
@@ -520,10 +516,10 @@ protected:
 			transformByU(tmpMatrix);
 
 			OperatorType myOp3(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    typename OperatorType::PairType(1, 1 - sigma),
-			    1,
-			    su2related3);
+			                   ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                   typename OperatorType::PairType(1, 1 - sigma),
+			                   1,
+			                   su2related3);
 
 			ops.push_back(myOp3);
 		}
@@ -535,17 +531,15 @@ private:
 
 	//! find all states in the natural basis for a block of n sites
 	//! N.B.: HAS BEEN CHANGED TO ACCOMODATE FOR MULTIPLE BANDS
-	static void setBasis(HilbertBasisType& basis,
-	    const VectorSizeType& block,
-	    SizeType phonons)
+	static void setBasis(HilbertBasisType& basis, const VectorSizeType& block, SizeType phonons)
 	{
-		SizeType n = block.size();
+		SizeType     n     = block.size();
 		HilbertState total = 2 * (phonons + 1);
-		total = pow(total, n);
+		total              = pow(total, n);
 
 		basis.resize(total);
 
-		SizeType counter = 0;
+		SizeType counter   = 0;
 		SizeType npPlusOne = phonons + 1;
 		for (SizeType i = 0; i < 2; ++i) {
 			for (SizeType b = 0; b < npPlusOne; ++b) {
@@ -555,16 +549,15 @@ private:
 
 		assert(counter == total);
 
-		SizeType sum = std::accumulate(basis.begin(),
-		    basis.end(),
-		    static_cast<SizeType>(0));
+		SizeType sum
+		    = std::accumulate(basis.begin(), basis.end(), static_cast<SizeType>(0));
 		if (sum != total * (total - 1) / 2)
 			err("Could not set up basis\n");
 	}
 
 	//! Find a^+ in the natural basis natBasis
 	SparseMatrixType findPhononadaggerMatrix(const HilbertBasisType& natBasis,
-	    SizeType phonons) const
+	                                         SizeType                phonons) const
 	{
 		const SizeType total = natBasis.size();
 
@@ -608,17 +601,18 @@ private:
 	}
 
 	//! Find c^\dagger_isigma in the natural basis natBasis
-	SparseMatrixType findOperatorMatrices(SizeType sigma,
-	    const HilbertBasisType& natBasis) const
+	SparseMatrixType findOperatorMatrices(SizeType                sigma,
+	                                      const HilbertBasisType& natBasis) const
 	{
-		const SizeType n = natBasis.size();
+		const SizeType                                            n = natBasis.size();
 		PsimagLite::Matrix<typename SparseMatrixType::value_type> cm(n, n);
 
 		for (SizeType ii = 0; ii < n; ++ii) {
 
 			typename HilbertSpaceHubbardHolsteinType::HilbertState ket = natBasis[ii];
 
-			SizeType neSpin = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(ket);
+			SizeType neSpin
+			    = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(ket);
 			if (neSpin == 0) {
 				typename HilbertSpaceHubbardHolsteinType::HilbertState bra = ket;
 				HilbertSpaceHubbardHolsteinType::createF(bra);
@@ -637,21 +631,20 @@ private:
 		return creationMatrix;
 	}
 
-	SparseMatrixType findSSHMatrices(SizeType sigma,
-	    const HilbertBasisType& natBasis,
-	    SizeType phonons) const
+	SparseMatrixType
+	findSSHMatrices(SizeType sigma, const HilbertBasisType& natBasis, SizeType phonons) const
 	{
 		SparseMatrixType csigma_temp = findOperatorMatrices(sigma, natBasis);
-		SparseMatrixType a_temp = findPhononadaggerMatrix(natBasis, phonons);
-		SparseMatrixType x_temp = displacementOp(a_temp);
+		SparseMatrixType a_temp      = findPhononadaggerMatrix(natBasis, phonons);
+		SparseMatrixType x_temp      = displacementOp(a_temp);
 		SparseMatrixType csigma_a;
 		multiply(csigma_a, csigma_temp, x_temp);
 		return csigma_a;
 	}
 
 	void findAllMatrices(VectorSparseMatrixType& vm,
-	    const HilbertBasisType& natBasis,
-	    SizeType phonons) const
+	                     const HilbertBasisType& natBasis,
+	                     SizeType                phonons) const
 	{
 		for (SizeType sigma = 0; sigma < 1; ++sigma) {
 			SparseMatrixType m = findOperatorMatrices(sigma, natBasis);
@@ -666,60 +659,60 @@ private:
 		vm.push_back(m);
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis) const
 	{
 		// find j,m and flavors (do it by hand since we assume n==1)
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
 		typedef std::pair<SizeType, SizeType> PairType;
-		VectorSizeType other(1, 0);
+		VectorSizeType                        other(1, 0);
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = PairType(0, 0);
 			// n
-			SizeType electrons = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(basis[i]);
-			other[0] = electrons;
+			SizeType electrons
+			    = HilbertSpaceHubbardHolsteinType::electronsWithGivenSpin(basis[i]);
+			other[0]  = electrons;
 			bool sign = electrons & 1;
-			qns[i] = QnType(sign, other, jmpair, electrons);
+			qns[i]    = QnType(sign, other, jmpair, electrons);
 		}
 	}
 
-	void addPotentialFV(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualIndexOfSite) const
+	void addPotentialFV(SparseMatrixType&             hmatrix,
+	                    const VectorSparseMatrixType& cm,
+	                    SizeType                      actualIndexOfSite) const
 	{
 		SparseMatrixType nup = n(cm[0]); // spin up
-		SizeType iUp = actualIndexOfSite;
+		SizeType         iUp = actualIndexOfSite;
 		assert(iUp < modelParameters_.potentialFV.size());
 		hmatrix += modelParameters_.potentialFV[iUp] * nup;
 	}
 
-	void addPotentialPhononV(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualIndexOfSite,
-	    SizeType phonons) const
+	void addPotentialPhononV(SparseMatrixType&             hmatrix,
+	                         const VectorSparseMatrixType& cm,
+	                         SizeType                      actualIndexOfSite,
+	                         SizeType                      phonons) const
 	{
 		if (phonons == 0)
 			return;
 		assert(1 < cm.size());
 		SparseMatrixType nphon = n(cm[1]);
-		SizeType iUp = actualIndexOfSite;
+		SizeType         iUp   = actualIndexOfSite;
 		assert(iUp < modelParameters_.potentialPV.size());
 		hmatrix += modelParameters_.potentialPV[iUp] * nphon;
 	}
 
-	void addPotentialPhononDV(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualIndexOfSite,
-	    SizeType phonons) const
+	void addPotentialPhononDV(SparseMatrixType&             hmatrix,
+	                          const VectorSparseMatrixType& cm,
+	                          SizeType                      actualIndexOfSite,
+	                          SizeType                      phonons) const
 	{
 		if (phonons == 0)
 			return;
 		assert(1 < cm.size());
 		SparseMatrixType nphon = displacementOp(cm[1]);
-		SizeType iUp = actualIndexOfSite;
+		SizeType         iUp   = actualIndexOfSite;
 		assert(iUp < modelParameters_.potentialDV.size());
 		hmatrix += modelParameters_.potentialDV[iUp] * nphon;
 	}
@@ -744,10 +737,10 @@ private:
 	}
 
 	//! Term is lambda(n_{i}) x_{i}
-	void addInteractionFPhonon(SparseMatrixType& hmatrix,
-	    const VectorSparseMatrixType& cm,
-	    SizeType actualSite,
-	    SizeType phonons) const
+	void addInteractionFPhonon(SparseMatrixType&             hmatrix,
+	                           const VectorSparseMatrixType& cm,
+	                           SizeType                      actualSite,
+	                           SizeType                      phonons) const
 	{
 		if (phonons == 0)
 			return;
@@ -777,10 +770,10 @@ private:
 
 	void notReallySortU(const MatrixType& U, SizeType start)
 	{
-		const SizeType site = 0;
-		BlockType block(1, site);
+		const SizeType   site = 0;
+		BlockType        block(1, site);
 		HilbertBasisType natBasis;
-		const SizeType phonons = modelParameters_.oStruncPhonons;
+		const SizeType   phonons = modelParameters_.oStruncPhonons;
 		setBasis(natBasis, block, phonons);
 		VectorQnType qns;
 		setSymmetryRelated(qns, natBasis);
@@ -797,21 +790,21 @@ private:
 			io.read(U_, "OneSiteTruncationU");
 			std::cout << "OneSiteTruncationU = " << U_.rows() << " x " << U_.cols();
 			std::cout << " read from " << restartFilename << "\n";
-		} catch (...) {
-		}
+		} catch (...) { }
 
 		if (U_.rows() > 0) {
 			io.read(modelParameters_.oStruncPhonons, "OsTruncPhonons");
-			std::cout << "OsTruncPhonons set to " << modelParameters_.oStruncPhonons << "\n";
+			std::cout << "OsTruncPhonons set to " << modelParameters_.oStruncPhonons
+			          << "\n";
 		}
 	}
 
 	ParametersHubbardHolsteinType modelParameters_;
-	bool isSsh_;
-	bool isLrh_;
-	mutable bool oStruncActive_;
-	mutable SizeType wantsOneSiteTruncation_;
-	mutable MatrixType U_;
+	bool                          isSsh_;
+	bool                          isLrh_;
+	mutable bool                  oStruncActive_;
+	mutable SizeType              wantsOneSiteTruncation_;
+	mutable MatrixType            U_;
 }; // class HubbardHolstein
 } // namespace Dmrg
 /*@}*/

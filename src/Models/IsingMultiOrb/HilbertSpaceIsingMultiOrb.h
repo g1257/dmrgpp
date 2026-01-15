@@ -86,33 +86,30 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HILBERTSPACEISING_HEADER_H
 #define HILBERTSPACEISING_HEADER_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
-template <typename Word>
-class HilbertSpaceIsingMultiOrb
-{
+template <typename Word> class HilbertSpaceIsingMultiOrb {
 
 	static SizeType orbitals_;
 
 public:
 
-	typedef Word HilbertState;
+	typedef Word              HilbertState;
 	typedef unsigned int long WordType;
 
-	enum { SPIN_UP = 0,
-		SPIN_DOWN = 1 };
-
-	static void setOrbitals(SizeType orbitals)
+	enum
 	{
-		orbitals_ = orbitals;
-	}
+		SPIN_UP   = 0,
+		SPIN_DOWN = 1
+	};
+
+	static void setOrbitals(SizeType orbitals) { orbitals_ = orbitals; }
 
 	static bool isBitZeroAt(SizeType pos, SizeType ket)
 	{
 		SizeType mask = 1ul;
-		bool flag = true;
+		bool     flag = true;
 		for (SizeType i = 1; i < pos; i++)
 			mask <<= 1;
 
@@ -129,8 +126,7 @@ private:
 
 }; // class HilbertSpaceIsingMultiOrb
 
-template <typename Word>
-SizeType HilbertSpaceIsingMultiOrb<Word>::orbitals_ = 1;
+template <typename Word> SizeType HilbertSpaceIsingMultiOrb<Word>::orbitals_ = 1;
 } // namespace Dmrg
 
 /*@}*/

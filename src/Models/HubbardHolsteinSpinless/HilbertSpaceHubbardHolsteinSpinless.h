@@ -89,29 +89,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Utils.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 //! A class to operate on n-ary numbers (base n)
-template <typename Word>
-class HilbertSpaceHubbardHolsteinSpinless
-{
+template <typename Word> class HilbertSpaceHubbardHolsteinSpinless {
 
 public:
 
 	typedef Word HilbertState;
 
 	// Get electronic state from combined electron and phonon ket a
-	static Word getF(Word a)
-	{
-		return (a & 1);
-	}
+	static Word getF(Word a) { return (a & 1); }
 
 	// Get phononic state from combined electron and phonon ket a
-	static Word getP(Word a)
-	{
-		return (a >> 1);
-	}
+	static Word getP(Word a) { return (a >> 1); }
 
 	// Create electron in binary number "a"
 	static void createF(Word& a)
@@ -125,9 +116,9 @@ public:
 	static void createP(Word& a)
 	{
 		const SizeType nphonons = getP(a);
-		const Word stateP = 1 + nphonons;
-		const Word maskP = (stateP << 1);
-		const Word maskF = getF(a);
+		const Word     stateP   = 1 + nphonons;
+		const Word     maskP    = (stateP << 1);
+		const Word     maskF    = getF(a);
 		assert(maskF < 2);
 		a = (maskP | maskF);
 	}

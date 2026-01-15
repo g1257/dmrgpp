@@ -84,13 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Heisenberg Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersGaugeSpin : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
@@ -103,12 +102,10 @@ struct ParametersGaugeSpin : public ParametersModelBase<RealType, QnType> {
 		try {
 			magneticFieldV.resize(nsites);
 			io.read(magneticFieldV, "MagneticField");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersGaugeSpin";
 		io.createGroup(label);
@@ -117,15 +114,14 @@ struct ParametersGaugeSpin : public ParametersModelBase<RealType, QnType> {
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersGaugeSpin& parameters)
+	friend std::ostream& operator<<(std::ostream& os, const ParametersGaugeSpin& parameters)
 	{
 		os << "MagneticField=" << parameters.magneticFieldV << "\n";
 		os << parameters.targetQuantum;
 		return os;
 	}
 
-	SizeType twiceTheSpin;
+	SizeType       twiceTheSpin;
 	VectorRealType magneticFieldV;
 };
 } // namespace Dmrg

@@ -19,7 +19,9 @@ Please see full open source license included in file LICENSE.
 use warnings;
 use strict;
 
+use lib ".";
 use lib "../../PsimagLite/scripts";
+
 use DmrgDriver;
 
 my ($arg) = @ARGV;
@@ -54,4 +56,3 @@ for (my $i = 0; $i < $templates; ++$i) {
 my %dmrgMain = (name => 'dmrg', dotos => $dotos);
 
 push @drivers,\%dmrgMain;
-

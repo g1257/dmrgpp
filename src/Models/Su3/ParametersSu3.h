@@ -84,13 +84,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename RealType, typename QnType>
 struct ParametersSu3 : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
@@ -101,8 +100,7 @@ struct ParametersSu3 : public ParametersModelBase<RealType, QnType> {
 		io.readline(p, "Su3RepresentationP=");
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersSu3";
 		io.createGroup(label);

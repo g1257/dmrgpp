@@ -1,14 +1,14 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void csr_transpose(const int nrow_A,
-    const int ncol_A,
-    const int arowptr[],
-    const int acol[],
-    const ComplexOrRealType aval[],
-    int atrowptr[],
-    int atcol[],
-    ComplexOrRealType atval[])
+void csr_transpose(const int               nrow_A,
+                   const int               ncol_A,
+                   const int               arowptr[],
+                   const int               acol[],
+                   const ComplexOrRealType aval[],
+                   int                     atrowptr[],
+                   int                     atcol[],
+                   ComplexOrRealType       atval[])
 {
 	/*
 	 * --------------------------------------------------------
@@ -38,10 +38,10 @@ void csr_transpose(const int nrow_A,
 		int ia = 0;
 		for (ia = 0; ia < nrow_A; ia++) {
 			int istart = arowptr[ia];
-			int iend = arowptr[ia + 1] - 1;
-			int k = 0;
+			int iend   = arowptr[ia + 1] - 1;
+			int k      = 0;
 			for (k = istart; k <= iend; k++) {
-				int ja = acol[k];
+				int ja  = acol[k];
 				int iat = ja;
 
 				nnz_row_At[iat] += 1;
@@ -55,7 +55,7 @@ void csr_transpose(const int nrow_A,
 	 * ---------------------------------------
 	 */
 	{
-		int iat = 0;
+		int iat     = 0;
 		atrowptr[0] = 0;
 		for (iat = 0; iat < nrow_At; iat++) {
 			atrowptr[iat + 1] = atrowptr[iat] + nnz_row_At[iat];
@@ -75,16 +75,16 @@ void csr_transpose(const int nrow_A,
 		int ia = 0;
 		for (ia = 0; ia < nrow_A; ia++) {
 			int istart = arowptr[ia];
-			int iend = arowptr[ia + 1] - 1;
-			int k = 0;
+			int iend   = arowptr[ia + 1] - 1;
+			int k      = 0;
 			for (k = istart; k <= iend; k++) {
-				int ja = acol[k];
+				int               ja  = acol[k];
 				ComplexOrRealType aij = aval[k];
 
 				int iat = ja;
 				int jat = ia;
 
-				int ipos = atrowptr[iat] + nnz_row_At[iat];
+				int ipos    = atrowptr[iat] + nnz_row_At[iat];
 				atcol[ipos] = jat;
 				atval[ipos] = aij;
 

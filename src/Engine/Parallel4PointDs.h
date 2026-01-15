@@ -78,44 +78,43 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Concurrency.h"
 #include "Matrix.h"
-#include "Mpi.h"
+#include "NotMpi.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ModelType, typename FourPointCorrelationsType>
-class Parallel4PointDs
-{
+template <typename ModelType, typename FourPointCorrelationsType> class Parallel4PointDs {
 
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename FourPointCorrelationsType::MatrixType MatrixType;
-	typedef typename FourPointCorrelationsType::BraketType BraketType;
-	typedef typename MatrixType::value_type FieldType;
+	typedef std::pair<SizeType, SizeType>                        PairType;
+	typedef typename FourPointCorrelationsType::MatrixType       MatrixType;
+	typedef typename FourPointCorrelationsType::BraketType       BraketType;
+	typedef typename MatrixType::value_type                      FieldType;
 	typedef typename FourPointCorrelationsType::SparseMatrixType SparseMatrixType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef PsimagLite::Concurrency                              ConcurrencyType;
 
 public:
 
-	enum FourPointModeEnum { MODE_NORMAL,
+	enum FourPointModeEnum
+	{
+		MODE_NORMAL,
 		MODE_THIN,
-		MODE_THINupdn };
+		MODE_THINupdn
+	};
 
 	typedef typename ModelType::RealType RealType;
 
-	Parallel4PointDs(MatrixType& fpd,
-	    const FourPointCorrelationsType& fourpoint,
-	    const ModelType& model,
-	    const typename PsimagLite::Vector<SizeType>::Type& gammas,
-	    const typename PsimagLite::Vector<PairType>::Type& pairs,
-	    FourPointModeEnum mode)
+	Parallel4PointDs(MatrixType&                                        fpd,
+	                 const FourPointCorrelationsType&                   fourpoint,
+	                 const ModelType&                                   model,
+	                 const typename PsimagLite::Vector<SizeType>::Type& gammas,
+	                 const typename PsimagLite::Vector<PairType>::Type& pairs,
+	                 FourPointModeEnum                                  mode)
 	    : fpd_(fpd)
 	    , fourpoint_(fourpoint)
 	    , model_(model)
 	    , gammas_(gammas)
 	    , pairs_(pairs)
 	    , mode_(mode)
-	{
-	}
+	{ }
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
@@ -123,7 +122,7 @@ public:
 		SizeType j = pairs_[taskNumber].second;
 
 		fpd_(i, j) = (mode_ == MODE_NORMAL) ? fourPointDelta(2 * i, 2 * j, gammas_)
-						    : fourPointThin(i, j);
+		                                    : fourPointThin(i, j);
 		if (mode_ == MODE_NORMAL) {
 			fpd_(i, j) = fourPointDelta(2 * i, 2 * j, gammas_);
 		} else if (mode_ == MODE_THIN) {
@@ -131,7 +130,8 @@ public:
 		} else if (mode_ == MODE_THINupdn) {
 			fpd_(i, j) = fourPointThinupdn(i, j);
 		} else {
-			throw PsimagLite::RuntimeError("Parallel4PointDs: No matching mode_ found \n");
+			throw PsimagLite::RuntimeError(
+			    "Parallel4PointDs: No matching mode_ found \n");
 		}
 	}
 
@@ -139,9 +139,9 @@ public:
 
 private:
 
-	FieldType fourPointDelta(SizeType i,
-	    SizeType j,
-	    const typename PsimagLite::Vector<SizeType>::Type& gammas) const
+	FieldType fourPointDelta(SizeType                                           i,
+	                         SizeType                                           j,
+	                         const typename PsimagLite::Vector<SizeType>::Type& gammas) const
 	{
 		SizeType hs = model_.hilbertSize(0);
 		SizeType nx = 0;
@@ -153,20 +153,25 @@ private:
 		nx /= 2;
 		SizeType site = 0;
 		// C_{gamma0,up}
-		PsimagLite::String str("<gs|c[" + ttos(site) + "]?" + ttos(gammas[0] + 0 * nx) + "';");
-		// const SparseMatrixType& opC0 = model.naturalOperator("c",site,gammas[0] + 0*nx).data;
+		PsimagLite::String str("<gs|c[" + ttos(site) + "]?" + ttos(gammas[0] + 0 * nx)
+		                       + "';");
+		// const SparseMatrixType& opC0 = model.naturalOperator("c",site,gammas[0] +
+		// 0*nx).data;
 
 		// C_{gamma1,down}
 		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[1] + 1 * nx) + "';";
-		// const SparseMatrixType& opC1 = model.naturalOperator("c",site,gammas[1] + 1*nx).data;
+		// const SparseMatrixType& opC1 = model.naturalOperator("c",site,gammas[1] +
+		// 1*nx).data;
 
 		// C_{gamma2,down}
 		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[2] + 1 * nx) + ";";
-		// const SparseMatrixType& opC2 = model.naturalOperator("c",site,gammas[2] + 1*nx).data;
+		// const SparseMatrixType& opC2 = model.naturalOperator("c",site,gammas[2] +
+		// 1*nx).data;
 
 		// C_{gamma3,up}
 		str += "<gs|c[" + ttos(site) + "]?" + ttos(gammas[3] + 0 * nx) + "|gs>";
-		// const SparseMatrixType& opC3 = model.naturalOperator("c",site,gammas[3] + 0*nx).data;
+		// const SparseMatrixType& opC3 = model.naturalOperator("c",site,gammas[3] +
+		// 0*nx).data;
 
 		BraketType braket(model_, str);
 		return fourpoint_(i, i + 1, j, j + 1, braket);
@@ -175,14 +180,14 @@ private:
 	FieldType fourPointThin(SizeType i, SizeType j) const
 	{
 		SizeType number1 = fpd_.n_row() / 2;
-		SizeType spin0 = i / number1;
-		SizeType tmp = i % number1;
+		SizeType spin0   = i / number1;
+		SizeType tmp     = i % number1;
 		SizeType number2 = sqrt(number1);
-		SizeType thini2 = tmp / number2;
-		SizeType thini1 = tmp % number2;
+		SizeType thini2  = tmp / number2;
+		SizeType thini1  = tmp % number2;
 
-		SizeType spin1 = j / number1;
-		tmp = j % number1;
+		SizeType spin1  = j / number1;
+		tmp             = j % number1;
 		SizeType thinj2 = tmp / number2;
 		SizeType thinj1 = tmp % number2;
 		// int sign = gammas[0] - 1;
@@ -211,21 +216,21 @@ private:
 		//		return signTerm*fourval;
 
 		BraketType braket(model_, str);
-		FieldType fourval = fourpoint_(thini1, thini2, thinj1, thinj2, braket);
+		FieldType  fourval = fourpoint_(thini1, thini2, thinj1, thinj2, braket);
 		return fourval;
 	}
 
 	FieldType fourPointThinupdn(SizeType i, SizeType j) const
 	{
 		SizeType number1 = fpd_.n_row() / 2;
-		SizeType spin0 = i / number1;
-		SizeType tmp = i % number1;
+		SizeType spin0   = i / number1;
+		SizeType tmp     = i % number1;
 		SizeType number2 = sqrt(number1);
-		SizeType thini2 = tmp / number2;
-		SizeType thini1 = tmp % number2;
+		SizeType thini2  = tmp / number2;
+		SizeType thini1  = tmp % number2;
 
-		SizeType spin1 = j / number1;
-		tmp = j % number1;
+		SizeType spin1  = j / number1;
+		tmp             = j % number1;
 		SizeType thinj2 = tmp / number2;
 		SizeType thinj1 = tmp % number2;
 		// int sign = gammas[0] - 1;
@@ -245,16 +250,16 @@ private:
 		str += "c?" + ttos(spin1) + "[" + ttos(site) + "]|gs>";
 
 		BraketType braket(model_, str);
-		FieldType fourval = fourpoint_(thini1, thini2, thinj1, thinj2, braket);
+		FieldType  fourval = fourpoint_(thini1, thini2, thinj1, thinj2, braket);
 		return fourval;
 	}
 
-	MatrixType& fpd_;
-	const FourPointCorrelationsType& fourpoint_;
-	const ModelType& model_;
+	MatrixType&                                        fpd_;
+	const FourPointCorrelationsType&                   fourpoint_;
+	const ModelType&                                   model_;
 	const typename PsimagLite::Vector<SizeType>::Type& gammas_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
-	const FourPointModeEnum mode_;
+	const FourPointModeEnum                            mode_;
 }; // class Parallel4PointDs
 } // namespace Dmrg
 

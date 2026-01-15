@@ -86,51 +86,48 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <iostream>
 #include <stdexcept>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingCorrection : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingCorrection : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 public:
 
-	typedef LanczosSolverType_ LanczosSolverType;
+	typedef LanczosSolverType_                                      LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType MatrixVectorType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type TargetVectorType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef TargetParamsCorrection<ModelType> TargetParamsType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename BasisType::QnType QnType;
-	typedef typename TargetingCommonType::StageEnumType StageEnumType;
-	typedef typename BaseType::VectorRealType VectorRealType;
-	typedef typename BaseType::CheckpointType CheckpointType;
+	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
+	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
+	typedef typename MatrixVectorType::ModelType                    ModelType;
+	typedef typename ModelType::RealType                            RealType;
+	typedef typename ModelType::ModelHelperType                     ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                   ComplexOrRealType;
+	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type    TargetVectorType;
+	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
+	typedef TargetParamsCorrection<ModelType>                       TargetParamsType;
+	typedef typename ModelType::InputValidatorType                  InputValidatorType;
+	typedef typename PsimagLite::Vector<SizeType>::Type             VectorSizeType;
+	typedef typename BasisType::QnType                              QnType;
+	typedef typename TargetingCommonType::StageEnumType             StageEnumType;
+	typedef typename BaseType::VectorRealType                       VectorRealType;
+	typedef typename BaseType::CheckpointType                       CheckpointType;
 
-	TargetingCorrection(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& io)
+	TargetingCorrection(const LeftRightSuperType&     lrs,
+	                    const CheckpointType&         checkPoint,
+	                    const WaveFunctionTransfType& wft,
+	                    const QnType&,
+	                    InputValidatorType& io)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_(io, "TargetingCorrection")
 	    , gsWeight_(1 - tstStruct_.correctionA())
 	    , progress_("TargetingCorrection")
-	{
-	}
+	{ }
 
 	SizeType sites() const { return tstStruct_.sites(); }
 
@@ -145,7 +142,7 @@ public:
 	{
 		assert(this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		RealType gsWeight = 1;
-		RealType weight1 = 0;
+		RealType weight1  = 0;
 		computeAllWeights(gsWeight, weight1);
 		return weight1;
 	}
@@ -153,16 +150,16 @@ public:
 	RealType gsWeight() const
 	{
 		RealType gsWeight = 1;
-		RealType weight = 0;
+		RealType weight   = 0;
 		computeAllWeights(gsWeight, weight);
 		return gsWeight;
 	}
 
 	void evolve(const VectorRealType&,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType&,
-	    SizeType)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType&              block1,
+	            const BlockType&,
+	            SizeType)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -173,15 +170,14 @@ public:
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io,
-	    PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
 		this->common().read(io, prefix);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out&                       io,
+	           PsimagLite::String                                 prefix) const
 	{
 		this->common().write(io, block, prefix);
 	}
@@ -193,7 +189,7 @@ private:
 		assert(1 == this->common().aoe().tvs());
 
 		RealType norma = norm(this->tv(0));
-		weight = (norma > 1e-6) ? tstStruct_.correctionA() : 0;
+		weight         = (norma > 1e-6) ? tstStruct_.correctionA() : 0;
 
 		gsWeight = 1 - weight;
 
@@ -207,8 +203,8 @@ private:
 		gsWeight = gsWeight_;
 	}
 
-	TargetParamsType tstStruct_;
-	const RealType gsWeight_;
+	TargetParamsType              tstStruct_;
+	const RealType                gsWeight_;
 	PsimagLite::ProgressIndicator progress_;
 }; // class TargetingCorrection
 } // namespace Dmrg

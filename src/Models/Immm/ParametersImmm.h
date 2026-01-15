@@ -80,8 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define PARAMETERS_IMMM_H
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 	// no connections here please!!
@@ -100,30 +99,26 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 	}
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	    SizeType,
-	    PsimagLite::String msg = "") const
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, PsimagLite::String msg = "") const
 	{
 		PsimagLite::String str = msg;
 		str += "ParametersImmm";
 
 		const char* start = reinterpret_cast<const char*>(this);
-		const char* end = reinterpret_cast<const char*>(&potentialV);
-		SizeType total = mres.memResolv(&hubbardU, end - start, str + " hubbardU");
+		const char* end   = reinterpret_cast<const char*>(&potentialV);
+		SizeType    total = mres.memResolv(&hubbardU, end - start, str + " hubbardU");
 
 		start = end;
-		end = reinterpret_cast<const char*>(&minOxygenElectrons);
+		end   = reinterpret_cast<const char*>(&minOxygenElectrons);
 		total += mres.memResolv(&potentialV, end - start, str + " potentialV");
 
-		total += mres.memResolv(&minOxygenElectrons,
-		    sizeof(*this) - total,
-		    str + " minOxygenElectrons");
+		total += mres.memResolv(
+		    &minOxygenElectrons, sizeof(*this) - total, str + " minOxygenElectrons");
 
 		return total;
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersImmm";
 		io.createGroup(label);
@@ -134,8 +129,7 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersImmm& parameters)
+	friend std::ostream& operator<<(std::ostream& os, const ParametersImmm& parameters)
 	{
 		os << "hubbardU\n";
 		os << parameters.hubbardU;
@@ -147,7 +141,7 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 
 	typename PsimagLite::Vector<RealType>::Type hubbardU;
 	typename PsimagLite::Vector<RealType>::Type potentialV;
-	SizeType minOxygenElectrons;
+	SizeType                                    minOxygenElectrons;
 };
 } // namespace Dmrg
 

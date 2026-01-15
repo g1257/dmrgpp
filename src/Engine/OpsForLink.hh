@@ -4,48 +4,48 @@
 #include "OperatorsCached.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename LeftRightSuperType>
-class OpsForLink
-{
+template <typename LeftRightSuperType> class OpsForLink {
 
 public:
 
 	typedef typename LeftRightSuperType::SparseMatrixType SparseMatrixType;
-	typedef typename LeftRightSuperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef Link<ComplexOrRealType> LinkType;
-	typedef typename PsimagLite::Vector<LinkType>::Type VectorLinkType;
-	typedef OperatorsCached<LeftRightSuperType> OperatorsCachedType;
+	typedef typename LeftRightSuperType::OperatorsType    OperatorsType;
+	typedef typename OperatorsType::OperatorType          OperatorType;
+	typedef typename OperatorType::StorageType            OperatorStorageType;
+	typedef typename SparseMatrixType::value_type         ComplexOrRealType;
+	typedef Link<ComplexOrRealType>                       LinkType;
+	typedef typename PsimagLite::Vector<LinkType>::Type   VectorLinkType;
+	typedef OperatorsCached<LeftRightSuperType>           OperatorsCachedType;
 
-	OpsForLink(const OperatorsCachedType& operatorsCached,
-	    const VectorLinkType& lps)
+	OpsForLink(const OperatorsCachedType& operatorsCached, const VectorLinkType& lps)
 	    : lps_(lps)
 	    , operatorsCached_(operatorsCached)
 	    , link2_(nullptr)
 	    , A_(nullptr)
 	    , B_(nullptr)
-	{
-	}
+	{ }
 
 	void setPointer(SizeType xx)
 	{
 		assert(xx < lps_.size());
 		link2_ = &lps_[xx];
 
-		assert(link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON || link2_->type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
+		assert(link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON
+		       || link2_->type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
 
-		const ProgramGlobals::SysOrEnvEnum sysOrEnv = (link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? ProgramGlobals::SysOrEnvEnum::SYSTEM : ProgramGlobals::SysOrEnvEnum::ENVIRON;
-		const ProgramGlobals::SysOrEnvEnum envOrSys = (link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? ProgramGlobals::SysOrEnvEnum::ENVIRON : ProgramGlobals::SysOrEnvEnum::SYSTEM;
+		const ProgramGlobals::SysOrEnvEnum sysOrEnv
+		    = (link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON)
+		    ? ProgramGlobals::SysOrEnvEnum::SYSTEM
+		    : ProgramGlobals::SysOrEnvEnum::ENVIRON;
+		const ProgramGlobals::SysOrEnvEnum envOrSys
+		    = (link2_->type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON)
+		    ? ProgramGlobals::SysOrEnvEnum::ENVIRON
+		    : ProgramGlobals::SysOrEnvEnum::SYSTEM;
 
-		A_ = &operatorsCached_.getOpStorage(link2_->pairMetaOps.first,
-		    sysOrEnv);
-		B_ = &operatorsCached_.getOpStorage(link2_->pairMetaOps.second,
-		    envOrSys);
+		A_ = &operatorsCached_.getOpStorage(link2_->pairMetaOps.first, sysOrEnv);
+		B_ = &operatorsCached_.getOpStorage(link2_->pairMetaOps.second, envOrSys);
 
 		assert(A_);
 		assert(B_);
@@ -82,9 +82,9 @@ public:
 
 private:
 
-	VectorLinkType lps_;
-	OperatorsCachedType operatorsCached_;
-	LinkType* link2_;
+	VectorLinkType             lps_;
+	OperatorsCachedType        operatorsCached_;
+	LinkType*                  link2_;
 	OperatorStorageType const* A_;
 	OperatorStorageType const* B_;
 };

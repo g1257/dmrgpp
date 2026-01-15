@@ -7,40 +7,37 @@
 #include "TermForTargetingExpression.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename TargetingBaseType>
-class AlgebraForTargetingExpression
-{
+template <typename TargetingBaseType> class AlgebraForTargetingExpression {
 
 public:
 
-	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename TargetingBaseType::ModelType ModelType;
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
-	typedef AuxForTargetingExpression<TargetingBaseType> AuxiliaryType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
+	typedef typename TargetingBaseType::VectorWithOffsetType    VectorWithOffsetType;
+	typedef typename TargetingBaseType::ModelType               ModelType;
+	typedef typename VectorWithOffsetType::value_type           ComplexOrRealType;
+	typedef AuxForTargetingExpression<TargetingBaseType>        AuxiliaryType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type        VectorStringType;
+	typedef typename ModelType::ModelHelperType                 ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef PsimagLite::Vector<int>::Type VectorIntType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef TermForTargetingExpression<TargetingBaseType> TermType;
-	typedef typename PsimagLite::Vector<TermType*>::Type VectorTermType;
-	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
+	typedef typename BasisWithOperatorsType::OperatorsType      OperatorsType;
+	typedef typename OperatorsType::OperatorType                OperatorType;
+	typedef PsimagLite::Vector<int>::Type                       VectorIntType;
+	typedef PsimagLite::Vector<SizeType>::Type                  VectorSizeType;
+	typedef typename VectorWithOffsetType::VectorType           VectorType;
+	typedef PsimagLite::PackIndices                             PackIndicesType;
+	typedef typename OperatorType::StorageType                  SparseMatrixType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type  RealType;
+	typedef TermForTargetingExpression<TargetingBaseType>       TermType;
+	typedef typename PsimagLite::Vector<TermType*>::Type        VectorTermType;
+	typedef PsimagLite::Vector<bool>::Type                      VectorBoolType;
+	using KetType = typename TermType::KetType;
 
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false)
 	    , aux_(aux)
-	{
-	}
+	{ }
 
 	AlgebraForTargetingExpression(PsimagLite::String str, const AuxiliaryType& aux)
 	    : finalized_(false)
@@ -58,7 +55,16 @@ public:
 		}
 	}
 
-	AlgebraForTargetingExpression(const AlgebraForTargetingExpression&) = delete;
+	AlgebraForTargetingExpression(const AlgebraForTargetingExpression& other)
+	    : finalized_(other.finalized_)
+	    , aux_(other.aux_)
+	{
+		SizeType n = other.size();
+		terms_.resize(n, nullptr);
+		for (SizeType i = 0; i < n; ++i) {
+			terms_[i] = new TermType(other.term(i));
+		}
+	}
 
 	AlgebraForTargetingExpression& operator=(const AlgebraForTargetingExpression&) = delete;
 
@@ -114,8 +120,6 @@ public:
 		terms_[0]->multiply(scalar);
 	}
 
-	bool isEmpty() const { return (terms_.size() == 0); }
-
 	void finalize()
 	{
 		const SizeType nterms = terms_.size();
@@ -125,10 +129,26 @@ public:
 
 	bool finalized() const { return finalized_; }
 
+	void setKet(SizeType ind, const std::string& ket)
+	{
+		assert(ind < terms_.size());
+		terms_[ind]->setKet(ket);
+	}
+
+	void setFactor(SizeType ind, const ComplexOrRealType& val)
+	{
+		assert(ind < terms_.size());
+		terms_[ind]->setFactor(val);
+	}
+
+	// Constant functions below
+
+	bool isEmpty() const { return (terms_.size() == 0); }
+
 	PsimagLite::String toString() const
 	{
 		PsimagLite::String s;
-		const SizeType n = terms_.size();
+		const SizeType     n = terms_.size();
 		if (n == 0)
 			err("toString returns empty\n");
 
@@ -145,24 +165,31 @@ public:
 		return *auxPtr;
 	}
 
-	int pIndex() const
+	const TermType& term(SizeType ind) const
 	{
-		if (terms_.size() != 1)
-			return -1;
-		return terms_[0]->pIndex();
+		if (ind >= terms_.size()) {
+			err("pIndex(): ind >= terms.size()\n");
+		}
+
+		if (!terms_[ind]) {
+			err("Term is null\n");
+		}
+
+		return *terms_[ind];
 	}
 
 	bool hasSummationKetAndNoMult() const
 	{
-		const SizeType nterms = terms_.size();
-		bool summation = false;
-		bool mult = false;
+		const SizeType nterms    = terms_.size();
+		bool           summation = false;
+		bool           mult      = false;
 		for (SizeType i = 0; i < nterms; ++i) {
-			if (terms_[i]->size() != 1)
+			if (!terms_[i]->isPureKet())
 				continue;
-			if (terms_[i]->toString().substr(0, 3) == "|!a")
+			const KetType& ket = terms_[i]->ket();
+			if (ket.kind() == KetType::Kind::S)
 				summation = true;
-			if (terms_[i]->toString().substr(0, 3) == "|!m")
+			if (ket.kind() == KetType::Kind::M)
 				mult = true;
 		}
 
@@ -173,63 +200,125 @@ private:
 
 	void simplifyTerms()
 	{
-		PsimagLite::String name;
-		VectorTermType termsNew;
+		simpleSimplification();
+		complicatedSimplification();
+	}
+
+	void simpleSimplification()
+	{
+		struct SimpleTerm {
+			SizeType          index   = 0;
+			SizeType          pIndex  = 0;
+			bool              enabled = false;
+			ComplexOrRealType factor  = 0.;
+		};
+
 		const SizeType nterms = terms_.size();
-		VectorBoolType indices(nterms, false);
-		SizeType survivingTermIndex = nterms + 1000;
-		SizeType survivingTerms = 0;
+
+		std::vector<SimpleTerm> simpleTerms;
+		std::vector<int>        term_mapping(nterms, -1);
 
 		for (SizeType i = 0; i < nterms; ++i) {
-			if (!isTermSimplifiable(i)) {
-				termsNew.push_back(terms_[i]);
-				indices[i] = true;
+			const TermType& term = *terms_[i];
+			if (!term.isSummable()) {
 				continue;
 			}
 
-			PsimagLite::GetBraOrKet ket(terms_[i]->toString());
-			const SizeType pIndex = ket.pIndex();
+			int pIndexInt = terms_[i]->pIndex();
+			if (pIndexInt < 0) {
+				continue;
+			}
 
-			if (survivingTerms == 0) {
-				survivingTermIndex = termsNew.size();
-				termsNew.push_back(terms_[i]);
-				indices[i] = true;
-				name = "|!aP" + ttos(pIndex);
+			SizeType pIndex = pIndexInt;
+
+			for (SizeType j = 0; j < simpleTerms.size(); ++j) {
+				if (!simpleTerms[j].enabled || simpleTerms[j].pIndex != pIndex) {
+					continue;
+				}
+
+				simpleTerms[j].factor += terms_[i]->ket().factor();
+				term_mapping[i] = -2; // ignore because i-th summed to j-th
+				break;
+			}
+
+			if (term_mapping[i] == -1) {
+				SimpleTerm st;
+				st.index        = i;
+				st.enabled      = true;
+				st.factor       = terms_[i]->ket().factor();
+				st.pIndex       = pIndex;
+				term_mapping[i] = simpleTerms.size();
+				simpleTerms.push_back(st);
+			}
+		}
+
+		VectorTermType newterms;
+
+		for (SizeType i = 0; i < nterms; ++i) {
+			if (term_mapping[i] == -2) {
+				delete terms_[i];
+				terms_[i] = nullptr;
+				continue;
+			} else if (term_mapping[i] == -1) {
+				newterms.push_back(terms_[i]);
 			} else {
-				name += "pP" + ttos(pIndex);
+				assert(term_mapping[i] >= 0);
+				SizeType ind   = term_mapping[i];
+				SizeType index = newterms.size();
+				newterms.push_back(terms_[i]);
+				assert(static_cast<SizeType>(term_mapping[i]) < simpleTerms.size());
+				const SimpleTerm& st = simpleTerms[ind];
+				assert(st.enabled);
+				newterms[index]->setFactor(st.factor);
 			}
-
-			++survivingTerms;
 		}
 
-		if (survivingTerms < 2)
-			return;
+		terms_ = newterms;
+	}
 
-		name += ">";
-		termsNew[survivingTermIndex]->setString(name);
+	void complicatedSimplification()
+	{
+		PsimagLite::String name;
+		const SizeType     nterms = terms_.size();
+		VectorBoolType     indices(nterms, false);
+		TermType*          combined_term = new TermType(aux_);
+		// VectorType factors;
 
 		for (SizeType i = 0; i < nterms; ++i) {
-			if (indices[i])
+			const TermType& term = *terms_[i];
+			if (!term.isSummable()) {
+				indices[i] = true;
 				continue;
-			delete terms_[i];
-			terms_[i] = nullptr;
+			}
+
+			combined_term->sum(term);
 		}
+
+		if (!combined_term->ket().canSumBeFinished()) {
+			delete combined_term;
+			combined_term = nullptr;
+			return;
+		}
+
+		VectorTermType termsNew;
+		for (SizeType i = 0; i < nterms; ++i) {
+			if (indices[i]) {
+				termsNew.push_back(terms_[i]);
+			} else {
+				delete terms_[i];
+				terms_[i] = nullptr;
+			}
+		}
+
+		termsNew.push_back(combined_term);
 
 		terms_.swap(termsNew);
 	}
 
-	bool isTermSimplifiable(SizeType i) const
-	{
-		if (terms_[i]->size() != 1 || !terms_[i]->finalized())
-			return false;
-		PsimagLite::String str = terms_[i]->toString();
-		return (str.substr(0, 2) != "|!");
-	}
-
 	// important: needs operator=
-	bool finalized_;
+	bool                 finalized_;
 	const AuxiliaryType& aux_;
-	VectorTermType terms_;
+	VectorTermType       terms_;
 };
 
 }

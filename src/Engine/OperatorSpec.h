@@ -5,37 +5,36 @@
 #include "LazyAlgebra.h"
 #include "OneOperatorSpec.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ModelType,
-    typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType>>
-class OperatorSpec
-{
+template <typename ModelType, typename AlgebraType = LazyAlgebra<typename ModelType::OperatorType>>
+class OperatorSpec {
 
 public:
 
-	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename OperatorType::StorageType OperatorStorageType;
+	typedef typename ModelType::OperatorType              OperatorType;
+	typedef typename OperatorType::StorageType            OperatorStorageType;
 	typedef LazyAlgebra<typename ModelType::OperatorType> LazyAlgebraType;
-	typedef PsimagLite::OneOperatorSpec OneOperatorSpecType;
-	typedef typename OneOperatorSpecType::SiteSplit SiteSplitType;
-	typedef AlgebraType ResultType;
-	typedef typename OperatorStorageType::value_type ComplexOrRealType;
-	typedef int AuxiliaryType;
+	typedef PsimagLite::OneOperatorSpec                   OneOperatorSpecType;
+	typedef typename OneOperatorSpecType::SiteSplit       SiteSplitType;
+	typedef AlgebraType                                   ResultType;
+	typedef typename OperatorStorageType::value_type      ComplexOrRealType;
+	typedef int                                           AuxiliaryType;
 
 	OperatorSpec(const ModelType& model)
 	    : model_(model)
-	{
-	}
+	{ }
 
 	ResultType operator()(PsimagLite::String opLabel, int& site2) const
 	{
 		PsimagLite::String copyOfOpLabel = opLabel;
-		SiteSplitType site3Split = OneOperatorSpecType::extractSiteIfAny(opLabel);
+		SiteSplitType      site3Split    = OneOperatorSpecType::extractSiteIfAny(opLabel);
 
-		if (site2 >= 0 && site3Split.hasSiteString && static_cast<SizeType>(site2) != OneOperatorSpecType::strToNumberOrFail(site3Split.siteString))
-			err(PsimagLite::String(__FILE__) + " FATAL , delete site from " + copyOfOpLabel + "\n");
+		if (site2 >= 0 && site3Split.hasSiteString
+		    && static_cast<SizeType>(site2)
+		        != OneOperatorSpecType::strToNumberOrFail(site3Split.siteString))
+			err(PsimagLite::String(__FILE__) + " FATAL , delete site from "
+			    + copyOfOpLabel + "\n");
 
 		opLabel = site3Split.root;
 
@@ -74,28 +73,24 @@ public:
 		return (op1.metaDiff(op2) == 0);
 	}
 
-	static bool isEmpty(const ResultType& op)
-	{
-		return op.isEmpty();
-	}
+	static bool isEmpty(const ResultType& op) { return op.isEmpty(); }
 
 private:
 
 	OperatorType specialOperator(SizeType site, ComplexOrRealType value) const
 	{
-		SizeType rows = model_.hilbertSize(site);
+		SizeType            rows = model_.hilbertSize(site);
 		OperatorStorageType tmp;
 		tmp.makeDiagonal(rows, value);
 		typename OperatorType::Su2RelatedType su2Related;
 		return OperatorType(tmp,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    typename OperatorType::PairType(0, 0),
-		    1.0,
-		    su2Related);
+		                    ProgramGlobals::FermionOrBosonEnum::BOSON,
+		                    typename OperatorType::PairType(0, 0),
+		                    1.0,
+		                    su2Related);
 	}
 
-	OperatorType findOperator(const PsimagLite::String& name,
-	    SizeType site) const
+	OperatorType findOperator(const PsimagLite::String& name, SizeType site) const
 	{
 		if (name.length() < 2 || name[0] != ':') {
 			PsimagLite::String str("OperatorInterpreter: syntax error for ");
@@ -106,16 +101,15 @@ private:
 		PsimagLite::String label = name.substr(1, name.length() - 1);
 
 		replaceString(label, ttos(site));
-		InputCheck inputCheck;
+		InputCheck                                 inputCheck;
 		PsimagLite::InputNg<InputCheck>::Writeable ioWriteable(label, inputCheck);
-		PsimagLite::InputNg<InputCheck>::Readable io(ioWriteable);
+		PsimagLite::InputNg<InputCheck>::Readable  io(ioWriteable);
 
 		PsimagLite::String prefix = "";
 		return OperatorType(io, model_, OperatorType::MUST_BE_NONZERO, prefix);
 	}
 
-	void replaceString(PsimagLite::String& str,
-	    PsimagLite::String substr) const
+	void replaceString(PsimagLite::String& str, PsimagLite::String substr) const
 	{
 		/* Locate the substring to replace. */
 		size_t index = str.find('$');

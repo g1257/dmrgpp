@@ -79,35 +79,29 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputCheck.h"
 #include "InputNg.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // This is a structure, don't add member functions here!
 struct Su2Related {
 	Su2Related()
 	    : offset(0) // setting to zero is necessary, because
-	{
-	} // we always print offset
+	{ } // we always print offset
 	// and when running Abelian
 	// it might be undefined
 
 	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres,
-	    SizeType,
-	    PsimagLite::String msg = "") const
+	SizeType memResolv(SomeMemResolvType& mres, SizeType, PsimagLite::String msg = "") const
 	{
 		return 0;
 	}
 
-	void read(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer)
+	void read(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer)
 	{
 		ioSerializer.read(offset, label + "/offset");
 		ioSerializer.read(source, label + "/source");
 		ioSerializer.read(transpose, label + "/transpose");
 	}
 
-	void write(PsimagLite::String label,
-	    PsimagLite::IoSerializer& ioSerializer) const
+	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
 		ioSerializer.createGroup(label);
 		ioSerializer.write(label + "/offset", offset);
@@ -115,9 +109,9 @@ struct Su2Related {
 		ioSerializer.write(label + "/transpose", transpose);
 	}
 
-	SizeType offset;
+	SizeType                           offset;
 	PsimagLite::Vector<SizeType>::Type source;
-	PsimagLite::Vector<int>::Type transpose;
+	PsimagLite::Vector<int>::Type      transpose;
 };
 
 std::istream& operator>>(std::istream&, Su2Related&);

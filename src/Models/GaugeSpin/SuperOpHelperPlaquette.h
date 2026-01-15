@@ -22,33 +22,28 @@
  * etc.
  *
  */
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename SuperGeometryType, typename ParamsType>
-class SuperOpHelperPlaquette : public SuperOpHelperBase<SuperGeometryType, ParamsType>
-{
+class SuperOpHelperPlaquette : public SuperOpHelperBase<SuperGeometryType, ParamsType> {
 
 public:
 
 	typedef SuperOpHelperBase<SuperGeometryType, ParamsType> BaseType;
-	typedef typename BaseType::VectorSizeType VectorSizeType;
-	typedef typename BaseType::PairBoolSizeType PairBoolSizeType;
+	typedef typename BaseType::VectorSizeType                VectorSizeType;
+	typedef typename BaseType::PairBoolSizeType              PairBoolSizeType;
 	using PairMetaOpForConnection = typename BaseType::PairMetaOpForConnection;
 
 	SuperOpHelperPlaquette(const SuperGeometryType& superGeometry)
 	    : BaseType(superGeometry)
 	    , smaxOrEmin_(0)
 	    , newSite_(0)
-	{
-	}
+	{ }
 
-	void setToProduct(SizeType smaxOrEmin,
-	    SizeType newSite,
-	    ProgramGlobals::DirectionEnum dir)
+	void setToProduct(SizeType smaxOrEmin, SizeType newSite, ProgramGlobals::DirectionEnum dir)
 	{
 		smaxOrEmin_ = smaxOrEmin;
-		newSite_ = newSite;
+		newSite_    = newSite;
 		BaseType::setToProduct(smaxOrEmin, newSite, dir);
 		isTriangle_ = (newSite & 1);
 		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM)
@@ -60,9 +55,9 @@ public:
 	// testing devel FIXME TODO
 	SizeType size() const { return 1; }
 
-	PairMetaOpForConnection finalIndices(const VectorSizeType& hItems,
-	    ProgramGlobals::ConnectionEnum type,
-	    SizeType rightBlockSize) const
+	PairMetaOpForConnection finalIndices(const VectorSizeType&          hItems,
+	                                     ProgramGlobals::ConnectionEnum type,
+	                                     SizeType                       rightBlockSize) const
 	{
 		assert(hItems.size() == 4);
 		constexpr int NON_LOCAL = -1;
@@ -77,15 +72,19 @@ public:
 
 		if (smaxOrEmin_ + 2 == nsites) {
 			// (n - 4, n - 3, n - 2) x (n - 1)
-			MetaOpForConnection left { NON_LOCAL, encodeNonLocalSys(nsites - 4, 3), 'N' };
+			MetaOpForConnection left { NON_LOCAL,
+				                   encodeNonLocalSys(nsites - 4, 3),
+				                   'N' };
 			MetaOpForConnection right { static_cast<int>(hItems[3]), 0, 'N' };
 			return PairMetaOpForConnection(left, right);
 		}
 
 		if (smaxOrEmin_ & 1) {
 			// (s - 1, s) x (s + 1, s + 2)
-			MetaOpForConnection left { NON_LOCAL, encodeNonLocalSys(smaxOrEmin_ - 1, 2), 'N' };
-			SizeType start = rightBlockSize + smaxOrEmin_ - 2;
+			MetaOpForConnection left { NON_LOCAL,
+				                   encodeNonLocalSys(smaxOrEmin_ - 1, 2),
+				                   'N' };
+			SizeType            start = rightBlockSize + smaxOrEmin_ - 2;
 			MetaOpForConnection right { NON_LOCAL, encodeNonLocalEnv(start, 2), 'N' };
 			return PairMetaOpForConnection(left, right);
 		}
@@ -161,7 +160,7 @@ private:
 
 	SizeType smaxOrEmin_;
 	SizeType newSite_;
-	bool isTriangle_;
+	bool     isTriangle_;
 };
 }
 #endif // SuperOpHelperPlaquette_H

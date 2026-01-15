@@ -2,25 +2,21 @@
 #define PRINTERINDETAIL_H
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename LeftRightSuperType>
-class PrinterInDetail
-{
+template <typename LeftRightSuperType> class PrinterInDetail {
 
 	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::QnType QnType;
-	typedef typename BasisWithOperatorsType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename BasisWithOperatorsType::QnType             QnType;
+	typedef typename BasisWithOperatorsType::OperatorsType      OperatorsType;
+	typedef typename OperatorsType::OperatorType                OperatorType;
 
 public:
 
 	PrinterInDetail(const LeftRightSuperType& lrs, bool extended)
 	    : lrs_(lrs)
 	    , extended_(extended)
-	{
-	}
+	{ }
 
 	void print(std::ostream& os, PsimagLite::String msg) const
 	{
@@ -32,9 +28,9 @@ public:
 
 private:
 
-	void printOneSide(std::ostream& os,
-	    PsimagLite::String msg,
-	    const BasisWithOperatorsType& basis) const
+	void printOneSide(std::ostream&                 os,
+	                  PsimagLite::String            msg,
+	                  const BasisWithOperatorsType& basis) const
 	{
 		SizeType sites = basis.block().size();
 		os << "Side=" << msg << "\n";
@@ -54,8 +50,8 @@ private:
 		}
 
 		assert(sites > 0);
-		SizeType site = basis.block()[sites - 1];
-		SizeType end = basis.operatorsPerSite(0);
+		SizeType site  = basis.block()[sites - 1];
+		SizeType end   = basis.operatorsPerSite(0);
 		SizeType siteC = site;
 		if (msg == "right") {
 			assert(site >= basis.block()[0]);
@@ -64,15 +60,16 @@ private:
 
 		os << "Operators at site " << site << " (" << siteC << ")\n";
 		for (SizeType sigma = 0; sigma < end; ++sigma) {
-			const OperatorType& myop = basis.localOperator(basis.localOperatorIndex(siteC,
-			    sigma));
+			const OperatorType& myop
+			    = basis.localOperator(basis.localOperatorIndex(siteC, sigma));
 			os << sigma << " non-zeroes=";
-			os << myop.getStorage().nonZeros() << " rows=" << myop.getStorage().rows() << "\n";
+			os << myop.getStorage().nonZeros() << " rows=" << myop.getStorage().rows()
+			   << "\n";
 		}
 	}
 
 	const LeftRightSuperType& lrs_;
-	bool extended_;
+	bool                      extended_;
 }; // class PrinterInDetail
 }
 #endif // PRINTERINDETAIL_H

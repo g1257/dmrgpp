@@ -3,9 +3,7 @@
 #include "Matrix.h"
 #include "PsimagLite.h"
 
-template <typename ComplexOrRealType>
-class Su3RepresentationBase
-{
+template <typename ComplexOrRealType> class Su3RepresentationBase {
 
 public:
 

@@ -1,19 +1,19 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void csc_kron_mult_method(const int imethod,
-    const int nrow_A,
-    const int ncol_A,
-    const PsimagLite::Vector<int>::Type& acolptr,
-    const PsimagLite::Vector<int>::Type& arow,
-    const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
-    const int nrow_B,
-    const int ncol_B,
-    const PsimagLite::Vector<int>::Type& bcolptr,
-    const PsimagLite::Vector<int>::Type& brow,
-    const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
-    const PsimagLite::Matrix<ComplexOrRealType>& yin,
-    PsimagLite::Matrix<ComplexOrRealType>& xout)
+void csc_kron_mult_method(const int                                                   imethod,
+                          const int                                                   nrow_A,
+                          const int                                                   ncol_A,
+                          const PsimagLite::Vector<int>::Type&                        acolptr,
+                          const PsimagLite::Vector<int>::Type&                        arow,
+                          const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
+                          const int                                                   nrow_B,
+                          const int                                                   ncol_B,
+                          const PsimagLite::Vector<int>::Type&                        bcolptr,
+                          const PsimagLite::Vector<int>::Type&                        brow,
+                          const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
+                          const PsimagLite::Matrix<ComplexOrRealType>&                yin,
+                          PsimagLite::Matrix<ComplexOrRealType>&                      xout)
 {
 	const int nrow_X = nrow_B;
 	const int ncol_X = nrow_A;
@@ -21,8 +21,8 @@ void csc_kron_mult_method(const int imethod,
 	const int nrow_Y = ncol_B;
 	const int ncol_Y = ncol_A;
 
-	int nnz_A = csc_nnz(ncol_A, acolptr);
-	int nnz_B = csc_nnz(ncol_B, bcolptr);
+	int nnz_A    = csc_nnz(ncol_A, acolptr);
+	int nnz_B    = csc_nnz(ncol_B, bcolptr);
 	int has_work = (nnz_A >= 1) && (nnz_B >= 1);
 
 	assert((imethod == 1) || (imethod == 2) || (imethod == 3));
@@ -75,8 +75,8 @@ void csc_kron_mult_method(const int imethod,
 		 * setup BY(ib,ja)
 		 * ---------------
 		 */
-		const int nrow_BY = nrow_B;
-		const int ncol_BY = ncol_A;
+		const int                             nrow_BY = nrow_B;
+		const int                             ncol_BY = ncol_A;
 		PsimagLite::Matrix<ComplexOrRealType> by_(nrow_BY, ncol_BY);
 
 		{
@@ -99,19 +99,19 @@ void csc_kron_mult_method(const int imethod,
 			 */
 			const char trans = 'N';
 			csc_matmul_pre(trans,
-			    nrow_B,
-			    ncol_B,
-			    bcolptr,
-			    brow,
-			    bval,
+			               nrow_B,
+			               ncol_B,
+			               bcolptr,
+			               brow,
+			               bval,
 
-			    nrow_Y,
-			    ncol_Y,
-			    yin,
+			               nrow_Y,
+			               ncol_Y,
+			               yin,
 
-			    nrow_BY,
-			    ncol_BY,
-			    by_);
+			               nrow_BY,
+			               ncol_BY,
+			               by_);
 		}
 
 		{
@@ -122,21 +122,20 @@ void csc_kron_mult_method(const int imethod,
 			 */
 			const char trans = 'T';
 
-			csc_matmul_post(
-			    trans,
-			    nrow_A,
-			    ncol_A,
-			    acolptr,
-			    arow,
-			    aval,
+			csc_matmul_post(trans,
+			                nrow_A,
+			                ncol_A,
+			                acolptr,
+			                arow,
+			                aval,
 
-			    nrow_BY,
-			    ncol_BY,
-			    by_,
+			                nrow_BY,
+			                ncol_BY,
+			                by_,
 
-			    nrow_X,
-			    ncol_X,
-			    xout);
+			                nrow_X,
+			                ncol_X,
+			                xout);
 		}
 	} else if (imethod == 2) {
 		/*
@@ -178,19 +177,19 @@ void csc_kron_mult_method(const int imethod,
 			const char transa = 'T';
 
 			csc_matmul_post(transa,
-			    nrow_A,
-			    ncol_A,
-			    acolptr,
-			    arow,
-			    aval,
+			                nrow_A,
+			                ncol_A,
+			                acolptr,
+			                arow,
+			                aval,
 
-			    nrow_Y,
-			    ncol_Y,
-			    yin,
+			                nrow_Y,
+			                ncol_Y,
+			                yin,
 
-			    nrow_YAt,
-			    ncol_YAt,
-			    yat_);
+			                nrow_YAt,
+			                ncol_YAt,
+			                yat_);
 		}
 
 		{
@@ -202,19 +201,19 @@ void csc_kron_mult_method(const int imethod,
 
 			const char trans = 'N';
 			csc_matmul_pre(trans,
-			    nrow_B,
-			    ncol_B,
-			    bcolptr,
-			    brow,
-			    bval,
+			               nrow_B,
+			               ncol_B,
+			               bcolptr,
+			               brow,
+			               bval,
 
-			    nrow_YAt,
-			    ncol_YAt,
-			    yat_,
+			               nrow_YAt,
+			               ncol_YAt,
+			               yat_,
 
-			    nrow_X,
-			    ncol_X,
-			    xout);
+			               nrow_X,
+			               ncol_X,
+			               xout);
 		}
 	} else if (imethod == 3) {
 		/*
@@ -228,18 +227,18 @@ void csc_kron_mult_method(const int imethod,
 		int ja = 0;
 		for (ja = 0; ja < ncol_A; ja++) {
 			int istarta = acolptr[ja];
-			int ienda = acolptr[ja + 1] - 1;
-			int ka = 0;
+			int ienda   = acolptr[ja + 1] - 1;
+			int ka      = 0;
 			for (ka = istarta; ka <= ienda; ka++) {
-				int ia = arow[ka];
+				int               ia  = arow[ka];
 				ComplexOrRealType aij = aval[ka];
-				int jb = 0;
+				int               jb  = 0;
 				for (jb = 0; jb < ncol_B; jb++) {
 					int istartb = bcolptr[jb];
-					int iendb = bcolptr[jb + 1] - 1;
-					int kb = 0;
+					int iendb   = bcolptr[jb + 1] - 1;
+					int kb      = 0;
 					for (kb = istartb; kb <= iendb; kb++) {
-						int ib = brow[kb];
+						int               ib  = brow[kb];
 						ComplexOrRealType bij = brow[kb];
 						ComplexOrRealType cij = aij * bij;
 
@@ -252,19 +251,19 @@ void csc_kron_mult_method(const int imethod,
 }
 
 template <typename ComplexOrRealType>
-void csc_kron_mult(const int nrow_A,
-    const int ncol_A,
-    const PsimagLite::Vector<int>::Type& acolptr,
-    const PsimagLite::Vector<int>::Type& arow,
-    const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
-    const int nrow_B,
-    const int ncol_B,
-    const PsimagLite::Vector<int>::Type& bcolptr,
-    const PsimagLite::Vector<int>::Type& brow,
-    const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
-    const PsimagLite::Matrix<ComplexOrRealType>& yin,
-    PsimagLite::Matrix<ComplexOrRealType>& xout,
-    const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
+void csc_kron_mult(const int                                                   nrow_A,
+                   const int                                                   ncol_A,
+                   const PsimagLite::Vector<int>::Type&                        acolptr,
+                   const PsimagLite::Vector<int>::Type&                        arow,
+                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& aval,
+                   const int                                                   nrow_B,
+                   const int                                                   ncol_B,
+                   const PsimagLite::Vector<int>::Type&                        bcolptr,
+                   const PsimagLite::Vector<int>::Type&                        brow,
+                   const typename PsimagLite::Vector<ComplexOrRealType>::Type& bval,
+                   const PsimagLite::Matrix<ComplexOrRealType>&                yin,
+                   PsimagLite::Matrix<ComplexOrRealType>&                      xout,
+                   const typename PsimagLite::Real<ComplexOrRealType>::Type    denseFlopDiscount)
 
 {
 	/*
@@ -297,36 +296,44 @@ void csc_kron_mult(const int nrow_A,
 	 *   -------------------------------------------------------------
 	 */
 
-	int nnz_A = csc_nnz(ncol_A, acolptr);
-	int nnz_B = csc_nnz(ncol_B, bcolptr);
+	int nnz_A    = csc_nnz(ncol_A, acolptr);
+	int nnz_B    = csc_nnz(ncol_B, bcolptr);
 	int has_work = (nnz_A >= 1) && (nnz_B >= 1);
 
-	ComplexOrRealType kron_nnz = 0;
+	ComplexOrRealType kron_nnz   = 0;
 	ComplexOrRealType kron_flops = 0;
-	int imethod = 1;
+	int               imethod    = 1;
 
 	if (!has_work) {
 		return;
 	};
 
-	estimate_kron_cost(nrow_A, ncol_A, nnz_A, nrow_B, ncol_B, nnz_B, &kron_nnz, &kron_flops, &imethod, denseFlopDiscount);
+	estimate_kron_cost(nrow_A,
+	                   ncol_A,
+	                   nnz_A,
+	                   nrow_B,
+	                   ncol_B,
+	                   nnz_B,
+	                   &kron_nnz,
+	                   &kron_flops,
+	                   &imethod,
+	                   denseFlopDiscount);
 
-	csc_kron_mult_method(
-	    imethod,
-	    nrow_A,
-	    ncol_A,
-	    acolptr,
-	    arow,
-	    aval,
+	csc_kron_mult_method(imethod,
+	                     nrow_A,
+	                     ncol_A,
+	                     acolptr,
+	                     arow,
+	                     aval,
 
-	    nrow_B,
-	    ncol_B,
-	    bcolptr,
-	    brow,
-	    bval,
+	                     nrow_B,
+	                     ncol_B,
+	                     bcolptr,
+	                     brow,
+	                     bval,
 
-	    yin,
-	    xout);
+	                     yin,
+	                     xout);
 }
 #undef BY
 #undef YAt

@@ -80,33 +80,30 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "GetBraOrKet.h"
 #include "Matrix.h"
-#include "Mpi.h"
+#include "NotMpi.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename TwoPointCorrelationsType>
-class Parallel2PointCorrelations
-{
+template <typename TwoPointCorrelationsType> class Parallel2PointCorrelations {
 
 public:
 
-	typedef typename TwoPointCorrelationsType::MatrixType MatrixType;
+	typedef typename TwoPointCorrelationsType::MatrixType       MatrixType;
 	typedef typename TwoPointCorrelationsType::SparseMatrixType SparseMatrixType;
-	typedef typename MatrixType::value_type FieldType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef typename PsimagLite::Real<FieldType>::Type RealType;
-	typedef typename TwoPointCorrelationsType::BraketType BraketType;
+	typedef typename MatrixType::value_type                     FieldType;
+	typedef PsimagLite::Concurrency                             ConcurrencyType;
+	typedef std::pair<SizeType, SizeType>                       PairType;
+	typedef typename PsimagLite::Real<FieldType>::Type          RealType;
+	typedef typename TwoPointCorrelationsType::BraketType       BraketType;
 
-	Parallel2PointCorrelations(MatrixType& w,
-	    const TwoPointCorrelationsType& twopoint,
-	    const typename PsimagLite::Vector<PairType>::Type& pairs,
-	    const BraketType& braket,
-	    ProgramGlobals::FermionOrBosonEnum fermionicSign,
-	    const PsimagLite::GetBraOrKet& bra,
-	    const PsimagLite::GetBraOrKet& ket)
+	Parallel2PointCorrelations(MatrixType&                                        w,
+	                           const TwoPointCorrelationsType&                    twopoint,
+	                           const typename PsimagLite::Vector<PairType>::Type& pairs,
+	                           const BraketType&                                  braket,
+	                           ProgramGlobals::FermionOrBosonEnum                 fermionicSign,
+	                           const PsimagLite::GetBraOrKet&                     bra,
+	                           const PsimagLite::GetBraOrKet&                     ket)
 	    : w_(w)
 	    , twopoint_(twopoint)
 	    , pairs_(pairs)
@@ -114,32 +111,26 @@ public:
 	    , fermionicSign_(fermionicSign)
 	    , bra_(bra)
 	    , ket_(ket)
-	{
-	}
+	{ }
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
 		SizeType i = pairs_[taskNumber].first;
 		SizeType j = pairs_[taskNumber].second;
-		w_(i, j) = twopoint_.calcCorrelation(i,
-		    j,
-		    braket_,
-		    fermionicSign_,
-		    bra_,
-		    ket_);
+		w_(i, j)   = twopoint_.calcCorrelation(i, j, braket_, fermionicSign_, bra_, ket_);
 	}
 
 	SizeType tasks() const { return pairs_.size(); }
 
 private:
 
-	MatrixType& w_;
-	const TwoPointCorrelationsType& twopoint_;
+	MatrixType&                                        w_;
+	const TwoPointCorrelationsType&                    twopoint_;
 	const typename PsimagLite::Vector<PairType>::Type& pairs_;
-	const BraketType& braket_;
-	const ProgramGlobals::FermionOrBosonEnum fermionicSign_;
-	const PsimagLite::GetBraOrKet& bra_;
-	const PsimagLite::GetBraOrKet& ket_;
+	const BraketType&                                  braket_;
+	const ProgramGlobals::FermionOrBosonEnum           fermionicSign_;
+	const PsimagLite::GetBraOrKet&                     bra_;
+	const PsimagLite::GetBraOrKet&                     ket_;
 }; // class Parallel2PointCorrelations
 } // namespace Dmrg
 

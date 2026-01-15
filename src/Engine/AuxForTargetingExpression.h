@@ -8,42 +8,40 @@
 #include "Pvectors.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename TargetingBaseType>
-class AuxForTargetingExpression
-{
+template <typename TargetingBaseType> class AuxForTargetingExpression {
 
 public:
 
-	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename TargetingBaseType::ModelType ModelType;
+	typedef typename TargetingBaseType::VectorWithOffsetType        VectorWithOffsetType;
+	typedef typename TargetingBaseType::ModelType                   ModelType;
 	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::Type VectorVectorVectorWithOffsetType;
-	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef typename TargetingBaseType::TargetParamsType TargetParamsType;
-	typedef PsimagLite::InputNg<InputCheck>::Readable InputValidatorType;
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
+	typedef
+	    typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::
+	        Type                                               VectorVectorVectorWithOffsetType;
+	typedef typename ModelType::LeftRightSuperType             LeftRightSuperType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type       VectorStringType;
+	typedef typename TargetingBaseType::TargetParamsType       TargetParamsType;
+	typedef PsimagLite::InputNg<InputCheck>::Readable          InputValidatorType;
+	typedef typename VectorWithOffsetType::value_type          ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef Pvectors<TargetingBaseType> PvectorsType;
-	typedef GroupOfOneTimeEvolutions<PvectorsType> GroupOfOneTimeEvolutionsType;
+	typedef Pvectors<TargetingBaseType>                        PvectorsType;
+	typedef GroupOfOneTimeEvolutions<PvectorsType>             GroupOfOneTimeEvolutionsType;
 
-	AuxForTargetingExpression(PvectorsType& pVectors,
-	    GroupOfOneTimeEvolutionsType& timeEvolve,
-	    ProgramGlobals::DirectionEnum dir,
-	    RealType Eg,
-	    SizeType currentCoo)
+	AuxForTargetingExpression(PvectorsType&                 pVectors,
+	                          GroupOfOneTimeEvolutionsType& timeEvolve,
+	                          ProgramGlobals::DirectionEnum dir,
+	                          RealType                      Eg,
+	                          SizeType                      currentCoo)
 	    : pVectors_(pVectors)
 	    , timeEvolve_(timeEvolve)
 	    , direction_(dir)
 	    , Eg_(Eg)
 	    , currentCoo_(currentCoo)
 	    , pIndexOutput_(0)
-	{
-	}
+	{ }
 
 	PvectorsType& pVectors() const { return pVectors_; }
 
@@ -65,11 +63,13 @@ public:
 		if (getBraOrKet.isRvector()) {
 			const SizeType pIndex = getBraOrKet.pIndex();
 			if (pIndex >= tempVectors_.size())
-				err("getCurrentVectorNonConst: out of range for " + braOrKet + "\n");
+				err("getCurrentVectorNonConst: out of range for " + braOrKet
+				    + "\n");
 			return tempVectors_[pIndex];
 		}
 
-		throw PsimagLite::RuntimeError("getCurrentVectorNonConst: psi or tvs cannot be modified\n");
+		throw PsimagLite::RuntimeError(
+		    "getCurrentVectorNonConst: psi or tvs cannot be modified\n");
 	}
 
 	PsimagLite::String createTemporaryVector(PsimagLite::String str) const
@@ -86,14 +86,14 @@ public:
 
 private:
 
-	PvectorsType& pVectors_;
-	GroupOfOneTimeEvolutionsType& timeEvolve_;
-	ProgramGlobals::DirectionEnum direction_;
-	RealType Eg_;
-	SizeType currentCoo_;
-	SizeType pIndexOutput_;
+	PvectorsType&                      pVectors_;
+	GroupOfOneTimeEvolutionsType&      timeEvolve_;
+	ProgramGlobals::DirectionEnum      direction_;
+	RealType                           Eg_;
+	SizeType                           currentCoo_;
+	SizeType                           pIndexOutput_;
 	mutable VectorVectorWithOffsetType tempVectors_;
-	mutable VectorStringType tempNames_;
+	mutable VectorStringType           tempNames_;
 };
 
 }

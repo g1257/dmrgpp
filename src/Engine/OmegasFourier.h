@@ -3,15 +3,11 @@
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ComplexOrRealType, typename Readable>
-class OmegasFourier
-{
+template <typename ComplexOrRealType, typename Readable> class OmegasFourier {
 
-	class OmegasGeometry
-	{
+	class OmegasGeometry {
 
 	public:
 
@@ -20,24 +16,16 @@ class OmegasFourier
 		{
 			try {
 				io.readline(name_, "GeometryName=");
-			} catch (std::exception&) {
-			}
+			} catch (std::exception&) { }
 
 			try {
 				io.readline(subname_, "GeometrySubname=");
-			} catch (std::exception&) {
-			}
+			} catch (std::exception&) { }
 		}
 
-		PsimagLite::String name() const
-		{
-			return name_;
-		}
+		PsimagLite::String name() const { return name_; }
 
-		PsimagLite::String subname() const
-		{
-			return subname_;
-		}
+		PsimagLite::String subname() const { return subname_; }
 
 	private:
 
@@ -48,11 +36,11 @@ class OmegasFourier
 public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef std::complex<RealType> ComplexType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename PsimagLite::Vector<ComplexType>::Type VectorComplexType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef ProgramGlobals ProgramGlobalsType;
+	typedef std::complex<RealType>                             ComplexType;
+	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
+	typedef typename PsimagLite::Vector<ComplexType>::Type     VectorComplexType;
+	typedef typename PsimagLite::Vector<SizeType>::Type        VectorSizeType;
+	typedef ProgramGlobals                                     ProgramGlobalsType;
 
 	static const SizeType M_MAX = 0;
 
@@ -124,8 +112,8 @@ public:
 
 			const PsimagLite::String honey = "HoneyComb";
 			if (subname.find(honey) == 0) {
-				PsimagLite::String type = subname.substr(honey.length(),
-				    subname.size() - honey.length());
+				PsimagLite::String type = subname.substr(
+				    honey.length(), subname.size() - honey.length());
 				return fourierHoneycomb(values1, values2, type);
 			}
 		}
@@ -149,7 +137,9 @@ private:
 		if (!isPeriodicX_) {
 			bool b = (centralSite_ == nOverTwo);
 			if (!b && (centralSite_ != nOverTwo - 1)) {
-				err("Chain of " + ttos(numberOfSites_) + "sites, but central site is " + ttos(centralSite_) + ", makes no sense!?\n");
+				err("Chain of " + ttos(numberOfSites_)
+				    + "sites, but central site is " + ttos(centralSite_)
+				    + ", makes no sense!?\n");
 			}
 		}
 
@@ -159,12 +149,12 @@ private:
 
 		for (SizeType m = 0; m < numberOfQs; ++m) {
 			ComplexType sum = 0;
-			RealType q = getQ(m, numberOfQs, isPeriodicX_);
-			qValues_[m] = q;
+			RealType    q   = getQ(m, numberOfQs, isPeriodicX_);
+			qValues_[m]     = q;
 			for (SizeType i = 0; i < numberOfSites_; ++i) {
-				RealType arg = q * (i - centralSite_);
-				RealType carg = cos(arg);
-				RealType sarg = sin(q * (i + 1)) * sin(q * (centralSite_ + 1));
+				RealType arg     = q * (i - centralSite_);
+				RealType carg    = cos(arg);
+				RealType sarg    = sin(q * (i + 1)) * sin(q * (centralSite_ + 1));
 				RealType cOrSarg = (isPeriodicX_) ? carg : sarg;
 				sum += ComplexType(values1[i] * cOrSarg, values2[i] * cOrSarg);
 			}
@@ -200,8 +190,8 @@ private:
 	}
 
 	void fourierHoneycomb(const VectorRealType& values1,
-	    const VectorRealType& values2,
-	    PsimagLite::String type)
+	                      const VectorRealType& values2,
+	                      PsimagLite::String    type)
 	{
 		err("unimplemented fourierLadderAverage\n");
 	}
@@ -211,14 +201,14 @@ private:
 		return (isPeriodic) ? 2.0 * M_PI * m / n : (m + 1.0) * M_PI / (n + 1.0);
 	}
 
-	bool skipFourier_;
-	OmegasGeometry geometry_;
-	SizeType numberOfSites_;
-	SizeType centralSite_;
-	SizeType orbitals_;
-	bool isPeriodicX_;
+	bool              skipFourier_;
+	OmegasGeometry    geometry_;
+	SizeType          numberOfSites_;
+	SizeType          centralSite_;
+	SizeType          orbitals_;
+	bool              isPeriodicX_;
 	VectorComplexType data_;
-	VectorRealType qValues_;
+	VectorRealType    qValues_;
 };
 }
 #endif // OMEGASFOURIER_H

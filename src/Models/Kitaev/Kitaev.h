@@ -91,16 +91,13 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "VerySparseMatrix.h"
 #include <algorithm>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ModelBaseType, bool>
-class AddSy
-{
+template <typename ModelBaseType, bool> class AddSy {
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelBaseType::ModelHelperType    ModelHelperType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
 
 	AddSy(ModelBaseType*) { }
@@ -108,35 +105,32 @@ public:
 	void operator()(SparseMatrixType) { }
 };
 
-template <typename ModelBaseType>
-class AddSy<ModelBaseType, true>
-{
+template <typename ModelBaseType> class AddSy<ModelBaseType, true> {
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	typedef typename ModelBaseType::ModelHelperType    ModelHelperType;
 	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
+	typedef typename ModelHelperType::OperatorsType    OperatorsType;
+	typedef typename OperatorsType::OperatorType       OperatorType;
+	typedef typename OperatorType::PairType            PairType;
+	typedef typename SparseMatrixType::value_type      ComplexOrRealType;
+	typedef typename ModelBaseType::OpsLabelType       OpsLabelType;
 
 	AddSy(ModelBaseType* base)
 	    : base_(base)
-	{
-	}
+	{ }
 
 	void operator()(SparseMatrixType tmpMatrix)
 	{
 		typename OperatorType::Su2RelatedType su2related;
-		ComplexOrRealType sqrtOfMinusOne(0, -1);
+		ComplexOrRealType                     sqrtOfMinusOne(0, -1);
 		tmpMatrix *= sqrtOfMinusOne;
-		OperatorType myOp2(tmpMatrix,
-		    ProgramGlobals::FermionOrBosonEnum::BOSON,
-		    PairType(0, 0),
-		    1.0,
-		    su2related);
+		OperatorType  myOp2(tmpMatrix,
+                                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+                                   PairType(0, 0),
+                                   1.0,
+                                   su2related);
 		OpsLabelType& sy = base_->createOpsLabel("sy");
 		sy.push(myOp2); // Sy = -iSybar
 	}
@@ -146,67 +140,71 @@ private:
 	ModelBaseType* base_;
 };
 
-template <typename ModelBaseType>
-class Kitaev : public ModelBaseType
-{
+template <typename ModelBaseType> class Kitaev : public ModelBaseType {
 
 	static const int TWICE_THE_SPIN = 1;
 
-	enum class InternalDir { DIR_X,
+	enum class InternalDir
+	{
+		DIR_X,
 		DIR_Y,
 		DIR_Z,
 		DIR_PLUS,
-		DIR_MINUS };
+		DIR_MINUS
+	};
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::BasisType BasisType;
-	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType LinkType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename ModelBaseType::QnType QnType;
-	typedef typename QnType::VectorQnType VectorQnType;
-	typedef typename ModelBaseType::VectorType VectorType;
-	typedef typename ModelBaseType::BlockType BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef unsigned int long WordType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename ModelBaseType::VectorRealType VectorRealType;
+	typedef typename ModelBaseType::ModelHelperType              ModelHelperType;
+	typedef typename ModelHelperType::BasisType                  BasisType;
+	typedef typename ModelBaseType::SuperGeometryType            SuperGeometryType;
+	typedef typename ModelBaseType::LeftRightSuperType           LeftRightSuperType;
+	typedef typename ModelBaseType::LinkType                     LinkType;
+	typedef typename ModelHelperType::OperatorsType              OperatorsType;
+	typedef typename ModelHelperType::RealType                   RealType;
+	typedef typename ModelBaseType::QnType                       QnType;
+	typedef typename QnType::VectorQnType                        VectorQnType;
+	typedef typename ModelBaseType::VectorType                   VectorType;
+	typedef typename ModelBaseType::BlockType                    BlockType;
+	typedef typename ModelBaseType::SolverParamsType             SolverParamsType;
+	typedef typename ModelHelperType::SparseMatrixType           SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
+	typedef unsigned int long                                    WordType;
+	typedef typename ModelBaseType::InputValidatorType           InputValidatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                MatrixType;
+	typedef typename PsimagLite::Vector<SizeType>::Type          VectorSizeType;
+	typedef typename ModelBaseType::VectorRealType               VectorRealType;
 	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
-	typedef typename OperatorsType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelBaseType::BasisWithOperatorsType MyBasisWithOperators;
-	typedef typename ModelBaseType::OpsLabelType OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	typedef typename OperatorsType::OperatorType                 OperatorType;
+	typedef typename OperatorType::PairType                      PairType;
+	typedef typename PsimagLite::Vector<OperatorType>::Type      VectorOperatorType;
+	typedef typename ModelBaseType::BasisWithOperatorsType       MyBasisWithOperators;
+	typedef typename ModelBaseType::OpsLabelType                 OpsLabelType;
+	typedef typename ModelBaseType::OpForLinkType                OpForLinkType;
+	typedef typename ModelBaseType::ModelTermType                ModelTermType;
+	typedef PsimagLite::Vector<PsimagLite::String>::Type         VectorStringType;
 
-	Kitaev(const SolverParamsType& solverParams,
-	    InputValidatorType& io,
-	    const SuperGeometryType& geometry,
-	    PsimagLite::String additional)
-	    : ModelBaseType(solverParams,
-		geometry,
-		io)
+	Kitaev(const SolverParamsType&  solverParams,
+	       InputValidatorType&      io,
+	       const SuperGeometryType& geometry,
+	       PsimagLite::String       additional)
+	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , extended_(additional.length() > 7 && additional.substr(0, 8) == "Extended")
 	    , withGammas_(additional.length() > 9 && additional.substr(0, 10) == "WithGammas")
-	    , withGammasReal_(additional.length() > 13 && additional.substr(0, 14) == "WithGammasReal")
-	    , withCharge_((additional.length() > 9 && (additional.substr(8, 10) == "WithCharge" || additional.substr(10, 10) == "WithCharge" || additional.substr(0, 10) == "WithCharge"))
-		  || (additional.length() > 13 && (additional.substr(14, 10) == "WithCharge")))
+	    , withGammasReal_(additional.length() > 13
+	                      && additional.substr(0, 14) == "WithGammasReal")
+	    , withCharge_(
+	          (additional.length() > 9
+	           && (additional.substr(8, 10) == "WithCharge"
+	               || additional.substr(10, 10) == "WithCharge"
+	               || additional.substr(0, 10) == "WithCharge"))
+	          || (additional.length() > 13 && (additional.substr(14, 10) == "WithCharge")))
 	{
 		if (withCharge_ and TWICE_THE_SPIN != 1)
 			err("Kitaev: Charged model only for s=1/2\n");
 
-		SizeType n = geometry.numberOfSites();
+		SizeType n  = geometry.numberOfSites();
 		SizeType mx = modelParameters_.magneticFieldX.size();
 		SizeType my = modelParameters_.magneticFieldY.size();
 		SizeType mz = modelParameters_.magneticFieldZ.size();
@@ -241,15 +239,15 @@ public:
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
-	    const BlockType& block,
-	    RealType time) const
+	                                const BlockType&  block,
+	                                RealType          time) const
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
 		SizeType linSize = ModelBaseType::superGeometry().numberOfSites();
-		bool hasX = (modelParameters_.magneticFieldX.size() == linSize);
-		bool hasY = (modelParameters_.magneticFieldY.size() == linSize);
-		bool hasZ = (modelParameters_.magneticFieldZ.size() == linSize);
+		bool     hasX    = (modelParameters_.magneticFieldX.size() == linSize);
+		bool     hasY    = (modelParameters_.magneticFieldY.size() == linSize);
+		bool     hasZ    = (modelParameters_.magneticFieldZ.size() == linSize);
 
 		SizeType n = block.size();
 		for (SizeType i = 0; i < n; ++i) {
@@ -257,21 +255,24 @@ public:
 
 			if (hasX) {
 				// magnetic field x
-				const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, 0);
+				const OperatorType& sx
+				    = ModelBaseType::naturalOperator("sx", site, 0);
 				RealType tmp = modelParameters_.magneticFieldX[block[0]];
 				hmatrix += tmp * sx.getCRS();
 			}
 
 			if (hasY) {
 				// magnetic field y
-				const OperatorType& sy = ModelBaseType::naturalOperator("sy", site, 0);
+				const OperatorType& sy
+				    = ModelBaseType::naturalOperator("sy", site, 0);
 				RealType tmp = modelParameters_.magneticFieldY[block[0]];
 				hmatrix += tmp * sy.getCRS();
 			}
 
 			if (hasZ) {
 				// magnetic field z
-				const OperatorType& sz = ModelBaseType::naturalOperator("sz", site, 0);
+				const OperatorType& sz
+				    = ModelBaseType::naturalOperator("sz", site, 0);
 				RealType tmp = modelParameters_.magneticFieldZ[block[0]];
 				hmatrix += tmp * sz.getCRS();
 			}
@@ -282,18 +283,18 @@ protected:
 
 	void fillLabeledOperators(VectorQnType& qns)
 	{
-		SizeType site = 0;
-		BlockType block(1, site);
+		SizeType         site = 0;
+		BlockType        block(1, site);
 		HilbertBasisType natBasis;
 		SparseMatrixType tmpMatrix;
 
 		setBasis(natBasis, block);
 		setSymmetryRelated(qns, natBasis, block.size());
 
-		OpsLabelType& sx = this->createOpsLabel("sx");
-		OpsLabelType& sybar = this->createOpsLabel("sybar");
-		OpsLabelType& sz = this->createOpsLabel("sz");
-		OpsLabelType& splus = this->createOpsLabel("splus");
+		OpsLabelType& sx     = this->createOpsLabel("sx");
+		OpsLabelType& sybar  = this->createOpsLabel("sybar");
+		OpsLabelType& sz     = this->createOpsLabel("sz");
+		OpsLabelType& splus  = this->createOpsLabel("splus");
 		OpsLabelType& sminus = this->createOpsLabel("sminus");
 
 		this->makeTrackable("sx");
@@ -307,39 +308,40 @@ protected:
 			// Set the operators S^x_i in the natural basis
 			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_X);
 			OperatorType myOp(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                  ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                  PairType(0, 0),
+			                  1.0,
+			                  su2related);
 			sx.push(myOp);
 
 			// Set the operators S^y_i in the natural basis
 			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_Y);
 			OperatorType myOp2(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 			sybar.push(myOp2); // Sybar = iSy
 
-			AddSy<ModelBaseType, PsimagLite::IsComplexNumber<ComplexOrRealType>::True> addSy(this);
+			AddSy<ModelBaseType, PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
+			    addSy(this);
 			addSy(tmpMatrix);
 
 			// Set the operators S^z_i in the natural basis
 			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_Z);
 			OperatorType myOp3(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 			sz.push(myOp3);
 
 			tmpMatrix = findSdirMatrices(i, natBasis, InternalDir::DIR_PLUS);
 			OperatorType myOp4(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::BOSON,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::BOSON,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 
 			splus.push(myOp4);
 
@@ -358,10 +360,10 @@ protected:
 
 			tmpMatrix = findDestructionC(natBasis, spin);
 			OperatorType myOpC(tmpMatrix,
-			    ProgramGlobals::FermionOrBosonEnum::FERMION,
-			    PairType(0, 0),
-			    1.0,
-			    su2related);
+			                   ProgramGlobals::FermionOrBosonEnum::FERMION,
+			                   PairType(0, 0),
+			                   1.0,
+			                   su2related);
 			destructionC.push(myOpC);
 		}
 	}
@@ -373,22 +375,32 @@ protected:
 			ModelTermType& hop = ModelBaseType::createTerm("hopping"); //(A)
 
 			OpForLinkType cup("c", 0); // (B)
-			hop.push(cup, 'N', cup, 'C', typename ModelTermType::Su2Properties(1, 1, 0)); // (C)
+			hop.push(cup,
+			         'N',
+			         cup,
+			         'C',
+			         typename ModelTermType::Su2Properties(1, 1, 0)); // (C)
 
 			OpForLinkType cdown("c", 1); // (D)
-			hop.push(cdown, 'N', cdown, 'C', typename ModelTermType::Su2Properties(1, -1, 1));
+			hop.push(cdown,
+			         'N',
+			         cdown,
+			         'C',
+			         typename ModelTermType::Su2Properties(1, -1, 1));
 		}
 
 		VectorStringType labels = { "sx", "sybar", "sz" };
 
 		for (SizeType i = 0; i < labels.size(); ++i) {
 			OpForLinkType smu(labels[i]);
-			auto modif = [i](ComplexOrRealType& value) {
+			auto          modif = [i](ComplexOrRealType& value)
+			{
 				ComplexOrRealType x = (i == 1) ? -1 : 1; // sybar * sybar = -sy*sy
 				value *= x;
 			};
 
-			ModelBaseType::createTerm(labels[i] + labels[i], false).push(smu, 'N', smu, 'N', modif);
+			ModelBaseType::createTerm(labels[i] + labels[i], false)
+			    .push(smu, 'N', smu, 'N', modif);
 		}
 
 		OpForLinkType sx("sx");
@@ -424,25 +436,22 @@ protected:
 
 private:
 
-	void createTermSySz(const OpForLinkType&,
-	    const OpForLinkType&,
-	    bool,
-	    RealType)
+	void createTermSySz(const OpForLinkType&, const OpForLinkType&, bool, RealType)
 	{
 		PsimagLite::String str = "needs useComplex in SolverOptions in the input\n";
 		err("FATAL: createTermSySz(): This Kitaev variant needs useComplex " + str);
 	}
 
 	void createTermSySz(const OpForLinkType& sybar,
-	    const OpForLinkType& sz,
-	    bool wantsHermit,
-	    std::complex<RealType>)
+	                    const OpForLinkType& sz,
+	                    bool                 wantsHermit,
+	                    std::complex<RealType>)
 	{
-		auto modifMinusSqrtMinusOne = [](ComplexOrRealType& value) {
-			value *= std::complex<RealType>(0, -1);
-		};
+		auto modifMinusSqrtMinusOne
+		    = [](ComplexOrRealType& value) { value *= std::complex<RealType>(0, -1); };
 
-		ModelBaseType::createTerm("sysz", false).push(sybar, 'N', sz, 'N', modifMinusSqrtMinusOne);
+		ModelBaseType::createTerm("sysz", false)
+		    .push(sybar, 'N', sz, 'N', modifMinusSqrtMinusOne);
 
 		bool noAlias = ModelBaseType::params().options.isSet("notermalias");
 		const PsimagLite::String aliasStr = (noAlias) ? "" : "sysz";
@@ -452,25 +461,22 @@ private:
 		szsy.push(sz, 'N', sybar, 'N', modifMinusSqrtMinusOne);
 	}
 
-	void createTermSxSy(const OpForLinkType&,
-	    const OpForLinkType&,
-	    bool,
-	    RealType) const
+	void createTermSxSy(const OpForLinkType&, const OpForLinkType&, bool, RealType) const
 	{
 		PsimagLite::String str = "needs useComplex in SolverOptions in the input\n";
 		err("createTermSxSy(): This Kitaev variant " + str);
 	}
 
 	void createTermSxSy(const OpForLinkType& sx,
-	    const OpForLinkType& sybar,
-	    bool wantsHermit,
-	    std::complex<RealType>) const
+	                    const OpForLinkType& sybar,
+	                    bool                 wantsHermit,
+	                    std::complex<RealType>) const
 	{
-		auto modifMinusSqrtMinusOne = [](ComplexOrRealType& value) {
-			value *= std::complex<RealType>(0, -1);
-		};
+		auto modifMinusSqrtMinusOne
+		    = [](ComplexOrRealType& value) { value *= std::complex<RealType>(0, -1); };
 
-		ModelBaseType::createTerm("sxsy", false).push(sx, 'N', sybar, 'N', modifMinusSqrtMinusOne);
+		ModelBaseType::createTerm("sxsy", false)
+		    .push(sx, 'N', sybar, 'N', modifMinusSqrtMinusOne);
 
 		bool noAlias = ModelBaseType::params().options.isSet("notermalias");
 		const PsimagLite::String aliasStr = (noAlias) ? "" : "sxsy";
@@ -478,19 +484,17 @@ private:
 		ModelTermType& sysx = ModelBaseType::createTerm("sysx", wantsHermit, aliasStr);
 		sysx.push(sybar, 'N', sx, 'N', modifMinusSqrtMinusOne);
 
-		SizeType site = 0;
-		BlockType block(1, site);
+		SizeType         site = 0;
+		BlockType        block(1, site);
 		HilbertBasisType natBasis;
 
 		setBasis(natBasis, block);
 	}
 
 	//! find all states in the natural basis for a block of n sites
-	void setBasis(HilbertBasisType& basis,
-	    const VectorSizeType& block) const
+	void setBasis(HilbertBasisType& basis, const VectorSizeType& block) const
 	{
-		const SizeType total1 = (withCharge_) ? 3
-						      : TWICE_THE_SPIN + 1;
+		const SizeType total1 = (withCharge_) ? 3 : TWICE_THE_SPIN + 1;
 
 		SizeType total = utils::powUint(total1, block.size());
 
@@ -511,12 +515,12 @@ private:
 	}
 
 	SparseMatrixType findSdirMatrices(SizeType, // site,
-	    const HilbertBasisType& natBasis,
-	    InternalDir dir) const
+	                                  const HilbertBasisType& natBasis,
+	                                  InternalDir             dir) const
 	{
-		SizeType total = natBasis.size();
+		SizeType   total = natBasis.size();
 		MatrixType cm(total, total);
-		SizeType offset = (withCharge_) ? 1 : 0;
+		SizeType   offset = (withCharge_) ? 1 : 0;
 
 		if (withCharge_) {
 			if (total != 3)
@@ -562,9 +566,7 @@ private:
 		return operatorMatrix;
 	}
 
-	void setSymmetryRelated(VectorQnType& qns,
-	    const HilbertBasisType& basis,
-	    int n) const
+	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, int n) const
 	{
 		assert(n == 1);
 
@@ -578,8 +580,7 @@ private:
 		setSymmetryRelatedWithCharge(qns, basis);
 	}
 
-	void setSymmetryRelatedWithCharge(VectorQnType& qns,
-	    const HilbertBasisType& basis) const
+	void setSymmetryRelatedWithCharge(VectorQnType& qns, const HilbertBasisType& basis) const
 	{
 		typedef std::pair<SizeType, SizeType> PairType;
 
@@ -592,15 +593,15 @@ private:
 			other[0] = (basis[i] == 0) ? 0 : 1;
 
 			bool sign = other[0] & 1;
-			qns[i] = QnType(sign, other, jmpair, other[0]);
+			qns[i]    = QnType(sign, other, jmpair, other[0]);
 		}
 	}
 
 	ParametersKitaev<RealType, QnType> modelParameters_;
-	const bool extended_;
-	const bool withGammas_;
-	const bool withGammasReal_;
-	const bool withCharge_;
+	const bool                         extended_;
+	const bool                         withGammas_;
+	const bool                         withGammasReal_;
+	const bool                         withCharge_;
 }; // class Kitaev
 
 } // namespace Dmrg

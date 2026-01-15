@@ -84,45 +84,42 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgressIndicator.h"
 #include <vector>
 
-namespace Dmrg
-{
-template <typename ModelType_>
-class MatrixVectorStored : public MatrixVectorBase<ModelType_>
-{
+namespace Dmrg {
+template <typename ModelType_> class MatrixVectorStored : public MatrixVectorBase<ModelType_> {
 
 	typedef MatrixVectorBase<ModelType_> BaseType;
 
 public:
 
-	typedef ModelType_ ModelType;
+	typedef ModelType_                                    ModelType;
 	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
-	typedef typename ModelType::ParametersType ParametersType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::RealType RealType;
-	typedef typename SparseMatrixType::value_type value_type;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename ParametersType::OptionsType OptionsType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> FullMatrixType;
+	typedef typename ModelType::ParametersType            ParametersType;
+	typedef typename ModelType::ModelHelperType           ModelHelperType;
+	typedef typename ModelHelperType::SparseMatrixType    SparseMatrixType;
+	typedef typename ModelHelperType::RealType            RealType;
+	typedef typename SparseMatrixType::value_type         value_type;
+	typedef typename SparseMatrixType::value_type         ComplexOrRealType;
+	typedef typename PsimagLite::Vector<RealType>::Type   VectorRealType;
+	typedef typename ParametersType::OptionsType          OptionsType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>         FullMatrixType;
 
-	MatrixVectorStored(const ModelType& model,
-	    const HamiltonianConnectionType& hc,
-	    const typename ModelHelperType::Aux& aux)
+	MatrixVectorStored(const ModelType&                     model,
+	                   const HamiltonianConnectionType&     hc,
+	                   const typename ModelHelperType::Aux& aux)
 	    : model_(model)
 	    , matrixStored_(2)
 	    , pointer_(0)
 	    , progress_("MatrixVectorStored")
 	{
-		const OptionsType& options = model.params().options;
-		const bool debugMatrix = options.isSet("debugmatrix");
+		const OptionsType& options     = model.params().options;
+		const bool         debugMatrix = options.isSet("debugmatrix");
 
 		matrixStored_[0].clear();
 		model.fullHamiltonian(matrixStored_[0], hc, aux);
 		assert(isHermitian(matrixStored_[0], true));
-		PsimagLite::OstringStream msgg(std::cout.precision());
-		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		SizeType rows = matrixStored_[0].rows();
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg  = msgg();
+		SizeType                                      rows = matrixStored_[0].rows();
 		msg << "fullHamiltonian has rank=" << rows;
 		msg << " nonzeros=" << matrixStored_[0].nonZeros();
 		progress_.printline(msgg, std::cout);
@@ -151,18 +148,16 @@ public:
 
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
 	{
-		BaseType::fullDiag(eigs,
-		    fm,
-		    matrixStored_[pointer_],
-		    model_.params().maxMatrixRankStored);
+		BaseType::fullDiag(
+		    eigs, fm, matrixStored_[pointer_], model_.params().maxMatrixRankStored);
 	}
 
 private:
 
-	const ModelType& model_;
+	const ModelType&                                    model_;
 	typename PsimagLite::Vector<SparseMatrixType>::Type matrixStored_;
-	SizeType pointer_;
-	PsimagLite::ProgressIndicator progress_;
+	SizeType                                            pointer_;
+	PsimagLite::ProgressIndicator                       progress_;
 }; // class MatrixVectorStored
 } // namespace Dmrg
 

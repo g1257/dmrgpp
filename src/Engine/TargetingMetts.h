@@ -89,85 +89,96 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <cassert>
 #include <iostream>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingMetts : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingMetts : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	typedef std::pair<SizeType, SizeType>      PairSizeType;
 
 	struct MettsPrev {
 
 		MettsPrev()
 		    : fixed(0)
 		    , permutationInverse(0)
-		{
-		}
+		{ }
 
-		SizeType fixed;
+		SizeType       fixed;
 		VectorSizeType permutationInverse;
 	};
 
 public:
 
-	typedef LanczosSolverType_ LanczosSolverType;
+	typedef LanczosSolverType_                                      LanczosSolverType;
 	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::OptionsType OptionsType;
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType MatrixVectorType;
-	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef typename MatrixVectorType::ModelType ModelType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::OperatorsType OperatorsType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrRealType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType TargetVectorType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorType OperatorType;
-	typedef MettsParams<ModelType> TargetParamsType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef BlockDiagonalMatrix<MatrixType> BlockDiagonalMatrixType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	typedef typename BaseType::OptionsType                          OptionsType;
+	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
+	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
+	typedef typename BaseType::CheckpointType                       CheckpointType;
+	typedef typename MatrixVectorType::ModelType                    ModelType;
+	typedef typename ModelType::RealType                            RealType;
+	typedef typename ModelType::OperatorsType                       OperatorsType;
+	typedef typename ModelType::ModelHelperType                     ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType              BasisType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                   ComplexOrRealType;
+	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
+	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
+	typedef typename VectorWithOffsetType::VectorType               TargetVectorType;
+	typedef typename LanczosSolverType::TridiagonalMatrixType       TridiagonalMatrixType;
+	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
+	typedef MettsParams<ModelType>                                  TargetParamsType;
+	typedef typename BasisType::BlockType                           BlockType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>                   MatrixType;
+	typedef BlockDiagonalMatrix<MatrixType>                         BlockDiagonalMatrixType;
+	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
 	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType> ApplyOperatorType;
-	typedef typename ApplyOperatorType::BorderEnum BorderEnumType;
-	typedef MettsSerializer<VectorWithOffsetType> MettsSerializerType;
-	typedef typename PsimagLite::RandomForTests<RealType> RngType;
-	typedef MettsStochastics<ModelType, RngType> MettsStochasticsType;
-	typedef typename MettsStochasticsType::PairType PairType;
-	typedef MettsCollapse<VectorWithOffsetType,
-	    MettsStochasticsType,
-	    TargetParamsType>
-	    MettsCollapseType;
-	typedef typename MettsCollapseType::PackIndicesType PackIndicesType;
+	typedef typename ApplyOperatorType::BorderEnum                       BorderEnumType;
+	typedef MettsSerializer<VectorWithOffsetType>                        MettsSerializerType;
+	typedef typename PsimagLite::RandomForTests<RealType>                RngType;
+	typedef MettsStochastics<ModelType, RngType>                         MettsStochasticsType;
+	typedef typename MettsStochasticsType::PairType                      PairType;
+	typedef MettsCollapse<VectorWithOffsetType, MettsStochasticsType, TargetParamsType>
+	                                                         MettsCollapseType;
+	typedef typename MettsCollapseType::PackIndicesType      PackIndicesType;
 	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef TimeVectorsKrylov<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsKrylovType;
-	typedef TimeVectorsRungeKutta<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsRungeKuttaType;
-	typedef TimeVectorsSuzukiTrotter<TargetParamsType, ModelType, WaveFunctionTransfType, LanczosSolverType, VectorWithOffsetType> TimeVectorsSuzukiTrotterType;
+	typedef TimeVectorsKrylov<TargetParamsType,
+	                          ModelType,
+	                          WaveFunctionTransfType,
+	                          LanczosSolverType,
+	                          VectorWithOffsetType>
+	    TimeVectorsKrylovType;
+	typedef TimeVectorsRungeKutta<TargetParamsType,
+	                              ModelType,
+	                              WaveFunctionTransfType,
+	                              LanczosSolverType,
+	                              VectorWithOffsetType>
+	    TimeVectorsRungeKuttaType;
+	typedef TimeVectorsSuzukiTrotter<TargetParamsType,
+	                                 ModelType,
+	                                 WaveFunctionTransfType,
+	                                 LanczosSolverType,
+	                                 VectorWithOffsetType>
+	                                               TimeVectorsSuzukiTrotterType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename BasisType::QnType QnType;
+	typedef typename BasisType::QnType                              QnType;
 	typedef typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type
-	    VectorBlockDiagonalMatrixType;
+	                                                    VectorBlockDiagonalMatrixType;
 	typedef typename TargetingCommonType::StageEnumType StageEnumType;
-	typedef typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	typedef
+	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
 	using OneSiteSpacesType = typename BaseType::OneSiteSpacesType;
 
-	TargetingMetts(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType& quantumSector,
-	    InputValidatorType& ioIn)
+	TargetingMetts(const LeftRightSuperType&     lrs,
+	               const CheckpointType&         checkPoint,
+	               const WaveFunctionTransfType& wft,
+	               const QnType&                 quantumSector,
+	               InputValidatorType&           ioIn)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , model_(checkPoint.model())
 	    , lrs_(lrs)
@@ -209,15 +220,9 @@ public:
 
 	SizeType targets() const { return mettsStruct_.times().size() + 1; }
 
-	RealType weight(SizeType i) const
-	{
-		return weight_[i];
-	}
+	RealType weight(SizeType i) const { return weight_[i]; }
 
-	RealType gsWeight() const
-	{
-		return gsWeight_;
-	}
+	RealType gsWeight() const { return gsWeight_; }
 
 	bool includeGroundStage() const { return (fabs(gsWeight_) > 1e-6); }
 
@@ -232,10 +237,10 @@ public:
 	}
 
 	void evolve(const VectorRealType&,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType& block2,
-	    SizeType loopNumber)
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType&              block1,
+	            const BlockType&              block2,
+	            SizeType                      loopNumber)
 	{
 		RealType Eg = 0;
 
@@ -274,21 +279,22 @@ public:
 			evolve(n1, n1, n1 - 1, Eg, direction, sites, loopNumber);
 
 		for (SizeType i = 0; i < this->common().aoe().tvs(); i++)
-			assert(this->tv(i).size() == 0 || this->tv(i).size() == lrs_.super().permutationVector().size());
+			assert(this->tv(i).size() == 0
+			       || this->tv(i).size() == lrs_.super().permutationVector().size());
 
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
 		PsimagLite::String predicate = model_.params().printHamiltonianAverage;
-		const SizeType center = model_.superGeometry().numberOfSites() / 2;
+		const SizeType     center    = model_.superGeometry().numberOfSites() / 2;
 		PsimagLite::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		assert(block1.size() > 0);
 		if (pAwesome.isTrue("s", block1[0]))
 			printEnergies(); // in-situ
 
-		const OptionsType& options = this->model().params().options;
-		const bool normalizeTimeVectors = !options.isSet("neverNormalizeVectors");
+		const OptionsType& options              = this->model().params().options;
+		const bool         normalizeTimeVectors = !options.isSet("neverNormalizeVectors");
 
 		if (normalizeTimeVectors)
 			this->common().normalizeTimeVectors();
@@ -300,12 +306,10 @@ public:
 			return;
 
 		// collapse
-		bool hasCollapsed = mettsCollapse_(this->tvNonConst(n1),
-		    this->tv(n1 - 1),
-		    sites,
-		    direction);
+		bool hasCollapsed
+		    = mettsCollapse_(this->tvNonConst(n1), this->tv(n1 - 1), sites, direction);
 		if (hasCollapsed) {
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "Has Collapsed";
 			progress_.printline(msgg, std::cout);
@@ -317,13 +321,14 @@ public:
 		this->common().readGSandNGSTs(io, prefix, "Metts");
 	}
 
-	void write(const VectorSizeType& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	void write(const VectorSizeType&        block,
+	           PsimagLite::IoSelector::Out& io,
+	           PsimagLite::String           prefix) const
 	{
 		this->common().write(io, block, prefix);
 
-		ApplyOperatorExpressionType& aoeNonConst = const_cast<ApplyOperatorExpressionType&>(this->common().aoe());
+		ApplyOperatorExpressionType& aoeNonConst
+		    = const_cast<ApplyOperatorExpressionType&>(this->common().aoe());
 		if (mettsStruct_.beta > this->common().aoe().timeVectors().time()) {
 			for (SizeType i = 0; i < this->common().aoe().tvs(); ++i)
 				aoeNonConst.destroyPvector(i);
@@ -341,18 +346,18 @@ public:
 
 private:
 
-	void evolve(SizeType index,
-	    SizeType start,
-	    SizeType indexAdvance,
-	    RealType Eg,
-	    const ProgramGlobals::DirectionEnum direction,
-	    const VectorSizeType& block,
-	    SizeType loopNumber)
+	void evolve(SizeType                            index,
+	            SizeType                            start,
+	            SizeType                            indexAdvance,
+	            RealType                            Eg,
+	            const ProgramGlobals::DirectionEnum direction,
+	            const VectorSizeType&               block,
+	            SizeType                            loopNumber)
 	{
 		if (index == 0 && start == 0)
 			advanceCounterAndComputeStage(block);
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Evolving, stage=" << getStage() << " loopNumber=" << loopNumber;
 		msg << " Eg=" << Eg;
@@ -360,27 +365,28 @@ private:
 		advanceOrWft(index, indexAdvance, direction, block);
 	}
 
-	void calcTimeVectors(const PairType& startEnd,
-	    RealType Eg,
-	    ProgramGlobals::DirectionEnum systemOrEnviron,
-	    const VectorSizeType& block)
+	void calcTimeVectors(const PairType&               startEnd,
+	                     RealType                      Eg,
+	                     ProgramGlobals::DirectionEnum systemOrEnviron,
+	                     const VectorSizeType&         block)
 	{
-		const VectorWithOffsetType& phi = this->tv(startEnd.first);
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		const VectorWithOffsetType&                   phi = this->tv(startEnd.first);
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << " vector number " << startEnd.first << " has norm ";
 		msg << norm(phi);
 		progress_.printline(msgg, std::cout);
 		if (norm(phi) < 1e-6)
-			setFromInfinite(this->tvNonConst(startEnd.first),
-			    lrs_);
-		bool allOperatorsApplied = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
+			setFromInfinite(this->tvNonConst(startEnd.first), lrs_);
+		bool allOperatorsApplied
+		    = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		VectorSizeType indices(startEnd.second - startEnd.first);
 		for (SizeType i = 0; i < indices.size(); ++i)
 			indices[i] = i + startEnd.first;
 
 		const bool isLastCall = true;
-		this->common().aoeNonConst().calcTimeVectors(indices,
+		this->common().aoeNonConst().calcTimeVectors(
+		    indices,
 		    Eg,
 		    phi,
 		    systemOrEnviron,
@@ -398,8 +404,10 @@ private:
 
 		if (this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
 			if (!allSitesCollapsed()) {
-				if (sitesCollapsed_.size() > 2 * model_.superGeometry().numberOfSites())
-					throw PsimagLite::RuntimeError("advanceCounterAndComputeStage\n");
+				if (sitesCollapsed_.size()
+				    > 2 * model_.superGeometry().numberOfSites())
+					throw PsimagLite::RuntimeError(
+					    "advanceCounterAndComputeStage\n");
 				printAdvancement(timesWithoutAdvancement_);
 				return;
 			}
@@ -407,12 +415,13 @@ private:
 			sitesCollapsed_.clear();
 			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 			timesWithoutAdvancement_ = 0;
-			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(&(this->common().aoe().timeVectors()));
+			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(
+			    &(this->common().aoe().timeVectors()));
 			ptr->setCurrentTimeStep(0);
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			SizeType n1 = mettsStruct_.times().size();
-			RealType x = norm(this->tv(n1));
+			RealType x  = norm(this->tv(n1));
 			msg << "Changing direction, setting collapsed with norm=" << x;
 			progress_.printline(msgg, std::cout);
 			for (SizeType i = 0; i < n1; i++)
@@ -428,22 +437,28 @@ private:
 			return;
 		}
 
-		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) && this->common().aoe().timeVectors().time() < mettsStruct_.beta) {
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)
+		    && this->common().aoe().timeVectors().time() < mettsStruct_.beta) {
 			this->common().setAllStagesTo(StageEnumType::WFT_ADVANCE);
-			const SizeType tmp = this->common().aoe().timeVectors().currentTimeStep() + 1;
-			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(&(this->common().aoe().timeVectors()));
+			const SizeType tmp
+			    = this->common().aoe().timeVectors().currentTimeStep() + 1;
+			TimeVectorsBaseType* ptr = const_cast<TimeVectorsBaseType*>(
+			    &(this->common().aoe().timeVectors()));
 			ptr->setCurrentTimeStep(tmp);
 			timesWithoutAdvancement_ = 0;
 			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
-		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) && this->common().aoe().timeVectors().time() >= mettsStruct_.beta && block[0] != block.size()) {
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)
+		    && this->common().aoe().timeVectors().time() >= mettsStruct_.beta
+		    && block[0] != block.size()) {
 			printAdvancement(timesWithoutAdvancement_);
 			return;
 		}
 
-		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE) && this->common().aoe().timeVectors().time() >= mettsStruct_.beta) {
+		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE)
+		    && this->common().aoe().timeVectors().time() >= mettsStruct_.beta) {
 			this->common().setAllStagesTo(StageEnumType::COLLAPSE);
 			sitesCollapsed_.clear();
 			SizeType n1 = mettsStruct_.times().size();
@@ -456,23 +471,25 @@ private:
 
 	void printAdvancement(SizeType timesWithoutAdvancement) const
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Steps without advance: " << timesWithoutAdvancement;
 		if (timesWithoutAdvancement > 0)
 			progress_.printline(msgg, std::cout);
 	}
 
-	void advanceOrWft(SizeType index,
-	    SizeType indexAdvance,
-	    const ProgramGlobals::DirectionEnum dir,
-	    const VectorSizeType& block)
+	void advanceOrWft(SizeType                            index,
+	                  SizeType                            indexAdvance,
+	                  const ProgramGlobals::DirectionEnum dir,
+	                  const VectorSizeType&               block)
 	{
 		if (this->tv(index).size() == 0)
 			return;
 		assert(norm(this->tv(index)) > 1e-6);
 
-		if (this->common().aoe().allStages(StageEnumType::WFT_NOADVANCE) || this->common().aoe().allStages(StageEnumType::WFT_ADVANCE) || this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
+		if (this->common().aoe().allStages(StageEnumType::WFT_NOADVANCE)
+		    || this->common().aoe().allStages(StageEnumType::WFT_ADVANCE)
+		    || this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
 
 			SizeType advance = index;
 
@@ -484,7 +501,7 @@ private:
 			// don't advance the collapsed vector because we'll recompute
 			if (index == weight_.size() - 1)
 				advance = index;
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "I'm calling the WFT now";
 			progress_.printline(msgg, std::cout);
@@ -506,8 +523,7 @@ private:
 		}
 	}
 
-	void updateStochastics(const VectorSizeType& block1,
-	    const VectorSizeType& block2)
+	void updateStochastics(const VectorSizeType& block1, const VectorSizeType& block2)
 	{
 		const QnType& qn = model_.targetQuantum().qn(0);
 		mettsStochastics_.update(qn, block1, block2, mettsStruct_.rngSeed);
@@ -525,8 +541,7 @@ private:
 	}
 
 	// direction here is INFINITE
-	void getNewPures(const VectorSizeType& block1,
-	    const VectorSizeType& block2)
+	void getNewPures(const VectorSizeType& block1, const VectorSizeType& block2)
 	{
 		VectorSizeType alphaFixed(block1.size());
 		for (SizeType i = 0; i < alphaFixed.size(); i++)
@@ -536,7 +551,7 @@ private:
 		for (SizeType i = 0; i < betaFixed.size(); i++)
 			betaFixed[i] = mettsStochastics_.chooseRandomState(block2[i]);
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "New pures for ";
 		for (SizeType i = 0; i < alphaFixed.size(); i++)
@@ -546,7 +561,8 @@ private:
 			msg << " site=" << block2[i] << " is " << betaFixed[i];
 		progress_.printline(msgg, std::cerr);
 
-		const BlockDiagonalMatrixType& transformSystem = getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM);
+		const BlockDiagonalMatrixType& transformSystem
+		    = getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM);
 
 		TargetVectorType newVector1(transformSystem.rows(), 0);
 
@@ -555,43 +571,42 @@ private:
 		SizeType alphaFixedVolume = mettsCollapse_.volumeOf(alphaFixed, nk1);
 
 		getNewPure(newVector1,
-		    pureVectors_.first,
-		    ProgramGlobals::SysOrEnvEnum::SYSTEM,
-		    alphaFixedVolume,
-		    lrs_.left(),
-		    transformSystem,
-		    block1);
+		           pureVectors_.first,
+		           ProgramGlobals::SysOrEnvEnum::SYSTEM,
+		           alphaFixedVolume,
+		           lrs_.left(),
+		           transformSystem,
+		           block1);
 		pureVectors_.first = newVector1;
 
-		const BlockDiagonalMatrixType& transformEnviron = getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON);
+		const BlockDiagonalMatrixType& transformEnviron
+		    = getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON);
 		TargetVectorType newVector2(transformEnviron.rows(), 0);
 
 		VectorSizeType nk2;
 		mettsCollapse_.setNk(nk2, block2);
 		SizeType betaFixedVolume = mettsCollapse_.volumeOf(betaFixed, nk2);
 		getNewPure(newVector2,
-		    pureVectors_.second,
-		    ProgramGlobals::SysOrEnvEnum::ENVIRON,
-		    betaFixedVolume,
-		    lrs_.right(),
-		    transformEnviron,
-		    block2);
+		           pureVectors_.second,
+		           ProgramGlobals::SysOrEnvEnum::ENVIRON,
+		           betaFixedVolume,
+		           lrs_.right(),
+		           transformEnviron,
+		           block2);
 		pureVectors_.second = newVector2;
 		setFromInfinite(this->tvNonConst(0), lrs_);
 		assert(norm(this->tv(0)) > 1e-6);
 
-		systemPrev_.fixed = alphaFixedVolume;
-		systemPrev_.permutationInverse = lrs_.left().permutationInverse();
-		environPrev_.fixed = betaFixedVolume;
+		systemPrev_.fixed               = alphaFixedVolume;
+		systemPrev_.permutationInverse  = lrs_.left().permutationInverse();
+		environPrev_.fixed              = betaFixedVolume;
 		environPrev_.permutationInverse = lrs_.right().permutationInverse();
 	}
 
-	void getFullVector(TargetVectorType& v,
-	    SizeType m,
-	    const LeftRightSuperType& lrs) const
+	void getFullVector(TargetVectorType& v, SizeType m, const LeftRightSuperType& lrs) const
 	{
 		int offset = lrs.super().partition(m);
-		int total = lrs.super().partition(m + 1) - offset;
+		int total  = lrs.super().partition(m + 1) - offset;
 
 		PackIndicesType pack(lrs.left().size());
 		v.resize(total);
@@ -604,13 +619,13 @@ private:
 		}
 	}
 
-	void getNewPure(TargetVectorType& newVector,
-	    TargetVectorType& oldVector,
-	    const ProgramGlobals::SysOrEnvEnum direction,
-	    SizeType alphaFixed,
-	    const BasisWithOperatorsType& basis,
-	    const BlockDiagonalMatrixType& transform,
-	    const VectorSizeType& block)
+	void getNewPure(TargetVectorType&                  newVector,
+	                TargetVectorType&                  oldVector,
+	                const ProgramGlobals::SysOrEnvEnum direction,
+	                SizeType                           alphaFixed,
+	                const BasisWithOperatorsType&      basis,
+	                const BlockDiagonalMatrixType&     transform,
+	                const VectorSizeType&              block)
 	{
 		if (oldVector.size() == 0)
 			setInitialPure(oldVector, block);
@@ -624,36 +639,39 @@ private:
 			delayedTransform(tmpVector, oldVector, direction, transform1, block);
 			assert(PsimagLite::norm(tmpVector) > 1e-6);
 		}
-		SizeType ns = tmpVector.size();
+		SizeType       ns = tmpVector.size();
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk, block);
 		SizeType volumeOfNk = mettsCollapse_.volumeOf(nk);
-		SizeType newSize = (transform.cols() == 0) ? (ns * ns) : transform.cols() * volumeOfNk;
+		SizeType newSize
+		    = (transform.cols() == 0) ? (ns * ns) : transform.cols() * volumeOfNk;
 		newVector.resize(newSize);
 		for (SizeType alpha = 0; alpha < newVector.size(); alpha++)
 			newVector[alpha] = 0;
 
 		for (SizeType alpha = 0; alpha < ns; alpha++) {
-			SizeType gamma = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? basis.permutationInverse(alpha + alphaFixed * ns) : basis.permutationInverse(alphaFixed + alpha * volumeOfNk);
+			SizeType gamma   = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+			      ? basis.permutationInverse(alpha + alphaFixed * ns)
+			      : basis.permutationInverse(alphaFixed + alpha * volumeOfNk);
 			newVector[gamma] = tmpVector[alpha];
 		}
 
-		PsimagLite::OstringStream msgg2(std::cout.precision());
+		PsimagLite::OstringStream                     msgg2(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
 		msg2 << "Old size of pure is " << ns << " norm=" << PsimagLite::norm(tmpVector);
 		progress_.printline(msgg2, std::cerr);
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "New size of pure is " << newSize << " norm=" << PsimagLite::norm(newVector);
 		progress_.printline(msgg, std::cerr);
 		assert(PsimagLite::norm(newVector) > 1e-6);
 	}
 
-	void delayedTransform(TargetVectorType& newVector,
-	    TargetVectorType& oldVector,
-	    const ProgramGlobals::SysOrEnvEnum direction,
-	    const MatrixType& transform,
-	    const VectorSizeType& block)
+	void delayedTransform(TargetVectorType&                  newVector,
+	                      TargetVectorType&                  oldVector,
+	                      const ProgramGlobals::SysOrEnvEnum direction,
+	                      const MatrixType&                  transform,
+	                      const VectorSizeType&              block)
 	{
 		assert(oldVector.size() == transform.rows());
 
@@ -661,7 +679,10 @@ private:
 		mettsCollapse_.setNk(nk, block);
 		SizeType ne = mettsCollapse_.volumeOf(nk);
 
-		const VectorSizeType& permutationInverse = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? systemPrev_.permutationInverse : environPrev_.permutationInverse;
+		const VectorSizeType& permutationInverse
+		    = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+		    ? systemPrev_.permutationInverse
+		    : environPrev_.permutationInverse;
 		SizeType nsPrev = permutationInverse.size() / ne;
 
 		newVector.resize(transform.cols());
@@ -669,31 +690,35 @@ private:
 		for (SizeType gamma = 0; gamma < newVector.size(); gamma++) {
 			newVector[gamma] = 0;
 			for (SizeType alpha = 0; alpha < nsPrev; alpha++) {
-				SizeType noPermIndex = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? alpha + systemPrev_.fixed * nsPrev : environPrev_.fixed + alpha * ne;
+				SizeType noPermIndex
+				    = (direction == ProgramGlobals::SysOrEnvEnum::SYSTEM)
+				    ? alpha + systemPrev_.fixed * nsPrev
+				    : environPrev_.fixed + alpha * ne;
 
 				SizeType gammaPrime = permutationInverse[noPermIndex];
 
 				assert(gammaPrime < transform.rows());
-				newVector[gamma] += transform(gammaPrime, gamma) * oldVector[gammaPrime];
+				newVector[gamma]
+				    += transform(gammaPrime, gamma) * oldVector[gammaPrime];
 			}
 		}
 	}
 
 	void setInitialPure(TargetVectorType& oldVector, const VectorSizeType& block)
 	{
-		int offset = (block[0] == block.size()) ? -block.size() : block.size();
+		int            offset = (block[0] == block.size()) ? -block.size() : block.size();
 		VectorSizeType blockCorrected = block;
 		for (SizeType i = 0; i < blockCorrected.size(); i++)
 			blockCorrected[i] += offset;
 
 		VectorSizeType nk;
 		mettsCollapse_.setNk(nk, blockCorrected);
-		SizeType volumeOfNk = mettsCollapse_.volumeOf(nk);
+		SizeType       volumeOfNk = mettsCollapse_.volumeOf(nk);
 		VectorSizeType alphaFixed(nk.size());
 		for (SizeType i = 0; i < alphaFixed.size(); i++)
 			alphaFixed[i] = mettsStochastics_.chooseRandomState(blockCorrected[i]);
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "New pures for site ";
 		for (SizeType i = 0; i < blockCorrected.size(); i++)
@@ -712,12 +737,11 @@ private:
 		assert(PsimagLite::norm(oldVector) > 1e-6);
 	}
 
-	void setFromInfinite(VectorWithOffsetType& phi,
-	    const LeftRightSuperType& lrs) const
+	void setFromInfinite(VectorWithOffsetType& phi, const LeftRightSuperType& lrs) const
 	{
 		phi.populateSectors(lrs.super());
 		for (SizeType ii = 0; ii < phi.sectors(); ii++) {
-			SizeType i0 = phi.sector(ii);
+			SizeType         i0 = phi.sector(ii);
 			TargetVectorType v;
 			getFullVector(v, i0, lrs);
 			RealType tmpNorm = PsimagLite::norm(v);
@@ -749,9 +773,9 @@ private:
 
 	void findElectronsOfOneSite(VectorSizeType& electrons, SizeType site) const
 	{
-		VectorSizeType block(1, site);
+		VectorSizeType                       block(1, site);
 		typename ModelType::HilbertBasisType basis;
-		VectorSizeType quantumNumbs;
+		VectorSizeType                       quantumNumbs;
 		model_.setNaturalBasis(basis, quantumNumbs, block);
 		model_.findElectrons(electrons, basis, site);
 	}
@@ -760,10 +784,8 @@ private:
 	{
 		SizeType n = model_.superGeometry().numberOfSites();
 		for (SizeType i = 0; i < n; i++) {
-			bool seen = (std::find(sitesCollapsed_.begin(),
-					 sitesCollapsed_.end(),
-					 i)
-			    != sitesCollapsed_.end());
+			bool seen = (std::find(sitesCollapsed_.begin(), sitesCollapsed_.end(), i)
+			             != sitesCollapsed_.end());
 			if (!seen)
 				return false;
 		}
@@ -784,32 +806,29 @@ private:
 		}
 	}
 
-	void printEnergies(const VectorWithOffsetType& phi,
-	    SizeType whatTarget,
-	    SizeType i0) const
+	void printEnergies(const VectorWithOffsetType& phi, SizeType whatTarget, SizeType i0) const
 	{
 		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-		typename ModelHelperType::Aux aux(p, BaseType::lrs());
-		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
+		typename ModelHelperType::Aux                 aux(p, BaseType::lrs());
+		typename ModelType::HamiltonianConnectionType hc(
+		    BaseType::lrs(),
 		    BaseType::ModelType::modelLinks(),
 		    this->common().aoe().timeVectors().time(),
 		    model_.superOpHelper());
-		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(),
-		    hc,
-		    aux);
+		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(), hc, aux);
 
-		SizeType total = phi.effectiveSize(i0);
+		SizeType         total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
 		phi.extract(phi2, i0);
 		TargetVectorType x(total);
 		lanczosHelper.matrixVectorProduct(x, phi2);
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "Hamiltonian average at time=" << this->common().aoe().timeVectors().time();
 		msg << " for target=" << whatTarget;
 		ComplexOrRealType numerator = phi2 * x;
-		ComplexOrRealType den = phi2 * phi2;
-		ComplexOrRealType division = (PsimagLite::norm(den) < 1e-10) ? 0 : numerator / den;
+		ComplexOrRealType den       = phi2 * phi2;
+		ComplexOrRealType division  = (PsimagLite::norm(den) < 1e-10) ? 0 : numerator / den;
 		msg << " sector=" << i0 << " <phi(t)|H|phi(t)>=" << numerator;
 		msg << " <phi(t)|phi(t)>=" << den << " " << division;
 		progress_.printline(msgg, std::cout);
@@ -830,9 +849,9 @@ private:
 
 	void setWeights()
 	{
-		gsWeight_ = 0;
-		const SizeType n = weight_.size();
-		SizeType sum = 0;
+		gsWeight_          = 0;
+		const SizeType n   = weight_.size();
+		SizeType       sum = 0;
 		for (SizeType i = 0; i < n; ++i) {
 
 			weight_[i] = 0;
@@ -850,33 +869,32 @@ private:
 
 		if (sum == 0)
 			sum = 1;
-		static const RealType one = 1;
-		const RealType factor = one / sum;
+		static const RealType one    = 1;
+		const RealType        factor = one / sum;
 		for (SizeType i = 0; i < n; ++i)
 			weight_[i] *= factor;
 	}
 
-	const ModelType& model_;
-	const LeftRightSuperType& lrs_;
-	TargetParamsType mettsStruct_;
-	const WaveFunctionTransfType& wft_;
-	const QnType& quantumSector_;
-	PsimagLite::ProgressIndicator progress_;
-	VectorRealType weight_;
-	RealType gsWeight_;
-	MettsStochasticsType mettsStochastics_;
-	MettsCollapseType mettsCollapse_;
-	ProgramGlobals::DirectionEnum prevDirection_;
-	MettsPrev systemPrev_;
-	MettsPrev environPrev_;
+	const ModelType&                              model_;
+	const LeftRightSuperType&                     lrs_;
+	TargetParamsType                              mettsStruct_;
+	const WaveFunctionTransfType&                 wft_;
+	const QnType&                                 quantumSector_;
+	PsimagLite::ProgressIndicator                 progress_;
+	VectorRealType                                weight_;
+	RealType                                      gsWeight_;
+	MettsStochasticsType                          mettsStochastics_;
+	MettsCollapseType                             mettsCollapse_;
+	ProgramGlobals::DirectionEnum                 prevDirection_;
+	MettsPrev                                     systemPrev_;
+	MettsPrev                                     environPrev_;
 	std::pair<TargetVectorType, TargetVectorType> pureVectors_;
-	VectorSizeType sitesCollapsed_;
-	VectorBlockDiagonalMatrixType garbage_;
-	static SizeType timesWithoutAdvancement_;
+	VectorSizeType                                sitesCollapsed_;
+	VectorBlockDiagonalMatrixType                 garbage_;
+	static SizeType                               timesWithoutAdvancement_;
 }; // class TargetingMetts
 
-template <typename T1, typename T2>
-SizeType TargetingMetts<T1, T2>::timesWithoutAdvancement_ = 0;
+template <typename T1, typename T2> SizeType TargetingMetts<T1, T2>::timesWithoutAdvancement_ = 0;
 
 } // namespace Dmrg
 

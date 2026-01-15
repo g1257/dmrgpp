@@ -79,42 +79,38 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename VectorWithOffsetType,
-    typename WaveFunctionTransfType,
-    typename LeftRightSuperType>
-class ParallelWftMany
-{
+          typename WaveFunctionTransfType,
+          typename LeftRightSuperType>
+class ParallelWftMany {
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type
-	    VectorVectorWithOffsetType;
+	typedef PsimagLite::Concurrency                                 ConcurrencyType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
 
 public:
 
-	typedef typename VectorWithOffsetType::value_type VectorElementType;
+	typedef typename VectorWithOffsetType::value_type          VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
-	ParallelWftMany(VectorVectorWithOffsetType& targetVectors,
-	    SizeType nk,
-	    const WaveFunctionTransfType& wft,
-	    const LeftRightSuperType& lrs)
+	ParallelWftMany(VectorVectorWithOffsetType&   targetVectors,
+	                SizeType                      nk,
+	                const WaveFunctionTransfType& wft,
+	                const LeftRightSuperType&     lrs)
 	    : targetVectors_(targetVectors)
 	    , nk_(nk)
 	    , wft_(wft)
 	    , lrs_(lrs)
-	{
-	}
+	{ }
 
 	void thread_function_(SizeType threadNum,
-	    SizeType blockSize,
-	    SizeType total,
-	    ConcurrencyType::MutexType*)
+	                      SizeType blockSize,
+	                      SizeType total,
+	                      ConcurrencyType::MutexType*)
 	{
-		SizeType nk = nk_;
-		SizeType mpiRank = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
+		SizeType nk        = nk_;
+		SizeType mpiRank   = PsimagLite::MPI::commRank(PsimagLite::MPI::COMM_WORLD);
 		SizeType npthreads = PsimagLite::Concurrency::npthreads;
 
 		ConcurrencyType::mpiDisableIfNeeded(mpiRank, blockSize, "ParallelWftMany", total);
@@ -131,10 +127,10 @@ public:
 
 private:
 
-	VectorVectorWithOffsetType& targetVectors_;
-	SizeType nk_;
+	VectorVectorWithOffsetType&   targetVectors_;
+	SizeType                      nk_;
 	const WaveFunctionTransfType& wft_;
-	const LeftRightSuperType& lrs_;
+	const LeftRightSuperType&     lrs_;
 }; // class ParallelWftMany
 } // namespace Dmrg
 

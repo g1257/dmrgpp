@@ -3,17 +3,19 @@
 
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
-	enum class ExtEnum { NONE,
+	enum class ExtEnum
+	{
+		NONE,
 		EXTENDED,
-		EXTENDED2 };
+		EXTENDED2
+	};
 
 	template <typename IoInputType>
 	ParametersKondo(IoInputType& io, PsimagLite::String option)
@@ -50,8 +52,7 @@ struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 		io.readline(pairingField, "PairingField=");
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersKondo";
 		io.createGroup(label);
@@ -70,14 +71,14 @@ struct ParametersKondo : public ParametersModelBase<RealType, QnType> {
 		io.write(label + "/pairingField", pairingField);
 	}
 
-	SizeType twiceTheSpin;
+	SizeType       twiceTheSpin;
 	VectorRealType potentialV;
 	VectorRealType hubbardU;
 	VectorRealType kondoJ;
-	ExtEnum extended;
-	RealType kondoHx;
-	RealType electronHx;
-	RealType pairingField;
+	ExtEnum        extended;
+	RealType       kondoHx;
+	RealType       electronHx;
+	RealType       pairingField;
 
 private:
 

@@ -1,64 +1,57 @@
 #ifndef WFTACCELPATCHES_H
 #define WFTACCELPATCHES_H
-#include "BLAS.h"
 #include "BlockDiagWf.h"
 #include "Matrix.h"
 #include "MatrixVectorKron/GenIjPatch.h"
 #include "ProgramGlobals.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename WaveFunctionTransfBaseType>
-class WftAccelPatches
-{
+template <typename WaveFunctionTransfBaseType> class WftAccelPatches {
 
-	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType DmrgWaveStructType;
-	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
+	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType   DmrgWaveStructType;
+	typedef typename WaveFunctionTransfBaseType::WftOptionsType       WftOptionsType;
 	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename WaveFunctionTransfBaseType::VectorSizeType VectorSizeType;
+	typedef typename WaveFunctionTransfBaseType::VectorSizeType       VectorSizeType;
 	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
-	typedef typename VectorWithOffsetType::VectorType VectorType;
-	typedef typename VectorType::value_type ComplexOrRealType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
+	typedef typename DmrgWaveStructType::LeftRightSuperType      LeftRightSuperType;
+	typedef typename VectorWithOffsetType::VectorType            VectorType;
+	typedef typename VectorType::value_type                      ComplexOrRealType;
+	typedef typename DmrgWaveStructType::BasisWithOperatorsType  BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType    SparseMatrixType;
 	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
 	typedef typename DmrgWaveStructType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BlockDiagonalMatrixType::BuildingBlockType MatrixType;
-	typedef GenIjPatch<LeftRightSuperType> GenIjPatchType;
-	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType> BlockDiagWfType;
+	typedef typename BlockDiagonalMatrixType::BuildingBlockType  MatrixType;
+	typedef GenIjPatch<LeftRightSuperType>                       GenIjPatchType;
+	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType>
+	    BlockDiagWfType;
 
 public:
 
-	WftAccelPatches(const DmrgWaveStructType& dmrgWaveStruct,
-	    const WftOptionsType& wftOptions)
+	WftAccelPatches(const DmrgWaveStructType& dmrgWaveStruct, const WftOptionsType& wftOptions)
 	    : dmrgWaveStruct_(dmrgWaveStruct)
 	    , wftOptions_(wftOptions)
-	{
-	}
+	{ }
 
-	void operator()(VectorWithOffsetType& psiDest,
-	    SizeType iNew,
-	    const VectorWithOffsetType& psiSrc,
-	    SizeType iOld,
-	    const LeftRightSuperType& lrs,
-	    const OneSiteSpacesType& oneSiteSpaces) const
+	void operator()(VectorWithOffsetType&       psiDest,
+	                SizeType                    iNew,
+	                const VectorWithOffsetType& psiSrc,
+	                SizeType                    iOld,
+	                const LeftRightSuperType&   lrs,
+	                const OneSiteSpacesType&    oneSiteSpaces) const
 	{
 		ProgramGlobals::DirectionEnum dir = oneSiteSpaces.direction();
-		char charLeft = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'C' : 'N';
+		char charLeft  = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'C' : 'N';
 		char charRight = (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? 'T' : 'N';
 
-		BlockDiagWfType psi(psiSrc,
-		    iOld,
-		    dmrgWaveStruct_.lrs());
+		BlockDiagWfType psi(psiSrc, iOld, dmrgWaveStruct_.lrs());
 
 		psi.transform(charLeft,
-		    charRight,
-		    dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM),
-		    dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON),
-		    wftOptions_.gemmRnb,
-		    wftOptions_.threadsForGemmR);
+		              charRight,
+		              dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM),
+		              dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON),
+		              wftOptions_.gemmRnb,
+		              wftOptions_.threadsForGemmR);
 
 		psi.toVectorWithOffsets(psiDest, iNew, lrs, oneSiteSpaces);
 	}
@@ -66,7 +59,7 @@ public:
 private:
 
 	const DmrgWaveStructType& dmrgWaveStruct_;
-	const WftOptionsType& wftOptions_;
+	const WftOptionsType&     wftOptions_;
 };
 }
 #endif // WFTACCELPATCHES_H

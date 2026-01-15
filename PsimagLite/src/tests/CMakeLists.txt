@@ -1,0 +1,3 @@
+add_executable(test_AkimaSpline test_AkimaSpline.cpp)
+target_link_libraries(test_AkimaSpline PRIVATE Catch2::Catch2WithMain psimaglite)
+catch_discover_tests(test_AkimaSpline)

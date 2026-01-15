@@ -3,29 +3,25 @@
 #include "GetBraOrKet.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename PvectorsType>
-class GroupOfOneTimeEvolutions
-{
-	class OneTimeEvolution
-	{
+template <typename PvectorsType> class GroupOfOneTimeEvolutions {
+	class OneTimeEvolution {
 
 	public:
 
-		typedef OneTimeEvolution ThisType;
+		typedef OneTimeEvolution                             ThisType;
 		typedef typename PsimagLite::Vector<ThisType*>::Type VectorOneTimeEvolutionType;
-		typedef typename PvectorsType::VectorWithOffsetType VectorWithOffsetType;
-		typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-		typedef typename PvectorsType::RealType RealType;
+		typedef typename PvectorsType::VectorWithOffsetType  VectorWithOffsetType;
+		typedef PsimagLite::Vector<SizeType>::Type           VectorSizeType;
+		typedef typename PvectorsType::RealType              RealType;
 
-		OneTimeEvolution(SizeType firstIndex,
-		    const VectorWithOffsetType& src,
-		    PsimagLite::String srcKet,
-		    SizeType disposition,
-		    SizeType timeSteps,
-		    PvectorsType& pVectors)
+		OneTimeEvolution(SizeType                    firstIndex,
+		                 const VectorWithOffsetType& src,
+		                 PsimagLite::String          srcKet,
+		                 SizeType                    disposition,
+		                 SizeType                    timeSteps,
+		                 PvectorsType&               pVectors)
 		    : indices_(timeSteps)
 		    , srcKet_(srcKet)
 		    , disposition_(disposition)
@@ -34,7 +30,8 @@ class GroupOfOneTimeEvolutions
 		{
 			indices_[0] = firstIndex;
 			for (SizeType i = 1; i < timeSteps; ++i) {
-				auto lambda = [this, i](SizeType ind) {
+				auto lambda = [this, i](SizeType ind)
+				{
 					indices_[i] = ind;
 					return "|P" + ttos(ind) + ">";
 				};
@@ -45,27 +42,15 @@ class GroupOfOneTimeEvolutions
 
 		const VectorSizeType& indices() const { return indices_; }
 
-		SizeType timesWithoutAdvancement() const
-		{
-			return timesWithoutAdvancement_;
-		}
+		SizeType timesWithoutAdvancement() const { return timesWithoutAdvancement_; }
 
 		RealType time() const { return time_; }
 
-		void advanceTime(RealType tau)
-		{
-			time_ += tau;
-		}
+		void advanceTime(RealType tau) { time_ += tau; }
 
-		void resetTimesWithoutAdvancement()
-		{
-			timesWithoutAdvancement_ = 1;
-		}
+		void resetTimesWithoutAdvancement() { timesWithoutAdvancement_ = 1; }
 
-		void incrementTimesWithoutAdvancement()
-		{
-			++timesWithoutAdvancement_;
-		}
+		void incrementTimesWithoutAdvancement() { ++timesWithoutAdvancement_; }
 
 		bool hasKet(SizeType ket) const
 		{
@@ -90,18 +75,18 @@ class GroupOfOneTimeEvolutions
 			return (getBraOrKet.isPvector()) ? getBraOrKet.pIndex() : -1;
 		}
 
-		VectorSizeType indices_;
+		VectorSizeType     indices_;
 		PsimagLite::String srcKet_;
-		SizeType disposition_;
-		SizeType timesWithoutAdvancement_;
-		RealType time_;
+		SizeType           disposition_;
+		SizeType           timesWithoutAdvancement_;
+		RealType           time_;
 	};
 
 public:
 
-	typedef OneTimeEvolution OneTimeEvolutionType;
+	typedef OneTimeEvolution                                     OneTimeEvolutionType;
 	typedef typename PsimagLite::Vector<OneTimeEvolution*>::Type VectorOneTimeEvolutionType;
-	typedef typename PvectorsType::RealType RealType;
+	typedef typename PvectorsType::RealType                      RealType;
 
 	GroupOfOneTimeEvolutions() { }
 

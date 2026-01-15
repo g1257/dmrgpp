@@ -1,14 +1,14 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void csr_matmul_pre(char trans_A,
-    const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
-    const int nrow_Y,
-    const int ncol_Y,
-    const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
-    const int nrow_X,
-    const int ncol_X,
-    PsimagLite::MatrixNonOwned<ComplexOrRealType>& xout)
+void csr_matmul_pre(char                                                       trans_A,
+                    const PsimagLite::CrsMatrix<ComplexOrRealType>&            a,
+                    const int                                                  nrow_Y,
+                    const int                                                  ncol_Y,
+                    const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
+                    const int                                                  nrow_X,
+                    const int                                                  ncol_X,
+                    PsimagLite::MatrixNonOwned<ComplexOrRealType>&             xout)
 {
 	/*
 	 * -------------------------------------------------------
@@ -28,11 +28,11 @@ void csr_matmul_pre(char trans_A,
 	 * -------------------------------------------------------
 	 */
 
-	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
-	const int nrow_A = a.rows();
-	int isTranspose = (trans_A == 'T') || (trans_A == 't');
-	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
-	int isConj = (trans_A == 'Z') || (trans_A == 'z');
+	const bool is_complex      = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+	const int  nrow_A          = a.rows();
+	int        isTranspose     = (trans_A == 'T') || (trans_A == 't');
+	int        isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
+	int        isConj          = (trans_A == 'Z') || (trans_A == 'z');
 
 	if (isTranspose || isConjTranspose) {
 		/*
@@ -49,11 +49,11 @@ void csr_matmul_pre(char trans_A,
 		int ia = 0;
 		for (ia = 0; ia < nrow_A; ia++) {
 			int istart = a.getRowPtr(ia);
-			int iend = a.getRowPtr(ia + 1);
-			int k = 0;
+			int iend   = a.getRowPtr(ia + 1);
+			int k      = 0;
 			for (k = istart; k < iend; k++) {
-				int ja = a.getCol(k);
-				ComplexOrRealType aij = a.getValue(k);
+				int               ja   = a.getCol(k);
+				ComplexOrRealType aij  = a.getValue(k);
 				ComplexOrRealType atji = aij;
 				if (is_complex && isConjTranspose) {
 					atji = PsimagLite::conj(atji);
@@ -80,10 +80,10 @@ void csr_matmul_pre(char trans_A,
 		int ia = 0;
 		for (ia = 0; ia < nrow_A; ia++) {
 			int istart = a.getRowPtr(ia);
-			int iend = a.getRowPtr(ia + 1);
-			int k = 0;
+			int iend   = a.getRowPtr(ia + 1);
+			int k      = 0;
 			for (k = istart; k < iend; k++) {
-				int ja = a.getCol(k);
+				int               ja  = a.getCol(k);
 				ComplexOrRealType aij = a.getValue(k);
 				if (is_complex && isConj) {
 					aij = PsimagLite::conj(aij);

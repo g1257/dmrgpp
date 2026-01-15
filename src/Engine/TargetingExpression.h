@@ -80,56 +80,59 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGETING_EXPRESSION_H
 #include "CanonicalExpression.h"
 #include "GroupOfOneTimeEvolutions.h"
+#include "KetForTargetingExpression.hh"
 #include "Pvector.h"
 #include "SpecForTargetingExpression.h"
 #include "TargetingBase.h"
 #include <iostream>
 #include <stdexcept>
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
-class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_>
-{
+class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
 	typedef TargetingBase<LanczosSolverType_, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType TargetingCommonType;
-	typedef typename BaseType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename BaseType::ModelType ModelType;
-	typedef typename BaseType::CheckpointType CheckpointType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::BlockType BlockType;
-	typedef typename BasisType::QnType QnType;
-	typedef typename TargetingCommonType::StageEnumType StageEnumType;
-	typedef Pvector<typename VectorWithOffsetType_::value_type> PvectorType;
-	typedef SpecForTargetingExpression<BaseType> SpecForTargetingExpressionType;
+	typedef typename BaseType::TargetingCommonType                   TargetingCommonType;
+	typedef typename BaseType::WaveFunctionTransfType                WaveFunctionTransfType;
+	typedef typename BaseType::ModelType                             ModelType;
+	typedef typename BaseType::CheckpointType                        CheckpointType;
+	typedef typename ModelType::RealType                             RealType;
+	typedef typename ModelType::InputValidatorType                   InputValidatorType;
+	typedef typename ModelType::ModelHelperType                      ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::BasisType               BasisType;
+	typedef typename BasisType::BlockType                            BlockType;
+	typedef typename BasisType::QnType                               QnType;
+	typedef typename TargetingCommonType::StageEnumType              StageEnumType;
+	typedef Pvector<typename VectorWithOffsetType_::value_type>      PvectorType;
+	typedef SpecForTargetingExpression<BaseType>                 SpecForTargetingExpressionType;
 	typedef typename SpecForTargetingExpressionType::AlgebraType AlgebraType;
 	typedef typename SpecForTargetingExpressionType::AssignAndDestroy AssignAndDestroyType;
-	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType, AssignAndDestroyType>
-	    CanonicalExpressionType;
-	typedef AuxForTargetingExpression<BaseType> AuxForTargetingExpressionType;
+	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType,
+	                                        AssignAndDestroyType>
+	                                                     CanonicalExpressionType;
+	typedef AuxForTargetingExpression<BaseType>          AuxForTargetingExpressionType;
 	typedef typename TargetingCommonType::VectorRealType VectorRealType;
 	typedef typename AuxForTargetingExpressionType::VectorStringType VectorStringType;
 	typedef typename AuxForTargetingExpressionType::VectorVectorWithOffsetType
-	    VectorVectorWithOffsetType;
-	typedef PsimagLite::Vector<bool>::Type VectorBoolType;
-	typedef typename AlgebraType::VectorSizeType VectorSizeType;
+	                                                       VectorVectorWithOffsetType;
+	typedef PsimagLite::Vector<bool>::Type                 VectorBoolType;
+	typedef typename AlgebraType::VectorSizeType           VectorSizeType;
 	typedef typename BaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef GroupOfOneTimeEvolutions<Pvectors<BaseType>> GroupOfOneTimeEvolutionsType;
+	typedef GroupOfOneTimeEvolutions<Pvectors<BaseType>>   GroupOfOneTimeEvolutionsType;
+	using ComplexOrRealType = typename ModelType::ComplexOrRealType;
+	using KetType           = KetForTargetingExpression<ComplexOrRealType>;
+	using TermType          = typename AlgebraType::TermType;
 
 public:
 
-	TargetingExpression(const LeftRightSuperType& lrs,
-	    const CheckpointType& checkPoint,
-	    const WaveFunctionTransfType& wft,
-	    const QnType&,
-	    InputValidatorType& io)
+	TargetingExpression(const LeftRightSuperType&     lrs,
+	                    const CheckpointType&         checkPoint,
+	                    const WaveFunctionTransfType& wft,
+	                    const QnType&,
+	                    InputValidatorType& io)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , progress_("TargetingExpression")
 	    , gsWeight_(0.3)
@@ -155,16 +158,13 @@ public:
 		return weights_[i];
 	}
 
-	RealType gsWeight() const
-	{
-		return gsWeightActual_;
-	}
+	RealType gsWeight() const { return gsWeightActual_; }
 
-	void evolve(const VectorRealType& energies,
-	    ProgramGlobals::DirectionEnum direction,
-	    const BlockType& block1,
-	    const BlockType&,
-	    SizeType loopNumber)
+	void evolve(const VectorRealType&         energies,
+	            ProgramGlobals::DirectionEnum direction,
+	            const BlockType&              block1,
+	            const BlockType&,
+	            SizeType loopNumber)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -172,7 +172,8 @@ public:
 		this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 		assert(block1.size() == 1);
 		const SizeType site = block1[0];
-		const SizeType numberOfSites = this->common().aoe().model().superGeometry().numberOfSites();
+		const SizeType numberOfSites
+		    = this->common().aoe().model().superGeometry().numberOfSites();
 		const SizeType total = this->common().aoe().tvs();
 		assert(total <= pvectors_.targets());
 		if (site != 0 && site + 1 != numberOfSites)
@@ -185,20 +186,23 @@ public:
 		this->common().printNormsAndWeights(gsWeightActual_, weights_);
 
 		const bool doBorderIfBorder = true;
-		auto testLambda = [this](const PsimagLite::GetBraOrKet& bra,
-				      const PsimagLite::GetBraOrKet& ket) {
+		auto       testLambda
+		    = [this](const PsimagLite::GetBraOrKet& bra, const PsimagLite::GetBraOrKet& ket)
+		{
 			if (!hasTimeEvolution(bra) || !hasTimeEvolution(ket))
 				return;
 
-			RealType braTime = getTimeForKet(bra);
-			RealType ketTime = getTimeForKet(ket);
+			RealType       braTime    = getTimeForKet(bra);
+			RealType       ketTime    = getTimeForKet(ket);
 			const RealType globalTime = this->common().time();
 
 			if (braTime != ketTime)
-				err("BraTime= " + ttos(braTime) + " but ketTime= " + ttos(ketTime) + "\n");
+				err("BraTime= " + ttos(braTime) + " but ketTime= " + ttos(ketTime)
+				    + "\n");
 
 			if (braTime != globalTime)
-				err("Bra and kets have some time= " + ttos(braTime) + " but globalTime= " + ttos(globalTime) + "\n");
+				err("Bra and kets have some time= " + ttos(braTime)
+				    + " but globalTime= " + ttos(globalTime) + "\n");
 		};
 
 		if (loopNumber >= this->model().params().finiteLoop.size() - 1) {
@@ -230,20 +234,19 @@ public:
 				return;
 		}
 
-		SizeType x = (site == 1) ? 0 : numberOfSites - 1;
+		SizeType  x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1, x);
 		evolve(energies, direction, block, block, loopNumber);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io,
-	    PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
 	{
 		this->common().readGSandNGSTs(io, prefix, "Expression");
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
-	    PsimagLite::IoSelector::Out& io,
-	    PsimagLite::String prefix) const
+	           PsimagLite::IoSelector::Out&                       io,
+	           PsimagLite::String                                 prefix) const
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "Expression");
@@ -276,7 +279,7 @@ private:
 			if (tvs < pvectors_.origPvectors())
 				err("TVS could not have decreased ?!\n");
 
-			PsimagLite::OstringStream msgg(std::cout.precision());
+			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 			msg << "All user-provided P vectors finished";
 			progress_.printline(msgg, std::cout);
@@ -289,18 +292,18 @@ private:
 			return;
 		}
 
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "P0=" << pvectors_(0).lastName();
 		progress_.printline(msgg, std::cout);
 
 		CanonicalExpressionType canonicalExpression(opSpec_);
-		SizeType total = pvectors_.targets();
+		SizeType                total = pvectors_.targets();
 
 		AuxForTargetingExpressionType aux(pvectors_, timeEvolve_, dir, Eg, site);
-		AlgebraType opEmpty(aux);
-		bool needsTrimming = false;
-		PsimagLite::String allpvectors;
+		AlgebraType                   opEmpty(aux);
+		bool                          needsTrimming = false;
+		PsimagLite::String            allpvectors;
 		for (SizeType i = 0; i < total; ++i) {
 
 			if (pvectors_(i).isDone())
@@ -312,15 +315,17 @@ private:
 			canonicalExpression(tmp, pvectors_(i).lastName(), opEmpty, aux);
 			tmp.finalize();
 
-			PsimagLite::String thispBefore = tmp.toString();
+			AlgebraType thispBefore(tmp);
 			finalize(aux.tempVectors(), aux.tempNames(), i, thispBefore);
 			PsimagLite::String thispAfter = pvectors_(i).lastName();
 
-			int x = tmp.pIndex();
-			if (x >= 0) {
-				if (static_cast<SizeType>(x) != i) {
+			int pIndexOrMinusOne = (tmp.size() == 1) ? tmp.term(0).pIndex() : -1;
+			if (pIndexOrMinusOne >= 0) {
+				SizeType x = pIndexOrMinusOne;
+				if (x != i) {
 					VectorWithOffsetType_& v0 = this->tvNonConst(i);
-					v0 = this->tv(x);
+					v0                        = this->tv(x);
+					v0 *= tmp.term(0).ket().factor();
 				} else {
 					std::cerr << "Ignoring self assignment P";
 					std::cerr << i << "=P" << x << "\n";
@@ -335,16 +340,15 @@ private:
 				continue;
 			}
 
-			PsimagLite::String newpstring = simplifyTerms(thispBefore);
-			if (newpstring != pvectors_(i).lastName()) {
+			simplifyTerms(thispBefore);
+			if (thispBefore.toString() != pvectors_(i).lastName()) {
 				needsTrimming = true;
-				PsimagLite::String compr = compressExpression(newpstring);
+				compressExpression(thispBefore);
 				// checkNoUncompressedExists(compr);
-				pvectors_.pushString(i, compr);
-				newpstring += compr;
+				pvectors_.pushString(i, thispBefore.toString());
 			}
 
-			allpvectors += newpstring;
+			allpvectors += thispBefore.toString();
 		}
 
 		if (needsTrimming)
@@ -352,9 +356,9 @@ private:
 	}
 
 	void finalize(const VectorVectorWithOffsetType& tempVectors,
-	    const VectorStringType& tempNames,
-	    SizeType pVectorIndex,
-	    PsimagLite::String tempExpr)
+	              const VectorStringType&           tempNames,
+	              SizeType                          pVectorIndex,
+	              const AlgebraType&                tempExpr)
 	{
 		const SizeType ntemps = tempNames.size();
 
@@ -371,7 +375,7 @@ private:
 			this->tvNonConst(x) = tempVectors[i];
 			pvectors_.setAsDone(x);
 			removed_[i] = true;
-			tempToP[i] = x;
+			tempToP[i]  = x;
 		}
 
 		// these surviving tempNames_ need storage, add them
@@ -381,7 +385,8 @@ private:
 			int x = pvectors_.findInAnyNames(tempNames[i]);
 			if (x >= 0)
 				continue;
-			auto lambda = [this, i, &tempToP, &tempNames](SizeType ind) {
+			auto lambda = [this, i, &tempToP, &tempNames](SizeType ind)
+			{
 				tempToP[i] = ind;
 				return this->expandExpression(tempNames[i], tempToP);
 			};
@@ -389,12 +394,13 @@ private:
 			pvectors_.createNew(tempVectors[i], lambda);
 		}
 
-		PsimagLite::String newpstring = compressExpression(tempExpr);
+		AlgebraType newexpr(tempExpr);
+		compressExpression(newexpr);
 		const PsimagLite::String selfName = "|P" + ttos(pVectorIndex) + ">";
-		if (newpstring == selfName)
+		if (newexpr.toString() == selfName)
 			pvectors_.setAsDone(pVectorIndex);
 		else
-			pvectors_.pushString(pVectorIndex, newpstring);
+			pvectors_.pushString(pVectorIndex, newexpr.toString());
 	}
 
 	bool allOrigPvectorsDone() const
@@ -406,48 +412,30 @@ private:
 	}
 
 	// replace "|!m" + something ==> "|P" + number
-	PsimagLite::String compressExpression(PsimagLite::String str) const
+	void compressExpression(AlgebraType& expr) const
 	{
-		SizeType i = 0;
-		const SizeType len = str.length();
-		if (len < 4)
-			return str;
-		PsimagLite::String result;
-		for (; i < len; ++i) {
-			if (i + 4 < len && str.substr(i, 3) == "|!m") {
-				SizeType j = i + 3;
-				PsimagLite::String buffer;
-				for (; j < len; ++j) {
-					buffer += str[j];
-					if (str[j] == '>')
-						break;
-				}
-
-				const SizeType ind = pvectors_.findPforThisExpression(buffer);
-				buffer = "|P" + ttos(ind) + ">";
-				i = j;
-				result += buffer;
-				continue;
+		SizeType n = expr.size();
+		for (SizeType i = 0; i < n; ++i) {
+			const KetType& ket = expr.term(i).ket();
+			if (ket.kind() == KetType::Kind::M) {
+				const SizeType ind = pvectors_.findPforThisExpression(ket.name());
+				expr.setKet(i, "|P" + ttos(ind) + ">");
 			}
-
-			result += str[i];
 		}
-
-		return result;
 	}
 
 	// replace "R" + i ==> "P" + tempToP[i]
-	PsimagLite::String expandExpression(PsimagLite::String str,
-	    const VectorSizeType& tempToP) const
+	PsimagLite::String expandExpression(PsimagLite::String    str,
+	                                    const VectorSizeType& tempToP) const
 	{
-		SizeType i = 0;
+		SizeType       i   = 0;
 		const SizeType len = str.length();
 		if (len < 4)
 			return str;
 		PsimagLite::String expanded;
 		for (; i < len; ++i) {
 			if (i + 4 < len && str[i] == '|' && str[i + 1] == 'R') {
-				SizeType j = i + 2;
+				SizeType           j = i + 2;
 				PsimagLite::String buffer;
 				for (; j < len; ++j) {
 					if (str[j] == '>')
@@ -459,7 +447,7 @@ private:
 				if (ind >= tempToP.size())
 					err("tempToP.size() >= index\n");
 				buffer = "|P" + ttos(tempToP[ind]);
-				i = j + 1;
+				i      = j + 1;
 				expanded += buffer;
 				continue;
 			}
@@ -472,64 +460,31 @@ private:
 
 	// replace |+PXpPY> ==> |PX>, update |PX>,
 	// FIMXE: ask aoe destroying PY if no longer referencable
-	PsimagLite::String simplifyTerms(PsimagLite::String str)
+	void simplifyTerms(AlgebraType& expr)
 	{
-		SizeType i = 0;
-		const SizeType len = str.length();
-		if (len < 4)
-			return str;
-		PsimagLite::String simplified;
-		for (; i < len; ++i) {
-			if (i + 4 < len && str.substr(i, 4) == "|!aP") {
-				SizeType j = i + 4;
-				PsimagLite::String buffer;
-				for (; j < len; ++j) {
-					if (str[j] == 'p')
-						break;
-					buffer += str[j];
-				}
-
-				SizeType ind0 = PsimagLite::atoi(buffer);
-				buffer = "";
-				++j;
-				assert(str[j] == 'P');
-				++j;
-				for (; j < len; ++j) {
-					if (str[j] == '>')
-						break;
-					buffer += str[j];
-				}
-
-				SizeType ind1 = PsimagLite::atoi(buffer);
-
-				// before reordering ind0 and ind1
-				PsimagLite::String p0PlusP1 = "|P" + ttos(ind0) + ">+|P" + ttos(ind1) + ">";
-
-				// ask aoe to sum ind0 and ind1 and put it into ind0
-				assert(ind0 != ind1);
-				if (ind0 > ind1) {
-					const SizeType tmp = ind0;
-					ind0 = ind1;
-					ind1 = tmp;
-				}
-
-				pvectors_.sumPvectors(ind0, ind1, p0PlusP1);
-
-				buffer = "|P" + ttos(ind0) + ">";
-				i = j;
-				simplified += buffer;
+		SizeType n = expr.size();
+		for (SizeType i = 0; i < n; ++i) {
+			const KetType& ket = expr.term(i).ket();
+			if (ket.kind() != KetType::Kind::S) {
 				continue;
 			}
 
-			simplified += str[i];
-		}
+			auto opaque = ket.fillSumStruct();
 
-		return simplified;
+			pvectors_.sumPvectors(opaque[0].first,
+			                      opaque[0].second,
+			                      opaque[1].first,
+			                      opaque[1].second,
+			                      ket.name());
+
+			expr.setKet(i, "|P" + ttos(opaque[0].first) + ">");
+			expr.setFactor(i, 1.);
+		}
 	}
 
 	static void checkNoUncompressedExists(PsimagLite::String str)
 	{
-		SizeType i = 0;
+		SizeType       i   = 0;
 		const SizeType len = str.length();
 		if (len < 4)
 			return;
@@ -567,13 +522,13 @@ private:
 		gsWeightActual_ = gsWeight_;
 	}
 
-	PsimagLite::ProgressIndicator progress_;
-	RealType gsWeight_;
-	RealType gsWeightActual_;
-	VectorRealType weights_;
+	PsimagLite::ProgressIndicator  progress_;
+	RealType                       gsWeight_;
+	RealType                       gsWeightActual_;
+	VectorRealType                 weights_;
 	SpecForTargetingExpressionType opSpec_;
-	Pvectors<BaseType> pvectors_;
-	GroupOfOneTimeEvolutionsType timeEvolve_;
+	Pvectors<BaseType>             pvectors_;
+	GroupOfOneTimeEvolutionsType   timeEvolve_;
 }; // class TargetingExpression
 } // namespace Dmrg
 /*@}*/

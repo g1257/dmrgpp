@@ -82,28 +82,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "TargetParamsTimeVectors.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 // Coordinates reading of TargetSTructure from input file
-template <typename ModelType>
-class MettsParams : public TargetParamsTimeVectors<ModelType>
-{
+template <typename ModelType> class MettsParams : public TargetParamsTimeVectors<ModelType> {
 
 	typedef TargetParamsTimeVectors<ModelType> BaseType;
-	typedef typename BaseType::VectorSizeType VectorSizeType;
+	typedef typename BaseType::VectorSizeType  VectorSizeType;
 
 public:
 
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::OperatorType OperatorType;
+	typedef typename ModelType::RealType       RealType;
+	typedef typename ModelType::OperatorType   OperatorType;
 	typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
 	typedef typename OperatorType::StorageType SparseMatrixType;
 
 	template <typename IoInputter>
-	MettsParams(IoInputter& io,
-	    PsimagLite::String targeting,
-	    const ModelType& model)
+	MettsParams(IoInputter& io, PsimagLite::String targeting, const ModelType& model)
 	    : TimeVectorParamsType(io, targeting, model)
 	{
 		io.readline(beta, "BetaDividedByTwo=");
@@ -111,8 +106,7 @@ public:
 		io.readline(collapse, "MettsCollapse=");
 		try {
 			io.read(pure, "MettsPure");
-		} catch (std::exception& e) {
-		}
+		} catch (std::exception& e) { }
 
 		SizeType n = model.superGeometry().numberOfSites();
 		if (pure.size() > 0 && pure.size() != n) {
@@ -124,10 +118,10 @@ public:
 		this->noOperator(false);
 	}
 
-	int long rngSeed;
-	RealType beta;
+	int long           rngSeed;
+	RealType           beta;
 	PsimagLite::String collapse;
-	VectorSizeType pure;
+	VectorSizeType     pure;
 }; // class MettsParams
 
 template <typename ModelType>

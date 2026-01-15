@@ -3,26 +3,24 @@
 #include "DmrgSerializer.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
 template <typename LeftRightSuperType, typename VectorWithOffsetType_>
-class MultiSiteExpressionHelper
-{
+class MultiSiteExpressionHelper {
 
 public:
 
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
+	typedef VectorWithOffsetType_                                    VectorWithOffsetType;
 	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
-	typedef typename PsimagLite::Vector<DmrgSerializerType const*>::Type VectorDmrgSerializerType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename DmrgSerializerType::FermionSignType FermionSignType;
+	typedef
+	    typename PsimagLite::Vector<DmrgSerializerType const*>::Type VectorDmrgSerializerType;
+	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type  VectorVectorWithOffsetType;
+	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
+	typedef typename DmrgSerializerType::FermionSignType             FermionSignType;
 
 	MultiSiteExpressionHelper(SizeType n)
 	    : vds_(n, nullptr)
-	{
-	}
+	{ }
 
 	~MultiSiteExpressionHelper()
 	{
@@ -33,8 +31,7 @@ public:
 		}
 	}
 
-	void push(DmrgSerializerType const* ds,
-	    const VectorWithOffsetType& psi)
+	void push(DmrgSerializerType const* ds, const VectorWithOffsetType& psi)
 	{
 		SizeType coo = ds->centerOfOrthogonality();
 		assert(coo > 0);
@@ -47,7 +44,7 @@ public:
 
 private:
 
-	VectorDmrgSerializerType vds_;
+	VectorDmrgSerializerType   vds_;
 	VectorVectorWithOffsetType vgs_;
 };
 }

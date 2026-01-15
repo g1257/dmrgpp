@@ -3,31 +3,30 @@
 #include "AnsiColors.h"
 #include "InputNg.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ModelType>
-class Intent
-{
+template <typename ModelType> class Intent {
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	typedef PsimagLite::Vector<SizeType>::Type     VectorSizeType;
 	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename ModelType::ParametersType DmrgSolverParamsType;
+	typedef typename ModelType::ParametersType     DmrgSolverParamsType;
 
-	enum class IntentEnum { NONE,
+	enum class IntentEnum
+	{
+		NONE,
 		UNKNOWN,
 		GS,
 		GIMP_MATSUBARA,
 		ARPES0,
 		ARPES1,
-		NEUTRONS_SZSZ };
+		NEUTRONS_SZSZ
+	};
 
 public:
 
 	Intent(const ModelType& model)
 	    : model_(model)
-	{
-	}
+	{ }
 
 	void check() const
 	{
@@ -86,8 +85,10 @@ private:
 		if (!hasInSolverOptions("restart"))
 			saySomethingAbout(PsimagLite::String("restart") + "in SolverOptions");
 
-		if (!hasInSolverOptions("CorrectionVectorTargeting") && !hasInSolverOptions("TargetingChebyshev"))
-			saySomethingAbout(PsimagLite::String("CorrectionVectorTargeting or ") + "TargetingChebyshev in SolverOptions");
+		if (!hasInSolverOptions("CorrectionVectorTargeting")
+		    && !hasInSolverOptions("TargetingChebyshev"))
+			saySomethingAbout(PsimagLite::String("CorrectionVectorTargeting or ")
+			                  + "TargetingChebyshev in SolverOptions");
 
 		if (!hasInSolverOptions("minimizeDisk"))
 			suggest("minimizeDisk in SolverOptions");
@@ -117,13 +118,14 @@ private:
 		const SizeType finiteLoops = model_.params().finiteLoop.size();
 
 		if (finiteLoops < tsploops.size() + 2)
-			saySomethingAbout("Expected finite loops equal or bigger than tsploops + 2");
+			saySomethingAbout(
+			    "Expected finite loops equal or bigger than tsploops + 2");
 	}
 
 	void examineSite(SizeType site) const
 	{
-		const SizeType l = model_.superGeometry().numberOfSites();
-		const SizeType leg = (l & 1) ? 0 : getLeg();
+		const SizeType l        = model_.superGeometry().numberOfSites();
+		const SizeType leg      = (l & 1) ? 0 : getLeg();
 		const SizeType lOverTwo = l / 2;
 
 		if (leg == 1) {
@@ -170,7 +172,7 @@ private:
 
 	SizeType getLeg() const
 	{
-		SizeType terms = model_.superGeometry().terms();
+		SizeType           terms = model_.superGeometry().terms();
 		PsimagLite::String name("");
 		for (SizeType t = 0; t < terms; ++t) {
 			if (t > 0 && name != model_.superGeometry().label(t))
@@ -207,7 +209,8 @@ private:
 		if (x == y)
 			return;
 
-		saySomethingAbout("DynamicDmrgType should be " + ttos(x) + ", but " + ttos(y) + " found instead");
+		saySomethingAbout("DynamicDmrgType should be " + ttos(x) + ", but " + ttos(y)
+		                  + " found instead");
 	}
 
 	void operatorShouldBe(PsimagLite::String x) const
@@ -223,7 +226,8 @@ private:
 		if (x == y)
 			return;
 
-		saySomethingAbout("OperatorExpression should be " + x + ", but " + y + " found instead");
+		saySomethingAbout("OperatorExpression should be " + x + ", but " + y
+		                  + " found instead");
 	}
 
 	const ModelType& model_;

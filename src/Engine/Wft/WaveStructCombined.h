@@ -6,35 +6,31 @@
 #include "ProgramGlobals.h"
 #include "WaveStructSvd.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename LeftRightSuperType_>
-class WaveStructCombined
-{
+template <typename LeftRightSuperType_> class WaveStructCombined {
 
 public:
 
-	typedef LeftRightSuperType_ LeftRightSuperType;
-	typedef WaveStructSvd<LeftRightSuperType> WaveStructSvdType;
-	typedef typename WaveStructSvdType::BasisWithOperatorsType BasisWithOperatorsType;
+	typedef LeftRightSuperType_                                 LeftRightSuperType;
+	typedef WaveStructSvd<LeftRightSuperType>                   WaveStructSvdType;
+	typedef typename WaveStructSvdType::BasisWithOperatorsType  BasisWithOperatorsType;
 	typedef typename WaveStructSvdType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename WaveStructSvdType::VectorVectorRealType VectorVectorRealType;
-	typedef typename WaveStructSvdType::VectorMatrixType VectorMatrixType;
-	typedef typename WaveStructSvdType::VectorQnType VectorQnType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef typename BasisType::BlockType VectorSizeType;
-	typedef DiskOrMemoryStack<WaveStructSvdType> WftStackType;
+	typedef typename WaveStructSvdType::VectorVectorRealType    VectorVectorRealType;
+	typedef typename WaveStructSvdType::VectorMatrixType        VectorMatrixType;
+	typedef typename WaveStructSvdType::VectorQnType            VectorQnType;
+	typedef typename BasisWithOperatorsType::BasisType          BasisType;
+	typedef typename BasisType::BlockType                       VectorSizeType;
+	typedef DiskOrMemoryStack<WaveStructSvdType>                WftStackType;
 
-	WaveStructCombined(bool onDisk,
-	    const PsimagLite::String filename,
-	    const BasisTraits& basisTraits)
+	WaveStructCombined(bool                     onDisk,
+	                   const PsimagLite::String filename,
+	                   const BasisTraits&       basisTraits)
 	    : lrs_("pSE", "pSprime", "pEprime", basisTraits)
 	    , wsStack_(onDisk, filename, "Wstacks", "system", basisTraits)
 	    , weStack_(onDisk, filename, "Wstacks", "environ", basisTraits)
 	    , needsPop_(false)
-	{
-	}
+	{ }
 
 	void read(PsimagLite::IoNg::In& io, PsimagLite::String prefix)
 	{
@@ -57,13 +53,12 @@ public:
 		weStack_.write(prefix + "/weStack", io.serializer());
 	}
 
-	void beforeWft(ProgramGlobals::DirectionEnum dir,
-	    bool twoSiteDmrg,
-	    bool bounce)
+	void beforeWft(ProgramGlobals::DirectionEnum dir, bool twoSiteDmrg, bool bounce)
 	{
-		WftStackType& stack = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_
-											     : weStack_;
-		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
+		WftStackType& stack
+		    = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_ : weStack_;
+		const PsimagLite::String label
+		    = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
 
 		needsPop_ = false;
 
@@ -86,9 +81,10 @@ public:
 
 	void afterWft(ProgramGlobals::DirectionEnum dir)
 	{
-		WftStackType& stack = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_
-											     : weStack_;
-		const PsimagLite::String label = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
+		WftStackType& stack
+		    = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? wsStack_ : weStack_;
+		const PsimagLite::String label
+		    = (dir == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON) ? "system" : "environ";
 
 		if (!needsPop_)
 			return;
@@ -102,11 +98,11 @@ public:
 	}
 
 	void push(const BlockDiagonalMatrixType& transform,
-	    ProgramGlobals::DirectionEnum direction,
-	    const VectorMatrixType& vts,
-	    const VectorVectorRealType& s,
-	    const VectorQnType& qns,
-	    ProgramGlobals::DirectionEnum dir)
+	          ProgramGlobals::DirectionEnum  direction,
+	          const VectorMatrixType&        vts,
+	          const VectorVectorRealType&    s,
+	          const VectorQnType&            qns,
+	          ProgramGlobals::DirectionEnum  dir)
 	{
 		WaveStructSvdType wave(transform, vts, s, qns);
 
@@ -132,23 +128,17 @@ public:
 		}
 	}
 
-	void setLrs(const LeftRightSuperType& lrs)
-	{
-		lrs_.dontCopyOperators(lrs);
-	}
+	void setLrs(const LeftRightSuperType& lrs) { lrs_.dontCopyOperators(lrs); }
 
 	const WaveStructSvdType& getWave(ProgramGlobals::SysOrEnvEnum sysOrEnv) const
 	{
 		assert(sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM || weStack_.size() > 0);
 		assert(sysOrEnv != ProgramGlobals::SysOrEnvEnum::SYSTEM || wsStack_.size() > 0);
 		return (sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? wsStack_.top()
-									  : weStack_.top();
+		                                                          : weStack_.top();
 	}
 
-	const LeftRightSuperType& lrs() const
-	{
-		return lrs_;
-	}
+	const LeftRightSuperType& lrs() const { return lrs_; }
 
 	const BlockDiagonalMatrixType& getTransform(ProgramGlobals::SysOrEnvEnum dir) const
 	{
@@ -158,14 +148,14 @@ public:
 	SizeType size(ProgramGlobals::SysOrEnvEnum sysOrEnv) const
 	{
 		return (sysOrEnv == ProgramGlobals::SysOrEnvEnum::SYSTEM) ? wsStack_.size()
-									  : weStack_.size();
+		                                                          : weStack_.size();
 	}
 
-	const BlockDiagonalMatrixType& multiPointGetTransform(SizeType ind,
-	    ProgramGlobals::DirectionEnum dir) const
+	const BlockDiagonalMatrixType&
+	multiPointGetTransform(SizeType ind, ProgramGlobals::DirectionEnum dir) const
 	{
 		return (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) ? wsStack_[ind].u()
-									     : weStack_[ind].u();
+		                                                             : weStack_[ind].u();
 	}
 
 private:
@@ -177,9 +167,9 @@ private:
 	}
 
 	LeftRightSuperType lrs_;
-	WftStackType wsStack_;
-	WftStackType weStack_;
-	bool needsPop_;
+	WftStackType       wsStack_;
+	WftStackType       weStack_;
+	bool               needsPop_;
 };
 }
 #endif // WAVESTRUCTCOMBINED_H

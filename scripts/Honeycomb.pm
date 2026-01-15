@@ -89,11 +89,11 @@ sub init
 	my $replaceMagnetic;
 	for (my $dir = 0; $dir < 3; ++$dir) {
 		my $upDir = uc($letters[$dir]);
-		my $type = ($isAinur) ? "vector ": "";
+		my $type = ""; #($isAinur) ? "vector ": "";
 		$replaceMagnetic .= getVector("${type}MagneticField$upDir", $n, $magnetic[$dir], $printcut, $isAinur);
 		$replaceMagnetic .= "\n";
 	}
-	
+
 	my $withCharge = ($model =~ /WithCharge$/);
 	my @hoppingsByDir = getHoppingsByDir($hoppingsComma, $withCharge);
 
@@ -121,7 +121,7 @@ sub init
 	} else {
 		die "$0: Model $model not supported\n";
 	}
-	
+
 	++$nOfTerms if ($withCharge);
 
 	$infoToCreateInput = {"n" => $n,
@@ -359,7 +359,7 @@ sub getConnectionsAndPlot
 	my $n = 2*$lx*$ly;
 	my $gconnections = "";
 	my $connections = "";
-	
+
 	my $isHash = procOptions($options);
 	my $isArmchairX = $isHash->{"isArmchairX"};
 	if ($isArmchairX){
@@ -380,17 +380,17 @@ sub getConnectionsAndPlot
 	my $withCharge = ($model =~ /WithCharge$/);
 	my $total = $n*$n;
 	my @hops;
-	
+
 	for (my $i = 0; $i < $total; ++$i) {
 		$hops[$i] = 0;
 	}
-		
+
 	for (my $dir = 0; $dir < 3; ++$dir) {
 		my @kthisdir;
 		for (my $i = 0; $i < $total; ++$i) {
 			$kthisdir[$i] = 0;
 		}
-		
+
 		if ($withCharge and !defined($valueOfHoppings->[$dir])) {
 			die "$0: You set *WithCharge but did not provide a #Hoppings line\n";
 		}
@@ -417,7 +417,7 @@ sub getConnectionsAndPlot
 				next unless (defined($jj) and $i < $jj);
 				addSymmetric(\@kthisdir, $i, $jj, $n, $heisenbergJ3->[$dir2]);
 			}
-			
+
 			#Hopping
 			if ($withCharge and defined($j) and $i < $j) {
 				addSymmetric(\@hops, $i, $j, $n, $valueOfHoppings->[$dir]);
@@ -430,14 +430,14 @@ sub getConnectionsAndPlot
 		$connections .= getDmrgppMatrix($kthismatrix, $mIndex, $isAinur);
 		$connections .= "\n" unless ($dir == 2);
 	}
-	
+
 	if ($withCharge) {
 		my $hopMatrix = {"data" => \@hops, "rows" => $n, "cols" => $n};
 		my $hoppingConnections = getDmrgppMatrix($hopMatrix, 0, $isAinur);
 		# Place hopping first
 		$connections = $hoppingConnections."\n\n".$connections;
 	}
-	
+
 	for (my $dirGamma = 0; $dirGamma < 3; ++$dirGamma) {
 		my @gammathisdir;
 		for (my $i = 0; $i < $total; ++$i) {
@@ -524,7 +524,7 @@ sub getDmrgppMatrix
 	if ($index > 7) { # Artificial maximum; need to FIX DMRG++ not this script
 		$ainurPrefix0 = "$ainurPrefix1";
 	}
-	
+
 my $str= <<EOF;
 ${ainurPrefix0}GeometryKind=${maybeDoubleQuote}LongRange${maybeDoubleQuote}$maybeSemicolon
 ${ainurPrefix0}GeometryOptions=${maybeDoubleQuote}none${maybeDoubleQuote}$maybeSemicolon
@@ -561,24 +561,29 @@ sub getMatrix
 	my $total = $rows*$cols;
 	my $str = ($isAinur) ? "$label=[\n" : "$label $rows $cols\n";
 	my $maybeComma = ($isAinur) ? "," : "";
+	my ($x, $y) = (0, 0);
 	for (my $i = 0; $i < $total; ++$i) {
 		my $value = $m->{"data"}->[$i];
 		defined($value) or die "$i\n";
 		$str .= "[" if ($isAinur and ($i % $cols) == 0);
+		$value = 0 if ($x <= $y); ### Long range lower matrix to zero 0
 		$str .= "$value ";
+		++$x;
 		if (($i + 1) % $cols == 0) {
 			if ($isAinur) {
 				$str .= "]";
 				$str .= "," if ($i + 1 < $total);
 			}
 			$str .= "\n";
+			++$y;
+			$x = 0;
 		} else {
 			$str .= "$maybeComma " if ($i + 1 != $total);
 		}
 	}
 
 	$str .= "];" if ($isAinur);
-	
+
 	return "$str\n";
 }
 

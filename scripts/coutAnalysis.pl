@@ -149,7 +149,7 @@ sub loadData
 	}
 
 	my $unobserved = $total - $observed;
-	my @temp = ($unobserved, 0, 0, 0);
+	my @temp = ($unobserved, 0, 0, 0, 0, 0);
 	$h->{"Unobserved"} = \@temp;
 
 	return $total;
@@ -202,8 +202,13 @@ sub printData
 		my $numberOfTimes = toFixedLength($ptr->[2], $ls[2], "before");
 		#my $min = $ptr->[4];
 		my $max = sprintf("%.3f", $ptr->[5]);
-		my $average = $time/$numberOfTimes;
-		$average = sprintf("%.3f", $average);
+		my $average;
+		if ($numberOfTimes != 0) {
+			$average = $time/$numberOfTimes;
+			$average = sprintf("%.3f", $average);
+		} else {
+			$average = "NaN";
+		}
 		print "$name$sep$time$sep2$perCentPrint$sep2$numberOfTimes";
 		print "    m $max   a $average\n";
 	}

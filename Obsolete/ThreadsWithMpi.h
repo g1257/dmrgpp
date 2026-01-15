@@ -88,28 +88,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 // typedef  int pthread_mutex_t;
 
 // bogus: to compile without pthreads
-void pthread_mutex_lock(int myMutex)
-{
-}
+void pthread_mutex_lock(int myMutex) { }
 // bogus: to compile without pthreads
-void pthread_mutex_unlock(int myMutex)
-{
-}
-namespace PsimagLite
-{
+void pthread_mutex_unlock(int myMutex) { }
+namespace PsimagLite {
 template <typename PthreadFunctionHolderType>
-class ThreadsWithMpi : public Concurrency<typename PthreadFunctionHolderType::RealType>
-{
+class ThreadsWithMpi : public Concurrency<typename PthreadFunctionHolderType::RealType> {
 public:
 
 	static void setThreads(SizeType dummy) { } // dummy
 
 	template <typename SomeConcurrencyType>
-	void loopCreate(SizeType total, PthreadFunctionHolderType& pfh, SomeConcurrencyType& concurrency)
+	void
+	loopCreate(SizeType total, PthreadFunctionHolderType& pfh, SomeConcurrencyType& concurrency)
 	{
 		PsimagLite::Range<SomeConcurrencyType> range(0, total, concurrency);
 
-		SizeType np = concurrency.nprocs();
+		SizeType np        = concurrency.nprocs();
 		SizeType blockSize = total / np;
 		if (total % np != 0)
 			blockSize++;

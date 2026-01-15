@@ -84,26 +84,23 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "TypeToString.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename VectorType>
-class TimeSerializer
-{
+template <typename VectorType> class TimeSerializer {
 
 public:
 
-	typedef typename VectorType::value_type VectorElementType;
+	typedef typename VectorType::value_type                    VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
-	typedef typename PsimagLite::Vector<StageEnum>::Type VectorStageEnumType;
-	typedef typename PsimagLite::Vector<VectorType*>::Type VectorVectorType;
+	typedef typename PsimagLite::Vector<StageEnum>::Type       VectorStageEnumType;
+	typedef typename PsimagLite::Vector<VectorType*>::Type     VectorVectorType;
 
 	template <typename SomeAoeType>
-	TimeSerializer(SizeType currentTimeStep,
-	    RealType currentTime,
-	    SizeType site,
-	    const SomeAoeType& aoe,
-	    PsimagLite::String name)
+	TimeSerializer(SizeType           currentTimeStep,
+	               RealType           currentTime,
+	               SizeType           site,
+	               const SomeAoeType& aoe,
+	               PsimagLite::String name)
 	    : currentTimeStep_(currentTimeStep)
 	    , currentTime_(currentTime)
 	    , site_(site)
@@ -117,8 +114,7 @@ public:
 			targetVectors_[i] = const_cast<VectorType*>(&aoe.targetVectors(i));
 	}
 
-	TimeSerializer(typename PsimagLite::IoSelector::In& io,
-	    PsimagLite::String prefix)
+	TimeSerializer(typename PsimagLite::IoSelector::In& io, PsimagLite::String prefix)
 	    : owner_(true)
 	{
 		prefix += "/TimeSerializer/";
@@ -129,7 +125,7 @@ public:
 		s = prefix + "Time";
 		io.read(currentTime_, s);
 
-		s = prefix + "TargetCentralSite";
+		s      = prefix + "TargetCentralSite";
 		int xi = 0;
 		io.read(xi, s);
 		if (xi < 0)
@@ -143,7 +139,7 @@ public:
 		targetVectors_.clear();
 		for (int i = 0; i < xi; ++i) {
 			VectorType* v = new VectorType();
-			s = prefix + "targetVector" + ttos(i);
+			s             = prefix + "targetVector" + ttos(i);
 			v->read(io, s);
 			targetVectors_.push_back(v);
 		}
@@ -190,10 +186,7 @@ public:
 		io.write(name_, prefix + "Name");
 	}
 
-	SizeType numberOfVectors() const
-	{
-		return targetVectors_.size();
-	}
+	SizeType numberOfVectors() const { return targetVectors_.size(); }
 
 	SizeType currentTimeStep() const { return currentTimeStep_; }
 
@@ -218,13 +211,13 @@ public:
 
 private:
 
-	SizeType currentTimeStep_;
-	RealType currentTime_;
-	SizeType site_;
-	VectorVectorType targetVectors_;
+	SizeType            currentTimeStep_;
+	RealType            currentTime_;
+	SizeType            site_;
+	VectorVectorType    targetVectors_;
 	VectorStageEnumType stages_;
-	PsimagLite::String name_;
-	bool owner_;
+	PsimagLite::String  name_;
+	bool                owner_;
 }; // class TimeSerializer
 } // namespace Dmrg
 

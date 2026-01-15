@@ -62,6 +62,9 @@ sub fromTexToTex
 	return if (!$runLatex);
 
 	my $cmd = "pdflatex $fout";
+	if($runLatex==2){
+		$cmd = "pdflatex -interaction=nonstopmode $fout"
+	}
 	system("$cmd");
 	sleep(1);
 	my $foutpdf = $fout;

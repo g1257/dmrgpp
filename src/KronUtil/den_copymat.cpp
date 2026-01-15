@@ -1,9 +1,6 @@
 #include "util.h"
 
-void den_copymat(const int nrow,
-    const int ncol,
-    const int asrc_[],
-    int bdest_[])
+void den_copymat(const int nrow, const int ncol, const int asrc_[], int bdest_[])
 {
 	/*
 	 * -----------------------------
@@ -11,8 +8,8 @@ void den_copymat(const int nrow,
 	 * -----------------------------
 	 */
 
-#define Asrc(ia, ja) asrc_[(ia) + (ja)*nrow]
-#define Bdest(ib, jb) bdest_[(ib) + (jb)*nrow]
+#define Asrc(ia, ja) asrc_[(ia) + (ja) * nrow]
+#define Bdest(ib, jb) bdest_[(ib) + (jb) * nrow]
 
 	int ia = 0;
 	int ja = 0;

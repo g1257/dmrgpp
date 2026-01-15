@@ -83,15 +83,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "InputNg.h"
 #include "ParametersModelBase.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 //! Hubbard Model Parameters
 template <typename RealType, typename QnType>
 struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
-	typedef PsimagLite::InputNg<InputCheck>::Readable IoInputType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	using BaseType         = ParametersModelBase<RealType, QnType>;
+	using IoInputType      = PsimagLite::InputNg<InputCheck>::Readable;
+	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorRealType   = std::vector<RealType>;
 
 	ParametersModelHubbard(IoInputType& io)
 	    : BaseType(io, false)
@@ -111,7 +111,8 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		}
 
 		if (anisotropy.size() > 0 && anisotropy.size() != nsites) {
-			throw PsimagLite::RuntimeError("AnisotropyD size must be " + ttos(nsites) + " entries long, if provided.\n");
+			throw PsimagLite::RuntimeError("AnisotropyD size must be " + ttos(nsites)
+			                               + " entries long, if provided.\n");
 		}
 
 		try {
@@ -122,15 +123,23 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 			magneticX.clear();
 		}
 
+		try {
+			potentialA.resize(nsites, 0.0);
+			io.read(potentialA, "PotentialA");
+			std::cout << "Has PotentialA\n";
+		} catch (std::exception&) {
+			potentialA.clear();
+		}
+
 		if (magneticX.size() > 0 && magneticX.size() != nsites) {
-			throw PsimagLite::RuntimeError("MagneticFieldX size must be " + ttos(nsites) + " entries long, if provided.\n");
+			throw PsimagLite::RuntimeError("MagneticFieldX size must be " + ttos(nsites)
+			                               + " entries long, if provided.\n");
 		}
 
 		onSiteHaddLegacy = readOldT(io, nsites);
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersModelHubbard";
 		io.createGroup(label);
@@ -143,7 +152,7 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 
 	VectorStringType readOldT(IoInputType& io, SizeType nsites)
 	{
-		typename PsimagLite::Vector<RealType>::Type potentialTlegacy;
+		VectorRealType potentialTlegacy;
 		try {
 			io.read(potentialTlegacy, "PotentialT");
 			std::cerr << "Has PotentialT\n";
@@ -154,24 +163,24 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		RealType omega = 0;
 		try {
 			io.readline(omega, "omega=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		RealType phase = 0;
 		try {
 			io.readline(phase, "phase=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		// c means cosine below
-		const PsimagLite::String function = "*(c:+:*:%t:" + ttos(omega) + ":" + ttos(phase) + ")*";
-		const PsimagLite::String nup = function + "nup";
+		const PsimagLite::String function
+		    = "*(c:+:*:%t:" + ttos(omega) + ":" + ttos(phase) + ")*";
+		const PsimagLite::String nup   = function + "nup";
 		const PsimagLite::String ndown = function + "ndown";
 
 		VectorStringType potentialTv(nsites);
 		for (SizeType site = 0; site < nsites; ++site) {
-			const RealType val = potentialTlegacy[site];
-			const PsimagLite::String plusSignOrNot = ((val < 0) && (site > 0)) ? "+" : "";
+			const RealType           val = potentialTlegacy[site];
+			const PsimagLite::String plusSignOrNot
+			    = ((val < 0) && (site > 0)) ? "+" : "";
 			PsimagLite::String expression = ttos(val) + nup + " + ";
 			expression += plusSignOrNot + ttos(val) + ndown;
 			potentialTv[site] = ProgramGlobals::killSpaces(expression);
@@ -180,10 +189,11 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 		return potentialTv;
 	}
 
-	typename PsimagLite::Vector<RealType>::Type hubbardU;
-	typename PsimagLite::Vector<RealType>::Type potentialV;
-	typename PsimagLite::Vector<RealType>::Type anisotropy;
-	typename PsimagLite::Vector<RealType>::Type magneticX;
+	VectorRealType hubbardU;
+	VectorRealType potentialV;
+	VectorRealType anisotropy;
+	VectorRealType magneticX;
+	VectorRealType potentialA;
 
 	// for time-dependent H:
 	VectorStringType onSiteHaddLegacy;

@@ -6,7 +6,7 @@ use warnings;
 my ($file) = @ARGV;
 defined($file) or exit(1);
 
-my $hashPsimagLite = getGitHash("../../PsimagLite");
+my $hashPsimagLite = getGitHash("../PsimagLite");
 
 my $hashDmrgpp = getGitHash("..");
 
@@ -70,5 +70,3 @@ sub getMicroArch
 	$vendorId =~ s/vendor_id[ \t] *:[ \t]*//;
 	return $vendorId;
 }
-
-

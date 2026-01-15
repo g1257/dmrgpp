@@ -7,7 +7,7 @@ all: manual.pdf
 FILES = $(shell find ../src -iname "*.h" -or -iname "*.cpp")
 manual.tex: manual.ptex ../README.md  $(FILES)
 	find ../src -iname "*.h" -or -iname "*.cpp" |\
-              perl ../../PsimagLite/scripts/doc.pl manual.ptex
+              perl ../PsimagLite/scripts/doc.pl manual.ptex
 
 manual.pdf: manual.tex ../README.md ../src/*h ../src/Engine/*h ../src/*cpp
 	pdflatex manual.tex

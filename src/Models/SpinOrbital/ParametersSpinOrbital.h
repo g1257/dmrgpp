@@ -84,12 +84,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../../Engine/ParametersModelBase.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersSpinOrbital : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	typedef ParametersModelBase<RealType, QnType>       BaseType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
@@ -103,8 +102,7 @@ struct ParametersSpinOrbital : public ParametersModelBase<RealType, QnType> {
 		io.readline(lambda2, "LambdaTwo=");
 	}
 
-	void write(PsimagLite::String label1,
-	    PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
 	{
 		PsimagLite::String label = label1 + "/ParametersSpinOrbital";
 		io.createGroup(label);
@@ -116,8 +114,7 @@ struct ParametersSpinOrbital : public ParametersModelBase<RealType, QnType> {
 	}
 
 	//! Function that prints model parameters to stream os
-	friend std::ostream& operator<<(std::ostream& os,
-	    const ParametersSpinOrbital& parameters)
+	friend std::ostream& operator<<(std::ostream& os, const ParametersSpinOrbital& parameters)
 	{
 		os << "SpinTwiceS=" << parameters.twiceS << "\n";
 		os << "OrbitalTwiceS=" << parameters.twiceL << "\n";

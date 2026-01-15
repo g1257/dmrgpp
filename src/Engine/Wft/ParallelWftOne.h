@@ -81,35 +81,31 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename VectorWithOffsetType,
-    typename DmrgWaveStructType,
-    typename OneSiteSpacesType>
-class ParallelWftOne
-{
+template <typename VectorWithOffsetType, typename DmrgWaveStructType, typename OneSiteSpacesType>
+class ParallelWftOne {
 
-	typedef PsimagLite::PackIndices PackIndicesType;
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	typedef PsimagLite::PackIndices                                 PackIndicesType;
+	typedef PsimagLite::Concurrency                                 ConcurrencyType;
 	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename DmrgWaveStructType::VectorSizeType VectorSizeType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type SparseElementType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType LeftRightSuperType;
+	typedef typename DmrgWaveStructType::VectorSizeType             VectorSizeType;
+	typedef typename DmrgWaveStructType::BasisWithOperatorsType     BasisWithOperatorsType;
+	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
+	typedef typename SparseMatrixType::value_type                   SparseElementType;
+	typedef typename DmrgWaveStructType::LeftRightSuperType         LeftRightSuperType;
 
 public:
 
-	typedef typename VectorWithOffsetType::value_type VectorElementType;
+	typedef typename VectorWithOffsetType::value_type          VectorElementType;
 	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
 
-	ParallelWftOne(VectorWithOffsetType& psiDest,
-	    const VectorWithOffsetType& psiSrc,
-	    const LeftRightSuperType& lrs,
-	    SizeType i0,
-	    const OneSiteSpacesType& oneSiteSpaces,
-	    const DmrgWaveStructType& dmrgWaveStruct)
+	ParallelWftOne(VectorWithOffsetType&       psiDest,
+	               const VectorWithOffsetType& psiSrc,
+	               const LeftRightSuperType&   lrs,
+	               SizeType                    i0,
+	               const OneSiteSpacesType&    oneSiteSpaces,
+	               const DmrgWaveStructType&   dmrgWaveStruct)
 	    : psiDest_(psiDest)
 	    , psiSrc_(psiSrc)
 	    , lrs_(lrs)
@@ -123,18 +119,30 @@ public:
 		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toSparse(ws_);
 		transposeConjugate(wsT_, ws_);
 		transposeConjugate(weT_, we_);
-		SizeType vOfNk = oneSiteSpaces.hilbertMain(); // CHECK!
+		SizeType vOfNk                             = oneSiteSpaces.hilbertMain(); // CHECK!
 		typename ProgramGlobals::DirectionEnum dir = oneSiteSpaces.direction();
 
 		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			assert(dmrgWaveStruct_.lrs().right().permutationInverse().size() == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).rows());
-			assert(lrs_.left().permutationInverse().size() / vOfNk == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols());
+			assert(
+			    dmrgWaveStruct_.lrs().right().permutationInverse().size()
+			    == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON)
+			           .rows());
+			assert(lrs_.left().permutationInverse().size() / vOfNk
+			       == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM)
+			              .cols());
 			pack1_ = new PackIndicesType(lrs.left().permutationInverse().size());
-			pack2_ = new PackIndicesType(lrs.left().permutationInverse().size() / vOfNk);
+			pack2_
+			    = new PackIndicesType(lrs.left().permutationInverse().size() / vOfNk);
 		} else {
-			assert(dmrgWaveStruct_.lrs().left().permutationInverse().size() == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).rows());
-			assert(lrs_.right().permutationInverse().size() / vOfNk == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON).cols());
-			pack1_ = new PackIndicesType(lrs.super().permutationInverse().size() / lrs.right().permutationInverse().size());
+			assert(dmrgWaveStruct_.lrs().left().permutationInverse().size()
+			       == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM)
+			              .rows());
+			assert(
+			    lrs_.right().permutationInverse().size() / vOfNk
+			    == dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::ENVIRON)
+			           .cols());
+			pack1_ = new PackIndicesType(lrs.super().permutationInverse().size()
+			                             / lrs.right().permutationInverse().size());
 			pack2_ = new PackIndicesType(vOfNk);
 		}
 	}
@@ -149,25 +157,29 @@ public:
 
 	void doTask(SizeType taskNumber, SizeType)
 	{
-		SizeType start = psiDest_.offset(i0_);
-		typename ProgramGlobals::DirectionEnum dir = oneSiteSpaces_.direction();
+		SizeType                               start = psiDest_.offset(i0_);
+		typename ProgramGlobals::DirectionEnum dir   = oneSiteSpaces_.direction();
 
 		if (dir == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
-			SizeType ip = 0;
+			SizeType ip    = 0;
 			SizeType alpha = 0;
-			SizeType kp = 0;
-			SizeType jp = 0;
-			pack1_->unpack(alpha, jp, (SizeType)lrs_.super().permutation(taskNumber + start));
+			SizeType kp    = 0;
+			SizeType jp    = 0;
+			pack1_->unpack(
+			    alpha, jp, (SizeType)lrs_.super().permutation(taskNumber + start));
 			pack2_->unpack(ip, kp, (SizeType)lrs_.left().permutation(alpha));
-			psiDest_.fastAccess(i0_, taskNumber) = createAux2b(psiSrc_, ip, kp, jp, wsT_, we_);
+			psiDest_.fastAccess(i0_, taskNumber)
+			    = createAux2b(psiSrc_, ip, kp, jp, wsT_, we_);
 		} else {
-			SizeType ip = 0;
+			SizeType ip   = 0;
 			SizeType beta = 0;
-			SizeType kp = 0;
-			SizeType jp = 0;
-			pack1_->unpack(ip, beta, (SizeType)lrs_.super().permutation(taskNumber + start));
+			SizeType kp   = 0;
+			SizeType jp   = 0;
+			pack1_->unpack(
+			    ip, beta, (SizeType)lrs_.super().permutation(taskNumber + start));
 			pack2_->unpack(kp, jp, (SizeType)lrs_.right().permutation(beta));
-			psiDest_.fastAccess(i0_, taskNumber) = createAux1b(psiSrc_, ip, kp, jp, ws_, weT_);
+			psiDest_.fastAccess(i0_, taskNumber)
+			    = createAux1b(psiSrc_, ip, kp, jp, ws_, weT_);
 		}
 	}
 
@@ -179,27 +191,29 @@ private:
 	ParallelWftOne& operator=(const ParallelWftOne&);
 
 	template <typename SomeVectorType>
-	SparseElementType createAux2b(const SomeVectorType& psiSrc,
-	    SizeType ip,
-	    SizeType kp,
-	    SizeType jp,
-	    const SparseMatrixType& wsT,
-	    const SparseMatrixType& we) const
+	SparseElementType createAux2b(const SomeVectorType&   psiSrc,
+	                              SizeType                ip,
+	                              SizeType                kp,
+	                              SizeType                jp,
+	                              const SparseMatrixType& wsT,
+	                              const SparseMatrixType& we) const
 	{
 		SizeType nalpha = dmrgWaveStruct_.lrs().left().permutationInverse().size();
 		assert(nalpha == wsT.cols());
 
-		SparseElementType sum = 0;
-		SizeType volumeOfNk = oneSiteSpaces_.hilbertMain(); // CHECK!
-		SizeType beta = dmrgWaveStruct_.lrs().right().permutationInverse(kp + jp * volumeOfNk);
+		SparseElementType sum        = 0;
+		SizeType          volumeOfNk = oneSiteSpaces_.hilbertMain(); // CHECK!
+		SizeType          beta
+		    = dmrgWaveStruct_.lrs().right().permutationInverse(kp + jp * volumeOfNk);
 
 		for (int k = wsT.getRowPtr(ip); k < wsT.getRowPtr(ip + 1); k++) {
-			SizeType alpha = wsT.getCol(k);
+			SizeType alpha  = wsT.getCol(k);
 			SizeType begink = we.getRowPtr(beta);
-			SizeType endk = we.getRowPtr(beta + 1);
+			SizeType endk   = we.getRowPtr(beta + 1);
 			for (SizeType k2 = begink; k2 < endk; ++k2) {
 				SizeType j = we.getCol(k2);
-				SizeType x = dmrgWaveStruct_.lrs().super().permutationInverse(alpha + j * nalpha);
+				SizeType x = dmrgWaveStruct_.lrs().super().permutationInverse(
+				    alpha + j * nalpha);
 				sum += wsT.getValue(k) * we.getValue(k2) * psiSrc.slowAccess(x);
 			}
 		}
@@ -208,16 +222,18 @@ private:
 	}
 
 	template <typename SomeVectorType>
-	SparseElementType createAux1b(const SomeVectorType& psiSrc,
-	    SizeType ip,
-	    SizeType kp,
-	    SizeType jp,
-	    const SparseMatrixType& ws,
-	    const SparseMatrixType& weT) const
+	SparseElementType createAux1b(const SomeVectorType&   psiSrc,
+	                              SizeType                ip,
+	                              SizeType                kp,
+	                              SizeType                jp,
+	                              const SparseMatrixType& ws,
+	                              const SparseMatrixType& weT) const
 	{
 		SizeType volumeOfNk = oneSiteSpaces_.hilbertMain(); // CHECK!
-		SizeType ni = dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols();
-		SizeType nip = dmrgWaveStruct_.lrs().left().permutationInverse().size() / volumeOfNk;
+		SizeType ni
+		    = dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).cols();
+		SizeType nip
+		    = dmrgWaveStruct_.lrs().left().permutationInverse().size() / volumeOfNk;
 		SizeType alpha = dmrgWaveStruct_.lrs().left().permutationInverse(ip + kp * nip);
 
 		SparseElementType sum = 0;
@@ -226,7 +242,8 @@ private:
 			SizeType i = ws.getCol(k);
 			for (int k2 = weT.getRowPtr(jp); k2 < weT.getRowPtr(jp + 1); k2++) {
 				SizeType j = weT.getCol(k2);
-				SizeType x = dmrgWaveStruct_.lrs().super().permutationInverse(i + j * ni);
+				SizeType x
+				    = dmrgWaveStruct_.lrs().super().permutationInverse(i + j * ni);
 				sum += ws.getValue(k) * weT.getValue(k2) * psiSrc.slowAccess(x);
 			}
 		}
@@ -234,18 +251,18 @@ private:
 		return sum;
 	}
 
-	VectorWithOffsetType& psiDest_;
+	VectorWithOffsetType&       psiDest_;
 	const VectorWithOffsetType& psiSrc_;
-	const LeftRightSuperType& lrs_;
-	SizeType i0_;
-	const OneSiteSpacesType& oneSiteSpaces_;
-	const DmrgWaveStructType& dmrgWaveStruct_;
-	SparseMatrixType we_;
-	SparseMatrixType ws_;
-	PackIndicesType* pack1_;
-	PackIndicesType* pack2_;
-	SparseMatrixType wsT_;
-	SparseMatrixType weT_;
+	const LeftRightSuperType&   lrs_;
+	SizeType                    i0_;
+	const OneSiteSpacesType&    oneSiteSpaces_;
+	const DmrgWaveStructType&   dmrgWaveStruct_;
+	SparseMatrixType            we_;
+	SparseMatrixType            ws_;
+	PackIndicesType*            pack1_;
+	PackIndicesType*            pack2_;
+	SparseMatrixType            wsT_;
+	SparseMatrixType            weT_;
 }; // class ParallelWftOne
 } // namespace Dmrg
 

@@ -3,12 +3,9 @@
 #include "InputCheck.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename InputNgType, typename RealType_>
-class OmegaParams
-{
+template <typename InputNgType, typename RealType_> class OmegaParams {
 
 public:
 
@@ -16,16 +13,13 @@ public:
 
 	OmegaParams(PsimagLite::String data)
 	{
-		Dmrg::InputCheck inputCheck;
+		Dmrg::InputCheck                inputCheck;
 		typename InputNgType::Writeable ioWriteable(inputCheck, data);
-		typename InputNgType::Readable io(ioWriteable);
+		typename InputNgType::Readable  io(ioWriteable);
 		configure(io);
 	}
 
-	OmegaParams(typename InputNgType::Readable& io)
-	{
-		configure(io);
-	}
+	OmegaParams(typename InputNgType::Readable& io) { configure(io); }
 
 	void configure(typename InputNgType::Readable& io)
 	{
@@ -36,10 +30,7 @@ public:
 		io.readline(obs_, "Observable=");
 	}
 
-	RealType omega(SizeType i) const
-	{
-		return i * step_ + begin_;
-	}
+	RealType omega(SizeType i) const { return i * step_ + begin_; }
 
 	PsimagLite::String observable() const { return obs_; }
 
@@ -49,10 +40,10 @@ public:
 
 private:
 
-	RealType begin_;
-	RealType step_;
-	SizeType offset_;
-	SizeType total_;
+	RealType           begin_;
+	RealType           step_;
+	SizeType           offset_;
+	SizeType           total_;
 	PsimagLite::String obs_;
 };
 

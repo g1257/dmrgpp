@@ -1,9 +1,7 @@
 #include "util.h"
 
 template <typename ComplexOrRealType>
-void den_eye(const int nrow_C,
-    const int ncol_C,
-    PsimagLite::Matrix<ComplexOrRealType>& c_)
+void den_eye(const int nrow_C, const int ncol_C, PsimagLite::Matrix<ComplexOrRealType>& c_)
 {
 	/*
 	 * -------------------------------------

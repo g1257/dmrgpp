@@ -85,28 +85,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "FreqEnum.h"
 #include "TargetParamsCommon.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType>
-class TargetParamsCorrectionVector : public TargetParamsCommon<ModelType>
-{
+class TargetParamsCorrectionVector : public TargetParamsCommon<ModelType> {
 
 public:
 
-	typedef TargetParamsCommon<ModelType> BaseType;
-	typedef typename ModelType::RealType RealType;
+	typedef TargetParamsCommon<ModelType>             BaseType;
+	typedef typename ModelType::RealType              RealType;
 	typedef typename BaseType::BaseType::PairFreqType PairFreqType;
-	typedef typename ModelType::OperatorType OperatorType;
-	typedef typename OperatorType::PairType PairType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrReal;
-	typedef PsimagLite::Matrix<ComplexOrReal> MatrixType;
+	typedef typename ModelType::OperatorType          OperatorType;
+	typedef typename OperatorType::PairType           PairType;
+	typedef typename OperatorType::StorageType        SparseMatrixType;
+	typedef typename SparseMatrixType::value_type     ComplexOrReal;
+	typedef PsimagLite::Matrix<ComplexOrReal>         MatrixType;
 
 	template <typename IoInputter>
-	TargetParamsCorrectionVector(IoInputter& io,
-	    PsimagLite::String targeting,
-	    const ModelType& model)
+	TargetParamsCorrectionVector(IoInputter&        io,
+	                             PsimagLite::String targeting,
+	                             const ModelType&   model)
 	    : BaseType(io, targeting, model)
 	    , cgSteps_(1000)
 	    , firstRitz_(0)
@@ -149,30 +147,26 @@ public:
 
 		try {
 			io.readline(cgSteps_, "ConjugateGradientSteps=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(cgEps_, "ConjugateGradientEps=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			int x = 0;
 			io.readline(x, "TSPUseQns=");
-			err("TSPUseQns= is no longer needed, please delete it from the input file\n");
-		} catch (std::exception&) {
-		}
+			err("TSPUseQns= is no longer needed, please delete it from the input "
+			    "file\n");
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(firstRitz_, "FirstRitz=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		try {
 			io.readline(nForFraction_, "CVnForFraction=");
-		} catch (std::exception&) {
-		}
+		} catch (std::exception&) { }
 
 		if (nForFraction_ > 1)
 			io.readline(advanceEach_, "TSPAdvanceEach=");
@@ -181,77 +175,49 @@ public:
 			err("FirstRitz must be 0 for Matsubara\n");
 	}
 
-	virtual RealType correctionA() const
-	{
-		return correctionA_;
-	}
+	virtual RealType correctionA() const { return correctionA_; }
 
-	virtual SizeType type() const
-	{
-		return type_;
-	}
+	virtual SizeType type() const { return type_; }
 
-	virtual void type(SizeType x)
-	{
-		type_ = x;
-	}
+	virtual void type(SizeType x) { type_ = x; }
 
-	virtual SizeType cgSteps() const
-	{
-		return cgSteps_;
-	}
+	virtual SizeType cgSteps() const { return cgSteps_; }
 
-	virtual PairFreqType omega() const
-	{
-		return omega_;
-	}
+	virtual PairFreqType omega() const { return omega_; }
 
 	virtual void omega(PsimagLite::FreqEnum freqEnum, RealType x)
 	{
 		omega_ = PairFreqType(freqEnum, x);
 	}
 
-	virtual RealType eta() const
-	{
-		return eta_;
-	}
+	virtual RealType eta() const { return eta_; }
 
-	virtual RealType cgEps() const
-	{
-		return cgEps_;
-	}
+	virtual RealType cgEps() const { return cgEps_; }
 
-	virtual typename BaseType::AlgorithmEnum algorithm() const
-	{
-		return algorithm_;
-	}
+	virtual typename BaseType::AlgorithmEnum algorithm() const { return algorithm_; }
 
 	virtual SizeType firstRitz() const { return firstRitz_; }
 
 	virtual SizeType nForFraction() const { return nForFraction_; }
 
-	virtual SizeType advanceEach() const
-	{
-		return advanceEach_;
-	}
+	virtual SizeType advanceEach() const { return advanceEach_; }
 
 private:
 
-	SizeType type_;
+	SizeType                         type_;
 	typename BaseType::AlgorithmEnum algorithm_;
-	SizeType cgSteps_;
-	SizeType firstRitz_;
-	SizeType nForFraction_;
-	SizeType advanceEach_;
-	RealType correctionA_;
-	PairFreqType omega_;
-	RealType eta_;
-	RealType cgEps_;
+	SizeType                         cgSteps_;
+	SizeType                         firstRitz_;
+	SizeType                         nForFraction_;
+	SizeType                         advanceEach_;
+	RealType                         correctionA_;
+	PairFreqType                     omega_;
+	RealType                         eta_;
+	RealType                         cgEps_;
 }; // class TargetParamsCorrectionVector
 
 template <typename ModelType>
-inline std::ostream& operator<<(std::ostream& os,
-    const TargetParamsCorrectionVector<ModelType>& t)
+inline std::ostream& operator<<(std::ostream& os, const TargetParamsCorrectionVector<ModelType>& t)
 {
 	os << "TargetParams.type=AdaptiveDynamic\n";
 	const TargetParamsCommon<ModelType>& tp = t;

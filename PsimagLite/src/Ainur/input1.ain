@@ -1,0 +1,13 @@
+##Ainur1.0
+int TotalNumberOfSites=16;
+
+vector myv=[0.5 i 0.0, 0.0 i 0.3];
+vector myv2;
+myv2=[4.2,...x10];
+
+string Model="HubbardOneBand";
+Model="2";
+
+matrix mymatrix=[
+[5, 4, 6],
+[7, 8, 9]];

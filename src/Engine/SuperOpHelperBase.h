@@ -4,23 +4,19 @@
 #include "ProgramGlobals.h"
 #include "Vector.h"
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename SuperGeometryType, typename ParametersType>
-class SuperOpHelperBase
-{
+template <typename SuperGeometryType, typename ParametersType> class SuperOpHelperBase {
 
 public:
 
 	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef std::pair<bool, SizeType> PairBoolSizeType;
+	typedef std::pair<bool, SizeType>          PairBoolSizeType;
 	using PairMetaOpForConnection = std::pair<MetaOpForConnection, MetaOpForConnection>;
 
 	SuperOpHelperBase(const SuperGeometryType& superGeometry)
 	    : superGeometry_(superGeometry)
-	{
-	}
+	{ }
 
 	virtual ~SuperOpHelperBase() { }
 
@@ -44,25 +40,21 @@ public:
 		return PairBoolSizeType(false, 0);
 	}
 
-	virtual PairMetaOpForConnection finalIndices(const VectorSizeType&,
-	    ProgramGlobals::ConnectionEnum,
-	    SizeType) const
+	virtual PairMetaOpForConnection
+	finalIndices(const VectorSizeType&, ProgramGlobals::ConnectionEnum, SizeType) const
 	{
 		throw PsimagLite::RuntimeError("SuperOpHelperBase::finalIndices4sites\n");
 	}
 
 	// non virtual below
 
-	const SuperGeometryType& superGeometry() const
-	{
-		return superGeometry_;
-	}
+	const SuperGeometryType& superGeometry() const { return superGeometry_; }
 
 	const ProgramGlobals::DirectionEnum& dir() const { return dir_; }
 
 private:
 
-	const SuperGeometryType& superGeometry_;
+	const SuperGeometryType&      superGeometry_;
 	ProgramGlobals::DirectionEnum dir_;
 };
 }

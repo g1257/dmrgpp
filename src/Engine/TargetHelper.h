@@ -79,30 +79,26 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGET_HELPER_H
 #define TARGET_HELPER_H
 
-namespace Dmrg
-{
+namespace Dmrg {
 
-template <typename ModelType_, typename WaveFunctionTransfType_>
-class TargetHelper
-{
+template <typename ModelType_, typename WaveFunctionTransfType_> class TargetHelper {
 
 public:
 
-	typedef ModelType_ ModelType;
-	typedef WaveFunctionTransfType_ WaveFunctionTransfType;
-	typedef typename ModelType::RealType RealType;
-	typedef typename ModelType::ModelHelperType ModelHelperType;
+	typedef ModelType_                                   ModelType;
+	typedef WaveFunctionTransfType_                      WaveFunctionTransfType;
+	typedef typename ModelType::RealType                 RealType;
+	typedef typename ModelType::ModelHelperType          ModelHelperType;
 	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
+	typedef typename ModelType::InputValidatorType       InputValidatorType;
 
-	TargetHelper(const LeftRightSuperType& lrs,
-	    const ModelType& model,
-	    const WaveFunctionTransfType& wft)
+	TargetHelper(const LeftRightSuperType&     lrs,
+	             const ModelType&              model,
+	             const WaveFunctionTransfType& wft)
 	    : lrs_(lrs)
 	    , model_(model)
 	    , wft_(wft)
-	{
-	}
+	{ }
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
@@ -110,15 +106,12 @@ public:
 
 	const WaveFunctionTransfType& wft() const { return wft_; }
 
-	bool withLegacyBugs() const
-	{
-		return model_.params().options.isSet("keepLegacyBugs");
-	}
+	bool withLegacyBugs() const { return model_.params().options.isSet("keepLegacyBugs"); }
 
 private:
 
-	const LeftRightSuperType& lrs_;
-	const ModelType& model_;
+	const LeftRightSuperType&     lrs_;
+	const ModelType&              model_;
 	const WaveFunctionTransfType& wft_;
 }; // TargetHelper
 

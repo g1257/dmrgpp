@@ -72,25 +72,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Utils.h"
 
 // Utility functions that are still needed
-namespace utils
-{
-
-PsimagLite::String basename(PsimagLite::String pathname)
-{
-	return PsimagLite::String(std::find_if(pathname.rbegin(),
-				      pathname.rend(),
-				      UnixPathSeparator())
-				      .base(),
-	    pathname.end());
-}
+namespace utils {
 
 PsimagLite::String pathPrepend(PsimagLite::String pre, PsimagLite::String pathname)
 {
-	bool addDotDot = false;
+	bool               addDotDot = false;
 	PsimagLite::String path1("");
 	if (pathname.length() > 2 && pathname[0] == '.' && pathname[1] == '.') {
 		addDotDot = true;
-		path1 = pathname.substr(2, pathname.length());
+		path1     = pathname.substr(2, pathname.length());
 	}
 
 	if (pathname.length() > 1 && pathname[0] == '/')

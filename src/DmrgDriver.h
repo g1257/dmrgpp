@@ -20,6 +20,7 @@
 #include "Operators.h"
 #include "ParametersDmrgSolver.h"
 #include "ProgramGlobals.h"
+#include "Qn.h"
 #include "SuperGeometry.h"
 #include "TargetingBase.h"
 #include "VectorWithOffset.h"
@@ -41,22 +42,19 @@ struct OperatorOptions {
 	    , hasOperatorExpression(false)
 	    , transpose(false)
 	    , enabled(false)
-	{
-	}
+	{ }
 
-	SizeType site;
-	SizeType dof;
+	SizeType           site;
+	SizeType           dof;
 	PsimagLite::String label;
 	PsimagLite::String opexpr;
-	bool hasOperatorExpression;
-	bool transpose;
-	bool enabled;
+	bool               hasOperatorExpression;
+	bool               transpose;
+	bool               enabled;
 };
 
 typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-typedef Dmrg::ParametersDmrgSolver<RealType,
-    InputNgType::Readable,
-    Dmrg::Qn>
+typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
     ParametersDmrgSolverType;
 
 void usageOperator();
@@ -64,9 +62,9 @@ void usageOperator();
 template <typename ModelBaseType>
 void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOptions)
 {
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::OperatorsType OperatorsType;
-	typedef typename OperatorsType::OperatorType OperatorType;
+	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
+	typedef typename ModelHelperType::OperatorsType         OperatorsType;
+	typedef typename OperatorsType::OperatorType            OperatorType;
 	typedef Dmrg::OperatorSpec<ModelBaseType, OperatorType> OperatorSpecType;
 
 	if (obsOptions.hasOperatorExpression && obsOptions.label != "") {
@@ -86,12 +84,12 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 		return;
 	}
 
-	OperatorType opC;
+	OperatorType       opC;
 	const OperatorType opEmpty;
 
 	if (obsOptions.hasOperatorExpression) {
-		OperatorSpecType opSpec(model);
-		int site = -1;
+		OperatorSpecType                                  opSpec(model);
+		int                                               site = -1;
 		PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(opSpec);
 
 		canonicalExpression(opC, obsOptions.opexpr, opEmpty, site);
@@ -119,8 +117,8 @@ void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOption
 
 template <typename SolverType, typename VectorWithOffsetType>
 void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType&,
-    const ParametersDmrgSolverType&,
-    InputNgType::Readable&,
-    const OperatorOptions&);
+               const ParametersDmrgSolverType&,
+               InputNgType::Readable&,
+               const OperatorOptions&);
 
 #endif // DMRGDRIVER_H

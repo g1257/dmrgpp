@@ -1,0 +1,157 @@
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[english]{babel}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{graphicx}
+\usepackage{fancyvrb} %keep
+\usepackage{fancyhdr}
+\usepackage{booktabs} %keep
+\usepackage{mathtools} %keep
+\usepackage{hyperref}
+
+\definecolor{mygray}{HTML}{AAAAAA}
+
+\newcommand{\code}[1]{{\ttfamily #1}}
+
+\fancyhead{}
+\fancyhead[L]{\leftmark}
+\fancyhead[R]{\rightmark}
+\cfoot{}
+\rfoot{\thepage} %exit
+
+\hypersetup{colorlinks=true}
+
+
+\newcommand{\cppFile}[1]{\texttt{#1}}
+%% Remove the below command before submission
+\newcommand{\todo}[1]{\textcolor{red}{#1}}
+%Format to denote a C++ class name:
+\newcommand{\cppClass}[1]{{\sffamily #1}}
+%Format to denote a C++ variable:
+\newcommand{\cppFunction}[1]{{\tt #1}}
+% for the cover page:
+\newcommand{\HRule}{\noindent\rule{\linewidth}{1.5pt}}
+\newcommand{\ptexPaste}[1]{\fbox{\textcolor{red}{PLEASE RUN ptex.pl on this .ptex source
+to obtain the correct test for tag #1}}}
+\newcommand{\ptexLabel}[1]{\ptexPaste{#1}}
+\newcommand{\ptexInterface}[1]{\ptexPaste{#1}}
+\newcommand{\ptexReadFile}[1]{\ptexPaste{#1}}
+\newcommand{\ptexReadFileVerbatim}[1]{\ptexPaste{#1}}
+
+\hyphenation{Wave-Function-Transformation}
+\lstset{language=c++,basicstyle=\footnotesize\ttfamily,
+keywordstyle=\color{blue}\bfseries,frame=shadowbox}
+\pagestyle{fancy}
+\begin{document}
+
+\begin{titlepage}
+\vspace*{\stretch{1}}
+\HRule
+\begin{flushright}
+\LARGE  PsimagLite v2 Tutorial\\
+\end{flushright}
+\HRule
+\vspace*{\stretch{2}}
+
+%
+\begin{center}
+%\Large Tutorial Version: \today\\
+\end{center}
+
+\begin{center}
+\textsc{Oak Ridge, 2020}
+\end{center}
+
+\end{titlepage}
+%
+\section*{Introduction}
+Why should you read this tutorial?
+The motivation for this tutorial is that you can use PsimagLite in
+your own C++ programs. Another reason to read this tutorial
+is to learn C++. We will pose exercises from beginner to intermediate
+to advanced. Moreover, some of the exercises will ask you to
+add or modify or improve functionality in PsimagLite itself,
+and so your solutions could be included in PsimagLite.
+You are encouraged to git clone PsimagLite and make changes that
+you think are suitable, and request pulls, and discuss in our 
+mailing list. All corrections are welcomed, and either git pull
+request or emails are OK.
+
+The actual topics to be discussed will become clear once we have
+some lessons typed in. The actual .cpp programs that use and
+illustrate how to use PsimagLite are going to be in
+\cppFile{drivers/}. We'll try to make them fit in one page including
+error testing, and additional pages of documentation in line.
+The documentation inside the .cpp file will then be split
+in parts, and each part will look like the following.
+\begin{tt}
+\begin{verbatim}
+/* PSIDOC PartName
+   standard latex markup here
+ */
+\end{verbatim}
+\end{tt}
+Note that the \texttt{PartName} will be something descriptive
+of what we are talking about there and must be \emph{unique}.
+Moreover, that part can be included in this document,
+the \cppFile{tutorial.ptex} file, by using the command
+\texttt{$\backslash$ptexPaste} \texttt{\{PartName\}}, where you have to use
+the right name for \texttt{PartName}.
+This way we import documentation from each .cpp file
+into this ptex file.
+
+In addition to being short, the .cpp files for the tutorial
+should include compilation instructions without any \texttt{Makefile},
+so that all includes and library paths and compiler switches
+are visible in the command line. Dependencies must be kept
+minimal; you'll need PsimagLite, of course, and a C++ compiler, but
+other than that, we should really really try not to have dependencies
+unless really needed. 
+What's an acceptable dependency?
+If we are showing how to read an Ainur input then we need BOOST, but should
+still compile without BOOST and run plain old data (POD) input files.
+If we are showing how to integrate a function, then we need the GSL, but
+again the example should be able to compile without it; it won't run
+though, but display a message saying that the GSL is needed.
+
+\ptexPaste{InputNg_Intro}
+\ptexPaste{InputNg_main1}
+\ptexPaste{InputNg_Recap}
+
+\subsection*{Exercises}
+We'll use stars * next to the exercise to mark the most difficult ones.
+The ones marked with M may lead to mainstream inclusion.
+
+1 In the tutorial, we printed the value of the scalar. Do the same
+for the vector and the string.
+
+
+2 Read a matrix from the input file. Use PsimagLite::Matrix for
+the type, and use $mymatrix=[[1,2],[3,4]];$ in the input file.
+Print the matrix observing that PsimagLite::Matrix has operator \verb!<<!
+
+
+3* (M) The need for Writeable and Readable implies the need for
+two statements for actually reading the file.
+This may seem cumbersome. Therefore, create a new class, say,
+MyInputNg, with a constructor that takes the filename and with
+client code
+\begin{lstlisting}
+MyInput io(filename);
+\end{lstlisting}
+where now the object io can be used as Readable.
+Discuss if it's better to use inheritance or not.
+Discuss the private members of your class, their memory usage, and lifetime.
+
+4 Check the tutorial for memory leaks.
+
+5 Define a C++ boolean variable hasTheString and after \verb!try!ing to read
+mystring from the input file, set hasTheString to true if mystring was
+actually present in the input, or false otherwise. Print the variable
+hasTheString at the end of the tutorial. \emph{Hint: Make sure you understand
+	how try/catch works in C++.}
+\end{document}
+
