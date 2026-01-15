@@ -122,10 +122,8 @@ Create a directory somewhere and cd to it.
 cd ../
 git clone https://github.com/g1257/dmrgpp.git
 cd dmrgpp/
-git checkout features
-git pull origin features
 </pre>
-Please also read https://g1257.github.io/availabilityOfSoftware.html
+Users should clone and work with branch master.
 
 ### Configure
 
