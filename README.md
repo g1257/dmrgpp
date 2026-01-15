@@ -123,7 +123,6 @@ cd ../
 git clone https://github.com/g1257/dmrgpp.git
 cd dmrgpp/
 </pre>
-Users should clone and work with the `master` branch.
 Pull requests should be opened against the `master` branch.
 
 ### Configure
