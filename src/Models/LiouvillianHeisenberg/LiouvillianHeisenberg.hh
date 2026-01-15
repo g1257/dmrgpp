@@ -97,7 +97,7 @@ class LiouvillianHeisenberg : public ModelBaseType
 {
 public:
 
-	typedef typename ModelBaseType::ModelHelperType ModelHelperType;
+	using ModelBaseType::ModelHelperType;
 	typedef typename ModelHelperType::BasisType BasisType;
 	typedef typename ModelBaseType::SuperGeometryType SuperGeometryType;
 	typedef typename ModelBaseType::LeftRightSuperType LeftRightSuperType;
