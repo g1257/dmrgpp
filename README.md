@@ -113,7 +113,7 @@ Only headers files are used; boost runtime is not used.
 
 * [required] perl
 
-* [optional] GSL (GNU Scientific library)
+* [optional] GSL (GNU Scientific Library)
 
 ### Downloading DMRG++
 Create a directory somewhere and cd to it.
