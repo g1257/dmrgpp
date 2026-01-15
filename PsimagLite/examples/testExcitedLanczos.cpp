@@ -22,15 +22,15 @@ int main(int argc, char* argv[])
 
 	SizeType excited = atoi(argv[1]);
 
-	SizeType                        n = 4;
+	/* We fill a dense matrix */
+	int                             n = 8;
 	PsimagLite::Matrix<ComplexType> m(n, n);
 	// fill m
-	m(1, 2) = -0.5;
+	for (int i = 0; i < n; ++i)
+		m(i, i) = 1.0;
+	m(1, 2) = ComplexType(0.0, 0.5);
 	m(2, 1) = PsimagLite::conj(m(1, 2));
-	m(0, 0) = m(3, 3) = -0.25;
-	m(1, 1) = m(2, 2) = 0.25;
-
-	std::cout << "matrix\n" << m << "\n";
+	m(3, 5) = m(5, 3) = -1.5;
 
 	PsimagLite::CrsMatrix<ComplexType> msparse(m);
 

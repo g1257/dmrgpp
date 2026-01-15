@@ -98,14 +98,13 @@ target_include_directories(omegas PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_link_libraries(omegas kronutil psimaglite::psimaglite)
 
 # Tests below for all executables
-# Pipeline tests for all executables here
 
 # For dmrg main executable
 set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)
 
 add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
 add_test(NAME input3 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3.ain)
-add_test(NAME energy2to3 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../PsimagLite/scripts/checkValueOfLabel.pl
+add_test(NAME energy2to3 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../PsimagLite/scripts/postDmrgChecks.pl
                                  ${CMAKE_CURRENT_BINARY_DIR}/src)
 add_test(NAME input4 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4.ain)
 add_test(NAME input5 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input5.ain)
@@ -155,3 +154,15 @@ add_test(NAME input3100 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3100.ain)
 add_test(NAME input4720 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4720.ain)
 add_test(NAME input6020 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input6020.ain)
 add_test(NAME input6700 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input6700.ain)
+
+# Tests for the observe executable
+add_test(NAME observe0002 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input2.ain
+                                  "<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>")
+add_test(NAME observe0002_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
+                                    ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput2.cout)
+set_tests_properties(observe0002_1 PROPERTIES DEPENDS observe0002)
+add_test(NAME observe6700 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input20.ain
+                                  "<gs|sz;sz|gs>,<gs|splus;sminus|gs>")
+add_test(NAME observe6700_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
+                                    ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput20.cout)
+set_tests_properties(observe6700_1 PROPERTIES DEPENDS observe6700)

@@ -93,7 +93,7 @@ struct ProgramGlobals {
 
 	static bool oldChangeOfBasis;
 
-	static const PsimagLite::String license;
+	static const std::string license;
 
 	static const SizeType MAX_LPS = 1000;
 
@@ -145,7 +145,7 @@ struct ProgramGlobals {
 			return;
 		if (maxElectronsOneSpin != 0) {
 			std::cerr << PsimagLite::AnsiColor::blue;
-			PsimagLite::String msg("ProgramGlobals::init(...) replayed\n");
+			std::string msg("ProgramGlobals::init(...) replayed\n");
 			std::cout << msg;
 			std::cerr << msg;
 			std::cerr << PsimagLite::AnsiColor::reset;
@@ -165,26 +165,28 @@ struct ProgramGlobals {
 		return -1;
 	}
 
-	static PsimagLite::String rootName(PsimagLite::String filename)
+	static std::string rootName(std::string filename)
 	{
-		PsimagLite::String rootname = filename;
-		size_t             index    = rootname.find(".", 0);
-		if (index != PsimagLite::String::npos) {
+		std::string rootname = filename;
+		size_t      index    = rootname.find(".", 0);
+		if (index != std::string::npos) {
 			rootname.erase(index, filename.length());
 		}
 
 		return rootname;
 	}
 
-	static PsimagLite::String coutName(PsimagLite::String filename)
+	static std::string coutName(std::string filename, std::string app_name)
 	{
-		PsimagLite::String rootname = PsimagLite::basename(filename);
-		size_t             index    = rootname.find(".", 0);
-		if (index != PsimagLite::String::npos) {
+		std::string rootname = PsimagLite::basename(filename);
+		size_t      index    = rootname.find(".", 0);
+		if (index != std::string::npos) {
 			rootname.erase(index, filename.length());
 		}
 
-		return "runFor" + rootname + ".cout";
+		std::string maybe_app_name = (app_name == "observe") ? app_name : "";
+
+		return "runFor" + maybe_app_name + rootname + ".cout";
 	}
 
 	static SizeType logBase2(SizeType x)
@@ -224,7 +226,7 @@ struct ProgramGlobals {
 		return is;
 	}
 
-	static PsimagLite::String toString(const DirectionEnum d)
+	static std::string toString(const DirectionEnum d)
 	{
 		switch (d) {
 		case DirectionEnum::INFINITE:
@@ -241,17 +243,17 @@ struct ProgramGlobals {
 		return "UNKNOWN_DIRECTION_ENUM";
 	}
 
-	static PsimagLite::String killSpaces(PsimagLite::String str)
+	static std::string killSpaces(std::string str)
 	{
-		PsimagLite::String buffer;
-		const SizeType     n = str.length();
+		std::string    buffer;
+		const SizeType n = str.length();
 		for (SizeType i = 0; i < n; ++i)
 			if (str[i] != ' ')
 				buffer += str[i];
 		return buffer;
 	}
 
-	static PsimagLite::String toLower(PsimagLite::String data)
+	static std::string toLower(std::string data)
 	{
 		std::transform(data.begin(),
 		               data.end(),
@@ -260,8 +262,8 @@ struct ProgramGlobals {
 		return data;
 	}
 
-	static PsimagLite::String SYSTEM_STACK_STRING;
-	static PsimagLite::String ENVIRON_STACK_STRING;
+	static std::string SYSTEM_STACK_STRING;
+	static std::string ENVIRON_STACK_STRING;
 }; // ProgramGlobals
 
 } // namespace Dmrg

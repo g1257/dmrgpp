@@ -63,11 +63,5 @@ private:
 	static std::ofstream   cout_stream_;
 	static bool            redirected_;
 };
-
-std::string     RedirectOutput::app_name_;
-std::string     RedirectOutput::app_name2_;
-std::streambuf* RedirectOutput::cout_buffer_ = nullptr;
-std::ofstream   RedirectOutput::cout_stream_;
-bool            RedirectOutput::redirected_ = false;
 }
 #endif // REDIRECTOUTPUT_HH
