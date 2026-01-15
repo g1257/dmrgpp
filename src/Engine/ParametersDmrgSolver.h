@@ -687,7 +687,10 @@ struct ParametersDmrgSolver {
 
 		// then for restart
 		bool isRestart = this->options.isSet("restart");
-		return (isRestart) ? this->checkpoint.filename() : "";
+		if (isRestart)
+			return this->checkpoint.filename();
+
+		return "";
 	}
 
 private:
