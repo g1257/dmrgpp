@@ -1,4 +1,5 @@
 #include "ObserveDriver.h"
+#include "RedirectOutput.hh"
 
 using namespace Dmrg;
 
@@ -15,7 +16,7 @@ template <typename GeometryType, typename ModelHelperType, typename VectorWithOf
 void mainLoop(GeometryType&                   geometry,
               InputNgType::Readable&          io,
               const ParametersDmrgSolverType& params,
-              const PsimagLite::String&       list)
+              const std::string&              list)
 {
 	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
 
@@ -33,8 +34,8 @@ void mainLoop(GeometryType&                   geometry,
 	ModelSelector<ModelBaseType> modelSelector(params.model);
 	const ModelBaseType&         model = modelSelector(params, io, geometry);
 
-	const PsimagLite::String& datafile = params.filename;
-	IoInputType               dataIo(datafile);
+	const std::string& datafile = params.filename;
+	IoInputType        dataIo(datafile);
 
 	bool iscomplex = false;
 	dataIo.read(iscomplex, "IsComplex");
@@ -53,7 +54,7 @@ template <typename GeometryType,
 void mainLoop1(GeometryType&                   geometry,
                InputNgType::Readable&          io,
                const ParametersDmrgSolverType& params,
-               const PsimagLite::String&       list)
+               const std::string&              list)
 {
 	typedef Basis<MySparseMatrix>                             BasisType;
 	typedef BasisWithOperators<BasisType>                     BasisWithOperatorsType;
@@ -77,7 +78,7 @@ template <typename MySparseMatrix>
 void mainLoop0(InputNgType::Readable&    io,
                ParametersDmrgSolverType& dmrgSolverParams,
                InputCheck&               inputCheck,
-               const PsimagLite::String& list)
+               const std::string&        list)
 {
 	typedef typename MySparseMatrix::value_type ComplexOrRealType;
 	typedef Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>
@@ -99,10 +100,10 @@ void mainLoop0(InputNgType::Readable&    io,
 	}
 }
 
-void usage(const PsimagLite::String& name)
+void usage(const std::string& name)
 {
-	std::cerr << "USAGE is " << name << " -f filename [-p precision] [-F fileoption]";
-	std::cerr << " [-V] whatToMeasure\n";
+	std::cerr << "USAGE is " << name << " -f filename [-l output_file] [-p precision] ";
+	std::cerr << " [-F fileoption] [-U] [-V] whatToMeasure\n";
 }
 
 /* PSIDOC ObserveDriver
@@ -119,11 +120,13 @@ must be present.
 \item[whatToMeasure] {[}Mandatory, String{]} What to measure post process.
 This is a comma-separated list of braket specifications.
 Braket specifications can be bare or dressed, and are explained elsewhere.
-\item[-p] [Optional, Integer] Digits of precision for printing.
+\item[-l] {[}Optional, String{]} Redirect std::cout to this file.
 \item[-o] {[}Optional, String{]} Extra options for SolverOptions
+\item[-p] [Optional, Integer] Digits of precision for printing.
 \item[-F] [Optional, string] TBW
 \item[-S] [Optional, number] Ignore the Threads= line if present in the input, and run with
 Threads=number
+\item[-U] [Optional] Make cout output unbuffered
 \item[-V] [Optional] Print version and exit
 \end{itemize}
   */
@@ -131,18 +134,23 @@ int main(int argc, char** argv)
 {
 	using namespace Dmrg;
 	PsimagLite::PsiApp application("observe", &argc, &argv, 1);
-	PsimagLite::String filename;
-	PsimagLite::String filesOption;
+	std::string        filename;
+	std::string        filesOption;
+	std::string        output_filename;
+	std::string        sOptions(",observe");
 	int                opt          = 0;
 	int                precision    = 0;
 	SizeType           threadsInCmd = 0;
 	bool               versionOnly  = false;
-	PsimagLite::String sOptions(",observe");
+	bool               unbuffered   = false;
 
-	while ((opt = getopt(argc, argv, "f:p:o:F:S:V")) != -1) {
+	while ((opt = getopt(argc, argv, "f:l:o:p:F:S:UV")) != -1) {
 		switch (opt) {
 		case 'f':
 			filename = optarg;
+			break;
+		case 'l':
+			output_filename = optarg;
 			break;
 		case 'p':
 			precision = atoi(optarg);
@@ -158,6 +166,9 @@ int main(int argc, char** argv)
 		case 'S':
 			threadsInCmd = atoi(optarg);
 			break;
+		case 'U':
+			unbuffered = true;
+			break;
 		case 'V':
 			versionOnly = true;
 			break;
@@ -167,7 +178,7 @@ int main(int argc, char** argv)
 		}
 	}
 
-	PsimagLite::String list = (optind < argc) ? argv[optind] : "";
+	std::string list = (optind < argc) ? argv[optind] : "";
 
 	// sanity checks here
 	if (filename == "" || (filesOption != "keep" && filesOption != "")) {
@@ -175,6 +186,28 @@ int main(int argc, char** argv)
 			usage(application.name());
 			return 1;
 		}
+	}
+
+	if (!output_filename.empty()) {
+		bool queryOnly = (output_filename == "?");
+		if (queryOnly) {
+			output_filename = ProgramGlobals::coutName(filename, application.name());
+			std::cout << output_filename << "\n";
+			return 0;
+		}
+
+		bool redirect = (output_filename == "+r");
+		if (redirect) {
+			output_filename = ProgramGlobals::coutName(filename, application.name());
+		}
+
+		PsimagLite::RedirectOutput::setAppName(application.name(),
+		                                       Provenance::logo(application.name()));
+
+		std::ios_base::openmode open_mode = std::ofstream::out;
+
+		PsimagLite::RedirectOutput::doIt(output_filename, open_mode, unbuffered);
+		application.echoBase64(std::cout, filename);
 	}
 
 	typedef PsimagLite::Concurrency ConcurrencyType;

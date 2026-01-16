@@ -148,8 +148,6 @@ public:
 		if (model_)
 			return *model_;
 
-		PsimagLite::String hdf5fileIfAny = findHdf5FileIfAny(solverParams);
-
 		// named models start  DO NOT REMOVE MARK
 		if (name_ == "Heisenberg") {
 			model_ = new ModelHeisenbergType(solverParams, io, geometry, "");
@@ -205,25 +203,19 @@ public:
 		} else if (name_ == "ModelHubbardMultiBand") {
 			model_ = new ModelHubbardMultiBandType(solverParams, io, geometry);
 		} else if (name_ == "HubbardHolstein") {
-			model_ = new HubbardHolsteinType(
-			    solverParams, io, geometry, "", hdf5fileIfAny);
+			model_ = new HubbardHolsteinType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardHolsteinSSH") {
-			model_ = new HubbardHolsteinType(
-			    solverParams, io, geometry, "SSH", hdf5fileIfAny);
+			model_ = new HubbardHolsteinType(solverParams, io, geometry, "SSH");
 		} else if (name_ == "HubbardHolsteinLRH") {
-			model_ = new HubbardHolsteinType(
-			    solverParams, io, geometry, "LRH", hdf5fileIfAny);
+			model_ = new HubbardHolsteinType(solverParams, io, geometry, "LRH");
 		} else if (name_ == "HolsteinThin") {
 			model_ = new HolsteinThinType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardHolsteinSpinless") {
-			model_ = new HubbardHolsteinSpinlessType(
-			    solverParams, io, geometry, "", hdf5fileIfAny);
+			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "");
 		} else if (name_ == "HubbardHolsteinSpinlessSSH") {
-			model_ = new HubbardHolsteinSpinlessType(
-			    solverParams, io, geometry, "SSH", hdf5fileIfAny);
+			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "SSH");
 		} else if (name_ == "HubbardHolsteinSpinlessLRH") {
-			model_ = new HubbardHolsteinSpinlessType(
-			    solverParams, io, geometry, "LRH", hdf5fileIfAny);
+			model_ = new HubbardHolsteinSpinlessType(solverParams, io, geometry, "LRH");
 		} else if (name_ == "HolsteinSpinlessThin") {
 			model_ = new HolsteinSpinlessThinType(solverParams, io, geometry, "");
 		} else if (name_.substr(0, 5) == "Kondo") {
@@ -263,21 +255,6 @@ private:
 		SizeType           namel = name_.length();
 		PsimagLite::String tmp   = (namel == l) ? "" : name_.substr(l, namel - l);
 		return tmp;
-	}
-
-	PsimagLite::String findHdf5FileIfAny(const SolverParamsType& solverParams) const
-	{
-		// check first for observe
-		bool isObserve = solverParams.options.isSet("observe");
-		if (isObserve)
-			return solverParams.filename;
-
-		// then for restart
-		bool isRestart = solverParams.options.isSet("restart");
-		if (isRestart)
-			return solverParams.checkpoint.filename();
-
-		return "";
 	}
 
 	PsimagLite::String name_;

@@ -103,8 +103,12 @@ public:
 		io.read(jmPair, str + "/jmPair");
 		io.read(flavors, str + "/flavors");
 
-		if (modalStruct.size() == 0)
-			io.read(modalStruct, "modalStruct");
+		VectorModalStructType modalStruct_prev;
+		io.read(modalStruct_prev, "modalStruct");
+
+		if (modalStruct_prev.size() != modalStruct.size()) {
+			err("This run and previous run have different symmetries\n");
+		}
 
 		if (modalStruct.size() != other.size())
 			err("Qn::read\n");

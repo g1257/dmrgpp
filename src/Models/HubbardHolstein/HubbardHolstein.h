@@ -136,8 +136,7 @@ public:
 	HubbardHolstein(const SolverParamsType&  solverParams,
 	                InputValidatorType&      io,
 	                const SuperGeometryType& geometry,
-	                PsimagLite::String       additional,
-	                PsimagLite::String       hdf5fileIfAny)
+	                PsimagLite::String       additional)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
@@ -158,7 +157,7 @@ public:
 			std::cerr << warning;
 		}
 
-		restartHook(hdf5fileIfAny);
+		restartHook(solverParams.restartFilename());
 	}
 
 	void print(std::ostream& os) const { operator<<(os, modelParameters_); }

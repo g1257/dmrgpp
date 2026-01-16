@@ -264,7 +264,7 @@ to the main dmrg driver are the following.
 	if (!options.enabled && options.label != "-") {
 		bool queryOnly = (options.label == "?");
 		if (options.label == "" || options.label == "?") {
-			options.label = ProgramGlobals::coutName(filename);
+			options.label = ProgramGlobals::coutName(filename, application.name());
 			if (queryOnly) {
 				std::cout << options.label << "\n";
 				return 0;

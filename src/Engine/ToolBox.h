@@ -209,7 +209,7 @@ public:
 		bool               isCout     = (inputfile.substr(loc, lenDotcout) == dotcout);
 
 		PsimagLite::String coutName
-		    = (isCout) ? inputfile : ProgramGlobals::coutName(inputfile);
+		    = (isCout) ? inputfile : ProgramGlobals::coutName(inputfile, "toolboxdmrg");
 		std::ifstream fin(coutName.c_str());
 		if (!fin || fin.bad()) {
 			err("Could not open file " + coutName + "\n");
