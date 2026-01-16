@@ -163,10 +163,6 @@ add_executable(testLapack testLapack.cpp)
 target_link_libraries(testLapack psimaglite)
 add_test(NAME testLapack COMMAND testLapack)
 
-add_executable(testArnoldiIteration testArnoldiIteration.cpp)
-target_link_libraries(testArnoldiIteration psimaglite)
-add_test(NAME testArnoldiIteration COMMAND testArnoldiIteration)
-
 add_executable(testArnoldiSaI testArnoldiSaI.cpp)
 target_link_libraries(testArnoldiSaI psimaglite)
 add_test(NAME testArnoldiSaI COMMAND testArnoldiSaI)

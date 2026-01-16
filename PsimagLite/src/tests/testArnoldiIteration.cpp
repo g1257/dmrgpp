@@ -4,6 +4,11 @@
 #include "PsimagLite.h"
 #include "Random48.h"
 #include <cassert>
+#include <catch2/catch_approx.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <catch2/matchers/catch_matchers_floating_point.hpp>
+
+namespace PsimagLite {
 
 using ComplexType          = std::complex<double>;
 using ComplexOrRealType    = ComplexType;
@@ -13,9 +18,8 @@ using RandomType           = PsimagLite::Random48<double>;
 
 /* This example does Arnoldi iteration
  * using PsimagLite's ArnoldiSaI solver */
-void test_arnoldi()
+TEST_CASE("Full ArnoldiIteration of a random matrix", "[ArnoldiIteration]")
 {
-	/* We fill a dense matrix */
 	int                                   n   = 64;
 	double                                max = 10.;
 	double                                min = -4.;
@@ -34,11 +38,11 @@ void test_arnoldi()
 	std::vector<ComplexType>              eigenvalues(n);
 	PsimagLite::Matrix<ComplexOrRealType> vl_unused(n, n);
 	PsimagLite::Matrix<ComplexOrRealType> right_eigenvectors(n, n);
-	geev('N', 'V', m_copy, eigenvalues, vl_unused, right_eigenvectors);
 
-	// Matrix eigenvalues are these
-	std::cout << "Actual eigs\n";
-	std::cout << eigenvalues << "\n\n";
+	geev('N', 'V', m_copy, eigenvalues, vl_unused, right_eigenvectors);
+	REQUIRE(eigenvalues.size() == n);
+	ComplexType ref_eig = eigenvalues[0];
+	REQUIRE_THAT(0., Catch::Matchers::WithinAbs(std::abs(std::imag(ref_eig)), 1e-5));
 
 	// Finally do Arnoldi
 	/* We convert the dense matrix into sparse
@@ -68,24 +72,17 @@ void test_arnoldi()
 	std::vector<VectorType>               q;
 	PsimagLite::Matrix<ComplexOrRealType> h;
 	int                                   error = arnoldi.decompose(q, h, msparse, initial);
-	std::cerr << "Arnolid return code = " << error << "\n";
+	CHECK(0 == error);
 
 	// Now we diag h
 	std::vector<ComplexOrRealType>        eigs_of_h;
 	PsimagLite::Matrix<ComplexOrRealType> h_right_eigenvectors;
 	arnoldi.diagHessenberg(eigs_of_h, h_right_eigenvectors, h);
-	std::cout << "Eigs of h\n";
-	std::cout << eigs_of_h << "\n\n";
 
+	REQUIRE(eigs_of_h.size() > 0);
+	CHECK(std::real(ref_eig) == Catch::Approx(std::real(eigs_of_h[0])));
+	CHECK_THAT(0., Catch::Matchers::WithinAbs(std::abs(std::imag(ref_eig)), 1e-5));
 	std::vector<ComplexOrRealType> l_eigenvector_estimate(n);
 	arnoldi.getEigenvector(l_eigenvector_estimate, h_right_eigenvectors, q, 0);
-	// makeItReal(l_eigenvector_estimate);
-	std::cout << "\nEstimated eigenvector \n";
-	std::cout << l_eigenvector_estimate << "\n";
 }
-
-int main(int argc, char* argv[])
-{
-	PsimagLite::Concurrency concurrency(&argc, &argv, /*nthreads=*/1);
-	test_arnoldi();
 }
