@@ -1,0 +1,39 @@
+##Ainur1.0
+TotalNumberOfSites=6;
+NumberOfTerms=1;
+DegreesOfFreedom=1;
+GeometryKind="star";
+GeometryOptions="none";
+
+#Model params
+hubbardU=[0.0, 4.0, 0.0, 0.0, 0.0, 0.0];
+Model="HubbardOneBand";
+SolverOptions="twositedmrg,geometryallinsystem,fixLegacyBugs,CorrectionVectorTargeting,restart,minimizeDisk,hd5dontprint";
+RestartFilename="gsForDMFT";
+Version="templateForDMFT";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[
+[-4, 300, 2],
+[ 4, 300, 2]];
+TargetElectronsUp=3;
+TargetElectronsDown=3;
+
+integer TridiagSteps=400;
+real TridiagEps=1e-9;
+TruncationTolerance="1e-10,100";
+CorrectionA=0;
+TSPSites=[1];
+TSPLoops=[0];
+TSPProductOrSum="product";
+CorrectionVectorFreqType="Matsubara";
+
+CorrectionVectorEta=0.1;
+CorrectionVectorAlgorithm="Krylov";
+Orbitals=1;
+GsWeight=0.1;
+
+Intent="GimpMatsubara";
+
+string TSPOp0:TSPOperator="expression";
+
+
