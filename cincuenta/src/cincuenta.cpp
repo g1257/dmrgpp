@@ -1,48 +1,49 @@
-#include "DmftSolver.h"
 #include "Dispersion.h"
-#include <unistd.h>
-#include "PsimagLite.h"
-#include "Provenance.h"
+#include "DmftSolver.h"
 #include "InputCheck.h"
-#include "../../dmrgpp/src/Engine/ProgramGlobals.h"
+#include "ProgramGlobals.h"
+#include "Provenance.h"
+#include "PsimagLite.h"
+#include <unistd.h>
 
-std::streambuf *GlobalCoutBuffer = 0;
-std::ofstream GlobalCoutStream;
-SizeType Dmft::BasisOneSpin::nsite_ = 0;
-PsimagLite::Matrix<SizeType> Dmft::BasisOneSpin::comb_;
+std::streambuf*                                        GlobalCoutBuffer = 0;
+std::ofstream                                          GlobalCoutStream;
+SizeType                                               Dmft::BasisOneSpin::nsite_ = 0;
+PsimagLite::Matrix<SizeType>                           Dmft::BasisOneSpin::comb_;
 PsimagLite::Vector<Dmft::BasisOneSpin::WordType>::Type Dmft::BasisOneSpin::bitmask_;
 
 void restoreCoutBuffer()
 {
-	if (GlobalCoutBuffer == 0) return;
+	if (GlobalCoutBuffer == 0)
+		return;
 	GlobalCoutStream.close();
 	std::cout.rdbuf(GlobalCoutBuffer);
 }
 
-void usage(const PsimagLite::String& name)
+void usage(const std::string& name)
 {
-	std::cerr<<"USAGE is "<<name<<" -f filename [-p precision] [-V]\n";
+	std::cerr << "USAGE is " << name << " -f filename [-p precision] [-V]\n";
 }
 
 int main(int argc, char** argv)
 {
-	PsimagLite::PsiApp application("dmft", &argc, &argv, 1);
+	PsimagLite::PsiApp                            application("dmft", &argc, &argv, 1);
 	typedef PsimagLite::InputNg<Dmft::InputCheck> InputNgType;
 	typedef
 #ifndef USE_FLOAT
-	double
+	    double
 #else
-	float
+	    float
 #endif
-	RealType;
-	typedef Dmft::DmftSolver<std::complex<RealType>,  InputNgType> DmftSolverType;
-	typedef DmftSolverType::ParamsDmftSolverType ParamsDmftSolverType;
-	int opt = 0;
-	bool versionOnly = false;
-	PsimagLite::String inputfile;
-	PsimagLite::String logfile;
-	SizeType precision = 12;
-	bool unbuffered = false;
+	                                                              RealType;
+	typedef Dmft::DmftSolver<std::complex<RealType>, InputNgType> DmftSolverType;
+	typedef DmftSolverType::ParamsDmftSolverType                  ParamsDmftSolverType;
+	int                                                           opt         = 0;
+	bool                                                          versionOnly = false;
+	std::string                                                   inputfile;
+	std::string                                                   logfile;
+	SizeType                                                      precision  = 12;
+	bool                                                          unbuffered = false;
 	/* PSIDOC DmrgDriver
 There is a single input file that is passed as the
 argument to \verb!-f!, like so
@@ -63,7 +64,7 @@ to the main dmrg driver are the following.
 	 \item[-V] [Optional] Print version and exit
 	  \end{itemize}
 	 */
-	while ((opt = getopt(argc, argv,"f:p:l:U:V")) != -1) {
+	while ((opt = getopt(argc, argv, "f:p:l:U:V")) != -1) {
 		switch (opt) {
 		case 'f':
 			inputfile = optarg;
@@ -81,7 +82,7 @@ to the main dmrg driver are the following.
 			break;
 		case 'V':
 			versionOnly = true;
-			logfile = "-";
+			logfile     = "-";
 			break;
 		default:
 			usage(application.name());
@@ -101,41 +102,42 @@ to the main dmrg driver are the following.
 	// print license
 	if (ConcurrencyType::root()) {
 		Dmft::Provenance provenance;
-		std::cout<<provenance;
-		std::cout<<Dmft::Provenance::logo(application.name())<<"\n";
+		std::cout << provenance;
+		std::cout << Dmft::Provenance::logo(application.name()) << "\n";
 		application.checkMicroArch(std::cout, Dmft::Provenance::compiledMicroArch());
 	}
 
 	if (logfile != "-") {
 		bool queryOnly = (logfile == "?");
 		if (logfile == "" || logfile == "?") {
-			logfile = Dmrg::ProgramGlobals::coutName(inputfile);
+			logfile = Dmrg::ProgramGlobals::coutName(inputfile, "cincuenta");
 			if (queryOnly) {
-				std::cout<<logfile<<"\n";
+				std::cout << logfile << "\n";
 				return 0;
 			}
 		}
 	}
 
-	if (versionOnly) return 0;
+	if (versionOnly)
+		return 0;
 
 	bool echoInput = false;
 	if (logfile != "-") {
 		GlobalCoutStream.open(logfile.c_str(), std::ofstream::out);
 		if (!GlobalCoutStream || GlobalCoutStream.bad() || !GlobalCoutStream.good()) {
-			PsimagLite::String str(application.name());
+			std::string str(application.name());
 			str += ": Could not redirect std::cout to " + logfile + "\n";
 			err(str);
 		}
 
 		echoInput = true;
 
-		std::cerr<<Dmft::Provenance::logo(application.name());
-		std::cerr<<"Standard output sent to ";
-		std::cerr<<logfile<<"\n";
+		std::cerr << Dmft::Provenance::logo(application.name());
+		std::cerr << "Standard output sent to ";
+		std::cerr << logfile << "\n";
 		std::cerr.flush();
-		GlobalCoutBuffer = std::cout.rdbuf(); //save old buf
-		std::cout.rdbuf(GlobalCoutStream.rdbuf()); //redirect std::cout to file
+		GlobalCoutBuffer = std::cout.rdbuf(); // save old buf
+		std::cout.rdbuf(GlobalCoutStream.rdbuf()); // redirect std::cout to file
 		if (unbuffered) {
 			std::cout.setf(std::ios::unitbuf);
 			GlobalCoutStream.setf(std::ios::unitbuf);
@@ -145,14 +147,16 @@ to the main dmrg driver are the following.
 	}
 
 	application.printCmdLine(std::cout);
-	if (echoInput) application.echoBase64(std::cout, inputfile);
+	if (echoInput)
+		application.echoBase64(std::cout, inputfile);
 
-	Dmft::InputCheck inputCheck;
+	Dmft::InputCheck       inputCheck;
 	InputNgType::Writeable ioWriteable(inputfile, inputCheck);
-	InputNgType::Readable io(ioWriteable);
+	InputNgType::Readable  io(ioWriteable);
 
 	ParamsDmftSolverType params(io);
-	if (precision > 0) params.precision = precision;
+	if (precision > 0)
+		params.precision = precision;
 	params.echoInput = echoInput;
 
 	DmftSolverType::FitType::InitResults initResults(io);
