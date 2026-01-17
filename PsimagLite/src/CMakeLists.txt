@@ -66,4 +66,10 @@ find_package(LAPACK REQUIRED)
 target_link_libraries(psimaglite PUBLIC BLAS::BLAS)
 target_link_libraries(psimaglite PUBLIC LAPACK::LAPACK)
 
+find_package(GSL)
+if(GSL_FOUND)
+  target_compile_definitions(psimaglite PUBLIC USE_GSL)
+  target_link_libraries(psimaglite PUBLIC GSL::gsl)
+endif()
+
 add_subdirectory(tests)
