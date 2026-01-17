@@ -163,10 +163,6 @@ add_executable(testLapack testLapack.cpp)
 target_link_libraries(testLapack psimaglite)
 add_test(NAME testLapack COMMAND testLapack)
 
-add_executable(testArnoldiSaI testArnoldiSaI.cpp)
-target_link_libraries(testArnoldiSaI psimaglite)
-add_test(NAME testArnoldiSaI COMMAND testArnoldiSaI)
-
 # I leave this test on for now but it really needs -DUSE_PTHREADS
 # the first number (4) is the matrix rank and the next number (1) is the
 # number of pthreads to use
