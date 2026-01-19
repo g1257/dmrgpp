@@ -1,7 +1,4 @@
 
-find_package(GSL)
-if(NOT GSL_FOUND)
-  MESSAGE(WARNING "libGSL required for cincuenta at runtime.")
-endif()
+find_package(GSL REQUIRED)
 
 add_subdirectory(src)

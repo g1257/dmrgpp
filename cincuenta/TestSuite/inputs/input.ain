@@ -16,8 +16,5 @@ MinParamsMaxIter=10000;
 MinParamsDelta2=0.01;
 MinParamsTolerance=0.01;
 MinParamsVerbose=1;
-DmrgGsTemplate="../TestSuite/inputs/gsTemplate.ain";
-DmrgOmegaTemplate="../TestSuite/inputs/omegaTemplate.ain";
-
-
-
+DmrgGsTemplate="../cincuenta/TestSuite/inputs/gsTemplate.ain";
+DmrgOmegaTemplate="../cincuenta/TestSuite/inputs/omegaTemplate.ain";
