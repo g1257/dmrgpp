@@ -1,24 +1,23 @@
 #ifndef FUNCTIONOFFREQUENCY_H
 #define FUNCTIONOFFREQUENCY_H
+#include "Matsubaras.h"
 #include "Vector.h"
 #include <cassert>
-#include "Matsubaras.h"
 
 namespace Dmft {
 
-template<typename ComplexOrRealType>
-class FunctionOfFrequency {
+template <typename ComplexOrRealType> class FunctionOfFrequency {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
 	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef Matsubaras<RealType> MatsubarasType;
+	typedef Matsubaras<RealType>                                 MatsubarasType;
 
 	FunctionOfFrequency(RealType fictBeta, SizeType nMatsubara)
-	    : matsubaras_(fictBeta, nMatsubara),
-	      data_(2*nMatsubara)
-	{}
+	    : matsubaras_(fictBeta, nMatsubara)
+	    , data_(2 * nMatsubara)
+	{ }
 
 	// Total number of Matsubaras used (includes negatives and positives)
 	SizeType totalMatsubaras() const { return matsubaras_.total(); }
@@ -26,10 +25,7 @@ public:
 	const RealType& fictitiousBeta() const { return matsubaras_.fictitiousBeta(); }
 
 	// Matsubara number i, starts at 0, and the 0th is the most negative.
-	const RealType& omega(SizeType i) const
-	{
-		return matsubaras_.omega(i);
-	}
+	const RealType& omega(SizeType i) const { return matsubaras_.omega(i); }
 
 	// Returns the content of this function at point i
 	// the wn at this point is given by omega(i) above
@@ -51,11 +47,11 @@ public:
 	friend std::ostream& operator<<(std::ostream& os, const FunctionOfFrequency& f)
 	{
 		const SizeType n = f.data_.size();
-		os<<n<<"\n";
+		os << n << "\n";
 		for (SizeType i = 0; i < n; ++i) {
 			const ComplexOrRealType value = f.data_[i];
-			os<<f.matsubaras_.omega(i)<<" "<<PsimagLite::real(value);
-			os<<" "<<PsimagLite::imag(value)<<"\n";
+			os << f.matsubaras_.omega(i) << " " << PsimagLite::real(value);
+			os << " " << PsimagLite::imag(value) << "\n";
 		}
 
 		return os;
@@ -64,7 +60,7 @@ public:
 private:
 
 	MatsubarasType matsubaras_;
-	VectorType data_;           // value of this function at each point or omega
+	VectorType     data_; // value of this function at each point or omega
 };
 }
 #endif // FUNCTIONOFFREQUENCY_H

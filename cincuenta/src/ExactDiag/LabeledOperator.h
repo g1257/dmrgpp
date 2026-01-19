@@ -8,24 +8,36 @@ class LabeledOperator {
 
 public:
 
-	enum class Label {OPERATOR_NIL,
-		              OPERATOR_C,
-		              OPERATOR_SZ,
-		              OPERATOR_CDAGGER,
-		              OPERATOR_N,
-		              OPERATOR_SPLUS,
-		              OPERATOR_SMINUS};
+	enum class Label
+	{
+		OPERATOR_NIL,
+		OPERATOR_C,
+		OPERATOR_SZ,
+		OPERATOR_CDAGGER,
+		OPERATOR_N,
+		OPERATOR_SPLUS,
+		OPERATOR_SMINUS
+	};
 
-	LabeledOperator(const Label& l) : what_(l), x_(0) {}
+	LabeledOperator(const Label& l)
+	    : what_(l)
+	    , x_(0)
+	{ }
 
 	/* PSIDOC OperatorIds
 	  These are \verb!c! \verb!cdagger! \verb!sz!
 	  \verb!nil! \verb!n! \verb!splus! and \verb!sminus!
 	  They are case sensitive and model depedent.
 	 */
-	explicit LabeledOperator(const PsimagLite::String& s) : what_(toId(s)), x_(0) {}
+	explicit LabeledOperator(const PsimagLite::String& s)
+	    : what_(toId(s))
+	    , x_(0)
+	{ }
 
-	explicit LabeledOperator(SizeType x) : what_(Label::OPERATOR_NIL), x_(x) {}
+	explicit LabeledOperator(SizeType x)
+	    : what_(Label::OPERATOR_NIL)
+	    , x_(x)
+	{ }
 
 	SizeType toUint() const
 	{
@@ -51,7 +63,7 @@ public:
 			return Label::OPERATOR_SMINUS;
 		} else {
 			PsimagLite::String str(__FILE__);
-			str += " " + ttos(__LINE__) +  "\n";
+			str += " " + ttos(__LINE__) + "\n";
 			err(str + "operatorWithType: unsupported operator " + s + "\n");
 		}
 
@@ -62,23 +74,16 @@ public:
 
 	PsimagLite::String toString() const
 	{
-		PsimagLite::Vector<PsimagLite::String>::Type labels = {"cdagger",
-		                                                       "c",
-		                                                       "n",
-		                                                       "sz",
-		                                                       "splus",
-		                                                       "sminus",
-		                                                       "nil"};
+		PsimagLite::Vector<PsimagLite::String>::Type labels
+		    = { "cdagger", "c", "n", "sz", "splus", "sminus", "nil" };
 		for (SizeType i = 0; i < labels.size(); ++i)
-			if (toId(labels[i]) == what_) return labels[i];
+			if (toId(labels[i]) == what_)
+				return labels[i];
 
 		return "UNKNOWN";
 	}
 
-	SizeType numberOfTypes() const
-	{
-		return 4;
-	}
+	SizeType numberOfTypes() const { return 4; }
 
 	bool needsNewBasis() const
 	{
@@ -99,8 +104,10 @@ public:
 
 	bool isFermionic() const
 	{
-		if (what_ == Label::OPERATOR_C) return true;
-		if (what_ == Label::OPERATOR_CDAGGER) return true;
+		if (what_ == Label::OPERATOR_C)
+			return true;
+		if (what_ == Label::OPERATOR_CDAGGER)
+			return true;
 		return false;
 	}
 
@@ -120,7 +127,7 @@ public:
 
 private:
 
-	Label what_;
+	Label    what_;
 	SizeType x_;
 };
 }

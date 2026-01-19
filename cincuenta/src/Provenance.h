@@ -1,12 +1,12 @@
 #ifndef CINC_PROVENANCE_H
 #define CINC_PROVENANCE_H
 #include "../../PsimagLite/src/Version.h"
-#include "Version.h"
 #include "AllocatorCpu.h"
-#include <iostream>
 #include "AnsiColors.h"
-#include <sstream>
 #include "GitRevision.h"
+#include "Version.h"
+#include <iostream>
+#include <sstream>
 
 namespace Dmft {
 
@@ -26,10 +26,10 @@ public:
 
 	static PsimagLite::String logo(PsimagLite::String appName)
 	{
-		PsimagLite::OstringStream msgg(std::cout.precision());
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg<<appName<<"\x1b[38;5;124m";
-		msg<<" [features "<<DMFT_VERSION<<"] "<<PsimagLite::AnsiColor::reset;
+		msg << appName << "\x1b[38;5;124m";
+		msg << " [features " << DMFT_VERSION << "] " << PsimagLite::AnsiColor::reset;
 		PsimagLite::String ctOpts("");
 #ifdef USE_SHORT
 		ctOpts += "SHORT ";
@@ -54,14 +54,13 @@ public:
 #endif
 
 		if (ctOpts != "")
-			msg<<"["<<ctOpts<<"]";
+			msg << "[" << ctOpts << "]";
 
 		return msg.str();
 	}
 }; // Provenance
 
-std::ostream& operator<<(std::ostream& os,const Provenance&);
+std::ostream& operator<<(std::ostream& os, const Provenance&);
 }
 
 #endif // CINC_PROVENANCE_H
-

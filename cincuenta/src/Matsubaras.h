@@ -5,23 +5,24 @@
 
 namespace Dmft {
 
-template<typename RealType_>
-class Matsubaras {
+template <typename RealType_> class Matsubaras {
 
 public:
 
-	typedef RealType_ RealType;
+	typedef RealType_                                   RealType;
 	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
 
 	Matsubaras(RealType fictBeta, SizeType nMatsubara)
-	    : fictBeta_(fictBeta), nMatsubara_(nMatsubara), matsubaras_(2*nMatsubara)
+	    : fictBeta_(fictBeta)
+	    , nMatsubara_(nMatsubara)
+	    , matsubaras_(2 * nMatsubara)
 	{
 		for (SizeType i = 0; i < nMatsubara_; ++i) {
-			matsubaras_[i  + nMatsubara_] = M_PI*(2*i + 1)/fictBeta_;
+			matsubaras_[i + nMatsubara_] = M_PI * (2 * i + 1) / fictBeta_;
 		}
 
 		for (SizeType i = 0; i < nMatsubara_; ++i) {
-			matsubaras_[i] = -matsubaras_[2*nMatsubara_ - 1 - i];
+			matsubaras_[i] = -matsubaras_[2 * nMatsubara_ - 1 - i];
 		}
 	}
 
@@ -39,8 +40,8 @@ public:
 
 private:
 
-	RealType fictBeta_;         // ficticious beta
-	SizeType nMatsubara_;       // half the number of matsubaras
+	RealType       fictBeta_; // ficticious beta
+	SizeType       nMatsubara_; // half the number of matsubaras
 	VectorRealType matsubaras_; // wn starting at 0 with the most negative wn
 };
 }

@@ -1,20 +1,20 @@
 #ifndef PARAMSDMFTSOLVER_H
 #define PARAMSDMFTSOLVER_H
-#include "Vector.h"
 #include "InputNg.h"
 #include "MinParams.h"
+#include "Vector.h"
 
 namespace Dmft {
 
-template<typename ComplexOrRealType_, typename InputNgType>
-struct ParamsDmftSolver {
+template <typename ComplexOrRealType_, typename InputNgType> struct ParamsDmftSolver {
 
-	typedef ComplexOrRealType_ ComplexOrRealType;
+	typedef ComplexOrRealType_                                 ComplexOrRealType;
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef MinParams<RealType> MinParamsType;
+	typedef MinParams<RealType>                                MinParamsType;
 
 	ParamsDmftSolver(typename InputNgType::Readable& io)
-	    : echoInput(false), minParams(io)
+	    : echoInput(false)
+	    , minParams(io)
 	{
 		io.readline(ficticiousBeta, "FicticiousBeta=");
 		io.readline(mu, "ChemicalPotential=");
@@ -29,24 +29,22 @@ struct ParamsDmftSolver {
 
 		try {
 			io.readline(precision, "Precision=");
-		} catch (std::exception&) {}
-
-
+		} catch (std::exception&) { }
 	}
 
-	bool echoInput;
-	RealType ficticiousBeta;
-	RealType mu;
-	RealType dmftError;
-	SizeType nMatsubaras;
+	bool               echoInput;
+	RealType           ficticiousBeta;
+	RealType           mu;
+	RealType           dmftError;
+	SizeType           nMatsubaras;
 	PsimagLite::String latticeGf;
-	SizeType nBath;
-	SizeType dmftIter;
-	SizeType precision;
+	SizeType           nBath;
+	SizeType           dmftIter;
+	SizeType           precision;
 	PsimagLite::String gsTemplate;
 	PsimagLite::String omegaTemplate;
 	PsimagLite::String impuritySolver;
-	MinParamsType minParams;
+	MinParamsType      minParams;
 };
 }
 #endif // PARAMSDMFTSOLVER_H

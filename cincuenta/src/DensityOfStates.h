@@ -4,20 +4,19 @@
 
 namespace Dmft {
 
-template<typename ComplexOrRealType>
-class DensityOfStates {
+template <typename ComplexOrRealType> class DensityOfStates {
 
 public:
 
 	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
 
 	DensityOfStates(PsimagLite::String option, RealType wOverTwo, RealType mu)
-	    : wOverTwo_(wOverTwo), mu_(mu)
+	    : wOverTwo_(wOverTwo)
+	    , mu_(mu)
 	{
 		if (option != "semicircular")
-			err("DensityOfStates " + option +
-			    " not yet supported; only semicircular supported.\n");
-
+			err("DensityOfStates " + option
+			    + " not yet supported; only semicircular supported.\n");
 	}
 
 	RealType lowerBound() const { return -wOverTwo_; }
@@ -26,8 +25,8 @@ public:
 
 	RealType operator()(RealType e) const
 	{
-		const RealType wOverTwoSquared = wOverTwo_*wOverTwo_;
-		return 2.0*sqrt(wOverTwoSquared - e*e)/(wOverTwoSquared*M_PI);
+		const RealType wOverTwoSquared = wOverTwo_ * wOverTwo_;
+		return 2.0 * sqrt(wOverTwoSquared - e * e) / (wOverTwoSquared * M_PI);
 	}
 
 private:
