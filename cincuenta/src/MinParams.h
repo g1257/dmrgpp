@@ -60,7 +60,7 @@ template <typename RealType> struct MinParams {
 	//	    : delta(d), delta2(d2), tolerance(t), maxIter(m), verbose(v)
 	//	{
 	//		method = (method_ == "simplex") ? Method::SIMPLEX :
-	//Method::CONJUGATE_GRADIENT;
+	// Method::CONJUGATE_GRADIENT;
 	//	}
 
 	RealType delta;
