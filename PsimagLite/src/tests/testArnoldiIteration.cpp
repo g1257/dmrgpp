@@ -33,7 +33,7 @@ TEST_CASE("Full ArnoldiIteration of a random matrix", "[ArnoldiIteration]")
 		}
 	}
 
-	// Diag the matrix for testing (FIXME: move to a function)
+	// Diag the matrix for testing
 	PsimagLite::Matrix<ComplexOrRealType> m_copy(m); // m_copy will be overwritten by geev
 	std::vector<ComplexType>              eigenvalues(n);
 	PsimagLite::Matrix<ComplexOrRealType> vl_unused(n, n);

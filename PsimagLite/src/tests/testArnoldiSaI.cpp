@@ -55,28 +55,6 @@ unsigned int findTheOne(const std::vector<std::complex<double>>& eigs)
 	return indices[iperm[0]];
 }
 
-//---------------------------------------------------------------------------//
-/*!
- * \brief Print matrix column
- *
- * \param[out] os     The stream to print to
- * \param[in]  mv     The matrix of complex or real values
- * \param[in]  index  The column index to print
- */
-template <typename ComplexOrRealType>
-void printEigenvector(std::ostream&                                os,
-                      const PsimagLite::Matrix<ComplexOrRealType>& mv,
-                      unsigned int                                 index)
-{
-	os << "Eigenvector for eigenvalue index = " << index << "\n";
-	SizeType n = mv.rows();
-	for (SizeType i = 0; i < n; ++i) {
-		os << mv(i, index) << " ";
-	}
-
-	os << "\n";
-}
-
 /* This example does Arnoldi shift-and-invert for a (small) matrix in RAM
  * using PsimagLite's ArnoldiSaI solver */
 TEST_CASE("Full Arnoldi shift-and-invert of a random matrix", "[ArnoldiSaI]")
@@ -105,14 +83,8 @@ TEST_CASE("Full Arnoldi shift-and-invert of a random matrix", "[ArnoldiSaI]")
 	REQUIRE(n == eigenvalues.size());
 	REQUIRE_THAT(0., Catch::Matchers::WithinAbs(std::abs(std::imag(eigenvalues[0])), 1e-5));
 
-	// Matrix eigenvalues are these
-	// std::cout << "Actual eigs\n";
-	// std::cout << eigenvalues << "\n\n";
-
 	unsigned int the_one = findTheOne(eigenvalues);
 	assert(the_one < eigenvalues.size());
-	// std::cout << "Lowest eig of L = " << the_one << " " << eigenvalues[the_one] << "\n";
-	// printEigenvector(std::cout, right_eigenvectors, the_one);
 
 	// Now we do Arnoldi Shift-and-Invert
 	double sigma = 0.1; // small value here
@@ -170,6 +142,5 @@ TEST_CASE("Full Arnoldi shift-and-invert of a random matrix", "[ArnoldiSaI]")
 	double                         eigenvalue  = 0;
 	constexpr SizeType             bogus_index = 0;
 	arnoldi_sai.computeOneState(eigenvalue, eigenvector, initial, bogus_index);
-	std::cout << "Eigenvalue = " << eigenvalue << "\n";
 	CHECK(std::real(eigenvalue) == Catch::Approx(std::real(eigenvalues[the_one])));
 }
