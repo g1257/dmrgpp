@@ -113,7 +113,7 @@ Only headers files are used; boost runtime is not used.
 
 * [required] perl
 
-* [optional] GSL (GNU Scientific Library)
+* [required] GSL (GNU Scientific Library)
 
 ### Downloading DMRG++
 Create a directory somewhere and cd to it.
@@ -163,7 +163,7 @@ To control where the project should find external dependencies installed on
 your system, you may pass `-D<PackageName>_ROOT=/path/to/package/install` to
 find a specific `<PackageName>` installed at `/path/to/package/install`.
 
-External dependencies are: `Boost`, `MPI`, `HDF5`, `BLAS`, and `LAPACK`.
+External dependencies are: `Boost`, `MPI`, `HDF5`, `GSL`, `BLAS`, and `LAPACK`.
 
 Example: `-DBoost_ROOT=/path/to/boost`
 
