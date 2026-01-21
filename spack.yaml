@@ -3,6 +3,7 @@ spack:
   - ninja
   - blas
   - lapack
+  - gsl
   - boost
   - openmpi
   - hdf5 +cxx +fortran +hl +mpi ^openmpi
