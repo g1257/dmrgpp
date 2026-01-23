@@ -8,6 +8,8 @@ namespace PsimagLite {
 template <typename T> class SparseConversions {
 public:
 
+	using value_type = typename T::value_type;
+
 	static CrsMatrix<value_type> toCRS(const T& a) { return a.toCRS(); }
 };
 

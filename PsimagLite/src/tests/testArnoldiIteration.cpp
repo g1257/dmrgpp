@@ -2,11 +2,11 @@
 #include "CrsMatrix.h"
 #include "Matrix.h"
 #include "PsimagLite.h"
-#include "Random48.h"
 #include <cassert>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <random>
 
 namespace PsimagLite {
 
@@ -25,11 +25,16 @@ TEST_CASE("Full ArnoldiIteration of a random matrix", "[ArnoldiIteration]")
 	double                                min = -4.;
 	PsimagLite::Matrix<ComplexOrRealType> m(n, n);
 	// fill m
-	constexpr long int seed = 1234;
-	RandomType         rng(seed);
+	// A fixed seed value for reproducibility
+	constexpr unsigned int SEED = 12345;
+
+	// 1. Seed the random number engine with the fixed value
+	std::mt19937                           rng(SEED);
+	std::uniform_real_distribution<double> dist(min, max);
+
 	for (int i = 0; i < n; ++i) {
 		for (int j = 0; j < n; ++j) {
-			m(i, j) = rng.random() * max + min;
+			m(i, j) = dist(rng);
 		}
 	}
 
@@ -42,7 +47,7 @@ TEST_CASE("Full ArnoldiIteration of a random matrix", "[ArnoldiIteration]")
 	geev('N', 'V', m_copy, eigenvalues, vl_unused, right_eigenvectors);
 	REQUIRE(eigenvalues.size() == n);
 	ComplexType ref_eig = eigenvalues[0];
-	REQUIRE_THAT(0., Catch::Matchers::WithinAbs(std::abs(std::imag(ref_eig)), 1e-5));
+	CHECK_THAT(std::abs(std::imag(ref_eig)), Catch::Matchers::WithinAbs(0, 1e-5));
 
 	// Finally do Arnoldi
 	/* We convert the dense matrix into sparse

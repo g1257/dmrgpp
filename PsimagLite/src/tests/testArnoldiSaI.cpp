@@ -2,11 +2,11 @@
 #include "CrsMatrix.h"
 #include "Matrix.h"
 #include "PsimagLite.h"
-#include "Random48.h"
 #include <cassert>
 #include <catch2/catch_approx.hpp>
 #include <catch2/catch_test_macros.hpp>
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
+#include <random>
 
 using ComplexType          = std::complex<double>;
 using ComplexOrRealType    = ComplexType;
@@ -16,43 +16,22 @@ using RandomType           = PsimagLite::Random48<double>;
 
 //---------------------------------------------------------------------------//
 /*!
- * \brief Lowest element that is also real and positive
+ * \brief Finds the index of the element with lowest complex norm
  *
  * \param[in] eigs A vector of complex numbers
  *
- * \returns the lowest element that is also real and positive
+ * \returns the index of the element with lowest complex norm
  */
 unsigned int findTheOne(const std::vector<std::complex<double>>& eigs)
 {
-	constexpr double          eps = 1e-8; // to determine real
-	unsigned int              n   = eigs.size();
-	std::vector<double>       candidates(n); // preallocate
-	std::vector<unsigned int> indices(n); // preallocate
-	unsigned int              j = 0;
-	for (unsigned int i = 0; i < n; ++i) {
-		const std::complex<double>& val = eigs[i];
-		// real?
-		if (std::abs(std::imag(val)) > eps) {
-			continue;
-		}
+	auto min_element_it
+	    = std::min_element(eigs.begin(),
+	                       eigs.end(),
+	                       [](const std::complex<double>& a, const std::complex<double>& b)
+	                       { return std::norm(a) < std::norm(b); });
 
-		double x = std::real(val);
-		// postive?
-		if (x < 0) {
-			continue;
-		}
-
-		candidates[j] = x;
-		indices[j++]  = i;
-	}
-
-	candidates.resize(j);
-	indices.resize(j);
-	PsimagLite::Sort<std::vector<double>> sort;
-	std::vector<long unsigned int>        iperm(j);
-	sort.sort(candidates, iperm);
-
-	return indices[iperm[0]];
+	assert(min_element_it != eigs.end());
+	return min_element_it - eigs.begin();
 }
 
 /* This example does Arnoldi shift-and-invert for a (small) matrix in RAM
@@ -65,12 +44,19 @@ TEST_CASE("Full Arnoldi shift-and-invert of a random matrix", "[ArnoldiSaI]")
 	double                                min = -4.;
 	PsimagLite::Matrix<ComplexOrRealType> m(n, n);
 	// fill m
-	constexpr long int seed = 1234;
-	RandomType         rng(seed);
+	// A fixed seed value for reproducibility
+	constexpr unsigned int SEED = 12345;
+
+	// 1. Seed the random number engine with the fixed value
+	std::mt19937                           rng(SEED);
+	std::uniform_real_distribution<double> dist(min, max);
+
 	for (int i = 0; i < n; ++i) {
 		for (int j = 0; j < n; ++j) {
-			m(i, j) = rng.random() * max + min;
+			m(i, j) = dist(rng);
 		}
+
+		m(i, i) = 0.;
 	}
 
 	// Diag the matrix for testing
@@ -104,8 +90,8 @@ TEST_CASE("Full Arnoldi shift-and-invert of a random matrix", "[ArnoldiSaI]")
 	geev('N', 'V', m_copy, inverse_eigs, vl_unused, right_eigenvectors);
 
 	// Predict for comparison the eigenvalues of the sai
-	ComplexType predicted_eig = 1.0 / (eigenvalues[0] - sigma);
-	int         index_inverse = n - 1;
+	ComplexType predicted_eig = 1.0 / (eigenvalues[the_one] - sigma);
+	int         index_inverse = n - 1 - the_one;
 	REQUIRE(index_inverse < inverse_eigs.size());
 	ComplexType value_inverse = inverse_eigs[index_inverse];
 	CHECK(std::real(predicted_eig) == Catch::Approx(std::real(value_inverse)));
