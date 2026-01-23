@@ -43,6 +43,11 @@ public:
 	 * \param[in] init_vector The initial vector for Krylov
 	 *
 	 * \param[in] n The number of Krylov vectors
+	 *
+	 * \returns The error code: If tolerance > 0 then the error code is always 0;
+	 *          If tolerance <= 0 then the error code indicates the last
+	 *          meaningful step that could be done, or 0 if all steps
+	 *          could be done as requested.
 	 */
 	int decompose(std::vector<VectorType>& q,
 	              DenseMatrixType&         h,
@@ -148,16 +153,16 @@ public:
 	/*!
 	 * \brief Get Arnoldi eigenvector number col from the Arnoldi decomposition
 	 *
-	 * \param[out] ev  The eigenvector
 	 * \param[in]  s   The matrix that diagonalizes the Hessenberg
 	 * \param[in]  q   The Q matrix
 	 * \param[in]  col The index of the eigenvector wanted
+	 *
+	 * \returns The eigenvector
 	 */
-	template <typename ComplexOrRealType>
-	void getEigenvector(std::vector<ComplexOrRealType>&                    ev,
-	                    const PsimagLite::Matrix<ComplexOrRealType>&       s,
-	                    const std::vector<std::vector<ComplexOrRealType>>& q,
-	                    SizeType                                           col) const
+	std::vector<ComplexOrRealType>
+	getEigenvector(const PsimagLite::Matrix<ComplexOrRealType>&       s,
+	               const std::vector<std::vector<ComplexOrRealType>>& q,
+	               SizeType                                           col) const
 	{
 		if (q.empty()) {
 			throw RuntimeError("getArnolidEigenvector(): q.size==0\n");
@@ -174,6 +179,7 @@ public:
 			throw RuntimeError("getArnolidEigenvector(): col >= s.cols\n");
 		}
 
+		std::vector<ComplexOrRealType> ev(nbig);
 		for (SizeType i = 0; i < nbig; ++i) {
 			ComplexOrRealType sum = 0;
 			for (SizeType j = 0; j < nsmall; ++j) {
@@ -182,6 +188,8 @@ public:
 
 			ev[i] = sum;
 		}
+
+		return ev;
 	}
 
 private:

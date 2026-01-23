@@ -50,7 +50,6 @@ public:
 		}
 	}
 
-	// should be final, what the C++ keyword for final?
 	//---------------------------------------------------------------------------//
 	/*!
 	 * \brief Compute the lowest real positive eigenvector of A
@@ -66,7 +65,7 @@ public:
 	void computeOneState(RealType&         eigenvalue,
 	                     VectorType&       eigenvector,
 	                     const VectorType& init_vector,
-	                     SizeType)
+	                     SizeType) final
 	{
 		std::vector<VectorType>   q;
 		Matrix<ComplexOrRealType> h;
@@ -119,12 +118,10 @@ public:
 		eigenvalue = std::real(sigma_ + 1. / eigs_of_sai);
 
 		// The eigenvector is the same
-		eigenvector.resize(a_.rows());
-		arnoldi_iteration_.getEigenvector(
-		    eigenvector, h_right_eigenvectors, q, index_wanted);
+		eigenvector
+		    = arnoldi_iteration_.getEigenvector(h_right_eigenvectors, q, index_wanted);
 	}
 
-	// should be final, what the C++ keyword for final?
 	//---------------------------------------------------------------------------//
 	/*!
 	 * \brief Compute lowest eigenvectors and eigenvalues below nexcited
@@ -136,12 +133,12 @@ public:
 	 * \param[out]  eigs      The eigenvalues
 	 * \param[out]  zs        The eigenvectors
 	 * \param[in]   init_v    The initial vector for Arnoldi
-	 * \param[in]   nexcited  Must be zero or throws
+	 * \param[in]   nexcited  Must be one or throws
 	 */
 	void computeAllStatesBelow(VectorRealType&   eigs,
 	                           VectorVectorType& zs,
 	                           const VectorType& init_v,
-	                           SizeType          nexcited)
+	                           SizeType          nexcited) final
 	{
 		if (nexcited != 1) {
 			throw RuntimeError("ArnoldiSaI::computeAllStatesBelow() only for g.s.\n");

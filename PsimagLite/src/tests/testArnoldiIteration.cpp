@@ -86,7 +86,7 @@ TEST_CASE("Full ArnoldiIteration of a random matrix", "[ArnoldiIteration]")
 	REQUIRE(eigs_of_h.size() > 0);
 	CHECK(std::real(ref_eig) == Catch::Approx(std::real(eigs_of_h[0])));
 	CHECK_THAT(0., Catch::Matchers::WithinAbs(std::abs(std::imag(ref_eig)), 1e-5));
-	std::vector<ComplexOrRealType> l_eigenvector_estimate(n);
-	arnoldi.getEigenvector(l_eigenvector_estimate, h_right_eigenvectors, q, 0);
+	std::vector<ComplexOrRealType> l_eigenvector_estimate
+	    = arnoldi.getEigenvector(h_right_eigenvectors, q, 0);
 }
 }
