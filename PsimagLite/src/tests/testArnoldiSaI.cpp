@@ -12,7 +12,6 @@ using ComplexType          = std::complex<double>;
 using ComplexOrRealType    = ComplexType;
 using SolverParametersType = PsimagLite::ParametersForSolver<double>;
 using VectorType           = std::vector<ComplexOrRealType>;
-using RandomType           = PsimagLite::Random48<double>;
 
 //---------------------------------------------------------------------------//
 /*!
