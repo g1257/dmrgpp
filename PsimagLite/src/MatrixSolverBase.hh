@@ -113,11 +113,9 @@ public:
 		bool canReortho = (lotaMemory);
 
 		if (!canReortho) {
-			PsimagLite::String str("MatrixSolverBase: Reortho "
-			                       "requested but cannot");
-			str += "Suggestion: Delete reortho from input or set "
-			       "lotaMemory=true\n";
-			throw PsimagLite::RuntimeError(str);
+			throw RuntimeError(
+			    "MatrixSolverBase: Reortho requested but cannot. Suggestion: Delete "
+			    "reortho from input or set lotaMemory=true\n");
 		}
 
 		return true;

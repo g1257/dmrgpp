@@ -1,7 +1,6 @@
 #ifndef SPARSECONVERSIONCRS_HH
 #define SPARSECONVERSIONCRS_HH
 #include "CrsMatrix.h"
-#include "Matrix.h"
 
 namespace PsimagLite {
 
