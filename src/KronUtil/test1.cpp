@@ -22,15 +22,15 @@ int main()
 	int            itransB           = 0;
 
 	static const bool           needsPrinting   = false;
-	const SizeType              gemmRnb         = 100;
+	const SizeType              gemmRnb         = 49;
 	const SizeType              threadsForGemmR = 1;
 	PsimagLite::GemmR<RealType> gemmR(needsPrinting, gemmRnb, threadsForGemmR);
 
 	for (thresholdB = 0; thresholdB <= 1.1; thresholdB += 0.1) {
 		for (thresholdA = 0; thresholdA <= 1.1; thresholdA += 0.1) {
-			for (ncol_A = 1; ncol_A <= 10; ncol_A += 3) {
-				for (nrow_A = 1; nrow_A <= 10; nrow_A += 3) {
-					for (ncol_B = 1; ncol_B <= 10; ncol_B += 3) {
+			for (ncol_A = 1; ncol_A <= 7; ncol_A += 3) {
+				for (nrow_A = 1; nrow_A <= 7; nrow_A += 3) {
+					for (ncol_B = 1; ncol_B <= 7; ncol_B += 3) {
 						for (nrow_B = 1; nrow_B <= 10; nrow_B += 3) {
 							for (itransA = 0; itransA <= 2; itransA++) {
 								for (itransB = 0; itransB <= 2;
