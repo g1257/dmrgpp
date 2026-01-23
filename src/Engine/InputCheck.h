@@ -254,6 +254,7 @@ public:
 		str += "string TSPAlgorithm;\n";
 		str += "vector.integer TSPSites;\n";
 		str += "vector.integer TSPLoops;\n";
+		str += "real TSPDamping;\n";
 		str += "string TSPProductOrSum;\n";
 		str += "string TSPOperator;\n";
 		str += "string OperatorExpression;\n";

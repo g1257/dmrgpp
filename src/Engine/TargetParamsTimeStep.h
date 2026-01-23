@@ -99,17 +99,25 @@ public:
 	TargetParamsTimeStep(IoInputter& io, PsimagLite::String targeting, const ModelType& model)
 	    : TimeVectorParamsType(io, targeting, model)
 	    , maxTime_(0)
+	    , eta_(0)
 	{
 		try {
 			io.readline(maxTime_, "TSPMaxTime=");
+		} catch (std::exception&) { }
+
+		try {
+			io.readline(eta_, "TSPDamping=");
 		} catch (std::exception&) { }
 	}
 
 	virtual RealType maxTime() const { return maxTime_; }
 
+	RealType eta() const { return eta_; }
+
 private:
 
 	RealType maxTime_;
+	RealType eta_;
 }; // class TargetParamsTimeStep
 
 template <typename ModelType>

@@ -276,13 +276,15 @@ private:
 		for (SizeType ii = 0; ii < phi.sectors(); ++ii) {
 			const RealType        time          = times[timeIndex];
 			const RealType        timeDirection = tstStruct_.timeDirection();
+			const RealType        damping       = exp(-time * tstStruct_.eta());
 			const VectorRealType& eigsii        = eigs[ii];
-			auto                  action = [eigsii, Eg, time, timeDirection](SizeType k)
+			auto action = [eigsii, Eg, time, timeDirection, damping](SizeType k)
 			{
 				RealType          tmp = (eigsii[k] - Eg) * time * timeDirection;
 				ComplexOrRealType c   = 0.0;
 				PsimagLite::expComplexOrReal(c, -tmp);
-				return c;
+				assert(damping <= 1.);
+				return c * damping;
 			};
 
 			SizeType   i0 = phi.sector(ii);
