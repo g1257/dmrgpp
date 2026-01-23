@@ -1,5 +1,5 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009-2013, 2026, UT-Battelle, LLC
 All rights reserved
 
 [PsimagLite, Version 1.0.0]
