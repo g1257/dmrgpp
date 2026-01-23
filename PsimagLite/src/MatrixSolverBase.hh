@@ -97,7 +97,7 @@ public:
 	using VectorVectorType  = std::vector<VectorType>;
 
 	// To avoid compiler warnings
-	virtual ~MatrixSolverBase() { }
+	virtual ~MatrixSolverBase() = default;
 
 	virtual void computeOneState(RealType&, VectorType&, const VectorType&, SizeType) = 0;
 
