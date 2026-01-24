@@ -101,6 +101,7 @@ public:
 	    , algorithm_(BaseType::AlgorithmEnum::KRYLOV)
 	    , tau_(0)
 	    , timeDirection_(1.0)
+	    , eta_(0)
 	{
 		/*PSIDOC TargetParamsTimeVectors
 		\item[TSPTau] [RealType], $\tau$ for the Krylov,
@@ -130,6 +131,10 @@ public:
 		try {
 			io.readline(timeDirection_, "TSPTimeFactor=");
 		} catch (std::exception&) { }
+
+		try {
+			io.readline(eta_, "TSPDamping=");
+		} catch (std::exception&) { }
 	}
 
 	virtual VectorRealType& times() { return times_; }
@@ -145,6 +150,8 @@ public:
 	virtual RealType timeDirection() const { return timeDirection_; }
 
 	virtual const VectorRealType& chebyTransform() const { return chebyTransform_; }
+
+	RealType eta() const { return eta_; }
 
 	template <typename IoInputter>
 	void setAlgorithm(VectorRealType* chebyTransform, PsimagLite::String s, IoInputter* io)
@@ -182,6 +189,7 @@ private:
 	typename BaseType::AlgorithmEnum algorithm_;
 	RealType                         tau_;
 	RealType                         timeDirection_;
+	RealType                         eta_;
 	VectorRealType                   chebyTransform_;
 }; // class TargetParamsTimeVectors
 
@@ -194,6 +202,7 @@ inline std::ostream& operator<<(std::ostream& os, const TargetParamsTimeVectors<
 	os << "TargetParams.advanceEach=" << t.advanceEach() << "\n";
 	os << "TargetParams.algorithm=" << t.algorithm() << "\n";
 	os << "TargetParams.timeDirection=" << t.timeDirection() << "\n";
+	os << "TargetParams.eta=" << t.eta() << "\n";
 	return os;
 }
 } // namespace Dmrg
