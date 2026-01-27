@@ -1,9 +1,9 @@
 #ifndef ARNOLDISAI_HH
 #define ARNOLDISAI_HH
 #include "ArnoldiIteration.hh"
+#include "CrsMatrix.h"
 #include "MatrixSolverBase.hh"
 #include "ParametersForSolver.h"
-#include "SparseConversionCrs.hh"
 #include <vector>
 
 namespace PsimagLite {
@@ -17,16 +17,15 @@ template <typename MatrixType_> class ArnoldiSaI : public MatrixSolverBase<Matri
 
 public:
 
-	using MatrixType            = MatrixType_;
-	using BaseType              = MatrixSolverBase<MatrixType_>;
-	using ComplexOrRealType     = typename MatrixType_::value_type;
-	using VectorType            = std::vector<ComplexOrRealType>;
-	using RealType              = typename Real<ComplexOrRealType>::Type;
-	using ArnoldiIterationType  = ArnoldiIteration<CrsMatrix<ComplexOrRealType>>;
-	using ParamsType            = ParametersForSolver<RealType>;
-	using VectorVectorType      = typename BaseType::VectorVectorType;
-	using VectorRealType        = typename BaseType::VectorRealType;
-	using SparseConversionsType = SparseConversions<MatrixType>;
+	using MatrixType           = MatrixType_;
+	using BaseType             = MatrixSolverBase<MatrixType_>;
+	using ComplexOrRealType    = typename MatrixType_::value_type;
+	using VectorType           = std::vector<ComplexOrRealType>;
+	using RealType             = typename Real<ComplexOrRealType>::Type;
+	using ArnoldiIterationType = ArnoldiIteration<CrsMatrix<ComplexOrRealType>>;
+	using ParamsType           = ParametersForSolver<RealType>;
+	using VectorVectorType     = typename BaseType::VectorVectorType;
+	using VectorRealType       = typename BaseType::VectorRealType;
 
 	//---------------------------------------------------------------------------//
 	/*!
@@ -74,7 +73,7 @@ public:
 		// I only know how to invert dense matrices
 		// Needs more study: FIXME TODO
 
-		const CrsMatrix<ComplexOrRealType>& crs    = SparseConversionsType::toCRS(a_);
+		const CrsMatrix<ComplexOrRealType>& crs    = a_;
 		Matrix<ComplexOrRealType>           a_copy = crs.toDense();
 
 		// shift first
