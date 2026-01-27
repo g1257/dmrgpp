@@ -1,3 +1,12 @@
 add_executable(test_AkimaSpline test_AkimaSpline.cpp)
 target_link_libraries(test_AkimaSpline PRIVATE Catch2::Catch2WithMain psimaglite)
 catch_discover_tests(test_AkimaSpline)
+
+add_executable(testArnoldiIteration testArnoldiIteration.cpp)
+target_link_libraries(testArnoldiIteration PRIVATE Catch2::Catch2WithMain psimaglite)
+catch_discover_tests(testArnoldiIteration)
+
+# ArnoldiSaI depends on ArnolidIteration; not sure how to make dependency explicit
+add_executable(testArnoldiSaI testArnoldiSaI.cpp)
+target_link_libraries(testArnoldiSaI PRIVATE Catch2::Catch2WithMain psimaglite)
+catch_discover_tests(testArnoldiSaI)
