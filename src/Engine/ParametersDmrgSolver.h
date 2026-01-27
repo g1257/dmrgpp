@@ -151,6 +151,14 @@ struct ParametersDmrgSolver {
 	typedef Options<InputValidatorType>                       OptionsType;
 	using TruncationControlType = TruncationControl<FieldType>;
 
+	enum class MatrixSolverEnum
+	{
+		DENSE,
+		LANCZOS,
+		DAVIDSON,
+		ARNOLDISAI
+	};
+
 	SizeType                      nthreads;
 	SizeType                      nthreads2;
 	SizeType                      sitesPerBlock;
@@ -178,6 +186,7 @@ struct ParametersDmrgSolver {
 	VectorFiniteLoopType          finiteLoop;
 	FieldType                     degeneracyMax;
 	FieldType                     denseSparseThreshold;
+	MatrixSolverEnum              matrix_solver_enum = MatrixSolverEnum::LANCZOS;
 
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{
@@ -376,6 +385,23 @@ struct ParametersDmrgSolver {
 		try {
 			io.readline(opOnSiteThreshold, "OpOnSiteThreshold=");
 		} catch (std::exception&) { }
+
+		std::string matrix_solver_str = "Lanczos";
+		try {
+			io.readline(matrix_solver_str, "MatrixSolver=");
+		} catch (std::exception&) { }
+
+		if (ProgramGlobals::toLower(matrix_solver_str) == "dense") {
+			matrix_solver_enum = MatrixSolverEnum::DENSE;
+		} else if (ProgramGlobals::toLower(matrix_solver_str) == "lanczos") {
+			matrix_solver_enum = MatrixSolverEnum::LANCZOS;
+		} else if (ProgramGlobals::toLower(matrix_solver_str) == "davidson") {
+			matrix_solver_enum = MatrixSolverEnum::DAVIDSON;
+		} else if (ProgramGlobals::toLower(matrix_solver_str) == "arnoldisai") {
+			matrix_solver_enum = MatrixSolverEnum::ARNOLDISAI;
+		} else {
+			err("Unknown MatrixSolver " + matrix_solver_str + "\n");
+		}
 
 		if (options.isSet("findSymmetrySector"))
 			findSymmetrySector = "1==1";
@@ -676,21 +702,6 @@ struct ParametersDmrgSolver {
 	{
 		checkFilesNotEqual(filename1, filename2);
 		checkTwoSiteDmrg(filename2, options);
-	}
-
-	PsimagLite::String restartFilename() const
-	{
-		// check first for observe
-		bool isObserve = this->options.isSet("observe");
-		if (isObserve)
-			return this->filename;
-
-		// then for restart
-		bool isRestart = this->options.isSet("restart");
-		if (isRestart)
-			return this->checkpoint.filename();
-
-		return "";
 	}
 
 private:

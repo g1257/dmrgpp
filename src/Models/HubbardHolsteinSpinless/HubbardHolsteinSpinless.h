@@ -136,7 +136,8 @@ public:
 	HubbardHolsteinSpinless(const SolverParamsType&  solverParams,
 	                        InputValidatorType&      io,
 	                        const SuperGeometryType& geometry,
-	                        PsimagLite::String       additional)
+	                        PsimagLite::String       additional,
+	                        PsimagLite::String       hdf5fileIfAny)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , isSsh_(additional == "SSH")
@@ -157,7 +158,7 @@ public:
 			std::cerr << warning;
 		}
 
-		restartHook(solverParams.restartFilename());
+		restartHook(hdf5fileIfAny);
 	}
 
 	void print(std::ostream& os) const { operator<<(os, modelParameters_); }

@@ -83,6 +83,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "LanczosSolver.h"
 #include "OneSiteSpaces.hh"
 #include "PackIndices.h"
+#include "ParametersDmrgSolver.h"
 #include "ParametersForSolver.h"
 #include "PredicateAwesome.h"
 #include "Profiling.h"
@@ -133,6 +134,7 @@ public:
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 	using FiniteLoopType    = FiniteLoop<RealType>;
 	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
+	using MatrixSolverEnum  = typename ParametersType::MatrixSolverEnum;
 
 	Diagonalization(const ParametersType&                parameters,
 	                const ModelType&                     model,
@@ -616,17 +618,7 @@ private:
 			return;
 		}
 
-		ParametersForSolverType    params(io_, "Lanczos", loopIndex);
-		LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
-
-		const bool useDavidson = parameters_.options.isSet("useDavidson");
-
-		if (useDavidson) {
-			lanczosOrDavidson = new DavidsonSolverType(lanczosHelper, params);
-		} else {
-			lanczosOrDavidson = new LanczosSolverType(lanczosHelper, params);
-		}
-
+		// special cases START
 		if (lanczosHelper.rows() == 0) {
 			static const RealType val = 10000;
 			std::fill(energyTmp.begin(), energyTmp.end(), val);
@@ -635,8 +627,6 @@ private:
 			msg << "Early exit due to matrix rank being zero.";
 			msg << " BOGUS energy= " << val;
 			progress_.printline(msgg, std::cout);
-			if (lanczosOrDavidson)
-				delete lanczosOrDavidson;
 			return;
 		}
 
@@ -656,9 +646,30 @@ private:
 			msg << "Early exit due to matrix rank being one;";
 			msg << " energy= " << val;
 			progress_.printline(msgg, std::cout);
-			if (lanczosOrDavidson)
-				delete lanczosOrDavidson;
 			return;
+		}
+		// special cases END
+
+		// "Lanczos" here is a legacy name; it should say MatrixSolver
+		ParametersForSolverType    params(io_, "Lanczos", loopIndex);
+		LanczosOrDavidsonBaseType* lanczosOrDavidson = nullptr;
+
+		switch (parameters_.matrix_solver_enum) {
+		case MatrixSolverEnum::DENSE:
+			energyTmp.resize(tmpVec.size());
+			dense_diag(lanczosHelper, energyTmp, tmpVec);
+			return; // EARLY EXIT HERE
+		case MatrixSolverEnum::LANCZOS:
+			lanczosOrDavidson = new LanczosSolverType(lanczosHelper, params);
+			break;
+		case MatrixSolverEnum::DAVIDSON:
+			lanczosOrDavidson = new DavidsonSolverType(lanczosHelper, params);
+			break;
+		case MatrixSolverEnum::ARNOLDISAI:
+			err("ArnoldiSAI is wip\n");
+			break;
+		default:
+			err("Unknown matrix solver; internal error");
 		}
 
 		try {
@@ -672,20 +683,7 @@ private:
 			progress_.printline(msgg0, std::cout);
 			progress_.printline(msgg0, std::cerr);
 
-			VectorRealType                        eigs(lanczosHelper.rows());
-			PsimagLite::Matrix<ComplexOrRealType> fm;
-			lanczosHelper.fullDiag(eigs, fm);
-			SizeType minExcited = std::min(energyTmp.size(), eigs.size());
-			for (SizeType excited = 0; excited < minExcited; ++excited) {
-				for (SizeType j = 0; j < eigs.size(); ++j)
-					tmpVec[excited][j] = fm(j, excited);
-				energyTmp[excited] = eigs[excited];
-				PsimagLite::OstringStream msgg2(std::cout.precision());
-				PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
-				msg2 << "Found eigenvalue[" << excited
-				     << "]= " << energyTmp[excited];
-				progress_.printline(msgg2, std::cout);
-			}
+			dense_diag(lanczosHelper, energyTmp, tmpVec);
 		}
 
 		PsimagLite::OstringStream                     msgg1(std::cout.precision());
@@ -693,8 +691,27 @@ private:
 		msg1 << "Found lowest eigenvalue= " << energyTmp[0];
 		progress_.printline(msgg1, std::cout);
 
-		if (lanczosOrDavidson)
-			delete lanczosOrDavidson;
+		delete lanczosOrDavidson;
+		lanczosOrDavidson = nullptr;
+	}
+
+	void dense_diag(const typename LanczosOrDavidsonBaseType::MatrixType& lanczosHelper,
+	                VectorRealType&                                       energyTmp,
+	                VectorVectorType&                                     tmpVec)
+	{
+		VectorRealType                        eigs(lanczosHelper.rows());
+		PsimagLite::Matrix<ComplexOrRealType> fm;
+		lanczosHelper.fullDiag(eigs, fm);
+		SizeType minExcited = std::min(energyTmp.size(), eigs.size());
+		for (SizeType excited = 0; excited < minExcited; ++excited) {
+			for (SizeType j = 0; j < eigs.size(); ++j)
+				tmpVec[excited][j] = fm(j, excited);
+			energyTmp[excited] = eigs[excited];
+			PsimagLite::OstringStream                     msgg2(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
+			msg2 << "Found eigenvalue[" << excited << "]= " << energyTmp[excited];
+			progress_.printline(msgg2, std::cout);
+		}
 	}
 
 	void computeAllLevelsBelow(VectorRealType&            energyTmp,
