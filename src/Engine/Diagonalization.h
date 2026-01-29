@@ -665,19 +665,7 @@ private:
 			err("Unknown matrix solver; internal error");
 		}
 
-		try {
-			computeAllLevelsBelow(energyTmp, tmpVec, *matrixSolverPtr, initialVector);
-		} catch (std::exception& e) {
-			PsimagLite::OstringStream                     msgg0(std::cout.precision());
-			PsimagLite::OstringStream::OstringStreamType& msg0 = msgg0();
-			msg0 << e.what() << "\n";
-			msg0 << "Lanczos or ArnoldiSaI solver failed, ";
-			msg0 << "trying with exact diagonalization...";
-			progress_.printline(msgg0, std::cout);
-			progress_.printline(msgg0, std::cerr);
-
-			dense_diag(lanczosHelper, energyTmp, tmpVec);
-		}
+		computeAllLevelsBelow(energyTmp, tmpVec, *matrixSolverPtr, initialVector);
 
 		PsimagLite::OstringStream                     msgg1(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg1 = msgg1();

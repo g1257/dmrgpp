@@ -110,11 +110,14 @@ public:
 		if (eigs_of_sai == 0.) {
 			// We shifted by sigma so that A - sigmaI be invertible
 			// If this isn't the case, we need to throw.
-			throw RuntimeError("Eigenvalue of the shifted-and-inverted is 0\n");
+			eigenvalue            = 0.;
+			std::string warn_zero = "Eigenvalue of the shifted-and-inverted is 0\n";
+			std::cerr << warn_zero;
+			std::cout << warn_zero;
+		} else {
+			// Recover the original eigenvalue
+			eigenvalue = std::real(sigma_ + 1. / eigs_of_sai);
 		}
-
-		// Recover the original eigenvalue
-		eigenvalue = std::real(sigma_ + 1. / eigs_of_sai);
 
 		// The eigenvector is the same
 		eigenvector
