@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, 2017-2025, UT-Battelle, LLC
+Copyright (c) 2009, 2017-2026, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 5.]
+[DMRG++, Version 6+]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -80,12 +80,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_LIOUVILLIANHEISENBERG_H
 #define DMRG_LIOUVILLIANHEISENBERG_H
 
-#include "../../Engine/ProgramGlobals.h"
-#include "../../Engine/Utils.h"
-#include "../../Engine/VerySparseMatrix.h"
 #include "CrsMatrix.h"
 #include "ImaginaryUnitOrFail.hh"
 #include "ParamsLiouvillianHeisenberg.hh"
+#include "ProgramGlobals.h"
+#include "Utils.h"
+#include "VerySparseMatrix.h"
 #include <algorithm>
 #include <utility>
 
