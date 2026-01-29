@@ -118,6 +118,8 @@ public:
 
 	SizeType rows() const { return hc_.modelHelper().size(aux_.m()); }
 
+	SizeType cols() const { return rows(); }
+
 	template <typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
