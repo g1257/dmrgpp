@@ -81,9 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef CHEBYSHEV_SOLVER_H_
 #define CHEBYSHEV_SOLVER_H_
 #include "ChebyshevSerializer.h"
-#include "LanczosOrDavidsonBase.h"
 #include "LanczosSolver.h"
 #include "Matrix.h"
+#include "MatrixSolverBase.hh"
+#include "ParametersForSolver.h"
 #include "ProgressIndicator.h"
 #include "Random48.h"
 #include "TridiagonalMatrix.h"
@@ -99,30 +100,24 @@ namespace PsimagLite {
  *        typename Vector< RealType>::Type& const y)
  *    member function that implements the operation x += Hy
  *
- * SolverParametersType is just a structure with a few things
- * like eMax, eMin, the spectrum bounds (needed to scale the Hamiltonian)
- * steps, the number of moments to compute, you can use
- * ParametersForSolver class, if you want.
- *
  */
-template <typename SolverParametersType, typename MatrixType_, typename VectorType>
-class ChebyshevSolver {
+template <typename MatrixType_> class ChebyshevSolver {
 
-	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType> NotBaseType;
-	typedef typename SolverParametersType::RealType                              RealType;
-	typedef LanczosVectors<MatrixType_, VectorType>          LanczosVectorsType;
-	typedef typename LanczosVectorsType::DenseMatrixType     DenseMatrixType;
-	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
-	typedef typename LanczosVectorsType::VectorVectorType    VectorVectorType;
+	using ComplexOrRealType   = typename MatrixType_::value_type;
+	using RealType            = typename Real<ComplexOrRealType>::Type;
+	using VectorType          = std::vector<ComplexOrRealType>;
+	using LanczosVectorsType  = LanczosVectors<MatrixType_, VectorType>;
+	using DenseMatrixType     = typename LanczosVectorsType::DenseMatrixType;
+	using DenseMatrixRealType = typename LanczosVectorsType::DenseMatrixRealType;
+	using VectorVectorType    = typename LanczosVectorsType::VectorVectorType;
 
 public:
 
-	typedef SolverParametersType                       ParametersSolverType;
-	typedef MatrixType_                                MatrixType;
-	typedef TridiagonalMatrix<RealType>                TridiagonalMatrixType;
-	typedef typename VectorType::value_type            VectorElementType;
-	typedef ChebyshevSerializer<TridiagonalMatrixType> PostProcType;
-	typedef PsimagLite::Random48<RealType>             RngType;
+	using ParametersSolverType  = ParametersForSolver<RealType>;
+	using MatrixType            = MatrixType_;
+	using TridiagonalMatrixType = TridiagonalMatrix<RealType>;
+	using PostProcType          = ChebyshevSerializer<TridiagonalMatrixType>;
+	using RngType               = PsimagLite::Random48<RealType>;
 
 	enum
 	{
@@ -131,16 +126,17 @@ public:
 		ALLOWS_ZERO = 4
 	};
 
-	ChebyshevSolver(MatrixType const& mat, SolverParametersType& params)
+	ChebyshevSolver(MatrixType const& mat, ParametersSolverType& params)
 	    : progress_("ChebyshevSolver")
 	    , mat_(mat)
 	    , params_(params)
 	    , mode_(WITH_INFO)
 	    , rng_(343311)
-	    , lanczosVectors_(mat,
-	                      params.lotaMemory,
-	                      params.steps,
-	                      NotBaseType::isReorthoEnabled(params))
+	    , lanczosVectors_(
+	          mat,
+	          params.lotaMemory,
+	          params.steps,
+	          MatrixSolverBase<MatrixType>::isReorthoEnabled(params.options, params.lotaMemory))
 	{
 		params.steps = 400;
 		setMode(params.options);
@@ -222,7 +218,7 @@ public:
 			atmp += PsimagLite::real(y[i] * PsimagLite::conj(y[i]));
 
 		for (SizeType i = 0; i < mat_.rows(); i++) {
-			VectorElementType tmp = val * z[i] - x[i];
+			ComplexOrRealType tmp = val * z[i] - x[i];
 			x[i]                  = y[i];
 			y[i]                  = tmp;
 		}
@@ -289,6 +285,8 @@ private:
 	class InternalMatrix {
 	public:
 
+		using value_type = ComplexOrRealType;
+
 		InternalMatrix(const MatrixType& mat)
 		    : matx_(mat)
 		    , y_(matx_.rows())
@@ -303,7 +301,7 @@ private:
 			matx_.matrixVectorProduct(x, y_);
 		}
 
-		VectorElementType operator()(SizeType i, SizeType j) const { return matx_(i, j); }
+		ComplexOrRealType operator()(SizeType i, SizeType j) const { return matx_(i, j); }
 
 	private:
 
@@ -318,21 +316,19 @@ private:
 		msg << "Asking LanczosSolver to compute spectrum bounds...";
 		progress_.printline(msgg, std::cout);
 
-		SolverParametersType                                            params;
-		InternalMatrix                                                  mat2(mat_);
-		RealType                                                        eMax = 0;
-		LanczosSolver<SolverParametersType, InternalMatrix, VectorType> lanczosSolver2(
-		    mat2, params);
+		ParametersSolverType          params;
+		InternalMatrix                mat2(mat_);
+		RealType                      eMax = 0;
+		LanczosSolver<InternalMatrix> lanczosSolver2(mat2, params);
 
 		VectorType z2(mat_.rows(), 0);
 		VectorType init(z2.size());
 		PsimagLite::fillRandom(init);
 		lanczosSolver2.computeOneState(eMax, z2, init, 0);
 
-		VectorType                                                  z(mat_.rows(), 0);
-		LanczosSolver<SolverParametersType, MatrixType, VectorType> lanczosSolver(mat_,
-		                                                                          params);
-		RealType                                                    eMin = 0;
+		VectorType                z(mat_.rows(), 0);
+		LanczosSolver<MatrixType> lanczosSolver(mat_, params);
+		RealType                  eMin = 0;
 		lanczosSolver.computeOneState(eMin, z, init, 0);
 
 		eMax = -eMax;
@@ -351,7 +347,7 @@ private:
 
 	ProgressIndicator     progress_;
 	MatrixType const&     mat_;
-	SolverParametersType& params_;
+	ParametersSolverType& params_;
 	SizeType              mode_;
 	RngType               rng_;
 	LanczosVectorsType    lanczosVectors_;

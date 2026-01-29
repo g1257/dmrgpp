@@ -19,7 +19,6 @@ Please see full open source license included in file LICENSE.
 // END LICENSE BLOCK
 
 #include "CrsMatrix.h"
-#include "DavidsonSolver.h"
 #include "LanczosSolver.h"
 #include "ParametersForSolver.h"
 #include "PsimagLite.h"
@@ -27,16 +26,12 @@ Please see full open source license included in file LICENSE.
 
 using namespace PsimagLite;
 
-typedef double RealType;
-typedef double ComplexOrRealType;
+using RealType          = double;
+using ComplexOrRealType = double;
 
-typedef ParametersForSolver<RealType>   ParametersForSolverType;
-typedef Vector<ComplexOrRealType>::Type VectorType;
-typedef CrsMatrix<ComplexOrRealType>    SparseMatrixType;
-typedef LanczosOrDavidsonBase<ParametersForSolverType, SparseMatrixType, VectorType>
-                                                                              SparseSolverType;
-typedef LanczosSolver<ParametersForSolverType, SparseMatrixType, VectorType>  LanczosSolverType;
-typedef DavidsonSolver<ParametersForSolverType, SparseMatrixType, VectorType> DavidsonSolverType;
+using SparseMatrixType  = CrsMatrix<ComplexOrRealType>;
+using MatrixSolverType  = MatrixSolverBase<SparseMatrixType>;
+using LanczosSolverType = LanczosSolver<SparseMatrixType>;
 
 void usage(const char* progName)
 {
@@ -127,23 +122,22 @@ int main(int argc, char* argv[])
 	assert(isHermitian(sparse));
 
 	// sparse solver setup
-	ParametersForSolverType params;
+	PsimagLite::ParametersForSolver<RealType> params;
 	params.lotaMemory = lotaMemory;
-	LanczosSolverType  lanczosSolver(sparse, params);
-	DavidsonSolverType davisonSolver(sparse, params);
-	SparseSolverType*  solver = 0;
+	LanczosSolverType lanczosSolver(sparse, params);
+	MatrixSolverType* solver = 0;
 
 	// select solver
 	if (useDavidson)
-		solver = &davisonSolver;
+		throw RuntimeError("Davidson was never finished and is now removed\n");
 	else
 		solver = &lanczosSolver;
 
 	// diagonalize matrix
-	RealType   gsEnergy = 0;
-	VectorType gsVector(n);
+	RealType                       gsEnergy = 0;
+	std::vector<ComplexOrRealType> gsVector(n);
 
-	VectorType initial(n);
+	std::vector<ComplexOrRealType> initial(n);
 	PsimagLite::fillRandom(initial);
 	solver->computeOneState(gsEnergy, gsVector, initial, 0);
 
