@@ -19,13 +19,13 @@ public:
 
 	using MatrixType           = MatrixType_;
 	using BaseType             = MatrixSolverBase<MatrixType_>;
-	using ComplexOrRealType    = typename MatrixType_::value_type;
-	using VectorType           = std::vector<ComplexOrRealType>;
-	using RealType             = typename Real<ComplexOrRealType>::Type;
+	using ComplexOrRealType    = typename BaseType::ComplexOrRealType;
+	using VectorType           = typename BaseType::VectorType;
+	using RealType             = typename BaseType::RealType;
+	using VectorRealType       = typename BaseType::VectorRealType;
+	using VectorVectorType     = typename BaseType::VectorVectorType;
 	using ArnoldiIterationType = ArnoldiIteration<CrsMatrix<ComplexOrRealType>>;
 	using ParametersSolverType = ParametersForSolver<RealType>;
-	using VectorVectorType     = typename BaseType::VectorVectorType;
-	using VectorRealType       = typename BaseType::VectorRealType;
 
 	//---------------------------------------------------------------------------//
 	/*!
