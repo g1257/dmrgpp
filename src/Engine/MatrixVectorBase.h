@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_MATRIX_VECTOR_BASE_H
 #define DMRG_MATRIX_VECTOR_BASE_H
 
+#include "PsimagLite.h"
 #include <vector>
 
 namespace Dmrg {
@@ -101,6 +102,11 @@ public:
 	void reflectionSector(SizeType) { }
 
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const;
+
+	const SparseMatrixType& toCRS() const
+	{
+		throw PsimagLite::RuntimeError("This MatrixVector class doesn't support toCRS()\n");
+	}
 
 	static void fullDiag(VectorRealType&         eigs,
 	                     FullMatrixType&         fm,

@@ -99,33 +99,33 @@ template <typename ParametersType, typename TargetingType> class Diagonalization
 
 public:
 
-	typedef std::pair<SizeType, SizeType>                     PairSizeType;
-	typedef typename ParametersType::OptionsType              OptionsType;
-	typedef typename TargetingType::WaveFunctionTransfType    WaveFunctionTransfType;
-	typedef typename TargetingType::ModelType                 ModelType;
-	typedef typename TargetingType::BasisType                 BasisType;
-	typedef typename TargetingType::BasisWithOperatorsType    BasisWithOperatorsType;
-	typedef typename TargetingType::BlockType                 BlockType;
-	typedef typename TargetingType::TargetVectorType          TargetVectorType;
-	typedef typename TargetingType::RealType                  RealType;
-	typedef typename TargetingType::VectorWithOffsetType      VectorWithOffsetType;
-	typedef typename BasisType::QnType                        QnType;
-	typedef typename ModelType::OperatorsType                 OperatorsType;
-	typedef typename ModelType::HamiltonianConnectionType     HamiltonianConnectionType;
-	typedef typename OperatorsType::SparseMatrixType          SparseMatrixType;
-	typedef typename SparseMatrixType::value_type             ComplexOrRealType;
-	typedef typename ModelType::ModelHelperType               ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename TargetingType::MatrixVectorType          MatrixVectorType;
-	typedef typename ModelType::InputValidatorType            InputValidatorType;
-	typedef typename PsimagLite::Vector<RealType>::Type       VectorRealType;
-	typedef typename PsimagLite::Vector<SizeType>::Type       VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
-	typedef PsimagLite::ParametersForSolver<RealType>         ParametersForSolverType;
-	typedef PsimagLite::MatrixSolverBase<MatrixVectorType>    MatrixSolverBaseType;
-	typedef PsimagLite::LanczosSolver<MatrixVectorType>       LanczosSolverType;
-	typedef PsimagLite::ArnoldiSaI<PsimagLite::CrsMatrix<ComplexOrRealType>> ArnoldiSaIType;
-	typedef typename PsimagLite::Vector<TargetVectorType>::Type              VectorVectorType;
+	typedef std::pair<SizeType, SizeType>                       PairSizeType;
+	typedef typename ParametersType::OptionsType                OptionsType;
+	typedef typename TargetingType::WaveFunctionTransfType      WaveFunctionTransfType;
+	typedef typename TargetingType::ModelType                   ModelType;
+	typedef typename TargetingType::BasisType                   BasisType;
+	typedef typename TargetingType::BasisWithOperatorsType      BasisWithOperatorsType;
+	typedef typename TargetingType::BlockType                   BlockType;
+	typedef typename TargetingType::TargetVectorType            TargetVectorType;
+	typedef typename TargetingType::RealType                    RealType;
+	typedef typename TargetingType::VectorWithOffsetType        VectorWithOffsetType;
+	typedef typename BasisType::QnType                          QnType;
+	typedef typename ModelType::OperatorsType                   OperatorsType;
+	typedef typename ModelType::HamiltonianConnectionType       HamiltonianConnectionType;
+	typedef typename OperatorsType::SparseMatrixType            SparseMatrixType;
+	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	typedef typename ModelType::ModelHelperType                 ModelHelperType;
+	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
+	typedef typename TargetingType::MatrixVectorType            MatrixVectorType;
+	typedef typename ModelType::InputValidatorType              InputValidatorType;
+	typedef typename PsimagLite::Vector<RealType>::Type         VectorRealType;
+	typedef typename PsimagLite::Vector<SizeType>::Type         VectorSizeType;
+	typedef typename PsimagLite::Vector<VectorRealType>::Type   VectorVectorRealType;
+	typedef PsimagLite::ParametersForSolver<RealType>           ParametersForSolverType;
+	typedef PsimagLite::MatrixSolverBase<MatrixVectorType>      MatrixSolverBaseType;
+	typedef PsimagLite::LanczosSolver<MatrixVectorType>         LanczosSolverType;
+	typedef PsimagLite::ArnoldiSaI<MatrixVectorType>            ArnoldiSaIType;
+	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
 
 	using FiniteLoopType    = FiniteLoop<RealType>;
@@ -659,7 +659,7 @@ private:
 			matrixSolverPtr = new LanczosSolverType(lanczosHelper, params);
 			break;
 		case MatrixSolverEnum::ARNOLDISAI:
-			err("ArnoldiSAI is wip\n");
+			matrixSolverPtr = new ArnoldiSaIType(lanczosHelper, params, params.b);
 			break;
 		default:
 			err("Unknown matrix solver; internal error");

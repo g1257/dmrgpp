@@ -73,7 +73,7 @@ public:
 		// I only know how to invert dense matrices
 		// Needs more study: FIXME TODO
 
-		const CrsMatrix<ComplexOrRealType>& crs    = a_;
+		const CrsMatrix<ComplexOrRealType>& crs    = a_.toCRS();
 		Matrix<ComplexOrRealType>           a_copy = crs.toDense();
 
 		// shift first

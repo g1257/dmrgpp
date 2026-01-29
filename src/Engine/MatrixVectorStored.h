@@ -129,7 +129,17 @@ public:
 			std::cerr << "WARNING: MatrixVectorStored being used for a large run!\n";
 	}
 
-	SizeType rows() const { return matrixStored_[pointer_].rows(); }
+	SizeType rows() const
+	{
+		assert(pointer_ < matrixStored_.size());
+		return matrixStored_[pointer_].rows();
+	}
+
+	SizeType cols() const
+	{
+		assert(pointer_ < matrixStored_.size());
+		return matrixStored_[pointer_].cols();
+	}
 
 	template <typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const

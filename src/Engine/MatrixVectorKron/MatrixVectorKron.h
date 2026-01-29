@@ -133,6 +133,8 @@ public:
 
 	SizeType rows() const { return initKron_.size(InitKronType::NEW); }
 
+	SizeType cols() const { return rows(); }
+
 	template <typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
