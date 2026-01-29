@@ -77,8 +77,8 @@ public:
 	}
 
 	template <typename RealType>
-	Matrix(const Matrix<RealType>& m,
-	       typename EnableIf<!IsComplexNumber<RealType>::True, int>::Type = 0)
+	explicit Matrix(const Matrix<RealType>& m,
+	                typename EnableIf<!IsComplexNumber<RealType>::True, int>::Type = 0)
 	{
 		nrow_ = m.rows();
 		ncol_ = m.cols();
@@ -88,7 +88,7 @@ public:
 				data_[i + j * nrow_] = m(i, j);
 	}
 
-	Matrix(std::ifstream& io)
+	explicit Matrix(std::ifstream& io)
 	{
 		io >> nrow_;
 		io >> ncol_;
@@ -556,12 +556,19 @@ private:
 }; // class Matrix
 
 // start in Matrix.cpp
-void geev(char                                jobvl,
-          char                                jobvr,
-          Matrix<std::complex<double>>&       a,
-          Vector<std::complex<double>>::Type& w,
-          Matrix<std::complex<double>>&       vl,
-          Matrix<std::complex<double>>&       vr);
+void geev(char                               jobvl,
+          char                               jobvr,
+          Matrix<double>&                    a,
+          std::vector<std::complex<double>>& w,
+          Matrix<double>&                    vl,
+          Matrix<double>&                    vr);
+
+void geev(char                               jobvl,
+          char                               jobvr,
+          Matrix<std::complex<double>>&      a,
+          std::vector<std::complex<double>>& w,
+          Matrix<std::complex<double>>&      vl,
+          Matrix<std::complex<double>>&      vr);
 
 void diag(Matrix<double>& m, Vector<double>::Type& eigs, char option);
 
