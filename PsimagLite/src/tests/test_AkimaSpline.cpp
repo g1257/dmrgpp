@@ -11,9 +11,9 @@ using Approx = Catch::Approx;
 
 TEST_CASE("AkimaSpline_from_std_vector", "[psimaglite]")
 {
-	std::vector<double> x { 1.0, 2.0, 3.0, 4.0, 5.0 };
-	std::vector<double> y { 1.0, 4.0, 9.0, 16.0, 25.0 };
-	AkimaSpline         akima_spline(x, y);
+	std::vector<double>              x { 1.0, 2.0, 3.0, 4.0, 5.0 };
+	std::vector<double>              y { 1.0, 4.0, 9.0, 16.0, 25.0 };
+	AkimaSpline<std::vector<double>> akima_spline(x, y);
 	CHECK(akima_spline(1.0) == Approx(1.0));
 	CHECK(akima_spline(2.0) == Approx(4.0));
 	CHECK(akima_spline(3.0) == Approx(9.0));
