@@ -671,7 +671,7 @@ private:
 			PsimagLite::OstringStream                     msgg0(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg0 = msgg0();
 			msg0 << e.what() << "\n";
-			msg0 << "Lanczos or Davidson solver failed, ";
+			msg0 << "Lanczos or ArnoldiSaI solver failed, ";
 			msg0 << "trying with exact diagonalization...";
 			progress_.printline(msgg0, std::cout);
 			progress_.printline(msgg0, std::cerr);

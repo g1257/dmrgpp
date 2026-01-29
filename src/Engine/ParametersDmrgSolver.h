@@ -155,7 +155,6 @@ struct ParametersDmrgSolver {
 	{
 		DENSE,
 		LANCZOS,
-		DAVIDSON,
 		ARNOLDISAI
 	};
 
@@ -395,8 +394,6 @@ struct ParametersDmrgSolver {
 			matrix_solver_enum = MatrixSolverEnum::DENSE;
 		} else if (ProgramGlobals::toLower(matrix_solver_str) == "lanczos") {
 			matrix_solver_enum = MatrixSolverEnum::LANCZOS;
-		} else if (ProgramGlobals::toLower(matrix_solver_str) == "davidson") {
-			matrix_solver_enum = MatrixSolverEnum::DAVIDSON;
 		} else if (ProgramGlobals::toLower(matrix_solver_str) == "arnoldisai") {
 			matrix_solver_enum = MatrixSolverEnum::ARNOLDISAI;
 		} else {

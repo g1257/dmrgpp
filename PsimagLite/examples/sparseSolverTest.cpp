@@ -45,19 +45,15 @@ int main(int argc, char* argv[])
 	constexpr unsigned int  nthreads = 1;
 	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);
 
-	int      opt         = 0;
-	bool     useDavidson = false;
-	SizeType n           = 0;
-	RealType maxValue    = 0;
-	SizeType maxCol      = 0;
-	SizeType seed        = 0;
-	bool     lotaMemory  = true;
+	int      opt        = 0;
+	SizeType n          = 0;
+	RealType maxValue   = 0;
+	SizeType maxCol     = 0;
+	SizeType seed       = 0;
+	bool     lotaMemory = true;
 
-	while ((opt = getopt(argc, argv, "n:c:m:r:dx")) != -1) {
+	while ((opt = getopt(argc, argv, "n:c:m:r:x")) != -1) {
 		switch (opt) {
-		case 'd':
-			useDavidson = true;
-			break;
 		case 'n':
 			n = atoi(optarg);
 			break;
@@ -125,13 +121,6 @@ int main(int argc, char* argv[])
 	PsimagLite::ParametersForSolver<RealType> params;
 	params.lotaMemory = lotaMemory;
 	LanczosSolverType lanczosSolver(sparse, params);
-	MatrixSolverType* solver = 0;
-
-	// select solver
-	if (useDavidson)
-		throw RuntimeError("Davidson was never finished and is now removed\n");
-	else
-		solver = &lanczosSolver;
 
 	// diagonalize matrix
 	RealType                       gsEnergy = 0;
@@ -139,7 +128,7 @@ int main(int argc, char* argv[])
 
 	std::vector<ComplexOrRealType> initial(n);
 	PsimagLite::fillRandom(initial);
-	solver->computeOneState(gsEnergy, gsVector, initial, 0);
+	lanczosSolver.computeOneState(gsEnergy, gsVector, initial, 0);
 
 	std::cout << "Energy=" << gsEnergy << "\n";
 }
