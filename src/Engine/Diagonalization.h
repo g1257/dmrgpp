@@ -681,6 +681,7 @@ private:
 
 		PsimagLite::OstringStream                     msgg1(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg1 = msgg1();
+		assert(energyTmp.size() > 0);
 		msg1 << "Found lowest eigenvalue= " << energyTmp[0];
 		progress_.printline(msgg1, std::cout);
 

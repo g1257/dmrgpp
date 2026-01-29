@@ -116,7 +116,6 @@ public:
 
 		matrixStored_[0].clear();
 		model.fullHamiltonian(matrixStored_[0], hc, aux);
-		assert(isHermitian(matrixStored_[0], true));
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg  = msgg();
 		SizeType                                      rows = matrixStored_[0].rows();
@@ -139,6 +138,12 @@ public:
 	{
 		assert(pointer_ < matrixStored_.size());
 		return matrixStored_[pointer_].cols();
+	}
+
+	const SparseMatrixType& toCRS() const
+	{
+		assert(pointer_ < matrixStored_.size());
+		return matrixStored_[pointer_];
 	}
 
 	template <typename SomeVectorType>
