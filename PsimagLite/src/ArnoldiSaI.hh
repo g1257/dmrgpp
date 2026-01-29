@@ -23,7 +23,7 @@ public:
 	using VectorType           = std::vector<ComplexOrRealType>;
 	using RealType             = typename Real<ComplexOrRealType>::Type;
 	using ArnoldiIterationType = ArnoldiIteration<CrsMatrix<ComplexOrRealType>>;
-	using ParamsType           = ParametersForSolver<RealType>;
+	using ParametersSolverType = ParametersForSolver<RealType>;
 	using VectorVectorType     = typename BaseType::VectorVectorType;
 	using VectorRealType       = typename BaseType::VectorRealType;
 
@@ -35,7 +35,7 @@ public:
 	 * \param[in]  params  The parameters object; see ParametersForSolver.h
 	 * \param[in]  sigma   The value for the small shift, must be positive
 	 */
-	ArnoldiSaI(const MatrixType& a, const ParamsType& params, const RealType& sigma)
+	ArnoldiSaI(const MatrixType& a, const ParametersSolverType& params, const RealType& sigma)
 	    : arnoldi_iteration_(params)
 	    , a_(a)
 	    , sigma_(sigma)

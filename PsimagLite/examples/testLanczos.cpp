@@ -37,9 +37,8 @@ int main(int argc, char* argv[])
 	params.lotaMemory = true;
 
 	/* We create the solver object */
-	PsimagLite::
-	    LanczosSolver<SolverParametersType, PsimagLite::CrsMatrix<ComplexType>, VectorType>
-	        lanczosSolver(msparse, params);
+	PsimagLite::LanczosSolver<PsimagLite::CrsMatrix<ComplexType>> lanczosSolver(msparse,
+	                                                                            params);
 
 	// This double will contain the lowest eigenvalue
 	double e = 0;
