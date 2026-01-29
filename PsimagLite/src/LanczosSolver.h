@@ -11,16 +11,16 @@ template <typename MatrixType_> class LanczosSolver : public MatrixSolverBase<Ma
 
 public:
 
+	using MatrixType            = MatrixType_;
 	using BaseType              = MatrixSolverBase<MatrixType_>;
-	using ComplexOrRealType     = typename MatrixType_::value_type;
-	using VectorType            = std::vector<ComplexOrRealType>;
-	using RealType              = typename Real<ComplexOrRealType>::Type;
+	using ComplexOrRealType     = typename BaseType::ComplexOrRealType;
+	using VectorType            = typename BaseType::VectorType;
+	using RealType              = typename BaseType::RealType;
+	using VectorRealType        = typename BaseType::VectorRealType;
+	using VectorVectorType      = typename BaseType::VectorVectorType;
 	using ParametersSolverType  = ParametersForSolver<RealType>;
 	using LanczosCoreType       = LanczosCore<ParametersSolverType, MatrixType_, VectorType>;
 	using TridiagonalMatrixType = typename LanczosCoreType::TridiagonalMatrixType;
-	using VectorVectorType      = std::vector<VectorType>;
-	using VectorRealType        = std::vector<RealType>;
-	using MatrixType            = MatrixType_;
 	using PostProcType          = ContinuedFraction<TridiagonalMatrixType>;
 
 	LanczosSolver(const MatrixType& mat, const ParametersSolverType& params)
