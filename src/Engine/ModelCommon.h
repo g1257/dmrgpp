@@ -160,10 +160,14 @@ public:
 
 		//! contribution to Hamiltonian from current system
 		hc.modelHelper().calcHamiltonianPart(matrixBlock, true, aux);
+		this->enforceHermiticity(matrixBlock, "left");
+
 		matrix = matrixBlock;
 
 		//! contribution to Hamiltonian from current envirnoment
 		hc.modelHelper().calcHamiltonianPart(matrixBlock, false, aux);
+		this->enforceHermiticity(matrixBlock, "right");
+
 		matrix += matrixBlock;
 
 		matrixBlock.clear();
@@ -172,9 +176,29 @@ public:
 		hc.matrixBond(vsm, aux);
 
 		matrix = vsm;
+		this->enforceHermiticity(matrix, "super");
 	}
 
 private:
+
+	void enforceHermiticity(const SparseMatrixType& m, const std::string& part) const
+	{
+#ifdef NDEBUG
+		return;
+#else
+		bool is_model_hermitian = isModelHermitian(params_.model);
+
+		if (is_model_hermitian && !isHermitian(m)) {
+			std::cerr << m.toDense();
+			err(part + " Hamiltonian Matrix not Hermitian\n");
+		}
+#endif
+	}
+
+	static bool isModelHermitian(const std::string& model_name)
+	{
+		return ("LiouvillianHeisenberg" != model_name);
+	}
 
 	const ParametersType&         params_;
 	const SuperGeometryType&      superGeometry_;
