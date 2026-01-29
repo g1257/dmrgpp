@@ -275,13 +275,22 @@ public:
 
 	void resize(SizeType nrow, SizeType ncol)
 	{
-		if (nrow_ > 0 && nrow_ != nrow)
-			throw RuntimeError("Matrix::resize: not allowed to "
-			                   "change rows from non-zero\n");
+		if (nrow_ == nrow && ncol_ == ncol) {
+			return;
+		}
+
+		SizeType       rows_min = std::min(nrow_, nrow);
+		SizeType       cols_min = std::min(ncol_, ncol);
+		std::vector<T> newdata(nrow * ncol);
+		for (SizeType i = 0; i < rows_min; ++i) {
+			for (SizeType j = 0; j < cols_min; ++j) {
+				newdata[i + j * nrow] = data_[i + j * nrow_];
+			}
+		}
 
 		nrow_ = nrow;
 		ncol_ = ncol;
-		data_.resize(nrow * ncol);
+		data_ = std::move(newdata);
 	}
 
 	Matrix<T>& operator+=(const Matrix<T>& other)
