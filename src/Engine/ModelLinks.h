@@ -179,14 +179,14 @@ public:
 			PsimagLite::String modStr("NN");
 			modStr[0] = mod1;
 			modStr[1] = mod2;
-			links_.push_back(OneLink(VectorSizeType { index1, index2 },
-			                         VectorSizeType { op1.edof, op2.edof },
-			                         fermionOrBoson,
-			                         modStr,
-			                         su2properties.angularMomentum,
-			                         su2properties.angularFactor,
-			                         su2properties.category,
-			                         vModifier));
+			links_.push_back(OneLinkType(VectorSizeType { index1, index2 },
+			                             VectorSizeType { op1.edof, op2.edof },
+			                             fermionOrBoson,
+			                             modStr,
+			                             su2properties.angularMomentum,
+			                             su2properties.angularFactor,
+			                             su2properties.category,
+			                             vModifier));
 		}
 
 		template <typename OpaqueOp>
