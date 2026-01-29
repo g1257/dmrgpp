@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2012, UT-Battelle, LLC
+Copyright (c) 2009, 2012-2026, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 6+]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -67,7 +67,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-
 */
 
 /** \ingroup DMRG */
@@ -75,7 +74,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file ParamsLiouvillianHeisenberg.hh
  *
- *  Contains the parameters for the LiouvillianHeisenberg model and function
+ *  Contains the parameters for the LiouvillianHeisenberg model and functions
  *  to read them from a file
  *
  */
