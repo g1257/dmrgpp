@@ -38,10 +38,8 @@ int main(int argc, char* argv[])
 	params.lotaMemory = true;
 	params.tolerance  = -1;
 	params.options    = "reortho";
-	PsimagLite::LanczosSolver<SolverParametersType,
-	                          PsimagLite::CrsMatrix<ComplexType>,
-	                          VectorComplexType>
-	    lanczosSolver(msparse, params);
+	PsimagLite::LanczosSolver<PsimagLite::CrsMatrix<ComplexType>> lanczosSolver(msparse,
+	                                                                            params);
 
 	PsimagLite::Random48<double> myrng(time(0));
 	VectorComplexType            initialV(n, 0.0);
