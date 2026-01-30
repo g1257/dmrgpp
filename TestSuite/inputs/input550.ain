@@ -1,0 +1,32 @@
+##Ainur1.0
+
+TotalNumberOfSites=8;
+NumberOfTerms=3;
+
+gt0:DegreesOfFreedom=1;
+gt0:GeometryKind=chain;
+gt0:GeometryOptions=ConstantValues;
+gt0:dir0:Connectors = [1.];
+
+gt1:DegreesOfFreedom=1;
+gt1:GeometryKind=chain;
+gt1:GeometryOptions=ConstantValues;
+gt1:dir0:Connectors = [1.];
+
+gt2:DegreesOfFreedom=1;
+gt2:GeometryKind=chain;
+gt2:GeometryOptions=ConstantValues;
+gt2:dir0:Connectors = [1.];
+
+Model=Aklt;
+HeisenbergTwiceS=2;
+
+OutputFile=data550;
+SolverOptions=twositedmrg;
+Version=version;
+InfiniteLoopKeptStates=50;
+FiniteLoops=[[@auto, 100, 0], [@auto, 100, 0], [@auto, 100, 0]];
+boolean IsPeriodicX=1;
+TargetSzPlusConst=8;
+
+
