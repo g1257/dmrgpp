@@ -1,30 +1,30 @@
 #ifndef PSI_LANCZOS_SOLVER_H
 #define PSI_LANCZOS_SOLVER_H
 #include "LanczosCore.h"
-#include "LanczosOrDavidsonBase.h"
+#include "MatrixSolverBase.hh"
 #include "Profiling.h"
 #include "Vector.h"
 
 namespace PsimagLite {
 
-template <typename SolverParametersType, typename MatrixType_, typename VectorType_>
-class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType_> {
+template <typename MatrixType_> class LanczosSolver : public MatrixSolverBase<MatrixType_> {
 
 public:
 
-	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType_> BaseType;
-	typedef LanczosCore<SolverParametersType, MatrixType_, VectorType_> LanczosCoreType;
-	typedef typename LanczosCoreType::TridiagonalMatrixType             TridiagonalMatrixType;
-	typedef typename LanczosCoreType::RealType                          RealType;
-	typedef typename LanczosCoreType::VectorType                        VectorType;
-	typedef typename Vector<VectorType>::Type                           VectorVectorType;
-	typedef typename LanczosCoreType::VectorRealType                    VectorRealType;
-	typedef MatrixType_                                                 MatrixType;
-	typedef ContinuedFraction<TridiagonalMatrixType>                    PostProcType;
-	typedef SolverParametersType                                        ParametersSolverType;
+	using MatrixType            = MatrixType_;
+	using BaseType              = MatrixSolverBase<MatrixType_>;
+	using ComplexOrRealType     = typename BaseType::ComplexOrRealType;
+	using VectorType            = typename BaseType::VectorType;
+	using RealType              = typename BaseType::RealType;
+	using VectorRealType        = typename BaseType::VectorRealType;
+	using VectorVectorType      = typename BaseType::VectorVectorType;
+	using ParametersSolverType  = ParametersForSolver<RealType>;
+	using LanczosCoreType       = LanczosCore<ParametersSolverType, MatrixType_, VectorType>;
+	using TridiagonalMatrixType = typename LanczosCoreType::TridiagonalMatrixType;
+	using PostProcType          = ContinuedFraction<TridiagonalMatrixType>;
 
-	LanczosSolver(const MatrixType& mat, const SolverParametersType& params)
-	    : ls_(mat, params, BaseType::isReorthoEnabled(params))
+	LanczosSolver(const MatrixType& mat, const ParametersSolverType& params)
+	    : ls_(mat, params, BaseType::isReorthoEnabled(params.options, params.lotaMemory))
 	{ }
 
 	void computeOneState(RealType&         energy,
