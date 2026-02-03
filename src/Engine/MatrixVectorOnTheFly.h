@@ -112,7 +112,7 @@ public:
 		if (hc.modelHelper().size(aux_.m()) > maxMatrixRankStored)
 			return;
 
-		model.fullHamiltonian(matrixStored_, hc, aux_);
+		hc.fullHamiltonian(matrixStored_, aux_, model_.isHermitian());
 		assert(isHermitian(matrixStored_, true));
 	}
 

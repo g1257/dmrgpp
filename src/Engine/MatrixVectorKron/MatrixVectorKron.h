@@ -120,7 +120,7 @@ public:
 		if (hc.modelHelper().size(aux.m()) > maxMatrixRankStored)
 			return;
 
-		model.fullHamiltonian(matrixStored_, hc, aux);
+		hc.fullHamiltonian(matrixStored_, aux, model.isHermitian());
 		assert(isHermitian(matrixStored_, true));
 
 		checkKron();
