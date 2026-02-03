@@ -115,7 +115,7 @@ public:
 		const bool         debugMatrix = options.isSet("debugmatrix");
 
 		matrixStored_[0].clear();
-		model.fullHamiltonian(matrixStored_[0], hc, aux);
+		hc.fullHamiltonian(matrixStored_[0], aux, model.isHermitian());
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg  = msgg();
 		SizeType                                      rows = matrixStored_[0].rows();

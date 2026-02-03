@@ -180,6 +180,8 @@ public:
 		hmatrix += jump_operators_[index];
 	}
 
+	bool isHermitian() const final { return false; }
+
 protected:
 
 	void fillLabeledOperators(VectorQnType& qns)

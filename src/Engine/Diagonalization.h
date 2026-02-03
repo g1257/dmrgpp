@@ -543,7 +543,7 @@ private:
 		if (options.isSet("debugmatrix") && !finiteLoop.wants("onlyslowwft")) {
 			SparseMatrixType fullm;
 
-			model_.fullHamiltonian(fullm, hc, aux);
+			hc.fullHamiltonian(fullm, aux, model_.isHermitian());
 
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 			crsMatrixToFullMatrix(fullm2, fullm);

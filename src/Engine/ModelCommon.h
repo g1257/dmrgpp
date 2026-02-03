@@ -147,59 +147,6 @@ public:
 			err("addConnectionsInNaturalBasis(): unimplemented\n");
 	}
 
-	/**
-	        Returns H, the hamiltonian for basis1 and partition
-	        $m$ consisting of the external product of basis2$\otimes$basis3
-	        Note: Used only for debugging purposes
-	        */
-	void fullHamiltonian(SparseMatrixType&                    matrix,
-	                     const HamiltonianConnectionType&     hc,
-	                     const typename ModelHelperType::Aux& aux) const
-	{
-		SparseMatrixType matrixBlock;
-
-		//! contribution to Hamiltonian from current system
-		hc.modelHelper().calcHamiltonianPart(matrixBlock, true, aux);
-		this->enforceHermiticity(matrixBlock, "left");
-
-		matrix = matrixBlock;
-
-		//! contribution to Hamiltonian from current envirnoment
-		hc.modelHelper().calcHamiltonianPart(matrixBlock, false, aux);
-		this->enforceHermiticity(matrixBlock, "right");
-
-		matrix += matrixBlock;
-
-		matrixBlock.clear();
-
-		VerySparseMatrixType vsm(matrix);
-		hc.matrixBond(vsm, aux);
-
-		matrix = vsm;
-		this->enforceHermiticity(matrix, "super");
-	}
-
-private:
-
-	void enforceHermiticity(const SparseMatrixType& m, const std::string& part) const
-	{
-#ifdef NDEBUG
-		return;
-#else
-		bool is_model_hermitian = isModelHermitian(params_.model);
-
-		if (is_model_hermitian && !isHermitian(m)) {
-			std::cerr << m.toDense();
-			err(part + " Hamiltonian Matrix not Hermitian\n");
-		}
-#endif
-	}
-
-	static bool isModelHermitian(const std::string& model_name)
-	{
-		return ("LiouvillianHeisenberg" != model_name);
-	}
-
 	const ParametersType&         params_;
 	const SuperGeometryType&      superGeometry_;
 	PsimagLite::ProgressIndicator progress_;
