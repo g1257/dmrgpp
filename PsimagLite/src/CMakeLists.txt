@@ -62,6 +62,12 @@ if(Boost_FOUND)
   target_link_libraries(psimaglite PUBLIC Boost::boost)
 endif()
 
+find_package(Threads)
+if(Threads_FOUND)
+  target_compile_definitions(psimaglite PUBLIC USE_PTHREADS)
+  target_link_libraries(psimaglite PUBLIC Threads::Threads)
+endif()
+
 find_package(BLAS REQUIRED)
 find_package(LAPACK REQUIRED)
 target_link_libraries(psimaglite PUBLIC BLAS::BLAS)
