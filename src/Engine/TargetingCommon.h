@@ -152,15 +152,15 @@ public:
 	using BlockType              = typename BasisType::BlockType;
 	using VectorStringType       = PsimagLite::Vector<PsimagLite::String>::Type;
 	using VectorOperatorType     = typename PsimagLite::Vector<OperatorType>::Type;
-	typedef ApplyOperatorExpression<TargetHelperType, VectorWithOffsetType, LanczosSolverType>
-	    ApplyOperatorExpressionType;
+	using ApplyOperatorExpressionType
+	    = ApplyOperatorExpression<TargetHelperType, VectorWithOffsetType, LanczosSolverType>;
 	using VectorSizeType         = typename ApplyOperatorExpressionType::VectorSizeType;
 	using ApplyOperatorType      = typename ApplyOperatorExpressionType::ApplyOperatorType;
 	using BorderEnumType         = typename ApplyOperatorType::BorderEnum;
 	using WaveFunctionTransfType = typename TargetHelperType::WaveFunctionTransfType;
 	using TargetParamsType       = typename ApplyOperatorExpressionType::TargetParamsType;
-	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType
-	    VectorVectorWithOffsetType;
+	using VectorVectorWithOffsetType =
+	    typename ApplyOperatorExpressionType::VectorVectorWithOffsetType;
 	using VectorRealType      = typename ApplyOperatorExpressionType::VectorRealType;
 	using PairType            = typename ApplyOperatorExpressionType::PairType;
 	using TimeVectorsBaseType = typename ApplyOperatorExpressionType::TimeVectorsBaseType;
@@ -170,8 +170,8 @@ public:
 	using StageEnumType       = typename ApplyOperatorExpressionType::StageEnumType;
 	using TimeSerializerType  = TimeSerializer<VectorWithOffsetType>;
 	using RestartStructType   = RestartStruct;
-	typedef typename ApplyOperatorExpressionType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	using VectorVectorVectorWithOffsetType =
+	    typename ApplyOperatorExpressionType::VectorVectorVectorWithOffsetType;
 	using SdhsReinterpretType  = SdhsReinterpret<BraketType>;
 	using MultiPointInSituType = MultiPointInSitu<VectorWithOffsetType_, ModelType>;
 	using CheckpointType       = Checkpoint<ModelType, WaveFunctionTransfType>;

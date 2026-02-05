@@ -54,8 +54,8 @@ struct OperatorOptions {
 };
 
 using InputNgType = PsimagLite::InputNg<Dmrg::InputCheck>;
-typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
-    ParametersDmrgSolverType;
+using ParametersDmrgSolverType
+    = Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>;
 
 void usageOperator();
 

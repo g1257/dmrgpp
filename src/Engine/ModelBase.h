@@ -125,8 +125,8 @@ public:
 	using InputValidatorType = InputValidatorType_;
 	using ModelHelperType    = ModelHelperType_;
 	using SuperGeometryType  = SuperGeometryType_;
-	typedef ModelBase<ModelHelperType_, ParametersType_, InputValidatorType_, SuperGeometryType>
-	    ThisType;
+	using ThisType
+	    = ModelBase<ModelHelperType_, ParametersType_, InputValidatorType_, SuperGeometryType>;
 	using BraketType                 = Braket<ThisType>;
 	using OperatorsType              = typename ModelHelperType::OperatorsType;
 	using BlockType                  = typename ModelHelperType::BlockType;

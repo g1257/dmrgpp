@@ -14,8 +14,8 @@ using RealType = double;
 using RealType = float;
 #endif
 using InputNgType = PsimagLite::InputNg<Dmrg::InputCheck>;
-typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
-    ParametersDmrgSolverType;
+using ParametersDmrgSolverType
+    = Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>;
 using ConcurrencyType = PsimagLite::Concurrency;
 
 void usage(const PsimagLite::String& name)
@@ -42,8 +42,8 @@ void main1(InputNgType::Readable&          io,
            const ParametersDmrgSolverType& dmrgSolverParams,
            const ToolOptions&              toolOptions)
 {
-	typedef PsimagLite::Geometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>
-	             GeometryType;
+	using GeometryType
+	    = PsimagLite::Geometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>;
 	GeometryType geometry(io);
 
 	using ToolBoxType = Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType>;

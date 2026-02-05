@@ -141,33 +141,30 @@ public:
 	using RngType              = typename PsimagLite::RandomForTests<RealType>;
 	using MettsStochasticsType = MettsStochastics<ModelType, RngType>;
 	using PairType             = typename MettsStochasticsType::PairType;
-	typedef MettsCollapse<VectorWithOffsetType, MettsStochasticsType, TargetParamsType>
-	    MettsCollapseType;
-	using PackIndicesType    = typename MettsCollapseType::PackIndicesType;
-	using TimeSerializerType = typename TargetingCommonType::TimeSerializerType;
-	typedef TimeVectorsKrylov<TargetParamsType,
-	                          ModelType,
-	                          WaveFunctionTransfType,
-	                          LanczosSolverType,
-	                          VectorWithOffsetType>
-	    TimeVectorsKrylovType;
-	typedef TimeVectorsRungeKutta<TargetParamsType,
-	                              ModelType,
-	                              WaveFunctionTransfType,
-	                              LanczosSolverType,
-	                              VectorWithOffsetType>
-	    TimeVectorsRungeKuttaType;
-	typedef TimeVectorsSuzukiTrotter<TargetParamsType,
-	                                 ModelType,
-	                                 WaveFunctionTransfType,
-	                                 LanczosSolverType,
-	                                 VectorWithOffsetType>
-	    TimeVectorsSuzukiTrotterType;
-	using InputValidatorType         = typename ModelType::InputValidatorType;
+	using MettsCollapseType
+	    = MettsCollapse<VectorWithOffsetType, MettsStochasticsType, TargetParamsType>;
+	using PackIndicesType              = typename MettsCollapseType::PackIndicesType;
+	using TimeSerializerType           = typename TargetingCommonType::TimeSerializerType;
+	using TimeVectorsKrylovType        = TimeVectorsKrylov<TargetParamsType,
+	                                                       ModelType,
+	                                                       WaveFunctionTransfType,
+	                                                       LanczosSolverType,
+	                                                       VectorWithOffsetType>;
+	using TimeVectorsRungeKuttaType    = TimeVectorsRungeKutta<TargetParamsType,
+	                                                           ModelType,
+	                                                           WaveFunctionTransfType,
+	                                                           LanczosSolverType,
+	                                                           VectorWithOffsetType>;
+	using TimeVectorsSuzukiTrotterType = TimeVectorsSuzukiTrotter<TargetParamsType,
+	                                                              ModelType,
+	                                                              WaveFunctionTransfType,
+	                                                              LanczosSolverType,
+	                                                              VectorWithOffsetType>;
+	using InputValidatorType           = typename ModelType::InputValidatorType;
 	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType>::Type;
 	using QnType                     = typename BasisType::QnType;
-	typedef typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type
-	    VectorBlockDiagonalMatrixType;
+	using VectorBlockDiagonalMatrixType =
+	    typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type;
 	using StageEnumType = typename TargetingCommonType::StageEnumType;
 	typedef
 	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;

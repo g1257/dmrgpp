@@ -103,12 +103,11 @@ class TimeVectorsRungeKutta : public TimeVectorsBase<TargetParamsType,
                                                      LanczosSolverType,
                                                      VectorWithOffsetType> {
 
-	typedef TimeVectorsBase<TargetParamsType,
-	                        ModelType,
-	                        WaveFunctionTransfType,
-	                        LanczosSolverType,
-	                        VectorWithOffsetType>
-	    BaseType;
+	using BaseType                   = TimeVectorsBase<TargetParamsType,
+	                                                   ModelType,
+	                                                   WaveFunctionTransfType,
+	                                                   LanczosSolverType,
+	                                                   VectorWithOffsetType>;
 	using PairType                   = typename BaseType::PairType;
 	using RealType                   = typename TargetParamsType::RealType;
 	using ModelHelperType            = typename ModelType::ModelHelperType;

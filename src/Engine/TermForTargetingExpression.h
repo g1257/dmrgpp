@@ -32,8 +32,8 @@ public:
 	using SiteSplitType               = typename OneOperatorSpecType::SiteSplit;
 	using ApplyOperatorExpressionType = typename TargetingBaseType::ApplyOperatorExpressionType;
 	using BorderEnumType              = typename ApplyOperatorExpressionType::BorderEnumType;
-	typedef NonLocalForTargetingExpression<TargetingBaseType>
-	    NonLocalForTargetingExpressionType;
+	using NonLocalForTargetingExpressionType
+	    = NonLocalForTargetingExpression<TargetingBaseType>;
 	using KetType = KetForTargetingExpression<ComplexOrRealType>;
 
 	TermForTargetingExpression(const AuxiliaryType& aux)

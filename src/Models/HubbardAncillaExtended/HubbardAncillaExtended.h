@@ -124,8 +124,8 @@ public:
 	using OpsLabelType                 = typename ModelBaseType::OpsLabelType;
 	using OpForLinkType                = typename ModelBaseType::OpForLinkType;
 	using ModelTermType                = typename ModelBaseType::ModelTermType;
-	typedef HelperHubbardAncilla<ModelBaseType, ParametersHubbardAncillaType>
-	    HelperHubbardAncillaType;
+	using HelperHubbardAncillaType
+	    = HelperHubbardAncilla<ModelBaseType, ParametersHubbardAncillaType>;
 	using HilbertSpaceFeAsType = typename HelperHubbardAncillaType::HilbertSpaceFeAsType;
 
 	static const int      FERMION_SIGN = -1;

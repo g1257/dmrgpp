@@ -24,8 +24,8 @@ public:
 	using RealType            = typename OperatorType::RealType;
 	using OperatorStorageType = typename OperatorType::StorageType;
 	using VectorOperatorType  = typename PsimagLite::Vector<OperatorType>::Type;
-	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
-	    VectorPairStringSizeType;
+	using VectorPairStringSizeType =
+	    typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type;
 	using OneLinkType = OneLink<ComplexOrRealType>;
 
 	class AtomKindBase {

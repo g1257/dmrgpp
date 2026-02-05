@@ -102,19 +102,17 @@ class TimeVectorsKrylov : public TimeVectorsBase<TargetParamsType,
 
 public:
 
-	using VectorWithOffsetType = VectorWithOffsetType_;
-	typedef TimeVectorsBase<TargetParamsType,
-	                        ModelType,
-	                        WaveFunctionTransfType,
-	                        LanczosSolverType,
-	                        VectorWithOffsetType>
-	    BaseType;
-	typedef TimeVectorsKrylov<TargetParamsType,
-	                          ModelType,
-	                          WaveFunctionTransfType,
-	                          LanczosSolverType,
-	                          VectorWithOffsetType>
-	    ThisType;
+	using VectorWithOffsetType   = VectorWithOffsetType_;
+	using BaseType               = TimeVectorsBase<TargetParamsType,
+	                                               ModelType,
+	                                               WaveFunctionTransfType,
+	                                               LanczosSolverType,
+	                                               VectorWithOffsetType>;
+	using ThisType               = TimeVectorsKrylov<TargetParamsType,
+	                                                 ModelType,
+	                                                 WaveFunctionTransfType,
+	                                                 LanczosSolverType,
+	                                                 VectorWithOffsetType>;
 	using PairType               = typename BaseType::PairType;
 	using RealType               = typename TargetParamsType::RealType;
 	using VectorRealType         = typename PsimagLite::Vector<RealType>::Type;
@@ -123,8 +121,8 @@ public:
 	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
 	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
 	using ComplexOrRealType      = typename SparseMatrixType::value_type;
-	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
-	    ParallelTriDiagType;
+	using ParallelTriDiagType
+	    = ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>;
 	using MatrixComplexOrRealType    = typename ParallelTriDiagType::MatrixComplexOrRealType;
 	using VectorType                 = typename ParallelTriDiagType::TargetVectorType;
 	using VectorMatrixFieldType      = typename ParallelTriDiagType::VectorMatrixFieldType;

@@ -123,8 +123,8 @@ public:
 	using OpsLabelType          = typename ModelBaseType::OpsLabelType;
 	using OpForLinkType         = typename ModelBaseType::OpForLinkType;
 	using SuperOpHelperBaseType = typename ModelBaseType::SuperOpHelperBaseType;
-	typedef SuperOpHelperPlaquette<SuperGeometryType, SolverParamsType>
-	    SuperOpHelperPlaquetteType;
+	using SuperOpHelperPlaquetteType
+	    = SuperOpHelperPlaquette<SuperGeometryType, SolverParamsType>;
 
 	static const SizeType TWICE_THE_SPIN = 2;
 

@@ -105,11 +105,10 @@ class WaveFunctionTransfLocal : public WaveFunctionTransfBase<DmrgWaveStructType
                                                               OptionsType_,
                                                               OneSiteSpacesType_> {
 
-	typedef WaveFunctionTransfBase<DmrgWaveStructType,
-	                               VectorWithOffsetType,
-	                               OptionsType_,
-	                               OneSiteSpacesType_>
-	    BaseType;
+	using BaseType        = WaveFunctionTransfBase<DmrgWaveStructType,
+	                                               VectorWithOffsetType,
+	                                               OptionsType_,
+	                                               OneSiteSpacesType_>;
 	using VectorSizeType  = typename BaseType::VectorSizeType;
 	using PackIndicesType = typename BaseType::PackIndicesType;
 
@@ -126,8 +125,8 @@ public:
 	using RealType               = typename BasisWithOperatorsType::RealType;
 	using LeftRightSuperType     = typename DmrgWaveStructType::LeftRightSuperType;
 	using MatrixOrIdentityType   = MatrixOrIdentity<SparseMatrixType>;
-	typedef ParallelWftOne<VectorWithOffsetType, DmrgWaveStructType, OneSiteSpacesType_>
-	    ParallelWftType;
+	using ParallelWftType
+	    = ParallelWftOne<VectorWithOffsetType, DmrgWaveStructType, OneSiteSpacesType_>;
 	using MatrixType           = PsimagLite::Matrix<SparseElementType>;
 	using WftAccelBlocksType   = WftAccelBlocks<BaseType>;
 	using WftAccelPatchesType  = WftAccelPatches<BaseType>;

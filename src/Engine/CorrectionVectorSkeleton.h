@@ -101,11 +101,10 @@ class CorrectionVectorSkeleton {
 
 public:
 
-	typedef CorrectionVectorSkeleton<LanczosSolverType_,
-	                                 VectorWithOffsetType_,
-	                                 TargetingBaseType,
-	                                 TargetParamsType>
-	    ThisType;
+	using ThisType               = CorrectionVectorSkeleton<LanczosSolverType_,
+	                                                        VectorWithOffsetType_,
+	                                                        TargetingBaseType,
+	                                                        TargetParamsType>;
 	using LanczosSolverType      = LanczosSolverType_;
 	using MatrixVectorType       = typename TargetingBaseType::MatrixVectorType;
 	using ModelType              = typename MatrixVectorType::ModelType;
@@ -131,12 +130,12 @@ public:
 	using DenseMatrixRealType    = PsimagLite::Matrix<RealType>;
 	using PostProcType           = typename LanczosSolverType::PostProcType;
 	using LanczosMatrixType      = typename LanczosSolverType::MatrixType;
-	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
-	    CorrectionVectorFunctionType;
-	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
-	    ParallelTriDiagType;
-	typedef TridiagRixsStatic<ModelType, LanczosSolverType, VectorWithOffsetType>
-	    TridiagRixsStaticType;
+	using CorrectionVectorFunctionType
+	    = CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>;
+	using ParallelTriDiagType
+	    = ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>;
+	using TridiagRixsStaticType
+	    = TridiagRixsStatic<ModelType, LanczosSolverType, VectorWithOffsetType>;
 	using MatrixComplexOrRealType = typename ParallelTriDiagType::MatrixComplexOrRealType;
 	using VectorMatrixFieldType   = typename ParallelTriDiagType::VectorMatrixFieldType;
 	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;

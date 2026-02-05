@@ -14,8 +14,8 @@ using LeftRightSuper2Type     = LeftRightSuper<BasisWithOperators2Type, Basis2Ty
 
 using ModelHelper2Type = ModelHelperLocal<LeftRightSuper2Type>;
 
-typedef ModelBase<ModelHelper2Type, ParametersDmrgSolverType, InputNgType::Readable, Geometry1Type>
-    ModelBase5Type;
+using ModelBase5Type
+    = ModelBase<ModelHelper2Type, ParametersDmrgSolverType, InputNgType::Readable, Geometry1Type>;
 
 template bool
 observeOneFullSweep<VectorWithOffset2Type, ModelBase5Type>(IoInputType&              io,

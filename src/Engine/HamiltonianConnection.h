@@ -120,8 +120,8 @@ public:
 	using AuxType                 = typename ModelHelperType::Aux;
 	using OperatorsCachedType     = OperatorsCached<LeftRightSuperType>;
 	using SuperOpHelperBaseType   = SuperOpHelperBase<SuperGeometryType, ParamsForSolverType>;
-	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>
-	    ManyToTwoConnectionType;
+	using ManyToTwoConnectionType
+	    = ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>;
 	using OpsForLinkType = OpsForLink<LeftRightSuperType>;
 
 	HamiltonianConnection(const LeftRightSuperType&    lrs,

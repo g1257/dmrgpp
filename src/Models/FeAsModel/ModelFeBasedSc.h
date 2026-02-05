@@ -122,10 +122,10 @@ public:
 	using MatrixType           = PsimagLite::Matrix<ComplexOrRealType>;
 	using ParamsModelFeAsType  = ParametersModelFeAs<ComplexOrRealType, QnType>;
 	using OpsLabelType         = typename ModelBaseType::OpsLabelType;
-	typedef FeAsJzSymmetry<HilbertBasisType,
-	                       VectorOperatorType,
-	                       PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
-	    FeAsJzSymmetryType;
+	using FeAsJzSymmetryType
+	    = FeAsJzSymmetry<HilbertBasisType,
+	                     VectorOperatorType,
+	                     PsimagLite::IsComplexNumber<ComplexOrRealType>::True>;
 	using OpForLinkType = typename ModelBaseType::OpForLinkType;
 	using ModelTermType = typename ModelBaseType::ModelTermType;
 

@@ -100,15 +100,14 @@ class DensityMatrixLocal : public DensityMatrixBase<TargetingType> {
 
 public:
 
-	using BlockDiagonalMatrixType = typename BaseType::BlockDiagonalMatrixType;
-	using BuildingBlockType       = typename BlockDiagonalMatrixType::BuildingBlockType;
-	typedef ParallelDensityMatrix<BlockDiagonalMatrixType,
-	                              BasisWithOperatorsType,
-	                              TargetVectorType>
-	    ParallelDensityMatrixType;
-	using ParallelizerType = PsimagLite::Parallelizer<ParallelDensityMatrixType>;
-	typedef typename TargetingType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	using BlockDiagonalMatrixType   = typename BaseType::BlockDiagonalMatrixType;
+	using BuildingBlockType         = typename BlockDiagonalMatrixType::BuildingBlockType;
+	using ParallelDensityMatrixType = ParallelDensityMatrix<BlockDiagonalMatrixType,
+	                                                        BasisWithOperatorsType,
+	                                                        TargetVectorType>;
+	using ParallelizerType          = PsimagLite::Parallelizer<ParallelDensityMatrixType>;
+	using VectorVectorVectorWithOffsetType =
+	    typename TargetingType::VectorVectorVectorWithOffsetType;
 
 	DensityMatrixLocal(const TargetingType&      target,
 	                   const LeftRightSuperType& lrs,

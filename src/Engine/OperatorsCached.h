@@ -19,8 +19,8 @@ public:
 	using OperatorStorageType       = typename OperatorType::StorageType;
 	using ConcurrencyType           = PsimagLite::Concurrency;
 	using VectorOperatorStorageType = typename PsimagLite::Vector<OperatorStorageType*>::Type;
-	typedef typename PsimagLite::Vector<VectorOperatorStorageType>::Type
-	    VectorVectorOperatorStorageType;
+	using VectorVectorOperatorStorageType =
+	    typename PsimagLite::Vector<VectorOperatorStorageType>::Type;
 	using VectorSizeType = BlockType;
 
 	OperatorsCached(const LeftRightSuperType& lrs)

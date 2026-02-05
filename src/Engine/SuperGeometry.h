@@ -10,8 +10,8 @@ template <typename ComplexOrRealType_, typename InputType_, typename ProgramGlob
 class SuperGeometry {
 public:
 
-	typedef PsimagLite::Geometry<ComplexOrRealType_, InputType_, ProgramGlobalsType>
-	    GeometryType;
+	using GeometryType
+	    = PsimagLite::Geometry<ComplexOrRealType_, InputType_, ProgramGlobalsType>;
 	using ComplexOrRealType    = typename GeometryType::ComplexOrRealType;
 	using VectorSizeType       = typename GeometryType::VectorSizeType;
 	using VectorVectorSizeType = typename PsimagLite::Vector<VectorSizeType>::Type;

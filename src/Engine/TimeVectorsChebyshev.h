@@ -102,12 +102,11 @@ class TimeVectorsChebyshev : public TimeVectorsBase<TargetParamsType,
                                                     LanczosSolverType,
                                                     VectorWithOffsetType> {
 
-	typedef TimeVectorsBase<TargetParamsType,
-	                        ModelType,
-	                        WaveFunctionTransfType,
-	                        LanczosSolverType,
-	                        VectorWithOffsetType>
-	    BaseType;
+	using BaseType               = TimeVectorsBase<TargetParamsType,
+	                                               ModelType,
+	                                               WaveFunctionTransfType,
+	                                               LanczosSolverType,
+	                                               VectorWithOffsetType>;
 	using PairType               = typename BaseType::PairType;
 	using RealType               = typename TargetParamsType::RealType;
 	using VectorRealType         = typename BaseType::VectorRealType;
@@ -117,8 +116,8 @@ class TimeVectorsChebyshev : public TimeVectorsBase<TargetParamsType,
 	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
 	using ComplexOrRealType      = typename SparseMatrixType::value_type;
 	using MatrixRealType         = typename PsimagLite::Matrix<ComplexOrRealType>;
-	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
-	    ParallelTriDiagType;
+	using ParallelTriDiagType
+	    = ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>;
 	using VectorType                 = typename VectorWithOffsetType::VectorType;
 	using MatrixComplexOrRealType    = typename ParallelTriDiagType::MatrixComplexOrRealType;
 	using TargetVectorType           = typename ParallelTriDiagType::TargetVectorType;

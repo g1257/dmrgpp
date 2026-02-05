@@ -7,11 +7,11 @@
 #include "RegisterSignals.h"
 #include "RunFinished.h"
 
-using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
+typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
 
 using namespace Dmrg;
 
-using ConcurrencyType = PsimagLite::Concurrency;
+typedef PsimagLite::Concurrency ConcurrencyType;
 
 void printLicense(const PsimagLite::PsiApp& app, const OperatorOptions& options)
 {
@@ -58,10 +58,10 @@ void mainLoop2(InputNgType::Readable&          io,
                const OperatorOptions&          opOptions)
 {
 
-	using ModelBaseType     = typename MatrixVectorType::ModelType;
-	using QnType            = typename ModelBaseType::QnType;
-	using ModelHelperType   = typename ModelBaseType::ModelHelperType;
-	using SparseElementType = typename ModelHelperType::SparseElementType;
+	typedef typename MatrixVectorType::ModelType        ModelBaseType;
+	typedef typename ModelBaseType::QnType              QnType;
+	typedef typename ModelBaseType::ModelHelperType     ModelHelperType;
+	typedef typename ModelHelperType::SparseElementType SparseElementType;
 	typedef SuperGeometry<SparseElementType, InputNgType::Readable, ProgramGlobals>
 	    SuperGeometryType;
 
@@ -71,14 +71,14 @@ void mainLoop2(InputNgType::Readable&          io,
 #ifndef MIN_COMPILE
 
 	if (dmrgSolverParams.options.isSet("vectorwithoffsets")) {
-		using VectorWithOffsetType = VectorWithOffsets<SparseElementType, QnType>;
+		typedef VectorWithOffsets<SparseElementType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType, VectorWithOffsetType>(
 		    geometry, dmrgSolverParams, io, opOptions);
 	} else {
 #else
 	{
 #endif
-		using VectorWithOffsetType = VectorWithOffset<SparseElementType, QnType>;
+		typedef VectorWithOffset<SparseElementType, QnType> VectorWithOffsetType;
 		mainLoop3<MatrixVectorType, VectorWithOffsetType>(
 		    geometry, dmrgSolverParams, io, opOptions);
 	}
@@ -90,12 +90,12 @@ void mainLoop1(InputNgType::Readable&          io,
                const OperatorOptions&          opOptions)
 {
 	typedef SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>
-	    SuperGeometryType;
-	using MySparseMatrix         = PsimagLite::CrsMatrix<ComplexOrRealType>;
-	using BasisType              = Basis<MySparseMatrix>;
-	using BasisWithOperatorsType = BasisWithOperators<BasisType>;
-	using LeftRightSuperType     = LeftRightSuper<BasisWithOperatorsType, BasisType>;
-	using ModelHelperType        = ModelHelperLocal<LeftRightSuperType>;
+	                                                          SuperGeometryType;
+	typedef PsimagLite::CrsMatrix<ComplexOrRealType>          MySparseMatrix;
+	typedef Basis<MySparseMatrix>                             BasisType;
+	typedef BasisWithOperators<BasisType>                     BasisWithOperatorsType;
+	typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
+	typedef ModelHelperLocal<LeftRightSuperType>              ModelHelperType;
 	typedef ModelBase<ModelHelperType,
 	                  ParametersDmrgSolverType,
 	                  InputNgType::Readable,

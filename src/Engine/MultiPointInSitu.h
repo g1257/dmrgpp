@@ -14,14 +14,13 @@ template <typename VectorWithOffsetType, typename ModelType> class MultiPointInS
 
 public:
 
-	using LeftRightSuperType = typename ModelType::LeftRightSuperType;
-	using ParametersType     = typename ModelType::ParametersType;
-	using OptionsType        = typename ParametersType::OptionsType;
-	typedef WaveFunctionTransfFactory<LeftRightSuperType,
-	                                  VectorWithOffsetType,
-	                                  OptionsType,
-	                                  OneSiteSpaces<ModelType>>
-	    WaveFunctionTransfType;
+	using LeftRightSuperType            = typename ModelType::LeftRightSuperType;
+	using ParametersType                = typename ModelType::ParametersType;
+	using OptionsType                   = typename ParametersType::OptionsType;
+	using WaveFunctionTransfType        = WaveFunctionTransfFactory<LeftRightSuperType,
+	                                                                VectorWithOffsetType,
+	                                                                OptionsType,
+	                                                                OneSiteSpaces<ModelType>>;
 	using CheckpointType                = Checkpoint<ModelType, WaveFunctionTransfType>;
 	using HelperForMultiPointInSituType = HelperForMultiPointInSitu<CheckpointType>;
 	using BogusInputType                = typename HelperForMultiPointInSituType::BogusInput;

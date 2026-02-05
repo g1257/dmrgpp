@@ -21,10 +21,10 @@ bool operator==(const MemoryPointer& a, const MemoryPointer& b);
 
 class MemResolv {
 
-	using VectorMemoryPointerType    = std::vector<MemoryPointer>;
-	using PairType                   = std::pair<long unsigned int, long int>;
-	using VectorPairType             = std::vector<PairType>;
-	using (*RefFunctionType)(double) = double;
+	using VectorMemoryPointerType = std::vector<MemoryPointer>;
+	using PairType                = std::pair<long unsigned int, long int>;
+	using VectorPairType          = std::vector<PairType>;
+	typedef double (*RefFunctionType)(double);
 
 public:
 

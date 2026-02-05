@@ -108,8 +108,8 @@ public:
 	using VectorWithOffsetType = VectorWithOffsetType_;
 	using OperatorsType        = typename ModelType::OperatorsType;
 	using OperatorType         = typename OperatorsType::OperatorType;
-	typedef ObservablesOnePointInSitu<typename TargetingType::TargetVectorType>
-	    ObservablesOnePointInSituType;
+	using ObservablesOnePointInSituType
+	    = ObservablesOnePointInSitu<typename TargetingType::TargetVectorType>;
 	using VectorStringType        = PsimagLite::Vector<PsimagLite::String>::Type;
 	using SparseMatrixType        = typename OperatorsType::SparseMatrixType;
 	using MyBasis                 = typename ModelType::MyBasis;
@@ -140,8 +140,8 @@ public:
 	using PairSizeType            = typename QnType::PairSizeType;
 	using VectorRealType          = typename DiagonalizationType::VectorRealType;
 	using VectorVectorRealType    = typename DiagonalizationType::VectorVectorRealType;
-	typedef typename TargetingType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	using VectorVectorVectorWithOffsetType =
+	    typename TargetingType::VectorVectorVectorWithOffsetType;
 	using OneSiteTruncationType = OneSiteTruncation<ModelType, VectorWithOffsetType>;
 	using FiniteLoopType        = FiniteLoop<RealType>;
 
