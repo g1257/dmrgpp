@@ -1,0 +1,36 @@
+##Ainur1.0
+TotalNumberOfSites=8;
+NumberOfTerms=1;
+
+#Term0=Hopping
+DegreesOfFreedom=1;
+GeometryKind=ladder;
+GeometryOptions=ConstantValues;
+dir0:Connectors=[-1.];
+dir1:Connectors=[-1.];
+LadderLeg=2;
+
+hubbardU=[8.,...];
+
+Model=HubbardOneBand;
+potentialV=[0.,...];
+
+SolverOptions=twositedmrg;
+Version=version;
+OutputFile=data61;
+InfiniteLoopKeptStates=81;
+FiniteLoops=[
+[@auto, 200, 0],
+[@auto, 200, 1],
+[@auto, 200, 1]
+];
+
+NumberOfTargetQns=2;
+integer TargetElectronsUp0=4;
+integer TargetElectronsDown0=4;
+integer TargetElectronsUp1=3;
+integer TargetElectronsDown1=3;
+Orbitals=1;
+Threads=1;
+#ci observe arguments="<Q0|c?0';c?1'|Q1>"
+
