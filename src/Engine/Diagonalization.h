@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Concurrency.h"
 #include "DavidsonSolver.h"
 #include "FiniteLoop.h"
+#include "InfiniteOrFiniteAlgorithm.hh"
 #include "LanczosSolver.h"
 #include "OneSiteSpaces.hh"
 #include "PackIndices.h"
@@ -131,8 +132,9 @@ public:
 	                                                            LanczosSolverType;
 	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
 	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
-	using FiniteLoopType    = FiniteLoop<RealType>;
-	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
+	using FiniteLoopType                = FiniteLoop<RealType>;
+	using OneSiteSpacesType             = OneSiteSpaces<ModelType>;
+	using InfiniteOrFiniteAlgorithmType = InfiniteOrFiniteAlgorithm<RealType>;
 
 	Diagonalization(const ParametersType&                parameters,
 	                const ModelType&                     model,
@@ -237,14 +239,19 @@ private:
 		wft_.triggerOn();
 
 		SizeType numberOfExcited = parameters_.numberOfExcited;
-		assert(loopIndex < parameters_.finiteLoop.size());
-		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
+		bool     onlyWft         = false;
+		bool     noguess         = false;
 
-		bool onlyWft = false;
-		if (direction != ProgramGlobals::DirectionEnum::INFINITE)
-			onlyWft = finiteLoop.wants("onlyfastwft");
+		if (direction != ProgramGlobals::DirectionEnum::INFINITE) {
+			assert(loopIndex < parameters_.finiteLoop.size());
+			const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 
-		bool noguess = finiteLoop.wants("randomguess");
+			bool onlyWft = false;
+			if (direction != ProgramGlobals::DirectionEnum::INFINITE)
+				onlyWft = finiteLoop.wants("onlyfastwft");
+
+			noguess = finiteLoop.wants("randomguess");
+		}
 
 		if (parameters_.options.isSet("MettsTargeting"))
 			return;
@@ -366,6 +373,8 @@ private:
 				     ++excitedIndex)
 					vecSaved[j][excitedIndex].resize(initialBySector->size());
 
+				InfiniteOrFiniteAlgorithmType inf_or_finite(
+				    direction, parameters_.finiteLoop, loopIndex);
 				VectorRealType myEnergy;
 				diagonaliseOneBlock(myEnergy,
 				                    vecSaved[j],
@@ -373,7 +382,7 @@ private:
 				                    lrs,
 				                    target.time(),
 				                    *initialBySector,
-				                    loopIndex);
+				                    inf_or_finite);
 
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited;
 				     ++excitedIndex) {
@@ -527,23 +536,27 @@ private:
 	/** Diagonalise the i-th block of the matrix, return its eigenvectors
 	                in tmpVec and its eigenvalues in energyTmp
 	        !PTEX_LABEL{diagonaliseOneBlock} */
-	void diagonaliseOneBlock(VectorRealType&           energyTmp,
-	                         VectorVectorType&         tmpVec,
-	                         SizeType                  partitionIndex,
-	                         const LeftRightSuperType& lrs,
-	                         RealType                  targetTime,
-	                         const TargetVectorType&   initialVector,
-	                         SizeType                  loopIndex)
+	void diagonaliseOneBlock(VectorRealType&                            energyTmp,
+	                         VectorVectorType&                          tmpVec,
+	                         SizeType                                   partitionIndex,
+	                         const LeftRightSuperType&                  lrs,
+	                         RealType                                   targetTime,
+	                         const TargetVectorType&                    initialVector,
+	                         const InfiniteOrFiniteAlgorithm<RealType>& inf_or_finite)
 	{
 		const OptionsType& options = parameters_.options;
 
 		HamiltonianConnectionType hc(
 		    lrs, ModelType::modelLinks(), targetTime, model_.superOpHelper());
 
-		const FiniteLoopType&         finiteLoop = parameters_.finiteLoop[loopIndex];
+		bool only_slow_wft = false;
+		if (inf_or_finite.isFinite()) {
+			only_slow_wft = inf_or_finite.finiteLoop().wants("onlyslowwft");
+		}
+
 		typename ModelHelperType::Aux aux(partitionIndex, lrs);
 
-		if (options.isSet("debugmatrix") && !finiteLoop.wants("onlyslowwft")) {
+		if (options.isSet("debugmatrix") && !only_slow_wft) {
 			SparseMatrixType fullm;
 
 			model_.fullHamiltonian(fullm, hc, aux);
@@ -571,7 +584,7 @@ private:
 			if (options.isSet("test"))
 				throw std::logic_error("Exiting due to option test in the input\n");
 
-			if (options.isSet("exactdiag") && !finiteLoop.wants("onlyslowwft")) {
+			if (options.isSet("exactdiag") && !only_slow_wft) {
 				SizeType nexcited = std::min(energyTmp.size(), eigs.size());
 				for (SizeType excited = 0; excited < nexcited; ++excited) {
 					energyTmp[excited] = eigs[excited];
@@ -592,20 +605,20 @@ private:
 		const SizeType mSize = hc.modelHelper().size(partitionIndex);
 		msg << "I will now diagonalize a matrix of size=" << mSize;
 		progress_.printline(msgg, std::cout);
-		diagonaliseOneBlock(energyTmp, tmpVec, hc, initialVector, loopIndex, aux);
+		diagonaliseOneBlock(energyTmp, tmpVec, hc, initialVector, inf_or_finite, aux);
 	}
 
 	void diagonaliseOneBlock(VectorRealType&                      energyTmp,
 	                         VectorVectorType&                    tmpVec,
 	                         HamiltonianConnectionType&           hc,
 	                         const TargetVectorType&              initialVector,
-	                         SizeType                             loopIndex,
+	                         const InfiniteOrFiniteAlgorithmType& inf_or_finite,
 	                         const typename ModelHelperType::Aux& aux)
 	{
 		const SizeType                                 nexcited = energyTmp.size();
 		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_, hc, aux);
 
-		if (parameters_.finiteLoop[loopIndex].wants("onlyslowwft")) {
+		if (inf_or_finite.isFinite() && inf_or_finite.finiteLoop().wants("onlyslowwft")) {
 			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
 			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -616,7 +629,7 @@ private:
 			return;
 		}
 
-		ParametersForSolverType    params(io_, "Lanczos", loopIndex);
+		ParametersForSolverType    params(io_, "Lanczos", inf_or_finite.loopIndex());
 		LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
 
 		const bool useDavidson = parameters_.options.isSet("useDavidson");
