@@ -47,10 +47,10 @@ public:
 		short unsigned int extra;
 	};
 
-	typedef PsimagLite::Vector<SizeType>::Type    VectorSizeType;
-	typedef std::pair<SizeType, SizeType>         PairSizeType;
-	typedef PsimagLite::Vector<Qn>::Type          VectorQnType;
-	typedef PsimagLite::Vector<ModalStruct>::Type VectorModalStructType;
+	using VectorSizeType        = PsimagLite::Vector<SizeType>::Type;
+	using PairSizeType          = std::pair<SizeType, SizeType>;
+	using VectorQnType          = PsimagLite::Vector<Qn>::Type;
+	using VectorModalStructType = PsimagLite::Vector<ModalStruct>::Type;
 
 	Qn(bool odd, VectorSizeType szPlusConst, PairSizeType j, SizeType flavor)
 	    : oddElectrons(odd)

@@ -15,11 +15,11 @@ template <typename ComplexOrRealType, typename OmegaParamsType> class ManyOmegas
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef DmrgRunner<ComplexOrRealType>                      DmrgRunnerType;
-	typedef typename DmrgRunnerType::InputNgType               InputNgType;
-	typedef PsimagLite::PsiApp                                 ApplicationType;
+	using RealType        = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType  = typename PsimagLite::Vector<RealType>::Type;
+	using DmrgRunnerType  = DmrgRunner<ComplexOrRealType>;
+	using InputNgType     = typename DmrgRunnerType::InputNgType;
+	using ApplicationType = PsimagLite::PsiApp;
 
 	ManyOmegas(PsimagLite::String     data,
 	           RealType               precision,

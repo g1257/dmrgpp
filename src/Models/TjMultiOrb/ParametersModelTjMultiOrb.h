@@ -86,7 +86,7 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersModelTjMultiOrb : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	using BaseType = ParametersModelBase<RealType, QnType>;
 
 	template <typename IoInputType>
 	ParametersModelTjMultiOrb(IoInputType& io)

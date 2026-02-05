@@ -97,53 +97,53 @@ namespace Dmrg {
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
 class TargetingCorrectionVector : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
-	typedef LanczosSolverType_                                      LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
+	using LanczosSolverType = LanczosSolverType_;
+	using BaseType          = TargetingBase<LanczosSolverType, VectorWithOffsetType_>;
 
 public:
 
-	typedef typename BaseType::TargetingCommonType                TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType                   MatrixVectorType;
-	typedef typename MatrixVectorType::ModelType                  ModelType;
-	typedef typename ModelType::RealType                          RealType;
-	typedef typename BaseType::OptionsType                        OptionsType;
-	typedef typename BaseType::CheckpointType                     CheckpointType;
-	typedef typename PsimagLite::Vector<RealType>::Type           VectorRealType;
-	typedef typename ModelType::OperatorsType                     OperatorsType;
-	typedef typename ModelType::ModelHelperType                   ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType          LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType   BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorType         OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType            BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType     SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                 ComplexOrRealType;
-	typedef TargetParamsCorrectionVector<ModelType>               TargetParamsType;
-	typedef typename BasisType::BlockType                         BlockType;
-	typedef typename BaseType::WaveFunctionTransfType             WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType             VectorType;
-	typedef VectorType                                            TargetVectorType;
-	typedef typename TargetingCommonType::TimeSerializerType      TimeSerializerType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType     TridiagonalMatrixType;
-	typedef PsimagLite::Matrix<typename VectorType::value_type>   DenseMatrixType;
-	typedef PsimagLite::Matrix<RealType>                          DenseMatrixRealType;
-	typedef typename LanczosSolverType::PostProcType              PostProcType;
-	typedef typename LanczosSolverType::MatrixType                LanczosMatrixType;
+	using TargetingCommonType    = typename BaseType::TargetingCommonType;
+	using MatrixVectorType       = typename BaseType::MatrixVectorType;
+	using ModelType              = typename MatrixVectorType::ModelType;
+	using RealType               = typename ModelType::RealType;
+	using OptionsType            = typename BaseType::OptionsType;
+	using CheckpointType         = typename BaseType::CheckpointType;
+	using VectorRealType         = typename PsimagLite::Vector<RealType>::Type;
+	using OperatorsType          = typename ModelType::OperatorsType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using TargetParamsType       = TargetParamsCorrectionVector<ModelType>;
+	using BlockType              = typename BasisType::BlockType;
+	using WaveFunctionTransfType = typename BaseType::WaveFunctionTransfType;
+	using VectorWithOffsetType   = typename WaveFunctionTransfType::VectorWithOffsetType;
+	using VectorType             = typename VectorWithOffsetType::VectorType;
+	using TargetVectorType       = VectorType;
+	using TimeSerializerType     = typename TargetingCommonType::TimeSerializerType;
+	using TridiagonalMatrixType  = typename LanczosSolverType::TridiagonalMatrixType;
+	using DenseMatrixType        = PsimagLite::Matrix<typename VectorType::value_type>;
+	using DenseMatrixRealType    = PsimagLite::Matrix<RealType>;
+	using PostProcType           = typename LanczosSolverType::PostProcType;
+	using LanczosMatrixType      = typename LanczosSolverType::MatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
 	    CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
-	                                                              ParallelTriDiagType;
-	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
-	typedef typename ParallelTriDiagType::VectorMatrixFieldType   VectorMatrixFieldType;
-	typedef typename PsimagLite::Vector<SizeType>::Type           VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type     VectorVectorRealType;
-	typedef typename ModelType::InputValidatorType                InputValidatorType;
+	    ParallelTriDiagType;
+	using MatrixComplexOrRealType = typename ParallelTriDiagType::MatrixComplexOrRealType;
+	using VectorMatrixFieldType   = typename ParallelTriDiagType::VectorMatrixFieldType;
+	using VectorSizeType          = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorVectorRealType    = typename PsimagLite::Vector<VectorRealType>::Type;
+	using InputValidatorType      = typename ModelType::InputValidatorType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
 	                                 VectorWithOffsetType,
 	                                 BaseType,
 	                                 TargetParamsType>
-	                                   CorrectionVectorSkeletonType;
-	typedef typename BasisType::QnType QnType;
+	    CorrectionVectorSkeletonType;
+	using QnType = typename BasisType::QnType;
 
 	TargetingCorrectionVector(const LeftRightSuperType&     lrs,
 	                          const CheckpointType&         checkPoint,

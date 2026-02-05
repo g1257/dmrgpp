@@ -96,27 +96,27 @@ template <typename ModelType, typename WaveFunctionTransfType_> class Checkpoint
 
 public:
 
-	typedef WaveFunctionTransfType_                             WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::RealType                        RealType;
-	typedef typename ModelType::ParametersType                  ParametersType;
-	typedef typename ModelType::BasisWithOperatorsType          BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::ComplexOrRealType  ComplexOrRealType;
-	typedef typename BasisWithOperatorsType::OperatorsType      OperatorsType;
-	typedef typename PsimagLite::IoSelector                     IoType;
-	typedef typename ModelType::InputValidatorType              InputValidatorType;
-	typedef typename OperatorsType::OperatorType                OperatorType;
-	typedef typename OperatorType::StorageType                  SparseMatrixType;
-	typedef DiskOrMemoryStack<BasisWithOperatorsType>           DiskOrMemoryStackType;
-	typedef typename BasisWithOperatorsType::QnType             QnType;
-	typedef typename QnType::VectorQnType                       VectorQnType;
-	typedef DiskStack<BasisWithOperatorsType>                   DiskStackType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type        VectorStringType;
-	typedef PsimagLite::Vector<SizeType>::Type                  VectorSizeType;
-	typedef typename PsimagLite::Vector<RealType>::Type         VectorRealType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type   VectorVectorRealType;
-	using FiniteLoopType       = FiniteLoop<RealType>;
-	using VectorFiniteLoopType = typename PsimagLite::Vector<FiniteLoopType>::Type;
+	using WaveFunctionTransfType = WaveFunctionTransfType_;
+	using LeftRightSuperType     = typename WaveFunctionTransfType::LeftRightSuperType;
+	using RealType               = typename ModelType::RealType;
+	using ParametersType         = typename ModelType::ParametersType;
+	using BasisWithOperatorsType = typename ModelType::BasisWithOperatorsType;
+	using ComplexOrRealType      = typename BasisWithOperatorsType::ComplexOrRealType;
+	using OperatorsType          = typename BasisWithOperatorsType::OperatorsType;
+	using IoType                 = typename PsimagLite::IoSelector;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
+	using OperatorType           = typename OperatorsType::OperatorType;
+	using SparseMatrixType       = typename OperatorType::StorageType;
+	using DiskOrMemoryStackType  = DiskOrMemoryStack<BasisWithOperatorsType>;
+	using QnType                 = typename BasisWithOperatorsType::QnType;
+	using VectorQnType           = typename QnType::VectorQnType;
+	using DiskStackType          = DiskStack<BasisWithOperatorsType>;
+	using VectorStringType       = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorSizeType         = PsimagLite::Vector<SizeType>::Type;
+	using VectorRealType         = typename PsimagLite::Vector<RealType>::Type;
+	using VectorVectorRealType   = typename PsimagLite::Vector<VectorRealType>::Type;
+	using FiniteLoopType         = FiniteLoop<RealType>;
+	using VectorFiniteLoopType   = typename PsimagLite::Vector<FiniteLoopType>::Type;
 
 	Checkpoint(const ParametersType& parameters,
 	           InputValidatorType&   ioIn,

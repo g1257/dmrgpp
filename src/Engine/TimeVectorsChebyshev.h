@@ -107,30 +107,30 @@ class TimeVectorsChebyshev : public TimeVectorsBase<TargetParamsType,
 	                        WaveFunctionTransfType,
 	                        LanczosSolverType,
 	                        VectorWithOffsetType>
-	                                                            BaseType;
-	typedef typename BaseType::PairType                         PairType;
-	typedef typename TargetParamsType::RealType                 RealType;
-	typedef typename BaseType::VectorRealType                   VectorRealType;
-	typedef typename ModelType::ModelHelperType                 ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
-	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
-	typedef typename PsimagLite::Matrix<ComplexOrRealType>      MatrixRealType;
+	    BaseType;
+	using PairType               = typename BaseType::PairType;
+	using RealType               = typename TargetParamsType::RealType;
+	using VectorRealType         = typename BaseType::VectorRealType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using MatrixRealType         = typename PsimagLite::Matrix<ComplexOrRealType>;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
-	                                                                 ParallelTriDiagType;
-	typedef typename VectorWithOffsetType::VectorType                VectorType;
-	typedef typename ParallelTriDiagType::MatrixComplexOrRealType    MatrixComplexOrRealType;
-	typedef typename ParallelTriDiagType::TargetVectorType           TargetVectorType;
-	typedef typename ParallelTriDiagType::VectorMatrixFieldType      VectorMatrixFieldType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType        TridiagonalMatrixType;
-	typedef typename ModelType::InputValidatorType                   InputValidatorType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type        VectorVectorRealType;
-	typedef typename LanczosSolverType::MatrixType                   MatrixLanczosType;
-	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType>   ScaledMatrixType;
-	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
-	typedef PsimagLite::PredicateAwesome<>                           PredicateAwesomeType;
+	    ParallelTriDiagType;
+	using VectorType                 = typename VectorWithOffsetType::VectorType;
+	using MatrixComplexOrRealType    = typename ParallelTriDiagType::MatrixComplexOrRealType;
+	using TargetVectorType           = typename ParallelTriDiagType::TargetVectorType;
+	using VectorMatrixFieldType      = typename ParallelTriDiagType::VectorMatrixFieldType;
+	using TridiagonalMatrixType      = typename LanczosSolverType::TridiagonalMatrixType;
+	using InputValidatorType         = typename ModelType::InputValidatorType;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType*>::Type;
+	using VectorVectorRealType       = typename PsimagLite::Vector<VectorRealType>::Type;
+	using MatrixLanczosType          = typename LanczosSolverType::MatrixType;
+	using ScaledMatrixType           = ScaledHamiltonian<MatrixLanczosType, TargetParamsType>;
+	using VectorSizeType             = PsimagLite::Vector<SizeType>::Type;
+	using PredicateAwesomeType       = PsimagLite::PredicateAwesome<>;
 
 public:
 
@@ -494,8 +494,8 @@ private:
 		// defining Hprime matrix:
 		ScaledMatrixType lanczosHelper2(lanczosHelper, tstStruct_, Eg, verbose);
 
-		const RealType                                        fakeTime = 0;
-		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
+		const RealType fakeTime = 0;
+		using ParallelizerType  = PsimagLite::NoPthreadsNg<ParallelTriDiagType>;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
 		//		VectorMatrixFieldType T(phi.sectors());

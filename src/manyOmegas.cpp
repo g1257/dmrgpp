@@ -70,7 +70,7 @@ to the main dmrg driver are the following.
 		}
 	}
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	using ConcurrencyType = PsimagLite::Concurrency;
 
 	// print license
 	if (ConcurrencyType::root()) {
@@ -83,16 +83,16 @@ to the main dmrg driver are the following.
 	if (versionOnly)
 		return 0;
 
-	typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
+	using InputNgType = PsimagLite::InputNg<Dmrg::InputCheck>;
 	typedef
 #ifndef USE_FLOAT
 	    double
 #else
 	    float
 #endif
-	                                                    RealType;
-	typedef Dmrg::OmegaParams<InputNgType, RealType>    OmegaParamsType;
-	typedef Dmrg::ManyOmegas<RealType, OmegaParamsType> ManyOmegasType;
+	        RealType;
+	using OmegaParamsType = Dmrg::OmegaParams<InputNgType, RealType>;
+	using ManyOmegasType  = Dmrg::ManyOmegas<RealType, OmegaParamsType>;
 
 	PsimagLite::String data;
 	ManyOmegasType::InputNgType::Writeable::readFile(data, inputfile);

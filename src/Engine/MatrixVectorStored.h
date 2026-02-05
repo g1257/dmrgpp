@@ -87,21 +87,21 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename ModelType_> class MatrixVectorStored : public MatrixVectorBase<ModelType_> {
 
-	typedef MatrixVectorBase<ModelType_> BaseType;
+	using BaseType = MatrixVectorBase<ModelType_>;
 
 public:
 
-	typedef ModelType_                                    ModelType;
-	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
-	typedef typename ModelType::ParametersType            ParametersType;
-	typedef typename ModelType::ModelHelperType           ModelHelperType;
-	typedef typename ModelHelperType::SparseMatrixType    SparseMatrixType;
-	typedef typename ModelHelperType::RealType            RealType;
-	typedef typename SparseMatrixType::value_type         value_type;
-	typedef typename SparseMatrixType::value_type         ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type   VectorRealType;
-	typedef typename ParametersType::OptionsType          OptionsType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>         FullMatrixType;
+	using ModelType                 = ModelType_;
+	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
+	using ParametersType            = typename ModelType::ParametersType;
+	using ModelHelperType           = typename ModelType::ModelHelperType;
+	using SparseMatrixType          = typename ModelHelperType::SparseMatrixType;
+	using RealType                  = typename ModelHelperType::RealType;
+	using value_type                = typename SparseMatrixType::value_type;
+	using ComplexOrRealType         = typename SparseMatrixType::value_type;
+	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
+	using OptionsType               = typename ParametersType::OptionsType;
+	using FullMatrixType            = PsimagLite::Matrix<ComplexOrRealType>;
 
 	MatrixVectorStored(const ModelType&                     model,
 	                   const HamiltonianConnectionType&     hc,

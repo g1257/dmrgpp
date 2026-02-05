@@ -105,49 +105,49 @@ public:
 	                                 VectorWithOffsetType_,
 	                                 TargetingBaseType,
 	                                 TargetParamsType>
-	                                                              ThisType;
-	typedef LanczosSolverType_                                    LanczosSolverType;
-	typedef typename TargetingBaseType::MatrixVectorType          MatrixVectorType;
-	typedef typename MatrixVectorType::ModelType                  ModelType;
-	typedef typename ModelType::RealType                          RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type           VectorRealType;
-	typedef typename ModelType::OperatorsType                     OperatorsType;
-	typedef typename ModelType::ModelHelperType                   ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType          LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType   BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorType         OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType            BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType     SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                 ComplexOrRealType;
-	typedef typename BasisType::BlockType                         BlockType;
-	typedef typename TargetingBaseType::WaveFunctionTransfType    WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType             VectorType;
-	typedef VectorType                                            TargetVectorType;
-	typedef typename TargetingBaseType::TargetingCommonType       TargetingCommonType;
-	typedef typename TargetingCommonType::TimeSerializerType      TimeSerializerType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType     TridiagonalMatrixType;
-	typedef PsimagLite::Matrix<typename VectorType::value_type>   DenseMatrixType;
-	typedef PsimagLite::Matrix<RealType>                          DenseMatrixRealType;
-	typedef typename LanczosSolverType::PostProcType              PostProcType;
-	typedef typename LanczosSolverType::MatrixType                LanczosMatrixType;
+	    ThisType;
+	using LanczosSolverType      = LanczosSolverType_;
+	using MatrixVectorType       = typename TargetingBaseType::MatrixVectorType;
+	using ModelType              = typename MatrixVectorType::ModelType;
+	using RealType               = typename ModelType::RealType;
+	using VectorRealType         = typename PsimagLite::Vector<RealType>::Type;
+	using OperatorsType          = typename ModelType::OperatorsType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using BlockType              = typename BasisType::BlockType;
+	using WaveFunctionTransfType = typename TargetingBaseType::WaveFunctionTransfType;
+	using VectorWithOffsetType   = typename WaveFunctionTransfType::VectorWithOffsetType;
+	using VectorType             = typename VectorWithOffsetType::VectorType;
+	using TargetVectorType       = VectorType;
+	using TargetingCommonType    = typename TargetingBaseType::TargetingCommonType;
+	using TimeSerializerType     = typename TargetingCommonType::TimeSerializerType;
+	using TridiagonalMatrixType  = typename LanczosSolverType::TridiagonalMatrixType;
+	using DenseMatrixType        = PsimagLite::Matrix<typename VectorType::value_type>;
+	using DenseMatrixRealType    = PsimagLite::Matrix<RealType>;
+	using PostProcType           = typename LanczosSolverType::PostProcType;
+	using LanczosMatrixType      = typename LanczosSolverType::MatrixType;
 	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
 	    CorrectionVectorFunctionType;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
 	    ParallelTriDiagType;
 	typedef TridiagRixsStatic<ModelType, LanczosSolverType, VectorWithOffsetType>
-	                                                              TridiagRixsStaticType;
-	typedef typename ParallelTriDiagType::MatrixComplexOrRealType MatrixComplexOrRealType;
-	typedef typename ParallelTriDiagType::VectorMatrixFieldType   VectorMatrixFieldType;
-	typedef PsimagLite::Vector<SizeType>::Type                    VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type     VectorVectorRealType;
-	typedef typename ModelType::InputValidatorType                InputValidatorType;
+	    TridiagRixsStaticType;
+	using MatrixComplexOrRealType = typename ParallelTriDiagType::MatrixComplexOrRealType;
+	using VectorMatrixFieldType   = typename ParallelTriDiagType::VectorMatrixFieldType;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using VectorVectorRealType    = typename PsimagLite::Vector<VectorRealType>::Type;
+	using InputValidatorType      = typename ModelType::InputValidatorType;
 
 	class CalcR {
 
 	public:
 
-		typedef CorrectionVectorAction<ComplexOrRealType, TargetParamsType> ActionType;
+		using ActionType = CorrectionVectorAction<ComplexOrRealType, TargetParamsType>;
 
 		CalcR(const TargetParamsType& tstStruct, RealType E0, const VectorRealType& eigs)
 		    : action_(tstStruct, E0, eigs)
@@ -172,12 +172,12 @@ public:
 
 	struct TypeWrapper {
 
-		typedef typename ThisType::MatrixComplexOrRealType MatrixComplexOrRealType;
-		typedef typename ThisType::VectorWithOffsetType    VectorWithOffsetType;
-		typedef typename ModelType::SolverParamsType       SolverParamsType;
+		using MatrixComplexOrRealType = typename ThisType::MatrixComplexOrRealType;
+		using VectorWithOffsetType    = typename ThisType::VectorWithOffsetType;
+		using SolverParamsType        = typename ModelType::SolverParamsType;
 	};
 
-	typedef KrylovHelper<typename CalcR::ActionType, TypeWrapper> KrylovHelperType;
+	using KrylovHelperType = KrylovHelper<typename CalcR::ActionType, TypeWrapper>;
 
 	CorrectionVectorSkeleton(InputValidatorType&       ioIn,
 	                         const TargetParamsType&   tstStruct,
@@ -340,8 +340,8 @@ private:
 	             VectorMatrixFieldType&      V,
 	             VectorSizeType&             steps)
 	{
-		RealType                                              fakeTime = 0;
-		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
+		RealType fakeTime      = 0;
+		using ParallelizerType = PsimagLite::NoPthreadsNg<ParallelTriDiagType>;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
 		ParallelTriDiagType helperTriDiag(phi, T, V, steps, lrs_, fakeTime, model_, ioIn_);

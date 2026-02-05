@@ -88,14 +88,14 @@ namespace Dmrg {
 template <typename ModelType> class TargetParamsDynamic : public TargetParamsCommon<ModelType> {
 public:
 
-	typedef TargetParamsCommon<ModelType> TargetParamsCommonType;
-	typedef typename ModelType::RealType  RealType;
+	using TargetParamsCommonType = TargetParamsCommon<ModelType>;
+	using RealType               = typename ModelType::RealType;
 
-	typedef typename ModelType::OperatorType      OperatorType;
-	typedef typename OperatorType::PairType       PairType;
-	typedef typename OperatorType::StorageType    SparseMatrixType;
-	typedef typename SparseMatrixType::value_type ComplexOrReal;
-	typedef PsimagLite::Matrix<ComplexOrReal>     MatrixType;
+	using OperatorType     = typename ModelType::OperatorType;
+	using PairType         = typename OperatorType::PairType;
+	using SparseMatrixType = typename OperatorType::StorageType;
+	using ComplexOrReal    = typename SparseMatrixType::value_type;
+	using MatrixType       = PsimagLite::Matrix<ComplexOrReal>;
 
 	template <typename IoInputter>
 	TargetParamsDynamic(IoInputter& io, PsimagLite::String targeting, const ModelType& model)

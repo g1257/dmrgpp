@@ -9,14 +9,14 @@
 #include <iostream>
 
 #ifndef USE_FLOAT
-typedef double RealType;
+using RealType = double;
 #else
-typedef float RealType;
+using RealType = float;
 #endif
-typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
+using InputNgType = PsimagLite::InputNg<Dmrg::InputCheck>;
 typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
-                                ParametersDmrgSolverType;
-typedef PsimagLite::Concurrency ConcurrencyType;
+    ParametersDmrgSolverType;
+using ConcurrencyType = PsimagLite::Concurrency;
 
 void usage(const PsimagLite::String& name)
 {
@@ -46,7 +46,7 @@ void main1(InputNgType::Readable&          io,
 	             GeometryType;
 	GeometryType geometry(io);
 
-	typedef Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType> ToolBoxType;
+	using ToolBoxType = Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType>;
 	ConcurrencyType::codeSectionParams.npthreads = dmrgSolverParams.nthreads;
 	PsimagLite::String label
 	    = (toolOptions.action == "energies") ? "lowest" : toolOptions.extraOptions;

@@ -87,7 +87,7 @@ namespace Dmrg {
 template <typename Word> class HilbertSpaceFermionSpinless {
 public:
 
-	typedef Word HilbertState;
+	using HilbertState = Word;
 
 	//! For state "a" set electron on site "j" to value "value"
 	static void set(Word& a, int j, int value)

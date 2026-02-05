@@ -86,10 +86,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename SparseMatrixType> class HamiltonianSymmetryLocal {
 
-	typedef typename SparseMatrixType::value_type              SparseElementType;
-	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
-	typedef PsimagLite::CrsMatrix<RealType>                    FactorsType;
-	typedef typename PsimagLite::Vector<SizeType>::Type        VectorSizeType;
+	using SparseElementType = typename SparseMatrixType::value_type;
+	using RealType          = typename PsimagLite::Real<SparseElementType>::Type;
+	using FactorsType       = PsimagLite::CrsMatrix<RealType>;
+	using VectorSizeType    = typename PsimagLite::Vector<SizeType>::Type;
 
 public:
 

@@ -86,17 +86,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 namespace Dmrg {
 template <typename LeftRightSuperType> class Su2Reduced {
-	typedef typename LeftRightSuperType::OperatorsType          OperatorsType;
-	typedef typename OperatorsType::SparseMatrixType            SparseMatrixType;
-	typedef typename SparseMatrixType::value_type               SparseElementType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename LeftRightSuperType::BasisType              BasisType;
-	typedef typename BasisType::BlockType                       VectorSizeType;
-	typedef typename BasisType::RealType                        RealType;
-	typedef std::pair<SizeType, SizeType>                       PairType;
-	typedef typename OperatorsType::OperatorType                OperatorType;
-	typedef Su2SymmetryGlobals<RealType>                        Su2SymmetryGlobalsType;
-	typedef typename Su2SymmetryGlobalsType::ClebschGordanType  ClebschGordanType;
+	using OperatorsType          = typename LeftRightSuperType::OperatorsType;
+	using SparseMatrixType       = typename OperatorsType::SparseMatrixType;
+	using SparseElementType      = typename SparseMatrixType::value_type;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType              = typename LeftRightSuperType::BasisType;
+	using VectorSizeType         = typename BasisType::BlockType;
+	using RealType               = typename BasisType::RealType;
+	using PairType               = std::pair<SizeType, SizeType>;
+	using OperatorType           = typename OperatorsType::OperatorType;
+	using Su2SymmetryGlobalsType = Su2SymmetryGlobals<RealType>;
+	using ClebschGordanType      = typename Su2SymmetryGlobalsType::ClebschGordanType;
 
 	static const SizeType System = 0, Environ = 1;
 

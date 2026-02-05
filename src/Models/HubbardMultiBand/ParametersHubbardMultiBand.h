@@ -90,10 +90,10 @@ struct ParametersHubbardMultiBand : public ParametersModelBase<ComplexOrRealType
 	// no connections here please!!
 	// connections are handled by the geometry
 
-	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType>>::Type VectorType;
+	using BaseType       = ParametersModelBase<ComplexOrRealType, QnType>;
+	using RealType       = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
+	using VectorType = typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType>>::Type;
 
 	template <typename IoInputType>
 	ParametersHubbardMultiBand(IoInputType& io)

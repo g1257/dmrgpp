@@ -8,23 +8,23 @@
 #include <cassert>
 #include <complex>
 
-typedef PsimagLite::Vector<IntegerType>::Type VectorIntegerType;
-typedef PsimagLite::Vector<int>::Type         VectorIntType;
+using VectorIntegerType = PsimagLite::Vector<IntegerType>::Type;
+using VectorIntType     = PsimagLite::Vector<int>::Type;
 
 namespace Dmrg {
 
 template <typename InitKronType> class BatchedGemmPluginSc {
 
-	typedef typename InitKronType::ArrayOfMatStructType            ArrayOfMatStructType;
-	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
-	typedef typename MatrixDenseOrSparseType::VectorType           VectorType;
-	typedef typename InitKronType::SparseMatrixType                SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                  ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                  MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType*>::Type         VectorMatrixType;
-	typedef typename InitKronType::GenIjPatchType                  GenIjPatchType;
-	typedef typename GenIjPatchType::BasisType                     BasisType;
-	typedef BatchedGemm<ComplexOrRealType>                         BatchedGemmType;
+	using ArrayOfMatStructType    = typename InitKronType::ArrayOfMatStructType;
+	using MatrixDenseOrSparseType = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
+	using VectorType              = typename MatrixDenseOrSparseType::VectorType;
+	using SparseMatrixType        = typename InitKronType::SparseMatrixType;
+	using ComplexOrRealType       = typename SparseMatrixType::value_type;
+	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorMatrixType        = typename PsimagLite::Vector<MatrixType*>::Type;
+	using GenIjPatchType          = typename InitKronType::GenIjPatchType;
+	using BasisType               = typename GenIjPatchType::BasisType;
+	using BatchedGemmType         = BatchedGemm<ComplexOrRealType>;
 
 	static const typename InitKronType::WhatBasisEnum DUMMY = InitKronType::OLD;
 

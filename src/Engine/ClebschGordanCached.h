@@ -86,8 +86,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template <typename FieldType> class ClebschGordanCached {
-	typedef ClebschGordan<FieldType>             ClebschGordanType;
-	typedef typename ClebschGordanType::PairType PairType;
+	using ClebschGordanType = ClebschGordan<FieldType>;
+	using PairType          = typename ClebschGordanType::PairType;
 
 public:
 

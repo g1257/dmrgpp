@@ -14,21 +14,21 @@ template <typename TargetingBaseType> class AuxForTargetingExpression {
 
 public:
 
-	typedef typename TargetingBaseType::VectorWithOffsetType        VectorWithOffsetType;
-	typedef typename TargetingBaseType::ModelType                   ModelType;
-	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	using VectorWithOffsetType        = typename TargetingBaseType::VectorWithOffsetType;
+	using ModelType                   = typename TargetingBaseType::ModelType;
+	using ApplyOperatorExpressionType = typename TargetingBaseType::ApplyOperatorExpressionType;
+	using VectorVectorWithOffsetType  = typename PsimagLite::Vector<VectorWithOffsetType>::Type;
 	typedef
 	    typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::
-	        Type                                               VectorVectorVectorWithOffsetType;
-	typedef typename ModelType::LeftRightSuperType             LeftRightSuperType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type       VectorStringType;
-	typedef typename TargetingBaseType::TargetParamsType       TargetParamsType;
-	typedef PsimagLite::InputNg<InputCheck>::Readable          InputValidatorType;
-	typedef typename VectorWithOffsetType::value_type          ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef Pvectors<TargetingBaseType>                        PvectorsType;
-	typedef GroupOfOneTimeEvolutions<PvectorsType>             GroupOfOneTimeEvolutionsType;
+	        Type VectorVectorVectorWithOffsetType;
+	using LeftRightSuperType           = typename ModelType::LeftRightSuperType;
+	using VectorStringType             = PsimagLite::Vector<PsimagLite::String>::Type;
+	using TargetParamsType             = typename TargetingBaseType::TargetParamsType;
+	using InputValidatorType           = PsimagLite::InputNg<InputCheck>::Readable;
+	using ComplexOrRealType            = typename VectorWithOffsetType::value_type;
+	using RealType                     = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using PvectorsType                 = Pvectors<TargetingBaseType>;
+	using GroupOfOneTimeEvolutionsType = GroupOfOneTimeEvolutions<PvectorsType>;
 
 	AuxForTargetingExpression(PvectorsType&                 pVectors,
 	                          GroupOfOneTimeEvolutionsType& timeEvolve,

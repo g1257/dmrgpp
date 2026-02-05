@@ -14,21 +14,21 @@ template <typename VectorWithOffsetType, typename ModelType> class MultiPointInS
 
 public:
 
-	typedef typename ModelType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::ParametersType     ParametersType;
-	typedef typename ParametersType::OptionsType   OptionsType;
+	using LeftRightSuperType = typename ModelType::LeftRightSuperType;
+	using ParametersType     = typename ModelType::ParametersType;
+	using OptionsType        = typename ParametersType::OptionsType;
 	typedef WaveFunctionTransfFactory<LeftRightSuperType,
 	                                  VectorWithOffsetType,
 	                                  OptionsType,
 	                                  OneSiteSpaces<ModelType>>
-	                                                           WaveFunctionTransfType;
-	typedef Checkpoint<ModelType, WaveFunctionTransfType>      CheckpointType;
-	typedef HelperForMultiPointInSitu<CheckpointType>          HelperForMultiPointInSituType;
-	typedef typename HelperForMultiPointInSituType::BogusInput BogusInputType;
-	typedef typename HelperForMultiPointInSituType::MatrixType MatrixType;
-	typedef Observer<HelperForMultiPointInSituType, ModelType> ObserverType;
-	typedef Braket<ModelType>                                  BraketType;
-	typedef PsimagLite::Vector<bool>::Type                     VectorBoolType;
+	    WaveFunctionTransfType;
+	using CheckpointType                = Checkpoint<ModelType, WaveFunctionTransfType>;
+	using HelperForMultiPointInSituType = HelperForMultiPointInSitu<CheckpointType>;
+	using BogusInputType                = typename HelperForMultiPointInSituType::BogusInput;
+	using MatrixType                    = typename HelperForMultiPointInSituType::MatrixType;
+	using ObserverType                  = Observer<HelperForMultiPointInSituType, ModelType>;
+	using BraketType                    = Braket<ModelType>;
+	using VectorBoolType                = PsimagLite::Vector<bool>::Type;
 
 	MultiPointInSitu(const ModelType&              model,
 	                 const CheckpointType&         checkpoint,

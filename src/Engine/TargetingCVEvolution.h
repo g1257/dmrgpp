@@ -96,34 +96,34 @@ class TargetingCVEvolution : public TargetingBase<LanczosSolverType_, VectorWith
 
 public:
 
-	typedef LanczosSolverType_                                      LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
-	typedef std::pair<SizeType, SizeType>                           PairType;
-	typedef typename BaseType::OptionsType                          OptionsType;
-	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
-	typedef typename BaseType::CheckpointType                       CheckpointType;
-	typedef typename MatrixVectorType::ModelType                    ModelType;
-	typedef typename ModelType::RealType                            RealType;
-	typedef typename ModelType::OperatorsType                       OperatorsType;
-	typedef typename ModelType::ModelHelperType                     ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
-	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::value_type               ComplexOrRealType;
-	typedef typename VectorWithOffsetType::VectorType               TargetVectorType;
-	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
-	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType              BasisType;
-	typedef TargetParamsCorrectionVector<ModelType>                 TargetParamsType;
-	typedef typename BasisType::BlockType                           BlockType;
-	typedef typename TargetingCommonType::TimeSerializerType        TimeSerializerType;
-	typedef typename OperatorType::StorageType                      SparseMatrixType;
-	typedef typename ModelType::InputValidatorType                  InputValidatorType;
-	typedef typename BasisType::QnType                              QnType;
-	typedef typename TargetingCommonType::StageEnumType             StageEnumType;
+	using LanczosSolverType      = LanczosSolverType_;
+	using BaseType               = TargetingBase<LanczosSolverType, VectorWithOffsetType_>;
+	using TargetingCommonType    = typename BaseType::TargetingCommonType;
+	using PairType               = std::pair<SizeType, SizeType>;
+	using OptionsType            = typename BaseType::OptionsType;
+	using MatrixVectorType       = typename BaseType::MatrixVectorType;
+	using CheckpointType         = typename BaseType::CheckpointType;
+	using ModelType              = typename MatrixVectorType::ModelType;
+	using RealType               = typename ModelType::RealType;
+	using OperatorsType          = typename ModelType::OperatorsType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using VectorSizeType         = PsimagLite::Vector<SizeType>::Type;
+	using WaveFunctionTransfType = typename BaseType::WaveFunctionTransfType;
+	using VectorWithOffsetType   = typename WaveFunctionTransfType::VectorWithOffsetType;
+	using ComplexOrRealType      = typename VectorWithOffsetType::value_type;
+	using TargetVectorType       = typename VectorWithOffsetType::VectorType;
+	using VectorRealType         = typename PsimagLite::Vector<RealType>::Type;
+	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using TargetParamsType       = TargetParamsCorrectionVector<ModelType>;
+	using BlockType              = typename BasisType::BlockType;
+	using TimeSerializerType     = typename TargetingCommonType::TimeSerializerType;
+	using SparseMatrixType       = typename OperatorType::StorageType;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
+	using QnType                 = typename BasisType::QnType;
+	using StageEnumType          = typename TargetingCommonType::StageEnumType;
 	typedef CorrectionVectorSkeleton<LanczosSolverType,
 	                                 VectorWithOffsetType,
 	                                 BaseType,
@@ -131,7 +131,7 @@ public:
 	    CorrectionVectorSkeletonType;
 	typedef
 	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
+	using TimeVectorsBaseType = typename ApplyOperatorExpressionType::TimeVectorsBaseType;
 
 	TargetingCVEvolution(const LeftRightSuperType&     lrs,
 	                     const CheckpointType&         checkPoint,

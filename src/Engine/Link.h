@@ -86,9 +86,9 @@ namespace Dmrg {
 
 template <typename FieldType> struct Link {
 
-	typedef std::pair<SizeType, SizeType>                       PairSizeType;
-	typedef typename PsimagLite::Real<FieldType>::Type          RealType;
-	typedef std::pair<MetaOpForConnection, MetaOpForConnection> PairMetaOForConnectoinType;
+	using PairSizeType               = std::pair<SizeType, SizeType>;
+	using RealType                   = typename PsimagLite::Real<FieldType>::Type;
+	using PairMetaOForConnectoinType = std::pair<MetaOpForConnection, MetaOpForConnection>;
 
 	Link(PairMetaOForConnectoinType         finalIndices1,
 	     ProgramGlobals::ConnectionEnum     type1,

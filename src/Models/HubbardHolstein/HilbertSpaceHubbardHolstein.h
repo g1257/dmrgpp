@@ -96,7 +96,7 @@ template <typename Word> class HilbertSpaceHubbardHolstein {
 
 public:
 
-	typedef Word HilbertState;
+	using HilbertState = Word;
 
 	enum class SpinEnum
 	{

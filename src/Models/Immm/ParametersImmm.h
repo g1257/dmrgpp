@@ -86,7 +86,7 @@ struct ParametersImmm : public ParametersModelBase<RealType, QnType> {
 	// no connections here please!!
 	// connections are handled by the geometry
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	using BaseType = ParametersModelBase<RealType, QnType>;
 
 	template <typename IoInputType>
 	ParametersImmm(IoInputType& io)

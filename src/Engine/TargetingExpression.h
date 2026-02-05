@@ -92,39 +92,39 @@ namespace Dmrg {
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
 class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
-	typedef TargetingBase<LanczosSolverType_, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType                   TargetingCommonType;
-	typedef typename BaseType::WaveFunctionTransfType                WaveFunctionTransfType;
-	typedef typename BaseType::ModelType                             ModelType;
-	typedef typename BaseType::CheckpointType                        CheckpointType;
-	typedef typename ModelType::RealType                             RealType;
-	typedef typename ModelType::InputValidatorType                   InputValidatorType;
-	typedef typename ModelType::ModelHelperType                      ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType               BasisType;
-	typedef typename BasisType::BlockType                            BlockType;
-	typedef typename BasisType::QnType                               QnType;
-	typedef typename TargetingCommonType::StageEnumType              StageEnumType;
-	typedef Pvector<typename VectorWithOffsetType_::value_type>      PvectorType;
-	typedef SpecForTargetingExpression<BaseType>                 SpecForTargetingExpressionType;
-	typedef typename SpecForTargetingExpressionType::AlgebraType AlgebraType;
-	typedef typename SpecForTargetingExpressionType::AssignAndDestroy AssignAndDestroyType;
+	using BaseType               = TargetingBase<LanczosSolverType_, VectorWithOffsetType_>;
+	using TargetingCommonType    = typename BaseType::TargetingCommonType;
+	using WaveFunctionTransfType = typename BaseType::WaveFunctionTransfType;
+	using ModelType              = typename BaseType::ModelType;
+	using CheckpointType         = typename BaseType::CheckpointType;
+	using RealType               = typename ModelType::RealType;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using BlockType              = typename BasisType::BlockType;
+	using QnType                 = typename BasisType::QnType;
+	using StageEnumType          = typename TargetingCommonType::StageEnumType;
+	using PvectorType            = Pvector<typename VectorWithOffsetType_::value_type>;
+	using SpecForTargetingExpressionType = SpecForTargetingExpression<BaseType>;
+	using AlgebraType                    = typename SpecForTargetingExpressionType::AlgebraType;
+	using AssignAndDestroyType = typename SpecForTargetingExpressionType::AssignAndDestroy;
 	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType,
 	                                        AssignAndDestroyType>
-	                                                     CanonicalExpressionType;
-	typedef AuxForTargetingExpression<BaseType>          AuxForTargetingExpressionType;
-	typedef typename TargetingCommonType::VectorRealType VectorRealType;
-	typedef typename AuxForTargetingExpressionType::VectorStringType VectorStringType;
+	    CanonicalExpressionType;
+	using AuxForTargetingExpressionType = AuxForTargetingExpression<BaseType>;
+	using VectorRealType                = typename TargetingCommonType::VectorRealType;
+	using VectorStringType = typename AuxForTargetingExpressionType::VectorStringType;
 	typedef typename AuxForTargetingExpressionType::VectorVectorWithOffsetType
-	                                                       VectorVectorWithOffsetType;
-	typedef PsimagLite::Vector<bool>::Type                 VectorBoolType;
-	typedef typename AlgebraType::VectorSizeType           VectorSizeType;
-	typedef typename BaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef GroupOfOneTimeEvolutions<Pvectors<BaseType>>   GroupOfOneTimeEvolutionsType;
-	using ComplexOrRealType = typename ModelType::ComplexOrRealType;
-	using KetType           = KetForTargetingExpression<ComplexOrRealType>;
-	using TermType          = typename AlgebraType::TermType;
+	    VectorVectorWithOffsetType;
+	using VectorBoolType               = PsimagLite::Vector<bool>::Type;
+	using VectorSizeType               = typename AlgebraType::VectorSizeType;
+	using ApplyOperatorExpressionType  = typename BaseType::ApplyOperatorExpressionType;
+	using GroupOfOneTimeEvolutionsType = GroupOfOneTimeEvolutions<Pvectors<BaseType>>;
+	using ComplexOrRealType            = typename ModelType::ComplexOrRealType;
+	using KetType                      = KetForTargetingExpression<ComplexOrRealType>;
+	using TermType                     = typename AlgebraType::TermType;
 
 public:
 

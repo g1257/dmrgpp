@@ -108,20 +108,20 @@ class TimeVectorsRungeKutta : public TimeVectorsBase<TargetParamsType,
 	                        WaveFunctionTransfType,
 	                        LanczosSolverType,
 	                        VectorWithOffsetType>
-	                                                                 BaseType;
-	typedef typename BaseType::PairType                              PairType;
-	typedef typename TargetParamsType::RealType                      RealType;
-	typedef typename ModelType::ModelHelperType                      ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                    MatrixComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type     VectorComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
-	typedef VectorComplexOrRealType                                  TargetVectorType;
-	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
+	    BaseType;
+	using PairType                   = typename BaseType::PairType;
+	using RealType                   = typename TargetParamsType::RealType;
+	using ModelHelperType            = typename ModelType::ModelHelperType;
+	using LeftRightSuperType         = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType     = typename LeftRightSuperType::BasisWithOperatorsType;
+	using SparseMatrixType           = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType          = typename SparseMatrixType::value_type;
+	using MatrixComplexOrRealType    = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorComplexOrRealType    = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using VectorRealType             = typename PsimagLite::Vector<RealType>::Type;
+	using TargetVectorType           = VectorComplexOrRealType;
+	using VectorSizeType             = PsimagLite::Vector<SizeType>::Type;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType*>::Type;
 
 public:
 

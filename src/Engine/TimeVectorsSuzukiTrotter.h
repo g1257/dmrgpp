@@ -103,27 +103,27 @@ class TimeVectorsSuzukiTrotter : public TimeVectorsBase<TargetParamsType,
 	                        WaveFunctionTransfType,
 	                        LanczosSolverType,
 	                        VectorWithOffsetType>
-	                                                                 BaseType;
-	typedef typename BaseType::PairType                              PairType;
-	typedef typename TargetParamsType::RealType                      RealType;
-	typedef typename TargetParamsType::SparseMatrixType              SparseMatrixType;
-	typedef typename ModelType::ModelHelperType                      ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
-	typedef PsimagLite::PackIndices                                  PackIndicesType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType               BasisType;
-	typedef typename BasisType::BlockType                            BlockType;
-	typedef MatrixOrIdentity<SparseMatrixType>                       MatrixOrIdentityType;
-	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                    MatrixComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type     VectorComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
-	typedef VectorComplexOrRealType                                  TargetVectorType;
-	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
-	typedef typename ModelType::HilbertBasisType                     HilbertBasisType;
-	typedef typename ModelType::HilbertBasisType::value_type         HilbertStateType;
-	using OneSiteSpacesType = typename WaveFunctionTransfType::OneSiteSpacesType;
+	    BaseType;
+	using PairType                   = typename BaseType::PairType;
+	using RealType                   = typename TargetParamsType::RealType;
+	using SparseMatrixType           = typename TargetParamsType::SparseMatrixType;
+	using ModelHelperType            = typename ModelType::ModelHelperType;
+	using LeftRightSuperType         = typename ModelHelperType::LeftRightSuperType;
+	using PackIndicesType            = PsimagLite::PackIndices;
+	using BasisWithOperatorsType     = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType                  = typename BasisWithOperatorsType::BasisType;
+	using BlockType                  = typename BasisType::BlockType;
+	using MatrixOrIdentityType       = MatrixOrIdentity<SparseMatrixType>;
+	using ComplexOrRealType          = typename SparseMatrixType::value_type;
+	using MatrixComplexOrRealType    = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorComplexOrRealType    = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using VectorRealType             = typename PsimagLite::Vector<RealType>::Type;
+	using TargetVectorType           = VectorComplexOrRealType;
+	using VectorSizeType             = PsimagLite::Vector<SizeType>::Type;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType*>::Type;
+	using HilbertBasisType           = typename ModelType::HilbertBasisType;
+	using HilbertStateType           = typename ModelType::HilbertBasisType::value_type;
+	using OneSiteSpacesType          = typename WaveFunctionTransfType::OneSiteSpacesType;
 
 public:
 

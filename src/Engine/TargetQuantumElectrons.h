@@ -87,9 +87,9 @@ template <typename RealType, typename QnType> class TargetQuantumElectrons {
 
 public:
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef typename QnType::PairSizeType      PairSizeType;
-	typedef typename QnType::VectorQnType      VectorQnType;
+	using VectorSizeType = PsimagLite::Vector<SizeType>::Type;
+	using PairSizeType   = typename QnType::PairSizeType;
+	using VectorQnType   = typename QnType::VectorQnType;
 
 	template <typename IoInputType>
 	TargetQuantumElectrons(IoInputType& io)
@@ -282,7 +282,7 @@ private:
 	template <typename IoInputType>
 	SizeType readNumberOrExpression(IoInputType& io, PsimagLite::String fullLabel)
 	{
-		typedef AlgebraicStringToNumber<RealType> AlgebraicStringToNumberType;
+		using AlgebraicStringToNumberType = AlgebraicStringToNumber<RealType>;
 
 		PsimagLite::String val;
 		io.readline(val, fullLabel);

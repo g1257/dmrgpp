@@ -88,25 +88,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename LeftRightSuperType_> class ModelHelperLocal {
 
-	typedef PsimagLite::PackIndices PackIndicesType;
+	using PackIndicesType = PsimagLite::PackIndices;
 
 public:
 
-	typedef LeftRightSuperType_                                  LeftRightSuperType;
-	typedef typename LeftRightSuperType::OperatorsType           OperatorsType;
-	typedef typename OperatorsType::SparseMatrixType             SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                SparseElementType;
-	typedef typename OperatorsType::OperatorType                 OperatorType;
-	typedef typename OperatorType::StorageType                   OperatorStorageType;
-	typedef typename OperatorsType::BasisType                    BasisType;
-	typedef typename BasisType::BlockType                        BlockType;
-	typedef typename BasisType::RealType                         RealType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType  BasisWithOperatorsType;
-	typedef Link<SparseElementType>                              LinkType;
-	typedef PsimagLite::Vector<SizeType>::Type                   VectorSizeType;
-	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorSparseElementType;
-	typedef typename PsimagLite::Vector<SparseMatrixType>::Type  VectorSparseMatrixType;
-	typedef typename BasisType::QnType                           QnType;
+	using LeftRightSuperType      = LeftRightSuperType_;
+	using OperatorsType           = typename LeftRightSuperType::OperatorsType;
+	using SparseMatrixType        = typename OperatorsType::SparseMatrixType;
+	using SparseElementType       = typename SparseMatrixType::value_type;
+	using OperatorType            = typename OperatorsType::OperatorType;
+	using OperatorStorageType     = typename OperatorType::StorageType;
+	using BasisType               = typename OperatorsType::BasisType;
+	using BlockType               = typename BasisType::BlockType;
+	using RealType                = typename BasisType::RealType;
+	using BasisWithOperatorsType  = typename LeftRightSuperType::BasisWithOperatorsType;
+	using LinkType                = Link<SparseElementType>;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using VectorSparseElementType = typename PsimagLite::Vector<SparseElementType>::Type;
+	using VectorSparseMatrixType  = typename PsimagLite::Vector<SparseMatrixType>::Type;
+	using QnType                  = typename BasisType::QnType;
 
 	class Aux {
 

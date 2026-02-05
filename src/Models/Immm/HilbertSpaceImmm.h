@@ -99,7 +99,7 @@ template <typename Word> class HilbertSpaceImmm {
 
 public:
 
-	typedef Word HilbertState;
+	using HilbertState = Word;
 
 	static const SizeType NUMBER_OF_SPINS = 2;
 	enum

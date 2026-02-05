@@ -9,17 +9,17 @@ template <typename ModelBaseType> class Aklt {
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType    ModelHelperType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename ModelHelperType::OperatorsType    OperatorsType;
-	typedef typename OperatorsType::OperatorType       OperatorType;
-	typedef typename OperatorType::PairType            PairType;
-	typedef typename ModelBaseType::OpsLabelType       OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType      OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType      ModelTermType;
-	typedef typename ModelHelperType::RealType         RealType;
-	typedef typename SparseMatrixType::value_type      ComplexOrRealType;
-	typedef std::pair<SizeType, char>                  PairSizeCharType;
+	using ModelHelperType   = typename ModelBaseType::ModelHelperType;
+	using SparseMatrixType  = typename ModelHelperType::SparseMatrixType;
+	using OperatorsType     = typename ModelHelperType::OperatorsType;
+	using OperatorType      = typename OperatorsType::OperatorType;
+	using PairType          = typename OperatorType::PairType;
+	using OpsLabelType      = typename ModelBaseType::OpsLabelType;
+	using OpForLinkType     = typename ModelBaseType::OpForLinkType;
+	using ModelTermType     = typename ModelBaseType::ModelTermType;
+	using RealType          = typename ModelHelperType::RealType;
+	using ComplexOrRealType = typename SparseMatrixType::value_type;
+	using PairSizeCharType  = std::pair<SizeType, char>;
 
 	Aklt(ModelBaseType& modelBase, PsimagLite::String additional)
 	    : modelBase_(modelBase)

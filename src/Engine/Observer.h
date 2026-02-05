@@ -99,27 +99,27 @@ template <typename ObserverHelperType, typename ModelType_> class Observer {
 
 public:
 
-	typedef ModelType_                                               ModelType;
-	typedef typename ObserverHelperType::VectorWithOffsetType        VectorWithOffsetType;
-	typedef typename ObserverHelperType::IoInputType                 IoInputType;
-	typedef typename VectorWithOffsetType::value_type                FieldType;
-	typedef PsimagLite::SparseVector<FieldType>                      VectorType;
-	typedef typename ModelType_::RealType                            RealType;
-	typedef PsimagLite::Matrix<FieldType>                            MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type            VectorMatrixType;
-	typedef typename ModelType_::BasisWithOperatorsType              BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
-	typedef typename ModelType_::ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType_::ParametersType                      ParametersType;
-	typedef CorrelationsSkeleton<ObserverHelperType, ModelType_>     CorrelationsSkeletonType;
-	typedef OnePointCorrelations<ObserverHelperType, ModelType_>     OnePointCorrelationsType;
-	typedef TwoPointCorrelations<CorrelationsSkeletonType>           TwoPointCorrelationsType;
-	typedef FourPointCorrelations<CorrelationsSkeletonType>          FourPointCorrelationsType;
-	typedef MultiPointCorrelations<CorrelationsSkeletonType>         MultiPointCorrelationsType;
-	typedef typename CorrelationsSkeletonType::BraketType            BraketType;
-	typedef Parallel4PointDs<ModelType, FourPointCorrelationsType>   Parallel4PointDsType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type             VectorStringType;
-	typedef ManyPointAction                                          ManyPointActionType;
+	using ModelType                  = ModelType_;
+	using VectorWithOffsetType       = typename ObserverHelperType::VectorWithOffsetType;
+	using IoInputType                = typename ObserverHelperType::IoInputType;
+	using FieldType                  = typename VectorWithOffsetType::value_type;
+	using VectorType                 = PsimagLite::SparseVector<FieldType>;
+	using RealType                   = typename ModelType_::RealType;
+	using MatrixType                 = PsimagLite::Matrix<FieldType>;
+	using VectorMatrixType           = typename PsimagLite::Vector<MatrixType>::Type;
+	using BasisWithOperatorsType     = typename ModelType_::BasisWithOperatorsType;
+	using SparseMatrixType           = typename BasisWithOperatorsType::SparseMatrixType;
+	using LeftRightSuperType         = typename ModelType_::ModelHelperType::LeftRightSuperType;
+	using ParametersType             = typename ModelType_::ParametersType;
+	using CorrelationsSkeletonType   = CorrelationsSkeleton<ObserverHelperType, ModelType_>;
+	using OnePointCorrelationsType   = OnePointCorrelations<ObserverHelperType, ModelType_>;
+	using TwoPointCorrelationsType   = TwoPointCorrelations<CorrelationsSkeletonType>;
+	using FourPointCorrelationsType  = FourPointCorrelations<CorrelationsSkeletonType>;
+	using MultiPointCorrelationsType = MultiPointCorrelations<CorrelationsSkeletonType>;
+	using BraketType                 = typename CorrelationsSkeletonType::BraketType;
+	using Parallel4PointDsType       = Parallel4PointDs<ModelType, FourPointCorrelationsType>;
+	using VectorStringType           = PsimagLite::Vector<PsimagLite::String>::Type;
+	using ManyPointActionType        = ManyPointAction;
 
 	Observer(IoInputType&      io,
 	         SizeType          start,
@@ -494,7 +494,7 @@ public:
 		}
 
 		assert(fpd.n_row() > 1);
-		typedef std::pair<SizeType, SizeType> PairType;
+		using PairType = std::pair<SizeType, SizeType>;
 
 		typename PsimagLite::Vector<PairType>::Type pairs;
 		for (SizeType i = 0; i < fpd.n_row(); i++) {
@@ -507,7 +507,7 @@ public:
 			}
 		}
 
-		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
+		using ParallelizerType = PsimagLite::Parallelizer<Parallel4PointDsType>;
 		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel4PointDsType helper4PointDs(

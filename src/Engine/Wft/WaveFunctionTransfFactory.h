@@ -95,26 +95,26 @@ template <typename LeftRightSuperType_,
           typename OneSiteSpacesType_>
 class WaveFunctionTransfFactory {
 
-	typedef PsimagLite::IoSelector IoType;
+	using IoType = PsimagLite::IoSelector;
 
 public:
 
-	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type             VectorStringType;
-	typedef LeftRightSuperType_                                      LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
-	typedef typename BasisWithOperatorsType::BasisType               BasisType;
-	typedef typename SparseMatrixType::value_type                    SparseElementType;
-	typedef typename PsimagLite::Vector<SparseElementType>::Type     VectorType;
-	typedef typename BasisWithOperatorsType::RealType                RealType;
-	typedef WaveStructCombined<LeftRightSuperType>                   WaveStructCombinedType;
-	typedef typename WaveStructCombinedType::VectorVectorRealType    VectorVectorRealType;
-	typedef typename WaveStructCombinedType::VectorMatrixType        VectorMatrixType;
-	typedef typename WaveStructCombinedType::VectorQnType            VectorQnType;
-	typedef VectorWithOffsetType_                                    VectorWithOffsetType;
-	using OneSiteSpacesType = OneSiteSpacesType_;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using VectorStringType        = PsimagLite::Vector<PsimagLite::String>::Type;
+	using LeftRightSuperType      = LeftRightSuperType_;
+	using BasisWithOperatorsType  = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BlockDiagonalMatrixType = typename BasisWithOperatorsType::BlockDiagonalMatrixType;
+	using SparseMatrixType        = typename BasisWithOperatorsType::SparseMatrixType;
+	using BasisType               = typename BasisWithOperatorsType::BasisType;
+	using SparseElementType       = typename SparseMatrixType::value_type;
+	using VectorType              = typename PsimagLite::Vector<SparseElementType>::Type;
+	using RealType                = typename BasisWithOperatorsType::RealType;
+	using WaveStructCombinedType  = WaveStructCombined<LeftRightSuperType>;
+	using VectorVectorRealType    = typename WaveStructCombinedType::VectorVectorRealType;
+	using VectorMatrixType        = typename WaveStructCombinedType::VectorMatrixType;
+	using VectorQnType            = typename WaveStructCombinedType::VectorQnType;
+	using VectorWithOffsetType    = VectorWithOffsetType_;
+	using OneSiteSpacesType       = OneSiteSpacesType_;
 	typedef WaveFunctionTransfBase<WaveStructCombinedType,
 	                               VectorWithOffsetType,
 	                               OptionsType_,
@@ -124,9 +124,9 @@ public:
 	                                VectorWithOffsetType,
 	                                OptionsType_,
 	                                OneSiteSpacesType_>
-	                                                            WaveFunctionTransfLocalType;
-	typedef typename WaveFunctionTransfBaseType::WftOptionsType WftOptionsType;
-	typedef typename WaveStructCombinedType::WaveStructSvdType  WaveStructSvdType;
+	    WaveFunctionTransfLocalType;
+	using WftOptionsType    = typename WaveFunctionTransfBaseType::WftOptionsType;
+	using WaveStructSvdType = typename WaveStructCombinedType::WaveStructSvdType;
 
 	template <typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)

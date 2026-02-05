@@ -2,26 +2,26 @@
 
 namespace Dmrg {
 
-typedef Qn                                     QnType;
-typedef VectorWithOffset<RealType, QnType>     VectorWithOffset1Type;
-typedef VectorWithOffset<ComplexType, QnType>  VectorWithOffset2Type;
-typedef VectorWithOffsets<RealType, QnType>    VectorWithOffset3Type;
-typedef VectorWithOffsets<ComplexType, QnType> VectorWithOffset4Type;
+using QnType                = Qn;
+using VectorWithOffset1Type = VectorWithOffset<RealType, QnType>;
+using VectorWithOffset2Type = VectorWithOffset<ComplexType, QnType>;
+using VectorWithOffset3Type = VectorWithOffsets<RealType, QnType>;
+using VectorWithOffset4Type = VectorWithOffsets<ComplexType, QnType>;
 
-typedef Dmrg::SuperGeometry<RealType, InputNgType::Readable, ProgramGlobals> Geometry1Type;
+using Geometry1Type = Dmrg::SuperGeometry<RealType, InputNgType::Readable, ProgramGlobals>;
 
-typedef Dmrg::SuperGeometry<ComplexType, InputNgType::Readable, ProgramGlobals> Geometry2Type;
+using Geometry2Type = Dmrg::SuperGeometry<ComplexType, InputNgType::Readable, ProgramGlobals>;
 
-typedef Basis<MySparseMatrixReal>                           Basis1Type;
-typedef BasisWithOperators<Basis1Type>                      BasisWithOperators1Type;
-typedef LeftRightSuper<BasisWithOperators1Type, Basis1Type> LeftRightSuper1Type;
+using Basis1Type              = Basis<MySparseMatrixReal>;
+using BasisWithOperators1Type = BasisWithOperators<Basis1Type>;
+using LeftRightSuper1Type     = LeftRightSuper<BasisWithOperators1Type, Basis1Type>;
 
-typedef Basis<MySparseMatrixComplex>                        Basis2Type;
-typedef BasisWithOperators<Basis2Type>                      BasisWithOperators2Type;
-typedef LeftRightSuper<BasisWithOperators2Type, Basis2Type> LeftRightSuper2Type;
+using Basis2Type              = Basis<MySparseMatrixComplex>;
+using BasisWithOperators2Type = BasisWithOperators<Basis2Type>;
+using LeftRightSuper2Type     = LeftRightSuper<BasisWithOperators2Type, Basis2Type>;
 
-typedef ModelHelperLocal<LeftRightSuper1Type> ModelHelper1Type;
-typedef ModelHelperLocal<LeftRightSuper2Type> ModelHelper2Type;
+using ModelHelper1Type = ModelHelperLocal<LeftRightSuper1Type>;
+using ModelHelper2Type = ModelHelperLocal<LeftRightSuper2Type>;
 
 typedef ModelBase<ModelHelper1Type, ParametersDmrgSolverType, InputNgType::Readable, Geometry1Type>
     ModelBase1Type;

@@ -15,8 +15,8 @@ void den_gen_matrix(const int                                                 nr
 	 * -------------------------------
 	 */
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	const ComplexOrRealType                                    dzero = 0;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	const ComplexOrRealType dzero = 0;
 
 	int ia = 0;
 	int ja = 0;

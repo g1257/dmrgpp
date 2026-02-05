@@ -93,30 +93,30 @@ class TargetingCorrection : public TargetingBase<LanczosSolverType_, VectorWithO
 
 public:
 
-	typedef LanczosSolverType_                                      LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
-	typedef typename MatrixVectorType::ModelType                    ModelType;
-	typedef typename ModelType::RealType                            RealType;
-	typedef typename ModelType::ModelHelperType                     ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                   ComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type    TargetVectorType;
-	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType              BasisType;
-	typedef typename BasisType::BlockType                           BlockType;
-	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
-	typedef TargetParamsCorrection<ModelType>                       TargetParamsType;
-	typedef typename ModelType::InputValidatorType                  InputValidatorType;
-	typedef typename PsimagLite::Vector<SizeType>::Type             VectorSizeType;
-	typedef typename BasisType::QnType                              QnType;
-	typedef typename TargetingCommonType::StageEnumType             StageEnumType;
-	typedef typename BaseType::VectorRealType                       VectorRealType;
-	typedef typename BaseType::CheckpointType                       CheckpointType;
+	using LanczosSolverType      = LanczosSolverType_;
+	using BaseType               = TargetingBase<LanczosSolverType, VectorWithOffsetType_>;
+	using TargetingCommonType    = typename BaseType::TargetingCommonType;
+	using MatrixVectorType       = typename BaseType::MatrixVectorType;
+	using ModelType              = typename MatrixVectorType::ModelType;
+	using RealType               = typename ModelType::RealType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using TargetVectorType       = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using BlockType              = typename BasisType::BlockType;
+	using WaveFunctionTransfType = typename BaseType::WaveFunctionTransfType;
+	using VectorWithOffsetType   = typename WaveFunctionTransfType::VectorWithOffsetType;
+	using TargetParamsType       = TargetParamsCorrection<ModelType>;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
+	using VectorSizeType         = typename PsimagLite::Vector<SizeType>::Type;
+	using QnType                 = typename BasisType::QnType;
+	using StageEnumType          = typename TargetingCommonType::StageEnumType;
+	using VectorRealType         = typename BaseType::VectorRealType;
+	using CheckpointType         = typename BaseType::CheckpointType;
 
 	TargetingCorrection(const LeftRightSuperType&     lrs,
 	                    const CheckpointType&         checkPoint,

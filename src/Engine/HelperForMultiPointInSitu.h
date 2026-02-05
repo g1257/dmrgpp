@@ -12,20 +12,20 @@ template <typename CheckpointType> class HelperForMultiPointInSitu {
 
 public:
 
-	typedef typename CheckpointType::WaveFunctionTransfType          WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType    VectorWithOffsetType;
-	typedef typename WaveFunctionTransfType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef FermionSign                                              FermionSignType;
-	typedef typename VectorWithOffsetType::VectorType                VectorType;
-	typedef typename VectorType::value_type                          ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                    MatrixType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
-	typedef typename BasisWithOperatorsType::BasisType               BasisType;
-	typedef typename PsimagLite::Vector<LeftRightSuperType*>::Type   VectorLeftRightSuperType;
-	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
-	typedef typename DmrgSerializerType::BlockDiagonalMatrixType     BlockDiagonalMatrixType;
-	typedef PsimagLite::Vector<short int>::Type                      VectorShortIntType;
+	using WaveFunctionTransfType   = typename CheckpointType::WaveFunctionTransfType;
+	using VectorWithOffsetType     = typename WaveFunctionTransfType::VectorWithOffsetType;
+	using LeftRightSuperType       = typename WaveFunctionTransfType::LeftRightSuperType;
+	using BasisWithOperatorsType   = typename LeftRightSuperType::BasisWithOperatorsType;
+	using FermionSignType          = FermionSign;
+	using VectorType               = typename VectorWithOffsetType::VectorType;
+	using ComplexOrRealType        = typename VectorType::value_type;
+	using MatrixType               = PsimagLite::Matrix<ComplexOrRealType>;
+	using SparseMatrixType         = typename BasisWithOperatorsType::SparseMatrixType;
+	using BasisType                = typename BasisWithOperatorsType::BasisType;
+	using VectorLeftRightSuperType = typename PsimagLite::Vector<LeftRightSuperType*>::Type;
+	using DmrgSerializerType       = DmrgSerializer<LeftRightSuperType, VectorWithOffsetType>;
+	using BlockDiagonalMatrixType  = typename DmrgSerializerType::BlockDiagonalMatrixType;
+	using VectorShortIntType       = PsimagLite::Vector<short int>::Type;
 
 	class BogusInput {
 
@@ -111,7 +111,7 @@ public:
 		VectorLeftRightSuperType      garbage_;
 	};
 
-	typedef BogusInput IoInputType;
+	using IoInputType = BogusInput;
 
 	HelperForMultiPointInSitu(BogusInput& io,
 	                          SizeType    start,

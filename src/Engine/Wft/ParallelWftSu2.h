@@ -86,19 +86,19 @@ namespace Dmrg {
 template <typename VectorWithOffsetType, typename DmrgWaveStructType, typename LeftRightSuperType>
 class ParallelWftSu2 {
 
-	typedef PsimagLite::PackIndices                                 PackIndicesType;
-	typedef PsimagLite::Concurrency                                 ConcurrencyType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                   SparseElementType;
-	typedef typename BasisWithOperatorsType::FactorsType            FactorsType;
+	using PackIndicesType            = PsimagLite::PackIndices;
+	using ConcurrencyType            = PsimagLite::Concurrency;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType>::Type;
+	using VectorSizeType             = PsimagLite::Vector<SizeType>::Type;
+	using BasisWithOperatorsType     = typename DmrgWaveStructType::BasisWithOperatorsType;
+	using SparseMatrixType           = typename BasisWithOperatorsType::SparseMatrixType;
+	using SparseElementType          = typename SparseMatrixType::value_type;
+	using FactorsType                = typename BasisWithOperatorsType::FactorsType;
 
 public:
 
-	typedef typename VectorWithOffsetType::value_type          VectorElementType;
-	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
+	using VectorElementType = typename VectorWithOffsetType::value_type;
+	using RealType          = typename PsimagLite::Real<VectorElementType>::Type;
 
 	ParallelWftSu2(VectorWithOffsetType&         psiDest,
 	               const VectorWithOffsetType&   psiSrc,

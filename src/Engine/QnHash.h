@@ -16,8 +16,8 @@ template <> class hash<Dmrg::Qn> {
 
 public:
 
-	typedef Dmrg::Qn::VectorQnType   VectorQnType;
-	typedef Dmrg::Qn::VectorSizeType VectorSizeType;
+	using VectorQnType   = Dmrg::Qn::VectorQnType;
+	using VectorSizeType = Dmrg::Qn::VectorSizeType;
 
 	hash(bool addOdd)
 	    : addOdd_(addOdd)

@@ -10,8 +10,8 @@ template <typename InputCheckType> class InputFromDataOrNot {
 
 public:
 
-	typedef PsimagLite::InputNg<InputCheckType> InputNgType;
-	typedef PsimagLite::IoNg::In                IoNgInType;
+	using InputNgType = PsimagLite::InputNg<InputCheckType>;
+	using IoNgInType  = PsimagLite::IoNg::In;
 
 	InputFromDataOrNot(PsimagLite::String    filename,
 	                   const InputCheckType& inputCheck,

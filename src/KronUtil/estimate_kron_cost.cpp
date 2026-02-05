@@ -12,7 +12,7 @@ void estimate_kron_cost(const int                                               
                         int*                                                     p_imethod,
                         const typename PsimagLite::Real<ComplexOrRealType>::Type denseFlopDiscount)
 {
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 
 	int imethod = 1;
 

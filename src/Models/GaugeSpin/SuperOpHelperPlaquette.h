@@ -29,9 +29,9 @@ class SuperOpHelperPlaquette : public SuperOpHelperBase<SuperGeometryType, Param
 
 public:
 
-	typedef SuperOpHelperBase<SuperGeometryType, ParamsType> BaseType;
-	typedef typename BaseType::VectorSizeType                VectorSizeType;
-	typedef typename BaseType::PairBoolSizeType              PairBoolSizeType;
+	using BaseType                = SuperOpHelperBase<SuperGeometryType, ParamsType>;
+	using VectorSizeType          = typename BaseType::VectorSizeType;
+	using PairBoolSizeType        = typename BaseType::PairBoolSizeType;
 	using PairMetaOpForConnection = typename BaseType::PairMetaOpForConnection;
 
 	SuperOpHelperPlaquette(const SuperGeometryType& superGeometry)

@@ -91,16 +91,16 @@ template <typename LeftRightSuperType> class ArrayOfMatStruct {
 
 public:
 
-	typedef typename LeftRightSuperType::SparseMatrixType        SparseMatrixType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType  BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorStorageType OperatorStorageType;
-	typedef MatrixDenseOrSparse<SparseMatrixType>                MatrixDenseOrSparseType;
-	typedef typename MatrixDenseOrSparseType::RealType           RealType;
-	typedef GenIjPatch<LeftRightSuperType>                       GenIjPatchType;
-	typedef typename GenIjPatchType::VectorSizeType              VectorSizeType;
-	typedef typename GenIjPatchType::BasisType                   BasisType;
-	typedef typename MatrixDenseOrSparseType::value_type         ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                MatrixType;
+	using SparseMatrixType        = typename LeftRightSuperType::SparseMatrixType;
+	using BasisWithOperatorsType  = typename LeftRightSuperType::BasisWithOperatorsType;
+	using OperatorStorageType     = typename BasisWithOperatorsType::OperatorStorageType;
+	using MatrixDenseOrSparseType = MatrixDenseOrSparse<SparseMatrixType>;
+	using RealType                = typename MatrixDenseOrSparseType::RealType;
+	using GenIjPatchType          = GenIjPatch<LeftRightSuperType>;
+	using VectorSizeType          = typename GenIjPatchType::VectorSizeType;
+	using BasisType               = typename GenIjPatchType::BasisType;
+	using ComplexOrRealType       = typename MatrixDenseOrSparseType::value_type;
+	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
 
 	ArrayOfMatStruct(const OperatorStorageType&                   sparse1,
 	                 const GenIjPatchType&                        patchOld,

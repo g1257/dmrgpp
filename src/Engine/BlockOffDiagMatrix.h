@@ -8,24 +8,24 @@ namespace Dmrg {
 
 template <typename MatrixBlockType> class BlockOffDiagMatrix {
 
-	typedef typename MatrixBlockType::value_type               ComplexOrRealType;
-	typedef PsimagLite::CrsMatrix<ComplexOrRealType>           SparseMatrixType;
-	typedef BlockDiagonalMatrix<MatrixBlockType>               BlockDiagonalMatrixType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
-	typedef std::pair<SizeType, SizeType>                      PairType;
-	typedef PsimagLite::Vector<VectorSizeType>::Type           VectorVectorSizeType;
+	using ComplexOrRealType       = typename MatrixBlockType::value_type;
+	using SparseMatrixType        = PsimagLite::CrsMatrix<ComplexOrRealType>;
+	using BlockDiagonalMatrixType = BlockDiagonalMatrix<MatrixBlockType>;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using PairType                = std::pair<SizeType, SizeType>;
+	using VectorVectorSizeType    = PsimagLite::Vector<VectorSizeType>::Type;
 
 public:
 
-	typedef MatrixBlockType value_type;
+	using value_type = MatrixBlockType;
 
 	template <typename SomeBasisType>
 	BlockOffDiagMatrix(const SomeBasisType&                  rowBasis,
 	                   const SomeBasisType&                  colBasis,
 	                   const typename SomeBasisType::QnType& qtarget)
 	{
-		typedef typename SomeBasisType::VectorQnType::value_type QnType;
+		using QnType        = typename SomeBasisType::VectorQnType::value_type;
 		SizeType rowPatches = rowBasis.partition();
 		offsetRows_.resize(rowPatches);
 		for (SizeType i = 0; i < rowPatches; ++i)

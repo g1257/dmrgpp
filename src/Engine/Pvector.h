@@ -9,8 +9,8 @@ template <typename ComplexOrRealType> class Pvector {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type       VectorStringType;
+	using RealType         = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
 
 	// |P0>=(c?0[0]'*c?0[1]' +  c?1[0]'*c?1[1] - c?0[1]'*c?0[0] - c?1[1]'*c?1[0])|gs>*weight
 	// The weight is optional

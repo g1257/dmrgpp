@@ -23,14 +23,14 @@ template <typename ComplexOrRealType> class DmrgRunner {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::InputNg<Dmrg::InputCheck>              InputNgType;
+	using RealType    = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using InputNgType = PsimagLite::InputNg<Dmrg::InputCheck>;
 	typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
 	    ParametersDmrgSolverType;
 	typedef Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>
-	                                                            SuperGeometryType;
-	typedef Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn> VectorWithOffsetType;
-	typedef PsimagLite::PsiApp                                  ApplicationType;
+	    SuperGeometryType;
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn>;
+	using ApplicationType      = PsimagLite::PsiApp;
 
 	DmrgRunner(RealType precision, const ApplicationType& application)
 	    : precision_(precision)
@@ -41,11 +41,11 @@ public:
 	              PsimagLite::String insitu,
 	              PsimagLite::String logfile) const
 	{
-		typedef PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrixComplex;
-		typedef Dmrg::Basis<MySparseMatrixComplex>       BasisType;
-		typedef Dmrg::BasisWithOperators<BasisType>      BasisWithOperatorsType;
-		typedef Dmrg::LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
-		typedef Dmrg::ModelHelperLocal<LeftRightSuperType>              ModelHelperType;
+		using MySparseMatrixComplex  = PsimagLite::CrsMatrix<ComplexOrRealType>;
+		using BasisType              = Dmrg::Basis<MySparseMatrixComplex>;
+		using BasisWithOperatorsType = Dmrg::BasisWithOperators<BasisType>;
+		using LeftRightSuperType = Dmrg::LeftRightSuper<BasisWithOperatorsType, BasisType>;
+		using ModelHelperType    = Dmrg::ModelHelperLocal<LeftRightSuperType>;
 		typedef Dmrg::ModelBase<ModelHelperType,
 		                        ParametersDmrgSolverType,
 		                        InputNgType::Readable,
@@ -124,16 +124,16 @@ private:
 		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
 		                                  MatrixVectorType,
 		                                  typename MatrixVectorType::VectorType>
-		                                                   SolverType;
-		typedef typename SolverType::MatrixType::ModelType ModelBaseType;
+		    SolverType;
+		using ModelBaseType = typename SolverType::MatrixType::ModelType;
 
 		//! Setup the Model
 		Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
 		ModelBaseType& model = modelSelector(dmrgSolverParams, io, geometry);
 
 		//! Setup the dmrg solver: (vectorwithoffset.h only):
-		typedef Dmrg::DmrgSolver<SolverType, VectorWithOffsetType> DmrgSolverType;
-		DmrgSolverType                                             dmrgSolver(model, io);
+		using DmrgSolverType = Dmrg::DmrgSolver<SolverType, VectorWithOffsetType>;
+		DmrgSolverType dmrgSolver(model, io);
 
 		//! Calculate observables:
 		dmrgSolver.main(geometry);
