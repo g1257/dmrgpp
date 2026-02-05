@@ -103,47 +103,47 @@ template <typename SolverType, typename VectorWithOffsetType_> class DmrgSolver 
 
 public:
 
-	typedef TargetingBase<SolverType, VectorWithOffsetType_> TargetingType;
-	typedef typename TargetingType::ModelType                ModelType;
-	typedef VectorWithOffsetType_                            VectorWithOffsetType;
-	typedef typename ModelType::OperatorsType                OperatorsType;
-	typedef typename OperatorsType::OperatorType             OperatorType;
+	using TargetingType        = TargetingBase<SolverType, VectorWithOffsetType_>;
+	using ModelType            = typename TargetingType::ModelType;
+	using VectorWithOffsetType = VectorWithOffsetType_;
+	using OperatorsType        = typename ModelType::OperatorsType;
+	using OperatorType         = typename OperatorsType::OperatorType;
 	typedef ObservablesOnePointInSitu<typename TargetingType::TargetVectorType>
-	                                                     ObservablesOnePointInSituType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-	typedef typename OperatorsType::SparseMatrixType     SparseMatrixType;
-	typedef typename ModelType::MyBasis                  MyBasis;
-	typedef typename MyBasis::RealType                   RealType;
-	typedef typename MyBasis::BlockType                  BlockType;
-	typedef typename ModelType::BasisWithOperatorsType   MyBasisWithOperators;
-	typedef typename ModelType::ModelHelperType::LeftRightSuperType  LeftRightSuperType;
-	typedef typename TargetingType::TargetVectorType                 TargetVectorType;
-	typedef typename TargetVectorType::value_type                    ComplexOrRealType;
-	typedef typename TargetingType::TargetParamsType                 TargetParamsType;
-	typedef typename ModelType::InputValidatorType                   InputValidatorType;
-	typedef typename ModelType::SolverParamsType                     ParametersType;
-	typedef Diagonalization<ParametersType, TargetingType>           DiagonalizationType;
-	typedef typename TargetingType::WaveFunctionTransfType           WaveFunctionTransfType;
-	typedef Truncation<ParametersType, TargetingType>                TruncationType;
-	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
-	typedef typename ModelType::SuperGeometryType                    SuperGeometryType;
-	typedef Checkpoint<ModelType, WaveFunctionTransfType>            CheckpointType;
-	typedef Recovery<CheckpointType, TargetingType>                  RecoveryType;
-	typedef typename DmrgSerializerType::FermionSignType             FermionSignType;
-	typedef typename PsimagLite::Vector<BlockType>::Type             VectorBlockType;
-	typedef typename PsimagLite::Vector<SizeType>::Type              VectorSizeType;
-	typedef typename TargetingType::LanczosSolverType                LanczosSolverType;
-	typedef PrinterInDetail<LeftRightSuperType>                      PrinterInDetailType;
-	typedef typename DiagonalizationType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BasisWithOperatorsType::QnType                  QnType;
-	typedef typename QnType::PairSizeType                            PairSizeType;
-	typedef typename DiagonalizationType::VectorRealType             VectorRealType;
-	typedef typename DiagonalizationType::VectorVectorRealType       VectorVectorRealType;
+	    ObservablesOnePointInSituType;
+	using VectorStringType        = PsimagLite::Vector<PsimagLite::String>::Type;
+	using SparseMatrixType        = typename OperatorsType::SparseMatrixType;
+	using MyBasis                 = typename ModelType::MyBasis;
+	using RealType                = typename MyBasis::RealType;
+	using BlockType               = typename MyBasis::BlockType;
+	using MyBasisWithOperators    = typename ModelType::BasisWithOperatorsType;
+	using LeftRightSuperType      = typename ModelType::ModelHelperType::LeftRightSuperType;
+	using TargetVectorType        = typename TargetingType::TargetVectorType;
+	using ComplexOrRealType       = typename TargetVectorType::value_type;
+	using TargetParamsType        = typename TargetingType::TargetParamsType;
+	using InputValidatorType      = typename ModelType::InputValidatorType;
+	using ParametersType          = typename ModelType::SolverParamsType;
+	using DiagonalizationType     = Diagonalization<ParametersType, TargetingType>;
+	using WaveFunctionTransfType  = typename TargetingType::WaveFunctionTransfType;
+	using TruncationType          = Truncation<ParametersType, TargetingType>;
+	using DmrgSerializerType      = DmrgSerializer<LeftRightSuperType, VectorWithOffsetType>;
+	using SuperGeometryType       = typename ModelType::SuperGeometryType;
+	using CheckpointType          = Checkpoint<ModelType, WaveFunctionTransfType>;
+	using RecoveryType            = Recovery<CheckpointType, TargetingType>;
+	using FermionSignType         = typename DmrgSerializerType::FermionSignType;
+	using VectorBlockType         = typename PsimagLite::Vector<BlockType>::Type;
+	using VectorSizeType          = typename PsimagLite::Vector<SizeType>::Type;
+	using LanczosSolverType       = typename TargetingType::LanczosSolverType;
+	using PrinterInDetailType     = PrinterInDetail<LeftRightSuperType>;
+	using BasisWithOperatorsType  = typename DiagonalizationType::BasisWithOperatorsType;
+	using BlockDiagonalMatrixType = typename BasisWithOperatorsType::BlockDiagonalMatrixType;
+	using QnType                  = typename BasisWithOperatorsType::QnType;
+	using PairSizeType            = typename QnType::PairSizeType;
+	using VectorRealType          = typename DiagonalizationType::VectorRealType;
+	using VectorVectorRealType    = typename DiagonalizationType::VectorVectorRealType;
 	typedef typename TargetingType::VectorVectorVectorWithOffsetType
-	                                                           VectorVectorVectorWithOffsetType;
-	typedef OneSiteTruncation<ModelType, VectorWithOffsetType> OneSiteTruncationType;
-	using FiniteLoopType = FiniteLoop<RealType>;
+	    VectorVectorVectorWithOffsetType;
+	using OneSiteTruncationType = OneSiteTruncation<ModelType, VectorWithOffsetType>;
+	using FiniteLoopType        = FiniteLoop<RealType>;
 
 	DmrgSolver(ModelType& model, InputValidatorType& ioIn)
 	    : model_(model)

@@ -8,15 +8,15 @@ namespace Dmrg {
 
 template <typename HamiltonianConnectionType> class ParallelHamiltonianConnection {
 
-	typedef typename HamiltonianConnectionType::ModelHelperType ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename ModelHelperType::OperatorStorageType       OperatorStorageType;
-	typedef typename ModelHelperType::SparseMatrixType          SparseMatrixType;
-	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
-	typedef PsimagLite::Concurrency                             ConcurrencyType;
-	typedef typename HamiltonianConnectionType::VectorType      VectorType;
-	typedef typename HamiltonianConnectionType::LinkType        LinkType;
-	typedef typename ModelHelperType::Aux                       AuxType;
+	using ModelHelperType     = typename HamiltonianConnectionType::ModelHelperType;
+	using LeftRightSuperType  = typename ModelHelperType::LeftRightSuperType;
+	using OperatorStorageType = typename ModelHelperType::OperatorStorageType;
+	using SparseMatrixType    = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType   = typename SparseMatrixType::value_type;
+	using ConcurrencyType     = PsimagLite::Concurrency;
+	using VectorType          = typename HamiltonianConnectionType::VectorType;
+	using LinkType            = typename HamiltonianConnectionType::LinkType;
+	using AuxType             = typename ModelHelperType::Aux;
 
 public:
 

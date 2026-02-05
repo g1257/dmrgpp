@@ -6,9 +6,9 @@ namespace Dmrg {
 
 template <typename OperatorType> class LazyAlgebraFactor {
 
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef PsimagLite::Vector<SizeType>::Type              VectorSizeType;
-	typedef typename OperatorType::value_type               ComplexOrRealType;
+	using VectorOperatorType = typename PsimagLite::Vector<OperatorType>::Type;
+	using VectorSizeType     = PsimagLite::Vector<SizeType>::Type;
+	using ComplexOrRealType  = typename OperatorType::value_type;
 
 public:
 
@@ -99,10 +99,10 @@ template <typename OperatorType> class LazyAlgebra {
 
 public:
 
-	typedef LazyAlgebraFactor<OperatorType> LazyAlgebraFactorType;
+	using LazyAlgebraFactorType = LazyAlgebraFactor<OperatorType>;
 	typedef
 	    typename PsimagLite::Vector<LazyAlgebraFactorType>::Type VectorLazyAlgebraFactorType;
-	typedef typename OperatorType::value_type                    ComplexOrRealType;
+	using ComplexOrRealType = typename OperatorType::value_type;
 
 	LazyAlgebra()
 	    : factors_(1, OperatorType())

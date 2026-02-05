@@ -7,7 +7,7 @@ template <typename ComplexOrRealType> class Su3RepresentationBase {
 
 public:
 
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	using MatrixType = PsimagLite::Matrix<ComplexOrRealType>;
 
 	virtual ~Su3RepresentationBase() { }
 

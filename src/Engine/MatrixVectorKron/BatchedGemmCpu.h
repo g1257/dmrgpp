@@ -12,18 +12,18 @@ namespace Dmrg {
 
 template <typename InitKronType> class BatchedGemmCpu {
 
-	typedef typename InitKronType::ArrayOfMatStructType                 ArrayOfMatStructType;
-	typedef typename InitKronType::GenIjPatchType                       GenIjPatchType;
-	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType      MatrixDenseOrSparseType;
-	typedef typename MatrixDenseOrSparseType::VectorType                VectorType;
-	typedef typename VectorType::value_type                             ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                       MatrixType;
-	typedef long int                                                    IntegerType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type          RealType;
-	typedef PsimagLite::Vector<SizeType>::Type                          VectorSizeType;
-	typedef PsimagLite::Vector<char>::Type                              VectorCharType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType*>::Type       VectorStarType;
-	typedef typename PsimagLite::Vector<const ComplexOrRealType*>::Type VectorConstStarType;
+	using ArrayOfMatStructType    = typename InitKronType::ArrayOfMatStructType;
+	using GenIjPatchType          = typename InitKronType::GenIjPatchType;
+	using MatrixDenseOrSparseType = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
+	using VectorType              = typename MatrixDenseOrSparseType::VectorType;
+	using ComplexOrRealType       = typename VectorType::value_type;
+	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
+	using IntegerType             = long int;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using VectorCharType          = PsimagLite::Vector<char>::Type;
+	using VectorStarType          = typename PsimagLite::Vector<ComplexOrRealType*>::Type;
+	using VectorConstStarType     = typename PsimagLite::Vector<const ComplexOrRealType*>::Type;
 
 	static const int ialign_ = 32;
 	static const int idebug_ = 0; // set to 0 until it gives correct results

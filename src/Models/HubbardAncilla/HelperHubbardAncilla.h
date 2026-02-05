@@ -10,24 +10,24 @@ template <typename ModelBaseType, typename ModelParametersType> class HelperHubb
 
 public:
 
-	typedef typename ModelBaseType::SuperGeometryType           SuperGeometryType;
-	typedef typename ModelBaseType::HilbertBasisType            HilbertBasisType;
-	typedef typename HilbertBasisType::value_type               HilbertState;
-	typedef HilbertSpaceFeAs<HilbertState>                      HilbertSpaceFeAsType;
-	typedef typename ModelBaseType::VectorSizeType              VectorSizeType;
-	typedef typename ModelBaseType::OpsLabelType                OpsLabelType;
-	typedef typename ModelBaseType::ModelHelperType             ModelHelperType;
-	typedef typename ModelHelperType::SparseMatrixType          SparseMatrixType;
-	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type  RealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>               MatrixType;
-	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename ModelHelperType::OperatorsType             OperatorsType;
-	typedef typename OperatorsType::OperatorType                OperatorType;
-	typedef typename ModelBaseType::QnType                      QnType;
-	typedef typename QnType::VectorQnType                       VectorQnType;
-	typedef std::pair<SizeType, SizeType>                       PairType;
-	typedef typename ModelHelperType::BlockType                 BlockType;
+	using SuperGeometryType      = typename ModelBaseType::SuperGeometryType;
+	using HilbertBasisType       = typename ModelBaseType::HilbertBasisType;
+	using HilbertState           = typename HilbertBasisType::value_type;
+	using HilbertSpaceFeAsType   = HilbertSpaceFeAs<HilbertState>;
+	using VectorSizeType         = typename ModelBaseType::VectorSizeType;
+	using OpsLabelType           = typename ModelBaseType::OpsLabelType;
+	using ModelHelperType        = typename ModelBaseType::ModelHelperType;
+	using SparseMatrixType       = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using RealType               = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using MatrixType             = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorSparseMatrixType = typename PsimagLite::Vector<SparseMatrixType>::Type;
+	using OperatorsType          = typename ModelHelperType::OperatorsType;
+	using OperatorType           = typename OperatorsType::OperatorType;
+	using QnType                 = typename ModelBaseType::QnType;
+	using VectorQnType           = typename QnType::VectorQnType;
+	using PairType               = std::pair<SizeType, SizeType>;
+	using BlockType              = typename ModelHelperType::BlockType;
 
 	static const SizeType ORBITALS     = 2;
 	static const int      SPIN_UP      = HilbertSpaceFeAsType::SPIN_UP;

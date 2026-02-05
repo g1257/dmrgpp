@@ -11,11 +11,11 @@ template <typename SparseMatrixType> class MatrixDenseOrSparse {
 
 public:
 
-	typedef typename SparseMatrixType::value_type                value_type;
-	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Vector<int>::Type                        VectorIntType;
+	using value_type        = typename SparseMatrixType::value_type;
+	using ComplexOrRealType = typename SparseMatrixType::value_type;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorType        = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using VectorIntType     = PsimagLite::Vector<int>::Type;
 
 	explicit MatrixDenseOrSparse(const SparseMatrixType& sparse, const RealType& threshold)
 	    : isDense_(sparse.nonZeros()

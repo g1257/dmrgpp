@@ -85,8 +85,8 @@ namespace Dmrg {
 
 template <typename VectorType> class MettsSerializer {
 
-	typedef typename VectorType::value_type                    VectorElementType;
-	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
+	using VectorElementType = typename VectorType::value_type;
+	using RealType          = typename PsimagLite::Real<VectorElementType>::Type;
 
 public:
 

@@ -7,9 +7,9 @@ namespace Dmrg {
 
 template <typename ModelType> class Intent {
 
-	typedef PsimagLite::Vector<SizeType>::Type     VectorSizeType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename ModelType::ParametersType     DmrgSolverParamsType;
+	using VectorSizeType       = PsimagLite::Vector<SizeType>::Type;
+	using InputValidatorType   = typename ModelType::InputValidatorType;
+	using DmrgSolverParamsType = typename ModelType::ParametersType;
 
 	enum class IntentEnum
 	{

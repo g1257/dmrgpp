@@ -89,14 +89,14 @@ template <typename ComplexOrRealType, typename QnType_> class VectorWithOffset {
 
 public:
 
-	typedef QnType_                                              QnType;
-	typedef VectorWithOffset<ComplexOrRealType, QnType>          ThisType;
-	typedef ComplexOrRealType                                    value_type;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Vector<SizeType>::Type                   VectorSizeType;
-	typedef std::pair<SizeType, QnType>                          PairQnType;
-	typedef typename QnType::PairSizeType                        PairSizeType;
+	using QnType         = QnType_;
+	using ThisType       = VectorWithOffset<ComplexOrRealType, QnType>;
+	using value_type     = ComplexOrRealType;
+	using RealType       = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorType     = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using VectorSizeType = PsimagLite::Vector<SizeType>::Type;
+	using PairQnType     = std::pair<SizeType, QnType>;
+	using PairSizeType   = typename QnType::PairSizeType;
 
 	static const ComplexOrRealType zero_;
 

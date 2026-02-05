@@ -90,17 +90,17 @@ template <typename BasisWithOperatorsType_, typename SuperBlockType> class LeftR
 
 public:
 
-	typedef typename SuperBlockType::RealType                       RealType;
-	typedef BasisWithOperatorsType_                                 BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType              BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorsType          OperatorsType;
-	typedef typename OperatorsType::OperatorType                    OperatorType;
-	typedef typename OperatorType::StorageType                      OperatorStorageType;
-	typedef typename BasisType::BlockType                           BlockType;
-	typedef PsimagLite::ProgressIndicator                           ProgressIndicatorType;
-	typedef LeftRightSuper<BasisWithOperatorsType_, SuperBlockType> ThisType;
-	typedef typename BasisType::QnType                              QnType;
+	using RealType               = typename SuperBlockType::RealType;
+	using BasisWithOperatorsType = BasisWithOperatorsType_;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using OperatorsType          = typename BasisWithOperatorsType::OperatorsType;
+	using OperatorType           = typename OperatorsType::OperatorType;
+	using OperatorStorageType    = typename OperatorType::StorageType;
+	using BlockType              = typename BasisType::BlockType;
+	using ProgressIndicatorType  = PsimagLite::ProgressIndicator;
+	using ThisType               = LeftRightSuper<BasisWithOperatorsType_, SuperBlockType>;
+	using QnType                 = typename BasisType::QnType;
 
 	template <typename IoInputter>
 	LeftRightSuper(
@@ -365,7 +365,7 @@ private:
 	              RealType                      time)
 	{
 		BasisWithOperatorsType Xbasis("Xbasis", pS.traits());
-		typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuper2Type;
+		using LeftRightSuper2Type = LeftRightSuper<BasisWithOperatorsType, BasisType>;
 		SizeType oneSiteTruncSize = Xbasis.setOneSite(X, model, time);
 
 		assert(X.size() == 1);

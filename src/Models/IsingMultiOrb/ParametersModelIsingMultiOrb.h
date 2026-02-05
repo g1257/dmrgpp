@@ -88,9 +88,9 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersModelIsingMultiOrb : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType>       BaseType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename PsimagLite::Matrix<RealType>       MatrixRealType;
+	using BaseType       = ParametersModelBase<RealType, QnType>;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
+	using MatrixRealType = typename PsimagLite::Matrix<RealType>;
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
 	ParametersModelIsingMultiOrb(IoInputType& io)

@@ -92,8 +92,8 @@ struct ParametersModelFeAs : public ParametersModelBase<ComplexOrRealType, QnTyp
 	// no connections here please!!
 	// connections are handled by the geometry
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
+	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using BaseType = ParametersModelBase<ComplexOrRealType, QnType>;
 
 	enum IntEnum
 	{

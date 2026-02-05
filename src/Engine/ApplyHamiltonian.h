@@ -9,14 +9,14 @@ class ApplyHamiltonian {
 
 public:
 
-	typedef typename ApplyOperatorLocalType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename ApplyOperatorLocalType::OperatorType         OperatorType;
-	typedef typename ApplyOperatorLocalType::FermionSignType      FermionSignType;
-	typedef typename VectorWithOffsetType::VectorType             VectorType;
-	typedef typename ModelType::HamiltonianConnectionType         HamiltonianConnectionType;
-	typedef typename ApplyOperatorLocalType::LeftRightSuperType   LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType   BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::RealType             RealType;
+	using VectorWithOffsetType      = typename ApplyOperatorLocalType::VectorWithOffsetType;
+	using OperatorType              = typename ApplyOperatorLocalType::OperatorType;
+	using FermionSignType           = typename ApplyOperatorLocalType::FermionSignType;
+	using VectorType                = typename VectorWithOffsetType::VectorType;
+	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
+	using LeftRightSuperType        = typename ApplyOperatorLocalType::LeftRightSuperType;
+	using BasisWithOperatorsType    = typename LeftRightSuperType::BasisWithOperatorsType;
+	using RealType                  = typename BasisWithOperatorsType::RealType;
 
 	ApplyHamiltonian(const LeftRightSuperType& lrs,
 	                 const ModelType&          model,

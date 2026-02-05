@@ -87,14 +87,14 @@ template <typename TargetingType> class DensityMatrixBase {
 
 public:
 
-	typedef typename TargetingType::BasisWithOperatorsType            BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType                BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType         SparseMatrixType;
-	typedef typename TargetingType::TargetVectorType::value_type      DensityMatrixElementType;
-	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type               VectorRealType;
-	typedef PsimagLite::Matrix<DensityMatrixElementType>              MatrixType;
-	typedef BlockDiagonalMatrix<MatrixType>                           BlockDiagonalMatrixType;
+	using BasisWithOperatorsType   = typename TargetingType::BasisWithOperatorsType;
+	using BasisType                = typename BasisWithOperatorsType::BasisType;
+	using SparseMatrixType         = typename BasisWithOperatorsType::SparseMatrixType;
+	using DensityMatrixElementType = typename TargetingType::TargetVectorType::value_type;
+	using RealType                 = typename PsimagLite::Real<DensityMatrixElementType>::Type;
+	using VectorRealType           = typename PsimagLite::Vector<RealType>::Type;
+	using MatrixType               = PsimagLite::Matrix<DensityMatrixElementType>;
+	using BlockDiagonalMatrixType  = BlockDiagonalMatrix<MatrixType>;
 
 	struct Params {
 
@@ -117,7 +117,7 @@ public:
 		bool                          serialSvd;
 	};
 
-	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
+	using BuildingBlockType = typename BlockDiagonalMatrixType::BuildingBlockType;
 
 	virtual ~DensityMatrixBase() { }
 

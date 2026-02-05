@@ -89,17 +89,17 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename SparseMatrixType, typename SymmetryRelatedType> class JmSubspace {
 
-	typedef typename SparseMatrixType::value_type              SparseElementType;
-	typedef typename PsimagLite::Real<SparseElementType>::Type RealType;
-	typedef std::pair<SizeType, SizeType>                      PairType;
-	typedef std::pair<PairType, PairType>                      TwoPairsType;
-	typedef Su2SymmetryGlobals<RealType>                       Su2SymmetryGlobalsType;
-	typedef typename Su2SymmetryGlobalsType::ClebschGordanType ClebschGordanType;
-	typedef PsimagLite::PackIndices                            PackIndicesType;
+	using SparseElementType      = typename SparseMatrixType::value_type;
+	using RealType               = typename PsimagLite::Real<SparseElementType>::Type;
+	using PairType               = std::pair<SizeType, SizeType>;
+	using TwoPairsType           = std::pair<PairType, PairType>;
+	using Su2SymmetryGlobalsType = Su2SymmetryGlobals<RealType>;
+	using ClebschGordanType      = typename Su2SymmetryGlobalsType::ClebschGordanType;
+	using PackIndicesType        = PsimagLite::PackIndices;
 
 public:
 
-	typedef std::pair<PairType, TwoPairsType> FlavorType;
+	using FlavorType = std::pair<PairType, TwoPairsType>;
 
 	JmSubspace(const PairType& jm,
 	           SizeType        index,

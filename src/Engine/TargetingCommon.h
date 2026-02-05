@@ -132,50 +132,50 @@ public:
 		READ_AND_SET_TVS = true
 	};
 
-	typedef VectorWithOffsetType_                               VectorWithOffsetType;
-	typedef LanczosSolverType_                                  LanczosSolverType;
-	typedef PsimagLite::IoSelector                              IoType;
-	typedef typename IoType::In                                 IoInputType;
-	typedef typename TargetHelperType::RealType                 RealType;
-	typedef typename TargetHelperType::ModelType                ModelType;
-	typedef typename TargetHelperType::ModelHelperType          ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename LanczosSolverType::PostProcType            PostProcType;
-	typedef typename VectorWithOffsetType::VectorType           VectorType;
-	typedef PsimagLite::Matrix<typename VectorType::value_type> DenseMatrixType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
-	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
-	typedef typename BasisWithOperatorsType::OperatorType       OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType          BasisType;
-	typedef typename BasisWithOperatorsType::VectorQnType       VectorQnType;
-	typedef typename BasisType::BlockType                       BlockType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type        VectorStringType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type     VectorOperatorType;
+	using VectorWithOffsetType   = VectorWithOffsetType_;
+	using LanczosSolverType      = LanczosSolverType_;
+	using IoType                 = PsimagLite::IoSelector;
+	using IoInputType            = typename IoType::In;
+	using RealType               = typename TargetHelperType::RealType;
+	using ModelType              = typename TargetHelperType::ModelType;
+	using ModelHelperType        = typename TargetHelperType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using PostProcType           = typename LanczosSolverType::PostProcType;
+	using VectorType             = typename VectorWithOffsetType::VectorType;
+	using DenseMatrixType        = PsimagLite::Matrix<typename VectorType::value_type>;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using VectorQnType           = typename BasisWithOperatorsType::VectorQnType;
+	using BlockType              = typename BasisType::BlockType;
+	using VectorStringType       = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorOperatorType     = typename PsimagLite::Vector<OperatorType>::Type;
 	typedef ApplyOperatorExpression<TargetHelperType, VectorWithOffsetType, LanczosSolverType>
-	                                                                ApplyOperatorExpressionType;
-	typedef typename ApplyOperatorExpressionType::VectorSizeType    VectorSizeType;
-	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
-	typedef typename ApplyOperatorType::BorderEnum                  BorderEnumType;
-	typedef typename TargetHelperType::WaveFunctionTransfType       WaveFunctionTransfType;
-	typedef typename ApplyOperatorExpressionType::TargetParamsType  TargetParamsType;
+	    ApplyOperatorExpressionType;
+	using VectorSizeType         = typename ApplyOperatorExpressionType::VectorSizeType;
+	using ApplyOperatorType      = typename ApplyOperatorExpressionType::ApplyOperatorType;
+	using BorderEnumType         = typename ApplyOperatorType::BorderEnum;
+	using WaveFunctionTransfType = typename TargetHelperType::WaveFunctionTransfType;
+	using TargetParamsType       = typename ApplyOperatorExpressionType::TargetParamsType;
 	typedef typename ApplyOperatorExpressionType::VectorVectorWithOffsetType
-	                                                             VectorVectorWithOffsetType;
-	typedef typename ApplyOperatorExpressionType::VectorRealType VectorRealType;
-	typedef typename ApplyOperatorExpressionType::PairType       PairType;
-	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
-	typedef typename ModelType::InputValidatorType                    InputValidatorType;
-	typedef Braket<ModelType>                                         BraketType;
-	typedef FermionSign                                               FermionSignType;
-	typedef typename ApplyOperatorExpressionType::StageEnumType       StageEnumType;
-	typedef TimeSerializer<VectorWithOffsetType>                      TimeSerializerType;
-	typedef RestartStruct                                             RestartStructType;
+	    VectorVectorWithOffsetType;
+	using VectorRealType      = typename ApplyOperatorExpressionType::VectorRealType;
+	using PairType            = typename ApplyOperatorExpressionType::PairType;
+	using TimeVectorsBaseType = typename ApplyOperatorExpressionType::TimeVectorsBaseType;
+	using InputValidatorType  = typename ModelType::InputValidatorType;
+	using BraketType          = Braket<ModelType>;
+	using FermionSignType     = FermionSign;
+	using StageEnumType       = typename ApplyOperatorExpressionType::StageEnumType;
+	using TimeSerializerType  = TimeSerializer<VectorWithOffsetType>;
+	using RestartStructType   = RestartStruct;
 	typedef typename ApplyOperatorExpressionType::VectorVectorVectorWithOffsetType
-	                                                           VectorVectorVectorWithOffsetType;
-	typedef SdhsReinterpret<BraketType>                        SdhsReinterpretType;
-	typedef MultiPointInSitu<VectorWithOffsetType_, ModelType> MultiPointInSituType;
-	typedef Checkpoint<ModelType, WaveFunctionTransfType>      CheckpointType;
-	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
+	    VectorVectorVectorWithOffsetType;
+	using SdhsReinterpretType  = SdhsReinterpret<BraketType>;
+	using MultiPointInSituType = MultiPointInSitu<VectorWithOffsetType_, ModelType>;
+	using CheckpointType       = Checkpoint<ModelType, WaveFunctionTransfType>;
+	using OneSiteSpacesType    = OneSiteSpaces<ModelType>;
 
 	enum class OpLabelCategory
 	{

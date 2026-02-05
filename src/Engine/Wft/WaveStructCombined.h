@@ -12,16 +12,16 @@ template <typename LeftRightSuperType_> class WaveStructCombined {
 
 public:
 
-	typedef LeftRightSuperType_                                 LeftRightSuperType;
-	typedef WaveStructSvd<LeftRightSuperType>                   WaveStructSvdType;
-	typedef typename WaveStructSvdType::BasisWithOperatorsType  BasisWithOperatorsType;
-	typedef typename WaveStructSvdType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename WaveStructSvdType::VectorVectorRealType    VectorVectorRealType;
-	typedef typename WaveStructSvdType::VectorMatrixType        VectorMatrixType;
-	typedef typename WaveStructSvdType::VectorQnType            VectorQnType;
-	typedef typename BasisWithOperatorsType::BasisType          BasisType;
-	typedef typename BasisType::BlockType                       VectorSizeType;
-	typedef DiskOrMemoryStack<WaveStructSvdType>                WftStackType;
+	using LeftRightSuperType      = LeftRightSuperType_;
+	using WaveStructSvdType       = WaveStructSvd<LeftRightSuperType>;
+	using BasisWithOperatorsType  = typename WaveStructSvdType::BasisWithOperatorsType;
+	using BlockDiagonalMatrixType = typename WaveStructSvdType::BlockDiagonalMatrixType;
+	using VectorVectorRealType    = typename WaveStructSvdType::VectorVectorRealType;
+	using VectorMatrixType        = typename WaveStructSvdType::VectorMatrixType;
+	using VectorQnType            = typename WaveStructSvdType::VectorQnType;
+	using BasisType               = typename BasisWithOperatorsType::BasisType;
+	using VectorSizeType          = typename BasisType::BlockType;
+	using WftStackType            = DiskOrMemoryStack<WaveStructSvdType>;
 
 	WaveStructCombined(bool                     onDisk,
 	                   const PsimagLite::String filename,

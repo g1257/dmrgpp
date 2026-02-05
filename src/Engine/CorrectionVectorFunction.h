@@ -84,15 +84,15 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename MatrixType, typename InfoType> class CorrectionVectorFunction {
 
-	typedef typename MatrixType::value_type              FieldType;
-	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
-	typedef typename PsimagLite::Real<FieldType>::Type   RealType;
+	using FieldType  = typename MatrixType::value_type;
+	using VectorType = typename PsimagLite::Vector<FieldType>::Type;
+	using RealType   = typename PsimagLite::Real<FieldType>::Type;
 
 	class InternalMatrix {
 
 	public:
 
-		typedef FieldType value_type;
+		using value_type = FieldType;
 		InternalMatrix(const MatrixType& m, const InfoType& info, RealType E0)
 		    : m_(m)
 		    , info_(info)
@@ -131,7 +131,7 @@ template <typename MatrixType, typename InfoType> class CorrectionVectorFunction
 		RealType          E0_;
 	};
 
-	typedef ConjugateGradient<InternalMatrix> ConjugateGradientType;
+	using ConjugateGradientType = ConjugateGradient<InternalMatrix>;
 
 public:
 

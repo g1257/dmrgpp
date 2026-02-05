@@ -91,20 +91,20 @@ template <typename ModelType> class TargetParamsCommon : public TargetParamsBase
 
 public:
 
-	typedef typename ModelType::RealType                         RealType;
-	typedef TargetParamsBase<ModelType>                          BaseType;
-	typedef typename ModelType::OperatorType                     OperatorType;
-	typedef typename OperatorType::PairType                      PairType;
-	typedef typename OperatorType::StorageType                   SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                MatrixType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Vector<SizeType>::Type                   VectorSizeType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type        VectorMatrixType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type      VectorOperatorType;
-	typedef typename ModelType::InputValidatorType               InputValidatorType;
-	typedef std::pair<SizeType, SizeType>                        PairSizeType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type         VectorStringType;
+	using RealType           = typename ModelType::RealType;
+	using BaseType           = TargetParamsBase<ModelType>;
+	using OperatorType       = typename ModelType::OperatorType;
+	using PairType           = typename OperatorType::PairType;
+	using SparseMatrixType   = typename OperatorType::StorageType;
+	using ComplexOrRealType  = typename SparseMatrixType::value_type;
+	using MatrixType         = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorType         = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using VectorSizeType     = PsimagLite::Vector<SizeType>::Type;
+	using VectorMatrixType   = typename PsimagLite::Vector<MatrixType>::Type;
+	using VectorOperatorType = typename PsimagLite::Vector<OperatorType>::Type;
+	using InputValidatorType = typename ModelType::InputValidatorType;
+	using PairSizeType       = std::pair<SizeType, SizeType>;
+	using VectorStringType   = PsimagLite::Vector<PsimagLite::String>::Type;
 
 	TargetParamsCommon(InputValidatorType& io,
 	                   PsimagLite::String  targeting,
@@ -407,9 +407,9 @@ private:
 
 	void vecstringToVecnumbers(VectorSizeType& nums, const VectorStringType& strs)
 	{
-		typedef AlgebraicStringToNumber<RealType> AlgebraicStringToNumberType;
-		const SizeType numberOfSites = model_.superGeometry().numberOfSites();
-		const SizeType n             = strs.size();
+		using AlgebraicStringToNumberType = AlgebraicStringToNumber<RealType>;
+		const SizeType numberOfSites      = model_.superGeometry().numberOfSites();
+		const SizeType n                  = strs.size();
 		nums.resize(n);
 
 		AlgebraicStringToNumberType algebraicStringToNumber("TSPSites", numberOfSites);

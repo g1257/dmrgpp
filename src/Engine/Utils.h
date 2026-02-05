@@ -141,7 +141,7 @@ fillFermionicSigns(SomeVectorType&                       fermionicSigns,
                    const PsimagLite::Vector<bool>::Type& signs,
                    int                                   f)
 {
-	typedef typename SomeVectorType::value_type ValueType;
+	using ValueType = typename SomeVectorType::value_type;
 	fermionicSigns.resize(signs.size());
 	for (SizeType i = 0; i < fermionicSigns.size(); i++)
 		fermionicSigns[i] = (signs[i]) ? static_cast<ValueType>(f) : 1;

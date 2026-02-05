@@ -85,8 +85,8 @@ template <typename FieldType_, typename Word_> class SpinSquaredHelper {
 
 public:
 
-	typedef FieldType_ FieldType;
-	typedef Word_      Word;
+	using FieldType = FieldType_;
+	using Word      = Word_;
 
 	SpinSquaredHelper()
 	    : data_(0)

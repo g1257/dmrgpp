@@ -8,26 +8,26 @@ namespace Dmrg {
 
 template <typename WaveFunctionTransfBaseType> class WftAccelSvd {
 
-	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType   DmrgWaveStructType;
-	typedef typename DmrgWaveStructType::WaveStructSvdType            WaveStructSvdType;
-	typedef typename WaveFunctionTransfBaseType::WftOptionsType       WftOptionsType;
-	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename WaveFunctionTransfBaseType::VectorSizeType       VectorSizeType;
-	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename VectorWithOffsetType::VectorType            VectorType;
-	typedef typename VectorType::value_type                      ComplexOrRealType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType  BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::VectorQnType        VectorQnType;
-	typedef typename BasisWithOperatorsType::QnType              QnType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType    SparseMatrixType;
-	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
-	typedef typename DmrgWaveStructType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BlockDiagonalMatrixType::BuildingBlockType  MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type        VectorMatrixType;
-	typedef typename PsimagLite::Vector<VectorType>::Type        VectorVectorType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type          VectorRealType;
+	using DmrgWaveStructType      = typename WaveFunctionTransfBaseType::DmrgWaveStructType;
+	using WaveStructSvdType       = typename DmrgWaveStructType::WaveStructSvdType;
+	using WftOptionsType          = typename WaveFunctionTransfBaseType::WftOptionsType;
+	using VectorWithOffsetType    = typename WaveFunctionTransfBaseType::VectorWithOffsetType;
+	using VectorSizeType          = typename WaveFunctionTransfBaseType::VectorSizeType;
+	using OneSiteSpacesType       = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
+	using LeftRightSuperType      = typename DmrgWaveStructType::LeftRightSuperType;
+	using VectorType              = typename VectorWithOffsetType::VectorType;
+	using ComplexOrRealType       = typename VectorType::value_type;
+	using BasisWithOperatorsType  = typename DmrgWaveStructType::BasisWithOperatorsType;
+	using VectorQnType            = typename BasisWithOperatorsType::VectorQnType;
+	using QnType                  = typename BasisWithOperatorsType::QnType;
+	using SparseMatrixType        = typename BasisWithOperatorsType::SparseMatrixType;
+	using PackIndicesType         = typename WaveFunctionTransfBaseType::PackIndicesType;
+	using BlockDiagonalMatrixType = typename DmrgWaveStructType::BlockDiagonalMatrixType;
+	using MatrixType              = typename BlockDiagonalMatrixType::BuildingBlockType;
+	using VectorMatrixType        = typename PsimagLite::Vector<MatrixType>::Type;
+	using VectorVectorType        = typename PsimagLite::Vector<VectorType>::Type;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
 
 	class LoopOne {
 
@@ -215,22 +215,22 @@ private:
 
 		VectorMatrixType vPrimePreviousPinv;
 		pinv(vPrimePreviousPinv, vPrimePrevious);
-		LoopOne                                   loopOne(uVeryOld,
-                                vPrimeVeryOld,
-                                qnsVeryOld,
-                                uPreviousPinv,
-                                vPrimePreviousPinv,
-                                qnsPrevious);
-		typedef PsimagLite::Parallelizer<LoopOne> ParallelizerOneType;
+		LoopOne loopOne(uVeryOld,
+		                vPrimeVeryOld,
+		                qnsVeryOld,
+		                uPreviousPinv,
+		                vPrimePreviousPinv,
+		                qnsPrevious);
+		using ParallelizerOneType = PsimagLite::Parallelizer<LoopOne>;
 		SizeType threads = std::min(std::max(qnsVeryOld.size(), qnsPrevious.size()),
 		                            PsimagLite::Concurrency::codeSectionParams.npthreads);
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 		ParallelizerOneType           threadOne(codeSectionParams);
 		threadOne.loopCreate(loopOne);
 
-		typedef PsimagLite::Parallelizer<LoopTwo> ParallelizerTwoType;
-		LoopTwo                                   loopTwo(
-                    loopOne.uFinal(), loopOne.vPrimeFinal(), loopOne.qns(), sPrevious, qnsPrevious);
+		using ParallelizerTwoType = PsimagLite::Parallelizer<LoopTwo>;
+		LoopTwo loopTwo(
+		    loopOne.uFinal(), loopOne.vPrimeFinal(), loopOne.qns(), sPrevious, qnsPrevious);
 		ParallelizerTwoType threadTwo(codeSectionParams);
 		threadTwo.loopCreate(loopTwo);
 	}

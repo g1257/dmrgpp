@@ -87,7 +87,7 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersTjAncillaC : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType> BaseType;
+	using BaseType = ParametersModelBase<RealType, QnType>;
 
 	template <typename IoInputType>
 	ParametersTjAncillaC(IoInputType& io)

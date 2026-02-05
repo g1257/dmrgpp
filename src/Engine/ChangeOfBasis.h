@@ -10,10 +10,10 @@ template <typename OperatorStorageType, typename MatrixType> class ChangeOfBasis
 
 public:
 
-	typedef BlockDiagonalMatrix<MatrixType>          BlockDiagonalMatrixType;
-	typedef BlockOffDiagMatrix<MatrixType>           BlockOffDiagMatrixType;
-	typedef typename OperatorStorageType::value_type ComplexOrRealType;
-	typedef PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
+	using BlockDiagonalMatrixType = BlockDiagonalMatrix<MatrixType>;
+	using BlockOffDiagMatrixType  = BlockOffDiagMatrix<MatrixType>;
+	using ComplexOrRealType       = typename OperatorStorageType::value_type;
+	using SparseMatrixType        = PsimagLite::CrsMatrix<ComplexOrRealType>;
 
 	ChangeOfBasis()
 	{

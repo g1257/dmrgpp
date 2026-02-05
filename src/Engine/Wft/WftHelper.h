@@ -10,11 +10,11 @@ class WftHelper {
 
 public:
 
-	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
-	typedef typename ModelType::ModelHelperType                      ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
-	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
-	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType*>::Type;
+	using ModelHelperType            = typename ModelType::ModelHelperType;
+	using LeftRightSuperType         = typename ModelHelperType::LeftRightSuperType;
+	using VectorSizeType             = PsimagLite::Vector<SizeType>::Type;
+	using OneSiteSpacesType          = OneSiteSpaces<ModelType>;
 
 	WftHelper(const ModelType&              model,
 	          const LeftRightSuperType&     lrs,

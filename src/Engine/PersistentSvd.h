@@ -10,9 +10,9 @@ class PersistentSvd {
 
 public:
 
-	typedef typename VectorMatrixType::value_type     MatrixType;
-	typedef typename VectorVectorRealType::value_type VectorRealType;
-	typedef typename VectorQnType::value_type         QnType;
+	using MatrixType     = typename VectorMatrixType::value_type;
+	using VectorRealType = typename VectorVectorRealType::value_type;
+	using QnType         = typename VectorQnType::value_type;
 
 	PersistentSvd(SizeType n)
 	    : vts_(n)

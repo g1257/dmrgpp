@@ -88,26 +88,26 @@ namespace Dmrg {
 template <typename ModelType_>
 class InitKronHamiltonian : public InitKronBase<typename ModelType_::LeftRightSuperType> {
 
-	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
+	using VectorBoolType = typename PsimagLite::Vector<bool>::Type;
 
 public:
 
-	typedef ModelType_                                               ModelType;
-	typedef typename ModelType::HamiltonianConnectionType            HamiltonianConnectionType;
-	typedef typename ModelType::ModelHelperType                      ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
-	typedef typename ModelHelperType::OperatorStorageType            OperatorStorageType;
-	typedef typename LeftRightSuperType::BasisType                   BasisType;
-	typedef InitKronBase<LeftRightSuperType>                         BaseType;
-	typedef typename ModelHelperType::SparseMatrixType               SparseMatrixType;
-	typedef typename HamiltonianConnectionType::LinkType             LinkType;
-	typedef typename ModelHelperType::RealType                       RealType;
-	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
-	typedef typename BaseType::ArrayOfMatStructType                  ArrayOfMatStructType;
-	typedef typename ArrayOfMatStructType::GenIjPatchType            GenIjPatchType;
-	typedef typename PsimagLite::Vector<ArrayOfMatStructType*>::Type VectorArrayOfMatStructType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type     VectorType;
-	typedef typename ArrayOfMatStructType::VectorSizeType            VectorSizeType;
+	using ModelType                  = ModelType_;
+	using HamiltonianConnectionType  = typename ModelType::HamiltonianConnectionType;
+	using ModelHelperType            = typename ModelType::ModelHelperType;
+	using LeftRightSuperType         = typename ModelHelperType::LeftRightSuperType;
+	using OperatorStorageType        = typename ModelHelperType::OperatorStorageType;
+	using BasisType                  = typename LeftRightSuperType::BasisType;
+	using BaseType                   = InitKronBase<LeftRightSuperType>;
+	using SparseMatrixType           = typename ModelHelperType::SparseMatrixType;
+	using LinkType                   = typename HamiltonianConnectionType::LinkType;
+	using RealType                   = typename ModelHelperType::RealType;
+	using ComplexOrRealType          = typename SparseMatrixType::value_type;
+	using ArrayOfMatStructType       = typename BaseType::ArrayOfMatStructType;
+	using GenIjPatchType             = typename ArrayOfMatStructType::GenIjPatchType;
+	using VectorArrayOfMatStructType = typename PsimagLite::Vector<ArrayOfMatStructType*>::Type;
+	using VectorType                 = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using VectorSizeType             = typename ArrayOfMatStructType::VectorSizeType;
 
 	InitKronHamiltonian(const ModelType&                     model,
 	                    const HamiltonianConnectionType&     hc,

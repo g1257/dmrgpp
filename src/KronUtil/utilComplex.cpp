@@ -30,9 +30,9 @@
 #include <complex>
 
 #ifndef USE_FLOAT
-typedef double RealType;
+using RealType = double;
 #else
-typedef float RealType;
+using RealType = float;
 #endif
 
 template void estimate_kron_cost<std::complex<RealType>>(const int               nrow_A,

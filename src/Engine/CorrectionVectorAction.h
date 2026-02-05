@@ -13,8 +13,8 @@ class CorrectionVectorActionBase {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
+	using RealType       = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
 
 	enum ActionEnum
 	{
@@ -70,8 +70,8 @@ class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, false>
 
 public:
 
-	typedef CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType> BaseType;
-	typedef typename BaseType::RealType                                     RealType;
+	using BaseType = CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType>;
+	using RealType = typename BaseType::RealType;
 
 	CorrectionVectorAction(const TargetParamsType&                  tstStruct,
 	                       RealType                                 E0,
@@ -125,8 +125,8 @@ class CorrectionVectorAction<ComplexOrRealType, TargetParamsType, true>
 
 public:
 
-	typedef CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType> BaseType;
-	typedef typename BaseType::RealType                                     RealType;
+	using BaseType = CorrectionVectorActionBase<ComplexOrRealType, TargetParamsType>;
+	using RealType = typename BaseType::RealType;
 
 	CorrectionVectorAction(const TargetParamsType&                  tstStruct,
 	                       RealType                                 E0,

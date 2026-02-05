@@ -102,7 +102,7 @@ class TimeVectorsKrylov : public TimeVectorsBase<TargetParamsType,
 
 public:
 
-	typedef VectorWithOffsetType_ VectorWithOffsetType;
+	using VectorWithOffsetType = VectorWithOffsetType_;
 	typedef TimeVectorsBase<TargetParamsType,
 	                        ModelType,
 	                        WaveFunctionTransfType,
@@ -114,38 +114,38 @@ public:
 	                          WaveFunctionTransfType,
 	                          LanczosSolverType,
 	                          VectorWithOffsetType>
-	                                                            ThisType;
-	typedef typename BaseType::PairType                         PairType;
-	typedef typename TargetParamsType::RealType                 RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type         VectorRealType;
-	typedef typename ModelType::ModelHelperType                 ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
-	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
+	    ThisType;
+	using PairType               = typename BaseType::PairType;
+	using RealType               = typename TargetParamsType::RealType;
+	using VectorRealType         = typename PsimagLite::Vector<RealType>::Type;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
 	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
-	                                                                 ParallelTriDiagType;
-	typedef typename ParallelTriDiagType::MatrixComplexOrRealType    MatrixComplexOrRealType;
-	typedef typename ParallelTriDiagType::TargetVectorType           VectorType;
-	typedef typename ParallelTriDiagType::VectorMatrixFieldType      VectorMatrixFieldType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType        TridiagonalMatrixType;
-	typedef typename ModelType::InputValidatorType                   InputValidatorType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType*>::Type VectorVectorWithOffsetType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type        VectorVectorRealType;
+	    ParallelTriDiagType;
+	using MatrixComplexOrRealType    = typename ParallelTriDiagType::MatrixComplexOrRealType;
+	using VectorType                 = typename ParallelTriDiagType::TargetVectorType;
+	using VectorMatrixFieldType      = typename ParallelTriDiagType::VectorMatrixFieldType;
+	using TridiagonalMatrixType      = typename LanczosSolverType::TridiagonalMatrixType;
+	using InputValidatorType         = typename ModelType::InputValidatorType;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType*>::Type;
+	using VectorVectorRealType       = typename PsimagLite::Vector<VectorRealType>::Type;
 
 	struct Action {
 
-		typedef typename ThisType::VectorRealType VectorRealType;
+		using VectorRealType = typename ThisType::VectorRealType;
 	};
 
 	struct TypeWrapper {
 
-		typedef typename ThisType::MatrixComplexOrRealType MatrixComplexOrRealType;
-		typedef typename ThisType::VectorWithOffsetType    VectorWithOffsetType;
-		typedef typename ModelType::SolverParamsType       SolverParamsType;
+		using MatrixComplexOrRealType = typename ThisType::MatrixComplexOrRealType;
+		using VectorWithOffsetType    = typename ThisType::VectorWithOffsetType;
+		using SolverParamsType        = typename ModelType::SolverParamsType;
 	};
 
-	typedef KrylovHelper<Action, TypeWrapper> KrylovHelperType;
+	using KrylovHelperType = KrylovHelper<Action, TypeWrapper>;
 
 	TimeVectorsKrylov(const TargetParamsType&       tstStruct,
 	                  VectorVectorWithOffsetType&   targetVectors,
@@ -328,7 +328,7 @@ private:
 	             VectorMatrixFieldType&                       V,
 	             typename PsimagLite::Vector<SizeType>::Type& steps)
 	{
-		typedef PsimagLite::NoPthreadsNg<ParallelTriDiagType> ParallelizerType;
+		using ParallelizerType = PsimagLite::NoPthreadsNg<ParallelTriDiagType>;
 		ParallelizerType threadedTriDiag(PsimagLite::CodeSectionParams(1));
 
 		ParallelTriDiagType helperTriDiag(

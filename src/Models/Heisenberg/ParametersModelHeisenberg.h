@@ -89,8 +89,8 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersModelHeisenberg : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType>       BaseType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	using BaseType       = ParametersModelBase<RealType, QnType>;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
 	ParametersModelHeisenberg(IoInputType& io)

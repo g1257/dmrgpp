@@ -98,30 +98,30 @@ namespace Dmrg {
 template <typename ParametersType, typename SuperGeometryType, typename ModelHelperType>
 class ModelCommon {
 
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
-	typedef typename SparseMatrixType::value_type      ComplexOrRealType;
-	typedef typename ModelHelperType::LinkType         LinkType;
+	using SparseMatrixType  = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType = typename SparseMatrixType::value_type;
+	using LinkType          = typename ModelHelperType::LinkType;
 
 public:
 
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::InputNg<InputCheck>::Readable            InputValidatorType;
-	typedef typename ModelHelperType::OperatorsType              OperatorsType;
-	typedef typename OperatorsType::OperatorType                 OperatorType;
-	typedef typename ModelHelperType::BlockType                  Block;
-	typedef typename ModelHelperType::RealType                   RealType;
-	typedef typename ModelHelperType::BasisType                  MyBasis;
-	typedef typename ModelHelperType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef LabeledOperators<OperatorType>                       LabeledOperatorsType;
-	typedef ModelLinks<LabeledOperatorsType, SuperGeometryType>  ModelLinksType;
+	using VectorType             = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using InputValidatorType     = PsimagLite::InputNg<InputCheck>::Readable;
+	using OperatorsType          = typename ModelHelperType::OperatorsType;
+	using OperatorType           = typename OperatorsType::OperatorType;
+	using Block                  = typename ModelHelperType::BlockType;
+	using RealType               = typename ModelHelperType::RealType;
+	using MyBasis                = typename ModelHelperType::BasisType;
+	using BasisWithOperatorsType = typename ModelHelperType::BasisWithOperatorsType;
+	using LabeledOperatorsType   = LabeledOperators<OperatorType>;
+	using ModelLinksType         = ModelLinks<LabeledOperatorsType, SuperGeometryType>;
 	typedef HamiltonianConnection<ModelLinksType, ModelHelperType, ParametersType>
-	                                                                 HamiltonianConnectionType;
-	typedef typename HamiltonianConnectionType::VectorLinkType       VectorLinkType;
-	typedef typename ModelHelperType::LeftRightSuperType             LeftRightSuperType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type          VectorOperatorType;
-	typedef typename PsimagLite::Vector<VectorLinkType>::Type        VectorVectorLinkType;
-	typedef typename HamiltonianConnectionType::VectorSizeType       VectorSizeType;
-	typedef typename HamiltonianConnectionType::VerySparseMatrixType VerySparseMatrixType;
+	    HamiltonianConnectionType;
+	using VectorLinkType       = typename HamiltonianConnectionType::VectorLinkType;
+	using LeftRightSuperType   = typename ModelHelperType::LeftRightSuperType;
+	using VectorOperatorType   = typename PsimagLite::Vector<OperatorType>::Type;
+	using VectorVectorLinkType = typename PsimagLite::Vector<VectorLinkType>::Type;
+	using VectorSizeType       = typename HamiltonianConnectionType::VectorSizeType;
+	using VerySparseMatrixType = typename HamiltonianConnectionType::VerySparseMatrixType;
 
 	ModelCommon(const ParametersType& params, const SuperGeometryType& superGeometry)
 	    : params_(params)

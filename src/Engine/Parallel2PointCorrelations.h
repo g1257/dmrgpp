@@ -89,13 +89,13 @@ template <typename TwoPointCorrelationsType> class Parallel2PointCorrelations {
 
 public:
 
-	typedef typename TwoPointCorrelationsType::MatrixType       MatrixType;
-	typedef typename TwoPointCorrelationsType::SparseMatrixType SparseMatrixType;
-	typedef typename MatrixType::value_type                     FieldType;
-	typedef PsimagLite::Concurrency                             ConcurrencyType;
-	typedef std::pair<SizeType, SizeType>                       PairType;
-	typedef typename PsimagLite::Real<FieldType>::Type          RealType;
-	typedef typename TwoPointCorrelationsType::BraketType       BraketType;
+	using MatrixType       = typename TwoPointCorrelationsType::MatrixType;
+	using SparseMatrixType = typename TwoPointCorrelationsType::SparseMatrixType;
+	using FieldType        = typename MatrixType::value_type;
+	using ConcurrencyType  = PsimagLite::Concurrency;
+	using PairType         = std::pair<SizeType, SizeType>;
+	using RealType         = typename PsimagLite::Real<FieldType>::Type;
+	using BraketType       = typename TwoPointCorrelationsType::BraketType;
 
 	Parallel2PointCorrelations(MatrixType&                                        w,
 	                           const TwoPointCorrelationsType&                    twopoint,

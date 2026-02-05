@@ -6,7 +6,7 @@ namespace Dmrg {
 
 template <typename ComplexOrRealType> class EnforcePhase {
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 
 public:
 

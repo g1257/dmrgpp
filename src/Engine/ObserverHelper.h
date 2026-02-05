@@ -98,25 +98,25 @@ class ObserverHelper {
 
 public:
 
-	typedef IoInputType_                                             IoInputType;
-	typedef MatrixType_                                              MatrixType;
-	typedef VectorType_                                              VectorType;
-	typedef VectorWithOffsetType_                                    VectorWithOffsetType;
-	typedef SizeType                                                 IndexType;
-	typedef typename VectorType::value_type                          FieldType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::RealType                RealType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType        SparseMatrixType;
-	typedef TimeSerializer<VectorWithOffsetType>                     TimeSerializerType;
-	typedef typename BasisWithOperatorsType::BasisType               BasisType;
-	typedef typename BasisWithOperatorsType::OperatorType            OperatorType;
-	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
-	typedef typename DmrgSerializerType::BlockDiagonalMatrixType     BlockDiagonalMatrixType;
-	typedef typename DmrgSerializerType::FermionSignType             FermionSignType;
-	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
-	typedef PsimagLite::Vector<short int>::Type                      VectorShortIntType;
-	typedef PsimagLite::GetBraOrKet                                  GetBraOrKetType;
-	typedef std::pair<LeftRightSuperType*, SizeType>                 PairLeftRightSuperSizeType;
+	using IoInputType                = IoInputType_;
+	using MatrixType                 = MatrixType_;
+	using VectorType                 = VectorType_;
+	using VectorWithOffsetType       = VectorWithOffsetType_;
+	using IndexType                  = SizeType;
+	using FieldType                  = typename VectorType::value_type;
+	using BasisWithOperatorsType     = typename LeftRightSuperType::BasisWithOperatorsType;
+	using RealType                   = typename BasisWithOperatorsType::RealType;
+	using SparseMatrixType           = typename BasisWithOperatorsType::SparseMatrixType;
+	using TimeSerializerType         = TimeSerializer<VectorWithOffsetType>;
+	using BasisType                  = typename BasisWithOperatorsType::BasisType;
+	using OperatorType               = typename BasisWithOperatorsType::OperatorType;
+	using DmrgSerializerType         = DmrgSerializer<LeftRightSuperType, VectorWithOffsetType>;
+	using BlockDiagonalMatrixType    = typename DmrgSerializerType::BlockDiagonalMatrixType;
+	using FermionSignType            = typename DmrgSerializerType::FermionSignType;
+	using VectorSizeType             = PsimagLite::Vector<SizeType>::Type;
+	using VectorShortIntType         = PsimagLite::Vector<short int>::Type;
+	using GetBraOrKetType            = PsimagLite::GetBraOrKet;
+	using PairLeftRightSuperSizeType = std::pair<LeftRightSuperType*, SizeType>;
 
 	enum class SaveEnum
 	{

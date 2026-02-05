@@ -99,34 +99,34 @@ template <typename ModelBaseType> class FermionSpinless : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType                      ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType                    SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType                   LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType                             LinkType;
-	typedef typename ModelHelperType::OperatorsType                      OperatorsType;
-	typedef typename OperatorsType::OperatorType                         OperatorType;
-	typedef typename ModelHelperType::RealType                           RealType;
-	typedef typename ModelBaseType::QnType                               QnType;
-	typedef typename QnType::VectorQnType                                VectorQnType;
-	typedef typename ModelBaseType::SparseMatrixType                     SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                        ComplexOrRealType;
-	typedef unsigned int long                                            WordType;
-	typedef HilbertSpaceFermionSpinless<WordType>                        HilbertSpaceType;
-	typedef typename ModelBaseType::VectorOperatorType                   VectorOperatorType;
-	typedef typename ModelBaseType::VectorSizeType                       VectorSizeType;
-	typedef typename ModelBaseType::OpsLabelType                         OpsLabelType;
-	typedef typename ModelBaseType::BlockType                            BlockType;
-	typedef typename ModelBaseType::SolverParamsType                     SolverParamsType;
-	typedef typename ModelBaseType::VectorType                           VectorType;
-	typedef typename HilbertSpaceType::HilbertState                      HilbertState;
-	typedef typename PsimagLite::Vector<HilbertState>::Type              VectorHilbertStateType;
-	typedef typename ModelBaseType::InputValidatorType                   InputValidatorType;
-	typedef typename ModelBaseType::MyBasis                              BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType               MyBasisWithOperators;
-	typedef typename PsimagLite::Vector<HilbertState>::Type              HilbertBasisType;
-	typedef typename ModelBaseType::OpForLinkType                        OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType                        ModelTermType;
-	typedef typename PsimagLite::Vector<std::pair<RealType, bool>>::Type VectorPairRealBoolType;
+	using ModelHelperType        = typename ModelBaseType::ModelHelperType;
+	using SuperGeometryType      = typename ModelBaseType::SuperGeometryType;
+	using LeftRightSuperType     = typename ModelBaseType::LeftRightSuperType;
+	using LinkType               = typename ModelBaseType::LinkType;
+	using OperatorsType          = typename ModelHelperType::OperatorsType;
+	using OperatorType           = typename OperatorsType::OperatorType;
+	using RealType               = typename ModelHelperType::RealType;
+	using QnType                 = typename ModelBaseType::QnType;
+	using VectorQnType           = typename QnType::VectorQnType;
+	using SparseMatrixType       = typename ModelBaseType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using WordType               = unsigned int long;
+	using HilbertSpaceType       = HilbertSpaceFermionSpinless<WordType>;
+	using VectorOperatorType     = typename ModelBaseType::VectorOperatorType;
+	using VectorSizeType         = typename ModelBaseType::VectorSizeType;
+	using OpsLabelType           = typename ModelBaseType::OpsLabelType;
+	using BlockType              = typename ModelBaseType::BlockType;
+	using SolverParamsType       = typename ModelBaseType::SolverParamsType;
+	using VectorType             = typename ModelBaseType::VectorType;
+	using HilbertState           = typename HilbertSpaceType::HilbertState;
+	using VectorHilbertStateType = typename PsimagLite::Vector<HilbertState>::Type;
+	using InputValidatorType     = typename ModelBaseType::InputValidatorType;
+	using BasisType              = typename ModelBaseType::MyBasis;
+	using MyBasisWithOperators   = typename ModelBaseType::BasisWithOperatorsType;
+	using HilbertBasisType       = typename PsimagLite::Vector<HilbertState>::Type;
+	using OpForLinkType          = typename ModelBaseType::OpForLinkType;
+	using ModelTermType          = typename ModelBaseType::ModelTermType;
+	using VectorPairRealBoolType = typename PsimagLite::Vector<std::pair<RealType, bool>>::Type;
 
 	FermionSpinless(const SolverParamsType&  solverParams,
 	                InputValidatorType&      io,
@@ -366,7 +366,7 @@ protected:
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		typedef std::pair<SizeType, SizeType> PairType;
+		using PairType = std::pair<SizeType, SizeType>;
 		qns.resize(basis.size(), QnType::zero());
 		VectorSizeType other;
 		if (isCanonical)

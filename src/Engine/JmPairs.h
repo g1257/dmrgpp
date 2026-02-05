@@ -90,13 +90,13 @@ namespace Dmrg {
 
 template <typename PairType_> class JmPairs {
 
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	using VectorSizeType = typename PsimagLite::Vector<SizeType>::Type;
 
 public:
 
-	typedef PairType_                                   PairType;
-	typedef PairType                                    value_type;
-	typedef typename PsimagLite::Vector<PairType>::Type VectorPairType;
+	using PairType       = PairType_;
+	using value_type     = PairType;
+	using VectorPairType = typename PsimagLite::Vector<PairType>::Type;
 
 	//! indices_[alpha] = jm
 	void push(const PairType& jm, SizeType)

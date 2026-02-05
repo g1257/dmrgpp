@@ -9,7 +9,7 @@ class Su3RepresentationP1 : public Su3RepresentationBase<ComplexOrRealType> {
 
 public:
 
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
+	using MatrixType = PsimagLite::Matrix<ComplexOrRealType>;
 
 	void getMatrix(MatrixType& m, SizeType n) const
 	{
@@ -74,8 +74,8 @@ class Su3RepresentationP1<ComplexOrRealType, true>
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
+	using RealType   = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using MatrixType = PsimagLite::Matrix<ComplexOrRealType>;
 
 	void getMatrix(MatrixType& m, SizeType n) const
 	{

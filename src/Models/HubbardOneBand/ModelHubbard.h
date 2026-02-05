@@ -96,9 +96,9 @@ template <typename ModelBaseType> class ExtendedHubbard1Orb;
 //! Model Hubbard for DMRG solver, inherits from ModelBase and implements its interface:
 template <typename ModelBaseType> class ModelHubbard : public ModelBaseType {
 
-	typedef typename ModelBaseType::BlockType        BlockType;
-	typedef typename ModelBaseType::SolverParamsType SolverParamsType;
-	typedef typename ModelBaseType::VectorType       VectorType;
+	using BlockType        = typename ModelBaseType::BlockType;
+	using SolverParamsType = typename ModelBaseType::SolverParamsType;
+	using VectorType       = typename ModelBaseType::VectorType;
 
 	static const int FERMION_SIGN       = -1;
 	static const int DEGREES_OF_FREEDOM = 2;
@@ -106,30 +106,30 @@ template <typename ModelBaseType> class ModelHubbard : public ModelBaseType {
 
 public:
 
-	typedef ModelHubbard<ModelBaseType>                     ThisType;
-	typedef unsigned int long                               WordType;
-	typedef HilbertSpaceHubbard<WordType>                   HilbertSpaceHubbardType;
-	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType       SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType                LinkType;
-	typedef typename ModelHelperType::OperatorsType         OperatorsType;
-	typedef typename OperatorsType::OperatorType            OperatorType;
-	typedef typename ModelHelperType::RealType              RealType;
-	typedef typename ModelBaseType::SparseMatrixType        SparseMatrixType;
-	typedef typename ModelHelperType::SparseElementType     SparseElementType;
-	typedef typename ModelBaseType::VectorOperatorType      VectorOperatorType;
-	typedef typename ModelBaseType::VectorSizeType          VectorSizeType;
-	typedef typename ModelBaseType::QnType                  QnType;
-	typedef typename QnType::VectorQnType                   VectorQnType;
-	typedef typename HilbertSpaceHubbardType::HilbertState  HilbertState;
-	typedef typename ModelBaseType::InputValidatorType      InputValidatorType;
-	typedef typename ModelBaseType::MyBasis                 MyBasis;
-	typedef typename ModelBaseType::BasisWithOperatorsType  MyBasisWithOperators;
-	typedef typename PsimagLite::Vector<HilbertState>::Type HilbertBasisType;
-	typedef typename ModelBaseType::ModelTermType           ModelTermType;
-	typedef typename ModelBaseType::OpForLinkType           OpForLinkType;
-	typedef typename ModelBaseType::OpsLabelType            OpsLabelType;
+	using ThisType                = ModelHubbard<ModelBaseType>;
+	using WordType                = unsigned int long;
+	using HilbertSpaceHubbardType = HilbertSpaceHubbard<WordType>;
+	using ModelHelperType         = typename ModelBaseType::ModelHelperType;
+	using SuperGeometryType       = typename ModelBaseType::SuperGeometryType;
+	using LeftRightSuperType      = typename ModelBaseType::LeftRightSuperType;
+	using LinkType                = typename ModelBaseType::LinkType;
+	using OperatorsType           = typename ModelHelperType::OperatorsType;
+	using OperatorType            = typename OperatorsType::OperatorType;
+	using RealType                = typename ModelHelperType::RealType;
+	using SparseMatrixType        = typename ModelBaseType::SparseMatrixType;
+	using SparseElementType       = typename ModelHelperType::SparseElementType;
+	using VectorOperatorType      = typename ModelBaseType::VectorOperatorType;
+	using VectorSizeType          = typename ModelBaseType::VectorSizeType;
+	using QnType                  = typename ModelBaseType::QnType;
+	using VectorQnType            = typename QnType::VectorQnType;
+	using HilbertState            = typename HilbertSpaceHubbardType::HilbertState;
+	using InputValidatorType      = typename ModelBaseType::InputValidatorType;
+	using MyBasis                 = typename ModelBaseType::MyBasis;
+	using MyBasisWithOperators    = typename ModelBaseType::BasisWithOperatorsType;
+	using HilbertBasisType        = typename PsimagLite::Vector<HilbertState>::Type;
+	using ModelTermType           = typename ModelBaseType::ModelTermType;
+	using OpForLinkType           = typename ModelBaseType::OpForLinkType;
+	using OpsLabelType            = typename ModelBaseType::OpsLabelType;
 
 	enum
 	{
@@ -538,7 +538,7 @@ private:
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		typedef std::pair<SizeType, SizeType> PairType;
+		using PairType = std::pair<SizeType, SizeType>;
 
 		const bool isCanonical = (ModelBaseType::targetQuantum().sizeOfOther() == 2);
 		if (isCanonical && extension_ == "RashbaSOC")

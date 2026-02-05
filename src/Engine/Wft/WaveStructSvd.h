@@ -87,22 +87,22 @@ namespace Dmrg {
 
 template <typename LeftRightSuperType_> struct WaveStructSvd {
 
-	typedef LeftRightSuperType_                                      LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorType            OperatorType;
-	typedef typename OperatorType::StorageType                       SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                    SparseElementType;
-	typedef typename BasisWithOperatorsType::BasisType               BasisType;
-	typedef typename BasisType::QnType                               QnType;
-	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
-	typedef typename BasisWithOperatorsType::RealType                RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type        VectorVectorRealType;
-	typedef typename PsimagLite::Matrix<SparseElementType>           MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type            VectorMatrixType;
-	typedef typename BasisWithOperatorsType::VectorQnType            VectorQnType;
-	typedef typename PsimagLite::IoNg::In                            IoInType;
+	using LeftRightSuperType      = LeftRightSuperType_;
+	using BasisWithOperatorsType  = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BlockDiagonalMatrixType = typename BasisWithOperatorsType::BlockDiagonalMatrixType;
+	using OperatorType            = typename BasisWithOperatorsType::OperatorType;
+	using SparseMatrixType        = typename OperatorType::StorageType;
+	using SparseElementType       = typename SparseMatrixType::value_type;
+	using BasisType               = typename BasisWithOperatorsType::BasisType;
+	using QnType                  = typename BasisType::QnType;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using RealType                = typename BasisWithOperatorsType::RealType;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
+	using VectorVectorRealType    = typename PsimagLite::Vector<VectorRealType>::Type;
+	using MatrixType              = typename PsimagLite::Matrix<SparseElementType>;
+	using VectorMatrixType        = typename PsimagLite::Vector<MatrixType>::Type;
+	using VectorQnType            = typename BasisWithOperatorsType::VectorQnType;
+	using IoInType                = typename PsimagLite::IoNg::In;
 
 	enum class SaveEnum
 	{

@@ -138,17 +138,17 @@ See the below for more information and examples on Finite Loops.
 template <typename FieldType, typename InputValidatorType, typename QnType>
 struct ParametersDmrgSolver {
 
-	typedef ParametersDmrgSolver<FieldType, InputValidatorType, QnType> ThisType;
-	typedef typename QnType::PairSizeType                               PairSizeType;
-	typedef typename PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
-	typedef typename PsimagLite::Vector<FieldType>::Type                VectorFieldType;
-	typedef PsimagLite::Matrix<FieldType>                               MatrixFieldType;
-	typedef PsimagLite::Matrix<PsimagLite::String>                      MatrixStringType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type                VectorStringType;
-	typedef std::pair<FieldType, SizeType>                              PairRealSizeType;
-	using FiniteLoopType = FiniteLoop<FieldType>;
-	typedef typename PsimagLite::Vector<FiniteLoopType>::Type VectorFiniteLoopType;
-	typedef Options<InputValidatorType>                       OptionsType;
+	using ThisType              = ParametersDmrgSolver<FieldType, InputValidatorType, QnType>;
+	using PairSizeType          = typename QnType::PairSizeType;
+	using VectorSizeType        = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorFieldType       = typename PsimagLite::Vector<FieldType>::Type;
+	using MatrixFieldType       = PsimagLite::Matrix<FieldType>;
+	using MatrixStringType      = PsimagLite::Matrix<PsimagLite::String>;
+	using VectorStringType      = PsimagLite::Vector<PsimagLite::String>::Type;
+	using PairRealSizeType      = std::pair<FieldType, SizeType>;
+	using FiniteLoopType        = FiniteLoop<FieldType>;
+	using VectorFiniteLoopType  = typename PsimagLite::Vector<FiniteLoopType>::Type;
+	using OptionsType           = Options<InputValidatorType>;
 	using TruncationControlType = TruncationControl<FieldType>;
 
 	enum class MatrixSolverEnum
@@ -562,7 +562,7 @@ struct ParametersDmrgSolver {
 		io.readline(numberOfSites, "TotalNumberOfSites=");
 		bool latticeIsOdd = (numberOfSites & 1);
 
-		typedef AlgebraicStringToNumber<FieldType> AlgebraicStringToNumberType;
+		using AlgebraicStringToNumberType = AlgebraicStringToNumber<FieldType>;
 		AlgebraicStringToNumberType algebraicStringToNumber("FiniteLoops", numberOfSites);
 
 		std::cout << "FiniteLoopLengths=[";

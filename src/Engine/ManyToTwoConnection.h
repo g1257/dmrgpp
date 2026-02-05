@@ -11,11 +11,11 @@ class ManyToTwoConnection {
 
 public:
 
-	typedef std::pair<SizeType, SizeType>      PairSizeType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	using ComplexOrRealType = typename ModelLinksType::ComplexOrRealType;
-	using ModelTermLinkType = OneLink<ComplexOrRealType>;
-	typedef typename ModelLinksType::HermitianEnum HermitianEnum;
+	using PairSizeType            = std::pair<SizeType, SizeType>;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using ComplexOrRealType       = typename ModelLinksType::ComplexOrRealType;
+	using ModelTermLinkType       = OneLink<ComplexOrRealType>;
+	using HermitianEnum           = typename ModelLinksType::HermitianEnum;
 	using PairMetaOpForConnection = std::pair<MetaOpForConnection, MetaOpForConnection>;
 
 	ManyToTwoConnection(const VectorSizeType&          hItems,

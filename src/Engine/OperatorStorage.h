@@ -18,16 +18,16 @@ template <typename ComplexOrRealType> class OperatorStorage {
 
 public:
 
-	typedef ComplexOrRealType                                  value_type;
-	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
-	typedef BlockDiagonalMatrix<MatrixType>                    BlockDiagonalMatrixType;
-	typedef BlockOffDiagMatrix<MatrixType>                     BlockOffDiagMatrixType;
-	typedef BlockDiagonalMatrixType                            BlockDiagonalType;
-	typedef BlockOffDiagMatrixType                             BlockOffDiagType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::CrsMatrix<ComplexOrRealType>           SparseMatrixType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
+	using value_type              = ComplexOrRealType;
+	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
+	using BlockDiagonalMatrixType = BlockDiagonalMatrix<MatrixType>;
+	using BlockOffDiagMatrixType  = BlockOffDiagMatrix<MatrixType>;
+	using BlockDiagonalType       = BlockDiagonalMatrixType;
+	using BlockOffDiagType        = BlockOffDiagMatrixType;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using SparseMatrixType        = PsimagLite::CrsMatrix<ComplexOrRealType>;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
 
 	enum class Type
 	{

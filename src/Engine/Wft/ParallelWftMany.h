@@ -86,13 +86,13 @@ template <typename VectorWithOffsetType,
           typename LeftRightSuperType>
 class ParallelWftMany {
 
-	typedef PsimagLite::Concurrency                                 ConcurrencyType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
+	using ConcurrencyType            = PsimagLite::Concurrency;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType>::Type;
 
 public:
 
-	typedef typename VectorWithOffsetType::value_type          VectorElementType;
-	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
+	using VectorElementType = typename VectorWithOffsetType::value_type;
+	using RealType          = typename PsimagLite::Real<VectorElementType>::Type;
 
 	ParallelWftMany(VectorVectorWithOffsetType&   targetVectors,
 	                SizeType                      nk,

@@ -96,7 +96,7 @@ template <typename Word> class HilbertSpaceHubbardHolsteinSpinless {
 
 public:
 
-	typedef Word HilbertState;
+	using HilbertState = Word;
 
 	// Get electronic state from combined electron and phonon ket a
 	static Word getF(Word a) { return (a & 1); }

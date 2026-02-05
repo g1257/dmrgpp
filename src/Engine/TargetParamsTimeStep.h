@@ -91,9 +91,9 @@ class TargetParamsTimeStep : public TargetParamsTimeVectors<ModelType> {
 
 public:
 
-	typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
-	typedef TargetParamsCommon<ModelType>      TargetParamsCommonType;
-	typedef typename ModelType::RealType       RealType;
+	using TimeVectorParamsType   = TargetParamsTimeVectors<ModelType>;
+	using TargetParamsCommonType = TargetParamsCommon<ModelType>;
+	using RealType               = typename ModelType::RealType;
 
 	template <typename IoInputter>
 	TargetParamsTimeStep(IoInputter& io, PsimagLite::String targeting, const ModelType& model)

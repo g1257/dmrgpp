@@ -2,22 +2,22 @@
 #include "util.h"
 
 #ifndef USE_FLOAT
-typedef double RealType;
+using RealType = double;
 #else
-typedef float RealType;
+using RealType = float;
 #endif
 
 int main()
 {
-	typedef RealType               RealType;
-	typedef std::complex<RealType> ComplexOrRealType;
-	int                            nerrors    = 0;
-	RealType                       thresholdA = 0;
-	RealType                       thresholdB = 0;
-	int                            nrow_A     = 0;
-	int                            ncol_A     = 0;
-	int                            nrow_B     = 0;
-	int                            ncol_B     = 0;
+	using RealType          = RealType;
+	using ComplexOrRealType = std::complex<RealType>;
+	int      nerrors        = 0;
+	RealType thresholdA     = 0;
+	RealType thresholdB     = 0;
+	int      nrow_A         = 0;
+	int      ncol_A         = 0;
+	int      nrow_B         = 0;
+	int      ncol_B         = 0;
 
 	for (thresholdB = 0; thresholdB <= 1.1; thresholdB += 0.1) {
 		for (thresholdA = 0; thresholdA <= 1.1; thresholdA += 0.1) {

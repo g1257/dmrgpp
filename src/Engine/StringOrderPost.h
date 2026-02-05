@@ -9,18 +9,18 @@ template <typename ObserverType> class StringOrderPost {
 
 public:
 
-	typedef typename ObserverType::ModelType ModelType;
-	using OperatorType = typename ModelType::OperatorType;
-	typedef Braket<ModelType>                                   BraketType;
-	typedef typename BraketType::VectorStringType               VectorStringType;
-	typedef typename BraketType::AlgebraType                    AlgebraType;
-	typedef typename BraketType::OperatorSpecType               OperatorSpecType;
-	typedef typename BraketType::VectorAlgebraType              VectorAlgebraType;
-	typedef typename BraketType::VectorIntType                  VectorIntType;
-	typedef typename BraketType::MatrixType                     MatrixType;
-	typedef typename BraketType::SparseMatrixType               SparseMatrixType;
-	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename BraketType::ComplexOrRealType              ComplexOrRealType;
+	using ModelType              = typename ObserverType::ModelType;
+	using OperatorType           = typename ModelType::OperatorType;
+	using BraketType             = Braket<ModelType>;
+	using VectorStringType       = typename BraketType::VectorStringType;
+	using AlgebraType            = typename BraketType::AlgebraType;
+	using OperatorSpecType       = typename BraketType::OperatorSpecType;
+	using VectorAlgebraType      = typename BraketType::VectorAlgebraType;
+	using VectorIntType          = typename BraketType::VectorIntType;
+	using MatrixType             = typename BraketType::MatrixType;
+	using SparseMatrixType       = typename BraketType::SparseMatrixType;
+	using VectorSparseMatrixType = typename PsimagLite::Vector<SparseMatrixType>::Type;
+	using ComplexOrRealType      = typename BraketType::ComplexOrRealType;
 
 	StringOrderPost(const BraketType& braket, const ObserverType& observe)
 	    : braket_(braket)

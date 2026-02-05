@@ -88,36 +88,36 @@ template <typename ModelBaseType> class TjAncillaC : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::VectorRealType              VectorRealType;
-	typedef ModelFeBasedSc<ModelBaseType>                       ModelFeAsType;
-	typedef typename ModelBaseType::ModelHelperType             ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType           SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType          LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType                    LinkType;
-	typedef typename ModelHelperType::OperatorsType             OperatorsType;
-	typedef typename OperatorsType::OperatorType                OperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type     VectorOperatorType;
-	typedef typename ModelHelperType::RealType                  RealType;
-	typedef typename ModelBaseType::QnType                      QnType;
-	typedef typename QnType::VectorQnType                       VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType          SparseMatrixType;
-	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
-	typedef typename ModelBaseType::MyBasis                     BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType      MyBasisWithOperators;
-	typedef typename ModelFeAsType::HilbertState                HilbertStateType;
-	typedef typename ModelFeAsType::HilbertBasisType            HilbertBasisType;
-	typedef typename ModelHelperType::BlockType                 BlockType;
-	typedef typename ModelBaseType::SolverParamsType            SolverParamsType;
-	typedef typename ModelBaseType::VectorType                  VectorType;
-	typedef typename ModelFeAsType::HilbertSpaceFeAsType        HilbertSpaceType;
-	typedef typename ModelBaseType::InputValidatorType          InputValidatorType;
-	typedef typename OperatorType::PairType                     PairType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>               MatrixType;
-	typedef typename PsimagLite::Vector<HilbertStateType>::Type VectorHilbertStateType;
-	typedef typename PsimagLite::Vector<SizeType>::Type         VectorSizeType;
-	typedef typename ModelBaseType::OpsLabelType                OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType               OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType               ModelTermType;
+	using VectorRealType         = typename ModelBaseType::VectorRealType;
+	using ModelFeAsType          = ModelFeBasedSc<ModelBaseType>;
+	using ModelHelperType        = typename ModelBaseType::ModelHelperType;
+	using SuperGeometryType      = typename ModelBaseType::SuperGeometryType;
+	using LeftRightSuperType     = typename ModelBaseType::LeftRightSuperType;
+	using LinkType               = typename ModelBaseType::LinkType;
+	using OperatorsType          = typename ModelHelperType::OperatorsType;
+	using OperatorType           = typename OperatorsType::OperatorType;
+	using VectorOperatorType     = typename PsimagLite::Vector<OperatorType>::Type;
+	using RealType               = typename ModelHelperType::RealType;
+	using QnType                 = typename ModelBaseType::QnType;
+	using VectorQnType           = typename QnType::VectorQnType;
+	using SparseMatrixType       = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using BasisType              = typename ModelBaseType::MyBasis;
+	using MyBasisWithOperators   = typename ModelBaseType::BasisWithOperatorsType;
+	using HilbertStateType       = typename ModelFeAsType::HilbertState;
+	using HilbertBasisType       = typename ModelFeAsType::HilbertBasisType;
+	using BlockType              = typename ModelHelperType::BlockType;
+	using SolverParamsType       = typename ModelBaseType::SolverParamsType;
+	using VectorType             = typename ModelBaseType::VectorType;
+	using HilbertSpaceType       = typename ModelFeAsType::HilbertSpaceFeAsType;
+	using InputValidatorType     = typename ModelBaseType::InputValidatorType;
+	using PairType               = typename OperatorType::PairType;
+	using MatrixType             = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorHilbertStateType = typename PsimagLite::Vector<HilbertStateType>::Type;
+	using VectorSizeType         = typename PsimagLite::Vector<SizeType>::Type;
+	using OpsLabelType           = typename ModelBaseType::OpsLabelType;
+	using OpForLinkType          = typename ModelBaseType::OpForLinkType;
+	using ModelTermType          = typename ModelBaseType::ModelTermType;
 
 	static const int NUMBER_OF_ORBITALS = 2;
 	static const int FERMION_SIGN       = -1;
@@ -577,7 +577,7 @@ private:
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		typedef std::pair<SizeType, SizeType> PairType;
+		using PairType = std::pair<SizeType, SizeType>;
 
 		SizeType       basisSize = basis.size();
 		VectorSizeType other(3, 0);
