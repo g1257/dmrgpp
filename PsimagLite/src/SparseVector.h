@@ -91,8 +91,8 @@ namespace PsimagLite {
 template <typename FieldType> struct SparseVector {
 public:
 
-	typedef FieldType                     value_type;
-	typedef std::pair<SizeType, SizeType> PairType;
+	using value_type = FieldType;
+	using PairType   = std::pair<SizeType, SizeType>;
 
 	SparseVector(const typename Vector<FieldType>::Type& v)
 	    : size_(v.size())

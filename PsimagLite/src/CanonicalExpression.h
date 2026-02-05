@@ -9,8 +9,8 @@ template <typename ItemSpecType> class AssignAndDestroy {
 
 public:
 
-	typedef typename ItemSpecType::ResultType        T;
-	typedef typename ItemSpecType::ComplexOrRealType ComplexOrRealType;
+	using T                 = typename ItemSpecType::ResultType;
+	using ComplexOrRealType = typename ItemSpecType::ComplexOrRealType;
 
 	AssignAndDestroy(const T& t)
 	    : t_(t)
@@ -43,12 +43,12 @@ private:
 template <typename ItemSpecType, typename AssignAndDestroyType = AssignAndDestroy<ItemSpecType>>
 class CanonicalExpression {
 
-	typedef typename ItemSpecType::ResultType        ResultType;
-	typedef typename ItemSpecType::ComplexOrRealType ComplexOrRealType;
-	typedef typename ItemSpecType::AuxiliaryType     AuxiliaryType;
-	typedef typename Real<ComplexOrRealType>::Type   RealType;
-	typedef Vector<String>::Type                     VectorStringType;
-	typedef QuasiCanonical<ComplexOrRealType>        QuasiCanonicalType;
+	using ResultType         = typename ItemSpecType::ResultType;
+	using ComplexOrRealType  = typename ItemSpecType::ComplexOrRealType;
+	using AuxiliaryType      = typename ItemSpecType::AuxiliaryType;
+	using RealType           = typename Real<ComplexOrRealType>::Type;
+	using VectorStringType   = Vector<String>::Type;
+	using QuasiCanonicalType = QuasiCanonical<ComplexOrRealType>;
 
 public:
 

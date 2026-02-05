@@ -466,13 +466,13 @@ namespace PsimagLite {
 template <typename T> class Vector {
 public:
 
-	typedef std::vector<T, typename Allocator<T>::Type> Type;
+	using Type = std::vector<T, typename Allocator<T>::Type>;
 }; // class Vector
 
 template <> class Vector<bool> {
 public:
 
-	typedef std::vector<bool, Allocator<bool>::Type> Type;
+	using Type = std::vector<bool, Allocator<bool>::Type>;
 }; // class Vector
 
 // change this when using PsimagLite::Vector:

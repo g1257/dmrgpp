@@ -96,15 +96,15 @@ namespace PsimagLite {
 class GslWrapper {
 public:
 
-	typedef int       DummyType;
-	typedef DummyType gsl_integration_workspace;
-	typedef double (*GslWrapperFunctionType)(double, void*);
+	using DummyType                 = int;
+	using gsl_integration_workspace = DummyType;
+	using void*) = double (*GslWrapperFunctionType)(double,;
 	typedef struct {
 		double val;
 		double err;
 	} gsl_sf_result;
 
-	typedef void (*gsl_error_handler_t)(const char*, const char*, int, int);
+	using int) = void (*gsl_error_handler_t)(const char*, const char*, int,;
 
 	struct gsl_function {
 		GslWrapperFunctionType function;
@@ -113,7 +113,6 @@ public:
 
 	gsl_error_handler_t gsl_set_error_handler(gsl_error_handler_t) const
 	{
-
 		thereSnoGsl();
 		gsl_error_handler_t* fx = new gsl_error_handler_t();
 
@@ -127,7 +126,8 @@ public:
 		return x;
 	}
 
-	void gsl_integration_workspace_free(gsl_integration_workspace*) const { thereSnoGsl(); }
+	void gsl_integration_workspace_free(gsl_integration_workspace*) const {
+		thereSnoGsl(); }
 
 	int gsl_integration_qag(const gsl_function*,
 	                        double,
@@ -183,7 +183,8 @@ public:
 		return 0;
 	}
 
-	void printError(int) const { thereSnoGsl(); }
+	void printError(int) const {
+		thereSnoGsl(); }
 
 	int gsl_sf_lngamma_complex_e(double, double, gsl_sf_result*, gsl_sf_result*) const
 	{
@@ -199,7 +200,8 @@ public:
 
 private:
 
-	void thereSnoGsl() const { throw RuntimeError("You need to compile with the GSL\n"); }
+	void thereSnoGsl() const {
+		throw RuntimeError("You need to compile with the GSL\n"); }
 
 }; // class GslWrapper
 
@@ -208,9 +210,9 @@ private:
 class GslWrapper {
 public:
 
-	typedef ::gsl_integration_workspace gsl_integration_workspace;
-	typedef ::gsl_function              gsl_function;
-	typedef ::gsl_sf_result             gsl_sf_result;
+	using gsl_integration_workspace = ::gsl_integration_workspace;
+	using gsl_function              = ::gsl_function;
+	using gsl_sf_result             = ::gsl_sf_result;
 
 	void printError(int status) const
 	{

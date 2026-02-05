@@ -6,7 +6,7 @@ namespace PsimagLite {
 
 template <typename T> class IsClass {
 
-	typedef char One;
+	using One = char;
 	typedef struct {
 		char a[2];
 	} Two;

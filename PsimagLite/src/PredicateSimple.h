@@ -18,7 +18,7 @@ class PredicateSimple {
 
 public:
 
-	typedef Vector<String>::Type VectorStringType;
+	using VectorStringType = Vector<String>::Type;
 
 	PredicateSimple(String pred, String separator = ":")
 	    : pred_(pred)
@@ -63,9 +63,9 @@ public:
 	template <typename SomeVectorType>
 	bool isTrue(const VectorStringType& names, const SomeVectorType& vals)
 	{
-		typedef typename SomeVectorType::value_type SomeValueType;
-		SomeValueType                               lv = getValue(lhs_, names, vals);
-		SomeValueType                               rv = getValue(rhs_, names, vals);
+		using SomeValueType = typename SomeVectorType::value_type;
+		SomeValueType lv    = getValue(lhs_, names, vals);
+		SomeValueType rv    = getValue(rhs_, names, vals);
 		return compareOnOp(lv, op_, rv);
 	}
 
@@ -118,8 +118,8 @@ private:
 		String           numericHs = replaceVariables(hs, names, vals);
 		VectorStringType tokens;
 		split(tokens, numericHs, separator_);
-		typedef PlusMinusMultiplyDivide<typename SomeVectorType::value_type> PrimitivesType;
-		PrimitivesType                                                       primitives;
+		using PrimitivesType = PlusMinusMultiplyDivide<typename SomeVectorType::value_type>;
+		PrimitivesType                   primitives;
 		ExpressionForAST<PrimitivesType> expresionForAST(tokens, primitives);
 		return expresionForAST.exec();
 	}

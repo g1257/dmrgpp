@@ -9,9 +9,9 @@ template <typename FunctionType> class Integrator {
 
 public:
 
-	typedef GslWrapper                                  GslWrapperType;
-	typedef typename FunctionType::RealType             RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	using GslWrapperType = GslWrapper;
+	using RealType       = typename FunctionType::RealType;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
 
 	enum IntegrationEnum
 	{

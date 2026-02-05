@@ -12,7 +12,7 @@ namespace PsimagLite {
 
 class IoNgSerializer {
 
-	typedef std::vector<unsigned char> VectorOfBoolInternalType;
+	using VectorOfBoolInternalType = std::vector<unsigned char>;
 
 	static const unsigned char CANARY_VALUE = 170;
 
@@ -630,7 +630,7 @@ private:
 
 	template <typename SomeVectorType> void readInternal(SomeVectorType& what, String name)
 	{
-		typedef typename Real<typename SomeVectorType::value_type>::Type UnderlyingType;
+		using UnderlyingType = typename Real<typename SomeVectorType::value_type>::Type;
 
 		H5::DataSet* dataset = new H5::DataSet(hdf5file_->openDataSet("Def/" + name));
 		const H5::DataSpace& dspace = dataset->getSpace();
@@ -774,8 +774,8 @@ private:
 
 	static VectorOfBoolInternalType convertFromBoolean(const std::vector<bool>& src)
 	{
-		typedef VectorOfBoolInternalType::value_type ValueType;
-		SizeType                                     total = src.size();
+		using ValueType = VectorOfBoolInternalType::value_type;
+		SizeType total  = src.size();
 
 		if (total == 0)
 			return VectorOfBoolInternalType(booleanEncodedSize_, 0);
@@ -810,7 +810,7 @@ private:
 
 	static void convertToBoolean(std::vector<bool>& dest, const VectorOfBoolInternalType& x)
 	{
-		typedef VectorOfBoolInternalType::value_type ValueType;
+		using ValueType       = VectorOfBoolInternalType::value_type;
 		SizeType numberOfBits = sizeof(ValueType) * 8 * x.size();
 		SizeType blockSize    = sizeof(ValueType);
 

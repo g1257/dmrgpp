@@ -88,7 +88,7 @@ class NoPthreadsNg {
 
 public:
 
-	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
+	using VectorSizeType = LoadBalancerDefault::VectorSizeType;
 
 	NoPthreadsNg(const CodeSectionParams& cs)
 	{

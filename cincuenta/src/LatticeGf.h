@@ -10,7 +10,7 @@ namespace Dmft {
 
 template <typename ComplexOrRealType> class LatticeGf {
 
-	typedef DensityOfStates<ComplexOrRealType> DensityOfStatesType;
+	using DensityOfStatesType = DensityOfStates<ComplexOrRealType>;
 
 	template <int RealOrImg> class Integrand {
 
@@ -31,7 +31,7 @@ template <typename ComplexOrRealType> class LatticeGf {
 
 	public:
 
-		typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+		using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 
 		Integrand(DensityOfStatesType* dos, ComplexOrRealType iwnMinusSigma)
 		    : p_(dos, iwnMinusSigma)
@@ -56,10 +56,10 @@ template <typename ComplexOrRealType> class LatticeGf {
 
 public:
 
-	typedef FunctionOfFrequency<ComplexOrRealType>             FunctionOfFrequencyType;
-	typedef Dispersion<ComplexOrRealType>                      DispersionType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type       VectorStringType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	using FunctionOfFrequencyType = FunctionOfFrequency<ComplexOrRealType>;
+	using DispersionType          = Dispersion<ComplexOrRealType>;
+	using VectorStringType        = PsimagLite::Vector<PsimagLite::String>::Type;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
 
 	LatticeGf(const FunctionOfFrequencyType& sigma, RealType mu, PsimagLite::String option)
 	    : dispersion_(nullptr)

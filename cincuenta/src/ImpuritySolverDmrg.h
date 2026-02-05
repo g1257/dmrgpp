@@ -27,17 +27,17 @@ class ImpuritySolverDmrg : public ImpuritySolverBase<ParamsDmftSolverType> {
 
 public:
 
-	typedef typename ParamsDmftSolverType::ComplexOrRealType   ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef std::complex<RealType>                             ComplexType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef typename PsimagLite::Vector<ComplexType>::Type     VectorComplexType;
-	typedef Dmrg::DmrgRunner<RealType>                         DmrgRunnerType;
-	typedef typename DmrgRunnerType::InputNgType               InputNgType;
-	typedef PsimagLite::PsiApp                                 ApplicationType;
-	typedef Matsubaras<RealType>                               MatsubarasType;
-	typedef Dmrg::ManyOmegas<RealType, MatsubarasType>         ManyOmegasType;
-	typedef Dmrg::ProcOmegas<RealType, MatsubarasType>         ProcOmegasType;
+	using ComplexOrRealType = typename ParamsDmftSolverType::ComplexOrRealType;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ComplexType       = std::complex<RealType>;
+	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
+	using VectorComplexType = typename PsimagLite::Vector<ComplexType>::Type;
+	using DmrgRunnerType    = Dmrg::DmrgRunner<RealType>;
+	using InputNgType       = typename DmrgRunnerType::InputNgType;
+	using ApplicationType   = PsimagLite::PsiApp;
+	using MatsubarasType    = Matsubaras<RealType>;
+	using ManyOmegasType    = Dmrg::ManyOmegas<RealType, MatsubarasType>;
+	using ProcOmegasType    = Dmrg::ProcOmegas<RealType, MatsubarasType>;
 
 	static const SizeType CENTER = PsimagLite::Star<ComplexOrRealType, int>::CENTER;
 

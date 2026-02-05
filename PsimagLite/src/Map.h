@@ -32,7 +32,7 @@ namespace PsimagLite {
 template <typename Key, typename T, typename Compare = std::less<Key>> class Map {
 public:
 
-	typedef std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type> Type;
+	using Type = std::map<Key, T, Compare, typename Allocator<std::pair<const Key, T>>::Type>;
 }; // class Map
 
 template <typename T> class IsMapLike {
@@ -58,7 +58,7 @@ template <typename MapType>
 typename EnableIf<IsMapLike<MapType>::True, void>::Type
 printMap(std::ostream& os, const MapType& x, const String& label)
 {
-	typedef typename MapType::const_iterator MapIteratorType;
+	using MapIteratorType = typename MapType::const_iterator;
 	for (MapIteratorType it = x.begin(); it != x.end(); ++it) {
 		os << label << "[" << it->first << "]=" << it->second << "\n";
 	}

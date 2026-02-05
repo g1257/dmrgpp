@@ -5,11 +5,11 @@
 namespace PsimagLite {
 
 template <typename T> struct VectorConstOrNot {
-	typedef typename Vector<T>::Type Type;
+	using Type = typename Vector<T>::Type;
 };
 
 template <typename T> struct VectorConstOrNot<const T> {
-	typedef const typename Vector<T>::Type Type;
+	using Type = const typename Vector<T>::Type;
 };
 
 template <typename T> class MatrixNonOwned {

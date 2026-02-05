@@ -15,7 +15,7 @@ template <typename LoadBalancerType = LoadBalancerMpi> class InterNode {
 
 public:
 
-	typedef LoadBalancerMpi::VectorSizeType VectorSizeType;
+	using VectorSizeType = LoadBalancerMpi::VectorSizeType;
 
 	InterNode(MPI::CommType comm)
 	    : comm_(comm)

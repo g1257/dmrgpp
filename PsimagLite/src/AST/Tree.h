@@ -25,13 +25,13 @@ template <typename PrimitivesType> class Tree {
 
 public:
 
-	typedef Tree<PrimitivesType>                               TreeType;
-	typedef typename PrimitivesType::ValueType                 ValueType;
-	typedef typename PrimitivesType::NodeType                  NodeType;
-	typedef typename PsimagLite::Vector<const TreeType*>::Type VectorTreeType;
-	typedef typename NodeType::AnglesType                      AnglesType;
-	typedef typename PsimagLite::Vector<AnglesType>::Type      VectorAnglesType;
-	typedef typename PsimagLite::Vector<ValueType>::Type       VectorValueType;
+	using TreeType         = Tree<PrimitivesType>;
+	using ValueType        = typename PrimitivesType::ValueType;
+	using NodeType         = typename PrimitivesType::NodeType;
+	using VectorTreeType   = typename PsimagLite::Vector<const TreeType*>::Type;
+	using AnglesType       = typename NodeType::AnglesType;
+	using VectorAnglesType = typename PsimagLite::Vector<AnglesType>::Type;
+	using VectorValueType  = typename PsimagLite::Vector<ValueType>::Type;
 
 	Tree(const PrimitivesType& primitives, const NodeType& node, bool verbose)
 	    : primitives_(primitives)

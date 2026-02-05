@@ -93,8 +93,8 @@ namespace PsimagLite {
 template <typename RealType, typename FunctionType, typename ArrayType = std::vector<RealType>>
 class RungeKutta {
 
-	typedef typename ArrayType::value_type           ComplexOrRealType;
-	typedef typename Vector<ComplexOrRealType>::Type VectorType;
+	using ComplexOrRealType = typename ArrayType::value_type;
+	using VectorType        = typename Vector<ComplexOrRealType>::Type;
 
 public:
 

@@ -14,20 +14,20 @@ template <typename ComplexOrRealType, typename InputNgType> class DmftSolver {
 
 public:
 
-	typedef FunctionOfFrequency<ComplexOrRealType>           FunctionOfFrequencyType;
-	typedef typename FunctionOfFrequencyType::RealType       RealType;
-	typedef typename FunctionOfFrequencyType::MatsubarasType MatsubarasType;
-	typedef typename MatsubarasType::VectorRealType          VectorRealType;
-	typedef Fit<ComplexOrRealType>                           FitType;
-	typedef typename FitType::MinParamsType                  MinParamsType;
-	typedef ParamsDmftSolver<ComplexOrRealType, InputNgType> ParamsDmftSolverType;
-	typedef ImpuritySolverBase<ParamsDmftSolverType>         ImpuritySolverType;
-	typedef ImpuritySolverExactDiag<ParamsDmftSolverType>    ImpuritySolverExactDiagType;
-	typedef ImpuritySolverDmrg<ParamsDmftSolverType>         ImpuritySolverDmrgType;
-	typedef LatticeGf<ComplexOrRealType>                     LatticeGfType;
-	typedef typename ImpuritySolverType::ApplicationType     ApplicationType;
-	typedef typename FitType::AndersonFunctionType           AndersonFunctionType;
-	typedef typename ImpuritySolverType::VectorComplexType   VectorComplexType;
+	using FunctionOfFrequencyType     = FunctionOfFrequency<ComplexOrRealType>;
+	using RealType                    = typename FunctionOfFrequencyType::RealType;
+	using MatsubarasType              = typename FunctionOfFrequencyType::MatsubarasType;
+	using VectorRealType              = typename MatsubarasType::VectorRealType;
+	using FitType                     = Fit<ComplexOrRealType>;
+	using MinParamsType               = typename FitType::MinParamsType;
+	using ParamsDmftSolverType        = ParamsDmftSolver<ComplexOrRealType, InputNgType>;
+	using ImpuritySolverType          = ImpuritySolverBase<ParamsDmftSolverType>;
+	using ImpuritySolverExactDiagType = ImpuritySolverExactDiag<ParamsDmftSolverType>;
+	using ImpuritySolverDmrgType      = ImpuritySolverDmrg<ParamsDmftSolverType>;
+	using LatticeGfType               = LatticeGf<ComplexOrRealType>;
+	using ApplicationType             = typename ImpuritySolverType::ApplicationType;
+	using AndersonFunctionType        = typename FitType::AndersonFunctionType;
+	using VectorComplexType           = typename ImpuritySolverType::VectorComplexType;
 
 	DmftSolver(const ParamsDmftSolverType&          params,
 	           const typename FitType::InitResults& initResults,

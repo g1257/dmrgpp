@@ -9,8 +9,8 @@ class BasisExactDiag {
 
 public:
 
-	typedef BasisOneSpin::WordType            WordType;
-	typedef BasisOneSpin::LabeledOperatorType LabeledOperatorType;
+	using WordType            = BasisOneSpin::WordType;
+	using LabeledOperatorType = BasisOneSpin::LabeledOperatorType;
 
 	BasisExactDiag(SizeType sites, SizeType nup, SizeType ndown)
 	    : basis1_(sites, nup)

@@ -28,18 +28,18 @@ template <typename ValueType_> class PlusMinusMultiplyDivide {
 
 public:
 
-	typedef typename PsimagLite::Vector<ValueType_>::Type VectorValueType;
-	typedef Node<VectorValueType>                         NodeType;
-	typedef typename PsimagLite::Vector<NodeType*>::Type  VectorNodeType;
-	typedef Plus<VectorValueType>                         PlusType;
-	typedef Minus<VectorValueType>                        MinusType;
-	typedef Times<VectorValueType>                        TimesType;
-	typedef DividedBy<VectorValueType>                    DividedByType;
-	typedef Modulus<VectorValueType>                      ModulusType;
-	typedef Input<VectorValueType>                        InputType;
-	typedef ValueType_                                    ValueType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type  VectorStringType;
-	typedef PsimagLite::Vector<SizeType>::Type            VectorSizeType;
+	using VectorValueType  = typename PsimagLite::Vector<ValueType_>::Type;
+	using NodeType         = Node<VectorValueType>;
+	using VectorNodeType   = typename PsimagLite::Vector<NodeType*>::Type;
+	using PlusType         = Plus<VectorValueType>;
+	using MinusType        = Minus<VectorValueType>;
+	using TimesType        = Times<VectorValueType>;
+	using DividedByType    = DividedBy<VectorValueType>;
+	using ModulusType      = Modulus<VectorValueType>;
+	using InputType        = Input<VectorValueType>;
+	using ValueType        = ValueType_;
+	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorSizeType   = PsimagLite::Vector<SizeType>::Type;
 
 	PlusMinusMultiplyDivide()
 	    : inputsSoFar_(0)

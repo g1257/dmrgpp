@@ -85,8 +85,8 @@ namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename GeometryBaseType> class GeometryDirection {
 
-	typedef Matrix<ComplexOrRealType>              MatrixType;
-	typedef typename Real<ComplexOrRealType>::Type RealType;
+	using MatrixType = Matrix<ComplexOrRealType>;
+	using RealType   = typename Real<ComplexOrRealType>::Type;
 
 public:
 

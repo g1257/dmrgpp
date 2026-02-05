@@ -89,12 +89,12 @@ class Geometry : public GeometryEx<typename Real<ComplexOrRealType_>::Type, Inpu
 
 public:
 
-	typedef ComplexOrRealType_                                             ComplexOrRealType;
-	typedef InputType_                                                     InputType;
-	typedef typename Real<ComplexOrRealType>::Type                         RealType;
-	typedef GeometryTerm<ComplexOrRealType, InputType>                     GeometryTermType;
-	typedef typename Vector<SizeType>::Type                                VectorSizeType;
-	typedef GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType> GeometryExType;
+	using ComplexOrRealType = ComplexOrRealType_;
+	using InputType         = InputType_;
+	using RealType          = typename Real<ComplexOrRealType>::Type;
+	using GeometryTermType  = GeometryTerm<ComplexOrRealType, InputType>;
+	using VectorSizeType    = typename Vector<SizeType>::Type;
+	using GeometryExType    = GeometryEx<typename Real<ComplexOrRealType_>::Type, InputType>;
 
 	/** @class hide_geometry1
 	        - TotalNumberOfSites=integer This is the total number of sites

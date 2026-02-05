@@ -21,10 +21,10 @@ bool operator==(const MemoryPointer& a, const MemoryPointer& b);
 
 class MemResolv {
 
-	typedef std::vector<MemoryPointer>             VectorMemoryPointerType;
-	typedef std::pair<long unsigned int, long int> PairType;
-	typedef std::vector<PairType>                  VectorPairType;
-	typedef double (*RefFunctionType)(double);
+	using VectorMemoryPointerType    = std::vector<MemoryPointer>;
+	using PairType                   = std::pair<long unsigned int, long int>;
+	using VectorPairType             = std::vector<PairType>;
+	using (*RefFunctionType)(double) = double;
 
 public:
 
@@ -273,8 +273,8 @@ public:
 	typename EnableIf<IsPairLike<SomePairType>::True, SizeType>::Type
 	memResolv(const SomePairType* c, SizeType x = sizeof(SomePairType), String msg = "")
 	{
-		typedef typename SomePairType::first_type  FirstType;
-		typedef typename SomePairType::second_type SecondType;
+		using FirstType  = typename SomePairType::first_type;
+		using SecondType = typename SomePairType::second_type;
 
 		const FirstType* f     = (const FirstType*)c;
 		SizeType         total = memResolv(f, sizeof(FirstType), msg + "->first");
@@ -305,7 +305,7 @@ public:
 	                  SizeType>::Type
 	memResolv(const SomeVectorType* v, SizeType = 0, String msg = "")
 	{
-		typedef typename SomeVectorType::value_type SomeElementType;
+		using SomeElementType = typename SomeVectorType::value_type;
 
 		SizeType tmp = sizeof(SomeVectorType);
 		push(MemResolv::MEMORY_HEAPPTR, tmp, v, msg + "vector<no class> ");
@@ -354,7 +354,7 @@ public:
 	                  SizeType>::Type
 	memResolvPtr(const SomeVectorType* v, SizeType = 0, String msg = "")
 	{
-		typedef typename SomeVectorType::value_type SomeElementType;
+		using SomeElementType = typename SomeVectorType::value_type;
 
 		SizeType tmp = sizeof(SomeVectorType);
 		push(MemResolv::MEMORY_HEAPPTR, tmp, v, msg + " vector<no class> ");

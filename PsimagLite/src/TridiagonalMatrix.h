@@ -83,15 +83,15 @@ namespace PsimagLite {
 
 template <typename FieldType> class TridiagonalMatrix {
 
-	typedef typename Real<FieldType>::Type RealType;
+	using RealType = typename Real<FieldType>::Type;
 
 	static const bool diagWithLapack_ = true;
 
 public:
 
-	typedef typename Vector<FieldType>::Type VectorType;
-	typedef typename Vector<RealType>::Type  VectorRealType;
-	typedef FieldType                        value_type;
+	using VectorType     = typename Vector<FieldType>::Type;
+	using VectorRealType = typename Vector<RealType>::Type;
+	using value_type     = FieldType;
 
 	TridiagonalMatrix() { }
 

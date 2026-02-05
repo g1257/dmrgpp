@@ -78,10 +78,10 @@ void AinurConvert::Action<T>::operator()(A& attr, ContextType&, bool&) const
 
 template <typename T> void AinurConvert::convert(Matrix<T>& t, const AinurVariable& ainurVariable)
 {
-	namespace qi = boost::spirit::qi;
-	typedef std::string::iterator         IteratorType;
-	typedef std::vector<std::string>      VectorStringType;
-	typedef std::vector<VectorStringType> VectorVectorVectorType;
+	namespace qi                 = boost::spirit::qi;
+	using IteratorType           = std::string::iterator;
+	using VectorStringType       = std::vector<std::string>;
+	using VectorVectorVectorType = std::vector<VectorStringType>;
 
 	String value = ainurVariable.value;
 
@@ -112,9 +112,9 @@ void AinurConvert::convert(
                           || TypesEqual<T, String>::True,
                       int>::Type)
 {
-	namespace qi = boost::spirit::qi;
-	typedef std::string::iterator    IteratorType;
-	typedef std::vector<std::string> VectorStringType;
+	namespace qi           = boost::spirit::qi;
+	using IteratorType     = std::string::iterator;
+	using VectorStringType = std::vector<std::string>;
 
 	String                                                     value  = ainurVariable.value;
 	IteratorType                                               it     = value.begin();

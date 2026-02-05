@@ -44,12 +44,12 @@ Ainur::Ainur(String str)
 	if (verbose)
 		std::cerr << str << "\n\n";
 #define AINUR_COMMENTS ('#' >> *(qi::char_ - qi::eol) >> qi::eol) | qi::eol | qi::space
-	namespace qi    = boost::spirit::qi;
-	namespace ascii = boost::spirit::ascii;
-	typedef boost::fusion::vector<std::string, std::string>              AttribType;
-	typedef boost::fusion::vector<std::string, std::string, std::string> Attrib3Type;
+	namespace qi      = boost::spirit::qi;
+	namespace ascii   = boost::spirit::ascii;
+	using AttribType  = boost::fusion::vector<std::string, std::string>;
+	using Attrib3Type = boost::fusion::vector<std::string, std::string, std::string>;
 
-	typedef BOOST_TYPEOF(AINUR_COMMENTS) SkipperType;
+	using SkipperType = BOOST_TYPEOF(AINUR_COMMENTS);
 
 	qi::rule<IteratorType, std::string(), qi::unused_type> aToZ;
 	qi::rule<IteratorType, std::string(), qi::unused_type> zeroToNine;

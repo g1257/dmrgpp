@@ -96,7 +96,7 @@ class ApplicationInfo {
 
 public:
 
-	typedef String RunIdType;
+	using RunIdType = String;
 
 	ApplicationInfo(const PsimagLite::String& name)
 	    : name_(name)

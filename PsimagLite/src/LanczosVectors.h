@@ -91,20 +91,20 @@ namespace PsimagLite {
 
 template <typename MatrixType_, typename VectorType_> class LanczosVectors {
 
-	typedef typename VectorType_::value_type         ComplexOrRealType;
-	typedef typename Real<ComplexOrRealType>::Type   RealType;
-	typedef LanczosVectors<MatrixType_, VectorType_> ThisType;
+	using ComplexOrRealType = typename VectorType_::value_type;
+	using RealType          = typename Real<ComplexOrRealType>::Type;
+	using ThisType          = LanczosVectors<MatrixType_, VectorType_>;
 
 public:
 
-	typedef MatrixType_                                   MatrixType;
-	typedef VectorType_                                   VectorType;
-	typedef TridiagonalMatrix<RealType>                   TridiagonalMatrixType;
-	typedef typename VectorType::value_type               VectorElementType;
-	typedef Matrix<VectorElementType>                     DenseMatrixType;
-	typedef Matrix<RealType>                              DenseMatrixRealType;
-	typedef ContinuedFraction<TridiagonalMatrixType>      PostProcType;
-	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
+	using MatrixType            = MatrixType_;
+	using VectorType            = VectorType_;
+	using TridiagonalMatrixType = TridiagonalMatrix<RealType>;
+	using VectorElementType     = typename VectorType::value_type;
+	using DenseMatrixType       = Matrix<VectorElementType>;
+	using DenseMatrixRealType   = Matrix<RealType>;
+	using PostProcType          = ContinuedFraction<TridiagonalMatrixType>;
+	using VectorVectorType      = typename PsimagLite::Vector<VectorType>::Type;
 
 	enum
 	{
