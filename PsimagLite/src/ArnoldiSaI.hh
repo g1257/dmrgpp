@@ -19,13 +19,13 @@ public:
 
 	using MatrixType           = MatrixType_;
 	using BaseType             = MatrixSolverBase<MatrixType_>;
-	using ComplexOrRealType    = typename MatrixType_::value_type;
-	using VectorType           = std::vector<ComplexOrRealType>;
-	using RealType             = typename Real<ComplexOrRealType>::Type;
-	using ArnoldiIterationType = ArnoldiIteration<CrsMatrix<ComplexOrRealType>>;
-	using ParamsType           = ParametersForSolver<RealType>;
-	using VectorVectorType     = typename BaseType::VectorVectorType;
+	using ComplexOrRealType    = typename BaseType::ComplexOrRealType;
+	using VectorType           = typename BaseType::VectorType;
+	using RealType             = typename BaseType::RealType;
 	using VectorRealType       = typename BaseType::VectorRealType;
+	using VectorVectorType     = typename BaseType::VectorVectorType;
+	using ArnoldiIterationType = ArnoldiIteration<CrsMatrix<ComplexOrRealType>>;
+	using ParametersSolverType = ParametersForSolver<RealType>;
 
 	//---------------------------------------------------------------------------//
 	/*!
@@ -35,7 +35,7 @@ public:
 	 * \param[in]  params  The parameters object; see ParametersForSolver.h
 	 * \param[in]  sigma   The value for the small shift, must be positive
 	 */
-	ArnoldiSaI(const MatrixType& a, const ParamsType& params, const RealType& sigma)
+	ArnoldiSaI(const MatrixType& a, const ParametersSolverType& params, const RealType& sigma)
 	    : arnoldi_iteration_(params)
 	    , a_(a)
 	    , sigma_(sigma)
@@ -73,7 +73,7 @@ public:
 		// I only know how to invert dense matrices
 		// Needs more study: FIXME TODO
 
-		const CrsMatrix<ComplexOrRealType>& crs    = a_;
+		const CrsMatrix<ComplexOrRealType>& crs    = a_.toCRS();
 		Matrix<ComplexOrRealType>           a_copy = crs.toDense();
 
 		// shift first
@@ -110,11 +110,14 @@ public:
 		if (eigs_of_sai == 0.) {
 			// We shifted by sigma so that A - sigmaI be invertible
 			// If this isn't the case, we need to throw.
-			throw RuntimeError("Eigenvalue of the shifted-and-inverted is 0\n");
+			eigenvalue            = 0.;
+			std::string warn_zero = "Eigenvalue of the shifted-and-inverted is 0\n";
+			std::cerr << warn_zero;
+			std::cout << warn_zero;
+		} else {
+			// Recover the original eigenvalue
+			eigenvalue = std::real(sigma_ + 1. / eigs_of_sai);
 		}
-
-		// Recover the original eigenvalue
-		eigenvalue = std::real(sigma_ + 1. / eigs_of_sai);
 
 		// The eigenvector is the same
 		eigenvector

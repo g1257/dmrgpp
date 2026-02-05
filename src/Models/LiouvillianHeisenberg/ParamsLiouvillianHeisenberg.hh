@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009-2013, UT-Battelle, LLC
+Copyright (c) 2009, 2012-2026, UT-Battelle, LLC
 All rights reserved
 
-[PsimagLite, Version 1.0.0]
+[DMRG++, Version 6+]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -68,61 +68,93 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 *********************************************************
 
 */
-/** \ingroup PsimagLite */
+
+/** \ingroup DMRG */
 /*@{*/
 
-/*! \file LanczosOrDavidsonBase.h
+/*! \file ParamsLiouvillianHeisenberg.hh
  *
- *  Virtual class to select lanczos or davidson
+ *  Contains the parameters for the LiouvillianHeisenberg model and functions
+ *  to read them from a file
  *
  */
+#ifndef DMRG_PARAMS_LIOUVILLIANHEISENBERG_H
+#define DMRG_PARAMS_LIOUVILLIANHEISENBERG_H
+#include "ParametersModelBase.h"
+#include "Vector.h"
 
-#ifndef LANCZOS_OR_DAVIDSON_BASE_H
-#define LANCZOS_OR_DAVIDSON_BASE_H
-#include <cassert>
+namespace Dmrg {
+//! Heisenberg Model Parameters
+template <typename RealType, typename QnType>
+struct ParamsLiouvillianHeisenberg : public ParametersModelBase<RealType, QnType> {
 
-namespace PsimagLite {
-
-template <typename SolverParametersType, typename MatrixType_, typename VectorType>
-class LanczosOrDavidsonBase {
-
-public:
-
-	typedef typename SolverParametersType::RealType RealType;
-	typedef typename Vector<RealType>::Type         VectorRealType;
-	typedef typename Vector<VectorType>::Type       VectorVectorType;
-	typedef MatrixType_                             MatrixType;
-
-	// To avoid compiler warnings
-	virtual ~LanczosOrDavidsonBase() { }
-
-	virtual void computeOneState(RealType&, VectorType&, const VectorType&, SizeType) = 0;
-
-	virtual void
-	computeAllStatesBelow(VectorRealType&, VectorVectorType&, const VectorType&, SizeType)
-	    = 0;
-
-	static bool isReorthoEnabled(const SolverParametersType& params)
+	using BaseType       = ParametersModelBase<RealType, QnType>;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
+	// no connectors here, connectors are handled by the geometry
+	template <typename IoInputType>
+	ParamsLiouvillianHeisenberg(IoInputType& io)
+	    : BaseType(io, false)
 	{
-		if (params.options.find("reortho") == PsimagLite::String::npos)
-			return false;
+		PsimagLite::String model;
+		io.readline(model, "Model=");
 
-		bool canReortho = (params.lotaMemory);
+		io.readline(twiceTheSpin, "HeisenbergTwiceS=");
 
-		if (!canReortho) {
-			PsimagLite::String str("LanczosOrDavidsonBase: Reortho "
-			                       "requested but cannot");
-			str += "Suggestion: Delete reortho from input or set "
-			       "lotaMemory=true\n";
-			throw PsimagLite::RuntimeError(str);
+		SizeType nsites = 0;
+		io.readline(nsites, "TotalNumberOfSites=");
+
+		bath_gamma.resize(nsites);
+		io.read(bath_gamma, "BathGamma");
+
+		bath_f.resize(nsites);
+		io.read(bath_f, "BathF");
+
+		try {
+			magneticFieldZ.resize(nsites);
+			io.read(magneticFieldZ, "MagneticFieldZ");
+		} catch (std::exception&) {
+			magneticFieldZ.clear();
 		}
-
-		return true;
 	}
 
-}; // class LanczosOrDavidsonBase
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	{
+		PsimagLite::String label = label1 + "/ParamsLiouvillianHeisenberg";
+		io.createGroup(label);
+		BaseType::write(label, io);
+		io.write(label + "/twiceTheSpin", twiceTheSpin);
+		io.write(label + "/magneticFieldZ", magneticFieldZ);
+	}
 
-} // namespace PsimagLite
+	static void checkMagneticField(SizeType s, unsigned char c, SizeType n)
+	{
+		if (s == 0 || s == n)
+			return;
+
+		PsimagLite::String msg("LiouvillianHeisenberg: If provided, ");
+		msg += " MagneticField" + ttos(c) + " must be a vector of " + ttos(n)
+		    + " entries.\n";
+		err(msg);
+	}
+
+	//! Function that prints model parameters to stream os
+	friend std::ostream& operator<<(std::ostream&                      os,
+	                                const ParamsLiouvillianHeisenberg& parameters)
+	{
+		if (!parameters.magneticFieldZ.empty())
+			os << "MagneticFieldZ=" << parameters.magneticFieldZ << "\n";
+
+		os << "HeisenbergTwiceS=" << parameters.twiceTheSpin << "\n";
+		os << parameters.targetQuantum;
+		return os;
+	}
+
+	SizeType       twiceTheSpin;
+	VectorRealType magneticFieldZ;
+	VectorRealType bath_gamma;
+	VectorRealType bath_f;
+};
+} // namespace Dmrg
 
 /*@}*/
-#endif // LANCZOS_OR_DAVIDSON_BASE_H
+#endif

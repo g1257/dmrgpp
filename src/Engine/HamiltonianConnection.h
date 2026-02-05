@@ -226,6 +226,38 @@ public:
 		matrix += matrix2;
 	}
 
+	/**
+	 * Returns H, the hamiltonian for basis1 and partition
+	 * $m$ consisting of the external product of basis2$\otimes$basis3
+	 * Note: Used only for debugging purposes
+	 */
+	void fullHamiltonian(SparseMatrixType&                    matrix,
+	                     const typename ModelHelperType::Aux& aux,
+	                     bool                                 is_hermitian) const
+	{
+		SparseMatrixType matrixBlock;
+
+		//! contribution to Hamiltonian from current system
+		modelHelper_.calcHamiltonianPart(matrixBlock, true, aux);
+		enforceHermiticity(matrixBlock, is_hermitian, "left");
+
+		matrix = matrixBlock;
+
+		//! contribution to Hamiltonian from current envirnoment
+		modelHelper_.calcHamiltonianPart(matrixBlock, false, aux);
+		enforceHermiticity(matrixBlock, is_hermitian, "right");
+
+		matrix += matrixBlock;
+
+		matrixBlock.clear();
+
+		VerySparseMatrixType vsm(matrix);
+		this->matrixBond(vsm, aux);
+
+		matrix = vsm;
+		enforceHermiticity(matrix, is_hermitian, "super");
+	}
+
 	OpsForLinkType opsForLink() const { return OpsForLinkType(operatorsCached_, lps_); }
 
 	const ModelHelperType& modelHelper() const { return modelHelper_; }
@@ -371,6 +403,19 @@ private:
 			err("conjugateChar\n");
 
 		return (c == 'N') ? 'C' : 'N';
+	}
+
+	static void
+	enforceHermiticity(const SparseMatrixType& m, bool is_hermitian, const std::string& part)
+	{
+#ifdef NDEBUG
+		return;
+#else
+		if (is_hermitian && !isHermitian(m)) {
+			std::cerr << m.toDense();
+			err(part + " Hamiltonian Matrix not Hermitian\n");
+		}
+#endif
 	}
 
 	const ModelHelperType         modelHelper_;

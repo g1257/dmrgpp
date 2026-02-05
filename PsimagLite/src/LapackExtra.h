@@ -81,4 +81,20 @@ extern "C" void zgeev_(char*,
                        IntegerForLapackType*,
                        double*,
                        IntegerForLapackType*);
+
+extern "C" void dgeev_(char*,
+                       char*,
+                       IntegerForLapackType*,
+                       double*,
+                       IntegerForLapackType*,
+                       double*,
+                       double*,
+                       double*,
+                       IntegerForLapackType*,
+                       double*,
+                       IntegerForLapackType*,
+                       double*,
+                       IntegerForLapackType*,
+                       double*,
+                       IntegerForLapackType*);
 #endif

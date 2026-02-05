@@ -78,6 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TRIDIAGRIXSSTATIC_H
 #define TRIDIAGRIXSSTATIC_H
 #include "ApplyOperatorLocal.h"
+#include "LanczosSolver.h"
+#include "VectorWithOffset.h"
 
 namespace Dmrg {
 
@@ -152,12 +154,9 @@ class TridiagRixsStatic {
 		mutable VectorWithOffsetType2               y2_;
 	}; // class MyMatrixVector
 
-	typedef MyMatrixVector MyMatrixVectorType;
-	typedef PsimagLite::LanczosSolver<ParametersSolverType,
-	                                  MyMatrixVectorType,
-	                                  typename MyMatrixVectorType::VectorType>
-	                                                            MyLanczosSolverType;
-	typedef typename MyLanczosSolverType::TridiagonalMatrixType MyTridiagonalMatrixType;
+	using MyMatrixVectorType      = MyMatrixVector;
+	using MyLanczosSolverType     = PsimagLite::LanczosSolver<MyMatrixVectorType>;
+	using MyTridiagonalMatrixType = typename MyLanczosSolverType::TridiagonalMatrixType;
 
 public:
 

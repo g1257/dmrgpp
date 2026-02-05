@@ -414,6 +414,8 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	                              RealType                   currentTime) const
 	{ }
 
+	virtual bool isHermitian() const { return true; }
+
 	// END OF VIRTUAL FUNCTIONS
 
 	/**
@@ -522,13 +524,6 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		parallelConnections.loopCreate(phc);
 
 		phc.sync();
-	}
-
-	void fullHamiltonian(SparseMatrixType&                    matrix,
-	                     const HamiltonianConnectionType&     hc,
-	                     const typename ModelHelperType::Aux& aux) const
-	{
-		return modelCommon_.fullHamiltonian(matrix, hc, aux);
 	}
 
 	// Return the size of the one-site Hilbert space basis for this model

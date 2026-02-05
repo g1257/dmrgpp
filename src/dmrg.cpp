@@ -41,21 +41,13 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
 	    ParametersForSolverType;
 #ifndef MIN_COMPILE
 	if (dmrgSolverParams.options.isSet("ChebyshevSolver")) {
-		typedef PsimagLite::ChebyshevSolver<ParametersForSolverType,
-		                                    MatrixVectorType,
-		                                    typename MatrixVectorType::VectorType>
-		    SolverType;
-		mainLoop4<SolverType, VectorWithOffsetType>(
+		mainLoop4<PsimagLite::ChebyshevSolver<MatrixVectorType>, VectorWithOffsetType>(
 		    geometry, dmrgSolverParams, io, opOptions);
 	} else {
 #else
 	{
 #endif
-		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-		                                  MatrixVectorType,
-		                                  typename MatrixVectorType::VectorType>
-		    SolverType;
-		mainLoop4<SolverType, VectorWithOffsetType>(
+		mainLoop4<PsimagLite::LanczosSolver<MatrixVectorType>, VectorWithOffsetType>(
 		    geometry, dmrgSolverParams, io, opOptions);
 	}
 }

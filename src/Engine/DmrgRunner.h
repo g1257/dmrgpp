@@ -120,12 +120,9 @@ private:
 			std::cout << geometry;
 
 		typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
-		    ParametersForSolverType;
-		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-		                                  MatrixVectorType,
-		                                  typename MatrixVectorType::VectorType>
-		                                                   SolverType;
-		typedef typename SolverType::MatrixType::ModelType ModelBaseType;
+		                                                    ParametersForSolverType;
+		typedef PsimagLite::LanczosSolver<MatrixVectorType> SolverType;
+		typedef typename SolverType::MatrixType::ModelType  ModelBaseType;
 
 		//! Setup the Model
 		Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);

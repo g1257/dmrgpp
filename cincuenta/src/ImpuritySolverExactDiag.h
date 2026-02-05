@@ -35,12 +35,11 @@ public:
 	typedef BasisExactDiag                                                     BasisType;
 	typedef ModelParams<RealType>                                              ModelParamsType;
 	typedef PsimagLite::InputNg<Dmrg::InputCheck>                              InputNgType;
-	typedef PsimagLite::ParametersForSolver<RealType> SolverParametersType;
-	typedef PsimagLite::LanczosSolver<SolverParametersType, SparseMatrixType, VectorComplexType>
-	                                              LanczosSolverType;
-	typedef BasisType::LabeledOperatorType        LabeledOperatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType> MatrixType;
-	typedef Matsubaras<RealType>                  MatsubarasType;
+	typedef PsimagLite::ParametersForSolver<RealType>   SolverParametersType;
+	typedef PsimagLite::LanczosSolver<SparseMatrixType> LanczosSolverType;
+	typedef BasisType::LabeledOperatorType              LabeledOperatorType;
+	typedef PsimagLite::Matrix<ComplexOrRealType>       MatrixType;
+	typedef Matsubaras<RealType>                        MatsubarasType;
 
 	ImpuritySolverExactDiag(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params)

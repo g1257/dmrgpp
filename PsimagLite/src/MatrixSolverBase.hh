@@ -73,7 +73,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 /*! \file MatrixSolverBase.h
  *
- *  Virtual class to select lanczos or davidson
+ *  Virtual class to select LanczosSolver or ArnoldiSaI
  *
  */
 
