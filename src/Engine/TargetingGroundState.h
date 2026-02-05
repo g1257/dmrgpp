@@ -119,8 +119,8 @@ public:
 	using VectorSizeType         = typename PsimagLite::Vector<SizeType>::Type;
 	using QnType                 = typename BasisType::QnType;
 	using VectorRealType         = typename BaseType::VectorRealType;
-	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	using VectorVectorVectorWithOffsetType =
+	    typename TargetingCommonType::VectorVectorVectorWithOffsetType;
 	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType*>::Type;
 
 	TargetingGroundState(const LeftRightSuperType&     lrs,

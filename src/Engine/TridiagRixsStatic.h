@@ -99,8 +99,8 @@ class TridiagRixsStatic {
 	using ParametersSolverType   = typename LanczosSolverType::ParametersSolverType;
 	using EffectiveQnType        = typename BasisWithOperatorsType::EffectiveQuantumNumberType;
 	using VectorWithOffsetType2  = VectorWithOffset<ComplexOrRealType, EffectiveQnType>;
-	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2>
-	    ApplyOperatorLocalType;
+	using ApplyOperatorLocalType
+	    = ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2>;
 	using VectorSizeType = typename VectorWithOffsetType2::VectorSizeType;
 
 	class MyMatrixVector : public LanczosSolverType::LanczosMatrixType {
@@ -153,10 +153,10 @@ class TridiagRixsStatic {
 	}; // class MyMatrixVector
 
 	using MyMatrixVectorType = MyMatrixVector;
-	typedef PsimagLite::LanczosSolver<ParametersSolverType,
-	                                  MyMatrixVectorType,
-	                                  typename MyMatrixVectorType::VectorType>
-	    MyLanczosSolverType;
+	using MyLanczosSolverType
+	    = PsimagLite::LanczosSolver<ParametersSolverType,
+	                                MyMatrixVectorType,
+	                                typename MyMatrixVectorType::VectorType>;
 	using MyTridiagonalMatrixType = typename MyLanczosSolverType::TridiagonalMatrixType;
 
 public:

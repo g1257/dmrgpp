@@ -10,16 +10,15 @@ bool observeOneFullSweep(IoInputType&              io,
                          const PsimagLite::String& list,
                          SizeType                  orbitals)
 {
-	using SuperGeometryType  = typename ModelType::SuperGeometryType;
-	using LeftRightSuperType = typename ModelType::ModelHelperType::LeftRightSuperType;
-	using MatrixType         = typename ModelType::MatrixType;
-	using VectorType         = typename ModelType::VectorType;
-	typedef ObserverHelper<IoInputType,
-	                       MatrixType,
-	                       VectorType,
-	                       VectorWithOffsetType,
-	                       LeftRightSuperType>
-	    ObserverHelperType;
+	using SuperGeometryType     = typename ModelType::SuperGeometryType;
+	using LeftRightSuperType    = typename ModelType::ModelHelperType::LeftRightSuperType;
+	using MatrixType            = typename ModelType::MatrixType;
+	using VectorType            = typename ModelType::VectorType;
+	using ObserverHelperType    = ObserverHelper<IoInputType,
+	                                             MatrixType,
+	                                             VectorType,
+	                                             VectorWithOffsetType,
+	                                             LeftRightSuperType>;
 	using ObserverType          = Observer<ObserverHelperType, ModelType>;
 	using ObservableLibraryType = ObservableLibrary<ObserverType>;
 	using ManyPointActionType   = typename ObservableLibraryType::ManyPointActionType;

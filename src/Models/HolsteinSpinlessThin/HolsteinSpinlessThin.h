@@ -125,8 +125,8 @@ public:
 	using MyBasisWithOperators    = typename ModelBaseType::BasisWithOperatorsType;
 	using InputValidatorType      = typename ModelBaseType::InputValidatorType;
 	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
-	typedef ParametersHubbardHolsteinSpinless<RealType, QnType>
-	    ParametersHolsteinSpinlessThinType;
+	using ParametersHolsteinSpinlessThinType
+	    = ParametersHubbardHolsteinSpinless<RealType, QnType>;
 	using PairType               = std::pair<SizeType, SizeType>;
 	using VectorPairType         = typename PsimagLite::Vector<PairType>::Type;
 	using VectorSparseMatrixType = typename PsimagLite::Vector<SparseMatrixType>::Type;

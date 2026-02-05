@@ -34,26 +34,26 @@ template <typename TargetingBaseType> class TargetSelector {
 	using InputValidatorType     = typename ModelType::InputValidatorType;
 	using LanczosSolverType      = typename TargetingBaseType::LanczosSolverType;
 	using VectorWithOffsetType   = typename TargetingBaseType::VectorWithOffsetType;
-	typedef TargetingGroundState<LanczosSolverType, VectorWithOffsetType>
-	    TargetingGroundStateType;
+	using TargetingGroundStateType
+	    = TargetingGroundState<LanczosSolverType, VectorWithOffsetType>;
 	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
 	// start targets here:  DO NOT REMOVE MARK
 	using TargetingTimeStepType  = TargetingTimeStep<LanczosSolverType, VectorWithOffsetType>;
 	using TargetingChebyshevType = TargetingChebyshev<LanczosSolverType, VectorWithOffsetType>;
 	using TargetingDynamicType   = TargetingDynamic<LanczosSolverType, VectorWithOffsetType>;
-	typedef TargetingCorrectionVector<LanczosSolverType, VectorWithOffsetType>
-	    TargetingCorrectionVectorType;
-	typedef TargetingCorrection<LanczosSolverType, VectorWithOffsetType>
-	    TargetingCorrectionType;
+	using TargetingCorrectionVectorType
+	    = TargetingCorrectionVector<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingCorrectionType
+	    = TargetingCorrection<LanczosSolverType, VectorWithOffsetType>;
 	using TargetingMettsType = TargetingMetts<LanczosSolverType, VectorWithOffsetType>;
-	typedef TargetingRixsStatic<LanczosSolverType, VectorWithOffsetType>
-	    TargetingRixsStaticType;
-	typedef TargetingRixsDynamic<LanczosSolverType, VectorWithOffsetType>
-	    TargetingRixsDynamicType;
-	typedef TargetingExpression<LanczosSolverType, VectorWithOffsetType>
-	    TargetingExpressionType;
-	typedef TargetingCVEvolution<LanczosSolverType, VectorWithOffsetType>
-	    TargetingCVEvolutionType;
+	using TargetingRixsStaticType
+	    = TargetingRixsStatic<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingRixsDynamicType
+	    = TargetingRixsDynamic<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingExpressionType
+	    = TargetingExpression<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingCVEvolutionType
+	    = TargetingCVEvolution<LanczosSolverType, VectorWithOffsetType>;
 	// end targets DO NOT REMOVE MARK
 
 public:

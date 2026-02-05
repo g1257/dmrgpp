@@ -37,24 +37,23 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
                InputNgType::Readable&                                   io,
                const OperatorOptions&                                   opOptions)
 {
-	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
-	    ParametersForSolverType;
+	using ParametersForSolverType
+	    = PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>;
 #ifndef MIN_COMPILE
 	if (dmrgSolverParams.options.isSet("ChebyshevSolver")) {
-		typedef PsimagLite::ChebyshevSolver<ParametersForSolverType,
-		                                    MatrixVectorType,
-		                                    typename MatrixVectorType::VectorType>
-		    SolverType;
+		using SolverType
+		    = PsimagLite::ChebyshevSolver<ParametersForSolverType,
+		                                  MatrixVectorType,
+		                                  typename MatrixVectorType::VectorType>;
 		mainLoop4<SolverType, VectorWithOffsetType>(
 		    geometry, dmrgSolverParams, io, opOptions);
 	} else {
 #else
 	{
 #endif
-		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-		                                  MatrixVectorType,
-		                                  typename MatrixVectorType::VectorType>
-		    SolverType;
+		using SolverType = PsimagLite::LanczosSolver<ParametersForSolverType,
+		                                             MatrixVectorType,
+		                                             typename MatrixVectorType::VectorType>;
 		mainLoop4<SolverType, VectorWithOffsetType>(
 		    geometry, dmrgSolverParams, io, opOptions);
 	}
@@ -70,8 +69,8 @@ void mainLoop2(InputNgType::Readable&          io,
 	using QnType            = typename ModelBaseType::QnType;
 	using ModelHelperType   = typename ModelBaseType::ModelHelperType;
 	using SparseElementType = typename ModelHelperType::SparseElementType;
-	typedef SuperGeometry<SparseElementType, InputNgType::Readable, ProgramGlobals>
-	    SuperGeometryType;
+	using SuperGeometryType
+	    = SuperGeometry<SparseElementType, InputNgType::Readable, ProgramGlobals>;
 
 	SuperGeometryType geometry(io);
 	if (dmrgSolverParams.options.isSet("printgeometry"))
@@ -97,18 +96,17 @@ void mainLoop1(InputNgType::Readable&          io,
                const ParametersDmrgSolverType& dmrgSolverParams,
                const OperatorOptions&          opOptions)
 {
-	typedef SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>
-	    SuperGeometryType;
+	using SuperGeometryType
+	    = SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>;
 	using MySparseMatrix         = PsimagLite::CrsMatrix<ComplexOrRealType>;
 	using BasisType              = Basis<MySparseMatrix>;
 	using BasisWithOperatorsType = BasisWithOperators<BasisType>;
 	using LeftRightSuperType     = LeftRightSuper<BasisWithOperatorsType, BasisType>;
 	using ModelHelperType        = ModelHelperLocal<LeftRightSuperType>;
-	typedef ModelBase<ModelHelperType,
-	                  ParametersDmrgSolverType,
-	                  InputNgType::Readable,
-	                  SuperGeometryType>
-	    ModelBaseType;
+	using ModelBaseType          = ModelBase<ModelHelperType,
+	                                         ParametersDmrgSolverType,
+	                                         InputNgType::Readable,
+	                                         SuperGeometryType>;
 
 #ifndef MIN_COMPILE
 	if (dmrgSolverParams.options.isSet("MatrixVectorStored"))

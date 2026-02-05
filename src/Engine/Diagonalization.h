@@ -120,15 +120,12 @@ public:
 	using VectorSizeType            = typename PsimagLite::Vector<SizeType>::Type;
 	using VectorVectorRealType      = typename PsimagLite::Vector<VectorRealType>::Type;
 	using ParametersForSolverType   = PsimagLite::ParametersForSolver<RealType>;
-	typedef PsimagLite::
-	    LanczosOrDavidsonBase<ParametersForSolverType, MatrixVectorType, TargetVectorType>
-	        LanczosOrDavidsonBaseType;
-	typedef PsimagLite::
-	    DavidsonSolver<ParametersForSolverType, MatrixVectorType, TargetVectorType>
-	        DavidsonSolverType;
-	typedef PsimagLite::
-	    LanczosSolver<ParametersForSolverType, MatrixVectorType, TargetVectorType>
-	        LanczosSolverType;
+	using LanczosOrDavidsonBaseType = PsimagLite::
+	    LanczosOrDavidsonBase<ParametersForSolverType, MatrixVectorType, TargetVectorType>;
+	using DavidsonSolverType = PsimagLite::
+	    DavidsonSolver<ParametersForSolverType, MatrixVectorType, TargetVectorType>;
+	using LanczosSolverType = PsimagLite::
+	    LanczosSolver<ParametersForSolverType, MatrixVectorType, TargetVectorType>;
 	using VectorVectorType       = typename PsimagLite::Vector<TargetVectorType>::Type;
 	using VectorVectorVectorType = typename PsimagLite::Vector<VectorVectorType>::Type;
 	using FiniteLoopType         = FiniteLoop<RealType>;

@@ -106,8 +106,8 @@ template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixB
 	using QnType                  = typename BasisType::QnType;
 	using VectorQnType            = typename BasisWithOperatorsType::VectorQnType;
 	using VectorVectorRealType    = typename PsimagLite::Vector<VectorRealType>::Type;
-	typedef typename TargetingType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	using VectorVectorVectorWithOffsetType =
+	    typename TargetingType::VectorVectorVectorWithOffsetType;
 
 	class GroupsStruct {
 
@@ -354,10 +354,10 @@ template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixB
 
 	public:
 
-		typedef PersistentSvd<typename PsimagLite::Vector<MatrixType>::Type,
-		                      VectorVectorRealType,
-		                      VectorQnType>
-		    PersistentSvdType;
+		using PersistentSvdType
+		    = PersistentSvd<typename PsimagLite::Vector<MatrixType>::Type,
+		                    VectorVectorRealType,
+		                    VectorQnType>;
 
 		ParallelSvd(BlockDiagonalMatrixType& blockDiagonalMatrix,
 		            GroupsStructType&        allTargets,

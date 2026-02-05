@@ -90,47 +90,42 @@ class ApplyOperatorExpression {
 
 public:
 
-	using RealType               = typename TargetHelperType::RealType;
-	using ModelType              = typename TargetHelperType::ModelType;
-	using ParametersType         = typename ModelType::ParametersType;
-	using OptionsType            = typename ParametersType::OptionsType;
-	using TargetParamsType       = TargetParamsBase<ModelType>;
-	using LeftRightSuperType     = typename TargetHelperType::LeftRightSuperType;
-	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
-	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
-	using ComplexOrRealType      = typename SparseMatrixType::value_type;
-	using WaveFunctionTransfType = typename TargetHelperType::WaveFunctionTransfType;
-	typedef TimeVectorsBase<TargetParamsType,
-	                        ModelType,
-	                        WaveFunctionTransfType,
-	                        LanczosSolverType,
-	                        VectorWithOffsetType>
-	    TimeVectorsBaseType;
-	typedef TimeVectorsKrylov<TargetParamsType,
-	                          ModelType,
-	                          WaveFunctionTransfType,
-	                          LanczosSolverType,
-	                          VectorWithOffsetType>
-	    TimeVectorsKrylovType;
-	typedef TimeVectorsChebyshev<TargetParamsType,
-	                             ModelType,
-	                             WaveFunctionTransfType,
-	                             LanczosSolverType,
-	                             VectorWithOffsetType>
-	    TimeVectorsChebyshevType;
-	typedef TimeVectorsRungeKutta<TargetParamsType,
-	                              ModelType,
-	                              WaveFunctionTransfType,
-	                              LanczosSolverType,
-	                              VectorWithOffsetType>
-	    TimeVectorsRungeKuttaType;
-	typedef TimeVectorsSuzukiTrotter<TargetParamsType,
-	                                 ModelType,
-	                                 WaveFunctionTransfType,
-	                                 LanczosSolverType,
-	                                 VectorWithOffsetType>
-	    TimeVectorsSuzukiTrotterType;
-	using InputValidatorType         = typename ModelType::InputValidatorType;
+	using RealType                     = typename TargetHelperType::RealType;
+	using ModelType                    = typename TargetHelperType::ModelType;
+	using ParametersType               = typename ModelType::ParametersType;
+	using OptionsType                  = typename ParametersType::OptionsType;
+	using TargetParamsType             = TargetParamsBase<ModelType>;
+	using LeftRightSuperType           = typename TargetHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType       = typename LeftRightSuperType::BasisWithOperatorsType;
+	using SparseMatrixType             = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType            = typename SparseMatrixType::value_type;
+	using WaveFunctionTransfType       = typename TargetHelperType::WaveFunctionTransfType;
+	using TimeVectorsBaseType          = TimeVectorsBase<TargetParamsType,
+	                                                     ModelType,
+	                                                     WaveFunctionTransfType,
+	                                                     LanczosSolverType,
+	                                                     VectorWithOffsetType>;
+	using TimeVectorsKrylovType        = TimeVectorsKrylov<TargetParamsType,
+	                                                       ModelType,
+	                                                       WaveFunctionTransfType,
+	                                                       LanczosSolverType,
+	                                                       VectorWithOffsetType>;
+	using TimeVectorsChebyshevType     = TimeVectorsChebyshev<TargetParamsType,
+	                                                          ModelType,
+	                                                          WaveFunctionTransfType,
+	                                                          LanczosSolverType,
+	                                                          VectorWithOffsetType>;
+	using TimeVectorsRungeKuttaType    = TimeVectorsRungeKutta<TargetParamsType,
+	                                                           ModelType,
+	                                                           WaveFunctionTransfType,
+	                                                           LanczosSolverType,
+	                                                           VectorWithOffsetType>;
+	using TimeVectorsSuzukiTrotterType = TimeVectorsSuzukiTrotter<TargetParamsType,
+	                                                              ModelType,
+	                                                              WaveFunctionTransfType,
+	                                                              LanczosSolverType,
+	                                                              VectorWithOffsetType>;
+	using InputValidatorType           = typename ModelType::InputValidatorType;
 	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType*>::Type;
 	using VectorSizeType             = typename PsimagLite::Vector<SizeType>::Type;
 	using VectorRealType             = typename PsimagLite::Vector<RealType>::Type;
@@ -139,11 +134,11 @@ public:
 	using PairType            = typename TimeVectorsBaseType::PairType;
 	using StageEnumType       = StageEnum;
 	using VectorStageEnumType = typename PsimagLite::Vector<StageEnum>::Type;
-	typedef MultiSiteExpressionHelper<LeftRightSuperType, VectorWithOffsetType>
-	    MultiSiteExpressionHelperType;
+	using MultiSiteExpressionHelperType
+	    = MultiSiteExpressionHelper<LeftRightSuperType, VectorWithOffsetType>;
 	using DmrgSerializerType = typename MultiSiteExpressionHelperType::DmrgSerializerType;
-	typedef CorrelationsSkeleton<MultiSiteExpressionHelperType, ModelType>
-	    CorrelationsSkeletonType;
+	using CorrelationsSkeletonType
+	    = CorrelationsSkeleton<MultiSiteExpressionHelperType, ModelType>;
 	using WftHelperType = typename TimeVectorsBaseType::WftHelperType;
 	using VectorType    = typename VectorWithOffsetType::VectorType;
 	typedef

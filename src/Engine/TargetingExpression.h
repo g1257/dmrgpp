@@ -110,14 +110,13 @@ class TargetingExpression : public TargetingBase<LanczosSolverType_, VectorWithO
 	using SpecForTargetingExpressionType = SpecForTargetingExpression<BaseType>;
 	using AlgebraType                    = typename SpecForTargetingExpressionType::AlgebraType;
 	using AssignAndDestroyType = typename SpecForTargetingExpressionType::AssignAndDestroy;
-	typedef PsimagLite::CanonicalExpression<SpecForTargetingExpressionType,
-	                                        AssignAndDestroyType>
-	    CanonicalExpressionType;
+	using CanonicalExpressionType
+	    = PsimagLite::CanonicalExpression<SpecForTargetingExpressionType, AssignAndDestroyType>;
 	using AuxForTargetingExpressionType = AuxForTargetingExpression<BaseType>;
 	using VectorRealType                = typename TargetingCommonType::VectorRealType;
 	using VectorStringType = typename AuxForTargetingExpressionType::VectorStringType;
-	typedef typename AuxForTargetingExpressionType::VectorVectorWithOffsetType
-	    VectorVectorWithOffsetType;
+	using VectorVectorWithOffsetType =
+	    typename AuxForTargetingExpressionType::VectorVectorWithOffsetType;
 	using VectorBoolType               = PsimagLite::Vector<bool>::Type;
 	using VectorSizeType               = typename AlgebraType::VectorSizeType;
 	using ApplyOperatorExpressionType  = typename BaseType::ApplyOperatorExpressionType;

@@ -132,21 +132,20 @@ public:
 	using PostProcType           = typename LanczosSolverType::PostProcType;
 	using TimeSerializerType     = typename TargetingCommonType::TimeSerializerType;
 	using LanczosMatrixType      = typename LanczosSolverType::MatrixType;
-	typedef CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>
-	    CorrectionVectorFunctionType;
-	typedef ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>
-	    ParallelTriDiagType;
-	using MatrixComplexOrRealType = typename ParallelTriDiagType::MatrixComplexOrRealType;
-	using VectorMatrixFieldType   = typename ParallelTriDiagType::VectorMatrixFieldType;
-	using VectorSizeType          = typename PsimagLite::Vector<SizeType>::Type;
-	using VectorVectorRealType    = typename PsimagLite::Vector<VectorRealType>::Type;
-	using InputValidatorType      = typename ModelType::InputValidatorType;
-	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	                                 VectorWithOffsetType,
-	                                 BaseType,
-	                                 TargetParamsType>
-	    CorrectionVectorSkeletonType;
-	using QnType = typename BasisType::QnType;
+	using CorrectionVectorFunctionType
+	    = CorrectionVectorFunction<LanczosMatrixType, TargetParamsType>;
+	using ParallelTriDiagType
+	    = ParallelTriDiag<ModelType, LanczosSolverType, VectorWithOffsetType>;
+	using MatrixComplexOrRealType      = typename ParallelTriDiagType::MatrixComplexOrRealType;
+	using VectorMatrixFieldType        = typename ParallelTriDiagType::VectorMatrixFieldType;
+	using VectorSizeType               = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorVectorRealType         = typename PsimagLite::Vector<VectorRealType>::Type;
+	using InputValidatorType           = typename ModelType::InputValidatorType;
+	using CorrectionVectorSkeletonType = CorrectionVectorSkeleton<LanczosSolverType,
+	                                                              VectorWithOffsetType,
+	                                                              BaseType,
+	                                                              TargetParamsType>;
+	using QnType                       = typename BasisType::QnType;
 
 	TargetingRixsStatic(const LeftRightSuperType&     lrs,
 	                    const CheckpointType&         checkPoint,

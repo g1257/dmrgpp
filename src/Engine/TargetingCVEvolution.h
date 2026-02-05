@@ -124,11 +124,10 @@ public:
 	using InputValidatorType     = typename ModelType::InputValidatorType;
 	using QnType                 = typename BasisType::QnType;
 	using StageEnumType          = typename TargetingCommonType::StageEnumType;
-	typedef CorrectionVectorSkeleton<LanczosSolverType,
-	                                 VectorWithOffsetType,
-	                                 BaseType,
-	                                 TargetParamsType>
-	    CorrectionVectorSkeletonType;
+	using CorrectionVectorSkeletonType = CorrectionVectorSkeleton<LanczosSolverType,
+	                                                              VectorWithOffsetType,
+	                                                              BaseType,
+	                                                              TargetParamsType>;
 	typedef
 	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	using TimeVectorsBaseType = typename ApplyOperatorExpressionType::TimeVectorsBaseType;

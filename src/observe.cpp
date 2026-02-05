@@ -20,11 +20,10 @@ void mainLoop(GeometryType&                   geometry,
 {
 	using ComplexOrRealType = typename VectorWithOffsetType::value_type;
 
-	typedef ModelBase<ModelHelperType,
-	                  ParametersDmrgSolverType,
-	                  InputNgType::Readable,
-	                  GeometryType>
-	    ModelBaseType;
+	using ModelBaseType = ModelBase<ModelHelperType,
+	                                ParametersDmrgSolverType,
+	                                InputNgType::Readable,
+	                                GeometryType>;
 
 	SizeType orbitals = 1.0;
 	try {
@@ -81,8 +80,8 @@ void mainLoop0(InputNgType::Readable&    io,
                const std::string&        list)
 {
 	using ComplexOrRealType = typename MySparseMatrix::value_type;
-	typedef Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>
-	    SuperGeometryType;
+	using SuperGeometryType
+	    = Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>;
 
 	SuperGeometryType superGeometry(io);
 	int               tmp = 0;

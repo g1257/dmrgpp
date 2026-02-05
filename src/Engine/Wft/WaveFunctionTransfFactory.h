@@ -99,34 +99,32 @@ class WaveFunctionTransfFactory {
 
 public:
 
-	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
-	using VectorStringType        = PsimagLite::Vector<PsimagLite::String>::Type;
-	using LeftRightSuperType      = LeftRightSuperType_;
-	using BasisWithOperatorsType  = typename LeftRightSuperType::BasisWithOperatorsType;
-	using BlockDiagonalMatrixType = typename BasisWithOperatorsType::BlockDiagonalMatrixType;
-	using SparseMatrixType        = typename BasisWithOperatorsType::SparseMatrixType;
-	using BasisType               = typename BasisWithOperatorsType::BasisType;
-	using SparseElementType       = typename SparseMatrixType::value_type;
-	using VectorType              = typename PsimagLite::Vector<SparseElementType>::Type;
-	using RealType                = typename BasisWithOperatorsType::RealType;
-	using WaveStructCombinedType  = WaveStructCombined<LeftRightSuperType>;
-	using VectorVectorRealType    = typename WaveStructCombinedType::VectorVectorRealType;
-	using VectorMatrixType        = typename WaveStructCombinedType::VectorMatrixType;
-	using VectorQnType            = typename WaveStructCombinedType::VectorQnType;
-	using VectorWithOffsetType    = VectorWithOffsetType_;
-	using OneSiteSpacesType       = OneSiteSpacesType_;
-	typedef WaveFunctionTransfBase<WaveStructCombinedType,
-	                               VectorWithOffsetType,
-	                               OptionsType_,
-	                               OneSiteSpacesType_>
-	    WaveFunctionTransfBaseType;
-	typedef WaveFunctionTransfLocal<WaveStructCombinedType,
-	                                VectorWithOffsetType,
-	                                OptionsType_,
-	                                OneSiteSpacesType_>
-	    WaveFunctionTransfLocalType;
-	using WftOptionsType    = typename WaveFunctionTransfBaseType::WftOptionsType;
-	using WaveStructSvdType = typename WaveStructCombinedType::WaveStructSvdType;
+	using VectorSizeType             = PsimagLite::Vector<SizeType>::Type;
+	using VectorStringType           = PsimagLite::Vector<PsimagLite::String>::Type;
+	using LeftRightSuperType         = LeftRightSuperType_;
+	using BasisWithOperatorsType     = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BlockDiagonalMatrixType    = typename BasisWithOperatorsType::BlockDiagonalMatrixType;
+	using SparseMatrixType           = typename BasisWithOperatorsType::SparseMatrixType;
+	using BasisType                  = typename BasisWithOperatorsType::BasisType;
+	using SparseElementType          = typename SparseMatrixType::value_type;
+	using VectorType                 = typename PsimagLite::Vector<SparseElementType>::Type;
+	using RealType                   = typename BasisWithOperatorsType::RealType;
+	using WaveStructCombinedType     = WaveStructCombined<LeftRightSuperType>;
+	using VectorVectorRealType       = typename WaveStructCombinedType::VectorVectorRealType;
+	using VectorMatrixType           = typename WaveStructCombinedType::VectorMatrixType;
+	using VectorQnType               = typename WaveStructCombinedType::VectorQnType;
+	using VectorWithOffsetType       = VectorWithOffsetType_;
+	using OneSiteSpacesType          = OneSiteSpacesType_;
+	using WaveFunctionTransfBaseType = WaveFunctionTransfBase<WaveStructCombinedType,
+	                                                          VectorWithOffsetType,
+	                                                          OptionsType_,
+	                                                          OneSiteSpacesType_>;
+	using WaveFunctionTransfLocalType = WaveFunctionTransfLocal<WaveStructCombinedType,
+	                                                            VectorWithOffsetType,
+	                                                            OptionsType_,
+	                                                            OneSiteSpacesType_>;
+	using WftOptionsType              = typename WaveFunctionTransfBaseType::WftOptionsType;
+	using WaveStructSvdType           = typename WaveStructCombinedType::WaveStructSvdType;
 
 	template <typename SomeParametersType>
 	WaveFunctionTransfFactory(SomeParametersType& params)

@@ -25,10 +25,10 @@ public:
 
 	using RealType    = typename PsimagLite::Real<ComplexOrRealType>::Type;
 	using InputNgType = PsimagLite::InputNg<Dmrg::InputCheck>;
-	typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
-	    ParametersDmrgSolverType;
-	typedef Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>
-	    SuperGeometryType;
+	using ParametersDmrgSolverType
+	    = Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>;
+	using SuperGeometryType
+	    = Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>;
 	using VectorWithOffsetType = Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn>;
 	using ApplicationType      = PsimagLite::PsiApp;
 
@@ -46,11 +46,10 @@ public:
 		using BasisWithOperatorsType = Dmrg::BasisWithOperators<BasisType>;
 		using LeftRightSuperType = Dmrg::LeftRightSuper<BasisWithOperatorsType, BasisType>;
 		using ModelHelperType    = Dmrg::ModelHelperLocal<LeftRightSuperType>;
-		typedef Dmrg::ModelBase<ModelHelperType,
-		                        ParametersDmrgSolverType,
-		                        InputNgType::Readable,
-		                        SuperGeometryType>
-		    ModelBaseType;
+		using ModelBaseType      = Dmrg::ModelBase<ModelHelperType,
+		                                           ParametersDmrgSolverType,
+		                                           InputNgType::Readable,
+		                                           SuperGeometryType>;
 
 		std::streambuf* globalCoutBuffer = 0;
 		std::ofstream   globalCoutStream;
@@ -119,12 +118,11 @@ private:
 		if (dmrgSolverParams.options.isSet("printgeometry"))
 			std::cout << geometry;
 
-		typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
-		    ParametersForSolverType;
-		typedef PsimagLite::LanczosSolver<ParametersForSolverType,
-		                                  MatrixVectorType,
-		                                  typename MatrixVectorType::VectorType>
-		    SolverType;
+		using ParametersForSolverType
+		    = PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>;
+		using SolverType    = PsimagLite::LanczosSolver<ParametersForSolverType,
+		                                                MatrixVectorType,
+		                                                typename MatrixVectorType::VectorType>;
 		using ModelBaseType = typename SolverType::MatrixType::ModelType;
 
 		//! Setup the Model

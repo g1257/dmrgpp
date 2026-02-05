@@ -23,8 +23,8 @@ template <typename WaveFunctionTransfBaseType> class WftAccelPatches {
 	using BlockDiagonalMatrixType = typename DmrgWaveStructType::BlockDiagonalMatrixType;
 	using MatrixType              = typename BlockDiagonalMatrixType::BuildingBlockType;
 	using GenIjPatchType          = GenIjPatch<LeftRightSuperType>;
-	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType>
-	    BlockDiagWfType;
+	using BlockDiagWfType
+	    = BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType>;
 
 public:
 

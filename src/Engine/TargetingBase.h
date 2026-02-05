@@ -122,8 +122,8 @@ public:
 	using TargetVectorType        = VectorType;
 	using TargetParamsType        = TargetParamsBase<ModelType>;
 	using TargetHelperType        = TargetHelper<ModelType, WaveFunctionTransfType>;
-	typedef TargetingCommon<TargetHelperType, VectorWithOffsetType, LanczosSolverType>
-	    TargetingCommonType;
+	using TargetingCommonType
+	    = TargetingCommon<TargetHelperType, VectorWithOffsetType, LanczosSolverType>;
 	typedef
 	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
 	using VectorOperatorType     = typename PsimagLite::Vector<OperatorType>::Type;
@@ -133,8 +133,8 @@ public:
 	using VectorRealType         = typename PsimagLite::Vector<RealType>::Type;
 	using VectorVectorType       = typename PsimagLite::Vector<TargetVectorType>::Type;
 	using VectorVectorVectorType = typename PsimagLite::Vector<VectorVectorType>::Type;
-	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	using VectorVectorVectorWithOffsetType =
+	    typename TargetingCommonType::VectorVectorVectorWithOffsetType;
 	using CheckpointType = Checkpoint<ModelType, WaveFunctionTransfType>;
 
 	TargetingBase(const LeftRightSuperType&     lrs,

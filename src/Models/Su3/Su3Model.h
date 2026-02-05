@@ -124,9 +124,9 @@ public:
 	using OpForLinkType             = typename ModelBaseType::OpForLinkType;
 	using ParametersSu3Type         = ParametersSu3<RealType, QnType>;
 	using Su3RepresentationBaseType = Su3RepresentationBase<ComplexOrRealType>;
-	typedef Su3RepresentationP1<ComplexOrRealType,
-	                            PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
-	    Su3RepresentationP1Type;
+	using Su3RepresentationP1Type
+	    = Su3RepresentationP1<ComplexOrRealType,
+	                          PsimagLite::IsComplexNumber<ComplexOrRealType>::True>;
 
 	static const bool IS_REAL = !PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
