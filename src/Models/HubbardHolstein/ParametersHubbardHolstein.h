@@ -90,10 +90,10 @@ struct ParametersHubbardHolstein : public ParametersModelBase<ComplexOrRealType,
 	// no connections here please!!
 	// connections are handled by the geometry
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef ParametersModelBase<ComplexOrRealType, QnType>     BaseType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType>>::Type VectorType;
+	using RealType       = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using BaseType       = ParametersModelBase<ComplexOrRealType, QnType>;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
+	using VectorType = typename PsimagLite::Vector<PsimagLite::Matrix<ComplexOrRealType>>::Type;
 
 	template <typename IoInputType>
 	ParametersHubbardHolstein(IoInputType& io)

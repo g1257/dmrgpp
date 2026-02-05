@@ -93,26 +93,26 @@ namespace Dmrg {
 
 template <typename ParametersType, typename TargetingType> class Truncation {
 
-	typedef typename TargetingType::LeftRightSuperType              LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType              BasisType;
-	typedef typename BasisType::BlockType                           VectorSizeType;
-	typedef typename BasisWithOperatorsType::PairSizeSizeType       PairSizeSizeType;
-	typedef typename LeftRightSuperType::ProgressIndicatorType      ProgressIndicatorType;
-	typedef typename TargetingType::SparseMatrixType                SparseMatrixType;
-	typedef typename TargetingType::RealType                        RealType;
-	typedef typename TargetingType::WaveFunctionTransfType          WaveFunctionTransfType;
-	typedef DensityMatrixLocal<TargetingType>                       DensityMatrixLocalType;
-	typedef DensityMatrixSvd<TargetingType>                         DensityMatrixSvdType;
-	typedef DensityMatrixBase<TargetingType>                        DensityMatrixBaseType;
-	typedef typename DensityMatrixBaseType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename TargetingType::ModelType                       ModelType;
-	typedef typename ModelType::SuperGeometryType                   SuperGeometryType;
-	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
-	typedef typename DensityMatrixBaseType::Params                  ParamsDensityMatrixType;
-	typedef BlockDiagonalMatrixType                                 TransformType;
-	typedef PsimagLite::IoNg::Out                                   IoOutType;
-	using TruncationControlType = TruncationControl<RealType>;
+	using LeftRightSuperType      = typename TargetingType::LeftRightSuperType;
+	using BasisWithOperatorsType  = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType               = typename BasisWithOperatorsType::BasisType;
+	using VectorSizeType          = typename BasisType::BlockType;
+	using PairSizeSizeType        = typename BasisWithOperatorsType::PairSizeSizeType;
+	using ProgressIndicatorType   = typename LeftRightSuperType::ProgressIndicatorType;
+	using SparseMatrixType        = typename TargetingType::SparseMatrixType;
+	using RealType                = typename TargetingType::RealType;
+	using WaveFunctionTransfType  = typename TargetingType::WaveFunctionTransfType;
+	using DensityMatrixLocalType  = DensityMatrixLocal<TargetingType>;
+	using DensityMatrixSvdType    = DensityMatrixSvd<TargetingType>;
+	using DensityMatrixBaseType   = DensityMatrixBase<TargetingType>;
+	using BlockDiagonalMatrixType = typename DensityMatrixBaseType::BlockDiagonalMatrixType;
+	using ModelType               = typename TargetingType::ModelType;
+	using SuperGeometryType       = typename ModelType::SuperGeometryType;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
+	using ParamsDensityMatrixType = typename DensityMatrixBaseType::Params;
+	using TransformType           = BlockDiagonalMatrixType;
+	using IoOutType               = PsimagLite::IoNg::Out;
+	using TruncationControlType   = TruncationControl<RealType>;
 
 	struct TruncationCache {
 

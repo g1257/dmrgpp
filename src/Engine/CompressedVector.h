@@ -9,7 +9,7 @@ template <typename T> class CompressedVector {
 
 public:
 
-	typedef T value_type;
+	using value_type = T;
 
 	CompressedVector()
 	    : size_(0)

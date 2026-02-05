@@ -86,23 +86,23 @@ namespace Dmrg {
 
 template <typename LeftRightSuperType> class InitKronBase {
 
-	typedef typename PsimagLite::Vector<bool>::Type VectorBoolType;
+	using VectorBoolType = typename PsimagLite::Vector<bool>::Type;
 
 public:
 
-	typedef typename LeftRightSuperType::SparseMatrixType            SparseMatrixType;
-	typedef typename LeftRightSuperType::RealType                    RealType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorStorageType     OperatorStorageType;
-	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
-	typedef ArrayOfMatStruct<LeftRightSuperType>                     ArrayOfMatStructType;
-	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType   MatrixDenseOrSparseType;
-	typedef typename LeftRightSuperType::BasisType                   BasisType;
-	typedef typename BasisType::QnType                               QnType;
-	typedef typename ArrayOfMatStructType::GenIjPatchType            GenIjPatchType;
-	typedef typename PsimagLite::Vector<ArrayOfMatStructType*>::Type VectorArrayOfMatStructType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type     VectorType;
-	typedef typename ArrayOfMatStructType::VectorSizeType            VectorSizeType;
+	using SparseMatrixType           = typename LeftRightSuperType::SparseMatrixType;
+	using RealType                   = typename LeftRightSuperType::RealType;
+	using BasisWithOperatorsType     = typename LeftRightSuperType::BasisWithOperatorsType;
+	using OperatorStorageType        = typename BasisWithOperatorsType::OperatorStorageType;
+	using ComplexOrRealType          = typename SparseMatrixType::value_type;
+	using ArrayOfMatStructType       = ArrayOfMatStruct<LeftRightSuperType>;
+	using MatrixDenseOrSparseType    = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
+	using BasisType                  = typename LeftRightSuperType::BasisType;
+	using QnType                     = typename BasisType::QnType;
+	using GenIjPatchType             = typename ArrayOfMatStructType::GenIjPatchType;
+	using VectorArrayOfMatStructType = typename PsimagLite::Vector<ArrayOfMatStructType*>::Type;
+	using VectorType                 = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using VectorSizeType             = typename ArrayOfMatStructType::VectorSizeType;
 
 	enum WhatBasisEnum
 	{

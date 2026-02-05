@@ -95,9 +95,9 @@ namespace Dmrg {
 
 template <typename CheckpointType, typename TargetingType> class Recovery {
 
-	typedef typename CheckpointType::ParametersType    ParametersType;
-	typedef Recovery<ParametersType, int>              RecoveryStaticType;
-	typedef typename CheckpointType::ComplexOrRealType ComplexOrRealType;
+	using ParametersType     = typename CheckpointType::ParametersType;
+	using RecoveryStaticType = Recovery<ParametersType, int>;
+	using ComplexOrRealType  = typename CheckpointType::ComplexOrRealType;
 
 	struct OptionSpec {
 
@@ -123,15 +123,15 @@ template <typename CheckpointType, typename TargetingType> class Recovery {
 
 public:
 
-	typedef PsimagLite::Vector<PsimagLite::String>::Type    VectorStringType;
-	typedef typename CheckpointType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename CheckpointType::WaveFunctionTransfType WaveFunctionTransfType;
-	typedef typename CheckpointType::IoType                 IoType;
-	typedef typename PsimagLite::Vector<SizeType>::Type     VectorSizeType;
-	typedef typename CheckpointType::DiskOrMemoryStackType  DiskOrMemoryStackType;
-	typedef typename CheckpointType::DiskStackType          DiskStackType;
-	typedef PsimagLite::Vector<VectorSizeType>::Type        VectorBlockType;
-	typedef typename CheckpointType::RealType               RealType;
+	using VectorStringType       = PsimagLite::Vector<PsimagLite::String>::Type;
+	using BasisWithOperatorsType = typename CheckpointType::BasisWithOperatorsType;
+	using WaveFunctionTransfType = typename CheckpointType::WaveFunctionTransfType;
+	using IoType                 = typename CheckpointType::IoType;
+	using VectorSizeType         = typename PsimagLite::Vector<SizeType>::Type;
+	using DiskOrMemoryStackType  = typename CheckpointType::DiskOrMemoryStackType;
+	using DiskStackType          = typename CheckpointType::DiskStackType;
+	using VectorBlockType        = PsimagLite::Vector<VectorSizeType>::Type;
+	using RealType               = typename CheckpointType::RealType;
 
 	class SpecOptions {
 

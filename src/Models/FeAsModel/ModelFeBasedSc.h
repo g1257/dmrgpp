@@ -96,38 +96,38 @@ template <typename ModelBaseType> class ModelFeBasedSc : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::VectorSizeType          VectorSizeType;
-	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType       SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType                LinkType;
-	typedef typename ModelHelperType::OperatorsType         OperatorsType;
-	typedef typename OperatorsType::OperatorType            OperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelHelperType::RealType              RealType;
-	typedef typename ModelBaseType::QnType                  QnType;
-	typedef typename QnType::VectorQnType                   VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType      SparseMatrixType;
-	typedef typename SparseMatrixType::value_type           ComplexOrRealType;
-	typedef typename ModelBaseType::HilbertBasisType        HilbertBasisType;
-	typedef typename HilbertBasisType::value_type           HilbertState;
-	typedef HilbertSpaceFeAs<HilbertState>                  HilbertSpaceFeAsType;
-	typedef typename ModelHelperType::BlockType             BlockType;
-	typedef typename ModelBaseType::SolverParamsType        SolverParamsType;
-	typedef typename ModelBaseType::VectorType              VectorType;
-	typedef typename ModelBaseType::MyBasis                 MyBasis;
-	typedef typename ModelBaseType::BasisWithOperatorsType  MyBasisWithOperators;
-	typedef typename ModelBaseType::InputValidatorType      InputValidatorType;
-	typedef typename SuperGeometryType::GeometryDcaType     GeometryDcaType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>           MatrixType;
-	typedef ParametersModelFeAs<ComplexOrRealType, QnType>  ParamsModelFeAsType;
-	typedef typename ModelBaseType::OpsLabelType            OpsLabelType;
-	typedef FeAsJzSymmetry<HilbertBasisType,
-	                       VectorOperatorType,
-	                       PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
-	                                              FeAsJzSymmetryType;
-	typedef typename ModelBaseType::OpForLinkType OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType ModelTermType;
+	using VectorSizeType       = typename ModelBaseType::VectorSizeType;
+	using ModelHelperType      = typename ModelBaseType::ModelHelperType;
+	using SuperGeometryType    = typename ModelBaseType::SuperGeometryType;
+	using LeftRightSuperType   = typename ModelBaseType::LeftRightSuperType;
+	using LinkType             = typename ModelBaseType::LinkType;
+	using OperatorsType        = typename ModelHelperType::OperatorsType;
+	using OperatorType         = typename OperatorsType::OperatorType;
+	using VectorOperatorType   = typename PsimagLite::Vector<OperatorType>::Type;
+	using RealType             = typename ModelHelperType::RealType;
+	using QnType               = typename ModelBaseType::QnType;
+	using VectorQnType         = typename QnType::VectorQnType;
+	using SparseMatrixType     = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType    = typename SparseMatrixType::value_type;
+	using HilbertBasisType     = typename ModelBaseType::HilbertBasisType;
+	using HilbertState         = typename HilbertBasisType::value_type;
+	using HilbertSpaceFeAsType = HilbertSpaceFeAs<HilbertState>;
+	using BlockType            = typename ModelHelperType::BlockType;
+	using SolverParamsType     = typename ModelBaseType::SolverParamsType;
+	using VectorType           = typename ModelBaseType::VectorType;
+	using MyBasis              = typename ModelBaseType::MyBasis;
+	using MyBasisWithOperators = typename ModelBaseType::BasisWithOperatorsType;
+	using InputValidatorType   = typename ModelBaseType::InputValidatorType;
+	using GeometryDcaType      = typename SuperGeometryType::GeometryDcaType;
+	using MatrixType           = PsimagLite::Matrix<ComplexOrRealType>;
+	using ParamsModelFeAsType  = ParametersModelFeAs<ComplexOrRealType, QnType>;
+	using OpsLabelType         = typename ModelBaseType::OpsLabelType;
+	using FeAsJzSymmetryType
+	    = FeAsJzSymmetry<HilbertBasisType,
+	                     VectorOperatorType,
+	                     PsimagLite::IsComplexNumber<ComplexOrRealType>::True>;
+	using OpForLinkType = typename ModelBaseType::OpForLinkType;
+	using ModelTermType = typename ModelBaseType::ModelTermType;
 
 	static const int FERMION_SIGN = -1;
 	static const int SPIN_UP      = HilbertSpaceFeAsType::SPIN_UP;
@@ -635,7 +635,7 @@ private:
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		typedef std::pair<SizeType, SizeType> PairType;
+		using PairType = std::pair<SizeType, SizeType>;
 
 		qns.resize(basis.size(), QnType::zero());
 		VectorSizeType other(2, 0);

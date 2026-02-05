@@ -88,14 +88,14 @@ namespace Dmrg {
 // Yet another sparse matrix class
 template <class ComplexOrRealType> class VerySparseMatrix {
 
-	typedef std::pair<SizeType, SizeType>                        PairType;
-	typedef PsimagLite::Vector<PairType>::Type                   VectorPairType;
-	typedef typename PsimagLite::Vector<SizeType>::Type          VectorSizeType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorComplexOrRealType;
+	using PairType                = std::pair<SizeType, SizeType>;
+	using VectorPairType          = PsimagLite::Vector<PairType>::Type;
+	using VectorSizeType          = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorComplexOrRealType = typename PsimagLite::Vector<ComplexOrRealType>::Type;
 
 public:
 
-	typedef ComplexOrRealType value_type;
+	using value_type = ComplexOrRealType;
 
 	explicit VerySparseMatrix(SizeType rows, SizeType cols)
 	    : rows_(rows)

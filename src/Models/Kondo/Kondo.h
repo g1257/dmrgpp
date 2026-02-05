@@ -7,26 +7,26 @@ namespace Dmrg {
 
 template <typename ModelBaseType> class Kondo : public ModelBaseType {
 
-	typedef typename ModelBaseType::ModelHelperType    ModelHelperType;
-	typedef typename ModelHelperType::OperatorsType    OperatorsType;
-	typedef typename OperatorsType::OperatorType       OperatorType;
-	typedef typename ModelBaseType::VectorOperatorType VectorOperatorType;
-	typedef typename ModelBaseType::VectorQnType       VectorQnType;
-	typedef typename ModelBaseType::BlockType          VectorSizeType;
-	typedef typename ModelBaseType::RealType           RealType;
-	typedef typename ModelBaseType::SparseMatrixType   SparseMatrixType;
-	typedef typename SparseMatrixType::value_type      ComplexOrRealType;
-	typedef typename ModelBaseType::QnType             QnType;
-	typedef typename ModelHelperType::BasisType        BasisType;
-	typedef ParametersKondo<RealType, QnType>          ParametersKondoType;
-	typedef typename ModelBaseType::SuperGeometryType  SuperGeometryType;
-	typedef typename ModelBaseType::SolverParamsType   SolverParamsType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>      MatrixType;
-	typedef typename ModelBaseType::OpsLabelType       OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType      OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType      ModelTermType;
-	typedef std::pair<SizeType, SizeType>              PairSizeType;
+	using ModelHelperType     = typename ModelBaseType::ModelHelperType;
+	using OperatorsType       = typename ModelHelperType::OperatorsType;
+	using OperatorType        = typename OperatorsType::OperatorType;
+	using VectorOperatorType  = typename ModelBaseType::VectorOperatorType;
+	using VectorQnType        = typename ModelBaseType::VectorQnType;
+	using VectorSizeType      = typename ModelBaseType::BlockType;
+	using RealType            = typename ModelBaseType::RealType;
+	using SparseMatrixType    = typename ModelBaseType::SparseMatrixType;
+	using ComplexOrRealType   = typename SparseMatrixType::value_type;
+	using QnType              = typename ModelBaseType::QnType;
+	using BasisType           = typename ModelHelperType::BasisType;
+	using ParametersKondoType = ParametersKondo<RealType, QnType>;
+	using SuperGeometryType   = typename ModelBaseType::SuperGeometryType;
+	using SolverParamsType    = typename ModelBaseType::SolverParamsType;
+	using InputValidatorType  = typename ModelBaseType::InputValidatorType;
+	using MatrixType          = PsimagLite::Matrix<ComplexOrRealType>;
+	using OpsLabelType        = typename ModelBaseType::OpsLabelType;
+	using OpForLinkType       = typename ModelBaseType::OpForLinkType;
+	using ModelTermType       = typename ModelBaseType::ModelTermType;
+	using PairSizeType        = std::pair<SizeType, SizeType>;
 
 public:
 

@@ -13,22 +13,22 @@ template <typename ModelType_> class Braket {
 
 public:
 
-	typedef ModelType_                                         ModelType;
-	typedef typename ModelType::OperatorType                   OperatorType;
-	typedef typename PsimagLite::Vector<int>::Type             VectorIntType;
-	typedef typename OperatorType::PairType                    PairType;
-	typedef typename OperatorType::Su2RelatedType              Su2RelatedType;
-	typedef typename OperatorType::StorageType                 SparseMatrixType;
-	typedef typename SparseMatrixType::value_type              ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef OperatorSpec<ModelType, OperatorType>              OperatorSpecType;
-	typedef typename OperatorSpecType::ResultType              AlgebraType;
-	typedef typename OperatorSpecType::OneOperatorSpecType     OneOperatorSpecType;
-	typedef typename PsimagLite::Vector<AlgebraType>::Type     VectorAlgebraType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type       VectorStringType;
-	typedef PsimagLite::GetBraOrKet                            GetBraOrKetType;
-	typedef PsimagLite::Vector<GetBraOrKetType>::Type          VectorGetBraOrKetType;
+	using ModelType             = ModelType_;
+	using OperatorType          = typename ModelType::OperatorType;
+	using VectorIntType         = typename PsimagLite::Vector<int>::Type;
+	using PairType              = typename OperatorType::PairType;
+	using Su2RelatedType        = typename OperatorType::Su2RelatedType;
+	using SparseMatrixType      = typename OperatorType::StorageType;
+	using ComplexOrRealType     = typename SparseMatrixType::value_type;
+	using MatrixType            = PsimagLite::Matrix<ComplexOrRealType>;
+	using RealType              = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using OperatorSpecType      = OperatorSpec<ModelType, OperatorType>;
+	using AlgebraType           = typename OperatorSpecType::ResultType;
+	using OneOperatorSpecType   = typename OperatorSpecType::OneOperatorSpecType;
+	using VectorAlgebraType     = typename PsimagLite::Vector<AlgebraType>::Type;
+	using VectorStringType      = PsimagLite::Vector<PsimagLite::String>::Type;
+	using GetBraOrKetType       = PsimagLite::GetBraOrKet;
+	using VectorGetBraOrKetType = PsimagLite::Vector<GetBraOrKetType>::Type;
 
 	Braket(const ModelType& model, const PsimagLite::String& braket)
 	    : model_(model)

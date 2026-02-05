@@ -114,24 +114,24 @@ template <typename BasisType_> class Operators {
 
 public:
 
-	typedef std::pair<SizeType, SizeType>                       PairType;
-	typedef BasisType_                                          BasisType;
-	typedef Operators<BasisType_>                               ThisType;
-	typedef typename BasisType::SparseMatrixType                SparseMatrixType;
-	typedef typename SparseMatrixType::value_type               SparseElementType;
-	typedef Operator<SparseElementType>                         OperatorType;
-	typedef typename OperatorType::StorageType                  OperatorStorageType;
-	typedef PsimagLite::Matrix<SparseElementType>               DenseMatrixType;
-	typedef ChangeOfBasis<OperatorStorageType, DenseMatrixType> ChangeOfBasisType;
-	typedef typename OperatorType::StorageType                  StorageType;
-	typedef typename StorageType::value_type                    ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type  RealType;
-	typedef PsimagLite::Concurrency                             ConcurrencyType;
-	typedef typename PsimagLite::Vector<RealType>::Type         VectorRealType;
-	typedef typename PsimagLite::Vector<SizeType>::Type         VectorSizeType;
-	typedef std::pair<SizeType, SizeType>                       PairSizeSizeType;
-	typedef typename ChangeOfBasisType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type     VectorOperatorType;
+	using PairType                = std::pair<SizeType, SizeType>;
+	using BasisType               = BasisType_;
+	using ThisType                = Operators<BasisType_>;
+	using SparseMatrixType        = typename BasisType::SparseMatrixType;
+	using SparseElementType       = typename SparseMatrixType::value_type;
+	using OperatorType            = Operator<SparseElementType>;
+	using OperatorStorageType     = typename OperatorType::StorageType;
+	using DenseMatrixType         = PsimagLite::Matrix<SparseElementType>;
+	using ChangeOfBasisType       = ChangeOfBasis<OperatorStorageType, DenseMatrixType>;
+	using StorageType             = typename OperatorType::StorageType;
+	using ComplexOrRealType       = typename StorageType::value_type;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ConcurrencyType         = PsimagLite::Concurrency;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
+	using VectorSizeType          = typename PsimagLite::Vector<SizeType>::Type;
+	using PairSizeSizeType        = std::pair<SizeType, SizeType>;
+	using BlockDiagonalMatrixType = typename ChangeOfBasisType::BlockDiagonalMatrixType;
+	using VectorOperatorType      = typename PsimagLite::Vector<OperatorType>::Type;
 
 	// law of the excluded middle went out the window here:
 	enum class ChangeAllEnum
@@ -336,7 +336,7 @@ public:
 	                 SizeType                       opsPerSite,
 	                 SizeType                       opOnSiteThreshold)
 	{
-		typedef PsimagLite::Parallelizer<MyLoop> ParallelizerType;
+		using ParallelizerType = PsimagLite::Parallelizer<MyLoop>;
 		ParallelizerType threadObject(PsimagLite::Concurrency::codeSectionParams);
 
 		MyLoop helper(operators_,
@@ -525,8 +525,8 @@ private:
 		superOps_.resize(nSuperOps);
 		ProgramGlobals::FermionOrBosonEnum savedSign
 		    = ProgramGlobals::FermionOrBosonEnum::BOSON;
-		typedef typename SomeSuperOperatorHelperType::PairBoolSizeType PairBoolSizeType;
-		const bool option = (basis3.block().size() == 1);
+		using PairBoolSizeType = typename SomeSuperOperatorHelperType::PairBoolSizeType;
+		const bool option      = (basis3.block().size() == 1);
 		for (SizeType i = 0; i < nSuperOps; ++i) {
 			const PairBoolSizeType op2Index = someSuperOpHelper.leftOperatorIndex(i);
 			const PairBoolSizeType op3Index = someSuperOpHelper.rightOperatorIndex(i);

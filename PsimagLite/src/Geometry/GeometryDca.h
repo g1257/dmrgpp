@@ -27,8 +27,8 @@ template <typename RealType_, typename GeometryType_> class GeometryDca {
 
 public:
 
-	typedef GeometryType_ GeometryType;
-	typedef RealType_     RealType;
+	using GeometryType = GeometryType_;
+	using RealType     = RealType_;
 
 	GeometryDca(const GeometryType& g, SizeType orbitals)
 	    : enabled_(false)

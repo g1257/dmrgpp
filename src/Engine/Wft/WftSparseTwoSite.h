@@ -9,19 +9,19 @@ namespace Dmrg {
 template <typename WaveFunctionTransfBaseType, typename MatrixOrIdentityType>
 class WftSparseTwoSite {
 
-	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType   DmrgWaveStructType;
-	typedef typename WaveFunctionTransfBaseType::WftOptionsType       WftOptionsType;
-	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename WaveFunctionTransfBaseType::VectorSizeType       VectorSizeType;
-	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename VectorWithOffsetType::VectorType            VectorType;
-	typedef typename VectorType::value_type                      ComplexOrRealType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType  BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType    SparseMatrixType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type        VectorMatrixType;
-	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
+	using DmrgWaveStructType     = typename WaveFunctionTransfBaseType::DmrgWaveStructType;
+	using WftOptionsType         = typename WaveFunctionTransfBaseType::WftOptionsType;
+	using VectorWithOffsetType   = typename WaveFunctionTransfBaseType::VectorWithOffsetType;
+	using VectorSizeType         = typename WaveFunctionTransfBaseType::VectorSizeType;
+	using OneSiteSpacesType      = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
+	using LeftRightSuperType     = typename DmrgWaveStructType::LeftRightSuperType;
+	using VectorType             = typename VectorWithOffsetType::VectorType;
+	using ComplexOrRealType      = typename VectorType::value_type;
+	using BasisWithOperatorsType = typename DmrgWaveStructType::BasisWithOperatorsType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using MatrixType             = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorMatrixType       = typename PsimagLite::Vector<MatrixType>::Type;
+	using PackIndicesType        = typename WaveFunctionTransfBaseType::PackIndicesType;
 
 public:
 

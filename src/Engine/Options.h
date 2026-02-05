@@ -12,9 +12,9 @@ template <typename InputValidatorType> class Options {
 
 public:
 
-	typedef typename PsimagLite::String::value_type      CharType;
-	typedef typename PsimagLite::String::const_iterator  StringConstIterator;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	using CharType            = typename PsimagLite::String::value_type;
+	using StringConstIterator = typename PsimagLite::String::const_iterator;
+	using VectorStringType    = PsimagLite::Vector<PsimagLite::String>::Type;
 
 	Options(PsimagLite::String label, InputValidatorType& io)
 	{

@@ -91,20 +91,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename ComplexOrRealType, typename QnType_> class VectorWithOffsets {
 
-	typedef VectorWithOffsets<ComplexOrRealType, QnType_> ThisType;
-	typedef typename QnType_::VectorSizeType              VectorSizeType;
-	typedef typename QnType_::PairSizeType                PairSizeType;
+	using ThisType       = VectorWithOffsets<ComplexOrRealType, QnType_>;
+	using VectorSizeType = typename QnType_::VectorSizeType;
+	using PairSizeType   = typename QnType_::PairSizeType;
 
 	static ComplexOrRealType const zero_;
 
 public:
 
-	typedef QnType_                                              QnType;
-	typedef ComplexOrRealType                                    value_type;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
-	typedef std::pair<SizeType, QnType>                          PairQnType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename PsimagLite::Vector<VectorType>::Type        VectorVectorType;
+	using QnType           = QnType_;
+	using value_type       = ComplexOrRealType;
+	using RealType         = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using PairQnType       = std::pair<SizeType, QnType>;
+	using VectorType       = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using VectorVectorType = typename PsimagLite::Vector<VectorType>::Type;
 
 	VectorWithOffsets()
 	    : progress_("VectorWithOffsets")

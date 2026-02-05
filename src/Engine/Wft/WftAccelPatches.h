@@ -9,22 +9,22 @@ namespace Dmrg {
 
 template <typename WaveFunctionTransfBaseType> class WftAccelPatches {
 
-	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType   DmrgWaveStructType;
-	typedef typename WaveFunctionTransfBaseType::WftOptionsType       WftOptionsType;
-	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename WaveFunctionTransfBaseType::VectorSizeType       VectorSizeType;
-	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename VectorWithOffsetType::VectorType            VectorType;
-	typedef typename VectorType::value_type                      ComplexOrRealType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType  BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType    SparseMatrixType;
-	typedef typename WaveFunctionTransfBaseType::PackIndicesType PackIndicesType;
-	typedef typename DmrgWaveStructType::BlockDiagonalMatrixType BlockDiagonalMatrixType;
-	typedef typename BlockDiagonalMatrixType::BuildingBlockType  MatrixType;
-	typedef GenIjPatch<LeftRightSuperType>                       GenIjPatchType;
-	typedef BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType>
-	    BlockDiagWfType;
+	using DmrgWaveStructType      = typename WaveFunctionTransfBaseType::DmrgWaveStructType;
+	using WftOptionsType          = typename WaveFunctionTransfBaseType::WftOptionsType;
+	using VectorWithOffsetType    = typename WaveFunctionTransfBaseType::VectorWithOffsetType;
+	using VectorSizeType          = typename WaveFunctionTransfBaseType::VectorSizeType;
+	using OneSiteSpacesType       = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
+	using LeftRightSuperType      = typename DmrgWaveStructType::LeftRightSuperType;
+	using VectorType              = typename VectorWithOffsetType::VectorType;
+	using ComplexOrRealType       = typename VectorType::value_type;
+	using BasisWithOperatorsType  = typename DmrgWaveStructType::BasisWithOperatorsType;
+	using SparseMatrixType        = typename BasisWithOperatorsType::SparseMatrixType;
+	using PackIndicesType         = typename WaveFunctionTransfBaseType::PackIndicesType;
+	using BlockDiagonalMatrixType = typename DmrgWaveStructType::BlockDiagonalMatrixType;
+	using MatrixType              = typename BlockDiagonalMatrixType::BuildingBlockType;
+	using GenIjPatchType          = GenIjPatch<LeftRightSuperType>;
+	using BlockDiagWfType
+	    = BlockDiagWf<GenIjPatchType, VectorWithOffsetType, OneSiteSpacesType>;
 
 public:
 

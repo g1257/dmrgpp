@@ -95,7 +95,7 @@ public:
 
 	class Writeable {
 
-		typedef Vector<String>::Type VectorStringType;
+		using VectorStringType = Vector<String>::Type;
 
 	public:
 

@@ -37,7 +37,7 @@ private:
 
 	template <typename RealType> static std::complex<RealType> toComplex(std::string str)
 	{
-		typedef std::complex<RealType> ComplexType;
+		using ComplexType = std::complex<RealType>;
 
 		if (str == "i")
 			return ComplexType(0., 1.);

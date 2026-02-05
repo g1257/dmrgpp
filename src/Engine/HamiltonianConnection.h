@@ -100,29 +100,29 @@ class HamiltonianConnection {
 
 public:
 
-	typedef ModelHelperType_                                          ModelHelperType;
-	typedef ParamsForSolverType_                                      ParamsForSolverType;
-	typedef typename ModelLinksType::SuperGeometryType                SuperGeometryType;
-	typedef HamiltonianAbstract<SuperGeometryType>                    HamiltonianAbstractType;
-	typedef typename ModelHelperType::RealType                        RealType;
-	typedef typename ModelHelperType::SparseMatrixType                SparseMatrixType;
-	typedef typename ModelHelperType::OperatorStorageType             OperatorStorageType;
-	typedef typename SparseMatrixType::value_type                     ComplexOrRealType;
-	typedef VerySparseMatrix<ComplexOrRealType>                       VerySparseMatrixType;
-	typedef typename ModelHelperType::LinkType                        LinkType;
-	typedef std::pair<SizeType, SizeType>                             PairType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type      VectorType;
-	typedef typename PsimagLite::Vector<VectorType>::Type             VectorVectorType;
-	typedef typename PsimagLite::Concurrency                          ConcurrencyType;
-	typedef PsimagLite::Vector<SizeType>::Type                        VectorSizeType;
-	typedef typename ModelHelperType::LeftRightSuperType              LeftRightSuperType;
-	typedef typename PsimagLite::Vector<LinkType>::Type               VectorLinkType;
-	typedef typename ModelHelperType::Aux                             AuxType;
-	typedef OperatorsCached<LeftRightSuperType>                       OperatorsCachedType;
-	typedef SuperOpHelperBase<SuperGeometryType, ParamsForSolverType> SuperOpHelperBaseType;
-	typedef ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>
-	                                       ManyToTwoConnectionType;
-	typedef OpsForLink<LeftRightSuperType> OpsForLinkType;
+	using ModelHelperType         = ModelHelperType_;
+	using ParamsForSolverType     = ParamsForSolverType_;
+	using SuperGeometryType       = typename ModelLinksType::SuperGeometryType;
+	using HamiltonianAbstractType = HamiltonianAbstract<SuperGeometryType>;
+	using RealType                = typename ModelHelperType::RealType;
+	using SparseMatrixType        = typename ModelHelperType::SparseMatrixType;
+	using OperatorStorageType     = typename ModelHelperType::OperatorStorageType;
+	using ComplexOrRealType       = typename SparseMatrixType::value_type;
+	using VerySparseMatrixType    = VerySparseMatrix<ComplexOrRealType>;
+	using LinkType                = typename ModelHelperType::LinkType;
+	using PairType                = std::pair<SizeType, SizeType>;
+	using VectorType              = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using VectorVectorType        = typename PsimagLite::Vector<VectorType>::Type;
+	using ConcurrencyType         = typename PsimagLite::Concurrency;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using LeftRightSuperType      = typename ModelHelperType::LeftRightSuperType;
+	using VectorLinkType          = typename PsimagLite::Vector<LinkType>::Type;
+	using AuxType                 = typename ModelHelperType::Aux;
+	using OperatorsCachedType     = OperatorsCached<LeftRightSuperType>;
+	using SuperOpHelperBaseType   = SuperOpHelperBase<SuperGeometryType, ParamsForSolverType>;
+	using ManyToTwoConnectionType
+	    = ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>;
+	using OpsForLinkType = OpsForLink<LeftRightSuperType>;
 
 	HamiltonianConnection(const LeftRightSuperType&    lrs,
 	                      const ModelLinksType&        lpb,

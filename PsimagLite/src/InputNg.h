@@ -106,7 +106,7 @@ template <typename InputCheckType> class InputNg {
 			SECOND
 		};
 
-		typedef std::pair<String, SizeType> PairType;
+		using PairType = std::pair<String, SizeType>;
 
 	public:
 
@@ -148,10 +148,10 @@ template <typename InputCheckType> class InputNg {
 		}
 	};
 
-	typedef MyCompare MyCompareType;
+	using MyCompareType = MyCompare;
 
-	typedef typename Map<String, String, MyCompareType>::Type               MapStrStrType;
-	typedef typename Map<String, Vector<String>::Type, MyCompareType>::Type MapStrVecType;
+	using MapStrStrType = typename Map<String, String, MyCompareType>::Type;
+	using MapStrVecType = typename Map<String, Vector<String>::Type, MyCompareType>::Type;
 
 public:
 
@@ -178,7 +178,7 @@ public:
 
 	public:
 
-		typedef Vector<String>::Type VectorStringType;
+		using VectorStringType = Vector<String>::Type;
 
 		Writeable(const InputCheckType& inputCheck, String data)
 		    : data_(data)
@@ -575,8 +575,8 @@ public:
 
 	public:
 
-		typedef typename Map<String, String, MyCompareType>::Type MapStringStringType;
-		typedef typename MapStringStringType::iterator            MapStringIteratorType;
+		using MapStringStringType   = typename Map<String, String, MyCompareType>::Type;
+		using MapStringIteratorType = typename MapStringStringType::iterator;
 		typedef typename Map<String, Vector<String>::Type, MyCompareType>::Type::iterator
 		    MapStringVectorIteratorType;
 
@@ -776,8 +776,8 @@ public:
 			if (ainur_)
 				return ainur_->readValue(val, label);
 
-			String                                      label2 = label2label(label);
-			typedef typename VectorLikeType::value_type NumericType;
+			String label2                  = label2label(label);
+			using NumericType              = typename VectorLikeType::value_type;
 			MapStringVectorIteratorType it = findFirstValueForLabel(label2, mapStrVec_);
 			if (it == mapStrVec_.end())
 				throwWithMessage(label, label2);
@@ -962,7 +962,7 @@ public:
 		typename EnableIf<IsComplexNumber<ComplexOrRealType>::True, ComplexOrRealType>::Type
 		stringToComplexOrReal(const String& s) const
 		{
-			typedef typename Real<ComplexOrRealType>::Type RealType;
+			using RealType = typename Real<ComplexOrRealType>::Type;
 
 			if (s[0] != '(') {
 				return stringToReal(s.c_str());

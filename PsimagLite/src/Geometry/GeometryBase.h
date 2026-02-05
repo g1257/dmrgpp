@@ -87,8 +87,8 @@ namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType> class GeometryBase {
 
-	typedef std::pair<SizeType, SizeType> PairType;
-	typedef Matrix<ComplexOrRealType>     MatrixType;
+	using PairType   = std::pair<SizeType, SizeType>;
+	using MatrixType = Matrix<ComplexOrRealType>;
 
 public:
 

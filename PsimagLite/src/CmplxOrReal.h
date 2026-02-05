@@ -10,7 +10,7 @@ template <typename RealType> class CpmlxOrReal<RealType, 1> {
 
 public:
 
-	typedef std::complex<RealType> ComplexType;
+	using ComplexType = std::complex<RealType>;
 
 	CpmlxOrReal(String t)
 	    : isImag_(false)

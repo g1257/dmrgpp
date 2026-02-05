@@ -14,11 +14,11 @@ template <typename MatrixLanczosType, typename TargetParamsType> class ScaledHam
 
 public:
 
-	typedef typename TargetParamsType::RealType                  RealType;
-	typedef typename MatrixLanczosType::ComplexOrRealType        ComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                MatrixType;
-	typedef typename PsimagLite::Vector<RealType>::Type          VectorRealType;
+	using RealType          = typename TargetParamsType::RealType;
+	using ComplexOrRealType = typename MatrixLanczosType::ComplexOrRealType;
+	using VectorType        = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using MatrixType        = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
 
 	ScaledHamiltonian(const MatrixLanczosType&    mat,
 	                  const TargetParamsType&     tstStruct,

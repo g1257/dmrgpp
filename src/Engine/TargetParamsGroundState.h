@@ -83,11 +83,11 @@ namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType> class TargetParamsGroundState : public TargetParamsBase<ModelType> {
 
-	typedef TargetParamsBase<ModelType> BaseType;
+	using BaseType = TargetParamsBase<ModelType>;
 
 public:
 
-	typedef typename ModelType::RealType RealType;
+	using RealType = typename ModelType::RealType;
 
 	TargetParamsGroundState(PsimagLite::String targeting)
 	    : BaseType(targeting)

@@ -12,28 +12,28 @@ template <typename TargetingBaseType> class TermForTargetingExpression {
 
 public:
 
-	typedef typename TargetingBaseType::ModelType               ModelType;
-	typedef typename ModelType::ModelHelperType                 ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorsType      OperatorsType;
-	typedef typename OperatorsType::OperatorType                OperatorType;
-	typedef typename OperatorType::StorageType                  SparseMatrixType;
-	typedef typename TargetingBaseType::VectorWithOffsetType    VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::value_type           ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type  RealType;
-	using VectorType = std::vector<ComplexOrRealType>;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type            VectorStringType;
-	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
-	typedef AuxForTargetingExpression<TargetingBaseType>            AuxiliaryType;
-	typedef typename AuxiliaryType::PvectorsType                    PvectorsType;
-	typedef PsimagLite::OneOperatorSpec                             OneOperatorSpecType;
-	typedef typename PsimagLite::Vector<OneOperatorSpecType*>::Type VectorOneOperatorSpecType;
-	typedef typename OneOperatorSpecType::SiteSplit                 SiteSplitType;
-	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef typename ApplyOperatorExpressionType::BorderEnumType    BorderEnumType;
-	typedef NonLocalForTargetingExpression<TargetingBaseType>
-	    NonLocalForTargetingExpressionType;
+	using ModelType                   = typename TargetingBaseType::ModelType;
+	using ModelHelperType             = typename ModelType::ModelHelperType;
+	using LeftRightSuperType          = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType      = typename LeftRightSuperType::BasisWithOperatorsType;
+	using OperatorsType               = typename BasisWithOperatorsType::OperatorsType;
+	using OperatorType                = typename OperatorsType::OperatorType;
+	using SparseMatrixType            = typename OperatorType::StorageType;
+	using VectorWithOffsetType        = typename TargetingBaseType::VectorWithOffsetType;
+	using ComplexOrRealType           = typename VectorWithOffsetType::value_type;
+	using RealType                    = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorType                  = std::vector<ComplexOrRealType>;
+	using VectorStringType            = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorSizeType              = PsimagLite::Vector<SizeType>::Type;
+	using AuxiliaryType               = AuxForTargetingExpression<TargetingBaseType>;
+	using PvectorsType                = typename AuxiliaryType::PvectorsType;
+	using OneOperatorSpecType         = PsimagLite::OneOperatorSpec;
+	using VectorOneOperatorSpecType   = typename PsimagLite::Vector<OneOperatorSpecType*>::Type;
+	using SiteSplitType               = typename OneOperatorSpecType::SiteSplit;
+	using ApplyOperatorExpressionType = typename TargetingBaseType::ApplyOperatorExpressionType;
+	using BorderEnumType              = typename ApplyOperatorExpressionType::BorderEnumType;
+	using NonLocalForTargetingExpressionType
+	    = NonLocalForTargetingExpression<TargetingBaseType>;
 	using KetType = KetForTargetingExpression<ComplexOrRealType>;
 
 	TermForTargetingExpression(const AuxiliaryType& aux)

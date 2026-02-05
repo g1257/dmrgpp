@@ -25,9 +25,9 @@ template <typename VectorValueType, typename AnglesType_ = int> class Node {
 
 public:
 
-	typedef AnglesType_                                   AnglesType;
-	typedef typename VectorValueType::value_type          ValueType;
-	typedef typename PsimagLite::Vector<AnglesType>::Type VectorAnglesType;
+	using AnglesType       = AnglesType_;
+	using ValueType        = typename VectorValueType::value_type;
+	using VectorAnglesType = typename PsimagLite::Vector<AnglesType>::Type;
 
 	virtual ~Node() { }
 
@@ -61,7 +61,7 @@ public:
 
 template <typename VectorValueType> class Plus : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -81,7 +81,7 @@ public:
 
 template <typename VectorValueType> class Minus : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -101,7 +101,7 @@ public:
 
 template <typename VectorValueType> class Times : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -121,7 +121,7 @@ public:
 
 template <typename VectorValueType> class DividedBy : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -144,7 +144,7 @@ public:
 
 template <typename VectorValueType> class IfGtZero : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -165,7 +165,7 @@ public:
 
 template <typename VectorValueType> class Int : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -187,7 +187,7 @@ public:
 
 template <typename VectorValueType> class Input : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 

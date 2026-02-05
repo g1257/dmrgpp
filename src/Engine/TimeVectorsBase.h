@@ -95,14 +95,14 @@ class TimeVectorsBase {
 
 public:
 
-	typedef typename ModelType::ModelHelperType                     ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
-	typedef typename TargetParamsType::RealType                     RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
-	typedef std::pair<SizeType, SizeType>                           PairType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
-	typedef WftHelper<ModelType, VectorWithOffsetType, WaveFunctionTransfType> WftHelperType;
+	using ModelHelperType            = typename ModelType::ModelHelperType;
+	using LeftRightSuperType         = typename ModelHelperType::LeftRightSuperType;
+	using RealType                   = typename TargetParamsType::RealType;
+	using VectorRealType             = typename PsimagLite::Vector<RealType>::Type;
+	using PairType                   = std::pair<SizeType, SizeType>;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType>::Type;
+	using VectorSizeType             = PsimagLite::Vector<SizeType>::Type;
+	using WftHelperType = WftHelper<ModelType, VectorWithOffsetType, WaveFunctionTransfType>;
 
 	TimeVectorsBase(const ModelType&              model,
 	                const LeftRightSuperType&     lrs,

@@ -87,9 +87,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template <typename MatrixType> class ConjugateGradient {
-	typedef typename MatrixType::value_type              FieldType;
-	typedef typename PsimagLite::Vector<FieldType>::Type VectorType;
-	typedef typename PsimagLite::Real<FieldType>::Type   RealType;
+	using FieldType  = typename MatrixType::value_type;
+	using VectorType = typename PsimagLite::Vector<FieldType>::Type;
+	using RealType   = typename PsimagLite::Real<FieldType>::Type;
 
 public:
 

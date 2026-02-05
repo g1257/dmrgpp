@@ -24,9 +24,9 @@ namespace psimag {
 namespace BLAS {
 
 #ifndef PSI_BLAS_64
-	typedef int IntegerForBlasType;
+	using IntegerForBlasType = int;
 #else
-	typedef long int IntegerForBlasType;
+	using IntegerForBlasType = long int;
 #endif
 
 	//===============================================================

@@ -89,20 +89,20 @@ namespace Dmrg {
 
 template <typename InitKronType> class KronConnections {
 
-	typedef typename InitKronType::SparseMatrixType                SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                  ComplexOrRealType;
-	typedef typename InitKronType::ArrayOfMatStructType            ArrayOfMatStructType;
-	typedef typename InitKronType::GenIjPatchType                  GenIjPatchType;
-	typedef PsimagLite::Concurrency                                ConcurrencyType;
-	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
-	typedef PsimagLite::Vector<SizeType>::Type                     VectorSizeType;
+	using SparseMatrixType        = typename InitKronType::SparseMatrixType;
+	using ComplexOrRealType       = typename SparseMatrixType::value_type;
+	using ArrayOfMatStructType    = typename InitKronType::ArrayOfMatStructType;
+	using GenIjPatchType          = typename InitKronType::GenIjPatchType;
+	using ConcurrencyType         = PsimagLite::Concurrency;
+	using MatrixDenseOrSparseType = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
 
 public:
 
-	typedef PsimagLite::Matrix<ComplexOrRealType>         MatrixType;
-	typedef typename MatrixDenseOrSparseType::VectorType  VectorType;
-	typedef typename PsimagLite::Vector<VectorType>::Type VectorVectorType;
-	typedef typename InitKronType::RealType               RealType;
+	using MatrixType       = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorType       = typename MatrixDenseOrSparseType::VectorType;
+	using VectorVectorType = typename PsimagLite::Vector<VectorType>::Type;
+	using RealType         = typename InitKronType::RealType;
 
 	KronConnections(InitKronType& initKron)
 	    : initKron_(initKron)

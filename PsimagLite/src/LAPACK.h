@@ -22,9 +22,9 @@ namespace psimag {
 namespace LAPACK {
 
 #ifndef PSI_LAPACK_64
-	typedef int IntegerForLapackType;
+	using IntegerForLapackType = int;
 #else
-	typedef long int IntegerForLapackType;
+	using IntegerForLapackType = long int;
 #endif
 	// ============================================================================
 	extern "C" void sgesv_(IntegerForLapackType*,

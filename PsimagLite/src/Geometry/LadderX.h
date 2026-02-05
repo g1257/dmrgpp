@@ -86,7 +86,7 @@ namespace PsimagLite {
 template <typename ComplexOrRealType, typename InputType>
 class LadderX : public GeometryBase<ComplexOrRealType, InputType> {
 
-	typedef Ladder<ComplexOrRealType, InputType> LadderType;
+	using LadderType = Ladder<ComplexOrRealType, InputType>;
 
 public:
 

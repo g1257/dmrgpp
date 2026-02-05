@@ -96,19 +96,19 @@ template <typename SparseMatrixType_> class Basis {
 
 public:
 
-	typedef typename SparseMatrixType_::value_type             SparseElementType;
-	typedef typename PsimagLite::Real<SparseElementType>::Type RealType_;
-	typedef Basis<SparseMatrixType_>                           ThisType;
-	typedef HamiltonianSymmetryLocal<SparseMatrixType_>        HamiltonianSymmetryLocalType;
-	typedef typename PsimagLite::Vector<SizeType>::Type        VectorSizeType;
-	typedef VectorSizeType                                     BlockType;
-	typedef SparseMatrixType_                                  SparseMatrixType;
-	typedef RealType_                                          RealType;
-	typedef PsimagLite::Vector<bool>::Type                     VectorBoolType;
-	typedef Qn                                                 QnType;
-	typedef typename QnType::VectorQnType                      VectorQnType;
-	typedef PsimagLite::Matrix<SparseElementType>              MatrixType;
-	typedef std::pair<SizeType, SizeType>                      PairSizeType;
+	using SparseElementType            = typename SparseMatrixType_::value_type;
+	using RealType_                    = typename PsimagLite::Real<SparseElementType>::Type;
+	using ThisType                     = Basis<SparseMatrixType_>;
+	using HamiltonianSymmetryLocalType = HamiltonianSymmetryLocal<SparseMatrixType_>;
+	using VectorSizeType               = typename PsimagLite::Vector<SizeType>::Type;
+	using BlockType                    = VectorSizeType;
+	using SparseMatrixType             = SparseMatrixType_;
+	using RealType                     = RealType_;
+	using VectorBoolType               = PsimagLite::Vector<bool>::Type;
+	using QnType                       = Qn;
+	using VectorQnType                 = typename QnType::VectorQnType;
+	using MatrixType                   = PsimagLite::Matrix<SparseElementType>;
+	using PairSizeType                 = std::pair<SizeType, SizeType>;
 
 	//! Constructor, s=name of this basis
 	Basis(const PsimagLite::String& s, const BasisTraits&)
@@ -550,9 +550,9 @@ public:
 		if (start >= ncols)
 			err("notReallySortU: wrong start\n");
 
-		VectorQnType                                              qnsSeen;
-		typedef typename PsimagLite::Vector<VectorSizeType>::Type VectorVectorSizeType;
-		VectorVectorSizeType                                      m;
+		VectorQnType qnsSeen;
+		using VectorVectorSizeType = typename PsimagLite::Vector<VectorSizeType>::Type;
+		VectorVectorSizeType m;
 		for (SizeType col = start; col < ncols; ++col) {
 			QnType qForThisColumn = computeQforThisColumn(Uconst, qns, col);
 			typename VectorQnType::const_iterator it

@@ -87,15 +87,15 @@ namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType> class MettsParams : public TargetParamsTimeVectors<ModelType> {
 
-	typedef TargetParamsTimeVectors<ModelType> BaseType;
-	typedef typename BaseType::VectorSizeType  VectorSizeType;
+	using BaseType       = TargetParamsTimeVectors<ModelType>;
+	using VectorSizeType = typename BaseType::VectorSizeType;
 
 public:
 
-	typedef typename ModelType::RealType       RealType;
-	typedef typename ModelType::OperatorType   OperatorType;
-	typedef TargetParamsTimeVectors<ModelType> TimeVectorParamsType;
-	typedef typename OperatorType::StorageType SparseMatrixType;
+	using RealType             = typename ModelType::RealType;
+	using OperatorType         = typename ModelType::OperatorType;
+	using TimeVectorParamsType = TargetParamsTimeVectors<ModelType>;
+	using SparseMatrixType     = typename OperatorType::StorageType;
 
 	template <typename IoInputter>
 	MettsParams(IoInputter& io, PsimagLite::String targeting, const ModelType& model)

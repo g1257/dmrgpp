@@ -11,9 +11,9 @@ template <typename OperatorType_> class LabeledOperators {
 
 	public:
 
-		typedef typename PsimagLite::Vector<OperatorType_>::Type      VectorOperatorType;
-		typedef typename PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
-		typedef std::pair<PsimagLite::String, SizeType>               PairStringSizeType;
+		using VectorOperatorType = typename PsimagLite::Vector<OperatorType_>::Type;
+		using VectorStringType   = typename PsimagLite::Vector<PsimagLite::String>::Type;
+		using PairStringSizeType = std::pair<PsimagLite::String, SizeType>;
 
 		Label(PsimagLite::String name, SizeType kindOfSite)
 		    : name_(name)
@@ -85,7 +85,7 @@ template <typename OperatorType_> class LabeledOperators {
 		VectorStringType   descriptions_;
 	};
 
-	typedef typename PsimagLite::Vector<Label*>::Type VectorLabelType;
+	using VectorLabelType = typename PsimagLite::Vector<Label*>::Type;
 	class IsValue {
 
 	public:
@@ -103,12 +103,12 @@ template <typename OperatorType_> class LabeledOperators {
 
 public:
 
-	typedef OperatorType_                                   OperatorType;
-	typedef Label                                           LabelType;
-	typedef PsimagLite::Vector<SizeType>::Type              VectorSizeType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename OperatorType::value_type               ComplexOrRealType;
-	typedef std::pair<SizeType, SizeType>                   PairSizeType;
+	using OperatorType       = OperatorType_;
+	using LabelType          = Label;
+	using VectorSizeType     = PsimagLite::Vector<SizeType>::Type;
+	using VectorOperatorType = typename PsimagLite::Vector<OperatorType>::Type;
+	using ComplexOrRealType  = typename OperatorType::value_type;
+	using PairSizeType       = std::pair<SizeType, SizeType>;
 
 	LabeledOperators(PsimagLite::String model = "")
 	    : model_(model)

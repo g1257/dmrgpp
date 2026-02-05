@@ -92,17 +92,17 @@ namespace Dmrg {
 
 template <typename InitKronType> class KronMatrix {
 
-	typedef typename InitKronType::SparseMatrixType                SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                  ComplexOrRealType;
-	typedef KronConnections<InitKronType>                          KronConnectionsType;
-	typedef typename KronConnectionsType::MatrixType               MatrixType;
-	typedef typename KronConnectionsType::VectorType               VectorType;
-	typedef typename InitKronType::ArrayOfMatStructType            ArrayOfMatStructType;
-	typedef typename InitKronType::GenIjPatchType                  GenIjPatchType;
-	typedef typename ArrayOfMatStructType::MatrixDenseOrSparseType MatrixDenseOrSparseType;
-	typedef typename PsimagLite::Vector<SizeType>::Type            VectorSizeType;
-	typedef typename GenIjPatchType::BasisType                     BasisType;
-	typedef BATCHED_GEMM<InitKronType>                             BatchedGemmType;
+	using SparseMatrixType        = typename InitKronType::SparseMatrixType;
+	using ComplexOrRealType       = typename SparseMatrixType::value_type;
+	using KronConnectionsType     = KronConnections<InitKronType>;
+	using MatrixType              = typename KronConnectionsType::MatrixType;
+	using VectorType              = typename KronConnectionsType::VectorType;
+	using ArrayOfMatStructType    = typename InitKronType::ArrayOfMatStructType;
+	using GenIjPatchType          = typename InitKronType::GenIjPatchType;
+	using MatrixDenseOrSparseType = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
+	using VectorSizeType          = typename PsimagLite::Vector<SizeType>::Type;
+	using BasisType               = typename GenIjPatchType::BasisType;
+	using BatchedGemmType         = BATCHED_GEMM<InitKronType>;
 
 public:
 

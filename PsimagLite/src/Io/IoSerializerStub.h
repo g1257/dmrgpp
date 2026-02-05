@@ -6,7 +6,7 @@
 #include "IoNgSerializer.h"
 namespace PsimagLite {
 
-typedef IoNgSerializer IoSerializer;
+using IoSerializer = IoNgSerializer;
 
 }
 
@@ -16,7 +16,7 @@ typedef IoNgSerializer IoSerializer;
 
 namespace PsimagLite {
 
-typedef IoSerializerEmpty IoSerializer;
+using IoSerializer = IoSerializerEmpty;
 
 }
 

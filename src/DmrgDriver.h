@@ -27,9 +27,9 @@
 #include "VectorWithOffsets.h"
 
 #ifndef USE_FLOAT
-typedef double RealType;
+using RealType = double;
 #else
-typedef float RealType;
+using RealType = float;
 #endif
 
 struct OperatorOptions {
@@ -53,19 +53,19 @@ struct OperatorOptions {
 	bool               enabled;
 };
 
-typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
-    ParametersDmrgSolverType;
+using InputNgType = PsimagLite::InputNg<Dmrg::InputCheck>;
+using ParametersDmrgSolverType
+    = Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>;
 
 void usageOperator();
 
 template <typename ModelBaseType>
 void operatorDriver(const ModelBaseType& model, const OperatorOptions& obsOptions)
 {
-	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
-	typedef typename ModelHelperType::OperatorsType         OperatorsType;
-	typedef typename OperatorsType::OperatorType            OperatorType;
-	typedef Dmrg::OperatorSpec<ModelBaseType, OperatorType> OperatorSpecType;
+	using ModelHelperType  = typename ModelBaseType::ModelHelperType;
+	using OperatorsType    = typename ModelHelperType::OperatorsType;
+	using OperatorType     = typename OperatorsType::OperatorType;
+	using OperatorSpecType = Dmrg::OperatorSpec<ModelBaseType, OperatorType>;
 
 	if (obsOptions.hasOperatorExpression && obsOptions.label != "") {
 		std::cerr << "You must provide exactly one option: -l or -e;";

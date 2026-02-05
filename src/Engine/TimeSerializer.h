@@ -90,10 +90,10 @@ template <typename VectorType> class TimeSerializer {
 
 public:
 
-	typedef typename VectorType::value_type                    VectorElementType;
-	typedef typename PsimagLite::Real<VectorElementType>::Type RealType;
-	typedef typename PsimagLite::Vector<StageEnum>::Type       VectorStageEnumType;
-	typedef typename PsimagLite::Vector<VectorType*>::Type     VectorVectorType;
+	using VectorElementType   = typename VectorType::value_type;
+	using RealType            = typename PsimagLite::Real<VectorElementType>::Type;
+	using VectorStageEnumType = typename PsimagLite::Vector<StageEnum>::Type;
+	using VectorVectorType    = typename PsimagLite::Vector<VectorType*>::Type;
 
 	template <typename SomeAoeType>
 	TimeSerializer(SizeType           currentTimeStep,

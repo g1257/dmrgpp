@@ -253,10 +253,10 @@ public:
 
 	public:
 
-		typedef int long             LongIntegerType;
+		using LongIntegerType                      = int long;
 		static const LongIntegerType LAST_INSTANCE = -1;
 		static const LongIntegerType ONLY_INSTANCE = 0;
-		typedef unsigned int long    LongSizeType;
+		using LongSizeType                         = unsigned int long;
 
 		In() { }
 

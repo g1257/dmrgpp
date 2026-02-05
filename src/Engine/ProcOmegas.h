@@ -23,14 +23,14 @@ template <typename ComplexOrRealType, typename OmegaParamsType> class ProcOmegas
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type      RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
-	typedef typename PsimagLite::Vector<PsimagLite::String>::Type   VectorStringType;
-	typedef typename PsimagLite::Vector<bool>::Type                 VectorBoolType;
-	typedef PsimagLite::PsiApp                                      ApplicationType;
-	typedef PsimagLite::InputNg<Dmrg::InputCheck>                   InputNgType;
-	typedef OmegasFourier<ComplexOrRealType, InputNgType::Readable> OmegasFourierType;
-	typedef typename OmegasFourierType::VectorComplexType           VectorComplexType;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
+	using VectorStringType  = typename PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorBoolType    = typename PsimagLite::Vector<bool>::Type;
+	using ApplicationType   = PsimagLite::PsiApp;
+	using InputNgType       = PsimagLite::InputNg<Dmrg::InputCheck>;
+	using OmegasFourierType = OmegasFourier<ComplexOrRealType, InputNgType::Readable>;
+	using VectorComplexType = typename OmegasFourierType::VectorComplexType;
 
 	static const SizeType MAX_LINE_SIZE = 409600;
 

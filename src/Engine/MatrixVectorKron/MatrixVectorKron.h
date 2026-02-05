@@ -88,25 +88,25 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename ModelType_> class MatrixVectorKron : public MatrixVectorBase<ModelType_> {
 
-	typedef MatrixVectorBase<ModelType_> BaseType;
+	using BaseType = MatrixVectorBase<ModelType_>;
 
 	static const bool CHECK_KRON = true;
 
 public:
 
-	typedef ModelType_                                           ModelType;
-	typedef typename ModelType::ModelHelperType                  ModelHelperType;
-	typedef typename ModelType::ParametersType                   ParametersType;
-	typedef typename ModelHelperType::RealType                   RealType;
-	typedef InitKronHamiltonian<ModelType>                       InitKronType;
-	typedef KronMatrix<InitKronType>                             KronMatrixType;
-	typedef typename ModelHelperType::SparseMatrixType           SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type          VectorRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                FullMatrixType;
-	typedef typename SparseMatrixType::value_type                value_type;
-	typedef typename ModelType::HamiltonianConnectionType        HamiltonianConnectionType;
+	using ModelType                 = ModelType_;
+	using ModelHelperType           = typename ModelType::ModelHelperType;
+	using ParametersType            = typename ModelType::ParametersType;
+	using RealType                  = typename ModelHelperType::RealType;
+	using InitKronType              = InitKronHamiltonian<ModelType>;
+	using KronMatrixType            = KronMatrix<InitKronType>;
+	using SparseMatrixType          = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType         = typename SparseMatrixType::value_type;
+	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
+	using VectorType                = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using FullMatrixType            = PsimagLite::Matrix<ComplexOrRealType>;
+	using value_type                = typename SparseMatrixType::value_type;
+	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
 
 	MatrixVectorKron(const ModelType&                     model,
 	                 const HamiltonianConnectionType&     hc,

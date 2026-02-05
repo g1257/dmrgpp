@@ -92,14 +92,14 @@ class TargetParamsCorrectionVector : public TargetParamsCommon<ModelType> {
 
 public:
 
-	typedef TargetParamsCommon<ModelType>             BaseType;
-	typedef typename ModelType::RealType              RealType;
-	typedef typename BaseType::BaseType::PairFreqType PairFreqType;
-	typedef typename ModelType::OperatorType          OperatorType;
-	typedef typename OperatorType::PairType           PairType;
-	typedef typename OperatorType::StorageType        SparseMatrixType;
-	typedef typename SparseMatrixType::value_type     ComplexOrReal;
-	typedef PsimagLite::Matrix<ComplexOrReal>         MatrixType;
+	using BaseType         = TargetParamsCommon<ModelType>;
+	using RealType         = typename ModelType::RealType;
+	using PairFreqType     = typename BaseType::BaseType::PairFreqType;
+	using OperatorType     = typename ModelType::OperatorType;
+	using PairType         = typename OperatorType::PairType;
+	using SparseMatrixType = typename OperatorType::StorageType;
+	using ComplexOrReal    = typename SparseMatrixType::value_type;
+	using MatrixType       = PsimagLite::Matrix<ComplexOrReal>;
 
 	template <typename IoInputter>
 	TargetParamsCorrectionVector(IoInputter&        io,

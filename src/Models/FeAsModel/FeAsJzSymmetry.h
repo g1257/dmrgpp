@@ -13,13 +13,13 @@ namespace Dmrg {
 template <typename HilbertBasisType, typename VectorOperatorType, bool> class FeAsJzSymmetry {
 public:
 
-	typedef typename VectorOperatorType::value_type            OperatorType;
-	typedef typename OperatorType::StorageType                 OperatorStorageType;
-	typedef typename OperatorStorageType::value_type           ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
+	using OperatorType        = typename VectorOperatorType::value_type;
+	using OperatorStorageType = typename OperatorType::StorageType;
+	using ComplexOrRealType   = typename OperatorStorageType::value_type;
+	using MatrixType          = PsimagLite::Matrix<ComplexOrRealType>;
+	using RealType            = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType      = typename PsimagLite::Vector<RealType>::Type;
+	using VectorSizeType      = PsimagLite::Vector<SizeType>::Type;
 
 	FeAsJzSymmetry(bool) { }
 	void init(HilbertBasisType&, VectorOperatorType&) { }
@@ -38,15 +38,15 @@ class FeAsJzSymmetry<HilbertBasisType, VectorOperatorType, true> {
 
 public:
 
-	typedef typename VectorOperatorType::value_type            OperatorType;
-	typedef typename OperatorType::StorageType                 OperatorStorageType;
-	typedef typename OperatorStorageType::value_type           ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
-	typedef typename HilbertBasisType::value_type              WordType;
-	typedef HilbertSpaceFeAs<WordType>                         HilbertSpaceFeAsType;
+	using OperatorType         = typename VectorOperatorType::value_type;
+	using OperatorStorageType  = typename OperatorType::StorageType;
+	using ComplexOrRealType    = typename OperatorStorageType::value_type;
+	using MatrixType           = PsimagLite::Matrix<ComplexOrRealType>;
+	using RealType             = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType       = typename PsimagLite::Vector<RealType>::Type;
+	using VectorSizeType       = PsimagLite::Vector<SizeType>::Type;
+	using WordType             = typename HilbertBasisType::value_type;
+	using HilbertSpaceFeAsType = HilbertSpaceFeAs<WordType>;
 
 	static const int SPIN_UP   = HilbertSpaceFeAsType::SPIN_UP;
 	static const int SPIN_DOWN = HilbertSpaceFeAsType::SPIN_DOWN;
