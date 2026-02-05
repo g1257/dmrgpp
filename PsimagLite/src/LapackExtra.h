@@ -23,9 +23,9 @@ Please see full open source license included in file LICENSE.
 #include <complex>
 
 #ifndef PSI_LAPACK_64
-typedef int IntegerForLapackType;
+using IntegerForLapackType = int;
 #else
-typedef long int IntegerForLapackType;
+using IntegerForLapackType = long int;
 #endif
 
 extern "C" void zheev_(char*,

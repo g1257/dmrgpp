@@ -54,9 +54,9 @@ class Ainur {
 
 public:
 
-	typedef std::string::iterator        IteratorType;
-	typedef Vector<char>::Type           VectorCharType;
-	typedef AinurState::VectorStringType VectorStringType;
+	using IteratorType     = std::string::iterator;
+	using VectorCharType   = Vector<char>::Type;
+	using VectorStringType = AinurState::VectorStringType;
 
 	Ainur(String str);
 

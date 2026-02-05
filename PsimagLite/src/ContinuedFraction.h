@@ -43,16 +43,16 @@ namespace PsimagLite {
 template <typename TridiagonalMatrixType_> class ContinuedFraction {
 public:
 
-	typedef TridiagonalMatrixType_                                  TridiagonalMatrixType;
-	typedef typename TridiagonalMatrixType::value_type              MatrixElementType;
-	typedef typename Real<MatrixElementType>::Type                  RealType;
-	typedef typename std::complex<RealType>                         ComplexType;
-	typedef typename TridiagonalMatrixType::value_type              FieldType;
-	typedef Matrix<FieldType>                                       MatrixType;
-	typedef Matrix<RealType>                                        MatrixRealType;
-	typedef typename Vector<std::pair<RealType, ComplexType>>::Type PlotDataType;
-	typedef PlotParams<RealType>                                    PlotParamsType;
-	typedef ParametersForSolver<RealType>                           ParametersType;
+	using TridiagonalMatrixType = TridiagonalMatrixType_;
+	using MatrixElementType     = typename TridiagonalMatrixType::value_type;
+	using RealType              = typename Real<MatrixElementType>::Type;
+	using ComplexType           = typename std::complex<RealType>;
+	using FieldType             = typename TridiagonalMatrixType::value_type;
+	using MatrixType            = Matrix<FieldType>;
+	using MatrixRealType        = Matrix<RealType>;
+	using PlotDataType          = typename Vector<std::pair<RealType, ComplexType>>::Type;
+	using PlotParamsType        = PlotParams<RealType>;
+	using ParametersType        = ParametersForSolver<RealType>;
 
 	ContinuedFraction(const TridiagonalMatrixType& ab, const ParametersType& params)
 	    : progress_("ContinuedFraction")

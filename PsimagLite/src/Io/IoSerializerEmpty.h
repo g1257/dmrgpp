@@ -10,7 +10,7 @@ namespace PsimagLite {
 
 class IoSerializerEmpty {
 
-	typedef std::vector<unsigned char> VectorOfBoolInternalType;
+	using VectorOfBoolInternalType = std::vector<unsigned char>;
 
 public:
 

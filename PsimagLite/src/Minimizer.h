@@ -44,9 +44,9 @@ void myFdFunction(const gsl_vector* v, void* params, double* f, gsl_vector* df)
 
 template <typename RealType, typename FunctionType> class Minimizer {
 
-	typedef typename FunctionType::FieldType  FieldType;
-	typedef typename Vector<FieldType>::Type  VectorType;
-	typedef Minimizer<RealType, FunctionType> ThisType;
+	using FieldType  = typename FunctionType::FieldType;
+	using VectorType = typename Vector<FieldType>::Type;
+	using ThisType   = Minimizer<RealType, FunctionType>;
 
 public:
 
@@ -255,8 +255,8 @@ namespace PsimagLite {
 
 template <typename RealType, typename FunctionType> class Minimizer {
 
-	typedef typename FunctionType::FieldType FieldType;
-	typedef typename Vector<FieldType>::Type VectorType;
+	using FieldType  = typename FunctionType::FieldType;
+	using VectorType = typename Vector<FieldType>::Type;
 
 public:
 

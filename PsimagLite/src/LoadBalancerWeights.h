@@ -9,7 +9,7 @@ class LoadBalancerWeights {
 
 public:
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	using VectorSizeType = PsimagLite::Vector<SizeType>::Type;
 
 	LoadBalancerWeights(SizeType ntasks, SizeType nthreads)
 	    : LoadBalancerWeights(VectorSizeType(ntasks, 1),

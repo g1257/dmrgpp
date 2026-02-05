@@ -96,11 +96,11 @@ namespace PsimagLite {
 template <typename SolverParametersType, typename MatrixType, typename VectorType>
 class DavidsonSolver : public LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType> {
 
-	typedef typename SolverParametersType::RealType                             RealType;
-	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType> BaseType;
-	typedef typename VectorType::value_type     ComplexOrRealType;
-	typedef typename BaseType::VectorRealType   VectorRealType;
-	typedef typename BaseType::VectorVectorType VectorVectorType;
+	using RealType = typename SolverParametersType::RealType;
+	using BaseType = LanczosOrDavidsonBase<SolverParametersType, MatrixType, VectorType>;
+	using ComplexOrRealType = typename VectorType::value_type;
+	using VectorRealType    = typename BaseType::VectorRealType;
+	using VectorVectorType  = typename BaseType::VectorVectorType;
 
 public:
 

@@ -11,7 +11,7 @@ template <typename RealType, typename InputType> class GeometryEx {
 
 public:
 
-	typedef typename Vector<RealType>::Type VectorRealType;
+	using VectorRealType = typename Vector<RealType>::Type;
 
 	GeometryEx()
 	    : meshLength_(0)
@@ -131,7 +131,7 @@ template <typename RealType, typename InputType> class GeometryEx {
 
 public:
 
-	typedef typename Vector<RealType>::Type VectorRealType;
+	using VectorRealType = typename Vector<RealType>::Type;
 
 	GeometryEx(InputType& io, SizeType meshPoints)
 	{

@@ -88,8 +88,8 @@ namespace PsimagLite {
 
 namespace MPI {
 
-	typedef MPI_Comm CommType;
-	extern CommType  COMM_WORLD;
+	using CommType = MPI_Comm;
+	extern CommType COMM_WORLD;
 
 	template <typename T> struct MpiData {
 		static const MPI_Datatype Type;
@@ -137,11 +137,11 @@ namespace MPI {
 	                  void>::Type
 	recv(SomeVectorType& v, int source, int tag, CommType mpiComm = COMM_WORLD)
 	{
-		typedef typename SomeVectorType::value_type NumericType;
-		String                                      name     = "MPI_Send";
-		MPI_Datatype                                datatype = MpiData<NumericType>::Type;
-		MPI_Status                                  status;
-		SizeType                                    total = v.size();
+		using NumericType     = typename SomeVectorType::value_type;
+		String       name     = "MPI_Send";
+		MPI_Datatype datatype = MpiData<NumericType>::Type;
+		MPI_Status   status;
+		SizeType     total = v.size();
 		recv(total, source, tag, mpiComm);
 		if (v.size() != total)
 			v.resize(total);
@@ -156,8 +156,8 @@ namespace MPI {
 	                  void>::Type
 	recv(SomeVectorType& v, int source, int tag, CommType mpiComm = COMM_WORLD)
 	{
-		typedef typename SomeVectorType::value_type NumericType;
-		String                                      name = "MPI_Send";
+		using NumericType     = typename SomeVectorType::value_type;
+		String       name     = "MPI_Send";
 		MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
 		MPI_Status   status;
 		SizeType     total = v.size();
@@ -192,10 +192,10 @@ namespace MPI {
 	                  void>::Type
 	send(SomeVectorType& v, int dest, int tag, CommType mpiComm = COMM_WORLD)
 	{
-		typedef typename SomeVectorType::value_type NumericType;
-		String                                      name     = "MPI_Send";
-		MPI_Datatype                                datatype = MpiData<NumericType>::Type;
-		int                                         total    = v.size();
+		using NumericType     = typename SomeVectorType::value_type;
+		String       name     = "MPI_Send";
+		MPI_Datatype datatype = MpiData<NumericType>::Type;
+		int          total    = v.size();
 		send(total, dest, tag, mpiComm);
 		int errorCode = MPI_Send(&(v[0]), v.size(), datatype, dest, tag, mpiComm);
 		checkError(errorCode, name, mpiComm);
@@ -207,8 +207,8 @@ namespace MPI {
 	                  void>::Type
 	send(SomeVectorType& v, int dest, int tag, CommType mpiComm = COMM_WORLD)
 	{
-		typedef typename SomeVectorType::value_type NumericType;
-		String                                      name = "MPI_Send";
+		using NumericType     = typename SomeVectorType::value_type;
+		String       name     = "MPI_Send";
 		MPI_Datatype datatype = MpiData<typename NumericType::value_type>::Type;
 		int          total    = v.size();
 		send(total, dest, tag, mpiComm);
@@ -223,9 +223,9 @@ namespace MPI {
 	                  void>::Type
 	pointByPointGather(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
 	{
-		typedef typename SomeVectorType::value_type NumericType;
-		int                                         mpiRank = MPI::commRank(mpiComm);
-		int                                         nprocs  = MPI::commSize(mpiComm);
+		using NumericType  = typename SomeVectorType::value_type;
+		int      mpiRank   = MPI::commRank(mpiComm);
+		int      nprocs    = MPI::commSize(mpiComm);
 		SizeType blockSize = static_cast<SizeType>(v.size() / nprocs);
 		if (v.size() % nprocs != 0)
 			blockSize++;
@@ -329,8 +329,8 @@ namespace MPI {
 	    void>::Type
 	bcast(SomeVectorType& v, int root = 0, CommType mpiComm = COMM_WORLD)
 	{
-		typedef typename SomeVectorType::value_type DataType;
-		String                                      name = "MPI_Bcast";
+		using DataType = typename SomeVectorType::value_type;
+		String name    = "MPI_Bcast";
 		for (SizeType i = 0; i < v.size(); i++) {
 			DataType& vv        = v[i];
 			int       total     = vv.size();

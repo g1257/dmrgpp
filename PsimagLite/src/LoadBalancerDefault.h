@@ -9,7 +9,7 @@ class LoadBalancerDefault {
 
 public:
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	using VectorSizeType = PsimagLite::Vector<SizeType>::Type;
 
 	LoadBalancerDefault(SizeType ntasks, SizeType nthreads)
 	    : blockSize_(ntasks / nthreads)

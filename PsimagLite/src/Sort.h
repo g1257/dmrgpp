@@ -10,8 +10,8 @@ namespace PsimagLite {
 template <typename ContainerType> class Sort {
 public:
 
-	typedef typename ContainerType::value_type FieldType;
-	typedef std::pair<FieldType, SizeType>     PairType;
+	using FieldType = typename ContainerType::value_type;
+	using PairType  = std::pair<FieldType, SizeType>;
 	class Compare {
 
 	public:

@@ -12,16 +12,16 @@ class LanczosSolver : public LanczosOrDavidsonBase<SolverParametersType, MatrixT
 
 public:
 
-	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType_> BaseType;
-	typedef LanczosCore<SolverParametersType, MatrixType_, VectorType_> LanczosCoreType;
-	typedef typename LanczosCoreType::TridiagonalMatrixType             TridiagonalMatrixType;
-	typedef typename LanczosCoreType::RealType                          RealType;
-	typedef typename LanczosCoreType::VectorType                        VectorType;
-	typedef typename Vector<VectorType>::Type                           VectorVectorType;
-	typedef typename LanczosCoreType::VectorRealType                    VectorRealType;
-	typedef MatrixType_                                                 MatrixType;
-	typedef ContinuedFraction<TridiagonalMatrixType>                    PostProcType;
-	typedef SolverParametersType                                        ParametersSolverType;
+	using BaseType = LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType_>;
+	using LanczosCoreType       = LanczosCore<SolverParametersType, MatrixType_, VectorType_>;
+	using TridiagonalMatrixType = typename LanczosCoreType::TridiagonalMatrixType;
+	using RealType              = typename LanczosCoreType::RealType;
+	using VectorType            = typename LanczosCoreType::VectorType;
+	using VectorVectorType      = typename Vector<VectorType>::Type;
+	using VectorRealType        = typename LanczosCoreType::VectorRealType;
+	using MatrixType            = MatrixType_;
+	using PostProcType          = ContinuedFraction<TridiagonalMatrixType>;
+	using ParametersSolverType  = SolverParametersType;
 
 	LanczosSolver(const MatrixType& mat, const SolverParametersType& params)
 	    : ls_(mat, params, BaseType::isReorthoEnabled(params))

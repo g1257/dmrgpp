@@ -108,21 +108,21 @@ namespace PsimagLite {
 template <typename SolverParametersType, typename MatrixType_, typename VectorType>
 class ChebyshevSolver {
 
-	typedef LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType> NotBaseType;
-	typedef typename SolverParametersType::RealType                              RealType;
-	typedef LanczosVectors<MatrixType_, VectorType>          LanczosVectorsType;
-	typedef typename LanczosVectorsType::DenseMatrixType     DenseMatrixType;
-	typedef typename LanczosVectorsType::DenseMatrixRealType DenseMatrixRealType;
-	typedef typename LanczosVectorsType::VectorVectorType    VectorVectorType;
+	using NotBaseType = LanczosOrDavidsonBase<SolverParametersType, MatrixType_, VectorType>;
+	using RealType    = typename SolverParametersType::RealType;
+	using LanczosVectorsType  = LanczosVectors<MatrixType_, VectorType>;
+	using DenseMatrixType     = typename LanczosVectorsType::DenseMatrixType;
+	using DenseMatrixRealType = typename LanczosVectorsType::DenseMatrixRealType;
+	using VectorVectorType    = typename LanczosVectorsType::VectorVectorType;
 
 public:
 
-	typedef SolverParametersType                       ParametersSolverType;
-	typedef MatrixType_                                MatrixType;
-	typedef TridiagonalMatrix<RealType>                TridiagonalMatrixType;
-	typedef typename VectorType::value_type            VectorElementType;
-	typedef ChebyshevSerializer<TridiagonalMatrixType> PostProcType;
-	typedef PsimagLite::Random48<RealType>             RngType;
+	using ParametersSolverType  = SolverParametersType;
+	using MatrixType            = MatrixType_;
+	using TridiagonalMatrixType = TridiagonalMatrix<RealType>;
+	using VectorElementType     = typename VectorType::value_type;
+	using PostProcType          = ChebyshevSerializer<TridiagonalMatrixType>;
+	using RngType               = PsimagLite::Random48<RealType>;
 
 	enum
 	{

@@ -25,12 +25,12 @@ namespace PsimagLite {
 template <typename PrimitivesType> class ExpressionForAST {
 public:
 
-	typedef typename PrimitivesType::VectorValueType VectorValueType;
-	typedef typename VectorValueType::value_type     ValueType;
-	typedef Tree<PrimitivesType>                     TreeType;
-	typedef Vector<String>::Type                     VectorStringType;
-	typedef Node<VectorValueType>                    NodeType;
-	typedef typename Vector<TreeType*>::Type         VectorTreeType;
+	using VectorValueType  = typename PrimitivesType::VectorValueType;
+	using ValueType        = typename VectorValueType::value_type;
+	using TreeType         = Tree<PrimitivesType>;
+	using VectorStringType = Vector<String>::Type;
+	using NodeType         = Node<VectorValueType>;
+	using VectorTreeType   = typename Vector<TreeType*>::Type;
 
 	ExpressionForAST(const VectorStringType& vecStr, PrimitivesType& primitives)
 	{

@@ -9,12 +9,12 @@ class AinurReadable {
 
 public:
 
-	typedef Store                              StoreType;
-	typedef Vector<StoreType>::Type            VectorStoreType;
-	typedef StoreType::AinurLexicalType        AinurLexicalType;
-	typedef AinurLexicalType::VectorStringType VectorStringType;
-	typedef DoubleOrFloatType                  RealType;
-	typedef std::complex<RealType>             ComplexType;
+	using StoreType        = Store;
+	using VectorStoreType  = Vector<StoreType>::Type;
+	using AinurLexicalType = StoreType::AinurLexicalType;
+	using VectorStringType = AinurLexicalType::VectorStringType;
+	using RealType         = DoubleOrFloatType;
+	using ComplexType      = std::complex<RealType>;
 
 	AinurReadable(const VectorStringType& names, const VectorStoreType& storage)
 	    : names_(names)

@@ -129,8 +129,8 @@ template <class T> class CrsMatrix {
 
 public:
 
-	typedef T MatrixElementType;
-	typedef T value_type;
+	using MatrixElementType = T;
+	using value_type        = T;
 
 	CrsMatrix()
 	    : nrow_(0)

@@ -108,8 +108,8 @@ public:
 		TYPE_C
 	};
 
-	typedef std::pair<TypeEnum, SubtypeEnum>           PairType;
-	typedef GeometryBase<ComplexOrRealType, InputType> GeometryBaseType;
+	using PairType         = std::pair<TypeEnum, SubtypeEnum>;
+	using GeometryBaseType = GeometryBase<ComplexOrRealType, InputType>;
 
 	KTwoNiFFour() { }
 

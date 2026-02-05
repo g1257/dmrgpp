@@ -91,7 +91,7 @@ namespace PsimagLite {
 
 class Concurrency {
 
-	typedef LabelDisabled MpiDisabledType;
+	using MpiDisabledType = LabelDisabled;
 
 public:
 
@@ -100,8 +100,8 @@ public:
 
 #ifndef USE_PTHREADS
 
-	typedef int      MutexType;
-	typedef SizeType PthreadtType;
+	using MutexType    = int;
+	using PthreadtType = SizeType;
 
 	static void mutexLock(MutexType*) { }
 
@@ -117,8 +117,8 @@ public:
 
 #include <pthread.h>
 
-	typedef pthread_mutex_t MutexType;
-	typedef pthread_t       PthreadtType;
+	using MutexType    = pthread_mutex_t;
+	using PthreadtType = pthread_t;
 
 	static void mutexInit(MutexType* mutex)
 	{

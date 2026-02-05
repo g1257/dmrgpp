@@ -28,13 +28,13 @@ namespace PsimagLite {
 template <typename ComplexOrRealType> class Real {
 public:
 
-	typedef ComplexOrRealType Type;
+	using Type = ComplexOrRealType;
 };
 
 template <typename RealType> class Real<std::complex<RealType>> {
 public:
 
-	typedef RealType Type;
+	using Type = RealType;
 };
 
 template <typename T> class IsComplexNumber {

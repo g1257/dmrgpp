@@ -15,7 +15,7 @@
 
 namespace PsimagLite {
 template <typename FunctionType> class RootFindingBisection {
-	typedef typename FunctionType::RealType RealType;
+	using RealType = typename FunctionType::RealType;
 
 public:
 

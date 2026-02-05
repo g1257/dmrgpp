@@ -10,8 +10,8 @@ template <typename ComplexOrRealType> class Dispersion {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
+	using RealType       = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
 
 	Dispersion(PsimagLite::String option, SizeType N)
 	    : ek_(N)

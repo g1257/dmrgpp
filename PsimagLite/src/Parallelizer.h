@@ -104,11 +104,11 @@ class Parallelizer
 #ifdef USE_PTHREADS
 
     : public ActualPthreadsName<InstanceType, LoadBalancerType> {
-	typedef ActualPthreadsName<InstanceType, LoadBalancerType> BaseType;
+	using BaseType = ActualPthreadsName<InstanceType, LoadBalancerType>;
 
 #else
     : public ActualNoPthreadsName<InstanceType, LoadBalancerType> {
-	typedef ActualNoPthreadsName<InstanceType, LoadBalancerType> BaseType;
+	using BaseType = ActualNoPthreadsName<InstanceType, LoadBalancerType>;
 #endif
 
 public:
