@@ -94,8 +94,8 @@ namespace Dmrg {
 template <typename LanczosSolverType_, typename VectorWithOffsetType_>
 class TargetingMetts : public TargetingBase<LanczosSolverType_, VectorWithOffsetType_> {
 
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef std::pair<SizeType, SizeType>      PairSizeType;
+	using VectorSizeType = PsimagLite::Vector<SizeType>::Type;
+	using PairSizeType   = std::pair<SizeType, SizeType>;
 
 	struct MettsPrev {
 
@@ -110,69 +110,66 @@ class TargetingMetts : public TargetingBase<LanczosSolverType_, VectorWithOffset
 
 public:
 
-	typedef LanczosSolverType_                                      LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::OptionsType                          OptionsType;
-	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
-	typedef typename BaseType::CheckpointType                       CheckpointType;
-	typedef typename MatrixVectorType::ModelType                    ModelType;
-	typedef typename ModelType::RealType                            RealType;
-	typedef typename ModelType::OperatorsType                       OperatorsType;
-	typedef typename ModelType::ModelHelperType                     ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType              BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                   ComplexOrRealType;
-	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType               TargetVectorType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType       TridiagonalMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
-	typedef MettsParams<ModelType>                                  TargetParamsType;
-	typedef typename BasisType::BlockType                           BlockType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                   MatrixType;
-	typedef BlockDiagonalMatrix<MatrixType>                         BlockDiagonalMatrixType;
-	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
-	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType> ApplyOperatorType;
-	typedef typename ApplyOperatorType::BorderEnum                       BorderEnumType;
-	typedef MettsSerializer<VectorWithOffsetType>                        MettsSerializerType;
-	typedef typename PsimagLite::RandomForTests<RealType>                RngType;
-	typedef MettsStochastics<ModelType, RngType>                         MettsStochasticsType;
-	typedef typename MettsStochasticsType::PairType                      PairType;
-	typedef MettsCollapse<VectorWithOffsetType, MettsStochasticsType, TargetParamsType>
-	                                                         MettsCollapseType;
-	typedef typename MettsCollapseType::PackIndicesType      PackIndicesType;
-	typedef typename TargetingCommonType::TimeSerializerType TimeSerializerType;
-	typedef TimeVectorsKrylov<TargetParamsType,
-	                          ModelType,
-	                          WaveFunctionTransfType,
-	                          LanczosSolverType,
-	                          VectorWithOffsetType>
-	    TimeVectorsKrylovType;
-	typedef TimeVectorsRungeKutta<TargetParamsType,
-	                              ModelType,
-	                              WaveFunctionTransfType,
-	                              LanczosSolverType,
-	                              VectorWithOffsetType>
-	    TimeVectorsRungeKuttaType;
-	typedef TimeVectorsSuzukiTrotter<TargetParamsType,
-	                                 ModelType,
-	                                 WaveFunctionTransfType,
-	                                 LanczosSolverType,
-	                                 VectorWithOffsetType>
-	                                               TimeVectorsSuzukiTrotterType;
-	typedef typename ModelType::InputValidatorType InputValidatorType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename BasisType::QnType                              QnType;
-	typedef typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type
-	                                                    VectorBlockDiagonalMatrixType;
-	typedef typename TargetingCommonType::StageEnumType StageEnumType;
+	using LanczosSolverType       = LanczosSolverType_;
+	using BaseType                = TargetingBase<LanczosSolverType, VectorWithOffsetType_>;
+	using OptionsType             = typename BaseType::OptionsType;
+	using TargetingCommonType     = typename BaseType::TargetingCommonType;
+	using MatrixVectorType        = typename BaseType::MatrixVectorType;
+	using CheckpointType          = typename BaseType::CheckpointType;
+	using ModelType               = typename MatrixVectorType::ModelType;
+	using RealType                = typename ModelType::RealType;
+	using OperatorsType           = typename ModelType::OperatorsType;
+	using ModelHelperType         = typename ModelType::ModelHelperType;
+	using LeftRightSuperType      = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType  = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType               = typename BasisWithOperatorsType::BasisType;
+	using SparseMatrixType        = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType       = typename SparseMatrixType::value_type;
+	using WaveFunctionTransfType  = typename BaseType::WaveFunctionTransfType;
+	using VectorWithOffsetType    = typename WaveFunctionTransfType::VectorWithOffsetType;
+	using TargetVectorType        = typename VectorWithOffsetType::VectorType;
+	using TridiagonalMatrixType   = typename LanczosSolverType::TridiagonalMatrixType;
+	using OperatorType            = typename BasisWithOperatorsType::OperatorType;
+	using TargetParamsType        = MettsParams<ModelType>;
+	using BlockType               = typename BasisType::BlockType;
+	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
+	using BlockDiagonalMatrixType = BlockDiagonalMatrix<MatrixType>;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
+	using ApplyOperatorType    = ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType>;
+	using BorderEnumType       = typename ApplyOperatorType::BorderEnum;
+	using MettsSerializerType  = MettsSerializer<VectorWithOffsetType>;
+	using RngType              = typename PsimagLite::RandomForTests<RealType>;
+	using MettsStochasticsType = MettsStochastics<ModelType, RngType>;
+	using PairType             = typename MettsStochasticsType::PairType;
+	using MettsCollapseType
+	    = MettsCollapse<VectorWithOffsetType, MettsStochasticsType, TargetParamsType>;
+	using PackIndicesType              = typename MettsCollapseType::PackIndicesType;
+	using TimeSerializerType           = typename TargetingCommonType::TimeSerializerType;
+	using TimeVectorsKrylovType        = TimeVectorsKrylov<TargetParamsType,
+	                                                       ModelType,
+	                                                       WaveFunctionTransfType,
+	                                                       LanczosSolverType,
+	                                                       VectorWithOffsetType>;
+	using TimeVectorsRungeKuttaType    = TimeVectorsRungeKutta<TargetParamsType,
+	                                                           ModelType,
+	                                                           WaveFunctionTransfType,
+	                                                           LanczosSolverType,
+	                                                           VectorWithOffsetType>;
+	using TimeVectorsSuzukiTrotterType = TimeVectorsSuzukiTrotter<TargetParamsType,
+	                                                              ModelType,
+	                                                              WaveFunctionTransfType,
+	                                                              LanczosSolverType,
+	                                                              VectorWithOffsetType>;
+	using InputValidatorType           = typename ModelType::InputValidatorType;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType>::Type;
+	using QnType                     = typename BasisType::QnType;
+	using VectorBlockDiagonalMatrixType =
+	    typename PsimagLite::Vector<BlockDiagonalMatrixType*>::Type;
+	using StageEnumType = typename TargetingCommonType::StageEnumType;
 	typedef
 	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType TimeVectorsBaseType;
-	using OneSiteSpacesType = typename BaseType::OneSiteSpacesType;
+	using TimeVectorsBaseType = typename ApplyOperatorExpressionType::TimeVectorsBaseType;
+	using OneSiteSpacesType   = typename BaseType::OneSiteSpacesType;
 
 	TargetingMetts(const LeftRightSuperType&     lrs,
 	               const CheckpointType&         checkPoint,

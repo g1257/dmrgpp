@@ -10,9 +10,9 @@ template <typename ComplexOrRealType> class FunctionOfFrequency {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef Matsubaras<RealType>                                 MatsubarasType;
+	using RealType       = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorType     = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using MatsubarasType = Matsubaras<RealType>;
 
 	FunctionOfFrequency(RealType fictBeta, SizeType nMatsubara)
 	    : matsubaras_(fictBeta, nMatsubara)

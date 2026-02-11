@@ -6,8 +6,8 @@ namespace Dmrg {
 
 template <typename VectorWithOffsetType_, typename OptionsType> struct WftOptions {
 
-	typedef typename VectorWithOffsetType_::value_type         ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	using ComplexOrRealType = typename VectorWithOffsetType_::value_type;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
 
 	enum AccelEnum
 	{

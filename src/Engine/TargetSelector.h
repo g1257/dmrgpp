@@ -19,41 +19,41 @@ namespace Dmrg {
 
 template <typename TargetingBaseType> class TargetSelector {
 
-	typedef typename TargetingBaseType::MatrixVectorType        MatrixVectorType;
-	typedef typename TargetingBaseType::CheckpointType          CheckpointType;
-	typedef typename MatrixVectorType::ModelType                ModelType;
-	typedef typename ModelType::ParametersType                  ParametersType;
-	typedef typename ModelType::RealType                        RealType;
-	typedef typename ModelType::ModelHelperType                 ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename TargetingBaseType::WaveFunctionTransfType  WaveFunctionTransfType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType          BasisType;
-	typedef typename BasisType::QnType                          QnType;
-	typedef typename ParametersType::OptionsType                OptionsType;
-	typedef typename ModelType::InputValidatorType              InputValidatorType;
-	typedef typename TargetingBaseType::LanczosSolverType       LanczosSolverType;
-	typedef typename TargetingBaseType::VectorWithOffsetType    VectorWithOffsetType;
-	typedef TargetingGroundState<LanczosSolverType, VectorWithOffsetType>
-	                                                     TargetingGroundStateType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	using MatrixVectorType       = typename TargetingBaseType::MatrixVectorType;
+	using CheckpointType         = typename TargetingBaseType::CheckpointType;
+	using ModelType              = typename MatrixVectorType::ModelType;
+	using ParametersType         = typename ModelType::ParametersType;
+	using RealType               = typename ModelType::RealType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using WaveFunctionTransfType = typename TargetingBaseType::WaveFunctionTransfType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using QnType                 = typename BasisType::QnType;
+	using OptionsType            = typename ParametersType::OptionsType;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
+	using LanczosSolverType      = typename TargetingBaseType::LanczosSolverType;
+	using VectorWithOffsetType   = typename TargetingBaseType::VectorWithOffsetType;
+	using TargetingGroundStateType
+	    = TargetingGroundState<LanczosSolverType, VectorWithOffsetType>;
+	using VectorStringType = PsimagLite::Vector<PsimagLite::String>::Type;
 	// start targets here:  DO NOT REMOVE MARK
-	typedef TargetingTimeStep<LanczosSolverType, VectorWithOffsetType>  TargetingTimeStepType;
-	typedef TargetingChebyshev<LanczosSolverType, VectorWithOffsetType> TargetingChebyshevType;
-	typedef TargetingDynamic<LanczosSolverType, VectorWithOffsetType>   TargetingDynamicType;
-	typedef TargetingCorrectionVector<LanczosSolverType, VectorWithOffsetType>
-	    TargetingCorrectionVectorType;
-	typedef TargetingCorrection<LanczosSolverType, VectorWithOffsetType>
-	                                                                TargetingCorrectionType;
-	typedef TargetingMetts<LanczosSolverType, VectorWithOffsetType> TargetingMettsType;
-	typedef TargetingRixsStatic<LanczosSolverType, VectorWithOffsetType>
-	    TargetingRixsStaticType;
-	typedef TargetingRixsDynamic<LanczosSolverType, VectorWithOffsetType>
-	    TargetingRixsDynamicType;
-	typedef TargetingExpression<LanczosSolverType, VectorWithOffsetType>
-	    TargetingExpressionType;
-	typedef TargetingCVEvolution<LanczosSolverType, VectorWithOffsetType>
-	    TargetingCVEvolutionType;
+	using TargetingTimeStepType  = TargetingTimeStep<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingChebyshevType = TargetingChebyshev<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingDynamicType   = TargetingDynamic<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingCorrectionVectorType
+	    = TargetingCorrectionVector<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingCorrectionType
+	    = TargetingCorrection<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingMettsType = TargetingMetts<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingRixsStaticType
+	    = TargetingRixsStatic<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingRixsDynamicType
+	    = TargetingRixsDynamic<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingExpressionType
+	    = TargetingExpression<LanczosSolverType, VectorWithOffsetType>;
+	using TargetingCVEvolutionType
+	    = TargetingCVEvolution<LanczosSolverType, VectorWithOffsetType>;
 	// end targets DO NOT REMOVE MARK
 
 public:

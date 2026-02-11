@@ -84,12 +84,12 @@ namespace Dmrg {
 
 template <typename ModelType, typename FourPointCorrelationsType> class Parallel4PointDs {
 
-	typedef std::pair<SizeType, SizeType>                        PairType;
-	typedef typename FourPointCorrelationsType::MatrixType       MatrixType;
-	typedef typename FourPointCorrelationsType::BraketType       BraketType;
-	typedef typename MatrixType::value_type                      FieldType;
-	typedef typename FourPointCorrelationsType::SparseMatrixType SparseMatrixType;
-	typedef PsimagLite::Concurrency                              ConcurrencyType;
+	using PairType         = std::pair<SizeType, SizeType>;
+	using MatrixType       = typename FourPointCorrelationsType::MatrixType;
+	using BraketType       = typename FourPointCorrelationsType::BraketType;
+	using FieldType        = typename MatrixType::value_type;
+	using SparseMatrixType = typename FourPointCorrelationsType::SparseMatrixType;
+	using ConcurrencyType  = PsimagLite::Concurrency;
 
 public:
 
@@ -100,7 +100,7 @@ public:
 		MODE_THINupdn
 	};
 
-	typedef typename ModelType::RealType RealType;
+	using RealType = typename ModelType::RealType;
 
 	Parallel4PointDs(MatrixType&                                        fpd,
 	                 const FourPointCorrelationsType&                   fourpoint,

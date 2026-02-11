@@ -86,34 +86,34 @@ template <typename ModelBaseType> class SuperHubbardExtended : public ModelBaseT
 
 public:
 
-	typedef typename ModelBaseType::VectorSizeType             VectorSizeType;
-	typedef ExtendedHubbard1Orb<ModelBaseType>                 ModelHubbardType;
-	typedef typename ModelBaseType::ModelHelperType            ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType          SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType         LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType                   LinkType;
-	typedef typename ModelHelperType::OperatorsType            OperatorsType;
-	typedef typename OperatorsType::OperatorType               OperatorType;
-	typedef typename ModelHelperType::RealType                 RealType;
-	typedef typename ModelBaseType::QnType                     QnType;
-	typedef typename QnType::VectorQnType                      VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType         SparseMatrixType;
-	typedef typename SparseMatrixType::value_type              ComplexOrRealType;
-	typedef typename ModelBaseType::MyBasis                    BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType     MyBasisWithOperators;
-	typedef typename ModelHubbardType::HilbertBasisType        HilbertBasisType;
-	typedef typename ModelHelperType::BlockType                BlockType;
-	typedef typename ModelBaseType::SolverParamsType           SolverParamsType;
-	typedef typename ModelBaseType::VectorType                 VectorType;
-	typedef typename ModelHubbardType::HilbertSpaceHubbardType HilbertSpaceHubbardType;
-	typedef typename HilbertSpaceHubbardType::HilbertState     HilbertState;
-	typedef typename ModelBaseType::InputValidatorType         InputValidatorType;
-	typedef typename ModelBaseType::VectorOperatorType         VectorOperatorType;
-	typedef typename ModelBaseType::ModelTermType              ModelTermType;
-	typedef typename PsimagLite::Vector<HilbertState>::Type    VectorHilbertStateType;
-	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeTypeType;
-	typedef typename ModelBaseType::OpsLabelType               OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType              OpForLinkType;
+	using VectorSizeType          = typename ModelBaseType::VectorSizeType;
+	using ModelHubbardType        = ExtendedHubbard1Orb<ModelBaseType>;
+	using ModelHelperType         = typename ModelBaseType::ModelHelperType;
+	using SuperGeometryType       = typename ModelBaseType::SuperGeometryType;
+	using LeftRightSuperType      = typename ModelBaseType::LeftRightSuperType;
+	using LinkType                = typename ModelBaseType::LinkType;
+	using OperatorsType           = typename ModelHelperType::OperatorsType;
+	using OperatorType            = typename OperatorsType::OperatorType;
+	using RealType                = typename ModelHelperType::RealType;
+	using QnType                  = typename ModelBaseType::QnType;
+	using VectorQnType            = typename QnType::VectorQnType;
+	using SparseMatrixType        = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType       = typename SparseMatrixType::value_type;
+	using BasisType               = typename ModelBaseType::MyBasis;
+	using MyBasisWithOperators    = typename ModelBaseType::BasisWithOperatorsType;
+	using HilbertBasisType        = typename ModelHubbardType::HilbertBasisType;
+	using BlockType               = typename ModelHelperType::BlockType;
+	using SolverParamsType        = typename ModelBaseType::SolverParamsType;
+	using VectorType              = typename ModelBaseType::VectorType;
+	using HilbertSpaceHubbardType = typename ModelHubbardType::HilbertSpaceHubbardType;
+	using HilbertState            = typename HilbertSpaceHubbardType::HilbertState;
+	using InputValidatorType      = typename ModelBaseType::InputValidatorType;
+	using VectorOperatorType      = typename ModelBaseType::VectorOperatorType;
+	using ModelTermType           = typename ModelBaseType::ModelTermType;
+	using VectorHilbertStateType  = typename PsimagLite::Vector<HilbertState>::Type;
+	using VectorSizeTypeType      = PsimagLite::Vector<SizeType>::Type;
+	using OpsLabelType            = typename ModelBaseType::OpsLabelType;
+	using OpForLinkType           = typename ModelBaseType::OpForLinkType;
 
 	SuperHubbardExtended(const SolverParamsType&  solverParams,
 	                     InputValidatorType&      io,

@@ -96,46 +96,46 @@ template <typename LanczosSolverType_, typename VectorWithOffsetType_> class Tar
 
 public:
 
-	typedef LanczosSolverType_                                  LanczosSolverType;
-	typedef VectorWithOffsetType_                               VectorWithOffsetType;
-	typedef typename LanczosSolverType::MatrixType              MatrixVectorType;
-	typedef typename MatrixVectorType::ModelType                ModelType;
-	typedef typename ModelType::RealType                        RealType;
-	typedef typename ModelType::ParametersType                  ParametersType;
-	typedef typename ParametersType::OptionsType                OptionsType;
-	typedef PsimagLite::ParametersForSolver<RealType>           ParametersForSolverType;
-	typedef typename ModelType::ModelHelperType                 ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
-	typedef typename BasisWithOperatorsType::OperatorType       OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType          BasisType;
-	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
-	typedef typename BasisType::BlockType                       BlockType;
-	typedef typename BasisType::QnType                          QnType;
-	using OneSiteSpacesType      = OneSiteSpaces<ModelType>;
-	using WaveFunctionTransfType = WaveFunctionTransfFactory<LeftRightSuperType,
-	                                                         VectorWithOffsetType,
-	                                                         OptionsType,
-	                                                         OneSiteSpacesType>;
-	typedef typename VectorWithOffsetType::VectorType       VectorType;
-	typedef VectorType                                      TargetVectorType;
-	typedef TargetParamsBase<ModelType>                     TargetParamsType;
-	typedef TargetHelper<ModelType, WaveFunctionTransfType> TargetHelperType;
-	typedef TargetingCommon<TargetHelperType, VectorWithOffsetType, LanczosSolverType>
-	    TargetingCommonType;
+	using LanczosSolverType       = LanczosSolverType_;
+	using VectorWithOffsetType    = VectorWithOffsetType_;
+	using MatrixVectorType        = typename LanczosSolverType::MatrixType;
+	using ModelType               = typename MatrixVectorType::ModelType;
+	using RealType                = typename ModelType::RealType;
+	using ParametersType          = typename ModelType::ParametersType;
+	using OptionsType             = typename ParametersType::OptionsType;
+	using ParametersForSolverType = PsimagLite::ParametersForSolver<RealType>;
+	using ModelHelperType         = typename ModelType::ModelHelperType;
+	using LeftRightSuperType      = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType  = typename LeftRightSuperType::BasisWithOperatorsType;
+	using SparseMatrixType        = typename BasisWithOperatorsType::SparseMatrixType;
+	using OperatorType            = typename BasisWithOperatorsType::OperatorType;
+	using BasisType               = typename BasisWithOperatorsType::BasisType;
+	using ComplexOrRealType       = typename SparseMatrixType::value_type;
+	using BlockType               = typename BasisType::BlockType;
+	using QnType                  = typename BasisType::QnType;
+	using OneSiteSpacesType       = OneSiteSpaces<ModelType>;
+	using WaveFunctionTransfType  = WaveFunctionTransfFactory<LeftRightSuperType,
+	                                                          VectorWithOffsetType,
+	                                                          OptionsType,
+	                                                          OneSiteSpacesType>;
+	using VectorType              = typename VectorWithOffsetType::VectorType;
+	using TargetVectorType        = VectorType;
+	using TargetParamsType        = TargetParamsBase<ModelType>;
+	using TargetHelperType        = TargetHelper<ModelType, WaveFunctionTransfType>;
+	using TargetingCommonType
+	    = TargetingCommon<TargetHelperType, VectorWithOffsetType, LanczosSolverType>;
 	typedef
 	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type       VectorOperatorType;
-	typedef typename ApplyOperatorExpressionType::StageEnumType   StageEnumType;
-	typedef typename ApplyOperatorExpressionType::DmrgSerializerType DmrgSerializerType;
-	typedef typename PsimagLite::Vector<SizeType>::Type              VectorSizeType;
-	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
-	typedef typename PsimagLite::Vector<TargetVectorType>::Type      VectorVectorType;
-	typedef typename PsimagLite::Vector<VectorVectorType>::Type      VectorVectorVectorType;
-	typedef typename TargetingCommonType::VectorVectorVectorWithOffsetType
-	                                                      VectorVectorVectorWithOffsetType;
-	typedef Checkpoint<ModelType, WaveFunctionTransfType> CheckpointType;
+	using VectorOperatorType     = typename PsimagLite::Vector<OperatorType>::Type;
+	using StageEnumType          = typename ApplyOperatorExpressionType::StageEnumType;
+	using DmrgSerializerType     = typename ApplyOperatorExpressionType::DmrgSerializerType;
+	using VectorSizeType         = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorRealType         = typename PsimagLite::Vector<RealType>::Type;
+	using VectorVectorType       = typename PsimagLite::Vector<TargetVectorType>::Type;
+	using VectorVectorVectorType = typename PsimagLite::Vector<VectorVectorType>::Type;
+	using VectorVectorVectorWithOffsetType =
+	    typename TargetingCommonType::VectorVectorVectorWithOffsetType;
+	using CheckpointType = Checkpoint<ModelType, WaveFunctionTransfType>;
 
 	TargetingBase(const LeftRightSuperType&     lrs,
 	              const CheckpointType&         checkPoint,
@@ -332,8 +332,8 @@ public:
 
 	static PsimagLite::String buildPrefix(PsimagLite::IoSelector::Out& io, SizeType counter)
 	{
-		PsimagLite::String                              prefix("TargetingCommon");
-		typedef PsimagLite::IoSelector::Out::Serializer SerializerType;
+		PsimagLite::String prefix("TargetingCommon");
+		using SerializerType = PsimagLite::IoSelector::Out::Serializer;
 		if (counter == 0)
 			io.createGroup(prefix);
 

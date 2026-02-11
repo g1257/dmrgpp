@@ -120,20 +120,20 @@ template <typename BasisType_> class BasisWithOperators : public BasisType_ {
 
 public:
 
-	typedef BasisType_                                        BaseType;
-	typedef std::pair<SizeType, SizeType>                     PairType;
-	typedef typename BaseType::RealType                       RealType;
-	typedef Operators<BasisType_>                             OperatorsType;
-	typedef typename OperatorsType::PairSizeSizeType          PairSizeSizeType;
-	typedef typename OperatorsType::OperatorType              OperatorType;
-	typedef typename OperatorsType::BasisType                 BasisType;
-	typedef typename BasisType::BlockType                     VectorSizeType;
-	typedef typename OperatorType::StorageType                OperatorStorageType;
-	typedef BasisWithOperators<BasisType_>                    ThisType;
-	typedef typename OperatorStorageType::value_type          ComplexOrRealType;
-	typedef typename PsimagLite::CrsMatrix<ComplexOrRealType> SparseMatrixType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>             MatrixType;
-	typedef BlockDiagonalMatrix<MatrixType>                   BlockDiagonalMatrixType;
+	using BaseType                = BasisType_;
+	using PairType                = std::pair<SizeType, SizeType>;
+	using RealType                = typename BaseType::RealType;
+	using OperatorsType           = Operators<BasisType_>;
+	using PairSizeSizeType        = typename OperatorsType::PairSizeSizeType;
+	using OperatorType            = typename OperatorsType::OperatorType;
+	using BasisType               = typename OperatorsType::BasisType;
+	using VectorSizeType          = typename BasisType::BlockType;
+	using OperatorStorageType     = typename OperatorType::StorageType;
+	using ThisType                = BasisWithOperators<BasisType_>;
+	using ComplexOrRealType       = typename OperatorStorageType::value_type;
+	using SparseMatrixType        = typename PsimagLite::CrsMatrix<ComplexOrRealType>;
+	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
+	using BlockDiagonalMatrixType = BlockDiagonalMatrix<MatrixType>;
 
 	enum class SaveEnum
 	{

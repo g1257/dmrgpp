@@ -88,10 +88,10 @@ class LanczosOrDavidsonBase {
 
 public:
 
-	typedef typename SolverParametersType::RealType RealType;
-	typedef typename Vector<RealType>::Type         VectorRealType;
-	typedef typename Vector<VectorType>::Type       VectorVectorType;
-	typedef MatrixType_                             MatrixType;
+	using RealType         = typename SolverParametersType::RealType;
+	using VectorRealType   = typename Vector<RealType>::Type;
+	using VectorVectorType = typename Vector<VectorType>::Type;
+	using MatrixType       = MatrixType_;
 
 	// To avoid compiler warnings
 	virtual ~LanczosOrDavidsonBase() { }

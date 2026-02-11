@@ -86,7 +86,7 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersHubbardAncilla : ParametersModelFeAs<RealType, QnType> {
 
-	typedef ParametersModelFeAs<RealType, QnType> BaseType;
+	using BaseType = ParametersModelFeAs<RealType, QnType>;
 
 	template <typename IoInputType>
 	ParametersHubbardAncilla(IoInputType& io)

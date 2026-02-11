@@ -9,11 +9,11 @@ class AinurStatements {
 
 public:
 
-	typedef AinurReadable::RealType            RealType;
-	typedef AinurReadable::VectorStoreType     VectorStoreType;
-	typedef AinurReadable::StoreType           StoreType;
-	typedef StoreType::AinurLexicalType        AinurLexicalType;
-	typedef AinurLexicalType::VectorStringType VectorStringType;
+	using RealType         = AinurReadable::RealType;
+	using VectorStoreType  = AinurReadable::VectorStoreType;
+	using StoreType        = AinurReadable::StoreType;
+	using AinurLexicalType = StoreType::AinurLexicalType;
+	using VectorStringType = AinurLexicalType::VectorStringType;
 
 	AinurStatements(const VectorStringType& vecStr,
 	                const String&           vecChar,

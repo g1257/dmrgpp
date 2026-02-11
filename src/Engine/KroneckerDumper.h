@@ -11,17 +11,17 @@ namespace Dmrg {
 
 template <typename LeftRightSuperType, typename SolverParamsType> class KroneckerDumper {
 
-	typedef PsimagLite::Concurrency                              ConcurrencyType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType  BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType           BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType    SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type   RealType;
-	typedef typename PsimagLite::Vector<bool>::Type              VectorBoolType;
-	typedef typename PsimagLite::Vector<SizeType>::Type          VectorSizeType;
-	typedef typename BasisType::QnType                           QnType;
-	typedef std::pair<SizeType, SizeType>                        PairSizeType;
+	using ConcurrencyType        = PsimagLite::Concurrency;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using VectorType             = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using RealType               = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorBoolType         = typename PsimagLite::Vector<bool>::Type;
+	using VectorSizeType         = typename PsimagLite::Vector<SizeType>::Type;
+	using QnType                 = typename BasisType::QnType;
+	using PairSizeType           = std::pair<SizeType, SizeType>;
 
 public:
 

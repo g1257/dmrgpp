@@ -105,34 +105,33 @@ class WaveFunctionTransfLocal : public WaveFunctionTransfBase<DmrgWaveStructType
                                                               OptionsType_,
                                                               OneSiteSpacesType_> {
 
-	typedef WaveFunctionTransfBase<DmrgWaveStructType,
-	                               VectorWithOffsetType,
-	                               OptionsType_,
-	                               OneSiteSpacesType_>
-	                                           BaseType;
-	typedef typename BaseType::VectorSizeType  VectorSizeType;
-	typedef typename BaseType::PackIndicesType PackIndicesType;
+	using BaseType        = WaveFunctionTransfBase<DmrgWaveStructType,
+	                                               VectorWithOffsetType,
+	                                               OptionsType_,
+	                                               OneSiteSpacesType_>;
+	using VectorSizeType  = typename BaseType::VectorSizeType;
+	using PackIndicesType = typename BaseType::PackIndicesType;
 
 public:
 
-	using OneSiteSpacesType = OneSiteSpacesType_;
-	typedef typename BaseType::WftOptionsType                    WftOptionsType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType  BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType    SparseMatrixType;
-	typedef typename BasisWithOperatorsType::BasisType           BasisType;
-	typedef typename BasisType::QnType                           QnType;
-	typedef typename SparseMatrixType::value_type                SparseElementType;
-	typedef typename PsimagLite::Vector<SparseElementType>::Type VectorType;
-	typedef typename BasisWithOperatorsType::RealType            RealType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType      LeftRightSuperType;
-	typedef MatrixOrIdentity<SparseMatrixType>                   MatrixOrIdentityType;
-	typedef ParallelWftOne<VectorWithOffsetType, DmrgWaveStructType, OneSiteSpacesType_>
-	                                                         ParallelWftType;
-	typedef PsimagLite::Matrix<SparseElementType>            MatrixType;
-	typedef WftAccelBlocks<BaseType>                         WftAccelBlocksType;
-	typedef WftAccelPatches<BaseType>                        WftAccelPatchesType;
-	typedef WftSparseTwoSite<BaseType, MatrixOrIdentityType> WftSparseTwoSiteType;
-	typedef WftAccelSvd<BaseType>                            WftAccelSvdType;
+	using OneSiteSpacesType      = OneSiteSpacesType_;
+	using WftOptionsType         = typename BaseType::WftOptionsType;
+	using BasisWithOperatorsType = typename DmrgWaveStructType::BasisWithOperatorsType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using QnType                 = typename BasisType::QnType;
+	using SparseElementType      = typename SparseMatrixType::value_type;
+	using VectorType             = typename PsimagLite::Vector<SparseElementType>::Type;
+	using RealType               = typename BasisWithOperatorsType::RealType;
+	using LeftRightSuperType     = typename DmrgWaveStructType::LeftRightSuperType;
+	using MatrixOrIdentityType   = MatrixOrIdentity<SparseMatrixType>;
+	using ParallelWftType
+	    = ParallelWftOne<VectorWithOffsetType, DmrgWaveStructType, OneSiteSpacesType_>;
+	using MatrixType           = PsimagLite::Matrix<SparseElementType>;
+	using WftAccelBlocksType   = WftAccelBlocks<BaseType>;
+	using WftAccelPatchesType  = WftAccelPatches<BaseType>;
+	using WftSparseTwoSiteType = WftSparseTwoSite<BaseType, MatrixOrIdentityType>;
+	using WftAccelSvdType      = WftAccelSvd<BaseType>;
 
 	WaveFunctionTransfLocal(const DmrgWaveStructType& dmrgWaveStruct,
 	                        const WftOptionsType&     wftOptions)
@@ -212,8 +211,8 @@ private:
 			return wftAccelSvd_(psiDest, iNew, psiSrc, iOld, lrs, oneSiteSpaces);
 		}
 
-		SizeType                                          i0 = psiDest.sector(iNew);
-		typedef PsimagLite::Parallelizer<ParallelWftType> ParallelizerType;
+		SizeType i0            = psiDest.sector(iNew);
+		using ParallelizerType = PsimagLite::Parallelizer<ParallelWftType>;
 
 		ParallelizerType threadedWft(PsimagLite::Concurrency::codeSectionParams);
 		ParallelWftType helperWft(psiDest, psiSrc, lrs, i0, oneSiteSpaces, dmrgWaveStruct_);
@@ -246,7 +245,7 @@ private:
 			return wftAccelBlocks_.environFromInfinite(
 			    psiDest, i0, psiSrc, iOld, lrs, oneSiteSpaces);
 
-		typedef PsimagLite::Parallelizer<WftSparseTwoSiteType> ParallelizerType;
+		using ParallelizerType = PsimagLite::Parallelizer<WftSparseTwoSiteType>;
 
 		SparseMatrixType ws;
 		dmrgWaveStruct_.getTransform(ProgramGlobals::SysOrEnvEnum::SYSTEM).toSparse(ws);
@@ -296,7 +295,7 @@ private:
 	                                  const LeftRightSuperType&   lrs,
 	                                  const OneSiteSpacesType&    oneSiteSpaces) const
 	{
-		typedef PsimagLite::Parallelizer<WftSparseTwoSiteType> ParallelizerType;
+		using ParallelizerType = PsimagLite::Parallelizer<WftSparseTwoSiteType>;
 
 		assert(dmrgWaveStruct_.lrs().super().permutationInverse().size() == psiSrc.size());
 

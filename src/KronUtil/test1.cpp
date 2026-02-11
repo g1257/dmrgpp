@@ -2,9 +2,9 @@
 #include "util.h"
 
 #ifndef USE_FLOAT
-typedef double RealType;
+using RealType = double;
 #else
-typedef float RealType;
+using RealType = float;
 #endif
 
 int main()

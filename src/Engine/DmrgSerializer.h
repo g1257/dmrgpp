@@ -91,18 +91,18 @@ template <typename LeftRightSuperType, typename VectorWithOffsetType> class Dmrg
 
 public:
 
-	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> ThisType;
-	typedef typename LeftRightSuperType::SparseMatrixType            SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                    ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                    MatrixType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType               BasisType;
-	typedef typename BasisType::VectorQnType                         VectorQnType;
-	typedef typename BasisType::VectorSizeType                       VectorSizeType;
-	typedef FermionSign                                              FermionSignType;
-	typedef typename BasisType::RealType                             RealType;
-	typedef BlockDiagonalMatrix<MatrixType>                          BlockDiagonalMatrixType;
-	typedef BlockOffDiagMatrix<MatrixType>                           BlockOffDiagMatrixType;
+	using ThisType                = DmrgSerializer<LeftRightSuperType, VectorWithOffsetType>;
+	using SparseMatrixType        = typename LeftRightSuperType::SparseMatrixType;
+	using ComplexOrRealType       = typename SparseMatrixType::value_type;
+	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
+	using BasisWithOperatorsType  = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType               = typename BasisWithOperatorsType::BasisType;
+	using VectorQnType            = typename BasisType::VectorQnType;
+	using VectorSizeType          = typename BasisType::VectorSizeType;
+	using FermionSignType         = FermionSign;
+	using RealType                = typename BasisType::RealType;
+	using BlockDiagonalMatrixType = BlockDiagonalMatrix<MatrixType>;
+	using BlockOffDiagMatrixType  = BlockOffDiagMatrix<MatrixType>;
 	typedef
 	    typename PsimagLite::Vector<typename PsimagLite::Vector<VectorWithOffsetType*>::Type>::
 	        Type VectorVectorVectorWithOffsetType;

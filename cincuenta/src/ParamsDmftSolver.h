@@ -8,9 +8,9 @@ namespace Dmft {
 
 template <typename ComplexOrRealType_, typename InputNgType> struct ParamsDmftSolver {
 
-	typedef ComplexOrRealType_                                 ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef MinParams<RealType>                                MinParamsType;
+	using ComplexOrRealType = ComplexOrRealType_;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using MinParamsType     = MinParams<RealType>;
 
 	ParamsDmftSolver(typename InputNgType::Readable& io)
 	    : echoInput(false)

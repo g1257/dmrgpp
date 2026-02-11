@@ -97,7 +97,7 @@ extern "C"
 namespace PsimagLite {
 
 template <typename FieldType> class LinearPrediction {
-	typedef Matrix<FieldType> MatrixType;
+	using MatrixType = Matrix<FieldType>;
 
 public:
 
@@ -148,7 +148,7 @@ public:
 	void predict2(SizeType p)
 	{
 		// Fix roots
-		typedef std::complex<double>     Complex;
+		using Complex                           = std::complex<double>;
 		SizeType                         twicep = 2 * p;
 		SizeType                         pp1    = p + 1;
 		typename Vector<FieldType>::Type nd(p), aa(pp1), zz(twicep);

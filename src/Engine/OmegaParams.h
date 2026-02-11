@@ -9,7 +9,7 @@ template <typename InputNgType, typename RealType_> class OmegaParams {
 
 public:
 
-	typedef RealType_ RealType;
+	using RealType = RealType_;
 
 	OmegaParams(PsimagLite::String data)
 	{

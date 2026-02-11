@@ -88,8 +88,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 
 template <typename FieldType> struct Su2SymmetryGlobals {
-	typedef ClebschGordanCached<FieldType> ClebschGordanType;
-	static void                            init(bool hasSu2Symmetry)
+	using ClebschGordanType = ClebschGordanCached<FieldType>;
+	static void init(bool hasSu2Symmetry)
 	{
 		if (!hasSu2Symmetry)
 			return;

@@ -31,21 +31,21 @@
 
 namespace Dmrg {
 
-typedef PsimagLite::IoSelector::In IoInputType;
+using IoInputType = PsimagLite::IoSelector::In;
 
 #ifndef USE_FLOAT
-typedef double RealType;
+using RealType = double;
 #else
-typedef float RealType;
+using RealType = float;
 #endif
 
-typedef std::complex<RealType> ComplexType;
+using ComplexType = std::complex<RealType>;
 
-typedef PsimagLite::CrsMatrix<ComplexType> MySparseMatrixComplex;
-typedef PsimagLite::CrsMatrix<RealType>    MySparseMatrixReal;
+using MySparseMatrixComplex = PsimagLite::CrsMatrix<ComplexType>;
+using MySparseMatrixReal    = PsimagLite::CrsMatrix<RealType>;
 
-typedef PsimagLite::InputNg<InputCheck>                                 InputNgType;
-typedef ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn> ParametersDmrgSolverType;
+using InputNgType              = PsimagLite::InputNg<InputCheck>;
+using ParametersDmrgSolverType = ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>;
 
 template <typename VectorWithOffsetType, typename ModelType>
 bool observeOneFullSweep(IoInputType&              io,

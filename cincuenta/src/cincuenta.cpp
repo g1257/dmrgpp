@@ -27,23 +27,23 @@ void usage(const std::string& name)
 
 int main(int argc, char** argv)
 {
-	PsimagLite::PsiApp                            application("dmft", &argc, &argv, 1);
-	typedef PsimagLite::InputNg<Dmft::InputCheck> InputNgType;
+	PsimagLite::PsiApp application("dmft", &argc, &argv, 1);
+	using InputNgType = PsimagLite::InputNg<Dmft::InputCheck>;
 	typedef
 #ifndef USE_FLOAT
 	    double
 #else
 	    float
 #endif
-	                                                              RealType;
-	typedef Dmft::DmftSolver<std::complex<RealType>, InputNgType> DmftSolverType;
-	typedef DmftSolverType::ParamsDmftSolverType                  ParamsDmftSolverType;
-	int                                                           opt         = 0;
-	bool                                                          versionOnly = false;
-	std::string                                                   inputfile;
-	std::string                                                   logfile;
-	SizeType                                                      precision  = 12;
-	bool                                                          unbuffered = false;
+	        RealType;
+	using DmftSolverType       = Dmft::DmftSolver<std::complex<RealType>, InputNgType>;
+	using ParamsDmftSolverType = DmftSolverType::ParamsDmftSolverType;
+	int         opt            = 0;
+	bool        versionOnly    = false;
+	std::string inputfile;
+	std::string logfile;
+	SizeType    precision  = 12;
+	bool        unbuffered = false;
 	/* PSIDOC DmrgDriver
 There is a single input file that is passed as the
 argument to \verb!-f!, like so
@@ -97,7 +97,7 @@ to the main dmrg driver are the following.
 		}
 	}
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	using ConcurrencyType = PsimagLite::Concurrency;
 
 	// print license
 	if (ConcurrencyType::root()) {

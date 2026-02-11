@@ -17,8 +17,8 @@ template <typename BasisWithOperatorsType> class DiskOrMemoryStack {
 
 public:
 
-	typedef MemoryStack<BasisWithOperatorsType> MemoryStackType;
-	typedef DiskStack<BasisWithOperatorsType>   DiskStackType;
+	using MemoryStackType = MemoryStack<BasisWithOperatorsType>;
+	using DiskStackType   = DiskStack<BasisWithOperatorsType>;
 
 	DiskOrMemoryStack(bool                     onDisk,
 	                  const PsimagLite::String filename,

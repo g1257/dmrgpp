@@ -12,20 +12,20 @@ namespace Dmrg {
 template <typename GenIjPatchType, typename VectorWithOffsetType, typename OneSiteSpacesType>
 class BlockDiagWf {
 
-	typedef typename VectorWithOffsetType::VectorType          VectorType;
-	typedef typename VectorType::value_type                    ComplexOrRealType;
-	typedef PsimagLite::CrsMatrix<ComplexOrRealType>           SparseMatrixType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>              MatrixType;
-	typedef BlockDiagonalMatrix<MatrixType>                    BlockDiagonalMatrixType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
-	typedef std::pair<SizeType, SizeType>                      PairType;
-	typedef PsimagLite::Vector<PairType>::Type                 VectorPairType;
-	typedef PsimagLite::Vector<VectorSizeType>::Type           VectorVectorSizeType;
-	typedef typename GenIjPatchType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisType             BasisType;
-	typedef PsimagLite::PackIndices                            PackIndicesType;
-	typedef typename PsimagLite::Vector<MatrixType*>::Type     VectorMatrixType;
+	using VectorType              = typename VectorWithOffsetType::VectorType;
+	using ComplexOrRealType       = typename VectorType::value_type;
+	using SparseMatrixType        = PsimagLite::CrsMatrix<ComplexOrRealType>;
+	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
+	using BlockDiagonalMatrixType = BlockDiagonalMatrix<MatrixType>;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using PairType                = std::pair<SizeType, SizeType>;
+	using VectorPairType          = PsimagLite::Vector<PairType>::Type;
+	using VectorVectorSizeType    = PsimagLite::Vector<VectorSizeType>::Type;
+	using LeftRightSuperType      = typename GenIjPatchType::LeftRightSuperType;
+	using BasisType               = typename LeftRightSuperType::BasisType;
+	using PackIndicesType         = PsimagLite::PackIndices;
+	using VectorMatrixType        = typename PsimagLite::Vector<MatrixType*>::Type;
 
 	class ParallelBlockCtor {
 
@@ -502,9 +502,9 @@ public:
 
 		SizeType threads
 		    = std::min(npatches, PsimagLite::Concurrency::codeSectionParams.npthreads);
-		typedef PsimagLite::Parallelizer<ParallelBlockCtor> ParallelizerType;
-		PsimagLite::CodeSectionParams                       codeSectionParams(threads);
-		ParallelizerType                                    threadedCtor(codeSectionParams);
+		using ParallelizerType = PsimagLite::Parallelizer<ParallelBlockCtor>;
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType              threadedCtor(codeSectionParams);
 
 		ParallelBlockCtor helper(
 		    patchesLeft, patchesRight, lrs, src, iSrc, patches_, data_);
@@ -531,9 +531,9 @@ public:
 		SizeType npatches = data_.size();
 		SizeType threads
 		    = std::min(npatches, PsimagLite::Concurrency::codeSectionParams.npthreads);
-		typedef PsimagLite::Parallelizer<ParallelBlockTransform> ParallelizerType;
-		PsimagLite::CodeSectionParams                            codeSectionParams(threads);
-		ParallelizerType threadedTransform(codeSectionParams);
+		using ParallelizerType = PsimagLite::Parallelizer<ParallelBlockTransform>;
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType              threadedTransform(codeSectionParams);
 
 		ParallelBlockTransform helper(tLeft,
 		                              tRight,

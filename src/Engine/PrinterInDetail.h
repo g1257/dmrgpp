@@ -6,10 +6,10 @@ namespace Dmrg {
 
 template <typename LeftRightSuperType> class PrinterInDetail {
 
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::QnType             QnType;
-	typedef typename BasisWithOperatorsType::OperatorsType      OperatorsType;
-	typedef typename OperatorsType::OperatorType                OperatorType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using QnType                 = typename BasisWithOperatorsType::QnType;
+	using OperatorsType          = typename BasisWithOperatorsType::OperatorsType;
+	using OperatorType           = typename OperatorsType::OperatorType;
 
 public:
 

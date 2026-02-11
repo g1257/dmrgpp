@@ -85,21 +85,21 @@ namespace Dmrg {
 template <typename ModelType, typename LanczosSolverType, typename VectorWithOffsetType>
 class ParallelTriDiag {
 
-	typedef typename ModelType::ModelHelperType                 ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType   SparseMatrixType;
-	typedef typename SparseMatrixType::value_type               ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type  RealType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType   TridiagonalMatrixType;
-	typedef typename ModelType::InputValidatorType              InputValidatorType;
-	typedef PsimagLite::Concurrency                             ConcurrencyType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using RealType               = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using TridiagonalMatrixType  = typename LanczosSolverType::TridiagonalMatrixType;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
+	using ConcurrencyType        = PsimagLite::Concurrency;
 
 public:
 
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type       TargetVectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                      MatrixComplexOrRealType;
-	typedef typename PsimagLite::Vector<MatrixComplexOrRealType>::Type VectorMatrixFieldType;
+	using TargetVectorType        = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using MatrixComplexOrRealType = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorMatrixFieldType   = typename PsimagLite::Vector<MatrixComplexOrRealType>::Type;
 
 	ParallelTriDiag(const VectorWithOffsetType&                  phi,
 	                VectorMatrixFieldType&                       T,

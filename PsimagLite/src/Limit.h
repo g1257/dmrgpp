@@ -13,7 +13,7 @@ class Limit {
 
 public:
 
-	typedef std::pair<rlim_t, rlim_t> PairRlimType;
+	using PairRlimType = std::pair<rlim_t, rlim_t>;
 
 	Limit()
 	    : rlimit_(new struct rlimit)

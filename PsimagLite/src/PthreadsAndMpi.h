@@ -89,7 +89,7 @@ namespace PsimagLite {
 template <typename PthreadFunctionHolderType>
 class PthreadsAndMpi : public Pthreads<PthreadFunctionHolderType> {
 
-	typedef Pthreads<PthreadFunctionHolderType> BaseType;
+	using BaseType = Pthreads<PthreadFunctionHolderType>;
 
 public:
 

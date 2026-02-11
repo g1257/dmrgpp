@@ -110,13 +110,13 @@ public:
 		SAVE_PARTIAL
 	};
 
-	typedef MatrixInBlockTemplate                              BuildingBlockType;
-	typedef typename BuildingBlockType::value_type             ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef PsimagLite::Vector<SizeType>::Type                 VectorSizeType;
-	typedef PsimagLite::Vector<int>::Type                      VectorIntType;
-	typedef PsimagLite::IoSelector::In                         IoInType;
+	using BuildingBlockType = MatrixInBlockTemplate;
+	using ComplexOrRealType = typename BuildingBlockType::value_type;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
+	using VectorSizeType    = PsimagLite::Vector<SizeType>::Type;
+	using VectorIntType     = PsimagLite::Vector<int>::Type;
+	using IoInType          = PsimagLite::IoSelector::In;
 
 	BlockDiagonalMatrix()
 	    : isSquare_(true)

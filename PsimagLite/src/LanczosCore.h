@@ -100,21 +100,21 @@ namespace PsimagLite {
 template <typename SolverParametersType, typename MatrixType, typename VectorType_>
 class LanczosCore {
 
-	typedef LanczosVectors<MatrixType, VectorType_> LanczosVectorsType;
+	using LanczosVectorsType = LanczosVectors<MatrixType, VectorType_>;
 
 public:
 
-	typedef VectorType_                                        VectorType;
-	typedef typename LanczosVectorsType::DenseMatrixType       DenseMatrixType;
-	typedef typename LanczosVectorsType::VectorVectorType      VectorVectorType;
-	typedef typename SolverParametersType::RealType            RealType;
-	typedef typename LanczosVectorsType::DenseMatrixRealType   DenseMatrixRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef SolverParametersType                               ParametersSolverType;
-	typedef MatrixType                                         LanczosMatrixType;
-	typedef typename LanczosVectorsType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef typename VectorType::value_type                    VectorElementType;
-	typedef ContinuedFraction<TridiagonalMatrixType>           PostProcType;
+	using VectorType            = VectorType_;
+	using DenseMatrixType       = typename LanczosVectorsType::DenseMatrixType;
+	using VectorVectorType      = typename LanczosVectorsType::VectorVectorType;
+	using RealType              = typename SolverParametersType::RealType;
+	using DenseMatrixRealType   = typename LanczosVectorsType::DenseMatrixRealType;
+	using VectorRealType        = typename PsimagLite::Vector<RealType>::Type;
+	using ParametersSolverType  = SolverParametersType;
+	using LanczosMatrixType     = MatrixType;
+	using TridiagonalMatrixType = typename LanczosVectorsType::TridiagonalMatrixType;
+	using VectorElementType     = typename VectorType::value_type;
+	using PostProcType          = ContinuedFraction<TridiagonalMatrixType>;
 
 	LanczosCore(const MatrixType&           mat,
 	            const SolverParametersType& params,

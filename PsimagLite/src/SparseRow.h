@@ -87,9 +87,9 @@ namespace PsimagLite {
 template <typename CrsMatrixType> class SparseRow {
 public:
 
-	typedef typename CrsMatrixType::value_type ValueType;
-	typedef typename Vector<SizeType>::Type    ColumnsType;
-	typedef typename Vector<ValueType>::Type   VectorType;
+	using ValueType   = typename CrsMatrixType::value_type;
+	using ColumnsType = typename Vector<SizeType>::Type;
+	using VectorType  = typename Vector<ValueType>::Type;
 
 	void add(SizeType col, ValueType value)
 	{

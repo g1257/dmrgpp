@@ -90,20 +90,20 @@ template <typename CorrelationsSkeletonType> class FourPointCorrelations {
 
 public:
 
-	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
-	typedef typename ObserverHelperType::VectorType               VectorType;
-	typedef typename ObserverHelperType::VectorWithOffsetType     VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType   BasisWithOperatorsType;
-	typedef SizeType                                              IndexType;
-	typedef typename VectorType::value_type                       FieldType;
-	typedef typename BasisWithOperatorsType::RealType             RealType;
-	typedef typename CorrelationsSkeletonType::SparseMatrixType   SparseMatrixType;
-	typedef typename CorrelationsSkeletonType::OperatorType       OperatorType;
-	typedef typename ObserverHelperType::MatrixType               MatrixType;
-	typedef PsimagLite::Vector<char>::Type                        VectorCharType;
-	typedef PsimagLite::Vector<SizeType>::Type                    VectorSizeType;
-	typedef typename PsimagLite::Vector<SparseMatrixType>::Type   VectorSparseMatrixType;
-	typedef typename CorrelationsSkeletonType::BraketType         BraketType;
+	using ObserverHelperType     = typename CorrelationsSkeletonType::ObserverHelperType;
+	using VectorType             = typename ObserverHelperType::VectorType;
+	using VectorWithOffsetType   = typename ObserverHelperType::VectorWithOffsetType;
+	using BasisWithOperatorsType = typename ObserverHelperType::BasisWithOperatorsType;
+	using IndexType              = SizeType;
+	using FieldType              = typename VectorType::value_type;
+	using RealType               = typename BasisWithOperatorsType::RealType;
+	using SparseMatrixType       = typename CorrelationsSkeletonType::SparseMatrixType;
+	using OperatorType           = typename CorrelationsSkeletonType::OperatorType;
+	using MatrixType             = typename ObserverHelperType::MatrixType;
+	using VectorCharType         = PsimagLite::Vector<char>::Type;
+	using VectorSizeType         = PsimagLite::Vector<SizeType>::Type;
+	using VectorSparseMatrixType = typename PsimagLite::Vector<SparseMatrixType>::Type;
+	using BraketType             = typename CorrelationsSkeletonType::BraketType;
 
 	FourPointCorrelations(const CorrelationsSkeletonType& skeleton)
 	    : skeleton_(skeleton)

@@ -11,25 +11,25 @@ template <typename TargetingBaseType> class NonLocalForTargetingExpression {
 
 public:
 
-	typedef AuxForTargetingExpression<TargetingBaseType>            AuxiliaryType;
-	typedef typename TargetingBaseType::VectorWithOffsetType        VectorWithOffsetType;
-	typedef typename TargetingBaseType::ModelType                   ModelType;
-	typedef typename TargetingBaseType::LanczosSolverType           LanczosSolverType;
-	typedef typename TargetingBaseType::WaveFunctionTransfType      WaveFunctionTransfType;
-	typedef typename TargetingBaseType::TargetParamsType            TargetParamsType;
-	typedef typename TargetParamsType::RealType                     RealType;
-	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type VectorVectorWithOffsetType;
-	typedef typename AuxiliaryType::InputValidatorType              InputValidatorType;
-	typedef typename AuxiliaryType::GroupOfOneTimeEvolutionsType GroupOfOneTimeEvolutionsType;
-	typedef typename GroupOfOneTimeEvolutionsType::OneTimeEvolutionType OneTimeEvolutionType;
-	typedef PsimagLite::OneOperatorSpec                                 OneOperatorSpecType;
-	typedef typename OneOperatorSpecType::SiteSplit                     SiteSplitType;
-	typedef typename ModelType::VectorSizeType                          VectorSizeType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type                VectorStringType;
-	typedef typename PsimagLite::Vector<RealType>::Type                 VectorRealType;
-	typedef std::pair<PsimagLite::String, SizeType>                     PairStringSizeType;
-	typedef typename ApplyOperatorExpressionType::TimeVectorsBaseType   TimeVectorsBaseType;
+	using AuxiliaryType               = AuxForTargetingExpression<TargetingBaseType>;
+	using VectorWithOffsetType        = typename TargetingBaseType::VectorWithOffsetType;
+	using ModelType                   = typename TargetingBaseType::ModelType;
+	using LanczosSolverType           = typename TargetingBaseType::LanczosSolverType;
+	using WaveFunctionTransfType      = typename TargetingBaseType::WaveFunctionTransfType;
+	using TargetParamsType            = typename TargetingBaseType::TargetParamsType;
+	using RealType                    = typename TargetParamsType::RealType;
+	using ApplyOperatorExpressionType = typename TargetingBaseType::ApplyOperatorExpressionType;
+	using VectorVectorWithOffsetType  = typename PsimagLite::Vector<VectorWithOffsetType>::Type;
+	using InputValidatorType          = typename AuxiliaryType::InputValidatorType;
+	using GroupOfOneTimeEvolutionsType = typename AuxiliaryType::GroupOfOneTimeEvolutionsType;
+	using OneTimeEvolutionType = typename GroupOfOneTimeEvolutionsType::OneTimeEvolutionType;
+	using OneOperatorSpecType  = PsimagLite::OneOperatorSpec;
+	using SiteSplitType        = typename OneOperatorSpecType::SiteSplit;
+	using VectorSizeType       = typename ModelType::VectorSizeType;
+	using VectorStringType     = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorRealType       = typename PsimagLite::Vector<RealType>::Type;
+	using PairStringSizeType   = std::pair<PsimagLite::String, SizeType>;
+	using TimeVectorsBaseType  = typename ApplyOperatorExpressionType::TimeVectorsBaseType;
 
 	struct TimeParams {
 

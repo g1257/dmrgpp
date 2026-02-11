@@ -11,7 +11,7 @@ namespace PsimagLite {
 
 class SumDecomposition {
 
-	typedef Vector<SizeType>::Type VectorSizeType;
+	using VectorSizeType = Vector<SizeType>::Type;
 
 public:
 

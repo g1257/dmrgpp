@@ -18,13 +18,12 @@ void mainLoop(GeometryType&                   geometry,
               const ParametersDmrgSolverType& params,
               const std::string&              list)
 {
-	typedef typename VectorWithOffsetType::value_type ComplexOrRealType;
+	using ComplexOrRealType = typename VectorWithOffsetType::value_type;
 
-	typedef ModelBase<ModelHelperType,
-	                  ParametersDmrgSolverType,
-	                  InputNgType::Readable,
-	                  GeometryType>
-	    ModelBaseType;
+	using ModelBaseType = ModelBase<ModelHelperType,
+	                                ParametersDmrgSolverType,
+	                                InputNgType::Readable,
+	                                GeometryType>;
 
 	SizeType orbitals = 1.0;
 	try {
@@ -56,19 +55,19 @@ void mainLoop1(GeometryType&                   geometry,
                const ParametersDmrgSolverType& params,
                const std::string&              list)
 {
-	typedef Basis<MySparseMatrix>                             BasisType;
-	typedef BasisWithOperators<BasisType>                     BasisWithOperatorsType;
-	typedef LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
-	typedef ModelHelperTemplate<LeftRightSuperType>           ModelHelperType;
-	typedef typename MySparseMatrix::value_type               ComplexOrRealType;
-	typedef Qn                                                QnType;
+	using BasisType              = Basis<MySparseMatrix>;
+	using BasisWithOperatorsType = BasisWithOperators<BasisType>;
+	using LeftRightSuperType     = LeftRightSuper<BasisWithOperatorsType, BasisType>;
+	using ModelHelperType        = ModelHelperTemplate<LeftRightSuperType>;
+	using ComplexOrRealType      = typename MySparseMatrix::value_type;
+	using QnType                 = Qn;
 
 	if (params.options.isSet("vectorwithoffsets")) {
-		typedef VectorWithOffsets<ComplexOrRealType, QnType> VectorWithOffsetType;
+		using VectorWithOffsetType = VectorWithOffsets<ComplexOrRealType, QnType>;
 		mainLoop<GeometryType, ModelHelperType, VectorWithOffsetType>(
 		    geometry, io, params, list);
 	} else {
-		typedef VectorWithOffset<ComplexOrRealType, QnType> VectorWithOffsetType;
+		using VectorWithOffsetType = VectorWithOffset<ComplexOrRealType, QnType>;
 		mainLoop<GeometryType, ModelHelperType, VectorWithOffsetType>(
 		    geometry, io, params, list);
 	}
@@ -80,9 +79,9 @@ void mainLoop0(InputNgType::Readable&    io,
                InputCheck&               inputCheck,
                const std::string&        list)
 {
-	typedef typename MySparseMatrix::value_type ComplexOrRealType;
-	typedef Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>
-	    SuperGeometryType;
+	using ComplexOrRealType = typename MySparseMatrix::value_type;
+	using SuperGeometryType
+	    = Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, ProgramGlobals>;
 
 	SuperGeometryType superGeometry(io);
 	int               tmp = 0;
@@ -210,7 +209,7 @@ int main(int argc, char** argv)
 		application.echoBase64(std::cout, filename);
 	}
 
-	typedef PsimagLite::Concurrency ConcurrencyType;
+	using ConcurrencyType = PsimagLite::Concurrency;
 
 	// print license
 	if (ConcurrencyType::root()) {

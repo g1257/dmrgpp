@@ -13,26 +13,26 @@ template <typename TargetingBaseType> class AlgebraForTargetingExpression {
 
 public:
 
-	typedef typename TargetingBaseType::VectorWithOffsetType    VectorWithOffsetType;
-	typedef typename TargetingBaseType::ModelType               ModelType;
-	typedef typename VectorWithOffsetType::value_type           ComplexOrRealType;
-	typedef AuxForTargetingExpression<TargetingBaseType>        AuxiliaryType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type        VectorStringType;
-	typedef typename ModelType::ModelHelperType                 ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType        LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorsType      OperatorsType;
-	typedef typename OperatorsType::OperatorType                OperatorType;
-	typedef PsimagLite::Vector<int>::Type                       VectorIntType;
-	typedef PsimagLite::Vector<SizeType>::Type                  VectorSizeType;
-	typedef typename VectorWithOffsetType::VectorType           VectorType;
-	typedef PsimagLite::PackIndices                             PackIndicesType;
-	typedef typename OperatorType::StorageType                  SparseMatrixType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type  RealType;
-	typedef TermForTargetingExpression<TargetingBaseType>       TermType;
-	typedef typename PsimagLite::Vector<TermType*>::Type        VectorTermType;
-	typedef PsimagLite::Vector<bool>::Type                      VectorBoolType;
-	using KetType = typename TermType::KetType;
+	using VectorWithOffsetType   = typename TargetingBaseType::VectorWithOffsetType;
+	using ModelType              = typename TargetingBaseType::ModelType;
+	using ComplexOrRealType      = typename VectorWithOffsetType::value_type;
+	using AuxiliaryType          = AuxForTargetingExpression<TargetingBaseType>;
+	using VectorStringType       = PsimagLite::Vector<PsimagLite::String>::Type;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using OperatorsType          = typename BasisWithOperatorsType::OperatorsType;
+	using OperatorType           = typename OperatorsType::OperatorType;
+	using VectorIntType          = PsimagLite::Vector<int>::Type;
+	using VectorSizeType         = PsimagLite::Vector<SizeType>::Type;
+	using VectorType             = typename VectorWithOffsetType::VectorType;
+	using PackIndicesType        = PsimagLite::PackIndices;
+	using SparseMatrixType       = typename OperatorType::StorageType;
+	using RealType               = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using TermType               = TermForTargetingExpression<TargetingBaseType>;
+	using VectorTermType         = typename PsimagLite::Vector<TermType*>::Type;
+	using VectorBoolType         = PsimagLite::Vector<bool>::Type;
+	using KetType                = typename TermType::KetType;
 
 	AlgebraForTargetingExpression(const AuxiliaryType& aux)
 	    : finalized_(false)

@@ -41,9 +41,9 @@ Please see full open source license included in file LICENSE.
 #endif
 
 #ifndef USE_SHORT
-typedef long unsigned int SizeType;
+using SizeType = long unsigned int;
 #else
-typedef uint32_t SizeType;
+using SizeType = uint32_t;
 #endif
 
 namespace PsimagLite {
@@ -58,15 +58,15 @@ struct IsEnumClass<T, true>
 
 #ifdef USE_CUSTOM_ALLOCATOR
 template <typename T, int templateParamFlags> class AllocatorCpu : public std::allocator<T> {
-	typedef typename std::allocator<T> BaseType;
+	using BaseType = typename std::allocator<T>;
 
-	typedef MemoryCpu     MemoryCpuType;
-	typedef unsigned char ByteType;
+	using MemoryCpuType = MemoryCpu;
+	using ByteType      = unsigned char;
 
 public:
 
 	template <typename U> struct rebind {
-		typedef AllocatorCpu<U, templateParamFlags> other;
+		using other = AllocatorCpu<U, templateParamFlags>;
 	}; // struct rebind
 
 	AllocatorCpu() { }
@@ -100,9 +100,9 @@ template <typename T> class Allocator {
 public:
 
 #ifdef USE_CUSTOM_ALLOCATOR
-	typedef AllocatorCpu<T, 1> Type;
+	using Type = AllocatorCpu<T, 1>;
 #else
-	typedef std::allocator<T> Type;
+	using Type = std::allocator<T>;
 #endif
 }; // class Allocator
 
@@ -111,15 +111,15 @@ template <bool b, typename T> class EnableIf { };
 template <typename T> class EnableIf<true, T> {
 public:
 
-	typedef T Type;
+	using Type = T;
 };
 
 template <typename T> struct RemoveConst {
-	typedef T Type;
+	using Type = T;
 };
 
 template <typename T> struct RemoveConst<const T> {
-	typedef T Type;
+	using Type = T;
 };
 
 template <typename T> struct IsStringLike {
@@ -136,8 +136,8 @@ template <typename A> struct IsStringLike<std::basic_string<char, std::char_trai
 	};
 };
 
-typedef std::basic_string<char, std::char_traits<char>, Allocator<char>::Type>        String;
-typedef std::basic_istringstream<char, std::char_traits<char>, Allocator<char>::Type> IstringStream;
+using String        = std::basic_string<char, std::char_traits<char>, Allocator<char>::Type>;
+using IstringStream = std::basic_istringstream<char, std::char_traits<char>, Allocator<char>::Type>;
 
 class OstringStream {
 public:

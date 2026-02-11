@@ -85,12 +85,12 @@ template <typename ModelType_, typename WaveFunctionTransfType_> class TargetHel
 
 public:
 
-	typedef ModelType_                                   ModelType;
-	typedef WaveFunctionTransfType_                      WaveFunctionTransfType;
-	typedef typename ModelType::RealType                 RealType;
-	typedef typename ModelType::ModelHelperType          ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::InputValidatorType       InputValidatorType;
+	using ModelType              = ModelType_;
+	using WaveFunctionTransfType = WaveFunctionTransfType_;
+	using RealType               = typename ModelType::RealType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
 
 	TargetHelper(const LeftRightSuperType&     lrs,
 	             const ModelType&              model,

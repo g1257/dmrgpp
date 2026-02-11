@@ -11,7 +11,7 @@ template <typename ComplexOrRealType> class Svd {
 
 public:
 
-	typedef typename Real<ComplexOrRealType>::Type RealType;
+	using RealType = typename Real<ComplexOrRealType>::Type;
 
 	Svd(String name = "gesdd")
 	    : name_(name)

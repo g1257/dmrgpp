@@ -11,9 +11,9 @@ template <typename FieldType> class AlgebraicStringToNumber {
 
 	public:
 
-		typedef FieldType ResultType;
-		typedef FieldType ComplexOrRealType;
-		typedef FieldType AuxiliaryType;
+		using ResultType        = FieldType;
+		using ComplexOrRealType = FieldType;
+		using AuxiliaryType     = FieldType;
 
 		LoopLengthSpec(SizeType n)
 		    : n_(n)

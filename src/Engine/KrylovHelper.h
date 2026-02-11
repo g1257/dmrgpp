@@ -9,12 +9,12 @@ template <typename ActionType, typename TypeWrapperType> class KrylovHelper {
 
 public:
 
-	typedef typename TypeWrapperType::MatrixComplexOrRealType MatrixComplexOrRealType;
-	typedef typename TypeWrapperType::VectorWithOffsetType    VectorWithOffsetType;
-	typedef typename ActionType::VectorRealType               VectorRealType;
-	typedef typename TypeWrapperType::SolverParamsType        SolverParamsType;
-	typedef typename VectorWithOffsetType::VectorType         VectorType;
-	typedef typename VectorWithOffsetType::value_type         ComplexOrRealType;
+	using MatrixComplexOrRealType = typename TypeWrapperType::MatrixComplexOrRealType;
+	using VectorWithOffsetType    = typename TypeWrapperType::VectorWithOffsetType;
+	using VectorRealType          = typename ActionType::VectorRealType;
+	using SolverParamsType        = typename TypeWrapperType::SolverParamsType;
+	using VectorType              = typename VectorWithOffsetType::VectorType;
+	using ComplexOrRealType       = typename VectorWithOffsetType::value_type;
 
 	KrylovHelper(const SolverParamsType& params, SizeType firstRitz)
 	    : params_(params)

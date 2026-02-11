@@ -84,7 +84,7 @@ namespace Dmrg {
 
 template <typename SparseMatrixType> class MatrixOrIdentity {
 
-	typedef typename SparseMatrixType::value_type SparseElementType;
+	using SparseElementType = typename SparseMatrixType::value_type;
 
 public:
 

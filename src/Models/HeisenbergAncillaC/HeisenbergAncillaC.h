@@ -101,35 +101,35 @@ template <typename ModelBaseType> class HeisenbergAncillaC : public ModelBaseTyp
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType              ModelHelperType;
-	typedef typename ModelHelperType::BasisType                  BasisType;
-	typedef typename ModelBaseType::SuperGeometryType            SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType           LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType                     LinkType;
-	typedef typename ModelHelperType::OperatorsType              OperatorsType;
-	typedef typename ModelHelperType::RealType                   RealType;
-	typedef typename ModelBaseType::VectorType                   VectorType;
-	typedef typename std::pair<SizeType, SizeType>               PairSizeType;
-	typedef typename ModelBaseType::QnType                       QnType;
-	typedef typename QnType::VectorQnType                        VectorQnType;
-	typedef typename ModelBaseType::BlockType                    BlockType;
-	typedef typename ModelBaseType::SolverParamsType             SolverParamsType;
-	typedef typename ModelHelperType::SparseMatrixType           SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                SparseElementType;
-	typedef unsigned int long                                    WordType;
-	typedef typename ModelBaseType::InputValidatorType           InputValidatorType;
-	typedef PsimagLite::Matrix<SparseElementType>                MatrixType;
-	typedef typename PsimagLite::Vector<SizeType>::Type          VectorSizeType;
-	typedef typename ModelBaseType::VectorRealType               VectorRealType;
-	typedef typename PsimagLite::Vector<unsigned int long>::Type HilbertBasisType;
-	typedef typename OperatorsType::OperatorType                 OperatorType;
-	typedef typename OperatorType::PairType                      PairType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type      VectorOperatorType;
-	typedef typename ModelBaseType::MyBasis                      MyBasis;
-	typedef typename ModelBaseType::BasisWithOperatorsType       MyBasisWithOperators;
-	typedef typename ModelBaseType::OpsLabelType                 OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType                OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType                ModelTermType;
+	using ModelHelperType      = typename ModelBaseType::ModelHelperType;
+	using BasisType            = typename ModelHelperType::BasisType;
+	using SuperGeometryType    = typename ModelBaseType::SuperGeometryType;
+	using LeftRightSuperType   = typename ModelBaseType::LeftRightSuperType;
+	using LinkType             = typename ModelBaseType::LinkType;
+	using OperatorsType        = typename ModelHelperType::OperatorsType;
+	using RealType             = typename ModelHelperType::RealType;
+	using VectorType           = typename ModelBaseType::VectorType;
+	using PairSizeType         = typename std::pair<SizeType, SizeType>;
+	using QnType               = typename ModelBaseType::QnType;
+	using VectorQnType         = typename QnType::VectorQnType;
+	using BlockType            = typename ModelBaseType::BlockType;
+	using SolverParamsType     = typename ModelBaseType::SolverParamsType;
+	using SparseMatrixType     = typename ModelHelperType::SparseMatrixType;
+	using SparseElementType    = typename SparseMatrixType::value_type;
+	using WordType             = unsigned int long;
+	using InputValidatorType   = typename ModelBaseType::InputValidatorType;
+	using MatrixType           = PsimagLite::Matrix<SparseElementType>;
+	using VectorSizeType       = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorRealType       = typename ModelBaseType::VectorRealType;
+	using HilbertBasisType     = typename PsimagLite::Vector<unsigned int long>::Type;
+	using OperatorType         = typename OperatorsType::OperatorType;
+	using PairType             = typename OperatorType::PairType;
+	using VectorOperatorType   = typename PsimagLite::Vector<OperatorType>::Type;
+	using MyBasis              = typename ModelBaseType::MyBasis;
+	using MyBasisWithOperators = typename ModelBaseType::BasisWithOperatorsType;
+	using OpsLabelType         = typename ModelBaseType::OpsLabelType;
+	using OpForLinkType        = typename ModelBaseType::OpForLinkType;
+	using ModelTermType        = typename ModelBaseType::ModelTermType;
 
 	HeisenbergAncillaC(const SolverParamsType&  solverParams,
 	                   InputValidatorType&      io,
@@ -647,8 +647,8 @@ private:
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		typedef std::pair<SizeType, SizeType> PairType;
-		VectorSizeType                        other(2, 0);
+		using PairType = std::pair<SizeType, SizeType>;
+		VectorSizeType other(2, 0);
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair;

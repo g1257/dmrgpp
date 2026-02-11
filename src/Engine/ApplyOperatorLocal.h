@@ -88,12 +88,12 @@ namespace Dmrg {
 
 template <typename LeftRightSuperType_, typename VectorWithOffsetType_> class ApplyOperatorLocal {
 
-	typedef typename VectorWithOffsetType_::VectorType           TargetVectorType;
-	typedef typename LeftRightSuperType_::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::RealType            RealType;
-	typedef typename BasisWithOperatorsType::ComplexOrRealType   ComplexOrRealType;
-	typedef PsimagLite::PackIndices                              PackIndicesType;
-	typedef typename BasisWithOperatorsType::OperatorType        OperatorType_;
+	using TargetVectorType       = typename VectorWithOffsetType_::VectorType;
+	using BasisWithOperatorsType = typename LeftRightSuperType_::BasisWithOperatorsType;
+	using RealType               = typename BasisWithOperatorsType::RealType;
+	using ComplexOrRealType      = typename BasisWithOperatorsType::ComplexOrRealType;
+	using PackIndicesType        = PsimagLite::PackIndices;
+	using OperatorType_          = typename BasisWithOperatorsType::OperatorType;
 
 	class LegacyBug {
 
@@ -146,11 +146,11 @@ public:
 		RIGHT_CORNER
 	};
 
-	typedef LeftRightSuperType_                        LeftRightSuperType;
-	typedef typename BasisWithOperatorsType::BasisType BasisType;
-	typedef VectorWithOffsetType_                      VectorWithOffsetType;
-	typedef OperatorType_                              OperatorType;
-	typedef FermionSign                                FermionSignType;
+	using LeftRightSuperType   = LeftRightSuperType_;
+	using BasisType            = typename BasisWithOperatorsType::BasisType;
+	using VectorWithOffsetType = VectorWithOffsetType_;
+	using OperatorType         = OperatorType_;
+	using FermionSignType      = FermionSign;
 
 	ApplyOperatorLocal(const LeftRightSuperType& lrs, bool withLegacyBug)
 	    : lrs_(lrs)

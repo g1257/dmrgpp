@@ -6,7 +6,7 @@ namespace PsimagLite {
 
 class LabelDisabled {
 
-	typedef Vector<String>::Type VectorStringType;
+	using VectorStringType = Vector<String>::Type;
 
 public:
 

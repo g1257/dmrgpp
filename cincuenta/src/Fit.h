@@ -12,12 +12,12 @@ template <typename ComplexOrRealType> class Fit {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type     RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type            VectorRealType;
-	typedef MinParams<RealType>                                    MinParamsType;
-	typedef AndersonFunction<ComplexOrRealType>                    AndersonFunctionType;
-	typedef typename AndersonFunctionType::FunctionOfFrequencyType FunctionOfFrequencyType;
-	typedef PsimagLite::MersenneTwister                            RngType;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
+	using MinParamsType           = MinParams<RealType>;
+	using AndersonFunctionType    = AndersonFunction<ComplexOrRealType>;
+	using FunctionOfFrequencyType = typename AndersonFunctionType::FunctionOfFrequencyType;
+	using RngType                 = PsimagLite::MersenneTwister;
 
 	struct InitResults {
 

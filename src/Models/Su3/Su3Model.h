@@ -94,39 +94,39 @@ template <typename ModelBaseType> class Su3Model : public ModelBaseType {
 
 public:
 
-	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
-	typedef typename ModelHelperType::BasisType             BasisType;
-	typedef typename ModelBaseType::SuperGeometryType       SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType                LinkType;
-	typedef typename ModelHelperType::OperatorsType         OperatorsType;
-	typedef typename ModelHelperType::RealType              RealType;
-	typedef typename ModelBaseType::VectorType              VectorType;
-	typedef typename ModelBaseType::QnType                  QnType;
-	typedef typename ModelBaseType::VectorQnType            VectorQnType;
-	typedef typename ModelBaseType::BlockType               BlockType;
-	typedef typename ModelBaseType::SolverParamsType        SolverParamsType;
-	typedef typename ModelHelperType::SparseMatrixType      SparseMatrixType;
-	typedef typename SparseMatrixType::value_type           ComplexOrRealType;
-	typedef unsigned int long                               WordType;
-	typedef typename ModelBaseType::InputValidatorType      InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>           MatrixType;
-	typedef typename PsimagLite::Vector<SizeType>::Type     VectorSizeType;
-	typedef typename ModelBaseType::VectorRealType          VectorRealType;
-	typedef typename ModelBaseType::ModelTermType           ModelTermType;
-	typedef typename PsimagLite::Vector<SizeType>::Type     HilbertBasisType;
-	typedef typename OperatorsType::OperatorType            OperatorType;
-	typedef typename OperatorType::PairType                 PairType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelBaseType::MyBasis                 MyBasis;
-	typedef typename ModelBaseType::BasisWithOperatorsType  MyBasisWithOperators;
-	typedef typename ModelBaseType::OpsLabelType            OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType           OpForLinkType;
-	typedef ParametersSu3<RealType, QnType>                 ParametersSu3Type;
-	typedef Su3RepresentationBase<ComplexOrRealType>        Su3RepresentationBaseType;
-	typedef Su3RepresentationP1<ComplexOrRealType,
-	                            PsimagLite::IsComplexNumber<ComplexOrRealType>::True>
-	    Su3RepresentationP1Type;
+	using ModelHelperType           = typename ModelBaseType::ModelHelperType;
+	using BasisType                 = typename ModelHelperType::BasisType;
+	using SuperGeometryType         = typename ModelBaseType::SuperGeometryType;
+	using LeftRightSuperType        = typename ModelBaseType::LeftRightSuperType;
+	using LinkType                  = typename ModelBaseType::LinkType;
+	using OperatorsType             = typename ModelHelperType::OperatorsType;
+	using RealType                  = typename ModelHelperType::RealType;
+	using VectorType                = typename ModelBaseType::VectorType;
+	using QnType                    = typename ModelBaseType::QnType;
+	using VectorQnType              = typename ModelBaseType::VectorQnType;
+	using BlockType                 = typename ModelBaseType::BlockType;
+	using SolverParamsType          = typename ModelBaseType::SolverParamsType;
+	using SparseMatrixType          = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType         = typename SparseMatrixType::value_type;
+	using WordType                  = unsigned int long;
+	using InputValidatorType        = typename ModelBaseType::InputValidatorType;
+	using MatrixType                = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorSizeType            = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorRealType            = typename ModelBaseType::VectorRealType;
+	using ModelTermType             = typename ModelBaseType::ModelTermType;
+	using HilbertBasisType          = typename PsimagLite::Vector<SizeType>::Type;
+	using OperatorType              = typename OperatorsType::OperatorType;
+	using PairType                  = typename OperatorType::PairType;
+	using VectorOperatorType        = typename PsimagLite::Vector<OperatorType>::Type;
+	using MyBasis                   = typename ModelBaseType::MyBasis;
+	using MyBasisWithOperators      = typename ModelBaseType::BasisWithOperatorsType;
+	using OpsLabelType              = typename ModelBaseType::OpsLabelType;
+	using OpForLinkType             = typename ModelBaseType::OpForLinkType;
+	using ParametersSu3Type         = ParametersSu3<RealType, QnType>;
+	using Su3RepresentationBaseType = Su3RepresentationBase<ComplexOrRealType>;
+	using Su3RepresentationP1Type
+	    = Su3RepresentationP1<ComplexOrRealType,
+	                          PsimagLite::IsComplexNumber<ComplexOrRealType>::True>;
 
 	static const bool IS_REAL = !PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 
@@ -340,7 +340,7 @@ private:
 	// We delegate to the representation the actual values and computation
 	void setSymmetryRelated(VectorQnType& qns, const HilbertBasisType& basis, int n) const
 	{
-		typedef std::pair<SizeType, SizeType> PairType;
+		using PairType = std::pair<SizeType, SizeType>;
 
 		VectorSizeType other(2);
 		QnType::ifPresentOther0IsElectrons = false;

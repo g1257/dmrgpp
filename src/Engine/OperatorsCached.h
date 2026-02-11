@@ -10,18 +10,18 @@ template <typename LeftRightSuperType> class OperatorsCached {
 
 public:
 
-	typedef std::pair<SizeType, SizeType>                           PairType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef typename LeftRightSuperType::BasisType                  BasisType;
-	typedef typename BasisType::BlockType                           BlockType;
-	typedef typename BasisWithOperatorsType::OperatorsType          OperatorsType;
-	typedef typename OperatorsType::OperatorType                    OperatorType;
-	typedef typename OperatorType::StorageType                      OperatorStorageType;
-	typedef PsimagLite::Concurrency                                 ConcurrencyType;
-	typedef typename PsimagLite::Vector<OperatorStorageType*>::Type VectorOperatorStorageType;
-	typedef typename PsimagLite::Vector<VectorOperatorStorageType>::Type
-	                  VectorVectorOperatorStorageType;
-	typedef BlockType VectorSizeType;
+	using PairType                  = std::pair<SizeType, SizeType>;
+	using BasisWithOperatorsType    = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType                 = typename LeftRightSuperType::BasisType;
+	using BlockType                 = typename BasisType::BlockType;
+	using OperatorsType             = typename BasisWithOperatorsType::OperatorsType;
+	using OperatorType              = typename OperatorsType::OperatorType;
+	using OperatorStorageType       = typename OperatorType::StorageType;
+	using ConcurrencyType           = PsimagLite::Concurrency;
+	using VectorOperatorStorageType = typename PsimagLite::Vector<OperatorStorageType*>::Type;
+	using VectorVectorOperatorStorageType =
+	    typename PsimagLite::Vector<VectorOperatorStorageType>::Type;
+	using VectorSizeType = BlockType;
 
 	OperatorsCached(const LeftRightSuperType& lrs)
 	    : lrs_(lrs)

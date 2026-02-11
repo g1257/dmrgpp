@@ -87,9 +87,9 @@ namespace PsimagLite {
 
 namespace MPI {
 
-	typedef int CommType;
-	extern int  COMM_WORLD;
-	extern int  SUM;
+	using CommType = int;
+	extern int COMM_WORLD;
+	extern int SUM;
 
 	void init(int*, char***);
 

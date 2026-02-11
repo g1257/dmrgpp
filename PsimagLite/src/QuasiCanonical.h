@@ -14,11 +14,11 @@ template <typename ComplexOrRealType> class QuasiCanonical {
 
 public:
 
-	typedef Vector<String>::Type                     VectorStringType;
-	typedef Vector<bool>::Type                       VectorBoolType;
-	typedef typename Vector<ComplexOrRealType>::Type VectorType;
-	typedef typename Real<ComplexOrRealType>::Type   RealType;
-	typedef std::complex<RealType>                   ComplexType;
+	using VectorStringType = Vector<String>::Type;
+	using VectorBoolType   = Vector<bool>::Type;
+	using VectorType       = typename Vector<ComplexOrRealType>::Type;
+	using RealType         = typename Real<ComplexOrRealType>::Type;
+	using ComplexType      = std::complex<RealType>;
 
 	QuasiCanonical(String str)
 	    : str_(str)
@@ -153,9 +153,9 @@ private:
 		VectorStringType ve;
 		split(ve, str, ":");
 
-		typedef PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
-		PrimitivesType                                     primitives;
-		ExpressionForAST<PrimitivesType>                   expresionForAST(ve, primitives);
+		using PrimitivesType = PlusMinusMultiplyDivide<ComplexOrRealType>;
+		PrimitivesType                   primitives;
+		ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
 		return expresionForAST.exec();
 	}
 
