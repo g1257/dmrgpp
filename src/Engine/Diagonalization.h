@@ -243,10 +243,7 @@ private:
 			assert(loopIndex < parameters_.finiteLoop.size());
 			const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 
-			onlyWft = false;
-			if (direction != ProgramGlobals::DirectionEnum::INFINITE)
-				onlyWft = finiteLoop.wants("onlyfastwft");
-
+			onlyWft = finiteLoop.wants("onlyfastwft");
 			noguess = finiteLoop.wants("randomguess");
 		}
 
