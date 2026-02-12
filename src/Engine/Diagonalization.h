@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ArnoldiSaI.hh"
 #include "Concurrency.h"
 #include "FiniteLoop.h"
+#include "InfiniteOrFiniteAlgorithm.hh"
 #include "LanczosSolver.h"
 #include "MatrixSolverBase.hh"
 #include "OneSiteSpaces.hh"
@@ -99,37 +100,38 @@ template <typename ParametersType, typename TargetingType> class Diagonalization
 
 public:
 
-	using PairSizeType              = std::pair<SizeType, SizeType>;
-	using OptionsType               = typename ParametersType::OptionsType;
-	using WaveFunctionTransfType    = typename TargetingType::WaveFunctionTransfType;
-	using ModelType                 = typename TargetingType::ModelType;
-	using BasisType                 = typename TargetingType::BasisType;
-	using BasisWithOperatorsType    = typename TargetingType::BasisWithOperatorsType;
-	using BlockType                 = typename TargetingType::BlockType;
-	using TargetVectorType          = typename TargetingType::TargetVectorType;
-	using RealType                  = typename TargetingType::RealType;
-	using VectorWithOffsetType      = typename TargetingType::VectorWithOffsetType;
-	using QnType                    = typename BasisType::QnType;
-	using OperatorsType             = typename ModelType::OperatorsType;
-	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
-	using SparseMatrixType          = typename OperatorsType::SparseMatrixType;
-	using ComplexOrRealType         = typename SparseMatrixType::value_type;
-	using ModelHelperType           = typename ModelType::ModelHelperType;
-	using LeftRightSuperType        = typename ModelHelperType::LeftRightSuperType;
-	using MatrixVectorType          = typename TargetingType::MatrixVectorType;
-	using InputValidatorType        = typename ModelType::InputValidatorType;
-	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
-	using VectorSizeType            = typename PsimagLite::Vector<SizeType>::Type;
-	using VectorVectorRealType      = typename PsimagLite::Vector<VectorRealType>::Type;
-	using ParametersForSolverType   = PsimagLite::ParametersForSolver<RealType>;
-	using MatrixSolverBaseType      = PsimagLite::MatrixSolverBase<MatrixVectorType>;
-	using LanczosSolverType         = PsimagLite::LanczosSolver<MatrixVectorType>;
-	using ArnoldiSaIType            = PsimagLite::ArnoldiSaI<MatrixVectorType>;
-	using VectorVectorType          = typename PsimagLite::Vector<TargetVectorType>::Type;
-	using VectorVectorVectorType    = typename PsimagLite::Vector<VectorVectorType>::Type;
-	using FiniteLoopType            = FiniteLoop<RealType>;
-	using OneSiteSpacesType         = OneSiteSpaces<ModelType>;
-	using MatrixSolverEnum          = typename ParametersType::MatrixSolverEnum;
+	using PairSizeType                  = std::pair<SizeType, SizeType>;
+	using OptionsType                   = typename ParametersType::OptionsType;
+	using WaveFunctionTransfType        = typename TargetingType::WaveFunctionTransfType;
+	using ModelType                     = typename TargetingType::ModelType;
+	using BasisType                     = typename TargetingType::BasisType;
+	using BasisWithOperatorsType        = typename TargetingType::BasisWithOperatorsType;
+	using BlockType                     = typename TargetingType::BlockType;
+	using TargetVectorType              = typename TargetingType::TargetVectorType;
+	using RealType                      = typename TargetingType::RealType;
+	using VectorWithOffsetType          = typename TargetingType::VectorWithOffsetType;
+	using QnType                        = typename BasisType::QnType;
+	using OperatorsType                 = typename ModelType::OperatorsType;
+	using HamiltonianConnectionType     = typename ModelType::HamiltonianConnectionType;
+	using SparseMatrixType              = typename OperatorsType::SparseMatrixType;
+	using ComplexOrRealType             = typename SparseMatrixType::value_type;
+	using ModelHelperType               = typename ModelType::ModelHelperType;
+	using LeftRightSuperType            = typename ModelHelperType::LeftRightSuperType;
+	using MatrixVectorType              = typename TargetingType::MatrixVectorType;
+	using InputValidatorType            = typename ModelType::InputValidatorType;
+	using VectorRealType                = typename PsimagLite::Vector<RealType>::Type;
+	using VectorSizeType                = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorVectorRealType          = typename PsimagLite::Vector<VectorRealType>::Type;
+	using ParametersForSolverType       = PsimagLite::ParametersForSolver<RealType>;
+	using MatrixSolverBaseType          = PsimagLite::MatrixSolverBase<MatrixVectorType>;
+	using LanczosSolverType             = PsimagLite::LanczosSolver<MatrixVectorType>;
+	using ArnoldiSaIType                = PsimagLite::ArnoldiSaI<MatrixVectorType>;
+	using VectorVectorType              = typename PsimagLite::Vector<TargetVectorType>::Type;
+	using VectorVectorVectorType        = typename PsimagLite::Vector<VectorVectorType>::Type;
+	using FiniteLoopType                = FiniteLoop<RealType>;
+	using OneSiteSpacesType             = OneSiteSpaces<ModelType>;
+	using MatrixSolverEnum              = typename ParametersType::MatrixSolverEnum;
+	using InfiniteOrFiniteAlgorithmType = InfiniteOrFiniteAlgorithm<RealType>;
 
 	Diagonalization(const ParametersType&                parameters,
 	                const ModelType&                     model,
@@ -234,14 +236,16 @@ private:
 		wft_.triggerOn();
 
 		SizeType numberOfExcited = parameters_.numberOfExcited;
-		assert(loopIndex < parameters_.finiteLoop.size());
-		const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
+		bool     onlyWft         = false;
+		bool     noguess         = false;
 
-		bool onlyWft = false;
-		if (direction != ProgramGlobals::DirectionEnum::INFINITE)
+		if (direction != ProgramGlobals::DirectionEnum::INFINITE) {
+			assert(loopIndex < parameters_.finiteLoop.size());
+			const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
+
 			onlyWft = finiteLoop.wants("onlyfastwft");
-
-		bool noguess = finiteLoop.wants("randomguess");
+			noguess = finiteLoop.wants("randomguess");
+		}
 
 		if (parameters_.options.isSet("MettsTargeting"))
 			return;
@@ -363,6 +367,8 @@ private:
 				     ++excitedIndex)
 					vecSaved[j][excitedIndex].resize(initialBySector->size());
 
+				InfiniteOrFiniteAlgorithmType inf_or_finite(
+				    direction, parameters_.finiteLoop, loopIndex);
 				VectorRealType myEnergy;
 				diagonaliseOneBlock(myEnergy,
 				                    vecSaved[j],
@@ -370,7 +376,7 @@ private:
 				                    lrs,
 				                    target.time(),
 				                    *initialBySector,
-				                    loopIndex);
+				                    inf_or_finite);
 
 				for (SizeType excitedIndex = 0; excitedIndex < numberOfExcited;
 				     ++excitedIndex) {
@@ -524,23 +530,27 @@ private:
 	/** Diagonalise the i-th block of the matrix, return its eigenvectors
 	                in tmpVec and its eigenvalues in energyTmp
 	        !PTEX_LABEL{diagonaliseOneBlock} */
-	void diagonaliseOneBlock(VectorRealType&           energyTmp,
-	                         VectorVectorType&         tmpVec,
-	                         SizeType                  partitionIndex,
-	                         const LeftRightSuperType& lrs,
-	                         RealType                  targetTime,
-	                         const TargetVectorType&   initialVector,
-	                         SizeType                  loopIndex)
+	void diagonaliseOneBlock(VectorRealType&                            energyTmp,
+	                         VectorVectorType&                          tmpVec,
+	                         SizeType                                   partitionIndex,
+	                         const LeftRightSuperType&                  lrs,
+	                         RealType                                   targetTime,
+	                         const TargetVectorType&                    initialVector,
+	                         const InfiniteOrFiniteAlgorithm<RealType>& inf_or_finite)
 	{
 		const OptionsType& options = parameters_.options;
 
 		HamiltonianConnectionType hc(
 		    lrs, ModelType::modelLinks(), targetTime, model_.superOpHelper());
 
-		const FiniteLoopType&         finiteLoop = parameters_.finiteLoop[loopIndex];
+		bool only_slow_wft = false;
+		if (inf_or_finite.isFinite()) {
+			only_slow_wft = inf_or_finite.finiteLoop().wants("onlyslowwft");
+		}
+
 		typename ModelHelperType::Aux aux(partitionIndex, lrs);
 
-		if (options.isSet("debugmatrix") && !finiteLoop.wants("onlyslowwft")) {
+		if (options.isSet("debugmatrix") && !only_slow_wft) {
 			SparseMatrixType fullm;
 
 			hc.fullHamiltonian(fullm, aux, model_.isHermitian());
@@ -568,7 +578,7 @@ private:
 			if (options.isSet("test"))
 				throw std::logic_error("Exiting due to option test in the input\n");
 
-			if (options.isSet("exactdiag") && !finiteLoop.wants("onlyslowwft")) {
+			if (options.isSet("exactdiag") && !only_slow_wft) {
 				SizeType nexcited = std::min(energyTmp.size(), eigs.size());
 				for (SizeType excited = 0; excited < nexcited; ++excited) {
 					energyTmp[excited] = eigs[excited];
@@ -589,20 +599,20 @@ private:
 		const SizeType mSize = hc.modelHelper().size(partitionIndex);
 		msg << "I will now diagonalize a matrix of size=" << mSize;
 		progress_.printline(msgg, std::cout);
-		diagonaliseOneBlock(energyTmp, tmpVec, hc, initialVector, loopIndex, aux);
+		diagonaliseOneBlock(energyTmp, tmpVec, hc, initialVector, inf_or_finite, aux);
 	}
 
 	void diagonaliseOneBlock(VectorRealType&                      energyTmp,
 	                         VectorVectorType&                    tmpVec,
 	                         HamiltonianConnectionType&           hc,
 	                         const TargetVectorType&              initialVector,
-	                         SizeType                             loopIndex,
+	                         const InfiniteOrFiniteAlgorithmType& inf_or_finite,
 	                         const typename ModelHelperType::Aux& aux)
 	{
 		const SizeType                            nexcited = energyTmp.size();
 		typename MatrixSolverBaseType::MatrixType lanczosHelper(model_, hc, aux);
 
-		if (parameters_.finiteLoop[loopIndex].wants("onlyslowwft")) {
+		if (inf_or_finite.isFinite() && inf_or_finite.finiteLoop().wants("onlyslowwft")) {
 			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
 			PsimagLite::OstringStream                     msgg(std::cout.precision());
 			PsimagLite::OstringStream::OstringStreamType& msg = msgg();
@@ -646,7 +656,7 @@ private:
 		// special cases END
 
 		// "Lanczos" here is a legacy name; it should say MatrixSolver
-		ParametersForSolverType params(io_, "Lanczos", loopIndex);
+		ParametersForSolverType params(io_, "Lanczos", inf_or_finite.loopIndex());
 		MatrixSolverBaseType*   matrixSolverPtr = nullptr;
 
 		switch (parameters_.matrix_solver_enum) {
