@@ -242,7 +242,7 @@ private:
 			assert(loopIndex < parameters_.finiteLoop.size());
 			const FiniteLoopType& finiteLoop = parameters_.finiteLoop[loopIndex];
 
-			bool onlyWft = false;
+			onlyWft = false;
 			if (direction != ProgramGlobals::DirectionEnum::INFINITE)
 				onlyWft = finiteLoop.wants("onlyfastwft");
 
