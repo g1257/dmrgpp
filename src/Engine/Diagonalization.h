@@ -77,12 +77,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DIAGONALIZATION_HEADER_H
 #define DIAGONALIZATION_HEADER_H
+#include "ArnoldiSaI.hh"
 #include "Concurrency.h"
-#include "DavidsonSolver.h"
 #include "FiniteLoop.h"
 #include "LanczosSolver.h"
+#include "MatrixSolverBase.hh"
 #include "OneSiteSpaces.hh"
 #include "PackIndices.h"
+#include "ParametersDmrgSolver.h"
 #include "ParametersForSolver.h"
 #include "PredicateAwesome.h"
 #include "Profiling.h"
@@ -97,42 +99,37 @@ template <typename ParametersType, typename TargetingType> class Diagonalization
 
 public:
 
-	typedef std::pair<SizeType, SizeType>                     PairSizeType;
-	typedef typename ParametersType::OptionsType              OptionsType;
-	typedef typename TargetingType::WaveFunctionTransfType    WaveFunctionTransfType;
-	typedef typename TargetingType::ModelType                 ModelType;
-	typedef typename TargetingType::BasisType                 BasisType;
-	typedef typename TargetingType::BasisWithOperatorsType    BasisWithOperatorsType;
-	typedef typename TargetingType::BlockType                 BlockType;
-	typedef typename TargetingType::TargetVectorType          TargetVectorType;
-	typedef typename TargetingType::RealType                  RealType;
-	typedef typename TargetingType::VectorWithOffsetType      VectorWithOffsetType;
-	typedef typename BasisType::QnType                        QnType;
-	typedef typename ModelType::OperatorsType                 OperatorsType;
-	typedef typename ModelType::HamiltonianConnectionType     HamiltonianConnectionType;
-	typedef typename OperatorsType::SparseMatrixType          SparseMatrixType;
-	typedef typename SparseMatrixType::value_type             ComplexOrRealType;
-	typedef typename ModelType::ModelHelperType               ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename TargetingType::MatrixVectorType          MatrixVectorType;
-	typedef typename ModelType::InputValidatorType            InputValidatorType;
-	typedef typename PsimagLite::Vector<RealType>::Type       VectorRealType;
-	typedef typename PsimagLite::Vector<SizeType>::Type       VectorSizeType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type VectorVectorRealType;
-	typedef PsimagLite::ParametersForSolver<RealType>         ParametersForSolverType;
-	typedef PsimagLite::
-	    LanczosOrDavidsonBase<ParametersForSolverType, MatrixVectorType, TargetVectorType>
-	        LanczosOrDavidsonBaseType;
-	typedef PsimagLite::
-	    DavidsonSolver<ParametersForSolverType, MatrixVectorType, TargetVectorType>
-	        DavidsonSolverType;
-	typedef PsimagLite::
-	    LanczosSolver<ParametersForSolverType, MatrixVectorType, TargetVectorType>
-	                                                            LanczosSolverType;
-	typedef typename PsimagLite::Vector<TargetVectorType>::Type VectorVectorType;
-	typedef typename PsimagLite::Vector<VectorVectorType>::Type VectorVectorVectorType;
-	using FiniteLoopType    = FiniteLoop<RealType>;
-	using OneSiteSpacesType = OneSiteSpaces<ModelType>;
+	using PairSizeType              = std::pair<SizeType, SizeType>;
+	using OptionsType               = typename ParametersType::OptionsType;
+	using WaveFunctionTransfType    = typename TargetingType::WaveFunctionTransfType;
+	using ModelType                 = typename TargetingType::ModelType;
+	using BasisType                 = typename TargetingType::BasisType;
+	using BasisWithOperatorsType    = typename TargetingType::BasisWithOperatorsType;
+	using BlockType                 = typename TargetingType::BlockType;
+	using TargetVectorType          = typename TargetingType::TargetVectorType;
+	using RealType                  = typename TargetingType::RealType;
+	using VectorWithOffsetType      = typename TargetingType::VectorWithOffsetType;
+	using QnType                    = typename BasisType::QnType;
+	using OperatorsType             = typename ModelType::OperatorsType;
+	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
+	using SparseMatrixType          = typename OperatorsType::SparseMatrixType;
+	using ComplexOrRealType         = typename SparseMatrixType::value_type;
+	using ModelHelperType           = typename ModelType::ModelHelperType;
+	using LeftRightSuperType        = typename ModelHelperType::LeftRightSuperType;
+	using MatrixVectorType          = typename TargetingType::MatrixVectorType;
+	using InputValidatorType        = typename ModelType::InputValidatorType;
+	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
+	using VectorSizeType            = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorVectorRealType      = typename PsimagLite::Vector<VectorRealType>::Type;
+	using ParametersForSolverType   = PsimagLite::ParametersForSolver<RealType>;
+	using MatrixSolverBaseType      = PsimagLite::MatrixSolverBase<MatrixVectorType>;
+	using LanczosSolverType         = PsimagLite::LanczosSolver<MatrixVectorType>;
+	using ArnoldiSaIType            = PsimagLite::ArnoldiSaI<MatrixVectorType>;
+	using VectorVectorType          = typename PsimagLite::Vector<TargetVectorType>::Type;
+	using VectorVectorVectorType    = typename PsimagLite::Vector<VectorVectorType>::Type;
+	using FiniteLoopType            = FiniteLoop<RealType>;
+	using OneSiteSpacesType         = OneSiteSpaces<ModelType>;
+	using MatrixSolverEnum          = typename ParametersType::MatrixSolverEnum;
 
 	Diagonalization(const ParametersType&                parameters,
 	                const ModelType&                     model,
@@ -546,7 +543,7 @@ private:
 		if (options.isSet("debugmatrix") && !finiteLoop.wants("onlyslowwft")) {
 			SparseMatrixType fullm;
 
-			model_.fullHamiltonian(fullm, hc, aux);
+			hc.fullHamiltonian(fullm, aux, model_.isHermitian());
 
 			PsimagLite::Matrix<typename SparseMatrixType::value_type> fullm2;
 			crsMatrixToFullMatrix(fullm2, fullm);
@@ -602,8 +599,8 @@ private:
 	                         SizeType                             loopIndex,
 	                         const typename ModelHelperType::Aux& aux)
 	{
-		const SizeType                                 nexcited = energyTmp.size();
-		typename LanczosOrDavidsonBaseType::MatrixType lanczosHelper(model_, hc, aux);
+		const SizeType                            nexcited = energyTmp.size();
+		typename MatrixSolverBaseType::MatrixType lanczosHelper(model_, hc, aux);
 
 		if (parameters_.finiteLoop[loopIndex].wants("onlyslowwft")) {
 			slowWft(energyTmp, tmpVec, lanczosHelper, initialVector);
@@ -616,17 +613,7 @@ private:
 			return;
 		}
 
-		ParametersForSolverType    params(io_, "Lanczos", loopIndex);
-		LanczosOrDavidsonBaseType* lanczosOrDavidson = 0;
-
-		const bool useDavidson = parameters_.options.isSet("useDavidson");
-
-		if (useDavidson) {
-			lanczosOrDavidson = new DavidsonSolverType(lanczosHelper, params);
-		} else {
-			lanczosOrDavidson = new LanczosSolverType(lanczosHelper, params);
-		}
-
+		// special cases START
 		if (lanczosHelper.rows() == 0) {
 			static const RealType val = 10000;
 			std::fill(energyTmp.begin(), energyTmp.end(), val);
@@ -635,8 +622,6 @@ private:
 			msg << "Early exit due to matrix rank being zero.";
 			msg << " BOGUS energy= " << val;
 			progress_.printline(msgg, std::cout);
-			if (lanczosOrDavidson)
-				delete lanczosOrDavidson;
 			return;
 		}
 
@@ -656,51 +641,64 @@ private:
 			msg << "Early exit due to matrix rank being one;";
 			msg << " energy= " << val;
 			progress_.printline(msgg, std::cout);
-			if (lanczosOrDavidson)
-				delete lanczosOrDavidson;
 			return;
 		}
+		// special cases END
 
-		try {
-			computeAllLevelsBelow(energyTmp, tmpVec, *lanczosOrDavidson, initialVector);
-		} catch (std::exception& e) {
-			PsimagLite::OstringStream                     msgg0(std::cout.precision());
-			PsimagLite::OstringStream::OstringStreamType& msg0 = msgg0();
-			msg0 << e.what() << "\n";
-			msg0 << "Lanczos or Davidson solver failed, ";
-			msg0 << "trying with exact diagonalization...";
-			progress_.printline(msgg0, std::cout);
-			progress_.printline(msgg0, std::cerr);
+		// "Lanczos" here is a legacy name; it should say MatrixSolver
+		ParametersForSolverType params(io_, "Lanczos", loopIndex);
+		MatrixSolverBaseType*   matrixSolverPtr = nullptr;
 
-			VectorRealType                        eigs(lanczosHelper.rows());
-			PsimagLite::Matrix<ComplexOrRealType> fm;
-			lanczosHelper.fullDiag(eigs, fm);
-			SizeType minExcited = std::min(energyTmp.size(), eigs.size());
-			for (SizeType excited = 0; excited < minExcited; ++excited) {
-				for (SizeType j = 0; j < eigs.size(); ++j)
-					tmpVec[excited][j] = fm(j, excited);
-				energyTmp[excited] = eigs[excited];
-				PsimagLite::OstringStream msgg2(std::cout.precision());
-				PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
-				msg2 << "Found eigenvalue[" << excited
-				     << "]= " << energyTmp[excited];
-				progress_.printline(msgg2, std::cout);
-			}
+		switch (parameters_.matrix_solver_enum) {
+		case MatrixSolverEnum::DENSE:
+			energyTmp.resize(tmpVec.size());
+			dense_diag(lanczosHelper, energyTmp, tmpVec);
+			return; // EARLY EXIT HERE
+		case MatrixSolverEnum::LANCZOS:
+			matrixSolverPtr = new LanczosSolverType(lanczosHelper, params);
+			break;
+		case MatrixSolverEnum::ARNOLDISAI:
+			matrixSolverPtr = new ArnoldiSaIType(lanczosHelper, params, params.b);
+			break;
+		default:
+			err("Unknown matrix solver; internal error");
 		}
+
+		computeAllLevelsBelow(energyTmp, tmpVec, *matrixSolverPtr, initialVector);
 
 		PsimagLite::OstringStream                     msgg1(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg1 = msgg1();
+		assert(energyTmp.size() > 0);
 		msg1 << "Found lowest eigenvalue= " << energyTmp[0];
 		progress_.printline(msgg1, std::cout);
 
-		if (lanczosOrDavidson)
-			delete lanczosOrDavidson;
+		delete matrixSolverPtr;
+		matrixSolverPtr = nullptr;
 	}
 
-	void computeAllLevelsBelow(VectorRealType&            energyTmp,
-	                           VectorVectorType&          gsVector,
-	                           LanczosOrDavidsonBaseType& object,
-	                           const TargetVectorType&    initialVector) const
+	void dense_diag(const typename MatrixSolverBaseType::MatrixType& lanczosHelper,
+	                VectorRealType&                                  energyTmp,
+	                VectorVectorType&                                tmpVec)
+	{
+		VectorRealType                        eigs(lanczosHelper.rows());
+		PsimagLite::Matrix<ComplexOrRealType> fm;
+		lanczosHelper.fullDiag(eigs, fm);
+		SizeType minExcited = std::min(energyTmp.size(), eigs.size());
+		for (SizeType excited = 0; excited < minExcited; ++excited) {
+			for (SizeType j = 0; j < eigs.size(); ++j)
+				tmpVec[excited][j] = fm(j, excited);
+			energyTmp[excited] = eigs[excited];
+			PsimagLite::OstringStream                     msgg2(std::cout.precision());
+			PsimagLite::OstringStream::OstringStreamType& msg2 = msgg2();
+			msg2 << "Found eigenvalue[" << excited << "]= " << energyTmp[excited];
+			progress_.printline(msgg2, std::cout);
+		}
+	}
+
+	void computeAllLevelsBelow(VectorRealType&         energyTmp,
+	                           VectorVectorType&       gsVector,
+	                           MatrixSolverBaseType&   object,
+	                           const TargetVectorType& initialVector) const
 	{
 		const SizeType nexcited = gsVector.size();
 		RealType       norma    = PsimagLite::norm(initialVector);
@@ -718,10 +716,10 @@ private:
 		}
 	}
 
-	void slowWft(VectorRealType&                                       energyTmp,
-	             VectorVectorType&                                     gsVector,
-	             const typename LanczosOrDavidsonBaseType::MatrixType& object,
-	             const TargetVectorType&                               initialVector) const
+	void slowWft(VectorRealType&                                  energyTmp,
+	             VectorVectorType&                                gsVector,
+	             const typename MatrixSolverBaseType::MatrixType& object,
+	             const TargetVectorType&                          initialVector) const
 	{
 		const SizeType nexcited = gsVector.size();
 

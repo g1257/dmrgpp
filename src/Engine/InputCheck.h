@@ -357,7 +357,6 @@ public:
 	                superblock
 	                \item[exactdiag] Do exact diagonalization with LAPACK instead of Lanczos
 	                \item[nodmrgtransform] Do not DMRG transform bases
-	                \item[useDavidson] Use Davidson instead of Lanczos
 	                \item[verbose] Enable verbose output
 	                \item[nowft] Disable the Wave Function Transformation (WFT)
 	                \item[useComplex] TBW
@@ -431,7 +430,6 @@ public:
 		registerOpts.push_back("test");
 		registerOpts.push_back("exactdiag");
 		registerOpts.push_back("nodmrgtransform");
-		registerOpts.push_back("useDavidson");
 		registerOpts.push_back("verbose");
 		registerOpts.push_back("nofiniteloops");
 		registerOpts.push_back("nowft");

@@ -120,7 +120,7 @@ public:
 		if (hc.modelHelper().size(aux.m()) > maxMatrixRankStored)
 			return;
 
-		model.fullHamiltonian(matrixStored_, hc, aux);
+		hc.fullHamiltonian(matrixStored_, aux, model.isHermitian());
 		assert(isHermitian(matrixStored_, true));
 
 		checkKron();
@@ -132,6 +132,8 @@ public:
 	}
 
 	SizeType rows() const { return initKron_.size(InitKronType::NEW); }
+
+	SizeType cols() const { return rows(); }
 
 	template <typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const

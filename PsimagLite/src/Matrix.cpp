@@ -161,24 +161,22 @@ void diag(Matrix<std::complex<float>>& m, Vector<float>::Type& eigs, char option
 #endif
 }
 
-void geev(char                                jobvl,
-          char                                jobvr,
-          Matrix<std::complex<double>>&       a,
-          Vector<std::complex<double>>::Type& w,
-          Matrix<std::complex<double>>&       vl,
-          Matrix<std::complex<double>>&       vr)
+// complex zgeev version
+void geev(char                               jobvl,
+          char                               jobvr,
+          Matrix<std::complex<double>>&      a,
+          std::vector<std::complex<double>>& w,
+          Matrix<std::complex<double>>&      vl,
+          Matrix<std::complex<double>>&      vr)
 {
-#ifdef NO_LAPACK
-	throw RuntimeError("diag: geev: NO LAPACK!\n");
-#else
-	int                                n    = a.rows();
-	int                                lda  = a.cols();
-	int                                ldvl = vl.rows();
-	int                                ldvr = vr.rows();
-	int                                info = 0;
-	Vector<std::complex<double>>::Type work(10, 0);
-	Vector<double>::Type               rwork(2 * n + 1, 0);
-	int                                lwork = -1;
+	int                               n    = a.rows();
+	int                               lda  = a.cols();
+	int                               ldvl = vl.rows();
+	int                               ldvr = vr.rows();
+	int                               info = 0;
+	std::vector<std::complex<double>> work(10, 0);
+	std::vector<double>               rwork(2 * n + 1, 0);
+	int                               lwork = -1;
 	zgeev_(&jobvl,
 	       &jobvr,
 	       &n,
@@ -214,7 +212,71 @@ void geev(char                                jobvl,
 	       &info);
 
 	checkBlasStatus(info, "zgeev_");
-#endif
+}
+
+// real dgeev version
+// Note that w will be filled with the complex eigenvalues
+// but dgeev splits them in real and imag so we have to postprocess
+// which is done at the end of this function
+void geev(char                               jobvl,
+          char                               jobvr,
+          Matrix<double>&                    a,
+          std::vector<std::complex<double>>& w,
+          Matrix<double>&                    vl,
+          Matrix<double>&                    vr)
+{
+	int                 n    = a.rows();
+	int                 lda  = a.cols();
+	int                 ldvl = vl.rows();
+	int                 ldvr = vr.rows();
+	int                 info = 0;
+	std::vector<double> wr(n);
+	std::vector<double> wi(n);
+	std::vector<double> work(10, 0);
+	std::vector<double> rwork(2 * n + 1, 0);
+	int                 lwork = -1;
+	dgeev_(&jobvl,
+	       &jobvr,
+	       &n,
+	       &(a(0, 0)),
+	       &lda,
+	       &(wr[0]),
+	       &(wi[0]),
+	       &(vl(0, 0)),
+	       &ldvl,
+	       &(vr(0, 0)),
+	       &ldvr,
+	       &(work[0]),
+	       &lwork,
+	       &(rwork[0]),
+	       &info);
+
+	const int NB = 256;
+	lwork        = std::max(1 + static_cast<int>(std::real(work[0])), (NB + 2) * n);
+	work.resize(lwork);
+
+	dgeev_(&jobvl,
+	       &jobvr,
+	       &n,
+	       &(a(0, 0)),
+	       &lda,
+	       &(wr[0]),
+	       &(wi[0]),
+	       &(vl(0, 0)),
+	       &ldvl,
+	       &(vr(0, 0)),
+	       &ldvr,
+	       &(work[0]),
+	       &lwork,
+	       &(rwork[0]),
+	       &info);
+
+	checkBlasStatus(info, "dgeev_");
+
+	// fill eigenvalues into complex vector
+	for (int i = 0; i < n; ++i) {
+		w[i] = std::complex<double>(wr[i], wi[i]);
+	}
 }
 
 } // namespace PsimagLite

@@ -19,7 +19,6 @@ Please see full open source license included in file LICENSE.
 // END LICENSE BLOCK
 
 #include "CrsMatrix.h"
-#include "DavidsonSolver.h"
 #include "LanczosSolver.h"
 #include "ParametersForSolver.h"
 #include "PsimagLite.h"
@@ -27,16 +26,12 @@ Please see full open source license included in file LICENSE.
 
 using namespace PsimagLite;
 
-typedef double RealType;
-typedef double ComplexOrRealType;
+using RealType          = double;
+using ComplexOrRealType = double;
 
-typedef ParametersForSolver<RealType>   ParametersForSolverType;
-typedef Vector<ComplexOrRealType>::Type VectorType;
-typedef CrsMatrix<ComplexOrRealType>    SparseMatrixType;
-typedef LanczosOrDavidsonBase<ParametersForSolverType, SparseMatrixType, VectorType>
-                                                                              SparseSolverType;
-typedef LanczosSolver<ParametersForSolverType, SparseMatrixType, VectorType>  LanczosSolverType;
-typedef DavidsonSolver<ParametersForSolverType, SparseMatrixType, VectorType> DavidsonSolverType;
+using SparseMatrixType  = CrsMatrix<ComplexOrRealType>;
+using MatrixSolverType  = MatrixSolverBase<SparseMatrixType>;
+using LanczosSolverType = LanczosSolver<SparseMatrixType>;
 
 void usage(const char* progName)
 {
@@ -50,19 +45,15 @@ int main(int argc, char* argv[])
 	constexpr unsigned int  nthreads = 1;
 	PsimagLite::Concurrency concurrency(&argc, &argv, nthreads);
 
-	int      opt         = 0;
-	bool     useDavidson = false;
-	SizeType n           = 0;
-	RealType maxValue    = 0;
-	SizeType maxCol      = 0;
-	SizeType seed        = 0;
-	bool     lotaMemory  = true;
+	int      opt        = 0;
+	SizeType n          = 0;
+	RealType maxValue   = 0;
+	SizeType maxCol     = 0;
+	SizeType seed       = 0;
+	bool     lotaMemory = true;
 
-	while ((opt = getopt(argc, argv, "n:c:m:r:dx")) != -1) {
+	while ((opt = getopt(argc, argv, "n:c:m:r:x")) != -1) {
 		switch (opt) {
-		case 'd':
-			useDavidson = true;
-			break;
 		case 'n':
 			n = atoi(optarg);
 			break;
@@ -127,25 +118,17 @@ int main(int argc, char* argv[])
 	assert(isHermitian(sparse));
 
 	// sparse solver setup
-	ParametersForSolverType params;
+	PsimagLite::ParametersForSolver<RealType> params;
 	params.lotaMemory = lotaMemory;
-	LanczosSolverType  lanczosSolver(sparse, params);
-	DavidsonSolverType davisonSolver(sparse, params);
-	SparseSolverType*  solver = 0;
-
-	// select solver
-	if (useDavidson)
-		solver = &davisonSolver;
-	else
-		solver = &lanczosSolver;
+	LanczosSolverType lanczosSolver(sparse, params);
 
 	// diagonalize matrix
-	RealType   gsEnergy = 0;
-	VectorType gsVector(n);
+	RealType                       gsEnergy = 0;
+	std::vector<ComplexOrRealType> gsVector(n);
 
-	VectorType initial(n);
+	std::vector<ComplexOrRealType> initial(n);
 	PsimagLite::fillRandom(initial);
-	solver->computeOneState(gsEnergy, gsVector, initial, 0);
+	lanczosSolver.computeOneState(gsEnergy, gsVector, initial, 0);
 
 	std::cout << "Energy=" << gsEnergy << "\n";
 }

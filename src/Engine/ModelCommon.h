@@ -147,35 +147,6 @@ public:
 			err("addConnectionsInNaturalBasis(): unimplemented\n");
 	}
 
-	/**
-	        Returns H, the hamiltonian for basis1 and partition
-	        $m$ consisting of the external product of basis2$\otimes$basis3
-	        Note: Used only for debugging purposes
-	        */
-	void fullHamiltonian(SparseMatrixType&                    matrix,
-	                     const HamiltonianConnectionType&     hc,
-	                     const typename ModelHelperType::Aux& aux) const
-	{
-		SparseMatrixType matrixBlock;
-
-		//! contribution to Hamiltonian from current system
-		hc.modelHelper().calcHamiltonianPart(matrixBlock, true, aux);
-		matrix = matrixBlock;
-
-		//! contribution to Hamiltonian from current envirnoment
-		hc.modelHelper().calcHamiltonianPart(matrixBlock, false, aux);
-		matrix += matrixBlock;
-
-		matrixBlock.clear();
-
-		VerySparseMatrixType vsm(matrix);
-		hc.matrixBond(vsm, aux);
-
-		matrix = vsm;
-	}
-
-private:
-
 	const ParametersType&         params_;
 	const SuperGeometryType&      superGeometry_;
 	PsimagLite::ProgressIndicator progress_;

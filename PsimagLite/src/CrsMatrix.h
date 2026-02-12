@@ -242,32 +242,7 @@ public:
 
 	// end all ctors
 
-	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType& mres, SizeType, String msg = "") const
-	{
-		String str = msg;
-		str += "CrsMatrix";
-
-		const char* start = reinterpret_cast<const char*>(this);
-		const char* end   = reinterpret_cast<const char*>(&colind_);
-		SizeType    total = mres.memResolv(&rowptr_, end - start, str + " rowptr");
-
-		start = end;
-		end   = reinterpret_cast<const char*>(&values_);
-		total += mres.memResolv(&colind_, end - start, str + " colind");
-
-		start = end;
-		end   = reinterpret_cast<const char*>(&nrow_);
-		total += mres.memResolv(&values_, end - start, str + " values");
-
-		start = end;
-		end   = reinterpret_cast<const char*>(&ncol_);
-		total += mres.memResolv(&nrow_, end - start, str + " nrow");
-
-		total += mres.memResolv(&ncol_, sizeof(*this) - total, str + " ncol");
-
-		return total;
-	}
+	const CrsMatrix<T>& toCRS() const { return *this; }
 
 	void resize(SizeType nrow, SizeType ncol)
 	{

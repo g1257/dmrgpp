@@ -1,8 +1,8 @@
 /*
-Copyright (c) 2009, UT-Battelle, LLC
+Copyright (c) 2009, 2026, UT-Battelle, LLC
 All rights reserved
 
-[DMRG++, Version 2.0.0]
+[DMRG++, Version 6+]
 [by G.A., Oak Ridge National Laboratory]
 
 UT Battelle Open Source Software License 11242008
@@ -107,57 +107,47 @@ public:
 	                   const HamiltonianConnectionType&     hc,
 	                   const typename ModelHelperType::Aux& aux)
 	    : model_(model)
-	    , matrixStored_(2)
-	    , pointer_(0)
 	    , progress_("MatrixVectorStored")
 	{
 		const OptionsType& options     = model.params().options;
 		const bool         debugMatrix = options.isSet("debugmatrix");
 
-		matrixStored_[0].clear();
-		model.fullHamiltonian(matrixStored_[0], hc, aux);
-		assert(isHermitian(matrixStored_[0], true));
+		matrixStored_.clear();
+		hc.fullHamiltonian(matrixStored_, aux, model.isHermitian());
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg  = msgg();
-		SizeType                                      rows = matrixStored_[0].rows();
+		SizeType                                      rows = matrixStored_.rows();
 		msg << "fullHamiltonian has rank=" << rows;
-		msg << " nonzeros=" << matrixStored_[0].nonZeros();
+		msg << " nonzeros=" << matrixStored_.nonZeros();
 		progress_.printline(msgg, std::cout);
 		if (debugMatrix)
-			printFullMatrix(matrixStored_[0], "matrix", 1);
+			printFullMatrix(matrixStored_, "matrix", 1);
 		if (rows > 5000)
 			std::cerr << "WARNING: MatrixVectorStored being used for a large run!\n";
 	}
 
-	SizeType rows() const { return matrixStored_[pointer_].rows(); }
+	SizeType rows() const { return matrixStored_.rows(); }
+
+	SizeType cols() const { return matrixStored_.cols(); }
+
+	const SparseMatrixType& toCRS() const { return matrixStored_; }
 
 	template <typename SomeVectorType>
 	void matrixVectorProduct(SomeVectorType& x, SomeVectorType const& y) const
 	{
-		matrixStored_[pointer_].matrixVectorProduct(x, y);
+		matrixStored_.matrixVectorProduct(x, y);
 	}
-
-	value_type operator()(SizeType i, SizeType j) const
-	{
-		return matrixStored_[pointer_](i, j);
-	}
-
-	SizeType reflectionSector() const { return pointer_; }
-
-	void reflectionSector(SizeType p) { pointer_ = p; }
 
 	void fullDiag(VectorRealType& eigs, FullMatrixType& fm) const
 	{
-		BaseType::fullDiag(
-		    eigs, fm, matrixStored_[pointer_], model_.params().maxMatrixRankStored);
+		BaseType::fullDiag(eigs, fm, matrixStored_, model_.params().maxMatrixRankStored);
 	}
 
 private:
 
-	const ModelType&                                    model_;
-	typename PsimagLite::Vector<SparseMatrixType>::Type matrixStored_;
-	SizeType                                            pointer_;
-	PsimagLite::ProgressIndicator                       progress_;
+	const ModelType&              model_;
+	SparseMatrixType              matrixStored_;
+	PsimagLite::ProgressIndicator progress_;
 }; // class MatrixVectorStored
 } // namespace Dmrg
 
