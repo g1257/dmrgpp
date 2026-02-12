@@ -1,20 +1,54 @@
 ##Ainur 1.0
 
+# It is highly recommended
+# to read arXiv:2009.08200v1
+# in particular, Eqs~(16), (17) and (18)
+# DMRG++ solvers for a state |x>
+# where L|x> = 0
+#
+# This is the FAT site implementation
+# (a thin site implementation will be forthcoming)
+#
+# This is a sample input file
+# to test a Heisenberg model
+# with jump operators that
+# simulate an open system
+#
+# The example is kept very small
+# so it runs in our CI/CD
+# by default.
+#
+# This is the total size of the chain
+# Each site has 4 states because
+# there are ancillas
+# This is a "fat" site implementation
 TotalNumberOfSites=6;
+
+# There are 4 connections in the Hamiltonian
+# All connectionsa are from i to j where
+# these sites are *different*
 NumberOfTerms=4;
 
+# The Sph^+_iSph-_j term; ph means physical
+# This term is automatically multiplied by -i
 gt0:GeometryKind="chain";
 gt0:GeometryOptions="ConstantValues";
 gt0:dir0:Connectors=[1.0];
 
+# The Sph^z_i Sph^z_j term; ph means physical
+# This term is automatically multiplied by -i
 gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
 gt1:dir0:Connectors=[1.0];
 
+# The Sanc^+_iSanc-_j term; anc means ancilla
+# This term is automatically multiplied by i
 gt2:GeometryKind="chain";
 gt2:GeometryOptions="ConstantValues";
 gt2:dir0:Connectors=[1.0];
 
+# The Sanc^z_iSanc^z_j term; anc means ancilla
+# This term is automatically multiplied by i
 gt3:GeometryKind="chain";
 gt3:GeometryOptions="ConstantValues";
 gt3:dir0:Connectors=[1.0];
@@ -22,15 +56,38 @@ gt3:dir0:Connectors=[1.0];
 Model="LiouvillianHeisenberg";
 HeisenbergTwiceS=1;
 
+# The options needed are as follows:
+# twositedmrg : strongly suggested
+# usecomplex : needed because of the sqrt(-1) == i factors
+# matrixvectorstored: needed because this algo. needs inversion for now
+# and the inversion is dense!
 SolverOptions="twositedmrg,usecomplex,matrixvectorstored";
 Version="247b335fe1542909b90be8647456bfd8fd56191c";
 OutputFile="data8900";
+
+# Very very small due to dense inversion needed!
 InfiniteLoopKeptStates=7;
+
+# This is needed but ignored; there are no symmetries due to
+# the jump operators
 TargetSzPlusConst=0;
+
+# Just one finite loop with m = 13
 FiniteLoops=[[@auto, 13, 0]];
+
+# Jump operator gamma and f parameters here; for each site
+# Note that they aren't zero only at the borders
 vector BathGamma=[1, 0, 0, 0, 0, 1];
 vector BathF=[0.2, 0, 0, 0, 0, 0.2];
+
+# Use the matrix solver because L is non-Hermitian
+# and we want the NESS
 string MatrixSolver="arnoldisai";
+
+# This is where sigma for (A-\sigma * I)^{-1}
+# is specified, so sigma = 0.5 here
 real LanczosB=0.5;
+
+# Maximum dense inversion we allow
 integer MaxMatrixRankStored=4096;
 
