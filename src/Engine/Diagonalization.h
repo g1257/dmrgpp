@@ -100,37 +100,38 @@ template <typename ParametersType, typename TargetingType> class Diagonalization
 
 public:
 
-	using PairSizeType              = std::pair<SizeType, SizeType>;
-	using OptionsType               = typename ParametersType::OptionsType;
-	using WaveFunctionTransfType    = typename TargetingType::WaveFunctionTransfType;
-	using ModelType                 = typename TargetingType::ModelType;
-	using BasisType                 = typename TargetingType::BasisType;
-	using BasisWithOperatorsType    = typename TargetingType::BasisWithOperatorsType;
-	using BlockType                 = typename TargetingType::BlockType;
-	using TargetVectorType          = typename TargetingType::TargetVectorType;
-	using RealType                  = typename TargetingType::RealType;
-	using VectorWithOffsetType      = typename TargetingType::VectorWithOffsetType;
-	using QnType                    = typename BasisType::QnType;
-	using OperatorsType             = typename ModelType::OperatorsType;
-	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
-	using SparseMatrixType          = typename OperatorsType::SparseMatrixType;
-	using ComplexOrRealType         = typename SparseMatrixType::value_type;
-	using ModelHelperType           = typename ModelType::ModelHelperType;
-	using LeftRightSuperType        = typename ModelHelperType::LeftRightSuperType;
-	using MatrixVectorType          = typename TargetingType::MatrixVectorType;
-	using InputValidatorType        = typename ModelType::InputValidatorType;
-	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
-	using VectorSizeType            = typename PsimagLite::Vector<SizeType>::Type;
-	using VectorVectorRealType      = typename PsimagLite::Vector<VectorRealType>::Type;
-	using ParametersForSolverType   = PsimagLite::ParametersForSolver<RealType>;
-	using MatrixSolverBaseType      = PsimagLite::MatrixSolverBase<MatrixVectorType>;
-	using LanczosSolverType         = PsimagLite::LanczosSolver<MatrixVectorType>;
-	using ArnoldiSaIType            = PsimagLite::ArnoldiSaI<MatrixVectorType>;
-	using VectorVectorType          = typename PsimagLite::Vector<TargetVectorType>::Type;
-	using VectorVectorVectorType    = typename PsimagLite::Vector<VectorVectorType>::Type;
-	using FiniteLoopType            = FiniteLoop<RealType>;
-	using OneSiteSpacesType         = OneSiteSpaces<ModelType>;
-	using MatrixSolverEnum          = typename ParametersType::MatrixSolverEnum;
+	using PairSizeType                  = std::pair<SizeType, SizeType>;
+	using OptionsType                   = typename ParametersType::OptionsType;
+	using WaveFunctionTransfType        = typename TargetingType::WaveFunctionTransfType;
+	using ModelType                     = typename TargetingType::ModelType;
+	using BasisType                     = typename TargetingType::BasisType;
+	using BasisWithOperatorsType        = typename TargetingType::BasisWithOperatorsType;
+	using BlockType                     = typename TargetingType::BlockType;
+	using TargetVectorType              = typename TargetingType::TargetVectorType;
+	using RealType                      = typename TargetingType::RealType;
+	using VectorWithOffsetType          = typename TargetingType::VectorWithOffsetType;
+	using QnType                        = typename BasisType::QnType;
+	using OperatorsType                 = typename ModelType::OperatorsType;
+	using HamiltonianConnectionType     = typename ModelType::HamiltonianConnectionType;
+	using SparseMatrixType              = typename OperatorsType::SparseMatrixType;
+	using ComplexOrRealType             = typename SparseMatrixType::value_type;
+	using ModelHelperType               = typename ModelType::ModelHelperType;
+	using LeftRightSuperType            = typename ModelHelperType::LeftRightSuperType;
+	using MatrixVectorType              = typename TargetingType::MatrixVectorType;
+	using InputValidatorType            = typename ModelType::InputValidatorType;
+	using VectorRealType                = typename PsimagLite::Vector<RealType>::Type;
+	using VectorSizeType                = typename PsimagLite::Vector<SizeType>::Type;
+	using VectorVectorRealType          = typename PsimagLite::Vector<VectorRealType>::Type;
+	using ParametersForSolverType       = PsimagLite::ParametersForSolver<RealType>;
+	using MatrixSolverBaseType          = PsimagLite::MatrixSolverBase<MatrixVectorType>;
+	using LanczosSolverType             = PsimagLite::LanczosSolver<MatrixVectorType>;
+	using ArnoldiSaIType                = PsimagLite::ArnoldiSaI<MatrixVectorType>;
+	using VectorVectorType              = typename PsimagLite::Vector<TargetVectorType>::Type;
+	using VectorVectorVectorType        = typename PsimagLite::Vector<VectorVectorType>::Type;
+	using FiniteLoopType                = FiniteLoop<RealType>;
+	using OneSiteSpacesType             = OneSiteSpaces<ModelType>;
+	using MatrixSolverEnum              = typename ParametersType::MatrixSolverEnum;
+	using InfiniteOrFiniteAlgorithmType = InfiniteOrFiniteAlgorithm<RealType>;
 
 	Diagonalization(const ParametersType&                parameters,
 	                const ModelType&                     model,
@@ -658,7 +659,7 @@ private:
 		// special cases END
 
 		// "Lanczos" here is a legacy name; it should say MatrixSolver
-		ParametersForSolverType params(io_, "Lanczos", loopIndex);
+		ParametersForSolverType params(io_, "Lanczos", inf_or_finite.loopIndex());
 		MatrixSolverBaseType*   matrixSolverPtr = nullptr;
 
 		switch (parameters_.matrix_solver_enum) {
