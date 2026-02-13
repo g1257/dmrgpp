@@ -277,9 +277,16 @@ protected:
 			// Multiply by +i
 			connectionsSpSm("spsm_a", "splus_a", sqrt_minus_one);
 			connectionSzSz("szsz_a", "sz_a", sqrt_minus_one);
-		}
+		} else {
+			// jump operators become connections when phys and anc are separate
 
-		// if (is_separate) the minus sign will be chosen from the input file
+			ModelTermType& spsp = ModelBaseType::createTerm("spsp");
+			OpForLinkType  splus("splus");
+			spsp.push(splus, 'N', splus, 'N');
+
+			ModelTermType& smsm = ModelBaseType::createTerm("smsm");
+			smsm.push(splus, 'C', splus, 'C');
+		}
 	}
 
 private:
