@@ -67,7 +67,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 *********************************************************
 
-*/
+ */
 
 /** \ingroup DMRG */
 /*@{*/
@@ -81,6 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_PARAMS_LIOUVILLIANHEISENBERG_H
 #define DMRG_PARAMS_LIOUVILLIANHEISENBERG_H
 #include "ParametersModelBase.h"
+#include "ProgramGlobals.h"
 #include "Vector.h"
 
 namespace Dmrg {
@@ -90,6 +91,13 @@ struct ParamsLiouvillianHeisenberg : public ParametersModelBase<RealType, QnType
 
 	using BaseType       = ParametersModelBase<RealType, QnType>;
 	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
+
+	enum class Ancillas
+	{
+		TOGETHER,
+		SEPARATE
+	};
+
 	// no connectors here, connectors are handled by the geometry
 	template <typename IoInputType>
 	ParamsLiouvillianHeisenberg(IoInputType& io)
@@ -99,6 +107,19 @@ struct ParamsLiouvillianHeisenberg : public ParametersModelBase<RealType, QnType
 		io.readline(model, "Model=");
 
 		io.readline(twiceTheSpin, "HeisenbergTwiceS=");
+
+		{
+			std::string tmp;
+			io.readline(tmp, "Ancillas");
+			tmp = ProgramGlobals::toLower(tmp);
+			if (tmp == "together") {
+				ancillas = Ancillas::TOGETHER;
+			} else if (tmp == "separate") {
+				ancillas = Ancillas::SEPARATE;
+			} else {
+				err("Ancillas= together or separate but not " + tmp + "\n");
+			}
+		}
 
 		SizeType nsites = 0;
 		io.readline(nsites, "TotalNumberOfSites=");
@@ -153,6 +174,7 @@ struct ParamsLiouvillianHeisenberg : public ParametersModelBase<RealType, QnType
 	VectorRealType magneticFieldZ;
 	VectorRealType bath_gamma;
 	VectorRealType bath_f;
+	Ancillas       ancillas = Ancillas::TOGETHER;
 };
 } // namespace Dmrg
 
