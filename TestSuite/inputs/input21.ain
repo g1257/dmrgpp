@@ -1,36 +1,160 @@
 ##Ainur 1.0
 
+# This file documents the TimeEvolutionTargeting in DMRG++
+
+# For the theory see our paper
+# http://link.aps.org/doi/10.1103/PhysRevE.84.056706
+# https://arxiv.org/abs/1103.5391
+# G. Alvarez, L. G. G. V. Dias da Silva, E. Ponce, E. Dagotto,
+# Time Evolution with the DMRG Algorithm:
+# A Generic Implementation for Strongly Correlated Electronic Systems,
+
+# Please see also input20.ain
+# which contains the ground state
+# run that this run uses
+# as starting point
+#
+# This is a Heisenberg chain of 8 sites
 TotalNumberOfSites=8;
+
+# The Heisenberg model has two
+# "connections", that is,
+# terms going from i to j
+# with i not equal j
 NumberOfTerms=2;
 
+# The first term is the S^+_i S^_j connection
 gt0:GeometryKind="chain";
 gt0:GeometryOptions="ConstantValues";
+# This is the value of J_pm for all N-1 chain connections
+# Here N = 8 so there are 7 connections
+# An automatic 0.5 is multiplied by DMRG++ so you don't have to include it.
+# so you get 0.5*J_pm * (S+i S-j + S-i S+j)
 gt0:dir0:Connectors=[1.0];
 
+# The second term is the S^z_i S^z_j connection
 gt1:GeometryKind="chain";
 gt1:GeometryOptions="ConstantValues";
+# Again Jz = 1 for all N - 1 chain connections of the open chain
+# Here N = 8 so there are 7 connections
 gt1:dir0:Connectors=[1.0];
 
+# The Heisenberg model
 Model="Heisenberg";
+# With s = 1/2 or 2s = 1
 HeisenbergTwiceS=1;
 
+# The SolverOptions are
+# twositedmrg : recommended
+# TimeStepTargeting: this tells DMRG++ to do time evolution instead of g.s. calculation
+# restart : we restart from a g.s. run done in input20.ain
 SolverOptions="twositedmrg,TimeStepTargeting,restart";
+
+# Ignored but mandatory string
 Version="247b335fe1542909b90be8647456bfd8fd56191c";
+
+# The file data20.hd5 must be present; the extension hd5 can be left out, as we do here
 RestartFilename="data20";
+
+# This run will create data21.hd5
 OutputFile="data21";
+
+# The value of kept states m for the infinite loop is ignored because we
+# are restarting. But this value is mandatory and may be used as minimum m value
+# if tolerance is enabled, as it is by default.
 InfiniteLoopKeptStates=60;
-FiniteLoops=[[6, 150, 2],[-6, 150, 2]];
+
+# The finite loops
+# There are two finite loops mentioned explicitly.
+# The first starts from where input20 left off and goes all the way to the left,
+# and the second loop all the way to the right.
+#
+# The value 150 refers to the kept states that will be used.
+# By default a Tolerance is assumed to be 1e-12 so this value of 150
+# is the absolute maximum to be used by DMRG++, even if the tolerance
+# wanted could not be reached. The .cout file will produce details.
+#
+# (Tolerance can be specified explicityly with
+# Tolerance=1e-10;
+# for example, and don't forget the semicolon at the end.
+# Moreover, you can set the minimum "m" value after it, like so:
+# Tolerance=1e-10,100;
+#)
+#
+# The number 2 tells DMRG++ to not recompute the g.s., only to wave-function-transform (WFT)
+# it. In the future we'll use labels like @wft instead of 2 for this, but for now
+# you have to enter the number 2 there.
+FiniteLoops=[[@auto, 150, 2],[@auto, 150, 2]];
+
+# We repeat the above FiniteLoops line 2 times. So it's as if you had
+# written 6 finite loops: the explicitly written 2, plus the 2 repetitions each containing two in turn.
+# This saves typing.
 RepeatFiniteLoopsTimes=2;
+
+# This is the number of "spins up" for Heisenberg spin=1/2, so we get Sz = 0 as a local symmetry.
+# For spin > 1/2, this is \sum_i (spin + m_i) = const., where the sum over i runs over all sites.
+# Note that in all cases this is a non-negative integer.
+# In other words, DMRG++ uses m + j instead of just m for the symmetry, so that the resulting number
+# is both an integer and non-negative.
 TargetSzPlusConst=4;
 
+# Many vectors will be included in the densiy matrix or actually the SVD decomposition (see paper mentioned above)
+# Each vector will have a weight, so that all weights add up to 1.
+# This is the weight of the g.s. vector. All other weights are computed automatically by DMRG++ to complete the sum.
 GsWeight=0.1;
+
+# exp(-H *TSPTau/Nsteps) will be applied.
+# Usually, tau is 0.1 or 0.2 but not more.
 TSPTau=0.1;
+
+# The number of Nsteps in the formula above.
+# Each of the 5 time vectors will be accessible with P0, P1, etc.
 TSPTimeSteps=5;
+
+# The time advancement happens after this many movements, in units of sites.
+# Keep this number a multiple of (N-2), which in this case is 6.
 TSPAdvanceEach=6;
+
+# The algorithm to be used for the time evolution; see reference above.
 TSPAlgorithm="Krylov";
+
+# The site(s) where the operators below in this input will be applied to the g.s.
+# Here we use the (one of the) center site.
+# Note that time evolution targeting goes through stages, and the next stage doesn't start
+# until the previous stage has finished.
+#
+# stage 1 : disabled: until the delay counter if any has been reached; see TSPDelay below.
+#
+# stage 2 : operators: apply to the g.s. all operators listed in this input
+#           Remember that this can only be done as sites come into view in the DMRG sweeping.
+#           Operators are applied in the order listed, so sites here is ordered
+#           by operators listed below.
+#
+# stage 3: time evolution: Do the time evolution proper;
+#          This stage has a counter for time advancement. When time advancement happens,
+#          the last time vector (P4) is moved to become the first (P0), all the
+#          other time vectors are recomputed from the new first time vector,
+#          and the advancement counter is reset to zero.
 TSPSites=[4];
+
+# The delay before stage 2 (operator application), in finite loop units.
+# If g.s. was done in a previous run, the recommended value here is 0 = no delay.
 TSPLoops=[0];
+
+# If more than one operator is mentioned below, this indicates whether they are summed
+# or multiplied. If only one operator is present, then this has no effect.
+#
+# (This method of doing things can only do sums or products, but not
+# sums of products or more complicated things. If those are needed, they should be done
+# with TargetingExpression instead, and before this run, and then here only the identity should be applied.
+# TargetingExpression isn't documented here.)
 TSPProductOrSum="product";
 
+# We apply only one operator, TSPOp0.
+# We provide it by expression (recommended). It could also be given as a raw matrix or in a file.
 string TSPOp0:TSPOperator=expression;
+# The name of the operator
 string TSPOp0:OperatorExpression="sz";
+# Use prelabels TSPOp1, etc, if other operators are needed. Remember that the sites
+# will be listed in TSPSites above in this order.
+#
