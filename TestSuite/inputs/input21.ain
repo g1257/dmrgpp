@@ -158,3 +158,56 @@ string TSPOp0:OperatorExpression="sz";
 # Use prelabels TSPOp1, etc, if other operators are needed. Remember that the sites
 # will be listed in TSPSites above in this order.
 #
+# How to run.
+# Make sure you produce the g.s. first with
+# ./dmrg -f input20.ain
+#
+# In situ time measurements can be done only for one-points, as follows:
+#
+# ./dmrg -f input21.ain "<gs|sz|P0>"
+#
+# which would measure the time-dependent correlation
+#
+# <gs|sz_i exp(-iHt) sz_4 |gs> (*)
+#
+# where 4 is the center site as selected in TSPSites, sz selected in TSPOp0,
+# and because |P0> = exp(-iHt) sz_4 |gs>
+#
+# The output would appear in the .cout file and one can do
+#
+# grep sz runForinput21.cout
+#
+# which would display things like
+#
+# 5 (-0.183963,0.056750) 0.300000 <gs|sz|P0> (-0.000000,0.000000)
+#
+# The first number is the site i in formula (*) above, so this line
+# shows results for i = 5.
+#
+# The second number is the value of <gs|sz_i exp(-iHt) sz_4 |gs>
+# which is complex as expected.
+#
+# The third number (0.3) indicates the time t in the formula (*).
+#
+# The fourth is the string being computed; make sure you understand
+# the meaning of P0 as indicated above.
+#
+# (In general |P0> = exp(-iHt) O_{X-1} op ... op O_1 op O_0 |gs>
+# where the O_x are the operators you included in the input file
+# with TSPOp0, TSPOp1, etc. and are applied as shown, with O_0 applied
+# first to the |gs>. Note that the sites assigned to these operators
+# are to be given in TSPSites.
+# The op is either + or * among operators on different sites,
+# depending on the value of TSPProductOrSum.
+# More complicated expressions aren't possible with this setup, but see
+# my comment above about TargetingExpression.)
+#
+# The last number, that I call "superdensity", indicates whatever label
+# you wanted to calculate, but with the things between the pipes | | deleted.
+# In this case the label is <gs|sz|P0>, so the thing between the pipes is sz,
+# and without it we get <gs|P0>, which turns out to be zero, as it should.
+#
+# For many-point time measurements, observe and saving must be used; this is out-of-scope here.
+#
+# For Hamiltonians that explicitly depend on time, I'll comment another input shortly. The
+# procedure will be very similar to the one here.
