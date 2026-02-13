@@ -7,7 +7,6 @@
 # where L|x> = 0
 #
 # This is the FAT site implementation
-# (a thin site implementation will be forthcoming)
 Ancillas=together;
 #
 # This is a sample input file
