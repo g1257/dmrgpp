@@ -8,6 +8,7 @@
 #
 # This is the FAT site implementation
 # (a thin site implementation will be forthcoming)
+Ancillas=together;
 #
 # This is a sample input file
 # to test a Heisenberg model
