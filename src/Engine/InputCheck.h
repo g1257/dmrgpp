@@ -293,6 +293,7 @@ public:
 		str += "string TargetFermionicParity;\n";
 		str += "matrix TimeSchedule;\n";
 		str += "string DefineOperators;\n";
+		str += "string Ancillas;\n";
 
 		return str;
 	}
