@@ -5,16 +5,19 @@ project(
   VERSION 1.1
   LANGUAGES CXX)
 
-include(CTest)
+option(BUILD_TESTING "Enable building tests" ON)
+if(BUILD_TESTING)
+  enable_testing()
 
-include(FetchContent)
-FetchContent_Declare(
-  Catch2
-  GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-  GIT_TAG v3.11.0
-  SYSTEM FIND_PACKAGE_ARGS NAMES Catch2)
-FetchContent_MakeAvailable(Catch2)
-include(Catch)
+  include(FetchContent)
+  FetchContent_Declare(
+    Catch2
+    GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+    GIT_TAG v3.11.0
+    SYSTEM FIND_PACKAGE_ARGS NAMES Catch2)
+  FetchContent_MakeAvailable(Catch2)
+  include(Catch)
+endif()
 
 add_subdirectory(PsimagLite)
 add_subdirectory(src)
