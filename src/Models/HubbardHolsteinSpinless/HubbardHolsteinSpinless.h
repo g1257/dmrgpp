@@ -96,39 +96,39 @@ template <typename ModelBaseType> class HubbardHolsteinSpinless : public ModelBa
 
 public:
 
-	typedef typename ModelBaseType::VectorSizeType          VectorSizeType;
-	typedef typename ModelBaseType::ModelHelperType         ModelHelperType;
-	typedef typename ModelBaseType::SuperGeometryType       SuperGeometryType;
-	typedef typename ModelBaseType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename ModelBaseType::LinkType                LinkType;
-	typedef typename ModelHelperType::OperatorsType         OperatorsType;
-	typedef typename OperatorsType::OperatorType            OperatorType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename ModelHelperType::RealType              RealType;
-	typedef typename ModelBaseType::QnType                  QnType;
-	typedef typename QnType::VectorQnType                   VectorQnType;
-	typedef typename ModelHelperType::SparseElementType     SparseElementType;
-	typedef typename ModelHelperType::SparseMatrixType      SparseMatrixType;
-	typedef typename SparseMatrixType::value_type           ComplexOrRealType;
-	typedef typename ModelBaseType::HilbertBasisType        HilbertBasisType;
-	typedef typename HilbertBasisType::value_type           HilbertState;
-	typedef unsigned int long                               WordType;
-	typedef HilbertSpaceHubbardHolsteinSpinless<WordType>   HilbertSpaceHubbardHolsteinWordType;
-	typedef HilbertSpaceHubbardHolsteinSpinless<HilbertState>   HilbertSpaceHubbardHolsteinType;
-	typedef typename ModelHelperType::BlockType                 BlockType;
-	typedef typename ModelBaseType::SolverParamsType            SolverParamsType;
-	typedef typename ModelBaseType::VectorType                  VectorType;
-	typedef typename ModelBaseType::MyBasis                     BasisType;
-	typedef typename ModelBaseType::BasisWithOperatorsType      MyBasisWithOperators;
-	typedef typename ModelBaseType::InputValidatorType          InputValidatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>               MatrixType;
-	typedef ParametersHubbardHolsteinSpinless<RealType, QnType> ParametersHubbardHolsteinType;
-	typedef std::pair<SizeType, SizeType>                       PairType;
-	typedef typename PsimagLite::Vector<PairType>::Type         VectorPairType;
-	typedef typename PsimagLite::Vector<SparseMatrixType>::Type VectorSparseMatrixType;
-	typedef typename ModelBaseType::OpsLabelType                OpsLabelType;
-	typedef typename ModelBaseType::OpForLinkType               OpForLinkType;
-	typedef typename ModelBaseType::ModelTermType               ModelTermType;
+	using VectorSizeType                      = typename ModelBaseType::VectorSizeType;
+	using ModelHelperType                     = typename ModelBaseType::ModelHelperType;
+	using SuperGeometryType                   = typename ModelBaseType::SuperGeometryType;
+	using LeftRightSuperType                  = typename ModelBaseType::LeftRightSuperType;
+	using LinkType                            = typename ModelBaseType::LinkType;
+	using OperatorsType                       = typename ModelHelperType::OperatorsType;
+	using OperatorType                        = typename OperatorsType::OperatorType;
+	using VectorOperatorType                  = typename PsimagLite::Vector<OperatorType>::Type;
+	using RealType                            = typename ModelHelperType::RealType;
+	using QnType                              = typename ModelBaseType::QnType;
+	using VectorQnType                        = typename QnType::VectorQnType;
+	using SparseElementType                   = typename ModelHelperType::SparseElementType;
+	using SparseMatrixType                    = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType                   = typename SparseMatrixType::value_type;
+	using HilbertBasisType                    = typename ModelBaseType::HilbertBasisType;
+	using HilbertState                        = typename HilbertBasisType::value_type;
+	using WordType                            = unsigned int long;
+	using HilbertSpaceHubbardHolsteinWordType = HilbertSpaceHubbardHolsteinSpinless<WordType>;
+	using HilbertSpaceHubbardHolsteinType = HilbertSpaceHubbardHolsteinSpinless<HilbertState>;
+	using BlockType                       = typename ModelHelperType::BlockType;
+	using SolverParamsType                = typename ModelBaseType::SolverParamsType;
+	using VectorType                      = typename ModelBaseType::VectorType;
+	using BasisType                       = typename ModelBaseType::MyBasis;
+	using MyBasisWithOperators            = typename ModelBaseType::BasisWithOperatorsType;
+	using InputValidatorType              = typename ModelBaseType::InputValidatorType;
+	using MatrixType                      = PsimagLite::Matrix<ComplexOrRealType>;
+	using ParametersHubbardHolsteinType   = ParametersHubbardHolsteinSpinless<RealType, QnType>;
+	using PairType                        = std::pair<SizeType, SizeType>;
+	using VectorPairType                  = typename PsimagLite::Vector<PairType>::Type;
+	using VectorSparseMatrixType          = typename PsimagLite::Vector<SparseMatrixType>::Type;
+	using OpsLabelType                    = typename ModelBaseType::OpsLabelType;
+	using OpForLinkType                   = typename ModelBaseType::OpForLinkType;
+	using ModelTermType                   = typename ModelBaseType::ModelTermType;
 
 	static const int      FERMION_SIGN = -1;
 	static SizeType const ORBITALS     = 2;
@@ -665,8 +665,8 @@ private:
 		// note: we use 2j instead of j
 		// note: we use m+j instead of m
 		// This assures us that both j and m are SizeType
-		typedef std::pair<SizeType, SizeType> PairType;
-		VectorSizeType                        other(1, 0);
+		using PairType = std::pair<SizeType, SizeType>;
+		VectorSizeType other(1, 0);
 		qns.resize(basis.size(), QnType::zero());
 		for (SizeType i = 0; i < basis.size(); ++i) {
 			PairType jmpair = PairType(0, 0);

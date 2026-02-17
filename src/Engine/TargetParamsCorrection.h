@@ -86,11 +86,11 @@ namespace Dmrg {
 // Coordinates reading of TargetSTructure from input file
 template <typename ModelType> class TargetParamsCorrection : public TargetParamsBase<ModelType> {
 
-	typedef TargetParamsBase<ModelType> BaseType;
+	using BaseType = TargetParamsBase<ModelType>;
 
 public:
 
-	typedef typename BaseType::RealType RealType;
+	using RealType = typename BaseType::RealType;
 
 	template <typename IoInputter>
 	TargetParamsCorrection(IoInputter& io, PsimagLite::String targeting)

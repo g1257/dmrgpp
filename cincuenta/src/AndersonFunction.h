@@ -9,11 +9,11 @@ template <typename ComplexOrRealType> class AndersonFunction {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef FunctionOfFrequency<ComplexOrRealType>             FunctionOfFrequencyType;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using VectorRealType          = typename PsimagLite::Vector<RealType>::Type;
+	using FunctionOfFrequencyType = FunctionOfFrequency<ComplexOrRealType>;
 
-	typedef RealType FieldType;
+	using FieldType = RealType;
 
 	AndersonFunction(SizeType nBath, const FunctionOfFrequencyType& gammaG)
 	    : nBath_(nBath)

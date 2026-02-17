@@ -59,8 +59,8 @@ template <typename SpecType = PredicateDefaultSpec> class PredicateAwesome {
 
 public:
 
-	typedef Vector<PredicateAnd>::Type     VectorPredicateAndType;
-	typedef PredicateAnd::VectorStringType VectorStringType;
+	using VectorPredicateAndType = Vector<PredicateAnd>::Type;
+	using VectorStringType       = PredicateAnd::VectorStringType;
 
 	PredicateAwesome(String    pred,
 	                 String    orSeparator  = ",",

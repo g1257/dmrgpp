@@ -91,12 +91,12 @@ namespace Dmrg {
 
 template <typename ObserverHelperType, typename ModelType> class OnePointCorrelations {
 
-	typedef typename ObserverHelperType::MatrixType             MatrixType;
-	typedef typename ObserverHelperType::VectorType             VectorType;
-	typedef typename ObserverHelperType::VectorWithOffsetType   VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename VectorType::value_type                     FieldType;
-	typedef typename BasisWithOperatorsType::RealType           RealType;
+	using MatrixType             = typename ObserverHelperType::MatrixType;
+	using VectorType             = typename ObserverHelperType::VectorType;
+	using VectorWithOffsetType   = typename ObserverHelperType::VectorWithOffsetType;
+	using BasisWithOperatorsType = typename ObserverHelperType::BasisWithOperatorsType;
+	using FieldType              = typename VectorType::value_type;
+	using RealType               = typename BasisWithOperatorsType::RealType;
 
 public:
 

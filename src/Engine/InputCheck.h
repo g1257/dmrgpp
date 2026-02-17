@@ -88,8 +88,8 @@ namespace Dmrg {
 
 class InputCheck {
 
-	typedef PsimagLite::Options::Readable                OptionsReadableType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
+	using OptionsReadableType = PsimagLite::Options::Readable;
+	using VectorStringType    = PsimagLite::Vector<PsimagLite::String>::Type;
 
 public:
 

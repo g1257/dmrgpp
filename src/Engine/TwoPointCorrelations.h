@@ -97,20 +97,20 @@ template <typename CorrelationsSkeletonType> class TwoPointCorrelations {
 
 public:
 
-	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
-	typedef typename ObserverHelperType::VectorType               VectorType;
-	typedef typename ObserverHelperType::VectorWithOffsetType     VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType   BasisWithOperatorsType;
-	typedef typename VectorType::value_type                       FieldType;
-	typedef typename BasisWithOperatorsType::RealType             RealType;
-	typedef TwoPointCorrelations<CorrelationsSkeletonType>        ThisType;
-	typedef typename CorrelationsSkeletonType::BraketType         BraketType;
-	typedef typename CorrelationsSkeletonType::SparseMatrixType   SparseMatrixType;
-	typedef typename ObserverHelperType::MatrixType               MatrixType;
-	typedef Parallel2PointCorrelations<ThisType>              Parallel2PointCorrelationsType;
-	typedef typename Parallel2PointCorrelationsType::PairType PairType;
-	typedef SdhsReinterpret<BraketType>                       SdhsReinterpretType;
-	typedef ManyPointAction                                   ManyPointActionType;
+	using ObserverHelperType     = typename CorrelationsSkeletonType::ObserverHelperType;
+	using VectorType             = typename ObserverHelperType::VectorType;
+	using VectorWithOffsetType   = typename ObserverHelperType::VectorWithOffsetType;
+	using BasisWithOperatorsType = typename ObserverHelperType::BasisWithOperatorsType;
+	using FieldType              = typename VectorType::value_type;
+	using RealType               = typename BasisWithOperatorsType::RealType;
+	using ThisType               = TwoPointCorrelations<CorrelationsSkeletonType>;
+	using BraketType             = typename CorrelationsSkeletonType::BraketType;
+	using SparseMatrixType       = typename CorrelationsSkeletonType::SparseMatrixType;
+	using MatrixType             = typename ObserverHelperType::MatrixType;
+	using Parallel2PointCorrelationsType = Parallel2PointCorrelations<ThisType>;
+	using PairType                       = typename Parallel2PointCorrelationsType::PairType;
+	using SdhsReinterpretType            = SdhsReinterpret<BraketType>;
+	using ManyPointActionType            = ManyPointAction;
 
 	TwoPointCorrelations(const CorrelationsSkeletonType& skeleton)
 	    : skeleton_(skeleton)
@@ -137,7 +137,7 @@ public:
 			}
 		}
 
-		typedef PsimagLite::Parallelizer<Parallel2PointCorrelationsType> ParallelizerType;
+		using ParallelizerType = PsimagLite::Parallelizer<Parallel2PointCorrelationsType>;
 		ParallelizerType threaded2Points(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel2PointCorrelationsType helper2Points(

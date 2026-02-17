@@ -1062,7 +1062,7 @@ template <typename T> void outerProduct(Matrix<T>& A, const Matrix<T>& B, const 
 // closures end
 template <typename T> typename EnableIf<IsComplexNumber<T>::True, void>::Type expIpi(Matrix<T>& A)
 {
-	typedef typename Real<T>::Type RT;
+	using RT = typename Real<T>::Type;
 
 	const SizeType n = A.rows();
 	if (n != A.cols())

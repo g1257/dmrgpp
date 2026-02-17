@@ -16,7 +16,7 @@ public:
 		R
 	}; // R means reserved for internal use
 
-	typedef std::pair<SizeType, SizeType> PairSizeType;
+	using PairSizeType = std::pair<SizeType, SizeType>;
 
 	GetBraOrKet(String braOrKet)
 	    : isKet_(true)

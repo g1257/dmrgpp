@@ -100,37 +100,37 @@ class TargetingDynamic : public TargetingBase<LanczosSolverType_, VectorWithOffs
 
 public:
 
-	typedef LanczosSolverType_                                      LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
-	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
-	typedef typename BaseType::CheckpointType                       CheckpointType;
-	typedef typename MatrixVectorType::ModelType                    ModelType;
-	typedef typename ModelType::RealType                            RealType;
-	typedef typename ModelType::OperatorsType                       OperatorsType;
-	typedef typename ModelType::ModelHelperType                     ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType              BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType       SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                   ComplexOrRealType;
-	typedef TargetParamsDynamic<ModelType>                          TargetParamsType;
-	typedef typename BasisType::BlockType                           BlockType;
-	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType               VectorType;
-	typedef VectorType                                              TargetVectorType;
-	typedef typename TargetingCommonType::TimeSerializerType        TimeSerializerType;
-	typedef PsimagLite::Matrix<typename VectorType::value_type>     DenseMatrixType;
-	typedef PsimagLite::Matrix<RealType>                            DenseMatrixRealType;
-	typedef typename LanczosSolverType::PostProcType                PostProcType;
-	typedef typename LanczosSolverType::TridiagonalMatrixType       TridiagonalMatrixType;
-	typedef typename ModelType::InputValidatorType                  InputValidatorType;
-	typedef typename PsimagLite::Vector<SizeType>::Type             VectorSizeType;
-	typedef typename BasisType::QnType                              QnType;
-	typedef typename TargetingCommonType::StageEnumType             StageEnumType;
-	typedef typename BaseType::VectorRealType                       VectorRealType;
+	using LanczosSolverType      = LanczosSolverType_;
+	using BaseType               = TargetingBase<LanczosSolverType, VectorWithOffsetType_>;
+	using TargetingCommonType    = typename BaseType::TargetingCommonType;
+	using MatrixVectorType       = typename BaseType::MatrixVectorType;
+	using CheckpointType         = typename BaseType::CheckpointType;
+	using ModelType              = typename MatrixVectorType::ModelType;
+	using RealType               = typename ModelType::RealType;
+	using OperatorsType          = typename ModelType::OperatorsType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using TargetParamsType       = TargetParamsDynamic<ModelType>;
+	using BlockType              = typename BasisType::BlockType;
+	using WaveFunctionTransfType = typename BaseType::WaveFunctionTransfType;
+	using VectorWithOffsetType   = typename WaveFunctionTransfType::VectorWithOffsetType;
+	using VectorType             = typename VectorWithOffsetType::VectorType;
+	using TargetVectorType       = VectorType;
+	using TimeSerializerType     = typename TargetingCommonType::TimeSerializerType;
+	using DenseMatrixType        = PsimagLite::Matrix<typename VectorType::value_type>;
+	using DenseMatrixRealType    = PsimagLite::Matrix<RealType>;
+	using PostProcType           = typename LanczosSolverType::PostProcType;
+	using TridiagonalMatrixType  = typename LanczosSolverType::TridiagonalMatrixType;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
+	using VectorSizeType         = typename PsimagLite::Vector<SizeType>::Type;
+	using QnType                 = typename BasisType::QnType;
+	using StageEnumType          = typename TargetingCommonType::StageEnumType;
+	using VectorRealType         = typename BaseType::VectorRealType;
 
 	TargetingDynamic(const LeftRightSuperType&     lrs,
 	                 const CheckpointType&         checkPoint,

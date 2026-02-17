@@ -100,13 +100,13 @@ namespace PsimagLite {
 
 template <typename ComplexOrRealType, typename InputType> class GeometryTerm {
 
-	typedef GeometryBase<ComplexOrRealType, InputType>             GeometryBaseType;
-	typedef GeometryDirection<ComplexOrRealType, GeometryBaseType> GeometryDirectionType;
+	using GeometryBaseType      = GeometryBase<ComplexOrRealType, InputType>;
+	using GeometryDirectionType = GeometryDirection<ComplexOrRealType, GeometryBaseType>;
 
 public:
 
-	typedef typename Real<ComplexOrRealType>::Type          RealType;
-	typedef typename GeometryDirectionType::InternalDofEnum InternalDofEnum;
+	using RealType        = typename Real<ComplexOrRealType>::Type;
+	using InternalDofEnum = typename GeometryDirectionType::InternalDofEnum;
 
 	struct Auxiliary {
 

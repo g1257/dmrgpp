@@ -85,11 +85,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace PsimagLite {
 
 template <typename ContainerType> class Permutations {
-	typedef typename ContainerType::value_type FieldType;
+	using FieldType = typename ContainerType::value_type;
 
 public:
 
-	typedef FieldType value_type;
+	using value_type = FieldType;
 
 	Permutations(const ContainerType& orig)
 	    : data_(orig.size())

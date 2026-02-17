@@ -93,7 +93,7 @@ namespace Dmrg {
 template <typename Word> class HilbertSpaceHubbard {
 public:
 
-	typedef Word     HilbertState;
+	using HilbertState         = Word;
 	static int const SPIN_UP   = 0;
 	static int const SPIN_DOWN = 1;
 

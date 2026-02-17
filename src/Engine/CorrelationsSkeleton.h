@@ -93,19 +93,19 @@ template <typename ObserverHelperType_, typename ModelType> class CorrelationsSk
 
 public:
 
-	typedef PsimagLite::PackIndices                             PackIndicesType;
-	typedef Braket<ModelType>                                   BraketType;
-	typedef ObserverHelperType_                                 ObserverHelperType;
-	typedef typename ObserverHelperType::VectorWithOffsetType   VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType           VectorType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename ObserverHelperType::FermionSignType        FermionSignType;
-	typedef typename BasisWithOperatorsType::RealType           RealType;
-	typedef typename BasisWithOperatorsType::BasisType          BasisType;
-	typedef typename BasisType::VectorSizeType                  VectorSizeType;
-	typedef typename VectorType::value_type                     FieldType;
-	typedef typename BasisWithOperatorsType::OperatorType       OperatorType;
-	typedef PsimagLite::CrsMatrix<FieldType>                    SparseMatrixType;
+	using PackIndicesType        = PsimagLite::PackIndices;
+	using BraketType             = Braket<ModelType>;
+	using ObserverHelperType     = ObserverHelperType_;
+	using VectorWithOffsetType   = typename ObserverHelperType::VectorWithOffsetType;
+	using VectorType             = typename VectorWithOffsetType::VectorType;
+	using BasisWithOperatorsType = typename ObserverHelperType::BasisWithOperatorsType;
+	using FermionSignType        = typename ObserverHelperType::FermionSignType;
+	using RealType               = typename BasisWithOperatorsType::RealType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using VectorSizeType         = typename BasisType::VectorSizeType;
+	using FieldType              = typename VectorType::value_type;
+	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
+	using SparseMatrixType       = PsimagLite::CrsMatrix<FieldType>;
 
 	enum class GrowDirection
 	{

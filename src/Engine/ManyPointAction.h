@@ -8,7 +8,7 @@ class ManyPointAction {
 
 public:
 
-	typedef PsimagLite::PredicateAwesome<> PredicateAwesomeType;
+	using PredicateAwesomeType = PsimagLite::PredicateAwesome<>;
 
 	ManyPointAction(bool hasNonTrivialAction, PsimagLite::String actionString)
 	    : nonTrivial_(hasNonTrivialAction)

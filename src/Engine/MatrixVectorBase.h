@@ -88,14 +88,14 @@ template <typename ModelType_> class MatrixVectorBase {
 
 public:
 
-	typedef ModelType_                                           ModelType;
-	typedef typename ModelType::ModelHelperType                  ModelHelperType;
-	typedef typename ModelHelperType::RealType                   RealType;
-	typedef typename ModelHelperType::SparseMatrixType           SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type          VectorRealType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type VectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                FullMatrixType;
+	using ModelType         = ModelType_;
+	using ModelHelperType   = typename ModelType::ModelHelperType;
+	using RealType          = typename ModelHelperType::RealType;
+	using SparseMatrixType  = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType = typename SparseMatrixType::value_type;
+	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
+	using VectorType        = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using FullMatrixType    = PsimagLite::Matrix<ComplexOrRealType>;
 
 	SizeType reflectionSector() const { return 0; }
 

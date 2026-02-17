@@ -85,9 +85,9 @@ namespace Dmrg {
 
 class FermionSign {
 
-	typedef PsimagLite::PackIndices            PackIndicesType;
-	typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
-	typedef PsimagLite::Vector<bool>::Type     VectorBoolType;
+	using PackIndicesType = PsimagLite::PackIndices;
+	using VectorSizeType  = PsimagLite::Vector<SizeType>::Type;
+	using VectorBoolType  = PsimagLite::Vector<bool>::Type;
 
 public:
 

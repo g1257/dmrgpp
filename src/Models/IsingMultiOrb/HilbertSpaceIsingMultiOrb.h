@@ -95,8 +95,8 @@ template <typename Word> class HilbertSpaceIsingMultiOrb {
 
 public:
 
-	typedef Word              HilbertState;
-	typedef unsigned int long WordType;
+	using HilbertState = Word;
+	using WordType     = unsigned int long;
 
 	enum
 	{

@@ -141,8 +141,8 @@ public:
 
 	public:
 
-		typedef IoNgSerializer      Serializer;
-		typedef std::vector<String> VectorStringType;
+		using Serializer       = IoNgSerializer;
+		using VectorStringType = std::vector<String>;
 
 		Out(const String& filename, OpenMode mode)
 		    : ioNgSerializer_(filename, modeToH5(mode))
@@ -256,8 +256,8 @@ public:
 
 	public:
 
-		typedef int long          LongIntegerType;
-		typedef unsigned int long LongSizeType;
+		using LongIntegerType = int long;
+		using LongSizeType    = unsigned int long;
 
 		In(String filename)
 		    : ioNgSerializer_(filename, H5F_ACC_RDONLY)

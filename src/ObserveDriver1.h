@@ -10,20 +10,19 @@ bool observeOneFullSweep(IoInputType&              io,
                          const PsimagLite::String& list,
                          SizeType                  orbitals)
 {
-	typedef typename ModelType::SuperGeometryType                   SuperGeometryType;
-	typedef typename ModelType::ModelHelperType::LeftRightSuperType LeftRightSuperType;
-	typedef typename ModelType::MatrixType                          MatrixType;
-	typedef typename ModelType::VectorType                          VectorType;
-	typedef ObserverHelper<IoInputType,
-	                       MatrixType,
-	                       VectorType,
-	                       VectorWithOffsetType,
-	                       LeftRightSuperType>
-	                                                            ObserverHelperType;
-	typedef Observer<ObserverHelperType, ModelType>             ObserverType;
-	typedef ObservableLibrary<ObserverType>                     ObservableLibraryType;
-	typedef typename ObservableLibraryType::ManyPointActionType ManyPointActionType;
-	typedef typename PsimagLite::OneOperatorSpec::SiteSplit     SiteSplitType;
+	using SuperGeometryType     = typename ModelType::SuperGeometryType;
+	using LeftRightSuperType    = typename ModelType::ModelHelperType::LeftRightSuperType;
+	using MatrixType            = typename ModelType::MatrixType;
+	using VectorType            = typename ModelType::VectorType;
+	using ObserverHelperType    = ObserverHelper<IoInputType,
+	                                             MatrixType,
+	                                             VectorType,
+	                                             VectorWithOffsetType,
+	                                             LeftRightSuperType>;
+	using ObserverType          = Observer<ObserverHelperType, ModelType>;
+	using ObservableLibraryType = ObservableLibrary<ObserverType>;
+	using ManyPointActionType   = typename ObservableLibraryType::ManyPointActionType;
+	using SiteSplitType         = typename PsimagLite::OneOperatorSpec::SiteSplit;
 
 	static SizeType start = 0;
 

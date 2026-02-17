@@ -10,8 +10,8 @@ class BasisOneSpin {
 
 public:
 
-	typedef long unsigned int WordType;
-	typedef LabeledOperator   LabeledOperatorType;
+	using WordType            = long unsigned int;
+	using LabeledOperatorType = LabeledOperator;
 
 	BasisOneSpin(SizeType nsite, SizeType npart)
 	{

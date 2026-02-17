@@ -87,17 +87,17 @@ namespace Dmrg {
 template <typename ModelType> class TargetParamsBase {
 public:
 
-	typedef typename ModelType::RealType                    RealType;
-	typedef std::pair<PsimagLite::FreqEnum, RealType>       PairFreqType;
-	typedef typename ModelType::OperatorType                OperatorType;
-	typedef typename OperatorType::PairType                 PairType;
-	typedef typename OperatorType::SparseMatrixType         SparseMatrixType;
-	typedef typename SparseMatrixType::value_type           ComplexOrRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>           MatrixType;
-	typedef PsimagLite::Vector<SizeType>::Type              VectorSizeType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type   VectorMatrixType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type VectorOperatorType;
-	typedef typename PsimagLite::Vector<RealType>::Type     VectorRealType;
+	using RealType           = typename ModelType::RealType;
+	using PairFreqType       = std::pair<PsimagLite::FreqEnum, RealType>;
+	using OperatorType       = typename ModelType::OperatorType;
+	using PairType           = typename OperatorType::PairType;
+	using SparseMatrixType   = typename OperatorType::SparseMatrixType;
+	using ComplexOrRealType  = typename SparseMatrixType::value_type;
+	using MatrixType         = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorSizeType     = PsimagLite::Vector<SizeType>::Type;
+	using VectorMatrixType   = typename PsimagLite::Vector<MatrixType>::Type;
+	using VectorOperatorType = typename PsimagLite::Vector<OperatorType>::Type;
+	using VectorRealType     = typename PsimagLite::Vector<RealType>::Type;
 
 	enum class ConcatEnum
 	{

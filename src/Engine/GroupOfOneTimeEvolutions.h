@@ -10,11 +10,11 @@ template <typename PvectorsType> class GroupOfOneTimeEvolutions {
 
 	public:
 
-		typedef OneTimeEvolution                             ThisType;
-		typedef typename PsimagLite::Vector<ThisType*>::Type VectorOneTimeEvolutionType;
-		typedef typename PvectorsType::VectorWithOffsetType  VectorWithOffsetType;
-		typedef PsimagLite::Vector<SizeType>::Type           VectorSizeType;
-		typedef typename PvectorsType::RealType              RealType;
+		using ThisType                   = OneTimeEvolution;
+		using VectorOneTimeEvolutionType = typename PsimagLite::Vector<ThisType*>::Type;
+		using VectorWithOffsetType       = typename PvectorsType::VectorWithOffsetType;
+		using VectorSizeType             = PsimagLite::Vector<SizeType>::Type;
+		using RealType                   = typename PvectorsType::RealType;
 
 		OneTimeEvolution(SizeType                    firstIndex,
 		                 const VectorWithOffsetType& src,
@@ -84,9 +84,9 @@ template <typename PvectorsType> class GroupOfOneTimeEvolutions {
 
 public:
 
-	typedef OneTimeEvolution                                     OneTimeEvolutionType;
-	typedef typename PsimagLite::Vector<OneTimeEvolution*>::Type VectorOneTimeEvolutionType;
-	typedef typename PvectorsType::RealType                      RealType;
+	using OneTimeEvolutionType       = OneTimeEvolution;
+	using VectorOneTimeEvolutionType = typename PsimagLite::Vector<OneTimeEvolution*>::Type;
+	using RealType                   = typename PvectorsType::RealType;
 
 	GroupOfOneTimeEvolutions() { }
 

@@ -92,21 +92,21 @@ namespace Dmrg {
 template <typename VectorWithOffsetType, typename MettsStochasticsType, typename TargetParamsType>
 class MettsCollapse {
 
-	typedef typename VectorWithOffsetType::VectorType           VectorType;
-	typedef typename MettsStochasticsType::PairType             PairType;
-	typedef typename MettsStochasticsType::LeftRightSuperType   LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType          BasisType;
-	typedef typename MettsStochasticsType::RealType             RealType;
-	typedef typename MettsStochasticsType::RngType              RngType;
-	typedef typename MettsStochasticsType::ModelType            ModelType;
-	typedef PsimagLite::Matrix<RealType>                        MatrixType;
+	using VectorType             = typename VectorWithOffsetType::VectorType;
+	using PairType               = typename MettsStochasticsType::PairType;
+	using LeftRightSuperType     = typename MettsStochasticsType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using RealType               = typename MettsStochasticsType::RealType;
+	using RngType                = typename MettsStochasticsType::RngType;
+	using ModelType              = typename MettsStochasticsType::ModelType;
+	using MatrixType             = PsimagLite::Matrix<RealType>;
 
 	static const bool COLLAPSE_INTO_RANDOM_BASIS = false;
 
 public:
 
-	typedef PsimagLite::PackIndices PackIndicesType;
+	using PackIndicesType = PsimagLite::PackIndices;
 
 	MettsCollapse(const MettsStochasticsType& mettsStochastics,
 	              const LeftRightSuperType&   lrs,

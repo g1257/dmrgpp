@@ -12,19 +12,19 @@ template <typename TargetingBaseType> class Pvectors {
 
 public:
 
-	typedef PsimagLite::InputNg<InputCheck>::Readable               InputValidatorType;
-	typedef typename TargetingBaseType::VectorWithOffsetType        VectorWithOffsetType;
-	typedef typename TargetingBaseType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
-	typedef typename TargetingBaseType::ModelType                   ModelType;
-	typedef typename ModelType::LeftRightSuperType                  LeftRightSuperType;
-	typedef typename VectorWithOffsetType::value_type               ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type      RealType;
-	typedef TargetParamsTimeVectors<ModelType>                      TargetParamsTimeVectorsType;
-	typedef Pvector<typename VectorWithOffsetType::value_type>      PvectorType;
-	typedef typename PsimagLite::Vector<PvectorType*>::Type         VectorPvectorType;
-	typedef PsimagLite::Vector<bool>::Type                          VectorBoolType;
-	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
-	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
+	using InputValidatorType          = PsimagLite::InputNg<InputCheck>::Readable;
+	using VectorWithOffsetType        = typename TargetingBaseType::VectorWithOffsetType;
+	using ApplyOperatorExpressionType = typename TargetingBaseType::ApplyOperatorExpressionType;
+	using ModelType                   = typename TargetingBaseType::ModelType;
+	using LeftRightSuperType          = typename ModelType::LeftRightSuperType;
+	using ComplexOrRealType           = typename VectorWithOffsetType::value_type;
+	using RealType                    = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using TargetParamsTimeVectorsType = TargetParamsTimeVectors<ModelType>;
+	using PvectorType                 = Pvector<typename VectorWithOffsetType::value_type>;
+	using VectorPvectorType           = typename PsimagLite::Vector<PvectorType*>::Type;
+	using VectorBoolType              = PsimagLite::Vector<bool>::Type;
+	using VectorSizeType              = PsimagLite::Vector<SizeType>::Type;
+	using VectorRealType              = typename PsimagLite::Vector<RealType>::Type;
 
 	Pvectors(InputValidatorType&                io,
 	         const ApplyOperatorExpressionType& aoe,

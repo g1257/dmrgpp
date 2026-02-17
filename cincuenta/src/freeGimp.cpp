@@ -9,9 +9,9 @@ void computeGamma(
     Dmft::FunctionOfFrequency<ComplexType>&                                                gamma,
     const typename PsimagLite::Vector<typename PsimagLite::Real<ComplexType>::Type>::Type& bath)
 {
-	typedef typename PsimagLite::Real<ComplexType>::Type RealType;
-	const SizeType                                       n     = gamma.totalMatsubaras();
-	const SizeType                                       nBath = bath.size() / 2;
+	using RealType       = typename PsimagLite::Real<ComplexType>::Type;
+	const SizeType n     = gamma.totalMatsubaras();
+	const SizeType nBath = bath.size() / 2;
 	for (SizeType i = 0; i < n; ++i) {
 		const RealType wn  = gamma.omega(i);
 		ComplexType    sum = 0;
@@ -26,9 +26,9 @@ template <typename ComplexType>
 void computeFreeGimp(Dmft::FunctionOfFrequency<ComplexType>&       freeGimp,
                      const Dmft::FunctionOfFrequency<ComplexType>& gamma)
 {
-	typedef typename PsimagLite::Real<ComplexType>::Type RealType;
-	const SizeType                                       n   = gamma.totalMatsubaras();
-	RealType                                             sum = 0;
+	using RealType     = typename PsimagLite::Real<ComplexType>::Type;
+	const SizeType n   = gamma.totalMatsubaras();
+	RealType       sum = 0;
 	for (SizeType i = 0; i < n; ++i) {
 		const RealType    wn = gamma.omega(i);
 		const ComplexType value(0, wn);
@@ -52,11 +52,11 @@ int main(int argc, char* argv[])
 #else
 	    float
 #endif
-	                                                      RealType;
-	typedef std::complex<RealType>                        ComplexType;
-	typedef PsimagLite::InputNg<Dmft::InputCheck>         InputNgType;
-	typedef Dmft::ParamsDmftSolver<RealType, InputNgType> ParamsDmftSolverType;
-	typedef Dmft::FunctionOfFrequency<ComplexType>        FunctionOfFrequencyType;
+	        RealType;
+	using ComplexType             = std::complex<RealType>;
+	using InputNgType             = PsimagLite::InputNg<Dmft::InputCheck>;
+	using ParamsDmftSolverType    = Dmft::ParamsDmftSolver<RealType, InputNgType>;
+	using FunctionOfFrequencyType = Dmft::FunctionOfFrequency<ComplexType>;
 
 	PsimagLite::String     inputfile = argv[1];
 	Dmft::InputCheck       inputCheck;

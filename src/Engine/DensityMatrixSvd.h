@@ -83,31 +83,31 @@ namespace Dmrg {
 
 template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixBase<TargetingType> {
 
-	typedef DensityMatrixBase<TargetingType>                   BaseType;
-	typedef typename TargetingType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef typename TargetingType::LeftRightSuperType         LeftRightSuperType;
-	typedef typename BasisWithOperatorsType::BasisType         BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType  SparseMatrixType;
-	typedef typename SparseMatrixType::value_type              ComplexOrRealType;
-	typedef typename TargetingType::VectorWithOffsetType       VectorWithOffsetType;
-	typedef typename BaseType::BuildingBlockType               MatrixType;
-	typedef PsimagLite::Matrix<SizeType>                       MatrixSizeType;
-	typedef typename PsimagLite::Vector<MatrixType*>::Type     VectorMatrixType;
-	typedef PsimagLite::Concurrency                            ConcurrencyType;
-	typedef PsimagLite::ProgressIndicator                      ProgressIndicatorType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef typename BaseType::Params                          ParamsType;
-	typedef GenIjPatch<LeftRightSuperType>                     GenIjPatchType;
-	typedef typename GenIjPatchType::VectorSizeType            VectorSizeType;
-	typedef typename BaseType::VectorRealType                  VectorRealType;
-	typedef typename PsimagLite::Vector<GenIjPatchType*>::Type VectorGenIjPatchType;
-	typedef std::pair<SizeType, SizeType>                      PairSizeType;
-	typedef typename BaseType::BlockDiagonalMatrixType         BlockDiagonalMatrixType;
-	typedef typename BasisType::QnType                         QnType;
-	typedef typename BasisWithOperatorsType::VectorQnType      VectorQnType;
-	typedef typename PsimagLite::Vector<VectorRealType>::Type  VectorVectorRealType;
-	typedef typename TargetingType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	using BaseType                = DensityMatrixBase<TargetingType>;
+	using BasisWithOperatorsType  = typename TargetingType::BasisWithOperatorsType;
+	using LeftRightSuperType      = typename TargetingType::LeftRightSuperType;
+	using BasisType               = typename BasisWithOperatorsType::BasisType;
+	using SparseMatrixType        = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType       = typename SparseMatrixType::value_type;
+	using VectorWithOffsetType    = typename TargetingType::VectorWithOffsetType;
+	using MatrixType              = typename BaseType::BuildingBlockType;
+	using MatrixSizeType          = PsimagLite::Matrix<SizeType>;
+	using VectorMatrixType        = typename PsimagLite::Vector<MatrixType*>::Type;
+	using ConcurrencyType         = PsimagLite::Concurrency;
+	using ProgressIndicatorType   = PsimagLite::ProgressIndicator;
+	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ParamsType              = typename BaseType::Params;
+	using GenIjPatchType          = GenIjPatch<LeftRightSuperType>;
+	using VectorSizeType          = typename GenIjPatchType::VectorSizeType;
+	using VectorRealType          = typename BaseType::VectorRealType;
+	using VectorGenIjPatchType    = typename PsimagLite::Vector<GenIjPatchType*>::Type;
+	using PairSizeType            = std::pair<SizeType, SizeType>;
+	using BlockDiagonalMatrixType = typename BaseType::BlockDiagonalMatrixType;
+	using QnType                  = typename BasisType::QnType;
+	using VectorQnType            = typename BasisWithOperatorsType::VectorQnType;
+	using VectorVectorRealType    = typename PsimagLite::Vector<VectorRealType>::Type;
+	using VectorVectorVectorWithOffsetType =
+	    typename TargetingType::VectorVectorVectorWithOffsetType;
 
 	class GroupsStruct {
 
@@ -124,7 +124,7 @@ template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixB
 			SizeType offset;
 		};
 
-		typedef typename PsimagLite::Vector<PropsOfGroup>::Type VectorPropsOfGroupType;
+		using VectorPropsOfGroupType = typename PsimagLite::Vector<PropsOfGroup>::Type;
 
 	public:
 
@@ -272,7 +272,7 @@ template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixB
 		VectorMatrixType m_;
 	};
 
-	typedef GroupsStruct GroupsStructType;
+	using GroupsStructType = GroupsStruct;
 
 	class ParallelPsiSplit {
 
@@ -354,10 +354,10 @@ template <typename TargetingType> class DensityMatrixSvd : public DensityMatrixB
 
 	public:
 
-		typedef PersistentSvd<typename PsimagLite::Vector<MatrixType>::Type,
-		                      VectorVectorRealType,
-		                      VectorQnType>
-		    PersistentSvdType;
+		using PersistentSvdType
+		    = PersistentSvd<typename PsimagLite::Vector<MatrixType>::Type,
+		                    VectorVectorRealType,
+		                    VectorQnType>;
 
 		ParallelSvd(BlockDiagonalMatrixType& blockDiagonalMatrix,
 		            GroupsStructType&        allTargets,
@@ -512,7 +512,7 @@ public:
 	{
 		PsimagLite::Profiling profiling("DensityMatrixSvdDiag", std::cout);
 
-		typedef PsimagLite::Parallelizer<ParallelSvd> ParallelizerType;
+		using ParallelizerType = PsimagLite::Parallelizer<ParallelSvd>;
 
 		PsimagLite::CodeSectionParams csp = PsimagLite::Concurrency::codeSectionParams;
 
@@ -574,10 +574,10 @@ private:
 	{
 		const BasisType& super = lrs_.super();
 		for (SizeType sector = 0; sector < v.sectors(); ++sector) {
-			SizeType                                           m  = v.sector(sector);
-			const QnType&                                      qn = super.qnEx(m);
-			GenIjPatchType                                     genIjPatch(lrs_, qn);
-			typedef PsimagLite::Parallelizer<ParallelPsiSplit> ParallelizerType;
+			SizeType       m  = v.sector(sector);
+			const QnType&  qn = super.qnEx(m);
+			GenIjPatchType genIjPatch(lrs_, qn);
+			using ParallelizerType = PsimagLite::Parallelizer<ParallelPsiSplit>;
 			ParallelizerType threaded(PsimagLite::Concurrency::codeSectionParams);
 			ParallelPsiSplit parallelPsiSplit(
 			    lrs_, genIjPatch, v, x, sector, sqrtW, allTargets_);

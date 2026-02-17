@@ -9,8 +9,8 @@ template <typename RealType_> class Matsubaras {
 
 public:
 
-	typedef RealType_                                   RealType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	using RealType       = RealType_;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
 
 	Matsubaras(RealType fictBeta, SizeType nMatsubara)
 	    : fictBeta_(fictBeta)

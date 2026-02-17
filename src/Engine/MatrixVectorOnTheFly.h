@@ -86,20 +86,20 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename ModelType_> class MatrixVectorOnTheFly : public MatrixVectorBase<ModelType_> {
 
-	typedef MatrixVectorBase<ModelType_> BaseType;
+	using BaseType = MatrixVectorBase<ModelType_>;
 
 public:
 
-	typedef ModelType_                                    ModelType;
-	typedef typename ModelType::ModelHelperType           ModelHelperType;
-	typedef typename ModelHelperType::RealType            RealType;
-	typedef typename ModelHelperType::SparseMatrixType    SparseMatrixType;
-	typedef typename SparseMatrixType::value_type         value_type;
-	typedef typename SparseMatrixType::value_type         ComplexOrRealType;
-	typedef typename PsimagLite::Vector<RealType>::Type   VectorRealType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>         FullMatrixType;
-	typedef typename ModelType::HamiltonianConnectionType HamiltonianConnectionType;
-	typedef typename ModelHelperType::Aux                 AuxType;
+	using ModelType                 = ModelType_;
+	using ModelHelperType           = typename ModelType::ModelHelperType;
+	using RealType                  = typename ModelHelperType::RealType;
+	using SparseMatrixType          = typename ModelHelperType::SparseMatrixType;
+	using value_type                = typename SparseMatrixType::value_type;
+	using ComplexOrRealType         = typename SparseMatrixType::value_type;
+	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
+	using FullMatrixType            = PsimagLite::Matrix<ComplexOrRealType>;
+	using HamiltonianConnectionType = typename ModelType::HamiltonianConnectionType;
+	using AuxType                   = typename ModelHelperType::Aux;
 
 	MatrixVectorOnTheFly(const ModelType&                 model,
 	                     const HamiltonianConnectionType& hc,

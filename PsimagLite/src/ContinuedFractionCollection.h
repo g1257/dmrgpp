@@ -40,13 +40,13 @@ namespace PsimagLite {
 template <typename ContinuedFractionType_> class ContinuedFractionCollection {
 public:
 
-	typedef ContinuedFractionType_                                ContinuedFractionType;
-	typedef typename ContinuedFractionType::ComplexType           ComplexType;
-	typedef typename ContinuedFractionType::TridiagonalMatrixType TridiagonalMatrixType;
-	typedef typename TridiagonalMatrixType::value_type            RealType;
-	typedef typename ContinuedFractionType::MatrixType            MatrixType;
-	typedef typename ContinuedFractionType::PlotDataType          PlotDataType;
-	typedef typename ContinuedFractionType::PlotParamsType        PlotParamsType;
+	using ContinuedFractionType = ContinuedFractionType_;
+	using ComplexType           = typename ContinuedFractionType::ComplexType;
+	using TridiagonalMatrixType = typename ContinuedFractionType::TridiagonalMatrixType;
+	using RealType              = typename TridiagonalMatrixType::value_type;
+	using MatrixType            = typename ContinuedFractionType::MatrixType;
+	using PlotDataType          = typename ContinuedFractionType::PlotDataType;
+	using PlotParamsType        = typename ContinuedFractionType::PlotParamsType;
 
 	ContinuedFractionCollection(FreqEnum freqEnum)
 	    : freqEnum_(freqEnum)

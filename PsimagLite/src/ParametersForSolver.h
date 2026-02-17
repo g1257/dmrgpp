@@ -92,7 +92,7 @@ namespace PsimagLite {
 
 template <typename RealType_> struct ParametersForSolver {
 
-	typedef RealType_ RealType;
+	using RealType = RealType_;
 
 	static const SizeType MaxLanczosSteps = 1000000; // max number of internal Lanczos steps
 	static const SizeType LanczosSteps    = 200; // max number of external Lanczos steps

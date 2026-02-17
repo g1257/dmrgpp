@@ -6,13 +6,13 @@ namespace Dmrg {
 
 template <typename BlockDiagonalMatrixType> class DiagBlockDiagMatrix {
 
-	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
-	typedef typename BuildingBlockType::value_type              ComplexOrRealType;
-	typedef typename BlockDiagonalMatrixType::VectorRealType    VectorRealType;
+	using BuildingBlockType = typename BlockDiagonalMatrixType::BuildingBlockType;
+	using ComplexOrRealType = typename BuildingBlockType::value_type;
+	using VectorRealType    = typename BlockDiagonalMatrixType::VectorRealType;
 
 	class LoopForDiag {
 
-		typedef PsimagLite::Concurrency ConcurrencyType;
+		using ConcurrencyType = PsimagLite::Concurrency;
 
 	public:
 
@@ -72,8 +72,8 @@ public:
 	// This function is NOT called by useSvd
 	static void diagonalise(BlockDiagonalMatrixType& C, VectorRealType& eigs, char option)
 	{
-		typedef PsimagLite::NoPthreadsNg<LoopForDiag> ParallelizerType;
-		typedef PsimagLite::Concurrency               ConcurrencyType;
+		using ParallelizerType  = PsimagLite::NoPthreadsNg<LoopForDiag>;
+		using ConcurrencyType   = PsimagLite::Concurrency;
 		SizeType savedNpthreads = ConcurrencyType::codeSectionParams.npthreads;
 		ConcurrencyType::codeSectionParams.npthreads = 1;
 		ParallelizerType threadObject(ConcurrencyType::codeSectionParams);

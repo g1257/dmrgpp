@@ -10,7 +10,7 @@
 namespace PsimagLite {
 template <typename VectorType> class AkimaSpline {
 
-	typedef typename VectorType::value_type RealType;
+	using RealType = typename VectorType::value_type;
 
 	struct AkimaStruct {
 		RealType x0, x1, a0, a1, a2, a3;
@@ -18,7 +18,7 @@ template <typename VectorType> class AkimaSpline {
 
 public:
 
-	typedef std::pair<RealType, RealType> IntervalType;
+	using IntervalType = std::pair<RealType, RealType>;
 
 	AkimaSpline(const VectorType& x, const VectorType& s)
 	{

@@ -9,14 +9,14 @@
 #include <iostream>
 
 #ifndef USE_FLOAT
-typedef double RealType;
+using RealType = double;
 #else
-typedef float RealType;
+using RealType = float;
 #endif
-typedef PsimagLite::InputNg<Dmrg::InputCheck> InputNgType;
-typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
-                                ParametersDmrgSolverType;
-typedef PsimagLite::Concurrency ConcurrencyType;
+using InputNgType = PsimagLite::InputNg<Dmrg::InputCheck>;
+using ParametersDmrgSolverType
+    = Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>;
+using ConcurrencyType = PsimagLite::Concurrency;
 
 void usage(const PsimagLite::String& name)
 {
@@ -42,11 +42,11 @@ void main1(InputNgType::Readable&          io,
            const ParametersDmrgSolverType& dmrgSolverParams,
            const ToolOptions&              toolOptions)
 {
-	typedef PsimagLite::Geometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>
-	             GeometryType;
+	using GeometryType
+	    = PsimagLite::Geometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>;
 	GeometryType geometry(io);
 
-	typedef Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType> ToolBoxType;
+	using ToolBoxType = Dmrg::ToolBox<ParametersDmrgSolverType, GeometryType>;
 	ConcurrencyType::codeSectionParams.npthreads = dmrgSolverParams.nthreads;
 	PsimagLite::String label
 	    = (toolOptions.action == "energies") ? "lowest" : toolOptions.extraOptions;

@@ -15,9 +15,9 @@ class AinurState {
 
 public:
 
-	typedef Vector<SizeType>::Type          VectorSizeType;
-	typedef Vector<String>::Type            VectorStringType;
-	typedef std::complex<DoubleOrFloatType> ComplexType;
+	using VectorSizeType   = Vector<SizeType>::Type;
+	using VectorStringType = Vector<String>::Type;
+	using ComplexType      = std::complex<DoubleOrFloatType>;
 
 	struct myprint {
 		template <typename T> void operator()(const T& t) const

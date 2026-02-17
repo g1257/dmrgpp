@@ -10,13 +10,13 @@ class MultiSiteExpressionHelper {
 
 public:
 
-	typedef VectorWithOffsetType_                                    VectorWithOffsetType;
-	typedef DmrgSerializer<LeftRightSuperType, VectorWithOffsetType> DmrgSerializerType;
+	using VectorWithOffsetType = VectorWithOffsetType_;
+	using DmrgSerializerType   = DmrgSerializer<LeftRightSuperType, VectorWithOffsetType>;
 	typedef
 	    typename PsimagLite::Vector<DmrgSerializerType const*>::Type VectorDmrgSerializerType;
-	typedef typename PsimagLite::Vector<VectorWithOffsetType>::Type  VectorVectorWithOffsetType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType      BasisWithOperatorsType;
-	typedef typename DmrgSerializerType::FermionSignType             FermionSignType;
+	using VectorVectorWithOffsetType = typename PsimagLite::Vector<VectorWithOffsetType>::Type;
+	using BasisWithOperatorsType     = typename LeftRightSuperType::BasisWithOperatorsType;
+	using FermionSignType            = typename DmrgSerializerType::FermionSignType;
 
 	MultiSiteExpressionHelper(SizeType n)
 	    : vds_(n, nullptr)

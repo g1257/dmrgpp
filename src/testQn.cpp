@@ -4,10 +4,10 @@
 #include <cstdlib>
 #include <tr1/unordered_map>
 
-typedef Dmrg::Qn               QnType;
-typedef QnType::VectorQnType   VectorQnType;
-typedef QnType::VectorSizeType VectorSizeType;
-typedef QnType::PairSizeType   PairSizeType;
+using QnType         = Dmrg::Qn;
+using VectorQnType   = QnType::VectorQnType;
+using VectorSizeType = QnType::VectorSizeType;
+using PairSizeType   = QnType::PairSizeType;
 
 void randomSzPlusConst(VectorSizeType& szPlusConst)
 {

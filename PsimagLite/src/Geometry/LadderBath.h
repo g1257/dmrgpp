@@ -86,8 +86,8 @@ namespace PsimagLite {
 template <typename ComplexOrRealType, typename InputType>
 class LadderBath : public GeometryBase<ComplexOrRealType, InputType> {
 
-	typedef std::pair<int, int>                  PairType;
-	typedef Ladder<ComplexOrRealType, InputType> LadderType;
+	using PairType   = std::pair<int, int>;
+	using LadderType = Ladder<ComplexOrRealType, InputType>;
 
 public:
 

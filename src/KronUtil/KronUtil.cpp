@@ -3,9 +3,9 @@
 #include "den_csr_kron_mult.cpp"
 #include "den_kron_mult.cpp"
 #ifndef USE_FLOAT
-typedef double RealType;
+using RealType = double;
 #else
-typedef float RealType;
+using RealType = float;
 #endif
 
 template void csr_kron_mult<RealType>(const char                                transA,

@@ -88,9 +88,9 @@ template <typename ModelType> class TargetParamsTimeVectors : public TargetParam
 
 public:
 
-	typedef TargetParamsCommon<ModelType>     BaseType;
-	typedef typename ModelType::RealType      RealType;
-	typedef typename BaseType::VectorRealType VectorRealType;
+	using BaseType       = TargetParamsCommon<ModelType>;
+	using RealType       = typename ModelType::RealType;
+	using VectorRealType = typename BaseType::VectorRealType;
 
 	template <typename IoInputter>
 	TargetParamsTimeVectors(IoInputter&        io,

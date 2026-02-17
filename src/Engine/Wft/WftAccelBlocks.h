@@ -10,20 +10,20 @@ namespace Dmrg {
 
 template <typename WaveFunctionTransfBaseType> class WftAccelBlocks {
 
-	typedef typename WaveFunctionTransfBaseType::DmrgWaveStructType   DmrgWaveStructType;
-	typedef typename WaveFunctionTransfBaseType::WftOptionsType       WftOptionsType;
-	typedef typename WaveFunctionTransfBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef typename WaveFunctionTransfBaseType::VectorSizeType       VectorSizeType;
-	typedef typename DmrgWaveStructType::LeftRightSuperType           LeftRightSuperType;
-	typedef typename VectorWithOffsetType::VectorType                 VectorType;
-	typedef typename VectorType::value_type                           ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type        RealType;
-	typedef typename DmrgWaveStructType::BasisWithOperatorsType       BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType         SparseMatrixType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                     MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type             VectorMatrixType;
-	typedef typename WaveFunctionTransfBaseType::PackIndicesType      PackIndicesType;
-	using OneSiteSpacesType = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
+	using DmrgWaveStructType     = typename WaveFunctionTransfBaseType::DmrgWaveStructType;
+	using WftOptionsType         = typename WaveFunctionTransfBaseType::WftOptionsType;
+	using VectorWithOffsetType   = typename WaveFunctionTransfBaseType::VectorWithOffsetType;
+	using VectorSizeType         = typename WaveFunctionTransfBaseType::VectorSizeType;
+	using LeftRightSuperType     = typename DmrgWaveStructType::LeftRightSuperType;
+	using VectorType             = typename VectorWithOffsetType::VectorType;
+	using ComplexOrRealType      = typename VectorType::value_type;
+	using RealType               = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using BasisWithOperatorsType = typename DmrgWaveStructType::BasisWithOperatorsType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using MatrixType             = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorMatrixType       = typename PsimagLite::Vector<MatrixType>::Type;
+	using PackIndicesType        = typename WaveFunctionTransfBaseType::PackIndicesType;
+	using OneSiteSpacesType      = typename WaveFunctionTransfBaseType::OneSiteSpacesType;
 
 	class ParallelWftInBlocks {
 
@@ -627,9 +627,9 @@ public:
 
 		SizeType threads
 		    = std::min(volumeOfNk, PsimagLite::Concurrency::codeSectionParams.npthreads);
-		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
-		PsimagLite::CodeSectionParams                         codeSectionParams(threads);
-		ParallelizerType threadedWft(codeSectionParams);
+		using ParallelizerType = PsimagLite::Parallelizer<ParallelWftInBlocks>;
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType              threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
 		                              psi,
@@ -678,9 +678,9 @@ public:
 
 		SizeType threads
 		    = std::min(volumeOfNk, PsimagLite::Concurrency::codeSectionParams.npthreads);
-		typedef PsimagLite::Parallelizer<ParallelWftInBlocks> ParallelizerType;
-		PsimagLite::CodeSectionParams                         codeSectionParams(threads);
-		ParallelizerType threadedWft(codeSectionParams);
+		using ParallelizerType = PsimagLite::Parallelizer<ParallelWftInBlocks>;
+		PsimagLite::CodeSectionParams codeSectionParams(threads);
+		ParallelizerType              threadedWft(codeSectionParams);
 
 		ParallelWftInBlocks helperWft(result,
 		                              psi,

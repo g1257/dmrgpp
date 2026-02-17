@@ -86,8 +86,8 @@ namespace Dmrg {
 template <typename RealType, typename QnType>
 struct ParametersModelUlsOsu : public ParametersModelBase<RealType, QnType> {
 
-	typedef ParametersModelBase<RealType, QnType>       BaseType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	using BaseType       = ParametersModelBase<RealType, QnType>;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
 
 	template <typename IoInputType>
 	ParametersModelUlsOsu(IoInputType& io)

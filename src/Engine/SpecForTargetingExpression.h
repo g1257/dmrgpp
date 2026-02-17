@@ -15,12 +15,12 @@ template <typename TargetingBaseType> class SpecForTargetingExpression {
 
 public:
 
-	typedef typename TargetingBaseType::VectorWithOffsetType VectorWithOffsetType;
-	typedef AlgebraForTargetingExpression<TargetingBaseType> AlgebraType;
-	typedef AlgebraType                                      ResultType;
-	typedef typename VectorWithOffsetType::value_type        ComplexOrRealType;
-	typedef typename AlgebraType::AuxiliaryType              AuxiliaryType;
-	typedef std::pair<PsimagLite::String, AuxiliaryType>     PairStringAuxType;
+	using VectorWithOffsetType = typename TargetingBaseType::VectorWithOffsetType;
+	using AlgebraType          = AlgebraForTargetingExpression<TargetingBaseType>;
+	using ResultType           = AlgebraType;
+	using ComplexOrRealType    = typename VectorWithOffsetType::value_type;
+	using AuxiliaryType        = typename AlgebraType::AuxiliaryType;
+	using PairStringAuxType    = std::pair<PsimagLite::String, AuxiliaryType>;
 
 	class AssignAndDestroy {
 

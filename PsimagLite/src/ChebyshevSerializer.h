@@ -70,22 +70,22 @@ template <typename RealType> struct KernelPolynomialParameters {
 
 template <typename VectorType_> class ChebyshevSerializer {
 
-	typedef typename VectorType_::value_type       VectorElementType;
-	typedef typename Real<VectorElementType>::Type RealType;
+	using VectorElementType = typename VectorType_::value_type;
+	using RealType          = typename Real<VectorElementType>::Type;
 
 	static const String stringMarker_;
 
 public:
 
-	typedef VectorType_                                          VectorType;
-	typedef typename VectorType::value_type                      FieldType;
-	typedef Matrix<FieldType>                                    MatrixType;
-	typedef typename Vector<std::pair<RealType, RealType>>::Type PlotDataType;
-	typedef PlotParams<RealType>                                 PlotParamsType;
-	typedef ParametersForSolver<RealType>                        ParametersType;
-	typedef KernelPolynomialParameters<RealType>                 KernelParametersType;
-	typedef TridiagonalMatrix<RealType>                          TridiagonalMatrixType;
-	typedef typename TridiagonalMatrixType::VectorRealType       VectorRealType;
+	using VectorType            = VectorType_;
+	using FieldType             = typename VectorType::value_type;
+	using MatrixType            = Matrix<FieldType>;
+	using PlotDataType          = typename Vector<std::pair<RealType, RealType>>::Type;
+	using PlotParamsType        = PlotParams<RealType>;
+	using ParametersType        = ParametersForSolver<RealType>;
+	using KernelParametersType  = KernelPolynomialParameters<RealType>;
+	using TridiagonalMatrixType = TridiagonalMatrix<RealType>;
+	using VectorRealType        = typename TridiagonalMatrixType::VectorRealType;
 
 	ChebyshevSerializer(const TridiagonalMatrixType& ab, const ParametersType& params)
 	    : progress_("ChebyshevSerializer")

@@ -13,14 +13,14 @@ template <typename ModelType, typename VectorWithOffsetType> class OneSiteTrunca
 
 public:
 
-	typedef PsimagLite::PackIndices                             PackIndicesType;
-	typedef typename ModelType::MatrixType                      MatrixType;
-	typedef typename ModelType::LeftRightSuperType              LeftRightSuperType;
-	typedef typename ModelType::VectorRealType                  VectorRealType;
-	typedef typename VectorWithOffsetType::value_type           ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type  RealType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename PsimagLite::InputNg<InputCheck>::Readable  ReadableType;
+	using PackIndicesType        = PsimagLite::PackIndices;
+	using MatrixType             = typename ModelType::MatrixType;
+	using LeftRightSuperType     = typename ModelType::LeftRightSuperType;
+	using VectorRealType         = typename ModelType::VectorRealType;
+	using ComplexOrRealType      = typename VectorWithOffsetType::value_type;
+	using RealType               = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using ReadableType           = typename PsimagLite::InputNg<InputCheck>::Readable;
 
 	OneSiteTruncation(const LeftRightSuperType& lrs,
 	                  ModelType&                model,

@@ -163,7 +163,7 @@ class PthreadsNg {
 
 public:
 
-	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
+	using VectorSizeType = LoadBalancerDefault::VectorSizeType;
 
 	PthreadsNg(const CodeSectionParams& codeSectionParams)
 	    : nthreads_(codeSectionParams.npthreads)

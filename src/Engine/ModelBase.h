@@ -121,52 +121,52 @@ public:
 		ProgramGlobals::FermionOrBosonEnum fermionOrBoson;
 	};
 
-	typedef ParametersType_     ParametersType;
-	typedef InputValidatorType_ InputValidatorType;
-	typedef ModelHelperType_    ModelHelperType;
-	typedef SuperGeometryType_  SuperGeometryType;
-	typedef ModelBase<ModelHelperType_, ParametersType_, InputValidatorType_, SuperGeometryType>
-	                                                         ThisType;
-	typedef Braket<ThisType>                                 BraketType;
-	typedef typename ModelHelperType::OperatorsType          OperatorsType;
-	typedef typename ModelHelperType::BlockType              BlockType;
-	typedef typename ModelHelperType::RealType               RealType;
-	typedef typename ModelHelperType::BasisType              MyBasis;
-	typedef typename ModelHelperType::BasisWithOperatorsType BasisWithOperatorsType;
-	typedef typename ModelHelperType::LeftRightSuperType     LeftRightSuperType;
-	typedef typename OperatorsType::OperatorType             OperatorType;
-	typedef typename OperatorType::StorageType               OperatorStorageType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type  VectorOperatorType;
-	typedef typename MyBasis::QnType                         QnType;
-	typedef TargetQuantumElectrons<RealType, QnType>         TargetQuantumElectronsType;
-	typedef typename QnType::VectorQnType                    VectorQnType;
-	typedef typename ModelHelperType::SparseMatrixType       SparseMatrixType;
-	typedef typename ModelHelperType::SparseElementType      ComplexOrRealType;
-	typedef ModelCommon<ParametersType, SuperGeometryType, ModelHelperType> ModelCommonType;
-	typedef typename ModelCommonType::HamiltonianConnectionType      HamiltonianConnectionType;
-	typedef typename ModelCommonType::VectorLinkType                 VectorLinkType;
-	typedef typename ModelCommonType::VectorType                     VectorType;
-	typedef ParametersType                                           SolverParamsType;
-	typedef typename ModelHelperType::LinkType                       LinkType;
-	typedef PsimagLite::Vector<SizeType>::Type                       VectorSizeType;
-	typedef VectorSizeType                                           HilbertBasisType;
-	typedef typename PsimagLite::Vector<RealType>::Type              VectorRealType;
-	typedef typename QnType::PairSizeType                            PairSizeType;
-	typedef typename BasisWithOperatorsType::VectorBoolType          VectorBoolType;
-	typedef typename ModelCommonType::LabeledOperatorsType           LabeledOperatorsType;
-	typedef typename ModelCommonType::ModelLinksType                 ModelLinksType;
-	typedef typename LabeledOperatorsType::LabelType                 OpsLabelType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type             VectorStringType;
-	typedef typename ModelCommonType::VerySparseMatrixType           VerySparseMatrixType;
-	typedef ParallelHamiltonianConnection<HamiltonianConnectionType> ParallelHamConnectionType;
-	typedef typename ModelLinksType::TermType                        ModelTermType;
-	typedef OpaqueOp                                                 OpForLinkType;
-	typedef typename ModelLinksType::AtomKindBase                    AtomKindBaseType;
-	typedef SuperOpHelperBase<SuperGeometryType, ParametersType>     SuperOpHelperBaseType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                    MatrixType;
-	typedef typename ModelLinksType::LabelType                       LabelType;
-	typedef OperatorSpec<ThisType, OperatorType>                     OperatorSpecType;
-	typedef PsimagLite::CanonicalExpression<OperatorSpecType>        CanonicalExpressionType;
+	using ParametersType     = ParametersType_;
+	using InputValidatorType = InputValidatorType_;
+	using ModelHelperType    = ModelHelperType_;
+	using SuperGeometryType  = SuperGeometryType_;
+	using ThisType
+	    = ModelBase<ModelHelperType_, ParametersType_, InputValidatorType_, SuperGeometryType>;
+	using BraketType                 = Braket<ThisType>;
+	using OperatorsType              = typename ModelHelperType::OperatorsType;
+	using BlockType                  = typename ModelHelperType::BlockType;
+	using RealType                   = typename ModelHelperType::RealType;
+	using MyBasis                    = typename ModelHelperType::BasisType;
+	using BasisWithOperatorsType     = typename ModelHelperType::BasisWithOperatorsType;
+	using LeftRightSuperType         = typename ModelHelperType::LeftRightSuperType;
+	using OperatorType               = typename OperatorsType::OperatorType;
+	using OperatorStorageType        = typename OperatorType::StorageType;
+	using VectorOperatorType         = typename PsimagLite::Vector<OperatorType>::Type;
+	using QnType                     = typename MyBasis::QnType;
+	using TargetQuantumElectronsType = TargetQuantumElectrons<RealType, QnType>;
+	using VectorQnType               = typename QnType::VectorQnType;
+	using SparseMatrixType           = typename ModelHelperType::SparseMatrixType;
+	using ComplexOrRealType          = typename ModelHelperType::SparseElementType;
+	using ModelCommonType = ModelCommon<ParametersType, SuperGeometryType, ModelHelperType>;
+	using HamiltonianConnectionType = typename ModelCommonType::HamiltonianConnectionType;
+	using VectorLinkType            = typename ModelCommonType::VectorLinkType;
+	using VectorType                = typename ModelCommonType::VectorType;
+	using SolverParamsType          = ParametersType;
+	using LinkType                  = typename ModelHelperType::LinkType;
+	using VectorSizeType            = PsimagLite::Vector<SizeType>::Type;
+	using HilbertBasisType          = VectorSizeType;
+	using VectorRealType            = typename PsimagLite::Vector<RealType>::Type;
+	using PairSizeType              = typename QnType::PairSizeType;
+	using VectorBoolType            = typename BasisWithOperatorsType::VectorBoolType;
+	using LabeledOperatorsType      = typename ModelCommonType::LabeledOperatorsType;
+	using ModelLinksType            = typename ModelCommonType::ModelLinksType;
+	using OpsLabelType              = typename LabeledOperatorsType::LabelType;
+	using VectorStringType          = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VerySparseMatrixType      = typename ModelCommonType::VerySparseMatrixType;
+	using ParallelHamConnectionType = ParallelHamiltonianConnection<HamiltonianConnectionType>;
+	using ModelTermType             = typename ModelLinksType::TermType;
+	using OpForLinkType             = OpaqueOp;
+	using AtomKindBaseType          = typename ModelLinksType::AtomKindBase;
+	using SuperOpHelperBaseType     = SuperOpHelperBase<SuperGeometryType, ParametersType>;
+	using MatrixType                = PsimagLite::Matrix<ComplexOrRealType>;
+	using LabelType                 = typename ModelLinksType::LabelType;
+	using OperatorSpecType          = OperatorSpec<ThisType, OperatorType>;
+	using CanonicalExpressionType   = PsimagLite::CanonicalExpression<OperatorSpecType>;
 
 	ModelBase(const ParametersType&    params,
 	          const SuperGeometryType& superGeometry,
@@ -517,7 +517,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 	                         const HamiltonianConnectionType&     hc,
 	                         const typename ModelHelperType::Aux& aux) const
 	{
-		typedef PsimagLite::Parallelizer<ParallelHamConnectionType> ParallelizerType;
+		using ParallelizerType = PsimagLite::Parallelizer<ParallelHamConnectionType>;
 		ParallelizerType parallelConnections(PsimagLite::Concurrency::codeSectionParams);
 
 		ParallelHamConnectionType phc(x, y, hc, aux);

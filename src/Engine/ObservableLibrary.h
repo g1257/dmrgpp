@@ -92,23 +92,23 @@ template <typename ObserverType> class ObservableLibrary {
 
 public:
 
-	typedef typename ObserverType::ModelType                             ModelType;
-	typedef typename ModelType::LeftRightSuperType                       LeftRightSuperType;
-	typedef typename ModelType::OperatorType                             OperatorType;
-	typedef typename OperatorType::Su2RelatedType                        Su2RelatedType;
-	typedef typename ObserverType::VectorWithOffsetType                  VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::VectorType                    VectorType;
-	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType> ApplyOperatorType;
-	typedef typename ModelType::RealType                                 RealType;
-	typedef typename OperatorType::SparseMatrixType                      SparseMatrixType;
-	typedef typename VectorWithOffsetType::value_type                    FieldType;
-	typedef typename PsimagLite::Vector<FieldType>::Type                 VectorFieldType;
-	typedef PsimagLite::Matrix<FieldType>                                MatrixType;
-	typedef typename PsimagLite::Vector<MatrixType>::Type                VectorMatrixType;
-	typedef typename ObserverType::BraketType                            BraketType;
-	typedef PsimagLite::Vector<SizeType>::Type                           VectorSizeType;
-	typedef std::pair<SizeType, SizeType>                                PairSizeType;
-	typedef typename ObserverType::ManyPointActionType                   ManyPointActionType;
+	using ModelType            = typename ObserverType::ModelType;
+	using LeftRightSuperType   = typename ModelType::LeftRightSuperType;
+	using OperatorType         = typename ModelType::OperatorType;
+	using Su2RelatedType       = typename OperatorType::Su2RelatedType;
+	using VectorWithOffsetType = typename ObserverType::VectorWithOffsetType;
+	using VectorType           = typename VectorWithOffsetType::VectorType;
+	using ApplyOperatorType    = ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType>;
+	using RealType             = typename ModelType::RealType;
+	using SparseMatrixType     = typename OperatorType::SparseMatrixType;
+	using FieldType            = typename VectorWithOffsetType::value_type;
+	using VectorFieldType      = typename PsimagLite::Vector<FieldType>::Type;
+	using MatrixType           = PsimagLite::Matrix<FieldType>;
+	using VectorMatrixType     = typename PsimagLite::Vector<MatrixType>::Type;
+	using BraketType           = typename ObserverType::BraketType;
+	using VectorSizeType       = PsimagLite::Vector<SizeType>::Type;
+	using PairSizeType         = std::pair<SizeType, SizeType>;
+	using ManyPointActionType  = typename ObserverType::ManyPointActionType;
 
 	template <typename IoInputter>
 	ObservableLibrary(IoInputter&      io,
@@ -730,8 +730,8 @@ private:
 			}
 		}
 
-		typedef typename ObserverType::Parallel4PointDsType    Parallel4PointDsType;
-		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
+		using Parallel4PointDsType = typename ObserverType::Parallel4PointDsType;
+		using ParallelizerType     = PsimagLite::Parallelizer<Parallel4PointDsType>;
 		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel4PointDsType helper4PointDs(m,
@@ -1364,8 +1364,8 @@ private:
 			}
 		}
 
-		typedef typename ObserverType::Parallel4PointDsType    Parallel4PointDsType;
-		typedef PsimagLite::Parallelizer<Parallel4PointDsType> ParallelizerType;
+		using Parallel4PointDsType = typename ObserverType::Parallel4PointDsType;
+		using ParallelizerType     = PsimagLite::Parallelizer<Parallel4PointDsType>;
 		ParallelizerType threaded4PointDs(PsimagLite::Concurrency::codeSectionParams);
 
 		Parallel4PointDsType helper4PointDs(m,

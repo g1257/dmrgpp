@@ -12,14 +12,14 @@ class OperatorSpec {
 
 public:
 
-	typedef typename ModelType::OperatorType              OperatorType;
-	typedef typename OperatorType::StorageType            OperatorStorageType;
-	typedef LazyAlgebra<typename ModelType::OperatorType> LazyAlgebraType;
-	typedef PsimagLite::OneOperatorSpec                   OneOperatorSpecType;
-	typedef typename OneOperatorSpecType::SiteSplit       SiteSplitType;
-	typedef AlgebraType                                   ResultType;
-	typedef typename OperatorStorageType::value_type      ComplexOrRealType;
-	typedef int                                           AuxiliaryType;
+	using OperatorType        = typename ModelType::OperatorType;
+	using OperatorStorageType = typename OperatorType::StorageType;
+	using LazyAlgebraType     = LazyAlgebra<typename ModelType::OperatorType>;
+	using OneOperatorSpecType = PsimagLite::OneOperatorSpec;
+	using SiteSplitType       = typename OneOperatorSpecType::SiteSplit;
+	using ResultType          = AlgebraType;
+	using ComplexOrRealType   = typename OperatorStorageType::value_type;
+	using AuxiliaryType       = int;
 
 	OperatorSpec(const ModelType& model)
 	    : model_(model)

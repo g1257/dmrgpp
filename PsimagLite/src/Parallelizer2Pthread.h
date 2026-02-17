@@ -79,7 +79,7 @@ template <typename LoadBalancerType = LoadBalancerDefault> class Parallelizer2 {
 
 public:
 
-	typedef LoadBalancerDefault::VectorSizeType VectorSizeType;
+	using VectorSizeType = LoadBalancerDefault::VectorSizeType;
 
 	Parallelizer2(const CodeSectionParams& codeParams)
 	    : nthreads_(codeParams.npthreads)

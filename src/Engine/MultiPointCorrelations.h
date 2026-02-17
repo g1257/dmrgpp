@@ -87,18 +87,18 @@ namespace Dmrg {
 
 template <typename CorrelationsSkeletonType> class MultiPointCorrelations {
 
-	typedef typename CorrelationsSkeletonType::ObserverHelperType ObserverHelperType;
-	typedef typename ObserverHelperType::VectorType               VectorType;
-	typedef typename ObserverHelperType::VectorWithOffsetType     VectorWithOffsetType;
-	typedef typename ObserverHelperType::BasisWithOperatorsType   BasisWithOperatorsType;
-	typedef typename VectorType::value_type                       FieldType;
-	typedef typename BasisWithOperatorsType::RealType             RealType;
-	typedef MultiPointCorrelations<CorrelationsSkeletonType>      ThisType;
-	typedef typename CorrelationsSkeletonType::SparseMatrixType   SparseMatrixType;
+	using ObserverHelperType     = typename CorrelationsSkeletonType::ObserverHelperType;
+	using VectorType             = typename ObserverHelperType::VectorType;
+	using VectorWithOffsetType   = typename ObserverHelperType::VectorWithOffsetType;
+	using BasisWithOperatorsType = typename ObserverHelperType::BasisWithOperatorsType;
+	using FieldType              = typename VectorType::value_type;
+	using RealType               = typename BasisWithOperatorsType::RealType;
+	using ThisType               = MultiPointCorrelations<CorrelationsSkeletonType>;
+	using SparseMatrixType       = typename CorrelationsSkeletonType::SparseMatrixType;
 
 public:
 
-	typedef typename ObserverHelperType::MatrixType MatrixType;
+	using MatrixType = typename ObserverHelperType::MatrixType;
 
 	MultiPointCorrelations(const CorrelationsSkeletonType& skeleton)
 	    : skeleton_(skeleton)

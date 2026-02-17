@@ -11,7 +11,7 @@ namespace Dmrg {
 // no longer a struct
 struct RestartStruct {
 
-	typedef PsimagLite::Vector<int>::Type VectorIntType;
+	using VectorIntType = PsimagLite::Vector<int>::Type;
 
 	RestartStruct()
 	    : filename_("")

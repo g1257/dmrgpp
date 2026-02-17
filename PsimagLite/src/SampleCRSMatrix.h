@@ -86,7 +86,7 @@ template <typename T> class SampleCRSMatrix {
 
 public:
 
-	typedef T value_type;
+	using value_type = T;
 
 	SampleCRSMatrix(SizeType rank)
 	    : rank_(rank)

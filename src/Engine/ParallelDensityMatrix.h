@@ -85,14 +85,14 @@ namespace Dmrg {
 template <typename BlockMatrixType, typename BasisWithOperatorsType, typename TargetVectorType>
 class ParallelDensityMatrix {
 
-	typedef typename BlockMatrixType::BuildingBlockType BuildingBlockType;
-	typedef typename TargetVectorType::value_type       DensityMatrixElementType;
-	typedef typename BasisWithOperatorsType::BasisType  BasisType;
-	typedef PsimagLite::Concurrency                     ConcurrencyType;
+	using BuildingBlockType        = typename BlockMatrixType::BuildingBlockType;
+	using DensityMatrixElementType = typename TargetVectorType::value_type;
+	using BasisType                = typename BasisWithOperatorsType::BasisType;
+	using ConcurrencyType          = PsimagLite::Concurrency;
 
 public:
 
-	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
+	using RealType = typename PsimagLite::Real<DensityMatrixElementType>::Type;
 
 	ParallelDensityMatrix(const TargetVectorType&       target,
 	                      const BasisWithOperatorsType& pBasis,

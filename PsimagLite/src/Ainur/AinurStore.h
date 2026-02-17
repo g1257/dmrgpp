@@ -9,8 +9,8 @@ class Store {
 
 public:
 
-	typedef AinurLexical                       AinurLexicalType;
-	typedef AinurLexicalType::VectorStringType VectorStringType;
+	using AinurLexicalType = AinurLexical;
+	using VectorStringType = AinurLexicalType::VectorStringType;
 
 	enum Type
 	{

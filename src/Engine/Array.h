@@ -11,7 +11,7 @@ template <typename T> class Array {
 
 public:
 
-	typedef T value_type;
+	using value_type = T;
 
 	Array()
 	    : size_(0)

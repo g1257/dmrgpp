@@ -90,11 +90,11 @@ namespace Dmrg {
 //( David G. Simpson NASA, Goddard Space Flight Center, Greenbelt, Maryland  20771)
 
 template <typename FieldType> class ClebschGordan {
-	typedef FieldType LongType;
+	using LongType = FieldType;
 
 public:
 
-	typedef std::pair<SizeType, SizeType> PairType;
+	using PairType = std::pair<SizeType, SizeType>;
 
 	ClebschGordan(SizeType numberOfFactorials)
 	    : factorial_(numberOfFactorials)

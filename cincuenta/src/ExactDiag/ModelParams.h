@@ -7,7 +7,7 @@ namespace Dmft {
 
 template <typename RealType> struct ModelParams {
 
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
+	using VectorRealType = typename PsimagLite::Vector<RealType>::Type;
 
 	ModelParams(const VectorRealType& bathParams)
 	{

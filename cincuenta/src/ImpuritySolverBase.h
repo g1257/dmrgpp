@@ -10,12 +10,12 @@ template <typename ParamsDmftSolverType> class ImpuritySolverBase {
 
 public:
 
-	typedef typename ParamsDmftSolverType::ComplexOrRealType   ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef std::complex<RealType>                             ComplexType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef typename PsimagLite::Vector<ComplexType>::Type     VectorComplexType;
-	typedef PsimagLite::PsiApp                                 ApplicationType;
+	using ComplexOrRealType = typename ParamsDmftSolverType::ComplexOrRealType;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ComplexType       = std::complex<RealType>;
+	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
+	using VectorComplexType = typename PsimagLite::Vector<ComplexType>::Type;
+	using ApplicationType   = PsimagLite::PsiApp;
 
 	virtual ~ImpuritySolverBase() { }
 

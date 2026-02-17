@@ -17,8 +17,8 @@ class PredicateAnd {
 
 public:
 
-	typedef Vector<PredicateSimple>::Type     VectorPredicateSimpleType;
-	typedef PredicateSimple::VectorStringType VectorStringType;
+	using VectorPredicateSimpleType = Vector<PredicateSimple>::Type;
+	using VectorStringType          = PredicateSimple::VectorStringType;
 
 	PredicateAnd(String pred, PsimagLite::String sep = "&")
 	    : pred_(pred)

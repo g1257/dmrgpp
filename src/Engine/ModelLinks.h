@@ -12,20 +12,20 @@ template <typename LabeledOperatorsType, typename SuperGeometryType_> class Mode
 
 public:
 
-	typedef std::pair<SizeType, SizeType>                         PairSizeType;
-	typedef std::pair<char, char>                                 PairCharType;
-	typedef std::pair<PsimagLite::String, PsimagLite::String>     PairStringType;
-	typedef std::pair<PsimagLite::String, SizeType>               PairStringSizeType;
-	typedef typename LabeledOperatorsType::OperatorType::RealType RealType_;
-	typedef PsimagLite::Vector<SizeType>::Type                    VectorSizeType;
-	typedef typename LabeledOperatorsType::LabelType              LabelType;
-	typedef typename LabeledOperatorsType::ComplexOrRealType      ComplexOrRealType;
-	typedef typename LabeledOperatorsType::OperatorType           OperatorType;
-	typedef typename OperatorType::RealType                       RealType;
-	typedef typename OperatorType::StorageType                    OperatorStorageType;
-	typedef typename PsimagLite::Vector<OperatorType>::Type       VectorOperatorType;
-	typedef typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type
-	    VectorPairStringSizeType;
+	using PairSizeType        = std::pair<SizeType, SizeType>;
+	using PairCharType        = std::pair<char, char>;
+	using PairStringType      = std::pair<PsimagLite::String, PsimagLite::String>;
+	using PairStringSizeType  = std::pair<PsimagLite::String, SizeType>;
+	using RealType_           = typename LabeledOperatorsType::OperatorType::RealType;
+	using VectorSizeType      = PsimagLite::Vector<SizeType>::Type;
+	using LabelType           = typename LabeledOperatorsType::LabelType;
+	using ComplexOrRealType   = typename LabeledOperatorsType::ComplexOrRealType;
+	using OperatorType        = typename LabeledOperatorsType::OperatorType;
+	using RealType            = typename OperatorType::RealType;
+	using OperatorStorageType = typename OperatorType::StorageType;
+	using VectorOperatorType  = typename PsimagLite::Vector<OperatorType>::Type;
+	using VectorPairStringSizeType =
+	    typename PsimagLite::Vector<typename LabelType::PairStringSizeType>::Type;
 	using OneLinkType = OneLink<ComplexOrRealType>;
 
 	class AtomKindBase {
@@ -358,11 +358,11 @@ public:
 		HERMIT_MINUS
 	};
 
-	typedef SuperGeometryType_                               SuperGeometryType;
-	typedef PsimagLite::Vector<PsimagLite::String>::Type     VectorStringType;
-	typedef typename PsimagLite::Vector<HermitianEnum>::Type VectorHermitianEnum;
-	typedef typename PsimagLite::Vector<Term*>::Type         VectorTermType;
-	typedef Term                                             TermType;
+	using SuperGeometryType   = SuperGeometryType_;
+	using VectorStringType    = PsimagLite::Vector<PsimagLite::String>::Type;
+	using VectorHermitianEnum = typename PsimagLite::Vector<HermitianEnum>::Type;
+	using VectorTermType      = typename PsimagLite::Vector<Term*>::Type;
+	using TermType            = Term;
 
 	ModelLinks()
 	    : maxDofs_(0)

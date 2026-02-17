@@ -12,9 +12,9 @@
 namespace PsimagLite {
 
 #ifdef USE_IO_SIMPLE
-typedef PsimagLite::IoSimple IoSelector;
+using IoSelector = PsimagLite::IoSimple;
 #else
-typedef PsimagLite::IoNg IoSelector;
+using IoSelector = PsimagLite::IoNg;
 #endif
 } // namespace PsimagLite
 

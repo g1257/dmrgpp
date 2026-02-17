@@ -83,8 +83,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename DataType> class DiskStack {
 
-	typedef typename PsimagLite::IoNg::In  IoInType;
-	typedef typename PsimagLite::IoNg::Out IoOutType;
+	using IoInType  = typename PsimagLite::IoNg::In;
+	using IoOutType = typename PsimagLite::IoNg::Out;
 
 public:
 

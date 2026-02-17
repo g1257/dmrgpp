@@ -23,14 +23,14 @@ template <typename ComplexOrRealType> class DmrgRunner {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef PsimagLite::InputNg<Dmrg::InputCheck>              InputNgType;
-	typedef Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>
-	    ParametersDmrgSolverType;
-	typedef Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>
-	                                                            SuperGeometryType;
-	typedef Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn> VectorWithOffsetType;
-	typedef PsimagLite::PsiApp                                  ApplicationType;
+	using RealType    = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using InputNgType = PsimagLite::InputNg<Dmrg::InputCheck>;
+	using ParametersDmrgSolverType
+	    = Dmrg::ParametersDmrgSolver<RealType, InputNgType::Readable, Dmrg::Qn>;
+	using SuperGeometryType
+	    = Dmrg::SuperGeometry<ComplexOrRealType, InputNgType::Readable, Dmrg::ProgramGlobals>;
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<ComplexOrRealType, Dmrg::Qn>;
+	using ApplicationType      = PsimagLite::PsiApp;
 
 	DmrgRunner(RealType precision, const ApplicationType& application)
 	    : precision_(precision)
@@ -41,16 +41,15 @@ public:
 	              PsimagLite::String insitu,
 	              PsimagLite::String logfile) const
 	{
-		typedef PsimagLite::CrsMatrix<ComplexOrRealType> MySparseMatrixComplex;
-		typedef Dmrg::Basis<MySparseMatrixComplex>       BasisType;
-		typedef Dmrg::BasisWithOperators<BasisType>      BasisWithOperatorsType;
-		typedef Dmrg::LeftRightSuper<BasisWithOperatorsType, BasisType> LeftRightSuperType;
-		typedef Dmrg::ModelHelperLocal<LeftRightSuperType>              ModelHelperType;
-		typedef Dmrg::ModelBase<ModelHelperType,
-		                        ParametersDmrgSolverType,
-		                        InputNgType::Readable,
-		                        SuperGeometryType>
-		    ModelBaseType;
+		using MySparseMatrixComplex  = PsimagLite::CrsMatrix<ComplexOrRealType>;
+		using BasisType              = Dmrg::Basis<MySparseMatrixComplex>;
+		using BasisWithOperatorsType = Dmrg::BasisWithOperators<BasisType>;
+		using LeftRightSuperType = Dmrg::LeftRightSuper<BasisWithOperatorsType, BasisType>;
+		using ModelHelperType    = Dmrg::ModelHelperLocal<LeftRightSuperType>;
+		using ModelBaseType      = Dmrg::ModelBase<ModelHelperType,
+		                                           ParametersDmrgSolverType,
+		                                           InputNgType::Readable,
+		                                           SuperGeometryType>;
 
 		std::streambuf* globalCoutBuffer = 0;
 		std::ofstream   globalCoutStream;
@@ -119,18 +118,18 @@ private:
 		if (dmrgSolverParams.options.isSet("printgeometry"))
 			std::cout << geometry;
 
-		typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
-		                                                    ParametersForSolverType;
-		typedef PsimagLite::LanczosSolver<MatrixVectorType> SolverType;
-		typedef typename SolverType::MatrixType::ModelType  ModelBaseType;
+		using ParametersForSolverType
+		    = PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>;
+		using SolverType    = PsimagLite::LanczosSolver<MatrixVectorType>;
+		using ModelBaseType = typename SolverType::MatrixType::ModelType;
 
 		//! Setup the Model
 		Dmrg::ModelSelector<ModelBaseType> modelSelector(dmrgSolverParams.model);
 		ModelBaseType& model = modelSelector(dmrgSolverParams, io, geometry);
 
 		//! Setup the dmrg solver: (vectorwithoffset.h only):
-		typedef Dmrg::DmrgSolver<SolverType, VectorWithOffsetType> DmrgSolverType;
-		DmrgSolverType                                             dmrgSolver(model, io);
+		using DmrgSolverType = Dmrg::DmrgSolver<SolverType, VectorWithOffsetType>;
+		DmrgSolverType dmrgSolver(model, io);
 
 		//! Calculate observables:
 		dmrgSolver.main(geometry);

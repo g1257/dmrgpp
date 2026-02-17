@@ -89,45 +89,45 @@ namespace Dmrg {
 
 template <typename ModelBaseType> class ModelSelector {
 
-	typedef typename ModelBaseType::ModelHelperType    ModelHelperType;
-	typedef typename ModelBaseType::SolverParamsType   SolverParamsType;
-	typedef typename ModelBaseType::SuperGeometryType  SuperGeometryType;
-	typedef typename ModelBaseType::InputValidatorType InputValidatorType;
-	typedef typename ModelHelperType::SparseMatrixType SparseMatrixType;
+	using ModelHelperType    = typename ModelBaseType::ModelHelperType;
+	using SolverParamsType   = typename ModelBaseType::SolverParamsType;
+	using SuperGeometryType  = typename ModelBaseType::SuperGeometryType;
+	using InputValidatorType = typename ModelBaseType::InputValidatorType;
+	using SparseMatrixType   = typename ModelHelperType::SparseMatrixType;
 
 	// start models here:  DO NOT REMOVE MARK
-	typedef ModelHeisenberg<ModelBaseType>          ModelHeisenbergType;
-	typedef ModelIsingMultiOrb<ModelBaseType>       ModelIsingMultiOrbType;
-	typedef ModelHubbard<ModelBaseType>             ModelHubbardType;
-	typedef HeisenbergAncillaC<ModelBaseType>       HeisenbergAncillaCType;
-	typedef ExtendedHubbard1Orb<ModelBaseType>      ModelHubbardExtType;
-	typedef ExtendedSuperHubbard1Orb<ModelBaseType> ModelHubbardExtSuperType;
-	typedef ModelFeBasedSc<ModelBaseType>           FeBasedScType;
-	typedef FeAsBasedScExtended<ModelBaseType>      FeBasedScExtType;
-	typedef Immm<ModelBaseType>                     ImmmType;
-	typedef TjMultiOrb<ModelBaseType>               TjMultiOrbType;
-	typedef TjAnisotropic<ModelBaseType>            TjAnisotropicType;
-	typedef UlsOsu<ModelBaseType>                   UlsOsuType;
-	typedef TjAncillaC2<ModelBaseType>              TjAncillaC2Type;
-	typedef TjAncillaC<ModelBaseType>               TjAncillaCType;
-	typedef TjAncillaG<ModelBaseType>               TjAncillaGType;
-	typedef SuperHubbardExtended<ModelBaseType>     SuperHubbardExtendedType;
-	typedef HubbardAncilla<ModelBaseType>           HubbardAncillaType;
-	typedef HubbardAncillaExtended<ModelBaseType>   HubbardAncillaExtendedType;
-	typedef FermionSpinless<ModelBaseType>          FermionSpinlessType;
-	typedef Kitaev<ModelBaseType>                   KitaevType;
-	typedef ModelHubbardMultiBand<ModelBaseType>    ModelHubbardMultiBandType;
-	typedef HubbardHolstein<ModelBaseType>          HubbardHolsteinType;
-	typedef HubbardHolsteinSpinless<ModelBaseType>  HubbardHolsteinSpinlessType;
-	typedef Kondo<ModelBaseType>                    KondoType;
-	typedef Graphene<ModelBaseType>                 GrapheneType;
-	typedef HolsteinThin<ModelBaseType>             HolsteinThinType;
-	typedef HolsteinSpinlessThin<ModelBaseType>     HolsteinSpinlessThinType;
-	typedef GaugeSpin<ModelBaseType>                GaugeSpinType;
-	typedef HeisenbergMix<ModelBaseType>            HeisenbergMixType;
-	typedef SpinOrbitalModel<ModelBaseType>         SpinOrbitalModelType;
-	typedef Su3Model<ModelBaseType>                 Su3ModelType;
-	typedef LiouvillianHeisenberg<ModelBaseType>    LiouvillianHeisenbergType;
+	using ModelHeisenbergType         = ModelHeisenberg<ModelBaseType>;
+	using ModelIsingMultiOrbType      = ModelIsingMultiOrb<ModelBaseType>;
+	using ModelHubbardType            = ModelHubbard<ModelBaseType>;
+	using HeisenbergAncillaCType      = HeisenbergAncillaC<ModelBaseType>;
+	using ModelHubbardExtType         = ExtendedHubbard1Orb<ModelBaseType>;
+	using ModelHubbardExtSuperType    = ExtendedSuperHubbard1Orb<ModelBaseType>;
+	using FeBasedScType               = ModelFeBasedSc<ModelBaseType>;
+	using FeBasedScExtType            = FeAsBasedScExtended<ModelBaseType>;
+	using ImmmType                    = Immm<ModelBaseType>;
+	using TjMultiOrbType              = TjMultiOrb<ModelBaseType>;
+	using TjAnisotropicType           = TjAnisotropic<ModelBaseType>;
+	using UlsOsuType                  = UlsOsu<ModelBaseType>;
+	using TjAncillaC2Type             = TjAncillaC2<ModelBaseType>;
+	using TjAncillaCType              = TjAncillaC<ModelBaseType>;
+	using TjAncillaGType              = TjAncillaG<ModelBaseType>;
+	using SuperHubbardExtendedType    = SuperHubbardExtended<ModelBaseType>;
+	using HubbardAncillaType          = HubbardAncilla<ModelBaseType>;
+	using HubbardAncillaExtendedType  = HubbardAncillaExtended<ModelBaseType>;
+	using FermionSpinlessType         = FermionSpinless<ModelBaseType>;
+	using KitaevType                  = Kitaev<ModelBaseType>;
+	using ModelHubbardMultiBandType   = ModelHubbardMultiBand<ModelBaseType>;
+	using HubbardHolsteinType         = HubbardHolstein<ModelBaseType>;
+	using HubbardHolsteinSpinlessType = HubbardHolsteinSpinless<ModelBaseType>;
+	using KondoType                   = Kondo<ModelBaseType>;
+	using GrapheneType                = Graphene<ModelBaseType>;
+	using HolsteinThinType            = HolsteinThin<ModelBaseType>;
+	using HolsteinSpinlessThinType    = HolsteinSpinlessThin<ModelBaseType>;
+	using GaugeSpinType               = GaugeSpin<ModelBaseType>;
+	using HeisenbergMixType           = HeisenbergMix<ModelBaseType>;
+	using SpinOrbitalModelType        = SpinOrbitalModel<ModelBaseType>;
+	using Su3ModelType                = Su3Model<ModelBaseType>;
+	using LiouvillianHeisenbergType   = LiouvillianHeisenberg<ModelBaseType>;
 	// end models  DO NOT REMOVE MARK
 
 public:

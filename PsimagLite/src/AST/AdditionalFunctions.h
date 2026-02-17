@@ -23,7 +23,7 @@ namespace PsimagLite {
 
 template <typename VectorValueType> class Modulus : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -35,7 +35,7 @@ public:
 
 	virtual ValueType exec(const VectorValueType& v) const
 	{
-		typedef typename Real<ValueType>::Type RealType;
+		using RealType = typename Real<ValueType>::Type;
 
 		assert(v.size() == 2);
 
@@ -53,7 +53,7 @@ public:
 
 template <typename VectorValueType> class Cosine : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -72,7 +72,7 @@ public:
 
 template <typename VectorValueType> class Sine : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -91,7 +91,7 @@ public:
 
 template <typename VectorValueType> class Exp : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -110,7 +110,7 @@ public:
 
 template <typename VectorValueType> class TernaryOp : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 
@@ -130,7 +130,7 @@ public:
 
 template <typename VectorValueType> class Log : public Node<VectorValueType> {
 
-	typedef typename VectorValueType::value_type ValueType;
+	using ValueType = typename VectorValueType::value_type;
 
 public:
 

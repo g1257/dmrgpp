@@ -35,12 +35,12 @@ template <typename ComplexOrRealType, typename Readable> class OmegasFourier {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef std::complex<RealType>                             ComplexType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef typename PsimagLite::Vector<ComplexType>::Type     VectorComplexType;
-	typedef typename PsimagLite::Vector<SizeType>::Type        VectorSizeType;
-	typedef ProgramGlobals                                     ProgramGlobalsType;
+	using RealType           = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ComplexType        = std::complex<RealType>;
+	using VectorRealType     = typename PsimagLite::Vector<RealType>::Type;
+	using VectorComplexType  = typename PsimagLite::Vector<ComplexType>::Type;
+	using VectorSizeType     = typename PsimagLite::Vector<SizeType>::Type;
+	using ProgramGlobalsType = ProgramGlobals;
 
 	static const SizeType M_MAX = 0;
 

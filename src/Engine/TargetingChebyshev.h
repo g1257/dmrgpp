@@ -95,37 +95,37 @@ class TargetingChebyshev : public TargetingBase<LanczosSolverType_, VectorWithOf
 
 public:
 
-	typedef LanczosSolverType_                                      LanczosSolverType;
-	typedef TargetingBase<LanczosSolverType, VectorWithOffsetType_> BaseType;
-	typedef typename BaseType::TargetingCommonType                  TargetingCommonType;
-	typedef typename BaseType::OptionsType                          OptionsType;
-	typedef std::pair<SizeType, SizeType>                           PairType;
-	typedef typename BaseType::MatrixVectorType                     MatrixVectorType;
-	typedef typename BaseType::CheckpointType                       CheckpointType;
-	typedef typename MatrixVectorType::ModelType                    ModelType;
-	typedef typename ModelType::RealType                            RealType;
-	typedef typename ModelType::OperatorsType                       OperatorsType;
-	typedef typename ModelType::ModelHelperType                     ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType            LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType     BasisWithOperatorsType;
-	typedef PsimagLite::Vector<SizeType>::Type                      VectorSizeType;
-	typedef typename BaseType::WaveFunctionTransfType               WaveFunctionTransfType;
-	typedef typename WaveFunctionTransfType::VectorWithOffsetType   VectorWithOffsetType;
-	typedef typename VectorWithOffsetType::value_type               ComplexOrRealType;
-	typedef typename VectorWithOffsetType::VectorType               TargetVectorType;
-	typedef typename PsimagLite::Vector<RealType>::Type             VectorRealType;
-	typedef typename BasisWithOperatorsType::OperatorType           OperatorType;
-	typedef typename BasisWithOperatorsType::BasisType              BasisType;
-	typedef TargetParamsTimeStep<ModelType>                         TargetParamsType;
-	typedef typename BasisType::BlockType                           BlockType;
-	typedef typename TargetingCommonType::TimeSerializerType        TimeSerializerType;
-	typedef typename OperatorType::StorageType                      SparseMatrixType;
-	typedef typename ModelType::InputValidatorType                  InputValidatorType;
-	typedef typename BasisType::QnType                              QnType;
+	using LanczosSolverType      = LanczosSolverType_;
+	using BaseType               = TargetingBase<LanczosSolverType, VectorWithOffsetType_>;
+	using TargetingCommonType    = typename BaseType::TargetingCommonType;
+	using OptionsType            = typename BaseType::OptionsType;
+	using PairType               = std::pair<SizeType, SizeType>;
+	using MatrixVectorType       = typename BaseType::MatrixVectorType;
+	using CheckpointType         = typename BaseType::CheckpointType;
+	using ModelType              = typename MatrixVectorType::ModelType;
+	using RealType               = typename ModelType::RealType;
+	using OperatorsType          = typename ModelType::OperatorsType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using VectorSizeType         = PsimagLite::Vector<SizeType>::Type;
+	using WaveFunctionTransfType = typename BaseType::WaveFunctionTransfType;
+	using VectorWithOffsetType   = typename WaveFunctionTransfType::VectorWithOffsetType;
+	using ComplexOrRealType      = typename VectorWithOffsetType::value_type;
+	using TargetVectorType       = typename VectorWithOffsetType::VectorType;
+	using VectorRealType         = typename PsimagLite::Vector<RealType>::Type;
+	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
+	using BasisType              = typename BasisWithOperatorsType::BasisType;
+	using TargetParamsType       = TargetParamsTimeStep<ModelType>;
+	using BlockType              = typename BasisType::BlockType;
+	using TimeSerializerType     = typename TargetingCommonType::TimeSerializerType;
+	using SparseMatrixType       = typename OperatorType::StorageType;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
+	using QnType                 = typename BasisType::QnType;
 	typedef
-	    typename TargetingCommonType::ApplyOperatorExpressionType   ApplyOperatorExpressionType;
-	typedef typename ApplyOperatorExpressionType::ApplyOperatorType ApplyOperatorType;
-	typedef typename TargetingCommonType::StageEnumType             StageEnumType;
+	    typename TargetingCommonType::ApplyOperatorExpressionType ApplyOperatorExpressionType;
+	using ApplyOperatorType = typename ApplyOperatorExpressionType::ApplyOperatorType;
+	using StageEnumType     = typename TargetingCommonType::StageEnumType;
 
 	TargetingChebyshev(const LeftRightSuperType&     lrs,
 	                   const CheckpointType&         checkPoint,
@@ -300,7 +300,7 @@ private:
 
 	void oracleChebyshev(SizeType site, SizeType systemOrEviron) const
 	{
-		typedef OracleChebyshev<TargetingCommonType, TargetParamsType> OracleChebyshevType;
+		using OracleChebyshevType = OracleChebyshev<TargetingCommonType, TargetParamsType>;
 		OracleChebyshevType oracle(BaseType::model(),
 		                           BaseType::lrs(),
 		                           this->common().aoe().currentTime(),

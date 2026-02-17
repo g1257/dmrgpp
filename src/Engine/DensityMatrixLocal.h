@@ -86,29 +86,28 @@ namespace Dmrg {
 template <typename TargetingType>
 class DensityMatrixLocal : public DensityMatrixBase<TargetingType> {
 
-	typedef DensityMatrixBase<TargetingType>                          BaseType;
-	typedef typename TargetingType::LeftRightSuperType                LeftRightSuperType;
-	typedef typename TargetingType::BasisWithOperatorsType            BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::BasisType                BasisType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType         SparseMatrixType;
-	typedef typename TargetingType::VectorWithOffsetType              TargetVectorType;
-	typedef typename TargetingType::TargetVectorType::value_type      DensityMatrixElementType;
-	typedef PsimagLite::Concurrency                                   ConcurrencyType;
-	typedef PsimagLite::ProgressIndicator                             ProgressIndicatorType;
-	typedef typename PsimagLite::Real<DensityMatrixElementType>::Type RealType;
-	typedef typename DensityMatrixBase<TargetingType>::Params         ParamsType;
+	using BaseType                 = DensityMatrixBase<TargetingType>;
+	using LeftRightSuperType       = typename TargetingType::LeftRightSuperType;
+	using BasisWithOperatorsType   = typename TargetingType::BasisWithOperatorsType;
+	using BasisType                = typename BasisWithOperatorsType::BasisType;
+	using SparseMatrixType         = typename BasisWithOperatorsType::SparseMatrixType;
+	using TargetVectorType         = typename TargetingType::VectorWithOffsetType;
+	using DensityMatrixElementType = typename TargetingType::TargetVectorType::value_type;
+	using ConcurrencyType          = PsimagLite::Concurrency;
+	using ProgressIndicatorType    = PsimagLite::ProgressIndicator;
+	using RealType                 = typename PsimagLite::Real<DensityMatrixElementType>::Type;
+	using ParamsType               = typename DensityMatrixBase<TargetingType>::Params;
 
 public:
 
-	typedef typename BaseType::BlockDiagonalMatrixType          BlockDiagonalMatrixType;
-	typedef typename BlockDiagonalMatrixType::BuildingBlockType BuildingBlockType;
-	typedef ParallelDensityMatrix<BlockDiagonalMatrixType,
-	                              BasisWithOperatorsType,
-	                              TargetVectorType>
-	                                                            ParallelDensityMatrixType;
-	typedef PsimagLite::Parallelizer<ParallelDensityMatrixType> ParallelizerType;
-	typedef typename TargetingType::VectorVectorVectorWithOffsetType
-	    VectorVectorVectorWithOffsetType;
+	using BlockDiagonalMatrixType   = typename BaseType::BlockDiagonalMatrixType;
+	using BuildingBlockType         = typename BlockDiagonalMatrixType::BuildingBlockType;
+	using ParallelDensityMatrixType = ParallelDensityMatrix<BlockDiagonalMatrixType,
+	                                                        BasisWithOperatorsType,
+	                                                        TargetVectorType>;
+	using ParallelizerType          = PsimagLite::Parallelizer<ParallelDensityMatrixType>;
+	using VectorVectorVectorWithOffsetType =
+	    typename TargetingType::VectorVectorVectorWithOffsetType;
 
 	DensityMatrixLocal(const TargetingType&      target,
 	                   const LeftRightSuperType& lrs,

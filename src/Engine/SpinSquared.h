@@ -84,8 +84,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 namespace Dmrg {
 template <typename CallbackType> class SpinSquared {
 
-	typedef typename CallbackType::Word      Word;
-	typedef typename CallbackType::FieldType FieldType;
+	using Word      = typename CallbackType::Word;
+	using FieldType = typename CallbackType::FieldType;
 
 public:
 

@@ -92,17 +92,17 @@ template <typename ModelType_, typename RngType_> class MettsStochastics {
 
 public:
 
-	typedef std::pair<SizeType, SizeType>               PairType;
-	typedef ModelType_                                  ModelType;
-	typedef typename ModelType::QnType                  QnType;
-	typedef typename QnType::VectorQnType               VectorQnType;
-	typedef typename ModelType::RealType                RealType;
-	typedef typename ModelType::LeftRightSuperType      LeftRightSuperType;
-	typedef typename ModelType::HilbertBasisType        HilbertBasisType;
-	typedef RngType_                                    RngType;
-	typedef typename RngType::LongType                  LongType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
+	using PairType           = std::pair<SizeType, SizeType>;
+	using ModelType          = ModelType_;
+	using QnType             = typename ModelType::QnType;
+	using VectorQnType       = typename QnType::VectorQnType;
+	using RealType           = typename ModelType::RealType;
+	using LeftRightSuperType = typename ModelType::LeftRightSuperType;
+	using HilbertBasisType   = typename ModelType::HilbertBasisType;
+	using RngType            = RngType_;
+	using LongType           = typename RngType::LongType;
+	using VectorRealType     = typename PsimagLite::Vector<RealType>::Type;
+	using VectorSizeType     = typename PsimagLite::Vector<SizeType>::Type;
 
 	MettsStochastics(const ModelType& model, int long seed, const VectorSizeType& pure)
 	    : model_(model)

@@ -8,19 +8,19 @@ template <typename TargetingCommonType, typename TargetParamsType> class OracleC
 
 public:
 
-	typedef typename TargetingCommonType::ModelType                ModelType;
-	typedef typename ModelType::ModelHelperType                    ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType           LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType    BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorType          OperatorType;
-	typedef typename TargetParamsType::RealType                    RealType;
-	typedef typename TargetingCommonType::LanczosSolverType        LanczosSolverType;
-	typedef typename TargetingCommonType::ComplexOrRealType        ComplexOrRealType;
-	typedef typename TargetingCommonType::VectorWithOffsetType     VectorWithOffsetType;
-	typedef typename LanczosSolverType::MatrixType                 MatrixLanczosType;
-	typedef ScaledHamiltonian<MatrixLanczosType, TargetParamsType> ScaledHamiltonianType;
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type   VectorType;
-	typedef typename TargetingCommonType::FermionSignType          FermionSignType;
+	using ModelType              = typename TargetingCommonType::ModelType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using OperatorType           = typename BasisWithOperatorsType::OperatorType;
+	using RealType               = typename TargetParamsType::RealType;
+	using LanczosSolverType      = typename TargetingCommonType::LanczosSolverType;
+	using ComplexOrRealType      = typename TargetingCommonType::ComplexOrRealType;
+	using VectorWithOffsetType   = typename TargetingCommonType::VectorWithOffsetType;
+	using MatrixLanczosType      = typename LanczosSolverType::MatrixType;
+	using ScaledHamiltonianType  = ScaledHamiltonian<MatrixLanczosType, TargetParamsType>;
+	using VectorType             = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using FermionSignType        = typename TargetingCommonType::FermionSignType;
 
 	OracleChebyshev(const ModelType&          model,
 	                const LeftRightSuperType& lrs,

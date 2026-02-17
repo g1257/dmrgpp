@@ -105,15 +105,15 @@ public:
 		MUST_BE_NONZERO = true
 	};
 
-	typedef PsimagLite::Vector<SizeType>::Type          VectorSizeType;
-	typedef ComplexOrRealType                           value_type;
-	typedef PsimagLite::CrsMatrix<value_type>           SparseMatrixType;
-	typedef typename PsimagLite::Real<value_type>::Type RealType;
-	typedef std::pair<SizeType, SizeType>               PairType;
-	typedef Su2Related                                  Su2RelatedType;
-	typedef PsimagLite::Matrix<value_type>              DenseMatrixType;
-	typedef typename PsimagLite::Vector<RealType>::Type VectorRealType;
-	typedef OperatorStorage<ComplexOrRealType>          StorageType;
+	using VectorSizeType   = PsimagLite::Vector<SizeType>::Type;
+	using value_type       = ComplexOrRealType;
+	using SparseMatrixType = PsimagLite::CrsMatrix<value_type>;
+	using RealType         = typename PsimagLite::Real<value_type>::Type;
+	using PairType         = std::pair<SizeType, SizeType>;
+	using Su2RelatedType   = Su2Related;
+	using DenseMatrixType  = PsimagLite::Matrix<value_type>;
+	using VectorRealType   = typename PsimagLite::Vector<RealType>::Type;
+	using StorageType      = OperatorStorage<ComplexOrRealType>;
 
 	Operator()
 	    : fermionOrBoson_(ProgramGlobals::FermionOrBosonEnum::BOSON)
@@ -219,7 +219,7 @@ public:
 			std::cout << msg;
 		} else if (s == "expression") {
 			io.readline(s, prefix + "OperatorExpression=");
-			typedef OperatorSpec<SomeModelType, Operator>     OperatorSpecType;
+			using OperatorSpecType = OperatorSpec<SomeModelType, Operator>;
 			OperatorSpecType                                  opSpec(model);
 			PsimagLite::CanonicalExpression<OperatorSpecType> canonicalExpression(
 			    opSpec);

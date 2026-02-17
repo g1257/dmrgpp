@@ -90,11 +90,11 @@ namespace Dmrg {
 
 template <typename DmrgParametersType, typename GeometryType> class ToolBox {
 
-	typedef std::pair<SizeType, PsimagLite::String> PairSizeStringType;
+	using PairSizeStringType = std::pair<SizeType, PsimagLite::String>;
 
 	class GrepForLabel {
 
-		typedef long int LongType;
+		using LongType = long int;
 
 		struct InternalName {
 			InternalName(PsimagLite::String label_, bool cooked_)
@@ -108,7 +108,7 @@ template <typename DmrgParametersType, typename GeometryType> class ToolBox {
 
 	public:
 
-		typedef InternalName ParametersType;
+		using ParametersType = InternalName;
 
 		static void hook(std::ifstream& fin,
 		                 PsimagLite::String,
@@ -172,7 +172,7 @@ public:
 		ACTION_ANALYSIS
 	};
 
-	typedef typename GrepForLabel::ParametersType ParametersForGrepType;
+	using ParametersForGrepType = typename GrepForLabel::ParametersType;
 
 	/* PSIDOC ToolBoxActions
 	 Actions marked with an asterix are only meaningful postprocessing.

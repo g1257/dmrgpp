@@ -9,7 +9,7 @@ class DeepCopyOrNot {
 
 public:
 
-	typedef typename Vector<UnderlyingType*>::Type VectorUnderlyingType;
+	using VectorUnderlyingType = typename Vector<UnderlyingType*>::Type;
 
 	DeepCopyOrNot(bool isDeep)
 	    : isDeep_(isDeep)

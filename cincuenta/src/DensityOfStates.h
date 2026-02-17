@@ -8,7 +8,7 @@ template <typename ComplexOrRealType> class DensityOfStates {
 
 public:
 
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
+	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 
 	DensityOfStates(PsimagLite::String option, RealType wOverTwo, RealType mu)
 	    : wOverTwo_(wOverTwo)
