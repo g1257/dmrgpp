@@ -1,3 +1,5 @@
 add_subdirectory(loki)
 add_subdirectory(src)
-add_subdirectory(examples)
+if(BUILD_TESTING)
+  add_subdirectory(examples)
+endif()

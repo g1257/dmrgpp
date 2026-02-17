@@ -77,4 +77,6 @@ find_package(GSL REQUIRED)
 target_compile_definitions(psimaglite PUBLIC USE_GSL)
 target_link_libraries(psimaglite PUBLIC GSL::gsl)
 
-add_subdirectory(tests)
+if(BUILD_TESTING)
+  add_subdirectory(tests)
+endif()
