@@ -86,28 +86,28 @@ namespace Dmrg {
 template <typename ModelType, typename LanczosSolverType, typename VectorWithOffsetType>
 class TridiagRixsStatic {
 
-	typedef typename ModelType::ModelHelperType                         ModelHelperType;
-	typedef typename ModelHelperType::LeftRightSuperType                LeftRightSuperType;
-	typedef typename LeftRightSuperType::BasisWithOperatorsType         BasisWithOperatorsType;
-	typedef typename BasisWithOperatorsType::OperatorsType              OperatorsType;
-	typedef typename OperatorsType::OperatorType                        OperatorType;
-	typedef typename BasisWithOperatorsType::SparseMatrixType           SparseMatrixType;
-	typedef typename SparseMatrixType::value_type                       ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type          RealType;
-	typedef typename ModelType::InputValidatorType                      InputValidatorType;
-	typedef PsimagLite::Concurrency                                     ConcurrencyType;
-	typedef typename SparseMatrixType::value_type                       SparseElementType;
-	typedef PsimagLite::Matrix<SparseElementType>                       MatrixType;
-	typedef typename LanczosSolverType::ParametersSolverType            ParametersSolverType;
-	typedef typename BasisWithOperatorsType::EffectiveQuantumNumberType EffectiveQnType;
-	typedef VectorWithOffset<ComplexOrRealType, EffectiveQnType>        VectorWithOffsetType2;
-	typedef ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2>
-	                                                       ApplyOperatorLocalType;
-	typedef typename VectorWithOffsetType2::VectorSizeType VectorSizeType;
+	using ModelHelperType        = typename ModelType::ModelHelperType;
+	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
+	using BasisWithOperatorsType = typename LeftRightSuperType::BasisWithOperatorsType;
+	using OperatorsType          = typename BasisWithOperatorsType::OperatorsType;
+	using OperatorType           = typename OperatorsType::OperatorType;
+	using SparseMatrixType       = typename BasisWithOperatorsType::SparseMatrixType;
+	using ComplexOrRealType      = typename SparseMatrixType::value_type;
+	using RealType               = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using InputValidatorType     = typename ModelType::InputValidatorType;
+	using ConcurrencyType        = PsimagLite::Concurrency;
+	using SparseElementType      = typename SparseMatrixType::value_type;
+	using MatrixType             = PsimagLite::Matrix<SparseElementType>;
+	using ParametersSolverType   = typename LanczosSolverType::ParametersSolverType;
+	using EffectiveQnType        = typename BasisWithOperatorsType::EffectiveQuantumNumberType;
+	using VectorWithOffsetType2  = VectorWithOffset<ComplexOrRealType, EffectiveQnType>;
+	using ApplyOperatorLocalType
+	    = ApplyOperatorLocal<LeftRightSuperType, VectorWithOffsetType2>;
+	using VectorSizeType = typename VectorWithOffsetType2::VectorSizeType;
 
 	class MyMatrixVector : public LanczosSolverType::LanczosMatrixType {
 
-		typedef typename LanczosSolverType::LanczosMatrixType BasisType;
+		using BasisType = typename LanczosSolverType::LanczosMatrixType;
 
 	public:
 
@@ -160,9 +160,9 @@ class TridiagRixsStatic {
 
 public:
 
-	typedef typename PsimagLite::Vector<ComplexOrRealType>::Type       TargetVectorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>                      MatrixComplexOrRealType;
-	typedef typename PsimagLite::Vector<MatrixComplexOrRealType>::Type VectorMatrixFieldType;
+	using TargetVectorType        = typename PsimagLite::Vector<ComplexOrRealType>::Type;
+	using MatrixComplexOrRealType = PsimagLite::Matrix<ComplexOrRealType>;
+	using VectorMatrixFieldType   = typename PsimagLite::Vector<MatrixComplexOrRealType>::Type;
 
 	TridiagRixsStatic(const LeftRightSuperType&     lrs,
 	                  const ModelType&              model,

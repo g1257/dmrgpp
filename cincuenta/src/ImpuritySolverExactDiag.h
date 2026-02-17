@@ -23,23 +23,23 @@ class ImpuritySolverExactDiag : public ImpuritySolverBase<ParamsDmftSolverType> 
 
 public:
 
-	typedef typename ParamsDmftSolverType::ComplexOrRealType   ComplexOrRealType;
-	typedef typename PsimagLite::Real<ComplexOrRealType>::Type RealType;
-	typedef std::complex<RealType>                             ComplexType;
-	typedef typename PsimagLite::Vector<RealType>::Type        VectorRealType;
-	typedef typename PsimagLite::Vector<ComplexType>::Type     VectorComplexType;
-	typedef typename ImpuritySolverBase<ParamsDmftSolverType>::ApplicationType ApplicationType;
-	typedef PsimagLite::CrsMatrix<ComplexOrRealType>                           SparseMatrixType;
-	typedef PsimagLite::SparseRow<SparseMatrixType>                            SparseRowType;
-	typedef long unsigned int                                                  WordType;
-	typedef BasisExactDiag                                                     BasisType;
-	typedef ModelParams<RealType>                                              ModelParamsType;
-	typedef PsimagLite::InputNg<Dmrg::InputCheck>                              InputNgType;
-	typedef PsimagLite::ParametersForSolver<RealType>   SolverParametersType;
-	typedef PsimagLite::LanczosSolver<SparseMatrixType> LanczosSolverType;
-	typedef BasisType::LabeledOperatorType              LabeledOperatorType;
-	typedef PsimagLite::Matrix<ComplexOrRealType>       MatrixType;
-	typedef Matsubaras<RealType>                        MatsubarasType;
+	using ComplexOrRealType = typename ParamsDmftSolverType::ComplexOrRealType;
+	using RealType          = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using ComplexType       = std::complex<RealType>;
+	using VectorRealType    = typename PsimagLite::Vector<RealType>::Type;
+	using VectorComplexType = typename PsimagLite::Vector<ComplexType>::Type;
+	using ApplicationType  = typename ImpuritySolverBase<ParamsDmftSolverType>::ApplicationType;
+	using SparseMatrixType = PsimagLite::CrsMatrix<ComplexOrRealType>;
+	using SparseRowType    = PsimagLite::SparseRow<SparseMatrixType>;
+	using WordType         = long unsigned int;
+	using BasisType        = BasisExactDiag;
+	using ModelParamsType  = ModelParams<RealType>;
+	using InputNgType      = PsimagLite::InputNg<Dmrg::InputCheck>;
+	using SolverParametersType = PsimagLite::ParametersForSolver<RealType>;
+	using LanczosSolverType    = PsimagLite::LanczosSolver<SparseMatrixType>;
+	using LabeledOperatorType  = BasisType::LabeledOperatorType;
+	using MatrixType           = PsimagLite::Matrix<ComplexOrRealType>;
+	using MatsubarasType       = Matsubaras<RealType>;
 
 	ImpuritySolverExactDiag(const ParamsDmftSolverType& params, const ApplicationType& app)
 	    : params_(params)

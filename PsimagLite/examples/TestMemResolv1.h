@@ -5,14 +5,14 @@
 #include <cstdlib>
 #include <iostream>
 
-typedef PsimagLite::MemResolv MemResolv;
+using MemResolv = PsimagLite::MemResolv;
 
 template <typename T> class TestMemResolv1 {
 
-	static const bool      IS_CLASS = PsimagLite::IsClass<T>::value;
-	typedef std::vector<T> VectorType;
-	typedef PsimagLite::ResolveFinalOrNot<VectorType, IS_CLASS> ResolveFinalOrNotType;
-	typedef TestMemResolv1<T>                                   ThisType;
+	static const bool IS_CLASS  = PsimagLite::IsClass<T>::value;
+	using VectorType            = std::vector<T>;
+	using ResolveFinalOrNotType = PsimagLite::ResolveFinalOrNot<VectorType, IS_CLASS>;
+	using ThisType              = TestMemResolv1<T>;
 
 public:
 
