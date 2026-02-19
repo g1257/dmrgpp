@@ -164,8 +164,7 @@ add_test(NAME observe0002 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input2.
 add_test(NAME observe0002_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
                                     ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput2.cout)
 set_tests_properties(observe0002_1 PROPERTIES DEPENDS observe0002)
-add_test(NAME observe6700 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input20.ain
-                                  "<gs|sz;sz|gs>,<gs|splus;sminus|gs>")
-add_test(NAME observe6700_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
-                                    ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput20.cout)
-set_tests_properties(observe6700_1 PROPERTIES DEPENDS observe6700)
+add_test(NAME observe20 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input20.ain "<gs|sz;sz|gs>,<gs|splus;sminus|gs>")
+add_test(NAME observe20_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
+                                  ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput20.cout)
+set_tests_properties(observe20_1 PROPERTIES DEPENDS observe20)
