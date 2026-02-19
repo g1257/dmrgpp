@@ -207,6 +207,14 @@ string TSPOp0:OperatorExpression="sz";
 # In this case the label is <gs|sz|P0>, so the thing between the pipes is sz,
 # and without it we get <gs|P0>, which turns out to be zero, as it should.
 #
+# To compute the Fourier transform in both space and time, the following can be done
+#
+#  ../scripts/fourierTimeSpace.pl runForinput21.cout "<gs|sz|P0>" 0 4 0.1
+#
+# where the output has the following columns
+# # momentum omega real_value imag_value
+# and a break is printed when omega changes.
+#
 # For many-point time measurements, observe and saving must be used; this is out-of-scope here.
 #
 # For Hamiltonians that explicitly depend on time, I'll comment another input shortly. The
