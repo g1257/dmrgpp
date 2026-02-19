@@ -161,10 +161,13 @@ add_test(NAME input8900 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input8900.ain)
 # Tests for the observe executable
 add_test(NAME observe0002 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input2.ain
                                   "<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>")
+set_tests_properties(observe0002 PROPERTIES DEPENDS input2)
 add_test(NAME observe0002_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
                                     ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput2.cout)
 set_tests_properties(observe0002_1 PROPERTIES DEPENDS observe0002)
+
 add_test(NAME observe20 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input20.ain "<gs|sz;sz|gs>,<gs|splus;sminus|gs>")
+set_tests_properties(observe20 PROPERTIES DEPENDS input20)
 add_test(NAME observe20_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
                                   ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput20.cout)
 set_tests_properties(observe20_1 PROPERTIES DEPENDS observe20)
