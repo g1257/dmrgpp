@@ -294,7 +294,8 @@ public:
 		str += "matrix TimeSchedule;\n";
 		str += "string DefineOperators;\n";
 		str += "integer NumberOfTargetQns;\n";
-
+		str += "integer RestartMapStages;\n";
+		str += "vectorIntegers RestartMappingTvs;\n";
 		return str;
 	}
 
