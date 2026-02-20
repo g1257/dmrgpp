@@ -25,6 +25,21 @@ execute_process(
 string(REGEX MATCH "([0-9]+)" match_result ${perl_error})
 set(NUM_DRIVER_FILES ${CMAKE_MATCH_1})
 
+# generate sources file for explicitly instantiating mainLoop4
+set(counter 0)
+set(instantiationFileList)
+foreach(complexOrReal RealType std::complex<RealType>)
+  foreach(solverType LanczosSolver ChebyshevSolver)
+    foreach(matrixVectorType MatrixVectorOnTheFly MatrixVectorStored MatrixVectorKron)
+      math(EXPR counter "${counter} + 1")
+      set(instantiationFile ${CMAKE_CURRENT_BINARY_DIR}/DmrgDriver${counter}.cpp)
+      configure_file(cmake/DmrgDriver.cpp.in ${instantiationFile})
+      list(APPEND instantiationFileList ${instantiationFile})
+    endforeach()
+  endforeach()
+endforeach()
+unset(counter)
+
 set(driver_list)
 # configure time math string(STRIP "${NUM_DRIVER_FILES}" NUM_DRIVER_FILES_CLEAN)
 math(EXPR NUM_DRIVER_FILES_MINUS_ONE "${NUM_DRIVER_FILES} - 1")
@@ -58,9 +73,9 @@ add_custom_command(
 # link everything.
 
 # Dmrg executable (main executable)
-add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> ${driver_templates} Qn.cpp dmrg.cpp)
+add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> ${instantiationFileList} Qn.cpp dmrg.cpp)
 target_link_libraries(dmrg PUBLIC kronutil psimaglite::psimaglite)
-target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
+target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 
