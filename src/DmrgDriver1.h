@@ -3,6 +3,28 @@
 
 #include "DmrgDriver.h"
 
+template <typename RealOrComplexType,
+          template <typename> typename MatrixVectorTemplate,
+          template <typename> typename LanczosSolverTemplate>
+struct ExplicitInstantiationHelper {
+	using SparseMatrixType = PsimagLite::CrsMatrix<RealOrComplexType>;
+	using GeometryType     = Dmrg::SuperGeometry<RealOrComplexType,
+	                                             PsimagLite::InputNg<Dmrg::InputCheck>::Readable,
+	                                             Dmrg::ProgramGlobals>;
+	using MatrixVectorType = MatrixVectorTemplate<
+	    Dmrg::ModelBase<Dmrg::ModelHelperLocal<Dmrg::LeftRightSuper<
+	                        Dmrg::BasisWithOperators<Dmrg::Basis<SparseMatrixType>>,
+	                        Dmrg::Basis<SparseMatrixType>>>,
+	                    ParametersDmrgSolverType,
+	                    InputNgType::Readable,
+	                    GeometryType>>;
+
+	using SolverType           = LanczosSolverTemplate<MatrixVectorType>;
+	using VectorWithOffsetType = Dmrg::VectorWithOffset<RealOrComplexType, Dmrg::Qn>;
+
+	using VectorWithOffsetsType = Dmrg::VectorWithOffsets<RealOrComplexType, Dmrg::Qn>;
+};
+
 template <typename SolverType, typename VectorWithOffsetType>
 void mainLoop4(typename SolverType::MatrixType::ModelType::SuperGeometryType& geometry,
                const ParametersDmrgSolverType&                                dmrgSolverParams,
