@@ -44,18 +44,19 @@ void AinurConvert::ActionMatrix<T>::operator()(A& attr, ContextType&, bool&) con
  *
  * \tparam SomeArithType The type of the storage, any arithmetic type or complex
  *
- * For ExpressionForAST see PsimagLite/doc/ExpressionForAST.txt
- *
  * \param[out] t    The storage
  * \param[in]  str  The string with the expression or the string with the complex number;
  *                  see AinurComplex.hh for format in case the string means a complex number
+ *
+ * For ExpressionForAST see PsimagLite/doc/ExpressionForAST.txt
+ *
+ * This function isn't exported and it's not in header
  */
-
 template <typename SomeArithType>
 typename std::enable_if<Loki::TypeTraits<SomeArithType>::isArith
                             || IsComplexNumber<SomeArithType>::True,
                         void>::type
-toComplexMaybeExpression(SomeArithType& t, const std::string& str)
+storeMaybeExpression(SomeArithType& t, const std::string& str)
 {
 	using PrimitivesType = PlusMinusMultiplyDivide<SomeArithType>;
 
@@ -72,10 +73,17 @@ toComplexMaybeExpression(SomeArithType& t, const std::string& str)
 	}
 }
 
-void toComplexMaybeExpression(std::string& t, const std::string& str)
-{
-	AinurComplex::convert(t, str);
-}
+/*!--------------------------------------------------------------------------
+ * \brief storeMaybeExpression for std::string
+ *
+ * \param[out] t   The storage
+ * \param[in]  str The value to be stored
+ *
+ * This function just saves the string into the storage, which is a string itself
+ *
+ * This function isn't exported and it's not in header
+ */
+void storeMaybeExpression(std::string& t, const std::string& str) { t = str; }
 
 template <typename T>
 template <typename A, typename ContextType>
@@ -108,7 +116,7 @@ void AinurConvert::Action<T>::operator()(A& attr, ContextType&, bool&) const
 	t_.resize(n);
 	for (SizeType i = 0; i < n; ++i) {
 		std::string val = ainurMacros_.valueFromFunction(attr[i]);
-		toComplexMaybeExpression(t_[i], val);
+		storeMaybeExpression(t_[i], val);
 	}
 }
 
