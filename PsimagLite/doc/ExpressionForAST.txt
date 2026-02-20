@@ -30,9 +30,9 @@ I'm afraid that you'll need to understand ExpressionForAST to input functions in
 
 ------------------------------------------------------------------------------------------------------------
 
-First, I discuss PsimagLite/drivers/calculator.cpp which now uses ExpressionForAST:
+First, I discuss PsimagLite/examples/calculator.cpp which now uses ExpressionForAST:
 
-cd PsimagLite/drivers
+cd build
 make calculator
 ./calculator "*:*:+:+:1:3:2:5:2"
 yields 35 because it's assumed BREADTH-FIRST as follows:

@@ -85,7 +85,7 @@ gt3:GeometryOptions="none";
 gt3:dir0:Connectors=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 # This number should gamma_i (1-f_i)
 # See PsimagLite/doc/ExpressionForAST.txt
-real ancilla_f = -:1.0:\f_bath;
+real ancilla_f = *:\gamma:-:1.0:\f_bath;
 gt3:dir1:Connectors=[\ancilla_f, 0, 0, 0, 0, \ancilla_f];
 
 Model="LiouvillianHeisenberg";
