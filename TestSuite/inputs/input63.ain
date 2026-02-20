@@ -1,0 +1,64 @@
+##Ainur1.0
+
+TotalNumberOfSites=8;
+NumberOfTerms=4;
+
+gt0:DegreesOfFreedom=1;
+gt0:GeometryKind=chain;
+gt0:GeometryOptions=ConstantValues;
+gt0:dir0:Connectors=[-1.0];
+
+gt1:DegreesOfFreedom=1;
+gt1:GeometryKind=chain;
+gt1:GeometryOptions=ConstantValues;
+gt1:dir0:Connectors=[0.25];
+
+gt2:DegreesOfFreedom=1;
+gt2:GeometryKind=chain;
+gt2:GeometryOptions=ConstantValues;
+gt2:dir0:Connectors=[0.25];
+
+gt3:DegreesOfFreedom=1;
+gt3:GeometryKind=chain;
+gt3:GeometryOptions=ConstantValues;
+gt3:dir0:Connectors=[-0.125];
+
+Model=TjMultiOrb;
+
+potentialV=[0.,...x16];
+
+InfiniteLoopKeptStates=128;
+FiniteLoops=[[@auto, 200, 2], [@auto, 200, 2]];
+
+TargetElectronsUp=3;
+TargetElectronsDown=3;
+
+SolverOptions=CorrectionVectorTargeting,twositedmrg,restart;
+CorrectionA=0;
+Version=version;
+RestartFilename=data62;
+LanczosEps=1e-7;
+TridiagonalEps=1e-7;
+TruncationTolerance=1e-7;
+
+OutputFile=data63;
+CorrectionVectorOmega=0.2;
+
+DynamicDmrgType=0;
+TSPProductOrSum=sum;
+CorrectionVectorFreqType=Real;
+
+CorrectionVectorEta=0.08;
+CorrectionVectorAlgorithm=Krylov;
+Orbitals=1;
+
+GsWeight=0.1;
+
+TSPSites=[3];
+TSPLoops=[0];
+
+string TSPOp0:TSPOperator=expression;
+string TSPOp0:OperatorExpression=sz;
+
+#ci dmrg arguments= -p 12 "<gs|sz|P1>,<gs|sz|P2>,<gs|sz|P3>"
+#ci CollectBrakets 0

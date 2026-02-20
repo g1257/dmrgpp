@@ -1,0 +1,26 @@
+##Ainur1.0
+
+TotalNumberOfSites=16;
+NumberOfTerms=1;
+
+#Term0=Hopping
+DegreesOfFreedom=1;
+GeometryKind=chain;
+GeometryOptions=ConstantValues;
+dir0:Connectors=[1.0];
+
+hubbardU=[16.,...];
+potentialV=[0.,...];
+Model=HubbardOneBand;
+SolverOptions=keepLegacyBugs;
+Version=version;
+OutputFile=data250;
+InfiniteLoopKeptStates=100;
+FiniteLoops=[[@auto, 100, 0],[@auto, 100, 0],[@auto, 100, 0]];
+NumberOfTargetQns=2;
+integer TargetElectronsUp0=8;
+integer TargetElectronsDown0=8;
+integer TargetElectronsUp1=7;
+integer TargetElectronsDown1=8;
+#ci dmrg arguments= -p 12 "<P0|c|P1>"
+#ci CollectBrakets 0
