@@ -22,6 +22,7 @@ Please see full open source license included in file LICENSE.
 
 namespace PsimagLite {
 
+// See PsimagLite/doc/ExpressionForAST.txt
 template <typename PrimitivesType> class ExpressionForAST {
 public:
 

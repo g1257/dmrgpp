@@ -1,3 +1,5 @@
+#include "AST/ExpressionForAST.h"
+#include "AST/PlusMinusMultiplyDivide.h"
 #include "AinurComplex.hh"
 #include "AinurConvert.hh"
 #include "AinurDoubleOrFloat.h"
@@ -37,7 +39,43 @@ void AinurConvert::ActionMatrix<T>::operator()(A& attr, ContextType&, bool&) con
 	}
 }
 
-//---------
+/*!--------------------------------------------------------------------------
+ * \brief Evaluate an expression given as an AST
+ *
+ * \tparam SomeArithType The type of the storage, any arithmetic type or complex
+ *
+ * For ExpressionForAST see PsimagLite/doc/ExpressionForAST.txt
+ *
+ * \param[out] t    The storage
+ * \param[in]  str  The string with the expression or the string with the complex number;
+ *                  see AinurComplex.hh for format in case the string means a complex number
+ */
+
+template <typename SomeArithType>
+typename std::enable_if<Loki::TypeTraits<SomeArithType>::isArith
+                            || IsComplexNumber<SomeArithType>::True,
+                        void>::type
+toComplexMaybeExpression(SomeArithType& t, const std::string& str)
+{
+	using PrimitivesType = PlusMinusMultiplyDivide<SomeArithType>;
+
+	if (str.find(":") != std::string::npos) {
+		// assume it's an expression
+		std::vector<std::string> ve;
+		PsimagLite::split(ve, str, ":");
+		PrimitivesType                   primitives;
+		ExpressionForAST<PrimitivesType> expresion_AST(ve, primitives);
+		t = expresion_AST.exec();
+	} else {
+		// assume it's a complex number
+		AinurComplex::convert(t, str);
+	}
+}
+
+void toComplexMaybeExpression(std::string& t, const std::string& str)
+{
+	AinurComplex::convert(t, str);
+}
 
 template <typename T>
 template <typename A, typename ContextType>
@@ -69,8 +107,8 @@ void AinurConvert::Action<T>::operator()(A& attr, ContextType&, bool&) const
 
 	t_.resize(n);
 	for (SizeType i = 0; i < n; ++i) {
-		String val = ainurMacros_.valueFromFunction(attr[i]);
-		AinurComplex::convert(t_[i], val);
+		std::string val = ainurMacros_.valueFromFunction(attr[i]);
+		toComplexMaybeExpression(t_[i], val);
 	}
 }
 

@@ -18,10 +18,19 @@ Ancillas=separate;
 # so it runs in our CI/CD
 # by default.
 #
-# This is the total size of the chain
+
+# These are the bath parameters for the jump operators
+real gamma = 1.0;
+real f_bath = 0.2;
+# We also define this product to be used below
+# See PsimagLite/doc/ExpressionForAST.txt
+real gamma_times_f = *:\gamma:\f_bath;
+
+# This is the total number of sites of the ladder
 # Each site has 2 states because
 # the ancillas are separate
-# This is a "thin" site implementation
+# This is a "thin" site implementation and
+# the ladder will be 6x2
 TotalNumberOfSites=12;
 
 # There are 4 connections in the Liouvillian:
@@ -65,9 +74,9 @@ gt2:GeometryKind="ladder";
 gt2:LadderLeg=2;
 gt2:GeometryOptions="none";
 gt2:dir0:Connectors=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-# This number should gamma_i f_i
-# FIXME USE VARIABLES HERE
-gt2:dir1:Connectors=[0.2, 0, 0, 0, 0, 0.2];
+# This number should gamma_i f_i and only set at the leftmost and
+# rightmost borders
+gt2:dir1:Connectors=[\gamma_times_f, 0, 0, 0, 0, \gamma_times_f];
 
 # The S+ S+ term between physical and ancillas
 gt3:GeometryKind="ladder";
@@ -75,8 +84,9 @@ gt3:LadderLeg=2;
 gt3:GeometryOptions="none";
 gt3:dir0:Connectors=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
 # This number should gamma_i (1-f_i)
-# FIXME USE VARIABLES HERE
-gt3:dir1:Connectors=[0.8, 0, 0, 0, 0, 0.8];
+# See PsimagLite/doc/ExpressionForAST.txt
+real ancilla_f = -:1.0:\f_bath;
+gt3:dir1:Connectors=[\ancilla_f, 0, 0, 0, 0, \ancilla_f];
 
 Model="LiouvillianHeisenberg";
 HeisenbergTwiceS=1;
@@ -103,9 +113,9 @@ FiniteLoops=[[@auto, 13, 0]];
 # Jump operator gamma and f parameters here; for each site
 # Note that they aren't zero only at the borders
 # See the ladder labeling above
-vector BathGamma=[1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1];
+vector BathGamma=[\gamma, \gamma, 0, 0, 0, 0, 0, 0, 0, 0, \gamma, \gamma];
 # f_i (ancilla) = 1 - f_i (physical)
-vector BathF=[0.2, 0.8, 0, 0, 0, 0, 0, 0, 0, 0, 0.2, 0.8];
+vector BathF=[\f_bath, \ancilla_f, 0, 0, 0, 0, 0, 0, 0, 0, \f_bath, \ancilla_f];
 
 # Use the matrix solver because L is non-Hermitian
 # and we want the NESS
