@@ -16,51 +16,25 @@ add_library(Su2Related OBJECT Su2Related.cpp)
 target_link_libraries(Su2Related PRIVATE psimaglite::psimaglite)
 target_include_directories(Su2Related PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
-execute_process(
-  COMMAND perl -I${CMAKE_CURRENT_SOURCE_DIR} countDrivers.pl
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  ERROR_VARIABLE perl_error
-  RESULT_VARIABLE perl_result
-  OUTPUT_STRIP_TRAILING_WHITESPACE)
-string(REGEX MATCH "([0-9]+)" match_result ${perl_error})
-set(NUM_DRIVER_FILES ${CMAKE_MATCH_1})
-
-set(driver_list)
-# configure time math string(STRIP "${NUM_DRIVER_FILES}" NUM_DRIVER_FILES_CLEAN)
-math(EXPR NUM_DRIVER_FILES_MINUS_ONE "${NUM_DRIVER_FILES} - 1")
-foreach(i RANGE 0 ${NUM_DRIVER_FILES_MINUS_ONE})
-  list(APPEND driver_list "DmrgDriver${i}.cpp;")
+# generate sources file for explicitly instantiating mainLoop4
+set(counter 0)
+set(instantiationFileList)
+foreach(complexOrReal RealType std::complex<RealType>)
+  foreach(solverType LanczosSolver ChebyshevSolver)
+    foreach(matrixVectorType MatrixVectorOnTheFly MatrixVectorStored MatrixVectorKron)
+      math(EXPR counter "${counter} + 1")
+      set(instantiationFile ${CMAKE_CURRENT_BINARY_DIR}/DmrgDriver${counter}.cpp)
+      configure_file(cmake/DmrgDriver.cpp.in ${instantiationFile})
+      list(APPEND instantiationFileList ${instantiationFile})
+    endforeach()
+  endforeach()
 endforeach()
-
-set(driver_templates)
-foreach(driver ${driver_list})
-  list(APPEND driver_templates "${CMAKE_CURRENT_SOURCE_DIR}/${driver};")
-endforeach()
-message("driver_list: ${driver_list}")
-
-add_custom_command(
-  OUTPUT ${driver_templates}
-  COMMAND perl -I ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/generateDrivers.pl
-  WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-  COMMENT "Generating driver files"
-  # VERBATIM
-)
-# If you decide you need to mess with DmrgDriver.pm you must reconfigure,
-# building again is not sufficient
-
-# for reasons that are not clear to me, almost every implementation file is
-# referred to as a driver in the dmrg build, and many have non informative file
-# names along that line don't make too much of it.
-
-# I don't wrap all the libraries into a variable on purpose the build is so slow
-# for such a small code and link time is substantial perhaps if we can reduce or
-# chain the library dependencies better right now everything seems to need to
-# link everything.
+unset(counter)
 
 # Dmrg executable (main executable)
-add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> ${driver_templates} Qn.cpp dmrg.cpp)
+add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> ${instantiationFileList} Qn.cpp dmrg.cpp)
 target_link_libraries(dmrg PUBLIC kronutil psimaglite::psimaglite)
-target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
+target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} Engine)
 
 target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 
@@ -170,10 +144,13 @@ add_test(NAME input8901 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input8901.ain "<gs|s
 # Tests for the observe executable
 add_test(NAME observe0002 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input2.ain
                                   "<gs|c';c|gs>,<gs|2.0*sz;2.0*sz|gs>,<gs|n;n|gs>")
+set_tests_properties(observe0002 PROPERTIES DEPENDS input2)
 add_test(NAME observe0002_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
                                     ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput2.cout)
 set_tests_properties(observe0002_1 PROPERTIES DEPENDS observe0002)
+
 add_test(NAME observe20 COMMAND ./observe -l "+r" -f ${PATH_TO_INPUTS}/input20.ain "<gs|sz;sz|gs>,<gs|splus;sminus|gs>")
+set_tests_properties(observe20 PROPERTIES DEPENDS input20)
 add_test(NAME observe20_1 COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/../scripts/correlations2.pl
                                   ${CMAKE_CURRENT_BINARY_DIR}/runForobserveinput20.cout)
 set_tests_properties(observe20_1 PROPERTIES DEPENDS observe20)

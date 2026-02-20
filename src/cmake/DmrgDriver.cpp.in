@@ -1,0 +1,22 @@
+#include <DmrgDriver1.h>
+
+namespace {
+using Helper = ExplicitInstantiationHelper<@complexOrReal@,
+                                           Dmrg::@matrixVectorType@,
+                                           PsimagLite::@solverType@>;
+using SolverType = Helper::SolverType;
+using VectorWithOffsetType = Helper::VectorWithOffsetType;
+using VectorWithOffsetsType = Helper::VectorWithOffsetsType;
+}
+
+template void
+mainLoop4<SolverType, VectorWithOffsetType>(SolverType::MatrixType::ModelType::SuperGeometryType&,
+                                            const ParametersDmrgSolverType&,
+                                            InputNgType::Readable&,
+                                            const OperatorOptions&);
+
+template void
+mainLoop4<SolverType, VectorWithOffsetsType>(SolverType::MatrixType::ModelType::SuperGeometryType&,
+                                             const ParametersDmrgSolverType&,
+                                             InputNgType::Readable&,
+                                             const OperatorOptions&);
