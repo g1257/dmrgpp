@@ -294,6 +294,7 @@ public:
 		str += "matrix TimeSchedule;\n";
 		str += "string DefineOperators;\n";
 		str += "integer NumberOfTargetQns;\n";
+		str += "string Ancillas;\n";
 
 		return str;
 	}

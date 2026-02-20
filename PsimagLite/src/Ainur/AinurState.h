@@ -277,16 +277,26 @@ private:
 				continue;
 			}
 
+			bool macro_ended   = false;
+			bool add_character = false;
 			if (isValidCharForMacroName(c)) {
 				macroName += c;
+				if (i + 1 == n)
+					macro_ended = true;
 			} else {
+				macro_ended   = true;
+				add_character = true;
+			}
 
+			if (macro_ended) {
 				int x = storageIndexByName(macroName);
 				if (x < 0)
 					err("No macro named " + macroName + "\n");
 
 				assert(static_cast<SizeType>(x) < ainurVariables_.size());
-				retString += unquote(ainurVariables_[x].value) + c;
+				retString += unquote(ainurVariables_[x].value);
+				if (add_character)
+					retString += c;
 
 				macroName          = "";
 				hasAtLeastOneMacro = true;

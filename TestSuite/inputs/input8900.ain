@@ -7,7 +7,7 @@
 # where L|x> = 0
 #
 # This is the FAT site implementation
-# (a thin site implementation will be forthcoming)
+Ancillas=together;
 #
 # This is a sample input file
 # to test a Heisenberg model
@@ -86,7 +86,7 @@ string MatrixSolver="arnoldisai";
 
 # This is where sigma for (A-\sigma * I)^{-1}
 # is specified, so sigma = 0.5 here
-real LanczosB=0.5;
+real LanczosB=0.05;
 
 # Maximum dense inversion we allow
 integer MaxMatrixRankStored=4096;
