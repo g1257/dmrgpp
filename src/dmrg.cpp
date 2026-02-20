@@ -4,7 +4,6 @@
 #include "Io/IoNg.h"
 #include "Provenance.h"
 #include "RedirectOutput.hh"
-#include "RegisterSignals.h"
 #include "RunFinished.h"
 
 typedef PsimagLite::Vector<PsimagLite::String>::Type VectorStringType;
@@ -332,8 +331,6 @@ to the main dmrg driver are the following.
 	PsimagLite::CodeSectionParams codeSection(
 	    dmrgSolverParams.nthreads, dmrgSolverParams.nthreads2, setAffinities, threadsStackSize);
 	ConcurrencyType::setOptions(codeSection);
-
-	registerSignals();
 
 	bool isComplex = (dmrgSolverParams.options.isSet("useComplex")
 	                  || dmrgSolverParams.options.isSet("TimeStepTargeting"));
