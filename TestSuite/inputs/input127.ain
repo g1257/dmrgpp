@@ -21,6 +21,6 @@ TargetElectronsUp=8;
 TargetElectronsDown=8;
 string P0="(2+-i4)*c'[5]*c[6]*|gs>+7.2i*c'[6]*c[7]*|gs>";
 GsWeight=0.2;
-OutputFile="data120";
+OutputFile="data127";
 #ci dmrg arguments= -p 12 "<gs|P0>"
 #ci CollectBrakets 0
