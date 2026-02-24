@@ -70,7 +70,7 @@ InfiniteLoopKeptStates=60;
 # and the second loop all the way to the right.
 #
 # The value 150 refers to the kept states that will be used.
-# By default a Tolerance is assumed to be 1e-12 so this value of 150
+# By default the tolerance is 1e-12 so this value of 150
 # is the absolute maximum to be used by DMRG++, even if the tolerance
 # wanted could not be reached. The .cout file will produce details.
 #
@@ -98,7 +98,7 @@ RepeatFiniteLoopsTimes=2;
 # is both an integer and non-negative.
 TargetSzPlusConst=4;
 
-# Many vectors will be included in the densiy matrix or actually the SVD decomposition (see paper mentioned above)
+# Many vectors will be included in the density matrix or actually the SVD decomposition (see paper mentioned above)
 # Each vector will have a weight, so that all weights add up to 1.
 # This is the weight of the g.s. vector. All other weights are computed automatically by DMRG++ to complete the sum.
 GsWeight=0.1;
