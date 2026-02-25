@@ -82,7 +82,8 @@ if(BUILD_TESTING)
 
   add_executable(Ainur_Test1 Ainur/test.cpp)
   target_link_libraries(Ainur_Test1 psimaglite::psimaglite)
-  add_test(NAME Ainur_Test1 COMMAND Ainur_Test1 ${CMAKE_CURRENT_SOURCE_DIR}/Ainur/input0.ain)
+  add_test(NAME Ainur_Test1 COMMAND Ainur_Test1 ${CMAKE_CURRENT_SOURCE_DIR}/Ainur/prelude.ain
+                                    ${CMAKE_CURRENT_SOURCE_DIR}/Ainur/input0.ain)
 
   add_executable(Ainur_Test2 Ainur/testReal.cpp)
   target_link_libraries(Ainur_Test2 psimaglite::psimaglite)
