@@ -1,0 +1,130 @@
+##Ainur 1.0
+
+# It is highly recommended
+# to read arXiv:2009.08200v1
+# in particular, Eqs~(16), (17) and (18)
+# DMRG++ solvers for a state |x>
+# where L|x> = 0
+#
+# This is the THIN site implementation
+Ancillas=separate;
+#
+# This is a sample input file
+# to test a Heisenberg model
+# with jump operators that
+# simulate an open system
+#
+# The example is kept very small
+# so it runs in our CI/CD
+# by default.
+#
+
+# These are the bath parameters for the jump operators
+real gamma = 1.0;
+real f_bath = 0.2;
+# We also define this product to be used below
+# See PsimagLite/doc/ExpressionForAST.txt
+real gamma_times_f = *:\gamma:\f_bath;
+
+# This is the total number of sites of the ladder
+# Each site has 2 states because
+# the ancillas are separate
+# This is a "thin" site implementation and
+# the ladder will be 6x2
+TotalNumberOfSites=12;
+
+# There are 4 connections in the Liouvillian:
+# S+S-, SzSz, S+S+, S-S-
+# All connectionsa are from i to j where
+# these sites are *different*
+NumberOfTerms=4;
+
+# The S^+_iS-_j term;
+# This term is automatically multiplied by -i
+gt0:GeometryKind="ladder";
+gt0:LadderLeg=2;
+gt0:GeometryOptions="none";
+# This is the labeling of the ladder
+# 0 2 4 6 8 10
+# 1 3 5 7 9 11
+# where the even sites are physical and the odd sites are ancillas.
+#
+# There are 10 connections in the x-direction of the ladder
+# The first is between sites 0 and 1, which is in the physical leg so it's +1,
+# the second is between sites 1 and 3, which is in the ancilla leg, so it's -1,
+# etc.
+#
+gt0:dir0:Connectors=[1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0];
+# There are 6 connections in the y-direction of the ladder; these are all zero
+# as there's no connection between physical and ancillas in s+ s-
+gt0:dir1:Connectors=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+
+# The S^z_i S^z_j term;
+# This term is automatically multiplied by -i
+gt1:GeometryKind="ladder";
+gt1:LadderLeg=2;
+gt1:GeometryOptions="none";
+# See the comment above for the S+ S- term
+gt1:dir0:Connectors=[1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0, -1.0];
+# There is no sz sz connection between physical sites and ancillas (y-direction)
+gt1:dir1:Connectors=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0];
+
+# The S- S- term between physical and ancillas
+gt2:GeometryKind="ladder";
+gt2:LadderLeg=2;
+gt2:GeometryOptions="none";
+gt2:dir0:Connectors=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+# This number should gamma_i f_i and only set at the leftmost and
+# rightmost borders
+gt2:dir1:Connectors=[\gamma_times_f, 0, 0, 0, 0, \gamma_times_f];
+
+# The S+ S+ term between physical and ancillas
+gt3:GeometryKind="ladder";
+gt3:LadderLeg=2;
+gt3:GeometryOptions="none";
+gt3:dir0:Connectors=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+# This number should gamma_i (1-f_i)
+# See PsimagLite/doc/ExpressionForAST.txt
+real ancilla_f = *:\gamma:-:1.0:\f_bath;
+gt3:dir1:Connectors=[\ancilla_f, 0, 0, 0, 0, \ancilla_f];
+
+Model="LiouvillianHeisenberg";
+HeisenbergTwiceS=1;
+
+# The options needed are as follows:
+# twositedmrg : strongly suggested
+# usecomplex : needed because of the sqrt(-1) == i factors
+# matrixvectorstored: needed because this algo. needs inversion for now
+# and the inversion is dense!
+SolverOptions="twositedmrg,usecomplex,matrixvectorstored";
+Version="247b335fe1542909b90be8647456bfd8fd56191c";
+OutputFile="data8900";
+
+# Very very small due to dense inversion needed!
+InfiniteLoopKeptStates=7;
+
+# This is needed but ignored; there are no symmetries due to
+# the jump operators
+TargetSzPlusConst=0;
+
+# Just one finite loop with m = 13
+FiniteLoops=[[@auto, 13, 0]];
+
+# Jump operator gamma and f parameters here; for each site
+# Note that they aren't zero only at the borders
+# See the ladder labeling above
+vector BathGamma=[\gamma, \gamma, 0, 0, 0, 0, 0, 0, 0, 0, \gamma, \gamma];
+# f_i (ancilla) = 1 - f_i (physical)
+vector BathF=[\f_bath, \ancilla_f, 0, 0, 0, 0, 0, 0, 0, 0, \f_bath, \ancilla_f];
+
+# Use the matrix solver because L is non-Hermitian
+# and we want the NESS
+string MatrixSolver="arnoldisai";
+
+# This is where sigma for (A-\sigma * I)^{-1}
+# is specified, so sigma = 0.5 here
+real LanczosB=0.05;
+
+# Maximum dense inversion we allow
+integer MaxMatrixRankStored=4096;
+
