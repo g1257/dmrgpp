@@ -24,7 +24,7 @@ TargetElectronsUp=8;
 TargetElectronsDown=8;
 
 #string AinurFromFile = blahblah;
-function myfunction = \AinurFromFile("../../../PsimagLite/src/Ainur/function.txt");
+function myfunction = \AinurFromFile("function.txt");
 
 real useit = \myfunction(%t);
 

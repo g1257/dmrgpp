@@ -80,6 +80,7 @@ target_link_libraries(psimaglite PUBLIC GSL::gsl)
 if(BUILD_TESTING)
   add_subdirectory(tests)
 
+  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Ainur/function.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
   add_executable(Ainur_Test1 Ainur/test.cpp)
   target_link_libraries(Ainur_Test1 psimaglite::psimaglite)
   add_test(NAME Ainur_Test1 COMMAND Ainur_Test1 ${CMAKE_CURRENT_SOURCE_DIR}/Ainur/prelude.ain
