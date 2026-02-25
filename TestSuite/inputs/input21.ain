@@ -69,10 +69,10 @@ InfiniteLoopKeptStates=60;
 # The first starts from where input20 left off and goes all the way to the left,
 # and the second loop all the way to the right.
 #
-# The value 150 refers to the kept states that will be used.
-# By default the tolerance is 1e-12 so this value of 150
-# is the absolute maximum to be used by DMRG++, even if the tolerance
-# wanted could not be reached. The .cout file will produce details.
+# The value 150 refers to the kept states that will be used, and
+# sets the maximum number of kept states. The solver will use fewer states if the
+# target tolerance is met earlier, but it will cap at this value regardless of
+# whether the tolerance is satisfied. The .cout file will log details.
 #
 # (Tolerance can be specified explicityly with
 # Tolerance=1e-10;
