@@ -1,4 +1,7 @@
 ##Ainur1.0
+#
+# input for testReal.cpp
+#
 int TotalNumberOfSites=16;
 
 vector myv=[0.5 i 0.0, 0.0 i 0.3];
