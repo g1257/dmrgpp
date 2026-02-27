@@ -21,15 +21,25 @@ public:
 	using ComplexOrRealType       = typename InitKronType::ComplexOrRealType;
 	using MatrixMarketType        = MatrixMarket<ComplexOrRealType>;
 
-	KronLogger(const InitKronType& init_kron, const std::string& filename)
+	KronLogger(const InitKronType& init_kron)
 	    : progress_("KronLogger")
 	    , fout_(nullptr)
 	    , init_kron_(init_kron)
 	{
-		if (!init_kron.params().options.isSet("kronlogger"))
+		if (!init_kron.params().options.isSet("KroneckerDumper")) {
 			return;
+		}
 
-		fout_ = new std::ofstream(filename);
+		if (counter_ >= init_kron.params().dumperEnd) {
+			return;
+		}
+
+		if (counter_++ < init_kron.params().dumperBegin) {
+			return;
+		}
+
+		std::string filename = buildFilename(init_kron.params().filename, counter_);
+		fout_                = new std::ofstream(filename);
 		if (!fout_ or !fout_->good() or fout_->bad()) {
 			delete fout_;
 			fout_ = nullptr;
@@ -137,9 +147,21 @@ private:
 		}
 	}
 
+	static std::string buildFilename(const std::string& filename, SizeType n)
+	{
+		// FIXME find the last . in filename if any
+		size_t dot_index = filename.find(".");
+
+		std::string root = filename.substr(0, dot_index);
+		return "kron_" + root + ttos(n) + ".txt";
+	}
+
+	static SizeType               counter_;
 	PsimagLite::ProgressIndicator progress_;
 	std::ofstream*                fout_;
 	const InitKronType&           init_kron_;
 };
+
+template <typename ModelType> SizeType KronLogger<ModelType>::counter_ = 0;
 }
 #endif // KRONLOGGER_HH
