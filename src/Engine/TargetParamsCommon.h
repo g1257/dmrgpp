@@ -435,6 +435,7 @@ private:
 		}
 
 		if (sites_.size() == 0) {
+			// Here we add a bogus operator: the identity in the middle of the lattice
 			const SizeType numberOfSites = model_.superGeometry().numberOfSites();
 			// it's OK if numberOfSites is odd also
 			sites_.push_back(numberOfSites / 2);
