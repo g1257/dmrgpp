@@ -37,9 +37,11 @@ Tests *with* SU(2) symmetry:
 25)  Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=2.5 with 8+8 sites
         INF(100)+7(200)-7(200)-7(200)+7(200) To check the WFT
 26) Fig 6(c) of PhysRevB48-10345
+27) Reserved for Heisenberg with spin=1
 28)  Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8 sites
 29) S(q,omega) cut at omega=2.0 for Heisenberg Model Spin 1/2 (HeStd-F12) on a chain (CubicStd1d) for J=1.0 with 8 sites
 30) Implicit loops
+31) Kron Printer
 32) TSPSites=[%c]
 #37) INVALID Like 29 but with correctionvectorimagonly
 #27 to 39 are reserved for Heisenberg spin 1/2

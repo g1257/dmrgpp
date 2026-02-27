@@ -34,11 +34,13 @@ public:
 			return;
 		}
 
-		if (counter_++ < init_kron.params().dumperBegin) {
+		SizeType start = init_kron.params().dumperBegin;
+		if (counter_++ < start) {
 			return;
 		}
 
-		std::string filename = buildFilename(init_kron.params().filename, counter_);
+		assert(counter_ >= start);
+		std::string filename = buildFilename(init_kron.params().filename, counter_ - start);
 		fout_                = new std::ofstream(filename);
 		if (!fout_ or !fout_->good() or fout_->bad()) {
 			delete fout_;
@@ -48,7 +50,7 @@ public:
 
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg << "KronLogger: Hello from ctor\n";
+		msg << "KronLogger: Hello from ctor, counter_=" << counter_ << "\n";
 		progress_.printline(msgg, *fout_);
 	}
 
@@ -64,6 +66,15 @@ public:
 
 		delete fout_;
 		fout_ = nullptr;
+	}
+
+	void vector(const std::vector<ComplexOrRealType>& v)
+	{
+		if (!fout_)
+			return;
+
+		*fout_ << "Vector\n";
+		*fout_ << v;
 	}
 
 	void one(SizeType outPatch)
