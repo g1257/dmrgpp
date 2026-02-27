@@ -111,7 +111,7 @@ public:
 	    : initKron_(initKron)
 	    , x_(initKron.xout())
 	    , y_(initKron.yin())
-	    , kron_logger_(initKron_, "kronlogger.txt")
+	    , kron_logger_(initKron_)
 	{ }
 
 	SizeType tasks() const { return initKron_.numberOfPatches(InitKronType::NEW); }
