@@ -86,10 +86,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 namespace Dmrg {
 
-template <typename BasisWithOperatorsType_, typename SuperBlockType> class LeftRightSuper {
+template <typename BasisWithOperatorsType_, typename SuperBlockType_> class LeftRightSuper {
 
 public:
 
+	using SuperBlockType         = SuperBlockType_;
 	using RealType               = typename SuperBlockType::RealType;
 	using BasisWithOperatorsType = BasisWithOperatorsType_;
 	using BasisType              = typename BasisWithOperatorsType::BasisType;

@@ -81,8 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef KRON_CONNECTIONS_H
 #define KRON_CONNECTIONS_H
 
+#include "../KronUtil/MatrixDenseOrSparse.h"
 #include "Concurrency.h"
 #include "GemmR.h"
+#include "KronLogger.hh"
 #include "Matrix.h"
 
 namespace Dmrg {
@@ -96,6 +98,7 @@ template <typename InitKronType> class KronConnections {
 	using ConcurrencyType         = PsimagLite::Concurrency;
 	using MatrixDenseOrSparseType = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
 	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
+	using KronLoggerType          = KronLogger<typename InitKronType::ModelType>;
 
 public:
 
@@ -108,7 +111,10 @@ public:
 	    : initKron_(initKron)
 	    , x_(initKron.xout())
 	    , y_(initKron.yin())
-	{ }
+	    , kron_logger_(initKron_)
+	{
+		kron_logger_.vector(y_);
+	}
 
 	SizeType tasks() const { return initKron_.numberOfPatches(InitKronType::NEW); }
 
@@ -124,9 +130,11 @@ public:
 		SizeType total   = initKron_.numberOfPatches(InitKronType::OLD);
 		SizeType offsetX = initKron_.offsetForPatches(InitKronType::NEW, outPatch);
 		assert(offsetX < x_.size());
+		kron_logger_.one(outPatch);
 		for (SizeType inPatch = 0; inPatch < total; ++inPatch) {
 			SizeType offsetY = initKron_.offsetForPatches(InitKronType::OLD, inPatch);
 			assert(offsetY < y_.size());
+			kron_logger_.two(inPatch);
 			for (SizeType ic = 0; ic < nC; ++ic) {
 				const ArrayOfMatStructType& xiStruct = initKron_.xc(ic);
 				const ArrayOfMatStructType& yiStruct = initKron_.yc(ic);
@@ -149,6 +157,7 @@ public:
 					initKron_.checks(*Amat, *Bmat, outPatch, inPatch);
 
 				const char opt = performTranspose ? (isComplex ? 'c' : 't') : 'n';
+				kron_logger_.three(outPatch, inPatch, ic);
 				kronMult(x_,
 				         offsetX,
 				         y_,
@@ -176,6 +185,7 @@ private:
 	const InitKronType& initKron_;
 	VectorType&         x_;
 	const VectorType&   y_;
+	KronLoggerType      kron_logger_;
 }; // class KronConnections
 
 } // namespace PsimagLite
