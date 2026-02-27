@@ -5,6 +5,11 @@
 
 namespace Dmrg {
 
+/*!
+ * \brief A MatrixMarket implementation
+ *
+ * The only current functionality is to print from a CRS format
+ */
 template <typename ComplexOrRealType> class MatrixMarket {
 
 public:
@@ -12,10 +17,20 @@ public:
 	using VectorType       = std::vector<ComplexOrRealType>;
 	using SparseMatrixType = PsimagLite::CrsMatrix<ComplexOrRealType>;
 
+	/*!
+	 * \brief CONSTRUCTOR
+	 *
+	 * \param[in] sparse The CRS matrix as const reference
+	 */
 	MatrixMarket(const SparseMatrixType& sparse)
 	    : sparse_(sparse)
 	{ }
 
+	/*!
+	 * \brief Prints the CRS matrix held by this class as const reference
+	 *
+	 * \param[out] os The output stream
+	 */
 	void print(std::ostream& os) const
 	{
 		SizeType rows      = sparse_.rows();
@@ -35,6 +50,11 @@ public:
 		}
 	}
 
+	/*!
+	 * \brief Returns a string documenting the Matrix Market format
+	 *
+	 * \returns The string documenting the Matrix Market format
+	 */
 	std::string formatInfo()
 	{
 		return std::string(
@@ -64,6 +84,8 @@ public:
 		    "%============================================================================="
 		    "====\n");
 	}
+
+private:
 
 	static std::string buildMMFormatHeader()
 	{

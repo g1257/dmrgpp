@@ -12,6 +12,23 @@
 
 namespace Dmrg {
 
+/*!
+ * The Kron logger logs data that is sent to KronUtil/MatrixDenseOrSparse.h
+ * function kronMult()
+ *
+ * It logs first the constant vector v in H*v, then it logs data in three
+ * stages, as you can see in member functions one(), two(), and three().
+ *
+ * DMRG++ calls H*v or matrixVector(x, y) many times so the user
+ * enters a start via KroneckerDumperBegin, and an end via KroneckerDumperEnd,
+ * and also enables KroneckerDumper in SolverOptions; see file input31.ain
+ * in the TestSuite.
+ *
+ * If the count for H*v is greater or equal start and less than end, then
+ * the logging is active, and each dataset going to kronMult is logged in
+ * a separate file, with a counter at the end and with a rootname
+ * based on the output file of the run; see buildFilename() below.
+ */
 template <typename ModelType> class KronLogger {
 public:
 
@@ -21,6 +38,12 @@ public:
 	using ComplexOrRealType       = typename InitKronType::ComplexOrRealType;
 	using MatrixMarketType        = MatrixMarket<ComplexOrRealType>;
 
+	/*!
+	 * \brief CONSTRUCTOR
+	 *
+	 * \param[in] init_kron The InitKronHamiltonian object as const reference
+	 *
+	 */
 	KronLogger(const InitKronType& init_kron)
 	    : progress_("KronLogger")
 	    , fout_(nullptr)
@@ -39,9 +62,10 @@ public:
 			return;
 		}
 
-		assert(counter_ >= start);
-		std::string filename = buildFilename(init_kron.params().filename, counter_ - start);
-		fout_                = new std::ofstream(filename);
+		assert(counter_ >= start + 1);
+		std::string filename
+		    = buildFilename(init_kron.params().filename, counter_ - start - 1);
+		fout_ = new std::ofstream(filename);
 		if (!fout_ or !fout_->good() or fout_->bad()) {
 			delete fout_;
 			fout_ = nullptr;
@@ -54,6 +78,9 @@ public:
 		progress_.printline(msgg, *fout_);
 	}
 
+	/*!
+	 * \brief DESTRUCTOR
+	 */
 	~KronLogger()
 	{
 		if (!fout_)
@@ -68,6 +95,11 @@ public:
 		fout_ = nullptr;
 	}
 
+	/*!
+	 * \brief Logs the constant vector v for H*v
+	 *
+	 * \param[in] v The vector
+	 */
 	void vector(const std::vector<ComplexOrRealType>& v)
 	{
 		if (!fout_)
@@ -77,6 +109,11 @@ public:
 		*fout_ << v;
 	}
 
+	/*!
+	 * \brief Logs the outer loop of the KronDiag algorithm
+	 *
+	 * \param[in] outPatch The outer patch index
+	 */
 	void one(SizeType outPatch)
 	{
 		if (!fout_)
@@ -89,6 +126,11 @@ public:
 		*fout_ << "nC=" << nC << " total=" << total << " offsetX=" << offsetX << "\n";
 	}
 
+	/*!
+	 * \brief Logs the middle loop of the KronDiag algorithm
+	 *
+	 * \param[in] inPatch The inner patch index
+	 */
 	void two(SizeType inPatch)
 	{
 		if (!fout_)
@@ -99,6 +141,13 @@ public:
 		*fout_ << separationLevel(1) << "offsetY=" << offsetY << "\n";
 	}
 
+	/*!
+	 * \brief Logs the innermost ("connections") loop of the KronDiag algorithm
+	 *
+	 * \param[in] outPatch The outer patch index
+	 * \param[in] inPatch The inner patch index
+	 * \param[in] ic The connection index
+	 */
 	void three(SizeType outPatch, SizeType inPatch, SizeType ic)
 	{
 		if (!fout_)
@@ -164,7 +213,7 @@ private:
 		size_t dot_index = filename.find(".");
 
 		std::string root = filename.substr(0, dot_index);
-		return "kron_" + root + ttos(n) + ".txt";
+		return "kron_" + root + "_" + ttos(n) + ".txt";
 	}
 
 	static SizeType               counter_;
