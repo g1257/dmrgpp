@@ -1,0 +1,149 @@
+##Ainur 1.0
+
+# This file documents how to continue a
+# TimeEvolutionTargeting in DMRG++
+
+# Please make sure you have run input20.ain (gs)
+# and the first time evolution input21.ain,
+# and have read the documentation on input21.ain,
+# and all has been successfully completed.
+#
+# This file starts from where input21.ain left off,
+# and continues the time evolution.
+# The documentation below describes only the changes
+# from input21.ain
+
+TotalNumberOfSites=8;
+
+NumberOfTerms=2;
+
+# The first term is the S^+_i S^_j connection
+gt0:GeometryKind="chain";
+gt0:GeometryOptions="ConstantValues";
+gt0:dir0:Connectors=[1.0];
+
+# The second term is the S^z_i S^z_j connection
+gt1:GeometryKind="chain";
+gt1:GeometryOptions="ConstantValues";
+gt1:dir0:Connectors=[1.0];
+
+Model="Heisenberg";
+HeisenbergTwiceS=1;
+
+# restart : we restart from a time evolution run done in input20.ain
+# This is what I call a NGST --> NGST run, where
+# NGST = non-ground state target, so here both the previous run
+# and this run are NGSTs.
+#
+# To see all the NGSTs that DMRG++ supports, visit
+# src/Engine/TargetSelector.h and in particular line 144 and following.
+SolverOptions="twositedmrg,TimeStepTargeting,restart";
+
+Version="247b335fe1542909b90be8647456bfd8fd56191c";
+
+# The file data21.hd5 must be present; the extension hd5 can be left out, as we do here
+RestartFilename="data21";
+
+# This run will create data22.hd5
+OutputFile="data22";
+
+InfiniteLoopKeptStates=60;
+
+FiniteLoops=[[@auto, 150, 2],[@auto, 150, 2]];
+
+RepeatFiniteLoopsTimes=2;
+
+TargetSzPlusConst=4;
+
+GsWeight=0.1;
+
+TSPTau=0.1;
+
+TSPTimeSteps=5;
+
+TSPAdvanceEach=6;
+
+TSPAlgorithm="Krylov";
+
+# For a TimeEvolution --> TimeEvolution, this label is ignored but mandatory;
+TSPSites=[4];
+
+# For a TimeEvolution --> TimeEvolution, this label is ignored but mandatory;
+TSPLoops=[0];
+
+# For a TimeEvolution --> TimeEvolution, this label is ignored but mandatory;
+TSPProductOrSum="product";
+
+# For a TimeEvolution --> TimeEvolution, this label is ignored but mandatory;
+string TSPOp0:TSPOperator=expression;
+# For documentation purposes, we may want to think that we apply the
+# identity, so we don't do anything, but with much ado
+string TSPOp0:OperatorExpression="identity";
+
+# This is a continuation of a previous time evolution done in input21
+# Here we introduce the label RestartMappingTvs
+# It's a vector of integers, as many as there are P vectors, which is determined
+# by the NGST used. For TimeStepTargeting, this is the number indicated above in
+# TSPTimeSteps=5, so there are 5 P vectors here.
+# We are mapping this run's P vectors to the old vectors in data21.hd5, as follows:
+# RestartMappingTvs=[x0, x1, ..., x_4];
+# where the x_i have the following meaning:
+# P0_thisRun = P(x_0)_PreviousRun
+# P1_thisRun = P(x_1)_PreviousRun
+# ...,
+# and if x_i = -1 it means don't map this run's P vector with that index,
+# but let it be filled by the DMRG algorithm in its normal course.
+# For a TimeEvolution --> TimeEvolution we want the following:
+RestartMappingTvs=[0, -1, -1, -1, -1];
+# so we only map the new P0 to the old P0 or
+# P0_thisRun = P0_PreviousRun
+# and because all the other Ps are built
+# from P0, this mapping is enough to continue the time evolution.
+#
+# Remember the meaning of the P vectors in TimeStepTargeting:
+# |P(x)> = exp(-iH*tau*x/5) operators |gs>
+#
+# The operators were applied in input21.ain, so that they are *not* applied in this run
+#
+# I need to explain stages here. Every NGST (including TimeStepTargeting) goes through stages.
+# The stages are in StageEnum.h and are in general the following.
+#
+# 0 disabled (because of delays or because we are in the infinite loop)
+# 1 operators (the NGST is applying an operator)
+# 2 wave function transform but do not advance (in time, polynomial expansion, etc)
+# 3 WFT advance (in time, polynomial expansion, etc, depending on NGST)
+#
+# where WFT means wave-function transform.
+#
+# Because all operators have been applied we want this run to start at stage 2:
+RestartMapStages=2;
+# Note that this time physical time will be set to the last physical time indicated
+# in the previous run in data21.hd5
+#
+# You may now run this input with
+#
+# ./dmrg -f input22.ain "<gs|sz|P0>"
+#
+# for example, which will produce runForinput22.cout and data22.hd5
+#
+# When this run ends, you may want to combine runForinput21.cout and runForinput22.cout in a single file,
+#
+# cp runForinput21.cout runForinput21and22.out
+# cat runForinput22.cout >> runForinput21and22.out
+#
+# and then Fourier transform it with
+#
+#  ../scripts/fourierTimeSpace.pl runForinput21and22.cout "<gs|sz|P0>" 0 4 0.1
+#
+# where the results of the script are described in input21.ain
+#
+# You may repeat this process as many time as desired.
+# For example, you may create another input and restart the time evolution from data22.hd5 following with
+# exactly the same parameters as here for the RestartMappingTvs= and RestartMapStages=
+# If you do that, then don't forget to change RestartFilename and OutputFile labels to the correct values.
+#
+# The length of the time evolution is controlled by the FiniteLoops you do in each run; you may use
+# the label TSPMaxTime= to graciously stop a run early when that time is reached or exceeded, but you
+# may not extend a run with TSPMaxTime= that would otherwise not have reached that time_max for lack
+# of enough finite loops. Remember that, in addition to FiniteLoops, the label TSPTau and TSPAdvanceEach
+# affect the maximum physical time reached by the run.

@@ -295,6 +295,8 @@ public:
 		str += "string DefineOperators;\n";
 		str += "integer NumberOfTargetQns;\n";
 		str += "string Ancillas;\n";
+		str += "integer RestartMapStages;\n";
+		str += "vectorIntegers RestartMappingTvs;\n";
 
 		return str;
 	}

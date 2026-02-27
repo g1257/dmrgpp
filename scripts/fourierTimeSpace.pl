@@ -6,12 +6,12 @@ use utf8;
 use Math::Trig;
 
 my $pi = Math::Trig::pi;
-my ($file, $wbegin, $wtotal, $wstep, $mode) = @ARGV;
-defined($wstep) or die "USAGE: $0 filename wbegin wtotal wstep [mode]\n";
+my ($file, $label, $wbegin, $wtotal, $wstep, $mode) = @ARGV;
+defined($wstep) or die "USAGE: $0 filename label wbegin wtotal wstep [mode]\n";
 defined($mode) or $mode = -1;
 my @data;
 
-my $tmax = loadData(\@data, $file);
+my $tmax = loadData(\@data, $file, $label);
 my $n = scalar(@data);
 print STDERR "$0: Found $n sites\n";
 printLoadedData(\@data, $mode) if ($mode >= 0);
@@ -32,16 +32,17 @@ sub dampFunction
 
 sub loadData
 {
-	my ($data, $file) = @_;
+	my ($data, $file, $label) = @_;
 	my $tmax = 0;
 	open(FILE, "<", "$file") or die "$0: Cannot open $file : $!\n";
 	while (<FILE>) {
 		next if (/^#/);
 		my @temp = split;
-		next if (scalar(@temp) != 4);
-		my $time = $temp[0];
-		my $site = $temp[1];
-		my $value = $temp[2];
+		next if (scalar(@temp) != 5);
+		next unless ($temp[3] =~ $label);
+		my $time = $temp[2];
+		my $site = $temp[0];
+		my $value = $temp[1];
 		$value = "(0,0)" if ($value eq "-100");
 		my $h = {"time" => $time, "value" => $value};
 
@@ -210,6 +211,7 @@ sub printData
 	my ($vals, $omegas) = @_;
 	my $n = scalar(@$omegas);
 	my $sites = scalar(@$vals);
+	print "# momentum omega real_value imag_value\n";
 	for (my $i = 0; $i < $n; ++$i) {
 		my $omega = $omegas->[$i];
 		for (my $k = 0; $k < $sites; ++$k) {
@@ -218,7 +220,7 @@ sub printData
 			my ($re, $im) = realImag($value);
 			#$value = 0 if (fabs($value) < 1e-4);
 			#$value = int($value*1000)/1000;
-			print "$kactual $omega $im\n";
+			print "$kactual $omega $re $im\n";
 		}
 
 		print "\n";
