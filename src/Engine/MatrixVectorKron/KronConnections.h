@@ -112,7 +112,9 @@ public:
 	    , x_(initKron.xout())
 	    , y_(initKron.yin())
 	    , kron_logger_(initKron_)
-	{ }
+	{
+		kron_logger_.vector(y_);
+	}
 
 	SizeType tasks() const { return initKron_.numberOfPatches(InitKronType::NEW); }
 
