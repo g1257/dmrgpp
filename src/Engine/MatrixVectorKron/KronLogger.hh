@@ -14,43 +14,71 @@ namespace Dmrg {
 template <typename ModelType> class KronLogger {
 public:
 
-	// using ComplexOrRealType = typename SuperBlockType::SparseElementType;
-	// using SparseMatrixType = PsimagLite::CrsMatrix<ComplexOrRealType>;
-	// using BasisType = Basis<SparseMatrixType>;
-	// using BasisWithOperatorsType = BasisWithOperators<BasisType>;
-	// using LeftRightSuperType = LeftRightSuper<BasisWithOperatorsType, SuperBlockType>;
 	using InitKronType = InitKronHamiltonian<ModelType>;
 
 	KronLogger(const InitKronType& init_kron, const std::string& filename)
 	    : progress_("KronLogger")
-	    , fout_(filename)
+	    , fout_(nullptr)
 	    , init_kron_(init_kron)
-
 	{
+		if (!init_kron.params().options.isSet("kronlogger"))
+			return;
+
+		fout_ = new std::ofstream(filename);
+		if (!fout_ or !fout_->good() or fout_->bad()) {
+			delete fout_;
+			fout_ = nullptr;
+			err(std::string("Failed to create KronLogger file ") + filename + "\n");
+		}
+
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "KronLogger: Hello from ctor\n";
-		progress_.printline(msgg, fout_);
+		progress_.printline(msgg, *fout_);
 	}
 
 	~KronLogger()
 	{
+		if (!fout_)
+			return;
+
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
 		msg << "KronLogger: Bye from dtor\n";
-		progress_.printline(msgg, fout_);
+		progress_.printline(msgg, *fout_);
+
+		delete fout_;
+		fout_ = nullptr;
 	}
 
-	void one(SizeType outPatch) { fout_ << "outPatch=" << outPatch << "\n"; }
+	void one(SizeType outPatch)
+	{
+		if (!fout_)
+			return;
 
-	void two(SizeType inPatch) { fout_ << "->inPatch=" << inPatch << "\n"; }
+		*fout_ << "outPatch=" << outPatch << "\n";
+	}
 
-	void three(SizeType ic) { fout_ << "-->ic=" << ic << "\n"; }
+	void two(SizeType inPatch)
+	{
+		if (!fout_)
+			return;
+
+		*fout_ << "->inPatch=" << inPatch << "\n";
+	}
+
+	void three(SizeType ic)
+	{
+		if (!fout_)
+			return;
+
+		*fout_ << "-->ic=" << ic << "\n";
+	}
 
 private:
 
 	PsimagLite::ProgressIndicator progress_;
-	std::ofstream                 fout_;
+	std::ofstream*                fout_;
 	const InitKronType&           init_kron_;
 };
 }

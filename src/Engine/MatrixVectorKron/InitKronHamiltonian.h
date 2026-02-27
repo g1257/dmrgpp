@@ -109,6 +109,7 @@ public:
 	using VectorType                 = typename PsimagLite::Vector<ComplexOrRealType>::Type;
 	using VectorSizeType             = typename ArrayOfMatStructType::VectorSizeType;
 	using SuperBlockType             = typename LeftRightSuperType::SuperBlockType;
+	using ParametersDmrgSolverType   = typename ModelType_::ParametersType;
 
 	InitKronHamiltonian(const ModelType&                     model,
 	                    const HamiltonianConnectionType&     hc,
@@ -232,7 +233,7 @@ public:
 		return offsetForPatches_[ind];
 	}
 
-	bool batchedGemm() const { return model_.params().options.isSet("BatchedGemm"); }
+	const ParametersDmrgSolverType& params() const { return model_.params(); }
 
 private:
 
