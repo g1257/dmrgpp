@@ -108,6 +108,7 @@ public:
 	using VectorArrayOfMatStructType = typename PsimagLite::Vector<ArrayOfMatStructType*>::Type;
 	using VectorType                 = typename PsimagLite::Vector<ComplexOrRealType>::Type;
 	using VectorSizeType             = typename ArrayOfMatStructType::VectorSizeType;
+	using SuperBlockType             = typename LeftRightSuperType::SuperBlockType;
 
 	InitKronHamiltonian(const ModelType&                     model,
 	                    const HamiltonianConnectionType&     hc,
