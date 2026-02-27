@@ -147,43 +147,9 @@ public:
 		if (targeting == "TargetingExpression")
 			return;
 
-		VectorStringType sitesStr;
-		io.read(sitesStr, "TSPSites");
-		vecstringToVecnumbers(sites_, sitesStr);
-		checkSites();
-		io.read(startingLoops_, "TSPLoops");
 		io.readline(gsWeight_, "GsWeight=");
 
-		if (sites_.size() != startingLoops_.size()) {
-			PsimagLite::String str(__FILE__);
-			str += " Listed sites is " + ttos(sites_.size());
-			str += " but delay loops found is " + ttos(startingLoops_.size()) + "\n";
-			throw PsimagLite::RuntimeError(str);
-		}
-
-		PsimagLite::String productOrSum = "product";
-		try {
-			io.readline(productOrSum, "TSPProductOrSum=");
-		} catch (std::exception&) {
-			PsimagLite::String s(__FILE__);
-			s += "\n FATAL: Must provide TSPProductOrSum=.\n";
-			s += "Please add TSPProductOrSum=product or TSPProductOrSum=sum  ";
-			s += "immediately below the TSPLoops= line in the input file\n";
-			throw PsimagLite::RuntimeError(s.c_str());
-		}
-
-		//! Concatenation specifies what to do with
-		//! operators at different sites, add them or multiply them
-		if (productOrSum == "product") {
-			this->concatenation_ = BaseType::ConcatEnum::PRODUCT;
-		} else if (productOrSum == "sum") {
-			this->concatenation_ = BaseType::ConcatEnum::SUM;
-		} else {
-			PsimagLite::String s(__FILE__);
-			s += " : Unknown concatentation " + productOrSum + "\n";
-			s += "Possible values: product sum\n";
-			throw PsimagLite::RuntimeError(s.c_str());
-		}
+		readOperatorsToApplyIfAny();
 
 		try {
 			int tmp = 0;
@@ -195,13 +161,6 @@ public:
 			io.readline(energyForExp_, "TSPEnergyForExp=");
 			isEnergyForExp_ = true;
 		} catch (std::exception&) { }
-
-		for (SizeType i = 0; i < sites_.size(); ++i) {
-			PsimagLite::String prefix2 = (io.isAinur()) ? "TSPOp" + ttos(i) + ":" : "";
-			OperatorType       myOp(
-                            io, model_, OperatorType::MUST_BE_NONZERO, prefix2, sites_[i]);
-			aOperators_.push_back(myOp);
-		}
 
 		try {
 			VectorType tmpVector;
@@ -410,6 +369,10 @@ private:
 		using AlgebraicStringToNumberType = AlgebraicStringToNumber<RealType>;
 		const SizeType numberOfSites      = model_.superGeometry().numberOfSites();
 		const SizeType n                  = strs.size();
+		if (n == 0) {
+			return;
+		}
+
 		nums.resize(n);
 
 		AlgebraicStringToNumberType algebraicStringToNumber("TSPSites", numberOfSites);
@@ -422,6 +385,91 @@ private:
 		}
 
 		std::cout << "];\n";
+	}
+
+	void readOperatorsToApplyIfAny()
+	{
+		VectorStringType sitesStr;
+		try {
+			io_.read(sitesStr, "TSPSites");
+		} catch (std::exception&) { }
+
+		vecstringToVecnumbers(sites_, sitesStr);
+		checkSites();
+
+		bool has_label = false;
+		try {
+			io_.read(startingLoops_, "TSPLoops");
+			has_label = true;
+		} catch (std::exception&) { }
+
+		checkError(sitesStr.size() > 0, has_label, "TSPLoops");
+
+		if (sites_.size() != startingLoops_.size()) {
+			PsimagLite::String str(__FILE__);
+			str += " Listed sites is " + ttos(sites_.size());
+			str += " but delay loops found is " + ttos(startingLoops_.size()) + "\n";
+			throw PsimagLite::RuntimeError(str);
+		}
+
+		PsimagLite::String productOrSum = "product";
+		has_label                       = false;
+		try {
+			io_.readline(productOrSum, "TSPProductOrSum=");
+			has_label = true;
+		} catch (std::exception&) { }
+
+		checkError(sitesStr.size() > 1, has_label, "TSPProductOrSum");
+
+		//! Concatenation specifies what to do with
+		//! operators at different sites, add them or multiply them
+		if (productOrSum == "product") {
+			this->concatenation_ = BaseType::ConcatEnum::PRODUCT;
+		} else if (productOrSum == "sum") {
+			this->concatenation_ = BaseType::ConcatEnum::SUM;
+		} else {
+			PsimagLite::String s(__FILE__);
+			s += " : Unknown concatentation " + productOrSum + "\n";
+			s += "Possible values: product sum\n";
+			throw PsimagLite::RuntimeError(s.c_str());
+		}
+
+		if (sites_.size() == 0) {
+			// Here we add a bogus operator: the identity in the middle of the lattice
+			const SizeType numberOfSites = model_.superGeometry().numberOfSites();
+			// it's OK if numberOfSites is odd also
+			sites_.push_back(numberOfSites / 2);
+			startingLoops_.push_back(0);
+			OperatorType identity = model_.naturalOperator("identity", 0, 0);
+			aOperators_.push_back(identity);
+		} else {
+			readOperators();
+		}
+	}
+
+	void readOperators()
+	{
+		for (SizeType i = 0; i < sites_.size(); ++i) {
+			PsimagLite::String prefix2 = (io_.isAinur()) ? "TSPOp" + ttos(i) + ":" : "";
+			OperatorType       myOp(
+                            io_, model_, OperatorType::MUST_BE_NONZERO, prefix2, sites_[i]);
+			aOperators_.push_back(myOp);
+		}
+	}
+
+	static void checkError(bool label_is_needed, bool has_label, const std::string& label)
+	{
+		if (label_is_needed) {
+			if (!has_label) {
+				err("Label " + label + " is needed in input file\n");
+			}
+		} else {
+			if (has_label) {
+				std::string msg = "Label " + label + " will be ignored\n";
+				std::cerr << msg;
+				std::cout << msg;
+			}
+		}
 	}
 
 	VectorSizeType                sites_;
