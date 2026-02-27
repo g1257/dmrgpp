@@ -5,6 +5,7 @@
 #include "CrsMatrix.h"
 #include "InitKronHamiltonian.h"
 #include "LeftRightSuper.h"
+#include "MatrixMarket.hh"
 #include "ProgressIndicator.h"
 #include "PsimagLite.h"
 #include <fstream>
@@ -17,6 +18,8 @@ public:
 	using InitKronType            = InitKronHamiltonian<ModelType>;
 	using ArrayOfMatStructType    = typename InitKronType::ArrayOfMatStructType;
 	using MatrixDenseOrSparseType = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
+	using ComplexOrRealType       = typename InitKronType::ComplexOrRealType;
+	using MatrixMarketType        = MatrixMarket<ComplexOrRealType>;
 
 	KronLogger(const InitKronType& init_kron, const std::string& filename)
 	    : progress_("KronLogger")
@@ -129,7 +132,8 @@ private:
 		if (mat.isDense()) {
 			*fout_ << mat.dense();
 		} else {
-			*fout_ << mat.sparse();
+			MatrixMarketType matrix_market(mat.sparse());
+			matrix_market.print(*fout_);
 		}
 	}
 
