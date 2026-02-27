@@ -155,7 +155,7 @@ public:
 					initKron_.checks(*Amat, *Bmat, outPatch, inPatch);
 
 				const char opt = performTranspose ? (isComplex ? 'c' : 't') : 'n';
-				kron_logger_.three(ic);
+				kron_logger_.three(outPatch, inPatch, ic);
 				kronMult(x_,
 				         offsetX,
 				         y_,
