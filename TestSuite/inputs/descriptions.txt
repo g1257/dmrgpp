@@ -426,4 +426,6 @@ d===> 0.3091
 6700) FindSymmetrySector= awesome predicate
 #7000) Chemical H: Gauge spin
 #7001-7500 reserved for ChemicalH
+9000) Peierls GS
+9001) Peierls time evolution
 #TAGEND DO NOT REMOVE THIS TAG

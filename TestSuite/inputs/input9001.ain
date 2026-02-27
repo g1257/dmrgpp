@@ -1,0 +1,83 @@
+##Ainur1.0
+
+# If you change the number of sites
+# adjust also TSPSites and AdvanceEach below
+TotalNumberOfSites=4;
+
+NumberOfTerms=1;
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+
+# BEGIN time dependence stuff
+# This multiplies all
+# hoppings by exp(iA*time)
+function values_of_A = \AinurFromFile("AversusTime.txt");
+
+real A_value = \values_of_A(%t);
+# FIXME TODO Shouldn't it be integration instead of value?
+real exp_A = exp:*:%t:*:i:\A_value;
+
+dir0:Connectors=[\exp_A];
+
+# END time dependence stuff
+
+# Model params
+hubbardU=[8.0, ...];
+potentialV=[10000000, 0, 0, 10000000, 10000000, 0, 0, 10000000];
+Model="HubbardOneBand";
+
+#real PotentialA=3.5;
+vectorReal PotentialA=[0.1,0.2,0.3,0.4,0.5,0.6,0.7];
+
+# We restart from the g.s. run
+# and do time evolution
+SolverOptions="twositedmrg,TimeStepTargeting,restart,usecomplex";
+Version="Pierls";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[[-2, 200, 2], [2, 200, 3]];
+
+# You can add more repetitons or loops
+# here so it goes to larger and larger times
+RepeatFiniteLoopsTimes=3;
+
+# Half filling
+TargetElectronsUp=1;
+TargetElectronsDown=1;
+
+# The input9000.hd5 file
+# must have been created
+# from the input9000 run
+# and must be located
+# in this directory
+RestartFilename=data9000;
+OutputFile=data9001;
+
+# Weight of the g.s. vector in the density matrix
+# or SVD
+GsWeight=0.2;
+
+# We use the center site for correlations
+TSPSites=[2];
+
+# Legacy: This is the delay in application
+TSPLoops=[0];
+
+# Legacy: Irrelevant as there's only one operator
+TSPProductOrSum=product;
+
+# We apply c up at the center
+# If you want c down say c?1
+# Note that c is equivalent to c?0
+string TSPOp0:TSPOperator=expression;
+string TSPOp0:OperatorExpression=identity;
+
+# Time evolution parameters
+TSPTau=0.1;
+TSPTimeSteps=3;
+
+# We advance after N-2 finite loops
+TSPAdvanceEach=2;
+TSPAlgorithm=Krylov;
+
+
+

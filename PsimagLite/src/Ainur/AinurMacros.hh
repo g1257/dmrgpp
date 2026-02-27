@@ -113,6 +113,8 @@ public:
 		static bool emptyLine(const std::string& s)
 		{
 			for (SizeType i = 0; i < s.size(); ++i) {
+				if (s[i] == '#')
+					return true;
 				if (s[i] != ' ' || s[i] != '\t')
 					return false;
 			}

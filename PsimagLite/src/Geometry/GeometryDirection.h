@@ -174,12 +174,6 @@ public:
 		rawHoppings_.write(label + "/rawHoppings_", ioSerializer);
 	}
 
-	template <typename SomeMemResolvType>
-	SizeType memResolv(SomeMemResolvType&, SizeType, String) const
-	{
-		return 0;
-	}
-
 	ComplexOrRealType operator()(SizeType i, SizeType edof1, SizeType j, SizeType edof2) const
 	{
 		SizeType ii = edof1 + i * aux_.orbitals;
