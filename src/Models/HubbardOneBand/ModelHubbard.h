@@ -82,7 +82,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "CrsMatrix.h"
 #include "HilbertSpaceHubbard.h"
 #include "ParametersModelHubbard.h"
-#include "PeierlsHopping.hh"
 #include "ProgramGlobals.h"
 #include "Sort.h" // in PsimagLite
 #include "SpinSquared.h"
@@ -348,16 +347,8 @@ protected:
 
 		OpForLinkType cup("c", 0); // (B)
 		OpForLinkType cdown("c", 1); // (D)
-
-		if (extension_ == "Peierls") {
-			auto peierls = BuildPierls<SuperGeometryType, isComplex>::lambda(
-			    modelParameters_.potentialA);
-			hop.push(cup, 'N', cup, 'C', peierls, su2_up); // (C)
-			hop.push(cdown, 'N', cdown, 'C', peierls, su2_do);
-		} else {
-			hop.push(cup, 'N', cup, 'C', su2_up); // (C)
-			hop.push(cdown, 'N', cdown, 'C', su2_do);
-		}
+		hop.push(cup, 'N', cup, 'C', su2_up); // (C)
+		hop.push(cdown, 'N', cdown, 'C', su2_do);
 
 		if (extension_ != "RashbaSOC")
 			return;
