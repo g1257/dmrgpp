@@ -8,6 +8,7 @@
 #include "MatrixMarket.hh"
 #include "ProgressIndicator.h"
 #include "PsimagLite.h"
+#include <cstddef>
 #include <fstream>
 
 namespace Dmrg {
@@ -167,7 +168,6 @@ public:
 		*fout_ << separationLevel(2) << "ic=" << ic << "\n";
 		*fout_ << separationLevel(2) << "performTranspose=" << performTranspose << "\n";
 
-		// TODO: Convert printing to Matrix Market Format
 		assert(Amat);
 		*fout_ << separationLevel(2)
 		       << "Matrix A follows in format: " + matrixFormat(Amat->isDense()) + "\n";
@@ -209,8 +209,7 @@ private:
 
 	static std::string buildFilename(const std::string& filename, SizeType n)
 	{
-		// FIXME find the last . in filename if any
-		size_t dot_index = filename.find(".");
+		size_t dot_index = filename.find_last_of(".");
 
 		std::string root = filename.substr(0, dot_index);
 		return "kron_" + root + "_" + ttos(n) + ".txt";
