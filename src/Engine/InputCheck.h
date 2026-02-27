@@ -471,6 +471,7 @@ public:
 		registerOpts.push_back("findSymmetrySector");
 		registerOpts.push_back("KroneckerDumper");
 		registerOpts.push_back("doNotCheckTwoSiteDmrg");
+		registerOpts.push_back("doNotCheckDmEigs");
 		registerOpts.push_back("extendedPrint");
 		registerOpts.push_back("truncationNoSvd");
 		registerOpts.push_back("KronNoLoadBalance");
