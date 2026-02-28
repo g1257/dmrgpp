@@ -116,7 +116,7 @@ private:
 	{
 		SuperGeometryType geometry(io);
 		if (dmrgSolverParams.options.isSet("printgeometry"))
-			std::cout << geometry;
+			std::cout << geometry.geometry();
 
 		using ParametersForSolverType
 		    = PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>;

@@ -138,26 +138,16 @@ public:
 		geometry_.split(sitesPerBlock, S, X, Y, E, allInSystem);
 	}
 
+	// Helper function
 	SizeType numberOfSites() const { return geometry_.numberOfSites(); }
 
-	SizeType terms() const { return geometry_.terms(); }
-
-	void write(PsimagLite::String label, PsimagLite::IoNgSerializer& ioSerializer) const
-	{
-		geometry_.write(label, ioSerializer);
-	}
+	// All other geometry_. use this function
+	const GeometryType& geometry() const { return geometry_; }
 
 	SizeType hollowOutRadius(SizeType maxLeft) const
 	{
 		return std::max(maxLeft * geometry_.maxConnections(), hollowOutRadius_);
 	}
-
-	SizeType orbitals(SizeType term, SizeType site) const
-	{
-		return geometry_.orbitals(term, site);
-	}
-
-	PsimagLite::String label(SizeType i) const { return geometry_.label(i); }
 
 	ComplexOrRealType operator()(SizeType              smax,
 	                             SizeType              emin,
@@ -220,12 +210,6 @@ public:
 		for (SizeType i = 0; i < n; ++i)
 			superStrings_[i]->addSuperConnections(
 			    data, smax, emin, geometry_.numberOfSites());
-	}
-
-	friend std::ostream& operator<<(std::ostream& os, const SuperGeometry& supergeometry)
-	{
-		os << supergeometry.geometry_;
-		return os;
 	}
 
 private:
