@@ -286,7 +286,8 @@ private:
 		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
 		                                                 ModelType::modelLinks(),
 		                                                 fakeTime,
-		                                                 BaseType::model().superOpHelper());
+		                                                 BaseType::model().superOpHelper(),
+		                                                 BaseType::model().ioIn());
 		typename LanczosSolverType::MatrixType        h(BaseType::model(), hc, aux);
 		paramsForSolver_.lotaMemory = true;
 		LanczosSolverType lanczosSolver(h, paramsForSolver_);

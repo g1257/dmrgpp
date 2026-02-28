@@ -180,7 +180,11 @@ private:
 		    , timeDirection_(timeDirection)
 		    , p_(lrs.super().findPartitionNumber(phi.offset(i0)))
 		    , aux_(p_, lrs)
-		    , hc_(lrs, ModelType::modelLinks(), currentTime, model.superOpHelper())
+		    , hc_(lrs,
+		          ModelType::modelLinks(),
+		          currentTime,
+		          model.superOpHelper(),
+		          model.ioIn())
 		    , lanczosHelper_(model, hc_, aux_)
 		{ }
 

@@ -125,15 +125,17 @@ public:
 	using SuperOpHelperBaseType   = SuperOpHelperBase<SuperGeometryType, ParamsForSolverType>;
 	using ManyToTwoConnectionType
 	    = ManyToTwoConnection<ModelLinksType, LeftRightSuperType, SuperOpHelperBaseType>;
-	using OpsForLinkType = OpsForLink<LeftRightSuperType>;
+	using OpsForLinkType          = OpsForLink<LeftRightSuperType>;
+	using CookInputExpressionType = CookInputExpression<ComplexOrRealType>;
+	using InputNgType             = typename CookInputExpressionType::InputNgType;
 
-	HamiltonianConnection(const LeftRightSuperType&    lrs,
-	                      const ModelLinksType&        lpb,
-	                      RealType                     targetTime,
-	                      const SuperOpHelperBaseType& superOpHelper)
+	HamiltonianConnection(const LeftRightSuperType&             lrs,
+	                      const ModelLinksType&                 lpb,
+	                      RealType                              time,
+	                      const SuperOpHelperBaseType&          superOpHelper,
+	                      const typename InputNgType::Readable& io)
 	    : modelHelper_(lrs)
 	    , modelLinks_(lpb)
-	    , targetTime_(targetTime)
 	    , superOpHelper_(superOpHelper)
 	    , operatorsCached_(lrs)
 	    , progress_("HamiltonianConnection")
@@ -152,7 +154,7 @@ public:
 		lps_.reserve(ProgramGlobals::MAX_LPS);
 		SizeType nitems = hamAbstract_.items();
 		for (SizeType x = 0; x < nitems; ++x)
-			totalOnes_[x] = cacheConnections(x);
+			totalOnes_[x] = cacheConnections(x, time, io);
 
 		SizeType last = lrs.super().block().size();
 		assert(last > 0);
@@ -271,7 +273,8 @@ public:
 
 private:
 
-	SizeType cacheConnections(SizeType x)
+	SizeType
+	cacheConnections(SizeType x, const RealType& time, const typename InputNgType::Readable& io)
 	{
 		const VectorSizeType& hItems = hamAbstract_.item(x);
 
@@ -303,7 +306,7 @@ private:
 				const OneLink<ComplexOrRealType>& oneLink = term(dofs);
 
 				ComplexOrRealType tmp1 = hamAbstract_.connectionValue(
-				    hItems, oneLink, termIndexForGeom, targetTime_);
+				    hItems, oneLink, termIndexForGeom, time);
 
 				if (tmp1 == 0.0)
 					continue;
@@ -313,7 +316,8 @@ private:
 				                                         .geometry()
 				                                         .term(termIndex)
 				                                         .factor();
-				ComplexOrRealType tmp2 = geometryFactor(geometry_factor, hItems);
+				ComplexOrRealType tmp2
+				    = geometryFactor(geometry_factor, time, hItems, io);
 
 				if (tmp2 == 0.0)
 					continue;
@@ -369,20 +373,22 @@ private:
 		return 1;
 	}
 
-	ComplexOrRealType geometryFactor(const std::string& factor,
-	                                 const std::vector<SizeType>&) const
+	static ComplexOrRealType geometryFactor(const std::string& factor,
+	                                        const RealType&    time,
+	                                        const std::vector<SizeType>&,
+	                                        const typename InputNgType::Readable& io)
 	{
 		if (factor.empty())
 			return 1.0;
 
 		std::string str = factor;
-		PsimagLite::replaceAll(str, "%t", ttos(targetTime_));
+		PsimagLite::replaceAll(str, "%t", ttos(time));
 		// TODO FIXME replace also number of sites here
 
 		std::vector<std::string> ve;
 		PsimagLite::split(ve, str, ":");
 
-		CookInputExpression<ComplexOrRealType> cook_input_expression;
+		CookInputExpression<ComplexOrRealType> cook_input_expression(io);
 		for (SizeType i = 0; i < ve.size(); ++i) {
 			ve[i] = cook_input_expression(ve[i]);
 		}
@@ -459,7 +465,6 @@ private:
 
 	const ModelHelperType         modelHelper_;
 	const ModelLinksType&         modelLinks_;
-	RealType                      targetTime_;
 	const SuperOpHelperBaseType&  superOpHelper_;
 	OperatorsCachedType           operatorsCached_;
 	PsimagLite::ProgressIndicator progress_;

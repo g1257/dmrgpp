@@ -136,9 +136,12 @@ private:
 	{
 		const SizeType                p = lrs_.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs_);
-		typename ModelType::HamiltonianConnectionType hc(
-		    lrs_, ModelType::modelLinks(), currentTime_, model_.superOpHelper());
-		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc, aux);
+		typename ModelType::HamiltonianConnectionType hc(lrs_,
+		                                                 ModelType::modelLinks(),
+		                                                 currentTime_,
+		                                                 model_.superOpHelper(),
+		                                                 model_.ioIn());
+		typename LanczosSolverType::MatrixType        lanczosHelper(model_, hc, aux);
 
 		typename LanczosSolverType::ParametersSolverType params(io_, "Tridiag");
 		params.lotaMemory = true;
