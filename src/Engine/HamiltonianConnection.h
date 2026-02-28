@@ -80,6 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "AST/ExpressionForAST.h"
 #include "AST/PlusMinusMultiplyDivide.h"
 #include "Concurrency.h"
+#include "CookInputExpression.hh"
 #include "CrsMatrix.h"
 #include "HamiltonianAbstract.h"
 #include "ManyToTwoConnection.h"
@@ -374,12 +375,20 @@ private:
 		if (factor.empty())
 			return 1.0;
 
-		std::string                                                    str = factor;
-		typedef PsimagLite::PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
+		std::string str = factor;
 		PsimagLite::replaceAll(str, "%t", ttos(targetTime_));
+		// TODO FIXME replace also number of sites here
+
 		std::vector<std::string> ve;
 		PsimagLite::split(ve, str, ":");
-		PrimitivesType                               primitives;
+
+		CookInputExpression<ComplexOrRealType> cook_input_expression;
+		for (SizeType i = 0; i < ve.size(); ++i) {
+			ve[i] = cook_input_expression(ve[i]);
+		}
+
+		typedef PsimagLite::PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
+		PrimitivesType                                                 primitives;
 		PsimagLite::ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
 		return expresionForAST.exec();
 	}
