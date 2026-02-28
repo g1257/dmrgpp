@@ -15,7 +15,7 @@ dir0:Connectors=[1.0];
 function values_of_A = \AinurFromFile("AversusTime.txt");
 
 # FIXME TODO Shouldn't it be integration instead of value?
-TermModifier = exp:*:%t:*:i:\values_of_A(%t);
+GeometryFactor=exp:*:%t:*:i:\values_of_A(%t);
 
 # END time dependence stuff
 

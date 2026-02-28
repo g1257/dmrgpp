@@ -77,6 +77,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HAMILTONIAN_CONNECTION_H
 #define HAMILTONIAN_CONNECTION_H
 
+#include "AST/ExpressionForAST.h"
+#include "AST/PlusMinusMultiplyDivide.h"
 #include "Concurrency.h"
 #include "CrsMatrix.h"
 #include "HamiltonianAbstract.h"
@@ -299,11 +301,23 @@ private:
 
 				const OneLink<ComplexOrRealType>& oneLink = term(dofs);
 
-				ComplexOrRealType tmp = hamAbstract_.connectionValue(
+				ComplexOrRealType tmp1 = hamAbstract_.connectionValue(
 				    hItems, oneLink, termIndexForGeom, targetTime_);
 
-				if (tmp == static_cast<RealType>(0.0))
+				if (tmp1 == 0.0)
 					continue;
+
+				// Factor added in the input file for this geometry term
+				const std::string& geometry_factor = hamAbstract_.superGeometry()
+				                                         .geometry()
+				                                         .term(termIndex)
+				                                         .factor();
+				ComplexOrRealType tmp2 = geometryFactor(geometry_factor, hItems);
+
+				if (tmp2 == 0.0)
+					continue;
+
+				ComplexOrRealType tmp = tmp1 * tmp2;
 
 				ManyToTwoConnectionType manyToTwo(hItems,
 				                                  type,
@@ -352,6 +366,22 @@ private:
 
 		lps_.push_back(link2);
 		return 1;
+	}
+
+	ComplexOrRealType geometryFactor(const std::string& factor,
+	                                 const std::vector<SizeType>&) const
+	{
+		if (factor.empty())
+			return 1.0;
+
+		std::string                                                    str = factor;
+		typedef PsimagLite::PlusMinusMultiplyDivide<ComplexOrRealType> PrimitivesType;
+		PsimagLite::replaceAll(str, "%t", ttos(targetTime_));
+		std::vector<std::string> ve;
+		PsimagLite::split(ve, str, ":");
+		PrimitivesType                               primitives;
+		PsimagLite::ExpressionForAST<PrimitivesType> expresionForAST(ve, primitives);
+		return expresionForAST.exec();
 	}
 
 	void checkGeometryTerms() const
