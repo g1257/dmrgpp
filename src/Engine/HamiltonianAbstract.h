@@ -74,15 +74,6 @@ public:
 
 private:
 
-	// SizeType findSite(const VectorSizeType& hItems) const
-	// {
-	// 	ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
-	// 	assert(type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON
-	// 	       || type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
-	// 	return (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? hItems[0]
-	// 	                                                                : hItems[1];
-	// }
-
 	const SuperGeometryType& superGeometry_;
 	const SizeType           smax_;
 	const SizeType           emin_;

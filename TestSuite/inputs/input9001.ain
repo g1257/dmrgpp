@@ -7,6 +7,7 @@ TotalNumberOfSites=4;
 NumberOfTerms=1;
 GeometryKind="chain";
 GeometryOptions="ConstantValues";
+dir0:Connectors=[1.0];
 
 # BEGIN time dependence stuff
 # This multiplies all
@@ -14,8 +15,7 @@ GeometryOptions="ConstantValues";
 function values_of_A = \AinurFromFile("AversusTime.txt");
 
 # FIXME TODO Shouldn't it be integration instead of value?
-real exp_A = exp:*:%t:*:i:\values_of_A(%t);
-dir0:Connectors=[1.0];
+TermModifier = exp:*:%t:*:i:\values_of_A(%t);
 
 # END time dependence stuff
 
