@@ -20,14 +20,15 @@ public:
 	    : io_(io)
 	{ }
 
-	std::string operator()(const std::string& expr) const
+	std::string operator()(const std::string& expr)
 	{
-		std::string label = "\\readTable";
+		std::string label = "!readTable";
 		if (expr.substr(0, label.size()) == label) {
+			std::string str = expr.substr(label.size(), std::string::npos);
 			// delete spaces FIXME TODO
 			// split on comma
 			std::vector<std::string> args;
-			PsimagLite::split(args, ",");
+			PsimagLite::split(args, str, ",");
 			if (args.size() != 2) {
 				err("readTable expects two arguments\n");
 			}
@@ -35,7 +36,7 @@ public:
 			// delete PARENS FIXME TODO
 			// delete double quotes FIXME TODO
 			PsimagLite::Matrix<RealType> matrix;
-			InputNgValidatorType io_non_const = const_cast<InputNgValidatorType&>(io_);
+			InputNgValidatorType& io_non_const = const_cast<InputNgValidatorType&>(io_);
 			io_non_const.read(matrix, args[0]);
 			RealType value = findValueFor(matrix, PsimagLite::atof(args[1]));
 			return ttos(value);
