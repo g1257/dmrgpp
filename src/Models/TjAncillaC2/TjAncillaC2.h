@@ -134,7 +134,7 @@ public:
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
 	    , superGeometry_(geometry)
-	    , hot_(superGeometry_.geometry().orbitals(0, 0) > 1)
+	    , hot_(superGeometry_.geometry().term(0).orbitals(0) > 1)
 	{ }
 
 	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const

@@ -136,7 +136,7 @@ public:
 	                   const SuperGeometryType& geometry)
 	    : ModelBaseType(solverParams, geometry, io)
 	    , modelParameters_(io)
-	    , hot_(geometry.geometry().orbitals(0, 0) > 1)
+	    , hot_(geometry.geometry().term(0).orbitals(0) > 1)
 	{
 		SizeType n = geometry.numberOfSites();
 		SizeType m = modelParameters_.magneticField.size();

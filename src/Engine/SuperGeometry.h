@@ -103,16 +103,17 @@ public:
 		// add super terms as needed
 		const SizeType n = geometry_.terms();
 		for (SizeType i = 0; i < n; ++i) {
-			if (geometry_.directions(i) > 0)
+			if (geometry_.term(i).directions() > 0)
 				continue;
 			// super term found
 			// it's gotta be "SuperPlaquette" for now, (only one option, sorry!)
-			if (geometry_.options(i) == "SuperPlaquette") {
+			if (geometry_.term(i).options() == "SuperPlaquette") {
 				auto ptr = new SuperPlaquette(io);
 				superStrings_.push_back(ptr);
 				hollowOutRadius_ = std::max(hollowOutRadius_, ptr->holloutRadius());
 			} else {
-				err("SuperGeometry " + geometry_.options(i) + " unsupported\n");
+				err("SuperGeometry " + geometry_.term(i).options()
+				    + " unsupported\n");
 			}
 		}
 	}
