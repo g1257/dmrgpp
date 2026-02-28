@@ -13,11 +13,9 @@ GeometryOptions="ConstantValues";
 # hoppings by exp(iA*time)
 function values_of_A = \AinurFromFile("AversusTime.txt");
 
-real A_value = \values_of_A(%t);
 # FIXME TODO Shouldn't it be integration instead of value?
-real exp_A = exp:*:%t:*:i:\A_value;
-
-dir0:Connectors=[\exp_A];
+real exp_A = exp:*:%t:*:i:\values_of_A(%t);
+dir0:Connectors=[1.0];
 
 # END time dependence stuff
 

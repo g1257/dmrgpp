@@ -225,7 +225,7 @@ protected:
 		    'N',
 		    splus,
 		    'C',
-		    [isSu2](SparseElementType& value, RealType, SizeType)
+		    [isSu2](SparseElementType& value, RealType, std::vector<SizeType>)
 		    { value *= (isSu2) ? -0.5 : 0.5; },
 		    typename ModelTermType::Su2Properties(2, -1, 2));
 
