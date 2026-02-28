@@ -11,12 +11,9 @@ dir0:Connectors=[1.0];
 
 # BEGIN time dependence stuff
 # This multiplies all
-# hoppings by exp(iA*time)
-#function values_of_A = \AinurFromFile("AversusTime.txt");
+# hoppings by exp(iA(time)*time)
 
 # FIXME TODO Shouldn't it be integration instead of value?
-#GeometryFactor=exp:*:%t:*:i:\values_of_A(%t);
-# GeometryFactor=exp:*:%t:3.i;
 matrix AversusTime=[
 [0.0, 0.0],
 [0.1, 0.05],
@@ -28,7 +25,7 @@ matrix AversusTime=[
 [0.7, 0.35]
 ];
 
-GeometryFactor=exp:*:%t:!readTableAversusTime,%t;
+GeometryFactor=exp:*:*:1.0i:%t:!readTableAversusTime,%t;
 
 # END time dependence stuff
 
