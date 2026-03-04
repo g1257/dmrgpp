@@ -65,21 +65,6 @@ TSPAdvanceEach=6;
 
 TSPAlgorithm="Krylov";
 
-# For a TimeEvolution --> TimeEvolution, this label is ignored but mandatory;
-TSPSites=[4];
-
-# For a TimeEvolution --> TimeEvolution, this label is ignored but mandatory;
-TSPLoops=[0];
-
-# For a TimeEvolution --> TimeEvolution, this label is ignored but mandatory;
-TSPProductOrSum="product";
-
-# For a TimeEvolution --> TimeEvolution, this label is ignored but mandatory;
-string TSPOp0:TSPOperator=expression;
-# For documentation purposes, we may want to think that we apply the
-# identity, so we don't do anything, but with much ado
-string TSPOp0:OperatorExpression="identity";
-
 # This is a continuation of a previous time evolution done in input21
 # Here we introduce the label RestartMappingTvs
 # It's a vector of integers, as many as there are P vectors, which is determined
