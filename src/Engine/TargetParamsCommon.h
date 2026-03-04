@@ -467,7 +467,6 @@ private:
 			if (has_label) {
 				std::string msg = "Label " + label + " will be ignored\n";
 				std::cerr << msg;
-				std::cout << msg;
 			}
 		}
 	}
