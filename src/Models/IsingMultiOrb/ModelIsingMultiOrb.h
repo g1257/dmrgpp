@@ -555,6 +555,7 @@ private:
 		return sum;
 	}
 
+	// TODO FIXME: Needs refactor after TimeDepConnections is refactored
 	ComplexOrRealType
 	timeDependentConnection(ComplexOrRealType tmp, RealType time, SizeType index) const
 	{
