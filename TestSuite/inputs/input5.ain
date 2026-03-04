@@ -22,9 +22,4 @@ TSPTau=0.01;
 TSPTimeSteps=10;
 TSPAdvanceEach=2;
 TSPAlgorithm="Krylov";
-TSPSites=[7];
-TSPLoops=[2];
-TSPProductOrSum="product";
 
-string TSPOp0:TSPOperator=expression;
-string TSPOp0:OperatorExpression="identity";

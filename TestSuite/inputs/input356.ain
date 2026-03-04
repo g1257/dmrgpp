@@ -30,13 +30,8 @@ TSPTau=0.001;
 TSPTimeSteps=5;
 TSPAdvanceEach=6;
 TSPAlgorithm="Krylov";
-TSPSites=[2];
-TSPLoops=[0];
-TSPProductOrSum="product";
 GsWeight=0.1;
 
-string TSPOp0:TSPOperator="expression";
-string TSPOp0:OperatorExpression="identity";
 
 TimeSchedule=[[0,-9.2575,0.27196],
 [0.001,-9.2575,0.27196],
