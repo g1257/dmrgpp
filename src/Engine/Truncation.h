@@ -266,7 +266,9 @@ private:
 		PsimagLite::Sort<VectorRealType>            sort;
 		sort.sort(cache.eigs, perm);
 
-		printSumAndCheckEigs(cache.eigs);
+		if (!parameters_.options.isSet("donotcheckdmeigs")) {
+			printSumAndCheckEigs(cache.eigs);
+		}
 
 		updateKeptStates(keptStates, truncationControl, cache.eigs);
 
