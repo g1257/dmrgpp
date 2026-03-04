@@ -330,9 +330,8 @@ private:
 		}
 
 		assert(c == 'X');
-		if (modelParameters_.hasTimeSchedule_) {
-			tmp = timeDependentConnection(tmp, time, 1);
-		}
+
+		tmp = timeDependentConnection(tmp, time, 1);
 
 		const OperatorType& sx = ModelBaseType::naturalOperator("sx", site, orb);
 		hmatrix += tmp * sx.getCRS();
@@ -360,9 +359,7 @@ private:
 		const OperatorType& sz1 = ModelBaseType::naturalOperator("sz", site, orb1);
 		const OperatorType& sz2 = ModelBaseType::naturalOperator("sz", site, orb2);
 
-		if (modelParameters_.hasTimeSchedule_) {
-			tmp = timeDependentConnection(tmp, time, 2);
-		}
+		tmp = timeDependentConnection(tmp, time, 2);
 
 		// Calculate Sz Sz term on site
 		SparseMatrixType tmpMatrix;
@@ -561,15 +558,24 @@ private:
 	ComplexOrRealType
 	timeDependentConnection(ComplexOrRealType tmp, RealType time, SizeType index) const
 	{
+		// If not time schedule, then acts like the identity function
+		if (!modelParameters_.hasTimeSchedule_) {
+			return tmp;
+		}
+
 		PsimagLite::Matrix<RealType> data;
 		interpolateSchedule(data);
+		assert(tau_ != 0);
 		SizeType ii = static_cast<SizeType>(time / tau_);
 		return tmp * data(ii, index);
 	}
 
 	void interpolateSchedule(PsimagLite::Matrix<RealType>& data) const
 	{
-		RealType sstep  = tau_ / modelParameters_.ta;
+		assert(modelParameters_.hasTimeSchedule_);
+		assert(modelParameters_.ta != 0);
+		RealType sstep = tau_ / modelParameters_.ta;
+		assert(sstep > 0);
 		SizeType mysize = SizeType(1.0 / sstep) + 1;
 		data.resize(mysize, 3);
 
