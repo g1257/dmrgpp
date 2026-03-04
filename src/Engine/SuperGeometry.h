@@ -213,6 +213,12 @@ public:
 			    data, smax, emin, geometry_.numberOfSites());
 	}
 
+	friend std::ostream& operator<<(std::ostream& os, const SuperGeometry& supergeometry)
+	{
+		os << supergeometry.geometry_;
+		return os;
+	}
+
 private:
 
 	const GeometryType       geometry_;

@@ -66,7 +66,7 @@ void mainLoop2(InputNgType::Readable&          io,
 
 	SuperGeometryType geometry(io);
 	if (dmrgSolverParams.options.isSet("printgeometry"))
-		std::cout << geometry.geometry();
+		std::cout << geometry;
 #ifndef MIN_COMPILE
 
 	if (dmrgSolverParams.options.isSet("vectorwithoffsets")) {
