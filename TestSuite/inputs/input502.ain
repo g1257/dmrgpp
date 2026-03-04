@@ -33,9 +33,3 @@ TSPTau=0.1;
 TSPTimeSteps=4;
 TSPAdvanceEach=6;
 TSPAlgorithm="RungeKutta";
-TSPSites=[5];
-TSPLoops=[4];
-TSPProductOrSum="product";
-
-string TSPOp0:TSPOperator="expression";
-string TSPOp0:OperatorExpression="identity";
