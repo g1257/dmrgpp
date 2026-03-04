@@ -77,8 +77,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef HAMILTONIAN_CONNECTION_H
 #define HAMILTONIAN_CONNECTION_H
 
-#include "AST/ExpressionForAST.h"
-#include "AST/PlusMinusMultiplyDivide.h"
 #include "Concurrency.h"
 #include "CrsMatrix.h"
 #include "HamiltonianAbstract.h"
@@ -304,7 +302,7 @@ private:
 				ComplexOrRealType tmp = hamAbstract_.connectionValue(
 				    hItems, oneLink, termIndexForGeom, targetTime_);
 
-				if (tmp == 0.0)
+				if (tmp == static_cast<RealType>(0.0))
 					continue;
 
 				ManyToTwoConnectionType manyToTwo(hItems,
