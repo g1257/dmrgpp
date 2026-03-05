@@ -214,7 +214,7 @@ public:
 
 	void main(const SuperGeometryType& geometry)
 	{
-		ioOut_.write(geometry, "GEOMETRY");
+		ioOut_.write(geometry.geometry(), "GEOMETRY");
 
 		BlockType       S, E;
 		VectorBlockType X, Y;

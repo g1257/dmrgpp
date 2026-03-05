@@ -103,16 +103,17 @@ public:
 		// add super terms as needed
 		const SizeType n = geometry_.terms();
 		for (SizeType i = 0; i < n; ++i) {
-			if (geometry_.directions(i) > 0)
+			if (geometry_.term(i).directions() > 0)
 				continue;
 			// super term found
 			// it's gotta be "SuperPlaquette" for now, (only one option, sorry!)
-			if (geometry_.options(i) == "SuperPlaquette") {
+			if (geometry_.term(i).options() == "SuperPlaquette") {
 				auto ptr = new SuperPlaquette(io);
 				superStrings_.push_back(ptr);
 				hollowOutRadius_ = std::max(hollowOutRadius_, ptr->holloutRadius());
 			} else {
-				err("SuperGeometry " + geometry_.options(i) + " unsupported\n");
+				err("SuperGeometry " + geometry_.term(i).options()
+				    + " unsupported\n");
 			}
 		}
 	}
@@ -138,26 +139,16 @@ public:
 		geometry_.split(sitesPerBlock, S, X, Y, E, allInSystem);
 	}
 
+	// Helper function
 	SizeType numberOfSites() const { return geometry_.numberOfSites(); }
 
-	SizeType terms() const { return geometry_.terms(); }
-
-	void write(PsimagLite::String label, PsimagLite::IoNgSerializer& ioSerializer) const
-	{
-		geometry_.write(label, ioSerializer);
-	}
+	// All other geometry_. use this function
+	const GeometryType& geometry() const { return geometry_; }
 
 	SizeType hollowOutRadius(SizeType maxLeft) const
 	{
 		return std::max(maxLeft * geometry_.maxConnections(), hollowOutRadius_);
 	}
-
-	SizeType orbitals(SizeType term, SizeType site) const
-	{
-		return geometry_.orbitals(term, site);
-	}
-
-	PsimagLite::String label(SizeType i) const { return geometry_.label(i); }
 
 	ComplexOrRealType operator()(SizeType              smax,
 	                             SizeType              emin,

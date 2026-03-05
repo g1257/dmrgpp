@@ -32,9 +32,9 @@ public:
 
 	GeometryDca(const GeometryType& g, SizeType orbitals)
 	    : enabled_(false)
-	    , message_(g.label(0) + " with " + ttos(orbitals))
+	    , message_(g.term(0).label() + " with " + ttos(orbitals))
 	{
-		if (g.label(0) == "star" && orbitals == 4)
+		if (g.term(0).label() == "star" && orbitals == 4)
 			enabled_ = true;
 	}
 

@@ -38,7 +38,7 @@ public:
 	                     const ModelParametersType& modelParams)
 	    : superGeometry_(geometry)
 	    , modelParameters_(modelParams)
-	    , hot_(superGeometry_.orbitals(0, 0) > 1)
+	    , hot_(superGeometry_.geometry().term(0).orbitals(0) > 1)
 	{
 		if (!hot_)
 			return;
