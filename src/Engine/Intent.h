@@ -172,12 +172,14 @@ private:
 
 	SizeType getLeg() const
 	{
-		SizeType           terms = model_.superGeometry().terms();
+		SizeType           terms = model_.superGeometry().geometry().terms();
 		PsimagLite::String name("");
 		for (SizeType t = 0; t < terms; ++t) {
-			if (t > 0 && name != model_.superGeometry().label(t))
+			const std::string& label
+			    = model_.superGeometry().geometry().term(t).label();
+			if (t > 0 && name != label)
 				return 0;
-			name = model_.superGeometry().label(t);
+			name = label;
 		}
 
 		if (name == "chain")

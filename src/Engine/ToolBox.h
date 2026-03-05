@@ -234,10 +234,10 @@ private:
 	{
 		SizeType terms = geometry.terms();
 		assert(terms > 0);
-		PsimagLite::String g            = geometry.label(0);
+		PsimagLite::String g            = geometry.term(0).label();
 		SizeType           heaviestTerm = 0;
 		for (SizeType i = 1; i < terms; ++i) {
-			PsimagLite::String tmp = geometry.label(i);
+			PsimagLite::String tmp = geometry.term(i).label();
 			if (geometryGreater(tmp, g)) {
 				g            = tmp;
 				heaviestTerm = i;
@@ -265,8 +265,8 @@ private:
 		if (g.second == "longchain") { // 1D
 			return modelFactor * n; // modelFactor * Lx
 		} else if (g.second == "ladder" || g.second == "ladderx") {
-			SizeType Lx         = geometry.length(0, g.first);
-			SizeType Ly         = geometry.length(1, g.first);
+			SizeType Lx         = geometry.term(g.first).length(0);
+			SizeType Ly         = geometry.term(g.first).length(1);
 			SizeType TwoToTheLy = (1 << Ly);
 			m = modelFactor * Lx * TwoToTheLy; // modelFactor * Lx * 2^Ly
 		} else {

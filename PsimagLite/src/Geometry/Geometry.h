@@ -149,8 +149,6 @@ public:
 		ioSerializer.write(label + "/terms_", terms_);
 	}
 
-	String label(SizeType i) const { return terms_[i]->label(); }
-
 	typename ProgramGlobalsType::ConnectionEnum
 	connectionKind(SizeType smax, SizeType ind, SizeType jnd) const
 	{
@@ -201,12 +199,6 @@ public:
 	SizeType terms() const { return terms_.size(); }
 
 	SizeType numberOfSites() const { return linSize_; }
-
-	SizeType orbitals(SizeType term, SizeType site) const
-	{
-		assert(term < terms_.size());
-		return terms_[term]->orbitals(site);
-	}
 
 	void split(SizeType                               sitesPerBlock,
 	           VectorSizeType&                        S,
@@ -271,8 +263,6 @@ public:
 		}
 	}
 
-	SizeType maxConnections(SizeType termId) const { return terms_[termId]->maxConnections(); }
-
 	SizeType maxConnections() const
 	{
 		SizeType result = 0;
@@ -282,41 +272,17 @@ public:
 		return result;
 	}
 
-	SizeType findReflection(SizeType site, SizeType termId) const
-	{
-		return terms_[termId]->findReflection(site);
-	}
-
-	SizeType length(SizeType i, SizeType termId) const { return terms_[termId]->length(i); }
-
-	SizeType translate(SizeType site, SizeType dir, SizeType amount, SizeType termId) const
-	{
-		return terms_[termId]->translate(site, dir, amount);
-	}
-
 	void print(std::ostream& os) const
 	{
 		for (SizeType i = 0; i < terms_.size(); i++)
 			terms_[i]->print(os, linSize_);
 	}
 
-	SizeType handle(SizeType t, SizeType ind, SizeType jnd) const
+	const GeometryTermType& term(SizeType ind) const
 	{
-		return terms_[t]->handle(ind, jnd);
-	}
-
-	SizeType directions(SizeType term) const { return terms_[term]->directions(); }
-
-	SizeType calcDir(SizeType term, SizeType i, SizeType j) const
-	{
-		assert(term < terms_.size());
-		return terms_[term]->calcDir(i, j);
-	}
-
-	String options(SizeType term) const
-	{
-		assert(term < terms_.size());
-		return terms_[term]->options();
+		assert(ind < terms_.size());
+		assert(terms_[ind]);
+		return *terms_[ind];
 	}
 
 	// extended functions in GeometryEx
