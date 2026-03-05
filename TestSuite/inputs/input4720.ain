@@ -42,10 +42,10 @@ Version="version"
 OutputFile="data4720";
 InfiniteLoopKeptStates=100;
 FiniteLoops=[
-[1, 100, 0], 
+[1, 100, 0],
 [-2, 100, 0], [2, 100, 1]];
 
 TargetElectronsUp=1;
 TargetElectronsDown=1;
-
+OutputFile="input4720.hd5";
 
