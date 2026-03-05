@@ -263,6 +263,7 @@ public:
 			str += "integer " + istr + "DegreesOfFreedom;\n";
 			str += "string " + istr + "GeometryKind;\n";
 			str += "string " + istr + "GeometryOptions;\n";
+			str += "string " + istr + "GeometryFactor;\n";
 			str += "integer " + istr + "LadderLeg;\n";
 			str += "integer " + istr + "LongChainDistance;\n";
 			str += "integer " + istr + "BathSitesPerSite;\n";

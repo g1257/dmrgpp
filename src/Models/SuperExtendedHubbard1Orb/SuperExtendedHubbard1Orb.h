@@ -199,7 +199,7 @@ protected:
 	{
 		extendedHubbard_.fillModelLinks();
 
-		const bool spinOrbit = (superGeometry_.orbitals(0, 0) == 2);
+		const bool spinOrbit = (superGeometry_.geometry().term(0).orbitals(0) == 2);
 		if (spinOrbit) {
 			ModelTermType& so = ModelBaseType::createTerm("SpinOrbit");
 			// spin dependence of the hopping parameter (spin orbit)

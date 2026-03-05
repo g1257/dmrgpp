@@ -356,7 +356,7 @@ private:
 
 	void checkGeometryTerms() const
 	{
-		const SizeType fromInput = hamAbstract_.superGeometry().terms();
+		const SizeType fromInput = hamAbstract_.superGeometry().geometry().terms();
 		const SizeType fromModel = modelLinks_.numberOfTerms();
 		bool           doPrint   = (smax_ == 0);
 
