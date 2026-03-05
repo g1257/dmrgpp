@@ -85,11 +85,6 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include <pthread.h>
 #include <sched.h>
 #include <unistd.h>
-#ifdef PTHREAD_ASSIGN_AFFINITIES
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
-#endif
 #ifdef _GNU_SOURCE
 #include <errno.h>
 #include <string.h>
@@ -211,23 +206,7 @@ public:
 
 private:
 
-	void setAffinity(pthread_attr_t* attr, SizeType threadNum, SizeType cores) const
-	{
-#ifdef PTHREAD_ASSIGN_AFFINITIES
-#ifndef __APPLE__
-		cpu_set_t* cpuset = new cpu_set_t;
-		int        cpu    = threadNum % cores;
-		CPU_ZERO(cpuset);
-		CPU_SET(cpu, cpuset);
-		std::size_t cpusetsize = sizeof(cpu_set_t);
-		int         ret        = pthread_attr_setaffinity_np(attr, cpusetsize, cpuset);
-		checkForError(ret);
-		// clean up
-		delete cpuset;
-		cpuset = 0;
-#endif
-#endif
-	}
+	void setAffinity(std::thread& thread, SizeType threadNum, SizeType cores) const { }
 
 	void checkForError(int ret) const
 	{
