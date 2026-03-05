@@ -190,7 +190,8 @@ public:
 		createIdentity();
 		if (modelLinks_.kindsOfAtoms() == 1)
 			checkThatQnsAreNotReallySorted();
-		modelLinks_.postCtor1(labeledOperators_, modelCommon_.superGeometry().terms());
+		modelLinks_.postCtor1(labeledOperators_,
+		                      modelCommon_.superGeometry().geometry().terms());
 		fillModelLinks(); // fills modelLinks_
 		customOperators();
 		modelLinks_.postCtor2();
