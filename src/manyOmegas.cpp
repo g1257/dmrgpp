@@ -1,6 +1,6 @@
 #include "ManyOmegas.h"
-#include "../../dmrgpp/src/Engine/ProgramGlobals.h"
 #include "InputCheck.h"
+#include "ProgramGlobals.h"
 #include "Provenance.h"
 #include "PsimagLite.h"
 #include <unistd.h>
