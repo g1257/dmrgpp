@@ -17,6 +17,7 @@ gt1:LadderLeg=2;
 
 Model="Heisenberg";
 HeisenbergTwiceS=1;
+OutputFile="data30.hd5";
 
 InfiniteLoopKeptStates=128;
 FiniteLoops=[
