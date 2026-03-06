@@ -1,6 +1,6 @@
 #!/usr/bin/awk -f
 BEGIN {
-	if (pattern = "" || (target = "" || (tolerance = ""))) {
+	if (pattern == "" || (expected == "" || (tolerance == ""))) {
 		print "Usage: awk -f check_value.awk -v pattern=\"regex\" -v expected=value -v tolerance=value file"
 		exit 1
 	}
@@ -12,14 +12,12 @@ BEGIN {
 {
 	#we're neglecting the case where the pattern appears more than
 	#once in a line, that can be dealt with in the regex itself
-	while (match($0, pattern)) {
+	temp_line = $0
+	while (match(temp_line, pattern, matches)) {
 		matched = 1
-		matched_part = substr($0, RSTART, RLENGTH)
-	}
-	if (matched) {
-		if (match($0, /([0-9]+([eE][+-]?[0-9]+)?)/)) {
-			last_found_float = substr($0, RSTART, RLENGTH)
-		}
+		print matches[0]
+		temp_line = substr(temp_line, RSTART + RLENGTH)
+		last_found_float = matches[1]
 	}
 }
 
@@ -29,9 +27,9 @@ END {
 		exit 1
 	}
 	last_found_float = last_found_float + 0
-	diff = (last_found_float > expected) ? expected - last_found_float : last_found_float - expected
-	if (expected <= tolerance) {
-		print "Value " last_found_float " within tolerance of " tolerance
+	diff = (last_found_float < expected) ? expected - last_found_float : last_found_float - expected
+	if (diff <= tolerance) {
+		print "Value " last_found_float " within tolerance of " tolerance " diff: " diff
 		exit 0
 	} else {
 		print "FAIL! Value " last_found_float " differs from expected value by " diff
