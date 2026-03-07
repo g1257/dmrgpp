@@ -41,3 +41,6 @@ jobs:
 
     - name: Test
       run: ctest --test-dir ${{github.workspace}}/build -C ${{env.BUILD_TYPE}} --output-on-failure
+
+    - name: Install
+      run: cmake --install ${{github.workspace}}/build --prefix ${{github.workspace}}/install --config ${{env.BUILD_TYPE}}
