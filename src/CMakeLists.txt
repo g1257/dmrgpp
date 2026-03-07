@@ -73,6 +73,8 @@ add_executable(omegas $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> Qn.c
 target_include_directories(omegas PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
 target_link_libraries(omegas kronutil psimaglite::psimaglite)
 
+install(TARGETS dmrg toolboxdmrg omegas RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
 # Tests below for all executables
 
 # For dmrg main executable

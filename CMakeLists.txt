@@ -19,6 +19,8 @@ if(BUILD_TESTING)
   include(Catch)
 endif()
 
+include(GNUInstallDirs)
+
 add_subdirectory(PsimagLite)
 add_subdirectory(src)
 

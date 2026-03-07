@@ -11,3 +11,5 @@ target_compile_definitions(dmftpp PUBLIC USE_GSL)
 
 add_executable(freeGimp freeGimp.cpp $<TARGET_OBJECTS:provenance>)
 target_link_libraries(freeGimp PUBLIC dmrgpp kronutil)
+
+install(TARGETS dmftpp freeGimp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
