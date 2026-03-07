@@ -7,14 +7,11 @@ add_custom_command(
 
 add_subdirectory(KronUtil)
 
-add_library(Common OBJECT ProgramGlobals.cpp Provenance.cpp Utils.cpp)
-target_sources(Common PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_link_libraries(Common PRIVATE psimaglite::psimaglite)
-target_include_directories(Common PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
-
-add_library(Su2Related OBJECT Su2Related.cpp)
-target_link_libraries(Su2Related PRIVATE psimaglite::psimaglite)
-target_include_directories(Su2Related PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
+# DMRG++ as a library so cincuenta can use it
+add_library(dmrgpp ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp)
+target_sources(dmrgpp PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
+target_include_directories(dmrgpp PUBLIC ${CMAKE_CURRENT_BINARY_DIR} Engine)
+target_link_libraries(dmrgpp PUBLIC psimaglite::psimaglite)
 
 # generate sources file for explicitly instantiating mainLoop4
 set(counter 0)
@@ -32,47 +29,25 @@ endforeach()
 unset(counter)
 
 # Dmrg executable (main executable)
-add_executable(dmrg $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> ${instantiationFileList} Qn.cpp dmrg.cpp)
-target_link_libraries(dmrg PUBLIC kronutil psimaglite::psimaglite)
-target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR} Engine)
+add_executable(dmrg ${instantiationFileList} dmrg.cpp)
+target_link_libraries(dmrg dmrgpp kronutil)
+target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
-target_sources(dmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
+# Observe executable
+add_executable(observe observe.cpp ObserveDriver0.cpp ObserveDriver1.cpp ObserveDriver2.cpp)
+target_link_libraries(observe dmrgpp kronutil)
 
-# DMRG++ as a library so cincuenta can use it
-# We may instead bring cincuenta into this repo
-add_library(dmrgpp STATIC $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> Qn.cpp ProgramGlobals.cpp)
-target_sources(dmrgpp PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_include_directories(dmrgpp PUBLIC ${CMAKE_CURRENT_BINARY_DIR} Engine)
-target_link_libraries(dmrgpp PUBLIC psimaglite::psimaglite)
-
-# Observe executable below
-add_executable(
-  observe
-  observe.cpp
-  ProgramGlobals.cpp
-  Provenance.cpp
-  Utils.cpp
-  Su2Related.cpp
-  Qn.cpp
-  ObserveDriver0.cpp
-  ObserveDriver1.cpp
-  ObserveDriver2.cpp)
-
-target_include_directories(observe PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
-target_sources(observe PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_link_libraries(observe kronutil psimaglite::psimaglite)
-
-# Toolbox executable now
+# Toolbox executable
 add_executable(toolboxdmrg toolboxdmrg.cpp Qn.cpp ProgramGlobals.cpp Provenance.cpp)
-target_link_libraries(toolboxdmrg psimaglite::psimaglite)
-target_sources(toolboxdmrg PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_include_directories(toolboxdmrg PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
+target_link_libraries(toolboxdmrg dmrgpp)
 
 # Many omegas executable
-add_executable(omegas $<TARGET_OBJECTS:Common> $<TARGET_OBJECTS:Su2Related> Qn.cpp manyOmegas.cpp)
-target_include_directories(omegas PRIVATE ${CMAKE_CURRENT_BINARY_DIR} Engine)
-target_link_libraries(omegas kronutil psimaglite::psimaglite)
+add_executable(omegas manyOmegas.cpp)
+target_link_libraries(omegas dmrgpp kronutil)
 
+if(BUILD_SHARED_LIBS)
+  install(TARGETS dmrgpp LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
 install(TARGETS dmrg toolboxdmrg omegas RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 # Tests below for all executables
