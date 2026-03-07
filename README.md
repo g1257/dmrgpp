@@ -189,6 +189,12 @@ and test with
 ctest --test-dir builddir --output-on-failure
 ```
 
+### Install
+After building, install with
+```
+cmake --install builddir --prefix installdir
+```
+
 ### Running DMRG++
 
 Assuming you are in dmrgpp/src,
