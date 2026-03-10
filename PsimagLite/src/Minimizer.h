@@ -208,7 +208,7 @@ public:
 
 private:
 
-	void found(VectorType& minVector, gsl_vector* x, SizeType iter)
+	void found(VectorType& minVector, gsl_vector* x, SizeType /* iter */)
 	{
 		for (SizeType i = 0; i < minVector.size(); i++)
 			minVector[i] = gsl_vector_get(x, i);

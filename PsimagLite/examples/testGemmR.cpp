@@ -6,7 +6,7 @@ typedef std::complex<double> zcomplex;
 
 template <typename T> T make_val(double const x, double const y) { return (x); }
 
-template <> double make_val<double>(double const x, double const y) { return (x); }
+template <> double make_val<double>(double const x, double const /* y */) { return (x); }
 
 template <> zcomplex make_val<zcomplex>(double const x, double const y)
 {
