@@ -369,7 +369,7 @@ protected:
 		return commonTargeting_.aoe().targetVectors(ind);
 	}
 
-	const SizeType numberOfTvs() const { return commonTargeting_.aoe().tvs(); }
+	SizeType numberOfTvs() const { return commonTargeting_.aoe().tvs(); }
 
 private:
 

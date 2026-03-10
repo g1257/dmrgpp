@@ -83,13 +83,13 @@ public:
 			t_->multiplyScalar(scalar);
 		}
 
-		const bool isEmpty() const
+		bool isEmpty() const
 		{
 			makeSureItsValid();
 			return t_->isEmpty();
 		}
 
-		const bool metaEqual(const AlgebraType&) const
+		bool metaEqual(const AlgebraType&) const
 		{
 			makeSureItsValid();
 			return true;

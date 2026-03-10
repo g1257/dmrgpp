@@ -26,9 +26,9 @@ public:
 
 	void multiplyScalar(const ComplexOrRealType& scalar) { t_ *= scalar; }
 
-	const bool isEmpty() const { return ItemSpecType::isEmpty(t_); }
+	bool isEmpty() const { return ItemSpecType::isEmpty(t_); }
 
-	const bool metaEqual(const T& t2) const { return ItemSpecType::metaEqual(t_, t2); }
+	bool metaEqual(const T& t2) const { return ItemSpecType::metaEqual(t_, t2); }
 
 	static bool metaEqual(const AssignAndDestroy& t1, const AssignAndDestroy& t2)
 	{

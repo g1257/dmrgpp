@@ -78,10 +78,7 @@ public:
 
 	SizeType size() const { return vStr_.size(); }
 
-	const bool hasTimeEvolution() const
-	{
-		return (vStr_.size() > 0 && isTimeEvolution(vStr_[0]));
-	}
+	bool hasTimeEvolution() const { return (vStr_.size() > 0 && isTimeEvolution(vStr_[0])); }
 
 	static bool isTimeEvolution(PsimagLite::String op)
 	{
