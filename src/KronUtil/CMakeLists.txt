@@ -1,6 +1,10 @@
 add_library(kronutil KronUtil.cpp util.cpp utilComplex.cpp csc_nnz.cpp)
 target_link_libraries(kronutil PUBLIC psimaglite::psimaglite)
 
+if(BUILD_SHARED_LIBS)
+  install(TARGETS kronutil LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
+
 if(BUILD_TESTING)
   add_executable(KronUtil_Test1 test1.cpp)
   target_link_libraries(KronUtil_Test1 kronutil)
