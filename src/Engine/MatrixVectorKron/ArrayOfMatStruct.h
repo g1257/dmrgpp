@@ -263,8 +263,7 @@ public:
 					const SizeType jcol   = sparse.getCol(k);
 					const SizeType jpatch = index_to_jpatch[jcol];
 
-					bool is_valid_jpatch
-					    = (0 <= jpatch) && (jpatch < jpatchSize);
+					bool is_valid_jpatch = (jpatch < jpatchSize);
 					if (!is_valid_jpatch)
 						continue;
 
@@ -276,8 +275,7 @@ public:
 					const SizeType i1 = offset_ipatch[ipatch];
 
 					const SizeType local_irow = (irow - i1);
-					assert((0 <= local_irow)
-					       && (local_irow < ipatch_Size[ipatch]));
+					assert(local_irow < ipatch_Size[ipatch]);
 
 					(rowPtr1D[indx])[local_irow]++;
 					total_nz[indx]++;
@@ -383,8 +381,7 @@ public:
 					const SizeType jcol   = sparse.getCol(k);
 					const SizeType jpatch = index_to_jpatch[jcol];
 
-					const bool is_valid_jpatch
-					    = (0 <= jpatch) && (jpatch < jpatchSize);
+					const bool is_valid_jpatch = (jpatch < jpatchSize);
 					if (!is_valid_jpatch)
 						continue;
 
