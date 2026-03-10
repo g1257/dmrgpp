@@ -325,8 +325,8 @@ private:
 		ModelTermType& spsm = ModelBaseType::createTerm(connection_name);
 		OpForLinkType  splus(op_name);
 
-		auto valueModiferTerm0 = [&factor = std::as_const(factor)](ComplexOrRealType& value)
-		{ value *= (0.5 * factor); };
+		auto valueModiferTerm0
+		    = [factor](ComplexOrRealType& value) { value *= (0.5 * factor); };
 		spsm.push(splus, 'N', splus, 'C', valueModiferTerm0);
 	}
 
@@ -337,8 +337,7 @@ private:
 		ModelTermType& szsz = ModelBaseType::createTerm(connection_name);
 
 		OpForLinkType sz(op_name);
-		auto valueModiferTerm0 = [&factor = std::as_const(factor)](ComplexOrRealType& value)
-		{ value *= factor; };
+		auto valueModiferTerm0 = [factor](ComplexOrRealType& value) { value *= factor; };
 		szsz.push(sz, 'N', sz, 'N', valueModiferTerm0);
 	}
 
