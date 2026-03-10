@@ -55,7 +55,7 @@ public:
 
 	SizeType currentCoO() const { return currentCoo_; }
 
-	const SizeType pIndexOutput() const { return pIndexOutput_; }
+	SizeType pIndexOutput() const { return pIndexOutput_; }
 
 	VectorWithOffsetType& getCurrentVectorNonConst(PsimagLite::String braOrKet) const
 	{
