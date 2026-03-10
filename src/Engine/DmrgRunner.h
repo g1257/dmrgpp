@@ -118,8 +118,6 @@ private:
 		if (dmrgSolverParams.options.isSet("printgeometry"))
 			std::cout << geometry;
 
-		using ParametersForSolverType
-		    = PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>;
 		using SolverType    = PsimagLite::LanczosSolver<MatrixVectorType>;
 		using ModelBaseType = typename SolverType::MatrixType::ModelType;
 

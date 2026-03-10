@@ -267,6 +267,7 @@ private:
 				break;
 			case LatticePartEnum::LEFT_CORNER:
 				err("applyLocalOpSystem: internal error\n");
+				break;
 			case LatticePartEnum::RIGHT_CORNER:
 				applyLocalOpRightCorner(dest2, src, A, i);
 				break;

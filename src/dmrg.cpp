@@ -36,8 +36,6 @@ void mainLoop3(typename MatrixVectorType::ModelType::SuperGeometryType& geometry
                InputNgType::Readable&                                   io,
                const OperatorOptions&                                   opOptions)
 {
-	typedef PsimagLite::ParametersForSolver<typename MatrixVectorType::RealType>
-	    ParametersForSolverType;
 #ifndef MIN_COMPILE
 	if (dmrgSolverParams.options.isSet("ChebyshevSolver")) {
 		mainLoop4<PsimagLite::ChebyshevSolver<MatrixVectorType>, VectorWithOffsetType>(
@@ -231,6 +229,7 @@ to the main dmrg driver are the following.
 			break;
 		case 'H':
 			options.label = "H";
+			break;
 		case 'U':
 			unbuffered = true;
 			break;
