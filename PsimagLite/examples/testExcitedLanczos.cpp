@@ -23,10 +23,10 @@ int main(int argc, char* argv[])
 	SizeType excited = atoi(argv[1]);
 
 	/* We fill a dense matrix */
-	int                             n = 8;
+	SizeType                        n = 8;
 	PsimagLite::Matrix<ComplexType> m(n, n);
 	// fill m
-	for (int i = 0; i < n; ++i)
+	for (SizeType i = 0; i < n; ++i)
 		m(i, i) = 1.0;
 	m(1, 2) = ComplexType(0.0, 0.5);
 	m(2, 1) = PsimagLite::conj(m(1, 2));

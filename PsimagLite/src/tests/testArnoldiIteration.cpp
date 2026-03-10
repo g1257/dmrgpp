@@ -19,7 +19,7 @@ using VectorType           = std::vector<ComplexOrRealType>;
  * using PsimagLite's ArnoldiSaI solver */
 TEST_CASE("Full ArnoldiIteration of a random matrix", "[ArnoldiIteration]")
 {
-	int                                   n   = 64;
+	SizeType                              n   = 64;
 	double                                max = 10.;
 	double                                min = -4.;
 	PsimagLite::Matrix<ComplexOrRealType> m(n, n);
@@ -31,8 +31,8 @@ TEST_CASE("Full ArnoldiIteration of a random matrix", "[ArnoldiIteration]")
 	std::mt19937                           rng(SEED);
 	std::uniform_real_distribution<double> dist(min, max);
 
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < n; ++j) {
+	for (SizeType i = 0; i < n; ++i) {
+		for (SizeType j = 0; j < n; ++j) {
 			m(i, j) = dist(rng);
 		}
 	}
