@@ -15,7 +15,6 @@ BEGIN {
 	temp_line = $0
 	while (match(temp_line, pattern, matches)) {
 		matched = 1
-		print matches[0]
 		temp_line = substr(temp_line, RSTART + RLENGTH)
 		last_found_float = matches[1]
 	}
@@ -29,10 +28,10 @@ END {
 	last_found_float = last_found_float + 0
 	diff = (last_found_float < expected) ? expected - last_found_float : last_found_float - expected
 	if (diff <= tolerance) {
-		print "Value " last_found_float " within tolerance of " tolerance " diff: " diff
+		printf "Value %e within tolerance of %e of expected value %e diff: %e\n", last_found_float, tolerance, expected, diff
 		exit 0
 	} else {
-		print "FAIL! Value " last_found_float " differs from expected value by " diff
+		printf "FAIL! Value %e differs from expected value %e by %e\n", last_found_float, expected, diff
 		exit 1
 	}
 }

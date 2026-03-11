@@ -19,6 +19,15 @@ if(BUILD_TESTING)
   include(Catch)
 endif()
 
+find_program(AWK NAMES awk mawk gawk)
+
+if(AWK MATCHES ".+-NOTFOUND")
+    message(WARNING "awk (and mawk and gawk) could not be found (${AWK}). As a result numeric checks of application level tests is disabled")
+elseif()
+    message(STATUS "awk found numerical checks of application level
+    tests is enabled")
+endif()
+
 add_subdirectory(PsimagLite)
 add_subdirectory(src)
 
