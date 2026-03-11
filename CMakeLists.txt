@@ -19,6 +19,17 @@ if(BUILD_TESTING)
   include(Catch)
 endif()
 
+find_program(AWK NAMES awk mawk gawk)
+
+if(AWK MATCHES ".+-NOTFOUND")
+  message(
+    WARNING
+      "awk (and mawk and gawk) could not be found (${AWK}). As a result numeric checks of application level tests are disabled"
+  )
+elseif()
+  message(STATUS "awk found numerical checks for application level tests will be enabled.")
+endif()
+
 include(GNUInstallDirs)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 if(APPLE)
