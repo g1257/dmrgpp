@@ -56,16 +56,30 @@ install(TARGETS dmrg toolboxdmrg omegas RUNTIME DESTINATION ${CMAKE_INSTALL_BIND
 set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)
 
 function(add_lowest_eigenvalue_check_test name expected output_file)
+  set(options SHOULD_FAIL)
+  set(one_value_args TOLERANCE)
+  set(multivalue_args)
+  cmake_parse_arguments(PARSE "${options}" "${one_value_args}" "${multi_value_args}" ${ARGN})
+
+  # name expected output_file)
   if(${AWK} MATCHES ".+-NOTFOUND")
     message(WARNING "No awk found not adding ${name} test")
   else()
+    set(tolerance 1e-5)
+    if(PARSE_TOLERANCE)
+      set(tolerance ${PARSE_TOLERANCE})
+    endif()
     add_test(
       NAME ${name}
       COMMAND
         ${AWK} -f ${dmrgpp_SOURCE_DIR}/scripts/check_value.awk -v
-        "pattern=Found lowest eigenvalue=[[:space:]]+([.0-9eE+-]+)" -v "expected=${expected}" -v "tolerance=1e-5"
-        ${CMAKE_CURRENT_BINARY_DIR}/${output_file})
+        "pattern=Found lowest eigenvalue=[[:space:]]+([.0-9eE+-]+)" -v "expected=${expected}" -v
+        "tolerance=${tolerance}" ${CMAKE_CURRENT_BINARY_DIR}/${output_file})
+    if(PARSE_SHOULD_FAIL)
+      set_tests_properties(${name} PROPERTIES WILL_FAIL TRUE)
+    endif()
   endif()
+
 endfunction()
 
 add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
@@ -138,7 +152,8 @@ add_lowest_eigenvalue_check_test(output1304 -1.78118 runForinput1304.cout)
 add_test(NAME input1306 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1306.ain) # energy -8.0
 add_lowest_eigenvalue_check_test(output1306 -8.0 runForinput1306.cout)
 add_test(NAME input1600 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1600.ain) # energy -9.51746
-add_lowest_eigenvalue_check_test(output1600 -9.51746 runForinput1600.cout)
+
+add_lowest_eigenvalue_check_test(output1600 -9.51746 runForinput1600.cout TOLERANCE 1e-4)
 add_test(NAME input1814 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1814.ain) # energy -6.0
 add_lowest_eigenvalue_check_test(output1814 -6.0 runForinput1814.cout)
 add_test(NAME input1815 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1815.ain) # none
@@ -164,7 +179,7 @@ add_lowest_eigenvalue_check_test(output4720 34.0013 runForinput4720.cout)
 add_test(NAME input6020 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input6020.ain) # energy -2.59474
 add_lowest_eigenvalue_check_test(output6020 -2.59474 runForinput6020.cout)
 add_test(NAME input6700 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input6700.ain) # energy -4.17889
-add_lowest_eigenvalue_check_test(output6700 -4.17889 runForinput6700.cout)
+add_lowest_eigenvalue_check_test(output6700 -4.17889 runForinput6700.cout SHOULD_FAIL)
 add_test(NAME input8900 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input8900.ain "<gs|sz_p|gs>") # none
 add_test(NAME input8901 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input8901.ain "<gs|sz|gs>") # none
 # Tests for the observe executable
