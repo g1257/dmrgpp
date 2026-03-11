@@ -1,15 +1,15 @@
 #ifndef IMPURITYSOLVER_DMRG_H
 #define IMPURITYSOLVER_DMRG_H
 
-#include "../../dmrgpp/src/Engine/DmrgRunner.h"
-#include "../../dmrgpp/src/Engine/ManyOmegas.h"
-#include "../../dmrgpp/src/Engine/ProcOmegas.h"
+#include "DmrgRunner.h"
 #include "Geometry/Star.h"
 #include "ImpuritySolverBase.h"
 #include "InputNg.h"
 #include "LanczosSolver.h"
+#include "ManyOmegas.h"
 #include "Matsubaras.h"
 #include "ParamsDmftSolver.h"
+#include "ProcOmegas.h"
 #include "PsiBase64.h"
 #include "PsimagLite.h"
 #include "Vector.h"

@@ -1,13 +1,13 @@
 #ifndef IMPURITYSOLVER_EXACTD_H
 #define IMPURITYSOLVER_EXACTD_H
 
-#include "../../dmrgpp/src/Engine/InputCheck.h"
 #include "BLAS.h"
 #include "BitManip.h"
 #include "CrsMatrix.h"
 #include "ExactDiag/BasisExactDiag.h"
 #include "ExactDiag/ModelParams.h"
 #include "ImpuritySolverBase.h"
+#include "InputCheck.h"
 #include "InputNg.h"
 #include "LanczosSolver.h"
 #include "Matsubaras.h"

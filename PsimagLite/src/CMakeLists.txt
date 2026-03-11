@@ -1,6 +1,6 @@
 # Add -Wextra in the future
 add_library(
-  psimaglite STATIC
+  psimaglite
   MersenneTwister.cpp
   Matrix.cpp
   Mpi.cpp
@@ -62,6 +62,10 @@ target_link_libraries(psimaglite PUBLIC LAPACK::LAPACK)
 find_package(GSL REQUIRED)
 target_compile_definitions(psimaglite PUBLIC USE_GSL)
 target_link_libraries(psimaglite PUBLIC GSL::gsl)
+
+if(BUILD_SHARED_LIBS)
+  install(TARGETS psimaglite LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
+endif()
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
