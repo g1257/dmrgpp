@@ -55,37 +55,29 @@ install(TARGETS dmrg toolboxdmrg omegas RUNTIME DESTINATION ${CMAKE_INSTALL_BIND
 # For dmrg main executable
 set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)
 
-
 function(add_lowest_eigenvalue_check_test name expected output_file)
   if(${AWK} MATCHES ".+-NOTFOUND")
     message(WARNING "No awk found not adding ${name} test")
   else()
-    add_test(NAME ${name}
-    COMMAND ${AWK}
-      -f ${dmrgpp_SOURCE_DIR}/scripts/check_value.awk
-      -v "pattern=Found lowest eigenvalue=[[:space:]]+([.0-9eE+-]+)"
-      -v "expected=${expected}"
-      -v "tolerance=1e-5"
-      ${CMAKE_CURRENT_BINARY_DIR}/${output_file}
-  )
+    add_test(
+      NAME ${name}
+      COMMAND
+        ${AWK} -f ${dmrgpp_SOURCE_DIR}/scripts/check_value.awk -v
+        "pattern=Found lowest eigenvalue=[[:space:]]+([.0-9eE+-]+)" -v "expected=${expected}" -v "tolerance=1e-5"
+        ${CMAKE_CURRENT_BINARY_DIR}/${output_file})
   endif()
 endfunction()
 
 add_test(NAME input2 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input2.ain)
 add_lowest_eigenvalue_check_test(output2 -9.51754 runForinput2.cout)
-
 add_test(NAME input3 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input3.ain) # energy -21.5102
 add_lowest_eigenvalue_check_test(output3 -21.5102 runForinput3.cout)
-
 add_test(NAME input4 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input4.ain) # energy -15.9938
 add_lowest_eigenvalue_check_test(output4 -15.9938 runForinput4.cout)
-
 add_test(NAME input5 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input5.ain) # energy -15.9938
 add_lowest_eigenvalue_check_test(output5 -15.9938 runForinput5.cout)
-
 add_test(NAME input7 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input7.ain) # energy -15.9939
 add_lowest_eigenvalue_check_test(output7 -15.9939 runForinput7.cout)
-
 
 # input8 is too slow (disabled)
 # add_test(NAME input8 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input8.ain)
@@ -147,7 +139,7 @@ add_test(NAME input1306 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1306.ain) # ene
 add_lowest_eigenvalue_check_test(output1306 -8.0 runForinput1306.cout)
 add_test(NAME input1600 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1600.ain) # energy -9.51746
 add_lowest_eigenvalue_check_test(output1600 -9.51746 runForinput1600.cout)
-add_test(NAME input1814 COMMAND ./dmrg -f  ${PATH_TO_INPUTS}/input1814.ain) # energy -6.0
+add_test(NAME input1814 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1814.ain) # energy -6.0
 add_lowest_eigenvalue_check_test(output1814 -6.0 runForinput1814.cout)
 add_test(NAME input1815 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1815.ain) # none
 add_test(NAME input1817 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1817.ain) # none
