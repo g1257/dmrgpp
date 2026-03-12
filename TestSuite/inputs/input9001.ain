@@ -64,21 +64,6 @@ OutputFile=data9001;
 # or SVD
 GsWeight=0.2;
 
-# We use the center site for correlations
-TSPSites=[2];
-
-# Legacy: This is the delay in application
-TSPLoops=[0];
-
-# Legacy: Irrelevant as there's only one operator
-TSPProductOrSum=product;
-
-# We apply c up at the center
-# If you want c down say c?1
-# Note that c is equivalent to c?0
-string TSPOp0:TSPOperator=expression;
-string TSPOp0:OperatorExpression=identity;
-
 # Time evolution parameters
 TSPTau=0.1;
 TSPTimeSteps=3;
