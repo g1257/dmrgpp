@@ -123,14 +123,6 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 			magneticX.clear();
 		}
 
-		try {
-			potentialA.resize(nsites, 0.0);
-			io.read(potentialA, "PotentialA");
-			std::cout << "Has PotentialA\n";
-		} catch (std::exception&) {
-			potentialA.clear();
-		}
-
 		if (magneticX.size() > 0 && magneticX.size() != nsites) {
 			throw PsimagLite::RuntimeError("MagneticFieldX size must be " + ttos(nsites)
 			                               + " entries long, if provided.\n");
@@ -193,7 +185,6 @@ struct ParametersModelHubbard : public ParametersModelBase<RealType, QnType> {
 	VectorRealType potentialV;
 	VectorRealType anisotropy;
 	VectorRealType magneticX;
-	VectorRealType potentialA;
 
 	// for time-dependent H:
 	VectorStringType onSiteHaddLegacy;
