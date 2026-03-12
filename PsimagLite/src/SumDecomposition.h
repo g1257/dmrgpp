@@ -62,7 +62,11 @@ private:
 
 		for (SizeType i = 0; i <= n; ++i) {
 			data[x] = i;
+			// FIXME
+			#pragma GCC diagnostic push
+            #pragma GCC diagnostic ignored "-Warray-bounds"
 			reentrant1_(data, n - i, x + 1);
+			#pragma GCC diagnostic pop
 		}
 	}
 
