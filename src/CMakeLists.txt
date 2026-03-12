@@ -89,6 +89,10 @@ add_test(NAME input170 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input170.ain) # energ
 add_test(NAME input172 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input172.ain) # energy -7
 add_test(NAME input250 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input250.ain) # energy -4.39454
 add_test(NAME input320 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input320.ain) # energy -18.8982
+add_test(NAME input351 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input320.ain) # energy -0.408019
+add_test(NAME input353 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input320.ain) # energy -0.407912
+add_test(NAME input355 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input320.ain) # energy -37.03
+add_test(NAME input356 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input320.ain) # none
 add_test(NAME input501 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input501.ain) # energy -6.77334
 add_test(NAME input550 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input550.ain) # energy -4.66667
 add_test(NAME input1300 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input1300.ain) # energy -2.32264
