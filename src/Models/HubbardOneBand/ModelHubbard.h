@@ -339,8 +339,7 @@ protected:
 	*/
 	void fillModelLinks()
 	{
-		constexpr bool isComplex = PsimagLite::IsComplexNumber<SparseElementType>::True;
-		ModelTermType& hop       = ModelBaseType::createTerm("hopping"); //(A)
+		ModelTermType& hop = ModelBaseType::createTerm("hopping"); //(A)
 
 		auto su2_up = typename ModelTermType::Su2Properties(1, 1, 0);
 		auto su2_do = typename ModelTermType::Su2Properties(1, -1, 1);

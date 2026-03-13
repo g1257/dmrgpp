@@ -38,7 +38,7 @@ unsigned int findTheOne(const std::vector<std::complex<double>>& eigs)
 TEST_CASE("Full Arnoldi shift-and-invert of a random matrix", "[ArnoldiSaI]")
 {
 	/* We fill a dense matrix */
-	int                                   n   = 64;
+	SizeType                              n   = 64;
 	double                                max = 10.;
 	double                                min = -4.;
 	PsimagLite::Matrix<ComplexOrRealType> m(n, n);
@@ -50,8 +50,8 @@ TEST_CASE("Full Arnoldi shift-and-invert of a random matrix", "[ArnoldiSaI]")
 	std::mt19937                           rng(SEED);
 	std::uniform_real_distribution<double> dist(min, max);
 
-	for (int i = 0; i < n; ++i) {
-		for (int j = 0; j < n; ++j) {
+	for (SizeType i = 0; i < n; ++i) {
+		for (SizeType j = 0; j < n; ++j) {
 			m(i, j) = dist(rng);
 		}
 
@@ -76,7 +76,7 @@ TEST_CASE("Full Arnoldi shift-and-invert of a random matrix", "[ArnoldiSaI]")
 
 	// shift first
 	m_copy = m;
-	for (int i = 0; i < n; ++i) {
+	for (SizeType i = 0; i < n; ++i) {
 		m_copy(i, i) -= sigma;
 	}
 
@@ -90,7 +90,8 @@ TEST_CASE("Full Arnoldi shift-and-invert of a random matrix", "[ArnoldiSaI]")
 
 	// Predict for comparison the eigenvalues of the sai
 	ComplexType predicted_eig = 1.0 / (eigenvalues[the_one] - sigma);
-	int         index_inverse = n - 1 - the_one;
+	assert(n >= 1 + the_one);
+	SizeType index_inverse = n - 1 - the_one;
 	REQUIRE(index_inverse < inverse_eigs.size());
 	ComplexType value_inverse = inverse_eigs[index_inverse];
 	CHECK(std::real(predicted_eig) == Catch::Approx(std::real(value_inverse)));

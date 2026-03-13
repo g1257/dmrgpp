@@ -29,7 +29,7 @@ public:
 	SizeType size() const { return 2; }
 };
 
-int main(int argc, char* argv[])
+int main()
 {
 	SizeType                        n = 2;
 	typename Vector<RealType>::Type x(n);

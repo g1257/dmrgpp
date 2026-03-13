@@ -428,7 +428,7 @@ public:
 		}
 	}
 
-	const SizeType tvs() const { return targetVectors_.size(); }
+	SizeType tvs() const { return targetVectors_.size(); }
 
 	VectorWithOffsetType& targetVectorsNonConst(SizeType i) // <--- FIXME
 	{
