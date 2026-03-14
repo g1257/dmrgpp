@@ -439,7 +439,7 @@ for (SizeType dof = 0; dof < numberOfDofs; ++dof) {
 		typename PsimagLite::Vector<VerySparseMatrixType*>::Type vvsm(total, 0);
 		VectorSizeType                                           nzs(total, 0);
 
-		HamiltonianConnectionType hc(lrs, modelLinks_, currentTime, superOpHelper());
+		HamiltonianConnectionType hc(lrs, modelLinks_, currentTime, superOpHelper(), ioIn_);
 
 		for (SizeType m = 0; m < total; ++m) {
 			SizeType offset = lrs.super().partition(m);

@@ -434,7 +434,8 @@ private:
 		const SizeType orbitals = modelParameters_.orbitals;
 		ModelTermType& szsz     = ModelBaseType::createTerm("szsz");
 
-		auto mylambda = [this](ComplexOrRealType& coupling, RealType time, SizeType)
+		auto mylambda
+		    = [this](ComplexOrRealType& coupling, RealType time, std::vector<SizeType>)
 		{ coupling = timeDependentConnection(coupling, time, 2); };
 
 		for (SizeType orb1 = 0; orb1 < orbitals; ++orb1) {

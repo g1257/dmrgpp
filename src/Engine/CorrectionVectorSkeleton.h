@@ -270,7 +270,7 @@ private:
 		const RealType                                fakeTime = 0;
 		typename ModelHelperType::Aux                 aux(p, lrs_);
 		typename ModelType::HamiltonianConnectionType hc(
-		    lrs_, ModelType::modelLinks(), fakeTime, model_.superOpHelper());
+		    lrs_, ModelType::modelLinks(), fakeTime, model_.superOpHelper(), ioIn_);
 		LanczosMatrixType            h(model_, hc, aux);
 		RealType                     E0 = energy_;
 		CorrectionVectorFunctionType cvft(h, tstStruct_, E0);

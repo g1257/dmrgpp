@@ -1,0 +1,35 @@
+##Ainur1.0
+
+# We do 8 sites for now so it goes fast
+# You can change the number of sites
+# here and it should work 
+TotalNumberOfSites=4;
+NumberOfTerms=1;
+GeometryKind="chain";
+GeometryOptions="ConstantValues";
+# Nothing depends on time here 
+# because this is a g.s. run
+# and therefore time = 0
+dir0:Connectors=[1.0];
+
+OutputFile="data9000";
+
+#Model params
+hubbardU=[8.0, ...];
+potentialV=[10000000, 0, 0, 10000000, 10000000, 0, 0, 10000000];
+Model="HubbardOneBand";
+SolverOptions="twositedmrg,usecomplex";
+Version="Pierls";
+InfiniteLoopKeptStates=100;
+FiniteLoops=[[@auto, 500, 0],
+[@auto, 500, 0],
+[@auto, 500, @save]];
+
+# This is Hubbard at half filling
+#TargetElectronsUp=0.5*%n;
+#TargetElectronsDown=0.5*%n;
+
+TargetElectronsUp=1;
+TargetElectronsDown=1;
+
+

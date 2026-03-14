@@ -55,8 +55,8 @@ public:
 	{
 		ComplexOrRealType value
 		    = superGeometry_(smax_, emin_, hItems, oneLink.orbs, termIndexForGeom);
-		SizeType site = findSite(hItems);
-		oneLink.modifier(value, targetTime, site);
+		// SizeType site = findSite(hItems);
+		oneLink.modifier(value, targetTime, hItems);
 		return value;
 	}
 
@@ -73,15 +73,6 @@ public:
 	const SuperGeometryType& superGeometry() const { return superGeometry_; }
 
 private:
-
-	SizeType findSite(const VectorSizeType& hItems) const
-	{
-		ProgramGlobals::ConnectionEnum type = superGeometry_.connectionKind(smax_, hItems);
-		assert(type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON
-		       || type == ProgramGlobals::ConnectionEnum::ENVIRON_SYSTEM);
-		return (type == ProgramGlobals::ConnectionEnum::SYSTEM_ENVIRON) ? hItems[0]
-		                                                                : hItems[1];
-	}
 
 	const SuperGeometryType& superGeometry_;
 	const SizeType           smax_;

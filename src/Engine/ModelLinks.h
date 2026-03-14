@@ -106,7 +106,7 @@ public:
 			    mod1,
 			    op2,
 			    mod2,
-			    [](ComplexOrRealType&, RealType, SizeType) { },
+			    [](ComplexOrRealType&, RealType, std::vector<SizeType>) { },
 			    su2properties);
 		}
 
@@ -130,7 +130,7 @@ public:
 		          OldLambdaType   modifier)
 		{
 			LambdaType newModif
-			    = [modifier](ComplexOrRealType& value, RealType, SizeType)
+			    = [modifier](ComplexOrRealType& value, RealType, std::vector<SizeType>)
 			{ modifier(value); };
 			push(op1, mod1, op2, mod2, newModif, Su2Properties());
 		}
@@ -144,7 +144,7 @@ public:
 			    mod1,
 			    op2,
 			    mod2,
-			    [](ComplexOrRealType&, RealType, SizeType) { },
+			    [](ComplexOrRealType&, RealType, std::vector<SizeType>) { },
 			    Su2Properties());
 		}
 

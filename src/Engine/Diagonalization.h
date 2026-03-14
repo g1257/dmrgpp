@@ -541,7 +541,7 @@ private:
 		const OptionsType& options = parameters_.options;
 
 		HamiltonianConnectionType hc(
-		    lrs, ModelType::modelLinks(), targetTime, model_.superOpHelper());
+		    lrs, ModelType::modelLinks(), targetTime, model_.superOpHelper(), io_);
 
 		bool only_slow_wft = false;
 		if (inf_or_finite.isFinite()) {

@@ -349,7 +349,8 @@ private:
 		    BaseType::lrs(),
 		    ModelType::modelLinks(),
 		    this->common().aoe().timeVectors().time(),
-		    BaseType::model().superOpHelper());
+		    BaseType::model().superOpHelper(),
+		    BaseType::model().ioIn());
 		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(), hc, aux);
 
 		const SizeType   total = phi.effectiveSize(i0);

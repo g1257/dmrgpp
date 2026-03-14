@@ -1066,6 +1066,10 @@ public:
 			return buffer2;
 		}
 
+		Readable(const Readable&) = delete;
+
+		Readable& operator=(const Readable&) = delete;
+
 		// serializr start class InputNgReadable
 		// serializr normal file_
 		String file_;

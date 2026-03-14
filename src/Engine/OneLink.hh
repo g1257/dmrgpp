@@ -9,9 +9,9 @@ template <typename ComplexOrRealType> class OneLink {
 
 public:
 
-	using RealType       = typename PsimagLite::Real<ComplexOrRealType>::Type;
-	using OldLambdaType  = std::function<void(ComplexOrRealType&)>;
-	using LambdaType     = std::function<void(ComplexOrRealType&, RealType, SizeType)>;
+	using RealType      = typename PsimagLite::Real<ComplexOrRealType>::Type;
+	using OldLambdaType = std::function<void(ComplexOrRealType&)>;
+	using LambdaType = std::function<void(ComplexOrRealType&, RealType, std::vector<SizeType>)>;
 	using VectorSizeType = std::vector<SizeType>;
 
 	OneLink(VectorSizeType                     indices_,
@@ -48,7 +48,7 @@ public:
 	    , angularFactor(angularFactor_)
 	    , category(category_)
 	{
-		modifier = [vModifier_](ComplexOrRealType& value, RealType, SizeType)
+		modifier = [vModifier_](ComplexOrRealType& value, RealType, std::vector<SizeType>)
 		{ vModifier_(value); };
 	}
 
