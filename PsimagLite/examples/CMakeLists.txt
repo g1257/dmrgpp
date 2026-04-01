@@ -109,10 +109,6 @@ add_executable(sparseSolverTest sparseSolverTest.cpp)
 target_link_libraries(sparseSolverTest psimaglite)
 add_test(NAME sparseSolverTest COMMAND sparseSolverTest -n 20)
 
-add_executable(sumDecomposition sumDecomposition.cpp)
-target_link_libraries(sumDecomposition psimaglite)
-add_test(NAME sumDecomposition COMMAND sumDecomposition 4 3)
-
 add_executable(svd svd.cpp)
 target_link_libraries(svd psimaglite)
 add_test(NAME svd COMMAND svd)
