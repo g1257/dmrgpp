@@ -26,7 +26,7 @@ if(AWK MATCHES ".+-NOTFOUND")
     WARNING
       "awk (and mawk and gawk) could not be found (${AWK}). As a result numeric checks of application level tests are disabled"
   )
-elseif()
+else()
   message(STATUS "awk found numerical checks for application level tests will be enabled.")
 endif()
 
