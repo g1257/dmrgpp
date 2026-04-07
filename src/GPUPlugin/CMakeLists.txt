@@ -1,16 +1,16 @@
 set(SRC_FILES
-    apply_Htarget_vbatch.c
+    apply_Htarget_vbatch.cpp
     cal_kron_flops.cpp
     dmrg_malloc.cpp
     dmrg_vbatch.cpp
     gen_patches_comb.cpp
     setup_matrix.cpp
     setup_vbatch.cpp
-    unsetup_vbatch.c
+    unsetup_vbatch.cpp
     setup_nC.cpp
     setup_sparse_batch.cpp
     unsetup_sparse_batch.cpp
-    apply_Htarget_sparse.c
+    apply_Htarget_sparse.cpp
     estimate_work.cpp
     BatchedGemm.cpp)
 
