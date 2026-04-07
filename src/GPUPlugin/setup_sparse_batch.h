@@ -2,6 +2,7 @@
 #define SETUP_SPARSE_BATCH_H
 
 #include "dmrg_types.h"
+#include "dmrg_vbatch.h"
 
 template <typename T>
 void setup_sparse_batch(

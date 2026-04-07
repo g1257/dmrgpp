@@ -1,11 +1,10 @@
 #include "setup_sparse_batch.h"
 #include "dmrg_lapack.h"
-#include "dmrg_types.h"
-#include "dmrg_vbatch.h"
 #include "setup_nC.h"
-#include <assert.h>
+
+#include <cassert>
+#include <cmath>
 #include <iostream>
-#include <math.h>
 
 template <typename T>
 void setup_sparse_batch(
