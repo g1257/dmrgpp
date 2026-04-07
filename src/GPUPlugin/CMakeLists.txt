@@ -12,10 +12,9 @@ set(SRC_FILES
     unsetup_sparse_batch.cpp
     apply_Htarget_sparse.c
     estimate_work.cpp
-    BatchedGemm.cpp
-)
+    BatchedGemm.cpp)
 
-add_library(gpuplugin ${SRC_FILES}) 
+add_library(gpuplugin ${SRC_FILES})
 target_include_directories(gpuplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}) # ${PROJECT_SOURCE_DIR}/PsimagLite/src)
 target_link_libraries(gpuplugin PUBLIC psimaglite::psimaglite) # HDF5::HDF5)
 target_compile_definitions(gpuplugin PUBLIC FpType=double)

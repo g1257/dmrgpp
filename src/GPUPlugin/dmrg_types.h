@@ -3,7 +3,6 @@
 
 typedef int IntegerType;
 
-
 #if defined(USE_COMPLEX_Z)
 
 #include <complex.h>
