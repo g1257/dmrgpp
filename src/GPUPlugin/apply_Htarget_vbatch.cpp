@@ -6,8 +6,8 @@
 #include <omp.h>
 #endif
 
-#include <vector>
 #include <cassert>
+#include <vector>
 
 void apply_Htarget_vbatch(IntegerType noperator,
                           IntegerType npatches,
@@ -62,8 +62,8 @@ void apply_Htarget_vbatch(IntegerType noperator,
 	IntegerType batch_size     = ngroups * noperator;
 	IntegerType batch_size_dim = ialign * ICEIL(batch_size, ialign);
 
-	std::vector<FpType> alpha_array_(ngroups_dim);
-	std::vector<FpType> beta_array_(ngroups_dim);
+	std::vector<FpType>  alpha_array_(ngroups_dim);
+	std::vector<FpType>  beta_array_(ngroups_dim);
 	std::vector<FpType*> a_array_(batch_size_dim);
 	std::vector<FpType*> b_array_(batch_size_dim);
 	std::vector<FpType*> c_array_(batch_size_dim);
