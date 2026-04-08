@@ -144,6 +144,9 @@ void apply_Htarget_sparse(IntegerType noperator,
 			assert((1 <= nrowA) && (1 <= ncolA));
 			assert((1 <= nrowB) && (nrowB <= ld_B));
 			assert((1 <= nrowX) && (1 <= ncolX));
+			(void)nrowA;
+			(void)nrowB;
+			(void)nrowX;
 
 			IntegerType nconnector = nC_[indx2f(ipatch, jpatch, npatches)];
 			if (nconnector >= 1) {
@@ -272,6 +275,8 @@ void apply_Htarget_sparse(IntegerType noperator,
 
 				assert((1 <= nrowY) && (1 <= ncolY));
 				assert((1 <= nrowX) && (1 <= ncolX));
+				(void)nrowY;
+				(void)ncolY;
 
 				IntegerType iconnection = 0;
 				for (iconnection = 1; iconnection <= nconnection; iconnection++) {
@@ -418,11 +423,13 @@ void apply_Htarget_sparse(IntegerType noperator,
 				IntegerType ncolX = ncolA;
 
 				assert((1 <= nrowX) && (1 <= ncolX));
+				(void)nrowX;
 
 				IntegerType nrowBX = nrowB;
 				IntegerType ncolBX = ncolX;
 
 				assert((1 <= nrowBX) && (1 <= ncolBX));
+				(void)nrowBX;
 
 				total_columns += (nconnector * ncolBX);
 			};

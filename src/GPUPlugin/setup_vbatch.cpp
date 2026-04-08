@@ -84,6 +84,8 @@ void     print_nnz(SizeType              noperator,
 
 	assert(istat_A == 0);
 	assert(istat_B == 0);
+	(void)istat_A;
+	(void)istat_B;
 }
 
 template <typename T>
@@ -481,6 +483,8 @@ void setup_vbatch(
 		};
 		assert(left_sum == left_max_state);
 		assert(right_sum == right_max_state);
+		(void)left_sum;
+		(void)right_sum;
 
 		for (jpatch = 1; jpatch <= npatches; jpatch++) {
 			for (ipatch = 1; ipatch <= npatches; ipatch++) {

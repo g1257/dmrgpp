@@ -304,6 +304,7 @@ void setup_sparse_batch(
 						IntegerType isok = (1 <= m) && (1 <= n)
 						    && (m <= ld1) && (m <= ld2);
 						assert(isok);
+						(void)isok;
 
 						if (use_Xlacpy) {
 							Xlacpy_(
@@ -327,6 +328,7 @@ void setup_sparse_batch(
 						IntegerType isok = (1 <= m) && (1 <= n)
 						    && (m <= ld1) && (m <= ld2);
 						assert(isok);
+						(void)isok;
 
 						if (use_Xlacpy) {
 							Xlacpy_(
