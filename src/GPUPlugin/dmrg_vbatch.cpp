@@ -294,8 +294,7 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	---------------------
 	*/
 	IntegerType batch_size = 0;
-	SizeType    igroup     = 0;
-	for (igroup = 0; igroup < group_count; igroup++) {
+	for (SizeType igroup = 0; igroup < group_count; igroup++) {
 		batch_size += group_size[igroup];
 	};
 
@@ -381,9 +380,8 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 #endif
 
 	IntegerType idx = 0;
-	for (igroup = 0; igroup < group_count; igroup++) {
-		IntegerType i = 0;
-		for (i = 0; i < group_size[igroup]; i++) {
+	for (SizeType igroup = 0; igroup < group_count; igroup++) {
+		for (IntegerType i = 0; i < group_size[igroup]; i++) {
 			transa_vbatch[idx] = ctransa_array[igroup];
 			transb_vbatch[idx] = ctransb_array[igroup];
 
