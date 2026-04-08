@@ -99,6 +99,9 @@ void apply_Htarget_vbatch(IntegerType noperator,
 		IntegerType nrowX  = right_patch_size_[jpatch - 1];
 		IntegerType ncolX  = left_patch_size_[jpatch - 1];
 		assert((j2 - j1 + 1) == (nrowX * ncolX));
+		(void)j2;
+		(void)nrowX;
+		(void)ncolX;
 
 		/*
 		 --------------------------------------
