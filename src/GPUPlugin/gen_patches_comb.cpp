@@ -117,12 +117,10 @@ SizeType gen_patches_comb(SizeType        left_size,
 	*/
 	for (nleft_down = 0; nleft_down <= max_left_down; nleft_down++) {
 		for (nleft_up = 0; nleft_up <= max_left_up; nleft_up++) {
-
 			SizeType nright_up   = target_up - nleft_up;
 			SizeType nright_down = target_down - nleft_down;
 
-			SizeType isvalid = (0 <= nright_up) && (nright_up <= max_right_up)
-			    && (0 <= nright_down) && (nright_down <= max_right_down);
+			SizeType isvalid = (nright_up <= max_right_up) && (nright_down <= max_right_down);
 			isvalid_left_[indx2f2(1 + nleft_up, 1 + nleft_down, ld_isvalid_left)]
 			    = isvalid ? 1 : 0;
 			isvalid_right_[indx2f2(1 + nright_up, 1 + nright_down, ld_isvalid_right)]
