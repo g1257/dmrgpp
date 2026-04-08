@@ -6,6 +6,9 @@
 #include <omp.h>
 #endif
 
+#include <vector>
+#include <cassert>
+
 void apply_Htarget_vbatch(IntegerType noperator,
                           IntegerType npatches,
                           IntegerType left_patch_start_[],
@@ -39,8 +42,8 @@ void apply_Htarget_vbatch(IntegerType noperator,
 	IntegerType left_max_states  = left_patch_start_[npatches] - 1;
 	IntegerType right_max_states = right_patch_start_[npatches] - 1;
 
-	IntegerType left_patch_size_[npatches];
-	IntegerType right_patch_size_[npatches];
+	std::vector<IntegerType> left_patch_size_(npatches);
+	std::vector<IntegerType> right_patch_size_(npatches);
 
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
 		IntegerType L1 = left_patch_start_[ipatch - 1];
@@ -59,22 +62,22 @@ void apply_Htarget_vbatch(IntegerType noperator,
 	IntegerType batch_size     = ngroups * noperator;
 	IntegerType batch_size_dim = ialign * ICEIL(batch_size, ialign);
 
-	FpType  alpha_array_[ngroups_dim];
-	FpType  beta_array_[ngroups_dim];
-	FpType* a_array_[batch_size_dim];
-	FpType* b_array_[batch_size_dim];
-	FpType* c_array_[batch_size_dim];
+	std::vector<FpType> alpha_array_(ngroups_dim);
+	std::vector<FpType> beta_array_(ngroups_dim);
+	std::vector<FpType*> a_array_(batch_size_dim);
+	std::vector<FpType*> b_array_(batch_size_dim);
+	std::vector<FpType*> c_array_(batch_size_dim);
 
-	IntegerType m_array_[ngroups_dim];
-	IntegerType n_array_[ngroups_dim];
-	IntegerType k_array_[ngroups_dim];
-	IntegerType group_size_[ngroups_dim];
-	IntegerType lda_array_[batch_size_dim];
-	IntegerType ldb_array_[batch_size_dim];
-	IntegerType ldc_array_[batch_size_dim];
+	std::vector<IntegerType> m_array_(ngroups_dim);
+	std::vector<IntegerType> n_array_(ngroups_dim);
+	std::vector<IntegerType> k_array_(ngroups_dim);
+	std::vector<IntegerType> group_size_(ngroups_dim);
+	std::vector<IntegerType> lda_array_(batch_size_dim);
+	std::vector<IntegerType> ldb_array_(batch_size_dim);
+	std::vector<IntegerType> ldc_array_(batch_size_dim);
 
-	char transa_array_[ngroups_dim];
-	char transb_array_[ngroups_dim];
+	std::vector<char> transa_array_(ngroups_dim);
+	std::vector<char> transb_array_(ngroups_dim);
 
 	IntegerType nrowA = left_max_states;
 	IntegerType ncolA = nrowA;
@@ -166,21 +169,21 @@ void apply_Htarget_vbatch(IntegerType noperator,
 	 */
 
 	time_1st_vbatch = -dmrg_get_wtime();
-	dmrg_Xgemm_vbatch(transa_array_,
-	                  transb_array_,
-	                  m_array_,
-	                  n_array_,
-	                  k_array_,
-	                  alpha_array_,
-	                  a_array_,
-	                  lda_array_,
-	                  b_array_,
-	                  ldb_array_,
-	                  beta_array_,
-	                  c_array_,
-	                  ldc_array_,
+	dmrg_Xgemm_vbatch(transa_array_.data(),
+	                  transb_array_.data(),
+	                  m_array_.data(),
+	                  n_array_.data(),
+	                  k_array_.data(),
+	                  alpha_array_.data(),
+	                  a_array_.data(),
+	                  lda_array_.data(),
+	                  b_array_.data(),
+	                  ldb_array_.data(),
+	                  beta_array_.data(),
+	                  c_array_.data(),
+	                  ldc_array_.data(),
 	                  ngroups,
-	                  group_size_);
+	                  group_size_.data());
 	time_1st_vbatch += dmrg_get_wtime();
 	gflops1 = gflops1 / (giga);
 
@@ -204,6 +207,8 @@ void apply_Htarget_vbatch(IntegerType noperator,
 		IntegerType isok = ((R2 - R1 + 1) == right_patch_size_[ipatch - 1])
 		    && ((L2 - L1 + 1) == left_patch_size_[ipatch - 1]);
 		assert(isok);
+		(void)i2;
+		(void)isok;
 
 		FpType*     YI     = &(Y_[i1 - 1]);
 		IntegerType nrowYI = R2 - R1 + 1;
@@ -244,21 +249,21 @@ void apply_Htarget_vbatch(IntegerType noperator,
 	 ------------------
 	 */
 	time_2nd_vbatch = -dmrg_get_wtime();
-	dmrg_Xgemm_vbatch(transa_array_,
-	                  transb_array_,
-	                  m_array_,
-	                  n_array_,
-	                  k_array_,
-	                  alpha_array_,
-	                  a_array_,
-	                  lda_array_,
-	                  b_array_,
-	                  ldb_array_,
-	                  beta_array_,
-	                  c_array_,
-	                  ldc_array_,
+	dmrg_Xgemm_vbatch(transa_array_.data(),
+	                  transb_array_.data(),
+	                  m_array_.data(),
+	                  n_array_.data(),
+	                  k_array_.data(),
+	                  alpha_array_.data(),
+	                  a_array_.data(),
+	                  lda_array_.data(),
+	                  b_array_.data(),
+	                  ldb_array_.data(),
+	                  beta_array_.data(),
+	                  c_array_.data(),
+	                  ldc_array_.data(),
 	                  ngroups,
-	                  group_size_);
+	                  group_size_.data());
 	time_2nd_vbatch += dmrg_get_wtime();
 	gflops2 = gflops2 / (giga);
 
