@@ -486,6 +486,7 @@ SizeType gen_patches_comb(SizeType        left_size,
 			SizeType isvalid = (left_patch_size_[ipatch - 1] > 0)
 			    && (right_patch_size_[ipatch - 1] > 0);
 			assert(isvalid);
+			(void)isvalid;
 		};
 	}
 
