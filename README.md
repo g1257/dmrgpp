@@ -215,3 +215,38 @@ name runForinput2.cout you may use
 <code>./dmrg -f ../TestSuite/inputs/input2.ain -l myoutputfile</code>
 If you would like stdout be written to the terminal say -l -
 
+# Development
+## Code map
+There are four packages in this repo.
+
+### DMRG proper
+      This module implements the DMRG algorithm; it has as it main executable ```dmrg```, as
+      a postprocessing executable ```observe```, as introspection ```introspect```, and
+      for MPI runs over frequencies ```manyomegas```.
+
+      This module has the following directories or sub-modules:
+      Engine, which contain model and geometry independent code,
+      Models, which contain the DMRG++ models available.
+      KronUtil, which contains utilities for Kronecker products.
+
+### PsimagLite
+      This modules contains (1) utilities needed by the other modules, (2) Geometries
+      for both DMRG proper and for LanczosPlusPlus, (3) AST for abstract syntax tree virtual "machine",
+      (4) Ainur for our input format used by all executables that read an input file
+
+### LanczosPlusPlus
+      This module contains the code to solve Hamiltonians (ground state, time evolution, frequency, temperature)
+      exactly with a Lanczos method. It can be used to obtain results for small systems or to test results
+      produced by the DMRG proper module, again for small geometries. The LanczosPlusPlus module includes
+      Engine for model-independent code, and Models for the model implementation, which differs from DMRG models even
+      if they refer to the same model as the interface needs to be different. The executable lanczos takes
+      input files in Ainur format and that can be exactly the same as those use by the dmrg executable (in DMRG module)
+      (and ignores DMRG specific settings) so that it facilitates comparison between DMRG results and LanczosPlusPlus results.
+      Note that the Lanczos algorithm proper is in PsimagLite, and not in this module
+
+### Cincuenta
+      This modules implements a DMFT (and in the future a DCA) self-consistency loop with DMRG as impurity solver or (for testing)
+      with Lanczos as an impurity solver. It takes inputs in Ainur format and can run in distributed memory with MPI, one rank for
+      each frequency. It uses PsimagLite, LanczosPlusPlus, and DMRG proper.
+      Cincuenta should have only one directory for code and maybe one for scripts.
+
