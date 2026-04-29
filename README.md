@@ -217,6 +217,9 @@ If you would like stdout be written to the terminal say -l -
 
 # Development
 ## Code map
+
+![code map](doc/codemap.png)
+
 There are four packages in this repo.
 
 ### DMRG proper
