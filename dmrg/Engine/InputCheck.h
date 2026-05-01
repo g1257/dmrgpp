@@ -77,10 +77,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef INPUT_CHECK_H
 #define INPUT_CHECK_H
-#include "../../PsimagLite/src/Options.h"
 #include "Geometry/Geometry.h"
 #include "MatrixVectorKron/BatchedGemmInclude.hh"
 #include "ProgramGlobals.h"
+#include <Utilities/Options.h>
 #include <stdexcept>
 #include <vector>
 

@@ -82,10 +82,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "../FeAsModel/HilbertSpaceFeAs.h"
 #include "ModelBase.h"
 #include "ParametersGraphene.h"
-// #include "CrsMatrix.h"
-#include "../../../PsimagLite/src/Vector.h"
 #include "ProgramGlobals.h"
 #include "VerySparseMatrix.h"
+#include <Utilities/Vector.h>
 #include <numeric>
 
 namespace Dmrg {

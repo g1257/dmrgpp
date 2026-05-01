@@ -175,8 +175,7 @@ int main(int argc, char** argv)
 	// print license
 	if (ConcurrencyType::root()) {
 		std::cerr << license;
-		std::cerr << "Lanczos++ Version " << LANCZOSPP_VERSION << "\n";
-		std::cerr << "PsimagLite version " << PSIMAGLITE_VERSION << "\n";
+		std::cerr << "DMRG++ Version " << DMRGPP_VERSION << "\n";
 	}
 
 	if (versionOnly)

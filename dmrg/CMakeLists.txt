@@ -11,7 +11,7 @@ add_subdirectory(KronUtil)
 add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp)
 target_sources(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} Engine)
-target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)
+target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite psimaglite::io)
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)

@@ -134,15 +134,6 @@ add_executable(testInputNg testInputNg.cpp)
 target_link_libraries(testInputNg psimaglite)
 add_test(NAME testInputNg COMMAND testInputNg ${INPUTS_DIR}/testInput.ain)
 
-add_executable(testIoNg testIoNg.cpp)
-target_link_libraries(testIoNg psimaglite)
-add_test(NAME testIoNg COMMAND testIoNg)
-
-add_executable(testIoNgBoolean testIoNgBoolean.cpp)
-target_link_libraries(testIoNgBoolean psimaglite)
-add_test(NAME testIoNgBoolean0 COMMAND testIoNgBoolean 0)
-add_test(NAME testIoNgBoolean1 COMMAND testIoNgBoolean 1)
-
 add_executable(testIsClass testIsClass.cpp)
 target_link_libraries(testIsClass psimaglite)
 add_test(NAME testIsClass COMMAND testIsClass)
