@@ -34,4 +34,4 @@ add_subdirectory(PsimagLite)
 add_subdirectory(dmrg)
 
 add_subdirectory(cincuenta/src)
-add_subdirectory(LanczosPlusPlus/src)
+add_subdirectory(LanczosPlusPlus)
