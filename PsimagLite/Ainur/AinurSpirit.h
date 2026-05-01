@@ -1,10 +1,10 @@
 #ifndef _AINUR_SPIRIT_H_
 #define _AINUR_SPIRIT_H_
-#include "../PsimagLite.h"
-#include "../TypeToString.h"
-#include "../Vector.h"
 #include "AinurLexical.h"
 #include "AinurState.h"
+#include <Utilities/PsimagLite.h>
+#include <Utilities/TypeToString.h>
+#include <Utilities/Vector.h>
 #include <fstream>
 #include <iostream>
 #include <string>

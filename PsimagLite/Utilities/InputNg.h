@@ -81,12 +81,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef INPUT_NG_H
 #define INPUT_NG_H
 
-#include "Ainur/Ainur.h"
 #include "Map.h"
 #include "Matrix.h"
 #include "PsiBase64.h"
 #include "Vector.h"
-#include "loki/TypeTraits.h"
+#include <Ainur/Ainur.h>
+#include <Loki/TypeTraits.h>
 #include <algorithm>
 #include <cassert>
 #include <cstdlib>

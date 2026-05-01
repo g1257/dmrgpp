@@ -15,11 +15,11 @@ Please see full open source license included in file LICENSE.
 *********************************************************
 
 */
-#include "../src/Concurrency.h"
+#include <Utilities/Concurrency.h>
 #include <cstdlib>
 #include <iostream>
 #define USE_PTHREADS_OR_NOT_NG
-#include "../src/Parallelizer.h"
+#include <Utilities/Parallelizer.h>
 
 class InnerHelper {
 

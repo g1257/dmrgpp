@@ -1,8 +1,8 @@
 #ifndef AINURCONVERT_HH
 #define AINURCONVERT_HH
-#include "../Matrix.h"
-#include "../PsimagLite.h"
 #include "AinurMacros.hh"
+#include <Utilities/Matrix.h>
+#include <Utilities/PsimagLite.h>
 
 namespace PsimagLite {
 

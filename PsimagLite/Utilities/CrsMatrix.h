@@ -81,11 +81,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define CRSMATRIX_HEADER_H
 #include "BLAS.h"
 #include "Complex.h"
-#include "Io/IoSerializerStub.h"
 #include "Matrix.h"
 #include "NotMpi.h"
 #include "Sort.h"
-#include "loki/TypeTraits.h"
+#include <Io/IoSerializerStub.h>
+#include <Loki/TypeTraits.h>
 #include <algorithm>
 #include <cassert>
 #include <fstream>

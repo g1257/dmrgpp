@@ -16,7 +16,7 @@ Please see full open source license included in file LICENSE.
 */
 #ifndef PSI_NODE_H
 #define PSI_NODE_H
-#include "TypeToString.h"
+#include <Utilities/TypeToString.h>
 #include <Utilities/Vector.h>
 #include <cassert>
 

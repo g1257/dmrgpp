@@ -1,6 +1,6 @@
 #ifndef AINURMACROS_HH
 #define AINURMACROS_HH
-#include "../PsimagLite.h"
+#include <Utilities/PsimagLite.h>
 #include <map>
 #include <string>
 
