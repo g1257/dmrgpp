@@ -78,8 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef MPINO_HEADER_H
 #define MPINO_HEADER_H
-#include "../loki/TypeTraits.h"
 #include "Vector.h"
+#include <Loki/TypeTraits.h>
 #include <algorithm>
 #include <stdexcept>
 

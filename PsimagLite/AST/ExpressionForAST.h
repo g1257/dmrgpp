@@ -16,9 +16,9 @@ Please see full open source license included in file LICENSE.
 */
 #ifndef EXPRESSIONFORAST_H
 #define EXPRESSIONFORAST_H
-#include "../Vector.h"
 #include "Node.h"
 #include "Tree.h"
+#include <Utilities/Vector.h>
 
 namespace PsimagLite {
 

@@ -16,10 +16,10 @@ Please see full open source license included in file LICENSE.
 */
 #ifndef PSI_LUS_MINUS_MULT_DIV_H
 #define PSI_LUS_MINUS_MULT_DIV_H
-#include "../PsimagLite.h"
-#include "../Vector.h"
 #include "AdditionalFunctions.h"
 #include "Node.h"
+#include <Utilities/PsimagLite.h>
+#include <Utilities/Vector.h>
 #include <cassert>
 
 namespace PsimagLite {

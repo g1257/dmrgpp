@@ -1,7 +1,7 @@
 #ifndef PSI_TYPETOH5_H
 #define PSI_TYPETOH5_H
-#include "../AllocatorCpu.h"
 #include <H5Cpp.h>
+#include <Utilities/AllocatorCpu.h>
 
 namespace PsimagLite {
 

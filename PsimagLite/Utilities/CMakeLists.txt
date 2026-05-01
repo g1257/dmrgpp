@@ -10,13 +10,9 @@ add_library(
   PsimagLite.cpp
   PsiBase64.cpp
   SpecialFunctions.cpp
-  Io/TypeToH5.cpp
   TridiagonalMatrix.cpp
-  PredicateSimple.cpp
-  Ainur/AinurSpirit.cpp
-  Ainur/AinurConvert.cpp)
-target_include_directories(psimaglite PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Io
-                                             ${CMAKE_CURRENT_SOURCE_DIR}/Ainur)
+  PredicateSimple.cpp)
+target_include_directories(psimaglite PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_compile_features(psimaglite PUBLIC cxx_std_17)
 target_link_libraries(psimaglite PUBLIC loki)
@@ -64,14 +60,4 @@ endif()
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
-
-  configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Ainur/function.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
-  add_executable(Ainur_Test1 Ainur/test.cpp)
-  target_link_libraries(Ainur_Test1 psimaglite::psimaglite)
-  add_test(NAME Ainur_Test1 COMMAND Ainur_Test1 ${CMAKE_CURRENT_SOURCE_DIR}/Ainur/prelude.ain
-                                    ${CMAKE_CURRENT_SOURCE_DIR}/Ainur/input0.ain)
-
-  add_executable(Ainur_Test2 Ainur/testReal.cpp)
-  target_link_libraries(Ainur_Test2 psimaglite::psimaglite)
-  add_test(NAME Ainur_Test2 COMMAND Ainur_Test2 ${CMAKE_CURRENT_SOURCE_DIR}/Ainur/input1.ain)
 endif()

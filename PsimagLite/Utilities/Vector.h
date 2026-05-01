@@ -26,9 +26,9 @@ Please see full open source license included in file LICENSE.
 #ifndef PSIVECTOR_H_
 #define PSIVECTOR_H_
 
-#include "../loki/TypeTraits.h"
 #include "AllocatorCpu.h"
 #include "Complex.h"
+#include <Loki/TypeTraits.h>
 #include <iostream>
 #include <stdexcept>
 #include <vector>
