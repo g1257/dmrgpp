@@ -2,6 +2,7 @@
 #define GEOMETRY_EX_H
 
 #include "Vector.h"
+#include <cassert>
 
 #ifndef USE_MS_GEOMETRY
 
