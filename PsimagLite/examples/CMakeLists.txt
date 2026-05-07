@@ -131,7 +131,7 @@ target_link_libraries(testGemmR2 psimaglite)
 # add_test(NAME testGemmR2 COMMAND testGemmR2)
 
 add_executable(testInputNg testInputNg.cpp)
-target_link_libraries(testInputNg psimaglite)
+target_link_libraries(testInputNg psimaglite ainur)
 add_test(NAME testInputNg COMMAND testInputNg ${INPUTS_DIR}/testInput.ain)
 
 add_executable(testIsClass testIsClass.cpp)
@@ -147,7 +147,7 @@ target_link_libraries(testLanczosMatrixInFile psimaglite)
 add_test(NAME testLanczosMatrixInFile COMMAND testLanczosMatrixInFile ${INPUTS_DIR}/matrix.txt)
 
 add_executable(testLapack testLapack.cpp)
-target_link_libraries(testLapack psimaglite)
+target_link_libraries(testLapack psimaglite ainur)
 add_test(NAME testLapack COMMAND testLapack)
 
 # I leave this test on for now but it really needs -DUSE_PTHREADS

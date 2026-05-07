@@ -24,11 +24,11 @@ target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Observe executable
 add_executable(observe observe.cpp ObserveDriver0.cpp ObserveDriver1.cpp ObserveDriver2.cpp)
-target_link_libraries(observe dmrgpp_utils kronutil)
+target_link_libraries(observe dmrgpp_utils kronutil psimaglite::ainur)
 
 # Toolbox executable
 add_executable(toolboxdmrg toolboxdmrg.cpp)
-target_link_libraries(toolboxdmrg dmrgpp_utils)
+target_link_libraries(toolboxdmrg dmrgpp_utils psimaglite::ainur)
 
 # Many omegas executable
 add_executable(omegas manyOmegas.cpp)
@@ -36,7 +36,7 @@ target_link_libraries(omegas dmrgpp_utils dmrg_runner)
 
 # Introspect executable
 add_executable(introspect introspect.cpp)
-target_link_libraries(introspect dmrgpp_utils dmrg_runner)
+target_link_libraries(introspect dmrgpp_utils dmrg_runner psimaglite::ainur)
 
 add_subdirectory(GPUPlugin)
 

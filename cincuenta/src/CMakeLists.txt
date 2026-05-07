@@ -2,10 +2,10 @@
 # command and info from dmrgpp/src
 
 add_executable(cincuenta cincuenta.cpp)
-target_link_libraries(cincuenta PUBLIC dmrgpp_utils lanczos_globals dmrg_runner kronutil)
+target_link_libraries(cincuenta PUBLIC dmrgpp_utils dmrg_runner kronutil psimaglite::ainur)
 
 add_executable(freeGimp freeGimp.cpp)
-target_link_libraries(freeGimp PUBLIC dmrgpp_utils kronutil)
+target_link_libraries(freeGimp PUBLIC dmrgpp_utils kronutil psimaglite::ainur)
 
 install(TARGETS cincuenta freeGimp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 

@@ -15,6 +15,7 @@ add_library(
 target_include_directories(psimaglite PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 
 target_compile_features(psimaglite PUBLIC cxx_std_17)
+target_compile_definitions(psimaglite PUBLIC USE_BOOST)
 target_link_libraries(psimaglite PUBLIC loki)
 
 add_library(psimaglite::psimaglite ALIAS psimaglite)
