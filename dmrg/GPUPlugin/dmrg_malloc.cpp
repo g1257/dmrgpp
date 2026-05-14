@@ -13,8 +13,8 @@ IntegerType dmrg_is_managed(const void* ptr)
 	IntegerType       is_managed = lfalse;
 
 #ifdef USE_MAGMA
-	struct cudaPoIntegerTypeerAttributes attribute;
-	cudaError_t ierr = cudaPoIntegerTypeerGetAttributes(&attribute, ptr);
+	struct cudaPointerAttributes attribute;
+	cudaError_t                  ierr = cudaPointerGetAttributes(&attribute, ptr);
 
 #if defined(CUDART_VERSION) && (CUDART_VERSION >= 10000)
 	is_managed = (ierr == cudaSuccess) && (attribute.type == cudaMemoryTypeManaged);
@@ -31,8 +31,11 @@ void dmrg_set_readonly(void* devPtr, size_t nbytes, IntegerType device)
 	if (dmrg_is_managed(devPtr)) {
 
 		/* cudaMemoryAdvise advice = cudaMemAdviseSetReadMostly; */
+		cudaMemLocation gpuLocation;
+		gpuLocation.type = cudaMemLocationTypeDevice; // or cudaMemLocationTypeHostNuma
+		gpuLocation.id   = device;
 		cudaError_t istat
-		    = cudaMemAdvise(devPtr, nbytes, cudaMemAdviseSetReadMostly, device);
+		    = cudaMemAdvise(devPtr, nbytes, cudaMemAdviseSetReadMostly, gpuLocation);
 		if (istat != cudaSuccess) {
 			fprintf(stderr, "dmrg_set_readonly: %s\n", cudaGetErrorString(istat));
 		};
@@ -45,8 +48,11 @@ void dmrg_unset_readonly(void* devPtr, size_t nbytes, IntegerType device)
 	if (dmrg_is_managed(devPtr)) {
 
 		/* cudaMemoryAdvise advice = cudaMemAdviseUnsetReadMostly; */
+		cudaMemLocation gpuLocation;
+		gpuLocation.type = cudaMemLocationTypeDevice; // or cudaMemLocationTypeHostNuma
+		gpuLocation.id   = device;
 		cudaError_t istat
-		    = cudaMemAdvise(devPtr, nbytes, cudaMemAdviseUnsetReadMostly, device);
+		    = cudaMemAdvise(devPtr, nbytes, cudaMemAdviseUnsetReadMostly, gpuLocation);
 		if (istat != cudaSuccess) {
 			fprintf(stderr, "dmrg_set_readonly: %s\n", cudaGetErrorString(istat));
 		};
@@ -74,10 +80,10 @@ template <typename T> T* dmrg_malloc(const size_t alloc_size, SizeType size)
 	T* ptr = NULL;
 #ifdef USE_MAGMA
 	{
-		const unsigned IntegerType flags  = cudaMemAttachGlobal;
-		const size_t               nbytes = (alloc_size > 0) ? alloc_size : 1;
-		cudaError_t                ierr   = cudaMallocManaged(&ptr, nbytes, flags);
-		IntegerType                isok   = (ierr == cudaSuccess);
+		auto        flags  = cudaMemAttachGlobal;
+		size_t      nbytes = (alloc_size > 0) ? alloc_size : 1;
+		cudaError_t ierr   = cudaMallocManaged(&ptr, nbytes, flags);
+		IntegerType isok   = (ierr == cudaSuccess);
 		if (!isok) {
 			fprintf(stderr, "dmrg_malloc: CUDA ERROR %s\n", cudaGetErrorString(ierr));
 
@@ -108,10 +114,13 @@ template <typename T> T* dmrg_malloc(const size_t alloc_size, SizeType size)
 		CUresult     istat  = cuMemAdvise(devPtr, count, advice, device);
 		assert(istat == CUDA_SUCCESS);
 #else
-		IntegerType device = 0;
-		size_t      count  = alloc_size;
+		IntegerType     device = 0;
+		cudaMemLocation gpuLocation;
+		gpuLocation.type  = cudaMemLocationTypeDevice; // or cudaMemLocationTypeHostNuma
+		gpuLocation.id    = device;
+		size_t      count = alloc_size;
 		cudaError_t ierr
-		    = cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, device);
+		    = cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, gpuLocation);
 		assert(ierr == cudaSuccess);
 #endif
 	}
@@ -134,8 +143,8 @@ void dmrg_lacpy(const char*       uplo,
                 const IntegerType ld_dest)
 {
 #ifdef USE_MAGMA
-	const IntegerType is_upper = (uplo == 'U') || (uplo == 'u');
-	const IntegerType is_lower = (uplo == 'L') || (uplo == 'l');
+	const IntegerType is_upper = (*uplo == 'U') || (*uplo == 'u');
+	const IntegerType is_lower = (*uplo == 'L') || (*uplo == 'l');
 	const IntegerType is_full  = (!is_upper) && (!is_lower);
 
 	IntegerType is_block_copy = is_full && (m == ld_src) && (m == ld_dest);
@@ -197,14 +206,25 @@ void dmrg_prefetch_to_device(void* unified_memory_ptr, size_t nbytes, IntegerTyp
 		istat                = cudaGetDevice(&deviceId);
 		assert(istat == cudaSuccess);
 
+		cudaMemLocation gpuLocation;
+		gpuLocation.type = cudaMemLocationTypeDevice; // or cudaMemLocationTypeHostNuma
+		gpuLocation.id   = deviceId;
+
 		struct cudaDeviceProp p;
 		istat = cudaGetDeviceProperties(&p, deviceId);
 		assert(istat == cudaSuccess);
 
 		if (p.concurrentManagedAccess) {
-			cudaStream_t stream = 0;
-			const void*  devPtr = unified_memory_ptr;
-			istat = cudaMemPrefetchAsync(devPtr, nbytes, deviceId, stream);
+			cudaStream_t stream;
+			cudaError_t  result = cudaStreamCreate(&stream);
+			if (result != cudaSuccess) {
+				// Handle error
+				fprintf(stderr,
+				        "cudaStreamCreate failed: %s\n",
+				        cudaGetErrorString(result));
+			}
+			const void* devPtr = unified_memory_ptr;
+			istat = cudaMemPrefetchAsync(devPtr, nbytes, gpuLocation, 0, stream);
 			assert(istat == cudaSuccess);
 
 			istat = cudaDeviceSynchronize();
@@ -218,12 +238,13 @@ template <typename T> void dmrg_free(T* ptr)
 {
 #ifdef USE_MAGMA
 	{
+		assert(ptr != 0);
 		cudaError_t ierr = cudaFree(ptr);
 		IntegerType isok = (ierr == cudaSuccess);
 		if (!isok) {
 			fprintf(stderr, "dmrg_free: CUDA ERROR %s\n", cudaGetErrorString(ierr));
 
-			if (ierr == cudaErrorInvalidDevicePoIntegerTypeer) {
+			if (ierr == cudaErrorInvalidDevicePointer) {
 				fprintf(stderr, "dmrg_free: cudaErrorInvalidDevicePointer \n");
 			} else if (ierr == cudaErrorIllegalAddress) {
 				fprintf(stderr, "dmrg_free: cudaErrorIllegalAddress \n");
@@ -240,9 +261,17 @@ template <typename T> void dmrg_free(T* ptr)
 #endif
 }
 
-template MYTYPE* dmrg_malloc<MYTYPE>(const size_t alloc_size, SizeType size);
-template void    dmrg_free<MYTYPE>(MYTYPE*);
-template void    dmrg_lacpy<MYTYPE>(const char*       uplo,
+template char*        dmrg_malloc<char>(const size_t alloc_size, SizeType size);
+template void         dmrg_free<char>(char*);
+template IntegerType* dmrg_malloc<IntegerType>(const size_t alloc_size, SizeType size);
+template void         dmrg_free<IntegerType>(IntegerType*);
+template MYTYPE*      dmrg_malloc<MYTYPE>(const size_t alloc_size, SizeType size);
+
+template MYTYPE** dmrg_malloc<MYTYPE*>(const size_t alloc_size, SizeType size);
+template void     dmrg_free<MYTYPE*>(MYTYPE**);
+
+template void dmrg_free<MYTYPE>(MYTYPE*);
+template void dmrg_lacpy<MYTYPE>(const char*       uplo,
                                  const IntegerType m,
                                  const IntegerType n,
                                  const MYTYPE*     src,
@@ -261,10 +290,13 @@ template void    dmrg_lacpy<double>(const char*       uplo,
                                  double*           dest,
                                  const IntegerType ld_dest);
 #else
-template void                  dmrg_free<std::complex<double>>(std::complex<double>*);
-template std::complex<double>* dmrg_malloc<std::complex<double>>(const size_t alloc_size,
+template void                   dmrg_free<std::complex<double>>(std::complex<double>*);
+template std::complex<double>*  dmrg_malloc<std::complex<double>>(const size_t alloc_size,
                                                                  SizeType     size);
-template void                  dmrg_lacpy<std::complex<double>>(const char*                 uplo,
+template std::complex<double>** dmrg_malloc<std::complex<double>*>(const size_t alloc_size,
+                                                                   SizeType     size);
+template void                   dmrg_free<std::complex<double>*>(std::complex<double>**);
+template void                   dmrg_lacpy<std::complex<double>>(const char*                 uplo,
                                                const IntegerType           m,
                                                const IntegerType           n,
                                                const std::complex<double>* src,

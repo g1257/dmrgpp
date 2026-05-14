@@ -1,9 +1,6 @@
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"
 #include <cassert>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
 template <typename T>
 void apply_Htarget_sparse(SizeType                 noperator,
@@ -41,15 +38,16 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	T* X_ = &(Xin_[0]);
 	T* Y_ = &(Yout_[0]);
 #ifdef USE_MAGMA
-	const IntegerType ltrue           = (1 == 1);
+	/*const IntegerType ltrue           = (1 == 1);
 	IntegerType       need_allocate_X = ltrue;
 	IntegerType       need_allocate_Y = ltrue;
-	/*
-	IntegerType need_allocate_X = !dmrg_is_managed( Xin_ );
-	IntegerType need_allocate_Y = !dmrg_is_managed( Yout_ );
 	*/
-
+	IntegerType need_allocate_X = !dmrg_is_managed(Xin_);
+	IntegerType need_allocate_Y = !dmrg_is_managed(Yout_);
+	std::cout << "apply_Htarget_sparse: need_allocate_X = " << need_allocate_X
+	          << " need_allocate_Y = " << need_allocate_Y << std::endl;
 #endif
+	assert(X_ != nullptr);
 
 	/*
 	 ------------------
@@ -92,8 +90,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 		nbytes_X = sizeof(T) * xy_size_dim;
 		T* X_    = new T[xy_size_dim];
 
-		assert(X_ != NULL);
-#ifdef USE_MAGMA
+		assert(X_ != nullptr);
 		{
 			IntegerType ngpu         = dmrg_get_ngpu();
 			IntegerType igpu         = 0;
@@ -106,20 +103,20 @@ void apply_Htarget_sparse(SizeType                 noperator,
 				dmrg_prefetch_to_device((void*)pX, X_inc_nbytes, igpu);
 			};
 		}
-#endif
 		void*  dest  = (void*)&(X_[0]);
 		void*  src   = (void*)&(Xin_[0]);
 		size_t count = sizeof(T) * xy_size;
 		dmrg_memcpy(dest, src, count);
-	};
+	}
 
 	if (need_allocate_Y) {
 		nbytes_Y = sizeof(T) * xy_size_dim;
 		T* Y_    = new T[xy_size_dim];
 		assert(Y_ != NULL);
-	};
+	}
 
 #endif
+	assert(X_ != nullptr);
 
 	IntegerType nnz_nC = 0;
 	SizeType    sum_nC = 0;
@@ -167,7 +164,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
 		sum_BX_sizes += BX_sizes_[ipatch - 1];
 	};
-
+	assert(X_ != nullptr);
 	/*
 	 ---------------
 	 setup gBXbatch
@@ -213,29 +210,69 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	SizeType batch_size     = ngroups;
 	SizeType batch_size_dim = ialign * ICEIL(batch_size, ialign);
 
-	VectorType alpha_array_(ngroups_dim, 0.0);
-	VectorType beta_array_(ngroups_dim, 0.0);
-	// T alpha_array_[ngroups_dim];
-	// T beta_array_[ngroups_dim];
+	// VectorType alpha_array_(ngroups_dim, 0.0);
+	// VectorType beta_array_(ngroups_dim, 0.0);
+	//  T alpha_array_[ngroups_dim];
+	//  T beta_array_[ngroups_dim];
+	T* alpha_array_ = (T*)dmrg_malloc<T>(sizeof(T) * ngroups_dim, sizeof(T) * ngroups_dim);
+	T* beta_array_  = (T*)dmrg_malloc<T>(sizeof(T) * ngroups_dim, sizeof(T) * ngroups_dim);
+	assert(alpha_array_ != nullptr);
+	assert(beta_array_ != nullptr);
 
-	VectorPointerType a_array_(batch_size_dim, nullptr);
-	VectorPointerType b_array_(batch_size_dim, nullptr);
-	VectorPointerType c_array_(batch_size_dim, nullptr);
+	// VectorPointerType a_array_(batch_size_dim, nullptr);
+	// VectorPointerType b_array_(batch_size_dim, nullptr);
+	// VectorPointerType c_array_(batch_size_dim, nullptr);
+	T** a_array_
+	    = (T**)dmrg_malloc<T*>(sizeof(T*) * batch_size_dim, sizeof(T*) * batch_size_dim);
+	T** b_array_
+	    = (T**)dmrg_malloc<T*>(sizeof(T*) * batch_size_dim, sizeof(T*) * batch_size_dim);
+	T** c_array_
+	    = (T**)dmrg_malloc<T*>(sizeof(T*) * batch_size_dim, sizeof(T*) * batch_size_dim);
+	assert(a_array_ != nullptr);
+	assert(b_array_ != nullptr);
+	assert(c_array_ != nullptr);
 
 	// T* a_array_[batch_size_dim];
 	// T* b_array_[batch_size_dim];
 	// T* c_array_[batch_size_dim];
 
-	VectorIntegerType m_array_(ngroups_dim, 0);
-	VectorIntegerType n_array_(ngroups_dim, 0);
-	VectorIntegerType k_array_(ngroups_dim, 0);
-	VectorIntegerType group_size_(ngroups_dim, 0);
-	VectorIntegerType lda_array_(batch_size_dim, 0);
-	VectorIntegerType ldb_array_(batch_size_dim, 0);
-	VectorIntegerType ldc_array_(batch_size_dim, 0);
+	// VectorIntegerType m_array_(ngroups_dim, 0);
+	// VectorIntegerType n_array_(ngroups_dim, 0);
+	// VectorIntegerType k_array_(ngroups_dim, 0);
+	// VectorIntegerType group_size_(ngroups_dim, 0);
+	// VectorIntegerType lda_array_(batch_size_dim, 0);
+	// VectorIntegerType ldb_array_(batch_size_dim, 0);
+	// VectorIntegerType ldc_array_(batch_size_dim, 0);
 
-	VectorCharType transa_array_(ngroups_dim, ' ');
-	VectorCharType transb_array_(ngroups_dim, ' ');
+	IntegerType* m_array_ = (IntegerType*)dmrg_malloc<IntegerType>(
+	    sizeof(IntegerType) * ngroups_dim, sizeof(IntegerType) * ngroups_dim);
+	IntegerType* n_array_ = (IntegerType*)dmrg_malloc<IntegerType>(
+	    sizeof(IntegerType) * ngroups_dim, sizeof(IntegerType) * ngroups_dim);
+	IntegerType* k_array_ = (IntegerType*)dmrg_malloc<IntegerType>(
+	    sizeof(IntegerType) * ngroups_dim, sizeof(IntegerType) * ngroups_dim);
+	IntegerType* group_size_ = (IntegerType*)dmrg_malloc<IntegerType>(
+	    sizeof(IntegerType) * ngroups_dim, sizeof(IntegerType) * ngroups_dim);
+	IntegerType* lda_array_ = (IntegerType*)dmrg_malloc<IntegerType>(
+	    sizeof(IntegerType) * batch_size_dim, sizeof(IntegerType) * batch_size_dim);
+	IntegerType* ldb_array_ = (IntegerType*)dmrg_malloc<IntegerType>(
+	    sizeof(IntegerType) * batch_size_dim, sizeof(IntegerType) * batch_size_dim);
+	IntegerType* ldc_array_ = (IntegerType*)dmrg_malloc<IntegerType>(
+	    sizeof(IntegerType) * batch_size_dim, sizeof(IntegerType) * batch_size_dim);
+	assert(m_array_ != nullptr);
+	assert(n_array_ != nullptr);
+	assert(k_array_ != nullptr);
+	assert(group_size_ != nullptr);
+	assert(lda_array_ != nullptr);
+	assert(ldb_array_ != nullptr);
+	assert(ldc_array_ != nullptr);
+
+	// VectorCharType transa_array_(ngroups_dim, ' ');
+	// VectorCharType transb_array_(ngroups_dim, ' ');
+	SizeType nbytes_trans  = (sizeof(char) * ngroups_dim);
+	char*    transa_array_ = (char*)dmrg_malloc<char>(nbytes_trans, nbytes_trans);
+	char*    transb_array_ = (char*)dmrg_malloc<char>(nbytes_trans, nbytes_trans);
+	assert(transa_array_ != nullptr);
+	assert(transb_array_ != nullptr);
 
 	// char transa_array_[ngroups_dim];
 	// char transb_array_[ngroups_dim];
@@ -340,6 +377,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 			group_size_[i - 1] = 1;
 		};
 	};
+	assert(X_ != nullptr);
 
 	/*
 	 ------------------
@@ -348,21 +386,21 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 */
 
 	time_1st_vbatch = -dmrg_get_wtime();
-	dmrg_Xgemm_vbatch<T>(transa_array_.data(),
-	                     transb_array_.data(),
-	                     m_array_.data(),
-	                     n_array_.data(),
-	                     k_array_.data(),
-	                     alpha_array_.data(),
-	                     a_array_.data(),
-	                     lda_array_.data(),
-	                     b_array_.data(),
-	                     ldb_array_.data(),
-	                     beta_array_.data(),
-	                     c_array_.data(),
-	                     ldc_array_.data(),
+	dmrg_Xgemm_vbatch<T>(transa_array_,
+	                     transb_array_,
+	                     m_array_,
+	                     n_array_,
+	                     k_array_,
+	                     alpha_array_,
+	                     a_array_,
+	                     lda_array_,
+	                     b_array_,
+	                     ldb_array_,
+	                     beta_array_,
+	                     c_array_,
+	                     ldc_array_,
 	                     ngroups,
-	                     group_size_.data());
+	                     group_size_);
 	time_1st_vbatch += dmrg_get_wtime();
 	gflops1 = gflops1 / giga;
 
@@ -494,21 +532,21 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 ------------------
 	 */
 	time_2nd_vbatch = -dmrg_get_wtime();
-	dmrg_Xgemm_vbatch<T>(transa_array_.data(),
-	                     transb_array_.data(),
-	                     m_array_.data(),
-	                     n_array_.data(),
-	                     k_array_.data(),
-	                     alpha_array_.data(),
-	                     a_array_.data(),
-	                     lda_array_.data(),
-	                     b_array_.data(),
-	                     ldb_array_.data(),
-	                     beta_array_.data(),
-	                     c_array_.data(),
-	                     ldc_array_.data(),
+	dmrg_Xgemm_vbatch<T>(transa_array_,
+	                     transb_array_,
+	                     m_array_,
+	                     n_array_,
+	                     k_array_,
+	                     alpha_array_,
+	                     a_array_,
+	                     lda_array_,
+	                     b_array_,
+	                     ldb_array_,
+	                     beta_array_,
+	                     c_array_,
+	                     ldc_array_,
 	                     ngroups,
-	                     group_size_.data());
+	                     group_size_);
 	time_2nd_vbatch += dmrg_get_wtime();
 	gflops2 = gflops2 / giga;
 
@@ -539,10 +577,11 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 */
 
 	if (need_allocate_X) {
-		//    dmrg_free( X_ );
-		delete[] X_;
+		dmrg_free(X_);
+		// delete[] X_;
 		X_ = NULL;
 	};
+	assert(X_ != nullptr);
 	if (need_allocate_Y) {
 		void*  dest  = &(Yout_[0]);
 		void*  src   = &(Y_[0]);

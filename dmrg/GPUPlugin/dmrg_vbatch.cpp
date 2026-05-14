@@ -31,13 +31,8 @@ static IntegerType   device = 0;
 
 #endif
 
-#ifdef _OPENMP
-#include <omp.h>
-double dmrg_get_wtime() { return omp_get_wtime(); }
-#else
 #include <time.h>
 double dmrg_get_wtime() { return ((double)clock()) / CLOCKS_PER_SEC; }
-#endif
 
 SizeType MAX(const SizeType& x, const SizeType& y) { return (((x) > (y)) ? (x) : (y)); }
 
@@ -306,7 +301,61 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
    */
 	const IntegerType ialign     = 32;
 	IntegerType       vbatch_dim = ialign * ICEIL((batch_size + 1), ialign);
-#ifdef USE_MALLOC
+#if USE_MAGMA
+
+	nbytes = sizeof(T) * (vbatch_dim);
+	nbytes_total += nbytes;
+	T* alpha_vbatch = dmrg_malloc<T>(nbytes, nbytes);
+
+	nbytes = sizeof(T) * (vbatch_dim);
+	nbytes_total += nbytes;
+	T* beta_vbatch = dmrg_malloc<T>(nbytes, nbytes);
+
+	nbytes = sizeof(IntegerType) * (vbatch_dim);
+	nbytes_total += nbytes;
+	IntegerType* m_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+
+	nbytes = sizeof(IntegerType) * (vbatch_dim);
+	nbytes_total += nbytes;
+	IntegerType* n_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+
+	nbytes = sizeof(IntegerType) * (vbatch_dim);
+	nbytes_total += nbytes;
+	IntegerType* k_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+
+	nbytes = sizeof(char) * (vbatch_dim);
+	nbytes_total += nbytes;
+	char* transa_vbatch = dmrg_malloc<char>(nbytes, nbytes);
+
+	nbytes = sizeof(char) * (vbatch_dim);
+	nbytes_total += nbytes;
+	char* transb_vbatch = dmrg_malloc<char>(nbytes, nbytes);
+
+	nbytes = sizeof(IntegerType) * (vbatch_dim);
+	nbytes_total += nbytes;
+	IntegerType* lda_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+
+	nbytes = sizeof(IntegerType) * (vbatch_dim);
+	nbytes_total += nbytes;
+	IntegerType* ldb_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+
+	nbytes = sizeof(IntegerType) * (vbatch_dim);
+	nbytes_total += nbytes;
+	IntegerType* ldc_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+
+	nbytes = sizeof(T*) * (vbatch_dim);
+	nbytes_total += nbytes;
+	T** a_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
+
+	nbytes = sizeof(T*) * (vbatch_dim);
+	nbytes_total += nbytes;
+	T** b_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
+
+	nbytes = sizeof(T*) * (vbatch_dim);
+	nbytes_total += nbytes;
+	T** c_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
+
+#elif defined(USE_MALLOC)
 
 	nbytes = sizeof(T) * (vbatch_dim);
 	nbytes_total += nbytes;
@@ -562,25 +611,24 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 					    "max_m=%d, max_n=%d, max_k=%d\n", max_m, max_n, max_k);
 				};
 
-				magmablas_Xgemm_vbatched_max_nocheck(
-				    transA,
-				    transB,
-				    m_vbatch,
-				    n_vbatch,
-				    k_vbatch,
-				    (MAGMA_T)alpha,
-				    (MAGMA_T const* const*)a_vbatch,
-				    lda_vbatch,
-				    (MAGMA_T const* const*)b_vbatch,
-				    ldb_vbatch,
-				    (MAGMA_T)beta,
-				    (MAGMA_T**)c_vbatch,
-				    ldc_vbatch,
-				    batch_size,
-				    max_m,
-				    max_n,
-				    max_k,
-				    queue);
+				magmablas_Xgemm_vbatched_max(transA,
+				                             transB,
+				                             m_vbatch,
+				                             n_vbatch,
+				                             k_vbatch,
+				                             (MAGMA_T)alpha,
+				                             (MAGMA_T const* const*)a_vbatch,
+				                             lda_vbatch,
+				                             (MAGMA_T const* const*)b_vbatch,
+				                             ldb_vbatch,
+				                             (MAGMA_T)beta,
+				                             (MAGMA_T**)c_vbatch,
+				                             ldc_vbatch,
+				                             batch_size,
+				                             max_m,
+				                             max_n,
+				                             max_k,
+				                             queue);
 			}
 		} else {
 			/*
@@ -775,7 +823,7 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType pbatch_size = gBatchCount[idev];
 
 				if (pbatch_size >= 1) {
-					magmablas_Xgemm_vbatched_max_nocheck(
+					magmablas_Xgemm_vbatched_max(
 					    transA,
 					    transB,
 					    pm_vbatch,
@@ -879,7 +927,27 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	};
 #endif
 
-#ifdef USE_MALLOC
+#ifdef USE_MAGMA
+
+	dmrg_free(alpha_vbatch);
+	dmrg_free(beta_vbatch);
+
+	dmrg_free(m_vbatch);
+	dmrg_free(n_vbatch);
+	dmrg_free(k_vbatch);
+
+	dmrg_free(transa_vbatch);
+	dmrg_free(transb_vbatch);
+
+	dmrg_free(lda_vbatch);
+	dmrg_free(ldb_vbatch);
+	dmrg_free(ldc_vbatch);
+
+	dmrg_free(a_vbatch);
+	dmrg_free(b_vbatch);
+	dmrg_free(c_vbatch);
+
+#elif defined(USE_MALLOC)
 
 	delete[] alpha_vbatch;
 	delete[] beta_vbatch;

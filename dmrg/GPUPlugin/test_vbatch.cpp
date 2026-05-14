@@ -318,11 +318,11 @@ IntegerType main(IntegerType argc, char* argv[])
 
 	nbytes_X   = (sizeof(FpType) * xy_size_dim);
 	FpType* X_ = (FpType*)dmrg_malloc<FpType>(nbytes_X, nbytes_X);
-	assert(X_ != NULL);
+	assert(X_ != nullptr);
 
 	nbytes_Y   = (sizeof(FpType) * xy_size_dim);
 	FpType* Y_ = (FpType*)dmrg_malloc<FpType>(nbytes_Y, nbytes_Y);
-	assert(Y_ != NULL);
+	assert(Y_ != nullptr);
 
 #define X(i) X_[(i) - 1]
 #define Y(i) Y_[(i) - 1]
@@ -331,25 +331,13 @@ IntegerType main(IntegerType argc, char* argv[])
 #define hY(i) hY_[(i) - 1]
 
 	{
-#ifdef USE_SETVECTOR
-		FpType hX_[xy_size_dim];
-#else
 		FpType* hX_ = X_;
-#endif
 
 		IntegerType i = 0;
 		for (i = 1; i <= xy_size; i++) {
 			hX(i) = ((FpType)i) / ((FpType)xy_size);
-		};
-
-#ifdef USE_GETSET
-		{
-			const IntegerType incx = 1;
-			const IntegerType incy = 1;
-			dmrg_Xsetvector(xy_size, &(hX(1)), incx, X_, incy);
-		};
-#endif
-	};
+		}
+	}
 
 	{
 		IntegerType       itimes = 0;
@@ -402,17 +390,8 @@ IntegerType main(IntegerType argc, char* argv[])
 		       (double)nbytes_Y / (giga));
 	}
 
-#ifdef USE_GETSET
-	FpType hY_[xy_size_dim];
-	{
-		const IntegerType incx = 1;
-		const IntegerType incy = 1;
-		dmrg_Xgetvector(xy_size, Y_, incx, &(hY(1)), incy);
-	};
-#else
 	FpType* hY_ = Y_;
-#endif
-
+#
 	/*
 	 * ---------------------------------
 	 * generate summary statistics for Y
@@ -449,9 +428,9 @@ IntegerType main(IntegerType argc, char* argv[])
 		                Bbatch_
 		              );*/
 	};
-
+	assert(X_ != nullptr);
 	dmrg_free(X_);
-	dmrg_free(Y_);
+	// dmrg_free(Y_);
 	dmrg_finalize();
 
 #ifdef USE_MAGMA

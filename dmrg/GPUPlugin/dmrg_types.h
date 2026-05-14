@@ -1,7 +1,7 @@
 #ifndef DMRG_TYPES_H
 #define DMRG_TYPES_H
 
-typedef int IntegerType;
+using IntegerType = int;
 
 #if defined(USE_COMPLEX_Z)
 
