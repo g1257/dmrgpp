@@ -1,6 +1,6 @@
 #include "ManyOmegas.h"
-#include "CmdLineOptions.hh"
-#include "InputCheck.h"
+#include "Engine/CmdLineOptions.hh"
+#include "Engine/InputCheck.h"
 #include "ProgramGlobals.h"
 #include "Provenance.h"
 #include "PsimagLite.h"

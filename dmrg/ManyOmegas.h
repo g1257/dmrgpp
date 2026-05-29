@@ -1,10 +1,10 @@
 #ifndef MANYOMEGAS_H
 #define MANYOMEGAS_H
-#include "DmrgRunner.h"
+#include "Engine/DmrgRunner.h"
+#include "Engine/OmegaParams.h"
 #include "InputNg.h"
 #include "InterNode.h"
 #include "LanczosSolver.h"
-#include "OmegaParams.h"
 #include "PsiBase64.h"
 #include "PsimagLite.h"
 #include "Vector.h"

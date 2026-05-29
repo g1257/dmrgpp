@@ -1,7 +1,7 @@
 #ifndef OBSERVEDRIVER1_H
 #define OBSERVEDRIVER1_H
 
-#include "ObserveDriver.h"
+#include "Engine/ObserveDriver.h"
 
 namespace Dmrg {
 template <typename VectorWithOffsetType, typename ModelType>
