@@ -78,8 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef ParametersHubbardAncillaExtended_H
 #define ParametersHubbardAncillaExtended_H
-#include "../FeAsModel/ParametersModelFeAs.h"
-#include "ParametersModelBase.h"
+#include "Engine/ParametersModelBase.h"
+#include "Models/FeAsModel/ParametersModelFeAs.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters

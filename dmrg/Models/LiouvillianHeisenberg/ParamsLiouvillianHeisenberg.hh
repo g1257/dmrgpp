@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_PARAMS_LIOUVILLIANHEISENBERG_H
 #define DMRG_PARAMS_LIOUVILLIANHEISENBERG_H
-#include "ParametersModelBase.h"
+#include "Engine/ParametersModelBase.h"
 #include "ProgramGlobals.h"
 #include "Vector.h"
 

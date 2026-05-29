@@ -79,7 +79,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_PARAMS_TJ_ANCILLAC_H
 #define DMRG_PARAMS_TJ_ANCILLAC_H
-#include "ParametersModelBase.h"
+#include "Engine/ParametersModelBase.h"
 
 namespace Dmrg {
 //! TjAncillaC Model Parameters

@@ -89,6 +89,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "ParallelHamiltonianConnection.h"
 #include "QnHash.h"
 #include "Sort.h"
+#include "SpinSquared.h"
+#include "SpinSquaredHelper.h"
 #include "SuperOpHelperBase.h"
 #include "TargetQuantumElectrons.h"
 #include "Vector.h"

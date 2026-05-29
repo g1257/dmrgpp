@@ -80,7 +80,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERS_KITAEV_H
 #define PARAMETERS_KITAEV_H
-#include "ParametersModelBase.h"
+#include "Engine/ParametersModelBase.h"
 #include "Vector.h"
 
 namespace Dmrg {

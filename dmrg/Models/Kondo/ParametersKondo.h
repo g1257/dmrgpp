@@ -1,7 +1,7 @@
 #ifndef PARAMETERSKONDO_H
 #define PARAMETERSKONDO_H
 
-#include "ParametersModelBase.h"
+#include "Engine/ParametersModelBase.h"
 
 namespace Dmrg {
 template <typename RealType, typename QnType>

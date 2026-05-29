@@ -78,7 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERS_IMMM_H
 #define PARAMETERS_IMMM_H
-#include "ParametersModelBase.h"
+#include "Engine/ParametersModelBase.h"
 
 namespace Dmrg {
 template <typename RealType, typename QnType>

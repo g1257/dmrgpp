@@ -78,7 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef SUPER_HUBBARD_EXTENDED_H
 #define SUPER_HUBBARD_EXTENDED_H
-#include "../Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
+#include "Models/ExtendedHubbard1Orb/ExtendedHubbard1Orb.h"
 
 namespace Dmrg {
 //! Extended Hubbard for DMRG solver, uses ExtendedHubbard1Orb by containment
