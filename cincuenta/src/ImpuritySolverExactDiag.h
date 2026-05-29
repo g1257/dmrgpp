@@ -145,11 +145,7 @@ private:
 			sum += gimp_[i];
 		}
 
-		/*
-		RealType factor = -std::real(M_PI / sum);
-		for (SizeType i = 0; i < gimp_.size(); ++i)
-		        gimp_[i] *= factor;
-		*/
+		BaseType::scale(gimp_);
 	}
 
 	const ParamsDmftSolverType&     params_;

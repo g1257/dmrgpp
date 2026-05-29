@@ -64,6 +64,14 @@ public:
 
 		return sum;
 	}
+
+	static void scale(std::vector<ComplexOrRealType>& g)
+	{
+		const ComplexOrRealType factor = 0.25;
+		for (auto& val : g) {
+			val *= factor;
+		}
+	}
 	// public static END
 
 protected:

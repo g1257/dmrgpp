@@ -81,7 +81,7 @@ public:
 
 		doType(DmrgType::TYPE_1, data3, impurity_site, freq_enum);
 
-		// scaleGimp();
+		BaseType::scale(gimp_);
 
 		freq_enum_ = freq_enum;
 
@@ -341,16 +341,6 @@ private:
 
 		if (ind < gimp_.size())
 			err("readGimp: Not all values computed\n");
-	}
-
-	void scaleGimp()
-	{
-		const SizeType n           = gimp_.size();
-		ComplexType    pre_density = BaseType::density(gimp_);
-		const RealType factor      = -M_PI / std::real(pre_density);
-		for (SizeType i = 0; i < n; ++i) {
-			gimp_[i] *= factor;
-		}
 	}
 
 	const ParamsDmftSolverType&     params_;
