@@ -1,17 +1,17 @@
 #ifndef IMPURITYSOLVER_DMRG_H
 #define IMPURITYSOLVER_DMRG_H
 
-#include "CmdLineOptions.hh"
-#include "DmrgRunner.h"
+#include "Engine/CmdLineOptions.hh"
+#include "Engine/DmrgRunner.h"
+#include "Engine/InputCheck.h"
+#include "Engine/ProcOmegas.h"
 #include "Geometry/Star.h"
 #include "ImpuritySolverBase.h"
-#include "InputCheck.h"
 #include "LanczosSolver.h"
 #include "ManyOmegas.h"
 #include "Matsubaras.h"
 #include "ModelParams.h"
 #include "ParamsDmftSolver.h"
-#include "ProcOmegas.h"
 #include "PsiBase64.h"
 #include "PsimagLite.h"
 #include "Vector.h"

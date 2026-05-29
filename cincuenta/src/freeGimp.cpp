@@ -1,5 +1,5 @@
+#include "Engine/InputCheck.h"
 #include "FunctionOfFrequency.h"
-#include "InputCheck.h"
 #include "InputNg.h"
 #include "Matsubaras.h"
 #include "ParamsDmftSolver.h"

@@ -2,7 +2,8 @@
 # command and info from dmrgpp/src
 
 add_executable(cincuenta cincuenta.cpp)
-target_link_libraries(cincuenta PUBLIC dmrgpp_utils dmrg_runner kronutil psimaglite::ainur)
+target_include_directories(cincuenta PUBLIC ${CMAKE_SOURCE_DIR})
+target_link_libraries(cincuenta PUBLIC dmrgpp_utils dmrg_runner kronutil lanczos_globals psimaglite::ainur)
 
 add_executable(freeGimp freeGimp.cpp)
 target_link_libraries(freeGimp PUBLIC dmrgpp_utils dmrg_runner kronutil psimaglite::ainur)
