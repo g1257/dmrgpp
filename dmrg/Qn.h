@@ -1,7 +1,7 @@
 #ifndef QN_H
 #define QN_H
 
-#include "Array.h"
+#include "Engine/Array.h"
 #include "Io/HDF5DisableExceptionPrinting.h"
 #include "Io/IoNg.h"
 #include "Profiling.h"

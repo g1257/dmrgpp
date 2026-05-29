@@ -3,11 +3,11 @@
 
 #include <unistd.h>
 #define USE_PTHREADS_OR_NOT_NG
-#include "BasisWithOperators.h"
 #include "CrsMatrix.h"
-#include "DmrgSolver.h" // only used for types
+#include "Engine/BasisWithOperators.h"
+#include "Engine/DmrgSolver.h" // only used for types
+#include "Engine/InputCheck.h"
 #include "Geometry/Geometry.h"
-#include "InputCheck.h"
 #include "InputFromDataOrNot.h"
 #include "InputNg.h"
 #include "Io/IoSelector.h"

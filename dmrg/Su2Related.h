@@ -76,7 +76,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_SU2_RELATED_H
 #define DMRG_SU2_RELATED_H
 #include "CrsMatrix.h"
-#include "InputCheck.h"
+#include "Engine/InputCheck.h"
 #include "InputNg.h"
 
 namespace Dmrg {

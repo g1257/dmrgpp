@@ -6,8 +6,8 @@
 
 #include "BasisBase.h"
 #include "BitManip.h"
-#include "LanczosPlusPlus/src/Engine/LabeledOperator.h"
-#include "LanczosPlusPlus/src/Engine/LanczosGlobals.h"
+#include "LabeledOperator.h"
+#include "LanczosGlobals.h"
 
 namespace LanczosPlusPlus {
 

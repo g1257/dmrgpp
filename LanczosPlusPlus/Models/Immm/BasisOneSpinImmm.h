@@ -21,8 +21,8 @@ Please see full open source license included in file LICENSE.
 #ifndef BASIS_ONE_SPIN_IMMM_H
 #define BASIS_ONE_SPIN_IMMM_H
 #include "BitManip.h"
-#include "LanczosPlusPlus/src/Engine/LabeledOperator.h"
-#include "LanczosPlusPlus/src/Engine/LanczosGlobals.h"
+#include "LabeledOperator.h"
+#include "LanczosGlobals.h"
 #include "Matrix.h"
 #include <cassert>
 

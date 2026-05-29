@@ -3,8 +3,8 @@
 #include "../../Version.h"
 #include "AllocatorCpu.h"
 #include "AnsiColors.h"
+#include "Engine/MatrixVectorKron/BatchedGemmInclude.hh"
 #include "GitRevision.h"
-#include "MatrixVectorKron/BatchedGemmInclude.hh"
 #include <iostream>
 #include <sstream>
 
