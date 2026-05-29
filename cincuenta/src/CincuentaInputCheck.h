@@ -4,9 +4,9 @@
  */
 #ifndef CINCUENTA_INPUT_CHECK_H
 #define CINCUENTA_INPUT_CHECK_H
-#include "Engine/InputCheck.h"
 #include "Geometry/Geometry.h"
 #include "Utilities/Options.h"
+#include "dmrg/Engine/InputCheck.h"
 #include <stdexcept>
 #include <vector>
 

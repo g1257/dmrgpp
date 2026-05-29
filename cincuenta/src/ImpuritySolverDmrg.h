@@ -1,20 +1,20 @@
 #ifndef IMPURITYSOLVER_DMRG_H
 #define IMPURITYSOLVER_DMRG_H
 
-#include "Engine/CmdLineOptions.hh"
-#include "Engine/DmrgRunner.h"
-#include "Engine/InputCheck.h"
-#include "Engine/ProcOmegas.h"
 #include "Geometry/Star.h"
 #include "ImpuritySolverBase.h"
-#include "LanczosSolver.h"
-#include "ManyOmegas.h"
+#include "LanczosSolver.h" // <--- in PsimagLite
 #include "Matsubaras.h"
 #include "ModelParams.h"
 #include "ParamsDmftSolver.h"
 #include "PsiBase64.h"
 #include "PsimagLite.h"
 #include "Vector.h"
+#include "dmrg/Engine/CmdLineOptions.hh"
+#include "dmrg/Engine/DmrgRunner.h"
+#include "dmrg/Engine/InputCheck.h"
+#include "dmrg/Engine/ProcOmegas.h"
+#include "dmrg/ManyOmegas.h"
 
 namespace Dmft {
 

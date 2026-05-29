@@ -1,8 +1,8 @@
-#include "Engine/InputCheck.h"
 #include "FunctionOfFrequency.h"
 #include "InputNg.h"
 #include "Matsubaras.h"
 #include "ParamsDmftSolver.h"
+#include "dmrg/Engine/InputCheck.h"
 
 template <typename ComplexType>
 void computeGamma(

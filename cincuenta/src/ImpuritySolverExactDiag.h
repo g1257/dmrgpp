@@ -4,7 +4,6 @@
 #include "ContinuedFractionCollection.h"
 #include "CrsMatrix.h"
 #include "ImpuritySolverBase.h"
-// #include "dmrg/Engine/InputCheck.h"
 #include "LanczosPlusPlus/Engine/DefaultSymmetry.h"
 #include "LanczosPlusPlus/Engine/Engine.h"
 #include "LanczosPlusPlus/Engine/InternalProductOnTheFly.h"
