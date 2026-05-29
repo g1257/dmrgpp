@@ -6,7 +6,7 @@ target_include_directories(cincuenta PUBLIC ${CMAKE_SOURCE_DIR})
 target_link_libraries(cincuenta PUBLIC dmrgpp_utils dmrg_runner kronutil lanczos_globals psimaglite::ainur)
 
 add_executable(freeGimp freeGimp.cpp)
-target_link_libraries(freeGimp PUBLIC dmrgpp_utils dmrg_runner kronutil psimaglite::ainur)
+target_link_libraries(freeGimp PUBLIC dmrgpp_utils kronutil lanczos_globals psimaglite::ainur)
 
 install(TARGETS cincuenta freeGimp RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
