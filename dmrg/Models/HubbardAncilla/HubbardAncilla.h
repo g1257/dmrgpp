@@ -80,14 +80,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_HUBBARD_ANCILLA_H
 #define DMRG_HUBBARD_ANCILLA_H
 #include "CrsMatrix.h"
+#include "Engine/ModelBase.h"
 #include "Geometry/GeometryDca.h"
 #include "HelperHubbardAncilla.h"
-#include "ModelBase.h"
 #include "ParametersHubbardAncilla.h"
 #include "ProgramGlobals.h"
-#include "SpinSquared.h"
-#include "SpinSquaredHelper.h"
-#include "VerySparseMatrix.h"
 #include <cstdlib>
 
 namespace Dmrg {

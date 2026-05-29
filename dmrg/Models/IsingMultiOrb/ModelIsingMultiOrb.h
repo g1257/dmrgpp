@@ -81,10 +81,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_MODEL_ISINGMULTIORB_HEADER_H
 
 #include "CrsMatrix.h"
-#include "Engine/VerySparseMatrix.h"
+#include "Engine/ModelBase.h"
 #include "HilbertSpaceIsingMultiOrb.h"
 #include "ParametersModelIsingMultiOrb.h"
-#include "ProgramGlobals.h"
 #include "Utils.h"
 #include <algorithm>
 

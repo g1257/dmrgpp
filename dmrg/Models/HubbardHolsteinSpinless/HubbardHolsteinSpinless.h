@@ -79,15 +79,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_HUBBARD_HOLSTEIN_SPINLESS_H
 #define DMRG_HUBBARD_HOLSTEIN_SPINLESS_H
 #include "CrsMatrix.h"
+#include "Engine/ModelBase.h"
 #include "Geometry/GeometryDca.h"
 #include "HilbertSpaceHubbardHolsteinSpinless.h"
-#include "ModelBase.h"
 #include "ParametersHubbardHolsteinSpinless.h"
-#include "ProgramGlobals.h"
 #include "PsimagLite.h"
-#include "SpinSquared.h"
-#include "SpinSquaredHelper.h"
-#include "VerySparseMatrix.h"
 #include <cstdlib>
 #include <numeric>
 

@@ -79,12 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRGPP_GRAPHENE_H
 #define DMRGPP_GRAPHENE_H
-#include "../FeAsModel/HilbertSpaceFeAs.h"
-#include "ModelBase.h"
+#include "Engine/ModelBase.h"
+#include "Models/FeAsModel/HilbertSpaceFeAs.h"
 #include "ParametersGraphene.h"
-#include "ProgramGlobals.h"
-#include "VerySparseMatrix.h"
-#include <Utilities/Vector.h>
+#include "Utilities/Vector.h"
 #include <numeric>
 
 namespace Dmrg {

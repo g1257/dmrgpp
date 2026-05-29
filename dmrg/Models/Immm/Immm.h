@@ -74,13 +74,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef IMMM_HEADER_H
 #define IMMM_HEADER_H
 #include "CrsMatrix.h"
+#include "Engine/ModelBase.h"
 #include "HilbertSpaceImmm.h"
-#include "ModelBase.h"
 #include "ParametersImmm.h"
-#include "ProgramGlobals.h"
-#include "SpinSquared.h"
-#include "SpinSquaredHelper.h"
-#include "VerySparseMatrix.h"
 #include <cassert>
 
 namespace Dmrg {

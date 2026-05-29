@@ -79,8 +79,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_TJ_ANCILLAC2_H
 #define DMRG_TJ_ANCILLAC2_H
-#include "../Models/FeAsModel/ModelFeBasedSc.h"
-#include "../Models/TjAncillaC/ParametersTjAncillaC.h"
+#include "Models/FeAsModel/ModelFeBasedSc.h"
+#include "Models/TjAncillaC/ParametersTjAncillaC.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment

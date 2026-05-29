@@ -1,8 +1,8 @@
 #ifndef WFTACCELPATCHES_H
 #define WFTACCELPATCHES_H
 #include "BlockDiagWf.h"
+#include "Engine/MatrixVectorKron/GenIjPatch.h"
 #include "Matrix.h"
-#include "MatrixVectorKron/GenIjPatch.h"
 #include "ProgramGlobals.h"
 
 namespace Dmrg {

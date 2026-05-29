@@ -79,9 +79,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMETERSMODELHUBBARD_H
 #define PARAMETERSMODELHUBBARD_H
-#include "InputCheck.h"
+#include "Engine/InputCheck.h"
+#include "Engine/ParametersModelBase.h"
 #include "InputNg.h"
-#include "ParametersModelBase.h"
 
 namespace Dmrg {
 //! Hubbard Model Parameters

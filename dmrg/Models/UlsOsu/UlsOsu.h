@@ -79,16 +79,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_ULSOSU_H
 #define DMRG_ULSOSU_H
-#include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/UlsOsu/ParametersModelUlsOsu.h"
 #include "Complex.h"
 #include "CrsMatrix.h"
 #include "Matrix.h"
-#include "ProgramGlobals.h"
-#include "SpinSquared.h"
-#include "SpinSquaredHelper.h"
+#include "Models/HubbardOneBand/ModelHubbard.h"
+#include "Models/UlsOsu/ParametersModelUlsOsu.h"
 #include "Utils.h"
-#include "VerySparseMatrix.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment

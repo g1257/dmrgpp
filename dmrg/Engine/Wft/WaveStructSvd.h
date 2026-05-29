@@ -78,7 +78,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef WAVE_STRUCT_SVD_H
 #define WAVE_STRUCT_SVD_H
-#include "BasisTraits.hh"
+#include "Engine/BasisTraits.hh"
 #include "Io/IoNg.h"
 #include "ProgramGlobals.h"
 #include "Vector.h"

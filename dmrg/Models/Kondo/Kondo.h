@@ -1,7 +1,7 @@
 #ifndef DMRGPP_MODEL_KONDO_H
 #define DMRGPP_MODEL_KONDO_H
+#include "Engine/ModelBase.h"
 #include "ParametersKondo.h"
-#include "ProgramGlobals.h"
 
 namespace Dmrg {
 

@@ -84,9 +84,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Aklt.h"
 #include "CrsMatrix.h"
-#include "Engine/VerySparseMatrix.h"
 #include "ParametersModelHeisenberg.h"
-#include "ProgramGlobals.h"
 #include "Utils.h"
 #include <algorithm>
 

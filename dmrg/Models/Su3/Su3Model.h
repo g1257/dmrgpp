@@ -81,9 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_SU3_MODEL_H
 
 #include "CrsMatrix.h"
-#include "Engine/VerySparseMatrix.h"
+#include "Engine/ModelBase.h"
 #include "ParametersSu3.h"
-#include "ProgramGlobals.h"
 #include "Su3RepresentationP1.h"
 #include "Utils.h"
 #include <algorithm>

@@ -80,15 +80,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_FEAS_DMRG
 #define MODEL_FEAS_DMRG
 #include "CrsMatrix.h"
+#include "Engine/ModelBase.h"
 #include "FeAsJzSymmetry.h"
 #include "Geometry/GeometryDca.h"
 #include "HilbertSpaceFeAs.h"
-#include "ModelBase.h"
 #include "ParametersModelFeAs.h"
-#include "ProgramGlobals.h"
-#include "SpinSquared.h"
-#include "SpinSquaredHelper.h"
-#include "VerySparseMatrix.h"
 #include <numeric>
 
 namespace Dmrg {

@@ -78,15 +78,11 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_HOLSTEIN_THIN_H
 #define DMRG_HOLSTEIN_THIN_H
-#include "../HubbardHolstein/ParametersHubbardHolstein.h"
-#include "../HubbardOneBand/HilbertSpaceHubbard.h"
 #include "CrsMatrix.h"
+#include "Engine/ModelBase.h"
 #include "Geometry/GeometryDca.h"
-#include "ModelBase.h"
-#include "ProgramGlobals.h"
-#include "SpinSquared.h"
-#include "SpinSquaredHelper.h"
-#include "VerySparseMatrix.h"
+#include "Models/HubbardHolstein/ParametersHubbardHolstein.h"
+#include "Models/HubbardOneBand/HilbertSpaceHubbard.h"
 #include <cstdlib>
 #include <numeric>
 

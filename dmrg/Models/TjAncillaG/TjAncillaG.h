@@ -79,9 +79,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_TJ_ANCILLAG_H
 #define DMRG_TJ_ANCILLAG_H
-#include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
-#include "../Models/TjMultiOrb/TjMultiOrb.h"
+#include "Models/HubbardOneBand/ModelHubbard.h"
+#include "Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
+#include "Models/TjMultiOrb/TjMultiOrb.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment

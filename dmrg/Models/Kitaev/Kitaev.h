@@ -82,13 +82,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Complex.h"
 #include "CrsMatrix.h"
-#include "ModelBase.h"
+#include "Engine/ModelBase.h"
 #include "ParametersKitaev.h"
-#include "ProgramGlobals.h"
-#include "SpinSquared.h"
-#include "SpinSquaredHelper.h"
 #include "Utils.h"
-#include "VerySparseMatrix.h"
 #include <algorithm>
 
 namespace Dmrg {

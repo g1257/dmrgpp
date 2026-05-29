@@ -78,8 +78,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef PARAMS_HUBBARD_HOLSTEIN_H
 #define PARAMS_HUBBARD_HOLSTEIN_H
+#include "Engine/ParametersModelBase.h"
 #include "Matrix.h"
-#include "ParametersModelBase.h"
 #include <stdexcept>
 #include <vector>
 

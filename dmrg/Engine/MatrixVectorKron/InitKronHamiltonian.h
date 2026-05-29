@@ -77,8 +77,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef INITKRON_HAMILTONIAN_H
 #define INITKRON_HAMILTONIAN_H
+#include "Engine/OpsForLink.hh"
 #include "InitKronBase.h"
-#include "OpsForLink.hh"
 #include "Profiling.h"
 #include "ProgramGlobals.h"
 #include "Vector.h"

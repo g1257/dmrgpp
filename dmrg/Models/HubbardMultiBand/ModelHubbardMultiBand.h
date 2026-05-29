@@ -78,14 +78,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef MODEL_HUBBARD_MULTI_BAND_H
 #define MODEL_HUBBARD_MULTI_BAND_H
-#include "../Models/FeAsModel/HilbertSpaceFeAs.h"
 #include "CrsMatrix.h"
-#include "ModelBase.h"
+#include "Engine/ModelBase.h"
+#include "Models/FeAsModel/HilbertSpaceFeAs.h"
 #include "ParametersHubbardMultiBand.h"
-#include "ProgramGlobals.h"
-#include "SpinSquared.h"
-#include "SpinSquaredHelper.h"
-#include "VerySparseMatrix.h"
 
 namespace Dmrg {
 template <typename ModelBaseType> class ModelHubbardMultiBand : public ModelBaseType {

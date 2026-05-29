@@ -1,7 +1,7 @@
 #ifndef SuperOpHelperPlaquette_H
 #define SuperOpHelperPlaquette_H
+#include "Engine/SuperOpHelperBase.h"
 #include "ProgramGlobals.h"
-#include "SuperOpHelperBase.h"
 #include "Vector.h"
 /*
  * Non local ops.

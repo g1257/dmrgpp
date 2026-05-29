@@ -82,12 +82,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "Engine/MatrixOrIdentity.h"
 #include "Engine/MatrixVectorKron/KronMatrix.h"
+#include "Engine/VectorWithOffset.h" // so that PsimagLite::norm() becomes visible here
+#include "Engine/VectorWithOffsets.h" // so that PsimagLite::norm() becomes visible here
 #include "ParallelWftOne.h"
 #include "Parallelizer.h"
 #include "Profiling.h"
 #include "ProgressIndicator.h"
-#include "VectorWithOffset.h" // so that PsimagLite::norm() becomes visible here
-#include "VectorWithOffsets.h" // so that PsimagLite::norm() becomes visible here
 #include "WaveFunctionTransfBase.h"
 #include "WftAccelBlocks.h"
 #include "WftAccelPatches.h"

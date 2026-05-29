@@ -81,9 +81,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_SPIN_ORBITAL_MODEL_H
 
 #include "CrsMatrix.h"
-#include "Engine/VerySparseMatrix.h"
+#include "Engine/ModelBase.h"
 #include "ParametersSpinOrbital.h"
-#include "ProgramGlobals.h"
 #include "Sort.h"
 #include "Utils.h"
 #include <algorithm>

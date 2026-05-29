@@ -1,7 +1,7 @@
 #ifndef BLOCKDIAGMATRIXWF_H
 #define BLOCKDIAGMATRIXWF_H
-#include "BlockDiagonalMatrix.h"
 #include "CrsMatrix.h"
+#include "Engine/BlockDiagonalMatrix.h"
 #include "GemmR.h"
 #include "PackIndices.h"
 #include <iomanip>

@@ -80,9 +80,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MATRIX_VECTOR_KRON_H
 #define MATRIX_VECTOR_KRON_H
 
+#include "Engine/MatrixVectorBase.h"
 #include "InitKronHamiltonian.h"
 #include "KronMatrix.h"
-#include "MatrixVectorBase.h"
 #include "Vector.h"
 
 namespace Dmrg {

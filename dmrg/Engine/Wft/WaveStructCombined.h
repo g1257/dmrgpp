@@ -1,7 +1,7 @@
 #ifndef WAVESTRUCTCOMBINED_H
 #define WAVESTRUCTCOMBINED_H
-#include "../DiskOrMemoryStack.h"
-#include "BasisTraits.hh"
+#include "Engine/BasisTraits.hh"
+#include "Engine/DiskOrMemoryStack.h"
 #include "Io/IoNg.h"
 #include "ProgramGlobals.h"
 #include "WaveStructSvd.h"

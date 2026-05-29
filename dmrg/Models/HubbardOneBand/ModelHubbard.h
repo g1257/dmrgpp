@@ -80,13 +80,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef MODEL_HUBBARD_DMRG
 #define MODEL_HUBBARD_DMRG
 #include "CrsMatrix.h"
+#include "Engine/ModelBase.h"
 #include "HilbertSpaceHubbard.h"
 #include "ParametersModelHubbard.h"
-#include "ProgramGlobals.h"
 #include "Sort.h" // in PsimagLite
-#include "SpinSquared.h"
-#include "SpinSquaredHelper.h"
-#include "VerySparseMatrix.h"
 #include <cassert>
 
 namespace Dmrg {

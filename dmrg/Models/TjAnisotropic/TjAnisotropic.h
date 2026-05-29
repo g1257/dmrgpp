@@ -79,11 +79,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_TJ_Anisotropic_H
 #define DMRG_TJ_Anisotropic_H
-#include "../Models/FeAsModel/HilbertSpaceFeAs.h"
-#include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/TjAnisotropic/ParametersModelTjAnisotropic.h"
 #include "Complex.h"
-#include "ProgramGlobals.h"
+#include "Models/FeAsModel/HilbertSpaceFeAs.h"
+#include "Models/HubbardOneBand/ModelHubbard.h"
+#include "Models/TjAnisotropic/ParametersModelTjAnisotropic.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment

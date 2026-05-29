@@ -81,11 +81,10 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define DMRG_LIOUVILLIANHEISENBERG_H
 
 #include "CrsMatrix.h"
+#include "Engine/ModelBase.h"
 #include "ImaginaryUnitOrFail.hh"
 #include "ParamsLiouvillianHeisenberg.hh"
-#include "ProgramGlobals.h"
 #include "Utils.h"
-#include "VerySparseMatrix.h"
 #include <algorithm>
 #include <utility>
 

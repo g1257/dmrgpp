@@ -1,10 +1,10 @@
 #ifndef FEASJZSYMMETRY_H
 #define FEASJZSYMMETRY_H
 #include "CrsMatrix.h"
+#include "Engine/ModelBase.h"
+#include "Engine/Operator.h"
 #include "HilbertSpaceFeAs.h"
 #include "Matrix.h"
-#include "ModelBase.h"
-#include "Operator.h"
 #include "ProgramGlobals.h"
 #include "Vector.h"
 

@@ -79,10 +79,9 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_TJ_MULTIORB_H
 #define DMRG_TJ_MULTIORB_H
-#include "../Models/FeAsModel/HilbertSpaceFeAs.h"
-#include "../Models/HubbardOneBand/ModelHubbard.h"
-#include "../Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
-#include "ProgramGlobals.h"
+#include "Models/FeAsModel/HilbertSpaceFeAs.h"
+#include "Models/HubbardOneBand/ModelHubbard.h"
+#include "Models/TjMultiOrb/ParametersModelTjMultiOrb.h"
 
 namespace Dmrg {
 //! t-J model for DMRG solver, uses ModelHubbard and ModelHeisenberg by containment

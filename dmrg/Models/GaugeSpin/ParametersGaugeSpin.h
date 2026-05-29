@@ -81,7 +81,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
  */
 #ifndef DMRG_PARAMS_MODEL_GAUGESPIN_H
 #define DMRG_PARAMS_MODEL_GAUGESPIN_H
-#include "ParametersModelBase.h"
+#include "Engine/ParametersModelBase.h"
 #include "Vector.h"
 
 namespace Dmrg {

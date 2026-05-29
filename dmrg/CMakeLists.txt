@@ -15,7 +15,6 @@ target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite psimaglite::io)
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)
-target_include_directories(dmrg_runner PUBLIC Engine)
 target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil)
 
 # Dmrg executable (main executable)

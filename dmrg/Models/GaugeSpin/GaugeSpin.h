@@ -82,10 +82,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 
 #include "CrsMatrix.h"
 #include "ParametersGaugeSpin.h"
-#include "ProgramGlobals.h"
 #include "SuperOpHelperPlaquette.h"
 #include "Utils.h"
-#include "VerySparseMatrix.h"
 #include <algorithm>
 
 namespace Dmrg {
