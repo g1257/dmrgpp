@@ -82,12 +82,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_HEISENBERG_MIX_H
 #define DMRG_HEISENBERG_MIX_H
 
-#include "../../Engine/ProgramGlobals.h"
-#include "../../Engine/Utils.h"
-#include "../../Engine/VerySparseMatrix.h"
 #include "Aklt.h"
 #include "CrsMatrix.h"
+#include "Engine/VerySparseMatrix.h"
 #include "ParametersModelHeisenberg.h"
+#include "ProgramGlobals.h"
+#include "Utils.h"
 #include <algorithm>
 
 namespace Dmrg {

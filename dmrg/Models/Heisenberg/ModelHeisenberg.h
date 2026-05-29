@@ -80,14 +80,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_MODEL_HEISENBERG_HEADER_H
 #define DMRG_MODEL_HEISENBERG_HEADER_H
 
-#include "../../Engine/ProgramGlobals.h"
-#include "../../Engine/SpinSquared.h"
-#include "../../Engine/SpinSquaredHelper.h"
-#include "../../Engine/Utils.h"
-#include "../../Engine/VerySparseMatrix.h"
 #include "Aklt.h"
 #include "CrsMatrix.h"
+#include "Engine/SpinSquared.h"
+#include "Engine/SpinSquaredHelper.h"
+#include "Engine/VerySparseMatrix.h"
 #include "ParametersModelHeisenberg.h"
+#include "ProgramGlobals.h"
+#include "Utils.h"
 #include <algorithm>
 
 namespace Dmrg {

@@ -80,12 +80,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_SU3_MODEL_H
 #define DMRG_SU3_MODEL_H
 
-#include "../../Engine/ProgramGlobals.h"
-#include "../../Engine/Utils.h"
-#include "../../Engine/VerySparseMatrix.h"
 #include "CrsMatrix.h"
+#include "Engine/VerySparseMatrix.h"
 #include "ParametersSu3.h"
+#include "ProgramGlobals.h"
 #include "Su3RepresentationP1.h"
+#include "Utils.h"
 #include <algorithm>
 
 namespace Dmrg {

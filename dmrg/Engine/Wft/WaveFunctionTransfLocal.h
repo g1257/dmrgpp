@@ -80,8 +80,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef WFT_LOCAL_HEADER_H
 #define WFT_LOCAL_HEADER_H
 
-#include "MatrixOrIdentity.h"
-#include "MatrixVectorKron/KronMatrix.h"
+#include "Engine/MatrixOrIdentity.h"
+#include "Engine/MatrixVectorKron/KronMatrix.h"
 #include "ParallelWftOne.h"
 #include "Parallelizer.h"
 #include "Profiling.h"

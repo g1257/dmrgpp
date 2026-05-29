@@ -1,6 +1,6 @@
 #ifndef WFTHELPER_H
 #define WFTHELPER_H
-#include "OneSiteSpaces.hh"
+#include "Engine/OneSiteSpaces.hh"
 #include "Vector.h"
 
 namespace Dmrg {

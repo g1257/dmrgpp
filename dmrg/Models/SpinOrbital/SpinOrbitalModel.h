@@ -80,12 +80,12 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef DMRG_SPIN_ORBITAL_MODEL_H
 #define DMRG_SPIN_ORBITAL_MODEL_H
 
-#include "../../Engine/ProgramGlobals.h"
-#include "../../Engine/Utils.h"
-#include "../../Engine/VerySparseMatrix.h"
 #include "CrsMatrix.h"
+#include "Engine/VerySparseMatrix.h"
 #include "ParametersSpinOrbital.h"
+#include "ProgramGlobals.h"
 #include "Sort.h"
+#include "Utils.h"
 #include <algorithm>
 
 namespace Dmrg {

@@ -10,14 +10,12 @@ add_subdirectory(KronUtil)
 # DMRG++ as a library so cincuenta can use it
 add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp)
 target_sources(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_include_directories(
-  dmrgpp_utils
-  PUBLIC ${CMAKE_CURRENT_BINARY_DIR}
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite psimaglite::io)
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)
+target_include_directories(dmrg_runner PUBLIC Engine)
 target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil)
 
 # Dmrg executable (main executable)
@@ -27,7 +25,6 @@ target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Observe executable
 add_executable(observe observe.cpp ObserveDriver0.cpp ObserveDriver1.cpp ObserveDriver2.cpp)
-target_include_directories(observe PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(observe dmrgpp_utils kronutil psimaglite::ainur)
 
 # Toolbox executable
