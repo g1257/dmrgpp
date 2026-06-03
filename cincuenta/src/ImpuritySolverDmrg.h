@@ -81,8 +81,6 @@ public:
 
 		doType(DmrgType::TYPE_1, data3, impurity_site, freq_enum);
 
-		BaseType::scale(gimp_);
-
 		freq_enum_ = freq_enum;
 
 		PsimagLite::MPI::barrier(PsimagLite::MPI::COMM_WORLD);
