@@ -38,7 +38,9 @@ target_link_libraries(omegas dmrgpp_utils dmrg_runner)
 add_executable(introspect introspect.cpp)
 target_link_libraries(introspect dmrgpp_utils dmrg_runner)
 
-add_subdirectory(GPUPlugin)
+if(DMRG_BUILD_MAGMA)
+    add_subdirectory(GPUPlugin)
+endif()
 
 if(BUILD_TESTING)
   add_subdirectory(Engine/tests)
