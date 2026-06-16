@@ -430,7 +430,8 @@ IntegerType main(IntegerType argc, char* argv[])
 	};
 	assert(X_ != nullptr);
 	dmrg_free(X_);
-	// dmrg_free(Y_);
+	assert(Y_ != nullptr);
+	dmrg_free(Y_);
 	dmrg_finalize();
 
 #ifdef USE_MAGMA
