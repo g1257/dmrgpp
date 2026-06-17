@@ -62,4 +62,5 @@ if(BUILD_DOC)
   add_subdirectory(doc)
 endif()
 
-option(DMRG_BUILD_MAGMA "Enable building with MAGMA support" OFF)
+option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
+option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma support" OFF)

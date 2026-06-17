@@ -15,14 +15,16 @@ set(SRC_FILES
     estimate_work.cpp
     BatchedGemm.cpp)
 
-# 1. Load the PkgConfig module
-find_package(PkgConfig REQUIRED)
+if(DMRG_BUILD_BATCHED_MAGMA)
+  # 1. Load the PkgConfig module
+  find_package(PkgConfig REQUIRED)
 
-set(ENV{PKG_CONFIG_PATH} "/home/svh/Documents/CONNEQT/magma-install/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
+  set(ENV{PKG_CONFIG_PATH} "/home/svh/Documents/CONNEQT/magma-install/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
 
-# 2. Check for the module and create an imported target
-# Example: searching for 'glib-2.0'
-pkg_check_modules(MAGMA REQUIRED IMPORTED_TARGET magma)
+  # 2. Check for the module and create an imported target
+  # Example: searching for 'glib-2.0'
+  pkg_check_modules(MAGMA REQUIRED IMPORTED_TARGET magma)
+endif()
 
 #find_package(OpenMP REQUIRED COMPONENTS C)
 
@@ -37,6 +39,9 @@ add_library(gpuplugin ${SRC_FILES})
 target_include_directories(gpuplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_link_libraries(gpuplugin PUBLIC psimaglite::psimaglite PkgConfig::MAGMA)
 target_compile_definitions(gpuplugin PUBLIC FpType=double USE_MAGMA)
+if(DMRG_BUILD_BATCHED_MAGMA)
+  target_compile_definitions(gpuplugin PUBLIC USE_MAGMA)
+endif()
 
 add_executable(test_vbatch test_vbatch.cpp)
 target_link_libraries(test_vbatch gpuplugin)
