@@ -37,9 +37,10 @@ endif()
 
 add_library(gpuplugin ${SRC_FILES})
 target_include_directories(gpuplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-target_link_libraries(gpuplugin PUBLIC psimaglite::psimaglite PkgConfig::MAGMA)
-target_compile_definitions(gpuplugin PUBLIC FpType=double USE_MAGMA)
+target_link_libraries(gpuplugin PUBLIC psimaglite::psimaglite)
+target_compile_definitions(gpuplugin PUBLIC FpType=double)
 if(DMRG_BUILD_BATCHED_MAGMA)
+  target_link_libraries(gpuplugin PUBLIC PkgConfig::MAGMA)
   target_compile_definitions(gpuplugin PUBLIC USE_MAGMA)
 endif()
 
