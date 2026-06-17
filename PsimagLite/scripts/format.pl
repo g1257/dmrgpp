@@ -4,7 +4,7 @@ use strict;
 use warnings;
 use utf8;
 
-my @extensions=("*.hh", "*.h", "*.cc", "*.cpp");
+my @extensions=("*.hh", "*.h", "*.cc", "*.cpp", "*.hpp");
 
 my $opts = " --style=file -i ";
 foreach my $ext (@extensions) {
