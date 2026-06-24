@@ -19,7 +19,7 @@ template <typename InitKronType> class BatchedGemmPluginSc {
 	using ArrayOfMatStructType    = typename InitKronType::ArrayOfMatStructType;
 	using MatrixDenseOrSparseType = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
 	using VectorType              = typename MatrixDenseOrSparseType::VectorType;
-    using VectorSizeType         = PsimagLite::Vector<SizeType>::Type;
+	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
 	using SparseMatrixType        = typename InitKronType::SparseMatrixType;
 	using ComplexOrRealType       = typename SparseMatrixType::value_type;
 	using MatrixType              = PsimagLite::Matrix<ComplexOrRealType>;
@@ -39,13 +39,13 @@ public:
 	{
 		if (!enabled())
 			return;
-		SizeType            npatches = initKron_.numberOfPatches(DUMMY);
-		SizeType            nC       = initKron_.connections();
-		const SizeType      total    = npatches * npatches * nC;
+		SizeType                        npatches = initKron_.numberOfPatches(DUMMY);
+		SizeType                        nC       = initKron_.connections();
+		const SizeType                  total    = npatches * npatches * nC;
 		std::vector<ComplexOrRealType*> aptr(total, 0);
 		std::vector<ComplexOrRealType*> bptr(total, 0);
-		VectorSizeType       ldAptr(npatches * npatches * nC);
-		VectorSizeType       ldBptr(npatches * npatches * nC);
+		VectorSizeType                  ldAptr(npatches * npatches * nC);
+		VectorSizeType                  ldBptr(npatches * npatches * nC);
 
 		pLeft_.resize(npatches, 0);
 		pRight_.resize(npatches, 0);
@@ -103,14 +103,8 @@ public:
 			progress_.printline(msg, std::cout);
 		}
 
-		batchedGemm_ = new BatchedGemmType(nC,
-		                                   npatches,
-		                                   pLeft_,
-		                                   pRight_,
-		                                   aptr,
-		                                   ldAptr,
-		                                   bptr,
-		                                   ldBptr);
+		batchedGemm_ = new BatchedGemmType(
+		    nC, npatches, pLeft_, pRight_, aptr, ldAptr, bptr, ldBptr);
 	}
 
 	~BatchedGemmPluginSc()
@@ -166,8 +160,8 @@ private:
 
 	PsimagLite::ProgressIndicator   progress_;
 	const InitKronType&             initKron_;
-	VectorSizeType                   pLeft_;
-	VectorSizeType                   pRight_;
+	VectorSizeType                  pLeft_;
+	VectorSizeType                  pRight_;
 	BatchedGemm<ComplexOrRealType>* batchedGemm_;
 	mutable VectorMatrixType        garbage_;
 };

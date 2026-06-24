@@ -20,7 +20,7 @@ public:
 		return;
 #else
 		err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
-#endif		
+#endif
 	}
 
 	static std::string info()
