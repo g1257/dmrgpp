@@ -5,6 +5,10 @@ add_custom_command(
   COMMENT "Generating Git Revision File"
   VERBATIM)
 
+if(DMRG_BUILD_BATCHED)
+  add_subdirectory(GPUPlugin)
+endif()
+
 add_subdirectory(KronUtil)
 
 # DMRG++ as a library so cincuenta can use it
@@ -15,7 +19,7 @@ target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)
-target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil)
+target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil gpuplugin)
 
 # Dmrg executable (main executable)
 add_executable(dmrg ${instantiationFileList} dmrg.cpp)
@@ -37,10 +41,6 @@ target_link_libraries(omegas dmrgpp_utils dmrg_runner)
 # Introspect executable
 add_executable(introspect introspect.cpp)
 target_link_libraries(introspect dmrgpp_utils dmrg_runner)
-
-if(DMRG_BUILD_BATCHED)
-  add_subdirectory(GPUPlugin)
-endif()
 
 if(BUILD_TESTING)
   add_subdirectory(Engine/tests)

@@ -18,8 +18,9 @@ public:
 	{
 #ifdef PLUGIN_SC
 		return;
-#endif
+#else
 		err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
+#endif		
 	}
 
 	static std::string info()
