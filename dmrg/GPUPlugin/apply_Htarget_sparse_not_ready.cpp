@@ -18,7 +18,6 @@ void apply_Htarget_sparse(SizeType                 noperator,
 {
 
 	typedef std::vector<T*> VectorPointerType;
-	typedef std::vector<T>  VectorType;
 
 	const double      giga   = 1000.0 * 1000.0 * 1000.0;
 	const IntegerType idebug = 1;

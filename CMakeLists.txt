@@ -64,4 +64,3 @@ option(BUILD_DOC "Build PDF manual (requires pdflatex, bibtex, and perl)" OFF)
 if(BUILD_DOC)
   add_subdirectory(doc)
 endif()
-
