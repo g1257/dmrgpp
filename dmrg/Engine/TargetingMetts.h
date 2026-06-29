@@ -275,10 +275,15 @@ public:
 		if (this->tv(n1).size() > 0)
 			evolve(n1, n1, n1 - 1, Eg, direction, sites, loopNumber);
 
-		const LeftRightSuperType& lrs = this->common().targetHelper().lrs();
 		for (SizeType i = 0; i < this->common().aoe().tvs(); i++)
 			assert(this->tv(i).size() == 0
-			       || this->tv(i).size() == lrs.super().permutationVector().size());
+			       || this->tv(i).size()
+			           == this->common()
+			                  .targetHelper()
+			                  .lrs()
+			                  .super()
+			                  .permutationVector()
+			                  .size());
 
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
