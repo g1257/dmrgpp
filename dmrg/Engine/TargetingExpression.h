@@ -141,6 +141,8 @@ public:
 		io.readline(gsWeight_, "GsWeight=");
 	}
 
+	std::string name() const final { return "Expression"; }
+
 	SizeType sites() const { return 0; }
 
 	SizeType targets() const { return pvectors_.targets(); }

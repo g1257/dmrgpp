@@ -133,6 +133,8 @@ public:
 	    , progress_("TargetingGroundState")
 	{ }
 
+	std::string name() const final { return "GroundState"; }
+
 	SizeType sites() const { return tstStruct_.sites(); }
 
 	SizeType targets() const { return 0; }
@@ -191,7 +193,6 @@ private:
 
 	TargetParamsType              tstStruct_;
 	PsimagLite::ProgressIndicator progress_;
-
 }; // class TargetingGroundState
 } // namespace Dmrg
 /*@}*/

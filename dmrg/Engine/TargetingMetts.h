@@ -177,8 +177,6 @@ public:
 	               const QnType&                 quantumSector,
 	               InputValidatorType&           ioIn)
 	    : BaseType(lrs, checkPoint, wft, 0)
-	    , model_(checkPoint.model())
-	    , lrs_(lrs)
 	    , mettsStruct_(ioIn, "TargetingMetts", checkPoint.model())
 	    , wft_(wft)
 	    , quantumSector_(quantumSector)
@@ -212,6 +210,8 @@ public:
 			garbage_[i] = 0;
 		}
 	}
+
+	std::string name() const final { return "Metts"; }
 
 	SizeType sites() const { return mettsStruct_.sites(); }
 
@@ -275,15 +275,17 @@ public:
 		if (this->tv(n1).size() > 0)
 			evolve(n1, n1, n1 - 1, Eg, direction, sites, loopNumber);
 
+		const LeftRightSuperType& lrs = this->common().targetHelper().lrs();
 		for (SizeType i = 0; i < this->common().aoe().tvs(); i++)
 			assert(this->tv(i).size() == 0
-			       || this->tv(i).size() == lrs_.super().permutationVector().size());
+			       || this->tv(i).size() == lrs.super().permutationVector().size());
 
 		bool doBorderIfBorder = true;
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 
-		PsimagLite::String predicate = model_.params().printHamiltonianAverage;
-		const SizeType     center    = model_.superGeometry().numberOfSites() / 2;
+		const ModelType&   model     = this->common().targetHelper().model();
+		PsimagLite::String predicate = model.params().printHamiltonianAverage;
+		const SizeType     center    = model.superGeometry().numberOfSites() / 2;
 		PsimagLite::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		assert(block1.size() > 0);
@@ -373,8 +375,9 @@ private:
 		msg << " vector number " << startEnd.first << " has norm ";
 		msg << norm(phi);
 		progress_.printline(msgg, std::cout);
+		const LeftRightSuperType& lrs = this->common().targetHelper().lrs();
 		if (norm(phi) < 1e-6)
-			setFromInfinite(this->tvNonConst(startEnd.first), lrs_);
+			setFromInfinite(this->tvNonConst(startEnd.first), lrs);
 		bool allOperatorsApplied
 		    = (this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		VectorSizeType indices(startEnd.second - startEnd.first);
@@ -399,10 +402,12 @@ private:
 		if (this->common().aoe().noStageIs(StageEnumType::COLLAPSE))
 			this->common().setAllStagesTo(StageEnumType::WFT_NOADVANCE);
 
+		const ModelType& model = this->common().targetHelper().model();
+
 		if (this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
 			if (!allSitesCollapsed()) {
 				if (sitesCollapsed_.size()
-				    > 2 * model_.superGeometry().numberOfSites())
+				    > 2 * model.superGeometry().numberOfSites())
 					throw PsimagLite::RuntimeError(
 					    "advanceCounterAndComputeStage\n");
 				printAdvancement(timesWithoutAdvancement_);
@@ -484,6 +489,9 @@ private:
 			return;
 		assert(norm(this->tv(index)) > 1e-6);
 
+		const ModelType&          model = this->common().targetHelper().model();
+		const LeftRightSuperType& lrs   = this->common().targetHelper().lrs();
+
 		if (this->common().aoe().allStages(StageEnumType::WFT_NOADVANCE)
 		    || this->common().aoe().allStages(StageEnumType::WFT_ADVANCE)
 		    || this->common().aoe().allStages(StageEnumType::COLLAPSE)) {
@@ -504,14 +512,14 @@ private:
 			progress_.printline(msgg, std::cout);
 
 			VectorWithOffsetType phiNew; // same sectors as g.s.
-			// phiNew.populateSectors(lrs_.super());
+			// phiNew.populateSectors(lrs.super());
 			assert(norm(this->tv(advance)) > 1e-6);
 
-			phiNew.populateSectors(lrs_.super());
+			phiNew.populateSectors(lrs.super());
 			// OK, now that we got the partition number right, let's wft:
 			assert(block.size() == 1);
-			OneSiteSpacesType oneSiteSpaces(block[0], dir, model_);
-			wft_.setInitialVector(phiNew, this->tv(advance), lrs_, oneSiteSpaces);
+			OneSiteSpacesType oneSiteSpaces(block[0], dir, model);
+			wft_.setInitialVector(phiNew, this->tv(advance), lrs, oneSiteSpaces);
 			phiNew.collapseSectors();
 			assert(norm(phiNew) > 1e-6);
 			this->tvNonConst(index) = phiNew;
@@ -522,16 +530,18 @@ private:
 
 	void updateStochastics(const VectorSizeType& block1, const VectorSizeType& block2)
 	{
-		const QnType& qn = model_.targetQuantum().qn(0);
+		const ModelType& model = this->common().targetHelper().model();
+		const QnType&    qn    = model.targetQuantum().qn(0);
 		mettsStochastics_.update(qn, block1, block2, mettsStruct_.rngSeed);
 	}
 
 	SizeType getPartition() const
 	{
-		SizeType total = lrs_.super().partition() - 1;
+		const LeftRightSuperType& lrs   = this->common().targetHelper().lrs();
+		SizeType                  total = lrs.super().partition() - 1;
 		for (SizeType i = 0; i < total; i++) {
 			// Do only one sector unless doing su(2) with j>0, then do all m's
-			if (lrs_.super().pseudoQnEqual(i, quantumSector_))
+			if (lrs.super().pseudoQnEqual(i, quantumSector_))
 				return i;
 		}
 		throw PsimagLite::RuntimeError("TargetingMetts: getPartition()\n");
@@ -567,11 +577,13 @@ private:
 		mettsCollapse_.setNk(nk1, block1);
 		SizeType alphaFixedVolume = mettsCollapse_.volumeOf(alphaFixed, nk1);
 
+		const LeftRightSuperType& lrs = this->common().targetHelper().lrs();
+
 		getNewPure(newVector1,
 		           pureVectors_.first,
 		           ProgramGlobals::SysOrEnvEnum::SYSTEM,
 		           alphaFixedVolume,
-		           lrs_.left(),
+		           lrs.left(),
 		           transformSystem,
 		           block1);
 		pureVectors_.first = newVector1;
@@ -587,17 +599,17 @@ private:
 		           pureVectors_.second,
 		           ProgramGlobals::SysOrEnvEnum::ENVIRON,
 		           betaFixedVolume,
-		           lrs_.right(),
+		           lrs.right(),
 		           transformEnviron,
 		           block2);
 		pureVectors_.second = newVector2;
-		setFromInfinite(this->tvNonConst(0), lrs_);
+		setFromInfinite(this->tvNonConst(0), lrs);
 		assert(norm(this->tv(0)) > 1e-6);
 
 		systemPrev_.fixed               = alphaFixedVolume;
-		systemPrev_.permutationInverse  = lrs_.left().permutationInverse();
+		systemPrev_.permutationInverse  = lrs.left().permutationInverse();
 		environPrev_.fixed              = betaFixedVolume;
-		environPrev_.permutationInverse = lrs_.right().permutationInverse();
+		environPrev_.permutationInverse = lrs.right().permutationInverse();
 	}
 
 	void getFullVector(TargetVectorType& v, SizeType m, const LeftRightSuperType& lrs) const
@@ -772,14 +784,16 @@ private:
 	{
 		VectorSizeType                       block(1, site);
 		typename ModelType::HilbertBasisType basis;
+		const ModelType&                     model = this->common().targetHelper().model();
 		VectorSizeType                       quantumNumbs;
-		model_.setNaturalBasis(basis, quantumNumbs, block);
-		model_.findElectrons(electrons, basis, site);
+		model.setNaturalBasis(basis, quantumNumbs, block);
+		model.findElectrons(electrons, basis, site);
 	}
 
 	bool allSitesCollapsed() const
 	{
-		SizeType n = model_.superGeometry().numberOfSites();
+		const ModelType& model = this->common().targetHelper().model();
+		SizeType         n     = model.superGeometry().numberOfSites();
 		for (SizeType i = 0; i < n; i++) {
 			bool seen = (std::find(sitesCollapsed_.begin(), sitesCollapsed_.end(), i)
 			             != sitesCollapsed_.end());
@@ -808,13 +822,14 @@ private:
 		const LeftRightSuperType&     lrs = this->common().targetHelper().lrs();
 		SizeType                      p   = lrs.super().findPartitionNumber(phi.offset(i0));
 		typename ModelHelperType::Aux aux(p, lrs);
+		const ModelType&              model = this->common().targetHelper().model();
 		typename ModelType::HamiltonianConnectionType hc(
 		    lrs,
 		    BaseType::ModelType::modelLinks(),
 		    this->common().aoe().timeVectors().time(),
-		    model_.superOpHelper(),
-		    model_.ioIn());
-		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc, aux);
+		    model.superOpHelper(),
+		    model.ioIn());
+		typename LanczosSolverType::MatrixType lanczosHelper(model, hc, aux);
 
 		SizeType         total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
@@ -874,8 +889,6 @@ private:
 			weight_[i] *= factor;
 	}
 
-	const ModelType&                              model_;
-	const LeftRightSuperType&                     lrs_;
 	TargetParamsType                              mettsStruct_;
 	const WaveFunctionTransfType&                 wft_;
 	const QnType&                                 quantumSector_;

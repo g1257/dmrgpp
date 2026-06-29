@@ -161,6 +161,8 @@ public:
 			weight_[i] = factor;
 	}
 
+	std::string name() const final { return "CVEvolution"; }
+
 	SizeType sites() const { return tstStruct_.sites(); }
 
 	SizeType targets() const

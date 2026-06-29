@@ -129,6 +129,8 @@ public:
 	    , progress_("TargetingCorrection")
 	{ }
 
+	std::string name() const final { return "Correction"; }
+
 	SizeType sites() const { return tstStruct_.sites(); }
 
 	SizeType targets() const { return 1; }

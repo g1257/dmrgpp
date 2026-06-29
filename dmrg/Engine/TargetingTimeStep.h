@@ -173,6 +173,8 @@ public:
 		this->common().aoeNonConst().initTimeVectors(tstStruct_, ioIn);
 	}
 
+	std::string name() const final { return "TimeStep"; }
+
 	SizeType sites() const { return tstStruct_.sites(); }
 
 	SizeType targets() const { return tstStruct_.times().size(); }

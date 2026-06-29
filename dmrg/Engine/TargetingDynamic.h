@@ -149,6 +149,8 @@ public:
 			err(" TargetingDynamic needs an enabled wft\n");
 	}
 
+	std::string name() const final { return "Dynamic"; }
+
 	SizeType sites() const { return tstStruct_.sites(); }
 
 	SizeType targets() const { return 0; }

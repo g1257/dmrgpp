@@ -161,6 +161,8 @@ public:
 			err("TargetingCorrectionVector needs wft\n");
 	}
 
+	std::string name() const final { return "CorrectionVector"; }
+
 	SizeType sites() const { return tstStruct_.sites(); }
 
 	SizeType targets() const { return 4; }

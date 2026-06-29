@@ -164,6 +164,8 @@ public:
 
 	virtual void postCtor() { commonTargeting_.postCtor(sites(), targets()); }
 
+	virtual std::string name() const = 0;
+
 	virtual SizeType sites() const = 0;
 
 	virtual SizeType targets() const = 0;

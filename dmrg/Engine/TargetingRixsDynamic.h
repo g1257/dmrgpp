@@ -201,6 +201,8 @@ public:
 		tstStruct2_ = nullptr;
 	}
 
+	std::string name() const final { return "RixsDynamic"; }
+
 	SizeType sites() const
 	{
 		return (tstStruct_.algorithm() == TargetParamsType::BaseType::AlgorithmEnum::KRYLOV)
