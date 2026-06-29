@@ -203,18 +203,16 @@ public:
 	void evolve(const VectorRealType&         energies,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
-	            const BlockType&              block2,
-	            SizeType                      loopNumber)
+	            const BlockType& /* block2 */,
+	            SizeType loopNumber)
 	{
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
 		assert(energies.size() > 0);
-		RealType Eg = energies[0];
-		SizeType super_block_size
-		    = this->common().targetHelper().lrs().super().block().size();
-		evolveInternal(Eg, direction, block1, loopNumber, super_block_size);
+		RealType Eg            = energies[0];
+		SizeType numberOfSites = this->common().targetHelper().lrs().super().block().size();
 
-		SizeType numberOfSites = block1.size() + block2.size();
+		evolveInternal(Eg, direction, block1, loopNumber, numberOfSites);
 
 		if (site > 1 && site < numberOfSites - 2)
 			return;
@@ -229,7 +227,7 @@ public:
 
 		SizeType  x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1, x);
-		evolveInternal(Eg, direction, block, loopNumber, super_block_size);
+		evolveInternal(Eg, direction, block, loopNumber, numberOfSites);
 	}
 
 	bool end() const
