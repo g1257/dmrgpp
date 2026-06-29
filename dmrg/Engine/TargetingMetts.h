@@ -290,7 +290,7 @@ public:
 		if (pAwesome.isTrue("s", block1[0]))
 			printEnergies(); // in-situ
 
-		const OptionsType& options              = this->model().params().options;
+		const OptionsType& options = this->common().targetHelper().model().params().options;
 		const bool         normalizeTimeVectors = !options.isSet("neverNormalizeVectors");
 
 		if (normalizeTimeVectors)
@@ -805,15 +805,16 @@ private:
 
 	void printEnergies(const VectorWithOffsetType& phi, SizeType whatTarget, SizeType i0) const
 	{
-		SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-		typename ModelHelperType::Aux                 aux(p, BaseType::lrs());
+		const LeftRightSuperType&     lrs = this->common().targetHelper().lrs();
+		SizeType                      p   = lrs.super().findPartitionNumber(phi.offset(i0));
+		typename ModelHelperType::Aux aux(p, lrs);
 		typename ModelType::HamiltonianConnectionType hc(
-		    BaseType::lrs(),
+		    lrs,
 		    BaseType::ModelType::modelLinks(),
 		    this->common().aoe().timeVectors().time(),
 		    model_.superOpHelper(),
 		    model_.ioIn());
-		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(), hc, aux);
+		typename LanczosSolverType::MatrixType lanczosHelper(model_, hc, aux);
 
 		SizeType         total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);

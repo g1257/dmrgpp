@@ -204,7 +204,8 @@ public:
 				    + " but globalTime= " + ttos(globalTime) + "\n");
 		};
 
-		if (loopNumber >= this->model().params().finiteLoop.size() - 1) {
+		if (loopNumber
+		    >= this->common().targetHelper().model().params().finiteLoop.size() - 1) {
 			if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 				if (site >= numberOfSites - 1)
 					return;

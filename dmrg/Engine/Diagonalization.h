@@ -153,6 +153,7 @@ public:
 	//! PTEX_LABEL{Diagonalization}
 	void operator()(TargetingType&                target,
 	                VectorVectorRealType&         energies,
+	                const LeftRightSuperType&     lrs,
 	                ProgramGlobals::DirectionEnum direction,
 	                const BlockType&              blockLeft,
 	                const BlockType&              blockRight)
@@ -160,14 +161,15 @@ public:
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction == ProgramGlobals::DirectionEnum::INFINITE);
 		SizeType loopIndex = 0;
-		internalMain_(target, energies, direction, loopIndex, blockLeft);
+		internalMain_(target, energies, lrs, direction, loopIndex, blockLeft);
 		//  targeting:
 		target.evolve(energies[0], direction, blockLeft, blockRight, loopIndex);
-		wft_.triggerOff(target.lrs());
+		wft_.triggerOff(lrs);
 	}
 
 	void operator()(TargetingType&                target,
 	                VectorVectorRealType&         energies,
+	                const LeftRightSuperType&     lrs,
 	                ProgramGlobals::DirectionEnum direction,
 	                const BlockType&              block,
 	                SizeType                      loopIndex)
@@ -175,10 +177,10 @@ public:
 		PsimagLite::Profiling profiling("Diagonalization", std::cout);
 		assert(direction != ProgramGlobals::DirectionEnum::INFINITE);
 
-		internalMain_(target, energies, direction, loopIndex, block);
+		internalMain_(target, energies, lrs, direction, loopIndex, block);
 		//  targeting:
 		target.evolve(energies[0], direction, block, block, loopIndex);
-		wft_.triggerOff(target.lrs());
+		wft_.triggerOff(lrs);
 	}
 
 private:
@@ -224,6 +226,7 @@ private:
 
 	void internalMain_(TargetingType&                target,
 	                   VectorVectorRealType&         energies,
+	                   const LeftRightSuperType&     lrs,
 	                   ProgramGlobals::DirectionEnum direction,
 	                   SizeType                      loopIndex,
 	                   const VectorSizeType&         block)
@@ -232,7 +235,6 @@ private:
 		assert(block.size() == 1);
 		OneSiteSpacesType oneSiteSpaces(block[0], direction, model_);
 
-		const LeftRightSuperType& lrs = target.lrs();
 		wft_.triggerOn();
 
 		SizeType numberOfExcited = parameters_.numberOfExcited;

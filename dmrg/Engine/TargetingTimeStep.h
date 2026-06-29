@@ -72,6 +72,7 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #define TARGETING_TIMESTEP_H
 
 #include "BlockDiagonalMatrix.h"
+#include "InputNg.h"
 #include "ParametersForSolver.h"
 #include "PredicateAwesome.h"
 #include "ProgramGlobals.h"
@@ -125,6 +126,10 @@ public:
 	using InputValidatorType     = typename ModelType::InputValidatorType;
 	using QnType                 = typename BasisType::QnType;
 	using StageEnumType          = typename TargetingCommonType::StageEnumType;
+	using ParametersType
+	    = ParametersDmrgSolver<RealType,
+	                           typename PsimagLite::InputNg<InputCheck>::Readable,
+	                           Qn>;
 
 	TargetingTimeStep(const LeftRightSuperType&     lrs,
 	                  const CheckpointType&         checkPoint,
@@ -134,7 +139,6 @@ public:
 	                  PsimagLite::String  targeting)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_(ioIn, targeting, checkPoint.model())
-	    , wft_(wft)
 	    , progress_(targeting)
 	    , weight_(tstStruct_.times().size())
 	    , tvEnergy_(tstStruct_.times().size(), 0.0)
@@ -197,16 +201,18 @@ public:
 	void evolve(const VectorRealType&         energies,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
-	            const BlockType&,
-	            SizeType loopNumber)
+	            const BlockType&              block2,
+	            SizeType                      loopNumber)
 	{
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
 		assert(energies.size() > 0);
 		RealType Eg = energies[0];
-		evolveInternal(Eg, direction, block1, loopNumber);
+		SizeType super_block_size
+		    = this->common().targetHelper().lrs().super().block().size();
+		evolveInternal(Eg, direction, block1, loopNumber, super_block_size);
 
-		SizeType numberOfSites = this->lrs().super().block().size();
+		SizeType numberOfSites = block1.size() + block2.size();
 
 		if (site > 1 && site < numberOfSites - 2)
 			return;
@@ -221,7 +227,7 @@ public:
 
 		SizeType  x = (site == 1) ? 0 : numberOfSites - 1;
 		BlockType block(1, x);
-		evolveInternal(Eg, direction, block, loopNumber);
+		evolveInternal(Eg, direction, block, loopNumber, super_block_size);
 	}
 
 	bool end() const
@@ -253,7 +259,8 @@ private:
 	void evolveInternal(RealType                      Eg,
 	                    ProgramGlobals::DirectionEnum direction,
 	                    const BlockType&              block1,
-	                    SizeType                      loopNumber)
+	                    SizeType                      loopNumber,
+	                    SizeType                      super_block_size)
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -261,11 +268,12 @@ private:
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
 
-		SizeType numberOfSites    = this->lrs().super().block().size();
+		SizeType numberOfSites    = super_block_size;
 		bool     doBorderIfBorder = (site < 1 || site >= numberOfSites - 1);
 
+		const ParametersType& parameters = this->common().targetHelper().model().params();
 		if (doBorderIfBorder) {
-			if (loopNumber >= this->model().params().finiteLoop.size() - 1) {
+			if (loopNumber >= parameters.finiteLoop.size() - 1) {
 				if (direction == ProgramGlobals::DirectionEnum::EXPAND_SYSTEM) {
 					if (site >= numberOfSites - 1) {
 						this->common().cocoon(block1, direction, false);
@@ -306,15 +314,15 @@ private:
 
 		this->common().cocoon(block1, direction, false);
 
-		PsimagLite::String predicate = this->model().params().printHamiltonianAverage;
-		const SizeType     center    = this->model().superGeometry().numberOfSites() / 2;
+		PsimagLite::String predicate = parameters.printHamiltonianAverage;
+		const SizeType     center    = super_block_size / 2;
 		PsimagLite::replaceAll(predicate, "c", ttos(center));
 		PsimagLite::PredicateAwesome<> pAwesome(predicate);
 		assert(block1.size() > 0);
 		if (pAwesome.isTrue("s", block1[0]))
 			printEnergies(); // in-situ
 
-		const OptionsType& options = this->model().params().options;
+		const OptionsType& options = parameters.options;
 		bool               normalizeTimeVectors
 		    = (options.isSet("normalizeTimeVectors") || options.isSet("TargetingAncilla"));
 
@@ -343,15 +351,17 @@ private:
 
 	void printEnergies(const VectorWithOffsetType& phi, SizeType whatTarget, SizeType i0) const
 	{
-		const SizeType p = this->lrs().super().findPartitionNumber(phi.offset(i0));
-		typename ModelHelperType::Aux                 aux(p, BaseType::lrs());
+		const LeftRightSuperType&     lrs = this->common().targetHelper().lrs();
+		const SizeType                p   = lrs.super().findPartitionNumber(phi.offset(i0));
+		typename ModelHelperType::Aux aux(p, lrs);
 		typename ModelType::HamiltonianConnectionType hc(
-		    BaseType::lrs(),
+		    lrs,
 		    ModelType::modelLinks(),
 		    this->common().aoe().timeVectors().time(),
-		    BaseType::model().superOpHelper(),
-		    BaseType::model().ioIn());
-		typename LanczosSolverType::MatrixType lanczosHelper(BaseType::model(), hc, aux);
+		    this->common().aoe().model().superOpHelper(),
+		    this->common().aoe().model().ioIn());
+		typename LanczosSolverType::MatrixType lanczosHelper(
+		    this->common().aoe().model(), hc, aux);
 
 		const SizeType   total = phi.effectiveSize(i0);
 		TargetVectorType phi2(total);
@@ -372,7 +382,6 @@ private:
 	}
 
 	TargetParamsType              tstStruct_;
-	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	VectorRealType                weight_;
 	mutable VectorRealType        tvEnergy_;

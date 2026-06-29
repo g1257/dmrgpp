@@ -357,8 +357,12 @@ obtain ordered
 
 			const BlockType& ystep = findRightBlock(Y, step, E);
 
-			diagonalization_(
-			    psi, energies, ProgramGlobals::DirectionEnum::INFINITE, X[step], ystep);
+			diagonalization_(psi,
+			                 energies,
+			                 lrs_,
+			                 ProgramGlobals::DirectionEnum::INFINITE,
+			                 X[step],
+			                 ystep);
 
 			truncate_.changeBasisInfinite(pS,
 			                              pE,
@@ -565,8 +569,12 @@ obtain ordered
 			assert(0 < quantumSector_.size()); // used only for SU(2)
 			lrs_.setToProduct(initialSizeOfHashTable);
 
-			diagonalization_(
-			    target, energies, direction, sitesIndices_[stepCurrent_], loopIndex);
+			diagonalization_(target,
+			                 energies,
+			                 lrs_,
+			                 direction,
+			                 sitesIndices_[stepCurrent_],
+			                 loopIndex);
 			printEnergies(energies);
 
 			assert(target.psiConst().size() > 0 || oneSiteTruncSize == 0);

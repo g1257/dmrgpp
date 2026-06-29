@@ -185,7 +185,7 @@ public:
 		evolve(Eg, direction, site, loopNumber);
 
 		// corner case
-		SizeType numberOfSites = this->lrs().super().block().size();
+		SizeType numberOfSites = this->common().targetHelper().lrs().super().block().size();
 		SizeType site2         = numberOfSites;
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)
@@ -263,7 +263,9 @@ private:
 			SizeType   i0 = phi.sector(i);
 			phi.extract(sv, i0);
 			DenseMatrixType V;
-			SizeType        p = this->lrs().super().findPartitionNumber(phi.offset(i0));
+			SizeType        p
+			    = this->common().targetHelper().lrs().super().findPartitionNumber(
+			        phi.offset(i0));
 			getLanczosVectors(V, sv, p);
 			if (i == 0) {
 				assert(V.cols() > 0);
@@ -281,14 +283,13 @@ private:
 
 	void getLanczosVectors(DenseMatrixType& V, const VectorType& sv, SizeType p)
 	{
-		const RealType                                fakeTime = 0;
-		typename ModelHelperType::Aux                 aux(p, BaseType::lrs());
-		typename ModelType::HamiltonianConnectionType hc(BaseType::lrs(),
-		                                                 ModelType::modelLinks(),
-		                                                 fakeTime,
-		                                                 BaseType::model().superOpHelper(),
-		                                                 BaseType::model().ioIn());
-		typename LanczosSolverType::MatrixType        h(BaseType::model(), hc, aux);
+		const RealType                fakeTime = 0;
+		const LeftRightSuperType&     lrs      = this->common().targetHelper().lrs();
+		const ModelType&              model    = this->common().targetHelper().model();
+		typename ModelHelperType::Aux aux(p, lrs);
+		typename ModelType::HamiltonianConnectionType hc(
+		    lrs, ModelType::modelLinks(), fakeTime, model.superOpHelper(), model.ioIn());
+		typename LanczosSolverType::MatrixType h(model, hc, aux);
 		paramsForSolver_.lotaMemory = true;
 		LanczosSolverType lanczosSolver(h, paramsForSolver_);
 

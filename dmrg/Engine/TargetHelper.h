@@ -79,6 +79,8 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #ifndef TARGET_HELPER_H
 #define TARGET_HELPER_H
 
+#include "Checkpoint.h"
+
 namespace Dmrg {
 
 template <typename ModelType_, typename WaveFunctionTransfType_> class TargetHelper {
@@ -87,31 +89,37 @@ public:
 
 	using ModelType              = ModelType_;
 	using WaveFunctionTransfType = WaveFunctionTransfType_;
+	using CheckpointType         = Checkpoint<ModelType_, WaveFunctionTransfType_>;
 	using RealType               = typename ModelType::RealType;
 	using ModelHelperType        = typename ModelType::ModelHelperType;
 	using LeftRightSuperType     = typename ModelHelperType::LeftRightSuperType;
 	using InputValidatorType     = typename ModelType::InputValidatorType;
 
 	TargetHelper(const LeftRightSuperType&     lrs,
-	             const ModelType&              model,
+	             const CheckpointType&         checkpoint,
 	             const WaveFunctionTransfType& wft)
 	    : lrs_(lrs)
-	    , model_(model)
+	    , checkpoint_(checkpoint)
 	    , wft_(wft)
 	{ }
 
 	const LeftRightSuperType& lrs() const { return lrs_; }
 
-	const ModelType& model() const { return model_; }
+	const ModelType& model() const { return checkpoint_.model(); }
+
+	const CheckpointType& checkpoint() const { return checkpoint_; }
 
 	const WaveFunctionTransfType& wft() const { return wft_; }
 
-	bool withLegacyBugs() const { return model_.params().options.isSet("keepLegacyBugs"); }
+	bool withLegacyBugs() const
+	{
+		return checkpoint_.model().params().options.isSet("keepLegacyBugs");
+	}
 
 private:
 
 	const LeftRightSuperType&     lrs_;
-	const ModelType&              model_;
+	const CheckpointType&         checkpoint_;
 	const WaveFunctionTransfType& wft_;
 }; // TargetHelper
 

@@ -206,7 +206,7 @@ public:
 		this->common().printNormsAndWeights(gsWeight_, weight_);
 
 		// corner case
-		SizeType numberOfSites = this->lrs().super().block().size();
+		SizeType numberOfSites = this->common().targetHelper().lrs().super().block().size();
 		SizeType site2         = numberOfSites;
 
 		if (site == 1 && direction == ProgramGlobals::DirectionEnum::EXPAND_ENVIRON)

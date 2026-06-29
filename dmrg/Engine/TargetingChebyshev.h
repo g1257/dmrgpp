@@ -284,7 +284,7 @@ private:
 
 		assert(phiNew.offset(0) == this->tv(1).offset(0));
 
-		const OptionsType& options              = this->model().params().options;
+		const OptionsType& options = this->common().targetHelper().model().params().options;
 		const bool         normalizeTimeVectors = (options.isSet("normalizeVectors")
                                                    && !options.isSet("neverNormalizeVectors"));
 

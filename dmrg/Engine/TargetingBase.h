@@ -141,14 +141,12 @@ public:
 	              const CheckpointType&         checkPoint,
 	              const WaveFunctionTransfType& wft,
 	              SizeType                      indexNoAdvance)
-	    : lrs_(lrs)
-	    , model_(checkPoint.model())
-	    , commonTargeting_(lrs, checkPoint, wft, indexNoAdvance)
+	    : commonTargeting_(lrs, checkPoint, wft, indexNoAdvance)
 	{
-		Intent<ModelType> intent(model_);
+		Intent<ModelType> intent(checkPoint.model());
 		intent.check();
 
-		const SizeType nexcited = model_.params().numberOfExcited;
+		const SizeType nexcited = checkPoint.model().params().numberOfExcited;
 
 		if (nexcited == 1)
 			return; // EARLY EXIT
@@ -194,12 +192,16 @@ public:
 	virtual void
 	set(VectorVectorVectorType& inV, const VectorSizeType& sectors, const BasisType& someBasis)
 	{
-		commonTargeting_.aoeNonConst().setPsi(
-		    inV, sectors, someBasis, model_.params().numberOfExcited);
+		SizeType numberOfExcited
+		    = commonTargeting_.targetHelper().model().params().numberOfExcited;
+		commonTargeting_.aoeNonConst().setPsi(inV, sectors, someBasis, numberOfExcited);
 	}
 
 	virtual void updateOnSiteForCorners(BasisWithOperatorsType& basisWithOps) const
 	{
+		const ModelType&          model = commonTargeting_.targetHelper().model();
+		const LeftRightSuperType& lrs   = commonTargeting_.targetHelper().lrs();
+
 		if (BasisWithOperatorsType::useSu2Symmetry())
 			return;
 
@@ -208,10 +210,10 @@ public:
 		if (X.size() != 1)
 			return;
 
-		if (X[0] != 0 && X[0] != lrs_.super().block().size() - 1)
+		if (X[0] != 0 && X[0] != lrs.super().block().size() - 1)
 			return;
 
-		basisWithOps.setOneSite(X, model_, commonTargeting_.time());
+		basisWithOps.setOneSite(X, model, commonTargeting_.time());
 	}
 
 	virtual bool end() const { return false; }
@@ -309,8 +311,6 @@ public:
 
 	// non-virtual below
 
-	const ModelType& model() const { return model_; }
-
 	const VectorVectorVectorWithOffsetType& psiConst() const
 	{
 		return commonTargeting_.aoe().psiConst();
@@ -327,8 +327,6 @@ public:
 	{
 		return commonTargeting_.inSitu(i);
 	}
-
-	const LeftRightSuperType& lrs() const { return lrs_; }
 
 	static PsimagLite::String buildPrefix(PsimagLite::IoSelector::Out& io, SizeType counter)
 	{
@@ -373,9 +371,7 @@ protected:
 
 private:
 
-	const LeftRightSuperType& lrs_;
-	const ModelType&          model_;
-	TargetingCommonType       commonTargeting_;
+	TargetingCommonType commonTargeting_;
 }; // class TargetingBase
 
 } // namespace Dmrg

@@ -85,11 +85,14 @@ DISCLOSED WOULD NOT INFRINGE PRIVATELY OWNED RIGHTS.
 #include "Checkpoint.h"
 #include "ContinuedFraction.h"
 #include "GetBraOrKet.h"
+#include "InputNg.h"
 #include "Io/IoSelector.h"
 #include "MultiPointInSitu.h"
 #include "OneSiteSpaces.hh"
+#include "ParametersDmrgSolver.h"
 #include "ProgressIndicator.h"
 #include "PsimagLite.h"
+#include "Qn.h"
 #include "RestartStruct.h"
 #include "SdhsReinterpret.h"
 #include "TargetParamsDynamic.h"
@@ -176,6 +179,10 @@ public:
 	using MultiPointInSituType = MultiPointInSitu<VectorWithOffsetType_, ModelType>;
 	using CheckpointType       = Checkpoint<ModelType, WaveFunctionTransfType>;
 	using OneSiteSpacesType    = OneSiteSpaces<ModelType>;
+	using ParametersDmrgSolverType
+	    = ParametersDmrgSolver<RealType,
+	                           typename PsimagLite::InputNg<InputCheck>::Readable,
+	                           Qn>;
 
 	enum class OpLabelCategory
 	{
@@ -189,8 +196,7 @@ public:
 	                SizeType                      indexNoAdvance)
 	    : cocoonType_(OpLabelCategory::DRESSED)
 	    , progress_("TargetingCommon")
-	    , checkPoint_(checkPoint)
-	    , targetHelper_(lrs, checkPoint.model(), wft)
+	    , targetHelper_(lrs, checkPoint, wft)
 	    , aoe_(targetHelper_, indexNoAdvance)
 	    , inSitu_(checkPoint.model().superGeometry().numberOfSites())
 	{
@@ -221,6 +227,8 @@ public:
 		aoe_.postCtor(tstSites);
 		aoe_.targetVectorsResize(targets);
 	}
+
+	const TargetHelperType& targetHelper() const { return targetHelper_; }
 
 	// START read/write
 
@@ -376,7 +384,7 @@ public:
 
 		LambdaForTests<SomeLambdaType> lambdaForTests;
 		MultiPointInSituType           multiPointInSitu(
-                    aoe_.model(), checkPoint_, targetHelper_.wft(), direction);
+                    aoe_.model(), targetHelper_.checkpoint(), targetHelper_.wft(), direction);
 
 		for (SizeType i = 0; i < n; ++i) {
 			PsimagLite::String opLabel = meas_[i];
@@ -887,7 +895,6 @@ private:
 	OpLabelCategory               cocoonType_;
 	VectorStringType              meas_;
 	PsimagLite::ProgressIndicator progress_;
-	const CheckpointType&         checkPoint_;
 	TargetHelperType              targetHelper_;
 	ApplyOperatorExpressionType   aoe_;
 	mutable VectorType            inSitu_;

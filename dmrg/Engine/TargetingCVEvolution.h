@@ -139,7 +139,6 @@ public:
 	                     InputValidatorType& ioIn)
 	    : BaseType(lrs, checkPoint, wft, 0)
 	    , tstStruct_(ioIn, "TargetingCVEvolution", checkPoint.model())
-	    , wft_(wft)
 	    , progress_("TargetingCVEvolution")
 	    , counter_(0)
 	    , almostDone_(0)
@@ -201,7 +200,7 @@ public:
 		assert(energies.size() > 0);
 		RealType Eg = energies[0];
 		evolveInternal(Eg, direction, block1, loopNumber);
-		SizeType numberOfSites = this->lrs().super().block().size();
+		SizeType numberOfSites = this->common().targetHelper().lrs().super().block().size();
 
 		if (site > 1 && site < numberOfSites - 2)
 			return;
@@ -326,7 +325,6 @@ private:
 	}
 
 	TargetParamsType              tstStruct_;
-	const WaveFunctionTransfType& wft_;
 	PsimagLite::ProgressIndicator progress_;
 	SizeType                      counter_;
 	SizeType                      almostDone_;
