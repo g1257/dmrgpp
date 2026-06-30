@@ -19,7 +19,10 @@ target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)
-target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil gpuplugin)
+target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil)
+if(DMRG_BUILD_BATCHED)
+    target_link_libraries(dmrg_runner PUBLIC gpuplugin)
+endif()
 
 # Dmrg executable (main executable)
 add_executable(dmrg ${instantiationFileList} dmrg.cpp)
