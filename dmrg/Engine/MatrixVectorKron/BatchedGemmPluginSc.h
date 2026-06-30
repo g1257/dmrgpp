@@ -117,7 +117,7 @@ public:
 		}
 	}
 
-	bool enabled() const { return initKron_.batchedGemm(); }
+	bool enabled() const { return initKron_.params().options.isSet("BatchedGemm"); }
 
 	void matrixVector(VectorType& vout, const VectorType& vin) const
 	{
