@@ -87,7 +87,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 */
 	if (need_allocate_X) {
 		nbytes_X = sizeof(T) * xy_size_dim;
-		T* X_    = new T[xy_size_dim];
+		X_       = dmrg_malloc<T>(nbytes_X, nbytes_X);
 
 		assert(X_ != nullptr);
 		{
@@ -110,8 +110,8 @@ void apply_Htarget_sparse(SizeType                 noperator,
 
 	if (need_allocate_Y) {
 		nbytes_Y = sizeof(T) * xy_size_dim;
-		T* Y_    = new T[xy_size_dim];
-		assert(Y_ != NULL);
+		Y_       = dmrg_malloc<T>(nbytes_Y, nbytes_Y);
+		assert(Y_ != nullptr);
 	}
 
 #endif
@@ -173,7 +173,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	VectorPointerType gBXbatch_(npatches, nullptr);
 
 	nbytes_BX = sizeof(T) * sum_BX_sizes;
-	T* pBXmem = new T[sum_BX_sizes];
+	T* pBXmem = dmrg_malloc<T>(nbytes_BX, nbytes_BX);
 
 	if (pBXmem == NULL) {
 		printf("apply_Htarget_sparse: sum_BX_sizes=%le\n", (double)sum_BX_sizes);
@@ -564,9 +564,8 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	};
 
 	assert(pBXmem != NULL);
-
-	delete[] pBXmem;
-	// dmrg_free( (void *) pBXmem );
+	dmrg_free(pBXmem);
+	pBXmem = nullptr;
 
 #ifdef USE_MAGMA
 	/*
@@ -577,8 +576,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 
 	if (need_allocate_X) {
 		dmrg_free(X_);
-		// delete[] X_;
-		X_ = NULL;
+		X_ = nullptr;
 	};
 	assert(X_ != nullptr);
 	if (need_allocate_Y) {
@@ -586,9 +584,8 @@ void apply_Htarget_sparse(SizeType                 noperator,
 		void*  src   = &(Y_[0]);
 		size_t count = sizeof(T) * xy_size;
 		dmrg_memcpy(dest, src, count);
-		//   dmrg_free( Y_ );
-		delete[] Y_;
-		Y_ = NULL;
+		dmrg_free(Y_);
+		Y_ = nullptr;
 	};
 #endif
 
