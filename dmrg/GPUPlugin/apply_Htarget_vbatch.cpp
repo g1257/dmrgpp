@@ -2,6 +2,9 @@
 #include "dmrg_types.h"
 
 #include "dmrg_vbatch.h"
+#ifdef _OPENMP
+#include <omp.h>
+#endif
 
 #include <cassert>
 #include <vector>

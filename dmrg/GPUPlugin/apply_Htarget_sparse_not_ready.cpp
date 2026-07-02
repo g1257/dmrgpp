@@ -86,8 +86,9 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	if (need_allocate_X) {
 		nbytes_X = sizeof(T) * xy_size_dim;
 		X_       = dmrg_malloc<T>(nbytes_X, nbytes_X);
-
 		assert(X_ != nullptr);
+
+#ifdef USE_MAGMA
 		{
 			IntegerType ngpu         = dmrg_get_ngpu();
 			IntegerType igpu         = 0;
@@ -100,6 +101,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 				dmrg_prefetch_to_device((void*)pX, X_inc_nbytes, igpu);
 			};
 		}
+#endif
 		void*  dest  = (void*)&(X_[0]);
 		void*  src   = (void*)&(Xin_[0]);
 		size_t count = sizeof(T) * xy_size;
@@ -347,7 +349,6 @@ void apply_Htarget_sparse(SizeType                 noperator,
 			group_size_[i - 1] = 1;
 		};
 	};
-	assert(X_ != nullptr);
 
 	/*
 	 ------------------
