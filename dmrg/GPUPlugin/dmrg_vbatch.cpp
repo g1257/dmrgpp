@@ -31,8 +31,13 @@ static IntegerType   device = 0;
 
 #endif
 
+#ifdef _OPENMP
+#include <omp.h>
+double dmrg_get_wtime() { return omp_get_wtime(); }
+#else
 #include <time.h>
 double dmrg_get_wtime() { return ((double)clock()) / CLOCKS_PER_SEC; }
+#endif
 
 SizeType MAX(const SizeType& x, const SizeType& y) { return (((x) > (y)) ? (x) : (y)); }
 
@@ -536,9 +541,9 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType ldb = ldb_vbatch[i];
 				IntegerType ldc = ldc_vbatch[i];
 
-				T* Amat = a_vbatch[i];
-				T* Bmat = b_vbatch[i];
-				T* Cmat = c_vbatch[i];
+				assert(a_vbatch[i] != nullptr);
+				assert(b_vbatch[i] != nullptr);
+				assert(c_vbatch[i] != nullptr);
 
 				IntegerType is_ok_mm = (mm >= 1);
 				IntegerType is_ok_nn = (nn >= 1);
@@ -583,9 +588,7 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				assert(ldb >= 1);
 				assert(ldc >= 1);
 
-				assert(Amat != 0);
-				assert(Bmat != 0);
-				assert(Cmat != 0);
+
 			};
 		};
 
@@ -823,7 +826,7 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType pbatch_size = gBatchCount[idev];
 
 				if (pbatch_size >= 1) {
-					magmablas_Xgemm_vbatched_max(
+					magmablas_Xgemm_vbatched_max_nocheck(
 					    transA,
 					    transB,
 					    pm_vbatch,

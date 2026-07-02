@@ -222,8 +222,8 @@ void setup_sparse_batch(
 
 	T** gAbatch_ = dmrg_malloc<T*>(sizeof(T*) * npatches, sizeof(T*) * npatches);
 	T** gBbatch_ = dmrg_malloc<T*>(sizeof(T*) * npatches, sizeof(T*) * npatches);
-	assert(gAbatch_ != NULL);
-	assert(gBbatch_ != NULL);
+	assert(gAbatch_ != nullptr);
+	assert(gBbatch_ != nullptr);
 
 	// printf("sizeof(FbType)=%lf \n",double(sizeof(T)));
 
@@ -232,8 +232,8 @@ void setup_sparse_batch(
 
 	T* pAmem = dmrg_malloc<T>(sizeof(T) * sum_Abatch_sizes, sizeof(T) * sum_Abatch_sizes);
 	T* pBmem = dmrg_malloc<T>(sizeof(T) * sum_Bbatch_sizes, sizeof(T) * sum_Bbatch_sizes);
-	assert(pAmem != NULL);
-	assert(pBmem != NULL);
+	assert(pAmem != nullptr);
+	assert(pBmem != nullptr);
 
 	{
 		SizeType ipatch = 0;
@@ -346,7 +346,6 @@ void setup_sparse_batch(
 			}; /* end for jpatch */
 
 		}; /* end for ipatch */
-
 #ifdef USE_MAGMA
 		{
 			IntegerType ngpu              = dmrg_get_ngpu();
