@@ -587,8 +587,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				assert(lda >= 1);
 				assert(ldb >= 1);
 				assert(ldc >= 1);
-
-
 			};
 		};
 
