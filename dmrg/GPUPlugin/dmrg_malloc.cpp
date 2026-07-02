@@ -99,10 +99,9 @@ template <typename T> T* dmrg_malloc(const size_t alloc_size, SizeType size)
 				fprintf(stderr,
 				        "dmrg_malloc:cudaErrorInvalidValue, alloc_size=%ld\n",
 				        alloc_size);
-			};
-		};
-
-		assert(ierr == cudaSuccess);
+			}
+		}
+		assert(isok);
 	}
 
 	if (dmrg_get_ngpu() == 1) {
@@ -122,6 +121,9 @@ template <typename T> T* dmrg_malloc(const size_t alloc_size, SizeType size)
 		cudaError_t ierr
 		    = cudaMemAdvise(ptr, count, cudaMemAdviseSetPreferredLocation, gpuLocation);
 		assert(ierr == cudaSuccess);
+#ifdef NDEBUG
+		(void)ierr;
+#endif
 #endif
 	}
 
@@ -186,10 +188,8 @@ void dmrg_prefetch_to_device(void* unified_memory_ptr, size_t nbytes, IntegerTyp
 
 #ifdef USE_MAGMA
 	if (dmrg_is_managed(unified_memory_ptr)) {
-		cudaError_t istat = cudaSuccess;
-
 		IntegerType ndevice = 0;
-		istat               = cudaGetDeviceCount(&ndevice);
+		cudaError_t istat   = cudaGetDeviceCount(&ndevice);
 		assert(istat == cudaSuccess);
 
 		if (idevice > (ndevice - 1)) {
@@ -230,6 +230,9 @@ void dmrg_prefetch_to_device(void* unified_memory_ptr, size_t nbytes, IntegerTyp
 			istat = cudaDeviceSynchronize();
 			assert(istat == cudaSuccess);
 		}
+#ifdef NDEBUG
+		(void)istat;
+#endif
 	};
 #endif
 }

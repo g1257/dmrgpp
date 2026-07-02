@@ -612,24 +612,25 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 					    "max_m=%d, max_n=%d, max_k=%d\n", max_m, max_n, max_k);
 				};
 
-				magmablas_Xgemm_vbatched_max(transA,
-				                             transB,
-				                             m_vbatch,
-				                             n_vbatch,
-				                             k_vbatch,
-				                             (MAGMA_T)alpha,
-				                             (MAGMA_T const* const*)a_vbatch,
-				                             lda_vbatch,
-				                             (MAGMA_T const* const*)b_vbatch,
-				                             ldb_vbatch,
-				                             (MAGMA_T)beta,
-				                             (MAGMA_T**)c_vbatch,
-				                             ldc_vbatch,
-				                             batch_size,
-				                             max_m,
-				                             max_n,
-				                             max_k,
-				                             queue);
+				magmablas_Xgemm_vbatched_max_nocheck(
+				    transA,
+				    transB,
+				    m_vbatch,
+				    n_vbatch,
+				    k_vbatch,
+				    (MAGMA_T)alpha,
+				    (MAGMA_T const* const*)a_vbatch,
+				    lda_vbatch,
+				    (MAGMA_T const* const*)b_vbatch,
+				    ldb_vbatch,
+				    (MAGMA_T)beta,
+				    (MAGMA_T**)c_vbatch,
+				    ldc_vbatch,
+				    batch_size,
+				    max_m,
+				    max_n,
+				    max_k,
+				    queue);
 			}
 		} else {
 			/*
