@@ -115,7 +115,6 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	}
 
 #endif
-	assert(X_ != nullptr);
 
 	IntegerType nnz_nC = 0;
 	SizeType    sum_nC = 0;
@@ -163,7 +162,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	for (ipatch = 1; ipatch <= npatches; ipatch++) {
 		sum_BX_sizes += BX_sizes_[ipatch - 1];
 	};
-	assert(X_ != nullptr);
+
 	/*
 	 ---------------
 	 setup gBXbatch
@@ -545,12 +544,11 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 * free unified memory
 	 * -------------------
 	 */
-	assert(X_ != nullptr);
+
 	if (need_allocate_X) {
 		dmrg_free(X_);
 		X_ = nullptr;
 	};
-	assert(Y_ != nullptr);
 	if (need_allocate_Y) {
 		void*  dest  = &(Yout_[0]);
 		void*  src   = &(Y_[0]);

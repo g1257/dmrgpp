@@ -50,7 +50,12 @@ else()
 endif()
 
 option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
-option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma support" OFF)
+
+include(CMakeDependentOption)
+cmake_dependent_option(DMRG_BUILD_BATCHED_MAGMA
+    "Enable building with Magma" ON
+    "DMRG_BUILD_BATCHED" OFF
+)
 
 add_subdirectory(util)
 

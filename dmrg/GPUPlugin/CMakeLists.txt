@@ -16,24 +16,12 @@ set(SRC_FILES
     BatchedGemm.cpp)
 
 if(DMRG_BUILD_BATCHED_MAGMA)
-  # 1. Load the PkgConfig module
+  #export PKG_CONFIG_PATH=<MAGMA_INSTALL_PREFIX>/lib/pkgconfig:$PKG_CONFIG_PATH
+
   find_package(PkgConfig REQUIRED)
 
-  set(ENV{PKG_CONFIG_PATH} "/home/svh/Documents/CONNEQT/magma-install/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
-
-  # 2. Check for the module and create an imported target
-  # Example: searching for 'glib-2.0'
   pkg_check_modules(MAGMA REQUIRED IMPORTED_TARGET magma)
 endif()
-
-#find_package(OpenMP REQUIRED COMPONENTS C)
-
-# 3. Link against the created target
-# The target is automatically named PkgConfig::<PREFIX>
-#target_link_libraries(my_app PRIVATE PkgConfig::GLIB2)
-
-#set(magma_DIR "/home/svh/Documents/CONNEQT/magma-2.10.0/build")
-#find_package(magma REQUIRED)
 
 add_library(gpuplugin ${SRC_FILES})
 target_include_directories(gpuplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
