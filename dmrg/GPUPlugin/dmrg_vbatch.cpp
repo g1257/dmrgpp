@@ -306,7 +306,7 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
    */
 	const IntegerType ialign     = 32;
 	IntegerType       vbatch_dim = ialign * ICEIL((batch_size + 1), ialign);
-#if USE_MAGMA
+#ifdef USE_MAGMA
 
 	nbytes = sizeof(T) * (vbatch_dim);
 	nbytes_total += nbytes;

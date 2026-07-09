@@ -7,15 +7,27 @@ add_custom_command(
 
 if(DMRG_BUILD_BATCHED)
   add_subdirectory(GPUPlugin)
+  set(PLUGIN_SC ON)
+  set(FpType "double")
+  if(DMRG_BUILD_BATCHED_MAGMA)
+    set(USE_MAGMA ON)
+  endif()
 endif()
 
 add_subdirectory(KronUtil)
 
+# Generate configuration header for PsimagLite
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/GPUPlugin/DMRGConfig.h.in ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin/DMRGConfig.h
+               @ONLY)
+
 # DMRG++ as a library so cincuenta can use it
 add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.cpp Qn.cpp)
 target_sources(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
-target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} Engine)
+target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin Engine)
 target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)
+if(DMRG_BUILD_BATCHED)
+  target_link_libraries(dmrgpp_utils PUBLIC gpuplugin)
+endif()
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)
@@ -31,7 +43,7 @@ target_include_directories(dmrg PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 # Observe executable
 add_executable(observe observe.cpp ObserveDriver0.cpp ObserveDriver1.cpp ObserveDriver2.cpp)
-target_link_libraries(observe dmrgpp_utils kronutil)
+target_link_libraries(observe PUBLIC dmrgpp_utils kronutil)
 
 # Toolbox executable
 add_executable(toolboxdmrg toolboxdmrg.cpp)

@@ -1,5 +1,6 @@
 #ifndef BATCHEDGEMMINCLUDE_HH
 #define BATCHEDGEMMINCLUDE_HH
+#include "DMRGConfig.h"
 #ifdef PLUGIN_SC
 #include "BatchedGemmPluginSc.h"
 #define BATCHED_GEMM BatchedGemmPluginSc
@@ -19,7 +20,7 @@ public:
 #ifdef PLUGIN_SC
 		return;
 #endif
-		err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
+		// err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
 	}
 
 	static std::string info()

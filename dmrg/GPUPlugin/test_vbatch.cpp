@@ -1,3 +1,4 @@
+#include "DMRGConfig.h"
 #include "analysis.h"
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"

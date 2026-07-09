@@ -1,6 +1,7 @@
 #ifndef SETUP_VBATCH_H
 #define SETUP_VBATCH_H
 
+#include "DMRGConfig.h"
 #include "Vector.h"
 #include "dmrg_types.h"
 

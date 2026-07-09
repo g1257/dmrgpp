@@ -24,12 +24,10 @@ if(DMRG_BUILD_BATCHED_MAGMA)
 endif()
 
 add_library(gpuplugin ${SRC_FILES})
-target_include_directories(gpuplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(gpuplugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 target_link_libraries(gpuplugin PUBLIC psimaglite::psimaglite)
-target_compile_definitions(gpuplugin PUBLIC FpType=double PLUGIN_SC)
 if(DMRG_BUILD_BATCHED_MAGMA)
   target_link_libraries(gpuplugin PUBLIC PkgConfig::MAGMA)
-  target_compile_definitions(gpuplugin PUBLIC USE_MAGMA)
 endif()
 
 add_executable(test_vbatch test_vbatch.cpp)

@@ -1,6 +1,7 @@
 #ifndef DMRG_VBATCH_H
 #define DMRG_VBATCH_H
 
+#include "DMRGConfig.h"
 #include "Vector.h"
 #include "dmrg_types.h"
 #include <cassert>
