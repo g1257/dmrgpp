@@ -8,6 +8,7 @@
 #include "BatchedGemmCpu.h"
 #define BATCHED_GEMM BatchedGemmCpu
 #endif
+#include "PsimagLite.h"
 
 namespace Dmrg {
 
@@ -20,7 +21,7 @@ public:
 #ifdef PLUGIN_SC
 		return;
 #endif
-		// err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
+		err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
 	}
 
 	static std::string info()
