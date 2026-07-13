@@ -98,20 +98,20 @@ template <typename InitKronType> class KronConnections {
 	using ConcurrencyType         = PsimagLite::Concurrency;
 	using MatrixDenseOrSparseType = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
 	using VectorSizeType          = PsimagLite::Vector<SizeType>::Type;
-	using KronLoggerType          = KronLogger<typename InitKronType::ModelType>;
 
 public:
 
+	using KronLoggerType   = KronLogger<typename InitKronType::ModelType>;
 	using MatrixType       = PsimagLite::Matrix<ComplexOrRealType>;
 	using VectorType       = typename MatrixDenseOrSparseType::VectorType;
 	using VectorVectorType = typename PsimagLite::Vector<VectorType>::Type;
 	using RealType         = typename InitKronType::RealType;
 
-	KronConnections(InitKronType& initKron)
+	KronConnections(InitKronType& initKron, KronLoggerType& kron_logger)
 	    : initKron_(initKron)
+	    , kron_logger_(kron_logger)
 	    , x_(initKron.xout())
 	    , y_(initKron.yin())
-	    , kron_logger_(initKron_)
 	{
 		kron_logger_.vector(y_);
 	}
@@ -183,9 +183,9 @@ private:
 	KronConnections& operator=(const KronConnections&);
 
 	const InitKronType& initKron_;
+	KronLoggerType&     kron_logger_;
 	VectorType&         x_;
 	const VectorType&   y_;
-	KronLoggerType      kron_logger_;
 }; // class KronConnections
 
 } // namespace PsimagLite

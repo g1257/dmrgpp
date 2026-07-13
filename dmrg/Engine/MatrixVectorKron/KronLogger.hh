@@ -55,12 +55,22 @@ public:
 			return;
 		}
 
-		if (counter_ >= init_kron.params().dumperEnd) {
+		PsimagLite::OstringStream                     msgg(std::cout.precision());
+		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
+		msg << "KronLogger: Hello from ctor, counter_=" << counter_;
+		progress_.printline(msgg, std::cout);
+		msg << "\n";
+
+		++counter_;
+
+		SizeType end = init_kron.params().dumperEnd;
+
+		if (end == 0 || counter_ >= end) {
 			return;
 		}
 
 		SizeType start = init_kron.params().dumperBegin;
-		if (counter_++ < start) {
+		if (counter_ < start) {
 			return;
 		}
 
@@ -73,9 +83,6 @@ public:
 			err(std::string("Failed to create KronLogger file ") + filename + "\n");
 		}
 
-		PsimagLite::OstringStream                     msgg(std::cout.precision());
-		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg << "KronLogger: Hello from ctor, counter_=" << counter_ << "\n";
 		progress_.printline(msgg, *fout_);
 	}
 
