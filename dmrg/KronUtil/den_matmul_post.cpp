@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include <Kokkos_Profiling_ScopedRegion.hpp>
+
 template <typename ComplexOrRealType>
 void den_matmul_post(const char                                                 trans_A,
                      const int                                                  nrow_A,
@@ -13,7 +15,8 @@ void den_matmul_post(const char                                                 
                      PsimagLite::MatrixNonOwned<ComplexOrRealType>&             xout,
                      PsimagLite::GemmR<ComplexOrRealType>&                      gemmR)
 {
-	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+	Kokkos::Profiling::ScopedRegion region("PsimagLite::den_matmul_post");
+
 	/*
 	 * -------------------------------------------------------
 	 * A in dense matrix format
@@ -33,8 +36,9 @@ void den_matmul_post(const char                                                 
 	 * -------------------------------------------------------
 	 */
 
-	int isTranspose     = (trans_A == 'T') || (trans_A == 't');
-	int isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
+	const bool is_complex      = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
+	int        isTranspose     = (trans_A == 'T') || (trans_A == 't');
+	int        isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
 
 	const bool use_blas = true;
 

@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include <Kokkos_Profiling_ScopedRegion.hpp>
+
 template <typename ComplexOrRealType>
 void csr_matmul_pre(char                                                       trans_A,
                     const PsimagLite::CrsMatrix<ComplexOrRealType>&            a,
@@ -10,6 +12,7 @@ void csr_matmul_pre(char                                                       t
                     const int                                                  ncol_X,
                     PsimagLite::MatrixNonOwned<ComplexOrRealType>&             xout)
 {
+	Kokkos::Profiling::ScopedRegion region("PsimagLite::csr_matmul_pre");
 	/*
 	 * -------------------------------------------------------
 	 * A in compressed sparse ROW format

@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include <Kokkos_Profiling_ScopedRegion.hpp>
+
 template <typename ComplexOrRealType>
 void den_matmul_pre(const char                                                 trans_A,
                     const int                                                  nrow_A,
@@ -13,6 +15,8 @@ void den_matmul_pre(const char                                                 t
                     PsimagLite::MatrixNonOwned<ComplexOrRealType>&             xout,
                     PsimagLite::GemmR<ComplexOrRealType>&                      gemmR)
 {
+	Kokkos::Profiling::ScopedRegion region("PsimagLite::den_matmul_pre");
+
 	/*
 	 * -------------------------------------------------------
 	 * A in dense matrix format

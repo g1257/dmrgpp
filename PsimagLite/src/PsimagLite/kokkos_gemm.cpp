@@ -39,7 +39,7 @@ inline void PsimagLite::kokkos_gemm(char               transa,
                                     Scalar*            C,
                                     IntegerForBlasType ldc)
 {
-	Kokkos::Profiling::ScopedRegion scoped_region("kokkos_gemm");
+	Kokkos::Profiling::ScopedRegion scoped_region("PsimagLite::kokkos_gemm");
 	int                             M      = static_cast<int>(m);
 	int                             N      = static_cast<int>(n);
 	int                             K      = static_cast<int>(k);

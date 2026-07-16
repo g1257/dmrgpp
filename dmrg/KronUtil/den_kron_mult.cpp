@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include <Kokkos_Profiling_ScopedRegion.hpp>
+
 template <typename ComplexOrRealType>
 void den_kron_mult_method(const int                                                   imethod,
                           const char                                                  transA,
@@ -12,6 +14,8 @@ void den_kron_mult_method(const int                                             
                           SizeType                                                    offsetX,
                           PsimagLite::GemmR<ComplexOrRealType>&                       gemmR)
 {
+	Kokkos::Profiling::ScopedRegion region("PsimagLite::csr_den_kron_mult_method");
+
 	const bool is_complex = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int  nrow_A     = a_.n_row();
 	const int  ncol_A     = a_.n_col();
@@ -69,6 +73,8 @@ void den_kron_mult_method(const int                                             
 	 */
 
 	if (imethod == 1) {
+		Kokkos::Profiling::ScopedRegion region(
+		    "PsimagLite::csr_den_kron_mult_method::imethod1");
 
 		/*
 		 *  --------------------------------------------
@@ -173,6 +179,9 @@ void den_kron_mult_method(const int                                             
 			};
 		}
 	} else if (imethod == 2) {
+		Kokkos::Profiling::ScopedRegion region(
+		    "PsimagLite::csr_den_kron_mult_method::imethod2");
+
 		/*
 		 * ---------------------
 		 * YAt(jb,ia) = Y(jb,ja) * tranpose(A(ia,ja))
@@ -276,6 +285,9 @@ void den_kron_mult_method(const int                                             
 			               gemmR);
 		}
 	} else if (imethod == 3) {
+		Kokkos::Profiling::ScopedRegion region(
+		    "PsimagLite::csr_den_kron_mult_method::imethod3");
+
 		/*
 		 * ---------------------------------------------
 		 * C = kron(A,B)

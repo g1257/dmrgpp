@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include <Kokkos_Profiling_ScopedRegion.hpp>
+
 template <typename ComplexOrRealType>
 void csr_to_den(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
                 PsimagLite::Matrix<ComplexOrRealType>&          a_)
@@ -40,6 +42,8 @@ void csr_kron_mult_method(const int  imethod,
                           const PsimagLite::MatrixNonOwned<const ComplexOrRealType>& yin,
                           PsimagLite::MatrixNonOwned<ComplexOrRealType>&             xout)
 {
+	Kokkos::Profiling::ScopedRegion region("PsimagLite::csr_kron_mult_method");
+
 	const bool is_complex   = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
 	const int  isTransA     = (transA == 'T') || (transA == 't');
 	const int  isTransB     = (transB == 'T') || (transB == 't');
@@ -109,6 +113,7 @@ void csr_kron_mult_method(const int  imethod,
 	 */
 
 	if (imethod == 1) {
+		Kokkos::Profiling::ScopedRegion region("PsimgLite::csr_kron_mult_method::imethod1");
 
 		/*
 		 *  --------------------------------------------
@@ -185,6 +190,8 @@ void csr_kron_mult_method(const int  imethod,
 			                xout);
 		}
 	} else if (imethod == 2) {
+		Kokkos::Profiling::ScopedRegion region("PsimgLite::csr_kron_mult_method::imethod2");
+
 		/*
 		 * ---------------------
 		 * YAt(jb,ia) = Y(jb,ja) * tranpose(A(ia,ja))
@@ -262,6 +269,8 @@ void csr_kron_mult_method(const int  imethod,
 			               xout);
 		}
 	} else if (imethod == 3) {
+		Kokkos::Profiling::ScopedRegion region("PsimgLite::csr_kron_mult_method::imethod3");
+
 		/*
 		 * ---------------------------------------------
 		 * C = kron(A,B)
