@@ -3,17 +3,11 @@
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"
 
-#inlcude < algorithm>
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <complex>
 #include <cstdlib>
-
-#if defined(USE_COMPLEX_Z)
-double ABS(std::complex<double> x) { return std::abs(x); }
-#else
-double ABS(double x) { return fabs(x); }
-#endif
 
 SizeType icall = 0;
 void     print_nnz(SizeType              noperator,
@@ -301,7 +295,7 @@ void setup_vbatch(
 								for (j = 0; j < SizeType(n); j++) {
 									for (i = 0; i < SizeType(m);
 									     i++) {
-										double abs_aij = ABS(
+										double abs_aij = std::abs(
 										    Asrc[i
 										         + j * ld1]);
 										lnnz_A += (abs_aij
@@ -408,7 +402,7 @@ void setup_vbatch(
 								for (j = 0; j < SizeType(n); j++) {
 									for (i = 0; i < SizeType(m);
 									     i++) {
-										double abs_bij = ABS(
+										double abs_bij = std::abs(
 										    Bsrc[i
 										         + j * ld1]);
 										lnnz_B += (abs_bij
@@ -596,12 +590,7 @@ void setup_vbatch(
 }
 
 int ICEIL2(const SizeType& x, const SizeType& n) { return (((x) + (n)-1) / (n)); }
-/*
-int indx2f2(const SizeType& i,const SizeType& j,const SizeType& lda)
-{
-        return (((i)-1) + ((j)-1)*(lda));
-}
-*/
+
 template void setup_vbatch<MYTYPE>(
     SizeType              noperator, /* number of connections (INPUT) */
     SizeType              npatches, /* number of patches (INPUT) */
