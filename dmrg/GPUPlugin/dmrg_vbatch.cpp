@@ -910,7 +910,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 
 #endif
 
-
 	if (idebug >= 1) {
 		elapsed_time += dmrg_get_wtime();
 		double gflops_per_sec = 0;
