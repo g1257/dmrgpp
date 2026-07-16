@@ -1126,8 +1126,8 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 	SizeType ncol_C = C.cols();
 
 	// ------------------------------
-	// nrow_A = MAX( nrow_B, nrow_C )
-	// ncol_A = MAX( ncol_B, ncol_C )
+	// nrow_A = std::max( nrow_B, nrow_C )
+	// ncol_A = std::max( ncol_B, ncol_C )
 	// ------------------------------
 	SizeType nrow_A = (nrow_B >= nrow_C) ? nrow_B : nrow_C;
 	SizeType ncol_A = (ncol_B >= ncol_C) ? ncol_B : ncol_C;
@@ -1270,8 +1270,8 @@ void sum(CrsMatrix<T>&                           A,
 	SizeType Bmats_size = Bmats.size();
 
 	// ------------------------------
-	// nrow_A = MAX( nrow_B(:) )
-	// ncol_A = MAX( ncol_B(:) )
+	// nrow_A = std::max( nrow_B(:) )
+	// ncol_A = std::max( ncol_B(:) )
 	// ------------------------------
 	SizeType nrow_A  = 0;
 	SizeType ncol_A  = 0;

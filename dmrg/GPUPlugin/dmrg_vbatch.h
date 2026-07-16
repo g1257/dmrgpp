@@ -12,8 +12,6 @@ typedef PsimagLite::Vector<IntegerType>::Type       VectorIntegerType;
 typedef typename PsimagLite::Vector<char>::Type     VectorCharType;
 typedef typename PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-SizeType    MIN(const SizeType& x, const SizeType& y);
-SizeType    MAX(const SizeType& x, const SizeType& y);
 SizeType    indx2f(const SizeType& i, const SizeType& j, const SizeType& lda);
 SizeType    ICEIL(const SizeType& x, const SizeType& n);
 IntegerType ICEIL(const IntegerType& x, const IntegerType& n);

@@ -1,5 +1,7 @@
 #include "analysis.h"
 #include "dmrg_vbatch.h"
+
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <cstdio>
@@ -16,7 +18,7 @@ SizeType indx2f2(const SizeType& i, const SizeType& j, const SizeType& lda)
 
 double nchoosek(SizeType n, SizeType k)
 {
-	k = MIN(k, n - k);
+	k = std::min(k, n - k);
 	if (k == 0) {
 		return ((double)1.0);
 	};
@@ -73,10 +75,10 @@ SizeType gen_patches_comb(SizeType        left_size,
 	% ------------------------------------------------
 	*/
 
-	SizeType max_left_up    = MIN(left_size, target_up);
-	SizeType max_left_down  = MIN(left_size, target_down);
-	SizeType max_right_up   = MIN(right_size, target_up);
-	SizeType max_right_down = MIN(right_size, target_down);
+	SizeType max_left_up    = std::min(left_size, target_up);
+	SizeType max_left_down  = std::min(left_size, target_down);
+	SizeType max_right_up   = std::min(right_size, target_up);
+	SizeType max_right_down = std::min(right_size, target_down);
 
 	/*
 	% ---------------------------------------------------------

@@ -35,10 +35,6 @@ double dmrg_get_wtime() { return omp_get_wtime(); }
 double dmrg_get_wtime() { return ((double)clock()) / CLOCKS_PER_SEC; }
 #endif
 
-SizeType MAX(const SizeType& x, const SizeType& y) { return (((x) > (y)) ? (x) : (y)); }
-
-SizeType MIN(const SizeType& x, const SizeType& y) { return (((x) < (y)) ? (x) : (y)); }
-
 IntegerType ICEIL(const IntegerType& x, const IntegerType& n)
 {
 	IntegerType value = (((x) + (n)-1) / (n));
@@ -542,9 +538,9 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 					const IntegerType n = n_array[i];
 					const IntegerType k = k_array[i];
 
-					max_m = MAX(m, max_m);
-					max_n = MAX(n, max_n);
-					max_k = MAX(k, max_k);
+					max_m = std::max(m, max_m);
+					max_n = std::max(n, max_n);
+					max_k = std::max(k, max_k);
 				};
 				if (idebug >= 1) {
 					printf(
@@ -676,9 +672,9 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 						IntegerType n = pn_vbatch[i];
 						IntegerType k = pk_vbatch[i];
 
-						max_m = MAX(max_m, m);
-						max_n = MAX(max_n, n);
-						max_k = MAX(max_k, k);
+						max_m = std::max(max_m, m);
+						max_n = std::max(max_n, n);
+						max_k = std::max(max_k, k);
 
 						gmem += m * n + m * k + k * n;
 						gflops += 2.0 * m * n * k;

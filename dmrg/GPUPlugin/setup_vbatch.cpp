@@ -2,6 +2,8 @@
 #include "dmrg_lapack.h"
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"
+
+#inlcude < algorithm>
 #include <cassert>
 #include <cmath>
 #include <complex>
@@ -336,7 +338,7 @@ void setup_vbatch(
 				const SizeType nb     = 1024 * 1024 * 1024;
 
 				for (istart = 1; istart <= n; istart += nb) {
-					SizeType iend  = MIN(n, istart + nb - 1);
+					SizeType iend  = std::min(n, istart + nb - 1);
 					SizeType isize = (iend - istart + 1);
 					T*       src   = &(hAbatch_[istart - 1]);
 					T*       dest  = &(pAbatch[istart - 1]);
@@ -441,7 +443,7 @@ void setup_vbatch(
 				const SizeType nb     = 1024 * 1024 * 1024;
 
 				for (istart = 1; istart <= n; istart += nb) {
-					SizeType iend  = MIN(n, istart + nb - 1);
+					SizeType iend  = std::min(n, istart + nb - 1);
 					SizeType isize = (iend - istart + 1);
 					T*       src   = &(hBbatch_[istart - 1]);
 					T*       dest  = &(pBbatch[istart - 1]);
@@ -522,7 +524,7 @@ void setup_vbatch(
 
 				total_flops_method_1 += flops_method_1;
 				total_flops_method_2 += flops_method_2;
-				total_flops_min += MIN(flops_method_1, flops_method_2);
+				total_flops_min += std::min(flops_method_1, flops_method_2);
 			};
 		};
 		total_flops_method_1 *= ((double)noperator);
