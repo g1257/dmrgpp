@@ -6,10 +6,6 @@
 #include <PsimagLite/Vector.h>
 #include <cassert>
 
-#ifdef USE_INTEL_MKL
-#include "dmrg_mkl.h"
-#endif
-
 double dmrg_get_wtime();
 
 typedef PsimagLite::Vector<IntegerType>::Type       VectorIntegerType;

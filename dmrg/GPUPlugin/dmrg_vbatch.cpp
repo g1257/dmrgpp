@@ -4,10 +4,6 @@
 
 #define USE_MALLOC
 
-#ifdef USE_INTEL_MKL
-#include "mkl.h"
-#endif
-
 static IntegerType is_initialized = 0;
 
 #ifdef USE_MAGMA
@@ -231,63 +227,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 		gflops = gflops / (giga);
 	};
 
-#ifdef USE_INTEL_MKL
-	{
-
-		MKL_INT m_array_mkl[group_count];
-		MKL_INT n_array_mkl[group_count];
-		MKL_INT k_array_mkl[group_count];
-
-		MKL_INT lda_array_mkl[group_count];
-		MKL_INT ldb_array_mkl[group_count];
-		MKL_INT ldc_array_mkl[group_count];
-
-		MKL_INT group_size_mkl[group_count];
-
-		CBLAS_TRANSPOSE transa_array[group_count];
-		CBLAS_TRANSPOSE transb_array[group_count];
-
-		MKL_INT group_count_mkl = group_count;
-
-		IntegerType igroup = 0;
-		for (igroup = 0; igroup < group_count; igroup++) {
-			char        transa    = ctransa_array[igroup];
-			char        transb    = ctransb_array[igroup];
-			IntegerType is_transa = (transa == 'T') || (transa == 't');
-			IntegerType is_transb = (transb == 'T') || (transb == 't');
-
-			transa_array[igroup] = is_transa ? CblasTrans : CblasNoTrans;
-			transb_array[igroup] = is_transb ? CblasTrans : CblasNoTrans;
-
-			m_array_mkl[igroup] = m_array[igroup];
-			n_array_mkl[igroup] = n_array[igroup];
-			k_array_mkl[igroup] = k_array[igroup];
-
-			lda_array_mkl[igroup] = lda_array[igroup];
-			ldb_array_mkl[igroup] = ldb_array[igroup];
-			ldc_array_mkl[igroup] = ldc_array[igroup];
-
-			group_size_mkl[igroup] = group_size[igroup];
-		};
-
-		cblas_Xgemm_batch(CblasColMajor,
-		                  transa_array,
-		                  transb_array,
-		                  m_array_mkl,
-		                  n_array_mkl,
-		                  k_array_mkl,
-		                  alpha_array,
-		                  (const T**)&(a_array[0]),
-		                  lda_array_mkl,
-		                  (const T**)&(b_array[0]),
-		                  ldb_array_mkl,
-		                  beta_array,
-		                  c_array,
-		                  ldc_array_mkl,
-		                  group_count_mkl,
-		                  group_size_mkl);
-	};
-#else
 	/*
 	---------------------
 	expand out the groups
@@ -971,7 +910,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 
 #endif
 
-#endif
 
 	if (idebug >= 1) {
 		elapsed_time += dmrg_get_wtime();
