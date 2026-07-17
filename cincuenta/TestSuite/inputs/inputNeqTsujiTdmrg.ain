@@ -1,0 +1,97 @@
+##Ainur1.0
+
+# ---- Equilibrium parameters (same as inputNeqTsuji.ain) --------------------
+FicticiousBeta=16;
+ChemicalPotential=0.;
+Matsubaras=200;
+LatticeGf="energy,semicircular,4";
+NumberOfBathPoints=5;
+
+DmftNumberOfIterations=20;
+DmftTolerance=0.001;
+ImpuritySolver="exactdiag";
+
+FitOptions=particleholesymmetric;
+MinParamsDelta=0.01;
+MinParamsMaxIter=10000;
+MinParamsDelta2=0.01;
+MinParamsTolerance=1e-3;
+MinParamsVerbose=1;
+
+TargetElectronsUp=3;
+TargetElectronsDown=3;
+
+int ImpuritySite=0;
+real HubbardU=0.;
+
+# ---- LanczosPlusPlus/DMRG GS settings --------------------------------------
+RootOutputname="NeqTsujiTdmrg";
+InfiniteLoopKeptStates=200;
+matrix FiniteLoopsGs=[[@auto, 200, 0],[@auto, 200, 0],[@auto, 200, 0],[@auto, 200, 0]];
+
+real OmegaBegin=-6.;
+integer OmegaTotal=120;
+real OmegaStep=0.1;
+real OmegaDelta=0.1;
+
+integer TridiagSteps=400;
+real TridiagEps=1e-9;
+TruncationTolerance="1e-10,100";
+CorrectionVectorEta=0.;
+GsWeight=0.1;
+
+matrix FiniteLoopsOmega=[[@auto, 200, 2],[@auto, 200, 2]];
+
+# ---- Non-equilibrium DMFT parameters ---------------------------------------
+HubbardUFinal=2.;
+
+# Reduced time parameters for a quick tDMRG validation test.
+# Full run uses NtNeq=200; here we use NtNeq=50 with larger TSPTau for speed.
+TmaxNeq=5.0;
+NtNeq=50;
+
+NeqDmftIter=1;
+NeqDmftTolerance=0.001;
+
+# ---- tDMRG impurity solver selection ---------------------------------------
+NeqSolver="tdmrg";
+
+# tDMRG finite loops: TSPAdvanceEach=4 gives ~1 advance per sweep.
+# For NtNeq=50: 60 rows covers 50 advances with 10 extra at t_max.
+matrix FiniteLoopsTdmrg=[
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0],
+    [@auto, 200, 0],[@auto, 200, 0]];
+
+# TSP parameters: reviewer-approved values (PR #202 / commit aa8c55e5)
+# TSPAdvanceEach = N-2 = 4 for N=6 sites: one time advance per half-sweep
+# TSPTimeSteps = 5: Krylov substeps (Gonzalo's preference)
+TSPTimeSteps=5;
+TSPAdvanceEach=4;

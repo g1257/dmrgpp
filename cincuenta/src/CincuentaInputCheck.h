@@ -62,6 +62,7 @@ public:
 		str += "integer NtNeq;\n";
 		str += "integer NeqDmftIter;\n";
 		str += "real NeqDmftTolerance;\n";
+		str += "string NeqSolver;\n"; // "tdmrg" to select ImpuritySolverNeqTdmrg
 		str += "real BandwidthFinal;\n"; // W_f for hopping quench; default 0 = no quench
 		str += "string NeqOutputPrefix;\n"; // prefix for output Green's function files
 
