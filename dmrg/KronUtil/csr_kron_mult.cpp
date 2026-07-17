@@ -1,7 +1,6 @@
 #include "util.h"
-#include <Kokkos_Core.hpp>
+
 #include <Kokkos_Profiling_ScopedRegion.hpp>
-#include <PsimagLite/KokkosType.h>
 
 template <typename ComplexOrRealType>
 void csr_to_den(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
@@ -279,134 +278,48 @@ void csr_kron_mult_method(const int  imethod,
 		 * ---------------------------------------------
 		 */
 
-#if 0
     std::cerr << "nrow_A: " << nrow_A << ' '
               << "nnz_A: " << csr_nnz(a) << ' '
               << "nrow_B: " << nrow_B << ' '
               << "nnz_B: " << csr_nnz(b) << '\n';
-#endif
+            
+		int ia = 0;
+		int ka = 0;
+		int ib = 0;
+		int kb = 0;
+		for (ia = 0; ia < nrow_A; ia++) {
+			int istarta = a.getRowPtr(ia);
+			int ienda   = a.getRowPtr(ia + 1);
+			for (ka = istarta; ka < ienda; ka++) {
+				int               ja  = a.getCol(ka);
+				ComplexOrRealType aij = a.getValue(ka);
+				if (is_complex && isConjTransA) {
+					aij = PsimagLite::conj(aij);
+				};
 
-		// Build flat lists of nonzeros for A and B on the host, then copy to device
-		using ExecutionSpace = Kokkos::DefaultExecutionSpace;
-		using KokkosScalar   = typename PsimagLite::KokkosType<ComplexOrRealType>::type;
+				for (ib = 0; ib < nrow_B; ib++) {
+					int istartb = b.getRowPtr(ib);
+					int iendb   = b.getRowPtr(ib + 1);
 
-		int nnzA = csr_nnz(a);
-		int nnzB = csr_nnz(b);
+					for (kb = istartb; kb < iendb; kb++) {
+						int               jb  = b.getCol(kb);
+						ComplexOrRealType bij = b.getValue(kb);
+						if (is_complex && isConjTransB) {
+							bij = PsimagLite::conj(bij);
+						};
 
-		// host-side temporary arrays
-		std::vector<int>          A_row(nnzA);
-		std::vector<int>          A_col(nnzA);
-		std::vector<KokkosScalar> A_val(nnzA);
-		{
-			int idx = 0;
-			for (int ia = 0; ia < nrow_A; ++ia) {
-				int istart = a.getRowPtr(ia);
-				int iend   = a.getRowPtr(ia + 1);
-				for (int ka = istart; ka < iend; ++ka) {
-					A_row[idx]             = ia;
-					A_col[idx]             = a.getCol(ka);
-					ComplexOrRealType aval = a.getValue(ka);
-					if (is_complex && isConjTransA)
-						aval = PsimagLite::conj(aval);
-					A_val[idx] = static_cast<KokkosScalar>(aval);
-					++idx;
-				}
-			}
-		}
+						ComplexOrRealType cij = aij * bij;
 
-		std::vector<int>          B_row(nnzB);
-		std::vector<int>          B_col(nnzB);
-		std::vector<KokkosScalar> B_val(nnzB);
-		{
-			int idx = 0;
-			for (int ib = 0; ib < nrow_B; ++ib) {
-				int istart = b.getRowPtr(ib);
-				int iend   = b.getRowPtr(ib + 1);
-				for (int kb = istart; kb < iend; ++kb) {
-					B_row[idx]             = ib;
-					B_col[idx]             = b.getCol(kb);
-					ComplexOrRealType bval = b.getValue(kb);
-					if (is_complex && isConjTransB)
-						bval = PsimagLite::conj(bval);
-					B_val[idx] = static_cast<KokkosScalar>(bval);
-					++idx;
-				}
-			}
-		}
+						int ix = (isTransB || isConjTransB) ? jb : ib;
+						int jx = (isTransA || isConjTransA) ? ja : ia;
+						int iy = (isTransB || isConjTransB) ? ib : jb;
+						int jy = (isTransA || isConjTransA) ? ia : ja;
 
-		// create device views
-		Kokkos::View<int*, Kokkos::HostSpace>          A_row_h("A_row_h", nnzA);
-		Kokkos::View<int*, Kokkos::HostSpace>          A_col_h("A_col_h", nnzA);
-		Kokkos::View<KokkosScalar*, Kokkos::HostSpace> A_val_h("A_val_h", nnzA);
-		Kokkos::View<int*, Kokkos::HostSpace>          B_row_h("B_row_h", nnzB);
-		Kokkos::View<int*, Kokkos::HostSpace>          B_col_h("B_col_h", nnzB);
-		Kokkos::View<KokkosScalar*, Kokkos::HostSpace> B_val_h("B_val_h", nnzB);
-
-		for (int i = 0; i < nnzA; ++i) {
-			A_row_h(i) = A_row[i];
-			A_col_h(i) = A_col[i];
-			A_val_h(i) = A_val[i];
-		}
-		for (int i = 0; i < nnzB; ++i) {
-			B_row_h(i) = B_row[i];
-			B_col_h(i) = B_col[i];
-			B_val_h(i) = B_val[i];
-		}
-
-		auto A_row_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace {}, A_row_h);
-		auto A_col_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace {}, A_col_h);
-		auto A_val_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace {}, A_val_h);
-		auto B_row_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace {}, B_row_h);
-		auto B_col_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace {}, B_col_h);
-		auto B_val_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace {}, B_val_h);
-		// device yin and xout
-
-		auto yin_host = Kokkos::View<const KokkosScalar**,
-		                             Kokkos::LayoutLeft,
-		                             Kokkos::HostSpace,
-		                             Kokkos::MemoryUnmanaged>(
-		    reinterpret_cast<const KokkosScalar*>(&yin(0, 0)), nrow_Y, ncol_Y);
-
-		auto y_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace {}, yin_host);
-
-		auto x_dev = Kokkos::View<KokkosScalar**>("x_dev", nrow_X, ncol_X);
-		Kokkos::deep_copy(x_dev, KokkosScalar(0));
-
-		const size_t totalPairs = static_cast<size_t>(nnzA) * static_cast<size_t>(nnzB);
-
-		Kokkos::parallel_for(
-		    "csr_kron_mult::imethod3_pairs",
-		    Kokkos::RangePolicy<ExecutionSpace>(0, totalPairs),
-		    KOKKOS_LAMBDA(const size_t idx) {
-			    const int ia_idx = static_cast<int>(idx / nnzB);
-			    const int ib_idx = static_cast<int>(idx % nnzB);
-
-			    int          ia  = A_row_dev(ia_idx);
-			    int          ja  = A_col_dev(ia_idx);
-			    KokkosScalar aij = A_val_dev(ia_idx);
-
-			    int          ib  = B_row_dev(ib_idx);
-			    int          jb  = B_col_dev(ib_idx);
-			    KokkosScalar bij = B_val_dev(ib_idx);
-
-			    KokkosScalar cij = aij * bij;
-
-			    int ix = (isTransB || isConjTransB) ? jb : ib;
-			    int jx = (isTransA || isConjTransA) ? ja : ia;
-			    int iy = (isTransB || isConjTransB) ? ib : jb;
-			    int jy = (isTransA || isConjTransA) ? ia : ja;
-
-			    KokkosScalar prod = cij * y_dev(iy, jy);
-			    Kokkos::atomic_add(&x_dev(ix, jx), prod);
-		    });
-
-		// copy back and accumulate into xout
-
-		auto xhost = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace {}, x_dev);
-		for (int ix = 0; ix < nrow_X; ++ix) {
-			for (int jx = 0; jx < ncol_X; ++jx)
-				xout(ix, jx) += static_cast<ComplexOrRealType>(xhost(ix, jx));
-		}
+						xout(ix, jx) += cij * yin(iy, jy);
+					};
+				};
+			};
+		};
 	};
 }
 
