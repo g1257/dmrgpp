@@ -40,8 +40,6 @@ void csr_matmul_post(char                                                       
 	int        isConjTranspose = (trans_A == 'C') || (trans_A == 'c');
 	int        isConj          = (trans_A == 'Z') || (trans_A == 'z');
 
-	Kokkos::Profiling::ScopedRegion region("PsimagLite::csr_matmul_post");
-
 	using ExecutionSpace = Kokkos::DefaultExecutionSpace;
 	ExecutionSpace exec;
 
