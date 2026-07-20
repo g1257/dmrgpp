@@ -295,8 +295,6 @@ void csr_kron_mult_method(const int  imethod,
 
 		// host-side temporary arrays
 		std::vector<int>          A_row(nnzA);
-		std::vector<int>          A_col(nnzA);
-		std::vector<KokkosScalar> A_val(nnzA);
 		{
       Kokkos::Profiling::ScopedRegion region("PsimgLite::csr_kron_mult_method::imethod3::fill_A");
 			int idx = 0;
@@ -305,17 +303,12 @@ void csr_kron_mult_method(const int  imethod,
 				int iend   = a.getRowPtr(ia + 1);
 				for (int ka = istart; ka < iend; ++ka) {
 					A_row[idx]             = ia;
-					A_col[idx]             = a.getCol(ka);
-					ComplexOrRealType aval = a.getValue(ka);
-					A_val[idx] = static_cast<KokkosScalar>(aval);
 					++idx;
 				}
 			}
 		}
 
 		std::vector<int>          B_row(nnzB);
-		std::vector<int>          B_col(nnzB);
-		std::vector<KokkosScalar> B_val(nnzB);
 		{
       Kokkos::Profiling::ScopedRegion region("PsimgLite::csr_kron_mult_method::imethod3::fill_B");
 			int idx = 0;
@@ -324,9 +317,6 @@ void csr_kron_mult_method(const int  imethod,
 				int iend   = b.getRowPtr(ib + 1);
 				for (int kb = istart; kb < iend; ++kb) {
 					B_row[idx]             = ib;
-					B_col[idx]             = b.getCol(kb);
-					ComplexOrRealType bval = b.getValue(kb);
-					B_val[idx] = static_cast<KokkosScalar>(bval);
 					++idx;
 				}
 			}
@@ -334,23 +324,19 @@ void csr_kron_mult_method(const int  imethod,
 
 		// create device views
 		Kokkos::View<int*, Kokkos::HostSpace>          A_row_h(Kokkos::view_alloc(Kokkos::WithoutInitializing, "A_row_h"), nnzA);
-		Kokkos::View<int*, Kokkos::HostSpace>          A_col_h(Kokkos::view_alloc(Kokkos::WithoutInitializing,"A_col_h"), nnzA);
-		Kokkos::View<KokkosScalar*, Kokkos::HostSpace> A_val_h(Kokkos::view_alloc(Kokkos::WithoutInitializing,"A_val_h"), nnzA);
+		Kokkos::View<const int*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>          A_col_h(&a.getCol(0), nnzA);
+		Kokkos::View<const KokkosScalar*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> A_val_h(reinterpret_cast<const KokkosScalar*>(&a.getValue(0)), nnzA);
 		Kokkos::View<int*, Kokkos::HostSpace>          B_row_h(Kokkos::view_alloc(Kokkos::WithoutInitializing,"B_row_h"), nnzB);
-		Kokkos::View<int*, Kokkos::HostSpace>          B_col_h(Kokkos::view_alloc(Kokkos::WithoutInitializing,"B_col_h"), nnzB);
-		Kokkos::View<KokkosScalar*, Kokkos::HostSpace> B_val_h(Kokkos::view_alloc(Kokkos::WithoutInitializing, "B_val_h"), nnzB);
+		Kokkos::View<const int*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>          B_col_h(&b.getCol(0), nnzB);
+		Kokkos::View<const KokkosScalar*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> B_val_h(reinterpret_cast<const KokkosScalar*>(&b.getValue(0)), nnzB);
 
 {
       Kokkos::Profiling::ScopedRegion region("PsimgLite::csr_kron_mult_method::imethod3::fill_AB");
 		for (int i = 0; i < nnzA; ++i) {
 			A_row_h(i) = A_row[i];
-			A_col_h(i) = A_col[i];
-			A_val_h(i) = A_val[i];
 		}
 		for (int i = 0; i < nnzB; ++i) {
 			B_row_h(i) = B_row[i];
-			B_col_h(i) = B_col[i];
-			B_val_h(i) = B_val[i];
 		}
 }
 
