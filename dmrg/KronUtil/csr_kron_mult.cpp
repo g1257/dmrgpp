@@ -394,7 +394,7 @@ void csr_kron_mult_method(const int  imethod,
 			    int jy = (isTransA || isConjTransA) ? ia : ja;
 
 			    KokkosScalar prod = cij * y_dev(iy, jy);
-			    x_dev(ix, jx) = prod;
+			    Kokkos::atomic_add(&x_dev(ix, jx), prod);
 		    });
 
 		// copy back and accumulate into xout
