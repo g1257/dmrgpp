@@ -6,19 +6,28 @@ tags:
   - physics
 authors:
   - name: Gonzalo Alvarez
-    orcid: 0000-0000-0000-0000
-    equal-contrib: true
-    affiliation: "1" # (Multiple affiliations must be quoted)
-  - name: Author Without ORCID
-    equal-contrib: true # (This is how you can denote equal contributions between multiple authors)
-    affiliation: 2
-  - name: Author with no affiliation
     corresponding: true # (This is how to denote the corresponding author)
-    affiliation: 3
-  - given-names: Ludwig
-    dropping-particle: van
-    surname: Beethoven
-    affiliation: 3
+    orcid: 0000-0000-0000-0000
+#    equal-contrib: true
+    affiliation: "1" # (Multiple affiliations must be quoted)
+  - name: Daniel Arndt
+    orcid: 0000-0000-0000-0000
+    affiliation: "1" # (Multiple affiliations must be quoted)
+  - name: Damien Lebrun-Grandie
+    orcid: 0000-0000-0000-0000
+    affiliation: "1"
+  - name: Peter Doak
+    orcid: 0000-0000-0000-0000
+    affiliation: 1
+  - name: Steven Hahn
+    orcid: 0000-0000-0000-0000
+    affiliation: 1
+  - name: Thomas A. Maier
+    orcid: 0000-0000-0000-0000
+    affiliation: 1
+  - name: Andrey Prokopenko
+    orcid: 0000-0000-0000-0000
+    affiliation: 1
 affiliations:
  - name: Oak Ridge National Laboratory
    index: 1
@@ -220,7 +229,7 @@ Over time, the scientific scope of DMRG++ expanded beyond ground states to
 nonequilibrium dynamics, frequency-dependent response, and finite-temperature
 observables.
 
-As of 2026, the five authors of this paper maintain DMRG++ as part-time
+As of 2026, the seven authors of this paper maintain DMRG++ as part-time
 developers. The authors know of approximately 15 active users and collaborators;
 this figure is not intended as a complete census of everyone who has run the
 software. More than 80 publications cite the original DMRG++ implementation
