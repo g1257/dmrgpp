@@ -278,13 +278,11 @@ void csr_kron_mult_method(const int  imethod,
 		 * ---------------------------------------------
 		 */
 
-#if 0
     std::cerr << "nrow_A: " << nrow_A << ' '
               << "nnz_A: " << csr_nnz(a) << ' '
               << "nrow_B: " << nrow_B << ' '
-              << "nnz_B: " << csr_nnz(b) << '\n';     
-#endif
-       
+              << "nnz_B: " << csr_nnz(b) << '\n';
+            
 		int ia = 0;
 		int ka = 0;
 		int ib = 0;
