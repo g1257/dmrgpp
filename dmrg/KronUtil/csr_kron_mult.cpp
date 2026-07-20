@@ -376,11 +376,8 @@ void csr_kron_mult_method(const int  imethod,
 
 		Kokkos::parallel_for(
 		    "csr_kron_mult::imethod3_pairs",
-		    Kokkos::RangePolicy<ExecutionSpace>(0, totalPairs),
-		    KOKKOS_LAMBDA(const size_t idx) {
-			    const int ia_idx = static_cast<int>(idx / nnzB);
-			    const int ib_idx = static_cast<int>(idx % nnzB);
-
+		    Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<2>>({0,0}, {nnzB, nnzA}),
+		    KOKKOS_LAMBDA(const size_t ib_idx, const size_t ia_idx) {
 			    int          ia  = A_row_dev(ia_idx);
 			    int          ja  = A_col_dev(ia_idx);
 			    KokkosScalar aij = A_val_dev(ia_idx);
