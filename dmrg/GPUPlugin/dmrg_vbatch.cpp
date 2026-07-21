@@ -379,8 +379,11 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 		magma_trans_t transA = isTransA ? MagmaTrans : MagmaNoTrans;
 		magma_trans_t transB = isTransB ? MagmaTrans : MagmaNoTrans;
 
-		MAGMA_T alpha = *((MAGMA_T*)&(alpha_vbatch[0]));
-		MAGMA_T beta  = *((MAGMA_T*)&(beta_vbatch[0]));
+		// static_assert(sizeof(MAGMA_T) == sizeof(alpha_vbatch[0]), "Size mismatch for
+		// MAGMA_T and alpha_vbatch element"); static_assert(sizeof(MAGMA_T) ==
+		// sizeof(beta_vbatch[0]), "Size mismatch for MAGMA_T and beta_vbatch element");
+		auto alpha = alpha_vbatch[0];
+		auto beta  = beta_vbatch[0];
 
 		/*
 		 * ------------
@@ -469,25 +472,24 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 					    "max_m=%d, max_n=%d, max_k=%d\n", max_m, max_n, max_k);
 				};
 
-				magmablas_Xgemm_vbatched_max_nocheck(
-				    transA,
-				    transB,
-				    m_vbatch,
-				    n_vbatch,
-				    k_vbatch,
-				    (MAGMA_T)alpha,
-				    (MAGMA_T const* const*)a_vbatch,
-				    lda_vbatch,
-				    (MAGMA_T const* const*)b_vbatch,
-				    ldb_vbatch,
-				    (MAGMA_T)beta,
-				    (MAGMA_T**)c_vbatch,
-				    ldc_vbatch,
-				    batch_size,
-				    max_m,
-				    max_n,
-				    max_k,
-				    queue);
+				magmablas_Xgemm_vbatched_max_nocheck(transA,
+				                                     transB,
+				                                     m_vbatch,
+				                                     n_vbatch,
+				                                     k_vbatch,
+				                                     alpha,
+				                                     a_vbatch,
+				                                     lda_vbatch,
+				                                     b_vbatch,
+				                                     ldb_vbatch,
+				                                     beta,
+				                                     c_vbatch,
+				                                     ldc_vbatch,
+				                                     batch_size,
+				                                     max_m,
+				                                     max_n,
+				                                     max_k,
+				                                     queue);
 			}
 		} else {
 			/*
@@ -685,25 +687,24 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType pbatch_size = gBatchCount[idev];
 
 				if (pbatch_size >= 1) {
-					magmablas_Xgemm_vbatched_max_nocheck(
-					    transA,
-					    transB,
-					    pm_vbatch,
-					    pn_vbatch,
-					    pk_vbatch,
-					    (MAGMA_T)alpha,
-					    (MAGMA_T const* const*)pa_vbatch,
-					    plda_vbatch,
-					    (MAGMA_T const* const*)pb_vbatch,
-					    pldb_vbatch,
-					    (MAGMA_T)beta,
-					    (MAGMA_T**)pc_vbatch,
-					    pldc_vbatch,
-					    pbatch_size,
-					    max_m,
-					    max_n,
-					    max_k,
-					    queue);
+					magmablas_Xgemm_vbatched_max_nocheck(transA,
+					                                     transB,
+					                                     pm_vbatch,
+					                                     pn_vbatch,
+					                                     pk_vbatch,
+					                                     alpha,
+					                                     pa_vbatch,
+					                                     plda_vbatch,
+					                                     pb_vbatch,
+					                                     pldb_vbatch,
+					                                     beta,
+					                                     pc_vbatch,
+					                                     pldc_vbatch,
+					                                     pbatch_size,
+					                                     max_m,
+					                                     max_n,
+					                                     max_k,
+					                                     queue);
 				};
 
 			}; /* end for idev */
@@ -838,7 +839,7 @@ template void dmrg_Xgemm_vbatch<MYTYPE>(char*,
                                         SizeType,
                                         IntegerType*);
 
-#if defined(USE_COMPLEX_Z)
+/*#if defined(USE_COMPLEX_Z)
 template void dmrg_Xgemm_vbatch<double>(char*,
                                         char*,
                                         IntegerType*,
@@ -871,7 +872,7 @@ template void dmrg_Xgemm_vbatch<std::complex<double>>(char*                  ctr
                                                       IntegerType*           ldc_array,
                                                       SizeType               group_count,
                                                       IntegerType*           group_size);
-#endif
+#endif*/
 
 template void
 dmrg_Xgetvector<MYTYPE>(const IntegerType, MYTYPE*, const IntegerType, MYTYPE*, const IntegerType);

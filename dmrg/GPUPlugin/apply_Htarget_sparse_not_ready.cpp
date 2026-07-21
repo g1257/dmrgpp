@@ -571,21 +571,6 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	};
 }
 
-template void apply_Htarget_sparse<MYTYPE>(SizeType,
-                                           SizeType,
-                                           VectorSizeType,
-                                           VectorSizeType,
-                                           VectorSizeType,
-                                           VectorSizeType,
-                                           MYTYPE**,
-                                           const VectorIntegerType&,
-                                           MYTYPE**,
-                                           const VectorIntegerType&,
-                                           MYTYPE*,
-                                           MYTYPE*);
-
-#if defined(USE_COMPLEX_Z)
-
 template void apply_Htarget_sparse<double>(SizeType,
                                            SizeType,
                                            VectorSizeType,
@@ -598,9 +583,8 @@ template void apply_Htarget_sparse<double>(SizeType,
                                            const VectorIntegerType&,
                                            double*,
                                            double*);
-#else
 
-template void apply_Htarget_sparse<std::complex<double>>(SizeType,
+/*template void apply_Htarget_sparse<std::complex<double>>(SizeType,
                                                          SizeType,
                                                          VectorSizeType,
                                                          VectorSizeType,
@@ -611,5 +595,4 @@ template void apply_Htarget_sparse<std::complex<double>>(SizeType,
                                                          std::complex<double>**,
                                                          const VectorIntegerType&,
                                                          std::complex<double>*,
-                                                         std::complex<double>*);
-#endif
+                                                         std::complex<double>*);*/
