@@ -282,7 +282,6 @@ void csr_kron_mult_method(const int  imethod,
 		 * ---------------------------------------------
 		 */
 
-		// Build flat lists of nonzeros for A and B on the host, then copy to device
 		using ExecutionSpace = Kokkos::DefaultExecutionSpace;
 		using MemorySpace    = ExecutionSpace::memory_space;
 		using KokkosScalar   = typename PsimagLite::KokkosType<ComplexOrRealType>::type;
@@ -290,15 +289,18 @@ void csr_kron_mult_method(const int  imethod,
 		int nnzA = a.nonZeros();
 		int nnzB = b.nonZeros();
 
-		// create device views
 		Kokkos::View<int*, Kokkos::HostSpace> A_row_h(
-		    Kokkos::view_alloc(Kokkos::WithoutInitializing, "A_row_h"), nnzA);
+		    Kokkos::view_alloc(Kokkos::WithoutInitializing,
+		                       "PsimgLite:csr_kron_mult::imethod3::A_row_h"),
+		    nnzA);
 		Kokkos::View<const int*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> A_col_h(
 		    &a.getCol(0), nnzA);
 		Kokkos::View<const KokkosScalar*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
 		    A_val_h(reinterpret_cast<const KokkosScalar*>(&a.getValue(0)), nnzA);
 		Kokkos::View<int*, Kokkos::HostSpace> B_row_h(
-		    Kokkos::view_alloc(Kokkos::WithoutInitializing, "B_row_h"), nnzB);
+		    Kokkos::view_alloc(Kokkos::WithoutInitializing,
+		                       "PsimgLite:csr_kron_mult::imethod3::B_row_h"),
+		    nnzB);
 		Kokkos::View<const int*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> B_col_h(
 		    &b.getCol(0), nnzB);
 		Kokkos::View<const KokkosScalar*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
@@ -306,9 +308,9 @@ void csr_kron_mult_method(const int  imethod,
 
 		{
 			Kokkos::Profiling::ScopedRegion region(
-			    "PsimgLite::csr_kron_mult_method::imethod3::fill_AB");
+			    "PsimgLite::csr_kron_mult_method::imethod3::store_rows");
 
-			// host-side temporary arrays
+			// store row for every entry
 			int idx = 0;
 			for (int ia = 0; ia < nrow_A; ++ia) {
 				int istart = a.getRowPtr(ia);
@@ -342,7 +344,6 @@ void csr_kron_mult_method(const int  imethod,
 		    Kokkos::view_alloc(ExecutionSpace {}, MemorySpace {}), B_col_h);
 		auto B_val_dev = Kokkos::create_mirror_view_and_copy(
 		    Kokkos::view_alloc(ExecutionSpace {}, MemorySpace {}), B_val_h);
-		// device yin and xout
 
 		auto yin_host = Kokkos::View<const KokkosScalar**,
 		                             Kokkos::LayoutLeft,
@@ -353,12 +354,11 @@ void csr_kron_mult_method(const int  imethod,
 		auto y_dev = Kokkos::create_mirror_view_and_copy(
 		    Kokkos::view_alloc(ExecutionSpace {}, MemorySpace {}), yin_host);
 
-		auto x_dev = Kokkos::View<KokkosScalar**>("x_dev", nrow_X, ncol_X);
-
-		const size_t totalPairs = static_cast<size_t>(nnzA) * static_cast<size_t>(nnzB);
+		auto x_dev = Kokkos::View<KokkosScalar**>(
+		    "PsimgLite:csr_kron_mult::imethod3::x_dev", nrow_X, ncol_X);
 
 		Kokkos::parallel_for(
-		    "csr_kron_mult::imethod3_pairs",
+		    "PsimgLite:csr_kron_mult::imethod3::spmv_kernel",
 		    Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<2>>({ 0, 0 },
 		                                                           { nnzB, nnzA }),
 		    KOKKOS_LAMBDA(const size_t ib_idx, const size_t ia_idx) {
@@ -386,13 +386,16 @@ void csr_kron_mult_method(const int  imethod,
 			    KokkosScalar prod = cij * y_dev(iy, jy);
 			    Kokkos::atomic_add(&x_dev(ix, jx), prod);
 		    });
-
-		// copy back and accumulate into xout
-
-		auto xhost = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace {}, x_dev);
-		for (int ix = 0; ix < nrow_X; ++ix) {
-			for (int jx = 0; jx < ncol_X; ++jx)
-				xout(ix, jx) += static_cast<ComplexOrRealType>(xhost(ix, jx));
+		{
+			Kokkos::Profiling::ScopedRegion region(
+			    "PsimgLite::csr_kron_mult_method::imethod3::copy_results");
+			auto xhost
+			    = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace {}, x_dev);
+			for (int ix = 0; ix < nrow_X; ++ix) {
+				for (int jx = 0; jx < ncol_X; ++jx)
+					xout(ix, jx)
+					    += static_cast<ComplexOrRealType>(xhost(ix, jx));
+			}
 		}
 	};
 }
