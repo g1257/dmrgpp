@@ -546,18 +546,18 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType* pn_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
 				IntegerType* pk_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
 
-				assert(pm_vbatch != NULL);
-				assert(pn_vbatch != NULL);
-				assert(pk_vbatch != NULL);
+				assert(pm_vbatch != nullptr);
+				assert(pn_vbatch != nullptr);
+				assert(pk_vbatch != nullptr);
 
 				nbytes        = (1 + isize) * sizeof(T*);
 				T** pa_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
 				T** pb_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
 				T** pc_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
 
-				assert(pa_vbatch != NULL);
-				assert(pb_vbatch != NULL);
-				assert(pc_vbatch != NULL);
+				assert(pa_vbatch != nullptr);
+				assert(pb_vbatch != nullptr);
+				assert(pc_vbatch != nullptr);
 
 				nbytes                   = (1 + isize) * sizeof(IntegerType);
 				IntegerType* plda_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
@@ -654,25 +654,25 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType* pn_vbatch = gpn_vbatch[idev];
 				IntegerType* pk_vbatch = gpk_vbatch[idev];
 
-				assert(pm_vbatch != NULL);
-				assert(pn_vbatch != NULL);
-				assert(pk_vbatch != NULL);
+				assert(pm_vbatch != nullptr);
+				assert(pn_vbatch != nullptr);
+				assert(pk_vbatch != nullptr);
 
 				T** pa_vbatch = gpa_vbatch[idev];
 				T** pb_vbatch = gpb_vbatch[idev];
 				T** pc_vbatch = gpc_vbatch[idev];
 
-				assert(pa_vbatch != NULL);
-				assert(pb_vbatch != NULL);
-				assert(pc_vbatch != NULL);
+				assert(pa_vbatch != nullptr);
+				assert(pb_vbatch != nullptr);
+				assert(pc_vbatch != nullptr);
 
 				IntegerType* plda_vbatch = gplda_vbatch[idev];
 				IntegerType* pldb_vbatch = gpldb_vbatch[idev];
 				IntegerType* pldc_vbatch = gpldc_vbatch[idev];
 
-				assert(plda_vbatch != NULL);
-				assert(pldb_vbatch != NULL);
-				assert(pldc_vbatch != NULL);
+				assert(plda_vbatch != nullptr);
+				assert(pldb_vbatch != nullptr);
+				assert(pldc_vbatch != nullptr);
 
 				IntegerType max_m = gmax_m[idev];
 				IntegerType max_n = gmax_n[idev];
