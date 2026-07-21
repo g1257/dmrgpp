@@ -2,13 +2,9 @@
 #include "dmrg_lapack.h"
 #include "dmrg_types.h"
 
-#define USE_MALLOC
-
 static IntegerType is_initialized = 0;
 
 #ifdef USE_MAGMA
-#undef USE_MALLOC
-#define USE_MALLOC
 
 #include "dmrg_magma.h"
 
@@ -241,7 +237,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
    */
 	const IntegerType ialign     = 32;
 	IntegerType       vbatch_dim = ialign * ICEIL((batch_size + 1), ialign);
-#ifdef USE_MAGMA
 
 	nbytes = sizeof(T) * (vbatch_dim);
 	nbytes_total += nbytes;
@@ -294,79 +289,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	nbytes = sizeof(T*) * (vbatch_dim);
 	nbytes_total += nbytes;
 	T** c_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
-
-#elif defined(USE_MALLOC)
-
-	nbytes = sizeof(T) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T* alpha_vbatch = new T[vbatch_dim];
-
-	nbytes = sizeof(T) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T* beta_vbatch = new T[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* m_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* n_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* k_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(char) * (vbatch_dim);
-	nbytes_total += nbytes;
-	char* transa_vbatch = new char[vbatch_dim];
-
-	nbytes = sizeof(char) * (vbatch_dim);
-	nbytes_total += nbytes;
-	char* transb_vbatch = new char[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* lda_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* ldb_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(IntegerType) * (vbatch_dim);
-	nbytes_total += nbytes;
-	IntegerType* ldc_vbatch = new IntegerType[vbatch_dim];
-
-	nbytes = sizeof(T*) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T** a_vbatch = new T*[vbatch_dim];
-
-	nbytes = sizeof(T*) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T** b_vbatch = new T*[vbatch_dim];
-
-	nbytes = sizeof(T*) * (vbatch_dim);
-	nbytes_total += nbytes;
-	T** c_vbatch = new T*[vbatch_dim];
-
-#else
-
-	std::vector<T> alpha_vbatch(vbatch_dim, 0.0);
-	std::vector<T> beta_vbatch(vbatch_dim, 0.0);
-	VectorSizeType m_vbatch(vbatch_dim, 0);
-	VectorSizeType n_vbatch(vbatch_dim, 0);
-	VectorSizeType k_vbatch(vbatch_dim, 0);
-	VectorCharType transa_vbatch(vbatch_dim, ' ');
-	VectorCharType transb_vbatch(vbatch_dim, ' ');
-	VectorSizeType lda_vbatch(vbatch_dim, 0);
-	VectorSizeType ldb_vbatch(vbatch_dim, 0);
-	VectorSizeType ldc_vbatch(vbatch_dim, 0);
-
-	std::vector<T*> a_vbatch = a_array;
-	std::vector<T*> b_vbatch = b_array;
-	std::vector<T*> c_vbatch = c_array;
-
-#endif
 
 	IntegerType idx = 0;
 	for (SizeType igroup = 0; igroup < group_count; igroup++) {
@@ -619,25 +541,28 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				 * --------------
 				 */
 
-				IntegerType* pm_vbatch = new IntegerType[1 + isize];
-				IntegerType* pn_vbatch = new IntegerType[1 + isize];
-				IntegerType* pk_vbatch = new IntegerType[1 + isize];
+				size_t       nbytes    = (1 + isize) * sizeof(IntegerType);
+				IntegerType* pm_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+				IntegerType* pn_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+				IntegerType* pk_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
 
 				assert(pm_vbatch != NULL);
 				assert(pn_vbatch != NULL);
 				assert(pk_vbatch != NULL);
 
-				T** pa_vbatch = new T*[1 + isize];
-				T** pb_vbatch = new T*[1 + isize];
-				T** pc_vbatch = new T*[1 + isize];
+				nbytes        = (1 + isize) * sizeof(T*);
+				T** pa_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
+				T** pb_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
+				T** pc_vbatch = dmrg_malloc<T*>(nbytes, nbytes);
 
 				assert(pa_vbatch != NULL);
 				assert(pb_vbatch != NULL);
 				assert(pc_vbatch != NULL);
 
-				IntegerType* plda_vbatch = new IntegerType[1 + isize];
-				IntegerType* pldb_vbatch = new IntegerType[1 + isize];
-				IntegerType* pldc_vbatch = new IntegerType[1 + isize];
+				nbytes                   = (1 + isize) * sizeof(IntegerType);
+				IntegerType* plda_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+				IntegerType* pldb_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
+				IntegerType* pldc_vbatch = dmrg_malloc<IntegerType>(nbytes, nbytes);
 
 				assert(plda_vbatch != 0);
 				assert(pldb_vbatch != 0);
@@ -808,17 +733,17 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 				IntegerType* pldb_vbatch = gpldb_vbatch[idev];
 				IntegerType* pldc_vbatch = gpldc_vbatch[idev];
 
-				delete[] pm_vbatch;
-				delete[] pn_vbatch;
-				delete[] pk_vbatch;
+				dmrg_free(pm_vbatch);
+				dmrg_free(pn_vbatch);
+				dmrg_free(pk_vbatch);
 
-				delete[] pa_vbatch;
-				delete[] pb_vbatch;
-				delete[] pc_vbatch;
+				dmrg_free(pa_vbatch);
+				dmrg_free(pb_vbatch);
+				dmrg_free(pc_vbatch);
 
-				delete[] plda_vbatch;
-				delete[] pldb_vbatch;
-				delete[] pldc_vbatch;
+				dmrg_free(plda_vbatch);
+				dmrg_free(pldb_vbatch);
+				dmrg_free(pldc_vbatch);
 
 			}; /* end for idev */
 
@@ -864,8 +789,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	};
 #endif
 
-#ifdef USE_MAGMA
-
 	dmrg_free(alpha_vbatch);
 	dmrg_free(beta_vbatch);
 
@@ -883,28 +806,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	dmrg_free(a_vbatch);
 	dmrg_free(b_vbatch);
 	dmrg_free(c_vbatch);
-
-#elif defined(USE_MALLOC)
-
-	delete[] alpha_vbatch;
-	delete[] beta_vbatch;
-
-	delete[] m_vbatch;
-	delete[] n_vbatch;
-	delete[] k_vbatch;
-
-	delete[] transa_vbatch;
-	delete[] transb_vbatch;
-
-	delete[] lda_vbatch;
-	delete[] ldb_vbatch;
-	delete[] ldc_vbatch;
-
-	delete[] a_vbatch;
-	delete[] b_vbatch;
-	delete[] c_vbatch;
-
-#endif
 
 	if (idebug >= 1) {
 		elapsed_time += dmrg_get_wtime();
