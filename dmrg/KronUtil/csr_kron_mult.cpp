@@ -292,7 +292,7 @@ void csr_kron_mult_method(const int  imethod,
 		 */
 		const size_t totalPairs  = static_cast<size_t>(nnzA) * static_cast<size_t>(nnzB);
 		static constexpr size_t kGpuThreshold = 100000;
-		if (totalPairs < kGpuThreshold) {
+		if (false) {
 			Kokkos::Profiling::ScopedRegion cpuRegion("PsimgLite::csr_kron_mult_method::imethod3::cpu");
 			for (int ia = 0; ia < nrow_A; ++ia) {
 				const int istart_a = a.getRowPtr(ia);
