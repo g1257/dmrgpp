@@ -63,14 +63,22 @@ public:
 
 		++counter_;
 
+		// Here counter_ has a value larger-by-one to what was printed
+		// so we use counter_ - 1 instead to compare with start and end
+		// it includes start but not end
+		// assumes start == end == 0 or start < end which where
+		// checked in the ParametersForDmrg reading
+
 		SizeType end = init_kron.params().dumperEnd;
 
-		if (end == 0 || counter_ >= end) {
+		if (end == 0 || counter_ >= end + 1) {
 			return;
 		}
 
 		SizeType start = init_kron.params().dumperBegin;
-		if (counter_ < start) {
+		assert((start == 0 && end == 0) || (start < end));
+
+		if (counter_ < start + 1) {
 			return;
 		}
 
