@@ -13,6 +13,7 @@ namespace PsimagLite {
 
 class TextAndNumbersChecker {
 public:
+
 	using RealType = double;
 
 	explicit TextAndNumbersChecker(RealType           tolerance,
@@ -21,7 +22,8 @@ public:
 	    , ignoredLinePrefix_(ignoredLinePrefix)
 	{
 		if (!std::isfinite(tolerance_) || tolerance_ < 0)
-			throw std::invalid_argument("The tolerance must be non-negative and finite");
+			throw std::invalid_argument(
+			    "The tolerance must be non-negative and finite");
 	}
 
 	void run(const std::string& file1, const std::string& file2) const
@@ -47,9 +49,14 @@ public:
 				return;
 
 			if (hasToken1 != hasToken2) {
-				const std::string shown1 = hasToken1 ? quote(token1) : "<end of file>";
-				const std::string shown2 = hasToken2 ? quote(token2) : "<end of file>";
-				fail(position, shown1, shown2, "the files contain different numbers of tokens");
+				const std::string shown1
+				    = hasToken1 ? quote(token1) : "<end of file>";
+				const std::string shown2
+				    = hasToken2 ? quote(token2) : "<end of file>";
+				fail(position,
+				     shown1,
+				     shown2,
+				     "the files contain different numbers of tokens");
 			}
 
 			compareTokens(token1, token2, position);
@@ -58,7 +65,13 @@ public:
 	}
 
 private:
-	enum class TokenClass { Word, Integer, Double };
+
+	enum class TokenClass
+	{
+		Word,
+		Integer,
+		Double
+	};
 
 	static bool isAsciiWhitespace(char c)
 	{
@@ -193,7 +206,7 @@ private:
 
 	void compareTokens(const std::string& token1,
 	                   const std::string& token2,
-	                   std::size_t position) const
+	                   std::size_t        position) const
 	{
 		const TokenClass class1 = classify(token1);
 		const TokenClass class2 = classify(token2);
@@ -210,18 +223,24 @@ private:
 			if (token1 != token2)
 				fail(position, quote(token1), quote(token2), "words differ");
 			return;
-		case TokenClass::Integer: {
+		case TokenClass::Integer:
+		{
 			const long long value1 = parseInteger(token1);
 			const long long value2 = parseInteger(token2);
 			if (value1 != value2)
-				fail(position, quote(token1), quote(token2), "integer values differ");
+				fail(position,
+				     quote(token1),
+				     quote(token2),
+				     "integer values differ");
 			return;
 		}
-		case TokenClass::Double: {
+		case TokenClass::Double:
+		{
 			const RealType value1 = parseDouble(token1);
 			const RealType value2 = parseDouble(token2);
 			if (!checkRealNumbers(value1, value2))
-				fail(position, quote(token1), quote(token2), "double values differ");
+				fail(
+				    position, quote(token1), quote(token2), "double values differ");
 			return;
 		}
 		}
@@ -234,13 +253,14 @@ private:
 
 	static std::string quote(const std::string& token) { return "\"" + token + "\""; }
 
-	[[noreturn]] static void fail(std::size_t position,
+	[[noreturn]] static void fail(std::size_t        position,
 	                              const std::string& token1,
 	                              const std::string& token2,
 	                              const std::string& reason)
 	{
 		throw std::runtime_error("Token " + std::to_string(position) + ": " + reason
-		                         + "; first file has " + token1 + ", second file has " + token2);
+		                         + "; first file has " + token1 + ", second file has "
+		                         + token2);
 	}
 
 	RealType    tolerance_;

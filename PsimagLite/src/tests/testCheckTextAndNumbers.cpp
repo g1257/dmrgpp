@@ -17,52 +17,61 @@
 namespace PsimagLite {
 namespace {
 
-class TemporaryFiles {
-public:
-	TemporaryFiles()
-	{
-		static unsigned long counter = 0;
-		const auto stamp = std::chrono::steady_clock::now().time_since_epoch().count();
-		directory_ = std::filesystem::temp_directory_path()
-		    / ("psimaglite-text-checker-" + std::to_string(stamp) + "-"
-		       + std::to_string(counter++));
-		std::filesystem::create_directory(directory_);
-	}
+	class TemporaryFiles {
+	public:
 
-	~TemporaryFiles()
-	{
-		std::error_code error;
-		std::filesystem::remove_all(directory_, error);
-	}
+		TemporaryFiles()
+		{
+			static unsigned long counter = 0;
+			const auto           stamp
+			    = std::chrono::steady_clock::now().time_since_epoch().count();
+			directory_ = std::filesystem::temp_directory_path()
+			    / ("psimaglite-text-checker-" + std::to_string(stamp) + "-"
+			       + std::to_string(counter++));
+			std::filesystem::create_directory(directory_);
+		}
 
-	std::string write(const std::string& name, const std::string& contents) const
-	{
-		const auto path = directory_ / name;
-		std::ofstream stream(path, std::ios::binary);
-		if (!stream)
-			throw std::runtime_error("Cannot create test file: " + path.string());
+		~TemporaryFiles()
+		{
+			std::error_code error;
+			std::filesystem::remove_all(directory_, error);
+		}
 
-		stream.write(contents.data(), static_cast<std::streamsize>(contents.size()));
-		if (!stream)
-			throw std::runtime_error("Cannot write test file: " + path.string());
+		std::string write(const std::string& name, const std::string& contents) const
+		{
+			const auto    path = directory_ / name;
+			std::ofstream stream(path, std::ios::binary);
+			if (!stream)
+				throw std::runtime_error("Cannot create test file: "
+				                         + path.string());
 
-		return path.string();
-	}
+			stream.write(contents.data(),
+			             static_cast<std::streamsize>(contents.size()));
+			if (!stream)
+				throw std::runtime_error("Cannot write test file: "
+				                         + path.string());
 
-	std::string path(const std::string& name) const { return (directory_ / name).string(); }
+			return path.string();
+		}
 
-private:
-	std::filesystem::path directory_;
-};
+		std::string path(const std::string& name) const
+		{
+			return (directory_ / name).string();
+		}
 
-using Catch::Matchers::ContainsSubstring;
-using Catch::Matchers::MessageMatches;
+	private:
+
+		std::filesystem::path directory_;
+	};
+
+	using Catch::Matchers::ContainsSubstring;
+	using Catch::Matchers::MessageMatches;
 
 } // namespace
 
 TEST_CASE("TextAndNumbersChecker accepts empty files", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 	const auto            file1 = files.write("first.txt", "");
 	const auto            file2 = files.write("second.txt", "");
@@ -72,7 +81,7 @@ TEST_CASE("TextAndNumbersChecker accepts empty files", "[TextAndNumbersChecker]"
 
 TEST_CASE("TextAndNumbersChecker compares words verbatim", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 
 	SECTION("identical words match")
@@ -86,22 +95,24 @@ TEST_CASE("TextAndNumbersChecker compares words verbatim", "[TextAndNumbersCheck
 	{
 		const auto file1 = files.write("first.txt", "Word");
 		const auto file2 = files.write("second.txt", "word");
-		CHECK_THROWS_WITH(checker.run(file1, file2),
-		                  "Token 1: words differ; first file has \"Word\", second file has \"word\"");
+		CHECK_THROWS_WITH(
+		    checker.run(file1, file2),
+		    "Token 1: words differ; first file has \"Word\", second file has \"word\"");
 	}
 
 	SECTION("punctuation differences fail")
 	{
 		const auto file1 = files.write("first.txt", "word,");
 		const auto file2 = files.write("second.txt", "word");
-		CHECK_THROWS_WITH(checker.run(file1, file2),
-		                  "Token 1: words differ; first file has \"word,\", second file has \"word\"");
+		CHECK_THROWS_WITH(
+		    checker.run(file1, file2),
+		    "Token 1: words differ; first file has \"word,\", second file has \"word\"");
 	}
 }
 
 TEST_CASE("TextAndNumbersChecker recognizes every ASCII whitespace", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 	const auto file1 = files.write("first.txt", "one two\tthree\nfour\rfive\fsix\vseven");
 	const auto file2 = files.write("second.txt", "one\ttwo three\rfour\nfive\vsix\fseven");
@@ -111,7 +122,7 @@ TEST_CASE("TextAndNumbersChecker recognizes every ASCII whitespace", "[TextAndNu
 
 TEST_CASE("TextAndNumbersChecker compares parsed integers", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 
 	SECTION("equivalent representations match")
@@ -125,27 +136,28 @@ TEST_CASE("TextAndNumbersChecker compares parsed integers", "[TextAndNumbersChec
 	{
 		const auto file1 = files.write("first.txt", "same 3");
 		const auto file2 = files.write("second.txt", "same 4");
-		CHECK_THROWS_WITH(checker.run(file1, file2),
-		                  "Token 2: integer values differ; first file has \"3\", second file has \"4\"");
+		CHECK_THROWS_WITH(
+		    checker.run(file1, file2),
+		    "Token 2: integer values differ; first file has \"3\", second file has \"4\"");
 	}
 }
 
 TEST_CASE("TextAndNumbersChecker rejects different token classes", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 	const auto            file1 = files.write("first.txt", "3");
 	const auto            file2 = files.write("second.txt", "3.0");
 
-	CHECK_THROWS_WITH(
-	    checker.run(file1, file2),
-	    "Token 1: different token classes (integer and double); first file has \"3\", second file has \"3.0\"");
+	CHECK_THROWS_WITH(checker.run(file1, file2),
+	                  "Token 1: different token classes (integer and double); first file has "
+	                  "\"3\", second file has \"3.0\"");
 }
 
 TEST_CASE("TextAndNumbersChecker recognizes strict double syntax", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
-	TextAndNumbersChecker checker(0.01);
+	TemporaryFiles                 files;
+	TextAndNumbersChecker          checker(0.01);
 	const std::vector<std::string> doubles { "3.0", ".5", "5.", "1e3", "-2.5e-4" };
 
 	for (const auto& token : doubles) {
@@ -159,7 +171,7 @@ TEST_CASE("TextAndNumbersChecker recognizes strict double syntax", "[TextAndNumb
 TEST_CASE("TextAndNumbersChecker treats malformed numeric tokens as words",
           "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 
 	SECTION("identical tokens match")
@@ -181,33 +193,35 @@ TEST_CASE("TextAndNumbersChecker treats malformed numeric tokens as words",
 
 TEST_CASE("TextAndNumbersChecker detects unequal token counts", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 
 	SECTION("first file is longer")
 	{
 		const auto file1 = files.write("first.txt", "one two");
 		const auto file2 = files.write("second.txt", "one");
-		CHECK_THROWS_MATCHES(checker.run(file1, file2),
-		                     std::runtime_error,
-		                     MessageMatches(ContainsSubstring(
-		                         "Token 2: the files contain different numbers of tokens")));
+		CHECK_THROWS_MATCHES(
+		    checker.run(file1, file2),
+		    std::runtime_error,
+		    MessageMatches(ContainsSubstring(
+		        "Token 2: the files contain different numbers of tokens")));
 	}
 
 	SECTION("second file is longer")
 	{
 		const auto file1 = files.write("first.txt", "one");
 		const auto file2 = files.write("second.txt", "one two");
-		CHECK_THROWS_MATCHES(checker.run(file1, file2),
-		                     std::runtime_error,
-		                     MessageMatches(ContainsSubstring(
-		                         "Token 2: the files contain different numbers of tokens")));
+		CHECK_THROWS_MATCHES(
+		    checker.run(file1, file2),
+		    std::runtime_error,
+		    MessageMatches(ContainsSubstring(
+		        "Token 2: the files contain different numbers of tokens")));
 	}
 }
 
 TEST_CASE("TextAndNumbersChecker stops at the first mismatch", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 	const auto            file1 = files.write("first.txt", "same first third");
 	const auto            file2 = files.write("second.txt", "same second fourth");
@@ -219,27 +233,29 @@ TEST_CASE("TextAndNumbersChecker stops at the first mismatch", "[TextAndNumbersC
 
 TEST_CASE("TextAndNumbersChecker reports files that cannot be opened", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 
 	SECTION("first file is missing")
 	{
 		const auto missing = files.path("missing-first.txt");
 		const auto file2   = files.write("second.txt", "same");
-		CHECK_THROWS_WITH(checker.run(missing, file2), "Cannot open first file: " + missing);
+		CHECK_THROWS_WITH(checker.run(missing, file2),
+		                  "Cannot open first file: " + missing);
 	}
 
 	SECTION("second file is missing")
 	{
 		const auto file1   = files.write("first.txt", "same");
 		const auto missing = files.path("missing-second.txt");
-		CHECK_THROWS_WITH(checker.run(file1, missing), "Cannot open second file: " + missing);
+		CHECK_THROWS_WITH(checker.run(file1, missing),
+		                  "Cannot open second file: " + missing);
 	}
 }
 
 TEST_CASE("TextAndNumbersChecker reports integer overflow", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 	const std::string     value = "999999999999999999999999999999999999";
 	const auto            file1 = files.write("first.txt", value);
@@ -251,13 +267,12 @@ TEST_CASE("TextAndNumbersChecker reports integer overflow", "[TextAndNumbersChec
 
 TEST_CASE("TextAndNumbersChecker reports double overflow", "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
+	TemporaryFiles        files;
 	TextAndNumbersChecker checker(0.01);
 	const auto            file1 = files.write("first.txt", "1e9999");
 	const auto            file2 = files.write("second.txt", "1e9999");
 
-	CHECK_THROWS_WITH(checker.run(file1, file2),
-	                  "Double token is out of range: \"1e9999\"");
+	CHECK_THROWS_WITH(checker.run(file1, file2), "Double token is out of range: \"1e9999\"");
 }
 
 TEST_CASE("TextAndNumbersChecker rejects non-finite tolerances", "[TextAndNumbersChecker]")
@@ -326,42 +341,42 @@ TEST_CASE("TextAndNumbersChecker compares real numbers with absolute tolerance",
 	SECTION("equal values match")
 	{
 		TextAndNumbersChecker checker(0.0);
-		const auto file1 = files.write("first.txt", "1.0");
-		const auto file2 = files.write("second.txt", "1.0");
+		const auto            file1 = files.write("first.txt", "1.0");
+		const auto            file2 = files.write("second.txt", "1.0");
 		CHECK_NOTHROW(checker.run(file1, file2));
 	}
 
 	SECTION("a difference smaller than the tolerance matches")
 	{
 		TextAndNumbersChecker checker(0.125);
-		const auto file1 = files.write("first.txt", "-1.0");
-		const auto file2 = files.write("second.txt", "-1.0625");
+		const auto            file1 = files.write("first.txt", "-1.0");
+		const auto            file2 = files.write("second.txt", "-1.0625");
 		CHECK_NOTHROW(checker.run(file1, file2));
 	}
 
 	SECTION("a difference equal to the tolerance matches")
 	{
 		TextAndNumbersChecker checker(0.125);
-		const auto file1 = files.write("first.txt", "1.0");
-		const auto file2 = files.write("second.txt", "1.125");
+		const auto            file1 = files.write("first.txt", "1.0");
+		const auto            file2 = files.write("second.txt", "1.125");
 		CHECK_NOTHROW(checker.run(file1, file2));
 	}
 
 	SECTION("a difference larger than the tolerance fails")
 	{
 		TextAndNumbersChecker checker(0.125);
-		const auto file1 = files.write("first.txt", "1.0");
-		const auto file2 = files.write("second.txt", "1.25");
-		CHECK_THROWS_WITH(
-		    checker.run(file1, file2),
-		    "Token 1: double values differ; first file has \"1.0\", second file has \"1.25\"");
+		const auto            file1 = files.write("first.txt", "1.0");
+		const auto            file2 = files.write("second.txt", "1.25");
+		CHECK_THROWS_WITH(checker.run(file1, file2),
+		                  "Token 1: double values differ; first file has \"1.0\", second "
+		                  "file has \"1.25\"");
 	}
 
 	SECTION("exponent notation uses parsed values")
 	{
 		TextAndNumbersChecker checker(0.125);
-		const auto file1 = files.write("first.txt", "1e3");
-		const auto file2 = files.write("second.txt", "1000.125");
+		const auto            file1 = files.write("first.txt", "1e3");
+		const auto            file2 = files.write("second.txt", "1000.125");
 		CHECK_NOTHROW(checker.run(file1, file2));
 	}
 }

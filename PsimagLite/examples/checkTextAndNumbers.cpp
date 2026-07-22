@@ -12,8 +12,8 @@
 
 namespace {
 
-std::string file1;
-std::string file2;
+std::string                                        file1;
+std::string                                        file2;
 std::unique_ptr<PsimagLite::TextAndNumbersChecker> checker;
 
 std::string parseIgnoredLinePrefix(const char* text)
@@ -29,7 +29,7 @@ std::string parseIgnoredLinePrefix(const char* text)
 double parseTolerance(const char* text)
 {
 	const std::string token(text);
-	std::size_t parsed = 0;
+	std::size_t       parsed = 0;
 	try {
 		const double value = std::stod(token, &parsed);
 		if (parsed != token.size() || !std::isfinite(value))
