@@ -131,6 +131,9 @@ add_test(NAME input22 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input22.ain "<gs|sz|P0
 add_test(NAME input30 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input30.ain) # energy -4.29307
 add_lowest_eigenvalue_check_test(output30 input30 -4.29307 runForinput30.cout)
 add_test(NAME input31 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input31.ain) # energy -3.37493
+add_test(NAME input31_kron_dumper COMMAND $<TARGET_FILE:checkTextAndNumbers> ${PATH_TO_INPUTS}/kron_data31_0_ref.txt
+                                          ${CMAKE_CURRENT_BINARY_DIR}/kron_data31_0.txt 1e-3)
+set_tests_properties(input31_kron_dumper PROPERTIES DEPENDS input31)
 add_lowest_eigenvalue_check_test(output31 input31 -3.37493 runForinput31.cout)
 add_test(NAME input32 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input32.ain) # energy -15.9931
 add_lowest_eigenvalue_check_test(output32 input32 -15.9931 runForinput32.cout)
