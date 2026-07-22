@@ -351,9 +351,10 @@ struct ParametersDmrgSolver {
 				PsimagLite::String msg("FATAL: KroneckerDumper cannot run with ");
 				throw PsimagLite::RuntimeError(msg + "MatrixVectorStored\n");
 			}
-			if (dumperBegin > 0 ||  dumperEnd > 0) {
+			if (dumperBegin > 0 || dumperEnd > 0) {
 				if (dumperBegin >= dumperEnd) {
-					err("FATAL: KroneckerDumperBegin must be smaller than KroneckerDumperEnd\n");
+					err("FATAL: KroneckerDumperBegin must be smaller than "
+					    "KroneckerDumperEnd\n");
 				}
 			}
 		} else {
