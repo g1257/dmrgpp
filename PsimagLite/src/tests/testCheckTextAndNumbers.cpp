@@ -152,7 +152,7 @@ TEST_CASE("TextAndNumbersChecker recognizes strict double syntax", "[TextAndNumb
 		CAPTURE(token);
 		const auto file1 = files.write("first.txt", token);
 		const auto file2 = files.write("second.txt", token);
-		CHECK_THROWS_WITH(checker.run(file1, file2), "checkRealNumbers is not implemented");
+		CHECK_NOTHROW(checker.run(file1, file2));
 	}
 }
 
@@ -270,15 +270,57 @@ TEST_CASE("TextAndNumbersChecker rejects non-finite tolerances", "[TextAndNumber
 	                std::invalid_argument);
 }
 
-TEST_CASE("TextAndNumbersChecker real-number comparison is unimplemented",
+TEST_CASE("TextAndNumbersChecker rejects negative tolerances", "[TextAndNumbersChecker]")
+{
+	CHECK_THROWS_AS(TextAndNumbersChecker(-0.01), std::invalid_argument);
+}
+
+TEST_CASE("TextAndNumbersChecker compares real numbers with absolute tolerance",
           "[TextAndNumbersChecker]")
 {
-	TemporaryFiles       files;
-	TextAndNumbersChecker checker(0.01);
-	const auto            file1 = files.write("first.txt", "1.0");
-	const auto            file2 = files.write("second.txt", "1.0");
+	TemporaryFiles files;
 
-	CHECK_THROWS_WITH(checker.run(file1, file2), "checkRealNumbers is not implemented");
+	SECTION("equal values match")
+	{
+		TextAndNumbersChecker checker(0.0);
+		const auto file1 = files.write("first.txt", "1.0");
+		const auto file2 = files.write("second.txt", "1.0");
+		CHECK_NOTHROW(checker.run(file1, file2));
+	}
+
+	SECTION("a difference smaller than the tolerance matches")
+	{
+		TextAndNumbersChecker checker(0.125);
+		const auto file1 = files.write("first.txt", "-1.0");
+		const auto file2 = files.write("second.txt", "-1.0625");
+		CHECK_NOTHROW(checker.run(file1, file2));
+	}
+
+	SECTION("a difference equal to the tolerance matches")
+	{
+		TextAndNumbersChecker checker(0.125);
+		const auto file1 = files.write("first.txt", "1.0");
+		const auto file2 = files.write("second.txt", "1.125");
+		CHECK_NOTHROW(checker.run(file1, file2));
+	}
+
+	SECTION("a difference larger than the tolerance fails")
+	{
+		TextAndNumbersChecker checker(0.125);
+		const auto file1 = files.write("first.txt", "1.0");
+		const auto file2 = files.write("second.txt", "1.25");
+		CHECK_THROWS_WITH(
+		    checker.run(file1, file2),
+		    "Token 1: double values differ; first file has \"1.0\", second file has \"1.25\"");
+	}
+
+	SECTION("exponent notation uses parsed values")
+	{
+		TextAndNumbersChecker checker(0.125);
+		const auto file1 = files.write("first.txt", "1e3");
+		const auto file2 = files.write("second.txt", "1000.125");
+		CHECK_NOTHROW(checker.run(file1, file2));
+	}
 }
 
 } // namespace PsimagLite

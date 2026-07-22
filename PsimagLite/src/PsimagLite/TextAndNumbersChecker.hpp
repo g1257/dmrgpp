@@ -17,8 +17,8 @@ public:
 	explicit TextAndNumbersChecker(RealType tolerance)
 	    : tolerance_(tolerance)
 	{
-		if (!std::isfinite(tolerance_))
-			throw std::invalid_argument("The tolerance must be finite");
+		if (!std::isfinite(tolerance_) || tolerance_ < 0)
+			throw std::invalid_argument("The tolerance must be non-negative and finite");
 	}
 
 	void run(const std::string& file1, const std::string& file2) const
@@ -186,9 +186,9 @@ private:
 		}
 	}
 
-	bool checkRealNumbers(RealType, RealType) const
+	bool checkRealNumbers(RealType value1, RealType value2) const
 	{
-		throw std::logic_error("checkRealNumbers is not implemented");
+		return std::abs(value1 - value2) <= tolerance_;
 	}
 
 	static std::string quote(const std::string& token) { return "\"" + token + "\""; }
