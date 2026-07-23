@@ -6,11 +6,21 @@ add_custom_command(
   VERBATIM)
 
 if(DMRG_BUILD_BATCHED)
-  add_subdirectory(GPUPlugin)
-  set(PLUGIN_SC ON)
-  set(FpType "double")
-  if(DMRG_BUILD_BATCHED_MAGMA)
-    set(USE_MAGMA ON)
+  if(DMRG_BUILD_BATCHED_KOKKOS)
+    # KokkosKernels path: portable GPU implementation, no separate GPU plugin.
+    # Kokkos and KokkosKernels are already a dependency of psimaglite.
+    set(KOKKOS_BATCHED ON)
+    set(FpType "double")
+    message(STATUS "BatchedGemm: using KokkosKernels (DMRG_BUILD_BATCHED_KOKKOS=ON)")
+  else()
+    # Original GPU plugin path (optionally with MAGMA).
+    add_subdirectory(GPUPlugin)
+    set(PLUGIN_SC ON)
+    set(FpType "double")
+    if(DMRG_BUILD_BATCHED_MAGMA)
+      set(USE_MAGMA ON)
+    endif()
+    message(STATUS "BatchedGemm: using GPU plugin (PLUGIN_SC)")
   endif()
 endif()
 
@@ -25,14 +35,14 @@ add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.
 target_sources(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin Engine)
 target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)
-if(DMRG_BUILD_BATCHED)
+if(DMRG_BUILD_BATCHED AND NOT DMRG_BUILD_BATCHED_KOKKOS)
   target_link_libraries(dmrgpp_utils PUBLIC gpuplugin)
 endif()
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)
 target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil)
-if(DMRG_BUILD_BATCHED)
+if(DMRG_BUILD_BATCHED AND NOT DMRG_BUILD_BATCHED_KOKKOS)
   target_link_libraries(dmrg_runner PUBLIC gpuplugin)
 endif()
 
@@ -170,6 +180,8 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug") # The following tests are expensive to
   add_test(NAME input341 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input341.ain) # energy -0.093321
   add_lowest_eigenvalue_check_test(output341 input341 -0.093321 runForinput341.cout)
   add_test(NAME input342 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input342.ain) # energy -0.0933211
+  set_tests_properties(input342 PROPERTIES
+    ENVIRONMENT "KOKKOS_TOOLS_LIBS=$ENV{HOME}/kokkos-tools/build/profiling/space-time-stack/libkp_space_time_stack.so")
   add_lowest_eigenvalue_check_test(output342 input342 -0.0933211 runForinput342.cout)
 endif()
 add_test(NAME input351 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input351.ain) # energy -0.408019

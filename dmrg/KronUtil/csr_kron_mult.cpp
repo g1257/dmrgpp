@@ -280,6 +280,7 @@ void csr_kron_mult_method(const int  imethod,
 		 */
 
 		using ExecutionSpace = Kokkos::DefaultExecutionSpace;
+    using MemorySpace = ExecutionSpace::memory_space;
 		using KokkosScalar   = typename PsimagLite::KokkosType<ComplexOrRealType>::type;
 
 		const int nnzA = a.nonZeros();
@@ -292,39 +293,6 @@ void csr_kron_mult_method(const int  imethod,
 		 */
 		const size_t totalPairs  = static_cast<size_t>(nnzA) * static_cast<size_t>(nnzB);
 		static constexpr size_t kGpuThreshold = 100000;
-		if (false) {
-			Kokkos::Profiling::ScopedRegion cpuRegion("PsimgLite::csr_kron_mult_method::imethod3::cpu");
-			for (int ia = 0; ia < nrow_A; ++ia) {
-				const int istart_a = a.getRowPtr(ia);
-				const int iend_a   = a.getRowPtr(ia + 1);
-				for (int ka = istart_a; ka < iend_a; ++ka) {
-					const int         ja  = a.getCol(ka);
-					ComplexOrRealType aij = a.getValue(ka);
-					if constexpr (is_complex)
-						if (isConjTransA)
-							aij = PsimagLite::conj(aij);
-					for (int ib = 0; ib < nrow_B; ++ib) {
-						const int istart_b = b.getRowPtr(ib);
-						const int iend_b   = b.getRowPtr(ib + 1);
-						for (int kb = istart_b; kb < iend_b; ++kb) {
-							const int         jb  = b.getCol(kb);
-							ComplexOrRealType bij = b.getValue(kb);
-							if constexpr (is_complex)
-								if (isConjTransB)
-									bij = PsimagLite::conj(bij);
-
-							const int ix = (isTransB || isConjTransB) ? jb : ib;
-							const int jx = (isTransA || isConjTransA) ? ja : ia;
-							const int iy = (isTransB || isConjTransB) ? ib : jb;
-							const int jy = (isTransA || isConjTransA) ? ia : ja;
-
-							xout(ix, jx) += aij * bij * yin(iy, jy);
-						}
-					}
-				}
-			}
-			return;
-		}
 
 		/*
 		 * GPU path for large problems.
@@ -346,6 +314,8 @@ void csr_kron_mult_method(const int  imethod,
 		 * With LayoutLeft both the x_dev writes and the y_dev reads are
 		 * stride-1 (ib / jb vary across threads, ia / ja fixed per team).
 		 */
+    Kokkos::Profiling::pushRegion("PsimgLite::csr_kron_mult_method::imethod3::view_init");
+
 		Kokkos::View<const int*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
 		    A_rowptr_h(&a.getRowPtr(0), nrow_A + 1);
 		Kokkos::View<const int*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
@@ -360,22 +330,23 @@ void csr_kron_mult_method(const int  imethod,
 		Kokkos::View<const KokkosScalar*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
 		    B_val_h(reinterpret_cast<const KokkosScalar*>(&b.getValue(0)), nnzB);
 
-		auto A_rowptr_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace{}, A_rowptr_h);
-		auto A_col_dev    = Kokkos::create_mirror_view_and_copy(ExecutionSpace{}, A_col_h);
-		auto A_val_dev    = Kokkos::create_mirror_view_and_copy(ExecutionSpace{}, A_val_h);
-		auto B_rowptr_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace{}, B_rowptr_h);
-		auto B_col_dev    = Kokkos::create_mirror_view_and_copy(ExecutionSpace{}, B_col_h);
-		auto B_val_dev    = Kokkos::create_mirror_view_and_copy(ExecutionSpace{}, B_val_h);
+		auto A_rowptr_dev = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(ExecutionSpace {}, MemorySpace{}), A_rowptr_h);
+		auto A_col_dev    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(ExecutionSpace {}, MemorySpace{}), A_col_h);
+		auto A_val_dev    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(ExecutionSpace {}, MemorySpace{}), A_val_h);
+		auto B_rowptr_dev = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(ExecutionSpace {}, MemorySpace{}), B_rowptr_h);
+		auto B_col_dev    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(ExecutionSpace {}, MemorySpace{}), B_col_h);
+		auto B_val_dev    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(ExecutionSpace {}, MemorySpace{}), B_val_h);
 
 		auto yin_host = Kokkos::View<const KokkosScalar**,
 		                             Kokkos::LayoutLeft,
 		                             Kokkos::HostSpace,
 		                             Kokkos::MemoryUnmanaged>(
 		    reinterpret_cast<const KokkosScalar*>(&yin(0, 0)), nrow_Y, ncol_Y);
-		auto y_dev = Kokkos::create_mirror_view_and_copy(ExecutionSpace{}, yin_host);
+		auto y_dev = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(ExecutionSpace {}, MemorySpace{}), yin_host);
 
 		auto x_dev = Kokkos::View<KokkosScalar**, Kokkos::LayoutLeft>("x_dev", nrow_X, ncol_X);
-		Kokkos::deep_copy(x_dev, KokkosScalar(0));
+
+    Kokkos::Profiling::popRegion();
 
 		using TeamPolicy = Kokkos::TeamPolicy<ExecutionSpace>;
 		using TeamMember = typename TeamPolicy::member_type;
@@ -388,7 +359,7 @@ void csr_kron_mult_method(const int  imethod,
 			 */
 			Kokkos::parallel_for(
 			    "csr_kron_mult::imethod3_nn",
-			    TeamPolicy(nrow_A, Kokkos::AUTO),
+			    TeamPolicy(nrow_A, Kokkos::AUTO, 32),
 			    KOKKOS_LAMBDA(const TeamMember& team) {
 				    const int ia       = team.league_rank();
 				    const int ka_begin = A_rowptr_dev(ia);
@@ -399,13 +370,15 @@ void csr_kron_mult_method(const int  imethod,
 					        const int    kb_begin = B_rowptr_dev(ib);
 					        const int    kb_end   = B_rowptr_dev(ib + 1);
 					        KokkosScalar acc      = 0;
-					        for (int ka = ka_begin; ka < ka_end; ++ka) {
+					        Kokkos::parallel_reduce(Kokkos::ThreadVectorRange(team, ka_begin, ka_end), [&](int ka, KokkosScalar& update) {
 						        const int    ja  = A_col_dev(ka);
 						        KokkosScalar aij = A_val_dev(ka);
 						        for (int kb = kb_begin; kb < kb_end; ++kb)
-							        acc += aij * B_val_dev(kb) * y_dev(B_col_dev(kb), ja);
-					        }
-					        x_dev(ib, ia) += acc;
+							        update += aij * B_val_dev(kb) * y_dev(B_col_dev(kb), ja);
+					        }, acc);
+Kokkos::single(Kokkos::PerThread(team),
+				                       [&]() { 
+					        x_dev(ib, ia) += acc; });
 				        });
 			    });
 		} else {
@@ -448,11 +421,15 @@ void csr_kron_mult_method(const int  imethod,
 			    });
 		}
 
+{
+      Kokkos::Profiling::ScopedRegion cpuRegion("PsimgLite::csr_kron_mult_method::imethod3::copy_back");
+
 		// copy result back and accumulate into xout
 		auto xhost = Kokkos::create_mirror_view_and_copy(Kokkos::HostSpace{}, x_dev);
 		for (int ix = 0; ix < nrow_X; ++ix)
 			for (int jx = 0; jx < ncol_X; ++jx)
 				xout(ix, jx) += static_cast<ComplexOrRealType>(xhost(ix, jx));
+}
 	};
 }
 
