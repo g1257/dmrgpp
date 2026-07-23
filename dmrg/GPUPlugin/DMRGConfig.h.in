@@ -6,5 +6,4 @@
 #cmakedefine FpType @FpType@
 #cmakedefine USE_MAGMA
 
-
 #endif // DMRG_CONFIG_H
