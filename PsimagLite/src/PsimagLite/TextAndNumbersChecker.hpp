@@ -5,6 +5,7 @@
 #include <cstddef>
 #include <fstream>
 #include <regex>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 
@@ -14,8 +15,10 @@ class TextAndNumbersChecker {
 public:
 	using RealType = double;
 
-	explicit TextAndNumbersChecker(RealType tolerance)
+	explicit TextAndNumbersChecker(RealType           tolerance,
+	                               const std::string& ignoredLinePrefix = "")
 	    : tolerance_(tolerance)
+	    , ignoredLinePrefix_(ignoredLinePrefix)
 	{
 		if (!std::isfinite(tolerance_) || tolerance_ < 0)
 			throw std::invalid_argument("The tolerance must be non-negative and finite");
@@ -31,12 +34,14 @@ public:
 		if (!stream2)
 			throw std::runtime_error("Cannot open second file: " + file2);
 
+		TokenReader reader1(stream1, ignoredLinePrefix_);
+		TokenReader reader2(stream2, ignoredLinePrefix_);
 		std::size_t position = 1;
 		for (;;) {
 			std::string token1;
 			std::string token2;
-			const bool hasToken1 = readToken(stream1, token1);
-			const bool hasToken2 = readToken(stream2, token2);
+			const bool  hasToken1 = reader1.read(token1);
+			const bool  hasToken2 = reader2.read(token2);
 
 			if (!hasToken1 && !hasToken2)
 				return;
@@ -92,6 +97,42 @@ private:
 
 		return true;
 	}
+
+	class TokenReader {
+	public:
+
+		TokenReader(std::istream& stream, const std::string& ignoredLinePrefix)
+		    : stream_(stream)
+		    , ignoredLinePrefix_(ignoredLinePrefix)
+		{ }
+
+		bool read(std::string& token)
+		{
+			for (;;) {
+				if (readToken(lineStream_, token))
+					return true;
+
+				if (!std::getline(stream_, line_))
+					return false;
+
+				if (!ignoredLinePrefix_.empty()
+				    && line_.compare(
+				           0, ignoredLinePrefix_.size(), ignoredLinePrefix_)
+				        == 0)
+					continue;
+
+				lineStream_.clear();
+				lineStream_.str(line_);
+			}
+		}
+
+	private:
+
+		std::istream&      stream_;
+		const std::string& ignoredLinePrefix_;
+		std::istringstream lineStream_;
+		std::string        line_;
+	};
 
 	static TokenClass classify(const std::string& token)
 	{
@@ -202,7 +243,8 @@ private:
 		                         + "; first file has " + token1 + ", second file has " + token2);
 	}
 
-	RealType tolerance_;
+	RealType    tolerance_;
+	std::string ignoredLinePrefix_;
 };
 
 } // namespace PsimagLite

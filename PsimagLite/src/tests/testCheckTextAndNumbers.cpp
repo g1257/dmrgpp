@@ -275,6 +275,49 @@ TEST_CASE("TextAndNumbersChecker rejects negative tolerances", "[TextAndNumbersC
 	CHECK_THROWS_AS(TextAndNumbersChecker(-0.01), std::invalid_argument);
 }
 
+TEST_CASE("TextAndNumbersChecker ignores configured line prefixes", "[TextAndNumbersChecker]")
+{
+	TemporaryFiles files;
+
+	SECTION("marked lines are ignored independently")
+	{
+		TextAndNumbersChecker checker(0.001, "##");
+		const auto            file1 = files.write(
+                    "first.txt", "## generated at 1.25 seconds\nword\n## first only\n1.0\n");
+		const auto file2
+		    = files.write("second.txt", "## generated at 9.75 seconds\nword\n1.0005\n");
+		CHECK_NOTHROW(checker.run(file1, file2));
+	}
+
+	SECTION("the marker must start at column one")
+	{
+		TextAndNumbersChecker checker(0.001, "##");
+		const auto            file1 = files.write("first.txt", " ## not ignored\nword\n");
+		const auto            file2 = files.write("second.txt", "word\n");
+		CHECK_THROWS(checker.run(file1, file2));
+	}
+
+	SECTION("a marker in the middle of a line is not ignored")
+	{
+		TextAndNumbersChecker checker(0.001, "##");
+		const auto            file1 = files.write("first.txt", "word ## first\n");
+		const auto            file2 = files.write("second.txt", "word ## second\n");
+		CHECK_THROWS_MATCHES(checker.run(file1, file2),
+		                     std::runtime_error,
+		                     MessageMatches(ContainsSubstring("Token 3: words differ")));
+	}
+
+	SECTION("strict comparison remains the default")
+	{
+		TextAndNumbersChecker checker(0.001);
+		const auto            file1 = files.write("first.txt", "## first\nword\n");
+		const auto            file2 = files.write("second.txt", "## second\nword\n");
+		CHECK_THROWS_MATCHES(checker.run(file1, file2),
+		                     std::runtime_error,
+		                     MessageMatches(ContainsSubstring("Token 2: words differ")));
+	}
+}
+
 TEST_CASE("TextAndNumbersChecker compares real numbers with absolute tolerance",
           "[TextAndNumbersChecker]")
 {
