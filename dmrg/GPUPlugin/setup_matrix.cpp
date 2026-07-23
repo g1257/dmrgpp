@@ -1,12 +1,18 @@
 #include "setup_matrix.h"
 #include "dmrg_types.h"
 #include <cassert>
+#include <complex>
+#include <type_traits>
 
-#if defined(USE_COMPLEX_Z)
-std::complex<double> makeFloat(double zr, double zi) { return std::complex<double>(zr, zi); }
-#else
-double makeFloat(double zr, double) { return zr; }
-#endif
+namespace {
+
+template <typename T> struct is_complex : std::false_type { };
+
+template <typename T> struct is_complex<std::complex<T>> : std::true_type { };
+
+template <typename T> inline constexpr bool is_complex_v = is_complex<T>::value;
+
+}
 
 SizeType f1(const SizeType& ipatch,
             const SizeType& jpatch,
@@ -81,13 +87,18 @@ void setup_matrix(SizeType              noperator,
 						dval += ((double)(ioperator - 1))
 						    * ((double)total_left_size)
 						    * ((double)total_left_size);
-						Amat_[((i)-1) + ((j)-1) * ld_Amat]
-						    = makeFloat(dval, -dval);
-					};
-				};
-			};
-		};
-	};
+						if constexpr (is_complex_v<T>) {
+							Amat_[((i)-1) + ((j)-1) * ld_Amat]
+							    = std::complex<typename T::value_type>(
+							        dval, -dval);
+						} else {
+							Amat_[((i)-1) + ((j)-1) * ld_Amat] = dval;
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 SizeType f1(const SizeType& ipatch,
@@ -121,9 +132,16 @@ SizeType f3(const SizeType& ipatch,
 	return mySizeType;
 }
 
-template void setup_matrix<MYTYPE>(SizeType,
+template void setup_matrix<double>(SizeType,
                                    SizeType,
-                                   std::vector<MYTYPE>& Abatch,
+                                   std::vector<double>& Abatch,
                                    const VectorSizeType&,
-                                   std::vector<MYTYPE*>&,
+                                   std::vector<double*>&,
                                    VectorSizeType&);
+
+template void setup_matrix<std::complex<double>>(SizeType,
+                                                 SizeType,
+                                                 std::vector<std::complex<double>>& Abatch,
+                                                 const VectorSizeType&,
+                                                 std::vector<std::complex<double>*>&,
+                                                 VectorSizeType&);

@@ -10,24 +10,6 @@
 #include "magma_types.h"
 #include "magma_v2.h"
 
-#if defined(USE_COMPLEX_Z)
-
-#define MAGMA_T magmaDoubleComplex
-
-#elif defined(USE_COMPLEX_C)
-
-#define MAGMA_T magmaFloatComplex
-
-#elif defined(USE_FLOAT)
-
-#define MAGMA_T float
-
-#else
-
-#define MAGMA_T double
-
-#endif
-
 using magma_IntegerType_t = magma_int_t;
 
 /*
@@ -116,24 +98,24 @@ static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t        transA,
 	                                     queue);
 }
 
-static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                    transA,
-                                                 magma_trans_t                    transB,
-                                                 magma_IntegerType_t*             m,
-                                                 magma_IntegerType_t*             n,
-                                                 magma_IntegerType_t*             k,
-                                                 magmaDoubleComplex               alpha,
-                                                 magmaDoubleComplex const* const* dA_array,
-                                                 magma_IntegerType_t*             ldda,
-                                                 magmaDoubleComplex const* const* dB_array,
-                                                 magma_IntegerType_t*             lddb,
-                                                 magmaDoubleComplex               beta,
-                                                 magmaDoubleComplex**             dC_array,
-                                                 magma_IntegerType_t*             lddc,
-                                                 magma_IntegerType_t              batchCount,
-                                                 magma_IntegerType_t              max_m,
-                                                 magma_IntegerType_t              max_n,
-                                                 magma_IntegerType_t              max_k,
-                                                 magma_queue_t                    queue)
+static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                      transA,
+                                                 magma_trans_t                      transB,
+                                                 magma_IntegerType_t*               m,
+                                                 magma_IntegerType_t*               n,
+                                                 magma_IntegerType_t*               k,
+                                                 std::complex<double>               alpha,
+                                                 std::complex<double> const* const* dA_array,
+                                                 magma_IntegerType_t*               ldda,
+                                                 std::complex<double> const* const* dB_array,
+                                                 magma_IntegerType_t*               lddb,
+                                                 std::complex<double>               beta,
+                                                 std::complex<double>**             dC_array,
+                                                 magma_IntegerType_t*               lddc,
+                                                 magma_IntegerType_t                batchCount,
+                                                 magma_IntegerType_t                max_m,
+                                                 magma_IntegerType_t                max_n,
+                                                 magma_IntegerType_t                max_k,
+                                                 magma_queue_t                      queue)
 {
 
 	magmablas_zgemm_vbatched_max_nocheck(transA,
@@ -141,13 +123,13 @@ static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                  
 	                                     m,
 	                                     n,
 	                                     k,
-	                                     alpha,
-	                                     dA_array,
+	                                     *(magmaDoubleComplex*)&alpha,
+	                                     (magmaDoubleComplex const* const*)dA_array,
 	                                     ldda,
-	                                     dB_array,
+	                                     (magmaDoubleComplex const* const*)dB_array,
 	                                     lddb,
-	                                     beta,
-	                                     dC_array,
+	                                     *(magmaDoubleComplex*)&beta,
+	                                     (magmaDoubleComplex**)dC_array,
 	                                     lddc,
 	                                     batchCount,
 	                                     max_m,
@@ -156,24 +138,24 @@ static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                  
 	                                     queue);
 }
 
-static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                   transA,
-                                                 magma_trans_t                   transB,
-                                                 magma_IntegerType_t*            m,
-                                                 magma_IntegerType_t*            n,
-                                                 magma_IntegerType_t*            k,
-                                                 magmaFloatComplex               alpha,
-                                                 magmaFloatComplex const* const* dA_array,
-                                                 magma_IntegerType_t*            ldda,
-                                                 magmaFloatComplex const* const* dB_array,
-                                                 magma_IntegerType_t*            lddb,
-                                                 magmaFloatComplex               beta,
-                                                 magmaFloatComplex**             dC_array,
-                                                 magma_IntegerType_t*            lddc,
-                                                 magma_IntegerType_t             batchCount,
-                                                 magma_IntegerType_t             max_m,
-                                                 magma_IntegerType_t             max_n,
-                                                 magma_IntegerType_t             max_k,
-                                                 magma_queue_t                   queue)
+static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                     transA,
+                                                 magma_trans_t                     transB,
+                                                 magma_IntegerType_t*              m,
+                                                 magma_IntegerType_t*              n,
+                                                 magma_IntegerType_t*              k,
+                                                 std::complex<float>               alpha,
+                                                 std::complex<float> const* const* dA_array,
+                                                 magma_IntegerType_t*              ldda,
+                                                 std::complex<float> const* const* dB_array,
+                                                 magma_IntegerType_t*              lddb,
+                                                 std::complex<float>               beta,
+                                                 std::complex<float>**             dC_array,
+                                                 magma_IntegerType_t*              lddc,
+                                                 magma_IntegerType_t               batchCount,
+                                                 magma_IntegerType_t               max_m,
+                                                 magma_IntegerType_t               max_n,
+                                                 magma_IntegerType_t               max_k,
+                                                 magma_queue_t                     queue)
 {
 
 	magmablas_cgemm_vbatched_max_nocheck(transA,
@@ -181,13 +163,13 @@ static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                  
 	                                     m,
 	                                     n,
 	                                     k,
-	                                     alpha,
-	                                     dA_array,
+	                                     *(magmaFloatComplex*)&alpha,
+	                                     (magmaFloatComplex const* const*)dA_array,
 	                                     ldda,
-	                                     dB_array,
+	                                     (magmaFloatComplex const* const*)dB_array,
 	                                     lddb,
-	                                     beta,
-	                                     dC_array,
+	                                     *(magmaFloatComplex*)&beta,
+	                                     (magmaFloatComplex**)dC_array,
 	                                     lddc,
 	                                     batchCount,
 	                                     max_m,
@@ -276,24 +258,24 @@ static void magmablas_Xgemm_vbatched_max(magma_trans_t        transA,
 	                             queue);
 }
 
-static void magmablas_Xgemm_vbatched_max(magma_trans_t                    transA,
-                                         magma_trans_t                    transB,
-                                         magma_IntegerType_t*             m,
-                                         magma_IntegerType_t*             n,
-                                         magma_IntegerType_t*             k,
-                                         magmaDoubleComplex               alpha,
-                                         magmaDoubleComplex const* const* dA_array,
-                                         magma_IntegerType_t*             ldda,
-                                         magmaDoubleComplex const* const* dB_array,
-                                         magma_IntegerType_t*             lddb,
-                                         magmaDoubleComplex               beta,
-                                         magmaDoubleComplex**             dC_array,
-                                         magma_IntegerType_t*             lddc,
-                                         magma_IntegerType_t              batchCount,
-                                         magma_IntegerType_t              max_m,
-                                         magma_IntegerType_t              max_n,
-                                         magma_IntegerType_t              max_k,
-                                         magma_queue_t                    queue)
+static void magmablas_Xgemm_vbatched_max(magma_trans_t                      transA,
+                                         magma_trans_t                      transB,
+                                         magma_IntegerType_t*               m,
+                                         magma_IntegerType_t*               n,
+                                         magma_IntegerType_t*               k,
+                                         std::complex<double>               alpha,
+                                         std::complex<double> const* const* dA_array,
+                                         magma_IntegerType_t*               ldda,
+                                         std::complex<double> const* const* dB_array,
+                                         magma_IntegerType_t*               lddb,
+                                         std::complex<double>               beta,
+                                         std::complex<double>**             dC_array,
+                                         magma_IntegerType_t*               lddc,
+                                         magma_IntegerType_t                batchCount,
+                                         magma_IntegerType_t                max_m,
+                                         magma_IntegerType_t                max_n,
+                                         magma_IntegerType_t                max_k,
+                                         magma_queue_t                      queue)
 {
 
 	magmablas_zgemm_vbatched_max(transA,
@@ -301,13 +283,13 @@ static void magmablas_Xgemm_vbatched_max(magma_trans_t                    transA
 	                             m,
 	                             n,
 	                             k,
-	                             alpha,
-	                             dA_array,
+	                             *(magmaDoubleComplex*)&alpha,
+	                             (magmaDoubleComplex const* const*)dA_array,
 	                             ldda,
-	                             dB_array,
+	                             (magmaDoubleComplex const* const*)dB_array,
 	                             lddb,
-	                             beta,
-	                             dC_array,
+	                             *(magmaDoubleComplex*)&beta,
+	                             (magmaDoubleComplex**)dC_array,
 	                             lddc,
 	                             batchCount,
 	                             max_m,
@@ -316,24 +298,24 @@ static void magmablas_Xgemm_vbatched_max(magma_trans_t                    transA
 	                             queue);
 }
 
-static void magmablas_Xgemm_vbatched_max(magma_trans_t                   transA,
-                                         magma_trans_t                   transB,
-                                         magma_IntegerType_t*            m,
-                                         magma_IntegerType_t*            n,
-                                         magma_IntegerType_t*            k,
-                                         magmaFloatComplex               alpha,
-                                         magmaFloatComplex const* const* dA_array,
-                                         magma_IntegerType_t*            ldda,
-                                         magmaFloatComplex const* const* dB_array,
-                                         magma_IntegerType_t*            lddb,
-                                         magmaFloatComplex               beta,
-                                         magmaFloatComplex**             dC_array,
-                                         magma_IntegerType_t*            lddc,
-                                         magma_IntegerType_t             batchCount,
-                                         magma_IntegerType_t             max_m,
-                                         magma_IntegerType_t             max_n,
-                                         magma_IntegerType_t             max_k,
-                                         magma_queue_t                   queue)
+static void magmablas_Xgemm_vbatched_max(magma_trans_t                     transA,
+                                         magma_trans_t                     transB,
+                                         magma_IntegerType_t*              m,
+                                         magma_IntegerType_t*              n,
+                                         magma_IntegerType_t*              k,
+                                         std::complex<float>               alpha,
+                                         std::complex<float> const* const* dA_array,
+                                         magma_IntegerType_t*              ldda,
+                                         std::complex<float> const* const* dB_array,
+                                         magma_IntegerType_t*              lddb,
+                                         std::complex<float>               beta,
+                                         std::complex<float>**             dC_array,
+                                         magma_IntegerType_t*              lddc,
+                                         magma_IntegerType_t               batchCount,
+                                         magma_IntegerType_t               max_m,
+                                         magma_IntegerType_t               max_n,
+                                         magma_IntegerType_t               max_k,
+                                         magma_queue_t                     queue)
 {
 
 	magmablas_cgemm_vbatched_max(transA,
@@ -341,13 +323,13 @@ static void magmablas_Xgemm_vbatched_max(magma_trans_t                   transA,
 	                             m,
 	                             n,
 	                             k,
-	                             alpha,
-	                             dA_array,
+	                             *(magmaFloatComplex*)&alpha,
+	                             (magmaFloatComplex const* const*)dA_array,
 	                             ldda,
-	                             dB_array,
+	                             (magmaFloatComplex const* const*)dB_array,
 	                             lddb,
-	                             beta,
-	                             dC_array,
+	                             *(magmaFloatComplex*)&beta,
+	                             (magmaFloatComplex**)dC_array,
 	                             lddc,
 	                             batchCount,
 	                             max_m,
@@ -356,21 +338,21 @@ static void magmablas_Xgemm_vbatched_max(magma_trans_t                   transA,
 	                             queue);
 }
 
-static void magmablas_Xgemm_vbatched(magma_trans_t                   transA,
-                                     magma_trans_t                   transB,
-                                     magma_IntegerType_t*            m,
-                                     magma_IntegerType_t*            n,
-                                     magma_IntegerType_t*            k,
-                                     magmaFloatComplex               alpha,
-                                     magmaFloatComplex const* const* dA_array,
-                                     magma_IntegerType_t*            ldda,
-                                     magmaFloatComplex const* const* dB_array,
-                                     magma_IntegerType_t*            lddb,
-                                     magmaFloatComplex               beta,
-                                     magmaFloatComplex**             dC_array,
-                                     magma_IntegerType_t*            lddc,
-                                     magma_IntegerType_t             batchCount,
-                                     magma_queue_t                   queue)
+static void magmablas_Xgemm_vbatched(magma_trans_t                     transA,
+                                     magma_trans_t                     transB,
+                                     magma_IntegerType_t*              m,
+                                     magma_IntegerType_t*              n,
+                                     magma_IntegerType_t*              k,
+                                     std::complex<float>               alpha,
+                                     std::complex<float> const* const* dA_array,
+                                     magma_IntegerType_t*              ldda,
+                                     std::complex<float> const* const* dB_array,
+                                     magma_IntegerType_t*              lddb,
+                                     std::complex<float>               beta,
+                                     std::complex<float>**             dC_array,
+                                     magma_IntegerType_t*              lddc,
+                                     magma_IntegerType_t               batchCount,
+                                     magma_queue_t                     queue)
 {
 
 	magmablas_cgemm_vbatched(transA,
@@ -378,47 +360,46 @@ static void magmablas_Xgemm_vbatched(magma_trans_t                   transA,
 	                         m,
 	                         n,
 	                         k,
-	                         alpha,
-	                         dA_array,
+	                         *(magmaFloatComplex*)&alpha,
+	                         (magmaFloatComplex const* const*)dA_array,
 	                         ldda,
-	                         dB_array,
+	                         (magmaFloatComplex const* const*)dB_array,
 	                         lddb,
-	                         beta,
-	                         dC_array,
+	                         *(magmaFloatComplex*)&beta,
+	                         (magmaFloatComplex**)dC_array,
 	                         lddc,
 	                         batchCount,
 	                         queue);
 }
 
-static void magmablas_Xgemm_vbatched(magma_trans_t                    transA,
-                                     magma_trans_t                    transB,
-                                     magma_IntegerType_t*             m,
-                                     magma_IntegerType_t*             n,
-                                     magma_IntegerType_t*             k,
-                                     magmaDoubleComplex               alpha,
-                                     magmaDoubleComplex const* const* dA_array,
-                                     magma_IntegerType_t*             ldda,
-                                     magmaDoubleComplex const* const* dB_array,
-                                     magma_IntegerType_t*             lddb,
-                                     magmaDoubleComplex               beta,
-                                     magmaDoubleComplex**             dC_array,
-                                     magma_IntegerType_t*             lddc,
-                                     magma_IntegerType_t              batchCount,
-                                     magma_queue_t                    queue)
+static void magmablas_Xgemm_vbatched(magma_trans_t                      transA,
+                                     magma_trans_t                      transB,
+                                     magma_IntegerType_t*               m,
+                                     magma_IntegerType_t*               n,
+                                     magma_IntegerType_t*               k,
+                                     std::complex<double>               alpha,
+                                     std::complex<double> const* const* dA_array,
+                                     magma_IntegerType_t*               ldda,
+                                     std::complex<double> const* const* dB_array,
+                                     magma_IntegerType_t*               lddb,
+                                     std::complex<double>               beta,
+                                     std::complex<double>**             dC_array,
+                                     magma_IntegerType_t*               lddc,
+                                     magma_IntegerType_t                batchCount,
+                                     magma_queue_t                      queue)
 {
-
 	magmablas_zgemm_vbatched(transA,
 	                         transB,
 	                         m,
 	                         n,
 	                         k,
-	                         alpha,
-	                         dA_array,
+	                         *(magmaDoubleComplex*)&alpha,
+	                         (magmaDoubleComplex const* const*)dA_array,
 	                         ldda,
-	                         dB_array,
+	                         (magmaDoubleComplex const* const*)dB_array,
 	                         lddb,
-	                         beta,
-	                         dC_array,
+	                         *(magmaDoubleComplex*)&beta,
+	                         (magmaDoubleComplex**)dC_array,
 	                         lddc,
 	                         batchCount,
 	                         queue);
@@ -512,56 +493,75 @@ static void magma_Xgetmatrix(magma_IntegerType_t m,
                              magma_IntegerType_t ldb,
                              magma_queue_t       queue)
 {
-
 	magma_sgetmatrix(m, n, dA_src, ldda, hB_dst, ldb, queue);
 }
 
-static void magma_Xgetmatrix(magma_IntegerType_t m,
-                             magma_IntegerType_t n,
-                             magmaFloatComplex*  dA_src,
-                             magma_IntegerType_t ldda,
-                             magmaFloatComplex*  hB_dst,
-                             magma_IntegerType_t ldb,
-                             magma_queue_t       queue)
+static void magma_Xgetmatrix(magma_IntegerType_t  m,
+                             magma_IntegerType_t  n,
+                             std::complex<float>* dA_src,
+                             magma_IntegerType_t  ldda,
+                             std::complex<float>* hB_dst,
+                             magma_IntegerType_t  ldb,
+                             magma_queue_t        queue)
 {
-
-	magma_cgetmatrix(m, n, dA_src, ldda, hB_dst, ldb, queue);
+	magma_cgetmatrix(m,
+	                 n,
+	                 reinterpret_cast<magmaFloatComplex*>(dA_src),
+	                 ldda,
+	                 reinterpret_cast<magmaFloatComplex*>(hB_dst),
+	                 ldb,
+	                 queue);
 }
 
-static void magma_Xgetmatrix(magma_IntegerType_t m,
-                             magma_IntegerType_t n,
-                             magmaDoubleComplex* dA_src,
-                             magma_IntegerType_t ldda,
-                             magmaDoubleComplex* hB_dst,
-                             magma_IntegerType_t ldb,
-                             magma_queue_t       queue)
+static void magma_Xgetmatrix(magma_IntegerType_t   m,
+                             magma_IntegerType_t   n,
+                             std::complex<double>* dA_src,
+                             magma_IntegerType_t   ldda,
+                             std::complex<double>* hB_dst,
+                             magma_IntegerType_t   ldb,
+                             magma_queue_t         queue)
 {
-
-	magma_zgetmatrix(m, n, dA_src, ldda, hB_dst, ldb, queue);
+	magma_zgetmatrix(m,
+	                 n,
+	                 reinterpret_cast<magmaDoubleComplex*>(dA_src),
+	                 ldda,
+	                 reinterpret_cast<magmaDoubleComplex*>(hB_dst),
+	                 ldb,
+	                 queue);
 }
 
-static void magma_Xsetmatrix(magma_IntegerType_t       m,
-                             magma_IntegerType_t       n,
-                             magmaDoubleComplex const* hA_src,
-                             magma_IntegerType_t       lda,
-                             magmaDoubleComplex*       dB_dst,
-                             magma_IntegerType_t       lddb,
-                             magma_queue_t             queue)
+static void magma_Xsetmatrix(magma_IntegerType_t         m,
+                             magma_IntegerType_t         n,
+                             std::complex<double> const* hA_src,
+                             magma_IntegerType_t         lda,
+                             std::complex<double>*       dB_dst,
+                             magma_IntegerType_t         lddb,
+                             magma_queue_t               queue)
 {
-
-	magma_zsetmatrix(m, n, hA_src, lda, dB_dst, lddb, queue);
+	magma_zsetmatrix(m,
+	                 n,
+	                 reinterpret_cast<const magmaDoubleComplex*>(hA_src),
+	                 lda,
+	                 reinterpret_cast<magmaDoubleComplex*>(dB_dst),
+	                 lddb,
+	                 queue);
 }
 
-static void magma_Xsetmatrix(magma_IntegerType_t      m,
-                             magma_IntegerType_t      n,
-                             magmaFloatComplex const* hA_src,
-                             magma_IntegerType_t      lda,
-                             magmaFloatComplex*       dB_dst,
-                             magma_IntegerType_t      lddb,
-                             magma_queue_t            queue)
+static void magma_Xsetmatrix(magma_IntegerType_t        m,
+                             magma_IntegerType_t        n,
+                             std::complex<float> const* hA_src,
+                             magma_IntegerType_t        lda,
+                             std::complex<float>*       dB_dst,
+                             magma_IntegerType_t        lddb,
+                             magma_queue_t              queue)
 {
-
-	magma_csetmatrix(m, n, hA_src, lda, dB_dst, lddb, queue);
+	magma_csetmatrix(m,
+	                 n,
+	                 reinterpret_cast<const magmaFloatComplex*>(hA_src),
+	                 lda,
+	                 reinterpret_cast<magmaFloatComplex*>(dB_dst),
+	                 lddb,
+	                 queue);
 }
 
 static void magma_Xsetmatrix(magma_IntegerType_t m,
@@ -610,48 +610,68 @@ static void magma_Xgetvector(magma_IntegerType_t n,
 	magma_sgetvector(n, dA_src, ldda, hB_dst, ldb, queue);
 }
 
-static void magma_Xgetvector(magma_IntegerType_t n,
-                             magmaFloatComplex*  dA_src,
-                             magma_IntegerType_t ldda,
-                             magmaFloatComplex*  hB_dst,
-                             magma_IntegerType_t ldb,
-                             magma_queue_t       queue)
+static void magma_Xgetvector(magma_IntegerType_t  n,
+                             std::complex<float>* dA_src,
+                             magma_IntegerType_t  ldda,
+                             std::complex<float>* hB_dst,
+                             magma_IntegerType_t  ldb,
+                             magma_queue_t        queue)
 {
 
-	magma_cgetvector(n, dA_src, ldda, hB_dst, ldb, queue);
+	magma_cgetvector(n,
+	                 reinterpret_cast<magmaFloatComplex*>(dA_src),
+	                 ldda,
+	                 reinterpret_cast<magmaFloatComplex*>(hB_dst),
+	                 ldb,
+	                 queue);
 }
 
-static void magma_Xgetvector(magma_IntegerType_t n,
-                             magmaDoubleComplex* dA_src,
-                             magma_IntegerType_t ldda,
-                             magmaDoubleComplex* hB_dst,
-                             magma_IntegerType_t ldb,
-                             magma_queue_t       queue)
+static void magma_Xgetvector(magma_IntegerType_t   n,
+                             std::complex<double>* dA_src,
+                             magma_IntegerType_t   ldda,
+                             std::complex<double>* hB_dst,
+                             magma_IntegerType_t   ldb,
+                             magma_queue_t         queue)
 {
 
-	magma_zgetvector(n, dA_src, ldda, hB_dst, ldb, queue);
+	magma_zgetvector(n,
+	                 reinterpret_cast<magmaDoubleComplex*>(dA_src),
+	                 ldda,
+	                 reinterpret_cast<magmaDoubleComplex*>(hB_dst),
+	                 ldb,
+	                 queue);
 }
 
-static void magma_Xsetvector(magma_IntegerType_t       n,
-                             magmaDoubleComplex const* hA_src,
-                             magma_IntegerType_t       incx,
-                             magmaDoubleComplex*       dB_dst,
-                             magma_IntegerType_t       incy,
-                             magma_queue_t             queue)
+static void magma_Xsetvector(magma_IntegerType_t         n,
+                             std::complex<double> const* hA_src,
+                             magma_IntegerType_t         incx,
+                             std::complex<double>*       dB_dst,
+                             magma_IntegerType_t         incy,
+                             magma_queue_t               queue)
 {
 
-	magma_zsetvector(n, hA_src, incx, dB_dst, incy, queue);
+	magma_zsetvector(n,
+	                 reinterpret_cast<const magmaDoubleComplex*>(hA_src),
+	                 incx,
+	                 reinterpret_cast<magmaDoubleComplex*>(dB_dst),
+	                 incy,
+	                 queue);
 }
 
-static void magma_Xsetvector(magma_IntegerType_t      n,
-                             magmaFloatComplex const* hA_src,
-                             magma_IntegerType_t      incx,
-                             magmaFloatComplex*       dB_dst,
-                             magma_IntegerType_t      incy,
-                             magma_queue_t            queue)
+static void magma_Xsetvector(magma_IntegerType_t        n,
+                             std::complex<float> const* hA_src,
+                             magma_IntegerType_t        incx,
+                             std::complex<float>*       dB_dst,
+                             magma_IntegerType_t        incy,
+                             magma_queue_t              queue)
 {
 
-	magma_csetvector(n, hA_src, incx, dB_dst, incy, queue);
+	magma_csetvector(n,
+	                 reinterpret_cast<const magmaFloatComplex*>(hA_src),
+	                 incx,
+	                 reinterpret_cast<magmaFloatComplex*>(dB_dst),
+	                 incy,
+	                 queue);
 }
 
 static void magma_Xsetvector(magma_IntegerType_t n,
@@ -675,62 +695,5 @@ static void magma_Xsetvector(magma_IntegerType_t n,
 
 	magma_dsetvector(n, hA_src, incx, dB_dst, incy, queue);
 }
-
-/*
-
-  #if defined(USE_COMPLEX_Z)
-
-    #define magma_Xsetmatrix magma_zsetmatrix
-    #define magma_Xgetmatrix magma_zgetmatrix
-
-    #define magma_Xsetvector magma_zsetvector
-    #define magma_Xgetvector magma_zgetvector
-
-    #define magmablas_Xgemm_vbatched magmablas_zgemm_vbatched
-    #define magmablas_Xgemm_vbatched_max_nocheck magmablas_zgemm_vbatched_max_nocheck
-    #define magmablas_Xgemm_vbatched_max magmablas_zgemm_vbatched_max
-
-
-  #elif defined(USE_COMPLEX_C)
-
-    #define magma_Xsetmatrix magma_csetmatrix
-    #define magma_Xgetmatrix magma_cgetmatrix
-
-    #define magma_Xsetvector magma_csetvector
-    #define magma_Xgetvector magma_cgetvector
-
-    #define magmablas_Xgemm_vbatched magmablas_cgemm_vbatched
-    #define magmablas_Xgemm_vbatched_max_nocheck magmablas_cgemm_vbatched_max_nocheck
-    #define magmablas_Xgemm_vbatched_max magmablas_cgemm_vbatched_max
-
-  #elif defined(USE_FLOAT)
-    #define magma_Xsetmatrix magma_ssetmatrix
-    #define magma_Xgetmatrix magma_sgetmatrix
-
-    #define magma_Xsetvector magma_ssetvector
-    #define magma_Xgetvector magma_sgetvector
-
-    #define magmablas_Xgemm_vbatched magmablas_sgemm_vbatched
-    #define magmablas_Xgemm_vbatched_max_nocheck magmablas_sgemm_vbatched_max_nocheck
-    #define magmablas_Xgemm_vbatched_max magmablas_sgemm_vbatched_max
-
-  #else
-
-    #define magma_Xsetmatrix magma_dsetmatrix
-    #define magma_Xgetmatrix magma_dgetmatrix
-
-    #define magma_Xsetvector magma_dsetvector
-    #define magma_Xgetvector magma_dgetvector
-
-    #define magmablas_Xgemm_vbatched magmablas_dgemm_vbatched
-    #define magmablas_Xgemm_vbatched_max_nocheck magmablas_dgemm_vbatched_max_nocheck
-    #define magmablas_Xgemm_vbatched_max magmablas_dgemm_vbatched_max
-
-  #endif
-
-
-
-#endif
-*/
 
 #endif

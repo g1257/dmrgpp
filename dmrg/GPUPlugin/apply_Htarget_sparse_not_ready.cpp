@@ -584,7 +584,7 @@ template void apply_Htarget_sparse<double>(SizeType,
                                            double*,
                                            double*);
 
-/*template void apply_Htarget_sparse<std::complex<double>>(SizeType,
+template void apply_Htarget_sparse<std::complex<double>>(SizeType,
                                                          SizeType,
                                                          VectorSizeType,
                                                          VectorSizeType,
@@ -595,4 +595,4 @@ template void apply_Htarget_sparse<double>(SizeType,
                                                          std::complex<double>**,
                                                          const VectorIntegerType&,
                                                          std::complex<double>*,
-                                                         std::complex<double>*);*/
+                                                         std::complex<double>*);

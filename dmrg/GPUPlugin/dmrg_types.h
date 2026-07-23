@@ -3,16 +3,4 @@
 
 using IntegerType = int;
 
-#if defined(USE_COMPLEX_Z)
-
-#include <complex>
-
-typedef std::complex<double> MYTYPE;
-
-#else
-
-typedef double MYTYPE;
-
-#endif
-
 #endif

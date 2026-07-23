@@ -129,7 +129,7 @@ void dmrg_Xgetvector(const IntegerType n,
                      const IntegerType incy)
 {
 #ifdef USE_MAGMA
-	magma_Xgetvector(n, (MAGMA_T*)dx_src, incx, (MAGMA_T*)hy_dst, incy, queue);
+	magma_Xgetvector(n, dx_src, incx, hy_dst, incy, queue);
 #else
 	Xcopy_(&n, dx_src, &incx, hy_dst, &incy);
 #endif
@@ -143,7 +143,7 @@ void dmrg_Xsetvector(const IntegerType n,
                      const IntegerType incy)
 {
 #ifdef USE_MAGMA
-	magma_Xsetvector(n, (MAGMA_T*)hx_src, incx, (MAGMA_T*)dy_dst, incy, queue);
+	magma_Xsetvector(n, hx_src, incx, dy_dst, incy, queue);
 #else
 	Xcopy_(&n, hx_src, &incx, dy_dst, &incy);
 #endif
@@ -158,7 +158,7 @@ void dmrg_Xgetmatrix(const IntegerType m,
                      const IntegerType ldb)
 {
 #ifdef USE_MAGMA
-	magma_Xgetmatrix(m, n, (MAGMA_T*)dA_src, ldda, (MAGMA_T*)hB_dst, ldb, queue);
+	magma_Xgetmatrix(m, n, dA_src, ldda, hB_dst, ldb, queue);
 #else
 	const char* uplo = "A";
 	Xlacpy_(uplo, &m, &n, dA_src, &ldda, hB_dst, &ldb);
@@ -174,7 +174,7 @@ void dmrg_Xsetmatrix(const IntegerType m,
                      const IntegerType lddb)
 {
 #ifdef USE_MAGMA
-	magma_Xsetmatrix(m, n, (MAGMA_T*)hA_src, lda, (MAGMA_T*)dB_dst, lddb, queue);
+	magma_Xsetmatrix(m, n, hA_src, lda, dB_dst, lddb, queue);
 #else
 	const char* uplo = "A";
 	Xlacpy_(uplo, &m, &n, hA_src, &lda, dB_dst, &lddb);
@@ -379,9 +379,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 		magma_trans_t transA = isTransA ? MagmaTrans : MagmaNoTrans;
 		magma_trans_t transB = isTransB ? MagmaTrans : MagmaNoTrans;
 
-		// static_assert(sizeof(MAGMA_T) == sizeof(alpha_vbatch[0]), "Size mismatch for
-		// MAGMA_T and alpha_vbatch element"); static_assert(sizeof(MAGMA_T) ==
-		// sizeof(beta_vbatch[0]), "Size mismatch for MAGMA_T and beta_vbatch element");
 		auto alpha = alpha_vbatch[0];
 		auto beta  = beta_vbatch[0];
 
@@ -823,23 +820,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	};
 }
 
-template void dmrg_Xgemm_vbatch<MYTYPE>(char*,
-                                        char*,
-                                        IntegerType*,
-                                        IntegerType*,
-                                        IntegerType*,
-                                        MYTYPE*,
-                                        MYTYPE**,
-                                        IntegerType*,
-                                        MYTYPE**,
-                                        IntegerType*,
-                                        MYTYPE*,
-                                        MYTYPE**,
-                                        IntegerType*,
-                                        SizeType,
-                                        IntegerType*);
-
-/*#if defined(USE_COMPLEX_Z)
 template void dmrg_Xgemm_vbatch<double>(char*,
                                         char*,
                                         IntegerType*,
@@ -856,7 +836,6 @@ template void dmrg_Xgemm_vbatch<double>(char*,
                                         SizeType,
                                         IntegerType*);
 
-#else
 template void dmrg_Xgemm_vbatch<std::complex<double>>(char*                  ctransa_array,
                                                       char*                  ctransb_array,
                                                       IntegerType*           m_array,
@@ -872,24 +851,52 @@ template void dmrg_Xgemm_vbatch<std::complex<double>>(char*                  ctr
                                                       IntegerType*           ldc_array,
                                                       SizeType               group_count,
                                                       IntegerType*           group_size);
-#endif*/
 
 template void
-dmrg_Xgetvector<MYTYPE>(const IntegerType, MYTYPE*, const IntegerType, MYTYPE*, const IntegerType);
-template void dmrg_Xsetvector<MYTYPE>(const IntegerType,
-                                      const MYTYPE*,
+dmrg_Xgetvector<double>(const IntegerType, double*, const IntegerType, double*, const IntegerType);
+
+template void dmrg_Xgetvector<std::complex<double>>(const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType);
+
+template void dmrg_Xsetvector<double>(const IntegerType,
+                                      const double*,
                                       const IntegerType,
-                                      MYTYPE*,
+                                      double*,
                                       const IntegerType);
-template void dmrg_Xgetmatrix<MYTYPE>(const IntegerType,
+
+template void dmrg_Xsetvector<std::complex<double>>(const IntegerType,
+                                                    const std::complex<double>*,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType);
+
+template void dmrg_Xgetmatrix<double>(const IntegerType,
                                       const IntegerType,
-                                      MYTYPE*,
+                                      double*,
                                       const IntegerType,
-                                      MYTYPE*,
+                                      double*,
                                       const IntegerType);
-template void dmrg_Xsetmatrix<MYTYPE>(const IntegerType,
+
+template void dmrg_Xgetmatrix<std::complex<double>>(const IntegerType,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType);
+
+template void dmrg_Xsetmatrix<double>(const IntegerType,
                                       const IntegerType,
-                                      const MYTYPE*,
+                                      const double*,
                                       const IntegerType,
-                                      MYTYPE*,
+                                      double*,
                                       const IntegerType);
+
+template void dmrg_Xsetmatrix<std::complex<double>>(const IntegerType,
+                                                    const IntegerType,
+                                                    const std::complex<double>*,
+                                                    const IntegerType,
+                                                    std::complex<double>*,
+                                                    const IntegerType);
