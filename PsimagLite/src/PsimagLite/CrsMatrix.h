@@ -711,12 +711,14 @@ template <typename S> void bcast(CrsMatrix<S>& m)
 //! Transforms a Compressed-Row-Storage (CRS) into a full Matrix (Fast version)
 template <typename T> void crsMatrixToFullMatrix(Matrix<T>& m, const CrsMatrix<T>& crsMatrix)
 {
-	m.resize(crsMatrix.rows(), crsMatrix.cols(), 0);
+	Matrix<T> temporary(crsMatrix.rows(), crsMatrix.cols());
 	for (SizeType i = 0; i < crsMatrix.rows(); i++) {
 		//  for (SizeType k=0;k<crsMatrix.cols();k++) m(i,k)=0;
 		for (int k = crsMatrix.getRowPtr(i); k < crsMatrix.getRowPtr(i + 1); k++)
-			m(i, crsMatrix.getCol(k)) = crsMatrix.getValue(k);
+			temporary(i, crsMatrix.getCol(k)) = crsMatrix.getValue(k);
 	}
+
+	m = std::move(temporary);
 }
 
 //! Transforms a full matrix into a Compressed-Row-Storage (CRS) Matrix
