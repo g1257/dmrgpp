@@ -1,3 +1,10 @@
+//---------------------------------*-C++-*-----------------------------------//
+/*!
+ * \file   PsimagLite/TextAndNumbersChecker.hpp
+ * \brief  Compare text files containing words and numbers
+ */
+//---------------------------------------------------------------------------//
+
 #ifndef TEXT_AND_NUMBERS_CHECKER_HPP
 #define TEXT_AND_NUMBERS_CHECKER_HPP
 
@@ -11,11 +18,34 @@
 
 namespace PsimagLite {
 
+//===========================================================================//
+/*!
+ * \class TextAndNumbersChecker
+ *
+ * \brief Compare whitespace-separated words and numbers in two text files
+ *
+ * Words are compared verbatim, integers by value, and real numbers using an
+ * absolute tolerance. Tokens in corresponding positions must have the same
+ * class. Lines beginning with an optional prefix can be excluded from the
+ * comparison.
+ */
+//===========================================================================//
 class TextAndNumbersChecker {
 public:
 
 	using RealType = double;
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Constructor
+	 *
+	 * \param[in] tolerance          Maximum absolute difference allowed between
+	 *                               corresponding real-number tokens
+	 * \param[in] ignoredLinePrefix  Prefix identifying lines to omit; an empty
+	 *                               prefix enables strict comparison of all lines
+	 *
+	 * 	hrows std::invalid_argument if the tolerance is negative or non-finite
+	 */
 	explicit TextAndNumbersChecker(RealType           tolerance,
 	                               const std::string& ignoredLinePrefix = "")
 	    : tolerance_(tolerance)
@@ -26,6 +56,16 @@ public:
 			    "The tolerance must be non-negative and finite");
 	}
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Compare two text files token by token
+	 *
+	 * \param[in] file1 Path to the first file
+	 * \param[in] file2 Path to the second file
+	 *
+	 * 	hrows std::runtime_error if a file cannot be opened, a numeric token
+	 *         cannot be represented, or the file contents do not match
+	 */
 	void run(const std::string& file1, const std::string& file2) const
 	{
 		std::ifstream stream1(file1);
@@ -73,6 +113,14 @@ private:
 		Double
 	};
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Determine whether a character is ASCII whitespace
+	 *
+	 * \param[in] c Character to classify
+	 *
+	 * \returns True for an ASCII whitespace character
+	 */
 	static bool isAsciiWhitespace(char c)
 	{
 		switch (c) {
@@ -88,6 +136,15 @@ private:
 		}
 	}
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Read the next ASCII-whitespace-delimited token from a stream
+	 *
+	 * \param[in/out] stream Stream from which to read
+	 * \param[out] token     Token read from the stream
+	 *
+	 * \returns True if a token was read, or false at end of stream
+	 */
 	static bool readToken(std::istream& stream, std::string& token)
 	{
 		token.clear();
@@ -111,14 +168,35 @@ private:
 		return true;
 	}
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \class TokenReader
+	 *
+	 * \brief Read tokens while omitting lines with a configured prefix
+	 */
 	class TokenReader {
 	public:
 
+		//---------------------------------------------------------------------------//
+		/*!
+		 * \brief Constructor
+		 *
+		 * \param[in/out] stream           Stream from which to read
+		 * \param[in] ignoredLinePrefix    Prefix identifying lines to omit
+		 */
 		TokenReader(std::istream& stream, const std::string& ignoredLinePrefix)
 		    : stream_(stream)
 		    , ignoredLinePrefix_(ignoredLinePrefix)
 		{ }
 
+		//---------------------------------------------------------------------------//
+		/*!
+		 * \brief Read the next token from a non-ignored line
+		 *
+		 * \param[out] token Token read from the stream
+		 *
+		 * \returns True if a token was read, or false at end of stream
+		 */
 		bool read(std::string& token)
 		{
 			for (;;) {
@@ -147,6 +225,14 @@ private:
 		std::string        line_;
 	};
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Classify a token as a word, integer, or real number
+	 *
+	 * \param[in] token Token to classify
+	 *
+	 * \returns The token class
+	 */
 	static TokenClass classify(const std::string& token)
 	{
 		static const std::regex integerPattern(R"([+-]?[0-9]+)");
@@ -160,6 +246,14 @@ private:
 		return TokenClass::Word;
 	}
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Return a printable name for a token class
+	 *
+	 * \param[in] tokenClass Token class to name
+	 *
+	 * \returns A static string naming the token class
+	 */
 	static const char* className(TokenClass tokenClass)
 	{
 		switch (tokenClass) {
@@ -174,6 +268,15 @@ private:
 		return "unknown";
 	}
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Parse an integer token
+	 *
+	 * \param[in] token Token to parse
+	 *
+	 * \returns The represented integer value
+	 * 	hrows std::runtime_error if the token is invalid or out of range
+	 */
 	static long long parseInteger(const std::string& token)
 	{
 		std::size_t parsed = 0;
@@ -189,6 +292,15 @@ private:
 		}
 	}
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Parse a real-number token
+	 *
+	 * \param[in] token Token to parse
+	 *
+	 * \returns The represented finite real value
+	 * 	hrows std::runtime_error if the token is invalid, non-finite, or out of range
+	 */
 	static RealType parseDouble(const std::string& token)
 	{
 		std::size_t parsed = 0;
@@ -204,6 +316,16 @@ private:
 		}
 	}
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Compare two tokens and report a mismatch
+	 *
+	 * \param[in] token1   Token from the first file
+	 * \param[in] token2   Token from the second file
+	 * \param[in] position One-based token position
+	 *
+	 * 	hrows std::runtime_error if the token classes or values differ
+	 */
 	void compareTokens(const std::string& token1,
 	                   const std::string& token2,
 	                   std::size_t        position) const
@@ -246,13 +368,41 @@ private:
 		}
 	}
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Compare two real values using the configured absolute tolerance
+	 *
+	 * \param[in] value1 Value from the first file
+	 * \param[in] value2 Value from the second file
+	 *
+	 * \returns True if the absolute difference does not exceed the tolerance
+	 */
 	bool checkRealNumbers(RealType value1, RealType value2) const
 	{
 		return std::abs(value1 - value2) <= tolerance_;
 	}
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Enclose a token in double quotation marks
+	 *
+	 * \param[in] token Token to quote
+	 *
+	 * \returns The quoted token
+	 */
 	static std::string quote(const std::string& token) { return "\"" + token + "\""; }
 
+	//---------------------------------------------------------------------------//
+	/*!
+	 * \brief Throw a comparison-failure exception
+	 *
+	 * \param[in] position One-based token position
+	 * \param[in] token1   Display text for the first file's token
+	 * \param[in] token2   Display text for the second file's token
+	 * \param[in] reason   Explanation of the mismatch
+	 *
+	 * 	hrows std::runtime_error unconditionally
+	 */
 	[[noreturn]] static void fail(std::size_t        position,
 	                              const std::string& token1,
 	                              const std::string& token2,
