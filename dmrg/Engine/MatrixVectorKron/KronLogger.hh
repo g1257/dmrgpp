@@ -56,11 +56,9 @@ public:
 			return;
 		}
 
-		PsimagLite::OstringStream                     msgg(std::cout.precision());
-		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg << "KronLogger: Hello from ctor, counter_=" << counter_;
-		progress_.printline(msgg, std::cout);
-		msg << "\n";
+		const std::string message
+		    = "KronLogger: Hello from ctor, counter_=" + ttos(counter_);
+		progress_.printline(message, std::cout);
 
 		++counter_;
 
@@ -92,7 +90,7 @@ public:
 			err(std::string("Failed to create KronLogger file ") + filename + "\n");
 		}
 
-		progress_.printline(msgg, *fout_);
+		printMetadata(message);
 	}
 
 	/*!
@@ -103,10 +101,7 @@ public:
 		if (!fout_.has_value())
 			return;
 
-		PsimagLite::OstringStream                     msgg(std::cout.precision());
-		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg << "KronLogger: Bye from dtor\n";
-		progress_.printline(msgg, *fout_);
+		printMetadata("KronLogger: Bye from dtor");
 	}
 
 	/*!
@@ -195,6 +190,15 @@ public:
 	void sync() { active_ = false; }
 
 private:
+
+	void printMetadata(const std::string& message)
+	{
+		if (PsimagLite::Concurrency::rank() != 0)
+			return;
+
+		*fout_ << "## ";
+		progress_.printline(message, *fout_);
+	}
 
 	static std::string separationLevel(SizeType n)
 	{
