@@ -172,7 +172,7 @@ public:
 		}
 	}
 
-	void sync() { }
+	void sync() { kron_logger_.sync(); }
 
 private:
 

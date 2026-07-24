@@ -50,6 +50,7 @@ public:
 	    : progress_("KronLogger")
 	    , fout_()
 	    , init_kron_(init_kron)
+	    , active_(true)
 	{
 		if (!init_kron.params().options.isSet("KroneckerDumper")) {
 			return;
@@ -115,7 +116,7 @@ public:
 	 */
 	void vector(const std::vector<ComplexOrRealType>& v)
 	{
-		if (!fout_.has_value())
+		if (!fout_.has_value() || !active_)
 			return;
 
 		*fout_ << "Vector\n";
@@ -129,7 +130,7 @@ public:
 	 */
 	void one(SizeType outPatch)
 	{
-		if (!fout_.has_value())
+		if (!fout_.has_value() || !active_)
 			return;
 
 		SizeType nC      = init_kron_.connections();
@@ -146,7 +147,7 @@ public:
 	 */
 	void two(SizeType inPatch)
 	{
-		if (!fout_.has_value())
+		if (!fout_.has_value() || !active_)
 			return;
 
 		SizeType offsetY = init_kron_.offsetForPatches(InitKronType::OLD, inPatch);
@@ -163,7 +164,7 @@ public:
 	 */
 	void three(SizeType outPatch, SizeType inPatch, SizeType ic)
 	{
-		if (!fout_.has_value())
+		if (!fout_.has_value() || !active_)
 			return;
 
 		const ArrayOfMatStructType& xiStruct = init_kron_.xc(ic);
@@ -190,6 +191,8 @@ public:
 		       << "Matrix B follows in format: " + matrixFormat(Bmat->isDense()) + "\n";
 		printMatrixDenseOrSparse(*Bmat);
 	}
+
+	void sync() { active_ = false; }
 
 private:
 
@@ -231,6 +234,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	std::optional<std::ofstream>  fout_;
 	const InitKronType&           init_kron_;
+	bool                          active_;
 };
 
 template <typename ModelType> SizeType KronLogger<ModelType>::counter_ = 0;
