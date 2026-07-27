@@ -8,6 +8,7 @@
 #ifndef TEXT_AND_NUMBERS_CHECKER_HPP
 #define TEXT_AND_NUMBERS_CHECKER_HPP
 
+#include <cctype>
 #include <cmath>
 #include <cstddef>
 #include <fstream>
@@ -115,29 +116,6 @@ private:
 
 	//---------------------------------------------------------------------------//
 	/*!
-	 * \brief Determine whether a character is ASCII whitespace
-	 *
-	 * \param[in] c Character to classify
-	 *
-	 * \returns True for an ASCII whitespace character
-	 */
-	static bool isAsciiWhitespace(char c)
-	{
-		switch (c) {
-		case ' ':
-		case '\t':
-		case '\n':
-		case '\r':
-		case '\f':
-		case '\v':
-			return true;
-		default:
-			return false;
-		}
-	}
-
-	//---------------------------------------------------------------------------//
-	/*!
 	 * \brief Read the next ASCII-whitespace-delimited token from a stream
 	 *
 	 * \param[in/out] stream Stream from which to read
@@ -150,7 +128,7 @@ private:
 		token.clear();
 		char c = 0;
 		while (stream.get(c)) {
-			if (!isAsciiWhitespace(c)) {
+			if (!std::isspace(c)) {
 				token.push_back(c);
 				break;
 			}
@@ -160,7 +138,7 @@ private:
 			return false;
 
 		while (stream.get(c)) {
-			if (isAsciiWhitespace(c))
+			if (std::isspace(c))
 				break;
 			token.push_back(c);
 		}

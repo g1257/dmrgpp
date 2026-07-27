@@ -1,8 +1,5 @@
 #include <PsimagLite/TextAndNumbersChecker.hpp>
 
-#include <catch2/catch_session.hpp>
-#include <catch2/catch_test_macros.hpp>
-
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
@@ -11,10 +8,6 @@
 #include <string>
 
 namespace {
-
-std::string                                        file1;
-std::string                                        file2;
-std::unique_ptr<PsimagLite::TextAndNumbersChecker> checker;
 
 std::string parseIgnoredLinePrefix(const char* text)
 {
@@ -44,12 +37,6 @@ double parseTolerance(const char* text)
 
 } // namespace
 
-TEST_CASE("text and numbers in two files match", "[TextAndNumbersChecker]")
-{
-	REQUIRE(static_cast<bool>(checker));
-	REQUIRE_NOTHROW(checker->run(file1, file2));
-}
-
 int main(int argc, char* argv[])
 {
 	if (argc != 4 && argc != 5) {
@@ -57,6 +44,10 @@ int main(int argc, char* argv[])
 		          << " FILE1 FILE2 TOLERANCE [--ignore-line-prefix=PREFIX]\n";
 		return EXIT_FAILURE;
 	}
+
+	std::string                                        file1;
+	std::string                                        file2;
+	std::unique_ptr<PsimagLite::TextAndNumbersChecker> checker;
 
 	try {
 		file1 = argv[1];
@@ -70,6 +61,5 @@ int main(int argc, char* argv[])
 		return EXIT_FAILURE;
 	}
 
-	char* catchArguments[] = { argv[0] };
-	return Catch::Session().run(1, catchArguments);
+	checker->run(file1, file2);
 }

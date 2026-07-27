@@ -25,7 +25,7 @@ target_link_libraries(checkRunId psimaglite)
 add_test(NAME checkRunId COMMAND checkRunId -g 4)
 
 add_executable(checkTextAndNumbers checkTextAndNumbers.cpp)
-target_link_libraries(checkTextAndNumbers PRIVATE Catch2::Catch2 psimaglite)
+target_link_libraries(checkTextAndNumbers psimaglite)
 add_test(NAME checkTextAndNumbers COMMAND checkTextAndNumbers ${CMAKE_CURRENT_SOURCE_DIR}/checkTextAndNumbers.cpp
                                           ${CMAKE_CURRENT_SOURCE_DIR}/checkTextAndNumbers.cpp 0.0)
 
