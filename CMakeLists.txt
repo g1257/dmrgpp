@@ -59,15 +59,10 @@ else()
   set(CMAKE_INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
 endif()
 
-# Mirror CI's warning settings (.github/workflows/ci.yml, ci-mac.yml) so
-# local builds surface the same issues CI would, before they reach CI.
-# Pass -DDMRG_WARNINGS_AS_ERRORS=OFF to opt out.
-option(DMRG_WARNINGS_AS_ERRORS "Treat compiler warnings as errors, like CI does" ON)
+# Define our prefered warning set for compilers we know about.
+# In other words we're going to use -Wno-unused-parameter rather than annotations
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   add_compile_options(-Wall -Wextra -Wno-unused-parameter)
-  if(DMRG_WARNINGS_AS_ERRORS)
-    set(CMAKE_COMPILE_WARNING_AS_ERROR ON)
-  endif()
 endif()
 
 option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
