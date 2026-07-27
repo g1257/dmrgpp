@@ -7,7 +7,7 @@ endif()
 
 if(BUILD_TESTING)
   add_executable(KronUtil_Test1 test1.cpp)
-  target_link_libraries(KronUtil_Test1 kronutil)
+  target_link_libraries(KronUtil_Test1 kronutil Catch2::Catch2)
   add_test(NAME KronUtil_Test1 COMMAND KronUtil_Test1)
 
   add_executable(KronUtil_Test2 test2.cpp)
