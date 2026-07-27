@@ -5,8 +5,8 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include <PsimagLite/KokkosGemm.h>
-#include <PsimagLite/KokkosType.h>
+#include "KokkosGemm.h"
+#include "KokkosType.h"
 
 template <typename Scalar, typename IntegerForBlasType>
 inline void PsimagLite::kokkos_gemm(char               transa,
