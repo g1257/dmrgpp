@@ -180,9 +180,9 @@ if(NOT CMAKE_BUILD_TYPE STREQUAL "Debug") # The following tests are expensive to
   add_test(NAME input341 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input341.ain) # energy -0.093321
   add_lowest_eigenvalue_check_test(output341 input341 -0.093321 runForinput341.cout)
   add_test(NAME input342 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input342.ain) # energy -0.0933211
-  set_tests_properties(input342 PROPERTIES
-    ENVIRONMENT "KOKKOS_TOOLS_LIBS=$ENV{HOME}/kokkos-tools/build/profiling/space-time-stack/libkp_space_time_stack.so")
   add_lowest_eigenvalue_check_test(output342 input342 -0.0933211 runForinput342.cout)
+  add_test(NAME input342_batchedgemm COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input342_batchedgemm.ain) # energy -0.0933211
+  add_lowest_eigenvalue_check_test(output342_batchedgemm input342_batchedgemm -0.0933211 runForinput342_batchedgemm.cout)
 endif()
 add_test(NAME input351 COMMAND ./dmrg -f ${PATH_TO_INPUTS}/input351.ain) # energy -0.408019
 add_lowest_eigenvalue_check_test(output351 input351 -0.408019 runForinput351.cout)

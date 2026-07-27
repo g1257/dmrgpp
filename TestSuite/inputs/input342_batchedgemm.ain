@@ -47,9 +47,10 @@ potentialV=[0.,...x32];
 Model=FeAsBasedScExtended;
 FeAsMode=INT_PAPER33;
 Orbitals=2;
-SolverOptions=twositedmrg,minimizedisk;
+SolverOptions=BatchedGemm,twositedmrg,minimizedisk;
+integer DenseSparseThreshold=0;
 Version=61289987cdd32b8485213ac0415baf4e9cd16432;
-OutputFile=data342;
+OutputFile=data342_batchedgemm;
 InfiniteLoopKeptStates=20;
 FiniteLoops=[
 	[@auto, 250, 0],
