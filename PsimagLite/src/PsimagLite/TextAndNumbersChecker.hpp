@@ -67,7 +67,7 @@ public:
 	 * 	hrows std::runtime_error if a file cannot be opened, a numeric token
 	 *         cannot be represented, or the file contents do not match
 	 */
-	void run(const std::string& file1, const std::string& file2) const
+	void run(const std::filesystem::path& file1, const std::filesystem::path& file2) const
 	{
 		std::ifstream stream1(file1);
 		if (!stream1)
@@ -128,7 +128,7 @@ private:
 		token.clear();
 		char c = 0;
 		while (stream.get(c)) {
-			if (!std::isspace(c)) {
+			if (!std::isspace(static_cast<unsigned char>(c))) {
 				token.push_back(c);
 				break;
 			}
@@ -138,7 +138,7 @@ private:
 			return false;
 
 		while (stream.get(c)) {
-			if (std::isspace(c))
+			if (std::isspace(static_cast<unsigned char>(c)))
 				break;
 			token.push_back(c);
 		}
