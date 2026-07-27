@@ -5,7 +5,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include <PsimagLite/kokkos_gemm.h>
+#include <PsimagLite/KokkosGemm.h>
 
 namespace {
 
