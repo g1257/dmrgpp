@@ -118,24 +118,25 @@ static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                  
                                                  magma_queue_t                      queue)
 {
 
-	magmablas_zgemm_vbatched_max_nocheck(transA,
-	                                     transB,
-	                                     m,
-	                                     n,
-	                                     k,
-	                                     *reinterpret_cast<magmaDoubleComplex*>(&alpha),
-	                                     reinterpret_cast<magmaDoubleComplex const* const*>(dA_array),
-	                                     ldda,
-	                                     reinterpret_cast<magmaDoubleComplex const* const*>(dB_array),
-	                                     lddb,
-	                                     *reinterpret_cast<magmaDoubleComplex*>(&beta),
-	                                     reinterpret_cast<magmaDoubleComplex**>(dC_array),
-	                                     lddc,
-	                                     batchCount,
-	                                     max_m,
-	                                     max_n,
-	                                     max_k,
-	                                     queue);
+	magmablas_zgemm_vbatched_max_nocheck(
+	    transA,
+	    transB,
+	    m,
+	    n,
+	    k,
+	    *reinterpret_cast<magmaDoubleComplex*>(&alpha),
+	    reinterpret_cast<magmaDoubleComplex const* const*>(dA_array),
+	    ldda,
+	    reinterpret_cast<magmaDoubleComplex const* const*>(dB_array),
+	    lddb,
+	    *reinterpret_cast<magmaDoubleComplex*>(&beta),
+	    reinterpret_cast<magmaDoubleComplex**>(dC_array),
+	    lddc,
+	    batchCount,
+	    max_m,
+	    max_n,
+	    max_k,
+	    queue);
 }
 
 static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                     transA,
@@ -158,24 +159,25 @@ static void magmablas_Xgemm_vbatched_max_nocheck(magma_trans_t                  
                                                  magma_queue_t                     queue)
 {
 
-	magmablas_cgemm_vbatched_max_nocheck(transA,
-	                                     transB,
-	                                     m,
-	                                     n,
-	                                     k,
-	                                     *reinterpret_cast<magmaFloatComplex*>(&alpha),
-	                                     reinterpret_cast<magmaFloatComplex const* const*>(dA_array),
-	                                     ldda,
-	                                     reinterpret_cast<magmaFloatComplex const* const*>(dB_array),
-	                                     lddb,
-	                                     *reinterpret_cast<magmaFloatComplex*>(&beta),
-	                                     reinterpret_cast<magmaFloatComplex**>(dC_array),
-	                                     lddc,
-	                                     batchCount,
-	                                     max_m,
-	                                     max_n,
-	                                     max_k,
-	                                     queue);
+	magmablas_cgemm_vbatched_max_nocheck(
+	    transA,
+	    transB,
+	    m,
+	    n,
+	    k,
+	    *reinterpret_cast<magmaFloatComplex*>(&alpha),
+	    reinterpret_cast<magmaFloatComplex const* const*>(dA_array),
+	    ldda,
+	    reinterpret_cast<magmaFloatComplex const* const*>(dB_array),
+	    lddb,
+	    *reinterpret_cast<magmaFloatComplex*>(&beta),
+	    reinterpret_cast<magmaFloatComplex**>(dC_array),
+	    lddc,
+	    batchCount,
+	    max_m,
+	    max_n,
+	    max_k,
+	    queue);
 }
 
 static void magmablas_Xgemm_vbatched_max(magma_trans_t        transA,

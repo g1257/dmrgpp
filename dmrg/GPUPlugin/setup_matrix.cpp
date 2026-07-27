@@ -1,6 +1,6 @@
 #include "setup_matrix.h"
-#include "dmrg_types.h"
 #include "PsimagLite/Complex.h"
+#include "dmrg_types.h"
 #include <cassert>
 #include <complex>
 
@@ -77,7 +77,8 @@ void setup_matrix(SizeType              noperator,
 						dval += ((double)(ioperator - 1))
 						    * ((double)total_left_size)
 						    * ((double)total_left_size);
-						if constexpr (PsimagLite::IsComplexNumber<T>::True) {
+						if constexpr (PsimagLite::IsComplexNumber<
+						                  T>::True) {
 							Amat_[((i)-1) + ((j)-1) * ld_Amat]
 							    = std::complex<typename T::value_type>(
 							        dval, -dval);
