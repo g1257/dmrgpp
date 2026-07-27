@@ -401,64 +401,34 @@ template <typename T> void run_kron_checks()
 											if (diffmax
 											    > tol) {
 												INFO(
-												    "den: "
-												    "transA"
-												    "="
+												    "den: transA="
 												    << transA
-												    << ", "
-												       "itr"
-												       "ans"
-												       "A "
+												    << ", itransA "
 												    << itransA
-												    << " tr"
-												       "ans"
-												       "B="
+												    << " transB="
 												    << transB
-												    << ", "
-												       "itr"
-												       "ans"
-												       "B "
+												    << ", itransB "
 												    << itransB
-												    << " nr"
-												       "ow_"
-												       "A "
+												    << " nrow_A "
 												    << nrow_A
-												    << " nc"
-												       "ol_"
-												       "A "
+												    << " ncol_A "
 												    << ncol_A
-												    << " nr"
-												       "ow_"
-												       "B "
+												    << " nrow_B "
 												    << nrow_B
-												    << " nco"
-												       "l_"
-												       "B "
+												    << " ncol_B "
 												    << ncol_B
 												    << '\n'
 												    << "ix "
 												    << ix
-												    << ", "
-												       "jx "
+												    << ", jx "
 												    << jx
-												    << ", "
-												       "dif"
-												       "f12"
-												       " "
+												    << ", diff12 "
 												    << diff12
-												    << ", "
-												       "dif"
-												       "f23"
-												       " "
+												    << ", diff23 "
 												    << diff23
-												    << ", "
-												       "dif"
-												       "f31"
-												       " "
+												    << ", diff31 "
 												    << diff31
-												    << " di"
-												       "ff4"
-												       "1 "
+												    << " diff41 "
 												    << diff41
 												    << '\n');
 												REQUIRE(
@@ -560,57 +530,32 @@ template <typename T> void run_kron_checks()
 											if (diffmax
 											    > tol) {
 												INFO(
-												    "csr: "
-												    "transA"
-												    "="
+												    "csr: transA="
 												    << transA
-												    << ", "
-												       "itr"
-												       "ans"
-												       "A "
+												    << ", itransA "
 												    << itransA
-												    << " tr"
-												       "ans"
-												       "B="
+												    << " transB="
 												    << transB
-												    << ", "
-												       "itr"
-												       "ans"
-												       "B "
+												    << ", itransB "
 												    << itransB
-												    << " nr"
-												       "ow_"
-												       "A "
+												    << " nrow_A "
 												    << nrow_A
-												    << " nc"
-												       "ol_"
-												       "A "
+												    << " ncol_A "
 												    << ncol_A
-												    << " nr"
-												       "ow_"
-												       "B "
+												    << " nrow_B "
 												    << nrow_B
-												    << " nco"
-												       "l_"
-												       "B "
+												    << " ncol_B "
 												    << ncol_B
 												    << '\n'
 												    << "ix "
 												    << ix
-												    << ", "
-												       "jx "
+												    << ", jx "
 												    << jx
-												    << ", "
-												       "dif"
-												       "f1 "
+												    << ", diff1 "
 												    << diff1
-												    << ", "
-												       "dif"
-												       "f2 "
+												    << ", diff2 "
 												    << diff2
-												    << ", "
-												       "dif"
-												       "f3 "
+												    << ", diff3 "
 												    << diff3
 												    << '\n');
 												REQUIRE(
@@ -755,48 +700,28 @@ template <typename T> void run_kron_checks()
 											if (diffmax
 											    > tol) {
 												INFO(
-												    "den_csr: "
-												    "itr"
-												    "ans"
-												    "A "
+												    "den_csr: itransA "
 												    << itransA
-												    << "itr"
-												       "ans"
-												       "B "
+												    << "itransB "
 												    << itransB
-												    << " nr"
-												       "ow_"
-												       "A "
+												    << " nrow_A "
 												    << nrow_A
-												    << " nc"
-												       "ol_"
-												       "A "
+												    << " ncol_A "
 												    << ncol_A
-												    << " nr"
-												       "ow_"
-												       "B "
+												    << " nrow_B "
 												    << nrow_B
-												    << " nco"
-												       "l_"
-												       "B "
+												    << " ncol_B "
 												    << ncol_B
 												    << '\n'
 												    << "ix "
 												    << ix
-												    << ", "
-												       "jx "
+												    << ", jx "
 												    << jx
-												    << ", "
-												       "dif"
-												       "f1 "
+												    << ", diff1 "
 												    << diff1
-												    << ", "
-												       "dif"
-												       "f2 "
+												    << ", diff2 "
 												    << diff2
-												    << ", "
-												       "dif"
-												       "f3 "
+												    << ", diff3 "
 												    << diff3
 												    << '\n');
 												REQUIRE(
@@ -896,48 +821,28 @@ template <typename T> void run_kron_checks()
 											if (diffmax
 											    > tol) {
 												INFO(
-												    "den_csr: "
-												    "itr"
-												    "ans"
-												    "A "
+												    "den_csr: itransA "
 												    << itransA
-												    << "itr"
-												       "ans"
-												       "B "
+												    << "itransB "
 												    << itransB
-												    << " nr"
-												       "ow_"
-												       "A "
+												    << " nrow_A "
 												    << nrow_A
-												    << " nc"
-												       "ol_"
-												       "A "
+												    << " ncol_A "
 												    << ncol_A
-												    << " nr"
-												       "ow_"
-												       "B "
+												    << " nrow_B "
 												    << nrow_B
-												    << " nco"
-												       "l_"
-												       "B "
+												    << " ncol_B "
 												    << ncol_B
 												    << '\n'
 												    << "ix "
 												    << ix
-												    << ", "
-												       "jx "
+												    << ", jx "
 												    << jx
-												    << ", "
-												       "dif"
-												       "f1 "
+												    << ", diff1 "
 												    << diff1
-												    << ", "
-												       "dif"
-												       "f2 "
+												    << ", diff2 "
 												    << diff2
-												    << ", "
-												       "dif"
-												       "f3 "
+												    << ", diff3 "
 												    << diff3
 												    << '\n');
 												REQUIRE(
@@ -999,48 +904,28 @@ template <typename T> void run_kron_checks()
 											if (diffmax
 											    > tol) {
 												INFO(
-												    "den_csr: "
-												    "itr"
-												    "ans"
-												    "A "
+												    "den_csr: itransA "
 												    << itransA
-												    << "itr"
-												       "ans"
-												       "B "
+												    << "itransB "
 												    << itransB
-												    << " nr"
-												       "ow_"
-												       "A "
+												    << " nrow_A "
 												    << nrow_A
-												    << " nc"
-												       "ol_"
-												       "A "
+												    << " ncol_A "
 												    << ncol_A
-												    << " nr"
-												       "ow_"
-												       "B "
+												    << " nrow_B "
 												    << nrow_B
-												    << " nco"
-												       "l_"
-												       "B "
+												    << " ncol_B "
 												    << ncol_B
 												    << '\n'
 												    << "ix "
 												    << ix
-												    << ", "
-												       "jx "
+												    << ", jx "
 												    << jx
-												    << ", "
-												       "dif"
-												       "f1 "
+												    << ", diff1 "
 												    << diff1
-												    << ", "
-												       "dif"
-												       "f2 "
+												    << ", diff2 "
 												    << diff2
-												    << ", "
-												       "dif"
-												       "f3 "
+												    << ", diff3 "
 												    << diff3
 												    << '\n');
 												REQUIRE(
@@ -1135,48 +1020,28 @@ template <typename T> void run_kron_checks()
 											if (diffmax
 											    > tol) {
 												INFO(
-												    "den_csr: "
-												    "itr"
-												    "ans"
-												    "A "
+												    "den_csr: itransA "
 												    << itransA
-												    << "itr"
-												       "ans"
-												       "B "
+												    << "itransB "
 												    << itransB
-												    << " nr"
-												       "ow_"
-												       "A "
+												    << " nrow_A "
 												    << nrow_A
-												    << " nc"
-												       "ol_"
-												       "A "
+												    << " ncol_A "
 												    << ncol_A
-												    << " nr"
-												       "ow_"
-												       "B "
+												    << " nrow_B "
 												    << nrow_B
-												    << " nco"
-												       "l_"
-												       "B "
+												    << " ncol_B "
 												    << ncol_B
 												    << '\n'
 												    << "ix "
 												    << ix
-												    << ", "
-												       "jx "
+												    << ", jx "
 												    << jx
-												    << ", "
-												       "dif"
-												       "f1 "
+												    << ", diff1 "
 												    << diff1
-												    << ", "
-												       "dif"
-												       "f2 "
+												    << ", diff2 "
 												    << diff2
-												    << ", "
-												       "dif"
-												       "f3 "
+												    << ", diff3 "
 												    << diff3
 												    << '\n');
 												REQUIRE(
