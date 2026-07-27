@@ -329,15 +329,15 @@ private:
         }
 
         // Allocate device arrays and upload operator matrices.
-        d_flatAbatch_  = DevScalView("d_flatAbatch",  totalAbatch  ? totalAbatch  : 1);
-        d_flatBbatch_  = DevScalView("d_flatBbatch",  totalBbatch  ? totalBbatch  : 1);
-        d_flatBXbatch_ = DevScalView("d_flatBXbatch", totalBXbatch ? totalBXbatch : 1);
-        d_vin_         = DevScalView("d_vin",  xyStart[npatches] ? xyStart[npatches] : 1);
-        d_vout_        = DevScalView("d_vout", xyStart[npatches] ? xyStart[npatches] : 1);
+        d_flatAbatch_  = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_flatAbatch"),  totalAbatch  ? totalAbatch  : 1);
+        d_flatBbatch_  = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_flatBbatch"),  totalBbatch  ? totalBbatch  : 1);
+        d_flatBXbatch_ = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_flatBXbatch"), totalBXbatch ? totalBXbatch : 1);
+        d_vin_         = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_vin"),  xyStart[npatches] ? xyStart[npatches] : 1);
+        d_vout_        = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_vout"), xyStart[npatches] ? xyStart[npatches] : 1);
 
         {
-            auto hA = Kokkos::create_mirror_view(d_flatAbatch_);
-            auto hB = Kokkos::create_mirror_view(d_flatBbatch_);
+            auto hA = Kokkos::create_mirror_view(Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatAbatch_);
+            auto hB = Kokkos::create_mirror_view(Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatBbatch_);
             for (SizeType i = 0; i < totalAbatch; ++i)
                 hA(i) = *reinterpret_cast<const KS*>(&h_flatAbatch[i]);
             for (SizeType i = 0; i < totalBbatch; ++i)
