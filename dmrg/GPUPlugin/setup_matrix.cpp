@@ -1,18 +1,8 @@
 #include "setup_matrix.h"
 #include "dmrg_types.h"
+#include "PsimagLite/Complex.h"
 #include <cassert>
 #include <complex>
-#include <type_traits>
-
-namespace {
-
-template <typename T> struct is_complex : std::false_type { };
-
-template <typename T> struct is_complex<std::complex<T>> : std::true_type { };
-
-template <typename T> inline constexpr bool is_complex_v = is_complex<T>::value;
-
-}
 
 SizeType f1(const SizeType& ipatch,
             const SizeType& jpatch,
@@ -87,7 +77,7 @@ void setup_matrix(SizeType              noperator,
 						dval += ((double)(ioperator - 1))
 						    * ((double)total_left_size)
 						    * ((double)total_left_size);
-						if constexpr (is_complex_v<T>) {
+						if constexpr (PsimagLite::IsComplexNumber<T>::True) {
 							Amat_[((i)-1) + ((j)-1) * ld_Amat]
 							    = std::complex<typename T::value_type>(
 							        dval, -dval);
