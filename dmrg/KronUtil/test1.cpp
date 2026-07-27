@@ -10,7 +10,7 @@
 template <typename T> void run_kron_checks()
 {
 	using RealT                   = typename PsimagLite::Real<T>::Type;
-	const RealT denseFlopDiscount = RealT(0.2);
+	const RealT denseFlopDiscount = 0.2;
 	double      thresholdA        = 0.0;
 	double      thresholdB        = 0.0;
 	int         nrow_A            = 0;
