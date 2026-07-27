@@ -11,6 +11,7 @@
 #include <cctype>
 #include <cmath>
 #include <cstddef>
+#include <filesystem>
 #include <fstream>
 #include <regex>
 #include <sstream>
@@ -71,11 +72,11 @@ public:
 	{
 		std::ifstream stream1(file1);
 		if (!stream1)
-			throw std::runtime_error("Cannot open first file: " + file1);
+			throw std::runtime_error("Cannot open first file: " + file1.string());
 
 		std::ifstream stream2(file2);
 		if (!stream2)
-			throw std::runtime_error("Cannot open second file: " + file2);
+			throw std::runtime_error("Cannot open second file: " + file2.string());
 
 		TokenReader reader1(stream1, ignoredLinePrefix_);
 		TokenReader reader2(stream2, ignoredLinePrefix_);

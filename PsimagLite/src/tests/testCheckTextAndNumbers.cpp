@@ -241,7 +241,7 @@ TEST_CASE("TextAndNumbersChecker reports files that cannot be opened", "[TextAnd
 	{
 		const auto missing = files.path("missing-first.txt");
 		const auto file2   = files.write("second.txt", "same");
-		CHECK_THROWS_WITH(checker.run(missing.string(), file2.string()),
+		CHECK_THROWS_WITH(checker.run(missing, file2),
 		                  "Cannot open first file: " + missing.string());
 	}
 
@@ -249,7 +249,7 @@ TEST_CASE("TextAndNumbersChecker reports files that cannot be opened", "[TextAnd
 	{
 		const auto file1   = files.write("first.txt", "same");
 		const auto missing = files.path("missing-second.txt");
-		CHECK_THROWS_WITH(checker.run(file1.string(), missing.string()),
+		CHECK_THROWS_WITH(checker.run(file1, missing),
 		                  "Cannot open second file: " + missing.string());
 	}
 }
