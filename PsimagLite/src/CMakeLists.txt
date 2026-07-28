@@ -37,7 +37,7 @@ FetchContent_MakeAvailable(KokkosKernels)
 list(POP_BACK CMAKE_MESSAGE_INDENT)
 
 target_link_libraries(psimaglite PUBLIC Kokkos::kokkoskernels Kokkos::kokkos)
-target_sources(psimaglite PRIVATE PsimagLite/kokkos_gemm.cpp)
+target_sources(psimaglite PRIVATE PsimagLite/KokkosGemm.cpp)
 
 target_include_directories(psimaglite PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/Io
                                              ${CMAKE_CURRENT_SOURCE_DIR}/Ainur)
