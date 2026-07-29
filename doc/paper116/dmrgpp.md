@@ -1,5 +1,7 @@
 ---
-title: 'DMRG++: A C++ Implementation of the DMRG Algorithm'
+title: 'DMRG++: DMRG calculations across time, frequency, and temperature'
+software_repository_url: 'https://github.com/dmrgpp-project/dmrgpp'
+archive_doi: '10.11578/dc.20260601.1'
 tags:
   - C++
   - condensed matter
@@ -7,31 +9,31 @@ tags:
 authors:
   - name: Gonzalo Alvarez
     corresponding: true # (This is how to denote the corresponding author)
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-1496-8261
 #    equal-contrib: true
     affiliation: "1" # (Multiple affiliations must be quoted)
   - name: Daniel Arndt
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0001-8773-4901
     affiliation: "1" # (Multiple affiliations must be quoted)
   - name: Damien Lebrun-Grandie
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0003-1952-7219
     affiliation: "1"
   - name: Peter Doak
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0001-6039-9752
     affiliation: 1
   - name: Steven Hahn
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-2018-7904
     affiliation: 1
   - name: Thomas A. Maier
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0002-1424-9996
     affiliation: 1
   - name: Andrey Prokopenko
-    orcid: 0000-0000-0000-0000
+    orcid: 0000-0003-3616-5504
     affiliation: 1
 affiliations:
  - name: Oak Ridge National Laboratory
    index: 1
-   ror: 00hx57361
+   ror: 01qz5mb56
 date: 13 August 2026
 bibliography: dmrgpp.bib
 
@@ -41,7 +43,8 @@ bibliography: dmrgpp.bib
 # Summary
 
 DMRG++ is an open-source C++ application for simulations of strongly correlated
-quantum systems using the density matrix renormalization group (DMRG) [citation to White FIXME]. The DMRG
+quantum systems using the density matrix renormalization group (DMRG)
+[@White:1992; @White:1993]. The DMRG
 algorithm is used to study many-body Hamiltonians in condensed-matter physics,
 quantum chemistry, and Hamiltonian lattice gauge theory. DMRG++ focuses on
 condensed-matter models and provides an input-driven framework for selecting the
@@ -121,7 +124,8 @@ conserved quantum-number sectors supported by each model.
 
 The shared infrastructure supports ground-state and static-correlation
 calculations, time evolution, frequency-dependent response, and
-finite-temperature observables. [citations to alvarez here FIXME] Researchers can therefore change a Hamiltonian
+finite-temperature observables [@Alvarez:2011; @Alvarez:2013;
+@Nocera:2016a; @Nocera:2016b]. Researchers can therefore change a Hamiltonian
 or calculation protocol while retaining the same simulation and analysis
 workflow.
 
@@ -195,7 +199,8 @@ matrix during a sweep. Implementations of the `TargetingBase` interface reuse
 the same model, geometry, basis, and sweep code for ground-state calculations,
 frequency-dependent response, correction-vector methods, real-time evolution,
 Chebyshev expansions, ancilla-based finite-temperature evolution, minimally
-entangled typical thermal states (METTS), and expression-based targeting. The
+entangled typical thermal states (METTS) [@Stoudenmire:2010], and
+expression-based targeting. The
 ancilla path reuses the time-step targeting infrastructure for purification,
 while METTS has a dedicated targeting implementation. Measurements follow a
 similar separation. Selected operator expressions can be evaluated in situ
