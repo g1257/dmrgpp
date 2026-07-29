@@ -63,6 +63,7 @@ void dmrg_finalize()
 			magma_queue_destroy(queue_array[idev]);
 		};
 	};
+	magma_finalize();
 #endif
 }
 
