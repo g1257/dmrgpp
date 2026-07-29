@@ -1,7 +1,7 @@
 #ifndef BATCHEDGEMMINCLUDE_HH
 #define BATCHEDGEMMINCLUDE_HH
 #include "DMRGConfig.h"
-#ifdef KOKKOS_BATCHED
+#if 1 //KOKKOS_BATCHED
 #include "BatchedGemmKokkos.h"
 #define BATCHED_GEMM BatchedGemmKokkos
 #elif defined(PLUGIN_SC)
@@ -29,7 +29,7 @@ public:
 
 	static std::string info()
 	{
-#ifdef KOKKOS_BATCHED
+#ifdef 1 //KOKKOS_BATCHED
 		return "KokkosKernels";
 #elif defined(PLUGIN_SC)
 		return "PLUGIN_SC";
