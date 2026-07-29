@@ -11,7 +11,8 @@
 
 #include <Kokkos_Core.hpp>
 #include <Kokkos_Profiling_ScopedRegion.hpp>
-#include <KokkosBlas3_gemm.hpp>
+#include <KokkosBatched_Gemm_Decl.hpp>
+#include <KokkosBatched_Gemm_TeamVector_Impl.hpp>
 
 namespace Dmrg {
 
@@ -24,16 +25,12 @@ namespace Dmrg {
  *     BXbatch[ip][:, colBX:colBX+lps[jp]] =
  *         Bbatch[ip][:, colB:colB+rps[jp]] * X[jp]
  *
- *  Pass 2: For each ipatch (with connections):
+ *  Pass 2: For each ipatch:
  *     Y[ip] = BXbatch[ip] * Abatch[ip]^T
  *
- * Abatch[ip] = left-operator (xc) matrices packed column-by-column (no padding).
- * Bbatch[ip] = right-operator (yc) matrices packed column-by-column (no padding).
- * BXbatch[ip] is the intermediate work buffer (no padding, same col-width as Abatch).
- *
- * No padding is used so that unmanaged Kokkos::LayoutLeft views can be created
- * directly from device pointers, enabling dispatch to rocBLAS/cuBLAS via
- * KokkosBlas::gemm.
+ * Abatch[ip] = left-operator (xc) matrices packed column-by-column (ldA padded).
+ * Bbatch[ip] = right-operator (yc) matrices packed column-by-column (ldB padded).
+ * BXbatch[ip] is the intermediate work buffer (ldB padded, same col-width as Abatch).
  *
  * All Abatch and Bbatch data live on the device for the lifetime of the object.
  * BXbatch, vin, vout are (re-)written on each matrixVector call.
@@ -57,12 +54,17 @@ class BatchedGemmKokkos {
     using DevMemSpace  = typename DevExecSpace::memory_space;
     using DevScalView  = Kokkos::View<KS*, DevMemSpace>;
 
-    // Parameters for one KokkosBlas::gemm call.
-    // With no padding: leading dims = m (for A,C) or k (for B in pass1) or n (for B in pass2).
+    // Compact struct holding all parameters for one batched GEMM call.
+    // Stored in device memory and accessed inside the kernel.
     struct GemmArgs {
         int       m, n, k;             // GEMM dimensions
+        int       lda, ldb, ldc;       // leading dimensions (column-major strides)
         long long a_off, b_off, c_off; // element offsets into device flat arrays
     };
+
+    using DevArgsView = Kokkos::View<GemmArgs*, DevMemSpace>;
+
+    static const int ialign_ = 32;
 
 public:
 
@@ -102,40 +104,97 @@ public:
             Kokkos::deep_copy(d_vin_, hv);
         }
 
-        // Zero d_vout_ so patches with no connections produce zero output.
-        // d_flatBXbatch_ is NOT zeroed: pass1 uses beta=0 (overwrites all used blocks).
+        // --- Zero output and work buffers -------------------------------------------
         Kokkos::deep_copy(d_vout_, KS(0));
+        Kokkos::deep_copy(d_flatBXbatch_, KS(0));
 
         DevExecSpace exec;
 
-        using UV = Kokkos::View<KS**, Kokkos::LayoutLeft, DevMemSpace, Kokkos::MemoryUnmanaged>;
+        // --- Pass 1: BXbatch[ip] = Bbatch[ip] * X[jp]  (NoT x NoT) ----------------
+        {
+            const DevScalView flatBbatch  = d_flatBbatch_;
+            const DevScalView vin_dev     = d_vin_;
+            const DevScalView flatBXbatch = d_flatBXbatch_;
+            const DevArgsView args        = d_pass1_;
 
-        // --- Pass 1: BXbatch[ip] block = Bbatch[ip] block * X[jp]  (N x N) ---------
-        // Each call: C(m, n) = A(m, k) * B(k, n), beta=0 overwrites C.
-        //   A = Bbatch block  (m=rps[ip], k=rps[jp]),  ld = rps[ip]
-        //   B = X[jp]         (k=rps[jp], n=lps[jp]),  ld = rps[jp]
-        //   C = BXbatch block (m=rps[ip], n=lps[jp]),  ld = rps[ip]
-        for (const GemmArgs& ag : h_pass1_) {
-            UV A(d_flatBbatch_.data()  + ag.a_off, ag.m, ag.k);
-            UV B(d_vin_.data()         + ag.b_off, ag.k, ag.n);
-            UV C(d_flatBXbatch_.data() + ag.c_off, ag.m, ag.n);
-            KokkosBlas::gemm(exec, "N", "N", KS(1), A, B, KS(0), C);
+            using MemberType = typename Kokkos::TeamPolicy<DevExecSpace>::member_type;
+            Kokkos::parallel_for(
+                "BatchedGemmKokkos_Pass1",
+                Kokkos::TeamPolicy<DevExecSpace>(exec, static_cast<int>(nbatch1_),
+                                                 Kokkos::AUTO, Kokkos::AUTO),
+                KOKKOS_LAMBDA(const MemberType& member) {
+                    const int       i  = member.league_rank();
+                    const GemmArgs& ag = args(i);
+
+                    using UV = Kokkos::View<KS**, Kokkos::LayoutLeft, DevMemSpace,
+                                            Kokkos::MemoryUnmanaged>;
+
+                    // A = Bbatch[ip] block: (lda, k) padded -> subview (m, k) active rows
+                    UV A_full(flatBbatch.data() + ag.a_off, ag.lda, ag.k);
+                    auto A = Kokkos::subview(A_full,
+                                 Kokkos::make_pair(0, ag.m), Kokkos::ALL());
+
+                    // B = X[jp]: (k, n) exact -- no padding for X slice
+                    UV B(vin_dev.data() + ag.b_off, ag.ldb, ag.n);
+
+                    // C = BXbatch[ip] block: (ldc, n) padded -> subview (m, n) active rows
+                    UV C_full(flatBXbatch.data() + ag.c_off, ag.ldc, ag.n);
+                    auto C = Kokkos::subview(C_full,
+                                 Kokkos::make_pair(0, ag.m), Kokkos::ALL());
+
+                    KokkosBatched::TeamVectorGemm<
+                        MemberType,
+                        KokkosBatched::Trans::NoTranspose,
+                        KokkosBatched::Trans::NoTranspose,
+                        KokkosBatched::Algo::Gemm::Unblocked>::
+                        invoke(member, KS(1), A, B, KS(0), C);
+                });
         }
 
         exec.fence();
 
-        // --- Pass 2: Y[ip] = BXbatch[ip] * Abatch[ip]^T  (N x T) ------------------
-        // Each call: C(m, n) = A(m, k) * B(n, k)^T, beta=0 overwrites C.
-        //   A = BXbatch[ip]  (m=rps[ip], k=AbatchCols[ip]), ld = rps[ip]
-        //   B = Abatch[ip]   (n=lps[ip], k=AbatchCols[ip]), ld = lps[ip]  (transposed)
-        //   C = Y[ip]        (m=rps[ip], n=lps[ip]),         ld = rps[ip]
-        for (const GemmArgs& ag : h_pass2_) {
-            if (ag.k == 0)
-                continue; // no connections for this ipatch; Y[ip] stays zero
-            UV A(d_flatBXbatch_.data() + ag.a_off, ag.m, ag.k);
-            UV B(d_flatAbatch_.data()  + ag.b_off, ag.n, ag.k);
-            UV C(d_vout_.data()        + ag.c_off, ag.m, ag.n);
-            KokkosBlas::gemm(exec, "N", "T", KS(1), A, B, KS(0), C);
+        // --- Pass 2: Y[ip] = BXbatch[ip] * Abatch[ip]^T  (NoT x T) ---------------
+        {
+            const DevScalView flatBXbatch = d_flatBXbatch_;
+            const DevScalView flatAbatch  = d_flatAbatch_;
+            const DevScalView vout_dev    = d_vout_;
+            const DevArgsView args        = d_pass2_;
+
+            using MemberType = typename Kokkos::TeamPolicy<DevExecSpace>::member_type;
+            Kokkos::parallel_for(
+                "BatchedGemmKokkos_Pass2",
+                Kokkos::TeamPolicy<DevExecSpace>(exec, static_cast<int>(nbatch2_),
+                                                 Kokkos::AUTO, Kokkos::AUTO),
+                KOKKOS_LAMBDA(const MemberType& member) {
+                    const int       i  = member.league_rank();
+                    const GemmArgs& ag = args(i);
+
+                    if (ag.k == 0)
+                        return; // no connections for this ipatch; Y[ip] already zero
+
+                    using UV = Kokkos::View<KS**, Kokkos::LayoutLeft, DevMemSpace,
+                                            Kokkos::MemoryUnmanaged>;
+
+                    // A = BXbatch[ip]: (lda, k) padded -> subview (m, k)
+                    UV A_full(flatBXbatch.data() + ag.a_off, ag.lda, ag.k);
+                    auto A = Kokkos::subview(A_full,
+                                 Kokkos::make_pair(0, ag.m), Kokkos::ALL());
+
+                    // B = Abatch[ip]: (ldb, k) padded -> subview (n, k); will be transposed
+                    UV B_full(flatAbatch.data() + ag.b_off, ag.ldb, ag.k);
+                    auto B = Kokkos::subview(B_full,
+                                 Kokkos::make_pair(0, ag.n), Kokkos::ALL());
+
+                    // C = Y[ip]: (ldc, n) exact -- no padding for output
+                    UV C(vout_dev.data() + ag.c_off, ag.ldc, ag.n);
+
+                    KokkosBatched::TeamVectorGemm<
+                        MemberType,
+                        KokkosBatched::Trans::NoTranspose,
+                        KokkosBatched::Trans::Transpose,
+                        KokkosBatched::Algo::Gemm::Unblocked>::
+                        invoke(member, KS(1), A, B, KS(0), C);
+                });
         }
 
         exec.fence();
@@ -149,6 +208,8 @@ public:
     }
 
 private:
+
+    static int iceil(int x, int n) { return (x + n - 1) / n; }
 
     // Dense matrix reference: pointer + source dimensions (no padding).
     // For sparse matrices, the expansion is heap-allocated and owned by garbage_.
@@ -193,9 +254,11 @@ private:
         const SizeType npatches  = initKron_.numberOfPatches(InitKronType::OLD);
         const SizeType noperator = initKron_.connections();
 
-        // Per-patch sizes — NO padding: leading dim == patch size.
-        VectorSizeType lps(npatches, 0);         // left patch size
-        VectorSizeType rps(npatches, 0);         // right patch size
+        // Per-patch sizes and padded leading dimensions.
+        VectorSizeType lps(npatches, 0);        // left patch size
+        VectorSizeType rps(npatches, 0);        // right patch size
+        VectorSizeType ldA(npatches, 0);        // padded lps -> Abatch leading dim
+        VectorSizeType ldB(npatches, 0);        // padded rps -> Bbatch / BXbatch leading dim
         VectorSizeType xyStart(npatches + 1, 0); // patch start offset in vin/vout
 
         for (SizeType ip = 0; ip < npatches; ++ip) {
@@ -207,13 +270,15 @@ private:
             const int R2 = initKron_.lrs(InitKronType::NEW).right().partition(rg + 1);
             lps[ip] = static_cast<SizeType>(L2 - L1);
             rps[ip] = static_cast<SizeType>(R2 - R1);
+            ldA[ip] = static_cast<SizeType>(ialign_ * iceil(static_cast<int>(lps[ip]), ialign_));
+            ldB[ip] = static_cast<SizeType>(ialign_ * iceil(static_cast<int>(rps[ip]), ialign_));
         }
 
         xyStart[0] = 0;
         for (SizeType ip = 0; ip < npatches; ++ip)
             xyStart[ip + 1] = xyStart[ip] + lps[ip] * rps[ip];
 
-        // Column widths for each patch's batch block.
+        // Column widths:
         //   AbatchCols[ip] = sum of lps[jp] over all non-zero (jp, k) connections for ip
         //   BbatchCols[ip] = sum of rps[jp] over all non-zero (jp, k) connections for ip
         VectorSizeType AbatchCols(npatches, 0);
@@ -232,18 +297,15 @@ private:
             }
         }
 
-        // Flat offsets: no padding, ld[ip] = rps[ip] or lps[ip].
-        //   Abatch[ip]:  lps[ip] rows x AbatchCols[ip] cols
-        //   Bbatch[ip]:  rps[ip] rows x BbatchCols[ip] cols
-        //   BXbatch[ip]: rps[ip] rows x AbatchCols[ip] cols
+        // Flat offsets: each patch ip occupies a contiguous slice.
         VectorSizeType AbatchOff(npatches + 1, 0);
         VectorSizeType BbatchOff(npatches + 1, 0);
-        VectorSizeType BXbatchOff(npatches + 1, 0);
+        VectorSizeType BXbatchOff(npatches + 1, 0); // ldB rows x AbatchCols columns
 
         for (SizeType ip = 0; ip < npatches; ++ip) {
-            AbatchOff[ip + 1]  = AbatchOff[ip]  + lps[ip] * AbatchCols[ip];
-            BbatchOff[ip + 1]  = BbatchOff[ip]  + rps[ip] * BbatchCols[ip];
-            BXbatchOff[ip + 1] = BXbatchOff[ip] + rps[ip] * AbatchCols[ip];
+            AbatchOff[ip + 1]  = AbatchOff[ip]  + ldA[ip] * AbatchCols[ip];
+            BbatchOff[ip + 1]  = BbatchOff[ip]  + ldB[ip] * BbatchCols[ip];
+            BXbatchOff[ip + 1] = BXbatchOff[ip] + ldB[ip] * AbatchCols[ip];
         }
 
         const SizeType totalAbatch  = AbatchOff[npatches];
@@ -254,13 +316,13 @@ private:
         std::vector<ComplexOrRealType> h_flatAbatch(totalAbatch, ComplexOrRealType(0));
         std::vector<ComplexOrRealType> h_flatBbatch(totalBbatch, ComplexOrRealType(0));
 
-        // Build host GEMM arg lists while packing operator matrices.
-        h_pass1_.clear();
-        h_pass2_.clear();
-        h_pass2_.reserve(npatches);
+        // Build GEMM arg lists while packing matrices.
+        std::vector<GemmArgs> pass1_args;
+        std::vector<GemmArgs> pass2_args;
+        pass2_args.reserve(npatches);
 
         for (SizeType ip = 0; ip < npatches; ++ip) {
-            long long colA = 0; // column cursor in Abatch[ip] and BXbatch[ip]
+            long long colA = 0; // column cursor in Abatch[ip]  (= BXbatch[ip])
             long long colB = 0; // column cursor in Bbatch[ip]
 
             for (SizeType jp = 0; jp < npatches; ++jp) {
@@ -274,39 +336,37 @@ private:
                     MatRef Bref = getMatRef(*Bmat); // right operator (yc)
                     assert(Aref.ptr && Bref.ptr);
 
-                    const int mA  = static_cast<int>(lps[ip]); // Abatch rows
-                    const int nAk = static_cast<int>(lps[jp]); // Abatch cols per op
-                    const int mB  = static_cast<int>(rps[ip]); // Bbatch / BXbatch rows
-                    const int nBk = static_cast<int>(rps[jp]); // Bbatch cols per op
+                    const int mA  = static_cast<int>(lps[ip]);
+                    const int nAk = static_cast<int>(lps[jp]); // A cols = BX cols per op
+                    const int mB  = static_cast<int>(rps[ip]);
+                    const int nBk = static_cast<int>(rps[jp]); // B cols = X rows
 
-                    // Pack A (left operator) into Abatch[ip] at column colA.
-                    // Abatch[ip]: lps[ip] rows, ld = lps[ip] (no padding).
+                    // Pack A (left operator) into Abatch[ip] at column colA
                     lacpy(Aref.ptr, mA, nAk, Aref.rows,
                           h_flatAbatch.data()
-                              + AbatchOff[ip] + colA * static_cast<long long>(lps[ip]),
-                          mA);
+                              + AbatchOff[ip] + colA * static_cast<long long>(ldA[ip]),
+                          static_cast<int>(ldA[ip]));
 
-                    // Pack B (right operator) into Bbatch[ip] at column colB.
-                    // Bbatch[ip]: rps[ip] rows, ld = rps[ip] (no padding).
+                    // Pack B (right operator) into Bbatch[ip] at column colB
                     lacpy(Bref.ptr, mB, nBk, Bref.rows,
                           h_flatBbatch.data()
-                              + BbatchOff[ip] + colB * static_cast<long long>(rps[ip]),
-                          mB);
+                              + BbatchOff[ip] + colB * static_cast<long long>(ldB[ip]),
+                          static_cast<int>(ldB[ip]));
 
-                    // Pass 1 GEMM: C(mB, nAk) = A(mB, nBk) * B(nBk, nAk)
-                    //   A = Bbatch block, ld = rps[ip] = mB
-                    //   B = X[jp],        ld = rps[jp] = nBk
-                    //   C = BXbatch block, ld = rps[ip] = mB
+                    // Pass 1 GEMM: C(mB, nAk) = Bbatch_block(mB, nBk) * X_jp(nBk, nAk)
                     GemmArgs a1;
-                    a1.m     = mB;
-                    a1.n     = nAk;
-                    a1.k     = nBk;
+                    a1.m   = mB;
+                    a1.n   = nAk;
+                    a1.k   = nBk;
+                    a1.lda = static_cast<int>(ldB[ip]);   // Bbatch leading dim
+                    a1.ldb = nBk;                          // X[jp] no padding: ld = rps[jp]
+                    a1.ldc = static_cast<int>(ldB[ip]);   // BXbatch leading dim
                     a1.a_off = static_cast<long long>(BbatchOff[ip])
-                               + colB * static_cast<long long>(rps[ip]);
+                               + colB * static_cast<long long>(ldB[ip]);
                     a1.b_off = static_cast<long long>(xyStart[jp]);
                     a1.c_off = static_cast<long long>(BXbatchOff[ip])
-                               + colA * static_cast<long long>(rps[ip]);
-                    h_pass1_.push_back(a1);
+                               + colA * static_cast<long long>(ldB[ip]);
+                    pass1_args.push_back(a1);
 
                     colA += nAk;
                     colB += nBk;
@@ -314,18 +374,18 @@ private:
             }
 
             // Pass 2 GEMM: Y[ip](mB, mA) = BXbatch[ip](mB, k) * Abatch[ip](mA, k)^T
-            //   A = BXbatch[ip], ld = rps[ip] = mB
-            //   B = Abatch[ip],  ld = lps[ip] = mA  (transposed)
-            //   C = Y[ip],       ld = rps[ip] = mB
             const int totalCols = static_cast<int>(colA); // = AbatchCols[ip]
             GemmArgs  a2;
-            a2.m     = static_cast<int>(rps[ip]);
-            a2.n     = static_cast<int>(lps[ip]);
-            a2.k     = totalCols;
+            a2.m   = static_cast<int>(rps[ip]);
+            a2.n   = static_cast<int>(lps[ip]);
+            a2.k   = totalCols;
+            a2.lda = static_cast<int>(ldB[ip]); // BXbatch leading dim
+            a2.ldb = static_cast<int>(ldA[ip]); // Abatch leading dim
+            a2.ldc = static_cast<int>(rps[ip]); // Y[ip] no padding: ld = rps[ip]
             a2.a_off = static_cast<long long>(BXbatchOff[ip]);
             a2.b_off = static_cast<long long>(AbatchOff[ip]);
             a2.c_off = static_cast<long long>(xyStart[ip]);
-            h_pass2_.push_back(a2);
+            pass2_args.push_back(a2);
         }
 
         // Allocate device arrays and upload operator matrices.
@@ -334,6 +394,9 @@ private:
         d_flatBXbatch_ = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_flatBXbatch"), totalBXbatch ? totalBXbatch : 1);
         d_vin_         = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_vin"),  xyStart[npatches] ? xyStart[npatches] : 1);
         d_vout_        = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_vout"), xyStart[npatches] ? xyStart[npatches] : 1);
+
+        nbatch1_ = pass1_args.size();
+        nbatch2_ = pass2_args.size(); // == npatches
 
         {
             auto hA = Kokkos::create_mirror_view(Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatAbatch_);
@@ -346,12 +409,23 @@ private:
             Kokkos::deep_copy(d_flatBbatch_, hB);
         }
 
+        d_pass1_ = DevArgsView("d_pass1", nbatch1_ ? nbatch1_ : 1);
+        d_pass2_ = DevArgsView("d_pass2", nbatch2_ ? nbatch2_ : 1);
+        {
+            auto h1 = Kokkos::create_mirror_view(d_pass1_);
+            auto h2 = Kokkos::create_mirror_view(d_pass2_);
+            for (SizeType i = 0; i < nbatch1_; ++i) h1(i) = pass1_args[i];
+            for (SizeType i = 0; i < nbatch2_; ++i) h2(i) = pass2_args[i];
+            Kokkos::deep_copy(d_pass1_, h1);
+            Kokkos::deep_copy(d_pass2_, h2);
+        }
+
         {
             PsimagLite::OstringStream msg(std::cout.precision());
             msg() << "setup done: npatches=" << npatches
                   << " noperator=" << noperator
-                  << " pass1_batches=" << h_pass1_.size()
-                  << " pass2_batches=" << h_pass2_.size()
+                  << " pass1_batches=" << nbatch1_
+                  << " pass2_batches=" << nbatch2_
                   << " Abatch=" << totalAbatch << "elems"
                   << " Bbatch=" << totalBbatch << "elems"
                   << " BXbatch=" << totalBXbatch << "elems";
@@ -365,14 +439,16 @@ private:
     PsimagLite::ProgressIndicator progress_;
     mutable VectorMatrixType      garbage_; // owns sparse->dense expansions (freed in dtor)
 
-    std::vector<GemmArgs>        h_pass1_; // pass-1 GEMM parameters (host, persistent)
-    std::vector<GemmArgs>        h_pass2_; // pass-2 GEMM parameters (host, persistent)
+    SizeType nbatch1_ = 0; // number of pass-1 GEMMs
+    SizeType nbatch2_ = 0; // number of pass-2 GEMMs (== npatches)
 
     DevScalView          d_flatAbatch_;   // left-operator matrices, device, persistent
     DevScalView          d_flatBbatch_;   // right-operator matrices, device, persistent
     mutable DevScalView  d_flatBXbatch_;  // intermediate BX work buffer, per-call
     mutable DevScalView  d_vin_;          // input vector on device, per-call
     mutable DevScalView  d_vout_;         // output vector on device, per-call
+    DevArgsView          d_pass1_;        // pass-1 GEMM parameters, persistent
+    DevArgsView          d_pass2_;        // pass-2 GEMM parameters, persistent
 };
 
 } // namespace Dmrg

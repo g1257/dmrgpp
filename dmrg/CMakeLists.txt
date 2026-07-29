@@ -6,21 +6,11 @@ add_custom_command(
   VERBATIM)
 
 if(DMRG_BUILD_BATCHED)
-  if(DMRG_BUILD_BATCHED_KOKKOS)
-    # KokkosKernels path: portable GPU implementation, no separate GPU plugin.
-    # Kokkos and KokkosKernels are already a dependency of psimaglite.
-    set(KOKKOS_BATCHED ON)
-    set(FpType "double")
-    message(STATUS "BatchedGemm: using KokkosKernels (DMRG_BUILD_BATCHED_KOKKOS=ON)")
-  else()
-    # Original GPU plugin path (optionally with MAGMA).
-    add_subdirectory(GPUPlugin)
-    set(PLUGIN_SC ON)
-    set(FpType "double")
-    if(DMRG_BUILD_BATCHED_MAGMA)
-      set(USE_MAGMA ON)
-    endif()
-    message(STATUS "BatchedGemm: using GPU plugin (PLUGIN_SC)")
+  add_subdirectory(GPUPlugin)
+  set(PLUGIN_SC ON)
+  set(FpType "double")
+  if(DMRG_BUILD_BATCHED_MAGMA)
+    set(USE_MAGMA ON)
   endif()
 endif()
 
@@ -35,14 +25,14 @@ add_library(dmrgpp_utils ProgramGlobals.cpp Provenance.cpp Utils.cpp Su2Related.
 target_sources(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR}/GitRevision.h)
 target_include_directories(dmrgpp_utils PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR}/GPUPlugin Engine)
 target_link_libraries(dmrgpp_utils PUBLIC psimaglite::psimaglite)
-if(DMRG_BUILD_BATCHED AND NOT DMRG_BUILD_BATCHED_KOKKOS)
+if(DMRG_BUILD_BATCHED)
   target_link_libraries(dmrgpp_utils PUBLIC gpuplugin)
 endif()
 
 # DMRG runner
 add_library(dmrg_runner Engine/DmrgRunner.cpp)
 target_link_libraries(dmrg_runner PUBLIC dmrgpp_utils kronutil)
-if(DMRG_BUILD_BATCHED AND NOT DMRG_BUILD_BATCHED_KOKKOS)
+if(DMRG_BUILD_BATCHED)
   target_link_libraries(dmrg_runner PUBLIC gpuplugin)
 endif()
 

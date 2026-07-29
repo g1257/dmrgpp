@@ -63,11 +63,6 @@ option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
 
 include(CMakeDependentOption)
 cmake_dependent_option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma" OFF "DMRG_BUILD_BATCHED" OFF)
-# KokkosKernels batched GEMM: portable GPU path, no separate GPU plugin needed.
-# Kokkos and KokkosKernels are already pulled in via PsimagLite.
-cmake_dependent_option(DMRG_BUILD_BATCHED_KOKKOS
-  "Use KokkosKernels for batched GEMM (GPU-portable, no GPU plugin required)"
-  OFF "DMRG_BUILD_BATCHED" OFF)
 
 add_subdirectory(util)
 
