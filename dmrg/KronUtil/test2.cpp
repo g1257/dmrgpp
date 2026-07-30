@@ -11,8 +11,10 @@ template <typename ComplexOrRealType> void run_kron_submatrix_checks()
 {
 	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 
-	for (RealType thresholdB = 0; thresholdB <= 1.1; thresholdB += 0.1) {
-		for (RealType thresholdA = 0; thresholdA <= 1.1; thresholdA += 0.1) {
+	for (int thresholdB_idx = 0; thresholdB_idx <= 11; ++thresholdB_idx) {
+		double thresholdB = .1 * thresholdB_idx;
+		for (int thresholdA_idx = 0; thresholdA_idx <= 11; ++thresholdA_idx) {
+			double thresholdA = .1 * thresholdA_idx;
 			for (int ncol_A = 1; ncol_A <= 10; ncol_A += 3) {
 				for (int nrow_A = 1; nrow_A <= 10; nrow_A += 3) {
 					for (int ncol_B = 1; ncol_B <= 10; ncol_B += 3) {

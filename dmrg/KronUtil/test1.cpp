@@ -11,28 +11,23 @@ template <typename T> void run_kron_checks()
 {
 	using RealT                   = typename PsimagLite::Real<T>::Type;
 	const RealT denseFlopDiscount = 0.2;
-	double      thresholdA        = 0.0;
-	double      thresholdB        = 0.0;
-	int         nrow_A            = 0;
-	int         ncol_A            = 0;
-	int         nrow_B            = 0;
-	int         ncol_B            = 0;
-	int         itransA           = 0;
-	int         itransB           = 0;
 
 	static const bool    needsPrinting   = false;
 	const SizeType       gemmRnb         = 49;
 	const SizeType       threadsForGemmR = 1;
 	PsimagLite::GemmR<T> gemmR(needsPrinting, gemmRnb, threadsForGemmR);
 
-	for (thresholdB = 0; thresholdB <= 1.1; thresholdB += 0.1) {
-		for (thresholdA = 0; thresholdA <= 1.1; thresholdA += 0.1) {
-			for (ncol_A = 1; ncol_A <= 7; ncol_A += 3) {
-				for (nrow_A = 1; nrow_A <= 7; nrow_A += 3) {
-					for (ncol_B = 1; ncol_B <= 7; ncol_B += 3) {
-						for (nrow_B = 1; nrow_B <= 10; nrow_B += 3) {
-							for (itransA = 0; itransA <= 2; itransA++) {
-								for (itransB = 0; itransB <= 2;
+	for (int thresholdB_idx = 0; thresholdB_idx <= 11; ++thresholdB_idx) {
+		double thresholdB = .1 * thresholdB_idx;
+		for (int thresholdA_idx = 0; thresholdA_idx <= 11; ++thresholdA_idx) {
+			double thresholdA = .1 * thresholdA_idx;
+			for (int ncol_A = 1; ncol_A <= 7; ncol_A += 3) {
+				for (int nrow_A = 1; nrow_A <= 7; nrow_A += 3) {
+					for (int ncol_B = 1; ncol_B <= 7; ncol_B += 3) {
+						for (int nrow_B = 1; nrow_B <= 10; nrow_B += 3) {
+							for (int itransA = 0; itransA <= 2;
+							     itransA++) {
+								for (int itransB = 0; itransB <= 2;
 								     itransB++) {
 									char transA = (itransA == 1)
 									    ? 'T'
