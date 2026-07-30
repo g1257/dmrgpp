@@ -144,10 +144,10 @@ public:
 	    , wftAccelSvd_(dmrgWaveStruct, wftOptions)
 	{ }
 
-	virtual void transformVector(VectorWithOffsetType&       psiDest,
-	                             const VectorWithOffsetType& psiSrc,
-	                             const LeftRightSuperType&   lrs,
-	                             const OneSiteSpacesType&    oneSiteSpaces) const
+	void transformVector(VectorWithOffsetType&       psiDest,
+	                     const VectorWithOffsetType& psiSrc,
+	                     const LeftRightSuperType&   lrs,
+	                     const OneSiteSpacesType&    oneSiteSpaces) const override
 
 	{
 		PsimagLite::Profiling profiling("WFT", std::cout);

@@ -169,7 +169,7 @@ public:
 			err("FermionSpinless: Both or none of TSPTau= and TSPMu= must appear\n");
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -184,7 +184,7 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		static bool firstCall = true;
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
@@ -225,7 +225,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		SizeType         site = 0;
 		BlockType        block(1, site);
@@ -276,7 +276,7 @@ protected:
 		this->makeTrackable("n");
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		ModelTermType& hop  = ModelBaseType::createTerm("hopping");
 		ModelTermType& ninj = ModelBaseType::createTerm("ninj");

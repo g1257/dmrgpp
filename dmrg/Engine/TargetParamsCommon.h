@@ -192,9 +192,9 @@ public:
 		return 0;
 	}
 
-	virtual SizeType sites() const { return sites_.size(); }
+	SizeType sites() const override { return sites_.size(); }
 
-	virtual SizeType sites(SizeType i) const
+	SizeType sites(SizeType i) const override
 	{
 		assert(i < sites_.size());
 		return sites_[i];
@@ -211,7 +211,7 @@ public:
 		return it - sites_.begin();
 	}
 
-	virtual void setOperator(SizeType i, SizeType j, const OperatorType& op)
+	void setOperator(SizeType i, SizeType j, const OperatorType& op) override
 	{
 		assert(i < sites_.size());
 		sites_[i] = j;
@@ -219,27 +219,27 @@ public:
 		aOperators_[i] = op;
 	}
 
-	virtual const VectorSizeType& startingLoops() const { return startingLoops_; }
+	const VectorSizeType& startingLoops() const override { return startingLoops_; }
 
-	virtual typename BaseType::ConcatEnum concatenation() const { return concatenation_; }
+	typename BaseType::ConcatEnum concatenation() const override { return concatenation_; }
 
-	virtual const VectorOperatorType& aOperators() const { return aOperators_; }
+	const VectorOperatorType& aOperators() const override { return aOperators_; }
 
-	virtual bool noOperator() const { return noOperator_; }
+	bool noOperator() const override { return noOperator_; }
 
-	virtual void noOperator(bool x) { noOperator_ = x; }
+	void noOperator(bool x) override { noOperator_ = x; }
 
-	virtual bool skipTimeZero() const { return skipTimeZero_; }
+	bool skipTimeZero() const override { return skipTimeZero_; }
 
-	virtual bool isEnergyForExp() const { return isEnergyForExp_; }
+	bool isEnergyForExp() const override { return isEnergyForExp_; }
 
-	virtual RealType energyForExp() const { return energyForExp_; }
+	RealType energyForExp() const override { return energyForExp_; }
 
-	virtual RealType gsWeight() const { return gsWeight_; }
+	RealType gsWeight() const override { return gsWeight_; }
 
-	virtual SizeType sectorIndex() const { return sectorLevel_.first; }
+	SizeType sectorIndex() const override { return sectorLevel_.first; }
 
-	virtual SizeType levelIndex() const { return sectorLevel_.second; }
+	SizeType levelIndex() const override { return sectorLevel_.second; }
 
 	void write(PsimagLite::String label, PsimagLite::IoSerializer& ioSerializer) const
 	{

@@ -169,24 +169,24 @@ public:
 		this->common().aoeNonConst().initTimeVectors(tstStruct_, ioIn);
 	}
 
-	SizeType sites() const { return tstStruct_.sites(); }
+	SizeType sites() const override { return tstStruct_.sites(); }
 
-	SizeType targets() const { return tstStruct_.times().size(); }
+	SizeType targets() const override { return tstStruct_.times().size(); }
 
-	RealType weight(SizeType i) const
+	RealType weight(SizeType i) const override
 	{
 		assert(!this->common().aoe().allStages(StageEnumType::DISABLED));
 		return weight_[i];
 	}
 
-	RealType gsWeight() const
+	RealType gsWeight() const override
 	{
 		if (this->common().aoe().allStages(StageEnumType::DISABLED))
 			return 1.0;
 		return gsWeight_;
 	}
 
-	bool includeGroundStage() const
+	bool includeGroundStage() const override
 	{
 		if (!this->common().aoe().noStageIs(StageEnumType::DISABLED))
 			return true;
@@ -198,7 +198,7 @@ public:
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
 	            const BlockType&,
-	            SizeType loopNumber)
+	            SizeType loopNumber) override
 	{
 		assert(block1.size() > 0);
 		SizeType site = block1[0];
@@ -224,20 +224,20 @@ public:
 		evolveInternal(Eg, direction, block, loopNumber);
 	}
 
-	bool end() const
+	bool end() const override
 	{
 		return (tstStruct_.maxTime() != 0
 		        && this->common().aoe().timeVectors().time() >= tstStruct_.maxTime());
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix) override
 	{
 		this->common().readGSandNGSTs(io, prefix, "TimeStep");
 	}
 
 	void write(const VectorSizeType&        block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String           prefix) const
+	           PsimagLite::String           prefix) const override
 	{
 		PsimagLite::OstringStream                     msgg(std::cout.precision());
 		PsimagLite::OstringStream::OstringStreamType& msg = msgg();

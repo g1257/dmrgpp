@@ -141,29 +141,29 @@ public:
 		io.readline(gsWeight_, "GsWeight=");
 	}
 
-	SizeType sites() const { return 0; }
+	SizeType sites() const override { return 0; }
 
-	SizeType targets() const { return pvectors_.targets(); }
+	SizeType targets() const override { return pvectors_.targets(); }
 
-	RealType normSquared(SizeType i) const
+	RealType normSquared(SizeType i) const override
 	{
 		return PsimagLite::real(this->tv(i) * this->tv(i));
 	}
 
-	RealType weight(SizeType i) const
+	RealType weight(SizeType i) const override
 	{
 		assert(this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		assert(i < weights_.size());
 		return weights_[i];
 	}
 
-	RealType gsWeight() const { return gsWeightActual_; }
+	RealType gsWeight() const override { return gsWeightActual_; }
 
 	void evolve(const VectorRealType&         energies,
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
 	            const BlockType&,
-	            SizeType loopNumber)
+	            SizeType loopNumber) override
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -238,14 +238,14 @@ public:
 		evolve(energies, direction, block, block, loopNumber);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix) override
 	{
 		this->common().readGSandNGSTs(io, prefix, "Expression");
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	           PsimagLite::IoSelector::Out&                       io,
-	           PsimagLite::String                                 prefix) const
+	           PsimagLite::String                                 prefix) const override
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "Expression");

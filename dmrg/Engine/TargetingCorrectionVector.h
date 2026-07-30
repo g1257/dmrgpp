@@ -161,24 +161,24 @@ public:
 			err("TargetingCorrectionVector needs wft\n");
 	}
 
-	SizeType sites() const { return tstStruct_.sites(); }
+	SizeType sites() const override { return tstStruct_.sites(); }
 
-	SizeType targets() const { return 4; }
+	SizeType targets() const override { return 4; }
 
-	RealType weight(SizeType i) const
+	RealType weight(SizeType i) const override
 	{
 		assert(i < weight_.size());
 		return weight_[i];
 	}
 
-	RealType gsWeight() const
+	RealType gsWeight() const override
 	{
 		if (!correctionEnabled_)
 			return 1.0;
 		return gsWeight_;
 	}
 
-	SizeType size() const
+	SizeType size() const override
 	{
 		if (!correctionEnabled_)
 			return 0;
@@ -189,7 +189,7 @@ public:
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
 	            const BlockType&              block2,
-	            SizeType                      loopNumber)
+	            SizeType                      loopNumber) override
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -221,13 +221,13 @@ public:
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	           PsimagLite::IoSelector::Out&                       io,
-	           PsimagLite::String                                 prefix) const
+	           PsimagLite::String                                 prefix) const override
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "CorrectionVector");
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix) override
 	{
 		this->common().readGSandNGSTs(io, prefix, "CorrectionVector");
 		setWeights();

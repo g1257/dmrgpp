@@ -110,29 +110,29 @@ public:
 		ladder_ = new LadderType(clusterSize_, io);
 	}
 
-	~LadderBath()
+	~LadderBath() override
 	{
 		if (ladder_)
 			delete ladder_;
 	}
 
-	virtual SizeType dirs() const { return 3; }
+	SizeType dirs() const override { return 3; }
 
-	virtual SizeType length(SizeType) const { return this->unimplemented("length"); }
+	SizeType length(SizeType) const override { return this->unimplemented("length"); }
 
-	virtual SizeType translate(SizeType, SizeType, SizeType) const
+	SizeType translate(SizeType, SizeType, SizeType) const override
 	{
 		return this->unimplemented("translate");
 	}
 
-	SizeType getVectorSize(SizeType dirId) const
+	SizeType getVectorSize(SizeType dirId) const override
 	{
 		if (dirId == DIRECTION_BATH)
 			return bathSitesPerSite_ * clusterSize_;
 		return ladder_->getVectorSize(dirId);
 	}
 
-	bool connected(SizeType i1, SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const override
 	{
 		if (i1 == i2)
 			return false;
@@ -154,7 +154,7 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType i1, SizeType i2) const
+	SizeType calcDir(SizeType i1, SizeType i2) const override
 	{
 		int c1 = getClusterSite(i1).first;
 		int c2 = getClusterSite(i2).first;
@@ -166,7 +166,7 @@ public:
 		return DIRECTION_BATH;
 	}
 
-	bool fringe(SizeType i, SizeType smax, SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const override
 	{
 		int c = getClusterSite(i).first;
 		if (c >= 0)
@@ -175,7 +175,7 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType handle(SizeType i1, SizeType i2) const
+	SizeType handle(SizeType i1, SizeType i2) const override
 	{
 		PairType c1 = getClusterSite(i1);
 		PairType c2 = getClusterSite(i2);
@@ -194,7 +194,7 @@ public:
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew) const override
 	{
 		PairType c1 = getClusterSite(siteNew);
 
@@ -214,11 +214,11 @@ public:
 		throw RuntimeError(str);
 	}
 
-	String label() const { return "ladderbath"; }
+	String label() const override { return "ladderbath"; }
 
-	SizeType maxConnections() const { return clusterSize_ + 1; }
+	SizeType maxConnections() const override { return clusterSize_ + 1; }
 
-	SizeType findReflection(SizeType) const
+	SizeType findReflection(SizeType) const override
 	{
 		throw RuntimeError("findReflection: unimplemented (sorry)\n");
 	}

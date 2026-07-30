@@ -165,7 +165,7 @@ public:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -194,7 +194,7 @@ public:
 		}
 	}
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -211,7 +211,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		SizeType  site = 0;
 		BlockType block(1, site);
@@ -436,7 +436,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		ModelTermType& hopf = ModelBaseType::createTerm("HoppingFermionic");
 
@@ -484,7 +484,7 @@ protected:
 		}
 	}
 
-	void announce(PsimagLite::String str) const
+	void announce(PsimagLite::String str) const override
 	{
 		const PsimagLite::String msg("finite loop");
 		const SizeType           l = msg.length();
@@ -500,7 +500,9 @@ protected:
 		wantsOneSiteTruncation_ = PsimagLite::atoi(tokens[1]);
 	}
 
-	void oneSiteTruncationUpdate(OutputFileOrNot& ioOut, const MatrixType& U, SizeType start)
+	void oneSiteTruncationUpdate(OutputFileOrNot&  ioOut,
+	                             const MatrixType& U,
+	                             SizeType          start) override
 	{
 		bool firstCall = (U_.rows() == 0);
 
@@ -526,8 +528,9 @@ protected:
 	}
 
 	// virtual override
-	SizeType
-	setOperatorMatrices(VectorOperatorType& ops, VectorQnType& qm, const BlockType& block) const
+	SizeType setOperatorMatrices(VectorOperatorType& ops,
+	                             VectorQnType&       qm,
+	                             const BlockType&    block) const override
 	{
 		oStruncActive_ = false;
 

@@ -176,7 +176,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		SizeType         site = 0;
 		BlockType        block(1, site);
@@ -337,7 +337,7 @@ protected:
 	Likewise, we create cdown in (D) and add the connection to \verb!hop! in (E)
 	PSIDOCCOPY $FirstFunctionBelow
 	*/
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		ModelTermType& hop = ModelBaseType::createTerm("hopping"); //(A)
 
@@ -383,7 +383,7 @@ protected:
 	and that's that. Here we write also some SU(2) auxiliary members in the last two lines.
 	PSIDOCCOPY $FirstFunctionBelow
 	 */
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1)) // (A)
 			io.createGroup(label1); // (B)
@@ -397,7 +397,7 @@ protected:
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          time) const
+	                                RealType          time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 

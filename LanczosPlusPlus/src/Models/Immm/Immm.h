@@ -59,13 +59,13 @@ public:
 	    , basis_(geometry, nup, ndown)
 	{ }
 
-	~Immm() { BaseType::deleteGarbage(garbage_); }
+	~Immm() override { BaseType::deleteGarbage(garbage_); }
 
-	SizeType size() const { return basis_.size(); }
+	SizeType size() const override { return basis_.size(); }
 
-	SizeType orbitals(SizeType site) const { return basis_.orbsPerSite(site); }
+	SizeType orbitals(SizeType site) const override { return basis_.orbsPerSite(site); }
 
-	void setupHamiltonian(SparseMatrixType& matrix) const
+	void setupHamiltonian(SparseMatrixType& matrix) const override
 	{
 		if (!mp_.useReflectionSymmetry) {
 			setupHamiltonian(matrix, basis_);
@@ -77,18 +77,19 @@ public:
 	                 const std::pair<SizeType, SizeType>& oldParts,
 	                 const LabeledOperator&               lOperator,
 	                 SizeType                             spin,
-	                 SizeType                             orb) const
+	                 SizeType                             orb) const override
 	{
 		return basis_.hasNewParts(newParts, oldParts, lOperator, spin, orb);
 	}
 
-	void matrixVectorProduct(VectorType& x, const VectorType& y) const
+	void matrixVectorProduct(VectorType& x, const VectorType& y) const override
 	{
 		matrixVectorProduct(x, y, basis_);
 	}
 
-	void
-	matrixVectorProduct(VectorType& x, const VectorType& y, const BasisBaseType& basis) const
+	void matrixVectorProduct(VectorType&          x,
+	                         const VectorType&    y,
+	                         const BasisBaseType& basis) const override
 	{
 		// Calculate diagonal elements AND count non-zero matrix elements
 		SizeType                                    hilbert = basis.size();
@@ -118,11 +119,11 @@ public:
 		}
 	}
 
-	const GeometryType& geometry() const { return geometry_; }
+	const GeometryType& geometry() const override { return geometry_; }
 
-	const BasisType& basis() const { return basis_; }
+	const BasisType& basis() const override { return basis_; }
 
-	void setupHamiltonian(SparseMatrixType& matrix, const BasisBaseType& basis) const
+	void setupHamiltonian(SparseMatrixType& matrix, const BasisBaseType& basis) const override
 	{
 		// Calculate diagonal elements AND count non-zero matrix elements
 		SizeType                                    hilbert = basis.size();
@@ -154,16 +155,16 @@ public:
 		matrix.setRow(hilbert, nCounter);
 	}
 
-	PsimagLite::String name() const { return __FILE__; }
+	PsimagLite::String name() const override { return __FILE__; }
 
-	BasisBaseType* createBasis(SizeType nup, SizeType ndown) const
+	BasisBaseType* createBasis(SizeType nup, SizeType ndown) const override
 	{
 		BasisType* ptr = new BasisType(geometry_, nup, ndown);
 		garbage_.push_back(ptr);
 		return ptr;
 	}
 
-	void print(std::ostream& os) const { os << mp_; }
+	void print(std::ostream& os) const override { os << mp_; }
 
 private:
 

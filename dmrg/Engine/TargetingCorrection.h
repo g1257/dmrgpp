@@ -129,16 +129,16 @@ public:
 	    , progress_("TargetingCorrection")
 	{ }
 
-	SizeType sites() const { return tstStruct_.sites(); }
+	SizeType sites() const override { return tstStruct_.sites(); }
 
-	SizeType targets() const { return 1; }
+	SizeType targets() const override { return 1; }
 
-	RealType normSquared(SizeType i) const
+	RealType normSquared(SizeType i) const override
 	{
 		return PsimagLite::real(this->tv(i) * this->tv(i));
 	}
 
-	RealType weight(SizeType) const
+	RealType weight(SizeType) const override
 	{
 		assert(this->common().aoe().noStageIs(StageEnumType::DISABLED));
 		RealType gsWeight = 1;
@@ -147,7 +147,7 @@ public:
 		return weight1;
 	}
 
-	RealType gsWeight() const
+	RealType gsWeight() const override
 	{
 		RealType gsWeight = 1;
 		RealType weight   = 0;
@@ -159,7 +159,7 @@ public:
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
 	            const BlockType&,
-	            SizeType)
+	            SizeType) override
 	{
 		if (direction == ProgramGlobals::DirectionEnum::INFINITE)
 			return;
@@ -170,14 +170,14 @@ public:
 		this->common().cocoon(block1, direction, doBorderIfBorder);
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix) override
 	{
 		this->common().read(io, prefix);
 	}
 
 	void write(const typename PsimagLite::Vector<SizeType>::Type& block,
 	           PsimagLite::IoSelector::Out&                       io,
-	           PsimagLite::String                                 prefix) const
+	           PsimagLite::String                                 prefix) const override
 	{
 		this->common().write(io, block, prefix);
 	}

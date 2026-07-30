@@ -70,7 +70,7 @@ public:
 	// For information purposes only. Write model parameters
 	// String contains the group
 	// Serializer object is second argument
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		if (!io.doesGroupExist(label1))
 			io.createGroup(label1);
@@ -89,7 +89,7 @@ public:
 	// depend on it
 	void addDiagonalsInNaturalBasis(SparseMatrixType&     hmatrix,
 	                                const VectorSizeType& block,
-	                                RealType              time) const
+	                                RealType              time) const override
 	{
 		ModelBaseType::additionalOnSiteHamiltonian(hmatrix, block, time);
 
@@ -160,7 +160,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		qns = qn_;
 		assert(ops_.size() >= 5);
@@ -200,7 +200,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		const bool     isSu2 = BasisType::useSu2Symmetry();
 		ModelTermType& hop   = ModelBaseType::createTerm("hopping");

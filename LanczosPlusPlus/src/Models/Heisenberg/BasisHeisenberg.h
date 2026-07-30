@@ -45,22 +45,22 @@ public:
 		}
 	}
 
-	PairIntType parts() const { return PairIntType(twiceS_, szPlusConst_); }
+	PairIntType parts() const override { return PairIntType(twiceS_, szPlusConst_); }
 
 	static const WordType& bitmask(SizeType i) { return LanczosGlobals::bitmask(i); }
 
-	SizeType size() const { return data_.size(); }
+	SizeType size() const override { return data_.size(); }
 
-	SizeType dofs() const { return twiceS_ + 1; }
+	SizeType dofs() const override { return twiceS_ + 1; }
 
-	virtual SizeType hilbertOneSite(SizeType) const { return 1 + twiceS_; }
+	SizeType hilbertOneSite(SizeType) const override { return 1 + twiceS_; }
 
-	SizeType perfectIndex(const VectorWordType&) const
+	SizeType perfectIndex(const VectorWordType&) const override
 	{
 		throw PsimagLite::RuntimeError("BasisHeisenberg::perfectIndex kets\n");
 	}
 
-	SizeType perfectIndex(WordType ket, WordType) const
+	SizeType perfectIndex(WordType ket, WordType) const override
 	{
 		for (SizeType i = 0; i < data_.size(); ++i) {
 			if (ket == data_[i])
@@ -70,26 +70,28 @@ public:
 		throw PsimagLite::RuntimeError("perfectIndex: no index found\n");
 	}
 
-	WordType operator()(SizeType i, SizeType) const { return data_[i]; }
+	WordType operator()(SizeType i, SizeType) const override { return data_[i]; }
 
-	SizeType isThereAnElectronAt(WordType, WordType, SizeType, SizeType, SizeType) const
+	SizeType
+	isThereAnElectronAt(WordType, WordType, SizeType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("BasisHeisenberg::isThereAnElectronAt\n");
 	}
 
-	SizeType getN(WordType ket1, WordType, SizeType site, SizeType, SizeType) const
+	SizeType getN(WordType ket1, WordType, SizeType site, SizeType, SizeType) const override
 	{
 		WordType mask = getMask();
 		ket1 >>= (bits_ * site);
 		return (ket1 & mask);
 	}
 
-	int doSignGf(WordType, WordType, SizeType, SizeType, SizeType) const
+	int doSignGf(WordType, WordType, SizeType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("BasisHeisenberg::doSignGf\n");
 	}
 
-	int doSign(WordType, WordType, SizeType, SizeType, SizeType, SizeType, SizeType) const
+	int
+	doSign(WordType, WordType, SizeType, SizeType, SizeType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("BasisHeisenberg::doSign\n");
 	}
@@ -99,7 +101,7 @@ public:
 	                        const LabeledOperatorType& lOperator,
 	                        SizeType                   site,
 	                        SizeType                   spin,
-	                        SizeType                   orb) const
+	                        SizeType                   orb) const override
 	{
 		if (twiceS_ != 1)
 			throw PsimagLite::RuntimeError("BasisHeisenberg::getBraIndex_ \n");
@@ -112,16 +114,16 @@ public:
 		return getBraIndex_(ket1, ket2, lOperator, site, spin, orb);
 	}
 
-	SizeType orbsPerSite(SizeType) const { return 1; }
+	SizeType orbsPerSite(SizeType) const override { return 1; }
 
-	SizeType orbs() const { return 1; }
+	SizeType orbs() const override { return 1; }
 
-	SizeType perfectIndex(WordType, SizeType, SizeType) const
+	SizeType perfectIndex(WordType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("BasisHeisenberg::perfectIndex\n");
 	}
 
-	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const
+	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const override
 	{
 		SizeType hilbert = 1;
 		hilbert <<= geometry_.numberOfSites();
@@ -145,7 +147,7 @@ private:
 	            WordType                   site1,
 	            const LabeledOperatorType& val1,
 	            SizeType                   site2,
-	            SizeType                   val2) const
+	            SizeType                   val2) const override
 	{
 		bra            = ket;
 		WordType mask1 = getMask();

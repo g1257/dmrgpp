@@ -141,19 +141,19 @@ public:
 	    , helperHubbardAncilla_(superGeometry_, modelParameters_)
 	{ }
 
-	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const
+	void write(PsimagLite::String label1, PsimagLite::IoNg::Out::Serializer& io) const override
 	{
 		helperHubbardAncilla_.write(label1, io, this->params().model);
 	}
 
 	void addDiagonalsInNaturalBasis(SparseMatrixType& hmatrix,
 	                                const BlockType&  block,
-	                                RealType          t) const
+	                                RealType          t) const override
 	{
 		helperHubbardAncilla_.addDiagonalsInNaturalBasis(hmatrix, block, t);
 	}
 
-	virtual PsimagLite::String oracle() const
+	PsimagLite::String oracle() const override
 	{
 		const RealType ne     = ModelBaseType::targetQuantum().qn(0).other[0];
 		const RealType nup    = ModelBaseType::targetQuantum().qn(0).other[1];
@@ -165,7 +165,7 @@ public:
 
 protected:
 
-	void fillLabeledOperators(VectorQnType& qns)
+	void fillLabeledOperators(VectorQnType& qns) override
 	{
 		SizeType         site = 0; // FIXME for Immm SDHS
 		BlockType        block(1, site);
@@ -240,7 +240,7 @@ protected:
 		}
 	}
 
-	void fillModelLinks()
+	void fillModelLinks() override
 	{
 		ModelTermType& hop = ModelBaseType::createTerm("hopping");
 		ModelTermType& ll  = ModelBaseType::createTerm("LambdaLambda");

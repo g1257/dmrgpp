@@ -512,9 +512,9 @@ public:
 		profiling.end(msg.str());
 	}
 
-	virtual const BlockDiagonalMatrixType& operator()() { return data_; }
+	const BlockDiagonalMatrixType& operator()() override { return data_; }
 
-	void diag(VectorRealType& eigs, char jobz)
+	void diag(VectorRealType& eigs, char jobz) override
 	{
 		PsimagLite::Profiling profiling("DensityMatrixSvdDiag", std::cout);
 
@@ -552,16 +552,16 @@ public:
 	}
 
 	// needed for WFT
-	const typename PsimagLite::Vector<MatrixType>::Type& vts() const
+	const typename PsimagLite::Vector<MatrixType>::Type& vts() const override
 	{
 		return persistentSvd_.vts();
 	}
 
 	// needed for WFT
-	const VectorVectorRealType& s() const { return persistentSvd_.s(); }
+	const VectorVectorRealType& s() const override { return persistentSvd_.s(); }
 
 	// needed for WFT
-	const VectorQnType& qns() const { return persistentSvd_.qns(); }
+	const VectorQnType& qns() const override { return persistentSvd_.qns(); }
 
 	friend std::ostream& operator<<(std::ostream& os, const DensityMatrixSvd& dm)
 	{

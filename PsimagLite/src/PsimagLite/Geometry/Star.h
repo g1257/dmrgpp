@@ -99,11 +99,11 @@ public:
 	    : linSize_(linSize)
 	{ }
 
-	virtual SizeType maxConnections() const { return linSize_ - 1; }
+	SizeType maxConnections() const override { return linSize_ - 1; }
 
-	virtual SizeType dirs() const { return 1; }
+	SizeType dirs() const override { return 1; }
 
-	SizeType handle(SizeType i, SizeType j) const
+	SizeType handle(SizeType i, SizeType j) const override
 	{
 		assert(i == CENTER || j == CENTER);
 		SizeType k      = (i == CENTER) ? j : i;
@@ -112,14 +112,14 @@ public:
 		return k - offset;
 	}
 
-	SizeType getVectorSize(SizeType dirId) const
+	SizeType getVectorSize(SizeType dirId) const override
 	{
 		if (dirId != DIRECTION_S)
 			throw RuntimeError("Star must have direction 0\n");
 		return linSize_ - 1;
 	}
 
-	bool connected(SizeType i1, SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const override
 	{
 		if (i1 == i2)
 			return false;
@@ -127,24 +127,27 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType, SizeType) const { return DIRECTION_S; }
+	SizeType calcDir(SizeType, SizeType) const override { return DIRECTION_S; }
 
-	bool fringe(SizeType i, SizeType, SizeType emin) const { return (i == emin); }
+	bool fringe(SizeType i, SizeType, SizeType emin) const override { return (i == emin); }
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType, SizeType, SizeType siteNew2) const { return siteNew2; }
+	SizeType getSubstituteSite(SizeType, SizeType, SizeType siteNew2) const override
+	{
+		return siteNew2;
+	}
 
-	String label() const { return "star"; }
+	String label() const override { return "star"; }
 
-	SizeType findReflection(SizeType) const { throw RuntimeError("findReflection\n"); }
+	SizeType findReflection(SizeType) const override { throw RuntimeError("findReflection\n"); }
 
-	SizeType length(SizeType i) const
+	SizeType length(SizeType i) const override
 	{
 		assert(i == 0);
 		return linSize_;
 	}
 
-	SizeType translate(SizeType, SizeType dir, SizeType) const
+	SizeType translate(SizeType, SizeType dir, SizeType) const override
 	{
 		assert(dir == 0);
 

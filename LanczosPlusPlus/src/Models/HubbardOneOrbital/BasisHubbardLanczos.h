@@ -32,29 +32,29 @@ public:
 	    , basis2_(geometry.numberOfSites(), ndown)
 	{ }
 
-	PairIntType parts() const { return PairIntType(nup_, ndown_); }
+	PairIntType parts() const override { return PairIntType(nup_, ndown_); }
 
 	static const WordType& bitmask(SizeType i) { return BasisType::bitmask(i); }
 
-	SizeType size() const { return basis1_.size() * basis2_.size(); }
+	SizeType size() const override { return basis1_.size() * basis2_.size(); }
 
 	//! Spin up and spin down
-	SizeType dofs() const { return 2; }
+	SizeType dofs() const override { return 2; }
 
-	virtual SizeType hilbertOneSite(SizeType) const { return 4; }
+	SizeType hilbertOneSite(SizeType) const override { return 4; }
 
-	SizeType perfectIndex(const VectorWordType& kets) const
+	SizeType perfectIndex(const VectorWordType& kets) const override
 	{
 		assert(kets.size() == 2);
 		return perfectIndex(kets[0], kets[1]);
 	}
 
-	SizeType perfectIndex(WordType ket1, WordType ket2) const
+	SizeType perfectIndex(WordType ket1, WordType ket2) const override
 	{
 		return basis1_.perfectIndex(ket1) + basis2_.perfectIndex(ket2) * basis1_.size();
 	}
 
-	virtual SizeType perfectIndex(WordType, SizeType, SizeType) const
+	SizeType perfectIndex(WordType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("perfectIndex\n");
 	}
@@ -64,7 +64,7 @@ public:
 		return (what == SPIN_UP) ? basis1_.electrons() : basis2_.electrons();
 	}
 
-	WordType operator()(SizeType i, SizeType spin) const
+	WordType operator()(SizeType i, SizeType spin) const override
 	{
 		SizeType y = i / basis1_.size();
 		SizeType x = i % basis1_.size();
@@ -77,19 +77,20 @@ public:
 	                             WordType ket2,
 	                             SizeType site,
 	                             SizeType spin,
-	                             SizeType) const
+	                             SizeType) const override
 	{
 		if (spin == SPIN_UP)
 			return basis1_.isThereAnElectronAt(ket1, site);
 		return basis2_.isThereAnElectronAt(ket2, site);
 	}
 
-	SizeType getN(WordType ket1, WordType ket2, SizeType site, SizeType spin, SizeType) const
+	SizeType
+	getN(WordType ket1, WordType ket2, SizeType site, SizeType spin, SizeType) const override
 	{
 		return (spin == SPIN_UP) ? basis1_.getN(ket1, site) : basis2_.getN(ket2, site);
 	}
 
-	int doSignGf(WordType a, WordType b, SizeType ind, SizeType sector, SizeType) const
+	int doSignGf(WordType a, WordType b, SizeType ind, SizeType sector, SizeType) const override
 	{
 		if (sector == SPIN_UP) {
 			if (ind == 0)
@@ -131,13 +132,13 @@ public:
 	           SizeType,
 	           SizeType j,
 	           SizeType,
-	           SizeType spin) const
+	           SizeType spin) const override
 	{
 		assert(i <= j);
 		return (spin == SPIN_UP) ? basis1_.doSign(ket1, i, j) : basis2_.doSign(ket2, i, j);
 	}
 
-	int doSignSpSm(WordType a, WordType b, SizeType ind, SizeType spin, SizeType) const
+	int doSignSpSm(WordType a, WordType b, SizeType ind, SizeType spin, SizeType) const override
 	{
 		if (spin == SPIN_UP) { // spin here means S^\dagger
 			// FIXME: Count over a (up)
@@ -153,7 +154,7 @@ public:
 	                        const LabeledOperatorType& lOperator,
 	                        SizeType                   site,
 	                        SizeType                   spin,
-	                        SizeType) const
+	                        SizeType) const override
 	{
 		if (lOperator.id() == LabeledOperatorType::Label::OPERATOR_SPLUS
 		    || lOperator.id() == LabeledOperatorType::Label::OPERATOR_SMINUS)
@@ -170,11 +171,11 @@ public:
 		return PairIntType(tmp, 1);
 	}
 
-	SizeType orbsPerSite(SizeType) const { return 1; }
+	SizeType orbsPerSite(SizeType) const override { return 1; }
 
-	SizeType orbs() const { return 1; }
+	SizeType orbs() const override { return 1; }
 
-	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const
+	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const override
 	{
 		bool isBinary = (binaryOrDecimal == BaseType::PRINT_BINARY);
 		os << "\tUp sector\n";
@@ -190,7 +191,7 @@ private:
 	            WordType                   ket2,
 	            const LabeledOperatorType& lOperator,
 	            SizeType                   site,
-	            SizeType                   spin) const
+	            SizeType                   spin) const override
 	{
 		return (spin == SPIN_UP) ? basis1_.getBra(bra, ket1, lOperator, site)
 		                         : basis2_.getBra(bra, ket2, lOperator, site);

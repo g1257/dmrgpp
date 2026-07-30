@@ -120,20 +120,20 @@ public:
 			RuntimeError("LongChain::ctor()\n");
 	}
 
-	virtual SizeType maxConnections() const { return (isPeriodic_) ? linSize_ : 1; }
+	SizeType maxConnections() const override { return (isPeriodic_) ? linSize_ : 1; }
 
-	virtual SizeType dirs() const { return 1; }
+	SizeType dirs() const override { return 1; }
 
-	SizeType handle(SizeType i, SizeType j) const { return (i < j) ? i : j; }
+	SizeType handle(SizeType i, SizeType j) const override { return (i < j) ? i : j; }
 
-	SizeType getVectorSize(SizeType dirId) const
+	SizeType getVectorSize(SizeType dirId) const override
 	{
 		assert(dirId == DIRECTION_X);
 		const SizeType oneOrZero = (isPeriodic_) ? 1 : 0;
 		return linSize_ - distance_ + oneOrZero;
 	}
 
-	bool connected(SizeType i1, SizeType i2) const
+	bool connected(SizeType i1, SizeType i2) const override
 	{
 		if (i1 == i2)
 			return false;
@@ -147,9 +147,9 @@ public:
 	}
 
 	// assumes i1 and i2 are connected
-	SizeType calcDir(SizeType, SizeType) const { return DIRECTION_X; }
+	SizeType calcDir(SizeType, SizeType) const override { return DIRECTION_X; }
 
-	bool fringe(SizeType i, SizeType smax, SizeType emin) const
+	bool fringe(SizeType i, SizeType smax, SizeType emin) const override
 	{
 		SizeType emin2 = smax + 1;
 		if (i <= smax) {
@@ -161,7 +161,7 @@ public:
 	}
 
 	// siteNew2 is fringe in the environment
-	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const
+	SizeType getSubstituteSite(SizeType smax, SizeType emin, SizeType siteNew2) const override
 	{
 		assert(siteNew2 >= emin);
 		SizeType tmp = siteNew2 - emin + smax + 1;
@@ -169,17 +169,17 @@ public:
 		return tmp;
 	}
 
-	String label() const { return "longchain"; }
+	String label() const override { return "longchain"; }
 
-	SizeType findReflection(SizeType site) const { return linSize_ - site - 1; }
+	SizeType findReflection(SizeType site) const override { return linSize_ - site - 1; }
 
-	SizeType length(SizeType i) const
+	SizeType length(SizeType i) const override
 	{
 		assert(i == 0);
 		return linSize_;
 	}
 
-	SizeType translate(SizeType site, SizeType dir, SizeType amount) const
+	SizeType translate(SizeType site, SizeType dir, SizeType amount) const override
 	{
 		assert(dir == 0);
 

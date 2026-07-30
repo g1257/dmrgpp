@@ -45,28 +45,28 @@ public:
 		std::sort(data_.begin(), data_.end());
 	}
 
-	PairIntType parts() const { return PairIntType(nup_, ndown_); }
+	PairIntType parts() const override { return PairIntType(nup_, ndown_); }
 
 	static const WordType& bitmask(SizeType i) { return LanczosGlobals::bitmask(i); }
 
-	SizeType size() const { return data_.size(); }
+	SizeType size() const override { return data_.size(); }
 
 	//! Spin up and spin down
-	SizeType dofs() const { return 2; }
+	SizeType dofs() const override { return 2; }
 
-	virtual SizeType hilbertOneSite(SizeType) const
+	SizeType hilbertOneSite(SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("hilbertOneSite unimplemented for t-J\n");
 	}
 
-	SizeType perfectIndex(const VectorWordType& kets) const
+	SizeType perfectIndex(const VectorWordType& kets) const override
 	{
 		assert(kets.size() == 2);
 		return (orbitals_ == 1) ? perfectIndex(kets[0], kets[1])
 		                        : bruteForce(kets[0], kets[1]);
 	}
 
-	SizeType perfectIndex(WordType ket1, WordType ket2) const
+	SizeType perfectIndex(WordType ket1, WordType ket2) const override
 	{
 		if (orbitals_ > 1)
 			return bruteForce(ket1, ket2);
@@ -128,7 +128,7 @@ public:
 
 	SizeType electrons(SizeType what) const { return (what == SPIN_UP) ? nup_ : ndown_; }
 
-	WordType operator()(SizeType i, SizeType spin) const
+	WordType operator()(SizeType i, SizeType spin) const override
 	{
 		SizeType n    = geometry_.numberOfSites() * orbitals_;
 		WordType w    = data_[i];
@@ -148,20 +148,23 @@ public:
 	                             WordType ket2,
 	                             SizeType site,
 	                             SizeType spin,
-	                             SizeType orb) const
+	                             SizeType orb) const override
 	{
 		return (spin == SPIN_UP) ? isThereAnElectronAt(ket1, site * orbitals_ + orb)
 		                         : isThereAnElectronAt(ket2, site * orbitals_ + orb);
 	}
 
-	SizeType
-	getN(WordType ket1, WordType ket2, SizeType site, SizeType spin, SizeType orb) const
+	SizeType getN(WordType ket1,
+	              WordType ket2,
+	              SizeType site,
+	              SizeType spin,
+	              SizeType orb) const override
 	{
 		return (spin == SPIN_UP) ? getN(ket1, site * orbitals_ + orb)
 		                         : getN(ket2, site * orbitals_ + orb);
 	}
 
-	int doSignGf(WordType a, WordType b, SizeType ind, SizeType sector, SizeType) const
+	int doSignGf(WordType a, WordType b, SizeType ind, SizeType sector, SizeType) const override
 	{
 		assert(orbitals_ == 1);
 		if (sector == SPIN_UP) {
@@ -202,7 +205,7 @@ public:
 	           SizeType orb,
 	           SizeType j,
 	           SizeType orb2,
-	           SizeType spin) const
+	           SizeType spin) const override
 	{
 		assert(i * orbitals_ + orb <= j * orbitals_ + orb2);
 		return (spin == SPIN_UP) ? doSign(ket1, i * orbitals_ + orb, j * orbitals_ + orb2)
@@ -214,7 +217,7 @@ public:
 	                        const LabeledOperatorType& lOperator,
 	                        SizeType                   site,
 	                        SizeType                   spin,
-	                        SizeType                   orb) const
+	                        SizeType                   orb) const override
 	{
 		LabeledOperatorType opC(LabeledOperatorType::Label::OPERATOR_C);
 
@@ -253,16 +256,16 @@ public:
 		return getBraIndex_(ket1, ket2, lOperator, site, spin, orb);
 	}
 
-	SizeType orbsPerSite(SizeType) const { return orbitals_; }
+	SizeType orbsPerSite(SizeType) const override { return orbitals_; }
 
-	SizeType orbs() const { return orbitals_; }
+	SizeType orbs() const override { return orbitals_; }
 
-	SizeType perfectIndex(WordType, SizeType, SizeType) const
+	SizeType perfectIndex(WordType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("perfectIndex\n");
 	}
 
-	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const
+	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const override
 	{
 		SizeType hilbert = 1;
 		hilbert <<= geometry_.numberOfSites();
@@ -278,7 +281,7 @@ public:
 	            WordType                   ket2,
 	            const LabeledOperatorType& lOperator,
 	            SizeType                   site,
-	            SizeType                   spin) const
+	            SizeType                   spin) const override
 	{
 		assert(orbitals_ == 1);
 		switch (lOperator.id()) {

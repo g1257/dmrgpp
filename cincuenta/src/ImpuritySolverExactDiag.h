@@ -61,7 +61,7 @@ public:
 	    , freq_enum_(PsimagLite::FreqEnum::MATSUBARA)
 	{ }
 
-	~ImpuritySolverExactDiag()
+	~ImpuritySolverExactDiag() override
 	{
 		delete solverParams_;
 		solverParams_ = nullptr;

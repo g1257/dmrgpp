@@ -132,19 +132,19 @@ public:
 		} catch (std::exception&) { }
 	}
 
-	virtual VectorRealType& times() { return times_; }
+	VectorRealType& times() override { return times_; }
 
-	virtual const VectorRealType& times() const { return times_; }
+	const VectorRealType& times() const override { return times_; }
 
-	virtual SizeType advanceEach() const { return advanceEach_; }
+	SizeType advanceEach() const override { return advanceEach_; }
 
-	virtual typename BaseType::AlgorithmEnum algorithm() const { return algorithm_; }
+	typename BaseType::AlgorithmEnum algorithm() const override { return algorithm_; }
 
-	virtual RealType tau() const { return tau_; }
+	RealType tau() const override { return tau_; }
 
-	virtual RealType timeDirection() const { return timeDirection_; }
+	RealType timeDirection() const override { return timeDirection_; }
 
-	virtual const VectorRealType& chebyTransform() const { return chebyTransform_; }
+	const VectorRealType& chebyTransform() const override { return chebyTransform_; }
 
 	template <typename IoInputter>
 	void setAlgorithm(VectorRealType* chebyTransform, PsimagLite::String s, IoInputter* io)

@@ -32,26 +32,29 @@ public:
 		LanczosGlobals::doBitmask(sites);
 	}
 
-	PairIntType parts() const { throw PsimagLite::RuntimeError("BasisKitaev::parts()\n"); }
+	PairIntType parts() const override
+	{
+		throw PsimagLite::RuntimeError("BasisKitaev::parts()\n");
+	}
 
 	static const WordType& bitmask(SizeType i) { return LanczosGlobals::bitmask(i); }
 
-	SizeType size() const { return hilbert_; }
+	SizeType size() const override { return hilbert_; }
 
-	SizeType dofs() const
+	SizeType dofs() const override
 	{
 		throw PsimagLite::RuntimeError("BasisKitaev::dofs() please check\n");
 		return TWICE_THE_SPIN + 1;
 	}
 
-	SizeType hilbertOneSite(SizeType) const { return TWICE_THE_SPIN + 1; }
+	SizeType hilbertOneSite(SizeType) const override { return TWICE_THE_SPIN + 1; }
 
-	SizeType perfectIndex(const VectorWordType&) const
+	SizeType perfectIndex(const VectorWordType&) const override
 	{
 		throw PsimagLite::RuntimeError("BasisKitaev::perfectIndex kets\n");
 	}
 
-	SizeType perfectIndex(WordType ket, WordType) const
+	SizeType perfectIndex(WordType ket, WordType) const override
 	{
 		if (ket < hilbert_)
 			return ket;
@@ -59,31 +62,33 @@ public:
 		throw PsimagLite::RuntimeError("perfectIndex: no index found\n");
 	}
 
-	SizeType perfectIndex(WordType, SizeType, SizeType) const
+	SizeType perfectIndex(WordType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("BasisKitaev::perfectIndex\n");
 	}
 
-	WordType operator()(SizeType i, SizeType) const { return i; }
+	WordType operator()(SizeType i, SizeType) const override { return i; }
 
-	SizeType isThereAnElectronAt(WordType, WordType, SizeType, SizeType, SizeType) const
+	SizeType
+	isThereAnElectronAt(WordType, WordType, SizeType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("BasisKitaev::isThereAnElectronAt\n");
 	}
 
-	SizeType getN(WordType ket1, WordType, SizeType site, SizeType, SizeType) const
+	SizeType getN(WordType ket1, WordType, SizeType site, SizeType, SizeType) const override
 	{
 		WordType mask = getMask();
 		ket1 >>= (BITS * site);
 		return (ket1 & mask);
 	}
 
-	int doSignGf(WordType, WordType, SizeType, SizeType, SizeType) const
+	int doSignGf(WordType, WordType, SizeType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("BasisKitaev::doSignGf\n");
 	}
 
-	int doSign(WordType, WordType, SizeType, SizeType, SizeType, SizeType, SizeType) const
+	int
+	doSign(WordType, WordType, SizeType, SizeType, SizeType, SizeType, SizeType) const override
 	{
 		throw PsimagLite::RuntimeError("BasisKitaev::doSign\n");
 	}
@@ -93,7 +98,7 @@ public:
 	                        const LabeledOperatorType&,
 	                        SizeType site,
 	                        SizeType spin,
-	                        SizeType orb) const
+	                        SizeType orb) const override
 	{
 		throw PsimagLite::RuntimeError("BasisKitaev::getBraIndex() unimplemented yet\n");
 
@@ -109,11 +114,11 @@ public:
 		//		return getBraIndex_(ket1,ket2,operatorLabel,site,spin,orb);
 	}
 
-	SizeType orbsPerSite(SizeType) const { return 1; }
+	SizeType orbsPerSite(SizeType) const override { return 1; }
 
-	SizeType orbs() const { return 1; }
+	SizeType orbs() const override { return 1; }
 
-	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const
+	void print(std::ostream& os, typename BaseType::PrintEnum binaryOrDecimal) const override
 	{
 		SizeType hilbert = 1;
 		hilbert <<= geometry_.numberOfSites();
@@ -138,7 +143,7 @@ private:
 	            WordType                   site1,
 	            const LabeledOperatorType& val1,
 	            SizeType                   site2,
-	            SizeType                   val2) const
+	            SizeType                   val2) const override
 	{
 		bra            = ket;
 		WordType mask1 = getMask();

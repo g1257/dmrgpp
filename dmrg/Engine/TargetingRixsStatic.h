@@ -165,15 +165,15 @@ public:
 			err("TargetingRixsStatic needs wft\n");
 	}
 
-	SizeType sites() const { return tstStruct_.sites(); }
+	SizeType sites() const override { return tstStruct_.sites(); }
 
-	SizeType targets() const { return 6; }
+	SizeType targets() const override { return 6; }
 
-	RealType weight(SizeType i) const { return weight_[i]; }
+	RealType weight(SizeType i) const override { return weight_[i]; }
 
-	RealType gsWeight() const { return gsWeight_; }
+	RealType gsWeight() const override { return gsWeight_; }
 
-	SizeType size() const
+	SizeType size() const override
 	{
 		if (!applied_ && appliedFirst_) {
 			return 4;
@@ -185,7 +185,7 @@ public:
 	            ProgramGlobals::DirectionEnum direction,
 	            const BlockType&              block1,
 	            const BlockType&              block2,
-	            SizeType                      loopNumber)
+	            SizeType                      loopNumber) override
 	{
 		if (block1.size() != 1 || block2.size() != 1) {
 			PsimagLite::String str(__FILE__);
@@ -203,13 +203,13 @@ public:
 
 	void write(const VectorSizeType&        block,
 	           PsimagLite::IoSelector::Out& io,
-	           PsimagLite::String           prefix) const
+	           PsimagLite::String           prefix) const override
 	{
 		this->common().write(io, block, prefix);
 		this->common().writeNGSTs(io, prefix, block, "RixsStatic");
 	}
 
-	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix)
+	void read(typename TargetingCommonType::IoInputType& io, PsimagLite::String prefix) override
 	{
 		this->common().read(io, prefix);
 
