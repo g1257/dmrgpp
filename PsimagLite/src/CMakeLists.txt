@@ -48,7 +48,6 @@ target_link_libraries(psimaglite PUBLIC loki)
 add_library(psimaglite::psimaglite ALIAS psimaglite)
 
 if(USE_MPI)
-  find_package(MPI REQUIRED COMPONENTS CXX)
   target_compile_definitions(psimaglite PUBLIC USE_MPI)
   target_link_libraries(psimaglite PUBLIC MPI::MPI_CXX)
 endif()

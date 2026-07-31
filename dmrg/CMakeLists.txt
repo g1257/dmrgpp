@@ -70,6 +70,21 @@ install(TARGETS dmrg observe toolboxdmrg omegas introspect RUNTIME DESTINATION $
 
 set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)
 
+if(USE_MPI)
+  add_test(
+    NAME omegas_mpi_dry_run
+    COMMAND
+      ${CMAKE_COMMAND}
+      -DOMEGAS_EXECUTABLE=$<TARGET_FILE:omegas>
+      -DOMEGAS_INPUT=${PATH_TO_INPUTS}/inputManyOmegasDryRun.ain
+      -DMPIEXEC_EXECUTABLE=${MPIEXEC_EXECUTABLE}
+      -DMPIEXEC_NUMPROC_FLAG=${MPIEXEC_NUMPROC_FLAG}
+      "-DMPIEXEC_PREFLAGS=${MPIEXEC_PREFLAGS}"
+      "-DMPIEXEC_POSTFLAGS=${MPIEXEC_POSTFLAGS}"
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunOmegasMpiDryRun.cmake)
+  set_tests_properties(omegas_mpi_dry_run PROPERTIES LABELS "MPI" PROCESSORS 2)
+endif()
+
 # For introspect
 add_test(
   NAME introspect0

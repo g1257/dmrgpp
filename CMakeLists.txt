@@ -61,6 +61,9 @@ endif()
 
 option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
 option(USE_MPI "Enable MPI support" OFF)
+if(USE_MPI)
+  find_package(MPI REQUIRED COMPONENTS CXX)
+endif()
 
 include(CMakeDependentOption)
 cmake_dependent_option(DMRG_BUILD_BATCHED_MAGMA "Enable building with Magma" OFF "DMRG_BUILD_BATCHED" OFF)
