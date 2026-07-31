@@ -158,7 +158,7 @@ private:
 
         using MemberType = typename Kokkos::TeamPolicy<DevExecSpace>::member_type;
         Kokkos::TeamPolicy<DevExecSpace> policy(exec, static_cast<int>(nbatch_fused_),
-                                                Kokkos::AUTO, 32);
+                                                Kokkos::AUTO, Kokkos::AUTO);
 
         if (max_scratch_size > 0) {
             policy.set_scratch_size(1, Kokkos::PerTeam(max_scratch_size));
