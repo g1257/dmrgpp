@@ -146,7 +146,7 @@ public:
                         MemberType,
                         KokkosBatched::Trans::NoTranspose,
                         KokkosBatched::Trans::NoTranspose,
-                        KokkosBatched::Algo::Gemm::Unblocked>::
+                        KokkosBatched::Algo::Gemm::Blocked>::
                         invoke(member, KS(1), A, B, KS(0), C);
                 });
         }
@@ -192,7 +192,7 @@ public:
                         MemberType,
                         KokkosBatched::Trans::NoTranspose,
                         KokkosBatched::Trans::Transpose,
-                        KokkosBatched::Algo::Gemm::Unblocked>::
+                        KokkosBatched::Algo::Gemm::Blocked>::
                         invoke(member, KS(1), A, B, KS(0), C);
                 });
         }
