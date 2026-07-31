@@ -1,0 +1,51 @@
+name: CI - Ubuntu 24.04 MPI
+
+on:
+  push:
+    branches:
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+    name: RelWithDebInfo (MPI)
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      with:
+        path: source
+
+    - name: Set up Spack
+      uses: spack/setup-spack@5ab3c91bdefffffad9a7e45d1d156146afebb3a7 # v2.1.1
+      with:
+        ref: develop      # Spack version (examples: develop, releases/v0.23)
+        buildcache: true  # Configure oci://ghcr.io/spack/github-actions-buildcache
+        color: true       # Force color output (SPACK_COLOR=always)
+        path: spack       # Where to clone Spack
+
+    - name: Install Dependencies
+      run: |
+        spack -e ${{github.workspace}}/source install
+
+    - name: Configure
+      shell: spack-bash {0}
+      run: |
+        spack env activate ${{github.workspace}}/source
+        cmake -S ${{github.workspace}}/source \
+              -B ${{github.workspace}}/build \
+              -GNinja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wno-unused-parameter" \
+              -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
+              -DCMAKE_REQUIRE_FIND_PACKAGE_Kokkos=ON \
+              -DCMAKE_REQUIRE_FIND_PACKAGE_KokkosKernels=ON \
+              -DUSE_MPI=ON
+
+    - name: Build MPI Targets
+      run: cmake --build ${{github.workspace}}/build --target dmrg omegas
+
+    - name: Test MPI
+      run: ctest --test-dir ${{github.workspace}}/build -L MPI --output-on-failure
