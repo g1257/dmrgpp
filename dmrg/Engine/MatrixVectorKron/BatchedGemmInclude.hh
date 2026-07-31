@@ -29,7 +29,7 @@ public:
 
 	static std::string info()
 	{
-#ifdef 1 //KOKKOS_BATCHED
+#if 1 //KOKKOS_BATCHED
 		return "KokkosKernels";
 #elif defined(PLUGIN_SC)
 		return "PLUGIN_SC";
