@@ -83,6 +83,22 @@ if(USE_MPI)
       "-DMPIEXEC_POSTFLAGS=${MPIEXEC_POSTFLAGS}"
       -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunOmegasMpiDryRun.cmake)
   set_tests_properties(omegas_mpi_dry_run PROPERTIES LABELS "MPI" PROCESSORS 2)
+
+  add_test(
+    NAME omegas_mpi_tiny_real
+    COMMAND
+      ${CMAKE_COMMAND}
+      -DDMRG_EXECUTABLE=$<TARGET_FILE:dmrg>
+      -DOMEGAS_EXECUTABLE=$<TARGET_FILE:omegas>
+      -DGS_INPUT=${PATH_TO_INPUTS}/inputManyOmegasTinyGs.ain
+      -DOMEGAS_INPUT=${PATH_TO_INPUTS}/inputManyOmegasTiny.ain
+      -DTEST_WORKDIR=${CMAKE_CURRENT_BINARY_DIR}/omegas_mpi_tiny_real
+      -DMPIEXEC_EXECUTABLE=${MPIEXEC_EXECUTABLE}
+      -DMPIEXEC_NUMPROC_FLAG=${MPIEXEC_NUMPROC_FLAG}
+      "-DMPIEXEC_PREFLAGS=${MPIEXEC_PREFLAGS}"
+      "-DMPIEXEC_POSTFLAGS=${MPIEXEC_POSTFLAGS}"
+      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunOmegasMpiTiny.cmake)
+  set_tests_properties(omegas_mpi_tiny_real PROPERTIES LABELS "MPI" PROCESSORS 2)
 endif()
 
 # For introspect
