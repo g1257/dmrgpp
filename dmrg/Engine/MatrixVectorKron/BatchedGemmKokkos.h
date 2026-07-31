@@ -64,24 +64,6 @@ class BatchedGemmKokkos {
 
     using DevArgsView = Kokkos::View<GemmArgs*, DevMemSpace>;
 
-    // Extended struct for fused Pass1+Pass2 kernel with scratch memory optimization
-    struct FusedGemmArgs {
-        // Pass 1 (Bbatch * X -> BXbatch)
-        int       m1, n1, k1;
-        int       lda1, ldb1, ldc1;
-        long long a_off1, b_off1, c_off1;
-        
-        // Pass 2 (BXbatch * Abatch^T -> Y)
-        int       m2, n2, k2;
-        int       lda2, ldb2, ldc2;
-        long long a_off2, b_off2, c_off2;
-        
-        // Flags
-        int       hasPass1, hasPass2;
-    };
-
-    using DevFusedArgsView = Kokkos::View<FusedGemmArgs*, DevMemSpace>;
-
     static const int ialign_ = 32;
 
 public:
@@ -122,116 +104,8 @@ public:
             Kokkos::deep_copy(d_vin_, hv);
         }
 
-        // --- Zero output buffer -------------------------------------------
+        // --- Zero output and work buffers -------------------------------------------
         Kokkos::deep_copy(d_vout_, KS(0));
-
-        // Use fused kernel if enabled, otherwise fall back to two-pass
-        if (useFusedKernel_ && nbatch_fused_ > 0) {
-            matrixVectorFused_();
-        } else {
-            matrixVectorTwoPass_();
-        }
-
-        // --- D2H: copy vout back to host -------------------------------------------
-        {
-            using HV = Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>;
-            HV hv(reinterpret_cast<KS*>(vout.data()), totalXY);
-            Kokkos::deep_copy(hv, d_vout_);
-        }
-    }
-
-private:
-
-    // Optimized fused kernel combining Pass1 and Pass2 with scratch memory
-    void matrixVectorFused_() const
-    {
-        Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::matrixVectorFused");
-
-        const DevScalView flatBbatch  = d_flatBbatch_;
-        const DevScalView flatAbatch  = d_flatAbatch_;
-        const DevScalView vin_dev     = d_vin_;
-        const DevScalView vout_dev    = d_vout_;
-        const DevFusedArgsView args   = d_fused_args_;
-        const size_t max_scratch_size = max_scratch_size_;
-
-        DevExecSpace exec;
-
-        using MemberType = typename Kokkos::TeamPolicy<DevExecSpace>::member_type;
-        Kokkos::TeamPolicy<DevExecSpace> policy(exec, static_cast<int>(nbatch_fused_),
-                                                Kokkos::AUTO, 32);
-
-        if (max_scratch_size > 0) {
-            policy.set_scratch_size(1, Kokkos::PerTeam(max_scratch_size));
-        }
-
-        Kokkos::parallel_for(
-            "BatchedGemmKokkos_FusedPass1Pass2",
-            policy,
-            KOKKOS_LAMBDA(const MemberType& member) {
-                const int i = member.league_rank();
-                const FusedGemmArgs& ag = args(i);
-
-                using UV = Kokkos::View<KS**, Kokkos::LayoutLeft, DevMemSpace,
-                                        Kokkos::MemoryUnmanaged>;
-                using ScratchView = Kokkos::View<KS**, Kokkos::LayoutLeft, Kokkos::DefaultExecutionSpace::scratch_memory_space>;
-
-                // --- Pass 1: BXbatch[ip] = Bbatch[ip] * X[jp] ---
-                ScratchView BXbatch_scratch;
-                if (ag.hasPass1 && ag.k1 > 0) {
-                    // Allocate BXbatch in scratch memory for this team
-                    BXbatch_scratch = ScratchView(member.team_scratch(1), ag.m1, ag.n1);
-
-                    // A = Bbatch[ip] block
-                    UV A_full(flatBbatch.data() + ag.a_off1, ag.lda1, ag.k1);
-                    auto A = Kokkos::subview(A_full,
-                                 Kokkos::make_pair(0, ag.m1), Kokkos::ALL());
-
-                    // B = X[jp]
-                    UV B(vin_dev.data() + ag.b_off1, ag.ldb1, ag.n1);
-
-                    // C = BXbatch (in scratch memory)
-                    UV C(BXbatch_scratch.data(), ag.m1, ag.n1);
-
-                    KokkosBatched::TeamVectorGemm<
-                        MemberType,
-                        KokkosBatched::Trans::NoTranspose,
-                        KokkosBatched::Trans::NoTranspose,
-                        KokkosBatched::Algo::Gemm::Blocked>::
-                        invoke(member, KS(1), A, B, KS(0), C);
-
-                    member.team_barrier();
-                }
-
-                // --- Pass 2: Y[ip] = BXbatch[ip] * Abatch[ip]^T ---
-                if (ag.hasPass2 && ag.k2 > 0 && ag.hasPass1) {
-                    // A = BXbatch (from scratch)
-                    UV A(BXbatch_scratch.data(), ag.m1, ag.n1);
-
-                    // B = Abatch[ip]
-                    UV B_full(flatAbatch.data() + ag.b_off2, ag.ldb2, ag.k2);
-                    auto B = Kokkos::subview(B_full,
-                                 Kokkos::make_pair(0, ag.n2), Kokkos::ALL());
-
-                    // C = Y[ip] (global output)
-                    UV C_out(vout_dev.data() + ag.c_off2, ag.ldc2, ag.n2);
-
-                    KokkosBatched::TeamVectorGemm<
-                        MemberType,
-                        KokkosBatched::Trans::NoTranspose,
-                        KokkosBatched::Trans::Transpose,
-                        KokkosBatched::Algo::Gemm::Blocked>::
-                        invoke(member, KS(1), A, B, KS(0), C_out);
-                }
-            });
-
-        exec.fence();
-    }
-
-    // Fallback two-pass kernel (original implementation)
-    void matrixVectorTwoPass_() const
-    {
-        Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::matrixVectorTwoPass");
-
         Kokkos::deep_copy(d_flatBXbatch_, KS(0));
 
         DevExecSpace exec;
@@ -324,7 +198,16 @@ private:
         }
 
         exec.fence();
+
+        // --- D2H: copy vout back to host -------------------------------------------
+        {
+            using HV = Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>;
+            HV hv(reinterpret_cast<KS*>(vout.data()), totalXY);
+            Kokkos::deep_copy(hv, d_vout_);
+        }
     }
+
+private:
 
     static int iceil(int x, int n) { return (x + n - 1) / n; }
 
@@ -362,73 +245,6 @@ private:
             for (int i = 0; i < m; ++i)
                 dst[i + static_cast<long long>(j) * ldd]
                     = src[i + static_cast<long long>(j) * lds];
-    }
-
-    // Build fused GEMM arguments combining Pass1 and Pass2 per ipatch
-    void buildFusedArgs_(std::vector<FusedGemmArgs>& fused_args,
-                         const std::vector<GemmArgs>& pass1_args,
-                         const std::vector<GemmArgs>& pass2_args)
-    {
-        const SizeType npatches = pass2_args.size();
-        
-        // Group Pass1 GEMMs by their output ipatch (destination in BXbatch)
-        std::vector<std::vector<int>> pass1_by_ipatch(npatches);
-        for (int idx = 0; idx < static_cast<int>(pass1_args.size()); ++idx) {
-            // Find which ipatch this Pass1 GEMM belongs to based on output offset
-            // Note: We assume Pass2 args correspond to ipatch order
-            for (SizeType ip = 0; ip < npatches; ++ip) {
-                // Simple heuristic: group by checking offset ranges
-                // In practice, the pass2_args[ip].a_off indicates BXbatch range for ipatch ip
-                if (pass1_args[idx].c_off == pass2_args[ip].a_off) {
-                    pass1_by_ipatch[ip].push_back(idx);
-                    break;
-                }
-            }
-        }
-
-        // Create one fused GEMM per ipatch
-        for (SizeType ip = 0; ip < npatches; ++ip) {
-            FusedGemmArgs fused = {};
-            fused.hasPass1 = pass1_by_ipatch[ip].empty() ? 0 : 1;
-            fused.hasPass2 = (pass2_args[ip].k == 0) ? 0 : 1;
-
-            if (fused.hasPass1 && !pass1_by_ipatch[ip].empty()) {
-                // Use the first Pass1 GEMM's parameters (they should all have same m,k)
-                const GemmArgs& ag1 = pass1_args[pass1_by_ipatch[ip][0]];
-                fused.m1 = ag1.m;
-                fused.k1 = ag1.k;
-                fused.lda1 = ag1.lda;
-                fused.ldb1 = ag1.ldb;
-                fused.ldc1 = ag1.ldc;
-                fused.a_off1 = ag1.a_off;
-                fused.b_off1 = ag1.b_off;
-                fused.c_off1 = ag1.c_off;
-                
-                // Sum up all n1 values from Pass1 GEMMs for this ipatch
-                int n1_total = 0;
-                for (int idx : pass1_by_ipatch[ip]) {
-                    n1_total += pass1_args[idx].n;
-                }
-                fused.n1 = n1_total;
-            } else {
-                fused.m1 = fused.n1 = fused.k1 = 0;
-                fused.lda1 = fused.ldb1 = fused.ldc1 = 0;
-                fused.a_off1 = fused.b_off1 = fused.c_off1 = 0;
-            }
-
-            // Copy Pass2 GEMM args
-            fused.m2 = pass2_args[ip].m;
-            fused.n2 = pass2_args[ip].n;
-            fused.k2 = pass2_args[ip].k;
-            fused.lda2 = pass2_args[ip].lda;
-            fused.ldb2 = pass2_args[ip].ldb;
-            fused.ldc2 = pass2_args[ip].ldc;
-            fused.a_off2 = pass2_args[ip].a_off;
-            fused.b_off2 = pass2_args[ip].b_off;
-            fused.c_off2 = pass2_args[ip].c_off;
-
-            fused_args.push_back(fused);
-        }
     }
 
     void setup_()
@@ -572,19 +388,6 @@ private:
             pass2_args.push_back(a2);
         }
 
-        // Build fused GEMM arguments combining Pass1 and Pass2 per ipatch
-        std::vector<FusedGemmArgs> fused_args;
-        buildFusedArgs_(fused_args, pass1_args, pass2_args);
-
-        // Calculate max scratch memory needed for fused kernel
-        max_scratch_size_ = 0;
-        for (const auto& fg : fused_args) {
-            if (fg.hasPass1 && fg.m1 > 0 && fg.n1 > 0) {
-                size_t bx_size = static_cast<size_t>(fg.m1) * static_cast<size_t>(fg.n1) * sizeof(KS);
-                max_scratch_size_ = (bx_size > max_scratch_size_) ? bx_size : max_scratch_size_;
-            }
-        }
-
         // Allocate device arrays and upload operator matrices.
         d_flatAbatch_  = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_flatAbatch"),  totalAbatch  ? totalAbatch  : 1);
         d_flatBbatch_  = DevScalView(Kokkos::view_alloc(Kokkos::WithoutInitializing, "d_flatBbatch"),  totalBbatch  ? totalBbatch  : 1);
@@ -594,7 +397,6 @@ private:
 
         nbatch1_ = pass1_args.size();
         nbatch2_ = pass2_args.size(); // == npatches
-        nbatch_fused_ = fused_args.size();
 
         {
             auto hA = Kokkos::create_mirror_view(Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatAbatch_);
@@ -609,17 +411,13 @@ private:
 
         d_pass1_ = DevArgsView("d_pass1", nbatch1_ ? nbatch1_ : 1);
         d_pass2_ = DevArgsView("d_pass2", nbatch2_ ? nbatch2_ : 1);
-        d_fused_args_ = DevFusedArgsView("d_fused_args", nbatch_fused_ ? nbatch_fused_ : 1);
         {
             auto h1 = Kokkos::create_mirror_view(d_pass1_);
             auto h2 = Kokkos::create_mirror_view(d_pass2_);
-            auto hf = Kokkos::create_mirror_view(d_fused_args_);
             for (SizeType i = 0; i < nbatch1_; ++i) h1(i) = pass1_args[i];
             for (SizeType i = 0; i < nbatch2_; ++i) h2(i) = pass2_args[i];
-            for (SizeType i = 0; i < nbatch_fused_; ++i) hf(i) = fused_args[i];
             Kokkos::deep_copy(d_pass1_, h1);
             Kokkos::deep_copy(d_pass2_, h2);
-            Kokkos::deep_copy(d_fused_args_, hf);
         }
 
         {
@@ -628,10 +426,9 @@ private:
                   << " noperator=" << noperator
                   << " pass1_batches=" << nbatch1_
                   << " pass2_batches=" << nbatch2_
-                  << " fused_batches=" << nbatch_fused_
                   << " Abatch=" << totalAbatch << "elems"
                   << " Bbatch=" << totalBbatch << "elems"
-                  << " BXbatch=" << totalBXbatch << "elems (can be on-device scratch)";
+                  << " BXbatch=" << totalBXbatch << "elems";
             progress_.printline(msg, std::cout);
         }
     }
@@ -642,21 +439,16 @@ private:
     PsimagLite::ProgressIndicator progress_;
     mutable VectorMatrixType      garbage_; // owns sparse->dense expansions (freed in dtor)
 
-    SizeType nbatch1_ = 0;      // number of pass-1 GEMMs
-    SizeType nbatch2_ = 0;      // number of pass-2 GEMMs (== npatches)
-    SizeType nbatch_fused_ = 0; // number of fused GEMM groups
-    size_t max_scratch_size_ = 0; // max scratch memory needed for fused kernel
-
-    bool useFusedKernel_ = true; // Enable fused kernel optimization
+    SizeType nbatch1_ = 0; // number of pass-1 GEMMs
+    SizeType nbatch2_ = 0; // number of pass-2 GEMMs (== npatches)
 
     DevScalView          d_flatAbatch_;   // left-operator matrices, device, persistent
     DevScalView          d_flatBbatch_;   // right-operator matrices, device, persistent
-    mutable DevScalView  d_flatBXbatch_;  // intermediate BX work buffer (for two-pass mode)
+    mutable DevScalView  d_flatBXbatch_;  // intermediate BX work buffer, per-call
     mutable DevScalView  d_vin_;          // input vector on device, per-call
     mutable DevScalView  d_vout_;         // output vector on device, per-call
     DevArgsView          d_pass1_;        // pass-1 GEMM parameters, persistent
     DevArgsView          d_pass2_;        // pass-2 GEMM parameters, persistent
-    DevFusedArgsView     d_fused_args_;   // fused GEMM parameters, persistent
 };
 
 } // namespace Dmrg
