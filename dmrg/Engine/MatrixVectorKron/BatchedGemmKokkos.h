@@ -151,8 +151,6 @@ public:
                 });
         }
 
-        exec.fence();
-
         // --- Pass 2: Y[ip] = BXbatch[ip] * Abatch[ip]^T  (NoT x T) ---------------
         {
             const DevScalView flatBXbatch = d_flatBXbatch_;
@@ -197,13 +195,12 @@ public:
                 });
         }
 
-        exec.fence();
-
         // --- D2H: copy vout back to host -------------------------------------------
         {
             using HV = Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>;
             HV hv(reinterpret_cast<KS*>(vout.data()), totalXY);
-            Kokkos::deep_copy(hv, d_vout_);
+            Kokkos::deep_copy(exec, hv, d_vout_);
+            exec.fence();
         }
     }
 
