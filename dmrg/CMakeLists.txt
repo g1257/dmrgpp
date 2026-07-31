@@ -71,34 +71,50 @@ install(TARGETS dmrg observe toolboxdmrg omegas introspect RUNTIME DESTINATION $
 set(PATH_TO_INPUTS ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite/inputs)
 
 if(USE_MPI)
-  add_test(
-    NAME omegas_mpi_dry_run
-    COMMAND
-      ${CMAKE_COMMAND}
-      -DOMEGAS_EXECUTABLE=$<TARGET_FILE:omegas>
-      -DOMEGAS_INPUT=${PATH_TO_INPUTS}/inputManyOmegasDryRun.ain
-      -DMPIEXEC_EXECUTABLE=${MPIEXEC_EXECUTABLE}
-      -DMPIEXEC_NUMPROC_FLAG=${MPIEXEC_NUMPROC_FLAG}
-      "-DMPIEXEC_PREFLAGS=${MPIEXEC_PREFLAGS}"
-      "-DMPIEXEC_POSTFLAGS=${MPIEXEC_POSTFLAGS}"
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunOmegasMpiDryRun.cmake)
-  set_tests_properties(omegas_mpi_dry_run PROPERTIES LABELS "MPI" PROCESSORS 2)
+  function(add_mpi_test name nprocs executable)
+    set(_cmd "${MPIEXEC_EXECUTABLE}" "${MPIEXEC_NUMPROC_FLAG}" "${nprocs}")
+    list(APPEND _cmd ${MPIEXEC_PREFLAGS})
+    list(APPEND _cmd "${executable}")
+    list(APPEND _cmd ${MPIEXEC_POSTFLAGS})
+    list(APPEND _cmd ${ARGN})
+    add_test(NAME ${name} COMMAND ${_cmd})
+    set_tests_properties(${name} PROPERTIES LABELS "MPI" PROCESSORS ${nprocs})
+  endfunction()
 
-  add_test(
-    NAME omegas_mpi_tiny_real
-    COMMAND
-      ${CMAKE_COMMAND}
-      -DDMRG_EXECUTABLE=$<TARGET_FILE:dmrg>
-      -DOMEGAS_EXECUTABLE=$<TARGET_FILE:omegas>
-      -DGS_INPUT=${PATH_TO_INPUTS}/inputManyOmegasTinyGs.ain
-      -DOMEGAS_INPUT=${PATH_TO_INPUTS}/inputManyOmegasTiny.ain
-      -DTEST_WORKDIR=${CMAKE_CURRENT_BINARY_DIR}/omegas_mpi_tiny_real
-      -DMPIEXEC_EXECUTABLE=${MPIEXEC_EXECUTABLE}
-      -DMPIEXEC_NUMPROC_FLAG=${MPIEXEC_NUMPROC_FLAG}
-      "-DMPIEXEC_PREFLAGS=${MPIEXEC_PREFLAGS}"
-      "-DMPIEXEC_POSTFLAGS=${MPIEXEC_POSTFLAGS}"
-      -P ${CMAKE_CURRENT_SOURCE_DIR}/cmake/RunOmegasMpiTiny.cmake)
-  set_tests_properties(omegas_mpi_tiny_real PROPERTIES LABELS "MPI" PROCESSORS 2)
+  add_mpi_test(
+    omegas_mpi_dry_run
+    2
+    $<TARGET_FILE:omegas>
+    -d
+    -f
+    ${PATH_TO_INPUTS}/inputManyOmegasDryRun.ain)
+  set_tests_properties(omegas_mpi_dry_run PROPERTIES PASS_REGULAR_EXPRESSION "MPI rank=1")
+
+  set(_omegas_mpi_tiny_workdir ${CMAKE_CURRENT_BINARY_DIR}/omegas_mpi_tiny_real)
+  file(MAKE_DIRECTORY ${_omegas_mpi_tiny_workdir})
+
+  add_test(NAME omegas_mpi_tiny_clean COMMAND ${CMAKE_COMMAND} -E rm -f tinyGs.hd5 tinyOmega0.hd5 tinyOmega1.hd5)
+  set_tests_properties(omegas_mpi_tiny_clean PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir})
+
+  add_test(NAME omegas_mpi_tiny_gs COMMAND $<TARGET_FILE:dmrg> -f ${PATH_TO_INPUTS}/inputManyOmegasTinyGs.ain)
+  set_tests_properties(omegas_mpi_tiny_gs PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir}
+                                                       DEPENDS omegas_mpi_tiny_clean)
+
+  add_mpi_test(
+    omegas_mpi_tiny_real
+    2
+    $<TARGET_FILE:omegas>
+    -f
+    ${PATH_TO_INPUTS}/inputManyOmegasTiny.ain
+    -O
+    tinyOmega)
+  set_tests_properties(omegas_mpi_tiny_real PROPERTIES WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir}
+                                                        DEPENDS omegas_mpi_tiny_gs
+                                                        PASS_REGULAR_EXPRESSION "MPI rank=1")
+
+  add_test(NAME omegas_mpi_tiny_outputs COMMAND sh -c "test -f tinyGs.hd5 && test -f tinyOmega0.hd5 && test -f tinyOmega1.hd5")
+  set_tests_properties(omegas_mpi_tiny_outputs PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir}
+                                                          DEPENDS omegas_mpi_tiny_real)
 endif()
 
 # For introspect
