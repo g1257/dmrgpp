@@ -5,9 +5,9 @@ spack:
   - lapack
   - gsl
   - boost
-  - openmpi
-  - hdf5 +cxx +fortran +hl +mpi ^openmpi
-  - kokkos-kernels +blas +lapack
+  - openmpi ~fortran %llvm@21.1.4
+  - hdf5 +cxx +hl +mpi %llvm@21.1.4 ^openmpi ~fortran %llvm@21.1.4
+  - kokkos-kernels +blas +lapack %llvm@21.1.4
   concretizer:
     unify: false
   config:
