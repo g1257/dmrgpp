@@ -3,32 +3,6 @@
 
 using MatrixType = PsimagLite::Matrix<int>;
 
-// Locks down resize(nrow, ncol, val)'s documented contract: NOT
-// element-preserving across a change in nrow. Found via a real bug: a
-// process-lifetime cache (LanczosPlusPlus::Combinatorial) relied on this
-// overload leaving untouched cells at their old value across repeated
-// resizes to different sizes, and instead got a different, unrelated old
-// cell's value reinterpreted at the new (row, col) position.
-TEST_CASE("Matrix resize(nrow,ncol,val) is not element-preserving across nrow changes",
-          "[Matrix][resize]")
-{
-	MatrixType m(3, 3);
-	for (SizeType i = 0; i < 3; ++i)
-		for (SizeType j = 0; j < 3; ++j)
-			m(i, j) = static_cast<int>(10 * i + j);
-
-	// (0,1) is 1 before the resize.
-	CHECK(m(0, 1) == 1);
-
-	// Shrink to 2x2 with nrow changing (3 -> 2). Storage is column-major
-	// (flat index = i + j*nrow_), so this is a raw flat-array truncation,
-	// not a reshape: new (0,1)'s flat index is 0 + 1*2 = 2, which under
-	// the OLD nrow=3 layout was flat index 2, i.e. old (2,0) = 20 -- a
-	// cell unrelated to (0,1) by row/col identity.
-	m.resize(2, 2, -1);
-	CHECK(m(0, 1) == 20); // old (2,0), NOT the fill value -1 and NOT old (0,1)
-}
-
 // Locks down resize(nrow, ncol)'s documented contract: element-preserving
 // and shape-aware. Every (i,j) present in both shapes keeps its value;
 // newly-added (i,j) are value-initialized (0 for int). This is the

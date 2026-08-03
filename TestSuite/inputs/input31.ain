@@ -20,6 +20,6 @@ OutputFile="data31";
 InfiniteLoopKeptStates=60;
 FiniteLoops=[[3, 100, 0],[-6, 100, 0]];
 TargetSzPlusConst=4;
-integer KroneckerDumperBegin=50;
-integer KroneckerDumperEnd=52;
+integer KroneckerDumperBegin=7;
+integer KroneckerDumperEnd=8;
 
