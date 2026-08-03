@@ -81,13 +81,7 @@ if(USE_MPI)
     set_tests_properties(${name} PROPERTIES LABELS "MPI" PROCESSORS ${nprocs})
   endfunction()
 
-  add_mpi_test(
-    omegas_mpi_dry_run
-    2
-    $<TARGET_FILE:omegas>
-    -d
-    -f
-    ${PATH_TO_INPUTS}/inputManyOmegasDryRun.ain)
+  add_mpi_test(omegas_mpi_dry_run 2 $<TARGET_FILE:omegas> -d -f ${PATH_TO_INPUTS}/inputManyOmegasDryRun.ain)
   set_tests_properties(omegas_mpi_dry_run PROPERTIES PASS_REGULAR_EXPRESSION "MPI rank=1")
 
   set(_omegas_mpi_tiny_workdir ${CMAKE_CURRENT_BINARY_DIR}/omegas_mpi_tiny_real)
@@ -97,8 +91,8 @@ if(USE_MPI)
   set_tests_properties(omegas_mpi_tiny_clean PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir})
 
   add_test(NAME omegas_mpi_tiny_gs COMMAND $<TARGET_FILE:dmrg> -f ${PATH_TO_INPUTS}/inputManyOmegasTinyGs.ain)
-  set_tests_properties(omegas_mpi_tiny_gs PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir}
-                                                       DEPENDS omegas_mpi_tiny_clean)
+  set_tests_properties(omegas_mpi_tiny_gs PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir} DEPENDS
+                                                     omegas_mpi_tiny_clean)
 
   add_mpi_test(
     omegas_mpi_tiny_real
@@ -108,11 +102,11 @@ if(USE_MPI)
     ${PATH_TO_INPUTS}/inputManyOmegasTiny.ain
     -O
     tinyOmega)
-  set_tests_properties(omegas_mpi_tiny_real PROPERTIES WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir}
-                                                        DEPENDS omegas_mpi_tiny_gs
-                                                        PASS_REGULAR_EXPRESSION "MPI rank=1")
+  set_tests_properties(omegas_mpi_tiny_real PROPERTIES WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir} DEPENDS
+                                                       omegas_mpi_tiny_gs PASS_REGULAR_EXPRESSION "MPI rank=1")
 
-  add_test(NAME omegas_mpi_tiny_outputs COMMAND sh -c "test -f tinyGs.hd5 && test -f tinyOmega0.hd5 && test -f tinyOmega1.hd5")
+  add_test(NAME omegas_mpi_tiny_outputs
+           COMMAND sh -c "test -f tinyGs.hd5 && test -f tinyOmega0.hd5 && test -f tinyOmega1.hd5")
   set_tests_properties(omegas_mpi_tiny_outputs PROPERTIES LABELS "MPI" WORKING_DIRECTORY ${_omegas_mpi_tiny_workdir}
                                                           DEPENDS omegas_mpi_tiny_real)
 endif()
