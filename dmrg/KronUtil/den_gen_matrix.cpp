@@ -1,5 +1,7 @@
 #include "util.h"
 
+#include <random>
+
 template <typename ComplexOrRealType>
 void den_gen_matrix(const int                                                 nrow_A,
                     const int                                                 ncol_A,
@@ -18,17 +20,20 @@ void den_gen_matrix(const int                                                 nr
 	using RealType                = typename PsimagLite::Real<ComplexOrRealType>::Type;
 	const ComplexOrRealType dzero = 0;
 
-	int ia = 0;
-	int ja = 0;
+	std::random_device rd;
+	std::mt19937       rng(rd());
 
-	for (ja = 0; ja < ncol_A; ja++) {
-		for (ia = 0; ia < nrow_A; ia++) {
-			RealType drand = rand() / static_cast<RealType>(RAND_MAX);
-			RealType aij   = rand() / static_cast<RealType>(RAND_MAX);
+	std::uniform_real_distribution<RealType> value(-1.0, 1.0);
+	std::uniform_real_distribution<RealType> keep(0.0, 1.0);
 
-			int is_accept = (drand <= threshold);
-
-			a_(ia, ja) = (is_accept) ? aij : dzero;
+	for (int ja = 0; ja < ncol_A; ja++) {
+		for (int ia = 0; ia < nrow_A; ia++) {
+			if constexpr (PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
+				a_(ia, ja) = (keep(rng) <= threshold)
+				    ? ComplexOrRealType(value(rng), value(rng))
+				    : dzero;
+			else
+				a_(ia, ja) = (keep(rng) <= threshold) ? value(rng) : dzero;
 		}
 	}
 }

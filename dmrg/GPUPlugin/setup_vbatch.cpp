@@ -2,16 +2,12 @@
 #include "dmrg_lapack.h"
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"
+
+#include <algorithm>
 #include <cassert>
 #include <cmath>
 #include <complex>
 #include <cstdlib>
-
-#if defined(USE_COMPLEX_Z)
-double ABS(std::complex<double> x) { return std::abs(x); }
-#else
-double ABS(double x) { return fabs(x); }
-#endif
 
 SizeType icall = 0;
 void     print_nnz(SizeType              noperator,
@@ -299,7 +295,7 @@ void setup_vbatch(
 								for (j = 0; j < SizeType(n); j++) {
 									for (i = 0; i < SizeType(m);
 									     i++) {
-										double abs_aij = ABS(
+										double abs_aij = std::abs(
 										    Asrc[i
 										         + j * ld1]);
 										lnnz_A += (abs_aij
@@ -336,7 +332,7 @@ void setup_vbatch(
 				const SizeType nb     = 1024 * 1024 * 1024;
 
 				for (istart = 1; istart <= n; istart += nb) {
-					SizeType iend  = MIN(n, istart + nb - 1);
+					SizeType iend  = std::min(n, istart + nb - 1);
 					SizeType isize = (iend - istart + 1);
 					T*       src   = &(hAbatch_[istart - 1]);
 					T*       dest  = &(pAbatch[istart - 1]);
@@ -406,7 +402,7 @@ void setup_vbatch(
 								for (j = 0; j < SizeType(n); j++) {
 									for (i = 0; i < SizeType(m);
 									     i++) {
-										double abs_bij = ABS(
+										double abs_bij = std::abs(
 										    Bsrc[i
 										         + j * ld1]);
 										lnnz_B += (abs_bij
@@ -441,7 +437,7 @@ void setup_vbatch(
 				const SizeType nb     = 1024 * 1024 * 1024;
 
 				for (istart = 1; istart <= n; istart += nb) {
-					SizeType iend  = MIN(n, istart + nb - 1);
+					SizeType iend  = std::min(n, istart + nb - 1);
 					SizeType isize = (iend - istart + 1);
 					T*       src   = &(hBbatch_[istart - 1]);
 					T*       dest  = &(pBbatch[istart - 1]);
@@ -522,7 +518,7 @@ void setup_vbatch(
 
 				total_flops_method_1 += flops_method_1;
 				total_flops_method_2 += flops_method_2;
-				total_flops_min += MIN(flops_method_1, flops_method_2);
+				total_flops_min += std::min(flops_method_1, flops_method_2);
 			};
 		};
 		total_flops_method_1 *= ((double)noperator);
@@ -594,12 +590,7 @@ void setup_vbatch(
 }
 
 int ICEIL2(const SizeType& x, const SizeType& n) { return (((x) + (n)-1) / (n)); }
-/*
-int indx2f2(const SizeType& i,const SizeType& j,const SizeType& lda)
-{
-        return (((i)-1) + ((j)-1)*(lda));
-}
-*/
+
 template void setup_vbatch<MYTYPE>(
     SizeType              noperator, /* number of connections (INPUT) */
     SizeType              npatches, /* number of patches (INPUT) */

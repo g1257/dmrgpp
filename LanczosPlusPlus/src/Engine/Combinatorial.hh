@@ -17,7 +17,11 @@ public:
 
 	void resize(SizeType m)
 	{
-		comb_.resize(m, m, 0);
+		// Must assign a fresh zero matrix, not resize in place.
+		// PsimagLite::Matrix::resize(m,m,0) only appends zeros for new slots and
+		// leaves existing elements at their old offsets, which are wrong after the
+		// column-major stride changes from the old width to the new width.
+		comb_ = PsimagLite::Matrix<SizeType>(m, m);
 		doCombinatorial();
 	}
 

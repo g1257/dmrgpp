@@ -401,17 +401,17 @@ IntegerType main(IntegerType argc, char* argv[])
 	{
 		IntegerType i     = 0;
 		FpType      Y_avg = 0;
-		double      Y_max = ABS(hY(1));
-		double      Y_min = ABS(hY(1));
+		double      Y_max = std::abs(hY(1));
+		double      Y_min = std::abs(hY(1));
 
 		for (i = 1; i <= xy_size; i++) {
 			Y_avg += hY(i);
-			Y_max = (ABS(hY(i)) > Y_max) ? ABS(hY(i)) : Y_max;
-			Y_min = (ABS(hY(i)) < Y_min) ? ABS(hY(i)) : Y_min;
+			Y_max = std::max(Y_max, std::abs(hY(i)));
+			Y_min = std::min(Y_min, std::abs(hY(i)));
 		};
 		Y_avg = Y_avg / ((double)xy_size);
-		printf("ABS(Y_avg) = %le, Y_max = %le Y_min = %le \n",
-		       (double)ABS(Y_avg),
+		printf("std::abs(Y_avg) = %le, Y_max = %le Y_min = %le \n",
+		       std::abs(Y_avg),
 		       Y_max,
 		       Y_min);
 	};

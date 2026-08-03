@@ -711,12 +711,14 @@ template <typename S> void bcast(CrsMatrix<S>& m)
 //! Transforms a Compressed-Row-Storage (CRS) into a full Matrix (Fast version)
 template <typename T> void crsMatrixToFullMatrix(Matrix<T>& m, const CrsMatrix<T>& crsMatrix)
 {
-	m.resize(crsMatrix.rows(), crsMatrix.cols(), 0);
+	Matrix<T> temporary(crsMatrix.rows(), crsMatrix.cols());
 	for (SizeType i = 0; i < crsMatrix.rows(); i++) {
 		//  for (SizeType k=0;k<crsMatrix.cols();k++) m(i,k)=0;
 		for (int k = crsMatrix.getRowPtr(i); k < crsMatrix.getRowPtr(i + 1); k++)
-			m(i, crsMatrix.getCol(k)) = crsMatrix.getValue(k);
+			temporary(i, crsMatrix.getCol(k)) = crsMatrix.getValue(k);
 	}
+
+	m = std::move(temporary);
 }
 
 //! Transforms a full matrix into a Compressed-Row-Storage (CRS) Matrix
@@ -1126,8 +1128,8 @@ void operatorPlus(CrsMatrix<T>& A, const CrsMatrix<T>& B, T1& b1, const CrsMatri
 	SizeType ncol_C = C.cols();
 
 	// ------------------------------
-	// nrow_A = MAX( nrow_B, nrow_C )
-	// ncol_A = MAX( ncol_B, ncol_C )
+	// nrow_A = std::max( nrow_B, nrow_C )
+	// ncol_A = std::max( ncol_B, ncol_C )
 	// ------------------------------
 	SizeType nrow_A = (nrow_B >= nrow_C) ? nrow_B : nrow_C;
 	SizeType ncol_A = (ncol_B >= ncol_C) ? ncol_B : ncol_C;
@@ -1270,8 +1272,8 @@ void sum(CrsMatrix<T>&                           A,
 	SizeType Bmats_size = Bmats.size();
 
 	// ------------------------------
-	// nrow_A = MAX( nrow_B(:) )
-	// ncol_A = MAX( ncol_B(:) )
+	// nrow_A = std::max( nrow_B(:) )
+	// ncol_A = std::max( ncol_B(:) )
 	// ------------------------------
 	SizeType nrow_A  = 0;
 	SizeType ncol_A  = 0;

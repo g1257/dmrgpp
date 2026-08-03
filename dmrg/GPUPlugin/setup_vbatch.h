@@ -7,12 +7,6 @@
 
 typedef PsimagLite::Vector<SizeType>::Type VectorSizeType;
 
-#if defined(USE_COMPLEX_Z)
-double ABS(std::complex<double> x);
-#else
-double ABS(double x);
-#endif
-
 template <typename T>
 void setup_vbatch(
     SizeType               noperator, /* number of connections (INPUT) */

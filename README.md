@@ -222,3 +222,12 @@ name runForinput2.cout you may use
 <code>./dmrg -f ../TestSuite/inputs/input2.ain -l myoutputfile</code>
 If you would like stdout be written to the terminal say -l -
 
+### Profiling
+
+DMRG++ uses Kokkos for its most compute intensive components. Thus, it supports profiling through [Kokkos Tools](https://github.com/kokkos/kokkos-tools).
+To use, e.g., the [Space Time Stack](https://github.com/kokkos/kokkos-tools/wiki/Space-Time-Stack) tool set the `KOKKOS_TOOLS_LIBS` environment variable
+to the corresponding library path
+```
+export KOKKOS_TOOLS_LIBS=${YOUR_KOKKOS_TOOLS_INSTALL_DIR}/lib/libkp_space_time_stack.so
+```
+before running `dmrg`.

@@ -6,6 +6,7 @@ UseTab: ForIndentation
 TabWidth: 8
 IndentWidth: 8
 BreakBeforeBraces: Custom
+BreakStringLiterals: false
 IndentAccessModifiers: false
 AccessModifierOffset: -8
 EmptyLineAfterAccessModifier: Always

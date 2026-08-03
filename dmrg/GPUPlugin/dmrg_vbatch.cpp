@@ -4,10 +4,6 @@
 
 #define USE_MALLOC
 
-#ifdef USE_INTEL_MKL
-#include "mkl.h"
-#endif
-
 static IntegerType is_initialized = 0;
 
 #ifdef USE_MAGMA
@@ -38,10 +34,6 @@ double dmrg_get_wtime() { return omp_get_wtime(); }
 #include <time.h>
 double dmrg_get_wtime() { return ((double)clock()) / CLOCKS_PER_SEC; }
 #endif
-
-SizeType MAX(const SizeType& x, const SizeType& y) { return (((x) > (y)) ? (x) : (y)); }
-
-SizeType MIN(const SizeType& x, const SizeType& y) { return (((x) < (y)) ? (x) : (y)); }
 
 IntegerType ICEIL(const IntegerType& x, const IntegerType& n)
 {
@@ -231,63 +223,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 		gflops = gflops / (giga);
 	};
 
-#ifdef USE_INTEL_MKL
-	{
-
-		MKL_INT m_array_mkl[group_count];
-		MKL_INT n_array_mkl[group_count];
-		MKL_INT k_array_mkl[group_count];
-
-		MKL_INT lda_array_mkl[group_count];
-		MKL_INT ldb_array_mkl[group_count];
-		MKL_INT ldc_array_mkl[group_count];
-
-		MKL_INT group_size_mkl[group_count];
-
-		CBLAS_TRANSPOSE transa_array[group_count];
-		CBLAS_TRANSPOSE transb_array[group_count];
-
-		MKL_INT group_count_mkl = group_count;
-
-		IntegerType igroup = 0;
-		for (igroup = 0; igroup < group_count; igroup++) {
-			char        transa    = ctransa_array[igroup];
-			char        transb    = ctransb_array[igroup];
-			IntegerType is_transa = (transa == 'T') || (transa == 't');
-			IntegerType is_transb = (transb == 'T') || (transb == 't');
-
-			transa_array[igroup] = is_transa ? CblasTrans : CblasNoTrans;
-			transb_array[igroup] = is_transb ? CblasTrans : CblasNoTrans;
-
-			m_array_mkl[igroup] = m_array[igroup];
-			n_array_mkl[igroup] = n_array[igroup];
-			k_array_mkl[igroup] = k_array[igroup];
-
-			lda_array_mkl[igroup] = lda_array[igroup];
-			ldb_array_mkl[igroup] = ldb_array[igroup];
-			ldc_array_mkl[igroup] = ldc_array[igroup];
-
-			group_size_mkl[igroup] = group_size[igroup];
-		};
-
-		cblas_Xgemm_batch(CblasColMajor,
-		                  transa_array,
-		                  transb_array,
-		                  m_array_mkl,
-		                  n_array_mkl,
-		                  k_array_mkl,
-		                  alpha_array,
-		                  (const T**)&(a_array[0]),
-		                  lda_array_mkl,
-		                  (const T**)&(b_array[0]),
-		                  ldb_array_mkl,
-		                  beta_array,
-		                  c_array,
-		                  ldc_array_mkl,
-		                  group_count_mkl,
-		                  group_size_mkl);
-	};
-#else
 	/*
 	---------------------
 	expand out the groups
@@ -603,9 +538,9 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 					const IntegerType n = n_array[i];
 					const IntegerType k = k_array[i];
 
-					max_m = MAX(m, max_m);
-					max_n = MAX(n, max_n);
-					max_k = MAX(k, max_k);
+					max_m = std::max(m, max_m);
+					max_n = std::max(n, max_n);
+					max_k = std::max(k, max_k);
 				};
 				if (idebug >= 1) {
 					printf(
@@ -737,9 +672,9 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 						IntegerType n = pn_vbatch[i];
 						IntegerType k = pk_vbatch[i];
 
-						max_m = MAX(max_m, m);
-						max_n = MAX(max_n, n);
-						max_k = MAX(max_k, k);
+						max_m = std::max(max_m, m);
+						max_n = std::max(max_n, n);
+						max_k = std::max(max_k, k);
 
 						gmem += m * n + m * k + k * n;
 						gflops += 2.0 * m * n * k;
@@ -968,8 +903,6 @@ void dmrg_Xgemm_vbatch(char*        ctransa_array,
 	delete[] a_vbatch;
 	delete[] b_vbatch;
 	delete[] c_vbatch;
-
-#endif
 
 #endif
 

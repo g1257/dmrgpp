@@ -7,9 +7,7 @@
 
 namespace PsimagLite {
 
-// The scalar types that are floating point types and their corresponding std::complex types.
-// We need to map std::complex to Kokkos::complex while keeping all the other types which is what
-// KokkosType does.
+// We need to map std::complex to Kokkos::complex while keeping all other types.
 template <typename T> struct KokkosType {
 	using type = T;
 };

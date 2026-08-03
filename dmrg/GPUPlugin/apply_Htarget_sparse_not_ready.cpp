@@ -1,6 +1,7 @@
 #include "DMRGConfig.h"
 #include "dmrg_types.h"
 #include "dmrg_vbatch.h"
+#include <algorithm>
 #include <cassert>
 #ifdef _OPENMP
 #include <omp.h>
@@ -153,7 +154,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 				IntegerType ld_BX = ld_B;
 
 				sum_nC += nconnector;
-				max_nC = MAX(max_nC, nconnector);
+				max_nC = std::max(max_nC, nconnector);
 				nnz_nC++;
 				BX_sizes_[ipatch - 1] += ld_BX * (ncolBX * nconnector);
 			};
@@ -204,7 +205,7 @@ void apply_Htarget_sparse(SizeType                 noperator,
 	 assume each group has size only 1
 	 --------------------------
 	 */
-	SizeType ngroups        = MAX(npatches, sum_nC);
+	SizeType ngroups        = std::max(npatches, sum_nC);
 	SizeType ngroups_dim    = ialign * ICEIL(ngroups, ialign);
 	SizeType batch_size     = ngroups;
 	SizeType batch_size_dim = ialign * ICEIL(batch_size, ialign);

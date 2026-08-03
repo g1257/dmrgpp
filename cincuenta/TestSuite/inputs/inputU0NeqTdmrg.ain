@@ -1,0 +1,85 @@
+##Ainur1.0
+
+# U=0 no-quench tDMRG neq test: plumbing check.
+# At U_i=U_f=0 there is no entanglement growth, so tDMRG is essentially
+# exact and G^R/G^< must match the ExactDiag reference (u0_neq_gImpEqG0_exactdiag).
+# This is a pipeline check, not an accuracy test.  Tolerances are set
+# for the comparison against ED output, not against the analytic G_0.
+
+# ---- Equilibrium parameters ------------------------------------------------
+FicticiousBeta=20;
+ChemicalPotential=0.;
+Matsubaras=200;
+
+LatticeGf="energy,semicircular,4";
+NumberOfBathPoints=5;
+
+DmftNumberOfIterations=1;
+DmftTolerance=1e-6;
+ImpuritySolver="exactdiag";
+
+FitOptions=particleholesymmetric;
+MinParamsDelta=0.01;
+MinParamsMaxIter=10000;
+MinParamsDelta2=0.01;
+MinParamsTolerance=1e-4;
+MinParamsVerbose=0;
+vector InitBathVector=[0.447, 0.447, 0.447, 1.0, 1.8];
+
+int ImpuritySite=0;
+real HubbardU=0.;
+
+TargetElectronsUp=3;
+TargetElectronsDown=3;
+
+# ---- DMRG GS settings ------------------------------------------------------
+RootOutputname="U0NeqTdmrg";
+InfiniteLoopKeptStates=100;
+matrix FiniteLoopsGs=[[@auto, 100, 0],[@auto, 100, 0]];
+
+real OmegaBegin=-6.;
+integer OmegaTotal=20;
+real OmegaStep=0.3;
+real OmegaDelta=0.1;
+
+integer TridiagSteps=200;
+real TridiagEps=1e-9;
+TruncationTolerance="1e-10,100";
+CorrectionVectorEta=0.;
+GsWeight=0.1;
+
+matrix FiniteLoopsOmega=[[@auto, 100, 2],[@auto, 100, 2]];
+
+# ---- Non-equilibrium parameters --------------------------------------------
+# U_f=0: no quench.  NtNeq=20, TmaxNeq=2 => dt=0.1.
+HubbardUFinal=0.;
+TmaxNeq=2.0;
+NtNeq=20;
+
+NeqDmftIter=1;
+NeqDmftTolerance=0.001;
+
+# ---- tDMRG impurity solver selection ---------------------------------------
+NeqSolver="tdmrg";
+
+# FiniteLoopsTdmrg: NtNeq+2 = 22 rows.
+# N=6 sites (5 bath + 1 imp): TSPAdvanceEach=N-2=4, TSPTimeSteps=5.
+# m=100 sufficient for U=0 (no entanglement growth).
+matrix FiniteLoopsTdmrg=[
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0],
+    [@auto, 100, 0],[@auto, 100, 0]];
+
+# TSP parameters: reviewer-approved values (PR #202 / commit aa8c55e5)
+# TSPAdvanceEach = N-2 = 4 for N=6 sites: one time advance per half-sweep
+# TSPTimeSteps = 5: Krylov substeps (Gonzalo's preference)
+TSPTimeSteps=5;
+TSPAdvanceEach=4;

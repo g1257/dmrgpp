@@ -1,0 +1,9 @@
+add_executable(test_Combinatorial test_Combinatorial.cpp)
+target_include_directories(test_Combinatorial PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(test_Combinatorial PRIVATE Catch2::Catch2WithMain lanczos_globals)
+catch_discover_tests(test_Combinatorial)
+
+add_executable(test_BasisOneSpin test_BasisOneSpin.cpp)
+target_include_directories(test_BasisOneSpin PRIVATE ${CMAKE_SOURCE_DIR})
+target_link_libraries(test_BasisOneSpin PRIVATE Catch2::Catch2WithMain lanczos_globals)
+catch_discover_tests(test_BasisOneSpin)

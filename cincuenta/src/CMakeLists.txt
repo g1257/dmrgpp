@@ -147,4 +147,82 @@ if(Python3_FOUND)
   set_tests_properties(u0_neq_gImpEqG0_exactdiag_check PROPERTIES DEPENDS u0_neq_gImpEqG0_exactdiag LABELS "Nightly")
   set_tests_properties(u0_neq_gImpEqG0_exactdiag PROPERTIES LABELS "Nightly")
 
+  # -- Neq tDMRG ---------------------------------------------------------------
+  # The tDMRG path bypasses NeqDmftSolver and writes no weiss-green-* output, so
+  # there is no direct comparison of tDMRG G_imp against the Weiss field G_0.
+  # Instead the check is transitive:
+  #   (1) u0_neq_gImpEqG0_exactdiag_check proved  ExactDiag G_imp = G_0  at U=0
+  #       (Nightly-only; not re-run here — see the dedicated reference run below)
+  #   (2) u0_neq_gImpEqGcluster_tdmrg_check proves tDMRG G_imp = ExactDiag G_imp
+  #   => tDMRG G_imp = G_0 = G_cluster_0 at U=0 by transitivity.
+  # Run covers t = 0..2 (NtNeq=20, TmaxNeq=2), no quench (U_i = U_f = 0).
+  # NOTE: this is a pipeline/plumbing check, not an accuracy test. U=0 produces
+  # no entanglement growth, so tDMRG is essentially exact and the check is trivially
+  # satisfied. The meaningful tDMRG accuracy test is neqTsujiTdmrg0_compare
+  # (U=0->2 quench). Additionally, only the G^R(t,0) column is compared — the
+  # full two-time structure G^R(t,t') for t'>0 is not exercised here.
+  #
+  # Dedicated ExactDiag reference run for this comparison: u0_neq_gImpEqG0_exactdiag
+  # above is LABELS "Nightly" and excluded from fast CI (-LE Nightly), so its
+  # output is not available to a fast-CI test. Run our own copy here, in its own
+  # directory, not Nightly-gated, so this check is self-contained.
+  set(U0_NEQ_ED_FOR_TDMRG_DIR ${CMAKE_CURRENT_BINARY_DIR}/u0NeqExactDiagForTdmrgCompare)
+  file(MAKE_DIRECTORY ${U0_NEQ_ED_FOR_TDMRG_DIR})
+
+  add_test(
+    NAME u0_neq_exactdiag_reference_for_tdmrg_compare
+    COMMAND $<TARGET_FILE:cincuenta> -I ${PATH_TO_INPUTS} -f inputU0NeqExactDiag.ain
+    WORKING_DIRECTORY ${U0_NEQ_ED_FOR_TDMRG_DIR})
+
+  set(U0_NEQ_TDMRG_DIR ${CMAKE_CURRENT_BINARY_DIR}/u0NeqTdmrg)
+  file(MAKE_DIRECTORY ${U0_NEQ_TDMRG_DIR})
+
+  add_test(
+    NAME u0_neq_gImpEqGcluster_tdmrg
+    COMMAND $<TARGET_FILE:cincuenta> -I ${PATH_TO_INPUTS} -f inputU0NeqTdmrg.ain
+    WORKING_DIRECTORY ${U0_NEQ_TDMRG_DIR})
+
+  add_test(
+    NAME u0_neq_gImpEqGcluster_tdmrg_check
+    COMMAND
+      ${Python3_EXECUTABLE} ${PATH_TO_TESTSUITE}/compare_neq_gr.py --tdmrg-retarded ${U0_NEQ_TDMRG_DIR}/green-retarded
+      --tdmrg-lesser ${U0_NEQ_TDMRG_DIR}/green-lesser --ed-retarded ${U0_NEQ_ED_FOR_TDMRG_DIR}/green-retarded
+      --ed-lesser ${U0_NEQ_ED_FOR_TDMRG_DIR}/green-lesser --tolerance-re 0.02 --tolerance-im 0.02)
+  set_tests_properties(u0_neq_gImpEqGcluster_tdmrg_check
+                       PROPERTIES DEPENDS "u0_neq_gImpEqGcluster_tdmrg;u0_neq_exactdiag_reference_for_tdmrg_compare")
+
+endif()
+
+# tDMRG non-equilibrium test: U_i=0 -> U_f=2 quench, compare G^R and G^< against
+# exact-diag reference.  Requires Python 3; skipped silently if not available.
+if(Python3_FOUND)
+  set(PATH_TO_TESTSUITE ${CMAKE_CURRENT_SOURCE_DIR}/../TestSuite)
+
+  # Each run writes green-retarded / green-lesser to its own subdirectory so
+  # they don't overwrite each other or the neqTsuji0 outputs above.
+  set(TDMRG_DIR ${CMAKE_CURRENT_BINARY_DIR}/neqTsujiTdmrg)
+  set(ED_DIR ${CMAKE_CURRENT_BINARY_DIR}/neqTsujiExactDiag)
+  file(MAKE_DIRECTORY ${TDMRG_DIR} ${ED_DIR})
+
+  # Run 1: particle + hole tDMRG, produces green-retarded and green-lesser
+  add_test(
+    NAME neqTsujiTdmrg0
+    COMMAND $<TARGET_FILE:cincuenta> -I ${PATH_TO_INPUTS} -f inputNeqTsujiTdmrg.ain
+    WORKING_DIRECTORY ${TDMRG_DIR})
+
+  # Run 2: exact-diag reference (single-step, no DMFT loop)
+  add_test(
+    NAME neqTsujiExactDiag0
+    COMMAND $<TARGET_FILE:cincuenta> -I ${PATH_TO_INPUTS} -f inputNeqTsujiExactDiag.ain
+    WORKING_DIRECTORY ${ED_DIR})
+
+  # Run 3: compare tDMRG vs ED; tolerances set with ~2x headroom over current results
+  # (G^R mean |dRe|~0.009, mean |dIm|~0.007 for U_i=0->U_f=2, m=200, dt=0.1, 6 sites)
+  add_test(
+    NAME neqTsujiTdmrg0_compare
+    COMMAND
+      ${Python3_EXECUTABLE} ${PATH_TO_TESTSUITE}/compare_neq_gr.py --tdmrg-retarded ${TDMRG_DIR}/green-retarded
+      --tdmrg-lesser ${TDMRG_DIR}/green-lesser --ed-retarded ${ED_DIR}/green-retarded --ed-lesser
+      ${ED_DIR}/green-lesser --tolerance-re 0.02 --tolerance-im 0.02)
+  set_tests_properties(neqTsujiTdmrg0_compare PROPERTIES DEPENDS "neqTsujiTdmrg0;neqTsujiExactDiag0")
 endif()

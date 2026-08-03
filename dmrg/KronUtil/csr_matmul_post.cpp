@@ -6,6 +6,8 @@
 
 #include <Kokkos_Profiling_ScopedRegion.hpp>
 
+#include <Kokkos_Profiling_ScopedRegion.hpp>
+
 template <typename ComplexOrRealType>
 void csr_matmul_post(char                                                       trans_A,
                      const PsimagLite::CrsMatrix<ComplexOrRealType>&            a,

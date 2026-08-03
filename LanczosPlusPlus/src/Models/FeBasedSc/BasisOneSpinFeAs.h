@@ -318,7 +318,8 @@ private:
 	void doCombinatorial()
 	{
 		/* look-up table for binomial coefficients */
-		comb_.resize(orbitals_ * nsite_ + 1, orbitals_ * nsite_ + 1, 0);
+		comb_
+		    = PsimagLite::Matrix<SizeType>(orbitals_ * nsite_ + 1, orbitals_ * nsite_ + 1);
 
 		for (SizeType n = 0; n < comb_.n_row(); n++) {
 			SizeType m   = 0;

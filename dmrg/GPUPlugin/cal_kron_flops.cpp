@@ -1,6 +1,8 @@
 #include "analysis.h"
 #include "dmrg_vbatch.h"
 
+#include <algorithm>
+
 void cal_kron_flops(SizeType nrowA,
                     SizeType nrowB,
                     SizeType ncolA,
@@ -41,7 +43,7 @@ void cal_kron_flops(SizeType nrowA,
 	double   flops_B_XAt   = (2.0 * nrowB) * ncolB * ncolXAt;
 	double   flops_method2 = flops_XAt + flops_B_XAt;
 
-	double flops_total = nrowY * ncolY + MIN(flops_method1, flops_method2);
+	double flops_total = nrowY * ncolY + std::min(flops_method1, flops_method2);
 
 	*pflops_total   = flops_total;
 	*pflops_method1 = flops_method1;

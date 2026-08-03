@@ -266,13 +266,16 @@ public:
 		return (nrow_ == other.nrow_ && ncol_ == other.ncol_ && data_ == other.data_);
 	}
 
-	void resize(SizeType nrow, SizeType ncol, const T& val)
-	{
-		nrow_ = nrow;
-		ncol_ = ncol;
-		data_.resize(nrow * ncol, val);
-	}
-
+	/*! \brief Reshape this matrix to nrow x ncol, preserving existing data.
+	 *
+	 * Element-preserving and shape-aware: for every (i, j) that exists in
+	 * both the old and new shape, the new matrix's (i, j) holds the old
+	 * matrix's (i, j) -- never a different old cell reinterpreted, even
+	 * when nrow changes. Any newly-added (i, j) outside the old shape is
+	 * value-initialized (0 for numeric T). This is the resize to use
+	 * whenever old contents (or the invariant "untouched cells are the
+	 * type's default value") must survive a reshape with a different nrow.
+	 */
 	void resize(SizeType nrow, SizeType ncol)
 	{
 		if (nrow_ == nrow && ncol_ == ncol) {

@@ -20,39 +20,6 @@ public:
 
 	using value_type = MatrixBlockType;
 
-	template <typename SomeBasisType>
-	BlockOffDiagMatrix(const SomeBasisType&                  rowBasis,
-	                   const SomeBasisType&                  colBasis,
-	                   const typename SomeBasisType::QnType& qtarget)
-	{
-		using QnType        = typename SomeBasisType::VectorQnType::value_type;
-		SizeType rowPatches = rowBasis.partition();
-		offsetRows_.resize(rowPatches);
-		for (SizeType i = 0; i < rowPatches; ++i)
-			offsetRows_[i] = rowBasis.partition(i);
-		rows_ = offsetRows_[rowPatches - 1];
-
-		SizeType colPatches = colBasis.partition();
-		offsetCols_.resize(colPatches);
-		for (SizeType i = 0; i < colPatches; ++i)
-			offsetCols_[i] = colBasis.partition(i);
-		cols_ = offsetCols_[colPatches - 1];
-		data_.resize(rowPatches - 1, colPatches - 1, 0);
-
-		for (SizeType i = 0; i < rowPatches - 1; ++i) {
-			SizeType rows = offsetRows_[i + 1] - offsetRows_[i];
-			QnType   qrow = rowBasis.qnEx(i);
-			for (SizeType j = 0; j < colPatches - 1; ++j) {
-				QnType qcol = colBasis.qnEx(j);
-				QnType q(qrow, qcol);
-				if (q != qtarget)
-					continue;
-				SizeType cols = offsetCols_[j + 1] - offsetCols_[j];
-				data_(i, j)   = new MatrixBlockType(rows, cols);
-			}
-		}
-	}
-
 	BlockOffDiagMatrix(const SparseMatrixType& sparse, const VectorSizeType& partitions)
 	    : offsetRows_(partitions)
 	    , rows_(0)
