@@ -57,43 +57,38 @@ inline void PsimagLite::kokkos_gemm(char               transa,
 		throw std::runtime_error("kokkos_gemm: invalid leading dimension");
 	}
 
+	using Pair = Kokkos::pair<int, int>;
+
 	// Create host unmanaged views that reflect the actual storage (use lda/ldb as the first
-	// extent)
+	// extent) and create subviews representing the logical matrix sizes.
 	Kokkos::View<const KokkosScalar**,
 	             Kokkos::LayoutLeft,
 	             Kokkos::HostSpace,
 	             Kokkos::MemoryUnmanaged>
 	     Aview_op(reinterpret_cast<const KokkosScalar*>(A), ldaVal, (ta == 'N' ? K : M));
-	auto Aview_op_device
-	    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Aview_op);
+	auto Aop        = (ta == 'N') ? Kokkos::subview(Aview_op, Pair(0, M), Pair(0, K))
+	                              : Kokkos::subview(Aview_op, Pair(0, K), Pair(0, M));
+	auto Aop_device = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Aop);
 
 	Kokkos::View<const KokkosScalar**,
 	             Kokkos::LayoutLeft,
 	             Kokkos::HostSpace,
 	             Kokkos::MemoryUnmanaged>
 	     Bview_op(reinterpret_cast<const KokkosScalar*>(B), ldbVal, (tb == 'N' ? N : K));
-	auto Bview_op_device
-	    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Bview_op);
+	auto Bop        = (tb == 'N') ? Kokkos::subview(Bview_op, Pair(0, K), Pair(0, N))
+	                              : Kokkos::subview(Bview_op, Pair(0, N), Pair(0, K));
+	auto Bop_device = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Bop);
 
 	// Create C view that reflects storage with possible padding (ldcVal >= M)
 	Kokkos::View<KokkosScalar**, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
 	     Cview(reinterpret_cast<KokkosScalar*>(C), ldcVal, N);
-	auto Cview_device
-	    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Cview);
-
-	// Create subviews that present the logical matrix sizes (m x k for A if not transposed,
-	// etc.)
-	using Pair = Kokkos::pair<int, int>;
-	auto Aop   = (ta == 'N') ? Kokkos::subview(Aview_op_device, Pair(0, M), Pair(0, K))
-	                         : Kokkos::subview(Aview_op_device, Pair(0, K), Pair(0, M));
-	auto Bop   = (tb == 'N') ? Kokkos::subview(Bview_op_device, Pair(0, K), Pair(0, N))
-	                         : Kokkos::subview(Bview_op_device, Pair(0, N), Pair(0, K));
-	auto Cop   = Kokkos::subview(Cview_device, Pair(0, M), Pair(0, N));
+	auto Cop        = Kokkos::subview(Cview, Pair(0, M), Pair(0, N));
+	auto Cop_device = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Cop);
 
 	const char transA2[2] = { ta, '\0' };
 	const char transB2[2] = { tb, '\0' };
-	KokkosBlas::gemm(exec, transA2, transB2, alpha, Aop, Bop, beta, Cop);
-	Kokkos::deep_copy(exec, Cview, Cview_device);
+	KokkosBlas::gemm(exec, transA2, transB2, alpha, Aop_device, Bop_device, beta, Cop_device);
+	Kokkos::deep_copy(exec, Cop, Cop_device);
 	exec.fence();
 }
 
