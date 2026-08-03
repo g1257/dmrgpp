@@ -97,6 +97,7 @@ template <typename InitKronType> class KronMatrix {
 	using KronConnectionsType     = KronConnections<InitKronType>;
 	using MatrixType              = typename KronConnectionsType::MatrixType;
 	using VectorType              = typename KronConnectionsType::VectorType;
+	using KronLoggerType          = typename KronConnectionsType::KronLoggerType;
 	using ArrayOfMatStructType    = typename InitKronType::ArrayOfMatStructType;
 	using GenIjPatchType          = typename InitKronType::GenIjPatchType;
 	using MatrixDenseOrSparseType = typename ArrayOfMatStructType::MatrixDenseOrSparseType;
@@ -108,6 +109,7 @@ public:
 
 	KronMatrix(InitKronType& initKron, PsimagLite::String name)
 	    : initKron_(initKron)
+	    , kron_logger_(initKron)
 	    , progress_("KronMatrix")
 	    , batchedGemm_(initKron)
 	{
@@ -135,7 +137,7 @@ public:
 			return;
 		}
 
-		KronConnectionsType kc(initKron_);
+		KronConnectionsType kc(initKron_, kron_logger_);
 		SizeType            threads = PsimagLite::Concurrency::codeSectionParams.npthreads;
 		PsimagLite::CodeSectionParams codeSectionParams(threads);
 
@@ -162,6 +164,7 @@ private:
 	const KronMatrix& operator=(const KronMatrix&);
 
 	InitKronType&                 initKron_;
+	mutable KronLoggerType        kron_logger_;
 	PsimagLite::ProgressIndicator progress_;
 	BatchedGemmType               batchedGemm_;
 }; // class KronMatrix

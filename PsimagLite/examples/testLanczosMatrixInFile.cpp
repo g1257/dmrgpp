@@ -21,9 +21,8 @@ int main(int argc, char** argv)
 	typedef PsimagLite::Vector<RealType>::Type      VectorRealType;
 	typedef PsimagLite::Vector<ComplexType>::Type   VectorType;
 
-	PsimagLite::Matrix<ComplexType> m;
-	std::ifstream                   fin(argv[1]);
-	PsimagLite::String              file(argv[1]);
+	std::ifstream      fin(argv[1]);
+	PsimagLite::String file(argv[1]);
 	if (!fin || fin.bad() || !fin.good())
 		throw PsimagLite::RuntimeError("Could not open file " + file + "\n");
 
@@ -34,7 +33,8 @@ int main(int argc, char** argv)
 	if (tmp != n)
 		throw PsimagLite::RuntimeError("Matrix in file " + file + " is not square\n");
 
-	m.resize(n, n, 0);
+	PsimagLite::Matrix<ComplexType> m(n, n);
+
 	for (SizeType i = 0; i < n; ++i)
 		for (SizeType j = 0; j < n; ++j)
 			fin >> m(i, j);

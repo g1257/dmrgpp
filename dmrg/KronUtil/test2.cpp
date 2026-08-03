@@ -1,31 +1,24 @@
 #include "KronUtil.h"
 #include "util.h"
 
-#ifndef USE_FLOAT
-using RealType = double;
-#else
-using RealType = float;
-#endif
+#include <Kokkos_Core.hpp>
+#define CATCH_CONFIG_RUNNER
+#include <catch2/catch_session.hpp>
+#include <catch2/catch_test_macros.hpp>
+#include <complex>
 
-int main()
+template <typename ComplexOrRealType> void run_kron_submatrix_checks()
 {
-	using RealType          = RealType;
-	using ComplexOrRealType = std::complex<RealType>;
-	int      nerrors        = 0;
-	RealType thresholdA     = 0;
-	RealType thresholdB     = 0;
-	int      nrow_A         = 0;
-	int      ncol_A         = 0;
-	int      nrow_B         = 0;
-	int      ncol_B         = 0;
+	using RealType = typename PsimagLite::Real<ComplexOrRealType>::Type;
 
-	for (thresholdB = 0; thresholdB <= 1.1; thresholdB += 0.1) {
-		for (thresholdA = 0; thresholdA <= 1.1; thresholdA += 0.1) {
-			for (ncol_A = 1; ncol_A <= 10; ncol_A += 3) {
-				for (nrow_A = 1; nrow_A <= 10; nrow_A += 3) {
-					for (ncol_B = 1; ncol_B <= 10; ncol_B += 3) {
-						for (nrow_B = 1; nrow_B <= 10; nrow_B += 3) {
-
+	for (int thresholdB_idx = 0; thresholdB_idx <= 11; ++thresholdB_idx) {
+		double thresholdB = .1 * thresholdB_idx;
+		for (int thresholdA_idx = 0; thresholdA_idx <= 11; ++thresholdA_idx) {
+			double thresholdA = .1 * thresholdA_idx;
+			for (int ncol_A = 1; ncol_A <= 10; ncol_A += 3) {
+				for (int nrow_A = 1; nrow_A <= 10; nrow_A += 3) {
+					for (int ncol_B = 1; ncol_B <= 10; ncol_B += 3) {
+						for (int nrow_B = 1; nrow_B <= 10; nrow_B += 3) {
 							PsimagLite::Matrix<ComplexOrRealType> a_(
 							    nrow_A, ncol_A);
 							PsimagLite::Matrix<ComplexOrRealType> b_(
@@ -40,12 +33,11 @@ int main()
 								 * ------------------------------------
 								 */
 								den_eye(nrow_A, ncol_A, a_);
-								assert(den_is_eye(a_));
-
+								REQUIRE(den_is_eye(a_));
 								PsimagLite::CrsMatrix<
 								    ComplexOrRealType>
 								    a(a_);
-								assert(csr_is_eye(a));
+								REQUIRE(csr_is_eye(a));
 							} else {
 								den_gen_matrix(
 								    nrow_A, ncol_A, thresholdA, a_);
@@ -53,21 +45,20 @@ int main()
 								PsimagLite::CrsMatrix<
 								    ComplexOrRealType>
 								    a(a_);
-								assert(den_is_eye(a_)
-								       == csr_is_eye(a));
-								assert(den_is_zeros(a_)
-								       == csr_is_zeros(a));
-							};
+								REQUIRE(den_is_eye(a_)
+								        == csr_is_eye(a));
+								REQUIRE(den_is_zeros(a_)
+								        == csr_is_zeros(a));
+							}
 
 							if ((thresholdB == 0)
 							    && (nrow_B == ncol_B)) {
 								den_eye(nrow_B, ncol_B, b_);
-								assert(den_is_eye(b_));
-
+								REQUIRE(den_is_eye(b_));
 								PsimagLite::CrsMatrix<
 								    ComplexOrRealType>
 								    b(b_);
-								assert(csr_is_eye(b));
+								REQUIRE(csr_is_eye(b));
 							} else {
 								den_gen_matrix(
 								    nrow_B, ncol_B, thresholdB, b_);
@@ -75,11 +66,11 @@ int main()
 								PsimagLite::CrsMatrix<
 								    ComplexOrRealType>
 								    b(b_);
-								assert(den_is_eye(b_)
-								       == csr_is_eye(b));
-								assert(den_is_zeros(b_)
-								       == csr_is_zeros(b));
-							};
+								REQUIRE(den_is_eye(b_)
+								        == csr_is_eye(b));
+								REQUIRE(den_is_zeros(b_)
+								        == csr_is_zeros(b));
+							}
 							/*
 							 * -----------------------------------
 							 * generate compressed row format from
@@ -88,11 +79,11 @@ int main()
 							 */
 							PsimagLite::CrsMatrix<ComplexOrRealType> a(
 							    a_);
-							assert(den_is_eye(a_) == csr_is_eye(a));
+							REQUIRE(den_is_eye(a_) == csr_is_eye(a));
 
 							PsimagLite::CrsMatrix<ComplexOrRealType> b(
 							    b_);
-							assert(den_is_eye(b_) == csr_is_eye(b));
+							REQUIRE(den_is_eye(a_) == csr_is_eye(a));
 
 							/*
 							 * -----------------------------
@@ -128,29 +119,20 @@ int main()
 							PsimagLite::Vector<int>::Type cindex(
 							    ncol_C);
 
-							int nrindex = 0;
-							int ncindex = 0;
-
 							/*
 							 * --------------------
 							 * extract  even rows
 							 * extract odd columns
 							 * --------------------
 							 */
-							int ic = 0;
-							int jc = 0;
-
-							nrindex = 0;
-							for (ic = 0; ic < nrow_C; ic += 2) {
-								rindex[nrindex] = ic;
-								nrindex++;
-							};
-
-							ncindex = 0;
-							for (jc = 1; jc < ncol_C; jc += 2) {
-								cindex[ncindex] = jc;
-								ncindex++;
-							};
+							int nrindex = 0;
+							for (int ic = 0; ic < nrow_C; ic += 2) {
+								rindex[nrindex++] = ic;
+							}
+							int ncindex = 0;
+							for (int jc = 1; jc < ncol_C; jc += 2) {
+								cindex[ncindex++] = jc;
+							}
 
 							/*
 							 * -------------------------------
@@ -206,62 +188,35 @@ int main()
 							 * check both matrices should be the same
 							 * --------------------------------------
 							 */
-							{
-								int id = 0;
-								int jd = 0;
 
-								for (jd = 0; jd < ncol_D; jd++) {
-									for (id = 0; id < nrow_D;
-									     id++) {
-										RealType diff
-										    = std::abs(
-										        dd_(id, jd)
-										        - d_(id,
-										             jd));
-										const RealType tol
-										    = 1.0
-										    / (1000.0
-										       * 1000.0);
-										bool isok
-										    = (diff <= tol);
-										if (!isok) {
-											nerrors
-											    += 1;
-											std::cout
-											    << "nro"
-											       "w_"
-											       "D "
-											    << nrow_D;
-											std::cout
-											    << " nc"
-											       "ol_"
-											       "D "
-											    << ncol_D;
-											std::cout
-											    << " DD"
-											       "("
-											    << id
-											    << ","
-											    << jd
-											    << ")"
-											    << dd_(id,
-											           jd);
-											std::cout
-											    << " D("
-											    << id
-											    << ","
-											    << jd
-											    << ")"
-											    << d_(id,
-											          jd);
-											std::cout
-											    << " di"
-											       "ff "
-											    << diff
-											    << "\n";
-										};
-									};
-								};
+							for (int jd = 0; jd < ncol_D; ++jd) {
+								for (int id = 0; id < nrow_D;
+								     ++id) {
+									RealType diff = std::abs(
+									    dd_(id, jd)
+									    - d_(id, jd));
+									const RealType tol = 1.0
+									    / (1000.0 * 1000.0);
+									if (diff > tol) {
+										INFO("nrow_D "
+										     << nrow_D
+										     << " ncol_D "
+										     << ncol_D
+										     << " DD(" << id
+										     << "," << jd
+										     << ")"
+										     << dd_(id, jd)
+										     << " D(" << id
+										     << "," << jd
+										     << ")"
+										     << d_(id, jd)
+										     << " di"
+										        "ff "
+										     << diff);
+										REQUIRE(diff
+										        <= tol);
+									}
+								}
 							}
 
 							/*
@@ -293,43 +248,35 @@ int main()
 							 * check E and D are the same
 							 * --------------------------
 							 */
-							int ie = 0;
-							int je = 0;
-							for (je = 0; je < ncol_E; je++) {
-								for (ie = 0; ie < nrow_E; ie++) {
+							for (int je = 0; je < ncol_E; ++je) {
+								for (int ie = 0; ie < nrow_E;
+								     ++ie) {
 									ComplexOrRealType eij
 									    = e_(ie, je);
 									ComplexOrRealType dij
 									    = d_(ie, je);
 
-									int isok = (eij == dij);
-									if (!isok) {
-										nerrors += 1;
-
-										std::cout
-										    << "nrow_A "
-										    << nrow_A
-										    << " ncol_A "
-										    << ncol_A;
-										std::cout
-										    << " nrow_B "
-										    << nrow_B
-										    << " ncol_B "
-										    << ncol_B;
-										std::cout
-										    << "  nrindex "
-										    << nrindex
-										    << " ncindex "
-										    << ncindex
-										    << "\n";
-
-										std::cout
-										    << "ie " << ie
-										    << " je " << je
-										    << " eij "
-										    << eij
-										    << " dij "
-										    << dij << "\n";
+									if (eij != dij) {
+										INFO("nrow_A="
+										     << nrow_A
+										     << " ncol_A="
+										     << ncol_A
+										     << " nrow_B="
+										     << nrow_B
+										     << " ncol_B="
+										     << ncol_B
+										     << "  nrindex "
+										     << nrindex
+										     << " ncindex "
+										     << ncindex
+										     << '\n'
+										     << " ie " << ie
+										     << " je " << je
+										     << " eij "
+										     << eij
+										     << " dij "
+										     << dij);
+										REQUIRE(eij == dij);
 									}
 								}
 							}
@@ -368,77 +315,56 @@ int main()
 							 * check E(ie,je) and SE(ie,je) are the same
 							 * -----------------------------------------
 							 */
-							{
-								int ie = 0;
-								int je = 0;
 
-								for (je = 0; je < ncol_E; je++) {
-									for (ie = 0; ie < nrow_E;
-									     ie++) {
-										RealType diff
-										    = std::abs(
-										        e_(ie, je)
-										        - se_(ie,
-										              je));
-										const RealType tol
-										    = 1.0
-										    / (1000.0
-										       * 1000.0);
-										bool isok
-										    = (diff <= tol);
-										if (!isok) {
-											nerrors
-											    += 1;
-											std::cout
-											    << "nro"
-											       "w_"
-											       "E "
-											    << nrow_E
-											    << " nc"
-											       "ol_"
-											       "E "
-											    << ncol_E;
-											std::cout
-											    << " E("
-											    << ie
-											    << ","
-											    << je
-											    << " "
-											    << e_(ie,
-											          je);
-											std::cout
-											    << " SE"
-											       "("
-											    << ie
-											    << ","
-											    << je
-											    << ")"
-											    << se_(ie,
-											           je)
-											    << "\n";
-										}
+							for (int je = 0; je < ncol_E; ++je) {
+								for (int ie = 0; ie < nrow_E;
+								     ++ie) {
+									RealType diff = std::abs(
+									    e_(ie, je)
+									    - se_(ie, je));
+									const RealType tol = 1.0
+									    / (1000.0 * 1000.0);
+									if (diff > tol) {
+										INFO(
+										    "nrow_E="
+										    << nrow_E
+										    << " ncol_E="
+										    << ncol_E
+
+										    << " E(" << ie
+										    << "," << je
+										    << " "
+										    << e_(ie, je)
+										    << " SE(" << ie
+										    << "," << je
+										    << ")"
+										    << se_(ie, je));
+										REQUIRE(diff
+										        <= tol);
 									}
 								}
 							}
-						};
-					};
-				};
-			};
-		};
-	};
-
-	if (nerrors == 0) {
-		printf("pass all tests\n");
-	};
-	return (0);
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
-#undef X1
-#undef X2
-#undef X3
-#undef SX1
-#undef SX2
-#undef SX3
-#undef A
-#undef B
-#undef Y
+TEST_CASE("kron_submatrix_test2_double", "[kron][submatrix]")
+{
+	run_kron_submatrix_checks<double>();
+}
+TEST_CASE("kron_submatrix_test2_complex", "[kron][submatrix]")
+{
+	run_kron_submatrix_checks<std::complex<double>>();
+}
+
+int main(int argc, char* argv[])
+{
+	Kokkos::initialize(argc, argv);
+	int result = Catch::Session().run(argc, argv);
+	Kokkos::finalize();
+	return result;
+}

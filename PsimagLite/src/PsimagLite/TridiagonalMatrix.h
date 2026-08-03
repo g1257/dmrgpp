@@ -146,11 +146,11 @@ public:
 	}
 
 	template <typename SomeMatrixType>
-	void buildDenseMatrix(SomeMatrixType& m, SizeType n = 0) const
+	void buildDenseMatrix(SomeMatrixType& m_dest, SizeType n = 0) const
 	{
 		if (n == 0)
 			n = a_.size();
-		m.resize(n, n, 0);
+		SomeMatrixType m(n, n);
 		for (SizeType i = 0; i < n - 1; ++i) {
 			m(i, i)     = a_[i];
 			m(i, i + 1) = b_[i + 1];
@@ -158,6 +158,8 @@ public:
 		}
 
 		m(n - 1, n - 1) = a_[n - 1];
+
+		m_dest = std::move(m);
 	}
 
 	void diag(VectorRealType& eigs, SizeType nn) const

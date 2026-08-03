@@ -266,27 +266,6 @@ public:
 		return (nrow_ == other.nrow_ && ncol_ == other.ncol_ && data_ == other.data_);
 	}
 
-	/*! \brief Reset this matrix to nrow x ncol, filled entirely with val.
-	 *
-	 * NOT element-preserving: existing entries are NOT reinterpreted at their
-	 * (row, col) position under the new shape. This resizes the flat
-	 * column-major backing store directly (data_[i + j*nrow_]), so if nrow
-	 * changes, a cell that reads as (row, col) after the call may hold
-	 * whatever was previously stored at a DIFFERENT (row, col) under the old
-	 * nrow_ -- e.g. shrinking from 12x12 to 8x8 leaves the new (0,1) holding
-	 * the old (8,0), not val and not the old (0,1). Safe uses: nrow is
-	 * unchanged, ncol is unchanged, or the matrix was empty beforehand (no
-	 * existing data to misinterpret). If you need old contents preserved (or
-	 * correctly zeroed) at their true (row, col) identity across a reshape
-	 * that changes nrow, use resize(nrow, ncol) instead.
-	 */
-	void resize(SizeType nrow, SizeType ncol, const T& val)
-	{
-		nrow_ = nrow;
-		ncol_ = ncol;
-		data_.resize(nrow * ncol, val);
-	}
-
 	/*! \brief Reshape this matrix to nrow x ncol, preserving existing data.
 	 *
 	 * Element-preserving and shape-aware: for every (i, j) that exists in

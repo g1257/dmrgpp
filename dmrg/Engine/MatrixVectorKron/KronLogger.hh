@@ -50,17 +50,34 @@ public:
 	    : progress_("KronLogger")
 	    , fout_()
 	    , init_kron_(init_kron)
+	    , active_(true)
 	{
 		if (!init_kron.params().options.isSet("KroneckerDumper")) {
 			return;
 		}
 
-		if (counter_ >= init_kron.params().dumperEnd) {
+		const std::string message
+		    = "KronLogger: Hello from ctor, counter_=" + ttos(counter_);
+		progress_.printline(message, std::cout);
+
+		++counter_;
+
+		// Here counter_ has a value larger-by-one to what was printed
+		// so we use counter_ - 1 instead to compare with start and end
+		// it includes start but not end
+		// assumes start == end == 0 or start < end which where
+		// checked in the ParametersForDmrg reading
+
+		SizeType end = init_kron.params().dumperEnd;
+
+		if (end == 0 || counter_ >= end + 1) {
 			return;
 		}
 
 		SizeType start = init_kron.params().dumperBegin;
-		if (counter_++ < start) {
+		assert((start == 0 && end == 0) || (start < end));
+
+		if (counter_ < start + 1) {
 			return;
 		}
 
@@ -73,10 +90,7 @@ public:
 			err(std::string("Failed to create KronLogger file ") + filename + "\n");
 		}
 
-		PsimagLite::OstringStream                     msgg(std::cout.precision());
-		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg << "KronLogger: Hello from ctor, counter_=" << counter_ << "\n";
-		progress_.printline(msgg, *fout_);
+		printMetadata(message);
 	}
 
 	/*!
@@ -87,10 +101,7 @@ public:
 		if (!fout_.has_value())
 			return;
 
-		PsimagLite::OstringStream                     msgg(std::cout.precision());
-		PsimagLite::OstringStream::OstringStreamType& msg = msgg();
-		msg << "KronLogger: Bye from dtor\n";
-		progress_.printline(msgg, *fout_);
+		printMetadata("KronLogger: Bye from dtor");
 	}
 
 	/*!
@@ -100,7 +111,7 @@ public:
 	 */
 	void vector(const std::vector<ComplexOrRealType>& v)
 	{
-		if (!fout_.has_value())
+		if (!fout_.has_value() || !active_)
 			return;
 
 		*fout_ << "Vector\n";
@@ -114,7 +125,7 @@ public:
 	 */
 	void one(SizeType outPatch)
 	{
-		if (!fout_.has_value())
+		if (!fout_.has_value() || !active_)
 			return;
 
 		SizeType nC      = init_kron_.connections();
@@ -131,7 +142,7 @@ public:
 	 */
 	void two(SizeType inPatch)
 	{
-		if (!fout_.has_value())
+		if (!fout_.has_value() || !active_)
 			return;
 
 		SizeType offsetY = init_kron_.offsetForPatches(InitKronType::OLD, inPatch);
@@ -148,7 +159,7 @@ public:
 	 */
 	void three(SizeType outPatch, SizeType inPatch, SizeType ic)
 	{
-		if (!fout_.has_value())
+		if (!fout_.has_value() || !active_)
 			return;
 
 		const ArrayOfMatStructType& xiStruct = init_kron_.xc(ic);
@@ -176,7 +187,18 @@ public:
 		printMatrixDenseOrSparse(*Bmat);
 	}
 
+	void sync() { active_ = false; }
+
 private:
+
+	void printMetadata(const std::string& message)
+	{
+		if (PsimagLite::Concurrency::rank() != 0)
+			return;
+
+		*fout_ << "## ";
+		progress_.printline(message, *fout_);
+	}
 
 	static std::string separationLevel(SizeType n)
 	{
@@ -216,6 +238,7 @@ private:
 	PsimagLite::ProgressIndicator progress_;
 	std::optional<std::ofstream>  fout_;
 	const InitKronType&           init_kron_;
+	bool                          active_;
 };
 
 template <typename ModelType> SizeType KronLogger<ModelType>::counter_ = 0;
