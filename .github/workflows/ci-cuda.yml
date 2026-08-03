@@ -1,0 +1,96 @@
+name: CI - CUDA A30
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - master
+      - dev_cincuenta_mpi
+      - add-cuda-ci-flavors
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: RelWithDebInfo (CUDA, A30)
+    # Register the self-hosted runner with matching labels, e.g.:
+    #   ./config.sh --labels cuda,a30
+    runs-on: [self-hosted, linux, x64, cuda, a30]
+    timeout-minutes: 120
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+      with:
+        path: source
+
+    - name: CUDA preflight
+      run: |
+        set -euo pipefail
+        nvidia-smi
+
+        if ! command -v nvcc >/dev/null 2>&1; then
+          if [[ -x /usr/local/cuda/bin/nvcc ]]; then
+            echo "/usr/local/cuda/bin" >> "$GITHUB_PATH"
+            echo "CUDA_HOME=/usr/local/cuda" >> "$GITHUB_ENV"
+            export PATH="/usr/local/cuda/bin:$PATH"
+            export CUDA_HOME=/usr/local/cuda
+          else
+            echo "nvcc not found. Install the CUDA toolkit or add nvcc to PATH." >&2
+            exit 1
+          fi
+        fi
+        nvcc --version
+
+        if [[ ! -x /usr/bin/g++-13 ]]; then
+          echo "/usr/bin/g++-13 is required for CUDA 12.x host compilation on Ubuntu 24.04." >&2
+          exit 1
+        fi
+        /usr/bin/g++-13 --version
+
+    - name: Set up Spack
+      uses: spack/setup-spack@5ab3c91bdefffffad9a7e45d1d156146afebb3a7 # v2.1.1
+      with:
+        ref: develop
+        buildcache: true
+        color: true
+        path: spack
+
+    - name: Install Dependencies
+      run: |
+        spack -e ${{ github.workspace }}/source install
+
+    - name: Configure
+      shell: spack-bash {0}
+      run: |
+        set -euo pipefail
+        spack env activate ${{ github.workspace }}/source
+
+        cuda_root_args=()
+        if [[ -n "${CUDA_HOME:-}" ]]; then
+          cuda_root_args+=("-DCUDAToolkit_ROOT=${CUDA_HOME}")
+        fi
+
+        cmake -S ${{ github.workspace }}/source \
+              -B ${{ github.workspace }}/build \
+              -GNinja \
+              -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+              -DCMAKE_CXX_COMPILER=/usr/bin/g++-13 \
+              -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wno-unused-parameter" \
+              -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
+              -DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER \
+              -DKokkos_ENABLE_CUDA=ON \
+              -DKokkos_ARCH_AMPERE80=ON \
+              -DKokkos_ENABLE_CUDA_LAMBDA=ON \
+              "${cuda_root_args[@]}"
+
+    - name: Build
+      run: cmake --build ${{ github.workspace }}/build --parallel $(nproc)
+
+    - name: Test
+      run: CUDA_VISIBLE_DEVICES=0 ctest --test-dir ${{ github.workspace }}/build -LE Nightly --output-on-failure
+
+    - name: Install
+      run: cmake --install ${{ github.workspace }}/build --prefix ${{ github.workspace }}/install
