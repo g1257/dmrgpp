@@ -225,7 +225,8 @@ and test infrastructure.
 # Research impact statement
 
 The project received research support during two distinct periods between 2011
-and 2020, and a new period of research funding began in 2025. [FIXME: Add funding
+and 2020, and a new period of research funding began in 2025. 
+FIXME: Add funding
 agencies, programs, award numbers, other funding details, and corrected exact
 dates.] Continued maintenance has enabled its models, algorithms, numerical
 kernels, and analysis tools to evolve.
@@ -262,5 +263,7 @@ final content of the paper. AI assistance was also used in selected DMRG++
 commits, which identify that assistance in their commit messages.
 
 # Acknowledgements
+This work was supported by the U.S. Department of Energy, Office of Science, Office of Advanced Scientific Computing Research and
+Office of Basic Energy Sciences, Scientific Discovery through Advanced Computing (SciDAC) program under the CONNEQT project.
 
 # References
