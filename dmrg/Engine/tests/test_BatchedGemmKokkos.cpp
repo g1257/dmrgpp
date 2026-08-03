@@ -1,4 +1,3 @@
-// #include "BatchedGemmKokkos.h"
 #include "BatchedGemmCpu.h"
 #include "BatchedGemmPluginSc.h"
 #include <Kokkos_Core.hpp>
@@ -30,7 +29,6 @@ struct FakeLrs {
 	const FakeLR& right() const { return r; }
 };
 
-// Matrix wrapper used by BatchedGemmKokkos via ArrayOfMatStructType.
 struct FakeMatrixDenseOrSparse {
 	using value_type = double;
 	using VectorType = PsimagLite::Vector<value_type>::Type;
@@ -165,10 +163,9 @@ struct FakeInitKron {
 	{ }
 };
 
-template <template <typename> class Impl> void runBatchedGemmTest(bool useKokkos)
+TEST_CASE("BatchedGemm matrixVector", "[BatchedGemm]")
 {
-	if (useKokkos)
-		Kokkos::initialize();
+	Kokkos::ScopeGuard scope_guard;
 
 	// Build fake initKron for 1 patch, 1 operator
 	FakeInitKron fk(1, 1);
@@ -184,100 +181,6 @@ template <template <typename> class Impl> void runBatchedGemmTest(bool useKokkos
 	std::mt19937_64                        rng(123456789);
 	std::uniform_real_distribution<double> dist(-1.0, 1.0);
 
-	// Create random matrices A (2x2) and B (3x3)
-	PsimagLite::Matrix<double> A(2, 2);
-	for (int i = 0; i < 2; ++i)
-		for (int j = 0; j < 2; ++j)
-			A(i, j) = dist(rng);
-
-	PsimagLite::Matrix<double> B(3, 3);
-	for (int i = 0; i < 3; ++i)
-		for (int j = 0; j < 3; ++j)
-			B(i, j) = dist(rng);
-
-	fk.xc0.set(0, 0, FakeMatrixDenseOrSparse(A));
-	fk.yc0.set(0, 0, FakeMatrixDenseOrSparse(B));
-
-	// Instantiate implementation inside a scope so it is destroyed before Kokkos::finalize()
-	{
-		Impl<FakeInitKron> bg(fk);
-
-		// Prepare vin as column-major 3x2 with random entries
-		using VectorType = PsimagLite::Vector<double>::Type;
-		VectorType vin(6), vout(6);
-		for (size_t i = 0; i < 6; ++i)
-			vin[i] = dist(rng);
-		for (size_t i = 0; i < 6; ++i)
-			vout[i] = 0.0;
-
-		// Compute expected result on host
-		PsimagLite::Matrix<double> X(3, 2);
-		for (size_t col = 0; col < 2; ++col)
-			for (size_t row = 0; row < 3; ++row)
-				X(row, col) = vin[row + col * 3];
-
-		PsimagLite::Matrix<double> BX(3, 2);
-		for (size_t i = 0; i < 3; ++i)
-			for (size_t j = 0; j < 2; ++j) {
-				double s = 0.0;
-				for (size_t k = 0; k < 3; ++k)
-					s += B(i, k) * X(k, j);
-				BX(i, j) = s;
-			}
-
-		PsimagLite::Matrix<double> Y(3, 2);
-		for (size_t i = 0; i < 3; ++i)
-			for (size_t j = 0; j < 2; ++j) {
-				double s = 0.0;
-				for (size_t k = 0; k < 2; ++k)
-					s += BX(i, k) * A(j, k);
-				Y(i, j) = s;
-			}
-
-		VectorType expected(6);
-		for (size_t col = 0; col < 2; ++col)
-			for (size_t row = 0; row < 3; ++row)
-				expected[row + col * 3] = Y(row, col);
-
-		// Call matrixVector (implementation under test)
-		bg.matrixVector(vout, vin);
-
-		// Compare device result with host reference
-		for (size_t i = 0; i < 6; ++i)
-			CHECK(vout[i] == Catch::Approx(expected[i]).epsilon(1e-12));
-	}
-
-	if (useKokkos)
-		Kokkos::finalize();
-}
-
-// TEST_CASE("BatchedGemmKokkos matrixVector", "[BatchedGemm]")
-//{
-//     runBatchedGemmTest<Dmrg::BatchedGemmKokkos>(true);
-// }
-
-TEST_CASE("BatchedGemmCpu matrixVector", "[BatchedGemm]")
-{
-	runBatchedGemmTest<Dmrg::BatchedGemmCpu>(true);
-}
-
-TEST_CASE("BatchedGemmPluginSc matrixVector", "[BatchedGemm]")
-{
-	runBatchedGemmTest<Dmrg::BatchedGemmPluginSc>(true);
-}
-
-TEST_CASE("BatchedGemm all implementations agree", "[BatchedGemm][integration]")
-{
-	Kokkos::initialize();
-	FakeInitKron fk(1, 1);
-	fk.lrs_.l.parts  = { 0, 2 };
-	fk.lrs_.r.parts  = { 0, 3 };
-	fk.patchLeft[0]  = 0;
-	fk.patchRight[0] = 0;
-
-	std::mt19937_64                        rng(123456);
-	std::uniform_real_distribution<double> dist(-1.0, 1.0);
-
 	PsimagLite::Matrix<double> A(2, 2), B(3, 3);
 	for (int i = 0; i < 2; i++)
 		for (int j = 0; j < 2; j++)
@@ -289,7 +192,7 @@ TEST_CASE("BatchedGemm all implementations agree", "[BatchedGemm][integration]")
 	fk.yc0.set(0, 0, FakeMatrixDenseOrSparse(B));
 
 	using VectorType = PsimagLite::Vector<double>::Type;
-	VectorType vin(6), v_k(6), v_c(6), v_p(6);
+	VectorType vin(6), v_c(6), v_p(6);
 	for (size_t i = 0; i < 6; i++)
 		vin[i] = dist(rng);
 
@@ -317,25 +220,14 @@ TEST_CASE("BatchedGemm all implementations agree", "[BatchedGemm][integration]")
 		for (size_t row = 0; row < 3; row++)
 			expected[row + col * 3] = Y(row, col);
 
-	// Instantiate and run each implementation inside a scope so Kokkos objects are
-	// destroyed before Kokkos::finalize()
-	{
-		// Dmrg::BatchedGemmKokkos<FakeInitKron> bgk(fk);
-		Dmrg::BatchedGemmCpu<FakeInitKron>      bgc(fk);
-		Dmrg::BatchedGemmPluginSc<FakeInitKron> bgp(fk);
+	Dmrg::BatchedGemmCpu<FakeInitKron>      bgc(fk);
+	Dmrg::BatchedGemmPluginSc<FakeInitKron> bgp(fk);
 
-		// bgk.matrixVector(v_k, vin);
-		bgc.matrixVector(v_c, vin);
-		bgp.matrixVector(v_p, vin);
+	bgc.matrixVector(v_c, vin);
+	bgp.matrixVector(v_p, vin);
 
-		// Compare Kokkos and Plugin results immediately (they don't depend on
-		// Kokkos::finalize)
-		for (size_t i = 0; i < 6; i++) {
-			// CHECK(v_k[i] == Catch::Approx(expected[i]).epsilon(1e-12));
-			CHECK(v_p[i] == Catch::Approx(expected[i]).epsilon(1e-12));
-			CHECK(v_c[i] == Catch::Approx(expected[i]).epsilon(1e-12));
-		}
+	for (size_t i = 0; i < 6; i++) {
+		CHECK(v_p[i] == Catch::Approx(expected[i]).epsilon(1e-12));
+		CHECK(v_c[i] == Catch::Approx(expected[i]).epsilon(1e-12));
 	}
-
-	Kokkos::finalize();
 }
