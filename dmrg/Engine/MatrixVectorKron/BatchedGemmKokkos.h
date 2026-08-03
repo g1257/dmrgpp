@@ -340,8 +340,8 @@ private:
 		const SizeType totalBXbatch = BXbatchOff[npatches];
 
 		// Host packing buffers (zeroed).
-		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatAbatch("h_flatAbatch", totalAbatch);
-		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatBbatch("h_flatBbatch", totalBbatch);
+		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatAbatch(Kokkos::view_alloc("h_flatAbatch", Kokkos::WithoutInitializing), totalAbatch);
+		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatBbatch(Kokkos::view_alloc("h_flatBbatch", Kokkos::WithoutInitializing), totalBbatch);
 
 		// Build GEMM arg lists while packing matrices.
 		std::vector<GemmArgs> pass1_args;
