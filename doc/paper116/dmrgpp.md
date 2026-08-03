@@ -162,7 +162,7 @@ by repository commit
 
 # Software design
 
-DMRG++ is an input-driven C++17 scientific application that combines generic
+DMRG++ is an input-driven C++20 scientific application that combines generic
 programming with runtime configuration. The principal `dmrg` executable reads
 and validates a single input file, after which `DmrgRunner` assembles the types
 and objects needed for the calculation. This includes choosing real or complex
@@ -225,10 +225,8 @@ and test infrastructure.
 # Research impact statement
 
 The project received research support during two distinct periods between 2011
-and 2020, and a new period of research funding began in 2025. 
-FIXME: Add funding
-agencies, programs, award numbers, other funding details, and corrected exact
-dates.] Continued maintenance has enabled its models, algorithms, numerical
+and 2020 [@Alvarez:2011Award; @Elwasif:2017Award], and a new period of research funding began in 2025, mentioned in the acknowledgments.
+Except for a gap between 2021 and 2024, continued maintenance has enabled its models, algorithms, numerical
 kernels, and analysis tools to evolve.
 
 Over time, the scientific scope of DMRG++ expanded beyond ground states to
@@ -263,6 +261,7 @@ final content of the paper. AI assistance was also used in selected DMRG++
 commits, which identify that assistance in their commit messages.
 
 # Acknowledgements
+Thanks to all users and contributors to DMRG++, during its history.
 This work was supported by the U.S. Department of Energy, Office of Science, Office of Advanced Scientific Computing Research and
 Office of Basic Energy Sciences, Scientific Discovery through Advanced Computing (SciDAC) program under the CONNEQT project.
 
