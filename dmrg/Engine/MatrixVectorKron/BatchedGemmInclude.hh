@@ -1,12 +1,15 @@
 #ifndef BATCHEDGEMMINCLUDE_HH
 #define BATCHEDGEMMINCLUDE_HH
 #include "DMRGConfig.h"
-#ifdef PLUGIN_SC
+#if 0 // KOKKOS_BATCHED
+#include "BatchedGemmKokkos.h"
+#define BATCHED_GEMM ::Dmrg::BatchedGemmKokkos
+#elif defined(PLUGIN_SC)
 #include "BatchedGemmPluginSc.h"
-#define BATCHED_GEMM BatchedGemmPluginSc
+#define BATCHED_GEMM ::Dmrg::BatchedGemmPluginSc
 #else
 #include "BatchedGemmCpu.h"
-#define BATCHED_GEMM BatchedGemmCpu
+#define BATCHED_GEMM ::Dmrg::BatchedGemmCpu
 #endif
 #include <PsimagLite/PsimagLite.h>
 
@@ -18,15 +21,17 @@ public:
 
 	static void failIfNotSupported()
 	{
-#ifdef PLUGIN_SC
+#if defined(KOKKOS_BATCHED) || defined(PLUGIN_SC)
 		return;
 #endif
-		err("BatchedGemm needs -DPLUGIN_SC in Config.make\n");
+		err("BatchedGemm needs DMRG_BUILD_BATCHED_KOKKOS=ON or -DPLUGIN_SC\n");
 	}
 
 	static std::string info()
 	{
-#ifdef PLUGIN_SC
+#if 1 // KOKKOS_BATCHED
+		return "KokkosKernels";
+#elif defined(PLUGIN_SC)
 		return "PLUGIN_SC";
 #else
 		return "";
