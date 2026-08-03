@@ -5,6 +5,25 @@
 
 #include <Kokkos_Profiling_ScopedRegion.hpp>
 
+// Keep this type-dependent branch out of the KOKKOS_LAMBDA below.  NVCC 12.6
+// rejects an extended __host__ __device__ lambda when a captured local is first
+// used in an if constexpr condition, e.g. `if constexpr (is_complex)`, with
+// "An extended __host__ __device__ lambda cannot first-capture variable in
+// constexpr-if context".  Putting the compile-time branch in a templated
+// KOKKOS_INLINE_FUNCTION leaves the lambda with only ordinary runtime captures
+// while preserving the generated real-vs-complex code paths.
+template <typename ComplexOrRealType>
+KOKKOS_INLINE_FUNCTION typename PsimagLite::KokkosType<ComplexOrRealType>::type
+maybeConjForKokkos(
+    const typename PsimagLite::KokkosType<ComplexOrRealType>::type& value,
+    const bool                                                       conjugate)
+{
+	if constexpr (PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
+		return conjugate ? Kokkos::conj(value) : value;
+	else
+		return value;
+}
+
 template <typename ComplexOrRealType>
 void csr_to_den(const PsimagLite::CrsMatrix<ComplexOrRealType>& a,
                 PsimagLite::Matrix<ComplexOrRealType>&          a_)
@@ -361,24 +380,15 @@ void csr_kron_mult_method(const int  imethod,
 		    Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<2>>({ 0, 0 },
 		                                                           { nnzB, nnzA }),
 		    KOKKOS_LAMBDA(const size_t ib_idx, const size_t ia_idx) {
-			    constexpr bool is_complex
-			        = PsimagLite::IsComplexNumber<ComplexOrRealType>::True;
-			    const int isConjTransA = (transA == 'C') || (transA == 'c');
-			    const int isConjTransB = (transB == 'C') || (transB == 'c');
+			    int ia = A_row_dev(ia_idx);
+			    int ja = A_col_dev(ia_idx);
+			    KokkosScalar aij
+			        = maybeConjForKokkos<ComplexOrRealType>(A_val_dev(ia_idx), isConjTransA);
 
-			    int          ia  = A_row_dev(ia_idx);
-			    int          ja  = A_col_dev(ia_idx);
-			    KokkosScalar aij = A_val_dev(ia_idx);
-			    if constexpr (is_complex)
-				    if (isConjTransA)
-					    aij = Kokkos::conj(aij);
-
-			    int          ib  = B_row_dev(ib_idx);
-			    int          jb  = B_col_dev(ib_idx);
-			    KokkosScalar bij = B_val_dev(ib_idx);
-			    if constexpr (is_complex)
-				    if (isConjTransB)
-					    bij = Kokkos::conj(bij);
+			    int ib = B_row_dev(ib_idx);
+			    int jb = B_col_dev(ib_idx);
+			    KokkosScalar bij
+			        = maybeConjForKokkos<ComplexOrRealType>(B_val_dev(ib_idx), isConjTransB);
 
 			    KokkosScalar cij = aij * bij;
 
