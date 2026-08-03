@@ -66,29 +66,32 @@ inline void PsimagLite::kokkos_gemm(char               transa,
 	             Kokkos::HostSpace,
 	             Kokkos::MemoryUnmanaged>
 	     Aview_op(reinterpret_cast<const KokkosScalar*>(A), ldaVal, (ta == 'N' ? K : M));
-	auto Aop        = (ta == 'N') ? Kokkos::subview(Aview_op, Pair(0, M), Pair(0, K))
-	                              : Kokkos::subview(Aview_op, Pair(0, K), Pair(0, M));
-	auto Aop_device = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Aop);
+	auto Aop_device
+	    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Aview_op);
+	auto Aop_logical = (ta == 'N') ? Kokkos::subview(Aop_device, Pair(0, M), Pair(0, K))
+	                               : Kokkos::subview(Aop_device, Pair(0, K), Pair(0, M));
 
 	Kokkos::View<const KokkosScalar**,
 	             Kokkos::LayoutLeft,
 	             Kokkos::HostSpace,
 	             Kokkos::MemoryUnmanaged>
 	     Bview_op(reinterpret_cast<const KokkosScalar*>(B), ldbVal, (tb == 'N' ? N : K));
-	auto Bop        = (tb == 'N') ? Kokkos::subview(Bview_op, Pair(0, K), Pair(0, N))
-	                              : Kokkos::subview(Bview_op, Pair(0, N), Pair(0, K));
-	auto Bop_device = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Bop);
+	auto Bop_device
+	    = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Bview_op);
+	auto Bop_logical = (tb == 'N') ? Kokkos::subview(Bop_device, Pair(0, K), Pair(0, N))
+	                               : Kokkos::subview(Bop_device, Pair(0, N), Pair(0, K));
 
 	// Create C view that reflects storage with possible padding (ldcVal >= M)
 	Kokkos::View<KokkosScalar**, Kokkos::LayoutLeft, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
 	     Cview(reinterpret_cast<KokkosScalar*>(C), ldcVal, N);
-	auto Cop        = Kokkos::subview(Cview, Pair(0, M), Pair(0, N));
-	auto Cop_device = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Cop);
+	auto Cop_device = Kokkos::create_mirror_view_and_copy(Kokkos::view_alloc(exec, mem), Cview);
+	auto Cop_logical = Kokkos::subview(Cop_device, Pair(0, M), Pair(0, N));
 
 	const char transA2[2] = { ta, '\0' };
 	const char transB2[2] = { tb, '\0' };
-	KokkosBlas::gemm(exec, transA2, transB2, alpha, Aop_device, Bop_device, beta, Cop_device);
-	Kokkos::deep_copy(exec, Cop, Cop_device);
+	KokkosBlas::gemm(
+	    exec, transA2, transB2, alpha, Aop_logical, Bop_logical, beta, Cop_logical);
+	Kokkos::deep_copy(exec, Cview, Cop_device);
 	exec.fence();
 }
 
