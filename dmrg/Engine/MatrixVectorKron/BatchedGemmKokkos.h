@@ -96,19 +96,19 @@ public:
 		assert(vout.size() == totalXY);
 		assert(d_vin_.extent(0) == totalXY);
 
+    DevExecSpace exec;
+
 		// --- H2D: copy vin to device -----------------------------------------------
 		{
 			using HV
 			    = Kokkos::View<const KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>;
 			HV hv(reinterpret_cast<const KS*>(vin.data()), totalXY);
-			Kokkos::deep_copy(d_vin_, hv);
+			Kokkos::deep_copy(exec, d_vin_, hv);
 		}
 
 		// --- Zero output and work buffers -------------------------------------------
-		Kokkos::deep_copy(d_vout_, KS(0));
-		Kokkos::deep_copy(d_flatBXbatch_, KS(0));
-
-		DevExecSpace exec;
+		Kokkos::deep_copy(exec, d_vout_, KS(0));
+		Kokkos::deep_copy(exec, d_flatBXbatch_, KS(0));
 
 		// --- Pass 1: BXbatch[ip] = Bbatch[ip] * X[jp]  (NoT x NoT) ----------------
 		{
@@ -237,6 +237,7 @@ private:
 		if (mat.isZero())
 			return { nullptr, 0, 0 };
 		if (!mat.isDense()) {
+      Kokkos::abort("bla");
 			MatrixType* dense = new MatrixType();
 			crsMatrixToFullMatrix(*dense, mat.sparse());
 			garbage_.push_back(dense);
@@ -250,14 +251,26 @@ private:
 			 static_cast<int>(d.cols()) };
 	}
 
+     // Pack A (left operator) into Abatch[ip] at column colA
+//          lacpy(Aref.ptr,
+ //               mA,
+  //              nAk,
+   //             Aref.rows,
+   //             h_flatAbatch.data() + AbatchOff[ip]
+    //                + colA * static_cast<long long>(ldA[ip]),
+    //            static_cast<int>(ldA[ip]));
+
+
 	// Column-major copy: src(m, n) with lds -> dst(m, n) with ldd.
 	static void
 	lacpy(const ComplexOrRealType* src, int m, int n, int lds, ComplexOrRealType* dst, int ldd)
 	{
+    //std::cerr << "lacpy m: " << m << " n: " << n << " lds " << lds << " ldd " << ldd << std::endl;
 		for (int j = 0; j < n; ++j)
-			for (int i = 0; i < m; ++i)
-				dst[i + static_cast<long long>(j) * ldd]
-				    = src[i + static_cast<long long>(j) * lds];
+      std::memcpy(dst+static_cast<long long>(j) * ldd, src + static_cast<long long>(j) * lds, m*sizeof(ComplexOrRealType));
+			//for (int i = 0; i < m; ++i)
+		//		dst[i + static_cast<long long>(j) * ldd]
+		//		    = src[i + static_cast<long long>(j) * lds];
 	}
 
 	void setup_()
@@ -380,6 +393,7 @@ private:
 					const int nBk
 					    = static_cast<int>(rps[jp]); // B cols = X rows
 
+ Kokkos::Profiling::pushRegion("BatchedGemmKokkos::setup::lacpy");
 					// Pack A (left operator) into Abatch[ip] at column colA
 					lacpy(Aref.ptr,
 					      mA,
@@ -397,6 +411,7 @@ private:
 					      h_flatBbatch.data() + BbatchOff[ip]
 					          + colB * static_cast<long long>(ldB[ip]),
 					      static_cast<int>(ldB[ip]));
+ Kokkos::Profiling::popRegion();
 
 					// Pass 1 GEMM: C(mB, nAk) = Bbatch_block(mB, nBk) *
 					// X_jp(nBk, nAk)
@@ -463,10 +478,10 @@ private:
 		nbatch2_ = pass2_args.size(); // == npatches
 
 		{
-			Kokkos::View<KS*, Kokkos::MemoryUnmanaged> hA(reinterpret_cast<KS*>(h_flatAbatch.data()), totalAbatch);
+			Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> hA(reinterpret_cast<KS*>(h_flatAbatch.data()), totalAbatch);
 // = Kokkos::create_mirror_view(
 //			    Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatAbatch_);
-			Kokkos::View<KS*, Kokkos::MemoryUnmanaged> hB(reinterpret_cast<KS*>(h_flatBbatch.data()), totalBbatch);
+			Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> hB(reinterpret_cast<KS*>(h_flatBbatch.data()), totalBbatch);
 // = Kokkos::create_mirror_view(
 //			    Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatBbatch_);
 //			for (SizeType i = 0; i < totalAbatch; ++i)
