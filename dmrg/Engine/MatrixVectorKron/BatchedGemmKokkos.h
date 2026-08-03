@@ -96,7 +96,7 @@ public:
 		assert(vout.size() == totalXY);
 		assert(d_vin_.extent(0) == totalXY);
 
-    DevExecSpace exec;
+		DevExecSpace exec;
 
 		// --- H2D: copy vin to device -----------------------------------------------
 		{
@@ -237,7 +237,6 @@ private:
 		if (mat.isZero())
 			return { nullptr, 0, 0 };
 		if (!mat.isDense()) {
-      Kokkos::abort("bla");
 			MatrixType* dense = new MatrixType();
 			crsMatrixToFullMatrix(*dense, mat.sparse());
 			garbage_.push_back(dense);
@@ -251,26 +250,14 @@ private:
 			 static_cast<int>(d.cols()) };
 	}
 
-     // Pack A (left operator) into Abatch[ip] at column colA
-//          lacpy(Aref.ptr,
- //               mA,
-  //              nAk,
-   //             Aref.rows,
-   //             h_flatAbatch.data() + AbatchOff[ip]
-    //                + colA * static_cast<long long>(ldA[ip]),
-    //            static_cast<int>(ldA[ip]));
-
-
 	// Column-major copy: src(m, n) with lds -> dst(m, n) with ldd.
 	static void
 	lacpy(const ComplexOrRealType* src, int m, int n, int lds, ComplexOrRealType* dst, int ldd)
 	{
-    //std::cerr << "lacpy m: " << m << " n: " << n << " lds " << lds << " ldd " << ldd << std::endl;
 		for (int j = 0; j < n; ++j)
-      std::memcpy(dst+static_cast<long long>(j) * ldd, src + static_cast<long long>(j) * lds, m*sizeof(ComplexOrRealType));
-			//for (int i = 0; i < m; ++i)
-		//		dst[i + static_cast<long long>(j) * ldd]
-		//		    = src[i + static_cast<long long>(j) * lds];
+			std::memcpy(dst + static_cast<long long>(j) * ldd,
+			            src + static_cast<long long>(j) * lds,
+			            m * sizeof(ComplexOrRealType));
 	}
 
 	void setup_()
@@ -287,56 +274,62 @@ private:
 		VectorSizeType ldB(npatches, 0); // padded rps -> Bbatch / BXbatch leading dim
 		VectorSizeType xyStart(npatches + 1, 0); // patch start offset in vin/vout
 
-    std::cerr << "XXX: n_patches=" << npatches << std::endl; 
-{
-    Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::setup::patch_sizes");
+		{
+			Kokkos::Profiling::ScopedRegion region(
+			    "BatchedGemmKokkos::setup::patch_sizes");
 
-		for (SizeType ip = 0; ip < npatches; ++ip) {
-			const SizeType lg
-			    = initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT)[ip];
-			const SizeType rg
-			    = initKron_.patch(InitKronType::NEW, GenIjPatchType::RIGHT)[ip];
-			const int L1 = initKron_.lrs(InitKronType::NEW).left().partition(lg);
-			const int L2 = initKron_.lrs(InitKronType::NEW).left().partition(lg + 1);
-			const int R1 = initKron_.lrs(InitKronType::NEW).right().partition(rg);
-			const int R2 = initKron_.lrs(InitKronType::NEW).right().partition(rg + 1);
-			lps[ip]      = static_cast<SizeType>(L2 - L1);
-			rps[ip]      = static_cast<SizeType>(R2 - R1);
-			ldA[ip]      = static_cast<SizeType>(
-                            ialign_ * iceil(static_cast<int>(lps[ip]), ialign_));
-			ldB[ip] = static_cast<SizeType>(
-			    ialign_ * iceil(static_cast<int>(rps[ip]), ialign_));
-	}
+			for (SizeType ip = 0; ip < npatches; ++ip) {
+				const SizeType lg
+				    = initKron_.patch(InitKronType::NEW, GenIjPatchType::LEFT)[ip];
+				const SizeType rg
+				    = initKron_.patch(InitKronType::NEW, GenIjPatchType::RIGHT)[ip];
+				const int L1
+				    = initKron_.lrs(InitKronType::NEW).left().partition(lg);
+				const int L2
+				    = initKron_.lrs(InitKronType::NEW).left().partition(lg + 1);
+				const int R1
+				    = initKron_.lrs(InitKronType::NEW).right().partition(rg);
+				const int R2
+				    = initKron_.lrs(InitKronType::NEW).right().partition(rg + 1);
+				lps[ip] = static_cast<SizeType>(L2 - L1);
+				rps[ip] = static_cast<SizeType>(R2 - R1);
+				ldA[ip] = static_cast<SizeType>(
+				    ialign_ * iceil(static_cast<int>(lps[ip]), ialign_));
+				ldB[ip] = static_cast<SizeType>(
+				    ialign_ * iceil(static_cast<int>(rps[ip]), ialign_));
+			}
 
-
-		xyStart[0] = 0;
-		for (SizeType ip = 0; ip < npatches; ++ip)
-			xyStart[ip + 1] = xyStart[ip] + lps[ip] * rps[ip];
-}
+			xyStart[0] = 0;
+			for (SizeType ip = 0; ip < npatches; ++ip)
+				xyStart[ip + 1] = xyStart[ip] + lps[ip] * rps[ip];
+		}
 		// Column widths:
 		//   AbatchCols[ip] = sum of lps[jp] over all non-zero (jp, k) connections for ip
 		//   BbatchCols[ip] = sum of rps[jp] over all non-zero (jp, k) connections for ip
 		VectorSizeType AbatchCols(npatches, 0);
 		VectorSizeType BbatchCols(npatches, 0);
 
-{   
-    Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::setup::patch_pointers");
-		for (SizeType ip = 0; ip < npatches; ++ip) {
-			for (SizeType jp = 0; jp < npatches; ++jp) {
-				for (SizeType k = 0; k < noperator; ++k) {
-					const MatrixDenseOrSparseType* Ap = initKron_.xc(k)(ip, jp);
-					const MatrixDenseOrSparseType* Bp = initKron_.yc(k)(ip, jp);
-					if (!Ap || !Bp)
-						continue;
-					if (Ap->isZero() || Bp->isZero())
-						continue;
-					AbatchCols[ip] += lps[jp];
-					BbatchCols[ip] += rps[jp];
+		{
+			Kokkos::Profiling::ScopedRegion region(
+			    "BatchedGemmKokkos::setup::patch_pointers");
+			for (SizeType ip = 0; ip < npatches; ++ip) {
+				for (SizeType jp = 0; jp < npatches; ++jp) {
+					for (SizeType k = 0; k < noperator; ++k) {
+						const MatrixDenseOrSparseType* Ap
+						    = initKron_.xc(k)(ip, jp);
+						const MatrixDenseOrSparseType* Bp
+						    = initKron_.yc(k)(ip, jp);
+						if (!Ap || !Bp)
+							continue;
+						if (Ap->isZero() || Bp->isZero())
+							continue;
+						AbatchCols[ip] += lps[jp];
+						BbatchCols[ip] += rps[jp];
+					}
 				}
 			}
 		}
-}
- Kokkos::Profiling::pushRegion("BatchedGemmKokkos::setup::intermediate");
+		Kokkos::Profiling::pushRegion("BatchedGemmKokkos::setup::intermediate");
 		// Flat offsets: each patch ip occupies a contiguous slice.
 		VectorSizeType AbatchOff(npatches + 1, 0);
 		VectorSizeType BbatchOff(npatches + 1, 0);
@@ -353,177 +346,178 @@ private:
 		const SizeType totalBXbatch = BXbatchOff[npatches];
 
 		// Host packing buffers (zeroed).
-		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatAbatch(Kokkos::view_alloc("h_flatAbatch", Kokkos::WithoutInitializing), totalAbatch);
-		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatBbatch(Kokkos::view_alloc("h_flatBbatch", Kokkos::WithoutInitializing), totalBbatch);
+		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatAbatch(
+		    Kokkos::view_alloc("h_flatAbatch", Kokkos::WithoutInitializing), totalAbatch);
+		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatBbatch(
+		    Kokkos::view_alloc("h_flatBbatch", Kokkos::WithoutInitializing), totalBbatch);
 
 		// Build GEMM arg lists while packing matrices.
 		std::vector<GemmArgs> pass1_args;
-    pass1_args.reserve(npatches*npatches*noperator);
+		pass1_args.reserve(npatches * npatches * noperator);
 		std::vector<GemmArgs> pass2_args;
 		pass2_args.reserve(npatches);
 
- Kokkos::Profiling::popRegion();
+		Kokkos::Profiling::popRegion();
 
-{
-    Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::setup::gemm");
+		{
+			Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::setup::gemm");
 
-		for (SizeType ip = 0; ip < npatches; ++ip) {
-			long long colA = 0; // column cursor in Abatch[ip]  (= BXbatch[ip])
-			long long colB = 0; // column cursor in Bbatch[ip]
+			for (SizeType ip = 0; ip < npatches; ++ip) {
+				long long colA = 0; // column cursor in Abatch[ip]  (= BXbatch[ip])
+				long long colB = 0; // column cursor in Bbatch[ip]
 
-			for (SizeType jp = 0; jp < npatches; ++jp) {
-				for (SizeType k = 0; k < noperator; ++k) {
-					const MatrixDenseOrSparseType* Amat
-					    = initKron_.xc(k)(ip, jp);
-					const MatrixDenseOrSparseType* Bmat
-					    = initKron_.yc(k)(ip, jp);
-					if (!Amat || !Bmat)
-						continue;
-					if (Amat->isZero() || Bmat->isZero())
-						continue;
+				for (SizeType jp = 0; jp < npatches; ++jp) {
+					for (SizeType k = 0; k < noperator; ++k) {
+						const MatrixDenseOrSparseType* Amat
+						    = initKron_.xc(k)(ip, jp);
+						const MatrixDenseOrSparseType* Bmat
+						    = initKron_.yc(k)(ip, jp);
+						if (!Amat || !Bmat)
+							continue;
+						if (Amat->isZero() || Bmat->isZero())
+							continue;
 
-					MatRef Aref = getMatRef(*Amat); // left operator (xc)
-					MatRef Bref = getMatRef(*Bmat); // right operator (yc)
-					assert(Aref.ptr && Bref.ptr);
+						MatRef Aref
+						    = getMatRef(*Amat); // left operator (xc)
+						MatRef Bref
+						    = getMatRef(*Bmat); // right operator (yc)
+						assert(Aref.ptr && Bref.ptr);
 
-					const int mA = static_cast<int>(lps[ip]);
-					const int nAk
-					    = static_cast<int>(lps[jp]); // A cols = BX cols per op
-					const int mB = static_cast<int>(rps[ip]);
-					const int nBk
-					    = static_cast<int>(rps[jp]); // B cols = X rows
+						const int mA  = static_cast<int>(lps[ip]);
+						const int nAk = static_cast<int>(
+						    lps[jp]); // A cols = BX cols per op
+						const int mB = static_cast<int>(rps[ip]);
+						const int nBk
+						    = static_cast<int>(rps[jp]); // B cols = X rows
 
- Kokkos::Profiling::pushRegion("BatchedGemmKokkos::setup::lacpy");
-					// Pack A (left operator) into Abatch[ip] at column colA
-					lacpy(Aref.ptr,
-					      mA,
-					      nAk,
-					      Aref.rows,
-					      h_flatAbatch.data() + AbatchOff[ip]
-					          + colA * static_cast<long long>(ldA[ip]),
-					      static_cast<int>(ldA[ip]));
+						Kokkos::Profiling::pushRegion(
+						    "BatchedGemmKokkos::setup::lacpy");
+						// Pack A (left operator) into Abatch[ip] at column
+						// colA
+						lacpy(Aref.ptr,
+						      mA,
+						      nAk,
+						      Aref.rows,
+						      h_flatAbatch.data() + AbatchOff[ip]
+						          + colA * static_cast<long long>(ldA[ip]),
+						      static_cast<int>(ldA[ip]));
 
-					// Pack B (right operator) into Bbatch[ip] at column colB
-					lacpy(Bref.ptr,
-					      mB,
-					      nBk,
-					      Bref.rows,
-					      h_flatBbatch.data() + BbatchOff[ip]
-					          + colB * static_cast<long long>(ldB[ip]),
-					      static_cast<int>(ldB[ip]));
- Kokkos::Profiling::popRegion();
+						// Pack B (right operator) into Bbatch[ip] at column
+						// colB
+						lacpy(Bref.ptr,
+						      mB,
+						      nBk,
+						      Bref.rows,
+						      h_flatBbatch.data() + BbatchOff[ip]
+						          + colB * static_cast<long long>(ldB[ip]),
+						      static_cast<int>(ldB[ip]));
+						Kokkos::Profiling::popRegion();
 
-					// Pass 1 GEMM: C(mB, nAk) = Bbatch_block(mB, nBk) *
-					// X_jp(nBk, nAk)
-					GemmArgs a1;
-					a1.m     = mB;
-					a1.n     = nAk;
-					a1.k     = nBk;
-					a1.lda   = static_cast<int>(ldB[ip]); // Bbatch leading dim
-					a1.ldb   = nBk; // X[jp] no padding: ld = rps[jp]
-					a1.ldc   = static_cast<int>(ldB[ip]); // BXbatch leading dim
-					a1.a_off = static_cast<long long>(BbatchOff[ip])
-					    + colB * static_cast<long long>(ldB[ip]);
-					a1.b_off = static_cast<long long>(xyStart[jp]);
-					a1.c_off = static_cast<long long>(BXbatchOff[ip])
-					    + colA * static_cast<long long>(ldB[ip]);
-					pass1_args.push_back(a1);
+						// Pass 1 GEMM: C(mB, nAk) = Bbatch_block(mB, nBk) *
+						// X_jp(nBk, nAk)
+						GemmArgs a1;
+						a1.m   = mB;
+						a1.n   = nAk;
+						a1.k   = nBk;
+						a1.lda = static_cast<int>(
+						    ldB[ip]); // Bbatch leading dim
+						a1.ldb = nBk; // X[jp] no padding: ld = rps[jp]
+						a1.ldc = static_cast<int>(
+						    ldB[ip]); // BXbatch leading dim
+						a1.a_off = static_cast<long long>(BbatchOff[ip])
+						    + colB * static_cast<long long>(ldB[ip]);
+						a1.b_off = static_cast<long long>(xyStart[jp]);
+						a1.c_off = static_cast<long long>(BXbatchOff[ip])
+						    + colA * static_cast<long long>(ldB[ip]);
+						pass1_args.push_back(a1);
 
-					colA += nAk;
-					colB += nBk;
+						colA += nAk;
+						colB += nBk;
+					}
 				}
+
+				// Pass 2 GEMM: Y[ip](mB, mA) = BXbatch[ip](mB, k) * Abatch[ip](mA,
+				// k)^T
+				const int totalCols = static_cast<int>(colA); // = AbatchCols[ip]
+				GemmArgs  a2;
+				a2.m   = static_cast<int>(rps[ip]);
+				a2.n   = static_cast<int>(lps[ip]);
+				a2.k   = totalCols;
+				a2.lda = static_cast<int>(ldB[ip]); // BXbatch leading dim
+				a2.ldb = static_cast<int>(ldA[ip]); // Abatch leading dim
+				a2.ldc
+				    = static_cast<int>(rps[ip]); // Y[ip] no padding: ld = rps[ip]
+				a2.a_off = static_cast<long long>(BXbatchOff[ip]);
+				a2.b_off = static_cast<long long>(AbatchOff[ip]);
+				a2.c_off = static_cast<long long>(xyStart[ip]);
+				pass2_args.push_back(a2);
+			}
+		}
+		{
+			Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::setup::rest");
+
+			DevExecSpace exec;
+
+			// Allocate device arrays and upload operator matrices.
+			d_flatAbatch_ = DevScalView(
+			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_flatAbatch"),
+			    totalAbatch);
+			d_flatBbatch_ = DevScalView(
+			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_flatBbatch"),
+			    totalBbatch);
+			d_flatBXbatch_ = DevScalView(
+			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_flatBXbatch"),
+			    totalBXbatch);
+			d_vin_ = DevScalView(
+			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_vin"),
+			    xyStart[npatches]);
+			d_vout_ = DevScalView(
+			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_vout"),
+			    xyStart[npatches]);
+
+			nbatch1_ = pass1_args.size();
+			nbatch2_ = pass2_args.size(); // == npatches
+
+			{
+				Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> hA(
+				    reinterpret_cast<KS*>(h_flatAbatch.data()), totalAbatch);
+				Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> hB(
+				    reinterpret_cast<KS*>(h_flatBbatch.data()), totalBbatch);
+				Kokkos::deep_copy(exec, d_flatAbatch_, hA);
+				Kokkos::deep_copy(exec, d_flatBbatch_, hB);
 			}
 
-			// Pass 2 GEMM: Y[ip](mB, mA) = BXbatch[ip](mB, k) * Abatch[ip](mA, k)^T
-			const int totalCols = static_cast<int>(colA); // = AbatchCols[ip]
-			GemmArgs  a2;
-			a2.m     = static_cast<int>(rps[ip]);
-			a2.n     = static_cast<int>(lps[ip]);
-			a2.k     = totalCols;
-			a2.lda   = static_cast<int>(ldB[ip]); // BXbatch leading dim
-			a2.ldb   = static_cast<int>(ldA[ip]); // Abatch leading dim
-			a2.ldc   = static_cast<int>(rps[ip]); // Y[ip] no padding: ld = rps[ip]
-			a2.a_off = static_cast<long long>(BXbatchOff[ip]);
-			a2.b_off = static_cast<long long>(AbatchOff[ip]);
-			a2.c_off = static_cast<long long>(xyStart[ip]);
-			pass2_args.push_back(a2);
-		}
-}
-{
-    Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::setup::rest");
+			d_pass1_ = DevArgsView("d_pass1", nbatch1_);
+			d_pass2_ = DevArgsView("d_pass2", nbatch2_);
+			{
+				Kokkos::View<GemmArgs*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
+				    h1(pass1_args.data(), nbatch1_);
+				Kokkos::View<GemmArgs*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged>
+				    h2(pass2_args.data(), nbatch2_);
+				Kokkos::deep_copy(exec, d_pass1_, h1);
+				Kokkos::deep_copy(exec, d_pass2_, h2);
+			}
+			exec.fence();
 
-    DevExecSpace exec;
-
-		// Allocate device arrays and upload operator matrices.
-    std::cerr << "Allocating " << totalAbatch << std::endl;
-		d_flatAbatch_
-		    = DevScalView(Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_flatAbatch"),
-		                  totalAbatch ? totalAbatch : 1);
-    std::cerr << "Allocating " << totalBbatch << std::endl;
-		d_flatBbatch_
-		    = DevScalView(Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_flatBbatch"),
-		                  totalBbatch ? totalBbatch : 1);
-    std::cerr << "Allocating " << totalBXbatch << std::endl;
-		d_flatBXbatch_
-		    = DevScalView(Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_flatBXbatch"),
-		                  totalBXbatch ? totalBXbatch : 1);
-    std::cerr << "Allocating " << xyStart[npatches] << std::endl;
-		d_vin_  = DevScalView(Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_vin"),
-                                     xyStart[npatches] ? xyStart[npatches] : 1);
-    std::cerr << "Allocating " << xyStart[npatches] << std::endl;
-		d_vout_ = DevScalView(Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_vout"),
-		                      xyStart[npatches] ? xyStart[npatches] : 1);
-
-		nbatch1_ = pass1_args.size();
-		nbatch2_ = pass2_args.size(); // == npatches
-
-		{
-			Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> hA(reinterpret_cast<KS*>(h_flatAbatch.data()), totalAbatch);
-// = Kokkos::create_mirror_view(
-//			    Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatAbatch_);
-			Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> hB(reinterpret_cast<KS*>(h_flatBbatch.data()), totalBbatch);
-// = Kokkos::create_mirror_view(
-//			    Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatBbatch_);
-//			for (SizeType i = 0; i < totalAbatch; ++i)
-//				hA(i) = *reinterpret_cast<const KS*>(&h_flatAbatch[i]);
-//			for (SizeType i = 0; i < totalBbatch; ++i)
-//				hB(i) = *reinterpret_cast<const KS*>(&h_flatBbatch[i]);
-			Kokkos::deep_copy(exec, d_flatAbatch_, hA);
-			Kokkos::deep_copy(exec, d_flatBbatch_, hB);
-		}
-
-		d_pass1_ = DevArgsView("d_pass1", nbatch1_ ? nbatch1_ : 1);
-		d_pass2_ = DevArgsView("d_pass2", nbatch2_ ? nbatch2_ : 1);
-		{
-			Kokkos::View<GemmArgs*, Kokkos::MemoryUnmanaged> h1(pass1_args.data(), nbatch1_);
-// = Kokkos::create_mirror_view(Kokkos::view_alloc(exec, Kokkos::WithoutInitializing), d_pass1_);
-			Kokkos::View<GemmArgs*, Kokkos::MemoryUnmanaged> h2(pass2_args.data(), nbatch2_);
-// = Kokkos::create_mirror_view(Kokkos::view_alloc(exec, Kokkos::WithoutInitializing), d_pass2_);
-//			for (SizeType i = 0; i < nbatch1_; ++i)
-//				h1(i) = pass1_args[i];
-//			for (SizeType i = 0; i < nbatch2_; ++i)
-//				h2(i) = pass2_args[i];
-			Kokkos::deep_copy(exec, d_pass1_, h1);
-			Kokkos::deep_copy(exec, d_pass2_, h2);
-		}
-    exec.fence();
-
-		{
-			PsimagLite::OstringStream msg(std::cout.precision());
-			msg() << "setup done: npatches=" << npatches << " noperator=" << noperator
-			      << " pass1_batches=" << nbatch1_ << " pass2_batches=" << nbatch2_
-			      << " Abatch=" << totalAbatch << "elems"
-			      << " Bbatch=" << totalBbatch << "elems"
-			      << " BXbatch=" << totalBXbatch << "elems";
- std::cerr << "setup done: npatches=" << npatches << " noperator=" << noperator
-            << " pass1_batches=" << nbatch1_ << " pass2_batches=" << nbatch2_
-            << " Abatch=" << totalAbatch << "elems"
-            << " Bbatch=" << totalBbatch << "elems"
-            << " BXbatch=" << totalBXbatch << "elems";
-			progress_.printline(msg, std::cout);
+			{
+				PsimagLite::OstringStream msg(std::cout.precision());
+				msg() << "setup done: npatches=" << npatches
+				      << " noperator=" << noperator << " pass1_batches=" << nbatch1_
+				      << " pass2_batches=" << nbatch2_ << " Abatch=" << totalAbatch
+				      << "elems"
+				      << " Bbatch=" << totalBbatch << "elems"
+				      << " BXbatch=" << totalBXbatch << "elems";
+				std::cerr
+				    << "setup done: npatches=" << npatches
+				    << " noperator=" << noperator << " pass1_batches=" << nbatch1_
+				    << " pass2_batches=" << nbatch2_ << " Abatch=" << totalAbatch
+				    << "elems"
+				    << " Bbatch=" << totalBbatch << "elems"
+				    << " BXbatch=" << totalBXbatch << "elems";
+				progress_.printline(msg, std::cout);
+			}
 		}
 	}
-}
 
 	// -----------------------------------------------------------------------
 
