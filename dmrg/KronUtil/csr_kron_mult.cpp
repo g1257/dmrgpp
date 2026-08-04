@@ -14,9 +14,8 @@
 // while preserving the generated real-vs-complex code paths.
 template <typename ComplexOrRealType>
 KOKKOS_INLINE_FUNCTION typename PsimagLite::KokkosType<ComplexOrRealType>::type
-maybeConjForKokkos(
-    const typename PsimagLite::KokkosType<ComplexOrRealType>::type& value,
-    const bool                                                       conjugate)
+maybeConjForKokkos(const typename PsimagLite::KokkosType<ComplexOrRealType>::type& value,
+                   const bool                                                      conjugate)
 {
 	if constexpr (PsimagLite::IsComplexNumber<ComplexOrRealType>::True)
 		return conjugate ? Kokkos::conj(value) : value;
@@ -380,15 +379,15 @@ void csr_kron_mult_method(const int  imethod,
 		    Kokkos::MDRangePolicy<ExecutionSpace, Kokkos::Rank<2>>({ 0, 0 },
 		                                                           { nnzB, nnzA }),
 		    KOKKOS_LAMBDA(const size_t ib_idx, const size_t ia_idx) {
-			    int ia = A_row_dev(ia_idx);
-			    int ja = A_col_dev(ia_idx);
-			    KokkosScalar aij
-			        = maybeConjForKokkos<ComplexOrRealType>(A_val_dev(ia_idx), isConjTransA);
+			    int          ia  = A_row_dev(ia_idx);
+			    int          ja  = A_col_dev(ia_idx);
+			    KokkosScalar aij = maybeConjForKokkos<ComplexOrRealType>(
+			        A_val_dev(ia_idx), isConjTransA);
 
-			    int ib = B_row_dev(ib_idx);
-			    int jb = B_col_dev(ib_idx);
-			    KokkosScalar bij
-			        = maybeConjForKokkos<ComplexOrRealType>(B_val_dev(ib_idx), isConjTransB);
+			    int          ib  = B_row_dev(ib_idx);
+			    int          jb  = B_col_dev(ib_idx);
+			    KokkosScalar bij = maybeConjForKokkos<ComplexOrRealType>(
+			        B_val_dev(ib_idx), isConjTransB);
 
 			    KokkosScalar cij = aij * bij;
 
