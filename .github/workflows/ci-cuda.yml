@@ -7,6 +7,10 @@ on:
       - master
       - dev_cincuenta_mpi
       - add-cuda-ci-flavors
+  pull_request:
+    branches:
+      - master
+      - dev_cincuenta_mpi
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -14,6 +18,10 @@ concurrency:
 
 jobs:
   build:
+    # Do not run arbitrary fork code on the self-hosted GPU runner.
+    if: >-
+      github.event_name != 'pull_request' ||
+      github.event.pull_request.head.repo.full_name == github.repository
     name: RelWithDebInfo (CUDA, A30)
     # Register the self-hosted runner with matching labels, e.g.:
     #   ./config.sh --labels cuda,a30
