@@ -360,8 +360,10 @@ private:
 
 		// Create host mirrors (likely pinned) to pack data into and then do a single
 		// deep_copy
-		auto h_flatAbatch = Kokkos::create_mirror_view(Kokkos::view_alloc(Kokkos::WithoutInitializing),d_flatAbatch_);
-		auto h_flatBbatch = Kokkos::create_mirror_view(Kokkos::view_alloc(Kokkos::WithoutInitializing),d_flatBbatch_);
+		auto h_flatAbatch = Kokkos::create_mirror_view(
+		    Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatAbatch_);
+		auto h_flatBbatch = Kokkos::create_mirror_view(
+		    Kokkos::view_alloc(Kokkos::WithoutInitializing), d_flatBbatch_);
 
 		// Build GEMM arg lists while packing matrices.
 		std::vector<GemmArgs> pass1_args;
