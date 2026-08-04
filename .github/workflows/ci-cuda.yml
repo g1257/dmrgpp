@@ -17,12 +17,25 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build:
-    # Do not run arbitrary fork code on the self-hosted GPU runner.
+  approve-external-pr:
+    name: Approve external PR for CUDA runner
     if: >-
-      github.event_name != 'pull_request' ||
-      github.event.pull_request.head.repo.full_name == github.repository
+      github.event_name == 'pull_request' &&
+      !contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association)
+    runs-on: ubuntu-24.04
+    environment: cuda-ci-approval
+    steps:
+    - name: Approval received
+      run: echo "External PR approved for CUDA CI"
+
+  build:
     name: RelWithDebInfo (CUDA, A30)
+    needs: approve-external-pr
+    if: >-
+      always() &&
+      (github.event_name != 'pull_request' ||
+       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.pull_request.author_association) ||
+       needs.approve-external-pr.result == 'success')
     # Register the self-hosted runner with matching labels, e.g.:
     #   ./config.sh --labels cuda,a30
     runs-on: [self-hosted, linux, x64, cuda, a30]
