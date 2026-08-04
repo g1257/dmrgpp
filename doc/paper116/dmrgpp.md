@@ -147,12 +147,41 @@ increases the work needed to maintain numerical infrastructure and adopt new
 backends. Shared numerical components, standard interfaces, and collaboration
 offer complementary ways to reduce that duplication.
 
-Within this landscape, DMRG++ is a free and open-source C++ implementation of
-conventional DMRG. Development began at Oak Ridge National Laboratory in 2008
-to solve condensed-matter problems with systematically monitored truncation
-error; the first software paper appeared in 2009 [@Alvarez:2009]. DMRG++ is an
-application-oriented code configured through input files, not a general-purpose
-tensor-network library. It uses generic programming and a comparatively small
+A useful contrast is the Julia implementation of ITensor, which provides a
+general-purpose library for constructing tensor-network calculations
+[@Fishman:2022]. In the current Julia package organization, `ITensors.jl`
+provides indexed-tensor abstractions, while `ITensorMPS.jl` provides finite MPS
+and MPO algorithms, including DMRG.^[See the official documentation for
+[`ITensors.jl`](https://docs.itensor.org/ITensors/stable/) and
+[`ITensorMPS.jl`](https://docs.itensor.org/ITensorMPS/stable/).] Users generally
+write or adapt Julia code to define sites and operators, construct an MPO for
+the Hamiltonian, prepare an MPS, and invoke library algorithms. DMRG++, by
+contrast, is a C++20 application implementing conventional DMRG. Its models,
+targeting methods, and solver components are compiled into the application,
+while users select supported calculations and specify their parameters through
+input files. The contrast is therefore between reusable tensor abstractions for
+constructing applications and an integrated, domain-focused application, not a
+ranking of their capabilities.
+
+The widespread use and greater generality of MPS and MPO interfaces do not make
+conventional DMRG obsolete. Block-based DMRG and variational MPS optimization
+are closely related formulations of the same method [@Schollwock:2011]. The
+MPS/MPO language exposes tensor-network structure directly and supports reuse
+across a broad range of algorithms. A mature conventional implementation can
+instead organize model-specific operators, symmetry sectors, targeting methods,
+measurements, checkpointing, and post-processing around a shared solver. This
+allows DMRG++ users to run supported workflows without constructing and
+maintaining a separate tensor-network application, while preserving validated
+input, regression-test, and analysis workflows. Which organization is more
+useful therefore depends in part on whether a user needs general tensor-network
+building blocks or an established application for a supported class of
+calculations.
+
+DMRG++ adopts the application-oriented side of this distinction as a free and
+open-source C++ implementation of conventional DMRG. Development began at Oak
+Ridge National Laboratory in 2008 to solve condensed-matter problems with
+systematically monitored truncation error; the first software paper appeared
+in 2009 [@Alvarez:2009]. It uses generic programming and a comparatively small
 software dependency set [@Sehlstedt:2026]. Accelerator-oriented batched kernels
 were originally developed in the separate `DmrgppPluginSc` repository and were
 integrated into the main DMRG++ repository in 2026.^[The integration is recorded
