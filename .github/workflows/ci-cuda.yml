@@ -2,15 +2,9 @@ name: CI - CUDA A30
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - master
-      - dev_cincuenta_mpi
-      - add-cuda-ci-flavors
   pull_request:
     branches:
       - master
-      - dev_cincuenta_mpi
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
