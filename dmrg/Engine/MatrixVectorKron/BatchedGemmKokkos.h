@@ -345,17 +345,43 @@ private:
 		const SizeType totalBbatch  = BbatchOff[npatches];
 		const SizeType totalBXbatch = BXbatchOff[npatches];
 
-		// Host packing buffers (zeroed).
-		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatAbatch(
-		    Kokkos::view_alloc("h_flatAbatch", Kokkos::WithoutInitializing), totalAbatch);
-		Kokkos::View<ComplexOrRealType*, Kokkos::HostSpace> h_flatBbatch(
-		    Kokkos::view_alloc("h_flatBbatch", Kokkos::WithoutInitializing), totalBbatch);
+		// Allocate device buffers early and create host mirrors for efficient H2D
+		DevExecSpace exec_for_alloc;
+		d_flatAbatch_ = DevScalView(
+		    Kokkos::view_alloc(exec_for_alloc, Kokkos::WithoutInitializing, "d_flatAbatch"),
+		    totalAbatch);
+		d_flatBbatch_ = DevScalView(
+		    Kokkos::view_alloc(exec_for_alloc, Kokkos::WithoutInitializing, "d_flatBbatch"),
+		    totalBbatch);
+		d_flatBXbatch_
+		    = DevScalView(Kokkos::view_alloc(
+		                      exec_for_alloc, Kokkos::WithoutInitializing, "d_flatBXbatch"),
+		                  totalBXbatch);
+
+		// Create host mirrors (likely pinned) to pack data into and then do a single
+		// deep_copy
+		auto h_flatAbatch = Kokkos::create_mirror_view(d_flatAbatch_);
+		auto h_flatBbatch = Kokkos::create_mirror_view(d_flatBbatch_);
+
+		// Initialize host mirrors to zero
+		Kokkos::deep_copy(h_flatAbatch, KS(0));
+		Kokkos::deep_copy(h_flatBbatch, KS(0));
 
 		// Build GEMM arg lists while packing matrices.
 		std::vector<GemmArgs> pass1_args;
 		pass1_args.reserve(npatches * npatches * noperator);
 		std::vector<GemmArgs> pass2_args;
 		pass2_args.reserve(npatches);
+
+		// Instead of performing many serial lacpy calls, collect pack tasks and
+		// perform them in parallel on the host mirror.
+		struct PackTask {
+			const ComplexOrRealType* src;
+			ComplexOrRealType*       dst;
+			int                      m, n, lds, ldd;
+		};
+		std::vector<PackTask> packTasks;
+		packTasks.reserve(npatches * npatches); // heuristic
 
 		Kokkos::Profiling::popRegion();
 
@@ -390,28 +416,31 @@ private:
 						const int nBk
 						    = static_cast<int>(rps[jp]); // B cols = X rows
 
-						Kokkos::Profiling::pushRegion(
-						    "BatchedGemmKokkos::setup::lacpy");
-						// Pack A (left operator) into Abatch[ip] at column
-						// colA
-						lacpy(Aref.ptr,
-						      mA,
-						      nAk,
-						      Aref.rows,
-						      h_flatAbatch.data() + AbatchOff[ip]
-						          + colA * static_cast<long long>(ldA[ip]),
-						      static_cast<int>(ldA[ip]));
+						// Record pack task for A (left operator)
+						PackTask tA;
+						tA.src = Aref.ptr;
+						tA.dst = reinterpret_cast<ComplexOrRealType*>(
+						             h_flatAbatch.data())
+						    + AbatchOff[ip]
+						    + colA * static_cast<long long>(ldA[ip]);
+						tA.m   = mA;
+						tA.n   = nAk;
+						tA.lds = Aref.rows;
+						tA.ldd = static_cast<int>(ldA[ip]);
+						packTasks.push_back(tA);
 
-						// Pack B (right operator) into Bbatch[ip] at column
-						// colB
-						lacpy(Bref.ptr,
-						      mB,
-						      nBk,
-						      Bref.rows,
-						      h_flatBbatch.data() + BbatchOff[ip]
-						          + colB * static_cast<long long>(ldB[ip]),
-						      static_cast<int>(ldB[ip]));
-						Kokkos::Profiling::popRegion();
+						// Record pack task for B (right operator)
+						PackTask tB;
+						tB.src = Bref.ptr;
+						tB.dst = reinterpret_cast<ComplexOrRealType*>(
+						             h_flatBbatch.data())
+						    + BbatchOff[ip]
+						    + colB * static_cast<long long>(ldB[ip]);
+						tB.m   = mB;
+						tB.n   = nBk;
+						tB.lds = Bref.rows;
+						tB.ldd = static_cast<int>(ldB[ip]);
+						packTasks.push_back(tB);
 
 						// Pass 1 GEMM: C(mB, nAk) = Bbatch_block(mB, nBk) *
 						// X_jp(nBk, nAk)
@@ -452,22 +481,37 @@ private:
 				a2.c_off = static_cast<long long>(xyStart[ip]);
 				pass2_args.push_back(a2);
 			}
+
+			// Execute pack tasks in parallel on the host mirror
+			if (!packTasks.empty()) {
+				using HostExec = Kokkos::DefaultHostExecutionSpace;
+
+				auto      tasksPtr = packTasks.data();
+				const int ntasks   = static_cast<int>(packTasks.size());
+				Kokkos::parallel_for(
+				    "BatchedGemmKokkos::host_pack",
+				    Kokkos::RangePolicy<HostExec>(0, ntasks),
+				    KOKKOS_LAMBDA(const int idx) {
+					    const PackTask& t = tasksPtr[idx];
+					    // column-major copy: for each column j copy m entries
+					    for (int j = 0; j < t.n; ++j) {
+						    std::memcpy(
+						        t.dst + static_cast<long long>(j) * t.ldd,
+						        t.src + static_cast<long long>(j) * t.lds,
+						        static_cast<size_t>(t.m)
+						            * sizeof(ComplexOrRealType));
+					    }
+				    });
+				Kokkos::fence();
+			}
 		}
 		{
 			Kokkos::Profiling::ScopedRegion region("BatchedGemmKokkos::setup::rest");
 
 			DevExecSpace exec;
 
-			// Allocate device arrays and upload operator matrices.
-			d_flatAbatch_ = DevScalView(
-			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_flatAbatch"),
-			    totalAbatch);
-			d_flatBbatch_ = DevScalView(
-			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_flatBbatch"),
-			    totalBbatch);
-			d_flatBXbatch_ = DevScalView(
-			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_flatBXbatch"),
-			    totalBXbatch);
+			// d_flatAbatch_, d_flatBbatch_, d_flatBXbatch_ were allocated above as
+			// device views.
 			d_vin_ = DevScalView(
 			    Kokkos::view_alloc(exec, Kokkos::WithoutInitializing, "d_vin"),
 			    xyStart[npatches]);
@@ -478,14 +522,9 @@ private:
 			nbatch1_ = pass1_args.size();
 			nbatch2_ = pass2_args.size(); // == npatches
 
-			{
-				Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> hA(
-				    reinterpret_cast<KS*>(h_flatAbatch.data()), totalAbatch);
-				Kokkos::View<KS*, Kokkos::HostSpace, Kokkos::MemoryUnmanaged> hB(
-				    reinterpret_cast<KS*>(h_flatBbatch.data()), totalBbatch);
-				Kokkos::deep_copy(exec, d_flatAbatch_, hA);
-				Kokkos::deep_copy(exec, d_flatBbatch_, hB);
-			}
+			// Copy packed host mirrors to device in a single shot
+			Kokkos::deep_copy(exec, d_flatAbatch_, h_flatAbatch);
+			Kokkos::deep_copy(exec, d_flatBbatch_, h_flatBbatch);
 
 			d_pass1_ = DevArgsView("d_pass1", nbatch1_);
 			d_pass2_ = DevArgsView("d_pass2", nbatch2_);
