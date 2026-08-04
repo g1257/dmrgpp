@@ -73,6 +73,22 @@ jobs:
         color: true
         path: spack
 
+    - name: Configure Spack install tree
+      run: |
+        set -euo pipefail
+        install_tree="${RUNNER_TEMP}/spack-install"
+        mkdir -p "${install_tree}"
+        python3 - "${install_tree}" <<'PY'
+        from pathlib import Path
+        import sys
+
+        spack_yaml = Path("source/spack.yaml")
+        install_tree = sys.argv[1]
+        text = spack_yaml.read_text()
+        text = text.replace("root: /opt/spack", f"root: {install_tree}")
+        spack_yaml.write_text(text)
+        PY
+
     - name: Install Dependencies
       run: |
         spack -e ${{ github.workspace }}/source install
