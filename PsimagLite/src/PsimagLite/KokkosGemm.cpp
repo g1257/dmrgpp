@@ -5,24 +5,8 @@
 #include <stdexcept>
 #include <type_traits>
 
-#include <PsimagLite/kokkos_gemm.h>
-
-namespace {
-
-// The scalar types that are floating point types and their corresponding std::complex types.
-// We need to map std::complex to Kokkos::complex while keeping all the other types which is what
-// KokkosType does.
-template <typename T> struct KokkosType {
-	using type = T;
-};
-
-template <typename T>
-        requires(!std::is_floating_point_v<T>)
-struct KokkosType<T> {
-	using type = Kokkos::complex<typename T::value_type>;
-};
-
-}
+#include "KokkosGemm.h"
+#include "KokkosType.h"
 
 template <typename Scalar, typename IntegerForBlasType>
 inline void PsimagLite::kokkos_gemm(char               transa,

@@ -687,7 +687,7 @@ private:
 		}
 	}
 
-	void ppupupdndn(MatrixType& m,
+	void ppupupdndn(MatrixType& m1,
 	                MatrixType& m2,
 	                SizeType    orb1,
 	                SizeType    orb2,
@@ -699,15 +699,15 @@ private:
 			throw PsimagLite::RuntimeError(
 			    "ppFour: only string = 'two' or 'four' is allowed \n");
 		}
-		SizeType rows = m.n_row();
-		SizeType cols = m.n_col();
+		SizeType rows = m1.n_row();
+		SizeType cols = m1.n_col();
 		assert(rows == cols);
 		typename PsimagLite::Vector<PairSizeType>::Type pairs;
 		int                                             sign = 1;
 		VectorSizeType                                  gammas(1, 1 + sign);
 		SizeType                                        orbitals = 2;
-		SizeType bigSize = rows * orbitals * rows * orbitals * 2;
-		m.resize(bigSize, bigSize, static_cast<typename MatrixType::value_type>(0.0));
+		SizeType   bigSize = rows * orbitals * rows * orbitals * 2;
+		MatrixType m(bigSize, bigSize);
 
 		SizeType offset = (string == "four") ? orbitals : 1;
 		SizeType jmax   = (string == "four") ? cols - 1 : cols;
@@ -773,10 +773,8 @@ private:
 			}
 		}
 
-		m  = mup;
-		m2 = mdown;
-		// std::cout << mSinglet;
-		// std::cout << mTriplet;
+		m1 = std::move(mup);
+		m2 = std::move(mdown);
 	}
 
 	void ddOrbitalsTwopoint(typename PsimagLite::Vector<MatrixType*>::Type&        result,
@@ -1319,7 +1317,7 @@ private:
 		//		result.push_back(m1);
 	}
 
-	void ppFour(MatrixType&               m,
+	void ppFour(MatrixType&               m1,
 	            MatrixType&               m2,
 	            SizeType                  orb1,
 	            SizeType                  orb2,
@@ -1332,14 +1330,14 @@ private:
 			throw PsimagLite::RuntimeError(
 			    "ppFour: only string = 'two' or 'four' is allowed \n");
 		}
-		SizeType rows = m.n_row();
-		SizeType cols = m.n_col();
+		SizeType rows = m1.n_row();
+		SizeType cols = m1.n_col();
 		assert(rows == cols);
 		typename PsimagLite::Vector<PairSizeType>::Type pairs;
 		VectorSizeType                                  gammas(1, 1 + sign);
 		SizeType                                        orbitals = 2;
-		SizeType bigSize = rows * orbitals * rows * orbitals * 2;
-		m.resize(bigSize, bigSize, static_cast<typename MatrixType::value_type>(0.0));
+		SizeType   bigSize = rows * orbitals * rows * orbitals * 2;
+		MatrixType m(bigSize, bigSize);
 
 		SizeType offset = (string == "four") ? orbitals : 1;
 		SizeType jmax   = (string == "four") ? cols - 1 : cols;
@@ -1414,10 +1412,8 @@ private:
 			}
 		}
 
-		m  = mSinglet;
-		m2 = mTriplet;
-		// std::cout << mSinglet;
-		// std::cout << mTriplet;
+		m1 = std::move(mSinglet);
+		m2 = std::move(mTriplet);
 	}
 
 	void manyPoint(MatrixType*                storage,
