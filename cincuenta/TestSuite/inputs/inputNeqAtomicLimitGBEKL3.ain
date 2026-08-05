@@ -1,0 +1,81 @@
+##Ainur1.0
+
+# True atomic-limit hopping quench for GBEK Fig. 3, L=3 second bath.
+#
+# Unlike inputNeqGBEKFig3L3.ain (which approximates the atomic limit with a
+# near-zero-bandwidth equilibrium bath, W_i=0.1), this input sets
+# NeqAtomicLimit=1 so the neq stage bypasses the equilibrium bath fit
+# entirely and starts from Delta^- === 0 exactly (see
+# ImpuritySolverNeqExactDiag::solveAtomicLimit() and
+# cincuenta/TestSuite/gbek_reference/atomic_limit_reference.py).
+#
+# NumberOfBathPoints=1 keeps the (discarded) equilibrium self-consistency
+# loop's minimizer well-posed (it needs >=1 bath parameter pair; 0 makes
+# GSL's simplex minimizer error out). TargetElectronsUp=1/Down=0 is read
+# by both the eq loop (no half-filling constraint there) and the neq
+# solver (which requires nup_+ndown_==1 for the atomic-limit bypass) from
+# the same keys -- the eq fit result itself is discarded by NeqAtomicLimit.
+#
+# GBEK Fig. 3 parameters: U=2, 100 steps, dt=0.04 (tmax=4),
+# quench to Bethe bandwidth W_f=4 (t*=1), L=3 second bath rank.
+
+FicticiousBeta=16;
+ChemicalPotential=0.;
+Matsubaras=200;
+LatticeGf="energy,semicircular,0.1";
+NumberOfBathPoints=1;
+
+DmftNumberOfIterations=1;
+DmftTolerance=0.001;
+ImpuritySolver="exactdiag";
+
+FitOptions=particleholesymmetric;
+MinParamsDelta=0.01;
+MinParamsMaxIter=10000;
+MinParamsDelta2=0.01;
+MinParamsTolerance=1e-3;
+MinParamsVerbose=1;
+
+TargetElectronsUp=1;
+TargetElectronsDown=0;
+
+int ImpuritySite=0;
+real HubbardU=2.;
+
+# DMRG settings (required by ParamsDmftSolver; unused for exactdiag)
+RootOutputname="NeqAtomicLimitGBEKL3";
+InfiniteLoopKeptStates=200;
+matrix FiniteLoopsGs=[[@auto, 200, 0],[@auto, 200, 0]];
+
+real OmegaBegin=-6.;
+integer OmegaTotal=120;
+real OmegaStep=0.1;
+real OmegaDelta=0.1;
+
+integer TridiagSteps=400;
+real TridiagEps=1e-9;
+TruncationTolerance="1e-10,100";
+CorrectionVectorEta=0.;
+GsWeight=0.1;
+
+matrix FiniteLoopsOmega=[[@auto, 200, 2],[@auto, 200, 2]];
+
+# Non-equilibrium: hopping quench, atomic limit start.  U=2 fixed.
+HubbardUFinal=2.;
+TmaxNeq=4.0;
+NtNeq=100;
+
+NeqDmftIter=3;
+NeqDmftTolerance=1e-8;
+
+# GBEK two-bath solver, second bath rank L=3
+NeqSolver="gbek";
+NeqBathRank=3;
+NeqAtomicLimit=1;
+
+# BandwidthFinal=4 -> t*_f = 1 -> tStarFinalSq_ = 1.
+BandwidthFinal=4.;
+QuenchShape="cosine";
+QuenchDuration=0.25;
+
+NeqOutputPrefix="atomic-limit-gbek-L3";

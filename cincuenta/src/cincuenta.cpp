@@ -1,6 +1,7 @@
 #include "CincuentaInputCheck.h"
 #include "Dispersion.h"
 #include "DmftSolver.h"
+#include "ImpuritySolverNeqGBEK.h"
 #include "ImpuritySolverNeqTdmrg.h"
 #include "NeqDmftSolver.h"
 #include "ProgramGlobals.h"
@@ -188,6 +189,16 @@ int main(int argc, char** argv)
 			std::cout << "\n=== Non-equilibrium DMFT (interaction quench) ===\n";
 			ParamsNeqType neqParams(io);
 
+			// NeqAtomicLimit=true: start the neq run from the atomic limit
+			// (no bath coupled at t=0), so the first bath is empty and
+			// Delta^- is identically zero, matching the setup of Gramsch,
+			// Balzer, Eckstein, Kollar, PRB 88, 235106 (2013), Sec. VI.
+			// This bypasses the equilibrium bath fit for the neq stage
+			// instead of forcing it to fit a near-zero bandwidth.
+			const PsimagLite::Vector<RealType>::Type emptyBathParams;
+			const auto&                              neqBathParams
+			    = neqParams.neqAtomicLimit ? emptyBathParams : dmftSolver.bathResult();
+
 			// Check for tDMRG solver selection
 			std::string neqSolverType;
 			try {
@@ -202,6 +213,14 @@ int main(int argc, char** argv)
 				tdmrgSolver.solve(dmftSolver.bathResult());
 				const std::string& p = neqParams.neqOutputPrefix;
 				tdmrgSolver.gimp().dump(p.empty() ? "green" : p + "-green");
+			} else if (neqSolverType == "gbek") {
+				std::cout << "  using ImpuritySolverNeqGBEK (two-bath GBEK)\n";
+				using GbekNeqSolverType
+				    = Dmft::NeqDmftSolver<std::complex<RealType>,
+				                          Dmft::ImpuritySolverNeqGBEK>;
+				GbekNeqSolverType neqSolver(neqParams, io);
+				neqSolver.solve(neqBathParams);
+				neqSolver.dumpGreenFunctions();
 			} else {
 				using ExactNeqSolverType
 				    = Dmft::NeqDmftSolver<std::complex<RealType>>;
