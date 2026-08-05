@@ -194,9 +194,19 @@ by repository commit
 DMRG++ is an input-driven C++20 scientific application that combines generic
 programming with runtime configuration. The principal `dmrg` executable reads
 and validates a single input file, after which `DmrgRunner` assembles the types
-and objects needed for the calculation. This includes choosing real or complex
-arithmetic, a Hamiltonian matrix-vector implementation, the geometry, the
-physical model, and the targeting method. The calculation has four main layers:
+and objects needed for the calculation. In addition to setting runtime
+parameters such as specifying real or complex arithmetic, choosing a
+Hamiltonian matrix-vector implementation, the physical model, and the
+targeting method, the input language has grown
+over time into a flexible mini-language for defining computations
+at runtime.
+It has a defined syntax for scoped labels,
+vector and matrix values, arithmetic expressions, and runtime
+substitutions. In the targeting and measurement layers syntax
+making use of Dirac bra and ket notaion can be used to accomplish
+considerable runtime composition.
+
+The calculation has four main layers:
 geometry, model, DMRG engine, and targeting and measurement.
 
 The model and geometry layers separate the local physics from the connections
@@ -210,12 +220,13 @@ remain compiled components. Model implementations derive from a common
 interface and are selected by `ModelSelector`. New models are added as C++
 classes, registered with the selector, and compiled into DMRG++.
 
+
 `DmrgSolver` implements the model-independent growth and finite-sweep stages. It
 constructs system and environment blocks, obtains target states through Lanczos
 diagonalization, truncates each block, and transforms states and operators into
-the retained basis. Bases carry both operators and quantum numbers, allowing the
-calculation to be divided into symmetry sectors and represented with
-block-sparse matrices. Lanczos accesses the Hamiltonian through a common
+the retained basis. These retained block bases carry both transformed operators and quantum numbers,
+allowing the calculation to be divided into symmetry sectors and represented
+with block-sparse matrices. Lanczos accesses the Hamiltonian through a common
 matrix-vector interface. DMRG++ can store the sparse Hamiltonian, apply it
 on-the-fly through the model, or evaluate its Kronecker-product decomposition
 without constructing the full superblock matrix. The conventional numerical
@@ -231,25 +242,52 @@ Chebyshev expansions, ancilla-based finite-temperature evolution, minimally
 entangled typical thermal states (METTS) [@Stoudenmire:2010], and
 expression-based targeting. The
 ancilla path reuses the time-step targeting infrastructure for purification,
-while METTS has a dedicated targeting implementation. Measurements follow a
+while METTS has a dedicated targeting implementation.
+
+Measurements follow a
 similar separation. Selected operator expressions can be evaluated in situ
 during the main run, while the separate `observe` executable reads saved
 simulation data to calculate one-point and multipoint correlations afterward.
+The input language allows target vectors to be specified in compact form from products and
+sums of model operators acting on the ground state or previously defined target
+states, request time evolution of those vectors, and use the resulting states in
+braket expressions for measurements. This lets many observables and calculation
+protocols be specified at runtime that would otherwise require
+additional development in C++.
 
+DMRG++ is composed of multiple executables that share these layers.
+The `dmrg` executable runs simulations, `observe`
+post-processes saved results, `manyOmegas` coordinates calculations at
+multiple frequencies, and `introspect` examines model bases,
+operators, and Hamiltonian terms.
+
+<!-- Not completely sure what to do here, I don't think it's as simple -->
+<!-- as `dmrg` write the hdf5 file as I believe they are produced as a -->
+<!-- result of some or all of the other executables as well. it seems -->
+<!-- a bit easier in practice that to describe. -->
 DMRG++ writes model and solver parameters, the geometry, an encoded copy of the
 input, energies, target states, renormalized bases, and checkpoint data to HDF5.
 These records support restart and recovery as well as post-processing without
 repeating the full simulation. Program and source-revision information is also
-reported with each run. CMake organizes common implementation code into internal
-library targets linked by the command-line executables; these `make` targets avoid code
-duplication but are not presented as a public programming interface. The `dmrg`
-executable runs simulations, `observe` post-processes saved results, `manyOmegas`
-coordinates calculations at multiple frequencies, and `introspect` examines
-model bases, operators, and Hamiltonian terms. Regression tests exercise
-representative input files and compare selected energies and observables with
-expected results. The model, targeting, and matrix-vector interfaces provide
-compiled extension points while retaining the same solver, input,
-and test infrastructure.
+reported with each run.
+
+# Project Infrastructure
+
+A CMake build system organizes common implementation code into internal
+library targets linked by the command-line executables; formalizing
+code shared between executables and making this code more visible for
+additional reuse.
+
+Regression tests are based on actual previous scientific applications of
+DMRG++ using representative input files and compare
+selected energies and observables with expected results. For new code
+the Catch2 testing framework has been adopted to support unit testing
+and tests are being added for existing code when possible.
+
+<!-- not sure what to do with this line -->
+The model,
+targeting, and matrix-vector interfaces provide compiled extension
+points while retaining the same solver, input, and test infrastructure.
 
 # Research impact statement
 
