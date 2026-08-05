@@ -39,11 +39,29 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 		}
 
 		try {
+			io.readline(neqBathRank, "NeqBathRank=");
+		} catch (std::exception&) { }
+
+		try {
 			io.readline(bandwidthFinal, "BandwidthFinal=");
 		} catch (std::exception&) { }
 
 		try {
+			io.readline(quenchShape, "QuenchShape=");
+		} catch (std::exception&) { }
+
+		try {
+			io.readline(quenchDuration, "QuenchDuration=");
+		} catch (std::exception&) { }
+
+		try {
 			io.readline(neqOutputPrefix, "NeqOutputPrefix=");
+		} catch (std::exception&) { }
+
+		try {
+			int tmp = 0;
+			io.readline(tmp, "NeqAtomicLimit=");
+			neqAtomicLimit = (tmp > 0);
 		} catch (std::exception&) { }
 	}
 
@@ -59,13 +77,33 @@ template <typename ComplexOrRealType> struct ParamsNeqDmftSolver {
 	SizeType neqDmftIter  = 10; ///< Inner DMFT convergence at each time step
 	RealType neqDmftError = 1e-4; ///<
 
+	/// Rank L of the low-rank Cholesky second bath (GBEK scheme).
+	/// L=0: first bath only (no GBEK second bath; equivalent to single-shot ExactDiag).
+	/// L>0: second bath with 2L orbitals (L empty + L occupied at t=0).
+	SizeType neqBathRank = 0;
+
 	/// Hopping quench: Bethe lattice bandwidth for t > 0.
 	/// 0 (default) means no quench — use the equilibrium bandwidth from LatticeGf.
 	RealType bandwidthFinal = 0;
 
+	/// Shape of the bandwidth ramp: "step" (default), "cosine", "tanh".
+	std::string quenchShape = "step";
+
+	/// Duration of the ramp in real time. 0 means instantaneous step at t=0.
+	RealType quenchDuration = 0;
+
 	/// Optional prefix for output Green's function files.
 	/// Empty (default) → "green-retarded" etc.  Non-empty → "{prefix}-green-retarded" etc.
 	std::string neqOutputPrefix = "";
+
+	/// True atomic limit start (GBEK PRB 88, 235106 (2013), Sec. VI): no
+	/// hopping at all at t=0, so the lattice hopping t*(t) ramp must start
+	/// from exactly 0, not from whatever small-but-nonzero bandwidth the
+	/// LatticeGf= equilibrium spec happens to use (that spec is only kept
+	/// non-degenerate to keep the discarded equilibrium bath-fit minimizer
+	/// well-posed; it should not leak into the real-time quench ramp's
+	/// baseline -- see NeqLatticeGf's tStar_ construction).
+	bool neqAtomicLimit = false;
 };
 
 } // namespace Dmft
