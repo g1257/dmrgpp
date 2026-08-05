@@ -20,7 +20,7 @@ jobs:
       with:
         path: source
 
-    - name: Install Dependencies 
+    - name: Install Dependencies
       run: brew install boost hdf5-mpi gsl open-mpi
 
     - name: Configure
@@ -29,7 +29,6 @@ jobs:
               -B ${{github.workspace}}/build \
               -GNinja \
               -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} \
-              -DCMAKE_CXX_FLAGS="-Wall -Wextra -Wno-unused-parameter" \
               -DCMAKE_COMPILE_WARNING_AS_ERROR=ON \
               -DKokkosKernels_ENABLE_TPL_BLAS=ON \
               -DKokkosKernels_ENABLE_TPL_LAPACK=ON
@@ -42,4 +41,3 @@ jobs:
 
     - name: Install
       run: cmake --install ${{github.workspace}}/build --prefix ${{github.workspace}}/install
-

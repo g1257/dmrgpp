@@ -59,6 +59,12 @@ else()
   set(CMAKE_INSTALL_RPATH "$ORIGIN/../${CMAKE_INSTALL_LIBDIR}")
 endif()
 
+# Define our prefered warning set for compilers we know about.
+# In other words we're going to use -Wno-unused-parameter rather than annotations
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  add_compile_options(-Wall -Wextra -Wno-unused-parameter)
+endif()
+
 option(DMRG_BUILD_BATCHED "Enable building with Batched support" ON)
 
 include(CMakeDependentOption)
