@@ -5,7 +5,7 @@ add_custom_command(
   COMMENT "Generating Git Revision File"
   VERBATIM)
 
-if(DMRG_BUILD_BATCHED)
+if(DMRG_BATCHED_GEMM_TYPE STREQUAL "Plugin")
   add_subdirectory(GPUPlugin)
   set(PLUGIN_SC ON)
   set(FpType "double")
